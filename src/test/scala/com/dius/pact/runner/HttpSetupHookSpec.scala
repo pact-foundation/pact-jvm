@@ -1,8 +1,9 @@
 package com.dius.pact.runner
 
 import org.specs2.mutable.Specification
-import scala.concurrent.ExecutionContext.Implicits.global
 import util.MockHttp
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class HttpSetupHookSpec extends Specification with MockHttp {
   "HttpSetupHook" should {
@@ -16,7 +17,7 @@ class HttpSetupHookSpec extends Specification with MockHttp {
 
       val setupHook = new HttpSetupHook(providerUrl, mockHttp)
 
-      setupHook.setup(setupString) must beTrue
+      setupHook.setup(setupString) must beTrue.await
     }
   }
 }

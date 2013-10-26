@@ -1,8 +1,7 @@
 package util
 
 import play.api.libs.json._
-import play.api.libs.ws.WS.WSRequestHolder
-import play.api.libs.ws.Response
+import play.api.libs.ws.{Response => WsResponse}
 import scala.concurrent.Future
 import com.dius.pact.runner.HttpCalls
 import org.specs2.mock.Mockito
@@ -10,12 +9,20 @@ import scala.xml.Elem
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.http.{ContentTypeOf, Writeable}
 import java.io.File
-import org.specs2.matcher.Hamcrest.eq
+import scala.concurrent.duration.Duration
+import java.util.concurrent.TimeUnit
+import com.ning.http.client.{Response => AhcResponse, FluentCaseInsensitiveStringsMap}
+import com.dius.pact.model.{Response => PactResponse}
+import scala.Predef._
+import play.api.libs.ws.WS.WSRequestHolder
+import java.{util => ju}
 
 trait MockHttp extends Mockito {
 
-  type ResponseMocker = (Response) => Unit
-  type Action = (WSRequestHolder, Response) => Unit
+  implicit val defaultTimeOut =  Duration(1, TimeUnit.SECONDS)
+
+  type ResponseMocker = (WsResponse) => Unit
+  type Action = (WSRequestHolder, WsResponse) => Unit
 
   val get:Action = (rh, r) => {
     rh.get() returns Future { r }
@@ -42,6 +49,23 @@ trait MockHttp extends Mockito {
     rh.post(any[File]) returns Future { r }
   }
 
+  def headersFor(headers:Option[Map[String,String]]): FluentCaseInsensitiveStringsMap = {
+    headers.fold (new FluentCaseInsensitiveStringsMap) { data =>
+      import scala.collection.JavaConversions._
+      new FluentCaseInsensitiveStringsMap(data.map{ case (key, value) => (key, ju.Arrays.asList(value))})
+    }
+  }
+
+  implicit def pactResponse(p:PactResponse):ResponseMocker = (r) => {
+    println(s"mocking response with headers: ${p.headers}")
+    val ahcResponse = mock[AhcResponse]
+    ahcResponse.getHeaders returns headersFor(p.headers)
+    r.getAHCResponse returns ahcResponse
+
+    r.status returns p.status
+    p.body.map(r.body returns _)
+  }
+
   implicit def basicResponseCode(code:Int):ResponseMocker = (r) => {
     r.status returns code
   }
@@ -62,12 +86,13 @@ trait MockHttp extends Mockito {
       "errorDescription"  -> "Test JSON Error")
   }
 
-  def stubWs(http:HttpCalls, uri:String, action:Action)(implicit extractor:ResponseMocker) = {
+  def stubWs(http:HttpCalls, uri:String, action:Action, requestHeaders:Option[Seq[(String,String)]] = None)(implicit extractor:ResponseMocker) = {
     val fakeRequestHolder = mock[WSRequestHolder]
-    val fakeResponse = mock[Response]
+    val fakeResponse = mock[WsResponse]
     extractor(fakeResponse)
     System.err.println("uri is:" + uri)
     http.url(uri) returns fakeRequestHolder
+    requestHeaders.map(fakeRequestHolder.withHeaders(_:_*) returns fakeRequestHolder)
     fakeRequestHolder.withQueryString(any[(String,String)]) returns fakeRequestHolder
     action(fakeRequestHolder, fakeResponse)
     fakeRequestHolder

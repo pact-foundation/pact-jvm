@@ -16,6 +16,25 @@ case class Interaction(
   request:Request,
   response:Response)
 
-case class Request(path:String)
+//TODO: support duplicate headers
+case class Request(method: String, path:String, headers:Option[Map[String, String]], body:Option[String])
 
-case class Response(body:String)
+//TODO: support duplicate headers
+case class Response(status: Int, headers:Option[Map[String, String]], body:Option[String]) {
+}
+
+object Response {
+  def apply(status:Int, headers:Map[String, String], body:String):Response = {
+    val optionalHeaders = if(headers == null || headers.isEmpty) {
+      None
+    } else {
+      Some(headers)
+    }
+    val optionalBody = if(body == null || body.isEmpty) {
+      None
+    } else {
+      Some(body)
+    }
+    Response(status, optionalHeaders, optionalBody)
+  }
+}
