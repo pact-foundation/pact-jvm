@@ -24,6 +24,8 @@ case class Response(status: Int, headers:Option[Map[String, String]], body:Optio
 }
 
 object Response {
+
+
   def apply(status:Int, headers:Map[String, String], body:String):Response = {
     val optionalHeaders = if(headers == null || headers.isEmpty) {
       None
@@ -38,3 +40,5 @@ object Response {
     Response(status, optionalHeaders, optionalBody)
   }
 }
+
+
