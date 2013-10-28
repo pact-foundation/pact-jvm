@@ -3,6 +3,7 @@
   <head>
     <link rel="stylesheet" href="style.css"/>
     <link rel="stylesheet" type="text/css" href="themes.css"/>
+    <link rel="stylesheet" href="http://lab.hakim.se/reveal-js/lib/css/zenburn.css"><!-- For syntax highlighting -->
   </head>
 
   <body class="coverflow">
@@ -11,7 +12,7 @@
       <section>
         <h1>pact-jvm</h1>
         <h2>Pact All the Things</h2>
-        <h3>bespoke.js</h3>
+        <h3><a href="http://markdalgleish.com/projects/bespoke.js">bespoke.js</a></h3>
       </section>
 
       <section>
@@ -31,10 +32,127 @@
           <li>Some other stuff</li>
         </ul>
       </section>
+
+      <section>
+        <h2>JSON Conversion</h2>
+        <pre><code data-trim class="scala">
+class JSONThingy extends DefaultWrites {
+  def convert(obj: Map[String,List[String]]): String =
+    Json.toJson(obj).toString()
+}
+
+...
+
+class TestSomethingSpec extends mutable.Specification {
+  "JSON Thingy" should {
+    "output valid JSON" in {
+      val jsonResult = new JSONThingy().convert(Map("cat" -> List()))
+      jsonResult must beEqualTo("{\"cat\":[]}")
+    }
+  }
+
+...
+        </code></pre>
+      </section>
+      <section>
+        <h2>Pact Builder Test</h2>
+        <pre><code data-trim class="scala">
+...
+
+  "pact" should {
+    "be constructed" in {
+      val pact:Pact = MakePact()
+        .withProvider("p")
+        .withConsumer("c")
+        .withInteractions(
+          given("something")
+          .uponReceiving("lol")
+        )
+
+      pact.provider.name must beEqualTo("p")
+      pact.consumer.name must beEqualTo("c")
+      pact.interactions.size must beEqualTo(1)
+      pact.interactionFor("something", "lol") must not be None
+    }
+  }
+}
+        </code></pre>
+      </section>
+      <section>
+        <h2>Builder: Interaction</h2>
+        <pre><code data-trim class="scala">
+case class MakeInteraction(
+                            description:   Option[String] = None,
+                            providerState: Option[String] = None) {
+  def uponReceiving(desc:String) = copy(description = Some(desc))
+}
+
+object MakeInteraction {
+
+  def given(state:String) = MakeInteraction(providerState = Some(state))
+
+  implicit def build(mi: MakeInteraction):Interaction = {
+    Interaction(mi.description.get, mi.providerState.get, null, null) //FIXME
+  }
+
+  implicit def build(mis: Seq[MakeInteraction]) : Seq[Interaction] = {
+    mis.map(mi => build(mi))
+  }
+}
+        </code></pre>
+      </section>
+      <section>
+        <h2>Builder: Pact</h2>
+        <pre><code data-trim class="scala">
+case class MakePact(
+                     provider:Option[Provider] = None,
+                     consumer:Option[Consumer] = None,
+                     interactions:Seq[MakeInteraction] = Seq()) {
+  def withProvider(name:String) = copy(provider = Some(Provider(name)))
+  def withConsumer(name:String) = copy(consumer = Some(Consumer(name)))
+  def withInteractions(list:MakeInteraction*) = copy(interactions = list)
+}
+
+object MakePact {
+  implicit def build(mp:MakePact):Pact = {
+    Pact(mp.provider.get, mp.consumer.get, mp.interactions)
+  }
+}
+        </code></pre>
+      </section>
+      <section>
+        <h2>Model</h2>
+        <pre><code data-trim class="scala">
+case class Pact( provider:Provider,
+                 consumer:Consumer,
+                 interactions:Seq[Interaction]) {
+  def interactionFor(providerState:String, description:String) =
+    interactions.find { i =>
+      i.description == description &&
+      i.providerState == providerState
+    }
+}
+
+case class Interaction( description:   String,
+                        providerState: String,
+                        request:       Request,
+                        response:      Response)
+
+case class Provider(name:String)
+case class Consumer(name:String)
+case class Request(path:String)
+case class Response(body:String)
+        </code></pre>
+      </section>
+
     </article>
 
     <script src="bespoke.min.js"></script>
     <script src="demo.js"></script>
-    <script type="text/javascript">bespoke.horizontal.from('article');</script>
+    <script src="http://yandex.st/highlightjs/7.3/highlight.min.js"></script>
+    <script type="text/javascript">
+      hljs.initHighlightingOnLoad();
+      bespoke.horizontal.from('article');
+    </script>
   </body>
 </html>

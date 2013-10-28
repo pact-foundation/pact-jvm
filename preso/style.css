@@ -173,6 +173,16 @@ ul, ol {
 	right: 0;
 	top: 30%;
 }
+pre > code {
+	font-size: 2em;
+	border-radius: 3em;
+	position: absolute;
+	left: 1em;
+	right: 1em;
+	bottom: 1em;
+	top: 25%;
+	text-align: left;
+}
 /* End custom stuff :) */
 
 /*h1 {
