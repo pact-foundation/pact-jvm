@@ -17,22 +17,51 @@
 
       <section>
         <h2>What we intended to do</h2>
-        <ul>
-          <li>Split Pacts into an Author, a Consumer Runner, and a Provider Runner</li>
-          <li>implement the Author and the provider runner</li>
-          <li>learn scala</li>
-        </ul>
       </section>
+    <section>
+        <h2>Split Pacts into</h2>
+        <ul><li>Author</li></ul>
+    </section>
+    <section>
+        <h2>Split Pacts into</h2>
+        <ul><li>Consumer Runner</li></ul>
+    </section>
+    <section>
+        <h2>Split Pacts into</h2>
+        <ul><li>Provider Runner</li></ul>
+    </section>
+        <section>
+            <h2>Learn Scala</h2>
+            <ul>
+                <li>Team of 4</li>
+                <li>1 Experienced</li>
+                <li>1 Well Read</li>
+                <li>2 newbies</li>
+            </ul>
+        </section>
+
 
       <section>
         <h2>What we actually did</h2>
-        <ul>
-          <li>Argued with Beth about splitting the Author form the Consumer Runner (lost)</li>
-          <li>Implemented the Author (mostly)</li>
-          <li>Learned that spray-can is a good http server</li>
-        </ul>
-      </section>
 
+      </section>
+        <section>
+            <h2>What we actually did</h2>
+            <ul>
+                <li>Argued with Beth</li>
+                <li>about splitting the Author form the Consumer Runner</li>
+            </ul>
+        </section>
+        <section>
+            <h2>What we actually did</h2>
+            <ul><li>Lost</li></ul>
+        </section>
+        <section>
+            <h2>What we actually did</h2>
+            <ul>
+                <li>Implemented the Author (mostly)</li>
+            </ul>
+        </section>
       <section>
         <h2>JSON Conversion</h2>
         <pre><code data-trim class="scala">
@@ -144,14 +173,22 @@ case class Request(path:String)
 case class Response(body:String)
         </code></pre>
       </section>
-
+        <section>
+            <h2>What we actually did.</h2>
+            <ul><li>Learned that spray-can is a good http server</li></ul>
+        </section>
       <section>
           <h2>spray-can server</h2>
           <h3>main</h3>
           <pre><code data-trim class="scala">
 implicit val system = ActorSystem()
-val handler = system.actorOf(Props[Service], name = "handler")
-io.IO(Http) ! Http.Bind(handler, interface = "localhost", port = 8888)
+
+val handler = system.actorOf(Props[Service],
+              name = "handler")
+
+io.IO(Http) ! Http.Bind(handler,
+              interface = "localhost",
+              port = 8888)
           </code></pre>
       </section>
         <section>
@@ -166,7 +203,9 @@ class Service extends Actor with ActorLogging {
 
     case HttpRequest(method, uri, headers, body, _) => {
       // Do Work
-      sender ! HttpResponse(status = 200, entity = "hello world", headers = List())
+      sender ! HttpResponse(status = 200,
+              entity = "hello world",
+              headers = List())
     }
   }
 }
