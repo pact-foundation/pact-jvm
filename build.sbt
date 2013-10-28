@@ -9,6 +9,7 @@ resolvers ++= Seq("spray repo" at "http://repo.spray.io",
 
 libraryDependencies ++= Seq(
   "commons-io" % "commons-io" % "2.4",
+  "io.spray" % "spray-client" % "1.2-RC1",
   "io.spray" % "spray-can" % "1.2-RC1",
   "com.typesafe.akka" %% "akka-actor" % "2.2.3",
   "com.typesafe.play" %% "play-json" % "2.2.0",

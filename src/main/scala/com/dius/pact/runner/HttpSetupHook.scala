@@ -6,7 +6,7 @@ import com.dius.pact.runner.http.Client
 
 case class HttpSetupHook(providerUrl:String, http:Client)(implicit executionContext: ExecutionContext) extends SetupHook {
   def setup(setupIdentifier : String) : Future[Boolean] = {
-    http.invoke(providerUrl, Json.obj("state" -> setupIdentifier))
+    http.invoke(providerUrl, Json.stringify(Json.obj("state" -> setupIdentifier)))
       .map { response =>
         response
       }.recover {
