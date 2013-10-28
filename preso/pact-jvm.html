@@ -18,18 +18,18 @@
       <section>
         <h2>What we intended to do</h2>
         <ul>
-          <li>Something</li>
-          <li>Something else awesome</li>
-          <li>Some other stuff</li>
+          <li>Split Pacts into an Author, a Consumer Runner, and a Provider Runner</li>
+          <li>implement the Author and the provider runner</li>
+          <li>learn scala</li>
         </ul>
       </section>
 
       <section>
         <h2>What we actually did</h2>
         <ul>
-          <li>Something</li>
-          <li>Something else awesome</li>
-          <li>Some other stuff</li>
+          <li>Argued with Beth about splitting the Author form the Consumer Runner (lost)</li>
+          <li>Implemented the Author (mostly)</li>
+          <li>Learned that spray-can is a good http server</li>
         </ul>
       </section>
 
@@ -145,6 +145,33 @@ case class Response(body:String)
         </code></pre>
       </section>
 
+      <section>
+          <h2>spray-can server</h2>
+          <h3>main</h3>
+          <pre><code data-trim class="scala">
+implicit val system = ActorSystem()
+val handler = system.actorOf(Props[Service], name = "handler")
+io.IO(Http) ! Http.Bind(handler, interface = "localhost", port = 8888)
+          </code></pre>
+      </section>
+        <section>
+            <h2>spray-can server</h2>
+            <h3>handler</h3>
+          <pre><code data-trim class="scala">
+class Service extends Actor with ActorLogging {
+  implicit val system = ActorSystem()
+
+  def receive = {
+    case _: Http.Connected => sender ! Http.Register(self)
+
+    case HttpRequest(method, uri, headers, body, _) => {
+      // Do Work
+      sender ! HttpResponse(status = 200, entity = "hello world", headers = List())
+    }
+  }
+}
+          </code></pre>
+        </section>
     </article>
 
     <script src="bespoke.min.js"></script>
