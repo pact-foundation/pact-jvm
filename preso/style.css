@@ -160,10 +160,15 @@ h1 {
 	top: 40%;
 }
 h2 {
-	top: 1em;
+	top: 0.7em;
 }
 h3 {
-	bottom: 1em;
+	bottom: 0.7em;
+}
+h3.overlay {
+	bottom: 0.4em;
+	z-index: 20;
+	opacity: 0.2;
 }
 ul, ol {
 	font-size: 5em;

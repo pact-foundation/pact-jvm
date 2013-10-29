@@ -18,50 +18,48 @@
       <section>
         <h2>What we intended to do</h2>
       </section>
-    <section>
+      <section>
         <h2>Split Pacts into</h2>
         <ul><li>Author</li></ul>
-    </section>
-    <section>
+      </section>
+      <section>
         <h2>Split Pacts into</h2>
         <ul><li>Consumer Runner</li></ul>
-    </section>
-    <section>
+      </section>
+      <section>
         <h2>Split Pacts into</h2>
         <ul><li>Provider Runner</li></ul>
-    </section>
-        <section>
-            <h2>Learn Scala</h2>
-            <ul>
-                <li>Team of 4</li>
-                <li>1 Experienced</li>
-                <li>1 Well Read</li>
-                <li>2 newbies</li>
-            </ul>
-        </section>
-
+      </section>
+      <section>
+        <h2>Learn Scala</h2>
+        <ul>
+          <li>Team of 4:</li>
+          <li>1 Experienced</li>
+          <li>1 Well Read</li>
+          <li>2 Newbies</li>
+        </ul>
+      </section>
 
       <section>
         <h2>What we actually did</h2>
-
       </section>
-        <section>
-            <h2>What we actually did</h2>
-            <ul>
-                <li>Argued with Beth</li>
-                <li>about splitting the Author form the Consumer Runner</li>
-            </ul>
-        </section>
-        <section>
-            <h2>What we actually did</h2>
-            <ul><li>Lost</li></ul>
-        </section>
-        <section>
-            <h2>What we actually did</h2>
-            <ul>
-                <li>Implemented the Author (mostly)</li>
-            </ul>
-        </section>
+      <section>
+        <h2>What we actually did</h2>
+        <ul>
+          <li>Argued with Beth</li>
+          <li>about splitting the Author from the Consumer Runner</li>
+        </ul>
+      </section>
+      <section>
+        <h2>What we actually did</h2>
+        <ul><li>Lost</li></ul>
+      </section>
+      <section>
+        <h2>What we actually did</h2>
+        <ul>
+          <li>Implemented the Author (mostly)</li>
+        </ul>
+      </section>
       <section>
         <h2>JSON Conversion</h2>
         <pre><code data-trim class="scala">
@@ -69,42 +67,38 @@ class JSONThingy extends DefaultWrites {
   def convert(obj: Map[String,List[String]]): String =
     Json.toJson(obj).toString()
 }
-
 ...
-
 class TestSomethingSpec extends mutable.Specification {
   "JSON Thingy" should {
     "output valid JSON" in {
-      val jsonResult = new JSONThingy().convert(Map("cat" -> List()))
+      val jsonResult = new JSONThingy().convert(
+        Map("cat" -> List())
+      )
       jsonResult must beEqualTo("{\"cat\":[]}")
     }
   }
-
 ...
         </code></pre>
       </section>
       <section>
         <h2>Pact Builder Test</h2>
-        <pre><code data-trim class="scala">
-...
-
-  "pact" should {
-    "be constructed" in {
-      val pact:Pact = MakePact()
-        .withProvider("p")
-        .withConsumer("c")
-        .withInteractions(
-          given("something")
-          .uponReceiving("lol")
-        )
-
-      pact.provider.name must beEqualTo("p")
-      pact.consumer.name must beEqualTo("c")
-      pact.interactions.size must beEqualTo(1)
-      pact.interactionFor("something", "lol") must not be None
-    }
-  }
-}
+        <pre><code data-trim class="scala"> ...
+   "pact" should {
+     "be constructed" in {
+       val pact:Pact = MakePact()
+         .withProvider("p")
+         .withConsumer("c")
+         .withInteractions(
+           given("something")
+           .uponReceiving("lol")
+         )
+       pact.provider.name must beEqualTo("p")
+       pact.consumer.name must beEqualTo("c")
+       pact.interactions.size must beEqualTo(1)
+       pact.interactionFor("something", "lol") must not be None
+     }
+   }
+ }
         </code></pre>
       </section>
       <section>
@@ -151,8 +145,7 @@ object MakePact {
       </section>
       <section>
         <h2>Model</h2>
-        <pre><code data-trim class="scala">
-case class Pact( provider:Provider,
+        <pre><code data-trim class="scala">case class Pact( provider:Provider,
                  consumer:Consumer,
                  interactions:Seq[Interaction]) {
   def interactionFor(providerState:String, description:String) =
@@ -173,14 +166,14 @@ case class Request(path:String)
 case class Response(body:String)
         </code></pre>
       </section>
-        <section>
-            <h2>What we actually did.</h2>
-            <ul><li>Learned that spray-can is a good http server</li></ul>
-        </section>
       <section>
-          <h2>spray-can server</h2>
-          <h3>main</h3>
-          <pre><code data-trim class="scala">
+        <h2>What we actually did.</h2>
+        <ul><li>Learned that spray-can is a good http server</li></ul>
+      </section>
+      <section>
+        <h2>spray-can server</h2>
+        <h3 class="overlay">main</h3>
+        <pre><code data-trim class="scala">
 implicit val system = ActorSystem()
 
 val handler = system.actorOf(Props[Service],
@@ -189,12 +182,12 @@ val handler = system.actorOf(Props[Service],
 io.IO(Http) ! Http.Bind(handler,
               interface = "localhost",
               port = 8888)
-          </code></pre>
+        </code></pre>
       </section>
-        <section>
-            <h2>spray-can server</h2>
-            <h3>handler</h3>
-          <pre><code data-trim class="scala">
+      <section>
+        <h2>spray-can server</h2>
+        <h3 class="overlay">handler</h3>
+        <pre><code data-trim class="scala">
 class Service extends Actor with ActorLogging {
   implicit val system = ActorSystem()
 
@@ -209,8 +202,9 @@ class Service extends Actor with ActorLogging {
     }
   }
 }
-          </code></pre>
-        </section>
+        </code></pre>
+      </section>
+
     </article>
 
     <script src="bespoke.min.js"></script>
