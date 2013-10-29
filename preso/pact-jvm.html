@@ -204,22 +204,21 @@ class Service extends Actor with ActorLogging {
 }
         </code></pre>
       </section>
-
-          </code></pre>
-        </section>
-        <section>
-            <h2>spray-client</h2>
-            <pre><code data-trim class="scala">
+      <section>
+        <h2>spray-client</h2>
+        <pre><code data-trim class="scala">
 
 val pipeline: HttpRequest => Future[HttpResponse] =
-    sendReceive
+  sendReceive
 
 val request = HttpRequest(blah, blah, blah)
 
 pipeline(request).map(
-    response:HttpResponse => blah)
-            </code></pre>
-        </section>
+  response:HttpResponse => blah
+)
+        </code></pre>
+      </section>
+
     </article>
 
     <script src="bespoke.min.js"></script>
