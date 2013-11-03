@@ -1,12 +1,11 @@
-import com.dius.pact.runner.http.Server
-import java.io.File
+import com.dius.pact.runner.Server
 import org.specs2.mutable.Specification
 
 class EndToEndSpec extends Specification {
 
   "PactRunner" should {
     "Run Pacts" in {
-      Server.start()
+      Server.start()(scala.concurrent.ExecutionContext.Implicits.global)
 
       val basePath = "src/test/resources/"
 
@@ -16,7 +15,7 @@ class EndToEndSpec extends Specification {
 
       Main.main(Array(testJson, testConfig))
 
-      Server.stop()
+      Server.stop()(scala.concurrent.ExecutionContext.Implicits.global)
 
       true must beTrue
     }

@@ -1,6 +1,7 @@
 import com.dius.pact.model.Pact
 import com.dius.pact.runner.http.Client
-import com.dius.pact.runner.{PactConfiguration, PactRunner, PactFileSource}
+import com.dius.pact.runner.{PactConfiguration, PactSpec, PactFileSource}
+import org.scalatest.Sequential
 import play.api.libs.json.{JsError, Json}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -23,8 +24,10 @@ object Main {
   }
 
   def runPacts(config:PactConfiguration, pacts:Seq[Pact]) = {
-    val runner = PactRunner(config)
-
-    pacts.map(runner.run)
+    org.scalatest.run(
+      new Sequential(pacts.map { pact =>
+        new PactSpec(config, pact)
+      } :_*)
+    )
   }
 }
