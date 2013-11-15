@@ -1,5 +1,7 @@
 package com.dius.pact.model
 
+import com.dius.pact.runner.JsonComparator
+
 case class Pact(provider:Provider, consumer:Consumer, interactions:Seq[Interaction]) {
   def interactionFor(description:String, providerState:String) = interactions.find { i =>
     i.description == description && i.providerState == providerState
@@ -19,9 +21,10 @@ case class Interaction(
 //TODO: support duplicate headers
 case class Request(method: String, path:String, headers:Option[Map[String, String]], body:Option[String])
 
+
+
 //TODO: support duplicate headers
-case class Response(status: Int, headers:Option[Map[String, String]], body:Option[String]) {
-}
+case class Response(status: Int, headers:Option[Map[String, String]], body:Option[String])
 
 object Response {
 

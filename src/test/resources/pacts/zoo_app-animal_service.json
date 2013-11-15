@@ -15,7 +15,7 @@
             "response": {
                 "status": 200,
                 "headers": {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json; charset=UTF-8"
                 },
                 "body": {
                     "alligators": [
@@ -39,7 +39,7 @@
             "response": {
                 "status": 200,
                 "headers": {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json; charset=UTF-8"
                 },
                 "body": [
                     {
@@ -61,7 +61,7 @@
             "response": {
                 "status": 200,
                 "headers": {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json; charset=UTF-8"
                 },
                 "body": {
                     "name": "Mary"
@@ -75,13 +75,13 @@
                 "method": "get",
                 "path": "/alligators",
                 "headers": {
-                    "Accept": "application/json"
+                    "Accept": "application/json; charset=UTF-8"
                 }
             },
             "response": {
                 "status": 500,
                 "headers": {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json; charset=UTF-8"
                 },
                 "body": {
                     "error": "Argh!!!"
@@ -95,14 +95,11 @@
                 "method": "get",
                 "path": "/alligators/Mary",
                 "headers": {
-                    "Accept": "application/json"
+                    "Accept": "application/json; charset=UTF-8"
                 }
             },
             "response": {
-                "status": 404,
-                "headers": {
-                    "Content-Type": "application/json"
-                }
+                "status": 404
             },
             "provider_state": "there is not an alligator named Mary"
         }

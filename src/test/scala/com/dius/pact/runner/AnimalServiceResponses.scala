@@ -14,6 +14,7 @@ object AnimalServiceResponses {
   val responses = Map(
     "there are alligators" -> Map (
       "/animal" -> bobResponse,
+      "/animals" -> bobResponse,
       "/alligators" -> bobResponse
     ),
     "there is an alligator named Mary" -> Map (
