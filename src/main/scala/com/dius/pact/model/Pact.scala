@@ -20,14 +20,14 @@ case class Interaction(
 case class Request(method: String,
                    path:String,
                    headers:Option[Map[String, String]],
-                   body:Option[String])
+                   body:Option[String])//TODO: convert body to json
 
 
 
 //TODO: support duplicate headers
 case class Response(status: Int,
                     headers:Option[Map[String, String]],
-                    body:Option[String])
+                    body:Option[String])//TODO: convert body to json
 
 object Response {
   def apply(status:Int, headers:Map[String, String], body:String):Response = {
