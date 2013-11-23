@@ -17,12 +17,17 @@ case class Interaction(
                         response:Response)
 
 //TODO: support duplicate headers
-case class Request(method: String, path:String, headers:Option[Map[String, String]], body:Option[String])
+case class Request(method: String,
+                   path:String,
+                   headers:Option[Map[String, String]],
+                   body:Option[String])
 
 
 
 //TODO: support duplicate headers
-case class Response(status: Int, headers:Option[Map[String, String]], body:Option[String])
+case class Response(status: Int,
+                    headers:Option[Map[String, String]],
+                    body:Option[String])
 
 object Response {
   def apply(status:Int, headers:Map[String, String], body:String):Response = {
