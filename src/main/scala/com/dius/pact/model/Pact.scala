@@ -16,8 +16,19 @@ case class Interaction(
                         request:Request,
                         response:Response)
 
+class HttpMethod(value:String) {
+  override def toString = value
+}
+
+case object Get    extends HttpMethod("GET")
+case object Post   extends HttpMethod("POST")
+case object Put    extends HttpMethod("PUT")
+case object Delete extends HttpMethod("DELETE")
+case object Head   extends HttpMethod("HEAD")
+case object Patch  extends HttpMethod("PATCH")
+
 //TODO: support duplicate headers
-case class Request(method: String,
+case class Request(method: HttpMethod,
                    path:String,
                    headers:Option[Map[String, String]],
                    body:Option[String])//TODO: convert body to json
