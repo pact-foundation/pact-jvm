@@ -14,12 +14,13 @@ case class MakeInteraction(providerState: String,
                            request: Option[Request] = None,
                            response: Option[Response] = None) {
 
+  //TODO: overload builder functions so callers don't need to be aware of Some vs None
   def uponReceiving(description: String,
                     path: String,
                     method: HttpMethod = Get,
                     headers: Option[Map[String, String]] = None,
                     body: Option[JsValue] = None) = {
-    val r = Request(method.toString, path, headers, body.map(Json.stringify))
+    val r = Request(method, path, headers, body.map(Json.stringify))
     copy(description = Some(description), request = Some(r))
   }
 
