@@ -27,6 +27,18 @@ case object Delete extends HttpMethod("DELETE")
 case object Head   extends HttpMethod("HEAD")
 case object Patch  extends HttpMethod("PATCH")
 
+object HttpMethod {
+  def build(key: String) = {
+    key.toUpperCase match {
+      case "GET" =>   Get
+      case "POST" =>    Post
+      case "PUT" =>   Put
+      case "DELETE" =>    Delete
+      case "HEAD" =>    Head
+      case "PATCH" =>   Patch
+    }
+  }
+}
 //TODO: support duplicate headers
 case class Request(method: HttpMethod,
                    path:String,

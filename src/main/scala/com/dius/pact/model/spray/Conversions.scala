@@ -28,27 +28,27 @@ object Conversions {
     }
   }
 
-  implicit def playToSprayRequest(request:Request):HttpRequest = HttpRequest(
-    method = HttpMethods.getForKey(request.method).get,
+  implicit def pactToSprayRequest(request:Request):HttpRequest = HttpRequest(
+    method = HttpMethods.getForKey(request.method.toString).get,
     uri = Uri(request.path),
     headers = request.headers,
     entity = request.body
   )
 
-  implicit def sprayToPlayRequest(request:HttpRequest):Request = Request(
-    method = request.method.value,
+  implicit def sprayToPactRequest(request:HttpRequest):Request = Request(
+    method = com.dius.pact.model.HttpMethod.build(request.method.value),
     path = request.uri.path.toString(),
     headers = request.headers,
     body = request.entity
   )
 
-  implicit def playToSprayResponse(response:Response):HttpResponse = HttpResponse(
+  implicit def pactToSprayResponse(response:Response):HttpResponse = HttpResponse(
     status = StatusCodes.getForKey(response.status).get,
     headers = response.headers,
     entity = response.body
   )
 
-  implicit def sprayToPlayResponse(response:HttpResponse):Response = Response(
+  implicit def sprayToPactResponse(response:HttpResponse):Response = Response(
     status = response.status.intValue,
     headers = response.headers,
     body = response.entity
