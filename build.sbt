@@ -7,6 +7,7 @@ version := "1.0-SNAPSHOT"
 scalaVersion := "2.10.3"
 
 resolvers ++= Seq("typesafe-releases" at "http://repo.typesafe.com/typesafe/releases",
+				  "spray repo" at "http://repo.spray.io",
                   "Local Maven Repository" at "file://"+Path.userHome.absolutePath+"/.m2/repository")
 
 libraryDependencies ++= Seq(
