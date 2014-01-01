@@ -16,5 +16,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor"     % "2.2.3",
   //NOTE: these two are published locally while waiting for my pull request to be released
   "org.json4s"        %% "json4s-native"  % "3.2.7-SNAPSHOT",
-  "org.json4s"        %% "json4s-jackson" % "3.2.7-SNAPSHOT"
+  "org.json4s"        %% "json4s-jackson" % "3.2.7-SNAPSHOT",
+  "org.scalaz"        %% "scalaz-core"    % "7.0.2"
 )

@@ -1,16 +1,19 @@
 package com.dius.pact.model.waitingforscalaz
 
-object Align {
-  def apply[A, B](a:List[A], b:List[B]):List[These[A, B]] = {
-    val size = Math.max(a.length, b.length)
-    padTo(a, size).zip(padTo(b, size)).map {
-      case (Some(aa), Some(bb)) => Both(aa, bb)
-      case (Some(aa), None) => This[A, B](aa)
-      case (None, Some(bb)) => That[A, B](bb)
-    }
-  }
+import scalaz._
+import Scalaz._
 
-  private def padTo[T](a:List[T], length:Int):List[Option[T]] = {
-    a.map(Some[T]).padTo(length, None)
+object Align {
+  def apply[A, B](thises:List[A], thats:List[B]):List[These[A, B]] = {
+    @annotation.tailrec
+    def loop(aa: List[A], bb: List[B], accum: List[These[A, B]]): List[These[A, B]] = (aa, bb) match {
+      case (Nil, _) =>
+        accum reverse_::: bb.map(b => That[A, B](b))
+      case (_, Nil) =>
+        accum reverse_::: aa.map(a => This[A, B](a))
+      case (ah :: at, bh :: bt) =>
+        loop(at, bt, Both(ah, bh) :: accum)
+    }
+    loop(thises, thats, Nil)
   }
 }
