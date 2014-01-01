@@ -1,9 +1,7 @@
 package com.dius.pact.model
 
 import org.specs2.mutable.Specification
-import org.json4s.Diff
-import org.json4s.JsonAST._
-import org.json4s.JsonAST.JInt
+import org.json4s._
 
 object JsonAstMagic {
   implicit def jObj[T](t:(String, T))(implicit c:(T) => JValue) = JObject(t._1 -> c(t._2))
@@ -12,7 +10,7 @@ object JsonAstMagic {
   implicit def jBool(b:Boolean) = JBool(b)
 //  implicit def jNoop(j:JValue) = j
   
-  def jArr[T](n:T *)(implicit c:(T) => JValue):JArray = JArray(n.map(c(_)).toList)
+  def jArr[T](n:T *)(implicit c:(T) => JValue):JArray = JArray(n.map(c).toList)
 }
 
 class JsonDiffSpec extends Specification {
@@ -434,7 +432,7 @@ class JsonDiffSpec extends Specification {
 
       "match by class" in {
         val actual = """ {"a" : [{"b": 9}, {"c": 2, "d": 3}]}"""
-        testDiff(expected, actual)
+        testDiff(expected, actual)(DiffConfig(structural = true))
       }
 
       "fail on missing keys" in {

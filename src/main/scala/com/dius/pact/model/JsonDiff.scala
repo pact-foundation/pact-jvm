@@ -2,6 +2,7 @@ package com.dius.pact.model
 
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
+import waitingforscalaz._
 
 object JsonDiff {
   case class DiffConfig(allowUnexpectedKeys: Boolean = true, structural: Boolean = false)
@@ -9,7 +10,6 @@ object JsonDiff {
   def diff(expected:String, actual:String, config:DiffConfig = DiffConfig()):Diff = {
 
     //TODO: fix this when we update the pact specification to use proper overrides
-    
     val structuralFilter:PartialFunction[JField, JField] = if(config.structural) {
       case (key, JString(_)) => (key, JString("anyString"))
       case (key, JBool(_)) => (key, JBool(true))
@@ -59,7 +59,11 @@ object JsonDiff {
    * arrays keep all values
    */
   def filterMatchingArray(expectedValues: List[JsonAST.JValue], actualValues: List[JsonAST.JValue]): List[JsonAST.JValue] = {
-    actualValues.zip(expectedValues).map { case (av, ev) => av}
+    Align(expectedValues, actualValues).flatMap {
+      case This(ev) => None
+      case That(av) => Some(av)
+      case Both(ev, av) => Some(filterAdditionalKeys(ev, av))
+    }
   }
 }
 
