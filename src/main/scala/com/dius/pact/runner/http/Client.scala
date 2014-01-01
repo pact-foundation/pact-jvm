@@ -22,7 +22,7 @@ class Client {
   }
 
   def convertRequest(baseUrl:String, request:Request):HttpRequest = {
-    val method = HttpMethods.getForKey(request.method.toUpperCase).get
+    val method = HttpMethods.getForKey(request.method.toString().toUpperCase).get
     val uri = Uri(s"$baseUrl${request.path}")
     println(s"uri:${uri.toString()}")
     val headers: List[HttpHeader] = request.headers.map(_.toList.map{case (key, value) => RawHeader(key, value)}).getOrElse(Nil)

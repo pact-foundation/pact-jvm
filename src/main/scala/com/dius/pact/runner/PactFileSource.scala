@@ -33,7 +33,7 @@ object PactFileSource {
       readOp[Map[String,String]]("headers") and
       readOp[JsValue]("body")
       ) ((method:String, path:String, headers: Option[Map[String,String]], body:Option[JsValue]) =>
-        Request(method, path, headers, body.map(Json.stringify)))
+        Request(HttpMethod.build(method), path, headers, body.map(Json.stringify)))
 
     implicit val readResponse:Reads[Response] = (
       read[Int]("status") and
