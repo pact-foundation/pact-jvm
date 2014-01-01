@@ -1,7 +1,7 @@
 package com.dius.pact.model.spray
 
 import org.specs2.mutable.Specification
-import com.dius.pact.model.{Request, Response}
+import com.dius.pact.model.{Get, Post, Request, Response}
 import spray.http._
 import spray.http.HttpHeaders.RawHeader
 
@@ -17,11 +17,11 @@ class ConversionsSpec extends Specification {
   }
 
   "Request" should {
-    val emptyPactRequest = Request("GET", "/", None, None)
+    val emptyPactRequest = Request(Get, "/", None, None)
 
     val emptySprayRequest = HttpRequest()
 
-    val fullPactRequest = Request("POST", "/post",
+    val fullPactRequest = Request(Post, "/post",
       headers = Some(Map("foo" -> "bar")),
       body = Some("""{"json":"values"}""")
     )

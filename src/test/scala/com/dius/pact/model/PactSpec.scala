@@ -11,7 +11,7 @@ class PactSpec extends Specification {
        val interaction = Interaction(
          description,
          state,
-         Request("","",None, None),
+         Request(Get,"",None, None),
          Response(200, None, None)
        )
 
