@@ -29,7 +29,7 @@ class TestService extends Actor with ActorLogging {
 
     case HttpRequest(method, uri, headers, entity, protocol) => {
       val request = Request(
-        method.toString().toLowerCase,
+        com.dius.pact.model.HttpMethod.build(method.value),
         uri.path.toString().replace("http://localhost:8888", ""),
         Some(headers.map(HttpHeader.unapply).flatten.toMap),
         Some(entity.asString)
