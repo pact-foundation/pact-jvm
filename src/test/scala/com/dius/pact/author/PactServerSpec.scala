@@ -74,7 +74,7 @@ class PactServerSpec extends Specification {
             Some("""{"responsetest":true}"""))))
 
 
-      server.interactions.map(_.toString) must beEqualTo(expectedInteractions.toString).await(timeout = timeout)
+      server.interactions must beEqualTo(expectedInteractions).await(timeout = timeout)
 
       server.stop must beEqualTo(server).await(timeout = timeout)
     }
