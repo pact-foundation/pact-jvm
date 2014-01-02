@@ -1,37 +1,29 @@
 package com.dius.pact.model
 
-import play.api.libs.json.{Json, JsValue}
-
-trait HttpMethod
-
-case object Get extends HttpMethod {
-  override def toString = "GET"
-}
-
-//TODO: use a chain of 3 single interface objects rather than allow for exception on get further down
 case class MakeInteraction(providerState: String,
                            description: Option[String] = None,
                            request: Option[Request] = None,
                            response: Option[Response] = None) {
 
-  //TODO: overload builder functions so callers don't need to be aware of Some vs None
   def uponReceiving(description: String,
                     path: String,
                     method: HttpMethod = Get,
                     headers: Option[Map[String, String]] = None,
-                    body: Option[JsValue] = None) = {
-    val r = Request(method, path, headers, body.map(Json.stringify))
+                    body: Option[String] = None):MakeInteraction = {
+    val r = Request(method, path, headers, body)
     copy(description = Some(description), request = Some(r))
   }
 
   def willRespondWith(status:Int = 200,
                       headers: Option[Map[String,String]] = None,
-                      body: Option[JsValue] = None) = {
-    copy(response = Some(Response(status, headers, body.map(Json.stringify))))
+                      body: Option[String] = None) = {
+    copy(response = Some(Response(status, headers, body)))
   }
 }
 
 object MakeInteraction {
+  implicit def someify[T](t:T):Option[T] = Some(t)
+
   def given(state:String) = MakeInteraction(providerState = state)
 
   implicit def build(mi: MakeInteraction):Interaction = {

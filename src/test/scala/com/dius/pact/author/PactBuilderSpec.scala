@@ -2,9 +2,9 @@ package com.dius.pact.author
 
 import org.specs2._
 import com.dius.pact.model._
-import com.dius.pact.model.MakeInteraction.given
+import com.dius.pact.model.MakeInteraction._
 import Fixtures._
-import play.api.libs.json.Json
+
 
 class PactBuilderSpec extends mutable.Specification {
   "Pact Builder" should {
@@ -18,9 +18,8 @@ class PactBuilderSpec extends mutable.Specification {
                           path = request.path,
                           method = request.method,
                           headers = request.headers,
-                          body = Some(Json.parse(request.body.get))
-          )
-          .willRespondWith(status=200)
+                          body = request.body)
+          .willRespondWith(status=200, headers = response.headers, body= response.body)
         )
 
       pact must beEqualTo(Fixtures.pact)

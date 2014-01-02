@@ -38,8 +38,9 @@ object PactServer {
 
       case r:HttpRequest => {
         pact.future.map { p =>
-          val result: Option[Response] = p.matchRequest(r)
-          result.fold(HttpResponse(status = 500, entity = "Request Invalid"))(_)
+          p.matchRequest(r).getOrElse { e: Throwable =>
+            HttpResponse(status = 500, entity = s"Request Invalid ${e.getMessage}")
+          }
         } (Config.executionContext)
       }
     }

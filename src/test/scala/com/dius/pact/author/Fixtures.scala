@@ -1,12 +1,13 @@
 package com.dius.pact.author
 
 import com.dius.pact.model._
+import scala.collection.mutable.ArrayBuffer
 
 object Fixtures {
   val provider = Provider("test provider")
   val consumer = Consumer("test consumer")
 
-  val request = Request("GET", "/",
+  val request = Request(Get, "/",
     Some(Map("testreqheader" -> "testreqheadervalue")),
     Some("""{"test":true}"""))
 
@@ -21,7 +22,7 @@ object Fixtures {
     response = response
   )
 
-  val interactions = Seq(interaction)
+  val interactions = ArrayBuffer(interaction)
 
   val pact:Pact = Pact(
     provider = provider,
