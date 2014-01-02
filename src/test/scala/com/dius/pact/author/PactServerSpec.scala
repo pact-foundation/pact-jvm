@@ -8,6 +8,8 @@ import akka.io.IO
 import akka.pattern.ask
 import spray.can.Http
 import spray.http._
+import com.dius.pact.model._
+import com.dius.pact.model.HttpMethod.build
 import com.dius.pact.model.spray.Conversions._
 import scala.concurrent.duration.FiniteDuration
 
@@ -44,9 +46,35 @@ class PactServerSpec extends Specification {
       val validResponse: Future[HttpResponse] = http(request.copy(path = s"http://${Config.interface}:${Config.port}/"))
       validResponse.map{_.status.intValue} must beEqualTo(response.status).await(timeout = timeout)
 
-      val expectedInteractions = interactions
+      val expectedInteractions = List(
+        Interaction("",
+          "test state",
+          Request(build("GET"), "/foo",
+            Some(Map(
+              "user-agent" -> "spray-can/1.2-RC1",
+              "host" -> "localhost:9090",
+              "content-length" -> "13",
+              "testreqheader" -> "testreqheadervalue",
+              "content-type" -> "application/json; charset=UTF-8")),
+            Some("""{"test":true}""")),
+          Response(500, None,
+            Some("""{"error": "unexpected request Request(GET,/foo,Some(Map(user-agent -> spray-can/1.2-RC1, host -> localhost:9090, content-length -> 13, testreqheader -> testreqheadervalue, content-type -> application/json; charset=UTF-8)),Some({"test":true}))"}"""))
+        ),
+        Interaction("",
+          "test state",
+          Request(build("GET"), "/",
+            Some(Map(
+              "user-agent" -> "spray-can/1.2-RC1",
+              "host" -> "localhost:9090",
+              "content-length" -> "13",
+              "testreqheader" -> "testreqheadervalue",
+              "content-type" -> "application/json; charset=UTF-8")),
+            Some("""{"test":true}""")),
+          Response(200, Some(Map("testreqheader" -> "testreqheaderval")),
+            Some("""{"responsetest":true}"""))))
 
-      server.interactions must beEqualTo(expectedInteractions).await(timeout = timeout)
+
+      server.interactions.map(_.toString) must beEqualTo(expectedInteractions.toString).await(timeout = timeout)
 
       server.stop must beEqualTo(server).await(timeout = timeout)
     }
