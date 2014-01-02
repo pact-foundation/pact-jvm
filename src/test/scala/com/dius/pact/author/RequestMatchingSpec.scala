@@ -3,26 +3,44 @@ package com.dius.pact.author
 import org.specs2.mutable.Specification
 import Fixtures._
 import scala.util.Failure
+import com.dius.pact.model.{Request, Pact, Response}
 
 class RequestMatchingSpec extends Specification {
   "matching" should {
+    def test(r:Request):Either[Response, String] = RequestMatching(pact).matchRequest(r)
+
     "match the valid request" in {
-      RequestMatching(pact).matchRequest(request) must beEqualTo(Left(response))
+      test(request) must beEqualTo(Left(response))
     }
 
     "disallow additional keys" in {
       val leakyRequest = request.copy(body = request.body.map{_.replaceFirst("\\{", """{"extra": 1, """)})
-      RequestMatching(pact).matchRequest(leakyRequest) must beEqualTo(Right(s"unexpected request $leakyRequest"))
+      test(leakyRequest) must beEqualTo(Right(s"unexpected request $leakyRequest"))
     }
 
     "require precise matching" in {
       val impreciseRequest = request.copy(body = request.body.map{_.replaceFirst("true", "false")})
-      RequestMatching(pact).matchRequest(impreciseRequest) must beEqualTo(Right(s"unexpected request $impreciseRequest"))
+      test(impreciseRequest) must beEqualTo(Right(s"unexpected request $impreciseRequest"))
     }
 
     "trim protocol, server name and port" in {
       val fancyRequest = request.copy(path = "http://localhost:9090/")
-      RequestMatching(pact).matchRequest(fancyRequest) must beEqualTo(Left(response))
+      test(fancyRequest) must beEqualTo(Left(response))
+    }
+
+    "fail to match when missing headers" in {
+      val headerlessRequest = request.copy(headers = Some(Map()))
+      test(headerlessRequest) must beEqualTo(Right(s"unexpected request $headerlessRequest"))
+    }
+
+    "fail to match on header with incorrect value" in {
+      val wrongHeaderRequest = request.copy(headers = Some(Map("testreqheader" -> "WRANG!")))
+      test(wrongHeaderRequest) must beEqualTo(Right(s"unexpected request $wrongHeaderRequest"))
+    }
+
+    "allow additional headers" in {
+      val extraHeaderRequest = request.copy(headers = request.headers.map(_.+("additonal" -> "header")))
+      test(extraHeaderRequest) must beEqualTo(Left(response))
     }
   }
 }

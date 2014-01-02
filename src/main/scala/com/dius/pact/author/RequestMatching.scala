@@ -14,10 +14,18 @@ case class RequestMatching(pact: Pact) {
       val request = i.request
       request.method == actual.method &&
         request.path == actual.path.replaceFirst(pathFilter, "") &&
-//    TODO: implement header matching
-//        request.headers == actual.headers &&
+        matchHeaders(request.headers, actual.headers) &&
         matchBodies(request.body, actual.body)
     }.fold[Either[Response, String]](Right(s"unexpected request $actual")) {i => Left(i.response)}
+  }
+
+  def matchHeaders(expected: Option[Map[String, String]], actual: Option[Map[String, String]]):Boolean = {
+    (expected, actual) match {
+      case (None, None) => true
+      case (None, _) => false
+      case (_, None) => false
+      case (Some(a), Some(b)) => a == b.filter { case (k, _) => a.contains(k) }
+    }
   }
 
   private def matchBodies(a: Option[String], b: Option[String]): Boolean = {

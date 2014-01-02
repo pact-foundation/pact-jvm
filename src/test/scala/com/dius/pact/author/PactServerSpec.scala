@@ -77,6 +77,10 @@ class PactServerSpec extends Specification {
       server.interactions must beEqualTo(expectedInteractions).await(timeout = timeout)
 
       server.stop must beEqualTo(server).await(timeout = timeout)
+
+      system.shutdown()
+
+      true must beTrue
     }
   }
 }
