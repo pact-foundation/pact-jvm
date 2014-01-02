@@ -4,6 +4,10 @@ case class Pact(provider:Provider, consumer:Consumer, interactions:Seq[Interacti
   def interactionFor(description:String, providerState:String) = interactions.find { i =>
     i.description == description && i.providerState == providerState
   }
+
+  def invalidRequest(s:String) = {
+    Response(500, Map[String, String](), s"""{"error": "$s"}""")
+  }
 }
 
 case class Provider(name:String)
