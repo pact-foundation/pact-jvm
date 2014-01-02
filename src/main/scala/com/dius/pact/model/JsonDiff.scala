@@ -7,7 +7,7 @@ import waitingforscalaz._
 object JsonDiff {
   case class DiffConfig(allowUnexpectedKeys: Boolean = true, structural: Boolean = false)
 
-  def diff(expected:String, actual:String, config:DiffConfig = DiffConfig()):Diff = {
+  def diff(expected: String, actual: String, config: DiffConfig = DiffConfig()): Diff = {
 
     //TODO: fix this when we update the pact specification to use proper overrides
     val structuralFilter:PartialFunction[JField, JField] = if(config.structural) {
@@ -29,6 +29,12 @@ object JsonDiff {
     val actualJson = expectedKeysFilter(parse(actual) transformField structuralFilter)
     
     expectedJson diff actualJson
+  }
+
+  val noChange = Diff(JNothing, JNothing, JNothing)
+
+  def matches(expected: String, actual: String, config: DiffConfig = DiffConfig()): Boolean = {
+    diff(expected, actual, config) == noChange
   }
 
   /**

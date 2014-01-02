@@ -441,4 +441,14 @@ class JsonDiffSpec extends Specification {
       }
     }
   }
+
+  "simple match" should {
+    "match" in {
+      matches("{}", "{}") must beTrue
+    }
+
+    "mismatch" in {
+      matches("{}", "[]") must beFalse
+    }
+  }
 }
