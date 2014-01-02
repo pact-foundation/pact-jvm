@@ -1,68 +1,145 @@
 package com.dius.pact.author
 
-import scala.concurrent.Promise
+import scala.concurrent.Future
 import akka.actor._
+import akka.pattern.ask
 import akka.io
-import spray.can.Http
-import com.dius.pact.model.{Response, Pact}
-import com.dius.pact.model.spray.Conversions._
-import scala.util.Try
 import akka.io.Tcp.Bound
-import spray.http.{HttpResponse, HttpRequest}
-import RequestMatching._
+import spray.http._
+import spray.can.Http
+import com.dius.pact.model._
+import com.dius.pact.model.spray.Conversions._
+import scalaz._
+import Scalaz._
+import akka.util.Timeout
 
+object PactServer {
+  implicit val timeout:Timeout = 1000L
 
-case class PactServer(actorRef:ActorRef) {
-  def stop = {
-    actorRef ! PactServer.Stop
+  def apply(pact: Pact)(implicit system: ActorSystem): PactServer = {
+    val ref: ActorRef = system.actorOf(Props[PactHttpServer], name="Pact-HTTP-Server")
+    PactServer(ref, pact)
+  }
+
+  case class Start(interface: String, port: Int, pact: Pact)
+  case object Started
+  case object Stop
+  case object Stopped
+  case class EnterState(state: String)
+  case object EnteredState
+  case object GetInteractions
+  case class CurrentInteractions(i: Seq[Interaction])
+}
+
+case class PactServer(actorRef: ActorRef, pact: Pact)(implicit system: ActorSystem) {
+  import PactServer._
+
+  implicit val executionContext = system.dispatcher
+
+  def start: Future[PactServer] = {
+    val f = (actorRef ? Start(Config.interface, Config.port, pact))
+    f.map(_ => this)
+  }
+
+  def stop: Future[PactServer] = {
+    (actorRef ? Stop).map(_ => this)
+  }
+
+  def enterState(state:String): Future[PactServer] = {
+    (actorRef ? EnterState(state)).map(_ => this)
+  }
+
+  def interactions: Future[Seq[Interaction]] = {
+    (actorRef ? GetInteractions).map { case CurrentInteractions(i) => i }
   }
 }
 
-object PactServer {
-  implicit val system = ActorSystem()
+class PactRequestHandler extends Actor with ActorLogging {
+  import PactServer._
 
-  case class Start(interface:String, port:Int, pact:Pact)
-  case object Stop
+  def receive = awaitPact
 
-  def start(pact:Pact) = {
-    val ref:ActorRef = system.actorOf(Props[PactHttpServer], name="Pact HTTP Server")
-    ref ! Start(Config.interface, Config.port, pact)
-  }
-
-  class PactRequestHandler extends Actor with ActorLogging {
-    val pact: Promise[Pact] = Promise()
-    def receive = {
-      case Http.Connected(_, _) => sender ! Http.Register(self)
-
-      case p:Pact => pact.complete(Try(p))
-
-      case r:HttpRequest => {
-        pact.future.map { p =>
-          p.matchRequest(r).getOrElse { e: Throwable =>
-            HttpResponse(status = 500, entity = s"Request Invalid ${e.getMessage}")
-          }
-        } (Config.executionContext)
-      }
+  def awaitPact: Receive = {
+    case p: Pact => {
+      log.debug(s"running pact: $p")
+      context.become(awaitState(p))
     }
   }
 
-  class PactHttpServer extends Actor with ActorLogging {
-    val stopper: Promise[ActorRef] = Promise()
+  def awaitState(pact: Pact): Receive = awaitPact orElse {
+    case EnterState(state: String) => {
+      log.debug(s"entering state $state")
+      sender ! EnteredState
+      context.become(ready(pact, state, Seq()))
+    }
+  }
 
-    def receive = {
-      case Start(interface, port, pact) => {
-        val handler = system.actorOf(Props[PactRequestHandler], name="Pact Request Handler")
-        io.IO(Http) ! Http.Bind(handler, interface = interface, port = port)
-        handler ! Pact
-      }
+  def ready(pact: Pact, state: String, interactions: Seq[Interaction]): Receive = awaitState(pact) orElse {
+    case Http.Connected(_, _) => {
+      log.debug("client connected")
+      sender ! Http.Register(self)
+    }
 
-      case Bound(_) => {
-        stopper.complete(Try(sender))
-      }
+    case request: HttpRequest => {
+      log.debug(s"got request:$request")
+      import RequestMatching._
+      val response: Response = pact.matchRequest(request).fold(identity, (s: String) => pact.invalidRequest(s) )
+      sender ! pactToSprayResponse(response)
+      context.become(ready(pact, state, interactions :+ Interaction("", state, request, response)))
+    }
 
-      case Http.Unbound => {
-        system.shutdown()
-      }
+    case GetInteractions => {
+      sender ! CurrentInteractions(interactions)
+    }
+  }
+}
+
+class PactHttpServer extends Actor with ActorLogging {
+  import PactServer._
+
+  def receive = awaitStart
+
+  def awaitStart: Receive = {
+    case Start(interface, port, pact) => {
+      val handler = context.system.actorOf(Props[PactRequestHandler], name="Pact-Request-Handler")
+      io.IO(Http)(context.system) ! Http.Bind(handler, interface = interface, port = port)
+      handler ! pact
+      log.debug("starting")
+      context.become(starting(sender, handler))
+    }
+  }
+
+  def starting(client: ActorRef, requestHandler: ActorRef): Receive = {
+    case Bound(_) => {
+      log.debug("started")
+      client ! Started
+      context.become(running(sender, requestHandler))
+    }
+  }
+
+  def running(stopper: ActorRef, requestHandler: ActorRef): Receive =  {
+    case Stop => {
+      stopper ! Http.Unbind
+      context.become(stopping(sender))
+    }
+
+    case GetInteractions => {
+      implicit val executionContext = context.system.dispatcher
+      val client = sender
+      (requestHandler ? GetInteractions).map(client !)
+    }
+
+    case EnterState(state: String) => {
+      implicit val executionContext = context.system.dispatcher
+      val client = sender
+      (requestHandler ? EnterState(state)).map(client !)
+    }
+  }
+
+  def stopping(client: ActorRef): Receive = {
+    case Http.Unbound => {
+      self ! PoisonPill
+      client ! Stopped
     }
   }
 }
