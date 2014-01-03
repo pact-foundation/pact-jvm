@@ -13,12 +13,12 @@ import scalaz._
 import Scalaz._
 import akka.util.Timeout
 
-object FakeProviderServer {
+object MockServiceProvider {
   implicit val timeout:Timeout = 1000L
 
-  def apply(config: PactServerConfig, pact: Pact)(implicit system: ActorSystem): FakeProviderServer = {
+  def apply(config: PactServerConfig, pact: Pact)(implicit system: ActorSystem): MockServiceProvider = {
     val ref: ActorRef = system.actorOf(Props[PactHttpServer], name="Pact-HTTP-Server")
-    FakeProviderServer(config, pact, ref)
+    MockServiceProvider(config, pact, ref)
   }
 
   case class Start(interface: String, port: Int, pact: Pact)
@@ -31,21 +31,21 @@ object FakeProviderServer {
   case class CurrentInteractions(i: Seq[Interaction])
 }
 
-case class FakeProviderServer(config: PactServerConfig, pact: Pact, actorRef: ActorRef)(implicit system: ActorSystem) {
-  import FakeProviderServer._
+case class MockServiceProvider(config: PactServerConfig, pact: Pact, actorRef: ActorRef)(implicit system: ActorSystem) {
+  import MockServiceProvider._
 
   implicit val executionContext = system.dispatcher
 
-  def start: Future[FakeProviderServer] = {
+  def start: Future[MockServiceProvider] = {
     val f = actorRef ? Start(config.interface, config.port, pact)
     f.map(_ => this)
   }
 
-  def stop: Future[FakeProviderServer] = {
+  def stop: Future[MockServiceProvider] = {
     (actorRef ? Stop).map(_ => this)
   }
 
-  def enterState(state:String): Future[FakeProviderServer] = {
+  def enterState(state:String): Future[MockServiceProvider] = {
     (actorRef ? EnterState(state)).map(_ => this)
   }
 
@@ -55,7 +55,7 @@ case class FakeProviderServer(config: PactServerConfig, pact: Pact, actorRef: Ac
 }
 
 class PactRequestHandler extends Actor with ActorLogging {
-  import FakeProviderServer._
+  import MockServiceProvider._
 
   def receive = awaitPact
 
@@ -95,7 +95,7 @@ class PactRequestHandler extends Actor with ActorLogging {
 }
 
 class PactHttpServer extends Actor with ActorLogging {
-  import FakeProviderServer._
+  import MockServiceProvider._
 
   def receive = awaitStart
 

@@ -11,7 +11,7 @@ case class ConsumerPact(pact: Pact) {
     implicit val executionContext = system.dispatcher
 
     for {
-      started <- FakeProviderServer(config, pact).start
+      started <- MockServiceProvider(config, pact).start
       inState <- started.enterState(state)
       result = test
       actualInteractions <- inState.interactions

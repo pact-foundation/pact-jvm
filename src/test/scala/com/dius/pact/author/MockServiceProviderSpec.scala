@@ -13,7 +13,7 @@ import com.dius.pact.model.HttpMethod.build
 import com.dius.pact.model.spray.Conversions._
 import scala.concurrent.duration.FiniteDuration
 
-class FakeProviderServerSpec extends Specification {
+class MockServiceProviderSpec extends Specification {
   
   implicit val timeout = FiniteDuration(10L, "second")
   
@@ -30,7 +30,7 @@ class FakeProviderServerSpec extends Specification {
 
       val config = PactServerConfig(port = 9999)
 
-      val server = FakeProviderServer(config, pact)
+      val server = MockServiceProvider(config, pact)
       //this line ensures the server is running before we start hitting it
       server.start must beEqualTo(server).await(timeout = timeout)
 
