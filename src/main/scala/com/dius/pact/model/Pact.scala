@@ -7,8 +7,9 @@ case class Pact(provider:Provider, consumer:Consumer, interactions:Seq[Interacti
     i.description == description && i.providerState == providerState
   }
 
+  //TODO: serialize pact
   def serialize(writer: PrintWriter) {
-    writer.println("woo hoo!")
+    writer.print("woo hoo!")
   }
 }
 
