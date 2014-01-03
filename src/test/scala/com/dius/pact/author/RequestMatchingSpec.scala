@@ -15,12 +15,12 @@ class RequestMatchingSpec extends Specification {
 
     "disallow additional keys" in {
       val leakyRequest = request.copy(body = request.body.map{_.replaceFirst("\\{", """{"extra": 1, """)})
-      test(leakyRequest) must beEqualTo(Right(s"unexpected request $leakyRequest"))
+      test(leakyRequest) must beEqualTo(Right(s"unexpected request"))
     }
 
     "require precise matching" in {
       val impreciseRequest = request.copy(body = request.body.map{_.replaceFirst("true", "false")})
-      test(impreciseRequest) must beEqualTo(Right(s"unexpected request $impreciseRequest"))
+      test(impreciseRequest) must beEqualTo(Right(s"unexpected request"))
     }
 
     "trim protocol, server name and port" in {
@@ -30,12 +30,12 @@ class RequestMatchingSpec extends Specification {
 
     "fail to match when missing headers" in {
       val headerlessRequest = request.copy(headers = Some(Map()))
-      test(headerlessRequest) must beEqualTo(Right(s"unexpected request $headerlessRequest"))
+      test(headerlessRequest) must beEqualTo(Right(s"unexpected request"))
     }
 
     "fail to match on header with incorrect value" in {
       val wrongHeaderRequest = request.copy(headers = Some(Map("testreqheader" -> "WRANG!")))
-      test(wrongHeaderRequest) must beEqualTo(Right(s"unexpected request $wrongHeaderRequest"))
+      test(wrongHeaderRequest) must beEqualTo(Right(s"unexpected request"))
     }
 
     "allow additional headers" in {

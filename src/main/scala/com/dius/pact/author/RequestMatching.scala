@@ -16,7 +16,7 @@ case class RequestMatching(pact: Pact) {
         request.path == actual.path.replaceFirst(pathFilter, "") &&
         matchHeaders(request.headers, actual.headers) &&
         matchBodies(request.body, actual.body)
-    }.fold[Either[Response, String]](Right(s"unexpected request $actual")) {i => Left(i.response)}
+    }.fold[Either[Response, String]](Right(s"unexpected request")) {i => Left(i.response)}
   }
 
   def matchHeaders(expected: Option[Map[String, String]], actual: Option[Map[String, String]]):Boolean = {

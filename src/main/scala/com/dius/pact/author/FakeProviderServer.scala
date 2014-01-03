@@ -13,12 +13,12 @@ import scalaz._
 import Scalaz._
 import akka.util.Timeout
 
-object PactServer {
+object FakeProviderServer {
   implicit val timeout:Timeout = 1000L
 
-  def apply(pact: Pact)(implicit system: ActorSystem): PactServer = {
+  def apply(config: PactServerConfig, pact: Pact)(implicit system: ActorSystem): FakeProviderServer = {
     val ref: ActorRef = system.actorOf(Props[PactHttpServer], name="Pact-HTTP-Server")
-    PactServer(ref, pact)
+    FakeProviderServer(config, pact, ref)
   }
 
   case class Start(interface: String, port: Int, pact: Pact)
@@ -31,21 +31,21 @@ object PactServer {
   case class CurrentInteractions(i: Seq[Interaction])
 }
 
-case class PactServer(actorRef: ActorRef, pact: Pact)(implicit system: ActorSystem) {
-  import PactServer._
+case class FakeProviderServer(config: PactServerConfig, pact: Pact, actorRef: ActorRef)(implicit system: ActorSystem) {
+  import FakeProviderServer._
 
   implicit val executionContext = system.dispatcher
 
-  def start: Future[PactServer] = {
-    val f = (actorRef ? Start(Config.interface, Config.port, pact))
+  def start: Future[FakeProviderServer] = {
+    val f = actorRef ? Start(config.interface, config.port, pact)
     f.map(_ => this)
   }
 
-  def stop: Future[PactServer] = {
+  def stop: Future[FakeProviderServer] = {
     (actorRef ? Stop).map(_ => this)
   }
 
-  def enterState(state:String): Future[PactServer] = {
+  def enterState(state:String): Future[FakeProviderServer] = {
     (actorRef ? EnterState(state)).map(_ => this)
   }
 
@@ -55,7 +55,7 @@ case class PactServer(actorRef: ActorRef, pact: Pact)(implicit system: ActorSyst
 }
 
 class PactRequestHandler extends Actor with ActorLogging {
-  import PactServer._
+  import FakeProviderServer._
 
   def receive = awaitPact
 
@@ -95,7 +95,7 @@ class PactRequestHandler extends Actor with ActorLogging {
 }
 
 class PactHttpServer extends Actor with ActorLogging {
-  import PactServer._
+  import FakeProviderServer._
 
   def receive = awaitStart
 
