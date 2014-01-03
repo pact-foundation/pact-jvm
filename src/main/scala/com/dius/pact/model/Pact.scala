@@ -5,9 +5,7 @@ case class Pact(provider:Provider, consumer:Consumer, interactions:Seq[Interacti
     i.description == description && i.providerState == providerState
   }
 
-  def invalidRequest(s:String) = {
-    Response(500, Map[String, String](), s"""{"error": "$s"}""")
-  }
+  val invalidRequestResponse = Response(500, Map[String, String](), s"""{"error": "unexpected request"}""")
 }
 
 case class Provider(name:String)
