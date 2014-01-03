@@ -1,8 +1,14 @@
 package com.dius.pact.model
 
+import java.io.PrintWriter
+
 case class Pact(provider:Provider, consumer:Consumer, interactions:Seq[Interaction]) {
   def interactionFor(description:String, providerState:String) = interactions.find { i =>
     i.description == description && i.providerState == providerState
+  }
+
+  def serialize(writer: PrintWriter) {
+    writer.println("woo hoo!")
   }
 }
 
