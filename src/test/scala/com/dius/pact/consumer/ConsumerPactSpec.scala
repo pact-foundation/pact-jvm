@@ -32,6 +32,7 @@ class ConsumerPactSpec extends Specification {
     )
 
     "Run integration tests" in {
+      //TODO: make port selection automatic so that mutiple specs can run in parallel
       val config = PactServerConfig(port = 9998)
       pact.runConsumer(config, interaction.providerState) {
         ConsumerService(config.url).hitEndpoint must beTrue.await
