@@ -48,7 +48,7 @@ class FakeProviderServerSpec extends Specification {
 
 
       val expectedInteractions = List(
-        Interaction("",
+        Interaction("MockServiceProvider received",
           "test state",
           Request(build("GET"), "/foo",
             Some(Map(
@@ -61,7 +61,7 @@ class FakeProviderServerSpec extends Specification {
           Response(500, None,
             Some(s"""{"error": "unexpected request"}"""))
         ),
-        Interaction("",
+        Interaction("MockServiceProvider received",
           "test state",
           Request(build("GET"), "/",
             Some(Map(

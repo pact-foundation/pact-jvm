@@ -33,7 +33,7 @@ object Fixtures {
 
   val interactions = ArrayBuffer(interaction)
 
-  val pact:Pact = Pact(
+  val pact: Pact = Pact(
     provider = provider,
     consumer = consumer,
     interactions = interactions

@@ -7,14 +7,15 @@ import com.dius.pact.model.Pact
 import scala.concurrent.Future
 
 case class ConsumerPact(pact: Pact) {
-  def runConsumer[T](config: PactServerConfig, state: String)(test: => T)(implicit system: ActorSystem = ActorSystem()): Future[PactVerification.PactVerification] = {
+  def runConsumer[T](config: PactServerConfig, state: String)(test: => T)(implicit system: ActorSystem = ActorSystem()): Future[PactVerification.VerificationResult] = {
     implicit val executionContext = system.dispatcher
 
     for {
       started <- FakeProviderServer(config, pact).start
       inState <- started.enterState(state)
       result = test
-      verified <- PactVerification(pact, inState)
+      actualInteractions <- inState.interactions
+      verified = PactVerification(pact.interactions, actualInteractions)
       stopped <- inState.stop
     } yield { verified }
   }
