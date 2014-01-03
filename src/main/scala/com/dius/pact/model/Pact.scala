@@ -4,8 +4,6 @@ case class Pact(provider:Provider, consumer:Consumer, interactions:Seq[Interacti
   def interactionFor(description:String, providerState:String) = interactions.find { i =>
     i.description == description && i.providerState == providerState
   }
-
-  val invalidRequestResponse = Response(500, Map[String, String](), s"""{"error": "unexpected request"}""")
 }
 
 case class Provider(name:String)
@@ -68,6 +66,8 @@ object Response {
     }
     Response(status, optionalHeaders, optionalBody)
   }
+
+  val invalidRequest = Response(500, Map[String, String](), s"""{"error": "unexpected request"}""")
 }
 
 
