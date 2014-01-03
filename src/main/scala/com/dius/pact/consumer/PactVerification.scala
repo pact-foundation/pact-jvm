@@ -10,6 +10,7 @@ object PactVerification {
   case object PactVerified extends VerificationResult
   case class MissingInteractions(missing: Seq[Interaction]) extends VerificationResult
   case class UnexpectedInteractions(unexpected: Seq[Interaction]) extends VerificationResult
+  case object ConsumerTestsFailed extends VerificationResult
 
   case class ComposableVerification(o: VerificationResult) {
     def and (v: VerificationResult) = { (o, v) match {
@@ -22,8 +23,12 @@ object PactVerification {
   }
   implicit def composable(a: VerificationResult) = ComposableVerification(a)
 
-  def apply(expected: Seq[Interaction], actual: Seq[Interaction]): VerificationResult = {
-    allExpectedInteractions(expected, actual) and noUnexpectedInteractions(Response.invalidRequest, actual)
+  def apply(expected: Seq[Interaction], actual: Seq[Interaction])(testResult: Boolean): VerificationResult = {
+    if(!testResult) {
+      ConsumerTestsFailed
+    } else {
+      allExpectedInteractions(expected, actual) and noUnexpectedInteractions(Response.invalidRequest, actual)
+    }
   }
 
   def noUnexpectedInteractions(invalid: Response, actual: Seq[Interaction]): VerificationResult = {

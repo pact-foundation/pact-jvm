@@ -13,8 +13,8 @@ import akka.pattern.ask
 import com.dius.pact.model.spray.Conversions
 
 object Fixtures {
-  val provider = Provider("test provider")
-  val consumer = Consumer("test consumer")
+  val provider = Provider("test_provider")
+  val consumer = Consumer("test_consumer")
 
   val request = Request(Get, "/",
     Some(Map("testreqheader" -> "testreqheadervalue")),

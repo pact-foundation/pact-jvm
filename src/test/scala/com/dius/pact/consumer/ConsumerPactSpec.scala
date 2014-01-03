@@ -38,7 +38,11 @@ class ConsumerPactSpec extends Specification {
         ConsumerService(config.url).hitEndpoint must beTrue.await
       } must beEqualTo(PactVerified).await
 
-      //TODO: assert correct output file has been created (${pact.description}.json)
+      //TODO: use environment property for pact output folder
+      val pactString = io.Source.fromFile(s"target/pacts/${pact.consumer.name}-${pact.provider.name}.json").mkString
+      //TODO: update expected string when pact serialization is complete
+      val expectedPactString = "woo hoo!"
+      pactString must beEqualTo(expectedPactString)
     }
   }
 }

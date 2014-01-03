@@ -8,11 +8,19 @@ import com.dius.pact.consumer.PactVerification._
 
 class PactVerificationSpec extends Specification with Mockito {
   "PactVerification" should {
-    def test(actualInteractions: Seq[Interaction], expectedResult: VerificationResult) = {
-      PactVerification(pact.interactions, actualInteractions) must beEqualTo(expectedResult)
+    def test(actualInteractions: Seq[Interaction], expectedResult: VerificationResult, testPassed: Boolean = true) = {
+      PactVerification(pact.interactions, actualInteractions)(testPassed) must beEqualTo(expectedResult)
     }
 
     val unexpectedInteraction = Interaction("", "", request.copy(path = "unexpected"), Response.invalidRequest)
+
+    "fail fast if tests didn't pass" in {
+      test(
+        Seq(),
+        ConsumerTestsFailed,
+        false
+      )
+    }
 
     "complain about missing interactions" in {
       test(
