@@ -2,8 +2,7 @@ package com.dius.pact.author
 
 import org.specs2.mutable.Specification
 import Fixtures._
-import scala.util.Failure
-import com.dius.pact.model.{Request, Pact, Response}
+import com.dius.pact.model.{Request, Response}
 
 class RequestMatchingSpec extends Specification {
   "matching" should {
