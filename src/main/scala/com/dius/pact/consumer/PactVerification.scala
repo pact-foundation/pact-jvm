@@ -1,7 +1,6 @@
 package com.dius.pact.consumer
 
 import com.dius.pact.model._
-import com.dius.pact.author.RequestMatching
 
 object PactVerification {
 
@@ -42,7 +41,7 @@ object PactVerification {
 
   def allExpectedInteractions(expected: Seq[Interaction], actual: Seq[Interaction]): VerificationResult = {
     def in(f: Seq[Interaction])(i:Interaction): Boolean = {
-      RequestMatching(f, true).matchRequest(i.request).isDefined
+      RequestMatching(f, true).findResponse(i.request).isDefined
     }
     val missing = expected.filterNot(in(actual))
     if(missing.isEmpty) {

@@ -22,13 +22,14 @@ class ConsumerPactSpec extends Specification {
       .withProvider(provider.name)
       .withConsumer(consumer.name)
       .withInteractions(
-      given(interaction.providerState)
-        .uponReceiving( description = interaction.description,
-        path = request.path,
-        method = request.method,
-        headers = request.headers,
-        body = request.body)
-        .willRespondWith(status=200, headers = response.headers, body= response.body)
+        given(interaction.providerState)
+          .uponReceiving(
+            description = interaction.description,
+            path = request.path,
+            method = request.method,
+            headers = request.headers,
+            body = request.body)
+          .willRespondWith(status = 200, headers = response.headers, body = response.body)
     )
 
     "Run integration tests" in {
