@@ -22,6 +22,7 @@ object Matching {
   case class PathMismatch(expected: String, actual: String) extends MatchResult
   case class HeaderMismatch(expected: Headers, actual: Headers) extends MatchResult
   case class BodyContentMismatch(diff: Diff) extends MatchResult
+  case class StatusMismatch(expected: Int, actual: Int) extends MatchResult
 
   implicit def pimpPactWithRequestMatch(pact: Pact) = RequestMatching(pact.interactions)
 
@@ -72,6 +73,14 @@ object Matching {
       MatchFound
     } else {
       PathMismatch(expected, replacedActual)
+    }
+  }
+
+  def matchStatus(expected: Int, actual: Int): MatchResult = {
+    if(expected == actual) {
+      MatchFound
+    } else {
+      StatusMismatch(expected, actual)
     }
   }
 }
