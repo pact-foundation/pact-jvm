@@ -16,7 +16,7 @@ case class RequestMatching(interactions: Seq[Interaction], reverseHeaders: Boole
 
     val result = matchMethod(request.method, actual.method) and
       matchPath(request.path, actual.path) and
-      matchHeaders(request.headers, actual.headers) and
+      matchHeaders(request.headers, actual.headers, reverseHeaders) and
       matchBodies(request.body, actual.body, diffConfig)
 
     result == MatchFound
