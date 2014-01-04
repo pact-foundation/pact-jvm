@@ -33,10 +33,6 @@ object JsonDiff {
 
   val noChange = Diff(JNothing, JNothing, JNothing)
 
-  def matches(expected: String, actual: String, config: DiffConfig = DiffConfig()): Boolean = {
-    diff(expected, actual, config) == noChange
-  }
-
   /**
    * returns a copy of actual with any keys that aren't present in expected filtered out
    */
