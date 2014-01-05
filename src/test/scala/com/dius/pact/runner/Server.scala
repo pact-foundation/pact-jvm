@@ -1,57 +1,71 @@
 package com.dius.pact.runner
 
 import akka.actor._
-import scala.concurrent.{ExecutionContext, Promise}
+import scala.concurrent.{Future, ExecutionContext}
 import akka.io
 import spray.can.Http
 import akka.io.Tcp.Bound
-import scala.util.Try
+import akka.pattern.ask
+
+case class Server(actor: ActorRef)(implicit system: ActorSystem) {
+  import Server._
+  implicit val executionContext = system.dispatcher
+  //TODO: externalise timeout config
+  implicit val timeout = akka.util.Timeout(10000L)
+
+  def start(interface:String = "localhost", port:Int = 8888)(implicit executionContext:ExecutionContext): Future[Server] = {
+    val f = (actor ? Start(interface, port)).map( (_) => this)
+    f.onFailure { case t: Throwable => t.printStackTrace() }
+    f
+  }
+
+  def stop()(implicit executionContext:ExecutionContext): Future[Server] = {
+    val f = (actor ? Stop).map( (_) => this )
+    f.onFailure { case t: Throwable => t.printStackTrace() }
+    f
+  }
+}
 
 object Server {
   case class Start(interface:String, port:Int)
+  case object Started
   case object Stop
+  case object Stopped
 
-  implicit val system = ActorSystem()
-
-  val actor = Promise[ActorRef]()
-
-  def start(interface:String = "localhost", port:Int = 8888)(implicit executionContext:ExecutionContext) {
-    actor.complete(Try(system.actorOf(Props[Main], name="main")))
-    actor.future.map(_ ! Start(interface, port))
-  }
-
-  def stop()(implicit executionContext:ExecutionContext) = {
-    actor.future.map(_ ! Stop)
+  def apply(implicit system: ActorSystem): Server = {
+    Server(system.actorOf(Props[Main], name="test-server-main"))
   }
 
   class Main extends Actor with ActorLogging {
-    val stopper:Promise[ActorRef] = Promise()
+    def receive = initial
 
-    def receive = {
+    def initial: Receive = {
       case Start(interface, port) => {
-        val handler = system.actorOf(Props[TestService], name = "handler")
-
-        io.IO(Http) ! Http.Bind(handler, interface = interface, port = port)
+        val handler = context.system.actorOf(Props[TestService], name = "request-handler")
+        io.IO(Http)(context.system) ! Http.Bind(handler, interface = interface, port = port)
+        context.become(starting(sender, handler))
       }
+    }
 
-      case Stop => {
-        import system.dispatcher
-
-        stopper.future.map( _ ! Http.Unbind)
-      }
-
-      case Http.Unbound => {
-        log.info("server stopped, shutting down actor system")
-        system.shutdown()
-      }
-
+    def starting(client: ActorRef, handler: ActorRef): Receive = {
       case Bound(_) => {
-        stopper.complete(Try(sender))
-        log.info("server bound")
+        client ! Started
+        context.become(started(sender, handler))
       }
+    }
 
-      case m => {
-        log.info(s"unrecognised message $m")
+    def started(stopper: ActorRef, handler: ActorRef): Receive = {
+      case Stop => {
+        stopper ! Http.Unbind
+        context.become(stopping(sender, handler))
+      }
+    }
+
+    def stopping(client: ActorRef, handler: ActorRef): Receive = {
+      case Http.Unbound => {
+        handler ! PoisonPill
+        self ! PoisonPill
+        client ! Stopped
       }
     }
   }
