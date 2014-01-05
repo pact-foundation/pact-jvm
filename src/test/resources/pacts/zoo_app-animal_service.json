@@ -7,6 +7,7 @@
     },
     "interactions": [
         {
+            "provider_state": "there are alligators",
             "description": "a request for animals",
             "request": {
                 "method": "get",
@@ -24,10 +25,10 @@
                         }
                     ]
                 }
-            },
-            "provider_state": "there are alligators"
+            }
         },
         {
+            "provider_state": "there are alligators",
             "description": "a request for alligators",
             "request": {
                 "method": "get",
@@ -41,15 +42,17 @@
                 "headers": {
                     "Content-Type": "application/json; charset=UTF-8"
                 },
-                "body": [
-                    {
-                        "name": "Bob"
-                    }
-                ]
-            },
-            "provider_state": "there are alligators"
+                "body": {
+                    "alligators": [
+                        {
+                            "name": "Bob"
+                        }
+                    ]
+                }
+            }
         },
         {
+            "provider_state": "there is an alligator named Mary",
             "description": "a request for alligator Mary",
             "request": {
                 "method": "get",
@@ -64,12 +67,16 @@
                     "Content-Type": "application/json; charset=UTF-8"
                 },
                 "body": {
-                    "name": "Mary"
+                    "alligators": [
+                        {
+                            "name": "Mary"
+                        }
+                    ]
                 }
-            },
-            "provider_state": "there is an alligator named Mary"
+            }
         },
         {
+            "provider_state": "an error has occurred",
             "description": "a request for alligators",
             "request": {
                 "method": "get",
@@ -86,10 +93,10 @@
                 "body": {
                     "error": "Argh!!!"
                 }
-            },
-            "provider_state": "an error has occurred"
+            }
         },
         {
+            "provider_state": "there is not an alligator named Mary",
             "description": "a request for alligator Mary",
             "request": {
                 "method": "get",
@@ -100,8 +107,7 @@
             },
             "response": {
                 "status": 404
-            },
-            "provider_state": "there is not an alligator named Mary"
+            }
         }
     ],
     "metadata": {
