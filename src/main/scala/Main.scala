@@ -23,7 +23,6 @@ object Main {
     Json.parse(io.Source.fromFile(config).mkString).validate[Map[String,String]].map { mapping =>
       try {
         runPacts(PactConfiguration(mapping, new Client), PactFileSource.loadFiles(dir))
-        println("ran em")
       } catch {
         case t: Throwable => t.printStackTrace()
       }

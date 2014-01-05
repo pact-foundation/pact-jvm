@@ -23,8 +23,6 @@ class EndToEndSpec extends Specification {
         _ = system.shutdown()
       } yield { stopped }
 
-      future.onComplete { case _ => println("finished spec future")}
-
       Await.result(future, Duration.Inf)
 
       true must beTrue
