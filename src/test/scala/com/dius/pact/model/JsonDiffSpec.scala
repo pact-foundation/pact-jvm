@@ -17,11 +17,6 @@ class JsonDiffSpec extends Specification {
   import JsonDiff._
   import JsonAstMagic._
 
-  val noChange           = Diff(JNothing, JNothing, JNothing)
-  def changed(o:JValue) = Diff(o, JNothing, JNothing)
-  def added(o:JValue)   = Diff(JNothing, o, JNothing)
-  def missing(o:JValue) = Diff(JNothing, JNothing, o)
-
   def testDiff(expected:String, actual:String, expectedDiff: Diff = noChange)(implicit config: DiffConfig) = {
     def toString(diff:Diff):String = {
       import org.json4s.jackson.JsonMethods._

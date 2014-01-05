@@ -4,7 +4,7 @@ import org.specs2.mutable.Specification
 import Fixtures._
 
 class RequestMatchingSpec extends Specification {
-  "matching" should {
+  "request matching" should {
     def test(r:Request):Option[Response] = RequestMatching(pact.interactions).findResponse(r)
 
     "match the valid request" in {

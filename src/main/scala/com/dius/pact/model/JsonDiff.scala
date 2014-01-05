@@ -31,7 +31,11 @@ object JsonDiff {
     expectedJson diff actualJson
   }
 
-  val noChange = Diff(JNothing, JNothing, JNothing)
+  val noChange           = Diff(JNothing, JNothing, JNothing)
+  def changed(o:JValue) = Diff(o, JNothing, JNothing)
+  def added(o:JValue)   = Diff(JNothing, o, JNothing)
+  def missing(o:JValue) = Diff(JNothing, JNothing, o)
+  def autoParse(s: String) = parse(s)
 
   /**
    * returns a copy of actual with any keys that aren't present in expected filtered out

@@ -58,11 +58,17 @@ object Matching {
   private type Body = Option[String]
 
   def matchBodies(expected: Body, actual: Body, diffConfig: DiffConfig): MatchResult = {
-    val d = diff(expected.getOrElse(""), actual.getOrElse(""), diffConfig)
-    if(d == noChange) {
+    implicit val autoParse = JsonDiff.autoParse _
+    val difference = (expected, actual) match {
+      case (None, None) => noChange
+      case (None, Some(b)) => added(b)
+      case (Some(a), None) => missing(a)
+      case (Some(a), Some(b)) => diff(a, b, diffConfig)
+    }
+    if(difference == noChange) {
       MatchFound
     } else {
-      BodyContentMismatch(d)
+      BodyContentMismatch(difference)
     }
   }
 
