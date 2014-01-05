@@ -1,17 +1,17 @@
 import com.dius.pact.model.Pact
 import com.dius.pact.runner.http.Client
 import com.dius.pact.runner.{PactConfiguration, PactSpec, PactFileSource}
-import org.scalatest.Sequential
+import org.scalatest._
 import play.api.libs.json.{JsError, Json}
 import scala.concurrent.ExecutionContext
 
 object Main {
-  def main(args: Array[String]) = {
-    run(args)
+  def main(args: Array[String]) {
+    runStuff(args)
   }
 
   //decoupled from command line runner so specs can provide execution context
-  def run(args: Array[String])(implicit executionContext: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global) = {
+  def runStuff(args: Array[String])(implicit executionContext: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global) = {
     args.headOption.fold (println("Need pact root as first arg")) {dir =>
       args.tail.headOption.fold (println("need config file as second arg")) { config =>
         loadFiles(dir, config)
@@ -32,7 +32,7 @@ object Main {
   }
 
   def runPacts(config:PactConfiguration, pacts:Seq[Pact])(implicit executionContext: ExecutionContext) = {
-    org.scalatest.run(
+    stats.run (
       new Sequential(pacts.map { pact =>
         new PactSpec(config, pact)
       } :_*)

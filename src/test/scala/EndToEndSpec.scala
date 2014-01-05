@@ -1,7 +1,6 @@
 import akka.actor.ActorSystem
 import com.dius.pact.runner.Server
 import org.specs2.mutable.Specification
-import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 class EndToEndSpec extends Specification {
@@ -18,16 +17,13 @@ class EndToEndSpec extends Specification {
       val future = for {
         //TODO: externalise interface and port
         started <- server.start()
-        _ = Main.run(Array(testJson, testConfig))
+        _ = Main.runStuff(Array(testJson, testConfig))
         stopped <- started.stop()
         _ = system.shutdown()
       } yield { stopped }
 
-      Await.result(future, Duration.Inf)
-
-      true must beTrue
-
-//      future must beEqualTo(server).await
+      //TODO: externalise timeout configuration
+      future must beEqualTo(server).await(timeout = Duration(10, "s"))
     }
   }
 }
