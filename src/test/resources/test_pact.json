@@ -1,0 +1,33 @@
+{
+  "provider" : {
+    "name" : "test_provider"
+  },
+  "consumer" : {
+    "name" : "test_consumer"
+  },
+  "interactions" : [ {
+    "provider_state" : "test state",
+    "description" : "test interaction",
+    "request" : {
+      "method" : "GET",
+      "headers" : {
+        "testreqheader" : "testreqheadervalue"
+      },
+      "path" : "/"
+    },
+    "response" : {
+      "status" : 200,
+      "headers" : {
+        "testreqheader" : "testreqheaderval"
+      },
+      "body" : {
+        "responsetest" : true
+      }
+    }
+  } ],
+  "metadata" : {
+    "pact_gem" : {
+      "version" : "1.0.9"
+    }
+  }
+}

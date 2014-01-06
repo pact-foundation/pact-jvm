@@ -1,15 +1,11 @@
 package com.dius.pact.model
 
-import java.io.PrintWriter
+import org.json4s._
+import org.json4s.jackson.JsonMethods._
 
-case class Pact(provider:Provider, consumer:Consumer, interactions:Seq[Interaction]) {
+case class Pact(provider:Provider, consumer:Consumer, interactions:Seq[Interaction]) extends PactSerializer {
   def interactionFor(description:String, providerState:String) = interactions.find { i =>
     i.description == description && i.providerState == providerState
-  }
-
-  //TODO: serialize pact
-  def serialize(writer: PrintWriter) {
-    writer.print("woo hoo!")
   }
 }
 
@@ -48,16 +44,20 @@ object HttpMethod {
 }
 //TODO: support duplicate headers
 case class Request(method: HttpMethod,
-                   path:String,
-                   headers:Option[Map[String, String]],
-                   body:Option[String])//TODO: convert body to json
+                   path: String,
+                   headers: Option[Map[String, String]],
+                   body: Option[String]) {
+  def bodyJson: Option[JValue] = body.map(parse(_))
+}
 
 
 
 //TODO: support duplicate headers
 case class Response(status: Int,
-                    headers:Option[Map[String, String]],
-                    body:Option[String])//TODO: convert body to json
+                    headers: Option[Map[String, String]],
+                    body: Option[String]) {
+  def bodyJson: Option[JValue] = body.map(parse(_))
+}
 
 object Response {
   def apply(status:Int, headers:Map[String, String], body:String):Response = {
