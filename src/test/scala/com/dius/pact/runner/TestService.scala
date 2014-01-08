@@ -36,17 +36,23 @@ class TestService extends Actor with ActorLogging {
 
   def running(state: String): Receive = awaitState orElse {
     case HttpRequest(method, uri, requestHeaders, entity, protocol) => {
+      val requestBody: Option[JValue] = entity match {
+        case HttpEntity.Empty => None
+        case e => Some(parse(e.asString))
+      }
+      val reqHeaders = Some(requestHeaders.map(HttpHeader.unapply).flatten.toMap)
       val request = Request(
-        com.dius.pact.model.HttpMethod.build(method.value),
+        method.value,
         uri.path.toString().replace("http://localhost:8888", ""),
-        Some(requestHeaders.map(HttpHeader.unapply).flatten.toMap),
-        Some(entity.asString)
+        reqHeaders,
+        requestBody
       )
       val response = responses(state)(request.path)
-      val body = response.body.fold[HttpEntity](HttpEntity.Empty){content => HttpEntity(ContentTypes.`application/json`, content)}
+      val body = response.bodyString.fold[HttpEntity](HttpEntity.Empty){content => HttpEntity(ContentTypes.`application/json`, content)}
       val headers = response.headers.fold[List[HttpHeader]](Nil)(_.map{ case (k,v) => RawHeader(k,v) }.toList)
 
-      sender ! HttpResponse(status = response.status, entity = body, headers = headers)
+      val sprayResponse = HttpResponse(status = response.status, entity = body, headers = headers)
+      sender ! sprayResponse
     }
   }
 }

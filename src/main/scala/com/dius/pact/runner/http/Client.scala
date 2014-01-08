@@ -14,23 +14,16 @@ class Client {
   import system.dispatcher // execution context for futures
   val pipeline: HttpRequest => Future[HttpResponse] = sendReceive
 
-  def convertResponse(response:HttpResponse):Response = {
-    val status:Int = response.status.intValue
-    val headers:Map[String,String] = response.headers.map(h => (h.name, h.value)).toMap
-    val body:String = response.entity.asString
-    Response(status, headers, body)
-  }
-
   def convertRequest(baseUrl:String, request:Request):HttpRequest = {
-    val method = HttpMethods.getForKey(request.method.toString().toUpperCase).get
+    val method = HttpMethods.getForKey(request.method.toString.toUpperCase).get
     val uri = Uri(s"$baseUrl${request.path}")
     val headers: List[HttpHeader] = request.headers.map(_.toList.map{case (key, value) => RawHeader(key, value)}).getOrElse(Nil)
-    val entity: HttpEntity = request.body.map(HttpEntity(_)).getOrElse(HttpEntity.Empty)
+    val entity: HttpEntity = request.bodyString.map(HttpEntity(_)).getOrElse(HttpEntity.Empty)
     HttpRequest(method, uri, headers, entity)
   }
 
   def invoke(baseUrl:String, request:Request):Future[Response] =  {
-    pipeline(convertRequest(baseUrl, request)).map(convertResponse)
+    pipeline(convertRequest(baseUrl, request)).map(com.dius.pact.model.spray.Conversions.sprayToPactResponse)
   }
 
   def invoke(url:String, body:String):Future[Boolean] = {

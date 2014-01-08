@@ -1,15 +1,20 @@
 package com.dius.pact.runner
 
 import com.dius.pact.model.Response
+import org.json4s.JsonDSL._
+import org.json4s.JValue
 
 object AnimalServiceResponses {
-  def alligator(name:String) = Response(
-    200,
-    None,
-    Some(s"""{"alligators": [{"name":"$name"}]}""")
-  )
+  def contentHeaders: Map[String, String] = Map()//"Content-Type" -> "application/json; charset=UTF-8")
+
+  def alligator(name:String): Response = {
+    val json: JValue = "alligators" -> List("name" -> s"$name")
+    Response(200, contentHeaders, Some(json))
+  }
   val bobResponse = alligator("Bob")
   val maryResponse = alligator("Mary")
+
+  val errorJson: JValue = "error" -> "Argh!!!"
 
   val responses = Map(
     "there are alligators" -> Map (
@@ -24,7 +29,7 @@ object AnimalServiceResponses {
       "/alligators/Mary" -> Response(404, None, None)
     ),
     "an error has occurred" -> Map (
-      "/alligators" -> Response(500, None, Some("""{"error":"Argh!!!"}"""))
+      "/alligators" -> Response(500, contentHeaders, Some(errorJson))
     )
   )
 

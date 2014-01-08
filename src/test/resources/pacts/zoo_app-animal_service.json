@@ -15,9 +15,6 @@
             },
             "response": {
                 "status": 200,
-                "headers": {
-                    "Content-Type": "application/json; charset=UTF-8"
-                },
                 "body": {
                     "alligators": [
                         {
@@ -39,9 +36,6 @@
             },
             "response": {
                 "status": 200,
-                "headers": {
-                    "Content-Type": "application/json; charset=UTF-8"
-                },
                 "body": {
                     "alligators": [
                         {
@@ -56,20 +50,14 @@
             "description": "a request for alligator Mary",
             "request": {
                 "method": "get",
-                "path": "/alligators/Mary",
-                "headers": {
-                    "Accept": "application/json"
-                }
+                "path": "/alligators/Mary"
             },
             "response": {
                 "status": 200,
-                "headers": {
-                    "Content-Type": "application/json; charset=UTF-8"
-                },
                 "body": {
                     "alligators": [
                         {
-                            "name": "MaryBREAK"
+                            "name": "Mary"
                         }
                     ]
                 }
@@ -80,16 +68,10 @@
             "description": "a request for alligators",
             "request": {
                 "method": "get",
-                "path": "/alligators",
-                "headers": {
-                    "Accept": "application/json; charset=UTF-8"
-                }
+                "path": "/alligators"
             },
             "response": {
                 "status": 500,
-                "headers": {
-                    "Content-Type": "application/json; charset=UTF-8"
-                },
                 "body": {
                     "error": "Argh!!!"
                 }
@@ -100,10 +82,7 @@
             "description": "a request for alligator Mary",
             "request": {
                 "method": "get",
-                "path": "/alligators/Mary",
-                "headers": {
-                    "Accept": "application/json; charset=UTF-8"
-                }
+                "path": "/alligators/Mary"
             },
             "response": {
                 "status": 404
