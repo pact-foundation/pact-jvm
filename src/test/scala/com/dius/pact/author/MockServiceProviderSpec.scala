@@ -9,9 +9,10 @@ import akka.pattern.ask
 import spray.can.Http
 import spray.http._
 import com.dius.pact.model._
-import com.dius.pact.model.HttpMethod.build
 import com.dius.pact.model.spray.Conversions._
 import scala.concurrent.duration.FiniteDuration
+import org.json4s.JsonDSL._
+import org.json4s.JsonAST.{JString, JObject}
 
 class MockServiceProviderSpec extends Specification {
   
@@ -46,34 +47,33 @@ class MockServiceProviderSpec extends Specification {
       val validResponse: Future[HttpResponse] = http(request.copy(path = s"${config.url}/"))
       validResponse.map{_.status.intValue} must beEqualTo(response.status).await(timeout = timeout)
 
-
       val expectedInteractions = List(
         Interaction("MockServiceProvider received",
           "test state",
-          Request(build("GET"), "/foo",
+          Request("GET", "/foo",
             Some(Map(
               "user-agent" -> "spray-can/1.2-RC1",
               "host" -> host,
               "content-length" -> "13",
               "testreqheader" -> "testreqheadervalue",
               "content-type" -> "application/json; charset=UTF-8")),
-            Some("""{"test":true}""")),
+            Some("test" -> true)),
           Response(500, None,
-            Some(s"""{"error": "unexpected request"}"""))
-        ),
+            Some(JObject("error" -> JString("unexpected request")))
+        )),
         Interaction("MockServiceProvider received",
           "test state",
-          Request(build("GET"), "/",
+          Request("GET", "/",
             Some(Map(
               "user-agent" -> "spray-can/1.2-RC1",
               "host" -> host,
               "content-length" -> "13",
               "testreqheader" -> "testreqheadervalue",
               "content-type" -> "application/json; charset=UTF-8")),
-            Some("""{"test":true}""")),
-          Response(200, Some(Map("testreqheader" -> "testreqheaderval")),
-            Some("""{"responsetest":true}"""))))
-
+            Some("test" -> true)),
+          Response(200, Map("testreqheader" -> "testreqheaderval"),
+            "responsetest" -> true))
+      )
 
       server.interactions must beEqualTo(expectedInteractions).await(timeout = timeout)
 
