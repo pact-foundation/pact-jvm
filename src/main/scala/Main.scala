@@ -1,9 +1,9 @@
 import com.dius.pact.model.Pact
-import com.dius.pact.runner.http.Client
 import com.dius.pact.runner.{PactConfiguration, PactSpec, PactFileSource}
 import org.scalatest._
-import play.api.libs.json.{JsError, Json}
 import scala.concurrent.ExecutionContext
+import org.json4s._
+import org.json4s.jackson.JsonMethods._
 
 object Main {
   def main(args: Array[String]) {
@@ -19,15 +19,14 @@ object Main {
     }
   }
 
-  def loadFiles(dir:String, config:String)(implicit executionContext: ExecutionContext) = {
-    Json.parse(io.Source.fromFile(config).mkString).validate[Map[String,String]].map { mapping =>
-      try {
-        runPacts(PactConfiguration(mapping, new Client), PactFileSource.loadFiles(dir))
-      } catch {
-        case t: Throwable => t.printStackTrace()
-      }
-    }.recover {
-      case e => println(s"Incorrect pact config file: ${Json.stringify(JsError.toFlatJson(e))}")
+  def loadFiles(dir: String, configFile: String)(implicit executionContext: ExecutionContext) = {
+    implicit val formats = org.json4s.DefaultFormats
+    val map = parse(io.Source.fromFile(configFile).mkString).extract[Map[String,String]]
+    val config = PactConfiguration(map)
+    try {
+      runPacts(config, PactFileSource.loadFiles(dir))
+    } catch {
+      case t: Throwable => t.printStackTrace()
     }
   }
 

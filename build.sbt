@@ -19,7 +19,6 @@ libraryDependencies ++= Seq(
   "io.spray" % "spray-client" % "1.2-RC1",
   "io.spray" % "spray-can" % "1.2-RC1",
   "com.typesafe.akka" %% "akka-actor" % "2.2.3",
-  "com.typesafe.play" %% "play-json" % "2.2.0",
   "org.specs2" %% "specs2" % "2.3.1" % "test",
   "org.mockito" % "mockito-core" % "1.8.5" % "test"
 )

@@ -2,7 +2,6 @@ package com.dius.pact.runner.http
 
 import com.dius.pact.model.{Response, Request}
 import scala.concurrent.Future
-import play.api.libs.json.JsValue
 import spray.http._
 import spray.client.pipelining._
 import akka.actor.ActorSystem
