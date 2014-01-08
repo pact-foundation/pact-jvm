@@ -41,12 +41,14 @@ case class Request(method: String,
                    path: String,
                    headers: Option[Map[String, String]],
                    body: Option[JValue]) {
+  def bodyString:Option[String] = body.map{ b => compact(render(b))}
 }
 
 //TODO: support duplicate headers
 case class Response(status: Int,
                     headers: Option[Map[String, String]],
                     body: Option[JValue]) {
+  def bodyString:Option[String] = body.map{ b => compact(render(b)) }
 }
 
 object Response {
