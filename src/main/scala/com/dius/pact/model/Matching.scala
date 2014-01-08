@@ -21,7 +21,16 @@ object Matching {
   case class MethodMismatch(expected: String, actual: String) extends MatchResult
   case class PathMismatch(expected: String, actual: String) extends MatchResult
   case class HeaderMismatch(expected: Headers, actual: Headers) extends MatchResult
-  case class BodyContentMismatch(diff: Diff) extends MatchResult
+  case class BodyContentMismatch(diff: Diff) extends MatchResult {
+
+    override def toString: String = {
+      import org.json4s.jackson.JsonMethods._
+      val changed = compact(render(diff.changed))
+      val added = compact(render(diff.added))
+      val missing = compact(render(diff.deleted))
+      s"BodyContentMismatch(changed:$changed, added:$added, missing:$missing)"
+    }
+  }
   case class StatusMismatch(expected: Int, actual: Int) extends MatchResult
 
   implicit def pimpPactWithRequestMatch(pact: Pact) = RequestMatching(pact.interactions)
