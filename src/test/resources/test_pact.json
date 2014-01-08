@@ -10,10 +10,13 @@
     "description" : "test interaction",
     "request" : {
       "method" : "GET",
+      "path" : "/",
       "headers" : {
         "testreqheader" : "testreqheadervalue"
       },
-      "path" : "/"
+      "body" : {
+        "test" : true
+      }
     },
     "response" : {
       "status" : 200,

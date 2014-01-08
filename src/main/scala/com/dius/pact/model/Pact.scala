@@ -1,7 +1,15 @@
 package com.dius.pact.model
 
 import org.json4s._
+import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
+
+object Pact {
+  def from(source: JsonInput): Pact = {
+    implicit val formats = DefaultFormats
+    parse(source).transformField { case ("provider_state", value) => ("providerState", value)}.extract[Pact]
+  }
+}
 
 case class Pact(provider:Provider, consumer:Consumer, interactions:Seq[Interaction]) extends PactSerializer {
   def interactionFor(description:String, providerState:String) = interactions.find { i =>
@@ -16,57 +24,39 @@ case class Consumer(name:String)
 case class Interaction(
                         description: String,
                         providerState: String,
-                        request:Request,
-                        response:Response)
-
-class HttpMethod(value:String) {
-  override def toString = value
-}
-
-case object Get    extends HttpMethod("GET")
-case object Post   extends HttpMethod("POST")
-case object Put    extends HttpMethod("PUT")
-case object Delete extends HttpMethod("DELETE")
-case object Head   extends HttpMethod("HEAD")
-case object Patch  extends HttpMethod("PATCH")
+                        request: Request,
+                        response: Response)
 
 object HttpMethod {
-  def build(key: String) = {
-    key.toUpperCase match {
-      case "GET" =>   Get
-      case "POST" =>    Post
-      case "PUT" =>   Put
-      case "DELETE" =>    Delete
-      case "HEAD" =>    Head
-      case "PATCH" =>   Patch
-    }
-  }
+  val Get    = "GET"
+  val Post   = "POST"
+  val Put    = "PUT"
+  val Delete = "DELETE"
+  val Head   = "HEAD"
+  val Patch  = "PATCH"
 }
+
 //TODO: support duplicate headers
-case class Request(method: HttpMethod,
+case class Request(method: String,
                    path: String,
                    headers: Option[Map[String, String]],
-                   body: Option[String]) {
-  def bodyJson: Option[JValue] = body.map(parse(_))
+                   body: Option[JValue]) {
 }
-
-
 
 //TODO: support duplicate headers
 case class Response(status: Int,
                     headers: Option[Map[String, String]],
-                    body: Option[String]) {
-  def bodyJson: Option[JValue] = body.map(parse(_))
+                    body: Option[JValue]) {
 }
 
 object Response {
-  def apply(status:Int, headers:Map[String, String], body:String):Response = {
+  def apply(status: Int, headers: Map[String, String], body: JValue):Response = {
     val optionalHeaders = if(headers == null || headers.isEmpty) {
       None
     } else {
       Some(headers)
     }
-    val optionalBody = if(body == null || body.isEmpty) {
+    val optionalBody = if(body == null) {
       None
     } else {
       Some(body)
@@ -74,7 +64,7 @@ object Response {
     Response(status, optionalHeaders, optionalBody)
   }
 
-  val invalidRequest = Response(500, Map[String, String](), s"""{"error": "unexpected request"}""")
+  val invalidRequest = Response(500, Map[String, String](), "error"-> "unexpected request")
 }
 
 

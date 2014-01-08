@@ -1,16 +1,20 @@
 package com.dius.pact.model
 
 object Fixtures {
+  import HttpMethod._
+  import org.json4s.JsonDSL._
+
   val provider = Provider("test_provider")
   val consumer = Consumer("test_consumer")
 
+
   val request = Request(Get, "/",
     Some(Map("testreqheader" -> "testreqheadervalue")),
-    Some("""{"test":true}"""))
+    Some("test" -> true))
 
   val response = Response(200,
-    Some(Map("testreqheader" -> "testreqheaderval")),
-    Some("""{"responsetest":true}"""))
+    Map("testreqheader" -> "testreqheaderval"),
+    "responsetest" -> true)
 
   val interaction = Interaction(
     description = "test interaction",

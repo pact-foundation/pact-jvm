@@ -1,6 +1,6 @@
 package com.dius.pact.model
 
-import java.io.PrintWriter
+import java.io.{File, PrintWriter}
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
@@ -9,23 +9,24 @@ trait PactSerializer {
   this: Pact =>
 
   import org.json4s.JsonDSL._
-  
+
   implicit def request2json(r: Request): JValue = {
     JObject(
-      "method" -> r.method.toString,
+      "method" -> r.method,
+      "path" -> r.path,
       "headers" -> r.headers,
-      "path" -> r.path
+      "body" -> r.body
     )
   }
-  
+
   implicit def response2json(r: Response): JValue = {
     JObject(
       "status" -> JInt(r.status),
       "headers" -> r.headers,
-      "body" -> r.bodyJson
+      "body" -> r.body
     )
   }
-  
+
   implicit def interaction2json(i: Interaction): JValue = {
     JObject (
       "provider_state" -> i.providerState,

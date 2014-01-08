@@ -1,6 +1,6 @@
 package com.dius.pact.model
 
-import org.json4s.Diff
+import org.json4s.{JValue, Diff}
 import com.dius.pact.model.JsonDiff._
 
 object Matching {
@@ -18,7 +18,7 @@ object Matching {
 
   case object MatchFound extends MatchResult
   case class MatchFailure(problems: List[MatchResult]) extends MatchResult
-  case class MethodMismatch(expected: HttpMethod, actual: HttpMethod) extends MatchResult
+  case class MethodMismatch(expected: String, actual: String) extends MatchResult
   case class PathMismatch(expected: String, actual: String) extends MatchResult
   case class HeaderMismatch(expected: Headers, actual: Headers) extends MatchResult
   case class BodyContentMismatch(diff: Diff) extends MatchResult
@@ -47,7 +47,7 @@ object Matching {
     }
   }
 
-  def matchMethod(expected: HttpMethod, actual: HttpMethod): MatchResult = {
+  def matchMethod(expected: String, actual: String): MatchResult = {
     if(expected == actual) {
       MatchFound
     } else {
@@ -55,7 +55,7 @@ object Matching {
     }
   }
 
-  private type Body = Option[String]
+  private type Body = Option[JValue]
 
   def matchBodies(expected: Body, actual: Body, diffConfig: DiffConfig): MatchResult = {
     implicit val autoParse = JsonDiff.autoParse _

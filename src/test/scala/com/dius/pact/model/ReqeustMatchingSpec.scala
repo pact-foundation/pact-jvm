@@ -2,6 +2,7 @@ package com.dius.pact.model
 
 import org.specs2.mutable.Specification
 import Fixtures._
+import org.json4s.JsonDSL._
 
 class RequestMatchingSpec extends Specification {
   "request matching" should {
@@ -12,12 +13,12 @@ class RequestMatchingSpec extends Specification {
     }
 
     "disallow additional keys" in {
-      val leakyRequest = request.copy(body = request.body.map{_.replaceFirst("\\{", """{"extra": 1, """)})
+      val leakyRequest = request.copy(body = Some(Map("test" -> true, "extra" -> false)))
       test(leakyRequest) must beNone
     }
 
     "require precise matching" in {
-      val impreciseRequest = request.copy(body = request.body.map{_.replaceFirst("true", "false")})
+      val impreciseRequest = request.copy(body = Some("test" -> false))
       test(impreciseRequest) must beNone
     }
 
