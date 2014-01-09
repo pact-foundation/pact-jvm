@@ -1,15 +1,19 @@
 import akka.actor.ActorSystem
 import com.dius.pact.runner.Server
+import java.net.URL
 import org.specs2.mutable.Specification
 import scala.concurrent.duration.Duration
 
 class EndToEndSpec extends Specification {
 
+  def loadResource(name: String): URL = {
+    this.getClass.getClassLoader.getResource(name)
+  }
+
   "PactRunner" should {
     "Run Pacts" in {
-      val basePath = "src/test/resources/"
-      val testJson = s"$basePath/pacts"
-      val testConfig = s"$basePath/pact-config.json"
+      val testJson = loadResource(s"pacts").getPath
+      val testConfig = loadResource(s"pact-config.json").getPath
 
       val system = ActorSystem("Test-Provider-System")
       implicit val executionContext = system.dispatcher
