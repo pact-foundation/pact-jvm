@@ -1,0 +1,3 @@
+[submodule "pact-model-jvm"]
+	path = pact-model-jvm
+	url = git@github.com:DiUS/pact-model-jvm.git
