@@ -1,4 +1,4 @@
-name := "pact-runner-jvm"
+name := "pact-provider-jvm"
 
 organization := "com.dius"
 
