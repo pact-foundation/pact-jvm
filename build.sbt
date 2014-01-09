@@ -1,4 +1,4 @@
-name := "pact-author-jvm"
+name := "pact-consumer-jvm"
 
 organization := "com.dius"
 
