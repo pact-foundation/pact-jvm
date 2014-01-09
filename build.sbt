@@ -2,15 +2,11 @@ name := "pact-provider-jvm"
 
 organization := "com.dius"
 
-version := "1.0-SNAPSHOT"
-
 scalaVersion := "2.10.2"
 
 resolvers ++= Seq("spray repo" at "http://repo.spray.io",
                   "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
                   "Local Maven Repository" at "file://"+Path.userHome.absolutePath+"/.m2/repository")
-
-publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository")))
 
 libraryDependencies ++= Seq(
   "com.dius" %% "pact-model-jvm" % "1.0-SNAPSHOT",
