@@ -60,16 +60,16 @@ object RootBuild extends Build {
 
 	lazy val model = Project(
 		id = "pact-model-jvm",
-		base = file("pact-model-jvm"),
+		base = file("model"),
 		settings = commonSettings)
 
 	lazy val consumer = Project( 
 		id = "pact-consumer-jvm",
-		base = file("pact-consumer-jvm"),
+		base = file("consumer"),
 		settings = commonSettings)
 
 	lazy val provider = Project( 
 		id = "pact-provider-jvm",
-		base = file("pact-provider-jvm"),
+		base = file("provider"),
 		settings = commonSettings)
 }
