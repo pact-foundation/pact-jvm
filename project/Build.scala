@@ -43,6 +43,11 @@ object BuildSettings {
   	)
 
 	val commonSettings = Defaults.defaultSettings ++ publishSettings
+	val skipPublish = Seq(
+		publish := { },
+		publishLocal := { }//,
+		// publishSigned := { }
+	)
 }
 
 object RootBuild extends Build {
@@ -50,7 +55,7 @@ object RootBuild extends Build {
 	lazy val pact = Project( 
 		id = "pact-jvm",
 		base = file("."),
-		settings = commonSettings)
+		settings = commonSettings ++ skipPublish)
 		.aggregate(model, consumer, provider)
 
 	lazy val model = Project(
