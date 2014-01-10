@@ -41,6 +41,8 @@ object BuildSettings {
 	        </developer>
 	      </developers>
   	)
+
+	val commonSettings = Defaults.defaultSettings ++ publishSettings
 }
 
 object RootBuild extends Build {
@@ -48,20 +50,21 @@ object RootBuild extends Build {
 	lazy val pact = Project( 
 		id = "pact-jvm",
 		base = file("."),
-		settings = Defaults.defaultSettings ++ publishSettings)
+		settings = commonSettings)
 		.aggregate(model, consumer, provider)
 
 	lazy val model = Project(
 		id = "pact-model-jvm",
 		base = file("pact-model-jvm"),
-		settings = Defaults.defaultSettings ++ publishSettings)
+		settings = commonSettings)
 
 	lazy val consumer = Project( 
 		id = "pact-consumer-jvm",
-		base = file("pact-consumer-jvm"))
+		base = file("pact-consumer-jvm"),
+		settings = commonSettings)
 
 	lazy val provider = Project( 
 		id = "pact-provider-jvm",
 		base = file("pact-provider-jvm"),
-		settings = Defaults.defaultSettings ++ publishSettings)
+		settings = commonSettings)
 }
