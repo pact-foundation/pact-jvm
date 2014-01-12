@@ -9,7 +9,6 @@ resolvers ++= Seq("spray repo" at "http://repo.spray.io",
                   "Local Maven Repository" at "file://"+Path.userHome.absolutePath+"/.m2/repository")
 
 libraryDependencies ++= Seq(
-  "com.dius" %% "pact-model-jvm" % "1.0-SNAPSHOT",
   "org.scalatest" % "scalatest_2.10" % "2.0.RC3", //scalatest is the runtime test library, hoping for simple single thread
   "commons-io" % "commons-io" % "2.4",
   "io.spray" % "spray-client" % "1.2-RC1",

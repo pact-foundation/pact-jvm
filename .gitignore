@@ -13,3 +13,6 @@ project/plugins/project/
 .scala_dependencies
 
 .DS_Store
+
+.idea
+.idea_modules
