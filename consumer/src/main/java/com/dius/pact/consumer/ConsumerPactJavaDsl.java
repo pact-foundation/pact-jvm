@@ -28,7 +28,7 @@ public class ConsumerPactJavaDsl {
     }
 
     public Pact withInteractions(ConsumerInteractionJavaDsl ... interactions) {
-        List<Interaction> builtInteractions = new ArrayList<>();
+        List<Interaction> builtInteractions = new ArrayList<Interaction>();
         for(ConsumerInteractionJavaDsl builder : interactions) {
             builtInteractions.add(builder.build());
         }
