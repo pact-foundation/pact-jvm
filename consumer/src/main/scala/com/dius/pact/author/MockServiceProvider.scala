@@ -46,6 +46,7 @@ case class MockServiceProvider(config: PactServerConfig, pact: Pact, actorRef: A
   }
 
   def enterState(state:String): Future[MockServiceProvider] = {
+    println(s"entering state: $state")
     (actorRef ? EnterState(state)).map(_ => this)
   }
 
@@ -83,7 +84,7 @@ class PactRequestHandler extends Actor with ActorLogging {
     case request: HttpRequest => {
       log.debug(s"got request:$request")
       import RequestMatching._
-      val response: Response = pact.findResponse(request).getOrElse(Response.invalidRequest)
+      val response: Response = pact.findResponse(request).getOrElse(Response.invalidRequest(request, pact))
       sender ! pactToSprayResponse(response)
       context.become(ready(pact, state, interactions :+ Interaction("MockServiceProvider received", state, request, response)))
     }

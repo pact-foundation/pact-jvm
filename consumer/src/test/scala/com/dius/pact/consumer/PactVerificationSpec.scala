@@ -12,7 +12,8 @@ class PactVerificationSpec extends Specification with Mockito {
       PactVerification(pact.interactions, actualInteractions)(testPassed) must beEqualTo(expectedResult)
     }
 
-    val unexpectedInteraction = Interaction("", "", request.copy(path = "unexpected"), Response.invalidRequest)
+    val invalidResponse = Response(500, None, None)
+    val unexpectedInteraction = Interaction("", "", request.copy(path = "unexpected"), invalidResponse)
 
     "fail fast if tests didn't pass" in {
       test(

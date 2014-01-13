@@ -66,7 +66,9 @@ object Response {
     Response(status, optionalHeaders, optionalBody)
   }
 
-  val invalidRequest = Response(500, Map[String, String](), "error"-> "unexpected request")
+  def invalidRequest(request: Request, pact: Pact) = {
+    Response(500, Map[String, String](), "error"-> s"unexpected request : $request \nnot in : $pact")
+  }
 }
 
 

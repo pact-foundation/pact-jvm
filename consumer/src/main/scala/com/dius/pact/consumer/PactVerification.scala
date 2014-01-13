@@ -26,7 +26,8 @@ object PactVerification {
     if(!testResult) {
       ConsumerTestsFailed
     } else {
-      allExpectedInteractions(expected, actual) and noUnexpectedInteractions(Response.invalidRequest, actual)
+      val invalidResponse = Response(500, None, None)
+      allExpectedInteractions(expected, actual) and noUnexpectedInteractions(invalidResponse, actual)
     }
   }
 
