@@ -47,6 +47,7 @@ case class MakePact(
   def withProvider(name:String) = copy(provider = Some(Provider(name)))
   def withConsumer(name:String) = copy(consumer = Some(Consumer(name)))
   def withInteractions(list:MakeInteraction*) = copy(interactions = list)
+  def build = MakePact.build(this)
 }
 
 object MakePact {
