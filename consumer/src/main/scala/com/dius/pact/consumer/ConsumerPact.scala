@@ -10,7 +10,10 @@ import scala.util.{Failure, Success, Try}
 case class ConsumerPact(pact: Pact) {
   def execute(test: => Unit): Try[Unit] = Try(test)
 
-  def runConsumer(config: PactServerConfig, state: String)(test: => Boolean)(implicit system: ActorSystem = ActorSystem()): Future[PactVerification.VerificationResult] = {
+  def runConsumer(config: PactServerConfig,state: String)
+                 (test: => Boolean)
+                 (implicit system: ActorSystem = ActorSystem("default-pact-consumer-actor-system")):
+      Future[PactVerification.VerificationResult] = {
     implicit val executionContext = system.dispatcher
 
     for {

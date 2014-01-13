@@ -36,22 +36,31 @@ case class MockServiceProvider(config: PactServerConfig, pact: Pact, actorRef: A
 
   implicit val executionContext = system.dispatcher
 
+  private def log[A, T](msg: String, f: Future[A])(mapper: (A) => T): Future[T] = {
+    f.onFailure { case e => println(s"error $msg: $e") }
+    f.map(mapper)
+  }
+
+  def alwaysThis(a:Any) = this
+
   def start: Future[MockServiceProvider] = {
-    val f = actorRef ? Start(config.interface, config.port, pact)
-    f.map(_ => this)
+    log("Starting Server",
+      actorRef ? Start(config.interface, config.port, pact))(alwaysThis)
   }
 
   def stop: Future[MockServiceProvider] = {
-    (actorRef ? Stop).map(_ => this)
+    log("stopping server",(actorRef ? Stop))(alwaysThis)
   }
 
   def enterState(state:String): Future[MockServiceProvider] = {
-    println(s"entering state: $state")
-    (actorRef ? EnterState(state)).map(_ => this)
+    log(s"Entering state $state",
+      (actorRef ? EnterState(state)))(alwaysThis)
   }
 
   def interactions: Future[Seq[Interaction]] = {
-    (actorRef ? GetInteractions).map { case CurrentInteractions(i) => i }
+    val f = (actorRef ? GetInteractions).map { case CurrentInteractions(i) => i }
+    f.onFailure { case e =>  println(s"error getting interactions: $e") }
+    f
   }
 }
 
