@@ -51,26 +51,26 @@ class MockServiceProviderSpec extends Specification {
         Interaction("MockServiceProvider received",
           "test state",
           Request("GET", "/foo",
-            Some(Map(
+            Map(
               "user-agent" -> "spray-can/1.2-RC1",
               "host" -> host,
               "content-length" -> "13",
               "testreqheader" -> "testreqheadervalue",
-              "content-type" -> "application/json; charset=UTF-8")),
-            Some("test" -> true)),
+              "content-type" -> "application/json; charset=UTF-8"),
+            "test" -> true),
           Response(500, None,
             Some(JObject("error" -> JString("unexpected request")))
         )),
         Interaction("MockServiceProvider received",
           "test state",
           Request("GET", "/",
-            Some(Map(
+            Map(
               "user-agent" -> "spray-can/1.2-RC1",
               "host" -> host,
               "content-length" -> "13",
               "testreqheader" -> "testreqheadervalue",
-              "content-type" -> "application/json; charset=UTF-8")),
-            Some("test" -> true)),
+              "content-type" -> "application/json; charset=UTF-8"),
+            "test" -> true),
           Response(200, Map("testreqheader" -> "testreqheaderval"),
             "responsetest" -> true))
       )

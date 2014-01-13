@@ -3,15 +3,20 @@ package com.dius.pact.model
 import org.json4s._
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
+import scala.collection.JavaConversions
 
 object Pact {
+  def apply(provider: Provider, consumer: Consumer, interactions: java.util.List[Interaction]): Pact = {
+    Pact(provider, consumer, JavaConversions.collectionAsScalaIterable(interactions).toSeq)
+  }
+
   def from(source: JsonInput): Pact = {
     implicit val formats = DefaultFormats
     parse(source).transformField { case ("provider_state", value) => ("providerState", value)}.extract[Pact]
   }
 }
 
-case class Pact(provider:Provider, consumer:Consumer, interactions:Seq[Interaction]) extends PactSerializer {
+case class Pact(provider:Provider, consumer:Consumer, interactions: Seq[Interaction]) extends PactSerializer {
   def interactionFor(description:String, providerState:String) = interactions.find { i =>
     i.description == description && i.providerState == providerState
   }
@@ -44,6 +49,46 @@ case class Request(method: String,
   def bodyString:Option[String] = body.map{ b => compact(render(b))}
 }
 
+trait Optionals {
+  def optional(headers: Map[String, String]): Option[Map[String,String]] = {
+    if(headers == null | headers.isEmpty) {
+      None
+    } else {
+      Some(headers)
+    }
+  }
+
+  def optional(body: String): Option[JValue] = {
+    if(body == null || body.trim().size == 0) {
+      None
+    } else {
+      Some(parse(body))
+    }
+  }
+
+  def optional(body: JValue): Option[JValue] = {
+    if(body == null) {
+      None
+    } else {
+      Some(body)
+    }
+  }
+}
+
+object Request extends Optionals {
+  def apply(method: String, path: String, headers: Map[String, String], body: String): Request = {
+    Request(method, path, optional(headers), optional(body))
+  }
+
+  def apply(method: String, path: String, headers: Map[String, String], body: JValue): Request = {
+    Request(method, path, optional(headers), optional(body))
+  }
+
+  def apply(method: String, path: String, headers: java.util.Map[String,String], body: String): Request = {
+    Request(method, path, optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body))
+  }
+}
+
 //TODO: support duplicate headers
 case class Response(status: Int,
                     headers: Option[Map[String, String]],
@@ -51,19 +96,17 @@ case class Response(status: Int,
   def bodyString:Option[String] = body.map{ b => compact(render(b)) }
 }
 
-object Response {
-  def apply(status: Int, headers: Map[String, String], body: JValue):Response = {
-    val optionalHeaders = if(headers == null || headers.isEmpty) {
-      None
-    } else {
-      Some(headers)
-    }
-    val optionalBody = if(body == null) {
-      None
-    } else {
-      Some(body)
-    }
-    Response(status, optionalHeaders, optionalBody)
+object Response extends Optionals {
+  def apply(status: Int, headers: Map[String, String], body: String): Response = {
+    Response(status, optional(headers), optional(body))
+  }
+
+  def apply(status: Int, headers: Map[String, String], body: JValue): Response = {
+    Response(status, optional(headers), optional(body))
+  }
+
+  def apply(status: Int, headers: java.util.Map[String, String], body: String): Response = {
+    Response(status, optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body))
   }
 
   def invalidRequest(request: Request, pact: Pact) = {

@@ -24,8 +24,8 @@ class ConversionsSpec extends Specification {
     val emptySprayRequest = HttpRequest()
 
     val fullPactRequest = Request(Post, "/post",
-      headers = Some(Map("foo" -> "bar")),
-      body = Some("json" -> "values")
+      headers = Map("foo" -> "bar"),
+      body = "json" -> "values"
     )
 
     val fullSprayRequest = HttpRequest(

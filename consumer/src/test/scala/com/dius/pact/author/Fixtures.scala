@@ -19,8 +19,8 @@ object Fixtures {
   val consumer = Consumer("test_consumer")
 
   val request = Request(Get, "/",
-    Some(Map("testreqheader" -> "testreqheadervalue")),
-    Some("test" -> true))
+    Map("testreqheader" -> "testreqheadervalue"),
+    "test" -> true)
 
   val response = Response(200,
     Map("testreqheader" -> "testreqheaderval"),

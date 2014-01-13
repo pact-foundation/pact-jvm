@@ -29,7 +29,7 @@ object MockServiceProvider {
   case class EnterState(state: String)
   case object EnteredState
   case object GetInteractions
-  case class CurrentInteractions(i: Seq[Interaction])
+  case class CurrentInteractions(i: Iterable[Interaction])
 }
 
 case class MockServiceProvider(config: PactServerConfig, pact: Pact, actorRef: ActorRef)(implicit system: ActorSystem) {
@@ -58,7 +58,7 @@ case class MockServiceProvider(config: PactServerConfig, pact: Pact, actorRef: A
       (actorRef ? EnterState(state)))(alwaysThis)
   }
 
-  def interactions: Future[Seq[Interaction]] = {
+  def interactions: Future[Iterable[Interaction]] = {
     val f = (actorRef ? GetInteractions).map { case CurrentInteractions(i) => i }
     f.onFailure { case e =>  println(s"error getting interactions: $e") }
     f

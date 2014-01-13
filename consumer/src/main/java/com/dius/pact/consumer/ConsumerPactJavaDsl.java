@@ -1,9 +1,6 @@
 package com.dius.pact.consumer;
 
-import com.dius.pact.model.Consumer;
-import com.dius.pact.model.Interaction;
-import com.dius.pact.model.Pact;
-import com.dius.pact.model.Provider;
+import com.dius.pact.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +29,9 @@ public class ConsumerPactJavaDsl {
 
     public Pact withInteractions(ConsumerInteractionJavaDsl ... interactions) {
         List<Interaction> builtInteractions = new ArrayList<>();
-
-        return null;//new Pact(new Provider(providerName), new Consumer(consumerName), scalaInteractions);
+        for(ConsumerInteractionJavaDsl builder : interactions) {
+            builtInteractions.add(builder.build());
+        }
+        return Pact$.MODULE$.apply(new Provider(providerName), new Consumer(consumerName), builtInteractions);
     }
 }

@@ -3,7 +3,7 @@ package com.dius.pact.model
 import JsonDiff._
 
 //TODO: find a better way to handle the header reverse thing
-case class RequestMatching(interactions: Seq[Interaction], reverseHeaders: Boolean = false) {
+case class RequestMatching(interactions: Iterable[Interaction], reverseHeaders: Boolean = false) {
   import Matching._
   import RequestMatching._
 

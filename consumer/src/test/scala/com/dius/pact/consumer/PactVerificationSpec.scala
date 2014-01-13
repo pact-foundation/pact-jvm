@@ -10,7 +10,7 @@ import scala.util.{Failure, Success, Try}
 class PactVerificationSpec extends Specification with Mockito {
   "PactVerification" should {
     def test(
-      actualInteractions: Seq[Interaction],
+      actualInteractions: Iterable[Interaction],
       expectedResult: VerificationResult,
       testPassed: Try[Unit] = Success(Unit)) = {
         PactVerification(pact.interactions, actualInteractions)(testPassed) must beEqualTo(expectedResult)

@@ -6,10 +6,10 @@ import scala.util.{Success, Failure, Try}
 object PactVerification {
 
   trait VerificationResult
-  case class PactFailure(missing: Seq[Interaction], unexpected: Seq[Interaction]) extends VerificationResult
+  case class PactFailure(missing: Iterable[Interaction], unexpected: Iterable[Interaction]) extends VerificationResult
   case object PactVerified extends VerificationResult
-  case class MissingInteractions(missing: Seq[Interaction]) extends VerificationResult
-  case class UnexpectedInteractions(unexpected: Seq[Interaction]) extends VerificationResult
+  case class MissingInteractions(missing: Iterable[Interaction]) extends VerificationResult
+  case class UnexpectedInteractions(unexpected: Iterable[Interaction]) extends VerificationResult
   case class ConsumerTestsFailed(error: Throwable) extends VerificationResult
 
   case class ComposableVerification(o: VerificationResult) {
@@ -23,7 +23,7 @@ object PactVerification {
   }
   implicit def composable(a: VerificationResult) = ComposableVerification(a)
 
-  def apply(expected: Seq[Interaction], actual: Seq[Interaction])(testResult: Try[Unit]): VerificationResult = {
+  def apply(expected: Iterable[Interaction], actual: Iterable[Interaction])(testResult: Try[Unit]): VerificationResult = {
     testResult match {
       case Success(_) => {
         val invalidResponse = Response(500, None, None)
@@ -33,7 +33,7 @@ object PactVerification {
     }
   }
 
-  def noUnexpectedInteractions(invalid: Response, actual: Seq[Interaction]): VerificationResult = {
+  def noUnexpectedInteractions(invalid: Response, actual: Iterable[Interaction]): VerificationResult = {
     val unexpected = actual.filter(_.response == invalid)
     if(unexpected.isEmpty) {
       PactVerified
@@ -42,8 +42,8 @@ object PactVerification {
     }
   }
 
-  def allExpectedInteractions(expected: Seq[Interaction], actual: Seq[Interaction]): VerificationResult = {
-    def in(f: Seq[Interaction])(i:Interaction): Boolean = {
+  def allExpectedInteractions(expected: Iterable[Interaction], actual: Iterable[Interaction]): VerificationResult = {
+    def in(f: Iterable[Interaction])(i:Interaction): Boolean = {
       RequestMatching(f, true).findResponse(i.request).isDefined
     }
     val missing = expected.filterNot(in(actual))
