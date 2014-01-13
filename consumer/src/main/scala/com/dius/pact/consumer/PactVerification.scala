@@ -1,6 +1,7 @@
 package com.dius.pact.consumer
 
 import com.dius.pact.model._
+import scala.util.{Success, Failure, Try}
 
 object PactVerification {
 
@@ -9,7 +10,7 @@ object PactVerification {
   case object PactVerified extends VerificationResult
   case class MissingInteractions(missing: Seq[Interaction]) extends VerificationResult
   case class UnexpectedInteractions(unexpected: Seq[Interaction]) extends VerificationResult
-  case object ConsumerTestsFailed extends VerificationResult
+  case class ConsumerTestsFailed(error: Throwable) extends VerificationResult
 
   case class ComposableVerification(o: VerificationResult) {
     def and (v: VerificationResult) = { (o, v) match {
@@ -22,12 +23,13 @@ object PactVerification {
   }
   implicit def composable(a: VerificationResult) = ComposableVerification(a)
 
-  def apply(expected: Seq[Interaction], actual: Seq[Interaction])(testResult: Boolean): VerificationResult = {
-    if(!testResult) {
-      ConsumerTestsFailed
-    } else {
-      val invalidResponse = Response(500, None, None)
-      allExpectedInteractions(expected, actual) and noUnexpectedInteractions(invalidResponse, actual)
+  def apply(expected: Seq[Interaction], actual: Seq[Interaction])(testResult: Try[Unit]): VerificationResult = {
+    testResult match {
+      case Success(_) => {
+        val invalidResponse = Response(500, None, None)
+        allExpectedInteractions(expected, actual) and noUnexpectedInteractions(invalidResponse, actual)
+      }
+      case Failure(t) => ConsumerTestsFailed(t)
     }
   }
 
