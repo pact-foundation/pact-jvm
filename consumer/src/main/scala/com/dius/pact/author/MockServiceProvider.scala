@@ -14,7 +14,8 @@ import Scalaz._
 import akka.util.Timeout
 
 object MockServiceProvider {
-  implicit val timeout:Timeout = 1000L
+  //TODO: externalise timeouts
+  implicit val timeout:Timeout = 5000L
 
   def apply(config: PactServerConfig, pact: Pact)(implicit system: ActorSystem): MockServiceProvider = {
     val ref: ActorRef = system.actorOf(Props[PactHttpServer], name="Pact-HTTP-Server")
