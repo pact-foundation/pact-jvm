@@ -4,16 +4,25 @@ import com.dius.pact.author._
 import akka.actor.ActorSystem
 import com.dius.pact.author.PactServerConfig
 import com.dius.pact.model.Pact
-import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.{Await, Future}
+import scala.util.Try
+import scala.concurrent.duration._
 
 case class ConsumerPact(pact: Pact) {
   def execute(test: => Unit): Try[Unit] = Try(test)
 
-  def runConsumer(config: PactServerConfig,state: String)
-                 (test: => Boolean)
-                 (implicit system: ActorSystem = ActorSystem("default-pact-consumer-actor-system")):
+  def runConsumer(config: PactServerConfig, state: String)(test: => Unit): Future[PactVerification.VerificationResult] = {
+    val system = ActorSystem("default-pact-consumer-actor-system")
+    implicit val executionContext = system.dispatcher
+    val f = runConsumer(config, state, system)(test)
+    f.onComplete {_ => system.shutdown() }
+    f
+  }
+
+  def runConsumer(config: PactServerConfig, state: String, system: ActorSystem)
+                 (test: => Unit):
       Future[PactVerification.VerificationResult] = {
+    implicit val actorSystem = system
     implicit val executionContext = system.dispatcher
 
     for {
@@ -25,6 +34,16 @@ case class ConsumerPact(pact: Pact) {
       fileWrite = PactGeneration(pact, verified)
       stopped <- inState.stop
     } yield { verified }
+  }
+
+  def runConsumer(config: PactServerConfig, state: String, test: Runnable): PactVerification.VerificationResult = {
+    val system = ActorSystem("default-pact-consumer-actor-system")
+    try {
+      //TODO: externalise timeouts
+      Await.result(runConsumer(config, state, system) { test.run() }, 20 seconds)
+    } finally {
+      system.shutdown()
+    }
   }
 }
 

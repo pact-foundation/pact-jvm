@@ -1,5 +1,6 @@
 package com.dius.pact.consumer;
 
+import com.dius.pact.author.PactServerConfig;
 import com.dius.pact.model.MakePact;
 import com.dius.pact.model.Pact;
 import org.junit.Test;
@@ -33,6 +34,14 @@ public class ConsumerPactTest {
                         "{\"responsetest\":true}")
             );
 
+        PactServerConfig config = new PactServerConfig(9989, "localhost");
 
+        Runnable test = new Runnable() {
+            public void run() {
+                assert true;
+            }
+        };
+
+        new ConsumerPact(pact).runConsumer(config, "test state", test);
     }
 }
