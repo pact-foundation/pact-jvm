@@ -22,7 +22,8 @@ class PactSpec(config: PactConfiguration, pact: Pact)(implicit actorSystem: Acto
     def apply(url: String, state: String): HttpRequest = {
       import org.json4s.JsonDSL._
       val jsonString = compact(render("state" -> state))
-      HttpRequest(uri = url, entity = HttpEntity(ContentTypes.`application/json`, jsonString))
+      println(s"entering state $state")
+      HttpRequest(method = HttpMethods.POST, uri = url, entity = HttpEntity(ContentTypes.`application/json`, jsonString))
     }
   }
 
@@ -32,6 +33,7 @@ class PactSpec(config: PactConfiguration, pact: Pact)(implicit actorSystem: Acto
       val uri = Uri(s"$url${request.path}")
       val headers: List[HttpHeader] = request.headers.map(_.toList.map{case (key, value) => RawHeader(key, value)}).getOrElse(Nil)
       val entity: HttpEntity = request.bodyString.map(HttpEntity(_)).getOrElse(HttpEntity.Empty)
+      println(s"invoking service with: $request")
       HttpRequest(method, uri, headers, entity)
     }
   }
@@ -42,7 +44,7 @@ class PactSpec(config: PactConfiguration, pact: Pact)(implicit actorSystem: Acto
       s"""interaction "${interaction.description}" """ +
       s"""in state: "${interaction.providerState}" """ in {
       val response = for {
-        inState <- pipeline(EnterStateRequest(config.providerBaseUrl, interaction.providerState))
+        inState <- pipeline(EnterStateRequest(config.stateChangeUrl, interaction.providerState))
         sprayResponse <- pipeline(ServiceInvokeRequest(config.providerBaseUrl, interaction.request))
         pactResponse = Conversions.sprayToPactResponse(sprayResponse)
       } yield pactResponse

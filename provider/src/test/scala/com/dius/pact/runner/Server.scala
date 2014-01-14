@@ -16,12 +16,14 @@ case class Server(actor: ActorRef)(implicit system: ActorSystem) {
   def start(interface:String = "localhost", port:Int = 8888)(implicit executionContext:ExecutionContext): Future[Server] = {
     val f = (actor ? Start(interface, port)).map( (_) => this)
     f.onFailure { case t: Throwable => t.printStackTrace() }
+    f.onSuccess { case _ => println("server started") }
     f
   }
 
   def stop()(implicit executionContext:ExecutionContext): Future[Server] = {
     val f = (actor ? Stop).map( (_) => this )
     f.onFailure { case t: Throwable => t.printStackTrace() }
+    f.onSuccess { case _ => println("server stopped") }
     f
   }
 }
