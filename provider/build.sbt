@@ -13,7 +13,7 @@ libraryDependencies ++= Seq(
   "commons-io" % "commons-io" % "2.4",
   "io.spray" % "spray-client" % "1.2.0",
   "io.spray" % "spray-can" % "1.2.0",
-  "com.typesafe.akka" %% "akka-actor" % "2.2.3",
+  "com.typesafe.akka" %% "akka-actor" % "2.2.0", //playframework 2.2.1 uses akka 2.2.0, try to avoid conflicts
   "org.specs2" %% "specs2" % "2.3.1" % "test",
   "org.mockito" % "mockito-core" % "1.8.5" % "test"
 )
