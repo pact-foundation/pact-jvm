@@ -29,9 +29,9 @@ Pact consumer
 Pact Consumer is used by projects that are consumers of an API.
 
 Example
-=======
+-------
 
-https://github.com/DiUS/pact-consumer-jvm/blob/master/src/test/scala/com/dius/pact/consumer/ConsumerPactSpec.scala
+https://github.com/DiUS/pact-jvm/blob/master/consumer/src/test/scala/com/dius/pact/consumer/ConsumerPactSpec.scala
 
 Is an example of how you should write your integration tests so that pact json files are generated.
 
@@ -39,7 +39,7 @@ The generated files should then be delivered to the provider project for running
 
 
 Ruby Compatibility
-==================
+------------------
 
 The pact-jvm libraries are pure jvm technologies and do not have any native dependencies.
 
@@ -47,7 +47,7 @@ However if you have a ruby provider, the json produced by this library is compat
 
 
 Pact broker
-===========
+-----------
 
 https://github.com/bethesque/pact_broker
 
@@ -66,7 +66,7 @@ This library provides the basic tools required to automate the process, and shou
 Framework and build tool specific bindings will be provided in separate libraries that build on top of this core functionality.
 
 Running Pacts
-=============
+-------------
 
 Main takes 2 arguments:
 
@@ -76,15 +76,15 @@ The first is the root folder of your pact files
 The second is the location of your pact config json file.
 
 Pact config
-===========
+-----------
 
 The pact config is a simple mapping of provider names to endpoint url's
 paths will be appended to endpoint url's when interactions are attempted
 
-for an example see: https://github.com/DiUS/pact-provider-jvm/blob/master/src/test/resources/pact-config.json
+for an example see: https://github.com/DiUS/pact-jvm/blob/master/provider/src/test/resources/pact-config.json
 
 Provider State
-==============
+--------------
 
 Before each interaction is executed, the provider under test will have the opportunity to enter a state.
 Generally the state maps to a set of fixture data for mocking out services that the provider is a consumer of (they will have their own pacts)
