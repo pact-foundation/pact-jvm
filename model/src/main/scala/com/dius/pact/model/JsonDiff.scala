@@ -29,8 +29,8 @@ object JsonDiff {
     }
 
     val actualJson = expectedKeysFilter(actual transformField structuralFilter)
-    
-    expectedJson diff actualJson
+
+    DiffPatched.diff(expectedJson, actualJson)
   }
 
   def diff(expected: String, actual: String, config: DiffConfig): Diff = {
