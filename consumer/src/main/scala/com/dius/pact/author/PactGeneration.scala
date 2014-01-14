@@ -1,28 +1,57 @@
 package com.dius.pact.author
 
-import com.dius.pact.consumer.PactVerification.{PactVerified, VerificationResult}
-import com.dius.pact.model.Pact
+import com.dius.pact.consumer.PactVerification.{PactMergeFailed, PactWritten, PactVerified, VerificationResult}
+import com.dius.pact.model.{Interaction, Pact}
 import java.io.{PrintWriter, File}
+import scala.concurrent.Future
+import com.dius.pact.model.Pact.{ConflictingInteractions, MergeSuccess}
 
 object PactGeneration {
+  private val hackyPactStore = scala.collection.mutable.Map[String, Pact]()
+
   //TODO: handle multiple sources writing interactions to the same pact, threadsafe merge and verify
-  def apply(pact: Pact, verification: VerificationResult) {
+  def apply(pact: Pact, verification: VerificationResult): VerificationResult = {
     verification match {
       case PactVerified => {
-        writeToDisk(pact)
+        hackyPactStore.synchronized {
+          merge(pact)
+        }
       }
-      case _ => println("pact not verified, skipping file output")
+      case _ => verification
     }
   }
 
-  def writeToDisk(pact: Pact) {
-    //TODO: use environment property for pact output folder
-    new File("target/pacts").mkdirs()
-    val writer = new PrintWriter(new File(s"target/pacts/${pact.consumer.name}-${pact.provider.name}.json"))
-    try {
-      pact.serialize(writer)
-    } finally {
-      writer.close()
+  def merge(pact: Pact): VerificationResult = {
+    val pactFileName = s"${pact.consumer.name}-${pact.provider.name}.json"
+    val existingPact = hackyPactStore.getOrElse(pactFileName, Pact(pact.provider, pact.consumer, Seq()))
+
+    Pact.merge(pact, existingPact) match {
+      case MergeSuccess(merged) => {
+        hackyPactStore.put(pactFileName, merged)
+        writeToFile(pactFileName, merged)
+      }
+      case failed:ConflictingInteractions => {
+        PactMergeFailed(failed)
+      }
     }
+  }
+
+  def writeToFile(fileName: String, pact: Pact): VerificationResult = {
+    //TODO: use environment property for pact output folder
+    val pactRootDir = "target/pacts"
+    val pactDestination = s"$pactRootDir/$fileName"
+    try {
+      new File(pactRootDir).mkdirs()
+      val writer = new PrintWriter(new File(pactDestination))
+      pact.serialize(writer)
+      writer.close()
+      println(s"pact written to: $pactDestination")
+      PactVerified
+    } catch {
+      case t:Throwable => {
+        println(s"unable to write: $pact")
+        throw t
+      }
+  }
   }
 }

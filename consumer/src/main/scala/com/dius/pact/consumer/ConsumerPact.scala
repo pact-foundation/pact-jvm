@@ -31,9 +31,9 @@ case class ConsumerPact(pact: Pact) {
       result = execute(test)
       actualInteractions <- inState.interactions
       verified = PactVerification(pact.interactions, actualInteractions)(result)
-      fileWrite = PactGeneration(pact, verified)
+      fileWriteVerification = PactGeneration(pact, verified)
       stopped <- inState.stop
-    } yield { verified }
+    } yield { fileWriteVerification }
   }
 
   def runConsumer(config: PactServerConfig, state: String, test: Runnable): PactVerification.VerificationResult = {

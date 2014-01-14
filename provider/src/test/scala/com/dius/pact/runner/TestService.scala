@@ -14,13 +14,18 @@ import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
 class TestService extends Actor with ActorLogging {
-  def receive = awaitState
+  def receive = awaitState orElse {
+    case r:HttpRequest => {
+      log.error(s"received unexpected request: $r\n expected only POST to ${Path("/enterState")}")
+    }
+  }
 
   def awaitState: Receive = {
     //singleton request handler, no fancy routing
     case Http.Connected(_, _) => sender ! Http.Register(self)
 
-    case HttpRequest(HttpMethods.POST, Uri(_, _, Path("/setup"), _, _), _, entity, _) => {
+    case HttpRequest(HttpMethods.POST, Uri(_, _, Path("/enterState"), _, _), _, entity, _) => {
+      log.info(s"received state transition message ${entity.asString}")
       parse(entity.data.asString) match {
         case JObject(List(JField("state", JString(state)))) => {
           context.become(running(state))
@@ -36,6 +41,7 @@ class TestService extends Actor with ActorLogging {
 
   def running(state: String): Receive = awaitState orElse {
     case HttpRequest(method, uri, requestHeaders, entity, protocol) => {
+      log.info(s"received request: $method $uri : ${entity.asString}")
       val requestBody: Option[JValue] = entity match {
         case HttpEntity.Empty => None
         case e => Some(parse(e.asString))

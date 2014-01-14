@@ -2,15 +2,19 @@ package com.dius.pact.consumer
 
 import com.dius.pact.model._
 import scala.util.{Success, Failure, Try}
+import com.dius.pact.model.Pact.ConflictingInteractions
 
 object PactVerification {
 
   trait VerificationResult
   case class PactFailure(missing: Iterable[Interaction], unexpected: Iterable[Interaction]) extends VerificationResult
+  case class PactWritten(destination: String) extends VerificationResult
   case object PactVerified extends VerificationResult
   case class MissingInteractions(missing: Iterable[Interaction]) extends VerificationResult
   case class UnexpectedInteractions(unexpected: Iterable[Interaction]) extends VerificationResult
   case class ConsumerTestsFailed(error: Throwable) extends VerificationResult
+  case class PactMergeFailed(error: ConflictingInteractions) extends VerificationResult
+
 
   case class ComposableVerification(o: VerificationResult) {
     def and (v: VerificationResult) = { (o, v) match {

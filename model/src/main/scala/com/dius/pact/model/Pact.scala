@@ -14,6 +14,27 @@ object Pact {
     implicit val formats = DefaultFormats
     parse(source).transformField { case ("provider_state", value) => ("providerState", value)}.extract[Pact]
   }
+
+  def merge(a: Pact, b: Pact): MergeResult = {
+    val failures: Seq[(Interaction, Interaction)] = a.interactions.flatMap { ai =>
+      b.interactions.find { bi =>
+        ai.description == bi.description &&
+        ai.providerState == bi.providerState &&
+          (ai.request != bi.request || ai.response != bi.response)
+      }.map[(Interaction, Interaction)]( ai -> _ )
+    }
+    if(failures.isEmpty) {
+      val mergedInteractions = a.interactions ++ b.interactions.filterNot { bi => a.interactions.contains(bi) }
+      MergeSuccess(Pact(a.provider, a.consumer, mergedInteractions))
+    } else {
+      ConflictingInteractions(failures)
+    }
+  }
+
+  trait MergeResult
+
+  case class MergeSuccess(result: Pact) extends MergeResult
+  case class ConflictingInteractions(result: Seq[(Interaction, Interaction)]) extends MergeResult
 }
 
 case class Pact(provider:Provider, consumer:Consumer, interactions: Seq[Interaction]) extends PactSerializer {
