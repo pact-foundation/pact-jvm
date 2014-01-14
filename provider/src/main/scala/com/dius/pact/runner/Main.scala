@@ -1,3 +1,5 @@
+package com.dius.pact.runner
+
 import com.dius.pact.model.Pact
 import com.dius.pact.runner.{PactConfiguration, PactSpec, PactFileSource}
 import org.scalatest._
