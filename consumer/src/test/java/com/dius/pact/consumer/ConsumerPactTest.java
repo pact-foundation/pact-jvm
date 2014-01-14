@@ -14,7 +14,7 @@ import static com.dius.pact.consumer.ConsumerInteractionJavaDsl.*;
 public class ConsumerPactTest {
     @Test
     public void testPact() {
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = new HashMap<String, String>();
 
         headers.put("testreqheader", "testreqheadervalue");
 
