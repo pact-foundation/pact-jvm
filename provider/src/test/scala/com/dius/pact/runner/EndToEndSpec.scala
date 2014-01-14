@@ -1,5 +1,6 @@
+package com.dius.pact.runner
+
 import akka.actor.ActorSystem
-import com.dius.pact.runner.Server
 import java.net.URL
 import org.specs2.mutable.Specification
 import scala.concurrent.duration.Duration
