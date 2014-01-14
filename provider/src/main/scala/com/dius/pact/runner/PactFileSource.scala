@@ -5,8 +5,8 @@ import org.apache.commons.io.FileUtils
 import com.dius.pact.model._
 
 object PactFileSource {
-  def loadFiles(baseDir:String):Seq[Pact] = {
+  def loadFiles(baseDir: File):Seq[Pact] = {
     import scala.collection.JavaConversions._
-    FileUtils.listFiles(new File(baseDir), Array("json"), true).asInstanceOf[java.util.LinkedList[File]].map(Pact.from(_))
+    FileUtils.listFiles(baseDir, Array("json"), true).asInstanceOf[java.util.LinkedList[File]].map(Pact.from(_))
   }
 }

@@ -1,39 +1,21 @@
 package com.dius.pact.runner
 
 import com.dius.pact.model.Pact
-import com.dius.pact.runner.{PactConfiguration, PactSpec, PactFileSource}
 import org.scalatest._
-import scala.concurrent.ExecutionContext
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
+import java.io.File
+import akka.actor.ActorSystem
 
 object Main {
-  def main(args: Array[String]) {
-    runStuff(args)
-  }
-
-  //decoupled from command line runner so specs can provide execution context
-  def runStuff(args: Array[String])(implicit executionContext: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global) = {
-    args.headOption.fold (println("Need pact root as first arg")) {dir =>
-      args.tail.headOption.fold (println("need config file as second arg")) { config =>
-        loadFiles(dir, config)
-      }
-    }
-  }
-
-  def loadFiles(dir: String, configFile: String)(implicit executionContext: ExecutionContext) = {
+  def loadFiles(pactRoot: File, configFile: File) = {
     implicit val formats = org.json4s.DefaultFormats
-    val map = parse(io.Source.fromFile(configFile).mkString).extract[Map[String,String]]
-    val config = PactConfiguration(map)
-    try {
-      runPacts(config, PactFileSource.loadFiles(dir))
-    } catch {
-      case t: Throwable => t.printStackTrace()
-    }
+    val config = parse(io.Source.fromFile(configFile).mkString).extract[PactConfiguration]
+    (config, PactFileSource.loadFiles(pactRoot))
   }
 
-  def runPacts(config:PactConfiguration, pacts:Seq[Pact])(implicit executionContext: ExecutionContext) = {
-    stats.run (
+  def runPacts(t:(PactConfiguration, Seq[Pact]))(implicit actorSystem: ActorSystem) = t match { case (config, pacts) =>
+    stats.fullstacks.run (
       new Sequential(pacts.map { pact =>
         new PactSpec(config, pact)
       } :_*)

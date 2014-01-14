@@ -1,3 +1,5 @@
 {
-    "Animal Service": "http://localhost:8888"
+    "providerBaseUrl": "http://localhost:8888",
+    "stateChangeUrl": "http://localhost:8888/enterState",
+    "timeoutSeconds": 10
 }

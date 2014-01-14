@@ -21,6 +21,11 @@ case class MakeInteraction(providerState: String,
                       body: Option[JValue] = None) = {
     copy(response = Some(Response(status, headers, body)))
   }
+
+  def willRespondWith(status: Int, headers: Map[String, String], body: String): MakeInteraction = {
+    import org.json4s.jackson.JsonMethods.parse
+    willRespondWith(status, Some(headers), Some(parse(body)))
+  }
 }
 
 object MakeInteraction {
