@@ -5,6 +5,10 @@ import com.dius.pact.model.*;
 import java.util.Map;
 
 public class ConsumerInteractionJavaDsl {
+    public static PactVerification.VerificationResult pactVerified = PactVerification.PactVerified$.MODULE$;
+
+
+
     static ConsumerInteractionJavaDsl given(String providerState) {
         return new ConsumerInteractionJavaDsl(providerState);
     }
