@@ -1,5 +1,6 @@
 package com.dius.pact.author
 
+import _root_.spray.http.HttpHeaders.RawHeader
 import scala.concurrent.Future
 import akka.actor._
 import akka.pattern.ask
@@ -95,7 +96,8 @@ class PactRequestHandler extends Actor with ActorLogging {
       log.debug(s"got request:$request")
       import RequestMatching._
       val response: Response = pact.findResponse(request).getOrElse(Response.invalidRequest(request, pact))
-      sender ! pactToSprayResponse(response)
+      val sprayResponse = pactToSprayResponse(response)
+      sender ! sprayResponse.withHeaders(sprayResponse.headers :+ RawHeader("Access-Control-Allow-Origin", "*"))
       context.become(ready(pact, state, interactions :+ Interaction("MockServiceProvider received", state, request, response)))
     }
 
