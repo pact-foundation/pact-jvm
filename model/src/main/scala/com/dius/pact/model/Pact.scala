@@ -51,7 +51,11 @@ case class Interaction(
                         description: String,
                         providerState: String,
                         request: Request,
-                        response: Response)
+                        response: Response) {
+  override def toString: String = {
+    s"Interaction: $description\n\tin state $providerState\nrequest:\n$request\n\nresponse:\n$response"
+  }
+}
 
 object HttpMethod {
   val Get    = "GET"
@@ -68,6 +72,10 @@ case class Request(method: String,
                    headers: Option[Map[String, String]],
                    body: Option[JValue]) {
   def bodyString:Option[String] = body.map{ b => compact(render(b))}
+
+  override def toString: String = {
+    s"\tmethod: $method\n\tpath: $path\n\theaders: $headers\n\tbody:\n${body.map{b => pretty(render(b))}}"
+  }
 }
 
 trait Optionals {
@@ -115,6 +123,10 @@ case class Response(status: Int,
                     headers: Option[Map[String, String]],
                     body: Option[JValue]) {
   def bodyString:Option[String] = body.map{ b => compact(render(b)) }
+
+  override def toString: String = {
+    s"\tstatus: $status \n\theaders: $headers \n\tbody: \n${body.map{b => pretty(render(b))}}"
+  }
 }
 
 object Response extends Optionals {

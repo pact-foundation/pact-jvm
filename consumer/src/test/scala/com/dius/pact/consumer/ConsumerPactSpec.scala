@@ -7,7 +7,7 @@ import com.dius.pact.model.MakeInteraction._
 import com.dius.pact.author.PactServerConfig
 import ConsumerPact._
 import akka.actor.ActorSystem
-import com.dius.pact.consumer.PactVerification.{PactWritten, ConsumerTestsFailed, PactVerified}
+import com.dius.pact.consumer.PactVerification.{ConsumerTestsFailed, PactVerified}
 
 /**
  * This is what a consumer pact should roughly look like
