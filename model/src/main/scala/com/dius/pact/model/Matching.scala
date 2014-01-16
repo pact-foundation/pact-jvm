@@ -70,7 +70,7 @@ object Matching {
     implicit val autoParse = JsonDiff.autoParse _
     val difference = (expected, actual) match {
       case (None, None) => noChange
-      case (None, Some(b)) => added(b)
+      case (None, Some(b)) => if(diffConfig.structural) { noChange } else { added(b) }
       case (Some(a), None) => missing(a)
       case (Some(a), Some(b)) => diff(a, b, diffConfig)
     }
