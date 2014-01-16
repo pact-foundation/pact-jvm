@@ -17,5 +17,5 @@ libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-testkit" % "2.2.3" % "test",
       "com.typesafe.akka" %% "akka-actor" % "2.2.3",
       "com.typesafe.akka" %% "akka-slf4j" % "2.2.3",
-  "com.novocode" % "junit-interface" % "0.9" % "test"
+      "com.novocode" % "junit-interface" % "0.9" % "test"
 )
