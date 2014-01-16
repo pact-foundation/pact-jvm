@@ -16,5 +16,6 @@ libraryDependencies ++= Seq(
   // Play ships 2.2.0, Spray 1.2.0 needs 2.2.3 these lines should overwrite it
       "com.typesafe.akka" %% "akka-testkit" % "2.2.3" % "test",
       "com.typesafe.akka" %% "akka-actor" % "2.2.3",
-      "com.typesafe.akka" %% "akka-slf4j" % "2.2.3"
+      "com.typesafe.akka" %% "akka-slf4j" % "2.2.3",
+      "com.novocode" % "junit-interface" % "0.9" % "test"
 )

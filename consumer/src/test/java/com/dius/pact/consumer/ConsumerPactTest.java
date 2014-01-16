@@ -1,17 +1,23 @@
 package com.dius.pact.consumer;
 
+import akka.actor.ActorSystem;
+import com.dius.pact.author.Fixtures;
 import com.dius.pact.author.PactServerConfig;
-import com.dius.pact.model.MakePact;
 import com.dius.pact.model.Pact;
-import org.junit.Test;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 import static com.dius.pact.consumer.ConsumerPactJavaDsl.*;
 import static com.dius.pact.consumer.ConsumerInteractionJavaDsl.*;
 
 public class ConsumerPactTest {
+
     @Test
     public void testPact() {
         Map<String, String> headers = new HashMap<String, String>();
@@ -20,11 +26,11 @@ public class ConsumerPactTest {
 
         Pact pact = makePact()
             .withProvider("test_provider")
-            .withConsumer("test_consumer")
+            .withConsumer("test_java_consumer")
             .withInteractions(
                 given("test state")
                     .uponReceiving(
-                        "test interaction",
+                        "java test interaction",
                         "/",
                         "GET",
                         headers,
@@ -34,14 +40,22 @@ public class ConsumerPactTest {
                         "{\"responsetest\":true}")
             );
 
-        PactServerConfig config = new PactServerConfig(9989, "localhost");
+        final PactServerConfig config = new PactServerConfig(9989, "localhost");
 
-        Runnable test = new Runnable() {
-            public void run() {
-                assert true;
-            }
-        };
 
-        new ConsumerPact(pact).runConsumer(config, "test state", test);
+        PactVerification.VerificationResult result = new ConsumerPact(pact).runConsumer(config, "test state",
+            new Runnable() {
+                public void run() {
+                    ActorSystem system = ActorSystem.create("testServiceSystem");
+                    Future future = new Fixtures.ConsumerService(config.url(), system).hitEndpoint();
+                    try {
+                        Object result = Await.result(future, Duration.apply(1, "s"));
+                        assertEquals(true, result);
+                    } catch(Exception e) {
+                        fail("error thrown"+e);
+                    }
+                }
+            });
+        assertEquals(pactVerified, result);
     }
 }

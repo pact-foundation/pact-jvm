@@ -12,6 +12,7 @@ import com.dius.pact.model.Matching._
 import akka.actor.ActorSystem
 import org.json4s.jackson.JsonMethods._
 import com.dius.pact.model.spray.Conversions
+import scala.util.control.NonFatal
 
 
 class PactSpec(config: PactConfiguration, pact: Pact)(implicit actorSystem: ActorSystem) extends FreeSpec with Assertions {
@@ -38,6 +39,14 @@ class PactSpec(config: PactConfiguration, pact: Pact)(implicit actorSystem: Acto
     }
   }
 
+  def convert(request: Request, response: HttpResponse): Response = {
+    try {
+      Conversions.sprayToPactResponse(response)
+    } catch {
+      case NonFatal(e) => throw new RuntimeException(s"Unable to convert response: \n\tstatus: ${response.status} \n\theaders: ${response.headers} \n\tbody: ${response.entity.asString}\nfor request: $request")
+    }
+  }
+
   pact.interactions.toList.map { interaction =>
     s"""pact for consumer ${pact.consumer.name} """ +
       s"""provider ${pact.provider.name} """ +
@@ -46,7 +55,7 @@ class PactSpec(config: PactConfiguration, pact: Pact)(implicit actorSystem: Acto
       val response = for {
         inState <- pipeline(EnterStateRequest(config.stateChangeUrl, interaction.providerState))
         sprayResponse <- pipeline(ServiceInvokeRequest(config.providerBaseUrl, interaction.request))
-        pactResponse = Conversions.sprayToPactResponse(sprayResponse)
+        pactResponse = convert(interaction.request, sprayResponse)
       } yield pactResponse
 
       val actualResponse = Await.result(response, Duration(config.timeoutSeconds, "s"))
