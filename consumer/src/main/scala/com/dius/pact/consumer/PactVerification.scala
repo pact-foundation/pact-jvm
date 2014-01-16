@@ -7,33 +7,34 @@ import com.dius.pact.model.Pact.ConflictingInteractions
 object PactVerification {
 
   trait VerificationResult
+  private def logEach(msg: String, iterable: Iterable[AnyRef]): String = {
+    s"$msg:${iterable.map("\n" + _)}"
+  }
+
   case class PactFailure(missing: Iterable[Interaction], unexpected: Iterable[Interaction]) extends VerificationResult {
     override def toString: String = {
-      s"""Multiple pact failures
-      missing interactions:
-        ${missing.map( _.toString + "\n\t\t")}
-      unexpected interactions:
-        ${unexpected.map( _.toString + "\n\t\t")}
-    """
+      "Multiple pact failures\n" +
+        logEach("missing interactions:", missing) +
+        logEach("unexpected interactions:", unexpected)
     }
   }
   case class PactWritten(destination: String) extends VerificationResult
   case object PactVerified extends VerificationResult
   case class MissingInteractions(missing: Iterable[Interaction]) extends VerificationResult {
     override def toString: String = {
-      s"missing interactions: \n\t\t${missing.map( _.toString + "\n\t\t")}"
+      logEach("missing interactions:", missing)
     }
   }
 
   case class UnexpectedInteractions(unexpected: Iterable[Interaction]) extends VerificationResult {
     override def toString: String = {
-      s"unexpected interactions: \n\t\t${unexpected.map( _.toString + "\n\t\t")}"
+      logEach("unexpected interactions:", unexpected)
     }
   }
   case class ConsumerTestsFailed(error: Throwable) extends VerificationResult
   case class PactMergeFailed(error: ConflictingInteractions) extends VerificationResult {
     override def toString: String = {
-      s"this pact conflicts with other pacts: \n\t$error"
+      s"This interaction conflicts with others: \n$error"
     }
   }
 

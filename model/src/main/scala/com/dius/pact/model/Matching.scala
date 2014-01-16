@@ -2,6 +2,7 @@ package com.dius.pact.model
 
 import org.json4s.{JValue, Diff}
 import com.dius.pact.model.JsonDiff._
+import org.json4s.JsonAST.JNothing
 
 object Matching {
   sealed trait MatchResult {
@@ -17,21 +18,49 @@ object Matching {
   }
 
   case object MatchFound extends MatchResult
-  case class MatchFailure(problems: List[MatchResult]) extends MatchResult
-  case class MethodMismatch(expected: String, actual: String) extends MatchResult
-  case class PathMismatch(expected: String, actual: String) extends MatchResult
-  case class HeaderMismatch(expected: Headers, actual: Headers) extends MatchResult
+  case class MatchFailure(problems: List[MatchResult]) extends MatchResult {
+    override def toString: String = {
+      s"Multiple Mismatches Found: \n${problems.map(_.toString+ "\n")}"
+    }
+  }
+  case class MethodMismatch(expected: String, actual: String) extends MatchResult {
+    override def toString: String = {
+      s"Method Mismatch(\n\texpected: $expected\n\tactual: $actual)"
+    }
+  }
+  case class PathMismatch(expected: String, actual: String) extends MatchResult {
+    override def toString: String = {
+      s"Patch Mismatch(\n\texpected: $expected\n\tactual: $actual)"
+    }
+  }
+  case class HeaderMismatch(expected: Headers, actual: Headers) extends MatchResult {
+    override def toString: String = {
+      s"Header Mismatch(\n\texpected: $expected\n\tactual: $actual)"
+    }
+  }
   case class BodyContentMismatch(diff: Diff) extends MatchResult {
 
     override def toString: String = {
       import org.json4s.jackson.JsonMethods._
-      val changed = compact(render(diff.changed))
-      val added = compact(render(diff.added))
-      val missing = compact(render(diff.deleted))
-      s"BodyContentMismatch(changed:$changed, added:$added, missing:$missing)"
+
+      def stringify(msg: String, json: JValue): String = {
+        json match {
+          case JNothing => ""
+          case j => s"$msg: ${compact(render(json))}"
+        }
+      }
+
+      val changed = stringify("\n\tchanged", diff.changed)
+      val added = stringify("\n\tadded", diff.added)
+      val missing = stringify("\n\tmissing", diff.deleted)
+      s"Body Content Mismatch($changed$added$missing)"
     }
   }
-  case class StatusMismatch(expected: Int, actual: Int) extends MatchResult
+  case class StatusMismatch(expected: Int, actual: Int) extends MatchResult {
+    override def toString: String = {
+      s"Status Code Mismatch(\n\texpected: $expected\n\tactual: $actual)"
+    }
+  }
 
   implicit def pimpPactWithRequestMatch(pact: Pact) = RequestMatching(pact.interactions)
 
