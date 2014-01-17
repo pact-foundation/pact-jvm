@@ -36,6 +36,16 @@ object PactGeneration {
     }
   }
 
+  /**
+   * sort keys in the pact so that serialization is consistent
+   *
+   * @param pact
+   * @return
+   */
+  def sort(pact: Pact): Pact = {
+    pact.copy(interactions = pact.interactions.sortBy{i => i.providerState+ i.description})
+  }
+
   def writeToFile(fileName: String, pact: Pact): VerificationResult = {
     //TODO: use environment property for pact output folder
     val pactRootDir = "target/pacts"
@@ -43,7 +53,7 @@ object PactGeneration {
     try {
       new File(pactRootDir).mkdirs()
       val writer = new PrintWriter(new File(pactDestination))
-      pact.serialize(writer)
+      sort(pact).serialize(writer)
       writer.close()
       println(s"pact written to: $pactDestination")
       PactVerified

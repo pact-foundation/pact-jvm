@@ -8,18 +8,17 @@ object BuildSettings {
 		organization := "com.dius",
 	    publishMavenStyle := true,
 	    // when playing around with a local install of nexus use this:
-        credentials += Credentials("Sonatype Nexus Repository Manager", "localhost", "deployment", "admin123"),
-	    publishTo := Some("releases" at "http://localhost:8081/nexus/content/repositories/releases/"),
+//        credentials += Credentials("Sonatype Nexus Repository Manager", "localhost", "deployment", "admin123"),
+//	    publishTo := Some("releases" at "http://localhost:8081/nexus/content/repositories/releases/"),
 	    // when sonatype comes online use this:
-	    // credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
-	    // publishTo := {
-	    //   // val nexus = "https://oss.sonatype.org/"
-	    //   val nexus = "http://localhost:8081/nexus/"
-	    //   if (version.value.trim.endsWith("SNAPSHOT"))
-	    //     Some("snapshots" at nexus + "content/repositories/snapshots")
-	    //   else
-	    //     Some("releases" at nexus + "service/local/staging/deploy/maven2")
-	    // },
+	    credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
+	    publishTo := {
+	       val nexus = "https://oss.sonatype.org/"
+	       if (version.value.trim.endsWith("SNAPSHOT"))
+	         Some("snapshots" at nexus + "content/repositories/snapshots")
+	       else
+	         Some("releases" at nexus + "service/local/staging/deploy/maven2")
+	    },
 	    pomExtra :=
 	      <url>https://github.com/DiUS/pact-jvm</url>
 	      <licenses>
