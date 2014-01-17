@@ -1,4 +1,5 @@
 import akka.actor.ActorSystem
+import au.com.dius.pact.provider.Main
 import com.typesafe.config.ConfigFactory
 import sbt._
 
@@ -13,7 +14,7 @@ object PactJvmPlugin extends Plugin {
     pactRoot := file("pacts"),
     verifyPacts := {
       implicit val executionContext = scala.concurrent.ExecutionContext.Implicits.global
-      import com.dius.pact.runner.Main._
+      import Main._
       val actorSystem = ActorSystem("Pact-Verification-Actor-System", ConfigFactory.load(classOf[ActorSystem].getClassLoader), classOf[ActorSystem].getClassLoader)
       try {
         runPacts(loadFiles(pactRoot.value, pactConfig.value))(actorSystem)

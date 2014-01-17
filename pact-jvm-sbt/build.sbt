@@ -1,5 +1,5 @@
 sbtPlugin := true
 
-organization := "com.dius"
+organization := "au.com.dius"
 
 name := "pact-jvm-sbt"

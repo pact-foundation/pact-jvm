@@ -1,6 +1,6 @@
 name := "pact-model-jvm"
 
-organization := "com.dius"
+organization := "au.com.dius"
 
 scalaVersion := "2.10.3"
 

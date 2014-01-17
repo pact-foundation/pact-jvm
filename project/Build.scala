@@ -5,7 +5,7 @@ import sbt.Keys._
 object BuildSettings {
 	val publishSettings = Seq(
 		version := "1.0",
-		organization := "com.dius",
+		organization := "au.com.dius",
 	    publishMavenStyle := true,
 	    // when playing around with a local install of nexus use this:
 //        credentials += Credentials("Sonatype Nexus Repository Manager", "localhost", "deployment", "admin123"),
