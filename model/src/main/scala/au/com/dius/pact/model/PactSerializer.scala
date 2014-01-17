@@ -1,6 +1,6 @@
 package au.com.dius.pact.model
 
-import java.io.{File, PrintWriter}
+import java.io.PrintWriter
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 

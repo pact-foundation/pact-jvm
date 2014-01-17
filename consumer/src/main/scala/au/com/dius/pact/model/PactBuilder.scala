@@ -1,8 +1,6 @@
 package au.com.dius.pact.model
 
 import org.json4s._
-import au.com.dius.pact.model.{HttpMethod, Response, Request}
-import au.com.dius.pact.model.HttpMethod._
 import scala.Some
 
 case class MakeInteraction(providerState: String,

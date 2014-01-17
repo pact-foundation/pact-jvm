@@ -10,10 +10,7 @@ import spray.http._
 import spray.can.Http
 import au.com.dius.pact.model._
 import au.com.dius.pact.model.spray.Conversions._
-import scalaz._
-import Scalaz._
 import akka.util.Timeout
-import au.com.dius.pact.consumer.PactServerConfig
 
 object MockServiceProvider {
   //TODO: externalise timeouts

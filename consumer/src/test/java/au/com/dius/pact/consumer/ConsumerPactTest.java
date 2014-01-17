@@ -2,17 +2,19 @@ package au.com.dius.pact.consumer;
 
 import akka.actor.ActorSystem;
 import au.com.dius.pact.model.Pact;
+import org.junit.Test;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
-import static au.com.dius.pact.consumer.ConsumerPactJavaDsl.*;
-import static au.com.dius.pact.consumer.ConsumerInteractionJavaDsl.*;
+import static au.com.dius.pact.consumer.ConsumerInteractionJavaDsl.given;
+import static au.com.dius.pact.consumer.ConsumerInteractionJavaDsl.pactVerified;
+import static au.com.dius.pact.consumer.ConsumerPactJavaDsl.makePact;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class ConsumerPactTest {
 

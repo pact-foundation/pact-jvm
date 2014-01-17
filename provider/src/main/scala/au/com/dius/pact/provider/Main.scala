@@ -6,7 +6,6 @@ import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import java.io.File
 import akka.actor.ActorSystem
-import au.com.dius.pact.provider.PactConfiguration
 
 object Main {
   def loadFiles(pactRoot: File, configFile: File) = {

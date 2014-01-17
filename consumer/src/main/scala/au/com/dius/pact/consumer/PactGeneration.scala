@@ -1,9 +1,8 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.consumer.PactVerification.{PactMergeFailed, PactWritten, PactVerified, VerificationResult}
-import au.com.dius.pact.model.{Interaction, Pact}
+import au.com.dius.pact.consumer.PactVerification.{PactMergeFailed, PactVerified, VerificationResult}
+import au.com.dius.pact.model.Pact
 import java.io.{PrintWriter, File}
-import scala.concurrent.Future
 import au.com.dius.pact.model.Pact.{ConflictingInteractions, MergeSuccess}
 
 object PactGeneration {

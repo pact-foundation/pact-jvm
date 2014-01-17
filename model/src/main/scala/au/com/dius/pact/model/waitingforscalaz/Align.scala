@@ -1,7 +1,5 @@
 package au.com.dius.pact.model.waitingforscalaz
 
-import scalaz._
-import Scalaz._
 
 object Align {
   def apply[A, B](thises:List[A], thats:List[B]):List[These[A, B]] = {

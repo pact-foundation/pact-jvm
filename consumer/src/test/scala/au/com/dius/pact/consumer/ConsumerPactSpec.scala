@@ -1,15 +1,13 @@
 package au.com.dius.pact.consumer
 
 import org.specs2.mutable.Specification
-import au.com.dius.pact.model.{Pact}
-import au.com.dius.pact.consumer.{Fixtures, PactServerConfig}
+import au.com.dius.pact.model.Pact
 import Fixtures._
 import au.com.dius.pact.model.{MakePact, MakeInteraction}
 import MakeInteraction._
 import ConsumerPact._
 import akka.actor.ActorSystem
-import au.com.dius.pact.consumer.PactVerification.{PactWritten, ConsumerTestsFailed, PactVerified}
-import au.com.dius.pact.consumer.PactServerConfig
+import au.com.dius.pact.consumer.PactVerification.{ConsumerTestsFailed, PactVerified}
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Future, Await}
 

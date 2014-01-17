@@ -5,7 +5,6 @@ import java.net.URL
 import org.specs2.mutable.Specification
 import scala.concurrent.duration.Duration
 import java.io.File
-import au.com.dius.pact.provider.Main
 
 class MainSpec extends Specification {
 

@@ -13,7 +13,6 @@ import au.com.dius.pact.model.spray.Conversions._
 import scala.concurrent.duration.FiniteDuration
 import org.json4s.JsonDSL._
 import org.json4s.JsonAST.{JString, JObject}
-import au.com.dius.pact.consumer.{PactServerConfig, MockServiceProvider}
 
 class MockServiceProviderSpec extends Specification {
   
