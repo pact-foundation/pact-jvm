@@ -4,8 +4,10 @@ import sbt.Keys._
 
 object BuildSettings {
 	val publishSettings = Seq(
-		version := "1.0",
+		version := "1.1",
 		organization := "au.com.dius",
+    scalaVersion := "2.10.3",
+
 	    publishMavenStyle := true,
 	    // when playing around with a local install of nexus use this:
 //        credentials += Credentials("Sonatype Nexus Repository Manager", "localhost", "deployment", "admin123"),
@@ -60,7 +62,7 @@ object RootBuild extends Build {
 	def p(id: String) = Project(
 		id = id, 
 		base = file(id), 
-		settings = commonSettings)
+		settings = commonSettings :+ (name := id))
 
 	lazy val model = p("pact-jvm-model")
 

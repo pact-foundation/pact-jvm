@@ -1,9 +1,3 @@
-name := "pact-consumer-jvm"
-
-organization := "au.com.dius"
-
-scalaVersion := "2.10.3"
-
 resolvers ++= Seq("typesafe-releases" at "http://repo.typesafe.com/typesafe/releases",
 				  "spray repo" at "http://repo.spray.io",
                   "Local Maven Repository" at "file://"+Path.userHome.absolutePath+"/.m2/repository")
