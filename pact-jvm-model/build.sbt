@@ -1,9 +1,3 @@
-name := "pact-model-jvm"
-
-organization := "au.com.dius"
-
-scalaVersion := "2.10.3"
-
 resolvers += "spray repo" at "http://repo.spray.io"
 
 libraryDependencies ++= Seq(

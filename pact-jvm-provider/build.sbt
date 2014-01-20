@@ -1,8 +1,3 @@
-name := "pact-provider-jvm"
-
-organization := "au.com.dius"
-
-scalaVersion := "2.10.2"
 
 resolvers ++= Seq("spray repo" at "http://repo.spray.io",
                   "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
