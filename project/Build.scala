@@ -57,30 +57,20 @@ object RootBuild extends Build {
 		settings = commonSettings ++ skipPublish)
 		.aggregate(model, consumer, provider, plugin, consumerSbt)
 
-	lazy val model = Project(
-		id = "pact-model-jvm",
-		base = file("model"),
+	def p(id: String) = Project(
+		id = id, 
+		base = file(id), 
 		settings = commonSettings)
 
-	lazy val consumer = Project( 
-		id = "pact-consumer-jvm",
-		base = file("consumer"),
-		settings = commonSettings).dependsOn(model)
+	lazy val model = p("pact-jvm-model")
 
-	lazy val provider = Project( 
-		id = "pact-provider-jvm",
-		base = file("provider"),
-		settings = commonSettings).dependsOn(model)
+	lazy val consumer = p("pact-jvm-consumer").dependsOn(model)
 
-  lazy val plugin = Project(
-    id = "pact-jvm-sbt",
-    base = file("pact-jvm-sbt"),
-    settings = commonSettings).dependsOn(provider)
+	lazy val provider = p("pact-jvm-provider").dependsOn(model)
 
-  lazy val consumerSbt = Project(
-    id = "pact-jvm-consumer-sbt",
-    base = file("pact-jvm-consumer-sbt"),
-    settings = commonSettings) dependsOn sbtGitProject
+  lazy val plugin = p("pact-jvm-provider-sbt").dependsOn(provider)
+
+  lazy val consumerSbt = p("pact-jvm-consumer-sbt") dependsOn sbtGitProject
 
   def sbtGitProject = uri("https://github.com/sbt/sbt-git.git")
 }
