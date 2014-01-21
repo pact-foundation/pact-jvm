@@ -8,15 +8,12 @@ import sbt.IO
 object GitOps {
   type GitCmd = Seq[String] => GitResult[String]
 
-
   private def isError(msg:String) = msg.contains("error")
-
 
   private def toGitResult(msg: String): GitResult[String] = {
     if(isError(msg)) FailedResult(msg)
     else HappyResult(msg)
   }
-
 
   def withGitRepo(repoDir: File, url: String)(f: GitCmd => GitResult[String]): GitResult[String] = {
     val cloneResult = toGitResult(ConsoleGitRunner("clone", url)(repoDir.getParentFile))
@@ -34,6 +31,15 @@ object GitOps {
     IO.delete(repoDir)
     log.info("cloning ...")
 
+    def somethingToCommit(status: String):GitResult[String] = {
+      println(s"status: $status")
+      if(status.contains("nothing to commit, working directory clean")) {
+        TerminatingResult("nothing to commit")
+      } else {
+        HappyResult(status)
+      }
+    }
+
     withGitRepo(repoDir, repoUrl) { g: GitCmd =>
       def git(args: String*) = { g(args) }
 
@@ -44,7 +50,9 @@ object GitOps {
 
       for {
         _ <- git("add", providerPactDir)
-        _ <-  git("commit", "-m", "updated pact")
+        status <- git("status")
+        _ <- somethingToCommit(status)
+        _ <- git("commit", "-m", "updated pact")
         result <-  if(dryRun) HappyResult("Pact committed without pushing") else git("push")
       } yield result
     }
