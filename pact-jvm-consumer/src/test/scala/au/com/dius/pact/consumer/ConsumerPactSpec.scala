@@ -40,8 +40,7 @@ class ConsumerPactSpec extends Specification {
     }
 
     "Report test success and write pact" in {
-      val config = PactServerConfig(port = 9988)
-
+      val config = PactServerConfig()
 
       //TODO: make port selection automatic so that mutiple specs can run in parallel
       awaitResult(pact.runConsumer(config, interaction.providerState) {
@@ -58,7 +57,7 @@ class ConsumerPactSpec extends Specification {
 
     "Report test failure nicely" in {
       val error = new RuntimeException("bad things happened in the test!")
-      val config = PactServerConfig(port = 9987)
+      val config = PactServerConfig()
       awaitResult(pact.runConsumer(config, interaction.providerState) {
         throw error
       }) must beEqualTo(ConsumerTestsFailed(error))

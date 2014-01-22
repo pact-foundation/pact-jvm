@@ -29,7 +29,7 @@ class MockServiceProviderSpec extends Specification {
       implicit val system = ActorSystem()
       implicit val executionContext = system.dispatcher
 
-      val config = PactServerConfig(port = 9999)
+      val config = PactServerConfig()
 
       val server = MockServiceProvider(config, pact)
       //this line ensures the server is running before we start hitting it
