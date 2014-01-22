@@ -32,7 +32,6 @@ object GitOps {
     log.info("cloning ...")
 
     def somethingToCommit(status: String):GitResult[String] = {
-      println(s"status: $status")
       if(status.contains("nothing to commit, working directory clean")) {
         TerminatingResult("nothing to commit")
       } else {
