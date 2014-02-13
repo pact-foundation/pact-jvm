@@ -37,8 +37,7 @@ object Complete {
 
   def toJson(error: VerificationResult) = {
     implicit val formats = Serialization.formats(NoTypeHints)
-    import org.json4s.jackson.Serialization.write
-    write(error)
+    Serialization.write(error)
   }
 
 
