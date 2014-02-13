@@ -8,11 +8,12 @@ import _root_.spray.http.{HttpResponse, HttpRequest}
 import au.com.dius.pact.model._
 import au.com.dius.pact.model.spray.Conversions._
 import au.com.dius.pact.consumer.{PactGeneration, PactVerification, MockServiceProvider, PactServerConfig}
-import scala.concurrent.Future
+import scala.concurrent.{Promise, Future}
 import akka.util.Timeout
 import org.json4s._
 import org.json4s.JsonDSL._
 import org.json4s.jackson.Serialization
+import com.typesafe.config.ConfigFactory
 
 
 object Complete {
@@ -129,11 +130,14 @@ class RequestHandler extends Actor with ActorLogging {
 }
 
 object Server extends App {
+
+  val started = Promise[Any]()
+
   implicit val timeout: Timeout = 5000L
 
   val port = Integer.parseInt(args.headOption.getOrElse("29999"))
 
-  implicit val actorSystem = ActorSystem("Pact-Actor-System")
+  implicit val actorSystem = ActorSystem(s"Pact-Actor-System-$port", ConfigFactory.load(classOf[ActorSystem].getClassLoader), classOf[ActorSystem].getClassLoader)
 
   val host: String = "localhost"
 
@@ -141,6 +145,5 @@ object Server extends App {
 
   val someFuture = io.IO(Http)(actorSystem) ? Http.Bind(handler, interface = host, port = port)
 
-  //TODO: shut down server gracefully at end of process
-
+  started.completeWith(someFuture)
 }
