@@ -11,8 +11,12 @@ object Pact {
   }
 
   def from(source: JsonInput): Pact = {
+    from(parse(source))
+  }
+
+  def from(json:JValue) = {
     implicit val formats = DefaultFormats
-    parse(source).transformField { case ("provider_state", value) => ("providerState", value)}.extract[Pact]
+    json.transformField { case ("provider_state", value) => ("providerState", value)}.extract[Pact]
   }
 
   def merge(a: Pact, b: Pact): MergeResult = {
