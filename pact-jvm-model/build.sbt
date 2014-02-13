@@ -2,6 +2,7 @@ resolvers += "spray repo" at "http://repo.spray.io"
 
 libraryDependencies ++= Seq(
   "org.specs2"        %% "specs2"         % "2.2.3" % "test",
+    "com.twitter" %% "finagle-http" % "6.2.0",
   "io.spray"           % "spray-http"     % "1.2.0",
   // Play ships 2.2.0, Spray 1.2.0 needs 2.2.3 these lines should overwrite it
     "com.typesafe.akka" %% "akka-testkit" % "2.2.3" % "test",
