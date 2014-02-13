@@ -50,12 +50,14 @@ object PactVerification {
   }
   implicit def composable(a: VerificationResult) = ComposableVerification(a)
 
-  def apply(expected: Iterable[Interaction], actual: Iterable[Interaction])(testResult: Try[Unit]): VerificationResult = {
+  def apply(expected: Iterable[Interaction], actual: Iterable[Interaction]): VerificationResult = {
+    val invalidResponse = Response(500, None, None)
+    allExpectedInteractions(expected, actual) and noUnexpectedInteractions(invalidResponse, actual)
+  }
+
+  def apply(expected: Iterable[Interaction], actual: Iterable[Interaction], testResult: Try[Unit]): VerificationResult = {
     testResult match {
-      case Success(_) => {
-        val invalidResponse = Response(500, None, None)
-        allExpectedInteractions(expected, actual) and noUnexpectedInteractions(invalidResponse, actual)
-      }
+      case Success(_) => PactVerification(expected, actual)
       case Failure(t) => ConsumerTestsFailed(t)
     }
   }

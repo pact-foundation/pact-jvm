@@ -28,7 +28,7 @@ case class ConsumerPact(pact: Pact) {
       inState <- started.enterState(state)
       result = execute(test)
       actualInteractions <- inState.interactions
-      verified = PactVerification(pact.interactions, actualInteractions)(result)
+      verified = PactVerification(pact.interactions, actualInteractions, result)
       fileWriteVerification = PactGeneration(pact, verified)
       stopped <- inState.stop
     } yield { fileWriteVerification }
