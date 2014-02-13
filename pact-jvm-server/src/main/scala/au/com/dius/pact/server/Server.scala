@@ -25,11 +25,14 @@ object Create {
       pact: Pact =>
         val config = PactServerConfig()
         val server = MockServiceProvider(config, pact)
-        server.start.map {
+        server.start.flatMap {
           _ =>
-            val entry = config.port -> server
-            val body:JValue = "port" -> config.port
-            Result(Response(201, Map[String, String](), body), oldState + entry)
+            //todo: HACK, we should not assume only one interaction per pact
+            server.enterState(pact.interactions.head.providerState).map { _ =>
+              val entry = config.port -> server
+              val body:JValue = "port" -> config.port
+              Result(Response(201, Map[String, String](), body), oldState + entry)
+            }
         }
     }.getOrElse(Future.successful(Result(Response(400, None, None), oldState)))
   }
@@ -64,7 +67,7 @@ class RequestHandler extends Actor with  ActorLogging {
       val client = sender
       f.onSuccess {
         case result: Result =>
-          log.warning(s"got result $result")
+//          log.warning(s"got result $result")
           client ! result.sprayResponse
           context.become(handleRequests(result.newState))
       }
@@ -81,11 +84,11 @@ object Server extends App {
 
   val port = Integer.parseInt(args.headOption.getOrElse("29999"))
 
-  implicit val actorSystem = ActorSystem("some-name")
+  implicit val actorSystem = ActorSystem("Pact-Actor-System")
 
   val host: String = "localhost"
 
-  val handler = actorSystem.actorOf(Props[RequestHandler], name="Pact-Controller-Handler-Engine")
+  val handler = actorSystem.actorOf(Props[RequestHandler], name=s"Pact-Server:$port")
 
   val someFuture = io.IO(Http)(actorSystem) ? Http.Bind(handler, interface = host, port = port)
 

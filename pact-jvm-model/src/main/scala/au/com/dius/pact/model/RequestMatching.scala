@@ -19,6 +19,10 @@ case class RequestMatching(interactions: Iterable[Interaction], reverseHeaders: 
       matchHeaders(request.headers, actual.headers, reverseHeaders) and
       matchBodies(request.body, actual.body, diffConfig)
 
+//    if(result != MatchFound) {
+//      println(s"mismatch:$result")
+//    }
+
     result == MatchFound
   }
 }

@@ -22,5 +22,19 @@ class MatchingSpec extends Specification {
         matchBodies(None, request.body, config) must beEqualTo(expected)
       }
     }
+
+    "Method Matching" should {
+      "match same"  in {
+        matchMethod("a", "a") must beEqualTo(MatchFound)
+      }
+
+      "match ignore case" in {
+        matchMethod("a", "A") must beEqualTo(MatchFound)
+      }
+
+      "mismatch different" in {
+        matchMethod("a", "b") must beEqualTo(MethodMismatch("a", "b"))
+      }
+    }
   }
 }

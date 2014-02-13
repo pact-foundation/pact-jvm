@@ -17,7 +17,7 @@ object MockServiceProvider {
   implicit val timeout:Timeout = 5000L
 
   def apply(config: PactServerConfig, pact: Pact)(implicit system: ActorSystem): MockServiceProvider = {
-    val ref: ActorRef = system.actorOf(Props[PactHttpServer], name="Pact-HTTP-Server")
+    val ref: ActorRef = system.actorOf(Props[PactHttpServer], name=s"Pact-HTTP-Server:${config.port}")
     MockServiceProvider(config, pact, ref)
   }
 
@@ -112,7 +112,7 @@ class PactHttpServer extends Actor with ActorLogging {
 
   def awaitStart: Receive = {
     case Start(interface, port, pact) => {
-      val handler = context.system.actorOf(Props[PactRequestHandler], name="Pact-Request-Handler")
+      val handler = context.system.actorOf(Props[PactRequestHandler], name=s"Pact-Request-Handler:$port")
       io.IO(Http)(context.system) ! Http.Bind(handler, interface = interface, port = port)
       handler ! pact
       log.debug("starting")

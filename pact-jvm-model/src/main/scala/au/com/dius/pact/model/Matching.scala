@@ -86,7 +86,7 @@ object Matching {
   }
 
   def matchMethod(expected: String, actual: String): MatchResult = {
-    if(expected == actual) {
+    if(expected.equalsIgnoreCase(actual)) {
       MatchFound
     } else {
       MethodMismatch(expected, actual)
