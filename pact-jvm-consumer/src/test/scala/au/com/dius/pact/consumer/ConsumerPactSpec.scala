@@ -6,7 +6,6 @@ import Fixtures._
 import au.com.dius.pact.model.{MakePact, MakeInteraction}
 import MakeInteraction._
 import ConsumerPact._
-import akka.actor.ActorSystem
 import au.com.dius.pact.consumer.PactVerification.{ConsumerTestsFailed, PactVerified}
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Future, Await}

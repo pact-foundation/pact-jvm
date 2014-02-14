@@ -1,5 +1,14 @@
 {
-    "providerBaseUrl": "http://localhost:8888",
-    "stateChangeUrl": "http://localhost:8888/enterState",
-    "timeoutSeconds": 10
+    "providerRoot": {
+        "protocol": "http://",
+        "host": "localhost",
+        "port": 8888,
+        "path": ""
+    },
+    "stateChangeUrl": {
+        "protocol": "http://",
+        "host": "localhost",
+        "port": 8888,
+        "path": "/enterState"
+    }
 }

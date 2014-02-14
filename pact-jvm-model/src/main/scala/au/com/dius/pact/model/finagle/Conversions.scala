@@ -28,7 +28,7 @@ object Conversions {
     HttpMethod.valueOf(method.toUpperCase)
   }
 
-  def toChannelBuffer(json: JValue): ChannelBuffer = {
+  implicit def toChannelBuffer(json: JValue): ChannelBuffer = {
     ChannelBuffers.copiedBuffer(compact(render(json)), Charset.forName("UTF-8"))
   }
 

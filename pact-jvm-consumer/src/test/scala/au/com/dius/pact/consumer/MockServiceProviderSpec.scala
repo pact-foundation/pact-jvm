@@ -30,8 +30,6 @@ class MockServiceProviderSpec extends Specification {
 
       val http = Http.newService(config.interface + ":" + config.port)
 
-      val host = s"${config.interface}:${config.port}"
-      //hit server with invalid request, add spray headers for easier verification
       val invalidRequest = request.copy(path = s"${config.url}/foo")
 
       val inValidResponse: Future[HttpResponse] = http(invalidRequest)

@@ -1,64 +1,36 @@
 package au.com.dius.pact.provider
 
-import spray.http._
-import spray.can.Http
-import akka.actor.{Actor, ActorLogging}
-import spray.http.HttpRequest
-import spray.http.HttpResponse
-import spray.http.HttpHeaders.RawHeader
-import au.com.dius.pact.model.Request
-import scala.Some
+import au.com.dius.pact.model.finagle.Conversions._
 import AnimalServiceResponses.responses
-import spray.http.Uri.Path
-import org.json4s._
-import org.json4s.jackson.JsonMethods._
+import com.twitter.finagle.{Service, Http}
+import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
+import com.twitter.util.Future
+import au.com.dius.pact.model.{Request, Response}
+import org.json4s.JsonAST.{JObject, JField, JString}
 
-class TestService extends Actor with ActorLogging {
-  def receive = awaitState orElse {
-    case r:HttpRequest => {
-      log.error(s"received unexpected request: $r\n expected only POST to ${Path("/enterState")}")
-    }
+object TestService {
+  var state: String = ""
+
+  def apply(port:Int) = {
+    Http.serve(s":$port", service(port))
   }
 
-  def awaitState: Receive = {
-    //singleton request handler, no fancy routing
-    case Http.Connected(_, _) => sender ! Http.Register(self)
-
-    case HttpRequest(HttpMethods.POST, Uri(_, _, Path("/enterState"), _, _), _, entity, _) => {
-      log.info(s"received state transition message ${entity.asString}")
-      parse(entity.data.asString) match {
-        case JObject(List(JField("state", JString(state)))) => {
-          context.become(running(state))
-          sender ! HttpResponse(status = 200)
-        }
-        case _ => {
-          log.error(s"invalid state posted: $entity")
-          sender ! HttpResponse(status = 400, entity = HttpEntity("Invalid body content"))
+  def service(port: Int) = new Service[HttpRequest, HttpResponse] {
+    def apply( request: HttpRequest): Future[HttpResponse] = {
+      Future{
+        if(request.getUri.endsWith("/enterState")) {
+          val pactRequest: Request = request
+//          println(s"entering state: ${pactRequest.bodyString}")
+          pactRequest.body.map {
+            case JObject(List(JField("state", JString(s)))) => state = s
+          }
+          Response(200, None, None)
+        } else {
+//          println(s"getting: $state ${request.path}")
+          val response: Response = responses.get(state).flatMap(_.get(request.path)).getOrElse(Response(400, None, None))
+          response: HttpResponse
         }
       }
-    }
-  }
-
-  def running(state: String): Receive = awaitState orElse {
-    case HttpRequest(method, uri, requestHeaders, entity, protocol) => {
-      log.info(s"received request: $method $uri : ${entity.asString}")
-      val requestBody: Option[JValue] = entity match {
-        case HttpEntity.Empty => None
-        case e => Some(parse(e.asString))
-      }
-      val reqHeaders = Some(requestHeaders.map(HttpHeader.unapply).flatten.toMap)
-      val request = Request(
-        method.value,
-        uri.path.toString().replace("http://localhost:8888", ""),
-        reqHeaders,
-        requestBody
-      )
-      val response = responses(state)(request.path)
-      val body = response.bodyString.fold[HttpEntity](HttpEntity.Empty){content => HttpEntity(ContentTypes.`application/json`, content)}
-      val headers = response.headers.fold[List[HttpHeader]](Nil)(_.map{ case (k,v) => RawHeader(k,v) }.toList)
-
-      val sprayResponse = HttpResponse(status = response.status, entity = body, headers = headers)
-      sender ! sprayResponse
     }
   }
 }

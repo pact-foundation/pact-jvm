@@ -5,7 +5,6 @@ import org.scalatest._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import java.io.File
-import akka.actor.ActorSystem
 
 object Main {
   def loadFiles(pactRoot: File, configFile: File) = {
@@ -14,7 +13,7 @@ object Main {
     (config, PactFileSource.loadFiles(pactRoot))
   }
 
-  def runPacts(t:(PactConfiguration, Seq[Pact]))(implicit actorSystem: ActorSystem) = t match { case (config, pacts) =>
+  def runPacts(t:(PactConfiguration, Seq[Pact])) = t match { case (config, pacts) =>
     stats.fullstacks.run (
       new Sequential(pacts.map { pact =>
         new PactSpec(config, pact)

@@ -1,3 +1,9 @@
 package au.com.dius.pact.provider
 
-case class PactConfiguration(providerBaseUrl: String, stateChangeUrl: String, timeoutSeconds: Int)
+case class Address(protocol: String, host: String, port: Int = 80, path: String = "") {
+  def url: String = s"$protocol$host:$port$path"
+}
+
+case class PactConfiguration(
+  providerRoot: Address,
+  stateChangeUrl: Address)

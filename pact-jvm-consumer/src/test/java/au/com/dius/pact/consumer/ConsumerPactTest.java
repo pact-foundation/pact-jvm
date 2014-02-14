@@ -1,6 +1,5 @@
 package au.com.dius.pact.consumer;
 
-import akka.actor.ActorSystem;
 import au.com.dius.pact.model.Pact;
 import org.junit.Test;
 import scala.concurrent.Await;
