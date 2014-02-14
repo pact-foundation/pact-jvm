@@ -18,9 +18,6 @@ class ConsumerPactSpec extends Specification {
 
   isolated
 
-  implicit val actorSystem = ActorSystem("test-client")
-  implicit val executionContext = actorSystem.dispatcher
-
   "consumer pact" should {
     val pact: Pact = MakePact()
     .withProvider(provider.name)

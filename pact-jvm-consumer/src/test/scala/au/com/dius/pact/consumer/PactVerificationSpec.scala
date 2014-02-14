@@ -13,7 +13,7 @@ class PactVerificationSpec extends Specification with Mockito {
       actualInteractions: Iterable[Interaction],
       expectedResult: VerificationResult,
       testPassed: Try[Unit] = Success(Unit)) = {
-        PactVerification(pact.interactions, actualInteractions)(testPassed) must beEqualTo(expectedResult)
+        PactVerification(pact.interactions, actualInteractions, testPassed) must beEqualTo(expectedResult)
     }
 
     val invalidResponse = Response(500, None, None)

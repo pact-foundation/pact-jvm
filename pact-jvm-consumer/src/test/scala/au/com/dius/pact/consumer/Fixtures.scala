@@ -1,16 +1,13 @@
 package au.com.dius.pact.consumer
 
-import _root_.spray.can.Http
-import _root_.spray.http._
 import au.com.dius.pact.model._
-
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.Future
-import akka.actor.ActorSystem
-import akka.io.IO
-import akka.pattern.ask
-import au.com.dius.pact.model.spray.Conversions
+import au.com.dius.pact.model.finagle.Conversions._
+import com.twitter.finagle.Service
+import com.twitter.finagle.Http
+import org.jboss.netty.handler.codec.http._
 
 object Fixtures {
   import au.com.dius.pact.model.HttpMethod._
@@ -41,12 +38,8 @@ object Fixtures {
     interactions = interactions
   )
 
-  case class ConsumerService(serverUrl: String)(implicit system: ActorSystem) {
-    private implicit val executionContext = system.dispatcher
-
-    private def http(r:HttpRequest): Future[HttpResponse] = {
-      ask(IO(Http), r)(5000L).mapTo[HttpResponse]
-    }
+  case class ConsumerService(serverUrl: String) {
+    val client: Service[HttpRequest, HttpResponse] = Http.newService(serverUrl.replace("http://", ""))
 
     private def extractFrom(body: String): Boolean = {
       import org.json4s._
@@ -61,8 +54,8 @@ object Fixtures {
     }
 
     def hitEndpoint: Future[Boolean] = {
-      http(Conversions.pactToSprayRequest(request.copy(path = s"$serverUrl${request.path}"))).map { response =>
-        response.status.isSuccess && extractFrom(response.entity.asString)
+      client(request.copy(path = s"$serverUrl${request.path}")).map { response: HttpResponse =>
+        response.getStatus.getCode == 200 && extractFrom(response.getContent)
       }
     }
   }

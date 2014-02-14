@@ -46,8 +46,7 @@ public class ConsumerPactTest {
         PactVerification.VerificationResult result = new ConsumerPact(pact).runConsumer(config, "test state",
             new Runnable() {
                 public void run() {
-                    ActorSystem system = ActorSystem.create("testServiceSystem");
-                    Future future = new Fixtures.ConsumerService(config.url(), system).hitEndpoint();
+                    Future future = new Fixtures.ConsumerService(config.url()).hitEndpoint();
                     try {
                         Object result = Await.result(future, Duration.apply(1, "s"));
                         assertEquals(true, result);
