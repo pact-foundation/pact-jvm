@@ -16,24 +16,37 @@ import org.json4s.jackson.Serialization
 import com.typesafe.config.ConfigFactory
 
 
+object ListServers {
+
+  def apply(oldState: ServerState): Future[Result] = {
+
+    implicit val formats = Serialization.formats(NoTypeHints)
+    val body = Serialization.write(Map("ports" -> oldState.keySet))
+    Future.successful(Result(Response(200, Map[String,String](), body),oldState))
+  }
+
+}
+
 object Complete {
+
   import PactVerification._
 
   implicit val executionContext = Server.actorSystem.dispatcher
 
-  def getPort(j:JValue): Option[Int] = j match {
+  def getPort(j: JValue): Option[Int] = j match {
     case JObject(List(JField("port", JInt(port)))) => {
       Some(port.intValue())
     }
     case _ => None
   }
 
-  def verify(pact:Pact, interactions:Iterable[Interaction]): VerificationResult = PactVerification(pact.interactions, interactions)
-  
-  def stopServer(msp: MockServiceProvider, result: Result):Future[Result] = {
-      msp.stop.map { _ =>
+  def verify(pact: Pact, interactions: Iterable[Interaction]): VerificationResult = PactVerification(pact.interactions, interactions)
+
+  def stopServer(msp: MockServiceProvider, result: Result): Future[Result] = {
+    msp.stop.map {
+      _ =>
         result
-      }
+    }
   }
 
   def toJson(error: VerificationResult) = {
@@ -42,20 +55,24 @@ object Complete {
   }
 
 
-  def apply(request: Request, oldState: Map[Int, MockServiceProvider]): Future[Result] = {
+  def apply(request: Request, oldState: ServerState): Future[Result] = {
     val clientError = Future.successful(Result(Response(400, None, None), oldState))
-    def pactWritten(response:Response, port: Int) = Result(response, oldState - port)
+    def pactWritten(response: Response, port: Int) = Result(response, oldState - port)
 
     val maybeMsp = getPort(request.body).flatMap(oldState.get)
-    
-    maybeMsp.map { msp =>
-      msp.interactions.map { interactions =>
-        val verification = verify(msp.pact, interactions)
-        PactGeneration(msp.pact, verification) match {
-          case PactVerified => pactWritten(Response(200, None, None), msp.config.port)
-          case error => pactWritten(Response(400, Map[String, String](), toJson(error)), msp.config.port)
+
+    maybeMsp.map {
+      msp =>
+        msp.interactions.map {
+          interactions =>
+            val verification = verify(msp.pact, interactions)
+            PactGeneration(msp.pact, verification) match {
+              case PactVerified => pactWritten(Response(200, None, None), msp.config.port)
+              case error => pactWritten(Response(400, Map[String, String](), toJson(error)), msp.config.port)
+            }
+        }.flatMap {
+          r => stopServer(msp, r)
         }
-      }.flatMap{r => stopServer(msp, r)}
     }.getOrElse(clientError)
   }
 
@@ -67,7 +84,7 @@ object Create {
   implicit val system = Server.actorSystem
   implicit val context = Server.actorSystem.dispatcher
 
-  def apply(request: Request, oldState: Map[Int, MockServiceProvider]): Future[Result] = {
+  def apply(request: Request, oldState: ServerState): Future[Result] = {
     val maybeJsonPact = request.body
     maybeJsonPact.map(Pact.from).map {
       pact: Pact =>
@@ -89,16 +106,17 @@ object Create {
 
 object RequestRouter {
 
-  def apply(request: Request, oldState: Map[Int, MockServiceProvider]): Future[Result] = {
+  def apply(request: Request, oldState: ServerState): Future[Result] = {
     request.path match {
       case "/create" => Create(request, oldState)
       case "/complete" => Complete(request, oldState)
+      case "/" => ListServers(oldState)
       case _ => Future.successful(Result(Response(404, None, None), oldState))
     }
   }
 }
 
-case class Result(response: Response, newState: Map[Int, MockServiceProvider]) {
+case class Result(response: Response, newState: ServerState) {
   def sprayResponse: HttpResponse = response
 }
 
@@ -107,7 +125,7 @@ class RequestHandler extends Actor with ActorLogging {
 
   def receive: Receive = handleRequests(Map())
 
-  def handleRequests(servers: Map[Int, MockServiceProvider]): Receive = {
+  def handleRequests(servers: ServerState): Receive = {
     case Http.Connected(_, _) => {
       sender ! Http.Register(self)
     }
