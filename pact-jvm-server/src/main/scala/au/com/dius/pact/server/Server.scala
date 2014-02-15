@@ -61,19 +61,33 @@ object Complete {
 }
 
 object Create {
+  def create(state: String, body: JValue, oldState: ServerState) = {
+    val pact = Pact.from(body)
+    Future {
+      val config = PactServerConfig()
+      val stopped = MockServiceProvider(config, pact, state)
+      val server = stopped.start
+      val entry = config.port -> server
+      val body: JValue = "port" -> config.port
+      Result(Response(201, noHeaders, body), oldState + entry)
+    }
+  }
+
   def apply(request: Request, oldState: ServerState): Future[Result] = {
-    val state = new QueryStringDecoder(request.path).getParameters.get("state").get(0)
+    val params = new QueryStringDecoder(request.path).getParameters
+    val maybeState:Option[String] = if(params.containsKey("state")) {
+      val states = params.get("state")
+      if(states.isEmpty) None else Some(states.get(0))
+    } else None
+
     val maybeJsonPact = request.body
-    maybeJsonPact.map(Pact.from).map { pact: Pact =>
-      Future {
-        val config = PactServerConfig()
-        val stopped = MockServiceProvider(config, pact, state)
-        val server = stopped.start
-        val entry = config.port -> server
-        val body: JValue = "port" -> config.port
-        Result(Response(201, Map[String, String](), body), oldState + entry)
-      }
-    }.getOrElse(Future(Result(Response(400, None, None), oldState)))
+
+    val errorJson:JValue = "error" -> "please provide state param and pact body"
+
+    (maybeState, maybeJsonPact) match {
+      case (Some(state), Some(body)) => create(state, body, oldState)
+      case _ => Future(Result(Response(400, noHeaders, errorJson), oldState))
+    }
   }
 }
 
