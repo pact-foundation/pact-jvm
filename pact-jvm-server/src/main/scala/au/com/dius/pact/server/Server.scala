@@ -48,7 +48,7 @@ object Complete {
       msp =>
         val verification = verify(msp.pact, msp.interactions)
         val result = PactGeneration(msp.pact, verification) match {
-          case PactVerified => pactWritten(Response(200, None, None), msp.config.port)
+          case PactVerified => pactWritten(Response(200, crossSiteHeaders, None), msp.config.port)
           case error => pactWritten(Response(400, Map[String, String](), toJson(error)), msp.config.port)
         }
         msp.stop
@@ -66,7 +66,7 @@ object Create {
     val server = stopped.start
     val entry = config.port -> server
     val body: JValue = "port" -> config.port
-    Result(Response(201, noHeaders, body), oldState + entry)
+    Result(Response(201, crossSiteHeaders, body), oldState + entry)
   }
 
   def apply(request: Request, oldState: ServerState): Result = {
