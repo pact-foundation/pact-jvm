@@ -109,7 +109,7 @@ Generally the state maps to a set of fixture data for mocking out services that 
 
 The pact framework will instruct the test server to enter that state by sending:
 
-    POST "${config.get(providerName)}/setup" { "state" : "${interaction.stateName}" }
+    POST "${config.stateChangeUrl.url}/setup" { "state" : "${interaction.stateName}" }
 
 
 Pact model
