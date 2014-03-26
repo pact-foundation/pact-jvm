@@ -1,9 +1,0 @@
-[submodule "pact-model-jvm"]
-	path = pact-model-jvm
-	url = git@github.com:DiUS/pact-model-jvm.git
-[submodule "pact-provider-jvm"]
-	path = pact-provider-jvm
-	url = git@github.com:DiUS/pact-provider-jvm.git
-[submodule "pact-consumer-jvm"]
-	path = pact-consumer-jvm
-	url = git@github.com:DiUS/pact-consumer-jvm.git
