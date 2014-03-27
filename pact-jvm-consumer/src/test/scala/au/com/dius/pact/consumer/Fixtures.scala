@@ -20,7 +20,7 @@ object Fixtures {
     "test" -> true)
 
   val response = Response(200,
-    Map("testreqheader" -> "testreqheaderval"),
+    Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*"),
     "responsetest" -> true)
 
   val interaction = Interaction(

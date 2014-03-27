@@ -145,6 +145,9 @@ case class Response(status: Int,
 }
 
 object Response extends Optionals {
+
+  val CrossSiteHeaders = Map[String, String]("Access-Control-Allow-Origin" -> "*")
+
   def apply(status: Int, headers: Map[String, String], body: String): Response = {
     Response(status, optional(headers), optional(body))
   }
@@ -158,7 +161,7 @@ object Response extends Optionals {
   }
 
   def invalidRequest(request: Request, pact: Pact) = {
-    Response(500, Map[String, String](), "error"-> s"unexpected request : $request \nnot in : $pact")
+    Response(500, CrossSiteHeaders, "error"-> s"unexpected request : $request \nnot in : $pact")
   }
 }
 
