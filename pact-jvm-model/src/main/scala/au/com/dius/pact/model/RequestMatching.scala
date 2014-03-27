@@ -16,7 +16,8 @@ case class RequestMatching(interactions: Iterable[Interaction], reverseHeaders: 
 
     val result = matchMethod(request.method, actual.method) and
       matchPath(request.path, actual.path) and
-      matchHeaders(request.headers, actual.headers, reverseHeaders) and
+      matchCookie(request.cookie, actual.cookie, reverseHeaders) and
+      matchHeaders(request.headersWithoutCookie, actual.headersWithoutCookie, reverseHeaders) and
       matchBodies(request.body, actual.body, diffConfig)
 
 //    if(result != MatchFound) {

@@ -77,6 +77,17 @@ case class Request(method: String,
                    body: Option[JValue]) {
   def bodyString:Option[String] = body.map{ b => compact(render(b))}
 
+  def cookie: Option[List[String]] = cookieHeader.map(_._2.split(";").map(_.trim).toList)
+
+  def headersWithoutCookie: Option[Map[String, String]] = cookieHeader match {
+    case Some(cookie) => headers.map(_ - cookie._1)
+    case _ => headers
+  }
+
+  private def cookieHeader = findHeaderByCaseInsensitiveKey("cookie")
+
+  private def findHeaderByCaseInsensitiveKey(key: String): Option[(String, String)] = headers.flatMap(_.find(_._1.toLowerCase == key.toLowerCase))
+
   override def toString: String = {
     s"\tmethod: $method\n\tpath: $path\n\theaders: $headers\n\tbody:\n${body.map{b => pretty(render(b))}}"
   }

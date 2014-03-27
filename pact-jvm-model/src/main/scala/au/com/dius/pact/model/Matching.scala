@@ -38,6 +38,12 @@ object Matching {
       s"Header Mismatch(\n\texpected: $expected\n\tactual: $actual)"
     }
   }
+  case class CookieMismatch(expected: List[String], actual: List[String]) extends MatchResult {
+    override def toString: String = {
+      s"Header 'Cookie' Mismatch(\n\texpected: $expected\n\tactual: $actual)"
+    }
+  }
+
   case class BodyContentMismatch(diff: Diff) extends MatchResult {
 
     override def toString: String = {
@@ -83,6 +89,15 @@ object Matching {
     } else {
       compareHeaders(e, a)
     }
+  }
+
+  def matchCookie(expected: Option[List[String]], actual: Option[List[String]], reverseCookies: Boolean = false): MatchResult = {
+    def compareCookies(e: List[String], a: List[String]) = {
+      if (e == e.intersect(a)) MatchFound else CookieMismatch(e, a)
+    }
+    val e = expected.getOrElse(List.empty)
+    val a = actual.getOrElse(List.empty)
+    if (reverseCookies) compareCookies(a, e) else compareCookies(e, a)
   }
 
   def matchMethod(expected: String, actual: String): MatchResult = {
