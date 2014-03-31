@@ -71,7 +71,8 @@ class MockServiceProviderSpec extends Specification {
         actual.response.copy(body = None) must beEqualTo(response.copy(body = None))
       }
       
-      compare(interactions.head, invalidRequest, Response(500, None, Some(JObject(JField("error", JString("unexpected request"))))))
+      compare(interactions.head, invalidRequest, Response(500, Map("Access-Control-Allow-Origin" -> "*"),
+        Some(JObject(JField("error", JString("unexpected request"))))))
       compare(interactions.tail.head, validRequest, response)
     }
   }
