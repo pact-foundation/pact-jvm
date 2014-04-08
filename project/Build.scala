@@ -43,20 +43,30 @@ object BuildSettings {
 	      </developers>
   	)
 
-	val commonSettings = Defaults.defaultSettings ++ publishSettings
+	val testSettings = Seq (
+		testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/test-reports"),
+		testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "junitxml", "console")
+	)
+
+	val commonSettings = Defaults.defaultSettings ++ publishSettings ++ testSettings
 	val skipPublish = Seq(
 		publish := { },
 		publishLocal := { }//,
 		// publishSigned := { }
 	)
+	val skipTest = Seq(
+		test:= {},
+		testOnly := {}
+	)
 }
 
 object RootBuild extends Build {
+
 	import BuildSettings._
 	lazy val pact = Project( 
 		id = "pact-jvm",
 		base = file("."),
-		settings = commonSettings ++ skipPublish)
+		settings = commonSettings ++ skipPublish ++ skipTest)
 		.aggregate(model, consumer, provider, plugin, consumerSbt, server)
 
 	def p(id: String) = Project(
@@ -77,4 +87,5 @@ object RootBuild extends Build {
   lazy val server = p("pact-jvm-server").dependsOn(model).dependsOn(consumer)
 
   def sbtGitProject = uri("https://github.com/sbt/sbt-git.git")
+
 }
