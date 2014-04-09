@@ -8,19 +8,19 @@ import java.util.Map;
 public class ConsumerInteractionJavaDsl {
     public static PactVerification.VerificationResult pactVerified = PactVerification.PactVerified$.MODULE$;
 
-
-
-    static ConsumerInteractionJavaDsl given(String providerState) {
-        return new ConsumerInteractionJavaDsl(providerState);
-    }
-
     private String providerState;
+    private String description;
+    private Request request;
+    private Response response;
+
     ConsumerInteractionJavaDsl(String providerState) {
         this.providerState = providerState;
     }
 
-    private String description;
-    private Request request;
+    public static ConsumerInteractionJavaDsl given(String providerState) {
+        return new ConsumerInteractionJavaDsl(providerState);
+    }
+
     public ConsumerInteractionJavaDsl uponReceiving(
         String description,
         String path,
@@ -33,7 +33,6 @@ public class ConsumerInteractionJavaDsl {
         return this;
     }
 
-    private Response response;
     public ConsumerInteractionJavaDsl willRespondWith(
         int status,
         Map<String, String> headers,
