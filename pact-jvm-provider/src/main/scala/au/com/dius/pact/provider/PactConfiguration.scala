@@ -6,4 +6,4 @@ case class Address(protocol: String, host: String, port: Int = 80, path: String 
 
 case class PactConfiguration(
   providerRoot: Address,
-  stateChangeUrl: Address)
+  stateChangeUrl: Option[Address])

@@ -7,11 +7,12 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 import com.twitter.util.Future
 import au.com.dius.pact.model.{Request, Response}
 import org.json4s.JsonAST.{JObject, JField, JString}
+import com.twitter.finagle.ListeningServer
 
 object TestService {
   var state: String = ""
 
-  def apply(port:Int) = {
+  def apply(port:Int): ListeningServer = {
     Http.serve(s":$port", service(port))
   }
 
