@@ -4,7 +4,7 @@ import sbt.Keys._
 
 object BuildSettings {
 	val publishSettings = Seq(
-		version := "1.9",
+		version := "1.10",
 		organization := "au.com.dius",
     scalaVersion := "2.10.3",
 
