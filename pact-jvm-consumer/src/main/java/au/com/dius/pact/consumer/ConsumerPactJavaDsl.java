@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer;
 import au.com.dius.pact.model.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ConsumerPactJavaDsl {
@@ -27,11 +28,7 @@ public class ConsumerPactJavaDsl {
         return this;
     }
 
-    public Pact withInteractions(ConsumerInteractionJavaDsl ... interactions) {
-        List<Interaction> builtInteractions = new ArrayList<Interaction>();
-        for(ConsumerInteractionJavaDsl builder : interactions) {
-            builtInteractions.add(builder.build());
-        }
-        return Pact$.MODULE$.apply(new Provider(providerName), new Consumer(consumerName), builtInteractions);
+    public Pact withInteractions(Interaction ... interactions) {
+        return Pact$.MODULE$.apply(new Provider(providerName), new Consumer(consumerName), Arrays.asList(interactions));
     }
 }

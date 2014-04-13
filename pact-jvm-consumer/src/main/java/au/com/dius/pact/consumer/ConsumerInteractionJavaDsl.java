@@ -13,12 +13,9 @@ public class ConsumerInteractionJavaDsl {
     private Request request;
     private Response response;
 
-    ConsumerInteractionJavaDsl(String providerState) {
+    public ConsumerInteractionJavaDsl given(String providerState) {
         this.providerState = providerState;
-    }
-
-    public static ConsumerInteractionJavaDsl given(String providerState) {
-        return new ConsumerInteractionJavaDsl(providerState);
+        return this;
     }
 
     public ConsumerInteractionJavaDsl uponReceiving(
@@ -33,13 +30,13 @@ public class ConsumerInteractionJavaDsl {
         return this;
     }
 
-    public ConsumerInteractionJavaDsl willRespondWith(
+    public Interaction willRespondWith(
         int status,
         Map<String, String> headers,
         String body) {
 
         response = Response$.MODULE$.apply(status, headers, body);
-        return this;
+        return this.build();
     }
 
     public Interaction build() {
