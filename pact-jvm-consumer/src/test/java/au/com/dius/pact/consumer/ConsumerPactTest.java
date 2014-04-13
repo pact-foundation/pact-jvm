@@ -20,8 +20,8 @@ public class ConsumerPactTest extends AbstractConsumerPactTest {
         return builder.given("test state")
                 .uponReceiving(
                         "java test interaction",
-                        "/",
                         "GET",
+                        "/",
                         headers,
                         "{\"test\":true}")
                 .willRespondWith(200,

@@ -20,8 +20,8 @@ public class ConsumerInteractionJavaDsl {
 
     public ConsumerInteractionJavaDsl uponReceiving(
         String description,
-        String path,
         String method,
+        String path,
         Map<String, String> headers,
         String body) {
 
