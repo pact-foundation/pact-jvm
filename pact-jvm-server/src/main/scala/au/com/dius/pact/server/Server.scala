@@ -1,14 +1,15 @@
 package au.com.dius.pact.server
 
+import _root_.unfiltered.netty.{ReceivedMessage, ServerErrorResponse, cycle}
+import _root_.unfiltered.request.HttpRequest
+import _root_.unfiltered.response.ResponseFunction
 import au.com.dius.pact.model._
-import au.com.dius.pact.model.finagle.Conversions._
 import au.com.dius.pact.consumer.{PactGeneration, PactVerification, MockServiceProvider, PactServerConfig}
 import org.json4s._
 import org.json4s.JsonDSL._
 import org.json4s.jackson.Serialization
-import com.twitter.finagle.{Service, Http}
-import org.jboss.netty.handler.codec.http._
-import com.twitter.util.Future
+import au.com.dius.pact.model.unfiltered.Conversions
+import org.jboss.netty.handler.codec.http.QueryStringDecoder
 
 object ListServers {
 
@@ -88,7 +89,6 @@ object Create {
 }
 
 object RequestRouter {
-
   def apply(request: Request, oldState: ServerState): Result = {
     val urlPattern ="/(\\w*)\\?{0,1}.*".r
     val urlPattern(action) = request.path
@@ -101,9 +101,7 @@ object RequestRouter {
   }
 }
 
-case class Result(response: Response, newState: ServerState) {
-  def httpResponse: HttpResponse = response
-}
+case class Result(response: Response, newState: ServerState)
 
 class ServerStateStore {
   private var state: ServerState = Map()
@@ -115,22 +113,26 @@ class ServerStateStore {
   }
 }
 
-case class RequestHandler(store: ServerStateStore) extends Service[HttpRequest, HttpResponse] {
-  def apply(request: HttpRequest): Future[HttpResponse] = {
-    Future{RequestRouter(request, store.getState)}.onFailure {
-      e => println(s"MISERABLE FAILURE $e")
-    }.map {
-      case result: Result =>
-        store.setState(result.newState)
-        result.httpResponse
+case class RequestHandler(store: ServerStateStore) extends cycle.Plan
+  with cycle.SynchronousExecution
+  with ServerErrorResponse {
+    import org.jboss.netty.handler.codec.http.{ HttpResponse=>NHttpResponse }
+
+    def handle(request:HttpRequest[ReceivedMessage]): ResponseFunction[NHttpResponse] = {
+      val result = RequestRouter(Conversions.unfilteredRequestToPactRequest(request), store.getState)
+      store.setState(result.newState)
+      Conversions.pactToUnfilteredResponse(result.response)
     }
-  }
+    def intent = PartialFunction[HttpRequest[ReceivedMessage], ResponseFunction[NHttpResponse]](handle)
 }
 
 object Server extends App {
   val port = Integer.parseInt(args.headOption.getOrElse("29999"))
 
   val host: String = "localhost"
-
-  val started = Http.serve(host + ":" + port, RequestHandler(new ServerStateStore()))
+  val server = _root_.unfiltered.netty.Http.local(port).handler(RequestHandler(new ServerStateStore()))
+  println(s"starting unfiltered app at 127.0.0.1 on port $port")
+  server.start()
+  readLine("press enter to stop server:\n")
+  server.stop()
 }

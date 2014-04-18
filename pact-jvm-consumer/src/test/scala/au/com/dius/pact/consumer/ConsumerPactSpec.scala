@@ -38,7 +38,6 @@ class ConsumerPactSpec extends Specification {
     "Report test success and write pact" in {
       val config = PactServerConfig()
 
-      //TODO: make port selection automatic so that mutiple specs can run in parallel
       awaitResult(pact.runConsumer(config, interaction.providerState) {
         awaitResult(ConsumerService(config.url).hitEndpoint) must beTrue
       }) must beEqualTo(PactVerified)

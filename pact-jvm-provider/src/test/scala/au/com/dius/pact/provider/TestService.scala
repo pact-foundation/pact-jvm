@@ -1,37 +1,43 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.finagle.Conversions._
 import AnimalServiceResponses.responses
-import com.twitter.finagle.{Service, Http}
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
-import com.twitter.util.Future
 import au.com.dius.pact.model.{Request, Response}
 import org.json4s.JsonAST.{JObject, JField, JString}
-import com.twitter.finagle.ListeningServer
+import unfiltered.netty.{ReceivedMessage, ServerErrorResponse, cycle}
+import unfiltered.request.HttpRequest
+import unfiltered.response.ResponseFunction
+import au.com.dius.pact.model.unfiltered.Conversions
 
 object TestService {
   var state: String = ""
 
-  def apply(port:Int): ListeningServer = {
-    Http.serve(s":$port", service(port))
-  }
+  case class RequestHandler(port: Int) extends cycle.Plan
+    with cycle.SynchronousExecution
+    with ServerErrorResponse {
+      import org.jboss.netty.handler.codec.http.{ HttpResponse=>NHttpResponse }
 
-  def service(port: Int) = new Service[HttpRequest, HttpResponse] {
-    def apply( request: HttpRequest): Future[HttpResponse] = {
-      Future{
-        if(request.getUri.endsWith("/enterState")) {
-          val pactRequest: Request = request
-//          println(s"entering state: ${pactRequest.bodyString}")
+      def handle(request:HttpRequest[ReceivedMessage]): ResponseFunction[NHttpResponse] = {
+        val response = if(request.uri.endsWith("enterState")) {
+          val pactRequest: Request = Conversions.unfilteredRequestToPactRequest(request)
           pactRequest.body.map {
-            case JObject(List(JField("state", JString(s)))) => state = s
+            case JObject(List(JField("state", JString(s)))) => {
+              state = s
+            }
           }
           Response(200, None, None)
         } else {
-//          println(s"getting: $state ${request.path}")
-          val response: Response = responses.get(state).flatMap(_.get(request.path)).getOrElse(Response(400, None, None))
-          response: HttpResponse
+          responses.get(state).flatMap(_.get(request.uri)).getOrElse(Response(400, None, None))
         }
+        Conversions.pactToUnfilteredResponse(response)
       }
-    }
+
+      def intent = PartialFunction[HttpRequest[ReceivedMessage], ResponseFunction[NHttpResponse]](handle)
+  }
+
+  def apply(port:Int) = {
+    val server = _root_.unfiltered.netty.Http.local(port).handler(RequestHandler(port))
+    println(s"starting unfiltered app at 127.0.0.1 on port $port")
+    server.start()
+    server
   }
 }

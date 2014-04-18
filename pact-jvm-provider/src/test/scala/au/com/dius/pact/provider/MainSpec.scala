@@ -18,9 +18,8 @@ class MainSpec extends Specification {
       try {
         Main.runPacts(Main.loadFiles(testJson, testConfig))
       } finally {
-        server.close()
+        server.stop()
       }
-
       success
     }
   }

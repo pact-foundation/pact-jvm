@@ -3,11 +3,9 @@ package au.com.dius.pact.consumer
 import au.com.dius.pact.model._
 
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.Future
-import au.com.dius.pact.model.finagle.Conversions._
-import com.twitter.finagle.Service
-import com.twitter.finagle.Http
-import org.jboss.netty.handler.codec.http._
+import scala.concurrent.{ExecutionContext, Future}
+import au.com.dius.pact.model.dispatch.HttpClient
+import java.util.concurrent.Executors
 
 object Fixtures {
   import au.com.dius.pact.model.HttpMethod._
@@ -15,7 +13,7 @@ object Fixtures {
   val provider = Provider("test_provider")
   val consumer = Consumer("test_consumer")
 
-  val request = Request(Get, "/",
+  val request = Request(Post, "/",
     Map("testreqheader" -> "testreqheadervalue"),
     "test" -> true)
 
@@ -39,7 +37,7 @@ object Fixtures {
   )
 
   case class ConsumerService(serverUrl: String) {
-    val client: Service[HttpRequest, HttpResponse] = Http.newService(serverUrl.replace("http://", ""))
+    implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool)
 
     private def extractFrom(body: String): Boolean = {
       import org.json4s._
@@ -54,8 +52,9 @@ object Fixtures {
     }
 
     def hitEndpoint: Future[Boolean] = {
-      client(request.copy(path = s"$serverUrl${request.path}")).map { response: HttpResponse =>
-        response.getStatus.getCode == 200 && extractFrom(response.getContent)
+      HttpClient.run(request.copy(path = s"$serverUrl${request.path}")).map{ response =>
+        response.status == 200 &&
+        response.bodyString.map(extractFrom).get
       }
     }
   }

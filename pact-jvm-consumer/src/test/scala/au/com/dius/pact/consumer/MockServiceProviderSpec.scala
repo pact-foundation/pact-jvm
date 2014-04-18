@@ -3,43 +3,39 @@ package au.com.dius.pact.consumer
 import org.specs2.mutable.Specification
 import au.com.dius.pact.consumer.Fixtures._
 import au.com.dius.pact.model._
-import au.com.dius.pact.model.finagle.Conversions._
 import scala.concurrent.duration.FiniteDuration
 import org.json4s.JsonDSL._
 import org.json4s.JsonAST.{JField, JString, JObject}
-import com.twitter.finagle.Http
-import org.jboss.netty.handler.codec.http._
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import java.util.concurrent.Executors
 import au.com.dius.pact.model.Interaction
+import au.com.dius.pact.model.dispatch.HttpClient
 
 class MockServiceProviderSpec extends Specification {
 
-  implicit val executionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(1))
+  implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
   
   implicit val timeout = FiniteDuration(10L, "second")
   
   //TODO: move PactServer startup and shutdown into an around function
-  "Pact Server" should {
-    "Work" in {
+  "Pact Mock Service Provider" should {
+    "Respond to invalid and valid requests" in {
       val config = PactServerConfig()
 
       val stopped = MockServiceProvider(config, pact, interaction.providerState)
 
       val server = stopped.start
 
-      val http = Http.newService(config.interface + ":" + config.port)
-
       val invalidRequest = request.copy(path = s"${config.url}/foo")
 
-      val inValidResponse: Future[HttpResponse] = http(invalidRequest)
+      val inValidResponse = HttpClient.run(invalidRequest)
 
-      inValidResponse.map{_.status.intValue} must beEqualTo(500).await(timeout = timeout)
+      inValidResponse.map(_.status) must beEqualTo(500).await(timeout = timeout)
 
       //hit server with valid request
       val validRequest = request.copy(path = s"${config.url}/")
-      val validResponse: Future[HttpResponse] = http(validRequest)
-      validResponse.map{_.status.intValue} must beEqualTo(response.status).await(timeout = timeout)
+      val validResponse = HttpClient.run(validRequest)
+      validResponse.map(_.status) must beEqualTo(response.status).await(timeout = timeout)
 
       server.stop
 
@@ -48,14 +44,13 @@ class MockServiceProviderSpec extends Specification {
 
       def compareRequests(actual: Request, expected: Request) = {
         actual.method must beEqualTo(expected.method)
+
         def trimHost(s:String) = s.replaceAll(config.url, "")
         trimHost(actual.path) must beEqualTo(trimHost(expected.path))
-        def addHeaders(m:Map[String, String]):Map[String, String] = {
-          val hostHeader = "Host" -> (config.interface+":"+config.port)
-          val contentLengthHeader = "Content-Length" -> "13"
-          m + hostHeader + contentLengthHeader
-        }
-        actual.headers.map(addHeaders) must beEqualTo(expected.headers.map(addHeaders))
+
+        val expectedHeaders = expected.headers.getOrElse(Map())
+        actual.headers.map(_.filter(t => expectedHeaders.contains(t._1))) must beEqualTo(expected.headers)
+
         actual.bodyString must beEqualTo(expected.bodyString)
       }
 

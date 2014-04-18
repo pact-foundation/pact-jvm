@@ -1,10 +1,11 @@
 package au.com.dius.pact.consumer
 
 import au.com.dius.pact.model._
-import au.com.dius.pact.model.finagle.Conversions._
-import com.twitter.finagle.{ListeningServer, Service, Http}
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
-import com.twitter.util.Future
+import _root_.unfiltered.request._
+import _root_.unfiltered.response._
+
+import _root_.unfiltered.netty._
+import au.com.dius.pact.model.unfiltered.Conversions
 
 object MockServiceProvider {
 
@@ -25,29 +26,38 @@ object MockServiceProvider {
   }
 
   case class StoppedMockServiceProvider(config: PactServerConfig, pact: Pact, state: String) {
-    def start: StartedMockServiceProvider = {
-      val interactionStore = new InteractionStore()
-      val server = Http.serve(s":${config.port}", routes(interactionStore))
-      StartedMockServiceProvider(config, pact, state, server, interactionStore)
+    case class Routes(interactions: InteractionStore) extends cycle.Plan
+      with cycle.SynchronousExecution
+      with ServerErrorResponse {
+
+        import org.jboss.netty.handler.codec.http.{ HttpResponse=>NHttpResponse }
+
+        def handle(request:HttpRequest[ReceivedMessage]): ResponseFunction[NHttpResponse] = {
+          import RequestMatching._
+          val pactRequest: Request = Conversions.unfilteredRequestToPactRequest(request)
+          val response: Response = pact.findResponse(pactRequest).getOrElse(Response.invalidRequest(pactRequest, pact))
+          interactions.addInteraction(Interaction("MockServiceProvider received", state, pactRequest, response))
+          Conversions.pactToUnfilteredResponse(response)
+        }
+        def intent = PartialFunction[HttpRequest[ReceivedMessage], ResponseFunction[NHttpResponse]](handle)
     }
 
-    def routes(interactions: InteractionStore) = new Service[HttpRequest, HttpResponse] {
-      def apply(request: HttpRequest): Future[HttpResponse] = {
-        import RequestMatching._
-        val response: Response = pact.findResponse(request).getOrElse(Response.invalidRequest(request, pact))
-        interactions.addInteraction(Interaction("MockServiceProvider received", state, request, response))
-        Future(response)
-      }
+    def start: StartedMockServiceProvider = {
+      val interactionStore = new InteractionStore()
+      val server = _root_.unfiltered.netty.Http(config.port, config.interface).handler(Routes(interactionStore))
+      println(s"starting server on: ${config.url}")
+      server.start()
+      StartedMockServiceProvider(config, pact, state, server, interactionStore)
     }
   }
 
   case class StartedMockServiceProvider(config: PactServerConfig, 
                                         pact: Pact,
                                         state: String,
-                                        server: ListeningServer, 
+                                        server: Http,
                                         interactionStore: InteractionStore) {
     def stop: StoppedMockServiceProvider = {
-      server.close()
+      server.stop()
       StoppedMockServiceProvider(config, pact, state)
     }
 
