@@ -7,3 +7,7 @@ libraryDependencies ++= Seq(
   "org.json4s"   %% "json4s-native"  % "3.2.6",
   "org.json4s"   %% "json4s-jackson" % "3.2.6"
 )
+
+initialCommands := """
+  import au.com.dius.pact.model._;
+"""
