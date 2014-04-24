@@ -72,15 +72,16 @@ object PactVerification {
   }
 
   def allExpectedInteractions(expected: Iterable[Interaction], actual: Iterable[Interaction]): VerificationResult = {
-    def in(f: Iterable[Interaction])(i:Interaction): Boolean = {
-      RequestMatching(f, true).findResponse(i.request).isDefined
-    }
-    val missing = expected.filterNot(in(actual))
+    import RequestMatching.matchesInteraction
+              
+    def isMatchFound(expected: Interaction): Boolean = 
+      actual.exists(matchesInteraction(expected, _))
+                        
+    val missing = expected filterNot isMatchFound
     if(missing.isEmpty) {
       PactVerified
     } else {
       MissingInteractions(missing)
     }
   }
-
 }

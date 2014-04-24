@@ -10,7 +10,7 @@ class RequestMatchingSpec extends Specification {
 
   "request matching" should {
 
-    def test(r: Request): Option[Response] = RequestMatching(pact.interactions).findResponse(r)
+    def test(actual: Request): Option[Response] = RequestMatching(pact.interactions).findResponse(actual)
 
     "match the valid request" in {
       test(request) must beSome(response)
@@ -36,11 +36,6 @@ class RequestMatchingSpec extends Specification {
       test(headerlessRequest) must beNone
     }
 
-    "fail to match on header with incorrect value" in {
-      val wrongHeaderRequest = request.copy(headers = Some(Map("testreqheader" -> "WRANG!")))
-      test(wrongHeaderRequest) must beNone
-    }
-
     "allow additional headers" in {
       val extraHeaderRequest = request.copy(headers = request.headers.map(_.+("additonal" -> "header")))
       test(extraHeaderRequest) must beSome(response)
@@ -53,7 +48,7 @@ class RequestMatchingSpec extends Specification {
     val request = Request(Get, "/", Map("Cookie" -> "key1=value1;key2=value2"), "")
     val interactions = List(interaction.copy(request = request))
 
-    def test(r: Request, reverseHeaders: Boolean = false): Option[Response] = RequestMatching(interactions, reverseHeaders).findResponse(r)
+    def test(r: Request): Option[Response] = RequestMatching(interactions).findResponse(r)
 
     "match if actual cookie exactly matches the expected" in {
       val cookieRequest = Request(Get, "/", Map("Cookie" -> "key1=value1;key2=value2"), "")
@@ -84,17 +79,6 @@ class RequestMatchingSpec extends Specification {
       val cookieRequest = Request(Get, "/", Map("cookie" -> "key1=value1; key2=value2"), "")
       test(cookieRequest) must beSome(response)
     }
-
-    "mismatch if actual cookie contains more data than expected request when reverseHeaders option is true" in {
-      val cookieRequest = Request(Get, "/", Map("Cookie" -> "key2=value2;key1=value1;key3=value3"), "")
-      test(cookieRequest, reverseHeaders = true) must beNone
-    }
-
-    "match if actual cookie contains less data than expected request when reverseHeaders option is true" in {
-      val cookieRequest = Request(Get, "/", Map("Cookie" -> "key2=value2"), "")
-      test(cookieRequest, reverseHeaders =true) must beSome(response)
-    }
-
   }
 
 }
