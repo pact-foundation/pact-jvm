@@ -51,8 +51,8 @@ object Fixtures {
       result.head
     }
 
-    def hitEndpoint: Future[Boolean] = {
-      HttpClient.run(request.copy(path = s"$serverUrl${request.path}")).map{ response =>
+    def hitEndpoint(path: String = request.path): Future[Boolean] = {
+      HttpClient.run(request.copy(path = s"$serverUrl$path")).map { response =>
         response.status == 200 &&
         response.bodyString.map(extractFrom).get
       }

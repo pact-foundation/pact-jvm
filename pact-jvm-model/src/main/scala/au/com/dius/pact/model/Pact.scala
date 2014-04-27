@@ -53,7 +53,7 @@ case class Consumer(name:String)
 
 case class Interaction(
                         description: String,
-                        providerState: String,
+                        providerState: String, //TODO: state should be Optional
                         request: Request,
                         response: Response) {
   override def toString: String = {

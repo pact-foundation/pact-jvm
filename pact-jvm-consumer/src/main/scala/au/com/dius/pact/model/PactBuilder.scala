@@ -3,6 +3,7 @@ package au.com.dius.pact.model
 import org.json4s._
 import scala.Some
 
+@deprecated("Use au.com.dius.pact.PactFragment instead")
 case class MakeInteraction(providerState: String,
                            description: Option[String] = None,
                            request: Option[Request] = None,
@@ -29,6 +30,7 @@ case class MakeInteraction(providerState: String,
   }
 }
 
+@deprecated("Use au.com.dius.pact.PactFragment instead")
 object MakeInteraction {
   implicit def someify[T](t:T):Option[T] = Some(t)
 
@@ -46,6 +48,7 @@ object MakeInteraction {
   }
 }
 
+@deprecated("Use au.com.dius.pact.PactFragment instead")
 case class MakePact(
                      provider:Option[Provider] = None,
                      consumer:Option[Consumer] = None,
@@ -56,6 +59,7 @@ case class MakePact(
   def build = MakePact.build(this)
 }
 
+@deprecated("Use au.com.dius.pact.PactFragment instead")
 object MakePact {
   implicit def build(mp:MakePact):Pact = {
     Pact(mp.provider.get, mp.consumer.get, mp.interactions)

@@ -8,6 +8,10 @@ import static au.com.dius.pact.consumer.ConsumerInteractionJavaDsl.pactVerified;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+/**
+ * @deprecated Use au.com.dius.pact.consumer.ConsumerPactTest instead
+ */
+@Deprecated
 public abstract class AbstractConsumerPactTest {
     protected abstract Interaction createInteraction(ConsumerInteractionJavaDsl builder);
     protected abstract String providerName();

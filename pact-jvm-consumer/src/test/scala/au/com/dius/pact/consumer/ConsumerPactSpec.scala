@@ -26,16 +26,16 @@ class ConsumerPactSpec extends Specification {
   "default state" should {
 
     "minimal request" in {
-      provider
+      awaitResult(provider
         .uponReceiving("request for root path").matching("/")
         .willRespondWith(200, Map("foo" -> "bar"), "[]")
         .duringConsumerSpec { config: MockProviderConfig =>
-          awaitResult(ConsumerService(config.url).hitEndpoint) must beTrue
-        } must beEqualTo(PactVerified)
+          awaitResult(ConsumerService(config.url).hitEndpoint("/")) must beTrue
+        }) must beEqualTo(PactVerified)
     }
 
     "longest request" in {
-        provider
+        awaitResult(provider
           .uponReceiving(interaction.description).matching(
             path = request.path,
             method = request.method,
@@ -46,8 +46,8 @@ class ConsumerPactSpec extends Specification {
             headers = response.headers.get,
             body = response.bodyString.get)
           .duringConsumerSpec { config: MockProviderConfig =>
-            awaitResult(ConsumerService(config.url).hitEndpoint) must beTrue
-          } must beEqualTo(PactVerified)
+            awaitResult(ConsumerService(config.url).hitEndpoint()) must beTrue
+          }) must beEqualTo(PactVerified)
     }
   }
 
@@ -55,7 +55,7 @@ class ConsumerPactSpec extends Specification {
     val providerInSpecificState = provider.given(interaction.providerState)
 
     "specificRequest" in {
-      providerInSpecificState
+      awaitResult(providerInSpecificState
         .uponReceiving(interaction.description).matching(
           path = request.path,
           method = request.method,
@@ -66,8 +66,8 @@ class ConsumerPactSpec extends Specification {
           headers = response.headers.get,
           body = response.bodyString.get)
         .duringConsumerSpec { config: MockProviderConfig =>
-          awaitResult(ConsumerService(config.url).hitEndpoint) must beTrue
-        } must beEqualTo(PactVerified)
+          awaitResult(ConsumerService(config.url).hitEndpoint()) must beTrue
+        }) must beEqualTo(PactVerified)
     }
   }
 }

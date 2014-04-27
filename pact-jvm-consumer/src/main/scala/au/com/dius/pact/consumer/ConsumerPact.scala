@@ -21,9 +21,11 @@ case class ConsumerPact(pact: Pact) {
       Future.successful(fileWriteVerification)
   }
 
+  @deprecated("exists to support au.com.dius.pact.consumer.AbstractConsumerPactTest, which is also deprecated")
   def runConsumer(config: MockProviderConfig, state: String, test: Runnable): PactVerification.VerificationResult = {
       Await.result(runConsumer(config, state) { test.run() }, 20 seconds)
   }
+
 }
 
 object ConsumerPact {
