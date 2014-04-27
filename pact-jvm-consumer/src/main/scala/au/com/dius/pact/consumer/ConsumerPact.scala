@@ -8,7 +8,7 @@ import scala.concurrent.duration._
 case class ConsumerPact(pact: Pact) {
   def execute(test: => Unit): Try[Unit] = Try(test)
 
-  def runConsumer(config: PactServerConfig, state: String)
+  def runConsumer(config: MockProviderConfig, state: String)
                  (test: => Unit):
       Future[PactVerification.VerificationResult] = {
 
@@ -21,7 +21,7 @@ case class ConsumerPact(pact: Pact) {
       Future.successful(fileWriteVerification)
   }
 
-  def runConsumer(config: PactServerConfig, state: String, test: Runnable): PactVerification.VerificationResult = {
+  def runConsumer(config: MockProviderConfig, state: String, test: Runnable): PactVerification.VerificationResult = {
       Await.result(runConsumer(config, state) { test.run() }, 20 seconds)
   }
 }

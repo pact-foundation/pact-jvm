@@ -20,7 +20,7 @@ class MockServiceProviderSpec extends Specification {
   //TODO: move PactServer startup and shutdown into an around function
   "Pact Mock Service Provider" should {
     "Respond to invalid and valid requests" in {
-      val config = PactServerConfig()
+      val config = MockProviderConfig()
 
       val stopped = MockServiceProvider(config, pact, interaction.providerState)
 

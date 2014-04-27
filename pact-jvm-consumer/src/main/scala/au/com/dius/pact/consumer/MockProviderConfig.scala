@@ -3,11 +3,11 @@ package au.com.dius.pact.consumer
 import java.net.ServerSocket
 import scala.util.control.NonFatal
 
-case class PactServerConfig(port: Int = PactServerConfig.randomPort.get, interface: String = "localhost") {
+case class MockProviderConfig(port: Int = MockProviderConfig.randomPort.get, interface: String = "localhost") {
   def url: String = s"http://$interface:$port"
 }
 
-object PactServerConfig {
+object MockProviderConfig {
   val portLowerBound = 20000
   val portUpperBound = 40000
 

@@ -9,7 +9,7 @@ import au.com.dius.pact.model.unfiltered.Conversions
 
 object MockServiceProvider {
 
-  def apply(config: PactServerConfig, pact: Pact, state: String): StoppedMockServiceProvider = {
+  def apply(config: MockProviderConfig, pact: Pact, state: String): StoppedMockServiceProvider = {
     StoppedMockServiceProvider(config, pact, state)
   }
   
@@ -25,7 +25,7 @@ object MockServiceProvider {
     }
   }
 
-  case class StoppedMockServiceProvider(config: PactServerConfig, pact: Pact, state: String) {
+  case class StoppedMockServiceProvider(config: MockProviderConfig, pact: Pact, state: String) {
     case class Routes(interactions: InteractionStore) extends cycle.Plan
       with cycle.SynchronousExecution
       with ServerErrorResponse {
@@ -51,7 +51,7 @@ object MockServiceProvider {
     }
   }
 
-  case class StartedMockServiceProvider(config: PactServerConfig, 
+  case class StartedMockServiceProvider(config: MockProviderConfig,
                                         pact: Pact,
                                         state: String,
                                         server: Http,

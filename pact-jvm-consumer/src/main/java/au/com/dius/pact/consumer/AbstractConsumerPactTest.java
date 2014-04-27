@@ -26,8 +26,8 @@ public abstract class AbstractConsumerPactTest {
     public void testPact() {
         Pact pact = createPact();
 
-        int port = (int)PactServerConfig.randomPort().get();
-        final PactServerConfig config = new PactServerConfig(port, "localhost");
+        int port = (int) MockProviderConfig.randomPort().get();
+        final MockProviderConfig config = new MockProviderConfig(port, "localhost");
 
         String state = pact.interactions().head().providerState();
 
