@@ -73,7 +73,8 @@ object Matching {
 
   def matchHeaders(expected: Headers, actual: Headers): MatchResult = {
     def compareHeaders(e: Map[String, String], a: Map[String, String]): MatchResult = {
-      if (e.keys forall a.contains) MatchFound 
+      def compareByKey(key: String): Boolean = { a.contains(key) && e(key) == a(key) }
+      if (e.keys forall compareByKey ) MatchFound
       else HeaderMismatch(Some(e), Some(a filterKeys e.contains))
     }
     compareHeaders(expected getOrElse Map(), actual getOrElse Map())
