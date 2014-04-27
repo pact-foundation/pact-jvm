@@ -11,3 +11,8 @@ libraryDependencies ++= Seq(
   "org.specs2"   %% "specs2"         % "2.2.3" % "test",
   "org.mockito"  %  "mockito-all"    % "1.9.5" % "test"
 )
+
+initialCommands := """
+  import au.com.dius.pact.model._;
+  import au.com.dius.pact.consumer._;
+"""

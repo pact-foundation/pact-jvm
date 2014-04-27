@@ -14,4 +14,7 @@ libraryDependencies ++= Seq(
   "org.mockito" % "mockito-core"   % "1.8.5" % "test"
 )
 
-
+initialCommands := """
+  import au.com.dius.pact.model._;
+  import au.com.dius.pact.provider._;
+"""

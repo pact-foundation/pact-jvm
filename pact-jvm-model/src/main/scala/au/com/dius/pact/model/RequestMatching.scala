@@ -1,36 +1,41 @@
 package au.com.dius.pact.model
 
-import JsonDiff._
+import JsonDiff.DiffConfig
 
-//TODO: find a better way to handle the header reverse thing
-case class RequestMatching(interactions: Iterable[Interaction], reverseHeaders: Boolean = false) {
-  import Matching._
+case class RequestMatching(expectedInteractions: Seq[Interaction]) {
   import RequestMatching._
-
+      
+      
   def findResponse(actual: Request): Option[Response] = {
-    interactions.find(matchRules(actual)).fold[Option[Response]](None) {i => Some(i.response)}
+    def interactionMatchesActual(ei: Interaction) = matchesRequest(ei.request, actual)    
+    expectedInteractions.find(interactionMatchesActual).map(_.response)
   }
-
-  def matchRules(actual: Request)(i:Interaction): Boolean = {
-    val request = i.request
-
-    val result = matchMethod(request.method, actual.method) and
-      matchPath(request.path, actual.path) and
-      matchCookie(request.cookie, actual.cookie, reverseHeaders) and
-      matchHeaders(request.headersWithoutCookie, actual.headersWithoutCookie, reverseHeaders) and
-      matchBodies(request.body, actual.body, diffConfig)
-
-//    if(result != MatchFound) {
-//      println(s"mismatch:$result")
-//    }
-
-    result == MatchFound
-  }
+                    
 }
 
+
 object RequestMatching {
+  import Matching._
+
   val diffConfig = DiffConfig(allowUnexpectedKeys = false, structural = false)
 
-  implicit def pimpPactWithRequestMatch(pact: Pact) = RequestMatching(pact.interactions)
+  implicit def liftPactForMatching(pact: Pact): RequestMatching = RequestMatching(pact.interactions)
+                          
+  def matchesRequest(expected: Request, actual: Request): Boolean = 
+    compareRequests(expected, actual) == MatchFound
+                                  
+  def matchesInteraction(expected: Interaction, actual: Interaction): Boolean = 
+    compareInteractions(expected, actual) == MatchFound
+                                        
+  def compareInteractions(expected: Interaction, actual: Interaction): MatchResult = 
+    compareRequests(expected.request, actual.request)
+                                              
+  def compareRequests(expected: Request, actual: Request): MatchResult = {
+    matchMethod(expected.method, actual.method) and
+    matchPath(expected.path, actual.path) and
+    matchCookie(expected.cookie, actual.cookie) and
+    matchHeaders(expected.headersWithoutCookie, actual.headersWithoutCookie) and
+    matchBodies(expected.body, actual.body, diffConfig)
+  }
 }
 

@@ -68,36 +68,23 @@ object Matching {
     }
   }
 
-  implicit def pimpPactWithRequestMatch(pact: Pact) = RequestMatching(pact.interactions)
-
   private type Headers = Option[Map[String, String]]
 
-  def compareHeaders(a: Map[String, String], b: Map[String, String]): MatchResult = {
-    val relevantActualHeaders = b.filter { case (key, _) => a.contains(key) }
-    if(a == relevantActualHeaders) {
-      MatchFound
-    } else {
-      HeaderMismatch(Some(a), Some(relevantActualHeaders))
+
+  def matchHeaders(expected: Headers, actual: Headers): MatchResult = {
+    def compareHeaders(e: Map[String, String], a: Map[String, String]): MatchResult = {
+      if (e.keys forall a.contains) MatchFound 
+      else HeaderMismatch(Some(e), Some(a filterKeys e.contains))
     }
+    compareHeaders(expected getOrElse Map(), actual getOrElse Map())
   }
 
-  def matchHeaders(expected: Headers, actual: Headers, reverseHeaders: Boolean = false): MatchResult = {
-    val e = expected.getOrElse(Map())
-    val a = actual.getOrElse(Map())
-    if(reverseHeaders) {
-      compareHeaders(a, e)
-    } else {
-      compareHeaders(e, a)
-    }
-  }
-
-  def matchCookie(expected: Option[List[String]], actual: Option[List[String]], reverseCookies: Boolean = false): MatchResult = {
+  def matchCookie(expected: Option[List[String]], actual: Option[List[String]]): MatchResult = {
     def compareCookies(e: List[String], a: List[String]) = {
-      if (e == e.intersect(a)) MatchFound else CookieMismatch(e, a)
+      if (e forall a.contains) MatchFound 
+      else CookieMismatch(e, a)
     }
-    val e = expected.getOrElse(List.empty)
-    val a = actual.getOrElse(List.empty)
-    if (reverseCookies) compareCookies(a, e) else compareCookies(e, a)
+    compareCookies(expected getOrElse Nil, actual getOrElse Nil)
   }
 
   def matchMethod(expected: String, actual: String): MatchResult = {
