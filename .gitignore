@@ -16,6 +16,7 @@ project/plugins/project/
 
 .idea
 .idea_modules
+*.iml
 
 # Eclipse
 */.cache
