@@ -18,7 +18,7 @@ public abstract class AbstractConsumerPactTest {
     protected abstract String consumerName();
 
     private Pact createPact() {
-        return ConsumerPactJavaDsl.makePact()
+        return ConsumerPactBuilder.makePact()
                 .withConsumer(consumerName())
                 .withProvider(providerName())
                 .withInteractions(createInteraction(new ConsumerInteractionJavaDsl()));

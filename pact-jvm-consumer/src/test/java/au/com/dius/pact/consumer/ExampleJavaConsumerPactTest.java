@@ -1,7 +1,6 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.PactFragment;
-import au.com.dius.pact.model.PactWithProvider;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -14,22 +13,22 @@ import static org.junit.Assert.assertEquals;
 public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
 
     @Override
-    protected PactFragment createFragment(PactWithProvider builder) {
+    protected PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("testreqheader", "testreqheadervalue");
 
         return builder.given("test state")
             .uponReceiving("java test interaction")
-            .matching(
-                "/",
-                "GET",
-                headers,
-                "{\"test\":true}")
-            .willRespondWith(
-                200,
-                headers,
-                "{\"responsetest\":true}");
+                .path("/")
+                .method("GET")
+                .headers(headers)
+                .body("{\"test\":true}")
+            .willRespondWith()
+                .status(200)
+                .headers(headers)
+                .body("{\"responsetest\":true}").toFragment();
     }
+
 
     @Override
     protected String providerName() {

@@ -8,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public abstract class ConsumerPactTest {
-    protected abstract PactFragment createFragment(PactWithProvider builder);
+    protected abstract PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder);
     protected abstract String providerName();
     protected abstract String consumerName();
 
@@ -16,7 +16,7 @@ public abstract class ConsumerPactTest {
 
     @Test
     public void testPact() {
-        PactFragment fragment = createFragment(PactFragment$.MODULE$.consumer(consumerName()).hasPactWith(providerName()));
+        PactFragment fragment = createFragment(ConsumerPactBuilder.consumer(consumerName()).hasPactWith(providerName()));
 
         int port = (int) MockProviderConfig.randomPort().get();
         final MockProviderConfig config = new MockProviderConfig(port, "localhost");
