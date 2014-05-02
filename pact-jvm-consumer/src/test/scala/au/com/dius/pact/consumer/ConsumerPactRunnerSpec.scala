@@ -5,8 +5,7 @@ import au.com.dius.pact.model.Pact
 import Fixtures._
 import au.com.dius.pact.model.{MakePact, MakeInteraction}
 import MakeInteraction._
-import ConsumerPact._
-import au.com.dius.pact.consumer.PactVerification.{ConsumerTestsFailed, PactVerified}
+import ConsumerPactRunner._
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Future, Await}
 
@@ -31,12 +30,9 @@ class ConsumerPactSpec extends Specification {
         body = request.body)
     .willRespondWith(status = 200, headers = response.headers, body = response.body))
 
-    def awaitResult[A](f: Future[A]): A = {
-      Await.result(f, Duration(10, "s"))
-    }
-
     "Report test success and write pact" in {
-      val config = PactServerConfig()
+      val server = DefaultPactServer.withDefaultConfig()
+      val runner = ConsumerPactRunner(server)
 
       awaitResult(pact.runConsumer(config, interaction.providerState) {
         awaitResult(ConsumerService(config.url).hitEndpoint) must beTrue

@@ -1,12 +1,13 @@
 package au.com.dius.pact.consumer;
 
-import au.com.dius.pact.model.Interaction;
-import au.com.dius.pact.model.Pact;
-import org.junit.Test;
-
-import static au.com.dius.pact.consumer.ConsumerInteractionJavaDsl.pactVerified;
+import static au.com.dius.pact.consumer.ConsumerInteractionJavaDsl.PACT_VERIFIED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
+import org.junit.Test;
+
+import au.com.dius.pact.model.Interaction;
+import au.com.dius.pact.model.Pact;
 
 public abstract class AbstractConsumerPactTest {
     protected abstract Interaction createInteraction(ConsumerInteractionJavaDsl builder);
@@ -25,22 +26,19 @@ public abstract class AbstractConsumerPactTest {
     @Test
     public void testPact() {
         Pact pact = createPact();
+        final PactServer server = DefaultPactServer.withDefaultConfig();
+        ConsumerPactRunner runner = new ConsumerPactRunner(server);
 
-        int port = (int)PactServerConfig.randomPort().get();
-        final PactServerConfig config = new PactServerConfig(port, "localhost");
-
-        String state = pact.interactions().head().providerState();
-
-        PactVerification.VerificationResult result = new ConsumerPact(pact).runConsumer(config, state,
+        VerificationResult result = runner.runAndWritePact(pact,
             new Runnable() {
                 public void run() {
                     try {
-                        runTest(config.url());
+                        runTest(server.config().url());
                     } catch(Exception e) {
                         fail("error thrown"+e);
                     }
                 }
             });
-        assertEquals(pactVerified, result);
+        assertEquals(PACT_VERIFIED, result);
     }
 }

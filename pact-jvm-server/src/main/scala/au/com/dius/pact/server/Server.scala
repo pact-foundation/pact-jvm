@@ -22,8 +22,6 @@ object ListServers {
 
 object Complete {
 
-  import PactVerification._
-
   def getPort(j: JValue): Option[Int] = j match {
     case JObject(List(JField("port", JInt(port)))) => {
       Some(port.intValue())

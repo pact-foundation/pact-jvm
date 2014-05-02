@@ -41,7 +41,11 @@ object Pact {
   case class ConflictingInteractions(result: Seq[(Interaction, Interaction)]) extends MergeResult
 }
 
-case class Pact(provider:Provider, consumer:Consumer, interactions: Seq[Interaction]) extends PactSerializer {
+case class Pact(provider: Provider, consumer: Consumer, interactions: Seq[Interaction]) extends PactSerializer {
+  
+  def sortInteractions: Pact = 
+    copy(interactions = interactions.sortBy(i => s"${i.providerState}${i.description}"))
+  
   def interactionFor(description:String, providerState:String) = interactions.find { i =>
     i.description == description && i.providerState == providerState
   }
@@ -160,8 +164,8 @@ object Response extends Optionals {
     Response(status, optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body))
   }
 
-  def invalidRequest(request: Request, pact: Pact) = {
-    Response(500, CrossSiteHeaders, "error"-> s"unexpected request : $request \nnot in : $pact")
+  def invalidRequest(request: Request) = {
+    Response(500, CrossSiteHeaders, "error"-> s"Unexpected request : $request")
   }
 }
 

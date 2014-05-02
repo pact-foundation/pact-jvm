@@ -3,7 +3,7 @@ package au.com.dius.pact.consumer
 import java.net.ServerSocket
 import scala.util.control.NonFatal
 
-case class PactServerConfig(port: Int = PactServerConfig.randomPort.get, interface: String = "localhost") {
+case class PactServerConfig(port: Int, interface: String) {
   def url: String = s"http://$interface:$port"
 }
 
@@ -11,6 +11,8 @@ object PactServerConfig {
   val portLowerBound = 20000
   val portUpperBound = 40000
 
+  def createDefault() = PactServerConfig(randomPort.get, "localhost")
+  
   def randomPort = {
     import util.Random.nextInt
     Stream.continually(nextInt(portUpperBound - portLowerBound)).map(_ + portLowerBound).find(portAvailable)
