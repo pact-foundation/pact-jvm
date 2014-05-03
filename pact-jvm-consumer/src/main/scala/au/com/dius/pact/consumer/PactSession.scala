@@ -31,15 +31,19 @@ object PactSession {
 case class PactSession(expected: Set[Interaction], results: PactSessionResults) {
   private def matcher = RequestMatching(expected.toSeq)
   
-  def receiveRequest(req: Request): (Response, PactSession) = matcher.matchInteraction(req) match {
-    case FullRequestMatch(inter) => 
-      (inter.response, recordMatched(inter))
-      
-    case p @ PartialRequestMatch(problems) => 
-      (Response.invalidRequest(req), recordAlmostMatched(p))
-      
-    case RequestMismatch => 
-      (Response.invalidRequest(req), recordUnexpected(req))
+  def receiveRequest(req: Request): (Response, PactSession) = {
+    val invalidResponse = Response.invalidRequest(req)
+    
+    matcher.matchInteraction(req) match {
+      case FullRequestMatch(inter) => 
+        (inter.response, recordMatched(inter))
+        
+      case p @ PartialRequestMatch(problems) => 
+        (invalidResponse, recordAlmostMatched(p))
+        
+      case RequestMismatch => 
+        (invalidResponse, recordUnexpected(req))
+    }
   }
   
   private def forgetAbout(req: Request): PactSession = 

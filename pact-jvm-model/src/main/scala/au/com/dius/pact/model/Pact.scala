@@ -19,29 +19,29 @@ object Pact {
     json.transformField { case ("provider_state", value) => ("providerState", value)}.extract[Pact]
   }
 
-  def merge(a: Pact, b: Pact): MergeResult = {
-    val failures: Seq[(Interaction, Interaction)] = a.interactions.flatMap { ai =>
-      b.interactions.find { bi =>
-        ai.description == bi.description &&
-        ai.providerState == bi.providerState &&
-          (ai.request != bi.request || ai.response != bi.response)
-      }.map[(Interaction, Interaction)]( ai -> _ )
-    }
-    if(failures.isEmpty) {
-      val mergedInteractions = a.interactions ++ b.interactions.filterNot { bi => a.interactions.contains(bi) }
-      MergeSuccess(Pact(a.provider, a.consumer, mergedInteractions))
-    } else {
-      ConflictingInteractions(failures)
-    }
-  }
-
   trait MergeResult
 
   case class MergeSuccess(result: Pact) extends MergeResult
-  case class ConflictingInteractions(result: Seq[(Interaction, Interaction)]) extends MergeResult
+  case class MergeConflict(result: Seq[(Interaction, Interaction)]) extends MergeResult
 }
 
 case class Pact(provider: Provider, consumer: Consumer, interactions: Seq[Interaction]) extends PactSerializer {
+  import Pact._
+  
+  def merge(other: Pact): MergeResult = {
+    val failures: Seq[(Interaction, Interaction)] = for {
+      a <- interactions
+      b <- other.interactions
+      if a conflictsWith b
+    } yield (a, b)
+
+    if(failures.isEmpty) {
+      val mergedInteractions = interactions ++ other.interactions.filterNot(interactions.contains)
+      MergeSuccess(Pact(provider, consumer, mergedInteractions))
+    } else {
+      MergeConflict(failures)
+    }
+  }
   
   def sortInteractions: Pact = 
     copy(interactions = interactions.sortBy(i => s"${i.providerState}${i.description}"))
@@ -55,13 +55,19 @@ case class Provider(name:String)
 
 case class Consumer(name:String)
 
-case class Interaction(
-                        description: String,
-                        providerState: String,
-                        request: Request,
-                        response: Response) {
+case class Interaction(description: String,
+                       providerState: String,
+                       request: Request,
+                       response: Response) {
+  
   override def toString: String = {
     s"Interaction: $description\n\tin state $providerState\nrequest:\n$request\n\nresponse:\n$response"
+  }
+  
+  def conflictsWith(other: Interaction): Boolean = {
+    description == other.description &&
+    providerState == other.providerState &&
+    (request != other.request || response != other.response)
   }
 }
 

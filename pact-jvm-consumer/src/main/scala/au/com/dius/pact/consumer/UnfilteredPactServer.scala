@@ -32,8 +32,9 @@ class UnfilteredPactServer(val config: PactServerConfig) extends StatefulPactSer
         Conversions.pactToUnfilteredResponse(response)
   }
   
-  def stop(): Unit = server.start()
-  def start(): Unit = server.stop()
+  def start(): Unit = server.start()
+  
+  def stop(): Unit = server.stop()
 }
 
 

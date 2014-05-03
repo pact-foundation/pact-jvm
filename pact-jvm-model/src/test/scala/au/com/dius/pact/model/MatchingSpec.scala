@@ -11,29 +11,29 @@ class MatchingSpec extends Specification {
     "Body Matching" should {
       val config = DiffConfig()
       "Handle both None" in {
-        matchBodies(None, None, config) must beEqualTo(MatchFound)
+        matchBody(None, None, config) must beNone
       }
       "Handle left None" in {
-        val expected = BodyContentMismatch(missing(request.body.get))
-        matchBodies(request.body, None, config) must beEqualTo(expected)
+        val expected = BodyMismatch(missing(request.body.get))
+        matchBody(request.body, None, config) must beSome(expected)
       }
       "Handle right None" in {
-        val expected = BodyContentMismatch(added(request.body.get))
-        matchBodies(None, request.body, config) must beEqualTo(expected)
+        val expected = BodyMismatch(added(request.body.get))
+        matchBody(None, request.body, config) must beSome(expected)
       }
     }
 
     "Method Matching" should {
       "match same"  in {
-        matchMethod("a", "a") must beEqualTo(MatchFound)
+        matchMethod("a", "a") must beNone
       }
 
       "match ignore case" in {
-        matchMethod("a", "A") must beEqualTo(MatchFound)
+        matchMethod("a", "A") must beNone
       }
 
       "mismatch different" in {
-        matchMethod("a", "b") must beEqualTo(MethodMismatch("a", "b"))
+        matchMethod("a", "b") must beSome(MethodMismatch("a", "b"))
       }
     }
   }

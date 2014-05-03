@@ -6,11 +6,11 @@ class ResponseMatchingSpec extends Specification {
   "response matching" should {
     import Matching._
     "match statuses" in {
-      matchStatus(200, 200) must beEqualTo(MatchFound)
+      matchStatus(200, 200) must beNone
     }
 
     "mismatch statuses" in {
-      matchStatus(200, 300) must beEqualTo(StatusMismatch(200, 300))
+      matchStatus(200, 300) must beSome(StatusMismatch(200, 300))
     }
   }
 }

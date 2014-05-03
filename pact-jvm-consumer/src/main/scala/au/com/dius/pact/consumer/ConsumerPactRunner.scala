@@ -8,7 +8,7 @@ case class ConsumerPactRunner(server: PactServer) {
   def runAndWritePact(pact: Pact)(userCode: => Unit): VerificationResult = {
     val tryResults = server.runAndClose(pact)(userCode)
     for (results <- tryResults if results.allMatched) {
-      PactGenerator(pact).writeToFile()
+      PactGenerator.merge(pact).writeAllToFile()
     }
     VerificationResult(tryResults)
   }

@@ -10,8 +10,9 @@ import scala.concurrent.ExecutionContext
 import java.util.concurrent.Executors
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.dispatch.HttpClient
+import scala.util.{Try, Success, Failure}
 
-class MockServiceProviderSpec extends Specification {
+class PactServerSpec extends Specification {
 
   implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
   
@@ -20,32 +21,31 @@ class MockServiceProviderSpec extends Specification {
   //TODO: move PactServer startup and shutdown into an around function
   "Pact Mock Service Provider" should {
     "Respond to invalid and valid requests" in {
-      val config = PactServerConfig()
+      val server = DefaultPactServer.withDefaultConfig()
 
-      val stopped = MockServiceProvider(config, pact, interaction.providerState)
+      val validRequest = request.copy(path = s"${server.config.url}/")
+      val invalidRequest = request.copy(path = s"${server.config.url}/foo")
+      
+      val Success(results) = server.runAndClose(pact) {
+  
+        val invalidResponse = HttpClient.run(invalidRequest)
+        invalidResponse.map(_.status) must beEqualTo(500).await(timeout = timeout)
+  
+        //hit server with valid request
+        val validResponse = HttpClient.run(validRequest)
+        validResponse.map(_.status) must beEqualTo(response.status).await(timeout = timeout)
 
-      val server = stopped.start
+      }
 
-      val invalidRequest = request.copy(path = s"${config.url}/foo")
-
-      val inValidResponse = HttpClient.run(invalidRequest)
-
-      inValidResponse.map(_.status) must beEqualTo(500).await(timeout = timeout)
-
-      //hit server with valid request
-      val validRequest = request.copy(path = s"${config.url}/")
-      val validResponse = HttpClient.run(validRequest)
-      validResponse.map(_.status) must beEqualTo(response.status).await(timeout = timeout)
-
-      server.stop
-
-      val interactions = server.interactions
-      interactions.size must beEqualTo(2)
+      results.matched.size must === (1)
+      results.unexpected.size must === (1)
+      
+      
 
       def compareRequests(actual: Request, expected: Request) = {
         actual.method must beEqualTo(expected.method)
 
-        def trimHost(s:String) = s.replaceAll(config.url, "")
+        def trimHost(s: String) = s.replaceAll(server.config.url, "")
         trimHost(actual.path) must beEqualTo(trimHost(expected.path))
 
         val expectedHeaders = expected.headers.getOrElse(Map())
@@ -55,7 +55,7 @@ class MockServiceProviderSpec extends Specification {
       }
 
       def compare(actual: Interaction, request:Request, response:Response) = {
-        actual.description must beEqualTo("MockServiceProvider received")
+        actual.description must beEqualTo(interaction.description)
         actual.providerState must beEqualTo(interaction.providerState)
         compareRequests(actual.request, request)
 
@@ -66,9 +66,11 @@ class MockServiceProviderSpec extends Specification {
         actual.response.copy(body = None) must beEqualTo(response.copy(body = None))
       }
       
-      compare(interactions.head, invalidRequest, Response(500, Map("Access-Control-Allow-Origin" -> "*"),
-        Some(JObject(JField("error", JString("unexpected request"))))))
-      compare(interactions.tail.head, validRequest, response)
+      val expectedInvalidResponse = Response(500, Map("Access-Control-Allow-Origin" -> "*"),
+        Some(JObject(JField("error", JString("unexpected request")))))
+      
+      compareRequests(results.unexpected.head, invalidRequest)
+      compare(results.matched.head, validRequest, response)
     }
   }
 }

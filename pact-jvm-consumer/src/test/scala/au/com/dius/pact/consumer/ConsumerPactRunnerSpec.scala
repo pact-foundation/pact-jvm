@@ -12,7 +12,7 @@ import scala.concurrent.{Future, Await}
 /**
  * This is what a consumer pact should roughly look like
  */
-class ConsumerPactSpec extends Specification {
+class ConsumerPactRunnerSpec extends Specification {
 
   isolated
 
@@ -30,16 +30,20 @@ class ConsumerPactSpec extends Specification {
         body = request.body)
     .willRespondWith(status = 200, headers = response.headers, body = response.body))
 
+    def awaitResult[A](f: Future[A]): A = {
+      Await.result(f, Duration(10, "s"))
+    }
+    
     "Report test success and write pact" in {
       val server = DefaultPactServer.withDefaultConfig()
-      val runner = ConsumerPactRunner(server)
 
-      awaitResult(pact.runConsumer(config, interaction.providerState) {
-        awaitResult(ConsumerService(config.url).hitEndpoint) must beTrue
-      }) must beEqualTo(PactVerified)
+      ConsumerPactRunner(server).runAndWritePact(pact) {
+        awaitResult(ConsumerService(server.config.url).hitEndpoint) must beTrue
+      } must beEqualTo(PactVerified)
 
       //TODO: use environment property for pact output folder
-      val saved: String = io.Source.fromFile(s"target/pacts/${pact.consumer.name}-${pact.provider.name}.json").mkString
+      val expectedOutputFile = PactGenerator.destinationFileForPact(pact)
+      val saved: String = io.Source.fromFile(expectedOutputFile).mkString
       val savedPact = Pact.from(saved)
 
       //TODO: update expected string when pact serialization is complete
@@ -48,10 +52,11 @@ class ConsumerPactSpec extends Specification {
 
     "Report test failure nicely" in {
       val error = new RuntimeException("bad things happened in the test!")
-      val config = PactServerConfig()
-      awaitResult(pact.runConsumer(config, interaction.providerState) {
+      val server = DefaultPactServer.withDefaultConfig()
+      
+      ConsumerPactRunner(server).runAndWritePact(pact) {
         throw error
-      }) must beEqualTo(ConsumerTestsFailed(error))
+      } must beEqualTo(PactError(error))
     }
   }
 }
