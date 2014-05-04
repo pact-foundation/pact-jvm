@@ -82,10 +82,8 @@ object RootBuild extends Build {
 
   lazy val plugin = p("pact-jvm-provider-sbt").dependsOn(provider)
 
-  lazy val consumerSbt = p("pact-jvm-consumer-sbt") dependsOn sbtGitProject
+  lazy val consumerSbt = p("pact-jvm-consumer-sbt")
 
   lazy val server = p("pact-jvm-server").dependsOn(model).dependsOn(consumer)
-
-  def sbtGitProject = uri("https://github.com/sbt/sbt-git.git")
 
 }

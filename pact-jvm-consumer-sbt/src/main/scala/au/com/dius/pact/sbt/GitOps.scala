@@ -1,28 +1,15 @@
 package au.com.dius.pact.sbt
 
-import com.typesafe.sbt.git.ConsoleGitRunner
 import java.io.File
 import sbt.Logger
 import sbt.IO
+import org.eclipse.jgit.api.{Status, Git, CloneCommand}
+import scala.util.{Success, Failure, Try}
+import org.eclipse.jgit.dircache.DirCache
 
 object GitOps {
-  type GitCmd = Seq[String] => GitResult[String]
 
-  private def isError(msg:String) = msg.contains("error")
-
-  private def toGitResult(msg: String): GitResult[String] = {
-    if(isError(msg)) FailedResult(msg)
-    else HappyResult(msg)
-  }
-
-  def withGitRepo(repoDir: File, url: String)(f: GitCmd => GitResult[String]): GitResult[String] = {
-    val cloneResult = toGitResult(ConsoleGitRunner("clone", url)(repoDir.getParentFile))
-
-    cloneResult.flatMap { msg =>
-      def git(args: Seq[String]): GitResult[String] = { toGitResult(ConsoleGitRunner(args:_*)(repoDir)) }
-      f(git)
-    }
-  }
+  case object FakeException extends Exception
 
   def pushPact(pactFile: File, providerPactDir: String, repoUrl: String, targetDir: File, log: Logger, dryRun: Boolean): GitResult[String] = {
     log.info("cleaning...")
@@ -31,29 +18,44 @@ object GitOps {
     IO.delete(repoDir)
     log.info("cloning ...")
 
-    def somethingToCommit(status: String):GitResult[String] = {
-      if(status.contains("nothing to commit")) {
-        TerminatingResult("nothing to commit")
-      } else {
-        HappyResult(status)
-      }
-    }
-
-    withGitRepo(repoDir, repoUrl) { g: GitCmd =>
-      def git(args: String*) = { g(args) }
-
+    def copyPacts {
       val pactsDir = new File(repoDir, providerPactDir)
       IO.createDirectory(new File(repoDir, providerPactDir))
       val pactName = pactFile.getName
       IO.copyFile(pactFile, new File(pactsDir, pactName))
+    }
 
-      for {
-        _ <- git("add", providerPactDir)
-        status <- git("status")
-        _ <- somethingToCommit(status)
-        _ <- git("commit", "-m", "updated pact")
-        result <-  if(dryRun) HappyResult("Pact committed without pushing") else git("push")
-      } yield result
+    def somethingToCommit(status: Status): Try[GitResult[String]] = {
+      if(status.isClean) {
+        Failure(FakeException)
+      } else {
+        Success(HappyResult(s"not clean"))
+      }
+    }
+
+    def invokePush(git:Git): Try[GitResult[String]] = {
+      if(dryRun) {
+        Success(HappyResult("Pact committed without pushing"))
+      } else {
+        Try(git.push().call()).map(_ => HappyResult("Pact Pushed"))
+      }
+    }
+
+    val cmd = new CloneCommand().setDirectory(repoDir).setURI(repoUrl)
+    val tryResult = for {
+      git <- Try(cmd.call())
+      _ = copyPacts
+      status <- Try(git.status().call())
+      _ <- somethingToCommit(status)
+      added <- Try(git.add().addFilepattern(providerPactDir).call())
+      _ <- Try(git.commit().setMessage("updated pact").call())
+      result <-  invokePush(git)
+    } yield result
+
+    tryResult match {
+      case Success(r) => r
+      case Failure(FakeException) => HappyResult("nothing to commit")
+      case Failure(t) => FailedResult(t.getMessage)
     }
   }
 }

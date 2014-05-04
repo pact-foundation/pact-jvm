@@ -30,7 +30,7 @@ public abstract class AbstractConsumerPactTest {
     public void testPact() {
         Pact pact = createPact();
 
-        int port = (int) MockProviderConfig.randomPort().get();
+        int port = (Integer) MockProviderConfig.randomPort().get();
         final MockProviderConfig config = new MockProviderConfig(port, "localhost");
 
         String state = pact.interactions().head().providerState();
