@@ -1,8 +1,11 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.*;
-import scala.Option$;
+import au.com.dius.pact.model.Interaction$;
+import scala.collection.JavaConverters$;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class ConsumerPactBuilder {
@@ -66,66 +69,120 @@ public class ConsumerPactBuilder {
                 }
 
                 public PactDslRequestWithPath path(String path) {
-                    return new PactDslRequestWithPath(path);
+                    return new PactDslRequestWithPath(consumerName, providerName, state, description, path, requestMethod, requestHeaders, requestBody);
                 }
-
-                class PactDslRequestWithPath {
-                    private String path;
-                    public PactDslRequestWithPath(String path) {
-                        this.path = path;
-                    }
-
-                    public PactDslRequestWithPath method(String method) {
-                        requestMethod = method;
-                        return this;
-                    }
-
-                    public PactDslRequestWithPath headers(Map<String, String> headers) {
-                        requestHeaders = headers;
-                        return this;
-                    }
-
-                    public PactDslRequestWithPath body(String body) {
-                        requestBody = body;
-                        return this;
-                    }
-
-                    public PactDslResponse willRespondWith() {
-                        return new PactDslResponse();
-                    }
-
-                    class PactDslResponse {
-                        private int responseStatus;
-                        public PactDslResponse status(int status) {
-                            this.responseStatus = status;
-                            return this;
-                        }
-
-                        private Map<String, String> responseHeaders;
-                        public PactDslResponse headers(Map<String, String> headers) {
-                            this.responseHeaders = headers;
-                            return this;
-                        }
-
-                        private String responseBody;
-                        public PactDslResponse body(String body) {
-                            this.responseBody = body;
-                            return this;
-                        }
-
-                        public PactFragment toFragment() {
-                            return new PactFragment(
-                                    new Consumer(consumerName),
-                                    new Provider(providerName),
-                                    Option$.MODULE$.apply(state),
-                                    description,
-                                    Request$.MODULE$.apply(requestMethod, path, requestHeaders, requestBody),
-                                    Response$.MODULE$.apply(responseStatus, responseHeaders, responseBody));
-                        }
-                    }
-                }
-
             }
+        }
+    }
+
+    class PactDslRequestWithPath {
+        private Consumer consumer;
+        private Provider provider;
+
+        private String state;
+
+        private String description;
+        private String path;
+        private String requestMethod;
+        private Map<String, String> requestHeaders;
+        private String requestBody;
+
+        private List<Interaction> interactions = new ArrayList<Interaction>();
+
+        public PactDslRequestWithPath(String consumerName,
+                                      String providerName,
+                                      String state,
+                                      String description,
+                                      String path,
+                                      String requestMethod,
+                                      Map<String, String> requestHeaders,
+                                      String requestBody) {
+            this.consumer = new Consumer(consumerName);
+            this.provider = new Provider(providerName);
+
+            this.state = state;
+
+            this.description = description;
+            this.path = path;
+            this.requestMethod = requestMethod;
+            this.requestHeaders = requestHeaders;
+            this.requestBody = requestBody;
+        }
+
+        public PactDslRequestWithPath(List<Interaction> interactions, String state, String description) {
+            this.interactions = interactions;
+            this.state = state;
+            this.description = description;
+        }
+
+        public PactDslRequestWithPath method(String method) {
+            requestMethod = method;
+            return this;
+        }
+
+        public PactDslRequestWithPath headers(Map<String, String> headers) {
+            requestHeaders = headers;
+            return this;
+        }
+
+        public PactDslRequestWithPath body(String body) {
+            requestBody = body;
+            return this;
+        }
+
+        public PactDslResponse willRespondWith() {
+            return new PactDslResponse(this);
+        }
+    }
+
+    class PactDslResponse {
+        private PactDslRequestWithPath existing;
+
+        public PactDslResponse(PactDslRequestWithPath existing) {
+            this.existing = existing;
+        }
+
+        private int responseStatus;
+        public PactDslResponse status(int status) {
+            this.responseStatus = status;
+            return this;
+        }
+
+        private Map<String, String> responseHeaders;
+        public PactDslResponse headers(Map<String, String> headers) {
+            this.responseHeaders = headers;
+            return this;
+        }
+
+        private String responseBody;
+        public PactDslResponse body(String body) {
+            this.responseBody = body;
+            return this;
+        }
+
+        private void addInteraction() {
+            Interaction currentInteraction = Interaction$.MODULE$.apply(
+                    existing.description,
+                    existing.state,
+                    Request$.MODULE$.apply(existing.requestMethod, existing.path, existing.requestHeaders, existing.requestBody),
+                    Response$.MODULE$.apply(responseStatus, responseHeaders, responseBody)
+            );
+
+            existing.interactions.add(currentInteraction);
+        }
+
+        public PactFragment toFragment() {
+            addInteraction();
+            return new PactFragment(
+                    existing.consumer,
+                    existing.provider,
+                    JavaConverters$.MODULE$.asScalaBufferConverter(existing.interactions).asScala());
+        }
+
+        //TODO: this mechanism allows creating subsequent requests without a path... fix that
+        public PactDslRequestWithPath uponRecieving(String description) {
+            addInteraction();
+            return new PactDslRequestWithPath(existing.interactions, existing.state, description);
         }
     }
 }

@@ -35,19 +35,31 @@ class ConsumerPactSpec extends Specification {
     }
 
     "longest request" in {
-        awaitResult(provider
-          .uponReceiving(interaction.description).matching(
-            path = request.path,
-            method = request.method,
-            headers = request.headers,
-            body = request.body)
-          .willRespondWith(
-            status = 200,
-            headers = response.headers.get,
-            body = response.bodyString.get)
-          .duringConsumerSpec { config: MockProviderConfig =>
-            awaitResult(ConsumerService(config.url).extractResponseTest()) must beTrue
-          }) must beEqualTo(PactVerified)
+      awaitResult(provider
+        .uponReceiving(interaction.description).matching(
+          path = request.path,
+          method = request.method,
+          headers = request.headers,
+          body = request.body)
+        .willRespondWith(
+          status = 200,
+          headers = response.headers.get,
+          body = response.bodyString.get)
+        .duringConsumerSpec { config: MockProviderConfig =>
+          awaitResult(ConsumerService(config.url).extractResponseTest()) must beTrue
+        }) must beEqualTo(PactVerified)
+    }
+
+    "multiple requests" in {
+      awaitResult(provider
+        .uponReceiving("request for root path").matching("/")
+        .willRespondWith(200, Map("foo" -> "bar"), "[]")
+        .uponReceiving("request for foo path").matching("/foo")
+        .willRespondWith(200, Map[String, String](), "{}")
+        .duringConsumerSpec { config: MockProviderConfig =>
+          awaitResult(ConsumerService(config.url).simpleGet("/")) must beEqualTo(200, Some("[]"))
+          awaitResult(ConsumerService(config.url).simpleGet("/foo")) must beEqualTo(200, Some("{}"))
+      }) must beEqualTo(PactVerified)
     }
   }
 
