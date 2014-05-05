@@ -116,7 +116,7 @@ object Matching {
   def matchPath(expected: String, actual: String): MatchResult = {
     val pathFilter = "http[s]*://([^/]*)"
     val replacedActual = actual.replaceFirst(pathFilter, "")
-    if(expected == replacedActual) {
+    if(expected == replacedActual || replacedActual.matches(expected)) {
       MatchFound
     } else {
       PathMismatch(expected, replacedActual)
