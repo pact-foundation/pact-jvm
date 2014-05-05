@@ -1,6 +1,8 @@
 pact-jvm
 ========
 
+[![Build Status](https://travis-ci.org/DiUS/pact-jvm.svg?branch=master)](https://travis-ci.org/DiUS/pact-jvm)
+
 Aggregation Project for Pact sub-modules:
 *  consumer
 *  provider
