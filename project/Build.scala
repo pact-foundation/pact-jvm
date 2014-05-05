@@ -1,10 +1,10 @@
 import sbt._
 import sbt.Keys._
-
+import com.typesafe.sbt.pgp.PgpKeys._
 
 object BuildSettings {
 	val publishSettings = Seq(
-		version := "1.12",
+		version := "2.0-RC1",
 		organization := "au.com.dius",
     scalaVersion := "2.10.3",
 
@@ -61,8 +61,8 @@ object BuildSettings {
 	val commonSettings = Defaults.defaultSettings ++ publishSettings ++ testSettings
 	val skipPublish = Seq(
 		publish := { },
-		publishLocal := { }//,
-		// publishSigned := { }
+		publishLocal := { },
+		publishSigned := { }
 	)
 	val skipTest = Seq(
 		test:= {},
