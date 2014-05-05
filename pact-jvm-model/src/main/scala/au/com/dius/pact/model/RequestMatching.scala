@@ -17,7 +17,7 @@ case class RequestMatching(expectedInteractions: Seq[Interaction]) {
 object RequestMatching {
   import Matching._
 
-  val diffConfig = DiffConfig(allowUnexpectedKeys = false, structural = false)
+  var diffConfig = DiffConfig(allowUnexpectedKeys = false, structural = false)
 
   implicit def liftPactForMatching(pact: Pact): RequestMatching = RequestMatching(pact.interactions)
                           
