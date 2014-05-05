@@ -4,7 +4,7 @@ import _root_.unfiltered.netty.{ReceivedMessage, ServerErrorResponse, cycle}
 import _root_.unfiltered.request.HttpRequest
 import _root_.unfiltered.response.ResponseFunction
 import au.com.dius.pact.model._
-import au.com.dius.pact.consumer.{PactGeneration, PactVerification, MockServiceProvider, PactServerConfig}
+import au.com.dius.pact.consumer.{PactGeneration, PactVerification, MockServiceProvider, MockProviderConfig}
 import org.json4s._
 import org.json4s.JsonDSL._
 import org.json4s.jackson.Serialization
@@ -62,7 +62,7 @@ object Complete {
 object Create {
   def create(state: String, requestBody: JValue, oldState: ServerState) = {
     val pact = Pact.from(requestBody)
-    val config = PactServerConfig()
+    val config = MockProviderConfig()
     val stopped = MockServiceProvider(config, pact, state)
     val server = stopped.start
     val entry = config.port -> server

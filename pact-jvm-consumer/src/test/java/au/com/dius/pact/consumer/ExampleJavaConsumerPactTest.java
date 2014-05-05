@@ -1,7 +1,6 @@
 package au.com.dius.pact.consumer;
 
-import au.com.dius.pact.model.Interaction;
-import au.com.dius.pact.model.Pact;
+import au.com.dius.pact.model.PactFragment;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -11,23 +10,25 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-public class ConsumerPactTest extends AbstractConsumerPactTest {
+public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
+
     @Override
-    protected Interaction createInteraction(ConsumerInteractionJavaDsl builder) {
+    protected PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("testreqheader", "testreqheadervalue");
 
         return builder.given("test state")
-                .uponReceiving(
-                        "java test interaction",
-                        "GET",
-                        "/",
-                        headers,
-                        "{\"test\":true}")
-                .willRespondWith(200,
-                        headers,
-                        "{\"responsetest\":true}");
+            .uponReceiving("java test interaction")
+                .path("/")
+                .method("GET")
+                .headers(headers)
+                .body("{\"test\":true}")
+            .willRespondWith()
+                .status(200)
+                .headers(headers)
+                .body("{\"responsetest\":true}").toFragment();
     }
+
 
     @Override
     protected String providerName() {
@@ -42,7 +43,7 @@ public class ConsumerPactTest extends AbstractConsumerPactTest {
     @Override
     protected void runTest(String url) {
         try {
-            Future future = new Fixtures.ConsumerService(url).hitEndpoint();
+            Future future = new Fixtures.ConsumerService(url).extractResponseTest("/");
             Object result = Await.result(future, Duration.apply(1, "s"));
             assertEquals(true, result);
         } catch (Exception e) {

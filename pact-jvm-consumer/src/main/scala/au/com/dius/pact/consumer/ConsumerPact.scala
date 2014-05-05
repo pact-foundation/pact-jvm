@@ -8,10 +8,9 @@ import scala.concurrent.duration._
 case class ConsumerPact(pact: Pact) {
   def execute(test: => Unit): Try[Unit] = Try(test)
 
-  def runConsumer(config: PactServerConfig, state: String)
+  def runConsumer(config: MockProviderConfig, state: String)
                  (test: => Unit):
       Future[PactVerification.VerificationResult] = {
-
       val started = MockServiceProvider(config, pact, state).start
       val result = execute(test)
       val actualInteractions = started.interactions
@@ -21,9 +20,11 @@ case class ConsumerPact(pact: Pact) {
       Future.successful(fileWriteVerification)
   }
 
-  def runConsumer(config: PactServerConfig, state: String, test: Runnable): PactVerification.VerificationResult = {
+  @deprecated("exists to support au.com.dius.pact.consumer.AbstractConsumerPactTest, which is also deprecated")
+  def runConsumer(config: MockProviderConfig, state: String, test: Runnable): PactVerification.VerificationResult = {
       Await.result(runConsumer(config, state) { test.run() }, 20 seconds)
   }
+
 }
 
 object ConsumerPact {

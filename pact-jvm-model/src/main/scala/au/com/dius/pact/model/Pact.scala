@@ -41,6 +41,8 @@ object Pact {
   case class ConflictingInteractions(result: Seq[(Interaction, Interaction)]) extends MergeResult
 }
 
+
+@deprecated("Use PactFragment where possible, same functionality but more appropriate language.  The serialized file is the true pact")
 case class Pact(provider:Provider, consumer:Consumer, interactions: Seq[Interaction]) extends PactSerializer {
   def interactionFor(description:String, providerState:String) = interactions.find { i =>
     i.description == description && i.providerState == providerState
@@ -53,7 +55,7 @@ case class Consumer(name:String)
 
 case class Interaction(
                         description: String,
-                        providerState: String,
+                        providerState: String, //TODO: state should be Optional
                         request: Request,
                         response: Response) {
   override def toString: String = {
