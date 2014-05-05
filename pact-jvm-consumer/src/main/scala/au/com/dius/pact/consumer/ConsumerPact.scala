@@ -11,7 +11,6 @@ case class ConsumerPact(pact: Pact) {
   def runConsumer(config: MockProviderConfig, state: String)
                  (test: => Unit):
       Future[PactVerification.VerificationResult] = {
-
       val started = MockServiceProvider(config, pact, state).start
       val result = execute(test)
       val actualInteractions = started.interactions

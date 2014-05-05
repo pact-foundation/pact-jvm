@@ -12,13 +12,13 @@ case class PactFragment(consumer: Consumer,
                         description: String,
                         request: Request,
                         response: Response) {
-  def duringConsumerSpec(test: => Unit, config: MockProviderConfig = MockProviderConfig()): Future[PactVerification.VerificationResult] = {
+  def duringConsumerSpec(test: MockProviderConfig => Unit, config: MockProviderConfig = MockProviderConfig()): Future[PactVerification.VerificationResult] = {
     //TODO: State needs to be a proper option all through the domain
     val defaultState = state.getOrElse("")
     //TODO: ConsumerPact should no longer be necessary, move implementation into this file
     val interaction = Interaction(defaultState, description, request, response)
     val pact = Pact(provider, consumer, List(interaction))
-    ConsumerPact(pact).runConsumer(config, defaultState)(test)
+    ConsumerPact(pact).runConsumer(config, defaultState)({test(config)})
   }
 
   def runConsumer(config: MockProviderConfig, test: Runnable): PactVerification.VerificationResult = {

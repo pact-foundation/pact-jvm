@@ -43,7 +43,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
     @Override
     protected void runTest(String url) {
         try {
-            Future future = new Fixtures.ConsumerService(url).hitEndpoint("/");
+            Future future = new Fixtures.ConsumerService(url).extractResponseTest("/");
             Object result = Await.result(future, Duration.apply(1, "s"));
             assertEquals(true, result);
         } catch (Exception e) {

@@ -3,11 +3,12 @@ package au.com.dius.pact.consumer;
 import au.com.dius.pact.model.*;
 import org.junit.Test;
 
-import static au.com.dius.pact.consumer.ConsumerInteractionJavaDsl.pactVerified;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public abstract class ConsumerPactTest {
+    public static PactVerification.VerificationResult pactVerified = PactVerification.PactVerified$.MODULE$;
+
     protected abstract PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder);
     protected abstract String providerName();
     protected abstract String consumerName();
@@ -18,7 +19,7 @@ public abstract class ConsumerPactTest {
     public void testPact() {
         PactFragment fragment = createFragment(ConsumerPactBuilder.consumer(consumerName()).hasPactWith(providerName()));
 
-        int port = (int) MockProviderConfig.randomPort().get();
+        Integer port = (Integer) MockProviderConfig.randomPort().get();
         final MockProviderConfig config = new MockProviderConfig(port, "localhost");
 
         PactVerification.VerificationResult result = fragment.runConsumer(config,

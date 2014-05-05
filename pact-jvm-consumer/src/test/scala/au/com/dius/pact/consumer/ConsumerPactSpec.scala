@@ -6,7 +6,7 @@ import au.com.dius.pact.consumer.PactVerification.PactVerified
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Future, Await}
 import au.com.dius.pact.consumer.Fixtures.ConsumerService
-import au.com.dius.pact.model.PactFragment
+import au.com.dius.pact.model.{Request, PactFragment}
 
 /**
  * This is what a consumer pact should roughly look like
@@ -30,7 +30,7 @@ class ConsumerPactSpec extends Specification {
         .uponReceiving("request for root path").matching("/")
         .willRespondWith(200, Map("foo" -> "bar"), "[]")
         .duringConsumerSpec { config: MockProviderConfig =>
-          awaitResult(ConsumerService(config.url).hitEndpoint("/")) must beTrue
+          awaitResult(ConsumerService(config.url).simpleGet("/")) must beEqualTo(200, Some("[]"))
         }) must beEqualTo(PactVerified)
     }
 
@@ -46,7 +46,7 @@ class ConsumerPactSpec extends Specification {
             headers = response.headers.get,
             body = response.bodyString.get)
           .duringConsumerSpec { config: MockProviderConfig =>
-            awaitResult(ConsumerService(config.url).hitEndpoint()) must beTrue
+            awaitResult(ConsumerService(config.url).extractResponseTest()) must beTrue
           }) must beEqualTo(PactVerified)
     }
   }
@@ -66,7 +66,7 @@ class ConsumerPactSpec extends Specification {
           headers = response.headers.get,
           body = response.bodyString.get)
         .duringConsumerSpec { config: MockProviderConfig =>
-          awaitResult(ConsumerService(config.url).hitEndpoint()) must beTrue
+          awaitResult(ConsumerService(config.url).extractResponseTest()) must beTrue
         }) must beEqualTo(PactVerified)
     }
   }
