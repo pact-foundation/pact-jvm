@@ -4,7 +4,7 @@ import sbt.Keys._
 
 object BuildSettings {
 	val publishSettings = Seq(
-		version := "1.11",
+		version := "1.12",
 		organization := "au.com.dius",
     scalaVersion := "2.10.3",
 
@@ -40,6 +40,16 @@ object BuildSettings {
 	          <name>Travis Dixon</name>
 	          <email>the.trav@gmail.com</email>
 	        </developer>
+          <developer>
+            <id>rholshausen</id>
+            <name>Ronald Holshausen</name>
+            <email>rholshausen@dius.com.au</email>
+          </developer>
+          <developer>
+            <id>kenbot</id>
+            <name>Ken Scambler</name>
+            <email>ken.scambler@gmail.com</email>
+          </developer>
 	      </developers>
   	)
 
