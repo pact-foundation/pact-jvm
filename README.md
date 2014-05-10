@@ -3,8 +3,7 @@ pact-jvm
 
 [![Build Status](https://travis-ci.org/DiUS/pact-jvm.svg?branch=master)](https://travis-ci.org/DiUS/pact-jvm)
 
-JVM specific port of the ruby project:
-*  https://github.com/realestate-com-au/pact
+JVM implementation of the consumer driven contract library (pact)[https://github.com/bethesque/pact_specification]
 
 ##I Use Scala and Specs 2
 
