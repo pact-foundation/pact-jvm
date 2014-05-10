@@ -77,7 +77,7 @@ object RootBuild extends Build {
 		id = "pact-jvm",
 		base = file("."),
 		settings = commonSettings ++ skipPublish ++ skipTest)
-		.aggregate(model, consumer, provider, plugin, consumerSbt, server)
+		.aggregate(model, consumer, provider, plugin, consumerSbt, server, specs2)
 
 	def p(id: String) = Project(
 		id = id, 
@@ -87,6 +87,8 @@ object RootBuild extends Build {
 	lazy val model = p("pact-jvm-model")
 
 	lazy val consumer = p("pact-jvm-consumer").dependsOn(model)
+
+  lazy val specs2 = p("pact-jvm-specs2").dependsOn(consumer)
 
 	lazy val provider = p("pact-jvm-provider").dependsOn(model)
 
