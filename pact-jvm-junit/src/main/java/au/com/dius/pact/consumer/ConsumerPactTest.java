@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer;
 
-import au.com.dius.pact.model.*;
+import au.com.dius.pact.model.PactFragment;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

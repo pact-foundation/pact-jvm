@@ -1,9 +1,26 @@
-package au.com.dius.pact.consumer;
+pact-jvm-junit
+===============
 
+##Specs2 Bindings for the junit library
+
+##Dependency
+
+The library is available on maven central using:
+
+group-id = `au.com.dius`
+
+artifact-id = `pact-jvm-junit`
+
+version-id = `2.0-RC1`
+
+##Usage
+
+To write a pact spec extend ConsumerPactTest
+
+Here is an example:
+
+```
 import au.com.dius.pact.model.PactFragment;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
-import scala.concurrent.duration.Duration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,11 +60,11 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
     @Override
     protected void runTest(String url) {
         try {
-            Future future = new Fixtures.ConsumerService(url).extractResponseTest("/");
-            Object result = Await.result(future, Duration.apply(1, "s"));
-            assertEquals(true, result);
+            assertEquals(new ConsumerClient(url).get("/"), "{\"responsetest\":true}");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 }
+```
+

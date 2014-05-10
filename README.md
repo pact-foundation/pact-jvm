@@ -3,18 +3,20 @@ pact-jvm
 
 [![Build Status](https://travis-ci.org/DiUS/pact-jvm.svg?branch=master)](https://travis-ci.org/DiUS/pact-jvm)
 
-Aggregation Project for Pact sub-modules:
-*  consumer
-*  provider
-*  model
-*  server
-
 JVM specific port of the ruby project:
 *  https://github.com/realestate-com-au/pact
 
 
-How to Release Pacts
-====================
+##I Use Scala and Specs 2
+
+You want to look at: [pact-jvm-specs2](pact-jvm-specs2)
+
+
+##I Use Java
+
+You want to look at: [pact-jvm-junit](pact-jvm-junit)
+
+##I want to contribute
 
 You can publish pacts locally using:
 
