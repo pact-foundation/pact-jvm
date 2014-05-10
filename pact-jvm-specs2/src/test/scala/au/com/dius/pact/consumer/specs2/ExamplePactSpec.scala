@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer.specs2
 
-import au.com.dius.pact.consumer.{MockProviderConfig, PactSpec}
+import au.com.dius.pact.consumer.PactSpec
 
 class ExamplePactSpec extends PactSpec {
   
@@ -10,7 +10,7 @@ class ExamplePactSpec extends PactSpec {
   uponReceiving("a request for foo")
     .matching(path = "/foo")
     .willRespondWith(body = "{}")
-  .during { providerConfig: MockProviderConfig =>
+  .during { providerConfig =>
     ConsumerService(providerConfig.url).simpleGet("/foo") must beEqualTo(200, Some("{}")).await
   }
 }
