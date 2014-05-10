@@ -1,7 +1,7 @@
 pact-jvm-junit
 ===============
 
-##Specs2 Bindings for the junit library
+Bindings for the junit library
 
 ##Dependency
 
