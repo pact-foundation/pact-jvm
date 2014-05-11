@@ -23,7 +23,7 @@ public class ConsumerPactBuilder {
         return new PactDslWithProvider(provider);
     }
 
-    class PactDslWithProvider {
+    public class PactDslWithProvider {
         private String providerName;
         public PactDslWithProvider(String provider) {
             this.providerName = provider;
@@ -33,7 +33,7 @@ public class ConsumerPactBuilder {
             return new PactDslWithState(state);
         }
 
-        class PactDslWithState {
+        public class PactDslWithState {
             private String state;
             public PactDslWithState(String state) {
                 this.state = state;
@@ -43,7 +43,7 @@ public class ConsumerPactBuilder {
                 return new PactDslRequestWithoutPath(description);
             }
 
-            class PactDslRequestWithoutPath {
+            public class PactDslRequestWithoutPath {
                 private String description;
                 public PactDslRequestWithoutPath(String description) {
                     this.description = description;
@@ -75,7 +75,7 @@ public class ConsumerPactBuilder {
         }
     }
 
-    class PactDslRequestWithPath {
+    public class PactDslRequestWithPath {
         private Consumer consumer;
         private Provider provider;
 
@@ -135,7 +135,7 @@ public class ConsumerPactBuilder {
         }
     }
 
-    class PactDslResponse {
+    public class PactDslResponse {
         private PactDslRequestWithPath existing;
 
         public PactDslResponse(PactDslRequestWithPath existing) {
