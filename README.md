@@ -7,11 +7,11 @@ JVM implementation of the consumer driven contract library (pact)[https://github
 
 ##I Use Scala and Specs 2
 
-You want to look at: [pact-jvm-specs2](pact-jvm-specs2)
+You want to look at: [pact-jvm-consumer-specs2](pact-jvm-consumer-specs2)
 
 ##I Use Java
 
-You want to look at: [pact-jvm-junit](pact-jvm-junit)
+You want to look at: [pact-jvm-consumer-junit](pact-jvm-consumer-junit)
 
 ##I Use some other jvm language or test framework (groovy, clojure etc)
 

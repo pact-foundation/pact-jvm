@@ -4,7 +4,7 @@ import com.typesafe.sbt.pgp.PgpKeys._
 
 object BuildSettings {
 	val publishSettings = Seq(
-		version := "2.0-RC1",
+		version := "2.0-RC3",
 		organization := "au.com.dius",
     scalaVersion := "2.10.3",
 
@@ -58,7 +58,11 @@ object BuildSettings {
 		testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "junitxml", "console")
 	)
 
-	val commonSettings = Defaults.defaultSettings ++ publishSettings ++ testSettings
+  val javacSettings = Seq (
+    scalacOptions += "-target:jvm-1.6"
+  )
+
+	val commonSettings = Defaults.defaultSettings ++ publishSettings ++ testSettings ++ javacSettings
 	val skipPublish = Seq(
 		publish := { },
 		publishLocal := { },
@@ -88,9 +92,9 @@ object RootBuild extends Build {
 
 	lazy val consumer = p("pact-jvm-consumer").dependsOn(model)
 
-  lazy val specs2 = p("pact-jvm-specs2").dependsOn(consumer)
+  lazy val specs2 = p("pact-jvm-consumer-specs2").dependsOn(consumer)
 
-  lazy val junit = p("pact-jvm-junit").dependsOn(consumer)
+  lazy val junit = p("pact-jvm-consumer-junit").dependsOn(consumer)
 
 	lazy val provider = p("pact-jvm-provider").dependsOn(model)
 
