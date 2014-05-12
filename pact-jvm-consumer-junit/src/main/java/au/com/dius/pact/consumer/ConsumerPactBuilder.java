@@ -109,10 +109,20 @@ public class ConsumerPactBuilder {
             this.requestBody = requestBody;
         }
 
-        public PactDslRequestWithPath(List<Interaction> interactions, String state, String description) {
-            this.interactions = interactions;
-            this.state = state;
+        public PactDslRequestWithPath(PactDslRequestWithPath existing, String description) {
+            this.consumer = existing.consumer;
+            this.provider = existing.provider;
+
+            this.state = existing.state;
+
             this.description = description;
+            this.path = existing.path;
+            this.requestMethod = existing.requestMethod;
+            this.requestHeaders = existing.requestHeaders;
+            this.requestBody = existing.requestBody;
+
+
+            this.interactions = existing.interactions;
         }
 
         public PactDslRequestWithPath method(String method) {
@@ -179,10 +189,9 @@ public class ConsumerPactBuilder {
                     JavaConverters$.MODULE$.asScalaBufferConverter(existing.interactions).asScala());
         }
 
-        //TODO: this mechanism allows creating subsequent requests without a path... fix that
         public PactDslRequestWithPath uponRecieving(String description) {
             addInteraction();
-            return new PactDslRequestWithPath(existing.interactions, existing.state, description);
+            return new PactDslRequestWithPath(existing, description);
         }
     }
 }
