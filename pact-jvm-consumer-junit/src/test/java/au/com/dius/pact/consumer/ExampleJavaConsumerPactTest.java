@@ -19,11 +19,19 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
                 .path("/")
                 .method("GET")
                 .headers(headers)
-                .body("{\"test\":true}")
+                .body("")
             .willRespondWith()
                 .status(200)
                 .headers(headers)
-                .body("{\"responsetest\":true}").toFragment();
+                .body("{\"responsetest\":true}")
+            .uponReceiving("a second test interaction")
+                .method("OPTIONS")
+                .headers(headers)
+            .willRespondWith()
+                .status(200)
+                .headers(headers)
+                .body("")
+            .toFragment();
     }
 
 
@@ -40,6 +48,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
     @Override
     protected void runTest(String url) {
         try {
+            assertEquals(new ConsumerClient(url).options("/"), 200);
             assertEquals(new ConsumerClient(url).get("/"), "{\"responsetest\":true}");
         } catch (Exception e) {
             throw new RuntimeException(e);

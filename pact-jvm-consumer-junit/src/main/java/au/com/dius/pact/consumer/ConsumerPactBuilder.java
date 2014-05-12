@@ -189,7 +189,7 @@ public class ConsumerPactBuilder {
                     JavaConverters$.MODULE$.asScalaBufferConverter(existing.interactions).asScala());
         }
 
-        public PactDslRequestWithPath uponRecieving(String description) {
+        public PactDslRequestWithPath uponReceiving(String description) {
             addInteraction();
             return new PactDslRequestWithPath(existing, description);
         }
