@@ -140,6 +140,11 @@ public class ConsumerPactBuilder {
             return this;
         }
 
+        public PactDslRequestWithPath path(String path) {
+            this.path = path;
+            return this;
+        }
+
         public PactDslResponse willRespondWith() {
             return new PactDslResponse(this);
         }

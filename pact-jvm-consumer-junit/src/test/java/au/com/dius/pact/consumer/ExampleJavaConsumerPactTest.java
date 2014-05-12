@@ -27,6 +27,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
             .uponReceiving("a second test interaction")
                 .method("OPTIONS")
                 .headers(headers)
+                .path("/second")
             .willRespondWith()
                 .status(200)
                 .headers(headers)
@@ -48,7 +49,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
     @Override
     protected void runTest(String url) {
         try {
-            assertEquals(new ConsumerClient(url).options("/"), 200);
+            assertEquals(new ConsumerClient(url).options("/second"), 200);
             assertEquals(new ConsumerClient(url).get("/"), "{\"responsetest\":true}");
         } catch (Exception e) {
             throw new RuntimeException(e);
