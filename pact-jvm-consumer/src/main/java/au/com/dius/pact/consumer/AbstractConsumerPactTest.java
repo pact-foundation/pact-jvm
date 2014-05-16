@@ -26,7 +26,7 @@ public abstract class AbstractConsumerPactTest {
     @Test
     public void testPact() {
         Pact pact = createPact();
-        final PactServer server = DefaultPactServer.withDefaultConfig();
+        final MockProvider server = DefaultMockProvider.withDefaultConfig();
         ConsumerPactRunner runner = new ConsumerPactRunner(server);
 
         VerificationResult result = runner.runAndWritePact(pact,

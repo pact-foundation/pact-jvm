@@ -7,40 +7,48 @@ import au.com.dius.pact.model.{RequestMatch, FullRequestMatch, PartialRequestMat
 import au.com.dius.pact.model.RequestMatching
 import au.com.dius.pact.model.Response
 import scala.util.Try
+import scala.util.Success
 
-trait PactServer {
-  def config: PactServerConfig
+trait MockProvider {
+  def config: MockProviderConfig
   def runAndClose(pact: Pact)(code: => Unit): Try[PactSessionResults]
 }
 
+object DefaultMockProvider {
   
-object DefaultPactServer {
+  def withDefaultConfig() = apply(MockProviderConfig.createDefault())
   
-  def withDefaultConfig() = apply(PactServerConfig.createDefault())
-  
-  // Constructor providing a default implementation of StatePactServer.
+  // Constructor providing a default implementation of StatefulMockProvider.
   // Users should not explicitly be forced to choose a variety.
-  def apply(config: PactServerConfig): PactServer = 
-    new UnfilteredPactServer(config)
+  def apply(config: MockProviderConfig): StatefulMockProvider = 
+    new UnfilteredMockProvider(config)
 }
 
 // TODO: eliminate horrid state mutation and synchronisation.  Reactive stuff to the rescue?
-abstract class StatefulPactServer extends PactServer {
+abstract class StatefulMockProvider extends MockProvider {
   private var sessionVar = PactSession.empty
-  def session: PactSession  = sessionVar
+  private var pactVar: Option[Pact] = None
   
-  protected def stop(): Unit
-  protected def start(): Unit
+  def session: PactSession  = sessionVar
+  def pact: Option[Pact] = pactVar
+  
+  def stop(): Unit
+  def start(): Unit
+  
+  final def start(pact: Pact): Unit = {
+    pactVar = Some(pact)
+    sessionVar = PactSession.forPact(pact)
+    start()
+  }
   
   override def runAndClose(pact: Pact)(code: => Unit): Try[PactSessionResults] = {
     def waitForRequestsToFinish() = Thread.sleep(50)
-    sessionVar = PactSession.forPact(pact)
     Try {
-      start()
+      start(pact)
       code
       waitForRequestsToFinish()
       stop()
-      session.withTheRestMissing.results
+      session.remainingResults
     } 
   }
   

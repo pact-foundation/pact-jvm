@@ -24,11 +24,12 @@ case class PactSessionResults(
 
 
 object PactSession {
-  val empty = PactSession(Set.empty, PactSessionResults.empty)
-  def forPact(pact: Pact) = PactSession(pact.interactions.toSet, PactSessionResults.empty)
+  val empty = PactSession(Seq(), PactSessionResults.empty)
+  
+  def forPact(pact: Pact) = PactSession(pact.interactions, PactSessionResults.empty)
 }
 
-case class PactSession(expected: Set[Interaction], results: PactSessionResults) {
+case class PactSession(expected: Seq[Interaction], results: PactSessionResults) {
   private def matcher = RequestMatching(expected.toSeq)
   
   def receiveRequest(req: Request): (Response, PactSession) = {
@@ -58,7 +59,9 @@ case class PactSession(expected: Set[Interaction], results: PactSessionResults) 
   def recordMatched(interaction: Interaction): PactSession = 
     forgetAbout(interaction.request).copy(results = results addMatched interaction)
   
-  def withTheRestMissing: PactSession = PactSession(Set(), results addMissing expected)
+  def withTheRestMissing: PactSession = PactSession(Seq(), remainingResults)
+  
+  def remainingResults: PactSessionResults = results addMissing expected
 }
 
 

@@ -11,7 +11,7 @@ import unfiltered.netty.{cycle => unettyc}
 import unfiltered.{request => ureq}
 import unfiltered.{response => uresp}
 
-class UnfilteredPactServer(val config: PactServerConfig) extends StatefulPactServer {
+class UnfilteredMockProvider(val config: MockProviderConfig) extends StatefulMockProvider {
   type UnfilteredRequest = ureq.HttpRequest[unetty.ReceivedMessage]
   type UnfilteredResponse = uresp.ResponseFunction[netty.HttpResponse]
   

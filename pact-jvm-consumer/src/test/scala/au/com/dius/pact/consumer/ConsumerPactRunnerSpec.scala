@@ -35,9 +35,9 @@ class ConsumerPactRunnerSpec extends Specification {
     }
     
     "Report test success and write pact" in {
-      val server = DefaultPactServer.withDefaultConfig()
+      val server = DefaultMockProvider.withDefaultConfig()
 
-      ConsumerPactRunner(server).runAndWritePact(pact) {
+      new ConsumerPactRunner(server).runAndWritePact(pact) {
         awaitResult(ConsumerService(server.config.url).hitEndpoint) must beTrue
       } must beEqualTo(PactVerified)
 
@@ -52,9 +52,9 @@ class ConsumerPactRunnerSpec extends Specification {
 
     "Report test failure nicely" in {
       val error = new RuntimeException("bad things happened in the test!")
-      val server = DefaultPactServer.withDefaultConfig()
+      val server = DefaultMockProvider.withDefaultConfig()
       
-      ConsumerPactRunner(server).runAndWritePact(pact) {
+      new ConsumerPactRunner(server).runAndWritePact(pact) {
         throw error
       } must beEqualTo(PactError(error))
     }

@@ -12,7 +12,7 @@ import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.dispatch.HttpClient
 import scala.util.{Try, Success, Failure}
 
-class PactServerSpec extends Specification {
+class MockProviderSpec extends Specification {
 
   implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
   
@@ -21,7 +21,7 @@ class PactServerSpec extends Specification {
   //TODO: move PactServer startup and shutdown into an around function
   "Pact Mock Service Provider" should {
     "Respond to invalid and valid requests" in {
-      val server = DefaultPactServer.withDefaultConfig()
+      val server = DefaultMockProvider.withDefaultConfig()
 
       val validRequest = request.copy(path = s"${server.config.url}/")
       val invalidRequest = request.copy(path = s"${server.config.url}/foo")
