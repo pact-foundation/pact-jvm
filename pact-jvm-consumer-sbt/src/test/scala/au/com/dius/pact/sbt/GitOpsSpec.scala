@@ -4,8 +4,9 @@ import org.specs2.mutable.Specification
 import java.io.{FileWriter, File}
 import sbt.{IO, Logger}
 import org.specs2.mock.Mockito
-import com.typesafe.sbt.git.ConsoleGitRunner
 import scala.annotation.tailrec
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.eclipse.jgit.api.Git
 
 class GitOpsSpec extends Specification with Mockito {
 
@@ -40,16 +41,16 @@ class GitOpsSpec extends Specification with Mockito {
 
       IO.delete(repoDir)
 
-      val repoUrl = repoDir.getAbsolutePath
+      val repoUrl = repoDir.toURI.toString
       IO.createDirectory(repoDir)
       val providerPactDir = "pacts"
       val pactDir = new File(repoDir, providerPactDir)
       IO.createDirectory(pactDir)
       IO.copyFile(testPactFile, new File(pactDir, testPactFile.getName))
 
-      ConsoleGitRunner("init")(repoDir)
-      ConsoleGitRunner("add", ".")(repoDir)
-      ConsoleGitRunner("commit", "-am", "init")(repoDir)
+      val git = Git.init().setDirectory(repoDir).call()
+      git.add.addFilepattern(".").call().getEntryCount must beGreaterThan(0)
+      git.commit.setMessage("init").call()
 
       GitOps.pushPact(deriveFile(targetDir, testPactFile), providerPactDir, repoUrl, targetDir, log, dryRun)
     }
@@ -57,7 +58,7 @@ class GitOpsSpec extends Specification with Mockito {
     "short circuit for no changes" in {
       val result = setup((targetDir, testPactFile) => testPactFile)
 
-      result must beEqualTo(TerminatingResult("nothing to commit"))
+      result must beEqualTo(HappyResult("nothing to commit"))
     }
 
     "work properly when there are changes" in {

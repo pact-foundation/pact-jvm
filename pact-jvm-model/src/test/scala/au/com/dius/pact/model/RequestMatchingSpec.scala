@@ -36,6 +36,11 @@ class RequestMatchingSpec extends Specification {
       test(headerlessRequest) must beNone
     }
 
+    "fail to match when headers are present but contain incorrect value" in {
+      val incorrectRequest = request.copy(headers = Some(Map("testreqheader" -> "incorrectValue")))
+      test(incorrectRequest) must beNone
+    }
+
     "allow additional headers" in {
       val extraHeaderRequest = request.copy(headers = request.headers.map(_.+("additonal" -> "header")))
       test(extraHeaderRequest) must beSome(response)

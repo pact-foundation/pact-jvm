@@ -1,10 +1,10 @@
 import sbt._
 import sbt.Keys._
-
+import com.typesafe.sbt.pgp.PgpKeys._
 
 object BuildSettings {
 	val publishSettings = Seq(
-		version := "1.10",
+		version := "2.0-RC3",
 		organization := "au.com.dius",
     scalaVersion := "2.10.3",
 
@@ -40,6 +40,16 @@ object BuildSettings {
 	          <name>Travis Dixon</name>
 	          <email>the.trav@gmail.com</email>
 	        </developer>
+          <developer>
+            <id>rholshausen</id>
+            <name>Ronald Holshausen</name>
+            <email>rholshausen@dius.com.au</email>
+          </developer>
+          <developer>
+            <id>kenbot</id>
+            <name>Ken Scambler</name>
+            <email>ken.scambler@gmail.com</email>
+          </developer>
 	      </developers>
   	)
 
@@ -48,11 +58,15 @@ object BuildSettings {
 		testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "junitxml", "console")
 	)
 
-	val commonSettings = Defaults.defaultSettings ++ publishSettings ++ testSettings
+  val javacSettings = Seq (
+    scalacOptions += "-target:jvm-1.6"
+  )
+
+	val commonSettings = Defaults.defaultSettings ++ publishSettings ++ testSettings ++ javacSettings
 	val skipPublish = Seq(
 		publish := { },
-		publishLocal := { }//,
-		// publishSigned := { }
+		publishLocal := { },
+		publishSigned := { }
 	)
 	val skipTest = Seq(
 		test:= {},
@@ -67,7 +81,7 @@ object RootBuild extends Build {
 		id = "pact-jvm",
 		base = file("."),
 		settings = commonSettings ++ skipPublish ++ skipTest)
-		.aggregate(model, consumer, provider, plugin, consumerSbt, server)
+		.aggregate(model, consumer, provider, plugin, consumerSbt, server, specs2, junit)
 
 	def p(id: String) = Project(
 		id = id, 
@@ -78,14 +92,16 @@ object RootBuild extends Build {
 
 	lazy val consumer = p("pact-jvm-consumer").dependsOn(model)
 
+  lazy val specs2 = p("pact-jvm-consumer-specs2").dependsOn(consumer)
+
+  lazy val junit = p("pact-jvm-consumer-junit").dependsOn(consumer)
+
 	lazy val provider = p("pact-jvm-provider").dependsOn(model)
 
   lazy val plugin = p("pact-jvm-provider-sbt").dependsOn(provider)
 
-  lazy val consumerSbt = p("pact-jvm-consumer-sbt") dependsOn sbtGitProject
+  lazy val consumerSbt = p("pact-jvm-consumer-sbt")
 
   lazy val server = p("pact-jvm-server").dependsOn(model).dependsOn(consumer)
-
-  def sbtGitProject = uri("https://github.com/sbt/sbt-git.git")
 
 }

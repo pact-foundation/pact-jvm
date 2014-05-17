@@ -38,7 +38,8 @@ object Matching {
   
   def matchHeaders(expected: Option[Headers], actual: Option[Headers]): Option[HeaderMismatch] = {
     def compareHeaders(e: Map[String, String], a: Map[String, String]): Option[HeaderMismatch] = {
-      if (e.keys forall a.contains) None 
+      def actuallyFound(kv: (String, String)): Boolean = a.get(kv._1) == Some(kv._2)
+      if (e forall actuallyFound) None 
       else Some(HeaderMismatch(e, a filterKeys e.contains))
     }
     compareHeaders(expected getOrElse Map(), actual getOrElse Map())
@@ -72,8 +73,11 @@ object Matching {
   def matchPath(expected: Path, actual: Path): Option[PathMismatch] = {
     val pathFilter = "http[s]*://([^/]*)"
     val replacedActual = actual.replaceFirst(pathFilter, "")
-    if(expected == replacedActual) None
-    else Some(PathMismatch(expected, replacedActual))
+    if(expected == replacedActual || replacedActual.matches(expected)) {
+      MatchFound
+    } else {
+      PathMismatch(expected, replacedActual)
+    }
   }
   
   def matchStatus(expected: Int, actual: Int): Option[StatusMismatch] = {

@@ -22,7 +22,6 @@ object ListServers {
 }
 
 
-
 case class Result(response: Response, newState: ServerState)
 
 
