@@ -1,4 +1,4 @@
-package au.com.dius.pact.consumer
+package au.com.dius.pact.model
 
 import java.net.ServerSocket
 import scala.util.control.NonFatal

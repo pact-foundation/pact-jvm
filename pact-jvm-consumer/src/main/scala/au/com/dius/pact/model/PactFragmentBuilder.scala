@@ -2,8 +2,6 @@ package au.com.dius.pact.model
 
 import au.com.dius.pact.model.HttpMethod._
 import org.json4s._
-import scala.concurrent.Future
-import au.com.dius.pact.consumer.MockProviderConfig
 import au.com.dius.pact.consumer.VerificationResult
 
 object PactFragmentBuilder {

@@ -1,13 +1,8 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.model.Interaction
-import au.com.dius.pact.model.Pact
-import au.com.dius.pact.model.Request
-import au.com.dius.pact.model.{RequestMatch, FullRequestMatch, PartialRequestMatch, RequestMismatch}
-import au.com.dius.pact.model.RequestMatching
-import au.com.dius.pact.model.Response
+import au.com.dius.pact.model._
 import scala.util.Try
-import scala.util.Success
+import scala.Some
 
 trait MockProvider {
   def config: MockProviderConfig

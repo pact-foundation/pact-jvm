@@ -2,9 +2,7 @@ package au.com.dius.pact.consumer
 
 import org.jboss.netty.handler.codec.{http => netty}
 
-import au.com.dius.pact.model.Pact
-import au.com.dius.pact.model.Request
-import au.com.dius.pact.model.Response
+import au.com.dius.pact.model.{MockProviderConfig, Request, Response}
 import au.com.dius.pact.model.unfiltered.Conversions
 import unfiltered.{netty => unetty}
 import unfiltered.netty.{cycle => unettyc}

@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.model.PactFragment
+import au.com.dius.pact.model.{MockProviderConfig, PactFragment}
 import org.specs2.SpecificationLike
 import org.specs2.specification._
 import org.specs2.matcher.{StandardMatchResults, MustMatchers}

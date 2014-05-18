@@ -1,16 +1,8 @@
 package au.com.dius.pact.server
 
-import _root_.unfiltered.netty.{ReceivedMessage, ServerErrorResponse, cycle}
-import _root_.unfiltered.request.HttpRequest
-import _root_.unfiltered.response.ResponseFunction
 import au.com.dius.pact.model._
-import au.com.dius.pact.consumer.{PactGenerator, MockProvider, MockProviderConfig, DefaultMockProvider}
 import org.json4s._
-import org.json4s.JsonDSL._
 import org.json4s.jackson.Serialization
-import au.com.dius.pact.model.unfiltered.Conversions
-import org.jboss.netty.handler.codec.http.QueryStringDecoder
-import au.com.dius.pact.consumer.VerificationResult
 
 object ListServers {
 

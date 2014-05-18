@@ -3,7 +3,6 @@ package au.com.dius.pact.model
 import au.com.dius.pact.consumer.DefaultMockProvider
 import au.com.dius.pact.consumer.ConsumerPactRunner
 import au.com.dius.pact.consumer.VerificationResult
-import au.com.dius.pact.consumer.MockProviderConfig
 
 case class PactFragment(consumer: Consumer,
                         provider: Provider,
