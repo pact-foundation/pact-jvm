@@ -5,7 +5,6 @@ import org.specs2.SpecificationLike
 import org.specs2.specification._
 import org.specs2.matcher.{StandardMatchResults, MustMatchers}
 import org.specs2.execute.{Result, StandardResults}
-import au.com.dius.pact.consumer.PactVerification.PactVerified
 import au.com.dius.pact.model.PactFragmentBuilder.PactWithAtLeastOneRequest
 
 trait PactSpec extends SpecificationLike
@@ -32,10 +31,11 @@ trait PactSpec extends SpecificationLike
 
   class ReadyForTest(fragment: PactFragment) {
     def during(test: MockProviderConfig => Result) = {
+      val config = MockProviderConfig.createDefault()
       val description = fragment.interactions.map(i => s"${i.providerState} ${i.description}").mkString(" ")
 
       fragments = fragments :+ Example(description, {
-        fragment.duringConsumerSpec(test(_)) must beEqualTo(PactVerified).await
+        fragment.duringConsumerSpec(config)(test(config)) must beEqualTo(PactVerified)
       })
     }
   }

@@ -1,24 +1,26 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.consumer.{ConsumerPact, PactVerification, MockProviderConfig}
-import scala.concurrent.{Future, Await}
+import au.com.dius.pact.consumer.DefaultMockProvider
+import au.com.dius.pact.consumer.ConsumerPactRunner
+import au.com.dius.pact.consumer.VerificationResult
+import au.com.dius.pact.consumer.MockProviderConfig
 
 case class PactFragment(consumer: Consumer,
                         provider: Provider,
                         interactions: Seq[Interaction]) {
-  def duringConsumerSpec(test: MockProviderConfig => Unit, config: MockProviderConfig = MockProviderConfig()): Future[PactVerification.VerificationResult] = {
-    val pact = Pact(provider, consumer, interactions)
-    ConsumerPact(pact).runConsumer(config, defaultState)({test(config)})
+  
+  def toPact: Pact = Pact(provider, consumer, interactions)
+
+  def duringConsumerSpec(config: MockProviderConfig)(test: => Unit): VerificationResult = {
+    val server = DefaultMockProvider(config)
+    new ConsumerPactRunner(server).runAndWritePact(toPact)(test)
   }
 
   //TODO: it would be a good idea to ensure that all interactions in the fragment have the same state
-  def defaultState = {
-    interactions.head.providerState
-  }
+  def defaultState: Option[String] = interactions.headOption.map(_.providerState)
 
-  def runConsumer(config: MockProviderConfig, test: Runnable): PactVerification.VerificationResult = {
-    import scala.concurrent.duration._
-    Await.result(duringConsumerSpec({ config:MockProviderConfig => test.run() }, config), 20 seconds)
+  def runConsumer(config: MockProviderConfig, test: Runnable): VerificationResult = {
+    duringConsumerSpec(config)(test.run())
   }
 }
 

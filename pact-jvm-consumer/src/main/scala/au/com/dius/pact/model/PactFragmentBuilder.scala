@@ -2,8 +2,9 @@ package au.com.dius.pact.model
 
 import au.com.dius.pact.model.HttpMethod._
 import org.json4s._
-import au.com.dius.pact.consumer.{PactVerification, MockProviderConfig}
 import scala.concurrent.Future
+import au.com.dius.pact.consumer.MockProviderConfig
+import au.com.dius.pact.consumer.VerificationResult
 
 object PactFragmentBuilder {
   def apply(consumer: Consumer) = {
@@ -79,8 +80,8 @@ object PactFragmentBuilder {
       DescribingRequest(consumer, provider, state, description, CanBuildPactFragment.additionalBuild(this))
     }
 
-    def duringConsumerSpec(test: MockProviderConfig => Unit, config: MockProviderConfig = MockProviderConfig()): Future[PactVerification.VerificationResult] = {
-      PactFragment(consumer, provider, interactions).duringConsumerSpec(test, config)
+    def duringConsumerSpec(config: MockProviderConfig)(test: => Unit): VerificationResult = {
+      PactFragment(consumer, provider, interactions).duringConsumerSpec(config)(test)
     }
   }
 

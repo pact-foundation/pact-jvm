@@ -73,11 +73,8 @@ object Matching {
   def matchPath(expected: Path, actual: Path): Option[PathMismatch] = {
     val pathFilter = "http[s]*://([^/]*)"
     val replacedActual = actual.replaceFirst(pathFilter, "")
-    if(expected == replacedActual || replacedActual.matches(expected)) {
-      MatchFound
-    } else {
-      PathMismatch(expected, replacedActual)
-    }
+    if(expected == replacedActual || replacedActual.matches(expected)) None
+    else Some(PathMismatch(expected, replacedActual))
   }
   
   def matchStatus(expected: Int, actual: Int): Option[StatusMismatch] = {

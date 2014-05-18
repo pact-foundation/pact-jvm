@@ -35,7 +35,7 @@ abstract class StatefulMockProvider extends MockProvider {
   def stop(): Unit
   def start(): Unit
   
-  final def start(pact: Pact): Unit = {
+  final def start(pact: Pact): Unit = synchronized {
     pactVar = Some(pact)
     sessionVar = PactSession.forPact(pact)
     start()
