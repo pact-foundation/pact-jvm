@@ -82,7 +82,7 @@ object RootBuild extends Build {
 		id = "pact-jvm",
 		base = file("."),
 		settings = commonSettings ++ skipPublish ++ skipTest)
-		.aggregate(model, consumer, provider, plugin, consumerSbt, server, consumerSpecs2, providerSpecs2, junit)
+		.aggregate(model, consumer, provider, plugin, consumerSbt, server, consumerSpecs2, providerSpecs2, junit, pactSpecification)
 
 	def p(id: String, settings: Seq[Def.Setting[_]] = commonSettings) = Project(
 		id = id, 

@@ -1,6 +1,6 @@
 package specification
 
-import au.com.dius.pact.model.RequestMatching
+import au.com.dius.pact.model.{FullRequestMatch, Response, Interaction, RequestMatching}
 import java.io.{FilenameFilter, File}
 import org.specs2.SpecificationLike
 import org.specs2.matcher.{StandardMatchResults, MustMatchers}
@@ -9,7 +9,6 @@ import org.specs2.specification.{Example, Fragments, FragmentsBuilder}
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.DefaultFormats
-import au.com.dius.pact.model.Matching.MatchFound
 
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
@@ -45,11 +44,12 @@ class SpecificationSpec extends SpecificationLike
   override def is: Fragments = Fragments.create(fragments :_*)
 
   def test(input: PactSpecification) = {
-    val result = RequestMatching.compareRequests(input.expected, input.actual)
+    val fakeInteraction = Interaction("", "", input.expected, Response(200, Map[String, String](), ""))
+    val result = RequestMatching.compareRequest(fakeInteraction, input.actual)
     if(input.`match`) {
-      result mustEqual MatchFound
+      result mustEqual FullRequestMatch(fakeInteraction)
     } else {
-      result mustNotEqual MatchFound
+      result mustNotEqual FullRequestMatch(fakeInteraction)
     }
   }
 }
