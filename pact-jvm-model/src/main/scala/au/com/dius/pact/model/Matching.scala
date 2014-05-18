@@ -5,7 +5,7 @@ import au.com.dius.pact.model.JsonDiff._
 import org.json4s.JsonAST.JNothing
 
 object Matching {
-  sealed trait MatchResult {
+  trait MatchResult {
     def and(o: MatchResult): MatchResult = { (this, o) match {
       case (MatchFound, MatchFound) => MatchFound
       case (a, MatchFound) => a
@@ -33,11 +33,7 @@ object Matching {
       s"Patch Mismatch(\n\texpected: $expected\n\tactual: $actual)"
     }
   }
-  case class HeaderMismatch(expected: Headers, actual: Headers) extends MatchResult {
-    override def toString: String = {
-      s"Header Mismatch(\n\texpected: $expected\n\tactual: $actual)"
-    }
-  }
+
   case class CookieMismatch(expected: List[String], actual: List[String]) extends MatchResult {
     override def toString: String = {
       s"Header 'Cookie' Mismatch(\n\texpected: $expected\n\tactual: $actual)"
@@ -66,18 +62,6 @@ object Matching {
     override def toString: String = {
       s"Status Code Mismatch(\n\texpected: $expected\n\tactual: $actual)"
     }
-  }
-
-  private type Headers = Option[Map[String, String]]
-
-
-  def matchHeaders(expected: Headers, actual: Headers): MatchResult = {
-    def compareHeaders(e: Map[String, String], a: Map[String, String]): MatchResult = {
-      def compareByKey(key: String): Boolean = { a.contains(key) && e(key) == a(key) }
-      if (e.keys forall compareByKey ) MatchFound
-      else HeaderMismatch(Some(e), Some(a filterKeys e.contains))
-    }
-    compareHeaders(expected getOrElse Map(), actual getOrElse Map())
   }
 
   def matchCookie(expected: Option[List[String]], actual: Option[List[String]]): MatchResult = {

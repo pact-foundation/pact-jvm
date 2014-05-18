@@ -1,6 +1,7 @@
 package au.com.dius.pact.model
 
 import JsonDiff.DiffConfig
+import au.com.dius.pact.model.matching.HeadersMatch
 
 case class RequestMatching(expectedInteractions: Seq[Interaction]) {
   import RequestMatching._
@@ -34,7 +35,7 @@ object RequestMatching {
     matchMethod(expected.method, actual.method) and
     matchPath(expected.path, actual.path) and
     matchCookie(expected.cookie, actual.cookie) and
-    matchHeaders(expected.headersWithoutCookie, actual.headersWithoutCookie) and
+    HeadersMatch(expected.headersWithoutCookie, actual.headersWithoutCookie) and
     matchBodies(expected.body, actual.body, diffConfig)
   }
 }
