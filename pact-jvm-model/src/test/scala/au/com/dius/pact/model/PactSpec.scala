@@ -2,7 +2,7 @@ package au.com.dius.pact.model
 
 import org.specs2.mutable.Specification
 import au.com.dius.pact.model.Pact.MergeSuccess
-import au.com.dius.pact.model.Pact.ConflictingInteractions
+import au.com.dius.pact.model.Pact.MergeConflict
 
 class PactSpec extends Specification {
   "Pact" should {
@@ -31,31 +31,31 @@ class PactSpec extends Specification {
 
       "allow different descriptions" in {
         val newInteractions = Seq(interaction.copy(description = "different"))
-        val result = Pact.merge(pact, pact.copy(interactions = newInteractions))
+        val result = pact merge pact.copy(interactions = newInteractions)
         result must beEqualTo(MergeSuccess(Pact(provider, consumer, interactions ++ newInteractions )))
       }
 
       "allow different states" in {
         val newInteractions = Seq(interaction.copy(providerState = "different"))
-        val result = Pact.merge(pact, pact.copy(interactions = newInteractions))
+        val result = pact merge pact.copy(interactions = newInteractions)
         result must beEqualTo(MergeSuccess(Pact(provider, consumer, interactions ++ newInteractions )))
       }
 
       "allow identical interactions without duplication" in {
-        val result = Pact.merge(pact, pact.copy())
+        val result = pact merge pact.copy()
         result must beEqualTo(MergeSuccess(pact))
       }
 
       "refuse different requests for identical description and states" in {
         val newInteractions = Seq(interaction.copy(request = request.copy(path = "different")))
-        val result = Pact.merge(pact, pact.copy(interactions = newInteractions))
-        result must beEqualTo(ConflictingInteractions(Seq((interaction, newInteractions.head))))
+        val result = pact merge pact.copy(interactions = newInteractions)
+        result must beEqualTo(MergeConflict(Seq((interaction, newInteractions.head))))
       }
 
       "refuse different responses for identical description and states" in {
         val newInteractions = Seq(interaction.copy(response = response.copy(status = 503)))
-        val result = Pact.merge(pact, pact.copy(interactions = newInteractions))
-        result must beEqualTo(ConflictingInteractions(Seq((interaction, newInteractions.head))))
+        val result = pact merge pact.copy(interactions = newInteractions)
+        result must beEqualTo(MergeConflict(Seq((interaction, newInteractions.head))))
       }
     }
   }

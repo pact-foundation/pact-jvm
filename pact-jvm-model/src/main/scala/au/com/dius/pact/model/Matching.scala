@@ -4,85 +4,78 @@ import org.json4s.{JValue, Diff}
 import au.com.dius.pact.model.JsonDiff._
 import org.json4s.JsonAST.JNothing
 
+import RequestPartMismatch._
+import ResponsePartMismatch._
+import scala.collection.immutable.TreeMap
+
+trait SharedMismatch {
+  type Body = Option[JValue]
+  type Headers = Map[String, String]
+}
+
+object RequestPartMismatch extends SharedMismatch {
+  type Cookies = List[String]
+  type Path = String
+  type Method = String
+}
+
+object ResponsePartMismatch extends SharedMismatch {
+  type Status = Int
+}
+
+// Overlapping ADTs.  The body and headers can mismatch for both of them.
+sealed trait RequestPartMismatch
+sealed trait ResponsePartMismatch 
+
+case class StatusMismatch(expected: Status, actual: Status) extends ResponsePartMismatch
+case class HeaderMismatch(expected: Headers, actual: Headers) extends RequestPartMismatch with ResponsePartMismatch
+case class BodyMismatch(diff: Diff) extends RequestPartMismatch with ResponsePartMismatch
+case class CookieMismatch(expected: Cookies, actual: Cookies) extends RequestPartMismatch
+case class PathMismatch(expected: Path, actual: Path) extends RequestPartMismatch
+case class MethodMismatch(expected: Method, actual: Method) extends RequestPartMismatch
+
+
 object Matching {
-  trait MatchResult {
-    def and(o: MatchResult): MatchResult = { (this, o) match {
-      case (MatchFound, MatchFound) => MatchFound
-      case (a, MatchFound) => a
-      case (MatchFound, b) => b
-      case (MatchFailure(a), MatchFailure(b)) => MatchFailure(a.reverse_:::(b))
-      case (a, MatchFailure(b)) => MatchFailure(b :+ a)
-      case (MatchFailure(a), b) => MatchFailure(a :+ b)
-      case (a, b) => MatchFailure(List(a, b))
-    }}
-  }
-
-  case object MatchFound extends MatchResult
-  case class MatchFailure(problems: List[MatchResult]) extends MatchResult {
-    override def toString: String = {
-      s"Multiple Mismatches Found: \n${problems.map(_.toString+ "\n")}"
-    }
-  }
-  case class MethodMismatch(expected: String, actual: String) extends MatchResult {
-    override def toString: String = {
-      s"Method Mismatch(\n\texpected: $expected\n\tactual: $actual)"
-    }
-  }
-  case class PathMismatch(expected: String, actual: String) extends MatchResult {
-    override def toString: String = {
-      s"Patch Mismatch(\n\texpected: $expected\n\tactual: $actual)"
-    }
-  }
-
-  case class CookieMismatch(expected: List[String], actual: List[String]) extends MatchResult {
-    override def toString: String = {
-      s"Header 'Cookie' Mismatch(\n\texpected: $expected\n\tactual: $actual)"
-    }
-  }
-
-  case class BodyContentMismatch(diff: Diff) extends MatchResult {
-
-    override def toString: String = {
-      import org.json4s.jackson.JsonMethods._
-
-      def stringify(msg: String, json: JValue): String = {
-        json match {
-          case JNothing => ""
-          case j => s"$msg: ${compact(render(json))}"
+  
+  def matchHeaders(expected: Option[Headers], actual: Option[Headers]): Option[HeaderMismatch] = {
+    def compareHeaders(e: Map[String, String], a: Map[String, String]): Option[HeaderMismatch] = {
+      
+      def actuallyFound(kv: (String, String)): Boolean = {
+        def compareNormalisedHeaders(expected: String, actual: String): Boolean = {
+          def stripWhiteSpaceAfterCommas(in: String): String = in.replaceAll(",[ ]*", ",")
+          stripWhiteSpaceAfterCommas(expected) == stripWhiteSpaceAfterCommas(actual)
         }
+        a.get(kv._1).fold(false)(compareNormalisedHeaders(_, kv._2))
       }
-
-      val changed = stringify("\n\tchanged", diff.changed)
-      val added = stringify("\n\tadded", diff.added)
-      val missing = stringify("\n\tmissing", diff.deleted)
-      s"Body Content Mismatch($changed$added$missing)"
+      
+      if (e forall actuallyFound) None 
+      else Some(HeaderMismatch(e, a filterKeys e.contains))
     }
-  }
-  case class StatusMismatch(expected: Int, actual: Int) extends MatchResult {
-    override def toString: String = {
-      s"Status Code Mismatch(\n\texpected: $expected\n\tactual: $actual)"
+    
+    def sortedOrEmpty(h: Option[Headers]): Map[String,String] = {
+      def sortCaseInsensitive[T](in: Map[String, T]): TreeMap[String, T] = {
+        new TreeMap[String, T]()(Ordering.by(_.toLowerCase)) ++ in
+      }
+      h.fold[Map[String,String]](Map())(sortCaseInsensitive)
     }
+      
+    compareHeaders(sortedOrEmpty(expected), sortedOrEmpty(actual))
   }
 
-  def matchCookie(expected: Option[List[String]], actual: Option[List[String]]): MatchResult = {
-    def compareCookies(e: List[String], a: List[String]) = {
-      if (e forall a.contains) MatchFound 
-      else CookieMismatch(e, a)
+  def matchCookie(expected: Option[Cookies], actual: Option[Cookies]): Option[CookieMismatch] = {
+    def compareCookies(e: Cookies, a: Cookies) = {
+      if (e forall a.contains) None 
+      else Some(CookieMismatch(e, a))
     }
     compareCookies(expected getOrElse Nil, actual getOrElse Nil)
   }
 
-  def matchMethod(expected: String, actual: String): MatchResult = {
-    if(expected.equalsIgnoreCase(actual)) {
-      MatchFound
-    } else {
-      MethodMismatch(expected, actual)
-    }
+  def matchMethod(expected: Method, actual: Method): Option[MethodMismatch] = {
+    if(expected.equalsIgnoreCase(actual)) None
+    else Some(MethodMismatch(expected, actual))
   }
 
-  private type Body = Option[JValue]
-
-  def matchBodies(expected: Body, actual: Body, diffConfig: DiffConfig): MatchResult = {
+  def matchBody(expected: Body, actual: Body, diffConfig: DiffConfig): Option[BodyMismatch] = {
     implicit val autoParse = JsonDiff.autoParse _
     val difference = (expected, actual) match {
       case (None, None) => noChange
@@ -90,28 +83,19 @@ object Matching {
       case (Some(a), None) => missing(a)
       case (Some(a), Some(b)) => diff(a, b, diffConfig)
     }
-    if(difference == noChange) {
-      MatchFound
-    } else {
-      BodyContentMismatch(difference)
-    }
+    if(difference == noChange) None
+    else Some(BodyMismatch(difference))
   }
 
-  def matchPath(expected: String, actual: String): MatchResult = {
+  def matchPath(expected: Path, actual: Path): Option[PathMismatch] = {
     val pathFilter = "http[s]*://([^/]*)"
     val replacedActual = actual.replaceFirst(pathFilter, "")
-    if(expected == replacedActual || replacedActual.matches(expected)) {
-      MatchFound
-    } else {
-      PathMismatch(expected, replacedActual)
-    }
+    if(expected == replacedActual || replacedActual.matches(expected)) None
+    else Some(PathMismatch(expected, replacedActual))
   }
-
-  def matchStatus(expected: Int, actual: Int): MatchResult = {
-    if(expected == actual) {
-      MatchFound
-    } else {
-      StatusMismatch(expected, actual)
-    }
+  
+  def matchStatus(expected: Int, actual: Int): Option[StatusMismatch] = {
+    if(expected == actual) None
+    else Some(StatusMismatch(expected, actual))
   }
 }

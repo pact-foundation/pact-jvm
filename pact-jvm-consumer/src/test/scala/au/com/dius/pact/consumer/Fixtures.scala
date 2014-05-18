@@ -2,7 +2,6 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.model._
 
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.{ExecutionContext, Future}
 import au.com.dius.pact.model.dispatch.HttpClient
 import java.util.concurrent.Executors
@@ -28,7 +27,7 @@ object Fixtures {
     response = response
   )
 
-  val interactions = ArrayBuffer(interaction)
+  val interactions = List(interaction)
 
   val pact: Pact = Pact(
     provider = provider,

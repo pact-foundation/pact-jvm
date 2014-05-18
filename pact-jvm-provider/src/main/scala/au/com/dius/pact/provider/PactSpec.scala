@@ -29,7 +29,7 @@ class PactSpec(config: PactConfiguration, pact: Pact)(implicit timeout: Duration
 
         val actualResponse = Await.result(pactResponseFuture, timeout)
 
-        assert(ResponseMatching.matchRules(interaction.response, actualResponse) === MatchFound)
+        assert(ResponseMatching.matchRules(interaction.response, actualResponse) === FullResponseMatch)
       }
   }
 }
