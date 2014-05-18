@@ -4,6 +4,10 @@ import org.json4s.{JValue, Diff}
 import au.com.dius.pact.model.JsonDiff._
 import org.json4s.JsonAST.JNothing
 
+import RequestPartMismatch._
+import ResponsePartMismatch._
+import scala.collection.immutable.TreeMap
+
 trait SharedMismatch {
   type Body = Option[JValue]
   type Headers = Map[String, String]
@@ -18,9 +22,6 @@ object RequestPartMismatch extends SharedMismatch {
 object ResponsePartMismatch extends SharedMismatch {
   type Status = Int
 }
-
-import RequestPartMismatch._
-import ResponsePartMismatch._
 
 // Overlapping ADTs.  The body and headers can mismatch for both of them.
 sealed trait RequestPartMismatch
@@ -38,11 +39,27 @@ object Matching {
   
   def matchHeaders(expected: Option[Headers], actual: Option[Headers]): Option[HeaderMismatch] = {
     def compareHeaders(e: Map[String, String], a: Map[String, String]): Option[HeaderMismatch] = {
-      def actuallyFound(kv: (String, String)): Boolean = a.get(kv._1) == Some(kv._2)
+      
+      def actuallyFound(kv: (String, String)): Boolean = {
+        def compareNormalisedHeaders(expected: String, actual: String): Boolean = {
+          def stripWhiteSpaceAfterCommas(in: String): String = in.replaceAll(",[ ]*", ",")
+          stripWhiteSpaceAfterCommas(expected) == stripWhiteSpaceAfterCommas(actual)
+        }
+        a.get(kv._1).fold(false)(compareNormalisedHeaders(_, kv._2))
+      }
+      
       if (e forall actuallyFound) None 
       else Some(HeaderMismatch(e, a filterKeys e.contains))
     }
-    compareHeaders(expected getOrElse Map(), actual getOrElse Map())
+    
+    def sortedOrEmpty(h: Option[Headers]): Map[String,String] = {
+      def sortCaseInsensitive[T](in: Map[String, T]): TreeMap[String, T] = {
+        new TreeMap[String, T]()(Ordering.by(_.toLowerCase)) ++ in
+      }
+      h.fold[Map[String,String]](Map())(sortCaseInsensitive)
+    }
+      
+    compareHeaders(sortedOrEmpty(expected), sortedOrEmpty(actual))
   }
 
   def matchCookie(expected: Option[Cookies], actual: Option[Cookies]): Option[CookieMismatch] = {

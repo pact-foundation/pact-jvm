@@ -1,0 +1,20 @@
+{
+  "match": false,
+  "comment": "Headers values are case sensitive",
+  "expected" : {
+    "method": "POST",
+    "path": "/path",
+    "query": "",
+    "headers": {
+      "Accept": "alligators"
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/path",
+    "query": "",
+    "headers": {
+      "Accept": "Alligators"
+    }
+  }
+}
