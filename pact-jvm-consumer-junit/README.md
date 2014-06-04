@@ -68,3 +68,10 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
 }
 ```
 
+## Debugging pact failures
+
+When the test runs, Pact will start a mock provider that will listen for requests and match them against the expectations
+you setup in `createFragment`. If the request does not match, it will return a 500 error response.
+
+Each request received and the generated response is logged using [SLF4J](http://www.slf4j.org/). Just enable debug level
+logging for au.com.dius.pact.consumer.UnfilteredMockProvider. Most failures tend to be mismatched headers or bodies.

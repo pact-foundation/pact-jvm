@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer
 import au.com.dius.pact.model._
 import scala.util.Try
 import scala.Some
+import com.typesafe.scalalogging.slf4j.StrictLogging
 
 trait MockProvider {
   def config: MockProviderConfig
@@ -20,7 +21,7 @@ object DefaultMockProvider {
 }
 
 // TODO: eliminate horrid state mutation and synchronisation.  Reactive stuff to the rescue?
-abstract class StatefulMockProvider extends MockProvider {
+abstract class StatefulMockProvider extends MockProvider with StrictLogging {
   private var sessionVar = PactSession.empty
   private var pactVar: Option[Pact] = None
   
@@ -48,7 +49,9 @@ abstract class StatefulMockProvider extends MockProvider {
   }
   
   final def handleRequest(req: Request): Response = synchronized {
+    logger.debug("Received request: " + req)
     val (response, newSession) = session.receiveRequest(req)
+    logger.debug("Generating response: " + response)
     sessionVar = newSession
     response
   }

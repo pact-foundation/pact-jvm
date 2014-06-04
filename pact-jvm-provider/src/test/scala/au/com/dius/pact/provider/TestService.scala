@@ -7,8 +7,9 @@ import unfiltered.netty.{ReceivedMessage, ServerErrorResponse, cycle}
 import unfiltered.request.HttpRequest
 import unfiltered.response.ResponseFunction
 import au.com.dius.pact.model.unfiltered.Conversions
+import com.typesafe.scalalogging.slf4j.StrictLogging
 
-object TestService {
+object TestService extends StrictLogging {
   var state: String = ""
 
   case class RequestHandler(port: Int) extends cycle.Plan
@@ -36,7 +37,7 @@ object TestService {
 
   def apply(port:Int) = {
     val server = _root_.unfiltered.netty.Http.local(port).handler(RequestHandler(port))
-    println(s"starting unfiltered app at 127.0.0.1 on port $port")
+    logger.info(s"starting unfiltered app at 127.0.0.1 on port $port")
     server.start()
     server
   }

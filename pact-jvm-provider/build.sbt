@@ -7,11 +7,11 @@ libraryDependencies ++= Seq(
   "commons-io"  % "commons-io"     % "2.4",
   "net.databinder" %% "unfiltered-netty-server" % "0.7.1",
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.0",
-  "org.clapper" %% "avsl" % "1.0.1",
   "org.json4s" %% "json4s-native"  % "3.2.6",
   "org.json4s" %% "json4s-jackson" % "3.2.6",
   "org.specs2" %% "specs2"         % "2.3.1" % "test",
-  "org.mockito" % "mockito-core"   % "1.8.5" % "test"
+  "org.mockito" % "mockito-core"   % "1.8.5" % "test",
+  "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2"
 )
 
 initialCommands := """
