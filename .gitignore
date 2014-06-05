@@ -24,3 +24,6 @@ project/plugins/project/
 */.cache
 */.classpath
 */.project
+build/
+pkgdiff_reports/
+.gradle/

@@ -1,0 +1,12 @@
+include 'pact-jvm-consumer'
+include 'pact-jvm-consumer-junit'
+include 'pact-jvm-consumer-sbt'
+include 'pact-jvm-consumer-specs2'
+include 'pact-jvm-model'
+include 'pact-jvm-provider'
+include 'pact-jvm-provider-sbt'
+include 'pact-jvm-provider-specs2'
+include 'pact-jvm-server'
+//include 'pact-specification-test'
+
+rootProject.name = 'pact-jvm'

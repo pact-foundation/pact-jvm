@@ -1,0 +1,4 @@
+
+dependencies {
+    compile project(':pact-jvm-consumer'), "org.specs2:specs2_${project.scalaVersion}:2.2.3"
+}

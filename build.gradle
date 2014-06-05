@@ -1,0 +1,34 @@
+project.ext {
+    scalaVersion = '2.10'
+    sbtVersion = '0.13.5'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'scala'
+    apply plugin: 'maven'
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    dependencies {
+        compile 'org.slf4j:slf4j-api:1.7.5', 'org.scala-lang:scala-library:2.10.3',
+                "com.typesafe.scala-logging:scala-logging-slf4j_${project.scalaVersion}:2.1.2",
+                "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.7.1",
+                "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.0",
+                "org.json4s:json4s-native_${project.scalaVersion}:3.2.6",
+                "org.json4s:json4s-jackson_${project.scalaVersion}:3.2.6"
+        testCompile 'junit:junit:4.11', 'org.mockito:mockito-all:1.9.5', "org.specs2:specs2_${project.scalaVersion}:2.2.3"
+    }
+
+    group = 'au.com.dius'
+    version = '2.0-RC3'
+    targetCompatibility = '1.6'
+    sourceCompatibility = '1.6'
+
+    jar {
+        manifest.attributes provider: 'gradle'
+    }
+}

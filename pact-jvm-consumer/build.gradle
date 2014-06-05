@@ -1,0 +1,4 @@
+
+dependencies {
+    compile project(':pact-jvm-model')
+}
