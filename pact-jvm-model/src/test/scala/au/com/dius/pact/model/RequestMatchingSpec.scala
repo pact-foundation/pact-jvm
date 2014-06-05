@@ -6,6 +6,10 @@ import org.json4s.JsonDSL._
 import au.com.dius.pact.model.HttpMethod._
 import scala.Some
 
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
+
+@RunWith(classOf[JUnitRunner])
 class RequestMatchingSpec extends Specification {
 
   "request matching" should {

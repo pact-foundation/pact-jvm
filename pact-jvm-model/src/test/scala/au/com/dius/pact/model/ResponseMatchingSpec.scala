@@ -2,6 +2,10 @@ package au.com.dius.pact.model
 
 import org.specs2.mutable.Specification
 
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
+
+@RunWith(classOf[JUnitRunner])
 class ResponseMatchingSpec extends Specification {
   "response matching" should {
     import Matching._

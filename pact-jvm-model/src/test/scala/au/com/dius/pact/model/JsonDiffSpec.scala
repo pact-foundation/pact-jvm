@@ -13,6 +13,10 @@ object JsonAstMagic {
   def jArr[T](n:T *)(implicit c:(T) => JValue):JArray = JArray(n.map(c).toList)
 }
 
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
+
+@RunWith(classOf[JUnitRunner])
 class JsonDiffSpec extends Specification {
   import JsonDiff._
   import JsonAstMagic._

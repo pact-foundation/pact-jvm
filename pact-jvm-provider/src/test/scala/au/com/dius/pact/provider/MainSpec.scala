@@ -4,6 +4,10 @@ import java.net.URL
 import org.specs2.mutable.Specification
 import java.io.File
 
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
+
+@RunWith(classOf[JUnitRunner])
 class MainSpec extends Specification {
 
   def loadResource(name: String): URL = {

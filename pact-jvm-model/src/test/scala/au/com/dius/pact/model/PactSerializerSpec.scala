@@ -3,6 +3,10 @@ package au.com.dius.pact.model
 import org.specs2.mutable.Specification
 import java.io.{InputStream, StringWriter, PrintWriter}
 
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
+
+@RunWith(classOf[JUnitRunner])
 class PactSerializerSpec extends Specification {
 
   def loadTestFile(name: String): InputStream = {

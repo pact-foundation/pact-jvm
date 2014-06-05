@@ -28,6 +28,12 @@ subprojects {
     targetCompatibility = '1.6'
     sourceCompatibility = '1.6'
 
+    tasks.withType(ScalaCompile) {
+        scalaCompileOptions.useCompileDaemon = false
+        scalaCompileOptions.useAnt = false
+        scalaCompileOptions.additionalParameters = ['-target:jvm-1.6']
+    }
+
     jar {
         manifest.attributes provider: 'gradle',
                 'Implementation-Title': project.name, 'Implementation-Version': version,

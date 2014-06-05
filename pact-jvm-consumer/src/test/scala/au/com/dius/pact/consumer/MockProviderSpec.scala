@@ -11,7 +11,10 @@ import java.util.concurrent.Executors
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.dispatch.HttpClient
 import scala.util.{Try, Success, Failure}
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class MockProviderSpec extends Specification {
 
   implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())

@@ -11,6 +11,10 @@ import org.json4s.jackson.JsonMethods._
 import org.json4s.DefaultFormats
 import au.com.dius.pact.model.Matching.MatchFound
 
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
+
+@RunWith(classOf[JUnitRunner])
 class SpecificationSpec extends SpecificationLike
   with MustMatchers
   with StandardResults

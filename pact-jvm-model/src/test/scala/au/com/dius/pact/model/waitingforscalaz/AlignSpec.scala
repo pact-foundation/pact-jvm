@@ -2,6 +2,10 @@ package au.com.dius.pact.model.waitingforscalaz
 
 import org.specs2.mutable.Specification
 
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
+
+@RunWith(classOf[JUnitRunner])
 class AlignSpec extends Specification {
   "Align" should {
     val short = List(1)

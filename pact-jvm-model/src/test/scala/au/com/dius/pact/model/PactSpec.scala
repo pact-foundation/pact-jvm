@@ -4,6 +4,10 @@ import org.specs2.mutable.Specification
 import au.com.dius.pact.model.Pact.MergeSuccess
 import au.com.dius.pact.model.Pact.MergeConflict
 
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
+
+@RunWith(classOf[JUnitRunner])
 class PactSpec extends Specification {
   "Pact" should {
     "Locate Interactions" in {

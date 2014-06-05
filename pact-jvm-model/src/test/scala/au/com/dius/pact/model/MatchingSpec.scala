@@ -3,6 +3,10 @@ package au.com.dius.pact.model
 import org.specs2.mutable.Specification
 import Fixtures._
 
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
+
+@RunWith(classOf[JUnitRunner])
 class MatchingSpec extends Specification {
   "Matching" should {
     import Matching._

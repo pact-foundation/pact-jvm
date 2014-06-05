@@ -8,6 +8,10 @@ import scala.annotation.tailrec
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.eclipse.jgit.api.Git
 
+import org.junit.runner.RunWith
+import org.specs2.runner.JUnitRunner
+
+@RunWith(classOf[JUnitRunner])
 class GitOpsSpec extends Specification with Mockito {
 
   def writeToFile(file: File, s:String) {
@@ -31,7 +35,7 @@ class GitOpsSpec extends Specification with Mockito {
 
       @tailrec
       def findTarget(f:File):File = {
-        if(f.getName == "target") f else findTarget(new File(f.getParent))
+        if(f.getName == "target" || f.getName == "build") f else findTarget(new File(f.getParent))
       }
 
       val targetDir = findTarget(testPactFile)
