@@ -52,13 +52,49 @@ subprojects {
         archives sourceJar
     }
 
-    uploadArchives {
-        repositories {
-            mavenDeployer {
-                pom.project {
+    def pomCustomisation = {
+        url 'https://github.com/DiUS/pact-jvm'
+        licenses {
+            license {
+                name 'Apache 2'
+	            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+	            distribution 'repo'
+            }
+        }
+        scm {
+            url 'https://github.com/DiUS/pact-jvm'
+            connection 'https://github.com/DiUS/pact-jvm.git'
+        }
 
-                }
+	    developers {
+            developer {
+                id 'thetrav'
+                name 'Travis Dixon'
+                email 'the.trav@gmail.com'
+            }
+            developer {
+                id 'rholshausen'
+                name 'Ronald Holshausen'
+                email 'rholshausen@dius.com.au'
+            }
+            developer {
+                id 'kenbot'
+                name 'Ken Scambler'
+                email 'ken.scambler@gmail.com'
             }
         }
     }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+
+            }
+        }
+    }
+
+    ext.installer = install.repositories.mavenInstaller
+    ext.deployer = uploadArchives.repositories.mavenDeployer
+    installer.pom.project(pomCustomisation)
+    deployer.pom.project(pomCustomisation)
 }
