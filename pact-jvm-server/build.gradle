@@ -2,3 +2,7 @@
 dependencies {
     compile project(':pact-jvm-model'), project(':pact-jvm-consumer')
 }
+
+jar {
+    manifest.attributes 'Main-Class': 'au.com.dius.pact.server.Server'
+}

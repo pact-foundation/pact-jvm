@@ -29,6 +29,11 @@ subprojects {
     sourceCompatibility = '1.6'
 
     jar {
-        manifest.attributes provider: 'gradle'
+        manifest.attributes provider: 'gradle',
+                'Implementation-Title': project.name, 'Implementation-Version': version,
+                'Implementation-Vendor': project.group, 'Implementation-Vendor-Id': project.group,
+                'Specification-Vendor': project.group,
+                'Specification-Title': project.name,
+                'Specification-Version': version
     }
 }
