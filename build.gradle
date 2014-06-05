@@ -36,4 +36,29 @@ subprojects {
                 'Specification-Title': project.name,
                 'Specification-Version': version
     }
+
+    task javadocJar(type: Jar, dependsOn: [javadoc, scaladoc]) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir, scaladoc.destinationDir
+    }
+
+    task sourceJar(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives javadocJar
+        archives sourceJar
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                pom.project {
+
+                }
+            }
+        }
+    }
 }
