@@ -34,7 +34,8 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("testreqheader", "testreqheadervalue");
 
-        return builder.given("test state")
+        return builder
+            .given("test state") // NOTE: Using provider states are optional, you can leave it out
             .uponReceiving("java test interaction")
                 .path("/")
                 .method("GET")
@@ -62,6 +63,8 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
         try {
             assertEquals(new ConsumerClient(url).get("/"), "{\"responsetest\":true}");
         } catch (Exception e) {
+            // NOTE: if you want to see any pact failure, do not throw an exception here. This should be
+            // fixed at some point (see Issue #40 https://github.com/DiUS/pact-jvm/issues/40)
             throw new RuntimeException(e);
         }
     }
