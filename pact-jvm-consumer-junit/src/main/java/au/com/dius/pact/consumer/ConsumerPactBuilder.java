@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.*;
 import au.com.dius.pact.model.Interaction$;
+import org.json.JSONObject;
 import scala.collection.JavaConverters$;
 
 import java.util.ArrayList;
@@ -140,6 +141,11 @@ public class ConsumerPactBuilder {
             return this;
         }
 
+        public PactDslRequestWithPath body(JSONObject body) {
+            requestBody = body.toString();
+            return this;
+        }
+
         public PactDslRequestWithPath path(String path) {
             this.path = path;
             return this;
@@ -172,6 +178,11 @@ public class ConsumerPactBuilder {
         private String responseBody;
         public PactDslResponse body(String body) {
             this.responseBody = body;
+            return this;
+        }
+
+        public PactDslResponse body(JSONObject body) {
+            this.responseBody = body.toString();
             return this;
         }
 
