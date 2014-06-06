@@ -5,6 +5,21 @@ pact-jvm
 
 JVM implementation of the consumer driven contract library (pact)[https://github.com/bethesque/pact_specification]
 
+From the [Ruby Pact website](https://github.com/realestate-com-au/pact):
+
+> Define a pact between service consumers and providers, enabling "consumer driven contract" testing.
+>
+>Pact provides an RSpec DSL for service consumers to define the HTTP requests they will make to a service provider and the HTTP responses they expect back. These expectations are used in the >consumers specs to provide a mock service provider. The interactions are recorded, and played back in the service provider specs to ensure the service provider actually does provide the response the >consumer expects.
+>
+>This allows testing of both sides of an integration point using fast unit tests.
+>
+>This gem is inspired by the concept of "Consumer driven contracts". See http://martinfowler.com/articles/consumerDrivenContracts.html for more information.
+
+## Contact
+
+* Twitter: [@pact_up](https://twitter.com/pact_up)
+* Google users group: https://groups.google.com/forum/#!forum/pact-support
+
 ##I Use Scala and Specs 2
 
 You want to look at: [pact-jvm-consumer-specs2](pact-jvm-consumer-specs2)
@@ -45,6 +60,12 @@ Which is a project that aims at providing tooling to coordinate pact generation 
 
 ##I want to contribute
 
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
+
 You can publish pacts locally using:
 
 ```
@@ -57,3 +78,4 @@ To publish to a nexus repo, change the url in project/Build.scala then run:
 sbt clean test publish
 ```
 
+You will need to be added to the nexus project to be able to do this.
