@@ -6,7 +6,6 @@ import org.specs2.specification._
 import org.specs2.matcher.{StandardMatchResults, MustMatchers}
 import org.specs2.execute.{Result, StandardResults}
 import au.com.dius.pact.model.PactFragmentBuilder.PactWithAtLeastOneRequest
-import scala.util.{Success, Failure, Try}
 
 trait PactSpec extends SpecificationLike
   with MustMatchers
@@ -42,10 +41,10 @@ trait PactSpec extends SpecificationLike
   }
 
   def verify:ConsumerTestVerification[Result] = { r:Result =>
-    if(r.isFailure || r.isError) {
-      Failure(new RuntimeException(r.message))
+    if(r.isSuccess) {
+      None
     } else {
-      Success(r)
+      Some(r)
     }
   }
 }

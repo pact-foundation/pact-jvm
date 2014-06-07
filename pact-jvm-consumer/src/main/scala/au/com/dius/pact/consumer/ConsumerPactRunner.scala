@@ -1,8 +1,7 @@
 package au.com.dius.pact.consumer
 
 import au.com.dius.pact.model.Pact
-import scala.util.Try
-import scala.util.Success
+import scala.util.{Failure, Try, Success}
 
 object ConsumerPactRunner {
   
@@ -26,11 +25,19 @@ class ConsumerPactRunner(server: MockProvider) {
   import ConsumerPactRunner._
   
   def runAndWritePact[T](pact: Pact)(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
-    val tryResults = server.runAndClose(pact)(userCode, userVerification)
-    writeIfMatching(pact, tryResults)
+    val tryResults = server.runAndClose(pact)(userCode)
+    tryResults match {
+      case Failure(e) => PactError(e)
+      case Success((codeResult, pactSessionResults)) => {
+        userVerification(codeResult).fold(writeIfMatching(pact, pactSessionResults)){error =>
+          UserCodeFailed(error)
+        }
+      }
+    }
+
   }
   
   def runAndWritePact(pact: Pact, userCode: Runnable): VerificationResult =
-    runAndWritePact(pact)(userCode.run(), (u:Unit) => Success(u))
+    runAndWritePact(pact)(userCode.run(), (u:Unit) => None)
   
 }

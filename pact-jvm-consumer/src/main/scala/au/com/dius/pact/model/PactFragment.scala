@@ -1,7 +1,6 @@
 package au.com.dius.pact.model
 
 import au.com.dius.pact.consumer.{ConsumerTestVerification, DefaultMockProvider, ConsumerPactRunner, VerificationResult}
-import scala.util.Success
 
 case class PactFragment(consumer: Consumer,
                         provider: Provider,
@@ -18,7 +17,7 @@ case class PactFragment(consumer: Consumer,
   def defaultState: Option[String] = interactions.headOption.map(_.providerState)
 
   def runConsumer(config: MockProviderConfig, test: Runnable): VerificationResult = {
-    duringConsumerSpec(config)(test.run(), (u:Unit) => Success(u))
+    duringConsumerSpec(config)(test.run(), (u:Unit) => None)
   }
 }
 
