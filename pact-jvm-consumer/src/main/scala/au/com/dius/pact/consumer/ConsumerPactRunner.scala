@@ -16,21 +16,21 @@ object ConsumerPactRunner {
     VerificationResult(tryResults)
   }
   
-  def runAndWritePact(pact: Pact)(userCode: => Unit): VerificationResult = {
+  def runAndWritePact[T](pact: Pact)(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
     val server = DefaultMockProvider.withDefaultConfig()
-    new ConsumerPactRunner(server).runAndWritePact(pact)(userCode)
+    new ConsumerPactRunner(server).runAndWritePact(pact)(userCode, userVerification)
   }
 }
 
 class ConsumerPactRunner(server: MockProvider) {
   import ConsumerPactRunner._
   
-  def runAndWritePact(pact: Pact)(userCode: => Unit): VerificationResult = {
-    val tryResults = server.runAndClose(pact)(userCode)
+  def runAndWritePact[T](pact: Pact)(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
+    val tryResults = server.runAndClose(pact)(userCode, userVerification)
     writeIfMatching(pact, tryResults)
   }
   
-  def runAndWritePact(pact: Pact, userCode: Runnable): VerificationResult = 
-    runAndWritePact(pact)(userCode.run())
+  def runAndWritePact(pact: Pact, userCode: Runnable): VerificationResult =
+    runAndWritePact(pact)(userCode.run(), (u:Unit) => Success(u))
   
 }

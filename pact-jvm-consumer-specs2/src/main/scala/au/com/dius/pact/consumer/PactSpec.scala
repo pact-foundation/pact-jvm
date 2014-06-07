@@ -6,6 +6,7 @@ import org.specs2.specification._
 import org.specs2.matcher.{StandardMatchResults, MustMatchers}
 import org.specs2.execute.{Result, StandardResults}
 import au.com.dius.pact.model.PactFragmentBuilder.PactWithAtLeastOneRequest
+import scala.util.{Success, Failure, Try}
 
 trait PactSpec extends SpecificationLike
   with MustMatchers
@@ -35,8 +36,16 @@ trait PactSpec extends SpecificationLike
       val description = fragment.interactions.map(i => s"${i.providerState} ${i.description}").mkString(" ")
 
       fragments = fragments :+ Example(description, {
-        fragment.duringConsumerSpec(config)(test(config)) must beEqualTo(PactVerified)
+        fragment.duringConsumerSpec(config)(test(config), verify) must beEqualTo(PactVerified)
       })
+    }
+  }
+
+  def verify:ConsumerTestVerification[Result] = { r:Result =>
+    if(r.isFailure || r.isError) {
+      Failure(new RuntimeException(r.message))
+    } else {
+      Success(r)
     }
   }
 }
