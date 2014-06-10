@@ -7,7 +7,7 @@ import com.typesafe.scalalogging.slf4j.StrictLogging
 
 trait MockProvider {
   def config: MockProviderConfig
-  def runAndClose(pact: Pact)(code: => Unit): Try[PactSessionResults]
+  def runAndClose[T](pact: Pact)(code: => T): Try[(T, PactSessionResults)]
 }
 
 object DefaultMockProvider {
@@ -37,15 +37,15 @@ abstract class StatefulMockProvider extends MockProvider with StrictLogging {
     start()
   }
   
-  override def runAndClose(pact: Pact)(code: => Unit): Try[PactSessionResults] = {
+  override def runAndClose[T](pact: Pact)(code: => T): Try[(T, PactSessionResults)] = {
     def waitForRequestsToFinish() = Thread.sleep(50)
     Try {
       start(pact)
-      code
+      val codeResult = code
       waitForRequestsToFinish()
       stop()
-      session.remainingResults
-    } 
+      (codeResult, session.remainingResults)
+    }
   }
   
   final def handleRequest(req: Request): Response = synchronized {

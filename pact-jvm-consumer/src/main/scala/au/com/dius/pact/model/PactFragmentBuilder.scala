@@ -2,7 +2,7 @@ package au.com.dius.pact.model
 
 import au.com.dius.pact.model.HttpMethod._
 import org.json4s._
-import au.com.dius.pact.consumer.VerificationResult
+import au.com.dius.pact.consumer.{ConsumerTestVerification, VerificationResult}
 
 object PactFragmentBuilder {
   def apply(consumer: Consumer) = {
@@ -78,8 +78,8 @@ object PactFragmentBuilder {
       DescribingRequest(consumer, provider, state, description, CanBuildPactFragment.additionalBuild(this))
     }
 
-    def duringConsumerSpec(config: MockProviderConfig)(test: => Unit): VerificationResult = {
-      PactFragment(consumer, provider, interactions).duringConsumerSpec(config)(test)
+    def duringConsumerSpec[T](config: MockProviderConfig)(test: => T, verification: ConsumerTestVerification[T]): VerificationResult = {
+      PactFragment(consumer, provider, interactions).duringConsumerSpec(config)(test, verification)
     }
   }
 

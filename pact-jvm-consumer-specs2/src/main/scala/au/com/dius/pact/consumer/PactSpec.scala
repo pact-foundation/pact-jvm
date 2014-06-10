@@ -35,8 +35,16 @@ trait PactSpec extends SpecificationLike
       val description = fragment.interactions.map(i => s"${i.providerState} ${i.description}").mkString(" ")
 
       fragments = fragments :+ Example(description, {
-        fragment.duringConsumerSpec(config)(test(config)) must beEqualTo(PactVerified)
+        fragment.duringConsumerSpec(config)(test(config), verify) must beEqualTo(PactVerified)
       })
+    }
+  }
+
+  def verify:ConsumerTestVerification[Result] = { r:Result =>
+    if(r.isSuccess) {
+      None
+    } else {
+      Some(r)
     }
   }
 }

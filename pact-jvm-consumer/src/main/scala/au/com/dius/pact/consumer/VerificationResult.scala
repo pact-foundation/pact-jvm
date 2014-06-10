@@ -25,3 +25,4 @@ sealed trait VerificationResult {
 object PactVerified extends VerificationResult
 case class PactMismatch(results: PactSessionResults) extends VerificationResult
 case class PactError(error: Throwable) extends VerificationResult
+case class UserCodeFailed[T](error: T) extends VerificationResult

@@ -1,8 +1,7 @@
 package au.com.dius.pact.consumer
 
 import au.com.dius.pact.model.Pact
-import scala.util.Try
-import scala.util.Success
+import scala.util.{Failure, Try, Success}
 
 object ConsumerPactRunner {
   
@@ -16,21 +15,29 @@ object ConsumerPactRunner {
     VerificationResult(tryResults)
   }
   
-  def runAndWritePact(pact: Pact)(userCode: => Unit): VerificationResult = {
+  def runAndWritePact[T](pact: Pact)(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
     val server = DefaultMockProvider.withDefaultConfig()
-    new ConsumerPactRunner(server).runAndWritePact(pact)(userCode)
+    new ConsumerPactRunner(server).runAndWritePact(pact)(userCode, userVerification)
   }
 }
 
 class ConsumerPactRunner(server: MockProvider) {
   import ConsumerPactRunner._
   
-  def runAndWritePact(pact: Pact)(userCode: => Unit): VerificationResult = {
+  def runAndWritePact[T](pact: Pact)(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
     val tryResults = server.runAndClose(pact)(userCode)
-    writeIfMatching(pact, tryResults)
+    tryResults match {
+      case Failure(e) => PactError(e)
+      case Success((codeResult, pactSessionResults)) => {
+        userVerification(codeResult).fold(writeIfMatching(pact, pactSessionResults)){error =>
+          UserCodeFailed(error)
+        }
+      }
+    }
+
   }
   
-  def runAndWritePact(pact: Pact, userCode: Runnable): VerificationResult = 
-    runAndWritePact(pact)(userCode.run())
+  def runAndWritePact(pact: Pact, userCode: Runnable): VerificationResult =
+    runAndWritePact(pact)(userCode.run(), (u:Unit) => None)
   
 }

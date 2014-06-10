@@ -10,9 +10,10 @@ import scala.concurrent.ExecutionContext
 import java.util.concurrent.Executors
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.dispatch.HttpClient
-import scala.util.{Try, Success, Failure}
+import scala.util.Success
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
+import org.specs2.execute.Result
 
 @RunWith(classOf[JUnitRunner])
 class MockProviderSpec extends Specification {
@@ -20,7 +21,15 @@ class MockProviderSpec extends Specification {
   implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
   
   implicit val timeout = FiniteDuration(10L, "second")
-  
+
+  def verify:ConsumerTestVerification[Result] = { r:Result =>
+    if(r.isSuccess) {
+      None
+    } else {
+      Some(r)
+    }
+  }
+
   //TODO: move PactServer startup and shutdown into an around function
   "Pact Mock Service Provider" should {
     "Respond to invalid and valid requests" in {
@@ -29,7 +38,7 @@ class MockProviderSpec extends Specification {
       val validRequest = request.copy(path = s"${server.config.url}/")
       val invalidRequest = request.copy(path = s"${server.config.url}/foo")
       
-      val Success(results) = server.runAndClose(pact) {
+      val Success((codeResult, results)) = server.runAndClose[Result](pact){
   
         val invalidResponse = HttpClient.run(invalidRequest)
         invalidResponse.map(_.status) must beEqualTo(500).await(timeout = timeout)
@@ -37,8 +46,9 @@ class MockProviderSpec extends Specification {
         //hit server with valid request
         val validResponse = HttpClient.run(validRequest)
         validResponse.map(_.status) must beEqualTo(response.status).await(timeout = timeout)
-
       }
+
+      verify(codeResult) must beNone
 
       results.matched.size must === (1)
       results.unexpected.size must === (1)
