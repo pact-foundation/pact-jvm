@@ -69,6 +69,16 @@ public class ConsumerPactBuilder {
                     return this;
                 }
 
+                public PactDslRequestWithoutPath body(JSONObject body) {
+                    requestBody = body.toString();
+                    return this;
+                }
+
+                public PactDslRequestWithoutPath body(PactDslJsonBody body) {
+                    requestBody = body.section("requestMatchers").toString();
+                    return this;
+                }
+
                 public PactDslRequestWithPath path(String path) {
                     return new PactDslRequestWithPath(consumerName, providerName, state, description, path, requestMethod, requestHeaders, requestBody);
                 }
@@ -146,6 +156,11 @@ public class ConsumerPactBuilder {
             return this;
         }
 
+        public PactDslRequestWithPath body(PactDslJsonBody body) {
+            requestBody = body.section("requestMatchers").toString();
+            return this;
+        }
+
         public PactDslRequestWithPath path(String path) {
             this.path = path;
             return this;
@@ -154,6 +169,7 @@ public class ConsumerPactBuilder {
         public PactDslResponse willRespondWith() {
             return new PactDslResponse(this);
         }
+
     }
 
     public class PactDslResponse {
@@ -186,6 +202,11 @@ public class ConsumerPactBuilder {
             return this;
         }
 
+        public PactDslResponse body(PactDslJsonBody body) {
+            this.responseBody = body.section("responseMatchers").toString();
+            return this;
+        }
+
         private void addInteraction() {
             Interaction currentInteraction = Interaction$.MODULE$.apply(
                     existing.description,
@@ -209,5 +230,9 @@ public class ConsumerPactBuilder {
             addInteraction();
             return new PactDslRequestWithPath(existing, description);
         }
+    }
+
+    public static PactDslJsonBody jsonBody() {
+        return new PactDslJsonBody();
     }
 }

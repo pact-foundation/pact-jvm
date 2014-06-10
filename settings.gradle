@@ -7,6 +7,6 @@ include 'pact-jvm-provider'
 include 'pact-jvm-provider-sbt'
 include 'pact-jvm-provider-specs2'
 include 'pact-jvm-server'
-//include 'pact-specification-test'
+include 'pact-specification-test'
 
 rootProject.name = 'pact-jvm'
