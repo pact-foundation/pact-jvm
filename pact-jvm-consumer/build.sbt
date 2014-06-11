@@ -9,7 +9,8 @@ libraryDependencies ++= Seq(
   "org.json4s"   %% "json4s-jackson" % "3.2.6",
   "org.specs2"   %% "specs2"         % "2.2.3" % "test",
   "org.mockito"  %  "mockito-all"    % "1.9.5" % "test",
-  "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2"
+  "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
+  "com.googlecode.java-diff-utils" % "diffutils" % "1.3.0"
 )
 
 initialCommands := """
