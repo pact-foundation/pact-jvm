@@ -10,13 +10,13 @@ import java.util.Date;
 
 public class PactDslJsonBody {
 
-    private JSONObject body, matchers;
-    private String root, section;
+    private JSONObject body;
+    private JSONObject matchers;
+    private String root;
     private PactDslJsonBody parent;
 
     public PactDslJsonBody() {
         root = "$";
-        section = "requestMatchers";
         matchers = new JSONObject();
         body = new JSONObject();
     }
@@ -28,7 +28,6 @@ public class PactDslJsonBody {
     }
 
     public String toString() {
-        body.put(section, matchers);
         return body.toString();
     }
 
@@ -126,8 +125,11 @@ public class PactDslJsonBody {
         return jsonObject;
     }
 
-    public PactDslJsonBody section(String section) {
-        this.section = section;
-        return this;
+    public JSONObject getMatchers() {
+        return matchers;
+    }
+
+    public void setMatchers(JSONObject matchers) {
+        this.matchers = matchers;
     }
 }

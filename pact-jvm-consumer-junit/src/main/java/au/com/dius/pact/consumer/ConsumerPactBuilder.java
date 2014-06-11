@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import scala.collection.JavaConverters$;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -74,13 +75,16 @@ public class ConsumerPactBuilder {
                     return this;
                 }
 
+                private JSONObject requestMatchers;
                 public PactDslRequestWithoutPath body(PactDslJsonBody body) {
-                    requestBody = body.section("requestMatchers").toString();
+                    requestMatchers = body.getMatchers();
+                    requestBody = body.toString();
                     return this;
                 }
 
                 public PactDslRequestWithPath path(String path) {
-                    return new PactDslRequestWithPath(consumerName, providerName, state, description, path, requestMethod, requestHeaders, requestBody);
+                    return new PactDslRequestWithPath(consumerName, providerName, state, description, path,
+                            requestMethod, requestHeaders, requestBody, requestMatchers);
                 }
             }
         }
@@ -97,6 +101,7 @@ public class ConsumerPactBuilder {
         private String requestMethod;
         private Map<String, String> requestHeaders;
         private String requestBody;
+        private JSONObject requestMatchers;
 
         private List<Interaction> interactions = new ArrayList<Interaction>();
 
@@ -107,7 +112,9 @@ public class ConsumerPactBuilder {
                                       String path,
                                       String requestMethod,
                                       Map<String, String> requestHeaders,
-                                      String requestBody) {
+                                      String requestBody,
+                                      JSONObject requestMatchers) {
+            this.requestMatchers = requestMatchers;
             this.consumer = new Consumer(consumerName);
             this.provider = new Provider(providerName);
 
@@ -118,6 +125,7 @@ public class ConsumerPactBuilder {
             this.requestMethod = requestMethod;
             this.requestHeaders = requestHeaders;
             this.requestBody = requestBody;
+            this.requestMatchers = requestMatchers;
         }
 
         public PactDslRequestWithPath(PactDslRequestWithPath existing, String description) {
@@ -131,7 +139,7 @@ public class ConsumerPactBuilder {
             this.requestMethod = existing.requestMethod;
             this.requestHeaders = existing.requestHeaders;
             this.requestBody = existing.requestBody;
-
+            this.requestMatchers = existing.requestMatchers;
 
             this.interactions = existing.interactions;
         }
@@ -157,7 +165,8 @@ public class ConsumerPactBuilder {
         }
 
         public PactDslRequestWithPath body(PactDslJsonBody body) {
-            requestBody = body.section("requestMatchers").toString();
+            requestMatchers = body.getMatchers();
+            requestBody = body.toString();
             return this;
         }
 
@@ -202,8 +211,10 @@ public class ConsumerPactBuilder {
             return this;
         }
 
+        private JSONObject responseMatchers;
         public PactDslResponse body(PactDslJsonBody body) {
-            this.responseBody = body.section("responseMatchers").toString();
+            responseMatchers = body.getMatchers();
+            this.responseBody = body.toString();
             return this;
         }
 
@@ -211,8 +222,9 @@ public class ConsumerPactBuilder {
             Interaction currentInteraction = Interaction$.MODULE$.apply(
                     existing.description,
                     existing.state,
-                    Request$.MODULE$.apply(existing.requestMethod, existing.path, existing.requestHeaders, existing.requestBody),
-                    Response$.MODULE$.apply(responseStatus, responseHeaders, responseBody)
+                    Request$.MODULE$.apply(existing.requestMethod, existing.path, existing.requestHeaders,
+                            existing.requestBody, existing.requestMatchers),
+                    Response$.MODULE$.apply(responseStatus, responseHeaders, responseBody, responseMatchers)
             );
 
             existing.interactions.add(currentInteraction);

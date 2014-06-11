@@ -3,6 +3,7 @@ package au.com.dius.pact.model
 import au.com.dius.pact.model.HttpMethod._
 import org.json4s._
 import au.com.dius.pact.consumer.{ConsumerTestVerification, VerificationResult}
+import org.json.JSONObject
 
 object PactFragmentBuilder {
   def apply(consumer: Consumer) = {
@@ -36,30 +37,32 @@ object PactFragmentBuilder {
     /**
      * supports java DSL
      */
-    def matching(path: String, method: String, headers: java.util.Map[String, String], body: String): DescribingResponse = {
+    def matching(path: String, method: String, headers: java.util.Map[String, String], body: String, matchers: JSONObject): DescribingResponse = {
       import collection.JavaConversions._
-      matching(path, method, optional(headers.toMap), optional(body))
+      matching(path, method, optional(headers.toMap), optional(body), optional(matchers))
     }
 
     def matching(path: String,
                  method: String = Get,
                  headers: Option[Map[String, String]] = None,
-                 body: Option[JValue] = None): DescribingResponse = {
-      DescribingResponse(Request(method, path, headers, body))
+                 body: Option[JValue] = None,
+                 matchers: Option[JSONObject] = None): DescribingResponse = {
+      DescribingResponse(Request(method, path, headers, body, matchers))
     }
 
     case class DescribingResponse(request: Request) {
       /**
        * supports java DSL
        */
-      def willRespondWith(status: Int, headers: java.util.Map[String, String], body: String): PactWithAtLeastOneRequest = {
+      def willRespondWith(status: Int, headers: java.util.Map[String, String], body: String, matchers: JSONObject): PactWithAtLeastOneRequest = {
         import collection.JavaConversions._
-        willRespondWith(status, headers.toMap, body)
+        willRespondWith(status, headers.toMap, body, matchers)
       }
 
       def willRespondWith(status:Int = 200,
                           headers: Map[String,String] = Map(),
-                          body: String = ""): PactWithAtLeastOneRequest = {
+                          body: String = "",
+                          matchers: JSONObject = null): PactWithAtLeastOneRequest = {
         builder(
           consumer,
           provider,
@@ -68,7 +71,7 @@ object PactFragmentBuilder {
             description,
             state.getOrElse(""), //TODO: state shoud be Optional in Interactions
             request,
-            Response(status, headers, body))))
+            Response(status, headers, body, matchers))))
       }
     }
   }

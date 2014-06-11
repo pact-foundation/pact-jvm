@@ -80,7 +80,7 @@ class MockProviderSpec extends Specification {
       }
       
       val expectedInvalidResponse = Response(500, Map("Access-Control-Allow-Origin" -> "*"),
-        Some(JObject(JField("error", JString("unexpected request")))))
+        Some(JObject(JField("error", JString("unexpected request")))), null)
       
       compareRequests(results.unexpected.head, invalidRequest)
       compare(results.matched.head, validRequest, response)

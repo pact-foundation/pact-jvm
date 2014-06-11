@@ -15,11 +15,11 @@ object Fixtures {
 
   val request = Request(Post, "/",
     Map("testreqheader" -> "testreqheadervalue"),
-    "test" -> true)
+    "test" -> true, null)
 
   val response = Response(200,
     Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*"),
-    "responsetest" -> true)
+    "responsetest" -> true, null)
 
   val interaction = Interaction(
     description = "test interaction",

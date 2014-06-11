@@ -4,6 +4,7 @@ import org.json4s._
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
 import scala.collection.JavaConversions
+import org.json.JSONObject
 
 object Pact {
   def apply(provider: Provider, consumer: Consumer, interactions: java.util.List[Interaction]): Pact = {
@@ -85,7 +86,8 @@ object HttpMethod {
 case class Request(method: String,
                    path: String,
                    headers: Option[Map[String, String]],
-                   body: Option[JValue]) {
+                   body: Option[JValue],
+                   matchers: Option[JSONObject]) {
   def bodyString:Option[String] = body.map{ b => compact(render(b))}
 
   def cookie: Option[List[String]] = cookieHeader.map(_._2.split(";").map(_.trim).toList)
@@ -100,7 +102,7 @@ case class Request(method: String,
   private def findHeaderByCaseInsensitiveKey(key: String): Option[(String, String)] = headers.flatMap(_.find(_._1.toLowerCase == key.toLowerCase))
 
   override def toString: String = {
-    s"\tmethod: $method\n\tpath: $path\n\theaders: $headers\n\tbody:\n${body.map{b => pretty(render(b))}}"
+    s"\tmethod: $method\n\tpath: $path\n\theaders: $headers\n\trequestMatchers: $matchers\n\tbody:\n${body.map{b => pretty(render(b))}}"
   }
 }
 
@@ -128,30 +130,38 @@ trait Optionals {
       Some(body)
     }
   }
+
+  def optional(matchers: JSONObject): Option[JSONObject] = {
+    if(matchers == null) {
+      None
+    } else {
+      Some(matchers)
+    }
+  }
 }
 
 object Request extends Optionals {
-  def apply(method: String, path: String, headers: Map[String, String], body: String): Request = {
-    Request(method, path, optional(headers), optional(body))
+  def apply(method: String, path: String, headers: Map[String, String], body: String, matchers: JSONObject): Request = {
+    Request(method, path, optional(headers), optional(body), optional(matchers))
   }
 
-  def apply(method: String, path: String, headers: Map[String, String], body: JValue): Request = {
-    Request(method, path, optional(headers), optional(body))
+  def apply(method: String, path: String, headers: Map[String, String], body: JValue, matchers: JSONObject): Request = {
+    Request(method, path, optional(headers), optional(body), optional(matchers))
   }
 
-  def apply(method: String, path: String, headers: java.util.Map[String,String], body: String): Request = {
-    Request(method, path, optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body))
+  def apply(method: String, path: String, headers: java.util.Map[String,String], body: String, matchers: JSONObject): Request = {
+    Request(method, path, optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body), optional(matchers))
   }
 }
 
 //TODO: support duplicate headers
 case class Response(status: Int,
                     headers: Option[Map[String, String]],
-                    body: Option[JValue]) {
+                    body: Option[JValue], matchers: Option[JSONObject]) {
   def bodyString:Option[String] = body.map{ b => compact(render(b)) }
 
   override def toString: String = {
-    s"\tstatus: $status \n\theaders: $headers \n\tbody: \n${body.map{b => pretty(render(b))}}"
+    s"\tstatus: $status \n\theaders: $headers \n\tmatchers: $matchers \n\tbody: \n${body.map{b => pretty(render(b))}}"
   }
 }
 
@@ -159,21 +169,20 @@ object Response extends Optionals {
 
   val CrossSiteHeaders = Map[String, String]("Access-Control-Allow-Origin" -> "*")
 
-  def apply(status: Int, headers: Map[String, String], body: String): Response = {
-    Response(status, optional(headers), optional(body))
+  def apply(status: Int, headers: Map[String, String], body: String, matchers: JSONObject): Response = {
+    Response(status, optional(headers), optional(body), optional(matchers))
   }
 
-  def apply(status: Int, headers: Map[String, String], body: JValue): Response = {
-    Response(status, optional(headers), optional(body))
+  def apply(status: Int, headers: Map[String, String], body: JValue, matchers: JSONObject): Response = {
+    Response(status, optional(headers), optional(body), optional(matchers))
   }
 
-  def apply(status: Int, headers: java.util.Map[String, String], body: String): Response = {
-    Response(status, optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body))
+  def apply(status: Int, headers: java.util.Map[String, String], body: String, matchers: JSONObject): Response = {
+    Response(status, optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body), optional(matchers))
   }
 
   def invalidRequest(request: Request) = {
-    Response(500, CrossSiteHeaders, "error"-> s"Unexpected request : $request")
+    Response(500, CrossSiteHeaders, "error"-> s"Unexpected request : $request", null)
   }
 }
-
 

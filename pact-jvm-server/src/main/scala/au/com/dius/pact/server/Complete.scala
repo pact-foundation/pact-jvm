@@ -26,7 +26,7 @@ object Complete {
   }
 
   def apply(request: Request, oldState: ServerState): Result = {
-    def clientError = Result(Response(400, None, None), oldState)
+    def clientError = Result(Response(400, None, None, None), oldState)
     def pactWritten(response: Response, port: Int) = Result(response, oldState - port)
 
     val result = for {
@@ -38,8 +38,8 @@ object Complete {
       mockProvider.stop()
       
       ConsumerPactRunner.writeIfMatching(pact, sessionResults) match {
-        case PactVerified => pactWritten(Response(200, Response.CrossSiteHeaders, None), mockProvider.config.port)
-        case error => pactWritten(Response(400, Map[String, String](), toJson(error)), mockProvider.config.port)
+        case PactVerified => pactWritten(Response(200, Response.CrossSiteHeaders, None, null), mockProvider.config.port)
+        case error => pactWritten(Response(400, Map[String, String](), toJson(error), null), mockProvider.config.port)
       }
     }
     

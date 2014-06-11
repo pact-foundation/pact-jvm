@@ -12,7 +12,7 @@ object RequestRouter {
       case "create" => Create(request, oldState)
       case "complete" => Complete(request, oldState)
       case "" => ListServers(oldState)
-      case _ => Result(Response(404, None, None), oldState)
+      case _ => Result(Response(404, None, None, None), oldState)
     }
   }
 }

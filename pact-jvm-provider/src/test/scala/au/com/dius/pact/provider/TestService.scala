@@ -25,9 +25,9 @@ object TestService extends StrictLogging {
               state = s
             }
           }
-          Response(200, None, None)
+          Response(200, None, None, None)
         } else {
-          responses.get(state).flatMap(_.get(request.uri)).getOrElse(Response(400, None, None))
+          responses.get(state).flatMap(_.get(request.uri)).getOrElse(Response(400, None, None, None))
         }
         Conversions.pactToUnfilteredResponse(response)
       }

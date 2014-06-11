@@ -17,7 +17,7 @@ object Conversions {
   }
 
   implicit def dispatchResponseToPactResponse(response: client.Response): Response = {
-    Response(response.getStatusCode, toMap(response.getHeaders), response.getResponseBody)
+    Response(response.getStatusCode, toMap(response.getHeaders), response.getResponseBody, null)
   }
 
   case class Headers(headers:Option[Map[String, String]]) extends unfiltered.response.Responder[Any] {
@@ -36,6 +36,6 @@ object Conversions {
   }
 
   implicit def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {
-    Request(request.method, request.uri, toHeaders(request), Source.fromInputStream(request.inputStream).mkString(""))
+    Request(request.method, request.uri, toHeaders(request), Source.fromInputStream(request.inputStream).mkString(""), null)
   }
 }
