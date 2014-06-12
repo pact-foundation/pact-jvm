@@ -16,7 +16,7 @@ public class PactDslJsonBody {
     private PactDslJsonBody parent;
 
     public PactDslJsonBody() {
-        root = "$";
+        root = "$.body";
         matchers = new JSONObject();
         body = new JSONObject();
     }
