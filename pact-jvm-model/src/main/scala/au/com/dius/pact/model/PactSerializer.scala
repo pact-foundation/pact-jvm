@@ -17,7 +17,8 @@ trait PactSerializer extends StrictLogging {
       "method" -> r.method,
       "path" -> r.path,
       "headers" -> r.headers,
-      "body" -> r.body
+      "body" -> r.body,
+      "requestMatchers" -> parse(r.matchers.getOrElse("{}").toString)
     )
   }
 
@@ -25,7 +26,8 @@ trait PactSerializer extends StrictLogging {
     JObject(
       "status" -> JInt(r.status),
       "headers" -> r.headers,
-      "body" -> r.body
+      "body" -> r.body,
+      "responseMatchers" -> parse(r.matchers.getOrElse("{}").toString)
     )
   }
 

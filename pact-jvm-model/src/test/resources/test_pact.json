@@ -16,7 +16,8 @@
       },
       "body" : {
         "test" : true
-      }
+      },
+      "requestMatchers" : { }
     },
     "response" : {
       "status" : 200,
@@ -25,12 +26,16 @@
       },
       "body" : {
         "responsetest" : true
-      }
+      },
+      "responseMatchers" : { }
     }
   } ],
   "metadata" : {
     "pact_gem" : {
       "version" : "1.0.9"
+    },
+    "pact-jvm" : {
+      "version" : ""
     }
   }
 }
