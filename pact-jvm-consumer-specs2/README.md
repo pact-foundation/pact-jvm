@@ -7,7 +7,7 @@ pact-jvm-specs2
 
 In the root folder of your project in build.sbt add the line:
 ```
-libraryDependencies += "au.com.dius" %% "pact-jvm-specs2" % "2.0-RC1"
+libraryDependencies += "au.com.dius" %% "pact-jvm-consumer-specs2" % "2.0-RC4"
 ```
 
 ##Usage
