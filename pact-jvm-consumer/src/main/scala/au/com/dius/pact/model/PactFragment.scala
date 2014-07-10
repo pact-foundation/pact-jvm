@@ -14,7 +14,7 @@ case class PactFragment(consumer: Consumer,
   }
 
   //TODO: it would be a good idea to ensure that all interactions in the fragment have the same state
-  def defaultState: Option[String] = interactions.headOption.map(_.providerState)
+  def defaultState: Option[String] = interactions.headOption.map(_.providerState).get
 
   def runConsumer(config: MockProviderConfig, test: Runnable): VerificationResult = {
     duringConsumerSpec(config)(test.run(), (u:Unit) => None)

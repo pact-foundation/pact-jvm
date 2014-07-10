@@ -48,7 +48,7 @@ case class Pact(provider: Provider, consumer: Consumer, interactions: Seq[Intera
   def sortInteractions: Pact = 
     copy(interactions = interactions.sortBy(i => s"${i.providerState}${i.description}"))
   
-  def interactionFor(description:String, providerState:String) = interactions.find { i =>
+  def interactionFor(description:String, providerState: Option[String]) = interactions.find { i =>
     i.description == description && i.providerState == providerState
   }
 }
@@ -58,7 +58,7 @@ case class Provider(name:String)
 case class Consumer(name:String)
 
 case class Interaction(description: String,
-                       providerState: String, //TODO: state should be Optional
+                       providerState: Option[String],
                        request: Request,
                        response: Response) {
   

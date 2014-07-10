@@ -69,7 +69,7 @@ object PactFragmentBuilder {
           state,
           Seq(Interaction(
             description,
-            state.getOrElse(""), //TODO: state shoud be Optional in Interactions
+            state,
             request,
             Response(status, headers, body, matchers))))
       }

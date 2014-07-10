@@ -23,7 +23,7 @@ object Fixtures {
 
   val interaction = Interaction(
     description = "test interaction",
-    providerState = "test state",
+    providerState = Some("test state"),
     request = request,
     response = response
   )

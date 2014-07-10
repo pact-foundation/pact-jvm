@@ -44,7 +44,7 @@ class SpecificationSpec extends SpecificationLike
   override def is: Fragments = Fragments.create(fragments :_*)
 
   def test(input: PactSpecification) = {
-    val fakeInteraction = Interaction("", "", input.expected, Response(200, Map[String, String](), "", null))
+    val fakeInteraction = Interaction("", None, input.expected, Response(200, Map[String, String](), "", null))
     val result = RequestMatching.compareRequest(fakeInteraction, input.actual)
     if(input.`match`) {
       result mustEqual FullRequestMatch(fakeInteraction)

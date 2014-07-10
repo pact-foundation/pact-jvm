@@ -3,10 +3,12 @@ package au.com.dius.pact.consumer;
 import au.com.dius.pact.model.*;
 import au.com.dius.pact.model.Interaction$;
 import org.json.JSONObject;
+import scala.None$;
+import scala.Some$;
 import scala.collection.JavaConverters$;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +37,10 @@ public class ConsumerPactBuilder {
             return new PactDslWithState(state);
         }
 
+        public PactDslWithState.PactDslRequestWithoutPath uponReceiving(String description) {
+            return new PactDslWithState(null).uponReceiving(description);
+        }
+
         public class PactDslWithState {
             private String state;
             public PactDslWithState(String state) {
@@ -58,7 +64,7 @@ public class ConsumerPactBuilder {
                     return this;
                 }
 
-                private Map<String, String> requestHeaders;
+                private Map<String, String> requestHeaders = Collections.emptyMap();
                 public PactDslRequestWithoutPath headers(Map<String, String> headers) {
                     requestHeaders = headers;
                     return this;
@@ -99,7 +105,7 @@ public class ConsumerPactBuilder {
         private String description;
         private String path;
         private String requestMethod;
-        private Map<String, String> requestHeaders;
+        private Map<String, String> requestHeaders = Collections.emptyMap();
         private String requestBody;
         private JSONObject requestMatchers;
 
@@ -194,7 +200,7 @@ public class ConsumerPactBuilder {
             return this;
         }
 
-        private Map<String, String> responseHeaders;
+        private Map<String, String> responseHeaders = Collections.emptyMap();
         public PactDslResponse headers(Map<String, String> headers) {
             this.responseHeaders = headers;
             return this;
@@ -219,13 +225,24 @@ public class ConsumerPactBuilder {
         }
 
         private void addInteraction() {
-            Interaction currentInteraction = Interaction$.MODULE$.apply(
-                    existing.description,
-                    existing.state,
-                    Request$.MODULE$.apply(existing.requestMethod, existing.path, existing.requestHeaders,
-                            existing.requestBody, existing.requestMatchers),
-                    Response$.MODULE$.apply(responseStatus, responseHeaders, responseBody, responseMatchers)
-            );
+            Interaction currentInteraction;
+            if (existing.state == null) {
+                currentInteraction = Interaction$.MODULE$.apply(
+                        existing.description,
+                        None$.apply(existing.state),
+                        Request$.MODULE$.apply(existing.requestMethod, existing.path, existing.requestHeaders,
+                                existing.requestBody, existing.requestMatchers),
+                        Response$.MODULE$.apply(responseStatus, responseHeaders, responseBody, responseMatchers)
+                );
+            } else {
+                currentInteraction = Interaction$.MODULE$.apply(
+                        existing.description,
+                        Some$.MODULE$.apply(existing.state),
+                        Request$.MODULE$.apply(existing.requestMethod, existing.path, existing.requestHeaders,
+                                existing.requestBody, existing.requestMatchers),
+                        Response$.MODULE$.apply(responseStatus, responseHeaders, responseBody, responseMatchers)
+                );
+            }
 
             existing.interactions.add(currentInteraction);
         }
