@@ -1,7 +1,7 @@
 // stolen from https://github.com/linkedin/rest.li-sbt-plugin/blob/master/build.gradle
 
 dependencies {
-    compile project(':pact-jvm-provider')
+    compile project(':pact-jvm-provider_2.10')
     // This sbt artifact is non-standard.  Default configuration does not exist, so must explicitly request the compile configuration.
     compile group: 'org.scala-sbt', name: 'sbt', version: project.sbtVersion, configuration: 'compile'
 }

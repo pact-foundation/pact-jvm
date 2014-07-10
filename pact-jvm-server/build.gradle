@@ -1,6 +1,6 @@
 
 dependencies {
-    compile project(':pact-jvm-model'), project(':pact-jvm-consumer')
+    compile project(':pact-jvm-model_2.10'), project(':pact-jvm-consumer_2.10')
 }
 
 jar {

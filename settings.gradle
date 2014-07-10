@@ -10,3 +10,7 @@ include 'pact-jvm-server'
 include 'pact-specification-test'
 
 rootProject.name = 'pact-jvm'
+
+rootProject.children.each {
+    it.name += "_2.10"
+}
