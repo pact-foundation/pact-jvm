@@ -7,6 +7,7 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'scala'
     apply plugin: 'maven'
+    apply plugin: 'signing'
 
     repositories {
         mavenLocal()
@@ -95,6 +96,12 @@ subprojects {
         repositories {
             mavenDeployer {
 
+                beforeDeployment { def deployment -> signing.signPom(deployment) }
+
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: sonatypeUsername, password: sonatypePassword)
+                }
+
             }
         }
     }
@@ -103,4 +110,8 @@ subprojects {
     ext.deployer = uploadArchives.repositories.mavenDeployer
     installer.pom.project(pomCustomisation)
     deployer.pom.project(pomCustomisation)
+
+    signing {
+        sign configurations.archives
+    }
 }
