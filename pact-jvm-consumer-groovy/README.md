@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 group-id = `au.com.dius`
 
-artifact-id = `pact-jvm-consumer-groovy`
+artifact-id = `pact-jvm-consumer-groovy_2.10`
 
 version-id = `2.0-RC5`
 

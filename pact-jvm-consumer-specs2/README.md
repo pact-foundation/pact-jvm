@@ -1,5 +1,5 @@
-pact-jvm-specs2
-===============
+pact-jvm-consumer-specs2
+========================
 
 ##Specs2 Bindings for the pact-jvm library
 

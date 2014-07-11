@@ -1,5 +1,5 @@
-pact-jvm-junit
-===============
+pact-jvm-consumer-junit
+=======================
 
 Bindings for the junit library
 
@@ -9,9 +9,9 @@ The library is available on maven central using:
 
 group-id = `au.com.dius`
 
-artifact-id = `pact-jvm-junit`
+artifact-id = `pact-jvm-consumer-junit_2.10`
 
-version-id = `2.0-RC1`
+version-id = `2.0-RC5`
 
 ##Usage
 
