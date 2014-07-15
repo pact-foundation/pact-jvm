@@ -24,7 +24,7 @@ The second is the location of your pact config json file.
 The pact config is a simple mapping of provider names to endpoint url's
 paths will be appended to endpoint url's when interactions are attempted
 
-for an example see: https://github.com/DiUS/pact-jvm/blob/master/provider/src/test/resources/pact-config.json
+for an example see: https://github.com/DiUS/pact-jvm/blob/master/pact-jvm-provider/src/test/resources/pact-config.json
 
 ### Provider State
 
