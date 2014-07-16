@@ -44,9 +44,9 @@ Then create an instance of the `PactBuilder` in your test.
             )
         }
         
-	// Execute the run method to have the mock server run. 
-	// It takes a closure to execute your requests and returns a Pact VerificationResult.
-	VerificationResult result = alice_service.run() {
+	      // Execute the run method to have the mock server run.
+	      // It takes a closure to execute your requests and returns a Pact VerificationResult.
+	      VerificationResult result = alice_service.run() {
             def client = new RESTClient('http://localhost:1234/')
             def alice_response = client.get(path: '/mallory')
 
