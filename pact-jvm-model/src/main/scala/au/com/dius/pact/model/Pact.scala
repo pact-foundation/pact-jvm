@@ -182,7 +182,7 @@ object Response extends Optionals {
   }
 
   def invalidRequest(request: Request) = {
-    Response(500, CrossSiteHeaders, "error"-> s"Unexpected request : $request", null)
+    Response(500, CrossSiteHeaders ++ Map("Content-Type" -> "application/json"), "error"-> s"Unexpected request : $request", null)
   }
 }
 

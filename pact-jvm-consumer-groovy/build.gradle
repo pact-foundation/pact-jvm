@@ -1,5 +1,7 @@
 apply plugin: 'groovy'
 
 dependencies {
-    compile project(':pact-jvm-consumer_2.10'), 'org.codehaus.groovy:groovy-all:2.3.4'
+    compile project(':pact-jvm-consumer_2.10'), 'org.codehaus.groovy:groovy-all:2.3.4:indy'
+
+    testCompile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1', 'ch.qos.logback:logback-classic:1.1.2'
 }
