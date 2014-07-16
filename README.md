@@ -22,45 +22,49 @@ From the [Ruby Pact website](https://github.com/realestate-com-au/pact):
 * Twitter: [@pact_up](https://twitter.com/pact_up)
 * Google users group: https://groups.google.com/forum/#!forum/pact-support
 
-##I Use Scala and Specs 2
+## I Use Scala and Specs 2
 
 You want to look at: [pact-jvm-consumer-specs2](pact-jvm-consumer-specs2)
 
-##I Use Java
+## I Use Java
 
 You want to look at: [pact-jvm-consumer-junit](pact-jvm-consumer-junit)
 
-##I Use some other jvm language or test framework (groovy, clojure etc)
+## I Use Groovy or Grails
+
+You want to look at: [pact-jvm-consumer-groovy](pact-jvm-consumer-groovy) or [pact-jvm-consumer-junit](pact-jvm-consumer-junit)
+
+## I Use some other jvm language or test framework (clojure etc)
 
 You want to look at: [Pact Consumer](pact-jvm-consumer)
 
-##I am writing a provider and want to run pacts
+## I am writing a provider and want to run pacts
 
 You want to look at: [pact sbt plugin](pact-jvm-provider-sbt)
 
-##I want to run pacts but don't want to use sbt
+## I want to run pacts but don't want to use sbt
 
 You want to look at: [pact-jvm-provider](pact-jvm-provider)
 
-##I Use Ruby
+## I Use Ruby
 The pact-jvm libraries are pure jvm technologies and do not have any native dependencies.
 
 However if you have a ruby provider, the json produced by this library is compatible with the ruby pact library.
 
 You'll want to look at: [pact](https://github.com/realestate-com-au/pact)
 
-##I Use something completely different
+## I Use something completely different
 
 There's a limit to how much we can help, however check out [pact-jvm-server](pact-jvm-server)
 
-##How do I transport my pacts from consumers to providers?
+## How do I transport my pacts from consumers to providers?
 
 You want to look at:
 [Pact Broker](https://github.com/bethesque/pact_broker)
 
 Which is a project that aims at providing tooling to coordinate pact generation and delivery between projects
 
-##I want to contribute
+## I want to contribute
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
