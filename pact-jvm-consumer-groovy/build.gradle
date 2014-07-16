@@ -1,4 +1,3 @@
-apply plugin: 'groovy'
 
 dependencies {
     compile project(':pact-jvm-consumer_2.10'), 'org.codehaus.groovy:groovy-all:2.3.4:indy'

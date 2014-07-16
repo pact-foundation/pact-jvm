@@ -59,7 +59,7 @@ class PactBuilder {
     def buildInteractions() {
         int numInteractions = Math.min(requestData.size(), responseData.size())
         for (int i = 0; i < numInteractions; i++) {
-            Map headers = requestData[i].requestHeaders ?: [:]
+            Map headers = requestData[i].headers ?: [:]
             Map responseHeaders = responseData[i].headers ?: [:]
             interactions << Interaction$.MODULE$.apply(
                     requestDescription,

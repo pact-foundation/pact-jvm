@@ -6,6 +6,7 @@ project.ext {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'scala'
+    apply plugin: 'groovy'
     apply plugin: 'maven'
     apply plugin: 'signing'
 
@@ -44,9 +45,9 @@ subprojects {
                 'Specification-Version': version
     }
 
-    task javadocJar(type: Jar, dependsOn: [javadoc, scaladoc]) {
+    task javadocJar(type: Jar, dependsOn: [javadoc, scaladoc, groovydoc]) {
         classifier = 'javadoc'
-        from javadoc.destinationDir, scaladoc.destinationDir
+        from javadoc.destinationDir, scaladoc.destinationDir, groovydoc.destinationDir
     }
 
     task sourceJar(type: Jar) {
