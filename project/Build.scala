@@ -6,7 +6,7 @@ object BuildSettings {
 	val publishSettings = Seq(
 		version := "2.0-RC6",
 		organization := "au.com.dius",
-    scalaVersion := "2.10.3",
+    crossScalaVersions := Seq("2.10", "2.11"),
 
 	    publishMavenStyle := true,
 	    // when playing around with a local install of nexus use this:
