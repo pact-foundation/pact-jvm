@@ -4,5 +4,5 @@ jdk:
   - oraclejdk7
   - openjdk7
   - oraclejdk8
-before_script:
- - "export JAVA_OPTS=-XX:MaxPermSize=256m"
+env:
+  - JAVA_OPTS=-XX:MaxPermSize=256m
