@@ -1,6 +1,36 @@
+To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
+
 # 2.0.0
 
-
+* dc7ba34 - updated the readmes (Ronald Holshausen, Sun Jul 20 09:52:34 2014 +1000)
+* 62a9ddd - small tweak to the docs (Ronald Holshausen, Sun Jul 20 09:38:56 2014 +1000)
+* d0fc19e - bump version (Ronald Holshausen, Sun Jul 20 09:38:36 2014 +1000)
+* e58114f - try the env instead for travis ci (Ronald Holshausen, Sat Jul 19 19:33:52 2014 +1000)
+* aadfc43 - ok, lets actually set the permgen if we say we are going to set it (Ronald Holshausen, Sat Jul 19 19:25:04 2014 +1000)
+* 18fe49b - give the travis-ci build some permgen juice (Ronald Holshausen, Sat Jul 19 19:17:40 2014 +1000)
+* e4a7f52 - if we are building against java 6, we can not use the groovy indy jars (Ronald Holshausen, Sat Jul 19 17:18:50 2014 +1000)
+* 5953cc1 - get travis to build using gradle instead of sbt (Ronald Holshausen, Sat Jul 19 16:55:46 2014 +1000)
+* 09efa0c - setup gradle to cross compile against different scala version (Ronald Holshausen, Sat Jul 19 16:47:36 2014 +1000)
+* eafc6d9 - fix the expansion of the scala version in the dependancies (Ronald Holshausen, Sat Jul 19 14:19:13 2014 +1000)
+* d2d8444 - added 2.10 version to the cross build versions (Ronald Holshausen, Sat Jul 19 14:18:03 2014 +1000)
+* c52977f - if the sonatype properties are not defined, the build will fail (Ronald Holshausen, Sat Jul 19 13:19:25 2014 +1000)
+* a67a62f - add the additional scala versions to travis (Ronald Holshausen, Sat Jul 19 13:18:42 2014 +1000)
+* 97ac503 - Merge pull request #47 from CaseyLeask/update-scala-to-2.11 (Ronald Holshausen, Sat Jul 19 12:44:10 2014 +1000)
+* 315956f - Our progress in attempting to upgrade to 2.11 (Casey Leask, Thu Jul 17 16:16:32 2014 +1000)
+* 2e4457d - Used Cross-building to support Scala 2.10 & 2.11 (Casey Leask, Thu Jul 17 10:39:40 2014 +1000)
+* a01c111 - updated main readme (Ronald Holshausen, Wed Jul 16 21:03:57 2014 +1000)
+* 7bb6dba - update the readme and sbt build for the groovy dsl (Ronald Holshausen, Wed Jul 16 20:57:35 2014 +1000)
+* 8bc8961 - updated the readme for the pact groovy DSL (Ronald Holshausen, Wed Jul 16 20:45:41 2014 +1000)
+* f9c5478 - implemented groovy pact DSL (Ronald Holshausen, Wed Jul 16 17:28:17 2014 +1000)
+* 7fce093 - Merge pull request #45 from codingricky/readme (Ronald Holshausen, Wed Jul 16 10:31:04 2014 +1000)
+* b87f5ac - updated link to example pact-config (Ricky Yim, Tue Jul 15 20:32:56 2014 +1000)
+* d6bca0e - no openjdk8 on travis yet (Ronald Holshausen, Fri Jul 11 16:29:19 2014 +1000)
+* 1caa828 - include java 8 in the travis config (Ronald Holshausen, Fri Jul 11 16:20:08 2014 +1000)
+* f7f8695 - fix the sbt build for groovy module (Ronald Holshausen, Fri Jul 11 15:51:43 2014 +1000)
+* adec037 - corrected some of the readmes (Ronald Holshausen, Fri Jul 11 15:38:46 2014 +1000)
+* 7ff0e35 - added a groovy subproject (Ronald Holshausen, Fri Jul 11 15:30:46 2014 +1000)
+* c605d4c - bump version (Ronald Holshausen, Fri Jul 11 14:23:05 2014 +1000)
+* 409e714 - add gradle setup for deploying to nexus (Ronald Holshausen, Fri Jul 11 13:36:23 2014 +1000)
 
 # 2.0 RC5 - More Java DSL tweaks, started pact specification 2 matcher implementation
 
