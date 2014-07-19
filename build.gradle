@@ -16,7 +16,7 @@ subprojects {
     }
 
     dependencies {
-        compile 'org.slf4j:slf4j-api:1.7.5', 'org.scala-lang:scala-library:2.10.3',
+        compile 'org.slf4j:slf4j-api:1.7.5', 'org.scala-lang:scala-library:#{project.scalaVersion}',
                 "com.typesafe.scala-logging:scala-logging-slf4j_${project.scalaVersion}:2.1.2",
                 "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.7.1",
                 "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.0",
