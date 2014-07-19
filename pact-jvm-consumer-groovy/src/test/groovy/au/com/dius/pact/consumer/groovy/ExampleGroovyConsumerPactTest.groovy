@@ -41,7 +41,7 @@ class ExampleGroovyConsumerPactTest {
             body name: 'Bobby' //Pact::Term.new(matcher: /Bob/, generate: 'Bob')
             with(method: 'post', path: '/donuts',
                 body: body.toPrettyString(),
-                headers: ['Accept': 'text/plain', 'Content-Type': 'application/json']
+                headers: ['Accept': 'application/json', 'Content-Type': 'application/json']
             )
             will_respond_with(status: 201, body: '"Donut created."', headers: ['Content-Type': 'text/plain'])
 

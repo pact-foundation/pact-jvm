@@ -5,3 +5,5 @@ libraryDependencies ++= Seq(
   "org.specs2" %% "specs2" % "2.3.11" % "test",
   "org.mockito" % "mockito-core" % "1.8.5" % "test",
   "org.scala-lang.modules" % "scala-xml_2.11" % "1.0.2")
+
+scalaVersion := "2.10.4"

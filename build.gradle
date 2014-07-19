@@ -1,9 +1,15 @@
-project.ext {
-    scalaVersion = '2.10'
-    sbtVersion = '0.13.5'
-}
-
 subprojects {
+
+    def m = project.name =~ /.*_(2\.1\d)/
+    if (m.matches()) {
+      project.ext {
+          scalaVersion = m.group(1)
+          sbtVersion = '0.13.5'
+      }
+    }
+
+    buildDir = new File(projectDir, "build/" + project.scalaVersion)
+
     apply plugin: 'java'
     apply plugin: 'scala'
     apply plugin: 'groovy'
@@ -16,13 +22,17 @@ subprojects {
     }
 
     dependencies {
-        compile 'org.slf4j:slf4j-api:1.7.5', "org.scala-lang:scala-library:${project.scalaVersion}",
-                "com.typesafe.scala-logging:scala-logging-slf4j_${project.scalaVersion}:2.1.2",
-                "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.7.1",
-                "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.0",
-                "org.json4s:json4s-native_${project.scalaVersion}:3.2.6",
-                "org.json4s:json4s-jackson_${project.scalaVersion}:3.2.6"
-        testCompile 'junit:junit:4.11', 'org.mockito:mockito-all:1.9.5', "org.specs2:specs2_${project.scalaVersion}:2.2.3"
+      compile 'org.slf4j:slf4j-api:1.7.5', "org.scala-lang:scala-library:${project.scalaVersion}",
+              "com.typesafe.scala-logging:scala-logging-slf4j_${project.scalaVersion}:2.1.2",
+              "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.7.1",
+              "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.0",
+              "org.json4s:json4s-native_${project.scalaVersion}:3.2.10",
+              "org.json4s:json4s-jackson_${project.scalaVersion}:3.2.10"
+      testCompile 'junit:junit:4.11', 'org.mockito:mockito-all:1.9.5', "org.specs2:specs2_${project.scalaVersion}:2.3.13"
+
+      if (project.scalaVersion == '2.11') {
+        compile "org.scala-lang.modules:scala-xml_2.11:1.0.2"
+      }
     }
 
     group = 'au.com.dius'
@@ -116,4 +126,25 @@ subprojects {
         required { gradle.taskGraph.hasTask("uploadArchives") }
         sign configurations.archives
     }
+}
+
+task build_2_10(description: 'Build all artifacts against Scala 2.10')
+task build_2_11(description: 'Build all artifacts against Scala 2.11')
+task install_2_10(description: 'Install all artifacts built against Scala 2.10')
+task install_2_11(description: 'Install all artifacts built against Scala 2.11')
+
+build_2_10.dependsOn {
+    subprojects.findAll { project -> project.name.endsWith('_2.10') }.collect { it.name + ':build' }
+}
+
+build_2_11.dependsOn {
+    subprojects.findAll { project -> project.name.endsWith('_2.11') }.collect { it.name + ':build' }
+}
+
+install_2_10.dependsOn {
+    subprojects.findAll { project -> project.name.endsWith('_2.10') }.collect { it.name + ':install' }
+}
+
+install_2_11.dependsOn {
+    subprojects.findAll { project -> project.name.endsWith('_2.11') }.collect { it.name + ':install' }
 }

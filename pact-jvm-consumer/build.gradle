@@ -1,4 +1,4 @@
 
 dependencies {
-    compile project(':pact-jvm-model_2.10')
+    compile project(":pact-jvm-model_${project.scalaVersion}")
 }
