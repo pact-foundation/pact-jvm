@@ -22,38 +22,47 @@ From the [Ruby Pact website](https://github.com/realestate-com-au/pact):
 * Twitter: [@pact_up](https://twitter.com/pact_up)
 * Google users group: https://groups.google.com/forum/#!forum/pact-support
 
-## I Use Scala and Specs 2
+## Service Consumers
+
+Pact-JVM has a number of ways you can write your service consumer tests.
+
+### I Use Scala and Specs 2
 
 You want to look at: [pact-jvm-consumer-specs2](pact-jvm-consumer-specs2)
 
-## I Use Java
+### I Use Java
 
 You want to look at: [pact-jvm-consumer-junit](pact-jvm-consumer-junit)
 
-## I Use Groovy or Grails
+### I Use Groovy or Grails
 
 You want to look at: [pact-jvm-consumer-groovy](pact-jvm-consumer-groovy) or [pact-jvm-consumer-junit](pact-jvm-consumer-junit)
 
-## I Use some other jvm language or test framework (clojure etc)
+### I Use some other jvm language or test framework (clojure etc)
 
 You want to look at: [Pact Consumer](pact-jvm-consumer)
 
-## I am writing a provider and want to run pacts
+## Service Providers
+
+Once you have run your consumer tests, you will have generated some Pact files. You can then verify your service providers
+with these files.
+
+### I am writing a provider and want to verify pacts
 
 You want to look at: [pact sbt plugin](pact-jvm-provider-sbt)
 
-## I want to run pacts but don't want to use sbt
+### I want to run pacts but don't want to use sbt
 
 You want to look at: [pact-jvm-provider](pact-jvm-provider)
 
-## I Use Ruby
+### I Use Ruby
 The pact-jvm libraries are pure jvm technologies and do not have any native dependencies.
 
 However if you have a ruby provider, the json produced by this library is compatible with the ruby pact library.
 
 You'll want to look at: [pact](https://github.com/realestate-com-au/pact)
 
-## I Use something completely different
+### I Use something completely different
 
 There's a limit to how much we can help, however check out [pact-jvm-server](pact-jvm-server)
 
@@ -62,7 +71,7 @@ There's a limit to how much we can help, however check out [pact-jvm-server](pac
 You want to look at:
 [Pact Broker](https://github.com/bethesque/pact_broker)
 
-Which is a project that aims at providing tooling to coordinate pact generation and delivery between projects
+Which is a project that aims at providing tooling to coordinate pact generation and delivery between projects.
 
 ## I want to contribute
 
@@ -72,16 +81,32 @@ Which is a project that aims at providing tooling to coordinate pact generation 
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
-You can publish pacts locally using:
+## Building the library
 
-```
-sbt clean test publishLocal
-```
+Most of pact-jvm is written in Scala. You can build it using SBT (the old way). We are moving the build to Gradle,
+so you can build it with that too.
+
+To build the libraries:
+
+    $ sbt clean test install
+
+or
+
+    $ ./gradlew clean build
+
+You can publish pacts to your local maven repo using:
+
+    $ sbt clean test publishLocal
+
+or
+
+    $ ~/.gradlew clean install
 
 To publish to a nexus repo, change the url in project/Build.scala then run:
 
-```
-sbt clean test publish
-```
+    $ sbt clean test publish
+
+or
+    $ ./gradlew clean check uploadArchives
 
 You will need to be added to the nexus project to be able to do this.
