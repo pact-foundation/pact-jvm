@@ -5,7 +5,7 @@ The sbt plugin adds an sbt task for running all provider pacts against a running
 
 To use the pact sbt plugin, add the following to your project/plugins.sbt
 
-    addSbtPlugin("com.dius" %% "pact-jvm-provider-sbt" % "2.0-RC5")
+    addSbtPlugin("com.dius" %% "pact-jvm-provider-sbt" % "2.0.0")
 
 and the following to your build.sbt
 

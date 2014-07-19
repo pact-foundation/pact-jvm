@@ -83,7 +83,7 @@ Which is a project that aims at providing tooling to coordinate pact generation 
 
 ## Building the library
 
-Most of pact-jvm is written in Scala. You can build it using SBT (the old way). We are moving the build to Gradle,
+Most of Pact-JVM is written in Scala. You can build it using SBT (the old way). We are moving the build to Gradle,
 so you can build it with that too.
 
 To build the libraries:
@@ -107,6 +107,7 @@ To publish to a nexus repo, change the url in project/Build.scala then run:
     $ sbt clean test publish
 
 or
+
     $ ./gradlew clean check uploadArchives
 
 You will need to be added to the nexus project to be able to do this.

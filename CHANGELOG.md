@@ -1,3 +1,7 @@
+# 2.0.0
+
+
+
 # 2.0 RC5 - More Java DSL tweaks, started pact specification 2 matcher implementation
 
 * 0682fe2 - update changelog (Ronald Holshausen, Fri Jul 11 13:10:38 2014 +1000)

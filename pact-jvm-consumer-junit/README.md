@@ -11,7 +11,7 @@ group-id = `au.com.dius`
 
 artifact-id = `pact-jvm-consumer-junit_2.10`
 
-version-id = `2.0-RC5`
+version-id = `2.0.0`
 
 ##Usage
 
