@@ -22,6 +22,14 @@ From the [Ruby Pact website](https://github.com/realestate-com-au/pact):
 * Twitter: [@pact_up](https://twitter.com/pact_up)
 * Google users group: https://groups.google.com/forum/#!forum/pact-support
 
+## Note about artifact names and versions
+
+Pact-JVM is written in Scala. As Scala does not provide binary compatibility between major versions, all the Pact-JVM
+artifacts have the version of Scala they were built with in the artifact name. So, for example, the pact-jvm-consumer-junit
+module has a Jar file named pact-jvm-consumer_2.10. The full name of the file is pact-jvm-consumer_2.10-2.0.0.jar.
+
+We currently cross-compile all the artifacts against 2.10 and 2.11 versions of Scala, except for the SBT modules.
+
 ## Service Consumers
 
 Pact-JVM has a number of ways you can write your service consumer tests.
