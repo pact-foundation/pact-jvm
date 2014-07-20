@@ -1,11 +1,13 @@
 package au.com.dius.pact.model
 
-import java.io.PrintWriter
+import java.io.{InputStream, File, PrintWriter}
+import java.util.jar.JarInputStream
+import com.typesafe.scalalogging.slf4j.StrictLogging
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
 
-trait PactSerializer {
+trait PactSerializer extends StrictLogging {
   this: Pact =>
 
   import org.json4s.JsonDSL._
@@ -15,7 +17,8 @@ trait PactSerializer {
       "method" -> r.method,
       "path" -> r.path,
       "headers" -> r.headers,
-      "body" -> r.body
+      "body" -> r.body,
+      "requestMatchers" -> parse(r.matchers.getOrElse("{}").toString)
     )
   }
 
@@ -23,7 +26,8 @@ trait PactSerializer {
     JObject(
       "status" -> JInt(r.status),
       "headers" -> r.headers,
-      "body" -> r.body
+      "body" -> r.body,
+      "responseMatchers" -> parse(r.matchers.getOrElse("{}").toString)
     )
   }
 
@@ -49,11 +53,26 @@ trait PactSerializer {
       "provider" -> provider,
       "consumer" -> consumer,
       "interactions" -> interactions,
-      "metadata" -> Map( "pact_gem" -> Map("version" -> "1.0.9"))
+      "metadata" -> Map( "pact_gem" -> Map("version" -> "1.0.9"), "pact-jvm" -> Map("version" -> lookupVersion))
     )
   }
 
   def serialize(writer: PrintWriter) {
     writer.print(pretty(render(this)))
+  }
+
+  def lookupVersion() = {
+    val url = getClass.getProtectionDomain.getCodeSource.getLocation
+    val openStream: InputStream = url.openStream()
+    try {
+      val jarStream = new JarInputStream(openStream)
+      val manifest = jarStream.getManifest
+      val attributes = manifest.getMainAttributes
+      attributes.getValue("Implementation-Version")
+    }
+    catch {
+      case e : Throwable => logger.warn("Could not load pact-jvm manifest", e); ""
+    }
+    finally openStream.close()
   }
 }

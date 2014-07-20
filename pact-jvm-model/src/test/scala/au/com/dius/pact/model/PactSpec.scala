@@ -12,13 +12,13 @@ class PactSpec extends Specification {
   "Pact" should {
     "Locate Interactions" in {
       val description = "descriptiondata"
-      val state = "stateData"
+      val state = Some("stateData")
 
       val interaction = Interaction(
         description,
         state,
-        Request(HttpMethod.Get,"",None, None),
-        Response(200, None, None)
+        Request(HttpMethod.Get,"",None, None, None),
+        Response(200, None, None, None)
       )
 
       val pact = Pact(
@@ -40,7 +40,7 @@ class PactSpec extends Specification {
       }
 
       "allow different states" in {
-        val newInteractions = Seq(interaction.copy(providerState = "different"))
+        val newInteractions = Seq(interaction.copy(providerState = Some("different")))
         val result = pact merge pact.copy(interactions = newInteractions)
         result must beEqualTo(MergeSuccess(Pact(provider, consumer, interactions ++ newInteractions )))
       }

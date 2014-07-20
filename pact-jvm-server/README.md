@@ -15,7 +15,7 @@ The server implements a `JSON` `REST` Admin API with the following endpoints.
 
 ## Running the server
 
-    sbt pact-jvm-server/run
+    $ sbt pact-jvm-server/run
 
 By default will run on port `29999` but a port number can be optionally supplied.
 

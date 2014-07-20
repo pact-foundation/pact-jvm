@@ -3,9 +3,12 @@ package au.com.dius.pact.consumer;
 import au.com.dius.pact.model.*;
 import au.com.dius.pact.model.Interaction$;
 import org.json.JSONObject;
+import scala.None$;
+import scala.Some$;
 import scala.collection.JavaConverters$;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +37,10 @@ public class ConsumerPactBuilder {
             return new PactDslWithState(state);
         }
 
+        public PactDslWithState.PactDslRequestWithoutPath uponReceiving(String description) {
+            return new PactDslWithState(null).uponReceiving(description);
+        }
+
         public class PactDslWithState {
             private String state;
             public PactDslWithState(String state) {
@@ -57,7 +64,7 @@ public class ConsumerPactBuilder {
                     return this;
                 }
 
-                private Map<String, String> requestHeaders;
+                private Map<String, String> requestHeaders = Collections.emptyMap();
                 public PactDslRequestWithoutPath headers(Map<String, String> headers) {
                     requestHeaders = headers;
                     return this;
@@ -69,8 +76,21 @@ public class ConsumerPactBuilder {
                     return this;
                 }
 
+                public PactDslRequestWithoutPath body(JSONObject body) {
+                    requestBody = body.toString();
+                    return this;
+                }
+
+                private JSONObject requestMatchers;
+                public PactDslRequestWithoutPath body(PactDslJsonBody body) {
+                    requestMatchers = body.getMatchers();
+                    requestBody = body.toString();
+                    return this;
+                }
+
                 public PactDslRequestWithPath path(String path) {
-                    return new PactDslRequestWithPath(consumerName, providerName, state, description, path, requestMethod, requestHeaders, requestBody);
+                    return new PactDslRequestWithPath(consumerName, providerName, state, description, path,
+                            requestMethod, requestHeaders, requestBody, requestMatchers);
                 }
             }
         }
@@ -85,8 +105,9 @@ public class ConsumerPactBuilder {
         private String description;
         private String path;
         private String requestMethod;
-        private Map<String, String> requestHeaders;
+        private Map<String, String> requestHeaders = Collections.emptyMap();
         private String requestBody;
+        private JSONObject requestMatchers;
 
         private List<Interaction> interactions = new ArrayList<Interaction>();
 
@@ -97,7 +118,9 @@ public class ConsumerPactBuilder {
                                       String path,
                                       String requestMethod,
                                       Map<String, String> requestHeaders,
-                                      String requestBody) {
+                                      String requestBody,
+                                      JSONObject requestMatchers) {
+            this.requestMatchers = requestMatchers;
             this.consumer = new Consumer(consumerName);
             this.provider = new Provider(providerName);
 
@@ -108,6 +131,7 @@ public class ConsumerPactBuilder {
             this.requestMethod = requestMethod;
             this.requestHeaders = requestHeaders;
             this.requestBody = requestBody;
+            this.requestMatchers = requestMatchers;
         }
 
         public PactDslRequestWithPath(PactDslRequestWithPath existing, String description) {
@@ -121,7 +145,7 @@ public class ConsumerPactBuilder {
             this.requestMethod = existing.requestMethod;
             this.requestHeaders = existing.requestHeaders;
             this.requestBody = existing.requestBody;
-
+            this.requestMatchers = existing.requestMatchers;
 
             this.interactions = existing.interactions;
         }
@@ -146,6 +170,12 @@ public class ConsumerPactBuilder {
             return this;
         }
 
+        public PactDslRequestWithPath body(PactDslJsonBody body) {
+            requestMatchers = body.getMatchers();
+            requestBody = body.toString();
+            return this;
+        }
+
         public PactDslRequestWithPath path(String path) {
             this.path = path;
             return this;
@@ -154,6 +184,7 @@ public class ConsumerPactBuilder {
         public PactDslResponse willRespondWith() {
             return new PactDslResponse(this);
         }
+
     }
 
     public class PactDslResponse {
@@ -169,7 +200,7 @@ public class ConsumerPactBuilder {
             return this;
         }
 
-        private Map<String, String> responseHeaders;
+        private Map<String, String> responseHeaders = Collections.emptyMap();
         public PactDslResponse headers(Map<String, String> headers) {
             this.responseHeaders = headers;
             return this;
@@ -186,13 +217,32 @@ public class ConsumerPactBuilder {
             return this;
         }
 
+        private JSONObject responseMatchers;
+        public PactDslResponse body(PactDslJsonBody body) {
+            responseMatchers = body.getMatchers();
+            this.responseBody = body.toString();
+            return this;
+        }
+
         private void addInteraction() {
-            Interaction currentInteraction = Interaction$.MODULE$.apply(
-                    existing.description,
-                    existing.state,
-                    Request$.MODULE$.apply(existing.requestMethod, existing.path, existing.requestHeaders, existing.requestBody),
-                    Response$.MODULE$.apply(responseStatus, responseHeaders, responseBody)
-            );
+            Interaction currentInteraction;
+            if (existing.state == null) {
+                currentInteraction = Interaction$.MODULE$.apply(
+                        existing.description,
+                        None$.apply(existing.state),
+                        Request$.MODULE$.apply(existing.requestMethod, existing.path, existing.requestHeaders,
+                                existing.requestBody, existing.requestMatchers),
+                        Response$.MODULE$.apply(responseStatus, responseHeaders, responseBody, responseMatchers)
+                );
+            } else {
+                currentInteraction = Interaction$.MODULE$.apply(
+                        existing.description,
+                        Some$.MODULE$.apply(existing.state),
+                        Request$.MODULE$.apply(existing.requestMethod, existing.path, existing.requestHeaders,
+                                existing.requestBody, existing.requestMatchers),
+                        Response$.MODULE$.apply(responseStatus, responseHeaders, responseBody, responseMatchers)
+                );
+            }
 
             existing.interactions.add(currentInteraction);
         }
@@ -209,5 +259,9 @@ public class ConsumerPactBuilder {
             addInteraction();
             return new PactDslRequestWithPath(existing, description);
         }
+    }
+
+    public static PactDslJsonBody jsonBody() {
+        return new PactDslJsonBody();
     }
 }

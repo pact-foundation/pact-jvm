@@ -1,4 +1,4 @@
 
 dependencies {
-    testCompile project(':pact-jvm-model')
+    testCompile project(":pact-jvm-model_${project.scalaVersion}")
 }

@@ -9,7 +9,7 @@ object ListServers {
   def apply(oldState: ServerState): Result = {
     implicit val formats = Serialization.formats(NoTypeHints)
     val body = Serialization.write(Map("ports" -> oldState.keySet))
-    Result(Response(200, Map[String, String](), body), oldState)
+    Result(Response(200, Map[String, String](), body, null), oldState)
   }
 }
 

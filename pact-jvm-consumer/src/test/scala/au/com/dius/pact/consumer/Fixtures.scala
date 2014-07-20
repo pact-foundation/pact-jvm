@@ -14,15 +14,15 @@ object Fixtures {
 
   val request = Request(Post, "/",
     Map("testreqheader" -> "testreqheadervalue"),
-    "test" -> true)
+    "test" -> true, null)
 
   val response = Response(200,
     Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*"),
-    "responsetest" -> true)
+    "responsetest" -> true, null)
 
   val interaction = Interaction(
     description = "test interaction",
-    providerState = "test state",
+    providerState = Some("test state"),
     request = request,
     response = response
   )
@@ -58,7 +58,7 @@ object Fixtures {
     }
 
     def simpleGet(path: String): Future[(Int, Option[String])] = {
-      HttpClient.run(Request(Get, serverUrl + path, None, None)).map { response =>
+      HttpClient.run(Request(Get, serverUrl + path, None, None, None)).map { response =>
         (response.status, response.bodyString)
       }
     }

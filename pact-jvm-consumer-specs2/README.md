@@ -1,16 +1,16 @@
-pact-jvm-specs2
-===============
+pact-jvm-consumer-specs2
+========================
 
-##Specs2 Bindings for the pact-jvm library
+## Specs2 Bindings for the pact-jvm library
 
-##Dependency
+## Dependency
 
 In the root folder of your project in build.sbt add the line:
 ```
-libraryDependencies += "au.com.dius" %% "pact-jvm-specs2" % "2.0-RC1"
+libraryDependencies += "au.com.dius" %% "pact-jvm-consumer-specs2" % "2.0.0"
 ```
 
-##Usage
+## Usage
 
 To author a test, extend `PactSpec`
 

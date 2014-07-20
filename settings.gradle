@@ -1,12 +1,23 @@
-include 'pact-jvm-consumer'
-include 'pact-jvm-consumer-junit'
-include 'pact-jvm-consumer-sbt'
-include 'pact-jvm-consumer-specs2'
-include 'pact-jvm-model'
-include 'pact-jvm-provider'
-include 'pact-jvm-provider-sbt'
-include 'pact-jvm-provider-specs2'
-include 'pact-jvm-server'
-//include 'pact-specification-test'
+def crossCompileModules = [ 'pact-jvm-consumer', 'pact-jvm-consumer-junit', 'pact-jvm-consumer-specs2',
+  'pact-jvm-consumer-groovy', 'pact-jvm-model', 'pact-jvm-provider', 'pact-jvm-provider-specs2',
+  'pact-jvm-server', 'pact-specification-test']
+
+def sbtModules = ['pact-jvm-consumer-sbt', 'pact-jvm-provider-sbt']
 
 rootProject.name = 'pact-jvm'
+
+crossCompileModules.each {
+  include it + '_2.10'
+  include it + '_2.11'
+}
+
+sbtModules.each {
+  include it + '_2.10'
+}
+
+rootProject.children.each {
+  def m = it.dir =~ /(.*)_2\.1\d$/
+  if (m.matches()) {
+    it.dir = file(m.group(1))
+  }
+}

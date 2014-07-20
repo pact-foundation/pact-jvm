@@ -5,16 +5,16 @@ import Keys.{streams, target}
 
 object CopyPacts extends Plugin {
 
-  val copyPacts = inputKey[Unit]("copy all pacts to provider project, supply dryRun param to skip git push")
-  val copyPact = inputKey[Unit]("copy a pact to provider project, supply dryRun param to skip git push")
-  val providerRepos = settingKey[Map[String, String]]("mapping of pact filename to git repo locations")
-  val pactFolder = settingKey[File]("folder that consumer outputs pacts to during test phase")
-  val providerPactDir = settingKey[String]("Location to store pacts in the provider repo")
+  val copyPacts = InputKey[Unit]("copy all pacts to provider project, supply dryRun param to skip git push")
+  val copyPact = InputKey[Unit]("copy a pact to provider project, supply dryRun param to skip git push")
+  val providerRepos = SettingKey[Map[String, String]]("mapping of pact filename to git repo locations")
+  val pactFolder = SettingKey[File]("folder that consumer outputs pacts to during test phase")
+  val providerPactDir = SettingKey[String]("Location to store pacts in the provider repo")
 
   val copyPactsSettings = Seq(
     providerPactDir := "src/test/resources/pacts",
 
-    pactFolder := new File(target.value, "pacts"),
+    pactFolder := new File(target.value, "pacts"), // <+= Initialize[String](targetValue => new File(targetValue, "pacts")),
 
     copyPact := {
       import _root_.sbt.complete.DefaultParsers._

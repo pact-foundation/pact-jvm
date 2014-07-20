@@ -9,7 +9,7 @@ object AnimalServiceResponses {
 
   def alligator(name:String): Response = {
     val json: JValue = "alligators" -> List("name" -> s"$name")
-    Response(200, contentHeaders, Some(json))
+    Response(200, contentHeaders, Some(json), null)
   }
   val bobResponse = alligator("Bob")
   val maryResponse = alligator("Mary")
@@ -26,10 +26,10 @@ object AnimalServiceResponses {
       "/alligators/Mary" -> maryResponse
     ),
     "there is not an alligator named Mary" -> Map (
-      "/alligators/Mary" -> Response(404, None, None)
+      "/alligators/Mary" -> Response(404, None, None, None)
     ),
     "an error has occurred" -> Map (
-      "/alligators" -> Response(500, contentHeaders, Some(errorJson))
+      "/alligators" -> Response(500, contentHeaders, Some(errorJson), null)
     )
   )
 

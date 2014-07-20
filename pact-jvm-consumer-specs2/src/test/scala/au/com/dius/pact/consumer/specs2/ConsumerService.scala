@@ -30,7 +30,7 @@ case class ConsumerService(serverUrl: String) {
   }
 
   def simpleGet(path: String): Future[(Int, Option[String])] = {
-    HttpClient.run(Request("GET", serverUrl + path, None, None)).map { response =>
+    HttpClient.run(Request("GET", serverUrl + path, None, None, None)).map { response =>
       (response.status, response.bodyString)
     }
   }

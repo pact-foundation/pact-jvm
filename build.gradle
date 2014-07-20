@@ -1,12 +1,29 @@
-project.ext {
-    scalaVersion = '2.10'
-    sbtVersion = '0.13.5'
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'org.apache.commons:commons-lang3:3.3.2'
+  }
 }
 
 subprojects {
+
+    def m = project.name =~ /.*_(2\.1\d)/
+    if (m.matches()) {
+      project.ext {
+          scalaVersion = m.group(1)
+          sbtVersion = '0.13.5'
+      }
+    }
+
+    buildDir = new File(projectDir, "build/" + project.scalaVersion)
+
     apply plugin: 'java'
     apply plugin: 'scala'
+    apply plugin: 'groovy'
     apply plugin: 'maven'
+    apply plugin: 'signing'
 
     repositories {
         mavenLocal()
@@ -14,17 +31,21 @@ subprojects {
     }
 
     dependencies {
-        compile 'org.slf4j:slf4j-api:1.7.5', 'org.scala-lang:scala-library:2.10.3',
-                "com.typesafe.scala-logging:scala-logging-slf4j_${project.scalaVersion}:2.1.2",
-                "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.7.1",
-                "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.0",
-                "org.json4s:json4s-native_${project.scalaVersion}:3.2.6",
-                "org.json4s:json4s-jackson_${project.scalaVersion}:3.2.6"
-        testCompile 'junit:junit:4.11', 'org.mockito:mockito-all:1.9.5', "org.specs2:specs2_${project.scalaVersion}:2.2.3"
+      compile 'org.slf4j:slf4j-api:1.7.5', "org.scala-lang:scala-library:${project.scalaVersion}",
+              "com.typesafe.scala-logging:scala-logging-slf4j_${project.scalaVersion}:2.1.2",
+              "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.7.1",
+              "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.0",
+              "org.json4s:json4s-native_${project.scalaVersion}:3.2.10",
+              "org.json4s:json4s-jackson_${project.scalaVersion}:3.2.10"
+      testCompile 'junit:junit:4.11', 'org.mockito:mockito-all:1.9.5', "org.specs2:specs2_${project.scalaVersion}:2.3.13"
+
+      if (project.scalaVersion == '2.11') {
+        compile "org.scala-lang.modules:scala-xml_2.11:1.0.2"
+      }
     }
 
     group = 'au.com.dius'
-    version = '2.0-RC5'
+    version = '2.0.0'
     targetCompatibility = '1.6'
     sourceCompatibility = '1.6'
 
@@ -43,9 +64,9 @@ subprojects {
                 'Specification-Version': version
     }
 
-    task javadocJar(type: Jar, dependsOn: [javadoc, scaladoc]) {
+    task javadocJar(type: Jar, dependsOn: [javadoc, scaladoc, groovydoc]) {
         classifier = 'javadoc'
-        from javadoc.destinationDir, scaladoc.destinationDir
+        from javadoc.destinationDir, scaladoc.destinationDir, groovydoc.destinationDir
     }
 
     task sourceJar(type: Jar) {
@@ -59,6 +80,8 @@ subprojects {
     }
 
     def pomCustomisation = {
+        name project.name
+        description new File(projectDir, 'README.md').text
         url 'https://github.com/DiUS/pact-jvm'
         licenses {
             license {
@@ -95,6 +118,12 @@ subprojects {
         repositories {
             mavenDeployer {
 
+                beforeDeployment { def deployment -> signing.signPom(deployment) }
+
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+//                    authentication(userName: sonatypeUsername, password: sonatypePassword)
+                }
+
             }
         }
     }
@@ -103,4 +132,30 @@ subprojects {
     ext.deployer = uploadArchives.repositories.mavenDeployer
     installer.pom.project(pomCustomisation)
     deployer.pom.project(pomCustomisation)
+
+    signing {
+        required { gradle.taskGraph.hasTask("uploadArchives") }
+        sign configurations.archives
+    }
+}
+
+task build_2_10(description: 'Build all artifacts against Scala 2.10')
+task build_2_11(description: 'Build all artifacts against Scala 2.11')
+task install_2_10(description: 'Install all artifacts built against Scala 2.10')
+task install_2_11(description: 'Install all artifacts built against Scala 2.11')
+
+build_2_10.dependsOn {
+    subprojects.findAll { project -> project.name.endsWith('_2.10') }.collect { it.name + ':build' }
+}
+
+build_2_11.dependsOn {
+    subprojects.findAll { project -> project.name.endsWith('_2.11') }.collect { it.name + ':build' }
+}
+
+install_2_10.dependsOn {
+    subprojects.findAll { project -> project.name.endsWith('_2.10') }.collect { it.name + ':install' }
+}
+
+install_2_11.dependsOn {
+    subprojects.findAll { project -> project.name.endsWith('_2.11') }.collect { it.name + ':install' }
 }

@@ -4,9 +4,10 @@ import com.typesafe.sbt.pgp.PgpKeys._
 
 object BuildSettings {
 	val publishSettings = Seq(
-		version := "2.0-RC5",
+		version := "2.0-RC6",
 		organization := "au.com.dius",
-    scalaVersion := "2.10.3",
+    scalaVersion := "2.10.4",
+    crossScalaVersions := Seq("2.10.4", "2.11.1"),
 
 	    publishMavenStyle := true,
 	    // when playing around with a local install of nexus use this:
@@ -21,7 +22,6 @@ object BuildSettings {
 	       else
 	         Some("releases" at nexus + "service/local/staging/deploy/maven2")
 	    },
-//      publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository"))),
 	    pomExtra :=
 	      <url>https://github.com/DiUS/pact-jvm</url>
 	      <licenses>
@@ -82,7 +82,7 @@ object RootBuild extends Build {
 		id = "pact-jvm",
 		base = file("."),
 		settings = commonSettings ++ skipPublish ++ skipTest)
-		.aggregate(model, consumer, provider, plugin, consumerSbt, server, consumerSpecs2, providerSpecs2, junit, pactSpecification)
+		.aggregate(model, consumer, provider, plugin, consumerSbt, server, consumerSpecs2, providerSpecs2, junit, pactSpecification, consumerGroovy)
 
 	def p(id: String, settings: Seq[Def.Setting[_]] = commonSettings) = Project(
 		id = id, 
@@ -96,6 +96,8 @@ object RootBuild extends Build {
   lazy val consumerSpecs2 = p("pact-jvm-consumer-specs2").dependsOn(consumer)
 
   lazy val junit = p("pact-jvm-consumer-junit").dependsOn(consumer)
+
+  lazy val consumerGroovy = p("pact-jvm-consumer-groovy").dependsOn(consumer)
 
 	lazy val provider = p("pact-jvm-provider").dependsOn(model)
 

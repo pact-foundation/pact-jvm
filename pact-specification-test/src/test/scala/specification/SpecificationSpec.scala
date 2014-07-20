@@ -24,7 +24,7 @@ class SpecificationSpec extends SpecificationLike
     def accept(dir: File, name: String): Boolean = name.endsWith(".json")
   }
 
-  def fragments: Seq[Example] = new File("pact-specification-test/src/test/resources/request").listFiles().flatMap { folder =>
+  def fragments: Seq[Example] = new File("src/test/resources/request").listFiles().flatMap { folder =>
     if(folder.isDirectory) {
       val dirName = folder.getName
       folder.listFiles(jsonFilter).map { testFile =>
@@ -44,7 +44,7 @@ class SpecificationSpec extends SpecificationLike
   override def is: Fragments = Fragments.create(fragments :_*)
 
   def test(input: PactSpecification) = {
-    val fakeInteraction = Interaction("", "", input.expected, Response(200, Map[String, String](), ""))
+    val fakeInteraction = Interaction("", None, input.expected, Response(200, Map[String, String](), "", null))
     val result = RequestMatching.compareRequest(fakeInteraction, input.actual)
     if(input.`match`) {
       result mustEqual FullRequestMatch(fakeInteraction)

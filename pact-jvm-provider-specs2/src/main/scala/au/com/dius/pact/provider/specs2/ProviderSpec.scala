@@ -25,7 +25,7 @@ trait ProviderSpec extends Specification {
         val actualResponse = Await.result(actualResponseFuture, timeout)
         ResponseMatching.matchRules(interaction.response, actualResponse) must beEqualTo(FullResponseMatch)
       }
-      Example(description,{inState(interaction.providerState, test)})
+      Example(description,{inState(interaction.providerState.get, test)})
     }
 
     Fragments.create(fragments :_*)

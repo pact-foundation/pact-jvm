@@ -17,9 +17,9 @@ class PactSpec(config: PactConfiguration, pact: Pact)(implicit timeout: Duration
        |interaction "${interaction.description}"
        |in state: "${interaction.providerState}" """.stripMargin in {
 
-        val stateChangeFuture = config.stateChangeUrl match {
-          case Some(stateChangeUrl) => HttpClient.run(EnterStateRequest(stateChangeUrl.url, interaction.providerState))
-          case None => Future()
+        val stateChangeFuture = (config.stateChangeUrl, interaction.providerState) match {
+          case (Some(stateChangeUrl), Some(providerState)) => HttpClient.run(EnterStateRequest(stateChangeUrl.url, providerState))
+          case (_, _) => Future()
         }
         
         val pactResponseFuture: Future[Response] = for {
