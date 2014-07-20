@@ -80,6 +80,8 @@ subprojects {
     }
 
     def pomCustomisation = {
+        name project.name
+        description new File(projectDir, 'README.md').text
         url 'https://github.com/DiUS/pact-jvm'
         licenses {
             license {
