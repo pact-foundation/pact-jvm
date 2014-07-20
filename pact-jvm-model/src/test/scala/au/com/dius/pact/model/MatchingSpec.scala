@@ -18,11 +18,11 @@ class MatchingSpec extends Specification {
         matchBody(None, None, config) must beNone
       }
       "Handle left None" in {
-        val expected = BodyMismatch(missing(request.body.get))
+        val expected = BodyMismatch(request.body, None)
         matchBody(request.body, None, config) must beSome(expected)
       }
       "Handle right None" in {
-        val expected = BodyMismatch(added(request.body.get))
+        val expected = BodyMismatch(None, request.body)
         matchBody(None, request.body, config) must beSome(expected)
       }
     }

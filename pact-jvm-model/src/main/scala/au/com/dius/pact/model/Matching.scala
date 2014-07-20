@@ -29,7 +29,7 @@ sealed trait ResponsePartMismatch
 
 case class StatusMismatch(expected: Status, actual: Status) extends ResponsePartMismatch
 case class HeaderMismatch(expected: Headers, actual: Headers) extends RequestPartMismatch with ResponsePartMismatch
-case class BodyMismatch(diff: Diff) extends RequestPartMismatch with ResponsePartMismatch
+case class BodyMismatch(expected: Body, actual: Body) extends RequestPartMismatch with ResponsePartMismatch
 case class CookieMismatch(expected: Cookies, actual: Cookies) extends RequestPartMismatch
 case class PathMismatch(expected: Path, actual: Path) extends RequestPartMismatch
 case class MethodMismatch(expected: Method, actual: Method) extends RequestPartMismatch
@@ -84,7 +84,7 @@ object Matching {
       case (Some(a), Some(b)) => diff(a, b, diffConfig)
     }
     if(difference == noChange) None
-    else Some(BodyMismatch(difference))
+    else Some(BodyMismatch(expected, actual))
   }
 
   def matchPath(expected: Path, actual: Path): Option[PathMismatch] = {

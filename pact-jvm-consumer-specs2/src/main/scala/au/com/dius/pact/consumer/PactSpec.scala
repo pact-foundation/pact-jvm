@@ -6,6 +6,7 @@ import org.specs2.specification._
 import org.specs2.matcher.{StandardMatchResults, MustMatchers}
 import org.specs2.execute.{Result, StandardResults}
 import au.com.dius.pact.model.PactFragmentBuilder.PactWithAtLeastOneRequest
+import org.specs2.execute.Failure
 
 trait PactSpec extends SpecificationLike
   with MustMatchers
@@ -35,10 +36,18 @@ trait PactSpec extends SpecificationLike
       val description = fragment.interactions.map(i => s"${i.providerState} ${i.description}").mkString(" ")
 
       fragments = fragments :+ Example(description, {
-        fragment.duringConsumerSpec(config)(test(config), verify) must beEqualTo(PactVerified)
+        val result = fragment.duringConsumerSpec(config)(test(config), verify)
+        result match {
+          case PactVerified => success
+          case PactMismatch(results) => Failure(PrettyPrinter.print(results))
+          case UserCodeFailed(r:Result) => r
+          case PactError(e) => Failure(m = s"There was an unexpected exception: ${e.getMessage}", stackTrace = e.getStackTrace.toList)
+        }
       })
     }
   }
+
+  case class ConsumerTestFailed(r:Result) extends RuntimeException
 
   def verify:ConsumerTestVerification[Result] = { r:Result =>
     if(r.isSuccess) {
