@@ -1,6 +1,6 @@
 def crossCompileModules = [ 'pact-jvm-consumer', 'pact-jvm-consumer-junit', 'pact-jvm-consumer-specs2',
   'pact-jvm-consumer-groovy', 'pact-jvm-model', 'pact-jvm-provider', 'pact-jvm-provider-specs2',
-  'pact-jvm-server', 'pact-specification-test']
+  'pact-jvm-server', 'pact-specification-test', 'pact-jvm-provider-gradle']
 
 def sbtModules = ['pact-jvm-consumer-sbt', 'pact-jvm-provider-sbt']
 

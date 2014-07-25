@@ -1,0 +1,5 @@
+
+dependencies {
+    compile gradleApi(), localGroovy(), project(":pact-jvm-provider_${project.scalaVersion}"),
+            'org.fusesource.jansi:jansi:1.11', 'org.codehaus.groovy.modules.http-builder:http-builder:0.7'
+}
