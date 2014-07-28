@@ -55,11 +55,17 @@ You want to look at: [Pact Consumer](pact-jvm-consumer)
 Once you have run your consumer tests, you will have generated some Pact files. You can then verify your service providers
 with these files.
 
-### I am writing a provider and want to verify pacts
+### I am writing a provider and want to ...
+
+#### verify pacts with SBT
 
 You want to look at: [pact sbt plugin](pact-jvm-provider-sbt)
 
-### I want to run pacts but don't want to use sbt
+#### verify pacts with Gradle
+
+You want to look at: [pact gradle plugin](pact-jvm-provider-gradle)
+
+#### I want to verify pacts but don't want to use sbt or gradle
 
 You want to look at: [pact-jvm-provider](pact-jvm-provider)
 
