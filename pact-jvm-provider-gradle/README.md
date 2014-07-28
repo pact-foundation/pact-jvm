@@ -96,5 +96,5 @@ pact {
 }
 ```
 
-Following typical Gradle behaviour, you can set the provider task propeties to the actual tasks, or to the task names
+Following typical Gradle behaviour, you can set the provider task properties to the actual tasks, or to the task names
 as a string (for the case when they haven't been defined yet).
