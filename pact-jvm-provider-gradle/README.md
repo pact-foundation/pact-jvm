@@ -85,7 +85,6 @@ pact {
             startProviderTask = startTheApp
             terminateProviderTask = killTheApp
 
-            // Again, you can define as many consumers for each provider as you need, but each must have a unique name
             hasPactWith('consumer1') {
                 pactFile = file('path/to/provider1-consumer1-pact.json')
             }
