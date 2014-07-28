@@ -6,6 +6,8 @@ class ProviderInfo {
     Integer port = 8080
     String path = '/'
     String name
+    def startProviderTask
+    def terminateProviderTask
 
     List<ConsumerInfo> consumers = []
 
