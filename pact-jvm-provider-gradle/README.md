@@ -7,7 +7,7 @@ The Gradle plugin creates a task `pactVerify` to your build which will verify al
 
 ## To Use It
 
-1. Add the pact-jvm-provider-gradle jar file to your build script class path:
+1 - Add the pact-jvm-provider-gradle jar file to your build script class path:
 
 ```groovy
 buildscript {
@@ -20,13 +20,13 @@ buildscript {
 }
 ```
 
-2. Apply the pact plugin
+2 - Apply the pact plugin
 
 ```groovy
 apply plugin: 'pact'
 ```
 
-3. Define the pacts between your consumers and providers
+3 - Define the pacts between your consumers and providers
 
 ```groovy
 
@@ -57,5 +57,45 @@ pact {
 }
 ```
 
-4. Execute `gradle pactVerify`
+4 - Execute `gradle pactVerify`
 
+## Starting and shutting down your provider
+
+If you need to start-up or shutdown your provider, you can define a start and terminate task for each provider.
+You could use the jetty tasks here if you provider is built as a WAR file.
+
+```groovy
+
+// This will be called before the provider task
+task('startTheApp') << {
+  // start up your provider here
+}
+
+// This will be called after the provider task
+task('killTheApp') << {
+  // kill your provider here
+}
+
+pact {
+
+    serviceProviders {
+
+        provider1 {
+
+            startProviderTask = startTheApp
+            terminateProviderTask = killTheApp
+
+            // Again, you can define as many consumers for each provider as you need, but each must have a unique name
+            hasPactWith('consumer1') {
+                pactFile = file('path/to/provider1-consumer1-pact.json')
+            }
+
+        }
+
+    }
+
+}
+```
+
+Following typical Gradle behaviour, you can set the provider task propeties to the actual tasks, or to the task names
+as a string (for the case when they haven't been defined yet).
