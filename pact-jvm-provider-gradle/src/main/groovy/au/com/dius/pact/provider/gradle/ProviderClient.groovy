@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.model.Request
 import groovyx.net.http.RESTClient
+import org.apache.http.HttpResponse
 import scala.collection.JavaConverters$
 
 class ProviderClient {
@@ -9,7 +10,7 @@ class ProviderClient {
     Request request
     ProviderInfo provider
 
-    def makeRequest() {
+    HttpResponse makeRequest() {
         def client = new RESTClient(
                 "${provider.protocol}://${provider.host}:${provider.port}${provider.path}")
         def response
@@ -37,8 +38,6 @@ class ProviderClient {
                 response = client.get(requestMap)
                 break
         }
-
-        println response.dump()
 
         response
     }
