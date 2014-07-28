@@ -7,7 +7,7 @@ The Gradle plugin creates a task `pactVerify` to your build which will verify al
 
 ## To Use It
 
-1 - Add the pact-jvm-provider-gradle jar file to your build script class path:
+### 1. Add the pact-jvm-provider-gradle jar file to your build script class path:
 
 ```groovy
 buildscript {
@@ -20,13 +20,13 @@ buildscript {
 }
 ```
 
-2 - Apply the pact plugin
+### 2. Apply the pact plugin
 
 ```groovy
 apply plugin: 'pact'
 ```
 
-3 - Define the pacts between your consumers and providers
+### 3. Define the pacts between your consumers and providers
 
 ```groovy
 
@@ -57,7 +57,7 @@ pact {
 }
 ```
 
-4 - Execute `gradle pactVerify`
+### 4. Execute `gradle pactVerify`
 
 ## Starting and shutting down your provider
 
