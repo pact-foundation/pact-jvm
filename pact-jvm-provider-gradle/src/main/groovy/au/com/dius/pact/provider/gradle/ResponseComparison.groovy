@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.model.Response
+import groovy.json.JsonSlurper
 import org.apache.http.HttpResponse
 import org.apache.http.Header
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
@@ -51,13 +52,13 @@ class ResponseComparison {
   }
 
   def compareBody() {
-    def actualBody = actual.data?.text ?: ''
-    def expectedBody = expected.body().defined ? expected.bodyString().get() : ''
-    try {
-      assert actualBody == expectedBody
-      return true
-    } catch (PowerAssertionError e) {
-      return e
-    }
+      def actualBody = actual.data ?: [:]
+      def expectedBody = expected.body().defined ? new JsonSlurper().parseText(expected.bodyString().get()) : [:]
+      try {
+          assert actualBody == expectedBody
+          return true
+      } catch (PowerAssertionError e) {
+          return e
+      }
   }
 }
