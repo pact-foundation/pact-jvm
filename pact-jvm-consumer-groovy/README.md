@@ -11,7 +11,7 @@ group-id = `au.com.dius`
 
 artifact-id = `pact-jvm-consumer-groovy_2.10`
 
-version-id = `2.0.0`
+version-id = `2.0.1`
 
 ##Usage
 
@@ -20,7 +20,7 @@ Add the `pact-jvm-consumer-groovy` library to your test class path. This provide
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.10:2.0-RC5'    
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.10:2.0.1'
     }
   
 Then create an instance of the `PactBuilder` in your test.
@@ -72,7 +72,7 @@ After running this test, the following pact file is produced:
         "name" : "Consumer"
       },
       "interactions" : [ {
-        "provider_state" : "",
+        "provider_state" : "there is some good mallory",
         "description" : "a retrieve Mallory request",
         "request" : {
           "method" : "get",
