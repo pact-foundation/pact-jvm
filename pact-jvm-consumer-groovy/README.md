@@ -34,7 +34,8 @@ Then create an instance of the `PactBuilder` in your test.
             service_consumer "Consumer" 	// Define the service consumer by name
             has_pact_with "Alice Service"   	// Define the service provider that it has a pact with
             port 1234						// The port number for the service. It is optional
-        
+
+            given('there is some good mallory') // defines a provider state. It is optional.
             upon_receiving('a retrieve Mallory request') // upon_receiving starts a new interaction
             with(method: 'get', path: '/mallory')		// define the request, a GET request to '/mallory'
             will_respond_with(						// define the response we want returned
@@ -110,6 +111,11 @@ This names the service provider for the pact.
 #### port(int port)
 
 Sets the port that the mock server will run on. If not supplied, a random port will be used.
+
+#### given(String providerState)
+
+Defines a state that the provider needs to be in for the request to succeed. For more info, see
+https://github.com/realestate-com-au/pact/wiki/Provider-states
 
 #### upon_receiving(String requestDescription)
 
