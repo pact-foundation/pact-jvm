@@ -59,6 +59,9 @@ class PactPlugin implements Plugin<Project> {
                                 AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a('Request Failed - ')
                                     .a(e.message).reset())
                                 ext.failures[interactionMessage] = e
+                                if (project.hasProperty('pact.showStacktrace')) {
+                                    e.printStackTrace()
+                                }
                             }
                         }
                     }
