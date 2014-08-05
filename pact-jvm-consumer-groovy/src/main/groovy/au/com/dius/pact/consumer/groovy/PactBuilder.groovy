@@ -13,6 +13,7 @@ import au.com.dius.pact.model.Interaction$
 import groovy.json.JsonBuilder
 import org.json.JSONObject
 import scala.None$
+import scala.Some$
 import scala.collection.JavaConverters$
 
 class PactBuilder {
@@ -25,6 +26,7 @@ class PactBuilder {
     List responseData = []
     List interactions = []
     StatefulMockProvider server
+    String providerState = ''
 
     def call(Closure closure) {
         build(closure)
@@ -50,6 +52,11 @@ class PactBuilder {
         this
     }
 
+    PactBuilder given(String providerState) {
+        this.providerState = providerState
+        this
+    }
+
     PactBuilder upon_receiving(String requestDescription) {
         buildInteractions()
         this.requestDescription = requestDescription
@@ -61,9 +68,10 @@ class PactBuilder {
         for (int i = 0; i < numInteractions; i++) {
             Map headers = requestData[i].headers ?: [:]
             Map responseHeaders = responseData[i].headers ?: [:]
+            def state = providerState.empty ? None$.apply("") : Some$.MODULE$.apply(providerState)
             interactions << Interaction$.MODULE$.apply(
                     requestDescription,
-                    None$.apply(""),
+                    state,
                     Request$.MODULE$.apply(requestData[i].method ?: 'get', requestData[i].path ?: '/', headers,
                             requestData[i].body ?: '', new JSONObject()),
                     Response$.MODULE$.apply(responseData[i].status ?: 200, responseHeaders,
