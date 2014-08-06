@@ -106,3 +106,31 @@ The following project properties can be specified with `-Pproperty=value` on the
 |Property|Description|
 |--------|-----------|
 |pact.showStacktrace|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
+
+## Provider States
+
+For each provider you can specify a state change URL to use to switch the state of the provider. This URL will
+receive the providerState description from the pact file before each interaction via a POST.
+
+```
+pact {
+
+    serviceProviders {
+
+        provider1 {
+
+            hasPactWith('consumer1') {
+                pactFile = file('path/to/provider1-consumer1-pact.json')
+                stateChange = url('http://localhost:8001/tasks/pactStateChange')
+                stateChangeUsesBody = false // defaults to true
+            }
+
+        }
+
+    }
+
+}
+```
+
+If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description will be sent as
+ JSON in the body of the request. If it is set to false, it will passed as a query parameter.
