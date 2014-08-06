@@ -45,7 +45,7 @@ pact {
             // Again, you can define as many consumers for each provider as you need, but each must have a unique name
             hasPactWith('consumer1') {
 
-                // currenty supports a file path, but soon will support any URL
+                // currenty supports a file path using file() or a URL using url()
                 pactFile = file('path/to/provider1-consumer1-pact.json')
 
             }
@@ -98,3 +98,11 @@ pact {
 
 Following typical Gradle behaviour, you can set the provider task properties to the actual tasks, or to the task names
 as a string (for the case when they haven't been defined yet).
+
+## Project Properties
+
+The following project properties can be specified with `-Pproperty=value` on the command line:
+
+|Property|Description|
+|--------|-----------|
+|pact.showStacktrace|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
