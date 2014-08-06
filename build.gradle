@@ -45,7 +45,7 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '2.0.1'
+    version = '2.0.2'
     targetCompatibility = '1.6'
     sourceCompatibility = '1.6'
 
@@ -121,7 +121,9 @@ subprojects {
                 beforeDeployment { def deployment -> signing.signPom(deployment) }
 
                 repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-//                    authentication(userName: sonatypeUsername, password: sonatypePassword)
+                    if (project.hasProperty('sonatypeUsername')) {
+                        authentication(userName: sonatypeUsername, password: sonatypePassword)
+                    }
                 }
 
             }

@@ -27,3 +27,5 @@ project/plugins/project/
 build/
 pkgdiff_reports/
 .gradle/
+gradle.properties
+
