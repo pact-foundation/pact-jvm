@@ -1,5 +1,31 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.0.1 - Added gradle plugin
+
+* 4d850e7 - updated gradle plugin doco to include provider state info (Ronald Holshausen, Wed Aug 6 17:08:56 2014 +1000)
+* 9e9ed5f - implemented provider states for the gradle plugin (Ronald Holshausen, Wed Aug 6 16:59:58 2014 +1000)
+* dcf2834 - request headers are optional, so handle the case where there are none (Ronald Holshausen, Wed Aug 6 09:14:14 2014 +1000)
+* 6ae1cfd - added provider state to doco (Ronald Holshausen, Tue Aug 5 17:31:21 2014 +1000)
+* 7594cc8 - added provider state to doco (Ronald Holshausen, Tue Aug 5 17:29:03 2014 +1000)
+* eb4eadc - provider states missing from groovy DSL (Ronald Holshausen, Tue Aug 5 17:19:42 2014 +1000)
+* b7755ae - pact gradle plugin now handles basic body comparison correctly (Ronald Holshausen, Thu Jul 31 13:05:08 2014 +1000)
+* f1ca023 - itsy, bitsy spelling error (Ronald Holshausen, Mon Jul 28 20:39:25 2014 +1000)
+* 27df836 - update initial doco for the gradle plugin (Ronald Holshausen, Mon Jul 28 20:30:40 2014 +1000)
+* 0625b63 - update initial doco for the gradle plugin (Ronald Holshausen, Mon Jul 28 20:28:32 2014 +1000)
+* 4f3d6e7 - update initial doco for the gradle plugin (Ronald Holshausen, Mon Jul 28 20:25:37 2014 +1000)
+* 3bdfac3 - added initial doco for the gradle plugin (Ronald Holshausen, Mon Jul 28 20:14:15 2014 +1000)
+* 7d68cee - create a gradle task per provider, allow users to define a before and after task (Ronald Holshausen, Mon Jul 28 17:22:32 2014 +1000)
+* b534cfd - bump version (Ronald Holshausen, Mon Jul 28 13:34:16 2014 +1000)
+* a316ecf - basic pact verification with a gradle plugin (Ronald Holshausen, Mon Jul 28 13:33:27 2014 +1000)
+* e228a25 - first stab at implementing a gradle plugin for verifying pacts (Ronald Holshausen, Fri Jul 25 10:32:28 2014 +1000)
+* dde1f10 - Merge branch 'pretty-print' (Ronald Holshausen, Sun Jul 20 11:25:14 2014 +1000)
+* 56798ab - added the dependancies to the gradle build (Ronald Holshausen, Sun Jul 20 11:22:40 2014 +1000)
+* 71bb7cd - Merge branch 'master' into pretty-print (Ronald Holshausen, Sun Jul 20 11:11:46 2014 +1000)
+* 67c5d14 - added name and description to poms so gradle can publish the artifacts (Ronald Holshausen, Sun Jul 20 11:04:04 2014 +1000)
+* f07fa70 - added note about scala versions (Ronald Holshausen, Sun Jul 20 11:03:31 2014 +1000)
+* c4e479a - Pretty Printing (thetrav, Thu Jun 12 07:38:48 2014 +1000)
+* 0b3f991 - laying the groundwork for pretty printing (thetrav, Sat Jun 7 17:08:39 2014 +1000)
+
 # 2.0.0
 
 * dc7ba34 - updated the readmes (Ronald Holshausen, Sun Jul 20 09:52:34 2014 +1000)
