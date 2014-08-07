@@ -9,10 +9,16 @@ buildscript {
 
 subprojects {
 
+    def scalaVersionLookup = [
+        '2.10': '2.10.4',
+        '2.11': '2.11.1'
+    ]
+
     def m = project.name =~ /.*_(2\.1\d)/
     if (m.matches()) {
       project.ext {
           scalaVersion = m.group(1)
+          scalaFullVersion = scalaVersionLookup[m.group(1)]
           sbtVersion = '0.13.5'
       }
     }
@@ -31,7 +37,7 @@ subprojects {
     }
 
     dependencies {
-      compile 'org.slf4j:slf4j-api:1.7.5', "org.scala-lang:scala-library:${project.scalaVersion}",
+      compile 'org.slf4j:slf4j-api:1.7.5', "org.scala-lang:scala-library:${project.scalaFullVersion}",
               "com.typesafe.scala-logging:scala-logging-slf4j_${project.scalaVersion}:2.1.2",
               "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.7.1",
               "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.0",
