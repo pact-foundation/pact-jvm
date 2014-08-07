@@ -18,7 +18,7 @@ trait PactSerializer extends StrictLogging {
       "path" -> r.path,
       "headers" -> r.headers,
       "body" -> r.body,
-      "requestMatchers" -> parse(r.matchers.getOrElse("{}").toString)
+      "requestMatchingRules" -> parse(r.matchers.getOrElse("{}").toString)
     )
   }
 
@@ -27,13 +27,13 @@ trait PactSerializer extends StrictLogging {
       "status" -> JInt(r.status),
       "headers" -> r.headers,
       "body" -> r.body,
-      "responseMatchers" -> parse(r.matchers.getOrElse("{}").toString)
+      "responseMatchingRules" -> parse(r.matchers.getOrElse("{}").toString)
     )
   }
 
   implicit def interaction2json(i: Interaction): JValue = {
     JObject (
-      "provider_state" -> i.providerState,
+      "providerState" -> i.providerState,
       "description" -> i.description,
       "request" -> i.request,
       "response" -> i.response
@@ -53,7 +53,7 @@ trait PactSerializer extends StrictLogging {
       "provider" -> provider,
       "consumer" -> consumer,
       "interactions" -> interactions,
-      "metadata" -> Map( "pact_gem" -> Map("version" -> "1.0.9"), "pact-jvm" -> Map("version" -> lookupVersion))
+      "metadata" -> Map( "pact-specification" -> Map("version" -> "2.0.0"), "pact-jvm" -> Map("version" -> lookupVersion))
     )
   }
 
