@@ -1,5 +1,14 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.0.2
+
+* 6fbed88 - minor update to readmes (Ronald Holshausen, Thu Aug 7 19:12:44 2014 +1000)
+* c06fde1 - cleanup the verification text so it is more like the ruby version (Ronald Holshausen, Thu Aug 7 16:44:19 2014 +1000)
+* 114ac86 - oops, missed a test fixture (Ronald Holshausen, Thu Aug 7 14:59:20 2014 +1000)
+* 762f6f7 - bring the pact json format inline with pact specification 2.0.0 (Ronald Holshausen, Thu Aug 7 14:19:13 2014 +1000)
+* 177bc99 - fix scala full version of scala library (Ronald Holshausen, Thu Aug 7 13:55:58 2014 +1000)
+* d6e7a60 - bump version (Ronald Holshausen, Wed Aug 6 20:58:16 2014 +1000)
+
 # 2.0.1 - Added gradle plugin
 
 * 4d850e7 - updated gradle plugin doco to include provider state info (Ronald Holshausen, Wed Aug 6 17:08:56 2014 +1000)
