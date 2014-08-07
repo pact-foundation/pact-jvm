@@ -33,18 +33,21 @@ class PactVerificationTask extends DefaultTask {
                 .boldOff().a(' and ').bold().a(providerToVerify.name).boldOff())
             def interactions = JavaConverters$.MODULE$.asJavaIteratorConverter(pact.interactions().iterator())
             interactions.asJava().each { Interaction interaction ->
+                def interactionMessage = "Verifying a pact between ${consumer.name} and ${providerToVerify.name} - ${interaction.description()}"
+
                 def stateChangeOk = true
                 if (interaction.providerState.defined) {
                     stateChangeOk = stateChange(interaction.providerState.get(), consumer)
                     if (stateChangeOk != true) {
-                        ext.failures["Verifying a pact between ${consumer.name} and ${providerToVerify.name}"] = stateChangeOk
+                        ext.failures[interactionMessage] = stateChangeOk
                         stateChangeOk = false
+                    } else {
+                        interactionMessage += " Given " + interaction.providerState.get()
                     }
                 }
 
                 if (stateChangeOk) {
                     AnsiConsole.out().println(Ansi.ansi().a('  ').a(interaction.description()))
-                    def interactionMessage = "Verifying a pact between ${consumer.name} and ${providerToVerify.name} - ${interaction.description()}"
 
                     try {
                         ProviderClient client = new ProviderClient(request: interaction.request(), provider: providerToVerify)
@@ -117,12 +120,12 @@ class PactVerificationTask extends DefaultTask {
     }
 
     void displayBodyResult(Map failures, String body, def comparison, String comparisonDescription) {
-        def ansi = Ansi.ansi().a('      ').a('has body').a(' (')
+        def ansi = Ansi.ansi().a('      ').a('has a matching body').a(' (')
         if (comparison == true) {
             AnsiConsole.out().println(ansi.fg(Ansi.Color.GREEN).a('OK').reset().a(')'))
         } else {
             AnsiConsole.out().println(ansi.fg(Ansi.Color.RED).a('FAILED').reset().a(')'))
-            failures["$comparisonDescription has body"] = comparison
+            failures["$comparisonDescription has a matching body"] = comparison
         }
     }
 
