@@ -81,8 +81,14 @@ class PactVerificationTask extends DefaultTask {
             AnsiConsole.out().println('\nFailures:\n')
             failures.eachWithIndex { err, i ->
                 AnsiConsole.out().println("$i) ${err.key}")
-                err.value.message.split('\n').each {
-                    AnsiConsole.out().println("      $it")
+                if (err.value instanceof Exception) {
+                    err.value.message.split('\n').each {
+                        AnsiConsole.out().println("      $it")
+                    }
+                } else {
+                    err.value.each { key, message ->
+                        AnsiConsole.out().println("      $key -> $message")
+                    }
                 }
                 AnsiConsole.out().println()
             }
@@ -121,7 +127,7 @@ class PactVerificationTask extends DefaultTask {
 
     void displayBodyResult(Map failures, String body, def comparison, String comparisonDescription) {
         def ansi = Ansi.ansi().a('      ').a('has a matching body').a(' (')
-        if (comparison == true) {
+        if (comparison.isEmpty()) {
             AnsiConsole.out().println(ansi.fg(Ansi.Color.GREEN).a('OK').reset().a(')'))
         } else {
             AnsiConsole.out().println(ansi.fg(Ansi.Color.RED).a('FAILED').reset().a(')'))

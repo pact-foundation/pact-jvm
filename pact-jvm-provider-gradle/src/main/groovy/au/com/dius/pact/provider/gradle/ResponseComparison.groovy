@@ -54,11 +54,6 @@ class ResponseComparison {
   def compareBody() {
       def actualBody = actual.data ?: [:]
       def expectedBody = expected.body().defined ? new JsonSlurper().parseText(expected.bodyString().get()) : [:]
-      try {
-          assert actualBody == expectedBody
-          return true
-      } catch (PowerAssertionError e) {
-          return e
-      }
+      BodyComparison.compare('/', expectedBody, actualBody)
   }
 }
