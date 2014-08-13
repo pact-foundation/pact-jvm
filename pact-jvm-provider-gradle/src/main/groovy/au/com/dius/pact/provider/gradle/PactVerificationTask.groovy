@@ -95,7 +95,15 @@ class PactVerificationTask extends DefaultTask {
                     AnsiConsole.out().println()
 
                     err.value.diff.each { delta ->
-                        AnsiConsole.out().println("      $delta")
+                        if (delta.startsWith('@')) {
+                            AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.CYAN).a(delta).reset())
+                        } else if (delta.startsWith('-')) {
+                            AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a(delta).reset())
+                        } else if (delta.startsWith('+')) {
+                            AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.GREEN).a(delta).reset())
+                        } else {
+                            AnsiConsole.out().println("      $delta")
+                        }
                     }
                 } else {
                     err.value.each { key, message ->

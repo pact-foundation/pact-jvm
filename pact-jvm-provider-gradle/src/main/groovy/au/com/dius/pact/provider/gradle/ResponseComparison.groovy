@@ -64,17 +64,20 @@ class ResponseComparison {
       if (!compareResult.isEmpty()) {
           String actualBodyString = new JsonBuilder(actualBody).toPrettyString()
           String expectedBodyString = new JsonBuilder(expectedBody).toPrettyString()
-          def expectedLines = expectedBodyString.split() as List
-          Patch<String> patch = DiffUtils.diff(expectedLines,  actualBodyString.split() as List)
+          def expectedLines = expectedBodyString.split('\n') as List
+          def actualLines = actualBodyString.split('\n') as List
+          Patch<String> patch = DiffUtils.diff(expectedLines, actualLines)
 
           def diff = []
+
           patch.deltas.each { Delta<String> delta ->
               diff << "@${delta.original.position}"
               if (delta.original.position > 1) {
                   diff << expectedLines[delta.original.position - 1]
               }
+
               delta.original.lines.each {
-                diff << "-$it"
+                  diff << "-$it"
               }
               delta.revised.lines.each {
                   diff << "+$it"
