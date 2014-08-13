@@ -85,6 +85,18 @@ class PactVerificationTask extends DefaultTask {
                     err.value.message.split('\n').each {
                         AnsiConsole.out().println("      $it")
                     }
+                } else if (err.value instanceof Map && err.value.containsKey('diff')) {
+                    err.value.comparison.each { key, message ->
+                        AnsiConsole.out().println("      $key -> $message")
+                    }
+
+                    AnsiConsole.out().println()
+                    AnsiConsole.out().println("      Diff:")
+                    AnsiConsole.out().println()
+
+                    err.value.diff.each { delta ->
+                        AnsiConsole.out().println("      $delta")
+                    }
                 } else {
                     err.value.each { key, message ->
                         AnsiConsole.out().println("      $key -> $message")

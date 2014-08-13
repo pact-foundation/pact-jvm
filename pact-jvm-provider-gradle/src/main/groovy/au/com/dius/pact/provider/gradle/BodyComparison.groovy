@@ -24,6 +24,9 @@ class BodyComparison {
                 if (expected.size() == 0 && actual.size() != 0) {
                     result[path] = "Expected an empty List but received ${valueOf(actual)}"
                 } else {
+                    if (expected.size() != actual.size() != 0) {
+                        result[path] = "Expected a List with ${expected.size()} elements but received ${actual.size()} elements"
+                    }
                     expected.eachWithIndex { value, index ->
                         def s = path + index + '/'
                         if (index < actual.size()) {

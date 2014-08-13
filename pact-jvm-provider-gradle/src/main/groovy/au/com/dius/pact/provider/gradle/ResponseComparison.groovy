@@ -1,6 +1,11 @@
 package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.model.Response
+import difflib.Delta
+import difflib.DiffRowGenerator
+import difflib.DiffUtils
+import difflib.Patch
+import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import org.apache.http.HttpResponse
 import org.apache.http.Header
@@ -52,8 +57,39 @@ class ResponseComparison {
   }
 
   def compareBody() {
+      def result = [:]
       def actualBody = actual.data ?: [:]
       def expectedBody = expected.body().defined ? new JsonSlurper().parseText(expected.bodyString().get()) : [:]
-      BodyComparison.compare('/', expectedBody, actualBody)
+      def compareResult = BodyComparison.compare('/', expectedBody, actualBody)
+      if (!compareResult.isEmpty()) {
+          String actualBodyString = new JsonBuilder(actualBody).toPrettyString()
+          String expectedBodyString = new JsonBuilder(expectedBody).toPrettyString()
+          def expectedLines = expectedBodyString.split() as List
+          Patch<String> patch = DiffUtils.diff(expectedLines,  actualBodyString.split() as List)
+
+          def diff = []
+          patch.deltas.each { Delta<String> delta ->
+              diff << "@${delta.original.position}"
+              if (delta.original.position > 1) {
+                  diff << expectedLines[delta.original.position - 1]
+              }
+              delta.original.lines.each {
+                diff << "-$it"
+              }
+              delta.revised.lines.each {
+                  diff << "+$it"
+              }
+
+              int pos = delta.original.position + delta.original.lines.size()
+              if (pos < expectedLines.size()) {
+                  diff << expectedLines[pos]
+              }
+
+              diff << ''
+          }
+
+          result = [comparison: compareResult, diff: diff]
+      }
+      result
   }
 }
