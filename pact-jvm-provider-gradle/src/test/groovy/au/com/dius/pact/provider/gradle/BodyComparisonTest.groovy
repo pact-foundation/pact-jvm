@@ -43,10 +43,17 @@ class BodyComparisonTest {
         assert BodyComparison.compare('/', [100, 100], [100, 100]) == [:]
 
         assert BodyComparison.compare('/', [100, 200], [200, 100]) == [
+                '/': 'Expected a List with 2 elements but received 2 elements',
                 '/0/': 'Expected 100 but received 200',
                 '/1/': 'Expected 200 but received 100']
-        assert BodyComparison.compare('/', [100], [101, 102]) == ['/0/': 'Expected 100 but received 101']
-        assert BodyComparison.compare('/', [100, 101], [100]) == ['/1/': 'Expected 101 but was missing']
+        assert BodyComparison.compare('/', [100], [101, 102]) == [
+                '/': 'Expected a List with 1 elements but received 2 elements',
+                '/0/': 'Expected 100 but received 101'
+        ]
+        assert BodyComparison.compare('/', [100, 101], [100]) == [
+                '/': 'Expected a List with 2 elements but received 1 elements',
+                '/1/': 'Expected 101 but was missing'
+        ]
         assert BodyComparison.compare('/', [], [100]) == ['/': 'Expected an empty List but received [100]']
     }
 }
