@@ -81,7 +81,7 @@ class PactVerificationTask extends DefaultTask {
             AnsiConsole.out().println('\nFailures:\n')
             failures.eachWithIndex { err, i ->
                 AnsiConsole.out().println("$i) ${err.key}")
-                if (err.value instanceof Exception) {
+                if (err.value instanceof Exception || err.value instanceof Error) {
                     err.value.message.split('\n').each {
                         AnsiConsole.out().println("      $it")
                     }
