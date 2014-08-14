@@ -43,7 +43,6 @@ class BodyComparisonTest {
         assert BodyComparison.compare('/', [100, 100], [100, 100]) == [:]
 
         assert BodyComparison.compare('/', [100, 200], [200, 100]) == [
-                '/': 'Expected a List with 2 elements but received 2 elements',
                 '/0/': 'Expected 100 but received 200',
                 '/1/': 'Expected 200 but received 100']
         assert BodyComparison.compare('/', [100], [101, 102]) == [

@@ -11,6 +11,9 @@ class BodyComparison {
                 if (expected.size() == 0 && actual.size() != 0) {
                     result[path] = "Expected an empty Map but received ${valueOf(actual)}"
                 } else {
+                    if (expected.size() > actual.size()) {
+                        result[path] = "Expected a Map with atleast ${expected.size()} elements but received ${actual.size()} elements"
+                    }
                     expected.each { key, value ->
                         def s = path + key + '/'
                         if (actual.containsKey(key)) {
@@ -24,7 +27,7 @@ class BodyComparison {
                 if (expected.size() == 0 && actual.size() != 0) {
                     result[path] = "Expected an empty List but received ${valueOf(actual)}"
                 } else {
-                    if (expected.size() != actual.size() != 0) {
+                    if (expected.size() != actual.size()) {
                         result[path] = "Expected a List with ${expected.size()} elements but received ${actual.size()} elements"
                     }
                     expected.eachWithIndex { value, index ->

@@ -2,24 +2,24 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.model.Response
 import difflib.Delta
-import difflib.DiffRowGenerator
 import difflib.DiffUtils
 import difflib.Patch
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
-import org.apache.http.HttpResponse
-import org.apache.http.Header
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 import scala.collection.JavaConverters$
 
 class ResponseComparison {
 
   Response expected
-  HttpResponse actual
+  int actualStatus
+  Map actualHeaders
+  def actualBody
 
-  static def compareResponse(Response response, HttpResponse actual) {
+  static def compareResponse(Response response, int actualStatus, Map actualHeaders, def actualBody) {
     def result = [:]
-    def comparison = new ResponseComparison(expected: response, actual: actual)
+    def comparison = new ResponseComparison(expected: response, actualStatus: actualStatus,
+        actualHeaders: actualHeaders.collectEntries { k, v -> [k.toUpperCase(), v] }, actualBody: actualBody)
     result.method = comparison.compareMethod()
     result.headers = comparison.compareHeaders()
     result.body = comparison.compareBody()
@@ -27,7 +27,6 @@ class ResponseComparison {
   }
 
   def compareMethod() {
-    int actualStatus = actual.statusLine.statusCode
     int expectedStatus = expected.status()
     try {
       assert actualStatus == expectedStatus
@@ -41,11 +40,15 @@ class ResponseComparison {
     Map headerResult = [:]
 
     if (expected.headers().defined) {
-      JavaConverters$.MODULE$.asJavaMapConverter(expected.headers().get()).asJava().each { headerKey, value ->
+        def headers = []
+        if (JavaConverters$.MODULE$.metaClass.respondsTo('asJavaMapConverter')) {
+            headers = JavaConverters$.MODULE$.asJavaMapConverter(expected.headers().get()).asJava()
+        } else {
+            headers = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
+        }
+        headers.each { headerKey, value ->
         try {
-          assert actual.containsHeader(headerKey)
-          Header actualHeader = actual.getFirstHeader(headerKey)
-          assert actualHeader.value == value
+          assert actualHeaders[headerKey.toUpperCase()] == value
           headerResult[headerKey] = true
         } catch (PowerAssertionError e) {
           headerResult[headerKey] = e
@@ -58,7 +61,6 @@ class ResponseComparison {
 
   def compareBody() {
       def result = [:]
-      def actualBody = actual.data ?: [:]
       def expectedBody = expected.body().defined ? new JsonSlurper().parseText(expected.bodyString().get()) : [:]
       def compareResult = BodyComparison.compare('/', expectedBody, actualBody)
       if (!compareResult.isEmpty()) {

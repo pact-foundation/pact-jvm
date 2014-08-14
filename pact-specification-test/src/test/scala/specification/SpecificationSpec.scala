@@ -24,7 +24,7 @@ class SpecificationSpec extends SpecificationLike
     def accept(dir: File, name: String): Boolean = name.endsWith(".json")
   }
 
-  def fragments: Seq[Example] = new File("src/test/resources/request").listFiles().flatMap { folder =>
+  def fragments: Seq[Example] = new File("src/main/resources/request").listFiles().flatMap { folder =>
     if(folder.isDirectory) {
       val dirName = folder.getName
       folder.listFiles(jsonFilter).map { testFile =>

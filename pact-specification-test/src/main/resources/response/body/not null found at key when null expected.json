@@ -1,0 +1,20 @@
+{
+  "match": false,
+  "comment": "Name should be null",
+  "expected" : {
+    "headers": {},
+    "body": {
+      "alligator":{
+        "name": null
+      }
+    }
+  },
+  "actual": {
+    "headers": {},
+    "body": {
+      "alligator":{
+        "name": "Fred"
+      }
+    }
+  }
+}

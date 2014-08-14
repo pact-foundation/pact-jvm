@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.gradle
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.Pact$
 import au.com.dius.pact.model.Interaction
+import org.apache.http.Header
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.AnsiConsole
 import org.gradle.api.DefaultTask
@@ -54,7 +55,13 @@ class PactVerificationTask extends DefaultTask {
 
                         def expectedResponse = interaction.response()
                         def actualResponse = client.makeRequest()
-                        def comparison = ResponseComparison.compareResponse(expectedResponse, actualResponse)
+
+                        def headers = [:]
+                        actualResponse.allHeaders.each { Header header ->
+                            headers[header.name] = header.value
+                        }
+                        def comparison = ResponseComparison.compareResponse(expectedResponse,
+                                actualResponse.statusLine.statusCode, headers, actualResponse.data ?: [:])
 
                         AnsiConsole.out().println('    returns a response which')
                         displayMethodResult(failures, expectedResponse.status(), comparison.method,
