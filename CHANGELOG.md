@@ -1,5 +1,17 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.0.3 - pretty diff output for gradle plugin
+
+* 4c7c8db - changelog for 2.0.3 (Ronald Holshausen, Sat Aug 16 11:30:31 2014 +1000)
+* 24c6c93 - bump version in scala build (Ronald Holshausen, Sat Aug 16 10:23:59 2014 +1000)
+* 1b2eaa8 - got the gradle verification to pass the specification tests (Ronald Holshausen, Thu Aug 14 21:01:46 2014 +1000)
+* e7fac47 - handle both exceptions and errors in validating (Ronald Holshausen, Thu Aug 14 15:16:18 2014 +1000)
+* 2d029b8 - fix the build (Ronald Holshausen, Wed Aug 13 19:17:06 2014 +1000)
+* e2270f5 - fix the diff output for the gradle plugin (Ronald Holshausen, Wed Aug 13 17:04:27 2014 +1000)
+* a2dd749 - added diff output to the gradle verification (Ronald Holshausen, Wed Aug 13 16:44:34 2014 +1000)
+* 63139a9 - updated the gradle body comparison code (Ronald Holshausen, Tue Aug 12 21:06:15 2014 +1000)
+* 53bf5e0 - changelog (Ronald Holshausen, Thu Aug 7 19:47:22 2014 +1000)
+
 # 2.0.2
 
 * 6fbed88 - minor update to readmes (Ronald Holshausen, Thu Aug 7 19:12:44 2014 +1000)
