@@ -14,7 +14,7 @@ subprojects {
         '2.11': '2.11.1'
     ]
 
-    def m = project.name =~ /.*_(2\.1\d)/
+    def m = project.name =~ /.*_(2\.1\d)(_0\.\d+)?/
     if (m.matches()) {
       project.ext {
           scalaVersion = m.group(1)
@@ -51,7 +51,7 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '2.0.3'
+    version = '2.0.4'
     targetCompatibility = '1.6'
     sourceCompatibility = '1.6'
 

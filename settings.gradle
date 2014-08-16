@@ -12,11 +12,11 @@ crossCompileModules.each {
 }
 
 sbtModules.each {
-  include it + '_2.10'
+  include it + '_2.10_0.13'
 }
 
 rootProject.children.each {
-  def m = it.dir =~ /(.*)_2\.1\d$/
+  def m = it.dir =~ /(.*)_2\.1\d(_0\.\d+)?$/
   if (m.matches()) {
     it.dir = file(m.group(1))
   }
