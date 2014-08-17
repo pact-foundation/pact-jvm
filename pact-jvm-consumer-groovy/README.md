@@ -129,6 +129,7 @@ Defines the request for the interaction. The request data map can contain the fo
 |----------------------------|-------------------------------------------|-----------------------------|
 | method | The HTTP method to use | get |
 | path | The Path for the request | / |
+| query | Query parameters as a Map<String, List> |  |
 | headers | Map of key-value pairs for the request headers | |
 | body | The body of the request. If it is not a string, it will be converted to JSON | |
 

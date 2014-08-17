@@ -35,7 +35,11 @@ object Conversions {
     request.headerNames.map(name => name -> request.headers(name).mkString(",")).toMap
   }
 
+  def toQuery(request: HttpRequest[ReceivedMessage]): Map[String, Seq[String]] = {
+    request.parameterNames.map(name => name -> request.parameterValues(name)).toMap
+  }
+
   implicit def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {
-    Request(request.method, request.uri, toHeaders(request), Source.fromInputStream(request.inputStream).mkString(""), null)
+    Request(request.method, request.uri, toQuery(request), toHeaders(request), Source.fromInputStream(request.inputStream).mkString(""), null)
   }
 }

@@ -14,6 +14,7 @@
       "headers" : {
         "testreqheader" : "testreqheadervalue"
       },
+      "query" : "q=p&q=p2&r=s",
       "body" : {
         "test" : true
       },

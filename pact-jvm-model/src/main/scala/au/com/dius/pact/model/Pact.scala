@@ -4,6 +4,7 @@ import org.json4s._
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
 import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 import org.json.JSONObject
 
 object Pact {
@@ -17,7 +18,12 @@ object Pact {
 
   def from(json:JValue) = {
     implicit val formats = DefaultFormats
-    json.transformField { case ("provider_state", value) => ("providerState", value)}.extract[Pact]
+    json.transformField {
+      case ("provider_state", value) => ("providerState", value)
+      case ("query", value:JString) => ("query",
+        value.values.split("&").toList.map(_.split("=")).foldLeft(Map[String,Seq[String]]()) {
+          (m, a) => m + (a.head -> (m.getOrElse(a.head, Seq()) :+ a.last)) })
+    }.extract[Pact]
   }
 
   trait MergeResult
@@ -82,9 +88,9 @@ object HttpMethod {
   val Patch  = "PATCH"
 }
 
-//TODO: support duplicate headers
 case class Request(method: String,
                    path: String,
+                   query: Option[Map[String, Seq[String]]],
                    headers: Option[Map[String, String]],
                    body: Option[JValue],
                    matchers: Option[JSONObject]) {
@@ -102,7 +108,7 @@ case class Request(method: String,
   private def findHeaderByCaseInsensitiveKey(key: String): Option[(String, String)] = headers.flatMap(_.find(_._1.toLowerCase == key.toLowerCase))
 
   override def toString: String = {
-    s"\tmethod: $method\n\tpath: $path\n\theaders: $headers\n\trequestMatchers: $matchers\n\tbody:\n${body.map{b => pretty(render(b))}}"
+    s"\tmethod: $method\n\tpath: $path\n\tquery: $query\n\theaders: $headers\n\trequestMatchers: $matchers\n\tbody:\n${body.map{b => pretty(render(b))}}"
   }
 }
 
@@ -141,20 +147,19 @@ trait Optionals {
 }
 
 object Request extends Optionals {
-  def apply(method: String, path: String, headers: Map[String, String], body: String, matchers: JSONObject): Request = {
-    Request(method, path, optional(headers), optional(body), optional(matchers))
+  def apply(method: String, path: String, query: Map[String, Seq[String]], headers: Map[String, String], body: String, matchers: JSONObject): Request = {
+    Request(method, path, Option(query), optional(headers), optional(body), optional(matchers))
   }
 
-  def apply(method: String, path: String, headers: Map[String, String], body: JValue, matchers: JSONObject): Request = {
-    Request(method, path, optional(headers), optional(body), optional(matchers))
+  def apply(method: String, path: String, query: Map[String, Seq[String]], headers: Map[String, String], body: JValue, matchers: JSONObject): Request = {
+    Request(method, path, Option(query), optional(headers), optional(body), optional(matchers))
   }
 
-  def apply(method: String, path: String, headers: java.util.Map[String,String], body: String, matchers: JSONObject): Request = {
-    Request(method, path, optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body), optional(matchers))
+  def apply(method: String, path: String, query: java.util.Map[String, java.util.List[String]], headers: java.util.Map[String,String], body: String, matchers: JSONObject): Request = {
+    Request(method, path, Option(JavaConversions.mapAsScalaMap(query).toMap.mapValues(_.asScala)),  optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body), optional(matchers))
   }
 }
 
-//TODO: support duplicate headers
 case class Response(status: Int,
                     headers: Option[Map[String, String]],
                     body: Option[JValue], matchers: Option[JSONObject]) {
@@ -185,4 +190,3 @@ object Response extends Optionals {
     Response(500, CrossSiteHeaders ++ Map("Content-Type" -> "application/json"), "error"-> s"Unexpected request : $request", null)
   }
 }
-

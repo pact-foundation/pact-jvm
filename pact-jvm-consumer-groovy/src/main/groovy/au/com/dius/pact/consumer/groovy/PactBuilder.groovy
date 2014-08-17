@@ -68,12 +68,13 @@ class PactBuilder {
         for (int i = 0; i < numInteractions; i++) {
             Map headers = requestData[i].headers ?: [:]
             Map responseHeaders = responseData[i].headers ?: [:]
+            Map query = [:]
             def state = providerState.empty ? None$.apply("") : Some$.MODULE$.apply(providerState)
             interactions << Interaction$.MODULE$.apply(
                     requestDescription,
                     state,
                     Request$.MODULE$.apply(requestData[i].method ?: 'get', requestData[i].path ?: '/', headers,
-                            requestData[i].body ?: '', new JSONObject()),
+                            requestData[i].query ?: [:], requestData[i].body ?: '', new JSONObject()),
                     Response$.MODULE$.apply(responseData[i].status ?: 200, responseHeaders,
                             responseData[i].body ?: '', new JSONObject())
             )

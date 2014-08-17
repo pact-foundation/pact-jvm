@@ -12,7 +12,7 @@ object Fixtures {
   val provider = Provider("test_provider")
   val consumer = Consumer("test_consumer")
 
-  val request = Request(Post, "/",
+  val request = Request(Post, "/", Map("q" -> Seq("p")),
     Map("testreqheader" -> "testreqheadervalue"),
     "test" -> true, null)
 
@@ -58,7 +58,7 @@ object Fixtures {
     }
 
     def simpleGet(path: String): Future[(Int, Option[String])] = {
-      HttpClient.run(Request(Get, serverUrl + path, None, None, None)).map { response =>
+      HttpClient.run(Request(Get, serverUrl + path, None, None, None, None)).map { response =>
         (response.status, response.bodyString)
       }
     }

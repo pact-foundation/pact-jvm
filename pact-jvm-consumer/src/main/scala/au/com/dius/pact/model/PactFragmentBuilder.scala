@@ -37,17 +37,19 @@ object PactFragmentBuilder {
     /**
      * supports java DSL
      */
-    def matching(path: String, method: String, headers: java.util.Map[String, String], body: String, matchers: JSONObject): DescribingResponse = {
+    def matching(path: String, method: String, query: java.util.Map[String, java.util.List[String]], headers: java.util.Map[String, String], body: String, matchers: JSONObject): DescribingResponse = {
       import collection.JavaConversions._
-      matching(path, method, optional(headers.toMap), optional(body), optional(matchers))
+      import collection.JavaConverters._
+      matching(path, method, Option(query.toMap.mapValues(_.asScala)), optional(headers.toMap), optional(body), optional(matchers))
     }
 
     def matching(path: String,
                  method: String = Get,
+                 query: Option[Map[String, Seq[String]]] = None,
                  headers: Option[Map[String, String]] = None,
                  body: Option[JValue] = None,
                  matchers: Option[JSONObject] = None): DescribingResponse = {
-      DescribingResponse(Request(method, path, headers, body, matchers))
+      DescribingResponse(Request(method, path, query, headers, body, matchers))
     }
 
     case class DescribingResponse(request: Request) {

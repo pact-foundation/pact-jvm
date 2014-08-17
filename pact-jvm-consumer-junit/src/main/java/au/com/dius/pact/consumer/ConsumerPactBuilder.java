@@ -70,6 +70,12 @@ public class ConsumerPactBuilder {
                     return this;
                 }
 
+                private Map<String, List<String>> query = Collections.emptyMap();
+                public PactDslRequestWithoutPath query(Map<String, List<String>> query) {
+                    this.query = query;
+                    return this;
+                }
+
                 private String requestBody;
                 public PactDslRequestWithoutPath body(String body) {
                     requestBody = body;
@@ -90,7 +96,7 @@ public class ConsumerPactBuilder {
 
                 public PactDslRequestWithPath path(String path) {
                     return new PactDslRequestWithPath(consumerName, providerName, state, description, path,
-                            requestMethod, requestHeaders, requestBody, requestMatchers);
+                        requestMethod, requestHeaders, query, requestBody, requestMatchers);
                 }
             }
         }
@@ -106,6 +112,7 @@ public class ConsumerPactBuilder {
         private String path;
         private String requestMethod;
         private Map<String, String> requestHeaders = Collections.emptyMap();
+        private Map<String, List<String>> query = Collections.emptyMap();
         private String requestBody;
         private JSONObject requestMatchers;
 
@@ -118,6 +125,7 @@ public class ConsumerPactBuilder {
                                       String path,
                                       String requestMethod,
                                       Map<String, String> requestHeaders,
+                                      Map<String, List<String>> query,
                                       String requestBody,
                                       JSONObject requestMatchers) {
             this.requestMatchers = requestMatchers;
@@ -130,6 +138,7 @@ public class ConsumerPactBuilder {
             this.path = path;
             this.requestMethod = requestMethod;
             this.requestHeaders = requestHeaders;
+            this.query = query;
             this.requestBody = requestBody;
             this.requestMatchers = requestMatchers;
         }
@@ -144,6 +153,7 @@ public class ConsumerPactBuilder {
             this.path = existing.path;
             this.requestMethod = existing.requestMethod;
             this.requestHeaders = existing.requestHeaders;
+            this.query = existing.query;
             this.requestBody = existing.requestBody;
             this.requestMatchers = existing.requestMatchers;
 
@@ -157,6 +167,11 @@ public class ConsumerPactBuilder {
 
         public PactDslRequestWithPath headers(Map<String, String> headers) {
             requestHeaders = headers;
+            return this;
+        }
+
+        public PactDslRequestWithPath query(Map<String, List<String>> query) {
+            this.query = query;
             return this;
         }
 
@@ -230,7 +245,7 @@ public class ConsumerPactBuilder {
                 currentInteraction = Interaction$.MODULE$.apply(
                         existing.description,
                         None$.apply(existing.state),
-                        Request$.MODULE$.apply(existing.requestMethod, existing.path, existing.requestHeaders,
+                        Request$.MODULE$.apply(existing.requestMethod, existing.path, existing.query,  existing.requestHeaders,
                                 existing.requestBody, existing.requestMatchers),
                         Response$.MODULE$.apply(responseStatus, responseHeaders, responseBody, responseMatchers)
                 );
@@ -238,7 +253,7 @@ public class ConsumerPactBuilder {
                 currentInteraction = Interaction$.MODULE$.apply(
                         existing.description,
                         Some$.MODULE$.apply(existing.state),
-                        Request$.MODULE$.apply(existing.requestMethod, existing.path, existing.requestHeaders,
+                        Request$.MODULE$.apply(existing.requestMethod, existing.path, existing.query, existing.requestHeaders,
                                 existing.requestBody, existing.requestMatchers),
                         Response$.MODULE$.apply(responseStatus, responseHeaders, responseBody, responseMatchers)
                 );

@@ -5,6 +5,8 @@ import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.Consumer
 import scala.collection.mutable.ArrayBuffer
+import java.util
+import java.util.Collections
 
 object Fixtures {
   import au.com.dius.pact.model.HttpMethod._
@@ -13,7 +15,7 @@ object Fixtures {
   val provider = Provider("test_provider")
   val consumer = Consumer("test_consumer")
 
-  val request = Request(Post, "/",
+  val request = Request(Post, "/", Map("q" -> Seq("p")),
     Map("testreqheader" -> "testreqheadervalue"),
     "test" -> true, null)
 

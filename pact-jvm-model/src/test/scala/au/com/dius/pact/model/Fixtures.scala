@@ -8,7 +8,7 @@ object Fixtures {
   val consumer = Consumer("test_consumer")
 
 
-  val request = Request(Get, "/",
+  val request = Request(Get, "/", Map("q" -> Seq("p", "p2"), "r" -> Seq("s")),
     Map("testreqheader" -> "testreqheadervalue"),
     "test" -> true, null)
 
