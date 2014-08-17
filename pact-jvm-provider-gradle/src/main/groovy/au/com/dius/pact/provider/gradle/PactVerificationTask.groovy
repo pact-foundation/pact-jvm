@@ -21,17 +21,20 @@ class PactVerificationTask extends DefaultTask {
     void verifyPact() {
         ext.failures = [:]
         providerToVerify.consumers.each { consumer ->
+            AnsiConsole.out().println(Ansi.ansi().a('\nVerifying a pact between ').bold().a(consumer.name)
+                .boldOff().a(' and ').bold().a(providerToVerify.name).boldOff())
+
             Pact pact
             if (consumer.pactFile instanceof File) {
+                AnsiConsole.out().println(Ansi.ansi().a("  [Using file ${consumer.pactFile}]"))
                 pact = Pact$.MODULE$.from(new FileInput(consumer.pactFile))
             } else if (consumer.pactFile instanceof URL) {
+                AnsiConsole.out().println(Ansi.ansi().a("  [from URL ${consumer.pactFile}]"))
                 pact = Pact$.MODULE$.from(new StreamInput(consumer.pactFile.newInputStream()))
             } else {
                 throw new RuntimeException('You must specify the pactfile to execute (use pactFile = ...)')
             }
 
-            AnsiConsole.out().println(Ansi.ansi().a('\nVerifying a pact between ').bold().a(consumer.name)
-                .boldOff().a(' and ').bold().a(providerToVerify.name).boldOff())
             def interactions = JavaConverters$.MODULE$.asJavaIteratorConverter(pact.interactions().iterator())
             interactions.asJava().each { Interaction interaction ->
                 def interactionMessage = "Verifying a pact between ${consumer.name} and ${providerToVerify.name} - ${interaction.description()}"
