@@ -46,7 +46,11 @@ You want to look at: [pact-jvm-consumer-junit](pact-jvm-consumer-junit)
 
 You want to look at: [pact-jvm-consumer-groovy](pact-jvm-consumer-groovy) or [pact-jvm-consumer-junit](pact-jvm-consumer-junit)
 
-### I Use some other jvm language or test framework (clojure etc)
+### (Clojure Use I)
+
+Clojure can call out to Java, so have a look at [pact-jvm-consumer-junit](pact-jvm-consumer-junit).
+
+### I Use some other jvm language or test framework
 
 You want to look at: [Pact Consumer](pact-jvm-consumer)
 
