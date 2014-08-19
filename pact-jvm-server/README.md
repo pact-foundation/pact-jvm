@@ -23,9 +23,13 @@ You can build an application bundle with gradle by running (for 2.10 version):
 
     $ gradle :pact-jvm-server_2.10:installApp
 
-This will create an app bundle in `build/install`. You can then execute it with:
+This will create an app bundle in `build/2.10/install/pact-jvm-server_2.10`. You can then execute it with:
 
     $ java -jar pact-jvm-server/build/2.10/install/pact-jvm-server_2.10/lib/pact-jvm-server_2.10-2.0.4.jar
+
+or with the generated bundle script file:
+
+    $ pact-jvm-server/build/2.10/install/pact-jvm-server_2.10/bin/pact-jvm-server_2.10
 
 By default will run on port `29999` but a port number can be optionally supplied.
 
