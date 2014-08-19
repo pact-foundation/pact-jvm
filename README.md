@@ -48,7 +48,8 @@ You want to look at: [pact-jvm-consumer-groovy](pact-jvm-consumer-groovy) or [pa
 
 ### (Clojure Use I)
 
-Clojure can call out to Java, so have a look at [pact-jvm-consumer-junit](pact-jvm-consumer-junit).
+Clojure can call out to Java, so have a look at [pact-jvm-consumer-junit](pact-jvm-consumer-junit). For an example
+look at [ExampleClojureConsumerPactTest.clj](pact-jvm-consumer-junit/src/test/java/au/com/dius/pact/consumer/ExampleClojureConsumerPactTest.clj).
 
 ### I Use some other jvm language or test framework
 
