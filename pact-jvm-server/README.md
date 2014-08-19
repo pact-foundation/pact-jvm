@@ -21,7 +21,7 @@ If you use sbt, you can run the server with:
 
 You can build an application bundle with gradle by running (for 2.10 version):
 
-    $ gradle :pact-jvm-server_2.10:installApp
+    $ ./gradlew :pact-jvm-server_2.10:installApp
 
 This will create an app bundle in `build/2.10/install/pact-jvm-server_2.10`. You can then execute it with:
 
