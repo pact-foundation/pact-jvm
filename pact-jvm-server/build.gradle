@@ -1,8 +1,12 @@
+apply plugin:'application'
+
+mainClassName = 'au.com.dius.pact.server.Server'
 
 dependencies {
     compile project(":pact-jvm-model_${project.scalaVersion}"), project(":pact-jvm-consumer_${project.scalaVersion}")
 }
 
 jar {
-    manifest.attributes 'Main-Class': 'au.com.dius.pact.server.Server'
+    manifest.attributes 'Main-Class': mainClassName,
+            'Class-Path': configurations.compile.collect { it.getName() }.join(' ')
 }
