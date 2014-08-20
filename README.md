@@ -105,6 +105,13 @@ Which is a project that aims at providing tooling to coordinate pact generation 
 Most of Pact-JVM is written in Scala. You can build it using SBT (the old way). We are moving the build to Gradle,
 so you can build it with that too.
 
+### Note on buiding pact JVM with Java 6 or 7
+
+Scala requires a lot of permgen space to compile. If you're using Java 6 or 7, use the following java and sbt options:
+
+    export JAVA_OPTS='-Xmx2048m -XX:MaxPermSize=1024m -XX:PermSize=1024m'
+    export SBT_OPTS='-Xmx2048m -XX:MaxPermSize=1024m -XX:PermSize=1024m'
+
 To build the libraries:
 
     $ sbt clean test install
