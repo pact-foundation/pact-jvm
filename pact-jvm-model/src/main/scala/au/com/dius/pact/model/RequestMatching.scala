@@ -2,6 +2,7 @@ package au.com.dius.pact.model
 
 import JsonDiff.DiffConfig
 import org.json4s.JsonAST.JValue
+import com.typesafe.scalalogging.slf4j.StrictLogging
 
 case class RequestMatching(expectedInteractions: Seq[Interaction]) {
   import RequestMatching._
@@ -16,7 +17,7 @@ case class RequestMatching(expectedInteractions: Seq[Interaction]) {
     matchInteraction(actual).toOption.map(_.response)
 }
 
-object RequestMatching {
+object RequestMatching extends StrictLogging {
   import Matching._
 
   var diffConfig = DiffConfig(allowUnexpectedKeys = false, structural = false)
@@ -34,15 +35,17 @@ object RequestMatching {
     else RequestMismatch
     
   def compareRequest(expected: Interaction, actual: Request): RequestMatch = {
-    decideRequestMatch(expected, requestMismatches(expected.request, actual))
+    val mismatches: Seq[RequestPartMismatch] = requestMismatches(expected.request, actual)
+    logger.debug("Request mismatch: " + mismatches)
+    decideRequestMatch(expected, mismatches)
   }
                                               
   def requestMismatches(expected: Request, actual: Request): Seq[RequestPartMismatch] = {
     (matchMethod(expected.method, actual.method) 
       ++ matchPath(expected.path, actual.path)
+      ++ matchQuery(expected.query, actual.query)
       ++ matchCookie(expected.cookie, actual.cookie)
       ++ matchHeaders(expected.headersWithoutCookie, actual.headersWithoutCookie)
       ++ matchBody(expected.body, actual.body, diffConfig)).toSeq
   }
 }
-

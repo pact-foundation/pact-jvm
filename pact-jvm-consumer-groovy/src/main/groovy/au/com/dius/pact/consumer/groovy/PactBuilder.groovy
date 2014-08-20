@@ -73,14 +73,22 @@ class PactBuilder {
             interactions << Interaction$.MODULE$.apply(
                     requestDescription,
                     state,
-                    Request$.MODULE$.apply(requestData[i].method ?: 'get', requestData[i].path ?: '/', headers,
-                            requestData[i].query ?: [:], requestData[i].body ?: '', new JSONObject()),
+                    Request$.MODULE$.apply(requestData[i].method ?: 'get', requestData[i].path ?: '/',
+                            queryToString(requestData[i]?.query), headers, requestData[i].body ?: '', new JSONObject()),
                     Response$.MODULE$.apply(responseData[i].status ?: 200, responseHeaders,
                             responseData[i].body ?: '', new JSONObject())
             )
         }
         requestData = []
         responseData = []
+    }
+
+    private String queryToString(query) {
+        if (query instanceof Map) {
+            query.collect({ k, v -> (v instanceof List) ? v.collect({ "$k=$it" }) : "$k=$v" }).flatten().join('&')
+        } else {
+            query
+        }
     }
 
     PactBuilder with(Map requestData) {

@@ -17,7 +17,7 @@ trait PactSerializer extends StrictLogging {
       "method" -> r.method,
       "path" -> r.path,
       "headers" -> r.headers,
-      "query" -> r.query.getOrElse(Map()).transform((k,v) => v.map(k + "=" + _)).values.flatten.mkString("&"),
+      "query" -> r.query,
       "body" -> r.body,
       "requestMatchingRules" -> parse(r.matchers.getOrElse("{}").toString)
     )

@@ -3,8 +3,7 @@ package au.com.dius.pact.model
 import org.json4s._
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
-import scala.collection.JavaConversions
-import scala.collection.JavaConverters._
+import scala.collection.{mutable, JavaConversions}
 import org.json.JSONObject
 
 object Pact {
@@ -20,9 +19,6 @@ object Pact {
     implicit val formats = DefaultFormats
     json.transformField {
       case ("provider_state", value) => ("providerState", value)
-      case ("query", value:JString) => ("query",
-        value.values.split("&").toList.map(_.split("=")).foldLeft(Map[String,Seq[String]]()) {
-          (m, a) => m + (a.head -> (m.getOrElse(a.head, Seq()) :+ a.last)) })
     }.extract[Pact]
   }
 
@@ -90,7 +86,7 @@ object HttpMethod {
 
 case class Request(method: String,
                    path: String,
-                   query: Option[Map[String, Seq[String]]],
+                   query: Option[String],
                    headers: Option[Map[String, String]],
                    body: Option[JValue],
                    matchers: Option[JSONObject]) {
@@ -113,19 +109,27 @@ case class Request(method: String,
 }
 
 trait Optionals {
-  def optional(headers: Map[String, String]): Option[Map[String,String]] = {
-    if(headers == null | headers.isEmpty) {
+  def optional[A,B](map: Map[A, B]): Option[Map[A,B]] = {
+    if(map == null | map.isEmpty) {
       None
     } else {
-      Some(headers)
+      Some(map)
     }
   }
 
   def optional(body: String): Option[JValue] = {
-    if(body == null || body.trim().size == 0) {
+    if(body == null | body.trim().size == 0) {
       None
     } else {
       Some(parse(body))
+    }
+  }
+
+  def optionalQuery(query: String): Option[String] = {
+    if(query == null | query == "") {
+      None
+    } else {
+      Some(query)
     }
   }
 
@@ -147,16 +151,20 @@ trait Optionals {
 }
 
 object Request extends Optionals {
-  def apply(method: String, path: String, query: Map[String, Seq[String]], headers: Map[String, String], body: String, matchers: JSONObject): Request = {
-    Request(method, path, Option(query), optional(headers), optional(body), optional(matchers))
+  def apply(method: String, path: String, query: String, headers: Map[String, String],
+            body: String, matchers: JSONObject): Request = {
+    Request(method, path, optionalQuery(query), optional(headers), optional(body), optional(matchers))
   }
 
-  def apply(method: String, path: String, query: Map[String, Seq[String]], headers: Map[String, String], body: JValue, matchers: JSONObject): Request = {
-    Request(method, path, Option(query), optional(headers), optional(body), optional(matchers))
+  def apply(method: String, path: String, query: String, headers: Map[String, String],
+            body: JValue, matchers: JSONObject): Request = {
+    Request(method, path, optionalQuery(query), optional(headers), optional(body), optional(matchers))
   }
 
-  def apply(method: String, path: String, query: java.util.Map[String, java.util.List[String]], headers: java.util.Map[String,String], body: String, matchers: JSONObject): Request = {
-    Request(method, path, Option(JavaConversions.mapAsScalaMap(query).toMap.mapValues(_.asScala)),  optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body), optional(matchers))
+  def apply(method: String, path: String, query: String, headers: java.util.Map[String,String], body: String,
+            matchers: JSONObject): Request = {
+    Request(method, path, optionalQuery(query), optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body),
+      optional(matchers))
   }
 }
 

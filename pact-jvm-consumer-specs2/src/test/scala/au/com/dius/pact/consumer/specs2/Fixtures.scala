@@ -15,7 +15,7 @@ object Fixtures {
   val provider = Provider("test_provider")
   val consumer = Consumer("test_consumer")
 
-  val request = Request(Post, "/", Map("q" -> Seq("p")),
+  val request = Request(Post, "/", "q=p",
     Map("testreqheader" -> "testreqheadervalue"),
     "test" -> true, null)
 

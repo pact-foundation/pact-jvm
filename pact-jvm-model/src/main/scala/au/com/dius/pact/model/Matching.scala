@@ -17,6 +17,7 @@ object RequestPartMismatch extends SharedMismatch {
   type Cookies = List[String]
   type Path = String
   type Method = String
+  type Query = String
 }
 
 object ResponsePartMismatch extends SharedMismatch {
@@ -33,7 +34,7 @@ case class BodyMismatch(expected: Body, actual: Body) extends RequestPartMismatc
 case class CookieMismatch(expected: Cookies, actual: Cookies) extends RequestPartMismatch
 case class PathMismatch(expected: Path, actual: Path) extends RequestPartMismatch
 case class MethodMismatch(expected: Method, actual: Method) extends RequestPartMismatch
-
+case class QueryMismatch(expected: Query, actual: Query) extends RequestPartMismatch
 
 object Matching {
   
@@ -97,5 +98,14 @@ object Matching {
   def matchStatus(expected: Int, actual: Int): Option[StatusMismatch] = {
     if(expected == actual) None
     else Some(StatusMismatch(expected, actual))
+  }
+
+  def matchQuery(expected: Option[Query], actual: Option[Query]): Option[QueryMismatch] = {
+    (expected, actual) match {
+      case (None, None) => None
+      case (Some(a), None) => Some(QueryMismatch(a, ""))
+      case (None, Some(b)) => Some(QueryMismatch("", b))
+      case (Some(a), Some(b)) => if (a == b) { None } else { Some(QueryMismatch(a, b)) }
+    }
   }
 }

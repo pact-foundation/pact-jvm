@@ -70,8 +70,8 @@ public class ConsumerPactBuilder {
                     return this;
                 }
 
-                private Map<String, List<String>> query = Collections.emptyMap();
-                public PactDslRequestWithoutPath query(Map<String, List<String>> query) {
+                private String query;
+                public PactDslRequestWithoutPath query(String query) {
                     this.query = query;
                     return this;
                 }
@@ -112,7 +112,7 @@ public class ConsumerPactBuilder {
         private String path;
         private String requestMethod;
         private Map<String, String> requestHeaders = Collections.emptyMap();
-        private Map<String, List<String>> query = Collections.emptyMap();
+        private String query;
         private String requestBody;
         private JSONObject requestMatchers;
 
@@ -125,7 +125,7 @@ public class ConsumerPactBuilder {
                                       String path,
                                       String requestMethod,
                                       Map<String, String> requestHeaders,
-                                      Map<String, List<String>> query,
+                                      String query,
                                       String requestBody,
                                       JSONObject requestMatchers) {
             this.requestMatchers = requestMatchers;
@@ -170,7 +170,7 @@ public class ConsumerPactBuilder {
             return this;
         }
 
-        public PactDslRequestWithPath query(Map<String, List<String>> query) {
+        public PactDslRequestWithPath query(String query) {
             this.query = query;
             return this;
         }

@@ -7,6 +7,6 @@ object EnterStateRequest {
   def apply(url: String, state: String): Request = {
     import org.json4s.JsonDSL._
     val json: JValue = "state" -> state
-    Request("POST", url, Map[String, Seq[String]](), Map[String, String](), json, null)
+    Request("POST", url, null, Map[String, String](), json, null)
   }
 }
