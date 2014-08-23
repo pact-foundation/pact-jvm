@@ -38,7 +38,7 @@ object Complete {
       mockProvider.stop()
       
       ConsumerPactRunner.writeIfMatching(pact, sessionResults) match {
-        case PactVerified => pactWritten(Response(200, Response.CrossSiteHeaders, None, null), mockProvider.config.port)
+        case PactVerified => pactWritten(Response(200, Some(Response.CrossSiteHeaders), None, null), mockProvider.config.port)
         case error => pactWritten(Response(400, Map[String, String](), toJson(error), null), mockProvider.config.port)
       }
     }

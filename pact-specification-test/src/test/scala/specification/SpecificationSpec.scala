@@ -30,7 +30,9 @@ class SpecificationSpec extends SpecificationLike
       folder.listFiles(jsonFilter).map { testFile =>
         val fileName = testFile.getName
         implicit val formats = DefaultFormats
-        val testData = parse(testFile).extract[PactSpecification]
+        val testData = parse(testFile).transformField {
+          case ("body", value) => ("body", JString(pretty(value)))
+        }.extract[PactSpecification]
 
         val description = s"$dirName/$fileName ${testData.comment}"
         Example(description, {

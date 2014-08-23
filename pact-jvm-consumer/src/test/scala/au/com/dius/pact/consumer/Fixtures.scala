@@ -5,6 +5,7 @@ import au.com.dius.pact.model._
 import scala.concurrent.{ExecutionContext, Future}
 import au.com.dius.pact.model.dispatch.HttpClient
 import java.util.concurrent.Executors
+import org.json4s.jackson.JsonMethods.pretty
 
 object Fixtures {
   import au.com.dius.pact.model.HttpMethod._
@@ -12,11 +13,11 @@ object Fixtures {
   val provider = Provider("test_provider")
   val consumer = Consumer("test_consumer")
 
-  val request = Request(Post, "/", null, Map("testreqheader" -> "testreqheadervalue"), "test" -> true, null)
+  val request = Request(Post, "/", null, Map("testreqheader" -> "testreqheadervalue"), pretty(map2jvalue(Map("test" -> true))), null)
 
   val response = Response(200,
     Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*"),
-    "responsetest" -> true, null)
+    pretty(map2jvalue(Map("responsetest" -> true))), null)
 
   val interaction = Interaction(
     description = "test interaction",
@@ -51,13 +52,13 @@ object Fixtures {
     def extractResponseTest(path: String = request.path): Future[Boolean] = {
       HttpClient.run(request.copy(path = s"$serverUrl$path")).map { response =>
         response.status == 200 &&
-        response.bodyString.map(extractFrom).get
+        response.body.map(extractFrom).get
       }
     }
 
     def simpleGet(path: String): Future[(Int, Option[String])] = {
       HttpClient.run(Request(Get, serverUrl + path, None, None, None, None)).map { response =>
-        (response.status, response.bodyString)
+        (response.status, response.body)
       }
     }
   }

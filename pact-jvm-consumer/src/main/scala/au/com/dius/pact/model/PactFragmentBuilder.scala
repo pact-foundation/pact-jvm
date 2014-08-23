@@ -46,7 +46,7 @@ object PactFragmentBuilder {
                  method: String = Get,
                  query: Option[String] = None,
                  headers: Option[Map[String, String]] = None,
-                 body: Option[JValue] = None,
+                 body: Option[String] = None,
                  matchers: Option[JSONObject] = None): DescribingResponse = {
       DescribingResponse(Request(method, path, query, headers, body, matchers))
     }

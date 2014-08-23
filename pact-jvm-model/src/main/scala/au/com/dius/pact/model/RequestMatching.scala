@@ -1,7 +1,6 @@
 package au.com.dius.pact.model
 
 import JsonDiff.DiffConfig
-import org.json4s.JsonAST.JValue
 import com.typesafe.scalalogging.slf4j.StrictLogging
 
 case class RequestMatching(expectedInteractions: Seq[Interaction]) {
@@ -46,6 +45,6 @@ object RequestMatching extends StrictLogging {
       ++ matchQuery(expected.query, actual.query)
       ++ matchCookie(expected.cookie, actual.cookie)
       ++ matchHeaders(expected.headersWithoutCookie, actual.headersWithoutCookie)
-      ++ matchBody(expected.body, actual.body, diffConfig)).toSeq
+      ++ matchBody(expected.mimeType, expected.body, actual.mimeType, actual.body, diffConfig)).toSeq
   }
 }

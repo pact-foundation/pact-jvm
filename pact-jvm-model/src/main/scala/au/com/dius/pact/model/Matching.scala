@@ -1,15 +1,12 @@
 package au.com.dius.pact.model
 
-import org.json4s.{JValue, Diff}
-import au.com.dius.pact.model.JsonDiff._
-import org.json4s.JsonAST.JNothing
-
 import RequestPartMismatch._
 import ResponsePartMismatch._
 import scala.collection.immutable.TreeMap
+import au.com.dius.pact.model.JsonDiff.DiffConfig
 
 trait SharedMismatch {
-  type Body = Option[JValue]
+  type Body = Option[String]
   type Headers = Map[String, String]
 }
 
@@ -30,11 +27,16 @@ sealed trait ResponsePartMismatch
 
 case class StatusMismatch(expected: Status, actual: Status) extends ResponsePartMismatch
 case class HeaderMismatch(expected: Headers, actual: Headers) extends RequestPartMismatch with ResponsePartMismatch
+case class BodyTypeMismatch(expected: String, actual: String) extends RequestPartMismatch with ResponsePartMismatch
 case class BodyMismatch(expected: Body, actual: Body) extends RequestPartMismatch with ResponsePartMismatch
 case class CookieMismatch(expected: Cookies, actual: Cookies) extends RequestPartMismatch
 case class PathMismatch(expected: Path, actual: Path) extends RequestPartMismatch
 case class MethodMismatch(expected: Method, actual: Method) extends RequestPartMismatch
 case class QueryMismatch(expected: Query, actual: Query) extends RequestPartMismatch
+
+trait BodyMatcher {
+  def matchBody(expected: Option[String], actual: Option[String], diffConfig: DiffConfig) : List[BodyMismatch]
+}
 
 object Matching {
   
@@ -76,16 +78,21 @@ object Matching {
     else Some(MethodMismatch(expected, actual))
   }
 
-  def matchBody(expected: Body, actual: Body, diffConfig: DiffConfig): Option[BodyMismatch] = {
-    implicit val autoParse = JsonDiff.autoParse _
-    val difference = (expected, actual) match {
-      case (None, None) => noChange
-      case (None, Some(b)) => if(diffConfig.structural) { noChange } else { added(b) }
-      case (Some(a), None) => missing(a)
-      case (Some(a), Some(b)) => diff(a, b, diffConfig)
+  def matchBody(expectedMimeType: String, expected: Body, actualMimeType: String, actual: Body, diffConfig: DiffConfig) = {
+    if (expectedMimeType == actualMimeType) {
+      if (PactConfig.bodyMatchers.contains(expectedMimeType)) {
+        PactConfig.bodyMatchers(expectedMimeType).matchBody(expected, actual, diffConfig)
+      } else {
+        (expected, actual) match {
+          case (None, None) => List()
+          case (None, b) => if(diffConfig.structural) { List() } else { List(BodyMismatch(None, b)) }
+          case (a, None) => List(BodyMismatch(a, None))
+          case (a, b) => if (a == b) List() else List(BodyMismatch(a, b))
+        }
+      }
+    } else {
+      List(BodyTypeMismatch(expectedMimeType, actualMimeType))
     }
-    if(difference == noChange) None
-    else Some(BodyMismatch(expected, actual))
   }
 
   def matchPath(expected: Path, actual: Path): Option[PathMismatch] = {
