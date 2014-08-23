@@ -5,8 +5,7 @@ import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.Consumer
 import scala.collection.mutable.ArrayBuffer
-import java.util
-import java.util.Collections
+import org.json4s.jackson.JsonMethods.pretty
 
 object Fixtures {
   import au.com.dius.pact.model.HttpMethod._
@@ -17,11 +16,11 @@ object Fixtures {
 
   val request = Request(Post, "/", "q=p",
     Map("testreqheader" -> "testreqheadervalue"),
-    "test" -> true, null)
+    pretty(map2jvalue(Map("test" -> true))), null)
 
   val response = Response(200,
     Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*"),
-    "responsetest" -> true, null)
+    pretty(map2jvalue(Map("responsetest" -> true))), null)
 
   val interaction = Interaction(
     description = "test interaction",

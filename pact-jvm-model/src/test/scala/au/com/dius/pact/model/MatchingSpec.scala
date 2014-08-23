@@ -14,17 +14,21 @@ class MatchingSpec extends Specification {
     implicit val autoParse = JsonDiff.autoParse _
     "Body Matching" should {
       val config = DiffConfig()
+
       "Handle both None" in {
-        matchBody(None, None, config) must beNone
+        matchBody("a", None, "a", None, config) must beEmpty
       }
+
       "Handle left None" in {
-        val expected = BodyMismatch(request.body, None)
-        matchBody(request.body, None, config) must beSome(expected)
+        val expected = List(BodyMismatch(request.body, None))
+        matchBody("a", request.body, "a", None, config) must beEqualTo(expected)
       }
+
       "Handle right None" in {
-        val expected = BodyMismatch(None, request.body)
-        matchBody(None, request.body, config) must beSome(expected)
+        val expected = List(BodyMismatch(None, request.body))
+        matchBody("a", None, "a", request.body, config) must beEqualTo(expected)
       }
+
     }
 
     "Method Matching" should {

@@ -26,9 +26,8 @@ object PrettyPrinter {
     printDiff(label, stringify(expected), stringify(actual))
   }
 
-  def printStringMismatch(label: String, expected: Option[JValue], actual: Option[JValue]): Seq[String] = {
-    import org.json4s.jackson.JsonMethods._
-    def stringify(s: Option[JValue]) = s.fold(List[String]()){j => pretty(render(j)).split("\n").toList}
+  def printStringMismatch(label: String, expected: Option[String], actual: Option[String]): Seq[String] = {
+    def stringify(s: Option[String]) = s.fold(List[String]()){j => j.split("\n").toList}
     printDiff(label, stringify(expected), stringify(actual))
   }
 
@@ -36,6 +35,7 @@ object PrettyPrinter {
     partial.flatMap {
       case HeaderMismatch(expected, actual) => printMapMismatch("Headers", expected, actual)
       case BodyMismatch(expected, actual) => printStringMismatch("Body", expected, actual)
+      case BodyTypeMismatch(expected, actual) => printStringMismatch("Body Type", Some(expected), Some(actual))
       case CookieMismatch(expected, actual) => printDiff("Cookies", expected.sorted, actual.sorted)
       case PathMismatch(expected, actual) => printDiff("Path", List(expected), List(actual), 0)
       case MethodMismatch(expected, actual) => printDiff("Method", List(expected), List(actual), 0)
