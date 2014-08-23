@@ -2,14 +2,12 @@ package au.com.dius.pact.provider
 
 import AnimalServiceResponses.responses
 import au.com.dius.pact.model.{Request, Response}
-import org.json4s.JsonAST._
-import org.json4s.jackson.JsonMethods.parse
+import org.json4s.JsonAST.{JObject, JField, JString}
 import unfiltered.netty.{ReceivedMessage, ServerErrorResponse, cycle}
 import unfiltered.request.HttpRequest
 import unfiltered.response.ResponseFunction
 import au.com.dius.pact.model.unfiltered.Conversions
 import com.typesafe.scalalogging.slf4j.StrictLogging
-import org.json4s.StringInput
 
 object TestService extends StrictLogging {
   var state: String = ""
@@ -22,10 +20,11 @@ object TestService extends StrictLogging {
       def handle(request:HttpRequest[ReceivedMessage]): ResponseFunction[NHttpResponse] = {
         val response = if(request.uri.endsWith("enterState")) {
           val pactRequest: Request = Conversions.unfilteredRequestToPactRequest(request)
-          val json = parse(StringInput(pactRequest.body.get))
-          state = (for {
-            JString(s) <- json \\ "state"
-          } yield s).head
+          pactRequest.body.map {
+            case JObject(List(JField("state", JString(s)))) => {
+              state = s
+            }
+          }
           Response(200, None, None, None)
         } else {
           responses.get(state).flatMap(_.get(request.uri)).getOrElse(Response(400, None, None, None))

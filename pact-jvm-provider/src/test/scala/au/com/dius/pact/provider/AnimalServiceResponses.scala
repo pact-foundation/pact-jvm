@@ -3,14 +3,13 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.model.Response
 import org.json4s.JsonDSL._
 import org.json4s.JValue
-import org.json4s.jackson.JsonMethods.pretty
 
 object AnimalServiceResponses {
-  def contentHeaders: Map[String, String] = Map("Content-Type" -> "application/json; charset=UTF-8")
+  def contentHeaders: Map[String, String] = Map()//"Content-Type" -> "application/json; charset=UTF-8")
 
   def alligator(name:String): Response = {
     val json: JValue = "alligators" -> List("name" -> s"$name")
-    Response(200, contentHeaders, pretty(json), null)
+    Response(200, contentHeaders, Some(json), null)
   }
   val bobResponse = alligator("Bob")
   val maryResponse = alligator("Mary")
@@ -30,7 +29,7 @@ object AnimalServiceResponses {
       "/alligators/Mary" -> Response(404, None, None, None)
     ),
     "an error has occurred" -> Map (
-      "/alligators" -> Response(500, contentHeaders, pretty(errorJson), null)
+      "/alligators" -> Response(500, contentHeaders, Some(errorJson), null)
     )
   )
 

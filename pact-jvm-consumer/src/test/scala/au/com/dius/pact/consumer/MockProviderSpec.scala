@@ -14,7 +14,6 @@ import scala.util.Success
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.specs2.execute.Result
-import org.json4s.jackson.JsonMethods.pretty
 
 @RunWith(classOf[JUnitRunner])
 class MockProviderSpec extends Specification {
@@ -65,7 +64,7 @@ class MockProviderSpec extends Specification {
         val expectedHeaders = expected.headers.getOrElse(Map())
         actual.headers.map(_.filter(t => expectedHeaders.contains(t._1))) must beEqualTo(expected.headers)
 
-        actual.body must beEqualTo(expected.body)
+        actual.bodyString must beEqualTo(expected.bodyString)
       }
 
       def compare(actual: Interaction, request:Request, response:Response) = {
@@ -75,13 +74,13 @@ class MockProviderSpec extends Specification {
 
         def chunk(s:String) = s.replaceAll("\n", "").replaceAll(" ", "").replaceAll("\t", "").toLowerCase.take(10)
 
-        actual.response.body.map(chunk) must beEqualTo(response.body.map(chunk))
+        actual.response.bodyString.map(chunk) must beEqualTo(response.bodyString.map(chunk))
 
         actual.response.copy(body = None) must beEqualTo(response.copy(body = None))
       }
       
       val expectedInvalidResponse = Response(500, Map("Access-Control-Allow-Origin" -> "*"),
-        pretty(JObject(JField("error", JString("unexpected request")))), null)
+        Some(JObject(JField("error", JString("unexpected request")))), null)
       
       compareRequests(results.unexpected.head, invalidRequest)
       compare(results.matched.head, validRequest, response)

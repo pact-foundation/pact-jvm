@@ -28,7 +28,7 @@ object Conversions {
 
   implicit def pactToUnfilteredResponse(response: Response): ResponseFunction[NHttpResponse] = {
     val rf = Status(response.status) ~> Headers(response.headers)
-    response.body.fold(rf)(rf ~> ResponseString(_))
+    response.bodyString.fold(rf)(rf ~> ResponseString(_))
   }
 
   def toHeaders(request: HttpRequest[ReceivedMessage]): Map[String, String] = {

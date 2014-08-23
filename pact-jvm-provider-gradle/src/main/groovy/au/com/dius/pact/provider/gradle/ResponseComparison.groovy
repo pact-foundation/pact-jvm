@@ -61,7 +61,7 @@ class ResponseComparison {
 
   def compareBody() {
       def result = [:]
-      def expectedBody = expected.body().defined ? new JsonSlurper().parseText(expected.body().get()) : [:]
+      def expectedBody = expected.body().defined ? new JsonSlurper().parseText(expected.bodyString().get()) : [:]
       def compareResult = BodyComparison.compare('/', expectedBody, actualBody)
       if (!compareResult.isEmpty()) {
           String actualBodyString = new JsonBuilder(actualBody).toPrettyString()

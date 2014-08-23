@@ -18,23 +18,16 @@ trait PactSerializer extends StrictLogging {
       "path" -> r.path,
       "headers" -> r.headers,
       "query" -> r.query,
-      "body" -> parseBody(r),
+      "body" -> r.body,
       "requestMatchingRules" -> parse(r.matchers.getOrElse("{}").toString)
     )
-  }
-
-  def parseBody(r: HttpPart) = {
-    r.body match {
-      case None => JNothing
-      case Some(s) => if (r.jsonBody) parse(s) else JString(s)
-    }
   }
 
   implicit def response2json(r: Response): JValue = {
     JObject(
       "status" -> JInt(r.status),
       "headers" -> r.headers,
-      "body" -> parseBody(r),
+      "body" -> r.body,
       "responseMatchingRules" -> parse(r.matchers.getOrElse("{}").toString)
     )
   }

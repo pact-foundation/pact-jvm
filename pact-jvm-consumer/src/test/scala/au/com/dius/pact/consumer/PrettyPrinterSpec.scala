@@ -5,11 +5,6 @@ import au.com.dius.pact.model._
 import Fixtures._
 import au.com.dius.pact.model.PathMismatch
 import au.com.dius.pact.model.HeaderMismatch
-import org.json4s.jackson.JsonMethods._
-import au.com.dius.pact.model.PathMismatch
-import au.com.dius.pact.model.BodyMismatch
-import au.com.dius.pact.model.HeaderMismatch
-import scala.Some
 
 class PrettyPrinterSpec extends Specification {
   def print(mismatch: RequestPartMismatch) = {
@@ -40,7 +35,7 @@ class PrettyPrinterSpec extends Specification {
   "body mismatch" in {
     import org.json4s.JsonDSL._
 
-    print(BodyMismatch(Some(pretty(map2jvalue(Map("foo"->"bar")))), Some(pretty(map2jvalue(Map("ork" -> "Bif")))))) must beEqualTo(
+    print(BodyMismatch(Some(Map("foo"->"bar")), Some(Map("ork" -> "Bif")))) must beEqualTo(
     s"""--- Body
       |$plus
       |@@ -1,3 +1,3 @@

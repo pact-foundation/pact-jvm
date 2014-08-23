@@ -25,13 +25,13 @@ case class ConsumerService(serverUrl: String) {
   def extractResponseTest(path: String = request.path): Future[Boolean] = {
     HttpClient.run(request.copy(path = s"$serverUrl$path")).map { response =>
       response.status == 200 &&
-      response.body.map(extractFrom).get
+      response.bodyString.map(extractFrom).get
     }
   }
 
   def simpleGet(path: String): Future[(Int, Option[String])] = {
     HttpClient.run(Request("GET", serverUrl + path, None, None, None, None)).map { response =>
-      (response.status, response.body)
+      (response.status, response.bodyString)
     }
   }
 }

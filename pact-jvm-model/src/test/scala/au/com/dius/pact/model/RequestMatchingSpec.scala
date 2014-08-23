@@ -3,7 +3,6 @@ package au.com.dius.pact.model
 import org.specs2.mutable.Specification
 import Fixtures._
 import org.json4s.JsonDSL._
-import org.json4s.jackson.JsonMethods.pretty
 import au.com.dius.pact.model.HttpMethod._
 import scala.Some
 
@@ -22,12 +21,12 @@ class RequestMatchingSpec extends Specification {
     }
 
     "disallow additional keys" in {
-      val leakyRequest = request.copy(body = Some(pretty(map2jvalue(Map("test" -> true, "extra" -> false)))))
+      val leakyRequest = request.copy(body = Some(Map("test" -> true, "extra" -> false)))
       test(leakyRequest) must beNone
     }
 
     "require precise matching" in {
-      val impreciseRequest = request.copy(body = Some(pretty(map2jvalue(Map("test" -> false)))))
+      val impreciseRequest = request.copy(body = Some("test" -> false))
       test(impreciseRequest) must beNone
     }
 
