@@ -29,6 +29,11 @@ class MatchingSpec extends Specification {
         matchBody("a", None, "a", request.body, config) must beEqualTo(expected)
       }
 
+      "Handle different mime types" in {
+        val expected = List(BodyTypeMismatch("a", "b"))
+        matchBody("a", None, "b", request.body, config) must beEqualTo(expected)
+      }
+
     }
 
     "Method Matching" should {
