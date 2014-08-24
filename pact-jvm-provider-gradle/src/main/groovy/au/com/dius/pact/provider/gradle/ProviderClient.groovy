@@ -27,13 +27,28 @@ class ProviderClient {
         }
 
         if (request.body().defined) {
-            requestMap.body = request.bodyString().get()
+            requestMap.body = request.body().get()
         }
 
         client.handler.failure = { resp -> resp }
         switch (request.method()) {
             case 'POST':
                 response = client.post(requestMap)
+                break
+            case 'HEAD':
+                response = client.head(requestMap)
+                break
+            case 'OPTIONS':
+                response = client.options(requestMap)
+                break
+            case 'PUT':
+                response = client.put(requestMap)
+                break
+            case 'DELETE':
+                response = client.delete(requestMap)
+                break
+            case 'PATCH':
+                response = client.patch(requestMap)
                 break
             default:
                 response = client.get(requestMap)

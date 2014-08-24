@@ -4,6 +4,7 @@ import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.Pact$
 import au.com.dius.pact.model.Interaction
 import org.apache.http.Header
+import org.apache.http.HttpResponse
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.AnsiConsole
 import org.gradle.api.DefaultTask
@@ -57,13 +58,13 @@ class PactVerificationTask extends DefaultTask {
                         ProviderClient client = new ProviderClient(request: interaction.request(), provider: providerToVerify)
 
                         def expectedResponse = interaction.response()
-                        def actualResponse = client.makeRequest()
+                        HttpResponse actualResponse = client.makeRequest()
 
                         def headers = [:]
                         actualResponse.allHeaders.each { Header header ->
                             headers[header.name] = header.value
                         }
-                        def comparison = ResponseComparison.compareResponse(expectedResponse,
+                        def comparison = ResponseComparison.compareResponse(expectedResponse, actualResponse,
                                 actualResponse.statusLine.statusCode, headers, actualResponse.data ?: [:])
 
                         AnsiConsole.out().println('    returns a response which')

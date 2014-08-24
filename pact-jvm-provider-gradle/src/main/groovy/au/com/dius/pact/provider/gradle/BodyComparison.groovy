@@ -1,5 +1,8 @@
 package au.com.dius.pact.provider.gradle
 
+import au.com.dius.pact.model.Response
+import groovy.json.JsonSlurper
+
 class BodyComparison {
 
     static compare(String path, def expected, def actual) {
@@ -63,6 +66,18 @@ class BodyComparison {
             "'${p}'"
         } else {
             p
+        }
+    }
+
+    static def parseBody(Response response) {
+        if (response.body().defined) {
+            switch (response.mimeType()) {
+                default:
+                    new JsonSlurper().parseText(response.body().get())
+                    break
+            }
+        } else {
+            [:]
         }
     }
 }

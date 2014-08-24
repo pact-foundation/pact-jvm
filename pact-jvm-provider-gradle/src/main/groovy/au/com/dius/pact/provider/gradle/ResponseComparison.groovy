@@ -6,19 +6,22 @@ import difflib.DiffUtils
 import difflib.Patch
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
+import org.apache.http.HttpResponse
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 import scala.collection.JavaConverters$
 
 class ResponseComparison {
 
   Response expected
+  HttpResponse actual
   int actualStatus
   Map actualHeaders
   def actualBody
 
-  static def compareResponse(Response response, int actualStatus, Map actualHeaders, def actualBody) {
+  static def compareResponse(Response response, HttpResponse actualResponse, int actualStatus, Map actualHeaders,
+                             def actualBody) {
     def result = [:]
-    def comparison = new ResponseComparison(expected: response, actualStatus: actualStatus,
+    def comparison = new ResponseComparison(expected: response, actual: actualResponse, actualStatus: actualStatus,
         actualHeaders: actualHeaders.collectEntries { k, v -> [k.toUpperCase(), v] }, actualBody: actualBody)
     result.method = comparison.compareMethod()
     result.headers = comparison.compareHeaders()
@@ -40,13 +43,13 @@ class ResponseComparison {
     Map headerResult = [:]
 
     if (expected.headers().defined) {
-        def headers = []
-        if (JavaConverters$.MODULE$.metaClass.respondsTo('asJavaMapConverter')) {
-            headers = JavaConverters$.MODULE$.asJavaMapConverter(expected.headers().get()).asJava()
-        } else {
-            headers = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
-        }
-        headers.each { headerKey, value ->
+      def headers = []
+      if (JavaConverters$.MODULE$.metaClass.respondsTo('asJavaMapConverter')) {
+          headers = JavaConverters$.MODULE$.asJavaMapConverter(expected.headers().get()).asJava()
+      } else {
+          headers = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
+      }
+      headers.each { headerKey, value ->
         try {
           assert actualHeaders[headerKey.toUpperCase()] == value
           headerResult[headerKey] = true
@@ -60,8 +63,14 @@ class ResponseComparison {
   }
 
   def compareBody() {
-      def result = [:]
-      def expectedBody = expected.body().defined ? new JsonSlurper().parseText(expected.body().get()) : [:]
+    def result = [:]
+
+    def expectedType = expected.mimeType()
+    def actualType = actual.entity?.contentType?.value
+    if (expectedType != actualType) {
+        result = [comparison: "Expected a response type of '$expectedType' but the actual type was '$actualType'"]
+    } else {
+      def expectedBody = BodyComparison.parseBody(expected)
       def compareResult = BodyComparison.compare('/', expectedBody, actualBody)
       if (!compareResult.isEmpty()) {
           String actualBodyString = new JsonBuilder(actualBody).toPrettyString()
@@ -95,6 +104,7 @@ class ResponseComparison {
 
           result = [comparison: compareResult, diff: diff]
       }
-      result
+    }
+    result
   }
 }
