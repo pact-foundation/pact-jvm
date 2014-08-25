@@ -95,7 +95,7 @@ object HttpMethod {
 trait HttpPart {
   def headers: Option[Map[String, String]]
   def body: Option[String]
-  def mimeType = headers.getOrElse(Map()).getOrElse("Content-Type", "application/json")
+  def mimeType = headers.getOrElse(Map()).getOrElse("Content-Type", "application/json").split("\\s*;\\s*").head
   def jsonBody = mimeType == "application/json"
 }
 

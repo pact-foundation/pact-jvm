@@ -62,5 +62,22 @@ class PactSpec extends Specification {
         result must beEqualTo(MergeConflict(Seq((interaction, newInteractions.head))))
       }
     }
+
+    "mimeType" should {
+        "default to json" in {
+            val request = Request(HttpMethod.Get,"", None, None, None, None)
+            request.mimeType must beEqualTo("application/json")
+        }
+
+        "get the mime type from the headers" in {
+            val request = Request(HttpMethod.Get,"", None, Some(Map("Content-Type" -> "text/html")), None, None)
+            request.mimeType must beEqualTo("text/html")
+        }
+
+        "handle charsets in the content type" in {
+            val request = Request(HttpMethod.Get,"", None, Some(Map("Content-Type" -> "application/json; charset=UTF-8")), None, None)
+            request.mimeType must beEqualTo("application/json")
+        }
+    }
   }
 }
