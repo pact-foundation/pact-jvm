@@ -72,7 +72,7 @@ class PactVerificationTask extends DefaultTask {
                             interactionMessage + ' returns a response which')
                         displayHeadersResult(failures, expectedResponse.headers(), comparison.headers,
                             interactionMessage + ' returns a response which')
-                        def expectedBody = expectedResponse.body().defined ? expectedResponse.bodyString().get() : ''
+                        def expectedBody = expectedResponse.body().defined ? expectedResponse.body().get() : ''
                         displayBodyResult(failures, expectedBody, comparison.body,
                             interactionMessage + ' returns a response which')
                     } catch (e) {
