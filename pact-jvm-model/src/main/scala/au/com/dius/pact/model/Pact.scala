@@ -190,6 +190,7 @@ object Response extends Optionals {
   }
 
   def invalidRequest(request: Request) = {
-    Response(500, CrossSiteHeaders ++ Map("Content-Type" -> "application/json"), pretty(JObject("error"-> JString(s"Unexpected request : $request"))), null)
+    Response(500, CrossSiteHeaders ++ Map("Content-Type" -> "application/json", "X-Pact-Unexpected-Request" -> "1"),
+        pretty(JObject("error"-> JString(s"Unexpected request : $request"))), null)
   }
 }
