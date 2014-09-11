@@ -20,7 +20,7 @@ class ResponseComparisonTest {
 
   @Before
   void setup() {
-    response = Response$.MODULE$.apply(200, ['Content-Type': 'application/json'], '{"stuff": "is good"}', null)
+    response = Response$.MODULE$.apply(200, ['Content-Type': 'application/json'], '{"stuff": "is good"}', [:])
     actualStatus = 200
     actualBody = [
       stuff: 'is good'
@@ -41,23 +41,23 @@ class ResponseComparisonTest {
 
   @Test
   void 'should not compare headers if there are no expected headers'() {
-    response = Response$.MODULE$.apply(200, [:], "", null)
+    response = Response$.MODULE$.apply(200, [:], "", [:])
     assert testSubject().compareHeaders() == [:]
   }
 
   @Test
   void 'should only compare the expected headers'() {
     actualHeaders = ['A': 'B', 'C': 'D']
-    response = Response$.MODULE$.apply(200, ['A': 'B'], "", null)
+    response = Response$.MODULE$.apply(200, ['A': 'B'], "", [:])
     assert testSubject().compareHeaders() == ['A': true]
-    response = Response$.MODULE$.apply(200, ['A': 'D'], "", null)
+    response = Response$.MODULE$.apply(200, ['A': 'D'], "", [:])
     assert testSubject().compareHeaders().A instanceof PowerAssertionError
   }
 
   @Test
   void 'ignores case in header comparisons'() {
     actualHeaders = ['A': 'B', 'C': 'D']
-    response = Response$.MODULE$.apply(200, ['a': 'B'], "", null)
+    response = Response$.MODULE$.apply(200, ['a': 'B'], "", [:])
     assert testSubject().compareHeaders() == ['a': true]
   }
 

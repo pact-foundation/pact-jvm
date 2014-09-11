@@ -1,16 +1,27 @@
 package au.com.dius.pact.model
 
-import java.io.{InputStream, File, PrintWriter}
+import java.io.{InputStream, PrintWriter}
 import java.util.jar.JarInputStream
 import com.typesafe.scalalogging.slf4j.StrictLogging
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-
+import org.json4s.jackson.Serialization
 
 trait PactSerializer extends StrictLogging {
   this: Pact =>
 
   import org.json4s.JsonDSL._
+
+  def matchers2json(m: Option[Map[String, Any]]): JValue = {
+      implicit val formats = Serialization.formats(NoTypeHints)
+      m match {
+          case None => JNothing
+          case _ => map2jvalue(m.get.mapValues {
+              case map: Map[_, _] => matchers2json(Some(map.asInstanceOf[Map[String, Any]]))
+              case v => Extraction.decompose(v)
+          })
+      }
+  }
 
   implicit def request2json(r: Request): JValue = {
     JObject(
@@ -19,7 +30,7 @@ trait PactSerializer extends StrictLogging {
       "headers" -> r.headers,
       "query" -> r.query,
       "body" -> parseBody(r),
-      "requestMatchingRules" -> parse(r.matchers.getOrElse("{}").toString)
+      "requestMatchingRules" -> matchers2json(r.matchers)
     )
   }
 
@@ -35,7 +46,7 @@ trait PactSerializer extends StrictLogging {
       "status" -> JInt(r.status),
       "headers" -> r.headers,
       "body" -> parseBody(r),
-      "responseMatchingRules" -> parse(r.matchers.getOrElse("{}").toString)
+      "responseMatchingRules" -> matchers2json(r.matchers)
     )
   }
 

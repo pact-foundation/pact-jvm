@@ -1,7 +1,12 @@
 package au.com.dius.pact.consumer;
 
-import au.com.dius.pact.model.*;
+import au.com.dius.pact.model.Consumer;
+import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.model.Interaction$;
+import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.Provider;
+import au.com.dius.pact.model.Request$;
+import au.com.dius.pact.model.Response$;
 import org.json.JSONObject;
 import scala.None$;
 import scala.Some$;
@@ -87,7 +92,7 @@ public class ConsumerPactBuilder {
                     return this;
                 }
 
-                private JSONObject requestMatchers;
+                private Map<String, Object> requestMatchers = Collections.emptyMap();
                 public PactDslRequestWithoutPath body(PactDslJsonBody body) {
                     requestMatchers = body.getMatchers();
                     requestBody = body.toString();
@@ -114,7 +119,7 @@ public class ConsumerPactBuilder {
         private Map<String, String> requestHeaders = Collections.emptyMap();
         private String query;
         private String requestBody;
-        private JSONObject requestMatchers;
+        private Map<String, Object> requestMatchers = Collections.emptyMap();
 
         private List<Interaction> interactions = new ArrayList<Interaction>();
 
@@ -127,7 +132,7 @@ public class ConsumerPactBuilder {
                                       Map<String, String> requestHeaders,
                                       String query,
                                       String requestBody,
-                                      JSONObject requestMatchers) {
+                                      Map<String, Object> requestMatchers) {
             this.requestMatchers = requestMatchers;
             this.consumer = new Consumer(consumerName);
             this.provider = new Provider(providerName);
@@ -232,10 +237,10 @@ public class ConsumerPactBuilder {
             return this;
         }
 
-        private JSONObject responseMatchers;
+        private Map<String, Object> responseMatchers = Collections.emptyMap();
         public PactDslResponse body(PactDslJsonBody body) {
             responseMatchers = body.getMatchers();
-            this.responseBody = body.toString();
+            responseBody = body.toString();
             return this;
         }
 

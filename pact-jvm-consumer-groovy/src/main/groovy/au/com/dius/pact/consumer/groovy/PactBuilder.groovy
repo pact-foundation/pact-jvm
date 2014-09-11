@@ -74,9 +74,9 @@ class PactBuilder {
                     requestDescription,
                     state,
                     Request$.MODULE$.apply(requestData[i].method ?: 'get', requestData[i].path ?: '/',
-                            queryToString(requestData[i]?.query), headers, requestData[i].body ?: '', new JSONObject()),
+                            queryToString(requestData[i]?.query), headers, requestData[i].body ?: '', [:]),
                     Response$.MODULE$.apply(responseData[i].status ?: 200, responseHeaders,
-                            responseData[i].body ?: '', new JSONObject())
+                            responseData[i].body ?: '', [:])
             )
         }
         requestData = []

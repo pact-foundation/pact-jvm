@@ -3,7 +3,6 @@ package au.com.dius.pact.model
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import scala.collection.{mutable, JavaConversions}
-import org.json.JSONObject
 
 object PactConfig {
   var bodyMatchers = mutable.HashMap[String, BodyMatcher]("application/json" -> new JsonBodyMatcher())
@@ -104,7 +103,7 @@ case class Request(method: String,
                    query: Option[String],
                    headers: Option[Map[String, String]],
                    body: Option[String],
-                   matchers: Option[JSONObject]) extends HttpPart {
+                   matchers: Option[Map[String, Any]]) extends HttpPart {
   def cookie: Option[List[String]] = cookieHeader.map(_._2.split(";").map(_.trim).toList)
 
   def headersWithoutCookie: Option[Map[String, String]] = cookieHeader match {
@@ -145,33 +144,25 @@ trait Optionals {
       Some(query)
     }
   }
-
-  def optional(matchers: JSONObject): Option[JSONObject] = {
-    if(matchers == null) {
-      None
-    } else {
-      Some(matchers)
-    }
-  }
 }
 
 object Request extends Optionals {
   def apply(method: String, path: String, query: String, headers: Map[String, String],
-            body: String, matchers: JSONObject): Request = {
+            body: String, matchers: Map[String, Any]): Request = {
     Request(method, path, optionalQuery(query), optional(headers), optional(body), optional(matchers))
   }
 
   def apply(method: String, path: String, query: String, headers: java.util.Map[String,String], body: String,
-            matchers: JSONObject): Request = {
+            matchers: java.util.Map[String,Any]): Request = {
     Request(method, path, optionalQuery(query), optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body),
-      optional(matchers))
+      optional(JavaConversions.mapAsScalaMap(matchers).toMap))
   }
 }
 
 case class Response(status: Int,
                     headers: Option[Map[String, String]],
                     body: Option[String],
-                    matchers: Option[JSONObject]) extends HttpPart {
+                    matchers: Option[Map[String, Any]]) extends HttpPart {
   override def toString: String = {
     s"\tstatus: $status \n\theaders: $headers \n\tmatchers: $matchers \n\tbody: \n$body"
   }
@@ -181,12 +172,13 @@ object Response extends Optionals {
 
   val CrossSiteHeaders = Map[String, String]("Access-Control-Allow-Origin" -> "*")
 
-  def apply(status: Int, headers: Map[String, String], body: String, matchers: JSONObject): Response = {
+  def apply(status: Int, headers: Map[String, String], body: String, matchers: Map[String, Any]): Response = {
     Response(status, optional(headers), optional(body), optional(matchers))
   }
 
-  def apply(status: Int, headers: java.util.Map[String, String], body: String, matchers: JSONObject): Response = {
-    Response(status, optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body), optional(matchers))
+  def apply(status: Int, headers: java.util.Map[String, String], body: String, matchers: java.util.Map[String, Any]): Response = {
+    Response(status, optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body),
+        optional(JavaConversions.mapAsScalaMap(matchers).toMap))
   }
 
   def invalidRequest(request: Request) = {

@@ -51,7 +51,7 @@ class PactSpecificationTest {
     try {
       def specData = new JsonSlurper().parse(getClass().getResource(spec))
       def response = Response.apply(specData.expected.status ?: 200, specData.expected.headers ?: [:],
-        new JsonBuilder(specData.expected.body ?: [:]).toPrettyString(), null)
+        new JsonBuilder(specData.expected.body ?: [:]).toPrettyString(), [:])
       def actualMimeType = 'application/json'
       if (specData.actual?.headers != null && specData.actual?.headers['Content-Type'] != null) {
         actualMimeType = specData.actual.headers['Content-Type']

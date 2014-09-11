@@ -7,17 +7,19 @@ import org.json.Cookie;
 import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PactDslJsonBody {
 
     private JSONObject body;
-    private JSONObject matchers;
+    private Map<String, Object> matchers;
     private String root;
     private PactDslJsonBody parent;
 
     public PactDslJsonBody() {
         root = "$.body";
-        matchers = new JSONObject();
+        matchers = new HashMap<String, Object>();
         body = new JSONObject();
     }
 
@@ -101,35 +103,35 @@ public class PactDslJsonBody {
 
     private void putObject(PactDslJsonBody object) {
         String name = StringUtils.difference(root + ".", object.root);
-        for(String matcherName: JSONObject.getNames(object.matchers)) {
+        for(String matcherName: object.matchers.keySet()) {
             matchers.put(matcherName, object.matchers.get(matcherName));
         }
         body.put(name, object.body);
     }
 
-    private JSONObject matchType() {
-        JSONObject jsonObject = new JSONObject();
+    private Map<String, Object> matchType() {
+        Map<String, Object> jsonObject = new HashMap<String, Object>();
         jsonObject.put("match", "type");
         return jsonObject;
     }
 
-    private JSONObject regexp(String value) {
-        JSONObject jsonObject = new JSONObject();
+    private Map<String, Object> regexp(String value) {
+        Map<String, Object> jsonObject = new HashMap<String, Object>();
         jsonObject.put("regex", value);
         return jsonObject;
     }
 
-    private JSONObject matchTimestamp() {
-        JSONObject jsonObject = new JSONObject();
+    private Map<String, Object> matchTimestamp() {
+        Map<String, Object> jsonObject = new HashMap<String, Object>();
         jsonObject.put("match", "timestamp");
         return jsonObject;
     }
 
-    public JSONObject getMatchers() {
+    public Map<String, Object> getMatchers() {
         return matchers;
     }
 
-    public void setMatchers(JSONObject matchers) {
+    public void setMatchers(Map<String, Object> matchers) {
         this.matchers = matchers;
     }
 }

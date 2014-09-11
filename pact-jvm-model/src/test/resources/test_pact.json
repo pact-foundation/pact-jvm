@@ -17,8 +17,7 @@
       "query" : "q=p&q=p2&r=s",
       "body" : {
         "test" : true
-      },
-      "requestMatchingRules" : { }
+      }
     },
     "response" : {
       "status" : 200,
@@ -27,8 +26,7 @@
       },
       "body" : {
         "responsetest" : true
-      },
-      "responseMatchingRules" : { }
+      }
     }
   } ],
   "metadata" : {
