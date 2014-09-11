@@ -15,6 +15,8 @@ sbtModules.each {
   include it + '_2.10_0.13'
 }
 
+include 'pact-jvm-model-matchers'
+
 rootProject.children.each {
   def m = it.dir =~ /(.*)_2\.1\d(_0\.\d+)?$/
   if (m.matches()) {

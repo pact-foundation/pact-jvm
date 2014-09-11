@@ -21,9 +21,9 @@ subprojects {
           scalaFullVersion = scalaVersionLookup[m.group(1)]
           sbtVersion = '0.13.5'
       }
-    }
 
-    buildDir = new File(projectDir, "build/" + project.scalaVersion)
+      buildDir = new File(projectDir, "build/" + project.scalaVersion)
+    }
 
     apply plugin: 'java'
     apply plugin: 'scala'
@@ -37,17 +37,21 @@ subprojects {
     }
 
     dependencies {
-      compile 'org.slf4j:slf4j-api:1.7.5', "org.scala-lang:scala-library:${project.scalaFullVersion}",
-              "com.typesafe.scala-logging:scala-logging-slf4j_${project.scalaVersion}:2.1.2",
-              "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.7.1",
-              "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.0",
-              "org.json4s:json4s-native_${project.scalaVersion}:3.2.10",
-              "org.json4s:json4s-jackson_${project.scalaVersion}:3.2.10"
-      testCompile 'junit:junit:4.11', 'org.mockito:mockito-all:1.9.5', "org.specs2:specs2_${project.scalaVersion}:2.3.13"
+      if (project.hasProperty('scalaVersion')) {
+          compile 'org.slf4j:slf4j-api:1.7.5', "org.scala-lang:scala-library:${project.scalaFullVersion}",
+                  "com.typesafe.scala-logging:scala-logging-slf4j_${project.scalaVersion}:2.1.2",
+                  "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.7.1",
+                  "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.0",
+                  "org.json4s:json4s-native_${project.scalaVersion}:3.2.10",
+                  "org.json4s:json4s-jackson_${project.scalaVersion}:3.2.10"
+          testCompile "org.specs2:specs2_${project.scalaVersion}:2.3.13"
 
-      if (project.scalaVersion == '2.11') {
-        compile "org.scala-lang.modules:scala-xml_2.11:1.0.2"
+          if (project.scalaVersion == '2.11') {
+              compile "org.scala-lang.modules:scala-xml_2.11:1.0.2"
+          }
       }
+
+      testCompile 'junit:junit:4.11', 'org.mockito:mockito-all:1.9.5'
     }
 
     group = 'au.com.dius'
