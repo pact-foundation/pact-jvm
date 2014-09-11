@@ -35,7 +35,7 @@ case class MethodMismatch(expected: Method, actual: Method) extends RequestPartM
 case class QueryMismatch(expected: Query, actual: Query) extends RequestPartMismatch
 
 trait BodyMatcher {
-  def matchBody(expected: Option[String], actual: Option[String], diffConfig: DiffConfig) : List[BodyMismatch]
+  def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig) : List[BodyMismatch]
 }
 
 object Matching {
@@ -78,12 +78,12 @@ object Matching {
     else Some(MethodMismatch(expected, actual))
   }
 
-  def matchBody(expectedMimeType: String, expected: Body, actualMimeType: String, actual: Body, diffConfig: DiffConfig) = {
-    if (expectedMimeType == actualMimeType) {
-      if (PactConfig.bodyMatchers.contains(expectedMimeType)) {
-        PactConfig.bodyMatchers(expectedMimeType).matchBody(expected, actual, diffConfig)
+  def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig) = {
+    if (expected.mimeType == actual.mimeType) {
+      if (PactConfig.bodyMatchers.contains(expected.mimeType)) {
+        PactConfig.bodyMatchers(expected.mimeType).matchBody(expected, actual, diffConfig)
       } else {
-        (expected, actual) match {
+        (expected.body, actual.body) match {
           case (None, None) => List()
           case (None, b) => if(diffConfig.structural) { List() } else { List(BodyMismatch(None, b)) }
           case (a, None) => List(BodyMismatch(a, None))
@@ -91,7 +91,7 @@ object Matching {
         }
       }
     } else {
-      List(BodyTypeMismatch(expectedMimeType, actualMimeType))
+      List(BodyTypeMismatch(expected.mimeType, actual.mimeType))
     }
   }
 

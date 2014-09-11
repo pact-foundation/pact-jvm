@@ -16,22 +16,26 @@ class MatchingSpec extends Specification {
       val config = DiffConfig()
 
       "Handle both None" in {
-        matchBody("a", None, "a", None, config) must beEmpty
+        matchBody(Request("", "", None, Some(Map("Content-Type" -> "a")), None, None),
+          Request("", "", None, Some(Map("Content-Type" -> "a")), None, None), config) must beEmpty
       }
 
       "Handle left None" in {
         val expected = List(BodyMismatch(request.body, None))
-        matchBody("a", request.body, "a", None, config) must beEqualTo(expected)
+        matchBody(Request("", "", None, Some(Map("Content-Type" -> "a")), request.body, None),
+          Request("", "", None, Some(Map("Content-Type" -> "a")), None, None), config) must beEqualTo(expected)
       }
 
       "Handle right None" in {
         val expected = List(BodyMismatch(None, request.body))
-        matchBody("a", None, "a", request.body, config) must beEqualTo(expected)
+        matchBody(Request("", "", None, Some(Map("Content-Type" -> "a")), None, None),
+          Request("", "", None, Some(Map("Content-Type" -> "a")), request.body, None), config) must beEqualTo(expected)
       }
 
       "Handle different mime types" in {
         val expected = List(BodyTypeMismatch("a", "b"))
-        matchBody("a", None, "b", request.body, config) must beEqualTo(expected)
+        matchBody(Request("", "", None, Some(Map("Content-Type" -> "a")), None, None),
+          Request("", "", None, Some(Map("Content-Type" -> "b")), request.body, None), config) must beEqualTo(expected)
       }
 
     }

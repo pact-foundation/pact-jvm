@@ -153,7 +153,7 @@ object Request extends Optionals {
   }
 
   def apply(method: String, path: String, query: String, headers: java.util.Map[String,String], body: String,
-            matchers: java.util.Map[String,Any]): Request = {
+            matchers: java.util.Map[String, Any]): Request = {
     Request(method, path, optionalQuery(query), optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body),
       optional(JavaConversions.mapAsScalaMap(matchers).toMap))
   }

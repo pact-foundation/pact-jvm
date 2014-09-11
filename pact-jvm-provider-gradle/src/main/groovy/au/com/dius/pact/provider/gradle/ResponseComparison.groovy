@@ -43,7 +43,7 @@ class ResponseComparison {
     Map headerResult = [:]
 
     if (expected.headers().defined) {
-      def headers = []
+      def headers
       if (JavaConverters$.MODULE$.metaClass.respondsTo('asJavaMapConverter')) {
           headers = JavaConverters$.MODULE$.asJavaMapConverter(expected.headers().get()).asJava()
       } else {

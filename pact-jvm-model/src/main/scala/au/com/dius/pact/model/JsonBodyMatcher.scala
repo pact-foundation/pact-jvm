@@ -3,9 +3,9 @@ package au.com.dius.pact.model
 import au.com.dius.pact.model.JsonDiff._
 
 class JsonBodyMatcher extends BodyMatcher {
-  def matchBody(expected: Option[String], actual: Option[String], diffConfig: DiffConfig) : List[BodyMismatch] = {
+  def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig) : List[BodyMismatch] = {
       implicit val autoParse = JsonDiff.autoParse _
-      (expected, actual) match {
+      (expected.body, actual.body) match {
         case (None, None) => List()
         case (None, b) => if(diffConfig.structural) { List() } else { List(BodyMismatch(None, b)) }
         case (a, None) => List(BodyMismatch(a, None))
