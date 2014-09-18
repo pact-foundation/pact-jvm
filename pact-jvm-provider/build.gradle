@@ -1,4 +1,5 @@
 dependencies {
-    compile project(":pact-jvm-model_${project.scalaVersion}"), "org.scalatest:scalatest_${project.scalaVersion}:2.2.0", //scalatest is the runtime test library, hoping for simple single thread
-            'commons-io:commons-io:2.4'
+    compile project(":pact-jvm-model_${project.scalaVersion}"), project(":pact-jvm-matchers_${project.scalaVersion}"),
+        "org.scalatest:scalatest_${project.scalaVersion}:2.2.0", //scalatest is the runtime test library, hoping for simple single thread
+        'commons-io:commons-io:2.4'
 }

@@ -1,7 +1,7 @@
 package au.com.dius.pact.model
 
-import org.specs2.mutable.Specification
 import org.json4s._
+import org.specs2.mutable.Specification
 
 object JsonAstMagic {
   implicit def jObj[T](t:(String, T))(implicit c:(T) => JValue) = JObject(t._1 -> c(t._2))
@@ -18,8 +18,8 @@ import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class JsonDiffSpec extends Specification {
-  import JsonDiff._
-  import JsonAstMagic._
+  import au.com.dius.pact.model.JsonAstMagic._
+  import au.com.dius.pact.model.JsonDiff._
 
   def testDiff(expected:String, actual:String, expectedDiff: Diff = noChange)(implicit config: DiffConfig) = {
     def toString(diff:Diff):String = {

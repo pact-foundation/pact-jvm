@@ -1,9 +1,15 @@
 package au.com.dius.pact.model
 
-import RequestPartMismatch._
-import ResponsePartMismatch._
-import scala.collection.immutable.TreeMap
 import au.com.dius.pact.model.JsonDiff.DiffConfig
+import au.com.dius.pact.model.RequestPartMismatch._
+import au.com.dius.pact.model.ResponsePartMismatch._
+
+import scala.collection.immutable.TreeMap
+import scala.collection.mutable
+
+object PactConfig {
+    var bodyMatchers = mutable.HashMap[String, BodyMatcher]("application/json" -> new JsonBodyMatcher())
+}
 
 trait SharedMismatch {
   type Body = Option[String]

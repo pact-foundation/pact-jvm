@@ -1,16 +1,15 @@
 package au.com.dius.pact.model
 
-import org.specs2.mutable.Specification
-import Fixtures._
-
+import au.com.dius.pact.model.Fixtures._
 import org.junit.runner.RunWith
+import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class MatchingSpec extends Specification {
   "Matching" should {
-    import Matching._
-    import JsonDiff._
+    import au.com.dius.pact.model.JsonDiff._
+    import au.com.dius.pact.model.Matching._
     implicit val autoParse = JsonDiff.autoParse _
     "Body Matching" should {
       val config = DiffConfig()

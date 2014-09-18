@@ -1,6 +1,6 @@
 def crossCompileModules = [ 'pact-jvm-consumer', 'pact-jvm-consumer-junit', 'pact-jvm-consumer-specs2',
   'pact-jvm-consumer-groovy', 'pact-jvm-model', 'pact-jvm-provider', 'pact-jvm-provider-specs2',
-  'pact-jvm-server', 'pact-specification-test', 'pact-jvm-provider-gradle']
+  'pact-jvm-server', 'pact-specification-test', 'pact-jvm-provider-gradle', 'pact-jvm-matchers']
 
 def sbtModules = ['pact-jvm-consumer-sbt', 'pact-jvm-provider-sbt']
 
@@ -14,8 +14,6 @@ crossCompileModules.each {
 sbtModules.each {
   include it + '_2.10_0.13'
 }
-
-include 'pact-jvm-model-matchers'
 
 rootProject.children.each {
   def m = it.dir =~ /(.*)_2\.1\d(_0\.\d+)?$/

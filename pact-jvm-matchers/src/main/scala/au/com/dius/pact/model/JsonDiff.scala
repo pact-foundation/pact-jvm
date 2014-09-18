@@ -1,8 +1,8 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.model.waitingforscalaz._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-import waitingforscalaz._
 
 object JsonDiff {
   case class DiffConfig(allowUnexpectedKeys: Boolean = true, structural: Boolean = false)

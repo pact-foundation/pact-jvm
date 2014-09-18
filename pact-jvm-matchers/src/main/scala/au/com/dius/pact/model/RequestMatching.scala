@@ -1,10 +1,10 @@
 package au.com.dius.pact.model
 
-import JsonDiff.DiffConfig
+import au.com.dius.pact.model.JsonDiff.DiffConfig
 import com.typesafe.scalalogging.slf4j.StrictLogging
 
 case class RequestMatching(expectedInteractions: Seq[Interaction]) {
-  import RequestMatching._
+  import au.com.dius.pact.model.RequestMatching._
       
   def matchInteraction(actual: Request): RequestMatch = {
     def compareToActual(expected: Interaction) = compareRequest(expected, actual) 
@@ -17,7 +17,7 @@ case class RequestMatching(expectedInteractions: Seq[Interaction]) {
 }
 
 object RequestMatching extends StrictLogging {
-  import Matching._
+  import au.com.dius.pact.model.Matching._
 
   var diffConfig = DiffConfig(allowUnexpectedKeys = false, structural = false)
 

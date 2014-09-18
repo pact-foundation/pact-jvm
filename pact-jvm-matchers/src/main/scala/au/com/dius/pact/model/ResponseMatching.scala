@@ -9,7 +9,7 @@ case object ResponseMismatch extends ResponseMatch
 object ResponseMatching extends ResponseMatching(DiffConfig(allowUnexpectedKeys = true, structural = false))
 
 class ResponseMatching(val providerDiffConfig: DiffConfig) {
-  import Matching._
+  import au.com.dius.pact.model.Matching._
 
   def matchRules(expected: Response, actual: Response): ResponseMatch = 
     if (responseMismatches(expected, actual).isEmpty) FullResponseMatch

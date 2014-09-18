@@ -4,13 +4,14 @@ import org.json4s.JsonAST.{JBool, JObject}
 import org.json4s.jackson.JsonMethods.pretty
 
 object Fixtures {
+  import HttpMethod._
   import org.json4s.JsonDSL._
 
   val provider = Provider("test_provider")
   val consumer = Consumer("test_consumer")
 
 
-  val request = Request(HttpMethod.Get, "/", "q=p&q=p2&r=s", Map("testreqheader" -> "testreqheadervalue"),
+  val request = Request(Get, "/", "q=p&q=p2&r=s", Map("testreqheader" -> "testreqheadervalue"),
     pretty(JObject("test" -> JBool(true))), null)
 
   val response = Response(200,

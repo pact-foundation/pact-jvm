@@ -1,13 +1,10 @@
 package au.com.dius.pact.model
 
-import org.specs2.mutable.Specification
 import Fixtures._
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods.pretty
-import au.com.dius.pact.model.HttpMethod._
-import scala.Some
-
 import org.junit.runner.RunWith
+import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
@@ -55,38 +52,38 @@ class RequestMatchingSpec extends Specification {
 
   "request with cookie" should {
 
-    val request = Request(Get, "/", null, Map("Cookie" -> "key1=value1;key2=value2"), "", null)
+    val request = Request(HttpMethod.Get, "/", null, Map("Cookie" -> "key1=value1;key2=value2"), "", null)
     val interactions = List(interaction.copy(request = request))
 
     def test(r: Request): Option[Response] = RequestMatching(interactions).findResponse(r)
 
     "match if actual cookie exactly matches the expected" in {
-      val cookieRequest = Request(Get, "/", null, Map("Cookie" -> "key1=value1;key2=value2"), "", null)
+      val cookieRequest = Request(HttpMethod.Get, "/", null, Map("Cookie" -> "key1=value1;key2=value2"), "", null)
       test(cookieRequest) must beSome(response)
     }
 
     "mismatch if actual cookie contains less data than expected cookie" in {
-      val cookieRequest = Request(Get, "/", null, Map("Cookie" -> "key2=value2"), "", null)
+      val cookieRequest = Request(HttpMethod.Get, "/", null, Map("Cookie" -> "key2=value2"), "", null)
       test(cookieRequest) must beNone
     }
 
     "match if actual cookie contains more data than expected one" in {
-      val cookieRequest = Request(Get, "/", null, Map("Cookie" -> "key2=value2;key1=value1;key3=value3"), "", null)
+      val cookieRequest = Request(HttpMethod.Get, "/", null, Map("Cookie" -> "key2=value2;key1=value1;key3=value3"), "", null)
       test(cookieRequest) must beSome(response)
     }
 
     "mismatch if actual cookie has no intersection with expected request" in {
-      val cookieRequest = Request(Get, "/", null, Map("Cookie" -> "key5=value5"), "", null)
+      val cookieRequest = Request(HttpMethod.Get, "/", null, Map("Cookie" -> "key5=value5"), "", null)
       test(cookieRequest) must beNone
     }
 
     "match when cookie field is different from cases" in {
-      val cookieRequest = Request(Get, "/", null, Map("cOoKie" -> "key1=value1;key2=value2"), "", null)
+      val cookieRequest = Request(HttpMethod.Get, "/", null, Map("cOoKie" -> "key1=value1;key2=value2"), "", null)
       test(cookieRequest) must beSome(response)
     }
 
     "match when there are spaces between cookie items" in {
-      val cookieRequest = Request(Get, "/", null, Map("cookie" -> "key1=value1; key2=value2"), "", null)
+      val cookieRequest = Request(HttpMethod.Get, "/", null, Map("cookie" -> "key1=value1; key2=value2"), "", null)
       test(cookieRequest) must beSome(response)
     }
   }

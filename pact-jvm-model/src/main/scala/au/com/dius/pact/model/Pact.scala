@@ -4,10 +4,6 @@ import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import scala.collection.{mutable, JavaConversions}
 
-object PactConfig {
-  var bodyMatchers = mutable.HashMap[String, BodyMatcher]("application/json" -> new JsonBodyMatcher())
-}
-
 object Pact {
   def apply(provider: Provider, consumer: Consumer, interactions: java.util.List[Interaction]): Pact = {
     Pact(provider, consumer, JavaConversions.collectionAsScalaIterable(interactions).toSeq)
