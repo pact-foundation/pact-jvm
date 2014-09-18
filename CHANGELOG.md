@@ -1,5 +1,23 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.0.4 - Query parameters, body matching on mimetype, sbt publishing fixes
+
+* 2445e4e - #49 small typo in the gradle verify task (Ronald Holshausen, Mon Aug 25 13:28:46 2014 +1000)
+* c04d019 - #49 ignore charset when comparing content type header (Ronald Holshausen, Mon Aug 25 12:58:41 2014 +1000)
+* 3900438 - #49 Gradle plugin now supports body matching based on content type (Ronald Holshausen, Sun Aug 24 10:26:37 2014 +1000)
+* 4470335 - #49 Added a test for different mime types in match body (Ronald Holshausen, Sun Aug 24 10:25:58 2014 +1000)
+* 2989a35 - body matching is now based on mimetype #49 (Ronald Holshausen, Sat Aug 23 18:45:30 2014 +1000)
+* df2996e - Issue #52 - added gradle properties (Ronald Holshausen, Sat Aug 23 15:59:29 2014 +1000)
+* 6bc533d - first phase of implementing query matching; specification passing (Ronald Holshausen, Wed Aug 20 20:01:24 2014 +1000)
+* 5ea276f - #52 added comment about permgen (Ronald Holshausen, Wed Aug 20 19:15:43 2014 +1000)
+* d565466 - added a clojure example (Ronald Holshausen, Wed Aug 20 09:28:13 2014 +1000)
+* 82481a0 - use gradle wrapper in readme (Ronald Holshausen, Tue Aug 19 20:23:44 2014 +1000)
+* 105d96f - updated readme for running server from a jar file (Ronald Holshausen, Tue Aug 19 19:51:16 2014 +1000)
+* 15863dd - updated the manifest to include the class path, added application plugin (Ronald Holshausen, Tue Aug 19 19:44:45 2014 +1000)
+* b223f88 - display the path to the pact file when verifying for diagnostic purposes (Ronald Holshausen, Mon Aug 18 09:47:23 2014 +1000)
+* 3c99db1 - Added query parameters to the pact models, DSLs and serialisation (Ronald Holshausen, Sun Aug 17 13:14:29 2014 +1000)
+* fc98037 - sbt plugins also need the sbt version in the artifact names (Ronald Holshausen, Sat Aug 16 16:58:53 2014 +1000)
+
 # 2.0.3 - pretty diff output for gradle plugin
 
 * 4c7c8db - changelog for 2.0.3 (Ronald Holshausen, Sat Aug 16 11:30:31 2014 +1000)
