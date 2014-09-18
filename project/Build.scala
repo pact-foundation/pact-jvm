@@ -4,10 +4,10 @@ import com.typesafe.sbt.pgp.PgpKeys._
 
 object BuildSettings {
 	val publishSettings = Seq(
-		version := "2.0.4",
+		version := "2.0.5",
 		organization := "au.com.dius",
     scalaVersion := "2.10.4",
-    crossScalaVersions := Seq("2.10.4", "2.11.1"),
+    crossScalaVersions := Seq("2.10.4", "2.11.2"),
 
 	    publishMavenStyle := true,
 	    // when playing around with a local install of nexus use this:

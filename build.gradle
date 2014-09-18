@@ -11,7 +11,7 @@ subprojects {
 
     def scalaVersionLookup = [
         '2.10': '2.10.4',
-        '2.11': '2.11.1'
+        '2.11': '2.11.2'
     ]
 
     def m = project.name =~ /.*_(2\.1\d)(_0\.\d+)?/
@@ -55,7 +55,7 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '2.0.4'
+    version = '2.0.5'
     targetCompatibility = '1.6'
     sourceCompatibility = '1.6'
 
