@@ -17,12 +17,12 @@ object Conversions {
   }
 
   implicit def dispatchResponseToPactResponse(response: client.Response): Response = {
-    Response(response.getStatusCode, toMap(response.getHeaders), response.getResponseBody, null)
+    Response(response.getStatusCode, Some(toMap(response.getHeaders)), Some(response.getResponseBody), None)
   }
 
-  case class Headers(headers:Option[Map[String, String]]) extends unfiltered.response.Responder[Any] {
+  case class Headers(headers: Option[Map[String, String]]) extends unfiltered.response.Responder[Any] {
     def respond(res: HttpResponse[Any]) {
-      headers.foreach( _.foreach { case (key, value) => res.header(key, value) } )
+      headers.foreach(_.foreach { case (key, value) => res.header(key, value)})
     }
   }
 
@@ -31,15 +31,20 @@ object Conversions {
     response.body.fold(rf)(rf ~> ResponseString(_))
   }
 
-  def toHeaders(request: HttpRequest[ReceivedMessage]): Map[String, String] = {
-    request.headerNames.map(name => name -> request.headers(name).mkString(",")).toMap
+  def toHeaders(request: HttpRequest[ReceivedMessage]): Option[Map[String, String]] = {
+    Some(request.headerNames.map(name => name -> request.headers(name).mkString(",")).toMap)
   }
 
-  def toQuery(request: HttpRequest[ReceivedMessage]): String = {
-    request.parameterNames.map(name => request.parameterValues(name).map(name + "=" + _)).flatten.mkString("&")
+  def toQuery(request: HttpRequest[ReceivedMessage]): Option[String] = {
+    Some(request.parameterNames.map(name => request.parameterValues(name).map(name + "=" + _)).flatten.mkString("&"))
+  }
+
+  def toPath(uri: String) = {
+    uri.split('?').head
   }
 
   implicit def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {
-    Request(request.method, request.uri, toQuery(request), toHeaders(request), Source.fromInputStream(request.inputStream).mkString(""), null)
+    Request(request.method, toPath(request.uri), toQuery(request), toHeaders(request),
+      Some(Source.fromInputStream(request.inputStream).mkString("")), None)
   }
 }

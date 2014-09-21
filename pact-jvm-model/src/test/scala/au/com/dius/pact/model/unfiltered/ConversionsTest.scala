@@ -30,8 +30,8 @@ class ConversionsTest extends Specification with Mockito {
 
                 val pactRequest = Conversions.unfilteredRequestToPactRequest(request)
                 pactRequest.path must beEqualTo("/path")
-                pactRequest.query must beEqualTo("?a=1&b=2")
-            }.pendingUntilFixed
+                pactRequest.query must beEqualTo(Some("a=1&b=2"))
+            }
 
         }
 
