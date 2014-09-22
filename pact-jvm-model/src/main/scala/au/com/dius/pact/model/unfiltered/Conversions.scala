@@ -36,15 +36,26 @@ object Conversions {
   }
 
   def toQuery(request: HttpRequest[ReceivedMessage]): Option[String] = {
-    Some(request.parameterNames.map(name => request.parameterValues(name).map(name + "=" + _)).flatten.mkString("&"))
+    val queryString = request.parameterNames.map(name => request.parameterValues(name).map(name + "=" + _)).flatten.mkString("&")
+    if (queryString.isEmpty)
+      None
+    else
+      Some(queryString)
   }
 
   def toPath(uri: String) = {
     uri.split('?').head
   }
 
+  def toBody(body: String) = {
+    if (body.isEmpty)
+      None
+    else
+      Some(body)
+  }
+
   implicit def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {
     Request(request.method, toPath(request.uri), toQuery(request), toHeaders(request),
-      Some(Source.fromInputStream(request.inputStream).mkString("")), None)
+      toBody(Source.fromInputStream(request.inputStream).mkString("")), None)
   }
 }
