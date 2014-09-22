@@ -1,5 +1,19 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.0.5 - Added a matchers module for matching logic, fixed issue with query strings
+
+* c4de8a0 - #54 - When there is no query string, we should set the query string to None on the Request model (Ronald Holshausen, Mon Sep 22 13:23:40 2014 +1000)
+* e399f45 - #54 - fix for query string not being removed from path (Ronald Holshausen, Mon Sep 22 09:38:00 2014 +1000)
+* 7f2803f - #54 - added a failing testcase (currently pending) (Ronald Holshausen, Fri Sep 19 16:28:25 2014 +1000)
+* 0eb4445 - added matchers module to the sbt project (Ronald Holshausen, Fri Sep 19 14:38:13 2014 +1000)
+* 8d5890a - bump version (Ronald Holshausen, Thu Sep 18 21:18:09 2014 +1000)
+* 8caeb10 - updated changelog for 2.0.4 (Ronald Holshausen, Thu Sep 18 20:34:32 2014 +1000)
+* 81d5303 - Move all matching code to a seperate module (Ronald Holshausen, Thu Sep 18 13:41:55 2014 +1000)
+* f289dcd - created a seperate module for matchers (Ronald Holshausen, Thu Sep 11 21:25:32 2014 +1000)
+* 74aee32 - pass the full request into the body matchers as they might need additional info when matching (Ronald Holshausen, Thu Sep 11 21:03:47 2014 +1000)
+* 6f6f27e - internally store request and response matchers as maps (Ronald Holshausen, Thu Sep 11 13:43:03 2014 +1000)
+* 898ba09 - add a pact header when a consumer request does not match (Ronald Holshausen, Wed Sep 10 17:03:22 2014 +1000)
+
 # 2.0.4 - Query parameters, body matching on mimetype, sbt publishing fixes
 
 * 2445e4e - #49 small typo in the gradle verify task (Ronald Holshausen, Mon Aug 25 13:28:46 2014 +1000)
