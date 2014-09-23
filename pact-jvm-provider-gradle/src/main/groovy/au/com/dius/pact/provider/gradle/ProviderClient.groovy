@@ -30,6 +30,12 @@ class ProviderClient {
             requestMap.body = request.body().get()
         }
 
+        if (request.query().defined) {
+            requestMap.query = request.query().get().split('&')*.split('=').inject([:]) { map, entry ->
+                map[entry[0]] = entry[1]; map
+            }
+        }
+
         client.handler.failure = { resp -> resp }
         switch (request.method()) {
             case 'POST':
