@@ -69,7 +69,7 @@ class PactBuilder {
             Map headers = requestData[i].headers ?: [:]
             Map responseHeaders = responseData[i].headers ?: [:]
             Map query = [:]
-            def state = providerState.empty ? None$.apply("") : Some$.MODULE$.apply(providerState)
+            def state = providerState.empty ? None$.empty() : Some$.MODULE$.apply(providerState)
             interactions << Interaction$.MODULE$.apply(
                     requestDescription,
                     state,
