@@ -31,7 +31,6 @@ object Pact {
   case class MergeConflict(result: Seq[(Interaction, Interaction)]) extends MergeResult
 }
 
-@deprecated("Use PactFragment where possible, same functionality but more appropriate language.  The serialized file is the true pact")
 case class Pact(provider: Provider, consumer: Consumer, interactions: Seq[Interaction]) extends PactSerializer {
   import Pact._
   
