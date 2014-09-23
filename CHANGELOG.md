@@ -1,5 +1,12 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.0.6 - Small fix
+
+* 326c37a - small cleanups (Ronald Holshausen, Tue Sep 23 20:15:09 2014 +1000)
+* 0e0d525 - updated the versions in the readmes (Ronald Holshausen, Tue Sep 23 20:05:19 2014 +1000)
+* a868b97 - #54 - fix use of query string in the gradle plugin (Ronald Holshausen, Tue Sep 23 16:36:15 2014 +1000)
+* 3a445a8 - bump version (Ronald Holshausen, Mon Sep 22 13:45:20 2014 +1000)
+
 # 2.0.5 - Added a matchers module for matching logic, fixed issue with query strings
 
 * c4de8a0 - #54 - When there is no query string, we should set the query string to None on the Request model (Ronald Holshausen, Mon Sep 22 13:23:40 2014 +1000)
