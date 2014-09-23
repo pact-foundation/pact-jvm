@@ -11,7 +11,7 @@ group-id = `au.com.dius`
 
 artifact-id = `pact-jvm-consumer-groovy_2.10`
 
-version-id = `2.0.1`
+version-id = `2.0.6`
 
 ##Usage
 
