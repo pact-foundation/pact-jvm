@@ -26,7 +26,7 @@ From the [Ruby Pact website](https://github.com/realestate-com-au/pact):
 
 Pact-JVM is written in Scala. As Scala does not provide binary compatibility between major versions, all the Pact-JVM
 artifacts have the version of Scala they were built with in the artifact name. So, for example, the pact-jvm-consumer-junit
-module has a Jar file named pact-jvm-consumer_2.10. The full name of the file is pact-jvm-consumer_2.10-2.0.0.jar.
+module has a Jar file named pact-jvm-consumer_2.10. The full name of the file is pact-jvm-consumer_2.10-2.0.x.jar.
 
 We currently cross-compile all the artifacts against 2.10 and 2.11 versions of Scala, except for the SBT modules.
 
@@ -105,7 +105,7 @@ Which is a project that aims at providing tooling to coordinate pact generation 
 Most of Pact-JVM is written in Scala. You can build it using SBT (the old way). We are moving the build to Gradle,
 so you can build it with that too.
 
-### Note on buiding pact JVM with Java 6 or 7
+#### Note on buiding pact JVM with Java 6 or 7
 
 Scala requires a lot of permgen space to compile. If you're using Java 6 or 7, use the following java and sbt options:
 
