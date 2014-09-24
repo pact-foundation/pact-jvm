@@ -5,7 +5,7 @@ resolvers ++= Seq("Typesafe Repository" at "http://repo.typesafe.com/typesafe/re
 libraryDependencies ++= Seq(
   "org.scalatest" % "scalatest_2.10" % "2.0.RC3", //scalatest is the runtime test library, hoping for simple single thread
   "commons-io"  % "commons-io"     % "2.4",
-  "net.databinder" %% "unfiltered-netty-server" % "0.7.1",
+  "net.databinder" %% "unfiltered-netty-server" % "0.8.2",
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.0",
   "org.json4s" % "json4s-native_2.10"  % "3.2.6",
   "org.json4s" % "json4s-jackson_2.10" % "3.2.6",
