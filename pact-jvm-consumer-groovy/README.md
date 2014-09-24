@@ -20,7 +20,7 @@ Add the `pact-jvm-consumer-groovy` library to your test class path. This provide
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.10:2.0.1'
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.10:2.0.6'
     }
   
 Then create an instance of the `PactBuilder` in your test.
@@ -32,8 +32,9 @@ Then create an instance of the `PactBuilder` in your test.
         def alice_service = new PactBuilder() // Create a new PactBuilder
         alice_service {
             service_consumer "Consumer" 	// Define the service consumer by name
-            has_pact_with "Alice Service"   	// Define the service provider that it has a pact with
-            port 1234						// The port number for the service. It is optional
+            has_pact_with "Alice Service"   // Define the service provider that it has a pact with
+            port 1234                       // The port number for the service. It is optional, leave it out to
+                                            // to use a random one
 
             given('there is some good mallory') // defines a provider state. It is optional.
             upon_receiving('a retrieve Mallory request') // upon_receiving starts a new interaction

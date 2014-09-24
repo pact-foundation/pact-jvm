@@ -31,6 +31,11 @@ public abstract class ConsumerPactTest {
                 }
             }
         });
+
+        if (result instanceof PactError) {
+            throw new RuntimeException(((PactError)result).error());
+        }
+
         assertEquals(PACT_VERIFIED, result);
     }
 }

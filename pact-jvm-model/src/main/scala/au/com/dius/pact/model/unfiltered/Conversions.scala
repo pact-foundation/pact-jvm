@@ -1,11 +1,13 @@
 package au.com.dius.pact.model.unfiltered
 
+import java.io.{BufferedReader, Reader}
+
 import au.com.dius.pact.model.{Response, Request}
 import unfiltered.request.HttpRequest
 import scala.io.Source
 import unfiltered.netty.ReceivedMessage
 import unfiltered.response.{ResponseString, ResponseFunction, HttpResponse, Status}
-import org.jboss.netty.handler.codec.http.{HttpResponse => NHttpResponse}
+import io.netty.handler.codec.http.{HttpResponse => NHttpResponse}
 import com.ning.http.client
 import com.ning.http.client.FluentCaseInsensitiveStringsMap
 
@@ -47,7 +49,9 @@ object Conversions {
     uri.split('?').head
   }
 
-  def toBody(body: String) = {
+  def toBody(reader: Reader) = {
+    val br = new BufferedReader(reader)
+    val body = Stream.continually(br.readLine()).takeWhile(_ != null).mkString
     if (body.isEmpty)
       None
     else
@@ -55,7 +59,6 @@ object Conversions {
   }
 
   implicit def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {
-    Request(request.method, toPath(request.uri), toQuery(request), toHeaders(request),
-      toBody(Source.fromInputStream(request.inputStream).mkString("")), None)
+    Request(request.method, toPath(request.uri), toQuery(request), toHeaders(request), toBody(request.reader), None)
   }
 }

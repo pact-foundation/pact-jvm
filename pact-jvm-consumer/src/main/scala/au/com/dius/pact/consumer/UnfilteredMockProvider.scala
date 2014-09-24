@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer
 
-import org.jboss.netty.handler.codec.{http => netty}
+import io.netty.handler.codec.{http => netty}
 
 import au.com.dius.pact.model.{MockProviderConfig, Request, Response}
 import au.com.dius.pact.model.unfiltered.Conversions
@@ -12,8 +12,8 @@ import unfiltered.{response => uresp}
 class UnfilteredMockProvider(val config: MockProviderConfig) extends StatefulMockProvider {
   type UnfilteredRequest = ureq.HttpRequest[unetty.ReceivedMessage]
   type UnfilteredResponse = uresp.ResponseFunction[netty.HttpResponse]
-  
-  private val server = unetty.Http(config.port, config.interface).handler(Routes)
+
+  private val server = unetty.Server.http(config.port, config.interface).chunked(1048576).handler(Routes)
   
   object Routes extends unettyc.Plan
       with unettyc.SynchronousExecution

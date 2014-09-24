@@ -4,7 +4,7 @@ import scala.None$
 
 class PactBuilderTest {
     @Test
-    def void "should not define providerState when no given()"() {
+    void "should not define providerState when no given()"() {
         def alice_service = new PactBuilder()
         alice_service {
             service_consumer "Consumer"
