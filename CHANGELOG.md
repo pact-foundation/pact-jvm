@@ -1,5 +1,17 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.0.7 - few bug fixes
+
+* 8fb7b3d - #55 - Fixed stripping of newlines from body (Ronald Holshausen, Wed Sep 24 21:01:32 2014 +1000)
+* 2f72c74 - #58 - pass the mock server config into the groovy closure that gets run to execute the test (Ronald Holshausen, Wed Sep 24 20:52:43 2014 +1000)
+* 1311120 - #55 - Fix NPE in test due to content type header (Ronald Holshausen, Wed Sep 24 17:21:56 2014 +1000)
+* 3f23bf1 - #55 - Implemented handling of Gziped bodies in the mock server (Ronald Holshausen, Wed Sep 24 17:08:30 2014 +1000)
+* 5421248 - #55 Netty server is now in package io (Ronald Holshausen, Wed Sep 24 16:29:07 2014 +1000)
+* e4807e5 - #55 Fix for mock server handling requests with chunked transport encodings (Ronald Holshausen, Wed Sep 24 14:39:00 2014 +1000)
+* e3c519c - Merge pull request #57 from Freaky-namuH/master (Ronald Holshausen, Wed Sep 24 10:09:10 2014 +1000)
+* c1729ad - Create a None and not a Some('') when no given is set. Issue #56 (Ashley Cambrell, Wed Sep 24 09:31:11 2014 +1000)
+* 96087e3 - bump version (Ronald Holshausen, Tue Sep 23 20:48:24 2014 +1000)
+
 # 2.0.6 - Small fix
 
 * 326c37a - small cleanups (Ronald Holshausen, Tue Sep 23 20:15:09 2014 +1000)
