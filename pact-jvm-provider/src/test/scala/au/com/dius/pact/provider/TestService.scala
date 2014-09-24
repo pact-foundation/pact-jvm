@@ -17,7 +17,7 @@ object TestService extends StrictLogging {
   case class RequestHandler(port: Int) extends cycle.Plan
     with cycle.SynchronousExecution
     with ServerErrorResponse {
-      import org.jboss.netty.handler.codec.http.{ HttpResponse=>NHttpResponse }
+      import io.netty.handler.codec.http.{ HttpResponse=>NHttpResponse }
 
       def handle(request:HttpRequest[ReceivedMessage]): ResponseFunction[NHttpResponse] = {
         val response = if(request.uri.endsWith("enterState")) {
