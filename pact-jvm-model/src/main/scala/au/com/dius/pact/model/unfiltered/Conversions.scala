@@ -56,7 +56,7 @@ object Conversions {
     } else {
       new BufferedReader(request.reader)
     }
-    val body = Stream.continually(br.readLine()).takeWhile(_ != null).mkString
+    val body = Stream.continually(br.readLine()).takeWhile(_ != null).mkString("\n")
     if (body.isEmpty)
       None
     else

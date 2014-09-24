@@ -4,9 +4,6 @@ import org.specs2.mutable.Specification
 import au.com.dius.pact.consumer.Fixtures._
 import au.com.dius.pact.model._
 import scala.concurrent.duration.FiniteDuration
-import org.json4s.StringInput
-import org.json4s.jackson
-import org.json4s.JsonDSL._
 import org.json4s.JsonAST.{JField, JString, JObject}
 import scala.concurrent.ExecutionContext
 import java.util.concurrent.Executors
@@ -55,7 +52,6 @@ class MockProviderSpec extends Specification {
 
       results.matched.size must === (1)
       results.unexpected.size must === (1)
-      
 
       def compareRequests(actual: Request, expected: Request) = {
         actual.method must beEqualTo(expected.method)
@@ -66,7 +62,7 @@ class MockProviderSpec extends Specification {
         val expectedHeaders = expected.headers.getOrElse(Map())
         actual.headers.map(_.filter(t => expectedHeaders.contains(t._1))) must beEqualTo(expected.headers)
 
-        jackson.parseJson(StringInput(actual.body.get)) must beEqualTo(jackson.parseJson(StringInput(expected.body.get)))
+        actual.body must beEqualTo(expected.body)
       }
 
       def compare(actual: Interaction, request:Request, response:Response) = {

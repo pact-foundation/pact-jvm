@@ -23,11 +23,9 @@ class UnfilteredMockProvider(val config: MockProviderConfig) extends StatefulMoc
         case req => convertResponse(handleRequest(convertRequest(req)))
       }
       
-      def convertRequest(nr: UnfilteredRequest): Request = 
-        Conversions.unfilteredRequestToPactRequest(nr)
+      def convertRequest(nr: UnfilteredRequest): Request = Conversions.unfilteredRequestToPactRequest(nr)
         
-      def convertResponse(response: Response): UnfilteredResponse = 
-        Conversions.pactToUnfilteredResponse(response)
+      def convertResponse(response: Response): UnfilteredResponse = Conversions.pactToUnfilteredResponse(response)
   }
   
   def start(): Unit = server.start()
