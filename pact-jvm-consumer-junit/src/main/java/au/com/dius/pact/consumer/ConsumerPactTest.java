@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import au.com.dius.pact.model.MockProviderConfig;
+import au.com.dius.pact.model.TestRun;
 import org.junit.Test;
 
 import au.com.dius.pact.model.PactFragment;
@@ -22,8 +23,8 @@ public abstract class ConsumerPactTest {
         PactFragment fragment = createFragment(ConsumerPactBuilder.consumer(consumerName()).hasPactWith(providerName()));
         final MockProviderConfig config = MockProviderConfig.createDefault();
 
-        VerificationResult result = fragment.runConsumer(config, new Runnable() {
-            public void run() {
+        VerificationResult result = fragment.runConsumer(config, new TestRun() {
+            public void run(MockProviderConfig config) {
                 try {
                     runTest(config.url());
                 } catch(Exception e) {

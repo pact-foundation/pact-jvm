@@ -22,7 +22,6 @@ class ExampleGroovyConsumerPactTest {
         def bob_service = new PactBuilder().build {
             service_consumer "Consumer"
             has_pact_with "Bob"
-            port 4321
         }
 
         alice_service {
@@ -66,8 +65,8 @@ class ExampleGroovyConsumerPactTest {
         }
         assert result == PactVerified$.MODULE$
 
-        result = bob_service.run() {
-            def client = new RESTClient('http://localhost:4321/')
+        result = bob_service.run() { config ->
+            def client = new RESTClient(config.url())
             def body = new JsonBuilder([name: 'Bobby'])
             def bob_post_response = client.post(path: '/donuts', requestContentType: 'application/json',
                 headers: [

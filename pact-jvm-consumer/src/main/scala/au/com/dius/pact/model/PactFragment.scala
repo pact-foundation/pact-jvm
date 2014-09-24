@@ -2,6 +2,10 @@ package au.com.dius.pact.model
 
 import au.com.dius.pact.consumer.{ConsumerTestVerification, DefaultMockProvider, ConsumerPactRunner, VerificationResult}
 
+trait TestRun {
+  def run(config: MockProviderConfig): Unit
+}
+
 case class PactFragment(consumer: Consumer,
                         provider: Provider,
                         interactions: Seq[Interaction]) {
@@ -17,8 +21,8 @@ case class PactFragment(consumer: Consumer,
   //      really? why?
   def defaultState: Option[String] = interactions.headOption.map(_.providerState).get
 
-  def runConsumer(config: MockProviderConfig, test: Runnable): VerificationResult = {
-    duringConsumerSpec(config)(test.run(), (u:Unit) => None)
+  def runConsumer(config: MockProviderConfig, test: TestRun): VerificationResult = {
+    duringConsumerSpec(config)(test.run(config), (u:Unit) => None)
   }
 }
 
