@@ -1,15 +1,16 @@
 package au.com.dius.pact.model.unfiltered
 
-import java.io.{BufferedReader, Reader}
+import java.io.{InputStreamReader, BufferedReader, Reader}
+import java.util.zip.GZIPInputStream
 
 import au.com.dius.pact.model.{Response, Request}
 import unfiltered.request.HttpRequest
-import scala.io.Source
 import unfiltered.netty.ReceivedMessage
-import unfiltered.response.{ResponseString, ResponseFunction, HttpResponse, Status}
+import unfiltered.response._
 import io.netty.handler.codec.http.{HttpResponse => NHttpResponse}
 import com.ning.http.client
 import com.ning.http.client.FluentCaseInsensitiveStringsMap
+import scala.collection.immutable.Stream
 
 object Conversions {
 
@@ -49,8 +50,12 @@ object Conversions {
     uri.split('?').head
   }
 
-  def toBody(reader: Reader) = {
-    val br = new BufferedReader(reader)
+  def toBody(request: HttpRequest[ReceivedMessage]) = {
+    val br = if (request.headers(ContentEncoding.GZip.name).contains("gzip")) {
+      new BufferedReader(new InputStreamReader(new GZIPInputStream(request.inputStream)))
+    } else {
+      new BufferedReader(request.reader)
+    }
     val body = Stream.continually(br.readLine()).takeWhile(_ != null).mkString
     if (body.isEmpty)
       None
@@ -59,6 +64,6 @@ object Conversions {
   }
 
   implicit def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {
-    Request(request.method, toPath(request.uri), toQuery(request), toHeaders(request), toBody(request.reader), None)
+    Request(request.method, toPath(request.uri), toQuery(request), toHeaders(request), toBody(request), None)
   }
 }

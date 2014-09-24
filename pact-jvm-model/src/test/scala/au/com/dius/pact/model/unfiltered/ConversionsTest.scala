@@ -1,6 +1,6 @@
 package au.com.dius.pact.model.unfiltered
 
-import java.io.ByteArrayInputStream
+import java.io.{StringReader, ByteArrayInputStream}
 
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
@@ -18,6 +18,7 @@ class ConversionsTest extends Specification with Mockito {
   request.headerNames returns List("Accept").iterator
   request.headers("Accept") returns List("application/json").iterator
   request.inputStream returns new ByteArrayInputStream(Array[Byte]())
+  request.reader returns new StringReader("")
 
   "converting an unfiltered request to a pact request" should {
 
