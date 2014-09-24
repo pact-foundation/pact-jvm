@@ -16,7 +16,7 @@ class PactSerializerSpec extends Specification {
    "PactSerializer" should {
      "serialize pact" in {
        val sw = new StringWriter()
-       val pactString = io.Source.fromInputStream(loadTestFile("test_pact.json")).mkString
+       val pactString = scala.io.Source.fromInputStream(loadTestFile("test_pact.json")).mkString
 
        Fixtures.pact.serialize(new PrintWriter(sw))
        val json = sw.toString
