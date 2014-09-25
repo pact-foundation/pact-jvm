@@ -48,6 +48,16 @@ class RequestMatchingSpec extends Specification {
       test(extraHeaderRequest) must beSome(response)
     }
 
+    "allow query string in different order" in {
+      val queryRequest = request.copy(query = Some("r=s&q=p&q=p2"))
+      test(queryRequest) must beSome(response)
+    }
+
+    "fail if query string has the same parameter repeated in different order" in {
+      val queryRequest = request.copy(query = Some("r=s&q=p2&q=p"))
+      test(queryRequest) must beNone
+    }
+
   }
 
   "request with cookie" should {

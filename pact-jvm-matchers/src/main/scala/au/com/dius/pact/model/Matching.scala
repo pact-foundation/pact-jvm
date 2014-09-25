@@ -113,12 +113,18 @@ object Matching {
     else Some(StatusMismatch(expected, actual))
   }
 
+  def queryToMap(query: Query) = {
+    query.split("&").map(_.split("=")).foldLeft(Map[String,Seq[String]]()) {
+      (m, a) => m + (a.head -> (m.getOrElse(a.head, Seq()) :+ a.last))
+    }
+  }
+
   def matchQuery(expected: Option[Query], actual: Option[Query]): Option[QueryMismatch] = {
     (expected, actual) match {
       case (None, None) => None
       case (Some(a), None) => Some(QueryMismatch(a, ""))
       case (None, Some(b)) => Some(QueryMismatch("", b))
-      case (Some(a), Some(b)) => if (a == b) { None } else { Some(QueryMismatch(a, b)) }
+      case (Some(a), Some(b)) => if (queryToMap(a) == queryToMap(b)) { None } else { Some(QueryMismatch(a, b)) }
     }
   }
 }

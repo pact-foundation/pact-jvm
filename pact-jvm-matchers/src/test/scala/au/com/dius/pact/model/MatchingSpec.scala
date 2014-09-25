@@ -52,5 +52,31 @@ class MatchingSpec extends Specification {
         matchMethod("a", "b") must beSome(MethodMismatch("a", "b"))
       }
     }
+
+    "Query Matching" should {
+      "match same"  in {
+        matchQuery(Some("a=b"), Some("a=b")) must beNone
+      }
+
+      "match none" in {
+        matchQuery(None, None) must beNone
+      }
+
+      "mismatch none to something" in {
+        matchQuery(None, Some("a=b")) must beSome(QueryMismatch("", "a=b"))
+      }
+
+      "mismatch something to none" in {
+        matchQuery(Some("a=b"), None) must beSome(QueryMismatch("a=b", ""))
+      }
+
+      "match keys in different order"  in {
+        matchQuery(Some("status=RESPONSE_RECEIVED&insurerCode=ABC"), Some("insurerCode=ABC&status=RESPONSE_RECEIVED")) must beNone
+      }
+
+      "mismatch if the same key is repeated with values in different order"  in {
+        matchQuery(Some("a=1&a=2&b=3"), Some("a=2&a=1&b=3")) must beSome(QueryMismatch("a=1&a=2&b=3", "a=2&a=1&b=3"))
+      }
+    }
   }
 }
