@@ -22,9 +22,9 @@ import PactGenerator._
  * This code has a way to go before it is fit for purpose.
  */
 object PactGenerator {
-  //TODO: use environment property for pact output folder
-  val pactRootDir = "target/pacts"
-    
+
+  def pactRootDir = PactConfig.config("pactRootDir")
+
   def defaultFilename(pact: Pact): String = 
     s"${pact.consumer.name}-${pact.provider.name}.json"
 
