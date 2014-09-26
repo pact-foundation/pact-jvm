@@ -107,6 +107,8 @@ class PactBuilder {
         this
     }
 
+    def withAttributes = this.&with
+
     PactBuilder will_respond_with(Map responseData) {
         def response = [:] + responseData
         def body = responseData.body
