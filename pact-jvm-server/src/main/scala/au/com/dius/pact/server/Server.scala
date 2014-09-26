@@ -1,5 +1,6 @@
 package au.com.dius.pact.server
 
+import au.com.dius.pact.matchers.Matchers
 import au.com.dius.pact.model._
 import org.json4s._
 import org.json4s.jackson.Serialization
@@ -22,6 +23,7 @@ object Server extends App {
 
   val host: String = "localhost"
   val server = _root_.unfiltered.netty.Http.local(port).handler(RequestHandler(new ServerStateStore()))
+  Matchers.registerStandardMatchers()
   println(s"starting unfiltered app at 127.0.0.1 on port $port")
   server.start()
   readLine("press enter to stop server:\n")

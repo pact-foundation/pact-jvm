@@ -53,7 +53,7 @@
                 "path": "/alligators/Mary"
             },
             "response": {
-                "status": 200,
+                "status": 201,
                 "body": {
                     "alligators": [
                         {

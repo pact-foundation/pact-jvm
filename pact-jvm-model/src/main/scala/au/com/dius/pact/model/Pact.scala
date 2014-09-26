@@ -91,6 +91,7 @@ trait HttpPart {
   def body: Option[String]
   def mimeType = headers.getOrElse(Map()).getOrElse("Content-Type", "application/json").split("\\s*;\\s*").head
   def jsonBody = mimeType == "application/json"
+  def matchers: Option[Map[String, Any]]
 }
 
 case class Request(method: String,
