@@ -42,10 +42,14 @@ class PactBuilder {
         this
     }
 
+    def serviceConsumer = this.&service_consumer
+
     PactBuilder has_pact_with(String provider) {
         this.provider = new Provider(provider)
         this
     }
+
+    def hasPactWith = this.&has_pact_with
 
     PactBuilder port(int port) {
         this.port = port
@@ -62,6 +66,8 @@ class PactBuilder {
         this.requestDescription = requestDescription
         this
     }
+
+    def uponReceiving = this.&upon_receiving
 
     def buildInteractions() {
         int numInteractions = Math.min(requestData.size(), responseData.size())
@@ -110,6 +116,8 @@ class PactBuilder {
         this.responseData << response
         this
     }
+
+    def willRespondWith = this.&will_respond_with
 
     VerificationResult run(Closure closure) {
         buildInteractions()
