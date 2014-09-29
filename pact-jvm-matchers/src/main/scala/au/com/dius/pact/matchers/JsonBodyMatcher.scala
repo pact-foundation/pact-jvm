@@ -2,8 +2,7 @@ package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model.JsonDiff._
 import au.com.dius.pact.model.{BodyMismatch, HttpPart}
-import org.json4s.JsonAST.JObject
-import org.json4s.{JValue, DefaultFormats}
+import org.json4s.{JObject, JArray, JValue, DefaultFormats}
 import org.json4s.jackson.JsonMethods._
 
 class JsonBodyMatcher extends BodyMatcher {
@@ -50,7 +49,7 @@ class JsonBodyMatcher extends BodyMatcher {
           val expectedValues: Map[String, Any] = a.values
           val actualValues: Map[String, Any] = b.values
           if (expectedValues.isEmpty && actualValues.nonEmpty) {
-            List(BodyMismatch(a, b, Some(s"Expected an empty Map but received ${valueOf(actual)}"), path))
+            List(BodyMismatch(a, b, Some(s"Expected an empty Map but received ${valueOf(actualValues)}"), path))
           } else {
             var result = List[BodyMismatch]()
             if (expectedValues.size > actualValues.size) {
@@ -66,31 +65,33 @@ class JsonBodyMatcher extends BodyMatcher {
             })
             result
           }
-//        case (a: List[Any], b: List[Any]) =>
-//          if (a.isEmpty && b.nonEmpty) {
-//            List(BodyMismatch(a, b, Some(s"Expected an empty List but received ${valueOf(actual)}"), path))
-//          } else {
-//            var result = List[BodyMismatch]()
-//            if (a.size != b.size) {
-//              result = result :+ BodyMismatch(a, b, Some(s"Expected a List with ${a.size} elements but received ${b.size} elements"), path)
-//            }
-//            for ((value, index) <- a.view.zipWithIndex) {
-//              val s = path + index + "/"
-//              if (index < b.size) {
-//                result = result ++: compare(s, value, b(index))
-//              } else {
-//                result = result :+ BodyMismatch(a, b, Some(s"Expected ${valueOf(value)} but was missing"), path)
-//              }
-//            }
-//            result
-//          }
-//        case (_, _) =>
-//          if ((expected.isInstanceOf[Map[Any, Any]] && !actual.isInstanceOf[Map[Any, Any]]) ||
-//            (expected.isInstanceOf[List[Any]] && !actual.isInstanceOf[List[Any]])) {
-//            List(BodyMismatch(expected, actual, Some(s"Type mismatch: Expected ${typeOf(expected)} ${valueOf(expected)} but received ${typeOf(actual)} ${valueOf(actual)}"), path))
-//          } else {
-//            List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(expected)} but received ${valueOf(actual)}"), path))
-//          }
+        case (a: JArray, b: JArray) =>
+          val expectedValues: List[Any] = a.values
+          val actualValues: List[Any] = b.values
+          if (expectedValues.isEmpty && actualValues.nonEmpty) {
+            List(BodyMismatch(a, b, Some(s"Expected an empty List but received ${valueOf(actualValues)}"), path))
+          } else {
+            var result = List[BodyMismatch]()
+            if (expectedValues.size != actualValues.size) {
+              result = result :+ BodyMismatch(a, b, Some(s"Expected a List with ${expectedValues.size} elements but received ${actualValues.size} elements"), path)
+            }
+            for ((value, index) <- expectedValues.view.zipWithIndex) {
+              val s = path + index + "/"
+              if (index < actualValues.size) {
+                result = result ++: compare(s, value, actualValues(index))
+              } else {
+                result = result :+ BodyMismatch(a, b, Some(s"Expected ${valueOf(value)} but was missing"), path)
+              }
+            }
+            result
+          }
+        case (_, _) =>
+          if ((expected.isInstanceOf[JObject] && !actual.isInstanceOf[JObject]) ||
+            (expected.isInstanceOf[JArray] && !actual.isInstanceOf[JArray])) {
+            List(BodyMismatch(expected, actual, Some(s"Type mismatch: Expected ${typeOf(expected)} ${valueOf(expected)} but received ${typeOf(actual)} ${valueOf(actual)}"), path))
+          } else {
+            List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(expected)} but received ${valueOf(actual)}"), path))
+          }
       }
     } else {
       List[BodyMismatch]()

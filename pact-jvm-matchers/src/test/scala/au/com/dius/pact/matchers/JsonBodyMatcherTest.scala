@@ -5,6 +5,7 @@ import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 import org.specs2.specification.AllExpectations
+import org.specs2.matcher.Expectable
 
 @RunWith(classOf[JUnitRunner])
 class JsonBodyMatcherTest extends Specification with AllExpectations {
@@ -44,11 +45,20 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
         matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
       }
 
+      "with equal Lists" in {
+        actualBody = Some("[100,200,300]")
+        expectedBody = Some("[100, 200, 300]")
+        matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
+      }
+
     }
 
     "returns a mismatch" should {
 
-      def containMessage(a: List[BodyMismatch], s: String) = new Matcher[List[BodyMismatch]] {}
+      def containMessage(s: String) = (a: List[BodyMismatch]) => (
+          a.exists((m: BodyMismatch) => m.mismatch.get == s),
+          s"$a does not contain '$s'"
+        )
 
       "when comparing an empty body to anything and we do not allow extra keys" in {
         actualBody = Some("Blah")
@@ -65,7 +75,15 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
         actualBody = Some("{\"something\": 100}")
         val mismatches: List[BodyMismatch] = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
-        mismatches must contain((mismatch: BodyMismatch) => mismatch.mismatch must beSome("Expected an empty Map but received JObject(List((something,JInt(100))))"))
+        mismatches must containMessage("Expected an empty Map but received Map(something -> 100)")
+      }
+
+      "when comparing an empty list to a non-empty one" in {
+        expectedBody = Some("[]")
+        actualBody = Some("[100]")
+        val mismatches: List[BodyMismatch] = matcher.matchBody(expected(), actual(), diffconfig)
+        mismatches must not(beEmpty)
+        mismatches must containMessage("Expected an empty List but received List(100)")
       }
 
       "when comparing a map to one with less entries" in {
@@ -73,7 +91,17 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
         actualBody = Some("{\"something\": 100}")
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
-        mismatches must contain((mismatch: BodyMismatch) => mismatch.mismatch must beSome("Expected a Map with at least 2 elements but received 1 elements"))
+        mismatches must containMessage("Expected a Map with at least 2 elements but received 1 elements")
+      }
+
+      "when comparing a list to one with with different size" in {
+        expectedBody = Some("[1,2,3]")
+        actualBody = Some("[1,2,3,4]")
+        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
+        mismatches must not(beEmpty)
+        mismatches must have size 2
+        mismatches must containMessage("Expected a List with 3 elements but received 4 elements")
+        mismatches must containMessage("Expected 4 but was missing")
       }
 
       "when the actual body is missing a key" in {
@@ -81,7 +109,31 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
         actualBody = Some("{\"something\": 100}")
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
-        mismatches must contain((mismatch: BodyMismatch) => mismatch.mismatch must beSome("Expected somethingElse=100 but was missing"))
+        mismatches must containMessage("Expected somethingElse=100 but was missing")
+      }
+
+      "when the actual body has invalid value" in {
+        expectedBody = Some("{\"something\": 100}")
+        actualBody = Some("{\"something\": 101}")
+        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
+        mismatches must not(beEmpty)
+        mismatches must containMessage("Expected 100 but received 101")
+      }
+
+      "when comparing a map to a list" in {
+        expectedBody = Some("{\"something\": 100, \"somethingElse\": 100}")
+        actualBody = Some("[100, 100]")
+        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
+        mismatches must not(beEmpty)
+        mismatches must containMessage("Type mismatch: Expected JObject JObject(List((something,JInt(100)), (somethingElse,JInt(100)))) but received JArray JArray(List(JInt(100), JInt(100)))")
+      }
+
+      "when comparing list to anything" in {
+        expectedBody = Some("[100, 100]")
+        actualBody = Some("100")
+        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
+        mismatches must not(beEmpty)
+        mismatches must containMessage("Type mismatch: Expected JArray JArray(List(JInt(100), JInt(100))) but received JInt JInt(100)")
       }
 
     }
