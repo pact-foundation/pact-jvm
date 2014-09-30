@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.matchers.Matchers
 import au.com.dius.pact.model.Pact
 import org.scalatest._
 import org.json4s.jackson.JsonMethods._
@@ -15,7 +14,6 @@ object Main {
   }
 
   def runPacts(t:(PactConfiguration, Seq[Pact])) = t match { case (config, pacts) =>
-    Matchers.registerStandardMatchers()
     val suite = new Sequential(pacts.map { pact =>
       new PactSpec(config, pact)
     }: _*)

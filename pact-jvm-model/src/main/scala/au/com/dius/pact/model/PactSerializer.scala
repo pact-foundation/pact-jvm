@@ -12,15 +12,11 @@ trait PactSerializer extends StrictLogging {
 
   import org.json4s.JsonDSL._
 
-  def matchers2json(m: Option[Map[String, Any]]): JValue = {
-      implicit val formats = Serialization.formats(NoTypeHints)
-      m match {
-          case None => JNothing
-          case _ => map2jvalue(m.get.mapValues {
-              case map: Map[_, _] => matchers2json(Some(map.asInstanceOf[Map[String, Any]]))
-              case v => Extraction.decompose(v)
-          })
-      }
+  implicit def matcher2json(m: Matcher): JValue = {
+    JObject(
+      "expression" -> m.expression,
+      "value" -> m.value
+    )
   }
 
   implicit def request2json(r: Request): JValue = {
@@ -30,7 +26,7 @@ trait PactSerializer extends StrictLogging {
       "headers" -> r.headers,
       "query" -> r.query,
       "body" -> parseBody(r),
-      "requestMatchingRules" -> matchers2json(r.matchers)
+      "requestMatchingRules" -> r.matchers
     )
   }
 
@@ -46,7 +42,7 @@ trait PactSerializer extends StrictLogging {
       "status" -> JInt(r.status),
       "headers" -> r.headers,
       "body" -> parseBody(r),
-      "responseMatchingRules" -> matchers2json(r.matchers)
+      "responseMatchingRules" -> r.matchers
     )
   }
 

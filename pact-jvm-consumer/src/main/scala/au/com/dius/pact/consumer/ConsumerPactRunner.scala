@@ -1,6 +1,5 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.matchers.Matchers
 import au.com.dius.pact.model.Pact
 import scala.util.{Failure, Try, Success}
 
@@ -17,7 +16,6 @@ object ConsumerPactRunner {
   }
   
   def runAndWritePact[T](pact: Pact)(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
-    Matchers.registerStandardMatchers()
     val server = DefaultMockProvider.withDefaultConfig()
     new ConsumerPactRunner(server).runAndWritePact(pact)(userCode, userVerification)
   }

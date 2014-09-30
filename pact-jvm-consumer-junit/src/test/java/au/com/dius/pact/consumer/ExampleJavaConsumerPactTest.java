@@ -27,11 +27,13 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
                 .body(
                     ConsumerPactBuilder.jsonBody()
                         .booleanValue("responsetest", true)
+                        .stringMatcher("name", "\\w+", "harry")
                 )
             .uponReceiving("a second test interaction")
                 .method("OPTIONS")
                 .headers(headers)
                 .path("/second")
+                .body("")
             .willRespondWith()
                 .status(200)
                 .headers(headers)
@@ -54,7 +56,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
     protected void runTest(String url) {
         try {
             assertEquals(200, new ConsumerClient(url).options("/second"));
-            assertEquals("{\"responsetest\":true}", new ConsumerClient(url).get("/"));
+            assertEquals("{\"responsetest\":true,\"name\":\"harry\"}", new ConsumerClient(url).get("/"));
         } catch (Exception e) {
             // NOTE: if you want to see any pact failure, do not throw an exception here. This should be
             // fixed at some point (see Issue #40 https://github.com/DiUS/pact-jvm/issues/40)

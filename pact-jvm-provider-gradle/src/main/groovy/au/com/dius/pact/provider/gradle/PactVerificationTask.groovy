@@ -3,7 +3,6 @@ package au.com.dius.pact.provider.gradle
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.Pact$
 import au.com.dius.pact.model.Interaction
-import au.com.dius.pact.matchers.Matchers$
 import org.apache.http.Header
 import org.apache.http.HttpResponse
 import org.fusesource.jansi.Ansi
@@ -22,7 +21,6 @@ class PactVerificationTask extends DefaultTask {
     @TaskAction
     void verifyPact() {
         ext.failures = [:]
-        Matchers$.registerStandardMatchers()
         providerToVerify.consumers.each { consumer ->
             AnsiConsole.out().println(Ansi.ansi().a('\nVerifying a pact between ').bold().a(consumer.name)
                 .boldOff().a(' and ').bold().a(providerToVerify.name).boldOff())

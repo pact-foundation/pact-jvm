@@ -17,7 +17,7 @@ class JsonBodyMatcher extends BodyMatcher {
         List(BodyMismatch(None, b))
       }
       case (a, None) => List(BodyMismatch(a, None))
-      case (Some(a), Some(b)) => compare("/", parse(a), parse(b), diffConfig)
+      case (Some(a), Some(b)) => compare("$.body", parse(a), parse(b), diffConfig, expected.matchers)
     }
   }
 
@@ -42,8 +42,8 @@ class JsonBodyMatcher extends BodyMatcher {
     }
   }
 
-  def compare(path: String, expected: Any, actual: Any, diffConfig: DiffConfig): List[BodyMismatch] = {
-    if (expected != actual) {
+  def compare(path: String, expected: Any, actual: Any, diffConfig: DiffConfig, matchers: Option[Map[String, Any]]): List[BodyMismatch] = {
+    if (compareValues(path, expected, actual, matchers)) {
       (expected, actual) match {
         case (a: JObject, b: JObject) =>
           val expectedValues: Map[String, Any] = a.values
@@ -57,9 +57,9 @@ class JsonBodyMatcher extends BodyMatcher {
               result = result :+ BodyMismatch(a, b, Some(s"Expected a Map with at least ${expectedValues.size} elements but received ${actualValues.size} elements"), path)
             }
             expectedValues.foreach(entry => {
-              val s = path + entry._1 + "/"
+              val s = path + "." + entry._1
               if (actualValues.contains(entry._1)) {
-                result = result ++: compare(s, entry._2, actualValues(entry._1), diffConfig)
+                result = result ++: compare(s, entry._2, actualValues(entry._1), diffConfig, matchers)
               } else {
                 result = result :+ BodyMismatch(a, b, Some(s"Expected ${entry._1}=${valueOf(entry._2)} but was missing"), path)
               }
@@ -77,9 +77,9 @@ class JsonBodyMatcher extends BodyMatcher {
               result = result :+ BodyMismatch(a, b, Some(s"Expected a List with ${expectedValues.size} elements but received ${actualValues.size} elements"), path)
             }
             for ((value, index) <- expectedValues.view.zipWithIndex) {
-              val s = path + index + "/"
+              val s = path + "." + index
               if (index < actualValues.size) {
-                result = result ++: compare(s, value, actualValues(index), diffConfig)
+                result = result ++: compare(s, value, actualValues(index), diffConfig, matchers)
               } else {
                 result = result :+ BodyMismatch(a, b, Some(s"Expected ${valueOf(value)} but was missing"), path)
               }
@@ -96,6 +96,18 @@ class JsonBodyMatcher extends BodyMatcher {
       }
     } else {
       List[BodyMismatch]()
+    }
+  }
+
+  def hasMatcher(path: String, matchers: Option[Map[String, Any]]) = {
+    matchers.isDefined && matchers.get.contains(path)
+  }
+
+  def compareValues(path: String, expected: Any, actual: Any, matchers: Option[Map[String, Any]]): Boolean = {
+    if (hasMatcher(path, matchers)) {
+      Matchers.matches(matchers.get(path), expected, actual)
+    } else {
+      expected != actual
     }
   }
 }
