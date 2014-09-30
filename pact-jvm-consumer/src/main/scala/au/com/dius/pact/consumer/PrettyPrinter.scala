@@ -34,7 +34,7 @@ object PrettyPrinter {
   def printProblem(interaction:Interaction, partial: Seq[RequestPartMismatch]): String = {
     partial.flatMap {
       case HeaderMismatch(expected, actual) => printMapMismatch("Headers", expected, actual)
-      case BodyMismatch(expected, actual) => printStringMismatch("Body", expected, actual)
+      case BodyMismatch(expected, actual, mismatch, path) => printStringMismatch("Body", Some(expected.toString), Some(actual.toString))
       case BodyTypeMismatch(expected, actual) => printStringMismatch("Body Type", Some(expected), Some(actual))
       case CookieMismatch(expected, actual) => printDiff("Cookies", expected.sorted, actual.sorted)
       case PathMismatch(expected, actual) => printDiff("Path", List(expected), List(actual), 0)

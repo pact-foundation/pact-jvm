@@ -1,5 +1,6 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.matchers.{JsonBodyMatcher, BodyMatcher}
 import au.com.dius.pact.model.JsonDiff.DiffConfig
 import au.com.dius.pact.model.RequestPartMismatch._
 import au.com.dius.pact.model.ResponsePartMismatch._
@@ -34,15 +35,11 @@ sealed trait ResponsePartMismatch
 case class StatusMismatch(expected: Status, actual: Status) extends ResponsePartMismatch
 case class HeaderMismatch(expected: Headers, actual: Headers) extends RequestPartMismatch with ResponsePartMismatch
 case class BodyTypeMismatch(expected: String, actual: String) extends RequestPartMismatch with ResponsePartMismatch
-case class BodyMismatch(expected: Body, actual: Body) extends RequestPartMismatch with ResponsePartMismatch
+case class BodyMismatch(expected: Any, actual: Any, mismatch: Option[String] = None, path: String = "/") extends RequestPartMismatch with ResponsePartMismatch
 case class CookieMismatch(expected: Cookies, actual: Cookies) extends RequestPartMismatch
 case class PathMismatch(expected: Path, actual: Path) extends RequestPartMismatch
 case class MethodMismatch(expected: Method, actual: Method) extends RequestPartMismatch
 case class QueryMismatch(expected: Query, actual: Query) extends RequestPartMismatch
-
-trait BodyMatcher {
-  def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig) : List[BodyMismatch]
-}
 
 object Matching {
   
