@@ -95,12 +95,12 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
       }
 
       "when comparing a list to one with with different size" in {
-        expectedBody = Some("[1,2,3]")
-        actualBody = Some("[1,2,3,4]")
+        expectedBody = Some("[1,2,3,4]")
+        actualBody = Some("[1,2,3]")
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
         mismatches must have size 2
-        mismatches must containMessage("Expected a List with 3 elements but received 4 elements")
+        mismatches must containMessage("Expected a List with 4 elements but received 3 elements")
         mismatches must containMessage("Expected 4 but was missing")
       }
 

@@ -17,7 +17,7 @@ class JsonBodyMatcher extends BodyMatcher {
         List(BodyMismatch(None, b))
       }
       case (a, None) => List(BodyMismatch(a, None))
-      case (Some(a), Some(b)) => compare("/", parse(a), parse(b))
+      case (Some(a), Some(b)) => compare("/", parse(a), parse(b), diffConfig)
     }
   }
 
@@ -42,7 +42,7 @@ class JsonBodyMatcher extends BodyMatcher {
     }
   }
 
-  def compare(path: String, expected: Any, actual: Any): List[BodyMismatch] = {
+  def compare(path: String, expected: Any, actual: Any, diffConfig: DiffConfig): List[BodyMismatch] = {
     if (expected != actual) {
       (expected, actual) match {
         case (a: JObject, b: JObject) =>
@@ -52,13 +52,14 @@ class JsonBodyMatcher extends BodyMatcher {
             List(BodyMismatch(a, b, Some(s"Expected an empty Map but received ${valueOf(actualValues)}"), path))
           } else {
             var result = List[BodyMismatch]()
-            if (expectedValues.size > actualValues.size) {
+            if ((diffConfig.allowUnexpectedKeys && expectedValues.size > actualValues.size) ||
+              (!diffConfig.allowUnexpectedKeys && expectedValues.size != actualValues.size)) {
               result = result :+ BodyMismatch(a, b, Some(s"Expected a Map with at least ${expectedValues.size} elements but received ${actualValues.size} elements"), path)
             }
             expectedValues.foreach(entry => {
               val s = path + entry._1 + "/"
               if (actualValues.contains(entry._1)) {
-                result = result ++: compare(s, entry._2, actualValues(entry._1))
+                result = result ++: compare(s, entry._2, actualValues(entry._1), diffConfig)
               } else {
                 result = result :+ BodyMismatch(a, b, Some(s"Expected ${entry._1}=${valueOf(entry._2)} but was missing"), path)
               }
@@ -78,7 +79,7 @@ class JsonBodyMatcher extends BodyMatcher {
             for ((value, index) <- expectedValues.view.zipWithIndex) {
               val s = path + index + "/"
               if (index < actualValues.size) {
-                result = result ++: compare(s, value, actualValues(index))
+                result = result ++: compare(s, value, actualValues(index), diffConfig)
               } else {
                 result = result :+ BodyMismatch(a, b, Some(s"Expected ${valueOf(value)} but was missing"), path)
               }
