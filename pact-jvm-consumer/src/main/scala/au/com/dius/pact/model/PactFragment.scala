@@ -1,10 +1,6 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.consumer.{ConsumerTestVerification, DefaultMockProvider, ConsumerPactRunner, VerificationResult}
-
-trait TestRun {
-  def run(config: MockProviderConfig): Unit
-}
+import au.com.dius.pact.consumer._
 
 case class PactFragment(consumer: Consumer,
                         provider: Provider,
@@ -31,4 +27,3 @@ object PactFragment {
     PactFragmentBuilder.apply(Consumer(consumer))
   }
 }
-

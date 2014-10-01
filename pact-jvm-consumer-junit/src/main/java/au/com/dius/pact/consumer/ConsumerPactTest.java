@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.TestRun;
 import org.junit.Test;
 
 import au.com.dius.pact.model.PactFragment;

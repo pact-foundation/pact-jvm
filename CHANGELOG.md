@@ -1,5 +1,16 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.0.8 - few bugfixes
+
+* 4c12df1 - #58 - replace scala TestRun trait with a java interface (Ronald Holshausen, Mon Sep 29 16:58:06 2014 +1000)
+* 1135516 - Alias the "with" method on the Groovy DSL as it may lead to confusion with the Groovy "with" (Ronald Holshausen, Fri Sep 26 12:35:13 2014 +1000)
+* a14e0cc - Update Groovy DSL to use camelCase instead of underscores (currently just aliased) (Ronald Holshausen, Fri Sep 26 12:17:35 2014 +1000)
+* b9d043a - #59 - moved the pact root dir to a pact config singleton (Ronald Holshausen, Thu Sep 25 20:57:01 2014 +1000)
+* 1770da6 - Updated the specification test cases from the version 1.1 pact spec (Ronald Holshausen, Thu Sep 25 20:34:25 2014 +1000)
+* ff4c68c - #35 - Implemented support for query parameters in different order (Ronald Holshausen, Thu Sep 25 13:35:09 2014 +1000)
+* f337827 - bump version (Ronald Holshausen, Wed Sep 24 21:33:57 2014 +1000)
+* 99af09e - update unfiltered netty server version in sbt build (Ronald Holshausen, Wed Sep 24 21:32:22 2014 +1000)
+
 # 2.0.7 - few bug fixes
 
 * 8fb7b3d - #55 - Fixed stripping of newlines from body (Ronald Holshausen, Wed Sep 24 21:01:32 2014 +1000)
