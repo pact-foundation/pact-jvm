@@ -13,7 +13,8 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
 
   var expectedBody: Option[String] = None
   var actualBody: Option[String] = None
-  val expected = () => Request("", "", None, None, expectedBody, None)
+  var matchers: Option[Map[String, Any]] = None
+  val expected = () => Request("", "", None, None, expectedBody, matchers)
   val actual = () => Request("", "", None, None, actualBody, None)
 
   var diffconfig = JsonDiff.DiffConfig(structural = true)
@@ -134,6 +135,17 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
         mismatches must containMessage("Type mismatch: Expected JArray JArray(List(JInt(100), JInt(100))) but received JInt JInt(100)")
+      }
+
+    }
+
+    "with a matcher defined" should {
+
+      "delegate to the matcher" in {
+        expectedBody = Some("{\"something\": 100}")
+        actualBody = Some("{\"something\": 101}")
+        matchers = Some(Map("$.body.something" -> Map("regex" -> "\\d+")))
+        matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
       }
 
     }
