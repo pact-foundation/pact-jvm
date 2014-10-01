@@ -1,6 +1,6 @@
 {
-  "match": false,
-  "comment": "Queries are not the same - elephant is missing",
+  "match": true,
+  "comment": "Trailing amperands can be ignored",
   "expected" : {
     "method": "GET",
     "path": "/path",
@@ -11,7 +11,7 @@
   "actual": {
     "method": "GET",
     "path": "/path",
-    "query": "alligator=Mary&hippo=Fred&elephant=missing",
+    "query": "alligator=Mary&hippo=John&",
     "headers": {}
 
   }
