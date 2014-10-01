@@ -26,7 +26,7 @@ class ExampleGroovyConsumerPactTest {
 
         alice_service {
             upon_receiving('a retrieve Mallory request')
-            with(method: 'get', path: '/mallory')
+            with(method: 'get', path: '/mallory', query: [name: 'ron', status: 'good'])
             will_respond_with(
                 status: 200,
                 headers: ['Content-Type': 'text/html'],
@@ -55,7 +55,7 @@ class ExampleGroovyConsumerPactTest {
 
         VerificationResult result = alice_service.run() {
             def client = new RESTClient('http://localhost:1234/')
-            def alice_response = client.get(path: '/mallory')
+            def alice_response = client.get(path: '/mallory', query: [status: 'good', name: 'ron'])
 
             assert alice_response.status == 200
             assert alice_response.contentType == 'text/html'
