@@ -1,12 +1,9 @@
 package au.com.dius.pact.consumer;
 
-import au.com.dius.pact.matchers.Matcher;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.json.JSONObject;
-import scala.None$;
-import scala.Some$;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -56,9 +53,9 @@ public class PactDslJsonBody {
         return this;
     }
 
-    public PactDslJsonBody stringMatcher(String name, String regexp, String value) {
+    public PactDslJsonBody stringMatcher(String name, String regex, String value) {
         body.put(name, value);
-        matchers.put(root + "." + name, regexp(regexp, value));
+        matchers.put(root + "." + name, regexp(regex));
         return this;
     }
 
@@ -119,13 +116,7 @@ public class PactDslJsonBody {
 
     private Map<String, Object> regexp(String regex) {
         Map<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put("regex", new Matcher(regex, None$.<String>empty()));
-        return jsonObject;
-    }
-
-    private Map<String, Object> regexp(String regex, String value) {
-        Map<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put("regex", new Matcher(regex, Some$.MODULE$.apply(value)));
+        jsonObject.put("regex", regex);
         return jsonObject;
     }
 

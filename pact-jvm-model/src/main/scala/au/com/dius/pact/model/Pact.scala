@@ -86,14 +86,12 @@ object HttpMethod {
   val Patch  = "PATCH"
 }
 
-case class Matcher(expression: String, value: Option[String] = None)
-
 trait HttpPart {
   def headers: Option[Map[String, String]]
   def body: Option[String]
   def mimeType = headers.getOrElse(Map()).getOrElse("Content-Type", "application/json").split("\\s*;\\s*").head
   def jsonBody = mimeType == "application/json"
-  def matchers: Option[Map[String, Matcher]]
+  def matchers: Option[Map[String, Any]]
 }
 
 case class Request(method: String,
@@ -101,7 +99,7 @@ case class Request(method: String,
                    query: Option[String],
                    headers: Option[Map[String, String]],
                    body: Option[String],
-                   matchers: Option[Map[String, Matcher]]) extends HttpPart {
+                   matchers: Option[Map[String, Any]]) extends HttpPart {
   def cookie: Option[List[String]] = cookieHeader.map(_._2.split(";").map(_.trim).toList)
 
   def headersWithoutCookie: Option[Map[String, String]] = cookieHeader match {
@@ -142,25 +140,32 @@ trait Optionals {
       Some(query)
     }
   }
+
+  def recursiveJavaMapToScalaMap(map: java.util.Map[String, Any]) : Map[String, Any] = {
+    JavaConversions.mapAsScalaMap(map).mapValues {
+      case jmap: java.util.Map[String, Any] => recursiveJavaMapToScalaMap(jmap)
+      case v => v
+    }.toMap
+  }
 }
 
 object Request extends Optionals {
   def apply(method: String, path: String, query: String, headers: Map[String, String],
-            body: String, matchers: Map[String, Matcher]): Request = {
+            body: String, matchers: Map[String, Any]): Request = {
     Request(method, path, optionalQuery(query), optional(headers), optional(body), optional(matchers))
   }
 
   def apply(method: String, path: String, query: String, headers: java.util.Map[String,String], body: String,
-            matchers: java.util.Map[String, Matcher]): Request = {
+            matchers: java.util.Map[String, Any]): Request = {
     Request(method, path, optionalQuery(query), optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body),
-      optional(JavaConversions.mapAsScalaMap(matchers).toMap))
+      optional(recursiveJavaMapToScalaMap(matchers)))
   }
 }
 
 case class Response(status: Int,
                     headers: Option[Map[String, String]],
                     body: Option[String],
-                    matchers: Option[Map[String, Matcher]]) extends HttpPart {
+                    matchers: Option[Map[String, Any]]) extends HttpPart {
   override def toString: String = {
     s"\tstatus: $status \n\theaders: $headers \n\tmatchers: $matchers \n\tbody: \n$body"
   }
@@ -170,13 +175,13 @@ object Response extends Optionals {
 
   val CrossSiteHeaders = Map[String, String]("Access-Control-Allow-Origin" -> "*")
 
-  def apply(status: Int, headers: Map[String, String], body: String, matchers: Map[String, Matcher]): Response = {
+  def apply(status: Int, headers: Map[String, String], body: String, matchers: Map[String, Any]): Response = {
     Response(status, optional(headers), optional(body), optional(matchers))
   }
 
-  def apply(status: Int, headers: java.util.Map[String, String], body: String, matchers: java.util.Map[String, Matcher]): Response = {
+  def apply(status: Int, headers: java.util.Map[String, String], body: String, matchers: java.util.Map[String, Any]): Response = {
     Response(status, optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body),
-        optional(JavaConversions.mapAsScalaMap(matchers).toMap))
+        optional(recursiveJavaMapToScalaMap(matchers)))
   }
 
   def invalidRequest(request: Request) = {
