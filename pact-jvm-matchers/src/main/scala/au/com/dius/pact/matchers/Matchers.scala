@@ -9,23 +9,29 @@ object Matchers {
 
   def domatch(matcherDef: Any, path: String, expected: Any, actual: Any) : List[BodyMismatch] = {
     matcherDef match {
-      case map: Map[String, Any] => matcher(map).domatch(path, expected, actual)
+      case map: Map[String, Any] => matchers(map.keys.head).domatch(map, path, expected, actual)
       case _ => List(BodyMismatch(expected, actual, Some("matcher is mis-configured"), path))
     }
   }
 
   def matcher(matcherDef: Map[String, Any]) : Matcher = {
-    val matcherType = matcherDef.keys.head
-    matchers(matcherType)(matcherDef(matcherType))
+    matchers(matcherDef.keys.head)
   }
 
-  val matchers = mutable.HashMap[String, Class[Matcher]]("regex" -> RegexpMatcher.class)
+  val matchers = mutable.HashMap[String, Matcher]("regex" -> new RegexpMatcher)
 }
 
 trait Matcher {
-  def domatch(path: String, expected: Any, actual: Any) : List[BodyMismatch]
+  def domatch(matcherDef: Map[String, Any], path: String, expected: Any, actual: Any) : List[BodyMismatch]
 }
 
-class RegexpMatcher(regexp: String) extends Matcher {
-  def domatch(path: String, expected: Any, actual: Any): List[BodyMismatch] = { List() }
+class RegexpMatcher extends Matcher {
+  def domatch(matcherDef: Map[String, Any], path: String, expected: Any, actual: Any): List[BodyMismatch] = {
+    val regex = matcherDef("regex").toString
+    if (actual.toString.matches(regex)) {
+      List()
+    } else {
+      List(BodyMismatch(expected, actual, Some(s"Expected '$actual' to match '$regex'"), path))
+    }
+  }
 }

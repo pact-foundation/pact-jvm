@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer;
 
 import org.apache.http.client.fluent.Request;
+import org.apache.http.entity.ContentType;
 
 import java.io.IOException;
 
@@ -14,6 +15,13 @@ public class ConsumerClient{
     public String get(String path) throws IOException {
         return Request.Get(url + path)
                 .addHeader("testreqheader", "testreqheadervalue")
+                .execute().returnContent().asString();
+    }
+
+    public String post(String path, String body) throws IOException {
+        return Request.Post(url + path)
+                .addHeader("testreqheader", "testreqheadervalue")
+                .bodyString(body, ContentType.APPLICATION_JSON)
                 .execute().returnContent().asString();
     }
 

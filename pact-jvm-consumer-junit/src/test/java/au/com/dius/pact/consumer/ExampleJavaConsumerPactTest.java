@@ -18,9 +18,11 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
             .given("test state") // NOTE: Using provider states are optional, you can leave it out
             .uponReceiving("java test interaction")
                 .path("/")
-                .method("GET")
+                .method("POST")
                 .headers(headers)
-                .body("")
+                .body(
+                    ConsumerPactBuilder.jsonBody().stringMatcher("name", "\\w+", "harry")
+                )
             .willRespondWith()
                 .status(200)
                 .headers(headers)
@@ -56,7 +58,8 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
     protected void runTest(String url) {
         try {
             assertEquals(200, new ConsumerClient(url).options("/second"));
-            assertEquals("{\"responsetest\":true,\"name\":\"harry\"}", new ConsumerClient(url).get("/"));
+            assertEquals("{\"responsetest\":true,\"name\":\"harry\"}",
+                    new ConsumerClient(url).post("/", "{\"name\": \"Arnold\"}"));
         } catch (Exception e) {
             // NOTE: if you want to see any pact failure, do not throw an exception here. This should be
             // fixed at some point (see Issue #40 https://github.com/DiUS/pact-jvm/issues/40)
