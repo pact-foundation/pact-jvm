@@ -31,9 +31,8 @@ class ProviderClient {
         }
 
         if (request.query().defined) {
-            // TODO: Accept multiple parameters with the same name
-            requestMap.query = request.query().get().split('&')*.split('=').inject([:]) { map, entry ->
-                map[entry[0]] = entry[1]
+            requestMap.query = request.query().get().split('&')*.split('=').inject([:]) { Map map, entry ->
+                map[entry[0]] = (map[entry[0]] ?: []) << entry[1]
                 map
             }
         }
