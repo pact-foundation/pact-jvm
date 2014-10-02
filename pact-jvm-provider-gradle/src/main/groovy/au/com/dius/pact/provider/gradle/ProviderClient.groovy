@@ -17,7 +17,7 @@ class ProviderClient {
         def requestMap = [path: request.path()]
         requestMap.headers = [:]
         if (request.headers().defined) {
-            requestMap.headers = JavaConverters$.MODULE$.asJavaMapConverter(request.headers().get()).asJava()
+            requestMap.headers += JavaConverters$.MODULE$.mapAsJavaMapConverter(request.headers().get()).asJava()
         }
 
         if (requestMap.headers['Content-Type']) {
@@ -31,9 +31,14 @@ class ProviderClient {
         }
 
         if (request.query().defined) {
-            requestMap.query = request.query().get().split('&')*.split('=').inject([:]) { map, entry ->
-                map[entry[0]] = entry[1]; map
+            requestMap.query = request.query().get().split('&')*.split('=').inject([:]) { Map map, entry ->
+                map[entry[0]] = (map[entry[0]] ?: []) << entry[1]
+                map
             }
+        }
+
+        if (provider.requestFilter != null) {
+            provider.requestFilter(requestMap)
         }
 
         client.handler.failure = { resp -> resp }

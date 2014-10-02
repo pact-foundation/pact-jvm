@@ -99,6 +99,36 @@ pact {
 Following typical Gradle behaviour, you can set the provider task properties to the actual tasks, or to the task names
 as a string (for the case when they haven't been defined yet).
 
+## Modifying the requests before they are sent
+
+Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would
+be authentication tokens, which have a small life span. The Pact Gradle plugin provides a request filter that can be
+set to a closure on the provider that will be called before the request is made. This closure will receive a Map with
+all the requests attributes defined on it.
+
+```groovy
+pact {
+
+    serviceProviders {
+
+        provider1 {
+
+            requestFilter = { req ->
+                // Add an authorization header to each request
+                req.headers['Authorization] = 'OAUTH eyJhbGciOiJSUzI1NiIsImN0eSI6ImFw...'
+            }
+
+            hasPactWith('consumer1') {
+                pactFile = file('path/to/provider1-consumer1-pact.json')
+            }
+
+        }
+
+    }
+
+}
+```
+
 ## Project Properties
 
 The following project properties can be specified with `-Pproperty=value` on the command line:

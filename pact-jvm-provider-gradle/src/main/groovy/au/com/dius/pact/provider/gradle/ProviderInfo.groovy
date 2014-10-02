@@ -8,6 +8,7 @@ class ProviderInfo {
     String name
     def startProviderTask
     def terminateProviderTask
+    def requestFilter
 
     List<ConsumerInfo> consumers = []
 
