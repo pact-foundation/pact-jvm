@@ -22,7 +22,6 @@ class PactVerificationTask extends DefaultTask {
     @TaskAction
     void verifyPact() {
         ext.failures = [:]
-        Matchers$.registerStandardMatchers()
         providerToVerify.consumers.each { consumer ->
             AnsiConsole.out().println(Ansi.ansi().a('\nVerifying a pact between ').bold().a(consumer.name)
                 .boldOff().a(' and ').bold().a(providerToVerify.name).boldOff())
