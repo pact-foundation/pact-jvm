@@ -38,7 +38,7 @@ class PactVerificationTask extends DefaultTask {
                 throw new RuntimeException('You must specify the pactfile to execute (use pactFile = ...)')
             }
 
-            def interactions = JavaConverters$.MODULE$.asJavaIteratorConverter(pact.interactions().iterator())
+            def interactions = JavaConverters$.MODULE$.seqAsJavaListConverter(pact.interactions())
             interactions.asJava().each { Interaction interaction ->
                 def interactionMessage = "Verifying a pact between ${consumer.name} and ${providerToVerify.name} - ${interaction.description()}"
 
@@ -143,7 +143,7 @@ class PactVerificationTask extends DefaultTask {
     void displayHeadersResult(Map failures, def expected, Map comparison, String comparisonDescription) {
         if (!comparison.isEmpty()) {
             AnsiConsole.out().println('      includes headers')
-            Map expectedHeaders = JavaConverters$.MODULE$.asJavaMapConverter(expected.get()).asJava()
+            Map expectedHeaders = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.get()).asJava()
             comparison.each { key, headerComparison ->
                 def expectedHeaderValue = expectedHeaders[key]
                 def ansi = Ansi.ansi().a('        "').bold().a(key).boldOff().a('" with value "').bold()

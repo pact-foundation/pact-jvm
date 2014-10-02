@@ -43,12 +43,7 @@ class ResponseComparison {
     Map headerResult = [:]
 
     if (expected.headers().defined) {
-      def headers
-      if (JavaConverters$.MODULE$.metaClass.respondsTo('asJavaMapConverter')) {
-          headers = JavaConverters$.MODULE$.asJavaMapConverter(expected.headers().get()).asJava()
-      } else {
-          headers = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
-      }
+      def headers = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
       headers.each { headerKey, value ->
         try {
           assert actualHeaders[headerKey.toUpperCase()] == value

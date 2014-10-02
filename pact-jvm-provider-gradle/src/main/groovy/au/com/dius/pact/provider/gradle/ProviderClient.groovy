@@ -17,7 +17,7 @@ class ProviderClient {
         def requestMap = [path: request.path()]
         requestMap.headers = [:]
         if (request.headers().defined) {
-            requestMap.headers = JavaConverters$.MODULE$.asJavaMapConverter(request.headers().get()).asJava()
+            requestMap.headers = JavaConverters$.MODULE$.mapAsJavaMapConverter(request.headers().get()).asJava()
         }
 
         if (requestMap.headers['Content-Type']) {
