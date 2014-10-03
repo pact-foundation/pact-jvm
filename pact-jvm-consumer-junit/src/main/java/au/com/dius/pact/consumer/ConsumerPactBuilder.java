@@ -20,85 +20,136 @@ import java.util.Map;
 public class ConsumerPactBuilder {
 
     private String consumerName;
+
     public ConsumerPactBuilder(String consumer) {
         this.consumerName = consumer;
     }
 
+    /**
+     * Name the consumer of the pact
+     * @param consumer Consumer name
+     */
     public static ConsumerPactBuilder consumer(String consumer) {
         return new ConsumerPactBuilder(consumer);
     }
 
+    /**
+     * Name the provider that the consumer has a pact with
+     * @param provider provider name
+     */
     public PactDslWithProvider hasPactWith(String provider) {
         return new PactDslWithProvider(provider);
     }
 
     public class PactDslWithProvider {
         private String providerName;
+
         public PactDslWithProvider(String provider) {
             this.providerName = provider;
         }
 
+        /**
+         * Describe the state the provider needs to be in for the pact test to be verified.
+         * @param state Provider state
+         */
         public PactDslWithState given(String state) {
             return new PactDslWithState(state);
         }
 
+        /**
+         * Description of the request that is expected to be received
+         * @param description request description
+         */
         public PactDslWithState.PactDslRequestWithoutPath uponReceiving(String description) {
             return new PactDslWithState(null).uponReceiving(description);
         }
 
         public class PactDslWithState {
             private String state;
+
             public PactDslWithState(String state) {
                 this.state = state;
             }
 
+            /**
+             * Description of the request that is expected to be received
+             * @param description request description
+             */
             public PactDslRequestWithoutPath uponReceiving(String description) {
                 return new PactDslRequestWithoutPath(description);
             }
 
             public class PactDslRequestWithoutPath {
                 private String description;
+                private String requestMethod;
+                private Map<String, String> requestHeaders = Collections.emptyMap();
+                private String query;
+                private String requestBody;
+                private Map<String, Object> requestMatchers = Collections.emptyMap();
+
                 public PactDslRequestWithoutPath(String description) {
                     this.description = description;
                 }
 
-
-                private String requestMethod;
+                /**
+                 * The HTTP method for the request
+                 * @param method Valid HTTP method
+                 */
                 public PactDslRequestWithoutPath method(String method) {
                     requestMethod = method;
                     return this;
                 }
 
-                private Map<String, String> requestHeaders = Collections.emptyMap();
+                /**
+                 * Headers to be included in the request
+                 * @param headers Key-value pairs
+                 */
                 public PactDslRequestWithoutPath headers(Map<String, String> headers) {
                     requestHeaders = headers;
                     return this;
                 }
 
-                private String query;
+                /**
+                 * The query string for the request
+                 * @param query query string
+                 */
                 public PactDslRequestWithoutPath query(String query) {
                     this.query = query;
                     return this;
                 }
 
-                private String requestBody;
+                /**
+                 * The body of the request
+                 * @param body Request body in string form
+                 */
                 public PactDslRequestWithoutPath body(String body) {
                     requestBody = body;
                     return this;
                 }
 
+                /**
+                 * The body of the request
+                 * @param body Request body in JSON form
+                 */
                 public PactDslRequestWithoutPath body(JSONObject body) {
                     requestBody = body.toString();
                     return this;
                 }
 
-                private Map<String, Object> requestMatchers = Collections.emptyMap();
+                /**
+                 * The body of the request
+                 * @param body Built using the Pact body DSL
+                 */
                 public PactDslRequestWithoutPath body(PactDslJsonBody body) {
                     requestMatchers = body.getMatchers();
                     requestBody = body.toString();
                     return this;
                 }
 
+                /**
+                 * The path of the request
+                 * @param path string path
+                 */
                 public PactDslRequestWithPath path(String path) {
                     return new PactDslRequestWithPath(consumerName, providerName, state, description, path,
                         requestMethod, requestHeaders, query, requestBody, requestMatchers);
@@ -114,8 +165,8 @@ public class ConsumerPactBuilder {
         private String state;
 
         private String description;
-        private String path;
-        private String requestMethod;
+        private String path = "/";
+        private String requestMethod = "GET";
         private Map<String, String> requestHeaders = Collections.emptyMap();
         private String query;
         private String requestBody;
@@ -151,56 +202,78 @@ public class ConsumerPactBuilder {
         public PactDslRequestWithPath(PactDslRequestWithPath existing, String description) {
             this.consumer = existing.consumer;
             this.provider = existing.provider;
-
             this.state = existing.state;
-
             this.description = description;
-            this.path = existing.path;
-            this.requestMethod = existing.requestMethod;
-            this.requestHeaders = existing.requestHeaders;
-            this.query = existing.query;
-            this.requestBody = existing.requestBody;
-            this.requestMatchers = existing.requestMatchers;
-
             this.interactions = existing.interactions;
         }
 
+        /**
+         * The HTTP method for the request
+         * @param method Valid HTTP method
+         */
         public PactDslRequestWithPath method(String method) {
             requestMethod = method;
             return this;
         }
 
+        /**
+         * Headers to be included in the request
+         * @param headers Key-value pairs
+         */
         public PactDslRequestWithPath headers(Map<String, String> headers) {
             requestHeaders = headers;
             return this;
         }
 
+        /**
+         * The query string for the request
+         * @param query query string
+         */
         public PactDslRequestWithPath query(String query) {
             this.query = query;
             return this;
         }
 
+        /**
+         * The body of the request
+         * @param body Request body in string form
+         */
         public PactDslRequestWithPath body(String body) {
             requestBody = body;
             return this;
         }
 
+        /**
+         * The body of the request
+         * @param body Request body in JSON form
+         */
         public PactDslRequestWithPath body(JSONObject body) {
             requestBody = body.toString();
             return this;
         }
 
+        /**
+         * The body of the request
+         * @param body Built using the Pact body DSL
+         */
         public PactDslRequestWithPath body(PactDslJsonBody body) {
             requestMatchers = body.getMatchers();
             requestBody = body.toString();
             return this;
         }
 
+        /**
+         * The path of the request
+         * @param path string path
+         */
         public PactDslRequestWithPath path(String path) {
             this.path = path;
             return this;
         }
 
+        /**
+         * Define the response to return
+         */
         public PactDslResponse willRespondWith() {
             return new PactDslResponse(this);
         }
@@ -210,34 +283,55 @@ public class ConsumerPactBuilder {
     public class PactDslResponse {
         private PactDslRequestWithPath existing;
 
+        private int responseStatus = 200;
+        private Map<String, String> responseHeaders = Collections.emptyMap();
+        private String responseBody;
+        private Map<String, Object> responseMatchers = Collections.emptyMap();
+
         public PactDslResponse(PactDslRequestWithPath existing) {
             this.existing = existing;
         }
 
-        private int responseStatus;
+        /**
+         * Response status code
+         * @param status HTTP status code
+         */
         public PactDslResponse status(int status) {
             this.responseStatus = status;
             return this;
         }
 
-        private Map<String, String> responseHeaders = Collections.emptyMap();
+        /**
+         * Response headers to return
+         * @param headers key-value pairs of headers
+         */
         public PactDslResponse headers(Map<String, String> headers) {
             this.responseHeaders = headers;
             return this;
         }
 
-        private String responseBody;
+        /**
+         * Response body to return
+         * @param body Response body in string form
+         */
         public PactDslResponse body(String body) {
             this.responseBody = body;
             return this;
         }
 
+        /**
+         * Response body to return
+         * @param body Response body in JSON form
+         */
         public PactDslResponse body(JSONObject body) {
             this.responseBody = body.toString();
             return this;
         }
 
-        private Map<String, Object> responseMatchers = Collections.emptyMap();
+        /**
+         * Response body to return
+         * @param body Response body built using the Pact body DSL
+         */
         public PactDslResponse body(PactDslJsonBody body) {
             responseMatchers = body.getMatchers();
             responseBody = body.toString();
@@ -267,6 +361,10 @@ public class ConsumerPactBuilder {
             existing.interactions.add(currentInteraction);
         }
 
+        /**
+         * Terminates the DSL and builds a pact fragment to represent the interactions
+         * @return
+         */
         public PactFragment toFragment() {
             addInteraction();
             return new PactFragment(
@@ -275,6 +373,10 @@ public class ConsumerPactBuilder {
                     JavaConverters$.MODULE$.asScalaBufferConverter(existing.interactions).asScala());
         }
 
+        /**
+         * Description of the request that is expected to be received
+         * @param description request description
+         */
         public PactDslRequestWithPath uponReceiving(String description) {
             addInteraction();
             return new PactDslRequestWithPath(existing, description);
