@@ -162,7 +162,7 @@ object Request extends Optionals {
   }
 }
 
-case class Response(status: Int,
+case class Response(status: Int = 200,
                     headers: Option[Map[String, String]],
                     body: Option[String],
                     matchers: Option[Map[String, Any]]) extends HttpPart {

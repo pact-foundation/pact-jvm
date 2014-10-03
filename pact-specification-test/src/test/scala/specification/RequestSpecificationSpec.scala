@@ -14,7 +14,7 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class SpecificationSpec extends SpecificationLike
+class RequestSpecificationSpec extends SpecificationLike
   with MustMatchers
   with StandardResults
   with StandardMatchResults
@@ -33,7 +33,7 @@ class SpecificationSpec extends SpecificationLike
         val testJson = parse(testFile)
         var testData = testJson.transformField {
           case ("body", value) => ("body", JString(pretty(value)))
-        }.extract[PactSpecification]
+        }.extract[PactRequestSpecification]
 
         testData = testData.copy(expected = testData.expected.copy(matchers =
           ((testJson \ "expected") \ "requestMatchingRules").extract[Option[Map[String,Map[String,String]]]]),
@@ -52,7 +52,7 @@ class SpecificationSpec extends SpecificationLike
   }
   override def is: Fragments = Fragments.create(fragments :_*)
 
-  def test(input: PactSpecification) = {
+  def test(input: PactRequestSpecification) = {
     val fakeInteraction = Interaction("", None, input.expected, Response(200, Map[String, String](), "", null))
     val result = RequestMatching.compareRequest(fakeInteraction, input.actual)
     if(input.`match`) {
