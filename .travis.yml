@@ -6,3 +6,4 @@ jdk:
   - oraclejdk8
 env:
   - JAVA_OPTS=-XX:MaxPermSize=256m
+script: ./gradlew -i --stacktrace check
