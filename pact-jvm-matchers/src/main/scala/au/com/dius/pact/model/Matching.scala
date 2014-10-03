@@ -86,12 +86,7 @@ object Matching {
       if (PactConfig.bodyMatchers.contains(expected.mimeType)) {
         PactConfig.bodyMatchers(expected.mimeType).matchBody(expected, actual, diffConfig)
       } else {
-        (expected.body, actual.body) match {
-          case (None, None) => List()
-          case (None, b) => if(diffConfig.structural) { List() } else { List(BodyMismatch(None, b)) }
-          case (a, None) => List(BodyMismatch(a, None))
-          case (a, b) => if (a == b) List() else List(BodyMismatch(a, b))
-        }
+        List(BodyMismatch(expected, actual, Some(s"No matcher found for mime-type ${expected.mimeType}")))
       }
     } else {
       List(BodyTypeMismatch(expected.mimeType, actual.mimeType))

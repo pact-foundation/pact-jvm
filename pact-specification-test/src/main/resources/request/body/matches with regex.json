@@ -1,0 +1,33 @@
+{
+  "match": true,
+  "comment": "Requests match with regex",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": "",
+    "headers": {},
+    "requestMatchingRules": {
+      "$.body.alligator.name": {"regex": "\\w+"}
+    },
+    "body": {
+      "alligator":{
+        "name": "Mary",
+        "feet": 4,
+        "favouriteColours": ["red","blue"]
+      }
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": "",
+    "headers": {},
+    "body": {
+      "alligator":{
+        "feet": 4,
+        "name": "Harry",
+        "favouriteColours": ["red","blue"]
+      }
+    }
+  }
+}
