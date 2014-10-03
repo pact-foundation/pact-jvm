@@ -1,25 +1,32 @@
 pact-jvm-consumer-junit
 =======================
 
-Bindings for the junit library
+Provides a DSL and a base test class for use with Junit to build consumer tests.
 
 ##Dependency
 
 The library is available on maven central using:
 
-group-id = `au.com.dius`
-
-artifact-id = `pact-jvm-consumer-junit_2.10`
-
-version-id = `2.0.6`
+* group-id = `au.com.dius`
+* artifact-id = `pact-jvm-consumer-junit_2.11`
+* version-id = `2.0.8`
 
 ##Usage
 
-To write a pact spec extend ConsumerPactTest
+### Using the base ConsumerPactTest
+
+To write a pact spec extend ConsumerPactTest. This base class defines the following four methods which must be
+overridden in your test class.
+
+* *providerName:* Returns the name of the API provider that Pact will mock
+* *consumerName:* Returns the name of the API consumer that we are testing.
+* *createFragment:* Returns the PactFrament containing the interactions that the test setup using the
+  ConsumerPactBuilder DSL
+* *runTest:* The actual test run. It receives the URL to the mock server as a parameter.
 
 Here is an example:
 
-```
+```java
 import au.com.dius.pact.model.PactFragment;
 
 import java.util.HashMap;
@@ -70,6 +77,96 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
     }
 }
 ```
+
+### Using the Pact DSL directly
+
+Sometimes it is not convenient to use the ConsumerPactTest as it only allows one test per test class. The DSL can be
+ used directly in this case.
+
+Example:
+
+```java
+import au.com.dius.pact.model.MockProviderConfig;
+import au.com.dius.pact.model.PactFragment;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+
+public class PactTest {
+
+    @Test
+    public void testPact() {
+        PactFragment pactFragment = ConsumerPactBuilder
+            .consumer("test_consumer")
+            .hasPactWith("test_provider")
+            .uponReceiving("a test interaction")
+                .path("/hello")
+                .method("POST")
+                .body("{\"name\": \"harry\"}")
+            .willRespondWith()
+                .status(200)
+                .body("{\"hello\": \"harry\"}")
+                .toFragment();
+
+        MockProviderConfig config = MockProviderConfig.createDefault();
+        VerificationResult result = pactFragment.runConsumer(config, new TestRun() {
+            @Override
+            public void run(MockProviderConfig config) {
+                Map expectedResponse = new HashMap();
+                expectedResponse.put("hello", "harry");
+                try {
+                    assertEquals(new ConsumerClient(config.url()).post("/hello", "{\"name\": \"harry\"}"),
+                            expectedResponse);
+                } catch (IOException e) {}
+            }
+        });
+
+        if (result instanceof PactError) {
+            throw new RuntimeException(((PactError)result).error());
+        }
+
+        assertEquals(ConsumerPactTest.PACT_VERIFIED, result);
+    }
+
+}
+
+```
+
+### The Pact JUnit DSL
+
+The DSL has the following pattern:
+
+```java
+.consumer("test_consumer")
+.hasPactWith("test_provider")
+.given("test state")
+    .uponReceiving("a test interaction")
+        .path("/hello")
+        .method("POST")
+        .body("{\"name\": \"harry\"}")
+    .willRespondWith()
+        .status(200)
+        .body("{\"hello\": \"harry\"}")
+    .uponReceiving("a second test interaction")
+        .path("/hello")
+        .method("POST")
+        .body("{\"name\": \"harry\"}")
+    .willRespondWith()
+        .status(200)
+        .body("{\"hello\": \"harry\"}")
+    .
+    .
+    .
+.toFragment()
+```
+
+You can define as many interactions as required. Each interaction starts with `uponReceiving` followed by `willRespondWith`.
+The test state setup with `given` is a mechanism to describe what the state of the provider should be in before the provider
+is verified. It is only recorded in the consumer tests and used by the provider verification tasks.
 
 ## Debugging pact failures
 

@@ -46,7 +46,7 @@ You want to look at: [pact-jvm-consumer-junit](pact-jvm-consumer-junit)
 
 You want to look at: [pact-jvm-consumer-groovy](pact-jvm-consumer-groovy) or [pact-jvm-consumer-junit](pact-jvm-consumer-junit)
 
-### (Clojure Use I)
+### (Use Clojure I)
 
 Clojure can call out to Java, so have a look at [pact-jvm-consumer-junit](pact-jvm-consumer-junit). For an example
 look at [ExampleClojureConsumerPactTest.clj](pact-jvm-consumer-junit/src/test/java/au/com/dius/pact/consumer/ExampleClojureConsumerPactTest.clj).
@@ -112,7 +112,7 @@ Scala requires a lot of permgen space to compile. If you're using Java 6 or 7, u
     export JAVA_OPTS='-Xmx2048m -XX:MaxPermSize=1024m -XX:PermSize=1024m'
     export SBT_OPTS='-Xmx2048m -XX:MaxPermSize=1024m -XX:PermSize=1024m'
 
-To build the libraries:
+#### To build the libraries:
 
     $ sbt clean test install
 
