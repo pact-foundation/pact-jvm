@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.PactFragment;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,17 +21,11 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
                 .path("/")
                 .method("POST")
                 .headers(headers)
-                .body(
-                    ConsumerPactBuilder.jsonBody().stringMatcher("name", "\\w+", "harry")
-                )
+                .body("{\"name\": \"harry\"}")
             .willRespondWith()
                 .status(200)
                 .headers(headers)
-                .body(
-                    ConsumerPactBuilder.jsonBody()
-                        .booleanValue("responsetest", true)
-                        .stringMatcher("name", "\\w+", "harry")
-                )
+                .body("{\"responsetest\": true, \"name\": \"harry\"}")
             .uponReceiving("a second test interaction")
                 .method("OPTIONS")
                 .headers(headers)
@@ -57,9 +52,11 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
     @Override
     protected void runTest(String url) {
         try {
-            assertEquals(200, new ConsumerClient(url).options("/second"));
-            assertEquals("{\"responsetest\":true,\"name\":\"harry\"}",
-                    new ConsumerClient(url).post("/", "{\"name\": \"Arnold\"}"));
+            assertEquals(new ConsumerClient(url).options("/second"), 200);
+            Map expectedResponse = new HashMap();
+            expectedResponse.put("responsetest", true);
+            expectedResponse.put("name", "harry");
+            assertEquals(new ConsumerClient(url).post("/", "{\"name\": \"harry\"}"), expectedResponse);
         } catch (Exception e) {
             // NOTE: if you want to see any pact failure, do not throw an exception here. This should be
             // fixed at some point (see Issue #40 https://github.com/DiUS/pact-jvm/issues/40)

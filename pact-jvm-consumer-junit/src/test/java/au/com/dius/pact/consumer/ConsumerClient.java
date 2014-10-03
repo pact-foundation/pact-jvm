@@ -1,9 +1,12 @@
 package au.com.dius.pact.consumer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ConsumerClient{
     private String url;
@@ -18,11 +21,12 @@ public class ConsumerClient{
                 .execute().returnContent().asString();
     }
 
-    public String post(String path, String body) throws IOException {
-        return Request.Post(url + path)
+    public Map post(String path, String body) throws IOException {
+        String respBody = Request.Post(url + path)
                 .addHeader("testreqheader", "testreqheadervalue")
                 .bodyString(body, ContentType.APPLICATION_JSON)
                 .execute().returnContent().asString();
+        return new ObjectMapper().readValue(respBody, HashMap.class);
     }
 
     public int options(String path) throws IOException {
