@@ -22,10 +22,10 @@ class JsonBodyMatcher extends BodyMatcher {
   }
 
   def valueOf(value: Any) = {
-    if (value.isInstanceOf[String]) {
-      s"'$value'"
-    } else {
-      value.toString
+    value match {
+      case s: String => s"'$value'"
+      case null => "null"
+      case _ => value.toString
     }
   }
 
