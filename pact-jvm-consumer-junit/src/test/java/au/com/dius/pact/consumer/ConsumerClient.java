@@ -15,10 +15,10 @@ public class ConsumerClient{
         this.url = url;
     }
 
-    public String get(String path) throws IOException {
-        return Request.Get(url + path)
+    public Map get(String path) throws IOException {
+        return jsonToMap(Request.Get(url + path)
                 .addHeader("testreqheader", "testreqheadervalue")
-                .execute().returnContent().asString();
+                .execute().returnContent().asString());
     }
 
     public Map post(String path, String body) throws IOException {
@@ -26,6 +26,10 @@ public class ConsumerClient{
                 .addHeader("testreqheader", "testreqheadervalue")
                 .bodyString(body, ContentType.APPLICATION_JSON)
                 .execute().returnContent().asString();
+        return jsonToMap(respBody);
+    }
+
+    private HashMap jsonToMap(String respBody) throws IOException {
         return new ObjectMapper().readValue(respBody, HashMap.class);
     }
 

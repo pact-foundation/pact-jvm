@@ -2,7 +2,6 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.PactFragment;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,9 +18,8 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
             .given("test state") // NOTE: Using provider states are optional, you can leave it out
             .uponReceiving("java test interaction")
                 .path("/")
-                .method("POST")
+                .method("GET")
                 .headers(headers)
-                .body("{\"name\": \"harry\"}")
             .willRespondWith()
                 .status(200)
                 .headers(headers)
@@ -56,7 +54,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
             Map expectedResponse = new HashMap();
             expectedResponse.put("responsetest", true);
             expectedResponse.put("name", "harry");
-            assertEquals(new ConsumerClient(url).post("/", "{\"name\": \"harry\"}"), expectedResponse);
+            assertEquals(new ConsumerClient(url).get("/"), expectedResponse);
         } catch (Exception e) {
             // NOTE: if you want to see any pact failure, do not throw an exception here. This should be
             // fixed at some point (see Issue #40 https://github.com/DiUS/pact-jvm/issues/40)
