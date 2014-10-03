@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer;
 
+import nl.flotsam.xeger.Xeger;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -37,12 +38,6 @@ public class PactDslJsonBody {
         return this;
     }
 
-    public PactDslJsonBody stringValue(String name) {
-        body.put(name, RandomStringUtils.randomAlphabetic(20));
-        matchers.put(root + "." + name, matchType());
-        return this;
-    }
-
     public PactDslJsonBody numberValue(String name, Number value) {
         body.put(name, value);
         return this;
@@ -53,9 +48,32 @@ public class PactDslJsonBody {
         return this;
     }
 
+    public PactDslJsonBody stringType(String name) {
+        body.put(name, RandomStringUtils.randomAlphabetic(20));
+        matchers.put(root + "." + name, matchType());
+        return this;
+    }
+
+    public PactDslJsonBody numberType(String name) {
+        body.put(name, RandomStringUtils.randomNumeric(10));
+        matchers.put(root + "." + name, matchType());
+        return this;
+    }
+
+    public PactDslJsonBody booleanType(String name) {
+        body.put(name, true);
+        matchers.put(root + "." + name, matchType());
+        return this;
+    }
+
     public PactDslJsonBody stringMatcher(String name, String regex, String value) {
         body.put(name, value);
         matchers.put(root + "." + name, regexp(regex));
+        return this;
+    }
+
+    public PactDslJsonBody stringMatcher(String name, String regex) {
+        stringMatcher(name, regex, new Xeger(regex).generate());
         return this;
     }
 
@@ -90,7 +108,7 @@ public class PactDslJsonBody {
 
     public PactDslJsonBody id(String name) {
         body.put(name, RandomStringUtils.randomNumeric(10));
-        matchers.put(root + "." + name, regexp("\\d+"));
+        matchers.put(root + "." + name, matchType());
         return this;
     }
 

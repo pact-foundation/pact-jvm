@@ -18,7 +18,8 @@ public class MatchingTest {
     @Test
     public void testRegexpMatchingOnBody() {
         PactDslJsonBody body = new PactDslJsonBody()
-            .stringMatcher("name", "\\w+", "harry");
+            .stringMatcher("name", "\\w+", "harry")
+            .stringMatcher("position", "staff|contactor");
 
         PactDslJsonBody responseBody = new PactDslJsonBody()
             .stringMatcher("name", "\\w+", "harry");
@@ -26,14 +27,14 @@ public class MatchingTest {
         HashMap expectedResponse = new HashMap();
         expectedResponse.put("name", "harry");
         runTest(buildPactFragment(body, responseBody, "a test interaction that requires regex matching"),
-            "{\"name\": \"Arnold\"}", expectedResponse);
+            "{\"name\": \"Arnold\", \"position\": \"staff\"}", expectedResponse);
     }
 
     @Test
     public void testMatchingByTypeOnBody() {
         PactDslJsonBody body = new PactDslJsonBody()
-                .stringValue("name")
-                .booleanValue("happy", true)
+                .stringType("name")
+                .booleanType("happy")
                 .hexValue("hexCode")
                 .id()
                 .ipAddress("localAddress")
