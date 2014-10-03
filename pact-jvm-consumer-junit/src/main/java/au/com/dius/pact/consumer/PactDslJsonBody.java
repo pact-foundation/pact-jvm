@@ -71,7 +71,7 @@ public class PactDslJsonBody {
 
     public PactDslJsonBody ipAddress(String name) {
         body.put(name, "127.0.0.1");
-        matchers.put(root + "." + name, regexp("(\\d{1-3}\\.)+\\d{1-3}"));
+        matchers.put(root + "." + name, regexp("(\\d{1,3}\\.)+\\d{1,3}"));
         return this;
     }
 
