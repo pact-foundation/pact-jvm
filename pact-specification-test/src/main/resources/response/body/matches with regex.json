@@ -1,0 +1,27 @@
+{
+  "match": true,
+  "comment": "Requests match with regex",
+  "expected" : {
+    "headers": {},
+    "responseMatchingRules": {
+      "$.body.alligator.name": {"regex": "\\w+"}
+    },
+    "body": {
+      "alligator":{
+        "name": "Mary",
+        "feet": 4,
+        "favouriteColours": ["red","blue"]
+      }
+    }
+  },
+  "actual": {
+    "headers": {},
+    "body": {
+      "alligator":{
+        "feet": 4,
+        "name": "Harry",
+        "favouriteColours": ["red","blue"]
+      }
+    }
+  }
+}
