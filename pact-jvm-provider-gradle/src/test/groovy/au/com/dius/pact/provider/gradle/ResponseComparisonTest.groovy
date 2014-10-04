@@ -11,7 +11,7 @@ import org.junit.Test
 
 class ResponseComparisonTest {
 
-  Closure<ResponseComparison> testSubject
+  Closure<Map> testSubject
   Response response
   HttpResponse actualResponse
   int actualStatus
@@ -28,48 +28,47 @@ class ResponseComparisonTest {
     def contentTypeHeader = [getValue: { actualHeaders['Content-Type'] }] as Header
     def entity = [getContentType: { contentTypeHeader }] as HttpEntity
     actualResponse = [getEntity: { entity }] as HttpResponse
-    testSubject = { new ResponseComparison(expected: response, actual: actualResponse, actualStatus: actualStatus,
-      actualHeaders: actualHeaders, actualBody: actualBody) }
+    testSubject = { ResponseComparison.compareResponse(response, actualResponse, actualStatus, actualHeaders, actualBody) }
   }
 
   @Test
-  void 'compare the method should, well, compare the method'() {
-    assert testSubject().compareMethod() == true
+  void 'compare the status should, well, compare the status'() {
+    assert testSubject().method == true
     actualStatus = 400
-    assert testSubject().compareMethod() instanceof PowerAssertionError
+    assert testSubject().method instanceof PowerAssertionError
   }
 
   @Test
   void 'should not compare headers if there are no expected headers'() {
     response = Response$.MODULE$.apply(200, [:], "", [:])
-    assert testSubject().compareHeaders() == [:]
+    assert testSubject().headers == [:]
   }
 
   @Test
   void 'should only compare the expected headers'() {
     actualHeaders = ['A': 'B', 'C': 'D']
     response = Response$.MODULE$.apply(200, ['A': 'B'], "", [:])
-    assert testSubject().compareHeaders() == ['A': true]
+    assert testSubject().headers == ['A': true]
     response = Response$.MODULE$.apply(200, ['A': 'D'], "", [:])
-    assert testSubject().compareHeaders().A instanceof PowerAssertionError
+    assert testSubject().headers.A instanceof PowerAssertionError
   }
 
   @Test
   void 'ignores case in header comparisons'() {
     actualHeaders = ['A': 'B', 'C': 'D']
     response = Response$.MODULE$.apply(200, ['a': 'B'], "", [:])
-    assert testSubject().compareHeaders() == ['a': true]
+    assert testSubject().headers == ['a': true]
   }
 
   @Test
   void 'comparing bodies should fail with different content types'() {
     actualHeaders['Content-Type'] = 'text/plain'
-    assert testSubject().compareBody() == [comparison: "Expected a response type of 'application/json' but the actual type was 'text/plain'"]
+    assert testSubject().body == [comparison: "Expected a response type of 'application/json' but the actual type was 'text/plain'"]
   }
 
   @Test
   void 'comparing bodies should pass with the same content types and body contents'() {
-    assert testSubject().compareBody() == [:]
+    assert testSubject().body == [:]
   }
 
   @Test
@@ -77,8 +76,8 @@ class ResponseComparisonTest {
     actualBody = [
       stuff: 'should make the test fail'
     ]
-    def result = testSubject().compareBody()
-    assert result.comparison == ['/stuff/': "Expected 'is good' but received 'should make the test fail'"]
+    def result = testSubject().body
+    assert result.comparison == ['$.body.stuff': "Expected 'is good' but received 'should make the test fail'"]
     assert result.diff[0] == '@1'
     assert result.diff[1] == '-    "stuff": "is good"'
     assert result.diff[2] == '+    "stuff": "should make the test fail"'

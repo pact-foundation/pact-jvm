@@ -1,6 +1,13 @@
 package au.com.dius.pact.provider.gradle
 
+import au.com.dius.pact.model.BodyMismatch
+import au.com.dius.pact.model.BodyTypeMismatch
+import au.com.dius.pact.model.HeaderMismatch
 import au.com.dius.pact.model.Response
+import au.com.dius.pact.model.Response$
+import au.com.dius.pact.model.ResponseMatching$
+import au.com.dius.pact.model.ResponsePartMismatch
+import au.com.dius.pact.model.StatusMismatch
 import difflib.Delta
 import difflib.DiffUtils
 import difflib.Patch
@@ -23,27 +30,36 @@ class ResponseComparison {
     def result = [:]
     def comparison = new ResponseComparison(expected: response, actual: actualResponse, actualStatus: actualStatus,
         actualHeaders: actualHeaders.collectEntries { k, v -> [k.toUpperCase(), v] }, actualBody: actualBody)
-    result.method = comparison.compareMethod()
-    result.headers = comparison.compareHeaders()
-    result.body = comparison.compareBody()
+    def mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(
+            ResponseMatching$.MODULE$.responseMismatches(response, Response$.MODULE$.apply(actualStatus,
+            actualHeaders, new JsonBuilder(actualBody).toPrettyString(), [:]))).asJava()
+
+    result.method = comparison.compareStatus(mismatches)
+    result.headers = comparison.compareHeaders(mismatches)
+    result.body = comparison.compareBody(mismatches)
     result
   }
 
-  def compareMethod() {
-    int expectedStatus = expected.status()
-    try {
-      assert actualStatus == expectedStatus
-      return true
-    } catch (PowerAssertionError e) {
-      return e
+  def compareStatus(List<ResponsePartMismatch> mismatches) {
+    StatusMismatch statusMismatch = mismatches.find{ it instanceof StatusMismatch }
+    if (statusMismatch) {
+      int expectedStatus = statusMismatch.expected()
+      int actualStatus = statusMismatch.actual()
+      try {
+        assert expectedStatus == actualStatus
+      } catch (PowerAssertionError e) {
+        return e
+      }
     }
+    true
   }
 
-  def compareHeaders() {
+  def compareHeaders(List<ResponsePartMismatch> mismatches) {
     Map headerResult = [:]
 
-    if (expected.headers().defined) {
-      def headers = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
+    HeaderMismatch headerMismatch = mismatches.find{ it instanceof HeaderMismatch }
+    if (headerMismatch) {
+      def headers = JavaConverters$.MODULE$.mapAsJavaMapConverter(headerMismatch.expected()).asJava()
       headers.each { headerKey, value ->
         try {
           assert actualHeaders[headerKey.toUpperCase()] == value
@@ -52,54 +68,57 @@ class ResponseComparison {
           headerResult[headerKey] = e
         }
       }
+    } else if (expected.headers().defined) {
+      headerResult = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
+        .keySet().collectEntries{ [ it, true ] }
     }
 
     headerResult
   }
 
-  def compareBody() {
+  def compareBody(List<ResponsePartMismatch> mismatches) {
     def result = [:]
 
-    def expectedType = expected.mimeType()
-    def actualType = actual.entity?.contentType?.value
-    if (expectedType != actualType) {
-        result = [comparison: "Expected a response type of '$expectedType' but the actual type was '$actualType'"]
-    } else {
-      def expectedBody = BodyComparison.parseBody(expected)
-      def compareResult = BodyComparison.compare('/', expectedBody, actualBody)
-      if (!compareResult.isEmpty()) {
-          String actualBodyString = new JsonBuilder(actualBody).toPrettyString()
-          String expectedBodyString = new JsonBuilder(expectedBody).toPrettyString()
-          def expectedLines = expectedBodyString.split('\n') as List
-          def actualLines = actualBodyString.split('\n') as List
-          Patch<String> patch = DiffUtils.diff(expectedLines, actualLines)
+    BodyTypeMismatch bodyTypeMismatch = mismatches.find{ it instanceof BodyTypeMismatch }
+    if (bodyTypeMismatch) {
+      result = [comparison: "Expected a response type of '${bodyTypeMismatch.expected()}' but the actual type was '${bodyTypeMismatch.actual()}'"]
+    } else if (mismatches.any{ it instanceof BodyMismatch }) {
+      result.comparison = mismatches.findAll{ it instanceof BodyMismatch }.collectEntries { BodyMismatch bodyMismatch ->
+        [bodyMismatch.path(), bodyMismatch.mismatch().defined ? bodyMismatch.mismatch().get() : "mismatch"]
+      }
 
-          def diff = []
+      String actualBodyString = new JsonBuilder(actualBody).toPrettyString()
+      String expectedBodyString = expected.body().defined ? new JsonBuilder(new JsonSlurper().parseText(expected.body().get())).toPrettyString() : ''
+      def expectedLines = expectedBodyString.split('\n') as List
+      def actualLines = actualBodyString.split('\n') as List
+      Patch<String> patch = DiffUtils.diff(expectedLines, actualLines)
 
-          patch.deltas.each { Delta<String> delta ->
-              diff << "@${delta.original.position}"
-              if (delta.original.position > 1) {
-                  diff << expectedLines[delta.original.position - 1]
-              }
+      def diff = []
 
-              delta.original.lines.each {
-                  diff << "-$it"
-              }
-              delta.revised.lines.each {
-                  diff << "+$it"
-              }
-
-              int pos = delta.original.position + delta.original.lines.size()
-              if (pos < expectedLines.size()) {
-                  diff << expectedLines[pos]
-              }
-
-              diff << ''
+      patch.deltas.each { Delta<String> delta ->
+          diff << "@${delta.original.position}"
+          if (delta.original.position > 1) {
+              diff << expectedLines[delta.original.position - 1]
           }
 
-          result = [comparison: compareResult, diff: diff]
+          delta.original.lines.each {
+              diff << "-$it"
+          }
+          delta.revised.lines.each {
+              diff << "+$it"
+          }
+
+          int pos = delta.original.position + delta.original.lines.size()
+          if (pos < expectedLines.size()) {
+              diff << expectedLines[pos]
+          }
+
+          diff << ''
       }
+
+      result.diff = diff
     }
+
     result
   }
 }
