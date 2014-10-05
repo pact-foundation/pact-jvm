@@ -7,20 +7,19 @@ Groovy DSL for Pact JVM
 
 The library is available on maven central using:
 
-group-id = `au.com.dius`
-
-artifact-id = `pact-jvm-consumer-groovy_2.10`
-
-version-id = `2.0.6`
+* group-id = `au.com.dius`
+* artifact-id = `pact-jvm-consumer-groovy_2.11`
+* version-id = `2.0.8`
 
 ##Usage
 
-Add the `pact-jvm-consumer-groovy` library to your test class path. This provides a `PactBuilder` class for you to use to define your pacts. For a full example, have a look at the example JUnit `ExampleGroovyConsumerPactTest`.
+Add the `pact-jvm-consumer-groovy` library to your test class path. This provides a `PactBuilder` class for you to use
+to define your pacts. For a full example, have a look at the example JUnit `ExampleGroovyConsumerPactTest`.
 
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.10:2.0.6'
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:2.0.8'
     }
   
 Then create an instance of the `PactBuilder` in your test.
@@ -31,15 +30,15 @@ Then create an instance of the `PactBuilder` in your test.
 
         def alice_service = new PactBuilder() // Create a new PactBuilder
         alice_service {
-            service_consumer "Consumer" 	// Define the service consumer by name
-            has_pact_with "Alice Service"   // Define the service provider that it has a pact with
+            serviceConsumer "Consumer" 	// Define the service consumer by name
+            hasPactWith "Alice Service"   // Define the service provider that it has a pact with
             port 1234                       // The port number for the service. It is optional, leave it out to
                                             // to use a random one
 
             given('there is some good mallory') // defines a provider state. It is optional.
-            upon_receiving('a retrieve Mallory request') // upon_receiving starts a new interaction
-            with(method: 'get', path: '/mallory')		// define the request, a GET request to '/mallory'
-            will_respond_with(						// define the response we want returned
+            uponReceiving('a retrieve Mallory request') // upon_receiving starts a new interaction
+            withAttributes(method: 'get', path: '/mallory')		// define the request, a GET request to '/mallory'
+            willRespondWith(						// define the response we want returned
                 status: 200,
                 headers: ['Content-Type': 'text/html'],
                 body: '"That is some good Mallory."'
@@ -88,24 +87,16 @@ After running this test, the following pact file is produced:
           "body" : "That is some good Mallory.",
           "responseMatchers" : { }
         }
-      } ],
-      "metadata" : {
-        "pact_gem" : {
-          "version" : "1.0.9"
-        },
-        "pact-jvm" : {
-          "version" : "2.0-RC6"
-        }
-      }
+      } ]
     }
 
 ### DSL Methods
 
-#### service_consumer(String consumer)
+#### serviceConsumer(String consumer)
 
 This names the service consumer for the pact.
 
-#### has_pact_with(String provider)
+#### hasPactWith(String provider)
 
 This names the service provider for the pact.
 
@@ -118,11 +109,11 @@ Sets the port that the mock server will run on. If not supplied, a random port w
 Defines a state that the provider needs to be in for the request to succeed. For more info, see
 https://github.com/realestate-com-au/pact/wiki/Provider-states
 
-#### upon_receiving(String requestDescription)
+#### uponReceiving(String requestDescription)
 
 Starts the definition of a of a pact interaction.
 
-#### with(Map requestData)
+#### withAttributes(Map requestData)
 
 Defines the request for the interaction. The request data map can contain the following:
 
@@ -134,7 +125,7 @@ Defines the request for the interaction. The request data map can contain the fo
 | headers | Map of key-value pairs for the request headers | |
 | body | The body of the request. If it is not a string, it will be converted to JSON | |
 
-#### will_respond_with(Map responseData)
+#### willRespondWith(Map responseData)
 
 Defines the response for the interaction. The response data map can contain the following:
 
@@ -146,4 +137,14 @@ Defines the response for the interaction. The response data map can contain the 
 
 #### VerificationResult run(Closure closure)
 
-The `run` method starts the mock server, and then executes the provided closure. It then returns the pact verification result for the pact run.
+The `run` method starts the mock server, and then executes the provided closure. It then returns the pact verification
+result for the pact run. If you require access to the mock server configuration for the URL, it is passed into the
+closure, e.g.,
+
+```groovy
+
+VerificationResult result = alice_service.run() { config ->
+  def client = new RESTClient(config.url())
+  def alice_response = client.get(path: '/mallory')
+}
+```

@@ -14,20 +14,20 @@ class ExampleGroovyConsumerPactTest {
 
         def alice_service = new PactBuilder()
         alice_service {
-            service_consumer "Consumer"
-            has_pact_with "Alice Service"
+            serviceConsumer "Consumer"
+            hasPactWith "Alice Service"
             port 1234
         }
 
         def bob_service = new PactBuilder().build {
-            service_consumer "Consumer"
-            has_pact_with "Bob"
+            serviceConsumer "Consumer"
+            hasPactWith "Bob"
         }
 
         alice_service {
-            upon_receiving('a retrieve Mallory request')
-            with(method: 'get', path: '/mallory', query: [name: 'ron', status: 'good'])
-            will_respond_with(
+            uponReceiving('a retrieve Mallory request')
+            withAttributes(method: 'get', path: '/mallory', query: [name: 'ron', status: 'good'])
+            willRespondWith(
                 status: 200,
                 headers: ['Content-Type': 'text/html'],
                 body: '"That is some good Mallory."'
@@ -35,22 +35,22 @@ class ExampleGroovyConsumerPactTest {
         }
 
         bob_service {
-            upon_receiving('a create donut request')
+            uponReceiving('a create donut request')
             def body = new JsonBuilder()
             body name: 'Bobby' //Pact::Term.new(matcher: /Bob/, generate: 'Bob')
-            with(method: 'post', path: '/donuts',
+            withAttributes(method: 'post', path: '/donuts',
                 body: body.toPrettyString(),
                 headers: ['Accept': 'application/json', 'Content-Type': 'application/json']
             )
-            will_respond_with(status: 201, body: '"Donut created."', headers: ['Content-Type': 'text/plain'])
+            willRespondWith(status: 201, body: '"Donut created."', headers: ['Content-Type': 'text/plain'])
 
-            upon_receiving('a delete charlie request')
-            with(method: 'delete', path: '/charlie')
-            will_respond_with(status: 200, body: '"deleted"' /*/deleted/*/, headers: ['Content-Type': 'text/plain'])
+            uponReceiving('a delete charlie request')
+            withAttributes(method: 'delete', path: '/charlie')
+            willRespondWith(status: 200, body: '"deleted"' /*/deleted/*/, headers: ['Content-Type': 'text/plain'])
 
-            upon_receiving('an update alligators request')
-            with(method: 'put', path: '/alligators', body: [ ['name' : 'Roger' ] ])
-            will_respond_with(status: 200, body: [ ["name": "Roger", "age": 20 ] ], headers: ['Content-Type': 'application/json'])
+            uponReceiving('an update alligators request')
+            withAttributes(method: 'put', path: '/alligators', body: [ ['name' : 'Roger' ] ])
+            willRespondWith(status: 200, body: [ ["name": "Roger", "age": 20 ] ], headers: ['Content-Type': 'application/json'])
         }
 
         VerificationResult result = alice_service.run() {

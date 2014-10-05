@@ -7,14 +7,14 @@ class PactBuilderTest {
     void "should not define providerState when no given()"() {
         def alice_service = new PactBuilder()
         alice_service {
-            service_consumer "Consumer"
-            has_pact_with "Alice Service"
+            serviceConsumer "Consumer"
+            hasPactWith "Alice Service"
             port 1234
         }
         alice_service {
-            upon_receiving('a retrieve Mallory request')
-            with(method: 'get', path: '/mallory')
-            will_respond_with(
+            uponReceiving('a retrieve Mallory request')
+            withAttributes(method: 'get', path: '/mallory')
+            willRespondWith(
                     status: 200,
                     headers: ['Content-Type': 'text/html'],
                     body: '"That is some good Mallory."'
