@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.flotsam.xeger;
+package xeger;
 
 import dk.brics.automaton.Automaton;
+import dk.brics.automaton.RegExp;
 import dk.brics.automaton.State;
 import dk.brics.automaton.Transition;
-import dk.brics.automaton.RegExp;
 
-import java.util.Random;
 import java.util.List;
+import java.util.Random;
 
 /**
  * An object that will generate text from a regular expression. In a way, it's the opposite of a regular expression
