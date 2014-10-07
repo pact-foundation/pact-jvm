@@ -55,4 +55,12 @@ public abstract class DslPart {
         jsonObject.put("match", "timestamp");
         return jsonObject;
     }
+
+    public PactDslJsonBody asBody() {
+        return (PactDslJsonBody) this;
+    }
+
+    public PactDslJsonArray asArray() {
+        return (PactDslJsonArray) this;
+    }
 }
