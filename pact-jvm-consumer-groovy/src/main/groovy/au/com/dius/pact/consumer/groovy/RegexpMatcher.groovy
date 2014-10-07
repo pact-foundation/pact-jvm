@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
-import xeger.Xeger
+import nl.flotsam.xeger.Xeger
 
 class RegexpMatcher extends Matcher {
 
