@@ -256,7 +256,7 @@ public class ConsumerPactBuilder {
          * The body of the request
          * @param body Built using the Pact body DSL
          */
-        public PactDslRequestWithPath body(PactDslJsonBody body) {
+        public PactDslRequestWithPath body(DslPart body) {
             requestMatchers = body.getMatchers();
             requestBody = body.toString();
             return this;
@@ -332,7 +332,7 @@ public class ConsumerPactBuilder {
          * Response body to return
          * @param body Response body built using the Pact body DSL
          */
-        public PactDslResponse body(PactDslJsonBody body) {
+        public PactDslResponse body(DslPart body) {
             responseMatchers = body.getMatchers();
             responseBody = body.toString();
             return this;

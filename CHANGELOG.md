@@ -1,5 +1,18 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.0.9 - small bugfixes and added filter mechanism to the gradle provider
+
+* fed5caf - pact gradle provider should support multiple query parameters with the same name (Ronald Holshausen, Thu Oct 2 17:06:08 2014 +1000)
+* 59df942 - Allow the gradle plugin to accept a closure to modify the request before sending it (Ronald Holshausen, Thu Oct 2 16:11:57 2014 +1000)
+* 6165b71 - Fix the gradle plugun to work with scala 2.11 (Ronald Holshausen, Thu Oct 2 15:47:16 2014 +1000)
+* be586bb - updated the pact spec test cases from the 1.1 branch (Ronald Holshausen, Wed Oct 1 20:07:05 2014 +1000)
+* 999aa10 - Include a query string in the example pact groovy test (Ronald Holshausen, Wed Oct 1 12:23:51 2014 +1000)
+* 6577391 - got all tests to pass with new matching code (Ronald Holshausen, Tue Sep 30 19:35:42 2014 +1000)
+* c665241 - fleshed out the remaining matching cases (Ronald Holshausen, Mon Sep 29 21:14:21 2014 +1000)
+* 4b0ba83 - bump version (Ronald Holshausen, Mon Sep 29 20:12:11 2014 +1000)
+* abca29d - use JObject as the type instead of Map for matching (Ronald Holshausen, Mon Sep 29 16:39:29 2014 +1000)
+* cc1ce68 - Start of matching refactor: port the gradle plugin matching code to scala (Ronald Holshausen, Fri Sep 26 12:44:23 2014 +1000)
+
 # 2.0.8 - few bugfixes
 
 * 4c12df1 - #58 - replace scala TestRun trait with a java interface (Ronald Holshausen, Mon Sep 29 16:58:06 2014 +1000)

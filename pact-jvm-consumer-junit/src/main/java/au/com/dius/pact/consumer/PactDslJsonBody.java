@@ -6,31 +6,48 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.json.JSONObject;
 
+import javax.naming.OperationNotSupportedException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PactDslJsonBody {
+public class PactDslJsonBody extends DslPart {
 
-    private JSONObject body;
-    private Map<String, Object> matchers;
-    private String root;
-    private PactDslJsonBody parent;
+    private final JSONObject body;
 
     public PactDslJsonBody() {
-        root = "$.body";
-        matchers = new HashMap<String, Object>();
+        super("$.body");
         body = new JSONObject();
     }
 
-    public PactDslJsonBody(String root, PactDslJsonBody parent) {
-        this();
-        this.root = root;
-        this.parent = parent;
+    public PactDslJsonBody(String root, DslPart parent) {
+        super(parent, root);
+        body = new JSONObject();
     }
 
     public String toString() {
         return body.toString();
+    }
+
+    protected void putObject(DslPart object) {
+        String name = StringUtils.difference(root + ".", object.root);
+        for(String matcherName: object.matchers.keySet()) {
+            matchers.put(matcherName, object.matchers.get(matcherName));
+        }
+        body.put(name, object.getBody());
+    }
+
+    protected void putArray(DslPart object) {
+        String name = StringUtils.difference(root + ".", object.root);
+        for(String matcherName: object.matchers.keySet()) {
+            matchers.put(matcherName, object.matchers.get(matcherName));
+        }
+        body.put(name, object.getBody());
+    }
+
+    @Override
+    protected Object getBody() {
+        return body;
     }
 
     public PactDslJsonBody stringValue(String name, String value) {
@@ -97,9 +114,26 @@ public class PactDslJsonBody {
         return new PactDslJsonBody(root + "." + name, this);
     }
 
-    public PactDslJsonBody closeObject() {
+    public PactDslJsonBody object() {
+        throw new UnsupportedOperationException("use the object(String name) form");
+    }
+
+    public DslPart closeObject() {
         parent.putObject(this);
         return parent;
+    }
+
+    public PactDslJsonArray array(String name) {
+        return new PactDslJsonArray(root + "." + name, this);
+    }
+
+    public PactDslJsonArray array() {
+        throw new UnsupportedOperationException("use the array(String name) form");
+    }
+
+    @Override
+    public DslPart closeArray() {
+        throw new UnsupportedOperationException("can't call closeArray on an Object");
     }
 
     public PactDslJsonBody id() {
@@ -118,37 +152,4 @@ public class PactDslJsonBody {
         return this;
     }
 
-    private void putObject(PactDslJsonBody object) {
-        String name = StringUtils.difference(root + ".", object.root);
-        for(String matcherName: object.matchers.keySet()) {
-            matchers.put(matcherName, object.matchers.get(matcherName));
-        }
-        body.put(name, object.body);
-    }
-
-    private Map<String, Object> matchType() {
-        Map<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put("match", "type");
-        return jsonObject;
-    }
-
-    private Map<String, Object> regexp(String regex) {
-        Map<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put("regex", regex);
-        return jsonObject;
-    }
-
-    private Map<String, Object> matchTimestamp() {
-        Map<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put("match", "timestamp");
-        return jsonObject;
-    }
-
-    public Map<String, Object> getMatchers() {
-        return matchers;
-    }
-
-    public void setMatchers(Map<String, Object> matchers) {
-        this.matchers = matchers;
-    }
 }
