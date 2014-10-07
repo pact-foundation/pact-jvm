@@ -1,6 +1,10 @@
 package au.com.dius.pact.consumer.groovy
 
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 import org.junit.Test
+import scala.Option
+import scala.collection.JavaConverters
 
 class PactBodyBuilderTest {
     @Test
@@ -16,25 +20,28 @@ class PactBodyBuilderTest {
             withBody {
               name(~/\w+/, 'harry')
               surname regexp(~/\w+/, 'larry')
-              position regexp(~/staff|contractor/)
+              position regexp(~/staff|contractor/, 'staff')
               happy(true)
 
-              hexCode hexValue
+              hexCode(hexValue)
               hexCode2 hexValue('01234AB')
-              id identifier
+              id(identifier)
               id2 identifier('1234567890')
-              localAddress ipAddress
+              localAddress(ipAddress)
               localAddress2 ipAddress('192.169.0.2')
-              age 100
-              age2 numeric
-              timestamp timestamp
+              age(100)
+              age2(numeric)
 
-              values [1, 2, 3, numeric]
+              ts(timestamp)
+              timestamp = timestamp()
 
-              role {
-                name 'admin'
-                id guid
-              }
+
+//              values([1, 2, 3, numeric])
+
+//              role {
+//                name('admin')
+//                id(guid)
+//              }
             }
             willRespondWith(
                 status: 200,
@@ -46,9 +53,43 @@ class PactBodyBuilderTest {
         }
         service.buildInteractions()
         assert service.interactions.size() == 1
-        assert service.interactions[0].request.matchers.get() == [:]
-        assert service.interactions[0].request.body.get() == ""
-        assert service.interactions[0].response.matchers.get() == [:]
-        assert service.interactions[0].response.body.get() == ""
+        assert asJavaMap(service.interactions[0].request.matchers) == [
+          '$.body.name': [regex: '\\w+'],
+          '$.body.surname': ['regex': '\\w+'],
+          '$.body.position': ['regex': 'staff|contractor'],
+          '$.body.hexCode': [regex: '[0-9a-fA-F]+'],
+          '$.body.hexCode2': [regex: '[0-9a-fA-F]+'],
+          '$.body.id': [match: 'type'],
+          '$.body.id2': [match: 'type'],
+          '$.body.localAddress': [regex: '\\d{1,3}\\.)+\\d{1,3}'],
+          '$.body.localAddress2': [regex: '\\d{1,3}\\.)+\\d{1,3}'],
+          '$.body.age2': [match: 'type'],
+          '$.body.ts': [match: 'timestamp'],
+          '$.body.timestamp': [match: 'timestamp'],
+//          '$.body.values.3': [match: 'type']
+        ]
+        assert asJavaMap(service.interactions[0].response.matchers) == ['$.body.name': [regex: '\\w+']]
+
+        def keys = new JsonSlurper().parseText(service.interactions[0].request.body.get()).keySet()
+        assert keys == ['name', 'surname', 'position', 'happy', 'hexCode', 'hexCode2', 'id', 'id2', 'localAddress',
+          'localAddress2', 'age', 'age2', 'timestamp', 'ts'] as Set
+
+        assert service.interactions[0].response.body.get() == new JsonBuilder([name: "harry"]).toPrettyString()
     }
+
+  def asJavaMap(def map) {
+    if (map instanceof Option) {
+      if (map.defined) {
+        asJavaMap(map.get())
+      } else {
+        [:]
+      }
+    } else if (map instanceof scala.collection.Map) {
+      JavaConverters.mapAsJavaMapConverter(map).asJava().collectEntries {
+        [it.key, asJavaMap(it.value)]
+      }
+    } else {
+      map
+    }
+  }
 }

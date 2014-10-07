@@ -81,9 +81,9 @@ class PactBuilder {
         requestDescription,
         state,
         Request$.MODULE$.apply(requestData[i].method ?: 'get', requestData[i].path ?: '/',
-          queryToString(requestData[i]?.query), headers, requestData[i].body ?: '', [:]),
+          queryToString(requestData[i]?.query), headers, requestData[i].body ?: '', requestData[i].matchers),
         Response$.MODULE$.apply(responseData[i].status ?: 200, responseHeaders,
-          responseData[i].body ?: '', [:])
+          responseData[i].body ?: '', responseData[i].matchers)
       )
     }
     requestData = []
@@ -99,7 +99,7 @@ class PactBuilder {
   }
 
   PactBuilder withAttributes(Map requestData) {
-    def request = [:] + requestData
+    def request = [matchers: [:]] + requestData
     def body = requestData.body
     if (body instanceof PactBodyBuilder) {
       request.body = body.body
@@ -114,7 +114,7 @@ class PactBuilder {
   def with = this.&withAttributes
 
   PactBuilder willRespondWith(Map responseData) {
-    def response = [:] + responseData
+    def response = [matchers: [:]] + responseData
     def body = responseData.body
     if (body instanceof PactBodyBuilder) {
       response.body = body.body
