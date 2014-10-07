@@ -17,7 +17,9 @@
                             .toFragment)
         config (MockProviderConfig. 23456 "localhost")]
     (is (= (ConsumerPactTest/PACT_VERIFIED)
-          (.runConsumer consumer-fragment config
-            #(is (= 200
+        (.runConsumer consumer-fragment config
+          (proxy [TestRun] []
+            (run [_] (
+               #(is (= 200
                    (:status
-                     @(http/get (str (.url config) "/sample"))))))))))
+                     @(http/get (str (.url config) "/sample")))))))))))))
