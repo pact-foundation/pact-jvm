@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-groovy_2.11`
-* version-id = `2.0.8`
+* version-id = `2.1.0`
 
 ##Usage
 
@@ -19,7 +19,7 @@ to define your pacts. For a full example, have a look at the example JUnit `Exam
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:2.0.8'
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:2.1.0'
     }
   
 Then create an instance of the `PactBuilder` in your test.
@@ -123,7 +123,11 @@ Defines the request for the interaction. The request data map can contain the fo
 | path | The Path for the request | / |
 | query | Query parameters as a Map<String, List> |  |
 | headers | Map of key-value pairs for the request headers | |
-| body | The body of the request. If it is not a string, it will be converted to JSON | |
+| body | The body of the request. If it is not a string, it will be converted to JSON. Also accepts a PactBodyBuilder. | |
+
+#### withBody(Closure closure)
+
+Constructs the body of the request or response by invoking the supplied closure in the context of a PactBodyBuilder.
 
 #### willRespondWith(Map responseData)
 
@@ -133,7 +137,7 @@ Defines the response for the interaction. The response data map can contain the 
 |----------------------------|-------------------------------------------|-----------------------------|
 | status | The HTTP status code to return | 200 |
 | headers | Map of key-value pairs for the response headers | |
-| body | The body of the response. If it is not a string, it will be converted to JSON | |
+| body | The body of the response. If it is not a string, it will be converted to JSON. Also accepts a PactBodyBuilder. | |
 
 #### VerificationResult run(Closure closure)
 
@@ -148,3 +152,75 @@ VerificationResult result = alice_service.run() { config ->
   def alice_response = client.get(path: '/mallory')
 }
 ```
+
+### Body DSL
+
+For building JSON bodies there is a `PactBodyBuilder` that provides as DSL that includes matching with regular expressions
+and by types. For a more complete example look at `PactBodyBuilderTest`.
+
+For an example:
+
+```groovy
+service {
+    uponReceiving('a request')
+    withAttributes(method: 'get', path: '/')
+    withBody {
+      name(~/\w+/, 'harry')
+      surname regexp(~/\w+/, 'larry')
+      position regexp(~/staff|contractor/, 'staff')
+      happy(true)
+    }
+}
+```
+
+This will return the following body:
+
+```json
+{
+       "name": "harry",
+       "surname": "larry",
+       "position": "staff",
+       "happy": true
+}
+```
+
+and add the following matchers:
+
+```json
+"$.body.name": ["regex": "\\w+"],
+"$.body.surname": ["regex": "\\w+"], 
+"$.body.position": ["regex": "staff|contractor"]
+```
+
+#### DSL Methods
+
+The DSL supports the following matching methods:
+
+* regexp(Pattern re, String value = null), regexp(String regexp, String value = null)
+
+Defines a regular expression matcher. If the value is not provided, a random one will be generated.
+
+* hexValue(String value = null)
+
+Defines a matcher that accepts hexidecimal values. If the value is not provided, a random hexidcimal value will be
+generated.
+
+* identifier(def value = null)
+
+Defines a matcher that accepts integer values.  If the value is not provided, a random value will be generated.
+
+* ipAddress(String value = null)
+
+Defines a matcher that accepts IP addresses.  If the value is not provided, a 127.0.0.1 will be used.
+
+* numeric(Number value = null)
+
+Defines a matcher that accepts any numerical values. If the value is not provided, a random integer will be used.
+
+* timestamp(def value = null)
+
+Defines a matcher that accepts ISO and SMTP timestamps. If the value is not provided, the current date and time is used.
+
+* guid(String value = null)
+
+Defines a matcher that accepts UUIDs. A random one will be generated if no value is provided.

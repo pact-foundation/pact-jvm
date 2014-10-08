@@ -59,8 +59,6 @@ class PactBodyBuilder {
   }
 
   def methodMissing(String name, args) {
-    println "$path: $name -> $args"
-
     if (args.size() > 0) {
       if (args[0] instanceof Pattern) {
         def matcher = regexp(args[0], args.size() > 1 ? args[1] : null)
@@ -112,7 +110,6 @@ class PactBodyBuilder {
   }
 
   def propertyMissing(String name) {
-    println ">> $name"
     switch (name) {
       case 'hexValue':
         hexValue()
@@ -138,7 +135,6 @@ class PactBodyBuilder {
   }
 
   def propertyMissing(String name, def value) {
-    println ">> $name -> $value"
     methodMissing(name, [value])
   }
 
