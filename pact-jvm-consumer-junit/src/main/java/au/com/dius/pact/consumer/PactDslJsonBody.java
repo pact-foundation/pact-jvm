@@ -10,6 +10,7 @@ import javax.naming.OperationNotSupportedException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class PactDslJsonBody extends DslPart {
 
@@ -149,6 +150,12 @@ public class PactDslJsonBody extends DslPart {
     public PactDslJsonBody hexValue(String name) {
         body.put(name, RandomStringUtils.random(10, "0123456789abcdef"));
         matchers.put(root + "." + name, regexp("[0-9a-fA-F]+"));
+        return this;
+    }
+
+    public PactDslJsonBody guid(String name) {
+        body.put(name, UUID.randomUUID().toString());
+        matchers.put(root + "." + name, regexp("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
         return this;
     }
 

@@ -6,6 +6,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.json.JSONArray;
 
 import java.util.Date;
+import java.util.UUID;
 
 public class PactDslJsonArray extends DslPart {
 
@@ -134,6 +135,12 @@ public class PactDslJsonArray extends DslPart {
     public PactDslJsonArray hexValue() {
         body.put(RandomStringUtils.random(10, "0123456789abcdef"));
         matchers.put(root + "." + body.length(), regexp("[0-9a-fA-F]+"));
+        return this;
+    }
+
+    public PactDslJsonArray guid(String name) {
+        body.put(UUID.randomUUID().toString());
+        matchers.put(root + "." + name, regexp("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
         return this;
     }
 }
