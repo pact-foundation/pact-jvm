@@ -1,5 +1,41 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.1.0 - New matching release, Yay!
+
+* 01ccbf0 - Updated the groovy readme (Ronald Holshausen, Wed Oct 8 19:42:56 2014 +1100)
+* e2e7f34 - build with gradle 2.1 (Ronald Holshausen, Wed Oct 8 15:37:24 2014 +1100)
+* b63ef48 - completed the last case (objects in arrays) for groovy dsl (Ronald Holshausen, Wed Oct 8 15:21:10 2014 +1100)
+* 35639a5 - added guid matching to junit consumer library (Ronald Holshausen, Wed Oct 8 13:53:50 2014 +1100)
+* 0db2de3 - implemented objects in the groovy DSL (Ronald Holshausen, Wed Oct 8 13:53:27 2014 +1100)
+* 2232b2c - update gradle plugin to confrom with the gradle 2.1 plugin ids (Ronald Holshausen, Wed Oct 8 13:02:52 2014 +1100)
+* 4cd6612 - fix for failing build (Ronald Holshausen, Wed Oct 8 09:32:44 2014 +1100)
+* 24258b2 - implemented the majority of the groovy DSL for the new matchering code (Ronald Holshausen, Tue Oct 7 22:05:33 2014 +1100)
+* 7614f26 - added type cast methods for Java DSL (Ronald Holshausen, Tue Oct 7 22:04:39 2014 +1100)
+* 0beef97 - implemented a junit body DSL (Ronald Holshausen, Tue Oct 7 17:34:43 2014 +1100)
+* 7353f68 - update the example closure pact test (Ronald Holshausen, Tue Oct 7 17:27:44 2014 +1100)
+* af20f8f - updated changelog for 2.0.9 (Ronald Holshausen, Mon Oct 6 16:31:40 2014 +1100)
+* d5f4792 - Oops, Xeger needs has a dependency that needs to be moved too (Ronald Holshausen, Mon Oct 6 13:06:54 2014 +1100)
+* f18c5ac - Moved the Xeger utils to the base consumer module so they can be shared by all consumers (Ronald Holshausen, Mon Oct 6 13:02:32 2014 +1100)
+* a99bffd - Update the groovy DSL to handle the new matching (Ronald Holshausen, Mon Oct 6 07:28:40 2014 +1100)
+* 1c534cb - added specification test cases for matching by regex and type (Ronald Holshausen, Sat Oct 4 16:20:32 2014 +1000)
+* 65ca403 - updated the gradle plugin to use the new matching code (Ronald Holshausen, Sat Oct 4 16:20:04 2014 +1000)
+* 460b4d5 - implemented specification tests for responses (Ronald Holshausen, Fri Oct 3 19:29:31 2014 +1000)
+* 298acc3 - add the general body matching case back (Ronald Holshausen, Fri Oct 3 17:35:03 2014 +1000)
+* 0564107 - Passing Pact spec tests with matching by regex and type (Ronald Holshausen, Fri Oct 3 17:15:02 2014 +1000)
+* 05756eb - update the body DSL to autogenerate example values from the regex (Ronald Holshausen, Fri Oct 3 14:34:33 2014 +1000)
+* 5ddfc8e - Added type matching (Ronald Holshausen, Fri Oct 3 14:14:14 2014 +1000)
+* e3d4c58 - #60 - don't maintain state between consecutive uponRecieving/willRespondWith calls (Ronald Holshausen, Fri Oct 3 12:50:54 2014 +1000)
+* 1b4f5bd - update the JUnit readmes (Ronald Holshausen, Fri Oct 3 11:46:53 2014 +1000)
+* 5d3c6c8 - moved the junit matching test to a seperate test class (Ronald Holshausen, Fri Oct 3 11:22:34 2014 +1000)
+* 696a0e2 - fix the ExampleJavaConsumerPactTest to pass on JDK 6 (Ronald Holshausen, Fri Oct 3 10:56:18 2014 +1000)
+* 0ca5752 - include more logging in travis config (Ronald Holshausen, Fri Oct 3 10:38:09 2014 +1000)
+* ae473e9 - bump version (Ronald Holshausen, Fri Oct 3 10:17:59 2014 +1000)
+* ec60c96 - synchronised SBT build with gradle (Ronald Holshausen, Thu Oct 2 20:39:29 2014 +1000)
+* d69c6ca - implemented regex matching, Yay! (Ronald Holshausen, Thu Oct 2 20:31:55 2014 +1000)
+* db667b1 - define extensible matchers based on path and matcher type (Ronald Holshausen, Wed Oct 1 21:31:19 2014 +1000)
+* 4d7b822 - Fix the serialisation of request and response matchers (Ronald Holshausen, Wed Oct 1 14:44:06 2014 +1000)
+* e78d5bc - WIP implementing a regex matcher (Ronald Holshausen, Tue Sep 30 21:21:45 2014 +1000)
+
 # 2.0.9 - small bugfixes and added filter mechanism to the gradle provider
 
 * fed5caf - pact gradle provider should support multiple query parameters with the same name (Ronald Holshausen, Thu Oct 2 17:06:08 2014 +1000)
