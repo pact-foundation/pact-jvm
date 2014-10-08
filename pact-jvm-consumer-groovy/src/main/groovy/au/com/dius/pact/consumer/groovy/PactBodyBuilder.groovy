@@ -54,12 +54,6 @@ class PactBodyBuilder {
     new TimestampMatcher(values: value)
   }
 
-  def object(Closure closure) {
-    closure.delegate = this
-    closure.resolveStrategy = Closure.DELEGATE_FIRST
-    closure.call()
-  }
-
   def guid(String value = null) {
     new RegexpMatcher(values: ['[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', value ?: UUID.randomUUID().toString()])
   }
@@ -81,6 +75,18 @@ class PactBodyBuilder {
           if (entry instanceof Matcher) {
             matchers[path + '.' + name + '.' + i] = entry.matcher
             bodyMap[name] << entry.value
+          } else if (entry instanceof Closure) {
+            def oldpath = path
+            path += '.' + name + '.' + i
+            entry.delegate = this
+            entry.resolveStrategy = Closure.DELEGATE_FIRST
+            bodyStack.push(bodyMap)
+            bodyMap = [:]
+            entry.call()
+            path = oldpath
+            def tmp = bodyMap
+            bodyMap = bodyStack.pop()
+            bodyMap[name] << tmp
           } else {
             bodyMap[name] << entry
           }
@@ -92,14 +98,11 @@ class PactBodyBuilder {
         args[0].resolveStrategy = Closure.DELEGATE_FIRST
         bodyStack.push(bodyMap)
         bodyMap = [:]
-        try {
-          args[0].call()
-        } finally {
-          path = oldpath
-          def tmp = bodyMap
-          bodyMap = bodyStack.pop()
-          bodyMap[name] = tmp
-        }
+        args[0].call()
+        path = oldpath
+        def tmp = bodyMap
+        bodyMap = bodyStack.pop()
+        bodyMap[name] = tmp
       } else {
         bodyMap[name] = args.size() == 1 ? args[0] : args
       }
