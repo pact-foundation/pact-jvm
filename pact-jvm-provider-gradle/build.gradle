@@ -1,3 +1,4 @@
+apply plugin: 'java-gradle-plugin'
 
 dependencies {
     compile gradleApi(), localGroovy(), project(":pact-jvm-provider_${project.scalaVersion}"),

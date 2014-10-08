@@ -15,7 +15,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'au.com.dius:pact-jvm-provider-gradle_2.10:2.0.6'
+        classpath 'au.com.dius:pact-jvm-provider-gradle_2.10:2.0.10'
     }
 }
 ```
@@ -23,7 +23,7 @@ buildscript {
 ### 2. Apply the pact plugin
 
 ```groovy
-apply plugin: 'pact'
+apply plugin: 'au.com.dius.pact'
 ```
 
 ### 3. Define the pacts between your consumers and providers
