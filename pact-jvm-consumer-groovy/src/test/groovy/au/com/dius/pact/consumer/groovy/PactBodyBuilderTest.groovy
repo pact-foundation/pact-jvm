@@ -36,12 +36,19 @@ class PactBodyBuilderTest {
               timestamp = timestamp()
 
 
-//              values([1, 2, 3, numeric])
+              values([1, 2, 3, numeric])
 
-//              role {
-//                name('admin')
-//                id(guid)
-//              }
+              role {
+                name('admin')
+                id(guid)
+              }
+
+//              roles([
+//                object {
+//                  name('dev')
+//                  id(guid)
+//                }
+//              ])
             }
             willRespondWith(
                 status: 200,
@@ -66,13 +73,14 @@ class PactBodyBuilderTest {
           '$.body.age2': [match: 'type'],
           '$.body.ts': [match: 'timestamp'],
           '$.body.timestamp': [match: 'timestamp'],
-//          '$.body.values.3': [match: 'type']
+          '$.body.values.3': [match: 'type'],
+          '$.body.role.id': [regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}']
         ]
         assert asJavaMap(service.interactions[0].response.matchers) == ['$.body.name': [regex: '\\w+']]
 
         def keys = new JsonSlurper().parseText(service.interactions[0].request.body.get()).keySet()
         assert keys == ['name', 'surname', 'position', 'happy', 'hexCode', 'hexCode2', 'id', 'id2', 'localAddress',
-          'localAddress2', 'age', 'age2', 'timestamp', 'ts'] as Set
+          'localAddress2', 'age', 'age2', 'timestamp', 'ts', 'values', 'role'] as Set
 
         assert service.interactions[0].response.body.get() == new JsonBuilder([name: "harry"]).toPrettyString()
     }
