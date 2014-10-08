@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-junit_2.11`
-* version-id = `2.0.8`
+* version-id = `2.1.0`
 
 ##Usage
 
@@ -167,6 +167,24 @@ The DSL has the following pattern:
 You can define as many interactions as required. Each interaction starts with `uponReceiving` followed by `willRespondWith`.
 The test state setup with `given` is a mechanism to describe what the state of the provider should be in before the provider
 is verified. It is only recorded in the consumer tests and used by the provider verification tasks.
+
+### Building JSON bodies with PactDslJsonBody DSL
+
+The body method of the ConsumerPactBuilder can accept a PactDslJsonBody, which can construct a JSON body as well as
+define regex and type matchers.
+
+For example:
+
+```java
+PactDslJsonBody body = new PactDslJsonBody()
+    .stringType("name")
+    .booleanType("happy")
+    .hexValue("hexCode")
+    .id()
+    .ipAddress("localAddress")
+    .numberValue("age", 100)
+    .timestamp();
+```
 
 ## Debugging pact failures
 
