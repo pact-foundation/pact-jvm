@@ -1,5 +1,13 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.1.1 - 2.1 Hotfix
+
+* ad465ea - #62 - Add filters to the gradle plugin (Ronald Holshausen, Thu Oct 9 17:07:38 2014 +1100)
+* 64896da - make sure ids are numeric and not strings (Ronald Holshausen, Thu Oct 9 13:42:51 2014 +1100)
+* c6192e6 - make the match by type failure message less confusing (Ronald Holshausen, Thu Oct 9 13:36:47 2014 +1100)
+* 086f2d2 - Due to the matcher type on the request and responses, pact matchers where no being loaded from the json file (Ronald Holshausen, Thu Oct 9 13:36:10 2014 +1100)
+* f7d462b - bump version (Ronald Holshausen, Thu Oct 9 13:32:03 2014 +1100)
+
 # 2.1.0 - New matching release, Yay!
 
 * 01ccbf0 - Updated the groovy readme (Ronald Holshausen, Wed Oct 8 19:42:56 2014 +1100)
