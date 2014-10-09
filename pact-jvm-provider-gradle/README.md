@@ -136,6 +136,8 @@ The following project properties can be specified with `-Pproperty=value` on the
 |Property|Description|
 |--------|-----------|
 |pact.showStacktrace|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
+|pact.filter.consumers|Comma seperated list of consumer names to verify|
+|pact.filter.interactions|Only verify interactions that match the provided regular expression|
 
 ## Provider States
 
@@ -164,3 +166,10 @@ pact {
 
 If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description will be sent as
  JSON in the body of the request. If it is set to false, it will passed as a query parameter.
+
+## Filtering the interactions that are verified
+
+You can filter the interactions that are run using two project properties: `pact.filter.consumers` and `pact.filter.interactions`.
+Adding `-Ppact.filter.consumers=consumer1,consumer2` to the command line will only run the pact files for those
+consumers (consumer1 and consumer2). Adding `-Ppact.filter.interactions=a request for payment.*` will only run those interactions
+whose descriptions start with 'a request for payment'.

@@ -21,7 +21,7 @@ class PactVerificationTask extends DefaultTask {
     @TaskAction
     void verifyPact() {
         ext.failures = [:]
-        providerToVerify.consumers.each { consumer ->
+        providerToVerify.consumers.findAll(this.&filterConsumers).each { consumer ->
             AnsiConsole.out().println(Ansi.ansi().a('\nVerifying a pact between ').bold().a(consumer.name)
                 .boldOff().a(' and ').bold().a(providerToVerify.name).boldOff())
 
@@ -37,7 +37,7 @@ class PactVerificationTask extends DefaultTask {
             }
 
             def interactions = JavaConverters$.MODULE$.seqAsJavaListConverter(pact.interactions())
-            interactions.asJava().each { Interaction interaction ->
+            interactions.asJava().findAll(this.&filterInteractions).each { Interaction interaction ->
                 def interactionMessage = "Verifying a pact between ${consumer.name} and ${providerToVerify.name} - ${interaction.description()}"
 
                 def stateChangeOk = true
@@ -185,4 +185,14 @@ class PactVerificationTask extends DefaultTask {
             return e
         }
     }
+
+  boolean filterConsumers(def consumer) {
+    !project.hasProperty('pact.filter.consumers') || consumer.name in project.property('pact.filter.consumers').split(',').collect{
+      it.trim()
+    }
+  }
+
+  boolean filterInteractions(Interaction interaction) {
+    !project.hasProperty('pact.filter.interactions') || interaction.description() ==~ project.property('pact.filter.interactions')
+  }
 }
