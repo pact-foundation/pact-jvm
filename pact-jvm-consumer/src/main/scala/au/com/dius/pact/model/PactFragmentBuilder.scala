@@ -37,9 +37,10 @@ object PactFragmentBuilder {
     /**
      * supports java DSL
      */
-    def matching(path: String, method: String, query: String, headers: java.util.Map[String, String], body: String, matchers: java.util.Map[String, Any]): DescribingResponse = {
+    def matching(path: String, method: String, query: String, headers: java.util.Map[String, String], body: String,
+                 matchers: java.util.Map[String, Any]): DescribingResponse = {
       import collection.JavaConversions._
-      matching(path, method, Option(query), optional(headers.toMap), optional(body), optional(matchers.toMap))
+      matching(path, method, Option(query), optional(headers.toMap), optional(body), optional(matchers.toMap.asInstanceOf[Map[String, Map[String, String]]]))
     }
 
     def matching(path: String,
@@ -47,7 +48,7 @@ object PactFragmentBuilder {
                  query: Option[String] = None,
                  headers: Option[Map[String, String]] = None,
                  body: Option[String] = None,
-                 matchers: Option[Map[String, Any]] = None): DescribingResponse = {
+                 matchers: Option[Map[String, Map[String, String]]] = None): DescribingResponse = {
       DescribingResponse(Request(method, path, query, headers, body, matchers))
     }
 
@@ -63,7 +64,7 @@ object PactFragmentBuilder {
       def willRespondWith(status:Int = 200,
                           headers: Map[String,String] = Map(),
                           body: String = "",
-                          matchers: Map[String, Any] = Map()): PactWithAtLeastOneRequest = {
+                          matchers: Map[String, Map[String, String]] = Map()): PactWithAtLeastOneRequest = {
         builder(
           consumer,
           provider,

@@ -13,7 +13,7 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
 
   var expectedBody: Option[String] = None
   var actualBody: Option[String] = None
-  var matchers: Option[Map[String, Any]] = None
+  var matchers: Option[Map[String, Map[String, String]]] = None
   val expected = () => Request("", "", None, None, expectedBody, matchers)
   val actual = () => Request("", "", None, None, actualBody, None)
 

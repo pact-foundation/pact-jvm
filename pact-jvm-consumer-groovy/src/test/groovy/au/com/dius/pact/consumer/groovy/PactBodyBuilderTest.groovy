@@ -63,7 +63,7 @@ class PactBodyBuilderTest {
         }
         service.buildInteractions()
         assert service.interactions.size() == 1
-        assert asJavaMap(service.interactions[0].request.matchers) == [
+        assert asJavaMap(service.interactions[0].request.requestMatchingRules) == [
           '$.body.name': [regex: '\\w+'],
           '$.body.surname': ['regex': '\\w+'],
           '$.body.position': ['regex': 'staff|contractor'],
@@ -80,7 +80,7 @@ class PactBodyBuilderTest {
           '$.body.role.id': [regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'],
           '$.body.roles.0.id': [regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}']
         ]
-        assert asJavaMap(service.interactions[0].response.matchers) == ['$.body.name': [regex: '\\w+']]
+        assert asJavaMap(service.interactions[0].response.responseMatchingRules) == ['$.body.name': [regex: '\\w+']]
 
         def keys = new JsonSlurper().parseText(service.interactions[0].request.body.get()).keySet()
         assert keys == ['name', 'surname', 'position', 'happy', 'hexCode', 'hexCode2', 'id', 'id2', 'localAddress',

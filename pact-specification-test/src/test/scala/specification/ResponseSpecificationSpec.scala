@@ -35,12 +35,6 @@ class ResponseSpecificationSpec extends SpecificationLike
           case ("body", value) => ("body", JString(pretty(value)))
         }.extract[PactResponseSpecification]
 
-        testData = testData.copy(expected = testData.expected.copy(matchers =
-          ((testJson \ "expected") \ "responseMatchingRules").extract[Option[Map[String,Map[String,String]]]]),
-          actual = testData.actual.copy(matchers =
-            ((testJson \ "actual") \ "responseMatchingRules").extract[Option[Map[String,Map[String,String]]]])
-        )
-
         val description = s"$dirName/$fileName ${testData.comment}"
         Example(description, {
           test(testData)

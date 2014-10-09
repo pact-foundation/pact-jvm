@@ -91,7 +91,7 @@ trait HttpPart {
   def body: Option[String]
   def mimeType = headers.getOrElse(Map()).getOrElse("Content-Type", "application/json").split("\\s*;\\s*").head
   def jsonBody = mimeType == "application/json"
-  def matchers: Option[Map[String, Any]]
+  def matchers: Option[Map[String, Map[String, String]]]
 }
 
 case class Request(method: String,
@@ -99,7 +99,7 @@ case class Request(method: String,
                    query: Option[String],
                    headers: Option[Map[String, String]],
                    body: Option[String],
-                   matchers: Option[Map[String, Any]]) extends HttpPart {
+                   requestMatchingRules: Option[Map[String, Map[String, String]]]) extends HttpPart {
   def cookie: Option[List[String]] = cookieHeader.map(_._2.split(";").map(_.trim).toList)
 
   def headersWithoutCookie: Option[Map[String, String]] = cookieHeader match {
@@ -112,8 +112,10 @@ case class Request(method: String,
   private def findHeaderByCaseInsensitiveKey(key: String): Option[(String, String)] = headers.flatMap(_.find(_._1.toLowerCase == key.toLowerCase))
 
   override def toString: String = {
-    s"\tmethod: $method\n\tpath: $path\n\tquery: $query\n\theaders: $headers\n\trequestMatchers: $matchers\n\tbody:\n$body"
+    s"\tmethod: $method\n\tpath: $path\n\tquery: $query\n\theaders: $headers\n\tmatchers: $matchers\n\tbody:\n$body"
   }
+
+  override def matchers = requestMatchingRules
 }
 
 trait Optionals {
@@ -151,37 +153,39 @@ trait Optionals {
 
 object Request extends Optionals {
   def apply(method: String, path: String, query: String, headers: Map[String, String],
-            body: String, matchers: Map[String, Any]): Request = {
-    Request(method, path, optionalQuery(query), optional(headers), optional(body), optional(matchers))
+            body: String, requestMatchingRules: Map[String, Map[String, String]]): Request = {
+    Request(method, path, optionalQuery(query), optional(headers), optional(body), optional(requestMatchingRules))
   }
 
   def apply(method: String, path: String, query: String, headers: java.util.Map[String,String], body: String,
-            matchers: java.util.Map[String, Any]): Request = {
+            requestMatchingRules: java.util.Map[String, Any]): Request = {
     Request(method, path, optionalQuery(query), optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body),
-      optional(recursiveJavaMapToScalaMap(matchers)))
+      optional(recursiveJavaMapToScalaMap(requestMatchingRules).asInstanceOf[Map[String, Map[String, String]]]))
   }
 }
 
 case class Response(status: Int = 200,
                     headers: Option[Map[String, String]],
                     body: Option[String],
-                    matchers: Option[Map[String, Any]]) extends HttpPart {
+                    responseMatchingRules: Option[Map[String, Map[String, String]]]) extends HttpPart {
   override def toString: String = {
     s"\tstatus: $status \n\theaders: $headers \n\tmatchers: $matchers \n\tbody: \n$body"
   }
+
+  override def matchers = responseMatchingRules
 }
 
 object Response extends Optionals {
 
   val CrossSiteHeaders = Map[String, String]("Access-Control-Allow-Origin" -> "*")
 
-  def apply(status: Int, headers: Map[String, String], body: String, matchers: Map[String, Any]): Response = {
-    Response(status, optional(headers), optional(body), optional(matchers))
+  def apply(status: Int, headers: Map[String, String], body: String, responseMatchingRules: Map[String, Map[String, String]]): Response = {
+    Response(status, optional(headers), optional(body), optional(responseMatchingRules))
   }
 
-  def apply(status: Int, headers: java.util.Map[String, String], body: String, matchers: java.util.Map[String, Any]): Response = {
+  def apply(status: Int, headers: java.util.Map[String, String], body: String, responseMatchingRules: java.util.Map[String, Any]): Response = {
     Response(status, optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body),
-        optional(recursiveJavaMapToScalaMap(matchers)))
+        optional(recursiveJavaMapToScalaMap(responseMatchingRules).asInstanceOf[Map[String, Map[String, String]]]))
   }
 
   def invalidRequest(request: Request) = {
