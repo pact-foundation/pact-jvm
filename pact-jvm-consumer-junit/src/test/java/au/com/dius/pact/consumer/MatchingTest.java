@@ -49,7 +49,7 @@ public class MatchingTest {
                 .put("name", "Giggle and Hoot")
                 .put("happy", true)
                 .put("hexCode", "abcdef0123456789")
-                .put("id", "1234567890")
+                .put("id", 1234567890)
                 .put("localAddress", "192.168.0.1")
                 .put("age", 100)
                 .put("timestamp", DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date()))

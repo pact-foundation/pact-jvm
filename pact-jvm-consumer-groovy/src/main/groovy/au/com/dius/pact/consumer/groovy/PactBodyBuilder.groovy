@@ -39,7 +39,7 @@ class PactBodyBuilder {
   }
 
   def identifier(def value = null) {
-    new TypeMatcher(values: value)
+    new TypeMatcher(values: value ?: RandomStringUtils.randomNumeric(10) as Long)
   }
 
   def ipAddress(String value = null) {

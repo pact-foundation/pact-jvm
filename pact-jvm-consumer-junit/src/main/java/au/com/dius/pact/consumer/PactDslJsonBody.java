@@ -73,7 +73,7 @@ public class PactDslJsonBody extends DslPart {
     }
 
     public PactDslJsonBody numberType(String name) {
-        body.put(name, RandomStringUtils.randomNumeric(10));
+        body.put(name, Long.parseLong(RandomStringUtils.randomNumeric(10)));
         matchers.put(root + "." + name, matchType());
         return this;
     }
@@ -142,7 +142,7 @@ public class PactDslJsonBody extends DslPart {
     }
 
     public PactDslJsonBody id(String name) {
-        body.put(name, RandomStringUtils.randomNumeric(10));
+        body.put(name, Long.parseLong(RandomStringUtils.randomNumeric(10)));
         matchers.put(root + "." + name, matchType());
         return this;
     }
