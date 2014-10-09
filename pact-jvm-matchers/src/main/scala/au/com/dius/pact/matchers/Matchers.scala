@@ -25,6 +25,14 @@ object Matchers {
 
 trait Matcher {
   def domatch(matcherDef: Map[String, Any], path: String, expected: Any, actual: Any) : List[BodyMismatch]
+
+  def valueOf(value: Any) = {
+    value match {
+      case s: String => s"'$value'"
+      case null => "null"
+      case _ => value.toString
+    }
+  }
 }
 
 class RegexpMatcher extends Matcher {
@@ -33,7 +41,7 @@ class RegexpMatcher extends Matcher {
     if (actual.toString.matches(regex)) {
       List()
     } else {
-      List(BodyMismatch(expected, actual, Some(s"Expected '$actual' to match '$regex'"), path))
+      List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(actual)} to match '$regex'"), path))
     }
   }
 }
@@ -49,9 +57,9 @@ class TypeMatcher extends Matcher with StrictLogging {
         if (actual == null) {
           List()
         } else {
-          List(BodyMismatch(expected, actual, Some(s"Expected '$actual' to be null"), path))
+          List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(actual)} to be null"), path))
         }
-      case default => List(BodyMismatch(expected, actual, Some(s"Expected '$actual' to be the same type as '$expected'"), path))
+      case default => List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(actual)} to be the same type as ${valueOf(expected)}"), path))
     }
   }
 
@@ -65,8 +73,8 @@ class TypeMatcher extends Matcher with StrictLogging {
     }
     catch {
       case e: java.text.ParseException =>
-        logger.warn(s"failed to parse timestamp value of $actual", e)
-        List(BodyMismatch(expected, actual, Some(s"Expected '$actual' to be a timestamp"), path))
+        logger.warn(s"failed to parse timestamp value of ${valueOf(actual)}", e)
+        List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(actual)} to be a timestamp"), path))
     }
   }
 
