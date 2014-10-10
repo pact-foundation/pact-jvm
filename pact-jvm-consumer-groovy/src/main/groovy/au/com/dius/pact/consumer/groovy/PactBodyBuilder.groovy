@@ -60,50 +60,7 @@ class PactBodyBuilder {
 
   def methodMissing(String name, args) {
     if (args.size() > 0) {
-      if (args[0] instanceof Pattern) {
-        def matcher = regexp(args[0], args.size() > 1 ? args[1] : null)
-        matchers[path + '.' + name] = matcher.matcher
-        bodyMap[name] = matcher.value
-      } else if (args[0] instanceof Matcher) {
-        matchers[path + '.' + name] = args[0].matcher
-        bodyMap[name] = args[0].value
-      } else if (args[0] instanceof List) {
-        bodyMap[name] = []
-        args[0].eachWithIndex { def entry, int i ->
-          if (entry instanceof Matcher) {
-            matchers[path + '.' + name + '.' + i] = entry.matcher
-            bodyMap[name] << entry.value
-          } else if (entry instanceof Closure) {
-            def oldpath = path
-            path += '.' + name + '.' + i
-            entry.delegate = this
-            entry.resolveStrategy = Closure.DELEGATE_FIRST
-            bodyStack.push(bodyMap)
-            bodyMap = [:]
-            entry.call()
-            path = oldpath
-            def tmp = bodyMap
-            bodyMap = bodyStack.pop()
-            bodyMap[name] << tmp
-          } else {
-            bodyMap[name] << entry
-          }
-        }
-      } else if (args[0] instanceof Closure) {
-        def oldpath = path
-        path += '.' + name
-        args[0].delegate = this
-        args[0].resolveStrategy = Closure.DELEGATE_FIRST
-        bodyStack.push(bodyMap)
-        bodyMap = [:]
-        args[0].call()
-        path = oldpath
-        def tmp = bodyMap
-        bodyMap = bodyStack.pop()
-        bodyMap[name] = tmp
-      } else {
-        bodyMap[name] = args.size() == 1 ? args[0] : args
-      }
+      addAttribute(name, args[0], args.size() > 1 ? args[1] : null)
     } else {
       bodyMap[name] = [:]
     }
@@ -135,7 +92,50 @@ class PactBodyBuilder {
   }
 
   def propertyMissing(String name, def value) {
-    methodMissing(name, [value])
+    addAttribute(name, value)
+  }
+
+  private void addAttribute(String name, def value, def value2 = null) {
+    if (value instanceof Pattern) {
+      def matcher = regexp(value as Pattern, value2)
+      bodyMap[name] = setMatcherAttribute(matcher, path + '.' + name)
+    } else if (value instanceof Matcher) {
+      bodyMap[name] = setMatcherAttribute(value, path + '.' + name)
+    } else if (value instanceof List) {
+      bodyMap[name] = []
+      value.eachWithIndex { def entry, int i ->
+        if (entry instanceof Matcher) {
+          bodyMap[name] << setMatcherAttribute(entry, path + '.' + name + '.' + i)
+        } else if (entry instanceof Closure) {
+          bodyMap[name] << invokeClosure(entry, '.' + name + '.' + i)
+        } else {
+          bodyMap[name] << entry
+        }
+      }
+    } else if (value instanceof Closure) {
+      bodyMap[name] = invokeClosure(value, '.' + name)
+    } else {
+      bodyMap[name] = value
+    }
+  }
+
+  private def invokeClosure(Closure entry, String subPath) {
+    def oldpath = path
+    path += subPath
+    entry.delegate = this
+    entry.resolveStrategy = Closure.DELEGATE_FIRST
+    bodyStack.push(bodyMap)
+    bodyMap = [:]
+    entry.call()
+    path = oldpath
+    def tmp = bodyMap
+    bodyMap = bodyStack.pop()
+    tmp
+  }
+
+  private def setMatcherAttribute(Matcher value, String attributePath) {
+    matchers[attributePath] = value.matcher
+    value.value
   }
 
 }
