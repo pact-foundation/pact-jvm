@@ -32,6 +32,17 @@ class PactSerializerSpec extends Specification {
        json must beEqualTo(pactString)
      }
 
+     "serialize pact converts methods to uppercase" in {
+       val sw = new StringWriter()
+       val pactString = scala.io.Source.fromInputStream(loadTestFile("test_pact.json")).mkString
+
+       Fixtures.pact.copy(interactions = Fixtures.pact.interactions.map(
+         interaction => interaction.copy(request = Fixtures.request.copy(method = "get"))))
+         .serialize(new PrintWriter(sw))
+       val json = sw.toString
+       json must beEqualTo(pactString)
+     }
+
      "deserialize pact" in {
        val pact = Pact.from(loadTestFile("test_pact.json"))
        pact must beEqualTo(Fixtures.pact)
@@ -40,6 +51,11 @@ class PactSerializerSpec extends Specification {
      "deserialize pact with matchers" in {
        val pact = Pact.from(loadTestFile("test_pact_matchers.json"))
        pact must beEqualTo(Fixtures.pactWithMatchers)
+     }
+
+     "deserialize converts http methods to upper case" in {
+       val pact = Pact.from(loadTestFile("test_pact_lowercase_method.json"))
+       pact must beEqualTo(Fixtures.pact)
      }
    }
 }

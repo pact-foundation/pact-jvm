@@ -22,6 +22,7 @@ object Pact {
     json.transformField {
       case ("provider_state", value) => ("providerState", value)
       case ("body", value) => ("body", JString(pretty(value)))
+      case ("method", value) => ("method", JString(value.values.toString.toUpperCase))
     }.extract[Pact]
   }
 

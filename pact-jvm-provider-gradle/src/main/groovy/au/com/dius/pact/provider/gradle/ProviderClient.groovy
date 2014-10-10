@@ -42,7 +42,7 @@ class ProviderClient {
         }
 
         client.handler.failure = { resp -> resp }
-        switch (request.method()) {
+        switch (request.method().toUpperCase()) {
             case 'POST':
                 response = client.post(requestMap)
                 break

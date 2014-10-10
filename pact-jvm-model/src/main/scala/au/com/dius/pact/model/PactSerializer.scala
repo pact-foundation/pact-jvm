@@ -29,7 +29,7 @@ trait PactSerializer extends StrictLogging {
 
   implicit def request2json(r: Request): JValue = {
     JObject(
-      "method" -> r.method,
+      "method" -> r.method.toUpperCase,
       "path" -> r.path,
       "headers" -> r.headers,
       "query" -> r.query,
