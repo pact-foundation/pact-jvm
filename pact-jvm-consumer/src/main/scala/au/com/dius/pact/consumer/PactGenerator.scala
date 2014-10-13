@@ -23,7 +23,7 @@ import PactGenerator._
  */
 object PactGenerator {
 
-  def pactRootDir = PactConfig.config("pactRootDir")
+  def pactRootDir = PactConsumerConfig.config("pactRootDir")
 
   def defaultFilename(pact: Pact): String = 
     s"${pact.consumer.name}-${pact.provider.name}.json"

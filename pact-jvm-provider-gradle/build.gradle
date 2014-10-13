@@ -35,8 +35,10 @@ publishing {
 }
 
 bintray {
-  user = bintrayUser
-  key = bintrayKey
+  if (project.hasProperty('bintrayUser')) {
+    user = bintrayUser
+    key = bintrayKey
+  }
 
   publications = ['maven']
 
