@@ -32,7 +32,8 @@ object PactFragmentBuilder {
     }
   }
 
-  case class DescribingRequest(consumer: Consumer, provider: Provider, state: Option[String], description: String, builder: CanBuildPactFragment.Builder = CanBuildPactFragment.firstBuild) extends Optionals {
+  case class DescribingRequest(consumer: Consumer, provider: Provider, state: Option[String], description: String,
+                               builder: CanBuildPactFragment.Builder = CanBuildPactFragment.firstBuild) extends Optionals {
 
     /**
      * supports java DSL
@@ -40,7 +41,8 @@ object PactFragmentBuilder {
     def matching(path: String, method: String, query: String, headers: java.util.Map[String, String], body: String,
                  matchers: java.util.Map[String, Any]): DescribingResponse = {
       import collection.JavaConversions._
-      matching(path, method, Option(query), optional(headers.toMap), optional(body), optional(matchers.toMap.asInstanceOf[Map[String, Map[String, String]]]))
+      matching(path, method, Option(query), optional(headers.toMap), optional(body),
+        optional(matchers.toMap.asInstanceOf[Map[String, Map[String, String]]]))
     }
 
     def matching(path: String,
