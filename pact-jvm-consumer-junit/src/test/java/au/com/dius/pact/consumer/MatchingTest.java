@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactFragment;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -63,7 +64,7 @@ public class MatchingTest {
             @Override
             public void run(MockProviderConfig config) {
                 try {
-                    assertEquals(new ConsumerClient(config.url()).post("/hello", body), expectedResponse);
+                    assertEquals(new ConsumerClient(config.url()).post("/hello", body, ContentType.APPLICATION_JSON), expectedResponse);
                 } catch (IOException e) {}
             }
         });

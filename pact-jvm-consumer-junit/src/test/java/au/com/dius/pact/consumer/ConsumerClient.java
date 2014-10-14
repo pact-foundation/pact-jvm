@@ -21,10 +21,10 @@ public class ConsumerClient{
                 .execute().returnContent().asString());
     }
 
-    public Map post(String path, String body) throws IOException {
+    public Map post(String path, String body, ContentType mimeType) throws IOException {
         String respBody = Request.Post(url + path)
                 .addHeader("testreqheader", "testreqheadervalue")
-                .bodyString(body, ContentType.APPLICATION_JSON)
+                .bodyString(body, mimeType)
                 .execute().returnContent().asString();
         return jsonToMap(respBody);
     }
@@ -37,5 +37,11 @@ public class ConsumerClient{
         return Request.Options(url + path)
                 .addHeader("testreqheader", "testreqheadervalue")
                 .execute().returnResponse().getStatusLine().getStatusCode();
+    }
+
+    public String postBody(String path, String body, ContentType mimeType) throws IOException {
+        return Request.Post(url + path)
+            .bodyString(body, mimeType)
+            .execute().returnContent().asString();
     }
 }
