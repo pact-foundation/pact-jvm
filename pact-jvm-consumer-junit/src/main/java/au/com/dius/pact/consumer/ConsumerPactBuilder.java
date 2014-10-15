@@ -7,13 +7,24 @@ import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.Provider;
 import au.com.dius.pact.model.Request$;
 import au.com.dius.pact.model.Response$;
+import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
 import scala.None$;
 import scala.Some$;
 import scala.collection.JavaConverters$;
 
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -82,10 +93,10 @@ public class ConsumerPactBuilder {
             public class PactDslRequestWithoutPath {
                 private String description;
                 private String requestMethod;
-                private Map<String, String> requestHeaders = Collections.emptyMap();
+                private Map<String, String> requestHeaders = new HashMap<String, String>();
                 private String query;
                 private String requestBody;
-                private Map<String, Object> requestMatchers = Collections.emptyMap();
+                private Map<String, Object> requestMatchers = new HashMap<String, Object>();
 
                 public PactDslRequestWithoutPath(String description) {
                     this.description = description;
@@ -121,10 +132,30 @@ public class ConsumerPactBuilder {
                 /**
                  * The body of the request
                  * @param body Request body in string form
+                 * @deprecated Use the version that accepts a mime-type as a second parameter
                  */
+                @Deprecated
                 public PactDslRequestWithoutPath body(String body) {
                     requestBody = body;
                     return this;
+                }
+
+                /**
+                 * The body of the request
+                 * @param body Request body in string form
+                 */
+                public PactDslRequestWithoutPath body(String body, String mimeType) {
+                    requestBody = body;
+                    requestHeaders.put("Content-Type", mimeType);
+                    return this;
+                }
+
+                /**
+                 * The body of the request
+                 * @param body Request body in string form
+                 */
+                public PactDslRequestWithoutPath body(String body, ContentType mimeType) {
+                    return body(body, mimeType.toString());
                 }
 
                 /**
@@ -133,6 +164,7 @@ public class ConsumerPactBuilder {
                  */
                 public PactDslRequestWithoutPath body(JSONObject body) {
                     requestBody = body.toString();
+                    requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
                     return this;
                 }
 
@@ -143,6 +175,17 @@ public class ConsumerPactBuilder {
                 public PactDslRequestWithoutPath body(PactDslJsonBody body) {
                     requestMatchers = body.getMatchers();
                     requestBody = body.toString();
+                    requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+                    return this;
+                }
+
+                /**
+                 * The body of the request
+                 * @param body XML Document
+                 */
+                public PactDslRequestWithoutPath body(Document body) throws TransformerException {
+                    requestBody = xmlToString(body);
+                    requestHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
                     return this;
                 }
 
@@ -167,10 +210,10 @@ public class ConsumerPactBuilder {
         private String description;
         private String path = "/";
         private String requestMethod = "GET";
-        private Map<String, String> requestHeaders = Collections.emptyMap();
+        private Map<String, String> requestHeaders = new HashMap<String, String>();
         private String query;
         private String requestBody;
-        private Map<String, Object> requestMatchers = Collections.emptyMap();
+        private Map<String, Object> requestMatchers = new HashMap<String, Object>();
 
         private List<Interaction> interactions = new ArrayList<Interaction>();
 
@@ -237,10 +280,30 @@ public class ConsumerPactBuilder {
         /**
          * The body of the request
          * @param body Request body in string form
+         * @deprecated Use the version that accepts a mime-type as a second parameter
          */
+        @Deprecated
         public PactDslRequestWithPath body(String body) {
             requestBody = body;
             return this;
+        }
+
+        /**
+         * The body of the request
+         * @param body Request body in string form
+         */
+        public PactDslRequestWithPath body(String body, String mimeType) {
+            requestBody = body;
+            requestHeaders.put("Content-Type", mimeType);
+            return this;
+        }
+
+        /**
+         * The body of the request
+         * @param body Request body in string form
+         */
+        public PactDslRequestWithPath body(String body, ContentType mimeType) {
+            return body(body, mimeType.toString());
         }
 
         /**
@@ -249,6 +312,7 @@ public class ConsumerPactBuilder {
          */
         public PactDslRequestWithPath body(JSONObject body) {
             requestBody = body.toString();
+            requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
             return this;
         }
 
@@ -259,6 +323,17 @@ public class ConsumerPactBuilder {
         public PactDslRequestWithPath body(DslPart body) {
             requestMatchers = body.getMatchers();
             requestBody = body.toString();
+            requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+            return this;
+        }
+
+        /**
+         * The body of the request
+         * @param body XML Document
+         */
+        public PactDslRequestWithPath body(Document body) throws TransformerException {
+            requestBody = xmlToString(body);
+            requestHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
             return this;
         }
 
@@ -284,9 +359,9 @@ public class ConsumerPactBuilder {
         private PactDslRequestWithPath existing;
 
         private int responseStatus = 200;
-        private Map<String, String> responseHeaders = Collections.emptyMap();
+        private Map<String, String> responseHeaders = new HashMap<String, String>();
         private String responseBody;
-        private Map<String, Object> responseMatchers = Collections.emptyMap();
+        private Map<String, Object> responseMatchers = new HashMap<String, Object>();
 
         public PactDslResponse(PactDslRequestWithPath existing) {
             this.existing = existing;
@@ -313,6 +388,7 @@ public class ConsumerPactBuilder {
         /**
          * Response body to return
          * @param body Response body in string form
+         * @deprecated Use the version that takes a mime-type as a second parameter
          */
         public PactDslResponse body(String body) {
             this.responseBody = body;
@@ -321,10 +397,29 @@ public class ConsumerPactBuilder {
 
         /**
          * Response body to return
+         * @param body body in string form
+         */
+        public PactDslResponse body(String body, String mimeType) {
+            responseBody = body;
+            responseHeaders.put("Content-Type", mimeType);
+            return this;
+        }
+
+        /**
+         * Response body to return
+         * @param body body in string form
+         */
+        public PactDslResponse body(String body, ContentType mimeType) {
+            return body(body, mimeType.toString());
+        }
+
+        /**
+         * Response body to return
          * @param body Response body in JSON form
          */
         public PactDslResponse body(JSONObject body) {
             this.responseBody = body.toString();
+            responseHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
             return this;
         }
 
@@ -335,6 +430,17 @@ public class ConsumerPactBuilder {
         public PactDslResponse body(DslPart body) {
             responseMatchers = body.getMatchers();
             responseBody = body.toString();
+            responseHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+            return this;
+        }
+
+        /**
+         * Response body to return
+         * @param body Response body as an XML Document
+         */
+        public PactDslResponse body(Document body) throws TransformerException {
+            responseBody = xmlToString(body);
+            responseHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
             return this;
         }
 
@@ -385,5 +491,14 @@ public class ConsumerPactBuilder {
 
     public static PactDslJsonBody jsonBody() {
         return new PactDslJsonBody();
+    }
+
+    static String xmlToString(Document body) throws TransformerException {
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        StreamResult result = new StreamResult(new StringWriter());
+        DOMSource source = new DOMSource(body);
+        transformer.transform(source, result);
+        return result.getWriter().toString();
     }
 }
