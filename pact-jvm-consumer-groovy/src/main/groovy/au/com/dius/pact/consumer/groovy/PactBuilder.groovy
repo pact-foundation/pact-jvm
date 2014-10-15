@@ -143,16 +143,20 @@ class PactBuilder {
     fragment.runConsumer(config, closure)
   }
 
-  PactBuilder withBody(Closure closure) {
+  PactBuilder withBody(String mimeType = 'application/json', Closure closure) {
     def body = new PactBodyBuilder()
     closure.delegate = body
     closure.call()
     if (requestState) {
       requestData.last().body = body.body
       requestData.last().matchers = body.matchers
+      requestData.last().headers = requestData.last().headers ?: [:]
+      requestData.last().headers['Content-Type'] = mimeType
     } else {
       responseData.last().body = body.body
       responseData.last().matchers = body.matchers
+      responseData.last().headers = requestData.last().headers ?: [:]
+      responseData.last().headers['Content-Type'] = mimeType
     }
     this
   }
