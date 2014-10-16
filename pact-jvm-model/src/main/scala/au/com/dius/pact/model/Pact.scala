@@ -3,6 +3,7 @@ package au.com.dius.pact.model
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import scala.collection.{mutable, JavaConversions}
+import scala.util.matching.Regex
 
 object Pact {
   def apply(provider: Provider, consumer: Consumer, interactions: java.util.List[Interaction]): Pact = {
@@ -89,10 +90,41 @@ object HttpMethod {
 
 trait HttpPart {
   def headers: Option[Map[String, String]]
+
   def body: Option[String]
-  def mimeType = headers.getOrElse(Map()).getOrElse("Content-Type", "application/json").split("\\s*;\\s*").head
+
+  def mimeType = {
+    headers match {
+      case Some(h) =>
+        if (h.contains("Content-Type"))
+          h("Content-Type").split("\\s*;\\s*").head
+        else
+          detectContentType
+      case _ => detectContentType
+    }
+  }
+
   def jsonBody = mimeType == "application/json"
+
   def matchers: Option[Map[String, Map[String, String]]]
+
+  val xmlRegexp = "^\\s*<\\?xml\\s*version".r
+  val htmlRegexp = "^\\s*(<!DOCTYPE)|(<HTML>)".r
+  val jsonRegexp = "^\\s*(\"(\\.|[^\"\\\n\r])*?\"|[,:{}\\[\\]0-9.\\-+Eaeflnr-u \n\r\t])+".r
+  val xmlRegexp2 = "^\\s*<\\w+\\s*(:\\w+=[\\\"”][^\\\"”]+[\\\"”])?".r
+
+  def detectContentType = {
+    body match {
+      case Some(b) =>
+        val s = b.substring(0, Math.min(b.length, 32))
+        if (xmlRegexp.findFirstIn(s).isDefined) "application/xml"
+        else if (htmlRegexp.findFirstIn(s.toUpperCase).isDefined) "text/html"
+        else if (jsonRegexp.findFirstIn(s.toUpperCase).isDefined) "application/json"
+        else if (xmlRegexp2.findFirstIn(s.toUpperCase).isDefined) "application/xml"
+        else "text/plain"
+      case _ => "text/plain"
+    }
+  }
 }
 
 case class Request(method: String,

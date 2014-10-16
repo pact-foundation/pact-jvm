@@ -16,7 +16,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
 
         return builder
             .given("test state") // NOTE: Using provider states are optional, you can leave it out
-            .uponReceiving("java test interaction")
+            .uponReceiving("ExampleJavaConsumerPactTest test interaction")
                 .path("/")
                 .method("GET")
                 .headers(headers)
@@ -24,7 +24,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
                 .status(200)
                 .headers(headers)
                 .body("{\"responsetest\": true, \"name\": \"harry\"}")
-            .uponReceiving("a second test interaction")
+            .uponReceiving("ExampleJavaConsumerPactTest second test interaction")
                 .method("OPTIONS")
                 .headers(headers)
                 .path("/second")
