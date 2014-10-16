@@ -132,9 +132,7 @@ public class ConsumerPactBuilder {
                 /**
                  * The body of the request
                  * @param body Request body in string form
-                 * @deprecated Use the version that accepts a mime-type as a second parameter
                  */
-                @Deprecated
                 public PactDslRequestWithoutPath body(String body) {
                     requestBody = body;
                     return this;
@@ -280,9 +278,7 @@ public class ConsumerPactBuilder {
         /**
          * The body of the request
          * @param body Request body in string form
-         * @deprecated Use the version that accepts a mime-type as a second parameter
          */
-        @Deprecated
         public PactDslRequestWithPath body(String body) {
             requestBody = body;
             return this;
@@ -388,7 +384,6 @@ public class ConsumerPactBuilder {
         /**
          * Response body to return
          * @param body Response body in string form
-         * @deprecated Use the version that takes a mime-type as a second parameter
          */
         public PactDslResponse body(String body) {
             this.responseBody = body;
