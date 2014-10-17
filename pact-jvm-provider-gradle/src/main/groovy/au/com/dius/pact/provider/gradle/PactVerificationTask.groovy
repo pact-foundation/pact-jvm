@@ -193,11 +193,11 @@ class PactVerificationTask extends DefaultTask {
   }
 
   boolean filterInteractions(def interaction) {
-    if (project.hasProperty('pact.filter.interactions') && project.hasProperty('pact.filter.state')) {
+    if (project.hasProperty('pact.filter.description') && project.hasProperty('pact.filter.providerState')) {
       matchDescription(interaction) && matchState(interaction)
-    } else if (project.hasProperty('pact.filter.interactions')) {
+    } else if (project.hasProperty('pact.filter.description')) {
       matchDescription(interaction)
-    } else if (project.hasProperty('pact.filter.state')) {
+    } else if (project.hasProperty('pact.filter.providerState')) {
       matchState(interaction)
     } else {
       true
@@ -206,13 +206,13 @@ class PactVerificationTask extends DefaultTask {
 
   private boolean matchState(interaction) {
     if (interaction.providerState().defined) {
-      interaction.providerState().get() ==~ project.property('pact.filter.state')
+      interaction.providerState().get() ==~ project.property('pact.filter.providerState')
     } else {
-      project.property('pact.filter.state').empty
+      project.property('pact.filter.providerState').empty
     }
   }
 
   private boolean matchDescription(interaction) {
-    interaction.description() ==~ project.property('pact.filter.interactions')
+    interaction.description() ==~ project.property('pact.filter.description')
   }
 }
