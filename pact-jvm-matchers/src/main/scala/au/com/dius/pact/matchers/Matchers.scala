@@ -5,22 +5,32 @@ import scala.collection.mutable
 import org.apache.commons.lang3.time.{DateFormatUtils, DateUtils}
 import com.typesafe.scalalogging.slf4j.StrictLogging
 
-object Matchers {
+object Matchers extends StrictLogging {
   def matcherDefined(path: String, matchers: Option[Map[String, Any]]): Boolean =
     matchers.isDefined && matchers.get.contains(path)
 
   def domatch(matcherDef: Any, path: String, expected: Any, actual: Any) : List[BodyMismatch] = {
     matcherDef match {
-      case map: Map[String, Any] => matchers(map.keys.head).domatch(map, path, expected, actual)
-      case _ => List(BodyMismatch(expected, actual, Some("matcher is mis-configured"), path))
+      case map: Map[String, Any] => matcher(map).domatch(map, path, expected, actual)
+      case m =>
+        logger.warn(s"Matcher $m is mis-configured, defaulting to equality matching")
+        EqualsMatcher.domatch(Map(), path, expected, actual)
     }
   }
 
   def matcher(matcherDef: Map[String, Any]) : Matcher = {
-    matchers(matcherDef.keys.head)
+    if (matcherDef.isEmpty) {
+      logger.warn(s"Unrecognised empty matcher, defaulting to equality matching")
+      EqualsMatcher
+    } else matcherDef.keys.head match {
+      case "regex" => RegexpMatcher
+      case "match" => TypeMatcher
+      case m =>
+        logger.warn(s"Unrecognised matcher $m, defaulting to equality matching")
+        EqualsMatcher
+    }
   }
 
-  val matchers = mutable.HashMap[String, Matcher]("regex" -> new RegexpMatcher, "match" -> new TypeMatcher)
 }
 
 trait Matcher {
@@ -35,7 +45,17 @@ trait Matcher {
   }
 }
 
-class RegexpMatcher extends Matcher {
+object EqualsMatcher extends Matcher {
+  def domatch(matcherDef: Map[String, Any], path: String, expected: Any, actual: Any): List[BodyMismatch] = {
+    if (actual.equals(expected)) {
+      List()
+    } else {
+      List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(actual)} to equal ${valueOf(actual)}"), path))
+    }
+  }
+}
+
+object RegexpMatcher extends Matcher {
   def domatch(matcherDef: Map[String, Any], path: String, expected: Any, actual: Any): List[BodyMismatch] = {
     val regex = matcherDef("regex").toString
     if (actual.toString.matches(regex)) {
@@ -46,7 +66,7 @@ class RegexpMatcher extends Matcher {
   }
 }
 
-class TypeMatcher extends Matcher with StrictLogging {
+object TypeMatcher extends Matcher with StrictLogging {
 
   def matchType(path: String, expected: Any, actual: Any) = {
     (actual, expected) match {

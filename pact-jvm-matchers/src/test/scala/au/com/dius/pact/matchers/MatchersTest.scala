@@ -25,6 +25,20 @@ class MatchersTest extends Specification {
 
   }
 
+  "should default to equality matching if the matcher is unknown" in {
+    Matchers.matcher(Map("other" -> "something")) must be(EqualsMatcher)
+    Matchers.matcher(Map()) must be(EqualsMatcher)
+  }
+
+  "equal matcher" should {
+
+    "match using equals" in {
+      EqualsMatcher.domatch(Map(), "/", "100", "100") must beEmpty
+      EqualsMatcher.domatch(Map(), "/", 100, "100") must not(beEmpty)
+    }
+
+  }
+
   "regex matcher" should {
 
     "match using the provided regex" in {
