@@ -8,6 +8,7 @@ import unfiltered.{netty => unetty}
 import unfiltered.netty.{cycle => unettyc}
 import unfiltered.{request => ureq}
 import unfiltered.{response => uresp}
+import io.netty.channel.ChannelHandler.Sharable
 
 class UnfilteredMockProvider(val config: MockProviderConfig) extends StatefulMockProvider {
   type UnfilteredRequest = ureq.HttpRequest[unetty.ReceivedMessage]
@@ -15,6 +16,7 @@ class UnfilteredMockProvider(val config: MockProviderConfig) extends StatefulMoc
 
   private val server = unetty.Server.http(config.port, config.interface).chunked(1048576).handler(Routes)
   
+  @Sharable
   object Routes extends unettyc.Plan
       with unettyc.SynchronousExecution
       with unetty.ServerErrorResponse {
