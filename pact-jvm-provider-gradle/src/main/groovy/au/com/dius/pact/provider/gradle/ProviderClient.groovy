@@ -11,10 +11,9 @@ class ProviderClient {
     ProviderInfo provider
 
     HttpResponse makeRequest() {
-        def client = new RESTClient(
-                "${provider.protocol}://${provider.host}:${provider.port}${provider.path}")
+        def client = newClient()
         def response
-        def requestMap = [path: request.path()]
+        def requestMap = [path: URLDecoder.decode(request.path(), 'UTF-8')]
         requestMap.headers = [:]
         if (request.headers().defined) {
             requestMap.headers += JavaConverters$.MODULE$.mapAsJavaMapConverter(request.headers().get()).asJava()
@@ -68,5 +67,9 @@ class ProviderClient {
 
         response
     }
+
+  private RESTClient newClient() {
+    new RESTClient("${provider.protocol}://${provider.host}:${provider.port}${provider.path}")
+  }
 
 }
