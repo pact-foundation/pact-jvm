@@ -105,6 +105,44 @@ class MatchersTest extends Specification {
         new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
       }
 
+      "accept timestamps with custom patterns" in {
+        val expected = Request("get", "/", None, None, Some("{\"value\": \"2014-01-01-14:00:00+10:00\"}"), Some(Map("$.body.value" -> Map("timestamp" -> "yyyy-MM-dd-HH:mm:ssZZZ"))))
+        val actual = Request("get", "/", None, None, Some("{\"value\": \"2014-10-01-14:00:00+10:00\"}"), None)
+        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+      }
+
+    }
+
+    "match times" should {
+
+      "not accept incorrect formatted times" in {
+        val expected = Request("get", "/", None, None, Some("{\"value\": \"00:00\"}"), Some(Map("$.body.value" -> Map("time" -> "mm:ss"))))
+        val actual = Request("get", "/", None, None, Some("{\"value\": \"14:01:02\"}"), None)
+        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+      }
+
+      "accept times with custom patterns" in {
+        val expected = Request("get", "/", None, None, Some("{\"value\": \"00:00:14\"}"), Some(Map("$.body.value" -> Map("time" -> "ss:mm:HH"))))
+        val actual = Request("get", "/", None, None, Some("{\"value\": \"05:10:14\"}"), None)
+        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+      }
+
+    }
+
+    "match dates" should {
+
+      "not accept incorrect formatted dates" in {
+        val expected = Request("get", "/", None, None, Some("{\"value\": \"01-01-1970\"}"), Some(Map("$.body.value" -> Map("date" -> "dd-MM-yyyy"))))
+        val actual = Request("get", "/", None, None, Some("{\"value\": \"01011970\"}"), None)
+        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+      }
+
+      "accept dates with custom patterns" in {
+        val expected = Request("get", "/", None, None, Some("{\"value\": \"01/01/1970\"}"), Some(Map("$.body.value" -> Map("time" -> "MM/dd/yyyy"))))
+        val actual = Request("get", "/", None, None, Some("{\"value\": \"12/02/1970\"}"), None)
+        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+      }
+
     }
 
   }

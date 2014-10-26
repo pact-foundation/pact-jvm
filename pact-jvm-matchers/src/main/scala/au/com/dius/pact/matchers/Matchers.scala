@@ -2,8 +2,9 @@ package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model.BodyMismatch
 import scala.collection.mutable
-import org.apache.commons.lang3.time.{DateFormatUtils, DateUtils}
+import org.apache.commons.lang3.time.{FastDateParser, DateFormatUtils, DateUtils}
 import com.typesafe.scalalogging.slf4j.StrictLogging
+import java.text.ParseException
 
 object Matchers extends StrictLogging {
   def matcherDefined(path: String, matchers: Option[Map[String, Any]]): Boolean =
@@ -25,6 +26,9 @@ object Matchers extends StrictLogging {
     } else matcherDef.keys.head match {
       case "regex" => RegexpMatcher
       case "match" => TypeMatcher
+      case "timestamp" => TimestampMatcher
+      case "time" => TimeMatcher
+      case "date" => DateMatcher
       case m =>
         logger.warn(s"Unrecognised matcher $m, defaulting to equality matching")
         EqualsMatcher
@@ -103,6 +107,42 @@ object TypeMatcher extends Matcher with StrictLogging {
       case "type" => matchType(path, expected, actual)
       case "timestamp" => matchTimestamp(path, expected, actual)
       case _ => List(BodyMismatch(expected, actual, Some("type matcher is mis-configured"), path))
+    }
+  }
+}
+
+object TimestampMatcher extends Matcher {
+  def domatch(matcherDef: Map[String, Any], path: String, expected: Any, actual: Any): List[BodyMismatch] = {
+    val pattern = matcherDef("timestamp").toString
+    try {
+      DateUtils.parseDate(actual.toString, pattern)
+      List()
+    } catch {
+      case e: ParseException => List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(actual)} to match a timestamp of '$pattern': ${e.getMessage}"), path))
+    }
+  }
+}
+
+object TimeMatcher extends Matcher {
+  def domatch(matcherDef: Map[String, Any], path: String, expected: Any, actual: Any): List[BodyMismatch] = {
+    val pattern = matcherDef("time").toString
+    try {
+      DateUtils.parseDate(actual.toString, pattern)
+      List()
+    } catch {
+      case e: ParseException => List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(actual)} to match a time of '$pattern': ${e.getMessage}"), path))
+    }
+  }
+}
+
+object DateMatcher extends Matcher {
+  def domatch(matcherDef: Map[String, Any], path: String, expected: Any, actual: Any): List[BodyMismatch] = {
+    val pattern = matcherDef("date").toString
+    try {
+      DateUtils.parseDate(actual.toString, pattern)
+      List()
+    } catch {
+      case e: ParseException => List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(actual)} to match a date of '$pattern': ${e.getMessage}"), path))
     }
   }
 }
