@@ -1,5 +1,32 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.1.2 - bugfix release, add gradle pugin to community portal
+
+* 2100ed4 - try an even smaller stack size with travis (Ronald Holshausen, Sun Oct 26 13:10:16 2014 +1100)
+* 6d9f2be - add support for dates and times in the client DSLs, as well as custom patterns #65 (Ronald Holshausen, Sun Oct 26 12:12:15 2014 +1100)
+* 4576c63 - #65 - update the matchers to include dates and times as well as custom patterns (Ronald Holshausen, Sun Oct 26 12:38:16 2014 +1100)
+* 4316b6d - update travis-ci config to fix memory issues (Ronald Holshausen, Sat Oct 25 20:04:26 2014 +1100)
+* dbfbe81 - #66 - URL decodes the path before serialising to the pact file (Ronald Holshausen, Sat Oct 25 20:01:45 2014 +1100)
+* d61cf8f - #66 - gradle verifier now URL decodes the path before building the request (Ronald Holshausen, Sat Oct 25 19:28:19 2014 +1100)
+* fe922c9 - Merge pull request #64 from chrisholmes/master (Ronald Holshausen, Sat Oct 25 08:19:35 2014 +1100)
+* b1c722b - Annotate Route handler with @Sharable. This fixes a ChannelPipelineException occuring when running pact-jvm with a Dropwizard service as a client. (Christopher Holmes, Fri Oct 24 15:54:03 2014 +0100)
+* 66b492b - make matchers singeltons as they have no state (Ronald Holshausen, Fri Oct 17 13:00:53 2014 +1100)
+* 49dfecd - add more memory to the JVM on the travis build (Ronald Holshausen, Fri Oct 17 12:39:00 2014 +1100)
+* 056ddc9 - #62 - rename the filter parameters to keep the ruby people happy (Ronald Holshausen, Fri Oct 17 12:28:12 2014 +1100)
+* f6698f5 - if no content type header is provided, try work one out from the body contents #63 (Ronald Holshausen, Fri Oct 17 10:23:15 2014 +1100)
+* b8ead36 - #63 - remove the deprecation tag from the java dsl (in favour of magic number detection) (Ronald Holshausen, Thu Oct 16 12:33:18 2014 +1100)
+* 1c94cad - #63 - groovy DSL defaults to null mime-type when not specified (plan to use magic number detection) (Ronald Holshausen, Thu Oct 16 12:30:14 2014 +1100)
+* e42f771 - #63 - make the content type more explicit on the groovy DSL (Ronald Holshausen, Wed Oct 15 17:49:20 2014 +1100)
+* e7f5ed9 - #63 - make the content type explicit on the Java DSL (Ronald Holshausen, Wed Oct 15 14:09:52 2014 +1100)
+* c9d14df - added JUnit test for matching json, text and xml bodies (Ronald Holshausen, Tue Oct 14 20:32:21 2014 +1100)
+* ae0fa96 - #62 - added a provider state filter, including matching no state if it is empty (Ronald Holshausen, Tue Oct 14 09:51:23 2014 +1100)
+* f08bf0b - Rename consumer PactConfig -> PactConsumerConfig and make it mutable (Ronald Holshausen, Mon Oct 13 12:47:13 2014 +1100)
+* 9def3f3 - build setup for publishing gradle plugin to the gradle community portal (Ronald Holshausen, Fri Oct 10 19:41:54 2014 +1100)
+* eb6c206 - cleanup some of the nasty code in the PactBodyBuilder (Ronald Holshausen, Fri Oct 10 13:19:09 2014 +1100)
+* 701e8f7 - #34 - force HTTP method to always be uppercase (Ronald Holshausen, Fri Oct 10 12:52:21 2014 +1100)
+* 1d9b206 - bump version (Ronald Holshausen, Fri Oct 10 10:41:27 2014 +1100)
+* 990b028 - update gradle readme to include gradle 2.1+ plugin useage (Ronald Holshausen, Fri Oct 10 10:39:17 2014 +1100)
+
 # 2.1.1 - 2.1 Hotfix
 
 * ad465ea - #62 - Add filters to the gradle plugin (Ronald Holshausen, Thu Oct 9 17:07:38 2014 +1100)
