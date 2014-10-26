@@ -50,8 +50,16 @@ class PactBodyBuilder {
     new TypeMatcher(values: value ?: RandomStringUtils.randomNumeric(10) as Long)
   }
 
-  def timestamp(def value = null) {
-    new TimestampMatcher(values: value)
+  def timestamp(String pattern = null, def value = null) {
+    new TimestampMatcher(values: value, pattern: pattern)
+  }
+
+  def time(String pattern = null, def value = null) {
+    new TimeMatcher(values: value, pattern: pattern)
+  }
+
+  def date(String pattern = null, def value = null) {
+    new DateMatcher(values: value, pattern: pattern)
   }
 
   def guid(String value = null) {
@@ -81,6 +89,12 @@ class PactBodyBuilder {
         numeric()
         break
       case 'timestamp':
+        timestamp()
+        break
+      case 'time':
+        timestamp()
+        break
+      case 'date':
         timestamp()
         break
       case 'guid':

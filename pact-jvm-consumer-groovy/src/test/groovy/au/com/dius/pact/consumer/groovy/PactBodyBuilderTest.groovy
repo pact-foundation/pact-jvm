@@ -33,8 +33,7 @@ class PactBodyBuilderTest {
               age2(numeric)
 
               ts(timestamp)
-              timestamp = timestamp()
-
+              timestamp = timestamp('yyyy/MM/dd - HH:mm:ss.S')
 
               values([1, 2, 3, numeric])
 
@@ -44,6 +43,7 @@ class PactBodyBuilderTest {
                 kind {
                   id(100)
                 }
+                dob date('MM/dd/yyyy')
               }
 
               roles([
@@ -74,9 +74,10 @@ class PactBodyBuilderTest {
           '$.body.localAddress': [regex: '\\d{1,3}\\.)+\\d{1,3}'],
           '$.body.localAddress2': [regex: '\\d{1,3}\\.)+\\d{1,3}'],
           '$.body.age2': [match: 'type'],
-          '$.body.ts': [match: 'timestamp'],
-          '$.body.timestamp': [match: 'timestamp'],
+          '$.body.ts': [timestamp: 'yyyy-MM-dd\'T\'HH:mm:ss'],
+          '$.body.timestamp': [timestamp: 'yyyy/MM/dd - HH:mm:ss.S'],
           '$.body.values.3': [match: 'type'],
+          '$.body.role.dob': [date: 'MM/dd/yyyy'],
           '$.body.role.id': [regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'],
           '$.body.roles.0.id': [regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}']
         ]

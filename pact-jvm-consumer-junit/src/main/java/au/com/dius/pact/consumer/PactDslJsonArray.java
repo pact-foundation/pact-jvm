@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer;
 import nl.flotsam.xeger.Xeger;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.json.JSONArray;
 
 import java.util.Date;
@@ -95,7 +96,40 @@ public class PactDslJsonArray extends DslPart {
 
     public PactDslJsonArray timestamp() {
         body.put(DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date()));
-        matchers.put(root + "." + body.length(), matchTimestamp());
+        matchers.put(root + "." + body.length(), matchTimestamp(DateFormatUtils.ISO_DATETIME_FORMAT.getPattern()));
+        return this;
+    }
+
+    public PactDslJsonArray timestamp(String format) {
+        FastDateFormat instance = FastDateFormat.getInstance(format);
+        body.put(instance.format(new Date()));
+        matchers.put(root + "." + body.length(), matchTimestamp(format));
+        return this;
+    }
+
+    public PactDslJsonArray date() {
+        body.put(DateFormatUtils.ISO_DATE_FORMAT.format(new Date()));
+        matchers.put(root + "." + body.length(), matchDate(DateFormatUtils.ISO_DATE_FORMAT.getPattern()));
+        return this;
+    }
+
+    public PactDslJsonArray date(String format) {
+        FastDateFormat instance = FastDateFormat.getInstance(format);
+        body.put(instance.format(new Date()));
+        matchers.put(root + "." + body.length(), matchDate(format));
+        return this;
+    }
+
+    public PactDslJsonArray time() {
+        body.put(DateFormatUtils.ISO_TIME_FORMAT.format(new Date()));
+        matchers.put(root + "." + body.length(), matchTime(DateFormatUtils.ISO_TIME_FORMAT.getPattern()));
+        return this;
+    }
+
+    public PactDslJsonArray time(String format) {
+        FastDateFormat instance = FastDateFormat.getInstance(format);
+        body.put(instance.format(new Date()));
+        matchers.put(root + "." + body.length(), matchTime(format));
         return this;
     }
 

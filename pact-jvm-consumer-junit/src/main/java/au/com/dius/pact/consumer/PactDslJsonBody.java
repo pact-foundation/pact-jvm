@@ -4,6 +4,7 @@ import nl.flotsam.xeger.Xeger;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.json.JSONObject;
 
 import javax.naming.OperationNotSupportedException;
@@ -101,7 +102,48 @@ public class PactDslJsonBody extends DslPart {
 
     public PactDslJsonBody timestamp(String name) {
         body.put(name, DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date()));
-        matchers.put(root + "." + name, matchTimestamp());
+        matchers.put(root + "." + name, matchTimestamp(DateFormatUtils.ISO_DATETIME_FORMAT.getPattern()));
+        return this;
+    }
+
+    public PactDslJsonBody timestamp(String name, String format) {
+        FastDateFormat instance = FastDateFormat.getInstance(format);
+        body.put(name, instance.format(new Date()));
+        matchers.put(root + "." + name, matchTimestamp(format));
+        return this;
+    }
+
+    public PactDslJsonBody date() {
+        return date("date");
+    }
+
+    public PactDslJsonBody date(String name) {
+        body.put(name, DateFormatUtils.ISO_DATE_FORMAT.format(new Date()));
+        matchers.put(root + "." + name, matchDate(DateFormatUtils.ISO_DATE_FORMAT.getPattern()));
+        return this;
+    }
+
+    public PactDslJsonBody date(String name, String format) {
+        FastDateFormat instance = FastDateFormat.getInstance(format);
+        body.put(name, instance.format(new Date()));
+        matchers.put(root + "." + name, matchDate(format));
+        return this;
+    }
+
+    public PactDslJsonBody time() {
+        return time("time");
+    }
+
+    public PactDslJsonBody time(String name) {
+        body.put(name, DateFormatUtils.ISO_TIME_FORMAT.format(new Date()));
+        matchers.put(root + "." + name, matchTime(DateFormatUtils.ISO_TIME_FORMAT.getPattern()));
+        return this;
+    }
+
+    public PactDslJsonBody time(String name, String format) {
+        FastDateFormat instance = FastDateFormat.getInstance(format);
+        body.put(name, instance.format(new Date()));
+        matchers.put(root + "." + name, matchTime(format));
         return this;
     }
 

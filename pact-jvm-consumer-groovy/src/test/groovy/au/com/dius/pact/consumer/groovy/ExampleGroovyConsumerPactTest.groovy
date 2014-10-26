@@ -36,17 +36,17 @@ class ExampleGroovyConsumerPactTest {
 
         bob_service {
             uponReceiving('a create donut request')
-            def body = new JsonBuilder()
-            body name: 'Bobby' //Pact::Term.new(matcher: /Bob/, generate: 'Bob')
             withAttributes(method: 'post', path: '/donuts',
-                body: body.toPrettyString(),
-                headers: ['Accept': 'application/json', 'Content-Type': 'application/json']
+                headers: ['Accept': 'text/plain', 'Content-Type': 'application/json']
             )
+            withBody {
+              name regexp(~/Bob.*/, 'Bob')
+            }
             willRespondWith(status: 201, body: '"Donut created."', headers: ['Content-Type': 'text/plain'])
 
             uponReceiving('a delete charlie request')
             withAttributes(method: 'delete', path: '/charlie')
-            willRespondWith(status: 200, body: '"deleted"' /*/deleted/*/, headers: ['Content-Type': 'text/plain'])
+            willRespondWith(status: 200, body: '"deleted"', headers: ['Content-Type': 'text/plain'])
 
             uponReceiving('an update alligators request')
             withAttributes(method: 'put', path: '/alligators', body: [ ['name' : 'Roger' ] ])
@@ -70,7 +70,7 @@ class ExampleGroovyConsumerPactTest {
             def body = new JsonBuilder([name: 'Bobby'])
             def bob_post_response = client.post(path: '/donuts', requestContentType: 'application/json',
                 headers: [
-                    'Accept': 'application/json', //'text/plain',
+                    'Accept': 'text/plain',
                     'Content-Type': 'application/json'
                 ], body: body.toPrettyString()
             )

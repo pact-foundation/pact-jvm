@@ -25,6 +25,8 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
                 .object()
                     .id()
                     .stringValue("name", "Rogger the Dogger")
+                    .timestamp()
+                    .date("dob", "MM/dd/yyyy")
                 .closeObject()
             .closeArray();
         return builder

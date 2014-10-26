@@ -50,9 +50,21 @@ public abstract class DslPart {
         return jsonObject;
     }
 
-    protected Map<String, Object> matchTimestamp() {
+    protected Map<String, Object> matchTimestamp(String format) {
         Map<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put("match", "timestamp");
+        jsonObject.put("timestamp", format);
+        return jsonObject;
+    }
+
+    protected Map<String, Object> matchDate(String format) {
+        Map<String, Object> jsonObject = new HashMap<String, Object>();
+        jsonObject.put("date", format);
+        return jsonObject;
+    }
+
+    protected Map<String, Object> matchTime(String format) {
+        Map<String, Object> jsonObject = new HashMap<String, Object>();
+        jsonObject.put("time", format);
         return jsonObject;
     }
 
