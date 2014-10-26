@@ -5,5 +5,5 @@ jdk:
   - openjdk7
   - oraclejdk8
 env:
-  - JAVA_OPTS=-XX:MaxPermSize=256m -Xmx2048m -Xss4096kb
+  - JAVA_OPTS=-XX:MaxPermSize=256m -Xmx2048m -Xss2048kb
 script: ./gradlew -i --stacktrace check
