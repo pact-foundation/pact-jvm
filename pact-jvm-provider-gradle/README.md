@@ -187,3 +187,9 @@ whose descriptions start with 'a request for payment'. `-Ppact.filter.providerSt
 has a provider state that ends with payment, and `-Ppact.filter.providerState=` will match any interaction that does not have a
 provider state.
 
+## Publishing to the Gradle Community Portal
+
+To publish the plugin to the community portal requires first publishing the plugin to jcenter via the bintray plugin.
+
+    $ gradle :pact-jvm-provider-gradle_2.11:bintrayUpload
+
