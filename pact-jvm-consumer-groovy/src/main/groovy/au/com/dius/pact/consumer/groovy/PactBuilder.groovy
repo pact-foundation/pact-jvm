@@ -157,7 +157,7 @@ class PactBuilder {
     } else {
       responseData.last().body = body.body
       responseData.last().matchers = body.matchers
-      responseData.last().headers = requestData.last().headers ?: [:]
+      responseData.last().headers = responseData.last().headers ?: [:]
       if (mimeType) {
           responseData.last().headers['Content-Type'] = mimeType
       }
