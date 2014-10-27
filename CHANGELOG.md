@@ -1,5 +1,13 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.1.3 - small bugfix
+
+* fb33269 - fix the thread stack size for travis (Ronald Holshausen, Mon Oct 27 12:45:10 2014 +1100)
+* f13d1ec - travis java option env var not being populated correctly (Ronald Holshausen, Mon Oct 27 12:42:19 2014 +1100)
+* 2f0ab4f - Fix a bug in the Groovy Pact Builder where the response headers where being wiped (Ronald Holshausen, Mon Oct 27 12:27:32 2014 +1100)
+* 2de9d6f - add instructions to upload to bintray (Ronald Holshausen, Sun Oct 26 14:01:28 2014 +1100)
+* 5a89bf3 - bump version (Ronald Holshausen, Sun Oct 26 13:15:47 2014 +1100)
+
 # 2.1.2 - bugfix release, add gradle pugin to community portal
 
 * 2100ed4 - try an even smaller stack size with travis (Ronald Holshausen, Sun Oct 26 13:10:16 2014 +1100)
