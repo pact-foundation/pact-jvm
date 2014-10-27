@@ -6,7 +6,6 @@ import com.typesafe.scalalogging.slf4j.StrictLogging
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization
-import java.net.URLDecoder
 
 trait PactSerializer extends StrictLogging {
   this: Pact =>
@@ -31,7 +30,7 @@ trait PactSerializer extends StrictLogging {
   implicit def request2json(r: Request): JValue = {
     JObject(
       "method" -> r.method.toUpperCase,
-      "path" -> URLDecoder.decode(r.path, "UTF-8"),
+      "path" -> r.path,
       "headers" -> r.headers,
       "query" -> r.query,
       "body" -> parseBody(r),
