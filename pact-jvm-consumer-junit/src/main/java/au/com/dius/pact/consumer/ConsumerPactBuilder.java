@@ -262,7 +262,7 @@ public class ConsumerPactBuilder {
          * @param headers Key-value pairs
          */
         public PactDslRequestWithPath headers(Map<String, String> headers) {
-            requestHeaders = headers;
+            requestHeaders = new HashMap<String, String>(headers);
             return this;
         }
 
@@ -377,7 +377,7 @@ public class ConsumerPactBuilder {
          * @param headers key-value pairs of headers
          */
         public PactDslResponse headers(Map<String, String> headers) {
-            this.responseHeaders = headers;
+            this.responseHeaders = new HashMap<String, String>(headers);
             return this;
         }
 
