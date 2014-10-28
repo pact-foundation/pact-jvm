@@ -1,5 +1,14 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.1.4 - small bugfix
+
+* dfb225b - more travis ci tweaks (Ronald Holshausen, Tue Oct 28 17:19:39 2014 +1100)
+* 0954a1d - Merge pull request #68 from devacto/master (Ronald Holshausen, Tue Oct 28 15:55:50 2014 +1100)
+* 431f773 - Modified Java DSL so it does not overwrite Content-Type if already set. (Victor Wibisono, Tue Oct 28 15:24:55 2014 +1100)
+* ce9ea23 - Java DSL should make copies of the headers in case it is called from a language with immutable collections (Ronald Holshausen, Tue Oct 28 09:14:32 2014 +1100)
+* 985dad4 - Revert "#66 - URL decodes the path before serialising to the pact file" (Ronald Holshausen, Tue Oct 28 09:06:14 2014 +1100)
+* 42dd0e7 - bump version (Ronald Holshausen, Mon Oct 27 19:39:16 2014 +1100)
+
 # 2.1.3 - small bugfix
 
 * fb33269 - fix the thread stack size for travis (Ronald Holshausen, Mon Oct 27 12:45:10 2014 +1100)
