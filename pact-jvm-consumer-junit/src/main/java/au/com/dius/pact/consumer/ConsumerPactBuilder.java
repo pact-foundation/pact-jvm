@@ -116,7 +116,7 @@ public class ConsumerPactBuilder {
                  * @param headers Key-value pairs
                  */
                 public PactDslRequestWithoutPath headers(Map<String, String> headers) {
-                    requestHeaders = headers;
+                    requestHeaders = new HashMap<String, String>(headers);
                     return this;
                 }
 
@@ -162,7 +162,9 @@ public class ConsumerPactBuilder {
                  */
                 public PactDslRequestWithoutPath body(JSONObject body) {
                     requestBody = body.toString();
-                    requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+                    if (!requestHeaders.containsKey("Content-Type")) {
+                        requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+                    }
                     return this;
                 }
 
@@ -173,7 +175,9 @@ public class ConsumerPactBuilder {
                 public PactDslRequestWithoutPath body(PactDslJsonBody body) {
                     requestMatchers = body.getMatchers();
                     requestBody = body.toString();
-                    requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+                    if (!requestHeaders.containsKey("Content-Type")) {
+                        requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+                    }
                     return this;
                 }
 
@@ -183,7 +187,9 @@ public class ConsumerPactBuilder {
                  */
                 public PactDslRequestWithoutPath body(Document body) throws TransformerException {
                     requestBody = xmlToString(body);
-                    requestHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
+                    if (!requestHeaders.containsKey("Content-Type")) {
+                        requestHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
+                    }
                     return this;
                 }
 
@@ -308,7 +314,9 @@ public class ConsumerPactBuilder {
          */
         public PactDslRequestWithPath body(JSONObject body) {
             requestBody = body.toString();
-            requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+            if (!requestHeaders.containsKey("Content-Type")) {
+                requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+            }
             return this;
         }
 
@@ -319,7 +327,9 @@ public class ConsumerPactBuilder {
         public PactDslRequestWithPath body(DslPart body) {
             requestMatchers = body.getMatchers();
             requestBody = body.toString();
-            requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+            if (!requestHeaders.containsKey("Content-Type")) {
+                requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+            }
             return this;
         }
 
@@ -329,7 +339,9 @@ public class ConsumerPactBuilder {
          */
         public PactDslRequestWithPath body(Document body) throws TransformerException {
             requestBody = xmlToString(body);
-            requestHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
+            if (!requestHeaders.containsKey("Content-Type")) {
+                requestHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
+            }
             return this;
         }
 
@@ -414,7 +426,9 @@ public class ConsumerPactBuilder {
          */
         public PactDslResponse body(JSONObject body) {
             this.responseBody = body.toString();
-            responseHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+            if (!responseHeaders.containsKey("Content-Type")) {
+                responseHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+            }
             return this;
         }
 
@@ -425,7 +439,9 @@ public class ConsumerPactBuilder {
         public PactDslResponse body(DslPart body) {
             responseMatchers = body.getMatchers();
             responseBody = body.toString();
-            responseHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+            if (!responseHeaders.containsKey("Content-Type")) {
+                responseHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+            }
             return this;
         }
 
@@ -435,7 +451,9 @@ public class ConsumerPactBuilder {
          */
         public PactDslResponse body(Document body) throws TransformerException {
             responseBody = xmlToString(body);
-            responseHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
+            if (!responseHeaders.containsKey("Content-Type")) {
+                responseHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
+            }
             return this;
         }
 
