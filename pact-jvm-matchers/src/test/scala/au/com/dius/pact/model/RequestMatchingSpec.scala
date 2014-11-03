@@ -98,4 +98,30 @@ class RequestMatchingSpec extends Specification {
     }
   }
 
+  "path matching" should {
+
+    val request = Request(HttpMethod.Get, "/path", None, None, None, None)
+
+    "match when the paths are equal" in {
+      RequestMatching.requestMismatches(request, request) must beEmpty
+    }
+
+    "not match when the paths are different" in {
+      val requestWithDifferentPath = request.copy(path = "/path2")
+      RequestMatching.requestMismatches(requestWithDifferentPath, request) must contain(PathMismatch("/path2","/path"))
+    }
+
+    "allow matching with a defined matcher" in {
+      val requestWithMatcher = request.copy(path = "/path2", requestMatchingRules = Some(Map("$.path" -> Map("regex" -> "/path[0-9]*"))))
+      RequestMatching.requestMismatches(requestWithMatcher, request) must beEmpty
+    }
+
+    "not match with the defined matcher" in {
+      val requestWithMatcher = request.copy(path = "/path2", requestMatchingRules = Some(Map("$.path" -> Map("regex" -> "/path[0-9]*"))))
+      RequestMatching.requestMismatches(requestWithMatcher, request.copy(path = "/pathA")) must contain(
+        PathMismatch("/path2","/pathA",Some("Expected '/pathA' to match '/path[0-9]*'")))
+    }
+
+  }
+
 }

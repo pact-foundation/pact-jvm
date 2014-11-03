@@ -4,8 +4,6 @@ import org.json4s.JsonAST.{JBool, JObject}
 import org.json4s.jackson.JsonMethods.pretty
 
 object Fixtures {
-  import org.json4s.JsonDSL._
-
   val provider = Provider("test_provider")
   val consumer = Consumer("test_consumer")
 

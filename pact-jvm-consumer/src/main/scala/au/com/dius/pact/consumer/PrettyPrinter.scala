@@ -37,7 +37,7 @@ object PrettyPrinter {
       case BodyMismatch(expected, actual, mismatch, path) => printStringMismatch("Body", Some(expected.toString), Some(actual.toString))
       case BodyTypeMismatch(expected, actual) => printStringMismatch("Body Type", Some(expected), Some(actual))
       case CookieMismatch(expected, actual) => printDiff("Cookies", expected.sorted, actual.sorted)
-      case PathMismatch(expected, actual) => printDiff("Path", List(expected), List(actual), 0)
+      case PathMismatch(expected, actual, _) => printDiff("Path", List(expected), List(actual), 0)
       case MethodMismatch(expected, actual) => printDiff("Method", List(expected), List(actual), 0)
     }.mkString("\n")
   }

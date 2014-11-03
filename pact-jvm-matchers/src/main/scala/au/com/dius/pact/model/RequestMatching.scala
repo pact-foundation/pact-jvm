@@ -24,9 +24,9 @@ object RequestMatching extends StrictLogging {
   implicit def liftPactForMatching(pact: Pact): RequestMatching = RequestMatching(pact.interactions)
                      
   def isPartialMatch(problems: Seq[RequestPartMismatch]): Boolean = !problems.exists {
-    case PathMismatch(_,_) | MethodMismatch(_,_) => true
+    case PathMismatch(_,_,_) | MethodMismatch(_,_) => true
     case _ => false
-  } 
+  }
     
   def decideRequestMatch(expected: Interaction, problems: Seq[RequestPartMismatch]): RequestMatch = 
     if (problems.isEmpty) FullRequestMatch(expected)
@@ -41,7 +41,7 @@ object RequestMatching extends StrictLogging {
                                               
   def requestMismatches(expected: Request, actual: Request): Seq[RequestPartMismatch] = {
     (matchMethod(expected.method, actual.method) 
-      ++ matchPath(expected.path, actual.path)
+      ++ matchPath(expected, actual)
       ++ matchQuery(expected.query, actual.query)
       ++ matchCookie(expected.cookie, actual.cookie)
       ++ matchHeaders(expected.headersWithoutCookie, actual.headersWithoutCookie)

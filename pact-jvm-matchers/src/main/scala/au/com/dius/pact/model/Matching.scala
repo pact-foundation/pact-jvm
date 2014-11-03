@@ -1,6 +1,6 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.matchers.{MismatchFactory, JsonBodyMatcher, BodyMatcher}
+import au.com.dius.pact.matchers.{Matchers, MismatchFactory, JsonBodyMatcher, BodyMatcher}
 import au.com.dius.pact.model.JsonDiff.DiffConfig
 import au.com.dius.pact.model.RequestPartMismatch._
 import au.com.dius.pact.model.ResponsePartMismatch._
@@ -37,12 +37,17 @@ case class HeaderMismatch(expected: Headers, actual: Headers) extends RequestPar
 case class BodyTypeMismatch(expected: String, actual: String) extends RequestPartMismatch with ResponsePartMismatch
 case class BodyMismatch(expected: Any, actual: Any, mismatch: Option[String] = None, path: String = "/") extends RequestPartMismatch with ResponsePartMismatch
 case class CookieMismatch(expected: Cookies, actual: Cookies) extends RequestPartMismatch
-case class PathMismatch(expected: Path, actual: Path) extends RequestPartMismatch
+case class PathMismatch(expected: Path, actual: Path, mismatch: Option[String] = None) extends RequestPartMismatch
 case class MethodMismatch(expected: Method, actual: Method) extends RequestPartMismatch
 case class QueryMismatch(expected: Query, actual: Query) extends RequestPartMismatch
 
 object BodyMismatchFactory extends MismatchFactory[BodyMismatch] {
   def create(expected: scala.Any, actual: scala.Any, message: String, path: String) = BodyMismatch(expected, actual, Some(message), path)
+}
+
+object PathMismatchFactory extends MismatchFactory[PathMismatch] {
+  def create(expected: scala.Any, actual: scala.Any, message: String, path: String) = PathMismatch(expected.toString,
+    actual.toString, Some(message))
 }
 
 object Matching {
@@ -102,11 +107,16 @@ object Matching {
     }
   }
 
-  def matchPath(expected: Path, actual: Path): Option[PathMismatch] = {
+  def matchPath(expected: Request, actual: Request): Option[PathMismatch] = {
     val pathFilter = "http[s]*://([^/]*)"
-    val replacedActual = actual.replaceFirst(pathFilter, "")
-    if(expected == replacedActual || replacedActual.matches(expected)) None
-    else Some(PathMismatch(expected, replacedActual))
+    val replacedActual = actual.path.replaceFirst(pathFilter, "")
+    if (Matchers.matcherDefined("$.path", expected.matchers)) {
+      val mismatch = Matchers.domatch[PathMismatch](expected.matchers.get("$.path"), "$.path", expected.path,
+        replacedActual, PathMismatchFactory)
+      mismatch.headOption
+    }
+    else if(expected.path == replacedActual || replacedActual.matches(expected.path)) None
+    else Some(PathMismatch(expected.path, replacedActual))
   }
   
   def matchStatus(expected: Int, actual: Int): Option[StatusMismatch] = {
