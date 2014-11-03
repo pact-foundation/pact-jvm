@@ -7,6 +7,7 @@ import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.Provider;
 import au.com.dius.pact.model.Request$;
 import au.com.dius.pact.model.Response$;
+import nl.flotsam.xeger.Xeger;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
@@ -201,6 +202,27 @@ public class ConsumerPactBuilder {
                     return new PactDslRequestWithPath(consumerName, providerName, state, description, path,
                         requestMethod, requestHeaders, query, requestBody, requestMatchers);
                 }
+
+                /**
+                 * The path of the request. This will generate a random path to use when generating requests
+                 * @param pathRegex string path regular expression to match with
+                 */
+                public PactDslRequestWithPath matchPath(String pathRegex) {
+                    return matchPath(pathRegex, new Xeger(pathRegex).generate());
+                }
+
+                /**
+                 * The path of the request
+                 * @param path string path to use when generating requests
+                 * @param pathRegex regular expression to use to match paths
+                 */
+                public PactDslRequestWithPath matchPath(String pathRegex, String path) {
+                    HashMap<String, String> matcher = new HashMap<String, String>();
+                    matcher.put("regex", pathRegex);
+                    requestMatchers.put("$.path", matcher);
+                    return new PactDslRequestWithPath(consumerName, providerName, state, description, path,
+                        requestMethod, requestHeaders, query, requestBody, requestMatchers);
+                }
             }
         }
     }
@@ -350,6 +372,27 @@ public class ConsumerPactBuilder {
          * @param path string path
          */
         public PactDslRequestWithPath path(String path) {
+            this.path = path;
+            return this;
+        }
+
+        /**
+         * The path of the request. This will generate a random path to use when generating requests
+         * @param pathRegex string path regular expression to match with
+         */
+        public PactDslRequestWithPath matchPath(String pathRegex) {
+            return matchPath(pathRegex, new Xeger(pathRegex).generate());
+        }
+
+        /**
+         * The path of the request
+         * @param path string path to use when generating requests
+         * @param pathRegex regular expression to use to match paths
+         */
+        public PactDslRequestWithPath matchPath(String pathRegex, String path) {
+            HashMap<String, String> matcher = new HashMap<String, String>();
+            matcher.put("regex", pathRegex);
+            requestMatchers.put("$.path", matcher);
             this.path = path;
             return this;
         }

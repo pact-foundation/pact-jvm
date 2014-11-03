@@ -1,7 +1,6 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.PactFragment;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
@@ -28,7 +27,7 @@ public class MatchingTest {
         HashMap expectedResponse = new HashMap();
         expectedResponse.put("name", "harry");
         runTest(buildPactFragment(body, responseBody, "a test interaction that requires regex matching"),
-            "{\"name\": \"Arnold\", \"position\": \"staff\"}", expectedResponse);
+            "{\"name\": \"Arnold\", \"position\": \"staff\"}", expectedResponse, "/hello");
     }
 
     @Test
@@ -55,17 +54,33 @@ public class MatchingTest {
                 .put("age", 100)
                 .put("timestamp", DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date()))
                 .toString(),
-            expectedResponse);
+            expectedResponse, "/hello");
     }
 
-    private void runTest(PactFragment pactFragment, final String body, final Map expectedResponse) {
+    @Test
+    public void testRegexpMatchingOnPath() {
+        ConsumerPactBuilder.PactDslResponse fragment = ConsumerPactBuilder
+            .consumer("test_consumer")
+            .hasPactWith("test_provider")
+            .uponReceiving("a request to match on path")
+            .matchPath("/hello/[0-9]{4}")
+            .method("POST")
+            .body("{}", ContentType.APPLICATION_JSON)
+            .willRespondWith()
+            .status(200);
+        Map expectedResponse = new HashMap();
+        runTest(fragment, "{}", expectedResponse, "/hello/1234");
+    }
+
+    private void runTest(ConsumerPactBuilder.PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
         MockProviderConfig config = MockProviderConfig.createDefault();
-        VerificationResult result = pactFragment.runConsumer(config, new TestRun() {
+        VerificationResult result = pactFragment.toFragment().runConsumer(config, new TestRun() {
             @Override
             public void run(MockProviderConfig config) {
                 try {
-                    assertEquals(new ConsumerClient(config.url()).post("/hello", body, ContentType.APPLICATION_JSON), expectedResponse);
-                } catch (IOException e) {}
+                    assertEquals(new ConsumerClient(config.url()).post(path, body, ContentType.APPLICATION_JSON), expectedResponse);
+                } catch (IOException e) {
+                }
             }
         });
 
@@ -76,7 +91,7 @@ public class MatchingTest {
         assertEquals(ConsumerPactTest.PACT_VERIFIED, result);
     }
 
-    private PactFragment buildPactFragment(PactDslJsonBody body, PactDslJsonBody responseBody, String description) {
+    private ConsumerPactBuilder.PactDslResponse buildPactFragment(PactDslJsonBody body, PactDslJsonBody responseBody, String description) {
         return ConsumerPactBuilder
             .consumer("test_consumer")
             .hasPactWith("test_provider")
@@ -86,8 +101,7 @@ public class MatchingTest {
                 .body(body)
             .willRespondWith()
                 .status(200)
-                .body(responseBody)
-                .toFragment();
+                .body(responseBody);
     }
 
 }
