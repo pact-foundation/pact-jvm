@@ -1,6 +1,6 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.Request
+import au.com.dius.pact.model.{BodyMismatchFactory, BodyMismatch, Request}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -33,8 +33,8 @@ class MatchersTest extends Specification {
   "equal matcher" should {
 
     "match using equals" in {
-      EqualsMatcher.domatch(Map(), "/", "100", "100") must beEmpty
-      EqualsMatcher.domatch(Map(), "/", 100, "100") must not(beEmpty)
+      EqualsMatcher.domatch[BodyMismatch](null, "/", "100", "100", BodyMismatchFactory).isEmpty must beTrue
+      EqualsMatcher.domatch[BodyMismatch](null, "/", 100, "100", BodyMismatchFactory).isEmpty must beFalse
     }
 
   }

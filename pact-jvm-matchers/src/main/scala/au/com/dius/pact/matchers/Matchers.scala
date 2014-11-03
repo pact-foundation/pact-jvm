@@ -1,22 +1,24 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.BodyMismatch
-import scala.collection.mutable
-import org.apache.commons.lang3.time.{FastDateParser, DateFormatUtils, DateUtils}
+import org.apache.commons.lang3.time.{DateFormatUtils, DateUtils}
 import com.typesafe.scalalogging.slf4j.StrictLogging
 import java.text.ParseException
+
+import scala.collection.{JavaConverters, JavaConversions}
+import java.util.Collections
 
 object Matchers extends StrictLogging {
   def matcherDefined(path: String, matchers: Option[Map[String, Any]]): Boolean =
     matchers.isDefined && matchers.get.contains(path)
 
-  def domatch(matcherDef: Any, path: String, expected: Any, actual: Any) : List[BodyMismatch] = {
-    matcherDef match {
-      case map: Map[String, Any] => matcher(map).domatch(map, path, expected, actual)
+  def domatch[T](matcherDef: Any, path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]) : List[T] = {
+    val mismatches = matcherDef match {
+      case map: Map[String, Any] => matcher(map).domatch[T](JavaConversions.mapAsJavaMap(map), path, expected, actual, mismatchFn)
       case m =>
         logger.warn(s"Matcher $m is mis-configured, defaulting to equality matching")
-        EqualsMatcher.domatch(Map(), path, expected, actual)
+        EqualsMatcher.domatch[T](null, path, expected, actual, mismatchFn)
     }
+    JavaConverters.collectionAsScalaIterableConverter(mismatches).asScala.toList
   }
 
   def matcher(matcherDef: Map[String, Any]) : Matcher = {
@@ -35,114 +37,103 @@ object Matchers extends StrictLogging {
     }
   }
 
-}
-
-trait Matcher {
-  def domatch(matcherDef: Map[String, Any], path: String, expected: Any, actual: Any) : List[BodyMismatch]
-
-  def valueOf(value: Any) = {
-    value match {
-      case s: String => s"'$value'"
-      case null => "null"
-      case _ => value.toString
-    }
-  }
+  def toJavaList[T](list: Seq[T]) = JavaConverters.seqAsJavaListConverter(list).asJava
 }
 
 object EqualsMatcher extends Matcher {
-  def domatch(matcherDef: Map[String, Any], path: String, expected: Any, actual: Any): List[BodyMismatch] = {
+  def domatch[T](matcherDef: java.util.Map[String, _], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]): java.util.List[T] = {
     if (actual.equals(expected)) {
-      List()
+      Collections.emptyList[T]()
     } else {
-      List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(actual)} to equal ${valueOf(actual)}"), path))
+      Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to equal ${Matcher.valueOf(actual)}", path)))
     }
   }
 }
 
 object RegexpMatcher extends Matcher {
-  def domatch(matcherDef: Map[String, Any], path: String, expected: Any, actual: Any): List[BodyMismatch] = {
-    val regex = matcherDef("regex").toString
+  def domatch[T](matcherDef: java.util.Map[String, _], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]): java.util.List[T] = {
+    val regex = matcherDef.get("regex").toString
     if (actual.toString.matches(regex)) {
-      List()
+      Collections.emptyList[T]()
     } else {
-      List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(actual)} to match '$regex'"), path))
+      Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to match '$regex'", path)))
     }
   }
 }
 
 object TypeMatcher extends Matcher with StrictLogging {
 
-  def matchType(path: String, expected: Any, actual: Any) = {
+  def matchType[T](path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]) = {
     (actual, expected) match {
-      case (actual: String, expected: String) => List()
-      case (actual: Number, expected: Number) => List()
-      case (actual: Boolean, expected: Boolean) => List()
+      case (actual: String, expected: String) => Collections.emptyList[T]()
+      case (actual: Number, expected: Number) => Collections.emptyList[T]()
+      case (actual: Boolean, expected: Boolean) => Collections.emptyList[T]()
       case (_, null) =>
         if (actual == null) {
-          List()
+          Collections.emptyList[T]()
         } else {
-          List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(actual)} to be null"), path))
+          Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to be null", path)))
         }
-      case default => List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(actual)} to be the same type as ${valueOf(expected)}"), path))
+      case default => Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to be the same type as ${Matcher.valueOf(expected)}", path)))
     }
   }
 
-  def matchTimestamp(path: String, expected: Any, actual: Any) = {
+  def matchTimestamp[T](path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]) = {
     try {
       DateUtils.parseDate(actual.toString, DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern,
         DateFormatUtils.ISO_DATETIME_FORMAT.getPattern, DateFormatUtils.SMTP_DATETIME_FORMAT.getPattern,
         "yyyy-MM-dd HH:mm:ssZZ", "yyyy-MM-dd HH:mm:ss"
       )
-      List()
+      Collections.emptyList[T]()
     }
     catch {
       case e: java.text.ParseException =>
-        logger.warn(s"failed to parse timestamp value of ${valueOf(actual)}", e)
-        List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(actual)} to be a timestamp"), path))
+        logger.warn(s"failed to parse timestamp value of ${Matcher.valueOf(actual)}", e)
+        Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to be a timestamp", path)))
     }
   }
 
-  def domatch(matcherDef: Map[String, Any], path: String, expected: Any, actual: Any): List[BodyMismatch] = {
-    matcherDef("match") match {
-      case "type" => matchType(path, expected, actual)
-      case "timestamp" => matchTimestamp(path, expected, actual)
-      case _ => List(BodyMismatch(expected, actual, Some("type matcher is mis-configured"), path))
+  def domatch[T](matcherDef: java.util.Map[String, _], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]): java.util.List[T] = {
+    matcherDef.get("match") match {
+      case "type" => matchType[T](path, expected, actual, mismatchFn)
+      case "timestamp" => matchTimestamp[T](path, expected, actual, mismatchFn)
+      case _ => Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, "type matcher is mis-configured", path)))
     }
   }
 }
 
 object TimestampMatcher extends Matcher {
-  def domatch(matcherDef: Map[String, Any], path: String, expected: Any, actual: Any): List[BodyMismatch] = {
-    val pattern = matcherDef("timestamp").toString
+  def domatch[T](matcherDef: java.util.Map[String, _], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]): java.util.List[T] = {
+    val pattern = matcherDef.get("timestamp").toString
     try {
       DateUtils.parseDate(actual.toString, pattern)
-      List()
+      Collections.emptyList[T]()
     } catch {
-      case e: ParseException => List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(actual)} to match a timestamp of '$pattern': ${e.getMessage}"), path))
+      case e: ParseException => Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to match a timestamp of '$pattern': ${e.getMessage}", path)))
     }
   }
 }
 
 object TimeMatcher extends Matcher {
-  def domatch(matcherDef: Map[String, Any], path: String, expected: Any, actual: Any): List[BodyMismatch] = {
-    val pattern = matcherDef("time").toString
+  def domatch[T](matcherDef: java.util.Map[String, _], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]): java.util.List[T] = {
+    val pattern = matcherDef.get("time").toString
     try {
       DateUtils.parseDate(actual.toString, pattern)
-      List()
+      Collections.emptyList[T]()
     } catch {
-      case e: ParseException => List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(actual)} to match a time of '$pattern': ${e.getMessage}"), path))
+      case e: ParseException => Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to match a time of '$pattern': ${e.getMessage}", path)))
     }
   }
 }
 
 object DateMatcher extends Matcher {
-  def domatch(matcherDef: Map[String, Any], path: String, expected: Any, actual: Any): List[BodyMismatch] = {
-    val pattern = matcherDef("date").toString
+  def domatch[T](matcherDef: java.util.Map[String, _], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]): java.util.List[T] = {
+    val pattern = matcherDef.get("date").toString
     try {
       DateUtils.parseDate(actual.toString, pattern)
-      List()
+      Collections.emptyList[T]()
     } catch {
-      case e: ParseException => List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(actual)} to match a date of '$pattern': ${e.getMessage}"), path))
+      case e: ParseException => Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to match a date of '$pattern': ${e.getMessage}", path)))
     }
   }
 }

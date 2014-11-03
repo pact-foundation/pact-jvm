@@ -1,6 +1,6 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.matchers.{JsonBodyMatcher, BodyMatcher}
+import au.com.dius.pact.matchers.{MismatchFactory, JsonBodyMatcher, BodyMatcher}
 import au.com.dius.pact.model.JsonDiff.DiffConfig
 import au.com.dius.pact.model.RequestPartMismatch._
 import au.com.dius.pact.model.ResponsePartMismatch._
@@ -40,6 +40,10 @@ case class CookieMismatch(expected: Cookies, actual: Cookies) extends RequestPar
 case class PathMismatch(expected: Path, actual: Path) extends RequestPartMismatch
 case class MethodMismatch(expected: Method, actual: Method) extends RequestPartMismatch
 case class QueryMismatch(expected: Query, actual: Query) extends RequestPartMismatch
+
+object BodyMismatchFactory extends MismatchFactory[BodyMismatch] {
+  def create(expected: scala.Any, actual: scala.Any, message: String, path: String) = BodyMismatch(expected, actual, Some(message), path)
+}
 
 object Matching {
   

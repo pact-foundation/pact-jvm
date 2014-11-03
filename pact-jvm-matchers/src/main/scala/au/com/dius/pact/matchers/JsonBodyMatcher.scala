@@ -1,7 +1,7 @@
 package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model.JsonDiff._
-import au.com.dius.pact.model.{JsonDiff, BodyMismatch, HttpPart}
+import au.com.dius.pact.model.{BodyMismatchFactory, JsonDiff, BodyMismatch, HttpPart}
 import org.json4s.{JObject, JArray, JValue, DefaultFormats}
 import org.json4s.jackson.JsonMethods._
 
@@ -103,7 +103,7 @@ class JsonBodyMatcher extends BodyMatcher {
 
   def compareValues(path: String, expected: Any, actual: Any, matchers: Option[Map[String, Any]]): List[BodyMismatch] = {
     if (Matchers.matcherDefined(path, matchers)) {
-      Matchers.domatch(matchers.get(path), path, expected, actual)
+      Matchers.domatch[BodyMismatch](matchers.get(path), path, expected, actual, BodyMismatchFactory)
     } else {
       if (expected == actual) {
         List[BodyMismatch]()
