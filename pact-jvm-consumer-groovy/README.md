@@ -126,8 +126,9 @@ Defines the request for the interaction. The request data map can contain the fo
 | body | The body of the request. If it is not a string, it will be converted to JSON. Also accepts a PactBodyBuilder. | |
 
 For the path attribute, you can use regular expressions to match. You can either provide a regex `Pattern` class or use
-the `regexp` method to construct a `RegexpMatcher`. If you use a `Pattern`, or the `regexp` method but don't provide
-a value, a random one will be generated from the regular expression. This value is used when generating requests.
+the `regexp` method to construct a `RegexpMatcher` (you can use any of the defined matcher methods, see DSL methods below).
+If you use a `Pattern`, or the `regexp` method but don't provide a value, a random one will be generated from the
+regular expression. This value is used when generating requests.
 
 For example:
 

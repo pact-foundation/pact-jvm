@@ -95,7 +95,7 @@ class PactBuilder extends Matchers {
   }
 
   private static String setupPath(def path, Map matchers) {
-    if (path instanceof RegexpMatcher) {
+    if (path instanceof Matcher) {
       matchers['$.path'] = path.matcher
       return path.value
     } else if (path instanceof Pattern) {
