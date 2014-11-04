@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-junit_2.11`
-* version-id = `2.1.0`
+* version-id = `2.1.x`
 
 ##Usage
 
@@ -184,6 +184,25 @@ PactDslJsonBody body = new PactDslJsonBody()
     .ipAddress("localAddress")
     .numberValue("age", 100)
     .timestamp();
+```
+
+### Matching on paths (version 2.1.5+)
+
+You can use regular expressions to match incoming requests. The DSL has a `matchPath` method for this. You can provide
+a real path as a second value to use when generating requests, and if you leave it out it will generate a random one
+from the regular expression.
+
+For example:
+
+```java
+  .given("test state")
+    .uponReceiving("a test interaction")
+        .matchPath("/transaction/[0-9]+") // or .matchPath("/transaction/[0-9]+", "/transaction/1234567890")
+        .method("POST")
+        .body("{\"name\": \"harry\"}")
+    .willRespondWith()
+        .status(200)
+        .body("{\"hello\": \"harry\"}")
 ```
 
 ## Debugging pact failures

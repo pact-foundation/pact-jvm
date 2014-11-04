@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-groovy_2.11`
-* version-id = `2.1.0`
+* version-id = `2.1.x`
 
 ##Usage
 
@@ -19,7 +19,7 @@ to define your pacts. For a full example, have a look at the example JUnit `Exam
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:2.1.0'
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:2.1.5'
     }
   
 Then create an instance of the `PactBuilder` in your test.
@@ -124,6 +124,20 @@ Defines the request for the interaction. The request data map can contain the fo
 | query | Query parameters as a Map<String, List> |  |
 | headers | Map of key-value pairs for the request headers | |
 | body | The body of the request. If it is not a string, it will be converted to JSON. Also accepts a PactBodyBuilder. | |
+
+For the path attribute, you can use regular expressions to match. You can either provide a regex `Pattern` class or use
+the `regexp` method to construct a `RegexpMatcher`. If you use a `Pattern`, or the `regexp` method but don't provide
+a value, a random one will be generated from the regular expression. This value is used when generating requests.
+
+For example:
+
+```groovy
+    .withAttributes(path: ~'/transaction/[0-9]+') // This will generate a random path for requests
+
+    // or
+
+    .withAttributes(path: regexp('/transaction/[0-9]+', '/transaction/1234567890'))
+```
 
 #### withBody(Closure closure)
 
