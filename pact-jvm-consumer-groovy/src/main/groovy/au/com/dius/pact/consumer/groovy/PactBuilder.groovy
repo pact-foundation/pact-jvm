@@ -15,7 +15,9 @@ import scala.None$
 import scala.Some$
 import scala.collection.JavaConverters$
 
-class PactBuilder {
+import java.util.regex.Pattern
+
+class PactBuilder extends Matchers {
 
   Consumer consumer
   Provider provider
@@ -61,14 +63,14 @@ class PactBuilder {
     this
   }
 
-  PactBuilder upon_receiving(String requestDescription) {
+  PactBuilder uponReceiving(String requestDescription) {
     buildInteractions()
     this.requestDescription = requestDescription
     requestState = true
     this
   }
 
-  def uponReceiving = this.&upon_receiving
+  def upon_receiving = this.&uponReceiving
 
   def buildInteractions() {
     int numInteractions = Math.min(requestData.size(), responseData.size())
@@ -77,11 +79,13 @@ class PactBuilder {
       Map responseHeaders = responseData[i].headers ?: [:]
       Map query = [:]
       def state = providerState.empty ? None$.empty() : Some$.MODULE$.apply(providerState)
+      Map requestMatchers = requestData[i].matchers ?: [:]
+      String path = setupPath(requestData[i].path ?: '/', requestMatchers)
       interactions << Interaction$.MODULE$.apply(
         requestDescription,
         state,
-        Request$.MODULE$.apply(requestData[i].method ?: 'get', requestData[i].path ?: '/',
-          queryToString(requestData[i]?.query), headers, requestData[i].body ?: '', requestData[i].matchers),
+        Request$.MODULE$.apply(requestData[i].method ?: 'get', path,
+          queryToString(requestData[i]?.query), headers, requestData[i].body ?: '', requestMatchers),
         Response$.MODULE$.apply(responseData[i].status ?: 200, responseHeaders,
           responseData[i].body ?: '', responseData[i].matchers)
       )
@@ -90,7 +94,20 @@ class PactBuilder {
     responseData = []
   }
 
-  private String queryToString(query) {
+  private static String setupPath(def path, Map matchers) {
+    if (path instanceof RegexpMatcher) {
+      matchers['$.path'] = path.matcher
+      return path.value
+    } else if (path instanceof Pattern) {
+      def matcher = new RegexpMatcher(values: [path])
+      matchers['$.path'] = matcher.matcher
+      return matcher.value
+    } else {
+      return path as String
+    }
+  }
+
+  private static String queryToString(query) {
     if (query instanceof Map) {
       query.collect({ k, v -> (v instanceof List) ? v.collect({ "$k=$it" }) : "$k=$v" }).flatten().join('&')
     } else {
@@ -103,7 +120,7 @@ class PactBuilder {
     def body = requestData.body
     if (body instanceof PactBodyBuilder) {
       request.body = body.body
-      request.matchers = body.matchers
+      request.matchers.putAll(body.matchers)
     } else if (body != null && !(body instanceof String)) {
       request.body = new JsonBuilder(body).toPrettyString()
     }
@@ -118,7 +135,7 @@ class PactBuilder {
     def body = responseData.body
     if (body instanceof PactBodyBuilder) {
       response.body = body.body
-      response.matchers = body.matchers
+      response.matchers.putAll(body.matchers)
     } else if (body != null && !(body instanceof String)) {
       response.body = new JsonBuilder(body).toPrettyString()
     }
@@ -149,14 +166,14 @@ class PactBuilder {
     closure.call()
     if (requestState) {
       requestData.last().body = body.body
-      requestData.last().matchers = body.matchers
+      requestData.last().matchers.putAll(body.matchers)
       requestData.last().headers = requestData.last().headers ?: [:]
       if (mimeType) {
           requestData.last().headers['Content-Type'] = mimeType
       }
     } else {
       responseData.last().body = body.body
-      responseData.last().matchers = body.matchers
+      responseData.last().matchers.putAll(body.matchers)
       responseData.last().headers = responseData.last().headers ?: [:]
       if (mimeType) {
           responseData.last().headers['Content-Type'] = mimeType

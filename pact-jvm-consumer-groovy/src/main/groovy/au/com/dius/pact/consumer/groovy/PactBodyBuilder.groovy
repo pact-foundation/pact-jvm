@@ -1,11 +1,9 @@
 package au.com.dius.pact.consumer.groovy
 
 import groovy.json.JsonBuilder
-import org.apache.commons.lang3.RandomStringUtils
-
 import java.util.regex.Pattern
 
-class PactBodyBuilder {
+class PactBodyBuilder extends Matchers {
 
   def bodyMap = [:]
   def matchers = [:]
@@ -24,46 +22,6 @@ class PactBodyBuilder {
 
   String getBody() {
     new JsonBuilder(bodyMap).toPrettyString()
-  }
-
-  def regexp(Pattern re, String value = null) {
-    regexp(re.toString(), value)
-  }
-
-  def regexp(String regexp, String value = null) {
-    new RegexpMatcher(values: [regexp, value])
-  }
-
-  def hexValue(String value = null) {
-    new RegexpMatcher(values: ['[0-9a-fA-F]+', RandomStringUtils.random(10, "0123456789abcdef")])
-  }
-
-  def identifier(def value = null) {
-    new TypeMatcher(values: value ?: RandomStringUtils.randomNumeric(10) as Long)
-  }
-
-  def ipAddress(String value = null) {
-    new RegexpMatcher(values: ['\\d{1,3}\\.)+\\d{1,3}', value ?: '127.0.0.1'])
-  }
-
-  def numeric(Number value = null) {
-    new TypeMatcher(values: value ?: RandomStringUtils.randomNumeric(10) as Long)
-  }
-
-  def timestamp(String pattern = null, def value = null) {
-    new TimestampMatcher(values: value, pattern: pattern)
-  }
-
-  def time(String pattern = null, def value = null) {
-    new TimeMatcher(values: value, pattern: pattern)
-  }
-
-  def date(String pattern = null, def value = null) {
-    new DateMatcher(values: value, pattern: pattern)
-  }
-
-  def guid(String value = null) {
-    new RegexpMatcher(values: ['[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', value ?: UUID.randomUUID().toString()])
   }
 
   def methodMissing(String name, args) {
