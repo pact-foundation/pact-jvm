@@ -86,16 +86,18 @@ trait PactSerializer extends StrictLogging {
 
   def lookupVersion() = {
     val url = getClass.getProtectionDomain.getCodeSource.getLocation
-    val openStream: InputStream = url.openStream()
-    try {
-      val jarStream = new JarInputStream(openStream)
-      val manifest = jarStream.getManifest
-      val attributes = manifest.getMainAttributes
-      attributes.getValue("Implementation-Version")
-    }
-    catch {
-      case e : Throwable => logger.warn("Could not load pact-jvm manifest", e); ""
-    }
-    finally openStream.close()
+    if (url != null) {
+      val openStream: InputStream = url.openStream()
+      try {
+        val jarStream = new JarInputStream(openStream)
+        val manifest = jarStream.getManifest
+        val attributes = manifest.getMainAttributes
+        attributes.getValue("Implementation-Version")
+      }
+      catch {
+        case e : Throwable => logger.warn("Could not load pact-jvm manifest", e); ""
+      }
+      finally openStream.close()
+    } else ""
   }
 }
