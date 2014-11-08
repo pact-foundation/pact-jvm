@@ -1,5 +1,20 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.1.5 - small bugfixes + matching on paths
+
+* 714ddec - #70 - updated groovy DSL docs (Ronald Holshausen, Sat Nov 8 14:40:40 2014 +1100)
+* 1cbc1bd - #70 - added integer and real number type matchers (Ronald Holshausen, Sat Nov 8 14:37:20 2014 +1100)
+* 804f7b0 - #70 - extended the Java DSL to accept an example value when matching numbers; extended the by type matching to include integers and real numbers (Ronald Holshausen, Sat Nov 8 14:24:29 2014 +1100)
+* 4cac3f4 - #71 guard against NPE when trying to get the URL to load the manefest (Ronald Holshausen, Wed Nov 5 20:26:44 2014 +1100)
+* 3db3550 - allow any of the matching methods on the path (Ronald Holshausen, Tue Nov 4 11:48:21 2014 +1100)
+* 21416e3 - update the docs on path matching (Ronald Holshausen, Tue Nov 4 11:43:54 2014 +1100)
+* 0ea9500 - Updated the Groovy DSL to allow matching on paths (Ronald Holshausen, Tue Nov 4 11:30:03 2014 +1100)
+* 23cbab7 - Updated the Java DSL to allow matching on paths (Ronald Holshausen, Tue Nov 4 10:59:48 2014 +1100)
+* 0958366 - implemented path matching using the new matchers (Ronald Holshausen, Mon Nov 3 20:13:52 2014 +1100)
+* 649cc7f - Refactored the matchers to be generic so we can implement matching on all http parts instead of just bodies (Ronald Holshausen, Mon Nov 3 19:41:04 2014 +1100)
+* 3ce5f6b - #69 - add query parameters to request when using the basic provider (Ronald Holshausen, Sun Nov 2 09:14:53 2014 +1100)
+* 25ac70c - bump version (Ronald Holshausen, Wed Oct 29 09:16:37 2014 +1100)
+
 # 2.1.4 - small bugfix
 
 * dfb225b - more travis ci tweaks (Ronald Holshausen, Tue Oct 28 17:19:39 2014 +1100)
