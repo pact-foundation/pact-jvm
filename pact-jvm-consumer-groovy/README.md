@@ -232,6 +232,14 @@ Defines a matcher that accepts IP addresses.  If the value is not provided, a 12
 
 Defines a matcher that accepts any numerical values. If the value is not provided, a random integer will be used.
 
+* integer(def value = null)
+
+Defines a matcher that accepts any integer values. If the value is not provided, a random integer will be used.
+
+* real(def value = null)
+
+Defines a matcher that accepts any real numbers. If the value is not provided, a random double will be used.
+
 * timestamp(def value = null)
 
 Defines a matcher that accepts ISO and SMTP timestamps. If the value is not provided, the current date and time is used.
