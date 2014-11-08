@@ -72,8 +72,32 @@ public class PactDslJsonArray extends DslPart {
     }
 
     public PactDslJsonArray numberType() {
-        body.put(RandomStringUtils.randomNumeric(10));
-        matchers.put(root + "." + body.length(), matchType());
+        return numberType(Long.parseLong(RandomStringUtils.randomNumeric(10)));
+    }
+
+    public PactDslJsonArray numberType(Number number) {
+        body.put(number);
+        matchers.put(root + "." + body.length(), matchType("type"));
+        return this;
+    }
+
+    public PactDslJsonArray integerType() {
+        return integerType(Long.parseLong(RandomStringUtils.randomNumeric(10)));
+    }
+
+    public PactDslJsonArray integerType(Long number) {
+        body.put(number);
+        matchers.put(root + "." + body.length(), matchType("integer"));
+        return this;
+    }
+
+    public PactDslJsonArray realType() {
+        return realType(Double.parseDouble(RandomStringUtils.randomNumeric(10)) / 100.0);
+    }
+
+    public PactDslJsonArray realType(Double number) {
+        body.put(number);
+        matchers.put(root + "." + body.length(), matchType("real"));
         return this;
     }
 

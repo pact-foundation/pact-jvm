@@ -78,6 +78,49 @@ object TypeMatcher extends Matcher with StrictLogging {
     }
   }
 
+  def matchNumber[T](path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]) = {
+    (actual, expected) match {
+      case (actual: Number, _) => Collections.emptyList[T]()
+      case (_, null) =>
+        if (actual == null) {
+          Collections.emptyList[T]()
+        } else {
+          Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to be null", path)))
+        }
+      case default => Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to be a number", path)))
+    }
+  }
+
+  def matchInteger[T](path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]) = {
+    (actual, expected) match {
+      case (actual: Integer, _) => Collections.emptyList[T]()
+      case (actual: Long, _) => Collections.emptyList[T]()
+      case (actual: BigInt, _) => Collections.emptyList[T]()
+      case (_, null) =>
+        if (actual == null) {
+          Collections.emptyList[T]()
+        } else {
+          Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to be null", path)))
+        }
+      case default => Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to be an integer", path)))
+    }
+  }
+
+  def matchReal[T](path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]) = {
+    (actual, expected) match {
+      case (actual: Float, _) => Collections.emptyList[T]()
+      case (actual: Double, _) => Collections.emptyList[T]()
+      case (actual: BigDecimal, _) => Collections.emptyList[T]()
+      case (_, null) =>
+        if (actual == null) {
+          Collections.emptyList[T]()
+        } else {
+          Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to be null", path)))
+        }
+      case default => Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to be a real number", path)))
+    }
+  }
+
   def matchTimestamp[T](path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]) = {
     try {
       DateUtils.parseDate(actual.toString, DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern,
@@ -96,6 +139,9 @@ object TypeMatcher extends Matcher with StrictLogging {
   def domatch[T](matcherDef: java.util.Map[String, _], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]): java.util.List[T] = {
     matcherDef.get("match") match {
       case "type" => matchType[T](path, expected, actual, mismatchFn)
+      case "number" => matchNumber[T](path, expected, actual, mismatchFn)
+      case "integer" => matchInteger[T](path, expected, actual, mismatchFn)
+      case "real" => matchReal[T](path, expected, actual, mismatchFn)
       case "timestamp" => matchTimestamp[T](path, expected, actual, mismatchFn)
       case _ => Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, "type matcher is mis-configured", path)))
     }

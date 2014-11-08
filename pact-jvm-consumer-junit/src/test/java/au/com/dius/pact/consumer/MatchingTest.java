@@ -39,6 +39,8 @@ public class MatchingTest {
                 .id()
                 .ipAddress("localAddress")
                 .numberValue("age", 100)
+                .numberType("ageAverage", 150.0)
+                .integerType("age2", 200)
                 .timestamp();
 
         PactDslJsonBody responseBody = new PactDslJsonBody();
@@ -52,6 +54,8 @@ public class MatchingTest {
                 .put("id", 1234567890)
                 .put("localAddress", "192.168.0.1")
                 .put("age", 100)
+                .put("ageAverage", 150.0)
+                .put("age2", 200)
                 .put("timestamp", DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date()))
                 .toString(),
             expectedResponse, "/hello");

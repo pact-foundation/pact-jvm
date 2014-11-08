@@ -39,8 +39,12 @@ public abstract class DslPart {
     }
 
     protected Map<String, Object> matchType() {
+        return matchType("type");
+    }
+
+    protected Map<String, Object> matchType(String type) {
         Map<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put("match", "type");
+        jsonObject.put("match", type);
         return jsonObject;
     }
 
