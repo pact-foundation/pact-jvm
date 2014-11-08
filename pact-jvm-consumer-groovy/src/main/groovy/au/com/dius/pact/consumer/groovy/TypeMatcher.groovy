@@ -5,14 +5,14 @@ import org.apache.commons.lang3.RandomStringUtils
 class TypeMatcher extends Matcher {
 
   def getMatcher() {
-    [match: 'type']
+    [match: values.first()]
   }
 
   def getValue() {
-    if (values == null) {
+    if (values == null || values.empty || values.last() == null) {
       RandomStringUtils.randomNumeric(10)
     } else {
-      values
+      values.last()
     }
   }
 

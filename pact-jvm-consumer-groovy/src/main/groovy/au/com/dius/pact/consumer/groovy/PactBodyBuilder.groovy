@@ -46,6 +46,12 @@ class PactBodyBuilder extends Matchers {
       case 'numeric':
         numeric()
         break
+      case 'integer':
+        integer()
+        break
+      case 'real':
+        real()
+        break
       case 'timestamp':
         timestamp()
         break

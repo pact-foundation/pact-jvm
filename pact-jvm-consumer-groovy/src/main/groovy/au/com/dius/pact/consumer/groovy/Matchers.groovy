@@ -19,7 +19,7 @@ class Matchers {
   }
 
   def identifier(def value = null) {
-    new TypeMatcher(values: value ?: RandomStringUtils.randomNumeric(10) as Long)
+    new TypeMatcher(values: ['type', value ?: RandomStringUtils.randomNumeric(10) as Long])
   }
 
   def ipAddress(String value = null) {
@@ -27,7 +27,15 @@ class Matchers {
   }
 
   def numeric(Number value = null) {
-    new TypeMatcher(values: value ?: RandomStringUtils.randomNumeric(10) as Long)
+    new TypeMatcher(values: ['number', value ?: RandomStringUtils.randomNumeric(10) as Long])
+  }
+
+  def real(def value = null) {
+    new TypeMatcher(values: ['real', value ?: Double.parseDouble(RandomStringUtils.randomNumeric(10)) / 100.0])
+  }
+
+  def integer(def value = null) {
+    new TypeMatcher(values: ['integer', value ?: RandomStringUtils.randomNumeric(10) as Long])
   }
 
   def timestamp(String pattern = null, def value = null) {

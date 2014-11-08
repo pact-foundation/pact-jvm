@@ -30,7 +30,7 @@ class PactBodyBuilderTest {
               localAddress(ipAddress)
               localAddress2 ipAddress('192.169.0.2')
               age(100)
-              age2(numeric)
+              age2(integer)
 
               ts(timestamp)
               timestamp = timestamp('yyyy/MM/dd - HH:mm:ss.S')
@@ -73,10 +73,10 @@ class PactBodyBuilderTest {
           '$.body.id2': [match: 'type'],
           '$.body.localAddress': [regex: '\\d{1,3}\\.)+\\d{1,3}'],
           '$.body.localAddress2': [regex: '\\d{1,3}\\.)+\\d{1,3}'],
-          '$.body.age2': [match: 'type'],
+          '$.body.age2': [match: 'integer'],
           '$.body.ts': [timestamp: 'yyyy-MM-dd\'T\'HH:mm:ss'],
           '$.body.timestamp': [timestamp: 'yyyy/MM/dd - HH:mm:ss.S'],
-          '$.body.values.3': [match: 'type'],
+          '$.body.values.3': [match: 'number'],
           '$.body.role.dob': [date: 'MM/dd/yyyy'],
           '$.body.role.id': [regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'],
           '$.body.roles.0.id': [regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}']
