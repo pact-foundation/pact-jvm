@@ -24,13 +24,15 @@ class PactPluginTest {
 
     @Test
     public void 'defines a task for each defined provider'() {
-        project.extensions.pact.serviceProviders {
-            provider1 {
+        project.pact {
+            serviceProviders {
+                provider1 {
 
-            }
+                }
 
-            provider2 {
+                provider2 {
 
+                }
             }
         }
 
@@ -40,4 +42,26 @@ class PactPluginTest {
         assert project.tasks.pactVerify_provider2
     }
 
+    @Test
+    public void 'defines a task for each file in the pact file directory'() {
+        def resource = getClass().classLoader.getResource('pacts/foo_pact.json')
+        File pactFileDirectory = new File(resource.file).parentFile
+        project.pact {
+            serviceProviders {
+                provider1 {
+                    hasPactsWith("many consumers") {
+                        pactFileLocation = project.file("${pactFileDirectory.absolutePath}")
+                        stateChange = "http://localhost:8080/state"
+                    }
+                }
+            }
+        }
+        project.evaluate()
+
+
+        def consumers = project.tasks.pactVerify_provider1.providerToVerify.consumers
+        assert consumers.size() == 2
+        assert consumers.find { it.name == 'Foo Consumer'}
+        assert consumers.find { it.name == 'Bar Consumer'}
+    }
 }

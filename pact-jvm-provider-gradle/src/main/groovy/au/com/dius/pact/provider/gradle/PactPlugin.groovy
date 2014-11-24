@@ -7,15 +7,14 @@ class PactPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        project.extensions.create('pact', PactPluginExtension)
 
-        def providers = project.container(ProviderInfo)
-        project.pact.extensions.serviceProviders = providers
+        // Create and install the extension object
+        project.extensions.create("pact", PactPluginExtension, project.container(ProviderInfo))
 
         project.task('pactVerify', description: 'Verify your pacts against your providers')
 
         project.afterEvaluate {
-            providers.all { ProviderInfo provider ->
+            project.pact.serviceProviders.all { ProviderInfo provider ->
                 def providerTask = project.task("pactVerify_${provider.name}",
                     description: "Verify the pacts against ${provider.name}", type: PactVerificationTask) {
                     providerToVerify = provider
@@ -33,5 +32,4 @@ class PactPlugin implements Plugin<Project> {
             }
         }
     }
-
 }
