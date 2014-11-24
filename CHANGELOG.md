@@ -1,5 +1,11 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.1.6 - small update to the gradle plugin
+
+* c37f4ee - Merge pull request #72 from georgepapas/provider_gradle_autogenerate_consumers_from_pact_directory (Ronald Holshausen, Mon Nov 24 12:43:20 2014 +1100)
+* 3585813 - Adds support for generating consumers from pact file location (George & Stefan, Mon Nov 24 12:15:45 2014 +1100)
+* ab7c146 - bump version (Ronald Holshausen, Sun Nov 9 09:43:04 2014 +1100)
+
 # 2.1.5 - small bugfixes + matching on paths
 
 * 714ddec - #70 - updated groovy DSL docs (Ronald Holshausen, Sat Nov 8 14:40:40 2014 +1100)
