@@ -55,9 +55,18 @@ pact {
             // Again, you can define as many consumers for each provider as you need, but each must have a unique name
             hasPactWith('consumer1') {
 
-                // currenty supports a file path using file() or a URL using url()
+                // currently supports a file path using file() or a URL using url()
                 pactFile = file('path/to/provider1-consumer1-pact.json')
 
+            }
+            
+            // Or if you have many pact files in a directory
+            hasPactsWith('manyConsumers') {
+
+                // Will define a consumer for each pact file in the directory. 
+                // Consumer name is read from contents of pact file 
+                pactFileLocation = file('path/to/pacts')
+                               
             }
 
         }
@@ -164,6 +173,13 @@ pact {
 
             hasPactWith('consumer1') {
                 pactFile = file('path/to/provider1-consumer1-pact.json')
+                stateChange = url('http://localhost:8001/tasks/pactStateChange')
+                stateChangeUsesBody = false // defaults to true
+            }
+            
+            // or
+            hasPactsWith('consumers') {
+                pactFileLocation = file('path/to/pacts')                
                 stateChange = url('http://localhost:8001/tasks/pactStateChange')
                 stateChangeUsesBody = false // defaults to true
             }
