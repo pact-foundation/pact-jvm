@@ -43,7 +43,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
 
         return builder
             .given("test state") // NOTE: Using provider states are optional, you can leave it out
-            .uponReceiving("java test interaction")
+            .uponReceiving("a request for something")
                 .path("/")
                 .method("GET")
                 .headers(headers)
@@ -57,18 +57,18 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
 
     @Override
     protected String providerName() {
-        return "test_provider";
+        return "Some Provider";
     }
 
     @Override
     protected String consumerName() {
-        return "test_consumer";
+        return "Some Consumer";
     }
 
     @Override
     protected void runTest(String url) {
         try {
-            assertEquals(new ConsumerClient(url).get("/"), "{\"responsetest\":true}");
+            assertEquals(new ProviderClient(url).getSomething(), "{\"responsetest\":true}");
         } catch (Exception e) {
             // NOTE: if you want to see any pact failure, do not throw an exception here. This should be
             // fixed at some point (see Issue #40 https://github.com/DiUS/pact-jvm/issues/40)
@@ -101,9 +101,9 @@ public class PactTest {
     @Test
     public void testPact() {
         PactFragment pactFragment = ConsumerPactBuilder
-            .consumer("test_consumer")
-            .hasPactWith("test_provider")
-            .uponReceiving("a test interaction")
+            .consumer("Some Consumer")
+            .hasPactWith("Some Provider")
+            .uponReceiving("a request to say Hello")
                 .path("/hello")
                 .method("POST")
                 .body("{\"name\": \"harry\"}")
@@ -119,7 +119,7 @@ public class PactTest {
                 Map expectedResponse = new HashMap();
                 expectedResponse.put("hello", "harry");
                 try {
-                    assertEquals(new ConsumerClient(config.url()).post("/hello", "{\"name\": \"harry\"}"),
+                    assertEquals(new ProviderClient(config.url()).hello("{\"name\": \"harry\"}"),
                             expectedResponse);
                 } catch (IOException e) {}
             }
@@ -141,17 +141,17 @@ public class PactTest {
 The DSL has the following pattern:
 
 ```java
-.consumer("test_consumer")
-.hasPactWith("test_provider")
-.given("test state")
-    .uponReceiving("a test interaction")
+.consumer("Some Consumer")
+.hasPactWith("Some Provider")
+.given("a certain state on the provider")
+    .uponReceiving("a request for something")
         .path("/hello")
         .method("POST")
         .body("{\"name\": \"harry\"}")
     .willRespondWith()
         .status(200)
         .body("{\"hello\": \"harry\"}")
-    .uponReceiving("a second test interaction")
+    .uponReceiving("another request for something")
         .path("/hello")
         .method("POST")
         .body("{\"name\": \"harry\"}")
