@@ -65,6 +65,10 @@ subprojects {
         scalaCompileOptions.additionalParameters = ['-target:jvm-1.6']
     }
 
+    test {
+      jvmArgs '-Xss512k', '-XX:MaxPermSize=256m'
+    }
+
     jar {
         manifest.attributes provider: 'gradle',
                 'Implementation-Title': project.name, 'Implementation-Version': version,
