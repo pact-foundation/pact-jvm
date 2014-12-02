@@ -3,8 +3,8 @@ package au.com.dius.pact.model
 import java.net.ServerSocket
 import scala.util.control.NonFatal
 
-case class MockProviderConfig(port: Int, interface: String) {
-  def url: String = s"http://$interface:$port"
+case class MockProviderConfig(port: Int, hostname: String) {
+  def url: String = s"http://$hostname:$port"
 }
 
 object MockProviderConfig {

@@ -12,7 +12,7 @@ import au.com.dius.pact.model.MockProviderConfig
 case class TestServer(state: String) {
   def run[T](code: String => T):T = {
     val config = MockProviderConfig.createDefault()
-    val server = Http(config.port, config.interface).handler(new Plan with SynchronousExecution with ServerErrorResponse {
+    val server = Http(config.port, config.hostname).handler(new Plan with SynchronousExecution with ServerErrorResponse {
       def intent: Plan.Intent = {
         case req => {
           ResponseString("[\"All Done\"]")
