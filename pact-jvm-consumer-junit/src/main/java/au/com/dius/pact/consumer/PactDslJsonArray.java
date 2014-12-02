@@ -191,13 +191,25 @@ public class PactDslJsonArray extends DslPart {
     }
 
     public PactDslJsonArray hexValue() {
-        body.put(RandomStringUtils.random(10, "0123456789abcdef"));
+        return hexValue(RandomStringUtils.random(10, "0123456789abcdef"));
+    }
+
+    public PactDslJsonArray hexValue(String hexValue) {
+        body.put(hexValue);
         matchers.put(root + "." + body.length(), regexp("[0-9a-fA-F]+"));
         return this;
     }
 
     public PactDslJsonArray guid(String name) {
-        body.put(UUID.randomUUID().toString());
+        return guid(name, UUID.randomUUID().toString());
+    }
+
+    public PactDslJsonArray guid(String name, UUID uuid) {
+        return guid(name, uuid.toString());
+    }
+
+    public PactDslJsonArray guid(String name, String uuid) {
+        body.put(uuid);
         matchers.put(root + "." + name, regexp("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
         return this;
     }

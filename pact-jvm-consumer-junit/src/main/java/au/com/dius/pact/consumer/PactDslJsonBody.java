@@ -220,13 +220,25 @@ public class PactDslJsonBody extends DslPart {
     }
 
     public PactDslJsonBody hexValue(String name) {
-        body.put(name, RandomStringUtils.random(10, "0123456789abcdef"));
+        return hexValue(name, RandomStringUtils.random(10, "0123456789abcdef"));
+    }
+
+    public PactDslJsonBody hexValue(String name, String hexValue) {
+        body.put(name, hexValue);
         matchers.put(root + "." + name, regexp("[0-9a-fA-F]+"));
         return this;
     }
 
     public PactDslJsonBody guid(String name) {
-        body.put(name, UUID.randomUUID().toString());
+        return guid(name, UUID.randomUUID().toString());
+    }
+
+    public PactDslJsonBody guid(String name, UUID uuid) {
+        return guid(name, uuid.toString());
+    }
+
+    public PactDslJsonBody guid(String name, String uuid) {
+        body.put(name, uuid);
         matchers.put(root + "." + name, regexp("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
         return this;
     }
