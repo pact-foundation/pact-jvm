@@ -68,7 +68,7 @@ class JsonBodyMatcher extends BodyMatcher {
         result = result :+ BodyMismatch(a, b, Some(s"Expected a List with ${expectedValues.size} elements but received ${actualValues.size} elements"), path)
       }
       for ((value, index) <- expectedValues.view.zipWithIndex) {
-        val s = path + "." + index
+        val s = path + "." + (index + 1)
         if (index < actualValues.size) {
           result = result ++: compare(s, value, actualValues(index), diffConfig, matchers)
         } else {
