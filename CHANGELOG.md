@@ -1,5 +1,14 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.1.7 - bugfixes
+
+* 7112093 - updated the java DSL to include example values fir UUIDs and hex values (Ronald Holshausen, Tue Dec 2 17:35:09 2014 +1100)
+* 02c23a7 - fix issue where matchers on arrays start at index 1 in the client DSLs, but start at 0 in the core matching code (Ronald Holshausen, Tue Dec 2 15:54:26 2014 +1100)
+* 36f4d48 - further attempts to get the travis build to stop it's intermittent failures (Ronald Holshausen, Wed Nov 26 09:45:02 2014 +1100)
+* 0cc5e7c - Merge pull request #73 from bethesque/rename-client-in-example (Ronald Holshausen, Wed Nov 26 09:15:42 2014 +1100)
+* 0d813ad - Made some of the example code more meaningful. (Beth, Wed Nov 26 07:07:05 2014 +1100)
+* baf34ea - bump version (Ronald Holshausen, Tue Nov 25 19:08:36 2014 +1100)
+
 # 2.1.6 - small update to the gradle plugin
 
 * c37f4ee - Merge pull request #72 from georgepapas/provider_gradle_autogenerate_consumers_from_pact_directory (Ronald Holshausen, Mon Nov 24 12:43:20 2014 +1100)
