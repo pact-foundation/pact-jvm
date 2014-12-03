@@ -9,7 +9,7 @@ import scala.collection.immutable.TreeMap
 import scala.collection.mutable
 
 object PactConfig {
-    var bodyMatchers = mutable.HashMap[String, BodyMatcher]("application/json" -> new JsonBodyMatcher())
+    var bodyMatchers = mutable.HashMap[String, BodyMatcher]("application/.*json" -> new JsonBodyMatcher())
 }
 
 trait SharedMismatch {
@@ -92,8 +92,9 @@ object Matching {
 
   def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig) = {
     if (expected.mimeType == actual.mimeType) {
-      if (PactConfig.bodyMatchers.contains(expected.mimeType)) {
-        PactConfig.bodyMatchers(expected.mimeType).matchBody(expected, actual, diffConfig)
+      val result = PactConfig.bodyMatchers.find(entry => actual.mimeType.matches(entry._1))
+      if (result.isDefined) {
+        result.get._2.matchBody(expected, actual, diffConfig)
       } else {
         (expected.body, actual.body) match {
           case (None, None) => List()

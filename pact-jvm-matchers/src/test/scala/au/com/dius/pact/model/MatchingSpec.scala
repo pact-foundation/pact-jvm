@@ -37,6 +37,11 @@ class MatchingSpec extends Specification {
           Request("", "", None, Some(Map("Content-Type" -> "b")), request.body, None), config) must beEqualTo(expected)
       }
 
+      "match different mimetypes by regexp" in {
+        matchBody(Request("", "", None, Some(Map("Content-Type" -> "application/x+json")), Some("{ \"name\":  \"bob\" }"), None),
+          Request("", "", None, Some(Map("Content-Type" -> "application/x+json")), Some("{\"name\":\"bob\"}"), None), config) must beEmpty
+      }
+
     }
 
     "Method Matching" should {
