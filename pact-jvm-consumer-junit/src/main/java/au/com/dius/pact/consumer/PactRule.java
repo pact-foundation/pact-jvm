@@ -122,7 +122,7 @@ public class PactRule extends ExternalResource {
         boolean conforms =
             pact != null
             && PactFragment.class.isAssignableFrom(m.getReturnType())
-            && m.getParameterCount() == 1
+            && m.getParameterTypes().length == 1
             && m.getParameterTypes()[0].isAssignableFrom(PactDslWithState.class);
 
         if (!conforms && pact != null) {
