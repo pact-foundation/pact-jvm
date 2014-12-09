@@ -18,7 +18,7 @@ public @interface PactVerification {
 
     /**
      * the tested provider state.
-     * has to be the same id as in {@link Pact.state}
+     * has to be the same id as in {@link au.com.dius.pact.consumer.Pact} state
      */
     String value();
 }
