@@ -1,6 +1,6 @@
 *.class
 *.log
-
+*/bin
 # sbt specific
 dist/*
 target/
@@ -22,8 +22,9 @@ project/plugins/project/
 
 # Eclipse
 */.cache
-*/.classpath
-*/.project
+.classpath
+.settings
+.project
 build/
 pkgdiff_reports/
 .gradle/
