@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.model.Request
-import groovyx.net.http.RESTClient
+import groovyx.net.http.HTTPBuilder
 import org.apache.http.HttpResponse
 import scala.collection.JavaConverters$
 
@@ -41,35 +41,11 @@ class ProviderClient {
         }
 
         client.handler.failure = { resp -> resp }
-        switch (request.method().toUpperCase()) {
-            case 'POST':
-                response = client.post(requestMap)
-                break
-            case 'HEAD':
-                response = client.head(requestMap)
-                break
-            case 'OPTIONS':
-                response = client.options(requestMap)
-                break
-            case 'PUT':
-                response = client.put(requestMap)
-                break
-            case 'DELETE':
-                response = client.delete(requestMap)
-                break
-            case 'PATCH':
-                response = client.patch(requestMap)
-                break
-            default:
-                response = client.get(requestMap)
-                break
-        }
-
-        response
+        client."${request.method().toLowerCase()}"(requestMap)
     }
 
-  private RESTClient newClient() {
-    new RESTClient("${provider.protocol}://${provider.host}:${provider.port}${provider.path}")
+  private HTTPBuilder newClient() {
+    new HTTPBuilder("${provider.protocol}://${provider.host}:${provider.port}${provider.path}")
   }
 
 }
