@@ -22,7 +22,7 @@ public class ExampleJavaConsumerPactRuleTest {
         headers.put("testreqheader", "testreqheadervalue");
 
         return builder
-            .uponReceiving("ExampleJavaConsumerPactTest test interaction")
+            .uponReceiving("ExampleJavaConsumerPactRuleTest test interaction")
                 .path("/")
                 .method("GET")
                 .headers(headers)
@@ -30,7 +30,7 @@ public class ExampleJavaConsumerPactRuleTest {
                 .status(200)
                 .headers(headers)
                 .body("{\"responsetest\": true, \"name\": \"harry\"}")
-            .uponReceiving("ExampleJavaConsumerPactTest second test interaction")
+            .uponReceiving("ExampleJavaConsumerPactRuleTest second test interaction")
                 .method("OPTIONS")
                 .headers(headers)
                 .path("/second")

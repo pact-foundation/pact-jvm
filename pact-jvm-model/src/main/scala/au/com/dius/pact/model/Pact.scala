@@ -2,8 +2,7 @@ package au.com.dius.pact.model
 
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-import scala.collection.{mutable, JavaConversions}
-import scala.util.matching.Regex
+import scala.collection.JavaConversions
 
 object Pact {
   def apply(provider: Provider, consumer: Consumer, interactions: java.util.List[Interaction]): Pact = {
@@ -104,7 +103,7 @@ trait HttpPart {
     }
   }
 
-  def jsonBody = mimeType == "application/json"
+  def jsonBody = mimeType.matches("application\\/.*json")
 
   def matchers: Option[Map[String, Map[String, String]]]
 
