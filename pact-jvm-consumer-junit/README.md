@@ -78,6 +78,48 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
 }
 ```
 
+### Using the Pact JUnit Rule
+
+Thanks to @warmuuh we have a JUnit rule that simplifies running Pact consumer tests. To use it, create a test class
+and then add the rule:
+
+#### 1. Add the Pact Rule to your test class.
+
+```java
+    @Rule
+    public PactRule rule = new PactRule("localhost", 8080, this);
+```
+
+#### 2. Annotate a method with Pact that returns a pact fragment
+
+```java
+    @Pact(state="test state", provider="test_provider", consumer="test_consumer")
+    public PactFragment createFragment(PactDslWithState builder) {
+        return builder
+            .uponReceiving("ExampleJavaConsumerPactRuleTest test interaction")
+                .path("/")
+                .method("GET")
+            .willRespondWith()
+                .status(200)
+                .body("{\"responsetest\": true}")
+            .toFragment();
+    }
+```
+
+#### 3. Annotate your test method with PactVerification to have it run in the context of a mock server setup with the appropriate pact from step 2
+
+```java
+    @Test
+    @PactVerification("test state")
+    public void runTest() {
+        Map expectedResponse = new HashMap();
+        expectedResponse.put("responsetest", true);
+        assertEquals(new ConsumerClient("http://localhost:8080").get("/"), expectedResponse);
+    }
+```
+
+For an example, have a look at [ExampleJavaConsumerPactRuleTest](src/test/java/au/com/dius/pact/consumer/ExampleJavaConsumerPactRuleTest.java)
+
 ### Using the Pact DSL directly
 
 Sometimes it is not convenient to use the ConsumerPactTest as it only allows one test per test class. The DSL can be
@@ -204,6 +246,8 @@ For example:
         .status(200)
         .body("{\"hello\": \"harry\"}")
 ```
+
+##
 
 ## Debugging pact failures
 
