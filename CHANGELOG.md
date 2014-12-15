@@ -1,5 +1,26 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.1.8 - fixes plus pact junit rule
+
+**NOTE: This version has a breaking change for users of the gradle plugin with request filters.
+See [Modifying The Requests Before They Are Sent](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle#modifying-the-requests-before-they-are-sent)
+in the gradle plugin docs for more info.**
+
+* b6b836a - fixed link in readme (Ronald Holshausen, Mon Dec 15 19:31:19 2014 +1100)
+* be1f87d - updated readme to include docs about pact junit rule (Ronald Holshausen, Mon Dec 15 19:27:35 2014 +1100)
+* 118d5fa - fixed formatting in the readme (Ronald Holshausen, Mon Dec 15 16:14:34 2014 +1100)
+* f4d3287 - Switch from HttpBuilder to Apache HttpClient in gradle provider to be able to handle streaming responses (Ronald Holshausen, Mon Dec 15 15:34:27 2014 +1100)
+* 9d48373 - added a link to spring boot example (Ronald Holshausen, Sat Dec 13 09:21:54 2014 +1100)
+* 5c38ca6 - #74 - use a regexp when serialising pact file to detect extended json mimetypes like application/x-thrift+json (Ronald Holshausen, Thu Dec 11 20:14:18 2014 +1100)
+* 074c21e - use HttpBuilder instead of RestClient in the gradle plugin as the RestClient does not handle streaming responses (Ronald Holshausen, Thu Dec 11 10:18:53 2014 +1100)
+* b991a27 - get the PactRule working on JDK 6 (Ronald Holshausen, Tue Dec 9 19:33:36 2014 +1100)
+* dc9e5a1 - fix javadocs to get travis build going again (Ronald Holshausen, Tue Dec 9 19:24:49 2014 +1100)
+* c8a716a - Merge branch 'warmuuh-feature/junit-rule' (Ronald Holshausen, Tue Dec 9 19:16:07 2014 +1100)
+* 7a604c0 - #75 - added @Pact consumer rule (pmucha, Mon Dec 8 15:48:16 2014 +0100)
+* 948ecfc - #74 - handle application/xxx+json style mimetypes as json (Ronald Holshausen, Wed Dec 3 20:12:23 2014 +1100)
+* 823e6c8 - rename the second parameter in MockProviderConfig to be more meaningful (Ronald Holshausen, Wed Dec 3 09:10:53 2014 +1100)
+* 30088d7 - bump version (Ronald Holshausen, Tue Dec 2 20:35:00 2014 +1100)
+
 # 2.1.7 - bugfixes
 
 * 7112093 - updated the java DSL to include example values fir UUIDs and hex values (Ronald Holshausen, Tue Dec 2 17:35:09 2014 +1100)
