@@ -120,8 +120,8 @@ as a string (for the case when they haven't been defined yet).
 
 ## Modifying the requests before they are sent
 
-### NOTE on breaking change: Version 2.1.8+ uses Apache HttpClient instead of HttpBuilder so the closure will receive a
-HttpRequest object instead of a request Map.
+**NOTE on breaking change: Version 2.1.8+ uses Apache HttpClient instead of HttpBuilder so the closure will receive a
+HttpRequest object instead of a request Map.**
 
 Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would
 be authentication tokens, which have a small life span. The Pact Gradle plugin provides a request filter that can be
