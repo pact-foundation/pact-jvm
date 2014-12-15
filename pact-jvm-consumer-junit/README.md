@@ -80,7 +80,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
 
 ### Using the Pact JUnit Rule
 
-Thanks to @warmuuh we have a JUnit rule that simplifies running Pact consumer tests. To use it, create a test class
+Thanks to [@warmuuh](https://github.com/warmuuh) we have a JUnit rule that simplifies running Pact consumer tests. To use it, create a test class
 and then add the rule:
 
 #### 1. Add the Pact Rule to your test class.
