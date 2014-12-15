@@ -2,9 +2,7 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.Response$
-import org.apache.http.Header
-import org.apache.http.HttpEntity
-import org.apache.http.HttpResponse
+import org.apache.http.entity.ContentType
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 import org.junit.Before
 import org.junit.Test
@@ -13,7 +11,7 @@ class ResponseComparisonTest {
 
   Closure<Map> testSubject
   Response response
-  HttpResponse actualResponse
+  def actualResponse
   int actualStatus
   Map actualHeaders = ['A': 'B', 'C': 'D', 'Content-Type': 'application/json']
   def actualBody
@@ -22,12 +20,8 @@ class ResponseComparisonTest {
   void setup() {
     response = Response$.MODULE$.apply(200, ['Content-Type': 'application/json'], '{"stuff": "is good"}', [:])
     actualStatus = 200
-    actualBody = [
-      stuff: 'is good'
-    ]
-    def contentTypeHeader = [getValue: { actualHeaders['Content-Type'] }] as Header
-    def entity = [getContentType: { contentTypeHeader }] as HttpEntity
-    actualResponse = [getEntity: { entity }] as HttpResponse
+    actualBody = '{"stuff": "is good"}'
+    actualResponse = [contentType: ContentType.APPLICATION_JSON]
     testSubject = { ResponseComparison.compareResponse(response, actualResponse, actualStatus, actualHeaders, actualBody) }
   }
 
@@ -73,9 +67,7 @@ class ResponseComparisonTest {
 
   @Test
   void 'comparing bodies should show all the differences'() {
-    actualBody = [
-      stuff: 'should make the test fail'
-    ]
+    actualBody = '{"stuff": "should make the test fail"}'
     def result = testSubject().body
     assert result.comparison == ['$.body.stuff': "Expected 'is good' but received 'should make the test fail'"]
     assert result.diff[0] == '@1'

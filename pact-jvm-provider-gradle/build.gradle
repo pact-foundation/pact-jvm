@@ -14,7 +14,7 @@ apply plugin: 'maven-publish'
 dependencies {
     compile gradleApi(), localGroovy(), project(":pact-jvm-provider_${project.scalaVersion}"),
         'org.fusesource.jansi:jansi:1.11', 'org.codehaus.groovy.modules.http-builder:http-builder:0.7',
-        'com.googlecode.java-diff-utils:diffutils:1.3.0'
+        'org.apache.httpcomponents:httpclient:4.3.6', 'com.googlecode.java-diff-utils:diffutils:1.3.0'
 
     testCompile project(":pact-specification-test_${project.scalaVersion}")
 }

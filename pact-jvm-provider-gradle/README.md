@@ -120,10 +120,13 @@ as a string (for the case when they haven't been defined yet).
 
 ## Modifying the requests before they are sent
 
+### NOTE on breaking change: Version 2.1.8+ uses Apache HttpClient instead of HttpBuilder so the closure will receive a
+HttpRequest object instead of a request Map.
+
 Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would
 be authentication tokens, which have a small life span. The Pact Gradle plugin provides a request filter that can be
-set to a closure on the provider that will be called before the request is made. This closure will receive a Map with
-all the requests attributes defined on it.
+set to a closure on the provider that will be called before the request is made. This closure will receive the HttpRequest
+prior to it being executed.
 
 ```groovy
 pact {
@@ -134,7 +137,7 @@ pact {
 
             requestFilter = { req ->
                 // Add an authorization header to each request
-                req.headers['Authorization] = 'OAUTH eyJhbGciOiJSUzI1NiIsImN0eSI6ImFw...'
+                req.addHeader('Authorization', 'OAUTH eyJhbGciOiJSUzI1NiIsImN0eSI6ImFw...')
             }
 
             hasPactWith('consumer1') {

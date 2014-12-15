@@ -20,19 +20,19 @@ import scala.collection.JavaConverters$
 class ResponseComparison {
 
   Response expected
-  HttpResponse actual
+  Map actual
   int actualStatus
   Map actualHeaders
-  def actualBody
+  String actualBody
 
-  static def compareResponse(Response response, HttpResponse actualResponse, int actualStatus, Map actualHeaders,
-                             def actualBody) {
+  static def compareResponse(Response response, Map actualResponse, int actualStatus, Map actualHeaders,
+                             String actualBody) {
     def result = [:]
     def comparison = new ResponseComparison(expected: response, actual: actualResponse, actualStatus: actualStatus,
         actualHeaders: actualHeaders.collectEntries { k, v -> [k.toUpperCase(), v] }, actualBody: actualBody)
     def mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(
-            ResponseMatching$.MODULE$.responseMismatches(response, Response$.MODULE$.apply(actualStatus,
-            actualHeaders, new JsonBuilder(actualBody).toPrettyString(), [:]))).asJava()
+        ResponseMatching$.MODULE$.responseMismatches(response, Response$.MODULE$.apply(actualStatus,
+            actualHeaders, actualBody, [:]))).asJava()
 
     result.method = comparison.compareStatus(mismatches)
     result.headers = comparison.compareHeaders(mismatches)
@@ -87,8 +87,24 @@ class ResponseComparison {
         [bodyMismatch.path(), bodyMismatch.mismatch().defined ? bodyMismatch.mismatch().get() : "mismatch"]
       }
 
-      String actualBodyString = new JsonBuilder(actualBody).toPrettyString()
-      String expectedBodyString = expected.body().defined ? new JsonBuilder(new JsonSlurper().parseText(expected.body().get())).toPrettyString() : ''
+      String actualBodyString = ''
+      if (actualBody) {
+          if (actual.contentType.mimeType ==~ 'application/.*json') {
+              actualBodyString = new JsonBuilder(new JsonSlurper().parseText(actualBody)).toPrettyString()
+          } else {
+              actualBodyString = actualBody.toString()
+          }
+      }
+
+      String expectedBodyString = ''
+      if (expected.body().defined) {
+          if (expected.jsonBody()) {
+              expectedBodyString = new JsonBuilder(new JsonSlurper().parseText(expected.body().get())).toPrettyString()
+          } else {
+              expectedBodyString = expected.body().get()
+          }
+      }
+
       def expectedLines = expectedBodyString.split('\n') as List
       def actualLines = actualBodyString.split('\n') as List
       Patch<String> patch = DiffUtils.diff(expectedLines, actualLines)
