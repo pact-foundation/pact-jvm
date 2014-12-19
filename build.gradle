@@ -11,7 +11,7 @@ subprojects {
 
     def scalaVersionLookup = [
         '2.10': '2.10.4',
-        '2.11': '2.11.2'
+        '2.11': '2.11.4'
     ]
 
     def m = project.name =~ /.*_(2\.1\d)(_0\.\d+)?/
