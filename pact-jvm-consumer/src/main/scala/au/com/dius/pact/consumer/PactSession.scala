@@ -47,21 +47,16 @@ case class PactSession(expected: Seq[Interaction], results: PactSessionResults) 
     }
   }
   
-  private def forgetAbout(req: Request): PactSession = 
-    copy(expected = expected.filterNot(_.request == req))
-  
-  def recordUnexpected(req: Request): PactSession = 
-    forgetAbout(req).copy(results = results addUnexpected req)
+  def recordUnexpected(req: Request): PactSession =
+    copy(results = results addUnexpected req)
   
   def recordAlmostMatched(partial: PartialRequestMatch): PactSession = 
     copy(results = results addAlmostMatched partial)  
     
   def recordMatched(interaction: Interaction): PactSession = 
-    forgetAbout(interaction.request).copy(results = results addMatched interaction)
+    copy(results = results addMatched interaction)
   
   def withTheRestMissing: PactSession = PactSession(Seq(), remainingResults)
   
-  def remainingResults: PactSessionResults = results addMissing expected
+  def remainingResults: PactSessionResults = results.addMissing(expected diff results.matched)
 }
-
-

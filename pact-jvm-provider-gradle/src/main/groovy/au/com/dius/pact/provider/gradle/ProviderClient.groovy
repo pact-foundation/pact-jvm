@@ -1,7 +1,6 @@
 package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.model.Request
-import com.google.common.net.UrlEscapers
 import org.apache.http.Header
 import org.apache.http.HttpEntity
 import org.apache.http.HttpEntityEnclosingRequest

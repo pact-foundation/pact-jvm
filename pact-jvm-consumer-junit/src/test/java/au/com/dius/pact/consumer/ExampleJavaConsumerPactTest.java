@@ -55,6 +55,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
             expectedResponse.put("responsetest", true);
             expectedResponse.put("name", "harry");
             assertEquals(new ConsumerClient(url).get("/"), expectedResponse);
+            assertEquals(new ConsumerClient(url).options("/second"), 200);
         } catch (Exception e) {
             // NOTE: if you want to see any pact failure, do not throw an exception here. This should be
             // fixed at some point (see Issue #40 https://github.com/DiUS/pact-jvm/issues/40)
