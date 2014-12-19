@@ -38,11 +38,16 @@ object Matchers extends StrictLogging {
   }
 
   def toJavaList[T](list: Seq[T]) = JavaConverters.seqAsJavaListConverter(list).asJava
+
+  def safeToString(value: Any) = {
+    if (value == null) ""
+    else value.toString
+  }
 }
 
 object EqualsMatcher extends Matcher {
   def domatch[T](matcherDef: java.util.Map[String, _], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]): java.util.List[T] = {
-    if (actual.equals(expected)) {
+    if (Matchers.safeToString(actual).equals(expected)) {
       Collections.emptyList[T]()
     } else {
       Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to equal ${Matcher.valueOf(actual)}", path)))
@@ -53,7 +58,7 @@ object EqualsMatcher extends Matcher {
 object RegexpMatcher extends Matcher {
   def domatch[T](matcherDef: java.util.Map[String, _], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]): java.util.List[T] = {
     val regex = matcherDef.get("regex").toString
-    if (actual.toString.matches(regex)) {
+    if (Matchers.safeToString(actual).matches(regex)) {
       Collections.emptyList[T]()
     } else {
       Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to match '$regex'", path)))
@@ -123,7 +128,7 @@ object TypeMatcher extends Matcher with StrictLogging {
 
   def matchTimestamp[T](path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]) = {
     try {
-      DateUtils.parseDate(actual.toString, DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern,
+      DateUtils.parseDate(Matchers.safeToString(actual), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern,
         DateFormatUtils.ISO_DATETIME_FORMAT.getPattern, DateFormatUtils.SMTP_DATETIME_FORMAT.getPattern,
         "yyyy-MM-dd HH:mm:ssZZ", "yyyy-MM-dd HH:mm:ss"
       )
@@ -152,7 +157,7 @@ object TimestampMatcher extends Matcher {
   def domatch[T](matcherDef: java.util.Map[String, _], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]): java.util.List[T] = {
     val pattern = matcherDef.get("timestamp").toString
     try {
-      DateUtils.parseDate(actual.toString, pattern)
+      DateUtils.parseDate(Matchers.safeToString(actual), pattern)
       Collections.emptyList[T]()
     } catch {
       case e: ParseException => Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to match a timestamp of '$pattern': ${e.getMessage}", path)))
@@ -164,7 +169,7 @@ object TimeMatcher extends Matcher {
   def domatch[T](matcherDef: java.util.Map[String, _], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]): java.util.List[T] = {
     val pattern = matcherDef.get("time").toString
     try {
-      DateUtils.parseDate(actual.toString, pattern)
+      DateUtils.parseDate(Matchers.safeToString(actual), pattern)
       Collections.emptyList[T]()
     } catch {
       case e: ParseException => Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to match a time of '$pattern': ${e.getMessage}", path)))
@@ -176,7 +181,7 @@ object DateMatcher extends Matcher {
   def domatch[T](matcherDef: java.util.Map[String, _], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]): java.util.List[T] = {
     val pattern = matcherDef.get("date").toString
     try {
-      DateUtils.parseDate(actual.toString, pattern)
+      DateUtils.parseDate(Matchers.safeToString(actual), pattern)
       Collections.emptyList[T]()
     } catch {
       case e: ParseException => Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to match a date of '$pattern': ${e.getMessage}", path)))

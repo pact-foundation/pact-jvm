@@ -47,6 +47,12 @@ class MatchersTest extends Specification {
       new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
     }
 
+    "handle null values" in {
+      val expected = Request("get", "/", None, None, Some("{\"value\": \"Harry\"}"), Some(Map("$.body.value" -> Map("regex" -> "Ha[a-z]*"))))
+      val actual = Request("get", "/", None, None, Some("{\"value\": null}"), None)
+      new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+    }
+
   }
 
   "type matcher" should {
@@ -84,8 +90,8 @@ class MatchersTest extends Specification {
       }
 
       "not accept null/non-null" in {
-        val expected = Request("get", "/", None, None, Some("{\"value\": null}"), Some(Map("$.body.value" -> Map("match" -> "type"))))
-        val actual = Request("get", "/", None, None, Some("{\"value\": 200}"), None)
+        val expected = Request("get", "/", None, None, Some("{\"value\": 200}"), Some(Map("$.body.value" -> Map("match" -> "type"))))
+        val actual = Request("get", "/", None, None, Some("{\"value\": null}"), None)
         new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
       }
 
@@ -111,6 +117,12 @@ class MatchersTest extends Specification {
         new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
       }
 
+      "handle null values" in {
+        val expected = Request("get", "/", None, None, Some("{\"value\": \"2014-01-01-14:00:00+10:00\"}"), Some(Map("$.body.value" -> Map("timestamp" -> "yyyy-MM-dd-HH:mm:ssZZZ"))))
+        val actual = Request("get", "/", None, None, Some("{\"value\": null}"), None)
+        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+      }
+
     }
 
     "match times" should {
@@ -127,6 +139,12 @@ class MatchersTest extends Specification {
         new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
       }
 
+      "handle null values" in {
+        val expected = Request("get", "/", None, None, Some("{\"value\": \"14:00:00\"}"), Some(Map("$.body.value" -> Map("time" -> "HH:mm:ss"))))
+        val actual = Request("get", "/", None, None, Some("{\"value\": null}"), None)
+        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+      }
+
     }
 
     "match dates" should {
@@ -138,9 +156,15 @@ class MatchersTest extends Specification {
       }
 
       "accept dates with custom patterns" in {
-        val expected = Request("get", "/", None, None, Some("{\"value\": \"01/01/1970\"}"), Some(Map("$.body.value" -> Map("time" -> "MM/dd/yyyy"))))
-        val actual = Request("get", "/", None, None, Some("{\"value\": \"12/02/1970\"}"), None)
+        val expected = Request("get", "/", None, None, Some("{\"value\": \"12/30/1970\"}"), Some(Map("$.body.value" -> Map("date" -> "MM/dd/yyyy"))))
+        val actual = Request("get", "/", None, None, Some("{\"value\": \"12/30/1970\"}"), None)
         new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+      }
+
+      "handle null values" in {
+        val expected = Request("get", "/", None, None, Some("{\"value\": \"2014-01-01\"}"), Some(Map("$.body.value" -> Map("date" -> "yyyy-MM-dd"))))
+        val actual = Request("get", "/", None, None, Some("{\"value\": null}"), None)
+        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
       }
 
     }
