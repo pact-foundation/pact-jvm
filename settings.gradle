@@ -1,8 +1,9 @@
 def crossCompileModules = [ 'pact-jvm-consumer', 'pact-jvm-consumer-junit', 'pact-jvm-consumer-specs2',
-  'pact-jvm-consumer-groovy', 'pact-jvm-model', 'pact-jvm-provider', 'pact-jvm-provider-specs2',
-  'pact-jvm-server', 'pact-specification-test', 'pact-jvm-provider-gradle', 'pact-jvm-matchers']
+  'pact-jvm-model', 'pact-jvm-provider', 'pact-jvm-provider-specs2',
+  'pact-jvm-server', 'pact-specification-test', 'pact-jvm-matchers']
 
 def sbtModules = ['pact-jvm-consumer-sbt', 'pact-jvm-provider-sbt']
+def groovyModules = ['pact-jvm-consumer-groovy', 'pact-jvm-provider-gradle', 'pact-jvm-provider-maven']
 
 rootProject.name = 'pact-jvm'
 
@@ -11,12 +12,22 @@ crossCompileModules.each {
   include it + '_2.11'
 }
 
+groovyModules.each {
+  include it + '_2.11'
+  include it + '-indy_2.11'
+}
+
 sbtModules.each {
   include it + '_2.10_0.13'
 }
 
 rootProject.children.each {
   def m = it.dir =~ /(.*)_2\.1\d(_0\.\d+)?$/
+  if (m.matches()) {
+    it.dir = file(m.group(1))
+  }
+
+  m = it.dir =~ /(.*)-indy$/
   if (m.matches()) {
     it.dir = file(m.group(1))
   }

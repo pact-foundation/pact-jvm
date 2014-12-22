@@ -14,6 +14,7 @@ subprojects {
         '2.11': '2.11.4'
     ]
 
+    def buildDirStr = 'build'
     def m = project.name =~ /.*_(2\.1\d)(_0\.\d+)?/
     if (m.matches()) {
       project.ext {
@@ -22,8 +23,17 @@ subprojects {
           sbtVersion = '0.13.5'
       }
 
-      buildDir = new File(projectDir, "build/" + project.scalaVersion)
+      buildDirStr = "build/${project.scalaVersion}"
     }
+
+    if (project.name ==~ /.*\-indy_2\.11/) {
+        project.ext.groovyIndy = true
+        buildDirStr += 'indy'
+    } else {
+        project.ext.groovyIndy = false
+    }
+
+    buildDir = new File(projectDir, buildDirStr)
 
     apply plugin: 'java'
     apply plugin: 'scala'
@@ -34,6 +44,7 @@ subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
+        jcenter()
     }
 
     dependencies {
