@@ -1,0 +1,45 @@
+apply plugin: 'maven-publish'
+
+dependencies {
+
+    if (project.groovyIndy) {
+        compile 'org.codehaus.groovy:groovy-all:2.3.7:indy'
+    } else {
+        compile 'org.codehaus.groovy:groovy-all:2.3.7'
+    }
+
+    compile project(":pact-jvm-provider_${project.scalaVersion}"),
+        'org.fusesource.jansi:jansi:1.11', 'org.apache.httpcomponents:httpclient:4.3.6',
+        'com.googlecode.java-diff-utils:diffutils:1.3.0', 'org.apache.maven:maven-plugin-api:3.2.5',
+        'org.apache.maven.plugin-tools:maven-plugin-annotations:3.3'
+}
+
+tasks.withType(GroovyCompile) {
+    groovyOptions.optimizationOptions.indy = project.groovyIndy
+}
+
+task pluginDescriptor(type: Exec, dependsOn: ":pact-jvm-provider_${project.scalaVersion}:install") {
+    commandLine 'mvn', '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.2:descriptor'
+    doFirst {
+        def pomFile = file("${buildDir}/poms/pom.xml")
+        def pom = install.repositories.mavenInstaller.pom
+        pom.packaging = 'maven-plugin'
+        pom.groupId = project.group
+        pom.artifactId = project.name
+        pom.version = version
+        pom.withXml {
+            def buildNode = asNode().appendNode('build')
+            buildNode.appendNode('directory', buildDir)
+            buildNode.appendNode('outputDirectory', "$buildDir/classes/main")
+        }
+        pom.writeTo( pomFile )
+    }
+    doLast {
+        final  pluginDescriptor = file("${project.compileGroovy.destinationDir}/META-INF/maven/plugin.xml")
+        assert pluginDescriptor.file, "[$pluginDescriptor.canonicalPath] was not created"
+        println "Plugin descriptor file:$pluginDescriptor.canonicalPath is created successfully"
+    }
+}
+
+pluginDescriptor.shouldRunAfter project.jar
+project.jar.dependsOn pluginDescriptor
