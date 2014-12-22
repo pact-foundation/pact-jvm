@@ -17,7 +17,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'au.com.dius:pact-jvm-provider-gradle_2.11:2.1.8'
+        classpath 'au.com.dius:pact-jvm-provider-gradle_2.10:2.0.10'
     }
 }
 ```
@@ -32,13 +32,9 @@ apply plugin: 'au.com.dius.pact'
 
 ```groovy
 plugins {
-  id "au.com.dius.pact" version "2.1.8"
+  id "au.com.dius.pact" version "2.1.1"
 }
 ```
-
-**NOTE:** There are two versions of the gradle plugin, one compiled with standard groovy and then other with invoke dynamic
- support (indy version). To use the indy version, use the artifact `pact-jvm-provider-gradle-indy_2.11`. This version
- requires JDK 1.7+ (1.8 is recommended).
 
 ### 2. Define the pacts between your consumers and providers
 

@@ -1,11 +1,13 @@
+import org.apache.commons.lang3.SystemUtils
+
 dependencies {
     compile project(":pact-jvm-consumer_${project.scalaVersion}")
 
-    compile "org.codehaus.groovy:groovy-all:2.3.7${project.groovyIndy ? ':indy' : ''}"
+    if (SystemUtils.IS_JAVA_1_6) {
+      compile 'org.codehaus.groovy:groovy-all:2.3.4'
+    } else {
+      compile 'org.codehaus.groovy:groovy-all:2.3.4:indy'
+    }
 
     testCompile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1', 'ch.qos.logback:logback-classic:1.1.2'
-}
-
-tasks.withType(GroovyCompile) {
-    groovyOptions.optimizationOptions.indy = project.groovyIndy
 }
