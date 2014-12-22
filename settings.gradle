@@ -3,7 +3,7 @@ def crossCompileModules = [ 'pact-jvm-consumer', 'pact-jvm-consumer-junit', 'pac
   'pact-jvm-server', 'pact-specification-test', 'pact-jvm-matchers']
 
 def sbtModules = ['pact-jvm-consumer-sbt', 'pact-jvm-provider-sbt']
-def groovyModules = ['pact-jvm-consumer-groovy', 'pact-jvm-provider-gradle'/*, 'pact-jvm-provider-maven'*/]
+def groovyModules = ['pact-jvm-consumer-groovy', 'pact-jvm-provider-gradle', 'pact-jvm-provider-maven']
 
 rootProject.name = 'pact-jvm'
 
@@ -12,9 +12,13 @@ crossCompileModules.each {
   include it + '_2.11'
 }
 
+def javaVersion = System.getProperty('java.specification.version') as Double
 groovyModules.each {
   include it + '_2.11'
-  include it + '-indy_2.11'
+
+  if (javaVersion >= 1.7) {
+    include it + '-indy_2.11'
+  }
 }
 
 sbtModules.each {

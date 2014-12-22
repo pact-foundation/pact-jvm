@@ -12,7 +12,7 @@ The library is available on maven central (without invoke dynamic support) using
 * version-id = `2.1.x`
 
 For a version with support for evoke dynamic instruction, use the artifact `pact-jvm-consumer-groovy-indy_2.11`. Note
-that this version requires JDK 1.7.0+ and is available from version 2.1.9+.
+that this version requires JDK 1.7.0+ (1.8 recommended) and is available from version 2.1.9+.
 
 ##Usage
 
@@ -22,7 +22,7 @@ to define your pacts. For a full example, have a look at the example JUnit `Exam
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:2.1.5'
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:2.1.8'
     }
   
 Then create an instance of the `PactBuilder` in your test.
