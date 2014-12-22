@@ -5,15 +5,18 @@ Groovy DSL for Pact JVM
 
 ##Dependency
 
-The library is available on maven central using:
+The library is available on maven central (without invoke dynamic support) using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-groovy_2.11`
 * version-id = `2.1.x`
 
+For a version with support for evoke dynamic instruction, use the artifact `pact-jvm-consumer-groovy-indy_2.11`. Note
+that this version requires JDK 1.7.0+ and is available from version 2.1.9+.
+
 ##Usage
 
-Add the `pact-jvm-consumer-groovy` library to your test class path. This provides a `PactBuilder` class for you to use
+Add the `pact-jvm-consumer-groovy` or `pact-jvm-consumer-groovy-indy` library to your test class path. This provides a `PactBuilder` class for you to use
 to define your pacts. For a full example, have a look at the example JUnit `ExampleGroovyConsumerPactTest`.
 
 If you are using gradle for your build, add it to your `build.gradle`:
