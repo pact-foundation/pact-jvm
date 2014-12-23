@@ -203,9 +203,9 @@ and add the following matchers:
 
 ```json
 {
-    "$.body.name": ["regex": "\\w+"],
-    "$.body.surname": ["regex": "\\w+"],
-    "$.body.position": ["regex": "staff|contractor"]
+    "$.body.name": {"regex": "\\w+"},
+    "$.body.surname": {"regex": "\\w+"},
+    "$.body.position": {"regex": "staff|contractor"}
 }
 ```
 
