@@ -23,13 +23,11 @@ import PactGenerator._
  */
 object PactGenerator {
 
-  def pactRootDir = PactConsumerConfig.config("pactRootDir")
-
-  def defaultFilename(pact: Pact): String = 
+  def defaultFilename(pact: Pact): String =
     s"${pact.consumer.name}-${pact.provider.name}.json"
 
   def destinationFileForPact(pact: Pact): File = destinationFile(defaultFilename(pact))
-  def destinationFile(filename: String): File = new File(s"$pactRootDir/$filename")
+  def destinationFile(filename: String): File = new File(s"${PactConsumerConfig.pactRootDir}/$filename")
   
   def merge(pact: Pact): PactGenerator = synchronized {
     pactGen = pactGen merge pact
@@ -63,7 +61,7 @@ case class PactGenerator(pacts: Map[String, Pact], conflicts: List[MergeConflict
 
   def writeAllToFile(): Unit = {
     def createPactRootDir(): Unit = 
-      new File(pactRootDir).mkdirs()
+      new File(PactConsumerConfig.pactRootDir).mkdirs()
     
     def writeToFile(pact: Pact, filename: String): Unit = {
       val file = destinationFileForPact(pact)

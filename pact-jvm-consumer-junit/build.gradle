@@ -5,3 +5,7 @@ dependencies {
 
     testCompile 'ch.qos.logback:logback-core:1.1.2', 'ch.qos.logback:logback-classic:1.1.2'
 }
+
+test {
+    systemProperties['pact.rootDir'] = "$buildDir/pacts"
+}
