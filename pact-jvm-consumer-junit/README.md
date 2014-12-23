@@ -257,7 +257,7 @@ you setup in `createFragment`. If the request does not match, it will return a 5
 Each request received and the generated response is logged using [SLF4J](http://www.slf4j.org/). Just enable debug level
 logging for au.com.dius.pact.consumer.UnfilteredMockProvider. Most failures tend to be mismatched headers or bodies.
 
-## Changing the directory pact files are written to
+## Changing the directory pact files are written to (2.1.9+)
 
 By default, pact files are written to `target/pacts`, but this can be overwritten with the `pact.rootDir` system property.
 This property needs to be set on the test JVM as most build tools will fork a new JVM to run the tests.
