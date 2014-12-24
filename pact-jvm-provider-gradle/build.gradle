@@ -12,7 +12,10 @@ apply plugin: 'java-gradle-plugin'
 apply plugin: 'maven-publish'
 
 dependencies {
-    compile gradleApi(), localGroovy(), project(":pact-jvm-provider_${project.scalaVersion}")
+    compile gradleApi(), localGroovy()
+    compile(project(":pact-jvm-provider_${project.scalaVersion}")) {
+      exclude module: 'groovy-all'
+    }
 }
 
 publishing {
