@@ -3,6 +3,8 @@ package au.com.dius.pact.provider.gradle
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.Pact$
 import au.com.dius.pact.model.Interaction
+import au.com.dius.pact.provider.groovysupport.ProviderClient
+import au.com.dius.pact.provider.groovysupport.ResponseComparison
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.AnsiConsole
 import org.gradle.api.DefaultTask

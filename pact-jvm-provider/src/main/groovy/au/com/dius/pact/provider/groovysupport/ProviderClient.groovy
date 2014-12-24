@@ -1,4 +1,4 @@
-package au.com.dius.pact.provider.gradle
+package au.com.dius.pact.provider.groovysupport
 
 import au.com.dius.pact.model.Request
 import org.apache.http.Header
@@ -25,7 +25,7 @@ import scala.collection.JavaConverters$
 class ProviderClient {
 
     Request request
-    ProviderInfo provider
+    def provider
 
     def makeRequest() {
         CloseableHttpClient httpclient = newClient()

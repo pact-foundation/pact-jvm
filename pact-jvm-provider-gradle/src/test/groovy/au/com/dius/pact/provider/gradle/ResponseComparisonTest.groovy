@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.Response$
+import au.com.dius.pact.provider.groovysupport.ResponseComparison
 import org.apache.http.entity.ContentType
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 import org.junit.Before

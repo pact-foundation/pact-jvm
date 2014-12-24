@@ -1,4 +1,4 @@
-package au.com.dius.pact.provider.gradle
+package au.com.dius.pact.provider.groovysupport
 
 import au.com.dius.pact.model.BodyMismatch
 import au.com.dius.pact.model.BodyTypeMismatch
@@ -13,7 +13,6 @@ import difflib.DiffUtils
 import difflib.Patch
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
-import org.apache.http.HttpResponse
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 import scala.collection.JavaConverters$
 
