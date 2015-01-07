@@ -1,5 +1,5 @@
-Maven plugin to verify a provider
-=================================
+Maven plugin to verify a provider [version 2.1.9+]
+==================================================
 
 Maven plugin for verifying pacts against a provider.
 

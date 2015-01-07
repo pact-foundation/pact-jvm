@@ -74,6 +74,10 @@ You want to look at: [pact sbt plugin](pact-jvm-provider-sbt)
 
 You want to look at: [pact gradle plugin](pact-jvm-provider-gradle)
 
+#### verify pacts with Maven [version 2.1.9+]
+
+You want to look at: [pact maven plugin](pact-jvm-provider-maven)
+
 #### I want to verify pacts but don't want to use sbt or gradle
 
 You want to look at: [pact-jvm-provider](pact-jvm-provider)
