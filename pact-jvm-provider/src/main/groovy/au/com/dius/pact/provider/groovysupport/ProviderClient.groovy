@@ -46,7 +46,14 @@ class ProviderClient {
         }
 
         if (provider.requestFilter != null) {
-            provider.requestFilter(method)
+            if (provider.requestFilter instanceof Closure) {
+                provider.requestFilter(method)
+            } else {
+                Binding binding = new Binding()
+                binding.setVariable("request", method)
+                GroovyShell shell = new GroovyShell(binding)
+                shell.evaluate(provider.requestFilter as String)
+            }
         }
 
         def response = httpclient.execute(method)
