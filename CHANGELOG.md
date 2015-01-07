@@ -1,5 +1,24 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.1.9 - fixes plus maven plugin
+
+* 5b52f97 - added maven central badge (Ronald Holshausen, Wed Jan 7 16:24:32 2015 +1100)                                                                                                                                                     
+* 5e12a98 - updated the link in the main readme to the maven plugin (Ronald Holshausen, Wed Jan 7 13:55:11 2015 +1100)                                                                                                                       
+* a473e64 - updated readme for the maven plugin (Ronald Holshausen, Wed Jan 7 13:48:33 2015 +1100)                                                                                                                                           
+* 52d5d6f - implement the pre-filter as a groovy script (Ronald Holshausen, Wed Jan 7 13:18:18 2015 +1100)                                                                                                                                   
+* d5303d4 - for maven to generate the plugin descriptor, all the dependent jars must be in the maven repo (Ronald Holshausen, Wed Dec 24 14:56:30 2014 +1100)                                                                                
+* 243e6b5 - exclude groovy from gradle plugin as it pulls in the gradle version of groovy (Ronald Holshausen, Wed Dec 24 14:43:15 2014 +1100)                                                                                                
+* b15e191 - Ported the code from the gradle plugin to the maven plugin (Ronald Holshausen, Wed Dec 24 14:25:00 2014 +1100)                                                                                                                   
+* 43a0ed9 - correct example matcher json fragment (Ronald Holshausen, Wed Dec 24 10:47:01 2014 +1100)                                                                                                                                        
+* 8fd1de5 - update READMEs about updating the directory pact files are written to #59 (Ronald Holshausen, Wed Dec 24 10:45:01 2014 +1100)                                                                                                    
+* 37b48dc - pact.rootDir system property now overides the directory pact files are written to #59 (Ronald Holshausen, Wed Dec 24 10:27:13 2014 +1100)                                                                                        
+* 35bdf9d - added start of a maven plugin (Ronald Holshausen, Mon Dec 22 20:20:21 2014 +1100)
+* bf34f1e - update build to latest 2.11 version of scala (Ronald Holshausen, Fri Dec 19 15:03:27 2014 +1100)
+* 1461003 - fix the matchers to handle null values #77 (Ronald Holshausen, Fri Dec 19 14:48:39 2014 +1100)
+* f71f7d3 - fix to allow mock server to respond to a request more than once #78 (Ronald Holshausen, Fri Dec 19 12:43:07 2014 +1100)
+* db53e6c - memory settings for travis build (Ronald Holshausen, Fri Dec 19 12:40:34 2014 +1100)
+* 852e4ad - bump version (Ronald Holshausen, Mon Dec 15 19:59:13 2014 +1100)
+
 # 2.1.8 - fixes plus pact junit rule
 
 **NOTE: This version has a breaking change for users of the gradle plugin with request filters.
