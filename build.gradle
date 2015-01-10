@@ -55,7 +55,7 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '2.1.9'
+    version = '2.1.10'
     targetCompatibility = '1.6'
     sourceCompatibility = '1.6'
 
