@@ -5,6 +5,8 @@ import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.Pact$
 import au.com.dius.pact.provider.groovysupport.ProviderClient
 import au.com.dius.pact.provider.groovysupport.ResponseComparison
+import groovy.io.FileType
+import groovy.json.JsonSlurper
 import groovyx.net.http.RESTClient
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugin.MojoExecutionException
@@ -30,7 +32,13 @@ class PactProviderMojo extends AbstractMojo {
     void execute() throws MojoExecutionException, MojoFailureException {
         Map failures = [:]
         serviceProviders.each { provider ->
-            provider.consumers.findAll(this.&filterConsumers).each { consumer ->
+            List consumers = []
+            consumers.addAll(provider.consumers)
+            if (provider.pactFileDirectory != null) {
+                consumers.addAll(loadPactFiles(provider, provider.pactFileDirectory))
+            }
+
+            consumers.findAll(this.&filterConsumers).each { consumer ->
                 AnsiConsole.out().println(Ansi.ansi().a('\nVerifying a pact between ').bold().a(consumer.name)
                     .boldOff().a(' and ').bold().a(provider.name).boldOff())
 
@@ -51,7 +59,7 @@ class PactProviderMojo extends AbstractMojo {
 
                     def stateChangeOk = true
                     if (interaction.providerState.defined) {
-                        stateChangeOk = stateChange(interaction.providerState.get(), consumer)
+                        stateChangeOk = stateChange(interaction.providerState.get(), provider, consumer)
                         if (stateChangeOk != true) {
                             failures[interactionMessage] = stateChangeOk
                             stateChangeOk = false
@@ -133,6 +141,31 @@ class PactProviderMojo extends AbstractMojo {
         }
     }
 
+    List loadPactFiles(def provider, File pactFileDir) {
+        if (!pactFileDir.exists()) {
+            throw new RuntimeException("Pact file directory ($pactFileDir) does not exist")
+        }
+
+        if (!pactFileDir.isDirectory()) {
+            throw new RuntimeException("Pact file directory ($pactFileDir) is not a directory")
+        }
+
+        if (!pactFileDir.canRead()) {
+            throw new RuntimeException("Pact file directory ($pactFileDir) is not readable")
+        }
+
+        AnsiConsole.out().println("Loading pact files for provider ${provider.name} from $pactFileDir")
+
+        List consumers = []
+        pactFileDir.eachFileMatch FileType.FILES, ~/.*\.json/, {
+            def pactJson = new JsonSlurper().parse(it)
+            if (pactJson.provider.name == provider.name) {
+                consumers << new Consumer(name: pactJson.consumer.name, pactFile: it)
+            }
+        }
+        consumers
+    }
+
     void displayMethodResult(Map failures, int status, def comparison, String comparisonDescription) {
         def ansi = Ansi.ansi().a('      ').a('has status code ').bold().a(status).boldOff().a(' (')
         if (comparison == true) {
@@ -171,14 +204,20 @@ class PactProviderMojo extends AbstractMojo {
         }
     }
 
-    def stateChange(String state, Consumer consumer) {
+    def stateChange(String state, Consumer consumer, Provider provider) {
         AnsiConsole.out().println(Ansi.ansi().a('  Given ').bold().a(state).boldOff())
         try {
-            if (consumer.stateChangeUrl == null) {
-                throw new RuntimeException("stateChangeUrl is null")
+            if (consumer.stateChangeUrl == null && provider.stateChangeUrl == null) {
+                throw new RuntimeException("a stateChangeUrl has not been defined")
             }
-            def client = new RESTClient(consumer.stateChangeUrl.toString())
-            if (consumer.stateChangeUsesBody) {
+            def stateChangeUrl = consumer.stateChangeUrl
+            def stateChangeUsesBody = consumer.stateChangeUsesBody
+            if (stateChangeUrl == null) {
+                stateChangeUrl = provider.stateChangeUrl
+                stateChangeUsesBody = provider.stateChangeUsesBody
+            }
+            def client = new RESTClient(stateChangeUrl.toString())
+            if (stateChangeUsesBody) {
                 client.post(body: [state: state], requestContentType: 'application/json')
             } else {
                 client.post(query: [state: state])

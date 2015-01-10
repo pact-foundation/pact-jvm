@@ -62,6 +62,33 @@ You define all the providers and consumers within the configuration element of t
 
 You will have to have your provider running for this to pass.
 
+## Verifying all pact files in a directory for a provider. [2.1.10+]
+
+You can specify a directory that contains pact files, and the Pact plugin will scan for all pact files that match that
+provider and define a consumer for each pact file in the directory. Consumer name is read from contents of pact file.
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
+    <version>2.1.9</version>
+    <configuration>
+      <serviceProviders>
+        <!-- You can define as many as you need, but each must have a unique name -->
+        <serviceProvider>
+          <name>provider1</name>
+          <!-- All the provider properties are optional, and have sensible defaults (shown below) -->
+          <protocol>http</protocol>
+          <host>localhost</host>
+          <port>8080</port>
+          <path>/</path>
+          <pactFileDirectory>path/to/pacts</pactFileDirectory>
+        </serviceProvider>
+      </serviceProviders>
+    </configuration>
+</plugin>
+```
+
 ## Modifying the requests before they are sent
 
 Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would
@@ -137,6 +164,8 @@ For each provider you can specify a state change URL to use to switch the state 
 receive the providerState description from the pact file before each interaction via a POST. The stateChangeUsesBody
 controls if the state is passed in the request body or as a query parameter.
 
+These values can be set at the provider level, or for a specific consumer. Consumer values take precedent if both are given.
+
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
@@ -146,11 +175,13 @@ controls if the state is passed in the request body or as a query parameter.
       <serviceProviders>
         <serviceProvider>
           <name>provider1</name>
+          <stateChangeUrl>http://localhost:8080/tasks/pactStateChange</stateChangeUrl>
+          <stateChangeUsesBody>false</stateChangeUsesBody> <!-- defaults to true -->
           <consumers>
             <consumer>
               <name>consumer1</name>
               <pactFile>path/to/provider1-consumer1-pact.json</pactFile>
-              <stateChangeUrl>http://localhost:8080/tasks/pactStateChange</stateChangeUrl>
+              <stateChangeUrl>http://localhost:8080/tasks/pactStateChangeForConsumer1</stateChangeUrl>
               <stateChangeUsesBody>false</stateChangeUsesBody> <!-- defaults to true -->
             </consumer>
           </consumers>

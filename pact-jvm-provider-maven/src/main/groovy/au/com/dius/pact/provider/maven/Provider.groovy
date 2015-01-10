@@ -12,4 +12,7 @@ class Provider {
 
     List<Consumer> consumers = []
     def requestFilter
+    File pactFileDirectory
+    URL stateChangeUrl
+    boolean stateChangeUsesBody = true
 }
