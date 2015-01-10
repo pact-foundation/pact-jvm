@@ -204,7 +204,7 @@ class PactProviderMojo extends AbstractMojo {
         }
     }
 
-    def stateChange(String state, Consumer consumer, Provider provider) {
+    def stateChange(String state, Provider provider, Consumer consumer) {
         AnsiConsole.out().println(Ansi.ansi().a('  Given ').bold().a(state).boldOff())
         try {
             if (consumer.stateChangeUrl == null && provider.stateChangeUrl == null) {
