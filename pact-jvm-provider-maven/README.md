@@ -196,10 +196,9 @@ If the `stateChangeUsesBody` is not specified, or is set to true, then the provi
 
 ## Filtering the interactions that are verified
 
-You can filter the interactions that are run using two properties: `pact.filter.consumers` and `pact.filter.interactions`.
+You can filter the interactions that are run using three properties: `pact.filter.consumers`, `pact.filter.description` and `pact.filter.providerState`.
 Adding `-Dpact.filter.consumers=consumer1,consumer2` to the command line or configuration section will only run the pact files for those
 consumers (consumer1 and consumer2). Adding `-Dpact.filter.description=a request for payment.*` will only run those interactions
 whose descriptions start with 'a request for payment'. `-Dpact.filter.providerState=.*payment` will match any interaction that
 has a provider state that ends with payment, and `-Dpact.filter.providerState=` will match any interaction that does not have a
 provider state.
-

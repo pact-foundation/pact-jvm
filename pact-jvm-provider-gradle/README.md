@@ -199,7 +199,7 @@ If the `stateChangeUsesBody` is not specified, or is set to true, then the provi
 
 ## Filtering the interactions that are verified
 
-You can filter the interactions that are run using two project properties: `pact.filter.consumers` and `pact.filter.interactions`.
+You can filter the interactions that are run using three project properties: `pact.filter.consumers`, `pact.filter.description` and `pact.filter.providerState`.
 Adding `-Ppact.filter.consumers=consumer1,consumer2` to the command line will only run the pact files for those
 consumers (consumer1 and consumer2). Adding `-Ppact.filter.description=a request for payment.*` will only run those interactions
 whose descriptions start with 'a request for payment'. `-Ppact.filter.providerState=.*payment` will match any interaction that
@@ -211,4 +211,3 @@ provider state.
 To publish the plugin to the community portal requires first publishing the plugin to jcenter via the bintray plugin.
 
     $ gradle :pact-jvm-provider-gradle_2.11:bintrayUpload
-
