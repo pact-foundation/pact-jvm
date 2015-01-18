@@ -141,13 +141,27 @@ object TypeMatcher extends Matcher with StrictLogging {
     }
   }
 
+  def matchArray[T](path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T], matcher: String, args: List[String]) = {
+    matcher match {
+      case "atleast" => actual match {
+        case v: List[Any] =>
+          if (v.asInstanceOf[List[Any]].size < args.head.toInt) Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Expected ${Matcher.valueOf(actual)} to have at least ${args.head} elements", path)))
+          else Collections.emptyList[T]()
+        case _ => Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Array matcher $matcher can only be applied to arrays", path)))
+      }
+      case _ => Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, s"Array matcher $matcher is not defined", path)))
+    }
+  }
+
   def domatch[T](matcherDef: java.util.Map[String, _], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[T]): java.util.List[T] = {
+    val atleastN = "atleast\\((\\d+)\\)".r
     matcherDef.get("match") match {
       case "type" => matchType[T](path, expected, actual, mismatchFn)
       case "number" => matchNumber[T](path, expected, actual, mismatchFn)
       case "integer" => matchInteger[T](path, expected, actual, mismatchFn)
       case "real" => matchReal[T](path, expected, actual, mismatchFn)
       case "timestamp" => matchTimestamp[T](path, expected, actual, mismatchFn)
+      case atleastN(n) => matchArray[T](path, expected, actual, mismatchFn, "atleast", List(n))
       case _ => Matchers.toJavaList[T](Seq(mismatchFn.create(expected, actual, "type matcher is mis-configured", path)))
     }
   }

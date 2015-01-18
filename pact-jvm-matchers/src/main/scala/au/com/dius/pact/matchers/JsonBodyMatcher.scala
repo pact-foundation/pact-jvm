@@ -60,13 +60,8 @@ class JsonBodyMatcher extends BodyMatcher {
 
   def compareLists(expectedValues: List[Any], actualValues: List[Any], a: Any, b: Any, path: String,
                    diffConfig: JsonDiff.DiffConfig, matchers: Option[Map[String, Any]]): List[BodyMismatch] = {
-    if (expectedValues.isEmpty && actualValues.nonEmpty) {
-      List(BodyMismatch(a, b, Some(s"Expected an empty List but received ${valueOf(actualValues)}"), path))
-    } else {
+    def compareListContent = {
       var result = List[BodyMismatch]()
-      if (expectedValues.size != actualValues.size) {
-        result = result :+ BodyMismatch(a, b, Some(s"Expected a List with ${expectedValues.size} elements but received ${actualValues.size} elements"), path)
-      }
       for ((value, index) <- expectedValues.view.zipWithIndex) {
         val s = path + "." + (index + 1)
         if (index < actualValues.size) {
@@ -77,6 +72,22 @@ class JsonBodyMatcher extends BodyMatcher {
       }
       result
     }
+
+    var result = List[BodyMismatch]()
+    if (Matchers.matcherDefined(path, matchers)) {
+      result = Matchers.domatch[BodyMismatch](matchers.get(path), path, expectedValues, actualValues,
+        BodyMismatchFactory) ++ compareListContent
+    } else {
+      if (expectedValues.isEmpty && actualValues.nonEmpty) {
+        result = List(BodyMismatch(a, b, Some(s"Expected an empty List but received ${valueOf(actualValues)}"), path))
+      } else {
+        if (expectedValues.size != actualValues.size) {
+          result = result :+ BodyMismatch(a, b, Some(s"Expected a List with ${expectedValues.size} elements but received ${actualValues.size} elements"), path)
+        }
+        result = result ++ compareListContent
+      }
+    }
+    result
   }
 
   def compareMaps(expectedValues: Map[String, Any], actualValues: Map[String, Any], a: Any, b: Any, path: String,

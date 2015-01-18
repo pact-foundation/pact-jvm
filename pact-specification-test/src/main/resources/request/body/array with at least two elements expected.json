@@ -1,0 +1,29 @@
+{
+  "match": false,
+  "comment": "Favourite colours must have at least two elements",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": "",
+    "headers": {},
+    "requestMatchingRules": {
+      "$.body.alligator.favouriteColours": {"match": "atleast(2)"}
+    },
+    "body": {
+      "alligator":{
+        "favouriteColours": ["red", "blue"]
+      }
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": "",
+    "headers": {},
+    "body": {
+      "alligator":{
+        "favouriteColours": ["red"]
+      }
+    }
+  }
+}
