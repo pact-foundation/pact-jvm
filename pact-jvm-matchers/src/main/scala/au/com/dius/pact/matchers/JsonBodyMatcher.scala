@@ -42,7 +42,7 @@ class JsonBodyMatcher extends BodyMatcher {
     }
   }
 
-  def compare(path: String, expected: Any, actual: Any, diffConfig: DiffConfig, matchers: Option[Map[String, Any]]): List[BodyMismatch] = {
+  def compare(path: String, expected: Any, actual: Any, diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
     (expected, actual) match {
       case (a: JObject, b: JObject) => compareMaps(a.values, b.values, a, b, path, diffConfig, matchers)
       case (a: Map[String, Any], b: Map[String, Any]) => compareMaps(a, b, a, b, path, diffConfig, matchers)
@@ -59,7 +59,7 @@ class JsonBodyMatcher extends BodyMatcher {
   }
 
   def compareLists(expectedValues: List[Any], actualValues: List[Any], a: Any, b: Any, path: String,
-                   diffConfig: JsonDiff.DiffConfig, matchers: Option[Map[String, Any]]): List[BodyMismatch] = {
+                   diffConfig: JsonDiff.DiffConfig, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
     def compareListContent = {
       var result = List[BodyMismatch]()
       for ((value, index) <- expectedValues.view.zipWithIndex) {
@@ -91,7 +91,7 @@ class JsonBodyMatcher extends BodyMatcher {
   }
 
   def compareMaps(expectedValues: Map[String, Any], actualValues: Map[String, Any], a: Any, b: Any, path: String,
-                  diffConfig: JsonDiff.DiffConfig, matchers: Option[Map[String, Any]]): List[BodyMismatch] = {
+                  diffConfig: JsonDiff.DiffConfig, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
     if (expectedValues.isEmpty && actualValues.nonEmpty) {
       List(BodyMismatch(a, b, Some(s"Expected an empty Map but received ${valueOf(actualValues)}"), path))
     } else {
@@ -112,7 +112,7 @@ class JsonBodyMatcher extends BodyMatcher {
     }
   }
 
-  def compareValues(path: String, expected: Any, actual: Any, matchers: Option[Map[String, Any]]): List[BodyMismatch] = {
+  def compareValues(path: String, expected: Any, actual: Any, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
     if (Matchers.matcherDefined(path, matchers)) {
       Matchers.domatch[BodyMismatch](matchers.get(path), path, expected, actual, BodyMismatchFactory)
     } else {

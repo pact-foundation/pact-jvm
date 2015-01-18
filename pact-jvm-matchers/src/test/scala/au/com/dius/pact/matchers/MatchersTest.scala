@@ -20,7 +20,7 @@ class MatchersTest extends Specification {
     }
 
     "should be true when the path does have a matcher entry" in {
-      Matchers.matcherDefined("$.body.something", Some(Map("$.body.something" -> None))) must beTrue
+      Matchers.matcherDefined("$.body.something", Some(Map("$.body.something" -> Map[String, String]()))) must beTrue
     }
 
   }
