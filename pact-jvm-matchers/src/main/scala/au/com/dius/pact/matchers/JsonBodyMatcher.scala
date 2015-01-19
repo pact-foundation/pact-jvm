@@ -1,7 +1,6 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.JsonDiff._
-import au.com.dius.pact.model.{BodyMismatchFactory, JsonDiff, BodyMismatch, HttpPart}
+import au.com.dius.pact.model._
 import org.json4s.{JObject, JArray, JValue, DefaultFormats}
 import org.json4s.jackson.JsonMethods._
 
@@ -59,7 +58,7 @@ class JsonBodyMatcher extends BodyMatcher {
   }
 
   def compareLists(expectedValues: List[Any], actualValues: List[Any], a: Any, b: Any, path: String,
-                   diffConfig: JsonDiff.DiffConfig, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
+                   diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
     def compareListContent = {
       var result = List[BodyMismatch]()
       for ((value, index) <- expectedValues.view.zipWithIndex) {
@@ -91,7 +90,7 @@ class JsonBodyMatcher extends BodyMatcher {
   }
 
   def compareMaps(expectedValues: Map[String, Any], actualValues: Map[String, Any], a: Any, b: Any, path: String,
-                  diffConfig: JsonDiff.DiffConfig, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
+                  diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
     if (expectedValues.isEmpty && actualValues.nonEmpty) {
       List(BodyMismatch(a, b, Some(s"Expected an empty Map but received ${valueOf(actualValues)}"), path))
     } else {

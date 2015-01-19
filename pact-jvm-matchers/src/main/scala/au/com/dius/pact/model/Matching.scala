@@ -1,7 +1,6 @@
 package au.com.dius.pact.model
 
 import au.com.dius.pact.matchers.{Matchers, MismatchFactory, JsonBodyMatcher, BodyMatcher}
-import au.com.dius.pact.model.JsonDiff.DiffConfig
 import au.com.dius.pact.model.RequestPartMismatch._
 import au.com.dius.pact.model.ResponsePartMismatch._
 

@@ -4,7 +4,7 @@ import au.com.dius.pact.model.{BodyMismatchFactory, BodyMismatch, Request}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
-import au.com.dius.pact.model.JsonDiff.DiffConfig
+import au.com.dius.pact.model.DiffConfig
 
 @RunWith(classOf[JUnitRunner])
 class MatchersTest extends Specification {

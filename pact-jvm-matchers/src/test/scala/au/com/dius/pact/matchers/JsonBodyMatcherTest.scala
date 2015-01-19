@@ -1,6 +1,6 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.{BodyMismatch, JsonDiff, Request}
+import au.com.dius.pact.model.{BodyMismatch, DiffConfig, Request}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -17,7 +17,7 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
   val expected = () => Request("", "", None, None, expectedBody, matchers)
   val actual = () => Request("", "", None, None, actualBody, None)
 
-  var diffconfig = JsonDiff.DiffConfig(structural = true)
+  var diffconfig = DiffConfig(structural = true)
 
   "matching json bodies" should {
 
@@ -63,7 +63,7 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
 
       "when comparing an empty body to anything and we do not allow extra keys" in {
         actualBody = Some("Blah")
-        matcher.matchBody(expected(), actual(), JsonDiff.DiffConfig(structural = false)) must not(beEmpty)
+        matcher.matchBody(expected(), actual(), DiffConfig(structural = false)) must not(beEmpty)
       }
 
       "when comparing anything to an empty body" in {

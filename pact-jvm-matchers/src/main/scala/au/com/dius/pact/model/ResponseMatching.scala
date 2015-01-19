@@ -1,7 +1,5 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.model.JsonDiff.DiffConfig
-
 sealed trait ResponseMatch
 case object FullResponseMatch extends ResponseMatch
 case object ResponseMismatch extends ResponseMatch

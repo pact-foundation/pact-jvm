@@ -1,6 +1,5 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.model.JsonDiff.DiffConfig
 import com.typesafe.scalalogging.slf4j.StrictLogging
 
 case class RequestMatching(expectedInteractions: Seq[Interaction]) {
