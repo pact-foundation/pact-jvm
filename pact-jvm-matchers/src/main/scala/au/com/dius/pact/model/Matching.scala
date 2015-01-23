@@ -1,6 +1,6 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.matchers.{Matchers, MismatchFactory, JsonBodyMatcher, BodyMatcher}
+import au.com.dius.pact.matchers._
 import au.com.dius.pact.model.RequestPartMismatch._
 import au.com.dius.pact.model.ResponsePartMismatch._
 
@@ -8,7 +8,10 @@ import scala.collection.immutable.TreeMap
 import scala.collection.mutable
 
 object PactConfig {
-    var bodyMatchers = mutable.HashMap[String, BodyMatcher]("application/.*json" -> new JsonBodyMatcher())
+    var bodyMatchers = mutable.HashMap[String, BodyMatcher](
+      "application/.*xml" -> new XmlBodyMatcher(),
+      "application/.*json" -> new JsonBodyMatcher()
+    )
 }
 
 trait SharedMismatch {
