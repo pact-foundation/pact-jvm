@@ -31,7 +31,7 @@ class PactVerificationTask extends DefaultTask {
                 pact = Pact$.MODULE$.from(new FileInput(consumer.pactFile))
             } else if (consumer.pactFile instanceof URL) {
                 AnsiConsole.out().println(Ansi.ansi().a("  [from URL ${consumer.pactFile}]"))
-                pact = Pact$.MODULE$.from(new StreamInput(consumer.pactFile.newInputStream()))
+                pact = Pact$.MODULE$.from(new StreamInput(consumer.pactFile.newInputStream('Accept': 'application/json; text/plain')))
             } else {
                 throw new RuntimeException('You must specify the pactfile to execute (use pactFile = ...)')
             }
