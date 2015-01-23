@@ -4,9 +4,6 @@ import org.apache.commons.lang3.time.{DateFormatUtils, DateUtils}
 import com.typesafe.scalalogging.slf4j.StrictLogging
 import java.text.ParseException
 
-import scala.collection.{JavaConverters, JavaConversions}
-import java.util.Collections
-
 object Matchers extends StrictLogging {
   def matcherDefined(path: String, matchers: Option[Map[String, Map[String, String]]]): Boolean =
     matchers.isDefined && matchers.get.contains(path)
@@ -42,8 +39,9 @@ object Matchers extends StrictLogging {
   }
 }
 
-object EqualsMatcher extends Matcher {
+object EqualsMatcher extends Matcher with StrictLogging {
   def domatch[Mismatch](matcherDef: Map[String, String], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
+    logger.debug(s"comparing ${valueOf(actual)} to ${valueOf(expected)} at $path")
     if (Matchers.safeToString(actual).equals(expected)) {
       List[Mismatch]()
     } else {
@@ -52,9 +50,10 @@ object EqualsMatcher extends Matcher {
   }
 }
 
-object RegexpMatcher extends Matcher {
+object RegexpMatcher extends Matcher with StrictLogging {
   def domatch[Mismatch](matcherDef: Map[String, String], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
     val regex = matcherDef.get("regex").get
+    logger.debug(s"comparing ${valueOf(actual)} with regexp $regex at $path")
     if (Matchers.safeToString(actual).matches(regex)) {
       List[Mismatch]()
     } else {
@@ -66,6 +65,7 @@ object RegexpMatcher extends Matcher {
 object TypeMatcher extends Matcher with StrictLogging {
 
   def matchType[Mismatch](path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
+    logger.debug(s"comparing type of ${valueOf(actual)} to ${valueOf(expected)} at $path")
     (actual, expected) match {
       case (actual: String, expected: String) => List[Mismatch]()
       case (actual: Number, expected: Number) => List[Mismatch]()
@@ -81,6 +81,7 @@ object TypeMatcher extends Matcher with StrictLogging {
   }
 
   def matchNumber[Mismatch](path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
+    logger.debug(s"comparing type of ${valueOf(actual)} to Number at $path")
     (actual, expected) match {
       case (actual: Number, _) => List[Mismatch]()
       case (_, null) =>
@@ -94,6 +95,7 @@ object TypeMatcher extends Matcher with StrictLogging {
   }
 
   def matchInteger[Mismatch](path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
+    logger.debug(s"comparing type of ${valueOf(actual)} to Integer at $path")
     (actual, expected) match {
       case (actual: Integer, _) => List[Mismatch]()
       case (actual: Long, _) => List[Mismatch]()
@@ -109,6 +111,7 @@ object TypeMatcher extends Matcher with StrictLogging {
   }
 
   def matchReal[Mismatch](path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
+    logger.debug(s"comparing type of ${valueOf(actual)} to Real at $path")
     (actual, expected) match {
       case (actual: Float, _) => List[Mismatch]()
       case (actual: Double, _) => List[Mismatch]()
@@ -124,6 +127,7 @@ object TypeMatcher extends Matcher with StrictLogging {
   }
 
   def matchTimestamp[Mismatch](path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
+    logger.debug(s"comparing ${valueOf(actual)} as Timestamp at $path")
     try {
       DateUtils.parseDate(Matchers.safeToString(actual), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern,
         DateFormatUtils.ISO_DATETIME_FORMAT.getPattern, DateFormatUtils.SMTP_DATETIME_FORMAT.getPattern,
@@ -164,9 +168,10 @@ object TypeMatcher extends Matcher with StrictLogging {
   }
 }
 
-object TimestampMatcher extends Matcher {
+object TimestampMatcher extends Matcher with StrictLogging {
   def domatch[Mismatch](matcherDef: Map[String, String], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
     val pattern = matcherDef.get("timestamp").get
+    logger.debug(s"comparing ${valueOf(actual)} to timestamp pattern $pattern at $path")
     try {
       DateUtils.parseDate(Matchers.safeToString(actual), pattern)
       List[Mismatch]()
@@ -176,9 +181,10 @@ object TimestampMatcher extends Matcher {
   }
 }
 
-object TimeMatcher extends Matcher {
+object TimeMatcher extends Matcher with StrictLogging {
   def domatch[Mismatch](matcherDef: Map[String, String], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
     val pattern = matcherDef.get("time").get
+    logger.debug(s"comparing ${valueOf(actual)} to time pattern $pattern at $path")
     try {
       DateUtils.parseDate(Matchers.safeToString(actual), pattern)
       List[Mismatch]()
@@ -188,9 +194,10 @@ object TimeMatcher extends Matcher {
   }
 }
 
-object DateMatcher extends Matcher {
+object DateMatcher extends Matcher with StrictLogging {
   def domatch[Mismatch](matcherDef: Map[String, String], path: String, expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
     val pattern = matcherDef.get("date").get
+    logger.debug(s"comparing ${valueOf(actual)} to date pattern $pattern at $path")
     try {
       DateUtils.parseDate(Matchers.safeToString(actual), pattern)
       List[Mismatch]()

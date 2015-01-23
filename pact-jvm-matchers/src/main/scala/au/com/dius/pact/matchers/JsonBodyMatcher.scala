@@ -1,10 +1,11 @@
 package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model._
+import com.typesafe.scalalogging.slf4j.StrictLogging
 import org.json4s.{JObject, JArray, JValue, DefaultFormats}
 import org.json4s.jackson.JsonMethods._
 
-class JsonBodyMatcher extends BodyMatcher {
+class JsonBodyMatcher extends BodyMatcher  with StrictLogging {
   implicit lazy val formats = DefaultFormats
 
   def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig): List[BodyMismatch] = {
@@ -74,6 +75,7 @@ class JsonBodyMatcher extends BodyMatcher {
 
     var result = List[BodyMismatch]()
     if (Matchers.matcherDefined(path, matchers)) {
+      logger.debug("compareLists: Matcher defined for path " + path)
       result = Matchers.domatch[BodyMismatch](matchers.get(path), path, expectedValues, actualValues,
         BodyMismatchFactory) ++ compareListContent
     } else {
@@ -113,8 +115,10 @@ class JsonBodyMatcher extends BodyMatcher {
 
   def compareValues(path: String, expected: Any, actual: Any, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
     if (Matchers.matcherDefined(path, matchers)) {
+      logger.debug("compareValues: Matcher defined for path " + path)
       Matchers.domatch[BodyMismatch](matchers.get(path), path, expected, actual, BodyMismatchFactory)
     } else {
+      logger.debug("compareValues: No matcher defined for path " + path + ", using equality")
       if (expected == actual) {
         List[BodyMismatch]()
       } else {
