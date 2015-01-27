@@ -24,11 +24,7 @@ public abstract class ConsumerPactTest {
 
         VerificationResult result = fragment.runConsumer(config, new TestRun() {
             public void run(MockProviderConfig config) {
-                try {
-                    runTest(config.url());
-                } catch(Exception e) {
-                    fail("error thrown: "+e);
-                }
+                runTest(config.url());
             }
         });
 
