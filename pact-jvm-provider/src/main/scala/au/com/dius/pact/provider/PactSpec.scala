@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider
 
 import org.scalatest.{Assertions, FreeSpec}
+import org.scalatest.exceptions.TestFailedException
 import au.com.dius.pact.model._
-import au.com.dius.pact.model.Matching._
 import au.com.dius.pact.model.dispatch.HttpClient
 import scala.concurrent.{ExecutionContext, Await, Future}
 import scala.concurrent.duration._
@@ -15,7 +15,7 @@ class PactSpec(config: PactConfiguration, pact: Pact)(implicit timeout: Duration
     s"""pact for consumer ${pact.consumer.name} 
        |provider ${pact.provider.name} 
        |interaction "${interaction.description}"
-       |in state: "${interaction.providerState}" """.stripMargin in {
+       |in state: "${interaction.providerState.getOrElse("")}" """.stripMargin in {
 
         val stateChangeFuture = (config.stateChangeUrl, interaction.providerState) match {
           case (Some(stateChangeUrl), Some(providerState)) => HttpClient.run(EnterStateRequest(stateChangeUrl.url, providerState))
@@ -29,7 +29,10 @@ class PactSpec(config: PactConfiguration, pact: Pact)(implicit timeout: Duration
 
         val actualResponse = Await.result(pactResponseFuture, timeout)
 
-        assert(ResponseMatching.matchRules(interaction.response, actualResponse) === FullResponseMatch)
+      val responseMismatches = ResponseMatching.responseMismatches(interaction.response, actualResponse)
+      if (!responseMismatches.isEmpty) {
+          throw new TestFailedException(s"There were response mismatches: \n${responseMismatches.mkString("\n")}", 10)
+        }
       }
   }
 }

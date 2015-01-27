@@ -18,6 +18,5 @@ object Main {
       new PactSpec(config, pact)
     }: _*)
     stats.fullstacks.run(suite)
-
   }
 }

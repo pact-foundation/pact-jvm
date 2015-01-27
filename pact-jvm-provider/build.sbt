@@ -3,7 +3,7 @@ resolvers ++= Seq("Typesafe Repository" at "http://repo.typesafe.com/typesafe/re
                   "Local Maven Repository" at "file://"+Path.userHome.absolutePath+"/.m2/repository")
 
 libraryDependencies ++= Seq(
-  "org.scalatest" % "scalatest_2.10" % "2.0.RC3", //scalatest is the runtime test library, hoping for simple single thread
+  "org.scalatest" % "scalatest_2.10" % "2.2.1",
   "commons-io"  % "commons-io"     % "2.4",
   "net.databinder" %% "unfiltered-netty-server" % "0.8.2",
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.0",
