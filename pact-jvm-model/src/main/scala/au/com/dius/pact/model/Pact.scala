@@ -21,7 +21,11 @@ object Pact {
     implicit val formats = DefaultFormats
     json.transformField {
       case ("provider_state", value) => ("providerState", value)
-      case ("body", value) => ("body", JString(pretty(value)))
+      case ("body", value) => ("body", value match {
+        case s: JString => if (s.values.isEmpty) JNothing else s
+        case JNull => JNothing
+        case _ => JString(pretty(value))
+      })
       case ("method", value) => ("method", JString(value.values.toString.toUpperCase))
     }.extract[Pact]
   }
