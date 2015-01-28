@@ -8,6 +8,7 @@ import au.com.dius.pact.provider.groovysupport.ResponseComparison
 import groovy.io.FileType
 import groovy.json.JsonSlurper
 import groovyx.net.http.RESTClient
+import org.apache.commons.lang3.StringUtils
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugin.MojoFailureException
@@ -208,19 +209,21 @@ class PactProviderMojo extends AbstractMojo {
         AnsiConsole.out().println(Ansi.ansi().a('  Given ').bold().a(state).boldOff())
         try {
             if (consumer.stateChangeUrl == null && provider.stateChangeUrl == null) {
-                throw new RuntimeException("a stateChangeUrl has not been defined")
-            }
-            def stateChangeUrl = consumer.stateChangeUrl
-            def stateChangeUsesBody = consumer.stateChangeUsesBody
-            if (stateChangeUrl == null) {
-                stateChangeUrl = provider.stateChangeUrl
-                stateChangeUsesBody = provider.stateChangeUsesBody
-            }
-            def client = new RESTClient(stateChangeUrl.toString())
-            if (stateChangeUsesBody) {
-                client.post(body: [state: state], requestContentType: 'application/json')
+                AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
+                    .a('WARNING: Provider State ignored as there is no stateChange URL defined'))
             } else {
-                client.post(query: [state: state])
+                def stateChangeUrl = consumer.stateChangeUrl
+                def stateChangeUsesBody = consumer.stateChangeUsesBody
+                if (stateChangeUrl == null) {
+                    stateChangeUrl = provider.stateChangeUrl
+                    stateChangeUsesBody = provider.stateChangeUsesBody
+                }
+                def client = new RESTClient(stateChangeUrl.toString())
+                if (stateChangeUsesBody) {
+                    client.post(body: [state: state], requestContentType: 'application/json')
+                } else {
+                    client.post(query: [state: state])
+                }
             }
             return true
         } catch (e) {

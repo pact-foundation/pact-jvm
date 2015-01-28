@@ -5,6 +5,7 @@ import au.com.dius.pact.model.Pact$
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.provider.groovysupport.ProviderClient
 import au.com.dius.pact.provider.groovysupport.ResponseComparison
+import org.apache.commons.lang3.StringUtils
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.AnsiConsole
 import org.gradle.api.DefaultTask
@@ -165,11 +166,18 @@ class PactVerificationTask extends DefaultTask {
     def stateChange(String state, ConsumerInfo consumer) {
         AnsiConsole.out().println(Ansi.ansi().a('  Given ').bold().a(state).boldOff())
         try {
-            def client = new RESTClient(consumer.stateChange.toString())
-            if (consumer.stateChangeUsesBody) {
-                client.post(body: [state: state], requestContentType: 'application/json')
+
+            def url = consumer.stateChange
+            if (url == null || StringUtils.isBlank(url)) {
+                AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW).a('WARNING: State Change ignored as there is no stateChange URL')
+                    .reset())
             } else {
-                client.post(query: [state: state])
+                def client = new RESTClient(url.toString())
+                if (consumer.stateChangeUsesBody) {
+                    client.post(body: [state: state], requestContentType: 'application/json')
+                } else {
+                    client.post(query: [state: state])
+                }
             }
             return true
         } catch (e) {
