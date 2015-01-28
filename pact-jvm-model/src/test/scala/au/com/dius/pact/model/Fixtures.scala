@@ -37,15 +37,27 @@ object Fixtures {
 
   val interactions = List(interaction)
 
-  val pact: Pact = Pact(
+  val pact = Pact(
     provider = provider,
     consumer = consumer,
     interactions = interactions
   )
 
-  val pactWithMatchers: Pact = Pact(
+  val pactWithMatchers = Pact(
     provider = provider,
     consumer = consumer,
     interactions = interactionsWithMatchers
+  )
+
+  val pactWithNoBodies = Pact(
+    provider = provider,
+    consumer = consumer,
+    interactions = List(interaction.copy(request = request.copy(body = None), response = response.copy(body = None)))
+  )
+
+  val pactWithEmptyBodies = Pact(
+    provider = provider,
+    consumer = consumer,
+    interactions = List(interaction.copy(request = request.copy(body = Some("")), response = response.copy(body = Some(""))))
   )
 }

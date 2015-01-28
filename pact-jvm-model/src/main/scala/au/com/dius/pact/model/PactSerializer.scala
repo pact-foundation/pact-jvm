@@ -40,8 +40,9 @@ trait PactSerializer extends StrictLogging {
 
   def parseBody(r: HttpPart) = {
     r.body match {
-      case None => JNothing
-      case Some(s) => if (r.jsonBody) parse(s) else JString(s)
+      case None => JString("")
+      case Some(s) => if (r.jsonBody) parse(s)
+                      else JString(s)
     }
   }
 

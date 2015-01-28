@@ -43,6 +43,24 @@ class PactSerializerSpec extends Specification {
        json must beEqualTo(pactString)
      }
 
+     "serialize pact with no bodies" in {
+       val sw = new StringWriter()
+       val pactString = scala.io.Source.fromInputStream(loadTestFile("test_pact_empty_bodies.json")).mkString
+
+       Fixtures.pactWithNoBodies.serialize(new PrintWriter(sw))
+       val json = sw.toString
+       json must beEqualTo(pactString)
+     }
+
+     "serialize pact with empty bodies" in {
+       val sw = new StringWriter()
+       val pactString = scala.io.Source.fromInputStream(loadTestFile("test_pact_empty_bodies.json")).mkString
+
+       Fixtures.pactWithEmptyBodies.serialize(new PrintWriter(sw))
+       val json = sw.toString
+       json must beEqualTo(pactString)
+     }
+
      "deserialize pact" in {
        val pact = Pact.from(loadTestFile("test_pact.json"))
        pact must beEqualTo(Fixtures.pact)
