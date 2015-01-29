@@ -31,7 +31,7 @@ class MatchingSpec extends Specification {
 
       "Handle different mime types" in {
         val expected = List(BodyTypeMismatch("a", "b"))
-        matchBody(Request("", "", None, Some(Map("Content-Type" -> "a")), None, None),
+        matchBody(Request("", "", None, Some(Map("Content-Type" -> "a")), request.body, None),
           Request("", "", None, Some(Map("Content-Type" -> "b")), request.body, None), config) must beEqualTo(expected)
       }
 
