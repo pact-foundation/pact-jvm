@@ -75,20 +75,5 @@ class PactSerializerSpec extends Specification {
        val pact = Pact.from(loadTestFile("test_pact_lowercase_method.json"))
        pact must beEqualTo(Fixtures.pact)
      }
-
-     "deserialize converts missing bodies to None" in {
-       val pact = Pact.from(loadTestFile("test_pact_missing_bodies.json"))
-       pact must beEqualTo(Fixtures.pactWithNoBodies)
-     }
-
-     "deserialize converts empty bodies to None" in {
-       val pact = Pact.from(loadTestFile("test_pact_empty_bodies.json"))
-       pact must beEqualTo(Fixtures.pactWithNoBodies)
-     }
-
-     "deserialize converts null bodies to None" in {
-       val pact = Pact.from(loadTestFile("test_pact_null_bodies.json"))
-       pact must beEqualTo(Fixtures.pactWithNoBodies)
-     }
    }
 }
