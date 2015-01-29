@@ -99,14 +99,14 @@ object Matching {
         result.get._2.matchBody(expected, actual, diffConfig)
       } else {
         (expected.body, actual.body) match {
-          case (None, None) => List()
-          case (None, b) => List()
+          case (None, _) => List()
           case (a, None) => List(BodyMismatch(a, None))
           case (a, b) => if (a == b) List() else List(BodyMismatch(a, b))
         }
       }
     } else {
-      List(BodyTypeMismatch(expected.mimeType, actual.mimeType))
+      if (expected.body == None) List()
+      else List(BodyTypeMismatch(expected.mimeType, actual.mimeType))
     }
   }
 
