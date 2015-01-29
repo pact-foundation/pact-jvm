@@ -1,5 +1,27 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.1.10 - bugfix release
+
+* 973ef27 - do not compare the actual body if the body is left out of the pact file #85 (Ronald Holshausen, Thu Jan 29 19:29:15 2015 +1100)
+* 4a4aaba - Revert "when serialising a pact to JSON, always include a body attribute #85" (Ronald Holshausen, Thu Jan 29 13:39:53 2015 +1100)
+* 559a612 - Revert "when de-serialising a pact from JSON, set the body to None for empty, null and missing values #85" (Ronald Holshausen, Thu Jan 29 13:39:35 2015 +1100)
+* b44efd8 - Ignore the provider state if there is no state change URL #86 (Ronald Holshausen, Wed Jan 28 19:36:35 2015 +1100)
+* 650a824 - when de-serialising a pact from JSON, set the body to None for empty, null and missing values #85 (Ronald Holshausen, Wed Jan 28 13:35:49 2015 +1100)
+* b86095c - when serialising a pact to JSON, always include a body attribute #85 (Ronald Holshausen, Wed Jan 28 12:42:14 2015 +1100)
+* 7c62c7f - Merge pull request #84 from kolstae/master (Ronald Holshausen, Wed Jan 28 09:41:01 2015 +1100)
+* 102c762 - Changed ConsumerPactTest to not swallow exceptions (fieskols, Tue Jan 27 12:26:20 2015 +0100)
+* 129f4c3 - make PactSpec failure messages more meaningful #82 (Ronald Holshausen, Tue Jan 27 20:32:36 2015 +1100)
+* 4ddb281 - add accept headers when fetching pact files from a URL #83 (Ronald Holshausen, Sat Jan 24 10:01:57 2015 +1100)
+* 8499a94 - linked XML mimetypes to an XML body matcher #49 (Ronald Holshausen, Fri Jan 23 13:58:14 2015 +1100)
+* f51d92d - added debug logging to the matchers #82 (Ronald Holshausen, Fri Jan 23 13:20:29 2015 +1100)
+* 28fe123 - small refactor in prep for matching XML bodies #49 (Ronald Holshausen, Mon Jan 19 15:33:19 2015 +1100)
+* f9997e7 - refactored matching code and removed Java interfaces #80 (Ronald Holshausen, Sun Jan 18 17:40:48 2015 +1100)
+* aafe7b8 - very naive implementation of at least N matching of arrays #80 (Ronald Holshausen, Sun Jan 18 13:17:39 2015 +1100)
+* 8517c4b - Fix the readme section on filtering interactions for Gradle/Maven plugins (Ronald Holshausen, Mon Jan 12 12:58:36 2015 +1100)
+* 8361abc - fix parameter order #79 (Ronald Holshausen, Sat Jan 10 15:45:57 2015 +1100)
+* 2a08dc3 - add ability to maven plugin to verify pact files in a directory #79 (Ronald Holshausen, Sat Jan 10 15:40:05 2015 +1100)
+* 0126eaf - bump version (Ronald Holshausen, Sat Jan 10 13:47:03 2015 +1100)
+
 # 2.1.9 - fixes plus maven plugin
 
 * 5b52f97 - added maven central badge (Ronald Holshausen, Wed Jan 7 16:24:32 2015 +1100)                                                                                                                                                     
