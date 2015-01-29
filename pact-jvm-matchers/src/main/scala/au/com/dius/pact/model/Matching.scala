@@ -100,7 +100,7 @@ object Matching {
       } else {
         (expected.body, actual.body) match {
           case (None, None) => List()
-          case (None, b) => if(diffConfig.structural) { List() } else { List(BodyMismatch(None, b)) }
+          case (None, b) => List()
           case (a, None) => List(BodyMismatch(a, None))
           case (a, b) => if (a == b) List() else List(BodyMismatch(a, b))
         }

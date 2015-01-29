@@ -11,11 +11,7 @@ class JsonBodyMatcher extends BodyMatcher  with StrictLogging {
   def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig): List[BodyMismatch] = {
     (expected.body, actual.body) match {
       case (None, None) => List()
-      case (None, b) => if (diffConfig.structural) {
-        List()
-      } else {
-        List(BodyMismatch(None, b))
-      }
+      case (None, b) => List()
       case (a, None) => List(BodyMismatch(a, None))
       case (Some(a), Some(b)) => compare("$.body", parse(a), parse(b), diffConfig, expected.matchers)
     }

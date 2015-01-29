@@ -48,11 +48,6 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
           s"$a does not contain '$s'"
         )
 
-      "when comparing an empty body to anything and we do not allow extra keys" in {
-        actualBody = Some(<blah/>.toString())
-        matcher.matchBody(expected(), actual(), DiffConfig(structural = false)) must not(beEmpty)
-      }
-
       "when comparing anything to an empty body" in {
         expectedBody = Some(<blah/>.toString())
         matcher.matchBody(expected(), actual(), diffconfig) must not(beEmpty)

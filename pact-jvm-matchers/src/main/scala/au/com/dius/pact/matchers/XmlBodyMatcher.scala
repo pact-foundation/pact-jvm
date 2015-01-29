@@ -9,11 +9,7 @@ class XmlBodyMatcher extends BodyMatcher {
   override def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig): List[BodyMismatch] = {
     (expected.body, actual.body) match {
       case (None, None) => List[BodyMismatch]()
-      case (None, b) => if (diffConfig.structural) {
-        List[BodyMismatch]()
-      } else {
-        List(BodyMismatch(None, b))
-      }
+      case (None, b) => List[BodyMismatch]()
       case (a, None) => List(BodyMismatch(a, None))
       case (Some(a), Some(b)) => compareElem("$.body", parse(a), parse(b), diffConfig, expected.matchers)
     }

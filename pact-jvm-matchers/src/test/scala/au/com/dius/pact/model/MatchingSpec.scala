@@ -8,7 +8,6 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class MatchingSpec extends Specification {
   "Matching" should {
-    import au.com.dius.pact.model.JsonDiff._
     import au.com.dius.pact.model.Matching._
     implicit val autoParse = JsonDiff.autoParse _
     "Body Matching" should {
@@ -26,9 +25,8 @@ class MatchingSpec extends Specification {
       }
 
       "Handle right None" in {
-        val expected = List(BodyMismatch(None, request.body))
         matchBody(Request("", "", None, Some(Map("Content-Type" -> "a")), None, None),
-          Request("", "", None, Some(Map("Content-Type" -> "a")), request.body, None), config) must beEqualTo(expected)
+          Request("", "", None, Some(Map("Content-Type" -> "a")), request.body, None), config) must beEmpty
       }
 
       "Handle different mime types" in {
