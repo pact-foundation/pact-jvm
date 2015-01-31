@@ -24,7 +24,10 @@ class RequestSpecificationSpec extends SpecificationLike
     def accept(dir: File, name: String): Boolean = name.endsWith(".json")
   }
 
-  def fragments: Seq[Example] = new File("src/main/resources/request").listFiles().flatMap { folder =>
+  def fragments: Seq[Example] ={
+    val resources = getClass.getResource("/request/")
+    val file = new File(resources.toURI)
+    file.listFiles().flatMap { folder =>
     if(folder.isDirectory) {
       val dirName = folder.getName
       folder.listFiles(jsonFilter).map { testFile =>
@@ -43,6 +46,7 @@ class RequestSpecificationSpec extends SpecificationLike
     } else {
       Seq()
     }
+  }
   }
   override def is: Fragments = Fragments.create(fragments :_*)
 

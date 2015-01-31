@@ -24,26 +24,31 @@ class ResponseSpecificationSpec extends SpecificationLike
     def accept(dir: File, name: String): Boolean = name.endsWith(".json")
   }
 
-  def fragments: Seq[Example] = new File("src/main/resources/response").listFiles().flatMap { folder =>
-    if(folder.isDirectory) {
-      val dirName = folder.getName
-      folder.listFiles(jsonFilter).map { testFile =>
-        val fileName = testFile.getName
-        implicit val formats = DefaultFormats
-        val testJson = parse(testFile)
-        var testData = testJson.transformField {
-          case ("body", value) => ("body", JString(pretty(value)))
-        }.extract[PactResponseSpecification]
+  def fragments: Seq[Example] = {
+    val resources = getClass.getResource("/response/")
+    val file = new File(resources.toURI())
+    file.listFiles().flatMap { folder =>
+      if(folder.isDirectory) {
+        val dirName = folder.getName
+        folder.listFiles(jsonFilter).map { testFile =>
+          val fileName = testFile.getName
+          implicit val formats = DefaultFormats
+          val testJson = parse(testFile)
+          var testData = testJson.transformField {
+            case ("body", value) => ("body", JString(pretty(value)))
+          }.extract[PactResponseSpecification]
 
-        val description = s"$dirName/$fileName ${testData.comment}"
-        Example(description, {
-          test(testData)
-        })
+          val description = s"$dirName/$fileName ${testData.comment}"
+          Example(description, {
+            test(testData)
+          })
+        }
+      } else {
+        Seq()
       }
-    } else {
-      Seq()
     }
   }
+
   override def is: Fragments = Fragments.create(fragments :_*)
 
   def test(input: PactResponseSpecification) = {
