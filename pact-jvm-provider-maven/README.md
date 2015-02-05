@@ -194,6 +194,9 @@ These values can be set at the provider level, or for a specific consumer. Consu
 If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description will be sent as
  JSON in the body of the request. If it is set to false, it will passed as a query parameter.
 
+As for normal requests (see Modifying the requests before they are sent), a state change request can be modified before
+it is sent. Set `stateChangeRequestFilter` to a Groovy script on the provider that will be called before the request is made.
+
 ## Filtering the interactions that are verified
 
 You can filter the interactions that are run using three properties: `pact.filter.consumers`, `pact.filter.description` and `pact.filter.providerState`.

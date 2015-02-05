@@ -15,4 +15,5 @@ class Provider {
     File pactFileDirectory
     URL stateChangeUrl
     boolean stateChangeUsesBody = true
+    def stateChangeRequestFilter
 }

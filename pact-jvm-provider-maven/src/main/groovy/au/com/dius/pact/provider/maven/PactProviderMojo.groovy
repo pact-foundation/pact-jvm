@@ -218,12 +218,8 @@ class PactProviderMojo extends AbstractMojo {
                     stateChangeUrl = provider.stateChangeUrl
                     stateChangeUsesBody = provider.stateChangeUsesBody
                 }
-                def client = new RESTClient(stateChangeUrl.toString())
-                if (stateChangeUsesBody) {
-                    client.post(body: [state: state], requestContentType: 'application/json')
-                } else {
-                    client.post(query: [state: state])
-                }
+                ProviderClient client = new ProviderClient(provider: provider)
+                client.makeStateChangeRequest(stateChangeUrl.toString(), state, stateChangeUsesBody)
             }
             return true
         } catch (e) {
