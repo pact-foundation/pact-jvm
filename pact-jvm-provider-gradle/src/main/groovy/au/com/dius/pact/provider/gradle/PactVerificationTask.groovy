@@ -172,12 +172,8 @@ class PactVerificationTask extends DefaultTask {
                 AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW).a('WARNING: State Change ignored as there is no stateChange URL')
                     .reset())
             } else {
-                def client = new RESTClient(url.toString())
-                if (consumer.stateChangeUsesBody) {
-                    client.post(body: [state: state], requestContentType: 'application/json')
-                } else {
-                    client.post(query: [state: state])
-                }
+                ProviderClient client = new ProviderClient(provider: providerToVerify)
+                client.makeStateChangeRequest(url, state, consumer.stateChangeUsesBody)
             }
             return true
         } catch (e) {

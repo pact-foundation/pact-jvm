@@ -165,7 +165,8 @@ The following project properties can be specified with `-Pproperty=value` on the
 ## Provider States
 
 For each provider you can specify a state change URL to use to switch the state of the provider. This URL will
-receive the providerState description from the pact file before each interaction via a POST.
+receive the providerState description from the pact file before each interaction via a POST. As for normal requests,
+a request filter (`stateChangeRequestFilter`) can also be set to manipulate the request before it is sent.
 
 ```
 pact {
@@ -178,6 +179,10 @@ pact {
                 pactFile = file('path/to/provider1-consumer1-pact.json')
                 stateChange = url('http://localhost:8001/tasks/pactStateChange')
                 stateChangeUsesBody = false // defaults to true
+                stateChangeRequestFilter = { req ->
+                    // Add an authorization header to each request
+                    req.addHeader('Authorization', 'OAUTH eyJhbGciOiJSUzI1NiIsImN0eSI6ImFw...')
+                }
             }
             
             // or

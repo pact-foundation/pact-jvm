@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.groovysupport
 
 import au.com.dius.pact.model.Request
+import groovy.json.JsonBuilder
 import org.apache.http.Header
 import org.apache.http.HttpEntity
 import org.apache.http.HttpEntityEnclosingRequest
@@ -62,6 +63,33 @@ class ProviderClient {
         } finally {
             response.close()
         }
+    }
+
+    def makeStateChangeRequest(String url, String state, boolean postStateInBody) {
+        CloseableHttpClient httpclient = newClient()
+        def urlBuilder = new URIBuilder(url)
+        HttpRequest method
+
+        if (postStateInBody) {
+            method = new HttpPost(urlBuilder.build())
+            method.setEntity(new StringEntity(new JsonBuilder([state: state]).toPrettyString(),
+                    ContentType.APPLICATION_JSON))
+        } else {
+            method = new HttpPost(urlBuilder.setParameter('state', state).build())
+        }
+
+        if (provider.stateChangeRequestFilter != null) {
+            if (provider.stateChangeRequestFilter instanceof Closure) {
+                provider.stateChangeRequestFilter(method)
+            } else {
+                Binding binding = new Binding()
+                binding.setVariable("request", method)
+                GroovyShell shell = new GroovyShell(binding)
+                shell.evaluate(provider.stateChangeRequestFilter as String)
+            }
+        }
+
+        httpclient.execute(method)
     }
 
     def handleResponse(HttpResponse httpResponse) {

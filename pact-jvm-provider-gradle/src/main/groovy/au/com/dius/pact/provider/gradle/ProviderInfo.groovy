@@ -12,6 +12,7 @@ class ProviderInfo {
     def startProviderTask
     def terminateProviderTask
     def requestFilter
+    def stateChangeRequestFilter
 
     List<ConsumerInfo> consumers = []
 
