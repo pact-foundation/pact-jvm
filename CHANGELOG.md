@@ -1,5 +1,16 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.1.11 - bugfix release
+
+* 247f5ac - port the state change request filter to the maven plugin (Ronald Holshausen, Thu Feb 5 16:32:04 2015 +1100)
+* 3f59fdb - Allow state change requests from the gradle plugin to be modified (Ronald Holshausen, Thu Feb 5 16:21:20 2015 +1100)
+* e952761 - Merge pull request #88 from BobFromHuddle/build_fixes (Ronald Holshausen, Sun Feb 1 09:24:51 2015 +1100)
+* 838921e - Fixed failure to load resources. Added JUnit as test dependency to matchers (Bob Gregory, Sat Jan 31 21:36:27 2015 +0000)
+* df9d70a - Adding matchers as dependency for test projects (Bob Gregory, Fri Jan 30 20:18:50 2015 +0000)
+* ff32941 - Merge pull request #87 from algra/fix-empty-body (Ronald Holshausen, Fri Jan 30 09:16:40 2015 +1100)
+* 886866d - Fixing the problem of evaluating mime type even if no body is specified. In this case "fallback" mime type "text/plain" is used, which makes test failing if provider
+* 92175d7 - bump version (Ronald Holshausen, Thu Jan 29 20:18:49 2015 +1100)
+
 # 2.1.10 - bugfix release
 
 * 973ef27 - do not compare the actual body if the body is left out of the pact file #85 (Ronald Holshausen, Thu Jan 29 19:29:15 2015 +1100)
