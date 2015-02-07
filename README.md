@@ -111,8 +111,27 @@ Which is a project that aims at providing tooling to coordinate pact generation 
 
 ## Building the library
 
-Most of Pact-JVM is written in Scala. You can build it using SBT (the old way). We are moving the build to Gradle,
-so you can build it with that too.
+Most of Pact-JVM is written in Scala and is built with Gradle.
+
+#### To build the libraries:
+
+    $ ./gradlew clean build
+
+You can publish pact-jvm to your local maven repo using:
+
+    $ ~/.gradlew clean install
+
+To publish to a nexus repo:
+
+    $ ./gradlew clean check uploadArchives
+
+You will have to change the nexus URL and username/password in build.gradle and you must be added to the nexus project
+to be able to do this
+
+### Using SBT (the old way)
+
+The SBT project files still remain for those who want to build it with SBT. Note, however, that *this is unmaintained as
+there is no custodian for the SBT build*.
 
 #### Note on buiding pact JVM with Java 6 or 7
 
@@ -121,28 +140,14 @@ Scala requires a lot of permgen space to compile. If you're using Java 6 or 7, u
     export JAVA_OPTS='-Xmx2048m -XX:MaxPermSize=1024m -XX:PermSize=1024m'
     export SBT_OPTS='-Xmx2048m -XX:MaxPermSize=1024m -XX:PermSize=1024m'
 
-#### To build the libraries:
+To build the libraries:
 
     $ sbt clean test install
-
-or
-
-    $ ./gradlew clean build
 
 You can publish pacts to your local maven repo using:
 
     $ sbt clean test publishLocal
 
-or
-
-    $ ~/.gradlew clean install
-
 To publish to a nexus repo, change the url in project/Build.scala then run:
 
     $ sbt clean test publish
-
-or
-
-    $ ./gradlew clean check uploadArchives
-
-You will need to be added to the nexus project to be able to do this.
