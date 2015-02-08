@@ -5,10 +5,19 @@ dependencies {
         'org.apache.maven:maven-plugin-api:3.2.5', 'org.apache.maven.plugin-tools:maven-plugin-annotations:3.3'
 }
 
+import org.apache.tools.ant.taskdefs.condition.Os
+def isWindows() {
+    Os.isFamily(Os.FAMILY_WINDOWS)
+}
+
 task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider_${project.scalaVersion}:install",
                                               ":pact-jvm-model_${project.scalaVersion}:install",
                                               ":pact-jvm-matchers_${project.scalaVersion}:install"]) {
-    commandLine 'mvn', '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.2:descriptor'
+    String mvn = 'mvn'
+    if (isWindows()) {
+        mvn = 'mvn.bat'
+    }
+    commandLine mvn, '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.2:descriptor'
     doFirst {
         def pomFile = file("${buildDir}/poms/pom.xml")
         def pom = install.repositories.mavenInstaller.pom

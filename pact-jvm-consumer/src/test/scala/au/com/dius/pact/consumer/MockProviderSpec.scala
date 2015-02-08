@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.Fixtures._
 import au.com.dius.pact.model._
 import scala.concurrent.duration.FiniteDuration
 import org.json4s.JsonAST.{JField, JString, JObject}
+import org.json4s.jackson.JsonMethods._
 import scala.concurrent.ExecutionContext
 import java.util.concurrent.Executors
 import au.com.dius.pact.model.Interaction
@@ -13,7 +14,6 @@ import scala.util.Success
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.specs2.execute.Result
-import org.json4s.jackson.JsonMethods.pretty
 
 @RunWith(classOf[JUnitRunner])
 class MockProviderSpec extends Specification {
@@ -62,7 +62,7 @@ class MockProviderSpec extends Specification {
         val expectedHeaders = expected.headers.getOrElse(Map())
         actual.headers.map(_.filter(t => expectedHeaders.contains(t._1))) must beEqualTo(expected.headers)
 
-        actual.body must beEqualTo(expected.body)
+        parse(actual.body.get) must beEqualTo(parse(expected.body.get))
       }
 
       def compare(actual: Interaction, request:Request, response:Response) = {
