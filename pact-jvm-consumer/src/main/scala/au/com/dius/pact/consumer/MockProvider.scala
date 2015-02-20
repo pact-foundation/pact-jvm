@@ -40,11 +40,14 @@ abstract class StatefulMockProvider extends MockProvider with StrictLogging {
   override def runAndClose[T](pact: Pact)(code: => T): Try[(T, PactSessionResults)] = {
     def waitForRequestsToFinish() = Thread.sleep(50)
     Try {
-      start(pact)
-      val codeResult = code
-      waitForRequestsToFinish()
-      stop()
-      (codeResult, session.remainingResults)
+      try {
+        start(pact)
+        val codeResult = code
+        waitForRequestsToFinish()
+        (codeResult, session.remainingResults)
+      } finally {
+        stop()
+      }
     }
   }
   
