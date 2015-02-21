@@ -133,7 +133,7 @@ to be able to do this
 The SBT project files still remain for those who want to build it with SBT. Note, however, that _this is unmaintained as
 there is no custodian for the SBT build_.
 
-#### Note on buiding pact JVM with Java 6 or 7
+#### Note on building pact JVM with Java 6 or 7
 
 Scala requires a lot of permgen space to compile. If you're using Java 6 or 7, use the following java and sbt options:
 

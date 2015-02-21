@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer
 
+import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import au.com.dius.pact.model._
 import Fixtures._
@@ -9,8 +10,9 @@ import org.json4s.jackson.JsonMethods._
 import au.com.dius.pact.model.PathMismatch
 import au.com.dius.pact.model.BodyMismatch
 import au.com.dius.pact.model.HeaderMismatch
-import scala.Some
+import org.specs2.runner.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class PrettyPrinterSpec extends Specification {
   def print(mismatch: RequestPartMismatch) = {
     PrettyPrinter.print(PactSessionResults.empty.addAlmostMatched(PartialRequestMatch(interaction, Seq(mismatch))))
@@ -40,7 +42,7 @@ class PrettyPrinterSpec extends Specification {
   "body mismatch" in {
     import org.json4s.JsonDSL._
 
-    print(BodyMismatch(Some(pretty(map2jvalue(Map("foo"->"bar")))), Some(pretty(map2jvalue(Map("ork" -> "Bif")))))) must beEqualTo(
+    print(BodyMismatch(pretty(map2jvalue(Map("foo"->"bar"))), pretty(map2jvalue(Map("ork" -> "Bif"))))) must beEqualTo(
     s"""--- Body
       |$plus
       |@@ -1,3 +1,3 @@

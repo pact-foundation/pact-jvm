@@ -26,16 +26,25 @@ object PrettyPrinter {
     printDiff(label, stringify(expected), stringify(actual))
   }
 
-  def printStringMismatch(label: String, expected: Option[String], actual: Option[String]): Seq[String] = {
-    def stringify(s: Option[String]) = s.fold(List[String]()){j => j.split("\n").toList}
-    printDiff(label, stringify(expected), stringify(actual))
+  def printStringMismatch(label: String, expected: Any, actual: Any): Seq[String] = {
+
+    def stringify(s: String) = s.toString.split("\n").toList
+
+    def anyToString(a: Any) : String = {
+      a match {
+        case None => ""
+        case Some(s) => anyToString(s)
+        case _ => a.toString
+      }
+    }
+
+    printDiff(label, stringify(anyToString(expected)), stringify(anyToString(actual)))
   }
 
   def printProblem(interaction:Interaction, partial: Seq[RequestPartMismatch]): String = {
     partial.flatMap {
       case HeaderMismatch(expected, actual) => printMapMismatch("Headers", expected, actual)
-      case BodyMismatch(expected, actual, mismatch, path) => printStringMismatch("Body", Some(expected.toString), Some(actual.toString))
-      case BodyTypeMismatch(expected, actual) => printStringMismatch("Body Type", Some(expected), Some(actual))
+      case BodyMismatch(expected, actual, mismatch, path) => printStringMismatch("Body", expected, actual)
       case CookieMismatch(expected, actual) => printDiff("Cookies", expected.sorted, actual.sorted)
       case PathMismatch(expected, actual, _) => printDiff("Path", List(expected), List(actual), 0)
       case MethodMismatch(expected, actual) => printDiff("Method", List(expected), List(actual), 0)
