@@ -119,7 +119,7 @@ Most of Pact-JVM is written in Scala and is built with Gradle.
 
 You can publish pact-jvm to your local maven repo using:
 
-    $ ~/.gradlew clean install
+    $ ./gradlew clean install
 
 To publish to a nexus repo:
 
@@ -130,8 +130,8 @@ to be able to do this
 
 ### Using SBT (the old way)
 
-The SBT project files still remain for those who want to build it with SBT. Note, however, that *this is unmaintained as
-there is no custodian for the SBT build*.
+The SBT project files still remain for those who want to build it with SBT. Note, however, that _this is unmaintained as
+there is no custodian for the SBT build_.
 
 #### Note on buiding pact JVM with Java 6 or 7
 
