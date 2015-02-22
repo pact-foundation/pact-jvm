@@ -58,6 +58,7 @@ public class PactRule extends ExternalResource {
                 //no pactVerification? execute the test normally
                 if (pactDef == null) {
                     base.evaluate();
+                    return;
                 }
 
 
