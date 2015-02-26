@@ -59,7 +59,7 @@ class JsonBodyMatcher extends BodyMatcher  with StrictLogging {
     def compareListContent = {
       var result = List[BodyMismatch]()
       for ((value, index) <- expectedValues.view.zipWithIndex) {
-        val s = path + "." + (index + 1)
+        val s = path + "[" + index + "]"
         if (index < actualValues.size) {
           result = result ++: compare(s, value, actualValues(index), diffConfig, matchers)
         } else {

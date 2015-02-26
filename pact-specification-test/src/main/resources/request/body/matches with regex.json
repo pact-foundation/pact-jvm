@@ -8,8 +8,8 @@
     "headers": {},
     "requestMatchingRules": {
       "$.body.alligator.name": {"regex": "\\w+"},
-      "$.body.alligator.favouriteColours.1": {"regex": "red|blue"},
-      "$.body.alligator.favouriteColours.2": {"regex": "red|blue"}
+      "$.body.alligator.favouriteColours[0]": {"regex": "red|blue"},
+      "$.body.alligator.favouriteColours[1]": {"regex": "red|blue"}
     },
     "body": {
       "alligator":{

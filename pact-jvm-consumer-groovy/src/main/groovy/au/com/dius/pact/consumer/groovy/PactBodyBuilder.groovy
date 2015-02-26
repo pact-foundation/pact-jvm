@@ -83,9 +83,9 @@ class PactBodyBuilder extends Matchers {
       bodyMap[name] = []
       value.eachWithIndex { def entry, int i ->
         if (entry instanceof Matcher) {
-          bodyMap[name] << setMatcherAttribute(entry, path + '.' + name + '.' + (i + 1))
+          bodyMap[name] << setMatcherAttribute(entry, path + '.' + name + '[' + i + ']')
         } else if (entry instanceof Closure) {
-          bodyMap[name] << invokeClosure(entry, '.' + name + '.' + (i + 1))
+          bodyMap[name] << invokeClosure(entry, '.' + name + '[' + i + ']')
         } else {
           bodyMap[name] << entry
         }

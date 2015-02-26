@@ -67,7 +67,7 @@ public class PactDslJsonArray extends DslPart {
 
     public PactDslJsonArray stringType() {
         body.put(RandomStringUtils.randomAlphabetic(20));
-        matchers.put(root + "." + body.length(), matchType());
+        matchers.put(root + appendArrayIndex(), matchType());
         return this;
     }
 
@@ -77,7 +77,7 @@ public class PactDslJsonArray extends DslPart {
 
     public PactDslJsonArray numberType(Number number) {
         body.put(number);
-        matchers.put(root + "." + body.length(), matchType("type"));
+        matchers.put(root + appendArrayIndex(), matchType("type"));
         return this;
     }
 
@@ -87,7 +87,7 @@ public class PactDslJsonArray extends DslPart {
 
     public PactDslJsonArray integerType(Long number) {
         body.put(number);
-        matchers.put(root + "." + body.length(), matchType("integer"));
+        matchers.put(root + appendArrayIndex(), matchType("integer"));
         return this;
     }
 
@@ -97,19 +97,19 @@ public class PactDslJsonArray extends DslPart {
 
     public PactDslJsonArray realType(Double number) {
         body.put(number);
-        matchers.put(root + "." + body.length(), matchType("real"));
+        matchers.put(root + appendArrayIndex(), matchType("real"));
         return this;
     }
 
     public PactDslJsonArray booleanType(String name) {
         body.put(true);
-        matchers.put(root + "." + body.length(), matchType());
+        matchers.put(root + appendArrayIndex(), matchType());
         return this;
     }
 
     public PactDslJsonArray stringMatcher(String regex, String value) {
         body.put(value);
-        matchers.put(root + "." + body.length(), regexp(regex));
+        matchers.put(root + appendArrayIndex(), regexp(regex));
         return this;
     }
 
@@ -120,46 +120,46 @@ public class PactDslJsonArray extends DslPart {
 
     public PactDslJsonArray timestamp() {
         body.put(DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date()));
-        matchers.put(root + "." + body.length(), matchTimestamp(DateFormatUtils.ISO_DATETIME_FORMAT.getPattern()));
+        matchers.put(root + appendArrayIndex(), matchTimestamp(DateFormatUtils.ISO_DATETIME_FORMAT.getPattern()));
         return this;
     }
 
     public PactDslJsonArray timestamp(String format) {
         FastDateFormat instance = FastDateFormat.getInstance(format);
         body.put(instance.format(new Date()));
-        matchers.put(root + "." + body.length(), matchTimestamp(format));
+        matchers.put(root + appendArrayIndex(), matchTimestamp(format));
         return this;
     }
 
     public PactDslJsonArray date() {
         body.put(DateFormatUtils.ISO_DATE_FORMAT.format(new Date()));
-        matchers.put(root + "." + body.length(), matchDate(DateFormatUtils.ISO_DATE_FORMAT.getPattern()));
+        matchers.put(root + appendArrayIndex(), matchDate(DateFormatUtils.ISO_DATE_FORMAT.getPattern()));
         return this;
     }
 
     public PactDslJsonArray date(String format) {
         FastDateFormat instance = FastDateFormat.getInstance(format);
         body.put(instance.format(new Date()));
-        matchers.put(root + "." + body.length(), matchDate(format));
+        matchers.put(root + appendArrayIndex(), matchDate(format));
         return this;
     }
 
     public PactDslJsonArray time() {
         body.put(DateFormatUtils.ISO_TIME_FORMAT.format(new Date()));
-        matchers.put(root + "." + body.length(), matchTime(DateFormatUtils.ISO_TIME_FORMAT.getPattern()));
+        matchers.put(root + appendArrayIndex(), matchTime(DateFormatUtils.ISO_TIME_FORMAT.getPattern()));
         return this;
     }
 
     public PactDslJsonArray time(String format) {
         FastDateFormat instance = FastDateFormat.getInstance(format);
         body.put(instance.format(new Date()));
-        matchers.put(root + "." + body.length(), matchTime(format));
+        matchers.put(root + appendArrayIndex(), matchTime(format));
         return this;
     }
 
     public PactDslJsonArray ipAddress() {
         body.put("127.0.0.1");
-        matchers.put(root + "." + body.length(), regexp("(\\d{1,3}\\.)+\\d{1,3}"));
+        matchers.put(root + appendArrayIndex(), regexp("(\\d{1,3}\\.)+\\d{1,3}"));
         return this;
     }
 
@@ -168,7 +168,7 @@ public class PactDslJsonArray extends DslPart {
     }
 
     public PactDslJsonBody object() {
-        return new PactDslJsonBody(root + "." + (body.length() + 1), this);
+        return new PactDslJsonBody(root + "[" + body.length() + "]", this);
     }
 
     @Override
@@ -181,12 +181,12 @@ public class PactDslJsonArray extends DslPart {
     }
 
     public PactDslJsonArray array() {
-        return new PactDslJsonArray(root + "." + (body.length() + 1), this);
+        return new PactDslJsonArray(root + "[" + body.length() + "]", this);
     }
 
     public PactDslJsonArray id() {
         body.put(RandomStringUtils.randomNumeric(10));
-        matchers.put(root + "." + body.length(), matchType());
+        matchers.put(root + appendArrayIndex(), matchType());
         return this;
     }
 
@@ -196,21 +196,21 @@ public class PactDslJsonArray extends DslPart {
 
     public PactDslJsonArray hexValue(String hexValue) {
         body.put(hexValue);
-        matchers.put(root + "." + body.length(), regexp("[0-9a-fA-F]+"));
+        matchers.put(root + appendArrayIndex(), regexp("[0-9a-fA-F]+"));
         return this;
     }
 
-    public PactDslJsonArray guid(String name) {
-        return guid(name, UUID.randomUUID().toString());
+    public PactDslJsonArray guid() {
+        return guid(UUID.randomUUID().toString());
     }
 
-    public PactDslJsonArray guid(String name, UUID uuid) {
-        return guid(name, uuid.toString());
-    }
-
-    public PactDslJsonArray guid(String name, String uuid) {
+    public PactDslJsonArray guid(String uuid) {
         body.put(uuid);
-        matchers.put(root + "." + name, regexp("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
+        matchers.put(root + appendArrayIndex(), regexp("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
         return this;
+    }
+
+    private String appendArrayIndex() {
+        return "[" + (body.length() - 1) + "]";
     }
 }

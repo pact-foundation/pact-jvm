@@ -76,10 +76,10 @@ class PactBodyBuilderTest {
           '$.body.age2': [match: 'integer'],
           '$.body.ts': [timestamp: 'yyyy-MM-dd\'T\'HH:mm:ss'],
           '$.body.timestamp': [timestamp: 'yyyy/MM/dd - HH:mm:ss.S'],
-          '$.body.values.4': [match: 'number'],
+          '$.body.values[3]': [match: 'number'],
           '$.body.role.dob': [date: 'MM/dd/yyyy'],
           '$.body.role.id': [regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'],
-          '$.body.roles.1.id': [regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}']
+          '$.body.roles[0].id': [regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}']
         ]
         assert asJavaMap(service.interactions[0].response.responseMatchingRules) == ['$.body.name': [regex: '\\w+']]
 
