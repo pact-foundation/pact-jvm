@@ -173,7 +173,17 @@ class PactVerificationTask extends DefaultTask {
                     .reset())
             } else {
                 ProviderClient client = new ProviderClient(provider: providerToVerify)
-                client.makeStateChangeRequest(url, state, consumer.stateChangeUsesBody)
+                def response = client.makeStateChangeRequest(url, state, consumer.stateChangeUsesBody)
+                try {
+                    if (response.statusCode >= 400) {
+                        AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.RED)
+                            .a('State Change Request Failed - ')
+                            .a(response.statusLine.toString()).reset())
+                        return 'State Change Request Failed - ' + response.statusLine.toString()
+                    }
+                } finally {
+                    response.close()
+                }
             }
             return true
         } catch (e) {
