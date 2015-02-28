@@ -1,5 +1,23 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.1.12 - bugfix release
+
+**NOTE: This version has a breaking change for matching paths with arrays. To bring it inline with
+the other pact implementations, matcher paths will use [] for array indices. Pact files generated
+with previous versions with matchers defined on arrays will not be applied.**
+
+* a13bac9 - fail the build if a state change request returns a failure status code (Ronald Holshausen, Sat Feb 28 15:33:23 2015 +1100)
+* 2eff45b - Updated the matcher paths to use [] for array elements to bring it in line with ruby and .net pact (Ronald Holshausen, Thu Feb 26 12:56:49 2015 +1100)
+* 4bafbff - Merge pull request #91 from hbakkum/master (Ronald Holshausen, Mon Feb 23 20:25:43 2015 +1100)
+* ad04842 - Fixed an issue in PactRule whereby a test with no pact verification would still get run as a pact consumer resulting in a NPE (Hayden Bakkum, Mon Feb 23 10:33:10 2015
+* bf6e29e - fix to get the SBT build passing #89 (Ronald Holshausen, Sat Feb 21 16:00:44 2015 +1100)
+* 222d50b - small correction to readme (Ronald Holshausen, Sat Feb 21 13:13:08 2015 +1100)
+* 7b9ce84 - Merge pull request #90 from georgepapas/master (Ronald Holshausen, Fri Feb 20 15:51:41 2015 +1100)
+* 59f1f8d - Ensures mock server is stopped when pact client code causes exception (George Papas, Fri Feb 20 15:01:33 2015 +1100)
+* 80fb905 - fixes to get build to pass on windows #81 (Ronald Holshausen, Sun Feb 8 19:56:17 2015 +1100)
+* d109bcd - update build instructions with note about SBT being unmaintained (Ronald Holshausen, Sun Feb 8 10:59:04 2015 +1100)
+* 924bee4 - bump version (Ronald Holshausen, Thu Feb 5 21:31:45 2015 +1100)
+
 # 2.1.11 - bugfix release
 
 * 247f5ac - port the state change request filter to the maven plugin (Ronald Holshausen, Thu Feb 5 16:32:04 2015 +1100)
