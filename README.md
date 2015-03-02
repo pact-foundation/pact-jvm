@@ -4,7 +4,7 @@ pact-jvm
 [![Build Status](https://travis-ci.org/DiUS/pact-jvm.svg?branch=master)](https://travis-ci.org/DiUS/pact-jvm)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11)
 
-JVM implementation of the consumer driven contract library (pact)[https://github.com/bethesque/pact_specification]
+JVM implementation of the consumer driven contract library [pact](https://github.com/bethesque/pact_specification)
 
 From the [Ruby Pact website](https://github.com/realestate-com-au/pact):
 
