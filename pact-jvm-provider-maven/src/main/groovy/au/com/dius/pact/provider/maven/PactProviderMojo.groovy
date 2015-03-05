@@ -221,7 +221,7 @@ class PactProviderMojo extends AbstractMojo {
                 ProviderClient client = new ProviderClient(provider: provider)
                 def response = client.makeStateChangeRequest(stateChangeUrl.toString(), state, stateChangeUsesBody)
                 try {
-                    if (response.statusCode >= 400) {
+                    if (response.statusLine.statusCode >= 400) {
                         AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.RED)
                             .a('State Change Request Failed - ')
                             .a(response.statusLine.toString()).reset())

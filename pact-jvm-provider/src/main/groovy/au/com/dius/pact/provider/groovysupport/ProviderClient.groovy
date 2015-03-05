@@ -7,6 +7,7 @@ import org.apache.http.HttpEntity
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
+import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpHead
@@ -65,7 +66,7 @@ class ProviderClient {
         }
     }
 
-    def makeStateChangeRequest(String url, String state, boolean postStateInBody) {
+    CloseableHttpResponse makeStateChangeRequest(String url, String state, boolean postStateInBody) {
         CloseableHttpClient httpclient = newClient()
         def urlBuilder = new URIBuilder(url)
         HttpRequest method
