@@ -113,5 +113,12 @@ class PactSpec extends Specification {
 
         }
     }
+
+    "request" should {
+      "provide an way to find a header case insensitive" in {
+        val request = Request(HttpMethod.Get, "", None, Some(Map("Cookie" -> "cookie-value")), None, None)
+        request.findHeaderByCaseInsensitiveKey("cookie") must beSome("Cookie" -> "cookie-value")
+      }
+    }
   }
 }
