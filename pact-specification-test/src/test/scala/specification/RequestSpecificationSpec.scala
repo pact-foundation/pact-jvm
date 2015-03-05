@@ -34,7 +34,7 @@ class RequestSpecificationSpec extends SpecificationLike
         val fileName = testFile.getName
         implicit val formats = DefaultFormats
         val testJson = parse(testFile)
-        var testData = testJson.transformField {
+        val testData = testJson.transformField {
           case ("body", value) => ("body", JString(pretty(value)))
         }.extract[PactRequestSpecification]
 
