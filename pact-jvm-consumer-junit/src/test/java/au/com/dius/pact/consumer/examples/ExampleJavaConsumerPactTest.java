@@ -1,6 +1,10 @@
-package au.com.dius.pact.consumer;
+package au.com.dius.pact.consumer.examples;
 
+import au.com.dius.pact.consumer.ConsumerClient;
+import au.com.dius.pact.consumer.ConsumerPactBuilder;
+import au.com.dius.pact.consumer.ConsumerPactTest;
 import au.com.dius.pact.model.PactFragment;
+import org.junit.Assert;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +54,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
     @Override
     protected void runTest(String url) {
         try {
-            assertEquals(new ConsumerClient(url).options("/second"), 200);
+            Assert.assertEquals(new ConsumerClient(url).options("/second"), 200);
             Map expectedResponse = new HashMap();
             expectedResponse.put("responsetest", true);
             expectedResponse.put("name", "harry");

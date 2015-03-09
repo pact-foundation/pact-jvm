@@ -118,7 +118,7 @@ and then add the rule:
     }
 ```
 
-For an example, have a look at [ExampleJavaConsumerPactRuleTest](src/test/java/au/com/dius/pact/consumer/ExampleJavaConsumerPactRuleTest.java)
+For an example, have a look at [ExampleJavaConsumerPactRuleTest](src/test/java/au/com/dius/pact/consumer/examples/ExampleJavaConsumerPactRuleTest.java)
 
 ### Using the Pact DSL directly
 

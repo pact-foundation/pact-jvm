@@ -1,11 +1,16 @@
-package au.com.dius.pact.consumer;
+package au.com.dius.pact.consumer.examples;
 
+import au.com.dius.pact.consumer.ConsumerClient;
+import au.com.dius.pact.consumer.Pact;
+import au.com.dius.pact.consumer.PactRule;
+import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.consumer.ConsumerPactBuilder.PactDslWithProvider.PactDslWithState;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -48,7 +53,7 @@ public class ExampleJavaConsumerPactRuleTest {
     @PactVerification("test state")
     public void runTest() {
         try {
-            assertEquals(new ConsumerClient("http://localhost:8080").options("/second"), 200);
+            Assert.assertEquals(new ConsumerClient("http://localhost:8080").options("/second"), 200);
             Map expectedResponse = new HashMap();
             expectedResponse.put("responsetest", true);
             expectedResponse.put("name", "harry");
