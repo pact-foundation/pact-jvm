@@ -58,7 +58,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
             Map expectedResponse = new HashMap();
             expectedResponse.put("responsetest", true);
             expectedResponse.put("name", "harry");
-            assertEquals(new ConsumerClient(url).get("/"), expectedResponse);
+            assertEquals(new ConsumerClient(url).getAsMap("/"), expectedResponse);
             assertEquals(new ConsumerClient(url).options("/second"), 200);
         } catch (Exception e) {
             // NOTE: if you want to see any pact failure, do not throw an exception here. This should be

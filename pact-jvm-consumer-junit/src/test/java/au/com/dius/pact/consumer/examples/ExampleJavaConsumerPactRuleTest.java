@@ -57,7 +57,7 @@ public class ExampleJavaConsumerPactRuleTest {
             Map expectedResponse = new HashMap();
             expectedResponse.put("responsetest", true);
             expectedResponse.put("name", "harry");
-            assertEquals(new ConsumerClient("http://localhost:8080").get("/"), expectedResponse);
+            assertEquals(new ConsumerClient("http://localhost:8080").getAsMap("/"), expectedResponse);
         } catch (Exception e) {
             // NOTE: if you want to see any pact failure, do not throw an exception here. This should be
             // fixed at some point (see Issue #40 https://github.com/DiUS/pact-jvm/issues/40)
