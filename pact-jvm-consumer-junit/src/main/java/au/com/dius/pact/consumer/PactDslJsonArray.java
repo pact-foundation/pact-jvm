@@ -13,6 +13,10 @@ public class PactDslJsonArray extends DslPart {
 
     private final JSONArray body;
 
+	public PactDslJsonArray() {
+		this("$.body", null);
+	}
+	
     public PactDslJsonArray(String root, DslPart parent) {
         super(parent, root);
         body = new JSONArray();
@@ -209,6 +213,11 @@ public class PactDslJsonArray extends DslPart {
         matchers.put(root + appendArrayIndex(), regexp("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
         return this;
     }
+	
+	@Override
+	public String toString() {
+		return body.toString();
+	}
 
     private String appendArrayIndex() {
         return "[" + (body.length() - 1) + "]";

@@ -5,7 +5,9 @@ import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ConsumerClient{
@@ -15,11 +17,17 @@ public class ConsumerClient{
         this.url = url;
     }
 
-    public Map get(String path) throws IOException {
+    public Map getAsMap(String path) throws IOException {
         return jsonToMap(Request.Get(url + path)
                 .addHeader("testreqheader", "testreqheadervalue")
                 .execute().returnContent().asString());
     }
+
+	public List getAsList(String path) throws IOException {
+		return jsonToList(Request.Get(url + path)
+				.addHeader("testreqheader", "testreqheadervalue")
+				.execute().returnContent().asString());
+	}
 
     public Map post(String path, String body, ContentType mimeType) throws IOException {
         String respBody = Request.Post(url + path)
@@ -32,6 +40,10 @@ public class ConsumerClient{
     private HashMap jsonToMap(String respBody) throws IOException {
         return new ObjectMapper().readValue(respBody, HashMap.class);
     }
+	
+	private List jsonToList(String respBody) throws IOException {
+		return new ObjectMapper().readValue(respBody, ArrayList.class);		
+	}
 
     public int options(String path) throws IOException {
         return Request.Options(url + path)

@@ -2,11 +2,6 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.PactFragment;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-
 public class PactDslJsonBodyTest extends ConsumerPactTest {
 
     @Override
@@ -53,7 +48,7 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
     @Override
     protected void runTest(String url) {
         try {
-            new ConsumerClient(url).get("/");
+            new ConsumerClient(url).getAsMap("/");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
