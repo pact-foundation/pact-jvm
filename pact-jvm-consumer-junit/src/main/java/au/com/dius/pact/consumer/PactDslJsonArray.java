@@ -214,6 +214,18 @@ public class PactDslJsonArray extends DslPart {
         return this;
     }
 	
+	public PactDslJsonArray template(DslPart template) {
+		putObject(template);
+		return this;
+	}
+	
+	public PactDslJsonArray template(DslPart template, int occurrences) {
+		for(int i = 0; i < occurrences; i++) {
+			template(template);	
+		}
+		return this;
+	}
+	
 	@Override
 	public String toString() {
 		return body.toString();
