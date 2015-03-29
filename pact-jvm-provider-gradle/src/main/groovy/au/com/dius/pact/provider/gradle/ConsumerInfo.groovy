@@ -7,6 +7,6 @@ class ConsumerInfo {
     boolean stateChangeUsesBody = true
 
     def url(String path) {
-        stateChange = new URL(path)
+        new URL(path)
     }
 }

@@ -64,4 +64,57 @@ class PactPluginTest {
         assert consumers.find { it.name == 'Foo Consumer'}
         assert consumers.find { it.name == 'Bar Consumer'}
     }
+
+    @Test
+    public void 'configures the providers and consumers correctly'() {
+        def pactFileUrl = 'http://localhost:8000/pacts/provider/prividera/consumer/consumera/latest'
+        def stateChangeUrl = 'http://localhost:8080/stateChange'
+        project.pact {
+            serviceProviders {
+                ProviderA { providerInfo ->
+                    startProviderTask = 'jettyEclipseRun'
+                    terminateProviderTask = 'jettyEclipseStop'
+
+                    port = 1234
+
+                    hasPactWith('ConsumerA') {
+                        pactFile = url(pactFileUrl)
+                        stateChange = url(stateChangeUrl)
+                    }
+                }
+            }
+        }
+
+        project.evaluate()
+
+        def provider = project.tasks.pactVerify_ProviderA.providerToVerify
+        assert provider.startProviderTask == 'jettyEclipseRun'
+        assert provider.terminateProviderTask == 'jettyEclipseStop'
+        assert provider.port == 1234
+
+        def consumer = provider.consumers.first()
+        assert consumer.name == 'ConsumerA'
+        assert consumer.pactFile == new URL(pactFileUrl)
+        assert consumer.stateChange == new URL(stateChangeUrl)
+    }
+
+    @Test
+    public void 'do not set the state change url automatically'() {
+        def pactFileUrl = 'http://localhost:8000/pacts/provider/prividera/consumer/consumera/latest'
+        project.pact {
+            serviceProviders {
+                ProviderA { providerInfo ->
+                    hasPactWith('ConsumerA') {
+                        pactFile = url(pactFileUrl)
+                    }
+                }
+            }
+        }
+
+        project.evaluate()
+
+        def consumer = project.tasks.pactVerify_ProviderA.providerToVerify.consumers.first()
+        assert consumer.pactFile == new URL(pactFileUrl)
+        assert consumer.stateChange == null
+    }
 }
