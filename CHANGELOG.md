@@ -1,5 +1,28 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.1.13 - bugfix release
+
+* 55eb028 - fix defect where stateChangeUrl is automatically set by overridden url function #101 (Ronald Holshausen, Sun Mar 29 13:44:16 2015 +1100)
+* 3065910 - do not pretty print the request/response bodies when loading pact files if they are a string #102 (Ronald Holshausen, Fri Mar 27 13:05:06 2015 +1100)
+* 770bcd5 - Merge pull request #105 from rightmove/template-objects (Ronald Holshausen, Fri Mar 27 12:31:24 2015 +1100)
+* 8e0c7f1 - https://github.com/DiUS/pact-jvm/issues/104 - Added method to allow for templates to be used in arrays. (James Sawle, Wed Mar 25 18:17:20 2015 +0000)
+* c6516f3 - Merge pull request #103 from rightmove/master (Ronald Holshausen, Wed Mar 25 09:32:16 2015 +1100)
+* 97b189a - Allow PactDslJsonArray to be at the root of a response (James Sawle, Tue Mar 24 15:12:58 2015 +0000)
+* 46848ca - added example test to junit test examples #98 (Ronald Holshausen, Sat Mar 21 11:36:51 2015 +1100)
+* 9db509d - Merge pull request #99 from gthicks/accept-type-fix (Ronald Holshausen, Sat Mar 21 09:15:27 2015 +1100)
+* 86aaac5 - properly set accept type to ‘application/json’ (ghicks, Mon Mar 16 16:41:09 2015 -0700)
+* 0694216 - added JUnit consumer example from pact group thread (Ronald Holshausen, Mon Mar 9 13:26:24 2015 +1100)
+* d90ac06 - Merge pull request #95 from freewind/pact-request (Ronald Holshausen, Thu Mar 5 20:17:58 2015 +1100)
+* 2d25100 - #92 fix for No such property: statusCode (Ronald Holshausen, Thu Mar 5 19:36:34 2015 +1100)
+* 1c9a4f0 - reduced test stack size for travis build (Ronald Holshausen, Thu Mar 5 19:24:12 2015 +1100)
+* 898c1d8 - Turn an unnecessary `var` to `val` (Peng.Li, Thu Mar 5 11:23:53 2015 +0800)
+* 0c38d4a - Make 'findHeaderByCaseInsensitiveKey' public so user can use it to find a header easily. (Peng.Li, Thu Mar 5 11:23:31 2015 +0800)
+* 4bc0752 - Added link to spring MVC pact runner (Ronald Holshausen, Tue Mar 3 09:29:43 2015 +1100)
+* 72ba1fe - Merge pull request #94 from nicknovitski/patch-1 (Ronald Holshausen, Tue Mar 3 09:25:49 2015 +1100)
+* d9f9918 - README uses markdown to link to pact specification (Nick Novitski, Mon Mar 2 12:03:56 2015 -0800)
+* 3dcf510 - remove incorrect maven repo from gradle build (Ronald Holshausen, Mon Mar 2 12:45:15 2015 +1100)
+* 0e4905d - bump version (Ronald Holshausen, Sat Feb 28 16:12:02 2015 +1100)
+
 # 2.1.12 - bugfix release
 
 **NOTE: This version has a breaking change for matching paths with arrays. To bring it inline with
