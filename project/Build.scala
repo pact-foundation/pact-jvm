@@ -4,7 +4,7 @@ import com.typesafe.sbt.pgp.PgpKeys._
 
 object BuildSettings {
     val publishSettings = Seq(
-        version := "2.1.13",
+        version := "2.1.14",
         organization := "au.com.dius",
         scalaVersion := "2.10.4",
         crossScalaVersions := Seq("2.10.4", "2.11.4"),
