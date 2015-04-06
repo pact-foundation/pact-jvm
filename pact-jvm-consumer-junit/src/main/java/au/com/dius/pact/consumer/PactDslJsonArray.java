@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer;
 
 import nl.flotsam.xeger.Xeger;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.json.JSONArray;
@@ -215,7 +216,16 @@ public class PactDslJsonArray extends DslPart {
     }
 	
 	public PactDslJsonArray template(DslPart template) {
-		putObject(template);
+		String[] matcherNames = template.matchers.keySet().toArray(new String[]{});
+		int commonPrefixLength = StringUtils.getCommonPrefix(matcherNames).length();
+		String arrayIndexString = String.format("[%d]", body.length());
+		
+		for(String matcherName: template.matchers.keySet()) {
+			String matcherNameWithoutPrefix = matcherName.substring(commonPrefixLength);
+			String newMatcherName = String.format("%s%s.%s", root, arrayIndexString, matcherNameWithoutPrefix);
+            matchers.put(newMatcherName, template.matchers.get(matcherName));
+        }
+        body.put(template.getBody());
 		return this;
 	}
 	
