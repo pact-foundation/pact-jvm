@@ -49,7 +49,7 @@ class PactProviderMojo extends AbstractMojo {
                     pact = Pact$.MODULE$.from(new FileInput(consumer.pactFile))
                 } else if (consumer.pactUrl) {
                     AnsiConsole.out().println(Ansi.ansi().a("  [from URL ${consumer.pactUrl}]"))
-                    pact = Pact$.MODULE$.from(new StreamInput(consumer.pactFile.newInputStream(requestProperties: ['Accept': 'application/json'])))
+                    pact = Pact$.MODULE$.from(new StreamInput(consumer.pactUrl.newInputStream(requestProperties: ['Accept': 'application/json'])))
                 } else {
                     throw new RuntimeException("You must specify the pactfile to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)")
                 }
