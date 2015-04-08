@@ -12,15 +12,29 @@ public class PactDslJsonArrayTemplateTest extends ConsumerPactTest {
 		
 		DslPart body = new PactDslJsonArray()
 				.template(personTemplate, 3);
-				
-		return builder
+
+		PactFragment fragment = builder
 				.uponReceiving("java test interaction with a DSL array body with templates")
-					.path("/")
-					.method("GET")
+				.path("/")
+				.method("GET")
 				.willRespondWith()
-					.status(200)
-					.body(body)
+				.status(200)
+				.body(body)
 				.toFragment();
+
+		MatcherTestUtils.assertResponseMatchersEqualTo(fragment,
+				"$.body[0].id",
+				"$.body[0].name",
+				"$.body[0].dob",
+				"$.body[1].id",
+				"$.body[1].name",
+				"$.body[1].dob",
+				"$.body[2].id",
+				"$.body[2].name",
+				"$.body[2].dob"
+		);
+
+		return fragment;
 	}
 
 	@Override

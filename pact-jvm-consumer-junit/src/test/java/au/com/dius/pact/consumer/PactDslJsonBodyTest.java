@@ -2,6 +2,9 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.PactFragment;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class PactDslJsonBodyTest extends ConsumerPactTest {
 
     @Override
@@ -24,16 +27,26 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
                     .date("dob", "MM/dd/yyyy")
                 .closeObject()
             .closeArray();
-        return builder
-            .uponReceiving("java test interaction with a DSL body")
+        PactFragment fragment = builder
+                .uponReceiving("java test interaction with a DSL body")
                 .path("/")
                 .method("GET")
-            .willRespondWith()
+                .willRespondWith()
                 .status(200)
                 .body(body)
-            .toFragment();
-    }
+                .toFragment();
 
+        MatcherTestUtils.assertResponseMatchersEqualTo(fragment,
+                "$.body.id",
+                "$.body.obj.id",
+                "$.body.numbers[0]",
+                "$.body.numbers[3]",
+                "$.body.numbers[4].id",
+                "$.body.numbers[4].timestamp",
+                "$.body.numbers[4].dob");
+
+        return fragment;
+    }
 
     @Override
     protected String providerName() {

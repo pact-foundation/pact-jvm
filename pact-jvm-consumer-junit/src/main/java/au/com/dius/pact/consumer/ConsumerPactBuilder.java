@@ -174,7 +174,10 @@ public class ConsumerPactBuilder {
                  * @param body Built using the Pact body DSL
                  */
                 public PactDslRequestWithoutPath body(PactDslJsonBody body) {
-                    requestMatchers = body.getMatchers();
+                    requestMatchers = new HashMap<String, Object>();
+                    for(String matcherName: body.matchers.keySet()) {
+                        requestMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
+                    }
                     requestBody = body.toString();
                     if (!requestHeaders.containsKey("Content-Type")) {
                         requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
@@ -347,7 +350,10 @@ public class ConsumerPactBuilder {
          * @param body Built using the Pact body DSL
          */
         public PactDslRequestWithPath body(DslPart body) {
-            requestMatchers = body.getMatchers();
+            requestMatchers = new HashMap<String, Object>();
+            for(String matcherName: body.matchers.keySet()) {
+                requestMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
+            }
             requestBody = body.toString();
             if (!requestHeaders.containsKey("Content-Type")) {
                 requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
@@ -480,7 +486,10 @@ public class ConsumerPactBuilder {
          * @param body Response body built using the Pact body DSL
          */
         public PactDslResponse body(DslPart body) {
-            responseMatchers = body.getMatchers();
+            responseMatchers = new HashMap<String, Object>();
+            for(String matcherName: body.matchers.keySet()) {
+                responseMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
+            }
             responseBody = body.toString();
             if (!responseHeaders.containsKey("Content-Type")) {
                 responseHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());

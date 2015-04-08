@@ -14,7 +14,7 @@ public class PactDslJsonArray extends DslPart {
     private final JSONArray body;
 
 	public PactDslJsonArray() {
-		this("$.body", null);
+		this("", null);
 	}
 	
     public PactDslJsonArray(String root, DslPart parent) {
@@ -29,14 +29,14 @@ public class PactDslJsonArray extends DslPart {
 
     protected void putObject(DslPart object) {
         for(String matcherName: object.matchers.keySet()) {
-            matchers.put(matcherName, object.matchers.get(matcherName));
+            matchers.put(root + "[" + body.length() + "]" + matcherName, object.matchers.get(matcherName));
         }
         body.put(object.getBody());
     }
 
     protected void putArray(DslPart object) {
         for(String matcherName: object.matchers.keySet()) {
-            matchers.put(matcherName, object.matchers.get(matcherName));
+            matchers.put(root + "[" + body.length() + "]" + matcherName, object.matchers.get(matcherName));
         }
         body.put(object.getBody());
     }
@@ -172,7 +172,7 @@ public class PactDslJsonArray extends DslPart {
     }
 
     public PactDslJsonBody object() {
-        return new PactDslJsonBody(root + "[" + body.length() + "]", this);
+        return new PactDslJsonBody(".", this);
     }
 
     @Override
@@ -185,7 +185,7 @@ public class PactDslJsonArray extends DslPart {
     }
 
     public PactDslJsonArray array() {
-        return new PactDslJsonArray(root + "[" + body.length() + "]", this);
+        return new PactDslJsonArray("", this);
     }
 
     public PactDslJsonArray id() {

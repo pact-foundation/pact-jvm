@@ -18,7 +18,7 @@ public class PactDslJsonBody extends DslPart {
     private final JSONObject body;
 
     public PactDslJsonBody() {
-        super("$.body");
+        super(".");
         body = new JSONObject();
     }
 
@@ -32,7 +32,7 @@ public class PactDslJsonBody extends DslPart {
     }
 
     protected void putObject(DslPart object) {
-        String name = StringUtils.difference(root + ".", object.root);
+        String name = StringUtils.strip(object.root, ".");
         for(String matcherName: object.matchers.keySet()) {
             matchers.put(matcherName, object.matchers.get(matcherName));
         }
@@ -40,7 +40,7 @@ public class PactDslJsonBody extends DslPart {
     }
 
     protected void putArray(DslPart object) {
-        String name = StringUtils.difference(root + ".", object.root);
+        String name = StringUtils.strip(object.root, ".");
         for(String matcherName: object.matchers.keySet()) {
             matchers.put(matcherName, object.matchers.get(matcherName));
         }
@@ -69,7 +69,7 @@ public class PactDslJsonBody extends DslPart {
 
     public PactDslJsonBody stringType(String name) {
         body.put(name, RandomStringUtils.randomAlphabetic(20));
-        matchers.put(root + "." + name, matchType());
+        matchers.put(root + name, matchType());
         return this;
     }
 
@@ -79,7 +79,7 @@ public class PactDslJsonBody extends DslPart {
 
     public PactDslJsonBody numberType(String name, Number number) {
         body.put(name, number);
-        matchers.put(root + "." + name, matchType());
+        matchers.put(root + name, matchType());
         return this;
     }
 
@@ -89,13 +89,13 @@ public class PactDslJsonBody extends DslPart {
 
     public PactDslJsonBody integerType(String name, Long number) {
         body.put(name, number);
-        matchers.put(root + "." + name, matchType("integer"));
+        matchers.put(root + name, matchType("integer"));
         return this;
     }
 
     public PactDslJsonBody integerType(String name, Integer number) {
         body.put(name, number);
-        matchers.put(root + "." + name, matchType("integer"));
+        matchers.put(root + name, matchType("integer"));
         return this;
     }
 
@@ -105,19 +105,19 @@ public class PactDslJsonBody extends DslPart {
 
     public PactDslJsonBody realType(String name, Double number) {
         body.put(name, number);
-        matchers.put(root + "." + name, matchType("real"));
+        matchers.put(root + name, matchType("real"));
         return this;
     }
 
     public PactDslJsonBody booleanType(String name) {
         body.put(name, true);
-        matchers.put(root + "." + name, matchType());
+        matchers.put(root + name, matchType());
         return this;
     }
 
     public PactDslJsonBody stringMatcher(String name, String regex, String value) {
         body.put(name, value);
-        matchers.put(root + "." + name, regexp(regex));
+        matchers.put(root + name, regexp(regex));
         return this;
     }
 
@@ -132,14 +132,14 @@ public class PactDslJsonBody extends DslPart {
 
     public PactDslJsonBody timestamp(String name) {
         body.put(name, DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date()));
-        matchers.put(root + "." + name, matchTimestamp(DateFormatUtils.ISO_DATETIME_FORMAT.getPattern()));
+        matchers.put(root + name, matchTimestamp(DateFormatUtils.ISO_DATETIME_FORMAT.getPattern()));
         return this;
     }
 
     public PactDslJsonBody timestamp(String name, String format) {
         FastDateFormat instance = FastDateFormat.getInstance(format);
         body.put(name, instance.format(new Date()));
-        matchers.put(root + "." + name, matchTimestamp(format));
+        matchers.put(root + name, matchTimestamp(format));
         return this;
     }
 
@@ -149,14 +149,14 @@ public class PactDslJsonBody extends DslPart {
 
     public PactDslJsonBody date(String name) {
         body.put(name, DateFormatUtils.ISO_DATE_FORMAT.format(new Date()));
-        matchers.put(root + "." + name, matchDate(DateFormatUtils.ISO_DATE_FORMAT.getPattern()));
+        matchers.put(root + name, matchDate(DateFormatUtils.ISO_DATE_FORMAT.getPattern()));
         return this;
     }
 
     public PactDslJsonBody date(String name, String format) {
         FastDateFormat instance = FastDateFormat.getInstance(format);
         body.put(name, instance.format(new Date()));
-        matchers.put(root + "." + name, matchDate(format));
+        matchers.put(root + name, matchDate(format));
         return this;
     }
 
@@ -166,25 +166,25 @@ public class PactDslJsonBody extends DslPart {
 
     public PactDslJsonBody time(String name) {
         body.put(name, DateFormatUtils.ISO_TIME_FORMAT.format(new Date()));
-        matchers.put(root + "." + name, matchTime(DateFormatUtils.ISO_TIME_FORMAT.getPattern()));
+        matchers.put(root + name, matchTime(DateFormatUtils.ISO_TIME_FORMAT.getPattern()));
         return this;
     }
 
     public PactDslJsonBody time(String name, String format) {
         FastDateFormat instance = FastDateFormat.getInstance(format);
         body.put(name, instance.format(new Date()));
-        matchers.put(root + "." + name, matchTime(format));
+        matchers.put(root + name, matchTime(format));
         return this;
     }
 
     public PactDslJsonBody ipAddress(String name) {
         body.put(name, "127.0.0.1");
-        matchers.put(root + "." + name, regexp("(\\d{1,3}\\.)+\\d{1,3}"));
+        matchers.put(root + name, regexp("(\\d{1,3}\\.)+\\d{1,3}"));
         return this;
     }
 
     public PactDslJsonBody object(String name) {
-        return new PactDslJsonBody(root + "." + name, this);
+        return new PactDslJsonBody("." + name + ".", this);
     }
 
     public PactDslJsonBody object() {
@@ -197,7 +197,7 @@ public class PactDslJsonBody extends DslPart {
     }
 
     public PactDslJsonArray array(String name) {
-        return new PactDslJsonArray(root + "." + name, this);
+        return new PactDslJsonArray(root + name, this);
     }
 
     public PactDslJsonArray array() {
@@ -215,7 +215,7 @@ public class PactDslJsonBody extends DslPart {
 
     public PactDslJsonBody id(String name) {
         body.put(name, Long.parseLong(RandomStringUtils.randomNumeric(10)));
-        matchers.put(root + "." + name, matchType());
+        matchers.put(root + name, matchType());
         return this;
     }
 
@@ -225,7 +225,7 @@ public class PactDslJsonBody extends DslPart {
 
     public PactDslJsonBody hexValue(String name, String hexValue) {
         body.put(name, hexValue);
-        matchers.put(root + "." + name, regexp("[0-9a-fA-F]+"));
+        matchers.put(root + name, regexp("[0-9a-fA-F]+"));
         return this;
     }
 
@@ -239,7 +239,7 @@ public class PactDslJsonBody extends DslPart {
 
     public PactDslJsonBody guid(String name, String uuid) {
         body.put(name, uuid);
-        matchers.put(root + "." + name, regexp("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
+        matchers.put(root + name, regexp("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
         return this;
     }
 

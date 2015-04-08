@@ -1,7 +1,6 @@
 package au.com.dius.pact.consumer;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import au.com.dius.pact.model.MockProviderConfig;
 import org.junit.Test;
