@@ -1,0 +1,36 @@
+{
+  "match": true,
+  "comment": "Types and regular expressions match",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": "",
+    "headers": {},
+    "requestMatchingRules": {
+      "$.body.animals": {"min": "1"},
+      "$.body.animals[*].*": {"match": "type"}
+    },
+    "body": {
+      "animals": [
+        {
+          "name" : "Fred"
+        }
+      ]
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": "",
+    "headers": {},
+    "body": {
+      "animals": [
+        {
+          "name" : "Mary"
+        },{
+          "firstName" : "Susan"
+        }
+      ]
+    }
+  }
+}

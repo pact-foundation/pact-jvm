@@ -1,18 +1,20 @@
 {
   "match": false,
-  "comment": "Favourite colours must match at least one element",
+  "comment": "Empty array",
   "expected" : {
     "method": "POST",
     "path": "/",
     "query": "",
     "headers": {},
     "requestMatchingRules": {
-      "$.body.alligator.favouriteColours": {"match": "atleast(1)"}
+      "$.body.animals": {"min": "1"}
     },
     "body": {
-      "alligator":{
-        "favouriteColours": ["red"]
-      }
+      "animals": [
+        {
+          "name" : "Fred"
+        }
+      ]
     }
   },
   "actual": {
@@ -21,9 +23,7 @@
     "query": "",
     "headers": {},
     "body": {
-      "alligator":{
-        "favouriteColours": ["blue", "red"]
-      }
+      "animals": []
     }
   }
 }
