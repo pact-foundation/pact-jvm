@@ -9,22 +9,32 @@ import java.text.ParseException
 object Matchers extends StrictLogging {
 
   def matchesToken(pathElement: String, token: PathToken) = token match {
-    case RootNode => pathElement == "$"
-    case Field(name) => pathElement == name
-    case ArrayRandomAccess(indices) => pathElement.matches("\\d+") && indices.contains(pathElement.toInt)
-    case ArraySlice(None, None, 1) => pathElement.matches("\\d+")
-    case AnyField => true
-    case _ => false
+    case RootNode => if (pathElement == "$") 2 else 0
+    case Field(name) => if (pathElement == name) 2 else 0
+    case ArrayRandomAccess(indices) => if (pathElement.matches("\\d+") && indices.contains(pathElement.toInt)) 2 else 0
+    case ArraySlice(None, None, 1) => if (pathElement.matches("\\d+")) 1 else 0
+    case AnyField => 1
+    case _ => 0
   }
 
   def matchesPath(pathExp: String, path: Seq[String]) =
     new Parser().compile(pathExp) match {
       case Parser.Success(q, _) =>
-        path.corresponds(q)((pathElement, pathToken) => matchesToken(pathElement, pathToken))
+        path.corresponds(q)((pathElement, pathToken) => matchesToken(pathElement, pathToken) != 0)
       case ns: Parser.NoSuccess =>
         logger.warn(s"Path expression $pathExp is invalid, ignoring: $ns")
         false
     }
+
+  def calculatePathWeight(pathExp: String, path: Seq[String]) = {
+    new Parser().compile(pathExp) match {
+      case Parser.Success(q, _) =>
+        path.zip(q).map(entry => matchesToken(entry._1, entry._2)).product
+      case ns: Parser.NoSuccess =>
+        logger.warn(s"Path expression $pathExp is invalid, ignoring: $ns")
+        0
+    }
+  }
 
   def resolveMatchers(matchers: Map[String, Map[String, String]], path: Seq[String]) =
     matchers.filterKeys(p => matchesPath(p, path))
@@ -34,7 +44,7 @@ object Matchers extends StrictLogging {
 
   def domatch[Mismatch](matchers: Option[Map[String, Map[String, String]]], path: Seq[String], expected: Any, actual: Any,
                         mismatchFn: MismatchFactory[Mismatch]) : List[Mismatch] = {
-    val matcherDef = resolveMatchers(matchers.get, path).values.head
+    val matcherDef = resolveMatchers(matchers.get, path).maxBy(entry => calculatePathWeight(entry._1, path))._2
     matcherDef match {
       case map: Map[String, String] => matcher(map).domatch[Mismatch](map, path, expected, actual, mismatchFn)
       case m =>
@@ -47,6 +57,19 @@ object Matchers extends StrictLogging {
     if (matcherDef.isEmpty) {
       logger.warn(s"Unrecognised empty matcher, defaulting to equality matching")
       EqualsMatcher
+    } else if (matcherDef.contains("match")) {
+      matcherDef("match") match {
+        case "regex" => RegexpMatcher
+        case "type" => TypeMatcher
+        case "number" => TypeMatcher
+        case "integer" => TypeMatcher
+        case "real" => TypeMatcher
+        case "timestamp" => TypeMatcher
+        case "time" => TimeMatcher
+        case "date" => DateMatcher
+        case "min" => MinimumMatcher
+        case "max" => MaximumMatcher
+      }
     } else matcherDef.keys.head match {
       case "regex" => RegexpMatcher
       case "match" => TypeMatcher
