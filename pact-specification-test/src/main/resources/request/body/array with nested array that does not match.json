@@ -1,6 +1,6 @@
 {
   "match": false,
-  "comment": "Types and regular expressions match",
+  "comment": "Nested arrays do not match, age is wrong type",
   "expected" : {
     "method": "POST",
     "path": "/",
@@ -9,12 +9,18 @@
     "requestMatchingRules": {
       "$.body.animals": {"min": "1"},
       "$.body.animals[*].*": {"match": "type"},
-      "$.body.animals[*].phoneNumber": {"match": "regex", "regex": "\\d+"}
+      "$.body.animals[*].children": {"min": "1"},
+      "$.body.animals[*].children[*].*": {"match": "type"}
     },
     "body": {
       "animals": [
         {
-          "phoneNumber": "0415674567"
+          "name" : "Fred",
+          "children": [
+            {
+              "age": 9
+            }
+          ]
         }
       ]
     }
@@ -27,9 +33,8 @@
     "body": {
       "animals": [
         {
-          "phoneNumber": "333"
-        },{
-          "phoneNumber": "abc"
+          "name" : "Mary",
+          "children": [{"age": "9"}]
         }
       ]
     }
