@@ -7,9 +7,9 @@
     "query": "",
     "headers": {},
     "requestMatchingRules": {
-      "$.body.animals": {"min": "1"},
+      "$.body.animals": {"min": 1},
       "$.body.animals[*].*": {"match": "type"},
-      "$.body.animals[*].children": {"min": "1"},
+      "$.body.animals[*].children": {"min": 1},
       "$.body.animals[*].children[*].*": {"match": "type"}
     },
     "body": {

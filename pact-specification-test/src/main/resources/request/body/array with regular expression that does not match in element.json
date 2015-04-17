@@ -7,7 +7,7 @@
     "query": "",
     "headers": {},
     "requestMatchingRules": {
-      "$.body.animals": {"min": "1"},
+      "$.body.animals": {"min": 1},
       "$.body.animals[*].*": {"match": "type"},
       "$.body.animals[*].phoneNumber": {"match": "regex", "regex": "\\d+"}
     },
