@@ -13,7 +13,7 @@ class JsonBodyMatcher extends BodyMatcher  with StrictLogging {
       case (None, None) => List()
       case (None, b) => List()
       case (a, None) => List(BodyMismatch(a, None))
-      case (Some(a), Some(b)) => compare("$.body", parse(a), parse(b), diffConfig, expected.matchers)
+      case (Some(a), Some(b)) => compare(Seq("$", "body"), parse(a), parse(b), diffConfig, expected.matchers)
     }
   }
 
@@ -38,7 +38,7 @@ class JsonBodyMatcher extends BodyMatcher  with StrictLogging {
     }
   }
 
-  def compare(path: String, expected: Any, actual: Any, diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
+  def compare(path: Seq[String], expected: Any, actual: Any, diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
     (expected, actual) match {
       case (a: JObject, b: JObject) => compareMaps(a.values, b.values, a, b, path, diffConfig, matchers)
       case (a: Map[String, Any], b: Map[String, Any]) => compareMaps(a, b, a, b, path, diffConfig, matchers)
@@ -47,78 +47,88 @@ class JsonBodyMatcher extends BodyMatcher  with StrictLogging {
       case (_, _) =>
         if ((expected.isInstanceOf[JObject] && !actual.isInstanceOf[JObject]) ||
           (expected.isInstanceOf[JArray] && !actual.isInstanceOf[JArray])) {
-          List(BodyMismatch(expected, actual, Some(s"Type mismatch: Expected ${typeOf(expected)} ${valueOf(expected)} but received ${typeOf(actual)} ${valueOf(actual)}"), path))
+          List(BodyMismatch(expected, actual,
+            Some(s"Type mismatch: Expected ${typeOf(expected)} ${valueOf(expected)} but received ${typeOf(actual)} ${valueOf(actual)}"),
+            path.mkString(".")))
         } else {
           compareValues(path, expected, actual, matchers)
         }
     }
   }
 
-  def compareLists(expectedValues: List[Any], actualValues: List[Any], a: Any, b: Any, path: String,
-                   diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
-    def compareListContent = {
-      var result = List[BodyMismatch]()
-      for ((value, index) <- expectedValues.view.zipWithIndex) {
-        val s = path + "[" + index + "]"
-        if (index < actualValues.size) {
-          result = result ++: compare(s, value, actualValues(index), diffConfig, matchers)
-        } else {
-          result = result :+ BodyMismatch(a, b, Some(s"Expected ${valueOf(value)} but was missing"), path)
-        }
-      }
-      result
-    }
-
+  def compareListContent(expectedValues: List[Any], actualValues: List[Any], path: Seq[String],
+                         diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, String]]]) = {
     var result = List[BodyMismatch]()
-    if (Matchers.matcherDefined(path, matchers)) {
-      logger.debug("compareLists: Matcher defined for path " + path)
-      result = Matchers.domatch[BodyMismatch](matchers.get(path), path, expectedValues, actualValues,
-        BodyMismatchFactory) ++ compareListContent
-    } else {
-      if (expectedValues.isEmpty && actualValues.nonEmpty) {
-        result = List(BodyMismatch(a, b, Some(s"Expected an empty List but received ${valueOf(actualValues)}"), path))
+    for ((value, index) <- expectedValues.view.zipWithIndex) {
+      if (index < actualValues.size) {
+        result = result ++: compare(path :+ index.toString, value, actualValues(index), diffConfig, matchers)
       } else {
-        if (expectedValues.size != actualValues.size) {
-          result = result :+ BodyMismatch(a, b, Some(s"Expected a List with ${expectedValues.size} elements but received ${actualValues.size} elements"), path)
-        }
-        result = result ++ compareListContent
+        result = result :+ BodyMismatch(expectedValues, actualValues, Some(s"Expected ${valueOf(value)} but was missing"),
+          path.mkString("."))
       }
     }
     result
   }
 
-  def compareMaps(expectedValues: Map[String, Any], actualValues: Map[String, Any], a: Any, b: Any, path: String,
+  def compareLists(expectedValues: List[Any], actualValues: List[Any], a: Any, b: Any, path: Seq[String],
+                   diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
+    var result = List[BodyMismatch]()
+    if (Matchers.matcherDefined(path, matchers)) {
+      logger.debug("compareLists: Matcher defined for path " + path)
+      result = Matchers.domatch[BodyMismatch](matchers, path, expectedValues, actualValues,
+        BodyMismatchFactory) ++ compareListContent(expectedValues.padTo(actualValues.length, expectedValues.head),
+        actualValues, path, diffConfig, matchers)
+    } else {
+      if (expectedValues.isEmpty && actualValues.nonEmpty) {
+        result = List(BodyMismatch(a, b, Some(s"Expected an empty List but received ${valueOf(actualValues)}"),
+          path.mkString(".")))
+      } else {
+        if (expectedValues.size != actualValues.size) {
+          result = result :+ BodyMismatch(a, b,
+            Some(s"Expected a List with ${expectedValues.size} elements but received ${actualValues.size} elements"),
+            path.mkString("."))
+        }
+        result = result ++ compareListContent(expectedValues, actualValues, path, diffConfig, matchers)
+      }
+    }
+    result
+  }
+
+  def compareMaps(expectedValues: Map[String, Any], actualValues: Map[String, Any], a: Any, b: Any, path: Seq[String],
                   diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
     if (expectedValues.isEmpty && actualValues.nonEmpty) {
-      List(BodyMismatch(a, b, Some(s"Expected an empty Map but received ${valueOf(actualValues)}"), path))
+      List(BodyMismatch(a, b, Some(s"Expected an empty Map but received ${valueOf(actualValues)}"), path.mkString(".")))
     } else {
       var result = List[BodyMismatch]()
       if ((diffConfig.allowUnexpectedKeys && expectedValues.size > actualValues.size) ||
         (!diffConfig.allowUnexpectedKeys && expectedValues.size != actualValues.size)) {
-        result = result :+ BodyMismatch(a, b, Some(s"Expected a Map with at least ${expectedValues.size} elements but received ${actualValues.size} elements"), path)
+        result = result :+ BodyMismatch(a, b,
+          Some(s"Expected a Map with at least ${expectedValues.size} elements but received ${actualValues.size} elements"),
+          path.mkString("."))
       }
       expectedValues.foreach(entry => {
-        val s = path + "." + entry._1
         if (actualValues.contains(entry._1)) {
-          result = result ++: compare(s, entry._2, actualValues(entry._1), diffConfig, matchers)
+          result = result ++: compare(path :+ entry._1, entry._2, actualValues(entry._1), diffConfig, matchers)
         } else {
-          result = result :+ BodyMismatch(a, b, Some(s"Expected ${entry._1}=${valueOf(entry._2)} but was missing"), path)
+          result = result :+ BodyMismatch(a, b, Some(s"Expected ${entry._1}=${valueOf(entry._2)} but was missing"),
+            path.mkString("."))
         }
       })
       result
     }
   }
 
-  def compareValues(path: String, expected: Any, actual: Any, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
+  def compareValues(path: Seq[String], expected: Any, actual: Any, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
     if (Matchers.matcherDefined(path, matchers)) {
       logger.debug("compareValues: Matcher defined for path " + path)
-      Matchers.domatch[BodyMismatch](matchers.get(path), path, expected, actual, BodyMismatchFactory)
+      Matchers.domatch[BodyMismatch](matchers, path, expected, actual, BodyMismatchFactory)
     } else {
       logger.debug("compareValues: No matcher defined for path " + path + ", using equality")
       if (expected == actual) {
         List[BodyMismatch]()
       } else {
-        List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(expected)} but received ${valueOf(actual)}"), path))
+        List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(expected)} but received ${valueOf(actual)}"),
+          path.mkString(".")))
       }
     }
   }

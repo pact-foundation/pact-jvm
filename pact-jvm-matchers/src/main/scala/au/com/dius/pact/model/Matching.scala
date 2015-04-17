@@ -44,12 +44,13 @@ case class MethodMismatch(expected: Method, actual: Method) extends RequestPartM
 case class QueryMismatch(expected: Query, actual: Query) extends RequestPartMismatch
 
 object BodyMismatchFactory extends MismatchFactory[BodyMismatch] {
-  def create(expected: scala.Any, actual: scala.Any, message: String, path: String) = BodyMismatch(expected, actual, Some(message), path)
+  def create(expected: scala.Any, actual: scala.Any, message: String, path: Seq[String]) =
+    BodyMismatch(expected, actual, Some(message), path.mkString("."))
 }
 
 object PathMismatchFactory extends MismatchFactory[PathMismatch] {
-  def create(expected: scala.Any, actual: scala.Any, message: String, path: String) = PathMismatch(expected.toString,
-    actual.toString, Some(message))
+  def create(expected: scala.Any, actual: scala.Any, message: String, path: Seq[String]) =
+    PathMismatch(expected.toString, actual.toString, Some(message))
 }
 
 object Matching {
@@ -113,8 +114,8 @@ object Matching {
   def matchPath(expected: Request, actual: Request): Option[PathMismatch] = {
     val pathFilter = "http[s]*://([^/]*)"
     val replacedActual = actual.path.replaceFirst(pathFilter, "")
-    if (Matchers.matcherDefined("$.path", expected.matchers)) {
-      val mismatch = Matchers.domatch[PathMismatch](expected.matchers.get("$.path"), "$.path", expected.path,
+    if (Matchers.matcherDefined(Seq("$", "path"), expected.matchers)) {
+      val mismatch = Matchers.domatch[PathMismatch](expected.matchers, Seq("$", "path"), expected.path,
         replacedActual, PathMismatchFactory)
       mismatch.headOption
     }
