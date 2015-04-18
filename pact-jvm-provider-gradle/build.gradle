@@ -1,15 +1,18 @@
 buildscript {
   repositories {
     jcenter()
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
   }
   dependencies {
-    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.6'
+    classpath 'com.gradle.publish:plugin-publish-plugin:0.9.0'
   }
 }
 
-apply plugin: 'com.jfrog.bintray'
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'maven-publish'
+apply plugin: "com.gradle.plugin-publish"
 
 dependencies {
     compile gradleApi(), localGroovy()
@@ -33,29 +36,16 @@ publishing {
   }
 }
 
-bintray {
-  if (project.hasProperty('bintrayUser')) {
-    user = bintrayUser
-    key = bintrayKey
-  }
+pluginBundle {
+  website = 'https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle'
+  vcsUrl = 'https://github.com/DiUS/pact-jvm.git'
+  description = 'Gradle plugin for verifying pacts against a provider.'
+  tags = ['pact', 'provider', 'consumer driven contracts']
 
-  publications = ['maven']
-
-  dryRun = false //Whether to run this as dry-run, without deploying
-  publish = true //If version should be auto published after an upload
-  pkg {
-    repo = 'maven'
-    name = project.name
-    desc = new File(projectDir, 'README.md').text
-    websiteUrl = 'https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle'
-    issueTrackerUrl = 'https://github.com/DiUS/pact-jvm/issues'
-    vcsUrl = 'https://github.com/DiUS/pact-jvm.git'
-    licenses = ['Apache-2.0']
-    labels = ['pact', 'gradle', 'gradle plugin']
-    publicDownloadNumbers = true
-    //Optional version descriptor
-    version {
-      attributes = ['gradle-plugin': "au.com.dius.pact:au.com.dius:${project.name}"]
+  plugins {
+    pactProviderPlugin {
+      id = 'au.com.dius.pact'
+      displayName = 'Gradle Pact Provider plugin'
     }
   }
 }
