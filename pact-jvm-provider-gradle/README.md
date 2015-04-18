@@ -213,6 +213,7 @@ provider state.
 
 ## Publishing to the Gradle Community Portal
 
-To publish the plugin to the community portal requires first publishing the plugin to jcenter via the bintray plugin.
+To publish the plugin to the community portal:
 
-    $ gradle :pact-jvm-provider-gradle_2.11:bintrayUpload
+    $ gradle :pact-jvm-provider-gradle_2.11:publishPlugins
+    
