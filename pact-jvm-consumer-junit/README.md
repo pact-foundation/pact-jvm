@@ -228,6 +228,32 @@ PactDslJsonBody body = new PactDslJsonBody()
     .timestamp();
 ```
 
+#### Ensuring all items in a list match an example (2.2.0+)
+
+Lots of the time you might not know the number of items that will be in a list, but you want to ensure that the list
+has a minimum or maximum size and that each item in the list matches a given example. You can do this with the `arrayLike`,
+`minArrayLike` and `maxArrayLike` functions.
+
+| function | description |
+|----------|-------------|
+| `arrayLike` | Ensure that each item in the list matches the provided example |
+| `maxArrayLike` | Ensure that each item in the list matches the provided example and the list is no bigger than the provided max |
+| `minArrayLike` | Ensure that each item in the list matches the provided example and the list is no smaller than the provided min |
+
+For example:
+
+```java
+    DslPart body = new PactDslJsonBody()
+        .minArrayLike("users")
+            .id()
+            .stringType("name")
+            .closeObject()
+        .closeArray();
+```
+
+This will ensure that the users list is never empty and that each user has an identifier that is a number and a name that is a string.
+
+
 ### Matching on paths (version 2.1.5+)
 
 You can use regular expressions to match incoming requests. The DSL has a `matchPath` method for this. You can provide
@@ -246,8 +272,6 @@ For example:
         .status(200)
         .body("{\"hello\": \"harry\"}")
 ```
-
-##
 
 ## Debugging pact failures
 

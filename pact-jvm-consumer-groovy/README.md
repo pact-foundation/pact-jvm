@@ -250,6 +250,31 @@ Defines a matcher that accepts ISO and SMTP timestamps. If the value is not prov
 
 Defines a matcher that accepts UUIDs. A random one will be generated if no value is provided.
 
+### Ensuring all items in a list match an example (2.2.0+)
+
+Lots of the time you might not know the number of items that will be in a list, but you want to ensure that the list
+has a minimum or maximum size and that each item in the list matches a given example. You can do this with the `eachLike`,
+`minLike` and `maxLike` functions.
+
+| function | description |
+|----------|-------------|
+| `eachLike()` | Ensure that each item in the list matches the provided example |
+| `maxLike(integer max)` | Ensure that each item in the list matches the provided example and the list is no bigger than the provided max |
+| `minLike(integer min)` | Ensure that each item in the list matches the provided example and the list is no smaller than the provided min |
+
+For example:
+
+```groovy
+    withBody {
+        users minLike(1) {
+            id identifier
+            name string('Fred')
+        }
+    }
+```
+
+This will ensure that the user list is never empty and that each user has an identifier that is a number and a name that is a string.
+
 ## Changing the directory pact files are written to (2.1.9+)
 
 By default, pact files are written to `target/pacts`, but this can be overwritten with the `pact.rootDir` system property.
