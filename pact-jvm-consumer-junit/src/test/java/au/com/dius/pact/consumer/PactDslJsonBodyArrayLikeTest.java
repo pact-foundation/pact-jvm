@@ -2,30 +2,31 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.PactFragment;
 
-public class PactDslJsonBodyTest extends ConsumerPactTest {
+public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTest {
 
     @Override
     protected PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
         DslPart body = new PactDslJsonBody()
             .id()
-            .object("obj")
+            .arrayLike("array1")
                 .id()
-                .stringValue("test", "A Test String")
-            .closeObject()
-            .array("numbers")
-                .id()
-                .number(100)
-                .numberValue(101)
-                .hexValue()
-                .object()
-                    .id()
-                    .stringValue("name", "Rogger the Dogger")
-                    .timestamp()
-                    .date("dob", "MM/dd/yyyy")
+                .stringType("name")
+                .date("dob")
                 .closeObject()
+            .closeArray()
+            .minArrayLike("array2", 1)
+                .ipAddress("address")
+                .stringType("name")
+                .closeObject()
+            .closeArray()
+            .array("array3")
+                .maxArrayLike(5)
+                    .integerType("itemCount")
+                    .closeObject()
+                .closeArray()
             .closeArray();
         PactFragment fragment = builder
-                .uponReceiving("java test interaction with a DSL body")
+                .uponReceiving("java test interaction with an array like matcher")
                 .path("/")
                 .method("GET")
                 .willRespondWith()
@@ -35,24 +36,26 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
 
         MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment,
             "$.body.id",
-            "$.body.obj.id",
-            "$.body.numbers[0]",
-            "$.body.numbers[3]",
-            "$.body.numbers[4].id",
-            "$.body.numbers[4].timestamp",
-            "$.body.numbers[4].dob");
+            "$.body.array1[*].id",
+            "$.body.array1[*].name",
+            "$.body.array1[*].dob",
+            "$.body.array2",
+            "$.body.array2[*].address",
+            "$.body.array2[*].name",
+            "$.body.array3[0]",
+            "$.body.array3[0][*].itemCount");
 
         return fragment;
     }
 
     @Override
     protected String providerName() {
-        return "test_provider";
+        return "test_provider_array";
     }
 
     @Override
     protected String consumerName() {
-        return "test_consumer";
+        return "test_consumer_array";
     }
 
     @Override

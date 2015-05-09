@@ -6,18 +6,18 @@ import scala.collection.JavaConversions$;
 import scala.collection.immutable.Map;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class MatcherTestUtils {
 
     public static Set<String> asSet(String... strings) {
-        return new HashSet<String>(Arrays.asList(strings));
+        return new TreeSet<String>(Arrays.asList(strings));
     }
 
-    public static void assertResponseMatchersEqualTo(PactFragment fragment, String... matcherKeys) {
+    public static void assertResponseMatcherKeysEqualTo(PactFragment fragment, String... matcherKeys) {
         Map<String, Map<String, String>> scalaMap = fragment.interactions().head().response().matchers().get();
         java.util.Map<String, Map<String, String>> matchers = JavaConversions$.MODULE$.mapAsJavaMap(scalaMap);
-        Assert.assertEquals(asSet(matcherKeys), matchers.keySet());
+        Assert.assertEquals(asSet(matcherKeys), new TreeSet<String>(matchers.keySet()));
     }
 }

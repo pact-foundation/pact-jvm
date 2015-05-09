@@ -12,13 +12,19 @@ import java.util.UUID;
 public class PactDslJsonArray extends DslPart {
 
     private final JSONArray body;
+    private boolean wildCard;
 
-	public PactDslJsonArray() {
-		this("", null);
+    public PactDslJsonArray() {
+		this("", null, false);
 	}
 	
     public PactDslJsonArray(String root, DslPart parent) {
+        this(root, parent, false);
+    }
+
+    public PactDslJsonArray(String root, DslPart parent, boolean wildCard) {
         super(parent, root);
+        this.wildCard = wildCard;
         body = new JSONArray();
     }
 
@@ -27,16 +33,51 @@ public class PactDslJsonArray extends DslPart {
         return parent;
     }
 
+    @Override
+    public PactDslJsonBody arrayLike(String name) {
+        throw new UnsupportedOperationException("use the arrayLike() form");
+    }
+
+    @Override
+    public PactDslJsonBody arrayLike() {
+        PactDslJsonArray parent = new PactDslJsonArray(root, this, true);
+        return new PactDslJsonBody(".", parent);
+    }
+
+    @Override
+    public PactDslJsonBody minArrayLike(String name, Integer size) {
+        throw new UnsupportedOperationException("use the minArrayLike(Integer size) form");
+    }
+
+    @Override
+    public PactDslJsonBody minArrayLike(Integer size) {
+        matchers.put(root + appendArrayIndex(1), matchMin(size));
+        PactDslJsonArray parent = new PactDslJsonArray("", this, true);
+        return new PactDslJsonBody(".", parent);
+    }
+
+    @Override
+    public PactDslJsonBody maxArrayLike(String name, Integer size) {
+        throw new UnsupportedOperationException("use the maxArrayLike(Integer size) form");
+    }
+
+    @Override
+    public PactDslJsonBody maxArrayLike(Integer size) {
+        matchers.put(root + appendArrayIndex(1), matchMax(size));
+        PactDslJsonArray parent = new PactDslJsonArray("", this, true);
+        return new PactDslJsonBody(".", parent);
+    }
+
     protected void putObject(DslPart object) {
         for(String matcherName: object.matchers.keySet()) {
-            matchers.put(root + "[" + body.length() + "]" + matcherName, object.matchers.get(matcherName));
+            matchers.put(root + appendArrayIndex(1) + matcherName, object.matchers.get(matcherName));
         }
         body.put(object.getBody());
     }
 
     protected void putArray(DslPart object) {
         for(String matcherName: object.matchers.keySet()) {
-            matchers.put(root + "[" + body.length() + "]" + matcherName, object.matchers.get(matcherName));
+            matchers.put(root + appendArrayIndex(1) + matcherName, object.matchers.get(matcherName));
         }
         body.put(object.getBody());
     }
@@ -71,7 +112,7 @@ public class PactDslJsonArray extends DslPart {
 
     public PactDslJsonArray stringType() {
         body.put(RandomStringUtils.randomAlphabetic(20));
-        matchers.put(root + appendArrayIndex(), matchType());
+        matchers.put(root + appendArrayIndex(0), matchType());
         return this;
     }
 
@@ -81,7 +122,7 @@ public class PactDslJsonArray extends DslPart {
 
     public PactDslJsonArray numberType(Number number) {
         body.put(number);
-        matchers.put(root + appendArrayIndex(), matchType("type"));
+        matchers.put(root + appendArrayIndex(0), matchType("type"));
         return this;
     }
 
@@ -91,7 +132,7 @@ public class PactDslJsonArray extends DslPart {
 
     public PactDslJsonArray integerType(Long number) {
         body.put(number);
-        matchers.put(root + appendArrayIndex(), matchType("integer"));
+        matchers.put(root + appendArrayIndex(0), matchType("integer"));
         return this;
     }
 
@@ -101,19 +142,19 @@ public class PactDslJsonArray extends DslPart {
 
     public PactDslJsonArray realType(Double number) {
         body.put(number);
-        matchers.put(root + appendArrayIndex(), matchType("real"));
+        matchers.put(root + appendArrayIndex(0), matchType("real"));
         return this;
     }
 
     public PactDslJsonArray booleanType(String name) {
         body.put(true);
-        matchers.put(root + appendArrayIndex(), matchType());
+        matchers.put(root + appendArrayIndex(0), matchType());
         return this;
     }
 
     public PactDslJsonArray stringMatcher(String regex, String value) {
         body.put(value);
-        matchers.put(root + appendArrayIndex(), regexp(regex));
+        matchers.put(root + appendArrayIndex(0), regexp(regex));
         return this;
     }
 
@@ -124,46 +165,46 @@ public class PactDslJsonArray extends DslPart {
 
     public PactDslJsonArray timestamp() {
         body.put(DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date()));
-        matchers.put(root + appendArrayIndex(), matchTimestamp(DateFormatUtils.ISO_DATETIME_FORMAT.getPattern()));
+        matchers.put(root + appendArrayIndex(0), matchTimestamp(DateFormatUtils.ISO_DATETIME_FORMAT.getPattern()));
         return this;
     }
 
     public PactDslJsonArray timestamp(String format) {
         FastDateFormat instance = FastDateFormat.getInstance(format);
         body.put(instance.format(new Date()));
-        matchers.put(root + appendArrayIndex(), matchTimestamp(format));
+        matchers.put(root + appendArrayIndex(0), matchTimestamp(format));
         return this;
     }
 
     public PactDslJsonArray date() {
         body.put(DateFormatUtils.ISO_DATE_FORMAT.format(new Date()));
-        matchers.put(root + appendArrayIndex(), matchDate(DateFormatUtils.ISO_DATE_FORMAT.getPattern()));
+        matchers.put(root + appendArrayIndex(0), matchDate(DateFormatUtils.ISO_DATE_FORMAT.getPattern()));
         return this;
     }
 
     public PactDslJsonArray date(String format) {
         FastDateFormat instance = FastDateFormat.getInstance(format);
         body.put(instance.format(new Date()));
-        matchers.put(root + appendArrayIndex(), matchDate(format));
+        matchers.put(root + appendArrayIndex(0), matchDate(format));
         return this;
     }
 
     public PactDslJsonArray time() {
         body.put(DateFormatUtils.ISO_TIME_FORMAT.format(new Date()));
-        matchers.put(root + appendArrayIndex(), matchTime(DateFormatUtils.ISO_TIME_FORMAT.getPattern()));
+        matchers.put(root + appendArrayIndex(0), matchTime(DateFormatUtils.ISO_TIME_FORMAT.getPattern()));
         return this;
     }
 
     public PactDslJsonArray time(String format) {
         FastDateFormat instance = FastDateFormat.getInstance(format);
         body.put(instance.format(new Date()));
-        matchers.put(root + appendArrayIndex(), matchTime(format));
+        matchers.put(root + appendArrayIndex(0), matchTime(format));
         return this;
     }
 
     public PactDslJsonArray ipAddress() {
         body.put("127.0.0.1");
-        matchers.put(root + appendArrayIndex(), regexp("(\\d{1,3}\\.)+\\d{1,3}"));
+        matchers.put(root + appendArrayIndex(0), regexp("(\\d{1,3}\\.)+\\d{1,3}"));
         return this;
     }
 
@@ -190,7 +231,7 @@ public class PactDslJsonArray extends DslPart {
 
     public PactDslJsonArray id() {
         body.put(RandomStringUtils.randomNumeric(10));
-        matchers.put(root + appendArrayIndex(), matchType());
+        matchers.put(root + appendArrayIndex(0), matchType());
         return this;
     }
 
@@ -200,7 +241,7 @@ public class PactDslJsonArray extends DslPart {
 
     public PactDslJsonArray hexValue(String hexValue) {
         body.put(hexValue);
-        matchers.put(root + appendArrayIndex(), regexp("[0-9a-fA-F]+"));
+        matchers.put(root + appendArrayIndex(0), regexp("[0-9a-fA-F]+"));
         return this;
     }
 
@@ -210,7 +251,7 @@ public class PactDslJsonArray extends DslPart {
 
     public PactDslJsonArray guid(String uuid) {
         body.put(uuid);
-        matchers.put(root + appendArrayIndex(), regexp("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
+        matchers.put(root + appendArrayIndex(0), regexp("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
         return this;
     }
 	
@@ -231,7 +272,11 @@ public class PactDslJsonArray extends DslPart {
 		return body.toString();
 	}
 
-    private String appendArrayIndex() {
-        return "[" + (body.length() - 1) + "]";
+    private String appendArrayIndex(Integer offset) {
+        String index = "*";
+        if (!wildCard) {
+            index = String.valueOf(body.length() - 1 + offset);
+        }
+        return "[" + index + "]";
     }
 }

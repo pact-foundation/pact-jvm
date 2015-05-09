@@ -209,6 +209,39 @@ public class PactDslJsonBody extends DslPart {
         throw new UnsupportedOperationException("can't call closeArray on an Object");
     }
 
+    @Override
+    public PactDslJsonBody arrayLike(String name) {
+        return new PactDslJsonBody(".", new PactDslJsonArray(root + name, this, true));
+    }
+
+    @Override
+    public PactDslJsonBody arrayLike() {
+        throw new UnsupportedOperationException("use the arrayLike(String name) form");
+    }
+
+    @Override
+    public PactDslJsonBody minArrayLike(String name, Integer size) {
+        matchers.put(root + name, matchMin(size));
+        PactDslJsonArray parent = new PactDslJsonArray(root + name, this, true);
+        return new PactDslJsonBody(".", parent);
+    }
+
+    @Override
+    public PactDslJsonBody minArrayLike(Integer size) {
+        throw new UnsupportedOperationException("use the minArrayLike(String name, Integer size) form");
+    }
+
+    @Override
+    public PactDslJsonBody maxArrayLike(String name, Integer size) {
+        matchers.put(root + name, matchMax(size));
+        return new PactDslJsonBody(".", new PactDslJsonArray(root + name, this, true));
+    }
+
+    @Override
+    public PactDslJsonBody maxArrayLike(Integer size) {
+        throw new UnsupportedOperationException("use the maxArrayLike(String name, Integer size) form");
+    }
+
     public PactDslJsonBody id() {
         return id("id");
     }

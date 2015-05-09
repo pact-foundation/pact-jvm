@@ -55,7 +55,7 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '2.1.14'
+    version = '2.2.0'
     targetCompatibility = '1.6'
     sourceCompatibility = '1.6'
 
@@ -175,3 +175,4 @@ install_2_10.dependsOn {
 install_2_11.dependsOn {
     subprojects.findAll { project -> project.name.endsWith('_2.11') }.collect { it.name + ':install' }
 }
+

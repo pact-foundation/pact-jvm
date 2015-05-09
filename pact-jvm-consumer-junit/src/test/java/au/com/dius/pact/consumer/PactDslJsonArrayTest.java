@@ -27,26 +27,26 @@ public class PactDslJsonArrayTest extends ConsumerPactTest {
 				.body(body)
 				.toFragment();
 
-		MatcherTestUtils.assertResponseMatchersEqualTo(fragment,
-				"$.body[0].id",
-				"$.body[0].timestamp",
-				"$.body[0].dob",
-				"$.body[1].id",
-				"$.body[1].timestamp",
-				"$.body[1].dob"
-				);
+		MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment,
+			"$.body[0].id",
+			"$.body[0].timestamp",
+			"$.body[0].dob",
+			"$.body[1].id",
+			"$.body[1].timestamp",
+			"$.body[1].dob"
+		);
 
 		return fragment;
 	}
 
 	@Override
 	protected String providerName() {
-		return "test_provider";
+		return "test_provider_array";
 	}
 
 	@Override
 	protected String consumerName() {
-		return "test_consumer";
+		return "test_consumer_array";
 	}
 
 	@Override

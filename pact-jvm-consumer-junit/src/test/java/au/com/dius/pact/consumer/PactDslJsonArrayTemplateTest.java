@@ -9,7 +9,7 @@ public class PactDslJsonArrayTemplateTest extends ConsumerPactTest {
 				.id()
 				.stringType("name")
 				.date("dob");
-		
+
 		DslPart body = new PactDslJsonArray()
 				.template(personTemplate, 3);
 
@@ -22,16 +22,16 @@ public class PactDslJsonArrayTemplateTest extends ConsumerPactTest {
 				.body(body)
 				.toFragment();
 
-		MatcherTestUtils.assertResponseMatchersEqualTo(fragment,
-				"$.body[0].id",
-				"$.body[0].name",
-				"$.body[0].dob",
-				"$.body[1].id",
-				"$.body[1].name",
-				"$.body[1].dob",
-				"$.body[2].id",
-				"$.body[2].name",
-				"$.body[2].dob"
+		MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment,
+			"$.body[0].id",
+			"$.body[0].name",
+			"$.body[0].dob",
+			"$.body[1].id",
+			"$.body[1].name",
+			"$.body[1].dob",
+			"$.body[2].id",
+			"$.body[2].name",
+			"$.body[2].dob"
 		);
 
 		return fragment;
@@ -39,12 +39,12 @@ public class PactDslJsonArrayTemplateTest extends ConsumerPactTest {
 
 	@Override
 	protected String providerName() {
-		return "test_provider";
+		return "test_provider_array";
 	}
 
 	@Override
 	protected String consumerName() {
-		return "test_consumer";
+		return "test_consumer_array";
 	}
 
 	@Override

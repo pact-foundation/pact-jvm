@@ -22,12 +22,74 @@ public abstract class DslPart {
     protected abstract void putArray(DslPart object);
     protected abstract Object getBody();
 
+    /**
+     * Field which is an array
+     * @param name field name
+     */
     public abstract PactDslJsonArray array(String name);
+
+    /**
+     * Element as an array
+     */
     public abstract PactDslJsonArray array();
+
+    /**
+     * Close of the previous array element
+     */
     public abstract DslPart closeArray();
 
+    /**
+     * Array field where each element must match the following object
+     * @param name field name
+     */
+    public abstract PactDslJsonBody arrayLike(String name);
+
+    /**
+     * Array element where each element of the array must match the following object
+     */
+    public abstract PactDslJsonBody arrayLike();
+
+    /**
+     * Array field with a minumum size and each element must match the provided object
+     * @param name field name
+     * @param size minimum size
+     */
+    public abstract PactDslJsonBody minArrayLike(String name, Integer size);
+
+    /**
+     * Array element with a minumum size and each element of the array must match the provided object
+     * @param size minimum size
+     */
+    public abstract PactDslJsonBody minArrayLike(Integer size);
+
+    /**
+     * Array field with a maximum size and each element must match the provided object
+     * @param name field name
+     * @param size maximum size
+     */
+    public abstract PactDslJsonBody maxArrayLike(String name, Integer size);
+
+    /**
+     * Array element with a maximum size and each element of the array must match the provided object
+     * @param size minimum size
+     */
+    public abstract PactDslJsonBody maxArrayLike(Integer size);
+
+    /**
+     * Object field
+     * @param name field name
+     */
     public abstract PactDslJsonBody object(String name);
+
+    /**
+     * Object element
+     */
     public abstract PactDslJsonBody object();
+
+    /**
+     * Close off the previous object
+     * @return
+     */
     public abstract DslPart closeObject();
 
     public Map<String, Object> getMatchers() {
@@ -69,6 +131,18 @@ public abstract class DslPart {
     protected Map<String, Object> matchTime(String format) {
         Map<String, Object> jsonObject = new HashMap<String, Object>();
         jsonObject.put("time", format);
+        return jsonObject;
+    }
+
+    protected Map<String, Object> matchMin(Integer min) {
+        Map<String, Object> jsonObject = new HashMap<String, Object>();
+        jsonObject.put("min", min);
+        return jsonObject;
+    }
+
+    protected Map<String, Object> matchMax(Integer max) {
+        Map<String, Object> jsonObject = new HashMap<String, Object>();
+        jsonObject.put("min", max);
         return jsonObject;
     }
 
