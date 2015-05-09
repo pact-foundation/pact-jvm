@@ -77,6 +77,9 @@ class PactBodyBuilder extends Matchers {
     if (value instanceof Pattern) {
       def matcher = regexp(value as Pattern, value2)
       bodyMap[name] = setMatcherAttribute(matcher, path + '.' + name)
+    } else if (value instanceof LikeMatcher) {
+      setMatcherAttribute(value, path + '.' + name)
+      bodyMap[name] = invokeClosure(value.values.last(), '.' + name + '[*]')
     } else if (value instanceof Matcher) {
       bodyMap[name] = setMatcherAttribute(value, path + '.' + name)
     } else if (value instanceof List) {
@@ -112,8 +115,31 @@ class PactBodyBuilder extends Matchers {
   }
 
   private def setMatcherAttribute(Matcher value, String attributePath) {
-    matchers[attributePath] = value.matcher
+    if (value.matcher) {
+      matchers[attributePath] = value.matcher
+    }
     value.value
+  }
+
+  /**
+   * Array with maximum size and each element like the following object
+   */
+  def maxLike(Integer max, Closure closure) {
+    new MaxLikeMatcher(values: [max, closure])
+  }
+
+  /**
+   * Array with minimum size and each element like the following object
+   */
+  def minLike(Integer min, Closure closure) {
+    new MinLikeMatcher(values: [min, closure])
+  }
+
+  /**
+   * Array where each element is like the following object
+   */
+  def eachLike(Closure closure) {
+    new EachLikeMatcher(values: [null,  closure ])
   }
 
 }

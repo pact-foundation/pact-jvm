@@ -15,7 +15,7 @@ class Matchers {
   }
 
   def hexValue(String value = null) {
-    new RegexpMatcher(values: ['[0-9a-fA-F]+', RandomStringUtils.random(10, "0123456789abcdef")])
+    new RegexpMatcher(values: ['[0-9a-fA-F]+', value ?: RandomStringUtils.random(10, "0123456789abcdef")])
   }
 
   def identifier(def value = null) {
@@ -52,6 +52,10 @@ class Matchers {
 
   def guid(String value = null) {
     new RegexpMatcher(values: ['[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', value ?: UUID.randomUUID().toString()])
+  }
+
+  def string(String value = null) {
+    new TypeMatcher(values: ['type', value ?: RandomStringUtils.randomAlphanumeric(10)])
   }
 
 }

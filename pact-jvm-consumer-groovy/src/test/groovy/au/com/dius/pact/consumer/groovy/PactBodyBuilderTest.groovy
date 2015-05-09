@@ -90,7 +90,71 @@ class PactBodyBuilderTest {
         assert service.interactions[0].response.body.get() == new JsonBuilder([name: "harry"]).toPrettyString()
     }
 
-  def asJavaMap(def map) {
+    @Test
+    void 'arrays with matching'() {
+        def service = new PactBuilder()
+        service {
+            serviceConsumer "Consumer"
+            hasPactWith "Provider"
+
+            uponReceiving('a request with array matching')
+            withAttributes(method: 'get', path: '/')
+            withBody {
+                orders maxLike(10) {
+                    id identifier
+                    lineItems minLike(1) {
+                        id identifier
+                        amount numeric
+                        productCodes eachLike { code string('A100') }
+                    }
+                }
+            }
+            willRespondWith(
+                status: 200,
+                headers: ['Content-Type': 'text/html']
+            )
+        }
+        service.buildInteractions()
+        assert service.interactions.size() == 1
+        assert asJavaMap(service.interactions[0].request.requestMatchingRules) == [
+            '$.body.orders': [max: 10],
+            '$.body.orders[*].id': ['match': 'type'],
+            '$.body.orders[*].lineItems': ['min': 1],
+            '$.body.orders[*].lineItems[*].id': [match: 'type'],
+            '$.body.orders[*].lineItems[*].amount': [match: 'number'],
+            '$.body.orders[*].lineItems[*].productCodes[*].code': [match: 'type']
+        ]
+
+        def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.get()))
+        assert keys == [
+            'orders', [
+                'id', [], 'lineItems', [
+                    'amount', [], 'id', [], 'productCodes', [
+                        'code', []
+                    ]
+                ]
+            ]
+        ]
+
+    }
+
+    List walkGraph(def value) {
+        def set = []
+        if (value instanceof Map) {
+            value.each { k, v ->
+                set << k
+                set << walkGraph(v)
+            }
+        } else if (value instanceof List) {
+            value.eachWithIndex { v, i ->
+                set << i
+                set << walkGraph(v)
+            }
+        }
+        set
+    }
+
+    def asJavaMap(def map) {
     if (map instanceof Option) {
       if (map.defined) {
         asJavaMap(map.get())
