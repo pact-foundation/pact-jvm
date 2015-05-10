@@ -1,5 +1,24 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.2.0 - array-like matching feature release
+
+* f96f1eb - #80 update the readmes for array like matching with min/max (Ronald Holshausen, Sat May 9 16:33:05 2015 +1000)
+* 7a6ff83 - #80 add array like matching with min/max to Groovy DSL (Ronald Holshausen, Sat May 9 16:11:43 2015 +1000)
+* 56003f7 - #80 add array like matching with min/max to Java DSL (Ronald Holshausen, Sat May 9 13:24:30 2015 +1000)
+* 669fcfc - Merge pull request #116 from gitter-badger/gitter-badge (Ronald Holshausen, Tue Apr 28 18:16:17 2015 +1000)
+* 958512a - Added Gitter badge (The Gitter Badger, Tue Apr 28 08:15:20 2015 +0000)
+* 273592e - update doco about publishing (Ronald Holshausen, Sun Apr 19 09:59:06 2015 +1000)
+* b0eb075 - replace bintray publish plugin with gradle portal plugin (Ronald Holshausen, Sun Apr 19 09:52:52 2015 +1000)
+* a2fbc6e - updated testcases from pact spec project (Ronald Holshausen, Fri Apr 17 17:09:00 2015 +1000)
+* a032e44 - matching logic on arrays now handles embedded arrays and multiple matchers #80 (Ronald Holshausen, Fri Apr 17 17:05:48 2015 +1000)
+* 75448a7 - updated testcases from pact spec project (Ronald Holshausen, Fri Apr 17 15:35:33 2015 +1000)
+* f12b27a - implemented example matching logic on arrays #80 (Ronald Holshausen, Fri Apr 17 15:21:43 2015 +1000)
+* 2b0f194 - updated testcases from pact spec project (Ronald Holshausen, Fri Apr 17 10:19:44 2015 +1000)
+* 99e0cb1 - Merge pull request #109 from GorshSerginio/master (Ronald Holshausen, Wed Apr 8 20:12:25 2015 +1000)
+* 894ff15 - #108 - Fixed reference to pactUrl (Sergei Gorshechnikov, Wed Apr 8 16:55:57 2015 +1000)
+* 3d8ca1f - Generate correct matcher keys when the root of the body is an array #106 (Ronald Holshausen, Wed Apr 8 11:09:38 2015 +1000)
+* 5704c60 - bump version (Ronald Holshausen, Mon Mar 30 18:56:47 2015 +1100)
+
 # 2.1.13 - bugfix release
 
 * 55eb028 - fix defect where stateChangeUrl is automatically set by overridden url function #101 (Ronald Holshausen, Sun Mar 29 13:44:16 2015 +1100)
