@@ -1,5 +1,13 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.2.1 - allowed gradle plugin to resolve hostname at runtime + junit bugfix
+
+* 0211bea - #121 fix incorrect keys in fields that are arrays (Ronald Holshausen, Thu May 21 20:05:57 2015 +1000)
+* a576f42 - let the gradle pact plugin resolve provider host names at runtime using closures (Ronald Holshausen, Thu May 21 16:06:17 2015 +1000)
+* 014e418 - remove the xml body matcher as it is incomplete (Ronald Holshausen, Wed May 20 17:33:43 2015 +1000)
+* b907eac - added an example form post test (Ronald Holshausen, Thu May 14 09:41:34 2015 +1000)
+* 5f5723f - update changelog and bump version (Ronald Holshausen, Sun May 10 10:02:34 2015 +1000)
+
 # 2.2.0 - array-like matching feature release
 
 * f96f1eb - #80 update the readmes for array like matching with min/max (Ronald Holshausen, Sat May 9 16:33:05 2015 +1000)
