@@ -40,11 +40,10 @@ public class PactDslJsonBody extends DslPart {
     }
 
     protected void putArray(DslPart object) {
-        String name = StringUtils.strip(object.root, ".");
         for(String matcherName: object.matchers.keySet()) {
             matchers.put(matcherName, object.matchers.get(matcherName));
         }
-        body.put(name, object.getBody());
+        body.put(StringUtils.difference(this.root, object.root), object.getBody());
     }
 
     @Override

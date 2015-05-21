@@ -8,23 +8,25 @@ public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTest {
     protected PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
         DslPart body = new PactDslJsonBody()
             .id()
-            .arrayLike("array1")
-                .id()
-                .stringType("name")
-                .date("dob")
-                .closeObject()
-            .closeArray()
-            .minArrayLike("array2", 1)
-                .ipAddress("address")
-                .stringType("name")
-                .closeObject()
-            .closeArray()
-            .array("array3")
-                .maxArrayLike(5)
-                    .integerType("itemCount")
+            .object("data")
+                .arrayLike("array1")
+                    .id()
+                    .stringType("name")
+                    .date("dob")
                     .closeObject()
                 .closeArray()
-            .closeArray();
+                .minArrayLike("array2", 1)
+                    .ipAddress("address")
+                    .stringType("name")
+                    .closeObject()
+                .closeArray()
+                .array("array3")
+                    .maxArrayLike(5)
+                        .integerType("itemCount")
+                        .closeObject()
+                    .closeArray()
+                .closeArray()
+            .closeObject();
         PactFragment fragment = builder
                 .uponReceiving("java test interaction with an array like matcher")
                 .path("/")
@@ -36,14 +38,27 @@ public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTest {
 
         MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment,
             "$.body.id",
-            "$.body.array1[*].id",
-            "$.body.array1[*].name",
-            "$.body.array1[*].dob",
-            "$.body.array2",
-            "$.body.array2[*].address",
-            "$.body.array2[*].name",
-            "$.body.array3[0]",
-            "$.body.array3[0][*].itemCount");
+            "$.body.data.array1[*].id",
+            "$.body.data.array1[*].name",
+            "$.body.data.array1[*].dob",
+            "$.body.data.array2",
+            "$.body.data.array2[*].address",
+            "$.body.data.array2[*].name",
+            "$.body.data.array3[0]",
+            "$.body.data.array3[0][*].itemCount");
+
+        MatcherTestUtils.assertResponseKeysEqualTo(fragment,
+            "/data",
+            "/data/array1",
+            "/data/array1/0/dob",
+            "/data/array1/0/id",
+            "/data/array1/0/name",
+            "/data/array2",
+            "/data/array2/0/address",
+            "/data/array2/0/name",
+            "/data/array3/0/0/itemCount",
+            "/data/array3",
+            "/id");
 
         return fragment;
     }
