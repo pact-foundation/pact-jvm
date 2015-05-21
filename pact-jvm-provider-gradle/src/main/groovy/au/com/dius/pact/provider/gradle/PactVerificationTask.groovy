@@ -168,7 +168,7 @@ class PactVerificationTask extends DefaultTask {
         try {
 
             def url = consumer.stateChange
-            if (url == null || StringUtils.isBlank(url)) {
+            if (url == null || (url instanceof String && StringUtils.isBlank(url))) {
                 AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW).a('WARNING: State Change ignored as there is no stateChange URL')
                     .reset())
             } else {

@@ -5,7 +5,7 @@ import org.gradle.api.GradleException
 
 class ProviderInfo {
     String protocol = 'http'
-    String host = 'localhost'
+    def host = 'localhost'
     Integer port = 8080
     String path = '/'
     String name

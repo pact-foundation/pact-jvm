@@ -66,9 +66,17 @@ class ProviderClient {
         }
     }
 
-    CloseableHttpResponse makeStateChangeRequest(String url, String state, boolean postStateInBody) {
+    CloseableHttpResponse makeStateChangeRequest(def url, String state, boolean postStateInBody) {
         CloseableHttpClient httpclient = newClient()
-        def urlBuilder = new URIBuilder(url)
+
+        String stateChangeUrl
+        if (url instanceof Closure) {
+            stateChangeUrl = url.call()
+        } else {
+            stateChangeUrl = url
+        }
+
+        def urlBuilder = new URIBuilder(stateChangeUrl)
         HttpRequest method
 
         if (postStateInBody) {
@@ -121,7 +129,11 @@ class ProviderClient {
     private HttpRequest newRequest(Request request) {
         def urlBuilder = new URIBuilder()
         urlBuilder.scheme = provider.protocol
-        urlBuilder.host = provider.host
+        if (provider.host instanceof Closure) {
+            urlBuilder.host = provider.host.call()
+        } else {
+            urlBuilder.host = provider.host
+        }
         urlBuilder.port = provider.port
 
         String path = ''
