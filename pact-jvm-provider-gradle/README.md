@@ -17,7 +17,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'au.com.dius:pact-jvm-provider-gradle_2.10:2.0.10'
+        classpath 'au.com.dius:pact-jvm-provider-gradle_2.10:2.2.1'
     }
 }
 ```
@@ -32,7 +32,7 @@ apply plugin: 'au.com.dius.pact'
 
 ```groovy
 plugins {
-  id "au.com.dius.pact" version "2.1.1"
+  id "au.com.dius.pact" version "2.2.1"
 }
 ```
 
@@ -77,6 +77,28 @@ pact {
 ```
 
 ### 3. Execute `gradle pactVerify`
+
+## Specifying the provider hostname at runtime
+
+If you need to calculate the provider hostname at runtime, you can give a Closure as the provider host.
+
+```groovy
+pact {
+
+    serviceProviders {
+
+        provider1 {
+            host = { lookupHostName() }
+
+            hasPactWith('consumer1') {
+                pactFile = file('path/to/provider1-consumer1-pact.json')
+            }
+        }
+
+    }
+
+}
+```
 
 ## Starting and shutting down your provider
 
@@ -167,6 +189,8 @@ The following project properties can be specified with `-Pproperty=value` on the
 For each provider you can specify a state change URL to use to switch the state of the provider. This URL will
 receive the providerState description from the pact file before each interaction via a POST. As for normal requests,
 a request filter (`stateChangeRequestFilter`) can also be set to manipulate the request before it is sent.
+
+You can also give a Closure for the stateChange that returns the URL.
 
 ```
 pact {
