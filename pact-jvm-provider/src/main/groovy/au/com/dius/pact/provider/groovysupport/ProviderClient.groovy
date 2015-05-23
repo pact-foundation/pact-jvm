@@ -2,11 +2,14 @@ package au.com.dius.pact.provider.groovysupport
 
 import au.com.dius.pact.model.Request
 import groovy.json.JsonBuilder
+import org.apache.http.Consts
 import org.apache.http.Header
 import org.apache.http.HttpEntity
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
+import org.apache.http.NameValuePair
+import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
@@ -17,6 +20,7 @@ import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpPut
 import org.apache.http.client.methods.HttpTrace
 import org.apache.http.client.utils.URIBuilder
+import org.apache.http.client.utils.URLEncodedUtils
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
@@ -43,8 +47,14 @@ class ProviderClient {
             }
         }
 
-        if (request.body().defined && method instanceof HttpEntityEnclosingRequest) {
-            method.setEntity(new StringEntity(request.body().get()))
+        if (method instanceof HttpEntityEnclosingRequest) {
+            if (urlEncodedFormPost(request) && request.query().defined) {
+                def charset = Consts.UTF_8
+                List parameters = URLEncodedUtils.parse(request.query().get(), charset)
+                method.setEntity(new UrlEncodedFormEntity(parameters, charset))
+            } else if (request.body().defined) {
+                method.setEntity(new StringEntity(request.body().get()))
+            }
         }
 
         if (provider.requestFilter != null) {
@@ -147,8 +157,8 @@ class ProviderClient {
         path += URLDecoder.decode(request.path(), 'UTF-8')
         urlBuilder.path = path
 
-        if (request.query().defined) {
-            urlBuilder.query = request.query().get()
+        if (request.query().defined && !urlEncodedFormPost(request)) {
+            urlBuilder.customQuery = request.query().get()
         }
 
         def url = urlBuilder.build().toString()
@@ -172,4 +182,8 @@ class ProviderClient {
         }
   }
 
+  static boolean urlEncodedFormPost(Request request) {
+    request.method().toLowerCase() == 'post' &&
+      request.mimeType() == ContentType.APPLICATION_FORM_URLENCODED.mimeType
+  }
 }
