@@ -113,6 +113,8 @@ class PactVerificationTask extends DefaultTask {
                             AnsiConsole.out().println("      $delta")
                         }
                     }
+                } else if (err.value instanceof String) {
+                    AnsiConsole.out().println("      ${err.value}")
                 } else {
                     err.value.each { key, message ->
                         AnsiConsole.out().println("      $key -> $message")
