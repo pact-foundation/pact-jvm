@@ -9,7 +9,7 @@ import scala.collection.mutable
 
 object PactConfig {
     var bodyMatchers = mutable.HashMap[String, BodyMatcher](
-//      "application/.*xml" -> new XmlBodyMatcher(),
+      "application/.*xml" -> new XmlBodyMatcher(),
       "application/.*json" -> new JsonBodyMatcher()
     )
 }
