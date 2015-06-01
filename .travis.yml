@@ -4,4 +4,7 @@ jdk:
   - oraclejdk7
   - openjdk7
   - oraclejdk8
-script: ./gradlew -i --stacktrace check
+env:
+  - SCALA=2.10
+  - SCALA=2.11
+script: ./gradlew -i --stacktrace check_$SCALA
