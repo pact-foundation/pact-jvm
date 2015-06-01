@@ -186,13 +186,18 @@ The following project properties can be specified with `-Pproperty=value` on the
 
 ## Provider States
 
+For a description of what provider states are, see the wiki in the Ruby project:
+https://github.com/realestate-com-au/pact/wiki/Provider-states
+
+### Using a state change URL
+
 For each provider you can specify a state change URL to use to switch the state of the provider. This URL will
 receive the providerState description from the pact file before each interaction via a POST. As for normal requests,
 a request filter (`stateChangeRequestFilter`) can also be set to manipulate the request before it is sent.
 
 You can also give a Closure for the stateChange that returns the URL.
 
-```
+```groovy
 pact {
 
     serviceProviders {
