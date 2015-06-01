@@ -24,7 +24,7 @@ public class MatchingTest {
         PactDslJsonBody responseBody = new PactDslJsonBody()
             .stringMatcher("name", "\\w+", "harry");
 
-        HashMap expectedResponse = new HashMap();
+        HashMap<String, String> expectedResponse = new HashMap<String, String>();
         expectedResponse.put("name", "harry");
         runTest(buildPactFragment(body, responseBody, "a test interaction that requires regex matching"),
             "{\"name\": \"Arnold\", \"position\": \"staff\"}", expectedResponse, "/hello");

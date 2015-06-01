@@ -6,7 +6,7 @@ import java.io.File
 
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
-import unfiltered.netty.Http
+import unfiltered.netty.Server
 
 @RunWith(classOf[JUnitRunner])
 class MainSpec extends Specification {
@@ -15,7 +15,7 @@ class MainSpec extends Specification {
     this.getClass.getClassLoader.getResource(name)
   }
 
-  var server: Http = null
+  var server: Server = null
   step(server = TestService(8888))
 
   "PactRunner" should {

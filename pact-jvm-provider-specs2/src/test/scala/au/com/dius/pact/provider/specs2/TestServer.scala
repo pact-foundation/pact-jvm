@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider.specs2
 
-import unfiltered.netty.{ServerErrorResponse, Http}
+import unfiltered.netty.{ServerErrorResponse, Server}
 import unfiltered.netty.cycle.{SynchronousExecution, Plan}
 import unfiltered.response.ResponseString
 import au.com.dius.pact.model.MockProviderConfig
@@ -12,7 +12,7 @@ import au.com.dius.pact.model.MockProviderConfig
 case class TestServer(state: String) {
   def run[T](code: String => T):T = {
     val config = MockProviderConfig.createDefault()
-    val server = Http(config.port, config.hostname).handler(new Plan with SynchronousExecution with ServerErrorResponse {
+    val server = Server.http(config.port, config.hostname).handler(new Plan with SynchronousExecution with ServerErrorResponse {
       def intent: Plan.Intent = {
         case req => {
           ResponseString("[\"All Done\"]")

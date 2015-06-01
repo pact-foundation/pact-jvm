@@ -37,7 +37,7 @@ object TestService extends StrictLogging {
   }
 
   def apply(port:Int) = {
-    val server = _root_.unfiltered.netty.Http.local(port).handler(RequestHandler(port))
+    val server = _root_.unfiltered.netty.Server.local(port).handler(RequestHandler(port))
     logger.info(s"starting unfiltered app at 127.0.0.1 on port $port")
     server.start()
     server
