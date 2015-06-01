@@ -231,6 +231,37 @@ pact {
 If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description will be sent as
  JSON in the body of the request. If it is set to false, it will passed as a query parameter.
 
+### Using a Closure [version 2.2.2+]
+
+You can set a closure to be called before each verification with a defined provider state. The closure will be
+called with the state description from the pact file. If you also require the state change request to be executed,
+return the URL for the request (as a URL, URI or String) from the closure. Otherwise, return null or false.
+
+```groovy
+pact {
+
+    serviceProviders {
+
+        provider1 {
+
+            hasPactWith('consumer1') {
+                pactFile = file('path/to/provider1-consumer1-pact.json')
+                // Load a fixture file based on the provider state and then setup some database
+                // data. Does not require a state change request so returns false
+                stateChange = { providerState ->
+                    def fixture = loadFixtuerForProviderState(providerState)
+                    setupDatabase(fixture)
+                    false
+                }
+            }
+
+        }
+
+    }
+
+}
+```
+
 ## Filtering the interactions that are verified
 
 You can filter the interactions that are run using three project properties: `pact.filter.consumers`, `pact.filter.description` and `pact.filter.providerState`.

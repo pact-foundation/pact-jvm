@@ -77,38 +77,44 @@ class ProviderClient {
     }
 
     CloseableHttpResponse makeStateChangeRequest(def url, String state, boolean postStateInBody) {
-        CloseableHttpClient httpclient = newClient()
-
-        String stateChangeUrl
+        def stateChangeUrl
         if (url instanceof Closure) {
-            stateChangeUrl = url.call()
+            stateChangeUrl = url.call(state)
         } else {
             stateChangeUrl = url
         }
 
-        def urlBuilder = new URIBuilder(stateChangeUrl)
-        HttpRequest method
-
-        if (postStateInBody) {
-            method = new HttpPost(urlBuilder.build())
-            method.setEntity(new StringEntity(new JsonBuilder([state: state]).toPrettyString(),
-                    ContentType.APPLICATION_JSON))
-        } else {
-            method = new HttpPost(urlBuilder.setParameter('state', state).build())
-        }
-
-        if (provider.stateChangeRequestFilter != null) {
-            if (provider.stateChangeRequestFilter instanceof Closure) {
-                provider.stateChangeRequestFilter(method)
+        if (stateChangeUrl) {
+            CloseableHttpClient httpclient = newClient()
+            def urlBuilder
+            if (stateChangeUrl instanceof URI) {
+              urlBuilder = new URIBuilder(stateChangeUrl)
             } else {
-                Binding binding = new Binding()
-                binding.setVariable("request", method)
-                GroovyShell shell = new GroovyShell(binding)
-                shell.evaluate(provider.stateChangeRequestFilter as String)
+              urlBuilder = new URIBuilder(stateChangeUrl.toString())
             }
-        }
+            HttpRequest method
 
-        httpclient.execute(method)
+            if (postStateInBody) {
+                method = new HttpPost(urlBuilder.build())
+                method.setEntity(new StringEntity(new JsonBuilder([state: state]).toPrettyString(),
+                  ContentType.APPLICATION_JSON))
+            } else {
+                method = new HttpPost(urlBuilder.setParameter('state', state).build())
+            }
+
+            if (provider.stateChangeRequestFilter != null) {
+                if (provider.stateChangeRequestFilter instanceof Closure) {
+                    provider.stateChangeRequestFilter(method)
+                } else {
+                    Binding binding = new Binding()
+                    binding.setVariable("request", method)
+                    GroovyShell shell = new GroovyShell(binding)
+                    shell.evaluate(provider.stateChangeRequestFilter as String)
+                }
+            }
+
+            httpclient.execute(method)
+        }
     }
 
     def handleResponse(HttpResponse httpResponse) {

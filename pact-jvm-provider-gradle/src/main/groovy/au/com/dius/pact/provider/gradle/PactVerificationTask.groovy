@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider.gradle
 
+import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.Pact$
-import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.provider.groovysupport.ProviderClient
 import au.com.dius.pact.provider.groovysupport.ResponseComparison
 import org.apache.commons.lang3.StringUtils
@@ -13,7 +13,6 @@ import org.gradle.api.tasks.TaskAction
 import org.json4s.FileInput
 import org.json4s.StreamInput
 import scala.collection.JavaConverters$
-import groovyx.net.http.RESTClient
 
 class PactVerificationTask extends DefaultTask {
 
@@ -171,20 +170,23 @@ class PactVerificationTask extends DefaultTask {
 
             def url = consumer.stateChange
             if (url == null || (url instanceof String && StringUtils.isBlank(url))) {
-                AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW).a('WARNING: State Change ignored as there is no stateChange URL')
-                    .reset())
+                AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
+                  .a('WARNING: State Change ignored as there is no stateChange URL')
+                  .reset())
             } else {
                 ProviderClient client = new ProviderClient(provider: providerToVerify)
                 def response = client.makeStateChangeRequest(url, state, consumer.stateChangeUsesBody)
-                try {
+                if (response) {
+                  try {
                     if (response.statusLine.statusCode >= 400) {
-                        AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.RED)
-                            .a('State Change Request Failed - ')
-                            .a(response.statusLine.toString()).reset())
-                        return 'State Change Request Failed - ' + response.statusLine.toString()
+                      AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.RED)
+                        .a('State Change Request Failed - ')
+                        .a(response.statusLine.toString()).reset())
+                      return 'State Change Request Failed - ' + response.statusLine.toString()
                     }
-                } finally {
+                  } finally {
                     response.close()
+                  }
                 }
             }
             return true
