@@ -39,6 +39,17 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
       }
 
+      "when bodies differ only in whitespace" in {
+        actualBody = Some(
+          """<foo>
+            |  <bar></bar>
+            |</foo>
+          """.stripMargin)
+
+        expectedBody = Some("<foo><bar></bar></foo>")
+        matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
+      }
+
     }
 
     "returns a mismatch" should {
@@ -47,6 +58,12 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
           a.exists((m: BodyMismatch) => m.mismatch.get == s),
           s"$a does not contain '$s'"
         )
+
+      def havePath(p: String) = (a: List[BodyMismatch]) => (
+        a.forall((m: BodyMismatch) => m.path == p),
+        s"$a does not have path '$p', paths are: ${a.map(m => m.path).mkString(",")}"
+        )
+
 
       "when comparing anything to an empty body" in {
         expectedBody = Some(<blah/>.toString())
@@ -59,76 +76,99 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         val mismatches: List[BodyMismatch] = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
         mismatches must containMessage("Expected element foo but received bar")
+        mismatches must havePath("$.body")
       }
 
-//      "when comparing an empty list to a non-empty one" in {
-//        expectedBody = Some("[]")
-//        actualBody = Some("[100]")
-//        val mismatches: List[BodyMismatch] = matcher.matchBody(expected(), actual(), diffconfig)
-//        mismatches must not(beEmpty)
-//        mismatches must containMessage("Expected an empty List but received List(100)")
-//      }
-//
-//      "when comparing a map to one with less entries" in {
-//        expectedBody = Some("{\"something\": 100, \"somethingElse\": 100}")
-//        actualBody = Some("{\"something\": 100}")
-//        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
-//        mismatches must not(beEmpty)
-//        mismatches must containMessage("Expected a Map with at least 2 elements but received 1 elements")
-//      }
-//
-//      "when comparing a list to one with with different size" in {
-//        expectedBody = Some("[1,2,3,4]")
-//        actualBody = Some("[1,2,3]")
-//        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
-//        mismatches must not(beEmpty)
-//        mismatches must have size 2
-//        mismatches must containMessage("Expected a List with 4 elements but received 3 elements")
-//        mismatches must containMessage("Expected 4 but was missing")
-//      }
-//
-//      "when the actual body is missing a key" in {
-//        expectedBody = Some("{\"something\": 100, \"somethingElse\": 100}")
-//        actualBody = Some("{\"something\": 100}")
-//        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
-//        mismatches must not(beEmpty)
-//        mismatches must containMessage("Expected somethingElse=100 but was missing")
-//      }
-//
-//      "when the actual body has invalid value" in {
-//        expectedBody = Some("{\"something\": 100}")
-//        actualBody = Some("{\"something\": 101}")
-//        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
-//        mismatches must not(beEmpty)
-//        mismatches must containMessage("Expected 100 but received 101")
-//      }
-//
-//      "when comparing a map to a list" in {
-//        expectedBody = Some("{\"something\": 100, \"somethingElse\": 100}")
-//        actualBody = Some("[100, 100]")
-//        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
-//        mismatches must not(beEmpty)
-//        mismatches must containMessage("Type mismatch: Expected JObject JObject(List((something,JInt(100)), (somethingElse,JInt(100)))) but received JArray JArray(List(JInt(100), JInt(100)))")
-//      }
-//
-//      "when comparing list to anything" in {
-//        expectedBody = Some("[100, 100]")
-//        actualBody = Some("100")
-//        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
-//        mismatches must not(beEmpty)
-//        mismatches must containMessage("Type mismatch: Expected JArray JArray(List(JInt(100), JInt(100))) but received JInt JInt(100)")
-//      }
-//
-//    }
-//
-//    "with a matcher defined" should {
-//
-//      "delegate to the matcher" in {
-//        expectedBody = Some("{\"something\": 100}")
-//        actualBody = Some("{\"something\": 101}")
-//        matchers = Some(Map("$.body.something" -> Map("regex" -> "\\d+")))
-//        matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
-//      }
+      "when comparing an empty list to a non-empty one" in {
+        expectedBody = Some("<foo></foo>")
+        actualBody = Some("<foo><item/></foo>")
+        val mismatches: List[BodyMismatch] = matcher.matchBody(expected(), actual(), diffconfig)
+        mismatches must not(beEmpty)
+        mismatches must containMessage("Expected an empty List but received <item/>")
+        mismatches must havePath("$.body.foo")
+      }
+
+      "when comparing a list to one with with different size" in {
+        expectedBody = Some("<foo><one/><two/><three/><four/></foo>")
+        actualBody = Some("<foo><one/><two/><three/></foo>")
+        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
+        mismatches must not(beEmpty)
+        mismatches must have size 2
+        mismatches must containMessage("Expected a List with 4 elements but received 3 elements")
+        mismatches must containMessage("Expected <four/> but was missing")
+        mismatches must havePath("$.body.foo")
+      }
+
+      "when comparing a list to one with with the same size but different children" in {
+        expectedBody = Some("<foo><one/><two/><three/></foo>")
+        actualBody = Some("<foo><one/><two/><four/></foo>")
+        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
+
+        mismatches must containMessage("Expected element three but received four")
+        mismatches must havePath("$.body.foo[2]")
+      }
+
+      "when comparing a list to one where the items are in the wrong order" in {
+        expectedBody = Some("<foo><one/><two/><three/></foo>")
+        actualBody = Some("<foo><one/><three/><two/></foo>")
+        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
+
+        mismatches must containMessage("Expected element two but received three")
+        mismatches must containMessage("Expected element three but received two")
+      }
+
+      "when comparing a tags attributes to one with less entries" in {
+        expectedBody = Some("<foo something=\"100\" somethingElse=\"101\"/>")
+        actualBody = Some("<foo something=\"100\"/>")
+        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
+        mismatches must not(beEmpty)
+        mismatches must containMessage("Expected a Tag with at least 2 attributes but received 1 attributes")
+      }
+
+      "when a tag is missing an attribute" in {
+        expectedBody = Some("<foo something=\"100\" somethingElse=\"100\"/>")
+        actualBody = Some("<foo something=\"100\"/>")
+        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
+        mismatches must not(beEmpty)
+        mismatches must containMessage("Expected somethingElse=100 but was missing")
+      }
+
+      "when a tag has the same number of attributes but different keys" in {
+        expectedBody = Some("<foo something=\"100\" somethingElse=\"100\"/>")
+        actualBody = Some("<foo something=\"100\" somethingDifferent=\"100\"/>")
+        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
+        mismatches must not(beEmpty)
+        mismatches must containMessage("Expected somethingElse=100 but was missing")
+        mismatches must havePath("$.body.foo.somethingElse")
+      }
+
+      "when a tag has an invalid value" in {
+        expectedBody = Some("<foo something=\"100\"/>")
+        actualBody = Some("<foo something=\"101\"/>")
+        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
+        mismatches must not(beEmpty)
+        mismatches must containMessage("Expected something=100 but received 101")
+        mismatches must havePath("$.body.foo.something")
+      }
+
+      "when the content of an element does not match" in {
+        expectedBody = Some("<foo>hello world</foo>")
+        actualBody = Some("<foo>hello my friend</foo>")
+        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
+        mismatches must not(beEmpty)
+        mismatches must containMessage("Expected value 'hello world' but received 'hello my friend'")
+        mismatches must havePath("$.body.foo[0]")
+      }
+    }
+
+    "with a matcher defined" should {
+
+      "delegate to the matcher" in {
+        expectedBody = Some("<foo something=\"100\"/>")
+        actualBody = Some("<foo something=\"101\"/>")
+        matchers = Some(Map("$.body.foo.something" -> Map("regex" -> "\\d+")))
+        matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
+      }
 
     }
 
