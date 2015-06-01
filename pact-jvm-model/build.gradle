@@ -1,3 +1,5 @@
 dependencies {
-    compile 'org.json:json:20140107'
+    compile 'org.json:json:20140107',
+      "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.8.2",
+      "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.1"
 }

@@ -38,7 +38,7 @@ class MockProviderSpec extends Specification {
       val validRequest = request.copy(path = s"${server.config.url}/")
       val invalidRequest = request.copy(path = s"${server.config.url}/foo")
       
-      val Success((codeResult, results)) = server.runAndClose[Result](pact){
+      val Success((codeResult, results)) = server.runAndClose[Result](pact) {
   
         val invalidResponse = HttpClient.run(invalidRequest)
         invalidResponse.map(_.status) must beEqualTo(500).await(timeout = timeout)

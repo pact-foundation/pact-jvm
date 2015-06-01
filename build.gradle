@@ -40,8 +40,6 @@ subprojects {
       if (project.hasProperty('scalaVersion')) {
           compile 'org.slf4j:slf4j-api:1.7.5', "org.scala-lang:scala-library:${project.scalaFullVersion}",
                   "com.typesafe.scala-logging:scala-logging-slf4j_${project.scalaVersion}:2.1.2",
-                  "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.8.2",
-                  "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.0",
                   "org.json4s:json4s-native_${project.scalaVersion}:3.2.10",
                   "org.json4s:json4s-jackson_${project.scalaVersion}:3.2.10"
           testCompile "org.specs2:specs2_${project.scalaVersion}:2.3.13"
