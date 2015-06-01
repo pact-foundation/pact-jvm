@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactFragment;
 import org.apache.http.entity.ContentType;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -12,6 +13,8 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 public class MimeTypeTest {
+
+    private static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
 
     @Test
     public void testMatchingJson() {
@@ -67,7 +70,7 @@ public class MimeTypeTest {
             throw new RuntimeException(((PactError)result).error());
         }
 
-        assertEquals(ConsumerPactTest.PACT_VERIFIED, result);
+        Assert.assertEquals(PACT_VERIFIED, result);
     }
 
     private PactFragment buildPactFragment(String body, String responseBody, String description, ContentType contentType) {

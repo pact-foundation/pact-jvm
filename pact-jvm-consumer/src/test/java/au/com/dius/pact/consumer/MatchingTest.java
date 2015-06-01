@@ -4,6 +4,7 @@ import au.com.dius.pact.model.MockProviderConfig;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -11,9 +12,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-
 public class MatchingTest {
+    private static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
 
     @Test
     public void testRegexpMatchingOnBody() {
@@ -82,7 +82,7 @@ public class MatchingTest {
             @Override
             public void run(MockProviderConfig config) {
                 try {
-                    assertEquals(new ConsumerClient(config.url()).post(path, body, ContentType.APPLICATION_JSON), expectedResponse);
+                    Assert.assertEquals(new ConsumerClient(config.url()).post(path, body, ContentType.APPLICATION_JSON), expectedResponse);
                 } catch (IOException e) {
                 }
             }
@@ -92,7 +92,7 @@ public class MatchingTest {
             throw new RuntimeException(((PactError)result).error());
         }
 
-        assertEquals(ConsumerPactTest.PACT_VERIFIED, result);
+        Assert.assertEquals(PACT_VERIFIED, result);
     }
 
     private ConsumerPactBuilder.PactDslResponse buildPactFragment(PactDslJsonBody body, PactDslJsonBody responseBody, String description) {

@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactFragment;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -15,6 +16,7 @@ import static org.junit.Assert.assertEquals;
 public class PactDefectTest {
     private static final String method = "POST";
     private static final String path = "/ping";
+    private static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
 
 
     @Test
@@ -77,7 +79,7 @@ public class PactDefectTest {
         if (result instanceof PactError) {
             throw new RuntimeException(((PactError) result).error());
         }
-        assertEquals(ConsumerPactTest.PACT_VERIFIED, result);
+        Assert.assertEquals(PACT_VERIFIED, result);
     }
 
     private String post(URL url, String contentType, String requestBody) {
