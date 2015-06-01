@@ -8,3 +8,4 @@ env:
   - SCALA=2.10
   - SCALA=2.11
 script: ./gradlew -i --stacktrace check_$SCALA
+install: true
