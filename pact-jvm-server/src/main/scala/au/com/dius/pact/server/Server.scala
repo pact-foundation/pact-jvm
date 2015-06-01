@@ -4,8 +4,6 @@ import au.com.dius.pact.model._
 import org.json4s._
 import org.json4s.jackson.Serialization
 
-import scala.io.StdIn
-
 object ListServers {
 
   def apply(oldState: ServerState): Result = {
@@ -26,6 +24,6 @@ object Server extends App {
   val server = _root_.unfiltered.netty.Server.local(port).handler(RequestHandler(new ServerStateStore()))
   println(s"starting unfiltered app at 127.0.0.1 on port $port")
   server.start()
-  StdIn.readLine("press enter to stop server:\n")
+  readLine("press enter to stop server:\n")
   server.stop()
 }
