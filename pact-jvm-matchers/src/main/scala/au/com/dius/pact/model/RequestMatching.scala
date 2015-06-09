@@ -43,7 +43,7 @@ object RequestMatching extends StrictLogging {
       ++ matchPath(expected, actual)
       ++ matchQuery(expected.query, actual.query)
       ++ matchCookie(expected.cookie, actual.cookie)
-      ++ matchHeaders(expected.headersWithoutCookie, actual.headersWithoutCookie)
+      ++ matchRequestHeaders(expected, actual)
       ++ matchBody(expected, actual, diffConfig)).toSeq
   }
 }

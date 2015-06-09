@@ -10,6 +10,7 @@ class MatchingSpec extends Specification {
   "Matching" should {
     import au.com.dius.pact.model.Matching._
     implicit val autoParse = JsonDiff.autoParse _
+
     "Body Matching" should {
       val config = DiffConfig()
 
@@ -80,6 +81,37 @@ class MatchingSpec extends Specification {
       "mismatch if the same key is repeated with values in different order"  in {
         matchQuery(Some("a=1&a=2&b=3"), Some("a=2&a=1&b=3")) must beSome(QueryMismatch("a=1&a=2&b=3", "a=2&a=1&b=3"))
       }
+    }
+
+    "Header Matching" should {
+
+      "match empty" in {
+        matchHeaders(Request("", "", None, None, None, None),
+          Request("", "", None, None, None, None)) must beEmpty
+      }
+
+      "match same headers" in {
+        matchHeaders(Request("", "", None, Some(Map("A" -> "B")), None, None),
+          Request("", "", None, Some(Map("A" -> "B")), None, None)) must beEmpty
+      }
+
+      "ignore additional headers" in {
+        matchHeaders(Request("", "", None, Some(Map("A" -> "B")), None, None),
+          Request("", "", None, Some(Map("A" -> "B", "C" -> "D")), None, None)) must beEmpty
+      }
+
+      "complain about missing headers" in {
+        matchHeaders(Request("", "", None, Some(Map("A" -> "B", "C" -> "D")), None, None),
+          Request("", "", None, Some(Map("A" -> "B")), None, None)) must beEqualTo(List(
+          HeaderMismatch("C", "D", "", Some("Expected a header 'C' but was missing"))))
+      }
+
+      "complain about incorrect headers" in {
+        matchHeaders(Request("", "", None, Some(Map("A" -> "B")), None, None),
+          Request("", "", None, Some(Map("A" -> "C")), None, None)) must beEqualTo(List(
+          HeaderMismatch("A", "B", "C", Some("Expected header 'A' to have value 'B' but was 'C'"))))
+      }
+
     }
   }
 }

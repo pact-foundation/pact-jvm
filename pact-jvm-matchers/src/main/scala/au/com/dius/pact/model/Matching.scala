@@ -6,6 +6,7 @@ import au.com.dius.pact.model.ResponsePartMismatch._
 
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable
+import scala.collection.breakOut
 
 object PactConfig {
     var bodyMatchers = mutable.HashMap[String, BodyMatcher](
@@ -17,6 +18,7 @@ object PactConfig {
 trait SharedMismatch {
   type Body = Option[String]
   type Headers = Map[String, String]
+  type Header = Pair[String, String]
 }
 
 object RequestPartMismatch extends SharedMismatch {
@@ -35,7 +37,7 @@ sealed trait RequestPartMismatch
 sealed trait ResponsePartMismatch 
 
 case class StatusMismatch(expected: Status, actual: Status) extends ResponsePartMismatch
-case class HeaderMismatch(expected: Headers, actual: Headers) extends RequestPartMismatch with ResponsePartMismatch
+case class HeaderMismatch(headerKey: String, expected: String, actual: String, mismatch: Option[String] = None) extends RequestPartMismatch with ResponsePartMismatch
 case class BodyTypeMismatch(expected: String, actual: String) extends RequestPartMismatch with ResponsePartMismatch
 case class BodyMismatch(expected: Any, actual: Any, mismatch: Option[String] = None, path: String = "/") extends RequestPartMismatch with ResponsePartMismatch
 case class CookieMismatch(expected: Cookies, actual: Cookies) extends RequestPartMismatch
@@ -53,18 +55,27 @@ object PathMismatchFactory extends MismatchFactory[PathMismatch] {
     PathMismatch(expected.toString, actual.toString, Some(message))
 }
 
+object HeaderMismatchFactory extends MismatchFactory[HeaderMismatch] {
+  def create(expected: scala.Any, actual: scala.Any, message: String, path: Seq[String]) = {
+    val expectedHeader: (String, String) = expected.asInstanceOf[Pair[String, String]]
+    HeaderMismatch(expectedHeader._1, expectedHeader._2, actual.asInstanceOf[Pair[String, String]]._2, Some(message))
+  }
+}
+
 object Matching {
   
-  def matchHeaders(expected: Option[Headers], actual: Option[Headers]): Option[HeaderMismatch] = {
+  def matchHeaders(expected: Option[Headers], actual: Option[Headers], matchers: Option[Map[String, Map[String, String]]]): Seq[HeaderMismatch] = {
 
-    def compareHeaders(e: Map[String, String], a: Map[String, String]): Option[HeaderMismatch] = {
-      
-      def actuallyFound(kv: (String, String)): Boolean = {
-        a.get(kv._1).fold(false)(HeaderMatcher.compareHeader(kv._1, _, kv._2))
+    def compareHeaders(e: Map[String, String], a: Map[String, String]): Seq[HeaderMismatch] = {
+      e.foldLeft(Seq[HeaderMismatch]()) {
+        (seq, values) => a.get(values._1) match {
+          case Some(value) => HeaderMatcher.compareHeader(values._1, values._2, value, matchers) match {
+            case Some(mismatch) => seq :+ mismatch
+            case None => seq
+          }
+          case None => seq :+ HeaderMismatch(values._1, values._2, "", Some(s"Expected a header '${values._1}' but was missing"))
+        }
       }
-      
-      if (e forall actuallyFound) None 
-      else Some(HeaderMismatch(e, a filterKeys e.contains))
     }
     
     def sortedOrEmpty(h: Option[Headers]): Map[String,String] = {
@@ -75,6 +86,14 @@ object Matching {
     }
       
     compareHeaders(sortedOrEmpty(expected), sortedOrEmpty(actual))
+  }
+
+  def matchRequestHeaders(expected: Request, actual: Request) = {
+    matchHeaders(expected.headersWithoutCookie, actual.headersWithoutCookie, expected.matchers)
+  }
+
+  def matchHeaders(expected: HttpPart, actual: HttpPart) : Seq[HeaderMismatch] = {
+    matchHeaders(expected.headers, actual.headers, expected.matchers)
   }
 
   def matchCookie(expected: Option[Cookies], actual: Option[Cookies]): Option[CookieMismatch] = {

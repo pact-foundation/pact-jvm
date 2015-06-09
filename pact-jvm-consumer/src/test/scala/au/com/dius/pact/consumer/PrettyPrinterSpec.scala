@@ -21,11 +21,12 @@ class PrettyPrinterSpec extends Specification {
   def plus = "+++ "
 
   "header mismatch" in {
-    print(HeaderMismatch(Map("foo"-> "bar"), Map())) must beEqualTo(
-      s"""--- Headers
+    print(HeaderMismatch("foo", "bar", "", None)) must beEqualTo(
+      s"""--- Header foo
         |$plus
-        |@@ -1,1 +1,0 @@
-        |-foo = bar""".stripMargin
+        |@@ -1,1 +1,1 @@
+        |-bar
+        |+""".stripMargin
     )
   }
 

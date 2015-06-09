@@ -45,7 +45,7 @@ class ResponseComparisonTest {
     response = Response$.MODULE$.apply(200, ['A': 'B'], "", [:])
     assert testSubject().headers == ['A': true]
     response = Response$.MODULE$.apply(200, ['A': 'D'], "", [:])
-    assert testSubject().headers.A instanceof PowerAssertionError
+    assert testSubject().headers.A == 'Expected header \'A\' to have value \'D\' but was \'B\''
   }
 
   @Test

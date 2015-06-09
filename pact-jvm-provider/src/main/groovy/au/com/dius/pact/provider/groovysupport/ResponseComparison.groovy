@@ -56,20 +56,21 @@ class ResponseComparison {
   def compareHeaders(List<ResponsePartMismatch> mismatches) {
     Map headerResult = [:]
 
-    HeaderMismatch headerMismatch = mismatches.find{ it instanceof HeaderMismatch }
-    if (headerMismatch) {
-      def headers = JavaConverters$.MODULE$.mapAsJavaMapConverter(headerMismatch.expected()).asJava()
-      headers.each { headerKey, value ->
-        try {
-          assert actualHeaders[headerKey.toUpperCase()] == value
-          headerResult[headerKey] = true
-        } catch (PowerAssertionError e) {
-          headerResult[headerKey] = e
+    if (expected.headers().defined) {
+      def headerMismatchers = mismatches.findAll { it instanceof HeaderMismatch }.groupBy { it.headerKey }
+      if (!headerMismatchers.empty) {
+        def headers = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
+        headers.each { headerKey, value ->
+          if (headerMismatchers[headerKey]) {
+            headerResult[headerKey] = headerMismatchers[headerKey].first().mismatch.get()
+          } else {
+            headerResult[headerKey] = true
+          }
         }
+      } else {
+        headerResult = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
+          .keySet().collectEntries { [it, true] }
       }
-    } else if (expected.headers().defined) {
-      headerResult = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
-        .keySet().collectEntries{ [ it, true ] }
     }
 
     headerResult
