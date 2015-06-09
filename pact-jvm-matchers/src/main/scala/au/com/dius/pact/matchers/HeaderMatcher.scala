@@ -7,8 +7,8 @@ object HeaderMatcher {
     def stripWhiteSpaceAfterCommas(in: String): String = in.replaceAll(",[ ]*", ",")
 
     if (Matchers.matcherDefined(Seq("$", "headers", headerKey), matchers)) {
-      val mismatch = Matchers.domatch[HeaderMismatch](matchers, Seq("$", "headers", headerKey), Pair(headerKey, expected),
-        Pair(headerKey, actual), HeaderMismatchFactory)
+      val mismatch = Matchers.domatch[HeaderMismatch](matchers, Seq("$", "headers", headerKey), expected,
+        actual, HeaderMismatchFactory)
       mismatch.headOption
     } else if (stripWhiteSpaceAfterCommas(expected) == stripWhiteSpaceAfterCommas(actual)) None
     else Some(HeaderMismatch(headerKey, expected, actual,
