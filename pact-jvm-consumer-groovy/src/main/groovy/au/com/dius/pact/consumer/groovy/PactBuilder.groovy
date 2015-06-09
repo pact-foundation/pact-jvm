@@ -75,23 +75,39 @@ class PactBuilder extends Matchers {
   def buildInteractions() {
     int numInteractions = Math.min(requestData.size(), responseData.size())
     for (int i = 0; i < numInteractions; i++) {
-      Map headers = requestData[i].headers ?: [:]
-      Map responseHeaders = responseData[i].headers ?: [:]
+      Map requestMatchers = requestData[i].matchers ?: [:]
+      Map responseMatchers = responseData[i].matchers ?: [:]
+      Map headers = setupHeaders(requestData[i].headers ?: [:], requestMatchers)
+      Map responseHeaders = setupHeaders(responseData[i].headers ?: [:], responseMatchers)
       Map query = [:]
       def state = providerState.empty ? None$.empty() : Some$.MODULE$.apply(providerState)
-      Map requestMatchers = requestData[i].matchers ?: [:]
       String path = setupPath(requestData[i].path ?: '/', requestMatchers)
       interactions << Interaction$.MODULE$.apply(
         requestDescription,
         state,
         Request$.MODULE$.apply(requestData[i].method ?: 'get', path,
           queryToString(requestData[i]?.query), headers, requestData[i].body ?: '', requestMatchers),
-        Response$.MODULE$.apply(responseData[i].status ?: 200, responseHeaders,
-          responseData[i].body ?: '', responseData[i].matchers)
+        Response$.MODULE$.apply(responseData[i].status ?: 200, responseHeaders, responseData[i].body ?: '',
+          responseMatchers)
       )
     }
     requestData = []
     responseData = []
+  }
+
+  private static Map setupHeaders(Map headers, Map matchers) {
+    headers.collectEntries { key, value ->
+      if (value instanceof Matcher) {
+        matchers["\$.headers.$key"] = value.matcher
+        [key, value.value]
+      } else if (value instanceof Pattern) {
+        def matcher = new RegexpMatcher(values: [value])
+        matchers["\$.headers.$key"] = matcher.matcher
+        [key, matcher.value]
+      } else {
+        [key, value]
+      }
+    }
   }
 
   private static String setupPath(def path, Map matchers) {

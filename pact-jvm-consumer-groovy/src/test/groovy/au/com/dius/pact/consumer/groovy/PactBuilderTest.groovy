@@ -66,4 +66,25 @@ class PactBuilderTest {
     assert alice_service.interactions[0].request.path == '/mallory/1234567890'
     assert alice_service.interactions[0].request.requestMatchingRules.get().apply('$.path').apply('regex') == '/mallory/[0-9]+'
   }
+
+  @Test
+  void "allows matching on headers"() {
+    alice_service {
+      uponReceiving('a request to match a header')
+      withAttributes(method: 'get', path: '/headers', headers: [MALLORY: ~'mallory:[0-9]+'])
+      willRespondWith(
+        status: 200,
+        headers: ['Content-Type': regexp('text/.*', 'text/html')],
+        body: '"That is some good Mallory."'
+      )
+    }
+    alice_service.buildInteractions()
+    assert alice_service.interactions.size() == 1
+
+    def firstInteraction = alice_service.interactions[0]
+    assert firstInteraction.request.headers.get().apply('MALLORY') =~ 'mallory:[0-9]+'
+    assert firstInteraction.request.requestMatchingRules.get().apply('$.headers.MALLORY').apply('regex') == 'mallory:[0-9]+'
+    assert firstInteraction.response.headers.get().apply('Content-Type') == 'text/html'
+    assert firstInteraction.response.responseMatchingRules.get().apply('$.headers.Content-Type').apply('regex') == 'text/.*'
+  }
 }
