@@ -56,14 +56,11 @@ object PathMismatchFactory extends MismatchFactory[PathMismatch] {
 object Matching {
   
   def matchHeaders(expected: Option[Headers], actual: Option[Headers]): Option[HeaderMismatch] = {
+
     def compareHeaders(e: Map[String, String], a: Map[String, String]): Option[HeaderMismatch] = {
       
       def actuallyFound(kv: (String, String)): Boolean = {
-        def compareNormalisedHeaders(expected: String, actual: String): Boolean = {
-          def stripWhiteSpaceAfterCommas(in: String): String = in.replaceAll(",[ ]*", ",")
-          stripWhiteSpaceAfterCommas(expected) == stripWhiteSpaceAfterCommas(actual)
-        }
-        a.get(kv._1).fold(false)(compareNormalisedHeaders(_, kv._2))
+        a.get(kv._1).fold(false)(HeaderMatcher.compareHeader(kv._1, _, kv._2))
       }
       
       if (e forall actuallyFound) None 
