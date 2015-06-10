@@ -1,5 +1,33 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.2.2 - Matching on headers, XML body matching
+
+* ea4bd36 - added specification tests for header matching (Ronald Holshausen, Wed Jun 10 20:33:22 2015 +1000)
+* 3677c6b - added header matching to the java DSL (Ronald Holshausen, Wed Jun 10 13:38:14 2015 +1000)
+* 1dcf6e1 - updated docs about header matching in groovy DSL (Ronald Holshausen, Wed Jun 10 13:11:24 2015 +1000)
+* 0eefc36 - correct the header matcher (Ronald Holshausen, Wed Jun 10 09:20:16 2015 +1000)
+* 74130a1 - implement header matching in the groovy DSL (Ronald Holshausen, Tue Jun 9 17:26:54 2015 +1000)
+* 1ad0f6a - Implemented matching on headers (Ronald Holshausen, Tue Jun 9 16:55:19 2015 +1000)
+* e4ead43 - pull the header matching function into its own class (Ronald Holshausen, Tue Jun 9 11:48:56 2015 +1000)
+* 5188abe - skip the gradle assemble step in the travis build (Ronald Holshausen, Mon Jun 1 19:11:25 2015 +1000)
+* 94b5b9e - split the travis build by scala version (Ronald Holshausen, Mon Jun 1 18:58:05 2015 +1000)
+* 961a2e0 - readLine is only deprecated in 2.11 (Ronald Holshausen, Mon Jun 1 17:04:40 2015 +1000)
+* 934e837 - cleaned up some deprecation warnings (Ronald Holshausen, Mon Jun 1 16:43:14 2015 +1000)
+* 54ddf3c - Moved the netty dependencies to the pact-jvm-model project (Ronald Holshausen, Mon Jun 1 16:30:26 2015 +1000)
+* f14a764 - Allow handling of state changes with a build closure #86 (Ronald Holshausen, Mon Jun 1 15:41:01 2015 +1000)
+* ac3624e - increase the permgen for the scala compiler and tests (Ronald Holshausen, Mon Jun 1 14:40:22 2015 +1000)
+* 95bed5b - reference the ruby wiki for provider states (Ronald Holshausen, Mon Jun 1 14:06:23 2015 +1000)
+* dd48969 - Merge pull request #125 from flosell/improve-xml-support (Ronald Holshausen, Mon Jun 1 12:50:52 2015 +1000)
+* cb36f05 - #124 move some of the tests to the consumer project as it is not dependant on junit (Ronald Holshausen, Mon Jun 1 12:40:31 2015 +1000)
+* eef0f30 - #124 move ConsumerPactBuilder to the consumer project as it is not dependant on junit (Ronald Holshausen, Mon Jun 1 12:18:43 2015 +1000)
+* 1ffbd42 - implement missing parts of XmlBodyMatcher (Florian Sellmayr, Sun May 31 21:57:12 2015 +0200)
+* d1c68c0 - handle case where error is in a string format (Ronald Holshausen, Wed May 27 09:05:34 2015 +1000)
+* b589f3a - set latest scala version (Ronald Holshausen, Sat May 23 20:27:50 2015 +1000)
+* 1d7539c - #118 for URL encoded FORM posts, the query parameters must be in the body (Ronald Holshausen, Sat May 23 14:11:54 2015 +1000)
+* 1d0d718 - update gradle readme to include giving closures for provider hostname (Ronald Holshausen, Sat May 23 12:14:08 2015 +1000)
+* 770917a - bump version (Ronald Holshausen, Thu May 21 20:13:09 2015 +1000)
+
+
 # 2.2.1 - allowed gradle plugin to resolve hostname at runtime + junit bugfix
 
 * 0211bea - #121 fix incorrect keys in fields that are arrays (Ronald Holshausen, Thu May 21 20:05:57 2015 +1000)
