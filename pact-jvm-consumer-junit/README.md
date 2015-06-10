@@ -273,6 +273,27 @@ For example:
         .body("{\"hello\": \"harry\"}")
 ```
 
+### Matching on headers (version 2.2.2+)
+
+You can use regular expressions to match request and response headers. The DSL has a `matchHeader` method for this. You can provide
+an example header value to use when generating requests and responses, and if you leave it out it will generate a random one
+from the regular expression.
+
+For example:
+
+```java
+  .given("test state")
+    .uponReceiving("a test interaction")
+        .path("/hello")
+        .method("POST")
+        .matchHeader("testreqheader", "test.*value")
+        .body("{\"name\": \"harry\"}")
+    .willRespondWith()
+        .status(200)
+        .body("{\"hello\": \"harry\"}")
+        .matchHeader("Location", ".*/hello/[0-9]+", "/hello/1234")
+```
+
 ## Debugging pact failures
 
 When the test runs, Pact will start a mock provider that will listen for requests and match them against the expectations

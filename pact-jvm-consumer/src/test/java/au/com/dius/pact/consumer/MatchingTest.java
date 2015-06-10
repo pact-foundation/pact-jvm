@@ -76,6 +76,23 @@ public class MatchingTest {
         runTest(fragment, "{}", expectedResponse, "/hello/1234");
     }
 
+    @Test
+    public void testRegexpMatchingOnHeaders() {
+        ConsumerPactBuilder.PactDslResponse fragment = ConsumerPactBuilder
+                .consumer("test_consumer")
+                .hasPactWith("test_provider")
+                .uponReceiving("a request to match on headers")
+                    .path("/hello")
+                    .method("POST")
+                    .matchHeader("testreqheader", "test.*value", "testreqheadervalue")
+                .body("{}", ContentType.APPLICATION_JSON)
+                .willRespondWith()
+                .status(200)
+                    .matchHeader("Location", ".*/hello/[0-9]+", "/hello/1234");
+        Map expectedResponse = new HashMap();
+        runTest(fragment, "{}", expectedResponse, "/hello");
+    }
+
     private void runTest(ConsumerPactBuilder.PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
         MockProviderConfig config = MockProviderConfig.createDefault();
         VerificationResult result = pactFragment.toFragment().runConsumer(config, new TestRun() {

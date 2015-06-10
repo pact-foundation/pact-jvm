@@ -291,7 +291,7 @@ public class ConsumerPactBuilder {
          * @param headers Key-value pairs
          */
         public PactDslRequestWithPath headers(Map<String, String> headers) {
-            requestHeaders = new HashMap<String, String>(headers);
+            requestHeaders.putAll(headers);
             return this;
         }
 
@@ -348,7 +348,6 @@ public class ConsumerPactBuilder {
          * @param body Built using the Pact body DSL
          */
         public PactDslRequestWithPath body(DslPart body) {
-            requestMatchers = new HashMap<String, Object>();
             for(String matcherName: body.matchers.keySet()) {
                 requestMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
             }
@@ -402,12 +401,34 @@ public class ConsumerPactBuilder {
         }
 
         /**
+         * Match a request header. A random example header value will be generated from the provided regular expression.
+         * @param header Header to match
+         * @param regex Regular expression to match
+         */
+        public PactDslRequestWithPath matchHeader(String header, String regex) {
+            return matchHeader(header, regex, new Xeger(regex).generate());
+        }
+
+        /**
+         * Match a request header.
+         * @param header Header to match
+         * @param regex Regular expression to match
+         * @param headerExample Example value to use
+         */
+        public PactDslRequestWithPath matchHeader(String header, String regex, String headerExample) {
+            HashMap<String, String> matcher = new HashMap<String, String>();
+            matcher.put("regex", regex);
+            requestMatchers.put("$.headers." + header, matcher);
+            requestHeaders.put(header, headerExample);
+            return this;
+        }
+
+        /**
          * Define the response to return
          */
         public PactDslResponse willRespondWith() {
             return new PactDslResponse(this);
         }
-
     }
 
     public class PactDslResponse {
@@ -436,7 +457,7 @@ public class ConsumerPactBuilder {
          * @param headers key-value pairs of headers
          */
         public PactDslResponse headers(Map<String, String> headers) {
-            this.responseHeaders = new HashMap<String, String>(headers);
+            this.responseHeaders.putAll(headers);
             return this;
         }
 
@@ -484,7 +505,6 @@ public class ConsumerPactBuilder {
          * @param body Response body built using the Pact body DSL
          */
         public PactDslResponse body(DslPart body) {
-            responseMatchers = new HashMap<String, Object>();
             for(String matcherName: body.matchers.keySet()) {
                 responseMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
             }
@@ -504,6 +524,29 @@ public class ConsumerPactBuilder {
             if (!responseHeaders.containsKey("Content-Type")) {
                 responseHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
             }
+            return this;
+        }
+
+        /**
+         * Match a response header. A random example header value will be generated from the provided regular expression.
+         * @param header Header to match
+         * @param regexp Regular expression to match
+         */
+        public PactDslResponse matchHeader(String header, String regexp) {
+            return matchHeader(header, regexp, new Xeger(regexp).generate());
+        }
+
+        /**
+         * Match a response header.
+         * @param header Header to match
+         * @param regexp Regular expression to match
+         * @param headerExample Example value to use
+         */
+        public PactDslResponse matchHeader(String header, String regexp, String headerExample) {
+            HashMap<String, String> matcher = new HashMap<String, String>();
+            matcher.put("regex", regexp);
+            responseMatchers.put("$.headers." + header, matcher);
+            responseHeaders.put(header, headerExample);
             return this;
         }
 
