@@ -8,7 +8,7 @@
       "Accept": "alligators",
       "Content-Type": "hippos"
     },
-    "requestMatchingRules": {
+    "matchingRules": {
       "$.headers.Accept": {"regex": "\\w+"}
     }
   },

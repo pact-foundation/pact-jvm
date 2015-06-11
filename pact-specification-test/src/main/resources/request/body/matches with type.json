@@ -6,7 +6,7 @@
     "path": "/",
     "query": "",
     "headers": {},
-    "requestMatchingRules": {
+    "matchingRules": {
       "$.body.alligator.name": {"match": "type"},
       "$.body.alligator.feet": {"match": "type"}
     },

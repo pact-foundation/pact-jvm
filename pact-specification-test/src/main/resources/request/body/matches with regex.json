@@ -6,7 +6,7 @@
     "path": "/",
     "query": "",
     "headers": {},
-    "requestMatchingRules": {
+    "matchingRules": {
       "$.body.alligator.name": {"regex": "\\w+"},
       "$.body.alligator.favouriteColours[0]": {"regex": "red|blue"},
       "$.body.alligator.favouriteColours[1]": {"regex": "red|blue"}

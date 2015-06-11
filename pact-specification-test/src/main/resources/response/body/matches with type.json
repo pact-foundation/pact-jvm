@@ -3,7 +3,7 @@
   "comment": "Response match with same type",
   "expected" : {
     "headers": {},
-    "responseMatchingRules": {
+    "matchingRules": {
       "$.body.alligator.name": {"match": "type"},
       "$.body.alligator.feet": {"match": "type"}
     },

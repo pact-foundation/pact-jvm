@@ -3,7 +3,7 @@
   "comment": "Requests match with regex",
   "expected" : {
     "headers": {},
-    "responseMatchingRules": {
+    "matchingRules": {
       "$.body.alligator.name": {"regex": "\\w+"}
     },
     "body": {

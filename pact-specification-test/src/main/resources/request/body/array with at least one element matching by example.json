@@ -6,7 +6,7 @@
     "path": "/",
     "query": "",
     "headers": {},
-    "requestMatchingRules": {
+    "matchingRules": {
       "$.body.animals": {"min": 1},
       "$.body.animals[*].*": {"match": "type"}
     },
