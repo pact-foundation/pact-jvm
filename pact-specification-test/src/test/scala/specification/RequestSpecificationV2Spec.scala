@@ -14,7 +14,7 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class RequestSpecificationSpec extends SpecificationLike
+class RequestSpecificationV2Spec extends SpecificationLike
   with MustMatchers
   with StandardResults
   with StandardMatchResults
@@ -25,7 +25,7 @@ class RequestSpecificationSpec extends SpecificationLike
   }
 
   def fragments: Seq[Example] ={
-    val resources = getClass.getResource("/request/")
+    val resources = getClass.getResource("/v2/request/")
     val file = new File(resources.toURI)
     file.listFiles().flatMap { folder =>
     if(folder.isDirectory) {
