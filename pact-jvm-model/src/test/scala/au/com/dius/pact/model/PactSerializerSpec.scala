@@ -53,6 +53,11 @@ class PactSerializerSpec extends Specification {
        pact must beEqualTo(Fixtures.pactWithMatchers)
      }
 
+     "deserialize pact with matchers on old format" in {
+       val pact = Pact.from(loadTestFile("test_pact_matchers_old_format.json"))
+       pact must beEqualTo(Fixtures.pactWithMatchers)
+     }
+
      "deserialize converts http methods to upper case" in {
        val pact = Pact.from(loadTestFile("test_pact_lowercase_method.json"))
        pact must beEqualTo(Fixtures.pact)
