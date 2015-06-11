@@ -112,12 +112,12 @@ class RequestMatchingSpec extends Specification {
     }
 
     "allow matching with a defined matcher" in {
-      val requestWithMatcher = request.copy(path = "/path2", requestMatchingRules = Some(Map("$.path" -> Map("regex" -> "/path[0-9]*"))))
+      val requestWithMatcher = request.copy(path = "/path2", matchingRules = Some(Map("$.path" -> Map("regex" -> "/path[0-9]*"))))
       RequestMatching.requestMismatches(requestWithMatcher, request) must beEmpty
     }
 
     "not match with the defined matcher" in {
-      val requestWithMatcher = request.copy(path = "/path2", requestMatchingRules = Some(Map("$.path" -> Map("regex" -> "/path[0-9]*"))))
+      val requestWithMatcher = request.copy(path = "/path2", matchingRules = Some(Map("$.path" -> Map("regex" -> "/path[0-9]*"))))
       RequestMatching.requestMismatches(requestWithMatcher, request.copy(path = "/pathA")) must contain(
         PathMismatch("/path2","/pathA",Some("Expected '/pathA' to match '/path[0-9]*'")))
     }

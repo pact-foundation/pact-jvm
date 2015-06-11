@@ -34,7 +34,7 @@ trait PactSerializer extends StrictLogging {
       "headers" -> r.headers,
       "query" -> r.query,
       "body" -> parseBody(r),
-      "requestMatchingRules" -> matchers2json(r.matchers)
+      "matchingRules" -> matchers2json(r.matchers)
     )
   }
 
@@ -50,7 +50,7 @@ trait PactSerializer extends StrictLogging {
       "status" -> JInt(r.status),
       "headers" -> r.headers,
       "body" -> parseBody(r),
-      "responseMatchingRules" -> matchers2json(r.matchers)
+      "matchingRules" -> matchers2json(r.matchers)
     )
   }
 

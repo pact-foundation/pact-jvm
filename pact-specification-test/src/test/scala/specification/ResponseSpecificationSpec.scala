@@ -36,6 +36,8 @@ class ResponseSpecificationSpec extends SpecificationLike
           val testJson = parse(testFile)
           var testData = testJson.transformField {
             case ("body", value) => ("body", JString(pretty(value)))
+            case ("responseMatchingRules", value) => ("matchingRules", value)
+            case ("requestMatchingRules", value) => ("matchingRules", value)  
           }.extract[PactResponseSpecification]
 
           val description = s"$dirName/$fileName ${testData.comment}"
