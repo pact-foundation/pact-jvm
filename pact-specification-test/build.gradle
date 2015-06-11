@@ -1,4 +1,5 @@
 
 dependencies {
     testCompile project(":pact-jvm-model_${project.scalaVersion}"), project(":pact-jvm-matchers_${project.scalaVersion}")
+    testCompile 'ch.qos.logback:logback-core:1.1.2', 'ch.qos.logback:logback-classic:1.1.2'
 }

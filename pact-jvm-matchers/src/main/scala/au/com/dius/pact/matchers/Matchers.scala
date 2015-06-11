@@ -93,8 +93,9 @@ object Matchers extends StrictLogging {
 object EqualsMatcher extends Matcher with StrictLogging {
   def domatch[Mismatch](matcherDef: Map[String, String], path: Seq[String], expected: Any, actual: Any,
                         mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-    logger.debug(s"comparing ${valueOf(actual)} to ${valueOf(expected)} at $path")
-    if (Matchers.safeToString(actual).equals(expected)) {
+    val matches: Boolean = Matchers.safeToString(actual).equals(expected)
+    logger.debug(s"comparing ${valueOf(actual)} to ${valueOf(expected)} at $path -> $matches")
+    if (matches) {
       List[Mismatch]()
     } else {
       List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to equal ${valueOf(actual)}", path))
@@ -105,8 +106,9 @@ object EqualsMatcher extends Matcher with StrictLogging {
 object RegexpMatcher extends Matcher with StrictLogging {
   def domatch[Mismatch](matcherDef: Map[String, String], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
     val regex = matcherDef.get("regex").get
-    logger.debug(s"comparing ${valueOf(actual)} with regexp $regex at $path")
-    if (Matchers.safeToString(actual).matches(regex)) {
+    val matches: Boolean = Matchers.safeToString(actual).matches(regex)
+    logger.debug(s"comparing ${valueOf(actual)} with regexp $regex at $path -> $matches")
+    if (matches) {
       List[Mismatch]()
     } else {
       List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to match '$regex'", path))
