@@ -1,0 +1,20 @@
+{
+  "match": false,
+  "comment": "Missing favorite colour",
+  "expected" : {
+    "headers": {},
+    "body": {
+      "alligator":{
+        "favouriteColours": ["red","blue"]
+      }
+    }
+  },
+  "actual": {
+    "headers": {},
+    "body": {
+      "alligator": {
+        "favouriteColours": ["red"]
+      }
+    }
+  }
+}
