@@ -1,0 +1,17 @@
+{
+  "match": true,
+  "comment": "Empty headers match",
+  "expected" : {
+    "method": "POST",
+    "path": "/path",
+    "query": "",
+    "headers": {}
+
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/path",
+    "query": "",
+    "headers": {}
+  }
+}

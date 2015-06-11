@@ -1,0 +1,10 @@
+﻿{
+	"match": true,
+	"comment": "Status matches",
+	"expected" : {
+		"status" : 202
+	},
+	"actual" : {
+		"status" : 202
+	}
+}

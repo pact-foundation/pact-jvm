@@ -1,0 +1,18 @@
+{
+  "match": false,
+  "comment": "Empty path found when forward slash expected",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": "",
+    "headers": {}
+
+  },
+  "actual": {
+    "method": "POST",
+    "path": "",
+    "query": "",
+    "headers": {}
+
+  }
+}
