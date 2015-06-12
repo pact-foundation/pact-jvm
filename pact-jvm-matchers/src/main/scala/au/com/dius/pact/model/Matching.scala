@@ -57,8 +57,7 @@ object PathMismatchFactory extends MismatchFactory[PathMismatch] {
 
 object HeaderMismatchFactory extends MismatchFactory[HeaderMismatch] {
   def create(expected: scala.Any, actual: scala.Any, message: String, path: Seq[String]) = {
-    val expectedHeader: (String, String) = expected.asInstanceOf[Pair[String, String]]
-    HeaderMismatch(expectedHeader._1, expectedHeader._2, actual.asInstanceOf[Pair[String, String]]._2, Some(message))
+    HeaderMismatch(path.last, expected.toString, actual.toString, Some(message))
   }
 }
 
