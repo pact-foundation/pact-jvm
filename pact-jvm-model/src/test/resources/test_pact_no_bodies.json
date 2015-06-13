@@ -1,0 +1,34 @@
+{
+  "provider" : {
+    "name" : "test_provider"
+  },
+  "consumer" : {
+    "name" : "test_consumer"
+  },
+  "interactions" : [ {
+    "providerState" : "test state",
+    "description" : "test interaction with no bodies",
+    "request" : {
+      "method" : "GET",
+      "path" : "/",
+      "headers" : {
+        "testreqheader" : "testreqheadervalue"
+      },
+      "query" : "q=p&q=p2&r=s"
+    },
+    "response" : {
+      "status" : 200,
+      "headers" : {
+        "testreqheader" : "testreqheaderval"
+      }
+    }
+  } ],
+  "metadata" : {
+    "pact-specification" : {
+      "version" : "2.0.0"
+    },
+    "pact-jvm" : {
+      "version" : ""
+    }
+  }
+}

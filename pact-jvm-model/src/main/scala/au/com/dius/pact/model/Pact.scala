@@ -19,15 +19,33 @@ object Pact {
 
   def from(json:JValue) = {
     implicit val formats = DefaultFormats
-    json.transformField {
+    val transformedJson = json.transformField {
       case ("provider_state", value) => ("providerState", value)
       case ("responseMatchingRules", value) => ("matchingRules", value)
       case ("requestMatchingRules", value) => ("matchingRules", value)
-      case ("body", value) =>
-        if (value.isInstanceOf[JString]) ("body", value)
-        else ("body", JString(pretty(value)))
       case ("method", value) => ("method", JString(value.values.toString.toUpperCase))
-    }.extract[Pact]
+    }
+    val provider = (transformedJson \ "provider").extract[Provider]
+    val consumer = (transformedJson \ "consumer").extract[Consumer]
+
+    val interactions = (transformedJson \ "interactions").children.map(i => {
+      val interaction = i.extract[Interaction]
+      val requestBody = extractBody(i \ "request" \ "body")
+      val request = (i \ "request").extract[Request].copy(body = requestBody)
+      val responseBody = extractBody(i \ "response" \ "body")
+      val response = (i \ "response").extract[Response].copy(body = responseBody)
+      interaction.copy(request = request, response = response)
+    })
+    Pact(provider, consumer, interactions)
+  }
+
+  def extractBody(body: JValue): Option[String] = {
+    body match {
+      case JString(s) => Some(s)
+      case JNothing => None
+      case JNull => None
+      case b => Some(pretty(b))
+    }
   }
 
   trait MergeResult
@@ -164,7 +182,7 @@ trait Optionals {
   }
 
   def optional(body: String): Option[String] = {
-    if(body == null || body.trim().size == 0) {
+    if(body == null || body.trim().isEmpty) {
       None
     } else {
       Some(body)

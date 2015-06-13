@@ -35,6 +35,13 @@ object Fixtures {
     response = responseWithMatchers
   ))
 
+  val interactionsWithNoBodies = List(Interaction(
+    description = "test interaction with no bodies",
+    providerState = Some("test state"),
+    request = request.copy(body = None),
+    response = response.copy(body = None)
+  ))
+
   val interactions = List(interaction)
 
   val pact: Pact = Pact(
@@ -47,5 +54,11 @@ object Fixtures {
     provider = provider,
     consumer = consumer,
     interactions = interactionsWithMatchers
+  )
+
+  val pactWithNoBodies: Pact = Pact(
+    provider = provider,
+    consumer = consumer,
+    interactions = interactionsWithNoBodies
   )
 }

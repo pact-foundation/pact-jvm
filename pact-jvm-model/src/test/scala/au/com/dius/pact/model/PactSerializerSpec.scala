@@ -62,5 +62,29 @@ class PactSerializerSpec extends Specification {
        val pact = Pact.from(loadTestFile("test_pact_lowercase_method.json"))
        pact must beEqualTo(Fixtures.pact)
      }
+
+     "deserialize should not convert fields called 'body'" in {
+       val pact = Pact.from(loadTestFile("test_pact_with_bodies.json"))
+       pact.interactions.head.request.body.get must beEqualTo("{\n" +
+         "  \"complete\" : {\n" +
+         "    \"certificateUri\" : \"http://...\",\n" +
+         "    \"issues\" : {\n" +
+         "      \"idNotFound\" : { }\n" +
+         "    },\n" +
+         "    \"nevdis\" : {\n" +
+         "      \"body\" : null,\n" +
+         "      \"colour\" : null,\n" +
+         "      \"engine\" : null\n" +
+         "    },\n" +
+         "    \"body\" : 123456\n" +
+         "  },\n" +
+         "  \"body\" : [ 1, 2, 3 ]\n" +
+         "}")
+     }
+
+     "deserialize pact with no bodies" in {
+       val pact = Pact.from(loadTestFile("test_pact_no_bodies.json"))
+       pact must beEqualTo(Fixtures.pactWithNoBodies)
+     }
    }
 }
