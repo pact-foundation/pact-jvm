@@ -1,5 +1,19 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.2.3 - Bugfix release
+
+* a7f5df4 - fix converting of bodies with attributes named "body" to strings #119 (Ronald Holshausen, Sat Jun 13 12:58:45 2015 +1000)
+* c128ee8 - missed a required change in commit 0eefc36163ced5f2e37f2f487d12b96a6f2900c3 (Ronald Holshausen, Fri Jun 12 14:04:30 2015 +1000)
+* a78154a - added supported V1.1 specification testcases (Ronald Holshausen, Thu Jun 11 15:13:02 2015 +1000)
+* f97a3dc - added supported V1 specification testcases (Ronald Holshausen, Thu Jun 11 15:07:27 2015 +1000)
+* 4b2824d - moved the spec tests to a v2 directory (Ronald Holshausen, Thu Jun 11 14:27:55 2015 +1000)
+* 610569d - added a testcase with an array at the top level with matchers (Ronald Holshausen, Thu Jun 11 14:00:21 2015 +1000)
+* 0bdc5d9 - add a test to check that the old matcher format is still loadable (Ronald Holshausen, Thu Jun 11 13:20:00 2015 +1000)
+* 3c092e7 - rename "responseMatchingRules" and "requestMatchingRules" to just "matchingRules" in specification test cases (Ronald Holshausen, Thu Jun 11 13:13:55 2015 +1000)
+* 82fb0f4 - rename "responseMatchingRules" and "requestMatchingRules" to just "matchingRules" in pact files (Ronald Holshausen, Thu Jun 11 13:05:40 2015 +1000)
+* fa610f3 - added specification testcase for array at top level (Ronald Holshausen, Thu Jun 11 11:23:12 2015 +1000)
+* 6f35e3a - bump version (Ronald Holshausen, Wed Jun 10 21:02:19 2015 +1000)
+
 # 2.2.2 - Matching on headers, XML body matching
 
 * ea4bd36 - added specification tests for header matching (Ronald Holshausen, Wed Jun 10 20:33:22 2015 +1000)
