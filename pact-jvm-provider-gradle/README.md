@@ -140,6 +140,34 @@ pact {
 Following typical Gradle behaviour, you can set the provider task properties to the actual tasks, or to the task names
 as a string (for the case when they haven't been defined yet).
 
+## Modifying the HTTP Client Used [version 2.2.4+]
+
+The default HTTP client is used for all requests to providers (created with a call to `HttpClients.createDefault()`).
+This can be changed by specifying a closure assigned to createClient on the provider that returns a CloseableHttpClient. For example:
+
+```groovy
+pact {
+
+    serviceProviders {
+
+        provider1 {
+
+            createClient = { provider ->
+                // This will enable the client to accept self-signed certificates
+                HttpClients.custom().setSSLHostnameVerifier(new NoopHostnameVerifier()).build()
+            }
+
+            hasPactWith('consumer1') {
+                pactFile = file('path/to/provider1-consumer1-pact.json')
+            }
+
+        }
+
+    }
+
+}
+```
+
 ## Modifying the requests before they are sent
 
 **NOTE on breaking change: Version 2.1.8+ uses Apache HttpClient instead of HttpBuilder so the closure will receive a
