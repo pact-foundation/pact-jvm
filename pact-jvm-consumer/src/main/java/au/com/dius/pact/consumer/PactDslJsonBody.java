@@ -79,7 +79,11 @@ public class PactDslJsonBody extends DslPart {
     }
 
     private String matcherKey(String name) {
-        return root + name;
+        String key = root + name;
+        if (!name.matches(Parser$.MODULE$.FieldRegex().toString())) {
+            key = StringUtils.strip(root, ".") + "['" + name + "']";
+        }
+        return key;
     }
 
     public PactDslJsonBody numberType(String name) {

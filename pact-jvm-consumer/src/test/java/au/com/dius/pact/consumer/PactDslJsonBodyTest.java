@@ -14,7 +14,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 public class PactDslJsonBodyTest {
 
     @Test
-    public void guardAgainstInvalidObjectNames() {
+    public void guardAgainstObjectNamesThatDontConformToGatlingFields() {
         DslPart body = new PactDslJsonBody()
             .id()
             .object("2")
@@ -53,4 +53,19 @@ public class PactDslJsonBodyTest {
                 new HashSet(Arrays.asList("2", "numbers", "id")))));
     }
 
+    @Test
+    public void guardAgainstFieldNamesThatDontConformToGatlingFields() {
+        DslPart body = new PactDslJsonBody()
+                .id("1")
+                .stringType("@field")
+                .hexValue("200", "abc");
+
+        Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
+                "['200']", "['1']", "['@field']"
+        ));
+        assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
+
+        assertThat(((JSONObject) body.getBody()).keySet(), is(equalTo((Set)
+                new HashSet(Arrays.asList("200", "1", "@field")))));
+    }
 }
