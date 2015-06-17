@@ -10,6 +10,8 @@ import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PactDslJsonBody extends DslPart {
 
@@ -30,11 +32,17 @@ public class PactDslJsonBody extends DslPart {
     }
 
     protected void putObject(DslPart object) {
-        String name = StringUtils.strip(object.root, ".");
         for(String matcherName: object.matchers.keySet()) {
             matchers.put(matcherName, object.matchers.get(matcherName));
         }
-        body.put(name, object.getBody());
+        String name = StringUtils.strip(object.root, ".");
+        Pattern p = Pattern.compile("\\['(.+)'\\]");
+        Matcher matcher = p.matcher(name);
+        if (matcher.matches()) {
+            body.put(matcher.group(1), object.getBody());
+        } else {
+            body.put(name, object.getBody());
+        }
     }
 
     protected void putArray(DslPart object) {
