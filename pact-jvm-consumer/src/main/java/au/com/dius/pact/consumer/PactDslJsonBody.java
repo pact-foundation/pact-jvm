@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer;
 
+import io.gatling.jsonpath.Parser$;
 import nl.flotsam.xeger.Xeger;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -180,7 +181,11 @@ public class PactDslJsonBody extends DslPart {
     }
 
     public PactDslJsonBody object(String name) {
-        return new PactDslJsonBody("." + name + ".", this);
+        String base = "." + name;
+        if (!base.matches(Parser$.MODULE$.FieldRegex().toString())) {
+            base = "['" + name + "']";
+        }
+        return new PactDslJsonBody(base + ".", this);
     }
 
     public PactDslJsonBody object() {

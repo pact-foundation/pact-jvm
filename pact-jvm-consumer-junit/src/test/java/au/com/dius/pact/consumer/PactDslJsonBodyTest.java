@@ -8,7 +8,7 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
     protected PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
         DslPart body = new PactDslJsonBody()
             .id()
-            .object("obj")
+            .object("2")
                 .id()
                 .stringValue("test", "A Test String")
             .closeObject()
@@ -35,7 +35,7 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
 
         MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment,
             "$.body.id",
-            "$.body.obj.id",
+            "$.body['2'].id",
             "$.body.numbers[0]",
             "$.body.numbers[3]",
             "$.body.numbers[4].id",
