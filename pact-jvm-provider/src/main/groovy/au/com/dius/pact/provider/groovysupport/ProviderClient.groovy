@@ -138,7 +138,7 @@ class ProviderClient {
         response
     }
 
-    private static newClient(def provider) {
+    private newClient(def provider) {
         if (provider.createClient != null) {
             if (provider.createClient instanceof Closure) {
                 provider.createClient(provider)
