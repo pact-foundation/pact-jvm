@@ -1,5 +1,17 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.2.4 - Bugfix release
+
+* 1c493e9 - updated readme on overriding http client (Ronald Holshausen, Wed Jun 17 19:42:54 2015 +1000)
+* 4200ccf - use jsonpath bracket notation for normal fields as well #127 (Ronald Holshausen, Wed Jun 17 15:14:03 2015 +1000)
+* 27639eb - correct the junit <-> hamcrest dependency clash (Ronald Holshausen, Wed Jun 17 14:55:34 2015 +1000)
+* 40f461a - when using jsonpath bracket–notation, we still need to build the object with the original name #127 (Ronald Holshausen, Wed Jun 17 14:54:32 2015 +1000)
+* 196cc27 - make the newClient method non-static so a test can mock it (Ronald Holshausen, Wed Jun 17 13:56:14 2015 +1000)
+* 938f008 - use the field name for the jsonpath bracket–notation #127 (Ronald Holshausen, Wed Jun 17 13:39:57 2015 +1000)
+* e3de4c4 - use jsonpath bracket–notation when a field does not conform to the gatling regex #127 (Ronald Holshausen, Wed Jun 17 13:15:01 2015 +1000)
+* 0d0370d - allow the HTTP client used to verify the provider to be overridden (Ronald Holshausen, Wed Jun 17 13:12:33 2015 +1000)
+* 4ec54ba - bump version (Ronald Holshausen, Sun Jun 14 10:20:49 2015 +1000)
+
 # 2.2.3 - Bugfix release
 
 * a7f5df4 - fix converting of bodies with attributes named "body" to strings #119 (Ronald Holshausen, Sat Jun 13 12:58:45 2015 +1000)
