@@ -34,7 +34,7 @@ class ProviderClient {
     def provider
 
     def makeRequest() {
-        CloseableHttpClient httpclient = newClient()
+        CloseableHttpClient httpclient = newClient(provider)
         HttpRequest method = newRequest(request)
 
         if (request.headers().defined) {
@@ -138,8 +138,19 @@ class ProviderClient {
         response
     }
 
-    private newClient() {
-        HttpClients.createDefault()
+    private static newClient(def provider) {
+        if (provider.createClient != null) {
+            if (provider.createClient instanceof Closure) {
+                provider.createClient(provider)
+            } else {
+                Binding binding = new Binding()
+                binding.setVariable("provider", provider)
+                GroovyShell shell = new GroovyShell(binding)
+                shell.evaluate(provider.createClient as String)
+            }
+        } else {
+            HttpClients.createDefault()
+        }
     }
 
     private HttpRequest newRequest(Request request) {

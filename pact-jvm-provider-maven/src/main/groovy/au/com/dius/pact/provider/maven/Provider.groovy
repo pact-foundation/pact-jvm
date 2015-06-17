@@ -16,4 +16,5 @@ class Provider {
     URL stateChangeUrl
     boolean stateChangeUsesBody = true
     def stateChangeRequestFilter
+    def createClient
 }

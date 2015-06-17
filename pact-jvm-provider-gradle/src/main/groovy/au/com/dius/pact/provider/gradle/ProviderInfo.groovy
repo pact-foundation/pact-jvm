@@ -13,6 +13,7 @@ class ProviderInfo {
     def terminateProviderTask
     def requestFilter
     def stateChangeRequestFilter
+    def createClient
 
     List<ConsumerInfo> consumers = []
 
