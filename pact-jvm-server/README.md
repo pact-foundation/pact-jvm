@@ -15,21 +15,20 @@ The server implements a `JSON` `REST` Admin API with the following endpoints.
 
 ## Running the server
 
-If you use sbt, you can run the server with:
+You can download a [distribution from maven central](http://search.maven.org/remotecontent?filepath=au/com/dius/pact-jvm-server_2.11/2.2.4/).
+There is both a ZIP and TAR archive. Unpack it to a directory of choice and then run the script in the bin directory.
 
-    $ sbt pact-jvm-server/run
+You can build an application bundle with gradle by running (for 2.11 version):
 
-You can build an application bundle with gradle by running (for 2.10 version):
+    $ ./gradlew :pact-jvm-server_2.11:installdist
 
-    $ ./gradlew :pact-jvm-server_2.10:installApp
+This will create an app bundle in `build/2.11/install/pact-jvm-server_2.11`. You can then execute it with:
 
-This will create an app bundle in `build/2.10/install/pact-jvm-server_2.10`. You can then execute it with:
-
-    $ java -jar pact-jvm-server/build/2.10/install/pact-jvm-server_2.10/lib/pact-jvm-server_2.10-2.0.4.jar
+    $ java -jar pact-jvm-server/build/2.10/install/pact-jvm-server_2.11/lib/pact-jvm-server_2.11-2.2.4.jar
 
 or with the generated bundle script file:
 
-    $ pact-jvm-server/build/2.10/install/pact-jvm-server_2.10/bin/pact-jvm-server_2.10
+    $ pact-jvm-server/build/2.11/install/pact-jvm-server_2.11/bin/pact-jvm-server_2.11
 
 By default will run on port `29999` but a port number can be optionally supplied.
 
