@@ -23,7 +23,7 @@ object Create {
     val entry = port -> server
     val body = pretty(map2jvalue(Map("port" -> port)))
 
-    Result(Response(201, Response.CrossSiteHeaders, body, null), oldState + entry)
+    Result(Response(201, Response.CrossSiteHeaders ++ Map("Content-Type" -> "application/json"), body, null), oldState + entry)
   }
 
   def apply(request: Request, oldState: ServerState): Result = {
