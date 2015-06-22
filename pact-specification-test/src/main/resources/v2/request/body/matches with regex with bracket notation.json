@@ -1,0 +1,29 @@
+{
+  "match": true,
+  "comment": "Requests match with regex",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": "",
+    "headers": {},
+    "matchingRules": {
+      "$.body['2'].str": {"regex": "\\w+"}
+    },
+    "body": {
+      "2" : {
+        "str" : "jildrdmxddnVzcQZfjCA"
+      }
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": "",
+    "headers": {},
+    "body": {
+      "2" : {
+        "str" : "saldfhksajdhffdskkjh"
+      }
+    }
+  }
+}
