@@ -79,7 +79,7 @@ class PactBodyBuilder extends Matchers {
       bodyMap[name] = setMatcherAttribute(matcher, path + '.' + name)
     } else if (value instanceof LikeMatcher) {
       setMatcherAttribute(value, path + '.' + name)
-      bodyMap[name] = invokeClosure(value.values.last(), '.' + name + '[*]')
+      bodyMap[name] = [ invokeClosure(value.values.last(), '.' + name + '[*]') ]
     } else if (value instanceof Matcher) {
       bodyMap[name] = setMatcherAttribute(value, path + '.' + name)
     } else if (value instanceof List) {

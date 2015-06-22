@@ -127,13 +127,13 @@ class PactBodyBuilderTest {
 
         def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.get()))
         assert keys == [
-            'orders', [
-                'id', [], 'lineItems', [
-                    'amount', [], 'id', [], 'productCodes', [
-                        'code', []
-                    ]
-                ]
-            ]
+            'orders', [0, [
+                    'id', [], 'lineItems', [0, [
+                        'amount', [], 'id', [], 'productCodes', [0, [
+                            'code', []
+                        ]]
+                    ]]
+            ]]
         ]
 
     }
