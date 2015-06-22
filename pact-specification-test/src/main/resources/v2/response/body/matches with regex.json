@@ -4,7 +4,7 @@
   "expected" : {
     "headers": {},
     "matchingRules": {
-      "$.body.alligator.name": {"regex": "\\w+"}
+      "$.body.alligator.name": {"match": "regex", "regex": "\\w+"}
     },
     "body": {
       "alligator":{

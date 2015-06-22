@@ -9,7 +9,7 @@
       "Content-Type": "hippos"
     },
     "matchingRules": {
-      "$.headers.Accept": {"regex": "\\w+"}
+      "$.headers.Accept": {"match": "regex", "regex": "\\w+"}
     }
   },
   "actual": {

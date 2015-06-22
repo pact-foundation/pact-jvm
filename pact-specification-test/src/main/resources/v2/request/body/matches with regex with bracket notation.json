@@ -7,7 +7,7 @@
     "query": "",
     "headers": {},
     "matchingRules": {
-      "$.body['2'].str": {"regex": "\\w+"}
+      "$.body['2'].str": {"match": "regex", "regex": "\\w+"}
     },
     "body": {
       "2" : {

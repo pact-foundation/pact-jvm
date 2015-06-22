@@ -28,16 +28,16 @@
         "match" : "type"
       },
       "$.body[1].dob" : {
-        "regex" : "\\d{2}/\\d{2}/\\d{4}"
+        "match": "regex", "regex" : "\\d{2}/\\d{2}/\\d{4}"
       },
       "$.body[1].timestamp" : {
-        "regex" : "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}"
+        "match": "regex", "regex" : "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}"
       },
       "$.body[0].timestamp" : {
-        "regex" : "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}"
+        "match": "regex", "regex" : "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}"
       },
       "$.body[0].dob" : {
-        "regex" : "\\d{2}/\\d{2}/\\d{4}"
+        "match": "regex", "regex" : "\\d{2}/\\d{2}/\\d{4}"
       }
     }
   },
