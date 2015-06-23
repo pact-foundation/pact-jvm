@@ -1,5 +1,16 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.2.5 - Bufixes
+
+* 2a57cd9 - added the matcher definition to all regex matcher examples (Ronald Holshausen, Mon Jun 22 20:13:52 2015 +1000)
+* 071ce27 - added a testcase for matching with bracket notation (Ronald Holshausen, Mon Jun 22 19:30:51 2015 +1000)
+* c1acb13 - fix minLike matcher to define a list instead of an object (Ronald Holshausen, Mon Jun 22 14:28:11 2015 +1000)
+* 8ea3cad - set the mime type in the pact server (Ronald Holshausen, Sun Jun 21 19:31:07 2015 +1000)
+* 34eddcf - Update the readme on how to build and run pact-jvm-server #130 (Ronald Holshausen, Sat Jun 20 12:37:08 2015 +1000)
+* 08c8b4a - add distribution archives to the pact-jvm-server artifacts #130 (Ronald Holshausen, Sat Jun 20 12:36:28 2015 +1000)
+* 268adef - upgrade to gradle 2.4 (Ronald Holshausen, Sat Jun 20 11:45:07 2015 +1000)
+* 646c203 - bump version (Ronald Holshausen, Wed Jun 17 20:16:01 2015 +1000)
+
 # 2.2.4 - Bugfix release
 
 * 1c493e9 - updated readme on overriding http client (Ronald Holshausen, Wed Jun 17 19:42:54 2015 +1000)
