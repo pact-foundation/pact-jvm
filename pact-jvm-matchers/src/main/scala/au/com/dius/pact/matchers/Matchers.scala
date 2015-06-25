@@ -1,9 +1,9 @@
 package au.com.dius.pact.matchers
 
+import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import io.gatling.jsonpath.AST._
 import io.gatling.jsonpath.Parser
 import org.apache.commons.lang3.time.{DateFormatUtils, DateUtils}
-import com.typesafe.scalalogging.slf4j.StrictLogging
 import java.text.ParseException
 
 object Matchers extends StrictLogging {

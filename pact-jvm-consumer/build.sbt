@@ -10,7 +10,6 @@ libraryDependencies ++= Seq(
   "org.specs2"   %% "specs2"         % "2.3.11" % "test",
   "org.mockito"  %  "mockito-all"    % "1.9.5" % "test",
   "dk.brics.automaton" % "automaton" % "1.11-8",
-  "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
   "com.googlecode.java-diff-utils" % "diffutils" % "1.3.0"
 )
 

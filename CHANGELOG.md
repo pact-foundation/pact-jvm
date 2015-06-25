@@ -1,6 +1,6 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
-# 2.2.5 - Bufixes
+# 2.2.5 - Bugfixes
 
 * 2a57cd9 - added the matcher definition to all regex matcher examples (Ronald Holshausen, Mon Jun 22 20:13:52 2015 +1000)
 * 071ce27 - added a testcase for matching with bracket notation (Ronald Holshausen, Mon Jun 22 19:30:51 2015 +1000)

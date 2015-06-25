@@ -1,0 +1,3 @@
+dependencies {
+    compile "org.scala-lang:scala-reflect:${project.scalaFullVersion}"
+}

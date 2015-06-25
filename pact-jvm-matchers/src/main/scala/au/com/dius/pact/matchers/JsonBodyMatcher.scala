@@ -1,7 +1,7 @@
 package au.com.dius.pact.matchers
 
+import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.model._
-import com.typesafe.scalalogging.slf4j.StrictLogging
 import org.json4s.{JObject, JArray, JValue, DefaultFormats}
 import org.json4s.jackson.JsonMethods._
 

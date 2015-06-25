@@ -5,7 +5,6 @@ libraryDependencies ++= Seq(
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.0",
   "org.json4s"   %% "json4s-native"  % "3.2.11",
   "org.json4s"   %% "json4s-jackson" % "3.2.11",
-  "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
   "org.json" % "json" % "20140107"
 )
 

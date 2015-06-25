@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider
 
 import AnimalServiceResponses.responses
+import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.model.{Request, Response}
 import org.json4s.JsonAST._
 import org.json4s.jackson.JsonMethods.parse
@@ -8,7 +9,6 @@ import unfiltered.netty.{ReceivedMessage, ServerErrorResponse, cycle}
 import unfiltered.request.HttpRequest
 import unfiltered.response.ResponseFunction
 import au.com.dius.pact.model.unfiltered.Conversions
-import com.typesafe.scalalogging.slf4j.StrictLogging
 import org.json4s.StringInput
 
 object TestService extends StrictLogging {

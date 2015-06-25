@@ -1,9 +1,9 @@
 package au.com.dius.pact.consumer
 
+import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.model._
+
 import scala.util.Try
-import scala.Some
-import com.typesafe.scalalogging.slf4j.StrictLogging
 
 trait MockProvider {
   def config: MockProviderConfig

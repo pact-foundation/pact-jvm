@@ -83,7 +83,7 @@ object RootBuild extends Build {
         id = "pact-jvm",
         base = file("."),
         settings = commonSettings ++ skipPublish ++ skipTest)
-        .aggregate(model, consumer, provider, plugin, consumerSbt, server, consumerSpecs2, providerSpecs2, junit,
+        .aggregate(logging, model, consumer, provider, plugin, consumerSbt, server, consumerSpecs2, providerSpecs2, junit,
             pactSpecification, consumerGroovy, matchers)
 
     def p(id: String, settings: Seq[Def.Setting[_]] = commonSettings) = Project(
@@ -91,7 +91,9 @@ object RootBuild extends Build {
         base = file(id),
         settings = settings :+ (name := id))
 
-    lazy val model = p("pact-jvm-model")
+    lazy val logging = p("pact-jvm-logging")
+
+    lazy val model = p("pact-jvm-model").dependsOn(logging)
 
     lazy val matchers = p("pact-jvm-matchers").dependsOn(model)
 
