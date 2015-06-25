@@ -1,6 +1,7 @@
 package au.com.dius.pact.server
 
 import au.com.dius.pact.model.unfiltered.Conversions
+import io.netty.channel.ChannelHandler.Sharable
 import unfiltered.netty.ReceivedMessage
 import unfiltered.netty.ServerErrorResponse
 import unfiltered.netty.cycle
@@ -12,6 +13,7 @@ class ServerStateStore {
   var state: ServerState = Map()
 }
 
+@Sharable
 case class RequestHandler(store: ServerStateStore) extends cycle.Plan
   with cycle.SynchronousExecution
   with ServerErrorResponse {
