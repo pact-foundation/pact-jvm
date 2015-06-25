@@ -19,11 +19,13 @@ case class Result(response: Response, newState: ServerState)
 
 object Server extends App {
   val port = Integer.parseInt(args.headOption.getOrElse("29999"))
-
-  val host: String = "localhost"
-  val server = _root_.unfiltered.netty.Server.local(port).handler(RequestHandler(new ServerStateStore()))
-  println(s"starting unfiltered app at 127.0.0.1 on port $port")
+  val host = if (args.isDefinedAt(1)) args(1) else "localhost"
+  val daemon = if (args.isDefinedAt(2)) args(2).equals("true") else false
+  val server = _root_.unfiltered.netty.Server.http(port, host).handler(RequestHandler(new ServerStateStore()))
+  println(s"starting unfiltered app at $host on port $port")
   server.start()
-  readLine("press enter to stop server:\n")
-  server.stop()
+  if (!daemon) {
+    readLine("press enter to stop server:\n")
+    server.stop()
+  }
 }
