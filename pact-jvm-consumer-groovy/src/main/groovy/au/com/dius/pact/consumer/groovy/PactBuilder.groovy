@@ -163,8 +163,7 @@ class PactBuilder extends Matchers {
   def will_respond_with = this.&willRespondWith
 
   VerificationResult run(Closure closure) {
-    buildInteractions()
-    def fragment = new PactFragment(consumer, provider, JavaConverters$.MODULE$.asScalaBufferConverter(interactions).asScala())
+    PactFragment fragment = fragment()
 
     MockProviderConfig config
     if (port == null) {
@@ -174,6 +173,11 @@ class PactBuilder extends Matchers {
     }
 
     fragment.runConsumer(config, closure)
+  }
+
+  PactFragment fragment() {
+    buildInteractions()
+    new PactFragment(consumer, provider, JavaConverters$.MODULE$.asScalaBufferConverter(interactions).asScala())
   }
 
   PactBuilder withBody(String mimeType = null, Closure closure) {

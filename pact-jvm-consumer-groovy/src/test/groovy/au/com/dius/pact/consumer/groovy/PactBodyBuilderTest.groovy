@@ -61,7 +61,7 @@ class PactBodyBuilderTest {
               name(~/\w+/, 'harry')
             }
         }
-        service.buildInteractions()
+        def fragment = service.fragment()
         assert service.interactions.size() == 1
         assert asJavaMap(service.interactions[0].request.matchingRules) == [
           '$.body.name': [regex: '\\w+'],
@@ -114,7 +114,7 @@ class PactBodyBuilderTest {
                 headers: ['Content-Type': 'text/html']
             )
         }
-        service.buildInteractions()
+        def fragment = service.fragment()
         assert service.interactions.size() == 1
         assert asJavaMap(service.interactions[0].request.matchingRules) == [
             '$.body.orders': [max: 10],
