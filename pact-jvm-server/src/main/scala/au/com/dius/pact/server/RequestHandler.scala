@@ -14,14 +14,14 @@ class ServerStateStore {
 }
 
 @Sharable
-case class RequestHandler(store: ServerStateStore) extends cycle.Plan
+case class RequestHandler(store: ServerStateStore, config: Config) extends cycle.Plan
   with cycle.SynchronousExecution
   with ServerErrorResponse {
     import io.netty.handler.codec.http.{ HttpResponse=>NHttpResponse }
 
     def handle(request: HttpRequest[ReceivedMessage]): ResponseFunction[NHttpResponse] = {
       val pactRequest = Conversions.unfilteredRequestToPactRequest(request)
-      val result = RequestRouter.dispatch(pactRequest, store.state)
+      val result = RequestRouter.dispatch(pactRequest, store.state, config)
       store.state = result.newState
       Conversions.pactToUnfilteredResponse(result.response)
     }
