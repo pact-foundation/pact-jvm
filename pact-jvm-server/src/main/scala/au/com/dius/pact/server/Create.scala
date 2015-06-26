@@ -16,7 +16,6 @@ object Create extends StrictLogging {
     val pact = Pact.from(requestBody)
     val mockConfig: MockProviderConfig = MockProviderConfig.create(config.portLowerBound, config.portUpperBound)
       .copy(hostname = config.host)
-    println(mockConfig)
     val server = DefaultMockProvider.apply(mockConfig)
     val port = server.config.port
     val entry = port -> server
