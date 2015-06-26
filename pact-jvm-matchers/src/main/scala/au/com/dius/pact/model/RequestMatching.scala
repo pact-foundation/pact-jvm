@@ -8,7 +8,10 @@ case class RequestMatching(expectedInteractions: Seq[Interaction]) {
   def matchInteraction(actual: Request): RequestMatch = {
     def compareToActual(expected: Interaction) = compareRequest(expected, actual) 
     val matches = expectedInteractions.map(compareToActual)
-    matches.reduceLeft(_ merge _)
+    if (matches.isEmpty)
+      RequestMismatch
+    else
+      matches.reduceLeft(_ merge _)
   }
       
   def findResponse(actual: Request): Option[Response] = 

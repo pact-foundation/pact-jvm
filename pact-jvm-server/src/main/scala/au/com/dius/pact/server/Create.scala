@@ -21,7 +21,7 @@ object Create extends StrictLogging {
     val entry = port -> server
     val body = pretty(map2jvalue(Map("port" -> port)))
 
-    server.start()
+    server.start(pact)
 
     Result(Response(201, Response.CrossSiteHeaders ++ Map("Content-Type" -> "application/json"), body, null), oldState + entry)
   }
