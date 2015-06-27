@@ -15,8 +15,40 @@ The server implements a `JSON` `REST` Admin API with the following endpoints.
 
 ## Running the server
 
+### Versions 2.2.6+
+
+Pact server takes the following parameters:
+
+```
+Usage: pact-jvm-server [options] [port]
+
+  port
+        port to run on (defaults to 29999)
+  --help
+        prints this usage text
+  -h <value> | --host <value>
+        host to bind to (defaults to localhost)
+  -l <value> | --mock-port-lower <value>
+        lower bound to allocate mock ports (defaults to 20000)
+  -u <value> | --mock-port-upper <value>
+        upper bound to allocate mock ports (defaults to 40000)
+  -d | --daemon
+        run as a daemon process
+  --debug
+        run with debug logging
+```
+
+### Prior to version 2.2.6
+
+Pact server takes one optional parameter, the port number to listen on. If not provided, it will listen on 29999.
+It requires an active console to run.
+
+### Using a distribution archive
+
 You can download a [distribution from maven central](http://search.maven.org/remotecontent?filepath=au/com/dius/pact-jvm-server_2.11/2.2.4/).
 There is both a ZIP and TAR archive. Unpack it to a directory of choice and then run the script in the bin directory.
+
+### Building a distribution bundle
 
 You can build an application bundle with gradle by running (for 2.11 version):
 
@@ -31,6 +63,15 @@ or with the generated bundle script file:
     $ pact-jvm-server/build/2.11/install/pact-jvm-server_2.11/bin/pact-jvm-server_2.11
 
 By default will run on port `29999` but a port number can be optionally supplied.
+
+### Running it with docker
+
+You can use a docker image to execute the mock server as a docker container.
+
+    $ docker run -d -p 8080:8080 -p 20000-20010:20000-20010 uglyog/pact-jvm-server
+
+This will run the main server on port 8080, and each created mock server on ports 20000-20010. You can map the ports to
+any you require.
 
 ## Life cycle
 

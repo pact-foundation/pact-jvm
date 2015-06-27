@@ -1,4 +1,4 @@
-FROM docker-registry.hq.local/java:8
+FROM java:8
 MAINTAINER Ronald Holshausen <rholshausen@dius.com.au>
 
 RUN useradd -m pact-jvm-server -G users
