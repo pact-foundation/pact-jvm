@@ -21,7 +21,10 @@ object Conversions {
   }
 
   implicit def dispatchResponseToPactResponse(response: client.Response): Response = {
-    val contentType = org.apache.http.entity.ContentType.parse(response.getContentType)
+    val contentType = if (response.getContentType == null)
+        org.apache.http.entity.ContentType.APPLICATION_JSON
+      else
+        org.apache.http.entity.ContentType.parse(response.getContentType)
     val charset = if (contentType.getCharset == null) "UTF-8" else contentType.getCharset.name()
     Response(response.getStatusCode, Some(toMap(response.getHeaders)), Some(response.getResponseBody(charset)), None)
   }
