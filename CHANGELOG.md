@@ -1,5 +1,24 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.2.6 - Bugfixes
+
+* 9bcf989 - if no charset is defined, default to UTF-8 #132 (Ronald Holshausen, Thu Jul 2 21:04:16 2015 +1000)
+* feb8d8a - make the mismatch message clearer when the number of keys in a map do not match (Ronald Holshausen, Thu Jul 2 15:49:31 2015 +1000)
+* e01fb09 - allow state change requests to override the default http client (Ronald Holshausen, Thu Jul 2 14:32:06 2015 +1000)
+* 090715a - fix statechange bug (Ronald Holshausen, Wed Jul 1 09:05:21 2015 +1000)
+* 3e626b7 - update readme with running options (Ronald Holshausen, Sat Jun 27 13:38:33 2015 +1000)
+* 09d48e7 - correct the mock server spawned by pact-jvm-server (Ronald Holshausen, Fri Jun 26 17:32:05 2015 +1000)
+* d6906ad - Oops, missed a required change (Ronald Holshausen, Fri Jun 26 13:34:33 2015 +1000)
+* 905d1b2 - added CLI options to pact-jvm-server; fixed an issue with the mock servers that were not being started (Ronald Holshausen, Fri Jun 26 13:32:21 2015 +1000)
+* 7246458 - inline scala logging to avoid clashes with users projects #131 (Ronald Holshausen, Thu Jun 25 20:40:15 2015 +1000)
+* af27ed5 - correct invalid handling of query parameters on pact-jvm-server #128 (Ronald Holshausen, Thu Jun 25 17:19:10 2015 +1000)
+* 678ac06 - add Sharable annotation to RequestHandler #129 (Ronald Holshausen, Thu Jun 25 16:56:05 2015 +1000)
+* 148469b - add logging to the create endpoint in pact-jvm-server (Ronald Holshausen, Thu Jun 25 16:54:43 2015 +1000)
+* f0ecdf0 - added logback to pact-jvm-server (Ronald Holshausen, Thu Jun 25 16:53:35 2015 +1000)
+* b446713 - add convience method to groovy dsl to return pact frgament (Ronald Holshausen, Thu Jun 25 15:38:54 2015 +1000)
+* c46d702 - bump version (Ronald Holshausen, Thu Jun 25 14:31:29 2015 +1000)
+* 283f0d3 - updated pact-jvm-server to run as a docker container (Ronald Holshausen, Thu Jun 25 14:09:00 2015 +1000)
+
 # 2.2.5 - Bugfixes
 
 * 2a57cd9 - added the matcher definition to all regex matcher examples (Ronald Holshausen, Mon Jun 22 20:13:52 2015 +1000)
