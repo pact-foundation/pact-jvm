@@ -121,7 +121,7 @@ object Matching {
         }
       }
     } else {
-      if (expected.body == None) List()
+      if (expected.body.isEmpty) List()
       else List(BodyTypeMismatch(expected.mimeType, actual.mimeType))
     }
   }

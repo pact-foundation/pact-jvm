@@ -100,10 +100,13 @@ class JsonBodyMatcher extends BodyMatcher  with StrictLogging {
       List(BodyMismatch(a, b, Some(s"Expected an empty Map but received ${valueOf(actualValues)}"), path.mkString(".")))
     } else {
       var result = List[BodyMismatch]()
-      if ((diffConfig.allowUnexpectedKeys && expectedValues.size > actualValues.size) ||
-        (!diffConfig.allowUnexpectedKeys && expectedValues.size != actualValues.size)) {
+      if (diffConfig.allowUnexpectedKeys && expectedValues.size > actualValues.size) {
         result = result :+ BodyMismatch(a, b,
           Some(s"Expected a Map with at least ${expectedValues.size} elements but received ${actualValues.size} elements"),
+          path.mkString("."))
+      } else if (!diffConfig.allowUnexpectedKeys && expectedValues.size != actualValues.size) {
+        result = result :+ BodyMismatch(a, b,
+          Some(s"Expected a Map with ${expectedValues.size} elements but received ${actualValues.size} elements"),
           path.mkString("."))
       }
       expectedValues.foreach(entry => {
