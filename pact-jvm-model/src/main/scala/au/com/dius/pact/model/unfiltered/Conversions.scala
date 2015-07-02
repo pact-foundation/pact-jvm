@@ -1,15 +1,16 @@
 package au.com.dius.pact.model.unfiltered
 
-import java.io.{InputStreamReader, BufferedReader, Reader}
+import java.io.{BufferedReader, InputStreamReader}
 import java.util.zip.GZIPInputStream
 
-import au.com.dius.pact.model.{Response, Request}
-import unfiltered.request.HttpRequest
-import unfiltered.netty.ReceivedMessage
-import unfiltered.response._
-import io.netty.handler.codec.http.{HttpResponse => NHttpResponse}
+import au.com.dius.pact.model.{Request, Response}
 import com.ning.http.client
 import com.ning.http.client.FluentCaseInsensitiveStringsMap
+import io.netty.handler.codec.http.{HttpResponse => NHttpResponse}
+import unfiltered.netty.ReceivedMessage
+import unfiltered.request.HttpRequest
+import unfiltered.response._
+
 import scala.collection.immutable.Stream
 
 object Conversions {
@@ -20,7 +21,9 @@ object Conversions {
   }
 
   implicit def dispatchResponseToPactResponse(response: client.Response): Response = {
-    Response(response.getStatusCode, Some(toMap(response.getHeaders)), Some(response.getResponseBody), None)
+    val contentType = org.apache.http.entity.ContentType.parse(response.getContentType)
+    val charset = if (contentType.getCharset == null) "UTF-8" else contentType.getCharset.name()
+    Response(response.getStatusCode, Some(toMap(response.getHeaders)), Some(response.getResponseBody(charset)), None)
   }
 
   case class Headers(headers: Option[Map[String, String]]) extends unfiltered.response.Responder[Any] {

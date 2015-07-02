@@ -8,7 +8,6 @@ import org.apache.http.HttpEntity
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
-import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpDelete
@@ -127,12 +126,12 @@ class ProviderClient {
 
         HttpEntity entity = httpResponse.entity
         if (entity != null) {
-            response.data = EntityUtils.toString(entity)
             if (entity.contentType) {
                 response.contentType = ContentType.parse(entity.contentType.value)
             } else {
                 response.contentType = ContentType.APPLICATION_JSON
             }
+            response.data = EntityUtils.toString(entity, response.contentType?.charset?.name() ?: 'UTF-8')
         }
 
         response
