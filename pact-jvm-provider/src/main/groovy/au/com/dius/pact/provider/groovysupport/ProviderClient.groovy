@@ -85,7 +85,7 @@ class ProviderClient {
         }
 
         if (stateChangeUrl) {
-            CloseableHttpClient httpclient = newClient()
+            CloseableHttpClient httpclient = newClient(provider)
             def urlBuilder
             if (stateChangeUrl instanceof URI) {
               urlBuilder = new URIBuilder(stateChangeUrl)
