@@ -303,5 +303,5 @@ provider state.
 
 To publish the plugin to the community portal:
 
-    $ gradle :pact-jvm-provider-gradle_2.11:publishPlugins
+    $ ./gradlew :pact-jvm-provider-gradle_2.11:publishPlugins
     
