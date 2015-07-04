@@ -154,7 +154,10 @@ pact {
 
             createClient = { provider ->
                 // This will enable the client to accept self-signed certificates
-                HttpClients.custom().setSSLHostnameVerifier(new NoopHostnameVerifier()).build()
+                HttpClients.custom().setSSLHostnameVerifier(new NoopHostnameVerifier())
+                    .setSslcontext(new SSLContextBuilder().loadTrustMaterial(null, { x509Certificates, s -> true })
+                        .build())
+                    .build()
             }
 
             hasPactWith('consumer1') {

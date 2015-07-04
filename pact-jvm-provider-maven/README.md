@@ -121,6 +121,43 @@ bound to a variable named `request` prior to it being executed.
 </plugin>
 ```
 
+## Modifying the HTTP Client Used [version 2.2.4+]
+
+The default HTTP client is used for all requests to providers (created with a call to `HttpClients.createDefault()`).
+This can be changed by specifying a closure assigned to createClient on the provider that returns a CloseableHttpClient.
+For example:
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
+    <version>2.2.6</version>
+    <configuration>
+      <serviceProviders>
+        <serviceProvider>
+          <name>provider1</name>
+          <createClient>
+            // This is a Groovy script that will enable the client to accept self-signed certificates
+            import org.apache.http.ssl.SSLContextBuilder
+            import org.apache.http.conn.ssl.NoopHostnameVerifier
+            import org.apache.http.impl.client.HttpClients
+            HttpClients.custom().setSSLHostnameVerifier(new NoopHostnameVerifier())
+                .setSslcontext(new SSLContextBuilder().loadTrustMaterial(null, { x509Certificates, s -> true })
+                    .build())
+            .build()
+          </createClient>
+          <consumers>
+            <consumer>
+              <name>consumer1</name>
+              <pactFile>path/to/provider1-consumer1-pact.json</pactFile>
+            </consumer>
+          </consumers>
+        </serviceProvider>
+      </serviceProviders>
+    </configuration>
+</plugin>
+```
+
 ## Plugin Properties
 
 The following plugin properties can be specified with `-Dproperty=value` on the command line or in the configuration section:
