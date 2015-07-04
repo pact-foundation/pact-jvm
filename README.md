@@ -29,6 +29,11 @@ From the [Ruby Pact website](https://github.com/realestate-com-au/pact):
 
 * For an example of using pact-jvm with spring boot, have a look at https://github.com/mstine/microservices-pact
 
+## Documentation
+
+Additional documentation can be found in the [Pact Wiki](https://github.com/realestate-com-au/pact/wiki),
+and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki).
+
 ## Note about artifact names and versions
 
 Pact-JVM is written in Scala. As Scala does not provide binary compatibility between major versions, all the Pact-JVM
