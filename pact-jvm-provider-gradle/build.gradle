@@ -15,7 +15,7 @@ apply plugin: 'maven-publish'
 apply plugin: "com.gradle.plugin-publish"
 
 dependencies {
-    compile gradleApi(), localGroovy()
+    compile gradleApi(), localGroovy(), 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
     compile(project(":pact-jvm-provider_${project.scalaVersion}")) {
       exclude module: 'groovy-all'
     }

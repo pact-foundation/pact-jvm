@@ -11,19 +11,24 @@ class PactPluginTest {
     private Project project
 
     @Before
-    public void setup() {
+    void setup() {
         project = ProjectBuilder.builder().build()
         plugin = new PactPlugin()
         plugin.apply(project)
     }
 
     @Test
-    public void 'defines a pactVerify task'() {
+    void 'defines a pactVerify task'() {
         assert project.tasks.pactVerify
     }
 
     @Test
-    public void 'defines a task for each defined provider'() {
+    void 'defines a pactPublish task'() {
+        assert project.tasks.pactPublish
+    }
+
+    @Test
+    void 'defines a task for each defined provider'() {
         project.pact {
             serviceProviders {
                 provider1 {
@@ -43,7 +48,7 @@ class PactPluginTest {
     }
 
     @Test
-    public void 'defines a task for each file in the pact file directory'() {
+    void 'defines a task for each file in the pact file directory'() {
         def resource = getClass().classLoader.getResource('pacts/foo_pact.json')
         File pactFileDirectory = new File(resource.file).parentFile
         project.pact {
@@ -66,7 +71,7 @@ class PactPluginTest {
     }
 
     @Test
-    public void 'configures the providers and consumers correctly'() {
+    void 'configures the providers and consumers correctly'() {
         def pactFileUrl = 'http://localhost:8000/pacts/provider/prividera/consumer/consumera/latest'
         def stateChangeUrl = 'http://localhost:8080/stateChange'
         project.pact {
@@ -99,7 +104,7 @@ class PactPluginTest {
     }
 
     @Test
-    public void 'do not set the state change url automatically'() {
+    void 'do not set the state change url automatically'() {
         def pactFileUrl = 'http://localhost:8000/pacts/provider/prividera/consumer/consumera/latest'
         project.pact {
             serviceProviders {
@@ -116,5 +121,20 @@ class PactPluginTest {
         def consumer = project.tasks.pactVerify_ProviderA.providerToVerify.consumers.first()
         assert consumer.pactFile == new URL(pactFileUrl)
         assert consumer.stateChange == null
+    }
+
+    @Test
+    void 'configures the publish task correctly'() {
+        project.pact {
+            publish {
+                pactDirectory = '/pact/dir'
+                pactBrokerUrl = 'http://pactbroker:1234'
+            }
+        }
+
+        project.evaluate()
+
+        assert project.pact.publish.pactDirectory == '/pact/dir'
+        assert project.pact.publish.pactBrokerUrl == 'http://pactbroker:1234'
     }
 }
