@@ -308,3 +308,23 @@ To publish the plugin to the community portal:
 
     $ ./gradlew :pact-jvm-provider-gradle_2.11:publishPlugins
     
+# Publishing pact files to a pact broker
+
+*[version 2.2.7+]*
+
+The pact gradle plugin provides a `pactPublish` task that can publish all pact files in a directory
+to a pact broker. To use it, you need to add a publish configuration to the pact configuration that defines the
+directory where the pact files are and the URL to the pact broker.
+
+For example:
+
+```groovy
+pact {
+
+    publish {
+        pactDirectory = '/pact/dir' // defaults to $buildDir/pacts
+        pactBrokerUrl = 'http://pactbroker:1234'
+    }
+
+}
+```

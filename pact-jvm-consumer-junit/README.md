@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-junit_2.11`
-* version-id = `2.1.x`
+* version-id = `2.2.x`
 
 ##Usage
 
@@ -346,3 +346,7 @@ For SBT:
 fork in Test := true,
 javaOptions in Test := Seq("-Dpact.rootDir=some/other/directory")
 ```
+
+# Publishing your pact files to a pact broker
+
+If you use Gradle, you can use the [pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle#publishing-pact-files-to-a-pact-broker) to publish your pact files.
