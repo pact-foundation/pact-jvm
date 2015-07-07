@@ -1,5 +1,14 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.2.7 - Gradle publish task
+
+* 9eda214 - added docs about pactPublish task #120 (Ronald Holshausen, Mon Jul 6 19:37:28 2015 +1000)
+* 5fe1698 - add a gradle task to publish pact files to a pact broker #120 (Ronald Holshausen, Mon Jul 6 17:07:17 2015 +1000)
+* 11adca2 - add link to the project wikis (Ronald Holshausen, Sat Jul 4 13:58:54 2015 +1000)
+* e766aa1 - update maven plugin docs on how to overide the default http client #133 (Ronald Holshausen, Sat Jul 4 12:57:48 2015 +1000)
+* cc5ef05 - bump version (Ronald Holshausen, Thu Jul 2 22:03:25 2015 +1000)
+* 0ff176f - Update README.md (Ronald Holshausen, Thu Jul 2 21:50:12 2015 +1000)
+
 # 2.2.6 - Bugfixes
 
 * 9bcf989 - if no charset is defined, default to UTF-8 #132 (Ronald Holshausen, Thu Jul 2 21:04:16 2015 +1000)
