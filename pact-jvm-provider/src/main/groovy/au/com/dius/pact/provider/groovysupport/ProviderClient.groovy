@@ -1,39 +1,25 @@
 package au.com.dius.pact.provider.groovysupport
-
 import au.com.dius.pact.model.Request
 import groovy.json.JsonBuilder
-import org.apache.http.Consts
-import org.apache.http.Header
-import org.apache.http.HttpEntity
-import org.apache.http.HttpEntityEnclosingRequest
-import org.apache.http.HttpRequest
-import org.apache.http.HttpResponse
+import org.apache.http.*
 import org.apache.http.client.entity.UrlEncodedFormEntity
-import org.apache.http.client.methods.CloseableHttpResponse
-import org.apache.http.client.methods.HttpDelete
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.methods.HttpHead
-import org.apache.http.client.methods.HttpOptions
-import org.apache.http.client.methods.HttpPatch
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.client.methods.HttpPut
-import org.apache.http.client.methods.HttpTrace
+import org.apache.http.client.methods.*
 import org.apache.http.client.utils.URIBuilder
 import org.apache.http.client.utils.URLEncodedUtils
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
 import scala.collection.JavaConverters$
 
 class ProviderClient {
 
+    HttpClientFactory httpClientFactory = new HttpClientFactory()
     Request request
     def provider
 
     def makeRequest() {
-        CloseableHttpClient httpclient = newClient(provider)
+        CloseableHttpClient httpclient = httpClientFactory.newClient(provider)
         HttpRequest method = newRequest(request)
 
         if (request.headers().defined) {
@@ -84,19 +70,19 @@ class ProviderClient {
         }
 
         if (stateChangeUrl) {
-            CloseableHttpClient httpclient = newClient(provider)
+            CloseableHttpClient httpclient = httpClientFactory.newClient(provider)
             def urlBuilder
             if (stateChangeUrl instanceof URI) {
-              urlBuilder = new URIBuilder(stateChangeUrl)
+                urlBuilder = new URIBuilder(stateChangeUrl)
             } else {
-              urlBuilder = new URIBuilder(stateChangeUrl.toString())
+                urlBuilder = new URIBuilder(stateChangeUrl.toString())
             }
             HttpRequest method
 
             if (postStateInBody) {
                 method = new HttpPost(urlBuilder.build())
                 method.setEntity(new StringEntity(new JsonBuilder([state: state]).toPrettyString(),
-                  ContentType.APPLICATION_JSON))
+                        ContentType.APPLICATION_JSON))
             } else {
                 method = new HttpPost(urlBuilder.setParameter('state', state).build())
             }
@@ -137,21 +123,6 @@ class ProviderClient {
         response
     }
 
-    private newClient(def provider) {
-        if (provider?.createClient != null) {
-            if (provider.createClient instanceof Closure) {
-                provider.createClient(provider)
-            } else {
-                Binding binding = new Binding()
-                binding.setVariable("provider", provider)
-                GroovyShell shell = new GroovyShell(binding)
-                shell.evaluate(provider.createClient as String)
-            }
-        } else {
-            HttpClients.createDefault()
-        }
-    }
-
     private HttpRequest newRequest(Request request) {
         def urlBuilder = new URIBuilder()
         urlBuilder.scheme = provider.protocol
@@ -179,27 +150,27 @@ class ProviderClient {
 
         def url = urlBuilder.build().toString()
         switch (request.method().toLowerCase()) {
-          case 'post':
-              return new HttpPost(url)
-          case 'put':
-              return new HttpPut(url)
-          case 'options':
-              return new HttpOptions(url)
-          case 'delete':
-              return new HttpDelete(url)
-          case 'head':
-              return new HttpHead(url)
-          case 'patch':
-              return new HttpPatch(url)
-          case 'trace':
-              return new HttpTrace(url)
-          default:
-              return new HttpGet(url)
+            case 'post':
+                return new HttpPost(url)
+            case 'put':
+                return new HttpPut(url)
+            case 'options':
+                return new HttpOptions(url)
+            case 'delete':
+                return new HttpDelete(url)
+            case 'head':
+                return new HttpHead(url)
+            case 'patch':
+                return new HttpPatch(url)
+            case 'trace':
+                return new HttpTrace(url)
+            default:
+                return new HttpGet(url)
         }
-  }
+    }
 
-  static boolean urlEncodedFormPost(Request request) {
-    request.method().toLowerCase() == 'post' &&
-      request.mimeType() == ContentType.APPLICATION_FORM_URLENCODED.mimeType
-  }
+    static boolean urlEncodedFormPost(Request request) {
+        request.method().toLowerCase() == 'post' &&
+                request.mimeType() == ContentType.APPLICATION_FORM_URLENCODED.mimeType
+    }
 }
