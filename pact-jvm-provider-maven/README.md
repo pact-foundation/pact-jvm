@@ -89,6 +89,28 @@ provider and define a consumer for each pact file in the directory. Consumer nam
 </plugin>
 ```
 
+## Enabling insecure SSL [version 2.2.8+]
+
+For providers that are running on SSL with self-signed certificates, you need to enable insecure SSL mode by setting
+`<insecure>true</insecure>` on the provider.
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
+    <version>2.2.8</version>
+    <configuration>
+      <serviceProviders>
+        <serviceProvider>
+          <name>provider1</name>
+          <pactFileDirectory>path/to/pacts</pactFileDirectory>
+          <insecure>true</insecure>
+        </serviceProvider>
+      </serviceProviders>
+    </configuration>
+</plugin>
+```
+
 ## Modifying the requests before they are sent
 
 Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would

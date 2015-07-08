@@ -140,6 +140,29 @@ pact {
 Following typical Gradle behaviour, you can set the provider task properties to the actual tasks, or to the task names
 as a string (for the case when they haven't been defined yet).
 
+## Enabling insecure SSL [version 2.2.8+]
+
+For providers that are running on SSL with self-signed certificates, you need to enable insecure SSL mode by setting
+`insecure = true` on the provider.
+
+```groovy
+pact {
+
+    serviceProviders {
+
+        provider1 {
+            insecure = true // allow SSL with a self-signed cert
+            hasPactWith('consumer1') {
+                pactFile = file('path/to/provider1-consumer1-pact.json')
+            }
+
+        }
+
+    }
+
+}
+```
+
 ## Modifying the HTTP Client Used [version 2.2.4+]
 
 The default HTTP client is used for all requests to providers (created with a call to `HttpClients.createDefault()`).

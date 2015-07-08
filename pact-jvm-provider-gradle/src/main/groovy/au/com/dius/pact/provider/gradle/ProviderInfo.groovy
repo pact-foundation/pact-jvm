@@ -14,6 +14,7 @@ class ProviderInfo {
     def requestFilter
     def stateChangeRequestFilter
     def createClient
+    boolean insecure = false
 
     List<ConsumerInfo> consumers = []
 
