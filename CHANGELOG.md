@@ -1,5 +1,15 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.2.8 - inecure SSL flag for maven and gradle plugins
+
+* 5eaac32 - Merge pull request #137 from Freaky-namuH/specify-trust-store (Ronald Holshausen, Wed Jul 8 14:11:10 2015 +1000)
+* 88a6c1d - Add ability to specify a custom SSL trust store without breaking out the Groovy script in a pom file. (Ashley Cambrell, Wed Jul 8 13:26:12 2015 +1000)
+* 9145b12 - added insecure flag to gradle plugin and updated the readmes (Ronald Holshausen, Wed Jul 8 12:51:59 2015 +1000)
+* 4813115 - Fix the unit test broken by pull request #136 (Ronald Holshausen, Wed Jul 8 12:41:31 2015 +1000)
+* be0315e - Merge pull request #136 from Freaky-namuH/insecure-https (Ronald Holshausen, Wed Jul 8 12:25:58 2015 +1000)
+* a5aaf10 - Add insecure flag to reduce the amount of boiler plate groovy script is needed in the pom.xml file to allow tests to connect to https endpoints. (Ashley Cambrell, Wed Jul 8 11:26:23 2015 +1000
+* a008584 - bump version (Ronald Holshausen, Tue Jul 7 20:34:38 2015 +1000)
+
 # 2.2.7 - Gradle publish task
 
 * 9eda214 - added docs about pactPublish task #120 (Ronald Holshausen, Mon Jul 6 19:37:28 2015 +1000)
