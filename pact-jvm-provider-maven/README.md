@@ -111,6 +111,32 @@ For providers that are running on SSL with self-signed certificates, you need to
 </plugin>
 ```
 
+## Specifying a custom trust store [version 2.2.8+]
+
+For environments that are running their own certificate chains:
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
+    <version>2.2.8</version>
+    <configuration>
+      <serviceProviders>
+        <serviceProvider>
+          <name>provider1</name>
+          <pactFileDirectory>path/to/pacts</pactFileDirectory>
+          <trustStore>relative/path/to/trustStore.jks</trustStore>
+          <trustStorePassword>changeit</trustStorePassword>
+        </serviceProvider>
+      </serviceProviders>
+    </configuration>
+</plugin>
+```
+
+`trustStore` is either relative to the current working (build) directory. `trustStorePassword` defaults to `changeit`.
+
+NOTE: The hostname will still be verified against the certificate.
+
 ## Modifying the requests before they are sent
 
 Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would
