@@ -22,6 +22,7 @@ class ProviderClientTest {
   def provider
   def mockHttpClient
   HttpUriRequest args
+  HttpClientFactory httpClientFactory
 
   @Before
   void setup() {
@@ -31,8 +32,9 @@ class ProviderClientTest {
       port: 8080,
       path: '/'
     ]
-    client = new ProviderClient(request: request, provider: provider)
     mockHttpClient = mock CloseableHttpClient
+    httpClientFactory = [newClient: { provider -> mockHttpClient }] as HttpClientFactory
+    client = new ProviderClient(request: request, provider: provider, httpClientFactory: httpClientFactory)
     when(mockHttpClient.execute(any())).thenAnswer( { InvocationOnMock invocation ->
       args = invocation.arguments.first()
       [
@@ -42,7 +44,6 @@ class ProviderClientTest {
         close: {}
       ] as CloseableHttpResponse
     })
-    client.metaClass.newClient = { mockHttpClient }
   }
 
   @Test
