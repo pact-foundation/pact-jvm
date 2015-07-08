@@ -17,4 +17,5 @@ class Provider {
     boolean stateChangeUsesBody = true
     def stateChangeRequestFilter
     def createClient
+    boolean insecure = false
 }
