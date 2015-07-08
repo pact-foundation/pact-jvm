@@ -162,6 +162,31 @@ pact {
 
 }
 ```
+## Specifying a custom trust store [version 2.2.8+]
+
+For environments that are running their own certificate chains:
+
+```groovy
+pact {
+
+    serviceProviders {
+
+        provider1 {
+            trustStore = new File('relative/path/to/trustStore.jks')
+            trustStorePassword = 'changeit'
+            hasPactWith('consumer1') {
+                pactFile = file('path/to/provider1-consumer1-pact.json')
+            }
+
+        }
+
+    }
+
+}
+
+`trustStore` is either relative to the current working (build) directory. `trustStorePassword` defaults to `changeit`.
+
+NOTE: The hostname will still be verified against the certificate.
 
 ## Modifying the HTTP Client Used [version 2.2.4+]
 

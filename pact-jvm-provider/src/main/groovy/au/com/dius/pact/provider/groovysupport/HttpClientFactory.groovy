@@ -30,9 +30,20 @@ class HttpClientFactory {
             }
         } else if (provider?.insecure) {
             createInsecure()
+        } else if (provider?.trustStore && provider?.trustStorePassword) {
+            createWithTrustStore(provider)
         } else {
             HttpClients.createDefault()
         }
+    }
+
+    private static void createWithTrustStore(provider) {
+        char[] password = provider.trustStorePassword.toCharArray()
+
+        HttpClients
+                .custom()
+                .setSslcontext(new SSLContextBuilder().loadTrustMaterial(provider.trustStore as File, password).build())
+                .build()
     }
 
     private static CloseableHttpClient createInsecure() {
