@@ -15,6 +15,8 @@ class ProviderInfo {
     def stateChangeRequestFilter
     def createClient
     boolean insecure = false
+    File trustStore
+    String trustStorePassword = 'changeit'
 
     List<ConsumerInfo> consumers = []
 
