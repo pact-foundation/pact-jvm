@@ -3,7 +3,7 @@ package au.com.dius.pact.matchers
 import au.com.dius.pact.model.{HeaderMismatchFactory, HeaderMismatch}
 
 object HeaderMatcher {
-  def compareHeader(headerKey: String, expected: String, actual: String, matchers: Option[Map[String, Map[String, String]]]) = {
+  def compareHeader(headerKey: String, expected: String, actual: String, matchers: Option[Map[String, Map[String, Any]]]) = {
     def stripWhiteSpaceAfterCommas(in: String): String = in.replaceAll(",[ ]*", ",")
 
     if (Matchers.matcherDefined(Seq("$", "headers", headerKey), matchers)) {

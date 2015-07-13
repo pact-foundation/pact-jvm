@@ -34,24 +34,24 @@ class XmlBodyMatcher extends BodyMatcher {
 
 
   def compareText(path: Seq[String], expected: Node, actual: Node, config: DiffConfig,
-                  matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
+                  matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     if (expected.text != actual.text) {
-      List(BodyMismatch(expected,actual,Some(s"Expected value '${expected.text}' but received '${actual.text}'"),mkPathString(path)))
+      List(BodyMismatch(expected,actual,Some(s"Expected value '${expected.text}' but received '${actual.text}'"), mkPathString(path)))
     } else {
       List()
     }
   }
 
   def compare(path: Seq[String], expected: Node, actual: Node, config: DiffConfig,
-                  matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
+                  matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     expected match {
-        case _ : Text => compareText(path,expected,actual,config,matchers)
-        case _ : Elem => compareNode(path,expected,actual,config,matchers)
+        case _ : Text => compareText(path, expected, actual, config, matchers)
+        case _ : Elem => compareNode(path, expected, actual, config, matchers)
     }
   }
   
   def compareNode(path: Seq[String], expected: Node, actual: Node, config: DiffConfig,
-                  matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
+                  matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     if (actual.label != expected.label) {
       List(BodyMismatch(expected, actual, Some(s"Expected element ${expected.label} but received ${actual.label}"), mkPathString(path)))
     } else {
@@ -61,7 +61,7 @@ class XmlBodyMatcher extends BodyMatcher {
   }
 
   private def compareChildren(path: Seq[String], expected: Node, actual: Node, config: DiffConfig,
-                           matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
+                           matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     if (expected.child.isEmpty && actual.child.nonEmpty) {
       List(BodyMismatch(expected, actual, Some(s"Expected an empty List but received ${actual.child.mkString(",")}"),mkPathString(path)))
     } else if (expected.child.size != actual.child.size) {
@@ -77,7 +77,7 @@ class XmlBodyMatcher extends BodyMatcher {
   }
 
   private def compareAttributes(path: Seq[String], expected: Node, actual: Node, config: DiffConfig,
-                              matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
+                              matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
       val expectedAttrs = expected.attributes.asAttrMap
       val actualAttrs = actual.attributes.asAttrMap
 

@@ -38,7 +38,8 @@ class JsonBodyMatcher extends BodyMatcher  with StrictLogging {
     }
   }
 
-  def compare(path: Seq[String], expected: Any, actual: Any, diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
+  def compare(path: Seq[String], expected: Any, actual: Any, diffConfig: DiffConfig,
+              matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     (expected, actual) match {
       case (a: JObject, b: JObject) => compareMaps(a.values, b.values, a, b, path, diffConfig, matchers)
       case (a: Map[String, Any], b: Map[String, Any]) => compareMaps(a, b, a, b, path, diffConfig, matchers)
@@ -57,7 +58,7 @@ class JsonBodyMatcher extends BodyMatcher  with StrictLogging {
   }
 
   def compareListContent(expectedValues: List[Any], actualValues: List[Any], path: Seq[String],
-                         diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, String]]]) = {
+                         diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, Any]]]) = {
     var result = List[BodyMismatch]()
     for ((value, index) <- expectedValues.view.zipWithIndex) {
       if (index < actualValues.size) {
@@ -71,7 +72,7 @@ class JsonBodyMatcher extends BodyMatcher  with StrictLogging {
   }
 
   def compareLists(expectedValues: List[Any], actualValues: List[Any], a: Any, b: Any, path: Seq[String],
-                   diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
+                   diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     var result = List[BodyMismatch]()
     if (Matchers.matcherDefined(path, matchers)) {
       logger.debug("compareLists: Matcher defined for path " + path)
@@ -95,7 +96,7 @@ class JsonBodyMatcher extends BodyMatcher  with StrictLogging {
   }
 
   def compareMaps(expectedValues: Map[String, Any], actualValues: Map[String, Any], a: Any, b: Any, path: Seq[String],
-                  diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
+                  diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     if (expectedValues.isEmpty && actualValues.nonEmpty) {
       List(BodyMismatch(a, b, Some(s"Expected an empty Map but received ${valueOf(actualValues)}"), path.mkString(".")))
     } else {
@@ -121,7 +122,7 @@ class JsonBodyMatcher extends BodyMatcher  with StrictLogging {
     }
   }
 
-  def compareValues(path: Seq[String], expected: Any, actual: Any, matchers: Option[Map[String, Map[String, String]]]): List[BodyMismatch] = {
+  def compareValues(path: Seq[String], expected: Any, actual: Any, matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     if (Matchers.matcherDefined(path, matchers)) {
       logger.debug("compareValues: Matcher defined for path " + path)
       Matchers.domatch[BodyMismatch](matchers, path, expected, actual, BodyMismatchFactory)

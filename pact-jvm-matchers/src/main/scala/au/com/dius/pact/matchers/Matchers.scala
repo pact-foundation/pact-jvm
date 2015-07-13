@@ -36,24 +36,24 @@ object Matchers extends StrictLogging {
     }
   }
 
-  def resolveMatchers(matchers: Map[String, Map[String, String]], path: Seq[String]) =
+  def resolveMatchers(matchers: Map[String, Map[String, Any]], path: Seq[String]) =
     matchers.filterKeys(p => matchesPath(p, path))
 
-  def matcherDefined(path: Seq[String], matchers: Option[Map[String, Map[String, String]]]): Boolean =
+  def matcherDefined(path: Seq[String], matchers: Option[Map[String, Map[String, Any]]]): Boolean =
     matchers.isDefined && resolveMatchers(matchers.get, path).nonEmpty
 
-  def domatch[Mismatch](matchers: Option[Map[String, Map[String, String]]], path: Seq[String], expected: Any, actual: Any,
+  def domatch[Mismatch](matchers: Option[Map[String, Map[String, Any]]], path: Seq[String], expected: Any, actual: Any,
                         mismatchFn: MismatchFactory[Mismatch]) : List[Mismatch] = {
     val matcherDef = resolveMatchers(matchers.get, path).maxBy(entry => calculatePathWeight(entry._1, path))._2
     matcherDef match {
-      case map: Map[String, String] => matcher(map).domatch[Mismatch](map, path, expected, actual, mismatchFn)
+      case map: Map[String, Any] => matcher(map).domatch[Mismatch](map, path, expected, actual, mismatchFn)
       case m =>
         logger.warn(s"Matcher $m is mis-configured, defaulting to equality matching")
         EqualsMatcher.domatch[Mismatch](Map[String, String](), path, expected, actual, mismatchFn)
     }
   }
 
-  def matcher(matcherDef: Map[String, String]) : Matcher = {
+  def matcher(matcherDef: Map[String, Any]) : Matcher = {
     if (matcherDef.isEmpty) {
       logger.warn(s"Unrecognised empty matcher, defaulting to equality matching")
       EqualsMatcher
@@ -91,7 +91,7 @@ object Matchers extends StrictLogging {
 }
 
 object EqualsMatcher extends Matcher with StrictLogging {
-  def domatch[Mismatch](matcherDef: Map[String, String], path: Seq[String], expected: Any, actual: Any,
+  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any,
                         mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
     val matches: Boolean = Matchers.safeToString(actual).equals(expected)
     logger.debug(s"comparing ${valueOf(actual)} to ${valueOf(expected)} at $path -> $matches")
@@ -104,8 +104,8 @@ object EqualsMatcher extends Matcher with StrictLogging {
 }
 
 object RegexpMatcher extends Matcher with StrictLogging {
-  def domatch[Mismatch](matcherDef: Map[String, String], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-    val regex = matcherDef.get("regex").get
+  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
+    val regex = matcherDef.get("regex").get.toString
     val matches: Boolean = Matchers.safeToString(actual).matches(regex)
     logger.debug(s"comparing ${valueOf(actual)} with regexp $regex at $path -> $matches")
     if (matches) {
@@ -208,21 +208,21 @@ object TypeMatcher extends Matcher with StrictLogging {
     }
   }
 
-  def domatch[Mismatch](matcherDef: Map[String, String], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-    matcherDef.get("match") match {
-      case Some("type") => matchType[Mismatch](path, expected, actual, mismatchFn)
-      case Some("number") => matchNumber[Mismatch](path, expected, actual, mismatchFn)
-      case Some("integer") => matchInteger[Mismatch](path, expected, actual, mismatchFn)
-      case Some("real") => matchReal[Mismatch](path, expected, actual, mismatchFn)
-      case Some("timestamp") => matchTimestamp[Mismatch](path, expected, actual, mismatchFn)
+  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
+    matcherDef.get("match").get.toString match {
+      case "type" => matchType[Mismatch](path, expected, actual, mismatchFn)
+      case "number" => matchNumber[Mismatch](path, expected, actual, mismatchFn)
+      case "integer" => matchInteger[Mismatch](path, expected, actual, mismatchFn)
+      case "real" => matchReal[Mismatch](path, expected, actual, mismatchFn)
+      case "timestamp" => matchTimestamp[Mismatch](path, expected, actual, mismatchFn)
       case _ => List(mismatchFn.create(expected, actual, "type matcher is mis-configured", path))
     }
   }
 }
 
 object TimestampMatcher extends Matcher with StrictLogging {
-  def domatch[Mismatch](matcherDef: Map[String, String], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-    val pattern = matcherDef.get("timestamp").get
+  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
+    val pattern = matcherDef.get("timestamp").get.toString
     logger.debug(s"comparing ${valueOf(actual)} to timestamp pattern $pattern at $path")
     try {
       DateUtils.parseDate(Matchers.safeToString(actual), pattern)
@@ -234,8 +234,8 @@ object TimestampMatcher extends Matcher with StrictLogging {
 }
 
 object TimeMatcher extends Matcher with StrictLogging {
-  def domatch[Mismatch](matcherDef: Map[String, String], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-    val pattern = matcherDef.get("time").get
+  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
+    val pattern = matcherDef.get("time").get.toString
     logger.debug(s"comparing ${valueOf(actual)} to time pattern $pattern at $path")
     try {
       DateUtils.parseDate(Matchers.safeToString(actual), pattern)
@@ -247,8 +247,8 @@ object TimeMatcher extends Matcher with StrictLogging {
 }
 
 object DateMatcher extends Matcher with StrictLogging {
-  def domatch[Mismatch](matcherDef: Map[String, String], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-    val pattern = matcherDef.get("date").get
+  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
+    val pattern = matcherDef.get("date").get.toString
     logger.debug(s"comparing ${valueOf(actual)} to date pattern $pattern at $path")
     try {
       DateUtils.parseDate(Matchers.safeToString(actual), pattern)
@@ -260,8 +260,12 @@ object DateMatcher extends Matcher with StrictLogging {
 }
 
 object MinimumMatcher extends Matcher with StrictLogging {
-  def domatch[Mismatch](matcherDef: Map[String, String], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-    val value = matcherDef.get("min").get.toInt
+  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
+    val value = matcherDef.get("min").get match {
+      case i: Int => i
+      case j: Integer => j.toInt
+      case o => o.toString.toInt
+    }
     logger.debug(s"comparing ${valueOf(actual)} with minimum $value at $path")
     val size = actual match {
       case v: List[Any] => v.size
@@ -277,8 +281,12 @@ object MinimumMatcher extends Matcher with StrictLogging {
 }
 
 object MaximumMatcher extends Matcher with StrictLogging {
-  def domatch[Mismatch](matcherDef: Map[String, String], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-    val value = matcherDef.get("max").get.toInt
+  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
+    val value = matcherDef.get("max").get match {
+      case i: Int => i
+      case j: Integer => j.toInt
+      case o => o.toString.toInt
+    }
     logger.debug(s"comparing ${valueOf(actual)} with maximum $value at $path")
     val size = actual match {
       case v: List[Any] => v.size

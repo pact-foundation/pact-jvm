@@ -63,7 +63,7 @@ object HeaderMismatchFactory extends MismatchFactory[HeaderMismatch] {
 
 object Matching {
   
-  def matchHeaders(expected: Option[Headers], actual: Option[Headers], matchers: Option[Map[String, Map[String, String]]]): Seq[HeaderMismatch] = {
+  def matchHeaders(expected: Option[Headers], actual: Option[Headers], matchers: Option[Map[String, Map[String, Any]]]): Seq[HeaderMismatch] = {
 
     def compareHeaders(e: Map[String, String], a: Map[String, String]): Seq[HeaderMismatch] = {
       e.foldLeft(Seq[HeaderMismatch]()) {
