@@ -228,12 +228,24 @@ public class PactDslJsonBody extends DslPart {
 
     @Override
     public PactDslJsonBody arrayLike(String name) {
+        matchers.put(matcherKey(name), matchMin(0));
         return new PactDslJsonBody(".", new PactDslJsonArray(matcherKey(name), this, true));
     }
 
     @Override
     public PactDslJsonBody arrayLike() {
         throw new UnsupportedOperationException("use the arrayLike(String name) form");
+    }
+
+    @Override
+    public PactDslJsonBody eachLike(String name) {
+        matchers.put(matcherKey(name), matchMin(0));
+        return new PactDslJsonBody(".", new PactDslJsonArray(matcherKey(name), this, true));
+    }
+
+    @Override
+    public PactDslJsonBody eachLike() {
+        throw new UnsupportedOperationException("use the eachLike(String name) form");
     }
 
     @Override

@@ -68,4 +68,22 @@ public class PactDslJsonBodyTest {
         assertThat(((JSONObject) body.getBody()).keySet(), is(equalTo((Set)
                 new HashSet(Arrays.asList("200", "1", "@field")))));
     }
+
+    @Test
+    public void eachLikeMatcherTest() {
+        DslPart body = new PactDslJsonBody()
+                .eachLike("ids")
+                    .id()
+                    .closeObject()
+                .closeArray();
+
+        Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
+                ".ids",
+                ".ids[*].id"
+        ));
+        assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
+
+        assertThat(((JSONObject) body.getBody()).keySet(), is(equalTo((Set)
+                new HashSet(Arrays.asList("ids")))));
+    }
 }

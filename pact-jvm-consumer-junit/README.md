@@ -236,7 +236,7 @@ has a minimum or maximum size and that each item in the list matches a given exa
 
 | function | description |
 |----------|-------------|
-| `arrayLike` | Ensure that each item in the list matches the provided example |
+| `eachLike` | Ensure that each item in the list matches the provided example |
 | `maxArrayLike` | Ensure that each item in the list matches the provided example and the list is no bigger than the provided max |
 | `minArrayLike` | Ensure that each item in the list matches the provided example and the list is no smaller than the provided min |
 

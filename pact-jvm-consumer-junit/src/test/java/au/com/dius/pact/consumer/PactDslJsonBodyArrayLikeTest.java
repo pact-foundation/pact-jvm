@@ -9,7 +9,7 @@ public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTest {
         DslPart body = new PactDslJsonBody()
             .id()
             .object("data")
-                .arrayLike("array1")
+                .eachLike("array1")
                     .id()
                     .stringType("name")
                     .date("dob")
@@ -38,6 +38,7 @@ public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTest {
 
         MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment,
             "$.body.id",
+            "$.body.data.array1",
             "$.body.data.array1[*].id",
             "$.body.data.array1[*].name",
             "$.body.data.array1[*].dob",

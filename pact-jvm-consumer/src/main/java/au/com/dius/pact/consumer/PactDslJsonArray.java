@@ -40,6 +40,19 @@ public class PactDslJsonArray extends DslPart {
 
     @Override
     public PactDslJsonBody arrayLike() {
+        matchers.put(root + appendArrayIndex(1), matchMin(0));
+        PactDslJsonArray parent = new PactDslJsonArray(root, this, true);
+        return new PactDslJsonBody(".", parent);
+    }
+
+    @Override
+    public PactDslJsonBody eachLike(String name) {
+        throw new UnsupportedOperationException("use the eachLike() form");
+    }
+
+    @Override
+    public PactDslJsonBody eachLike() {
+        matchers.put(root + appendArrayIndex(1), matchMin(0));
         PactDslJsonArray parent = new PactDslJsonArray(root, this, true);
         return new PactDslJsonBody(".", parent);
     }
