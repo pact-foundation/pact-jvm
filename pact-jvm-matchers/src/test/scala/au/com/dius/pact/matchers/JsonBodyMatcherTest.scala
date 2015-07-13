@@ -52,6 +52,20 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
         matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
       }
 
+      "with each like matcher on unequal lists" in {
+        actualBody = Some("{\"list\": [100, 200, 300, 400]}")
+        expectedBody = Some("{\"list\": [100]}")
+        matchers = Some(Map("$.body.list" -> Map("min" -> "1"), "$.body.list.*" -> Map("match" -> "type")))
+        matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
+      }
+
+      "with each like matcher on empty list" in {
+        actualBody = Some("{\"list\": []}")
+        expectedBody = Some("{\"list\": [100]}")
+        matchers = Some(Map("$.body.list" -> Map("min" -> "0"), "$.body.list.*" -> Map("match" -> "type")))
+        matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
+      }
+
     }
 
     "returns a mismatch" should {

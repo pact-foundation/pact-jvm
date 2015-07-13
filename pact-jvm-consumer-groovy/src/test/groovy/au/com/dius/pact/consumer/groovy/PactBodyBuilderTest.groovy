@@ -122,6 +122,7 @@ class PactBodyBuilderTest {
             '$.body.orders[*].lineItems': ['min': 1],
             '$.body.orders[*].lineItems[*].id': [match: 'type'],
             '$.body.orders[*].lineItems[*].amount': [match: 'number'],
+            '$.body.orders[*].lineItems[*].productCodes': ['min': 0],
             '$.body.orders[*].lineItems[*].productCodes[*].code': [match: 'type']
         ]
 

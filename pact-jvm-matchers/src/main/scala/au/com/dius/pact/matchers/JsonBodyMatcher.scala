@@ -63,7 +63,7 @@ class JsonBodyMatcher extends BodyMatcher  with StrictLogging {
     for ((value, index) <- expectedValues.view.zipWithIndex) {
       if (index < actualValues.size) {
         result = result ++: compare(path :+ index.toString, value, actualValues(index), diffConfig, matchers)
-      } else {
+      } else if (!Matchers.matcherDefined(path, matchers)) {
         result = result :+ BodyMismatch(expectedValues, actualValues, Some(s"Expected ${valueOf(value)} but was missing"),
           path.mkString("."))
       }
