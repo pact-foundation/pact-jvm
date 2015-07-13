@@ -1,5 +1,13 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.2.9 - bugfixes in gradle plugin and `each like` matchers
+
+* 2ab96e3 - Correct the each like matcher in the Java DSL (Ronald Holshausen, Mon Jul 13 17:28:05 2015 +1000)
+* 3d78301 - fix for each like matchers with empty actual lists (Ronald Holshausen, Mon Jul 13 17:06:04 2015 +1000)
+* 5029796 - matcher definitions should accept all types for the values (Ronald Holshausen, Mon Jul 13 13:52:54 2015 +1000)
+* 2eeab6a - fix No such property: trustStore error in gradle plugin (Ronald Holshausen, Sun Jul 12 11:56:41 2015 +1000)
+* 26803f0 - bump version (Ronald Holshausen, Wed Jul 8 19:32:18 2015 +1000)
+
 # 2.2.8 - inecure SSL flag for maven and gradle plugins
 
 * 5eaac32 - Merge pull request #137 from Freaky-namuH/specify-trust-store (Ronald Holshausen, Wed Jul 8 14:11:10 2015 +1000)
