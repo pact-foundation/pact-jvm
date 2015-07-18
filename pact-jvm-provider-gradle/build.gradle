@@ -1,5 +1,3 @@
-import org.gradle.api.internal.file.collections.SimpleFileCollection
-
 buildscript {
   repositories {
     jcenter()

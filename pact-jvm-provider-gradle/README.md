@@ -274,8 +274,6 @@ For each provider you can specify a state change URL to use to switch the state 
 receive the providerState description from the pact file before each interaction via a POST. As for normal requests,
 a request filter (`stateChangeRequestFilter`) can also be set to manipulate the request before it is sent.
 
-You can also give a Closure for the stateChange that returns the URL.
-
 ```groovy
 pact {
 
@@ -313,8 +311,7 @@ If the `stateChangeUsesBody` is not specified, or is set to true, then the provi
 ### Using a Closure [version 2.2.2+]
 
 You can set a closure to be called before each verification with a defined provider state. The closure will be
-called with the state description from the pact file. If you also require the state change request to be executed,
-return the URL for the request (as a URL, URI or String) from the closure. Otherwise, return null or false.
+called with the state description from the pact file.
 
 ```groovy
 pact {
@@ -330,7 +327,6 @@ pact {
                 stateChange = { providerState ->
                     def fixture = loadFixtuerForProviderState(providerState)
                     setupDatabase(fixture)
-                    false
                 }
             }
 

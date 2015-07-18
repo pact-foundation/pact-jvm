@@ -167,7 +167,6 @@ class PactVerificationTask extends DefaultTask {
     }
 
     def stateChange(String state, ConsumerInfo consumer) {
-      println "-->>>> [${Ansi.class.getProtectionDomain().getCodeSource()?.getLocation()}]"
         AnsiConsole.out().println(Ansi.ansi().a('  Given ').bold().a(state).boldOff())
         try {
             def stateChangeHandler = consumer.stateChange

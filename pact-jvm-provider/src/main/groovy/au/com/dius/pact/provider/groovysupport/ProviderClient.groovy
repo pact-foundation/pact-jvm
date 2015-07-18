@@ -61,14 +61,7 @@ class ProviderClient {
         }
     }
 
-    CloseableHttpResponse makeStateChangeRequest(def url, String state, boolean postStateInBody) {
-        def stateChangeUrl
-        if (url instanceof Closure) {
-            stateChangeUrl = url.call(state)
-        } else {
-            stateChangeUrl = url
-        }
-
+    CloseableHttpResponse makeStateChangeRequest(def stateChangeUrl, String state, boolean postStateInBody) {
         if (stateChangeUrl) {
             CloseableHttpClient httpclient = httpClientFactory.newClient(provider)
             def urlBuilder
