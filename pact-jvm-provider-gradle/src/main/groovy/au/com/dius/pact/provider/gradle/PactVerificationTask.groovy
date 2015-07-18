@@ -9,6 +9,8 @@ import org.apache.commons.lang3.StringUtils
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.AnsiConsole
 import org.gradle.api.DefaultTask
+import org.gradle.api.Task
+import org.gradle.api.tasks.GradleBuild
 import org.gradle.api.tasks.TaskAction
 import org.json4s.FileInput
 import org.json4s.StreamInput
@@ -165,31 +167,51 @@ class PactVerificationTask extends DefaultTask {
     }
 
     def stateChange(String state, ConsumerInfo consumer) {
+      println "-->>>> [${Ansi.class.getProtectionDomain().getCodeSource()?.getLocation()}]"
         AnsiConsole.out().println(Ansi.ansi().a('  Given ').bold().a(state).boldOff())
         try {
-
-            def url = consumer.stateChange
-            if (url == null || (url instanceof String && StringUtils.isBlank(url))) {
-                AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
-                  .a('WARNING: State Change ignored as there is no stateChange URL')
-                  .reset())
+            def stateChangeHandler = consumer.stateChange
+            if (stateChangeHandler == null || (stateChangeHandler instanceof String && StringUtils.isBlank(stateChangeHandler))) {
+              AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
+                .a('WARNING: State Change ignored as there is no stateChange URL')
+                .reset())
+              return true
+            } else if (stateChangeHandler instanceof Closure) {
+              return stateChangeHandler.call(state)
+            } else if (stateChangeHandler instanceof Task || stateChangeHandler instanceof String
+              && project.tasks.findByName(stateChangeHandler)) {
+              def task = stateChangeHandler instanceof String ? project.tasks.getByName(stateChangeHandler) : stateChangeHandler
+              task.setProperty('providerState', state)
+              task.ext.providerState = state
+              def build = project.task(type: GradleBuild) {
+                tasks = [task.name]
+              }
+              build.execute()
+              return true
             } else {
-                ProviderClient client = new ProviderClient(provider: providerToVerify)
-                def response = client.makeStateChangeRequest(url, state, consumer.stateChangeUsesBody)
-                if (response) {
-                  try {
-                    if (response.statusLine.statusCode >= 400) {
-                      AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.RED)
-                        .a('State Change Request Failed - ')
-                        .a(response.statusLine.toString()).reset())
-                      return 'State Change Request Failed - ' + response.statusLine.toString()
+                try {
+                  def url = stateChangeHandler instanceof URI ? stateChangeHandler : new URI(stateChangeHandler.toString())
+                  ProviderClient client = new ProviderClient(provider: providerToVerify)
+                  def response = client.makeStateChangeRequest(url, state, consumer.stateChangeUsesBody)
+                  if (response) {
+                    try {
+                      if (response.statusLine.statusCode >= 400) {
+                        AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.RED)
+                          .a('State Change Request Failed - ')
+                          .a(response.statusLine.toString()).reset())
+                        return 'State Change Request Failed - ' + response.statusLine.toString()
+                      }
+                    } finally {
+                      response.close()
                     }
-                  } finally {
-                    response.close()
                   }
+                } catch (URISyntaxException ex) {
+                  AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
+                    .a("WARNING: State Change ignored as there is no stateChange URL, received \"$stateChangeHandler\"")
+                    .reset())
                 }
+                return true
             }
-            return true
         } catch (e) {
             AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.RED).a('State Change Request Failed - ')
                 .a(e.message).reset())

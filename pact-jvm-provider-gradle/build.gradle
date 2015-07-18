@@ -1,3 +1,5 @@
+import org.gradle.api.internal.file.collections.SimpleFileCollection
+
 buildscript {
   repositories {
     jcenter()
@@ -19,6 +21,8 @@ dependencies {
     compile(project(":pact-jvm-provider_${project.scalaVersion}")) {
       exclude module: 'groovy-all'
     }
+
+    testCompile 'org.fusesource.jansi:jansi:1.11'
 }
 
 publishing {
@@ -48,4 +52,13 @@ pluginBundle {
       displayName = 'Gradle Pact Provider plugin'
     }
   }
+}
+
+test {
+
+  // exclude the gradle version of jansi from the classpath
+  classpath = project.sourceSets.test.runtimeClasspath.filter {
+    it.name != 'jansi-1.2.1.jar'
+  }
+
 }
