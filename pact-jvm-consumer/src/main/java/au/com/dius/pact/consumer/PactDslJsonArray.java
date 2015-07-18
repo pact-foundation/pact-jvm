@@ -7,6 +7,8 @@ import org.apache.commons.lang3.time.FastDateFormat;
 import org.json.JSONArray;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class PactDslJsonArray extends DslPart {
@@ -40,7 +42,9 @@ public class PactDslJsonArray extends DslPart {
 
     @Override
     public PactDslJsonBody arrayLike() {
-        matchers.put(root + appendArrayIndex(1), matchMin(0));
+        Map<String, Object> matcher = new HashMap<String, Object>();
+        matcher.put("match", "type");
+        matchers.put(root + appendArrayIndex(1), matcher);
         PactDslJsonArray parent = new PactDslJsonArray(root, this, true);
         return new PactDslJsonBody(".", parent);
     }

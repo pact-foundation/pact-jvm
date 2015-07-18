@@ -117,12 +117,12 @@ class PactBodyBuilderTest {
         def fragment = service.fragment()
         assert service.interactions.size() == 1
         assert asJavaMap(service.interactions[0].request.matchingRules) == [
-            '$.body.orders': [max: 10],
+            '$.body.orders': [max: 10, 'match': 'type'],
             '$.body.orders[*].id': ['match': 'type'],
-            '$.body.orders[*].lineItems': ['min': 1],
+            '$.body.orders[*].lineItems': ['min': 1, 'match': 'type'],
             '$.body.orders[*].lineItems[*].id': [match: 'type'],
             '$.body.orders[*].lineItems[*].amount': [match: 'number'],
-            '$.body.orders[*].lineItems[*].productCodes': ['min': 0],
+            '$.body.orders[*].lineItems[*].productCodes': ['match': 'type'],
             '$.body.orders[*].lineItems[*].productCodes[*].code': [match: 'type']
         ]
 

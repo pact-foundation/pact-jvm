@@ -3,7 +3,7 @@ package au.com.dius.pact.consumer.groovy
 class EachLikeMatcher extends LikeMatcher {
 
   def getMatcher() {
-    [min: 0]
+    [match: 'type']
   }
 
   def getValue() {

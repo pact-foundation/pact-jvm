@@ -9,6 +9,8 @@ import org.apache.commons.lang3.time.FastDateFormat;
 import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -228,7 +230,9 @@ public class PactDslJsonBody extends DslPart {
 
     @Override
     public PactDslJsonBody arrayLike(String name) {
-        matchers.put(matcherKey(name), matchMin(0));
+        Map<String, Object> matcher = new HashMap<String, Object>();
+        matcher.put("match", "type");
+        matchers.put(matcherKey(name), matcher);
         return new PactDslJsonBody(".", new PactDslJsonArray(matcherKey(name), this, true));
     }
 

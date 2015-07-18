@@ -60,7 +60,10 @@ object Matchers extends StrictLogging {
     } else if (matcherDef.contains("match")) {
       matcherDef("match") match {
         case "regex" => RegexpMatcher
-        case "type" => TypeMatcher
+        case "type" =>
+          if (matcherDef.contains("min")) MinimumMatcher
+          else if (matcherDef.contains("max")) MaximumMatcher
+          else TypeMatcher
         case "number" => TypeMatcher
         case "integer" => TypeMatcher
         case "real" => TypeMatcher

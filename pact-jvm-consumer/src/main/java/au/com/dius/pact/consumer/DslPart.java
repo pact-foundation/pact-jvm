@@ -152,12 +152,14 @@ public abstract class DslPart {
     protected Map<String, Object> matchMin(Integer min) {
         Map<String, Object> jsonObject = new HashMap<String, Object>();
         jsonObject.put("min", min);
+        jsonObject.put("match", "type");
         return jsonObject;
     }
 
     protected Map<String, Object> matchMax(Integer max) {
         Map<String, Object> jsonObject = new HashMap<String, Object>();
         jsonObject.put("min", max);
+        jsonObject.put("match", "type");
         return jsonObject;
     }
 
