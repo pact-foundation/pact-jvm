@@ -2,7 +2,7 @@
   "match": false,
   "comment": "Unexpected favourite colour",
   "expected" : {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "favouriteColours": ["red","blue"]
@@ -10,7 +10,7 @@
     }
   },
   "actual": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "favouriteColours": ["red","blue","taupe"]

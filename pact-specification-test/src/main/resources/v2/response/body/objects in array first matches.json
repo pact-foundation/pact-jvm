@@ -2,7 +2,7 @@
   "match": false,
   "comment": "Properties match but unexpected element received",
   "expected": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": [
       {
         "favouriteColor": "red"
@@ -10,7 +10,7 @@
     ]
   },
   "actual": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": [
       {
         "favouriteColor": "red",

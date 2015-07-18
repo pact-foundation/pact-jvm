@@ -2,7 +2,7 @@
   "match": true,
   "comment": "Responses match",
   "expected" : {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "name": "Mary",
@@ -12,7 +12,7 @@
     }
   },
   "actual": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "feet": 4,

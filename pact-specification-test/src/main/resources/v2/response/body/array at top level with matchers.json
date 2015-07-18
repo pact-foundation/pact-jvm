@@ -2,7 +2,7 @@
   "match": true,
   "comment": "top level array matches",
   "expected": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body" : [ {
       "dob" : "06/11/2015",
       "name" : "Rogger the Dogger",
@@ -42,7 +42,7 @@
     }
   },
   "actual": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": [
       {
         "dob": "11/06/2015",
@@ -59,4 +59,3 @@
     ]
   }
 }
-        

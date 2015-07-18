@@ -5,7 +5,7 @@
     "method": "POST",
     "path": "/",
     "query": "",
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "matchingRules": {
       "$.body.alligator.name": {"match": "type"},
       "$.body.alligator.feet": {"match": "type"}
@@ -22,7 +22,7 @@
     "method": "POST",
     "path": "/",
     "query": "",
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "feet": 5,

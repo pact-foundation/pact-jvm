@@ -2,14 +2,14 @@
   "match": true,
   "comment": "Favourite number and favourite colours out of order",
   "expected" : {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
 		"favouriteNumber": 7,
         "favouriteColours": ["red","blue"]
     }
   },
   "actual": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
         "favouriteColours": ["red","blue"],
 		"favouriteNumber": 7

@@ -5,7 +5,7 @@
     "method": "POST",
     "path": "/",
     "query": "",
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "matchingRules": {
       "$.body.animals": {"min": 1}
     },
@@ -21,7 +21,7 @@
     "method": "POST",
     "path": "/",
     "query": "",
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "animals": []
     }

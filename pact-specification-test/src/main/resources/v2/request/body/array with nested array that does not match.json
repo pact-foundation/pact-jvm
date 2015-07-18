@@ -5,9 +5,9 @@
     "method": "POST",
     "path": "/",
     "query": "",
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "matchingRules": {
-      "$.body.animals": {"min": 1},
+      "$.body.animals": {"min": 1, "match": "type"},
       "$.body.animals[*].*": {"match": "type"},
       "$.body.animals[*].children": {"min": 1},
       "$.body.animals[*].children[*].*": {"match": "type"}
@@ -29,7 +29,7 @@
     "method": "POST",
     "path": "/",
     "query": "",
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "animals": [
         {

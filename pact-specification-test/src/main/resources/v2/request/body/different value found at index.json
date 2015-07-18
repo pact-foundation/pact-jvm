@@ -5,7 +5,7 @@
     "method": "POST",
     "path": "/",
     "query": "",
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "favouriteColours": ["red","blue"]
@@ -16,7 +16,7 @@
     "method": "POST",
     "path": "/",
     "query": "",
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "favouriteColours": ["red","taupe"]

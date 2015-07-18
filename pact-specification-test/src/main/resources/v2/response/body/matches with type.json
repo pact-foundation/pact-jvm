@@ -2,7 +2,7 @@
   "match": true,
   "comment": "Response match with same type",
   "expected" : {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "matchingRules": {
       "$.body.alligator.name": {"match": "type"},
       "$.body.alligator.feet": {"match": "type"}
@@ -16,7 +16,7 @@
     }
   },
   "actual": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "feet": 5,

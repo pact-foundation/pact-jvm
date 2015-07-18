@@ -2,13 +2,13 @@
   "match": false,
   "comment": "Property of second object matches, but unexpected element recieved",
   "expected" : {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": [
 		{"favouriteColor": "red"}
 	]
   },
   "actual": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": [
 		{"favouriteColor": "blue",
 		"favouriteNumber": 4},

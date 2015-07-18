@@ -2,7 +2,7 @@
   "match": true,
   "comment": "Requests match with regex",
   "expected" : {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "matchingRules": {
       "$.body.alligator.name": {"match": "regex", "regex": "\\w+"}
     },
@@ -15,7 +15,7 @@
     }
   },
   "actual": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "feet": 4,

@@ -5,7 +5,7 @@
     "method": "POST",
     "path": "/",
     "query": "",
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "favouriteNumbers": ["1",null,"3"]
@@ -16,7 +16,7 @@
     "method": "POST",
     "path": "/",
     "query": "",
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "favouriteNumbers": ["1","2","3"]

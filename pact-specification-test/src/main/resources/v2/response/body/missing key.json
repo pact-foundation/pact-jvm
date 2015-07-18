@@ -2,7 +2,7 @@
   "match": false,
   "comment": "Missing key alligator name",
   "expected" : {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "name": "Mary",
@@ -11,7 +11,7 @@
     }
   },
   "actual": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator": {
         "age": 3

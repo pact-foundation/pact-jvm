@@ -2,7 +2,7 @@
   "match": false,
   "comment": "Favourite numbers expected to be strings found a number",
   "expected" : {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "favouriteNumbers": ["1","2","3"]
@@ -10,7 +10,7 @@
     }
   },
   "actual": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "favouriteNumbers": ["1",2,"3"]

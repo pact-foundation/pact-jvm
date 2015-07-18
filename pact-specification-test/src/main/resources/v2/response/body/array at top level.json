@@ -2,7 +2,7 @@
   "match": true,
   "comment": "top level array matches",
   "expected": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": [
       {
         "dob": "06/10/2015",
@@ -19,7 +19,7 @@
     ]
   },
   "actual": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": [
       {
         "dob": "06/10/2015",
@@ -36,4 +36,3 @@
     ]
   }
 }
-        

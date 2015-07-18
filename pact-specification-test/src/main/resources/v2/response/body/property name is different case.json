@@ -2,7 +2,7 @@
   "match": false,
   "comment": "Property names on objects are case sensitive",
   "expected" : {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "FavouriteColour": "red"
@@ -10,7 +10,7 @@
     }
   },
   "actual": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "favouritecolour": "red"

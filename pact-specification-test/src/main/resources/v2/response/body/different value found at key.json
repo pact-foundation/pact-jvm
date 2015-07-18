@@ -2,7 +2,7 @@
   "match": false,
   "comment": "Incorrect value at alligator name",
   "expected" : {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "name": "Mary"
@@ -10,7 +10,7 @@
     }
   },
   "actual": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "name": "Fred"

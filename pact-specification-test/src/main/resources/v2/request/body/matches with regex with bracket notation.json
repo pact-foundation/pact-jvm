@@ -5,7 +5,7 @@
     "method": "POST",
     "path": "/",
     "query": "",
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "matchingRules": {
       "$.body['2'].str": {"match": "regex", "regex": "\\w+"}
     },
@@ -19,7 +19,7 @@
     "method": "POST",
     "path": "/",
     "query": "",
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "2" : {
         "str" : "saldfhksajdhffdskkjh"

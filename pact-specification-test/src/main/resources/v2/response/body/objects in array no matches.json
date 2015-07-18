@@ -2,14 +2,14 @@
   "match": false,
   "comment": "Array of objects, properties match on incorrect objects",
   "expected" : {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": [
 		{"favouriteColor": "red"},
 		{"favouriteNumber": 2}
 	]
   },
   "actual": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": [
 		{"favouriteColor": "blue",
 		"favouriteNumber": 4},

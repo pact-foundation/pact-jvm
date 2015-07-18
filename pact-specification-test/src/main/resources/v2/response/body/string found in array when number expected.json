@@ -2,7 +2,7 @@
   "match": false,
   "comment": "Favourite Numbers expected to be numbers, but 2 is a string",
   "expected" : {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "favouriteNumbers": [1,2,3]
@@ -10,7 +10,7 @@
     }
   },
   "actual": {
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "favouriteNumbers": [1,"2",3]

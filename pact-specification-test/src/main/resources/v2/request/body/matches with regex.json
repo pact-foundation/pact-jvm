@@ -5,7 +5,7 @@
     "method": "POST",
     "path": "/",
     "query": "",
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "matchingRules": {
       "$.body.alligator.name": {"match": "regex", "regex": "\\w+"},
       "$.body.alligator.favouriteColours[0]": {"match": "regex", "regex": "red|blue"},
@@ -23,7 +23,7 @@
     "method": "POST",
     "path": "/",
     "query": "",
-    "headers": {},
+    "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{
         "feet": 4,
