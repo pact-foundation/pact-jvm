@@ -131,6 +131,10 @@ public class PactDslJsonBody extends DslPart {
     }
 
     public PactDslJsonBody stringMatcher(String name, String regex, String value) {
+        if (!value.matches(regex)) {
+            throw new InvalidMatcherException("Example \"" + value + "\" does not match regular expression \"" +
+                regex + "\"");
+        }
         body.put(name, value);
         matchers.put(matcherKey(name), regexp(regex));
         return this;
@@ -290,6 +294,9 @@ public class PactDslJsonBody extends DslPart {
     }
 
     public PactDslJsonBody hexValue(String name, String hexValue) {
+        if (!hexValue.matches(HEXADECIMAL)) {
+            throw new InvalidMatcherException("Example \"" + hexValue + "\" is not a hexadecimal value");
+        }
         body.put(name, hexValue);
         matchers.put(matcherKey(name), regexp("[0-9a-fA-F]+"));
         return this;
@@ -304,6 +311,9 @@ public class PactDslJsonBody extends DslPart {
     }
 
     public PactDslJsonBody guid(String name, String uuid) {
+        if (!uuid.matches(GUID)) {
+            throw new InvalidMatcherException("Example \"" + uuid + "\" is not a GUID");
+        }
         body.put(name, uuid);
         matchers.put(matcherKey(name), regexp("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
         return this;

@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class DslPart {
+    public static final String HEXADECIMAL = "[0-9a-fA-F]+";
+    public static final String IP_ADDRESS = "(\\d{1,3}\\.)+\\d{1,3}";
+    public static final String GUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+
     protected final DslPart parent;
     protected final String root;
     protected Map<String, Object> matchers = new HashMap<String, Object>();

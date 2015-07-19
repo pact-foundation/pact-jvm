@@ -170,6 +170,10 @@ public class PactDslJsonArray extends DslPart {
     }
 
     public PactDslJsonArray stringMatcher(String regex, String value) {
+        if (!value.matches(regex)) {
+            throw new InvalidMatcherException("Example \"" + value + "\" does not match regular expression \"" +
+                regex + "\"");
+        }
         body.put(value);
         matchers.put(root + appendArrayIndex(0), regexp(regex));
         return this;
@@ -257,6 +261,9 @@ public class PactDslJsonArray extends DslPart {
     }
 
     public PactDslJsonArray hexValue(String hexValue) {
+        if (!hexValue.matches(HEXADECIMAL)) {
+            throw new InvalidMatcherException("Example \"" + hexValue + "\" is not a hexadecimal value");
+        }
         body.put(hexValue);
         matchers.put(root + appendArrayIndex(0), regexp("[0-9a-fA-F]+"));
         return this;
@@ -267,6 +274,9 @@ public class PactDslJsonArray extends DslPart {
     }
 
     public PactDslJsonArray guid(String uuid) {
+        if (!uuid.matches(GUID)) {
+            throw new InvalidMatcherException("Example \"" + uuid + "\" is not a GUID");
+        }
         body.put(uuid);
         matchers.put(root + appendArrayIndex(0), regexp("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
         return this;
