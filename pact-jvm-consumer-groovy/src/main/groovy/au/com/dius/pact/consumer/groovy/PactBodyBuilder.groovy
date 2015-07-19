@@ -139,7 +139,7 @@ class PactBodyBuilder extends Matchers {
    * Array where each element is like the following object
    */
   def eachLike(Closure closure) {
-    new EachLikeMatcher(values: [null,  closure ])
+    new EachLikeMatcher(values: [null,  closure])
   }
 
 }
