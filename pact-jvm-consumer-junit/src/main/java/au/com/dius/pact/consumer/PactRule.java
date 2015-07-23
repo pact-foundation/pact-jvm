@@ -69,12 +69,8 @@ public class PactRule extends ExternalResource {
                 VerificationResult result = fragment.runConsumer(config, new TestRun() {
 
                     @Override
-                    public void run(MockProviderConfig config) {
-                        try {
-                            base.evaluate();
-                        } catch (Throwable e) {
-                            fail("error thrown: "+e);
-                        }
+                    public void run(MockProviderConfig config) throws Throwable {
+                        base.evaluate();
                     }
                 });
 
