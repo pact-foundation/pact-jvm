@@ -1,11 +1,10 @@
 package au.com.dius.pact.consumer;
 
-import static org.junit.Assert.assertEquals;
-
 import au.com.dius.pact.model.MockProviderConfig;
+import au.com.dius.pact.model.PactFragment;
 import org.junit.Test;
 
-import au.com.dius.pact.model.PactFragment;
+import java.io.IOException;
 
 public abstract class ConsumerPactTest {
     public static VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
@@ -14,7 +13,7 @@ public abstract class ConsumerPactTest {
     protected abstract String providerName();
     protected abstract String consumerName();
 
-    protected abstract void runTest(String url);
+    protected abstract void runTest(String url) throws IOException;
 
     @Test
     public void testPact() {
@@ -22,15 +21,21 @@ public abstract class ConsumerPactTest {
         final MockProviderConfig config = MockProviderConfig.createDefault();
 
         VerificationResult result = fragment.runConsumer(config, new TestRun() {
-            public void run(MockProviderConfig config) {
+            public void run(MockProviderConfig config) throws IOException {
                 runTest(config.url());
             }
         });
 
-        if (result instanceof PactError) {
-            throw new RuntimeException(((PactError)result).error());
+        if (!result.equals(PACT_VERIFIED)) {
+            if (result instanceof PactError) {
+                throw new RuntimeException(((PactError)result).error());
+            }
+            if (result instanceof UserCodeFailed) {
+                throw new RuntimeException(((UserCodeFailed<RuntimeException>)result).error());
+            }
+            if (result instanceof PactMismatch) {
+                throw new PactMismatchException(((PactMismatch)result));
+            }
         }
-
-        assertEquals(PACT_VERIFIED, result);
     }
 }

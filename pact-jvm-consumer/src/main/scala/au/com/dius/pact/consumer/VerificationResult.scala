@@ -14,15 +14,37 @@ object VerificationResult {
 
 sealed trait VerificationResult {
   // Temporary.  Should belong somewhere else.
-  override def toString(): String = this match {
+  override def toString() = this match {
     case PactVerified => "Pact verified."
     case PactMismatch(results) => s"""
       |Missing: ${results.missing.map(_.request)}\n
+      |AlmostMatched: ${results.almostMatched}\n
       |Unexpected: ${results.unexpected}\n"""
     case PactError(error) => s"${error.getClass.getName} ${error.getMessage}"
+    case UserCodeFailed(error: RuntimeException) => s"${error.getClass.getName} ${error.getMessage}"
   }
 }
 object PactVerified extends VerificationResult
-case class PactMismatch(results: PactSessionResults) extends VerificationResult
+case class PactMismatch(results: PactSessionResults) extends VerificationResult {
+  override def toString() = {
+    var s = "Pact verification failed for the following reasons:\n"
+    for (mismatch <- results.almostMatched) {
+      s += mismatch.description()
+    }
+    if (results.unexpected.nonEmpty) {
+      s += "The following unexpected results where received:\n"
+      for (unexpectedResult <- results.unexpected) {
+        s += unexpectedResult.toString()
+      }
+    }
+    if (results.missing.nonEmpty) {
+      s += "The following requests where not received:\n"
+      for (unexpectedResult <- results.missing) {
+        s += unexpectedResult.toString()
+      }
+    }
+    s
+  }
+}
 case class PactError(error: Throwable) extends VerificationResult
 case class UserCodeFailed[T](error: T) extends VerificationResult

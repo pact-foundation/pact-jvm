@@ -27,9 +27,11 @@ class ConsumerPactRunner(server: MockProvider) {
   def runAndWritePact[T](pact: Pact)(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
     val tryResults = server.runAndClose(pact)(userCode)
     tryResults match {
-      case Failure(e) => PactError(e)
+      case Failure(e) =>
+        if (server.session.remainingResults.allMatched) UserCodeFailed(e)
+        else PactMismatch(server.session.remainingResults)
       case Success((codeResult, pactSessionResults)) => {
-        userVerification(codeResult).fold(writeIfMatching(pact, pactSessionResults)){error =>
+        userVerification(codeResult).fold(writeIfMatching(pact, pactSessionResults)){ error =>
           UserCodeFailed(error)
         }
       }

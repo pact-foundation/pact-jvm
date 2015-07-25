@@ -7,6 +7,7 @@ import scala.util.Try
 
 trait MockProvider {
   def config: MockProviderConfig
+  def session: PactSession
   def runAndClose[T](pact: Pact)(code: => T): Try[(T, PactSessionResults)]
 }
 

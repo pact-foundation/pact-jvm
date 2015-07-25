@@ -33,15 +33,35 @@ object ResponsePartMismatch extends SharedMismatch {
 }
 
 // Overlapping ADTs.  The body and headers can mismatch for both of them.
-sealed trait RequestPartMismatch
-sealed trait ResponsePartMismatch 
+sealed trait RequestPartMismatch {
+  def description: String = toString
+}
+
+sealed trait ResponsePartMismatch
 
 case class StatusMismatch(expected: Status, actual: Status) extends ResponsePartMismatch
-case class HeaderMismatch(headerKey: String, expected: String, actual: String, mismatch: Option[String] = None) extends RequestPartMismatch with ResponsePartMismatch
+case class HeaderMismatch(headerKey: String, expected: String, actual: String, mismatch: Option[String] = None)
+  extends RequestPartMismatch with ResponsePartMismatch {
+  override def description: String = mismatch match {
+    case Some(message) => s"HeaderMismatch - $message"
+    case _ => toString
+  }
+}
 case class BodyTypeMismatch(expected: String, actual: String) extends RequestPartMismatch with ResponsePartMismatch
-case class BodyMismatch(expected: Any, actual: Any, mismatch: Option[String] = None, path: String = "/") extends RequestPartMismatch with ResponsePartMismatch
+case class BodyMismatch(expected: Any, actual: Any, mismatch: Option[String] = None, path: String = "/")
+  extends RequestPartMismatch with ResponsePartMismatch {
+  override def description: String = mismatch match {
+    case Some(message) => s"BodyMismatch - $message"
+    case _ => toString
+  }
+}
 case class CookieMismatch(expected: Cookies, actual: Cookies) extends RequestPartMismatch
-case class PathMismatch(expected: Path, actual: Path, mismatch: Option[String] = None) extends RequestPartMismatch
+case class PathMismatch(expected: Path, actual: Path, mismatch: Option[String] = None) extends RequestPartMismatch {
+  override def description: String = mismatch match {
+    case Some(message) => s"PathMismatch - $message"
+    case _ => toString
+  }
+}
 case class MethodMismatch(expected: Method, actual: Method) extends RequestPartMismatch
 case class QueryMismatch(expected: Query, actual: Query) extends RequestPartMismatch
 

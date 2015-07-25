@@ -33,6 +33,17 @@ object PartialRequestMatch {
 }
 
 case class PartialRequestMatch(problems: Map[Interaction, Seq[RequestPartMismatch]]) extends RequestMatch {
+  def description() = {
+    var s = ""
+    for (problem <- problems) {
+      s += problem._1.description + ":\n"
+      for (mismatch <- problem._2) {
+        s += "    " + mismatch.description + "\n"
+      }
+    }
+    s
+  }
+
   // These invariants should be enforced by a better use of the type system. NonEmptyList, etc
   require(problems.nonEmpty, "Partial match must contain some failed matches")
   require(problems.values.forall(_.nonEmpty), "Mismatch lists shouldn't be empty")
