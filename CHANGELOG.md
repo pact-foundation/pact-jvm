@@ -2,6 +2,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 
 # 2.2.10 - bugfixes, JUnit pact failures now give more meaningful messages
 
+* 3d62f84 - corrected test for Java 6 & 7 (Ronald Holshausen, Sat Jul 25 15:58:49 2015 +1000)
 * c23c37f - Make JUnit pact test failures more meaningful #40 (Ronald Holshausen, Sat Jul 25 15:26:48 2015 +1000)
 * 1f16820 - PactRule must not swallow exceptions #140 (Ronald Holshausen, Thu Jul 23 19:21:26 2015 +1000)
 * fc6650e - put the scala compiler memory settings back as travis build is hanging (Ronald Holshausen, Sun Jul 19 13:14:21 2015 +1000)
