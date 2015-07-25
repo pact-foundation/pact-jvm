@@ -1,5 +1,23 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.2.10 - bugfixes, JUnit pact failures now give more meaningful messages
+
+* c23c37f - Make JUnit pact test failures more meaningful #40 (Ronald Holshausen, Sat Jul 25 15:26:48 2015 +1000)
+* 1f16820 - PactRule must not swallow exceptions #140 (Ronald Holshausen, Thu Jul 23 19:21:26 2015 +1000)
+* fc6650e - put the scala compiler memory settings back as travis build is hanging (Ronald Holshausen, Sun Jul 19 13:14:21 2015 +1000)
+* cd4bd4c - add info flag back to travis build (Ronald Holshausen, Sun Jul 19 12:49:15 2015 +1000)
+* bff7efa - use travis containers for travis build (Ronald Holshausen, Sun Jul 19 12:04:10 2015 +1000)
+* 57eb2b4 - try default memory for travis build (Ronald Holshausen, Sun Jul 19 11:56:34 2015 +1000)
+* 139f15f - turn off gradle daemon in travis (Ronald Holshausen, Sun Jul 19 11:43:13 2015 +1000)
+* aef761c - validate example values against the provided matching expressions in the java DSL #138 (Ronald Holshausen, Sun Jul 19 11:22:14 2015 +1000)
+* e2bd982 - validate example values against the provided matching expressions in the groovy DSL #138 (Ronald Holshausen, Sun Jul 19 10:37:05 2015 +1000)
+* 4269a38 - validate example values against the provided matching expressions in the groovy DSL #138 (Ronald Holshausen, Sun Jul 19 10:16:16 2015 +1000)
+* 9e0d4f7 - correct the array matchers so the spec tests pass (Ronald Holshausen, Sat Jul 18 18:35:30 2015 +1000)
+* 7639cff - updated pact specification testcases (Ronald Holshausen, Sat Jul 18 18:11:57 2015 +1000)
+* 1d7b186 - cleaned up debug code and update doco #86 (Ronald Holshausen, Sat Jul 18 17:39:28 2015 +1000)
+* d352a0c - implemented handler to allow statechange calls to be a closure or gradle task #86 (Ronald Holshausen, Sat Jul 18 17:27:43 2015 +1000)
+* e098927 - bump version (Ronald Holshausen, Mon Jul 13 19:56:57 2015 +1000)
+
 # 2.2.9 - bugfixes in gradle plugin and `each like` matchers
 
 * 2ab96e3 - Correct the each like matcher in the Java DSL (Ronald Holshausen, Mon Jul 13 17:28:05 2015 +1000)
