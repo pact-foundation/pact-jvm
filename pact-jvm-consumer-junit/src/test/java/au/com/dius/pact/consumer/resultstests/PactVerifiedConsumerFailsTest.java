@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.resultstests;
 import au.com.dius.pact.consumer.ConsumerClient;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.PactFragment;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -51,7 +52,12 @@ public class PactVerifiedConsumerFailsTest extends ExpectedToFailBase {
 
     @Override
     protected void assertException(RuntimeException e) {
-        assertThat(e.getMessage(),
-            containsString("expected:<{responsetest=true, name=harry}> but was:<{responsetest=true, name=fred}>"));
+        if (SystemUtils.IS_JAVA_1_8) {
+            assertThat(e.getMessage(),
+                containsString("expected:<{responsetest=true, name=harry}> but was:<{responsetest=true, name=fred}>"));
+        } else {
+            assertThat(e.getMessage(),
+                containsString("expected:<{name=harry, responsetest=true}> but was:<{name=fred, responsetest=true}>"));
+        }
     }
 }
