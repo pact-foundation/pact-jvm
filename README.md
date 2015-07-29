@@ -86,6 +86,8 @@ You want to look at: [pact gradle plugin](pact-jvm-provider-gradle)
 
 You want to look at: [pact maven plugin](pact-jvm-provider-maven)
 
+For publishing pacts to a pact broker, have a look at https://github.com/warmuuh/pactbroker-maven-plugin
+
 #### verify pacts with a Spring MVC project
 
 Have a look at [Spring MVC Pact Test Runner](https://github.com/realestate-com-au/pact-jvm-provider-spring-mvc)
