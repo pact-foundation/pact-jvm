@@ -53,18 +53,22 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '2.2.11'
-    targetCompatibility = '1.6'
-    sourceCompatibility = '1.6'
+    version = '3.0.0'
+    targetCompatibility = '1.8'
+    sourceCompatibility = '1.8'
 
     tasks.withType(ScalaCompile) {
         scalaCompileOptions.useCompileDaemon = false
         scalaCompileOptions.useAnt = false
-        scalaCompileOptions.additionalParameters = ['-target:jvm-1.6']
+        scalaCompileOptions.additionalParameters = ['-target:jvm-1.8']
         configure(scalaCompileOptions.forkOptions) {
           memoryMaximumSize = '1g'
           jvmArgs = ['-XX:MaxPermSize=512m']
         }
+    }
+
+    tasks.withType(GroovyCompile) {
+      groovyOptions.optimizationOptions.indy = true
     }
 
     jar {

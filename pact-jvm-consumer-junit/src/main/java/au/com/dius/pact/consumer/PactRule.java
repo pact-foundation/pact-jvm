@@ -1,32 +1,15 @@
 package au.com.dius.pact.consumer;
-import static org.junit.Assert.assertEquals;
 
-
-
-
-import static org.junit.Assert.fail;
-
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-
+import au.com.dius.pact.consumer.ConsumerPactBuilder.PactDslWithProvider.PactDslWithState;
+import au.com.dius.pact.model.MockProviderConfig;
+import au.com.dius.pact.model.PactFragment;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-
-
-
-
-
-import au.com.dius.pact.consumer.ConsumerPactBuilder;
-import au.com.dius.pact.consumer.ConsumerPactBuilder.PactDslWithProvider.PactDslWithState;
-import au.com.dius.pact.consumer.PactError;
-import au.com.dius.pact.consumer.PactVerified$;
-import au.com.dius.pact.consumer.TestRun;
-import au.com.dius.pact.consumer.VerificationResult;
-import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.PactFragment;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * a junit rule that wraps every test annotated with {@link PactVerification}.
