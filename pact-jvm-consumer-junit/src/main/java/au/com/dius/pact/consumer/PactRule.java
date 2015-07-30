@@ -61,10 +61,10 @@ public class PactRule extends ExternalResource {
                     return;
                 }
 
-
                 PactFragment fragment = getPacts().get(pactDef.value());
-                if (fragment == null)
+                if (fragment == null) {
                     throw new UnsupportedOperationException("Fragment not found: " + pactDef.value());
+                }
 
                 VerificationResult result = fragment.runConsumer(config, new TestRun() {
 
@@ -74,12 +74,18 @@ public class PactRule extends ExternalResource {
                     }
                 });
 
-                 if (result instanceof PactError) {
-                    throw new RuntimeException(((PactError)result).error());
+                if (!result.equals(PACT_VERIFIED)) {
+                    if (result instanceof PactError) {
+                        throw new RuntimeException(((PactError)result).error());
+                    }
+                    if (result instanceof UserCodeFailed) {
+                        throw new RuntimeException(((UserCodeFailed<RuntimeException>)result).error());
+                    }
+                    if (result instanceof PactMismatch) {
+                        PactMismatch mismatch = (PactMismatch) result;
+                        throw new PactMismatchException(mismatch);
+                    }
                 }
-
-                //writes all pacts to json files
-                assertEquals(PACT_VERIFIED, result);
             }
         };
     }

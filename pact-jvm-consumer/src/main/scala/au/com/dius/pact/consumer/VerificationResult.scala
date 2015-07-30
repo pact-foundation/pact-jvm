@@ -16,7 +16,7 @@ sealed trait VerificationResult {
   // Temporary.  Should belong somewhere else.
   override def toString() = this match {
     case PactVerified => "Pact verified."
-    case PactMismatch(results) => s"""
+    case PactMismatch(results, error) => s"""
       |Missing: ${results.missing.map(_.request)}\n
       |AlmostMatched: ${results.almostMatched}\n
       |Unexpected: ${results.unexpected}\n"""
@@ -26,7 +26,7 @@ sealed trait VerificationResult {
 }
 
 object PactVerified extends VerificationResult
-case class PactMismatch(results: PactSessionResults) extends VerificationResult {
+case class PactMismatch(results: PactSessionResults, userError: Option[Throwable] = None) extends VerificationResult {
   override def toString() = {
     var s = "Pact verification failed for the following reasons:\n"
     for (mismatch <- results.almostMatched) {

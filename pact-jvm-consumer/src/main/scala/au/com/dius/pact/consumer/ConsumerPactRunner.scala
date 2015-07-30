@@ -29,7 +29,7 @@ class ConsumerPactRunner(server: MockProvider) {
     tryResults match {
       case Failure(e) =>
         if (server.session.remainingResults.allMatched) PactError(e)
-        else PactMismatch(server.session.remainingResults)
+        else PactMismatch(server.session.remainingResults, Some(e))
       case Success((codeResult, pactSessionResults)) => {
         userVerification(codeResult).fold(writeIfMatching(pact, pactSessionResults)) { error =>
           UserCodeFailed(error)

@@ -34,7 +34,8 @@ public abstract class ConsumerPactTest {
                 throw new RuntimeException(((UserCodeFailed<RuntimeException>)result).error());
             }
             if (result instanceof PactMismatch) {
-                throw new PactMismatchException(((PactMismatch)result));
+                PactMismatch mismatch = (PactMismatch) result;
+                throw new PactMismatchException(mismatch);
             }
         }
     }
