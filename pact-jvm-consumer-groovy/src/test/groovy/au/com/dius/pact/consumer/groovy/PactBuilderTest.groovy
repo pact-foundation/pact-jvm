@@ -18,7 +18,7 @@ class PactBuilderTest {
   }
 
   @Test
-  void "should not define providerState when no given()"() {
+  void 'should not define providerState when no given()'() {
     alice_service {
       uponReceiving('a retrieve Mallory request')
       withAttributes(method: 'get', path: '/mallory')
@@ -34,7 +34,7 @@ class PactBuilderTest {
   }
 
   @Test
-  void "allows matching on paths"() {
+  void 'allows matching on paths'() {
     alice_service {
       uponReceiving('a request to match by path')
       withAttributes(method: 'get', path: ~'/mallory/[0-9]+')
@@ -51,7 +51,7 @@ class PactBuilderTest {
   }
 
   @Test
-  void "allows using the defined matcher on paths"() {
+  void 'allows using the defined matcher on paths'() {
     alice_service {
       uponReceiving('a request to match by path')
       withAttributes(method: 'get', path: regexp(~'/mallory/[0-9]+', '/mallory/1234567890'))
@@ -68,7 +68,7 @@ class PactBuilderTest {
   }
 
   @Test
-  void "allows matching on headers"() {
+  void 'allows matching on headers'() {
     alice_service {
       uponReceiving('a request to match a header')
       withAttributes(method: 'get', path: '/headers', headers: [MALLORY: ~'mallory:[0-9]+'])

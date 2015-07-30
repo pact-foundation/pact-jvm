@@ -1,16 +1,15 @@
 package au.com.dius.pact.consumer.groovy
 
-import au.com.dius.pact.consumer.PactVerified$
 import au.com.dius.pact.consumer.StatefulMockProvider
 import au.com.dius.pact.consumer.VerificationResult
 import au.com.dius.pact.model.Consumer
+import au.com.dius.pact.model.Interaction$
 import au.com.dius.pact.model.MockProviderConfig
 import au.com.dius.pact.model.MockProviderConfig$
 import au.com.dius.pact.model.PactFragment
 import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.Request$
 import au.com.dius.pact.model.Response$
-import au.com.dius.pact.model.Interaction$
 import groovy.json.JsonBuilder
 import scala.None$
 import scala.Some$
@@ -18,9 +17,7 @@ import scala.collection.JavaConverters$
 
 import java.util.regex.Pattern
 
-class PactBuilder extends Matchers {
-
-  public static final PactVerified$ PACTVERIFIED = PactVerified$.MODULE$
+class PactBuilder extends BaseBuilder {
 
   Consumer consumer
   Provider provider
@@ -33,20 +30,15 @@ class PactBuilder extends Matchers {
   String providerState = ''
   boolean requestState
 
-  def call(Closure closure) {
-    build(closure)
-  }
-
-  def build(Closure closure) {
-    closure.delegate = this
-    closure.call()
-  }
-
   PactBuilder serviceConsumer(String consumer) {
     this.consumer = new Consumer(consumer)
     this
   }
 
+  /**
+   * @deprecated Use serviceConsumer instead
+   */
+  @Deprecated
   def service_consumer = this.&serviceConsumer
 
   PactBuilder hasPactWith(String provider) {
@@ -54,6 +46,10 @@ class PactBuilder extends Matchers {
     this
   }
 
+  /**
+   * @deprecated Use hasPactWith instead
+   */
+  @Deprecated
   def has_pact_with = this.&hasPactWith
 
   PactBuilder port(int port) {
@@ -73,6 +69,10 @@ class PactBuilder extends Matchers {
     this
   }
 
+  /**
+   * @deprecated Use uponReceiving instead
+   */
+  @Deprecated
   def upon_receiving = this.&uponReceiving
 
   def buildInteractions() {
@@ -147,6 +147,10 @@ class PactBuilder extends Matchers {
     this
   }
 
+  /**
+   * @deprecated Use withAttributes instead
+   */
+  @Deprecated
   def with = this.&withAttributes
 
   PactBuilder willRespondWith(Map responseData) {
@@ -163,6 +167,10 @@ class PactBuilder extends Matchers {
     this
   }
 
+  /**
+   * @deprecated Use willRespondWith instead
+   */
+  @Deprecated
   def will_respond_with = this.&willRespondWith
 
   VerificationResult run(Closure closure) {
@@ -183,7 +191,7 @@ class PactBuilder extends Matchers {
     new PactFragment(consumer, provider, JavaConverters$.MODULE$.asScalaBufferConverter(interactions).asScala())
   }
 
-  PactBuilder withBody(String mimeType = 'application/json', Closure closure) {
+  PactBuilder withBody(String mimeType = null, Closure closure) {
     def body = new PactBodyBuilder()
     closure.delegate = body
     closure.call()

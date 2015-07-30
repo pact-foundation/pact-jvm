@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
+import groovy.json.JsonSlurper
 import groovyx.net.http.RESTClient
 import org.junit.Test
 
@@ -29,7 +30,13 @@ class PactResultTest {
                 requestContentType: 'application/json')
 
             assert response.status == 200
-            assert response.data == [status: 'isGood']
+
+            if (response.data instanceof InputStream) {
+                def data = new JsonSlurper().parse(response.data as InputStream)
+                assert data == [status: 'isGood']
+            } else {
+                assert response.data == [status: 'isGood']
+            }
         }
     }
 

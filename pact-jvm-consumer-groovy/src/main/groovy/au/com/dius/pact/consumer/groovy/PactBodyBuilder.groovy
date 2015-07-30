@@ -3,22 +3,12 @@ package au.com.dius.pact.consumer.groovy
 import groovy.json.JsonBuilder
 import java.util.regex.Pattern
 
-class PactBodyBuilder extends Matchers {
+class PactBodyBuilder extends BaseBuilder {
 
   def bodyMap = [:]
   def matchers = [:]
   def path = '$.body'
   def bodyStack = []
-
-  def call(Closure closure) {
-    build(closure)
-  }
-
-  def build(Closure closure) {
-    closure.delegate = this
-    closure.resolveStrategy = Closure.DELEGATE_FIRST
-    closure.call()
-  }
 
   String getBody() {
     new JsonBuilder(bodyMap).toPrettyString()

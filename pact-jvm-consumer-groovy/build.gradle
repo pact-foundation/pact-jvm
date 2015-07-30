@@ -3,6 +3,9 @@ dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.3.7'
 
     testCompile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1', 'ch.qos.logback:logback-classic:1.1.2'
+    testCompile ('org.spockframework:spock-core:1.0-groovy-2.3') {
+        exclude group: 'org.codehaus.groovy'
+    }
 }
 
 test {
