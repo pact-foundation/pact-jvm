@@ -21,9 +21,10 @@ sealed trait VerificationResult {
       |AlmostMatched: ${results.almostMatched}\n
       |Unexpected: ${results.unexpected}\n"""
     case PactError(error) => s"${error.getClass.getName} ${error.getMessage}"
-    case UserCodeFailed(error: RuntimeException) => s"${error.getClass.getName} ${error.getMessage}"
+    case UserCodeFailed(error) => s"${error.getClass.getName} $error"
   }
 }
+
 object PactVerified extends VerificationResult
 case class PactMismatch(results: PactSessionResults) extends VerificationResult {
   override def toString() = {

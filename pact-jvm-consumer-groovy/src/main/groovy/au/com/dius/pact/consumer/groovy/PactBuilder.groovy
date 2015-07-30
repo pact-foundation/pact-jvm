@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.consumer.PactVerified$
 import au.com.dius.pact.consumer.StatefulMockProvider
 import au.com.dius.pact.consumer.VerificationResult
 import au.com.dius.pact.model.Consumer
@@ -18,6 +19,8 @@ import scala.collection.JavaConverters$
 import java.util.regex.Pattern
 
 class PactBuilder extends Matchers {
+
+  public static final PactVerified$ PACTVERIFIED = PactVerified$.MODULE$
 
   Consumer consumer
   Provider provider
@@ -180,7 +183,7 @@ class PactBuilder extends Matchers {
     new PactFragment(consumer, provider, JavaConverters$.MODULE$.asScalaBufferConverter(interactions).asScala())
   }
 
-  PactBuilder withBody(String mimeType = null, Closure closure) {
+  PactBuilder withBody(String mimeType = 'application/json', Closure closure) {
     def body = new PactBodyBuilder()
     closure.delegate = body
     closure.call()
@@ -200,5 +203,12 @@ class PactBuilder extends Matchers {
       }
     }
     this
+  }
+
+  void runTestAndVerify(Closure closure) {
+    VerificationResult result = run(closure)
+    if (result != PACTVERIFIED) {
+      throw new PactFailedException(result)
+    }
   }
 }
