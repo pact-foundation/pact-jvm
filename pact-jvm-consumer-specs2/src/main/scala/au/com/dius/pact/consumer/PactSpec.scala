@@ -39,7 +39,7 @@ trait PactSpec extends SpecificationLike
         val result = fragment.duringConsumerSpec(config)(test(config), verify)
         result match {
           case PactVerified => success
-          case PactMismatch(results) => Failure(PrettyPrinter.print(results))
+          case PactMismatch(results, error) => Failure(PrettyPrinter.print(results))
           case UserCodeFailed(r:Result) => r
           case PactError(e) => Failure(m = s"There was an unexpected exception: ${e.getMessage}", stackTrace = e.getStackTrace.toList)
         }
