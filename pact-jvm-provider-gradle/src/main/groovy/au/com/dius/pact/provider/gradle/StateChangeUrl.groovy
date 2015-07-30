@@ -1,5 +1,8 @@
 package au.com.dius.pact.provider.gradle
 
+/**
+ * Config for stage change URL
+ */
 class StateChangeUrl {
 
     boolean enabled = false

@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.groovy
 import org.junit.Before
 import org.junit.Test
 
+@SuppressWarnings('JUnitTestMethodWithoutAssert')
 class MatchersTest {
 
   private Matchers matchers

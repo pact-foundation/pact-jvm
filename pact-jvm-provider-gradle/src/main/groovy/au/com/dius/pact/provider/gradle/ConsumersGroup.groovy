@@ -2,6 +2,9 @@ package au.com.dius.pact.provider.gradle
 
 import groovy.transform.ToString
 
+/**
+ * Consumers grouped by pacts in a directory
+ */
 @ToString
 class ConsumersGroup {
     def name

@@ -17,12 +17,12 @@ import static org.mockito.Mockito.when
 
 class ProviderClientTest {
 
-  ProviderClient client
-  Request request
-  def provider
-  def mockHttpClient
-  HttpUriRequest args
-  HttpClientFactory httpClientFactory
+  private ProviderClient client
+  private Request request
+  private provider
+  private mockHttpClient
+  private HttpUriRequest args
+  private HttpClientFactory httpClientFactory
 
   @Before
   void setup() {
@@ -33,17 +33,17 @@ class ProviderClientTest {
       path: '/'
     ]
     mockHttpClient = mock CloseableHttpClient
-    httpClientFactory = [newClient: { provider -> mockHttpClient }] as HttpClientFactory
+    httpClientFactory = [newClient: { provider -> mockHttpClient } ] as HttpClientFactory
     client = new ProviderClient(request: request, provider: provider, httpClientFactory: httpClientFactory)
-    when(mockHttpClient.execute(any())).thenAnswer( { InvocationOnMock invocation ->
+    when(mockHttpClient.execute(any())).thenAnswer { InvocationOnMock invocation ->
       args = invocation.arguments.first()
       [
-        getStatusLine: { [getStatusCode: { 200 }] as StatusLine },
+        getStatusLine: { [getStatusCode: { 200 } ] as StatusLine },
         getAllHeaders: { [] as Header[] },
-        getEntity: {},
-        close: {}
+        getEntity: { },
+        close: { }
       ] as CloseableHttpResponse
-    })
+    }
   }
 
   @Test

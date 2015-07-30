@@ -4,10 +4,13 @@ import au.com.dius.pact.consumer.groovy.BaseBuilder
 import au.com.dius.pact.consumer.groovy.InvalidPactException
 import au.com.dius.pact.consumer.groovy.PactBodyBuilder
 import au.com.dius.pact.model.Consumer
-import au.com.dius.pact.model.PactFragment
 import au.com.dius.pact.model.Provider
-import scala.collection.mutable.ListBuffer
+import au.com.dius.pact.model.v3.messaging.Message
+import au.com.dius.pact.model.v3.messaging.MessagePact
 
+/**
+ * Pact builder for consumer tests for messaging
+ */
 class PactMessageBuilder extends BaseBuilder {
     Consumer consumer
     Provider provider
@@ -30,7 +33,7 @@ class PactMessageBuilder extends BaseBuilder {
     }
 
     PactMessageBuilder expectsToReceive(String description) {
-        messages << [description: description, metaData: [:], matchers: [:]]
+        messages << new Message(description)
         this
     }
 
@@ -54,23 +57,26 @@ class PactMessageBuilder extends BaseBuilder {
         closure.delegate = body
         closure.call()
         messages.last().contents = body.body
-        messages.last().matchers.putAll(body.matchers)
+        messages.last().matchingRules.putAll(body.matchers)
 
         this
     }
 
     void run(Closure closure) {
-        def fragment = new PactFragment(consumer, provider, new ListBuffer())
+        def pact = new MessagePact(consumer, provider, messages)
         def results = messages.collect {
-            invokeTest(fragment, it, closure)
+            try {
+                closure.call(it)
+            } catch (ex) {
+                ex
+            }
         }
 
-        if (results.any { it != PACTVERIFIED }) {
-            throw new MessagePactFailedException(results.findAll { it != PACTVERIFIED })
+        if (results.any { it instanceof Throwable }) {
+            throw new MessagePactFailedException(results.findAll { it instanceof Throwable })
+        } else {
+            pact.write()
         }
     }
 
-    private invokeTest(PactFragment fragment, message, Closure closure) {
-
-    }
 }

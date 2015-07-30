@@ -2,6 +2,9 @@ package au.com.dius.pact.consumer.groovy
 
 import nl.flotsam.xeger.Xeger
 
+/**
+ * Regular Expression Matcher
+ */
 class RegexpMatcher extends Matcher {
 
   def getMatcher() {

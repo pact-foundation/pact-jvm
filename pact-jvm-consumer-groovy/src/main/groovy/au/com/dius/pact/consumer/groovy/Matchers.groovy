@@ -6,11 +6,16 @@ import org.apache.commons.lang3.time.DateUtils
 import java.text.ParseException
 import java.util.regex.Pattern
 
+/**
+ * Base class for DSL matcher methods
+ */
 class Matchers {
 
   static final String HEXADECIMAL = '[0-9a-fA-F]+'
   static final String IP_ADDRESS = '(\\d{1,3}\\.)+\\d{1,3}'
   static final String GUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+  private static final int TEN = 10
+  public static final String TYPE = 'type'
 
   def regexp(Pattern re, String value = null) {
     regexp(re.toString(), value)
@@ -27,11 +32,11 @@ class Matchers {
     if (value && !value.matches(HEXADECIMAL)) {
       throw new InvalidMatcherException("Example \"$value\" is not a hexadecimal value")
     }
-    new RegexpMatcher(values: [HEXADECIMAL, value ?: RandomStringUtils.random(10, "0123456789abcdef")])
+    new RegexpMatcher(values: [HEXADECIMAL, value ?: RandomStringUtils.random(TEN, '0123456789abcdef')])
   }
 
   def identifier(def value = null) {
-    new TypeMatcher(values: ['type', value ?: RandomStringUtils.randomNumeric(10) as Long])
+    new TypeMatcher(values: [TYPE, value ?: RandomStringUtils.randomNumeric(TEN) as Long])
   }
 
   def ipAddress(String value = null) {
@@ -42,15 +47,15 @@ class Matchers {
   }
 
   def numeric(Number value = null) {
-    new TypeMatcher(values: ['number', value ?: RandomStringUtils.randomNumeric(10) as Long])
+    new TypeMatcher(values: ['number', value ?: RandomStringUtils.randomNumeric(TEN) as Long])
   }
 
   def real(Number value = null) {
-    new TypeMatcher(values: ['real', value ?: Double.parseDouble(RandomStringUtils.randomNumeric(10)) / 100.0])
+    new TypeMatcher(values: ['real', value ?: Double.parseDouble(RandomStringUtils.randomNumeric(TEN)) / 100.0])
   }
 
   def integer(Integer value = null) {
-    new TypeMatcher(values: ['integer', value ?: RandomStringUtils.randomNumeric(10) as Long])
+    new TypeMatcher(values: ['integer', value ?: RandomStringUtils.randomNumeric(TEN) as Long])
   }
 
   def timestamp(String pattern = null, def value = null) {
@@ -78,6 +83,7 @@ class Matchers {
     new DateMatcher(values: value, pattern: pattern)
   }
 
+  @SuppressWarnings('ConfusingMethodName')
   def guid(String value = null) {
     if (value && !value.matches(GUID)) {
       throw new InvalidMatcherException("Example \"$value\" is not a GUID")
@@ -86,7 +92,7 @@ class Matchers {
   }
 
   def string(String value = null) {
-    new TypeMatcher(values: ['type', value ?: RandomStringUtils.randomAlphanumeric(10)])
+    new TypeMatcher(values: [TYPE, value ?: RandomStringUtils.randomAlphanumeric(TEN)])
   }
 
 }

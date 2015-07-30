@@ -30,6 +30,7 @@ subprojects {
     apply plugin: 'groovy'
     apply plugin: 'maven'
     apply plugin: 'signing'
+    apply plugin: 'codenarc'
 
     repositories {
         mavenLocal()
@@ -149,6 +150,14 @@ subprojects {
     signing {
         required { gradle.taskGraph.hasTask("uploadArchives") }
         sign configurations.archives
+    }
+
+    codenarcMain {
+        configFile = file('../config/codenarc/ruleset.groovy')
+    }
+
+    codenarcTest {
+        configFile = file('../config/codenarc/rulesetTest.groovy')
     }
 }
 

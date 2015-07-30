@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.model.Interaction
+@SuppressWarnings('UnusedImport')
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.Pact$
 import au.com.dius.pact.provider.groovysupport.ProviderClient
@@ -9,6 +10,7 @@ import org.apache.commons.lang3.StringUtils
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.AnsiConsole
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleScriptException
 import org.gradle.api.Task
 import org.gradle.api.tasks.GradleBuild
 import org.gradle.api.tasks.TaskAction
@@ -16,11 +18,16 @@ import org.json4s.FileInput
 import org.json4s.StreamInput
 import scala.collection.JavaConverters$
 
+/**
+ * Task to verify a pact against a provider
+ */
+@SuppressWarnings('DuplicateImport')
 class PactVerificationTask extends DefaultTask {
 
     ProviderInfo providerToVerify
 
     @TaskAction
+    @SuppressWarnings(['AbcMetric', 'PrintStackTrace', 'DuplicateStringLiteral', 'MethodSize'])
     void verifyPact() {
         ext.failures = [:]
         providerToVerify.consumers.findAll(this.&filterConsumers).each { consumer ->
@@ -33,14 +40,17 @@ class PactVerificationTask extends DefaultTask {
                 pact = Pact$.MODULE$.from(new FileInput(consumer.pactFile))
             } else if (consumer.pactFile instanceof URL) {
                 AnsiConsole.out().println(Ansi.ansi().a("  [from URL ${consumer.pactFile}]"))
-                pact = Pact$.MODULE$.from(new StreamInput(consumer.pactFile.newInputStream(requestProperties: ['Accept': 'application/json'])))
+                pact = Pact$.MODULE$.from(new StreamInput(consumer.pactFile.newInputStream(requestProperties:
+                    ['Accept': 'application/json'])))
             } else {
-                throw new RuntimeException('You must specify the pactfile to execute (use pactFile = ...)')
+                throw new GradleScriptException('You must specify the pactfile to execute (use pactFile = ...)',
+                    null)
             }
 
             def interactions = JavaConverters$.MODULE$.seqAsJavaListConverter(pact.interactions())
             interactions.asJava().findAll(this.&filterInteractions).each { Interaction interaction ->
-                def interactionMessage = "Verifying a pact between ${consumer.name} and ${providerToVerify.name} - ${interaction.description()}"
+                def interactionMessage = "Verifying a pact between ${consumer.name} and ${providerToVerify.name}" +
+                    " - ${interaction.description()}"
 
                 def stateChangeOk = true
                 if (interaction.providerState.defined) {
@@ -57,7 +67,8 @@ class PactVerificationTask extends DefaultTask {
                     AnsiConsole.out().println(Ansi.ansi().a('  ').a(interaction.description()))
 
                     try {
-                        ProviderClient client = new ProviderClient(request: interaction.request(), provider: providerToVerify)
+                        ProviderClient client = new ProviderClient(request: interaction.request(),
+                            provider: providerToVerify)
 
                         def expectedResponse = interaction.response()
                         def actualResponse = client.makeRequest()
@@ -66,13 +77,14 @@ class PactVerificationTask extends DefaultTask {
                                 actualResponse.statusCode, actualResponse.headers, actualResponse.data)
 
                         AnsiConsole.out().println('    returns a response which')
+
+                        def s = ' returns a response which'
                         displayMethodResult(failures, expectedResponse.status(), comparison.method,
-                            interactionMessage + ' returns a response which')
+                            interactionMessage + s)
                         displayHeadersResult(failures, expectedResponse.headers(), comparison.headers,
-                            interactionMessage + ' returns a response which')
-                        def expectedBody = expectedResponse.body().defined ? expectedResponse.body().get() : ''
-                        displayBodyResult(failures, expectedBody, comparison.body,
-                            interactionMessage + ' returns a response which')
+                            interactionMessage + s)
+                        expectedResponse.body().defined ? expectedResponse.body().get() : ''
+                        displayBodyResult(failures, comparison.body, interactionMessage + s)
                     } catch (e) {
                         AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a('Request Failed - ')
                             .a(e.message).reset())
@@ -84,7 +96,6 @@ class PactVerificationTask extends DefaultTask {
                 }
             }
         }
-
 
         if (ext.failures.size() > 0) {
             AnsiConsole.out().println('\nFailures:\n')
@@ -100,7 +111,7 @@ class PactVerificationTask extends DefaultTask {
                     }
 
                     AnsiConsole.out().println()
-                    AnsiConsole.out().println("      Diff:")
+                    AnsiConsole.out().println('      Diff:')
                     AnsiConsole.out().println()
 
                     err.value.diff.each { delta ->
@@ -124,10 +135,12 @@ class PactVerificationTask extends DefaultTask {
                 AnsiConsole.out().println()
             }
 
-            throw new RuntimeException("There were ${failures.size()} pact failures for provider ${providerToVerify.name}")
+            throw new GradleScriptException(
+                "There were ${failures.size()} pact failures for provider ${providerToVerify.name}", null)
         }
     }
 
+    @SuppressWarnings('DuplicateStringLiteral')
     void displayMethodResult(Map failures, int status, def comparison, String comparisonDescription) {
         def ansi = Ansi.ansi().a('      ').a('has status code ').bold().a(status).boldOff().a(' (')
         if (comparison == true) {
@@ -138,6 +151,7 @@ class PactVerificationTask extends DefaultTask {
         }
     }
 
+    @SuppressWarnings('DuplicateStringLiteral')
     void displayHeadersResult(Map failures, def expected, Map comparison, String comparisonDescription) {
         if (!comparison.isEmpty()) {
             AnsiConsole.out().println('      includes headers')
@@ -150,13 +164,15 @@ class PactVerificationTask extends DefaultTask {
                     AnsiConsole.out().println(ansi.fg(Ansi.Color.GREEN).a('OK').reset().a(')'))
                 } else {
                     AnsiConsole.out().println(ansi.fg(Ansi.Color.RED).a('FAILED').reset().a(')'))
-                    failures["$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""] = headerComparison
+                    failures["$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""] =
+                        headerComparison
                 }
             }
         }
     }
 
-    void displayBodyResult(Map failures, String body, def comparison, String comparisonDescription) {
+    @SuppressWarnings('DuplicateStringLiteral')
+    void displayBodyResult(Map failures, def comparison, String comparisonDescription) {
         def ansi = Ansi.ansi().a('      ').a('has a matching body').a(' (')
         if (comparison.isEmpty()) {
             AnsiConsole.out().println(ansi.fg(Ansi.Color.GREEN).a('OK').reset().a(')'))
@@ -166,11 +182,14 @@ class PactVerificationTask extends DefaultTask {
         }
     }
 
+    @SuppressWarnings(['AbcMetric', 'NestedBlockDepth', 'PrintStackTrace', 'UnnecessaryElseStatement',
+        'DuplicateStringLiteral'])
     def stateChange(String state, ConsumerInfo consumer) {
         AnsiConsole.out().println(Ansi.ansi().a('  Given ').bold().a(state).boldOff())
         try {
             def stateChangeHandler = consumer.stateChange
-            if (stateChangeHandler == null || (stateChangeHandler instanceof String && StringUtils.isBlank(stateChangeHandler))) {
+            if (stateChangeHandler == null || (stateChangeHandler instanceof String
+                && StringUtils.isBlank(stateChangeHandler))) {
               AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
                 .a('WARNING: State Change ignored as there is no stateChange URL')
                 .reset())
@@ -179,7 +198,8 @@ class PactVerificationTask extends DefaultTask {
               return stateChangeHandler.call(state)
             } else if (stateChangeHandler instanceof Task || stateChangeHandler instanceof String
               && project.tasks.findByName(stateChangeHandler)) {
-              def task = stateChangeHandler instanceof String ? project.tasks.getByName(stateChangeHandler) : stateChangeHandler
+              def task = stateChangeHandler instanceof String ? project.tasks.getByName(stateChangeHandler)
+                  : stateChangeHandler
               task.setProperty('providerState', state)
               task.ext.providerState = state
               def build = project.task(type: GradleBuild) {
@@ -189,7 +209,8 @@ class PactVerificationTask extends DefaultTask {
               return true
             } else {
                 try {
-                  def url = stateChangeHandler instanceof URI ? stateChangeHandler : new URI(stateChangeHandler.toString())
+                  def url = stateChangeHandler instanceof URI ? stateChangeHandler
+                      : new URI(stateChangeHandler.toString())
                   ProviderClient client = new ProviderClient(provider: providerToVerify)
                   def response = client.makeStateChangeRequest(url, state, consumer.stateChangeUsesBody)
                   if (response) {
@@ -221,12 +242,13 @@ class PactVerificationTask extends DefaultTask {
         }
     }
 
+  @SuppressWarnings('DuplicateStringLiteral')
   boolean filterConsumers(def consumer) {
-    !project.hasProperty('pact.filter.consumers') || consumer.name in project.property('pact.filter.consumers').split(',').collect{
-      it.trim()
-    }
+    !project.hasProperty('pact.filter.consumers') || consumer.name in project.property('pact.filter.consumers')
+        .split(',')*.trim()
   }
 
+  @SuppressWarnings('DuplicateStringLiteral')
   boolean filterInteractions(def interaction) {
     if (project.hasProperty('pact.filter.description') && project.hasProperty('pact.filter.providerState')) {
       matchDescription(interaction) && matchState(interaction)
@@ -239,6 +261,7 @@ class PactVerificationTask extends DefaultTask {
     }
   }
 
+  @SuppressWarnings('DuplicateStringLiteral')
   private boolean matchState(interaction) {
     if (interaction.providerState().defined) {
       interaction.providerState().get() ==~ project.property('pact.filter.providerState')
@@ -247,6 +270,7 @@ class PactVerificationTask extends DefaultTask {
     }
   }
 
+  @SuppressWarnings('DuplicateStringLiteral')
   private boolean matchDescription(interaction) {
     interaction.description() ==~ project.property('pact.filter.description')
   }

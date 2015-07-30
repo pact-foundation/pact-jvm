@@ -10,14 +10,14 @@ import org.junit.Test
 
 class PactVerificationTaskStateChangeTest {
 
-  PactVerificationTask task
-  Closure consumer
-  Project project
-  String state
-  def makeStateChangeRequestArgs
-  def consumerMap = [name: 'bob']
-  def mockProviderClient
-  Task otherTask
+  private PactVerificationTask task
+  private Closure consumer
+  private Project project
+  private String state
+  private makeStateChangeRequestArgs
+  private final consumerMap = [name: 'bob']
+  private mockProviderClient
+  private Task otherTask
 
   @Before
   void setup() {
@@ -29,13 +29,10 @@ class PactVerificationTaskStateChangeTest {
     mockProviderClient = [makeStateChangeRequest: { arg1, arg2, arg3 ->
       makeStateChangeRequestArgs << [arg1, arg2, arg3]
       null
-    }] as ProviderClient
+    } ] as ProviderClient
     ProviderClient.metaClass.constructor = { args -> mockProviderClient }
     otherTask = project.task('otherTask') {
       ext.providerState = ''
-      doLast {
-        println ">>> [$ext.providerState]"
-      }
     }
   }
 

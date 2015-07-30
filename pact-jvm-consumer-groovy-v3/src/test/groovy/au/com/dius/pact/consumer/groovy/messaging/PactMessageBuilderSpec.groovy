@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.groovy.messaging
 
+import au.com.dius.pact.model.v3.messaging.Message
 import groovy.json.JsonSlurper
-import spock.lang.Ignore
 import spock.lang.Specification
 
 class PactMessageBuilderSpec extends Specification {
@@ -15,8 +15,7 @@ class PactMessageBuilderSpec extends Specification {
         }
     }
 
-    @Ignore
-    def 'allows matching on a message'() {
+    def 'allows receiving a message'() {
         given:
         builder {
             given 'the provider has data for a message'
@@ -24,15 +23,15 @@ class PactMessageBuilderSpec extends Specification {
             withMetaData(contentType: 'application/json')
             withContent {
                 name 'Bob'
-                date '2000-01-01'
+                date = '2000-01-01'
                 status 'bad'
                 age 100
             }
         }
 
         when:
-        def result = builder.run { message ->
-            def content = new JsonSlurper().parse(message.contentAsBytes())
+        builder.run { Message message ->
+            def content = new JsonSlurper().parse(message.contentsAsBytes())
             assert content.name == 'Bob'
             assert content.date == '2000-01-01'
             assert content.status == 'bad'

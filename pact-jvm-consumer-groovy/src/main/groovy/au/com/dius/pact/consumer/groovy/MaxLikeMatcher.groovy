@@ -1,5 +1,8 @@
 package au.com.dius.pact.consumer.groovy
 
+/**
+ * Like matcher with a maximum size
+ */
 class MaxLikeMatcher extends LikeMatcher {
 
   def getMatcher() {

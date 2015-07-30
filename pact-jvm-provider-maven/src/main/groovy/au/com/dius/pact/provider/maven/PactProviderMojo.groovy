@@ -1,14 +1,13 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.model.Interaction
+@SuppressWarnings('UnusedImport')
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.Pact$
 import au.com.dius.pact.provider.groovysupport.ProviderClient
 import au.com.dius.pact.provider.groovysupport.ResponseComparison
 import groovy.io.FileType
 import groovy.json.JsonSlurper
-import groovyx.net.http.RESTClient
-import org.apache.commons.lang3.StringUtils
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugin.MojoFailureException
@@ -20,16 +19,26 @@ import org.json4s.FileInput
 import org.json4s.StreamInput
 import scala.collection.JavaConverters$
 
+/**
+ * Pact Verify Maven Plugin
+ */
 @Mojo(name = 'verify')
 class PactProviderMojo extends AbstractMojo {
+
+    private static final String PACT_FILTER_CONSUMERS = 'pact.filter.consumers'
+    private static final String PACT_FILTER_DESCIPTION = 'pact.filter.description'
+    private static final String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
 
     @Parameter
     private List<Provider> serviceProviders
 
     @Parameter
+    @SuppressWarnings('PrivateFieldCouldBeFinal')
     private Map<String, String> configuration = [:]
 
     @Override
+    @SuppressWarnings(['AbcMetric', 'ThrowRuntimeException', 'NestedBlockDepth', 'PrintStackTrace',
+        'DuplicateStringLiteral', 'MethodSize'])
     void execute() throws MojoExecutionException, MojoFailureException {
         Map failures = [:]
         serviceProviders.each { provider ->
@@ -49,14 +58,17 @@ class PactProviderMojo extends AbstractMojo {
                     pact = Pact$.MODULE$.from(new FileInput(consumer.pactFile))
                 } else if (consumer.pactUrl) {
                     AnsiConsole.out().println(Ansi.ansi().a("  [from URL ${consumer.pactUrl}]"))
-                    pact = Pact$.MODULE$.from(new StreamInput(consumer.pactUrl.newInputStream(requestProperties: ['Accept': 'application/json'])))
+                    pact = Pact$.MODULE$.from(new StreamInput(consumer.pactUrl.newInputStream(requestProperties:
+                        ['Accept': 'application/json'])))
                 } else {
-                    throw new RuntimeException("You must specify the pactfile to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)")
+                    throw new RuntimeException('You must specify the pactfile to execute for consumer ' +
+                        "'${consumer.name}' (use <pactFile> or <pactUrl>)")
                 }
 
                 def interactions = JavaConverters$.MODULE$.seqAsJavaListConverter(pact.interactions())
                 interactions.asJava().findAll(this.&filterInteractions).each { Interaction interaction ->
-                    def interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name} - ${interaction.description()}"
+                    def interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name} " +
+                        "- ${interaction.description()}"
 
                     def stateChangeOk = true
                     if (interaction.providerState.defined) {
@@ -73,7 +85,8 @@ class PactProviderMojo extends AbstractMojo {
                         AnsiConsole.out().println(Ansi.ansi().a('  ').a(interaction.description()))
 
                         try {
-                            ProviderClient client = new ProviderClient(request: interaction.request(), provider: provider)
+                            ProviderClient client = new ProviderClient(request: interaction.request(),
+                                provider: provider)
 
                             def expectedResponse = interaction.response()
                             def actualResponse = client.makeRequest()
@@ -82,13 +95,14 @@ class PactProviderMojo extends AbstractMojo {
                                 actualResponse.statusCode, actualResponse.headers, actualResponse.data)
 
                             AnsiConsole.out().println('    returns a response which')
+
+                            def s = ' returns a response which'
                             displayMethodResult(failures, expectedResponse.status(), comparison.method,
-                                interactionMessage + ' returns a response which')
+                                interactionMessage + s)
                             displayHeadersResult(failures, expectedResponse.headers(), comparison.headers,
-                                interactionMessage + ' returns a response which')
-                            def expectedBody = expectedResponse.body().defined ? expectedResponse.body().get() : ''
-                            displayBodyResult(failures, expectedBody, comparison.body,
-                                interactionMessage + ' returns a response which')
+                                interactionMessage + s)
+                            expectedResponse.body().defined ? expectedResponse.body().get() : ''
+                            displayBodyResult(failures, comparison.body, interactionMessage + s)
                         } catch (e) {
                             AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a('Request Failed - ')
                                 .a(e.message).reset())
@@ -116,7 +130,7 @@ class PactProviderMojo extends AbstractMojo {
                     }
 
                     AnsiConsole.out().println()
-                    AnsiConsole.out().println("      Diff:")
+                    AnsiConsole.out().println('      Diff:')
                     AnsiConsole.out().println()
 
                     err.value.diff.each { delta ->
@@ -142,6 +156,7 @@ class PactProviderMojo extends AbstractMojo {
         }
     }
 
+    @SuppressWarnings('ThrowRuntimeException')
     List loadPactFiles(def provider, File pactFileDir) {
         if (!pactFileDir.exists()) {
             throw new RuntimeException("Pact file directory ($pactFileDir) does not exist")
@@ -167,6 +182,7 @@ class PactProviderMojo extends AbstractMojo {
         consumers
     }
 
+    @SuppressWarnings('DuplicateStringLiteral')
     void displayMethodResult(Map failures, int status, def comparison, String comparisonDescription) {
         def ansi = Ansi.ansi().a('      ').a('has status code ').bold().a(status).boldOff().a(' (')
         if (comparison == true) {
@@ -177,6 +193,7 @@ class PactProviderMojo extends AbstractMojo {
         }
     }
 
+    @SuppressWarnings('DuplicateStringLiteral')
     void displayHeadersResult(Map failures, def expected, Map comparison, String comparisonDescription) {
         if (!comparison.isEmpty()) {
             AnsiConsole.out().println('      includes headers')
@@ -189,13 +206,15 @@ class PactProviderMojo extends AbstractMojo {
                     AnsiConsole.out().println(ansi.fg(Ansi.Color.GREEN).a('OK').reset().a(')'))
                 } else {
                     AnsiConsole.out().println(ansi.fg(Ansi.Color.RED).a('FAILED').reset().a(')'))
-                    failures["$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""] = headerComparison
+                    failures["$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""] =
+                        headerComparison
                 }
             }
         }
     }
 
-    void displayBodyResult(Map failures, String body, def comparison, String comparisonDescription) {
+    @SuppressWarnings('DuplicateStringLiteral')
+    void displayBodyResult(Map failures, def comparison, String comparisonDescription) {
         def ansi = Ansi.ansi().a('      ').a('has a matching body').a(' (')
         if (comparison.isEmpty()) {
             AnsiConsole.out().println(ansi.fg(Ansi.Color.GREEN).a('OK').reset().a(')'))
@@ -205,6 +224,7 @@ class PactProviderMojo extends AbstractMojo {
         }
     }
 
+    @SuppressWarnings(['DuplicateStringLiteral', 'PrintStackTrace'])
     def stateChange(String state, Provider provider, Consumer consumer) {
         AnsiConsole.out().println(Ansi.ansi().a('  Given ').bold().a(state).boldOff())
         try {
@@ -247,9 +267,8 @@ class PactProviderMojo extends AbstractMojo {
     }
 
     private boolean filterConsumers(def consumer) {
-        !this.propertyDefined('pact.filter.consumers') || consumer.name in this.property('pact.filter.consumers').split(',').collect{
-            it.trim()
-        }
+        !this.propertyDefined(PACT_FILTER_CONSUMERS) ||
+            consumer.name in this.property(PACT_FILTER_CONSUMERS).split(',')*.trim()
     }
 
     private String property(String key) {
@@ -257,11 +276,11 @@ class PactProviderMojo extends AbstractMojo {
     }
 
     private boolean filterInteractions(def interaction) {
-        if (propertyDefined('pact.filter.description') && propertyDefined('pact.filter.providerState')) {
+        if (propertyDefined(PACT_FILTER_DESCIPTION) && propertyDefined(PACT_FILTER_PROVIDERSTATE)) {
             matchDescription(interaction) && matchState(interaction)
-        } else if (propertyDefined('pact.filter.description')) {
+        } else if (propertyDefined(PACT_FILTER_DESCIPTION)) {
             matchDescription(interaction)
-        } else if (propertyDefined('pact.filter.providerState')) {
+        } else if (propertyDefined(PACT_FILTER_PROVIDERSTATE)) {
             matchState(interaction)
         } else {
             true
@@ -270,13 +289,13 @@ class PactProviderMojo extends AbstractMojo {
 
     private boolean matchState(def interaction) {
         if (interaction.providerState().defined) {
-            interaction.providerState().get() ==~ property('pact.filter.providerState')
+            interaction.providerState().get() ==~ property(PACT_FILTER_PROVIDERSTATE)
         } else {
-            property('pact.filter.providerState').empty
+            property(PACT_FILTER_PROVIDERSTATE).empty
         }
     }
 
     private boolean matchDescription(def interaction) {
-        interaction.description() ==~ property('pact.filter.description')
+        interaction.description() ==~ property(PACT_FILTER_DESCIPTION)
     }
 }

@@ -3,6 +3,9 @@ package au.com.dius.pact.provider.gradle
 import groovy.json.JsonSlurper
 import org.gradle.api.GradleException
 
+/**
+ * Provider Info Config
+ */
 class ProviderInfo {
     String protocol = 'http'
     def host = 'localhost'
@@ -20,11 +23,11 @@ class ProviderInfo {
 
     List<ConsumerInfo> consumers = []
 
-    public ProviderInfo(String name) {
+    ProviderInfo(String name) {
         this.name = name
     }
 
-    public ConsumerInfo hasPactWith(String consumer, Closure closure) {
+    ConsumerInfo hasPactWith(String consumer, Closure closure) {
         def consumerInfo = new ConsumerInfo(name: consumer)
         consumers << consumerInfo
         closure.delegate = consumerInfo
@@ -32,22 +35,23 @@ class ProviderInfo {
         consumerInfo
     }
 
-    public ConsumerInfo[] hasPactsWith(String consumersGroupName, Closure closure) {
+    List hasPactsWith(String consumersGroupName, Closure closure) {
         def consumersGroup = new ConsumersGroup(name: consumersGroupName)
         closure.delegate = consumersGroup
         closure(consumersGroup)
 
-        createConsumerListFromPactFiles(consumersGroup)
+        setupConsumerListFromPactFiles(consumersGroup)
     }
 
-    private void createConsumerListFromPactFiles(ConsumersGroup consumersGroup) {
+    private List setupConsumerListFromPactFiles(ConsumersGroup consumersGroup) {
         if (!consumersGroup.pactFileLocation) {
-            return
+            return []
         }
 
         File pactFileDirectory = consumersGroup.pactFileLocation
         if (!pactFileDirectory.exists() || !pactFileDirectory.canRead()) {
-            throw new GradleException("pactFileDirectory ${pactFileDirectory.absolutePath} does not exist or is not readable")
+            throw new GradleException("pactFileDirectory ${pactFileDirectory.absolutePath} " +
+                'does not exist or is not readable')
         }
 
         pactFileDirectory.eachFile { File file ->
@@ -57,5 +61,6 @@ class ProviderInfo {
                     stateChange: consumersGroup.stateChange,
                     stateChangeUsesBody: consumersGroup.stateChangeUsesBody)
         }
+        consumers
     }
 }

@@ -1,8 +1,12 @@
 package au.com.dius.pact.consumer.groovy
 
+@SuppressWarnings('UnusedImport')
 import au.com.dius.pact.consumer.PactVerified$
 
-abstract class BaseBuilder extends Matchers {
+/**
+ * Base class for builders
+ */
+class BaseBuilder extends Matchers {
 
     public static final PactVerified$ PACTVERIFIED = PactVerified$.MODULE$
 

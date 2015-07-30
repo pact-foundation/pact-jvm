@@ -54,20 +54,19 @@ class PactPluginTest {
         project.pact {
             serviceProviders {
                 provider1 {
-                    hasPactsWith("many consumers") {
+                    hasPactsWith('many consumers') {
                         pactFileLocation = project.file("${pactFileDirectory.absolutePath}")
-                        stateChange = "http://localhost:8080/state"
+                        stateChange = 'http://localhost:8080/state'
                     }
                 }
             }
         }
         project.evaluate()
 
-
         def consumers = project.tasks.pactVerify_provider1.providerToVerify.consumers
         assert consumers.size() == 2
-        assert consumers.find { it.name == 'Foo Consumer'}
-        assert consumers.find { it.name == 'Bar Consumer'}
+        assert consumers.find { it.name == 'Foo Consumer' }
+        assert consumers.find { it.name == 'Bar Consumer' }
     }
 
     @Test

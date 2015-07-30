@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.gradle
 
+@SuppressWarnings(['DuplicateImport', 'UnusedImport'])
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.Response$
 import au.com.dius.pact.provider.groovysupport.ResponseComparison
@@ -8,14 +9,15 @@ import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 import org.junit.Before
 import org.junit.Test
 
+@SuppressWarnings('ChainedTest')
 class ResponseComparisonTest {
 
-  Closure<Map> testSubject
-  Response response
-  def actualResponse
-  int actualStatus
-  Map actualHeaders = ['A': 'B', 'C': 'D', 'Content-Type': 'application/json']
-  def actualBody
+  private Closure<Map> testSubject
+  private Response response
+  private actualResponse
+  private int actualStatus
+  private Map actualHeaders = ['A': 'B', 'C': 'D', 'Content-Type': 'application/json']
+  private actualBody
 
   @Before
   void setup() {
@@ -23,7 +25,9 @@ class ResponseComparisonTest {
     actualStatus = 200
     actualBody = '{"stuff": "is good"}'
     actualResponse = [contentType: ContentType.APPLICATION_JSON]
-    testSubject = { ResponseComparison.compareResponse(response, actualResponse, actualStatus, actualHeaders, actualBody) }
+    testSubject = {
+      ResponseComparison.compareResponse(response, actualResponse, actualStatus, actualHeaders, actualBody)
+    }
   }
 
   @Test
@@ -35,30 +39,31 @@ class ResponseComparisonTest {
 
   @Test
   void 'should not compare headers if there are no expected headers'() {
-    response = Response$.MODULE$.apply(200, [:], "", [:])
+    response = Response$.MODULE$.apply(200, [:], '', [:])
     assert testSubject().headers == [:]
   }
 
   @Test
   void 'should only compare the expected headers'() {
     actualHeaders = ['A': 'B', 'C': 'D']
-    response = Response$.MODULE$.apply(200, ['A': 'B'], "", [:])
+    response = Response$.MODULE$.apply(200, ['A': 'B'], '', [:])
     assert testSubject().headers == ['A': true]
-    response = Response$.MODULE$.apply(200, ['A': 'D'], "", [:])
+    response = Response$.MODULE$.apply(200, ['A': 'D'], '', [:])
     assert testSubject().headers.A == 'Expected header \'A\' to have value \'D\' but was \'B\''
   }
 
   @Test
   void 'ignores case in header comparisons'() {
     actualHeaders = ['A': 'B', 'C': 'D']
-    response = Response$.MODULE$.apply(200, ['a': 'B'], "", [:])
+    response = Response$.MODULE$.apply(200, ['a': 'B'], '', [:])
     assert testSubject().headers == ['a': true]
   }
 
   @Test
   void 'comparing bodies should fail with different content types'() {
     actualHeaders['Content-Type'] = 'text/plain'
-    assert testSubject().body == [comparison: "Expected a response type of 'application/json' but the actual type was 'text/plain'"]
+    assert testSubject().body == [comparison:
+      'Expected a response type of \'application/json\' but the actual type was \'text/plain\'']
   }
 
   @Test

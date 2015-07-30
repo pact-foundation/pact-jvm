@@ -2,6 +2,9 @@ package au.com.dius.pact.provider.maven
 
 import groovy.transform.ToString
 
+/**
+ * Provider Info
+ */
 @ToString
 class Provider {
     String protocol = 'http'

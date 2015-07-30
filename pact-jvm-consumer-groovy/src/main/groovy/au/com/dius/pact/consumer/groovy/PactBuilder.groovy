@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
+@SuppressWarnings(['UnusedImport', 'DuplicateImport'])
 import au.com.dius.pact.consumer.StatefulMockProvider
 import au.com.dius.pact.consumer.VerificationResult
 import au.com.dius.pact.model.Consumer
@@ -17,8 +18,14 @@ import scala.collection.JavaConverters$
 
 import java.util.regex.Pattern
 
+/**
+ * Builder DSL for Pact tests
+ */
+@SuppressWarnings('PropertyName')
 class PactBuilder extends BaseBuilder {
 
+  private static final String PATH_MATCHER = '$.path'
+  private static final String CONTENT_TYPE = 'Content-Type'
   Consumer consumer
   Provider provider
   Integer port = null
@@ -52,6 +59,7 @@ class PactBuilder extends BaseBuilder {
   @Deprecated
   def has_pact_with = this.&hasPactWith
 
+  @SuppressWarnings('ConfusingMethodName')
   PactBuilder port(int port) {
     this.port = port
     this
@@ -82,7 +90,6 @@ class PactBuilder extends BaseBuilder {
       Map responseMatchers = responseData[i].matchers ?: [:]
       Map headers = setupHeaders(requestData[i].headers ?: [:], requestMatchers)
       Map responseHeaders = setupHeaders(responseData[i].headers ?: [:], responseMatchers)
-      Map query = [:]
       def state = providerState.empty ? None$.empty() : Some$.MODULE$.apply(providerState)
       String path = setupPath(requestData[i].path ?: '/', requestMatchers)
       interactions << Interaction$.MODULE$.apply(
@@ -115,25 +122,26 @@ class PactBuilder extends BaseBuilder {
 
   private static String setupPath(def path, Map matchers) {
     if (path instanceof Matcher) {
-      matchers['$.path'] = path.matcher
-      return path.value
+      matchers[PATH_MATCHER] = path.matcher
+      path.value
     } else if (path instanceof Pattern) {
       def matcher = new RegexpMatcher(values: [path])
-      matchers['$.path'] = matcher.matcher
-      return matcher.value
+      matchers[PATH_MATCHER] = matcher.matcher
+      matcher.value
     } else {
-      return path as String
+      path as String
     }
   }
 
   private static String queryToString(query) {
     if (query instanceof Map) {
-      query.collect({ k, v -> (v instanceof List) ? v.collect({ "$k=$it" }) : "$k=$v" }).flatten().join('&')
+      query.collectMany { k, v -> (v instanceof List) ? v.collect { "$k=$it" } : ["$k=$v"] }.join('&')
     } else {
       query
     }
   }
 
+  @SuppressWarnings('DuplicateMapLiteral')
   PactBuilder withAttributes(Map requestData) {
     def request = [matchers: [:]] + requestData
     def body = requestData.body
@@ -153,6 +161,7 @@ class PactBuilder extends BaseBuilder {
   @Deprecated
   def with = this.&withAttributes
 
+  @SuppressWarnings('DuplicateMapLiteral')
   PactBuilder willRespondWith(Map responseData) {
     def response = [matchers: [:]] + responseData
     def body = responseData.body
@@ -200,14 +209,14 @@ class PactBuilder extends BaseBuilder {
       requestData.last().matchers.putAll(body.matchers)
       requestData.last().headers = requestData.last().headers ?: [:]
       if (mimeType) {
-          requestData.last().headers['Content-Type'] = mimeType
+          requestData.last().headers[CONTENT_TYPE] = mimeType
       }
     } else {
       responseData.last().body = body.body
       responseData.last().matchers.putAll(body.matchers)
       responseData.last().headers = responseData.last().headers ?: [:]
       if (mimeType) {
-          responseData.last().headers['Content-Type'] = mimeType
+          responseData.last().headers[CONTENT_TYPE] = mimeType
       }
     }
     this

@@ -2,6 +2,9 @@ package au.com.dius.pact.provider.maven
 
 import groovy.transform.ToString
 
+/**
+ * Consumer Info
+ */
 @ToString
 class Consumer {
     String name = 'consumer'

@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.groovysupport
 import au.com.dius.pact.model.BodyMismatch
 import au.com.dius.pact.model.BodyTypeMismatch
 import au.com.dius.pact.model.HeaderMismatch
+@SuppressWarnings('UnusedImport')
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.Response$
 import au.com.dius.pact.model.ResponseMatching$
@@ -16,15 +17,20 @@ import groovy.json.JsonSlurper
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 import scala.collection.JavaConverters$
 
+/**
+ * Utility class to compare responses
+ */
 class ResponseComparison {
 
-  Response expected
-  Map actual
-  int actualStatus
-  Map actualHeaders
-  String actualBody
+    private static final String NL = '\n'
 
-  static def compareResponse(Response response, Map actualResponse, int actualStatus, Map actualHeaders,
+    Response expected
+    Map actual
+    int actualStatus
+    Map actualHeaders
+    String actualBody
+
+  static compareResponse(Response response, Map actualResponse, int actualStatus, Map actualHeaders,
                              String actualBody) {
     def result = [:]
     def comparison = new ResponseComparison(expected: response, actual: actualResponse, actualStatus: actualStatus,
@@ -40,7 +46,7 @@ class ResponseComparison {
   }
 
   def compareStatus(List<ResponsePartMismatch> mismatches) {
-    StatusMismatch statusMismatch = mismatches.find{ it instanceof StatusMismatch }
+    StatusMismatch statusMismatch = mismatches.find { it instanceof StatusMismatch }
     if (statusMismatch) {
       int expectedStatus = statusMismatch.expected()
       int actualStatus = statusMismatch.actual()
@@ -58,18 +64,18 @@ class ResponseComparison {
 
     if (expected.headers().defined) {
       def headerMismatchers = mismatches.findAll { it instanceof HeaderMismatch }.groupBy { it.headerKey }
-      if (!headerMismatchers.empty) {
-        def headers = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
-        headers.each { headerKey, value ->
-          if (headerMismatchers[headerKey]) {
-            headerResult[headerKey] = headerMismatchers[headerKey].first().mismatch.get()
-          } else {
-            headerResult[headerKey] = true
-          }
-        }
+      if (headerMismatchers.empty) {
+          headerResult = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
+              .keySet().collectEntries { [it, true] }
       } else {
-        headerResult = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
-          .keySet().collectEntries { [it, true] }
+          def headers = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
+          headers.each { headerKey, value ->
+              if (headerMismatchers[headerKey]) {
+                  headerResult[headerKey] = headerMismatchers[headerKey].first().mismatch.get()
+              } else {
+                  headerResult[headerKey] = true
+              }
+          }
       }
     }
 
@@ -79,12 +85,14 @@ class ResponseComparison {
   def compareBody(List<ResponsePartMismatch> mismatches) {
     def result = [:]
 
-    BodyTypeMismatch bodyTypeMismatch = mismatches.find{ it instanceof BodyTypeMismatch }
+    BodyTypeMismatch bodyTypeMismatch = mismatches.find { it instanceof BodyTypeMismatch }
     if (bodyTypeMismatch) {
-      result = [comparison: "Expected a response type of '${bodyTypeMismatch.expected()}' but the actual type was '${bodyTypeMismatch.actual()}'"]
-    } else if (mismatches.any{ it instanceof BodyMismatch }) {
-      result.comparison = mismatches.findAll{ it instanceof BodyMismatch }.collectEntries { BodyMismatch bodyMismatch ->
-        [bodyMismatch.path(), bodyMismatch.mismatch().defined ? bodyMismatch.mismatch().get() : "mismatch"]
+      result = [comparison: "Expected a response type of '${bodyTypeMismatch.expected()}' but the actual " +
+          "type was '${bodyTypeMismatch.actual()}'"]
+    } else if (mismatches.any { it instanceof BodyMismatch }) {
+      result.comparison = mismatches.findAll { it instanceof BodyMismatch }.collectEntries {
+          BodyMismatch bodyMismatch -> [bodyMismatch.path(), bodyMismatch.mismatch().defined ?
+              bodyMismatch.mismatch().get() : 'mismatch']
       }
 
       String actualBodyString = ''
@@ -105,8 +113,8 @@ class ResponseComparison {
           }
       }
 
-      def expectedLines = expectedBodyString.split('\n') as List
-      def actualLines = actualBodyString.split('\n') as List
+      def expectedLines = expectedBodyString.split(NL) as List
+      def actualLines = actualBodyString.split(NL) as List
       Patch<String> patch = DiffUtils.diff(expectedLines, actualLines)
 
       def diff = []

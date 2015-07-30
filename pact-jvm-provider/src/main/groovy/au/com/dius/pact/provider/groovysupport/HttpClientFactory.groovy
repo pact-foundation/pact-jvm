@@ -16,15 +16,19 @@ import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLContext
 import java.security.cert.X509Certificate
 
+/**
+ * HTTP Client Factory
+ */
+@SuppressWarnings('FactoryMethodName')
 class HttpClientFactory {
 
-    public CloseableHttpClient newClient(def provider) {
+    CloseableHttpClient newClient(def provider) {
         if (provider?.createClient != null) {
             if (provider.createClient instanceof Closure) {
                 provider.createClient(provider)
             } else {
                 Binding binding = new Binding()
-                binding.setVariable("provider", provider)
+                binding.setVariable('provider', provider)
                 GroovyShell shell = new GroovyShell(binding)
                 shell.evaluate(provider.createClient as String)
             }
@@ -37,7 +41,7 @@ class HttpClientFactory {
         }
     }
 
-    private static void createWithTrustStore(provider) {
+    private static createWithTrustStore(provider) {
         char[] password = provider.trustStorePassword.toCharArray()
 
         HttpClients
@@ -51,9 +55,8 @@ class HttpClientFactory {
 
         // setup a Trust Strategy that allows all certificates.
         //
-        SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, { X509Certificate[] chain, String authType ->
-            return true
-        }).build()
+        def trustStratergy = { X509Certificate[] chain, String authType -> true }
+        SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, trustStratergy).build()
         b.setSslcontext(sslContext)
         // don't check Hostnames, either.
         //      -- use SSLConnectionSocketFactory.getDefaultHostnameVerifier(), if you don't want to weaken
@@ -65,8 +68,8 @@ class HttpClientFactory {
         //
         SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, hostnameVerifier)
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
-                .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                .register("https", sslSocketFactory)
+                .register('http', PlainConnectionSocketFactory.socketFactory)
+                .register('https', sslSocketFactory)
                 .build()
 
         // now, we create connection-manager using our Registry.
@@ -76,6 +79,6 @@ class HttpClientFactory {
 
         // finally, build the HttpClient;
         //      -- done!
-        return b.build()
+        b.build()
     }
 }

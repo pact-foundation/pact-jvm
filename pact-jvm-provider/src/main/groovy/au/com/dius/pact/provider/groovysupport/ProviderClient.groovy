@@ -1,18 +1,40 @@
 package au.com.dius.pact.provider.groovysupport
+
 import au.com.dius.pact.model.Request
 import groovy.json.JsonBuilder
-import org.apache.http.*
+import org.apache.http.Consts
+import org.apache.http.Header
+import org.apache.http.HttpEntity
+import org.apache.http.HttpEntityEnclosingRequest
+import org.apache.http.HttpRequest
+import org.apache.http.HttpResponse
 import org.apache.http.client.entity.UrlEncodedFormEntity
-import org.apache.http.client.methods.*
+import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.client.methods.HttpDelete
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.HttpHead
+import org.apache.http.client.methods.HttpOptions
+import org.apache.http.client.methods.HttpPatch
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.client.methods.HttpPut
+import org.apache.http.client.methods.HttpTrace
 import org.apache.http.client.utils.URIBuilder
 import org.apache.http.client.utils.URLEncodedUtils
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.util.EntityUtils
+@SuppressWarnings('UnusedImport')
 import scala.collection.JavaConverters$
 
+/**
+ * Client HTTP utility for providers
+ */
 class ProviderClient {
+
+    private static final String CONTENT_TYPE = 'Content-Type'
+    private static final String UTF8 = 'UTF-8'
+    public static final String REQUEST = 'request'
 
     HttpClientFactory httpClientFactory = new HttpClientFactory()
     Request request
@@ -27,8 +49,8 @@ class ProviderClient {
                 method.addHeader(key, value)
             }
 
-            if (!method.containsHeader('Content-Type')) {
-                method.addHeader('Content-Type', 'application/json')
+            if (!method.containsHeader(CONTENT_TYPE)) {
+                method.addHeader(CONTENT_TYPE, 'application/json')
             }
         }
 
@@ -47,7 +69,7 @@ class ProviderClient {
                 provider.requestFilter(method)
             } else {
                 Binding binding = new Binding()
-                binding.setVariable("request", method)
+                binding.setVariable(REQUEST, method)
                 GroovyShell shell = new GroovyShell(binding)
                 shell.evaluate(provider.requestFilter as String)
             }
@@ -85,7 +107,7 @@ class ProviderClient {
                     provider.stateChangeRequestFilter(method)
                 } else {
                     Binding binding = new Binding()
-                    binding.setVariable("request", method)
+                    binding.setVariable(REQUEST, method)
                     GroovyShell shell = new GroovyShell(binding)
                     shell.evaluate(provider.stateChangeRequestFilter as String)
                 }
@@ -110,7 +132,7 @@ class ProviderClient {
             } else {
                 response.contentType = ContentType.APPLICATION_JSON
             }
-            response.data = EntityUtils.toString(entity, response.contentType?.charset?.name() ?: 'UTF-8')
+            response.data = EntityUtils.toString(entity, response.contentType?.charset?.name() ?: UTF8)
         }
 
         response
@@ -134,7 +156,7 @@ class ProviderClient {
             }
         }
 
-        path += URLDecoder.decode(request.path(), 'UTF-8')
+        path += URLDecoder.decode(request.path(), UTF8)
         urlBuilder.path = path
 
         if (request.query().defined && !urlEncodedFormPost(request)) {

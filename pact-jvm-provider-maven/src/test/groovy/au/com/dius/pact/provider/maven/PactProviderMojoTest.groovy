@@ -11,7 +11,7 @@ class PactProviderMojoTest {
     @Before
     void setup() {
         mojo = new PactProviderMojo()
-        consumer = new Consumer(name: "Test Consumer")
+        consumer = new Consumer(name: 'Test Consumer')
     }
 
     @Test

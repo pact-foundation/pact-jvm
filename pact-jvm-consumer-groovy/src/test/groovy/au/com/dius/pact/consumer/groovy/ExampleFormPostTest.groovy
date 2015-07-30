@@ -10,8 +10,8 @@ class ExampleFormPostTest {
     void 'handles bodies from form posts'() {
         def service = new PactBuilder()
         service {
-            serviceConsumer "Consumer"
-            hasPactWith "Old School Service"
+            serviceConsumer 'Consumer'
+            hasPactWith 'Old School Service'
             port 8000
 
             uponReceiving('a POST in application/x-www-form-urlencoded')

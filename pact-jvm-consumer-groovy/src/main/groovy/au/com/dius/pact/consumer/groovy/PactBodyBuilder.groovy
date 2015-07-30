@@ -3,8 +3,14 @@ package au.com.dius.pact.consumer.groovy
 import groovy.json.JsonBuilder
 import java.util.regex.Pattern
 
+/**
+ * DSL Builder for constructing JSON bodies
+ */
 class PactBodyBuilder extends BaseBuilder {
 
+  public static final String PATH_SEP = '.'
+  public static final String START_LIST = '['
+  public static final String END_LIST = ']'
   def bodyMap = [:]
   def matchers = [:]
   def path = '$.body'
@@ -26,7 +32,7 @@ class PactBodyBuilder extends BaseBuilder {
     switch (name) {
       case 'hexValue':
         hexValue()
-        break;
+        break
       case 'identifier':
         identifier()
         break
@@ -66,31 +72,31 @@ class PactBodyBuilder extends BaseBuilder {
   private void addAttribute(String name, def value, def value2 = null) {
     if (value instanceof Pattern) {
       def matcher = regexp(value as Pattern, value2)
-      bodyMap[name] = setMatcherAttribute(matcher, path + '.' + name)
+      bodyMap[name] = setMatcherAttribute(matcher, path + PATH_SEP + name)
     } else if (value instanceof LikeMatcher) {
-      setMatcherAttribute(value, path + '.' + name)
-      bodyMap[name] = [ invokeClosure(value.values.last(), '.' + name + '[*]') ]
+      setMatcherAttribute(value, path + PATH_SEP + name)
+      bodyMap[name] = [ invokeClosure(value.values.last(), PATH_SEP + name + '[*]') ]
     } else if (value instanceof Matcher) {
-      bodyMap[name] = setMatcherAttribute(value, path + '.' + name)
+      bodyMap[name] = setMatcherAttribute(value, path + PATH_SEP + name)
     } else if (value instanceof List) {
       bodyMap[name] = []
       value.eachWithIndex { def entry, int i ->
         if (entry instanceof Matcher) {
-          bodyMap[name] << setMatcherAttribute(entry, path + '.' + name + '[' + i + ']')
+          bodyMap[name] << setMatcherAttribute(entry, path + PATH_SEP + name + START_LIST + i + END_LIST)
         } else if (entry instanceof Closure) {
-          bodyMap[name] << invokeClosure(entry, '.' + name + '[' + i + ']')
+          bodyMap[name] << invokeClosure(entry, PATH_SEP + name + START_LIST + i + END_LIST)
         } else {
           bodyMap[name] << entry
         }
       }
     } else if (value instanceof Closure) {
-      bodyMap[name] = invokeClosure(value, '.' + name)
+      bodyMap[name] = invokeClosure(value, PATH_SEP + name)
     } else {
       bodyMap[name] = value
     }
   }
 
-  private def invokeClosure(Closure entry, String subPath) {
+  private invokeClosure(Closure entry, String subPath) {
     def oldpath = path
     path += subPath
     entry.delegate = this
@@ -104,7 +110,7 @@ class PactBodyBuilder extends BaseBuilder {
     tmp
   }
 
-  private def setMatcherAttribute(Matcher value, String attributePath) {
+  private setMatcherAttribute(Matcher value, String attributePath) {
     if (value.matcher) {
       matchers[attributePath] = value.matcher
     }

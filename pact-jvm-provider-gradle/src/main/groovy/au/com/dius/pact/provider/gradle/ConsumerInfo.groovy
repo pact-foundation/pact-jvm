@@ -1,5 +1,8 @@
 package au.com.dius.pact.provider.gradle
 
+/**
+ * Consumer Info
+ */
 class ConsumerInfo {
     String name
     def pactFile

@@ -2,6 +2,10 @@ package au.com.dius.pact.consumer.groovy
 
 import org.apache.commons.lang3.time.DateFormatUtils
 
+/**
+ * Matcher for dates
+ */
+@SuppressWarnings('UnnecessaryGetter')
 class DateMatcher extends Matcher {
 
   String pattern

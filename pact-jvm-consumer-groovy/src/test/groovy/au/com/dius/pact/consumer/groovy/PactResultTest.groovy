@@ -12,8 +12,8 @@ class PactResultTest {
     void 'case when the test passes and the pact is verified'() {
 
         def testService = new PactBuilder().build  {
-            serviceConsumer "Consumer"
-            hasPactWith "Test Service"
+            serviceConsumer 'Consumer'
+            hasPactWith 'Test Service'
             port 1234
 
             uponReceiving('a valid request')
@@ -24,7 +24,7 @@ class PactResultTest {
             }
         }
 
-        testService.runTestAndVerify() {
+        testService.runTestAndVerify {
             def client = new RESTClient('http://localhost:1234/')
             def response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                 requestContentType: 'application/json')
@@ -44,8 +44,8 @@ class PactResultTest {
     void 'case when the test fails and the pact is verified'() {
 
         def testService = new PactBuilder().build  {
-            serviceConsumer "Consumer"
-            hasPactWith "Test Service"
+            serviceConsumer 'Consumer'
+            hasPactWith 'Test Service'
             port 1234
 
             uponReceiving('a valid request')
@@ -57,7 +57,7 @@ class PactResultTest {
         }
 
         try {
-            testService.runTestAndVerify() {
+            testService.runTestAndVerify {
                 def client = new RESTClient('http://localhost:1234/')
                 def response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                     requestContentType: 'application/json')
@@ -75,8 +75,8 @@ class PactResultTest {
     void 'case when the test fails and the pact has a mismatch'() {
 
         def testService = new PactBuilder().build  {
-            serviceConsumer "Consumer"
-            hasPactWith "Test Service"
+            serviceConsumer 'Consumer'
+            hasPactWith 'Test Service'
             port 1234
 
             uponReceiving('a valid request')
@@ -88,9 +88,10 @@ class PactResultTest {
         }
 
         try {
-            testService.runTestAndVerify() {
+            testService.runTestAndVerify {
                 def client = new RESTClient('http://localhost:1234/')
-                def response = client.get(path: '/path', query: [status: 'bad', name: 'ron'], requestContentType: 'application/json')
+                def response = client.get(path: '/path', query: [status: 'bad', name: 'ron'],
+                    requestContentType: 'application/json')
                 assert response.status == 200
             }
             fail('Should have raised an exception')
@@ -103,8 +104,8 @@ class PactResultTest {
     void 'case when the test passes and there is a missing request'() {
 
         def testService = new PactBuilder().build  {
-            serviceConsumer "Consumer"
-            hasPactWith "Test Service"
+            serviceConsumer 'Consumer'
+            hasPactWith 'Test Service'
             port 1234
 
             uponReceiving('a valid request')
@@ -123,9 +124,10 @@ class PactResultTest {
         }
 
         try {
-            testService.runTestAndVerify() {
+            testService.runTestAndVerify {
                 def client = new RESTClient('http://localhost:1234/')
-                def response = client.get(path: '/path', query: [status: 'good', name: 'ron'], requestContentType: 'application/json')
+                def response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
+                    requestContentType: 'application/json')
                 assert response.status == 200
             }
         } catch (PactFailedException ex) {

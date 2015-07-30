@@ -7,12 +7,14 @@ import scala.Option
 import scala.collection.JavaConverters
 
 class PactBodyBuilderTest {
+
     @Test
+    @SuppressWarnings('AbcMetric')
     void dsl() {
         def service = new PactBuilder()
         service {
-            serviceConsumer "Consumer"
-            hasPactWith "Provider"
+            serviceConsumer 'Consumer'
+            hasPactWith 'Provider'
         }
         service {
             uponReceiving('a request')
@@ -61,7 +63,7 @@ class PactBodyBuilderTest {
               name(~/\w+/, 'harry')
             }
         }
-        def fragment = service.fragment()
+        service.fragment()
         assert service.interactions.size() == 1
         assert asJavaMap(service.interactions[0].request.matchingRules) == [
           '$.body.name': [regex: '\\w+'],
@@ -87,15 +89,15 @@ class PactBodyBuilderTest {
         assert keys == ['name', 'surname', 'position', 'happy', 'hexCode', 'hexCode2', 'id', 'id2', 'localAddress',
           'localAddress2', 'age', 'age2', 'timestamp', 'ts', 'values', 'role', 'roles'] as Set
 
-        assert service.interactions[0].response.body.get() == new JsonBuilder([name: "harry"]).toPrettyString()
+        assert service.interactions[0].response.body.get() == new JsonBuilder([name: 'harry']).toPrettyString()
     }
 
     @Test
     void 'arrays with matching'() {
         def service = new PactBuilder()
         service {
-            serviceConsumer "Consumer"
-            hasPactWith "Provider"
+            serviceConsumer 'Consumer'
+            hasPactWith 'Provider'
 
             uponReceiving('a request with array matching')
             withAttributes(method: 'get', path: '/')
@@ -114,7 +116,7 @@ class PactBodyBuilderTest {
                 headers: ['Content-Type': 'text/html']
             )
         }
-        def fragment = service.fragment()
+        service.fragment()
         assert service.interactions.size() == 1
         assert asJavaMap(service.interactions[0].request.matchingRules) == [
             '$.body.orders': [max: 10, 'match': 'type'],
@@ -139,7 +141,7 @@ class PactBodyBuilderTest {
 
     }
 
-    List walkGraph(def value) {
+    private List walkGraph(def value) {
         def set = []
         if (value instanceof Map) {
             value.each { k, v ->
@@ -155,19 +157,19 @@ class PactBodyBuilderTest {
         set
     }
 
-    def asJavaMap(def map) {
-    if (map instanceof Option) {
-      if (map.defined) {
-        asJavaMap(map.get())
-      } else {
-        [:]
-      }
-    } else if (map instanceof scala.collection.Map) {
-      JavaConverters.mapAsJavaMapConverter(map).asJava().collectEntries {
-        [it.key, asJavaMap(it.value)]
-      }
-    } else {
-      map
+    private asJavaMap(def map) {
+        if (map instanceof Option) {
+          if (map.defined) {
+            asJavaMap(map.get())
+          } else {
+            [:]
+          }
+        } else if (map instanceof scala.collection.Map) {
+          JavaConverters.mapAsJavaMapConverter(map).asJava().collectEntries {
+            [it.key, asJavaMap(it.value)]
+          }
+        } else {
+          map
+        }
     }
-  }
 }
