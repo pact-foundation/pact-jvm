@@ -59,7 +59,7 @@ subprojects {
 
     tasks.withType(ScalaCompile) {
         scalaCompileOptions.useCompileDaemon = false
-        scalaCompileOptions.useAnt = true
+        scalaCompileOptions.useAnt = false
         scalaCompileOptions.additionalParameters = ['-target:jvm-1.6']
         configure(scalaCompileOptions.forkOptions) {
           memoryMaximumSize = '700m'
