@@ -10,7 +10,8 @@ libraryDependencies ++= Seq(
   "org.json4s" % "json4s-native_2.10"  % "3.2.6",
   "org.json4s" % "json4s-jackson_2.10" % "3.2.6",
   "org.specs2" %% "specs2"         % "2.3.11" % "test",
-  "org.mockito" % "mockito-core"   % "1.8.5" % "test"
+  "org.mockito" % "mockito-core"   % "1.8.5" % "test",
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"
 )
 
 initialCommands := """

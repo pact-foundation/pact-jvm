@@ -5,6 +5,7 @@ libraryDependencies ++= Seq(
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.0",
   "org.json4s"   %% "json4s-native"  % "3.2.11",
   "org.json4s"   %% "json4s-jackson" % "3.2.11",
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
   "org.json" % "json" % "20140107",
   "org.apache.httpcomponents" % "httpclient" % "4.4.1"
 )

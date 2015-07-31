@@ -6,6 +6,7 @@ libraryDependencies ++= Seq(
   "org.mockito"  % "mockito-all"     % "1.9.5" % "test",
   "org.json4s"   % "json4s-native_2.10"  % "3.2.6",
   "org.json4s"   % "json4s-jackson_2.10" % "3.2.6",
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
   "com.github.scopt" %% "scopt" % "3.3.0"
 )
 

@@ -1,8 +1,8 @@
 package au.com.dius.pact.server
 
-import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.consumer.DefaultMockProvider
 import au.com.dius.pact.model.{MockProviderConfig, Pact, Request, Response}
+import com.typesafe.scalalogging.StrictLogging
 import org.jboss.netty.handler.codec.http.QueryStringDecoder
 import org.json4s.JsonDSL.{int2jvalue, map2jvalue, string2jvalue}
 import org.json4s.jackson.JsonMethods.pretty
