@@ -4,6 +4,7 @@ pact-jvm
 [![Join the chat at https://gitter.im/DiUS/pact-jvm](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/DiUS/pact-jvm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![Build Status](https://travis-ci.org/DiUS/pact-jvm.svg?branch=master)](https://travis-ci.org/DiUS/pact-jvm)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-logging_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-logging_2.11)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11)
 
 JVM implementation of the consumer driven contract library [pact](https://github.com/bethesque/pact_specification)
