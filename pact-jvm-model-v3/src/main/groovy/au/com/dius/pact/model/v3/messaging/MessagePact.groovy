@@ -20,18 +20,14 @@ class MessagePact {
     Map metadata = ['pact-specification': ['version': '3.0'], 'pact-jvm': ['version': lookupVersion()]]
 
     private static String lookupVersion() {
-        def url = MessagePact.protectionDomain.codeSource.location
-        if (url != null) {
-            url.withInputStream { stream ->
-                try {
-                    def jarStream = new JarInputStream(stream)
-                    return jarStream.manifest?.mainAttributes?.getValue('Implementation-Version') ?: ''
-                } catch (e) {
-                    log.warn('Could not load pact-jvm manifest', e)
-                }
+        MessagePact.protectionDomain.codeSource.location?.withInputStream { stream ->
+            try {
+                def jarStream = new JarInputStream(stream)
+                jarStream.manifest?.mainAttributes?.getValue('Implementation-Version')
+            } catch (e) {
+                log.warn('Could not load pact-jvm manifest', e)
             }
-        }
-        ''
+        } ?: ''
     }
 
     void write(String pactDir) {
