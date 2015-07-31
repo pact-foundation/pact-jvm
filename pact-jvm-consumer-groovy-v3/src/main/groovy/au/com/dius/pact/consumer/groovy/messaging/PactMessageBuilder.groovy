@@ -1,5 +1,7 @@
 package au.com.dius.pact.consumer.groovy.messaging
 
+@SuppressWarnings('UnusedImport')
+import au.com.dius.pact.consumer.PactConsumerConfig$
 import au.com.dius.pact.consumer.groovy.BaseBuilder
 import au.com.dius.pact.consumer.groovy.InvalidPactException
 import au.com.dius.pact.consumer.groovy.PactBodyBuilder
@@ -33,7 +35,7 @@ class PactMessageBuilder extends BaseBuilder {
     }
 
     PactMessageBuilder expectsToReceive(String description) {
-        messages << new Message(description)
+        messages << new Message(description, providerState)
         this
     }
 
@@ -75,7 +77,7 @@ class PactMessageBuilder extends BaseBuilder {
         if (results.any { it instanceof Throwable }) {
             throw new MessagePactFailedException(results.findAll { it instanceof Throwable })
         } else {
-            pact.write()
+            pact.write(PactConsumerConfig$.MODULE$.pactRootDir())
         }
     }
 
