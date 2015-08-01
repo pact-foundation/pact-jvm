@@ -243,32 +243,11 @@ class PactBuilder extends BaseBuilder {
     def body = new PactBodyBuilder()
     closure.delegate = body
     closure.call()
-    if (requestState) {
-      requestData.last().body = body.body
-      requestData.last().matchers.putAll(body.matchers)
-      requestData.last().headers = requestData.last().headers ?: [:]
-      if (mimeType) {
-          requestData.last().headers[CONTENT_TYPE] = mimeType
-      }
-    } else {
-      responseData.last().body = body.body
-      responseData.last().matchers.putAll(body.matchers)
-      responseData.last().headers = responseData.last().headers ?: [:]
-      if (mimeType) {
-          responseData.last().headers[CONTENT_TYPE] = mimeType
-      }
-    }
+    setupBody(body, mimeType)
     this
   }
 
-  /**
-   * Allows the body to be defined using a Groovy builder pattern with an array as the root
-   * @param mimeType Optional mimetype for the body
-   * @param array body
-   */
-  PactBuilder withBody(String mimeType = null, List array) {
-    def body = new PactBodyBuilder().build(array)
-
+  private setupBody(PactBodyBuilder body, String mimeType) {
     if (requestState) {
       requestData.last().body = body.body
       requestData.last().matchers.putAll(body.matchers)
@@ -284,6 +263,28 @@ class PactBuilder extends BaseBuilder {
         responseData.last().headers[CONTENT_TYPE] = mimeType
       }
     }
+  }
+
+  /**
+   * Allows the body to be defined using a Groovy builder pattern with an array as the root
+   * @param mimeType Optional mimetype for the body
+   * @param array body
+   */
+  PactBuilder withBody(String mimeType = null, List array) {
+    def body = new PactBodyBuilder().build(array)
+    setupBody(body, mimeType)
+    this
+  }
+
+  /**
+   * Allows the body to be defined using a Groovy builder pattern with an array as the root
+   * using a each like matcher for all elements of the array
+   * @param mimeType Optional mimetype for the body
+   * @param matcher body
+   */
+  PactBuilder withBody(String mimeType = null, LikeMatcher matcher) {
+    def body = new PactBodyBuilder().build(matcher)
+    setupBody(body, mimeType)
     this
   }
 

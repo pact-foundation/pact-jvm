@@ -142,4 +142,28 @@ class PactBuilderTest {
       ']'
     assert firstInteraction.response.matchingRules.get().keySet().toString() == 'Set($.body[0].id, $.body[1].id)'
   }
+
+  @Test
+  void 'allow like matcher as the root of the body'() {
+    aliceService {
+      uponReceiving('a request to get a like array of objects response')
+      withAttributes(method: 'get', path: '/array')
+      willRespondWith(status: 200)
+      withBody eachLike {
+        id identifier(1)
+        name 'item1'
+      }
+    }
+    aliceService.buildInteractions()
+    assert aliceService.interactions.size() == 1
+
+    def firstInteraction = aliceService.interactions[0]
+    assert firstInteraction.response.body.get() == '[\n' +
+      '    {\n' +
+      '        "id": 1,\n' +
+      '        "name": "item1"\n' +
+      '    }\n' +
+      ']'
+    assert firstInteraction.response.matchingRules.get().keySet().toString() == 'Set($.body, $.body[*].id)'
+  }
 }

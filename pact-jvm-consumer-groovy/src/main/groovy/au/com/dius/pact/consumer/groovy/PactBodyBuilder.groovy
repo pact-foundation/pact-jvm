@@ -11,6 +11,7 @@ class PactBodyBuilder extends BaseBuilder {
   public static final String PATH_SEP = '.'
   public static final String START_LIST = '['
   public static final String END_LIST = ']'
+  public static final String ALL_LIST_ITEMS = '[*]'
 
   def matchers = [:]
 
@@ -77,7 +78,7 @@ class PactBodyBuilder extends BaseBuilder {
       bodyRepresentation[name] = setMatcherAttribute(matcher, path + PATH_SEP + name)
     } else if (value instanceof LikeMatcher) {
       setMatcherAttribute(value, path + PATH_SEP + name)
-      bodyRepresentation[name] = [ invokeClosure(value.values.last(), PATH_SEP + name + '[*]') ]
+      bodyRepresentation[name] = [ invokeClosure(value.values.last(), PATH_SEP + name + ALL_LIST_ITEMS) ]
     } else if (value instanceof Matcher) {
       bodyRepresentation[name] = setMatcherAttribute(value, path + PATH_SEP + name)
     } else if (value instanceof List) {
@@ -119,27 +120,6 @@ class PactBodyBuilder extends BaseBuilder {
     value.value
   }
 
-  /**
-   * Array with maximum size and each element like the following object
-   */
-  def maxLike(Integer max, Closure closure) {
-    new MaxLikeMatcher(values: [max, closure])
-  }
-
-  /**
-   * Array with minimum size and each element like the following object
-   */
-  def minLike(Integer min, Closure closure) {
-    new MinLikeMatcher(values: [min, closure])
-  }
-
-  /**
-   * Array where each element is like the following object
-   */
-  def eachLike(Closure closure) {
-    new EachLikeMatcher(values: [null,  closure])
-  }
-
   def build(List array) {
     def index = 0
     bodyRepresentation = array.collect {
@@ -150,6 +130,12 @@ class PactBodyBuilder extends BaseBuilder {
         it
       }
     }
+    this
+  }
+
+  def build(LikeMatcher matcher) {
+    setMatcherAttribute(matcher, path)
+    bodyRepresentation = [ invokeClosure(matcher.values.last(), ALL_LIST_ITEMS) ]
     this
   }
 

@@ -95,4 +95,25 @@ class Matchers {
     new TypeMatcher(values: [TYPE, value ?: RandomStringUtils.randomAlphanumeric(TEN)])
   }
 
+  /**
+   * Array with maximum size and each element like the following object
+   */
+  def maxLike(Integer max, Closure closure) {
+    new MaxLikeMatcher(values: [max, closure])
+  }
+
+  /**
+   * Array with minimum size and each element like the following object
+   */
+  def minLike(Integer min, Closure closure) {
+    new MinLikeMatcher(values: [min, closure])
+  }
+
+  /**
+   * Array where each element is like the following object
+   */
+  def eachLike(Closure closure) {
+    new EachLikeMatcher(values: [null,  closure])
+  }
+
 }
