@@ -11,7 +11,8 @@ object MockProviderConfig {
   val portLowerBound = 20000
   val portUpperBound = 40000
 
-  def createDefault() = MockProviderConfig(randomPort(portLowerBound, portUpperBound).get, "localhost")
+  def createDefault() : MockProviderConfig = createDefault("localhost")
+  def createDefault(host: String) = MockProviderConfig(randomPort(portLowerBound, portUpperBound).get, host)
   def create(lower: Int, upper: Int) = MockProviderConfig(randomPort(lower, upper).get, "localhost")
 
   def randomPort(lower: Int, upper: Int) = {

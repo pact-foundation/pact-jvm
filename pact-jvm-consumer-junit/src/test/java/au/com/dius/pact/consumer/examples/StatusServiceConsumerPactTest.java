@@ -39,18 +39,12 @@ public class StatusServiceConsumerPactTest extends ConsumerPactTest {
     }
 
     @Override
-    protected void runTest(String baseUrl) {
-        try {
-            StatusServiceClient statusServiceClient = new StatusServiceClient(baseUrl);
+    protected void runTest(String baseUrl) throws IOException {
+        StatusServiceClient statusServiceClient = new StatusServiceClient(baseUrl);
 
-            String currentQuestionnairePage = statusServiceClient.getCurrentQuestionnairePage(null);
+        String currentQuestionnairePage = statusServiceClient.getCurrentQuestionnairePage(null);
 
-            assertEquals(currentQuestionnairePage, "my_home_1");
-        } catch (Exception e) {
-            // NOTE: if you want to see any pact failure, do not throw an exception here. This should be
-            // fixed at some point (see Issue #40 https://github.com/DiUS/pact-jvm/issues/40)
-            throw new RuntimeException(e);
-        }
+        assertEquals(currentQuestionnairePage, "my_home_1");
     }
 
     private class StatusServiceClient {

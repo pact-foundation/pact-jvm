@@ -11,20 +11,23 @@ class PactBodyBuilder extends BaseBuilder {
   public static final String PATH_SEP = '.'
   public static final String START_LIST = '['
   public static final String END_LIST = ']'
-  def bodyMap = [:]
+  public static final String ALL_LIST_ITEMS = '[*]'
+
   def matchers = [:]
-  def path = '$.body'
-  def bodyStack = []
+
+  private bodyRepresentation = [:]
+  private path = '$.body'
+  private final bodyStack = []
 
   String getBody() {
-    new JsonBuilder(bodyMap).toPrettyString()
+    new JsonBuilder(bodyRepresentation).toPrettyString()
   }
 
   def methodMissing(String name, args) {
     if (args.size() > 0) {
       addAttribute(name, args[0], args.size() > 1 ? args[1] : null)
     } else {
-      bodyMap[name] = [:]
+      bodyRepresentation[name] = [:]
     }
   }
 
@@ -72,27 +75,27 @@ class PactBodyBuilder extends BaseBuilder {
   private void addAttribute(String name, def value, def value2 = null) {
     if (value instanceof Pattern) {
       def matcher = regexp(value as Pattern, value2)
-      bodyMap[name] = setMatcherAttribute(matcher, path + PATH_SEP + name)
+      bodyRepresentation[name] = setMatcherAttribute(matcher, path + PATH_SEP + name)
     } else if (value instanceof LikeMatcher) {
       setMatcherAttribute(value, path + PATH_SEP + name)
-      bodyMap[name] = [ invokeClosure(value.values.last(), PATH_SEP + name + '[*]') ]
+      bodyRepresentation[name] = [ invokeClosure(value.values.last(), PATH_SEP + name + ALL_LIST_ITEMS) ]
     } else if (value instanceof Matcher) {
-      bodyMap[name] = setMatcherAttribute(value, path + PATH_SEP + name)
+      bodyRepresentation[name] = setMatcherAttribute(value, path + PATH_SEP + name)
     } else if (value instanceof List) {
-      bodyMap[name] = []
-      value.eachWithIndex { def entry, int i ->
+      bodyRepresentation[name] = []
+      value.eachWithIndex { entry, i ->
         if (entry instanceof Matcher) {
-          bodyMap[name] << setMatcherAttribute(entry, path + PATH_SEP + name + START_LIST + i + END_LIST)
+          bodyRepresentation[name] << setMatcherAttribute(entry, path + PATH_SEP + name + START_LIST + i + END_LIST)
         } else if (entry instanceof Closure) {
-          bodyMap[name] << invokeClosure(entry, PATH_SEP + name + START_LIST + i + END_LIST)
+          bodyRepresentation[name] << invokeClosure(entry, PATH_SEP + name + START_LIST + i + END_LIST)
         } else {
-          bodyMap[name] << entry
+          bodyRepresentation[name] << entry
         }
       }
     } else if (value instanceof Closure) {
-      bodyMap[name] = invokeClosure(value, PATH_SEP + name)
+      bodyRepresentation[name] = invokeClosure(value, PATH_SEP + name)
     } else {
-      bodyMap[name] = value
+      bodyRepresentation[name] = value
     }
   }
 
@@ -101,12 +104,12 @@ class PactBodyBuilder extends BaseBuilder {
     path += subPath
     entry.delegate = this
     entry.resolveStrategy = Closure.DELEGATE_FIRST
-    bodyStack.push(bodyMap)
-    bodyMap = [:]
+    bodyStack.push(bodyRepresentation)
+    bodyRepresentation = [:]
     entry.call()
     path = oldpath
-    def tmp = bodyMap
-    bodyMap = bodyStack.pop()
+    def tmp = bodyRepresentation
+    bodyRepresentation = bodyStack.pop()
     tmp
   }
 
@@ -117,25 +120,23 @@ class PactBodyBuilder extends BaseBuilder {
     value.value
   }
 
-  /**
-   * Array with maximum size and each element like the following object
-   */
-  def maxLike(Integer max, Closure closure) {
-    new MaxLikeMatcher(values: [max, closure])
+  def build(List array) {
+    def index = 0
+    bodyRepresentation = array.collect {
+      if (it instanceof Closure) {
+        invokeClosure(it, START_LIST + (index++) + END_LIST)
+      } else {
+        index++
+        it
+      }
+    }
+    this
   }
 
-  /**
-   * Array with minimum size and each element like the following object
-   */
-  def minLike(Integer min, Closure closure) {
-    new MinLikeMatcher(values: [min, closure])
-  }
-
-  /**
-   * Array where each element is like the following object
-   */
-  def eachLike(Closure closure) {
-    new EachLikeMatcher(values: [null,  closure])
+  def build(LikeMatcher matcher) {
+    setMatcherAttribute(matcher, path)
+    bodyRepresentation = [ invokeClosure(matcher.values.last(), ALL_LIST_ITEMS) ]
+    this
   }
 
 }

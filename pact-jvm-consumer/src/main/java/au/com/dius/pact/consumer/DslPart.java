@@ -3,6 +3,9 @@ package au.com.dius.pact.consumer;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Abstract base class to support Object and Array JSON DSL builders
+ */
 public abstract class DslPart {
     public static final String HEXADECIMAL = "[0-9a-fA-F]+";
     public static final String IP_ADDRESS = "(\\d{1,3}\\.)+\\d{1,3}";

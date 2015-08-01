@@ -88,4 +88,82 @@ class PactBuilderTest {
     assert firstInteraction.response.headers.get().apply('Content-Type') == 'text/html'
     assert firstInteraction.response.matchingRules.get().apply('$.headers.Content-Type').apply('regex') == 'text/.*'
   }
+
+  @Test
+  void 'allow arrays as the root of the body'() {
+    aliceService {
+      uponReceiving('a request to get a array response')
+      withAttributes(method: 'get', path: '/array')
+      willRespondWith(status: 200)
+      withBody([
+        1, 2, 3
+      ])
+    }
+    aliceService.buildInteractions()
+    assert aliceService.interactions.size() == 1
+
+    def firstInteraction = aliceService.interactions[0]
+    assert firstInteraction.response.body.get() == '[\n' +
+      '    1,\n' +
+      '    2,\n' +
+      '    3\n' +
+      ']'
+  }
+
+  @Test
+  void 'allow arrays of objects as the root of the body'() {
+    aliceService {
+      uponReceiving('a request to get a array of objects response')
+      withAttributes(method: 'get', path: '/array')
+      willRespondWith(status: 200)
+      withBody([
+        {
+          id identifier(1)
+          name 'item1'
+        }, {
+          id identifier(2)
+          name 'item2'
+        }
+      ])
+    }
+    aliceService.buildInteractions()
+    assert aliceService.interactions.size() == 1
+
+    def firstInteraction = aliceService.interactions[0]
+    assert firstInteraction.response.body.get() == '[\n' +
+      '    {\n' +
+      '        "id": 1,\n' +
+      '        "name": "item1"\n' +
+      '    },\n' +
+      '    {\n' +
+      '        "id": 2,\n' +
+      '        "name": "item2"\n' +
+      '    }\n' +
+      ']'
+    assert firstInteraction.response.matchingRules.get().keySet().toString() == 'Set($.body[0].id, $.body[1].id)'
+  }
+
+  @Test
+  void 'allow like matcher as the root of the body'() {
+    aliceService {
+      uponReceiving('a request to get a like array of objects response')
+      withAttributes(method: 'get', path: '/array')
+      willRespondWith(status: 200)
+      withBody eachLike {
+        id identifier(1)
+        name 'item1'
+      }
+    }
+    aliceService.buildInteractions()
+    assert aliceService.interactions.size() == 1
+
+    def firstInteraction = aliceService.interactions[0]
+    assert firstInteraction.response.body.get() == '[\n' +
+      '    {\n' +
+      '        "id": 1,\n' +
+      '        "name": "item1"\n' +
+      '    }\n' +
+      ']'
+    assert firstInteraction.response.matchingRules.get().keySet().toString() == 'Set($.body, $.body[*].id)'
+  }
 }

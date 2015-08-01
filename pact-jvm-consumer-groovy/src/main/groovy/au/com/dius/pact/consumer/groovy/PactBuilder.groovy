@@ -37,6 +37,10 @@ class PactBuilder extends BaseBuilder {
   String providerState = ''
   boolean requestState
 
+  /**
+   * Defines the service consumer
+   * @param consumer consumer name
+   */
   PactBuilder serviceConsumer(String consumer) {
     this.consumer = new Consumer(consumer)
     this
@@ -48,6 +52,10 @@ class PactBuilder extends BaseBuilder {
   @Deprecated
   def service_consumer = this.&serviceConsumer
 
+  /**
+   * Defines the provider the consumer has a pact with
+   * @param provider provider name
+   */
   PactBuilder hasPactWith(String provider) {
     this.provider = new Provider(provider)
     this
@@ -59,17 +67,29 @@ class PactBuilder extends BaseBuilder {
   @Deprecated
   def has_pact_with = this.&hasPactWith
 
+  /**
+   * Defines the port the provider will listen on
+   * @param port port number
+   */
   @SuppressWarnings('ConfusingMethodName')
   PactBuilder port(int port) {
     this.port = port
     this
   }
 
+  /**
+   * Defines the provider state the provider needs to be in for the interaction
+   * @param providerState provider state description
+   */
   PactBuilder given(String providerState) {
     this.providerState = providerState
     this
   }
 
+  /**
+   * Defines the start of an interaction
+   * @param requestDescription Description of the interaction. Must be unique.
+   */
   PactBuilder uponReceiving(String requestDescription) {
     buildInteractions()
     this.requestDescription = requestDescription
@@ -141,6 +161,10 @@ class PactBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * Defines the request attributes (body, headers, etc.)
+   * @param requestData Map of attributes
+   */
   @SuppressWarnings('DuplicateMapLiteral')
   PactBuilder withAttributes(Map requestData) {
     def request = [matchers: [:]] + requestData
@@ -161,6 +185,11 @@ class PactBuilder extends BaseBuilder {
   @Deprecated
   def with = this.&withAttributes
 
+  /**
+   * Defines the response attributes (body, headers, etc.) that are returned for the request
+   * @param responseData Map of attributes
+   * @return
+   */
   @SuppressWarnings('DuplicateMapLiteral')
   PactBuilder willRespondWith(Map responseData) {
     def response = [matchers: [:]] + responseData
@@ -182,6 +211,11 @@ class PactBuilder extends BaseBuilder {
   @Deprecated
   def will_respond_with = this.&willRespondWith
 
+  /**
+   * Executes the providers closure in the context of the interactions defined on this builder.
+   * @param closure Test to execute
+   * @return The result of the test run
+   */
   VerificationResult run(Closure closure) {
     PactFragment fragment = fragment()
 
@@ -200,28 +234,64 @@ class PactBuilder extends BaseBuilder {
     new PactFragment(consumer, provider, JavaConverters$.MODULE$.asScalaBufferConverter(interactions).asScala())
   }
 
+  /**
+   * Allows the body to be defined using a Groovy builder pattern
+   * @param mimeType Optional mimetype for the body
+   * @param closure Body closure
+   */
   PactBuilder withBody(String mimeType = null, Closure closure) {
     def body = new PactBodyBuilder()
     closure.delegate = body
     closure.call()
+    setupBody(body, mimeType)
+    this
+  }
+
+  private setupBody(PactBodyBuilder body, String mimeType) {
     if (requestState) {
       requestData.last().body = body.body
       requestData.last().matchers.putAll(body.matchers)
       requestData.last().headers = requestData.last().headers ?: [:]
       if (mimeType) {
-          requestData.last().headers[CONTENT_TYPE] = mimeType
+        requestData.last().headers[CONTENT_TYPE] = mimeType
       }
     } else {
       responseData.last().body = body.body
       responseData.last().matchers.putAll(body.matchers)
       responseData.last().headers = responseData.last().headers ?: [:]
       if (mimeType) {
-          responseData.last().headers[CONTENT_TYPE] = mimeType
+        responseData.last().headers[CONTENT_TYPE] = mimeType
       }
     }
+  }
+
+  /**
+   * Allows the body to be defined using a Groovy builder pattern with an array as the root
+   * @param mimeType Optional mimetype for the body
+   * @param array body
+   */
+  PactBuilder withBody(String mimeType = null, List array) {
+    def body = new PactBodyBuilder().build(array)
+    setupBody(body, mimeType)
     this
   }
 
+  /**
+   * Allows the body to be defined using a Groovy builder pattern with an array as the root
+   * using a each like matcher for all elements of the array
+   * @param mimeType Optional mimetype for the body
+   * @param matcher body
+   */
+  PactBuilder withBody(String mimeType = null, LikeMatcher matcher) {
+    def body = new PactBodyBuilder().build(matcher)
+    setupBody(body, mimeType)
+    this
+  }
+
+  /**
+   * Runs the test (via the run method), and throws an exception if it was not successful.
+   * @param closure
+   */
   void runTestAndVerify(Closure closure) {
     VerificationResult result = run(closure)
     if (result != PACTVERIFIED) {
