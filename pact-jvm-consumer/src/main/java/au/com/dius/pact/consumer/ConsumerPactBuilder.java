@@ -171,7 +171,7 @@ public class ConsumerPactBuilder {
                  * The body of the request
                  * @param body Built using the Pact body DSL
                  */
-                public PactDslRequestWithoutPath body(PactDslJsonBody body) {
+                public PactDslRequestWithoutPath body(DslPart body) {
                     requestMatchers = new HashMap<String, Object>();
                     for(String matcherName: body.matchers.keySet()) {
                         requestMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
