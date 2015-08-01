@@ -15,6 +15,9 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * DSL to define a JSON Object
+ */
 public class PactDslJsonBody extends DslPart {
 
     private final JSONObject body;
@@ -59,23 +62,51 @@ public class PactDslJsonBody extends DslPart {
         return body;
     }
 
+    /**
+     * Attribute that must be the specified value
+     * @param name attribute name
+     * @param value string value
+     */
     public PactDslJsonBody stringValue(String name, String value) {
         body.put(name, value);
         return this;
     }
 
+    /**
+     * Attribute that must be the specified number
+     * @param name attribute name
+     * @param value number value
+     */
     public PactDslJsonBody numberValue(String name, Number value) {
         body.put(name, value);
         return this;
     }
 
+    /**
+     * Attribute that must be the specified boolean
+     * @param name attribute name
+     * @param value boolean value
+     */
     public PactDslJsonBody booleanValue(String name, Boolean value) {
         body.put(name, value);
         return this;
     }
 
+    /**
+     * Attribute that can be any string
+     * @param name attribute name
+     */
     public PactDslJsonBody stringType(String name) {
-        body.put(name, RandomStringUtils.randomAlphabetic(20));
+        return stringType(name, RandomStringUtils.randomAlphabetic(20));
+    }
+
+    /**
+     * Attribute that can be any string
+     * @param name attribute name
+     * @param example example value to use for generated bodies
+     */
+    public PactDslJsonBody stringType(String name, String example) {
+        body.put(name, example);
         matchers.put(matcherKey(name), matchType());
         return this;
     }
@@ -88,48 +119,99 @@ public class PactDslJsonBody extends DslPart {
         return key;
     }
 
+    /**
+     * Attribute that can be any number
+     * @param name attribute name
+     */
     public PactDslJsonBody numberType(String name) {
         return numberType(name, Long.parseLong(RandomStringUtils.randomNumeric(10)));
     }
 
+    /**
+     * Attribute that can be any number
+     * @param name attribute name
+     * @param number example number to use for generated bodies
+     */
     public PactDslJsonBody numberType(String name, Number number) {
         body.put(name, number);
         matchers.put(matcherKey(name), matchType());
         return this;
     }
 
+    /**
+     * Attribute that must be an integer
+     * @param name attribute name
+     */
     public PactDslJsonBody integerType(String name) {
         return integerType(name, Long.parseLong(RandomStringUtils.randomNumeric(10)));
     }
 
+    /**
+     * Attribute that must be an integer
+     * @param name attribute name
+     * @param number example integer value to use for generated bodies
+     */
     public PactDslJsonBody integerType(String name, Long number) {
         body.put(name, number);
         matchers.put(matcherKey(name), matchType("integer"));
         return this;
     }
 
+    /**
+     * Attribute that must be an integer
+     * @param name attribute name
+     * @param number example integer value to use for generated bodies
+     */
     public PactDslJsonBody integerType(String name, Integer number) {
         body.put(name, number);
         matchers.put(matcherKey(name), matchType("integer"));
         return this;
     }
 
+    /**
+     * Attribute that must be a real value
+     * @param name attribute name
+     */
     public PactDslJsonBody realType(String name) {
         return realType(name, Double.parseDouble(RandomStringUtils.randomNumeric(10)));
     }
 
+    /**
+     * Attribute that must be a real value
+     * @param name attribute name
+     * @param number example real value
+     */
     public PactDslJsonBody realType(String name, Double number) {
         body.put(name, number);
         matchers.put(matcherKey(name), matchType("real"));
         return this;
     }
 
+    /**
+     * Attribute that must be a boolean
+     * @param name attribute name
+     */
     public PactDslJsonBody booleanType(String name) {
-        body.put(name, true);
+        return booleanType(name, true);
+    }
+
+    /**
+     * Attribute that must be a boolean
+     * @param name attribute name
+     * @param example example boolean to use for generated bodies
+     */
+    public PactDslJsonBody booleanType(String name, Boolean example) {
+        body.put(name, example);
         matchers.put(matcherKey(name), matchType());
         return this;
     }
 
+    /**
+     * Attribute that must match the regular expression
+     * @param name attribute name
+     * @param regex regular expression
+     * @param value example value to use for generated bodies
+     */
     public PactDslJsonBody stringMatcher(String name, String regex, String value) {
         if (!value.matches(regex)) {
             throw new InvalidMatcherException("Example \"" + value + "\" does not match regular expression \"" +
@@ -140,21 +222,38 @@ public class PactDslJsonBody extends DslPart {
         return this;
     }
 
+    /**
+     * Attribute that must match the regular expression
+     * @param name attribute name
+     * @param regex regular expression
+     */
     public PactDslJsonBody stringMatcher(String name, String regex) {
         stringMatcher(name, regex, new Xeger(regex).generate());
         return this;
     }
 
+    /**
+     * Attribute named 'timestamp' that must be an ISO formatted timestamp
+     */
     public PactDslJsonBody timestamp() {
         return timestamp("timestamp");
     }
 
+    /**
+     * Attribute that must be an ISO formatted timestamp
+     * @param name
+     */
     public PactDslJsonBody timestamp(String name) {
         body.put(name, DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date()));
         matchers.put(matcherKey(name), matchTimestamp(DateFormatUtils.ISO_DATETIME_FORMAT.getPattern()));
         return this;
     }
 
+    /**
+     * Attribute that must match the given timestamp format
+     * @param name attribute name
+     * @param format timestamp format
+     */
     public PactDslJsonBody timestamp(String name, String format) {
         FastDateFormat instance = FastDateFormat.getInstance(format);
         body.put(name, instance.format(new Date()));
@@ -162,16 +261,41 @@ public class PactDslJsonBody extends DslPart {
         return this;
     }
 
+    /**
+     * Attribute that must match the given timestamp format
+     * @param name attribute name
+     * @param format timestamp format
+     * @param example example date and time to use for generated bodies
+     */
+    public PactDslJsonBody timestamp(String name, String format, Date example) {
+        FastDateFormat instance = FastDateFormat.getInstance(format);
+        body.put(name, instance.format(example));
+        matchers.put(matcherKey(name), matchTimestamp(format));
+        return this;
+    }
+
+    /**
+     * Attribute named 'date' that must be formatted as an ISO date
+     */
     public PactDslJsonBody date() {
         return date("date");
     }
 
+    /**
+     * Attribute that must be formatted as an ISO date
+     * @param name attribute name
+     */
     public PactDslJsonBody date(String name) {
         body.put(name, DateFormatUtils.ISO_DATE_FORMAT.format(new Date()));
         matchers.put(matcherKey(name), matchDate(DateFormatUtils.ISO_DATE_FORMAT.getPattern()));
         return this;
     }
 
+    /**
+     * Attribute that must match the provided date format
+     * @param name attribute date
+     * @param format date format to match
+     */
     public PactDslJsonBody date(String name, String format) {
         FastDateFormat instance = FastDateFormat.getInstance(format);
         body.put(name, instance.format(new Date()));
@@ -179,16 +303,41 @@ public class PactDslJsonBody extends DslPart {
         return this;
     }
 
+    /**
+     * Attribute that must match the provided date format
+     * @param name attribute date
+     * @param format date format to match
+     * @param example example date to use for generated values
+     */
+    public PactDslJsonBody date(String name, String format, Date example) {
+        FastDateFormat instance = FastDateFormat.getInstance(format);
+        body.put(name, instance.format(example));
+        matchers.put(matcherKey(name), matchDate(format));
+        return this;
+    }
+
+    /**
+     * Attribute named 'time' that must be an ISO formatted time
+     */
     public PactDslJsonBody time() {
         return time("time");
     }
 
+    /**
+     * Attribute that must be an ISO formatted time
+     * @param name attribute name
+     */
     public PactDslJsonBody time(String name) {
         body.put(name, DateFormatUtils.ISO_TIME_FORMAT.format(new Date()));
         matchers.put(matcherKey(name), matchTime(DateFormatUtils.ISO_TIME_FORMAT.getPattern()));
         return this;
     }
 
+    /**
+     * Attribute that must match the given time format
+     * @param name attribute name
+     * @param format time format to match
+     */
     public PactDslJsonBody time(String name, String format) {
         FastDateFormat instance = FastDateFormat.getInstance(format);
         body.put(name, instance.format(new Date()));
@@ -196,12 +345,33 @@ public class PactDslJsonBody extends DslPart {
         return this;
     }
 
+    /**
+     * Attribute that must match the given time format
+     * @param name attribute name
+     * @param format time format to match
+     * @param example example time to use for generated bodies
+     */
+    public PactDslJsonBody time(String name, String format, Date example) {
+        FastDateFormat instance = FastDateFormat.getInstance(format);
+        body.put(name, instance.format(example));
+        matchers.put(matcherKey(name), matchTime(format));
+        return this;
+    }
+
+    /**
+     * Attribute that must be an IP4 address
+     * @param name attribute name
+     */
     public PactDslJsonBody ipAddress(String name) {
         body.put(name, "127.0.0.1");
         matchers.put(matcherKey(name), regexp("(\\d{1,3}\\.)+\\d{1,3}"));
         return this;
     }
 
+    /**
+     * Attribute that is a JSON object
+     * @param name field name
+     */
     public PactDslJsonBody object(String name) {
         String base = "." + name;
         if (!name.matches(Parser$.MODULE$.FieldRegex().toString())) {
@@ -214,11 +384,18 @@ public class PactDslJsonBody extends DslPart {
         throw new UnsupportedOperationException("use the object(String name) form");
     }
 
+    /**
+     * Closes the current JSON object
+     */
     public DslPart closeObject() {
         parent.putObject(this);
         return parent;
     }
 
+    /**
+     * Attribute that is an array
+     * @param name field name
+     */
     public PactDslJsonArray array(String name) {
         return new PactDslJsonArray(matcherKey(name), this);
     }
@@ -227,12 +404,21 @@ public class PactDslJsonBody extends DslPart {
         throw new UnsupportedOperationException("use the array(String name) form");
     }
 
+    /**
+     * Closes the current array
+     */
     @Override
     public DslPart closeArray() {
         throw new UnsupportedOperationException("can't call closeArray on an Object");
     }
 
+    /**
+     * Attribute that is an array where each item must match the following example
+     * @param name field name
+     * @deprecated use eachLike
+     */
     @Override
+    @Deprecated
     public PactDslJsonBody arrayLike(String name) {
         Map<String, Object> matcher = new HashMap<String, Object>();
         matcher.put("match", "type");
@@ -241,10 +427,15 @@ public class PactDslJsonBody extends DslPart {
     }
 
     @Override
+    @Deprecated
     public PactDslJsonBody arrayLike() {
         throw new UnsupportedOperationException("use the arrayLike(String name) form");
     }
 
+    /**
+     * Attribute that is an array where each item must match the following example
+     * @param name field name
+     */
     @Override
     public PactDslJsonBody eachLike(String name) {
         matchers.put(matcherKey(name), matchMin(0));
@@ -256,6 +447,11 @@ public class PactDslJsonBody extends DslPart {
         throw new UnsupportedOperationException("use the eachLike(String name) form");
     }
 
+    /**
+     * Attribute that is an array with a minimum size where each item must match the following example
+     * @param name field name
+     * @param size minimum size of the array
+     */
     @Override
     public PactDslJsonBody minArrayLike(String name, Integer size) {
         matchers.put(matcherKey(name), matchMin(size));
@@ -268,6 +464,11 @@ public class PactDslJsonBody extends DslPart {
         throw new UnsupportedOperationException("use the minArrayLike(String name, Integer size) form");
     }
 
+    /**
+     * Attribute that is an array with a maximum size where each item must match the following example
+     * @param name field name
+     * @param size maximum size of the array
+     */
     @Override
     public PactDslJsonBody maxArrayLike(String name, Integer size) {
         matchers.put(matcherKey(name), matchMax(size));
@@ -279,20 +480,47 @@ public class PactDslJsonBody extends DslPart {
         throw new UnsupportedOperationException("use the maxArrayLike(String name, Integer size) form");
     }
 
+    /**
+     * Attribute named 'id' that must be a numeric identifier
+     */
     public PactDslJsonBody id() {
         return id("id");
     }
 
+    /**
+     * Attribute that must be a numeric identifier
+     * @param name attribute name
+     */
     public PactDslJsonBody id(String name) {
         body.put(name, Long.parseLong(RandomStringUtils.randomNumeric(10)));
         matchers.put(matcherKey(name), matchType());
         return this;
     }
 
+    /**
+     * Attribute that must be a numeric identifier
+     * @param name attribute name
+     * @param id example id to use for generated bodies
+     */
+    public PactDslJsonBody id(String name, Long id) {
+        body.put(name, id);
+        matchers.put(matcherKey(name), matchType());
+        return this;
+    }
+
+    /**
+     * Attribute that must be encoded as a hexadecimal value
+     * @param name attribute name
+     */
     public PactDslJsonBody hexValue(String name) {
         return hexValue(name, RandomStringUtils.random(10, "0123456789abcdef"));
     }
 
+    /**
+     * Attribute that must be encoded as a hexadecimal value
+     * @param name attribute name
+     * @param hexValue example value to use for generated bodies
+     */
     public PactDslJsonBody hexValue(String name, String hexValue) {
         if (!hexValue.matches(HEXADECIMAL)) {
             throw new InvalidMatcherException("Example \"" + hexValue + "\" is not a hexadecimal value");
@@ -302,14 +530,28 @@ public class PactDslJsonBody extends DslPart {
         return this;
     }
 
+    /**
+     * Attribute that must be encoded as a GUID
+     * @param name attribute name
+     */
     public PactDslJsonBody guid(String name) {
         return guid(name, UUID.randomUUID().toString());
     }
 
+    /**
+     * Attribute that must be encoded as a GUID
+     * @param name attribute name
+     * @param uuid example UUID to use for generated bodies
+     */
     public PactDslJsonBody guid(String name, UUID uuid) {
         return guid(name, uuid.toString());
     }
 
+    /**
+     * Attribute that must be encoded as a GUID
+     * @param name attribute name
+     * @param uuid example UUID to use for generated bodies
+     */
     public PactDslJsonBody guid(String name, String uuid) {
         if (!uuid.matches(GUID)) {
             throw new InvalidMatcherException("Example \"" + uuid + "\" is not a GUID");
