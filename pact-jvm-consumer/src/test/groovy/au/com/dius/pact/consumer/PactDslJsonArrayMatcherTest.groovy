@@ -40,7 +40,7 @@ class PactDslJsonArrayMatcherTest {
         assert new JsonSlurper().parseText(subject.body.toString()) == [
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
-        assert subject.matchers.keySet() == ['[*].amount', '[*].clearedDate', '[*].status'] as Set
+        assert subject.matchers.keySet() == ['', '[*].amount', '[*].clearedDate', '[*].status'] as Set
     }
 
     @Test
