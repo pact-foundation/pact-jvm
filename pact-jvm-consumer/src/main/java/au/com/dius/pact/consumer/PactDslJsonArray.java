@@ -7,8 +7,6 @@ import org.apache.commons.lang3.time.FastDateFormat;
 import org.json.JSONArray;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -54,11 +52,7 @@ public class PactDslJsonArray extends DslPart {
     @Override
     @Deprecated
     public PactDslJsonBody arrayLike() {
-        Map<String, Object> matcher = new HashMap<String, Object>();
-        matcher.put("match", "type");
-        matchers.put(root + appendArrayIndex(1), matcher);
-        PactDslJsonArray parent = new PactDslJsonArray(root, this, true);
-        return new PactDslJsonBody(".", parent);
+        return eachLike();
     }
 
     @Override
@@ -502,5 +496,33 @@ public class PactDslJsonArray extends DslPart {
             index = String.valueOf(body.length() - 1 + offset);
         }
         return "[" + index + "]";
+    }
+
+    /**
+     * Array where each item must match the following example
+     */
+    public static PactDslJsonBody arrayEachLike() {
+        PactDslJsonArray parent = new PactDslJsonArray("", null, true);
+        return new PactDslJsonBody(".", parent);
+    }
+
+    /**
+     * Array with a minimum size where each item must match the following example
+     * @param minSize minimum size
+     */
+    public static PactDslJsonBody arrayMinLike(int minSize) {
+        PactDslJsonArray parent = new PactDslJsonArray("", null, true);
+        parent.matchers.put("", parent.matchMin(minSize));
+        return new PactDslJsonBody(".", parent);
+    }
+
+    /**
+     * Array with a maximum size where each item must match the following example
+     * @param maxSize maximum size
+     */
+    public static PactDslJsonBody arrayMaxLike(int maxSize) {
+        PactDslJsonArray parent = new PactDslJsonArray("", null, true);
+        parent.matchers.put("", parent.matchMax(maxSize));
+        return new PactDslJsonBody(".", parent);
     }
 }

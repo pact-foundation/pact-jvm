@@ -249,6 +249,44 @@ For example:
 
 This will ensure that the users list is never empty and that each user has an identifier that is a number and a name that is a string.
 
+#### Root level arrays that match all items (version 2.2.11+)
+
+If the root of the body is an array, you can create PactDslJsonArray classes with the following methods:
+
+| function | description |
+|----------|-------------|
+| `arrayEachLike` | Ensure that each item in the list matches the provided example |
+| `arrayMinLike` | Ensure that each item in the list matches the provided example and the list is no bigger than the provided max |
+| `arrayMaxLike` | Ensure that each item in the list matches the provided example and the list is no smaller than the provided min |
+
+For example:
+
+```java
+PactDslJsonArray.arrayEachLike()
+    .date("clearedDate", "mm/dd/yyyy", date)
+    .stringType("status", "STATUS")
+    .realType("amount", 100.0)
+    .closeObject()
+```
+
+This will then match a body like:
+
+```json
+[ {
+  "clearedDate" : "07/22/2015",
+  "status" : "C",
+  "amount" : 15.0
+}, {
+  "clearedDate" : "07/22/2015",
+  "status" : "C",
+  "amount" : 15.0
+}, {
+
+  "clearedDate" : "07/22/2015",
+  "status" : "C",
+  "amount" : 15.0
+} ]
+```
 
 ### Matching on paths (version 2.1.5+)
 
