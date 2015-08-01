@@ -67,13 +67,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
 
     @Override
     protected void runTest(String url) {
-        try {
-            assertEquals(new ProviderClient(url).getSomething(), "{\"responsetest\":true}");
-        } catch (Exception e) {
-            // NOTE: if you want to see any pact failure, do not throw an exception here. This should be
-            // fixed at some point (see Issue #40 https://github.com/DiUS/pact-jvm/issues/40)
-            throw new RuntimeException(e);
-        }
+        assertEquals(new ProviderClient(url).getSomething(), "{\"responsetest\":true}");
     }
 }
 ```
@@ -89,6 +83,8 @@ and then add the rule:
     @Rule
     public PactRule rule = new PactRule("localhost", 8080, this);
 ```
+
+The hostname and port are optional. If left out, it will default to localhost and a random available port.
 
 #### 2. Annotate a method with Pact that returns a pact fragment
 

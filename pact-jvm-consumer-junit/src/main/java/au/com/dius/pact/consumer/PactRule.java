@@ -1,38 +1,23 @@
 package au.com.dius.pact.consumer;
-import static org.junit.Assert.assertEquals;
 
-
-
-
-import static org.junit.Assert.fail;
+import au.com.dius.pact.consumer.ConsumerPactBuilder.PactDslWithProvider.PactDslWithState;
+import au.com.dius.pact.model.MockProviderConfig;
+import au.com.dius.pact.model.MockProviderConfig$;
+import au.com.dius.pact.model.PactFragment;
+import org.junit.rules.ExternalResource;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.rules.ExternalResource;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
-
-
-
-
-
-
-import au.com.dius.pact.consumer.ConsumerPactBuilder;
-import au.com.dius.pact.consumer.ConsumerPactBuilder.PactDslWithProvider.PactDslWithState;
-import au.com.dius.pact.consumer.PactError;
-import au.com.dius.pact.consumer.PactVerified$;
-import au.com.dius.pact.consumer.TestRun;
-import au.com.dius.pact.consumer.VerificationResult;
-import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.PactFragment;
-
 /**
- * a junit rule that wraps every test annotated with {@link PactVerification}.
+ * A junit rule that wraps every test annotated with {@link PactVerification}.
  * Before each test, a mock server will be setup at given port/host that will provide mocked responses.
  * after each test, it will be teared down.
  *
+ * If no host is given, it will default to localhost. If no port is given, it will default to a random port.
  */
 public class PactRule extends ExternalResource {
 
@@ -42,9 +27,18 @@ public class PactRule extends ExternalResource {
     private Object target;
     final MockProviderConfig config;
 
-
     public PactRule(String host, int port, Object target) {
         config = new MockProviderConfig(port, host);
+        this.target = target;
+    }
+
+    public PactRule(String host, Object target) {
+        config = MockProviderConfig$.MODULE$.createDefault(host);
+        this.target = target;
+    }
+
+    public PactRule(Object target) {
+        config = MockProviderConfig$.MODULE$.createDefault();
         this.target = target;
     }
 
@@ -91,7 +85,7 @@ public class PactRule extends ExternalResource {
     }
 
     /**
-     * scann all methods for @Pact annotation and execute them, if not already initialized
+     * scan all methods for @Pact annotation and execute them, if not already initialized
      * @return
      */
     protected Map < String, PactFragment > getPacts() {
@@ -118,7 +112,6 @@ public class PactRule extends ExternalResource {
 
     /**
      * validates method signature as described at {@link Pact}
-     *
      */
     private boolean conformsToSigniture(Method m) {
         Pact pact = m.getAnnotation(Pact.class);
@@ -129,7 +122,8 @@ public class PactRule extends ExternalResource {
             && m.getParameterTypes()[0].isAssignableFrom(PactDslWithState.class);
 
         if (!conforms && pact != null) {
-            throw new UnsupportedOperationException("Method "+m.getName()+" does not conform required method signature " + "'public PactFragment xxx(PactDslWithState builder)'");
+            throw new UnsupportedOperationException("Method " + m.getName() +
+                " does not conform required method signature 'public PactFragment xxx(PactDslWithState builder)'");
         }
         return conforms;
     }
