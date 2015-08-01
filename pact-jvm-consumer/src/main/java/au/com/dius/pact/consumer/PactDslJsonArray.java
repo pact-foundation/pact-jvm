@@ -503,6 +503,7 @@ public class PactDslJsonArray extends DslPart {
      */
     public static PactDslJsonBody arrayEachLike() {
         PactDslJsonArray parent = new PactDslJsonArray("", null, true);
+        parent.matchers.put("", parent.matchMin(0));
         return new PactDslJsonBody(".", parent);
     }
 
