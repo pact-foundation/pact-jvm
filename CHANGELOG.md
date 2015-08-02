@@ -1,5 +1,26 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.0.0 - JDK 8 and Scala 2.11 branch
+
+* 4c92628 - disable uploading ZIP distribution for the pact-jvm-server (Ronald Holshausen, Sun Aug 2 15:50:48 2015 +1000)
+* 7f98c40 - Merge branch 'v2.x' into v3.x (Ronald Holshausen, Sun Aug 2 15:42:34 2015 +1000)
+* 7813dff - bump version (Ronald Holshausen, Sun Aug 2 15:36:02 2015 +1000)
+* 02501fb - Merge branch 'v2.x' into v3.x (Ronald Holshausen, Sun Aug 2 14:19:54 2015 +1000)
+* 93d6d0d - correct the groovy dep in pact-jvm-consumer-groovy/build.gradle (Ronald Holshausen, Sun Aug 2 14:16:26 2015 +1000)
+* 7fe2bcb - removed JDK6 and Scala 2.10 references from the build (Ronald Holshausen, Sun Aug 2 13:44:40 2015 +1000)
+* b1dc02b - Merge branch 'v2.x' into v3.x (Ronald Holshausen, Sun Aug 2 13:39:53 2015 +1000)
+* ba73079 - Merge branch 'v2.x' into v3.x (Ronald Holshausen, Sun Aug 2 13:11:28 2015 +1000)
+* 76140c5 - drop unnessessary Java 8 check (Ronald Holshausen, Sun Aug 2 12:27:39 2015 +1000)
+* f49698d - Merge branch 'v2.x' into v3.x (Ronald Holshausen, Sun Aug 2 09:51:43 2015 +1000)
+* 7fe758d - Merge branch 'v2.x' into v3.x (Ronald Holshausen, Sat Aug 1 19:42:32 2015 +1000)
+* 572e959 - Merge branch 'v2.x' into v3.x (Ronald Holshausen, Sat Aug 1 13:54:12 2015 +1000)
+* 1ed35fd - removed the inlined scala logging (Ronald Holshausen, Fri Jul 31 19:16:37 2015 +1000)
+* 5d1bfdd - Merge branch 'v2.x' into v3.x (Ronald Holshausen, Fri Jul 31 18:46:24 2015 +1000)
+* 9208323 - Merge branch 'v2.x' into v3.x (Ronald Holshausen, Fri Jul 31 15:15:37 2015 +1000)
+* d894d21 - require maven-plugin-plugin:3.3+ with Java 8 (Ronald Holshausen, Fri Jul 31 15:14:03 2015 +1000)
+* f38dafa - Merge branch 'v2.x' into v3.x (Ronald Holshausen, Fri Jul 31 14:43:26 2015 +1000)
+* 287b3ee - Drop JDK6, JDK7 and Scala 2.10 (Ronald Holshausen, Thu Jul 30 20:55:23 2015 +1000)
+
 # 2.2.11 - bugfixes, project cleanup and initial WIP V3 message pact
 
 * d2001a5 - add note about 2.x vs 3.x versions (Ronald Holshausen, Sun Aug 2 14:37:23 2015 +1000)
