@@ -19,11 +19,6 @@ import java.lang.annotation.Target;
 public @interface Pact {
     
     /**
-     * name of the state, the provider has to be in
-     */
-    String state();
-
-    /**
      * name of the provider
      */
     String provider();
@@ -32,4 +27,11 @@ public @interface Pact {
      * name of the consumer
      */
     String consumer();
+
+    /**
+     * name of the state, the provider has to be in
+     * @deprecated Provider state should be defined on the interactions
+     */
+    @Deprecated
+    String state() default "";
 }

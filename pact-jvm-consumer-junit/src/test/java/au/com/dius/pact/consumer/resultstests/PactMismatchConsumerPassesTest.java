@@ -55,7 +55,7 @@ public class PactMismatchConsumerPassesTest extends ExpectedToFailBase {
     }
 
     @Override
-    protected void assertException(RuntimeException e) {
+    protected void assertException(Throwable e) {
         assertThat(e.getMessage(),
             containsString("HeaderMismatch - Expected header 'testreqheader' to have value 'someotherheader' but was 'testreqheadervalue'"));
     }

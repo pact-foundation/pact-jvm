@@ -1,8 +1,6 @@
 package au.com.dius.pact.consumer;
 
-import au.com.dius.pact.consumer.ConsumerPactBuilder.PactDslWithProvider.PactDslWithState;
 import au.com.dius.pact.model.PactFragment;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -15,11 +13,12 @@ import static org.junit.Assert.assertEquals;
 public class PactRuleWithRandomPortTest {
 
     @Rule
-    public PactRule rule = new PactRule(this);
+    public PactProviderRule rule = new PactProviderRule("test_provider", this);
 
-    @Pact(state="test state", provider="test_provider", consumer="test_consumer")
-    public PactFragment createFragment(PactDslWithState builder) {
+    @Pact(provider="test_provider", consumer="test_consumer")
+    public PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
         return builder
+            .given("test state")
             .uponReceiving("random port test interaction")
                 .path("/")
                 .method("GET")
@@ -30,10 +29,10 @@ public class PactRuleWithRandomPortTest {
     }
 
     @Test
-    @PactVerification("test state")
+    @PactVerification("test_provider")
     public void runTest() throws IOException {
         Map expectedResponse = new HashMap();
         expectedResponse.put("ok", true);
-        assertEquals(new ConsumerClient("http://localhost:" + rule.config.port()).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient("http://localhost:" + rule.getConfig().port()).getAsMap("/"), expectedResponse);
     }
 }

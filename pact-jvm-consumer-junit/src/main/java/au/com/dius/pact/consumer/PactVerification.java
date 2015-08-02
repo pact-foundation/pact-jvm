@@ -17,8 +17,12 @@ import java.lang.annotation.Target;
 public @interface PactVerification {
 
     /**
-     * the tested provider state.
-     * has to be the same id as in {@link au.com.dius.pact.consumer.Pact} state
+     * the tested provider name.
      */
     String value();
+
+    /**
+     * If a mismatch is expected. Use to test failure conditions
+     */
+    boolean expectMismatch() default false;
 }

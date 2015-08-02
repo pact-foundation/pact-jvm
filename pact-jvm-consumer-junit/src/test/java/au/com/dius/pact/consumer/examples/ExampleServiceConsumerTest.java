@@ -3,7 +3,7 @@ package au.com.dius.pact.consumer.examples;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactDslJsonBody;
-import au.com.dius.pact.consumer.PactRule;
+import au.com.dius.pact.consumer.PactProviderRule;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.PactFragment;
 import org.apache.commons.collections4.MapUtils;
@@ -29,11 +29,12 @@ public class ExampleServiceConsumerTest {
         new String[]{"Content-Type", "application/json;charset=UTF-8"});
 
     @Rule
-    public PactRule rule = new PactRule("localhost", 1234, this);
+    public PactProviderRule provider = new PactProviderRule("CarBookingProvider", "localhost", 1234, this);
 
-    @Pact(state = "john smith books a civic", provider = "CarBookingProvider", consumer = "CarBookingConsumer")
-    public PactFragment configurationFragment(ConsumerPactBuilder.PactDslWithProvider.PactDslWithState builder) {
+    @Pact(provider = "CarBookingProvider", consumer = "CarBookingConsumer")
+    public PactFragment configurationFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
         return builder
+            .given("john smith books a civic")
             .uponReceiving("retrieve data from Service-A")
             .path("/persons/" + DATA_A_ID)
             .method("GET")
@@ -88,7 +89,7 @@ public class ExampleServiceConsumerTest {
             .toFragment();
     }
 
-    @PactVerification("john smith books a civic")
+    @PactVerification("CarBookingProvider")
     @Test
     public void testBookCar() throws IOException {
         ProviderCarBookingRestClient providerRestClient = new ProviderCarBookingRestClient();

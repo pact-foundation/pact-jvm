@@ -16,7 +16,7 @@ import static org.junit.Assert.assertThat;
 public class PactVerifiedConsumerFailsTest extends ExpectedToFailBase {
 
     public PactVerifiedConsumerFailsTest() {
-        super(RuntimeException.class);
+        super(AssertionError.class);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class PactVerifiedConsumerFailsTest extends ExpectedToFailBase {
     }
 
     @Override
-    protected void assertException(RuntimeException e) {
+    protected void assertException(Throwable e) {
         assertThat(e.getMessage(),
             containsString("expected:<{responsetest=true, name=harry}> but was:<{responsetest=true, name=fred}>"));
     }
