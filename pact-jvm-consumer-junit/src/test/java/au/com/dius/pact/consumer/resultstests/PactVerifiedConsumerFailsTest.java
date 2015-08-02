@@ -52,12 +52,7 @@ public class PactVerifiedConsumerFailsTest extends ExpectedToFailBase {
 
     @Override
     protected void assertException(RuntimeException e) {
-        if (SystemUtils.IS_JAVA_1_8) {
-            assertThat(e.getMessage(),
-                containsString("expected:<{responsetest=true, name=harry}> but was:<{responsetest=true, name=fred}>"));
-        } else {
-            assertThat(e.getMessage(),
-                containsString("expected:<{name=harry, responsetest=true}> but was:<{name=fred, responsetest=true}>"));
-        }
+        assertThat(e.getMessage(),
+            containsString("expected:<{responsetest=true, name=harry}> but was:<{responsetest=true, name=fred}>"));
     }
 }
