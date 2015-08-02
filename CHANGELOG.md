@@ -1,5 +1,43 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.2.11 - bugfixes, project cleanup and initial WIP V3 message pact
+
+* d2001a5 - add note about 2.x vs 3.x versions (Ronald Holshausen, Sun Aug 2 14:37:23 2015 +1000)
+* bdb4ebf - remove the unessessary SBT build files (Ronald Holshausen, Sun Aug 2 14:13:48 2015 +1000)
+* b2efd80 - correct the groovy dep in pact-jvm-consumer-groovy/build.gradle (Ronald Holshausen, Sun Aug 2 14:11:37 2015 +1000)
+* 0b8183a - remove SBT modules from Gradle build and setup SBT to only build the modules (Ronald Holshausen, Sun Aug 2 13:55:30 2015 +1000)
+* 33af89f - update to latest 2.11 scala (Ronald Holshausen, Sun Aug 2 13:17:54 2015 +1000)
+* 4b75517 - AssertionError does not take a cause in JDK6 #144 #143 #117 (Ronald Holshausen, Sun Aug 2 12:58:23 2015 +1000)
+* 99864cc - update the readme with examples for the new pact rule #144 #143 #117 (Ronald Holshausen, Sun Aug 2 12:51:25 2015 +1000)
+* d35c1e5 - refactor the pact junit rule to be keyed on provider name instead of state #144 #143 #117 (Ronald Holshausen, Sun Aug 2 12:40:50 2015 +1000)
+* ad57d86 - Merge pull request #146 from batasha/master (Ronald Holshausen, Sun Aug 2 09:48:30 2015 +1000)
+* 5402713 - Update array matcher test #145 (Natasha Badillo, Sat Aug 1 16:38:52 2015 -0400)
+* 4850956 - Add missing matchers to arrayEachLike() #145 (Natasha Badillo, Sat Aug 1 16:00:09 2015 -0400)
+* 4667a3e - get eachLike working with arrays at the root with the groovy DSL #141 (Ronald Holshausen, Sat Aug 1 19:21:20 2015 +1000)
+* 0087758 - get bodies with arrays at the root working with the groovy DSL #141 (Ronald Holshausen, Sat Aug 1 18:45:36 2015 +1000)
+* 375bbf1 - fix PactDslJsonBodyTest in Java 6 (Ronald Holshausen, Sat Aug 1 18:29:02 2015 +1000)
+* fdeadc9 - allow the Java DSL body method to take both an object and an array #145 (Ronald Holshausen, Sat Aug 1 16:34:07 2015 +1000)
+* 3486f41 - add convenience methods on PactDslJsonArray for doing like matching where the root of the body is an array #145 (Ronald Holshausen, Sat Aug 1 16:22:21 2015 +1000)
+* f44f511 - added javadocs to the Java DSL methods (Ronald Holshausen, Sat Aug 1 15:23:25 2015 +1000)
+* ceb3f1f - updated the junit test examples (Ronald Holshausen, Sat Aug 1 13:46:37 2015 +1000)
+* 128c1b4 - make host and port optional in the JUnit Pact Rule #142 (Ronald Holshausen, Sat Aug 1 13:33:35 2015 +1000)
+* f6e1d98 - corrected the logging source to match the package names (Ronald Holshausen, Sat Aug 1 13:25:47 2015 +1000)
+* 1dd2491 - Revert "try using the ant compiler" (Ronald Holshausen, Fri Jul 31 20:14:32 2015 +1000)
+* c38d763 - try using the ant compiler (Ronald Holshausen, Fri Jul 31 20:05:08 2015 +1000)
+* d95288e - change scala compiler memory (Ronald Holshausen, Fri Jul 31 20:00:29 2015 +1000)
+* ff7ffaa - increase scala compiler memory (Ronald Holshausen, Fri Jul 31 19:45:06 2015 +1000)
+* b86c1df - added second badge for maven central (Ronald Holshausen, Fri Jul 31 18:43:17 2015 +1000)
+* b80fcc0 - correct the pact version in the message pact json file (Ronald Holshausen, Fri Jul 31 15:15:05 2015 +1000)
+* 35073f8 - first simple implementation of writing a v3 message pact (Ronald Holshausen, Fri Jul 31 14:19:29 2015 +1000)
+* b535945 - add groovy version to build properties (Ronald Holshausen, Thu Jul 30 20:57:32 2015 +1000)
+* e6d062b - missed a test in the previous commit (Ronald Holshausen, Thu Jul 30 20:03:33 2015 +1000)
+* 44bd626 - In the case where there is a pact mismatch and an exception, display both #140 (Ronald Holshausen, Thu Jul 30 19:57:54 2015 +1000)
+* f2c2db4 - enabled codenarc for the groovy code (Ronald Holshausen, Thu Jul 30 17:30:41 2015 +1000)
+* 77da366 - introduced V3 modules; started prototyping consumer tests for message queues (Ronald Holshausen, Thu Jul 30 12:54:17 2015 +1000)
+* 129489d - update the Groovy test DSL to bring it in line with the JUnit changes (Ronald Holshausen, Thu Jul 30 10:19:51 2015 +1000)
+* 6b061a4 - add note about maven pact broker plugin (Ronald Holshausen, Wed Jul 29 19:42:07 2015 +1000)
+* 23c9097 - bump version (Ronald Holshausen, Sat Jul 25 16:48:52 2015 +1000)
+
 # 2.2.10 - bugfixes, JUnit pact failures now give more meaningful messages
 
 * 3d62f84 - corrected test for Java 6 & 7 (Ronald Holshausen, Sat Jul 25 15:58:49 2015 +1000)
