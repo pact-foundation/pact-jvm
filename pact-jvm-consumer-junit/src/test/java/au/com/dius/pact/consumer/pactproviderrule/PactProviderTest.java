@@ -1,8 +1,9 @@
-package au.com.dius.pact.consumer.examples;
+package au.com.dius.pact.consumer.pactproviderrule;
 
 import au.com.dius.pact.consumer.ConsumerClient;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.Pact;
+import au.com.dius.pact.consumer.PactMismatchException;
 import au.com.dius.pact.consumer.PactProviderRule;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.PactFragment;
@@ -16,10 +17,10 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-public class ExampleJavaConsumerPactRuleTest {
+public class PactProviderTest {
 
     @Rule
-    public PactProviderRule provider = new PactProviderRule("test_provider", "localhost", 8080, this);
+    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", this);
 
     @Pact(provider="test_provider", consumer="test_consumer")
     public PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
@@ -27,8 +28,8 @@ public class ExampleJavaConsumerPactRuleTest {
         headers.put("testreqheader", "testreqheadervalue");
 
         return builder
-            .given("test state")
-            .uponReceiving("ExampleJavaConsumerPactRuleTest test interaction")
+            .given("good state")
+            .uponReceiving("PactProviderTest test interaction")
                 .path("/")
                 .method("GET")
                 .headers(headers)
@@ -36,7 +37,7 @@ public class ExampleJavaConsumerPactRuleTest {
                 .status(200)
                 .headers(headers)
                 .body("{\"responsetest\": true, \"name\": \"harry\"}")
-            .uponReceiving("ExampleJavaConsumerPactRuleTest second test interaction")
+            .uponReceiving("PactProviderTest second test interaction")
                 .method("OPTIONS")
                 .headers(headers)
                 .path("/second")
@@ -48,15 +49,29 @@ public class ExampleJavaConsumerPactRuleTest {
             .toFragment();
     }
 
-
-
     @Test
-    @PactVerification("test_provider")
+    @PactVerification(value = "test_provider")
     public void runTest() throws IOException {
-        Assert.assertEquals(new ConsumerClient("http://localhost:8080").options("/second"), 200);
+        Assert.assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).options("/second"), 200);
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient("http://localhost:8080").getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/"), expectedResponse);
+    }
+
+    @Test(expected = AssertionError.class)
+    @PactVerification("test_provider")
+    public void runTestWithUserCodeFailure() throws IOException {
+        Assert.assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).options("/second"), 200);
+        Map expectedResponse = new HashMap();
+        expectedResponse.put("responsetest", true);
+        expectedResponse.put("name", "fred");
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/"), expectedResponse);
+    }
+
+    @Test
+    @PactVerification(value = "test_provider", expectMismatch = true)
+    public void runTestWithPactError() throws IOException {
+        Assert.assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).options("/second"), 200);
     }
 }

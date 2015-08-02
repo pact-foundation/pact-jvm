@@ -16,7 +16,7 @@ public abstract class ConsumerPactTest {
     protected abstract void runTest(String url) throws IOException;
 
     @Test
-    public void testPact() {
+    public void testPact() throws Throwable {
         PactFragment fragment = createFragment(ConsumerPactBuilder.consumer(consumerName()).hasPactWith(providerName()));
         final MockProviderConfig config = MockProviderConfig.createDefault();
 
@@ -28,10 +28,10 @@ public abstract class ConsumerPactTest {
 
         if (!result.equals(PACT_VERIFIED)) {
             if (result instanceof PactError) {
-                throw new RuntimeException(((PactError)result).error());
+                throw ((PactError)result).error();
             }
             if (result instanceof UserCodeFailed) {
-                throw new RuntimeException(((UserCodeFailed<RuntimeException>)result).error());
+                throw ((UserCodeFailed<RuntimeException>)result).error();
             }
             if (result instanceof PactMismatch) {
                 PactMismatch mismatch = (PactMismatch) result;

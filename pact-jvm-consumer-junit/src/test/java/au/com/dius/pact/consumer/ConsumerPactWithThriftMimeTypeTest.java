@@ -1,6 +1,5 @@
 package au.com.dius.pact.consumer;
 
-import au.com.dius.pact.consumer.ConsumerPactBuilder.PactDslWithProvider.PactDslWithState;
 import au.com.dius.pact.model.PactFragment;
 import org.apache.http.client.fluent.Request;
 import org.junit.Rule;
@@ -22,14 +21,15 @@ public class ConsumerPactWithThriftMimeTypeTest {
         "{\"str\":\"1\"}}";
 
     @Rule
-    public PactRule rule = new PactRule("localhost", 8080, this);
+    public PactProviderRule provider = new PactProviderRule("test_provider", "localhost", 8080, this);
 
-    @Pact(state="test state", provider="test_provider", consumer="test_consumer")
-    public PactFragment createFragment(PactDslWithState builder) {
+    @Pact(provider="test_provider", consumer="test_consumer")
+    public PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Accept", "application/x-thrift+json");
 
         return builder
+            .given("test state")
             .uponReceiving("ConsumerPactWithThriftMimeTypeTest test interaction")
                 .path("/persons/429605785802342400")
                 .method("GET")
@@ -41,7 +41,7 @@ public class ConsumerPactWithThriftMimeTypeTest {
     }
 
     @Test
-    @PactVerification("test state")
+    @PactVerification("test_provider")
     public void runTest() throws IOException {
         assertEquals(Request.Get("http://localhost:8080/persons/429605785802342400")
             .addHeader("Accept", "application/x-thrift+json")

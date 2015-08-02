@@ -1,8 +1,6 @@
 package au.com.dius.pact.consumer;
 
-import au.com.dius.pact.consumer.ConsumerPactBuilder.PactDslWithProvider.PactDslWithState;
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.MockProviderConfig$;
 import au.com.dius.pact.model.PactFragment;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
@@ -16,37 +14,50 @@ import java.util.Map;
 
 /**
  * A junit rule that wraps every test annotated with {@link PactVerification}.
- * Before each test, a mock server will be setup at given port/host that will provide mocked responses.
- * after each test, it will be teared down.
+ * Before each test, a mock server will be setup at given port/host that will provide mocked responses for the given
+ * provider. After each test, it will be teared down.
  *
  * If no host is given, it will default to localhost. If no port is given, it will default to a random port.
- *
- * @deprecated Use PactProviderRule instead
  */
-@Deprecated
-public class PactRule extends ExternalResource {
+public class PactProviderRule extends ExternalResource {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PactRule.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PactProviderRule.class);
 
     public static VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
 
     private Map <String, PactFragment> fragments;
+    private final String provider;
     private Object target;
-    final MockProviderConfig config;
+    private final MockProviderConfig config;
 
-    public PactRule(String host, int port, Object target) {
-        config = new MockProviderConfig(port, host);
+    /**
+     * Creates a mock provider by the given name
+     * @param provider Provider name to mock
+     * @param host Host to bind to. Defaults to localhost
+     * @param port Port to bind to. Defaults to a random port.
+     * @param target Target test to apply this rule to.
+     */
+    public PactProviderRule(String provider, String host, Integer port, Object target) {
+        this.provider = provider;
         this.target = target;
+        if (host == null && port == null) {
+            config = MockProviderConfig.createDefault();
+        } else {
+            config = new MockProviderConfig(port, host);
+        }
     }
 
-    public PactRule(String host, Object target) {
-        config = MockProviderConfig$.MODULE$.createDefault(host);
-        this.target = target;
+    /**
+     * Creates a mock provider by the given name. Binds to localhost and a random port.
+     * @param provider Provider name to mock
+     * @param target Target test to apply this rule to.
+     */
+    public PactProviderRule(String provider, Object target) {
+        this(provider, null, null, target);
     }
 
-    public PactRule(Object target) {
-        config = MockProviderConfig$.MODULE$.createDefault();
-        this.target = target;
+    public MockProviderConfig getConfig() {
+        return config;
     }
 
     @Override
@@ -56,7 +67,7 @@ public class PactRule extends ExternalResource {
             @Override
             public void evaluate() throws Throwable {
                 PactVerification pactDef = description.getAnnotation(PactVerification.class);
-                //no pactVerification? execute the test normally
+                // no pactVerification? execute the test normally
                 if (pactDef == null) {
                     base.evaluate();
                     return;
@@ -64,11 +75,11 @@ public class PactRule extends ExternalResource {
 
                 PactFragment fragment = getPacts().get(pactDef.value());
                 if (fragment == null) {
-                    throw new UnsupportedOperationException("Fragment not found: " + pactDef.value());
+                    base.evaluate();
+                    return;
                 }
 
                 VerificationResult result = fragment.runConsumer(config, new TestRun() {
-
                     @Override
                     public void run(MockProviderConfig config) throws Throwable {
                         base.evaluate();
@@ -77,15 +88,17 @@ public class PactRule extends ExternalResource {
 
                 if (!result.equals(PACT_VERIFIED)) {
                     if (result instanceof PactError) {
-                        throw new RuntimeException(((PactError)result).error());
+                        throw ((PactError)result).error();
                     }
                     if (result instanceof UserCodeFailed) {
-                        throw new RuntimeException(((UserCodeFailed<RuntimeException>)result).error());
+                        throw ((UserCodeFailed<RuntimeException>)result).error();
                     }
-                    if (result instanceof PactMismatch) {
+                    if (result instanceof PactMismatch && !pactDef.expectMismatch()) {
                         PactMismatch mismatch = (PactMismatch) result;
                         throw new PactMismatchException(mismatch);
                     }
+                } else if (pactDef.expectMismatch()) {
+                    throw new RuntimeException("Expected a pact mismatch (PactVerification.expectMismatch is set to true)");
                 }
             }
         };
@@ -93,27 +106,25 @@ public class PactRule extends ExternalResource {
 
     /**
      * scan all methods for @Pact annotation and execute them, if not already initialized
-     * @return
      */
-    protected Map < String, PactFragment > getPacts() {
+    protected Map<String, PactFragment> getPacts() {
         if (fragments == null) {
             fragments = new HashMap <String, PactFragment> ();
-
             for (Method m: target.getClass().getMethods()) {
                 if (conformsToSigniture(m)) {
                     Pact pact = m.getAnnotation(Pact.class);
-                    PactDslWithState dslBuilder = ConsumerPactBuilder.consumer(pact.consumer())
-                        .hasPactWith(pact.provider())
-                        .given(pact.state());
-                    try {
-                        fragments.put(pact.state(), (PactFragment) m.invoke(target, dslBuilder));
-                    } catch (Exception e) {
-                        LOGGER.error("Failed to invoke pact method", e);
-                        throw new RuntimeException("Failed to invoke pact method", e);
+                    if (provider.equals(pact.provider())) {
+                        ConsumerPactBuilder.PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(pact.consumer())
+                            .hasPactWith(pact.provider());
+                        try {
+                            fragments.put(pact.provider(), (PactFragment) m.invoke(target, dslBuilder));
+                        } catch (Exception e) {
+                            LOGGER.error("Failed to invoke pact method", e);
+                            throw new RuntimeException("Failed to invoke pact method", e);
+                        }
                     }
                 }
             }
-
         }
         return fragments;
     }
@@ -127,11 +138,11 @@ public class PactRule extends ExternalResource {
             pact != null
             && PactFragment.class.isAssignableFrom(m.getReturnType())
             && m.getParameterTypes().length == 1
-            && m.getParameterTypes()[0].isAssignableFrom(PactDslWithState.class);
+            && m.getParameterTypes()[0].isAssignableFrom(ConsumerPactBuilder.PactDslWithProvider.class);
 
         if (!conforms && pact != null) {
             throw new UnsupportedOperationException("Method " + m.getName() +
-                " does not conform required method signature 'public PactFragment xxx(PactDslWithState builder)'");
+                " does not conform required method signature 'public PactFragment xxx(PactDslWithProvider builder)'");
         }
         return conforms;
     }

@@ -64,7 +64,7 @@ public class MissingRequestConsumerPassesTest extends ExpectedToFailBase {
     }
 
     @Override
-    protected void assertException(RuntimeException e) {
+    protected void assertException(Throwable e) {
         assertThat(e.getMessage(),
             containsString("The following requests where not received:\n" +
                 "Interaction: MissingRequestConsumerPassesTest second test interaction\n" +

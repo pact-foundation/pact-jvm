@@ -17,13 +17,13 @@ public abstract class ExpectedToFailBase extends ConsumerPactTest {
         try {
             super.testPact();
             fail("Expected an exception of type " + expectedException.getName());
-        } catch (RuntimeException e) {
+        } catch (Throwable e) {
             if (!expectedException.isAssignableFrom(e.getClass())) {
-                throw e;
+                throw new AssertionError(e);
             }
             assertException(e);
         }
     }
 
-    protected abstract void assertException(RuntimeException e);
+    protected abstract void assertException(Throwable e);
 }
