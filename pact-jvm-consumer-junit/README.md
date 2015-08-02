@@ -77,21 +77,22 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
 Thanks to [@warmuuh](https://github.com/warmuuh) we have a JUnit rule that simplifies running Pact consumer tests. To use it, create a test class
 and then add the rule:
 
-#### 1. Add the Pact Rule to your test class.
+#### 1. Add the Pact Rule to your test class to represent your provider.
 
 ```java
     @Rule
-    public PactRule rule = new PactRule("localhost", 8080, this);
+    public PactProviderRule mockProvider = new PactProviderRule("test_provider", "localhost", 8080, this);
 ```
 
 The hostname and port are optional. If left out, it will default to localhost and a random available port.
 
-#### 2. Annotate a method with Pact that returns a pact fragment
+#### 2. Annotate a method with Pact that returns a pact fragment for the provider and consumer
 
 ```java
-    @Pact(state="test state", provider="test_provider", consumer="test_consumer")
-    public PactFragment createFragment(PactDslWithState builder) {
+    @Pact(provider="test_provider", consumer="test_consumer")
+    public PactFragment createFragment(PactDslWithProvider builder) {
         return builder
+            .given("test state")
             .uponReceiving("ExampleJavaConsumerPactRuleTest test interaction")
                 .path("/")
                 .method("GET")
@@ -102,11 +103,11 @@ The hostname and port are optional. If left out, it will default to localhost an
     }
 ```
 
-#### 3. Annotate your test method with PactVerification to have it run in the context of a mock server setup with the appropriate pact from step 2
+#### 3. Annotate your test method with PactVerification to have it run in the context of the mock server setup with the appropriate pact from step 1 and 2
 
 ```java
     @Test
-    @PactVerification("test state")
+    @PactVerification("test_provider")
     public void runTest() {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
