@@ -11,7 +11,7 @@ subprojects {
 
     def scalaVersionLookup = [
         '2.10': '2.10.5',
-        '2.11': '2.11.6'
+        '2.11': '2.11.7'
     ]
 
     def m = project.name =~ /.*_(2\.1\d)(_0\.\d+)?/
@@ -22,7 +22,7 @@ subprojects {
           sbtVersion = '0.13.5'
       }
 
-      buildDir = new File(projectDir, "build/" + project.scalaVersion)
+      buildDir = new File(projectDir, "build/$project.scalaVersion")
     }
 
     apply plugin: 'java'
