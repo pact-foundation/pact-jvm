@@ -3,17 +3,11 @@ def crossCompileModules = [ 'pact-jvm-consumer', 'pact-jvm-consumer-junit', 'pac
   'pact-jvm-provider', 'pact-jvm-provider-specs2', 'pact-jvm-server', 'pact-specification-test',
   'pact-jvm-provider-gradle', 'pact-jvm-matchers', 'pact-jvm-provider-maven', 'pact-jvm-logging']
 
-def sbtModules = ['pact-jvm-consumer-sbt', 'pact-jvm-provider-sbt']
-
 rootProject.name = 'pact-jvm'
 
 crossCompileModules.each {
   include it + '_2.10'
   include it + '_2.11'
-}
-
-sbtModules.each {
-  include it + '_2.10_0.13'
 }
 
 rootProject.children.each {

@@ -2,12 +2,15 @@ import sbt._
 import sbt.Keys._
 import com.typesafe.sbt.pgp.PgpKeys._
 
+object Common {
+    def version = "2.2.11"
+}
+
 object BuildSettings {
     val publishSettings = Seq(
-        version := "2.2.11",
+        version := Common.version,
         organization := "au.com.dius",
         scalaVersion := "2.10.5",
-        crossScalaVersions := Seq("2.10.5", "2.11.7"),
 
         publishMavenStyle := true,
         // when playing around with a local install of nexus use this:
@@ -73,6 +76,7 @@ object BuildSettings {
         test := {},
         testOnly := {}
     )
+
 }
 
 object RootBuild extends Build {
@@ -83,38 +87,15 @@ object RootBuild extends Build {
         id = "pact-jvm",
         base = file("."),
         settings = commonSettings ++ skipPublish ++ skipTest)
-        .aggregate(logging, model, consumer, provider, plugin, consumerSbt, server, consumerSpecs2, providerSpecs2, junit,
-            pactSpecification, consumerGroovy, matchers)
+        .aggregate(plugin, consumerSbt)
 
     def p(id: String, settings: Seq[Def.Setting[_]] = commonSettings) = Project(
         id = id,
         base = file(id),
         settings = settings :+ (name := id))
 
-    lazy val logging = p("pact-jvm-logging")
-
-    lazy val model = p("pact-jvm-model").dependsOn(logging)
-
-    lazy val matchers = p("pact-jvm-matchers").dependsOn(model)
-
-    lazy val consumer = p("pact-jvm-consumer").dependsOn(model).dependsOn(matchers)
-
-    lazy val consumerSpecs2 = p("pact-jvm-consumer-specs2").dependsOn(consumer)
-
-    lazy val junit = p("pact-jvm-consumer-junit").dependsOn(consumer)
-
-    lazy val consumerGroovy = p("pact-jvm-consumer-groovy").dependsOn(consumer)
-
-    lazy val provider = p("pact-jvm-provider").dependsOn(model).dependsOn(matchers)
-
-    lazy val providerSpecs2 = p("pact-jvm-provider-specs2").dependsOn(model).dependsOn(matchers)
-
-    lazy val plugin = p("pact-jvm-provider-sbt").dependsOn(provider)
+    lazy val plugin = p("pact-jvm-provider-sbt")
 
     lazy val consumerSbt = p("pact-jvm-consumer-sbt")
-
-    lazy val server = p("pact-jvm-server").dependsOn(model).dependsOn(consumer)
-
-    lazy val pactSpecification = p("pact-specification-test", commonSettings ++ skipPublish).dependsOn(model).dependsOn(matchers)
 
 }
