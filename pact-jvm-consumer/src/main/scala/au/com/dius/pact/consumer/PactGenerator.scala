@@ -8,6 +8,7 @@ import scala.util.{Try, Success, Failure}
 import au.com.dius.pact.model.Pact
 import Pact.{MergeSuccess, MergeConflict}
 import PactGenerator._
+import com.typesafe.scalalogging.StrictLogging
 
 /**
  * Globally accumulates Pacts, merges by destination file, and allows writing to File.
@@ -38,7 +39,7 @@ object PactGenerator {
     
 }
 
-case class PactGenerator(pacts: Map[String, Pact], conflicts: List[MergeConflict]) {
+case class PactGenerator(pacts: Map[String, Pact], conflicts: List[MergeConflict]) extends StrictLogging {
   import PactGenerator._
   
   def failed: Boolean = conflicts.nonEmpty
@@ -65,6 +66,7 @@ case class PactGenerator(pacts: Map[String, Pact], conflicts: List[MergeConflict
     
     def writeToFile(pact: Pact, filename: String): Unit = {
       val file = destinationFileForPact(pact)
+      logger.debug(s"Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file $file")
       val writer = new PrintWriter(file)
       try pact.sortInteractions.serialize(writer)
       finally writer.close()
