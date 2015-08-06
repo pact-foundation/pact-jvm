@@ -4,7 +4,9 @@ import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.Provider
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import groovy.transform.Canonical
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
+import groovy.transform.TupleConstructor
 import groovy.util.logging.Slf4j
 
 import java.util.jar.JarInputStream
@@ -12,8 +14,10 @@ import java.util.jar.JarInputStream
 /**
  * Pact implementing V3 version of the spec
  */
-@Canonical
 @Slf4j
+@ToString
+@EqualsAndHashCode(excludes = ['metadata'])
+@TupleConstructor
 abstract class V3Pact {
     Consumer consumer
     Provider provider

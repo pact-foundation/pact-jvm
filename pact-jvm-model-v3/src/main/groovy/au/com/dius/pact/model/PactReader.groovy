@@ -12,6 +12,9 @@ import org.json4s.StreamInput
 @SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter'])
 class PactReader {
 
+    private static final String JSON = 'application/json'
+    private static final Map ACCEPT_JSON = [requestProperties: [Accept: JSON] ]
+
     /**
      * Loads a pact file from either a File or a URL
      * @param source a File or a URL
@@ -39,8 +42,7 @@ class PactReader {
         if (source instanceof File) {
             Pact$.MODULE$.from(new FileInput(source))
         } else {
-            Pact$.MODULE$.from(new StreamInput(source.newInputStream(requestProperties:
-                ['Accept': 'application/json'])))
+            Pact$.MODULE$.from(new StreamInput(source.newInputStream(ACCEPT_JSON)))
         }
     }
 
@@ -48,7 +50,7 @@ class PactReader {
         if (source instanceof File) {
             new JsonSlurper().parse(source)
         } else if (source instanceof URL) {
-            new JsonSlurper().parse(source, requestProperties: ['Accept': 'application/json'])
+            new JsonSlurper().parse(source, ACCEPT_JSON)
         } else {
             throw new UnsupportedOperationException(
                 "Unable to load pact file from $source as it is neither a file or a URL")
