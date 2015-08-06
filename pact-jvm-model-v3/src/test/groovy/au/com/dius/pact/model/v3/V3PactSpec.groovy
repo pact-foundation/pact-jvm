@@ -17,7 +17,7 @@ class V3PactSpec extends Specification {
         def pact = new V3Pact() {
             @Override
             Map toMap() {
-                return [
+                [
                     consumer: [name: 'asis-trading-order-repository'],
                     provider: [name: 'asis-core'],
                     messages: [
@@ -30,6 +30,7 @@ class V3PactSpec extends Specification {
                 ]
             }
 
+            @SuppressWarnings('UnusedMethodParameter')
             protected File fileForPact(String pactDir) {
                 pactFile
             }
@@ -52,7 +53,7 @@ class V3PactSpec extends Specification {
         def pact = new V3Pact() {
             @Override
             Map toMap() {
-                return [
+                [
                     consumer: [name: 'asis-trading-order-repository'],
                     provider: [name: 'asis-core'],
                     messages: [
@@ -68,6 +69,7 @@ class V3PactSpec extends Specification {
                 ]
             }
 
+            @SuppressWarnings('UnusedMethodParameter')
             protected File fileForPact(String pactDir) {
                 pactFile
             }
