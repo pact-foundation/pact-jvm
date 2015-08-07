@@ -1,13 +1,18 @@
 package au.com.dius.pact.provider.gradle
 
-import au.com.dius.pact.model.Interaction
 @SuppressWarnings('UnusedImport')
-import au.com.dius.pact.model.Pact
-import au.com.dius.pact.model.Pact$
 import au.com.dius.pact.model.PactReader
+import au.com.dius.pact.model.Response
+import au.com.dius.pact.model.v3.V3Pact
+import au.com.dius.pact.model.v3.messaging.Message
+import au.com.dius.pact.model.v3.messaging.MessagePact
+import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.PactInteractionProxy
+import au.com.dius.pact.provider.PactVerification
+import au.com.dius.pact.provider.PactVerifyProvider
+import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.groovysupport.ProviderClient
 import au.com.dius.pact.provider.groovysupport.ResponseComparison
-import groovy.transform.CompileStatic
 import org.apache.commons.lang3.StringUtils
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.AnsiConsole
@@ -16,10 +21,13 @@ import org.gradle.api.GradleScriptException
 import org.gradle.api.Task
 import org.gradle.api.tasks.GradleBuild
 import org.gradle.api.tasks.TaskAction
-import org.json4s.FileInput
-import org.json4s.StreamInput
+import org.reflections.Reflections
+import org.reflections.scanners.MethodAnnotationsScanner
+import org.reflections.util.ConfigurationBuilder
+import org.reflections.util.FilterBuilder
 import scala.collection.JavaConverters$
-import scala.collection.convert.Decorators
+
+import java.lang.reflect.Method
 
 /**
  * Task to verify a pact against a provider
@@ -45,12 +53,29 @@ class PactVerificationTask extends DefaultTask {
 
     void runVerificationForConsumer(ProviderInfo provider, ConsumerInfo consumer) {
         AnsiConsole.out().println(Ansi.ansi().a('\nVerifying a pact between ').bold().a(consumer.name)
-            .boldOff().a(' and ').bold().a(provider.name).boldOff().a(' [').a(consumer.pactType).a(']'))
+            .boldOff().a(' and ').bold().a(provider.name).boldOff())
 
-        Pact pact = loadPactFileForConsumer(consumer)
+        def pact = loadPactFileForConsumer(consumer)
 
-        def interactions = JavaConverters$.MODULE$.seqAsJavaListConverter(pact.interactions())
-        interactions.asJava().findAll(this.&filterInteractions).each(this.&verifyInteraction.curry(provider, consumer))
+        def interactions
+        if (pact instanceof V3Pact) {
+            if (pact instanceof MessagePact) {
+                interactions = pact.messages.findAll(this.&filterInteractions)
+            } else {
+                interactions = pact.interactions.findAll(this.&filterInteractions)
+            }
+        } else {
+            interactions = JavaConverters$.MODULE$.seqAsJavaListConverter(pact.interactions()).asJava()
+                .collect { new PactInteractionProxy(it) }.findAll(this.&filterInteractions)
+        }
+
+        if (interactions.empty) {
+            AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
+                .a('WARNING: Pact file has no interactions')
+                .reset())
+        } else {
+            interactions.each(this.&verifyInteraction.curry(provider, consumer, pact))
+        }
     }
 
     private void displayFailures(failures) {
@@ -100,48 +125,120 @@ class PactVerificationTask extends DefaultTask {
         }
     }
 
-    void verifyInteraction(ProviderInfo provider, ConsumerInfo consumer, Interaction interaction) {
+    void verifyInteraction(ProviderInfo provider, ConsumerInfo consumer, def pact, def interaction) {
         def interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name}" +
-            " - ${interaction.description()}"
+            " - ${interaction.description}"
 
         def stateChangeOk = true
-        if (interaction.providerState.defined) {
-            stateChangeOk = stateChange(interaction.providerState.get(), consumer)
+        if (interaction.providerState) {
+            stateChangeOk = stateChange(interaction.providerState, consumer)
             if (stateChangeOk != true) {
                 ext.failures[interactionMessage] = stateChangeOk
                 stateChangeOk = false
             } else {
-                interactionMessage += " Given ${interaction.providerState.get()}"
+                interactionMessage += " Given ${interaction.providerState}"
             }
         }
 
         if (stateChangeOk) {
-            AnsiConsole.out().println(Ansi.ansi().a('  ').a(interaction.description()))
+            AnsiConsole.out().println(Ansi.ansi().a('  ').a(interaction.description))
 
-            verifyResponseFromProvider(provider, interaction, interactionMessage)
+            if (provider.verificationType == PactVerification.REQUST_RESPONSE) {
+                verifyResponseFromProvider(provider, interaction, interactionMessage)
+            } else {
+                verifyResponseByInvokingProviderMethods(pact, provider, interaction, interactionMessage)
+            }
         }
     }
 
-    @SuppressWarnings('PrintStackTrace')
-    void verifyResponseFromProvider(ProviderInfo provider, Interaction interaction, String interactionMessage) {
+    @SuppressWarnings(['PrintStackTrace', 'ThrowRuntimeException'])
+    void verifyResponseByInvokingProviderMethods(def pact, ProviderInfo providerInfo, def interaction,
+                                           String interactionMessage) {
         try {
-            ProviderClient client = new ProviderClient(request: interaction.request(), provider: provider)
+            def urls = project.sourceSets.test.runtimeClasspath*.toURL() as URL[]
+            URLClassLoader loader = new URLClassLoader(urls, GroovyObject.classLoader)
+            def configurationBuilder = new ConfigurationBuilder()
+                .setScanners(new MethodAnnotationsScanner())
+                .addClassLoader(loader)
+                .addUrls(loader.URLs)
 
-            def expectedResponse = interaction.response()
+            if (!providerInfo.packagesToScan.empty) {
+                def filterBuilder = new FilterBuilder()
+                providerInfo.packagesToScan.each { filterBuilder.include(it) }
+                configurationBuilder.filterInputsBy(filterBuilder)
+            }
+
+            Reflections reflections = new Reflections(configurationBuilder)
+            def methodsAnnotatedWith = reflections.getMethodsAnnotatedWith(PactVerifyProvider)
+            def providerMethods = methodsAnnotatedWith.findAll { Method m ->
+                logger.debug("Found annotated method $m")
+                def annotation = m.annotations.find { it.annotationType().toString() == PactVerifyProvider.toString() }
+                logger.debug("Found annotation $annotation")
+                annotation?.value() == interaction.description
+            }
+
+            if (providerMethods.empty) {
+                throw new RuntimeException('No annotated methods were found for interaction ' +
+                    "'${interaction.description}'")
+            } else {
+                if (pact instanceof MessagePact) {
+                    verifyMessagePact(providerMethods, interaction as Message, interactionMessage)
+                } else {
+                    def expectedResponse = interaction.response
+                    providerMethods.each {
+                        def actualResponse = invokeProviderMethod(it)
+                        verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage)
+                    }
+                }
+            }
+        } catch (e) {
+            AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a('Verification Failed - ')
+                .a(e.message).reset())
+            ext.failures[interactionMessage] = e
+            if (project.hasProperty('pact.showStacktrace')) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    void verifyRequestResponsePact(Response expectedResponse, Map actualResponse, String interactionMessage) {
+        def comparison = ResponseComparison.compareResponse(expectedResponse, actualResponse,
+            actualResponse.statusCode, actualResponse.headers, actualResponse.data)
+
+        AnsiConsole.out().println('    returns a response which')
+
+        def s = ' returns a response which'
+        displayMethodResult(ext.failures, expectedResponse.status(), comparison.method,
+            interactionMessage + s)
+        displayHeadersResult(ext.failures, expectedResponse.headers(), comparison.headers,
+            interactionMessage + s)
+        expectedResponse.body().defined ? expectedResponse.body().get() : ''
+        displayBodyResult(ext.failures, comparison.body, interactionMessage + s)
+    }
+
+    void verifyMessagePact(Set methods, Message message, String interactionMessage) {
+        methods.each {
+            AnsiConsole.out().println('    generates a message which')
+            def actualMessage = invokeProviderMethod(it)
+            def comparison = ResponseComparison.compareMessage(message, actualMessage)
+            def s = ' generates a message which'
+            displayBodyResult(ext.failures, comparison, interactionMessage + s)
+        }
+    }
+
+    def invokeProviderMethod(Method m) {
+        m.invoke(m.declaringClass.newInstance())
+    }
+
+    @SuppressWarnings('PrintStackTrace')
+    void verifyResponseFromProvider(ProviderInfo provider, def interaction, String interactionMessage) {
+        try {
+            ProviderClient client = new ProviderClient(request: interaction.request, provider: provider)
+
+            def expectedResponse = interaction.response
             def actualResponse = client.makeRequest()
 
-            def comparison = ResponseComparison.compareResponse(expectedResponse, actualResponse,
-                actualResponse.statusCode, actualResponse.headers, actualResponse.data)
-
-            AnsiConsole.out().println('    returns a response which')
-
-            def s = ' returns a response which'
-            displayMethodResult(ext.failures, expectedResponse.status(), comparison.method,
-                interactionMessage + s)
-            displayHeadersResult(ext.failures, expectedResponse.headers(), comparison.headers,
-                interactionMessage + s)
-            expectedResponse.body().defined ? expectedResponse.body().get() : ''
-            displayBodyResult(ext.failures, comparison.body, interactionMessage + s)
+            verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage)
         } catch (e) {
             AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a('Request Failed - ')
                 .a(e.message).reset())
@@ -284,14 +381,14 @@ class PactVerificationTask extends DefaultTask {
   }
 
   private boolean matchState(interaction) {
-    if (interaction.providerState().defined) {
-      interaction.providerState().get() ==~ project.property('pact.filter.providerState')
+    if (interaction.providerState) {
+      interaction.providerState ==~ project.property('pact.filter.providerState')
     } else {
       project.property('pact.filter.providerState').empty
     }
   }
 
   private boolean matchDescription(interaction) {
-    interaction.description() ==~ project.property('pact.filter.description')
+    interaction.description ==~ project.property('pact.filter.description')
   }
 }
