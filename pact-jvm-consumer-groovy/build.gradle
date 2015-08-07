@@ -1,6 +1,6 @@
 dependencies {
     compile project(":pact-jvm-consumer_${project.scalaVersion}")
-    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
+    compile "org.codehaus.groovy:groovy-all:$groovyVersion:indy"
 
     testCompile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1', 'ch.qos.logback:logback-classic:1.1.2'
     testCompile ('org.spockframework:spock-core:1.0-groovy-2.4') {

@@ -2,7 +2,8 @@ package au.com.dius.pact.model
 
 import java.io.{InputStream, PrintWriter}
 import java.util.jar.JarInputStream
-import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
+
+import com.typesafe.scalalogging.StrictLogging
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization

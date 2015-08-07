@@ -13,4 +13,4 @@ jar {
             'Class-Path': configurations.compile.collect { it.getName() }.join(' ')
 }
 
-artifacts { archives distZip }
+//artifacts { archives distZip }
