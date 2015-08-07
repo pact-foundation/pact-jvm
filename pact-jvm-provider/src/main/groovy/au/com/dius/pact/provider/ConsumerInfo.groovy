@@ -1,4 +1,4 @@
-package au.com.dius.pact.provider.gradle
+package au.com.dius.pact.provider
 
 /**
  * Consumer Info
@@ -8,7 +8,6 @@ class ConsumerInfo {
     def pactFile
     def stateChange
     boolean stateChangeUsesBody = true
-    String pactType = 'requestResponse'
 
     def url(String path) {
         new URL(path)

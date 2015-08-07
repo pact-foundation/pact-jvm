@@ -21,7 +21,11 @@ class PactReader {
      */
     def loadPact(def source) {
         def pact = loadFile(source)
-        def specVersion = Version.valueOf(pact.metadata?.'pact-specification'?.version ?: '2.0.0')
+        def version = pact.metadata?.'pact-specification'?.version ?: '2.0.0'
+        if (version == '3.0') {
+            version = '3.0.0'
+        }
+        def specVersion = Version.valueOf(version)
         switch (specVersion.majorVersion) {
             case 3:
                 return loadV3Pact(source, pact)
@@ -32,7 +36,7 @@ class PactReader {
 
     def loadV3Pact(def source, def pactJson) {
         if (pactJson.messages) {
-            pactJson as MessagePact
+            new MessagePact().fromMap(pactJson)
         } else {
             loadV2Pact(source, pactJson)
         }

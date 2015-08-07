@@ -6,7 +6,6 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import groovy.transform.TupleConstructor
 import groovy.util.logging.Slf4j
 
 import java.util.jar.JarInputStream
@@ -17,11 +16,15 @@ import java.util.jar.JarInputStream
 @Slf4j
 @ToString
 @EqualsAndHashCode(excludes = ['metadata'])
-@TupleConstructor
 abstract class V3Pact {
+    private static final Map DEFAULT_METADATA = [
+        'pact-specification': ['version': '3.0.0'],
+        'pact-jvm': ['version': lookupVersion()]
+    ]
+
     Consumer consumer
     Provider provider
-    Map metadata = ['pact-specification': ['version': '3.0.0'], 'pact-jvm': ['version': lookupVersion()]]
+    Map metadata = DEFAULT_METADATA
 
     protected static String lookupVersion() {
         V3Pact.protectionDomain.codeSource.location?.withInputStream { stream ->
@@ -49,6 +52,7 @@ abstract class V3Pact {
             jsonMap = mergePacts(jsonMap, pactFile)
         }
 
+        jsonMap.metadata = jsonMap.metadata ? jsonMap.metadata + DEFAULT_METADATA : DEFAULT_METADATA
         def json = JsonOutput.toJson(jsonMap)
         pactFile.withWriter { writer ->
             writer.print JsonOutput.prettyPrint(json)
@@ -67,4 +71,11 @@ abstract class V3Pact {
     }
 
     abstract Map toMap()
+
+    V3Pact fromMap(Map map) {
+        consumer = Consumer.apply(map.consumer?.name ?: 'consumer')
+        provider = Provider.apply(map.provider?.name ?: 'provider')
+        metadata = map.metadata
+        this
+    }
 }
