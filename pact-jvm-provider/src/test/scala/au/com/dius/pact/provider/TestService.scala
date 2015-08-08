@@ -1,15 +1,15 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.unfiltered.Conversions
+import AnimalServiceResponses.responses
+import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.model.{Request, Response}
-import au.com.dius.pact.provider.AnimalServiceResponses.responses
-import com.typesafe.scalalogging.StrictLogging
 import org.json4s.JsonAST._
-import org.json4s.StringInput
 import org.json4s.jackson.JsonMethods.parse
 import unfiltered.netty.{ReceivedMessage, ServerErrorResponse, cycle}
 import unfiltered.request.HttpRequest
 import unfiltered.response.ResponseFunction
+import au.com.dius.pact.model.unfiltered.Conversions
+import org.json4s.StringInput
 
 object TestService extends StrictLogging {
   var state: String = ""

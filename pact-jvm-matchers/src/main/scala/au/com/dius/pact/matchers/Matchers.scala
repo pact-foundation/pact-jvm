@@ -1,11 +1,10 @@
 package au.com.dius.pact.matchers
 
-import java.text.ParseException
-
-import com.typesafe.scalalogging.StrictLogging
+import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import io.gatling.jsonpath.AST._
 import io.gatling.jsonpath.Parser
 import org.apache.commons.lang3.time.{DateFormatUtils, DateUtils}
+import java.text.ParseException
 
 object Matchers extends StrictLogging {
 

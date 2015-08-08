@@ -1,6 +1,6 @@
 package au.com.dius.pact.model
 
-import com.typesafe.scalalogging.StrictLogging
+import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 
 case class RequestMatching(expectedInteractions: Seq[Interaction]) {
   import au.com.dius.pact.model.RequestMatching._
