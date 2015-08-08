@@ -16,8 +16,9 @@
 
 package au.com.dius.pact.com.typesafe.scalalogging
 
-import language.experimental.macros
-import org.slf4j.{ Logger => Underlying, Marker }
+import org.slf4j.{Logger => Underlying, Marker}
+
+import scala.language.experimental.macros
 
 object Logger {
 

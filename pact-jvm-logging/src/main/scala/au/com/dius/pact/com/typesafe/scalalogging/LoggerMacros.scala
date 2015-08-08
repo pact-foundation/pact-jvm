@@ -17,7 +17,8 @@
 package au.com.dius.pact.com.typesafe.scalalogging
 
 import org.slf4j.Marker
-import scala.reflect.macros.Context
+
+import scala.reflect.macros._
 
 private object LoggerMacros {
 

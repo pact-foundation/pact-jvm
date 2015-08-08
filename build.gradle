@@ -19,7 +19,6 @@ subprojects {
       project.ext {
           scalaVersion = m.group(1)
           scalaFullVersion = scalaVersionLookup[m.group(1)]
-          sbtVersion = '0.13.5'
       }
 
       buildDir = new File(projectDir, "build/$project.scalaVersion")
@@ -62,7 +61,7 @@ subprojects {
         scalaCompileOptions.useAnt = false
         scalaCompileOptions.additionalParameters = ['-target:jvm-1.6']
         configure(scalaCompileOptions.forkOptions) {
-          memoryMaximumSize = '1g'
+          memoryMaximumSize = '700m'
           jvmArgs = ['-XX:MaxPermSize=512m']
         }
     }
