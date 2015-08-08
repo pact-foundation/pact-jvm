@@ -28,9 +28,12 @@ abstract class ResponseSpecificationSpec extends SpecificationSpec {
           val fileName = testFile.getName
           implicit val formats = DefaultFormats
           val testJson = parse(testFile)
-          val testData = testJson.transformField {
+          val transformedJson: JValue = testJson.transformField {
             case ("body", value) => ("body", JString(pretty(value)))
-          }.extract[PactResponseSpecification]
+          }
+          val testData = transformedJson.extract[PactResponseSpecification].copy(
+            actual = Pact.extractResponse(transformedJson, "actual"),
+            expected = Pact.extractResponse(transformedJson, "expected"))
 
           val description = s"$dirName/$fileName ${testData.comment}"
           Example(description, {

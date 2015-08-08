@@ -30,13 +30,25 @@ object Pact {
 
     val interactions = (transformedJson \ "interactions").children.map(i => {
       val interaction = i.extract[Interaction]
-      val requestBody = extractBody(i \ "request" \ "body")
-      val request = (i \ "request").extract[Request].copy(body = requestBody)
-      val responseBody = extractBody(i \ "response" \ "body")
-      val response = (i \ "response").extract[Response].copy(body = responseBody)
+      val request: Request = extractRequest(i)
+      val response: Response = extractResponse(i)
       interaction.copy(request = request, response = response)
     })
     Pact(provider, consumer, interactions)
+  }
+
+  def extractResponse(interactionJson: JValue, responseElement: String = "response"): Response = {
+    implicit val formats = DefaultFormats
+    val responseBody = extractBody(interactionJson \ responseElement \ "body")
+    val responseMatchingRules = extractMatchingRules(interactionJson \ responseElement \ "matchingRules")
+    (interactionJson \ responseElement).extract[Response].copy(body = responseBody, matchingRules = responseMatchingRules)
+  }
+
+  def extractRequest(interactionJson: JValue, requestElement: String = "request"): Request = {
+    implicit val formats = DefaultFormats
+    val requestBody = extractBody(interactionJson \ requestElement \ "body")
+    val requestMatchingRules = extractMatchingRules(interactionJson \ requestElement \ "matchingRules")
+    (interactionJson \ requestElement).extract[Request].copy(body = requestBody, matchingRules = requestMatchingRules)
   }
 
   def extractBody(body: JValue): Option[String] = {
@@ -45,6 +57,23 @@ object Pact {
       case JNothing => None
       case JNull => None
       case b => Some(pretty(b))
+    }
+  }
+
+  def extractMatcher(matcher: JValue): Map[String, Any] = {
+    matcher match {
+      case JObject(fields) => Map(fields.map { f =>
+        f._1 -> f._2.values
+      }: _*)
+      case _ => Map()
+    }
+  }
+
+  def extractMatchingRules(matchingRules: JValue) : Option[Map[String, Map[String, Any]]] = {
+    matchingRules match {
+      case JObject(fields) =>
+        Some(Map(fields.map { f => f._1 -> extractMatcher(f._2) }: _*))
+      case _ => None
     }
   }
 

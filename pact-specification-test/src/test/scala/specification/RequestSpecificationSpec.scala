@@ -2,7 +2,7 @@ package specification
 
 import java.io.File
 
-import au.com.dius.pact.model.{FullRequestMatch, RequestMatching, Response, Interaction}
+import au.com.dius.pact.model._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.specs2.specification.Example
@@ -29,9 +29,12 @@ abstract class RequestSpecificationSpec extends SpecificationSpec {
           val fileName = testFile.getName
           implicit val formats = DefaultFormats
           val testJson = parse(testFile)
-          val testData = testJson.transformField {
+          val transformedJson = testJson.transformField {
             case ("body", value) => ("body", JString(pretty(value)))
-          }.extract[PactRequestSpecification]
+          }
+          val testData = transformedJson.extract[PactRequestSpecification].copy(
+            actual = Pact.extractRequest(transformedJson, "actual"),
+            expected = Pact.extractRequest(transformedJson, "expected"))
 
           val description = s"$dirName/$fileName ${testData.comment}"
           Example(description, {
