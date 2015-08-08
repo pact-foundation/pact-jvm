@@ -1,0 +1,29 @@
+{
+  "consumer": {
+    "name": "asis-trading-order-repository"
+  },
+  "provider": {
+    "name": "asis-core"
+  },
+  "messages": [
+    {
+      "metaData": {
+        "contentType": "application/json"
+      },
+      "providerState": "message exists",
+      "contents": "Hello",
+      "matchingRules": {
+
+      },
+      "description": "a hello message"
+    }
+  ],
+  "metadata": {
+    "pact-specification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "3.0.0"
+    }
+  }
+}

@@ -1,4 +1,4 @@
-package au.com.dius.pact.provider.gradle
+package au.com.dius.pact.provider
 
 /**
  * Consumer Info

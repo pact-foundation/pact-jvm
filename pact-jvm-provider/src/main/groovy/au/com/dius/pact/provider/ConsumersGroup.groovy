@@ -1,4 +1,4 @@
-package au.com.dius.pact.provider.gradle
+package au.com.dius.pact.provider
 
 import groovy.transform.ToString
 

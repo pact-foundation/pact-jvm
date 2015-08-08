@@ -1,7 +1,6 @@
-package au.com.dius.pact.provider.gradle
+package au.com.dius.pact.provider
 
 import groovy.json.JsonSlurper
-import org.gradle.api.GradleException
 
 /**
  * Provider Info Config
@@ -21,6 +20,8 @@ class ProviderInfo {
     File trustStore
     String trustStorePassword = 'changeit'
 
+    PactVerification verificationType = PactVerification.REQUST_RESPONSE
+    List packagesToScan = []
     List<ConsumerInfo> consumers = []
 
     ProviderInfo(String name) {
@@ -43,6 +44,7 @@ class ProviderInfo {
         setupConsumerListFromPactFiles(consumersGroup)
     }
 
+    @SuppressWarnings('ThrowRuntimeException')
     private List setupConsumerListFromPactFiles(ConsumersGroup consumersGroup) {
         if (!consumersGroup.pactFileLocation) {
             return []
@@ -50,7 +52,7 @@ class ProviderInfo {
 
         File pactFileDirectory = consumersGroup.pactFileLocation
         if (!pactFileDirectory.exists() || !pactFileDirectory.canRead()) {
-            throw new GradleException("pactFileDirectory ${pactFileDirectory.absolutePath} " +
+            throw new RuntimeException("pactFileDirectory ${pactFileDirectory.absolutePath} " +
                 'does not exist or is not readable')
         }
 

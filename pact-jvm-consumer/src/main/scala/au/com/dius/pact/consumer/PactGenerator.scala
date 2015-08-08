@@ -3,8 +3,9 @@ package au.com.dius.pact.consumer
 import java.io.{File, PrintWriter}
 
 import au.com.dius.pact.model.Pact
-import au.com.dius.pact.model.Pact.{MergeConflict, MergeSuccess}
-import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
+import Pact.{MergeSuccess, MergeConflict}
+import PactGenerator._
+import com.typesafe.scalalogging.StrictLogging
 
 /**
  * Globally accumulates Pacts, merges by destination file, and allows writing to File.

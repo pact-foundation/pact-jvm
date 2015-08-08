@@ -100,6 +100,7 @@ class PactPluginTest {
         assert consumer.name == 'ConsumerA'
         assert consumer.pactFile == new URL(pactFileUrl)
         assert consumer.stateChange == new URL(stateChangeUrl)
+        assert consumer.pactType == 'requestResponse'
     }
 
     @Test

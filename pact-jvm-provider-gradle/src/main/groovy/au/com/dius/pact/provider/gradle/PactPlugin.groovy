@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.gradle
 
+import au.com.dius.pact.provider.ProviderInfo
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -24,7 +25,7 @@ class PactPlugin implements Plugin<Project> {
             project.pact.serviceProviders.all { ProviderInfo provider ->
                 def providerTask = project.task("pactVerify_${provider.name}",
                     description: "Verify the pacts against ${provider.name}", type: PactVerificationTask,
-                    group: GROUP) {
+                    group: GROUP, dependsOn: 'testClasses') {
                     providerToVerify = provider
                 }
 

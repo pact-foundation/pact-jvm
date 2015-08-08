@@ -2,19 +2,25 @@ package au.com.dius.pact.provider.groovysupport
 
 import au.com.dius.pact.model.BodyMismatch
 import au.com.dius.pact.model.BodyTypeMismatch
+import au.com.dius.pact.model.DiffConfig
 import au.com.dius.pact.model.HeaderMismatch
+import au.com.dius.pact.model.HttpPart
+import au.com.dius.pact.model.PactConfig
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.Response$
 import au.com.dius.pact.model.ResponseMatching$
 import au.com.dius.pact.model.ResponsePartMismatch
 import au.com.dius.pact.model.StatusMismatch
+import au.com.dius.pact.model.v3.messaging.Message
 import difflib.Delta
 import difflib.DiffUtils
 import difflib.Patch
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
+import org.apache.commons.lang3.StringUtils
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
+import scala.None$
 import scala.collection.JavaConverters$
 
 /**
@@ -43,6 +49,29 @@ class ResponseComparison {
     result.headers = comparison.compareHeaders(mismatches)
     result.body = comparison.compareBody(mismatches)
     result
+  }
+
+  static compareMessage(Message message, def actual) {
+    def result = JavaConverters$.MODULE$.mutableMapAsJavaMapConverter(PactConfig.bodyMatchers()).asJava().find {
+          message.contentType ==~ it.key
+    }
+    def mismatches = []
+    def expected = message.asPactRequest()
+    def actualMessage = Response$.MODULE$.apply(200, ['Content-Type': message.contentType], actual, [:])
+    if (result) {
+          mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(result.value.matchBody(expected,
+            actualMessage, DiffConfig.apply(true, false))).asJava()
+      } else {
+          def expectedBody = message.contents?.toString()
+          if (!StringUtils.isEmpty(expectedBody) && StringUtils.isEmpty(actual)) {
+              mismatches << BodyMismatch.apply(expectedBody, None$.MODULE$.get())
+          } else if (actual != expectedBody) {
+              mismatches << BodyMismatch(expectedBody, actual)
+          }
+    }
+
+    new ResponseComparison(expected: expected, actual: [contentType: [mimeType: message.contentType]],
+      actualBody: actual).compareBody(mismatches)
   }
 
   def compareStatus(List<ResponsePartMismatch> mismatches) {

@@ -123,8 +123,8 @@ ruleset {
     ToStringReturnsNull
 
     // rulesets/dry.xml
-    DuplicateListLiteral
-    DuplicateMapLiteral
+//    DuplicateListLiteral
+//    DuplicateMapLiteral
 //    DuplicateNumberLiteral
 //    DuplicateStringLiteral
 
@@ -315,7 +315,7 @@ ruleset {
     VariableName
 
     // rulesets/security.xml
-    FileCreateTempFile
+//    FileCreateTempFile
     InsecureRandom
 //    JavaIoPackageAccess
     NonFinalPublicField

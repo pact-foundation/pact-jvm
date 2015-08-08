@@ -19,8 +19,10 @@ dependencies {
     compile(project(":pact-jvm-provider_${project.scalaVersion}")) {
       exclude module: 'groovy-all'
     }
-
-    testCompile 'org.fusesource.jansi:jansi:1.11'
+    compile(project(":pact-jvm-model-v3_${project.scalaVersion}")) {
+      exclude module: 'groovy-all'
+    }
+    compile 'org.fusesource.jansi:jansi:1.11'
 }
 
 publishing {

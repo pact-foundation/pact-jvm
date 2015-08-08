@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.gradle
 
+import au.com.dius.pact.provider.ProviderInfo
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.util.ConfigureUtil
 
@@ -10,7 +11,7 @@ class PactPluginExtension {
 
     final NamedDomainObjectContainer<ProviderInfo> serviceProviders
 
-    PactPublish pactPublish
+    PactPublish publish
 
     PactPluginExtension(serviceProviders) {
         this.serviceProviders = serviceProviders
@@ -21,8 +22,9 @@ class PactPluginExtension {
         serviceProviders.configure(closure)
     }
 
+    @SuppressWarnings('ConfusingMethodName')
     def publish(Closure closure) {
-        pactPublish = new PactPublish()
-        ConfigureUtil.configure(closure, pactPublish)
+        publish = new PactPublish()
+        ConfigureUtil.configure(closure, publish)
     }
 }
