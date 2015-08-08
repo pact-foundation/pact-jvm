@@ -3,7 +3,8 @@ package au.com.dius.pact.consumer
 import java.io.{File, PrintWriter}
 
 import au.com.dius.pact.model.Pact
-import au.com.dius.pact.model.Pact.{MergeConflict, MergeSuccess}
+import Pact.{MergeSuccess, MergeConflict}
+import PactGenerator._
 import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 
 /**
