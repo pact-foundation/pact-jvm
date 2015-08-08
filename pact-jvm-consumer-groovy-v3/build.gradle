@@ -1,6 +1,6 @@
 dependencies {
     compile project(":pact-jvm-consumer-groovy_${project.scalaVersion}"), project(":pact-jvm-model-v3_${project.scalaVersion}")
-    compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
+    compile 'org.codehaus.groovy:groovy-all:2.4.4'
 
     testCompile 'ch.qos.logback:logback-classic:1.1.2'
     testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {

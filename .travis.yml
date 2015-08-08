@@ -1,8 +1,12 @@
 language: java
 sudo: false
 jdk:
+  - openjdk6
+  - oraclejdk7
+  - openjdk7
   - oraclejdk8
 env:
+  - SCALA=2.10
   - SCALA=2.11
 script: ./gradlew --stacktrace --no-daemon -i check_$SCALA
 install: true
