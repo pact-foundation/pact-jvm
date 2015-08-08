@@ -3,7 +3,7 @@ import sbt.Keys._
 import com.typesafe.sbt.pgp.PgpKeys._
 
 object Common {
-    def version = "2.2.11"
+    def version = "2.2.12"
 }
 
 object BuildSettings {
@@ -11,7 +11,7 @@ object BuildSettings {
         version := Common.version,
         organization := "au.com.dius",
         scalaVersion := "2.10.5",
-        crossScalaVersions := Seq("2.10.5", "2.11.6"),
+        crossScalaVersions := Seq("2.10.5", "2.11.7"),
 
         publishMavenStyle := true,
         // when playing around with a local install of nexus use this:
