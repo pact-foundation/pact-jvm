@@ -19,7 +19,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * a020b46 - updated changelog (Ronald Holshausen, Sun Aug 2 15:53:03 2015 +1000)
 * a754633 - bump version (Ronald Holshausen, Sun Aug 2 16:16:54 2015 +1000)
 
-2.2.12 - verification of message pacts; some bugfixes
+# 2.2.12 - verification of message pacts; some bugfixes
 
 * e8e4994 - Merge remote-tracking branch 'origin/master' into v2.x (Ronald Holshausen, Sun Aug 9 13:48:59 2015 +1000)
 * cb0c829 - expose the mock provider config #151 (Ronald Holshausen, Sun Aug 9 13:27:33 2015 +1000)
