@@ -151,10 +151,17 @@ To publish to a nexus repo:
 You will have to change the nexus URL and username/password in build.gradle and you must be added to the nexus project
 to be able to do this
 
-### Using SBT (the old way)
+### Building the SBT modules
 
-The SBT project files still remain for those who want to build it with SBT. Note, however, that _this is unmaintained as
-there is no custodian for the SBT build_.
+The SBT need to be build using SBT on the v2.x branch. First check that branch out:
+
+    $ git checkout v2.x
+
+Then build all the other modules using Gradle and publish to your local maven repo.
+
+    $ ./gradlew install
+
+Once that is done, you can now build the SBT modules.
 
 #### Note on building pact JVM with Java 6 or 7
 
@@ -163,13 +170,9 @@ Scala requires a lot of permgen space to compile. If you're using Java 6 or 7, u
     export JAVA_OPTS='-Xmx2048m -XX:MaxPermSize=1024m -XX:PermSize=1024m'
     export SBT_OPTS='-Xmx2048m -XX:MaxPermSize=1024m -XX:PermSize=1024m'
 
-To build the libraries:
+To build the SBT modules:
 
-    $ sbt clean test install
-
-You can publish pacts to your local maven repo using:
-
-    $ sbt clean test publishLocal
+    $ sbt clean test publishM2
 
 To publish to a nexus repo, change the url in project/Build.scala then run:
 
