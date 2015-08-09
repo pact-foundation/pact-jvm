@@ -32,7 +32,7 @@ public class PactRule extends ExternalResource {
 
     private Map <String, PactFragment> fragments;
     private Object target;
-    final MockProviderConfig config;
+    private final MockProviderConfig config;
 
     public PactRule(String host, int port, Object target) {
         config = new MockProviderConfig(port, host);
@@ -47,6 +47,10 @@ public class PactRule extends ExternalResource {
     public PactRule(Object target) {
         config = MockProviderConfig$.MODULE$.createDefault();
         this.target = target;
+    }
+
+    public MockProviderConfig getConfig() {
+        return config;
     }
 
     @Override
