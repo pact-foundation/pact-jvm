@@ -372,3 +372,64 @@ pact {
 
 }
 ```
+
+# Verifying a message provider
+
+*[version 2.2.12+]*
+
+The Gradle plugin has been updated to allow invoking test methods that can return the message contents from a message
+producer. To use it, set the way to invoke the verification to `ANNOTATED_METHOD`. This will allow the pact verification
+ task to scan for test methods that return the message contents.
+
+Add something like the following to your gradle build file:
+
+```groovy
+pact {
+
+    serviceProviders {
+
+        messageProvider {
+
+            verificationType = 'ANNOTATED_METHOD'
+            packagesToScan = ['au.com.example.messageprovider.*'] // This optional, but leaving it out will result in the entire
+                                                                  // test classpath being scanned
+
+            hasPactWith('messageConsumer') {
+                pactFile = url('url/to/messagepact.json')
+            }
+
+        }
+
+    }
+
+}
+```
+
+Now when the `pactVerify` task is run, will look for methods annotated with `@PactVerifyProvider` in the test classpath
+that have a matching description to what is in the pact file.
+
+```groovy
+class ConfirmationKafkaMessageBuilderTest {
+
+  @PactVerifyProvider('an order confirmation message'')
+      String verifyMessageForOrder() {
+          Order order = new Order()
+          order.setId(10000004)
+          order.setExchange('ASX')
+          order.setSecurityCode('CBA')
+          order.setPrice(BigDecimal.TEN)
+          order.setUnits(15)
+          order.setGst(new BigDecimal('15.0'))
+          odrer.setFees(BigDecimal.TEN)
+
+          def message = new ConfirmationKafkaMessageBuilder()
+                  .withOrder(order)
+                  .build()
+
+          JsonOutput.toJson(message)
+      }
+
+}
+```
+
+It will then validate that the returned contents matches the contents for the message in the pact file.

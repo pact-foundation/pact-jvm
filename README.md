@@ -77,6 +77,11 @@ look at [ExampleClojureConsumerPactTest.clj](pact-jvm-consumer-junit/src/test/ja
 
 You want to look at: [Pact Consumer](pact-jvm-consumer)
 
+### My Consumer interacts with a Message Queue
+
+As part of the V3 pact specification, we have defined a new pact file for interactions with message queues. For an
+  implementation of a Groovy consumer test with a message pact, have a look at [pact-jvm-consumer-groovy-v3](pact-jvm-consumer-groovy-v3).
+
 ## Service Providers
 
 Once you have run your consumer tests, you will have generated some Pact files. You can then verify your service providers
@@ -105,6 +110,11 @@ Have a look at [Spring MVC Pact Test Runner](https://github.com/realestate-com-a
 #### I want to verify pacts but don't want to use sbt or gradle
 
 You want to look at: [pact-jvm-provider](pact-jvm-provider)
+
+#### verify interactions with a message queue
+
+As part of the V3 pact specification, we have defined a new pact file for interactions with message queues. The Gradle
+pact plugin supports a mechanism where you can verify V3 message pacts, have a look at [pact gradle plugin](pact-jvm-provider-gradle#Verifying a message provider).
 
 ### I Use Ruby
 The pact-jvm libraries are pure jvm technologies and do not have any native dependencies.
