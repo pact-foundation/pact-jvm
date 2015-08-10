@@ -411,23 +411,23 @@ that have a matching description to what is in the pact file.
 ```groovy
 class ConfirmationKafkaMessageBuilderTest {
 
-  @PactVerifyProvider('an order confirmation message'')
-      String verifyMessageForOrder() {
-          Order order = new Order()
-          order.setId(10000004)
-          order.setExchange('ASX')
-          order.setSecurityCode('CBA')
-          order.setPrice(BigDecimal.TEN)
-          order.setUnits(15)
-          order.setGst(new BigDecimal('15.0'))
-          odrer.setFees(BigDecimal.TEN)
+  @PactVerifyProvider('an order confirmation message')
+  String verifyMessageForOrder() {
+      Order order = new Order()
+      order.setId(10000004)
+      order.setExchange('ASX')
+      order.setSecurityCode('CBA')
+      order.setPrice(BigDecimal.TEN)
+      order.setUnits(15)
+      order.setGst(new BigDecimal('15.0'))
+      odrer.setFees(BigDecimal.TEN)
 
-          def message = new ConfirmationKafkaMessageBuilder()
-                  .withOrder(order)
-                  .build()
+      def message = new ConfirmationKafkaMessageBuilder()
+              .withOrder(order)
+              .build()
 
-          JsonOutput.toJson(message)
-      }
+      JsonOutput.toJson(message)
+  }
 
 }
 ```

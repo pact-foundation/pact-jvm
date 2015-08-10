@@ -114,7 +114,7 @@ You want to look at: [pact-jvm-provider](pact-jvm-provider)
 #### verify interactions with a message queue
 
 As part of the V3 pact specification, we have defined a new pact file for interactions with message queues. The Gradle
-pact plugin supports a mechanism where you can verify V3 message pacts, have a look at [pact gradle plugin](pact-jvm-provider-gradle#Verifying a message provider).
+pact plugin supports a mechanism where you can verify V3 message pacts, have a look at [pact gradle plugin](pact-jvm-provider-gradle#verifying-a-message-provider).
 
 ### I Use Ruby
 The pact-jvm libraries are pure jvm technologies and do not have any native dependencies.
