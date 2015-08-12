@@ -15,7 +15,7 @@ class PactPlugin implements Plugin<Project> {
     void apply(Project project) {
 
         // Create and install the extension object
-        project.extensions.create('pact', PactPluginExtension, project.container(ProviderInfo))
+        project.extensions.create('pact', PactPluginExtension, project.container(GradleProviderInfo))
 
         project.task('pactVerify', description: 'Verify your pacts against your providers', group: GROUP)
         project.task('pactPublish', description: 'Publish your pacts to a pact broker', type: PactPublishTask,

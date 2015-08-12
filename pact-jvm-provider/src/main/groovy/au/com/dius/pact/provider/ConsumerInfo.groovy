@@ -8,6 +8,8 @@ class ConsumerInfo {
     def pactFile
     def stateChange
     boolean stateChangeUsesBody = true
+    PactVerification verificationType
+    List packagesToScan
 
     def url(String path) {
         new URL(path)
