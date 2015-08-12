@@ -143,17 +143,21 @@ class PactVerificationTask extends DefaultTask {
         if (stateChangeOk) {
             AnsiConsole.out().println(Ansi.ansi().a('  ').a(interaction.description))
 
-            if (provider.verificationType == PactVerification.REQUST_RESPONSE) {
+            if (verificationType(provider, consumer) == PactVerification.REQUST_RESPONSE) {
                 verifyResponseFromProvider(provider, interaction, interactionMessage)
             } else {
-                verifyResponseByInvokingProviderMethods(pact, provider, interaction, interactionMessage)
+                verifyResponseByInvokingProviderMethods(pact, provider, consumer, interaction, interactionMessage)
             }
         }
     }
 
+    private PactVerification verificationType(ProviderInfo provider, ConsumerInfo consumer) {
+        consumer.verificationType ?: provider.verificationType
+    }
+
     @SuppressWarnings(['PrintStackTrace', 'ThrowRuntimeException'])
-    void verifyResponseByInvokingProviderMethods(def pact, ProviderInfo providerInfo, def interaction,
-                                           String interactionMessage) {
+    void verifyResponseByInvokingProviderMethods(def pact, ProviderInfo providerInfo, ConsumerInfo consumer,
+                                                 def interaction, String interactionMessage) {
         try {
             def urls = project.sourceSets.test.runtimeClasspath*.toURL() as URL[]
             URLClassLoader loader = new URLClassLoader(urls, GroovyObject.classLoader)
@@ -162,9 +166,10 @@ class PactVerificationTask extends DefaultTask {
                 .addClassLoader(loader)
                 .addUrls(loader.URLs)
 
-            if (!providerInfo.packagesToScan.empty) {
+          def scan = packagesToScan(providerInfo, consumer)
+          if (!scan.empty) {
                 def filterBuilder = new FilterBuilder()
-                providerInfo.packagesToScan.each { filterBuilder.include(it) }
+                scan.each { filterBuilder.include(it) }
                 configurationBuilder.filterInputsBy(filterBuilder)
             }
 
@@ -199,6 +204,10 @@ class PactVerificationTask extends DefaultTask {
                 e.printStackTrace()
             }
         }
+    }
+
+    private List packagesToScan(ProviderInfo providerInfo, ConsumerInfo consumer) {
+        consumer.packagesToScan ?: providerInfo.packagesToScan
     }
 
     void verifyRequestResponsePact(Response expectedResponse, Map actualResponse, String interactionMessage) {
