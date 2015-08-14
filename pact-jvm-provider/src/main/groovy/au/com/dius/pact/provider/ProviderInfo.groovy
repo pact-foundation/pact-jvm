@@ -1,10 +1,12 @@
 package au.com.dius.pact.provider
 
 import groovy.json.JsonSlurper
+import groovy.transform.ToString
 
 /**
  * Provider Info Config
  */
+@ToString
 class ProviderInfo {
     String protocol = 'http'
     def host = 'localhost'
