@@ -1,0 +1,19 @@
+buildscript {
+  repositories {
+    jcenter()
+    maven { url "https://plugins.gradle.org/m2/" }
+    maven { url 'http://clojars.org/repo' }
+  }
+  dependencies {
+    classpath 'com.netflix.nebula:nebula-clojure-plugin:2.2.0'
+  }
+}
+
+apply plugin: 'nebula.nebula-clojure'
+
+dependencies {
+  compile 'org.clojure:clojure:1.7.0'
+  compile 'leiningen-core:leiningen-core:2.5.0'
+}
+
+clojure.aotCompile = true
