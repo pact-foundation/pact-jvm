@@ -228,7 +228,8 @@ PactDslJsonBody body = new PactDslJsonBody()
 #### DSL Matching methods
 
 The following matching methods are provided with the DSL. In most cases, they take an optional value parameter which
-will be used to generate example values (i.e. when returning a mock response).
+will be used to generate example values (i.e. when returning a mock response). If no example value is given, a random
+one will be generated.
 
 | method | description |
 |--------|-------------|
