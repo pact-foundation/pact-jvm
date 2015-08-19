@@ -61,7 +61,8 @@ class PactBodyBuilder extends BaseBuilder {
         timestamp()
         break
       case 'guid':
-        guid()
+      case 'uuid':
+        uuid()
         break
       default:
         throw new MissingPropertyException(name, this.class)

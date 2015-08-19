@@ -533,32 +533,63 @@ public class PactDslJsonBody extends DslPart {
     /**
      * Attribute that must be encoded as a GUID
      * @param name attribute name
+     * @deprecated use uuid instead
      */
+    @Deprecated
     public PactDslJsonBody guid(String name) {
-        return guid(name, UUID.randomUUID().toString());
+        return uuid(name);
     }
 
     /**
      * Attribute that must be encoded as a GUID
      * @param name attribute name
      * @param uuid example UUID to use for generated bodies
+     * @deprecated use uuid instead
      */
+    @Deprecated
     public PactDslJsonBody guid(String name, UUID uuid) {
-        return guid(name, uuid.toString());
+        return uuid(name, uuid);
     }
 
     /**
      * Attribute that must be encoded as a GUID
      * @param name attribute name
      * @param uuid example UUID to use for generated bodies
+     * @deprecated use uuid instead
      */
+    @Deprecated
     public PactDslJsonBody guid(String name, String uuid) {
-        if (!uuid.matches(GUID)) {
-            throw new InvalidMatcherException("Example \"" + uuid + "\" is not a GUID");
+        return uuid(name, uuid);
+    }
+
+    /**
+     * Attribute that must be encoded as an UUID
+     * @param name attribute name
+     */
+    public PactDslJsonBody uuid(String name) {
+        return uuid(name, UUID.randomUUID().toString());
+    }
+
+    /**
+     * Attribute that must be encoded as an UUID
+     * @param name attribute name
+     * @param uuid example UUID to use for generated bodies
+     */
+    public PactDslJsonBody uuid(String name, UUID uuid) {
+        return uuid(name, uuid.toString());
+    }
+
+    /**
+     * Attribute that must be encoded as an UUID
+     * @param name attribute name
+     * @param uuid example UUID to use for generated bodies
+     */
+    public PactDslJsonBody uuid(String name, String uuid) {
+        if (!uuid.matches(UUID_REGEX)) {
+            throw new InvalidMatcherException("Example \"" + uuid + "\" is not an UUID");
         }
         body.put(name, uuid);
-        matchers.put(matcherKey(name), regexp("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
+        matchers.put(matcherKey(name), regexp(UUID_REGEX));
         return this;
     }
-
 }

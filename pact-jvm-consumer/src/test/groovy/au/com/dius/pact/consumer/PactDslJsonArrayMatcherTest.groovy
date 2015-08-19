@@ -24,8 +24,8 @@ class PactDslJsonArrayMatcherTest {
     }
 
     @Test(expected = InvalidMatcherException)
-    void guidMatcherThrowsExceptionIfTheExampleIsNotAGuid() {
-        subject.guid('dfhdsjf87fdjh')
+    void uuidMatcherThrowsExceptionIfTheExampleIsNotAUuid() {
+        subject.uuid('dfhdsjf87fdjh')
     }
 
     @Test

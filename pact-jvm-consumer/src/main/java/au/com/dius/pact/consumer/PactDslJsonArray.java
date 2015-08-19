@@ -446,21 +446,40 @@ public class PactDslJsonArray extends DslPart {
 
     /**
      * Element that must be encoded as a GUID
+     * @deprecated use uuid instead
      */
+    @Deprecated
     public PactDslJsonArray guid() {
-        return guid(UUID.randomUUID().toString());
+        return uuid();
     }
 
     /**
      * Element that must be encoded as a GUID
      * @param uuid example UUID to use for generated bodies
+     * @deprecated use uuid instead
      */
+    @Deprecated
     public PactDslJsonArray guid(String uuid) {
-        if (!uuid.matches(GUID)) {
-            throw new InvalidMatcherException("Example \"" + uuid + "\" is not a GUID");
+        return uuid(uuid);
+    }
+
+    /**
+     * Element that must be encoded as an UUID
+     */
+    public PactDslJsonArray uuid() {
+        return uuid(UUID.randomUUID().toString());
+    }
+
+    /**
+     * Element that must be encoded as an UUID
+     * @param uuid example UUID to use for generated bodies
+     */
+    public PactDslJsonArray uuid(String uuid) {
+        if (!uuid.matches(UUID_REGEX)) {
+            throw new InvalidMatcherException("Example \"" + uuid + "\" is not an UUID");
         }
         body.put(uuid);
-        matchers.put(root + appendArrayIndex(0), regexp("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
+        matchers.put(root + appendArrayIndex(0), regexp(UUID_REGEX));
         return this;
     }
 

@@ -84,13 +84,13 @@ class MatchersTest {
   }
 
   @Test(expected = InvalidMatcherException)
-  void 'guid matcher fails if the the example is not a guid'() {
-    matchers.guid('aksdfkdshfkjdhf23876r872')
+  void 'uuid matcher fails if the the example is not an UUID'() {
+    matchers.uuid('aksdfkdshfkjdhf23876r872')
   }
 
   @Test
-  void 'guid matcher does not fail if the the example is a guid'() {
-    matchers.guid('74a7c275-ee8b-4019-b4eb-3e37f7cde95f')
+  void 'uuid matcher does not fail if the the example is an UUID'() {
+    matchers.uuid('74a7c275-ee8b-4019-b4eb-3e37f7cde95f')
   }
 
 }
