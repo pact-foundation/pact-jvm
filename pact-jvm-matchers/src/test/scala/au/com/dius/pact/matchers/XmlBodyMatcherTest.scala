@@ -66,6 +66,12 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
           matcher.matchBody(expected(), actual(), allowUnexpectedKeys) must beEmpty
         }
 
+        "and comparing a tags attributes to one with more entries" in {
+          expectedBody = Some("<foo something=\"100\"/>")
+          actualBody = Some("<foo something=\"100\" somethingElse=\"101\"/>")
+          matcher.matchBody(expected(), actual(), allowUnexpectedKeys) must beEmpty
+        }
+
       }
 
     }
@@ -141,6 +147,14 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
         mismatches must containMessage("Expected a Tag with at least 2 attributes but received 1 attributes")
+      }
+
+      "when comparing a tags attributes to one with more entries" in {
+        expectedBody = Some("<foo something=\"100\"/>")
+        actualBody = Some("<foo something=\"100\" somethingElse=\"101\"/>")
+        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
+        mismatches must not(beEmpty)
+        mismatches must containMessage("Expected a Tag with at least 1 attributes but received 2 attributes")
       }
 
       "when a tag is missing an attribute" in {

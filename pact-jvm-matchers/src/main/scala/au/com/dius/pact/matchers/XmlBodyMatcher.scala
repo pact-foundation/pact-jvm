@@ -89,7 +89,7 @@ class XmlBodyMatcher extends BodyMatcher {
       val expectedAttrs = expected.attributes.asAttrMap
       val actualAttrs = actual.attributes.asAttrMap
 
-      val wrongSize = if (expectedAttrs.size != actualAttrs.size) {
+      val wrongSize = if (expectedAttrs.size > actualAttrs.size || (expectedAttrs.size < actualAttrs.size && !config.allowUnexpectedKeys)) {
         List(BodyMismatch(expected, actual, Some(s"Expected a Tag with at least ${expected.attributes.size} attributes but received ${actual.attributes.size} attributes"),mkPathString(path)))
       } else {
         List()
