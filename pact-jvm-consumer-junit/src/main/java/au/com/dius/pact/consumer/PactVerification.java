@@ -19,7 +19,7 @@ public @interface PactVerification {
     /**
      * the tested provider name.
      */
-    String value();
+    String[] value();
 
     /**
      * If a mismatch is expected. Use to test failure conditions

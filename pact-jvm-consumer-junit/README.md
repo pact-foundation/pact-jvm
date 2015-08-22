@@ -117,6 +117,16 @@ The hostname and port are optional. If left out, it will default to localhost an
 
 For an example, have a look at [ExampleJavaConsumerPactRuleTest](src/test/java/au/com/dius/pact/consumer/examples/ExampleJavaConsumerPactRuleTest.java)
 
+### Requiring a test with multiple providers
+
+The Pact Rule can be used to test with multiple providers. Just add a rule to the test class for each provider, and
+then include all the providers required in the `@PactVerification` annotation. For an example, look at
+[PactMultiProviderTest](src/test/java/au/com/dius/pact/consumer/pactproviderrule/PactMultiProviderTest.java).
+
+Note that if more than one provider fails verification for the same test, you will only receive a failure for one of them.
+Also, to have multiple tests in the same test class, the providers must be setup with random ports (i.e. don't specify
+a hostname and port).
+
 ### Using the Pact DSL directly
 
 Sometimes it is not convenient to use the ConsumerPactTest as it only allows one test per test class. The DSL can be

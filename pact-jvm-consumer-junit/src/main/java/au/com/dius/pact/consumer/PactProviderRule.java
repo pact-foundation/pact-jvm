@@ -9,8 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * A junit rule that wraps every test annotated with {@link PactVerification}.
@@ -73,13 +75,15 @@ public class PactProviderRule extends ExternalResource {
                     return;
                 }
 
-                PactFragment fragment = getPacts().get(pactDef.value());
-                if (fragment == null) {
+                Map<String, PactFragment> pacts = getPacts();
+                Optional<PactFragment> fragment = Arrays.asList(pactDef.value()).stream().map(pacts::get)
+                        .filter(p -> p != null).findFirst();
+                if (!fragment.isPresent()) {
                     base.evaluate();
                     return;
                 }
 
-                VerificationResult result = fragment.runConsumer(config, new TestRun() {
+                VerificationResult result = fragment.get().runConsumer(config, new TestRun() {
                     @Override
                     public void run(MockProviderConfig config) throws Throwable {
                         base.evaluate();
@@ -111,7 +115,7 @@ public class PactProviderRule extends ExternalResource {
         if (fragments == null) {
             fragments = new HashMap <String, PactFragment> ();
             for (Method m: target.getClass().getMethods()) {
-                if (conformsToSigniture(m)) {
+                if (conformsToSignature(m)) {
                     Pact pact = m.getAnnotation(Pact.class);
                     if (provider.equals(pact.provider())) {
                         ConsumerPactBuilder.PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(pact.consumer())
@@ -132,7 +136,7 @@ public class PactProviderRule extends ExternalResource {
     /**
      * validates method signature as described at {@link Pact}
      */
-    private boolean conformsToSigniture(Method m) {
+    private boolean conformsToSignature(Method m) {
         Pact pact = m.getAnnotation(Pact.class);
         boolean conforms =
             pact != null

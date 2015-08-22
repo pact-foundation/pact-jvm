@@ -25,8 +25,8 @@ public class ConsumerClient{
 
 	public List getAsList(String path) throws IOException {
 		return jsonToList(Request.Get(url + path)
-				.addHeader("testreqheader", "testreqheadervalue")
-				.execute().returnContent().asString());
+                .addHeader("testreqheader", "testreqheadervalue")
+                .execute().returnContent().asString());
 	}
 
     public Map post(String path, String body, ContentType mimeType) throws IOException {
@@ -55,5 +55,13 @@ public class ConsumerClient{
         return Request.Post(url + path)
             .bodyString(body, mimeType)
             .execute().returnContent().asString();
+    }
+
+    public Map putAsMap(String path, String body) throws IOException {
+        String respBody = Request.Put(url + path)
+                .addHeader("testreqheader", "testreqheadervalue")
+                .bodyString(body, ContentType.APPLICATION_JSON)
+                .execute().returnContent().asString();
+        return jsonToMap(respBody);
     }
 }
