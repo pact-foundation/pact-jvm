@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.provider.ConsumerInfo
-import au.com.dius.pact.provider.groovysupport.ProviderClient
+import au.com.dius.pact.provider.ProviderClient
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.testfixtures.ProjectBuilder

@@ -11,8 +11,8 @@ import au.com.dius.pact.provider.PactInteractionProxy
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.PactVerifyProvider
 import au.com.dius.pact.provider.ProviderInfo
-import au.com.dius.pact.provider.groovysupport.ProviderClient
-import au.com.dius.pact.provider.groovysupport.ResponseComparison
+import au.com.dius.pact.provider.ProviderClient
+import au.com.dius.pact.provider.ResponseComparison
 import org.apache.commons.lang3.StringUtils
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.AnsiConsole

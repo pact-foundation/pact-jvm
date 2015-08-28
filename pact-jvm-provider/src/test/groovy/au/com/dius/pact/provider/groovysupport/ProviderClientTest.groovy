@@ -1,6 +1,8 @@
 package au.com.dius.pact.provider.groovysupport
 
 import au.com.dius.pact.model.Request
+import au.com.dius.pact.provider.HttpClientFactory
+import au.com.dius.pact.provider.ProviderClient
 import org.apache.http.Header
 import org.apache.http.StatusLine
 import org.apache.http.client.methods.CloseableHttpResponse

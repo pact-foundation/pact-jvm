@@ -4,8 +4,8 @@ import au.com.dius.pact.model.Interaction
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.Pact$
-import au.com.dius.pact.provider.groovysupport.ProviderClient
-import au.com.dius.pact.provider.groovysupport.ResponseComparison
+import au.com.dius.pact.provider.ProviderClient
+import au.com.dius.pact.provider.ResponseComparison
 import groovy.io.FileType
 import groovy.json.JsonSlurper
 import org.apache.maven.plugin.AbstractMojo
