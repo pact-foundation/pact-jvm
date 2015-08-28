@@ -4,17 +4,26 @@ import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.v3.V3Pact
+import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
+import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.AnsiConsole
+import org.reflections.Reflections
+import org.reflections.scanners.MethodAnnotationsScanner
+import org.reflections.util.ConfigurationBuilder
+import org.reflections.util.FilterBuilder
 @SuppressWarnings('UnusedImport')
 import scala.collection.JavaConverters$
+
+import java.lang.reflect.Method
 
 /**
  * Verifies the providers against the defined consumers in the context of a build plugin
  */
 @SuppressWarnings('DuplicateStringLiteral')
+@Slf4j
 class ProviderVerifier {
 
   static final String PACT_FILTER_CONSUMERS = 'pact.filter.consumers'
@@ -26,6 +35,7 @@ class ProviderVerifier {
   String pactLoadFailureMessage
   Closure isBuildSpecificTask
   Closure executeBuildSpecificTask
+  Closure projectClasspath
 
   Map verifyProvider(ProviderInfo provider) {
     Map failures = [:]
@@ -133,7 +143,7 @@ class ProviderVerifier {
       if (verificationType(provider, consumer) == PactVerification.REQUST_RESPONSE) {
         verifyResponseFromProvider(provider, interaction, interactionMessage, failures)
       } else {
-//        verifyResponseByInvokingProviderMethods(pact, provider, consumer, interaction, interactionMessage)
+        verifyResponseByInvokingProviderMethods(pact, provider, consumer, interaction, interactionMessage, failures)
       }
     }
   }
@@ -269,6 +279,123 @@ class ProviderVerifier {
     } else {
       AnsiConsole.out().println(ansi.fg(Ansi.Color.RED).a('FAILED').reset().a(')'))
       failures["$comparisonDescription has a matching body"] = comparison
+    }
+  }
+
+  @SuppressWarnings(['PrintStackTrace', 'ThrowRuntimeException', 'ParameterCount'])
+  void verifyResponseByInvokingProviderMethods(def pact, ProviderInfo providerInfo, ConsumerInfo consumer,
+                                               def interaction, String interactionMessage,
+                                               Map failures) {
+    try {
+      def urls = projectClasspath()
+      URLClassLoader loader = new URLClassLoader(urls, GroovyObject.classLoader)
+      def configurationBuilder = new ConfigurationBuilder()
+        .setScanners(new MethodAnnotationsScanner())
+        .addClassLoader(loader)
+        .addUrls(loader.URLs)
+
+      def scan = packagesToScan(providerInfo, consumer)
+      if (!scan.empty) {
+        def filterBuilder = new FilterBuilder()
+        scan.each { filterBuilder.include(it) }
+        configurationBuilder.filterInputsBy(filterBuilder)
+      }
+
+      Reflections reflections = new Reflections(configurationBuilder)
+      def methodsAnnotatedWith = reflections.getMethodsAnnotatedWith(PactVerifyProvider)
+      def providerMethods = methodsAnnotatedWith.findAll { Method m ->
+        log.debug("Found annotated method $m")
+        def annotation = m.annotations.find { it.annotationType().toString() == PactVerifyProvider.toString() }
+        log.debug("Found annotation $annotation")
+        annotation?.value() == interaction.description
+      }
+
+      if (providerMethods.empty) {
+        throw new RuntimeException('No annotated methods were found for interaction ' +
+          "'${interaction.description}'")
+      } else {
+        if (pact instanceof MessagePact) {
+          verifyMessagePact(providerMethods, interaction as Message, interactionMessage, failures)
+        } else {
+          def expectedResponse = interaction.response
+          providerMethods.each {
+            def actualResponse = invokeProviderMethod(it)
+            verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
+          }
+        }
+      }
+    } catch (e) {
+      AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a('Verification Failed - ')
+        .a(e.message).reset())
+      failures[interactionMessage] = e
+      if (projectHasProperty('pact.showStacktrace')) {
+        e.printStackTrace()
+      }
+    }
+  }
+
+  private List packagesToScan(ProviderInfo providerInfo, ConsumerInfo consumer) {
+    consumer.packagesToScan ?: providerInfo.packagesToScan
+  }
+
+  void verifyMessagePact(Set methods, Message message, String interactionMessage, Map failures) {
+    methods.each {
+      AnsiConsole.out().println('    generates a message which')
+      def actualMessage = invokeProviderMethod(it)
+      def comparison = ResponseComparison.compareMessage(message, actualMessage)
+      def s = ' generates a message which'
+      displayBodyResult(failures, comparison, interactionMessage + s)
+    }
+  }
+
+  def invokeProviderMethod(Method m) {
+    m.invoke(m.declaringClass.newInstance())
+  }
+
+  void displayFailures(failures) {
+    AnsiConsole.out().println('\nFailures:\n')
+    failures.eachWithIndex { err, i ->
+      AnsiConsole.out().println("$i) ${err.key}")
+      if (err.value instanceof Throwable) {
+        displayError(err.value)
+      } else if (err.value instanceof Map && err.value.containsKey('diff')) {
+        displayDiff(err)
+      } else if (err.value instanceof String) {
+        AnsiConsole.out().println("      ${err.value}")
+      } else {
+        err.value.each { key, message ->
+          AnsiConsole.out().println("      $key -> $message")
+        }
+      }
+      AnsiConsole.out().println()
+    }
+  }
+
+  void displayDiff(err) {
+    err.value.comparison.each { key, message ->
+      AnsiConsole.out().println("      $key -> $message")
+    }
+
+    AnsiConsole.out().println()
+    AnsiConsole.out().println('      Diff:')
+    AnsiConsole.out().println()
+
+    err.value.diff.each { delta ->
+      if (delta.startsWith('@')) {
+        AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.CYAN).a(delta).reset())
+      } else if (delta.startsWith('-')) {
+        AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a(delta).reset())
+      } else if (delta.startsWith('+')) {
+        AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.GREEN).a(delta).reset())
+      } else {
+        AnsiConsole.out().println("      $delta")
+      }
+    }
+  }
+
+  void displayError(Throwable err) {
+    err.message.split('\n').each {
+      AnsiConsole.out().println("      $it")
     }
   }
 }

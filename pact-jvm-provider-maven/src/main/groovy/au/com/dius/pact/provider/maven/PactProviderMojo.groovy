@@ -8,10 +8,7 @@ import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
-import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.AnsiConsole
-@SuppressWarnings('UnusedImport')
-import scala.collection.JavaConverters$
 
 /**
  * Pact Verify Maven Plugin
@@ -27,8 +24,7 @@ class PactProviderMojo extends AbstractMojo {
   private Map<String, String> configuration = [:]
 
   @Override
-  @SuppressWarnings(['AbcMetric', 'ThrowRuntimeException', 'NestedBlockDepth', 'PrintStackTrace',
-      'DuplicateStringLiteral', 'MethodSize', 'Println'])
+  @SuppressWarnings(['ThrowRuntimeException'])
   void execute() throws MojoExecutionException, MojoFailureException {
     Map failures = [:]
     ProviderVerifier verifier = new ProviderVerifier()
@@ -50,42 +46,8 @@ class PactProviderMojo extends AbstractMojo {
     }
 
     if (failures.size() > 0) {
-        AnsiConsole.out().println('\nFailures:\n')
-        failures.eachWithIndex { err, i ->
-            AnsiConsole.out().println("$i) ${err.key}")
-            if (err.value instanceof Exception || err.value instanceof Error) {
-                err.value.message.split('\n').each {
-                    AnsiConsole.out().println("      $it")
-                }
-            } else if (err.value instanceof Map && err.value.containsKey('diff')) {
-                err.value.comparison.each { key, message ->
-                    AnsiConsole.out().println("      $key -> $message")
-                }
-
-                AnsiConsole.out().println()
-                AnsiConsole.out().println('      Diff:')
-                AnsiConsole.out().println()
-
-                err.value.diff.each { delta ->
-                    if (delta.startsWith('@')) {
-                        AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.CYAN).a(delta).reset())
-                    } else if (delta.startsWith('-')) {
-                        AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a(delta).reset())
-                    } else if (delta.startsWith('+')) {
-                        AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.GREEN).a(delta).reset())
-                    } else {
-                        AnsiConsole.out().println("      $delta")
-                    }
-                }
-            } else {
-                err.value.each { key, message ->
-                    AnsiConsole.out().println("      $key -> $message")
-                }
-            }
-            AnsiConsole.out().println()
-        }
-
-        throw new RuntimeException("There were ${failures.size()} pact failures")
+      verifier.displayFailures(failures)
+      throw new RuntimeException("There were ${failures.size()} pact failures")
     }
   }
 
