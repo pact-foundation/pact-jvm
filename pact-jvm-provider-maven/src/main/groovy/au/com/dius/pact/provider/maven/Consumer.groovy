@@ -1,15 +1,27 @@
 package au.com.dius.pact.provider.maven
 
+import au.com.dius.pact.provider.ConsumerInfo
 import groovy.transform.ToString
 
 /**
- * Consumer Info
+ * Consumer Info for maven projects
  */
-@ToString
-class Consumer {
-    String name = 'consumer'
-    File pactFile
-    URL pactUrl
-    URL stateChangeUrl
-    boolean stateChangeUsesBody = true
+@ToString(includeSuperProperties = true)
+class Consumer extends ConsumerInfo {
+
+  URL getPactUrl() {
+    new URL(pactFile.toString())
+  }
+
+  void setPactUrl(URL pactUrl) {
+    pactFile = pactUrl
+  }
+
+  URL getStateChangeUrl() {
+    stateChange ? new URL(stateChange.toString()) : null
+  }
+
+  void setStateChangeUrl(URL url) {
+    stateChange = url
+  }
 }

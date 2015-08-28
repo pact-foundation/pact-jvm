@@ -12,9 +12,11 @@ class ProviderInfo {
     def host = 'localhost'
     Integer port = 8080
     String path = '/'
-    String name
+    String name = 'provider'
+
     def startProviderTask
     def terminateProviderTask
+
     def requestFilter
     def stateChangeRequestFilter
     def createClient
@@ -25,6 +27,9 @@ class ProviderInfo {
     PactVerification verificationType = PactVerification.REQUST_RESPONSE
     List packagesToScan = []
     List<ConsumerInfo> consumers = []
+
+    ProviderInfo() {
+    }
 
     ProviderInfo(String name) {
         this.name = name

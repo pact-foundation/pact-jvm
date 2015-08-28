@@ -38,7 +38,7 @@ class PactProviderMojo extends AbstractMojo {
 
     @Override
     @SuppressWarnings(['AbcMetric', 'ThrowRuntimeException', 'NestedBlockDepth', 'PrintStackTrace',
-        'DuplicateStringLiteral', 'MethodSize'])
+        'DuplicateStringLiteral', 'MethodSize', 'Println'])
     void execute() throws MojoExecutionException, MojoFailureException {
         Map failures = [:]
         serviceProviders.each { provider ->
@@ -53,16 +53,16 @@ class PactProviderMojo extends AbstractMojo {
                     .boldOff().a(' and ').bold().a(provider.name).boldOff())
 
                 Pact pact
-                if (consumer.pactFile) {
-                    AnsiConsole.out().println(Ansi.ansi().a("  [Using file ${consumer.pactFile}]"))
-                    pact = Pact$.MODULE$.from(new FileInput(consumer.pactFile))
-                } else if (consumer.pactUrl) {
+                if (consumer.pactFile instanceof URL) {
                     AnsiConsole.out().println(Ansi.ansi().a("  [from URL ${consumer.pactUrl}]"))
                     pact = Pact$.MODULE$.from(new StreamInput(consumer.pactUrl.newInputStream(requestProperties:
-                        ['Accept': 'application/json'])))
+                      ['Accept': 'application/json'])))
+                } else if (consumer.pactFile instanceof File || pactFileExists(consumer.pactFile)) {
+                    AnsiConsole.out().println(Ansi.ansi().a("  [Using file ${consumer.pactFile}]"))
+                    pact = Pact$.MODULE$.from(new FileInput(consumer.pactFile as File))
                 } else {
-                    throw new RuntimeException('You must specify the pactfile to execute for consumer ' +
-                        "'${consumer.name}' (use <pactFile> or <pactUrl>)")
+                  throw new RuntimeException('You must specify the pactfile to execute for consumer ' +
+                      "'${consumer.name}' (use <pactFile> or <pactUrl>)")
                 }
 
                 def interactions = JavaConverters$.MODULE$.seqAsJavaListConverter(pact.interactions())
@@ -156,7 +156,11 @@ class PactProviderMojo extends AbstractMojo {
         }
     }
 
-    @SuppressWarnings('ThrowRuntimeException')
+  boolean pactFileExists(def pactFile) {
+    pactFile && new File(pactFile).exists()
+  }
+
+  @SuppressWarnings('ThrowRuntimeException')
     List loadPactFiles(def provider, File pactFileDir) {
         if (!pactFileDir.exists()) {
             throw new RuntimeException("Pact file directory ($pactFileDir) does not exist")
@@ -230,7 +234,7 @@ class PactProviderMojo extends AbstractMojo {
         try {
             if (consumer.stateChangeUrl == null && provider.stateChangeUrl == null) {
                 AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
-                    .a('WARNING: Provider State ignored as there is no stateChange URL defined'))
+                    .a('WARNING: Provider State ignored as there is no stateChange URL defined').reset())
             } else {
                 def stateChangeUrl = consumer.stateChangeUrl
                 def stateChangeUsesBody = consumer.stateChangeUsesBody
