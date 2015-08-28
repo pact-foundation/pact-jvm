@@ -6,10 +6,8 @@ import groovy.transform.ToString
 /**
  * Provider Info
  */
-@ToString
+@ToString(includeSuperProperties = true)
 class Provider extends ProviderInfo {
     def requestFilter
     File pactFileDirectory
-    URL stateChangeUrl
-    boolean stateChangeUsesBody = true
 }

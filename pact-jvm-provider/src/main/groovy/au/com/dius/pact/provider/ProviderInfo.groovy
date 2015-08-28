@@ -24,6 +24,9 @@ class ProviderInfo {
     File trustStore
     String trustStorePassword = 'changeit'
 
+    URL stateChangeUrl
+    boolean stateChangeUsesBody = true
+
     PactVerification verificationType = PactVerification.REQUST_RESPONSE
     List packagesToScan = []
     List<ConsumerInfo> consumers = []
