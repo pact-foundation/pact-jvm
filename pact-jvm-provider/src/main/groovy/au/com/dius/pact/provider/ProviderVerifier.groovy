@@ -30,12 +30,12 @@ class ProviderVerifier {
   static final String PACT_FILTER_DESCRIPTION = 'pact.filter.description'
   static final String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
 
-  Closure projectHasProperty
-  Closure projectGetProperty
+  Closure projectHasProperty = {}
+  Closure projectGetProperty = {}
   String pactLoadFailureMessage
-  Closure isBuildSpecificTask
-  Closure executeBuildSpecificTask
-  Closure projectClasspath
+  Closure isBuildSpecificTask = {}
+  Closure executeBuildSpecificTask = {}
+  Closure projectClasspath = {}
 
   Map verifyProvider(ProviderInfo provider) {
     Map failures = [:]
@@ -169,7 +169,11 @@ class ProviderVerifier {
           .reset())
         return true
       } else if (stateChangeHandler instanceof Closure) {
-        return stateChangeHandler.call(state)
+        def result = stateChangeHandler.call(state)
+        if (!(result instanceof URL)) {
+          return result
+        }
+        stateChangeHandler = result
       } else if (isBuildSpecificTask(stateChangeHandler)) {
         executeBuildSpecificTask(stateChangeHandler, state)
         return true
@@ -362,10 +366,12 @@ class ProviderVerifier {
         displayDiff(err)
       } else if (err.value instanceof String) {
         AnsiConsole.out().println("      ${err.value}")
-      } else {
+      } else if (err.value instanceof Map) {
         err.value.each { key, message ->
           AnsiConsole.out().println("      $key -> $message")
         }
+      } else {
+        AnsiConsole.out().println("      ${err}")
       }
       AnsiConsole.out().println()
     }
