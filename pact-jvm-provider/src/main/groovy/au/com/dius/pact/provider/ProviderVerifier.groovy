@@ -30,12 +30,12 @@ class ProviderVerifier {
   static final String PACT_FILTER_DESCRIPTION = 'pact.filter.description'
   static final String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
 
-  Closure projectHasProperty = {}
-  Closure projectGetProperty = {}
+  Closure projectHasProperty = { }
+  Closure projectGetProperty = { }
   String pactLoadFailureMessage
-  Closure isBuildSpecificTask = {}
-  Closure executeBuildSpecificTask = {}
-  Closure projectClasspath = {}
+  Closure isBuildSpecificTask = { }
+  Closure executeBuildSpecificTask = { }
+  Closure projectClasspath = { }
 
   Map verifyProvider(ProviderInfo provider) {
     Map failures = [:]
