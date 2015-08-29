@@ -77,19 +77,22 @@ public class PactProviderRule extends ExternalResource {
                 }
 
                 Map<String, PactFragment> pacts = getPacts();
-                Optional<PactFragment> fragment;
+                PactFragment fragment = null;
                 if (pactDef.value().length == 1 && StringUtils.isEmpty(pactDef.value()[0])) {
-                    fragment = pacts.values().stream().findFirst();
+                    fragment = pacts.values().iterator().next();
                 } else {
-                    fragment = Arrays.asList(pactDef.value()).stream().map(pacts::get)
-                            .filter(p -> p != null).findFirst();
+                    for (String provider: pactDef.value()) {
+                        if (fragment == null && pacts.containsKey(provider)) {
+                            fragment = pacts.get(provider);
+                        }
+                    }
                 }
-                if (!fragment.isPresent()) {
+                if (fragment == null) {
                     base.evaluate();
                     return;
                 }
 
-                VerificationResult result = fragment.get().runConsumer(config, new TestRun() {
+                VerificationResult result = fragment.runConsumer(config, new TestRun() {
                     @Override
                     public void run(MockProviderConfig config) throws Throwable {
                         base.evaluate();
