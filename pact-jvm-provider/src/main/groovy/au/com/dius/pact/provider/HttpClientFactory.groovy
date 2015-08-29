@@ -1,4 +1,4 @@
-package au.com.dius.pact.provider.groovysupport
+package au.com.dius.pact.provider
 
 import org.apache.http.config.Registry
 import org.apache.http.config.RegistryBuilder

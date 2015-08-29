@@ -3,7 +3,7 @@ package au.com.dius.pact.provider.gradle
 @SuppressWarnings(['DuplicateImport', 'UnusedImport'])
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.Response$
-import au.com.dius.pact.provider.groovysupport.ResponseComparison
+import au.com.dius.pact.provider.ResponseComparison
 import org.apache.http.entity.ContentType
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 import org.junit.Before

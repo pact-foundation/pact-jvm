@@ -262,7 +262,7 @@ Defines a matcher that accepts any real numbers. If the value is not provided, a
 
 Defines a matcher that accepts ISO and SMTP timestamps. If the value is not provided, the current date and time is used.
 
-* guid(String value = null)
+* uuid(String value = null)
 
 Defines a matcher that accepts UUIDs. A random one will be generated if no value is provided.
 

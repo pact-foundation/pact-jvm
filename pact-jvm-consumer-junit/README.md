@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-junit_2.11`
-* version-id = `2.2.x`
+* version-id = `3.0.x`
 
 ##Usage
 
@@ -103,6 +103,25 @@ The hostname and port are optional. If left out, it will default to localhost an
     }
 ```
 
+##### Versions 3.0.2/2.2.13+
+
+You can leave the provider name out. It will then use the provider name of the first mock provider found. I.e.,
+
+```java
+    @Pact(consumer="test_consumer") // will default to the provider name from mockProvider
+    public PactFragment createFragment(PactDslWithProvider builder) {
+        return builder
+            .given("test state")
+            .uponReceiving("ExampleJavaConsumerPactRuleTest test interaction")
+                .path("/")
+                .method("GET")
+            .willRespondWith()
+                .status(200)
+                .body("{\"responsetest\": true}")
+            .toFragment();
+    }
+```
+
 #### 3. Annotate your test method with PactVerification to have it run in the context of the mock server setup with the appropriate pact from step 1 and 2
 
 ```java
@@ -115,7 +134,33 @@ The hostname and port are optional. If left out, it will default to localhost an
     }
 ```
 
+##### Versions 3.0.2/2.2.13+
+
+You can leave the provider name out. It will then use the provider name of the first mock provider found. I.e.,
+
+```java
+    @Test
+    @PactVerification
+    public void runTest() {
+        // This will run against mockProvider
+        Map expectedResponse = new HashMap();
+        expectedResponse.put("responsetest", true);
+        assertEquals(new ConsumerClient("http://localhost:8080").get("/"), expectedResponse);
+    }
+```
+
 For an example, have a look at [ExampleJavaConsumerPactRuleTest](src/test/java/au/com/dius/pact/consumer/examples/ExampleJavaConsumerPactRuleTest.java)
+
+### Requiring a test with multiple providers
+
+The Pact Rule can be used to test with multiple providers. Just add a rule to the test class for each provider, and
+then include all the providers required in the `@PactVerification` annotation. For an example, look at
+[PactMultiProviderTest](src/test/java/au/com/dius/pact/consumer/pactproviderrule/PactMultiProviderTest.java).
+
+Note that if more than one provider fails verification for the same test, you will only receive a failure for one of them.
+Also, to have multiple tests in the same test class, the providers must be setup with random ports (i.e. don't specify
+a hostname and port). Also, if the provider name is left out of any of the annotations, the first one found will be used
+(which may not be the first one defined).
 
 ### Using the Pact DSL directly
 
@@ -224,6 +269,33 @@ PactDslJsonBody body = new PactDslJsonBody()
     .numberValue("age", 100)
     .timestamp();
 ```
+
+#### DSL Matching methods
+
+The following matching methods are provided with the DSL. In most cases, they take an optional value parameter which
+will be used to generate example values (i.e. when returning a mock response). If no example value is given, a random
+one will be generated.
+
+| method | description |
+|--------|-------------|
+| string, stringValue | Match a string value (using string equality) |
+| number, numberValue | Match a number value (using Number.equals)\* |
+| booleanValue | Match a boolean value (using equality) |
+| stringType | Will match all Strings |
+| numberType | Will match all numbers\* |
+| integerType | Will match all numbers that are integers (both ints and longs)\* |
+| realType | Will match all real numbers (floating point and decimal)\* |
+| booleanType | Will match all boolean values (true and false) |
+| stringMatcher | Will match strings using the provided regular expression |
+| timestamp | Will match string containing timestamps. If a timestamp format is not given, will match an ISO timestamp format |
+| date | Will match string containing dates. If a date format is not given, will match an ISO date format |
+| time | Will match string containing times. If a time format is not given, will match an ISO time format |
+| ipAddress | Will match string containing IP4 formatted address. |
+| id | Will match all numbers by type |
+| hexValue | Will match all hexadecimal encoded strings |
+| uuid | Will match strings containing UUIDs |
+
+_\* Note:_ JSON only supports double precision floating point values.
 
 #### Ensuring all items in a list match an example (2.2.0+)
 

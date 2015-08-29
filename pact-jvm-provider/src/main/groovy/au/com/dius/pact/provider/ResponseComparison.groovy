@@ -1,10 +1,9 @@
-package au.com.dius.pact.provider.groovysupport
+package au.com.dius.pact.provider
 
 import au.com.dius.pact.model.BodyMismatch
 import au.com.dius.pact.model.BodyTypeMismatch
 import au.com.dius.pact.model.DiffConfig
 import au.com.dius.pact.model.HeaderMismatch
-import au.com.dius.pact.model.HttpPart
 import au.com.dius.pact.model.PactConfig
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.model.Response

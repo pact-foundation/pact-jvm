@@ -13,7 +13,7 @@ class Matchers {
 
   static final String HEXADECIMAL = '[0-9a-fA-F]+'
   static final String IP_ADDRESS = '(\\d{1,3}\\.)+\\d{1,3}'
-  static final String GUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+  static final String UUID_REGEX = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
   private static final int TEN = 10
   public static final String TYPE = 'type'
 
@@ -83,12 +83,26 @@ class Matchers {
     new DateMatcher(values: value, pattern: pattern)
   }
 
+  /**
+   * Match a globally unique ID (GUID)
+   * @param value optional value to use for examples
+   * @deprecated use uuid instead
+   */
   @SuppressWarnings('ConfusingMethodName')
+  @Deprecated
   def guid(String value = null) {
-    if (value && !value.matches(GUID)) {
-      throw new InvalidMatcherException("Example \"$value\" is not a GUID")
+    uuid(value)
+  }
+
+  /**
+   * Match a universally unique identifier (UUID)
+   * @param value optional value to use for examples
+   */
+  def uuid(String value = null) {
+    if (value && !value.matches(UUID_REGEX)) {
+      throw new InvalidMatcherException("Example \"$value\" is not a UUID")
     }
-    new RegexpMatcher(values: [GUID, value ?: UUID.randomUUID().toString()])
+    new RegexpMatcher(values: [UUID_REGEX, value ?: UUID.randomUUID().toString()])
   }
 
   def string(String value = null) {

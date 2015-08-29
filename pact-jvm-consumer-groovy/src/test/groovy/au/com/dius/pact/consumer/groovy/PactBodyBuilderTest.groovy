@@ -41,7 +41,7 @@ class PactBodyBuilderTest {
 
               role {
                 name('admin')
-                id(guid)
+                id(uuid)
                 kind {
                   id(100)
                 }
@@ -51,7 +51,7 @@ class PactBodyBuilderTest {
               roles([
                 {
                   name('dev')
-                  id(guid)
+                  id(uuid)
                 }
               ])
             }

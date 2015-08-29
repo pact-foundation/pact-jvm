@@ -16,7 +16,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
   val expected = () => Request("", "", None, None, expectedBody, matchers)
   val actual = () => Request("", "", None, None, actualBody, None)
 
-  var diffconfig = DiffConfig(structural = true)
+  var diffconfig = DiffConfig(structural = true, allowUnexpectedKeys = false)
 
   "matching XML bodies" should {
 
@@ -48,6 +48,30 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
 
         expectedBody = Some("<foo><bar></bar></foo>")
         matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
+      }
+
+      "when allowUnexpectedKeys is true" in {
+
+        val allowUnexpectedKeys = DiffConfig(structural = true, allowUnexpectedKeys = true)
+
+        "and comparing an empty list to a non-empty one" in {
+          expectedBody = Some("<foo></foo>")
+          actualBody = Some("<foo><item/></foo>")
+          matcher.matchBody(expected(), actual(), allowUnexpectedKeys) must beEmpty
+        }
+
+        "and comparing a list to a super-set" in {
+          expectedBody = Some("<foo><item1/></foo>")
+          actualBody = Some("<foo><item1/><item2/></foo>")
+          matcher.matchBody(expected(), actual(), allowUnexpectedKeys) must beEmpty
+        }
+
+        "and comparing a tags attributes to one with more entries" in {
+          expectedBody = Some("<foo something=\"100\"/>")
+          actualBody = Some("<foo something=\"100\" somethingElse=\"101\"/>")
+          matcher.matchBody(expected(), actual(), allowUnexpectedKeys) must beEmpty
+        }
+
       }
 
     }
@@ -123,6 +147,14 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
         mismatches must containMessage("Expected a Tag with at least 2 attributes but received 1 attributes")
+      }
+
+      "when comparing a tags attributes to one with more entries" in {
+        expectedBody = Some("<foo something=\"100\"/>")
+        actualBody = Some("<foo something=\"100\" somethingElse=\"101\"/>")
+        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
+        mismatches must not(beEmpty)
+        mismatches must containMessage("Expected a Tag with at least 1 attributes but received 2 attributes")
       }
 
       "when a tag is missing an attribute" in {

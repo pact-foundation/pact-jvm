@@ -23,8 +23,8 @@ public class PactDslJsonBodyMatcherTest {
     }
 
     @Test(expected = InvalidMatcherException.class)
-    public void guidMatcherThrowsExceptionIfTheExampleIsNotAGuid() {
-        subject.guid("name", "dfhdsjf87fdjh");
+    public void uuidMatcherThrowsExceptionIfTheExampleIsNotAnUuid() {
+        subject.uuid("name", "dfhdsjf87fdjh");
     }
 
 }

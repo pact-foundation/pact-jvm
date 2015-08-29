@@ -1,18 +1,22 @@
 package au.com.dius.pact.provider
 
 import groovy.json.JsonSlurper
+import groovy.transform.ToString
 
 /**
  * Provider Info Config
  */
+@ToString
 class ProviderInfo {
     String protocol = 'http'
     def host = 'localhost'
     Integer port = 8080
     String path = '/'
-    String name
+    String name = 'provider'
+
     def startProviderTask
     def terminateProviderTask
+
     def requestFilter
     def stateChangeRequestFilter
     def createClient
@@ -20,9 +24,15 @@ class ProviderInfo {
     File trustStore
     String trustStorePassword = 'changeit'
 
+    URL stateChangeUrl
+    boolean stateChangeUsesBody = true
+
     PactVerification verificationType = PactVerification.REQUST_RESPONSE
     List packagesToScan = []
     List<ConsumerInfo> consumers = []
+
+    ProviderInfo() {
+    }
 
     ProviderInfo(String name) {
         this.name = name

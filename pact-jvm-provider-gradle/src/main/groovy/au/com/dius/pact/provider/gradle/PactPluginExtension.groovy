@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider.gradle
 
-import au.com.dius.pact.provider.ProviderInfo
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.util.ConfigureUtil
 
@@ -9,7 +8,7 @@ import org.gradle.util.ConfigureUtil
  */
 class PactPluginExtension {
 
-    final NamedDomainObjectContainer<ProviderInfo> serviceProviders
+    final NamedDomainObjectContainer<GradleProviderInfo> serviceProviders
 
     PactPublish publish
 
