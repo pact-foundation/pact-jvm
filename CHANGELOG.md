@@ -27,6 +27,42 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 1d4b5aa - bump version (Ronald Holshausen, Sun Aug 9 17:09:48 2015 +1000)
 * 76fb1ca - correct changelog (Ronald Holshausen, Sun Aug 9 16:39:04 2015 +1000)
 
+# 2.2.13 - fixes to XML matching and JUnit rule
+
+* 7144cd3 - fix imports for JDK6 & 7 (Ronald Holshausen, Sat Aug 29 14:45:00 2015 +1000)
+* 5e25750 - Clojure Gradle plugin needs JDK7+ (Ronald Holshausen, Sat Aug 29 14:44:14 2015 +1000)
+* 55ec698 - changes to run on JDK6 (Ronald Holshausen, Sat Aug 29 14:25:26 2015 +1000)
+* d5439fa - Merge branch 'master' into v2.x (Ronald Holshausen, Sat Aug 29 14:14:17 2015 +1000)
+* 8aa6295a - updated changelog (Ronald Holshausen, Sat Aug 29 13:47:04 2015 +1000)
+* 624b1ca - updated the readme about defaulting the provider name #144 (Ronald Holshausen, Sat Aug 29 13:23:23 2015 +1000)
+* 4c51ed9 - allow the pact rule to default the provider name so they do not have to be repeated #148 (Ronald Holshausen, Sat Aug 29 13:07:36 2015 +100
+* bfe70ac - fix for code narc (Ronald Holshausen, Fri Aug 28 19:46:35 2015 +1000)
+* afdac9f - if a statechange closure returns a URL, handle it as normal (Ronald Holshausen, Fri Aug 28 16:57:26 2015 +1000)
+* 633e050 - refactored the remainder of gradle and maven verification code into a common provider verifier (Ronald Holshausen, Fri Aug 28 15:31:02 201
+* 3d800a9 - refactored the gradle and maven verification code into a common provider verifier (Ronald Holshausen, Fri Aug 28 15:10:59 2015 +1000)
+* 6e651ab - refactored common code out of the maven Consumer and Provider classes (Ronald Holshausen, Fri Aug 28 11:13:58 2015 +1000)
+* d528c30 - refactor provider packages in preperation of cleanup of gradle, maven and lein plugins (Ronald Holshausen, Fri Aug 28 10:31:18 2015 +1000)
+* a616db1 - allow multiple providers in a junit test #117 (Ronald Holshausen, Sat Aug 22 13:53:46 2015 +1000)
+* 8f58982 - when comparing XML node attributes, always honour the allowUnexpectedKeys value #153 (Ronald Holshausen, Thu Aug 20 12:52:06 2015 +1000)
+* 8b5037c - updated the readme for the Java DSL matching methods (Ronald Holshausen, Wed Aug 19 13:46:15 2015 +1000)
+* 4a568b6 - updated the readme for the Java DSL matching methods (Ronald Holshausen, Wed Aug 19 13:44:38 2015 +1000)
+* 13dfe85 - rename GUID to UUID in the consumer modules #154 (Ronald Holshausen, Wed Aug 19 13:25:34 2015 +1000)
+* 021e636 - when comparing XML nodes, always honour the allowUnexpectedKeys value #153 (Ronald Holshausen, Wed Aug 19 12:58:57 2015 +1000)
+* 83c1396 - fix the gradle plugin to support a mix of different verification types (Ronald Holshausen, Fri Aug 14 16:10:36 2015 +1000)
+* e8ba430 - loop over all providers defined in the build (Ronald Holshausen, Fri Aug 14 14:58:24 2015 +1000)
+* 948d460 - start of a Leiningen plugin (Ronald Holshausen, Fri Aug 14 12:45:47 2015 +1000)
+* 062397d - Merge branch 'master' into v2.x (Ronald Holshausen, Thu Aug 13 13:08:06 2015 +1000)
+* 7090fc1 - fix codenarc violation (Ronald Holshausen, Thu Aug 13 12:32:07 2015 +1000)
+* cb0b98f - Merge branch 'master' into v2.x (Ronald Holshausen, Wed Aug 12 16:20:58 2015 +1000)
+* 529b555 - allow the pact verification type to be set at the consumer level in the gradle plugin (Ronald Holshausen, Wed Aug 12 15:56:38 2015 +1000)
+* ca87362 - small corrections to the readmes (Ronald Holshausen, Mon Aug 10 11:21:36 2015 +1000)
+* 66d2cf0 - added docs about message queue consumers and provider tests (Ronald Holshausen, Mon Aug 10 11:16:37 2015 +1000)
+* 1a2604f - bump version (Ronald Holshausen, Sun Aug 9 17:51:25 2015 +1000)
+* 04bb058 - Merge remote-tracking branch 'origin/master' into v2.x (Ronald Holshausen, Sun Aug 9 17:50:30 2015 +1000)
+* d23bbb3 - bump version (Ronald Holshausen, Sun Aug 9 17:47:28 2015 +1000)
+* 1d4b5aa - bump version (Ronald Holshausen, Sun Aug 9 17:09:48 2015 +1000)
+* 76fb1ca - correct changelog (Ronald Holshausen, Sun Aug 9 16:39:04 2015 +1000)
+
 # 3.0.1 - verification of message pacts; some bugfixes
 
 * cb0c829 - expose the mock provider config #151 (Ronald Holshausen, Sun Aug 9 13:27:33 2015 +1000)
