@@ -15,11 +15,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface PactVerification {
-
     /**
      * the tested provider name.
      */
-    String[] value();
+    String[] value() default "";
 
     /**
      * If a mismatch is expected. Use to test failure conditions

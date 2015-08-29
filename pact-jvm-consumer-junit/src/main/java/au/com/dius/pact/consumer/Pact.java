@@ -21,7 +21,7 @@ public @interface Pact {
     /**
      * name of the provider
      */
-    String provider();
+    String provider() default "";
 
     /**
      * name of the consumer

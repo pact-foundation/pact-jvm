@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactFragment;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -76,8 +77,13 @@ public class PactProviderRule extends ExternalResource {
                 }
 
                 Map<String, PactFragment> pacts = getPacts();
-                Optional<PactFragment> fragment = Arrays.asList(pactDef.value()).stream().map(pacts::get)
-                        .filter(p -> p != null).findFirst();
+                Optional<PactFragment> fragment;
+                if (pactDef.value().length == 1 && StringUtils.isEmpty(pactDef.value()[0])) {
+                    fragment = pacts.values().stream().findFirst();
+                } else {
+                    fragment = Arrays.asList(pactDef.value()).stream().map(pacts::get)
+                            .filter(p -> p != null).findFirst();
+                }
                 if (!fragment.isPresent()) {
                     base.evaluate();
                     return;
@@ -117,11 +123,11 @@ public class PactProviderRule extends ExternalResource {
             for (Method m: target.getClass().getMethods()) {
                 if (conformsToSignature(m)) {
                     Pact pact = m.getAnnotation(Pact.class);
-                    if (provider.equals(pact.provider())) {
+                    if (StringUtils.isEmpty(pact.provider()) || provider.equals(pact.provider())) {
                         ConsumerPactBuilder.PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(pact.consumer())
-                            .hasPactWith(pact.provider());
+                            .hasPactWith(provider);
                         try {
-                            fragments.put(pact.provider(), (PactFragment) m.invoke(target, dslBuilder));
+                            fragments.put(provider, (PactFragment) m.invoke(target, dslBuilder));
                         } catch (Exception e) {
                             LOGGER.error("Failed to invoke pact method", e);
                             throw new RuntimeException("Failed to invoke pact method", e);
