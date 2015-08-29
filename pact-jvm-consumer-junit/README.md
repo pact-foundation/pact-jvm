@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-junit_2.11`
-* version-id = `2.2.x`
+* version-id = `3.0.x`
 
 ##Usage
 
@@ -103,12 +103,46 @@ The hostname and port are optional. If left out, it will default to localhost an
     }
 ```
 
+##### Versions 3.0.2/2.2.13+
+
+You can leave the provider name out. It will then use the provider name of the first mock provider found. I.e.,
+
+```java
+    @Pact(consumer="test_consumer") // will default to the provider name from mockProvider
+    public PactFragment createFragment(PactDslWithProvider builder) {
+        return builder
+            .given("test state")
+            .uponReceiving("ExampleJavaConsumerPactRuleTest test interaction")
+                .path("/")
+                .method("GET")
+            .willRespondWith()
+                .status(200)
+                .body("{\"responsetest\": true}")
+            .toFragment();
+    }
+```
+
 #### 3. Annotate your test method with PactVerification to have it run in the context of the mock server setup with the appropriate pact from step 1 and 2
 
 ```java
     @Test
     @PactVerification("test_provider")
     public void runTest() {
+        Map expectedResponse = new HashMap();
+        expectedResponse.put("responsetest", true);
+        assertEquals(new ConsumerClient("http://localhost:8080").get("/"), expectedResponse);
+    }
+```
+
+##### Versions 3.0.2/2.2.13+
+
+You can leave the provider name out. It will then use the provider name of the first mock provider found. I.e.,
+
+```java
+    @Test
+    @PactVerification
+    public void runTest() {
+        // This will run against mockProvider
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         assertEquals(new ConsumerClient("http://localhost:8080").get("/"), expectedResponse);
@@ -125,7 +159,8 @@ then include all the providers required in the `@PactVerification` annotation. F
 
 Note that if more than one provider fails verification for the same test, you will only receive a failure for one of them.
 Also, to have multiple tests in the same test class, the providers must be setup with random ports (i.e. don't specify
-a hostname and port).
+a hostname and port). Also, if the provider name is left out of any of the annotations, the first one found will be used
+(which may not be the first one defined).
 
 ### Using the Pact DSL directly
 
