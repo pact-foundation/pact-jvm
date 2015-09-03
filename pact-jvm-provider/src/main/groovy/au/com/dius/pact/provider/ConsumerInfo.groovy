@@ -1,11 +1,11 @@
 package au.com.dius.pact.provider
 
-import groovy.transform.ToString
+import groovy.transform.Canonical
 
 /**
  * Consumer Info
  */
-@ToString
+@Canonical
 class ConsumerInfo {
     String name
     def pactFile
