@@ -1,9 +1,10 @@
 (ns au.com.dius.pact.provider.lein.verify-provider
-  (import (au.com.dius.pact.provider ProviderInfo ConsumerInfo))
   (:require [clojure.pprint :as pp]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.string :as str])
+  (:import (au.com.dius.pact.provider ProviderInfo ConsumerInfo)))
 
-(defn to-provider [provider-info]
+(defn to-provider [verifier provider-info]
   (let [provider (ProviderInfo. (-> provider-info key str))
         provider-data (val provider-info)]
     (if (contains? provider-data :protocol) (.setProtocol provider (:protocol provider-data)))
@@ -17,14 +18,12 @@
     (if (contains? provider-data :state-change-uses-body) (.setStateChangeUsesBody provider (:state-change-uses-body provider-data)))
     (if (contains? provider-data :verification-type) (.setVerificationType provider (:verification-type provider-data)))
     (if (contains? provider-data :packages-to-scan) (.setPackagesToScan provider (:packages-to-scan provider-data)))
-    ;
+
+    (if (contains? provider-data :request-filter) (.setRequestFilter provider (.wrap verifier (eval (:request-filter provider-data)))))
+    (if (contains? provider-data :state-change-request-filter) (.setStateChangeRequestFilter provider (.wrap verifier (eval (:state-change-request-filter provider-data)))))
+    (if (contains? provider-data :create-client) (.setCreateClient provider (.wrap verifier (eval (:create-client provider-data)))))
     ;def startProviderTask
     ;def terminateProviderTask
-    ;
-    ;def requestFilter
-    ;def stateChangeRequestFilter
-    ;def createClient
-    ;
     provider))
 
 (defn to-consumer [consumer-info]
@@ -38,11 +37,20 @@
     consumer))
 
 (defn verify-providers [verifier providers]
-  (let [failures (mapcat #(let [provider (to-provider %)
-                           consumers (->> % val :hasPactWith (map to-consumer))]
+  (let [failures (mapcat #(let [provider (to-provider verifier %)
+                           consumers (->> % val :has-pact-with (map to-consumer))]
       (.setConsumers provider consumers)
       (.verifyProvider verifier provider)) providers)]
     (if (not-empty failures)
       (do
         (.displayFailures verifier failures)
         (throw (RuntimeException. (str "There were " (count failures) " pact failures")))))))
+
+(defn verify [verifier pact-info]
+  (verify-providers verifier (:service-providers pact-info)))
+
+(defn has-property? [property args]
+  (contains? args property))
+
+(defn get-property [property args]
+  (args property))

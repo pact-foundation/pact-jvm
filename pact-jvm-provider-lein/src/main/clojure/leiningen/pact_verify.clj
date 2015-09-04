@@ -1,6 +1,5 @@
 (ns leiningen.pact-verify
-  (:require [clojure.pprint :as pprint]
-            [au.com.dius.pact.provider.lein.verify-provider :as verify]
+  (:require [au.com.dius.pact.provider.lein.verify-provider :as verify]
             [clojure.string :as str])
   (:import (au.com.dius.pact.provider.lein LeinVerifierProxy)))
 
@@ -20,11 +19,5 @@
       [project & args]
       (if (contains? project :pact)
         (let [verifier (LeinVerifierProxy. project (parse-args args))]
-          (verify/verify-providers verifier (-> project :pact :serviceProviders)))
+          (verify/verify verifier (-> project :pact)))
         (throw (RuntimeException. "No pact definition was found in the project"))))
-
-(defn has-property? [property args]
-  (contains? args property))
-
-(defn get-property [property args]
-  (args property))

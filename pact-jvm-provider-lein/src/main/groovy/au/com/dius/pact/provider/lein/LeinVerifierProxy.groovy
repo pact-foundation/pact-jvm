@@ -12,7 +12,7 @@ import groovy.transform.Canonical
 @Canonical
 class LeinVerifierProxy {
 
-  private static final String LEIN_PACT_VERIFY_NAMESPACE = 'leiningen.pact-verify'
+  private static final String LEIN_PACT_VERIFY_NAMESPACE = 'au.com.dius.pact.provider.lein.verify-provider'
 
   def project
   def args
@@ -35,6 +35,12 @@ class LeinVerifierProxy {
     verifier.isBuildSpecificTask = { false }
 
     verifier.verifyProvider(provider)
+  }
+
+  Closure wrap(def fn) {
+    return { args ->
+      fn.invoke(args)
+    }
   }
 
 }
