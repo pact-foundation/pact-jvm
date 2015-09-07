@@ -186,3 +186,45 @@ consumers (consumer1 and consumer2). Adding `:pact.filter.description=a request 
 whose descriptions start with 'a request for payment'. `:pact.filter.providerState=.*payment` will match any interaction that
 has a provider state that ends with payment, and `:pact.filter.providerState=` will match any interaction that does not have a
 provider state.
+
+## Starting and shutting down your provider
+
+For the pact verification to run, the provider needs to be running. Leiningen provides a `do` task that can chain tasks
+together. So, by creating a `start-app` and `terminate-app` alias, you could so something like:
+
+    $ lein with-profile pact do start-app, pact-verify, terminate-app
+
+However, if the pact verification fails the build will abort without running the `terminate-app` task. To have the
+start and terminate tasks always run regardless of the state of the verification, you can assign them to `:start-provider-task`
+and `:terminate-provider-task` on the provider.
+
+```clojure
+
+  :aliases {"start-app" ^{:doc "Starts the app"}
+                          ["tasks to start app ..."] ; insert tasks to start the app here
+
+            "terminate-app" ^{:doc "Kills the app"}
+                          ["tasks to terminate app ..."] ; insert tasks to stop the app here
+            }
+
+  :pact {
+      :service-providers {
+          :provider1 {
+              :start-provider-task "start-app"
+              :terminate-provider-task "terminate-app"
+
+              :has-pact-with {
+                  :consumer1 {
+                    :pact-file "path/to/provider1-consumer1-pact.json"
+                  }
+              }
+          }
+      }
+  }
+```
+
+Then you can just run:
+
+    $ lein with-profile pact pact-verify
+
+and the `start-app` and `terminate-app` tasks will run before and after the provider verification.
