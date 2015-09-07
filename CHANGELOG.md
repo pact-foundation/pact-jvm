@@ -13,6 +13,22 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 49143cd - updated changelog (Ronald Holshausen, Sat Aug 29 15:54:04 2015 +1000)
 * 95e0c45 - bump version (Ronald Holshausen, Sat Aug 29 14:26:31 2015 +1000)
 
+# 2.2.14 - leiningen plugin
+
+* 23460cf - Merge branch 'master' into v2.x (Ronald Holshausen, Mon Sep 7 19:51:06 2015 +1000)
+* b515752 - updated changelog (Ronald Holshausen, Mon Sep 7 19:25:28 2015 +1000)
+* 893103c - updated readme about start and terminate provider in lein plugin (Ronald Holshausen, Mon Sep 7 17:21:06 2015 +1000)
+* 00ebc6d - implement start and terminate provider tasks (Ronald Holshausen, Mon Sep 7 17:07:03 2015 +1000)
+* 6c5471f - updated lein readme (Ronald Holshausen, Mon Sep 7 13:48:50 2015 +1000)
+* e2f3246 - added basic readme about lein plugin (Ronald Holshausen, Mon Sep 7 13:18:19 2015 +1000)
+* d06652b - add clojars repo for the pact-jvm-provider-lein module (Ronald Holshausen, Mon Sep 7 13:03:57 2015 +1000)
+* 05572ff - fix the repos on the lein plugin (Ronald Holshausen, Fri Sep 4 19:21:03 2015 +1000)
+* e695114 - lein plugin can now accept anonymous functions (Ronald Holshausen, Fri Sep 4 15:27:56 2015 +1000)
+* b1b843c - first semi-working version of the lein plugin (Ronald Holshausen, Thu Sep 3 16:31:16 2015 +1000)
+* 49143cd - updated changelog (Ronald Holshausen, Sat Aug 29 15:54:04 2015 +1000)
+* 99a1a0d - bump version (Ronald Holshausen, Sat Aug 29 16:27:45 2015 +1000)
+* 95e0c45 - bump version (Ronald Holshausen, Sat Aug 29 14:26:31 2015 +1000)
+
 # 3.0.2 - fixes to XML matching and JUnit rule
 
 * 624b1ca - updated the readme about defaulting the provider name #144 (Ronald Holshausen, Sat Aug 29 13:23:23 2015 +1000)
