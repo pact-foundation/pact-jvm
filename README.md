@@ -103,11 +103,15 @@ You want to look at: [pact maven plugin](pact-jvm-provider-maven)
 
 For publishing pacts to a pact broker, have a look at https://github.com/warmuuh/pactbroker-maven-plugin
 
+#### verify pacts with Leiningen [version 2.2.14+, 3.0.3+]
+
+You want to look at: [pact leiningen plugin](pact-jvm-provider-lein)
+
 #### verify pacts with a Spring MVC project
 
 Have a look at [Spring MVC Pact Test Runner](https://github.com/realestate-com-au/pact-jvm-provider-spring-mvc)
 
-#### I want to verify pacts but don't want to use sbt or gradle
+#### I want to verify pacts but don't want to use sbt or gradle or leiningen
 
 You want to look at: [pact-jvm-provider](pact-jvm-provider)
 
