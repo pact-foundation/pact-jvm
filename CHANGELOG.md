@@ -13,7 +13,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 49143cd - updated changelog (Ronald Holshausen, Sat Aug 29 15:54:04 2015 +1000)
 * 95e0c45 - bump version (Ronald Holshausen, Sat Aug 29 14:26:31 2015 +1000)
 
-# 2.2.13 - leiningen plugin
+# 2.2.14 - leiningen plugin
 
 * 23460cf - Merge branch 'master' into v2.x (Ronald Holshausen, Mon Sep 7 19:51:06 2015 +1000)
 * b515752 - updated changelog (Ronald Holshausen, Mon Sep 7 19:25:28 2015 +1000)
