@@ -32,7 +32,7 @@ class ProviderVerifier {
 
   Closure projectHasProperty = { }
   Closure projectGetProperty = { }
-  String pactLoadFailureMessage
+  def pactLoadFailureMessage
   Closure isBuildSpecificTask = { }
   Closure executeBuildSpecificTask = { }
   Closure projectClasspath = { }
@@ -84,7 +84,8 @@ class ProviderVerifier {
       AnsiConsole.out().println(Ansi.ansi().a("  [Using file ${consumer.pactFile}]"))
       new PactReader().loadPact(consumer.pactFile)
     } else {
-      throw new RuntimeException(pactLoadFailureMessage(consumer))
+      throw new RuntimeException(pactLoadFailureMessage instanceof Closure ? pactLoadFailureMessage.call(consumer) :
+        pactLoadFailureMessage as String)
     }
   }
 
