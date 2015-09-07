@@ -1,8 +1,12 @@
 (ns au.com.dius.pact.provider.lein.verify-provider
   (:require [clojure.pprint :as pp]
             [clojure.java.io :as io]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [leiningen.core.main :as lein])
   (:import (au.com.dius.pact.provider ProviderInfo ConsumerInfo)))
+
+(defn wrap-task [verifier task-name]
+  #(lein/resolve-and-apply (.getProject verifier) [task-name]))
 
 (defn to-provider [verifier provider-info]
   (let [provider (ProviderInfo. (-> provider-info key str))
@@ -22,8 +26,9 @@
     (if (contains? provider-data :request-filter) (.setRequestFilter provider (.wrap verifier (eval (:request-filter provider-data)))))
     (if (contains? provider-data :state-change-request-filter) (.setStateChangeRequestFilter provider (.wrap verifier (eval (:state-change-request-filter provider-data)))))
     (if (contains? provider-data :create-client) (.setCreateClient provider (.wrap verifier (eval (:create-client provider-data)))))
-    ;def startProviderTask
-    ;def terminateProviderTask
+
+    (if (contains? provider-data :start-provider-task) (.setStartProviderTask provider (wrap-task verifier (:start-provider-task provider-data))))
+    (if (contains? provider-data :terminate-provider-task) (.setTerminateProviderTask provider (wrap-task verifier (:terminate-provider-task provider-data))))
     provider))
 
 (defn to-consumer [consumer-info]
@@ -36,11 +41,27 @@
     (if (contains? consumer-data :packages-to-scan) (.setPackagesToScan consumer (:packages-to-scan consumer-data)))
     consumer))
 
+(defn execute-start-provider-task [provider]
+  (if-let [start-task (.getStartProviderTask provider)]
+    (do
+      (lein/info (str "Executing start provider task for " (.getName provider)))
+      (start-task))))
+
+(defn execute-terminate-provider-task [provider]
+  (if-let [terminate-task (.getTerminateProviderTask provider)]
+    (do
+      (lein/info (str "Executing terminate provider task for " (.getName provider)))
+      (terminate-task))))
+
 (defn verify-providers [verifier providers]
   (let [failures (mapcat #(let [provider (to-provider verifier %)
-                           consumers (->> % val :has-pact-with (map to-consumer))]
-      (.setConsumers provider consumers)
-      (.verifyProvider verifier provider)) providers)]
+                                consumers (->> % val :has-pact-with (map to-consumer))]
+                            (.setConsumers provider consumers)
+                            (execute-start-provider-task provider)
+                            (try
+                              (.verifyProvider verifier provider)
+                              (finally (execute-terminate-provider-task provider)))
+                            ) providers)]
     (if (not-empty failures)
       (do
         (.displayFailures verifier failures)
