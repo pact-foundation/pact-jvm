@@ -12,7 +12,12 @@
   (let [provider (ProviderInfo. (-> provider-info key str))
         provider-data (val provider-info)]
     (if (contains? provider-data :protocol) (.setProtocol provider (:protocol provider-data)))
-    (if (contains? provider-data :host) (.setHost provider (:host provider-data)))
+
+    (if (contains? provider-data :host)
+      (if (fn? (eval (:host provider-data)))
+        (.setHost provider (.wrap verifier (eval (:host provider-data))))
+        (.setHost provider (:host provider-data))))
+
     (if (contains? provider-data :port) (.setPort provider (-> provider-data :port int)))
     (if (contains? provider-data :path) (.setPath provider (:path provider-data)))
     (if (contains? provider-data :insecure) (.setInsecure provider (:insecure provider-data)))
