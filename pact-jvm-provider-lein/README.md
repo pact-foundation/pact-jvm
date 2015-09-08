@@ -228,26 +228,3 @@ Then you can just run:
     $ lein with-profile pact pact-verify
 
 and the `start-app` and `terminate-app` tasks will run before and after the provider verification.
-
-## Specifying the provider hostname at runtime [3.0.4+]
-
-If you need to calculate the provider hostname at runtime (for instance it is run as a new docker container or
-AWS instance), you can give an anonymous function as the provider host that returns the host name. The function
-will receive the provider information as a parameter.
-
-```clojure
-
-  :pact {
-      :service-providers {
-          :provider1 {
-              :host #(calculate-host-name %)
-
-              :has-pact-with {
-                  :consumer1 {
-                    :pact-file "path/to/provider1-consumer1-pact.json"
-                  }
-              }
-          }
-      }
-  }
-```
