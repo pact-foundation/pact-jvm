@@ -1,5 +1,9 @@
 buildscript {
   repositories {
+    maven {
+        url "http://spvx10419.hq.local:8081/nexus/content/groups/public"
+    }
+
     mavenCentral()
   }
   dependencies {
@@ -31,6 +35,11 @@ subprojects {
     apply plugin: 'codenarc'
 
     repositories {
+
+        maven {
+            url "http://spvx10419.hq.local:8081/nexus/content/groups/public"
+        }
+
         mavenLocal()
         mavenCentral()
     }

@@ -1,5 +1,8 @@
 buildscript {
   repositories {
+    maven {
+      url "http://spvx10419.hq.local:8081/nexus/content/groups/public"
+    }
     jcenter()
     maven {
       url "https://plugins.gradle.org/m2/"
