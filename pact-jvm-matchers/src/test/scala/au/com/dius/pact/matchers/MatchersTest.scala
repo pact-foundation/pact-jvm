@@ -23,11 +23,19 @@ class MatchersTest extends Specification {
       Matchers.matcherDefined(Seq("$", "body", "something"), Some(Map("$.body.something" -> Map[String, String]()))) must beTrue
     }
 
+    "should be true when a parent of the path has a matcher entry" in {
+      Matchers.matcherDefined(Seq("$", "body", "something"), Some(Map("$.body" -> Map[String, String]()))) must beTrue
+    }
+
   }
 
   "should default to equality matching if the matcher is unknown" in {
     Matchers.matcher(Map("other" -> "something")) must be(EqualsMatcher)
     Matchers.matcher(Map()) must be(EqualsMatcher)
+  }
+
+  "should default to a matching defined at a parent level" in {
+    Matchers.selectBestMatcher(Some(Map("$.body" -> Map("match" -> "type"))), Seq("$", "body", "value")) must beEqualTo(Map("match" -> "type"))
   }
 
   "equal matcher" should {
@@ -92,6 +100,30 @@ class MatchersTest extends Specification {
       "not accept null/non-null" in {
         val expected = Request("get", "/", None, None, Some("{\"value\": 200}"), Some(Map("$.body.value" -> Map("match" -> "type"))))
         val actual = Request("get", "/", None, None, Some("{\"value\": null}"), None)
+        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+      }
+
+      "accept lists" in {
+        val expected = Request("get", "/", None, None, Some("{\"value\": [100, 200, 300]}"), Some(Map("$.body.value" -> Map("match" -> "type"))))
+        val actual = Request("get", "/", None, None, Some("{\"value\": [200.3]}"), None)
+        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+      }
+
+      "accept maps" in {
+        val expected = Request("get", "/", None, None, Some("{\"value\": {\"a\": 100}}"), Some(Map("$.body.value" -> Map("match" -> "type"))))
+        val actual = Request("get", "/", None, None, Some("{\"value\": {\"a\": 200.3, \"b\": 200, \"c\": 300} }"), None)
+        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+      }
+
+      "list elements should inherit the matcher from the parent" in {
+        val expected = Request("get", "/", None, None, Some("{\"value\": [100]}"), Some(Map("$.body.value" -> Map("match" -> "type"))))
+        val actual = Request("get", "/", None, None, Some("{\"value\": [\"200.3\"]}"), None)
+        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+      }
+
+      "map elements should inherit the matchers from the parent" in {
+        val expected = Request("get", "/", None, None, Some("{\"value\": {\"a\": 100}}"), Some(Map("$.body.value" -> Map("match" -> "type"))))
+        val actual = Request("get", "/", None, None, Some("{\"value\": {\"a\": \"200.3\", \"b\": 200, \"c\": 300} }"), None)
         new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
       }
 
@@ -182,7 +214,9 @@ class MatchersTest extends Specification {
       Matchers.matchesPath("$.name", Seq("$", "name")) must beTrue
       Matchers.matchesPath("$.name.other", Seq("$", "name", "other")) must beTrue
       Matchers.matchesPath("$.name", Seq("$", "other")) must beFalse
-      Matchers.matchesPath("$.name", Seq("$", "name", "other")) must beFalse
+      Matchers.matchesPath("$.name", Seq("$", "name", "other")) must beTrue
+      Matchers.matchesPath("$.other", Seq("$", "name", "other")) must beFalse
+      Matchers.matchesPath("$.name.other", Seq("$", "name")) must beFalse
     }
 
     "match array indices" in {
