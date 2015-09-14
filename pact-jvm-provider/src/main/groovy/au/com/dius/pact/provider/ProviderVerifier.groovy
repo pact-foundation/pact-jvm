@@ -51,7 +51,7 @@ class ProviderVerifier {
     forEachInteraction(pact, this.&verifyInteraction.curry(provider, consumer, pact, failures))
   }
 
-  List interactions(Pact pact) {
+  List interactions(def pact) {
     if (pact instanceof V3Pact) {
       if (pact instanceof MessagePact) {
         pact.messages.findAll(this.&filterInteractions)
@@ -64,7 +64,7 @@ class ProviderVerifier {
     }
   }
 
-  void forEachInteraction(Pact pact, Closure verifyInteraction) {
+  void forEachInteraction(def pact, Closure verifyInteraction) {
     List interactions = interactions(pact)
     if (interactions.empty) {
       AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
@@ -76,7 +76,7 @@ class ProviderVerifier {
   }
 
   @SuppressWarnings('ThrowRuntimeException')
-  Pact loadPactFileForConsumer(ConsumerInfo consumer) {
+  def loadPactFileForConsumer(ConsumerInfo consumer) {
     if (consumer.pactFile instanceof URL) {
       AnsiConsole.out().println(Ansi.ansi().a("  [from URL ${consumer.pactFile}]"))
       new PactReader().loadPact(consumer.pactFile)
