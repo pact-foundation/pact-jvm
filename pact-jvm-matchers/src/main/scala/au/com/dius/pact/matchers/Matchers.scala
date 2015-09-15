@@ -21,7 +21,7 @@ object Matchers extends StrictLogging {
   def matchesPath(pathExp: String, path: Seq[String]) =
     new Parser().compile(pathExp) match {
       case Parser.Success(q, _) =>
-        path.corresponds(q)((pathElement, pathToken) => matchesToken(pathElement, pathToken) != 0)
+        path.reverse.tails.filter(l => l.reverse.corresponds(q)((pathElement, pathToken) => matchesToken(pathElement, pathToken) != 0)).hasNext
       case ns: Parser.NoSuccess =>
         logger.warn(s"Path expression $pathExp is invalid, ignoring: $ns")
         false
@@ -45,13 +45,17 @@ object Matchers extends StrictLogging {
 
   def domatch[Mismatch](matchers: Option[Map[String, Map[String, Any]]], path: Seq[String], expected: Any, actual: Any,
                         mismatchFn: MismatchFactory[Mismatch]) : List[Mismatch] = {
-    val matcherDef = resolveMatchers(matchers.get, path).maxBy(entry => calculatePathWeight(entry._1, path))._2
+    val matcherDef = selectBestMatcher(matchers, path)
     matcherDef match {
       case map: Map[String, Any] => matcher(map).domatch[Mismatch](map, path, expected, actual, mismatchFn)
       case m =>
         logger.warn(s"Matcher $m is mis-configured, defaulting to equality matching")
         EqualsMatcher.domatch[Mismatch](Map[String, String](), path, expected, actual, mismatchFn)
     }
+  }
+
+  def selectBestMatcher[Mismatch](matchers: Option[Map[String, Map[String, Any]]], path: Seq[String]): Map[String, Any] = {
+    resolveMatchers(matchers.get, path).maxBy(entry => calculatePathWeight(entry._1, path))._2
   }
 
   def matcher(matcherDef: Map[String, Any]) : Matcher = {
@@ -128,6 +132,8 @@ object TypeMatcher extends Matcher with StrictLogging {
       case (actual: String, expected: String) => List[Mismatch]()
       case (actual: Number, expected: Number) => List[Mismatch]()
       case (actual: Boolean, expected: Boolean) => List[Mismatch]()
+      case (actual: List[_], expected: List[_]) => List[Mismatch]()
+      case (actual: Map[_, _], expected: Map[_, _]) => List[Mismatch]()
       case (_, null) =>
         if (actual == null) {
           List[Mismatch]()
@@ -213,13 +219,18 @@ object TypeMatcher extends Matcher with StrictLogging {
   }
 
   def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-    matcherDef.get("match").get.toString match {
-      case "type" => matchType[Mismatch](path, expected, actual, mismatchFn)
-      case "number" => matchNumber[Mismatch](path, expected, actual, mismatchFn)
-      case "integer" => matchInteger[Mismatch](path, expected, actual, mismatchFn)
-      case "real" => matchReal[Mismatch](path, expected, actual, mismatchFn)
-      case "timestamp" => matchTimestamp[Mismatch](path, expected, actual, mismatchFn)
-      case _ => List(mismatchFn.create(expected, actual, "type matcher is mis-configured", path))
+    if (matcherDef.contains("match")) {
+      matcherDef.get("match").get.toString match {
+        case "type" => matchType[Mismatch](path, expected, actual, mismatchFn)
+        case "number" => matchNumber[Mismatch](path, expected, actual, mismatchFn)
+        case "integer" => matchInteger[Mismatch](path, expected, actual, mismatchFn)
+        case "real" => matchReal[Mismatch](path, expected, actual, mismatchFn)
+        case "timestamp" => matchTimestamp[Mismatch](path, expected, actual, mismatchFn)
+        case _ => List(mismatchFn.create(expected, actual, "type matcher is mis-configured", path))
+      }
+    } else {
+      logger.warn("Matcher definition does not contain a 'match' element, defaulting to type matching")
+      matchType[Mismatch](path, expected, actual, mismatchFn)
     }
   }
 }
@@ -271,15 +282,14 @@ object MinimumMatcher extends Matcher with StrictLogging {
       case o => o.toString.toInt
     }
     logger.debug(s"comparing ${valueOf(actual)} with minimum $value at $path")
-    val size = actual match {
-      case v: List[Any] => v.size
-      case s: String => s.length
-      case n: Number => n.intValue()
-    }
-    if (size < value) {
-      List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to have minimum $value", path))
-    } else {
-      List()
+    actual match {
+      case v: List[Any] =>
+        if (v.size < value) {
+          List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to have minimum $value", path))
+        } else {
+          List()
+        }
+      case _ => TypeMatcher.domatch[Mismatch](matcherDef, path, expected, actual, mismatchFn)
     }
   }
 }
@@ -292,15 +302,14 @@ object MaximumMatcher extends Matcher with StrictLogging {
       case o => o.toString.toInt
     }
     logger.debug(s"comparing ${valueOf(actual)} with maximum $value at $path")
-    val size = actual match {
-      case v: List[Any] => v.size
-      case s: String => s.length
-      case n: Number => n.intValue()
-    }
-    if (size > value) {
-      List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to have maximum $value", path))
-    } else {
-      List()
+    actual match {
+      case v: List[Any] =>
+        if (v.size > value) {
+          List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to have maximum $value", path))
+        } else {
+          List()
+        }
+      case _ => TypeMatcher.domatch[Mismatch](matcherDef, path, expected, actual, mismatchFn)
     }
   }
 }
