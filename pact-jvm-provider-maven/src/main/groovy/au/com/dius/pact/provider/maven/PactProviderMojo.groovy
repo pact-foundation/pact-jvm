@@ -16,6 +16,9 @@ import org.fusesource.jansi.AnsiConsole
 @Mojo(name = 'verify')
 class PactProviderMojo extends AbstractMojo {
 
+  @Parameter(defaultValue = '${project.runtimeClasspathElements}', required = true, readonly = true)
+  private List<String> classpathElements
+
   @Parameter
   private List<Provider> serviceProviders
 
@@ -34,6 +37,14 @@ class PactProviderMojo extends AbstractMojo {
       "You must specify the pactfile to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
     }
     verifier.isBuildSpecificTask = { false }
+
+	verifier.projectClasspath = {
+		List<URL> urls = []
+		for (element in classpathElements) {
+			urls.add(new File(element).toURI().toURL())
+		}
+		urls as URL[]
+	}
 
     serviceProviders.each { provider ->
       List consumers = []
