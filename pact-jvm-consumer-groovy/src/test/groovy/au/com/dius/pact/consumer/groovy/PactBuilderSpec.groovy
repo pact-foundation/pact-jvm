@@ -275,4 +275,27 @@ class PactBuilderSpec extends Specification {
     request.body.get() == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
     response.body.get() == '{"name":"harry"}'
   }
+
+  def 'does not pretty print bodies if the mimetype corresponds to one that requires compact bodies'() {
+    given:
+    aliceService {
+      uponReceiving('a request')
+      withAttributes(method: 'get', path: '/', body: [
+        name: 'harry',
+        surname: 'larry',
+        position: 'staff',
+        happy: true
+      ], headers: ['Content-Type': 'application/x-thrift+json'])
+      willRespondWith(status: 200, body: [name: 'harry'], headers: ['Content-Type': 'application/x-thrift+json'])
+    }
+
+    when:
+    aliceService.buildInteractions()
+    def request = aliceService.interactions.first().request
+    def response = aliceService.interactions.first().response
+
+    then:
+    request.body.get() == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
+    response.body.get() == '{"name":"harry"}'
+  }
 }

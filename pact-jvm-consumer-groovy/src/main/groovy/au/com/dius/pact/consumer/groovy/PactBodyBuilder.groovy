@@ -22,11 +22,19 @@ class PactBodyBuilder extends BaseBuilder {
   private final bodyStack = []
 
   String getBody() {
-    if (prettyPrintBody == null || prettyPrintBody) {
+    if (shouldPrettyPrint()) {
       new JsonBuilder(bodyRepresentation).toPrettyString()
     } else {
       new JsonBuilder(bodyRepresentation).toString()
     }
+  }
+
+  private boolean shouldPrettyPrint() {
+    prettyPrintBody == null && !compactMimeType() || prettyPrintBody
+  }
+
+  private boolean compactMimeType() {
+    mimetype in COMPACT_MIME_TYPES
   }
 
   def methodMissing(String name, args) {

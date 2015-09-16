@@ -26,6 +26,7 @@ class PactBuilder extends BaseBuilder {
 
   private static final String PATH_MATCHER = '$.path'
   private static final String CONTENT_TYPE = 'Content-Type'
+
   Consumer consumer
   Provider provider
   Integer port = null
@@ -155,7 +156,7 @@ class PactBuilder extends BaseBuilder {
       request.body = body.body
       request.matchers.putAll(body.matchers)
     } else if (body != null && !(body instanceof String)) {
-      if (requestData.prettyPrint == null || requestData.prettyPrint) {
+      if (requestData.prettyPrint == null && !compactMimeTypes(requestData) || requestData.prettyPrint) {
         request.body = new JsonBuilder(body).toPrettyString()
       } else {
         request.body = new JsonBuilder(body).toString()
@@ -178,7 +179,7 @@ class PactBuilder extends BaseBuilder {
       response.body = body.body
       response.matchers.putAll(body.matchers)
     } else if (body != null && !(body instanceof String)) {
-      if (responseData.prettyPrint == null || responseData.prettyPrint) {
+      if (responseData.prettyPrint == null && !compactMimeTypes(responseData) || responseData.prettyPrint) {
         response.body = new JsonBuilder(body).toPrettyString()
       } else {
         response.body = new JsonBuilder(body).toString()
@@ -187,6 +188,10 @@ class PactBuilder extends BaseBuilder {
     this.responseData << response
     requestState = false
     this
+  }
+
+  private boolean compactMimeTypes(Map reqResData) {
+    reqResData.headers && reqResData.headers[CONTENT_TYPE] in COMPACT_MIME_TYPES
   }
 
   /**

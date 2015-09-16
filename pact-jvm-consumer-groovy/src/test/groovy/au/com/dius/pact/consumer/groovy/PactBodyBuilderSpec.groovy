@@ -244,6 +244,33 @@ class PactBodyBuilderSpec extends Specification {
     response.body.get() == '{"name":"harry"}'
   }
 
+  def 'does not pretty print bodies if mimetype corresponds to one that requires compact bodies'() {
+    given:
+    service {
+      uponReceiving('a request')
+      withAttributes(method: 'get', path: '/')
+      withBody(mimetype: 'application/x-thrift+json') {
+        name(~/\w+/, 'harry')
+        surname regexp(~/\w+/, 'larry')
+        position regexp(~/staff|contractor/, 'staff')
+        happy(true)
+      }
+      willRespondWith(status: 200)
+      withBody(mimetype: 'application/x-thrift+json') {
+        name(~/\w+/, 'harry')
+      }
+    }
+
+    when:
+    service.buildInteractions()
+    def request = service.interactions.first().request
+    def response = service.interactions.first().response
+
+    then:
+    request.body.get() == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
+    response.body.get() == '{"name":"harry"}'
+  }
+
   private List walkGraph(def value) {
       def set = []
       if (value instanceof Map) {
