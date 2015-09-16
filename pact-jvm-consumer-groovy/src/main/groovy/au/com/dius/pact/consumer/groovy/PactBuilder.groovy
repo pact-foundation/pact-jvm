@@ -173,7 +173,11 @@ class PactBuilder extends BaseBuilder {
       request.body = body.body
       request.matchers.putAll(body.matchers)
     } else if (body != null && !(body instanceof String)) {
-      request.body = new JsonBuilder(body).toPrettyString()
+      if (requestData.prettyPrint == null || requestData.prettyPrint) {
+        request.body = new JsonBuilder(body).toPrettyString()
+      } else {
+        request.body = new JsonBuilder(body).toString()
+      }
     }
     this.requestData << request
     this
@@ -198,7 +202,11 @@ class PactBuilder extends BaseBuilder {
       response.body = body.body
       response.matchers.putAll(body.matchers)
     } else if (body != null && !(body instanceof String)) {
-      response.body = new JsonBuilder(body).toPrettyString()
+      if (responseData.prettyPrint == null || responseData.prettyPrint) {
+        response.body = new JsonBuilder(body).toPrettyString()
+      } else {
+        response.body = new JsonBuilder(body).toString()
+      }
     }
     this.responseData << response
     requestState = false
@@ -238,42 +246,22 @@ class PactBuilder extends BaseBuilder {
    * Allows the body to be defined using a Groovy builder pattern
    * @param mimeType Optional mimetype for the body
    * @param closure Body closure
+   * @deprecated Use the withBody method that takes a Map for options
    */
-  PactBuilder withBody(String mimeType = null, Closure closure) {
-    def body = new PactBodyBuilder()
-    closure.delegate = body
-    closure.call()
-    setupBody(body, mimeType)
-    this
-  }
-
-  private setupBody(PactBodyBuilder body, String mimeType) {
-    if (requestState) {
-      requestData.last().body = body.body
-      requestData.last().matchers.putAll(body.matchers)
-      requestData.last().headers = requestData.last().headers ?: [:]
-      if (mimeType) {
-        requestData.last().headers[CONTENT_TYPE] = mimeType
-      }
-    } else {
-      responseData.last().body = body.body
-      responseData.last().matchers.putAll(body.matchers)
-      responseData.last().headers = responseData.last().headers ?: [:]
-      if (mimeType) {
-        responseData.last().headers[CONTENT_TYPE] = mimeType
-      }
-    }
+  @Deprecated
+  PactBuilder withBody(String mimeType, Closure closure) {
+    withBody(mimeType: mimeType, closure)
   }
 
   /**
    * Allows the body to be defined using a Groovy builder pattern with an array as the root
    * @param mimeType Optional mimetype for the body
    * @param array body
+   * @deprecated Use the withBody method that takes a Map for options
    */
-  PactBuilder withBody(String mimeType = null, List array) {
-    def body = new PactBodyBuilder().build(array)
-    setupBody(body, mimeType)
-    this
+  @Deprecated
+  PactBuilder withBody(String mimeType, List array) {
+    withBody(mimeType: mimeType, array)
   }
 
   /**
@@ -281,11 +269,70 @@ class PactBuilder extends BaseBuilder {
    * using a each like matcher for all elements of the array
    * @param mimeType Optional mimetype for the body
    * @param matcher body
+   * @deprecated Use the withBody method that takes a Map for options
    */
-  PactBuilder withBody(String mimeType = null, LikeMatcher matcher) {
-    def body = new PactBodyBuilder().build(matcher)
-    setupBody(body, mimeType)
+  @Deprecated
+  PactBuilder withBody(String mimeType, LikeMatcher matcher) {
+    withBody(mimeType: mimeType, matcher)
+  }
+
+  /**
+   * Allows the body to be defined using a Groovy builder pattern
+   * @param options The following options are available:
+   *   - mimeType Optional mimetype for the body
+   *   - prettyPrint If the body should be pretty printed
+   * @param closure Body closure
+   */
+  PactBuilder withBody(Map options = [:], Closure closure) {
+    def body = new PactBodyBuilder(mimetype: options.mimetype, prettyPrintBody: options.prettyPrint)
+    closure.delegate = body
+    closure.call()
+    setupBody(body, options)
     this
+  }
+
+  /**
+   * Allows the body to be defined using a Groovy builder pattern with an array as the root
+   * @param options The following options are available:
+   *   - mimeType Optional mimetype for the body
+   *   - prettyPrint If the body should be pretty printed
+   * @param array body
+   */
+  PactBuilder withBody(Map options = [:], List array) {
+    def body = new PactBodyBuilder(mimetype: options.mimetype, prettyPrintBody: options.prettyPrint).build(array)
+    setupBody(body, options)
+    this
+  }
+
+  /**
+   * Allows the body to be defined using a Groovy builder pattern with an array as the root
+   * @param options The following options are available:
+   *   - mimeType Optional mimetype for the body
+   *   - prettyPrint If the body should be pretty printed
+   * @param matcher body
+   */
+  PactBuilder withBody(Map options = [:], LikeMatcher matcher) {
+    def body = new PactBodyBuilder(mimetype: options.mimetype, prettyPrintBody: options.prettyPrint).build(matcher)
+    setupBody(body, options)
+    this
+  }
+
+  private setupBody(PactBodyBuilder body, Map options) {
+    if (requestState) {
+      requestData.last().body = body.body
+      requestData.last().matchers.putAll(body.matchers)
+      requestData.last().headers = requestData.last().headers ?: [:]
+      if (options.mimeType) {
+        requestData.last().headers[CONTENT_TYPE] = options.mimeType
+      }
+    } else {
+      responseData.last().body = body.body
+      responseData.last().matchers.putAll(body.matchers)
+      responseData.last().headers = responseData.last().headers ?: [:]
+      if (options.mimeType) {
+        responseData.last().headers[CONTENT_TYPE] = options.mimeType
+      }
+    }
   }
 
   /**
