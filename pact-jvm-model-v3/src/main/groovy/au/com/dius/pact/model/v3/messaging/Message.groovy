@@ -15,45 +15,45 @@ class Message {
   private static final String JSON = 'application/json'
 
   String description
-    String providerState
-    def contents
-    Map matchingRules = [:]
-    Map metaData = [:]
+  String providerState
+  def contents
+  Map matchingRules = [:]
+  Map metaData = [:]
 
-    byte[] contentsAsBytes() {
-        if (contents) {
-            contents.toString().bytes
-        } else {
-            []
-        }
+  byte[] contentsAsBytes() {
+    if (contents) {
+      contents.toString().bytes
+    } else {
+      []
     }
+  }
 
-    String getContentType() {
-        metaData.contentType ?: JSON
-    }
+  String getContentType() {
+    metaData.contentType ?: JSON
+  }
 
-    Map toMap() {
-        def map = MessagePact.toMap(this)
-        if (contents) {
-            if (metaData.contentType == JSON) {
-                map.contents = new JsonSlurper().parseText(contents.toString())
-            } else {
-                map.contents = contentsAsBytes().encodeBase64().toString()
-            }
-        }
-        map
+  Map toMap() {
+    def map = MessagePact.toMap(this)
+    if (contents) {
+      if (metaData.contentType == JSON) {
+        map.contents = new JsonSlurper().parseText(contents.toString())
+      } else {
+        map.contents = contentsAsBytes().encodeBase64().toString()
+      }
     }
+    map
+  }
 
-    Message fromMap(Map map) {
-        description = map.description ?: ''
-        providerState = map.providerState
-        contents = map.contents
-        matchingRules = map.matchingRules ?: [:]
-        metaData = map.metaData ?: [:]
-        this
-    }
+  Message fromMap(Map map) {
+    description = map.description ?: ''
+    providerState = map.providerState
+    contents = map.contents
+    matchingRules = map.matchingRules ?: [:]
+    metaData = map.metaData ?: [:]
+    this
+  }
 
-    HttpPart asPactRequest() {
-        Response$.MODULE$.apply(200, ['Content-Type': contentType], JsonOutput.toJson(contents), matchingRules)
-    }
+  HttpPart asPactRequest() {
+    Response$.MODULE$.apply(200, ['Content-Type': contentType], JsonOutput.toJson(contents), matchingRules)
+  }
 }

@@ -14,71 +14,111 @@ import au.com.dius.pact.model.v3.messaging.MessagePact
  * Pact builder for consumer tests for messaging
  */
 class PactMessageBuilder extends BaseBuilder {
-    Consumer consumer
-    Provider provider
-    String providerState = ''
-    List messages = []
+  Consumer consumer
+  Provider provider
+  String providerState = ''
+  List messages = []
 
-    PactMessageBuilder serviceConsumer(String consumer) {
-        this.consumer = new Consumer(consumer)
-        this
+  /**
+   * Service consumer
+   * @param consumer
+   */
+  PactMessageBuilder serviceConsumer(String consumer) {
+    this.consumer = new Consumer(consumer)
+    this
+  }
+
+  /**
+   * Provider that the consumer has a pact with
+   * @param provider
+   */
+  PactMessageBuilder hasPactWith(String provider) {
+    this.provider = new Provider(provider)
+    this
+  }
+
+  /**
+   * Provider state required for the message to be produced
+   * @param providerState
+   */
+  PactMessageBuilder given(String providerState) {
+    this.providerState = providerState
+    this
+  }
+
+  /**
+   * Description of the message to be received
+   * @param description
+   */
+  PactMessageBuilder expectsToReceive(String description) {
+    messages << new Message(description, providerState)
+    this
+  }
+
+  /**
+   * Metadata attached to the message
+   * @param metaData
+   */
+  PactMessageBuilder withMetaData(Map metaData) {
+    if (messages.empty) {
+      throw new InvalidPactException('expectsToReceive is required before withMetaData')
+    }
+    messages.last().metaData = metaData
+    this
+  }
+
+  /**
+   * Content of the message
+   * @param contentType optional content type of the message
+   * @deprecated Use version that takes an option map
+   */
+  @Deprecated
+  PactMessageBuilder withContent(String contentType, Closure closure) {
+    withContent(contentType: contentType, closure)
+  }
+
+  /**
+   * Content of the message
+   * @param options Options for generating the message content:
+   *  - contentType: optional content type of the message
+   *  - prettyPrint: if the message content should be pretty printed
+   */
+  PactMessageBuilder withContent(Map options = [:], Closure closure) {
+    if (messages.empty) {
+      throw new InvalidPactException('expectsToReceive is required before withContent')
+    }
+    if (options.contentType) {
+      messages.last().metaData.contentType = options.contentType
     }
 
-    PactMessageBuilder hasPactWith(String provider) {
-        this.provider = new Provider(provider)
-        this
+    def body = new PactBodyBuilder(mimetype: options.contentType, prettyPrintBody: options.prettyPrint)
+    closure.delegate = body
+    closure.call()
+    messages.last().contents = body.body
+    messages.last().matchingRules.putAll(body.matchers)
+
+    this
+  }
+
+  /**
+   * Execute the given closure for each defined message
+   * @param closure
+   */
+  void run(Closure closure) {
+    def pact = new MessagePact(consumer: consumer, provider: provider, messages: messages)
+    def results = messages.collect {
+      try {
+        closure.call(it)
+      } catch (ex) {
+        ex
+      }
     }
 
-    PactMessageBuilder given(String providerState) {
-        this.providerState = providerState
-        this
+    if (results.any { it instanceof Throwable }) {
+      throw new MessagePactFailedException(results.findAll { it instanceof Throwable })
+    } else {
+      pact.write(PactConsumerConfig$.MODULE$.pactRootDir())
     }
-
-    PactMessageBuilder expectsToReceive(String description) {
-        messages << new Message(description, providerState)
-        this
-    }
-
-    PactMessageBuilder withMetaData(Map metaData) {
-        if (messages.empty) {
-            throw new InvalidPactException('expectsToReceive is required before withMetaData')
-        }
-        messages.last().metaData = metaData
-        this
-    }
-
-    PactMessageBuilder withContent(String contentType = null, Closure closure) {
-        if (messages.empty) {
-            throw new InvalidPactException('expectsToReceive is required before withContent')
-        }
-        if (contentType) {
-            messages.last().metaData.contentType = contentType
-        }
-
-        def body = new PactBodyBuilder()
-        closure.delegate = body
-        closure.call()
-        messages.last().contents = body.body
-        messages.last().matchingRules.putAll(body.matchers)
-
-        this
-    }
-
-    void run(Closure closure) {
-        def pact = new MessagePact(consumer: consumer, provider: provider, messages: messages)
-        def results = messages.collect {
-            try {
-                closure.call(it)
-            } catch (ex) {
-                ex
-            }
-        }
-
-        if (results.any { it instanceof Throwable }) {
-            throw new MessagePactFailedException(results.findAll { it instanceof Throwable })
-        } else {
-            pact.write(PactConsumerConfig$.MODULE$.pactRootDir())
-        }
-    }
+  }
 
 }
