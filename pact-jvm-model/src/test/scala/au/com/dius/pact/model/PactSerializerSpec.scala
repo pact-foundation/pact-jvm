@@ -65,7 +65,7 @@ class PactSerializerSpec extends Specification {
 
      "deserialize should not convert fields called 'body'" in {
        val pact = Pact.from(loadTestFile("test_pact_with_bodies.json"))
-       pact.interactions.head.request.body.get must beEqualTo("{\n" +
+       pact.interactions.head.request.body.get must beEqualTo(("{\n" +
          "  \"complete\" : {\n" +
          "    \"certificateUri\" : \"http://...\",\n" +
          "    \"issues\" : {\n" +
@@ -79,7 +79,7 @@ class PactSerializerSpec extends Specification {
          "    \"body\" : 123456\n" +
          "  },\n" +
          "  \"body\" : [ 1, 2, 3 ]\n" +
-         "}")
+         "}").replaceAll("\\s+", ""))
      }
 
      "deserialize pact with no bodies" in {
