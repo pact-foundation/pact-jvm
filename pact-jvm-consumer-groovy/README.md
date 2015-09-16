@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-groovy_2.11`
-* version-id = `2.2.x`
+* version-id = `2.2.x` or `3.0.x`
 
 ##Usage
 
@@ -19,7 +19,7 @@ to define your pacts. For a full example, have a look at the example JUnit `Exam
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:2.2.6'
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.0.4'
     }
   
 Then create an instance of the `PactBuilder` in your test.
@@ -124,6 +124,7 @@ Defines the request for the interaction. The request data map can contain the fo
 | query | Query parameters as a Map<String, List> |  |
 | headers | Map of key-value pairs for the request headers | |
 | body | The body of the request. If it is not a string, it will be converted to JSON. Also accepts a PactBodyBuilder. | |
+| prettyPrint | Boolean value to control if the body is pretty printed. See note on Pretty Printed Bodies below |
 
 For the path and header attributes (version 2.2.2+ for headers), you can use regular expressions to match.
 You can either provide a regex `Pattern` class or use the `regexp` method to construct a `RegexpMatcher`
@@ -145,6 +146,31 @@ For example:
 
 Constructs the body of the request or response by invoking the supplied closure in the context of a PactBodyBuilder.
 
+##### Pretty Printed Bodies [Version 2.2.15+, 3.0.4+]
+
+An optional Map can be supplied to control how the body is generated. The option values are available:
+
+| Option | Description |
+|--------|-------------|
+| mimetype | The mimetype of the body. Defaults to `application/json` |
+| prettyPrint | Boolean value controlling whether to pretty-print the body or not. Defaults to true |
+
+If the prettyPrint option is not specified, the bodies will be pretty printed unless the mime type corresponds to one
+ that requires compact bodies. Currently only `application/x-thrift+json` is classed as requiring a compact body.
+
+For an example of turning off pretty printing:
+
+```groovy
+service {
+    uponReceiving('a request')
+    withAttributes(method: 'get', path: '/')
+    withBody(prettyPrint: false) {
+      name 'harry'
+      surname 'larry'
+    }
+}
+```
+
 #### willRespondWith(Map responseData)
 
 Defines the response for the interaction. The response data map can contain the following:
@@ -154,6 +180,7 @@ Defines the response for the interaction. The response data map can contain the 
 | status | The HTTP status code to return | 200 |
 | headers | Map of key-value pairs for the response headers | |
 | body | The body of the response. If it is not a string, it will be converted to JSON. Also accepts a PactBodyBuilder. | |
+| prettyPrint | Boolean value to control if the body is pretty printed. See note on Pretty Printed Bodies above |
 
 For the headers (version 2.2.2+), you can use regular expressions to match. You can either provide a regex `Pattern` class or use
 the `regexp` method to construct a `RegexpMatcher` (you can use any of the defined matcher methods, see DSL methods below).

@@ -41,7 +41,7 @@ def eventStream = new PactMessageBuilder().call {
 
     expectsToReceive 'an order confirmation message'
     withMetaData(type: 'OrderConfirmed') // Can define any key-value pairs here
-    withContent('application/json') {
+    withContent(contentType: 'application/json') {
         type 'OrderConfirmed'
         audit {
             userCode 'messageService'
