@@ -47,12 +47,6 @@ class PactBuilder extends BaseBuilder {
   }
 
   /**
-   * @deprecated Use serviceConsumer instead
-   */
-  @Deprecated
-  def service_consumer = this.&serviceConsumer
-
-  /**
    * Defines the provider the consumer has a pact with
    * @param provider provider name
    */
@@ -60,12 +54,6 @@ class PactBuilder extends BaseBuilder {
     this.provider = new Provider(provider)
     this
   }
-
-  /**
-   * @deprecated Use hasPactWith instead
-   */
-  @Deprecated
-  def has_pact_with = this.&hasPactWith
 
   /**
    * Defines the port the provider will listen on
@@ -96,12 +84,6 @@ class PactBuilder extends BaseBuilder {
     requestState = true
     this
   }
-
-  /**
-   * @deprecated Use uponReceiving instead
-   */
-  @Deprecated
-  def upon_receiving = this.&uponReceiving
 
   def buildInteractions() {
     int numInteractions = Math.min(requestData.size(), responseData.size())
@@ -184,12 +166,6 @@ class PactBuilder extends BaseBuilder {
   }
 
   /**
-   * @deprecated Use withAttributes instead
-   */
-  @Deprecated
-  def with = this.&withAttributes
-
-  /**
    * Defines the response attributes (body, headers, etc.) that are returned for the request
    * @param responseData Map of attributes
    * @return
@@ -212,12 +188,6 @@ class PactBuilder extends BaseBuilder {
     requestState = false
     this
   }
-
-  /**
-   * @deprecated Use willRespondWith instead
-   */
-  @Deprecated
-  def will_respond_with = this.&willRespondWith
 
   /**
    * Executes the providers closure in the context of the interactions defined on this builder.
