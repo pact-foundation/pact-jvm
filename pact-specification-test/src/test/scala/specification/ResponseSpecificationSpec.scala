@@ -5,7 +5,6 @@ import java.io.File
 import au.com.dius.pact.model._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-import org.specs2.specification.Example
 
 abstract class ResponseSpecificationSpec extends SpecificationSpec {
 
@@ -18,7 +17,7 @@ abstract class ResponseSpecificationSpec extends SpecificationSpec {
     }
   }
 
-  def fragments(path: String): Seq[Example] = {
+  def fragments(path: String) = {
     val resources = getClass.getResource(path)
     val file = new File(resources.toURI)
     file.listFiles().flatMap { folder =>
@@ -36,7 +35,7 @@ abstract class ResponseSpecificationSpec extends SpecificationSpec {
             expected = Pact.extractResponse(transformedJson, "expected"))
 
           val description = s"$dirName/$fileName ${testData.comment}"
-          Example(description, {
+          fragmentFactory.example(description, {
             test(testData)
           })
         }

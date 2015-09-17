@@ -1,23 +1,24 @@
 package au.com.dius.pact.provider.specs2
 
+import java.util.concurrent.Executors
+
+import au.com.dius.pact.model.dispatch.HttpClient
+import au.com.dius.pact.model.{FullResponseMatch, Pact, ResponseMatching}
+import org.json4s.JsonInput
 import org.specs2.Specification
 import org.specs2.execute.Result
-import org.specs2.specification.{Fragment, Example, Fragments}
-import au.com.dius.pact.model.{FullResponseMatch, ResponseMatching, Pact}
-import scala.concurrent.{ExecutionContext, Await}
-import au.com.dius.pact.model.dispatch.HttpClient
+import org.specs2.specification.core.Fragments
+
 import scala.concurrent.duration.Duration
-import org.json4s.JsonInput
-import java.util.concurrent.Executors
+import scala.concurrent.{Await, ExecutionContext}
 
 trait ProviderSpec extends Specification {
 
   def timeout = Duration.apply(10000, "s")
 
-  override def is: Fragments = {
+  override def is = {
     val pact = Pact.from(honoursPact)
-
-    val fragments:Seq[Fragment] = pact.interactions.map { interaction =>
+    val fs = pact.interactions.map { interaction =>
       val description = s"${interaction.providerState} ${interaction.description}"
       val test: String => Result = { url =>
         implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
@@ -25,10 +26,9 @@ trait ProviderSpec extends Specification {
         val actualResponse = Await.result(actualResponseFuture, timeout)
         ResponseMatching.matchRules(interaction.response, actualResponse) must beEqualTo(FullResponseMatch)
       }
-      Example(description,{inState(interaction.providerState.get, test)})
+      fragmentFactory.example(description, {inState(interaction.providerState.get, test)})
     }
-
-    Fragments.create(fragments :_*)
+    Fragments(fs :_*)
   }
 
   def honoursPact: JsonInput

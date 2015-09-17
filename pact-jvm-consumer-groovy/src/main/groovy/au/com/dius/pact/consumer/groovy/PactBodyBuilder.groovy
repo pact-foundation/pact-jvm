@@ -14,13 +14,27 @@ class PactBodyBuilder extends BaseBuilder {
   public static final String ALL_LIST_ITEMS = '[*]'
 
   def matchers = [:]
+  def mimetype = null
+  Boolean prettyPrintBody = null
 
   private bodyRepresentation = [:]
   private path = '$.body'
   private final bodyStack = []
 
   String getBody() {
-    new JsonBuilder(bodyRepresentation).toPrettyString()
+    if (shouldPrettyPrint()) {
+      new JsonBuilder(bodyRepresentation).toPrettyString()
+    } else {
+      new JsonBuilder(bodyRepresentation).toString()
+    }
+  }
+
+  private boolean shouldPrettyPrint() {
+    prettyPrintBody == null && !compactMimeType() || prettyPrintBody
+  }
+
+  private boolean compactMimeType() {
+    mimetype in COMPACT_MIME_TYPES
   }
 
   def methodMissing(String name, args) {

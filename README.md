@@ -107,6 +107,10 @@ For publishing pacts to a pact broker, have a look at https://github.com/warmuuh
 
 You want to look at: [pact leiningen plugin](pact-jvm-provider-lein)
 
+#### verify pacts with Specs2
+
+Have a look at [writing specs to validate a provider](https://github.com/realestate-com-au/pact-jvm-provider-specs2)
+
 #### verify pacts with a Spring MVC project
 
 Have a look at [Spring MVC Pact Test Runner](https://github.com/realestate-com-au/pact-jvm-provider-spring-mvc)
@@ -140,54 +144,4 @@ Which is a project that aims at providing tooling to coordinate pact generation 
 
 ## I want to contribute
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
-
-## Building the library
-
-Most of Pact-JVM is written in Scala and is built with Gradle.
-
-#### To build the libraries:
-
-    $ ./gradlew clean build
-
-You can publish pact-jvm to your local maven repo using:
-
-    $ ./gradlew clean install
-
-To publish to a nexus repo:
-
-    $ ./gradlew clean check uploadArchives
-
-You will have to change the nexus URL and username/password in build.gradle and you must be added to the nexus project
-to be able to do this
-
-### Building the SBT modules
-
-The SBT need to be build using SBT on the v2.x branch. First check that branch out:
-
-    $ git checkout v2.x
-
-Then build all the other modules using Gradle and publish to your local maven repo.
-
-    $ ./gradlew install
-
-Once that is done, you can now build the SBT modules.
-
-#### Note on building pact JVM with Java 6 or 7
-
-Scala requires a lot of permgen space to compile. If you're using Java 6 or 7, use the following java and sbt options:
-
-    export JAVA_OPTS='-Xmx2048m -XX:MaxPermSize=1024m -XX:PermSize=1024m'
-    export SBT_OPTS='-Xmx2048m -XX:MaxPermSize=1024m -XX:PermSize=1024m'
-
-To build the SBT modules:
-
-    $ sbt clean test publishM2
-
-To publish to a nexus repo, change the url in project/Build.scala then run:
-
-    $ sbt clean test publish
+[Documentation for contributors is on the wiki](https://github.com/DiUS/pact-jvm/wiki/Hot-to-contribute-to-Pact-JVM).

@@ -7,7 +7,7 @@ import au.com.dius.pact.consumer.PactVerified$
  * Base class for builders
  */
 class BaseBuilder extends Matchers {
-
+    public static final List COMPACT_MIME_TYPES = ['application/x-thrift+json']
     public static final PactVerified$ PACTVERIFIED = PactVerified$.MODULE$
 
     def call(Closure closure) {

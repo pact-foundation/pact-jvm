@@ -24,4 +24,9 @@ public @interface PactVerification {
      * If a mismatch is expected. Use to test failure conditions
      */
     boolean expectMismatch() default false;
+
+    /**
+     * Method to call to get the pact fragment. Defaults to empty string which results in using the first one found
+     */
+    String fragment() default "";
 }

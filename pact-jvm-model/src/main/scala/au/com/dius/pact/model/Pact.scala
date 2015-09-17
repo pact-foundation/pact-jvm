@@ -56,7 +56,7 @@ object Pact {
       case JString(s) => Some(s)
       case JNothing => None
       case JNull => None
-      case b => Some(pretty(b))
+      case b => Some(compact(b))
     }
   }
 

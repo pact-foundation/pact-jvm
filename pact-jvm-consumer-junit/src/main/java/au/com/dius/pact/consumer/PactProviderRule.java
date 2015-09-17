@@ -74,7 +74,7 @@ public class PactProviderRule extends ExternalResource {
                     return;
                 }
 
-                Map<String, PactFragment> pacts = getPacts();
+                Map<String, PactFragment> pacts = getPacts(pactDef.fragment());
                 PactFragment fragment = null;
                 if (pactDef.value().length == 1 && StringUtils.isEmpty(pactDef.value()[0])) {
                     fragment = pacts.values().iterator().next();
@@ -117,12 +117,13 @@ public class PactProviderRule extends ExternalResource {
 
     /**
      * scan all methods for @Pact annotation and execute them, if not already initialized
+     * @param fragment
      */
-    protected Map<String, PactFragment> getPacts() {
+    protected Map<String, PactFragment> getPacts(String fragment) {
         if (fragments == null) {
             fragments = new HashMap <String, PactFragment> ();
             for (Method m: target.getClass().getMethods()) {
-                if (conformsToSignature(m)) {
+                if (conformsToSignature(m) && methodMatchesFragment(m, fragment)) {
                     Pact pact = m.getAnnotation(Pact.class);
                     if (StringUtils.isEmpty(pact.provider()) || provider.equals(pact.provider())) {
                         ConsumerPactBuilder.PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(pact.consumer())
@@ -138,6 +139,10 @@ public class PactProviderRule extends ExternalResource {
             }
         }
         return fragments;
+    }
+
+    private boolean methodMatchesFragment(Method m, String fragment) {
+        return StringUtils.isEmpty(fragment) || m.getName().equals(fragment);
     }
 
     /**

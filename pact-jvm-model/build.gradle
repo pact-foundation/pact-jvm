@@ -1,7 +1,9 @@
 dependencies {
-    compile 'org.json:json:20140107',
-      "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.8.2",
-      "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.1",
-      project(":pact-jvm-logging_${project.scalaVersion}"),
-      'org.apache.httpcomponents:httpclient:4.4.1'
+  compile 'org.json:json:20140107',
+    "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.8.2",
+    "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.1",
+    'org.apache.httpcomponents:httpclient:4.4.1'
+  compile project(":pact-jvm-logging_${project.scalaVersion}")
+
+  testCompile "org.specs2:specs2-mock_${project.scalaVersion}:3.6.4"
 }

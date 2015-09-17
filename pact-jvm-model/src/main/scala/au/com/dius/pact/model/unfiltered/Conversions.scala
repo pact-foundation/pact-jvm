@@ -26,7 +26,8 @@ object Conversions {
       else
         org.apache.http.entity.ContentType.parse(response.getContentType)
     val charset = if (contentType.getCharset == null) "UTF-8" else contentType.getCharset.name()
-    Response(response.getStatusCode, Some(toMap(response.getHeaders)), Some(response.getResponseBody(charset)), None)
+    val body = response.getResponseBody(charset)
+    Response(response.getStatusCode, Some(toMap(response.getHeaders)), if (body.isEmpty) None else Some(body), None)
   }
 
   case class Headers(headers: Option[Map[String, String]]) extends unfiltered.response.Responder[Any] {
@@ -56,7 +57,7 @@ object Conversions {
     uri.split('?').head
   }
 
-  def toBody(request: HttpRequest[ReceivedMessage]) = {
+  def toBody(request: HttpRequest[ReceivedMessage], charset: String = "UTF-8") = {
     val br = if (request.headers(ContentEncoding.GZip.name).contains("gzip")) {
       new BufferedReader(new InputStreamReader(new GZIPInputStream(request.inputStream)))
     } else {
