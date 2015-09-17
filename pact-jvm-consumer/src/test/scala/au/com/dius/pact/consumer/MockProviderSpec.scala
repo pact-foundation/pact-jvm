@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer
 
+import org.specs2.concurrent.ExecutionEnv
 import org.specs2.mutable.Specification
 import au.com.dius.pact.consumer.Fixtures._
 import au.com.dius.pact.model._
@@ -31,8 +32,8 @@ class MockProviderSpec extends Specification {
   }
 
   //TODO: move PactServer startup and shutdown into an around function
-  "Pact Mock Service Provider" should {
-    "Respond to invalid and valid requests" in {
+  "Pact Mock Service Provider" >> {
+    "Respond to invalid and valid requests" >> { implicit ee: ExecutionEnv =>
       val server = DefaultMockProvider.withDefaultConfig()
 
       val validRequest = request.copy(path = s"${server.config.url}/")
@@ -41,11 +42,11 @@ class MockProviderSpec extends Specification {
       val Success((codeResult, results)) = server.runAndClose[Result](pact) {
   
         val invalidResponse = HttpClient.run(invalidRequest)
-        invalidResponse.map(_.status) must beEqualTo(500).await(timeout = timeout)
+        invalidResponse.map(_.status) must be_==(500).awaitFor(timeout)
   
         //hit server with valid request
         val validResponse = HttpClient.run(validRequest)
-        validResponse.map(_.status) must beEqualTo(response.status).await(timeout = timeout)
+        validResponse.map(_.status) must be_==(response.status).awaitFor(timeout)
       }
 
       verify(codeResult) must beNone

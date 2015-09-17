@@ -41,7 +41,8 @@ subprojects {
                   "com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.1.0",
                   "org.json4s:json4s-native_${project.scalaVersion}:$json4sVersion",
                   "org.json4s:json4s-jackson_${project.scalaVersion}:$json4sVersion"
-          testCompile "org.specs2:specs2_${project.scalaVersion}:2.3.13"
+
+          testCompile "org.specs2:specs2-core_${project.scalaVersion}:3.6.4", "org.specs2:specs2-junit_${project.scalaVersion}:3.6.4"
 
           compile "org.scala-lang.modules:scala-xml_2.11:1.0.2"
       }

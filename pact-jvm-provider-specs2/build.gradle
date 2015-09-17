@@ -1,4 +1,4 @@
 
 dependencies {
-    compile project(":pact-jvm-provider_${project.scalaVersion}"), "org.specs2:specs2_${project.scalaVersion}:2.3.13"
+    compile project(":pact-jvm-provider_${project.scalaVersion}"), "org.specs2:specs2-core_${project.scalaVersion}:3.6.4"
 }

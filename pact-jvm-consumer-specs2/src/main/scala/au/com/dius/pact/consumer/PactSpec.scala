@@ -1,26 +1,21 @@
 package au.com.dius.pact.consumer
 
+import au.com.dius.pact.model.PactFragmentBuilder.PactWithAtLeastOneRequest
 import au.com.dius.pact.model.{MockProviderConfig, PactFragment}
 import org.specs2.SpecificationLike
-import org.specs2.specification._
-import org.specs2.matcher.{StandardMatchResults, MustMatchers}
-import org.specs2.execute.{Result, StandardResults}
-import au.com.dius.pact.model.PactFragmentBuilder.PactWithAtLeastOneRequest
-import org.specs2.execute.Failure
+import org.specs2.concurrent.ExecutionEnv
+import org.specs2.execute.{AsResult, Failure, Result}
+import org.specs2.specification.core.{Execution, Fragments}
 
-trait PactSpec extends SpecificationLike
-  with MustMatchers
-  with StandardResults
-  with StandardMatchResults
-  with FragmentsBuilder {
-
-  var fragments = Seq[Fragment]()
+trait PactSpec extends SpecificationLike {
 
   val provider: String
   val consumer: String
   val providerState: String = ""
 
-  override def is: Fragments = Fragments.create(fragments :_*)
+  var fs = Fragments()
+
+  def is = fragmentsAsSpecStructure(fs)
 
   def uponReceiving(description: String) = {
     PactFragment.consumer(consumer).hasPactWith(provider).given(providerState).uponReceiving(description)
@@ -30,13 +25,13 @@ trait PactSpec extends SpecificationLike
     new ReadyForTest(PactFragment(builder.consumer, builder.provider, builder.interactions))
   }
 
-  class ReadyForTest(fragment: PactFragment) {
-    def during(test: MockProviderConfig => Result) = {
+  class ReadyForTest(pactFragment: PactFragment) {
+    def during(test: (MockProviderConfig, ExecutionEnv) => Result) = {
       val config = MockProviderConfig.createDefault()
-      val description = fragment.interactions.map(i => s"${i.providerState} ${i.description}").mkString(" ")
+      val description = pactFragment.interactions.map(i => s"${i.providerState} ${i.description}").mkString(" ")
 
-      fragments = fragments :+ Example(description, {
-        val result = fragment.duringConsumerSpec(config)(test(config), verify)
+      fs ^ fragmentFactory.example(description, Execution.withExecutionEnv { ee: ExecutionEnv =>
+        val result = pactFragment.duringConsumerSpec(config)(test(config, ee), verify)
         result match {
           case PactVerified => success
           case PactMismatch(results, error) => Failure(PrettyPrinter.print(results))
