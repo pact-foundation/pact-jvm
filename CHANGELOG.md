@@ -24,6 +24,32 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 3cad739 - bump version (Ronald Holshausen, Mon Sep 7 21:02:29 2015 +1000)
 * 7f8dd18 - updated changelog (Ronald Holshausen, Mon Sep 7 20:09:06 2015 +1000)
 
+# 2.2.15 - bugfix release
+
+* e8562a7 - Merge branch 'master' into v2.x (Ronald Holshausen, Thu Sep 17 17:03:02 2015 +1000)
+* 58bcc34 - fixed consumer specs2 support updated readmes after upgrade to specs2 3.x #135 (Ronald Holshausen, Thu Sep 17 16:07:28 2015 +1000)
+* 3d37cd3 - Upgrade specs to version 3.6.4 #135 (Ronald Holshausen, Thu Sep 17 13:00:17 2015 +1000)
+* c2db15e - update the Groovy message DSL readmes on to be able to turn off pretty printing #158 (Ronald Holshausen, Wed Sep 16 14:51:01 2015 +1000)
+* 0d24e91 - update the Groovy message DSL to be able to turn off pretty printing #158 (Ronald Holshausen, Wed Sep 16 14:35:33 2015 +1000)
+* cf0eee3 - do not pretty printing bodies if the mime type corresponds to one that requires compact bodies #158 (Ronald Holshausen, Wed Sep 16 14:12:3
+* 2f93013 - removed some deprecated methods (Ronald Holshausen, Wed Sep 16 13:53:33 2015 +1000)
+* d984822 - allow the groovy DSL to control pretty printing bodies #158 (Ronald Holshausen, Wed Sep 16 13:43:18 2015 +1000)
+* 8070e91 - moved contribution doco to the wiki (Ronald Holshausen, Wed Sep 16 10:56:46 2015 +1000)
+* dfb3c8a - use compact printer for JSON bodies #158 (Ronald Holshausen, Wed Sep 16 10:20:54 2015 +1000)
+* 47b2f8a - Merge pull request #162 from venksub/master (Ronald Holshausen, Wed Sep 16 09:43:53 2015 +1000)
+* 33791e4 - Fix codenarc violations in last commit (Venkatesan Subramanian, Tue Sep 15 16:33:36 2015 -0700)
+* 217a1a3 - Fix for no project classpath in maven v3 pact verifier (Venkatesan Subramanian, Tue Sep 15 15:48:09 2015 -0700)
+* ef56a02 - Merge pull request #1 from DiUS/master (venksub, Tue Sep 15 15:37:11 2015 -0700)
+* 8705200 - Fix for invalid cast when using a V3 pact #160 (Ronald Holshausen, Mon Sep 14 13:48:01 2015 +1000)
+* 496416c - Fix a regression where the type matcher was not handling lists or maps #156 (Ronald Holshausen, Fri Sep 11 14:56:06 2015 +1000)
+* 6548661 - Allow multiple pact fragment methods in the same test #148 (Ronald Holshausen, Fri Sep 11 12:24:06 2015 +1000)
+* 93b05c5 - allow the lein plugin to accept a function for the host (Ronald Holshausen, Tue Sep 8 16:27:57 2015 +1000)
+* 8ac4642 - Revert "allow the lein plugin to accept a function for the host" (Ronald Holshausen, Tue Sep 8 16:20:49 2015 +1000)
+* 11fdb43 - allow the lein plugin to accept a function for the host (Ronald Holshausen, Tue Sep 8 16:06:26 2015 +1000)
+* 3cad739 - bump version (Ronald Holshausen, Mon Sep 7 21:02:29 2015 +1000)
+* 7f8dd18 - updated changelog (Ronald Holshausen, Mon Sep 7 20:09:06 2015 +1000)
+* 2b2509b - bump version (Ronald Holshausen, Mon Sep 7 20:58:47 2015 +1000)
+
 # 3.0.3 - leiningen plugin
 
 * 893103c - updated readme about start and terminate provider in lein plugin (Ronald Holshausen, Mon Sep 7 17:21:06 2015 +1000)
