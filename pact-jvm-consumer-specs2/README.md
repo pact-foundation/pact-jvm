@@ -6,30 +6,42 @@ pact-jvm-consumer-specs2
 ## Dependency
 
 In the root folder of your project in build.sbt add the line:
-```
+
+```scala
 libraryDependencies += "au.com.dius" %% "pact-jvm-consumer-specs2" % "3.0.4"
 ```
 
+or if you are using Gradle:
+
+```groovy
+dependencies {
+    testCompile "au.com.dius:pact-jvm-consumer-specs2:3.0.4"
+}
+
+```
+
+*Note:* `PactSpec` requires spec2 3.x
+
 ## Usage
 
-To author a test, extend `PactSpec`
+To author a test, mix `PactSpec` into your spec
 
 Here is a simple example:
 
 ```
 import au.com.dius.pact.consumer.PactSpec
 
-class ExamplePactSpec extends PactSpec {
+class ExamplePactSpec extends Specification with PactSpec {
 
   val consumer = "My Consumer"
   val provider = "My Provider"
 
-  uponReceiving("a request for foo")
+  override def is = uponReceiving("a request for foo")
     .matching(path = "/foo")
     .willRespondWith(body = "{}")
-  .during { providerConfig =>
-    ConsumerService(providerConfig.url).simpleGet("/foo") must beEqualTo(200, Some("{}")).await
-  }
+    .withConsumerTest { providerConfig =>
+      Await.result(ConsumerService(providerConfig.url).simpleGet("/foo"), Duration(1000, MILLISECONDS)) must beEqualTo(200, Some("{}"))
+    }
 }
 
 ```

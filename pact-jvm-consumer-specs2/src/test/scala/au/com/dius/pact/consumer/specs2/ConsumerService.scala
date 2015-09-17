@@ -34,4 +34,10 @@ case class ConsumerService(serverUrl: String) {
       (response.status, response.body)
     }
   }
+
+  def options(path: String): Future[(Int, Option[String], Option[Map[String, String]])] = {
+    HttpClient.run(Request("OPTION", serverUrl + path, None, None, None, None)).map { response =>
+      (response.status, response.body, response.headers)
+    }
+  }
 }

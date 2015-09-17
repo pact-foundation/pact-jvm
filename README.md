@@ -107,6 +107,10 @@ For publishing pacts to a pact broker, have a look at https://github.com/warmuuh
 
 You want to look at: [pact leiningen plugin](pact-jvm-provider-lein)
 
+#### verify pacts with Specs2
+
+Have a look at [writing specs to validate a provider](https://github.com/realestate-com-au/pact-jvm-provider-specs2)
+
 #### verify pacts with a Spring MVC project
 
 Have a look at [Spring MVC Pact Test Runner](https://github.com/realestate-com-au/pact-jvm-provider-spring-mvc)
