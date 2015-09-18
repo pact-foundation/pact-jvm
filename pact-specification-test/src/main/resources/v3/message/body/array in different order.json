@@ -1,23 +1,21 @@
 {
   "match": false,
   "comment": "Favourite colours in wrong order",
-  "expected" : {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "body": {
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
       "alligator":{
         "favouriteColours": ["red","blue"]
       }
     }
   },
   "actual": {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "body": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
       "alligator":{
         "favouriteColours": ["blue", "red"]
       }

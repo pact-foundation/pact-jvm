@@ -1,18 +1,16 @@
 {
   "match": true,
   "comment": "Missing body",
-  "expected" : {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"}
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
+    }
   },
   "actual": {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "body": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
       "alligator": {
         "age": 3
       }

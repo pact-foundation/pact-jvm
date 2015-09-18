@@ -1,26 +1,24 @@
 {
   "match": true,
-  "comment": "Requests match with regex",
-  "expected" : {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "matchingRules": {
-      "$.body['2'].str": {"match": "regex", "regex": "\\w+"}
+  "comment": "Messages match with regex with bracket notation",
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
     },
-    "body": {
+    "contents": {
       "2" : {
         "str" : "jildrdmxddnVzcQZfjCA"
       }
+    },
+    "matchingRules": {
+      "$.body['2'].str": {"match": "regex", "regex": "\\w+"}
     }
   },
   "actual": {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "body": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
       "2" : {
         "str" : "saldfhksajdhffdskkjh"
       }

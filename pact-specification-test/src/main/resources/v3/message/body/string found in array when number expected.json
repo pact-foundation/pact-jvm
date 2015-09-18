@@ -1,23 +1,21 @@
 {
   "match": false,
   "comment": "Favourite Numbers expected to be numbers, but 2 is a string",
-  "expected" : {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "body": {
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
       "alligator":{
         "favouriteNumbers": [1,2,3]
       }
     }
   },
   "actual": {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "body": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
       "alligator":{
         "favouriteNumbers": [1,"2",3]
       }

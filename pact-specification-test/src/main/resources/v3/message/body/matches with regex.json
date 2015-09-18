@@ -1,30 +1,28 @@
 {
   "match": true,
-  "comment": "Requests match with regex",
-  "expected" : {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "matchingRules": {
-      "$.body.alligator.name": {"match": "regex", "regex": "\\w+"},
-      "$.body.alligator.favouriteColours[0]": {"match": "regex", "regex": "red|blue"},
-      "$.body.alligator.favouriteColours[1]": {"match": "regex", "regex": "red|blue"}
+  "comment": "Messages match with regex",
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
     },
-    "body": {
+    "contents": {
       "alligator":{
         "name": "Mary",
         "feet": 4,
         "favouriteColours": ["red","blue"]
       }
+    },
+    "matchingRules": {
+      "$.body.alligator.name": {"match": "regex", "regex": "\\w+"},
+      "$.body.alligator.favouriteColours[0]": {"match": "regex", "regex": "red|blue"},
+      "$.body.alligator.favouriteColours[1]": {"match": "regex", "regex": "red|blue"}
     }
   },
   "actual": {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "body": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
       "alligator":{
         "feet": 4,
         "name": "Harry",

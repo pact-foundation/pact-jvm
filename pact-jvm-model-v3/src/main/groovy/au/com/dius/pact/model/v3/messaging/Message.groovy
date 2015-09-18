@@ -54,6 +54,7 @@ class Message {
   }
 
   HttpPart asPactRequest() {
-    Response$.MODULE$.apply(200, ['Content-Type': contentType], JsonOutput.toJson(contents), matchingRules)
+    Response$.MODULE$.apply(200, ['Content-Type': contentType], contents ? JsonOutput.toJson(contents) : null,
+      matchingRules)
   }
 }

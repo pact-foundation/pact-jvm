@@ -1,12 +1,11 @@
 {
   "match": false,
   "comment": "Missing key alligator name",
-  "expected" : {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "body": {
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
       "alligator":{
         "name": "Mary",
         "age": 3
@@ -14,11 +13,10 @@
     }
   },
   "actual": {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "body": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
       "alligator": {
         "age": 3
       }

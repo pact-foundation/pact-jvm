@@ -1,12 +1,11 @@
 {
   "match": true,
-  "comment": "Requests match",
-  "expected" : {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "body": {
+  "comment": "Messages match",
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
       "alligator":{
         "name": "Mary",
         "feet": 4,
@@ -15,11 +14,10 @@
     }
   },
   "actual": {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "body": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
       "alligator":{
         "feet": 4,
         "name": "Mary",

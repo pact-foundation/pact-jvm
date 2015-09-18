@@ -1,29 +1,27 @@
 {
   "match": true,
-  "comment": "Requests match with same type",
-  "expected" : {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "matchingRules": {
-      "$.body.alligator.name": {"match": "type"},
-      "$.body.alligator.feet": {"match": "type"}
+  "comment": "Messages match with same type",
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
     },
-    "body": {
+    "contents": {
       "alligator":{
         "name": "Mary",
         "feet": 4,
         "favouriteColours": ["red","blue"]
       }
+    },
+    "matchingRules": {
+      "$.body.alligator.name": {"match": "type"},
+      "$.body.alligator.feet": {"match": "type"}
     }
   },
   "actual": {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "body": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
       "alligator":{
         "feet": 5,
         "name": "Harry the very hungry alligator with an extra foot",

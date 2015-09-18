@@ -1,30 +1,28 @@
 {
   "match": true,
   "comment": "Types and regular expressions match",
-  "expected" : {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "matchingRules": {
-      "$.body.animals": {"min": 1, "match": "type"},
-      "$.body.animals[*].*": {"match": "type"},
-      "$.body.animals[*].phoneNumber": {"match": "regex", "regex": "\\d+"}
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
     },
-    "body": {
+    "contents": {
       "animals": [
         {
           "phoneNumber": "0415674567"
         }
       ]
+    },
+    "matchingRules": {
+      "$.body.animals": {"min": 1, "match": "type"},
+      "$.body.animals[*].*": {"match": "type"},
+      "$.body.animals[*].phoneNumber": {"match": "regex", "regex": "\\d+"}
     }
   },
   "actual": {
-    "method": "POST",
-    "path": "/",
-    "query": "",
-    "headers": {"Content-Type": "application/json"},
-    "body": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
       "animals": [
         {
           "phoneNumber": "333"
