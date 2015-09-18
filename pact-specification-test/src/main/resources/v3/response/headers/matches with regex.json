@@ -1,0 +1,20 @@
+{
+  "match": true,
+  "comment": "Headers match with regex",
+  "expected" : {
+    "headers": {
+      "Accept": "alligators",
+      "Content-Type": "hippos"
+    },
+    "matchingRules": {
+      "$.headers.Accept": {"match": "regex", "regex": "\\w+"}
+    }
+  },
+  "actual": {
+    "headers": {
+      "Content-Type": "hippos",
+      "Accept": "godzilla"
+    }
+  }
+}
+        

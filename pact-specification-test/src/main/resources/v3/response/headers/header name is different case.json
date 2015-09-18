@@ -1,0 +1,14 @@
+{
+  "match": true,
+  "comment": "Header name is case insensitive",
+  "expected" : {
+    "headers": {
+      "Accept": "alligators"
+    }
+  },
+  "actual": {
+    "headers": {
+      "ACCEPT": "alligators"
+    }
+  }
+}

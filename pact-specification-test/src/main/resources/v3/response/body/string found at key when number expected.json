@@ -1,0 +1,20 @@
+{
+  "match": false,
+  "comment": "Number of feet expected to be number but was string",
+  "expected" : {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "alligator":{
+        "feet": 4
+      }
+    }
+  },
+  "actual": {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "alligator":{
+        "feet": "4"
+      }
+    }
+  }
+}

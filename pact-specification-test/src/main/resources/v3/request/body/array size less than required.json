@@ -1,0 +1,29 @@
+{
+  "match": false,
+  "comment": "Empty array",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": "",
+    "headers": {"Content-Type": "application/json"},
+    "matchingRules": {
+      "$.body.animals": {"min": 1}
+    },
+    "body": {
+      "animals": [
+        {
+          "name" : "Fred"
+        }
+      ]
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": "",
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "animals": []
+    }
+  }
+}
