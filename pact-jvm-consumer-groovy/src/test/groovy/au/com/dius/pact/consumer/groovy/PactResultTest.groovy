@@ -131,7 +131,7 @@ class PactResultTest {
                 assert response.status == 200
             }
         } catch (PactFailedException ex) {
-            assert ex.message.contains('The following requests where not received:\n' +
+            assert ex.message.contains('The following requests were not received:\n' +
                 'Interaction: a valid post request\n' +
                 '\tin state None\n' +
                 'request:\n' +

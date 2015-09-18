@@ -60,7 +60,7 @@ public class UnexpectedRequestConsumerPassesTest extends ExpectedToFailBase {
     @Override
     protected void assertException(Throwable e) {
         assertThat(e.getMessage(),
-            containsString("The following unexpected results where received:\n" +
+            containsString("The following unexpected results were received:\n" +
                 "\tmethod: OPTIONS\n" +
                 "\tpath: /options\n"));
 
