@@ -8,5 +8,7 @@ jdk:
 env:
   - SCALA=2.10
   - SCALA=2.11
+  global:
+    - JAVA_OPTS="-XX:MaxPermSize=512m -XX:ReservedCodeCacheSize=512m"
 script: ./gradlew --stacktrace --no-daemon -i check_$SCALA
 install: true
