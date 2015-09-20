@@ -1,13 +1,13 @@
 package au.com.dius.pact.consumer.specs2
 
-import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.util.concurrent.TimeUnit.SECONDS
 
 import au.com.dius.pact.consumer.PactSpec
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 
-import scala.concurrent.{Future, Await}
+import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 @RunWith(classOf[JUnitRunner])
@@ -16,7 +16,7 @@ class ExamplePactSpec extends Specification with PactSpec {
   val consumer = "My Consumer"
   val provider = "My Provider"
 
-  val timeout = Duration(1000, MILLISECONDS)
+  val timeout = Duration(2, SECONDS)
 
   override def is = uponReceiving("a request for foo")
       .matching(path = "/foo")
