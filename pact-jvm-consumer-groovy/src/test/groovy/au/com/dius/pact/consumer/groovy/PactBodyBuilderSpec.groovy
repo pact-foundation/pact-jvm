@@ -271,6 +271,54 @@ class PactBodyBuilderSpec extends Specification {
     response.body.get() == '{"name":"harry"}'
   }
 
+  def 'Guard Against Field Names That Dont Conform To Gatling Fields'() {
+    given:
+    service {
+      uponReceiving('a request with invalid gatling fields')
+      withAttributes(method: 'get', path: '/')
+      withBody {
+        '2' maxLike(10) {
+          id identifier
+          lineItems minLike(1) {
+            id identifier
+            '10k-depreciation-bips' integer(-2090)
+            productCodes eachLike { code string('A100') }
+          }
+        }
+      }
+      willRespondWith(
+        status: 200,
+        headers: ['Content-Type': 'text/html']
+      )
+    }
+
+    when:
+    service.fragment()
+    def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.get()))
+
+    then:
+    service.interactions.size() == 1
+    asJavaMap(service.interactions[0].request.matchingRules) == [
+      $/$.body['2']/$: [max: 10, 'match': 'type'],
+      $/$.body['2'][*].id/$: ['match': 'type'],
+      $/$.body['2'][*].lineItems/$: ['min': 1, 'match': 'type'],
+      $/$.body['2'][*].lineItems[*].id/$: [match: 'type'],
+      $/$.body['2'][*].lineItems[*]['10k-depreciation-bips']/$: [match: 'integer'],
+      $/$.body['2'][*].lineItems[*].productCodes/$: ['match': 'type'],
+      $/$.body['2'][*].lineItems[*].productCodes[*].code/$: [match: 'type']
+    ]
+
+    keys == [
+      '2', [0, [
+        'id', [], 'lineItems', [0, [
+          '10k-depreciation-bips', [], 'id', [], 'productCodes', [0, [
+            'code', []
+          ]]
+        ]]
+      ]]
+    ]
+  }
+
   private List walkGraph(def value) {
       def set = []
       if (value instanceof Map) {
