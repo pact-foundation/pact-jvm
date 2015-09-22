@@ -8,8 +8,7 @@ import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization
 
-trait PactSerializer extends StrictLogging {
-  this: Pact =>
+object PactSerializer extends StrictLogging {
 
   import org.json4s.JsonDSL._
 
@@ -74,15 +73,15 @@ trait PactSerializer extends StrictLogging {
 
   implicit def pact2json(p: Pact): JValue = {
     JObject(
-      "provider" -> provider,
-      "consumer" -> consumer,
-      "interactions" -> interactions,
-      "metadata" -> Map( "pact-specification" -> Map("version" -> "2.0.0"), "pact-jvm" -> Map("version" -> lookupVersion))
+      "provider" -> p.provider,
+      "consumer" -> p.consumer,
+      "interactions" -> p.interactions,
+      "metadata" -> Map("pact-specification" -> Map("version" -> "2.0.0"), "pact-jvm" -> Map("version" -> lookupVersion))
     )
   }
 
-  def serialize(writer: PrintWriter) {
-    writer.print(pretty(render(this)))
+  def serialize(p: Pact, writer: PrintWriter) {
+    writer.print(pretty(render(p)))
   }
 
   def lookupVersion() = {

@@ -9,16 +9,14 @@ import org.specs2.runner.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class PactSerializerSpec extends Specification {
 
-  def loadTestFile(name: String): InputStream = {
-    this.getClass.getClassLoader.getResourceAsStream(name)
-  }
+  def loadTestFile(name: String): InputStream = this.getClass.getClassLoader.getResourceAsStream(name)
 
    "PactSerializer" should {
      "serialize pact" in {
        val sw = new StringWriter()
        val pactString = scala.io.Source.fromInputStream(loadTestFile("test_pact.json")).mkString
 
-       Fixtures.pact.serialize(new PrintWriter(sw))
+       PactSerializer.serialize(Fixtures.pact, new PrintWriter(sw))
        val json = sw.toString
        json must beEqualTo(pactString)
      }
@@ -27,7 +25,7 @@ class PactSerializerSpec extends Specification {
        val sw = new StringWriter()
        val pactString = scala.io.Source.fromInputStream(loadTestFile("test_pact_matchers.json")).mkString
 
-       Fixtures.pactWithMatchers.serialize(new PrintWriter(sw))
+       PactSerializer.serialize(Fixtures.pactWithMatchers, new PrintWriter(sw))
        val json = sw.toString
        json must beEqualTo(pactString)
      }
@@ -36,9 +34,8 @@ class PactSerializerSpec extends Specification {
        val sw = new StringWriter()
        val pactString = scala.io.Source.fromInputStream(loadTestFile("test_pact.json")).mkString
 
-       Fixtures.pact.copy(interactions = Fixtures.pact.interactions.map(
-         interaction => interaction.copy(request = Fixtures.request.copy(method = "get"))))
-         .serialize(new PrintWriter(sw))
+       PactSerializer.serialize(Fixtures.pact.copy(interactions = Fixtures.pact.interactions.map(
+         interaction => interaction.copy(request = Fixtures.request.copy(method = "get")))), new PrintWriter(sw))
        val json = sw.toString
        json must beEqualTo(pactString)
      }

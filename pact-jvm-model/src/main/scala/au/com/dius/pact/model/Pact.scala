@@ -54,7 +54,7 @@ object Pact {
   case class MergeConflict(result: Seq[(Interaction, Interaction)]) extends MergeResult
 }
 
-case class Pact(provider: Provider, consumer: Consumer, interactions: Seq[Interaction]) extends PactSerializer {
+case class Pact(provider: Provider, consumer: Consumer, interactions: Seq[Interaction]) {
   import Pact._
   
   def merge(other: Pact): MergeResult = {
