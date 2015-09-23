@@ -71,7 +71,7 @@ object PactSerializer extends StrictLogging {
     Map("name" -> c.name)
   }
 
-  implicit def pact2json(p: Pact): JValue = {
+  def pact2jsonV2(p: Pact): JValue = {
     JObject(
       "provider" -> p.provider,
       "consumer" -> p.consumer,
@@ -80,8 +80,24 @@ object PactSerializer extends StrictLogging {
     )
   }
 
-  def serialize(p: Pact, writer: PrintWriter) {
-    writer.print(pretty(render(p)))
+  def pact2jsonV3(p: Pact): JValue = {
+    JObject(
+      "provider" -> p.provider,
+      "consumer" -> p.consumer,
+      "interactions" -> p.interactions,
+      "metadata" -> Map("pact-specification" -> Map("version" -> "3.0.0"), "pact-jvm" -> Map("version" -> lookupVersion))
+    )
+  }
+
+  def renderV2(p: Pact): JValue = render(pact2jsonV2(p))
+
+  def renderV3(p: Pact): JValue = render(pact2jsonV3(p))
+
+  def serialize(p: Pact, writer: PrintWriter, config: PactConfig = PactConfig(2)) {
+    config.pactVersion match {
+      case 3 => writer.print(pretty(renderV3(p)))
+      case _ => writer.print(pretty(renderV2(p)))
+    }
   }
 
   def from(source: String): Pact = {

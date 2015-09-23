@@ -1,10 +1,10 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.matchers.MatchingConfig
 import au.com.dius.pact.model.BodyMismatch
 import au.com.dius.pact.model.BodyTypeMismatch
 import au.com.dius.pact.model.DiffConfig
 import au.com.dius.pact.model.HeaderMismatch
-import au.com.dius.pact.model.PactConfig
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.Response$
@@ -51,7 +51,7 @@ class ResponseComparison {
   }
 
   static compareMessage(Message message, def actual) {
-    def result = JavaConverters$.MODULE$.mutableMapAsJavaMapConverter(PactConfig.bodyMatchers()).asJava().find {
+    def result = JavaConverters$.MODULE$.mutableMapAsJavaMapConverter(MatchingConfig.bodyMatchers()).asJava().find {
           message.contentType ==~ it.key
     }
     def mismatches = []

@@ -5,15 +5,6 @@ import au.com.dius.pact.model.RequestPartMismatch._
 import au.com.dius.pact.model.ResponsePartMismatch._
 
 import scala.collection.immutable.TreeMap
-import scala.collection.mutable
-import scala.collection.breakOut
-
-object PactConfig {
-    var bodyMatchers = mutable.HashMap[String, BodyMatcher](
-      "application/.*xml" -> new XmlBodyMatcher(),
-      "application/.*json" -> new JsonBodyMatcher()
-    )
-}
 
 trait SharedMismatch {
   type Body = Option[String]
@@ -130,7 +121,7 @@ object Matching {
 
   def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig) = {
     if (expected.mimeType == actual.mimeType) {
-      val result = PactConfig.bodyMatchers.find(entry => actual.mimeType.matches(entry._1))
+      val result = MatchingConfig.bodyMatchers.find(entry => actual.mimeType.matches(entry._1))
       if (result.isDefined) {
         result.get._2.matchBody(expected, actual, diffConfig)
       } else {

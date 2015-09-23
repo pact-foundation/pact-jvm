@@ -21,6 +21,15 @@ class PactSerializerSpec extends Specification {
        json must beEqualTo(pactString)
      }
 
+     "serialize V3 pact" in {
+       val sw = new StringWriter()
+       val pactString = scala.io.Source.fromInputStream(loadTestFile("test_pact_v3.json")).mkString
+
+       PactSerializer.serialize(Fixtures.pact, new PrintWriter(sw), PactConfig(3))
+       val json = sw.toString
+       json must beEqualTo(pactString)
+     }
+
      "serialize pact with matchers" in {
        val sw = new StringWriter()
        val pactString = scala.io.Source.fromInputStream(loadTestFile("test_pact_matchers.json")).mkString
@@ -42,6 +51,11 @@ class PactSerializerSpec extends Specification {
 
      "deserialize pact" in {
        val pact = PactSerializer.from(loadTestFile("test_pact.json"))
+       pact must beEqualTo(Fixtures.pact)
+     }
+
+     "deserialize V3 pact" in {
+       val pact = PactSerializer.from(loadTestFile("test_pact_v3.json"))
        pact must beEqualTo(Fixtures.pact)
      }
 
