@@ -1,7 +1,7 @@
 package au.com.dius.pact.server
 
 import au.com.dius.pact.consumer.DefaultMockProvider
-import au.com.dius.pact.model.{MockProviderConfig, Pact, Request, Response}
+import au.com.dius.pact.model._
 import com.typesafe.scalalogging.StrictLogging
 import org.jboss.netty.handler.codec.http.QueryStringDecoder
 import org.json4s.JsonDSL.{int2jvalue, map2jvalue, string2jvalue}
@@ -13,7 +13,7 @@ import scala.collection.JavaConversions._
 object Create extends StrictLogging {
   
   def create(state: String, requestBody: String, oldState: ServerState, config: Config): Result = {
-    val pact = Pact.from(requestBody)
+    val pact = PactSerializer.from(requestBody)
     val mockConfig: MockProviderConfig = MockProviderConfig.create(config.portLowerBound, config.portUpperBound)
       .copy(hostname = config.host)
     val server = DefaultMockProvider.apply(mockConfig)

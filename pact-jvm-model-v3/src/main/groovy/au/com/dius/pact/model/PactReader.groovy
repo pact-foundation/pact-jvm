@@ -43,7 +43,7 @@ class PactReader {
     }
 
     Pact loadV2Pact(def source, def pactJson) {
-        Pact$.MODULE$.from(new StringInput(JsonOutput.toJson(pactJson)))
+        PactSerializer$.MODULE$.from(new StringInput(JsonOutput.toJson(pactJson)))
     }
 
     private static loadFile(def source) {

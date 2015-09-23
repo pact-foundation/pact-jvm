@@ -3,7 +3,7 @@ package au.com.dius.pact.provider.specs2
 import java.util.concurrent.Executors
 
 import au.com.dius.pact.model.dispatch.HttpClient
-import au.com.dius.pact.model.{FullResponseMatch, Pact, ResponseMatching}
+import au.com.dius.pact.model.{FullResponseMatch, PactSerializer, ResponseMatching}
 import org.json4s.JsonInput
 import org.specs2.Specification
 import org.specs2.execute.Result
@@ -17,7 +17,7 @@ trait ProviderSpec extends Specification {
   def timeout = Duration.apply(10000, "s")
 
   override def is = {
-    val pact = Pact.from(honoursPact)
+    val pact = PactSerializer.from(honoursPact)
     val fs = pact.interactions.map { interaction =>
       val description = s"${interaction.providerState} ${interaction.description}"
       val test: String => Result = { url =>

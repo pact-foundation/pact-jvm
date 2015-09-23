@@ -84,6 +84,45 @@ object PactSerializer extends StrictLogging {
     writer.print(pretty(render(p)))
   }
 
+  def from(source: String): Pact = {
+    from(parse(StringInput(source)))
+  }
+
+  def from(source: JsonInput): Pact = {
+    from(parse(source))
+  }
+
+  def from(json:JValue) = {
+    implicit val formats = DefaultFormats
+    val transformedJson = json.transformField {
+      case ("provider_state", value) => ("providerState", value)
+      case ("responseMatchingRules", value) => ("matchingRules", value)
+      case ("requestMatchingRules", value) => ("matchingRules", value)
+      case ("method", value) => ("method", JString(value.values.toString.toUpperCase))
+    }
+    val provider = (transformedJson \ "provider").extract[Provider]
+    val consumer = (transformedJson \ "consumer").extract[Consumer]
+
+    val interactions = (transformedJson \ "interactions").children.map(i => {
+      val interaction = i.extract[Interaction]
+      val requestBody = extractBody(i \ "request" \ "body")
+      val request = (i \ "request").extract[Request].copy(body = requestBody)
+      val responseBody = extractBody(i \ "response" \ "body")
+      val response = (i \ "response").extract[Response].copy(body = responseBody)
+      interaction.copy(request = request, response = response)
+    })
+    Pact(provider, consumer, interactions)
+  }
+
+  def extractBody(body: JValue): Option[String] = {
+    body match {
+      case JString(s) => Some(s)
+      case JNothing => None
+      case JNull => None
+      case b => Some(compact(b))
+    }
+  }
+
   def lookupVersion() = {
     val url = getClass.getProtectionDomain.getCodeSource.getLocation
     if (url != null) {

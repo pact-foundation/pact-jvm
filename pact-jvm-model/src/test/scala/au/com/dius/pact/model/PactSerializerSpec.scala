@@ -41,27 +41,27 @@ class PactSerializerSpec extends Specification {
      }
 
      "deserialize pact" in {
-       val pact = Pact.from(loadTestFile("test_pact.json"))
+       val pact = PactSerializer.from(loadTestFile("test_pact.json"))
        pact must beEqualTo(Fixtures.pact)
      }
 
      "deserialize pact with matchers" in {
-       val pact = Pact.from(loadTestFile("test_pact_matchers.json"))
+       val pact = PactSerializer.from(loadTestFile("test_pact_matchers.json"))
        pact must beEqualTo(Fixtures.pactWithMatchers)
      }
 
      "deserialize pact with matchers on old format" in {
-       val pact = Pact.from(loadTestFile("test_pact_matchers_old_format.json"))
+       val pact = PactSerializer.from(loadTestFile("test_pact_matchers_old_format.json"))
        pact must beEqualTo(Fixtures.pactWithMatchers)
      }
 
      "deserialize converts http methods to upper case" in {
-       val pact = Pact.from(loadTestFile("test_pact_lowercase_method.json"))
+       val pact = PactSerializer.from(loadTestFile("test_pact_lowercase_method.json"))
        pact must beEqualTo(Fixtures.pact)
      }
 
      "deserialize should not convert fields called 'body'" in {
-       val pact = Pact.from(loadTestFile("test_pact_with_bodies.json"))
+       val pact = PactSerializer.from(loadTestFile("test_pact_with_bodies.json"))
        pact.interactions.head.request.body.get must beEqualTo(("{\n" +
          "  \"complete\" : {\n" +
          "    \"certificateUri\" : \"http://...\",\n" +
@@ -80,7 +80,7 @@ class PactSerializerSpec extends Specification {
      }
 
      "deserialize pact with no bodies" in {
-       val pact = Pact.from(loadTestFile("test_pact_no_bodies.json"))
+       val pact = PactSerializer.from(loadTestFile("test_pact_no_bodies.json"))
        pact must beEqualTo(Fixtures.pactWithNoBodies)
      }
    }
