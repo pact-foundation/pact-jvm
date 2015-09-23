@@ -9,7 +9,6 @@ import org.specs2.runner.JUnitRunner
 class MatchingSpec extends Specification {
   "Matching" should {
     import au.com.dius.pact.model.Matching._
-    implicit val autoParse = JsonDiff.autoParse _
 
     "Body Matching" should {
       val config = DiffConfig()
