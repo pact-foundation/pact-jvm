@@ -27,7 +27,6 @@ class PactProviderMojo extends AbstractMojo {
   private Map<String, String> configuration = [:]
 
   @Override
-  @SuppressWarnings(['ThrowRuntimeException'])
   void execute() throws MojoExecutionException, MojoFailureException {
     Map failures = [:]
     ProviderVerifier verifier = new ProviderVerifier()
@@ -58,22 +57,21 @@ class PactProviderMojo extends AbstractMojo {
 
     if (failures.size() > 0) {
       verifier.displayFailures(failures)
-      throw new RuntimeException("There were ${failures.size()} pact failures")
+      throw new MojoFailureException("There were ${failures.size()} pact failures")
     }
   }
 
-  @SuppressWarnings('ThrowRuntimeException')
   List loadPactFiles(def provider, File pactFileDir) {
     if (!pactFileDir.exists()) {
-        throw new RuntimeException("Pact file directory ($pactFileDir) does not exist")
+        throw new MojoFailureException("Pact file directory ($pactFileDir) does not exist")
     }
 
     if (!pactFileDir.isDirectory()) {
-        throw new RuntimeException("Pact file directory ($pactFileDir) is not a directory")
+        throw new MojoFailureException("Pact file directory ($pactFileDir) is not a directory")
     }
 
     if (!pactFileDir.canRead()) {
-        throw new RuntimeException("Pact file directory ($pactFileDir) is not readable")
+        throw new MojoFailureException("Pact file directory ($pactFileDir) is not readable")
     }
 
     AnsiConsole.out().println("Loading pact files for provider ${provider.name} from $pactFileDir")
