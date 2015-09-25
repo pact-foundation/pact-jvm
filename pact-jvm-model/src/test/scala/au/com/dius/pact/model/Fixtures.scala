@@ -61,4 +61,11 @@ object Fixtures {
     consumer = consumer,
     interactions = interactionsWithNoBodies
   )
+
+  val pactDecodedQuery = Pact(provider = provider,
+    consumer = consumer,
+    interactions = List(interaction.copy(
+      request = request.copy(query = Some(
+        Map("datetime" -> List("2011-12-03T10:15:30+01:00"), "description" -> List("hello world!"))))
+    )))
 }

@@ -118,5 +118,10 @@ class PactSerializerSpec extends Specification {
        val pact = PactSerializer.from(loadTestFile("test_pact_no_metadata.json"))
        pact must beEqualTo(Fixtures.pact)
      }
+
+     "deserialize pact with encoded query string" in {
+       val pact = PactSerializer.from(loadTestFile("test_pact_encoded_query.json"))
+       pact must beEqualTo(Fixtures.pactDecodedQuery)
+     }
    }
 }

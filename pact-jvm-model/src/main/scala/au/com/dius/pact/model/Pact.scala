@@ -1,5 +1,8 @@
 package au.com.dius.pact.model
 
+import java.net.URLDecoder
+
+import org.apache.http.client.utils.URLEncodedUtils
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import scala.collection.JavaConversions
@@ -152,19 +155,22 @@ trait Optionals {
     }
   }
 
-  def optionalQuery(query: String): Option[Map[String, List[String]]] = {
+  def optionalQuery(query: String, decode: Boolean = false): Option[Map[String, List[String]]] = {
     if(query == null || query == "") {
       None
     } else {
       Some(query.split("&").map(_.split("=")).foldLeft(Map[String,List[String]]()) {
-        (m, a) => m + (a.head -> (m.getOrElse(a.head, List[String]()) :+ a.last))
+        (m, a) =>
+          val name = if (decode) URLDecoder.decode(a.head, "UTF-8") else a.head
+          val value = if (decode) URLDecoder.decode(a.last, "UTF-8") else a.last
+          m + (name -> (m.getOrElse(name, List[String]()) :+ value))
       })
     }
   }
 
-  def optionalQuery(query: Option[String]): Option[Map[String, List[String]]] = {
+  def optionalQuery(query: Option[String], decode: Boolean): Option[Map[String, List[String]]] = {
     if(query.isDefined) {
-      optionalQuery(query.get)
+      optionalQuery(query.get, decode)
     } else {
       None
     }

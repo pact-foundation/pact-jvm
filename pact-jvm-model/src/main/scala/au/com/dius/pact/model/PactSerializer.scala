@@ -5,6 +5,7 @@ import java.util.jar.JarInputStream
 
 import com.github.zafarkhaja.semver.Version
 import com.typesafe.scalalogging.StrictLogging
+import org.apache.http.client.utils.URLEncodedUtils
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization
@@ -116,9 +117,7 @@ object PactSerializer extends StrictLogging with au.com.dius.pact.model.Optional
     }
   }
 
-  def queryToMap(value: JValue) = {
-    optionalQuery(value.values.toString)
-  }
+  def queryToMap(value: JValue) = optionalQuery(value.values.toString, true)
 
   def mapToQueryStr(queryMap: Option[Map[String, List[String]]]) = {
     queryMap.getOrElse(Map()).flatMap(entry => entry._2.map(value => entry._1 + "=" + value)).mkString("&")
