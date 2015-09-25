@@ -2,7 +2,6 @@ package au.com.dius.pact.consumer.resultstests;
 
 import au.com.dius.pact.consumer.ConsumerClient;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
-import au.com.dius.pact.consumer.ConsumerPactTest;
 import au.com.dius.pact.consumer.PactMismatchException;
 import au.com.dius.pact.model.PactFragment;
 
@@ -52,7 +51,7 @@ public class UnexpectedRequestConsumerPassesTest extends ExpectedToFailBase {
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "fred");
         ConsumerClient consumerClient = new ConsumerClient(url);
-        assertEquals(consumerClient.getAsMap("/"), expectedResponse);
+        assertEquals(consumerClient.getAsMap("/", ""), expectedResponse);
         consumerClient.options("/options");
     }
 

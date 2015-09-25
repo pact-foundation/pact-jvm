@@ -51,7 +51,7 @@ public class PactProviderUsingDefaultsTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
     }
 
     @Test(expected = AssertionError.class)
@@ -61,7 +61,7 @@ public class PactProviderUsingDefaultsTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "fred");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
     }
 
     @Test

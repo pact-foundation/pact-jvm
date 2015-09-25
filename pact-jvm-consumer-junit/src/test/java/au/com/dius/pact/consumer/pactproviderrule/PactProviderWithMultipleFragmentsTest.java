@@ -68,7 +68,7 @@ public class PactProviderWithMultipleFragmentsTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
     }
 
     @Test
@@ -77,6 +77,6 @@ public class PactProviderWithMultipleFragmentsTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
     }
 }

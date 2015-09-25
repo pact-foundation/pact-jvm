@@ -68,7 +68,7 @@ public class PactMultiProviderTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
 
         Map expectedResponse2 = new HashMap();
         expectedResponse2.put("responsetest", true);
@@ -85,7 +85,7 @@ public class PactMultiProviderTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
 
         Map expectedResponse2 = new HashMap();
         expectedResponse2.put("responsetest", true);
@@ -103,7 +103,7 @@ public class PactMultiProviderTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/abc"), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/abc", ""), expectedResponse);
 
         Map expectedResponse2 = new HashMap();
         expectedResponse2.put("responsetest", true);
@@ -119,7 +119,7 @@ public class PactMultiProviderTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
 
         Map expectedResponse2 = new HashMap();
         expectedResponse2.put("responsetest", true);
@@ -135,7 +135,7 @@ public class PactMultiProviderTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/abc"), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/abc", ""), expectedResponse);
 
         Map expectedResponse2 = new HashMap();
         expectedResponse2.put("responsetest", true);

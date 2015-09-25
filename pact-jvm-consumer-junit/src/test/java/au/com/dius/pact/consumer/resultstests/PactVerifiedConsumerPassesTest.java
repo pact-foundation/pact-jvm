@@ -41,6 +41,6 @@ public class PactVerifiedConsumerPassesTest extends ConsumerPactTest {
         Map<String, Object> expectedResponse = new HashMap<String, Object>();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(url).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient(url).getAsMap("/", ""), expectedResponse);
     }
 }

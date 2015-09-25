@@ -57,6 +57,6 @@ public class ExampleJavaConsumerPactRuleTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient("http://localhost:8080").getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient("http://localhost:8080").getAsMap("/", ""), expectedResponse);
     }
 }

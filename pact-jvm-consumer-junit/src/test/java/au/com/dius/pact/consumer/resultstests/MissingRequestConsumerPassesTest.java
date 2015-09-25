@@ -60,7 +60,7 @@ public class MissingRequestConsumerPassesTest extends ExpectedToFailBase {
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "fred");
         ConsumerClient consumerClient = new ConsumerClient(url);
-        assertEquals(consumerClient.getAsMap("/"), expectedResponse);
+        assertEquals(consumerClient.getAsMap("/", ""), expectedResponse);
     }
 
     @Override

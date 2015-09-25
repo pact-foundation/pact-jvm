@@ -53,6 +53,15 @@ class ConversionsTest extends Specification with Mockito {
         pactRequest.query must beEmpty
       }
 
+      "with a path with strings in it" in {
+        request.parameterNames returns List().iterator
+        request.uri returns "/some+path"
+
+        val pactRequest = Conversions.unfilteredRequestToPactRequest(request)
+        pactRequest.path must beEqualTo("/some+path")
+        pactRequest.query must beEmpty
+      }
+
     }
 
   }

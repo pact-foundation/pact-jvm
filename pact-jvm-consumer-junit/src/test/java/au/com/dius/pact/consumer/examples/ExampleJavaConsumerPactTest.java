@@ -58,7 +58,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(url).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient(url).getAsMap("/", ""), expectedResponse);
         assertEquals(new ConsumerClient(url).options("/second"), 200);
     }
 }

@@ -3,7 +3,6 @@ package au.com.dius.pact.consumer.resultstests;
 import au.com.dius.pact.consumer.ConsumerClient;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.PactFragment;
-import org.apache.commons.lang3.SystemUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -47,7 +46,7 @@ public class PactVerifiedConsumerFailsTest extends ExpectedToFailBase {
         Map<String, Object> expectedResponse = new HashMap<String, Object>();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "fred");
-        assertEquals(new ConsumerClient(url).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient(url).getAsMap("/", ""), expectedResponse);
     }
 
     @Override

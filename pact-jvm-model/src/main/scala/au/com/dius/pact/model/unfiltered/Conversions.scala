@@ -1,6 +1,7 @@
 package au.com.dius.pact.model.unfiltered
 
 import java.io.{BufferedReader, InputStreamReader}
+import java.net.URI
 import java.util.zip.GZIPInputStream
 
 import au.com.dius.pact.model.{Request, Response}
@@ -52,9 +53,7 @@ object Conversions {
       Some(request.parameterNames.map(name => name -> request.parameterValues(name).toList).toMap)
   }
 
-  def toPath(uri: String) = {
-    uri.split('?').head
-  }
+  def toPath(uri: String) = new URI(uri).getPath
 
   def toBody(request: HttpRequest[ReceivedMessage], charset: String = "UTF-8") = {
     val br = if (request.headers(ContentEncoding.GZip.name).contains("gzip")) {

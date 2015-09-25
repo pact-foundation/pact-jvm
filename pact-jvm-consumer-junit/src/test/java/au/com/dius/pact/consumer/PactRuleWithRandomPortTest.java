@@ -33,6 +33,6 @@ public class PactRuleWithRandomPortTest {
     public void runTest() throws IOException {
         Map expectedResponse = new HashMap();
         expectedResponse.put("ok", true);
-        assertEquals(new ConsumerClient("http://localhost:" + rule.getConfig().port()).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient("http://localhost:" + rule.getConfig().port()).getAsMap("/", ""), expectedResponse);
     }
 }

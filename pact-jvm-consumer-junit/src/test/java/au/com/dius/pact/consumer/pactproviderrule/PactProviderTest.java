@@ -3,7 +3,6 @@ package au.com.dius.pact.consumer.pactproviderrule;
 import au.com.dius.pact.consumer.ConsumerClient;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.Pact;
-import au.com.dius.pact.consumer.PactMismatchException;
 import au.com.dius.pact.consumer.PactProviderRule;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.PactFragment;
@@ -56,7 +55,7 @@ public class PactProviderTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
     }
 
     @Test(expected = AssertionError.class)
@@ -66,7 +65,7 @@ public class PactProviderTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "fred");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
     }
 
     @Test

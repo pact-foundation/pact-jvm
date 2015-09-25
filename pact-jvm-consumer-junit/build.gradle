@@ -5,7 +5,7 @@ dependencies {
 
     testCompile 'ch.qos.logback:logback-core:1.1.2', 'ch.qos.logback:logback-classic:1.1.2',
         'org.apache.commons:commons-collections4:4.0', 'com.google.code.gson:gson:2.3.1',
-        'org.apache.httpcomponents:fluent-hc:4.4'
+        'org.apache.httpcomponents:fluent-hc:4.4', 'org.apache.httpcomponents:httpclient:4.5.1'
 }
 
 test {
