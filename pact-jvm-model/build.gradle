@@ -3,6 +3,7 @@ dependencies {
     "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.8.2",
     "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.1",
     'org.apache.httpcomponents:httpclient:4.4.1'
+  compile 'com.github.zafarkhaja:java-semver:0.9.0'
 
   testCompile 'org.specs2:specs2-mock_2.11:3.6.4'
 }

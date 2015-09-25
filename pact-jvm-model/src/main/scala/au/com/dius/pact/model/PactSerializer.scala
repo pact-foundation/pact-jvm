@@ -3,12 +3,13 @@ package au.com.dius.pact.model
 import java.io.{InputStream, PrintWriter}
 import java.util.jar.JarInputStream
 
+import com.github.zafarkhaja.semver.Version
 import com.typesafe.scalalogging.StrictLogging
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization
 
-object PactSerializer extends StrictLogging {
+object PactSerializer extends StrictLogging with au.com.dius.pact.model.Optionals {
 
   import org.json4s.JsonDSL._
 
@@ -27,12 +28,12 @@ object PactSerializer extends StrictLogging {
     }
   }
 
-  implicit def request2json(r: Request): JValue = {
+  def request2json(r: Request, config: PactConfig): JValue = {
     JObject(
       "method" -> r.method.toUpperCase,
       "path" -> r.path,
       "headers" -> r.headers,
-      "query" -> r.query,
+      "query" -> (if (config.pactVersion >= 3) r.query else mapToQueryStr(r.query)),
       "body" -> parseBody(r),
       "matchingRules" -> matchers2json(r.matchers)
     )
@@ -45,7 +46,7 @@ object PactSerializer extends StrictLogging {
     }
   }
 
-  implicit def response2json(r: Response): JValue = {
+  def response2json(r: Response, config: PactConfig): JValue = {
     JObject(
       "status" -> JInt(r.status),
       "headers" -> r.headers,
@@ -54,12 +55,12 @@ object PactSerializer extends StrictLogging {
     )
   }
 
-  implicit def interaction2json(i: Interaction): JValue = {
+  def interaction2json(i: Interaction, config: PactConfig = PactConfig(2)): JValue = {
     JObject (
       "providerState" -> i.providerState,
       "description" -> i.description,
-      "request" -> i.request,
-      "response" -> i.response
+      "request" -> request2json(i.request, config),
+      "response" -> response2json(i.response, config)
     )
   }
 
@@ -75,7 +76,7 @@ object PactSerializer extends StrictLogging {
     JObject(
       "provider" -> p.provider,
       "consumer" -> p.consumer,
-      "interactions" -> p.interactions,
+      "interactions" -> JArray(p.interactions.map(interaction2json(_)).toList),
       "metadata" -> Map("pact-specification" -> Map("version" -> "2.0.0"), "pact-jvm" -> Map("version" -> lookupVersion))
     )
   }
@@ -84,7 +85,7 @@ object PactSerializer extends StrictLogging {
     JObject(
       "provider" -> p.provider,
       "consumer" -> p.consumer,
-      "interactions" -> p.interactions,
+      "interactions" -> JArray(p.interactions.map(interaction2json(_, PactConfig(3))).toList),
       "metadata" -> Map("pact-specification" -> Map("version" -> "3.0.0"), "pact-jvm" -> Map("version" -> lookupVersion))
     )
   }
@@ -100,15 +101,30 @@ object PactSerializer extends StrictLogging {
     }
   }
 
-  def from(source: String): Pact = {
-    from(parse(StringInput(source)))
+  def from(source: String): Pact = from(parse(StringInput(source)))
+
+  def from(source: JsonInput): Pact = from(parse(source))
+
+  def from(json: JValue) = {
+    json \ "metadata" \ "pact-specification" \ "version" match {
+      case JString(version) =>
+        Version.valueOf(version).getMajorVersion match {
+          case 3 => fromV3(json)
+          case _ => fromV2(json)
+        }
+      case _ => fromV2(json)
+    }
   }
 
-  def from(source: JsonInput): Pact = {
-    from(parse(source))
+  def queryToMap(value: JValue) = {
+    optionalQuery(value.values.toString)
   }
 
-  def from(json:JValue) = {
+  def mapToQueryStr(queryMap: Option[Map[String, List[String]]]) = {
+    queryMap.getOrElse(Map()).flatMap(entry => entry._2.map(value => entry._1 + "=" + value)).mkString("&")
+  }
+
+  def fromV2(json: JValue) = {
     implicit val formats = DefaultFormats
     val transformedJson = json.transformField {
       case ("provider_state", value) => ("providerState", value)
@@ -120,12 +136,48 @@ object PactSerializer extends StrictLogging {
     val consumer = (transformedJson \ "consumer").extract[Consumer]
 
     val interactions = (transformedJson \ "interactions").children.map(i => {
-      val interaction = i.extract[Interaction]
-      val requestBody = extractBody(i \ "request" \ "body")
-      val request = (i \ "request").extract[Request].copy(body = requestBody)
-      val responseBody = extractBody(i \ "response" \ "body")
-      val response = (i \ "response").extract[Response].copy(body = responseBody)
-      interaction.copy(request = request, response = response)
+      val request = extractRequestV2(i \ "request")
+      val response = extractResponse(i \ "response")
+      i.extract[Interaction].copy(request = request, response = response)
+    })
+    Pact(provider, consumer, interactions)
+  }
+
+  def extractResponse(responseJson: JValue): Response = {
+    implicit val formats = DefaultFormats
+    val responseBody = extractBody(responseJson \ "body")
+    responseJson.extract[Response].copy(body = responseBody)
+  }
+
+  def extractRequestV2(requestJson: JValue): Request = {
+    implicit val formats = DefaultFormats
+    val requestBody = extractBody(requestJson \ "body")
+    requestJson.transformField {
+      case ("query", value) => ("query", queryToMap(value))
+    }.extract[Request].copy(body = requestBody)
+  }
+
+  def extractRequestV3(requestJson: JValue): Request = {
+    implicit val formats = DefaultFormats
+    val requestBody = extractBody(requestJson \ "body")
+    requestJson.extract[Request].copy(body = requestBody)
+  }
+
+  def fromV3(json: JValue) = {
+    implicit val formats = DefaultFormats
+    val transformedJson = json.transformField {
+      case ("provider_state", value) => ("providerState", value)
+      case ("responseMatchingRules", value) => ("matchingRules", value)
+      case ("requestMatchingRules", value) => ("matchingRules", value)
+      case ("method", value) => ("method", JString(value.values.toString.toUpperCase))
+    }
+    val provider = (transformedJson \ "provider").extract[Provider]
+    val consumer = (transformedJson \ "consumer").extract[Consumer]
+
+    val interactions = (transformedJson \ "interactions").children.map(i => {
+      val request: Request = extractRequestV3(i \ "request")
+      val response = extractResponse(i \ "response")
+      i.extract[Interaction].copy(request = request, response = response)
     })
     Pact(provider, consumer, interactions)
   }

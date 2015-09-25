@@ -12,12 +12,13 @@ class PactSerializerSpec extends Specification {
   def loadTestFile(name: String): InputStream = this.getClass.getClassLoader.getResourceAsStream(name)
 
    "PactSerializer" should {
+
      "serialize pact" in {
        val sw = new StringWriter()
-       val pactString = scala.io.Source.fromInputStream(loadTestFile("test_pact.json")).mkString
+       val pactString = scala.io.Source.fromInputStream(loadTestFile("test_pact.json")).mkString.trim
 
        PactSerializer.serialize(Fixtures.pact, new PrintWriter(sw))
-       val json = sw.toString
+       val json = sw.toString.trim
        json must beEqualTo(pactString)
      }
 
@@ -34,18 +35,18 @@ class PactSerializerSpec extends Specification {
        val sw = new StringWriter()
        val pactString = scala.io.Source.fromInputStream(loadTestFile("test_pact_matchers.json")).mkString
 
-       PactSerializer.serialize(Fixtures.pactWithMatchers, new PrintWriter(sw))
+       PactSerializer.serialize(Fixtures.pactWithMatchers, new PrintWriter(sw), PactConfig(3))
        val json = sw.toString
        json must beEqualTo(pactString)
      }
 
      "serialize pact converts methods to uppercase" in {
        val sw = new StringWriter()
-       val pactString = scala.io.Source.fromInputStream(loadTestFile("test_pact.json")).mkString
+       val pactString = scala.io.Source.fromInputStream(loadTestFile("test_pact.json")).mkString.trim
 
        PactSerializer.serialize(Fixtures.pact.copy(interactions = Fixtures.pact.interactions.map(
          interaction => interaction.copy(request = Fixtures.request.copy(method = "get")))), new PrintWriter(sw))
-       val json = sw.toString
+       val json = sw.toString.trim
        json must beEqualTo(pactString)
      }
 
@@ -96,6 +97,26 @@ class PactSerializerSpec extends Specification {
      "deserialize pact with no bodies" in {
        val pact = PactSerializer.from(loadTestFile("test_pact_no_bodies.json"))
        pact must beEqualTo(Fixtures.pactWithNoBodies)
+     }
+
+     "deserialize pact with query in old format" in {
+       val pact = PactSerializer.from(loadTestFile("test_pact_query_old_format.json"))
+       pact must beEqualTo(Fixtures.pact)
+     }
+
+     "deserialize pact with no version" in {
+       val pact = PactSerializer.from(loadTestFile("test_pact_no_version.json"))
+       pact must beEqualTo(Fixtures.pact)
+     }
+
+     "deserialize pact with no specification version" in {
+       val pact = PactSerializer.from(loadTestFile("test_pact_no_spec_version.json"))
+       pact must beEqualTo(Fixtures.pact)
+     }
+
+     "deserialize pact with no metadata" in {
+       val pact = PactSerializer.from(loadTestFile("test_pact_no_metadata.json"))
+       pact must beEqualTo(Fixtures.pact)
      }
    }
 }

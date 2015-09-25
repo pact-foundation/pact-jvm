@@ -2,7 +2,7 @@ package specification
 
 import java.io.File
 
-import au.com.dius.pact.model.{FullRequestMatch, RequestMatching, Response, Interaction}
+import au.com.dius.pact.model._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 
@@ -27,10 +27,10 @@ abstract class RequestSpecificationSpec extends SpecificationSpec {
         folder.listFiles(jsonFilter).map { testFile =>
           val fileName = testFile.getName
           implicit val formats = DefaultFormats
-          val testJson = parse(testFile)
-          val testData = testJson.transformField {
+          val testJson = parse(testFile).transformField {
             case ("body", value) => ("body", JString(pretty(value)))
-          }.extract[PactRequestSpecification]
+          }
+          val testData = extractRequestSpecification(testJson)
 
           val description = s"$dirName/$fileName ${testData.comment}"
           fragmentFactory.example(description, {
@@ -43,4 +43,11 @@ abstract class RequestSpecificationSpec extends SpecificationSpec {
     }
   }
 
+  def extractRequestSpecification(testJson: JValue): PactRequestSpecification = {
+    implicit val formats = DefaultFormats
+    PactRequestSpecification((testJson \ "match").extract[Boolean],
+      (testJson \ "comment").extract[String],
+      PactSerializer.extractRequestV2(testJson \ "expected"),
+      PactSerializer.extractRequestV2(testJson \ "actual"))
+  }
 }

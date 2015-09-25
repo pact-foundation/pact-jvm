@@ -4,14 +4,18 @@
   "expected" : {
     "method": "GET",
     "path": "/path",
-    "query": "animal=alligator&animal=hippo&animal=elephant",
+    "query": {
+      "animal": ["alligator", "hippo", "elephant"]
+    },
     "headers": {}
 
   },
   "actual": {
     "method": "GET",
     "path": "/path",
-    "query": "animal=hippo&animal=alligator&animal=elephant",
+    "query": {
+      "animal": ["hippo", "alligator", "elephant"]
+    },
     "headers": {}
   }
 }

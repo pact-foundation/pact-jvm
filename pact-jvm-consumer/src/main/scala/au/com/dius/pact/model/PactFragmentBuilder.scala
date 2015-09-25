@@ -41,16 +41,15 @@ object PactFragmentBuilder {
     def matching(path: String, method: String, query: String, headers: java.util.Map[String, String], body: String,
                  matchers: java.util.Map[String, Any]): DescribingResponse = {
       import collection.JavaConversions._
-      matching(path, method, Option(query), optional(headers.toMap), optional(body),
-        optional(matchers.toMap.asInstanceOf[Map[String, Map[String, String]]]))
+      matching(path, method, query, headers.toMap, body, matchers.toMap.asInstanceOf[Map[String, Map[String, String]]])
     }
 
     def matching(path: String,
                  method: String = Get,
-                 query: Option[String] = None,
-                 headers: Option[Map[String, String]] = None,
-                 body: Option[String] = None,
-                 matchers: Option[Map[String, Map[String, String]]] = None): DescribingResponse = {
+                 query: String = "",
+                 headers: Map[String, String] = Map(),
+                 body: String = "",
+                 matchers: Map[String, Map[String, String]] = Map()): DescribingResponse = {
       DescribingResponse(Request(method, path, query, headers, body, matchers))
     }
 

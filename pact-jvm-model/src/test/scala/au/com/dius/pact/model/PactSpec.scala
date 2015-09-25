@@ -9,6 +9,9 @@ import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class PactSpec extends Specification {
+
+  val emptyQuery = None
+
   "Pact" should {
     "Locate Interactions" in {
       val description = "descriptiondata"
@@ -17,7 +20,7 @@ class PactSpec extends Specification {
       val interaction = Interaction(
         description,
         state,
-        Request(HttpMethod.Get,"", None, None, None, None),
+        Request(HttpMethod.Get, "", emptyQuery, None, None, None),
         Response(200, None, None, None)
       )
 
@@ -65,49 +68,49 @@ class PactSpec extends Specification {
 
     "mimeType" should {
         "default to text" in {
-            val request = Request(HttpMethod.Get,"", None, None, None, None)
+            val request = Request(HttpMethod.Get, "", emptyQuery, None, None, None)
             request.mimeType must beEqualTo("text/plain")
         }
 
         "get the mime type from the headers" in {
-            val request = Request(HttpMethod.Get,"", None, Some(Map("Content-Type" -> "text/html")), None, None)
+            val request = Request(HttpMethod.Get, "", emptyQuery, Some(Map("Content-Type" -> "text/html")), None, None)
             request.mimeType must beEqualTo("text/html")
         }
 
         "handle charsets in the content type" in {
-            val request = Request(HttpMethod.Get,"", None, Some(Map("Content-Type" -> "application/json; charset=UTF-8")), None, None)
+            val request = Request(HttpMethod.Get, "", emptyQuery, Some(Map("Content-Type" -> "application/json; charset=UTF-8")), None, None)
             request.mimeType must beEqualTo("application/json")
         }
 
         "use regexp detection when not supplied" should {
 
           "for json" in {
-            var request = Request(HttpMethod.Get,"", None, None, Some("{\"json\": true}"), None)
+            var request = Request(HttpMethod.Get, "", emptyQuery, None, Some("{\"json\": true}"), None)
             request.mimeType must beEqualTo("application/json")
-            request = Request(HttpMethod.Get,"", None, None, Some("{}"), None)
+            request = Request(HttpMethod.Get, "", emptyQuery, None, Some("{}"), None)
             request.mimeType must beEqualTo("application/json")
-            request = Request(HttpMethod.Get,"", None, None, Some("[]"), None)
+            request = Request(HttpMethod.Get, "", emptyQuery, None, Some("[]"), None)
             request.mimeType must beEqualTo("application/json")
-            request = Request(HttpMethod.Get,"", None, None, Some("[1,2,3]"), None)
+            request = Request(HttpMethod.Get, "", emptyQuery, None, Some("[1,2,3]"), None)
             request.mimeType must beEqualTo("application/json")
-            request = Request(HttpMethod.Get,"", None, None, Some("  \"string\"  "), None)
+            request = Request(HttpMethod.Get, "", emptyQuery, None, Some("  \"string\"  "), None)
             request.mimeType must beEqualTo("application/json")
           }
 
           "for xml" in {
-            var request = Request(HttpMethod.Get,"", None, None, Some("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<json>false</json>"), None)
+            var request = Request(HttpMethod.Get, "", emptyQuery, None, Some("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<json>false</json>"), None)
             request.mimeType must beEqualTo("application/xml")
-            request = Request(HttpMethod.Get,"", None, None, Some("<json>false</json>"), None)
+            request = Request(HttpMethod.Get, "", emptyQuery, None, Some("<json>false</json>"), None)
             request.mimeType must beEqualTo("application/xml")
           }
 
           "for text" in {
-            val request = Request(HttpMethod.Get,"", None, None, Some("this is not json"), None)
+            val request = Request(HttpMethod.Get, "", emptyQuery, None, Some("this is not json"), None)
             request.mimeType must beEqualTo("text/plain")
           }
 
           "for html" in {
-            val request = Request(HttpMethod.Get,"", None, None, Some("<html><body>this is also not json</body></html>"), None)
+            val request = Request(HttpMethod.Get, "", emptyQuery, None, Some("<html><body>this is also not json</body></html>"), None)
             request.mimeType must beEqualTo("text/html")
           }
 
@@ -116,7 +119,7 @@ class PactSpec extends Specification {
 
     "request" should {
       "provide an way to find a header case insensitive" in {
-        val request = Request(HttpMethod.Get, "", None, Some(Map("Cookie" -> "cookie-value")), None, None)
+        val request = Request(HttpMethod.Get, "", emptyQuery, Some(Map("Cookie" -> "cookie-value")), None, None)
         request.findHeaderByCaseInsensitiveKey("cookie") must beSome("Cookie" -> "cookie-value")
       }
     }

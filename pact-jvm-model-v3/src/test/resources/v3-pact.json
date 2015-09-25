@@ -11,7 +11,10 @@
       "request": {
         "method": "GET",
         "path": "/mallory",
-        "query": "name=ron&status=good"
+        "query": {
+          "name": ["ron"],
+          "status": ["good"]
+        }
       },
       "response": {
         "status": 200,

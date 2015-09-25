@@ -32,7 +32,7 @@ class ConversionsTest extends Specification with Mockito {
 
         val pactRequest = Conversions.unfilteredRequestToPactRequest(request)
         pactRequest.path must beEqualTo("/path")
-        pactRequest.query must beEqualTo(Some("a=1&b=2"))
+        pactRequest.query must beEqualTo(Some(Map("a" -> List("1"), "b" -> List("2"))))
       }
 
       "with no query string" in {
@@ -41,7 +41,7 @@ class ConversionsTest extends Specification with Mockito {
 
         val pactRequest = Conversions.unfilteredRequestToPactRequest(request)
         pactRequest.path must beEqualTo("/path")
-        pactRequest.query must beEqualTo(None)
+        pactRequest.query must beEmpty
       }
 
       "with a path ending with a question mark" in {
@@ -50,7 +50,7 @@ class ConversionsTest extends Specification with Mockito {
 
         val pactRequest = Conversions.unfilteredRequestToPactRequest(request)
         pactRequest.path must beEqualTo("/path")
-        pactRequest.query must beEqualTo(None)
+        pactRequest.query must beEmpty
       }
 
     }

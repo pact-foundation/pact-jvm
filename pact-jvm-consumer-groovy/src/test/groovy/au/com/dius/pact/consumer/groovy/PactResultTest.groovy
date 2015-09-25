@@ -96,7 +96,9 @@ class PactResultTest {
             }
             fail('Should have raised an exception')
         } catch (PactFailedException ex) {
-            assert ex.message.contains('QueryMismatch(status=good&name=ron,name=ron&status=bad)')
+            assert ex.message.contains(
+              'QueryMismatch(status,good,bad,Some(Expected \'good\' but received \'bad\' for query parameter ' +
+                '\'status\'),$.query.status.0)')
         }
     }
 

@@ -5,7 +5,7 @@ import com.typesafe.scalalogging.StrictLogging
 import org.json4s.{JObject, JArray, JValue, DefaultFormats}
 import org.json4s.jackson.JsonMethods._
 
-class JsonBodyMatcher extends BodyMatcher  with StrictLogging {
+class JsonBodyMatcher extends BodyMatcher with StrictLogging {
   implicit lazy val formats = DefaultFormats
 
   def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig): List[BodyMismatch] = {

@@ -4,14 +4,21 @@
   "expected" : {
     "method": "GET",
     "path": "/path",
-    "query": "alligator=Mary&hippo=John&elephant=missing",
+    "query": {
+      "alligator": ["Mary"],
+      "hippo": ["John"],
+      "elephant": ["missing"]
+    },
     "headers": {}
 
   },
   "actual": {
     "method": "GET",
     "path": "/path",
-    "query": "alligator=Mary&hippo=Fred",
+    "query": {
+      "alligator": ["Mary"],
+      "hippo": ["John"]
+    },
     "headers": {}
 
   }

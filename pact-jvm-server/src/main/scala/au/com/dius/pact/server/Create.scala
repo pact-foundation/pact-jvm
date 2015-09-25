@@ -29,14 +29,13 @@ object Create extends StrictLogging {
   def apply(request: Request, oldState: ServerState, config: Config): Result = {
     def errorJson = pretty(map2jvalue(Map("error" -> "please provide state param and pact body")))
     def clientError = Result(Response(400, Response.CrossSiteHeaders, errorJson, null), oldState)
-    val params = new QueryStringDecoder(s"/?${request.query.getOrElse("")}").getParameters.toMap
 
     logger.debug(s"path=${request.path}")
     logger.debug(s"query=${request.query.toString}")
     logger.debug(request.body.toString)
 
     val result = for {
-      stateList <- params.get("state")
+      stateList <- request.query.getOrElse(Map()).get("state")
       state <- stateList.toList.headOption
       body <- request.body
     } yield create(state, body, oldState, config)

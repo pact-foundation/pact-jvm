@@ -71,6 +71,8 @@ object HttpMethod {
 }
 
 trait HttpPart {
+  type QUERY = Option[Map[String, List[String]]]
+
   def headers: Option[Map[String, String]]
 
   def body: Option[String]
@@ -111,7 +113,7 @@ trait HttpPart {
 
 case class Request(method: String,
                    path: String,
-                   query: Option[String],
+                   query: Option[Map[String, List[String]]],
                    headers: Option[Map[String, String]],
                    body: Option[String],
                    matchingRules: Option[Map[String, Map[String, Any]]]) extends HttpPart {
@@ -150,11 +152,21 @@ trait Optionals {
     }
   }
 
-  def optionalQuery(query: String): Option[String] = {
+  def optionalQuery(query: String): Option[Map[String, List[String]]] = {
     if(query == null || query == "") {
       None
     } else {
-      Some(query)
+      Some(query.split("&").map(_.split("=")).foldLeft(Map[String,List[String]]()) {
+        (m, a) => m + (a.head -> (m.getOrElse(a.head, List[String]()) :+ a.last))
+      })
+    }
+  }
+
+  def optionalQuery(query: Option[String]): Option[Map[String, List[String]]] = {
+    if(query.isDefined) {
+      optionalQuery(query.get)
+    } else {
+      None
     }
   }
 
