@@ -373,6 +373,9 @@ pact {
 }
 ```
 
+_NOTE:_ The pact broker requires a version for all published pacts. The `pactPublish` task will use the version of the
+gradle project. Make sure you have set one otherwise the broker will reject the pact files.
+
 # Verifying a message provider
 
 *[version 2.2.12+]*
