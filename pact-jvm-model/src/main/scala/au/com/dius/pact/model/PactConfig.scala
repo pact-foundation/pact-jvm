@@ -1,3 +1,3 @@
 package au.com.dius.pact.model
 
-case class PactConfig(pactVersion: Int)
+case class PactConfig(pactVersion: PactSpecVersion)

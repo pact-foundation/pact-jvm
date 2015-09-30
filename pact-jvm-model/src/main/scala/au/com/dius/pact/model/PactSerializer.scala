@@ -34,7 +34,7 @@ object PactSerializer extends StrictLogging with au.com.dius.pact.model.Optional
       "method" -> r.method.toUpperCase,
       "path" -> r.path,
       "headers" -> r.headers,
-      "query" -> (if (config.pactVersion >= 3) r.query else mapToQueryStr(r.query)),
+      "query" -> (if (config.pactVersion.compareTo(PactSpecVersion.V3) >= 0) r.query else mapToQueryStr(r.query)),
       "body" -> parseBody(r),
       "matchingRules" -> matchers2json(r.matchers)
     )
@@ -56,7 +56,7 @@ object PactSerializer extends StrictLogging with au.com.dius.pact.model.Optional
     )
   }
 
-  def interaction2json(i: Interaction, config: PactConfig = PactConfig(2)): JValue = {
+  def interaction2json(i: Interaction, config: PactConfig): JValue = {
     JObject (
       "providerState" -> i.providerState,
       "description" -> i.description,
@@ -77,7 +77,7 @@ object PactSerializer extends StrictLogging with au.com.dius.pact.model.Optional
     JObject(
       "provider" -> p.provider,
       "consumer" -> p.consumer,
-      "interactions" -> JArray(p.interactions.map(interaction2json(_)).toList),
+      "interactions" -> JArray(p.interactions.map(interaction2json(_, PactConfig(PactSpecVersion.V2))).toList),
       "metadata" -> Map("pact-specification" -> Map("version" -> "2.0.0"), "pact-jvm" -> Map("version" -> lookupVersion))
     )
   }
@@ -86,7 +86,7 @@ object PactSerializer extends StrictLogging with au.com.dius.pact.model.Optional
     JObject(
       "provider" -> p.provider,
       "consumer" -> p.consumer,
-      "interactions" -> JArray(p.interactions.map(interaction2json(_, PactConfig(3))).toList),
+      "interactions" -> JArray(p.interactions.map(interaction2json(_, PactConfig(PactSpecVersion.V3))).toList),
       "metadata" -> Map("pact-specification" -> Map("version" -> "3.0.0"), "pact-jvm" -> Map("version" -> lookupVersion))
     )
   }
@@ -96,10 +96,10 @@ object PactSerializer extends StrictLogging with au.com.dius.pact.model.Optional
   def renderV3(p: Pact): JValue = render(pact2jsonV3(p))
 
   def serialize(p: Pact, writer: PrintWriter, config: PactConfig) {
-    config.pactVersion match {
-      case 3 => writer.print(pretty(renderV3(p)))
-      case _ => writer.print(pretty(renderV2(p)))
-    }
+    if (config.pactVersion.compareTo(PactSpecVersion.V3) >= 0)
+      writer.print(pretty(renderV3(p)))
+    else
+      writer.print(pretty(renderV2(p)))
   }
 
   def from(source: String): Pact = from(parse(StringInput(source)))

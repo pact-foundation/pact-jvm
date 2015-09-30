@@ -9,6 +9,7 @@ import au.com.dius.pact.model.MockProviderConfig
 import au.com.dius.pact.model.MockProviderConfig$
 import au.com.dius.pact.model.PactConfig
 import au.com.dius.pact.model.PactFragment
+import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.Request$
 import au.com.dius.pact.model.Response$
@@ -204,7 +205,7 @@ class PactBuilder extends BaseBuilder {
     PactFragment fragment = fragment()
 
     MockProviderConfig config
-    def pactConfig = PactConfig.apply(2)
+    def pactConfig = PactConfig.apply(PactSpecVersion.V2)
     if (port == null) {
       config = MockProviderConfig.createDefault(pactConfig)
     } else {

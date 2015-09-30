@@ -5,6 +5,7 @@ import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.MockProviderConfig$;
 import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.PactSpecVersion;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -36,17 +37,17 @@ public class PactRule extends ExternalResource {
     private final MockProviderConfig config;
 
     public PactRule(String host, int port, Object target) {
-        config = new MockProviderConfig(port, host, PactConfig.apply(2));
+        config = new MockProviderConfig(port, host, PactConfig.apply(PactSpecVersion.V2));
         this.target = target;
     }
 
     public PactRule(String host, Object target) {
-        config = MockProviderConfig$.MODULE$.createDefault(host, PactConfig.apply(2));
+        config = MockProviderConfig$.MODULE$.createDefault(host, PactConfig.apply(PactSpecVersion.V2));
         this.target = target;
     }
 
     public PactRule(Object target) {
-        config = MockProviderConfig$.MODULE$.createDefault(PactConfig.apply(2));
+        config = MockProviderConfig$.MODULE$.createDefault(PactConfig.apply(PactSpecVersion.V2));
         this.target = target;
     }
 

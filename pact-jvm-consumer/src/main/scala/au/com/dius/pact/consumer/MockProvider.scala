@@ -13,7 +13,7 @@ trait MockProvider {
 
 object DefaultMockProvider {
   
-  def withDefaultConfig(pactConfig: PactConfig = PactConfig(2)) = apply(MockProviderConfig.createDefault(pactConfig))
+  def withDefaultConfig(pactConfig: PactConfig = PactConfig(PactSpecVersion.V2)) = apply(MockProviderConfig.createDefault(pactConfig))
   
   // Constructor providing a default implementation of StatefulMockProvider.
   // Users should not explicitly be forced to choose a variety.

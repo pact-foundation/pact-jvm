@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.PactSpecVersion;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
@@ -44,7 +45,7 @@ public class PactProviderRule extends ExternalResource {
     public PactProviderRule(String provider, String host, Integer port, Object target) {
         this.provider = provider;
         this.target = target;
-        PactConfig pactConfig = PactConfig.apply(2);
+        PactConfig pactConfig = PactConfig.apply(PactSpecVersion.V2);
         if (host == null && port == null) {
             config = MockProviderConfig.createDefault(pactConfig);
         } else {

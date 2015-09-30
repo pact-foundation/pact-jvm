@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.model.{PactConfig, Pact}
+import au.com.dius.pact.model.{PactSpecVersion, PactConfig, Pact}
 import scala.util.{Failure, Try, Success}
 
 object ConsumerPactRunner {
@@ -15,7 +15,7 @@ object ConsumerPactRunner {
     VerificationResult(tryResults)
   }
   
-  def runAndWritePact[T](pact: Pact, pactConfig: PactConfig = PactConfig(2))(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
+  def runAndWritePact[T](pact: Pact, pactConfig: PactConfig = PactConfig(PactSpecVersion.V2))(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
     val server = DefaultMockProvider.withDefaultConfig(pactConfig)
     new ConsumerPactRunner(server).runAndWritePact(pact, pactConfig)(userCode, userVerification)
   }
