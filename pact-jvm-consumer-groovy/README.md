@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-groovy_2.11`
-* version-id = `2.2.x` or `3.0.x`
+* version-id = `2.3.x` or `3.1.x`
 
 ##Usage
 
@@ -19,7 +19,7 @@ to define your pacts. For a full example, have a look at the example JUnit `Exam
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.0.4'
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.1.0'
     }
   
 Then create an instance of the `PactBuilder` in your test.
@@ -335,7 +335,24 @@ test {
 
 If you use Gradle, you can use the [pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle#publishing-pact-files-to-a-pact-broker) to publish your pact files.
 
-# Pact Specification V3  - Consumer test for a message consumer
+# Pact Specification V3
+
+Version 3 of the pact specification changes the format of pact files in the following ways:
+
+* Query parameters are stored in a map form and are un-encoded (see #66 and #97 for information on what this can cause).
+
+## Generating V3 spec pact files (3.1.0+, 2.3.0+)
+
+To have your consumer tests generate V3 format pacts, you can pass an option into the `run` method. For example:
+
+```groovy
+VerificationResult result = service.run(specificationVersion: PactSpecVersion.V3) { config ->
+  def client = new RESTClient(config.url())
+  def response = client.get(path: '/')
+}
+```
+
+## Consumer test for a message consumer
 
 The `PactMessageBuilder` class provides a DSL for defining your message expectations. It works in much the same way as
 the `PactBuilder` class for Request-Response interactions.
