@@ -17,7 +17,7 @@ class PactSerializerSpec extends Specification {
        val sw = new StringWriter()
        val pactString = scala.io.Source.fromInputStream(loadTestFile("test_pact.json")).mkString.trim
 
-       PactSerializer.serialize(Fixtures.pact, new PrintWriter(sw))
+       PactSerializer.serialize(Fixtures.pact, new PrintWriter(sw), PactConfig(2))
        val json = sw.toString.trim
        json must beEqualTo(pactString)
      }
@@ -45,7 +45,8 @@ class PactSerializerSpec extends Specification {
        val pactString = scala.io.Source.fromInputStream(loadTestFile("test_pact.json")).mkString.trim
 
        PactSerializer.serialize(Fixtures.pact.copy(interactions = Fixtures.pact.interactions.map(
-         interaction => interaction.copy(request = Fixtures.request.copy(method = "get")))), new PrintWriter(sw))
+         interaction => interaction.copy(request = Fixtures.request.copy(method = "get")))), new PrintWriter(sw),
+         PactConfig(2))
        val json = sw.toString.trim
        json must beEqualTo(pactString)
      }

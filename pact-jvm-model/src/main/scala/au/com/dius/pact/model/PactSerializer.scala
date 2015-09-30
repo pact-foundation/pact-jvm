@@ -95,7 +95,7 @@ object PactSerializer extends StrictLogging with au.com.dius.pact.model.Optional
 
   def renderV3(p: Pact): JValue = render(pact2jsonV3(p))
 
-  def serialize(p: Pact, writer: PrintWriter, config: PactConfig = PactConfig(2)) {
+  def serialize(p: Pact, writer: PrintWriter, config: PactConfig) {
     config.pactVersion match {
       case 3 => writer.print(pretty(renderV3(p)))
       case _ => writer.print(pretty(renderV2(p)))

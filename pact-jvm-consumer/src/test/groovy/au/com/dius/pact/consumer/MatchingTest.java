@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.MockProviderConfig;
+import au.com.dius.pact.model.PactConfig;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
@@ -94,7 +95,7 @@ public class MatchingTest {
     }
 
     private void runTest(ConsumerPactBuilder.PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
-        MockProviderConfig config = MockProviderConfig.createDefault();
+        MockProviderConfig config = MockProviderConfig.createDefault(PactConfig.apply(2));
         VerificationResult result = pactFragment.toFragment().runConsumer(config, new TestRun() {
             @Override
             public void run(MockProviderConfig config) {

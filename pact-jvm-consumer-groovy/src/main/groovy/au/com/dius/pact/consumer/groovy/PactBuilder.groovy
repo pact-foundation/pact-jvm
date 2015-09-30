@@ -7,6 +7,7 @@ import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.Interaction$
 import au.com.dius.pact.model.MockProviderConfig
 import au.com.dius.pact.model.MockProviderConfig$
+import au.com.dius.pact.model.PactConfig
 import au.com.dius.pact.model.PactFragment
 import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.Request$
@@ -203,10 +204,11 @@ class PactBuilder extends BaseBuilder {
     PactFragment fragment = fragment()
 
     MockProviderConfig config
+    def pactConfig = PactConfig.apply(2)
     if (port == null) {
-      config = MockProviderConfig.createDefault()
+      config = MockProviderConfig.createDefault(pactConfig)
     } else {
-      config = MockProviderConfig$.MODULE$.apply(port, 'localhost')
+      config = MockProviderConfig$.MODULE$.apply(port, 'localhost', pactConfig)
     }
 
     fragment.runConsumer(config, closure)

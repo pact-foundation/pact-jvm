@@ -14,8 +14,8 @@ object Create extends StrictLogging {
   
   def create(state: String, requestBody: String, oldState: ServerState, config: Config): Result = {
     val pact = PactSerializer.from(requestBody)
-    val mockConfig: MockProviderConfig = MockProviderConfig.create(config.portLowerBound, config.portUpperBound)
-      .copy(hostname = config.host)
+    val mockConfig: MockProviderConfig = MockProviderConfig.create(config.portLowerBound, config.portUpperBound,
+      PactConfig(config.pactVersion)).copy(hostname = config.host)
     val server = DefaultMockProvider.apply(mockConfig)
     val port = server.config.port
     val entry = port -> server
