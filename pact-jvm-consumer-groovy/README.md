@@ -334,3 +334,64 @@ test {
 # Publishing your pact files to a pact broker
 
 If you use Gradle, you can use the [pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle#publishing-pact-files-to-a-pact-broker) to publish your pact files.
+
+# Pact Specification V3  - Consumer test for a message consumer
+
+The `PactMessageBuilder` class provides a DSL for defining your message expectations. It works in much the same way as
+the `PactBuilder` class for Request-Response interactions.
+
+### Step 1 - define the message expectations
+
+Create a test that uses the `PactMessageBuilder` to define a message expectation, and then call `run`. This will invoke
+the given closure with a message for each one defined in the pact.
+
+```groovy
+def eventStream = new PactMessageBuilder().call {
+    serviceConsumer 'messageConsumer'
+    hasPactWith 'messageProducer'
+
+    given 'order with id 10000004 exists'
+
+    expectsToReceive 'an order confirmation message'
+    withMetaData(type: 'OrderConfirmed') // Can define any key-value pairs here
+    withContent(contentType: 'application/json') {
+        type 'OrderConfirmed'
+        audit {
+            userCode 'messageService'
+        }
+        origin 'message-service'
+        referenceId '10000004-2'
+        timeSent: '2015-07-22T10:14:28+00:00'
+        value {
+            orderId '10000004'
+            value '10.000000'
+            fee '10.00'
+            gst '15.00'
+        }
+    }
+}
+```
+
+### Step 2 - call your message handler with the generated messages
+
+This example tests a message handler that gets messages from a Kafka topic. In this case the Pact message is wrapped
+as a Kafka `MessageAndMetadata`.
+
+```groovy
+eventStream.run { Message message ->
+    messageHandler.handleMessage(new MessageAndMetadata('topic', 1,
+        new kafka.message.Message(message.contentsAsBytes()), 0, null, valueDecoder))
+}
+```
+
+### Step 3 - validate that the message was handled correctly
+
+```groovy
+def order = orderRepository.getOrder('10000004')
+assert order.status == 'confirmed'
+assert order.value == 10.0
+```
+
+### Step 4 - Publish the pact file
+
+If the test was successful, a pact file would have been produced with the message from step 1.

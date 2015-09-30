@@ -1,7 +1,7 @@
-def crossCompileModules = [ 'pact-jvm-consumer', 'pact-jvm-consumer-junit', 'pact-jvm-consumer-junit-v3', 'pact-jvm-consumer-specs2',
-  'pact-jvm-consumer-groovy', 'pact-jvm-consumer-groovy-v3', 'pact-jvm-model', 'pact-jvm-model-v3',
-  'pact-jvm-provider', 'pact-jvm-provider-specs2', 'pact-jvm-server', 'pact-specification-test',
-  'pact-jvm-provider-gradle', 'pact-jvm-matchers', 'pact-jvm-provider-maven', 'pact-jvm-provider-lein']
+def crossCompileModules = [ 'pact-jvm-consumer', 'pact-jvm-consumer-junit', 'pact-jvm-consumer-specs2',
+  'pact-jvm-consumer-groovy', 'pact-jvm-model', 'pact-jvm-provider', 'pact-jvm-provider-specs2', 'pact-jvm-server',
+  'pact-specification-test', 'pact-jvm-provider-gradle', 'pact-jvm-matchers', 'pact-jvm-provider-maven',
+  'pact-jvm-provider-lein']
 
 rootProject.name = 'pact-jvm'
 
