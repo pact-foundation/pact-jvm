@@ -339,7 +339,9 @@ If you use Gradle, you can use the [pact Gradle plugin](https://github.com/DiUS/
 
 Version 3 of the pact specification changes the format of pact files in the following ways:
 
-* Query parameters are stored in a map form and are un-encoded (see #66 and #97 for information on what this can cause).
+* Query parameters are stored in a map form and are un-encoded (see [#66](https://github.com/DiUS/pact-jvm/issues/66)
+and [#97](https://github.com/DiUS/pact-jvm/issues/97) for information on what this can cause).
+* Introduces a new message pact format for testing interactions via a message queue.
 
 ## Generating V3 spec pact files (3.1.0+, 2.3.0+)
 
@@ -354,8 +356,11 @@ VerificationResult result = service.run(specificationVersion: PactSpecVersion.V3
 
 ## Consumer test for a message consumer
 
-The `PactMessageBuilder` class provides a DSL for defining your message expectations. It works in much the same way as
-the `PactBuilder` class for Request-Response interactions.
+For testing a consumer of messages from a message queue, the `PactMessageBuilder` class provides a DSL for defining
+your message expectations. It works in much the same way as the `PactBuilder` class for Request-Response interactions,
+but will generate a V3 format message pact file.
+
+The following steps demonstrate how to use it.
 
 ### Step 1 - define the message expectations
 
