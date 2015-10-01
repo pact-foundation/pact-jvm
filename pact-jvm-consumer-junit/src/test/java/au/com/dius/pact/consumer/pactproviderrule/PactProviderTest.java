@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer.pactproviderrule;
 
-import au.com.dius.pact.consumer.ConsumerClient;
+import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactProviderRule;

@@ -170,6 +170,12 @@ Sometimes it is not convenient to use the ConsumerPactTest as it only allows one
 Example:
 
 ```java
+import au.com.dius.pact.consumer.ConsumerPactBuilder;
+import au.com.dius.pact.consumer.ConsumerPactTest;
+import au.com.dius.pact.consumer.PactError;
+import au.com.dius.pact.consumer.TestRun;
+import au.com.dius.pact.consumer.VerificationResult;
+import au.com.dius.pact.consumer.examples.client.ProviderClient;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactFragment;
 import org.junit.Test;
@@ -205,7 +211,9 @@ public class PactTest {
                 try {
                     assertEquals(new ProviderClient(config.url()).hello("{\"name\": \"harry\"}"),
                             expectedResponse);
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -457,3 +465,37 @@ javaOptions in Test := Seq("-Dpact.rootDir=some/other/directory")
 # Publishing your pact files to a pact broker
 
 If you use Gradle, you can use the [pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle#publishing-pact-files-to-a-pact-broker) to publish your pact files.
+
+# Pact Specification V3
+
+Version 3 of the pact specification changes the format of pact files in the following ways:
+
+* Query parameters are stored in a map form and are un-encoded (see [#66](https://github.com/DiUS/pact-jvm/issues/66)
+and [#97](https://github.com/DiUS/pact-jvm/issues/97) for information on what this can cause).
+* Introduces a new message pact format for testing interactions via a message queue.
+
+## Generating V3 spec pact files (3.1.0+, 2.3.0+)
+
+To have your consumer tests generate V3 format pacts, you can set the specification version to V3. If you're using the
+`ConsumerPactTest` base class, you can override the `getSpecificationVersion` method. For example:
+
+```java
+    @Override
+    protected PactSpecVersion getSpecificationVersion() {
+        return PactSpecVersion.V3;
+    }
+```
+
+If you are using the `PactProviderRule`, you can pass the version into the constructor for the rule.
+
+```java
+    @Rule
+    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", PactSpecVersion.V3, this);
+```
+
+## Consumer test for a message consumer
+
+For testing a consumer of messages from a message queue, the `MessagePactProviderRule` rule class works in much the
+same way as the `PactProviderRule` class for Request-Response interactions, but will generate a V3 format message pact file.
+
+For an example, look at [ExampleMessageConsumerTest](https://github.com/DiUS/pact-jvm/blob/master/pact-jvm-consumer-junit%2Fsrc%2Ftest%2Fjava%2Fau%2Fcom%2Fdius%2Fpact%2Fconsumer%2Fv3%2FExampleMessageConsumerTest.java)

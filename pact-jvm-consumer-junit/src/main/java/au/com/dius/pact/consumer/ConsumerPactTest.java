@@ -20,7 +20,7 @@ public abstract class ConsumerPactTest {
     @Test
     public void testPact() throws Throwable {
         PactFragment fragment = createFragment(ConsumerPactBuilder.consumer(consumerName()).hasPactWith(providerName()));
-        final MockProviderConfig config = MockProviderConfig.createDefault(PactConfig.apply(PactSpecVersion.V2));
+        final MockProviderConfig config = MockProviderConfig.createDefault(PactConfig.apply(getSpecificationVersion()));
 
         VerificationResult result = fragment.runConsumer(config, new TestRun() {
             public void run(MockProviderConfig config) throws IOException {
@@ -41,4 +41,9 @@ public abstract class ConsumerPactTest {
             }
         }
     }
+
+    protected PactSpecVersion getSpecificationVersion() {
+        return PactSpecVersion.V2;
+    }
+
 }

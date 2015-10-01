@@ -71,7 +71,7 @@ You want to look at: [pact-jvm-consumer-groovy](pact-jvm-consumer-groovy) or [pa
 ### (Use Clojure I)
 
 Clojure can call out to Java, so have a look at [pact-jvm-consumer-junit](pact-jvm-consumer-junit). For an example
-look at [ExampleClojureConsumerPactTest.clj](pact-jvm-consumer-junit/src/test/java/au/com/dius/pact/consumer/examples/ExampleClojureConsumerPactTest.clj).
+look at [example_clojure_consumer_pact_test.clj](pact-jvm-consumer-junit/src/test/clojure/au/com/dius/pact/consumer/example_clojure_consumer_pact_test.clj).
 
 ### I Use some other jvm language or test framework
 

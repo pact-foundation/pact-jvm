@@ -1,4 +1,4 @@
-package au.com.dius.pact.consumer;
+package au.com.dius.pact.consumer.exampleclients;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.UrlEscapers;

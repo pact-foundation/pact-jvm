@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.model.PactFragment;
 import org.junit.Rule;
 import org.junit.Test;
