@@ -2,6 +2,8 @@ buildscript {
   repositories {
     mavenLocal()
     jcenter()
+    mavenCentral()
+    maven { url 'http://clojars.org/repo' }
   }
   dependencies {
     classpath 'com.netflix.nebula:nebula-clojure-plugin:2.2.0'
