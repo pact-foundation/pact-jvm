@@ -3,7 +3,7 @@ import sbt.Keys._
 import com.typesafe.sbt.pgp.PgpKeys._
 
 object Common {
-    def version = "2.2.16"
+    def version = "2.3.0"
 }
 
 object BuildSettings {
