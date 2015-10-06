@@ -58,7 +58,7 @@ public class MimeTypeTest {
     }
 
     private void runTest(PactFragment pactFragment, final String body, final String expectedResponse, final ContentType mimeType) {
-        MockProviderConfig config = MockProviderConfig.createDefault(PactConfig.apply(PactSpecVersion.V2));
+        MockProviderConfig config = MockProviderConfig.createDefault(new PactConfig(PactSpecVersion.V2));
         VerificationResult result = pactFragment.runConsumer(config, new TestRun() {
             @Override
             public void run(MockProviderConfig config) {

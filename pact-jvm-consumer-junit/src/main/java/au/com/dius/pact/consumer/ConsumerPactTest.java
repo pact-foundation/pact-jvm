@@ -20,7 +20,7 @@ public abstract class ConsumerPactTest {
     @Test
     public void testPact() throws Throwable {
         PactFragment fragment = createFragment(ConsumerPactBuilder.consumer(consumerName()).hasPactWith(providerName()));
-        final MockProviderConfig config = MockProviderConfig.createDefault(PactConfig.apply(getSpecificationVersion()));
+        final MockProviderConfig config = MockProviderConfig.createDefault(new PactConfig(getSpecificationVersion()));
 
         VerificationResult result = fragment.runConsumer(config, new TestRun() {
             public void run(MockProviderConfig config) throws IOException {

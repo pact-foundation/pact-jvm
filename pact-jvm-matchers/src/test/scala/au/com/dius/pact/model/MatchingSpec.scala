@@ -61,7 +61,7 @@ class MatchingSpec extends Specification {
 
     "Query Matching" should {
 
-      def query(queryString: String = "") = Request("", "", queryString, Map[String, String](), "", Map[String, Map[String, Any]]())
+      def query(queryString: String = "") = Request("", "", queryString, Map[String, String](), "", Map[String, Map[String, String]]())
 
       "match same"  in {
         matchQuery(query("a=b"), query("a=b")) must beEmpty

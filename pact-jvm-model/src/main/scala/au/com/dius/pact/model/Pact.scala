@@ -119,7 +119,7 @@ case class Request(method: String,
                    query: Option[Map[String, List[String]]],
                    headers: Option[Map[String, String]],
                    body: Option[String],
-                   matchingRules: Option[Map[String, Map[String, Any]]]) extends HttpPart {
+                   matchingRules: Option[Map[String, Map[String, String]]]) extends HttpPart {
   def cookie: Option[List[String]] = cookieHeader.map(_._2.split(";").map(_.trim).toList)
 
   def headersWithoutCookie: Option[Map[String, String]] = cookieHeader match {
@@ -186,21 +186,21 @@ trait Optionals {
 
 object Request extends Optionals {
   def apply(method: String, path: String, query: String, headers: Map[String, String],
-            body: String, matchingRules: Map[String, Map[String, Any]]): Request = {
+            body: String, matchingRules: Map[String, Map[String, String]]): Request = {
     Request(method, path, optionalQuery(query), optional(headers), optional(body), optional(matchingRules))
   }
 
   def apply(method: String, path: String, query: String, headers: java.util.Map[String,String], body: String,
             matchingRules: java.util.Map[String, Any]): Request = {
     Request(method, path, optionalQuery(query), optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body),
-      optional(recursiveJavaMapToScalaMap(matchingRules).asInstanceOf[Map[String, Map[String, Any]]]))
+      optional(recursiveJavaMapToScalaMap(matchingRules).asInstanceOf[Map[String, Map[String, String]]]))
   }
 }
 
 case class Response(status: Int = 200,
                     headers: Option[Map[String, String]],
                     body: Option[String],
-                    matchingRules: Option[Map[String, Map[String, Any]]]) extends HttpPart {
+                    matchingRules: Option[Map[String, Map[String, String]]]) extends HttpPart {
   override def toString: String = {
     s"\tstatus: $status \n\theaders: $headers \n\tmatchers: $matchers \n\tbody: \n$body"
   }
@@ -212,13 +212,13 @@ object Response extends Optionals {
 
   val CrossSiteHeaders = Map[String, String]("Access-Control-Allow-Origin" -> "*")
 
-  def apply(status: Int, headers: Map[String, String], body: String, matchingRules: Map[String, Map[String, Any]]): Response = {
+  def apply(status: Int, headers: Map[String, String], body: String, matchingRules: Map[String, Map[String, String]]): Response = {
     Response(status, optional(headers), optional(body), optional(matchingRules))
   }
 
   def apply(status: Int, headers: java.util.Map[String, String], body: String, matchingRules: java.util.Map[String, Any]): Response = {
     Response(status, optional(JavaConversions.mapAsScalaMap(headers).toMap), optional(body),
-        optional(recursiveJavaMapToScalaMap(matchingRules).asInstanceOf[Map[String, Map[String, Any]]]))
+        optional(recursiveJavaMapToScalaMap(matchingRules).asInstanceOf[Map[String, Map[String, String]]]))
   }
 
   def invalidRequest(request: Request) = {

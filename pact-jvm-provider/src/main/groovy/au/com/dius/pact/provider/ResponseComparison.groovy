@@ -59,7 +59,7 @@ class ResponseComparison {
     def actualMessage = Response$.MODULE$.apply(200, ['Content-Type': message.contentType], actual, [:])
     if (result) {
           mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(result.value.matchBody(expected,
-            actualMessage, DiffConfig.apply(true, false))).asJava()
+            actualMessage, new DiffConfig(true, false))).asJava()
       } else {
           def expectedBody = message.contents?.toString()
           if (!StringUtils.isEmpty(expectedBody) && StringUtils.isEmpty(actual)) {

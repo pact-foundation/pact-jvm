@@ -65,7 +65,7 @@ public class PactDefectTest {
             .body(expectedResponseBody)
             .toFragment();
         VerificationResult result = pactFragment.runConsumer(
-            MockProviderConfig.createDefault(PactConfig.apply(PactSpecVersion.V2)),
+            MockProviderConfig.createDefault(new PactConfig(PactSpecVersion.V2)),
             new TestRun() {
                 @Override
                 public void run(MockProviderConfig config) {

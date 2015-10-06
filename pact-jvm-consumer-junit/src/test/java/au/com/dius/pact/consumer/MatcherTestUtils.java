@@ -28,9 +28,9 @@ public class MatcherTestUtils {
     }
 
     public static void assertResponseMatcherKeysEqualTo(PactFragment fragment, String... matcherKeys) {
-        scala.collection.immutable.Map<String, scala.collection.immutable.Map<String, Object>> scalaMap
+        scala.collection.immutable.Map<String, scala.collection.immutable.Map<String, String>> scalaMap
             = fragment.interactions().head().response().matchers().get();
-        Map<String, scala.collection.immutable.Map<String, Object>> matchers =
+        Map<String, scala.collection.immutable.Map<String, String>> matchers =
             JavaConversions$.MODULE$.mapAsJavaMap(scalaMap);
         assertEquals(asSet(matcherKeys), new TreeSet<String>(matchers.keySet()));
     }

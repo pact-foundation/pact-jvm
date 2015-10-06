@@ -31,8 +31,8 @@ abstract class ResponseSpecificationSpec extends SpecificationSpec {
             case ("body", value) => ("body", JString(pretty(value)))
           }
           val testData = transformedJson.extract[PactResponseSpecification].copy(
-            actual = Pact.extractResponse(transformedJson, "actual"),
-            expected = Pact.extractResponse(transformedJson, "expected"))
+            actual = PactSerializer.extractResponse(transformedJson \ "actual"),
+            expected = PactSerializer.extractResponse(transformedJson \ "expected"))
 
           val description = s"$dirName/$fileName ${testData.comment}"
           fragmentFactory.example(description, {

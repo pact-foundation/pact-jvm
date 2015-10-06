@@ -96,7 +96,7 @@ public class MatchingTest {
     }
 
     private void runTest(ConsumerPactBuilder.PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
-        MockProviderConfig config = MockProviderConfig.createDefault(PactConfig.apply(PactSpecVersion.V2));
+        MockProviderConfig config = MockProviderConfig.createDefault(new PactConfig(PactSpecVersion.V2));
         VerificationResult result = pactFragment.toFragment().runConsumer(config, new TestRun() {
             @Override
             public void run(MockProviderConfig config) {
