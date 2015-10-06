@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.resultstests;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.PactFragment;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
