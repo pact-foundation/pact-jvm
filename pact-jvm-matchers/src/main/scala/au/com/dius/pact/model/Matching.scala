@@ -5,15 +5,6 @@ import au.com.dius.pact.model.RequestPartMismatch._
 import au.com.dius.pact.model.ResponsePartMismatch._
 
 import scala.collection.immutable.TreeMap
-import scala.collection.mutable
-import scala.collection.breakOut
-
-object PactConfig {
-    var bodyMatchers = mutable.HashMap[String, BodyMatcher](
-      "application/.*xml" -> new XmlBodyMatcher(),
-      "application/.*json" -> new JsonBodyMatcher()
-    )
-}
 
 trait SharedMismatch {
   type Body = Option[String]
@@ -25,7 +16,7 @@ object RequestPartMismatch extends SharedMismatch {
   type Cookies = List[String]
   type Path = String
   type Method = String
-  type Query = String
+  type Query = Map[String, List[String]]
 }
 
 object ResponsePartMismatch extends SharedMismatch {
@@ -63,7 +54,7 @@ case class PathMismatch(expected: Path, actual: Path, mismatch: Option[String] =
   }
 }
 case class MethodMismatch(expected: Method, actual: Method) extends RequestPartMismatch
-case class QueryMismatch(expected: Query, actual: Query) extends RequestPartMismatch
+case class QueryMismatch(queryParameter: String, expected: String, actual: String, mismatch: Option[String] = None, path: String = "/") extends RequestPartMismatch
 
 object BodyMismatchFactory extends MismatchFactory[BodyMismatch] {
   def create(expected: scala.Any, actual: scala.Any, message: String, path: Seq[String]) =
@@ -78,6 +69,12 @@ object PathMismatchFactory extends MismatchFactory[PathMismatch] {
 object HeaderMismatchFactory extends MismatchFactory[HeaderMismatch] {
   def create(expected: scala.Any, actual: scala.Any, message: String, path: Seq[String]) = {
     HeaderMismatch(path.last, expected.toString, actual.toString, Some(message))
+  }
+}
+
+object QueryMismatchFactory extends MismatchFactory[QueryMismatch] {
+  def create(expected: scala.Any, actual: scala.Any, message: String, path: Seq[String]) = {
+    QueryMismatch(path.last, expected.toString, actual.toString, Some(message))
   }
 }
 
@@ -130,7 +127,7 @@ object Matching {
 
   def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig) = {
     if (expected.mimeType == actual.mimeType) {
-      val result = PactConfig.bodyMatchers.find(entry => actual.mimeType.matches(entry._1))
+      val result = MatchingConfig.bodyMatchers.find(entry => actual.mimeType.matches(entry._1))
       if (result.isDefined) {
         result.get._2.matchBody(expected, actual, diffConfig)
       } else {
@@ -163,18 +160,19 @@ object Matching {
     else Some(StatusMismatch(expected, actual))
   }
 
-  def queryToMap(query: Query) = {
-    query.split("&").map(_.split("=")).foldLeft(Map[String,Seq[String]]()) {
-      (m, a) => m + (a.head -> (m.getOrElse(a.head, Seq()) :+ a.last))
-    }
-  }
-
-  def matchQuery(expected: Option[Query], actual: Option[Query]): Option[QueryMismatch] = {
-    (expected, actual) match {
-      case (None, None) => None
-      case (Some(a), None) => Some(QueryMismatch(a, ""))
-      case (None, Some(b)) => Some(QueryMismatch("", b))
-      case (Some(a), Some(b)) => if (queryToMap(a) == queryToMap(b)) { None } else { Some(QueryMismatch(a, b)) }
+  def matchQuery(expected: Request, actual: Request) = {
+    expected.query.getOrElse(Map()).foldLeft(Seq[QueryMismatch]()) {
+      (seq, values) => actual.query.getOrElse(Map()).get(values._1) match {
+        case Some(value) => seq ++ QueryMatcher.compareQuery(values._1, values._2, value, expected.matchingRules)
+        case None => seq :+ QueryMismatch(values._1, values._2.mkString(","), "",
+          Some(s"Expected query parameter '${values._1}' but was missing"), Seq("$", "query", values._1).mkString("."))
+      }
+    } ++ actual.query.getOrElse(Map()).foldLeft(Seq[QueryMismatch]()) {
+      (seq, values) => expected.query.getOrElse(Map()).get(values._1) match {
+        case Some(value) => seq
+        case None => seq :+ QueryMismatch(values._1, "", values._2.mkString(","),
+          Some(s"Unexpected query parameter '${values._1}' received"), Seq("$", "query", values._1).mkString("."))
+      }
     }
   }
 }

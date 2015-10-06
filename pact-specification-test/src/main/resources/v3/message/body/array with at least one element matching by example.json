@@ -1,0 +1,34 @@
+{
+  "match": true,
+  "comment": "Types and regular expressions match",
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "animals": [
+        {
+          "name" : "Fred"
+        }
+      ]
+    },
+    "matchingRules": {
+      "$.body.animals": {"min": 1, "match": "type"},
+      "$.body.animals[*].*": {"match": "type"}
+    }
+  },
+  "actual": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "animals": [
+        {
+          "name" : "Mary"
+        },{
+          "name" : "Susan"
+        }
+      ]
+    }
+  }
+}

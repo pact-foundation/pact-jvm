@@ -27,13 +27,10 @@ abstract class RequestSpecificationSpec extends SpecificationSpec {
         folder.listFiles(jsonFilter).map { testFile =>
           val fileName = testFile.getName
           implicit val formats = DefaultFormats
-          val testJson = parse(testFile)
-          val transformedJson = testJson.transformField {
+          val testJson = parse(testFile).transformField {
             case ("body", value) => ("body", JString(pretty(value)))
           }
-          val testData = transformedJson.extract[PactRequestSpecification].copy(
-            actual = Pact.extractRequest(transformedJson, "actual"),
-            expected = Pact.extractRequest(transformedJson, "expected"))
+          val testData = extractRequestSpecification(testJson)
 
           val description = s"$dirName/$fileName ${testData.comment}"
           fragmentFactory.example(description, {
@@ -46,4 +43,11 @@ abstract class RequestSpecificationSpec extends SpecificationSpec {
     }
   }
 
+  def extractRequestSpecification(testJson: JValue): PactRequestSpecification = {
+    implicit val formats = DefaultFormats
+    PactRequestSpecification((testJson \ "match").extract[Boolean],
+      (testJson \ "comment").extract[String],
+      PactSerializer.extractRequestV2(testJson \ "expected"),
+      PactSerializer.extractRequestV2(testJson \ "actual"))
+  }
 }

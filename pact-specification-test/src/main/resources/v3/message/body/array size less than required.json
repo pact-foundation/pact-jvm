@@ -1,0 +1,27 @@
+{
+  "match": false,
+  "comment": "Empty array",
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "animals": [
+        {
+          "name" : "Fred"
+        }
+      ]
+    },
+    "matchingRules": {
+      "$.body.animals": {"min": 1}
+    }
+  },
+  "actual": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "animals": []
+    }
+  }
+}

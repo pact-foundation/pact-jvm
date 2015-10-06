@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.model.PactFragment;
 
 public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTest {
@@ -77,7 +78,7 @@ public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTest {
     @Override
     protected void runTest(String url) {
         try {
-            new ConsumerClient(url).getAsMap("/");
+            new ConsumerClient(url).getAsMap("/", "");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

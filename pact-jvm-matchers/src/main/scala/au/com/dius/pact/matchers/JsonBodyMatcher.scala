@@ -5,7 +5,7 @@ import au.com.dius.pact.model._
 import org.json4s.{JObject, JArray, JValue, DefaultFormats}
 import org.json4s.jackson.JsonMethods._
 
-class JsonBodyMatcher extends BodyMatcher  with StrictLogging {
+class JsonBodyMatcher extends BodyMatcher with StrictLogging {
   implicit lazy val formats = DefaultFormats
 
   def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig): List[BodyMismatch] = {
@@ -73,26 +73,27 @@ class JsonBodyMatcher extends BodyMatcher  with StrictLogging {
 
   def compareLists(expectedValues: List[Any], actualValues: List[Any], a: Any, b: Any, path: Seq[String],
                    diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
-    var result = List[BodyMismatch]()
     if (Matchers.matcherDefined(path, matchers)) {
       logger.debug("compareLists: Matcher defined for path " + path)
-      result = Matchers.domatch[BodyMismatch](matchers, path, expectedValues, actualValues,
-        BodyMismatchFactory) ++ compareListContent(expectedValues.padTo(actualValues.length, expectedValues.head),
-        actualValues, path, diffConfig, matchers)
+      var result = Matchers.domatch[BodyMismatch](matchers, path, expectedValues, actualValues, BodyMismatchFactory)
+      if (expectedValues.nonEmpty) {
+        result = result ++ compareListContent(expectedValues.padTo(actualValues.length, expectedValues.head),
+          actualValues, path, diffConfig, matchers)
+      }
+      result
     } else {
       if (expectedValues.isEmpty && actualValues.nonEmpty) {
-        result = List(BodyMismatch(a, b, Some(s"Expected an empty List but received ${valueOf(actualValues)}"),
-          path.mkString(".")))
+        List(BodyMismatch(a, b, Some(s"Expected an empty List but received ${valueOf(actualValues)}"), path.mkString(".")))
       } else {
+        var result = compareListContent(expectedValues, actualValues, path, diffConfig, matchers)
         if (expectedValues.size != actualValues.size) {
           result = result :+ BodyMismatch(a, b,
             Some(s"Expected a List with ${expectedValues.size} elements but received ${actualValues.size} elements"),
             path.mkString("."))
         }
-        result = result ++ compareListContent(expectedValues, actualValues, path, diffConfig, matchers)
+        result
       }
     }
-    result
   }
 
   def compareMaps(expectedValues: Map[String, Any], actualValues: Map[String, Any], a: Any, b: Any, path: Seq[String],

@@ -7,7 +7,9 @@ import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.Interaction$
 import au.com.dius.pact.model.MockProviderConfig
 import au.com.dius.pact.model.MockProviderConfig$
+import au.com.dius.pact.model.PactConfig
 import au.com.dius.pact.model.PactFragment
+import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.Request$
 import au.com.dius.pact.model.Response$
@@ -196,17 +198,19 @@ class PactBuilder extends BaseBuilder {
 
   /**
    * Executes the providers closure in the context of the interactions defined on this builder.
+   * @param options Optional map of options for the run
    * @param closure Test to execute
    * @return The result of the test run
    */
-  VerificationResult run(Closure closure) {
+  VerificationResult run(Map options = [:], Closure closure) {
     PactFragment fragment = fragment()
 
     MockProviderConfig config
+    def pactConfig = PactConfig.apply(options.specificationVersion ?: PactSpecVersion.V2)
     if (port == null) {
-      config = MockProviderConfig.createDefault()
+      config = MockProviderConfig.createDefault(pactConfig)
     } else {
-      config = MockProviderConfig$.MODULE$.apply(port, 'localhost')
+      config = MockProviderConfig$.MODULE$.apply(port, 'localhost', pactConfig)
     }
 
     fragment.runConsumer(config, closure)
@@ -312,10 +316,11 @@ class PactBuilder extends BaseBuilder {
 
   /**
    * Runs the test (via the run method), and throws an exception if it was not successful.
+   * @param options Optional map of options for the run
    * @param closure
    */
-  void runTestAndVerify(Closure closure) {
-    VerificationResult result = run(closure)
+  void runTestAndVerify(Map options = [:], Closure closure) {
+    VerificationResult result = run(options, closure)
     if (result != PACTVERIFIED) {
       throw new PactFailedException(result)
     }

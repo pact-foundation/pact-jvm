@@ -1,0 +1,27 @@
+{
+  "match": true,
+  "comment": "Messages match with regex with bracket notation",
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "2" : {
+        "str" : "jildrdmxddnVzcQZfjCA"
+      }
+    },
+    "matchingRules": {
+      "$.body['2'].str": {"match": "regex", "regex": "\\w+"}
+    }
+  },
+  "actual": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "2" : {
+        "str" : "saldfhksajdhffdskkjh"
+      }
+    }
+  }
+}

@@ -49,12 +49,12 @@ class RequestMatchingSpec extends Specification {
     }
 
     "allow query string in different order" in {
-      val queryRequest = request.copy(query = Some("r=s&q=p&q=p2"))
+      val queryRequest = request.copy(query = Some(Map("r" -> List("s"), "q" -> List("p", "p2"))))
       test(queryRequest) must beSome(response)
     }
 
     "fail if query string has the same parameter repeated in different order" in {
-      val queryRequest = request.copy(query = Some("r=s&q=p2&q=p"))
+      val queryRequest = request.copy(query = Some(Map("r" -> List("s"), "q" -> List("p2", "p"))))
       test(queryRequest) must beNone
     }
 
@@ -119,7 +119,7 @@ class RequestMatchingSpec extends Specification {
     "not match with the defined matcher" in {
       val requestWithMatcher = request.copy(path = "/path2", matchingRules = Some(Map("$.path" -> Map("regex" -> "/path[0-9]*"))))
       RequestMatching.requestMismatches(requestWithMatcher, request.copy(path = "/pathA")) must contain(
-        PathMismatch("/path2","/pathA",Some("Expected '/pathA' to match '/path[0-9]*'")))
+        PathMismatch("/path2","/pathA", Some("Expected '/pathA' to match '/path[0-9]*'")))
     }
 
   }

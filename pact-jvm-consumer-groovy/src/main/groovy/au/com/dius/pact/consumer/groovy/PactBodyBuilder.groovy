@@ -1,6 +1,9 @@
 package au.com.dius.pact.consumer.groovy
 
 import groovy.json.JsonBuilder
+@SuppressWarnings('UnusedImport')
+import io.gatling.jsonpath.Parser$
+
 import java.util.regex.Pattern
 
 /**
@@ -90,28 +93,36 @@ class PactBodyBuilder extends BaseBuilder {
   private void addAttribute(String name, def value, def value2 = null) {
     if (value instanceof Pattern) {
       def matcher = regexp(value as Pattern, value2)
-      bodyRepresentation[name] = setMatcherAttribute(matcher, path + PATH_SEP + name)
+      bodyRepresentation[name] = setMatcherAttribute(matcher, path + buildPath(name))
     } else if (value instanceof LikeMatcher) {
-      setMatcherAttribute(value, path + PATH_SEP + name)
-      bodyRepresentation[name] = [ invokeClosure(value.values.last(), PATH_SEP + name + ALL_LIST_ITEMS) ]
+      setMatcherAttribute(value, path + buildPath(name))
+      bodyRepresentation[name] = [ invokeClosure(value.values.last(), buildPath(name, ALL_LIST_ITEMS)) ]
     } else if (value instanceof Matcher) {
-      bodyRepresentation[name] = setMatcherAttribute(value, path + PATH_SEP + name)
+      bodyRepresentation[name] = setMatcherAttribute(value, path + buildPath(name))
     } else if (value instanceof List) {
       bodyRepresentation[name] = []
       value.eachWithIndex { entry, i ->
         if (entry instanceof Matcher) {
-          bodyRepresentation[name] << setMatcherAttribute(entry, path + PATH_SEP + name + START_LIST + i + END_LIST)
+          bodyRepresentation[name] << setMatcherAttribute(entry, path + buildPath(name, START_LIST + i + END_LIST))
         } else if (entry instanceof Closure) {
-          bodyRepresentation[name] << invokeClosure(entry, PATH_SEP + name + START_LIST + i + END_LIST)
+          bodyRepresentation[name] << invokeClosure(entry, buildPath(name, START_LIST + i + END_LIST))
         } else {
           bodyRepresentation[name] << entry
         }
       }
     } else if (value instanceof Closure) {
-      bodyRepresentation[name] = invokeClosure(value, PATH_SEP + name)
+      bodyRepresentation[name] = invokeClosure(value, buildPath(name))
     } else {
       bodyRepresentation[name] = value
     }
+  }
+
+  private String buildPath(String name, String children = '') {
+    def key = PATH_SEP + name
+    if (!(name ==~ Parser$.MODULE$.FieldRegex().toString())) {
+      key = "['" + name + "']"
+    }
+    key + children
   }
 
   private invokeClosure(Closure entry, String subPath) {

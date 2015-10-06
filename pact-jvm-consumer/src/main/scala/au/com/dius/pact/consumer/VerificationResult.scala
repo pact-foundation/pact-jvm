@@ -33,13 +33,13 @@ case class PactMismatch(results: PactSessionResults, userError: Option[Throwable
       s += mismatch.description()
     }
     if (results.unexpected.nonEmpty) {
-      s += "\nThe following unexpected results where received:\n"
+      s += "\nThe following unexpected results were received:\n"
       for (unexpectedResult <- results.unexpected) {
         s += unexpectedResult.toString()
       }
     }
     if (results.missing.nonEmpty) {
-      s += "\nThe following requests where not received:\n"
+      s += "\nThe following requests were not received:\n"
       for (unexpectedResult <- results.missing) {
         s += unexpectedResult.toString()
       }

@@ -19,8 +19,13 @@ object ListServers {
 
 case class Result(response: Response, newState: ServerState)
 
-case class Config(port: Int = 29999, host: String = "localhost", daemon: Boolean = false,
-                  portLowerBound: Int = 20000, portUpperBound: Int = 40000, debug: Boolean = false)
+case class Config(port: Int = 29999,
+                  host: String = "localhost",
+                  daemon: Boolean = false,
+                  portLowerBound: Int = 20000,
+                  portUpperBound: Int = 40000,
+                  debug: Boolean = false,
+                  pactVersion: Int = 2)
 
 object Server extends App {
 
@@ -32,6 +37,7 @@ object Server extends App {
     opt[Int]('u', "mock-port-upper") action { (x, c) => c.copy(portUpperBound = x) } text("upper bound to allocate mock ports (defaults to 40000)")
     opt[Unit]('d', "daemon") action { (_, c) => c.copy(daemon = true) } text("run as a daemon process")
     opt[Unit]("debug") action { (_, c) => c.copy(debug = true) } text("run with debug logging")
+    opt[Int]('v', "pact-version") action { (x, c) => c.copy(pactVersion = x) } text("pact version to generate for (2 or 3)")
   }
 
   parser.parse(args, Config()) match {

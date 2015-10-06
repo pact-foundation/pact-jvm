@@ -4,9 +4,9 @@ Integer major = javaMatcher[0][1] as Integer
 Integer minor = javaMatcher[0][2] as Integer
 
 def crossCompileModules = [ 'pact-jvm-consumer', 'pact-jvm-consumer-junit', 'pact-jvm-consumer-specs2',
-  'pact-jvm-consumer-groovy', 'pact-jvm-consumer-groovy-v3', 'pact-jvm-model', 'pact-jvm-model-v3',
-  'pact-jvm-provider', 'pact-jvm-provider-specs2', 'pact-jvm-server', 'pact-specification-test',
-  'pact-jvm-provider-gradle', 'pact-jvm-matchers', 'pact-jvm-provider-maven', 'pact-jvm-logging']
+  'pact-jvm-consumer-groovy', 'pact-jvm-model', 'pact-jvm-provider', 'pact-jvm-provider-specs2', 'pact-jvm-server',
+  'pact-specification-test', 'pact-jvm-provider-gradle', 'pact-jvm-matchers', 'pact-jvm-provider-maven',
+  'pact-jvm-logging']
 
 if (major > 1 || minor > 6) {
   crossCompileModules << 'pact-jvm-provider-lein'

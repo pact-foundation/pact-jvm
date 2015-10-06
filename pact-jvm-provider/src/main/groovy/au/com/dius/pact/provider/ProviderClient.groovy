@@ -8,6 +8,7 @@ import org.apache.http.HttpEntity
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
+import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpDelete
@@ -23,6 +24,7 @@ import org.apache.http.client.utils.URLEncodedUtils
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.message.BasicNameValuePair
 import org.apache.http.util.EntityUtils
 @SuppressWarnings('UnusedImport')
 import scala.collection.JavaConverters$
@@ -56,9 +58,14 @@ class ProviderClient {
 
         if (method instanceof HttpEntityEnclosingRequest) {
             if (urlEncodedFormPost(request) && request.query().defined) {
-                def charset = Consts.UTF_8
-                List parameters = URLEncodedUtils.parse(request.query().get(), charset)
-                method.setEntity(new UrlEncodedFormEntity(parameters, charset))
+              def charset = Consts.UTF_8
+              List parameters = JavaConverters$.MODULE$.mapAsJavaMapConverter(request.query().get()).asJava()
+                .collectMany { entry ->
+                  JavaConverters$.MODULE$.seqAsJavaListConverter(entry.value).asJava().collect {
+                    new BasicNameValuePair(entry.key, it)
+                  }
+              }
+              method.setEntity(new UrlEncodedFormEntity(parameters, charset))
             } else if (request.body().defined) {
                 method.setEntity(new StringEntity(request.body().get()))
             }
@@ -160,7 +167,11 @@ class ProviderClient {
         urlBuilder.path = path
 
         if (request.query().defined && !urlEncodedFormPost(request)) {
-            urlBuilder.customQuery = request.query().get()
+          JavaConverters$.MODULE$.mapAsJavaMapConverter(request.query().get()).asJava().each {
+            entry -> JavaConverters$.MODULE$.seqAsJavaListConverter(entry.value).asJava().each {
+              urlBuilder.addParameter(entry.key, it)
+            }
+          }
         }
 
         def url = urlBuilder.build().toString()

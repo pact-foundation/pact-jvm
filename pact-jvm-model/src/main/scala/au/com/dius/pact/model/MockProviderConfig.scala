@@ -3,7 +3,7 @@ package au.com.dius.pact.model
 import java.net.ServerSocket
 import scala.util.control.NonFatal
 
-case class MockProviderConfig(port: Int, hostname: String) {
+case class MockProviderConfig(port: Int, hostname: String, pactConfig: PactConfig) {
   def url: String = s"http://$hostname:$port"
 }
 
@@ -11,9 +11,12 @@ object MockProviderConfig {
   val portLowerBound = 20000
   val portUpperBound = 40000
 
-  def createDefault() : MockProviderConfig = createDefault("localhost")
-  def createDefault(host: String) = MockProviderConfig(randomPort(portLowerBound, portUpperBound).get, host)
-  def create(lower: Int, upper: Int) = MockProviderConfig(randomPort(lower, upper).get, "localhost")
+  def createDefault() : MockProviderConfig = createDefault("localhost", PactConfig(PactSpecVersion.V2))
+  def createDefault(pactConfig: PactConfig) : MockProviderConfig = createDefault("localhost", pactConfig)
+  def createDefault(host: String, pactConfig: PactConfig) =
+    MockProviderConfig(randomPort(portLowerBound, portUpperBound).get, host, pactConfig)
+  def create(lower: Int, upper: Int, pactConfig: PactConfig) =
+    MockProviderConfig(randomPort(lower, upper).get, "localhost", pactConfig)
 
   def randomPort(lower: Int, upper: Int) = {
     import util.Random.nextInt

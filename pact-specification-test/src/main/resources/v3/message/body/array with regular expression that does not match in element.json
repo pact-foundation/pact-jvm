@@ -1,0 +1,35 @@
+{
+  "match": false,
+  "comment": "Types and regular expressions don't match",
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "animals": [
+        {
+          "phoneNumber": "0415674567"
+        }
+      ]
+    },
+    "matchingRules": {
+      "$.body.animals": {"min": 1, "match": "type"},
+      "$.body.animals[*].*": {"match": "type"},
+      "$.body.animals[*].phoneNumber": {"match": "regex", "regex": "\\d+"}
+    }
+  },
+  "actual": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "animals": [
+        {
+          "phoneNumber": "333"
+        },{
+          "phoneNumber": "abc"
+        }
+      ]
+    }
+  }
+}

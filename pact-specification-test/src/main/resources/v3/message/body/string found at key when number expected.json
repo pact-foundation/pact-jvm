@@ -1,0 +1,24 @@
+{
+  "match": false,
+  "comment": "Number of feet expected to be number but was string",
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "alligator":{
+        "feet": 4
+      }
+    }
+  },
+  "actual": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "alligator":{
+        "feet": "4"
+      }
+    }
+  }
+}

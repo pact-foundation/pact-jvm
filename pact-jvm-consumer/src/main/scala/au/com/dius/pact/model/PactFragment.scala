@@ -10,7 +10,7 @@ case class PactFragment(consumer: Consumer,
 
   def duringConsumerSpec[T](config: MockProviderConfig)(test: => T, verification: ConsumerTestVerification[T]): VerificationResult = {
     val server = DefaultMockProvider(config)
-    new ConsumerPactRunner(server).runAndWritePact(toPact)(test, verification)
+    new ConsumerPactRunner(server).runAndWritePact(toPact, config.pactConfig)(test, verification)
   }
 
   //TODO: it would be a good idea to ensure that all interactions in the fragment have the same state

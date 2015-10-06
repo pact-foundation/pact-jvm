@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer.resultstests;
 
-import au.com.dius.pact.consumer.ConsumerClient;
+import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.PactMismatchException;
 import au.com.dius.pact.model.PactFragment;
@@ -60,13 +60,13 @@ public class MissingRequestConsumerPassesTest extends ExpectedToFailBase {
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "fred");
         ConsumerClient consumerClient = new ConsumerClient(url);
-        assertEquals(consumerClient.getAsMap("/"), expectedResponse);
+        assertEquals(consumerClient.getAsMap("/", ""), expectedResponse);
     }
 
     @Override
     protected void assertException(Throwable e) {
         assertThat(e.getMessage(),
-            containsString("The following requests where not received:\n" +
+            containsString("The following requests were not received:\n" +
                 "Interaction: MissingRequestConsumerPassesTest second test interaction\n" +
                 "\tin state None\n" +
                 "request:\n" +

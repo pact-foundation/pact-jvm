@@ -11,7 +11,7 @@ import java.util.concurrent.Executors
 class PactSpec(config: PactConfiguration, pact: Pact)(implicit timeout: Duration = 10.seconds) extends FreeSpec with Assertions {
   implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool)
 
-  pact.interactions.toList.map { interaction =>
+  pact.interactions.toList.foreach { interaction =>
     s"""pact for consumer ${pact.consumer.name} 
        |provider ${pact.provider.name} 
        |interaction "${interaction.description}"
@@ -19,7 +19,7 @@ class PactSpec(config: PactConfiguration, pact: Pact)(implicit timeout: Duration
 
         val stateChangeFuture = (config.stateChangeUrl, interaction.providerState) match {
           case (Some(stateChangeUrl), Some(providerState)) => HttpClient.run(EnterStateRequest(stateChangeUrl.url, providerState))
-          case (_, _) => Future()
+          case (_, _) => Future.successful(Response(200, None, None, None))
         }
         
         val pactResponseFuture: Future[Response] = for {

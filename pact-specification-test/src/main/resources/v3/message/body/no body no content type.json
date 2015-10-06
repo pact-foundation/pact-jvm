@@ -1,0 +1,15 @@
+{
+  "match": true,
+  "comment": "No body, no content-type",
+  "expected": {},
+  "actual": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "alligator": {
+        "age": 3
+      }
+    }
+  }
+}

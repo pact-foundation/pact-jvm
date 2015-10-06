@@ -1,0 +1,20 @@
+{
+  "match": false,
+  "comment": "Name should not be null",
+  "expected" : {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "alligator":{
+        "name": "Mary"
+      }
+    }
+  },
+  "actual": {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "alligator":{
+        "name": null
+      }
+    }
+  }
+}

@@ -1,5 +1,8 @@
 package au.com.dius.pact.model
 
+import java.net.URLDecoder
+
+import org.apache.http.client.utils.URLEncodedUtils
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import scala.collection.JavaConversions
@@ -9,81 +12,13 @@ object Pact {
     Pact(provider, consumer, JavaConversions.collectionAsScalaIterable(interactions).toSeq)
   }
 
-  def from(source: String): Pact = {
-    from(parse(StringInput(source)))
-  }
-
-  def from(source: JsonInput): Pact = {
-    from(parse(source))
-  }
-
-  def from(json:JValue) = {
-    implicit val formats = DefaultFormats
-    val transformedJson = json.transformField {
-      case ("provider_state", value) => ("providerState", value)
-      case ("responseMatchingRules", value) => ("matchingRules", value)
-      case ("requestMatchingRules", value) => ("matchingRules", value)
-      case ("method", value) => ("method", JString(value.values.toString.toUpperCase))
-    }
-    val provider = (transformedJson \ "provider").extract[Provider]
-    val consumer = (transformedJson \ "consumer").extract[Consumer]
-
-    val interactions = (transformedJson \ "interactions").children.map(i => {
-      val interaction = i.extract[Interaction]
-      val request: Request = extractRequest(i)
-      val response: Response = extractResponse(i)
-      interaction.copy(request = request, response = response)
-    })
-    Pact(provider, consumer, interactions)
-  }
-
-  def extractResponse(interactionJson: JValue, responseElement: String = "response"): Response = {
-    implicit val formats = DefaultFormats
-    val responseBody = extractBody(interactionJson \ responseElement \ "body")
-    val responseMatchingRules = extractMatchingRules(interactionJson \ responseElement \ "matchingRules")
-    (interactionJson \ responseElement).extract[Response].copy(body = responseBody, matchingRules = responseMatchingRules)
-  }
-
-  def extractRequest(interactionJson: JValue, requestElement: String = "request"): Request = {
-    implicit val formats = DefaultFormats
-    val requestBody = extractBody(interactionJson \ requestElement \ "body")
-    val requestMatchingRules = extractMatchingRules(interactionJson \ requestElement \ "matchingRules")
-    (interactionJson \ requestElement).extract[Request].copy(body = requestBody, matchingRules = requestMatchingRules)
-  }
-
-  def extractBody(body: JValue): Option[String] = {
-    body match {
-      case JString(s) => Some(s)
-      case JNothing => None
-      case JNull => None
-      case b => Some(compact(b))
-    }
-  }
-
-  def extractMatcher(matcher: JValue): Map[String, Any] = {
-    matcher match {
-      case JObject(fields) => Map(fields.map { f =>
-        f._1 -> f._2.values
-      }: _*)
-      case _ => Map()
-    }
-  }
-
-  def extractMatchingRules(matchingRules: JValue) : Option[Map[String, Map[String, Any]]] = {
-    matchingRules match {
-      case JObject(fields) =>
-        Some(Map(fields.map { f => f._1 -> extractMatcher(f._2) }: _*))
-      case _ => None
-    }
-  }
-
   trait MergeResult
 
   case class MergeSuccess(result: Pact) extends MergeResult
   case class MergeConflict(result: Seq[(Interaction, Interaction)]) extends MergeResult
 }
 
-case class Pact(provider: Provider, consumer: Consumer, interactions: Seq[Interaction]) extends PactSerializer {
+case class Pact(provider: Provider, consumer: Consumer, interactions: Seq[Interaction]) {
   import Pact._
   
   def merge(other: Pact): MergeResult = {
@@ -139,6 +74,8 @@ object HttpMethod {
 }
 
 trait HttpPart {
+  type QUERY = Option[Map[String, List[String]]]
+
   def headers: Option[Map[String, String]]
 
   def body: Option[String]
@@ -179,7 +116,7 @@ trait HttpPart {
 
 case class Request(method: String,
                    path: String,
-                   query: Option[String],
+                   query: Option[Map[String, List[String]]],
                    headers: Option[Map[String, String]],
                    body: Option[String],
                    matchingRules: Option[Map[String, Map[String, Any]]]) extends HttpPart {
@@ -218,11 +155,24 @@ trait Optionals {
     }
   }
 
-  def optionalQuery(query: String): Option[String] = {
+  def optionalQuery(query: String, decode: Boolean = false): Option[Map[String, List[String]]] = {
     if(query == null || query == "") {
       None
     } else {
-      Some(query)
+      Some(query.split("&").map(_.split("=")).foldLeft(Map[String,List[String]]()) {
+        (m, a) =>
+          val name = if (decode) URLDecoder.decode(a.head, "UTF-8") else a.head
+          val value = if (decode) URLDecoder.decode(a.last, "UTF-8") else a.last
+          m + (name -> (m.getOrElse(name, List[String]()) :+ value))
+      })
+    }
+  }
+
+  def optionalQuery(query: Option[String], decode: Boolean): Option[Map[String, List[String]]] = {
+    if(query.isDefined) {
+      optionalQuery(query.get, decode)
+    } else {
+      None
     }
   }
 

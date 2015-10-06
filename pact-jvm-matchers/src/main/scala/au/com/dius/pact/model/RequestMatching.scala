@@ -44,7 +44,7 @@ object RequestMatching extends StrictLogging {
   def requestMismatches(expected: Request, actual: Request): Seq[RequestPartMismatch] = {
     (matchMethod(expected.method, actual.method) 
       ++ matchPath(expected, actual)
-      ++ matchQuery(expected.query, actual.query)
+      ++ matchQuery(expected, actual)
       ++ matchCookie(expected.cookie, actual.cookie)
       ++ matchRequestHeaders(expected, actual)
       ++ matchBody(expected, actual, diffConfig)).toSeq

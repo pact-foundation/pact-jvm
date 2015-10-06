@@ -1,13 +1,38 @@
+buildscript {
+  repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven { url 'http://clojars.org/repo' }
+  }
+  dependencies {
+    classpath 'com.netflix.nebula:nebula-clojure-plugin:2.2.0'
+  }
+}
+
+apply plugin: 'nebula.nebula-clojure'
 
 dependencies {
-    compile project(":pact-jvm-consumer_${project.scalaVersion}"), 'junit:junit:4.12',
-        'org.json:json:20140107', 'org.apache.commons:commons-lang3:3.3.2'
+  compile project(":pact-jvm-consumer_${project.scalaVersion}"), 'junit:junit:4.12',
+      'org.json:json:20140107', 'org.apache.commons:commons-lang3:3.3.2', 'com.google.guava:guava:18.0'
 
-    testCompile 'ch.qos.logback:logback-core:1.1.2', 'ch.qos.logback:logback-classic:1.1.2',
-        'org.apache.commons:commons-collections4:4.0', 'com.google.code.gson:gson:2.3.1',
-        'org.apache.httpcomponents:fluent-hc:4.4'
+  testCompile 'ch.qos.logback:logback-core:1.1.2', 'ch.qos.logback:logback-classic:1.1.2',
+      'org.apache.commons:commons-collections4:4.0', 'com.google.code.gson:gson:2.3.1',
+      'org.apache.httpcomponents:fluent-hc:4.5.1', 'org.apache.httpcomponents:httpclient:4.5.1'
+  testCompile 'org.clojure:clojure:1.6.0', 'http-kit:http-kit:2.1.19'
 }
 
 test {
     systemProperties['pact.rootDir'] = "$buildDir/pacts"
 }
+
+clojureTest {
+  jvmOptions = {
+    systemProperty('pact.rootDir', "$buildDir/pacts")
+  }
+  junit = true
+  clojureTest.dependsOn 'testClasses'
+}
+
+clojure.aotCompile = true
+clojureRepl.port = '7888'

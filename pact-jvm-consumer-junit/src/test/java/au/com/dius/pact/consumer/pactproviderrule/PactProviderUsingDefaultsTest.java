@@ -1,6 +1,10 @@
 package au.com.dius.pact.consumer.pactproviderrule;
 
-import au.com.dius.pact.consumer.*;
+import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
+import au.com.dius.pact.consumer.ConsumerPactBuilder;
+import au.com.dius.pact.consumer.Pact;
+import au.com.dius.pact.consumer.PactProviderRule;
+import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.PactFragment;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -51,7 +55,7 @@ public class PactProviderUsingDefaultsTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
     }
 
     @Test(expected = AssertionError.class)
@@ -61,7 +65,7 @@ public class PactProviderUsingDefaultsTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "fred");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
     }
 
     @Test

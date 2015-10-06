@@ -1,0 +1,32 @@
+{
+  "match": true,
+  "comment": "Messages match with same type",
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "alligator":{
+        "name": "Mary",
+        "feet": 4,
+        "favouriteColours": ["red","blue"]
+      }
+    },
+    "matchingRules": {
+      "$.body.alligator.name": {"match": "type"},
+      "$.body.alligator.feet": {"match": "type"}
+    }
+  },
+  "actual": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "alligator":{
+        "feet": 5,
+        "name": "Harry the very hungry alligator with an extra foot",
+        "favouriteColours": ["red","blue"]
+      }
+    }
+  }
+}

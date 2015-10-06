@@ -1,6 +1,5 @@
 dependencies {
     compile project(":pact-jvm-model_${project.scalaVersion}"),
-        project(":pact-jvm-model-v3_${project.scalaVersion}"),
         project(":pact-jvm-matchers_${project.scalaVersion}"),
         "org.scalatest:scalatest_${project.scalaVersion}:2.2.1",
         'commons-io:commons-io:2.4', 'org.codehaus.groovy:groovy-all:2.4.4', 'org.fusesource.jansi:jansi:1.11',

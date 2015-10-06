@@ -1,0 +1,20 @@
+{
+  "match": false,
+  "comment": "Property names on objects are case sensitive",
+  "expected" : {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "alligator":{
+        "FavouriteColour": "red"
+      }
+    }
+  },
+  "actual": {
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "alligator":{
+        "favouritecolour": "red"
+      }
+    }
+  }
+}

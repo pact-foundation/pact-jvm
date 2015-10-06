@@ -1,0 +1,24 @@
+{
+  "match": false,
+  "comment": "Unexpected favourite colour with null value",
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "alligator":{
+        "favouriteColours": ["red","blue"]
+      }
+    }
+  },
+  "actual": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "alligator":{
+        "favouriteColours": ["red","blue", null]
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer.examples;
 
-import au.com.dius.pact.consumer.ConsumerClient;
+import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactProviderRule;
@@ -57,6 +57,6 @@ public class ExampleJavaConsumerPactRuleTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient("http://localhost:8080").getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient("http://localhost:8080").getAsMap("/", ""), expectedResponse);
     }
 }

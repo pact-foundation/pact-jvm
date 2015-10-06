@@ -1,0 +1,24 @@
+{
+  "match": false,
+  "comment": "Incorrect value at alligator name",
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "alligator":{
+        "name": "Mary"
+      }
+    }
+  },
+  "actual": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "alligator":{
+        "name": "Fred"
+      }
+    }
+  }
+}

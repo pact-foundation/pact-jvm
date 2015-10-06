@@ -2,7 +2,7 @@ package au.com.dius.pact.consumer
 
 import java.io.{File, PrintWriter}
 
-import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.{PactConfig, PactSerializer, Pact}
 import Pact.{MergeSuccess, MergeConflict}
 import PactGenerator._
 import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
@@ -57,7 +57,7 @@ case class PactGenerator(pacts: Map[String, Pact], conflicts: List[MergeConflict
     } 
   }
 
-  def writeAllToFile(): Unit = {
+  def writeAllToFile(config: PactConfig): Unit = {
     def createPactRootDir(): Unit = 
       new File(PactConsumerConfig.pactRootDir).mkdirs()
     
@@ -65,7 +65,7 @@ case class PactGenerator(pacts: Map[String, Pact], conflicts: List[MergeConflict
       val file = destinationFileForPact(pact)
       logger.debug(s"Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file $file")
       val writer = new PrintWriter(file)
-      try pact.sortInteractions.serialize(writer)
+      try PactSerializer.serialize(pact.sortInteractions, writer, config)
       finally writer.close()
     }
     require(!isEmpty, "Cannot write to file; no pacts have been recorded")

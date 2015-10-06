@@ -1,0 +1,19 @@
+{
+  "match": true,
+  "comment": "Missing body",
+  "expected": {
+    "metaData": {
+      "contentType": "application/json"
+    }
+  },
+  "actual": {
+    "metaData": {
+      "contentType": "application/json"
+    },
+    "contents": {
+      "alligator": {
+        "age": 3
+      }
+    }
+  }
+}

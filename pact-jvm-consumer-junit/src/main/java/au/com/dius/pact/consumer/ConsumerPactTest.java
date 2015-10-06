@@ -1,7 +1,9 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.MockProviderConfig;
+import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.PactSpecVersion;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -18,7 +20,7 @@ public abstract class ConsumerPactTest {
     @Test
     public void testPact() throws Throwable {
         PactFragment fragment = createFragment(ConsumerPactBuilder.consumer(consumerName()).hasPactWith(providerName()));
-        final MockProviderConfig config = MockProviderConfig.createDefault();
+        final MockProviderConfig config = MockProviderConfig.createDefault(PactConfig.apply(getSpecificationVersion()));
 
         VerificationResult result = fragment.runConsumer(config, new TestRun() {
             public void run(MockProviderConfig config) throws IOException {
@@ -39,4 +41,9 @@ public abstract class ConsumerPactTest {
             }
         }
     }
+
+    protected PactSpecVersion getSpecificationVersion() {
+        return PactSpecVersion.V2;
+    }
+
 }

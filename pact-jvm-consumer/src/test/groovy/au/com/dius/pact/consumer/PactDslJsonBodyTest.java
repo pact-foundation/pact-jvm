@@ -31,7 +31,7 @@ public class PactDslJsonBodyTest {
                     .stringValue("name", "Rogger the Dogger")
                     .timestamp()
                     .date("dob", "MM/dd/yyyy")
-                    .object("1")
+                    .object("10k-depreciation-bips")
                         .id()
                     .closeObject()
                 .closeObject()
@@ -45,7 +45,7 @@ public class PactDslJsonBodyTest {
                 ".numbers[4].timestamp",
                 ".numbers[4].dob",
                 ".numbers[4].id",
-                ".numbers[4]['1'].id"
+                ".numbers[4]['10k-depreciation-bips'].id"
         ));
         assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
 
@@ -58,15 +58,16 @@ public class PactDslJsonBodyTest {
         DslPart body = new PactDslJsonBody()
                 .id("1")
                 .stringType("@field")
-                .hexValue("200", "abc");
+                .hexValue("200", "abc")
+                .integerType("10k-depreciation-bips");
 
         Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
-                "['200']", "['1']", "['@field']"
+                "['200']", "['1']", "['@field']", "['10k-depreciation-bips']"
         ));
         assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
 
         assertThat(((JSONObject) body.getBody()).keySet(), is(equalTo((Set)
-                new HashSet(Arrays.asList("200", "1", "@field")))));
+                new HashSet(Arrays.asList("200", "10k-depreciation-bips", "1", "@field")))));
     }
 
     @Test

@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer.resultstests;
 
-import au.com.dius.pact.consumer.ConsumerClient;
+import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.ConsumerPactTest;
 import au.com.dius.pact.model.PactFragment;
@@ -41,6 +41,6 @@ public class PactVerifiedConsumerPassesTest extends ConsumerPactTest {
         Map<String, Object> expectedResponse = new HashMap<String, Object>();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(url).getAsMap("/"), expectedResponse);
+        assertEquals(new ConsumerClient(url).getAsMap("/", ""), expectedResponse);
     }
 }

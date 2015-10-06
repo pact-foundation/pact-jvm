@@ -14,9 +14,9 @@ object Fixtures {
   val provider = Provider("test_provider")
   val consumer = Consumer("test_consumer")
 
-  val request = Request(Post, "/", "q=p",
-    Map("testreqheader" -> "testreqheadervalue"),
-    pretty(map2jvalue(Map("test" -> true))), null)
+  val request = Request(Post, "/", Some(Map("q" -> List("p"))),
+    Some(Map("testreqheader" -> "testreqheadervalue")),
+    Some(pretty(map2jvalue(Map("test" -> true)))), None)
 
   val response = Response(200,
     Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*"),

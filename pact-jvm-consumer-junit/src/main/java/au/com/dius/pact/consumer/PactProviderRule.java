@@ -1,7 +1,9 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.MockProviderConfig;
+import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.PactSpecVersion;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
@@ -36,16 +38,28 @@ public class PactProviderRule extends ExternalResource {
      * @param provider Provider name to mock
      * @param host Host to bind to. Defaults to localhost
      * @param port Port to bind to. Defaults to a random port.
+     * @param pactConfig Pact configuration
      * @param target Target test to apply this rule to.
      */
-    public PactProviderRule(String provider, String host, Integer port, Object target) {
+    public PactProviderRule(String provider, String host, Integer port, PactConfig pactConfig, Object target) {
         this.provider = provider;
         this.target = target;
         if (host == null && port == null) {
-            config = MockProviderConfig.createDefault();
+            config = MockProviderConfig.createDefault(pactConfig);
         } else {
-            config = new MockProviderConfig(port, host);
+            config = new MockProviderConfig(port, host, pactConfig);
         }
+    }
+
+    /**
+     * Creates a mock provider by the given name
+     * @param provider Provider name to mock
+     * @param host Host to bind to. Defaults to localhost
+     * @param port Port to bind to. Defaults to a random port.
+     * @param target Target test to apply this rule to.
+     */
+    public PactProviderRule(String provider, String host, Integer port, Object target) {
+        this(provider, host, port, PactConfig.apply(PactSpecVersion.V2), target);
     }
 
     /**
@@ -54,7 +68,16 @@ public class PactProviderRule extends ExternalResource {
      * @param target Target test to apply this rule to.
      */
     public PactProviderRule(String provider, Object target) {
-        this(provider, null, null, target);
+        this(provider, null, null, PactConfig.apply(PactSpecVersion.V2), target);
+    }
+
+    /**
+     * Creates a mock provider by the given name. Binds to localhost and a random port.
+     * @param provider Provider name to mock
+     * @param target Target test to apply this rule to.
+     */
+    public PactProviderRule(String provider, PactSpecVersion pactSpecVersion, Object target) {
+        this(provider, null, null, PactConfig.apply(pactSpecVersion), target);
     }
 
     public MockProviderConfig getConfig() {
