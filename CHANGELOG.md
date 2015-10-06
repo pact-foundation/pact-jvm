@@ -24,6 +24,40 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 3cad739 - bump version (Ronald Holshausen, Mon Sep 7 21:02:29 2015 +1000)
 * 7f8dd18 - updated changelog (Ronald Holshausen, Mon Sep 7 20:09:06 2015 +1000)
 
+# 3.1.0 - First implementation of V3 pacts + bugfixes
+
+* 250becc - updated changelog (Ronald Holshausen, Thu Sep 17 19:56:18 2015 +1000)
+* 21502e3 - fix package name in pact-jvm-consumer-groovy after a previous refactor (Ronald Holshausen, Tue Oct 6 11:06:15 2015 +1100)
+* 8910495 - Oops, was missing the clojars repo (Ronald Holshausen, Thu Oct 1 15:16:15 2015 +1000)
+* 3f2f431 - allow the java junit consumer tests to set the pact spec version to use (Ronald Holshausen, Thu Oct 1 15:09:49 2015 +1000)
+* 160c2c8 - added note about requiring a version when using the gradle `pactPublish` task (Ronald Holshausen, Thu Oct 1 09:41:03 2015 +1000)
+* 3d0e3ca - updated readme (Ronald Holshausen, Thu Oct 1 09:35:58 2015 +1000)
+* 58549b1 - allow the groovy consumer tests to set the pact spec version to use (Ronald Holshausen, Wed Sep 30 17:32:24 2015 +1000)
+* 9519b1b - use an enum for the pact spec version (Ronald Holshausen, Wed Sep 30 17:15:42 2015 +1000)
+* 02a5407 - wire the pact config all the way through the codez (Ronald Holshausen, Wed Sep 30 16:27:23 2015 +1000)
+* cd866b2 - merged v3 modules into the corresponding base one (Ronald Holshausen, Wed Sep 30 15:11:14 2015 +1000)
+* 1c668c1 - updated specification tests from pact-specification project (Ronald Holshausen, Wed Sep 30 13:17:37 2015 +1000)
+* af87236 - attempt at better query string handling #66 (Ronald Holshausen, Fri Sep 25 16:45:56 2015 +1000)
+* 05d5dc8 - better handling of path in the mock server and query strings in the java tests (Ronald Holshausen, Fri Sep 25 16:03:02 2015 +1000)
+* c9a840a - big refactor to split pact model from serilaisation code; introduced V3 reading/writing (Ronald Holshausen, Fri Sep 25 13:50:54 2015 +1000
+* 60a51f0 - Update README.md (Stefan Leszkiewicz, Thu Sep 24 12:40:25 2015 +1000)
+* ec22888 - maven plugin should throw a MojoFailureException on failure #167 (Ronald Holshausen, Thu Sep 24 10:36:37 2015 +1000)
+* a393350 - bump minor version (Ronald Holshausen, Wed Sep 23 15:02:27 2015 +1000)
+* 8996ff5 - upgrade to gradle 2.7 (Ronald Holshausen, Wed Sep 23 15:01:00 2015 +1000)
+* f3c7c69 - removed some unused code (Ronald Holshausen, Wed Sep 23 15:00:43 2015 +1000)
+* 25b087c - Pact Serializer will generate a V2 vs V3 pact file based on config (Ronald Holshausen, Wed Sep 23 14:37:03 2015 +1000)
+* 14f303b - move the pact loading code to the PactSerializer (Ronald Holshausen, Wed Sep 23 13:30:48 2015 +1000)
+* a395d92 - guard against expected lists being empty when using the each-like matchers #166 (Ronald Holshausen, Wed Sep 23 12:47:02 2015 +1000)
+* a824383 - seperate pact serialisation from the pact model (Ronald Holshausen, Wed Sep 23 09:18:53 2015 +1000)
+* f6db65b - Guard against field names that are not valid json path in the groovy dsl #165 (Ronald Holshausen, Tue Sep 22 17:20:05 2015 +1000)
+* 1e36385 - Merge pull request #164 from venksub/master (Ronald Holshausen, Tue Sep 22 14:37:21 2015 +1000)
+* 93e364f - Java DSL and JUnit infrastructure implementing V3 specification changes. (Venkatesan Subramanian, Mon Sep 21 15:36:03 2015 -0700)
+* ec668b1 - added message pact test cases (Ronald Holshausen, Fri Sep 18 17:09:03 2015 +1000)
+* 1ad30a8 - added specification tests for V3 (Ronald Holshausen, Fri Sep 18 13:33:09 2015 +1000)
+* 606a6cf - fix incorrect grammar in VerificationResult error message #163 (Ronald Holshausen, Fri Sep 18 12:33:12 2015 +1000)
+* 7c61bce - bump version (Ronald Holshausen, Thu Sep 17 20:41:52 2015 +1000)
+* 7c6f8a4 - Merge pull request #2 from DiUS/master (venksub, Wed Sep 16 09:27:10 2015 -0700)
+
 # 2.2.15 - bugfix release
 
 * e8562a7 - Merge branch 'master' into v2.x (Ronald Holshausen, Thu Sep 17 17:03:02 2015 +1000)
