@@ -1,7 +1,7 @@
 package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model.{QueryMismatchFactory, QueryMismatch}
-import com.typesafe.scalalogging.StrictLogging
+import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 
 object QueryMatcher extends StrictLogging {
 
