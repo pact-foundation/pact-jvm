@@ -24,6 +24,13 @@ subprojects {
       buildDir = new File(projectDir, "build/$project.scalaVersion")
     }
 
+    String javaVersion = Runtime.package.specificationVersion
+    def javaMatcher = javaVersion =~ /(\d+)\.(\d+)/
+    project.ext {
+      javaMajor = javaMatcher[0][1] as Integer
+      javaMinor = javaMatcher[0][2] as Integer
+    }
+
     apply plugin: 'java'
     apply plugin: 'scala'
     apply plugin: 'groovy'

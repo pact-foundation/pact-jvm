@@ -10,7 +10,10 @@ buildscript {
   }
 }
 
-apply plugin: 'nebula.nebula-clojure'
+// Clojure plugin is compiled for JDK7
+if (javaMajor > 1 || javaMinor > 6) {
+  apply plugin: 'nebula.nebula-clojure'
+}
 
 dependencies {
   compile project(":pact-jvm-consumer_${project.scalaVersion}"), 'junit:junit:4.12',
@@ -19,20 +22,25 @@ dependencies {
   testCompile 'ch.qos.logback:logback-core:1.1.2', 'ch.qos.logback:logback-classic:1.1.2',
       'org.apache.commons:commons-collections4:4.0', 'com.google.code.gson:gson:2.3.1',
       'org.apache.httpcomponents:fluent-hc:4.5.1', 'org.apache.httpcomponents:httpclient:4.5.1'
-  testCompile 'org.clojure:clojure:1.6.0', 'http-kit:http-kit:2.1.19'
+
+  if (javaMajor > 1 || javaMinor > 6) {
+    testCompile 'org.clojure:clojure:1.6.0', 'http-kit:http-kit:2.1.19'
+  }
 }
 
 test {
     systemProperties['pact.rootDir'] = "$buildDir/pacts"
 }
 
-clojureTest {
-  jvmOptions = {
-    systemProperty('pact.rootDir', "$buildDir/pacts")
+if (javaMajor > 1 || javaMinor > 6) {
+  clojureTest {
+    jvmOptions = {
+      systemProperty('pact.rootDir', "$buildDir/pacts")
+    }
+    junit = true
+    clojureTest.dependsOn 'testClasses'
   }
-  junit = true
-  clojureTest.dependsOn 'testClasses'
-}
 
-clojure.aotCompile = true
-clojureRepl.port = '7888'
+  clojure.aotCompile = true
+  clojureRepl.port = '7888'
+}
