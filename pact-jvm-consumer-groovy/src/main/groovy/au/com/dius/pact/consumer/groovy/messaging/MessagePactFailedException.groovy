@@ -1,4 +1,4 @@
-package messaging
+package au.com.dius.pact.consumer.groovy.messaging
 
 /**
  * Exception thrown when a message pact consumer test has failed

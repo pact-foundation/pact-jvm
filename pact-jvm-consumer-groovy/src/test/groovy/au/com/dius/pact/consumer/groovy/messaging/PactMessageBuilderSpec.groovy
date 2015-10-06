@@ -1,4 +1,4 @@
-package messaging
+package au.com.dius.pact.consumer.groovy.messaging
 
 import au.com.dius.pact.model.v3.messaging.Message
 import groovy.json.JsonSlurper

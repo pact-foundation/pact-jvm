@@ -1,4 +1,4 @@
-package messaging
+package au.com.dius.pact.consumer.groovy.messaging
 
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.consumer.PactConsumerConfig$
