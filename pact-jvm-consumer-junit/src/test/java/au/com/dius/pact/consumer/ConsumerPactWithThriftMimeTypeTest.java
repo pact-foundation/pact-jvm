@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.PactFragment;
 import org.apache.http.client.fluent.Request;
 import org.junit.Rule;
@@ -24,7 +25,7 @@ public class ConsumerPactWithThriftMimeTypeTest {
     public PactProviderRule provider = new PactProviderRule("test_provider", "localhost", 8080, this);
 
     @Pact(provider="test_provider", consumer="test_consumer")
-    public PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
+    public PactFragment createFragment(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Accept", "application/x-thrift+json");
 

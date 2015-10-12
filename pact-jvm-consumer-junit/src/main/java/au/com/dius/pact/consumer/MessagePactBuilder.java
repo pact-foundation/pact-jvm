@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.InvalidPactException;
 import org.apache.http.entity.ContentType;
 

@@ -1,4 +1,4 @@
-package au.com.dius.pact.consumer;
+package au.com.dius.pact.consumer.dsl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +27,7 @@ public abstract class DslPart {
 
     protected abstract void putObject(DslPart object);
     protected abstract void putArray(DslPart object);
-    protected abstract Object getBody();
+    public abstract Object getBody();
 
     /**
      * Field which is an array

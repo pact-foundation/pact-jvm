@@ -1,10 +1,10 @@
 package au.com.dius.pact.consumer.examples;
 
-import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.Pact;
-import au.com.dius.pact.consumer.PactDslJsonBody;
+import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.PactProviderRule;
 import au.com.dius.pact.consumer.PactVerification;
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.PactFragment;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.http.HttpResponse;
@@ -32,7 +32,7 @@ public class ExampleServiceConsumerTest {
     public PactProviderRule provider = new PactProviderRule("CarBookingProvider", "localhost", 1234, this);
 
     @Pact(provider = "CarBookingProvider", consumer = "CarBookingConsumer")
-    public PactFragment configurationFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
+    public PactFragment configurationFragment(PactDslWithProvider builder) {
         return builder
             .given("john smith books a civic")
             .uponReceiving("retrieve data from Service-A")

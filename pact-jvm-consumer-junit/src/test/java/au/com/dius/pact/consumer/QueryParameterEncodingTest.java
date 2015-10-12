@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.model.PactFragment;
 
@@ -8,7 +9,7 @@ import java.io.IOException;
 public class QueryParameterEncodingTest extends ConsumerPactTest {
 
     @Override
-    protected PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
+    protected PactFragment createFragment(PactDslWithProvider builder) {
         PactFragment fragment = builder
                 .uponReceiving("java test interaction with a query string")
                 .path("/some path")

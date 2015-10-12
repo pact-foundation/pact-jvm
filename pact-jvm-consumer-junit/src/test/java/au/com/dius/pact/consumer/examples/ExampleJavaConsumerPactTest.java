@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.examples;
 
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.ConsumerPactTest;
 import au.com.dius.pact.model.PactFragment;
 import org.junit.Assert;
@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
 
     @Override
-    protected PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
+    protected PactFragment createFragment(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("testreqheader", "testreqheadervalue");
 
@@ -29,6 +29,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
                 .status(200)
                 .headers(headers)
                 .body("{\"responsetest\": true, \"name\": \"harry\"}")
+            .given("test state 2") // NOTE: Using provider states are optional, you can leave it out
             .uponReceiving("ExampleJavaConsumerPactTest second test interaction")
                 .method("OPTIONS")
                 .headers(headers)

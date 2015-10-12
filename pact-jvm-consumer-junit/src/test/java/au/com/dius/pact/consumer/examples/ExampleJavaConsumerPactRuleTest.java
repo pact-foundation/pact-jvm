@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.examples;
 
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactProviderRule;
 import au.com.dius.pact.consumer.PactVerification;
@@ -22,7 +22,7 @@ public class ExampleJavaConsumerPactRuleTest {
     public PactProviderRule provider = new PactProviderRule("test_provider", "localhost", 8080, this);
 
     @Pact(provider="test_provider", consumer="test_consumer")
-    public PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
+    public PactFragment createFragment(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("testreqheader", "testreqheadervalue");
 
@@ -36,6 +36,7 @@ public class ExampleJavaConsumerPactRuleTest {
                 .status(200)
                 .headers(headers)
                 .body("{\"responsetest\": true, \"name\": \"harry\"}")
+            .given("test state")
             .uponReceiving("ExampleJavaConsumerPactRuleTest second test interaction")
                 .method("OPTIONS")
                 .headers(headers)
@@ -47,8 +48,6 @@ public class ExampleJavaConsumerPactRuleTest {
                 .body("")
             .toFragment();
     }
-
-
 
     @Test
     @PactVerification("test_provider")

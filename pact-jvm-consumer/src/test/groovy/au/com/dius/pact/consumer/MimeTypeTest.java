@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactFragment;

@@ -1,5 +1,6 @@
-package au.com.dius.pact.consumer;
+package au.com.dius.pact.consumer.dsl;
 
+import au.com.dius.pact.consumer.InvalidMatcherException;
 import nl.flotsam.xeger.Xeger;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -117,7 +118,7 @@ public class PactDslJsonArray extends DslPart {
     }
 
     @Override
-    protected Object getBody() {
+    public Object getBody() {
         return body;
     }
 

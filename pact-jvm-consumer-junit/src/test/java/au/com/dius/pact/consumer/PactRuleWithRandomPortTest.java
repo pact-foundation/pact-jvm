@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.model.PactFragment;
 import org.junit.Rule;
@@ -17,7 +18,7 @@ public class PactRuleWithRandomPortTest {
     public PactProviderRule rule = new PactProviderRule("test_provider", this);
 
     @Pact(provider="test_provider", consumer="test_consumer")
-    public PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
+    public PactFragment createFragment(PactDslWithProvider builder) {
         return builder
             .given("test state")
             .uponReceiving("random port test interaction")

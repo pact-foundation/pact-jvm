@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.pactproviderrule;
 
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactProviderRule;
 import au.com.dius.pact.consumer.PactVerification;
@@ -22,7 +22,7 @@ public class PactProviderTest {
     public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", this);
 
     @Pact(provider="test_provider", consumer="test_consumer")
-    public PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
+    public PactFragment createFragment(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("testreqheader", "testreqheadervalue");
 

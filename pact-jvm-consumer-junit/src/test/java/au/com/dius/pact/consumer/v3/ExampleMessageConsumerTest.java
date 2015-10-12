@@ -10,7 +10,7 @@ import org.junit.Test;
 import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.consumer.MessagePactProviderRule;
 import au.com.dius.pact.consumer.Pact;
-import au.com.dius.pact.consumer.PactDslJsonBody;
+import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 

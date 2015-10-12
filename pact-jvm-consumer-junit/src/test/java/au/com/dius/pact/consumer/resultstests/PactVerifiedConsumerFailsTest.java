@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.resultstests;
 
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.PactFragment;
 
 import java.io.IOException;
@@ -19,7 +19,7 @@ public class PactVerifiedConsumerFailsTest extends ExpectedToFailBase {
     }
 
     @Override
-    protected PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
+    protected PactFragment createFragment(PactDslWithProvider builder) {
         return builder
             .uponReceiving("PactVerifiedConsumerPassesTest test interaction")
                 .path("/")

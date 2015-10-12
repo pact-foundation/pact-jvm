@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer;
 
-import au.com.dius.pact.consumer.ConsumerPactBuilder.PactDslWithProvider.PactDslWithState;
+import au.com.dius.pact.consumer.dsl.PactDslWithState;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.MockProviderConfig$;
 import au.com.dius.pact.model.PactConfig;

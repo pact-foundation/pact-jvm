@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactFragment;
@@ -11,7 +12,7 @@ import java.io.IOException;
 public abstract class ConsumerPactTest {
     public static VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
 
-    protected abstract PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder);
+    protected abstract PactFragment createFragment(PactDslWithProvider builder);
     protected abstract String providerName();
     protected abstract String consumerName();
 
