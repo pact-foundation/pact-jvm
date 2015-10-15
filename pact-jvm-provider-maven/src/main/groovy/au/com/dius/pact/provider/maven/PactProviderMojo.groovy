@@ -52,6 +52,8 @@ class PactProviderMojo extends AbstractMojo {
           consumers.addAll(loadPactFiles(provider, provider.pactFileDirectory))
       }
 
+      provider.setConsumers(consumers)
+
       failures << verifier.verifyProvider(provider)
     }
 
@@ -81,8 +83,11 @@ class PactProviderMojo extends AbstractMojo {
         def pactJson = new JsonSlurper().parse(it)
         if (pactJson.provider.name == provider.name) {
             consumers << new Consumer(name: pactJson.consumer.name, pactFile: it)
+        } else {
+          AnsiConsole.out().println("Skipping ${it} as the provider names don't match provider.name: ${provider.name} vs pactJson.provider.name: ${pactJson.provider.name}")
         }
     }
+    AnsiConsole.out().println("Found ${consumers.size()} pact files")
     consumers
   }
 
