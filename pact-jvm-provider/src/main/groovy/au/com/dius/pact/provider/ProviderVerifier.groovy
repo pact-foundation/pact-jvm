@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.v3.V3Pact
@@ -122,7 +121,6 @@ class ProviderVerifier {
     interaction.description ==~ projectGetProperty(PACT_FILTER_DESCRIPTION)
   }
 
-  @SuppressWarnings(['UnusedMethodParameter', 'EmptyIfStatement', 'EmptyElseBlock'])
   void verifyInteraction(ProviderInfo provider, ConsumerInfo consumer, def pact, Map failures, def interaction) {
     def interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name}" +
       " - ${interaction.description}"
@@ -130,6 +128,7 @@ class ProviderVerifier {
     def stateChangeOk = true
     if (interaction.providerState) {
       stateChangeOk = stateChange(interaction.providerState, provider, consumer)
+      log.debug "State Change: \"${interaction.providerState}\" -> ${stateChangeOk}"
       if (stateChangeOk != true) {
         failures[interactionMessage] = stateChangeOk
         stateChangeOk = false
@@ -142,8 +141,10 @@ class ProviderVerifier {
       AnsiConsole.out().println(Ansi.ansi().a('  ').a(interaction.description))
 
       if (verificationType(provider, consumer) == PactVerification.REQUST_RESPONSE) {
+        log.debug('Verifying via request/response')
         verifyResponseFromProvider(provider, interaction, interactionMessage, failures)
       } else {
+        log.debug('Verifying via annotated test method')
         verifyResponseByInvokingProviderMethods(pact, provider, consumer, interaction, interactionMessage, failures)
       }
     }
@@ -171,11 +172,13 @@ class ProviderVerifier {
         return true
       } else if (stateChangeHandler instanceof Closure) {
         def result = stateChangeHandler.call(state)
+        log.debug "Invoked state change closure -> ${result}"
         if (!(result instanceof URL)) {
           return result
         }
         stateChangeHandler = result
       } else if (isBuildSpecificTask(stateChangeHandler)) {
+        log.debug "Invokeing build specific task ${stateChangeHandler}"
         executeBuildSpecificTask(stateChangeHandler, state)
         return true
       }
@@ -196,6 +199,7 @@ class ProviderVerifier {
         : new URI(stateChangeHandler.toString())
       ProviderClient client = new ProviderClient(provider: provider)
       def response = client.makeStateChangeRequest(url, state, useBody)
+      log.debug "Invoked state change $url -> ${response?.statusLine}"
       if (response) {
         try {
           if (response.statusLine.statusCode >= 400) {
