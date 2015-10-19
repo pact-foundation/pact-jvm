@@ -38,7 +38,14 @@ class ProviderVerifier {
 
   Map verifyProvider(ProviderInfo provider) {
     Map failures = [:]
-    provider.consumers.findAll(this.&filterConsumers).each(this.&runVerificationForConsumer.curry(failures, provider))
+
+    def consumers = provider.consumers.findAll(this.&filterConsumers)
+    if (consumers.empty) {
+      AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
+        .a('WARNING: There are no consumers to verify').reset())
+    }
+    consumers.each(this.&runVerificationForConsumer.curry(failures, provider))
+
     failures
   }
 

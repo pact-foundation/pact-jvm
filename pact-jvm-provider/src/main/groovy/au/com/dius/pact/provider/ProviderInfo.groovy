@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.provider.broker.PactBrokerClient
 import groovy.json.JsonSlurper
 import groovy.transform.ToString
 
@@ -52,6 +53,13 @@ class ProviderInfo {
         closure(consumersGroup)
 
         setupConsumerListFromPactFiles(consumersGroup)
+    }
+
+    List hasPactsFromPactBroker(String pactBrokerUrl) {
+      PactBrokerClient client = new PactBrokerClient(pactBrokerUrl)
+      def consumersFromBroker = client.fetchConsumers(name)
+      consumers.addAll(consumersFromBroker)
+      consumersFromBroker
     }
 
     @SuppressWarnings('ThrowRuntimeException')
