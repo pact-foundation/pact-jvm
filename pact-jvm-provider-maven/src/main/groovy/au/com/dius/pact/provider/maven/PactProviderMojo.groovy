@@ -37,19 +37,22 @@ class PactProviderMojo extends AbstractMojo {
     }
     verifier.isBuildSpecificTask = { false }
 
-	verifier.projectClasspath = {
-		List<URL> urls = []
-		for (element in classpathElements) {
-			urls.add(new File(element).toURI().toURL())
-		}
-		urls as URL[]
-	}
+    verifier.projectClasspath = {
+      List<URL> urls = []
+      for (element in classpathElements) {
+        urls.add(new File(element).toURI().toURL())
+      }
+      urls as URL[]
+    }
 
     serviceProviders.each { provider ->
       List consumers = []
       consumers.addAll(provider.consumers)
       if (provider.pactFileDirectory != null) {
           consumers.addAll(loadPactFiles(provider, provider.pactFileDirectory))
+      }
+      if (provider.pactBrokerUrl != null) {
+        consumers.addAll(provider.hasPactsFromPactBroker(provider.pactBrokerUrl.toString()))
       }
 
       provider.setConsumers(consumers)
