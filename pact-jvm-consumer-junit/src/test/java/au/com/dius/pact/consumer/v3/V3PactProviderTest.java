@@ -1,9 +1,9 @@
 package au.com.dius.pact.consumer.v3;
 
-import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactProviderRule;
 import au.com.dius.pact.consumer.PactVerification;
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
@@ -22,7 +22,7 @@ public class V3PactProviderTest {
     public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", PactSpecVersion.V3, this);
 
     @Pact(provider="test_provider", consumer="v3_test_consumer")
-    public PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
+    public PactFragment createFragment(PactDslWithProvider builder) {
         return builder
             .given("good state")
             .uponReceiving("V3 PactProviderTest test interaction")

@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer
 
+import au.com.dius.pact.consumer.dsl.PactDslJsonArray
 import groovy.json.JsonSlurper
 import org.junit.Before
 import org.junit.Test

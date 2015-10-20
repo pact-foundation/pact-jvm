@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactFragment;
@@ -149,7 +150,7 @@ public class PactProviderRule extends ExternalResource {
                 if (conformsToSignature(m) && methodMatchesFragment(m, fragment)) {
                     Pact pact = m.getAnnotation(Pact.class);
                     if (StringUtils.isEmpty(pact.provider()) || provider.equals(pact.provider())) {
-                        ConsumerPactBuilder.PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(pact.consumer())
+                        PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(pact.consumer())
                             .hasPactWith(provider);
                         try {
                             fragments.put(provider, (PactFragment) m.invoke(target, dslBuilder));
@@ -177,7 +178,7 @@ public class PactProviderRule extends ExternalResource {
             pact != null
             && PactFragment.class.isAssignableFrom(m.getReturnType())
             && m.getParameterTypes().length == 1
-            && m.getParameterTypes()[0].isAssignableFrom(ConsumerPactBuilder.PactDslWithProvider.class);
+            && m.getParameterTypes()[0].isAssignableFrom(PactDslWithProvider.class);
 
         if (!conforms && pact != null) {
             throw new UnsupportedOperationException("Method " + m.getName() +

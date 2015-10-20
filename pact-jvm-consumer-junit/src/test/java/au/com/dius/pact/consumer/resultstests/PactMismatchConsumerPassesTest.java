@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.resultstests;
 
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.PactMismatchException;
 import au.com.dius.pact.model.PactFragment;
 
@@ -20,7 +20,7 @@ public class PactMismatchConsumerPassesTest extends ExpectedToFailBase {
     }
 
     @Override
-    protected PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
+    protected PactFragment createFragment(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("testreqheader", "someotherheader");
         return builder

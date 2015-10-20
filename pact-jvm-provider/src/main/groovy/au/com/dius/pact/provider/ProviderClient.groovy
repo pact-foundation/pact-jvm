@@ -2,6 +2,7 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.model.Request
 import groovy.json.JsonBuilder
+import groovy.util.logging.Slf4j
 import org.apache.http.Consts
 import org.apache.http.Header
 import org.apache.http.HttpEntity
@@ -32,6 +33,7 @@ import scala.collection.JavaConverters$
 /**
  * Client HTTP utility for providers
  */
+@Slf4j
 class ProviderClient {
 
     private static final String CONTENT_TYPE = 'Content-Type'
@@ -43,6 +45,9 @@ class ProviderClient {
     def provider
 
     def makeRequest() {
+        log.debug "Making request for provider $provider:"
+        log.debug request.toString()
+
         CloseableHttpClient httpclient = httpClientFactory.newClient(provider)
         HttpRequest method = newRequest(request)
 
@@ -125,6 +130,7 @@ class ProviderClient {
     }
 
     def handleResponse(HttpResponse httpResponse) {
+        log.debug "Received response: ${httpResponse.statusLine}"
         def response = [statusCode: httpResponse.statusLine.statusCode]
 
         response.headers = [:]
@@ -141,6 +147,8 @@ class ProviderClient {
             }
             response.data = EntityUtils.toString(entity, response.contentType?.charset?.name() ?: UTF8)
         }
+
+        log.debug "Response: $response"
 
         response
     }

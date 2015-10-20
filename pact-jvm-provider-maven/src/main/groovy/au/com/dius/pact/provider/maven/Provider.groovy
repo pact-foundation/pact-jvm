@@ -10,4 +10,5 @@ import groovy.transform.ToString
 class Provider extends ProviderInfo {
     def requestFilter
     File pactFileDirectory
+    URL pactBrokerUrl
 }

@@ -1,11 +1,14 @@
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.consumer.dsl.DslPart;
+import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.model.PactFragment;
 
 public class PactDslJsonArrayTest extends ConsumerPactTest {
     @Override
-    protected PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
+    protected PactFragment createFragment(PactDslWithProvider builder) {
         DslPart body = new PactDslJsonArray()
                 .object()
                 .id()

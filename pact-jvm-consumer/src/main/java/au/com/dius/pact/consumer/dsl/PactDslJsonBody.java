@@ -1,5 +1,6 @@
-package au.com.dius.pact.consumer;
+package au.com.dius.pact.consumer.dsl;
 
+import au.com.dius.pact.consumer.InvalidMatcherException;
 import io.gatling.jsonpath.Parser$;
 import nl.flotsam.xeger.Xeger;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -58,7 +59,7 @@ public class PactDslJsonBody extends DslPart {
     }
 
     @Override
-    protected Object getBody() {
+    public Object getBody() {
         return body;
     }
 

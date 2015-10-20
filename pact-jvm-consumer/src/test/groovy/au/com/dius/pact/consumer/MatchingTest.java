@@ -1,5 +1,7 @@
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
+import au.com.dius.pact.consumer.dsl.PactDslResponse;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactSpecVersion;
@@ -65,7 +67,7 @@ public class MatchingTest {
 
     @Test
     public void testRegexpMatchingOnPath() {
-        ConsumerPactBuilder.PactDslResponse fragment = ConsumerPactBuilder
+        PactDslResponse fragment = ConsumerPactBuilder
             .consumer("test_consumer")
             .hasPactWith("test_provider")
             .uponReceiving("a request to match on path")
@@ -80,7 +82,7 @@ public class MatchingTest {
 
     @Test
     public void testRegexpMatchingOnHeaders() {
-        ConsumerPactBuilder.PactDslResponse fragment = ConsumerPactBuilder
+        PactDslResponse fragment = ConsumerPactBuilder
                 .consumer("test_consumer")
                 .hasPactWith("test_provider")
                 .uponReceiving("a request to match on headers")
@@ -95,7 +97,7 @@ public class MatchingTest {
         runTest(fragment, "{}", expectedResponse, "/hello");
     }
 
-    private void runTest(ConsumerPactBuilder.PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
+    private void runTest(PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
         MockProviderConfig config = MockProviderConfig.createDefault(new PactConfig(PactSpecVersion.V2));
         VerificationResult result = pactFragment.toFragment().runConsumer(config, new TestRun() {
             @Override
@@ -114,7 +116,7 @@ public class MatchingTest {
         Assert.assertEquals(PACT_VERIFIED, result);
     }
 
-    private ConsumerPactBuilder.PactDslResponse buildPactFragment(PactDslJsonBody body, PactDslJsonBody responseBody, String description) {
+    private PactDslResponse buildPactFragment(PactDslJsonBody body, PactDslJsonBody responseBody, String description) {
         return ConsumerPactBuilder
             .consumer("test_consumer")
             .hasPactWith("test_provider")

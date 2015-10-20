@@ -21,4 +21,11 @@ class GradleProviderInfo extends ProviderInfo {
     consumerInfo
   }
 
+  List hasPactsFromPactBroker(String pactBrokerUrl, Closure closure) {
+    def fromPactBroker = super.hasPactsFromPactBroker(pactBrokerUrl)
+    fromPactBroker.each {
+      ConfigureUtil.configure(closure, it)
+    }
+    fromPactBroker
+  }
 }

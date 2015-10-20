@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.v3;
 
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.ConsumerPactTest;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 public class V3ConsumerPactTest extends ConsumerPactTest {
 
     @Override
-    protected PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
+    protected PactFragment createFragment(PactDslWithProvider builder) {
         return builder
             .uponReceiving("v3 test interaction")
                 .path("/")

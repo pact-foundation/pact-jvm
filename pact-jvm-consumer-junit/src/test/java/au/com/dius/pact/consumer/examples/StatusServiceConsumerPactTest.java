@@ -3,8 +3,9 @@ package au.com.dius.pact.consumer.examples;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import au.com.dius.pact.consumer.ConsumerPactBuilder;
+
 import au.com.dius.pact.consumer.ConsumerPactTest;
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.PactFragment;
 import org.apache.http.client.fluent.Request;
 
@@ -13,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 public class StatusServiceConsumerPactTest extends ConsumerPactTest {
 
     @Override
-    protected PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
+    protected PactFragment createFragment(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap();
         headers.put("testreqheader", "testreqheadervalue");
 
