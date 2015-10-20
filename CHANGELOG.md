@@ -1,5 +1,20 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.1.1 -  bugfixes and pact broker integration
+
+* a98f461 - let the user configure the consumers from the pact broker with a closure in the Gradle plugin #168 (Ronald Holshausen, Tue Oct 20 09:50:05
+* e8a93ec - add ability to fetch pacts from pact broker in maven plugin #168 (Ronald Holshausen, Tue Oct 20 09:05:38 2015 +1100)
+* 3aa394a - add ability to fetch pacts from pact broker in gradle plugin #168 (Ronald Holshausen, Mon Oct 19 13:49:44 2015 +1100)
+* d67443c - added some debug statements to the pact verifer (Ronald Holshausen, Fri Oct 16 14:12:16 2015 +1100)
+* 754b57c - fix code narc (Ronald Holshausen, Fri Oct 16 09:25:16 2015 +1100)
+* 878ee30 - Merge pull request #171 from Freaky-namuH/master (Ronald Holshausen, Fri Oct 16 09:17:17 2015 +1100)
+* 5f06ad5 - Set found consumers on the provider so that the pact files are run. Fixes #170. Added additional output to make it easier to know if there
+* 8050223 - refactored the Java consumer DSL to allow the provider state to be set per request #169 (Ronald Holshausen, Mon Oct 12 14:29:03 2015 +1100
+* 52b7457 - bump version (Ronald Holshausen, Tue Oct 6 21:45:25 2015 +1100)
+* a2eab6d - upgrade to the latest version of the gradle publish plugin (Ronald Holshausen, Tue Oct 6 21:44:13 2015 +1100)
+* c6ba451 - add version badges against branches (Ronald Holshausen, Tue Oct 6 21:18:44 2015 +1100)
+* 0d09534 - update changelog (Ronald Holshausen, Tue Oct 6 20:30:22 2015 +1100)
+
 # 3.1.0 - First implementation of V3 pacts + bugfixes
 
 * 250becc - updated changelog (Ronald Holshausen, Thu Sep 17 19:56:18 2015 +1000)
