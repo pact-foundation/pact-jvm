@@ -76,4 +76,18 @@ class PactReaderSpec extends Specification {
         pact instanceof MessagePact
     }
 
+    def 'loads a pact from an inputstream'() {
+        given:
+        def pactInputStream = PactReaderSpec.classLoader.getResourceAsStream('pact.json')
+        def pactLoader = Spy(PactReader)
+
+        when:
+        def pact = pactLoader.loadPact(pactInputStream)
+
+        then:
+        1 * pactLoader.loadV2Pact(pactInputStream, _)
+        0 * pactLoader.loadV3Pact(pactInputStream, _)
+        pact instanceof Pact
+    }
+
 }
