@@ -346,15 +346,64 @@ whose descriptions start with 'a request for payment'. `-Ppact.filter.providerSt
 has a provider state that ends with payment, and `-Ppact.filter.providerState=` will match any interaction that does not have a
 provider state.
 
-## Publishing to the Gradle Community Portal
+# Verifying pact files from a pact broker [version 3.1.1+/2.3.1+]
 
-To publish the plugin to the community portal:
+You can setup your build to validate against the pacts stored in a pact broker. The pact gradle plugin will query
+the pact broker for all consumers that have a pact with the provider based in its name.
 
-    $ ./gradlew :pact-jvm-provider-gradle_2.11:publishPlugins
-    
-# Publishing pact files to a pact broker
+For example:
 
-*[version 2.2.7+]*
+```groovy
+pact {
+
+    serviceProviders {
+        provider1 {
+            hasPactsFromPactBroker('http://pact-broker:5000/')
+        }
+    }
+
+}
+```
+
+This will verify all pacts found in the pact broker where the provider name is 'provider1'. If you need to set any
+values on the consumers from the pact broker, you can add a Closure to configure them.
+
+```groovy
+pact {
+
+    serviceProviders {
+        provider1 {
+            hasPactsFromPactBroker('http://pact-broker:5000/') { consumer ->
+                 stateChange = { providerState -> /* state change code here */ true }
+            }
+        }
+    }
+
+}
+```
+
+_NOTE:_ Currently the pacts are fetched from the broker during the configuration phase of the build. This means that
+if the broker is not available, you will not be able to run any Gradle tasks. To only load the pacts when running the
+validate task, you can do something like:
+
+```groovy
+pact {
+
+    serviceProviders {
+        provider1 {
+            // Only load the pacts from the broker if the start tasks from the command line include pactVerify
+            if ('pactVerify' in gradle.startParameter.taskNames) {
+                hasPactsFromPactBroker('http://pact-broker:5000/') { consumer ->
+                     stateChange = { providerState -> /* state change code here */ true }
+                }
+            }
+        }
+    }
+
+}
+```
+
+# Publishing pact files to a pact broker [version 2.2.7+]
 
 The pact gradle plugin provides a `pactPublish` task that can publish all pact files in a directory
 to a pact broker. To use it, you need to add a publish configuration to the pact configuration that defines the
@@ -376,9 +425,7 @@ pact {
 _NOTE:_ The pact broker requires a version for all published pacts. The `pactPublish` task will use the version of the
 gradle project. Make sure you have set one otherwise the broker will reject the pact files.
 
-# Verifying a message provider
-
-*[version 2.2.12+]*
+# Verifying a message provider [version 2.2.12+]
 
 The Gradle plugin has been updated to allow invoking test methods that can return the message contents from a message
 producer. To use it, set the way to invoke the verification to `ANNOTATED_METHOD`. This will allow the pact verification
@@ -436,3 +483,9 @@ class ConfirmationKafkaMessageBuilderTest {
 ```
 
 It will then validate that the returned contents matches the contents for the message in the pact file.
+
+## Publishing to the Gradle Community Portal
+
+To publish the plugin to the community portal:
+
+    $ ./gradlew :pact-jvm-provider-gradle_2.11:publishPlugins
