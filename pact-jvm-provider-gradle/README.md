@@ -346,10 +346,10 @@ whose descriptions start with 'a request for payment'. `-Ppact.filter.providerSt
 has a provider state that ends with payment, and `-Ppact.filter.providerState=` will match any interaction that does not have a
 provider state.
 
-# Verifying pact files from a pact broker [version 3.1.1+/2.3.1+]
+## Verifying pact files from a pact broker [version 3.1.1+/2.3.1+]
 
 You can setup your build to validate against the pacts stored in a pact broker. The pact gradle plugin will query
-the pact broker for all consumers that have a pact with the provider based in its name.
+the pact broker for all consumers that have a pact with the provider based on its name.
 
 For example:
 
@@ -382,9 +382,11 @@ pact {
 }
 ```
 
-_NOTE:_ Currently the pacts are fetched from the broker during the configuration phase of the build. This means that
-if the broker is not available, you will not be able to run any Gradle tasks. To only load the pacts when running the
-validate task, you can do something like:
+**NOTE: Currently the pacts are fetched from the broker during the configuration phase of the build. This means that
+if the broker is not available, you will not be able to run any Gradle tasks.** This should be fixed in a forth coming
+release.
+
+In the mean time, to only load the pacts when running the validate task, you can do something like:
 
 ```groovy
 pact {
