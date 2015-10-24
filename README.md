@@ -144,4 +144,4 @@ Which is a project that aims at providing tooling to coordinate pact generation 
 
 ## I want to contribute
 
-[Documentation for contributors is on the wiki](https://github.com/DiUS/pact-jvm/wiki/Hot-to-contribute-to-Pact-JVM).
+[Documentation for contributors is on the wiki](https://github.com/DiUS/pact-jvm/wiki/How-to-contribute-to-Pact-JVM).
