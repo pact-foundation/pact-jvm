@@ -282,6 +282,31 @@ If the `stateChangeUsesBody` is not specified, or is set to true, then the provi
 As for normal requests (see Modifying the requests before they are sent), a state change request can be modified before
 it is sent. Set `stateChangeRequestFilter` to a Groovy script on the provider that will be called before the request is made.
 
+## Verifying pact files from a pact broker [version 3.1.1+/2.3.1+]
+
+You can setup your build to validate against the pacts stored in a pact broker. The pact plugin will query
+the pact broker for all consumers that have a pact with the provider based on its name. To use it, just configure the
+`pactBrokerUrl` value for the provider with the base URL to the pact broker.
+
+For example:
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
+    <version>3.1.1</version>
+    <configuration>
+      <serviceProviders>
+        <serviceProvider>
+          <name>provider1</name>
+          <stateChangeUrl>http://localhost:8080/tasks/pactStateChange</stateChangeUrl>
+          <pactBrokerUrl>http://pact-broker:5000/</pactBrokerUrl>
+        </serviceProvider>
+      </serviceProviders>
+    </configuration>
+</plugin>
+```
+
 ## Filtering the interactions that are verified
 
 You can filter the interactions that are run using three properties: `pact.filter.consumers`, `pact.filter.description` and `pact.filter.providerState`.

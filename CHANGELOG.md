@@ -1,5 +1,16 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.1.2 - minor update for loading pacts from an input stream
+
+* c0b243a - Merge pull request #174 from Freaky-namuH/pact-load-from-inputstream (Ronald Holshausen, Thu Oct 22 10:29:49 2015 +1100)
+* e5a7634 - Add support to PactReader to read from an InputStream. #173 (Ashley Cambrell, Thu Oct 22 10:05:17 2015 +1100)
+* 4985d5c - add docs about loading pacts from a broker for the maven plugin (Ronald Holshausen, Wed Oct 21 13:00:35 2015 +1100)
+* ab38b51 - correct docs about loading pacts from a broker for the gradle plugin (Ronald Holshausen, Wed Oct 21 12:54:39 2015 +1100)
+* c4714f9 - add docs about loading pacts from a broker for the gradle plugin (Ronald Holshausen, Wed Oct 21 12:50:07 2015 +1100)
+* e63e6d9 - updated change log (Ronald Holshausen, Tue Oct 20 19:25:26 2015 +1100)
+* 2751d24 - update 2.x changelog (Ronald Holshausen, Tue Oct 6 21:12:32 2015 +1100)
+* ecf6e51 - bump version (Ronald Holshausen, Tue Oct 20 20:17:01 2015 +1100)
+
 # 3.1.1 -  bugfixes and pact broker integration
 
 * a98f461 - let the user configure the consumers from the pact broker with a closure in the Gradle plugin #168 (Ronald Holshausen, Tue Oct 20 09:50:05
