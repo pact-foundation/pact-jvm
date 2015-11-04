@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * describes the interactions between a provider and a consumer.
  * The annotated method has to be of following signature:
  *
- * public PactFragment providerDef1(PactDslWithState builder) {...}
+ * public PactFragment providerDef1(PactDslWithProvider builder) {...}
  *
  * @author pmucha
  *
