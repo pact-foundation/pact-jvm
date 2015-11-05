@@ -1,21 +1,42 @@
 package au.com.dius.pact.provider.broker
 
+import groovy.transform.Canonical
+import groovy.util.logging.Slf4j
 import groovyx.net.http.RESTClient
 
 /**
  * HAL client for navigating the HAL links
  */
+@Slf4j
+@Canonical
 class HalClient {
   private static final String ROOT = '/'
 
   String baseUrl
-  def pathInfo
+  Map options = [:]
   def http
+  private pathInfo
 
-  HalClient(String baseUrl) {
-    http = new RESTClient(baseUrl)
-    http.parser.'application/hal+json' = http.parser.'application/json'
-    this.baseUrl = baseUrl
+  @SuppressWarnings('DuplicateNumberLiteral')
+  private void setupHttpClient() {
+    if (http == null) {
+      http = new RESTClient(baseUrl)
+      http.parser.'application/hal+json' = http.parser.'application/json'
+
+      if (options.authentication instanceof List) {
+        switch (options.authentication.first()) {
+          case 'basic':
+            if (options.authentication.size() > 2) {
+              http.auth.basic(options.authentication[1].toString(), options.authentication[2].toString())
+            } else {
+              log.warn('Basic authentication requires a username and password, ignoring.')
+            }
+            break
+        }
+      } else {
+        log.warn('Authentication options needs to be a list of values, ignoring.')
+      }
+    }
   }
 
   HalClient navigate(Map options = [:], String link) {
@@ -54,6 +75,7 @@ class HalClient {
   }
 
   private fetch(String path) {
+    setupHttpClient()
     http.get(path: path, requestContentType: 'application/json').data
   }
 

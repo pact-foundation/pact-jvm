@@ -55,8 +55,8 @@ class ProviderInfo {
         setupConsumerListFromPactFiles(consumersGroup)
     }
 
-    List hasPactsFromPactBroker(String pactBrokerUrl) {
-      PactBrokerClient client = new PactBrokerClient(pactBrokerUrl)
+    List hasPactsFromPactBroker(Map options = [:], String pactBrokerUrl) {
+      PactBrokerClient client = new PactBrokerClient(pactBrokerUrl, options)
       def consumersFromBroker = client.fetchConsumers(name)
       consumers.addAll(consumersFromBroker)
       consumersFromBroker

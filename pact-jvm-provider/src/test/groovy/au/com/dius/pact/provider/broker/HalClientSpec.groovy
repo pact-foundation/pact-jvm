@@ -7,7 +7,7 @@ class HalClientSpec extends Specification {
   private HalClient client
 
   def setup() {
-    client = new HalClient()
+    client = new HalClient('')
   }
 
   @SuppressWarnings(['LineLength', 'UnnecessaryBooleanExpression'])
