@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.gradle
 
+import au.com.dius.pact.provider.PactVerification
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Before
@@ -100,7 +101,7 @@ class PactPluginTest {
         assert consumer.name == 'ConsumerA'
         assert consumer.pactFile == new URL(pactFileUrl)
         assert consumer.stateChange == new URL(stateChangeUrl)
-        assert consumer.pactType == 'requestResponse'
+        assert consumer.verificationType == PactVerification.REQUST_RESPONSE
     }
 
     @Test

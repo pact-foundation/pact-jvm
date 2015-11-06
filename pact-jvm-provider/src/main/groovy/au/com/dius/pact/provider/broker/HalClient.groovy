@@ -33,7 +33,7 @@ class HalClient {
             }
             break
         }
-      } else {
+      } else if (options.authentication) {
         log.warn('Authentication options needs to be a list of values, ignoring.')
       }
     }

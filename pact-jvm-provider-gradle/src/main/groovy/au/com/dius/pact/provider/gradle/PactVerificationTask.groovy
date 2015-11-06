@@ -23,15 +23,7 @@ class PactVerificationTask extends DefaultTask {
       projectGetProperty = { project.property(it) }
       pactLoadFailureMessage = { 'You must specify the pactfile to execute (use pactFile = ...)' }
       isBuildSpecificTask = { it instanceof Task || it instanceof String && project.tasks.findByName(it) }
-      executeBuildSpecificTask = { t, state ->
-        def task = t instanceof String ? project.tasks.getByName(t) : t
-        task.setProperty('providerState', state)
-        task.ext.providerState = state
-        def build = project.task(type: GradleBuild) {
-          tasks = [task.name]
-        }
-        build.execute()
-      }
+      executeBuildSpecificTask = this.&executeStateChangeTask
       projectClasspath = {
         project.sourceSets.test.runtimeClasspath*.toURL() as URL[]
       }
@@ -43,5 +35,15 @@ class PactVerificationTask extends DefaultTask {
       throw new GradleScriptException(
           "There were ${ext.failures.size()} pact failures for provider ${providerToVerify.name}", null)
     }
+  }
+
+  def executeStateChangeTask(t, state) {
+    def task = t instanceof String ? project.tasks.getByName(t) : t
+    task.setProperty('providerState', state)
+    task.ext.providerState = state
+    def build = project.task(type: GradleBuild) {
+      tasks = [task.name]
+    }
+    build.execute()
   }
 }
