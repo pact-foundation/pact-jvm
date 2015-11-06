@@ -9,7 +9,7 @@ pact-jvm
 
 JVM implementation of the consumer driven contract library [pact](https://github.com/bethesque/pact_specification)
 
-From the [Ruby Pact website](https://github.com/realestate-com-au/pact):
+From the [Ruby Pact website](https://github.com/DiUS/pact-jvm/tree/master/pact):
 
 > Define a pact between service consumers and providers, enabling "consumer driven contract" testing.
 >
@@ -32,7 +32,7 @@ From the [Ruby Pact website](https://github.com/realestate-com-au/pact):
 
 ## Documentation
 
-Additional documentation can be found in the [Pact Wiki](https://github.com/realestate-com-au/pact/wiki),
+Additional documentation can be found in the [Pact Wiki](https://github.com/DiUS/pact-jvm/tree/master/pact/wiki),
 and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki).
 
 ## Note about artifact names and versions
@@ -109,11 +109,11 @@ You want to look at: [pact leiningen plugin](pact-jvm-provider-lein)
 
 #### verify pacts with Specs2
 
-Have a look at [writing specs to validate a provider](https://github.com/realestate-com-au/pact-jvm-provider-specs2)
+Have a look at [writing specs to validate a provider](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-specs2)
 
 #### verify pacts with a Spring MVC project
 
-Have a look at [Spring MVC Pact Test Runner](https://github.com/realestate-com-au/pact-jvm-provider-spring-mvc)
+Have a look at [Spring MVC Pact Test Runner](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-spring-mvc)
 
 #### I want to verify pacts but don't want to use sbt or gradle or leiningen
 
@@ -129,7 +129,7 @@ The pact-jvm libraries are pure jvm technologies and do not have any native depe
 
 However if you have a ruby provider, the json produced by this library is compatible with the ruby pact library.
 
-You'll want to look at: [pact](https://github.com/realestate-com-au/pact)
+You'll want to look at: [pact](https://github.com/DiUS/pact-jvm/tree/master/pact)
 
 ### I Use something completely different
 
