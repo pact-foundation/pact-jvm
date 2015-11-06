@@ -36,8 +36,6 @@ subprojects {
     }
 
     dependencies {
-      compile "org.codehaus.groovy:groovy-all:2.4.5:indy"
-
       if (project.hasProperty('scalaVersion')) {
           compile 'org.slf4j:slf4j-api:1.7.7', "org.scala-lang:scala-library:${project.scalaFullVersion}",
                   "com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.1.0",
