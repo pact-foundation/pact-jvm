@@ -11,6 +11,7 @@ class ConsumersGroup {
     File pactFileLocation
     def stateChange
     boolean stateChangeUsesBody = false
+    def include = /.*\.json$/
 
     def url(String path) {
         stateChange = new URL(path)
