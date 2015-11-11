@@ -73,7 +73,7 @@ It's possible to use custom Pact source: for this implement `interface au.com.di
 
 ## Test target
 
-Field in test class of type `au.com.dius.pact.provider.junit.target.Target` annotated with `au.com.dius.pact.provider.junit.target.TestTarget` will be used for actual Interaction execution and asserting of contract. **Note:** should be excatly 1 such field, otherwise `InitializationException` will be thrown.
+Field in test class of type `au.com.dius.pact.provider.junit.target.Target` annotated with `au.com.dius.pact.provider.junit.target.TestTarget` will be used for actual Interaction execution and asserting of contract. **Note:** should be exactly 1 such field, otherwise `InitializationException` will be thrown.
 
 ### HttpTarget
 
