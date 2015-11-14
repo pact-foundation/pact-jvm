@@ -15,11 +15,12 @@ import static groovyx.net.http.Method.PUT
 class PactBrokerClient {
 
   String pactBrokerUrl
+  Map options = [:]
 
   List fetchConsumers(String provider) {
     List consumers = []
 
-    HalClient halClient = new HalClient(pactBrokerUrl)
+    HalClient halClient = new HalClient(pactBrokerUrl, options)
     halClient.navigate('pb:latest-provider-pacts', provider: provider).pacts { pact ->
       consumers << new ConsumerInfo(pact.name, new URL(pact.href))
     }

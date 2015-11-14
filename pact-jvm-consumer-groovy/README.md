@@ -285,9 +285,17 @@ Defines a matcher that accepts any integer values. If the value is not provided,
 
 Defines a matcher that accepts any real numbers. If the value is not provided, a random double will be used.
 
-* timestamp(def value = null)
+* timestamp(String pattern = null, def value = null)
 
-Defines a matcher that accepts ISO and SMTP timestamps. If the value is not provided, the current date and time is used.
+If pattern is not provided the ISO_DATETIME_FORMAT is used ("yyyy-MM-dd'T'HH:mm:ss") . If the value is not provided, the current date and time is used. 
+
+* time(String pattern = null, def value = null)
+
+If pattern is not provided the ISO_TIME_FORMAT is used ("'T'HH:mm:ss") . If the value is not provided, the current date and time is used.
+
+* date(String pattern = null, def value = null)
+
+If pattern is not provided the ISO_DATE_FORMAT is used ("yyyy-MM-dd") . If the value is not provided, the current date and time is used.
 
 * uuid(String value = null)
 

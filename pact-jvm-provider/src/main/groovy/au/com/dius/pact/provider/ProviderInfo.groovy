@@ -55,8 +55,8 @@ class ProviderInfo {
         setupConsumerListFromPactFiles(consumersGroup)
     }
 
-    List hasPactsFromPactBroker(String pactBrokerUrl) {
-      PactBrokerClient client = new PactBrokerClient(pactBrokerUrl)
+    List hasPactsFromPactBroker(Map options = [:], String pactBrokerUrl) {
+      PactBrokerClient client = new PactBrokerClient(pactBrokerUrl, options)
       def consumersFromBroker = client.fetchConsumers(name)
       consumers.addAll(consumersFromBroker)
       consumersFromBroker
@@ -74,12 +74,14 @@ class ProviderInfo {
                 'does not exist or is not readable')
         }
 
-        pactFileDirectory.eachFile { File file ->
-            consumers << new ConsumerInfo(
-                    name: new JsonSlurper().parse(file).consumer.name,
-                    pactFile: file,
-                    stateChange: consumersGroup.stateChange,
-                    stateChangeUsesBody: consumersGroup.stateChangeUsesBody)
+        pactFileDirectory.eachFileRecurse { File file ->
+            if (file.file && file.name ==~ consumersGroup.include) {
+              consumers << new ConsumerInfo(
+                name: new JsonSlurper().parse(file).consumer.name,
+                pactFile: file,
+                stateChange: consumersGroup.stateChange,
+                stateChangeUsesBody: consumersGroup.stateChangeUsesBody)
+            }
         }
         consumers
     }

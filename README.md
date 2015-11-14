@@ -103,6 +103,10 @@ You want to look at: [pact maven plugin](pact-jvm-provider-maven)
 
 For publishing pacts to a pact broker, have a look at https://github.com/warmuuh/pactbroker-maven-plugin
 
+#### verify pacts with JUnit tests [version 2.3.3+, 3.1.3+]
+
+You want to look at: [junit provider support](pact-jvm-provider-junit)
+
 #### verify pacts with Leiningen [version 2.2.14+, 3.0.3+]
 
 You want to look at: [pact leiningen plugin](pact-jvm-provider-lein)
@@ -144,4 +148,4 @@ Which is a project that aims at providing tooling to coordinate pact generation 
 
 ## I want to contribute
 
-[Documentation for contributors is on the wiki](https://github.com/DiUS/pact-jvm/wiki/Hot-to-contribute-to-Pact-JVM).
+[Documentation for contributors is on the wiki](https://github.com/DiUS/pact-jvm/wiki/How-to-contribute-to-Pact-JVM).

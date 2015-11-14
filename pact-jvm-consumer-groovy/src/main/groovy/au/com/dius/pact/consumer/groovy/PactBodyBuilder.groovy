@@ -72,10 +72,10 @@ class PactBodyBuilder extends BaseBuilder {
         timestamp()
         break
       case 'time':
-        timestamp()
+        time()
         break
       case 'date':
-        timestamp()
+        date()
         break
       case 'guid':
       case 'uuid':
