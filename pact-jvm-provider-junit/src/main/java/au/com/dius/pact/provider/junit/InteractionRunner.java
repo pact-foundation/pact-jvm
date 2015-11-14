@@ -38,7 +38,7 @@ class InteractionRunner extends Runner {
     private final TestClass testClass;
     private final Pact pact;
 
-    private final ConcurrentHashMap<Interaction, Description> childDescriptions = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Interaction, Description> childDescriptions = new ConcurrentHashMap<Interaction, Description>();
 
     public InteractionRunner(final TestClass testClass, final Pact pact) throws InitializationError {
         this.testClass = testClass;
@@ -50,17 +50,23 @@ class InteractionRunner extends Runner {
     @Override
     public Description getDescription() {
         final Description description = Description.createSuiteDescription(pact.consumer().name());
-        scala.collection.JavaConversions.seqAsJavaList(pact.interactions()).stream().map(this::describeChild).forEach(description::addChild);
+        for (Interaction i: scala.collection.JavaConversions.seqAsJavaList(pact.interactions())) {
+            description.addChild(describeChild(i));
+        }
         return description;
     }
 
     protected Description describeChild(final Interaction interaction) {
-        return childDescriptions.computeIfAbsent(interaction, i -> Description.createTestDescription(pact.consumer().name(), i.description()));
+        if (!childDescriptions.containsKey(interaction)) {
+            childDescriptions.put(interaction, Description.createTestDescription(pact.consumer().name(),
+                interaction.description()));
+        }
+        return childDescriptions.get(interaction);
     }
 
     // Validation
     protected void validate() throws InitializationError {
-        final List<Throwable> errors = new ArrayList<>();
+        final List<Throwable> errors = new ArrayList<Throwable>();
 
         validatePublicVoidNoArgMethods(Before.class, false, errors);
         validatePublicVoidNoArgMethods(After.class, false, errors);
@@ -74,8 +80,11 @@ class InteractionRunner extends Runner {
         }
     }
 
-    protected void validatePublicVoidNoArgMethods(final Class<? extends Annotation> annotation, final boolean isStatic, final List<Throwable> errors) {
-        testClass.getAnnotatedMethods(annotation).stream().forEach(method -> method.validatePublicVoidNoArg(isStatic, errors));
+    protected void validatePublicVoidNoArgMethods(final Class<? extends Annotation> annotation, final boolean isStatic,
+                                                  final List<Throwable> errors) {
+        for (FrameworkMethod method: testClass.getAnnotatedMethods(annotation)) {
+            method.validatePublicVoidNoArg(isStatic, errors);
+        }
     }
 
     protected void validateConstructor(final List<Throwable> errors) {
@@ -163,10 +172,12 @@ class InteractionRunner extends Runner {
     protected Statement withStateChanges(final Interaction interaction, final Object target, final Statement statement) {
         if (interaction.providerState().nonEmpty()) {
             final String state = interaction.providerState().get();
-            final List<FrameworkMethod> onStateChange = testClass.getAnnotatedMethods(State.class)
-                    .stream()
-                    .filter(ann -> ArrayUtils.contains(ann.getAnnotation(State.class).value(), state))
-                    .collect(toList());
+            final List<FrameworkMethod> onStateChange = new ArrayList<FrameworkMethod>();
+            for (FrameworkMethod ann: testClass.getAnnotatedMethods(State.class)) {
+                if (ArrayUtils.contains(ann.getAnnotation(State.class).value(), state)) {
+                    onStateChange.add(ann);
+                }
+            }
             return onStateChange.isEmpty() ? statement : new RunBefores(statement, onStateChange, target);
         } else {
             return statement;

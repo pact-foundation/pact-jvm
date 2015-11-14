@@ -47,10 +47,10 @@ public class HttpTarget implements Target {
         final Seq<ResponsePartMismatch> mismatches = ResponseMatching$.MODULE$.responseMismatches(
                 interaction.response(),
                 Response$.MODULE$.apply(
-                        (int) actualResponse.get("statusCode"),
-                        (Map) actualResponse.get("headers"),
+                        ((Integer) actualResponse.get("statusCode")).intValue(),
+                        (Map<String, String>) actualResponse.get("headers"),
                         (String) actualResponse.get("data"),
-                        Collections.emptyMap())
+                        Collections.<String, Object>emptyMap())
         );
 
         if (!mismatches.isEmpty()) {
@@ -67,25 +67,24 @@ public class HttpTarget implements Target {
 
     private AssertionError getAssertionError(final Seq<ResponsePartMismatch> mismatches) {
         final StringBuilder result = new StringBuilder();
-        scala.collection.JavaConversions.seqAsJavaList(mismatches)
-                .stream()
-                .map(
-                        mismatch -> {
-                            if (mismatch instanceof StatusMismatch) {
-                                final StatusMismatch statusMismatch = (StatusMismatch) mismatch;
-                                return "StatusMismatch - Expected status " + statusMismatch.expected() + " but was " + statusMismatch.actual();
-                            } else if (mismatch instanceof HeaderMismatch) {
-                                return ((HeaderMismatch) mismatch).description();
-                            } else if (mismatch instanceof BodyTypeMismatch) {
-                                final BodyTypeMismatch bodyTypeMismatch = (BodyTypeMismatch) mismatch;
-                                return "BodyTypeMismatch - Expected body to have type '" + bodyTypeMismatch.expected() + "' but was '" + bodyTypeMismatch.actual() + "'";
-                            } else if (mismatch instanceof BodyMismatch) {
-                                return ((BodyMismatch) mismatch).description();
-                            } else {
-                                return mismatch.toString();
-                            }
-                        }
-                ).forEach(mismatch -> result.append(System.lineSeparator()).append(mismatch));
+        for (ResponsePartMismatch mismatch: scala.collection.JavaConversions.seqAsJavaList(mismatches)) {
+            result.append(System.lineSeparator());
+            if (mismatch instanceof StatusMismatch) {
+                final StatusMismatch statusMismatch = (StatusMismatch) mismatch;
+                result.append("StatusMismatch - Expected status " + statusMismatch.expected() + " but was " +
+                        statusMismatch.actual());
+            } else if (mismatch instanceof HeaderMismatch) {
+                result.append(((HeaderMismatch) mismatch).description());
+            } else if (mismatch instanceof BodyTypeMismatch) {
+                final BodyTypeMismatch bodyTypeMismatch = (BodyTypeMismatch) mismatch;
+                result.append("BodyTypeMismatch - Expected body to have type '" + bodyTypeMismatch.expected() +
+                        "' but was '" + bodyTypeMismatch.actual() + "'");
+            } else if (mismatch instanceof BodyMismatch) {
+                result.append(((BodyMismatch) mismatch).description());
+            } else {
+                result.append(mismatch.toString());
+            }
+        }
         return new AssertionError(result.toString());
     }
 }

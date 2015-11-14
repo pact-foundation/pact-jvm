@@ -58,7 +58,7 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
 
         final TestClass testClass = new TestClass(clazz);
 
-        this.child = new ArrayList<>();
+        this.child = new ArrayList<InteractionRunner>();
         final List<Pact> pacts;
         try {
             pacts = getPactSource(testClass).load(serviceName);
@@ -88,9 +88,12 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
 
     protected PactLoader getPactSource(final TestClass clazz) throws InitializationError {
         final PactSource pactSource = clazz.getAnnotation(PactSource.class);
-        final List<Annotation> pactLoaders = Arrays.stream(clazz.getAnnotations())
-                .filter(annotation -> annotation.annotationType().getAnnotation(PactSource.class) != null)
-                .collect(toList());
+        List<Annotation> pactLoaders = new ArrayList<Annotation>();
+        for(Annotation annotation: clazz.getAnnotations()) {
+            if (annotation.annotationType().getAnnotation(PactSource.class) != null) {
+                pactLoaders.add(annotation);
+            }
+        }
         if ((pactSource == null ? 0 : 1) + pactLoaders.size() != 1) {
             throw new InitializationError("Exactly one pact source should be set");
         }
@@ -101,7 +104,7 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
                 final Annotation annotation = pactLoaders.iterator().next();
                 return annotation.annotationType().getAnnotation(PactSource.class).value().getConstructor(annotation.annotationType()).newInstance(annotation);
             }
-        } catch (final InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+        } catch (Exception e) {
             throw new InitializationError("Error while creating pact source");
         }
     }

@@ -4,8 +4,10 @@ import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.model.PactReader;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,10 +39,19 @@ public class PactFolderLoader implements PactLoader {
     @Override
     public List<Pact> load(final String providerName) throws IOException {
         final PactReader pactReader = new PactReader();
-        return Arrays.stream(path.listFiles((dir, name) -> name.endsWith(".json")))
-                .map(pactReader::loadPact)
-                .map(object -> (Pact) object)
-                .filter(pact -> pact.provider().name().equals(providerName))
-                .collect(toList());
+        List<Pact> pacts = new ArrayList<Pact>();
+        File[] files = path.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".json");
+            }
+        });
+        for (File file: files) {
+            Pact pact = (Pact) pactReader.loadPact(file);
+            if (pact.provider().name().equals(providerName)) {
+                pacts.add(pact);
+            }
+        }
+        return pacts;
     }
 }
