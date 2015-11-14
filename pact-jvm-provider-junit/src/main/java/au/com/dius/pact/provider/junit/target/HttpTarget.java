@@ -68,7 +68,7 @@ public class HttpTarget implements Target {
     private AssertionError getAssertionError(final Seq<ResponsePartMismatch> mismatches) {
         final StringBuilder result = new StringBuilder();
         for (ResponsePartMismatch mismatch: scala.collection.JavaConversions.seqAsJavaList(mismatches)) {
-            result.append(System.lineSeparator());
+            result.append("\n");
             if (mismatch instanceof StatusMismatch) {
                 final StatusMismatch statusMismatch = (StatusMismatch) mismatch;
                 result.append("StatusMismatch - Expected status " + statusMismatch.expected() + " but was " +

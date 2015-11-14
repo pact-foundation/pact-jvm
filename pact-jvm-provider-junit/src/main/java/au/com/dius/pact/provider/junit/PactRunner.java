@@ -3,8 +3,8 @@ package au.com.dius.pact.provider.junit;
 import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.provider.junit.loader.PactBroker;
 import au.com.dius.pact.provider.junit.loader.PactFolder;
-import au.com.dius.pact.provider.junit.loader.PactSource;
 import au.com.dius.pact.provider.junit.loader.PactLoader;
+import au.com.dius.pact.provider.junit.loader.PactSource;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
@@ -16,12 +16,8 @@ import org.junit.runners.model.TestClass;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * JUnit Runner runs pacts against provider
