@@ -4,7 +4,7 @@
   "expected" : {
     "method": "POST",
     "path": "/",
-    "query": "",
+    "query": {},
     "headers": {"Content-Type": "application/json"},
     "matchingRules": {
       "$.body.alligator.name": {"match": "regex", "regex": "\\w+"},
@@ -22,7 +22,7 @@
   "actual": {
     "method": "POST",
     "path": "/",
-    "query": "",
+    "query": {},
     "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator":{

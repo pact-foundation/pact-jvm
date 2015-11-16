@@ -2,6 +2,7 @@ package au.com.dius.pact.model.unfiltered
 
 import java.io.{StringReader, ByteArrayInputStream}
 
+import au.com.dius.pact.model.CollectionUtils
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -31,8 +32,8 @@ class ConversionsTest extends Specification with Mockito {
         request.uri returns "/path?a=1&b=2"
 
         val pactRequest = Conversions.unfilteredRequestToPactRequest(request)
-        pactRequest.path must beEqualTo("/path")
-        pactRequest.query must beEqualTo(Some(Map("a" -> List("1"), "b" -> List("2"))))
+        pactRequest.getPath must beEqualTo("/path")
+        pactRequest.getQuery must beEqualTo(CollectionUtils.scalaLMaptoJavaLMap(Map("a" -> List("1"), "b" -> List("2"))))
       }
 
       "with no query string" in {
@@ -40,8 +41,8 @@ class ConversionsTest extends Specification with Mockito {
         request.uri returns "/path"
 
         val pactRequest = Conversions.unfilteredRequestToPactRequest(request)
-        pactRequest.path must beEqualTo("/path")
-        pactRequest.query must beEmpty
+        pactRequest.getPath must beEqualTo("/path")
+        pactRequest.getQuery.isEmpty must beTrue
       }
 
       "with a path ending with a question mark" in {
@@ -49,8 +50,8 @@ class ConversionsTest extends Specification with Mockito {
         request.uri returns "/path?"
 
         val pactRequest = Conversions.unfilteredRequestToPactRequest(request)
-        pactRequest.path must beEqualTo("/path")
-        pactRequest.query must beEmpty
+        pactRequest.getPath must beEqualTo("/path")
+        pactRequest.getQuery.isEmpty must beTrue
       }
 
       "with a path with strings in it" in {
@@ -58,8 +59,8 @@ class ConversionsTest extends Specification with Mockito {
         request.uri returns "/some+path"
 
         val pactRequest = Conversions.unfilteredRequestToPactRequest(request)
-        pactRequest.path must beEqualTo("/some+path")
-        pactRequest.query must beEmpty
+        pactRequest.getPath must beEqualTo("/some+path")
+        pactRequest.getQuery.isEmpty must beTrue
       }
 
     }

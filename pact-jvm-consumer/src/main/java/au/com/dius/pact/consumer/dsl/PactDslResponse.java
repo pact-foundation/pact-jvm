@@ -2,16 +2,14 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.Interaction;
-import au.com.dius.pact.model.Interaction$;
 import au.com.dius.pact.model.PactFragment;
-import au.com.dius.pact.model.Request$;
-import au.com.dius.pact.model.Response$;
+import au.com.dius.pact.model.PactReader;
+import au.com.dius.pact.model.Request;
+import au.com.dius.pact.model.Response;
 import nl.flotsam.xeger.Xeger;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
-import scala.None$;
-import scala.Some$;
 import scala.collection.JavaConverters$;
 
 import javax.xml.transform.TransformerException;
@@ -25,7 +23,7 @@ public class PactDslResponse {
     private int responseStatus = 200;
     private Map<String, String> responseHeaders = new HashMap<String, String>();
     private String responseBody;
-    private Map<String, Object> responseMatchers = new HashMap<String, Object>();
+    private Map<String, Map<String, Object>> responseMatchers = new HashMap<String, Map<String, Object>>();
 
     public PactDslResponse(ConsumerPactBuilder consumerPactBuilder, PactDslRequestWithPath request) {
         this.consumerPactBuilder = consumerPactBuilder;
@@ -142,7 +140,7 @@ public class PactDslResponse {
      * @param headerExample Example value to use
      */
     public PactDslResponse matchHeader(String header, String regexp, String headerExample) {
-        HashMap<String, String> matcher = new HashMap<String, String>();
+        HashMap<String, Object> matcher = new HashMap<String, Object>();
         matcher.put("regex", regexp);
         responseMatchers.put("$.headers." + header, matcher);
         responseHeaders.put(header, headerExample);
@@ -150,26 +148,13 @@ public class PactDslResponse {
     }
 
     private void addInteraction() {
-        Interaction currentInteraction;
-        if (request.state == null) {
-            currentInteraction = Interaction$.MODULE$.apply(
-                    request.description,
-                    None$.apply(request.state),
-                    Request$.MODULE$.apply(request.requestMethod, request.path, request.query, request.requestHeaders,
-                            request.requestBody, request.requestMatchers),
-                    Response$.MODULE$.apply(responseStatus, responseHeaders, responseBody, responseMatchers)
-            );
-        } else {
-            currentInteraction = Interaction$.MODULE$.apply(
-                    request.description,
-                    Some$.MODULE$.apply(request.state),
-                    Request$.MODULE$.apply(request.requestMethod, request.path, request.query, request.requestHeaders,
-                            request.requestBody, request.requestMatchers),
-                    Response$.MODULE$.apply(responseStatus, responseHeaders, responseBody, responseMatchers)
-            );
-        }
-
-        consumerPactBuilder.getInteractions().add(currentInteraction);
+        consumerPactBuilder.getInteractions().add(new Interaction(
+          request.description,
+          request.state,
+          new Request(request.requestMethod, request.path, PactReader.queryStringToMap(request.query, false),
+            request.requestHeaders, request.requestBody, request.requestMatchers),
+          new Response(responseStatus, responseHeaders, responseBody, responseMatchers)
+        ));
     }
 
     /**
@@ -197,6 +182,6 @@ public class PactDslResponse {
 
     public PactDslWithState given(String state) {
         addInteraction();
-        return new PactDslWithState(consumerPactBuilder, request.consumer.name(), request.provider.name(), state);
+        return new PactDslWithState(consumerPactBuilder, request.consumer.getName(), request.provider.getName(), state);
     }
 }

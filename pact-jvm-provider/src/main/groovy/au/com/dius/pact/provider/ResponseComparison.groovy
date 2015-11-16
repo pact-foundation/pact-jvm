@@ -7,7 +7,6 @@ import au.com.dius.pact.model.DiffConfig
 import au.com.dius.pact.model.HeaderMismatch
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.model.Response
-import au.com.dius.pact.model.Response$
 import au.com.dius.pact.model.ResponseMatching$
 import au.com.dius.pact.model.ResponsePartMismatch
 import au.com.dius.pact.model.StatusMismatch
@@ -16,6 +15,7 @@ import difflib.Delta
 import difflib.DiffUtils
 import difflib.Patch
 import groovy.json.JsonBuilder
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.apache.commons.lang3.StringUtils
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
@@ -41,7 +41,7 @@ class ResponseComparison {
     def comparison = new ResponseComparison(expected: response, actual: actualResponse, actualStatus: actualStatus,
         actualHeaders: actualHeaders.collectEntries { k, v -> [k.toUpperCase(), v] }, actualBody: actualBody)
     def mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(
-        ResponseMatching$.MODULE$.responseMismatches(response, Response$.MODULE$.apply(actualStatus,
+        ResponseMatching$.MODULE$.responseMismatches(response, new Response(actualStatus,
             actualHeaders, actualBody, [:]))).asJava()
 
     result.method = comparison.compareStatus(mismatches)
@@ -56,7 +56,7 @@ class ResponseComparison {
     }
     def mismatches = []
     def expected = message.asPactRequest()
-    def actualMessage = Response$.MODULE$.apply(200, ['Content-Type': message.contentType], actual, [:])
+    def actualMessage = new Response(200, ['Content-Type': message.contentType], actual, [:])
     if (result) {
           mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(result.value.matchBody(expected,
             actualMessage, DiffConfig.apply(true, false))).asJava()
@@ -90,20 +90,18 @@ class ResponseComparison {
   def compareHeaders(List<ResponsePartMismatch> mismatches) {
     Map headerResult = [:]
 
-    if (expected.headers().defined) {
+    if (expected.headers != null) {
       def headerMismatchers = mismatches.findAll { it instanceof HeaderMismatch }.groupBy { it.headerKey }
       if (headerMismatchers.empty) {
-          headerResult = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
-              .keySet().collectEntries { [it, true] }
+          headerResult = expected.headers.keySet().collectEntries { [it, true] }
       } else {
-          def headers = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
-          headers.each { headerKey, value ->
+        expected.headers.each { headerKey, value ->
               if (headerMismatchers[headerKey]) {
                   headerResult[headerKey] = headerMismatchers[headerKey].first().mismatch.get()
               } else {
                   headerResult[headerKey] = true
               }
-          }
+        }
       }
     }
 
@@ -126,18 +124,18 @@ class ResponseComparison {
       String actualBodyString = ''
       if (actualBody) {
           if (actual.contentType.mimeType ==~ 'application/.*json') {
-              actualBodyString = new JsonBuilder(new JsonSlurper().parseText(actualBody)).toPrettyString()
+              actualBodyString = JsonOutput.prettyPrint(actualBody)
           } else {
-              actualBodyString = actualBody.toString()
+              actualBodyString = actualBody
           }
       }
 
       String expectedBodyString = ''
-      if (expected.body().defined) {
+      if (expected.body != null) {
           if (expected.jsonBody()) {
-              expectedBodyString = new JsonBuilder(new JsonSlurper().parseText(expected.body().get())).toPrettyString()
+              expectedBodyString = JsonOutput.prettyPrint(expected.body)
           } else {
-              expectedBodyString = expected.body().get()
+              expectedBodyString = expected.body
           }
       }
 

@@ -17,7 +17,7 @@ sealed trait VerificationResult {
   override def toString() = this match {
     case PactVerified => "Pact verified."
     case PactMismatch(results, error) => s"""
-      |Missing: ${results.missing.map(_.request)}\n
+      |Missing: ${results.missing.map(_.getRequest)}\n
       |AlmostMatched: ${results.almostMatched}\n
       |Unexpected: ${results.unexpected}\n"""
     case PactError(error) => s"${error.getClass.getName} ${error.getMessage}"

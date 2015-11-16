@@ -9,7 +9,6 @@ import org.apache.http.HttpEntity
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
-import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpDelete
@@ -21,7 +20,6 @@ import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpPut
 import org.apache.http.client.methods.HttpTrace
 import org.apache.http.client.utils.URIBuilder
-import org.apache.http.client.utils.URLEncodedUtils
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
@@ -51,8 +49,8 @@ class ProviderClient {
         CloseableHttpClient httpclient = httpClientFactory.newClient(provider)
         HttpRequest method = newRequest(request)
 
-        if (request.headers().defined) {
-            JavaConverters$.MODULE$.mapAsJavaMapConverter(request.headers().get()).asJava().each { key, value ->
+        if (request.headers != null) {
+            request.headers.each { key, value ->
                 method.addHeader(key, value)
             }
 
@@ -62,17 +60,16 @@ class ProviderClient {
         }
 
         if (method instanceof HttpEntityEnclosingRequest) {
-            if (urlEncodedFormPost(request) && request.query().defined) {
+            if (urlEncodedFormPost(request) && request.query != null) {
               def charset = Consts.UTF_8
-              List parameters = JavaConverters$.MODULE$.mapAsJavaMapConverter(request.query().get()).asJava()
-                .collectMany { entry ->
-                  JavaConverters$.MODULE$.seqAsJavaListConverter(entry.value).asJava().collect {
+              List parameters = request.query.collectMany { entry ->
+                  entry.value.collect {
                     new BasicNameValuePair(entry.key, it)
                   }
               }
               method.setEntity(new UrlEncodedFormEntity(parameters, charset))
-            } else if (request.body().defined) {
-                method.setEntity(new StringEntity(request.body().get()))
+            } else if (request.body != null) {
+                method.setEntity(new StringEntity(request.body))
             }
         }
 
@@ -171,19 +168,19 @@ class ProviderClient {
             }
         }
 
-        path += URLDecoder.decode(request.path(), UTF8)
+        path += URLDecoder.decode(request.path, UTF8)
         urlBuilder.path = path
 
-        if (request.query().defined && !urlEncodedFormPost(request)) {
-          JavaConverters$.MODULE$.mapAsJavaMapConverter(request.query().get()).asJava().each {
-            entry -> JavaConverters$.MODULE$.seqAsJavaListConverter(entry.value).asJava().each {
+        if (request.query != null && !urlEncodedFormPost(request)) {
+          request.query.each {
+            entry -> entry.value.each {
               urlBuilder.addParameter(entry.key, it)
             }
           }
         }
 
         def url = urlBuilder.build().toString()
-        switch (request.method().toLowerCase()) {
+        switch (request.method.toLowerCase()) {
             case 'post':
                 return new HttpPost(url)
             case 'put':
@@ -204,7 +201,7 @@ class ProviderClient {
     }
 
     static boolean urlEncodedFormPost(Request request) {
-        request.method().toLowerCase() == 'post' &&
+        request.method.toLowerCase() == 'post' &&
                 request.mimeType() == ContentType.APPLICATION_FORM_URLENCODED.mimeType
     }
 }

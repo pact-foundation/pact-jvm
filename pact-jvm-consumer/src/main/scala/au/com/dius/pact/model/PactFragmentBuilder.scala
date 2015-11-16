@@ -1,7 +1,6 @@
 package au.com.dius.pact.model
 
 import au.com.dius.pact.model.HttpMethod._
-import org.json4s._
 import au.com.dius.pact.consumer.{ConsumerTestVerification, VerificationResult}
 import org.json.JSONObject
 
@@ -12,7 +11,7 @@ object PactFragmentBuilder {
 
   case class WithConsumer(consumer: Consumer) {
     def hasPactWith(provider: String) = {
-      WithProvider(Provider(provider))
+      WithProvider(new Provider(provider))
     }
 
     case class WithProvider(provider: Provider) {
@@ -34,6 +33,7 @@ object PactFragmentBuilder {
 
   case class DescribingRequest(consumer: Consumer, provider: Provider, state: Option[String], description: String,
                                builder: CanBuildPactFragment.Builder = CanBuildPactFragment.firstBuild) extends Optionals {
+    import scala.collection.JavaConversions._
 
     /**
      * supports java DSL
@@ -50,7 +50,8 @@ object PactFragmentBuilder {
                  headers: Map[String, String] = Map(),
                  body: String = "",
                  matchers: Map[String, Map[String, String]] = Map()): DescribingResponse = {
-      DescribingResponse(Request(method, path, query, headers, body, matchers))
+      DescribingResponse(new Request(method, path, PactReader.queryStringToMap(query), headers, body,
+        CollectionUtils.scalaMMapToJavaMMap(matchers)))
     }
 
     case class DescribingResponse(request: Request) {
@@ -70,11 +71,11 @@ object PactFragmentBuilder {
           consumer,
           provider,
           state,
-          Seq(Interaction(
+          Seq(new Interaction(
             description,
-            state,
+            state.orNull,
             request,
-            Response(status, headers, body, matchers))))
+            new Response(status, headers, body, CollectionUtils.scalaMMapToJavaMMap(matchers)))))
       }
     }
   }

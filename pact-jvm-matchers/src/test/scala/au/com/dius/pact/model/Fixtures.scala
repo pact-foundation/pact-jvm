@@ -1,35 +1,25 @@
 package au.com.dius.pact.model
 
-import org.json4s.JsonAST.{JBool, JObject}
-import org.json4s.jackson.JsonMethods.pretty
+import java.util
+
+import scala.collection.JavaConversions
 
 object Fixtures {
   import HttpMethod._
-  import org.json4s.JsonDSL._
 
-  val provider = Provider("test_provider")
-  val consumer = Consumer("test_consumer")
+  val provider = new Provider("test_provider")
+  val consumer = new Consumer("test_consumer")
 
 
-  val request = Request(Get, "/", "q=p&q=p2&r=s", Map("testreqheader" -> "testreqheadervalue"),
-    pretty(JObject("test" -> JBool(true))), null)
+  val request = new Request(Get, "/", PactReader.queryStringToMap("q=p&q=p2&r=s"), JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheadervalue")),
+    "{\"test\": true}")
 
-  val response = Response(200,
-    Map("testreqheader" -> "testreqheaderval"),
-    pretty(JObject("responsetest" -> JBool(true))), null)
+  val response = new Response(200, JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheaderval")),
+    "{\"responsetest\": true}")
 
-  val interaction = Interaction(
-    description = "test interaction",
-    providerState = Some("test state"),
-    request = request,
-    response = response
-  )
+  val interaction = new Interaction("test interaction", "test state", request, response)
 
-  val interactions = List(interaction)
+  val interactions = util.Arrays.asList(interaction)
 
-  val pact: Pact = Pact(
-    provider = provider,
-    consumer = consumer,
-    interactions = interactions
-  )
+  val pact: Pact = new Pact(provider, consumer, interactions)
 }

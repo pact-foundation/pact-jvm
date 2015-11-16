@@ -36,7 +36,7 @@ case class PartialRequestMatch(problems: Map[Interaction, Seq[RequestPartMismatc
   def description() = {
     var s = ""
     for (problem <- problems) {
-      s += problem._1.description + ":\n"
+      s += problem._1.getDescription + ":\n"
       for (mismatch <- problem._2) {
         s += "    " + mismatch.description + "\n"
       }

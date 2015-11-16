@@ -1,5 +1,9 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.model.Interaction
+import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.v3.messaging.Message
+import au.com.dius.pact.model.v3.messaging.MessagePact
 import spock.lang.Specification
 
 class ProviderVerifierSpec extends Specification {
@@ -275,6 +279,30 @@ class ProviderVerifierSpec extends Specification {
 
     then:
     !result
+  }
+
+  def 'extract interactions from a V2 pact'() {
+    given:
+    def interaction = new Interaction('test interaction')
+    def pact = new Pact(null, null, [interaction])
+
+    when:
+    def result = verifier.interactions(pact)
+
+    then:
+    result == [interaction]
+  }
+
+  def 'extract interactions from a Message pact'() {
+    given:
+    def interaction = new Message('test message')
+    def pact = new MessagePact(messages: [ interaction ])
+
+    when:
+    def result = verifier.interactions(pact)
+
+    then:
+    result == [interaction]
   }
 
 }

@@ -4,7 +4,7 @@
   "expected" : {
     "method": "POST",
     "path": "/path",
-    "query": "",
+    "query": {},
     "headers": {
       "Accept": "alligators",
       "Content-Type": "hippos"
@@ -13,7 +13,7 @@
   "actual": {
     "method": "POST",
     "path": "/path",
-    "query": "",
+    "query": {},
     "headers": {
       "Content-Type": "hippos",
       "Accept": "alligators"

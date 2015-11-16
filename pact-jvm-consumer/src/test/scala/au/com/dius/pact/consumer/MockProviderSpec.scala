@@ -1,23 +1,24 @@
 package au.com.dius.pact.consumer
 
-import org.specs2.concurrent.ExecutionEnv
-import org.specs2.mutable.Specification
-import au.com.dius.pact.consumer.Fixtures._
-import au.com.dius.pact.model._
-import scala.concurrent.duration.FiniteDuration
-import org.json4s.JsonAST.{JField, JString, JObject}
-import org.json4s.jackson.JsonMethods._
-import scala.concurrent.ExecutionContext
 import java.util.concurrent.Executors
-import au.com.dius.pact.model.Interaction
-import au.com.dius.pact.model.dispatch.HttpClient
-import scala.util.Success
+
+import com.typesafe.scalalogging.StrictLogging
+import au.com.dius.pact.consumer.Fixtures._
+import au.com.dius.pact.consumer.dispatch.HttpClient
+import au.com.dius.pact.model.{Interaction, _}
 import org.junit.runner.RunWith
-import org.specs2.runner.JUnitRunner
+import org.specs2.concurrent.ExecutionEnv
 import org.specs2.execute.Result
+import org.specs2.mutable.Specification
+import org.specs2.runner.JUnitRunner
+
+import scala.collection.JavaConversions
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.FiniteDuration
+import scala.util.Success
 
 @RunWith(classOf[JUnitRunner])
-class MockProviderSpec extends Specification {
+class MockProviderSpec extends Specification with StrictLogging {
 
   implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
   
@@ -36,17 +37,22 @@ class MockProviderSpec extends Specification {
     "Respond to invalid and valid requests" >> { implicit ee: ExecutionEnv =>
       val server = DefaultMockProvider.withDefaultConfig()
 
-      val validRequest = request.copy(path = s"${server.config.url}/")
-      val invalidRequest = request.copy(path = s"${server.config.url}/foo")
+      val validRequest = request.copy()
+      validRequest.setPath(server.config.url)
+      val invalidRequest = request.copy()
+      invalidRequest.setPath(s"${server.config.url}/foo")
       
       val Success((codeResult, results)) = server.runAndClose[Result](pact) {
-  
+
+        logger.debug("invalidRequest: " + invalidRequest.toString)
         val invalidResponse = HttpClient.run(invalidRequest)
-        invalidResponse.map(_.status) must be_==(500).awaitFor(timeout)
+        logger.debug("invalidResponse: " + invalidResponse.toString)
+        invalidResponse.map(_.getStatus) must be_==(500).awaitFor(timeout)
   
         //hit server with valid request
         val validResponse = HttpClient.run(validRequest)
-        validResponse.map(_.status) must be_==(response.status).awaitFor(timeout)
+        logger.debug("validResponse: " + validResponse.toString)
+        validResponse.map(_.getStatus) must be_==(response.getStatus).awaitFor(timeout)
       }
 
       verify(codeResult) must beNone
@@ -55,31 +61,45 @@ class MockProviderSpec extends Specification {
       results.unexpected.size must === (1)
 
       def compareRequests(actual: Request, expected: Request) = {
-        actual.method must beEqualTo(expected.method)
+        actual.getMethod must beEqualTo(expected.getMethod)
 
-        def trimHost(s: String) = s.replaceAll(server.config.url, "")
-        trimHost(actual.path) must beEqualTo(trimHost(expected.path))
+        def trimHost(s: String) = {
+          val path = s.replaceAll(server.config.url, "")
+          if (path.isEmpty) {
+            "/"
+          } else {
+            path
+          }
+        }
+        logger.debug("actual.getPath=" + actual.getPath)
+        logger.debug("expected.getPath=" + expected.getPath)
+        trimHost(actual.getPath) must beEqualTo(trimHost(expected.getPath))
 
-        val expectedHeaders = expected.headers.getOrElse(Map())
-        actual.headers.map(_.filter(t => expectedHeaders.contains(t._1))) must beEqualTo(expected.headers)
+        val expectedHeaders = JavaConversions.mapAsScalaMap(expected.getHeaders)
+        val actualHeaders = JavaConversions.mapAsScalaMap(actual.getHeaders)
+        actualHeaders.filter(t => expectedHeaders.contains(t._1)) must beEqualTo(expectedHeaders)
 
-        parse(actual.body.get) must beEqualTo(parse(expected.body.get))
+        actual.getBody must beEqualTo(expected.getBody)
       }
 
       def compare(actual: Interaction, request:Request, response:Response) = {
-        actual.description must beEqualTo(interaction.description)
-        actual.providerState must beEqualTo(interaction.providerState)
-        compareRequests(actual.request, request)
+        actual.getDescription must beEqualTo(interaction.getDescription)
+        actual.getProviderState must beEqualTo(interaction.getProviderState)
+        compareRequests(actual.getRequest, request)
 
         def chunk(s:String) = s.replaceAll("\n", "").replaceAll(" ", "").replaceAll("\t", "").toLowerCase.take(10)
 
-        actual.response.body.map(chunk) must beEqualTo(response.body.map(chunk))
+        chunk(actual.getResponse.getBody) must beEqualTo(chunk(response.getBody))
 
-        actual.response.copy(body = None) must beEqualTo(response.copy(body = None))
+        val actualResponse = actual.getResponse.copy
+        actualResponse.setBody("")
+        val expectedResponse = response.copy
+        expectedResponse.setBody("")
+        actualResponse must beEqualTo(expectedResponse)
       }
       
-      val expectedInvalidResponse = Response(500, Map("Access-Control-Allow-Origin" -> "*"),
-        pretty(JObject(JField("error", JString("unexpected request")))), null)
+      val expectedInvalidResponse = new Response(500, JavaConversions.mapAsJavaMap(Map("Access-Control-Allow-Origin" -> "*")),
+        "{\"error\": \"unexpected request\"}")
 
       compareRequests(results.unexpected.head, invalidRequest)
       compare(results.matched.head, validRequest, response)

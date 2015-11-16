@@ -3,9 +3,11 @@ apply plugin:'application'
 mainClassName = 'au.com.dius.pact.server.Server'
 
 dependencies {
-    compile project(":pact-jvm-model_${project.scalaVersion}"), project(":pact-jvm-consumer_${project.scalaVersion}")
-    compile 'ch.qos.logback:logback-core:1.1.2', 'ch.qos.logback:logback-classic:1.1.2',
-        "com.github.scopt:scopt_${project.scalaVersion}:3.3.0"
+    compile project(":pact-jvm-model_${project.scalaVersion}"),
+      project(":pact-jvm-consumer_${project.scalaVersion}")
+    compile 'ch.qos.logback:logback-core:1.1.2',
+      'ch.qos.logback:logback-classic:1.1.2',
+      "com.github.scopt:scopt_${project.scalaVersion}:3.3.0"
 }
 
 jar {

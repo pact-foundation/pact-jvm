@@ -1,10 +1,10 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.model._
-import au.com.dius.pact.model.Interaction
-import scala.Some
+import au.com.dius.pact.model.{Interaction, _}
 import difflib.DiffUtils
-import org.json4s.JValue
+import groovy.json.JsonOutput
+
+import scala.Some
 
 object PrettyPrinter {
   //TODO: allow configurable context lines
@@ -44,7 +44,8 @@ object PrettyPrinter {
   def printProblem(interaction:Interaction, partial: Seq[RequestPartMismatch]): String = {
     partial.flatMap {
       case HeaderMismatch(key, expected, actual, mismatch) => printStringMismatch("Header " + key, expected, actual)
-      case BodyMismatch(expected, actual, mismatch, path) => printStringMismatch("Body", expected, actual)
+      case BodyMismatch(expected, actual, mismatch, path) => printStringMismatch("Body",
+        JsonOutput.prettyPrint(expected.toString), JsonOutput.prettyPrint(actual.toString))
       case CookieMismatch(expected, actual) => printDiff("Cookies", expected.sorted, actual.sorted)
       case PathMismatch(expected, actual, _) => printDiff("Path", List(expected), List(actual), 0)
       case MethodMismatch(expected, actual) => printDiff("Method", List(expected), List(actual), 0)
@@ -67,7 +68,7 @@ object PrettyPrinter {
     if(missing.isEmpty) {
       ""
     } else {
-      s"missing:\n ${missing.map(_.request).mkString("\n")}"
+      s"missing:\n ${missing.map(_.getRequest).mkString("\n")}"
     }
   }
 

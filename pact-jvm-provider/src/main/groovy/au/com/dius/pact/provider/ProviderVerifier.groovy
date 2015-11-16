@@ -58,15 +58,10 @@ class ProviderVerifier {
   }
 
   List interactions(def pact) {
-    if (pact instanceof V3Pact) {
-      if (pact instanceof MessagePact) {
-        pact.messages.findAll(this.&filterInteractions)
-      } else {
-        pact.interactions.findAll(this.&filterInteractions)
-      }
+    if (pact instanceof MessagePact) {
+      pact.messages.findAll(this.&filterInteractions)
     } else {
-      JavaConverters$.MODULE$.seqAsJavaListConverter(pact.interactions()).asJava()
-        .collect { new PactInteractionProxy(it) }.findAll(this.&filterInteractions)
+      pact.interactions.findAll(this.&filterInteractions)
     }
   }
 
@@ -254,8 +249,8 @@ class ProviderVerifier {
     AnsiConsole.out().println('    returns a response which')
 
     def s = ' returns a response which'
-    displayMethodResult(failures, expectedResponse.status(), comparison.method, interactionMessage + s)
-    displayHeadersResult(failures, expectedResponse.headers(), comparison.headers, interactionMessage + s)
+    displayMethodResult(failures, expectedResponse.status, comparison.method, interactionMessage + s)
+    displayHeadersResult(failures, expectedResponse.headers, comparison.headers, interactionMessage + s)
     displayBodyResult(failures, comparison.body, interactionMessage + s)
   }
 
@@ -272,7 +267,7 @@ class ProviderVerifier {
   void displayHeadersResult(Map failures, def expected, Map comparison, String comparisonDescription) {
     if (!comparison.isEmpty()) {
       AnsiConsole.out().println('      includes headers')
-      Map expectedHeaders = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.get()).asJava()
+      Map expectedHeaders = expected
       comparison.each { key, headerComparison ->
         def expectedHeaderValue = expectedHeaders[key]
         def ansi = Ansi.ansi().a('        "').bold().a(key).boldOff().a('" with value "').bold()

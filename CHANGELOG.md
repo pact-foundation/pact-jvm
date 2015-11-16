@@ -1,5 +1,28 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.4.0 - removed json4s library in favour of groovy JSON parsing
+
+* 2f0f9d5 - missed some old scala model access code #152 (Ronald Holshausen, Sun Nov 22 14:38:03 2015 +1100)
+* 25d79d0 - content type check should be case insensitive #152 (Ronald Holshausen, Sun Nov 22 14:06:14 2015 +1100)
+* 7a57fd2 - consolidate some common library versions in the build property file (Ronald Holshausen, Sat Nov 21 17:30:04 2015 +1100)
+* feffb3a - removed the remaining references to json4s #152 (Ronald Holshausen, Sat Nov 21 17:03:43 2015 +1100)
+* 179b95b - standalone mock server converted to not use json4s #152 (Ronald Holshausen, Sat Nov 21 13:27:00 2015 +1100)
+* 093ffbb - got all provider tests passing after refactor #152 (Ronald Holshausen, Sat Nov 21 12:19:24 2015 +1100)
+* 42928f9 - got all model and matcher tests passing after refactor #152 (Ronald Holshausen, Fri Nov 20 16:50:27 2015 +1100)
+* 71a2198 - got all consumer tests passing after refactor #152 (Ronald Holshausen, Thu Nov 19 11:57:05 2015 +1100)
+* a7063d6 - first phase of a big refactor to remove json4s #152 (Ronald Holshausen, Thu Nov 19 09:47:29 2015 +1100)
+* 5aae979 - refactored SBT support classes into a sbtsupport package and added validation to the config #152 (Ronald Holshausen, Tue Nov 17 11:13:47 2015 +1100)
+* 3a1b6d1 - swap Groovy JsonSlurper instead of json4s in the SBT provider plugin #152 (Ronald Holshausen, Tue Nov 17 10:38:09 2015 +1100)
+* a1210e6 - Merge branch 'master' into v2.x (Ronald Holshausen, Tue Nov 17 10:18:42 2015 +1100)
+* db10e39 - updated V3 test cases (Ronald Holshausen, Mon Nov 16 13:54:29 2015 +1100)
+* d0b5347 - updated V2 test cases (Ronald Holshausen, Mon Nov 16 13:20:45 2015 +1100)
+* adbf184 - force the org.scala-lang:scala-compiler dependency to be the same version as org.scala-lang:scala-library #182 (Ronald Holshausen, Mon Nov 16 12:39:44 2015 +1100)
+* 99c941f - added nullValue method and updated support for setting string values to null in Java DSL #183 (Ronald Holshausen, Mon Nov 16 12:14:05 2015 +1100)
+* 9330b3c - bump version (Ronald Holshausen, Sat Nov 14 18:49:29 2015 +1100)
+* e115260 - update changelog (Ronald Holshausen, Sat Nov 14 18:21:37 2015 +1100)
+* 0f26261 - bump version (Ronald Holshausen, Sat Nov 14 18:19:58 2015 +1100)
+* d6f4cbf - update changelog (Ronald Holshausen, Sat Nov 14 16:54:33 2015 +1100)
+
 # 3.1.3 - JUnit provider test support + bugfixes
 
 * d6f4cbf - update changelog (Ronald Holshausen, Sat Nov 14 16:54:33 2015 +1100)

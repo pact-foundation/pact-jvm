@@ -3,7 +3,7 @@ import sbt.Keys._
 import com.typesafe.sbt.pgp.PgpKeys._
 
 object Common {
-    def version = "3.1.4"
+    def version = "3.2.0"
 }
 
 object BuildSettings {
@@ -13,6 +13,7 @@ object BuildSettings {
         scalaVersion := "2.10.5",
 
         publishMavenStyle := true,
+        isSnapshot := true,
         // when playing around with a local install of nexus use this:
         //        credentials += Credentials("Sonatype Nexus Repository Manager", "localhost", "deployment", "admin123"),
         //	    publishTo := Some("releases" at "http://localhost:8081/nexus/content/repositories/releases/"),

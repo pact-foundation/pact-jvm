@@ -18,14 +18,17 @@ import org.junit.runner.Description;
 import org.junit.runner.Runner;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
-import org.junit.runners.model.*;
+import org.junit.runners.model.FrameworkField;
+import org.junit.runners.model.FrameworkMethod;
+import org.junit.runners.model.InitializationError;
+import org.junit.runners.model.Statement;
+import org.junit.runners.model.TestClass;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static java.util.stream.Collectors.toList;
 import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_METHOD_VALIDATOR;
 import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_VALIDATOR;
 
@@ -49,13 +52,19 @@ class InteractionRunner extends Runner {
 
     @Override
     public Description getDescription() {
-        final Description description = Description.createSuiteDescription(pact.consumer().name());
-        scala.collection.JavaConversions.seqAsJavaList(pact.interactions()).stream().map(this::describeChild).forEach(description::addChild);
+        final Description description = Description.createSuiteDescription(pact.getConsumer().getName());
+        for (Interaction i: pact.getInteractions()) {
+            description.addChild(describeChild(i));
+        }
         return description;
     }
 
     protected Description describeChild(final Interaction interaction) {
-        return childDescriptions.computeIfAbsent(interaction, i -> Description.createTestDescription(pact.consumer().name(), i.description()));
+        if (!childDescriptions.containsKey(interaction)) {
+            childDescriptions.put(interaction, Description.createTestDescription(pact.getConsumer().getName(),
+                interaction.getDescription()));
+        }
+        return childDescriptions.get(interaction);
     }
 
     // Validation
@@ -109,7 +118,7 @@ class InteractionRunner extends Runner {
 
     // Running
     public void run(final RunNotifier notifier) {
-        for (final Interaction interaction : scala.collection.JavaConversions.seqAsJavaList(pact.interactions())) {
+        for (final Interaction interaction : pact.getInteractions()) {
             final Description description = describeChild(interaction);
             notifier.fireTestStarted(description);
             try {
@@ -161,12 +170,14 @@ class InteractionRunner extends Runner {
     }
 
     protected Statement withStateChanges(final Interaction interaction, final Object target, final Statement statement) {
-        if (interaction.providerState().nonEmpty()) {
-            final String state = interaction.providerState().get();
-            final List<FrameworkMethod> onStateChange = testClass.getAnnotatedMethods(State.class)
-                    .stream()
-                    .filter(ann -> ArrayUtils.contains(ann.getAnnotation(State.class).value(), state))
-                    .collect(toList());
+        if (interaction.getProviderState() != null && !interaction.getProviderState().isEmpty()) {
+            final String state = interaction.getProviderState();
+            final List<FrameworkMethod> onStateChange = new ArrayList<FrameworkMethod>();
+            for (FrameworkMethod ann: testClass.getAnnotatedMethods(State.class)) {
+                if (ArrayUtils.contains(ann.getAnnotation(State.class).value(), state)) {
+                    onStateChange.add(ann);
+                }
+            }
             return onStateChange.isEmpty() ? statement : new RunBefores(statement, onStateChange, target);
         } else {
             return statement;

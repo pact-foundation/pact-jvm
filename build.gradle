@@ -3,7 +3,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.apache.commons:commons-lang3:3.3.2'
+    classpath "org.apache.commons:commons-lang3:$commonsLang3Version"
   }
 }
 
@@ -39,9 +39,7 @@ subprojects {
       if (project.hasProperty('scalaVersion')) {
           compile 'org.slf4j:slf4j-api:1.7.7', "org.scala-lang:scala-library:${project.scalaFullVersion}",
             "org.scala-lang:scala-compiler:${project.scalaFullVersion}",
-            "com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.1.0",
-            "org.json4s:json4s-native_${project.scalaVersion}:$json4sVersion",
-            "org.json4s:json4s-jackson_${project.scalaVersion}:$json4sVersion"
+            "com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.1.0"
 
           testCompile "org.specs2:specs2-core_${project.scalaVersion}:3.6.4", "org.specs2:specs2-junit_${project.scalaVersion}:3.6.4"
       }
@@ -50,7 +48,7 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '3.1.4'
+    version = '3.2.0'
     targetCompatibility = '1.8'
     sourceCompatibility = '1.8'
 

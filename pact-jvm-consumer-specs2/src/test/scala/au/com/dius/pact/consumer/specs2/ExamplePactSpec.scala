@@ -10,7 +10,7 @@ import org.specs2.runner.JUnitRunner
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-@RunWith(classOf[JUnitRunner])
+//@RunWith(classOf[JUnitRunner])
 class ExamplePactSpec extends Specification with PactSpec {
 
   val consumer = "My Consumer"

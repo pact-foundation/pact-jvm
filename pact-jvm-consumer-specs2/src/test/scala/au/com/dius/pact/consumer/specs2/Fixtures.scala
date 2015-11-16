@@ -1,39 +1,25 @@
 package au.com.dius.pact.consumer.specs2
 
-import au.com.dius.pact.model._
-import au.com.dius.pact.model.Interaction
-import au.com.dius.pact.model.Provider
-import au.com.dius.pact.model.Consumer
-import scala.collection.mutable.ArrayBuffer
-import org.json4s.jackson.JsonMethods.pretty
+import java.util
+
+import au.com.dius.pact.model.{Consumer, Interaction, Provider, _}
 
 object Fixtures {
   import au.com.dius.pact.model.HttpMethod._
-  import org.json4s.JsonDSL._
+  import scala.collection.JavaConversions._
 
-  val provider = Provider("test_provider")
-  val consumer = Consumer("test_consumer")
+  val provider = new Provider("test_provider")
+  val consumer = new Consumer("test_consumer")
 
-  val request = Request(Post, "/", Some(Map("q" -> List("p"))),
-    Some(Map("testreqheader" -> "testreqheadervalue")),
-    Some(pretty(map2jvalue(Map("test" -> true)))), None)
+  val request = new Request(Post, "/", PactReader.queryStringToMap("q=p"),
+    Map("testreqheader" -> "testreqheadervalue").asInstanceOf[java.util.Map[String, String]],
+    "{\"test\": true}")
 
-  val response = Response(200,
-    Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*"),
-    pretty(map2jvalue(Map("responsetest" -> true))), null)
+  val response = new Response(200,
+    Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*").asInstanceOf[java.util.Map[String, String]],
+    "{\"responsetest\": true}")
 
-  val interaction = Interaction(
-    description = "test interaction",
-    providerState = Some("test state"),
-    request = request,
-    response = response
-  )
+  val interaction = new Interaction("test interaction", "test state", request, response)
 
-  val interactions = ArrayBuffer(interaction)
-
-  val pact: Pact = Pact(
-    provider = provider,
-    consumer = consumer,
-    interactions = interactions
-  )
+  val pact: Pact = new Pact(provider, consumer, util.Arrays.asList(interaction))
 }

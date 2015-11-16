@@ -71,7 +71,7 @@ class PactBodyBuilderSpec extends Specification {
 
     when:
     service.fragment()
-    def keys = new JsonSlurper().parseText(service.interactions[0].request.body.get()).keySet()
+    def keys = new JsonSlurper().parseText(service.interactions[0].request.body).keySet()
 
     then:
     service.interactions.size() == 1
@@ -98,7 +98,7 @@ class PactBodyBuilderSpec extends Specification {
     keys == ['name', 'surname', 'position', 'happy', 'hexCode', 'hexCode2', 'id', 'id2', 'localAddress',
       'localAddress2', 'age', 'age2', 'timestamp', 'ts', 'values', 'role', 'roles'] as Set
 
-    service.interactions[0].response.body.get() == new JsonBuilder([name: 'harry']).toPrettyString()
+    service.interactions[0].response.body == new JsonBuilder([name: 'harry']).toPrettyString()
   }
 
   def 'arrays with matching'() {
@@ -124,7 +124,7 @@ class PactBodyBuilderSpec extends Specification {
 
     when:
     service.fragment()
-    def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.get()))
+    def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body))
 
     then:
     service.interactions.size() == 1
@@ -172,15 +172,15 @@ class PactBodyBuilderSpec extends Specification {
     def response = service.interactions.first().response
 
     then:
-    request.body.get() == '''|{
-                             |    "name": "harry",
-                             |    "surname": "larry",
-                             |    "position": "staff",
-                             |    "happy": true
-                             |}'''.stripMargin()
-    response.body.get() == '''|{
-                              |    "name": "harry"
-                              |}'''.stripMargin()
+    request.body == '''|{
+                       |    "name": "harry",
+                       |    "surname": "larry",
+                       |    "position": "staff",
+                       |    "happy": true
+                       |}'''.stripMargin()
+    response.body == '''|{
+                        |    "name": "harry"
+                        |}'''.stripMargin()
   }
 
   def 'pretty prints bodies if pretty print is set to true'() {
@@ -206,15 +206,15 @@ class PactBodyBuilderSpec extends Specification {
     def response = service.interactions.first().response
 
     then:
-    request.body.get() == '''|{
-                             |    "name": "harry",
-                             |    "surname": "larry",
-                             |    "position": "staff",
-                             |    "happy": true
-                             |}'''.stripMargin()
-    response.body.get() == '''|{
-                              |    "name": "harry"
-                              |}'''.stripMargin()
+    request.body == '''|{
+                       |    "name": "harry",
+                       |    "surname": "larry",
+                       |    "position": "staff",
+                       |    "happy": true
+                       |}'''.stripMargin()
+    response.body == '''|{
+                        |    "name": "harry"
+                        |}'''.stripMargin()
   }
 
   def 'does not pretty print bodies if pretty print is set to false'() {
@@ -240,8 +240,8 @@ class PactBodyBuilderSpec extends Specification {
     def response = service.interactions.first().response
 
     then:
-    request.body.get() == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
-    response.body.get() == '{"name":"harry"}'
+    request.body == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
+    response.body == '{"name":"harry"}'
   }
 
   def 'does not pretty print bodies if mimetype corresponds to one that requires compact bodies'() {
@@ -267,8 +267,8 @@ class PactBodyBuilderSpec extends Specification {
     def response = service.interactions.first().response
 
     then:
-    request.body.get() == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
-    response.body.get() == '{"name":"harry"}'
+    request.body == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
+    response.body == '{"name":"harry"}'
   }
 
   def 'Guard Against Field Names That Dont Conform To Gatling Fields'() {
@@ -294,7 +294,7 @@ class PactBodyBuilderSpec extends Specification {
 
     when:
     service.fragment()
-    def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.get()))
+    def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body))
 
     then:
     service.interactions.size() == 1

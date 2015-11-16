@@ -1,21 +1,20 @@
 package au.com.dius.pact.consumer.groovy
 
-@SuppressWarnings(['UnusedImport', 'DuplicateImport'])
+@SuppressWarnings('UnusedImport')
 import au.com.dius.pact.consumer.StatefulMockProvider
 import au.com.dius.pact.consumer.VerificationResult
 import au.com.dius.pact.model.Consumer
-import au.com.dius.pact.model.Interaction$
+import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.MockProviderConfig
 import au.com.dius.pact.model.MockProviderConfig$
 import au.com.dius.pact.model.PactConfig
 import au.com.dius.pact.model.PactFragment
+import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.Provider
-import au.com.dius.pact.model.Request$
-import au.com.dius.pact.model.Response$
+import au.com.dius.pact.model.Request
+import au.com.dius.pact.model.Response
 import groovy.json.JsonBuilder
-import scala.None$
-import scala.Some$
 import scala.collection.JavaConverters$
 
 import java.util.regex.Pattern
@@ -95,15 +94,13 @@ class PactBuilder extends BaseBuilder {
       Map responseMatchers = responseData[i].matchers ?: [:]
       Map headers = setupHeaders(requestData[i].headers ?: [:], requestMatchers)
       Map responseHeaders = setupHeaders(responseData[i].headers ?: [:], responseMatchers)
-      def state = providerState.empty ? None$.empty() : Some$.MODULE$.apply(providerState)
       String path = setupPath(requestData[i].path ?: '/', requestMatchers)
-      interactions << Interaction$.MODULE$.apply(
+      interactions << new Interaction(
         requestDescription,
-        state,
-        Request$.MODULE$.apply(requestData[i].method ?: 'get', path,
-          queryToString(requestData[i]?.query), headers, requestData[i].body ?: '', requestMatchers),
-        Response$.MODULE$.apply(responseData[i].status ?: 200, responseHeaders, responseData[i].body ?: '',
-          responseMatchers)
+        providerState,
+        new Request(requestData[i].method ?: 'get', path, requestData[i]?.query, headers, requestData[i].body ?: '',
+          requestMatchers),
+        new Response(responseData[i].status ?: 200, responseHeaders, responseData[i].body ?: '', responseMatchers)
       )
     }
     requestData = []
@@ -138,14 +135,6 @@ class PactBuilder extends BaseBuilder {
     }
   }
 
-  private static String queryToString(query) {
-    if (query instanceof Map) {
-      query.collectMany { k, v -> (v instanceof List) ? v.collect { "$k=$it" } : ["$k=$v"] }.join('&')
-    } else {
-      query
-    }
-  }
-
   /**
    * Defines the request attributes (body, headers, etc.)
    * @param requestData Map of attributes
@@ -162,6 +151,17 @@ class PactBuilder extends BaseBuilder {
         request.body = new JsonBuilder(body).toPrettyString()
       } else {
         request.body = new JsonBuilder(body).toString()
+      }
+    }
+    if (requestData.query instanceof String) {
+      request.query = PactReader.queryStringToMap(requestData.query)
+    } else {
+      request.query = requestData.query?.collectEntries { k, v ->
+        if (v instanceof Collection) {
+          [k, v]
+        } else {
+          [k, [v]]
+        }
       }
     }
     this.requestData << request

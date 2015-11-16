@@ -1,0 +1,8 @@
+{
+    "stateChangeUrl": {
+        "protocol": "http",
+        "host": "localhost",
+        "port": 8888,
+        "path": "/enterState"
+    }
+}

@@ -4,12 +4,12 @@
   "expected" : {
     "method": "POST",
     "path": "/",
-    "query": ""
+    "query": {}
   },
   "actual": {
     "method": "POST",
     "path": "/",
-    "query": "",
+    "query": {},
     "headers": {"Content-Type": "application/json"},
     "body": {
       "alligator": {

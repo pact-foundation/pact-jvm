@@ -1,14 +1,16 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.model.Fixtures._
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 
+import scala.collection.JavaConversions
+
 @RunWith(classOf[JUnitRunner])
 class MatchingSpec extends Specification {
+  import Fixtures._
 
-  val emptyQuery = None
+  val emptyQuery = null
 
   "Matching" should {
     import au.com.dius.pact.model.Matching._
@@ -17,30 +19,30 @@ class MatchingSpec extends Specification {
       val config = DiffConfig()
 
       "Handle both None" in {
-        matchBody(Request("", "", emptyQuery, Some(Map("Content-Type" -> "a")), None, None),
-          Request("", "", emptyQuery, Some(Map("Content-Type" -> "a")), None, None), config) must beEmpty
+        matchBody(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a"))),
+          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a"))), config) must beEmpty
       }
 
       "Handle left None" in {
-        val expected = List(BodyMismatch(request.body, None))
-        matchBody(Request("", "", emptyQuery, Some(Map("Content-Type" -> "a")), request.body, None),
-          Request("", "", emptyQuery, Some(Map("Content-Type" -> "a")), None, None), config) must beEqualTo(expected)
+        val expected = List(BodyMismatch(request.getBody, None))
+        matchBody(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a")), request.getBody),
+          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a"))), config) must beEqualTo(expected)
       }
 
       "Handle right None" in {
-        matchBody(Request("", "", emptyQuery, Some(Map("Content-Type" -> "a")), None, None),
-          Request("", "", emptyQuery, Some(Map("Content-Type" -> "a")), request.body, None), config) must beEmpty
+        matchBody(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a"))),
+          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a")), request.getBody), config) must beEmpty
       }
 
       "Handle different mime types" in {
         val expected = List(BodyTypeMismatch("a", "b"))
-        matchBody(Request("", "", emptyQuery, Some(Map("Content-Type" -> "a")), request.body, None),
-          Request("", "", emptyQuery, Some(Map("Content-Type" -> "b")), request.body, None), config) must beEqualTo(expected)
+        matchBody(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a")), request.getBody),
+          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "b")), request.getBody), config) must beEqualTo(expected)
       }
 
       "match different mimetypes by regexp" in {
-        matchBody(Request("", "", emptyQuery, Some(Map("Content-Type" -> "application/x+json")), Some("{ \"name\":  \"bob\" }"), None),
-          Request("", "", emptyQuery, Some(Map("Content-Type" -> "application/x+json")), Some("{\"name\":\"bob\"}"), None), config) must beEmpty
+        matchBody(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/x+json")), "{ \"name\":  \"bob\" }"),
+          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/x+json")), "{\"name\":\"bob\"}"), config) must beEmpty
       }
 
     }
@@ -61,7 +63,7 @@ class MatchingSpec extends Specification {
 
     "Query Matching" should {
 
-      def query(queryString: String = "") = Request("", "", queryString, Map[String, String](), "", Map[String, Map[String, Any]]())
+      def query(queryString: String = "") = new Request("", "", PactReader.queryStringToMap(queryString), null, "", null)
 
       "match same"  in {
         matchQuery(query("a=b"), query("a=b")) must beEmpty
@@ -95,29 +97,29 @@ class MatchingSpec extends Specification {
     "Header Matching" should {
 
       "match empty" in {
-        matchHeaders(Request("", "", emptyQuery, None, None, None),
-          Request("", "", emptyQuery, None, None, None)) must beEmpty
+        matchHeaders(new Request("", "", emptyQuery),
+          new Request("", "", emptyQuery)) must beEmpty
       }
 
       "match same headers" in {
-        matchHeaders(Request("", "", emptyQuery, Some(Map("A" -> "B")), None, None),
-          Request("", "", emptyQuery, Some(Map("A" -> "B")), None, None)) must beEmpty
+        matchHeaders(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("A" -> "B"))),
+          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("A" -> "B")))) must beEmpty
       }
 
       "ignore additional headers" in {
-        matchHeaders(Request("", "", emptyQuery, Some(Map("A" -> "B")), None, None),
-          Request("", "", emptyQuery, Some(Map("A" -> "B", "C" -> "D")), None, None)) must beEmpty
+        matchHeaders(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("A" -> "B"))),
+          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("A" -> "B", "C" -> "D")))) must beEmpty
       }
 
       "complain about missing headers" in {
-        matchHeaders(Request("", "", emptyQuery, Some(Map("A" -> "B", "C" -> "D")), None, None),
-          Request("", "", emptyQuery, Some(Map("A" -> "B")), None, None)) must beEqualTo(List(
+        matchHeaders(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("A" -> "B", "C" -> "D"))),
+          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("A" -> "B")))) must beEqualTo(List(
           HeaderMismatch("C", "D", "", Some("Expected a header 'C' but was missing"))))
       }
 
       "complain about incorrect headers" in {
-        matchHeaders(Request("", "", emptyQuery, Some(Map("A" -> "B")), None, None),
-          Request("", "", emptyQuery, Some(Map("A" -> "C")), None, None)) must beEqualTo(List(
+        matchHeaders(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("A" -> "B"))),
+          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("A" -> "C")))) must beEqualTo(List(
           HeaderMismatch("A", "B", "C", Some("Expected header 'A' to have value 'B' but was 'C'"))))
       }
 

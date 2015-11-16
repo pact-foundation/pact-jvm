@@ -13,7 +13,7 @@ public abstract class DslPart {
 
     protected final DslPart parent;
     protected final String root;
-    protected Map<String, Object> matchers = new HashMap<String, Object>();
+    protected Map<String, Map<String, Object>> matchers = new HashMap<String, Map<String, Object>>();
 
     public DslPart(DslPart parent, String root) {
         this.parent = parent;
@@ -114,11 +114,11 @@ public abstract class DslPart {
      */
     public abstract DslPart closeObject();
 
-    public Map<String, Object> getMatchers() {
+    public Map<String, Map<String, Object>> getMatchers() {
         return matchers;
     }
 
-    public void setMatchers(Map<String, Object> matchers) {
+    public void setMatchers(Map<String, Map<String, Object>> matchers) {
         this.matchers = matchers;
     }
 

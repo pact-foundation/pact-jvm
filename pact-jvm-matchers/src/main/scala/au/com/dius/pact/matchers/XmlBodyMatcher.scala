@@ -1,17 +1,18 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.{BodyMismatchFactory, BodyMismatch, DiffConfig, HttpPart}
+import au.com.dius.pact.model._
 
 import scala.xml._
 
 class XmlBodyMatcher extends BodyMatcher {
 
   override def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig): List[BodyMismatch] = {
-    (expected.body, actual.body) match {
+    (Option.apply(expected.getBody), Option.apply(actual.getBody)) match {
       case (None, None) => List[BodyMismatch]()
       case (None, b) => List[BodyMismatch]()
       case (a, None) => List(BodyMismatch(a, None))
-      case (Some(a), Some(b)) => compare(Seq("$","body"), parse(a), parse(b), diffConfig, expected.matchers)
+      case (Some(a), Some(b)) => compare(Seq("$","body"), parse(a), parse(b), diffConfig,
+        Option.apply(CollectionUtils.javaMMapToScalaMMap(expected.getMatchingRules)))
     }
   }
 

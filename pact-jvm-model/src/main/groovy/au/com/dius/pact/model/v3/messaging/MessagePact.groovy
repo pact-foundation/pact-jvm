@@ -22,8 +22,8 @@ class MessagePact extends V3Pact {
 
     Map toMap() {
         [
-            consumer: [name: consumer.name()],
-            provider: [name: provider.name()],
+            consumer: [name: consumer.name],
+            provider: [name: provider.name],
             messages: messages*.toMap(),
             metadata: metadata
         ]

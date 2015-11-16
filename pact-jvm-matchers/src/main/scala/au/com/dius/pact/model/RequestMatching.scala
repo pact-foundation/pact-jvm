@@ -2,6 +2,8 @@ package au.com.dius.pact.model
 
 import com.typesafe.scalalogging.StrictLogging
 
+import scala.collection.JavaConversions
+
 case class RequestMatching(expectedInteractions: Seq[Interaction]) {
   import au.com.dius.pact.model.RequestMatching._
       
@@ -15,7 +17,7 @@ case class RequestMatching(expectedInteractions: Seq[Interaction]) {
   }
       
   def findResponse(actual: Request): Option[Response] = 
-    matchInteraction(actual).toOption.map(_.response)
+    matchInteraction(actual).toOption.map(_.getResponse)
 }
 
 object RequestMatching extends StrictLogging {
@@ -23,7 +25,8 @@ object RequestMatching extends StrictLogging {
 
   var diffConfig = DiffConfig(allowUnexpectedKeys = false, structural = false)
 
-  implicit def liftPactForMatching(pact: Pact): RequestMatching = RequestMatching(pact.interactions)
+  implicit def liftPactForMatching(pact: Pact): RequestMatching =
+    RequestMatching(JavaConversions.collectionAsScalaIterable(pact.getInteractions).toSeq)
                      
   def isPartialMatch(problems: Seq[RequestPartMismatch]): Boolean = !problems.exists {
     case PathMismatch(_,_,_) | MethodMismatch(_,_) => true
@@ -36,16 +39,17 @@ object RequestMatching extends StrictLogging {
     else RequestMismatch
     
   def compareRequest(expected: Interaction, actual: Request): RequestMatch = {
-    val mismatches: Seq[RequestPartMismatch] = requestMismatches(expected.request, actual)
+    val mismatches: Seq[RequestPartMismatch] = requestMismatches(expected.getRequest, actual)
     logger.debug("Request mismatch: " + mismatches)
     decideRequestMatch(expected, mismatches)
   }
                                               
   def requestMismatches(expected: Request, actual: Request): Seq[RequestPartMismatch] = {
-    (matchMethod(expected.method, actual.method) 
+    logger.debug("comparing to expected request: \n" + expected)
+    (matchMethod(expected.getMethod, actual.getMethod)
       ++ matchPath(expected, actual)
       ++ matchQuery(expected, actual)
-      ++ matchCookie(expected.cookie, actual.cookie)
+      ++ matchCookie(CollectionUtils.toOptionalList(expected.cookie), CollectionUtils.toOptionalList(actual.cookie))
       ++ matchRequestHeaders(expected, actual)
       ++ matchBody(expected, actual, diffConfig)).toSeq
   }
