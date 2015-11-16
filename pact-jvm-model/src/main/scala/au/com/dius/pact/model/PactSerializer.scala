@@ -3,9 +3,8 @@ package au.com.dius.pact.model
 import java.io.{InputStream, PrintWriter}
 import java.util.jar.JarInputStream
 
-import com.github.zafarkhaja.semver.Version
 import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
-import org.apache.http.client.utils.URLEncodedUtils
+import com.github.zafarkhaja.semver.Version
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization

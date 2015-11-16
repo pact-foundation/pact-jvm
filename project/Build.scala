@@ -14,6 +14,7 @@ object BuildSettings {
         crossScalaVersions := Seq("2.10.5", "2.11.7"),
 
         publishMavenStyle := true,
+        isSnapshot := true,
         // when playing around with a local install of nexus use this:
         //        credentials += Credentials("Sonatype Nexus Repository Manager", "localhost", "deployment", "admin123"),
         //	    publishTo := Some("releases" at "http://localhost:8081/nexus/content/repositories/releases/"),

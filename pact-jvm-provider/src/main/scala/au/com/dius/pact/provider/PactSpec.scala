@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.provider.configuration.PactConfiguration
 import org.scalatest.{Assertions, FreeSpec}
 import org.scalatest.exceptions.TestFailedException
 import au.com.dius.pact.model._
@@ -17,14 +18,14 @@ class PactSpec(config: PactConfiguration, pact: Pact)(implicit timeout: Duration
        |interaction "${interaction.description}"
        |in state: "${interaction.providerState.getOrElse("")}" """.stripMargin in {
 
-        val stateChangeFuture = (config.stateChangeUrl, interaction.providerState) match {
+        val stateChangeFuture = (Option.apply(config.getStateChangeUrl), interaction.providerState) match {
           case (Some(stateChangeUrl), Some(providerState)) => HttpClient.run(EnterStateRequest(stateChangeUrl.url, providerState))
           case (_, _) => Future.successful(Response(200, None, None, None))
         }
         
         val pactResponseFuture: Future[Response] = for {
           _ <- stateChangeFuture
-          response <- HttpClient.run(ServiceInvokeRequest(config.providerRoot.url, interaction.request))
+          response <- HttpClient.run(ServiceInvokeRequest(config.getProviderRoot.url, interaction.request))
         } yield response
 
         val actualResponse = Await.result(pactResponseFuture, timeout)

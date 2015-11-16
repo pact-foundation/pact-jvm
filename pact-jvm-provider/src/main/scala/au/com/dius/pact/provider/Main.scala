@@ -1,15 +1,14 @@
 package au.com.dius.pact.provider
 
 import au.com.dius.pact.model.Pact
+import au.com.dius.pact.provider.configuration.PactConfiguration
 import org.scalatest._
-import org.json4s.jackson.JsonMethods._
 import java.io.File
 
 object Main {
 
   def loadFiles(pactRoot: File, configFile: File) = {
-    implicit val formats = org.json4s.DefaultFormats
-    val config = parse(scala.io.Source.fromFile(configFile).mkString).extract[PactConfiguration]
+    val config = PactConfiguration.loadConfiguration(configFile)
     (config, PactFileSource.loadFiles(pactRoot))
   }
 
