@@ -1,5 +1,22 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.1.3 - JUnit provider test support + bugfixes
+
+* d6f4cbf - update changelog (Ronald Holshausen, Sat Nov 14 16:54:33 2015 +1100)
+* 32c095f - update readme with link to pact-jvm-provider-junit (Ronald Holshausen, Wed Nov 11 16:59:14 2015 +1100)
+* 2f1229a - add filter when loading pact files from a directory #177 (Ronald Holshausen, Wed Nov 11 10:47:52 2015 +1100)
+* ac5b13d - Merge pull request #181 from knok16/add_junit_pact_test_runner (Ronald Holshausen, Tue Nov 10 14:13:37 2015 +1100)
+* 8971375 - Add ability to play contract tests against provider service in JUnit fashionable way. (Veniamin Viflyantsev, Mon Nov 9 19:53:04 2015 +0300
+* 56611ce - fix for failing gradle plugin tests (Ronald Holshausen, Fri Nov 6 15:13:58 2015 +1100)
+* 12a3f33 - Revert "Adds groovy (indy) dependency to the main gradle.build" (Stefan Leszkiewicz, Fri Nov 6 14:26:39 2015 +1100)
+* cd83c88 - Adds groovy (indy) dependency to the main gradle.build (Stefan Leszkiewicz, Thu Nov 5 14:07:53 2015 +1100)
+* f32e845 - fix the time and date convenience functions in the groovy DSL (Ronald Holshausen, Thu Nov 5 13:38:39 2015 +1100)
+* 5843e35 - add basic auth to the pact broker client #176 (Ronald Holshausen, Thu Nov 5 13:31:31 2015 +1100)
+* be87cde - correct the javadoc on the @Pact annotation #175 (Ronald Holshausen, Thu Nov 5 09:14:28 2015 +1100)
+* b3137c5 - Update README.md (Stefan Leszkiewicz, Mon Nov 2 16:55:57 2015 +1100)
+* ef4772d - fix link in readme (Ronald Holshausen, Sat Oct 24 12:11:23 2015 +1100)
+* 2cd1c42 - bump version (Ronald Holshausen, Sat Oct 24 12:09:19 2015 +1100)
+
 # 2.3.3 - JUnit provider test support + bugfixes
 
 * 003d15f - JDK6 compatibility changes (Ronald Holshausen, Sat Nov 14 16:49:28 2015 +1100)

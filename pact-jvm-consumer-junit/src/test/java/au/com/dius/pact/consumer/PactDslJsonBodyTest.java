@@ -6,6 +6,13 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.model.PactFragment;
 
+import java.util.Map;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+
 public class PactDslJsonBodyTest extends ConsumerPactTest {
 
     @Override
@@ -14,7 +21,7 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
             .id()
             .object("2")
                 .id()
-                .stringValue("test", "A Test String")
+                .stringValue("test", null)
             .closeObject()
             .array("numbers")
                 .id()
@@ -61,10 +68,15 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
 
     @Override
     protected void runTest(String url) {
+        Map response;
         try {
-            new ConsumerClient(url).getAsMap("/", "");
+            response = new ConsumerClient(url).getAsMap("/", "");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
+        Map<String, Object> object2 = (Map<String, Object>) response.get("2");
+        assertThat(object2, hasKey("test"));
+        assertThat(object2.get("test"), is(nullValue()));
     }
 }

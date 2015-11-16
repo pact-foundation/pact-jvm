@@ -69,7 +69,11 @@ public class PactDslJsonBody extends DslPart {
      * @param value string value
      */
     public PactDslJsonBody stringValue(String name, String value) {
-        body.put(name, value);
+        if (value == null) {
+          body.put(name, JSONObject.NULL);
+        } else {
+          body.put(name, value);
+        }
         return this;
     }
 
@@ -591,6 +595,15 @@ public class PactDslJsonBody extends DslPart {
         }
         body.put(name, uuid);
         matchers.put(matcherKey(name), regexp(UUID_REGEX));
+        return this;
+    }
+
+    /**
+     * Sets the field to a null value
+     * @param fieldName field name
+     */
+    public PactDslJsonBody nullValue(String fieldName) {
+        body.put(fieldName, JSONObject.NULL);
         return this;
     }
 }

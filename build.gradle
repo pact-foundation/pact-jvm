@@ -46,14 +46,11 @@ subprojects {
     dependencies {
       if (project.hasProperty('scalaVersion')) {
           compile 'org.slf4j:slf4j-api:1.7.7', "org.scala-lang:scala-library:${project.scalaFullVersion}",
-                  "org.json4s:json4s-native_${project.scalaVersion}:$json4sVersion",
-                  "org.json4s:json4s-jackson_${project.scalaVersion}:$json4sVersion"
+            "org.scala-lang:scala-compiler:${project.scalaFullVersion}",
+            "org.json4s:json4s-native_${project.scalaVersion}:$json4sVersion",
+            "org.json4s:json4s-jackson_${project.scalaVersion}:$json4sVersion"
 
           testCompile "org.specs2:specs2-core_${project.scalaVersion}:3.6.4", "org.specs2:specs2-junit_${project.scalaVersion}:3.6.4"
-
-          if (project.scalaVersion == '2.11') {
-              compile "org.scala-lang.modules:scala-xml_2.11:1.0.2"
-          }
       }
 
       testCompile 'org.hamcrest:hamcrest-all:1.3', 'org.mockito:mockito-core:1.9.5', 'junit:junit:4.12'

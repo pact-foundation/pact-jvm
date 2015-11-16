@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -10,6 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 
@@ -88,5 +91,31 @@ public class PactDslJsonBodyTest {
 
         assertThat(((JSONObject) body.getBody()).keySet(), is(equalTo((Set)
                 new HashSet(Arrays.asList("ids")))));
+    }
+
+    @Test
+    public void allowSettingFieldsToNull() {
+        DslPart body = new PactDslJsonBody()
+          .id()
+          .object("2")
+            .id()
+            .stringValue("test", null)
+            .nullValue("nullValue")
+          .closeObject()
+          .array("numbers")
+            .id()
+            .nullValue()
+            .stringValue(null)
+          .closeArray();
+
+        JSONObject jsonObject = (JSONObject) body.getBody();
+        assertThat(jsonObject.keySet(), is(equalTo((Set) new HashSet(Arrays.asList("2", "numbers", "id")))));
+
+        assertThat(jsonObject.getJSONObject("2").get("test"), is(JSONObject.NULL));
+        JSONArray numbers = jsonObject.getJSONArray("numbers");
+        assertThat(numbers.length(), is(3));
+        assertThat(numbers.get(0), is(notNullValue()));
+        assertThat(numbers.get(1), is(JSONObject.NULL));
+        assertThat(numbers.get(2), is(JSONObject.NULL));
     }
 }
