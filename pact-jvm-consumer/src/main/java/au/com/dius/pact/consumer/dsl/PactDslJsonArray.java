@@ -6,6 +6,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.UUID;
@@ -127,7 +128,11 @@ public class PactDslJsonArray extends DslPart {
      * @param value string value
      */
     public PactDslJsonArray stringValue(String value) {
+      if (value == null) {
+        body.put(JSONObject.NULL);
+      } else {
         body.put(value);
+      }
         return this;
     }
 
@@ -546,4 +551,12 @@ public class PactDslJsonArray extends DslPart {
         parent.matchers.put("", parent.matchMax(maxSize));
         return new PactDslJsonBody(".", parent);
     }
+
+  /**
+   * Adds a null value to the list
+   */
+  public PactDslJsonArray nullValue() {
+    body.put(JSONObject.NULL);
+    return this;
+  }
 }
