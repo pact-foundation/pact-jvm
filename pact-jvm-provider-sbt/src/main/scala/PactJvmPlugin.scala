@@ -1,4 +1,4 @@
-import au.com.dius.pact.provider.Main
+import au.com.dius.pact.provider.sbtsupport.Main
 import sbt._
 
 object PactJvmPlugin extends Plugin {

@@ -1,10 +1,4 @@
 {
-    "providerRoot": {
-        "protocol": "http",
-        "host": "localhost",
-        "port": 8888,
-        "path": ""
-    },
     "stateChangeUrl": {
         "protocol": "http",
         "host": "localhost",

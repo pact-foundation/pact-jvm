@@ -1,10 +1,11 @@
-package au.com.dius.pact.provider
+package au.com.dius.pact.provider.sbtsupport
 
-import java.net.URL
-import org.specs2.mutable.Specification
 import java.io.File
+import java.net.URL
 
+import au.com.dius.pact.provider.TestService
 import org.junit.runner.RunWith
+import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 import unfiltered.netty.Server
 

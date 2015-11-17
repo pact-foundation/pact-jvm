@@ -1,13 +1,15 @@
-package au.com.dius.pact.provider
+package au.com.dius.pact.provider.sbtsupport
 
-import au.com.dius.pact.provider.configuration.PactConfiguration
-import org.scalatest.{Assertions, FreeSpec}
-import org.scalatest.exceptions.TestFailedException
+import java.util.concurrent.Executors
+
 import au.com.dius.pact.model._
 import au.com.dius.pact.model.dispatch.HttpClient
-import scala.concurrent.{ExecutionContext, Await, Future}
+import au.com.dius.pact.provider.{EnterStateRequest, ServiceInvokeRequest}
+import org.scalatest.exceptions.TestFailedException
+import org.scalatest.{Assertions, FreeSpec}
+
 import scala.concurrent.duration._
-import java.util.concurrent.Executors
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class PactSpec(config: PactConfiguration, pact: Pact)(implicit timeout: Duration = 10.seconds) extends FreeSpec with Assertions {
   implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool)

@@ -1,9 +1,10 @@
-package au.com.dius.pact.provider
+package au.com.dius.pact.provider.sbtsupport
+
+import java.io.File
 
 import au.com.dius.pact.model.Pact
-import au.com.dius.pact.provider.configuration.PactConfiguration
+import au.com.dius.pact.provider.PactFileSource
 import org.scalatest._
-import java.io.File
 
 object Main {
 
