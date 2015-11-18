@@ -2,18 +2,19 @@ package au.com.dius.pact.matchers
 
 import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.model._
-import org.json4s.{JObject, JArray, JValue, DefaultFormats}
 import org.json4s.jackson.JsonMethods._
+import org.json4s.{DefaultFormats, JArray, JObject}
 
 class JsonBodyMatcher extends BodyMatcher with StrictLogging {
   implicit lazy val formats = DefaultFormats
 
   def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig): List[BodyMismatch] = {
-    (expected.body, actual.body) match {
+    (Option.apply(expected.getBody), Option.apply(actual.getBody)) match {
       case (None, None) => List()
       case (None, b) => List()
       case (a, None) => List(BodyMismatch(a, None))
-      case (Some(a), Some(b)) => compare(Seq("$", "body"), parse(a), parse(b), diffConfig, expected.matchers)
+      case (Some(a), Some(b)) => compare(Seq("$", "body"), parse(a), parse(b), diffConfig,
+        Option.apply(CollectionUtils.javaMMapToScalaMMap(expected.getMatchingRules)))
     }
   }
 

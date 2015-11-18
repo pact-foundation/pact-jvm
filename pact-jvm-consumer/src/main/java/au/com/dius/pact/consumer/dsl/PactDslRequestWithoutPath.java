@@ -20,7 +20,7 @@ public class PactDslRequestWithoutPath {
     private Map<String, String> requestHeaders = new HashMap<String, String>();
     private String query;
     private String requestBody;
-    private Map<String, Object> requestMatchers = new HashMap<String, Object>();
+    private Map<String, Map<String, Object>> requestMatchers = new HashMap<String, Map<String, Object>>();
     private String consumerName;
     private String providerName;
 
@@ -113,7 +113,7 @@ public class PactDslRequestWithoutPath {
      * @param body Built using the Pact body DSL
      */
     public PactDslRequestWithoutPath body(DslPart body) {
-        requestMatchers = new HashMap<String, Object>();
+        requestMatchers = new HashMap<String, Map<String, Object>>();
         for (String matcherName : body.matchers.keySet()) {
             requestMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
         }
@@ -163,7 +163,7 @@ public class PactDslRequestWithoutPath {
      * @param pathRegex regular expression to use to match paths
      */
     public PactDslRequestWithPath matchPath(String pathRegex, String path) {
-        HashMap<String, String> matcher = new HashMap<String, String>();
+        HashMap<String, Object> matcher = new HashMap<String, Object>();
         matcher.put("regex", pathRegex);
         requestMatchers.put("$.path", matcher);
         return new PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state, description, path,

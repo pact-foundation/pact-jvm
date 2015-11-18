@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer
 
 import au.com.dius.pact.model._
-
+import org.apache.commons.lang3.StringEscapeUtils
 
 object PactSessionResults {
   val empty = PactSessionResults(Nil, Nil, Nil, Nil)
@@ -21,23 +21,31 @@ case class PactSessionResults(
   def allMatched: Boolean = missing.isEmpty && unexpected.isEmpty
 }
 
-
-
 object PactSession {
+  import scala.collection.JavaConversions._
+
   val empty = PactSession(Seq(), PactSessionResults.empty)
   
-  def forPact(pact: Pact) = PactSession(pact.interactions, PactSessionResults.empty)
+  def forPact(pact: Pact) = PactSession(pact.getInteractions, PactSessionResults.empty)
 }
 
 case class PactSession(expected: Seq[Interaction], results: PactSessionResults) {
+  import scala.collection.JavaConversions._
   private def matcher = RequestMatching(expected.toSeq)
-  
+
+  val CrossSiteHeaders = Map[String, String]("Access-Control-Allow-Origin" -> "*")
+
+  def invalidRequest(req: Request) = {
+    val headers: Map[String, String] = CrossSiteHeaders ++ Map("Content-Type" -> "application/json", "X-Pact-Unexpected-Request" -> "1")
+    new Response(500, headers, "{ \"error\": \"Unexpected request : " + StringEscapeUtils.escapeJson(req.toString) + "\" }")
+  }
+
   def receiveRequest(req: Request): (Response, PactSession) = {
-    val invalidResponse = Response.invalidRequest(req)
+    val invalidResponse = invalidRequest(req)
     
     matcher.matchInteraction(req) match {
       case FullRequestMatch(inter) => 
-        (inter.response, recordMatched(inter))
+        (inter.getResponse, recordMatched(inter))
         
       case p @ PartialRequestMatch(problems) => 
         (invalidResponse, recordAlmostMatched(p))

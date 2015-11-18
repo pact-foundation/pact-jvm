@@ -1,10 +1,11 @@
 package au.com.dius.pact.consumer.specs2
 
-import au.com.dius.pact.model._
-
-import scala.concurrent.{ExecutionContext, Future}
-import au.com.dius.pact.model.dispatch.HttpClient
 import java.util.concurrent.Executors
+
+import au.com.dius.pact.model.Request
+
+import scala.collection.JavaConversions
+import scala.concurrent.{ExecutionContext, Future}
 
 case class ConsumerService(serverUrl: String) {
   import Fixtures._
@@ -22,22 +23,23 @@ case class ConsumerService(serverUrl: String) {
     result.head
   }
 
-  def extractResponseTest(path: String = request.path): Future[Boolean] = {
-    HttpClient.run(request.copy(path = s"$serverUrl$path")).map { response =>
-      response.status == 200 &&
-      response.body.map(extractFrom).get
+  def extractResponseTest(path: String = request.getPath): Future[Boolean] = {
+    val r = request.copy()
+    r.setPath(s"$serverUrl$path")
+    HttpClient.run(r).map { response =>
+      response.getStatus == 200 && extractFrom(response.getBody)
     }
   }
 
-  def simpleGet(path: String): Future[(Int, Option[String])] = {
-    HttpClient.run(Request("GET", serverUrl + path, None, None, None, None)).map { response =>
-      (response.status, response.body)
+  def simpleGet(path: String): Future[(Int, String)] = {
+    HttpClient.run(new Request("GET", serverUrl + path)).map { response =>
+      (response.getStatus, response.getBody)
     }
   }
 
-  def options(path: String): Future[(Int, Option[String], Option[Map[String, String]])] = {
-    HttpClient.run(Request("OPTION", serverUrl + path, None, None, None, None)).map { response =>
-      (response.status, response.body, response.headers)
+  def options(path: String): Future[(Int, String, Map[String, String])] = {
+    HttpClient.run(new Request("OPTION", serverUrl + path)).map { response =>
+      (response.getStatus, response.getBody, JavaConversions.mapAsScalaMap(response.getHeaders).toMap)
     }
   }
 }

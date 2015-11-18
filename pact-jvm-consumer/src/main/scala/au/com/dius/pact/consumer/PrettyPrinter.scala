@@ -67,7 +67,7 @@ object PrettyPrinter {
     if(missing.isEmpty) {
       ""
     } else {
-      s"missing:\n ${missing.map(_.request).mkString("\n")}"
+      s"missing:\n ${missing.map(_.getRequest).mkString("\n")}"
     }
   }
 

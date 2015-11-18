@@ -1,5 +1,6 @@
 package au.com.dius.pact.model.v3
 
+import au.com.dius.pact.model.BasePact
 import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.InvalidPactException
 import au.com.dius.pact.model.Provider
@@ -17,7 +18,7 @@ import java.util.jar.JarInputStream
 @Slf4j
 @ToString
 @EqualsAndHashCode(excludes = ['metadata'])
-abstract class V3Pact {
+abstract class V3Pact extends BasePact {
     private static final Map DEFAULT_METADATA = [
         'pact-specification': ['version': '3.0.0'],
         'pact-jvm': ['version': lookupVersion()]
@@ -83,7 +84,7 @@ abstract class V3Pact {
     }
 
     protected File fileForPact(String pactDir) {
-        new File(pactDir, "${consumer.name()}-${provider.name()}.json")
+        new File(pactDir, "${consumer.name}-${provider.name}.json")
     }
 
     abstract Map toMap()

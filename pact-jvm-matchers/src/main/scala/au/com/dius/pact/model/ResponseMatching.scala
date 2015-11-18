@@ -14,7 +14,7 @@ class ResponseMatching(val providerDiffConfig: DiffConfig) {
     else ResponseMismatch
   
   def responseMismatches(expected: Response, actual: Response): Seq[ResponsePartMismatch] = {
-    (matchStatus(expected.status, actual.status) 
+    (matchStatus(expected.getStatus, actual.getStatus)
       ++ matchHeaders(expected, actual)
       ++ matchBody(expected, actual, providerDiffConfig)).toSeq
   }

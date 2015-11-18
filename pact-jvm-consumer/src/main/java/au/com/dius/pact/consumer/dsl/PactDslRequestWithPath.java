@@ -28,7 +28,7 @@ public class PactDslRequestWithPath {
     Map<String, String> requestHeaders = new HashMap<String, String>();
     String query;
     String requestBody;
-    Map<String, Object> requestMatchers = new HashMap<String, Object>();
+    Map<String, Map<String, Object>> requestMatchers = new HashMap<String, Map<String, Object>>();
 
     public PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
                                   String consumerName,
@@ -40,7 +40,7 @@ public class PactDslRequestWithPath {
                                   Map<String, String> requestHeaders,
                                   String query,
                                   String requestBody,
-                                  Map<String, Object> requestMatchers) {
+                                  Map<String, Map<String, Object>> requestMatchers) {
         this.consumerPactBuilder = consumerPactBuilder;
         this.requestMatchers = requestMatchers;
         this.consumer = new Consumer(consumerName);
@@ -195,7 +195,7 @@ public class PactDslRequestWithPath {
      * @param pathRegex regular expression to use to match paths
      */
     public PactDslRequestWithPath matchPath(String pathRegex, String path) {
-        HashMap<String, String> matcher = new HashMap<String, String>();
+        HashMap<String, Object> matcher = new HashMap<String, Object>();
         matcher.put("regex", pathRegex);
         requestMatchers.put("$.path", matcher);
         this.path = path;
@@ -220,7 +220,7 @@ public class PactDslRequestWithPath {
      * @param headerExample Example value to use
      */
     public PactDslRequestWithPath matchHeader(String header, String regex, String headerExample) {
-        HashMap<String, String> matcher = new HashMap<String, String>();
+        HashMap<String, Object> matcher = new HashMap<String, Object>();
         matcher.put("regex", regex);
         requestMatchers.put("$.headers." + header, matcher);
         requestHeaders.put(header, headerExample);

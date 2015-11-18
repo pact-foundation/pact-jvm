@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.collection.JavaConversions$;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,9 +12,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -28,15 +27,12 @@ public class MatcherTestUtils {
     }
 
     public static void assertResponseMatcherKeysEqualTo(PactFragment fragment, String... matcherKeys) {
-        scala.collection.immutable.Map<String, scala.collection.immutable.Map<String, String>> scalaMap
-            = fragment.interactions().head().response().matchers().get();
-        Map<String, scala.collection.immutable.Map<String, String>> matchers =
-            JavaConversions$.MODULE$.mapAsJavaMap(scalaMap);
+        Map<String, Map<String, Object>> matchers = fragment.interactions().head().getResponse().getMatchingRules();
         assertEquals(asSet(matcherKeys), new TreeSet<String>(matchers.keySet()));
     }
 
     public static void assertResponseKeysEqualTo(PactFragment fragment, String... keys) {
-        String body = fragment.interactions().head().response().body().get();
+        String body = fragment.interactions().head().getResponse().getBody();
         Map hashMap = null;
         try {
             hashMap = new ObjectMapper().readValue(body, HashMap.class);

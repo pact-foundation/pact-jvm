@@ -1,11 +1,9 @@
 package au.com.dius.pact.consumer
 
-import java.io.{File, PrintWriter}
+import java.io.{PrintWriter, File}
 
-import au.com.dius.pact.model.{PactConfig, PactSerializer, Pact}
-import Pact.{MergeSuccess, MergeConflict}
-import PactGenerator._
 import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
+import au.com.dius.pact.model._
 
 /**
  * Globally accumulates Pacts, merges by destination file, and allows writing to File.
@@ -21,8 +19,7 @@ import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
  */
 object PactGenerator {
 
-  def defaultFilename(pact: Pact): String =
-    s"${pact.consumer.name}-${pact.provider.name}.json"
+  def defaultFilename(pact: Pact): String = s"${pact.getConsumer.getName}-${pact.getProvider.getName}.json"
 
   def destinationFileForPact(pact: Pact): File = destinationFile(defaultFilename(pact))
   def destinationFile(filename: String): File = new File(s"${PactConsumerConfig.pactRootDir}/$filename")
@@ -49,8 +46,8 @@ case class PactGenerator(pacts: Map[String, Pact], conflicts: List[MergeConflict
     def directlyAddPact(p: Pact) = 
       PactGenerator(pacts + (pactFileName -> p), conflicts)
 
-    existingPact.fold(directlyAddPact(pact)) { existing => 
-      pact.merge(existing) match {
+    existingPact.fold(directlyAddPact(pact)) { existing =>
+      PactMerge.merge(pact, existing) match {
         case MergeSuccess(merged) => directlyAddPact(merged)
         case c @ MergeConflict(_) => PactGenerator(pacts, c :: conflicts)
       }
@@ -63,9 +60,9 @@ case class PactGenerator(pacts: Map[String, Pact], conflicts: List[MergeConflict
     
     def writeToFile(pact: Pact, filename: String): Unit = {
       val file = destinationFileForPact(pact)
-      logger.debug(s"Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file $file")
+      logger.debug(s"Writing pact ${pact.getConsumer.getName} -> ${pact.getProvider.getName} to file $file")
       val writer = new PrintWriter(file)
-      try PactSerializer.serialize(pact.sortInteractions, writer, config)
+      try PactWriter.writePact(pact, writer, config.pactVersion)
       finally writer.close()
     }
     require(!isEmpty, "Cannot write to file; no pacts have been recorded")

@@ -1,9 +1,11 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.matchers._
 import au.com.dius.pact.model.RequestPartMismatch._
 import au.com.dius.pact.model.ResponsePartMismatch._
 
+import scala.collection.JavaConversions
 import scala.collection.immutable.TreeMap
 
 trait SharedMismatch {
@@ -78,7 +80,9 @@ object QueryMismatchFactory extends MismatchFactory[QueryMismatch] {
   }
 }
 
-object Matching {
+object Matching extends StrictLogging {
+
+  import JavaConversions._
   
   def matchHeaders(expected: Option[Headers], actual: Option[Headers], matchers: Option[Map[String, Map[String, Any]]]): Seq[HeaderMismatch] = {
 
@@ -104,12 +108,42 @@ object Matching {
     compareHeaders(sortedOrEmpty(expected), sortedOrEmpty(actual))
   }
 
+  def javaMapToScalaMap(map: java.util.Map[String, String]) : Option[Map[String, String]] = {
+    if (map == null) {
+      None
+    } else {
+      Some(JavaConversions.mapAsScalaMap(map).toMap)
+    }
+  }
+
+  def javaMapToScalaMap2(map: java.util.Map[String, java.util.Map[String, AnyRef]]) : Option[Map[String, Map[String, Any]]] = {
+    if (map == null) {
+      None
+    } else {
+      Some(JavaConversions.mapAsScalaMap(map).mapValues {
+          case jmap: java.util.Map[String, _] => JavaConversions.mapAsScalaMap(jmap).toMap
+        }.toMap)
+    }
+  }
+
+  def javaMapToScalaMap3(map: java.util.Map[String, java.util.List[String]]) : Option[Map[String, List[String]]] = {
+    if (map == null) {
+      None
+    } else {
+      Some(JavaConversions.mapAsScalaMap(map).mapValues {
+        case jlist: java.util.List[String] => JavaConversions.collectionAsScalaIterable(jlist).toList
+      }.toMap)
+    }
+  }
+
   def matchRequestHeaders(expected: Request, actual: Request) = {
-    matchHeaders(expected.headersWithoutCookie, actual.headersWithoutCookie, expected.matchers)
+    matchHeaders(javaMapToScalaMap(expected.headersWithoutCookie), javaMapToScalaMap(actual.headersWithoutCookie),
+      javaMapToScalaMap2(expected.getMatchingRules))
   }
 
   def matchHeaders(expected: HttpPart, actual: HttpPart) : Seq[HeaderMismatch] = {
-    matchHeaders(expected.headers, actual.headers, expected.matchers)
+    matchHeaders(javaMapToScalaMap(expected.getHeaders), javaMapToScalaMap(actual.getHeaders),
+      javaMapToScalaMap2(expected.getMatchingRules))
   }
 
   def matchCookie(expected: Option[Cookies], actual: Option[Cookies]): Option[CookieMismatch] = {
@@ -129,30 +163,33 @@ object Matching {
     if (expected.mimeType == actual.mimeType) {
       val result = MatchingConfig.bodyMatchers.find(entry => actual.mimeType.matches(entry._1))
       if (result.isDefined) {
+        logger.debug("Found a matcher for " + actual.mimeType + " -> " + result)
         result.get._2.matchBody(expected, actual, diffConfig)
       } else {
-        (expected.body, actual.body) match {
+        logger.debug("No matcher for " + actual.mimeType + ", using equality")
+        (Option.apply(expected.getBody), Option.apply(actual.getBody)) match {
           case (None, _) => List()
           case (a, None) => List(BodyMismatch(a, None))
           case (a, b) => if (a == b) List() else List(BodyMismatch(a, b))
         }
       }
     } else {
-      if (expected.body.isEmpty) List()
+      if (expected.getBody == null || expected.getBody.isEmpty) List()
       else List(BodyTypeMismatch(expected.mimeType, actual.mimeType))
     }
   }
 
   def matchPath(expected: Request, actual: Request): Option[PathMismatch] = {
     val pathFilter = "http[s]*://([^/]*)"
-    val replacedActual = actual.path.replaceFirst(pathFilter, "")
-    if (Matchers.matcherDefined(Seq("$", "path"), expected.matchers)) {
-      val mismatch = Matchers.domatch[PathMismatch](expected.matchers, Seq("$", "path"), expected.path,
+    val replacedActual = actual.getPath.replaceFirst(pathFilter, "")
+    val matchers: Option[Map[String, Map[String, Any]]] = javaMapToScalaMap2(expected.getMatchingRules)
+    if (Matchers.matcherDefined(Seq("$", "path"), matchers)) {
+      val mismatch = Matchers.domatch[PathMismatch](matchers, Seq("$", "path"), expected.getPath,
         replacedActual, PathMismatchFactory)
       mismatch.headOption
     }
-    else if(expected.path == replacedActual || replacedActual.matches(expected.path)) None
-    else Some(PathMismatch(expected.path, replacedActual))
+    else if(expected.getPath == replacedActual || replacedActual.matches(expected.getPath)) None
+    else Some(PathMismatch(expected.getPath, replacedActual))
   }
   
   def matchStatus(expected: Int, actual: Int): Option[StatusMismatch] = {
@@ -161,14 +198,14 @@ object Matching {
   }
 
   def matchQuery(expected: Request, actual: Request) = {
-    expected.query.getOrElse(Map()).foldLeft(Seq[QueryMismatch]()) {
-      (seq, values) => actual.query.getOrElse(Map()).get(values._1) match {
-        case Some(value) => seq ++ QueryMatcher.compareQuery(values._1, values._2, value, expected.matchingRules)
+    javaMapToScalaMap3(expected.getQuery).getOrElse(Map()).foldLeft(Seq[QueryMismatch]()) {
+      (seq, values) => javaMapToScalaMap3(actual.getQuery).getOrElse(Map()).get(values._1) match {
+        case Some(value) => seq ++ QueryMatcher.compareQuery(values._1, values._2, value, javaMapToScalaMap2(expected.getMatchingRules))
         case None => seq :+ QueryMismatch(values._1, values._2.mkString(","), "",
           Some(s"Expected query parameter '${values._1}' but was missing"), Seq("$", "query", values._1).mkString("."))
       }
-    } ++ actual.query.getOrElse(Map()).foldLeft(Seq[QueryMismatch]()) {
-      (seq, values) => expected.query.getOrElse(Map()).get(values._1) match {
+    } ++ javaMapToScalaMap3(actual.getQuery).getOrElse(Map()).foldLeft(Seq[QueryMismatch]()) {
+      (seq, values) => javaMapToScalaMap3(expected.getQuery).getOrElse(Map()).get(values._1) match {
         case Some(value) => seq
         case None => seq :+ QueryMismatch(values._1, "", values._2.mkString(","),
           Some(s"Unexpected query parameter '${values._1}' received"), Seq("$", "query", values._1).mkString("."))

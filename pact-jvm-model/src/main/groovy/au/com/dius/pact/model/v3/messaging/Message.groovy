@@ -1,8 +1,7 @@
 package au.com.dius.pact.model.v3.messaging
 
 import au.com.dius.pact.model.HttpPart
-@SuppressWarnings('UnusedImport')
-import au.com.dius.pact.model.Response$
+import au.com.dius.pact.model.Response
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
@@ -54,7 +53,6 @@ class Message {
   }
 
   HttpPart asPactRequest() {
-    Response$.MODULE$.apply(200, ['Content-Type': contentType], contents ? JsonOutput.toJson(contents) : null,
-      matchingRules)
+    new Response(200, ['Content-Type': contentType], contents ? JsonOutput.toJson(contents) : null, matchingRules)
   }
 }

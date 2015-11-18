@@ -5,8 +5,8 @@ import au.com.dius.pact.consumer._
 case class PactFragment(consumer: Consumer,
                         provider: Provider,
                         interactions: Seq[Interaction]) {
-  
-  def toPact: Pact = Pact(provider, consumer, interactions)
+  import scala.collection.JavaConversions._
+  def toPact: Pact = new Pact(provider, consumer, interactions)
 
   def duringConsumerSpec[T](config: MockProviderConfig)(test: => T, verification: ConsumerTestVerification[T]): VerificationResult = {
     val server = DefaultMockProvider(config)
@@ -15,7 +15,7 @@ case class PactFragment(consumer: Consumer,
 
   //TODO: it would be a good idea to ensure that all interactions in the fragment have the same state
   //      really? why?
-  def defaultState: Option[String] = interactions.headOption.map(_.providerState).get
+  def defaultState: Option[String] = interactions.headOption.map(_.getProviderState)
 
   def runConsumer(config: MockProviderConfig, test: TestRun): VerificationResult = {
     duringConsumerSpec(config)(test.run(config), (u:Unit) => None)
@@ -24,6 +24,6 @@ case class PactFragment(consumer: Consumer,
 
 object PactFragment {
   def consumer(consumer: String) = {
-    PactFragmentBuilder.apply(Consumer(consumer))
+    PactFragmentBuilder.apply(new Consumer(consumer))
   }
 }
