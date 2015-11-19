@@ -1,10 +1,9 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.model._
-import au.com.dius.pact.model.Interaction
-import scala.Some
+import au.com.dius.pact.model.{Interaction, _}
 import difflib.DiffUtils
-import org.json4s.JValue
+
+import scala.Some
 
 object PrettyPrinter {
   //TODO: allow configurable context lines

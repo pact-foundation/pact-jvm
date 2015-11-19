@@ -16,4 +16,15 @@ class Response implements HttpPart {
   String toString() {
     "\tstatus: $status \n\theaders: $headers \n\tmatchers: $matchingRules \n\tbody: $body"
   }
+
+  Response copy() {
+    def r = this;
+    new Response().with {
+      status = r.status
+      headers = r.headers
+      body = r.body
+      matchingRules = r.matchingRules
+      it
+    }
+  }
 }

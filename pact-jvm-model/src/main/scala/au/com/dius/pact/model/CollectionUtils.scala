@@ -4,15 +4,23 @@ import scala.collection.JavaConversions
 
 object CollectionUtils {
   def javaMMapToScalaMMap(map: java.util.Map[String, java.util.Map[String, AnyRef]]) : Map[String, Map[String, Any]] = {
-    JavaConversions.mapAsScalaMap(map).mapValues {
-      case jmap: java.util.Map[String, _] => JavaConversions.mapAsScalaMap(jmap).toMap
-    }.toMap
+    if (map != null) {
+      JavaConversions.mapAsScalaMap(map).mapValues {
+        case jmap: java.util.Map[String, _] => JavaConversions.mapAsScalaMap(jmap).toMap
+      }.toMap
+    } else {
+      Map()
+    }
   }
 
   def javaLMapToScalaLMap(map: java.util.Map[String, java.util.List[String]]) : Map[String, List[String]] = {
-    JavaConversions.mapAsScalaMap(map).mapValues {
-      case jlist: java.util.List[String] => JavaConversions.collectionAsScalaIterable(jlist).toList
-    }.toMap
+    if (map != null) {
+      JavaConversions.mapAsScalaMap(map).mapValues {
+        case jlist: java.util.List[String] => JavaConversions.collectionAsScalaIterable(jlist).toList
+      }.toMap
+    } else {
+      Map()
+    }
   }
 
   def scalaMMapToJavaMMap(map: Map[String, Map[String, AnyRef]]) : java.util.Map[String, java.util.Map[String, AnyRef]] = {

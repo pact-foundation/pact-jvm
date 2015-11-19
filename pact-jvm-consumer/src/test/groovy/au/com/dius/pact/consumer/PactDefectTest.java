@@ -59,7 +59,7 @@ public class PactDefectTest {
             .uponReceiving("Ping with " + contentType)
             .path(path)
             .method(method)
-            .body(requestBody)
+            .body(requestBody, contentType)
             .willRespondWith()
             .status(200)
             .body(expectedResponseBody)

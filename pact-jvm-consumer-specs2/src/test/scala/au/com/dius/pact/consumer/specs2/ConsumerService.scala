@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.specs2
 
 import java.util.concurrent.Executors
 
+import au.com.dius.pact.consumer.dispatch.HttpClient
 import au.com.dius.pact.model.Request
 
 import scala.collection.JavaConversions
@@ -12,15 +13,7 @@ case class ConsumerService(serverUrl: String) {
   implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool)
 
   private def extractFrom(body: String): Boolean = {
-    import org.json4s._
-    import org.json4s.jackson.JsonMethods._
-
-    val result:List[Boolean] = for {
-      JObject(child) <- parse(body)
-      JField("responsetest", JBool(value)) <- child
-    } yield value
-
-    result.head
+    body == "{\"responsetest\": true}"
   }
 
   def extractResponseTest(path: String = request.getPath): Future[Boolean] = {

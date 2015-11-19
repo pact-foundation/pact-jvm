@@ -1,15 +1,10 @@
 package au.com.dius.pact.consumer
 
+import au.com.dius.pact.consumer.Fixtures._
+import au.com.dius.pact.model.{BodyMismatch, HeaderMismatch, PathMismatch, _}
+import org.json4s.jackson.JsonMethods._
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
-import au.com.dius.pact.model._
-import Fixtures._
-import au.com.dius.pact.model.PathMismatch
-import au.com.dius.pact.model.HeaderMismatch
-import org.json4s.jackson.JsonMethods._
-import au.com.dius.pact.model.PathMismatch
-import au.com.dius.pact.model.BodyMismatch
-import au.com.dius.pact.model.HeaderMismatch
 import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
