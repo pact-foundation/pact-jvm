@@ -66,8 +66,8 @@ class PactWriter {
 
   static Map requestToMap(Request request, PactSpecVersion pactSpecVersion) {
     def map = [
-      method       : request.method.toUpperCase(),
-      path         : request.path
+      method: request.method.toUpperCase(),
+      path: request.path
     ]
     if (request.headers) {
       map.headers = request.headers
@@ -85,15 +85,13 @@ class PactWriter {
   }
 
   static String mapToQueryStr(Map<String, List<String>> query) {
-    query.collect { k, v -> v.collect { "$k=$it" } }.flatten().join('&')
+    query.collectMany { k, v -> v.collect { "$k=$it" } }.join('&')
   }
 
   private static Map metaData(String version) {
     [
-      'pact-specification': [
-        version   : version,
-        'pact-jvm': [version: lookupVersion()]
-      ]
+      'pact-specification': [version: version],
+      'pact-jvm': [version: lookupVersion()]
     ]
   }
 
@@ -103,16 +101,15 @@ class PactWriter {
       def openStream = url.openStream()
       try {
         def jarStream = new JarInputStream(openStream)
-        def attributes = jarStream.manifest.mainAttributes
-        attributes.getValue("Implementation-Version")
+        jarStream.manifest?.mainAttributes?.getValue('Implementation-Version') ?: ''
       } catch (e) {
         log.warn('Could not load pact-jvm manifest', e)
-        ""
+        ''
       } finally {
         openStream.close()
       }
     } else {
-      ""
+      ''
     }
   }
 
@@ -132,7 +129,7 @@ class PactWriter {
         if (v instanceof Map) {
           [k, convertToMap(v)]
         } else if (v instanceof Collection) {
-          [k, v.collect { convertToMap(v) }]
+          [k, v.collect { convertToMap(v) } ]
         } else {
           [k, v]
         }

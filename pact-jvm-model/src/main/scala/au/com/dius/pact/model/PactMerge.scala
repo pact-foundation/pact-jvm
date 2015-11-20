@@ -19,15 +19,11 @@ object PactMerge {
 
     if (failures.isEmpty) {
       val mergedInteractions = interactions ++ otherInteractions.filterNot(interactions.contains)
-      MergeSuccess(new Pact(existing.getProvider, existing.getConsumer, JavaConversions.seqAsJavaList(mergedInteractions)))
+      val result: Pact = new Pact(existing.getProvider, existing.getConsumer, JavaConversions.seqAsJavaList(mergedInteractions))
+      result.sortInteractions()
+      MergeSuccess(result)
     } else {
       MergeConflict(failures)
     }
   }
-
-  //
-  //  def interactionFor(description:String, providerState: Option[String]) = interactions.find { i =>
-  //    i.description == description && i.providerState == providerState
-  //  }
-
 }

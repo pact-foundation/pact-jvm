@@ -13,17 +13,27 @@ class Response implements HttpPart {
   String body
   Map<String, Map<String, Object>> matchingRules
 
+  static Response fromMap(def map) {
+    new Response().with {
+      status = map.status as Integer
+      headers = map.headers
+      body = map.body
+      matchingRules = map.matchingRules
+      it
+    }
+  }
+
   String toString() {
     "\tstatus: $status \n\theaders: $headers \n\tmatchers: $matchingRules \n\tbody: $body"
   }
 
   Response copy() {
-    def r = this;
+    def r = this
     new Response().with {
       status = r.status
-      headers = r.headers
+      headers = r.headers ? [:] + r.headers : null
       body = r.body
-      matchingRules = r.matchingRules
+      matchingRules = r.matchingRules ? [:] + r.matchingRules : null
       it
     }
   }

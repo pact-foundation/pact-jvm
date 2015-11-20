@@ -14,4 +14,10 @@ class Pact extends BasePact {
   void sortInteractions() {
     interactions = new ArrayList(interactions).sort { it.providerState + it.description }
   }
+
+  Interaction interactionFor(String description, String providerState) {
+    interactions.find { i ->
+      i.description == description && i.providerState == providerState
+    }
+  }
 }

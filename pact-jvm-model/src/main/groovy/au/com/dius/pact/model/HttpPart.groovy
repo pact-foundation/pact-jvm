@@ -21,10 +21,10 @@ trait HttpPart {
     mimeType().matches('application\\/.*json')
   }
 
-  static XMLREGEXP = /^\s*<\?xml\s*version/
-  static HTMLREGEXP = /^\s*(<!DOCTYPE)|(<HTML>)/
+  static XMLREGEXP = /^\s*<\?xml\s*version.*/
+  static HTMLREGEXP = /^\s*(<!DOCTYPE)|(<HTML>).*/
   static JSONREGEXP = /^\s*("(\.|[^"\\u000A\u000D])*?"|[,:{}\[\]0-9.\-+Eaeflnr-u \u000A\u000D\u0009])+/
-  static XMLREGEXP2 = /^\s*<\w+\s*(:\w+=[\"”][^\"”]+[\"”])?/
+  static XMLREGEXP2 = /^\s*<\w+\s*(:\w+=[\"”][^\"”]+[\"”])?.*/
 
   String detectContentType() {
     if (body) {

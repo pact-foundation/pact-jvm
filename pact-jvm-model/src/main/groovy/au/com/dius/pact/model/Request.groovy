@@ -7,6 +7,8 @@ import groovy.transform.Canonical
  */
 @Canonical
 class Request implements HttpPart {
+  private static final String COOKIE_KEY = 'cookie'
+
   String method
   String path
   Map<String, List<String>> query
@@ -14,36 +16,47 @@ class Request implements HttpPart {
   String body
   Map<String, Map<String, Object>> matchingRules
 
+  static Request fromMap(Map map) {
+    new Request().with {
+      method = map.method as String
+      path = map.path as String
+      query = map.query
+      headers = map.headers
+      body = map.body
+      matchingRules = map.matchingRules
+      it
+    }
+  }
+
   Request copy() {
-    def r = this;
+    def r = this
     new Request().with {
       method = r.method
       path = r.path
-      query = r.query
-      headers = r.headers
+      query = r.query ? [:] + r.query : null
+      headers = r.headers ? [:] + r.headers : null
       body = r.body
-      matchingRules = r.matchingRules
+      matchingRules = r.matchingRules ? [:] + r.matchingRules : null
       it
     }
   }
 
   String toString() {
-    "\tmethod: $method\n\tpath: $path\n\tquery: $query\n\theaders: $headers\n\tmatchers: $matchingRules\n\tbody:\n$body"
+    "\tmethod: $method\n\tpath: $path\n\tquery: $query\n\theaders: $headers\n\tmatchers: $matchingRules\n\tbody: $body"
   }
 
   Map<String, String> headersWithoutCookie() {
-    headers.findAll { k, v -> k.toString().toLowerCase() != 'cookie' }
+    headers?.findAll { k, v -> k.toLowerCase() != COOKIE_KEY }
   }
 
   List<String> cookie() {
-    def cookieEntry = headers.find { k, v ->
-      k.toLowerCase() == 'cookie'
+    def cookieEntry = headers?.find { k, v ->
+      k.toLowerCase() == COOKIE_KEY
     }
     if (cookieEntry) {
-      cookieEntry.value.split(';').collect{ it.trim() }
+      cookieEntry.value.split(';')*.trim()
     } else {
       null
     }
   }
-
 }

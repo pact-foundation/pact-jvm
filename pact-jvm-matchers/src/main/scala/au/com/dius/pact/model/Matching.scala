@@ -169,8 +169,8 @@ object Matching extends StrictLogging {
         logger.debug("No matcher for " + actual.mimeType + ", using equality")
         (Option.apply(expected.getBody), Option.apply(actual.getBody)) match {
           case (None, _) => List()
-          case (a, None) => List(BodyMismatch(a, None))
-          case (a, b) => if (a == b) List() else List(BodyMismatch(a, b))
+          case (Some(a), None) => List(BodyMismatch(a, None))
+          case (Some(a), Some(b)) => if (a == b) List() else List(BodyMismatch(a, b))
         }
       }
     } else {

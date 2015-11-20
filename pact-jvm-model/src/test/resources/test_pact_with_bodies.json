@@ -30,10 +30,10 @@
             2,
             3
           ]
-        },
-        "response": {
-          "status": 200
         }
+      },
+      "response": {
+        "status": 200
       }
     }
   ],

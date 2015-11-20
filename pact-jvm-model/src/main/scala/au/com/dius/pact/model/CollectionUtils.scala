@@ -1,5 +1,7 @@
 package au.com.dius.pact.model
 
+import java.util
+
 import scala.collection.JavaConversions
 
 object CollectionUtils {
@@ -26,6 +28,12 @@ object CollectionUtils {
   def scalaMMapToJavaMMap(map: Map[String, Map[String, AnyRef]]) : java.util.Map[String, java.util.Map[String, AnyRef]] = {
     JavaConversions.mapAsJavaMap(map.mapValues {
       case jmap: Map[String, _] => JavaConversions.mapAsJavaMap(jmap)
+    })
+  }
+
+  def scalaLMaptoJavaLMap(map: Map[String, List[String]]): util.Map[String, util.List[String]] = {
+    JavaConversions.mapAsJavaMap(map.mapValues {
+      case jlist: List[String] => JavaConversions.seqAsJavaList(jlist.toSeq)
     })
   }
 

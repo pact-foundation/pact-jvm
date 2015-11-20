@@ -1,4 +1,9 @@
 dependencies {
-    compile project(":pact-jvm-model_${project.scalaVersion}"), 'org.apache.commons:commons-lang3:3.3.2',
-        "io.gatling:jsonpath_${project.scalaVersion}:0.6.4"
+  compile project(":pact-jvm-model_${project.scalaVersion}"), 'org.apache.commons:commons-lang3:3.3.2',
+    "io.gatling:jsonpath_${project.scalaVersion}:0.6.4"
+
+  testCompile 'ch.qos.logback:logback-classic:1.1.2'
+  testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+    exclude group: 'org.codehaus.groovy'
+  }
 }

@@ -8,7 +8,7 @@ class PactReaderTransformSpec extends Specification {
   private consumer
   private jsonMap
   private request
-  private LinkedHashMap<String, Serializable> response
+  private Map<String, Serializable> response
 
   def setup() {
     provider = [
@@ -19,15 +19,15 @@ class PactReaderTransformSpec extends Specification {
     ]
     request = [
       method: 'GET',
-      path  : '/mallory',
-      query : 'name=ron&status=good'
+      path: '/mallory',
+      query: 'name=ron&status=good'
     ]
     response = [
-      status : 200,
+      status: 200,
       headers: [
         'Content-Type': 'text/html'
       ],
-      body   : '"That is some good Mallory."'
+      body: '"That is some good Mallory."'
     ]
 
     jsonMap = new JsonSlurper().parse(this.class.getResourceAsStream('/pact.json'))

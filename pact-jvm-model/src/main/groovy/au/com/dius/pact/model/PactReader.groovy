@@ -4,15 +4,16 @@ import au.com.dius.pact.model.v3.messaging.MessagePact
 import com.github.zafarkhaja.semver.Version
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import groovy.util.logging.Slf4j
 
 /**
  * Class to load a Pact from a JSON source using a version strategy
  */
+@Slf4j
 class PactReader {
 
   private static final String JSON = 'application/json'
   private static final Map ACCEPT_JSON = [requestProperties: [Accept: JSON]]
-
   /**
    * Loads a pact file from either a File or a URL
    * @param source a File or a URL
@@ -32,6 +33,7 @@ class PactReader {
       }
   }
 
+  @SuppressWarnings('UnusedMethodParameter')
   static BasePact loadV3Pact(def source, def pactJson) {
       if (pactJson.messages) {
           new MessagePact().fromMap(pactJson)
@@ -50,14 +52,15 @@ class PactReader {
       }
   }
 
+  @SuppressWarnings('UnusedMethodParameter')
   static BasePact loadV2Pact(def source, def pactJson) {
     def transformedJson = recursiveTransformJson(pactJson)
     def provider = transformedJson.provider as Provider
     def consumer = transformedJson.consumer as Consumer
 
     def interactions = transformedJson.interactions.collect { i ->
-      def request = extractRequestV2(i.request)
-      def response = extractResponse(i.response)
+      def request = extractRequestV2(i.request ?: [:])
+      def response = extractResponse(i.response ?: [:])
       new Interaction(i.description, i.providerState, request, response)
     }
 
@@ -65,19 +68,20 @@ class PactReader {
   }
 
   static Response extractResponse(responseJson) {
-    def responseBody = extractBody(responseJson.body)
-    new Response(responseJson.status as Integer, responseJson.headers, responseBody, responseJson.matchingRules)
+    responseJson.body = extractBody(responseJson.body)
+    Response.fromMap(responseJson)
   }
 
   static Request extractRequestV2(requestJson) {
-    def requestBody = extractBody(requestJson.body)
-    new Request(requestJson.method as String, requestJson.path as String, queryStringToMap(requestJson.query),
-      requestJson.headers, requestBody, requestJson.matchingRules)
+    requestJson.body = extractBody(requestJson.body)
+    requestJson.query = queryStringToMap(requestJson.query)
+    Request.fromMap(requestJson)
   }
 
+  @SuppressWarnings('DuplicateStringLiteral')
   static Map<String, List<String>> queryStringToMap(String query, boolean decode = true) {
     if (query) {
-      query.split("&").collect { it.split("=") }.inject([:]) { Map map, String[] nameAndValue ->
+      query.split('&')*.split('=').inject([:]) { Map map, String[] nameAndValue ->
         def name = decode ? URLDecoder.decode(nameAndValue.first(), 'UTF-8') : nameAndValue.first()
         def value = decode ? URLDecoder.decode(nameAndValue.last(), 'UTF-8') : nameAndValue.last()
         if (map.containsKey(name)) {
@@ -91,19 +95,19 @@ class PactReader {
   }
 
   static Request extractRequestV3(requestJson) {
-    def requestBody = extractBody(requestJson.body)
-    new Request(requestJson.method as String, requestJson.path as String, requestJson.query, requestJson.headers,
-      requestBody, requestJson.matchingRules)
+    requestJson.body = extractBody(requestJson.body)
+    Request.fromMap(requestJson)
   }
 
   static extractBody(body) {
-    if (body instanceof Collection) {
-      JsonOutput.toJson(body)
-    } else {
+    if (body == null || body instanceof String) {
       body
+    } else {
+      JsonOutput.toJson(body)
     }
   }
 
+  @SuppressWarnings('DuplicateStringLiteral')
   static recursiveTransformJson(def pactJson) {
     pactJson.collectEntries { k, v ->
       def entry = [k, v]

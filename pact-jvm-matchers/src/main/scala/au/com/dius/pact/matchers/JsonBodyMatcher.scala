@@ -12,7 +12,7 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
     (Option.apply(expected.getBody), Option.apply(actual.getBody)) match {
       case (None, None) => List()
       case (None, b) => List()
-      case (a, None) => List(BodyMismatch(a, None))
+      case (Some(a), None) => List(BodyMismatch(a, None))
       case (Some(a), Some(b)) => compare(Seq("$", "body"), parse(a), parse(b), diffConfig,
         Option.apply(CollectionUtils.javaMMapToScalaMMap(expected.getMatchingRules)))
     }
