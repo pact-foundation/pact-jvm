@@ -5,7 +5,7 @@ dependencies {
       'org.apache.httpcomponents:fluent-hc:4.5',
       'org.apache.httpcomponents:httpclient:4.5',
       'junit:junit:4.12',
-      'org.apache.commons:commons-lang3:3.3.2',
+      "org.apache.commons:commons-lang3:$commonsLang3Version",
       'com.fasterxml.jackson.core:jackson-databind:2.6.3'
 
     testCompile 'com.github.rest-driver:rest-client-driver:1.1.36'

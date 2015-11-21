@@ -3,7 +3,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'org.apache.commons:commons-lang3:3.3.2'
+    classpath "org.apache.commons:commons-lang3:$commonsLang3Version"
   }
 }
 
