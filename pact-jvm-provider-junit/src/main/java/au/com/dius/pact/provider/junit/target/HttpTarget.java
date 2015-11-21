@@ -1,11 +1,17 @@
 package au.com.dius.pact.provider.junit.target;
 
-import au.com.dius.pact.model.*;
+import au.com.dius.pact.model.BodyMismatch;
+import au.com.dius.pact.model.BodyTypeMismatch;
+import au.com.dius.pact.model.HeaderMismatch;
+import au.com.dius.pact.model.Interaction;
+import au.com.dius.pact.model.Response;
+import au.com.dius.pact.model.ResponseMatching$;
+import au.com.dius.pact.model.ResponsePartMismatch;
+import au.com.dius.pact.model.StatusMismatch;
 import au.com.dius.pact.provider.ProviderClient;
 import au.com.dius.pact.provider.ProviderInfo;
 import scala.collection.Seq;
 
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -41,16 +47,15 @@ public class HttpTarget implements Target {
     public void testInteraction(final Interaction interaction) {
         final ProviderClient providerClient = new ProviderClient();
         providerClient.setProvider(getProviderInfo());
-        providerClient.setRequest(interaction.request());
+        providerClient.setRequest(interaction.getRequest());
         final Map<String, Object> actualResponse = (Map<String, Object>) providerClient.makeRequest();
 
         final Seq<ResponsePartMismatch> mismatches = ResponseMatching$.MODULE$.responseMismatches(
-                interaction.response(),
-                Response$.MODULE$.apply(
+                interaction.getResponse(),
+                new Response(
                         ((Integer) actualResponse.get("statusCode")).intValue(),
                         (Map<String, String>) actualResponse.get("headers"),
-                        (String) actualResponse.get("data"),
-                        Collections.<String, Object>emptyMap())
+                        (String) actualResponse.get("data"))
         );
 
         if (!mismatches.isEmpty()) {

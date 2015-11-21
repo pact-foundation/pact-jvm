@@ -1,38 +1,61 @@
 package au.com.dius.pact.provider.specs2
 
+import java.io.{StringReader, File, InputStream, Reader}
 import java.util.concurrent.Executors
 
-import au.com.dius.pact.model.dispatch.HttpClient
-import au.com.dius.pact.model.{FullResponseMatch, PactSerializer, ResponseMatching}
-import org.json4s.JsonInput
+import au.com.dius.pact.model.{FullResponseMatch, Pact, PactReader, ResponseMatching}
+import au.com.dius.pact.provider.sbtsupport.HttpClient
 import org.specs2.Specification
 import org.specs2.execute.Result
 import org.specs2.specification.core.Fragments
 
+import scala.collection.JavaConversions
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext}
+
+trait PactInput
+case class StringInput(string: String) extends PactInput
+case class ReaderInput(reader: Reader) extends PactInput
+case class StreamInput(stream: InputStream) extends PactInput
+case class FileInput(file: File) extends PactInput
 
 trait ProviderSpec extends Specification {
 
   def timeout = Duration.apply(10000, "s")
 
+  def convertInput(input: PactInput) = {
+    input match {
+      case StringInput(string) => new StringReader(string)
+      case ReaderInput(reader) => reader
+      case StreamInput(stream) => stream
+      case FileInput(file) => file
+    }
+  }
+
   override def is = {
-    val pact = PactSerializer.from(honoursPact)
-    val fs = pact.interactions.map { interaction =>
-      val description = s"${interaction.providerState} ${interaction.description}"
+    val pact = PactReader.loadPact(convertInput(honoursPact)).asInstanceOf[Pact]
+    val fs = JavaConversions.asScalaBuffer(pact.getInteractions).map { interaction =>
+      val description = s"${interaction.getProviderState} ${interaction.getDescription}"
       val test: String => Result = { url =>
         implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
-        val actualResponseFuture = HttpClient.run(interaction.request.copy(path = s"$url${interaction.request.path}"))
+        val request = interaction.getRequest.copy
+        request.setPath(s"$url${interaction.getRequest.getPath}")
+        val actualResponseFuture = HttpClient.run(request)
         val actualResponse = Await.result(actualResponseFuture, timeout)
-        ResponseMatching.matchRules(interaction.response, actualResponse) must beEqualTo(FullResponseMatch)
+        ResponseMatching.matchRules(interaction.getResponse, actualResponse) must beEqualTo(FullResponseMatch)
       }
-      fragmentFactory.example(description, {inState(interaction.providerState.get, test)})
+      fragmentFactory.example(description, {inState(interaction.getProviderState, test)})
     }
     Fragments(fs :_*)
   }
 
-  def honoursPact: JsonInput
+  def honoursPact: PactInput
 
   def inState(state: String, test: String => Result): Result
+
+  implicit def steamToPactInput(source: InputStream) : PactInput = StreamInput(source)
+  implicit def stringToPactInput(source: String) : PactInput = StringInput(source)
+  implicit def readerToPactInput(source: Reader) : PactInput = ReaderInput(source)
+  implicit def fileToPactInput(source: File) : PactInput = FileInput(source)
 
 }

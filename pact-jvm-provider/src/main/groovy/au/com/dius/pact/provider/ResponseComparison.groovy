@@ -7,7 +7,6 @@ import au.com.dius.pact.model.DiffConfig
 import au.com.dius.pact.model.HeaderMismatch
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.model.Response
-import au.com.dius.pact.model.Response$
 import au.com.dius.pact.model.ResponseMatching$
 import au.com.dius.pact.model.ResponsePartMismatch
 import au.com.dius.pact.model.StatusMismatch
@@ -41,7 +40,7 @@ class ResponseComparison {
     def comparison = new ResponseComparison(expected: response, actual: actualResponse, actualStatus: actualStatus,
         actualHeaders: actualHeaders.collectEntries { k, v -> [k.toUpperCase(), v] }, actualBody: actualBody)
     def mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(
-        ResponseMatching$.MODULE$.responseMismatches(response, Response$.MODULE$.apply(actualStatus,
+        ResponseMatching$.MODULE$.responseMismatches(response, new Response(actualStatus,
             actualHeaders, actualBody, [:]))).asJava()
 
     result.method = comparison.compareStatus(mismatches)
@@ -56,7 +55,7 @@ class ResponseComparison {
     }
     def mismatches = []
     def expected = message.asPactRequest()
-    def actualMessage = Response$.MODULE$.apply(200, ['Content-Type': message.contentType], actual, [:])
+    def actualMessage = new Response(200, ['Content-Type': message.contentType], actual, [:])
     if (result) {
           mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(result.value.matchBody(expected,
             actualMessage, new DiffConfig(true, false))).asJava()

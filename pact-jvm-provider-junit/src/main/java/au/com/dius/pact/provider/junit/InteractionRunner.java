@@ -18,7 +18,11 @@ import org.junit.runner.Description;
 import org.junit.runner.Runner;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
-import org.junit.runners.model.*;
+import org.junit.runners.model.FrameworkField;
+import org.junit.runners.model.FrameworkMethod;
+import org.junit.runners.model.InitializationError;
+import org.junit.runners.model.Statement;
+import org.junit.runners.model.TestClass;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -48,8 +52,8 @@ class InteractionRunner extends Runner {
 
     @Override
     public Description getDescription() {
-        final Description description = Description.createSuiteDescription(pact.consumer().name());
-        for (Interaction i: scala.collection.JavaConversions.seqAsJavaList(pact.interactions())) {
+        final Description description = Description.createSuiteDescription(pact.getConsumer().getName());
+        for (Interaction i: pact.getInteractions()) {
             description.addChild(describeChild(i));
         }
         return description;
@@ -57,8 +61,8 @@ class InteractionRunner extends Runner {
 
     protected Description describeChild(final Interaction interaction) {
         if (!childDescriptions.containsKey(interaction)) {
-            childDescriptions.put(interaction, Description.createTestDescription(pact.consumer().name(),
-                interaction.description()));
+            childDescriptions.put(interaction, Description.createTestDescription(pact.getConsumer().getName(),
+                interaction.getDescription()));
         }
         return childDescriptions.get(interaction);
     }
@@ -117,7 +121,7 @@ class InteractionRunner extends Runner {
 
     // Running
     public void run(final RunNotifier notifier) {
-        for (final Interaction interaction : scala.collection.JavaConversions.seqAsJavaList(pact.interactions())) {
+        for (final Interaction interaction : pact.getInteractions()) {
             final Description description = describeChild(interaction);
             notifier.fireTestStarted(description);
             try {
@@ -169,8 +173,8 @@ class InteractionRunner extends Runner {
     }
 
     protected Statement withStateChanges(final Interaction interaction, final Object target, final Statement statement) {
-        if (interaction.providerState().nonEmpty()) {
-            final String state = interaction.providerState().get();
+        if (interaction.getProviderState() != null && !interaction.getProviderState().isEmpty()) {
+            final String state = interaction.getProviderState();
             final List<FrameworkMethod> onStateChange = new ArrayList<FrameworkMethod>();
             for (FrameworkMethod ann: testClass.getAnnotatedMethods(State.class)) {
                 if (ArrayUtils.contains(ann.getAnnotation(State.class).value(), state)) {

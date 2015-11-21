@@ -45,7 +45,7 @@ public class PactFolderLoader implements PactLoader {
         });
         for (File file: files) {
             Pact pact = (Pact) pactReader.loadPact(file);
-            if (pact.provider().name().equals(providerName)) {
+            if (pact.getProvider().getName().equals(providerName)) {
                 pacts.add(pact);
             }
         }

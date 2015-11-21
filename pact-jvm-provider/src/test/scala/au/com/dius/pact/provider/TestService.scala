@@ -1,15 +1,13 @@
 package au.com.dius.pact.provider
 
-import AnimalServiceResponses.responses
 import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
+import au.com.dius.pact.model.unfiltered.Conversions
 import au.com.dius.pact.model.{Request, Response}
-import org.json4s.JsonAST._
-import org.json4s.jackson.JsonMethods.parse
+import au.com.dius.pact.provider.AnimalServiceResponses.responses
+import groovy.json.JsonSlurper
 import unfiltered.netty.{ReceivedMessage, ServerErrorResponse, cycle}
 import unfiltered.request.HttpRequest
 import unfiltered.response.ResponseFunction
-import au.com.dius.pact.model.unfiltered.Conversions
-import org.json4s.StringInput
 
 object TestService extends StrictLogging {
   var state: String = ""
@@ -17,18 +15,20 @@ object TestService extends StrictLogging {
   case class RequestHandler(port: Int) extends cycle.Plan
     with cycle.SynchronousExecution
     with ServerErrorResponse {
-      import io.netty.handler.codec.http.{ HttpResponse=>NHttpResponse }
+      import io.netty.handler.codec.http.{HttpResponse => NHttpResponse}
 
-      def handle(request:HttpRequest[ReceivedMessage]): ResponseFunction[NHttpResponse] = {
+    def parse(body: String): java.util.Map[Any, Any] = {
+      new JsonSlurper().parseText(body).asInstanceOf[java.util.Map[Any, Any]]
+    }
+
+    def handle(request:HttpRequest[ReceivedMessage]): ResponseFunction[NHttpResponse] = {
         val response = if(request.uri.endsWith("enterState")) {
           val pactRequest: Request = Conversions.unfilteredRequestToPactRequest(request)
-          val json = parse(StringInput(pactRequest.body.get))
-          state = (for {
-            JString(s) <- json \\ "state"
-          } yield s).head
-          Response(200, None, None, None)
+          val json = parse(pactRequest.getBody)
+          state = json.get("state").toString
+          new Response(200)
         } else {
-          responses.get(state).flatMap(_.get(request.uri)).getOrElse(Response(400, None, None, None))
+          responses.get(state).flatMap(_.get(request.uri)).getOrElse(new Response(400))
         }
         Conversions.pactToUnfilteredResponse(response)
       }

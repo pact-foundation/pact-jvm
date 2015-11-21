@@ -143,9 +143,7 @@ class PactReader {
   }
 
   private static loadFile(def source) {
-      if (source instanceof InputStream) {
-          new JsonSlurper().parse(source)
-      } else if (source instanceof File) {
+      if (source instanceof InputStream || source instanceof Reader || source instanceof File) {
           new JsonSlurper().parse(source)
       } else if (source instanceof URL) {
           new JsonSlurper().parse(source, ACCEPT_JSON)
@@ -155,7 +153,7 @@ class PactReader {
           new JsonSlurper().parse(source as File)
       } else {
           throw new UnsupportedOperationException(
-                  "Unable to load pact file from $source as it is neither a file or a URL")
+                  "Unable to load pact file from '$source' as it is neither a file, input stream, reader or an URL")
       }
   }
 

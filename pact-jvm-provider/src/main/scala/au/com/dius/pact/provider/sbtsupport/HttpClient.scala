@@ -1,4 +1,4 @@
-package au.com.dius.pact.consumer.dispatch
+package au.com.dius.pact.provider.sbtsupport
 
 import au.com.dius.pact.model.unfiltered.Conversions
 import au.com.dius.pact.model.{CollectionUtils, Request, Response}
@@ -18,7 +18,7 @@ object HttpClient {
       }
     }
     val headers = if (request.getHeaders == null) None
-    else Some(JavaConversions.mapAsScalaMap(request.getHeaders))
+      else Some(JavaConversions.mapAsScalaMap(request.getHeaders))
     val r = url(request.getPath).underlying(
       _.setMethod(request.getMethod).setQueryParameters(query)
     ) <:< headers.getOrElse(Map())
