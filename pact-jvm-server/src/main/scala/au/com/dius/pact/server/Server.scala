@@ -2,20 +2,17 @@ package au.com.dius.pact.server
 
 import au.com.dius.pact.model._
 import ch.qos.logback.classic.Level
-import org.json4s._
-import org.json4s.jackson.Serialization
-import org.slf4j.LoggerFactory
-import org.slf4j.Logger
+import org.slf4j.{Logger, LoggerFactory}
+
+import scala.collection.JavaConversions
 
 object ListServers {
 
   def apply(oldState: ServerState): Result = {
-    implicit val formats = Serialization.formats(NoTypeHints)
-    val body = Serialization.write(Map("ports" -> oldState.keySet))
-    Result(Response(200, Map("Content-Type" -> "application/json"), body, null), oldState)
+    val body = "{\"ports\": [" + oldState.keySet.mkString(", ") + "]}"
+    Result(new Response(200, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/json")), body), oldState)
   }
 }
-
 
 case class Result(response: Response, newState: ServerState)
 

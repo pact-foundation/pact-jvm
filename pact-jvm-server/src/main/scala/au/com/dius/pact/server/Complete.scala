@@ -1,36 +1,30 @@
 package au.com.dius.pact.server
 
-import _root_.unfiltered.netty.{ReceivedMessage, ServerErrorResponse, cycle}
-import _root_.unfiltered.request.HttpRequest
-import _root_.unfiltered.response.ResponseFunction
-import au.com.dius.pact.model._
 import au.com.dius.pact.consumer._
-import org.json4s._
-import org.json4s.JsonDSL._
-import org.json4s.jackson.Serialization
-import au.com.dius.pact.model.unfiltered.Conversions
-import org.jboss.netty.handler.codec.http.QueryStringDecoder
+import au.com.dius.pact.model._
+
+import scala.collection.JavaConversions
 
 object Complete {
 
-  def getPort(j: JValue): Option[Int] = j match {
-    case JObject(List(JField("port", JInt(port)))) => {
-      Some(port.intValue())
+  def getPort(j: Any): Option[Int] = j match {
+    case map: Map[AnyRef, AnyRef] => {
+      if (map.contains("port")) Some(map("port").asInstanceOf[Int])
+      else None
     }
     case _ => None
   }
 
   def toJson(error: VerificationResult) = {
-    implicit val formats = Serialization.formats(NoTypeHints)
-    Serialization.write(error)
+    "{\"error\": \"" + error + "\"}"
   }
 
   def apply(request: Request, oldState: ServerState): Result = {
-    def clientError = Result(Response(400, None, None, None), oldState)
+    def clientError = Result(new Response(400), oldState)
     def pactWritten(response: Response, port: Int) = Result(response, oldState - port)
 
     val result = for {
-      port <- getPort(request.body)
+      port <- getPort(JsonUtils.parseJsonString(request.getBody))
       mockProvider <- oldState.get(port)
       sessionResults = mockProvider.session.remainingResults
       pact <- mockProvider.pact
@@ -38,8 +32,11 @@ object Complete {
       mockProvider.stop()
       
       ConsumerPactRunner.writeIfMatching(pact, sessionResults, mockProvider.config.pactConfig) match {
-        case PactVerified => pactWritten(Response(200, Some(Response.CrossSiteHeaders), None, null), mockProvider.config.port)
-        case error => pactWritten(Response(400, Map("Content-Type" -> "application/json"), toJson(error), null), mockProvider.config.port)
+        case PactVerified => pactWritten(new Response(200, JavaConversions.mapAsJavaMap(ResponseUtils.CrossSiteHeaders)),
+          mockProvider.config.port)
+        case error => pactWritten(new Response(400,
+          JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/json")), toJson(error)),
+          mockProvider.config.port)
       }
     }
     
