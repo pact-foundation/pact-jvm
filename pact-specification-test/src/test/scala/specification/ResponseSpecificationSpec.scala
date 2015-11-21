@@ -1,20 +1,33 @@
 package specification
 
 import java.io.File
+import java.util
 
+import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.model._
-import org.json4s._
-import org.json4s.jackson.JsonMethods._
+import groovy.json.JsonSlurper
 
-abstract class ResponseSpecificationSpec extends SpecificationSpec {
+abstract class ResponseSpecificationSpec extends SpecificationSpec with StrictLogging {
+
+  sequential
 
   def test(input: PactResponseSpecification) = {
     val result = ResponseMatching.matchRules(input.expected, input.actual)
+    logger.debug(s"${input.comment} -> $result")
     if(input.`match`) {
       result mustEqual FullResponseMatch
     } else {
       result mustNotEqual FullResponseMatch
     }
+  }
+
+  def extractResponseSpecification(testJson: util.Map[String, AnyRef]) = {
+    val expected = PactReader.extractResponse(testJson.get("expected"))
+    expected.setDefaultMimeType("application/json")
+    val actual = PactReader.extractResponse(testJson.get("actual"))
+    actual.setDefaultMimeType("application/json")
+    PactResponseSpecification(testJson.get("match").asInstanceOf[Boolean],
+      testJson.get("comment").toString, expected, actual)
   }
 
   def fragments(path: String) = {
@@ -25,14 +38,8 @@ abstract class ResponseSpecificationSpec extends SpecificationSpec {
         val dirName = folder.getName
         folder.listFiles(jsonFilter).map { testFile =>
           val fileName = testFile.getName
-          implicit val formats = DefaultFormats
-          val testJson = parse(testFile)
-          val transformedJson: JValue = testJson.transformField {
-            case ("body", value) => ("body", JString(pretty(value)))
-          }
-          val testData = transformedJson.extract[PactResponseSpecification].copy(
-            actual = PactSerializer.extractResponse(transformedJson \ "actual"),
-            expected = PactSerializer.extractResponse(transformedJson \ "expected"))
+          val testJson = new JsonSlurper().parse(testFile).asInstanceOf[java.util.Map[String, AnyRef]]
+          val testData = extractResponseSpecification(testJson)
 
           val description = s"$dirName/$fileName ${testData.comment}"
           fragmentFactory.example(description, {

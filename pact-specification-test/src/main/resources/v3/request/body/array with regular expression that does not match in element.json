@@ -4,7 +4,7 @@
   "expected" : {
     "method": "POST",
     "path": "/",
-    "query": "",
+    "query": {},
     "headers": {"Content-Type": "application/json"},
     "matchingRules": {
       "$.body.animals": {"min": 1, "match": "type"},
@@ -22,7 +22,7 @@
   "actual": {
     "method": "POST",
     "path": "/",
-    "query": "",
+    "query": {},
     "headers": {"Content-Type": "application/json"},
     "body": {
       "animals": [

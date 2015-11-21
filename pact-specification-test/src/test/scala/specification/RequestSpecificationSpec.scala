@@ -2,15 +2,18 @@ package specification
 
 import java.io.File
 
+import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.model._
-import org.json4s._
-import org.json4s.jackson.JsonMethods._
+import groovy.json.JsonSlurper
 
-abstract class RequestSpecificationSpec extends SpecificationSpec {
+abstract class RequestSpecificationSpec extends SpecificationSpec with StrictLogging {
+
+  sequential
 
   def test(input: PactRequestSpecification) = {
-    val fakeInteraction = Interaction("", None, input.expected, Response(200, Map[String, String](), "", null))
+    val fakeInteraction = new Interaction("", null, input.expected, new Response(200))
     val result = RequestMatching.compareRequest(fakeInteraction, input.actual)
+    logger.debug(s"${input.comment} -> $result")
     if(input.`match`) {
       result mustEqual FullRequestMatch(fakeInteraction)
     } else {
@@ -26,10 +29,7 @@ abstract class RequestSpecificationSpec extends SpecificationSpec {
         val dirName = folder.getName
         folder.listFiles(jsonFilter).map { testFile =>
           val fileName = testFile.getName
-          implicit val formats = DefaultFormats
-          val testJson = parse(testFile).transformField {
-            case ("body", value) => ("body", JString(pretty(value)))
-          }
+          val testJson = new JsonSlurper().parse(testFile).asInstanceOf[java.util.Map[String, AnyRef]]
           val testData = extractRequestSpecification(testJson)
 
           val description = s"$dirName/$fileName ${testData.comment}"
@@ -43,11 +43,10 @@ abstract class RequestSpecificationSpec extends SpecificationSpec {
     }
   }
 
-  def extractRequestSpecification(testJson: JValue): PactRequestSpecification = {
-    implicit val formats = DefaultFormats
-    PactRequestSpecification((testJson \ "match").extract[Boolean],
-      (testJson \ "comment").extract[String],
-      PactSerializer.extractRequestV2(testJson \ "expected"),
-      PactSerializer.extractRequestV2(testJson \ "actual"))
+  def extractRequestSpecification(testJson: java.util.Map[String, AnyRef]): PactRequestSpecification = {
+    PactRequestSpecification(testJson.get("match").asInstanceOf[Boolean],
+      testJson.get("comment").toString,
+      PactReader.extractRequestV2(testJson.get("expected")),
+      PactReader.extractRequestV2(testJson.get("actual")))
   }
 }

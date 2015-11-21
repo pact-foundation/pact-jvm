@@ -192,7 +192,7 @@ object Matching extends StrictLogging {
     else Some(PathMismatch(expected.getPath, replacedActual))
   }
   
-  def matchStatus(expected: Int, actual: Int): Option[StatusMismatch] = {
+  def matchStatus(expected: Integer, actual: Integer): Option[StatusMismatch] = {
     if(expected == actual) None
     else Some(StatusMismatch(expected, actual))
   }

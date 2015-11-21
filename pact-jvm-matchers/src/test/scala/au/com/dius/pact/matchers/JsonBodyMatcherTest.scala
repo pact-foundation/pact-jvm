@@ -134,7 +134,7 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
         actualBody = "[100, 100]"
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
-        mismatches must containMessage("Type mismatch: Expected JObject JObject(List((something,JInt(100)), (somethingElse,JInt(100)))) but received JArray JArray(List(JInt(100), JInt(100)))")
+        mismatches must containMessage("Type mismatch: Expected Map Map(something -> 100, somethingElse -> 100) but received List List(100, 100)")
       }
 
       "when comparing list to anything" in {
@@ -142,7 +142,7 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
         actualBody = "100"
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
-        mismatches must containMessage("Type mismatch: Expected JArray JArray(List(JInt(100), JInt(100))) but received JInt JInt(100)")
+        mismatches must containMessage("Type mismatch: Expected List List(100, 100) but received Integer 100")
       }
 
     }

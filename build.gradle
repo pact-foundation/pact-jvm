@@ -46,9 +46,7 @@ subprojects {
     dependencies {
       if (project.hasProperty('scalaVersion')) {
           compile 'org.slf4j:slf4j-api:1.7.7', "org.scala-lang:scala-library:${project.scalaFullVersion}",
-            "org.scala-lang:scala-compiler:${project.scalaFullVersion}",
-            "org.json4s:json4s-native_${project.scalaVersion}:$json4sVersion",
-            "org.json4s:json4s-jackson_${project.scalaVersion}:$json4sVersion"
+            "org.scala-lang:scala-compiler:${project.scalaFullVersion}"
 
           testCompile "org.specs2:specs2-core_${project.scalaVersion}:3.6.4", "org.specs2:specs2-junit_${project.scalaVersion}:3.6.4"
       }

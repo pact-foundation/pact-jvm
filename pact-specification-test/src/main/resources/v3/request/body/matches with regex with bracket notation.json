@@ -4,7 +4,7 @@
   "expected" : {
     "method": "POST",
     "path": "/",
-    "query": "",
+    "query": {},
     "headers": {"Content-Type": "application/json"},
     "matchingRules": {
       "$.body['2'].str": {"match": "regex", "regex": "\\w+"}
@@ -18,7 +18,7 @@
   "actual": {
     "method": "POST",
     "path": "/",
-    "query": "",
+    "query": {},
     "headers": {"Content-Type": "application/json"},
     "body": {
       "2" : {

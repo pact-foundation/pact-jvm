@@ -2,7 +2,6 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.Fixtures._
 import au.com.dius.pact.model.{BodyMismatch, HeaderMismatch, PathMismatch, _}
-import org.json4s.jackson.JsonMethods._
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -36,15 +35,13 @@ class PrettyPrinterSpec extends Specification {
   }
 
   "body mismatch" in {
-    import org.json4s.JsonDSL._
-
-    print(BodyMismatch(pretty(map2jvalue(Map("foo"->"bar"))), pretty(map2jvalue(Map("ork" -> "Bif"))))) must beEqualTo(
+    print(BodyMismatch("{\"foo\": \"bar\"}", "{\"ork\": \"Bif\"}")) must beEqualTo(
     s"""--- Body
       |$plus
       |@@ -1,3 +1,3 @@
       | {
-      |-  "foo" : "bar"
-      |+  "ork" : "Bif"
+      |-    "foo": "bar"
+      |+    "ork": "Bif"
       | }""".stripMargin
     )
   }

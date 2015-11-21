@@ -1,7 +1,6 @@
 package au.com.dius.pact.model
 
 import au.com.dius.pact.model.HttpMethod._
-import org.json4s._
 import au.com.dius.pact.consumer.{ConsumerTestVerification, VerificationResult}
 import org.json.JSONObject
 

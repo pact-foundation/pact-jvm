@@ -15,6 +15,7 @@ import difflib.Delta
 import difflib.DiffUtils
 import difflib.Patch
 import groovy.json.JsonBuilder
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.apache.commons.lang3.StringUtils
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
@@ -89,20 +90,18 @@ class ResponseComparison {
   def compareHeaders(List<ResponsePartMismatch> mismatches) {
     Map headerResult = [:]
 
-    if (expected.headers().defined) {
+    if (expected.headers != null) {
       def headerMismatchers = mismatches.findAll { it instanceof HeaderMismatch }.groupBy { it.headerKey }
       if (headerMismatchers.empty) {
-          headerResult = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
-              .keySet().collectEntries { [it, true] }
+          headerResult = expected.headers.keySet().collectEntries { [it, true] }
       } else {
-          def headers = JavaConverters$.MODULE$.mapAsJavaMapConverter(expected.headers().get()).asJava()
-          headers.each { headerKey, value ->
+        expected.headers.each { headerKey, value ->
               if (headerMismatchers[headerKey]) {
                   headerResult[headerKey] = headerMismatchers[headerKey].first().mismatch.get()
               } else {
                   headerResult[headerKey] = true
               }
-          }
+        }
       }
     }
 
@@ -125,18 +124,18 @@ class ResponseComparison {
       String actualBodyString = ''
       if (actualBody) {
           if (actual.contentType.mimeType ==~ 'application/.*json') {
-              actualBodyString = new JsonBuilder(new JsonSlurper().parseText(actualBody)).toPrettyString()
+              actualBodyString = JsonOutput.prettyPrint(actualBody)
           } else {
-              actualBodyString = actualBody.toString()
+              actualBodyString = actualBody
           }
       }
 
       String expectedBodyString = ''
-      if (expected.body().defined) {
+      if (expected.body != null) {
           if (expected.jsonBody()) {
-              expectedBodyString = new JsonBuilder(new JsonSlurper().parseText(expected.body().get())).toPrettyString()
+              expectedBodyString = JsonOutput.prettyPrint(expected.body)
           } else {
-              expectedBodyString = expected.body().get()
+              expectedBodyString = expected.body
           }
       }
 

@@ -4,13 +4,13 @@
   "expected" : {
     "method": "POST",
     "path": "/path",
-    "query": "",
+    "query": {},
     "headers": {}
   },
   "actual": {
     "method": "POST",
     "path": "/path",
-    "query": "",
+    "query": {},
     "headers": {
       "Accept": "alligators"
     }

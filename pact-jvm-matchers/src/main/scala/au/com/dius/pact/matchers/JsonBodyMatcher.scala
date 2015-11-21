@@ -2,19 +2,16 @@ package au.com.dius.pact.matchers
 
 import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.model._
-import org.json4s.jackson.JsonMethods._
-import org.json4s.{DefaultFormats, JArray, JObject}
 
 class JsonBodyMatcher extends BodyMatcher with StrictLogging {
-  implicit lazy val formats = DefaultFormats
 
   def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig): List[BodyMismatch] = {
     (Option.apply(expected.getBody), Option.apply(actual.getBody)) match {
       case (None, None) => List()
       case (None, b) => List()
       case (Some(a), None) => List(BodyMismatch(a, None))
-      case (Some(a), Some(b)) => compare(Seq("$", "body"), parse(a), parse(b), diffConfig,
-        Option.apply(CollectionUtils.javaMMapToScalaMMap(expected.getMatchingRules)))
+      case (Some(a), Some(b)) => compare(Seq("$", "body"), JsonUtils.parseJsonString(a), JsonUtils.parseJsonString(b),
+        diffConfig, Option.apply(CollectionUtils.javaMMapToScalaMMap(expected.getMatchingRules)))
     }
   }
 
@@ -42,13 +39,11 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
   def compare(path: Seq[String], expected: Any, actual: Any, diffConfig: DiffConfig,
               matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     (expected, actual) match {
-      case (a: JObject, b: JObject) => compareMaps(a.values, b.values, a, b, path, diffConfig, matchers)
       case (a: Map[String, Any], b: Map[String, Any]) => compareMaps(a, b, a, b, path, diffConfig, matchers)
-      case (a: JArray, b: JArray) => compareLists(a.values, b.values, a, b, path, diffConfig, matchers)
       case (a: List[Any], b: List[Any]) => compareLists(a, b, a, b, path, diffConfig, matchers)
       case (_, _) =>
-        if ((expected.isInstanceOf[JObject] && !actual.isInstanceOf[JObject]) ||
-          (expected.isInstanceOf[JArray] && !actual.isInstanceOf[JArray])) {
+        if ((expected.isInstanceOf[Map[String, Any]] && !actual.isInstanceOf[Map[String, Any]]) ||
+          (expected.isInstanceOf[List[Any]] && !actual.isInstanceOf[List[Any]])) {
           List(BodyMismatch(expected, actual,
             Some(s"Type mismatch: Expected ${typeOf(expected)} ${valueOf(expected)} but received ${typeOf(actual)} ${valueOf(actual)}"),
             path.mkString(".")))

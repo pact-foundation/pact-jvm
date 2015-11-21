@@ -4,13 +4,13 @@
   "expected" : {
     "method": "POST",
     "path": "/",
-    "query": "",
+    "query": {},
     "headers": {}
   },
   "actual": {
     "method": "GET",
     "path": "/",
-    "query": "",
+    "query": {},
     "headers": {}
 
   }
