@@ -2,14 +2,16 @@ package au.com.dius.pact.provider.sbtsupport
 
 import au.com.dius.pact.model.unfiltered.Conversions
 import au.com.dius.pact.model.{CollectionUtils, Request, Response}
+import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import com.ning.http.client.FluentStringsMap
 import dispatch.url
 
 import scala.collection.JavaConversions
 import scala.concurrent.{ExecutionContext, Future}
 
-object HttpClient {
+object HttpClient extends StrictLogging {
   def run(request:Request)(implicit executionContext: ExecutionContext):Future[Response] = {
+    logger.debug("request=" + request)
     val query = new FluentStringsMap()
     if (request.getQuery != null) {
       val queryMap = CollectionUtils.javaLMapToScalaLMap(request.getQuery)

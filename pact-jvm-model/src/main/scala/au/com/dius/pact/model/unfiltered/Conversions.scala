@@ -4,6 +4,7 @@ import java.io.{BufferedReader, InputStreamReader}
 import java.net.URI
 import java.util.zip.GZIPInputStream
 
+import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.model.{Request, Response}
 import com.ning.http.client
 import com.ning.http.client.FluentCaseInsensitiveStringsMap
@@ -15,7 +16,7 @@ import unfiltered.response._
 import scala.collection.JavaConversions
 import scala.collection.immutable.Stream
 
-object Conversions {
+object Conversions extends StrictLogging {
 
   def toMap(map: FluentCaseInsensitiveStringsMap): java.util.Map[String, String] = {
     import collection.JavaConversions._
@@ -29,7 +30,9 @@ object Conversions {
         org.apache.http.entity.ContentType.parse(response.getContentType)
     val charset = if (contentType.getCharset == null) "UTF-8" else contentType.getCharset.name()
     val body = response.getResponseBody(charset)
-    new Response(response.getStatusCode, toMap(response.getHeaders), body)
+    val r = new Response(response.getStatusCode, toMap(response.getHeaders), body)
+    logger.debug("response=" + r)
+    r
   }
 
   case class Headers(headers: java.util.Map[String, String]) extends unfiltered.response.Responder[Any] {

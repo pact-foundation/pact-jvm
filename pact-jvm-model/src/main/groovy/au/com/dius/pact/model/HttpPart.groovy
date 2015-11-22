@@ -13,8 +13,9 @@ trait HttpPart {
   abstract Map<String, Map<String, Object>> getMatchingRules()
 
   String mimeType() {
-    if (headers?.containsKey(CONTENT_TYPE)) {
-      headers[CONTENT_TYPE].split('\\s*;\\s*').first()
+    def contentTypeKey = headers?.keySet()?.find { CONTENT_TYPE.equalsIgnoreCase(it) }
+    if (contentTypeKey) {
+      headers[contentTypeKey].split('\\s*;\\s*').first()
     } else {
       detectContentType()
     }
