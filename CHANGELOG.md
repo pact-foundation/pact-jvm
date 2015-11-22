@@ -2,6 +2,8 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 
 # 2.4.0 - removed json4s library in favour of groovy JSON parsing
 
+* 2f0f9d5 - missed some old scala model access code #152 (Ronald Holshausen, Sun Nov 22 14:38:03 2015 +1100)
+* 25d79d0 - content type check should be case insensitive #152 (Ronald Holshausen, Sun Nov 22 14:06:14 2015 +1100)
 * 7a57fd2 - consolidate some common library versions in the build property file (Ronald Holshausen, Sat Nov 21 17:30:04 2015 +1100)
 * feffb3a - removed the remaining references to json4s #152 (Ronald Holshausen, Sat Nov 21 17:03:43 2015 +1100)
 * 179b95b - standalone mock server converted to not use json4s #152 (Ronald Holshausen, Sat Nov 21 13:27:00 2015 +1100)
