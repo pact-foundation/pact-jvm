@@ -39,30 +39,30 @@ object ModelFixtures {
     JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheadervalue")),
     "{\"test\":true}")
 
-  val interaction = new Interaction("test interaction", "test state", request, response)
+  val interaction = new RequestResponseInteraction("test interaction", "test state", request, response)
 
-  val interactionsWithMatchers = List(new Interaction("test interaction with matchers", "test state",
+  val interactionsWithMatchers = List(new RequestResponseInteraction("test interaction with matchers", "test state",
     requestWithMatchers, responseWithMatchers))
 
-  val interactionsWithNoBodies = List(new Interaction("test interaction with no bodies", "test state",
+  val interactionsWithNoBodies = List(new RequestResponseInteraction("test interaction with no bodies", "test state",
     requestNoBody, responseNoBody))
 
-  val interactionsWithDecodedQuery = List(new Interaction("test interaction", "test state",
+  val interactionsWithDecodedQuery = List(new RequestResponseInteraction("test interaction", "test state",
     requestDecodedQuery, response))
 
-  val interactionsWithLowerCaseMethods = List(new Interaction("test interaction", "test state",
+  val interactionsWithLowerCaseMethods = List(new RequestResponseInteraction("test interaction", "test state",
     requestLowerCaseMethod, response))
 
   val interactions = List(interaction)
 
-  val pact: Pact = new Pact(provider, consumer, JavaConversions.seqAsJavaList(interactions.toSeq))
+  val pact: RequestResponsePact = new RequestResponsePact(provider, consumer, JavaConversions.seqAsJavaList(interactions.toSeq))
 
-  val pactWithMatchers: Pact = new Pact(provider, consumer, JavaConversions.seqAsJavaList(interactionsWithMatchers.toSeq))
+  val pactWithMatchers: RequestResponsePact = new RequestResponsePact(provider, consumer, JavaConversions.seqAsJavaList(interactionsWithMatchers.toSeq))
 
-  val pactWithNoBodies: Pact = new Pact(provider, consumer, JavaConversions.seqAsJavaList(interactionsWithNoBodies.toSeq))
+  val pactWithNoBodies: RequestResponsePact = new RequestResponsePact(provider, consumer, JavaConversions.seqAsJavaList(interactionsWithNoBodies.toSeq))
 
-  val pactDecodedQuery = new Pact(provider, consumer, JavaConversions.seqAsJavaList(interactionsWithDecodedQuery.toSeq))
+  val pactDecodedQuery = new RequestResponsePact(provider, consumer, JavaConversions.seqAsJavaList(interactionsWithDecodedQuery.toSeq))
 
-  val pactWithLowercaseMethods: Pact = new Pact(provider, consumer, JavaConversions.seqAsJavaList(interactionsWithLowerCaseMethods.toSeq))
+  val pactWithLowercaseMethods: RequestResponsePact = new RequestResponsePact(provider, consumer, JavaConversions.seqAsJavaList(interactionsWithLowerCaseMethods.toSeq))
 
 }

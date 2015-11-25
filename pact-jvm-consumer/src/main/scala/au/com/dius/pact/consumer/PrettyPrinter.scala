@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.model.{Interaction, _}
+import au.com.dius.pact.model.{RequestResponseInteraction, _}
 import difflib.DiffUtils
 import groovy.json.JsonOutput
 
@@ -68,7 +68,7 @@ object PrettyPrinter {
     if(missing.isEmpty) {
       ""
     } else {
-      s"missing:\n ${missing.map(_.getRequest).mkString("\n")}"
+      s"missing:\n ${missing.map(_.asInstanceOf[RequestResponseInteraction].getRequest).mkString("\n")}"
     }
   }
 

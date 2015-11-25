@@ -11,7 +11,7 @@ import scala.collection.JavaConversions
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-class PactSpec(config: PactConfiguration, pact: Pact)(implicit timeout: Duration = 10.seconds) extends FreeSpec with Assertions {
+class PactSpec(config: PactConfiguration, pact: RequestResponsePact)(implicit timeout: Duration = 10.seconds) extends FreeSpec with Assertions {
   implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool)
 
   JavaConversions.asScalaBuffer(pact.getInteractions).toList.foreach { interaction =>

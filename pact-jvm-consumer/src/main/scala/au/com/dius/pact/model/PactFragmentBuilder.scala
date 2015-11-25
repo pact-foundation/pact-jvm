@@ -71,7 +71,7 @@ object PactFragmentBuilder {
           consumer,
           provider,
           state,
-          Seq(new Interaction(
+          Seq(new RequestResponseInteraction(
             description,
             state.orNull,
             request,
@@ -80,7 +80,7 @@ object PactFragmentBuilder {
     }
   }
 
-  case class PactWithAtLeastOneRequest(consumer: Consumer, provider:Provider, state: Option[String], interactions: Seq[Interaction]) {
+  case class PactWithAtLeastOneRequest(consumer: Consumer, provider:Provider, state: Option[String], interactions: Seq[RequestResponseInteraction]) {
     def uponReceiving(description: String) = {
       DescribingRequest(consumer, provider, state, description, CanBuildPactFragment.additionalBuild(this))
     }
@@ -91,7 +91,7 @@ object PactFragmentBuilder {
   }
 
   object CanBuildPactFragment {
-    type Builder = (Consumer, Provider, Option[String], Seq[Interaction]) => PactWithAtLeastOneRequest
+    type Builder = (Consumer, Provider, Option[String], Seq[RequestResponseInteraction]) => PactWithAtLeastOneRequest
 
     val firstBuild: Builder = PactWithAtLeastOneRequest.apply
 

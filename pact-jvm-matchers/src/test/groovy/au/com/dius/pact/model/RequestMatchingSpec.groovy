@@ -16,7 +16,7 @@ class RequestMatchingSpec extends Specification {
   }
 
   def test(Request actual) {
-    interaction = new Interaction('test interaction', 'test state', request, response)
+    interaction = new RequestResponseInteraction('test interaction', 'test state', request, response)
     new RequestMatching(JavaConversions.asScalaBuffer([interaction]).toSeq()).findResponse(actual)
   }
 

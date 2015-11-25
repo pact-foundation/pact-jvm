@@ -4,7 +4,7 @@ package au.com.dius.pact.consumer.groovy
 import au.com.dius.pact.consumer.StatefulMockProvider
 import au.com.dius.pact.consumer.VerificationResult
 import au.com.dius.pact.model.Consumer
-import au.com.dius.pact.model.Interaction
+import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.MockProviderConfig
 import au.com.dius.pact.model.MockProviderConfig$
 import au.com.dius.pact.model.PactConfig
@@ -95,7 +95,7 @@ class PactBuilder extends BaseBuilder {
       Map headers = setupHeaders(requestData[i].headers ?: [:], requestMatchers)
       Map responseHeaders = setupHeaders(responseData[i].headers ?: [:], responseMatchers)
       String path = setupPath(requestData[i].path ?: '/', requestMatchers)
-      interactions << new Interaction(
+      interactions << new RequestResponseInteraction(
         requestDescription,
         providerState,
         new Request(requestData[i].method ?: 'get', path, requestData[i]?.query, headers, requestData[i].body ?: '',

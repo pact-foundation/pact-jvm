@@ -60,7 +60,7 @@ class PactSerializerSpec extends Specification with StrictLogging {
      }
 
      "deserialize V3 pact" in {
-       val pact = PactReader.loadPact(loadTestFile("test_pact_v3.json")).asInstanceOf[Pact]
+       val pact = PactReader.loadPact(loadTestFile("test_pact_v3.json")).asInstanceOf[RequestResponsePact]
        pact must beEqualTo(ModelFixtures.pact)
      }
 
@@ -80,7 +80,7 @@ class PactSerializerSpec extends Specification with StrictLogging {
      }
 
      "deserialize should not convert fields called 'body'" in {
-       val pact = PactReader.loadPact(loadTestFile("test_pact_with_bodies.json")).asInstanceOf[Pact]
+       val pact = PactReader.loadPact(loadTestFile("test_pact_with_bodies.json")).asInstanceOf[RequestResponsePact]
        pact.getInteractions.get(0).getRequest.getBody must beEqualTo(("{\n" +
          "  \"body\" : [ 1, 2, 3 ],\n" +
          "  \"complete\" : {\n" +
@@ -99,7 +99,7 @@ class PactSerializerSpec extends Specification with StrictLogging {
      }
 
      "deserialize pact with no bodies" in {
-       val pact = PactReader.loadPact(loadTestFile("test_pact_no_bodies.json")).asInstanceOf[Pact]
+       val pact = PactReader.loadPact(loadTestFile("test_pact_no_bodies.json")).asInstanceOf[RequestResponsePact]
        pact must beEqualTo(ModelFixtures.pactWithNoBodies)
      }
 

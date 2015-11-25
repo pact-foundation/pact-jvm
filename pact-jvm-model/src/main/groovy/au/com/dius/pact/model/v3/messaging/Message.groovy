@@ -1,6 +1,7 @@
 package au.com.dius.pact.model.v3.messaging
 
 import au.com.dius.pact.model.HttpPart
+import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Response
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -10,7 +11,7 @@ import groovy.transform.Canonical
  * Message in a Message Pact
  */
 @Canonical
-class Message {
+class Message implements Interaction {
   private static final String JSON = 'application/json'
 
   String description
@@ -54,5 +55,10 @@ class Message {
 
   HttpPart asPactRequest() {
     new Response(200, ['Content-Type': contentType], contents ? JsonOutput.toJson(contents) : null, matchingRules)
+  }
+
+  @Override
+  boolean conflictsWith(Interaction other) {
+    false
   }
 }

@@ -20,7 +20,7 @@ class PactReaderSpec extends Specification {
       then:
       1 * PactReader.loadV2Pact(pactUrl, _)
       0 * PactReader.loadV3Pact(pactUrl, _)
-      pact instanceof Pact
+      pact instanceof RequestResponsePact
   }
 
   def 'loads a pact with V1 version using existing loader'() {
@@ -33,7 +33,7 @@ class PactReaderSpec extends Specification {
       then:
       1 * PactReader.loadV2Pact(pactUrl, _)
       0 * PactReader.loadV3Pact(pactUrl, _)
-      pact instanceof Pact
+      pact instanceof RequestResponsePact
   }
 
   def 'loads a pact with V2 version using existing loader'() {
@@ -46,7 +46,7 @@ class PactReaderSpec extends Specification {
       then:
       1 * PactReader.loadV2Pact(pactUrl, _)
       0 * PactReader.loadV3Pact(pactUrl, _)
-      pact instanceof Pact
+      pact instanceof RequestResponsePact
   }
 
   def 'loads a pact with V3 version using V3 loader'() {
@@ -59,7 +59,7 @@ class PactReaderSpec extends Specification {
       then:
       0 * PactReader.loadV2Pact(pactUrl, _)
       1 * PactReader.loadV3Pact(pactUrl, _)
-      pact instanceof Pact
+      pact instanceof RequestResponsePact
   }
 
   def 'loads a message pact with V3 version using V3 loader'() {
@@ -85,7 +85,7 @@ class PactReaderSpec extends Specification {
       then:
       1 * PactReader.loadV2Pact(pactInputStream, _)
       0 * PactReader.loadV3Pact(pactInputStream, _)
-      pact instanceof Pact
+      pact instanceof RequestResponsePact
   }
 
 }

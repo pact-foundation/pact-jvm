@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.junit;
 
 import au.com.dius.pact.model.Pact;
+import au.com.dius.pact.model.RequestResponsePact;
 import au.com.dius.pact.provider.junit.loader.PactBroker;
 import au.com.dius.pact.provider.junit.loader.PactFolder;
 import au.com.dius.pact.provider.junit.loader.PactSource;
@@ -67,7 +68,7 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         }
 
         for (final Pact pact : pacts) {
-            this.child.add(new InteractionRunner(testClass, pact));
+            this.child.add(new InteractionRunner(testClass, (RequestResponsePact) pact));
         }
     }
 

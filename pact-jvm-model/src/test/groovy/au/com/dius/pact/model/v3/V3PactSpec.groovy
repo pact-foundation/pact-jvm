@@ -1,6 +1,8 @@
 package au.com.dius.pact.model.v3
 
+import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.InvalidPactException
+import au.com.dius.pact.model.Pact
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import spock.lang.Specification
@@ -41,6 +43,15 @@ class V3PactSpec extends Specification {
             protected File fileForPact(String pactDir) {
                 pactFile
             }
+
+            List<Interaction> getInteractions() {
+                []
+            }
+
+            @Override
+            Pact sortInteractions() {
+                this
+            }
         }
 
         when:
@@ -77,6 +88,15 @@ class V3PactSpec extends Specification {
             @SuppressWarnings('UnusedMethodParameter')
             protected File fileForPact(String pactDir) {
                 pactFile
+            }
+
+            List<Interaction> getInteractions() {
+                []
+            }
+
+            @Override
+            Pact sortInteractions() {
+                this
             }
         }
 
@@ -121,6 +141,15 @@ class V3PactSpec extends Specification {
             protected File fileForPact(String pactDir) {
                 pactFile
             }
+
+            List<Interaction> getInteractions() {
+                []
+            }
+
+            @Override
+            Pact sortInteractions() {
+                this
+            }
         }
 
         when:
@@ -159,6 +188,15 @@ class V3PactSpec extends Specification {
             @SuppressWarnings('UnusedMethodParameter')
             protected File fileForPact(String pactDir) {
                 pactFile
+            }
+
+            List<Interaction> getInteractions() {
+                []
+            }
+
+            @Override
+            Pact sortInteractions() {
+                this
             }
         }
 

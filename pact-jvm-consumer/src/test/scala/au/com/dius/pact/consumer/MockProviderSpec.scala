@@ -5,7 +5,7 @@ import java.util.concurrent.Executors
 import com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.consumer.Fixtures._
 import au.com.dius.pact.consumer.dispatch.HttpClient
-import au.com.dius.pact.model.{Interaction, _}
+import au.com.dius.pact.model.{RequestResponseInteraction, _}
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.execute.Result
@@ -82,7 +82,7 @@ class MockProviderSpec extends Specification with StrictLogging {
         actual.getBody must beEqualTo(expected.getBody)
       }
 
-      def compare(actual: Interaction, request:Request, response:Response) = {
+      def compare(actual: RequestResponseInteraction, request:Request, response:Response) = {
         actual.getDescription must beEqualTo(interaction.getDescription)
         actual.getProviderState must beEqualTo(interaction.getProviderState)
         compareRequests(actual.getRequest, request)
@@ -102,7 +102,7 @@ class MockProviderSpec extends Specification with StrictLogging {
         "{\"error\": \"unexpected request\"}")
 
       compareRequests(results.unexpected.head, invalidRequest)
-      compare(results.matched.head, validRequest, response)
+      compare(results.matched.head.asInstanceOf[RequestResponseInteraction], validRequest, response)
     }
   }
 }

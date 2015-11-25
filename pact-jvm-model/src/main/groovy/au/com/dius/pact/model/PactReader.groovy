@@ -18,7 +18,7 @@ class PactReader {
    * Loads a pact file from either a File or a URL
    * @param source a File or a URL
    */
-  static BasePact loadPact(def source) {
+  static Pact loadPact(def source) {
       def pact = loadFile(source)
       def version = pact.metadata?.'pact-specification'?.version ?: '2.0.0'
       if (version == '3.0') {
@@ -34,7 +34,7 @@ class PactReader {
   }
 
   @SuppressWarnings('UnusedMethodParameter')
-  static BasePact loadV3Pact(def source, def pactJson) {
+  static Pact loadV3Pact(def source, def pactJson) {
       if (pactJson.messages) {
           new MessagePact().fromMap(pactJson)
       } else {
@@ -45,15 +45,15 @@ class PactReader {
         def interactions = transformedJson.interactions.collect { i ->
           def request = extractRequestV3(i.request)
           def response = extractResponse(i.response)
-          new Interaction(i.description, i.providerState, request, response)
+          new RequestResponseInteraction(i.description, i.providerState, request, response)
         }
 
-        new Pact(provider, consumer, interactions)
+        new RequestResponsePact(provider, consumer, interactions)
       }
   }
 
   @SuppressWarnings('UnusedMethodParameter')
-  static BasePact loadV2Pact(def source, def pactJson) {
+  static Pact loadV2Pact(def source, def pactJson) {
     def transformedJson = recursiveTransformJson(pactJson)
     def provider = transformedJson.provider as Provider
     def consumer = transformedJson.consumer as Consumer
@@ -61,10 +61,10 @@ class PactReader {
     def interactions = transformedJson.interactions.collect { i ->
       def request = extractRequestV2(i.request ?: [:])
       def response = extractResponse(i.response ?: [:])
-      new Interaction(i.description, i.providerState, request, response)
+      new RequestResponseInteraction(i.description, i.providerState, request, response)
     }
 
-    new Pact(provider, consumer, interactions)
+    new RequestResponsePact(provider, consumer, interactions)
   }
 
   static Response extractResponse(responseJson) {

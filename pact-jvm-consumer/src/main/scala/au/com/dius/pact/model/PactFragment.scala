@@ -4,9 +4,9 @@ import au.com.dius.pact.consumer._
 
 case class PactFragment(consumer: Consumer,
                         provider: Provider,
-                        interactions: Seq[Interaction]) {
+                        interactions: Seq[RequestResponseInteraction]) {
   import scala.collection.JavaConversions._
-  def toPact: Pact = new Pact(provider, consumer, interactions)
+  def toPact: RequestResponsePact = new RequestResponsePact(provider, consumer, interactions)
 
   def duringConsumerSpec[T](config: MockProviderConfig)(test: => T, verification: ConsumerTestVerification[T]): VerificationResult = {
     val server = DefaultMockProvider(config)

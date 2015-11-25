@@ -3,7 +3,7 @@ package au.com.dius.pact.provider.junit.target;
 import au.com.dius.pact.model.BodyMismatch;
 import au.com.dius.pact.model.BodyTypeMismatch;
 import au.com.dius.pact.model.HeaderMismatch;
-import au.com.dius.pact.model.Interaction;
+import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.model.Response;
 import au.com.dius.pact.model.ResponseMatching$;
 import au.com.dius.pact.model.ResponsePartMismatch;
@@ -16,7 +16,7 @@ import java.util.Map;
 
 /**
  * Out-of-the-box implementation of {@link Target},
- * that run {@link Interaction} against http service and verify response
+ * that run {@link RequestResponseInteraction} against http service and verify response
  */
 public class HttpTarget implements Target {
     private final String host;
@@ -44,7 +44,7 @@ public class HttpTarget implements Target {
      * {@inheritDoc}
      */
     @Override
-    public void testInteraction(final Interaction interaction) {
+    public void testInteraction(final RequestResponseInteraction interaction) {
         final ProviderClient providerClient = new ProviderClient();
         providerClient.setProvider(getProviderInfo());
         providerClient.setRequest(interaction.getRequest());

@@ -1,8 +1,7 @@
 package au.com.dius.pact.provider.sbtsupport
 
 import java.io.File
-
-import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.provider.PactFileSource
 import org.scalatest._
 
@@ -13,7 +12,7 @@ object Main {
     (config, PactFileSource.loadFiles(pactRoot))
   }
 
-  def runPacts(t:(PactConfiguration, Seq[Pact])) = t match { case (config, pacts) =>
+  def runPacts(t:(PactConfiguration, Seq[RequestResponsePact])) = t match { case (config, pacts) =>
     val suite = new Sequential(pacts.map { pact =>
       new PactSpec(config, pact)
     }: _*)

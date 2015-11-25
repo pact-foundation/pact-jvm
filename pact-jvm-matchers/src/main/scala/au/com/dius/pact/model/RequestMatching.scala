@@ -4,11 +4,11 @@ import com.typesafe.scalalogging.StrictLogging
 
 import scala.collection.JavaConversions
 
-case class RequestMatching(expectedInteractions: Seq[Interaction]) {
+case class RequestMatching(expectedInteractions: Seq[RequestResponseInteraction]) {
   import au.com.dius.pact.model.RequestMatching._
       
   def matchInteraction(actual: Request): RequestMatch = {
-    def compareToActual(expected: Interaction) = compareRequest(expected, actual) 
+    def compareToActual(expected: RequestResponseInteraction) = compareRequest(expected, actual)
     val matches = expectedInteractions.map(compareToActual)
     if (matches.isEmpty)
       RequestMismatch
@@ -17,7 +17,7 @@ case class RequestMatching(expectedInteractions: Seq[Interaction]) {
   }
       
   def findResponse(actual: Request): Option[Response] = 
-    matchInteraction(actual).toOption.map(_.getResponse)
+    matchInteraction(actual).toOption.map(_.asInstanceOf[RequestResponseInteraction].getResponse)
 }
 
 object RequestMatching extends StrictLogging {
@@ -25,7 +25,7 @@ object RequestMatching extends StrictLogging {
 
   var diffConfig = DiffConfig(allowUnexpectedKeys = false, structural = false)
 
-  implicit def liftPactForMatching(pact: Pact): RequestMatching =
+  implicit def liftPactForMatching(pact: RequestResponsePact): RequestMatching =
     RequestMatching(JavaConversions.collectionAsScalaIterable(pact.getInteractions).toSeq)
                      
   def isPartialMatch(problems: Seq[RequestPartMismatch]): Boolean = !problems.exists {
@@ -33,12 +33,12 @@ object RequestMatching extends StrictLogging {
     case _ => false
   }
     
-  def decideRequestMatch(expected: Interaction, problems: Seq[RequestPartMismatch]): RequestMatch = 
+  def decideRequestMatch(expected: RequestResponseInteraction, problems: Seq[RequestPartMismatch]): RequestMatch =
     if (problems.isEmpty) FullRequestMatch(expected)
     else if (isPartialMatch(problems)) PartialRequestMatch(expected, problems) 
     else RequestMismatch
     
-  def compareRequest(expected: Interaction, actual: Request): RequestMatch = {
+  def compareRequest(expected: RequestResponseInteraction, actual: Request): RequestMatch = {
     val mismatches: Seq[RequestPartMismatch] = requestMismatches(expected.getRequest, actual)
     logger.debug("Request mismatch: " + mismatches)
     decideRequestMatch(expected, mismatches)
