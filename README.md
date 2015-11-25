@@ -37,7 +37,7 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki).
 
 ## Note about artifact names and versions
 
-Pact-JVM is written in Scala. As Scala does not provide binary compatibility between major versions, all the Pact-JVM
+Pact-JVM is partially written in Scala. As Scala does not provide binary compatibility between major versions, all the Pact-JVM
 artifacts have the version of Scala they were built with in the artifact name. So, for example, the pact-jvm-consumer-junit
 module has a Jar file named pact-jvm-consumer_2.10. The full name of the file is pact-jvm-consumer_2.10-2.0.x.jar.
 

@@ -1,8 +1,6 @@
 package au.com.dius.pact.provider.gradle
 
-@SuppressWarnings(['DuplicateImport', 'UnusedImport'])
 import au.com.dius.pact.model.Response
-import au.com.dius.pact.model.Response$
 import au.com.dius.pact.provider.ResponseComparison
 import org.apache.http.entity.ContentType
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
@@ -21,7 +19,7 @@ class ResponseComparisonTest {
 
   @Before
   void setup() {
-    response = Response$.MODULE$.apply(200, ['Content-Type': 'application/json'], '{"stuff": "is good"}', [:])
+    response = new Response(200, ['Content-Type': 'application/json'], '{"stuff": "is good"}', [:])
     actualStatus = 200
     actualBody = '{"stuff": "is good"}'
     actualResponse = [contentType: ContentType.APPLICATION_JSON]
@@ -39,23 +37,23 @@ class ResponseComparisonTest {
 
   @Test
   void 'should not compare headers if there are no expected headers'() {
-    response = Response$.MODULE$.apply(200, [:], '', [:])
+    response = new Response(200, [:], '', [:])
     assert testSubject().headers == [:]
   }
 
   @Test
   void 'should only compare the expected headers'() {
     actualHeaders = ['A': 'B', 'C': 'D']
-    response = Response$.MODULE$.apply(200, ['A': 'B'], '', [:])
+    response = new Response(200, ['A': 'B'], '', [:])
     assert testSubject().headers == ['A': true]
-    response = Response$.MODULE$.apply(200, ['A': 'D'], '', [:])
+    response = new Response(200, ['A': 'D'], '', [:])
     assert testSubject().headers.A == 'Expected header \'A\' to have value \'D\' but was \'B\''
   }
 
   @Test
   void 'ignores case in header comparisons'() {
     actualHeaders = ['A': 'B', 'C': 'D']
-    response = Response$.MODULE$.apply(200, ['a': 'B'], '', [:])
+    response = new Response(200, ['a': 'B'], '', [:])
     assert testSubject().headers == ['a': true]
   }
 
