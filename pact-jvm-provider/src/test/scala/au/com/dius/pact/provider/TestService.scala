@@ -5,6 +5,7 @@ import au.com.dius.pact.model.unfiltered.Conversions
 import au.com.dius.pact.model.{Request, Response}
 import au.com.dius.pact.provider.AnimalServiceResponses.responses
 import groovy.json.JsonSlurper
+import io.netty.channel.ChannelHandler.Sharable
 import unfiltered.netty.{ReceivedMessage, ServerErrorResponse, cycle}
 import unfiltered.request.HttpRequest
 import unfiltered.response.ResponseFunction
@@ -12,6 +13,7 @@ import unfiltered.response.ResponseFunction
 object TestService extends StrictLogging {
   var state: String = ""
 
+  @Sharable
   case class RequestHandler(port: Int) extends cycle.Plan
     with cycle.SynchronousExecution
     with ServerErrorResponse {
