@@ -8,8 +8,11 @@ import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
 
+/**
+ * Task to push pact files to a pact broker
+ */
 @Mojo(name = 'publish')
-public class PactPublishMojo extends AbstractMojo {
+class PactPublishMojo extends AbstractMojo {
     @Parameter(required = true, readonly = true, defaultValue = '${project.version}')
     private String projectVersion
 
