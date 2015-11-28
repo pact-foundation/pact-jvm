@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.v3.messaging.MessagePact;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.slf4j.Logger;
@@ -43,6 +44,11 @@ public class MatcherTestUtils {
         List<String> list = Arrays.asList(keys);
         Collections.sort(list);
         assertEquals(list, extractKeys(hashMap));
+    }
+
+    public static void assertMessageMatcherKeysEqualTo(MessagePact messagePact, String... matcherKeys) {
+        Map<String, Map<String,Object>> matchers = messagePact.getMessages().get(0).getMatchingRules();
+        assertEquals(asSet(matcherKeys), new TreeSet<String>(matchers.keySet()));
     }
 
     private static List<String> extractKeys(Map hashMap) {

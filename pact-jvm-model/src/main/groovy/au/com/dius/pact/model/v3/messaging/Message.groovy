@@ -17,8 +17,8 @@ class Message implements Interaction {
   String description
   String providerState
   def contents
-  Map matchingRules = [:]
-  Map metaData = [:]
+  Map<String, Map<String, Object>> matchingRules = [:]
+  Map<String, String> metaData = [:]
 
   byte[] contentsAsBytes() {
     if (contents) {
