@@ -1,5 +1,7 @@
 package au.com.dius.pact.model.v3.messaging
 
+import au.com.dius.pact.model.InvalidPactException
+import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.v3.V3Pact
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
@@ -28,5 +30,23 @@ class MessagePact extends V3Pact {
             metadata: metadata
         ]
     }
+
+    List getInteractions() {
+        messages
+    }
+
+  @Override
+  Pact sortInteractions() {
+    messages.sort { it.providerState + it.description }
+    this
+  }
+
+  MessagePact mergePact(Pact other) {
+    if (!(other instanceof MessagePact)) {
+      throw new InvalidPactException("Unable to merge pact $other as it is not a MessagePact")
+    }
+    messages = (messages + other.interactions).unique { it.description }
+    this
+  }
 
 }

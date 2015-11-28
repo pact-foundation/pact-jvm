@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.Interaction
-import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.RequestResponseInteraction
+import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
 import spock.lang.Specification
@@ -283,8 +283,8 @@ class ProviderVerifierSpec extends Specification {
 
   def 'extract interactions from a V2 pact'() {
     given:
-    def interaction = new Interaction('test interaction')
-    def pact = new Pact(null, null, [interaction])
+    def interaction = new RequestResponseInteraction('test interaction')
+    def pact = new RequestResponsePact(null, null, [interaction])
 
     when:
     def result = verifier.interactions(pact)

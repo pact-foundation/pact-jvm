@@ -2,7 +2,7 @@ package au.com.dius.pact.consumer.specs2
 
 import java.util
 
-import au.com.dius.pact.model.{Consumer, Interaction, Provider, _}
+import au.com.dius.pact.model.{Consumer, RequestResponseInteraction, Provider, _}
 
 object Fixtures {
   import au.com.dius.pact.model.HttpMethod._
@@ -19,7 +19,7 @@ object Fixtures {
     Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*").asInstanceOf[java.util.Map[String, String]],
     "{\"responsetest\": true}")
 
-  val interaction = new Interaction("test interaction", "test state", request, response)
+  val interaction = new RequestResponseInteraction("test interaction", "test state", request, response)
 
-  val pact: Pact = new Pact(provider, consumer, util.Arrays.asList(interaction))
+  val pact: RequestResponsePact = new RequestResponsePact(provider, consumer, util.Arrays.asList(interaction))
 }

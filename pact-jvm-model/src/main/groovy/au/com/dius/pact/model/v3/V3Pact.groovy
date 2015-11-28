@@ -90,9 +90,9 @@ abstract class V3Pact extends BasePact {
     abstract Map toMap()
 
     V3Pact fromMap(Map map) {
-        consumer = new Consumer(map.consumer?.name ?: 'consumer')
-        provider = new Provider(map.provider?.name ?: 'provider')
-        metadata = map.metadata
-        this
+      consumer = new Consumer(map.consumer?.name ?: 'consumer')
+      provider = new Provider(map.provider?.name ?: 'provider')
+      metadata = map.metadata
+      this
     }
 }

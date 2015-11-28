@@ -83,12 +83,11 @@ public class PactBrokerLoader implements PactLoader {
                     "\n payload: '" + IOUtils.toString(httpResponse.getEntity().getContent()) + "'");
         }
 
-        final PactReader pactReader = new PactReader();
         final JsonNode fullList = OBJECT_MAPPER.readTree(httpResponse.getEntity().getContent());
         JsonNode path = fullList.path("_links").path("pacts");
         List<Pact> pacts = new ArrayList<Pact>();
         for (JsonNode jsonNode: path) {
-            pacts.add((Pact) pactReader.loadPact(jsonNode.get("href").asText()));
+            pacts.add(PactReader.loadPact(jsonNode.get("href").asText()));
         }
         return pacts;
     }

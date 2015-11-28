@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
-import au.com.dius.pact.model.Interaction;
+import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactReader;
 import au.com.dius.pact.model.Request;
@@ -148,7 +148,7 @@ public class PactDslResponse {
     }
 
     private void addInteraction() {
-        consumerPactBuilder.getInteractions().add(new Interaction(
+        consumerPactBuilder.getInteractions().add(new RequestResponseInteraction(
           request.description,
           request.state,
           new Request(request.requestMethod, request.path, PactReader.queryStringToMap(request.query, false),

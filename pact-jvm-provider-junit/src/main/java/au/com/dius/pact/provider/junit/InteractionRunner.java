@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.junit;
 
 import au.com.dius.pact.model.Interaction;
-import au.com.dius.pact.model.Pact;
+import au.com.dius.pact.model.RequestResponsePact;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
 import org.apache.commons.lang3.ArrayUtils;
@@ -39,11 +39,12 @@ import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_VALIDATO
  */
 class InteractionRunner extends Runner {
     private final TestClass testClass;
-    private final Pact pact;
+    private final RequestResponsePact pact;
 
-    private final ConcurrentHashMap<Interaction, Description> childDescriptions = new ConcurrentHashMap<Interaction, Description>();
+    private final ConcurrentHashMap<Interaction, Description> childDescriptions =
+      new ConcurrentHashMap<Interaction, Description>();
 
-    public InteractionRunner(final TestClass testClass, final Pact pact) throws InitializationError {
+    public InteractionRunner(final TestClass testClass, final RequestResponsePact pact) throws InitializationError {
         this.testClass = testClass;
         this.pact = pact;
 

@@ -60,4 +60,3 @@ abstract class StatefulMockProvider extends MockProvider with StrictLogging {
     response
   }
 }
-

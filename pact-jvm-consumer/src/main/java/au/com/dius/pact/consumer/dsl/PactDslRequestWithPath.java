@@ -2,7 +2,6 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.Consumer;
-import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.model.Provider;
 import nl.flotsam.xeger.Xeger;
 import org.apache.http.entity.ContentType;
@@ -10,9 +9,7 @@ import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class PactDslRequestWithPath {

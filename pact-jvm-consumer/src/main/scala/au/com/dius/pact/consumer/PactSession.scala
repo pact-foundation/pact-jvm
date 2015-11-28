@@ -8,10 +8,10 @@ object PactSessionResults {
 }
 
 case class PactSessionResults(
-    matched: List[Interaction], 
-    almostMatched: List[PartialRequestMatch],
-    missing: List[Interaction], 
-    unexpected: List[Request]) {
+                               matched: List[Interaction],
+                               almostMatched: List[PartialRequestMatch],
+                               missing: List[Interaction],
+                               unexpected: List[Request]) {
   
   def addMatched(inter: Interaction) = copy(matched = inter :: matched)
   def addUnexpected(request: Request) = copy(unexpected = request :: unexpected)
@@ -31,7 +31,7 @@ object PactSession {
 
 case class PactSession(expected: Seq[Interaction], results: PactSessionResults) {
   import scala.collection.JavaConversions._
-  private def matcher = RequestMatching(expected.toSeq)
+  private def matcher = RequestMatching(expected.asInstanceOf[Seq[RequestResponseInteraction]])
 
   val CrossSiteHeaders = Map[String, String]("Access-Control-Allow-Origin" -> "*")
 
@@ -45,7 +45,7 @@ case class PactSession(expected: Seq[Interaction], results: PactSessionResults) 
     
     matcher.matchInteraction(req) match {
       case FullRequestMatch(inter) => 
-        (inter.getResponse, recordMatched(inter))
+        (inter.asInstanceOf[RequestResponseInteraction].getResponse, recordMatched(inter))
         
       case p @ PartialRequestMatch(problems) => 
         (invalidResponse, recordAlmostMatched(p))
@@ -61,7 +61,7 @@ case class PactSession(expected: Seq[Interaction], results: PactSessionResults) 
   def recordAlmostMatched(partial: PartialRequestMatch): PactSession = 
     copy(results = results addAlmostMatched partial)  
     
-  def recordMatched(interaction: Interaction): PactSession = 
+  def recordMatched(interaction: Interaction): PactSession =
     copy(results = results addMatched interaction)
   
   def withTheRestMissing: PactSession = PactSession(Seq(), remainingResults)

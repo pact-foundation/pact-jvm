@@ -11,7 +11,7 @@ abstract class RequestSpecificationSpec extends SpecificationSpec with StrictLog
   sequential
 
   def test(input: PactRequestSpecification) = {
-    val fakeInteraction = new Interaction("", null, input.expected, new Response(200))
+    val fakeInteraction = new RequestResponseInteraction("", null, input.expected, new Response(200))
     val result = RequestMatching.compareRequest(fakeInteraction, input.actual)
     logger.debug(s"${input.comment} -> $result")
     if(input.`match`) {

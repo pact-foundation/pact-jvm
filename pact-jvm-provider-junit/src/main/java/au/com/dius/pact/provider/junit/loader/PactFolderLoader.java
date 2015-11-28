@@ -35,7 +35,6 @@ public class PactFolderLoader implements PactLoader {
 
     @Override
     public List<Pact> load(final String providerName) throws IOException {
-        final PactReader pactReader = new PactReader();
         List<Pact> pacts = new ArrayList<Pact>();
         File[] files = path.listFiles(new FilenameFilter() {
             @Override
@@ -43,10 +42,12 @@ public class PactFolderLoader implements PactLoader {
                 return name.endsWith(".json");
             }
         });
-        for (File file: files) {
-            Pact pact = (Pact) pactReader.loadPact(file);
-            if (pact.getProvider().getName().equals(providerName)) {
-                pacts.add(pact);
+        if (files != null) {
+            for (File file : files) {
+                Pact pact = PactReader.loadPact(file);
+                if (pact.getProvider().getName().equals(providerName)) {
+                    pacts.add(pact);
+                }
             }
         }
         return pacts;

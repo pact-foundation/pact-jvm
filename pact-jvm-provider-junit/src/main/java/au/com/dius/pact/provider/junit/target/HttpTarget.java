@@ -4,6 +4,7 @@ import au.com.dius.pact.model.BodyMismatch;
 import au.com.dius.pact.model.BodyTypeMismatch;
 import au.com.dius.pact.model.HeaderMismatch;
 import au.com.dius.pact.model.Interaction;
+import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.model.Response;
 import au.com.dius.pact.model.ResponseMatching$;
 import au.com.dius.pact.model.ResponsePartMismatch;
@@ -16,7 +17,7 @@ import java.util.Map;
 
 /**
  * Out-of-the-box implementation of {@link Target},
- * that run {@link Interaction} against http service and verify response
+ * that run {@link RequestResponseInteraction} against http service and verify response
  */
 public class HttpTarget implements Target {
     private final String host;
@@ -47,11 +48,12 @@ public class HttpTarget implements Target {
     public void testInteraction(final Interaction interaction) {
         final ProviderClient providerClient = new ProviderClient();
         providerClient.setProvider(getProviderInfo());
-        providerClient.setRequest(interaction.getRequest());
+        RequestResponseInteraction reqResInteraction = (RequestResponseInteraction) interaction;
+        providerClient.setRequest(reqResInteraction.getRequest());
         final Map<String, Object> actualResponse = (Map<String, Object>) providerClient.makeRequest();
 
         final Seq<ResponsePartMismatch> mismatches = ResponseMatching$.MODULE$.responseMismatches(
-                interaction.getResponse(),
+                reqResInteraction.getResponse(),
                 new Response(
                         ((Integer) actualResponse.get("statusCode")).intValue(),
                         (Map<String, String>) actualResponse.get("headers"),

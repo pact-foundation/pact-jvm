@@ -1,5 +1,7 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.model.v3.messaging.MessagePact
+
 import scala.collection.JavaConversions
 
 trait MergeResult
@@ -18,8 +20,13 @@ object PactMerge {
     } yield (a, b)
 
     if (failures.isEmpty) {
-      val mergedInteractions = interactions ++ otherInteractions.filterNot(interactions.contains)
-      val result: Pact = new Pact(existing.getProvider, existing.getConsumer, JavaConversions.seqAsJavaList(mergedInteractions))
+      val result = existing match {
+        case reqRes: RequestResponsePact =>
+          val mergedInteractions = interactions ++ otherInteractions.filterNot(interactions.contains)
+          new RequestResponsePact(existing.getProvider, existing.getConsumer, JavaConversions.seqAsJavaList(mergedInteractions).asInstanceOf[java.util.List[RequestResponseInteraction]])
+        case messagePact: MessagePact =>
+          messagePact.mergePact(newPact)
+      }
       result.sortInteractions()
       MergeSuccess(result)
     } else {

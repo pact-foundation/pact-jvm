@@ -22,9 +22,9 @@ object Fixtures {
     JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*")),
     "{\"responsetest\": true}")
 
-  val interaction = new Interaction("test interaction", "test state", request, response)
+  val interaction = new RequestResponseInteraction("test interaction", "test state", request, response)
 
-  val pact: Pact = new Pact(provider, consumer, util.Arrays.asList(interaction))
+  val pact: RequestResponsePact = new RequestResponsePact(provider, consumer, util.Arrays.asList(interaction))
 
   case class ConsumerService(serverUrl: String) {
     implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool)

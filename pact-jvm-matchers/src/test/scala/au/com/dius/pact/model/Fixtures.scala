@@ -17,9 +17,9 @@ object Fixtures {
   val response = new Response(200, JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheaderval")),
     "{\"responsetest\": true}")
 
-  val interaction = new Interaction("test interaction", "test state", request, response)
+  val interaction = new RequestResponseInteraction("test interaction", "test state", request, response)
 
   val interactions = util.Arrays.asList(interaction)
 
-  val pact: Pact = new Pact(provider, consumer, interactions)
+  val pact: RequestResponsePact = new RequestResponsePact(provider, consumer, interactions)
 }

@@ -33,7 +33,7 @@ class PactWriter {
     ]
   }
 
-  static Map interactionToMap(Interaction interaction, PactSpecVersion pactSpecVersion) {
+  static Map interactionToMap(RequestResponseInteraction interaction, PactSpecVersion pactSpecVersion) {
     [
       providerState: interaction.providerState,
       description: interaction.description,
