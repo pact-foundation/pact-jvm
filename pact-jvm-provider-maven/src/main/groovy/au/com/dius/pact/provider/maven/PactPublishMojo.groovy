@@ -12,6 +12,7 @@ import org.apache.maven.plugins.annotations.Parameter
  * Task to push pact files to a pact broker
  */
 @Mojo(name = 'publish')
+@SuppressWarnings('Println')
 class PactPublishMojo extends AbstractMojo {
     @Parameter(required = true, readonly = true, defaultValue = '${project.version}')
     private String projectVersion
