@@ -32,7 +32,7 @@ public class ExampleMessageConsumerWithV2MatchersTest {
           .closeArray()
           .asBody();
 
-        Map<String, String> metaData = new HashMap<>();
+        Map<String, String> metaData = new HashMap<String, String>();
         metaData.put("contentType", "application/json");
 
       MessagePact messagePact = builder.given("executing a workflow with rabbitmq")
