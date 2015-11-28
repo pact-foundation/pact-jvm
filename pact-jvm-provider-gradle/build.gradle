@@ -15,12 +15,16 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.gradle.plugin-publish'
 
 dependencies {
-    compile gradleApi(), localGroovy(),
-      "org.codehaus.groovy.modules.http-builder:http-builder:$httpBuilderVersion"
-    compile(project(":pact-jvm-provider_${project.scalaVersion}")) {
-      exclude module: 'groovy-all'
-    }
-    compile 'org.fusesource.jansi:jansi:1.11'
+  compile localGroovy(),
+    "org.codehaus.groovy.modules.http-builder:http-builder:$httpBuilderVersion"
+  compile(project(":pact-jvm-provider_${project.scalaVersion}")) {
+    exclude module: 'groovy-all'
+  }
+  compile 'org.fusesource.jansi:jansi:1.11'
+
+  testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+    exclude group: 'org.codehaus.groovy'
+  }
 }
 
 publishing {

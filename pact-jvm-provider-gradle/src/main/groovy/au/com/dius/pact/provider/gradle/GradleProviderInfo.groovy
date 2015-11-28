@@ -16,6 +16,7 @@ class GradleProviderInfo extends ProviderInfo {
   @Override
   ConsumerInfo hasPactWith(String consumer, Closure closure) {
     def consumerInfo = new ConsumerInfo(name: consumer)
+    consumerInfo.verificationType = this.verificationType
     consumers << consumerInfo
     ConfigureUtil.configure(closure, consumerInfo)
     consumerInfo
