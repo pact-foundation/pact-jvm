@@ -1,5 +1,6 @@
 package au.com.dius.pact.model.v3.messaging
 
+import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.InvalidPactException
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.v3.V3Pact
@@ -14,7 +15,7 @@ import groovy.util.logging.Slf4j
 @ToString(includeSuperProperties = true)
 @EqualsAndHashCode(callSuper = true)
 class MessagePact extends V3Pact {
-    List messages = []
+    List<Message> messages = []
 
     MessagePact fromMap(Map map) {
         super.fromMap(map)
@@ -31,7 +32,7 @@ class MessagePact extends V3Pact {
         ]
     }
 
-    List getInteractions() {
+    List<Interaction> getInteractions() {
         messages
     }
 
