@@ -38,7 +38,9 @@ object Conversions extends StrictLogging {
   case class Headers(headers: java.util.Map[String, String]) extends unfiltered.response.Responder[Any] {
     def respond(res: HttpResponse[Any]) {
       import collection.JavaConversions._
-      headers.foreach{ case (key, value) => res.header(key, value)}
+      if (headers != null) {
+        headers.foreach { case (key, value) => res.header(key, value) }
+      }
     }
   }
 
