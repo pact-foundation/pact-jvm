@@ -51,7 +51,7 @@ class Matchers {
   }
 
   def real(Number value = null) {
-    new TypeMatcher(values: ['real', value ?: Double.parseDouble(RandomStringUtils.randomNumeric(TEN)) / 100.0])
+    new TypeMatcher(values: ['real', value ?: (RandomStringUtils.randomNumeric(TEN) as BigDecimal) / 100.0])
   }
 
   def integer(Integer value = null) {

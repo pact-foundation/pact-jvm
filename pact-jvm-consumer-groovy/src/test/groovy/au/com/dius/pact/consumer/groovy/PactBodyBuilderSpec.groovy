@@ -38,6 +38,7 @@ class PactBodyBuilderSpec extends Specification {
           localAddress2 ipAddress('192.169.0.2')
           age(100)
           age2(integer)
+          salary real
 
           ts(timestamp)
           timestamp = timestamp('yyyy/MM/dd - HH:mm:ss.S')
@@ -83,6 +84,7 @@ class PactBodyBuilderSpec extends Specification {
       '$.body.hexCode2': [regex: '[0-9a-fA-F]+'],
       '$.body.id': [match: 'type'],
       '$.body.id2': [match: 'type'],
+      '$.body.salary': [match: 'real'],
       '$.body.localAddress': [regex: '(\\d{1,3}\\.)+\\d{1,3}'],
       '$.body.localAddress2': [regex: '(\\d{1,3}\\.)+\\d{1,3}'],
       '$.body.age2': [match: 'integer'],
@@ -96,7 +98,7 @@ class PactBodyBuilderSpec extends Specification {
     asJavaMap(service.interactions[0].response.matchingRules) == ['$.body.name': [regex: '\\w+']]
 
     keys == ['name', 'surname', 'position', 'happy', 'hexCode', 'hexCode2', 'id', 'id2', 'localAddress',
-      'localAddress2', 'age', 'age2', 'timestamp', 'ts', 'values', 'role', 'roles'] as Set
+      'localAddress2', 'age', 'age2', 'salary', 'timestamp', 'ts', 'values', 'role', 'roles'] as Set
 
     service.interactions[0].response.body == new JsonBuilder([name: 'harry']).toPrettyString()
   }

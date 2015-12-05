@@ -72,6 +72,7 @@ object Matchers extends StrictLogging {
         case "number" => TypeMatcher
         case "integer" => TypeMatcher
         case "real" => TypeMatcher
+        case "decimal" => TypeMatcher
         case "timestamp" => TypeMatcher
         case "time" => TimeMatcher
         case "date" => DateMatcher
@@ -129,11 +130,11 @@ object TypeMatcher extends Matcher with StrictLogging {
   def matchType[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
     logger.debug(s"comparing type of ${valueOf(actual)} to ${valueOf(expected)} at $path")
     (actual, expected) match {
-      case (actual: String, expected: String) => List[Mismatch]()
-      case (actual: Number, expected: Number) => List[Mismatch]()
-      case (actual: Boolean, expected: Boolean) => List[Mismatch]()
-      case (actual: List[_], expected: List[_]) => List[Mismatch]()
-      case (actual: Map[_, _], expected: Map[_, _]) => List[Mismatch]()
+      case (a: String, e: String) => List[Mismatch]()
+      case (a: Number, e: Number) => List[Mismatch]()
+      case (a: Boolean, e: Boolean) => List[Mismatch]()
+      case (a: List[_], e: List[_]) => List[Mismatch]()
+      case (a: Map[_, _], e: Map[_, _]) => List[Mismatch]()
       case (_, null) =>
         if (actual == null) {
           List[Mismatch]()
@@ -147,7 +148,7 @@ object TypeMatcher extends Matcher with StrictLogging {
   def matchNumber[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
     logger.debug(s"comparing type of ${valueOf(actual)} to Number at $path")
     (actual, expected) match {
-      case (actual: Number, _) => List[Mismatch]()
+      case (a: Number, _) => List[Mismatch]()
       case (_, null) =>
         if (actual == null) {
           List[Mismatch]()
@@ -161,9 +162,9 @@ object TypeMatcher extends Matcher with StrictLogging {
   def matchInteger[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
     logger.debug(s"comparing type of ${valueOf(actual)} to Integer at $path")
     (actual, expected) match {
-      case (actual: Integer, _) => List[Mismatch]()
-      case (actual: Long, _) => List[Mismatch]()
-      case (actual: BigInt, _) => List[Mismatch]()
+      case (a: Integer, _) => List[Mismatch]()
+      case (a: Long, _) => List[Mismatch]()
+      case (a: BigInt, _) => List[Mismatch]()
       case (_, null) =>
         if (actual == null) {
           List[Mismatch]()
@@ -174,19 +175,20 @@ object TypeMatcher extends Matcher with StrictLogging {
     }
   }
 
-  def matchReal[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
+  def matchDecimal[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
     logger.debug(s"comparing type of ${valueOf(actual)} to Real at $path")
     (actual, expected) match {
-      case (actual: Float, _) => List[Mismatch]()
-      case (actual: Double, _) => List[Mismatch]()
-      case (actual: BigDecimal, _) => List[Mismatch]()
+      case (_: Float, _) => List[Mismatch]()
+      case (_: Double, _) => List[Mismatch]()
+      case (_: BigDecimal, _) => List[Mismatch]()
+      case (_: java.math.BigDecimal, _) => List[Mismatch]()
       case (_, null) =>
         if (actual == null) {
           List[Mismatch]()
         } else {
           List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to be null", path))
         }
-      case default => List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to be a real number", path))
+      case default => List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to be a decimal number", path))
     }
   }
 
@@ -224,7 +226,8 @@ object TypeMatcher extends Matcher with StrictLogging {
         case "type" => matchType[Mismatch](path, expected, actual, mismatchFn)
         case "number" => matchNumber[Mismatch](path, expected, actual, mismatchFn)
         case "integer" => matchInteger[Mismatch](path, expected, actual, mismatchFn)
-        case "real" => matchReal[Mismatch](path, expected, actual, mismatchFn)
+        case "decimal" => matchDecimal[Mismatch](path, expected, actual, mismatchFn)
+        case "real" => matchDecimal[Mismatch](path, expected, actual, mismatchFn)
         case "timestamp" => matchTimestamp[Mismatch](path, expected, actual, mismatchFn)
         case _ => List(mismatchFn.create(expected, actual, "type matcher is mis-configured", path))
       }
