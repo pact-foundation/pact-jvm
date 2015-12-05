@@ -9,6 +9,7 @@ import java.util.regex.Pattern
 /**
  * Base class for DSL matcher methods
  */
+@SuppressWarnings('DuplicateNumberLiteral')
 class Matchers {
 
   static final String HEXADECIMAL = '[0-9a-fA-F]+'
@@ -50,11 +51,19 @@ class Matchers {
     new TypeMatcher(values: ['number', value ?: RandomStringUtils.randomNumeric(TEN) as Long])
   }
 
+  /**
+   * @deprecated Use decimal instead
+   */
+  @Deprecated
   def real(Number value = null) {
     new TypeMatcher(values: ['real', value ?: (RandomStringUtils.randomNumeric(TEN) as BigDecimal) / 100.0])
   }
 
-  def integer(Integer value = null) {
+  def decimal(Number value = null) {
+    new TypeMatcher(values: ['decimal', value ?: (RandomStringUtils.randomNumeric(TEN) as BigDecimal) / 100.0])
+  }
+
+  def integer(Long value = null) {
     new TypeMatcher(values: ['integer', value ?: RandomStringUtils.randomNumeric(TEN) as Long])
   }
 

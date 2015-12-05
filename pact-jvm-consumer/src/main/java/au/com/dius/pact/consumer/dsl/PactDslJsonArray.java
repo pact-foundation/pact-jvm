@@ -8,6 +8,7 @@ import org.apache.commons.lang3.time.FastDateFormat;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
@@ -221,20 +222,49 @@ public class PactDslJsonArray extends DslPart {
 
     /**
      * Element that must be a real value
+     * @deprecated Use decimalType instead
      */
+    @Deprecated
     public PactDslJsonArray realType() {
-        return realType(Double.parseDouble(RandomStringUtils.randomNumeric(10)) / 100.0);
+        return decimalType();
     }
 
     /**
      * Element that must be a real value
      * @param number example real value
+     * @deprecated Use decimalType instead
      */
+    @Deprecated
     public PactDslJsonArray realType(Double number) {
-        body.put(number);
-        matchers.put(root + appendArrayIndex(0), matchType("real"));
-        return this;
+      return decimalType(number);
     }
+
+  /**
+   * Element that must be a decimal value
+   */
+  public PactDslJsonArray decimalType() {
+      return decimalType(new BigDecimal(RandomStringUtils.randomNumeric(10)));
+  }
+
+  /**
+   * Element that must be a decimalType value
+   * @param number example decimalType value
+   */
+  public PactDslJsonArray decimalType(BigDecimal number) {
+      body.put(number);
+      matchers.put(root + appendArrayIndex(0), matchType("decimal"));
+      return this;
+  }
+
+  /**
+   * Attribute that must be a decimalType value
+   * @param number example decimalType value
+   */
+  public PactDslJsonArray decimalType(Double number) {
+      body.put(number);
+      matchers.put(root + appendArrayIndex(0), matchType("decimal"));
+      return this;
+  }
 
     /**
      * Element that must be a boolean
