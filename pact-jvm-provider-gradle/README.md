@@ -183,6 +183,7 @@ pact {
     }
 
 }
+```
 
 `trustStore` is either relative to the current working (build) directory. `trustStorePassword` defaults to `changeit`.
 
