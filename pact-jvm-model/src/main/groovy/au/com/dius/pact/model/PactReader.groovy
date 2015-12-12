@@ -162,7 +162,7 @@ class PactReader {
   @SuppressWarnings('DuplicateNumberLiteral')
   private static loadPactFromUrl(URL source, Map options) {
     if (options.authentication) {
-      def http = new RESTClient(source)
+      def http = newHttpClient(source)
       switch (options.authentication.first().toLowerCase()) {
         case 'basic':
           if (options.authentication.size() > 2) {
@@ -176,6 +176,10 @@ class PactReader {
     } else {
       new JsonSlurper().parse(source, ACCEPT_JSON)
     }
+  }
+
+  private static newHttpClient(URL source) {
+    new RESTClient(source)
   }
 
   private static boolean fileExists(String path) {
