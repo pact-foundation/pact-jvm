@@ -1,5 +1,30 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.4.2 - bugfix release
+
+* 924ed1d - more jdk 6 fixes (Ronald Holshausen, Sun Dec 13 08:41:57 2015 +1100)
+* 28c8415 - jdk 6 fixes (Ronald Holshausen, Sat Dec 12 21:11:18 2015 +1100)
+* 88f4807 - jdk 6 fixes (Ronald Holshausen, Sat Dec 12 21:06:08 2015 +1100)
+* 2f43245 - Merge branch 'master' into v2.x (Ronald Holshausen, Sat Dec 12 20:56:17 2015 +1100)
+* 31133e7 - added some tests around using basic auth with a pact broker #176 (Ronald Holshausen, Sat Dec 12 20:51:49 2015 +1100)
+* ad2b5f4 - Support basic auth when using hasPactsFromPactBroker #176 (Ronald Holshausen, Sat Dec 12 19:02:26 2015 +1100)
+* 5c8f10e - Fix the version of http client across all modules #196 (Ronald Holshausen, Sat Dec 12 14:38:53 2015 +1100)
+* e4ce01c - Merge pull request #194 from tanob/patch-1 (Ronald Holshausen, Fri Dec 11 09:55:53 2015 +1100)
+* 19a63cc - Fix unclosed code snippet in README (Adriano Bonat, Tue Dec 8 12:21:28 2015 -0200)
+* 124d64f - Rename the real matcher to decimal in the consumer modules #189 (Ronald Holshausen, Sat Dec 5 19:34:25 2015 +1100)
+* d8864f5 - Fix the number matchers after refactor to remove json4s #189 #192 (Ronald Holshausen, Sat Dec 5 19:04:23 2015 +1100)
+* 43f2fd7 - updated readme with links to other implementations (Ronald Holshausen, Sat Dec 5 16:05:42 2015 +1100)
+* e24b544 - Merge pull request #193 from DiUS/pacturl_junit_provider (Ronald Holshausen, Sat Dec 5 15:56:10 2015 +1100)
+* 31fc47f - add @PactUrl to pact-jvm-provider-junit (Stefan Leszkiewicz, Thu Dec 3 00:05:35 2015 +1100)
+* e54bb29 - bump version (Ronald Holshausen, Sun Nov 29 08:18:23 2015 +1100)
+* 204a1d6 - bump version (Ronald Holshausen, Sun Nov 29 08:17:16 2015 +1100)
+* f9f8db3 - use gradle 2.9 after scala memory changes (Ronald Holshausen, Sun Nov 29 08:00:37 2015 +1100)
+* a6e3665 - reduce scala compiler memory for travis build (Ronald Holshausen, Sun Nov 29 07:58:47 2015 +1100)
+* 2835f7a - add travis settings from 2.x build (Ronald Holshausen, Sat Nov 28 21:17:24 2015 +1100)
+* 9fbf795 - updated changelog (Ronald Holshausen, Sat Nov 28 17:53:40 2015 +1100)
+* b960e40 - updated changelog (Ronald Holshausen, Sat Nov 28 17:21:29 2015 +1100)
+* 20b8201 - guard against null headers in the mock server (Ronald Holshausen, Sat Nov 28 17:20:23 2015 +1100)
+
 # 3.2.0 - removed json4s library in favour of groovy JSON parsing, bug fixes + maven pact publish task
 
 * b960e40 - updated changelog (Ronald Holshausen, Sat Nov 28 17:21:29 2015 +1100)
