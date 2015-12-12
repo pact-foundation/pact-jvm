@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,9 +41,10 @@ public class PactUrlLoader implements PactLoader {
     }
 
     public List<Pact> load(final String providerName) throws IOException {
-        return Arrays.stream(urls)
-                .map(PactReader::loadPact)
-                .map(obj -> (Pact) obj)
-                .collect(toList());
+      List<Pact> pacts = new ArrayList<Pact>();
+      for (String url: urls) {
+        pacts.add(PactReader.loadPact(url));
+      }
+      return pacts;
     }
 }
