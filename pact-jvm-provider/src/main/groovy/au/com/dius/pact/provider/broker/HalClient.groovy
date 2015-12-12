@@ -24,7 +24,7 @@ class HalClient {
       http.parser.'application/hal+json' = http.parser.'application/json'
 
       if (options.authentication instanceof List) {
-        switch (options.authentication.first()) {
+        switch (options.authentication.first().toLowerCase()) {
           case 'basic':
             if (options.authentication.size() > 2) {
               http.auth.basic(options.authentication[1].toString(), options.authentication[2].toString())
@@ -76,6 +76,7 @@ class HalClient {
 
   private fetch(String path) {
     setupHttpClient()
+    log.debug "Fetching: $path"
     http.get(path: path, requestContentType: 'application/json').data
   }
 

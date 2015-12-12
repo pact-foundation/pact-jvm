@@ -5,6 +5,7 @@ dependencies {
     "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.1",
     "org.apache.httpcomponents:httpclient:$httpClientVersion"
   compile 'com.github.zafarkhaja:java-semver:0.9.0'
+  compile "org.codehaus.groovy.modules.http-builder:http-builder:$httpBuilderVersion"
 
   testCompile "org.specs2:specs2-mock_${project.scalaVersion}:3.6.4"
   testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {

@@ -23,6 +23,9 @@ class PactBrokerClient {
     HalClient halClient = new HalClient(pactBrokerUrl, options)
     halClient.navigate('pb:latest-provider-pacts', provider: provider).pacts { pact ->
       consumers << new ConsumerInfo(pact.name, new URL(pact.href))
+      if (options.authentication) {
+        consumers.last().pactFileAuthentication = options.authentication
+      }
     }
 
     consumers

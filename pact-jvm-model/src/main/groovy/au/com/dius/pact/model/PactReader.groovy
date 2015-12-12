@@ -5,6 +5,7 @@ import com.github.zafarkhaja.semver.Version
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
+import groovyx.net.http.RESTClient
 
 /**
  * Class to load a Pact from a JSON source using a version strategy
@@ -14,12 +15,13 @@ class PactReader {
 
   private static final String JSON = 'application/json'
   private static final Map ACCEPT_JSON = [requestProperties: [Accept: JSON]]
+
   /**
    * Loads a pact file from either a File or a URL
    * @param source a File or a URL
    */
-  static Pact loadPact(def source) {
-      def pact = loadFile(source)
+  static Pact loadPact(Map options = [:], def source) {
+      def pact = loadFile(source, options)
       def version = pact.metadata?.'pact-specification'?.version ?: '2.0.0'
       if (version == '3.0') {
           version = '3.0.0'
@@ -142,19 +144,38 @@ class PactReader {
     }
   }
 
-  private static loadFile(def source) {
+  private static loadFile(def source, Map options = [:]) {
       if (source instanceof InputStream || source instanceof Reader || source instanceof File) {
           new JsonSlurper().parse(source)
       } else if (source instanceof URL) {
-          new JsonSlurper().parse(source, ACCEPT_JSON)
+        loadPactFromUrl(source, options)
       } else if (source instanceof String && source ==~ '(https?|file)://.*') {
-          new JsonSlurper().parse(new URL(source), ACCEPT_JSON)
+        loadPactFromUrl(new URL(source), options)
       } else if (source instanceof String && fileExists(source)) {
           new JsonSlurper().parse(source as File)
       } else {
           throw new UnsupportedOperationException(
                   "Unable to load pact file from '$source' as it is neither a file, input stream, reader or an URL")
       }
+  }
+
+  @SuppressWarnings('DuplicateNumberLiteral')
+  private static loadPactFromUrl(URL source, Map options) {
+    if (options.authentication) {
+      def http = new RESTClient(source)
+      switch (options.authentication.first().toLowerCase()) {
+        case 'basic':
+          if (options.authentication.size() > 2) {
+            http.auth.basic(options.authentication[1].toString(), options.authentication[2].toString())
+          } else {
+            log.warn('Basic authentication requires a username and password, ignoring.')
+          }
+          break
+      }
+      http.get(headers: [Accept: JSON]).data
+    } else {
+      new JsonSlurper().parse(source, ACCEPT_JSON)
+    }
   }
 
   private static boolean fileExists(String path) {
