@@ -63,6 +63,10 @@ Pact runner will automatically collect pacts: for this purpose there are 2 out-o
 
 To use pacts from Pact Broker annotate test class with `@PactBroker(host="host.of.pact.broker.com", port = 80)`.
 
+### Pact Url
+
+To use pacts from urls annotate test class with `@PactUrl(urls = {http://build.server/zoo_app-animal_service.json} )`.
+
 ### Pact folder
 
 To use pacts from resource folder of project annotate test class with `@PactFolder("subfolder/in/resource/directory")`.

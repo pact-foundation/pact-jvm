@@ -66,7 +66,10 @@ class PactBodyBuilder extends BaseBuilder {
         integer()
         break
       case 'real':
-        real()
+        decimal()
+        break
+      case 'decimal':
+        decimal()
         break
       case 'timestamp':
         timestamp()

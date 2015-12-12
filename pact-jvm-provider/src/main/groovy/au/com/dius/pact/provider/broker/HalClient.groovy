@@ -20,11 +20,9 @@ class HalClient {
   @SuppressWarnings('DuplicateNumberLiteral')
   private void setupHttpClient() {
     if (http == null) {
-      http = new RESTClient(baseUrl)
-      http.parser.'application/hal+json' = http.parser.'application/json'
-
+      http = newHttpClient()
       if (options.authentication instanceof List) {
-        switch (options.authentication.first()) {
+        switch (options.authentication.first().toLowerCase()) {
           case 'basic':
             if (options.authentication.size() > 2) {
               http.auth.basic(options.authentication[1].toString(), options.authentication[2].toString())
@@ -37,6 +35,12 @@ class HalClient {
         log.warn('Authentication options needs to be a list of values, ignoring.')
       }
     }
+  }
+
+  private newHttpClient() {
+    http = new RESTClient(baseUrl)
+    http.parser.'application/hal+json' = http.parser.'application/json'
+    http
   }
 
   HalClient navigate(Map options = [:], String link) {
@@ -76,6 +80,7 @@ class HalClient {
 
   private fetch(String path) {
     setupHttpClient()
+    log.debug "Fetching: $path"
     http.get(path: path, requestContentType: 'application/json').data
   }
 

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -176,7 +177,9 @@ public class PactDslJsonBody extends DslPart {
     /**
      * Attribute that must be a real value
      * @param name attribute name
+     * @deprecated Use decimal instead
      */
+    @Deprecated
     public PactDslJsonBody realType(String name) {
         return realType(name, Double.parseDouble(RandomStringUtils.randomNumeric(10)));
     }
@@ -185,12 +188,44 @@ public class PactDslJsonBody extends DslPart {
      * Attribute that must be a real value
      * @param name attribute name
      * @param number example real value
+     * @deprecated Use decimal instead
      */
+    @Deprecated
     public PactDslJsonBody realType(String name, Double number) {
         body.put(name, number);
         matchers.put(matcherKey(name), matchType("real"));
         return this;
     }
+
+  /**
+   * Attribute that must be a decimal value
+   * @param name attribute name
+   */
+  public PactDslJsonBody decimalType(String name) {
+      return decimalType(name, new BigDecimal(RandomStringUtils.randomNumeric(10)));
+  }
+
+  /**
+   * Attribute that must be a decimalType value
+   * @param name attribute name
+   * @param number example decimalType value
+   */
+  public PactDslJsonBody decimalType(String name, BigDecimal number) {
+      body.put(name, number);
+      matchers.put(matcherKey(name), matchType("decimal"));
+      return this;
+  }
+
+  /**
+   * Attribute that must be a decimalType value
+   * @param name attribute name
+   * @param number example decimalType value
+   */
+  public PactDslJsonBody decimalType(String name, Double number) {
+    body.put(name, number);
+    matchers.put(matcherKey(name), matchType("decimal"));
+    return this;
+  }
 
     /**
      * Attribute that must be a boolean

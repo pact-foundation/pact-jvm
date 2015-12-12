@@ -1,5 +1,7 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.v3.messaging.Message
@@ -305,4 +307,16 @@ class ProviderVerifierSpec extends Specification {
     result == [interaction]
   }
 
+  def 'when loading a pact file for a consumer, it should pass on any authentication options'() {
+    given:
+    def pactFile = new URL('http://some.pact.file/')
+    def consumer = new ConsumerInfo(pactFile: pactFile, pactFileAuthentication: ['basic', 'test', 'pwd'])
+    GroovyMock(PactReader, global: true)
+
+    when:
+    verifier.loadPactFileForConsumer(consumer)
+
+    then:
+    1 * PactReader.loadPact(['authentication': ['basic', 'test', 'pwd']], pactFile) >> Mock(Pact)
+  }
 }

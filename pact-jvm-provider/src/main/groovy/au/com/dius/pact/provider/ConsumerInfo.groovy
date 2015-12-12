@@ -13,6 +13,7 @@ class ConsumerInfo {
     boolean stateChangeUsesBody = true
     PactVerification verificationType = PactVerification.REQUST_RESPONSE
     List packagesToScan
+    List pactFileAuthentication
 
     def url(String path) {
         new URL(path)

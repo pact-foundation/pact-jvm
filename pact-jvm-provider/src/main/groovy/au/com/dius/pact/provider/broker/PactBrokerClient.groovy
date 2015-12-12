@@ -20,12 +20,19 @@ class PactBrokerClient {
   List fetchConsumers(String provider) {
     List consumers = []
 
-    HalClient halClient = new HalClient(pactBrokerUrl, options)
+    HalClient halClient = newHalClient()
     halClient.navigate('pb:latest-provider-pacts', provider: provider).pacts { pact ->
       consumers << new ConsumerInfo(pact.name, new URL(pact.href))
+      if (options.authentication) {
+        consumers.last().pactFileAuthentication = options.authentication
+      }
     }
 
     consumers
+  }
+
+  private newHalClient() {
+    new HalClient(pactBrokerUrl, options)
   }
 
   def uploadPactFile(File pactFile, String version) {

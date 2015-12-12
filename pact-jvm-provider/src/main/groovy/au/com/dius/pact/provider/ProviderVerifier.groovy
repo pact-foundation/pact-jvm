@@ -80,17 +80,21 @@ class ProviderVerifier {
   def loadPactFileForConsumer(ConsumerInfo consumer) {
     if (consumer.pactFile instanceof URL) {
       AnsiConsole.out().println(Ansi.ansi().a("  [from URL ${consumer.pactFile}]"))
-      new PactReader().loadPact(consumer.pactFile)
+      def options = [:]
+      if (consumer.pactFileAuthentication) {
+        options.authentication = consumer.pactFileAuthentication
+      }
+      PactReader.loadPact(options, consumer.pactFile)
     } else if (consumer.pactFile instanceof File || pactFileExists(consumer.pactFile)) {
       AnsiConsole.out().println(Ansi.ansi().a("  [Using file ${consumer.pactFile}]"))
-      new PactReader().loadPact(consumer.pactFile)
+      PactReader.loadPact(consumer.pactFile)
     } else {
       throw new RuntimeException(pactLoadFailureMessage instanceof Closure ? pactLoadFailureMessage.call(consumer) :
         pactLoadFailureMessage as String)
     }
   }
 
-  private boolean pactFileExists(def pactFile) {
+  private static boolean pactFileExists(def pactFile) {
     pactFile && new File(pactFile).exists()
   }
 

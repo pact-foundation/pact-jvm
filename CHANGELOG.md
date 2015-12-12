@@ -1,5 +1,25 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.2.0 - removed json4s library in favour of groovy JSON parsing, bug fixes + maven pact publish task
+
+* b960e40 - updated changelog (Ronald Holshausen, Sat Nov 28 17:21:29 2015 +1100)
+* 20b8201 - guard against null headers in the mock server (Ronald Holshausen, Sat Nov 28 17:20:23 2015 +1100)
+* cdbc25c - default the verification type of the consumer on what is set on the provider #185 (Ronald Holshausen, Sat Nov 28 16:52:42 2015 +1100)
+* 0077069 - correct the matcher keys when using the MessagePactBuilder #185 (Ronald Holshausen, Sat Nov 28 15:36:53 2015 +1100)
+* a8db8ac - Add pact broker publish task for maven provider (Ashley Cambrell, Thu Nov 26 11:30:19 2015 +1100)
+* d544292 - downgrade gradle because version 2.9 is failing on travis ci (Ronald Holshausen, Wed Nov 25 15:04:44 2015 +1100)
+* 2c88d87 - add a sharable annotation to the scala test service (Ronald Holshausen, Wed Nov 25 14:15:15 2015 +1100)
+* a36aeb4 - Raise an initialization error if there are no pacts for a JUnit pact provider test #188 (Ronald Holshausen, Wed Nov 25 13:42:36 2015 +1100)
+* 160eb66 - guard against null when the pact directory to load from does not exist #187 (Ronald Holshausen, Wed Nov 25 13:24:53 2015 +1100)
+* e1b5f2b - upgrade to gradle 2.9 (Ronald Holshausen, Wed Nov 25 13:07:55 2015 +1100)
+* 505fc83 - consolidate the pact and message pact classes into a single hierarchy (Ronald Holshausen, Wed Nov 25 12:43:33 2015 +1100)
+* 4b23556 - remove json4s as it was causing issues when run from SBT (Ronald Holshausen, Tue Nov 17 10:38:09 2015 +1100)
+* db10e39 - updated V3 test cases (Ronald Holshausen, Mon Nov 16 13:54:29 2015 +1100)
+* d0b5347 - updated V2 test cases (Ronald Holshausen, Mon Nov 16 13:20:45 2015 +1100)
+* adbf184 - force the org.scala-lang:scala-compiler dependency to be the same version as org.scala-lang:scala-library #182 (Ronald Holshausen, Mon Nov 16 12:39:44 2015 +1100)
+* 99c941f - added nullValue method and updated support for setting string values to null in Java DSL #183 (Ronald Holshausen, Mon Nov 16 12:14:05 2015 +1100)
+* 9330b3c - bump version (Ronald Holshausen, Sat Nov 14 18:49:29 2015 +1100)
+
 # 2.4.1 - bug fixes + maven pact publish task
 
 * 1213287 - guard against null headers in the mock server (Ronald Holshausen, Sat Nov 28 17:20:23 2015 +1100)

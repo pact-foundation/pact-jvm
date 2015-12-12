@@ -6,7 +6,7 @@ dependencies {
         "org.codehaus.groovy:groovy-all:$groovyVersion",
         'org.fusesource.jansi:jansi:1.11',
         "org.codehaus.groovy.modules.http-builder:http-builder:$httpBuilderVersion",
-        'org.apache.httpcomponents:httpclient:4.4.1',
+        "org.apache.httpcomponents:httpclient:$httpClientVersion",
         'com.googlecode.java-diff-utils:diffutils:1.3.0',
         'org.reflections:reflections:0.9.10'
 

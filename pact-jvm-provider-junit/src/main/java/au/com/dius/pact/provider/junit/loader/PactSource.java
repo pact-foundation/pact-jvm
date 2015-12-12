@@ -17,6 +17,7 @@ public @interface PactSource {
      * @see PactLoader
      * @see PactBrokerLoader loads pacts from Pact broker
      * @see PactFolderLoader loads pacts from folder
+     * @see PactUrlLoader loads pacts from urls
      */
     Class<? extends PactLoader> value();
 }

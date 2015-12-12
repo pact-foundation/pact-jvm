@@ -128,12 +128,17 @@ You want to look at: [pact-jvm-provider](pact-jvm-provider)
 As part of the V3 pact specification, we have defined a new pact file for interactions with message queues. The Gradle
 pact plugin supports a mechanism where you can verify V3 message pacts, have a look at [pact gradle plugin](pact-jvm-provider-gradle#verifying-a-message-provider).
 
-### I Use Ruby
+### I Use Ruby or Go or something else
 The pact-jvm libraries are pure jvm technologies and do not have any native dependencies.
 
 However if you have a ruby provider, the json produced by this library is compatible with the ruby pact library.
+You'll want to look at: [Ruby Pact](https://github.com/realestate-com-au/pact).
 
-You'll want to look at: [pact](https://github.com/realestate-com-au/pact)
+For .Net, there is [Pact-net](https://github.com/SEEK-Jobs/pact-net).
+
+For Go, there is [Pact-go](https://github.com/seek-jobs/pact-go).
+
+Have a look at [implementations in other languages](https://github.com/realestate-com-au/pact/wiki#implementations-in-other-languages).
 
 ### I Use something completely different
 
