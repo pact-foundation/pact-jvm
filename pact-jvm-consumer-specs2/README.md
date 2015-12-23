@@ -26,6 +26,8 @@ dependencies {
 
 To author a test, mix `PactSpec` into your spec
 
+First we define a service client called `ConsumerService`. In our example this is a simple wrapper for `dispatch`, an HTTP client. The source code can be found in the test folder alongside the `ExamplePactSpec`.
+
 Here is a simple example:
 
 ```
