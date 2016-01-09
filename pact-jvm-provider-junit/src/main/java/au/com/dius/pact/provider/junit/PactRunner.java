@@ -104,7 +104,8 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
                 return pactSource.value().newInstance();
             } else {
                 final Annotation annotation = pactLoaders.iterator().next();
-                return annotation.annotationType().getAnnotation(PactSource.class).value().getConstructor(annotation.annotationType()).newInstance(annotation);
+                return annotation.annotationType().getAnnotation(PactSource.class).value()
+                  .getConstructor(annotation.annotationType()).newInstance(annotation);
             }
         } catch (final InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new InitializationError("Error while creating pact source");
