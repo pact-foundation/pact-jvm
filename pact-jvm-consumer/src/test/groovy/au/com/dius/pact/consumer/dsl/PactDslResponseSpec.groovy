@@ -10,10 +10,10 @@ class PactDslResponseSpec extends Specification {
     response.matchingRules == ['$.body': [match: 'type']]
 
     where:
-    pact = ConsumerPactBuilder.consumer("complex-instruction-service")
-      .hasPactWith("workflow-service")
-      .uponReceiving("a request to start a workflow")
-      .path("/startWorkflowProcessInstance")
+    pact = ConsumerPactBuilder.consumer('complex-instruction-service')
+      .hasPactWith('workflow-service')
+      .uponReceiving('a request to start a workflow')
+      .path('/startWorkflowProcessInstance')
       .willRespondWith()
       .body(PactDslJsonRootValue.numberType())
       .toFragment()
