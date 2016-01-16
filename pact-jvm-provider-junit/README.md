@@ -63,6 +63,8 @@ Pact runner will automatically collect pacts: for this purpose there are 2 out-o
 
 To use pacts from Pact Broker annotate test class with `@PactBroker(host="host.of.pact.broker.com", port = 80)`.
 
+Version 3.2.2/2.4.3+ you can also specify the protocol, defaults to 'http'.
+
 ### Pact Url
 
 To use pacts from urls annotate test class with `@PactUrl(urls = {http://build.server/zoo_app-animal_service.json} )`.
@@ -82,6 +84,8 @@ Field in test class of type `au.com.dius.pact.provider.junit.target.Target` anno
 ### HttpTarget
 
 `au.com.dius.pact.provider.junit.target.HttpTarget` - out-of-the-box implementation of `au.com.dius.pact.provider.junit.target.Target` that will play pacts as http request and assert response from service by matching rules from pact.
+
+Version 3.2.2/2.4.3+ you can also specify the protocol, defaults to 'http'.
 
 ### Custom Test Target
 

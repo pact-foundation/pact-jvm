@@ -292,7 +292,7 @@ one will be generated.
 | stringType | Will match all Strings |
 | numberType | Will match all numbers\* |
 | integerType | Will match all numbers that are integers (both ints and longs)\* |
-| realType | Will match all real numbers (floating point and decimal)\* |
+| decimalType | Will match all real numbers (floating point and decimal)\* |
 | booleanType | Will match all boolean values (true and false) |
 | stringMatcher | Will match strings using the provided regular expression |
 | timestamp | Will match string containing timestamps. If a timestamp format is not given, will match an ISO timestamp format |
@@ -303,7 +303,8 @@ one will be generated.
 | hexValue | Will match all hexadecimal encoded strings |
 | uuid | Will match strings containing UUIDs |
 
-_\* Note:_ JSON only supports double precision floating point values.
+_\* Note:_ JSON only supports double precision floating point values. Depending on the language implementation, they
+may parsed as integer, floating point or decimal numbers.
 
 #### Ensuring all items in a list match an example (2.2.0+)
 
@@ -367,6 +368,24 @@ This will then match a body like:
   "status" : "C",
   "amount" : 15.0
 } ]
+```
+
+#### Matching JSON values at the root (Version 3.2.2/2.4.3+)
+
+For cases where you are expecting basic JSON values (strings, numbers, booleans and null) at the root level of the body
+and need to use matchers, you can use the `PactDslJsonRootValue` class. It has all the DSL matching methods for basic
+values that you can use.
+
+For example:
+
+```java
+.consumer("Some Consumer")
+.hasPactWith("Some Provider")
+    .uponReceiving("a request for a basic JSON value")
+        .path("/hello")
+    .willRespondWith()
+        .status(200)
+        .body(PactDslJsonRootValue.integerType())
 ```
 
 ### Matching on paths (version 2.1.5+)
