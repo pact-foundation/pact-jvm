@@ -22,7 +22,7 @@ object HttpClient extends StrictLogging {
     val headers = if (request.getHeaders == null) None
       else Some(JavaConversions.mapAsScalaMap(request.getHeaders))
     val r = url(request.getPath).underlying(
-      _.setMethod(request.getMethod).setQueryParams(query)
+      _.setMethod(request.getMethod).setQueryParameters(query)
     ) <:< headers.getOrElse(Map())
     val httpRequest = r.setBody(request.getBody)
     dispatch.Http(httpRequest).map(Conversions.dispatchResponseToPactResponse)

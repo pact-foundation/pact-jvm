@@ -15,8 +15,8 @@ object Fixtures {
   val provider = new Provider("test_provider")
   val consumer = new Consumer("test_consumer")
 
-  val headers = Map("testreqheader" -> "testreqheadervalue", "Content-Type" -> "application/json")
-  val request = new Request(Post, "/", null, JavaConversions.mapAsJavaMap(headers), "{\"test\": true}")
+  val request = new Request(Post, "/", null, JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheadervalue")),
+    "{\"test\": true}")
 
   val response = new Response(200,
     JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*")),
