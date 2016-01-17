@@ -69,6 +69,10 @@ subprojects {
         }
     }
 
+    tasks.withType(GroovyCompile) {
+      groovyOptions.optimizationOptions.indy = true
+    }
+
     jar {
         manifest.attributes provider: 'gradle',
                 'Implementation-Title': project.name, 'Implementation-Version': version,

@@ -31,11 +31,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class PactBrokerLoader implements PactLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(PactBrokerLoader.class);
-    private static final String PACT_URL_PATTERN = "http://{0}:{1}/pacts/provider/{2}/latest";
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    private static final String PACT_URL_PATTERN = "{0}://{1}:{2}/pacts/provider/{3}/latest";
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().disable(
+      DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     private final String pactBrokerHost;
     private final int pactBrokerPort;
+    private final String pactBrokerProtocol;
     private final Retryer<HttpResponse> retryer = RetryerBuilder.<HttpResponse>newBuilder()
             .retryIfResult(new Predicate<HttpResponse>() {
                 @Override
@@ -47,17 +49,19 @@ public class PactBrokerLoader implements PactLoader {
             .withStopStrategy(StopStrategies.stopAfterDelay(5000))
             .build();
 
-    public PactBrokerLoader(final String pactBrokerHost, final int pactBrokerPort) {
+    public PactBrokerLoader(final String pactBrokerHost, final int pactBrokerPort, final String pactBrokerProtocol) {
         this.pactBrokerHost = pactBrokerHost;
         this.pactBrokerPort = pactBrokerPort;
+        this.pactBrokerProtocol = pactBrokerProtocol;
     }
 
     public PactBrokerLoader(final PactBroker pactBroker) {
-        this(pactBroker.host(), pactBroker.port());
+        this(pactBroker.host(), pactBroker.port(), pactBroker.protocol());
     }
 
     public List<Pact> load(final String providerName) throws IOException {
-        final String uri = MessageFormat.format(PACT_URL_PATTERN, pactBrokerHost, Integer.toString(pactBrokerPort), providerName);
+        final String uri = MessageFormat.format(PACT_URL_PATTERN, pactBrokerProtocol, pactBrokerHost,
+          Integer.toString(pactBrokerPort), providerName);
         final HttpResponse httpResponse;
         try {
             httpResponse = retryer.call(new Callable<HttpResponse>() {

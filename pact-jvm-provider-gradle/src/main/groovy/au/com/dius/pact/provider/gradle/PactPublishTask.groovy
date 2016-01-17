@@ -23,12 +23,15 @@ class PactPublishTask extends DefaultTask {
         if (pactPublish.pactDirectory == null) {
             pactPublish.pactDirectory = project.file("${project.buildDir}/pacts")
         }
+        if (pactPublish.version == null) {
+            pactPublish.version = project.version
+        }
 
         def brokerClient = new PactBrokerClient(pactPublish.pactBrokerUrl)
         File pactDirectory = pactPublish.pactDirectory as File
         pactDirectory.eachFileMatch(FileType.FILES, ~/.*\.json/) { pactFile ->
             print "Publishing ${pactFile.name} ... "
-            println brokerClient.uploadPactFile(pactFile, project.version)
+            println brokerClient.uploadPactFile(pactFile, pactPublish.version)
         }
     }
 

@@ -9,4 +9,5 @@ import groovy.transform.ToString
 class PactPublish {
     def pactDirectory
     String pactBrokerUrl
+    String version
 }

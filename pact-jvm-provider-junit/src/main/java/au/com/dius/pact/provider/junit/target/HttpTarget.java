@@ -22,14 +22,14 @@ import java.util.Map;
 public class HttpTarget implements Target {
     private final String host;
     private final int port;
+    private final String protocol;
 
     /**
      * @param host host of tested service
      * @param port port of tested service
      */
     public HttpTarget(final String host, final int port) {
-        this.host = host;
-        this.port = port;
+        this("http", host, port);
     }
 
     /**
@@ -38,7 +38,18 @@ public class HttpTarget implements Target {
      * @param port port of tested service
      */
     public HttpTarget(final int port) {
-        this("localhost", port);
+        this("http", "localhost", port);
+    }
+
+    /**
+     * @param host host of tested service
+     * @param port port of tested service
+     * @param protocol of tested service
+     */
+    public HttpTarget(final String protocol, final String host, final int port) {
+        this.host = host;
+        this.port = port;
+        this.protocol = protocol;
     }
 
     /**
@@ -69,6 +80,7 @@ public class HttpTarget implements Target {
         final ProviderInfo providerInfo = new ProviderInfo();
         providerInfo.setPort(port);
         providerInfo.setHost(host);
+        providerInfo.setProtocol(protocol);
         return providerInfo;
     }
 

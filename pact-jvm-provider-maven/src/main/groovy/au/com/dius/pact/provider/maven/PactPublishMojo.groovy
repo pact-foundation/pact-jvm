@@ -14,13 +14,13 @@ import org.apache.maven.plugins.annotations.Parameter
 @Mojo(name = 'publish')
 @SuppressWarnings('Println')
 class PactPublishMojo extends AbstractMojo {
-    @Parameter(required = true, readonly = true, defaultValue = '${project.version}')
+    @Parameter(required = true, defaultValue = '${project.version}')
     private String projectVersion
 
     @Parameter(defaultValue = '${project.build.directory}/pacts')
     private String pactDirectory
 
-    @Parameter
+    @Parameter(required = true)
     private String pactBrokerUrl
 
     @Override
