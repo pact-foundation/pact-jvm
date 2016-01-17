@@ -347,7 +347,7 @@ For example:
 PactDslJsonArray.arrayEachLike()
     .date("clearedDate", "mm/dd/yyyy", date)
     .stringType("status", "STATUS")
-    .realType("amount", 100.0)
+    .decimalType("amount", 100.0)
     .closeObject()
 ```
 
