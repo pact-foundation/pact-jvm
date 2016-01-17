@@ -1,5 +1,21 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.2.2 - small feature release
+
+* 5234497 - update changelog (Ronald Holshausen, Sun Jan 17 13:39:13 2016 +1100)
+* bf0392e - use groovy script for release prep (Ronald Holshausen, Sun Jan 17 14:13:15 2016 +1100)
+* 020728a - updated READMEs (Ronald Holshausen, Sun Jan 17 11:03:33 2016 +1100)
+* e16e01e - updated READMEs (Ronald Holshausen, Sun Jan 17 10:57:34 2016 +1100)
+* bc5b1c6 - fix codenarc failure (Ronald Holshausen, Sat Jan 16 13:28:45 2016 +1100)
+* 8dbe451 - Add DSL class to the Java DSL to match values at the root #207 (Ronald Holshausen, Fri Jan 15 15:56:40 2016 +1100)
+* e4c6fe1 - Merge pull request #206 from treppo/update-dispatch (Ronald Holshausen, Tue Jan 12 15:14:25 2016 +1100)
+* 81cd950 - Update net.databinder.dispatch version to 0.11.3 (Christian Treppo, Mon Jan 11 18:52:45 2016 +0100)
+* a1d7e30 - allow the version to be overwriiten when publishing pacts #200 (Ronald Holshausen, Sat Jan 9 15:42:16 2016 +1100)
+* 84dac49 - added protocol to @PactBroker and HttpTarget #205 (Ronald Holshausen, Sat Jan 9 15:07:33 2016 +1100)
+* 52ca265 - Merge pull request #203 from davesmith00000/master (Ronald Holshausen, Sat Dec 26 10:31:44 2015 +1100)
+* 7d9ef1c - Added one line description of ConsumerService to README example that would have saved me 20 minutes... (Dave Smith, Wed Dec 23 14:07:46 2015 +0000)
+* 0cdf768 - bump version (Ronald Holshausen, Sun Dec 13 15:55:47 2015 +1100)
+
 # 2.4.3 - small feature release
 
 * caaa3d9 - Revert "Update net.databinder.dispatch version to 0.11.3" as the transitive async-http-client does not support JDK 6. (Ronald Holshausen, Sun Jan 17 12:03:43 2016 +1100)
