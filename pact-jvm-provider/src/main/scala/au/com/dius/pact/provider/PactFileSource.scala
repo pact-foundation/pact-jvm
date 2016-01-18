@@ -1,7 +1,8 @@
 package au.com.dius.pact.provider
 
 import java.io.File
-import org.apache.commons.io.FileUtils
+
+import _root_.org.apache.commons.io.FileUtils
 import au.com.dius.pact.model._
 
 object PactFileSource {
