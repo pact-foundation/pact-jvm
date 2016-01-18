@@ -7,8 +7,8 @@ import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
-import org.fusesource.jansi.Ansi
-import org.fusesource.jansi.AnsiConsole
+import au.com.dius.pact.provider.org.fusesource.jansi.Ansi
+import au.com.dius.pact.provider.org.fusesource.jansi.AnsiConsole
 import org.reflections.Reflections
 import org.reflections.scanners.MethodAnnotationsScanner
 import org.reflections.util.ConfigurationBuilder
@@ -42,7 +42,7 @@ class ProviderVerifier {
     def consumers = provider.consumers.findAll(this.&filterConsumers)
     if (consumers.empty) {
       AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
-        .a('WARNING: There are no consumers to verify').reset())
+        .a("WARNING: There are no consumers to verify for provider '$provider.name'").reset())
     }
     consumers.each(this.&runVerificationForConsumer.curry(failures, provider))
 
