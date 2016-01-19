@@ -1,4 +1,5 @@
 import au.com.dius.pact.provider.sbtsupport.Main
+import sbt.Keys.TaskStreams
 import sbt._
 
 object PactJvmPlugin extends Plugin {
@@ -12,9 +13,8 @@ object PactJvmPlugin extends Plugin {
     pactRoot := file("pacts"),
     verifyPacts := {
       implicit val executionContext = scala.concurrent.ExecutionContext.Implicits.global
-      println
-      println("=== WARNING: verifyPacts is deprecated and is being replaced with an updated task (pactVerify). ===")
-      println
+      val s: TaskStreams = Keys.streams.value
+      s.log.warn("=== WARNING: verifyPacts is deprecated and is being replaced with an updated task (pactVerify). ===")
       import Main._
       runPacts(loadFiles(pactRoot.value, pactConfig.value))
     }

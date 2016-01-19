@@ -2,10 +2,11 @@ package au.com.dius.pact.provider.sbt
 
 import java.util
 
-import au.com.dius.pact.provider.{ProviderInfo, ConsumerInfo, PactVerification, ProviderVerifier}
+import au.com.dius.pact.provider.{ProviderInfo, ConsumerInfo, PactVerification, ProviderVerifier, ProviderUtils}
+import sbt.Keys.TaskStreams
 import sbt._
 
-import scala.collection.{GenTraversableOnce, JavaConversions}
+import scala.collection.JavaConversions
 import scala.collection.mutable.ArrayBuffer
 
 object SbtProviderPlugin extends Plugin {
@@ -16,12 +17,28 @@ object SbtProviderPlugin extends Plugin {
   val config = Seq(
     providers := Seq(),
     pactVerify := {
+      val s: TaskStreams = Keys.streams.value
       if (providers.value.isEmpty)
         sys.error("No providers have been defined. Configure them by setting the providers build setting.")
       else
         Verification.verify(providers.value)
     })
 }
+
+trait ConsumerConfigInfo
+case class ConsumerConfig(name: String,
+                          pactFile: File,
+                          stateChange: Option[URL] = None,
+                          stateChangeUsesBody: Boolean = false,
+                          verificationType: PactVerification = PactVerification.REQUST_RESPONSE,
+                          packagesToScan: List[String] = List()
+                         ) extends ConsumerConfigInfo
+case class ConsumersFromDirectory(dir: File,
+                                  stateChange: Option[URL] = None,
+                                  stateChangeUsesBody: Boolean = false,
+                                  verificationType: PactVerification = PactVerification.REQUST_RESPONSE,
+                                  packagesToScan: List[String] = List()
+                          ) extends ConsumerConfigInfo
 
 case class ProviderConfig(protocol: String = "http",
                           host: String = "localhost",
@@ -35,7 +52,7 @@ case class ProviderConfig(protocol: String = "http",
                           stateChangeUsesBody: Boolean = false,
                           verificationType: PactVerification = PactVerification.REQUST_RESPONSE,
                           packagesToScan: List[String] = List(),
-                          consumers: ArrayBuffer[ConsumerConfig] = ArrayBuffer(),
+                          consumers: ArrayBuffer[ConsumerConfigInfo] = ArrayBuffer(),
                           pactFileDirectory: Option[File] = None,
                           pactBrokerUrl: Option[URL] = None
 
@@ -52,16 +69,15 @@ case class ProviderConfig(protocol: String = "http",
     this
   }
 
-}
-
-case class ConsumerConfig(name: String,
-                          pactFile: File,
-                          stateChange: Option[URL] = None,
+  def hasPactsInDirectory(dir: File, stateChange: Option[URL] = None,
                           stateChangeUsesBody: Boolean = false,
                           verificationType: PactVerification = PactVerification.REQUST_RESPONSE,
-                          packagesToScan: List[String] = List()
-//                          pactFileAuthentication: List[AnyRef] = List()
-                         )
+                          packagesToScan: List[String] = List()) = {
+    consumers += ConsumersFromDirectory(dir, stateChange, stateChangeUsesBody, verificationType, packagesToScan)
+    this
+  }
+
+}
 
 object Verification {
 
@@ -89,21 +105,17 @@ object Verification {
     provInfo.setStateChangeUsesBody(provider.stateChangeUsesBody)
     provInfo.setVerificationType(provider.verificationType)
     provInfo.setPackagesToScan(JavaConversions.seqAsJavaList(provider.packagesToScan))
-    provInfo.setConsumers(JavaConversions.seqAsJavaList(provider.consumers.toSeq.map{
-      consumer => new ConsumerInfo(consumer.name, consumer.pactFile, consumer.stateChange.orNull,
-        consumer.stateChangeUsesBody, consumer.verificationType,
-        JavaConversions.seqAsJavaList(consumer.packagesToScan))
-    }))
+    provider.consumers.foreach {
+      case ci: ConsumerConfig => provInfo.getConsumers.add(
+        new ConsumerInfo(ci.name, ci.pactFile, ci.stateChange.orNull,
+          ci.stateChangeUsesBody, ci.verificationType,
+          JavaConversions.seqAsJavaList(ci.packagesToScan)))
+      case dir: ConsumersFromDirectory => provInfo.getConsumers.addAll(
+        ProviderUtils.loadPactFiles(provInfo, dir.dir, dir.stateChange.orNull, dir.stateChangeUsesBody,
+        dir.verificationType, JavaConversions.seqAsJavaList(dir.packagesToScan)).asInstanceOf[util.List[ConsumerInfo]])
+    }
 
     provInfo
-  }
-
-  def consumersFromDirectory(pactFileDirectory: File) : Seq[ConsumerConfig] = {
-    Seq()
-  }
-
-  def consumersFromPactBroker(pactBroker: URL): Seq[ConsumerConfig] = {
-    Seq()
   }
 
   def verify(providers: Seq[ProviderConfig]) = {
@@ -126,13 +138,6 @@ object Verification {
 //
 
     providers.foreach { provider =>
-      var consumers = provider.consumers.toSeq
-
-      if (provider.pactFileDirectory.isDefined)
-        provider.consumers ++= consumersFromDirectory(provider.pactFileDirectory.get)
-      if (provider.pactBrokerUrl.isDefined)
-        provider.consumers ++= consumersFromPactBroker(provider.pactBrokerUrl.get)
-
       failures.putAll(verifier.verifyProvider(provider).asInstanceOf[util.HashMap[String, AnyRef]])
     }
 

@@ -1,14 +1,12 @@
 package au.com.dius.pact.provider.maven
 
+import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderVerifier
-import groovy.io.FileType
-import groovy.json.JsonSlurper
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
-import org.fusesource.jansi.AnsiConsole
 
 /**
  * Pact Verify Maven Plugin
@@ -66,33 +64,12 @@ class PactProviderMojo extends AbstractMojo {
     }
   }
 
-  List loadPactFiles(def provider, File pactFileDir) {
-    if (!pactFileDir.exists()) {
-        throw new MojoFailureException("Pact file directory ($pactFileDir) does not exist")
+  static List loadPactFiles(def provider, File pactFileDir) {
+    try {
+      return ProviderUtils.loadPactFiles(provider, pactFileDir)
+    } catch (e) {
+      throw new MojoFailureException(e.message, e)
     }
-
-    if (!pactFileDir.isDirectory()) {
-        throw new MojoFailureException("Pact file directory ($pactFileDir) is not a directory")
-    }
-
-    if (!pactFileDir.canRead()) {
-        throw new MojoFailureException("Pact file directory ($pactFileDir) is not readable")
-    }
-
-    AnsiConsole.out().println("Loading pact files for provider ${provider.name} from $pactFileDir")
-
-    List consumers = []
-    pactFileDir.eachFileMatch FileType.FILES, ~/.*\.json/, {
-        def pactJson = new JsonSlurper().parse(it)
-        if (pactJson.provider.name == provider.name) {
-            consumers << new Consumer(name: pactJson.consumer.name, pactFile: it)
-        } else {
-          AnsiConsole.out().println("Skipping ${it} as the provider names don't match provider.name: " +
-            "${provider.name} vs pactJson.provider.name: ${pactJson.provider.name}")
-        }
-    }
-    AnsiConsole.out().println("Found ${consumers.size()} pact files")
-    consumers
   }
 
   private boolean propertyDefined(String key) {
