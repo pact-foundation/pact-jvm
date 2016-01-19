@@ -2,19 +2,17 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.Response
-import au.com.dius.pact.model.v3.V3Pact
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
-import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import au.com.dius.pact.provider.org.fusesource.jansi.Ansi
 import au.com.dius.pact.provider.org.fusesource.jansi.AnsiConsole
+import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.reflections.Reflections
 import org.reflections.scanners.MethodAnnotationsScanner
 import org.reflections.util.ConfigurationBuilder
 import org.reflections.util.FilterBuilder
-@SuppressWarnings('UnusedImport')
-import scala.collection.JavaConverters$
+import scala.Function1
 
 import java.lang.reflect.Method
 
@@ -89,8 +87,15 @@ class ProviderVerifier {
       AnsiConsole.out().println(Ansi.ansi().a("  [Using file ${consumer.pactFile}]"))
       PactReader.loadPact(consumer.pactFile)
     } else {
-      throw new RuntimeException(pactLoadFailureMessage instanceof Closure ? pactLoadFailureMessage.call(consumer) :
-        pactLoadFailureMessage as String)
+      def message
+      if (pactLoadFailureMessage instanceof Closure) {
+        message = pactLoadFailureMessage.call(consumer)
+      } else if (pactLoadFailureMessage instanceof Function1) {
+        message = pactLoadFailureMessage.apply(consumer)
+      } else {
+        message = pactLoadFailureMessage as String
+      }
+      throw new RuntimeException(message)
     }
   }
 

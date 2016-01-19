@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.broker
 
 import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.PactVerifierException
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import groovyx.net.http.HTTPBuilder
@@ -21,11 +22,15 @@ class PactBrokerClient {
     List consumers = []
 
     HalClient halClient = newHalClient()
-    halClient.navigate('pb:latest-provider-pacts', provider: provider).pacts { pact ->
-      consumers << new ConsumerInfo(pact.name, new URL(pact.href))
-      if (options.authentication) {
-        consumers.last().pactFileAuthentication = options.authentication
+    try {
+      halClient.navigate('pb:latest-provider-pacts', provider: provider).pacts { pact ->
+        consumers << new ConsumerInfo(pact.name, new URL(pact.href))
+        if (options.authentication) {
+          consumers.last().pactFileAuthentication = options.authentication
+        }
       }
+    } catch (e) {
+      throw new PactVerifierException("Failed to load pacts from pact broker at '$pactBrokerUrl'", e)
     }
 
     consumers
