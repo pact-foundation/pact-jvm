@@ -90,7 +90,7 @@ import au.com.dius.pact.provider.sbt._
 // This defines a single provider and all the consumers from the src/test/resources directory.
 SbtProviderPlugin.config ++ Seq(
   providers := Seq(
-    ProviderConfig(name = "Our Service", port = 5050)
+    ProviderConfig(name = "Our Service")
         .hasPactsInDirectory(file("src/test/resources")))
 )
 ```
@@ -106,3 +106,19 @@ The `hasPactsInDirectory` has the following optional parameters:
 
 These will be applied to all consumers configured from the files in the directory.
 
+### Verifying pact files from a pact broker
+
+You can setup your build to validate against the pacts stored in a pact broker. The pact plugin will query
+the pact broker for all consumers that have a pact with the provider based on its name. To use it, just configure the
+provider config with `hasPactsFromPactBroker` with the base URL to the pact broker.
+
+For example:
+
+```scala
+import au.com.dius.pact.provider.sbt._
+SbtProviderPlugin.config ++ Seq(
+  providers := Seq(
+    ProviderConfig(name = "Our Service")
+        .hasPactsFromPactBroker(new URL("http://pact-broker.local")))
+)
+```
