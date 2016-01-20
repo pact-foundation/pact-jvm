@@ -65,6 +65,9 @@ NOTE: The hostname will still be verified against the certificate.
 
 ### Provider States
 
+For a description of what provider states are, see the wiki in the Ruby project:
+https://github.com/realestate-com-au/pact/wiki/Provider-states
+
 For each provider you can specify a state change URL to use to switch the state of the provider. This URL will
 receive the providerState description from the pact file before each interaction via a POST. The stateChangeUsesBody
 controls if the state is passed in the request body or as a query parameter.
@@ -122,3 +125,26 @@ SbtProviderPlugin.config ++ Seq(
         .hasPactsFromPactBroker(new URL("http://pact-broker.local")))
 )
 ```
+
+### Filtering the interactions that are verified
+
+You can filter the interactions that are run using three properties: `pact.filter.consumers`, `pact.filter.description` and `pact.filter.providerState`.
+Adding `-Dpact.filter.consumers=consumer1,consumer2` to the command line will only run the pact files for those
+consumers (consumer1 and consumer2). Adding `-Dpact.filter.description=a\\srequest\\sfor\\spayment.*` will only run those interactions
+whose descriptions start with 'a request for payment'. `-Dpact.filter.providerState=.*payment` will match any interaction that
+has a provider state that ends with payment, and `-Dpact.filter.providerState=` will match any interaction that does not have a
+provider state.
+
+NOTE: SBT does not handle spaces in the property values, so you will have to use escaped values (like using '\\s' in the
+description and provider state filters).
+
+### Command Line Properties
+
+The following project properties can be specified with `-Dproperty=value` on the command line:
+
+|Property|Description|
+|--------|-----------|
+|pact.showStacktrace|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
+|pact.filter.consumers|Comma separated list of consumer names to verify|
+|pact.filter.description|Only verify interactions whose description match the provided regular expression|
+|pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
