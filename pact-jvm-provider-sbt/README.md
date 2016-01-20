@@ -148,3 +148,26 @@ The following project properties can be specified with `-Dproperty=value` on the
 |pact.filter.consumers|Comma separated list of consumer names to verify|
 |pact.filter.description|Only verify interactions whose description match the provided regular expression|
 |pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
+|pact.logLevel|Set the log level for the pact verification (DEBUG, INFO, etc).|
+
+## Modifying the requests before they are sent
+
+Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would
+be authentication tokens, which have a small life span. The Pact SBT plugin provides a request filter that can be
+set to an anonymous function on the provider config that will be called before the request is made. This function will receive the HttpRequest
+prior to it being executed. For normal requests, set `requestFilter` and for state change requests, `stateChangeRequestFilter`.
+
+For example:
+
+```scala
+import au.com.dius.pact.provider.sbt._
+SbtProviderPlugin.config ++ Seq(
+  providers := Seq(
+    ProviderConfig(name = "Our Service", requestFilter = Some(request =>
+       // request is an instance of org.apache.http.HttpRequest
+       request.addHeader("Authorization", "OAUTH eyJhbGciOiJSUzI1NiIsImN0eSI6ImFw...")
+    ))
+        .hasPactWith(ConsumerConfig(name = "sampleconsumer", pactFile = file("src/test/resources/sample-pact.json")))
+  )
+)
+```
