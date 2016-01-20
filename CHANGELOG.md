@@ -1,5 +1,38 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.4.4 - Update SBT provider plugin
+
+* ad0b55f - Merge branch 'master' into v2.x (Ronald Holshausen, Thu Jan 21 09:33:40 2016 +1100)
+* 6d03988 - implemented request filters in the SBT plugin (Ronald Holshausen, Wed Jan 20 15:49:25 2016 +1100)
+* d830ee7 - enable pact build properties from SBT plugin (Ronald Holshausen, Wed Jan 20 12:29:21 2016 +1100)
+* 9ca37c2 - updated readme on request filters in the SBT plugin (Ronald Holshausen, Wed Jan 20 16:24:21 2016 +1100)
+* 1b9abbf - travis stablility changes (Ronald Holshausen, Wed Jan 20 16:16:52 2016 +1100)
+* 8bc6906 - updated readme on request filters in the SBT plugin (Ronald Holshausen, Wed Jan 20 16:03:25 2016 +1100)
+* b50c2da - implemented request filters in the SBT plugin (Ronald Holshausen, Wed Jan 20 15:49:25 2016 +1100)
+* 0e392d3 - travis build stablility changes (Ronald Holshausen, Wed Jan 20 14:19:03 2016 +1100)
+* 06a79ad - Update readme with details on filtering the interactions run with the updated verify task (Ronald Holshausen, Wed Jan 20 13:49:08 2016 +1100)
+* 74bbdfe - enable pact build properties from SBT plugin (Ronald Holshausen, Wed Jan 20 12:29:21 2016 +1100)
+* f5d9718 - correct the SBT line in travis config (Ronald Holshausen, Wed Jan 20 11:22:46 2016 +1100)
+* d3676c8 - add sbt build to travis (Ronald Holshausen, Wed Jan 20 10:17:03 2016 +1100)
+* 0ba705c - Merge branch 'master' into v2.x (Ronald Holshausen, Tue Jan 19 19:47:13 2016 +1100)
+* c310c72 - Update readme with details on loading pacts from a pact broker with the updated verify task #195 (Ronald Holshausen, Tue Jan 19 17:29:37 2016 +1100)
+* e629fc1 - implement loading pact files from a pact broker in the updated SBT plugin #195 (Ronald Holshausen, Tue Jan 19 17:25:14 2016 +1100)
+* 9fa476a - implement loading pact files from a directory in the updated SBT plugin #195 (Ronald Holshausen, Tue Jan 19 15:01:36 2016 +1100)
+* 09310b5 - Update readme with details on loading pacts from a directory with the updated verify task #195 (Ronald Holshausen, Tue Jan 19 15:15:49 2016 +1100)
+* b94780e - implement loading pact files from a directory in the updated SBT plugin #195 (Ronald Holshausen, Tue Jan 19 15:01:36 2016 +1100)
+* 38590da - first phase of implementing updated SBT plugin #195 (Ronald Holshausen, Mon Jan 18 17:02:58 2016 +1100)
+* 8f1ae43 - inline jansi as both Gradle and SBT use it and have different versions #195 (Ronald Holshausen, Mon Jan 18 17:01:26 2016 +1100)
+* 4089aa3 - Update readme with details on the updated verify task #195 (Ronald Holshausen, Mon Jan 18 17:35:52 2016 +1100)
+* 06bba9d - first phase of implementing updated SBT plugin #195 (Ronald Holshausen, Mon Jan 18 17:02:58 2016 +1100)
+* e7321db - inline jansi as both Gradle and SBT use it and have different versions #195 (Ronald Holshausen, Mon Jan 18 17:01:26 2016 +1100)
+* cbac147 - first phase of release prep script (Ronald Holshausen, Sun Jan 17 15:51:47 2016 +1100)
+* 6a0d2d2 - bump version (Ronald Holshausen, Sun Jan 17 14:53:37 2016 +1100)
+* 599858c - bump version (Ronald Holshausen, Sun Jan 17 14:52:38 2016 +1100)
+* 5499a09 - update changelog (Ronald Holshausen, Sun Jan 17 14:22:52 2016 +1100)
+* 5234497 - update changelog (Ronald Holshausen, Sun Jan 17 13:39:13 2016 +1100)
+* bf0392e - use groovy script for release prep (Ronald Holshausen, Sun Jan 17 14:13:15 2016 +1100)
+* cd22c3b - use groovy script for release prep (Ronald Holshausen, Sun Jan 17 14:13:15 2016 +1100)
+
 # 3.2.2 - small feature release
 
 * 5234497 - update changelog (Ronald Holshausen, Sun Jan 17 13:39:13 2016 +1100)
