@@ -130,12 +130,13 @@ SbtProviderPlugin.config ++ Seq(
 
 You can filter the interactions that are run using three properties: `pact.filter.consumers`, `pact.filter.description` and `pact.filter.providerState`.
 Adding `-Dpact.filter.consumers=consumer1,consumer2` to the command line will only run the pact files for those
-consumers (consumer1 and consumer2). Adding `-Dpact.filter.description=a\\srequest\\sfor\\spayment.*` will only run those interactions
+consumers (consumer1 and consumer2).
+Adding `-Dpact.filter.description=a\\srequest\\sfor\\spayment.*` will only run those interactions
 whose descriptions start with 'a request for payment'. `-Dpact.filter.providerState=.*payment` will match any interaction that
 has a provider state that ends with payment, and `-Dpact.filter.providerState=` will match any interaction that does not have a
 provider state.
 
-NOTE: SBT does not handle spaces in the property values, so you will have to use escaped values (like using '\\s' in the
+**NOTE:** SBT does not handle spaces in the property values, so you will have to use escaped values (like using '\\s' in the
 description and provider state filters).
 
 ### Command Line Properties
@@ -157,6 +158,8 @@ be authentication tokens, which have a small life span. The Pact SBT plugin prov
 set to an anonymous function on the provider config that will be called before the request is made. This function will receive the HttpRequest
 prior to it being executed. For normal requests, set `requestFilter` and for state change requests, `stateChangeRequestFilter`.
 
+**NOTE:** The request filter is executed for every request, so make so it does not do too much.
+
 For example:
 
 ```scala
@@ -166,8 +169,7 @@ SbtProviderPlugin.config ++ Seq(
     ProviderConfig(name = "Our Service", requestFilter = Some(request =>
        // request is an instance of org.apache.http.HttpRequest
        request.addHeader("Authorization", "OAUTH eyJhbGciOiJSUzI1NiIsImN0eSI6ImFw...")
-    ))
-        .hasPactWith(ConsumerConfig(name = "sampleconsumer", pactFile = file("src/test/resources/sample-pact.json")))
+    )).hasPactWith(ConsumerConfig(name = "sampleconsumer", pactFile = file("src/test/resources/sample-pact.json")))
   )
 )
 ```
