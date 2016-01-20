@@ -39,6 +39,7 @@ case class ConsumersFromDirectory(dir: File,
                                   verificationType: PactVerification = PactVerification.REQUST_RESPONSE,
                                   packagesToScan: List[String] = List()
                           ) extends ConsumerConfigInfo
+case class ConsumersFromPactBroker(pactBrokerUrl: URL) extends ConsumerConfigInfo
 
 case class ProviderConfig(protocol: String = "http",
                           host: String = "localhost",
@@ -77,6 +78,11 @@ case class ProviderConfig(protocol: String = "http",
     this
   }
 
+  def hasPactsFromPactBroker(pactBrokerUrl: URL) = {
+    consumers += ConsumersFromPactBroker(pactBrokerUrl)
+    this
+  }
+
 }
 
 object Verification {
@@ -105,6 +111,7 @@ object Verification {
     provInfo.setStateChangeUsesBody(provider.stateChangeUsesBody)
     provInfo.setVerificationType(provider.verificationType)
     provInfo.setPackagesToScan(JavaConversions.seqAsJavaList(provider.packagesToScan))
+
     provider.consumers.foreach {
       case ci: ConsumerConfig => provInfo.getConsumers.add(
         new ConsumerInfo(ci.name, ci.pactFile, ci.stateChange.orNull,
@@ -113,6 +120,7 @@ object Verification {
       case dir: ConsumersFromDirectory => provInfo.getConsumers.addAll(
         ProviderUtils.loadPactFiles(provInfo, dir.dir, dir.stateChange.orNull, dir.stateChangeUsesBody,
         dir.verificationType, JavaConversions.seqAsJavaList(dir.packagesToScan)).asInstanceOf[util.List[ConsumerInfo]])
+      case ConsumersFromPactBroker(pactBrokerUrl) => provInfo.hasPactsFromPactBroker(pactBrokerUrl.toString)
     }
 
     provInfo
@@ -121,11 +129,11 @@ object Verification {
   def verify(providers: Seq[ProviderConfig]) = {
     val failures = new util.HashMap[String, AnyRef]()
     val verifier = new ProviderVerifier()
-//    verifier.projectHasProperty = { this.propertyDefined(it) }
-//    verifier.projectGetProperty =  { this.property(it) }
-//    verifier.pactLoadFailureMessage = { consumer ->
-//      "You must specify the pactfile to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
-//    }
+    verifier.setProjectHasProperty( (property: String) => System.getProperty(property) != null )
+    verifier.setProjectGetProperty( (property: String) => System.getProperty(property) )
+    verifier.setPactLoadFailureMessage( (consumer: ConsumerInfo) =>
+      s"You must specify the pactFile to execute for consumer '${consumer.getName}'."
+    )
 //    verifier.isBuildSpecificTask = { false }
 //
 //    verifier.projectClasspath = {
@@ -135,7 +143,6 @@ object Verification {
 //      }
 //      urls as URL[]
 //    }
-//
 
     providers.foreach { provider =>
       failures.putAll(verifier.verifyProvider(provider).asInstanceOf[util.HashMap[String, AnyRef]])

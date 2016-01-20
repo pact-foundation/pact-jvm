@@ -2,19 +2,17 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.Response
-import au.com.dius.pact.model.v3.V3Pact
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
-import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import au.com.dius.pact.provider.org.fusesource.jansi.Ansi
 import au.com.dius.pact.provider.org.fusesource.jansi.AnsiConsole
+import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.reflections.Reflections
 import org.reflections.scanners.MethodAnnotationsScanner
 import org.reflections.util.ConfigurationBuilder
 import org.reflections.util.FilterBuilder
-@SuppressWarnings('UnusedImport')
-import scala.collection.JavaConverters$
+import scala.Function1
 
 import java.lang.reflect.Method
 
@@ -29,12 +27,12 @@ class ProviderVerifier {
   static final String PACT_FILTER_DESCRIPTION = 'pact.filter.description'
   static final String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
 
-  Closure projectHasProperty = { }
-  Closure projectGetProperty = { }
+  def projectHasProperty = { }
+  def projectGetProperty = { }
   def pactLoadFailureMessage
-  Closure isBuildSpecificTask = { }
-  Closure executeBuildSpecificTask = { }
-  Closure projectClasspath = { }
+  def isBuildSpecificTask = { }
+  def executeBuildSpecificTask = { }
+  def projectClasspath = { }
 
   Map verifyProvider(ProviderInfo provider) {
     Map failures = [:]
@@ -89,26 +87,33 @@ class ProviderVerifier {
       AnsiConsole.out().println(Ansi.ansi().a("  [Using file ${consumer.pactFile}]"))
       PactReader.loadPact(consumer.pactFile)
     } else {
-      throw new RuntimeException(pactLoadFailureMessage instanceof Closure ? pactLoadFailureMessage.call(consumer) :
-        pactLoadFailureMessage as String)
+      String message
+      if (pactLoadFailureMessage instanceof Closure) {
+        message = pactLoadFailureMessage.call(consumer) as String
+      } else if (pactLoadFailureMessage instanceof Function1) {
+        message = pactLoadFailureMessage.apply(consumer) as String
+      } else {
+        message = pactLoadFailureMessage as String
+      }
+      throw new RuntimeException(message)
     }
   }
 
   private static boolean pactFileExists(def pactFile) {
-    pactFile && new File(pactFile).exists()
+    pactFile && new File(pactFile as String).exists()
   }
 
   boolean filterConsumers(def consumer) {
-    !projectHasProperty(PACT_FILTER_CONSUMERS) ||
-      consumer.name in projectGetProperty(PACT_FILTER_CONSUMERS).split(',')*.trim()
+    !callProjectHasProperty(PACT_FILTER_CONSUMERS) ||
+      consumer.name in callProjectGetProperty(PACT_FILTER_CONSUMERS).split(',')*.trim()
   }
 
   boolean filterInteractions(def interaction) {
-    if (projectHasProperty(PACT_FILTER_DESCRIPTION) && projectHasProperty(PACT_FILTER_PROVIDERSTATE)) {
+    if (callProjectHasProperty(PACT_FILTER_DESCRIPTION) && callProjectHasProperty(PACT_FILTER_PROVIDERSTATE)) {
       matchDescription(interaction) && matchState(interaction)
-    } else if (projectHasProperty(PACT_FILTER_DESCRIPTION)) {
+    } else if (callProjectHasProperty(PACT_FILTER_DESCRIPTION)) {
       matchDescription(interaction)
-    } else if (projectHasProperty(PACT_FILTER_PROVIDERSTATE)) {
+    } else if (callProjectHasProperty(PACT_FILTER_PROVIDERSTATE)) {
       matchState(interaction)
     } else {
       true
@@ -117,14 +122,14 @@ class ProviderVerifier {
 
   private boolean matchState(interaction) {
     if (interaction.providerState) {
-      interaction.providerState ==~ projectGetProperty(PACT_FILTER_PROVIDERSTATE)
+      interaction.providerState ==~ callProjectGetProperty(PACT_FILTER_PROVIDERSTATE)
     } else {
-      projectGetProperty(PACT_FILTER_PROVIDERSTATE).empty
+      callProjectGetProperty(PACT_FILTER_PROVIDERSTATE).empty
     }
   }
 
   private boolean matchDescription(interaction) {
-    interaction.description ==~ projectGetProperty(PACT_FILTER_DESCRIPTION)
+    interaction.description ==~ callProjectGetProperty(PACT_FILTER_DESCRIPTION)
   }
 
   void verifyInteraction(ProviderInfo provider, ConsumerInfo consumer, def pact, Map failures, def interaction) {
@@ -192,7 +197,7 @@ class ProviderVerifier {
     } catch (e) {
       AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.RED).a('State Change Request Failed - ')
         .a(e.message).reset())
-      if (projectHasProperty('pact.showStacktrace')) {
+      if (callProjectHasProperty('pact.showStacktrace')) {
         e.printStackTrace()
       }
       return e
@@ -239,7 +244,7 @@ class ProviderVerifier {
       AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a('Request Failed - ')
         .a(e.message).reset())
       failures[interactionMessage] = e
-      if (projectHasProperty('pact.showStacktrace')) {
+      if (callProjectHasProperty('pact.showStacktrace')) {
         e.printStackTrace()
       }
     }
@@ -343,9 +348,25 @@ class ProviderVerifier {
       AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a('Verification Failed - ')
         .a(e.message).reset())
       failures[interactionMessage] = e
-      if (projectHasProperty('pact.showStacktrace')) {
+      if (callProjectHasProperty('pact.showStacktrace')) {
         e.printStackTrace()
       }
+    }
+  }
+
+  boolean callProjectHasProperty(String property) {
+    if (projectHasProperty instanceof Function1) {
+      projectHasProperty.apply(property)
+    } else {
+      projectHasProperty(property)
+    }
+  }
+
+  String callProjectGetProperty(String property) {
+    if (projectGetProperty instanceof Function1) {
+      projectGetProperty.apply(property)
+    } else {
+      projectGetProperty(property)
     }
   }
 
