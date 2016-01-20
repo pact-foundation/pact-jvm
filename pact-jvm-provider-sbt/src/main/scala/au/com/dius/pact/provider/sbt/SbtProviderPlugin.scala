@@ -129,8 +129,8 @@ object Verification {
   def verify(providers: Seq[ProviderConfig]) = {
     val failures = new util.HashMap[String, AnyRef]()
     val verifier = new ProviderVerifier()
-//    verifier.projectHasProperty = { this.propertyDefined(it) }
-//    verifier.projectGetProperty =  { this.property(it) }
+    verifier.setProjectHasProperty( (property: String) => System.getProperty(property) != null )
+    verifier.setProjectGetProperty( (property: String) => System.getProperty(property) )
     verifier.setPactLoadFailureMessage( (consumer: ConsumerInfo) =>
       s"You must specify the pactFile to execute for consumer '${consumer.getName}'."
     )
