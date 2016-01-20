@@ -25,6 +25,7 @@ import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.util.EntityUtils
+import scala.Function1
 @SuppressWarnings('UnusedImport')
 import scala.collection.JavaConverters$
 
@@ -76,6 +77,8 @@ class ProviderClient {
         if (provider.requestFilter != null) {
             if (provider.requestFilter instanceof Closure) {
                 provider.requestFilter(method)
+            } else if (provider.requestFilter instanceof Function1) {
+                provider.requestFilter.apply(method)
             } else {
                 Binding binding = new Binding()
                 binding.setVariable(REQUEST, method)
@@ -113,7 +116,9 @@ class ProviderClient {
 
             if (provider.stateChangeRequestFilter != null) {
                 if (provider.stateChangeRequestFilter instanceof Closure) {
-                    provider.stateChangeRequestFilter(method)
+                  provider.stateChangeRequestFilter(method)
+                } else if (provider.stateChangeRequestFilter instanceof Function1) {
+                  provider.stateChangeRequestFilter.apply(method)
                 } else {
                     Binding binding = new Binding()
                     binding.setVariable(REQUEST, method)

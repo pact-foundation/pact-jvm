@@ -3,6 +3,9 @@ package au.com.dius.pact.provider.sbt
 import java.util
 
 import au.com.dius.pact.provider.{ProviderInfo, ConsumerInfo, PactVerification, ProviderVerifier, ProviderUtils}
+import org.apache.http.HttpRequest
+import org.slf4j.LoggerFactory
+import ch.qos.logback.classic.{Logger, Level}
 import sbt.Keys.TaskStreams
 import sbt._
 
@@ -18,6 +21,13 @@ object SbtProviderPlugin extends Plugin {
     providers := Seq(),
     pactVerify := {
       val s: TaskStreams = Keys.streams.value
+
+      if (System.getProperty("pact.logLevel") != null) {
+        LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).asInstanceOf[Logger].setLevel(
+          Level.toLevel(System.getProperty("pact.logLevel"))
+        )
+      }
+
       if (providers.value.isEmpty)
         sys.error("No providers have been defined. Configure them by setting the providers build setting.")
       else
@@ -55,14 +65,12 @@ case class ProviderConfig(protocol: String = "http",
                           packagesToScan: List[String] = List(),
                           consumers: ArrayBuffer[ConsumerConfigInfo] = ArrayBuffer(),
                           pactFileDirectory: Option[File] = None,
-                          pactBrokerUrl: Option[URL] = None
+                          pactBrokerUrl: Option[URL] = None,
+                          requestFilter: Option[HttpRequest => Unit] = None,
+                          stateChangeRequestFilter: Option[HttpRequest => Unit] = None
 
 //def startProviderTask
 //def terminateProviderTask
-
-//def requestFilter
-//def stateChangeRequestFilter
-//def createClient
                          ) {
 
   def hasPactWith(consumer: ConsumerConfig) = {
@@ -97,17 +105,22 @@ object Verification {
 
 //    def startProviderTask
 //    def terminateProviderTask
-//
-//    def requestFilter
-//    def stateChangeRequestFilter
-//    def createClient
+
+    if (provider.requestFilter.isDefined) {
+      provInfo.setRequestFilter(provider.requestFilter.get)
+    }
+    if (provider.stateChangeRequestFilter.isDefined) {
+      provInfo.setStateChangeRequestFilter(provider.stateChangeRequestFilter.get)
+    }
 
     provInfo.setInsecure(provider.insecure)
-    if (provider.trustStore.isDefined)
+    if (provider.trustStore.isDefined) {
       provInfo.setTrustStore(provider.trustStore.get)
+    }
     provInfo.setTrustStorePassword(provider.trustStorePassword)
-    if (provider.stateChangeUrl.isDefined)
+    if (provider.stateChangeUrl.isDefined) {
       provInfo.setStateChangeUrl(provider.stateChangeUrl.get)
+    }
     provInfo.setStateChangeUsesBody(provider.stateChangeUsesBody)
     provInfo.setVerificationType(provider.verificationType)
     provInfo.setPackagesToScan(JavaConversions.seqAsJavaList(provider.packagesToScan))
