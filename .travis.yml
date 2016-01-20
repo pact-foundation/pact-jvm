@@ -10,5 +10,5 @@ env:
   - SCALA=2.11 JAVA_OPTS="-XX:MaxPermSize=512m -XX:ReservedCodeCacheSize=512m"
 script:
   - ./gradlew --stacktrace --no-daemon -i check_$SCALA install_$SCALA
-  - if [[ "$SCALA" == "2.10" ]]; then sbt clean check; fi
+  - if [[ "$SCALA" == "2.10" ]]; then sbt clean test; fi
 install: true
