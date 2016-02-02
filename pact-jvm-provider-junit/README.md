@@ -115,7 +115,7 @@ To use pacts from urls annotate the test class with
 
 ### Pact folder
 
-To use pacts from a resource folder of the project (or any folder) annotate test class with
+To use pacts from a resource folder of the project annotate test class with
 
 ```java
 @PactFolder("subfolder/in/resource/directory")
