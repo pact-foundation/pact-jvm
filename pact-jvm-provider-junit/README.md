@@ -1,7 +1,7 @@
 # Pact junit runner
 
 ## Overview
-Library provides ability to play contract tests against provider service in JUnit fashionable way.
+Library provides ability to play contract tests against a provider service in JUnit fashionable way.
 
 Supports:
 
@@ -9,11 +9,14 @@ Supports:
 
 - Easy way to change assertion strategy
 
-- **org.junit.BeforeClass**, **org.junit.AfterClass** and **org.junit.ClassRule** JUnit annotations, that will be run once - before/after whole contract test suite
+- **org.junit.BeforeClass**, **org.junit.AfterClass** and **org.junit.ClassRule** JUnit annotations, that will be run
+once - before/after whole contract test suite.
 
-- **org.junit.Before**, **org.junit.After** and **org.junit.Rule** JUnit annotations, that will be run before/after each test of interaction
+- **org.junit.Before**, **org.junit.After** and **org.junit.Rule** JUnit annotations, that will be run before/after
+each test of an interaction.
 
-- **au.com.dius.pact.provider.junit.State** custom annotation - before each interaction that require state change, all methods annotated by State with appropriate state listed will be invoked
+- **au.com.dius.pact.provider.junit.State** custom annotation - before each interaction that requires a state change,
+all methods annotated by `@State` with appropriate the state listed will be invoked.
 
 ## Example of test
 
@@ -57,18 +60,23 @@ Supports:
 
 ## Pacts source
 
-Pact runner will automatically collect pacts: for this purpose there are 2 out-of-the-box options or you can easily
-add your own Pact source. **Note:** You can only define one source of pacts.
+The Pact runner will automatically collect pacts based on annotations on the test class. For this purpose there are 3
+out-of-the-box options (files from a directory, files from a set of URLs or a pact broker) or you can easily add your
+own Pact source.
+
+**Note:** You can only define one source of pacts per test class.
 
 ### Download pacts from pact-broker
 
-To use pacts from Pact Broker annotate test class with `@PactBroker(host="host.of.pact.broker.com", port = 80)`.
+To use pacts from Pact Broker annotate the test class with `@PactBroker(host="host.of.pact.broker.com", port = 80)`.
 
-_Version 3.2.2/2.4.3+_ you can also specify the protocol, defaults to "http".
+From _version 3.2.2/2.4.3+_ you can also specify the protocol, which defaults to "http".
 
 #### _Version 3.2.3/2.4.4+_ - Using Java System properties
 
-The pact broker loaded was updated to allow system properties to be used. The port was changed to a string to allow expressions.
+The pact broker loader was updated to allow system properties to be used for the hostname, port or protocol. The port
+was changed to a string to allow expressions.
+
 The normal use case changes to:
 
 ```java
@@ -89,26 +97,39 @@ You can provide a default value by separating the property name with a colon (`:
 
 ### Pact Url
 
-To use pacts from urls annotate test class with `@PactUrl(urls = {"http://build.server/zoo_app-animal_service.json"} )`.
+To use pacts from urls annotate the test class with
+
+```java
+@PactUrl(urls = {"http://build.server/zoo_app-animal_service.json"} )
+```
 
 ### Pact folder
 
-To use pacts from resource folder of project annotate test class with `@PactFolder("subfolder/in/resource/directory")`.
+To use pacts from a resource folder of the project (or any folder) annotate test class with
+
+```java
+@PactFolder("subfolder/in/resource/directory")
+```
 
 ### Custom pacts source
 
-It's possible to use custom Pact source: for this implement `interface au.com.dius.pact.provider.junit.loader.PactLoader` and annotate test class with `@PactSource(MyOwnPactLoader.class)`. **Note:** `class MyOwnPactLoader` should have default constructor.
+It's possible to use a custom Pact source. For this, implement interface `au.com.dius.pact.provider.junit.loader.PactLoader`
+and annotate the test class with `@PactSource(MyOwnPactLoader.class)`. **Note:** class `MyOwnPactLoader` must have a default constructor.
 
 ## Test target
 
-Field in test class of type `au.com.dius.pact.provider.junit.target.Target` annotated with `au.com.dius.pact.provider.junit.target.TestTarget` will be used for actual Interaction execution and asserting of contract. **Note:** should be exactly 1 such field, otherwise `InitializationException` will be thrown.
+The field in test class of type `au.com.dius.pact.provider.junit.target.Target` annotated with `au.com.dius.pact.provider.junit.target.TestTarget`
+will be used for actual Interaction execution and asserting of contract.
+
+**Note:** there must be exactly 1 such field, otherwise an `InitializationException` will be thrown.
 
 ### HttpTarget
 
-`au.com.dius.pact.provider.junit.target.HttpTarget` - out-of-the-box implementation of `au.com.dius.pact.provider.junit.target.Target` that will play pacts as http request and assert response from service by matching rules from pact.
+`au.com.dius.pact.provider.junit.target.HttpTarget` - out-of-the-box implementation of `au.com.dius.pact.provider.junit.target.Target`
+that will play pacts as http request and assert response from service by matching rules from pact.
 
 _Version 3.2.2/2.4.3+_ you can also specify the protocol, defaults to "http".
 
 ### Custom Test Target
 
-It's possible to use custom `Target` for that `interface Target` should be implemented and this class can be used instead of `HttpTarget`.
+It's possible to use custom `Target`, for that interface `Target` should be implemented and this class can be used instead of `HttpTarget`.
