@@ -68,20 +68,30 @@ own Pact source.
 
 ### Download pacts from pact-broker
 
-To use pacts from Pact Broker annotate the test class with `@PactBroker(host="host.of.pact.broker.com", port = 80)`.
+To use pacts from Pact Broker annotate the test class with `@PactBroker(host="host.of.pact.broker.com", port = "80")`.
 
 From _version 3.2.2/2.4.3+_ you can also specify the protocol, which defaults to "http".
+
+The pact broker will be queried for all pacts with the same name as the provider annotation.
+
+For example, test all pacts for the "Activity Service" in the pact broker:
+
+```java
+@RunWith(PactRunner.class)
+@Provider("Activity Service")
+@PactBroker(host = "localhost", port = "80")
+public class PactJUnitTest {
+
+  @TestTarget
+  public final Target target = new HttpTarget(5050);
+
+}
+```
 
 #### _Version 3.2.3/2.4.4+_ - Using Java System properties
 
 The pact broker loader was updated to allow system properties to be used for the hostname, port or protocol. The port
-was changed to a string to allow expressions.
-
-The normal use case changes to:
-
-```java
-@PactBroker(host="host.of.pact.broker.com", port = "80")
-```
+was changed to a string to allow expressions to be set.
 
 To use a system property or environment variable, you can place the property name in `${}` expression de-markers:
 
