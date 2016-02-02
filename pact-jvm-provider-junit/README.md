@@ -57,17 +57,39 @@ Supports:
 
 ## Pacts source
 
-Pact runner will automatically collect pacts: for this purpose there are 2 out-of-the-box options or you can easily add your own Pact source. **Note:** it's possible to use only one source of pacts.
+Pact runner will automatically collect pacts: for this purpose there are 2 out-of-the-box options or you can easily
+add your own Pact source. **Note:** You can only define one source of pacts.
 
 ### Download pacts from pact-broker
 
 To use pacts from Pact Broker annotate test class with `@PactBroker(host="host.of.pact.broker.com", port = 80)`.
 
-Version 3.2.2/2.4.3+ you can also specify the protocol, defaults to 'http'.
+_Version 3.2.2/2.4.3+_ you can also specify the protocol, defaults to "http".
+
+#### _Version 3.2.3/2.4.4+_ - Using Java System properties
+
+The pact broker loaded was updated to allow system properties to be used. The port was changed to a string to allow expressions.
+The normal use case changes to:
+
+```java
+@PactBroker(host="host.of.pact.broker.com", port = "80")
+```
+
+To use a system property or environment variable, you can place the property name in `${}` expression de-markers:
+
+```java
+@PactBroker(host="${pactbroker.hostname}", port = "80")
+```
+
+You can provide a default value by separating the property name with a colon (`:`):
+
+```java
+@PactBroker(host="${pactbroker.hostname:localhost}", port = "80")
+```
 
 ### Pact Url
 
-To use pacts from urls annotate test class with `@PactUrl(urls = {http://build.server/zoo_app-animal_service.json} )`.
+To use pacts from urls annotate test class with `@PactUrl(urls = {"http://build.server/zoo_app-animal_service.json"} )`.
 
 ### Pact folder
 
@@ -85,7 +107,7 @@ Field in test class of type `au.com.dius.pact.provider.junit.target.Target` anno
 
 `au.com.dius.pact.provider.junit.target.HttpTarget` - out-of-the-box implementation of `au.com.dius.pact.provider.junit.target.Target` that will play pacts as http request and assert response from service by matching rules from pact.
 
-Version 3.2.2/2.4.3+ you can also specify the protocol, defaults to 'http'.
+_Version 3.2.2/2.4.3+_ you can also specify the protocol, defaults to "http".
 
 ### Custom Test Target
 
