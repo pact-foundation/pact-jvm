@@ -58,7 +58,7 @@ all methods annotated by `@State` with appropriate the state listed will be invo
     }
 ```
 
-## Pacts source
+## Pact source
 
 The Pact runner will automatically collect pacts based on annotations on the test class. For this purpose there are 3
 out-of-the-box options (files from a directory, files from a set of URLs or a pact broker) or you can easily add your
@@ -66,9 +66,9 @@ own Pact source.
 
 **Note:** You can only define one source of pacts per test class.
 
-### Download pacts from pact-broker
+### Download pacts from a pact-broker
 
-To use pacts from Pact Broker annotate the test class with `@PactBroker(host="host.of.pact.broker.com", port = "80")`.
+To use pacts from a Pact Broker, annotate the test class with `@PactBroker(host="host.of.pact.broker.com", port = "80")`.
 
 From _version 3.2.2/2.4.3+_ you can also specify the protocol, which defaults to "http".
 
