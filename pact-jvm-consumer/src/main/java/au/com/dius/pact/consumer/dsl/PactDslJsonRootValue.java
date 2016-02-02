@@ -169,7 +169,7 @@ public class PactDslJsonRootValue extends DslPart {
    * Value that can be any number
    */
   public static PactDslJsonRootValue numberType() {
-    return numberType(Long.parseLong(RandomStringUtils.randomNumeric(10)));
+    return numberType(Long.parseLong(RandomStringUtils.randomNumeric(9)));
   }
 
   /**
@@ -187,7 +187,7 @@ public class PactDslJsonRootValue extends DslPart {
    * Value that must be an integer
    */
   public static PactDslJsonRootValue integerType() {
-    return integerType(Long.parseLong(RandomStringUtils.randomNumeric(10)));
+    return integerType(Long.parseLong(RandomStringUtils.randomNumeric(9)));
   }
 
   /**

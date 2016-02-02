@@ -130,7 +130,7 @@ public class PactDslJsonBody extends DslPart {
      * @param name attribute name
      */
     public PactDslJsonBody numberType(String name) {
-        return numberType(name, Long.parseLong(RandomStringUtils.randomNumeric(10)));
+        return numberType(name, Long.parseLong(RandomStringUtils.randomNumeric(9)));
     }
 
     /**
@@ -149,7 +149,7 @@ public class PactDslJsonBody extends DslPart {
      * @param name attribute name
      */
     public PactDslJsonBody integerType(String name) {
-        return integerType(name, Long.parseLong(RandomStringUtils.randomNumeric(10)));
+        return integerType(name, Long.parseLong(RandomStringUtils.randomNumeric(9)));
     }
 
     /**
