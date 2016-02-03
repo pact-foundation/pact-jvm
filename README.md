@@ -22,7 +22,7 @@ From the [Ruby Pact website](https://github.com/realestate-com-au/pact):
 >This gem is inspired by the concept of "Consumer driven contracts". See http://martinfowler.com/articles/consumerDrivenContracts.html for more information.
 
 
-Read [Getting started with Pact](https://github.com/DiUS/pact-jvm/wiki/Getting-started-with-Pact) for more information on
+Read [Getting started with Pact](http://dius.com.au/2016/02/03/microservices-pact/) for more information on
 how to get going.
 
 
