@@ -5,7 +5,7 @@ def crossCompileModules = [
   'pact-jvm-consumer-groovy',
   'pact-jvm-model',
   'pact-jvm-provider',
-//  'pact-jvm-provider-specs2',
+  'pact-jvm-provider-specs2',
   'pact-jvm-server',
   'pact-specification-test',
   'pact-jvm-provider-gradle',
