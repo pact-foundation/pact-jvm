@@ -21,7 +21,7 @@ dependencies {
 ```
 
 __*Note:*__ `PactSpec` requires spec2 3.x. Also, for spray users there's an incompatibility between specs2 v3.x and spray.
-Follow these instructions resolves that problem: https://groups.google.com/forum/#!msg/spray-user/2T6SBp4OJeI/AJlnJuAKPRsJ
+Follow these instructions to resolve that problem: https://groups.google.com/forum/#!msg/spray-user/2T6SBp4OJeI/AJlnJuAKPRsJ
 
 ## Usage
 
