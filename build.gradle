@@ -57,7 +57,7 @@ subprojects {
         scalaCompileOptions.useAnt = false
         scalaCompileOptions.additionalParameters = ['-target:jvm-1.8']
         configure(scalaCompileOptions.forkOptions) {
-          memoryMaximumSize = '200m'
+          memoryMaximumSize = '256m'
         }
     }
 

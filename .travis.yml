@@ -3,6 +3,6 @@ sudo: false
 jdk:
   - oraclejdk8
 env:
-  - SCALA=2.11 JAVA_OPTS="-XX:ReservedCodeCacheSize=512m"
+  - SCALA=2.11 JAVA_OPTS="-XX:MaxPermSize=512m -XX:ReservedCodeCacheSize=512m"
 script: ./gradlew --stacktrace --no-daemon -i check_$SCALA
 install: true
