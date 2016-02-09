@@ -413,9 +413,9 @@ public class PactDslJsonBody extends DslPart {
      * @param name field name
      */
     public PactDslJsonBody object(String name) {
-        String base = "." + name;
+        String base = root + name;
         if (!name.matches(Parser$.MODULE$.FieldRegex().toString())) {
-            base = "['" + name + "']";
+            base = StringUtils.substringBeforeLast(root, ".") + "['" + name + "']";
         }
         return new PactDslJsonBody(base + ".", this);
     }
