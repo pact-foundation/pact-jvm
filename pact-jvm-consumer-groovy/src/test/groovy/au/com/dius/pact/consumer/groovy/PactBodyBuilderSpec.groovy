@@ -251,14 +251,14 @@ class PactBodyBuilderSpec extends Specification {
     service {
       uponReceiving('a request')
       withAttributes(method: 'get', path: '/')
-      withBody(mimetype: 'application/x-thrift+json') {
+      withBody(mimeType: 'application/x-thrift+json') {
         name(~/\w+/, 'harry')
         surname regexp(~/\w+/, 'larry')
         position regexp(~/staff|contractor/, 'staff')
         happy(true)
       }
       willRespondWith(status: 200)
-      withBody(mimetype: 'application/x-thrift+json') {
+      withBody(mimeType: 'application/x-thrift+json') {
         name(~/\w+/, 'harry')
       }
     }
