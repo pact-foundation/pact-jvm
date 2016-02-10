@@ -1,6 +1,8 @@
 package au.com.dius.pact.provider.groovysupport
 
 import au.com.dius.pact.model.Request
+@SuppressWarnings('UnusedImport')
+import au.com.dius.pact.provider.GroovyScalaUtils$
 import au.com.dius.pact.provider.ProviderClient
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpRequest

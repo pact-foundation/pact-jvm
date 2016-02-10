@@ -1,6 +1,6 @@
-package au.com.dius.pact.provider.groovysupport
+package au.com.dius.pact.provider
 
-import org.apache.http.HttpRequest
+import _root_.org.apache.http.HttpRequest
 
 object GroovyScalaUtils {
 
