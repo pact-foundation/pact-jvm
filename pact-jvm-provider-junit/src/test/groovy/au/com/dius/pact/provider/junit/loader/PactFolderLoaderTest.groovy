@@ -1,7 +1,5 @@
-package au.com.dius.pact.provider.junit.junit.loader
+package au.com.dius.pact.provider.junit.loader
 
-import au.com.dius.pact.provider.junit.loader.PactFolder
-import au.com.dius.pact.provider.junit.loader.PactFolderLoader
 import org.junit.Test
 
 import static org.hamcrest.MatcherAssert.assertThat

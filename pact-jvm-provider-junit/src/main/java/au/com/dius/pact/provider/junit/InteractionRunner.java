@@ -3,8 +3,10 @@ package au.com.dius.pact.provider.junit;
 import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.model.RequestResponsePact;
 import au.com.dius.pact.provider.junit.target.Target;
+import au.com.dius.pact.provider.junit.target.TestClassAwareTarget;
 import au.com.dius.pact.provider.junit.target.TestTarget;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.http.HttpRequest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -77,13 +79,26 @@ class InteractionRunner extends Runner {
         validateConstructor(errors);
         validateTestTarget(errors);
         validateRules(errors);
+        validateTargetRequestFilters(errors);
 
         if (!errors.isEmpty()) {
             throw new InitializationError(errors);
         }
     }
 
-    protected void validatePublicVoidNoArgMethods(final Class<? extends Annotation> annotation, final boolean isStatic, final List<Throwable> errors) {
+  private void validateTargetRequestFilters(final List<Throwable> errors) {
+    testClass.getAnnotatedMethods(TargetRequestFilter.class)
+      .stream().forEach(method -> {
+        method.validatePublicVoid(false, errors);
+        if (method.getMethod().getParameterTypes().length != 1) {
+          errors.add(new Exception("Method " + method.getName() + " should take only a single HttpRequest parameter"));
+        } else if (!HttpRequest.class.isAssignableFrom(method.getMethod().getParameterTypes()[0])) {
+          errors.add(new Exception("Method " + method.getName() + " should take only a single HttpRequest parameter"));
+        }
+      });
+  }
+
+  protected void validatePublicVoidNoArgMethods(final Class<? extends Annotation> annotation, final boolean isStatic, final List<Throwable> errors) {
         testClass.getAnnotatedMethods(annotation).stream().forEach(method -> method.validatePublicVoidNoArg(isStatic, errors));
     }
 
@@ -155,6 +170,9 @@ class InteractionRunner extends Runner {
             return new Fail(e);
         }
         final Target target = testClass.getAnnotatedFieldValues(test, TestTarget.class, Target.class).get(0);
+        if (target instanceof TestClassAwareTarget) {
+          ((TestClassAwareTarget) target).setTestClass(testClass, test);
+        }
 
         Statement statement = new Statement() {
             @Override

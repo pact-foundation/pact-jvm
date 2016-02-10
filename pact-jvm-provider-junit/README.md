@@ -140,6 +140,25 @@ that will play pacts as http request and assert response from service by matchin
 
 _Version 3.2.2/2.4.3+_ you can also specify the protocol, defaults to "http".
 
+#### Modifying the requests before they are sent [Version 3.2.3/2.4.5+]
+
+Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would
+be authentication tokens, which have a small life span. The HttpTarget supports request filters by annotating methods
+on the test class with `@TargetRequestFilter`. These methods must be public void methods that take a single HttpRequest
+parameter.
+
+For example:
+
+```java
+    @TargetRequestFilter
+    public void exampleRequestFilter(HttpRequest request) {
+      request.addHeader("Authorization", "OAUTH hdsagasjhgdjashgdah...");
+    }
+```
+
+__*Important Note:*__ You should only use this feature for things that can not be persisted in the pact file. By modifying
+the request, you are potentially modifying the contract from the consumer tests!
+
 ### Custom Test Target
 
 It's possible to use custom `Target`, for that interface `Target` should be implemented and this class can be used instead of `HttpTarget`.

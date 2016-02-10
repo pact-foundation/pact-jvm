@@ -1,7 +1,5 @@
-package au.com.dius.pact.provider.junit.junit.loader
+package au.com.dius.pact.provider.junit.loader
 
-import au.com.dius.pact.provider.junit.loader.PactBroker
-import au.com.dius.pact.provider.junit.loader.PactBrokerLoader
 import com.github.rholder.retry.Attempt
 import com.github.rholder.retry.RetryException
 import org.apache.http.HttpResponse

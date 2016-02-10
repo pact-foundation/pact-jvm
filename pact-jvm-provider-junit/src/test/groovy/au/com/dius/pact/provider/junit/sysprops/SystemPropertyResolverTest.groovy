@@ -1,6 +1,5 @@
-package au.com.dius.pact.provider.junit.junit.sysprops
+package au.com.dius.pact.provider.junit.sysprops
 
-import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver
 import org.junit.Before
 import org.junit.Test
 

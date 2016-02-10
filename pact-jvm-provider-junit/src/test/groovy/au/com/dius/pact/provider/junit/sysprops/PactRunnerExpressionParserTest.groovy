@@ -1,7 +1,5 @@
-package au.com.dius.pact.provider.junit.junit.sysprops
+package au.com.dius.pact.provider.junit.sysprops
 
-import au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser
-import au.com.dius.pact.provider.junit.sysprops.ValueResolver
 import org.junit.Test
 
 import static org.hamcrest.CoreMatchers.equalTo

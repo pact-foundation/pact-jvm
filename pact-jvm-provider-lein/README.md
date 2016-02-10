@@ -124,6 +124,9 @@ object as a parameter.
   }
 ```
 
+__*Important Note:*__ You should only use this feature for things that can not be persisted in the pact file. By modifying
+the request, you are potentially modifying the contract from the consumer tests!
+
 ## Modifying the HTTP Client Used
 
 The default HTTP client is used for all requests to providers (created with a call to `HttpClients.createDefault()`).

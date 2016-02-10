@@ -5,10 +5,13 @@ import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
 import com.github.restdriver.clientdriver.ClientDriverRule;
+import org.apache.http.HttpRequest;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.github.restdriver.clientdriver.RestClientDriver.giveEmptyResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
@@ -17,6 +20,8 @@ import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 @Provider("myAwesomeService")
 @PactFolder("pacts")
 public class ContractTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContractTest.class);
+
     // NOTE: this is just an example of embedded service that listens to requests, you should start here real service
     @ClassRule
     public static final ClientDriverRule embeddedService = new ClientDriverRule(8332);
@@ -42,7 +47,12 @@ public class ContractTest {
     public void toDefaultState() {
         // Prepare service before interaction that require "default" state
         // ...
-        System.out.println("Now service in default state");
+      LOGGER.info("Now service in default state");
+    }
+
+    @TargetRequestFilter
+    public void exampleRequestFilter(HttpRequest request) {
+      LOGGER.info("exampleRequestFilter called: " + request);
     }
 
     @TestTarget
