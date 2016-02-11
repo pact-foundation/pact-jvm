@@ -66,6 +66,8 @@ class ProviderClient {
                 provider.requestFilter(method)
             } else if (provider.requestFilter instanceof Function1) {
               provider.requestFilter.apply(method)
+            } else if (provider.requestFilter instanceof org.apache.commons.collections.Closure) {
+              provider.requestFilter.execute(method)
             } else if (provider.requestFilter.class.interfaces.any { it.isAnnotationPresent(FunctionalInterface) }) {
               invokeJavaFunctionalInterface(provider.requestFilter, method)
             } else {
