@@ -12,14 +12,13 @@ import au.com.dius.pact.model.StatusMismatch;
 import au.com.dius.pact.provider.ProviderClient;
 import au.com.dius.pact.provider.ProviderInfo;
 import au.com.dius.pact.provider.junit.TargetRequestFilter;
-import org.apache.http.HttpRequest;
+import org.apache.commons.collections.Closure;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.TestClass;
 import scala.collection.Seq;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 /**
  * Out-of-the-box implementation of {@link Target},
@@ -30,7 +29,7 @@ public class HttpTarget implements TestClassAwareTarget {
     private final int port;
     private final String protocol;
     private TestClass testClass;
-  private Object testTarget;
+    private Object testTarget;
 
   /**
      * @param host host of tested service
@@ -92,13 +91,18 @@ public class HttpTarget implements TestClassAwareTarget {
 
       final List<FrameworkMethod> methods = testClass.getAnnotatedMethods(TargetRequestFilter.class);
       if (testClass != null && !methods.isEmpty()) {
-          providerInfo.setRequestFilter((Consumer<HttpRequest>) httpRequest -> methods.forEach(method -> {
-            try {
-              method.invokeExplosively(testTarget, httpRequest);
-            } catch (Throwable t) {
-              throw new AssertionError("Request filter method " + method.getName() + " failed with an exception", t);
+          providerInfo.setRequestFilter(new Closure() {
+            @Override
+            public void execute(Object httpRequest) {
+              for (FrameworkMethod method: methods) {
+                try {
+                  method.invokeExplosively(testTarget, httpRequest);
+                } catch (Throwable t) {
+                  throw new AssertionError("Request filter method " + method.getName() + " failed with an exception", t);
+                }
+              }
             }
-          }));
+          });
         }
 
         return providerInfo;

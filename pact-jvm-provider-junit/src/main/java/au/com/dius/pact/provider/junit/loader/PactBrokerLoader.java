@@ -5,11 +5,11 @@ import au.com.dius.pact.model.PactReader;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
+import com.google.common.base.Predicate;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -21,18 +21,14 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.StreamSupport;
 
 import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseExpressions;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Out-of-the-box implementation of {@link PactLoader} that downloads pacts from Pact broker
@@ -71,18 +67,23 @@ public class PactBrokerLoader implements PactLoader {
     public List<Pact> load(final String providerName) throws IOException {
         final HttpResponse httpResponse;
         try {
-          URI brokerUri = new URIBuilder().setScheme(parseExpressions(pactBrokerProtocol))
+          final URI brokerUri = new URIBuilder().setScheme(parseExpressions(pactBrokerProtocol))
             .setHost(parseExpressions(pactBrokerHost))
             .setPort(Integer.parseInt(parseExpressions(pactBrokerPort)))
             .setPath(MessageFormat.format(PACT_URL_PATTERN, providerName))
             .build();
           if (httpResponseCallable == null) {
-            httpResponseCallable = () -> Request.Get(brokerUri)
-              .setHeader(HttpHeaders.ACCEPT, "application/hal+json")
-              .execute().returnResponse();
+            httpResponseCallable = new Callable<HttpResponse>() {
+              @Override
+              public HttpResponse call() throws Exception {
+                return Request.Get(brokerUri)
+                  .setHeader(HttpHeaders.ACCEPT, "application/hal+json")
+                  .execute().returnResponse();
+              }
+            };
           }
           httpResponse = retryer.call(httpResponseCallable);
-        } catch (final ExecutionException | RetryException | URISyntaxException e) {
+        } catch (final Exception e) {
             throw new IOException("Was not able load pacts from broker", e);
         }
 

@@ -108,7 +108,7 @@ public class PactDslJsonBodyTest {
                 .closeObject()
                 .closeObject();
 
-        Set<String> expectedMatchers = new HashSet<>(Arrays.asList(
+        Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
                 ".first.second['@third'].fourth.level4",
                 ".first.second['@third'].level3",
                 ".first.second.level2",

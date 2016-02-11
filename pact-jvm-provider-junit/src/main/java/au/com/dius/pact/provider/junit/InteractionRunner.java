@@ -88,15 +88,14 @@ class InteractionRunner extends Runner {
     }
 
   private void validateTargetRequestFilters(final List<Throwable> errors) {
-    testClass.getAnnotatedMethods(TargetRequestFilter.class)
-      .stream().forEach(method -> {
+    for (FrameworkMethod method : testClass.getAnnotatedMethods(TargetRequestFilter.class)) {
         method.validatePublicVoid(false, errors);
         if (method.getMethod().getParameterTypes().length != 1) {
           errors.add(new Exception("Method " + method.getName() + " should take only a single HttpRequest parameter"));
         } else if (!HttpRequest.class.isAssignableFrom(method.getMethod().getParameterTypes()[0])) {
           errors.add(new Exception("Method " + method.getName() + " should take only a single HttpRequest parameter"));
         }
-      });
+    }
   }
 
     protected void validatePublicVoidNoArgMethods(final Class<? extends Annotation> annotation, final boolean isStatic,
