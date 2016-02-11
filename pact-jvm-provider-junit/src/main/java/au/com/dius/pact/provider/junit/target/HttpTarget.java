@@ -15,16 +15,21 @@ import au.com.dius.pact.provider.junit.TargetRequestFilter;
 import org.apache.commons.collections.Closure;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.TestClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.collection.Seq;
 
 import java.util.List;
 import java.util.Map;
+import java.lang.AssertionError;
 
 /**
  * Out-of-the-box implementation of {@link Target},
  * that run {@link RequestResponseInteraction} against http service and verify response
  */
 public class HttpTarget implements TestClassAwareTarget {
+  private static final Logger LOGGER = LoggerFactory.getLogger(HttpTarget.class);
+
     private final String host;
     private final int port;
     private final String protocol;
@@ -98,7 +103,8 @@ public class HttpTarget implements TestClassAwareTarget {
                 try {
                   method.invokeExplosively(testTarget, httpRequest);
                 } catch (Throwable t) {
-                  throw new AssertionError("Request filter method " + method.getName() + " failed with an exception", t);
+                  LOGGER.error("Request filter failed with an exception", t);
+                  throw new AssertionError("Request filter method " + method.getName() + " failed with an exception");
                 }
               }
             }
