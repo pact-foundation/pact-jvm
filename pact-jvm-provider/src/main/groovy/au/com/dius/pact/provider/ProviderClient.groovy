@@ -26,8 +26,6 @@ import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.util.EntityUtils
 import scala.Function1
-@SuppressWarnings('UnusedImport')
-import scala.collection.JavaConverters$
 
 /**
  * Client HTTP utility for providers
@@ -49,7 +47,69 @@ class ProviderClient {
 
         CloseableHttpClient httpclient = httpClientFactory.newClient(provider)
         HttpRequest method = newRequest(request)
+        setupHeaders(method)
+        setupBody(method)
 
+        executeRequestFilter(method)
+
+        def response = httpclient.execute(method)
+        try {
+            return handleResponse(response)
+        } finally {
+            response.close()
+        }
+    }
+
+    private void executeRequestFilter(HttpRequest method) {
+        if (provider.requestFilter != null) {
+            if (provider.requestFilter instanceof Closure) {
+                provider.requestFilter(method)
+            } else if (provider.requestFilter instanceof Function1) {
+              provider.requestFilter.apply(method)
+            } else if (provider.requestFilter.class.interfaces.any { it.isAnnotationPresent(FunctionalInterface) }) {
+              invokeJavaFunctionalInterface(provider.requestFilter, method)
+            } else {
+                Binding binding = new Binding()
+                binding.setVariable(REQUEST, method)
+                GroovyShell shell = new GroovyShell(binding)
+                shell.evaluate(provider.requestFilter as String)
+            }
+        }
+    }
+
+  private static void invokeJavaFunctionalInterface(def functionalInterface, HttpRequest httpRequest) {
+    def invokableMethods = functionalInterface.metaClass.methods - Object.metaClass.methods
+    if (invokableMethods.size() == 1) {
+      MetaMethod method = invokableMethods.first()
+      if (method.parameterTypes.size() > 0) {
+        def parameters = method.parameterTypes.collect { null }
+        parameters[0] = httpRequest
+        method.invoke(functionalInterface, parameters as Object[])
+        return
+      }
+    }
+
+    throw new IllegalArgumentException('Java request filters must be either a Consumer or Function that takes at ' +
+      'least one HttpRequest parameter')
+  }
+
+  private void setupBody(HttpRequest method) {
+        if (method instanceof HttpEntityEnclosingRequest) {
+            if (urlEncodedFormPost(request) && request.query != null) {
+                def charset = Consts.UTF_8
+                List parameters = request.query.collectMany { entry ->
+                    entry.value.collect {
+                        new BasicNameValuePair(entry.key, it)
+                    }
+                }
+                method.setEntity(new UrlEncodedFormEntity(parameters, charset))
+            } else if (request.body != null) {
+                method.setEntity(new StringEntity(request.body))
+            }
+        }
+    }
+
+    private void setupHeaders(HttpRequest method) {
         if (request.headers != null) {
             request.headers.each { key, value ->
                 method.addHeader(key, value)
@@ -58,40 +118,6 @@ class ProviderClient {
             if (!method.containsHeader(CONTENT_TYPE)) {
                 method.addHeader(CONTENT_TYPE, 'application/json')
             }
-        }
-
-        if (method instanceof HttpEntityEnclosingRequest) {
-            if (urlEncodedFormPost(request) && request.query != null) {
-              def charset = Consts.UTF_8
-              List parameters = request.query.collectMany { entry ->
-                  entry.value.collect {
-                    new BasicNameValuePair(entry.key, it)
-                  }
-              }
-              method.setEntity(new UrlEncodedFormEntity(parameters, charset))
-            } else if (request.body != null) {
-                method.setEntity(new StringEntity(request.body))
-            }
-        }
-
-        if (provider.requestFilter != null) {
-            if (provider.requestFilter instanceof Closure) {
-                provider.requestFilter(method)
-            } else if (provider.requestFilter instanceof Function1) {
-                provider.requestFilter.apply(method)
-            } else {
-                Binding binding = new Binding()
-                binding.setVariable(REQUEST, method)
-                GroovyShell shell = new GroovyShell(binding)
-                shell.evaluate(provider.requestFilter as String)
-            }
-        }
-
-        def response = httpclient.execute(method)
-        try {
-            return handleResponse(response)
-        } finally {
-            response.close()
         }
     }
 

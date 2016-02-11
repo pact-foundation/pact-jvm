@@ -65,4 +65,5 @@ class ProviderClientTest {
     assert args.params.parameters == [:]
     assert args.entity.content.text == 'a=1&b=11&c=Hello+World'
   }
+
 }

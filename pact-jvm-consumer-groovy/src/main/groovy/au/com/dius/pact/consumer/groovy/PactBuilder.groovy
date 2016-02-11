@@ -27,6 +27,7 @@ class PactBuilder extends BaseBuilder {
 
   private static final String PATH_MATCHER = '$.path'
   private static final String CONTENT_TYPE = 'Content-Type'
+  private static final String JSON = 'application/json'
 
   Consumer consumer
   Provider provider
@@ -263,7 +264,7 @@ class PactBuilder extends BaseBuilder {
    * @param closure Body closure
    */
   PactBuilder withBody(Map options = [:], Closure closure) {
-    def body = new PactBodyBuilder(mimetype: options.mimetype, prettyPrintBody: options.prettyPrint)
+    def body = new PactBodyBuilder(mimetype: options.mimeType, prettyPrintBody: options.prettyPrint)
     closure.delegate = body
     closure.call()
     setupBody(body, options)
@@ -278,7 +279,7 @@ class PactBuilder extends BaseBuilder {
    * @param array body
    */
   PactBuilder withBody(Map options = [:], List array) {
-    def body = new PactBodyBuilder(mimetype: options.mimetype, prettyPrintBody: options.prettyPrint).build(array)
+    def body = new PactBodyBuilder(mimetype: options.mimeType, prettyPrintBody: options.prettyPrint).build(array)
     setupBody(body, options)
     this
   }
@@ -303,6 +304,8 @@ class PactBuilder extends BaseBuilder {
       requestData.last().headers = requestData.last().headers ?: [:]
       if (options.mimeType) {
         requestData.last().headers[CONTENT_TYPE] = options.mimeType
+      } else {
+        requestData.last().headers[CONTENT_TYPE] = JSON
       }
     } else {
       responseData.last().body = body.body
@@ -310,6 +313,8 @@ class PactBuilder extends BaseBuilder {
       responseData.last().headers = responseData.last().headers ?: [:]
       if (options.mimeType) {
         responseData.last().headers[CONTENT_TYPE] = options.mimeType
+      } else {
+        responseData.last().headers[CONTENT_TYPE] = JSON
       }
     }
   }

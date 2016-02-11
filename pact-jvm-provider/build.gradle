@@ -15,3 +15,5 @@ dependencies {
     }
     testCompile 'cglib:cglib:3.2.0'
 }
+
+compileTestGroovy.dependsOn 'compileTestScala'

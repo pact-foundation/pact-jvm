@@ -24,7 +24,7 @@ public @interface PactBroker {
     /**
      * @return port of pact broker
      */
-    int port();
+    String port();
 
   /**
    * HTTP protocol, defaults to http

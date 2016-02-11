@@ -7,7 +7,7 @@ pact-jvm
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-logging_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-logging_2.11)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11)
 
-JVM implementation of the consumer driven contract library [pact](https://github.com/bethesque/pact_specification)
+JVM implementation of the consumer driven contract library [pact](https://github.com/bethesque/pact_specification).
 
 From the [Ruby Pact website](https://github.com/realestate-com-au/pact):
 
@@ -21,10 +21,16 @@ From the [Ruby Pact website](https://github.com/realestate-com-au/pact):
 >
 >This gem is inspired by the concept of "Consumer driven contracts". See http://martinfowler.com/articles/consumerDrivenContracts.html for more information.
 
+
+Read [Getting started with Pact](http://dius.com.au/2016/02/03/microservices-pact/) for more information on
+how to get going.
+
+
 ## Contact
 
 * Twitter: [@pact_up](https://twitter.com/pact_up)
 * Google users group: https://groups.google.com/forum/#!forum/pact-support
+* Gitter: [![Join the chat at https://gitter.im/DiUS/pact-jvm](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/DiUS/pact-jvm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Links
 

@@ -37,6 +37,7 @@ subprojects {
     apply plugin: 'maven'
     apply plugin: 'signing'
     apply plugin: 'codenarc'
+    apply plugin: 'jacoco'
 
     repositories {
         mavenLocal()
@@ -138,7 +139,6 @@ subprojects {
                     if (project.hasProperty('sonatypeUsername')) {
                         authentication(userName: sonatypeUsername, password: sonatypePassword)
                     }
-//                    proxy(host: 'localhost', port: 3128, type: 'http')
                 }
 
             }

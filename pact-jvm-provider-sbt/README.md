@@ -173,3 +173,6 @@ SbtProviderPlugin.config ++ Seq(
   )
 )
 ```
+
+__*Important Note:*__ You should only use this feature for things that can not be persisted in the pact file. By modifying
+the request, you are potentially modifying the contract from the consumer tests!

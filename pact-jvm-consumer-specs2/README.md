@@ -8,19 +8,20 @@ pact-jvm-consumer-specs2
 In the root folder of your project in build.sbt add the line:
 
 ```scala
-libraryDependencies += "au.com.dius" %% "pact-jvm-consumer-specs2" % "3.0.4"
+libraryDependencies += "au.com.dius" %% "pact-jvm-consumer-specs2" % "3.2.2"
 ```
 
 or if you are using Gradle:
 
 ```groovy
 dependencies {
-    testCompile "au.com.dius:pact-jvm-consumer-specs2:3.0.4"
+    testCompile "au.com.dius:pact-jvm-consumer-specs2_2.11:3.2.2"
 }
 
 ```
 
-*Note:* `PactSpec` requires spec2 3.x
+__*Note:*__ `PactSpec` requires spec2 3.x. Also, for spray users there's an incompatibility between specs2 v3.x and spray.
+Follow these instructions to resolve that problem: https://groups.google.com/forum/#!msg/spray-user/2T6SBp4OJeI/AJlnJuAKPRsJ
 
 ## Usage
 

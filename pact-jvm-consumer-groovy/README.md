@@ -21,7 +21,7 @@ If you are using gradle for your build, add it to your `build.gradle`:
     dependencies {
         testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.1.0'
     }
-  
+
 Then create an instance of the `PactBuilder` in your test.
 
 ```groovy
@@ -44,7 +44,7 @@ Then create an instance of the `PactBuilder` in your test.
                 body: '"That is some good Mallory."'
             )
         }
-        
+
 	      // Execute the run method to have the mock server run.
 	      // It takes a closure to execute your requests and returns a Pact VerificationResult.
 	      VerificationResult result = alice_service.run() {
@@ -58,9 +58,9 @@ Then create an instance of the `PactBuilder` in your test.
             assert data == '"That is some good Mallory."'
         }
         assert result == PactVerified$.MODULE$  // This means it is all good in weird Scala speak.
-        
+
     }
-```    
+```
 
 After running this test, the following pact file is produced:
 
@@ -287,7 +287,7 @@ Defines a matcher that accepts any real numbers. If the value is not provided, a
 
 * timestamp(String pattern = null, def value = null)
 
-If pattern is not provided the ISO_DATETIME_FORMAT is used ("yyyy-MM-dd'T'HH:mm:ss") . If the value is not provided, the current date and time is used. 
+If pattern is not provided the ISO_DATETIME_FORMAT is used ("yyyy-MM-dd'T'HH:mm:ss") . If the value is not provided, the current date and time is used.
 
 * time(String pattern = null, def value = null)
 
@@ -300,6 +300,15 @@ If pattern is not provided the ISO_DATE_FORMAT is used ("yyyy-MM-dd") . If the v
 * uuid(String value = null)
 
 Defines a matcher that accepts UUIDs. A random one will be generated if no value is provided.
+
+#### What if a field matches a matcher name in the DSL?
+When using the body DSL, if there is a field that matches a matcher name (e.g. a field named 'date') then you can do the following:
+
+```groovy
+  withBody {
+    date = date()
+  }
+```
 
 ### Ensuring all items in a list match an example (2.2.0+)
 

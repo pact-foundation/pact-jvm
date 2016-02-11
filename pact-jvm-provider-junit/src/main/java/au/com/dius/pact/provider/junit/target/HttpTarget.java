@@ -11,20 +11,28 @@ import au.com.dius.pact.model.ResponsePartMismatch;
 import au.com.dius.pact.model.StatusMismatch;
 import au.com.dius.pact.provider.ProviderClient;
 import au.com.dius.pact.provider.ProviderInfo;
+import au.com.dius.pact.provider.junit.TargetRequestFilter;
+import org.apache.http.HttpRequest;
+import org.junit.runners.model.FrameworkMethod;
+import org.junit.runners.model.TestClass;
 import scala.collection.Seq;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Out-of-the-box implementation of {@link Target},
  * that run {@link RequestResponseInteraction} against http service and verify response
  */
-public class HttpTarget implements Target {
+public class HttpTarget implements TestClassAwareTarget {
     private final String host;
     private final int port;
     private final String protocol;
+    private TestClass testClass;
+  private Object testTarget;
 
-    /**
+  /**
      * @param host host of tested service
      * @param port port of tested service
      */
@@ -81,6 +89,18 @@ public class HttpTarget implements Target {
         providerInfo.setPort(port);
         providerInfo.setHost(host);
         providerInfo.setProtocol(protocol);
+
+      final List<FrameworkMethod> methods = testClass.getAnnotatedMethods(TargetRequestFilter.class);
+      if (testClass != null && !methods.isEmpty()) {
+          providerInfo.setRequestFilter((Consumer<HttpRequest>) httpRequest -> methods.forEach(method -> {
+            try {
+              method.invokeExplosively(testTarget, httpRequest);
+            } catch (Throwable t) {
+              throw new AssertionError("Request filter method " + method.getName() + " failed with an exception", t);
+            }
+          }));
+        }
+
         return providerInfo;
     }
 
@@ -105,5 +125,11 @@ public class HttpTarget implements Target {
             }
         }
         return new AssertionError(result.toString());
+    }
+
+    @Override
+    public void setTestClass(final TestClass testClass, final Object testTarget) {
+      this.testClass = testClass;
+      this.testTarget = testTarget;
     }
 }

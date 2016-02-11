@@ -1,6 +1,5 @@
 package au.com.dius.pact.consumer.groovy
 
-import groovy.json.JsonSlurper
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
 
@@ -23,12 +22,13 @@ class PactResultSpec extends Specification {
 
       when:
         def response
+        def data
         testService.runTestAndVerify {
             def client = new RESTClient('http://localhost:1234/')
             response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                 requestContentType: 'application/json')
+            data = response.data
         }
-        def data = new JsonSlurper().parse(response.data as InputStream)
 
       then:
         response.status == 200

@@ -102,7 +102,6 @@ ask('Tag and Push commits?: [Y]') {
 
 ask('Publish artifacts to maven central?: [Y]') {
   executeOnShell './gradlew clean uploadArchives -S'
-  executeOnShell 'sbt publish'
 }
 
 def nextVer = Version.valueOf(releaseVer).incrementPatchVersion()

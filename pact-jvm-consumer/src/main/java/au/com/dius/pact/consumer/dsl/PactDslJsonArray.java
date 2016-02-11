@@ -190,7 +190,7 @@ public class PactDslJsonArray extends DslPart {
      * Element that can be any number
      */
     public PactDslJsonArray numberType() {
-        return numberType(Long.parseLong(RandomStringUtils.randomNumeric(10)));
+        return numberType(Long.parseLong(RandomStringUtils.randomNumeric(9)));
     }
 
     /**
@@ -207,7 +207,7 @@ public class PactDslJsonArray extends DslPart {
      * Element that must be an integer
      */
     public PactDslJsonArray integerType() {
-        return integerType(Long.parseLong(RandomStringUtils.randomNumeric(10)));
+        return integerType(Long.parseLong(RandomStringUtils.randomNumeric(9)));
     }
 
     /**

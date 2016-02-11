@@ -253,6 +253,9 @@ pact {
 }
 ```
 
+__*Important Note:*__ You should only use this feature for things that can not be persisted in the pact file. By modifying
+the request, you are potentially modifying the contract from the consumer tests!
+
 ## Project Properties
 
 The following project properties can be specified with `-Pproperty=value` on the command line:
