@@ -42,7 +42,8 @@ public class PactDslJsonBody extends DslPart {
         for(String matcherName: object.matchers.keySet()) {
             matchers.put(matcherName, object.matchers.get(matcherName));
         }
-        String name = StringUtils.strip(object.root, ".");
+        String elementBase = StringUtils.difference(this.root, object.root);
+        String name = StringUtils.strip(elementBase, ".");
         Pattern p = Pattern.compile("\\['(.+)'\\]");
         Matcher matcher = p.matcher(name);
         if (matcher.matches()) {

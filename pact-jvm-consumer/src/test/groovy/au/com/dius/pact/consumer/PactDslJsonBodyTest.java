@@ -116,6 +116,28 @@ public class PactDslJsonBodyTest {
         ));
 
         assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
+
+        assertThat(((JSONObject)body.getBody())
+                .getJSONObject("first")
+                .getString("level1"), is(equalTo("l1example")));
+
+        assertThat(((JSONObject)body.getBody())
+                .getJSONObject("first")
+                .getJSONObject("second")
+                .getString("level2"), is(equalTo("l2example")));
+
+        assertThat(((JSONObject)body.getBody())
+                .getJSONObject("first")
+                .getJSONObject("second")
+                .getJSONObject("@third")
+                .getString("level3"), is(equalTo("l3example")));
+
+        assertThat(((JSONObject)body.getBody())
+                .getJSONObject("first")
+                .getJSONObject("second")
+                .getJSONObject("@third")
+                .getJSONObject("fourth")
+                .getString("level4"), is(equalTo("l4example")));
     }
 
     @Test
@@ -134,6 +156,15 @@ public class PactDslJsonBodyTest {
         ));
 
         assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
+
+        assertThat(((JSONObject)body.getBody())
+                .getJSONArray("first")
+                .getString(0), is(equalTo("l1example")));
+
+        assertThat(((JSONObject)body.getBody())
+                .getJSONArray("first")
+                .getJSONArray(1)
+                .getString(0), is(equalTo("l2example")));
     }
 
     @Test
@@ -160,6 +191,29 @@ public class PactDslJsonBodyTest {
         ));
 
         assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
+
+        assertThat(((JSONObject)body.getBody())
+                .getJSONObject("first")
+                .getString("level1"), is(equalTo("l1example")));
+
+        assertThat(((JSONObject)body.getBody())
+                .getJSONObject("first")
+                .getJSONArray("second")
+                .getString(0), is(equalTo("al2example")));
+
+        assertThat(((JSONObject)body.getBody())
+                .getJSONObject("first")
+                .getJSONArray("second")
+                .getJSONObject(1)
+                .getString("level2"), is(equalTo("l2example")));
+
+        assertThat(((JSONObject)body.getBody())
+                .getJSONObject("first")
+                .getJSONArray("second")
+                .getJSONObject(1)
+                .getJSONArray("third")
+                .getString(0), is(equalTo("al3example")));
+
     }
 
     @Test
