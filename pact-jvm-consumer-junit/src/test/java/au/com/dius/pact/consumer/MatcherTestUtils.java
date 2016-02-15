@@ -61,7 +61,6 @@ public class MatcherTestUtils {
     private static void walkGraph(Map hashMap, List<String> list, String path) {
         for (Object o : hashMap.entrySet()) {
             Map.Entry e = (Map.Entry) o;
-            LOGGER.debug(e.toString());
             list.add(path + e.getKey());
             if (e.getValue() instanceof Map) {
                 walkGraph((Map) e.getValue(), list, path + e.getKey() + "/");

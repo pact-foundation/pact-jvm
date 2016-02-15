@@ -19,6 +19,7 @@ public class PactDslJsonArray extends DslPart {
 
     private final JSONArray body;
     private boolean wildCard;
+    private int numberExamples = 1;
 
     public PactDslJsonArray() {
 		this("", null, false);
@@ -45,7 +46,7 @@ public class PactDslJsonArray extends DslPart {
     @Override
     @Deprecated
     public PactDslJsonBody arrayLike(String name) {
-        throw new UnsupportedOperationException("use the arrayLike() form");
+        throw new UnsupportedOperationException("use the eachLike() form");
     }
 
     /**
@@ -63,14 +64,29 @@ public class PactDslJsonArray extends DslPart {
         throw new UnsupportedOperationException("use the eachLike() form");
     }
 
+    @Override
+    public PactDslJsonBody eachLike(String name, int numberExamples) {
+      throw new UnsupportedOperationException("use the eachLike(numberExamples) form");
+    }
+
     /**
      * Element that is an array where each item must match the following example
      */
     @Override
     public PactDslJsonBody eachLike() {
-        matchers.put(root + appendArrayIndex(1), matchMin(0));
-        PactDslJsonArray parent = new PactDslJsonArray(root, this, true);
-        return new PactDslJsonBody(".", parent);
+        return eachLike(1);
+    }
+
+    /**
+     * Element that is an array where each item must match the following example
+     * @param numberExamples Number of examples to generate
+     */
+    @Override
+    public PactDslJsonBody eachLike(int numberExamples) {
+      matchers.put(root + appendArrayIndex(1), matchMin(0));
+      PactDslJsonArray parent = new PactDslJsonArray(root, this, true);
+      parent.setNumberExamples(numberExamples);
+      return new PactDslJsonBody(".", parent);
     }
 
     @Override
@@ -84,9 +100,25 @@ public class PactDslJsonArray extends DslPart {
      */
     @Override
     public PactDslJsonBody minArrayLike(Integer size) {
-        matchers.put(root + appendArrayIndex(1), matchMin(size));
-        PactDslJsonArray parent = new PactDslJsonArray("", this, true);
-        return new PactDslJsonBody(".", parent);
+        return minArrayLike(size, 1);
+    }
+
+    @Override
+    public PactDslJsonBody minArrayLike(String name, Integer size, int numberExamples) {
+      throw new UnsupportedOperationException("use the minArrayLike(Integer size, int numberExamples) form");
+    }
+
+    /**
+     * Element that is an array with a minimum size where each item must match the following example
+     * @param size minimum size of the array
+     * @param numberExamples number of examples to generate
+     */
+    @Override
+    public PactDslJsonBody minArrayLike(Integer size, int numberExamples) {
+      matchers.put(root + appendArrayIndex(1), matchMin(size));
+      PactDslJsonArray parent = new PactDslJsonArray("", this, true);
+      parent.setNumberExamples(numberExamples);
+      return new PactDslJsonBody(".", parent);
     }
 
     @Override
@@ -100,16 +132,34 @@ public class PactDslJsonArray extends DslPart {
      */
     @Override
     public PactDslJsonBody maxArrayLike(Integer size) {
-        matchers.put(root + appendArrayIndex(1), matchMax(size));
-        PactDslJsonArray parent = new PactDslJsonArray("", this, true);
-        return new PactDslJsonBody(".", parent);
+        return maxArrayLike(size, 1);
+    }
+
+    @Override
+    public PactDslJsonBody maxArrayLike(String name, Integer size, int numberExamples) {
+      throw new UnsupportedOperationException("use the maxArrayLike(Integer size, int numberExamples) form");
+    }
+
+    /**
+     * Element that is an array with a maximum size where each item must match the following example
+     * @param size maximum size of the array
+     * @param numberExamples number of examples to generate
+     */
+    @Override
+    public PactDslJsonBody maxArrayLike(Integer size, int numberExamples) {
+      matchers.put(root + appendArrayIndex(1), matchMax(size));
+      PactDslJsonArray parent = new PactDslJsonArray("", this, true);
+      parent.setNumberExamples(numberExamples);
+      return new PactDslJsonBody(".", parent);
     }
 
     protected void putObject(DslPart object) {
-        for(String matcherName: object.matchers.keySet()) {
-            matchers.put(root + appendArrayIndex(1) + matcherName, object.matchers.get(matcherName));
-        }
+      for(String matcherName: object.matchers.keySet()) {
+          matchers.put(root + appendArrayIndex(1) + matcherName, object.matchers.get(matcherName));
+      }
+      for (int i = 0; i < getNumberExamples(); i++) {
         body.put(object.getBody());
+      }
     }
 
     protected void putArray(DslPart object) {
@@ -553,34 +603,63 @@ public class PactDslJsonArray extends DslPart {
         return "[" + index + "]";
     }
 
-    /**
-     * Array where each item must match the following example
-     */
-    public static PactDslJsonBody arrayEachLike() {
-        PactDslJsonArray parent = new PactDslJsonArray("", null, true);
-        parent.matchers.put("", parent.matchMin(0));
-        return new PactDslJsonBody(".", parent);
-    }
+  /**
+   * Array where each item must match the following example
+   */
+  public static PactDslJsonBody arrayEachLike() {
+    return arrayEachLike(1);
+  }
 
-    /**
-     * Array with a minimum size where each item must match the following example
-     * @param minSize minimum size
-     */
-    public static PactDslJsonBody arrayMinLike(int minSize) {
-        PactDslJsonArray parent = new PactDslJsonArray("", null, true);
-        parent.matchers.put("", parent.matchMin(minSize));
-        return new PactDslJsonBody(".", parent);
-    }
+  /**
+   * Array where each item must match the following example
+   * @param numberExamples Number of examples to generate
+   */
+  public static PactDslJsonBody arrayEachLike(Integer numberExamples) {
+    PactDslJsonArray parent = new PactDslJsonArray("", null, true);
+    parent.setNumberExamples(numberExamples);
+    parent.matchers.put("", parent.matchMin(0));
+    return new PactDslJsonBody(".", parent);
+  }
 
-    /**
-     * Array with a maximum size where each item must match the following example
-     * @param maxSize maximum size
-     */
-    public static PactDslJsonBody arrayMaxLike(int maxSize) {
-        PactDslJsonArray parent = new PactDslJsonArray("", null, true);
-        parent.matchers.put("", parent.matchMax(maxSize));
-        return new PactDslJsonBody(".", parent);
-    }
+  /**
+   * Array with a minimum size where each item must match the following example
+   * @param minSize minimum size
+   */
+  public static PactDslJsonBody arrayMinLike(int minSize) {
+      return arrayMinLike(minSize, 1);
+  }
+
+  /**
+   * Array with a minimum size where each item must match the following example
+   * @param minSize minimum size
+   * @param numberExamples Number of examples to generate
+   */
+  public static PactDslJsonBody arrayMinLike(int minSize, int numberExamples) {
+    PactDslJsonArray parent = new PactDslJsonArray("", null, true);
+    parent.setNumberExamples(numberExamples);
+    parent.matchers.put("", parent.matchMin(minSize));
+    return new PactDslJsonBody(".", parent);
+  }
+
+  /**
+   * Array with a maximum size where each item must match the following example
+   * @param maxSize maximum size
+   */
+  public static PactDslJsonBody arrayMaxLike(int maxSize) {
+      return arrayMaxLike(maxSize, 1);
+  }
+
+  /**
+   * Array with a maximum size where each item must match the following example
+   * @param maxSize maximum size
+   * @param numberExamples Number of examples to generate
+   */
+  public static PactDslJsonBody arrayMaxLike(int maxSize, int numberExamples) {
+    PactDslJsonArray parent = new PactDslJsonArray("", null, true);
+    parent.setNumberExamples(numberExamples);
+    parent.matchers.put("", parent.matchMax(maxSize));
+    return new PactDslJsonBody(".", parent);
+  }
 
   /**
    * Adds a null value to the list
@@ -588,5 +667,19 @@ public class PactDslJsonArray extends DslPart {
   public PactDslJsonArray nullValue() {
     body.put(JSONObject.NULL);
     return this;
+  }
+
+  /**
+   * Returns the number of example elements to generate for sample bodies
+   */
+  public int getNumberExamples() {
+    return numberExamples;
+  }
+
+  /**
+   * Sets the number of example elements to generate for sample bodies
+   */
+  public void setNumberExamples(int numberExamples) {
+    this.numberExamples = numberExamples;
   }
 }
