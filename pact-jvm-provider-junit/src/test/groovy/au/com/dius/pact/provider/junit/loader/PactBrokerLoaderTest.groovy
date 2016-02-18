@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.junit.loader
 
 import com.github.rholder.retry.Attempt
 import com.github.rholder.retry.RetryException
+import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.StatusLine
 import org.junit.Before
@@ -12,24 +13,31 @@ import java.util.concurrent.ExecutionException
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.empty
+import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
 @PactBroker(host = 'pactbroker.host', port = '1000')
 class PactBrokerLoaderTest {
 
+  private static final String DEFAULT_BODY = '''
+    {
+    }
+  '''
   private Closure<PactBrokerLoader> pactBrokerLoader
   private String host
   private String port
   private String protocol
   private Closure<HttpResponse> closure
+  private List tags
 
   @Before
   void setup() {
     host = 'pactbroker'
     port = '1234'
     protocol = 'http'
+    tags = ['latest']
     pactBrokerLoader = {
-      PactBrokerLoader pactBrokerLoader = new PactBrokerLoader(host, port, protocol)
+      PactBrokerLoader pactBrokerLoader = new PactBrokerLoader(host, port, protocol, tags)
       pactBrokerLoader.setHttpResponseCallable(closure as Callable<HttpResponse>)
       pactBrokerLoader
     }
@@ -70,12 +78,26 @@ class PactBrokerLoaderTest {
     assertThat(pactBrokerLoader.call().load('test'), is(empty()))
   }
 
-  private static HttpResponse mockResponse(Integer status) {
+  @Test
+  void 'Loads pacts for each provided tag'() {
+    def count = 0
+    closure = { count++; mockResponse(200) }
+    tags = ['latest', 'a', 'b', 'c']
+    pactBrokerLoader.call().load('test')
+    assertThat(count, is(equalTo(4)))
+  }
+
+  private static HttpResponse mockResponse(Integer status, String body = DEFAULT_BODY) {
     [
       getStatusLine: {
         [
           getStatusCode: { status }
         ] as StatusLine
+      },
+      getEntity: {
+        [
+          getContent: { new ByteArrayInputStream(body.bytes) }
+        ] as HttpEntity
       }
     ] as HttpResponse
   }

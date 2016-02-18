@@ -26,8 +26,13 @@ public @interface PactBroker {
      */
     String port();
 
-  /**
-   * HTTP protocol, defaults to http
-   */
+    /**
+     * HTTP protocol, defaults to http
+     */
     String protocol() default "http";
+
+    /**
+     * Tags to use to fetch pacts for
+     */
+    String[] tags() default "latest";
 }
