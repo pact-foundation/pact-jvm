@@ -151,6 +151,50 @@ class PactBodyBuilderSpec extends Specification {
     ]
   }
 
+  def 'arrays with matching with extra examples'() {
+    given:
+    service {
+      uponReceiving('a request with array matching with extra examples')
+      withAttributes(method: 'get', path: '/')
+      withBody {
+        orders maxLike(10, 2) {
+          id identifier
+          lineItems minLike(1, 3) {
+            id identifier
+            amount numeric
+            productCodes eachLike(4) { code string('A100') }
+          }
+        }
+      }
+      willRespondWith(
+        status: 200,
+        headers: ['Content-Type': 'text/html']
+      )
+    }
+
+    when:
+    service.fragment()
+    def body = new JsonSlurper().parseText(service.interactions[0].request.body)
+
+    then:
+    service.interactions.size() == 1
+    asJavaMap(service.interactions[0].request.matchingRules) == [
+      '$.body.orders': [max: 10, 'match': 'type'],
+      '$.body.orders[*].id': ['match': 'type'],
+      '$.body.orders[*].lineItems': ['min': 1, 'match': 'type'],
+      '$.body.orders[*].lineItems[*].id': [match: 'type'],
+      '$.body.orders[*].lineItems[*].amount': [match: 'number'],
+      '$.body.orders[*].lineItems[*].productCodes': ['match': 'type'],
+      '$.body.orders[*].lineItems[*].productCodes[*].code': [match: 'type']
+    ]
+    body.orders.size == 2
+    body.orders.every { it.keySet() == ['id', 'lineItems'] as Set }
+    body.orders.first().lineItems.size == 3
+    body.orders.first().lineItems.every { it.keySet() == ['id', 'amount', 'productCodes'] as Set }
+    body.orders.first().lineItems.first().productCodes.size == 4
+    body.orders.first().lineItems.first().productCodes.every { it.keySet() == ['code'] as Set }
+  }
+
   def 'pretty prints bodies by default'() {
     given:
     service {
@@ -273,7 +317,7 @@ class PactBodyBuilderSpec extends Specification {
     response.body == '{"name":"harry"}'
   }
 
-  def 'Guard Against Field Names That Dont Conform To Gatling Fields'() {
+  def 'Guard Against Field Names That Don\'t Conform To Gatling Fields'() {
     given:
     service {
       uponReceiving('a request with invalid gatling fields')

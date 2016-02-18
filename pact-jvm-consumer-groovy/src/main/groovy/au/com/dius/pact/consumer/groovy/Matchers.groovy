@@ -18,36 +18,36 @@ class Matchers {
   private static final int TEN = 10
   public static final String TYPE = 'type'
 
-  def regexp(Pattern re, String value = null) {
+  static regexp(Pattern re, String value = null) {
     regexp(re.toString(), value)
   }
 
-  def regexp(String regexp, String value = null) {
+  static regexp(String regexp, String value = null) {
     if (value && !value.matches(regexp)) {
       throw new InvalidMatcherException("Example \"$value\" does not match regular expression \"$regexp\"")
     }
     new RegexpMatcher(values: [regexp, value])
   }
 
-  def hexValue(String value = null) {
+  static hexValue(String value = null) {
     if (value && !value.matches(HEXADECIMAL)) {
       throw new InvalidMatcherException("Example \"$value\" is not a hexadecimal value")
     }
     new RegexpMatcher(values: [HEXADECIMAL, value ?: RandomStringUtils.random(TEN, '0123456789abcdef')])
   }
 
-  def identifier(def value = null) {
+  static identifier(def value = null) {
     new TypeMatcher(values: [TYPE, value ?: RandomStringUtils.randomNumeric(TEN) as Long])
   }
 
-  def ipAddress(String value = null) {
+  static ipAddress(String value = null) {
     if (value && !value.matches(IP_ADDRESS)) {
       throw new InvalidMatcherException("Example \"$value\" is not an ip adress")
     }
     new RegexpMatcher(values: [IP_ADDRESS, value ?: '127.0.0.1'])
   }
 
-  def numeric(Number value = null) {
+  static numeric(Number value = null) {
     new TypeMatcher(values: ['number', value ?: RandomStringUtils.randomNumeric(TEN) as Long])
   }
 
@@ -55,24 +55,24 @@ class Matchers {
    * @deprecated Use decimal instead
    */
   @Deprecated
-  def real(Number value = null) {
+  static real(Number value = null) {
     new TypeMatcher(values: ['real', value ?: (RandomStringUtils.randomNumeric(TEN) as BigDecimal) / 100.0])
   }
 
-  def decimal(Number value = null) {
+  static decimal(Number value = null) {
     new TypeMatcher(values: ['decimal', value ?: (RandomStringUtils.randomNumeric(TEN) as BigDecimal) / 100.0])
   }
 
-  def integer(Long value = null) {
+  static integer(Long value = null) {
     new TypeMatcher(values: ['integer', value ?: RandomStringUtils.randomNumeric(TEN) as Long])
   }
 
-  def timestamp(String pattern = null, def value = null) {
+  static timestamp(String pattern = null, def value = null) {
     validateTimeValue(value, pattern)
     new TimestampMatcher(values: value, pattern: pattern)
   }
 
-  private validateTimeValue(String value, String pattern) {
+  private static validateTimeValue(String value, String pattern) {
     if (value && pattern) {
       try {
         DateUtils.parseDateStrictly(value, pattern)
@@ -82,12 +82,12 @@ class Matchers {
     }
   }
 
-  def time(String pattern = null, def value = null) {
+  static time(String pattern = null, def value = null) {
     validateTimeValue(value, pattern)
     new TimeMatcher(values: value, pattern: pattern)
   }
 
-  def date(String pattern = null, def value = null) {
+  static date(String pattern = null, def value = null) {
     validateTimeValue(value, pattern)
     new DateMatcher(values: value, pattern: pattern)
   }
@@ -99,7 +99,7 @@ class Matchers {
    */
   @SuppressWarnings('ConfusingMethodName')
   @Deprecated
-  def guid(String value = null) {
+  static guid(String value = null) {
     uuid(value)
   }
 
@@ -107,36 +107,41 @@ class Matchers {
    * Match a universally unique identifier (UUID)
    * @param value optional value to use for examples
    */
-  def uuid(String value = null) {
+  static uuid(String value = null) {
     if (value && !value.matches(UUID_REGEX)) {
       throw new InvalidMatcherException("Example \"$value\" is not a UUID")
     }
     new RegexpMatcher(values: [UUID_REGEX, value ?: UUID.randomUUID().toString()])
   }
 
-  def string(String value = null) {
+  static string(String value = null) {
     new TypeMatcher(values: [TYPE, value ?: RandomStringUtils.randomAlphanumeric(TEN)])
   }
 
   /**
    * Array with maximum size and each element like the following object
+   * @param max The maximum size of the array
+   * @param numberExamples Optional number of examples to generate. Defaults to 1.
    */
-  def maxLike(Integer max, Closure closure) {
-    new MaxLikeMatcher(values: [max, closure])
+  static maxLike(Integer max, Integer numberExamples = 1, Closure closure) {
+    new MaxLikeMatcher(values: [max, closure], numberExamples: numberExamples)
   }
 
   /**
    * Array with minimum size and each element like the following object
+   * @param min The minimum size of the array
+   * @param numberExamples Optional number of examples to generate. Defaults to 1.
    */
-  def minLike(Integer min, Closure closure) {
-    new MinLikeMatcher(values: [min, closure])
+  static minLike(Integer min, Integer numberExamples = 1, Closure closure) {
+    new MinLikeMatcher(values: [min, closure], numberExamples: numberExamples)
   }
 
   /**
    * Array where each element is like the following object
+   * @param numberExamples Optional number of examples to generate. Defaults to 1.
    */
-  def eachLike(Closure closure) {
-    new EachLikeMatcher(values: [null,  closure])
+  static eachLike(Integer numberExamples = 1, Closure closure) {
+    new EachLikeMatcher(values: [null,  closure], numberExamples: numberExamples)
   }
 
 }

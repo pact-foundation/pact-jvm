@@ -99,7 +99,10 @@ class PactBodyBuilder extends BaseBuilder {
       bodyRepresentation[name] = setMatcherAttribute(matcher, path + buildPath(name))
     } else if (value instanceof LikeMatcher) {
       setMatcherAttribute(value, path + buildPath(name))
-      bodyRepresentation[name] = [ invokeClosure(value.values.last(), buildPath(name, ALL_LIST_ITEMS)) ]
+      bodyRepresentation[name] = []
+      value.numberExamples.times {
+        bodyRepresentation[name] << invokeClosure(value.values.last(), buildPath(name, ALL_LIST_ITEMS))
+      }
     } else if (value instanceof Matcher) {
       bodyRepresentation[name] = setMatcherAttribute(value, path + buildPath(name))
     } else if (value instanceof List) {
