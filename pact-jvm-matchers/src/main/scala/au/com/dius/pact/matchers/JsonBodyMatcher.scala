@@ -6,13 +6,19 @@ import au.com.dius.pact.model._
 class JsonBodyMatcher extends BodyMatcher with StrictLogging {
 
   def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig): List[BodyMismatch] = {
-    (Option.apply(expected.getBody), Option.apply(actual.getBody)) match {
+    (getBody(expected), getBody(actual)) match {
       case (None, None) => List()
       case (None, b) => List()
       case (Some(a), None) => List(BodyMismatch(a, None))
       case (Some(a), Some(b)) => compare(Seq("$", "body"), JsonUtils.parseJsonString(a), JsonUtils.parseJsonString(b),
         diffConfig, Option.apply(CollectionUtils.javaMMapToScalaMMap(expected.getMatchingRules)))
     }
+  }
+
+  def getBody(http: HttpPart): Option[String] = {
+    val body: String = http.getBody
+    if (body == null || body.isEmpty) None
+    else Some(body)
   }
 
   def valueOf(value: Any) = {

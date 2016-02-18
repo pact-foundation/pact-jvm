@@ -74,8 +74,14 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
           s"$a does not contain '$s'"
         )
 
+      "when comparing anything to an null body" in {
+        expectedBody = "Blah"
+        matcher.matchBody(expected(), actual(), diffconfig) must not(beEmpty)
+      }
+
       "when comparing anything to an empty body" in {
         expectedBody = "Blah"
+        actualBody = ""
         matcher.matchBody(expected(), actual(), diffconfig) must not(beEmpty)
       }
 
