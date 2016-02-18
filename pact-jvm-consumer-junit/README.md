@@ -322,7 +322,7 @@ For example:
 
 ```java
     DslPart body = new PactDslJsonBody()
-        .minArrayLike("users")
+        .minArrayLike("users", 1)
             .id()
             .stringType("name")
             .closeObject()
@@ -330,6 +330,19 @@ For example:
 ```
 
 This will ensure that the users list is never empty and that each user has an identifier that is a number and a name that is a string.
+
+__Version 3.2.4/2.4.6+__ You can specify the number of example items to generate in the array. The default is 1.
+
+```java
+    DslPart body = new PactDslJsonBody()
+        .minArrayLike("users", 1, 2)
+            .id()
+            .stringType("name")
+            .closeObject()
+        .closeArray();
+```
+
+This will generate the example body with 2 items in the users list.
 
 #### Root level arrays that match all items (version 2.2.11+)
 
@@ -369,6 +382,8 @@ This will then match a body like:
   "amount" : 15.0
 } ]
 ```
+
+__Version 3.2.4/2.4.6+__ You can specify the number of example items to generate in the array. The default is 1.
 
 #### Matching JSON values at the root (Version 3.2.2/2.4.3+)
 
