@@ -302,6 +302,7 @@ If pattern is not provided the ISO_DATE_FORMAT is used ("yyyy-MM-dd") . If the v
 Defines a matcher that accepts UUIDs. A random one will be generated if no value is provided.
 
 #### What if a field matches a matcher name in the DSL?
+
 When using the body DSL, if there is a field that matches a matcher name (e.g. a field named 'date') then you can do the following:
 
 ```groovy
@@ -334,6 +335,19 @@ For example:
 ```
 
 This will ensure that the user list is never empty and that each user has an identifier that is a number and a name that is a string.
+
+__Version 3.2.4/2.4.6+__ You can specify the number of example items to generate in the array. The default is 1.
+
+```groovy
+    withBody {
+        users minLike(1, 3) {
+            id identifier
+            name string('Fred')
+        }
+    }
+```
+
+This will create an example user list with 3 users.
 
 ## Changing the directory pact files are written to (2.1.9+)
 

@@ -86,6 +86,22 @@ public class PactDslJsonRootValue extends DslPart {
    * @deprecated Use PactDslJsonArray for arrays
    */
   @Override
+  public PactDslJsonBody eachLike(int numberExamples) {
+    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonBody eachLike(String name, int numberExamples) {
+    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
   public PactDslJsonBody eachLike() {
     throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
   }
@@ -110,6 +126,22 @@ public class PactDslJsonRootValue extends DslPart {
    * @deprecated Use PactDslJsonArray for arrays
    */
   @Override
+  public PactDslJsonBody minArrayLike(String name, Integer size, int numberExamples) {
+    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonBody minArrayLike(Integer size, int numberExamples) {
+    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
   public PactDslJsonBody maxArrayLike(String name, Integer size) {
     throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
   }
@@ -119,6 +151,22 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody maxArrayLike(Integer size) {
+    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonBody maxArrayLike(String name, Integer size, int numberExamples) {
+    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonBody maxArrayLike(Integer size, int numberExamples) {
     throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
   }
 

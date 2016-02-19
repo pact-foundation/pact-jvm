@@ -27,10 +27,12 @@ dependencies {
     'org.apache.commons:commons-collections4:4.0',
     'com.google.code.gson:gson:2.3.1',
     "org.apache.httpcomponents:fluent-hc:$httpClientVersion",
-    "org.apache.httpcomponents:httpclient:$httpClientVersion"
+    "org.apache.httpcomponents:httpclient:$httpClientVersion",
+    'com.jayway.restassured:rest-assured:2.8.0'
 
   if (javaMajor > 1 || javaMinor > 6) {
-    testCompile 'org.clojure:clojure:1.6.0', 'http-kit:http-kit:2.1.19'
+    testCompile 'org.clojure:clojure:1.6.0',
+      'http-kit:http-kit:2.1.19'
   }
 }
 

@@ -105,6 +105,16 @@ You can provide a default value by separating the property name with a colon (`:
 @PactBroker(host="${pactbroker.hostname:localhost}", port = "80")
 ```
 
+#### _Version 3.2.4/2.4.6+_ - Using tags with the pact broker
+
+The pact broker allows different versions to be tagged. To load all the pacts:
+
+```java
+@PactBroker(host="pactbroker", port = "80", tags = {"latest", "dev", "prod"})
+```
+
+The `latest` tag corresponds to the latest version ignoring the tags, and is the default.
+
 ### Pact Url
 
 To use pacts from urls annotate the test class with
