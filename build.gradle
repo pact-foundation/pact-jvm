@@ -49,7 +49,7 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '3.2.4'
+    version = '3.2.5'
     targetCompatibility = '1.8'
     sourceCompatibility = '1.8'
 
@@ -136,7 +136,7 @@ subprojects {
                     if (project.hasProperty('sonatypeUsername')) {
                         authentication(userName: sonatypeUsername, password: sonatypePassword)
                     }
-                     proxy(host: 'localhost', port: 3128, type: 'http')
+//                     proxy(host: 'localhost', port: 3128, type: 'http')
                 }
 
             }
