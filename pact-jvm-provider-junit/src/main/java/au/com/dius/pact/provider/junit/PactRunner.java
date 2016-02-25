@@ -2,7 +2,6 @@ package au.com.dius.pact.provider.junit;
 
 import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.model.RequestResponsePact;
-import au.com.dius.pact.provider.junit.loader.ConsumerPactLoader;
 import au.com.dius.pact.provider.junit.loader.PactBroker;
 import au.com.dius.pact.provider.junit.loader.PactFolder;
 import au.com.dius.pact.provider.junit.loader.PactSource;
@@ -22,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -59,25 +59,16 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         final String serviceName = providerInfo.value();
 
         final Consumer consumerInfo = clazz.getAnnotation(Consumer.class);
-        String consumerName = null;
-        if (consumerInfo != null) {
-            consumerName = consumerInfo.value();
-        }
+        final String consumerName = consumerInfo != null ? consumerInfo.value() : null;
 
         final TestClass testClass = new TestClass(clazz);
 
         this.child = new ArrayList<>();
         final List<Pact> pacts;
         try {
-            PactLoader pactSource = getPactSource(testClass);
-            if(consumerName != null){
-                if(!(pactSource instanceof ConsumerPactLoader)){
-                    throw new InitializationError("Consumer name can only be specified if pact loader implements" + ConsumerPactLoader.class.getName());
-                }
-                pacts = ((ConsumerPactLoader) pactSource).load(serviceName, consumerName);
-            } else {
-                pacts = pactSource.load(serviceName);
-            }
+            pacts = getPactSource(testClass).load(serviceName).stream()
+                  .filter(p -> consumerName == null || p.getConsumer().getName().equals(consumerName))
+                  .collect(Collectors.toList());
         } catch (final IOException e) {
             throw new InitializationError(e);
         }
