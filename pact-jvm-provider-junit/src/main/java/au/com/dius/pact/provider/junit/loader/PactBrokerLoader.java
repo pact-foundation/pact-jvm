@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseExpressions;
@@ -37,7 +38,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Out-of-the-box implementation of {@link PactLoader} that downloads pacts from Pact broker
  */
-public class PactBrokerLoader implements PactLoader {
+public class PactBrokerLoader implements PactLoader, ConsumerPactLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(PactBrokerLoader.class);
     private static final String PACT_URL_PATTERN = "/pacts/provider/{0}/latest";
     private static final String PACT_URL_PATTERN_WITH_TAG = "/pacts/provider/{0}/latest/{1}";
@@ -78,6 +79,10 @@ public class PactBrokerLoader implements PactLoader {
         pacts.addAll(loadPactsForProvider(providerName, tag));
       }
       return pacts;
+    }
+
+    public List<Pact> load(final String providerName, final String consumerName) throws IOException {
+        return load(providerName).stream().filter(p -> p.getConsumer().getName().equals(consumerName)).collect(Collectors.toList());
     }
 
   private List<Pact> loadPactsForProvider(final String providerName, final String tag) throws IOException {

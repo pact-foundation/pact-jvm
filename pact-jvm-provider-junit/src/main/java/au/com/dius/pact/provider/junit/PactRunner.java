@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.junit;
 
 import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.model.RequestResponsePact;
+import au.com.dius.pact.provider.junit.loader.ConsumerPactLoader;
 import au.com.dius.pact.provider.junit.loader.PactBroker;
 import au.com.dius.pact.provider.junit.loader.PactFolder;
 import au.com.dius.pact.provider.junit.loader.PactSource;
@@ -57,12 +58,26 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         }
         final String serviceName = providerInfo.value();
 
+        final Consumer consumerInfo = clazz.getAnnotation(Consumer.class);
+        String consumerName = null;
+        if (consumerInfo != null) {
+            consumerName = consumerInfo.value();
+        }
+
         final TestClass testClass = new TestClass(clazz);
 
         this.child = new ArrayList<>();
         final List<Pact> pacts;
         try {
-            pacts = getPactSource(testClass).load(serviceName);
+            PactLoader pactSource = getPactSource(testClass);
+            if(consumerName != null){
+                if(!(pactSource instanceof ConsumerPactLoader)){
+                    throw new InitializationError("Consumer name can only be specified if pact loader implements" + ConsumerPactLoader.class.getName());
+                }
+                pacts = ((ConsumerPactLoader) pactSource).load(serviceName, consumerName);
+            } else {
+                pacts = pactSource.load(serviceName);
+            }
         } catch (final IOException e) {
             throw new InitializationError(e);
         }
