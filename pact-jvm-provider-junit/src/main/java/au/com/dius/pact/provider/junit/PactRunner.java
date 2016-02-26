@@ -21,6 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -57,12 +58,17 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         }
         final String serviceName = providerInfo.value();
 
+        final Consumer consumerInfo = clazz.getAnnotation(Consumer.class);
+        final String consumerName = consumerInfo != null ? consumerInfo.value() : null;
+
         final TestClass testClass = new TestClass(clazz);
 
         this.child = new ArrayList<>();
         final List<Pact> pacts;
         try {
-            pacts = getPactSource(testClass).load(serviceName);
+            pacts = getPactSource(testClass).load(serviceName).stream()
+                  .filter(p -> consumerName == null || p.getConsumer().getName().equals(consumerName))
+                  .collect(Collectors.toList());
         } catch (final IOException e) {
             throw new InitializationError(e);
         }
