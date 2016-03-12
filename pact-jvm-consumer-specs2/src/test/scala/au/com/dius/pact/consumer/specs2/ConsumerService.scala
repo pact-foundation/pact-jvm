@@ -3,7 +3,7 @@ package au.com.dius.pact.consumer.specs2
 import java.util.concurrent.Executors
 
 import au.com.dius.pact.consumer.dispatch.HttpClient
-import au.com.dius.pact.model.Request
+import au.com.dius.pact.model.{PactReader, Request}
 
 import scala.collection.JavaConversions
 import scala.concurrent.{ExecutionContext, Future}
@@ -26,6 +26,12 @@ case class ConsumerService(serverUrl: String) {
 
   def simpleGet(path: String): Future[(Int, String)] = {
     HttpClient.run(new Request("GET", serverUrl + path)).map { response =>
+      (response.getStatus, response.getBody)
+    }
+  }
+
+  def simpleGet(path: String, query: String): Future[(Int, String)] = {
+    HttpClient.run(new Request("GET", serverUrl + path, PactReader.queryStringToMap(query, true))).map { response =>
       (response.getStatus, response.getBody)
     }
   }

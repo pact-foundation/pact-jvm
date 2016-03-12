@@ -83,7 +83,7 @@ class PactReader {
   @SuppressWarnings('DuplicateStringLiteral')
   static Map<String, List<String>> queryStringToMap(String query, boolean decode = true) {
     if (query) {
-      query.split('&')*.split('=').inject([:]) { Map map, String[] nameAndValue ->
+      query.split('&')*.split('=', 2).inject([:]) { Map map, String[] nameAndValue ->
         def name = decode ? URLDecoder.decode(nameAndValue.first(), 'UTF-8') : nameAndValue.first()
         def value = decode ? URLDecoder.decode(nameAndValue.last(), 'UTF-8') : nameAndValue.last()
         if (map.containsKey(name)) {

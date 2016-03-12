@@ -111,4 +111,18 @@ class PactReaderSpec extends Specification {
     pact instanceof RequestResponsePact
   }
 
+  def 'correctly loads V2 pact query strings'() {
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('v2_pact_query.json')
+
+    when:
+    def pact = PactReader.loadPact(pactUrl)
+
+    then:
+    pact instanceof RequestResponsePact
+    pact.interactions[0].request.query == [q:['p', 'p2'], r:['s']]
+    pact.interactions[1].request.query == [datetime:['2011-12-03T10:15:30+01:00'], description:['hello world!']]
+    pact.interactions[2].request.query == [options:['delete.topic.enable=true'], broker:['1']]
+  }
+
 }

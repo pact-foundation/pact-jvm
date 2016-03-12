@@ -10,7 +10,7 @@ import org.specs2.runner.JUnitRunner
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-//@RunWith(classOf[JUnitRunner])
+@RunWith(classOf[JUnitRunner])
 class ExamplePactSpec extends Specification with PactSpec {
 
   val consumer = "My Consumer"
@@ -27,9 +27,9 @@ class ExamplePactSpec extends Specification with PactSpec {
     .withConsumerTest(providerConfig => {
       val optionsResult = ConsumerService(providerConfig.url).options("/")
       val simpleGet = ConsumerService(providerConfig.url).simpleGet("/foo")
-      Await.result(optionsResult, timeout) must be_==(200, None,
-        Some(Map("Content-Length" -> "0", "Connection" -> "keep-alive", "Option" -> "Value-X"))) and
-        (Await.result(simpleGet, timeout) must be_==(200, Some("{}")))
+      Await.result(optionsResult, timeout) must be_==(200, "",
+        Map("Content-Length" -> "0", "Connection" -> "keep-alive", "Option" -> "Value-X")) and
+        (Await.result(simpleGet, timeout) must be_==(200, "{}"))
     })
 
 }
