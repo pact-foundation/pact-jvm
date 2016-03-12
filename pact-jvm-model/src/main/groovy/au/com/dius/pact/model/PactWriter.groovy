@@ -85,7 +85,7 @@ class PactWriter {
   }
 
   static String mapToQueryStr(Map<String, List<String>> query) {
-    query.collectMany { k, v -> v.collect { "$k=$it" } }.join('&')
+    query.collectMany { k, v -> v.collect { "$k=${URLEncoder.encode(it, 'UTF-8')}" } }.join('&')
   }
 
   private static Map metaData(String version) {
