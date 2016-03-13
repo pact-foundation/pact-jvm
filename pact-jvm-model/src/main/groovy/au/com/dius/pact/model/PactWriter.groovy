@@ -57,10 +57,10 @@ class PactWriter {
   }
 
   static parseBody(HttpPart httpPart) {
-    if (httpPart.jsonBody()) {
-      new JsonSlurper().parseText(httpPart.body)
+    if (httpPart.jsonBody() && httpPart.body.present) {
+      new JsonSlurper().parseText(httpPart.body.value)
     } else {
-      httpPart.body
+      httpPart.body.value
     }
   }
 

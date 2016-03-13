@@ -1,5 +1,6 @@
 package specification
 
+import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.provider.ResponseComparison
 import groovy.json.JsonBuilder
@@ -27,7 +28,9 @@ class MessageSpecificationSpec extends Specification {
         def json = new JsonSlurper().parse(f)
         result << [json.comment, json.match, json.match ? 'should match' : 'should not match',
                    new Message().fromMap(json.expected),
-                   json.actual.contents ? new JsonBuilder(json.actual.contents).toPrettyString() : null]
+                   json.actual.contents ?
+                     OptionalBody.body(new JsonBuilder(json.actual.contents).toPrettyString()) :
+                     OptionalBody.missing()]
       }
     }
     result

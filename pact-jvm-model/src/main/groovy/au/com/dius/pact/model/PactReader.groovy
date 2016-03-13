@@ -70,12 +70,12 @@ class PactReader {
   }
 
   static Response extractResponse(responseJson) {
-    responseJson.body = extractBody(responseJson.body)
+    extractBody(responseJson)
     Response.fromMap(responseJson)
   }
 
   static Request extractRequestV2(requestJson) {
-    requestJson.body = extractBody(requestJson.body)
+    extractBody(requestJson)
     requestJson.query = queryStringToMap(requestJson.query)
     Request.fromMap(requestJson)
   }
@@ -97,15 +97,13 @@ class PactReader {
   }
 
   static Request extractRequestV3(requestJson) {
-    requestJson.body = extractBody(requestJson.body)
+    extractBody(requestJson)
     Request.fromMap(requestJson)
   }
 
-  static extractBody(body) {
-    if (body == null || body instanceof String) {
-      body
-    } else {
-      JsonOutput.toJson(body)
+  static void extractBody(json) {
+    if (json.containsKey('body') && json.body != null && !(json.body instanceof String)) {
+      json.body = JsonOutput.toJson(json.body)
     }
   }
 

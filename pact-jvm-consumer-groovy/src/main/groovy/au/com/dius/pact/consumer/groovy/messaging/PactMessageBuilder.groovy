@@ -6,6 +6,7 @@ import au.com.dius.pact.consumer.groovy.BaseBuilder
 import au.com.dius.pact.consumer.groovy.PactBodyBuilder
 import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.InvalidPactException
+import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
@@ -94,7 +95,7 @@ class PactMessageBuilder extends BaseBuilder {
     def body = new PactBodyBuilder(mimetype: options.contentType, prettyPrintBody: options.prettyPrint)
     closure.delegate = body
     closure.call()
-    messages.last().contents = body.body
+    messages.last().contents = OptionalBody.body(body.body)
     messages.last().matchingRules.putAll(body.matchers)
 
     this

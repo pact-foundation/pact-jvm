@@ -72,7 +72,7 @@ class PactBodyBuilderSpec extends Specification {
 
     when:
     service.fragment()
-    def keys = new JsonSlurper().parseText(service.interactions[0].request.body).keySet()
+    def keys = new JsonSlurper().parseText(service.interactions[0].request.body.value).keySet()
 
     then:
     service.interactions.size() == 1
@@ -100,7 +100,7 @@ class PactBodyBuilderSpec extends Specification {
     keys == ['name', 'surname', 'position', 'happy', 'hexCode', 'hexCode2', 'id', 'id2', 'localAddress',
       'localAddress2', 'age', 'age2', 'salary', 'timestamp', 'ts', 'values', 'role', 'roles'] as Set
 
-    service.interactions[0].response.body == new JsonBuilder([name: 'harry']).toPrettyString()
+    service.interactions[0].response.body.value == new JsonBuilder([name: 'harry']).toPrettyString()
   }
 
   def 'arrays with matching'() {
@@ -126,7 +126,7 @@ class PactBodyBuilderSpec extends Specification {
 
     when:
     service.fragment()
-    def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body))
+    def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.value))
 
     then:
     service.interactions.size() == 1
@@ -174,7 +174,7 @@ class PactBodyBuilderSpec extends Specification {
 
     when:
     service.fragment()
-    def body = new JsonSlurper().parseText(service.interactions[0].request.body)
+    def body = new JsonSlurper().parseText(service.interactions[0].request.body.value)
 
     then:
     service.interactions.size() == 1
@@ -218,13 +218,13 @@ class PactBodyBuilderSpec extends Specification {
     def response = service.interactions.first().response
 
     then:
-    request.body == '''|{
+    request.body.value == '''|{
                        |    "name": "harry",
                        |    "surname": "larry",
                        |    "position": "staff",
                        |    "happy": true
                        |}'''.stripMargin()
-    response.body == '''|{
+    response.body.value == '''|{
                         |    "name": "harry"
                         |}'''.stripMargin()
   }
@@ -252,13 +252,13 @@ class PactBodyBuilderSpec extends Specification {
     def response = service.interactions.first().response
 
     then:
-    request.body == '''|{
+    request.body.value == '''|{
                        |    "name": "harry",
                        |    "surname": "larry",
                        |    "position": "staff",
                        |    "happy": true
                        |}'''.stripMargin()
-    response.body == '''|{
+    response.body.value == '''|{
                         |    "name": "harry"
                         |}'''.stripMargin()
   }
@@ -286,8 +286,8 @@ class PactBodyBuilderSpec extends Specification {
     def response = service.interactions.first().response
 
     then:
-    request.body == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
-    response.body == '{"name":"harry"}'
+    request.body.value == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
+    response.body.value == '{"name":"harry"}'
   }
 
   def 'does not pretty print bodies if mimetype corresponds to one that requires compact bodies'() {
@@ -313,8 +313,8 @@ class PactBodyBuilderSpec extends Specification {
     def response = service.interactions.first().response
 
     then:
-    request.body == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
-    response.body == '{"name":"harry"}'
+    request.body.value == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
+    response.body.value == '{"name":"harry"}'
   }
 
   def 'Guard Against Field Names That Don\'t Conform To Gatling Fields'() {
@@ -340,7 +340,7 @@ class PactBodyBuilderSpec extends Specification {
 
     when:
     service.fragment()
-    def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body))
+    def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.value))
 
     then:
     service.interactions.size() == 1

@@ -9,7 +9,7 @@ import scala.collection.JavaConversions
 object ListServers {
 
   def apply(oldState: ServerState): Result = {
-    val body = "{\"ports\": [" + oldState.keySet.mkString(", ") + "]}"
+    val body = OptionalBody.body("{\"ports\": [" + oldState.keySet.mkString(", ") + "]}")
     Result(new Response(200, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/json")), body), oldState)
   }
 }

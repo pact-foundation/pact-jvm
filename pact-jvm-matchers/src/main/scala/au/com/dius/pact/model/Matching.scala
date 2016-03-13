@@ -1,9 +1,11 @@
 package au.com.dius.pact.model
 
-import com.typesafe.scalalogging.StrictLogging
+import java.util.Optional
+
 import au.com.dius.pact.matchers._
 import au.com.dius.pact.model.RequestPartMismatch._
 import au.com.dius.pact.model.ResponsePartMismatch._
+import com.typesafe.scalalogging.StrictLogging
 
 import scala.collection.JavaConversions
 import scala.collection.immutable.TreeMap
@@ -81,8 +83,6 @@ object QueryMismatchFactory extends MismatchFactory[QueryMismatch] {
 }
 
 object Matching extends StrictLogging {
-
-  import JavaConversions._
   
   def matchHeaders(expected: Option[Headers], actual: Option[Headers], matchers: Option[Map[String, Map[String, Any]]]): Seq[HeaderMismatch] = {
 
@@ -167,14 +167,22 @@ object Matching extends StrictLogging {
         result.get._2.matchBody(expected, actual, diffConfig)
       } else {
         logger.debug("No matcher for " + actual.mimeType + ", using equality")
-        (Option.apply(expected.getBody), Option.apply(actual.getBody)) match {
-          case (None, _) => List()
-          case (Some(a), None) => List(BodyMismatch(a, None))
-          case (Some(a), Some(b)) => if (a == b) List() else List(BodyMismatch(a, b))
+        (expected.getBody.getState, actual.getBody.getState) match {
+          case (OptionalBody.State.MISSING, _) => List()
+          case (OptionalBody.State.NULL, OptionalBody.State.PRESENT) => List(BodyMismatch(None, actual.getBody.getValue,
+            Some(s"Expected empty body but received '${actual.getBody.getValue}'")))
+          case (OptionalBody.State.NULL, _) => List()
+          case (_, OptionalBody.State.MISSING) => List(BodyMismatch(expected.getBody.getValue, None,
+            Some(s"Expected body '${expected.getBody.getValue}' but was missing")))
+          case (_, _) =>
+            if (expected.getBody.getValue == actual.getBody.getValue)
+              List()
+            else
+              List(BodyMismatch(expected.getBody.getValue, actual.getBody.getValue))
         }
       }
     } else {
-      if (expected.getBody == null || expected.getBody.isEmpty) List()
+      if (expected.getBody.isMissing || expected.getBody.isNull || expected.getBody.isEmpty) List()
       else List(BodyTypeMismatch(expected.mimeType, actual.mimeType))
     }
   }

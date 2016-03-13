@@ -12,7 +12,7 @@ object JsonUtils {
   }
 
   def parseJsonString(json: String) = {
-    if (json.trim.isEmpty) null
+    if (json == null || json.trim.isEmpty) null
     else javaObjectGraphToScalaObjectGraph(new JsonSlurper().parseText(json))
   }
 

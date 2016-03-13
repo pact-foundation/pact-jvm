@@ -15,7 +15,7 @@ object Create extends StrictLogging {
     val server = DefaultMockProvider.apply(mockConfig)
     val port = server.config.port
     val entry = port -> server
-    val body = "{\"port\": " + port + "}"
+    val body = OptionalBody.body("{\"port\": " + port + "}")
 
     server.start(pact)
 
@@ -24,20 +24,20 @@ object Create extends StrictLogging {
   }
 
   def apply(request: Request, oldState: ServerState, config: Config): Result = {
-    def errorJson = "{\"error\": \"please provide state param and pact body\"}"
+    def errorJson = OptionalBody.body("{\"error\": \"please provide state param and pact body\"}")
     def clientError = Result(new Response(400, JavaConversions.mapAsJavaMap(ResponseUtils.CrossSiteHeaders), errorJson),
       oldState)
 
     logger.debug(s"path=${request.getPath}")
     logger.debug(s"query=${request.getQuery}")
-    logger.debug(request.getBody)
+    logger.debug(request.getBody.toString)
 
     val result = if (request.getQuery != null) {
       for {
         stateList <- CollectionUtils.javaLMapToScalaLMap(request.getQuery).get("state")
         state <- stateList.headOption
         body <- Option(request.getBody)
-      } yield create(state, body, oldState, config)
+      } yield create(state, body.getValue, oldState, config)
     } else None
 
     result getOrElse clientError

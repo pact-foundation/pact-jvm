@@ -7,17 +7,23 @@ import scala.xml._
 class XmlBodyMatcher extends BodyMatcher {
 
   override def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig): List[BodyMismatch] = {
-    (Option.apply(expected.getBody), Option.apply(actual.getBody)) match {
-      case (None, None) => List[BodyMismatch]()
-      case (None, b) => List[BodyMismatch]()
-      case (a, None) => List(BodyMismatch(a, None))
-      case (Some(a), Some(b)) => compare(Seq("$","body"), parse(a), parse(b), diffConfig,
+    (expected.getBody.getState, actual.getBody.getState) match {
+      case (OptionalBody.State.MISSING, _) => List()
+      case (OptionalBody.State.NULL, OptionalBody.State.PRESENT) => List(BodyMismatch(None, actual.getBody.getValue,
+        Some(s"Expected empty body but received '${actual.getBody.getValue}'")))
+      case (OptionalBody.State.NULL, _) => List()
+      case (_, OptionalBody.State.MISSING) => List(BodyMismatch(expected.getBody.getValue, None,
+        Some(s"Expected body '${expected.getBody.getValue}' but was missing")))
+      case (OptionalBody.State.EMPTY, OptionalBody.State.EMPTY) => List()
+      case (_, _) => compare(Seq("$", "body"), parse(expected.getBody.orElse("")),
+        parse(actual.getBody.orElse("")), diffConfig,
         Option.apply(CollectionUtils.javaMMapToScalaMMap(expected.getMatchingRules)))
     }
   }
 
   def parse(xmlData: String) = {
-    Utility.trim(XML.loadString(xmlData))
+    if (xmlData.isEmpty) Text("")
+    else Utility.trim(XML.loadString(xmlData))
   }
 
   def appendIndex(path:Seq[String], index:Integer): Seq[String] = {

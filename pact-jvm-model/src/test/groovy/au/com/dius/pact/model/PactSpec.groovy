@@ -7,8 +7,8 @@ class PactSpec extends Specification {
 
   def setup() {
     request = new Request('Get', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
-      [testreqheader: 'testreqheadervalue'], '{"test":true}')
-    response = new Response(200, [testreqheader: 'testreqheaderval'], '{"responsetest":true}')
+      [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'))
+    response = new Response(200, [testreqheader: 'testreqheaderval'], OptionalBody.body('{"responsetest":true}'))
     interaction = new RequestResponseInteraction('test interaction', 'test state', request, response)
     provider = new Provider('test_provider')
     consumer = new Consumer('test_consumer')

@@ -13,7 +13,7 @@ class Request implements HttpPart {
   String path
   Map<String, List<String>> query
   Map<String, String> headers
-  String body
+  OptionalBody body = OptionalBody.missing()
   Map<String, Map<String, Object>> matchingRules
 
   static Request fromMap(Map map) {
@@ -22,7 +22,7 @@ class Request implements HttpPart {
       path = map.path as String
       query = map.query
       headers = map.headers
-      body = map.body
+      body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
       matchingRules = map.matchingRules
       it
     }

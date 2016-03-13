@@ -36,8 +36,10 @@ case class PactSession(expected: Seq[Interaction], results: PactSessionResults) 
   val CrossSiteHeaders = Map[String, String]("Access-Control-Allow-Origin" -> "*")
 
   def invalidRequest(req: Request) = {
-    val headers: Map[String, String] = CrossSiteHeaders ++ Map("Content-Type" -> "application/json", "X-Pact-Unexpected-Request" -> "1")
-    new Response(500, headers, "{ \"error\": \"Unexpected request : " + StringEscapeUtils.escapeJson(req.toString) + "\" }")
+    val headers: Map[String, String] = CrossSiteHeaders ++ Map("Content-Type" -> "application/json",
+      "X-Pact-Unexpected-Request" -> "1")
+    new Response(500, headers, OptionalBody.body("{ \"error\": \"Unexpected request : " +
+      StringEscapeUtils.escapeJson(req.toString) + "\" }"))
   }
 
   def receiveRequest(req: Request): (Response, PactSession) = {

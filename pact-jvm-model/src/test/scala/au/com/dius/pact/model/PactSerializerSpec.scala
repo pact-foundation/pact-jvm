@@ -81,7 +81,7 @@ class PactSerializerSpec extends Specification with StrictLogging {
 
      "deserialize should not convert fields called 'body'" in {
        val pact = PactReader.loadPact(loadTestFile("test_pact_with_bodies.json")).asInstanceOf[RequestResponsePact]
-       pact.getInteractions.get(0).getRequest.getBody must beEqualTo(("{\n" +
+       pact.getInteractions.get(0).getRequest.getBody.getValue must beEqualTo(("{\n" +
          "  \"body\" : [ 1, 2, 3 ],\n" +
          "  \"complete\" : {\n" +
          "    \"body\" : 123456,\n" +

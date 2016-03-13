@@ -105,8 +105,8 @@ class ProviderClient {
                     }
                 }
                 method.setEntity(new UrlEncodedFormEntity(parameters, charset))
-            } else if (request.body != null) {
-                method.setEntity(new StringEntity(request.body))
+            } else if (!request.body.missing) {
+                method.setEntity(new StringEntity(request.body.orElse('')))
             }
         }
     }

@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.junit.target;
 import au.com.dius.pact.model.BodyMismatch;
 import au.com.dius.pact.model.BodyTypeMismatch;
 import au.com.dius.pact.model.HeaderMismatch;
+import au.com.dius.pact.model.OptionalBody;
 import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.model.Response;
 import au.com.dius.pact.model.ResponseMatching$;
@@ -29,7 +30,7 @@ public class HttpTarget implements TestClassAwareTarget {
     private final int port;
     private final String protocol;
     private TestClass testClass;
-  private Object testTarget;
+    private Object testTarget;
 
   /**
      * @param host host of tested service
@@ -74,7 +75,7 @@ public class HttpTarget implements TestClassAwareTarget {
                 new Response(
                         ((Integer) actualResponse.get("statusCode")).intValue(),
                         (Map<String, String>) actualResponse.get("headers"),
-                        (String) actualResponse.get("data"))
+                        OptionalBody.body((String) actualResponse.get("data")))
         );
 
         if (!mismatches.isEmpty()) {

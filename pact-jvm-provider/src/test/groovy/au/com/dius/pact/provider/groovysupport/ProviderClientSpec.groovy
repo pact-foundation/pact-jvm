@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.groovysupport
 
+import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Request
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.provider.GroovyScalaUtils$
@@ -31,7 +32,7 @@ class ProviderClientSpec extends Specification {
 
   def 'setting up headers does nothing if there are no headers'() {
     given:
-    client.request = new Request('PUT', '/', null, null, null, [:])
+    client.request = new Request('PUT', '/')
 
     when:
     client.setupHeaders(httpRequest)
@@ -48,7 +49,7 @@ class ProviderClientSpec extends Specification {
       B: 'b',
       C: 'c'
     ]
-    client.request = new Request('PUT', '/', null, headers, null, [:])
+    client.request = new Request('PUT', '/', null, headers)
 
     when:
     client.setupHeaders(httpRequest)
@@ -69,7 +70,7 @@ class ProviderClientSpec extends Specification {
       B: 'b',
       C: 'c'
     ]
-    client.request = new Request('PUT', '/', null, headers, null, [:])
+    client.request = new Request('PUT', '/', null, headers)
 
     when:
     client.setupHeaders(httpRequest)
@@ -95,7 +96,7 @@ class ProviderClientSpec extends Specification {
   def 'setting up body does nothing if it is not a post and there is no body'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
-    client.request = new Request('PUT', '/', null, null, null, [:])
+    client.request = new Request('PUT', '/')
 
     when:
     client.setupBody(httpRequest)
@@ -107,7 +108,7 @@ class ProviderClientSpec extends Specification {
   def 'setting up body sets a string entity if it is not a url encoded form post and there is a body'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
-    client.request = new Request('PUT', '/', null, null, '{}', [:])
+    client.request = new Request('PUT', '/', null, null, OptionalBody.body('{}'), [:])
 
     when:
     client.setupBody(httpRequest)
@@ -121,7 +122,7 @@ class ProviderClientSpec extends Specification {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
     client.request = new Request('POST', '/', null, ['Content-Type': ContentType.APPLICATION_FORM_URLENCODED.mimeType],
-      'A=B', [:])
+      OptionalBody.body('A=B'), [:])
 
     when:
     client.setupBody(httpRequest)
@@ -135,7 +136,7 @@ class ProviderClientSpec extends Specification {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
     client.request = new Request('POST', '/', ['A': ['B', 'C']], ['Content-Type': 'application/x-www-form-urlencoded'],
-      '{}', [:])
+      OptionalBody.body('{}'), [:])
 
     when:
     client.setupBody(httpRequest)
@@ -149,7 +150,8 @@ class ProviderClientSpec extends Specification {
   @SuppressWarnings('UnnecessaryBooleanExpression')
   def 'request is a url encoded form post'() {
     expect:
-    def request = new Request(method, '/', ['A': ['B', 'C']], ['Content-Type': contentType], '{}', [:])
+    def request = new Request(method, '/', ['A': ['B', 'C']], ['Content-Type': contentType],
+      OptionalBody.body('{}'), [:])
     ProviderClient.urlEncodedFormPost(request) == urlEncodedFormPost
 
     where:

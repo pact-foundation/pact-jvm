@@ -10,14 +10,14 @@ class Response implements HttpPart {
 
   Integer status = 200
   Map<String, String> headers
-  String body
+  OptionalBody body = OptionalBody.missing()
   Map<String, Map<String, Object>> matchingRules
 
   static Response fromMap(def map) {
     new Response().with {
       status = map.status as Integer
       headers = map.headers
-      body = map.body
+      body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
       matchingRules = map.matchingRules
       it
     }

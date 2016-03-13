@@ -22,7 +22,8 @@ object HttpClient {
     val r = url(request.getPath).underlying(
       _.setMethod(request.getMethod).setQueryParams(query)
     ) <:< headers.getOrElse(Map())
-    val httpRequest = r.setBody(request.getBody)
+    val body = if (request.getBody != null) request.getBody.orElse("") else null
+    val httpRequest = if (body != null) r.setBody(body) else r
     dispatch.Http(httpRequest).map(Conversions.dispatchResponseToPactResponse)
   }
 }

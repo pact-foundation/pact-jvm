@@ -1,7 +1,7 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.model.HttpMethod._
 import au.com.dius.pact.consumer.{ConsumerTestVerification, VerificationResult}
+import au.com.dius.pact.model.HttpMethod._
 import org.json.JSONObject
 
 object PactFragmentBuilder {
@@ -50,7 +50,7 @@ object PactFragmentBuilder {
                  headers: Map[String, String] = Map(),
                  body: String = "",
                  matchers: Map[String, Map[String, String]] = Map()): DescribingResponse = {
-      DescribingResponse(new Request(method, path, PactReader.queryStringToMap(query), headers, body,
+      DescribingResponse(new Request(method, path, PactReader.queryStringToMap(query), headers, OptionalBody.body(body),
         CollectionUtils.scalaMMapToJavaMMap(matchers)))
     }
 
@@ -75,7 +75,7 @@ object PactFragmentBuilder {
             description,
             state.orNull,
             request,
-            new Response(status, headers, body, CollectionUtils.scalaMMapToJavaMMap(matchers)))))
+            new Response(status, headers, OptionalBody.body(body), CollectionUtils.scalaMMapToJavaMMap(matchers)))))
       }
     }
   }

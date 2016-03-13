@@ -33,7 +33,7 @@ public class MatcherTestUtils {
     }
 
     public static void assertResponseKeysEqualTo(PactFragment fragment, String... keys) {
-        String body = fragment.interactions().head().getResponse().getBody();
+        String body = fragment.interactions().head().getResponse().getBody().getValue();
         Map hashMap = null;
         try {
             hashMap = new ObjectMapper().readValue(body, HashMap.class);

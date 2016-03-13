@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.Consumer;
+import au.com.dius.pact.model.OptionalBody;
 import au.com.dius.pact.model.Provider;
 import nl.flotsam.xeger.Xeger;
 import org.apache.http.entity.ContentType;
@@ -24,7 +25,7 @@ public class PactDslRequestWithPath {
     String requestMethod = "GET";
     Map<String, String> requestHeaders = new HashMap<String, String>();
     String query;
-    String requestBody;
+    OptionalBody requestBody = OptionalBody.missing();
     Map<String, Map<String, Object>> requestMatchers = new HashMap<String, Map<String, Object>>();
 
     public PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
@@ -36,7 +37,7 @@ public class PactDslRequestWithPath {
                                   String requestMethod,
                                   Map<String, String> requestHeaders,
                                   String query,
-                                  String requestBody,
+                                  OptionalBody requestBody,
                                   Map<String, Map<String, Object>> requestMatchers) {
         this.consumerPactBuilder = consumerPactBuilder;
         this.requestMatchers = requestMatchers;
@@ -100,7 +101,7 @@ public class PactDslRequestWithPath {
      * @param body Request body in string form
      */
     public PactDslRequestWithPath body(String body) {
-        requestBody = body;
+        requestBody = OptionalBody.body(body);
         return this;
     }
 
@@ -110,7 +111,7 @@ public class PactDslRequestWithPath {
      * @param body Request body in string form
      */
     public PactDslRequestWithPath body(String body, String mimeType) {
-        requestBody = body;
+        requestBody = OptionalBody.body(body);
         requestHeaders.put("Content-Type", mimeType);
         return this;
     }
@@ -130,7 +131,7 @@ public class PactDslRequestWithPath {
      * @param body Request body in JSON form
      */
     public PactDslRequestWithPath body(JSONObject body) {
-        requestBody = body.toString();
+        requestBody = OptionalBody.body(body.toString());
         if (!requestHeaders.containsKey("Content-Type")) {
             requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
         }
@@ -146,7 +147,7 @@ public class PactDslRequestWithPath {
         for (String matcherName : body.matchers.keySet()) {
             requestMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
         }
-        requestBody = body.toString();
+        requestBody = OptionalBody.body(body.toString());
         if (!requestHeaders.containsKey("Content-Type")) {
             requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
         }
@@ -159,7 +160,7 @@ public class PactDslRequestWithPath {
      * @param body XML Document
      */
     public PactDslRequestWithPath body(Document body) throws TransformerException {
-        requestBody = ConsumerPactBuilder.xmlToString(body);
+        requestBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body));
         if (!requestHeaders.containsKey("Content-Type")) {
             requestHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
         }

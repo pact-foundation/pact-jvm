@@ -1,7 +1,5 @@
 package au.com.dius.pact.consumer.groovy
 
-@SuppressWarnings('UnusedImport')
-import scala.None$
 import spock.lang.Specification
 
 class PactBuilderSpec extends Specification {
@@ -121,7 +119,7 @@ class PactBuilderSpec extends Specification {
     then:
     aliceService.interactions.size() == 1
 
-    firstInteraction.response.body == '[\n' +
+    firstInteraction.response.body.value == '[\n' +
       '    1,\n' +
       '    2,\n' +
       '    3\n' +
@@ -152,7 +150,7 @@ class PactBuilderSpec extends Specification {
     then:
     aliceService.interactions.size() == 1
 
-    firstInteraction.response.body == '[\n' +
+    firstInteraction.response.body.value == '[\n' +
       '    {\n' +
       '        "id": 1,\n' +
       '        "name": "item1"\n' +
@@ -184,7 +182,7 @@ class PactBuilderSpec extends Specification {
     then:
     aliceService.interactions.size() == 1
 
-    firstInteraction.response.body == '[\n' +
+    firstInteraction.response.body.value == '[\n' +
       '    {\n' +
       '        "id": 1,\n' +
       '        "name": "item1"\n' +
@@ -212,13 +210,13 @@ class PactBuilderSpec extends Specification {
     def response = aliceService.interactions.first().response
 
     then:
-    request.body == '''|{
+    request.body.value == '''|{
                              |    "name": "harry",
                              |    "surname": "larry",
                              |    "position": "staff",
                              |    "happy": true
                              |}'''.stripMargin()
-    response.body == '''|{
+    response.body.value == '''|{
                               |    "name": "harry"
                               |}'''.stripMargin()
   }
@@ -242,13 +240,13 @@ class PactBuilderSpec extends Specification {
     def response = aliceService.interactions.first().response
 
     then:
-    request.body == '''|{
+    request.body.value == '''|{
                              |    "name": "harry",
                              |    "surname": "larry",
                              |    "position": "staff",
                              |    "happy": true
                              |}'''.stripMargin()
-    response.body == '''|{
+    response.body.value == '''|{
                               |    "name": "harry"
                               |}'''.stripMargin()
   }
@@ -272,8 +270,8 @@ class PactBuilderSpec extends Specification {
     def response = aliceService.interactions.first().response
 
     then:
-    request.body == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
-    response.body == '{"name":"harry"}'
+    request.body.value == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
+    response.body.value == '{"name":"harry"}'
   }
 
   def 'does not pretty print bodies if the mimetype corresponds to one that requires compact bodies'() {
@@ -295,7 +293,7 @@ class PactBuilderSpec extends Specification {
     def response = aliceService.interactions.first().response
 
     then:
-    request.body == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
-    response.body == '{"name":"harry"}'
+    request.body.value == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
+    response.body.value == '{"name":"harry"}'
   }
 }

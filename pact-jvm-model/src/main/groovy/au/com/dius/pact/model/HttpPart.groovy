@@ -7,7 +7,7 @@ trait HttpPart {
 
   private static String CONTENT_TYPE = 'Content-Type'
 
-  abstract String getBody()
+  abstract OptionalBody getBody()
   abstract Map<String, String> getHeaders()
   abstract void setHeaders(Map<String, String> headers)
   abstract Map<String, Map<String, Object>> getMatchingRules()
@@ -31,8 +31,8 @@ trait HttpPart {
   static XMLREGEXP2 = /^\s*<\w+\s*(:\w+=[\"”][^\"”]+[\"”])?.*/
 
   String detectContentType() {
-    if (body) {
-      def s = body.substring(0, Math.min(body.size(), 32)).replaceAll('\n', '')
+    if (body.present) {
+      def s = body.value.substring(0, Math.min(body.value.size(), 32)).replaceAll('\n', '')
       if (s ==~ XMLREGEXP) {
         "application/xml"
       } else if (s.toUpperCase() ==~ HTMLREGEXP) {

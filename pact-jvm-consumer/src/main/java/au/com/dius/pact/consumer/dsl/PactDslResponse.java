@@ -1,16 +1,17 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
-import au.com.dius.pact.model.RequestResponseInteraction;
+import au.com.dius.pact.model.OptionalBody;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactReader;
 import au.com.dius.pact.model.Request;
+import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.model.Response;
 import nl.flotsam.xeger.Xeger;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
-import scala.collection.JavaConverters$;
+import scala.collection.JavaConversions$;
 
 import javax.xml.transform.TransformerException;
 import java.util.HashMap;
@@ -22,7 +23,7 @@ public class PactDslResponse {
 
     private int responseStatus = 200;
     private Map<String, String> responseHeaders = new HashMap<String, String>();
-    private String responseBody;
+    private OptionalBody responseBody = OptionalBody.missing();
     private Map<String, Map<String, Object>> responseMatchers = new HashMap<String, Map<String, Object>>();
 
     public PactDslResponse(ConsumerPactBuilder consumerPactBuilder, PactDslRequestWithPath request) {
@@ -56,7 +57,7 @@ public class PactDslResponse {
      * @param body Response body in string form
      */
     public PactDslResponse body(String body) {
-        this.responseBody = body;
+        this.responseBody = OptionalBody.body(body);
         return this;
     }
 
@@ -66,7 +67,7 @@ public class PactDslResponse {
      * @param body body in string form
      */
     public PactDslResponse body(String body, String mimeType) {
-        responseBody = body;
+        responseBody = OptionalBody.body(body);
         responseHeaders.put("Content-Type", mimeType);
         return this;
     }
@@ -86,7 +87,7 @@ public class PactDslResponse {
      * @param body Response body in JSON form
      */
     public PactDslResponse body(JSONObject body) {
-        this.responseBody = body.toString();
+        this.responseBody = OptionalBody.body(body.toString());
         if (!responseHeaders.containsKey("Content-Type")) {
             responseHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
         }
@@ -102,7 +103,7 @@ public class PactDslResponse {
         for (String matcherName : body.matchers.keySet()) {
             responseMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
         }
-        responseBody = body.toString();
+        responseBody = OptionalBody.body(body.toString());
         if (!responseHeaders.containsKey("Content-Type")) {
             responseHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
         }
@@ -115,7 +116,7 @@ public class PactDslResponse {
      * @param body Response body as an XML Document
      */
     public PactDslResponse body(Document body) throws TransformerException {
-        responseBody = ConsumerPactBuilder.xmlToString(body);
+        responseBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body));
         if (!responseHeaders.containsKey("Content-Type")) {
             responseHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
         }
@@ -167,7 +168,7 @@ public class PactDslResponse {
         return new PactFragment(
                 request.consumer,
                 request.provider,
-                JavaConverters$.MODULE$.asScalaBufferConverter(consumerPactBuilder.getInteractions()).asScala());
+          JavaConversions$.MODULE$.asScalaBuffer(consumerPactBuilder.getInteractions()).toSeq());
     }
 
     /**
