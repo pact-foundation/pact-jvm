@@ -17,11 +17,11 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class PactVerificationsTest {
+public class PactVerificationsForHttpAndMessageTest {
 
     private static final String HTTP_PROVIDER_NAME = "a_http_provider";
     private static final String MESSAGE_PROVIDER_NAME = "a_message_provider";
-    private static final String PACT_VERIFICATIONS_CONSUMER_NAME = "pact_verifications_consumer";
+    private static final String PACT_VERIFICATIONS_CONSUMER_NAME = "pact_verifications_http_and_message_consumer";
 
     @Rule
     public PactProviderRule httpProvider =
@@ -33,8 +33,8 @@ public class PactVerificationsTest {
     @Pact(provider = HTTP_PROVIDER_NAME, consumer = PACT_VERIFICATIONS_CONSUMER_NAME)
     public PactFragment httpPact(PactDslWithProvider builder) {
         return builder
-                .given("good state")
-                .uponReceiving("PactProviderTest test interaction 2")
+                .given("a good state")
+                .uponReceiving("a query test interaction")
                 .path("/")
                 .method("GET")
                 .willRespondWith()
