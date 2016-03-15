@@ -3,17 +3,17 @@
  */
 package au.com.dius.pact.consumer;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import au.com.dius.pact.model.v3.messaging.Message;
+import au.com.dius.pact.model.v3.messaging.MessagePact;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import au.com.dius.pact.model.v3.messaging.Message;
-import au.com.dius.pact.model.v3.messaging.MessagePact;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -24,7 +24,8 @@ public class MessagePactProviderRule extends ExternalResource {
 	private Object testClassInstance;
 	public static VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
 	private MessagePact messagePact;
-	
+	private byte[] message;
+
 	/**
 	 * @param testClassInstance
 	 */
@@ -45,9 +46,8 @@ public class MessagePactProviderRule extends ExternalResource {
 				if (pactDef == null) {
 					base.evaluate();
 					return;
-				} 
-				
-				
+				}
+
 				Message providedMessage = null;
 				Map<String, Message> pacts = parsePacts();
 				if (pactDef.value().length == 2 && !pactDef.value()[1].trim().isEmpty()) {
@@ -55,25 +55,13 @@ public class MessagePactProviderRule extends ExternalResource {
 				} else if (!pacts.isEmpty()) {
 					providedMessage = pacts.values().iterator().next();
 				}
-				
+
 				if (providedMessage == null) {
 					base.evaluate();
 					return;
-				} 
-				
-				Method messageSetter = null ;
-				try {
-					messageSetter = description.getTestClass().getMethod("setMessage", byte[].class);
-				} catch (Exception e) {
-					//ignore 
-					base.evaluate();
-					return;
 				}
-				
-				if (messageSetter != null) {
-					messageSetter.invoke(testClassInstance, providedMessage.contentsAsBytes());
-				}
-				
+
+				setMessage(providedMessage.contentsAsBytes(), description);
 				try {
 					base.evaluate();
 					messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir());
@@ -83,7 +71,7 @@ public class MessagePactProviderRule extends ExternalResource {
 			}
 		};
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private Map<String, Message> parsePacts() {
         if (providerStateMessages == null) {
@@ -102,7 +90,7 @@ public class MessagePactProviderRule extends ExternalResource {
 	                		} catch (Exception e) {
 		                        throw new RuntimeException("Failed to invoke pact method", e);
 		                    }
-	                		
+
 	                		for (Message message : messages) {
 	                			providerStateMessages.put(message.getProviderState(), message);
 	                		}
@@ -112,7 +100,7 @@ public class MessagePactProviderRule extends ExternalResource {
                 }
             }
         }
-        
+
         return providerStateMessages;
 	}
 
@@ -134,4 +122,21 @@ public class MessagePactProviderRule extends ExternalResource {
         return conforms;
     }
 
+	public byte[] getMessage() {
+		return message;
+	}
+
+	private void setMessage(byte[] message, Description description)
+			throws InvocationTargetException, IllegalAccessException {
+
+		this.message = message;
+		Method messageSetter;
+		try {
+			messageSetter = description.getTestClass().getMethod("setMessage", byte[].class);
+		} catch (Exception e) {
+			//ignore
+			return;
+		}
+		messageSetter.invoke(testClassInstance, message);
+	}
 }
