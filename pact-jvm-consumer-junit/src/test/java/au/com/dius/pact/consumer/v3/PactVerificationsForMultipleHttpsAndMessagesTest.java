@@ -18,7 +18,7 @@ import static java.util.Collections.singletonMap;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.*;
 
-public class PactVerificationsWithMultipleHttpsAndMessagesTest {
+public class PactVerificationsForMultipleHttpsAndMessagesTest {
 
     private static final String HTTP_PROVIDER_NAME = "a_http_provider";
     private static final String OTHER_HTTP_PROVIDER_NAME = "other_http_provider";
@@ -43,7 +43,7 @@ public class PactVerificationsWithMultipleHttpsAndMessagesTest {
     @Pact(provider = HTTP_PROVIDER_NAME, consumer = PACT_VERIFICATIONS_CONSUMER_NAME)
     public PactFragment httpPact(PactDslWithProvider builder) {
         return builder
-                .given("good state")
+                .given("a good state")
                 .uponReceiving("a query test interaction")
                 .path("/")
                 .method("GET")
@@ -56,8 +56,8 @@ public class PactVerificationsWithMultipleHttpsAndMessagesTest {
     @Pact(provider = OTHER_HTTP_PROVIDER_NAME, consumer = PACT_VERIFICATIONS_CONSUMER_NAME)
     public PactFragment otherHttpPact(PactDslWithProvider builder) {
         return builder
-                .given("good state")
-                .uponReceiving("a query test interaction")
+                .given("another good state")
+                .uponReceiving("another query test interaction")
                 .path("/other")
                 .method("GET")
                 .willRespondWith()
@@ -89,8 +89,8 @@ public class PactVerificationsWithMultipleHttpsAndMessagesTest {
         Map<String, String> metadata = new HashMap<String, String>();
         metadata.put("contentType", "application/json");
 
-        return builder.given("SomeProviderState")
-                      .expectsToReceive("a test message")
+        return builder.given("SomeOtherProviderState")
+                      .expectsToReceive("another test message")
                       .withMetadata(metadata)
                       .withContent(body)
                       .toPact();
