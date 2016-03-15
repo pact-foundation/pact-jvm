@@ -20,7 +20,7 @@ public class ExampleMessageConsumerWithGetMessageFromRuleTest {
     @Rule
     public MessagePactProviderRule messageProvider = new MessagePactProviderRule(this);
 
-    @Pact(provider = "test_provider", consumer = "test_consumer")
+    @Pact(provider = "message_test_provider", consumer = "message_test_consumer")
     public MessagePact createPact(MessagePactBuilder builder) {
         PactDslJsonBody body = new PactDslJsonBody();
         body.stringValue("testParam1", "value1");
@@ -37,7 +37,7 @@ public class ExampleMessageConsumerWithGetMessageFromRuleTest {
     }
 
     @Test
-    @PactVerification({"test_provider", "SomeProviderState"})
+    @PactVerification({"message_test_provider", "SomeProviderState"})
     public void test() throws Exception {
         assertNotNull(new String(messageProvider.getMessage()));
     }
