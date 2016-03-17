@@ -35,9 +35,10 @@ class ProviderClient {
 
     private static final String CONTENT_TYPE = 'Content-Type'
     private static final String UTF8 = 'UTF-8'
-    public static final String REQUEST = 'request'
+    private static final String REQUEST = 'request'
+    private static final String ACTION = 'action'
 
-    HttpClientFactory httpClientFactory = new HttpClientFactory()
+  HttpClientFactory httpClientFactory = new HttpClientFactory()
     Request request
     def provider
 
@@ -123,7 +124,8 @@ class ProviderClient {
         }
     }
 
-    CloseableHttpResponse makeStateChangeRequest(def stateChangeUrl, String state, boolean postStateInBody) {
+    CloseableHttpResponse makeStateChangeRequest(def stateChangeUrl, String state, boolean postStateInBody,
+                                                 boolean isSetup, boolean stateChangeTeardown) {
         if (stateChangeUrl) {
             CloseableHttpClient httpclient = httpClientFactory.newClient(provider)
             def urlBuilder
@@ -135,11 +137,23 @@ class ProviderClient {
             HttpRequest method
 
             if (postStateInBody) {
-                method = new HttpPost(urlBuilder.build())
-                method.setEntity(new StringEntity(new JsonBuilder([state: state]).toPrettyString(),
+              method = new HttpPost(urlBuilder.build())
+              def map = [state: state]
+              if (stateChangeTeardown) {
+                map.action = isSetup ? 'setup' : 'teardown'
+              }
+              method.setEntity(new StringEntity(new JsonBuilder(map).toPrettyString(),
                         ContentType.APPLICATION_JSON))
             } else {
-                method = new HttpPost(urlBuilder.setParameter('state', state).build())
+              urlBuilder.setParameter('state', state)
+              if (stateChangeTeardown) {
+                if (isSetup) {
+                  urlBuilder.setParameter(ACTION, 'setup')
+                } else {
+                  urlBuilder.setParameter(ACTION, 'teardown')
+                }
+              }
+              method = new HttpPost(urlBuilder.build())
             }
 
             if (provider.stateChangeRequestFilter != null) {

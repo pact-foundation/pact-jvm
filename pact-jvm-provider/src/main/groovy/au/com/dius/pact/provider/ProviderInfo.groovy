@@ -27,6 +27,7 @@ class ProviderInfo {
 
     URL stateChangeUrl
     boolean stateChangeUsesBody = true
+    boolean stateChangeTeardown = false
 
     PactVerification verificationType = PactVerification.REQUST_RESPONSE
     List packagesToScan = []
@@ -80,7 +81,8 @@ class ProviderInfo {
                 name: new JsonSlurper().parse(file).consumer.name,
                 pactFile: file,
                 stateChange: consumersGroup.stateChange,
-                stateChangeUsesBody: consumersGroup.stateChangeUsesBody)
+                stateChangeUsesBody: consumersGroup.stateChangeUsesBody
+              )
             }
         }
         consumers

@@ -29,4 +29,8 @@ class GradleProviderInfo extends ProviderInfo {
     }
     fromPactBroker
   }
+
+  def url(String path) {
+    new URL(path)
+  }
 }
