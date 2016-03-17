@@ -285,6 +285,12 @@ If the `stateChangeUsesBody` is not specified, or is set to true, then the provi
 As for normal requests (see Modifying the requests before they are sent), a state change request can be modified before
 it is sent. Set `stateChangeRequestFilter` to a Groovy script on the provider that will be called before the request is made.
 
+#### Teardown calls for state changes [version 3.2.5/2.4.7+]
+
+You can enable teardown state change calls by setting the property `<stateChangeTeardown>true</stateChangeTeardown>` on the provider. This
+will add an `action` parameter to the state change call. The setup call before the test will receive `action=setup`, and
+then a teardown call will be made afterwards to the state change URL with `action=teardown`.
+
 ## Verifying pact files from a pact broker [version 3.1.1+/2.3.1+]
 
 You can setup your build to validate against the pacts stored in a pact broker. The pact plugin will query

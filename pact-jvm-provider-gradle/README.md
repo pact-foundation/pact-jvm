@@ -17,7 +17,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'au.com.dius:pact-jvm-provider-gradle_2.10:2.2.1'
+        classpath 'au.com.dius:pact-jvm-provider-gradle_2.10:3.2.4'
     }
 }
 ```
@@ -32,7 +32,7 @@ apply plugin: 'au.com.dius.pact'
 
 ```groovy
 plugins {
-  id "au.com.dius.pact" version "2.2.1"
+  id "au.com.dius.pact" version "3.2.4"
 }
 ```
 
@@ -269,8 +269,7 @@ The following project properties can be specified with `-Pproperty=value` on the
 
 ## Provider States
 
-For a description of what provider states are, see the wiki in the Ruby project:
-https://github.com/realestate-com-au/pact/wiki/Provider-states
+For a description of what provider states are, see the pact documentations: http://docs.pact.io/documentation/provider_states.html
 
 ### Using a state change URL
 
@@ -312,6 +311,12 @@ pact {
 If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description will be sent as
  JSON in the body of the request. If it is set to false, it will passed as a query parameter.
 
+#### Teardown calls for state changes [version 3.2.5/2.4.7+]
+
+You can enable teardown state change calls by setting the property `stateChangeTeardown = true` on the provider. This
+will add an `action` parameter to the state change call. The setup call before the test will receive `action=setup`, and
+then a teardown call will be made afterwards to the state change URL with `action=teardown`.
+
 ### Using a Closure [version 2.2.2+]
 
 You can set a closure to be called before each verification with a defined provider state. The closure will be
@@ -331,6 +336,41 @@ pact {
                 stateChange = { providerState ->
                     def fixture = loadFixtuerForProviderState(providerState)
                     setupDatabase(fixture)
+                }
+            }
+
+        }
+
+    }
+
+}
+```
+
+#### Teardown calls for state changes [version 3.2.5/2.4.7+]
+
+You can enable teardown state change calls by setting the property `stateChangeTeardown = true` on the provider. This
+will add an `action` parameter to the state change closure call. The setup call before the test will receive `setup`,
+as the second parameter, and then a teardown call will be made afterwards `teardown` as the parameter.
+
+```groovy
+pact {
+
+    serviceProviders {
+
+        provider1 {
+
+            hasPactWith('consumer1') {
+                pactFile = file('path/to/provider1-consumer1-pact.json')
+                // Load a fixture file based on the provider state and then setup some database
+                // data. Does not require a state change request so returns false
+                stateChange = { providerState, action ->
+                    if (action == 'setup') {
+                      def fixture = loadFixtuerForProviderState(providerState)
+                      setupDatabase(fixture)
+                    } else {
+                      cleanupDatabase()
+                    }
+                    false
                 }
             }
 
