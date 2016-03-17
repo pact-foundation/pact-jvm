@@ -350,7 +350,7 @@ pact {
 
 You can enable teardown state change calls by setting the property `stateChangeTeardown = true` on the provider. This
 will add an `action` parameter to the state change closure call. The setup call before the test will receive `setup`,
-as the second parameter, and then a teardown call will be made afterwards `teardown` as the parameter.
+as the second parameter, and then a teardown call will be made afterwards with `teardown` as the second parameter.
 
 ```groovy
 pact {
