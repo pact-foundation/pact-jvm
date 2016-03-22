@@ -103,7 +103,7 @@ public class PactDslResponse {
         for (String matcherName : body.matchers.keySet()) {
             responseMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
         }
-        responseBody = OptionalBody.body(body.toString());
+        responseBody = OptionalBody.body(body.getBody().toString());
         if (!responseHeaders.containsKey("Content-Type")) {
             responseHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
         }
