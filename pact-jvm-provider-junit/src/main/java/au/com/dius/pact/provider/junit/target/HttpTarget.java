@@ -57,7 +57,7 @@ public class HttpTarget implements TestClassAwareTarget {
      * @param protocol of tested service
      */
     public HttpTarget(final String protocol, final String host, final int port) {
-        this(protocol, host, port, null);
+        this(protocol, host, port, "/");
     }
 
     /**
