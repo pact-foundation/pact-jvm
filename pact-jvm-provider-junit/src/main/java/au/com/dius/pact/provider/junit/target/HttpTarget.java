@@ -17,6 +17,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.TestClass;
 import scala.collection.Seq;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -26,6 +27,7 @@ import java.util.function.Consumer;
  * that run {@link RequestResponseInteraction} against http service and verify response
  */
 public class HttpTarget implements TestClassAwareTarget {
+    private final String path;
     private final String host;
     private final int port;
     private final String protocol;
@@ -55,9 +57,30 @@ public class HttpTarget implements TestClassAwareTarget {
      * @param protocol of tested service
      */
     public HttpTarget(final String protocol, final String host, final int port) {
+        this(protocol, host, port, "/");
+    }
+
+    /**
+     * @param host host of tested service
+     * @param port port of tested service
+     * @param protocol of tested service
+     * @param path of the tested service
+     */
+    public HttpTarget(final String protocol, final String host, final int port, final String path) {
         this.host = host;
         this.port = port;
         this.protocol = protocol;
+        this.path = path;
+    }
+
+    /**
+     * @param url of the tested service
+     */
+    public HttpTarget(final URL url) {
+        this(url.getProtocol() == null ? "http" : url.getProtocol(),
+                url.getHost(),
+                url.getPort() == -1 ? 8080 : url.getPort(),
+                url.getPath() == null ? "/" : url.getPath());
     }
 
     /**
@@ -88,6 +111,7 @@ public class HttpTarget implements TestClassAwareTarget {
         providerInfo.setPort(port);
         providerInfo.setHost(host);
         providerInfo.setProtocol(protocol);
+        providerInfo.setPath(path);
 
       final List<FrameworkMethod> methods = testClass.getAnnotatedMethods(TargetRequestFilter.class);
       if (testClass != null && !methods.isEmpty()) {
