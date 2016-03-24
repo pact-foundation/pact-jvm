@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.gradle
 
+import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.provider.ResponseComparison
 import org.apache.http.entity.ContentType
@@ -19,7 +20,7 @@ class ResponseComparisonTest {
 
   @Before
   void setup() {
-    response = new Response(200, ['Content-Type': 'application/json'], '{"stuff": "is good"}', [:])
+    response = new Response(200, ['Content-Type': 'application/json'], OptionalBody.body('{"stuff": "is good"}'), [:])
     actualStatus = 200
     actualBody = '{"stuff": "is good"}'
     actualResponse = [contentType: ContentType.APPLICATION_JSON]
@@ -37,23 +38,23 @@ class ResponseComparisonTest {
 
   @Test
   void 'should not compare headers if there are no expected headers'() {
-    response = new Response(200, [:], '', [:])
+    response = new Response(200, [:], OptionalBody.body(''), [:])
     assert testSubject().headers == [:]
   }
 
   @Test
   void 'should only compare the expected headers'() {
     actualHeaders = ['A': 'B', 'C': 'D']
-    response = new Response(200, ['A': 'B'], '', [:])
+    response = new Response(200, ['A': 'B'], OptionalBody.body(''), [:])
     assert testSubject().headers == ['A': true]
-    response = new Response(200, ['A': 'D'], '', [:])
+    response = new Response(200, ['A': 'D'], OptionalBody.body(''), [:])
     assert testSubject().headers.A == 'Expected header \'A\' to have value \'D\' but was \'B\''
   }
 
   @Test
   void 'ignores case in header comparisons'() {
     actualHeaders = ['A': 'B', 'C': 'D']
-    response = new Response(200, ['a': 'B'], '', [:])
+    response = new Response(200, ['a': 'B'], OptionalBody.body(''), [:])
     assert testSubject().headers == ['a': true]
   }
 

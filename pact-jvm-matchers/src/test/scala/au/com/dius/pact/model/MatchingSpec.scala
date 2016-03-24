@@ -24,7 +24,7 @@ class MatchingSpec extends Specification {
       }
 
       "Handle left None" in {
-        val expected = List(BodyMismatch(request.getBody, None))
+        val expected = List(BodyMismatch(request.getBody.orElse(""), None, Some("Expected body '{\"test\": true}' but was missing")))
         matchBody(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a")), request.getBody),
           new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a"))), config) must beEqualTo(expected)
       }
@@ -41,8 +41,10 @@ class MatchingSpec extends Specification {
       }
 
       "match different mimetypes by regexp" in {
-        matchBody(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/x+json")), "{ \"name\":  \"bob\" }"),
-          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/x+json")), "{\"name\":\"bob\"}"), config) must beEmpty
+        matchBody(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/x+json")),
+          OptionalBody.body("{ \"name\":  \"bob\" }")),
+          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/x+json")),
+            OptionalBody.body("{\"name\":\"bob\"}")), config) must beEmpty
       }
 
     }
@@ -63,7 +65,8 @@ class MatchingSpec extends Specification {
 
     "Query Matching" should {
 
-      def query(queryString: String = "") = new Request("", "", PactReader.queryStringToMap(queryString), null, "", null)
+      def query(queryString: String = "") = new Request("", "", PactReader.queryStringToMap(queryString), null,
+        OptionalBody.body(""), null)
 
       "match same"  in {
         matchQuery(query("a=b"), query("a=b")) must beEmpty

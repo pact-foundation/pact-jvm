@@ -158,6 +158,10 @@ class ProviderVerifier {
         log.debug('Verifying via annotated test method')
         verifyResponseByInvokingProviderMethods(pact, provider, consumer, interaction, interactionMessage, failures)
       }
+
+      if (provider.stateChangeTeardown) {
+        stateChange(interaction.providerState, provider, consumer, false)
+      }
     }
   }
 
@@ -166,7 +170,7 @@ class ProviderVerifier {
   }
 
   @SuppressWarnings('PrintStackTrace')
-  def stateChange(String state, ProviderInfo provider, ConsumerInfo consumer) {
+  def stateChange(String state, ProviderInfo provider, ConsumerInfo consumer, boolean isSetup = true) {
     AnsiConsole.out().println(Ansi.ansi().a('  Given ').bold().a(state).boldOff())
     try {
       def stateChangeHandler = consumer.stateChange
@@ -182,7 +186,12 @@ class ProviderVerifier {
           .reset())
         return true
       } else if (stateChangeHandler instanceof Closure) {
-        def result = stateChangeHandler.call(state)
+        def result
+        if (provider.stateChangeTeardown) {
+          result = stateChangeHandler.call(state, isSetup ? 'setup' : 'teardown')
+        } else {
+          result = stateChangeHandler.call(state)
+        }
         log.debug "Invoked state change closure -> ${result}"
         if (!(result instanceof URL)) {
           return result
@@ -193,7 +202,7 @@ class ProviderVerifier {
         executeBuildSpecificTask(stateChangeHandler, state)
         return true
       }
-      return executeHttpStateChangeRequest(stateChangeHandler, stateChangeUsesBody, state, provider)
+      return executeHttpStateChangeRequest(stateChangeHandler, stateChangeUsesBody, state, provider, isSetup)
     } catch (e) {
       AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.RED).a('State Change Request Failed - ')
         .a(e.message).reset())
@@ -204,12 +213,13 @@ class ProviderVerifier {
     }
   }
 
-  private executeHttpStateChangeRequest(stateChangeHandler, useBody, String state, ProviderInfo provider) {
+  private executeHttpStateChangeRequest(stateChangeHandler, useBody, String state, ProviderInfo provider,
+                                        boolean isSetup) {
     try {
       def url = stateChangeHandler instanceof URI ? stateChangeHandler
         : new URI(stateChangeHandler.toString())
       ProviderClient client = new ProviderClient(provider: provider)
-      def response = client.makeStateChangeRequest(url, state, useBody)
+      def response = client.makeStateChangeRequest(url, state, useBody, isSetup, provider.stateChangeTeardown)
       log.debug "Invoked state change $url -> ${response?.statusLine}"
       if (response) {
         try {

@@ -4,10 +4,10 @@ import java.io.{BufferedReader, InputStreamReader}
 import java.net.URI
 import java.util.zip.GZIPInputStream
 
-import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
-import au.com.dius.pact.model.{Request, Response}
+import au.com.dius.pact.model.{OptionalBody, Request, Response}
 import com.ning.http.client
 import com.ning.http.client.FluentCaseInsensitiveStringsMap
+import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import io.netty.handler.codec.http.{HttpResponse => NHttpResponse}
 import unfiltered.netty.ReceivedMessage
 import unfiltered.request.HttpRequest
@@ -29,7 +29,7 @@ object Conversions extends StrictLogging {
       else
         org.apache.http.entity.ContentType.parse(response.getContentType)
     val charset = if (contentType.getCharset == null) "UTF-8" else contentType.getCharset.name()
-    val body = response.getResponseBody(charset)
+    val body = OptionalBody.body(response.getResponseBody(charset))
     val r = new Response(response.getStatusCode, toMap(response.getHeaders), body)
     logger.debug("response=" + r)
     r
@@ -45,8 +45,9 @@ object Conversions extends StrictLogging {
   }
 
   implicit def pactToUnfilteredResponse(response: Response): ResponseFunction[NHttpResponse] = {
-    if (response.getBody != null) Status(response.getStatus) ~> Headers(response.getHeaders) ~> ResponseString(response.getBody)
-    else Status(response.getStatus) ~> Headers(response.getHeaders)
+    if (response.getBody.isPresent) {
+      Status(response.getStatus) ~> Headers(response.getHeaders) ~> ResponseString(response.getBody.getValue())
+    } else Status(response.getStatus) ~> Headers(response.getHeaders)
   }
 
   def toHeaders(request: HttpRequest[ReceivedMessage]): java.util.Map[String, String] = {
@@ -71,6 +72,7 @@ object Conversions extends StrictLogging {
   }
 
   implicit def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {
-    new Request(request.method, toPath(request.uri), toQuery(request), toHeaders(request), toBody(request))
+    new Request(request.method, toPath(request.uri), toQuery(request), toHeaders(request),
+      OptionalBody.body(toBody(request)))
   }
 }

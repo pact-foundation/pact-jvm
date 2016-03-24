@@ -7,6 +7,7 @@ import java.util.Map;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.InvalidPactException;
+import au.com.dius.pact.model.OptionalBody;
 import org.apache.http.entity.ContentType;
 
 import au.com.dius.pact.model.Consumer;
@@ -121,7 +122,7 @@ public class MessagePactBuilder {
       metadata.put("Content-Type", ContentType.APPLICATION_JSON.toString());
     }
 
-    message.setContents(body.getBody());
+    message.setContents(OptionalBody.body(body.toString()));
     Map<String, Map<String, Object>> matchingRules = new HashMap<String, Map<String, Object>>();
     for (String matcherName : body.getMatchers().keySet()) {
       matchingRules.put("$.body" + matcherName, body.getMatchers().get(matcherName));

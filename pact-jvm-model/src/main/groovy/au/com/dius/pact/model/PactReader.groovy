@@ -70,12 +70,12 @@ class PactReader {
   }
 
   static Response extractResponse(responseJson) {
-    responseJson.body = extractBody(responseJson.body)
+    extractBody(responseJson)
     Response.fromMap(responseJson)
   }
 
   static Request extractRequestV2(requestJson) {
-    requestJson.body = extractBody(requestJson.body)
+    extractBody(requestJson)
     requestJson.query = queryStringToMap(requestJson.query)
     Request.fromMap(requestJson)
   }
@@ -83,7 +83,7 @@ class PactReader {
   @SuppressWarnings('DuplicateStringLiteral')
   static Map<String, List<String>> queryStringToMap(String query, boolean decode = true) {
     if (query) {
-      query.split('&')*.split('=').inject([:]) { Map map, String[] nameAndValue ->
+      query.split('&')*.split('=', 2).inject([:]) { Map map, String[] nameAndValue ->
         def name = decode ? URLDecoder.decode(nameAndValue.first(), 'UTF-8') : nameAndValue.first()
         def value = decode ? URLDecoder.decode(nameAndValue.last(), 'UTF-8') : nameAndValue.last()
         if (map.containsKey(name)) {
@@ -97,15 +97,13 @@ class PactReader {
   }
 
   static Request extractRequestV3(requestJson) {
-    requestJson.body = extractBody(requestJson.body)
+    extractBody(requestJson)
     Request.fromMap(requestJson)
   }
 
-  static extractBody(body) {
-    if (body == null || body instanceof String) {
-      body
-    } else {
-      JsonOutput.toJson(body)
+  static void extractBody(json) {
+    if (json.containsKey('body') && json.body != null && !(json.body instanceof String)) {
+      json.body = JsonOutput.toJson(json.body)
     }
   }
 

@@ -15,12 +15,12 @@ object Fixtures {
   val provider = new Provider("test_provider")
   val consumer = new Consumer("test_consumer")
 
-  val request = new Request(Post, "/", null, JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheadervalue")),
-    "{\"test\": true}")
+  val headers = Map("testreqheader" -> "testreqheadervalue", "Content-Type" -> "application/json")
+  val request = new Request(Post, "/", null, JavaConversions.mapAsJavaMap(headers), OptionalBody.body("{\"test\": true}"))
 
   val response = new Response(200,
     JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*")),
-    "{\"responsetest\": true}")
+    OptionalBody.body("{\"responsetest\": true}"))
 
   val interaction = new RequestResponseInteraction("test interaction", "test state", request, response)
 
@@ -29,8 +29,8 @@ object Fixtures {
   case class ConsumerService(serverUrl: String) {
     implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool)
 
-    private def extractFrom(body: String): Boolean = {
-      body == "{\"responsetest\": true}"
+    private def extractFrom(body: OptionalBody): Boolean = {
+      body.orElse("") == "{\"responsetest\": true}"
     }
 
     def extractResponseTest(path: String = request.getPath): Future[Boolean] = {
@@ -43,7 +43,7 @@ object Fixtures {
 
     def simpleGet(path: String): Future[(Int, Option[String])] = {
       HttpClient.run(new Request(Get, serverUrl + path)).map { response =>
-        (response.getStatus, Some(response.getBody))
+        (response.getStatus, Some(response.getBody.orElse("")))
       }
     }
   }

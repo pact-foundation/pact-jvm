@@ -4,6 +4,7 @@ import au.com.dius.pact.model.BodyMismatch;
 import au.com.dius.pact.model.BodyTypeMismatch;
 import au.com.dius.pact.model.HeaderMismatch;
 import au.com.dius.pact.model.Interaction;
+import au.com.dius.pact.model.OptionalBody;
 import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.model.Response;
 import au.com.dius.pact.model.ResponseMatching$;
@@ -19,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.collection.Seq;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.lang.AssertionError;
@@ -30,6 +32,7 @@ import java.lang.AssertionError;
 public class HttpTarget implements TestClassAwareTarget {
   private static final Logger LOGGER = LoggerFactory.getLogger(HttpTarget.class);
 
+    private final String path;
     private final String host;
     private final int port;
     private final String protocol;
@@ -59,28 +62,49 @@ public class HttpTarget implements TestClassAwareTarget {
      * @param protocol of tested service
      */
     public HttpTarget(final String protocol, final String host, final int port) {
+        this(protocol, host, port, "/");
+    }
+
+    /**
+     * @param host host of tested service
+     * @param port port of tested service
+     * @param protocol of tested service
+     * @param path of the tested service
+     */
+    public HttpTarget(final String protocol, final String host, final int port, final String path) {
         this.host = host;
         this.port = port;
         this.protocol = protocol;
+        this.path = path;
+    }
+
+    /**
+     * @param url of the tested service
+     */
+    public HttpTarget(final URL url) {
+        this(url.getProtocol() == null ? "http" : url.getProtocol(),
+                url.getHost(),
+                url.getPort() == -1 ? 8080 : url.getPort(),
+                url.getPath() == null ? "/" : url.getPath());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void testInteraction(final Interaction interaction) {
+    public void testInteraction(final Interaction i) {
+        RequestResponseInteraction interaction = (RequestResponseInteraction) i;
         final ProviderClient providerClient = new ProviderClient();
         providerClient.setProvider(getProviderInfo());
-        RequestResponseInteraction reqResInteraction = (RequestResponseInteraction) interaction;
-        providerClient.setRequest(reqResInteraction.getRequest());
+        providerClient.setRequest(interaction.getRequest());
         final Map<String, Object> actualResponse = (Map<String, Object>) providerClient.makeRequest();
 
         final Seq<ResponsePartMismatch> mismatches = ResponseMatching$.MODULE$.responseMismatches(
-                reqResInteraction.getResponse(),
+                interaction.getResponse(),
                 new Response(
                         ((Integer) actualResponse.get("statusCode")).intValue(),
                         (Map<String, String>) actualResponse.get("headers"),
-                        (String) actualResponse.get("data"))
+                        OptionalBody.body((String) actualResponse.get("data")))
         );
 
         if (!mismatches.isEmpty()) {
@@ -93,6 +117,7 @@ public class HttpTarget implements TestClassAwareTarget {
         providerInfo.setPort(port);
         providerInfo.setHost(host);
         providerInfo.setProtocol(protocol);
+        providerInfo.setPath(path);
 
       final List<FrameworkMethod> methods = testClass.getAnnotatedMethods(TargetRequestFilter.class);
       if (testClass != null && !methods.isEmpty()) {

@@ -34,12 +34,16 @@ trait Optionals {
     if(query == null || query == "") {
       None
     } else {
-      Some(query.split("&").map(_.split("=")).foldLeft(Map[String,List[String]]()) {
-        (m, a) =>
-          val name = if (decode) URLDecoder.decode(a.head, "UTF-8") else a.head
-          val value = if (decode) URLDecoder.decode(a.last, "UTF-8") else a.last
-          m + (name -> (m.getOrElse(name, List[String]()) :+ value))
-      })
+      Some(parseQueryString(query, decode))
+    }
+  }
+
+  def parseQueryString(query: String, decode: Boolean): Map[String, List[String]] = {
+    query.split("&").map(_.split("=")).foldLeft(Map[String, List[String]]()) {
+      (m, a) =>
+        val name = if (decode) URLDecoder.decode(a.head, "UTF-8") else a.head
+        val value = if (decode) URLDecoder.decode(a.last, "UTF-8") else a.last
+        m + (name -> (m.getOrElse(name, List[String]()) :+ value))
     }
   }
 

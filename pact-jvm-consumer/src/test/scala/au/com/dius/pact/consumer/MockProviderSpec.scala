@@ -89,17 +89,17 @@ class MockProviderSpec extends Specification with StrictLogging {
 
         def chunk(s:String) = s.replaceAll("\n", "").replaceAll(" ", "").replaceAll("\t", "").toLowerCase.take(10)
 
-        chunk(actual.getResponse.getBody) must beEqualTo(chunk(response.getBody))
+        chunk(actual.getResponse.getBody.orElse("")) must beEqualTo(chunk(response.getBody.orElse("")))
 
         val actualResponse = actual.getResponse.copy
-        actualResponse.setBody("")
+        actualResponse.setBody(OptionalBody.empty())
         val expectedResponse = response.copy
-        expectedResponse.setBody("")
+        expectedResponse.setBody(OptionalBody.empty())
         actualResponse must beEqualTo(expectedResponse)
       }
       
       val expectedInvalidResponse = new Response(500, JavaConversions.mapAsJavaMap(Map("Access-Control-Allow-Origin" -> "*")),
-        "{\"error\": \"unexpected request\"}")
+        OptionalBody.body("{\"error\": \"unexpected request\"}"))
 
       compareRequests(results.unexpected.head, invalidRequest)
       compare(results.matched.head.asInstanceOf[RequestResponseInteraction], validRequest, response)

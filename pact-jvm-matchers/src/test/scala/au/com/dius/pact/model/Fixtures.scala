@@ -11,11 +11,12 @@ object Fixtures {
   val consumer = new Consumer("test_consumer")
 
 
-  val request = new Request(Get, "/", PactReader.queryStringToMap("q=p&q=p2&r=s"), JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheadervalue")),
-    "{\"test\": true}")
+  val request = new Request(Get, "/", PactReader.queryStringToMap("q=p&q=p2&r=s"),
+    JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheadervalue")),
+    OptionalBody.body("{\"test\": true}"))
 
   val response = new Response(200, JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheaderval")),
-    "{\"responsetest\": true}")
+    OptionalBody.body("{\"responsetest\": true}"))
 
   val interaction = new RequestResponseInteraction("test interaction", "test state", request, response)
 

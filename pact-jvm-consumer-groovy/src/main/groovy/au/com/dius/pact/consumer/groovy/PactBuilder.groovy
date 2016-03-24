@@ -4,15 +4,16 @@ package au.com.dius.pact.consumer.groovy
 import au.com.dius.pact.consumer.StatefulMockProvider
 import au.com.dius.pact.consumer.VerificationResult
 import au.com.dius.pact.model.Consumer
-import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.MockProviderConfig
 import au.com.dius.pact.model.MockProviderConfig$
+import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.PactConfig
 import au.com.dius.pact.model.PactFragment
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.Request
+import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.Response
 import groovy.json.JsonBuilder
 import scala.collection.JavaConverters$
@@ -28,6 +29,7 @@ class PactBuilder extends BaseBuilder {
   private static final String PATH_MATCHER = '$.path'
   private static final String CONTENT_TYPE = 'Content-Type'
   private static final String JSON = 'application/json'
+  private static final String BODY = 'body'
 
   Consumer consumer
   Provider provider
@@ -99,9 +101,12 @@ class PactBuilder extends BaseBuilder {
       interactions << new RequestResponseInteraction(
         requestDescription,
         providerState,
-        new Request(requestData[i].method ?: 'get', path, requestData[i]?.query, headers, requestData[i].body ?: '',
+        new Request(requestData[i].method ?: 'get', path, requestData[i]?.query, headers,
+          requestData[i].containsKey(BODY) ? OptionalBody.body(requestData[i].body) : OptionalBody.missing(),
           requestMatchers),
-        new Response(responseData[i].status ?: 200, responseHeaders, responseData[i].body ?: '', responseMatchers)
+        new Response(responseData[i].status ?: 200, responseHeaders,
+          responseData[i].containsKey(BODY) ? OptionalBody.body(responseData[i].body) : OptionalBody.missing(),
+          responseMatchers)
       )
     }
     requestData = []
@@ -143,17 +148,7 @@ class PactBuilder extends BaseBuilder {
   @SuppressWarnings('DuplicateMapLiteral')
   PactBuilder withAttributes(Map requestData) {
     def request = [matchers: [:]] + requestData
-    def body = requestData.body
-    if (body instanceof PactBodyBuilder) {
-      request.body = body.body
-      request.matchers.putAll(body.matchers)
-    } else if (body != null && !(body instanceof String)) {
-      if (requestData.prettyPrint == null && !compactMimeTypes(requestData) || requestData.prettyPrint) {
-        request.body = new JsonBuilder(body).toPrettyString()
-      } else {
-        request.body = new JsonBuilder(body).toString()
-      }
-    }
+    setupBody(requestData, request)
     if (requestData.query instanceof String) {
       request.query = PactReader.queryStringToMap(requestData.query)
     } else {
@@ -169,6 +164,22 @@ class PactBuilder extends BaseBuilder {
     this
   }
 
+  private setupBody(Map requestData, Map request) {
+    if (requestData.containsKey(BODY)) {
+      def body = requestData.body
+      if (body instanceof PactBodyBuilder) {
+        request.body = body.body
+        request.matchers.putAll(body.matchers)
+      } else if (body != null && !(body instanceof String)) {
+        if (requestData.prettyPrint == null && !compactMimeTypes(requestData) || requestData.prettyPrint) {
+          request.body = new JsonBuilder(body).toPrettyString()
+        } else {
+          request.body = new JsonBuilder(body).toString()
+        }
+      }
+    }
+  }
+
   /**
    * Defines the response attributes (body, headers, etc.) that are returned for the request
    * @param responseData Map of attributes
@@ -177,23 +188,13 @@ class PactBuilder extends BaseBuilder {
   @SuppressWarnings('DuplicateMapLiteral')
   PactBuilder willRespondWith(Map responseData) {
     def response = [matchers: [:]] + responseData
-    def body = responseData.body
-    if (body instanceof PactBodyBuilder) {
-      response.body = body.body
-      response.matchers.putAll(body.matchers)
-    } else if (body != null && !(body instanceof String)) {
-      if (responseData.prettyPrint == null && !compactMimeTypes(responseData) || responseData.prettyPrint) {
-        response.body = new JsonBuilder(body).toPrettyString()
-      } else {
-        response.body = new JsonBuilder(body).toString()
-      }
-    }
+    setupBody(responseData, response)
     this.responseData << response
     requestState = false
     this
   }
 
-  private boolean compactMimeTypes(Map reqResData) {
+  private static boolean compactMimeTypes(Map reqResData) {
     reqResData.headers && reqResData.headers[CONTENT_TYPE] in COMPACT_MIME_TYPES
   }
 

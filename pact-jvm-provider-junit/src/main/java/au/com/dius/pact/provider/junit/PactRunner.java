@@ -53,17 +53,25 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         }
         final String serviceName = providerInfo.value();
 
+        final Consumer consumerInfo = clazz.getAnnotation(Consumer.class);
+        final String consumerName = consumerInfo != null ? consumerInfo.value() : null;
+
         final TestClass testClass = new TestClass(clazz);
 
         this.child = new ArrayList<InteractionRunner>();
-        final List<Pact> pacts;
+        final List<Pact> pacts = new ArrayList<Pact>();
         try {
-            pacts = getPactSource(testClass).load(serviceName);
+            List<Pact> list = getPactSource(testClass).load(serviceName);
+            for (final Pact p : list) {
+                if (consumerName == null || p.getConsumer().getName().equals(consumerName)) {
+                    pacts.add(p);
+                }
+            }
         } catch (final IOException e) {
             throw new InitializationError(e);
         }
 
-        if (pacts == null || pacts.isEmpty()) {
+        if (pacts.isEmpty()) {
           throw new InitializationError("Did not find any pact files for provider " + providerInfo.value());
         }
 

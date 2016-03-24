@@ -26,7 +26,7 @@ object TestService extends StrictLogging {
     def handle(request:HttpRequest[ReceivedMessage]): ResponseFunction[NHttpResponse] = {
         val response = if(request.uri.endsWith("enterState")) {
           val pactRequest: Request = Conversions.unfilteredRequestToPactRequest(request)
-          val json = parse(pactRequest.getBody)
+          val json = parse(pactRequest.getBody.getValue)
           state = json.get("state").toString
           new Response(200)
         } else {

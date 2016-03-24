@@ -5,6 +5,7 @@ import au.com.dius.pact.model.BodyMismatch
 import au.com.dius.pact.model.BodyTypeMismatch
 import au.com.dius.pact.model.DiffConfig
 import au.com.dius.pact.model.HeaderMismatch
+import au.com.dius.pact.model.OptionalBody
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.ResponseMatching$
@@ -42,7 +43,7 @@ class ResponseComparison {
         actualHeaders: actualHeaders.collectEntries { k, v -> [k.toUpperCase(), v] }, actualBody: actualBody)
     def mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(
         ResponseMatching$.MODULE$.responseMismatches(response, new Response(actualStatus,
-            actualHeaders, actualBody, [:]))).asJava()
+            actualHeaders, OptionalBody.body(actualBody), [:]))).asJava()
 
     result.method = comparison.compareStatus(mismatches)
     result.headers = comparison.compareHeaders(mismatches)
@@ -50,7 +51,7 @@ class ResponseComparison {
     result
   }
 
-  static compareMessage(Message message, def actual) {
+  static compareMessage(Message message, OptionalBody actual) {
     def result = JavaConverters$.MODULE$.mutableMapAsJavaMapConverter(MatchingConfig.bodyMatchers()).asJava().find {
           message.contentType ==~ it.key
     }
@@ -58,19 +59,19 @@ class ResponseComparison {
     def expected = message.asPactRequest()
     def actualMessage = new Response(200, ['Content-Type': message.contentType], actual, [:])
     if (result) {
-          mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(result.value.matchBody(expected,
+      mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(result.value.matchBody(expected,
             actualMessage, new DiffConfig(true, false))).asJava()
-      } else {
-          def expectedBody = message.contents?.toString()
-          if (!StringUtils.isEmpty(expectedBody) && StringUtils.isEmpty(actual)) {
-              mismatches << BodyMismatch.apply(expectedBody, None$.MODULE$.get())
-          } else if (actual != expectedBody) {
-              mismatches << BodyMismatch(expectedBody, actual)
-          }
+    } else {
+      def expectedBody = message.contents.orElse('')
+      if (!StringUtils.isEmpty(expectedBody) && StringUtils.isEmpty(actual)) {
+          mismatches << BodyMismatch.apply(expectedBody, None$.MODULE$.get())
+      } else if (actual.orElse('') != expectedBody) {
+          mismatches << BodyMismatch(expectedBody, actual.orElse(''))
+      }
     }
 
     new ResponseComparison(expected: expected, actual: [contentType: [mimeType: message.contentType]],
-      actualBody: actual).compareBody(mismatches)
+      actualBody: actual.orElse('')).compareBody(mismatches)
   }
 
   def compareStatus(List<ResponsePartMismatch> mismatches) {
@@ -131,11 +132,11 @@ class ResponseComparison {
       }
 
       String expectedBodyString = ''
-      if (expected.body != null) {
+      if (expected.body.present) {
           if (expected.jsonBody()) {
-              expectedBodyString = JsonOutput.prettyPrint(expected.body)
+              expectedBodyString = JsonOutput.prettyPrint(expected.body.value)
           } else {
-              expectedBodyString = expected.body
+              expectedBodyString = expected.body.value
           }
       }
 

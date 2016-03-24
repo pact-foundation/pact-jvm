@@ -2,6 +2,7 @@ package au.com.dius.pact.model.v3.messaging
 
 import au.com.dius.pact.model.HttpPart
 import au.com.dius.pact.model.Interaction
+import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Response
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -16,13 +17,13 @@ class Message implements Interaction {
 
   String description
   String providerState
-  def contents
+  OptionalBody contents = OptionalBody.missing()
   Map<String, Map<String, Object>> matchingRules = [:]
   Map<String, String> metaData = [:]
 
   byte[] contentsAsBytes() {
-    if (contents) {
-      contents.toString().bytes
+    if (contents.present) {
+      contents.value.toString().bytes
     } else {
       []
     }
@@ -34,9 +35,9 @@ class Message implements Interaction {
 
   Map toMap() {
     def map = MessagePact.toMap(this)
-    if (contents) {
+    if (contents.present) {
       if (metaData.contentType == JSON) {
-        map.contents = new JsonSlurper().parseText(contents.toString())
+        map.contents = new JsonSlurper().parseText(contents.value.toString())
       } else {
         map.contents = contentsAsBytes().encodeBase64().toString()
       }
@@ -47,14 +48,22 @@ class Message implements Interaction {
   Message fromMap(Map map) {
     description = map.description ?: ''
     providerState = map.providerState
-    contents = map.contents
+    if (map.containsKey('contents')) {
+      if (map.contents == null) {
+        contents = OptionalBody.nullBody()
+      } else if (map.contents instanceof String && map.contents.empty) {
+        contents = OptionalBody.empty()
+      } else {
+        contents = OptionalBody.body(JsonOutput.toJson(map.contents))
+      }
+    }
     matchingRules = map.matchingRules ?: [:]
     metaData = map.metaData ?: [:]
     this
   }
 
   HttpPart asPactRequest() {
-    new Response(200, ['Content-Type': contentType], contents ? JsonOutput.toJson(contents) : null, matchingRules)
+    new Response(200, ['Content-Type': contentType], contents, matchingRules)
   }
 
   @Override

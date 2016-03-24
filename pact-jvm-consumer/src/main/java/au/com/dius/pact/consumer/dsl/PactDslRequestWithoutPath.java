@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
+import au.com.dius.pact.model.OptionalBody;
 import nl.flotsam.xeger.Xeger;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
@@ -19,7 +20,7 @@ public class PactDslRequestWithoutPath {
     private String requestMethod;
     private Map<String, String> requestHeaders = new HashMap<String, String>();
     private String query;
-    private String requestBody;
+    private OptionalBody requestBody = OptionalBody.missing();
     private Map<String, Map<String, Object>> requestMatchers = new HashMap<String, Map<String, Object>>();
     private String consumerName;
     private String providerName;
@@ -70,7 +71,7 @@ public class PactDslRequestWithoutPath {
      * @param body Request body in string form
      */
     public PactDslRequestWithoutPath body(String body) {
-        requestBody = body;
+        requestBody = OptionalBody.body(body);
         return this;
     }
 
@@ -80,7 +81,7 @@ public class PactDslRequestWithoutPath {
      * @param body Request body in string form
      */
     public PactDslRequestWithoutPath body(String body, String mimeType) {
-        requestBody = body;
+        requestBody = OptionalBody.body(body);
         requestHeaders.put("Content-Type", mimeType);
         return this;
     }
@@ -100,7 +101,7 @@ public class PactDslRequestWithoutPath {
      * @param body Request body in JSON form
      */
     public PactDslRequestWithoutPath body(JSONObject body) {
-        requestBody = body.toString();
+        requestBody = OptionalBody.body(body.toString());
         if (!requestHeaders.containsKey("Content-Type")) {
             requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
         }
@@ -117,7 +118,7 @@ public class PactDslRequestWithoutPath {
         for (String matcherName : body.matchers.keySet()) {
             requestMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
         }
-        requestBody = body.toString();
+        requestBody = OptionalBody.body(body.toString());
         if (!requestHeaders.containsKey("Content-Type")) {
             requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
         }
@@ -130,7 +131,7 @@ public class PactDslRequestWithoutPath {
      * @param body XML Document
      */
     public PactDslRequestWithoutPath body(Document body) throws TransformerException {
-        requestBody = xmlToString(body);
+        requestBody = OptionalBody.body(xmlToString(body));
         if (!requestHeaders.containsKey("Content-Type")) {
             requestHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
         }

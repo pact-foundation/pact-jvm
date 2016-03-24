@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.groovysupport
 
+import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.provider.HttpClientFactory
@@ -52,7 +53,7 @@ class ProviderClientTest {
   @Test
   void 'URL decodes the path'() {
     String path = '%2Fpath%2FTEST+PATH%2F2014-14-06+23%3A22%3A21'
-    client.request = new Request('GET', path, [:], [:], '', [:])
+    client.request = new Request('GET', path, [:], [:], OptionalBody.body(''), [:])
     client.makeRequest()
     assert args.URI.path == '/path/TEST PATH/2014-14-06 23:22:21'
   }
@@ -60,7 +61,7 @@ class ProviderClientTest {
   @Test
   void 'query parameters must be placed in the body for URL encoded FORM POSTs'() {
     client.request = new Request('POST', '/', PactReader.queryStringToMap('a=1&b=11&c=Hello World'),
-      ['Content-Type': ContentType.APPLICATION_FORM_URLENCODED.toString()], null, [:])
+      ['Content-Type': ContentType.APPLICATION_FORM_URLENCODED.toString()], OptionalBody.nullBody(), [:])
     client.makeRequest()
     assert args.params.parameters == [:]
     assert args.entity.content.text == 'a=1&b=11&c=Hello+World'

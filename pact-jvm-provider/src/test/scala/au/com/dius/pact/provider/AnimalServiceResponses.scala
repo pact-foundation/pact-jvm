@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.Response
+import au.com.dius.pact.model.{OptionalBody, Response}
 
 import scala.collection.JavaConversions
 
@@ -8,13 +8,13 @@ object AnimalServiceResponses {
   def contentHeaders: Map[String, String] = Map("Content-Type" -> "application/json; charset=UTF-8")
 
   def alligator(name:String): Response = {
-    val json = "{\"alligators\": [{\"name\": \"" + name + "\"}"
+    val json = OptionalBody.body("{\"alligators\": [{\"name\": \"" + name + "\"}")
     new Response(200, JavaConversions.mapAsJavaMap(contentHeaders), json)
   }
   val bobResponse = alligator("Bob")
   val maryResponse = alligator("Mary")
 
-  val errorJson = "{\"error\": \"Argh!!!\"}"
+  val errorJson = OptionalBody.body("{\"error\": \"Argh!!!\"}")
 
   val responses = Map(
     "there are alligators" -> Map (

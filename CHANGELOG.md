@@ -1,5 +1,19 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.2.4 - Bugfix Release
+
+* 5fbb5ba - update changelog for release 2.4.6 (Ronald Holshausen, Sat Feb 20 09:58:40 2016 +1100)
+* 0bac2ba - when comparing bodies, handle the case where a request returns an empty string for a body #216 (Ronald Holshausen, Thu Feb 18 17:18:51 2016 +1100)
+* 60aa099 - add tags to the junit pact broker loader #215 (Ronald Holshausen, Thu Feb 18 15:14:55 2016 +1100)
+* d7c5495 - update readmes on ability to allow each/min/maxLike to specify the number of examples to generate #202 (Ronald Holshausen, Thu Feb 18 13:47:51 2016 +1100)
+* f9704d3 - update the Groovy DSL to allow each/min/maxLike to specify the number of examples to generate #202 (Ronald Holshausen, Thu Feb 18 13:36:32 2016 +1100)
+* 53bd327 - update the Java DSL to allow each/min/maxLike to specify the number of examples to generate #202 (Ronald Holshausen, Mon Feb 15 16:37:25 2016 +1100)
+* 2cc1e7e - Merge pull request #214 from tobivogel/nestedObjects (Ronald Holshausen, Sat Feb 13 18:54:12 2016 +1100)
+* 706d568 - bugfix - nested JSON objects get parent nodes prefixed (tobi vogel, Fri Feb 12 10:20:15 2016 +0100)
+* f7d7325 - handle content type header parameters #213 (Ronald Holshausen, Fri Feb 12 14:03:05 2016 +1100)
+* 19b42e3 - update to the latest gradle publish plugin (Ronald Holshausen, Fri Feb 12 10:03:03 2016 +1100)
+* a1f5fdc - bump version to 3.2.4 (Ronald Holshausen, Thu Feb 11 17:28:26 2016 +1100)
+
 # 2.4.6 - Bugfix Release
 
 * 68576a9 - Merge branch 'master' into v2.x (Ronald Holshausen, Fri Feb 19 13:39:35 2016 +1100)
