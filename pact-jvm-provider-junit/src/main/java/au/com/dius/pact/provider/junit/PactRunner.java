@@ -17,6 +17,7 @@ import org.junit.runners.model.TestClass;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -107,7 +108,15 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         }
         try {
             if (pactSource != null) {
-                return pactSource.value().newInstance();
+                final Class<? extends PactLoader> pactLoaderClass = pactSource.value();
+                try {
+                    // Checks if there is a constructor with one argument of type Class.
+                    final Constructor<? extends PactLoader> contructorWithClass = pactLoaderClass.getDeclaredConstructor(Class.class);
+                    contructorWithClass.setAccessible(true);
+                    return contructorWithClass.newInstance(clazz.getJavaClass());
+                } catch(NoSuchMethodException e) {
+                    return pactLoaderClass.newInstance();
+                }
             } else {
                 final Annotation annotation = pactLoaders.iterator().next();
                 return annotation.annotationType().getAnnotation(PactSource.class).value()
