@@ -1,5 +1,39 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.4.7 - Bugfix + small feature release
+
+* 42af997 - Merge branch 'master' into v2.x (Ronald Holshausen, Fri Mar 25 10:27:08 2016 +1100)
+* 74511df - Merge pull request #229 from lordofthejars/issue-227 (Ronald Holshausen, Thu Mar 24 08:25:13 2016 +1100)
+* 8c59a36 - fixes default value from null to '/' (Alex Soto, Wed Mar 23 11:00:13 2016 +0100)
+* 2bba2a5 - HttpTarget supports URLs with path expressions (Alex Soto, Wed Mar 23 10:41:04 2016 +0100)
+* 69a8508 - Merge pull request #228 from lordofthejars/master (Ronald Holshausen, Wed Mar 23 11:41:46 2016 +1100)
+* 0cb1f83 - fixes possible null value in body (Alex Soto, Tue Mar 22 13:32:36 2016 +0100)
+* 6c5c1cc - fixes toString problem in PactDslResponse when DslPart used (Alex Soto, Tue Mar 22 13:23:46 2016 +0100)
+* bedae45 - upgrade groovy to 2.4.6 to fix loss of precision when parsing decimal numbers in JSON #221 (Ronald Holshausen, Fri Mar 18 16:26:47 2016 +1100)
+* 2982836 - Merge pull request #225 from andreschaffer/pact-verifications (Ronald Holshausen, Fri Mar 18 13:12:13 2016 +1100)
+* 210cf94 - small correction to readme #220 (Ronald Holshausen, Thu Mar 17 13:22:13 2016 +1100)
+* c3929de - updated readme with teardown statechange calls for the Groovy + Maven plugins #220 (Ronald Holshausen, Thu Mar 17 13:19:31 2016 +1100)
+* 8f08aec - implemented teardown state change call in the Groovy + Maven plugins #220 (Ronald Holshausen, Thu Mar 17 12:58:03 2016 +1100)
+* 0f959e8 - Merge pull request #224 from andreschaffer/get-message-from-message-pact-provider-rule (Ronald Holshausen, Thu Mar 17 12:48:30 2016 +1100)
+* 40ce7af - Make it possible to specify which fragment from which provider to use in the test with @PactVerifications (André Schaffer, Wed Mar 16 00:01:26 2016 +0100)
+* 984334f - Add more tests for the @PactVerifications with multiple http and message pacts in the same test class (André Schaffer, Tue Mar 15 23:22:59 2016 +0100)
+* cce408d - Implement @PactVerifications that plays better with @PactProviderRule and @MessagePactProviderRule so that it becomes possible to have http and message pact tests in the same class (André Schaffer, Tue Mar 15 22:28:35 2016 +0100)
+* cf33306 - Change names of test provider and consumer in test so that it doesn't conflict with other tests (André Schaffer, Tue Mar 15 14:11:48 2016 +0100)
+* c7f152c - Implement getMessage from MessagePactProviderRule (André Schaffer, Tue Mar 15 12:49:27 2016 +0100)
+* 76d9ed6 - handle null and empty bodies as per v1.1 spec testcases (Ronald Holshausen, Sun Mar 13 20:20:45 2016 +1100)
+* 376c52f - update the spec test cases to include a query with an equals in the value (Ronald Holshausen, Sat Mar 12 18:09:02 2016 +1100)
+* c449839 - increase test timeout for travis build #219 (Ronald Holshausen, Sat Mar 12 17:23:47 2016 +1100)
+* e24cc76 - encode query values when writing a V2 format pact file #219 (Ronald Holshausen, Sat Mar 12 17:10:46 2016 +1100)
+* e5f3079 - Fix for codenarc failure #219 (Ronald Holshausen, Sat Mar 12 16:22:43 2016 +1100)
+* d21b304 - Handle query strings that contain equals in the value #219 (Ronald Holshausen, Sat Mar 12 16:13:23 2016 +1100)
+* 424725d - Merge pull request #218 from flaregames/master (Ronald Holshausen, Fri Feb 26 14:47:04 2016 +1100)
+* 6994db0 - Load all pacts and filter instead of loading only pacts for a certain consumer (Georg Meyer, Thu Feb 25 19:21:23 2016 +0100)
+* fadc65c - Add consumer annotation and ConsumerPactLoader (Georg Meyer, Thu Feb 25 19:08:23 2016 +0100)
+* 7f9f4da - bump version to 3.2.5 (Ronald Holshausen, Sat Feb 20 13:06:42 2016 +1100)
+* 079bad9 - update changelog for release 3.2.4 (Ronald Holshausen, Sat Feb 20 11:34:58 2016 +1100)
+* 5fbb5ba - update changelog for release 2.4.6 (Ronald Holshausen, Sat Feb 20 09:58:40 2016 +1100)
+* 7873e9a - bump version to 2.4.7 (Ronald Holshausen, Sat Feb 20 11:28:02 2016 +1100)
+
 # 3.2.4 - Bugfix Release
 
 * 5fbb5ba - update changelog for release 2.4.6 (Ronald Holshausen, Sat Feb 20 09:58:40 2016 +1100)
