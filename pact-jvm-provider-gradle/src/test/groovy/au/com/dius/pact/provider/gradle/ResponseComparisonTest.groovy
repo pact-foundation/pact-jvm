@@ -71,6 +71,14 @@ class ResponseComparisonTest {
   }
 
   @Test
+  void 'comparing bodies should pass when the order of elements in the actual response is different'() {
+    response = new Response(200, ['Content-Type': 'application/json'], OptionalBody.body(
+            '{"moar_stuff": {"a": "is also good", "b": "is even better"}, "stuff": "is good"}'), [:])
+    actualBody = '{"stuff": "is good", "moar_stuff": {"b": "is even better", "a": "is also good"}}'
+    assert testSubject().body == [:]
+  }
+
+  @Test
   void 'comparing bodies should show all the differences'() {
     actualBody = '{"stuff": "should make the test fail"}'
     def result = testSubject().body
