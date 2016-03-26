@@ -125,7 +125,9 @@ class ResponseComparison {
       String actualBodyString = ''
       if (actualBody) {
           if (actual.contentType.mimeType ==~ 'application/.*json') {
-              actualBodyString = JsonOutput.prettyPrint(actualBody)
+              def bodyMap = new JsonSlurper().parseText(actualBody)
+              def bodyJson = JsonOutput.toJson(bodyMap)
+              actualBodyString = JsonOutput.prettyPrint(bodyJson)
           } else {
               actualBodyString = actualBody
           }
