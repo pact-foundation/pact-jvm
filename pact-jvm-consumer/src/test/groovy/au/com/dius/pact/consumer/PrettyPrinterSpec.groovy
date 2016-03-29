@@ -10,10 +10,12 @@ import scala.collection.JavaConversions
 import scala.collection.Seq
 import spock.lang.Specification
 
+import static au.com.dius.pact.consumer.Fixtures.interaction
+
 class PrettyPrinterSpec extends Specification {
     def print(mismatch) {
         PrettyPrinter.print(PactSessionResults.empty().addAlmostMatched(
-                PartialRequestMatch.apply(Fixtures.interaction(),
+                PartialRequestMatch.apply(interaction(),
                         JavaConversions.asScalaBuffer([mismatch]).toSeq() as Seq<RequestPartMismatch>)))
     }
 
