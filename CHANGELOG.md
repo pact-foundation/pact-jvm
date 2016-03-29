@@ -1,5 +1,21 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.4.8 - Bugfix Release
+
+* ca0a7cd - Merge branch 'master' into v2.x (Ronald Holshausen, Tue Mar 29 12:32:03 2016 +1100)
+* 6143e58 - fix regression in pact mock server after change from using json4s #231 (Ronald Holshausen, Tue Mar 29 11:59:15 2016 +1100)
+* 968b795 - Merge branch 'jocranford-master' (Ronald Holshausen, Sat Mar 26 13:16:12 2016 +1100)
+* 3d1bb7b - fix codenarc failures (Ronald Holshausen, Sat Mar 26 13:14:51 2016 +1100)
+* 346ac46 - Merge branch 'master' of https://github.com/jocranford/pact-jvm into jocranford-master (Ronald Holshausen, Sat Mar 26 12:57:59 2016 +1100)
+* cbc3ca9 - Merge pull request #234 from lordofthejars/issue-232 (Ronald Holshausen, Sat Mar 26 11:16:38 2016 +1100)
+* 28d5fd4 - adds possibility to add a constructor with class argument in custom pact loader. (Alex Soto, Fri Mar 25 18:22:16 2016 +0100)
+* c0392d8 - Reformat JSON in compareBody method so that it doesn't mismatch if the order is different between the expected and actual body (Jo Cranford, Fri Mar 25 18:03:39 2016 +1100)
+* a1988e7 - bump version to 3.2.6 (Ronald Holshausen, Fri Mar 25 13:17:23 2016 +1100)
+* d0d2eae - update changelog for release 3.2.5 (Ronald Holshausen, Fri Mar 25 12:53:28 2016 +1100)
+* 106c083 - correct the groovy dependency (Ronald Holshausen, Fri Mar 25 12:44:23 2016 +1100)
+* c674562 - update changelog for release 2.4.7 (Ronald Holshausen, Fri Mar 25 11:39:08 2016 +1100)
+* 9096f3a - bump version to 2.4.8 (Ronald Holshausen, Fri Mar 25 12:28:10 2016 +1100)
+
 # 3.2.5 - Bugfix + small feature release
 
 * 106c083 - correct the groovy dependency (Ronald Holshausen, Fri Mar 25 12:44:23 2016 +1100)
