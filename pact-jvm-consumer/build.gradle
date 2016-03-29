@@ -17,3 +17,5 @@ dependencies {
 
 sourceSets.main.scala.srcDir "src/main/java"
 sourceSets.main.java.srcDirs = []
+
+compileTestGroovy.dependsOn compileTestScala
