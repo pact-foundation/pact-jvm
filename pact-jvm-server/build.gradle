@@ -8,11 +8,14 @@ dependencies {
     compile 'ch.qos.logback:logback-core:1.1.2',
       'ch.qos.logback:logback-classic:1.1.2',
       "com.github.scopt:scopt_${project.scalaVersion}:3.3.0"
+
+    testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+        exclude group: 'org.codehaus.groovy'
+    }
+    testCompile 'cglib:cglib:3.2.1'
 }
 
 jar {
     manifest.attributes 'Main-Class': mainClassName,
             'Class-Path': configurations.compile.collect { it.getName() }.join(' ')
 }
-
-//artifacts { archives distZip }

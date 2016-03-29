@@ -14,9 +14,13 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.TestClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +46,7 @@ import java.util.List;
  * all methods annotated by {@link State} with appropriate state listed will be invoked
  */
 public class PactRunner extends ParentRunner<InteractionRunner> {
+    private final Logger LOGGER = LoggerFactory.getLogger(PactRunner.class);
     private final List<InteractionRunner> child;
 
     public PactRunner(final Class<?> clazz) throws InitializationError {
@@ -108,14 +113,32 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         }
         try {
             if (pactSource != null) {
-                return pactSource.value().newInstance();
+                final Class<? extends PactLoader> pactLoaderClass = pactSource.value();
+                try {
+                    // Checks if there is a constructor with one argument of type Class.
+                    final Constructor<? extends PactLoader> contructorWithClass = pactLoaderClass.getDeclaredConstructor(Class.class);
+                    contructorWithClass.setAccessible(true);
+                    return contructorWithClass.newInstance(clazz.getJavaClass());
+                } catch(NoSuchMethodException e) {
+                    return pactLoaderClass.newInstance();
+                }
             } else {
                 final Annotation annotation = pactLoaders.iterator().next();
                 return annotation.annotationType().getAnnotation(PactSource.class).value()
                   .getConstructor(annotation.annotationType()).newInstance(annotation);
             }
-        } catch (Exception e) {
-            throw new InitializationError("Error while creating pact source");
+        } catch (final InstantiationException e) {
+          LOGGER.error("Error while creating pact source", e);
+          throw new InitializationError("Error while creating pact source");
+        } catch (final IllegalAccessException e) {
+          LOGGER.error("Error while creating pact source", e);
+          throw new InitializationError("Error while creating pact source");
+        } catch (final NoSuchMethodException e) {
+          LOGGER.error("Error while creating pact source", e);
+          throw new InitializationError("Error while creating pact source");
+        } catch (final InvocationTargetException e) {
+          LOGGER.error("Error while creating pact source", e);
+          throw new InitializationError("Error while creating pact source");
         }
     }
 }
