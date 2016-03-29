@@ -152,8 +152,14 @@ class PactReader {
       } else if (source instanceof String && fileExists(source)) {
           new JsonSlurper().parse(source as File)
       } else {
-          throw new UnsupportedOperationException(
-                  "Unable to load pact file from '$source' as it is neither a file, input stream, reader or an URL")
+          try {
+            new JsonSlurper().parseText(source)
+          } catch (e) {
+            throw new UnsupportedOperationException(
+              "Unable to load pact file from '$source' as it is neither a json document, file, input stream, " +
+                'reader or an URL',
+              e)
+          }
       }
   }
 

@@ -90,6 +90,32 @@ class PactReaderSpec extends Specification {
       pact instanceof RequestResponsePact
   }
 
+  def 'loads a pact from a json string'() {
+    given:
+    def pactString = PactReaderSpec.classLoader.getResourceAsStream('pact.json').text
+
+    when:
+    def pact = PactReader.loadPact(pactString)
+
+    then:
+    1 * PactReader.loadV2Pact(pactString, _)
+    0 * PactReader.loadV3Pact(pactString, _)
+    pact instanceof RequestResponsePact
+  }
+
+  def 'throws an exception if it can not load the pact file'() {
+    given:
+    def pactString = 'this is not a pact file!'
+
+    when:
+    PactReader.loadPact(pactString)
+
+    then:
+    thrown(UnsupportedOperationException)
+    0 * PactReader.loadV2Pact(pactString, _)
+    0 * PactReader.loadV3Pact(pactString, _)
+  }
+
   @SuppressWarnings('UnnecessaryGetter')
   def 'if authentication is set, loads the pact file from a URL with auth'() {
     given:
