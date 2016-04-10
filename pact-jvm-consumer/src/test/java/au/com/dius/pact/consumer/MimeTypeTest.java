@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.MockProviderConfig;
+import au.com.dius.pact.model.MockProviderConfig$;
 import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
@@ -59,7 +60,7 @@ public class MimeTypeTest {
     }
 
     private void runTest(PactFragment pactFragment, final String body, final String expectedResponse, final ContentType mimeType) {
-        MockProviderConfig config = MockProviderConfig.createDefault(PactConfig.apply(PactSpecVersion.V2));
+        MockProviderConfig config = MockProviderConfig$.MODULE$.createDefault(PactConfig.apply(PactSpecVersion.V2));
         VerificationResult result = pactFragment.runConsumer(config, new TestRun() {
             @Override
             public void run(MockProviderConfig config) {

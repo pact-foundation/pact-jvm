@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.MockProviderConfig;
+import au.com.dius.pact.model.MockProviderConfig$;
 import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
@@ -43,9 +44,9 @@ public class PactProviderRule extends ExternalResource {
         this.provider = provider;
         this.target = target;
         if (host == null && port == null) {
-            config = MockProviderConfig.createDefault(pactConfig);
+            config = MockProviderConfig$.MODULE$.createDefault(pactConfig);
         } else {
-            config = new MockProviderConfig(port, host, pactConfig);
+            config = MockProviderConfig$.MODULE$.apply(port, host, pactConfig);
         }
     }
 

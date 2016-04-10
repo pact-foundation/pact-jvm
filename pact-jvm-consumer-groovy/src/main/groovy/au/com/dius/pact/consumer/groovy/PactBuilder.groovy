@@ -210,7 +210,7 @@ class PactBuilder extends BaseBuilder {
     MockProviderConfig config
     def pactConfig = PactConfig.apply(options.specificationVersion ?: PactSpecVersion.V2)
     if (port == null) {
-      config = MockProviderConfig.createDefault(pactConfig)
+      config = MockProviderConfig$.MODULE$.createDefault(pactConfig)
     } else {
       config = MockProviderConfig$.MODULE$.apply(port, 'localhost', pactConfig)
     }

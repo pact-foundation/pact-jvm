@@ -3,7 +3,7 @@
     [org.httpkit.client :as http]
     [clojure.test :refer :all])
   (:import [au.com.dius.pact.consumer ConsumerPactBuilder ConsumerPactTest TestRun]
-           [au.com.dius.pact.model MockProviderConfig]))
+           [au.com.dius.pact.model MockProviderConfig$]))
 
 (deftest example-clojure-consumer-pact-test
   (let [consumer-fragment (-> "clojure_test_consumer"
@@ -15,7 +15,7 @@
                             .willRespondWith
                             (.status 200)
                             .toFragment)
-        config (MockProviderConfig/createDefault)]
+        config (-> MockProviderConfig$/MODULE$ (.createDefault))]
     (is (= (ConsumerPactTest/PACT_VERIFIED)
         (.runConsumer consumer-fragment config
           (proxy [TestRun] []

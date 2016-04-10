@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.MockProviderConfig;
+import au.com.dius.pact.model.MockProviderConfig$;
 import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
@@ -21,7 +22,7 @@ public abstract class ConsumerPactTest {
     @Test
     public void testPact() throws Throwable {
         PactFragment fragment = createFragment(ConsumerPactBuilder.consumer(consumerName()).hasPactWith(providerName()));
-        final MockProviderConfig config = MockProviderConfig.createDefault(PactConfig.apply(getSpecificationVersion()));
+        final MockProviderConfig config = MockProviderConfig$.MODULE$.createDefault(PactConfig.apply(getSpecificationVersion()));
 
         VerificationResult result = fragment.runConsumer(config, new TestRun() {
             public void run(MockProviderConfig config) throws IOException {
