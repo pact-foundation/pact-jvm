@@ -4,8 +4,7 @@ import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
-import au.com.dius.pact.provider.org.fusesource.jansi.Ansi
-import au.com.dius.pact.provider.org.fusesource.jansi.AnsiConsole
+import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.reflections.Reflections
@@ -19,13 +18,13 @@ import java.lang.reflect.Method
 /**
  * Verifies the providers against the defined consumers in the context of a build plugin
  */
-@SuppressWarnings('DuplicateStringLiteral')
 @Slf4j
 class ProviderVerifier {
 
   static final String PACT_FILTER_CONSUMERS = 'pact.filter.consumers'
   static final String PACT_FILTER_DESCRIPTION = 'pact.filter.description'
   static final String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
+  static final String PACT_SHOW_STACKTRACE = 'pact.showStacktrace'
 
   def projectHasProperty = { }
   def projectGetProperty = { }
@@ -33,14 +32,14 @@ class ProviderVerifier {
   def isBuildSpecificTask = { }
   def executeBuildSpecificTask = { }
   def projectClasspath = { }
+  def reporters = [ new AnsiConsoleReporter() ]
 
   Map verifyProvider(ProviderInfo provider) {
     Map failures = [:]
 
     def consumers = provider.consumers.findAll(this.&filterConsumers)
     if (consumers.empty) {
-      AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
-        .a("WARNING: There are no consumers to verify for provider '$provider.name'").reset())
+      reporters.each { it.warnProviderHasNoConsumers(provider) }
     }
     consumers.each(this.&runVerificationForConsumer.curry(failures, provider))
 
@@ -48,8 +47,7 @@ class ProviderVerifier {
   }
 
   void runVerificationForConsumer(Map failures, ProviderInfo provider, ConsumerInfo consumer) {
-    AnsiConsole.out().println(Ansi.ansi().a('\nVerifying a pact between ').bold().a(consumer.name)
-      .boldOff().a(' and ').bold().a(provider.name).boldOff())
+    reporters.each { it.reportVerificationForConsumer(consumer, provider) }
 
     def pact = loadPactFileForConsumer(consumer)
     forEachInteraction(pact, this.&verifyInteraction.curry(provider, consumer, pact, failures))
@@ -66,9 +64,7 @@ class ProviderVerifier {
   void forEachInteraction(def pact, Closure verifyInteraction) {
     List interactions = interactions(pact)
     if (interactions.empty) {
-      AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
-        .a('WARNING: Pact file has no interactions')
-        .reset())
+      reporters.each { it.warnPactFileHasNoInteractions(pact) }
     } else {
       interactions.each(verifyInteraction)
     }
@@ -77,14 +73,14 @@ class ProviderVerifier {
   @SuppressWarnings('ThrowRuntimeException')
   def loadPactFileForConsumer(ConsumerInfo consumer) {
     if (consumer.pactFile instanceof URL) {
-      AnsiConsole.out().println(Ansi.ansi().a("  [from URL ${consumer.pactFile}]"))
+      reporters.each { it.verifyConsumerFromUrl(consumer) }
       def options = [:]
       if (consumer.pactFileAuthentication) {
         options.authentication = consumer.pactFileAuthentication
       }
       PactReader.loadPact(options, consumer.pactFile)
     } else if (consumer.pactFile instanceof File || pactFileExists(consumer.pactFile)) {
-      AnsiConsole.out().println(Ansi.ansi().a("  [Using file ${consumer.pactFile}]"))
+      reporters.each { it.verifyConsumerFromFile(consumer) }
       PactReader.loadPact(consumer.pactFile)
     } else {
       String message
@@ -95,6 +91,7 @@ class ProviderVerifier {
       } else {
         message = pactLoadFailureMessage as String
       }
+      reporters.each { it.pactLoadFailureForConsumer(consumer, message) }
       throw new RuntimeException(message)
     }
   }
@@ -149,7 +146,7 @@ class ProviderVerifier {
     }
 
     if (stateChangeOk) {
-      AnsiConsole.out().println(Ansi.ansi().a('  ').a(interaction.description))
+      reporters.each { it.interactionDescription(interaction) }
 
       if (verificationType(provider, consumer) == PactVerification.REQUST_RESPONSE) {
         log.debug('Verifying via request/response')
@@ -169,9 +166,8 @@ class ProviderVerifier {
     consumer.verificationType ?: provider.verificationType
   }
 
-  @SuppressWarnings('PrintStackTrace')
   def stateChange(String state, ProviderInfo provider, ConsumerInfo consumer, boolean isSetup = true) {
-    AnsiConsole.out().println(Ansi.ansi().a('  Given ').bold().a(state).boldOff())
+    reporters.each { it.stateForInteraction(state, provider, consumer, isSetup) }
     try {
       def stateChangeHandler = consumer.stateChange
       def stateChangeUsesBody = consumer.stateChangeUsesBody
@@ -181,9 +177,7 @@ class ProviderVerifier {
       }
       if (stateChangeHandler == null || (stateChangeHandler instanceof String
         && StringUtils.isBlank(stateChangeHandler))) {
-        AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
-          .a('WARNING: State Change ignored as there is no stateChange URL')
-          .reset())
+        reporters.each { it.warnStateChangeIgnored(state, provider, consumer) }
         return true
       } else if (stateChangeHandler instanceof Closure) {
         def result
@@ -204,10 +198,9 @@ class ProviderVerifier {
       }
       return executeHttpStateChangeRequest(stateChangeHandler, stateChangeUsesBody, state, provider, isSetup)
     } catch (e) {
-      AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.RED).a('State Change Request Failed - ')
-        .a(e.message).reset())
-      if (callProjectHasProperty('pact.showStacktrace')) {
-        e.printStackTrace()
+      reporters.each {
+        it.stateChangeRequestFailedWithException(state, provider, consumer, isSetup, e,
+          callProjectHasProperty(PACT_SHOW_STACKTRACE))
       }
       return e
     }
@@ -224,9 +217,7 @@ class ProviderVerifier {
       if (response) {
         try {
           if (response.statusLine.statusCode >= 400) {
-            AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.RED)
-              .a('State Change Request Failed - ')
-              .a(response.statusLine.toString()).reset())
+            reporters.each { it.stateChangeRequestFailed(state, provider, isSetup, response.statusLine.toString()) }
             return 'State Change Request Failed - ' + response.statusLine.toString()
           }
         } finally {
@@ -234,14 +225,11 @@ class ProviderVerifier {
         }
       }
     } catch (URISyntaxException ex) {
-      AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
-        .a("WARNING: State Change ignored as there is no stateChange URL, received \"$stateChangeHandler\"")
-        .reset())
+      reporters.each { it.warnStateChangeIgnoredDueToInvalidUrl(state, provider, isSetup, stateChangeHandler) }
     }
     true
   }
 
-  @SuppressWarnings('PrintStackTrace')
   void verifyResponseFromProvider(ProviderInfo provider, def interaction, String interactionMessage, Map failures) {
     try {
       ProviderClient client = new ProviderClient(request: interaction.request, provider: provider)
@@ -251,11 +239,9 @@ class ProviderVerifier {
 
       verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
     } catch (e) {
-      AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a('Request Failed - ')
-        .a(e.message).reset())
       failures[interactionMessage] = e
-      if (callProjectHasProperty('pact.showStacktrace')) {
-        e.printStackTrace()
+      reporters.each {
+        it.requestFailed(provider, interaction, interactionMessage, e, callProjectHasProperty(PACT_SHOW_STACKTRACE))
       }
     }
   }
@@ -265,7 +251,7 @@ class ProviderVerifier {
     def comparison = ResponseComparison.compareResponse(expectedResponse, actualResponse,
       actualResponse.statusCode, actualResponse.headers, actualResponse.data)
 
-    AnsiConsole.out().println('    returns a response which')
+    reporters.each { it.returnsAResponseWhich() }
 
     def s = ' returns a response which'
     displayMethodResult(failures, expectedResponse.status, comparison.method, interactionMessage + s)
@@ -274,27 +260,24 @@ class ProviderVerifier {
   }
 
   void displayMethodResult(Map failures, int status, def comparison, String comparisonDescription) {
-    def ansi = Ansi.ansi().a('      ').a('has status code ').bold().a(status).boldOff().a(' (')
     if (comparison == true) {
-      AnsiConsole.out().println(ansi.fg(Ansi.Color.GREEN).a('OK').reset().a(')'))
+      reporters.each { it.methodComparisonOk(status) }
     } else {
-      AnsiConsole.out().println(ansi.fg(Ansi.Color.RED).a('FAILED').reset().a(')'))
+      reporters.each { it.methodComparisonFailed(status) }
       failures["$comparisonDescription has status code $status"] = comparison
     }
   }
 
   void displayHeadersResult(Map failures, def expected, Map comparison, String comparisonDescription) {
     if (!comparison.isEmpty()) {
-      AnsiConsole.out().println('      includes headers')
+      reporters.each { it.includesHeaders() }
       Map expectedHeaders = expected
       comparison.each { key, headerComparison ->
         def expectedHeaderValue = expectedHeaders[key]
-        def ansi = Ansi.ansi().a('        "').bold().a(key).boldOff().a('" with value "').bold()
-          .a(expectedHeaderValue).boldOff().a('" (')
         if (headerComparison == true) {
-          AnsiConsole.out().println(ansi.fg(Ansi.Color.GREEN).a('OK').reset().a(')'))
+          reporters.each { it.headerComparisonOk(key, expectedHeaderValue) }
         } else {
-          AnsiConsole.out().println(ansi.fg(Ansi.Color.RED).a('FAILED').reset().a(')'))
+          reporters.each { it.headerComparisonFailed(key, expectedHeaderValue) }
           failures["$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""] =
             headerComparison
         }
@@ -303,16 +286,15 @@ class ProviderVerifier {
   }
 
   void displayBodyResult(Map failures, def comparison, String comparisonDescription) {
-    def ansi = Ansi.ansi().a('      ').a('has a matching body').a(' (')
     if (comparison.isEmpty()) {
-      AnsiConsole.out().println(ansi.fg(Ansi.Color.GREEN).a('OK').reset().a(')'))
+      reporters.each { it.bodyComparisonOk() }
     } else {
-      AnsiConsole.out().println(ansi.fg(Ansi.Color.RED).a('FAILED').reset().a(')'))
+      reporters.each { it.bodyComparisonFailed() }
       failures["$comparisonDescription has a matching body"] = comparison
     }
   }
 
-  @SuppressWarnings(['PrintStackTrace', 'ThrowRuntimeException', 'ParameterCount'])
+  @SuppressWarnings(['ThrowRuntimeException', 'ParameterCount'])
   void verifyResponseByInvokingProviderMethods(def pact, ProviderInfo providerInfo, ConsumerInfo consumer,
                                                def interaction, String interactionMessage,
                                                Map failures) {
@@ -341,6 +323,7 @@ class ProviderVerifier {
       }
 
       if (providerMethods.empty) {
+        reporters.each { it.errorHasNoAnnotatedMethodsFoundForInteraction(interaction) }
         throw new RuntimeException('No annotated methods were found for interaction ' +
           "'${interaction.description}'")
       } else {
@@ -355,12 +338,8 @@ class ProviderVerifier {
         }
       }
     } catch (e) {
-      AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a('Verification Failed - ')
-        .a(e.message).reset())
       failures[interactionMessage] = e
-      if (callProjectHasProperty('pact.showStacktrace')) {
-        e.printStackTrace()
-      }
+      reporters.each { it.verificationFailed(interaction, e, callProjectHasProperty(PACT_SHOW_STACKTRACE)) }
     }
   }
 
@@ -386,7 +365,7 @@ class ProviderVerifier {
 
   void verifyMessagePact(Set methods, Message message, String interactionMessage, Map failures) {
     methods.each {
-      AnsiConsole.out().println('    generates a message which')
+      reporters.each { it.generatesAMessageWhich() }
       def actualMessage = invokeProviderMethod(it)
       def comparison = ResponseComparison.compareMessage(message, actualMessage)
       def s = ' generates a message which'
@@ -394,56 +373,11 @@ class ProviderVerifier {
     }
   }
 
-  def invokeProviderMethod(Method m) {
+  static invokeProviderMethod(Method m) {
     m.invoke(m.declaringClass.newInstance())
   }
 
-  void displayFailures(failures) {
-    AnsiConsole.out().println('\nFailures:\n')
-    failures.eachWithIndex { err, i ->
-      AnsiConsole.out().println("$i) ${err.key}")
-      if (err.value instanceof Throwable) {
-        displayError(err.value)
-      } else if (err.value instanceof Map && err.value.containsKey('diff')) {
-        displayDiff(err)
-      } else if (err.value instanceof String) {
-        AnsiConsole.out().println("      ${err.value}")
-      } else if (err.value instanceof Map) {
-        err.value.each { key, message ->
-          AnsiConsole.out().println("      $key -> $message")
-        }
-      } else {
-        AnsiConsole.out().println("      ${err}")
-      }
-      AnsiConsole.out().println()
-    }
-  }
-
-  void displayDiff(err) {
-    err.value.comparison.each { key, message ->
-      AnsiConsole.out().println("      $key -> $message")
-    }
-
-    AnsiConsole.out().println()
-    AnsiConsole.out().println('      Diff:')
-    AnsiConsole.out().println()
-
-    err.value.diff.each { delta ->
-      if (delta.startsWith('@')) {
-        AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.CYAN).a(delta).reset())
-      } else if (delta.startsWith('-')) {
-        AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a(delta).reset())
-      } else if (delta.startsWith('+')) {
-        AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.GREEN).a(delta).reset())
-      } else {
-        AnsiConsole.out().println("      $delta")
-      }
-    }
-  }
-
-  void displayError(Throwable err) {
-    err.message.split('\n').each {
-      AnsiConsole.out().println("      $it")
-    }
+  void displayFailures(def failures) {
+    reporters.each { it.displayFailures(failures) }
   }
 }
