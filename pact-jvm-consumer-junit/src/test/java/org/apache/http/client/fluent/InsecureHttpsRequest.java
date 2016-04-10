@@ -23,8 +23,6 @@ import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 
 public class InsecureHttpsRequest extends Request {
   private CloseableHttpClient httpclient;

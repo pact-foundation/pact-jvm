@@ -56,14 +56,14 @@ public class PactProviderRule extends ExternalResource {
      * @param provider Provider name to mock
      * @param host Host to bind to. Defaults to localhost
      * @param port Port to bind to. Defaults to a random port.
-     * @param ssl Boolean flag to control starting HTTPS or HTTP mock server
+     * @param https Boolean flag to control starting HTTPS or HTTP mock server
      * @param pactConfig Pact configuration
      * @param target Target test to apply this rule to.
      */
-    public PactProviderRule(String provider, String host, Integer port, boolean ssl, PactConfig pactConfig,
+    public PactProviderRule(String provider, String host, Integer port, boolean https, PactConfig pactConfig,
                             Object target) {
       this(provider, host, port, pactConfig, target);
-      if (ssl) {
+      if (https) {
         config = MockHttpsProviderConfig.apply(port, host, pactConfig);
       }
     }
