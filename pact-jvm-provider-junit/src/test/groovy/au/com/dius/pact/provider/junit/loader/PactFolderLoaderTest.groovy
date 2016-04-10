@@ -25,4 +25,15 @@ class PactFolderLoaderTest {
     assertThat(new PactFolderLoader(this.class.getAnnotation(PactFolder)).load('myAwesomeService2'), hasSize(1))
   }
 
+  @Test
+  void 'is able to load files from a directory'() {
+    File tmpDir = File.createTempDir()
+    tmpDir.deleteOnExit()
+    File pactFile = new File(tmpDir, 'pact.json')
+    pactFile.deleteOnExit()
+    pactFile.text = this.class.classLoader.getResourceAsStream('pacts/contract.json').text
+
+    assertThat(new PactFolderLoader(tmpDir.path).load('myAwesomeService'), hasSize(1))
+  }
+
 }
