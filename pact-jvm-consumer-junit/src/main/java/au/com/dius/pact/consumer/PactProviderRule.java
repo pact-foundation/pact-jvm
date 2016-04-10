@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.model.MockHttpsProviderConfig;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.MockProviderConfig$;
 import au.com.dius.pact.model.PactConfig;
@@ -29,7 +30,7 @@ public class PactProviderRule extends ExternalResource {
     private static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
     private final String provider;
     private final Object target;
-    private final MockProviderConfig config;
+    private MockProviderConfig config;
     private Map <String, PactFragment> fragments;
 
     /**
@@ -48,6 +49,23 @@ public class PactProviderRule extends ExternalResource {
         } else {
             config = MockProviderConfig$.MODULE$.apply(port, host, pactConfig);
         }
+    }
+
+    /**
+     * Creates a mock provider by the given name
+     * @param provider Provider name to mock
+     * @param host Host to bind to. Defaults to localhost
+     * @param port Port to bind to. Defaults to a random port.
+     * @param ssl Boolean flag to control starting HTTPS or HTTP mock server
+     * @param pactConfig Pact configuration
+     * @param target Target test to apply this rule to.
+     */
+    public PactProviderRule(String provider, String host, Integer port, boolean ssl, PactConfig pactConfig,
+                            Object target) {
+      this(provider, host, port, pactConfig, target);
+      if (ssl) {
+        config = MockHttpsProviderConfig.apply(port, host, pactConfig);
+      }
     }
 
     /**

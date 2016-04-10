@@ -6,7 +6,9 @@ import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.consumer.exampleclients.ConsumerHttpsClient;
+import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.PactSpecVersion;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -18,11 +20,11 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-@Ignore
 public class PactProviderHttpsTest {
 
     @Rule
-    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", this);
+    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", "localhost", 8443, true,
+      PactConfig.apply(PactSpecVersion.V2), this);
 
     @Pact(provider="test_provider", consumer="test_consumer")
     public PactFragment createFragment(PactDslWithProvider builder) {
