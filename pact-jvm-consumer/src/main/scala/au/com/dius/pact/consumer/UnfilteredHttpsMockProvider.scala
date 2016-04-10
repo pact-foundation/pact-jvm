@@ -12,9 +12,7 @@ class UnfilteredHttpsMockProvider(val config: MockHttpsProviderConfig) extends S
   type UnfilteredRequest = ureq.HttpRequest[unetty.ReceivedMessage]
   type UnfilteredResponse = uresp.ResponseFunction[netty.HttpResponse]
 
-  def sslContext: SslContextProvider = {
-    SslContextProvider.selfSigned(new SelfSignedCertificate())
-  }
+  def sslContext: SslContextProvider = SslContextProvider.selfSigned(config.httpsCertificate)
 
   private val server = unetty.Server.https(config.port, config.hostname, sslContext).chunked(1048576).handler(Routes)
   

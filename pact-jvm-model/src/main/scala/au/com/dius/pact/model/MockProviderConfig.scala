@@ -1,6 +1,9 @@
 package au.com.dius.pact.model
 
 import java.net.ServerSocket
+
+import io.netty.handler.ssl.util.SelfSignedCertificate
+
 import scala.util.control.NonFatal
 
 trait MockProviderConfig {
@@ -15,6 +18,8 @@ case class MockHttpProviderConfig(port: Int, hostname: String, pactConfig: PactC
 }
 
 case class MockHttpsProviderConfig(port: Int, hostname: String, pactConfig: PactConfig) extends MockProviderConfig {
+  def httpsCertificate: SelfSignedCertificate = new SelfSignedCertificate()
+
   def url: String = s"https://$hostname:$port"
 }
 
