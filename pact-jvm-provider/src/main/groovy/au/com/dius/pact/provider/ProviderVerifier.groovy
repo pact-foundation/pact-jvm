@@ -37,6 +37,8 @@ class ProviderVerifier {
   Map verifyProvider(ProviderInfo provider) {
     Map failures = [:]
 
+    reporters.each { it.initialise(provider) }
+
     def consumers = provider.consumers.findAll(this.&filterConsumers)
     if (consumers.empty) {
       reporters.each { it.warnProviderHasNoConsumers(provider) }
@@ -254,16 +256,16 @@ class ProviderVerifier {
     reporters.each { it.returnsAResponseWhich() }
 
     def s = ' returns a response which'
-    displayMethodResult(failures, expectedResponse.status, comparison.method, interactionMessage + s)
+    displayStatusResult(failures, expectedResponse.status, comparison.method, interactionMessage + s)
     displayHeadersResult(failures, expectedResponse.headers, comparison.headers, interactionMessage + s)
     displayBodyResult(failures, comparison.body, interactionMessage + s)
   }
 
-  void displayMethodResult(Map failures, int status, def comparison, String comparisonDescription) {
+  void displayStatusResult(Map failures, int status, def comparison, String comparisonDescription) {
     if (comparison == true) {
-      reporters.each { it.methodComparisonOk(status) }
+      reporters.each { it.statusComparisonOk(status) }
     } else {
-      reporters.each { it.methodComparisonFailed(status) }
+      reporters.each { it.statusComparisonFailed(status, comparison) }
       failures["$comparisonDescription has status code $status"] = comparison
     }
   }
@@ -277,7 +279,7 @@ class ProviderVerifier {
         if (headerComparison == true) {
           reporters.each { it.headerComparisonOk(key, expectedHeaderValue) }
         } else {
-          reporters.each { it.headerComparisonFailed(key, expectedHeaderValue) }
+          reporters.each { it.headerComparisonFailed(key, expectedHeaderValue, headerComparison) }
           failures["$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""] =
             headerComparison
         }
@@ -289,7 +291,7 @@ class ProviderVerifier {
     if (comparison.isEmpty()) {
       reporters.each { it.bodyComparisonOk() }
     } else {
-      reporters.each { it.bodyComparisonFailed() }
+      reporters.each { it.bodyComparisonFailed(comparison) }
       failures["$comparisonDescription has a matching body"] = comparison
     }
   }
@@ -379,5 +381,9 @@ class ProviderVerifier {
 
   void displayFailures(def failures) {
     reporters.each { it.displayFailures(failures) }
+  }
+
+  void finialiseReports() {
+    reporters.each { it.finaliseReport() }
   }
 }

@@ -27,13 +27,23 @@ class PactVerificationTask extends DefaultTask {
       projectClasspath = {
         project.sourceSets.test.runtimeClasspath*.toURL() as URL[]
       }
+
+      if (project.pact.reports) {
+        def reportsDir = new File(project.buildDir, 'reports/pact')
+        reportsDir.mkdirs()
+        reporters = project.pact.reports.toVerifierReporters(reportsDir)
+      }
     }
 
     ext.failures = verifier.verifyProvider(providerToVerify)
-    if (ext.failures.size() > 0) {
-      verifier.displayFailures(ext.failures)
-      throw new GradleScriptException(
+    try {
+      if (ext.failures.size() > 0) {
+        verifier.displayFailures(ext.failures)
+        throw new GradleScriptException(
           "There were ${ext.failures.size()} pact failures for provider ${providerToVerify.name}", null)
+      }
+    } finally {
+      verifier.finialiseReports()
     }
   }
 

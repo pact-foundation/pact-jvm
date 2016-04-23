@@ -14,6 +14,12 @@ import au.com.dius.pact.provider.org.fusesource.jansi.AnsiConsole
 class AnsiConsoleReporter implements VerifierReporter {
 
   @Override
+  void initialise(ProviderInfo provider) { }
+
+  @Override
+  void finaliseReport() { }
+
+  @Override
   void reportVerificationForConsumer(ConsumerInfo consumer, ProviderInfo provider) {
     AnsiConsole.out().println(Ansi.ansi().a('\nVerifying a pact between ').bold().a(consumer.name)
       .boldOff().a(' and ').bold().a(provider.name).boldOff())
@@ -106,13 +112,13 @@ class AnsiConsoleReporter implements VerifierReporter {
   }
 
   @Override
-  void methodComparisonOk(int status) {
+  void statusComparisonOk(int status) {
     AnsiConsole.out().println(Ansi.ansi().a('      ').a('has status code ').bold().a(status).boldOff().a(' (')
       .fg(Ansi.Color.GREEN).a('OK').reset().a(')'))
   }
 
   @Override
-  void methodComparisonFailed(int status) {
+  void statusComparisonFailed(int status, def comparison) {
     AnsiConsole.out().println(Ansi.ansi().a('      ').a('has status code ').bold().a(status).boldOff().a(' (')
       .fg(Ansi.Color.RED).a('FAILED').reset().a(')'))
   }
@@ -129,7 +135,7 @@ class AnsiConsoleReporter implements VerifierReporter {
   }
 
   @Override
-  void headerComparisonFailed(String key, String value) {
+  void headerComparisonFailed(String key, String value, def comparison) {
     AnsiConsole.out().println(Ansi.ansi().a('        "').bold().a(key).boldOff().a('" with value "').bold()
       .a(value).boldOff().a('" (').fg(Ansi.Color.RED).a('FAILED').reset().a(')'))
   }
@@ -141,7 +147,7 @@ class AnsiConsoleReporter implements VerifierReporter {
   }
 
   @Override
-  void bodyComparisonFailed() {
+  void bodyComparisonFailed(def comparison) {
     AnsiConsole.out().println(Ansi.ansi().a('      ').a('has a matching body').a(' (')
       .fg(Ansi.Color.RED).a('FAILED').reset().a(')'))
   }
