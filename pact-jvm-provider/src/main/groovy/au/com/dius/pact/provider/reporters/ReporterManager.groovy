@@ -16,6 +16,9 @@ class ReporterManager {
 
   @SuppressWarnings('FactoryMethodName')
   static VerifierReporter createReporter(String name) {
+    if (!reporterDefined(name)) {
+      throw new RuntimeException("No reporter with name '" + name + "' defined");
+    }
     def reporter = REPORTERS[name].newInstance()
     if (reporter.hasProperty('name')) {
       reporter.name = name

@@ -17,9 +17,7 @@ class VerificationReports {
 
   List toVerifierReporters(File reportDir) {
     reports.values().collect {
-      if (it.hasProperty('reportDir') && !it.reportDir) {
-        it.reportDir = reportDir
-      }
+      it.reportDir = reportDir
       it
     }
   }

@@ -23,6 +23,11 @@ class JsonReporter implements VerifierReporter {
   def jsonData
 
   @Override
+  String getExt() {
+    return '.json'
+  }
+
+  @Override
   void initialise(ProviderInfo provider) {
     jsonData = [
       metaData: [
@@ -35,7 +40,8 @@ class JsonReporter implements VerifierReporter {
       ],
       execution: []
     ]
-    reportFile = reportFile ?: new File(reportDir, (provider.name + '.json'))
+    reportDir.mkdirs()
+    reportFile = reportFile ?: new File(reportDir, (provider.name + ext))
   }
 
   @Override

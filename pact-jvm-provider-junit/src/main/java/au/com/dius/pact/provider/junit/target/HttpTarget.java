@@ -6,6 +6,9 @@ import au.com.dius.pact.provider.ProviderInfo;
 import au.com.dius.pact.provider.ProviderVerifier;
 import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.TargetRequestFilter;
+import au.com.dius.pact.provider.junit.VerificationReports;
+import au.com.dius.pact.provider.reporters.ReporterManager;
+import au.com.dius.pact.provider.reporters.VerifierReporter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpRequest;
 import org.jooq.lambda.Seq;
@@ -13,7 +16,9 @@ import org.jooq.lambda.tuple.Tuple2;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.TestClass;
 
+import java.io.File;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,27 +93,57 @@ public class HttpTarget implements TestClassAwareTarget {
     @Override
     public void testInteraction(final String consumerName, final RequestResponseInteraction interaction) {
       ProviderInfo provider = getProviderInfo();
-      ProviderVerifier verifier = new ProviderVerifier();
-      verifier.initialiseReporters(provider);
       ConsumerInfo consumer = new ConsumerInfo(consumerName);
-      verifier.reportVerificationForConsumer(consumer, provider);
-
-      if (interaction.getProviderState() != null) {
-        verifier.reportStateForInteraction(interaction.getProviderState(), provider, consumer, true);
-      }
-
-      verifier.reportInteractionDescription(interaction);
+      ProviderVerifier verifier = setupVerifier(interaction, provider, consumer);
 
       Map<String, Object> failures = new HashMap<>();
       verifier.verifyResponseFromProvider(provider, interaction, interaction.getDescription(), failures);
 
-      if (!failures.isEmpty()) {
-        verifier.displayFailures(failures);
-        throw getAssertionError(failures);
+      try {
+        if (!failures.isEmpty()) {
+          verifier.displayFailures(failures);
+          throw getAssertionError(failures);
+        }
+      } finally {
+        verifier.finialiseReports();
       }
     }
 
-    private ProviderInfo getProviderInfo() {
+  private ProviderVerifier setupVerifier(RequestResponseInteraction interaction, ProviderInfo provider,
+                                         ConsumerInfo consumer) {
+    ProviderVerifier verifier = new ProviderVerifier();
+
+    setupReporters(verifier, provider.getName(), interaction.getDescription());
+
+    verifier.initialiseReporters(provider);
+    verifier.reportVerificationForConsumer(consumer, provider);
+
+    if (interaction.getProviderState() != null) {
+      verifier.reportStateForInteraction(interaction.getProviderState(), provider, consumer, true);
+    }
+
+    verifier.reportInteractionDescription(interaction);
+
+    return verifier;
+  }
+
+  private void setupReporters(ProviderVerifier verifier, String name, String description) {
+    VerificationReports verificationReports = testClass.getAnnotation(VerificationReports.class);
+    if (verificationReports != null) {
+      File reportDir = new File(verificationReports.reportDir());
+      reportDir.mkdirs();
+      verifier.setReporters(Seq.of(verificationReports.value())
+        .map(r -> {
+          VerifierReporter reporter = ReporterManager.createReporter(r);
+          reporter.setReportDir(reportDir);
+          reporter.setReportFile(new File(reportDir, name + " - " + description + reporter.getExt()));
+          return reporter;
+        })
+        .toList());
+    }
+  }
+
+  private ProviderInfo getProviderInfo() {
       Provider provider = testClass.getAnnotation(Provider.class);
       final ProviderInfo providerInfo = new ProviderInfo(provider.value());
       providerInfo.setPort(port);

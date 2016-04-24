@@ -18,8 +18,14 @@ class MarkdownReporter implements VerifierReporter {
   PrintWriter writer
 
   @Override
+  String getExt() {
+    return '.md'
+  }
+
+  @Override
   void initialise(ProviderInfo provider) {
-    reportFile = reportFile ?: new File(reportDir, (provider.name + '.md'))
+    reportDir.mkdirs()
+    reportFile = reportFile ?: new File(reportDir, (provider.name + ext))
     writer = reportFile.newPrintWriter()
     writer.println "# $provider.name"
     writer.println()

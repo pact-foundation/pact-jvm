@@ -14,6 +14,12 @@ import au.com.dius.pact.provider.org.fusesource.jansi.AnsiConsole
 class AnsiConsoleReporter implements VerifierReporter {
 
   @Override
+  void setReportDir(File reportDir) { }
+
+  @Override
+  void setReportFile(File reportFile) { }
+
+  @Override
   void initialise(ProviderInfo provider) { }
 
   @Override

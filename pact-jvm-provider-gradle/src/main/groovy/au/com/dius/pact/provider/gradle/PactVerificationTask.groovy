@@ -30,7 +30,6 @@ class PactVerificationTask extends DefaultTask {
 
       if (project.pact.reports) {
         def reportsDir = new File(project.buildDir, 'reports/pact')
-        reportsDir.mkdirs()
         reporters = project.pact.reports.toVerifierReporters(reportsDir)
       }
     }
