@@ -37,7 +37,7 @@ class ProviderVerifier {
   Map verifyProvider(ProviderInfo provider) {
     Map failures = [:]
 
-    reporters.each { it.initialise(provider) }
+    initialiseReporters(provider)
 
     def consumers = provider.consumers.findAll(this.&filterConsumers)
     if (consumers.empty) {
@@ -48,11 +48,18 @@ class ProviderVerifier {
     failures
   }
 
-  void runVerificationForConsumer(Map failures, ProviderInfo provider, ConsumerInfo consumer) {
-    reporters.each { it.reportVerificationForConsumer(consumer, provider) }
+  void initialiseReporters(ProviderInfo provider) {
+    reporters.each { it.initialise(provider) }
+  }
 
+  void runVerificationForConsumer(Map failures, ProviderInfo provider, ConsumerInfo consumer) {
+    reportVerificationForConsumer(consumer, provider)
     def pact = loadPactFileForConsumer(consumer)
     forEachInteraction(pact, this.&verifyInteraction.curry(provider, consumer, pact, failures))
+  }
+
+  void reportVerificationForConsumer(ConsumerInfo consumer, ProviderInfo provider) {
+    reporters.each { it.reportVerificationForConsumer(consumer, provider) }
   }
 
   List interactions(def pact) {
@@ -81,7 +88,7 @@ class ProviderVerifier {
         options.authentication = consumer.pactFileAuthentication
       }
       PactReader.loadPact(options, consumer.pactFile)
-    } else if (consumer.pactFile instanceof File || pactFileExists(consumer.pactFile)) {
+    } else if (consumer.pactFile instanceof File || ProviderUtils.pactFileExists(consumer.pactFile)) {
       reporters.each { it.verifyConsumerFromFile(consumer) }
       PactReader.loadPact(consumer.pactFile)
     } else {
@@ -96,10 +103,6 @@ class ProviderVerifier {
       reporters.each { it.pactLoadFailureForConsumer(consumer, message) }
       throw new RuntimeException(message)
     }
-  }
-
-  private static boolean pactFileExists(def pactFile) {
-    pactFile && new File(pactFile as String).exists()
   }
 
   boolean filterConsumers(def consumer) {
@@ -148,9 +151,9 @@ class ProviderVerifier {
     }
 
     if (stateChangeOk) {
-      reporters.each { it.interactionDescription(interaction) }
+      reportInteractionDescription(interaction)
 
-      if (verificationType(provider, consumer) == PactVerification.REQUST_RESPONSE) {
+      if (ProviderUtils.verificationType(provider, consumer) == PactVerification.REQUST_RESPONSE) {
         log.debug('Verifying via request/response')
         verifyResponseFromProvider(provider, interaction, interactionMessage, failures)
       } else {
@@ -164,12 +167,12 @@ class ProviderVerifier {
     }
   }
 
-  private static PactVerification verificationType(ProviderInfo provider, ConsumerInfo consumer) {
-    consumer.verificationType ?: provider.verificationType
+  void reportInteractionDescription(interaction) {
+    reporters.each { it.interactionDescription(interaction) }
   }
 
   def stateChange(String state, ProviderInfo provider, ConsumerInfo consumer, boolean isSetup = true) {
-    reporters.each { it.stateForInteraction(state, provider, consumer, isSetup) }
+    reportStateForInteraction(state, provider, consumer, isSetup)
     try {
       def stateChangeHandler = consumer.stateChange
       def stateChangeUsesBody = consumer.stateChangeUsesBody
@@ -206,6 +209,10 @@ class ProviderVerifier {
       }
       return e
     }
+  }
+
+  void reportStateForInteraction(String state, ProviderInfo provider, ConsumerInfo consumer, boolean isSetup) {
+    reporters.each { it.stateForInteraction(state, provider, consumer, isSetup) }
   }
 
   private executeHttpStateChangeRequest(stateChangeHandler, useBody, String state, ProviderInfo provider,
@@ -308,7 +315,7 @@ class ProviderVerifier {
         .addClassLoader(loader)
         .addUrls(loader.URLs)
 
-      def scan = packagesToScan(providerInfo, consumer)
+      def scan = ProviderUtils.packagesToScan(providerInfo, consumer)
       if (!scan.empty) {
         def filterBuilder = new FilterBuilder()
         scan.each { filterBuilder.include(it) }
@@ -359,10 +366,6 @@ class ProviderVerifier {
     } else {
       projectGetProperty(property)
     }
-  }
-
-  private List packagesToScan(ProviderInfo providerInfo, ConsumerInfo consumer) {
-    consumer.packagesToScan ?: providerInfo.packagesToScan
   }
 
   void verifyMessagePact(Set methods, Message message, String interactionMessage, Map failures) {

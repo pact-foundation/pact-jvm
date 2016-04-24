@@ -1,26 +1,25 @@
 package au.com.dius.pact.provider.junit.target;
 
-import au.com.dius.pact.model.BodyMismatch;
-import au.com.dius.pact.model.BodyTypeMismatch;
-import au.com.dius.pact.model.HeaderMismatch;
-import au.com.dius.pact.model.OptionalBody;
 import au.com.dius.pact.model.RequestResponseInteraction;
-import au.com.dius.pact.model.Response;
-import au.com.dius.pact.model.ResponseMatching$;
-import au.com.dius.pact.model.ResponsePartMismatch;
-import au.com.dius.pact.model.StatusMismatch;
-import au.com.dius.pact.provider.ProviderClient;
+import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.ProviderInfo;
+import au.com.dius.pact.provider.ProviderVerifier;
+import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.TargetRequestFilter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpRequest;
+import org.jooq.lambda.Seq;
+import org.jooq.lambda.tuple.Tuple2;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.TestClass;
-import scala.collection.Seq;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Out-of-the-box implementation of {@link Target},
@@ -87,31 +86,35 @@ public class HttpTarget implements TestClassAwareTarget {
      * {@inheritDoc}
      */
     @Override
-    public void testInteraction(final RequestResponseInteraction interaction) {
-        final ProviderClient providerClient = new ProviderClient();
-        providerClient.setProvider(getProviderInfo());
-        providerClient.setRequest(interaction.getRequest());
-        final Map<String, Object> actualResponse = (Map<String, Object>) providerClient.makeRequest();
+    public void testInteraction(final String consumerName, final RequestResponseInteraction interaction) {
+      ProviderInfo provider = getProviderInfo();
+      ProviderVerifier verifier = new ProviderVerifier();
+      verifier.initialiseReporters(provider);
+      ConsumerInfo consumer = new ConsumerInfo(consumerName);
+      verifier.reportVerificationForConsumer(consumer, provider);
 
-        final Seq<ResponsePartMismatch> mismatches = ResponseMatching$.MODULE$.responseMismatches(
-                interaction.getResponse(),
-                new Response(
-                        ((Integer) actualResponse.get("statusCode")).intValue(),
-                        (Map<String, String>) actualResponse.get("headers"),
-                        OptionalBody.body((String) actualResponse.get("data")))
-        );
+      if (interaction.getProviderState() != null) {
+        verifier.reportStateForInteraction(interaction.getProviderState(), provider, consumer, true);
+      }
 
-        if (!mismatches.isEmpty()) {
-            throw getAssertionError(mismatches);
-        }
+      verifier.reportInteractionDescription(interaction);
+
+      Map<String, Object> failures = new HashMap<>();
+      verifier.verifyResponseFromProvider(provider, interaction, interaction.getDescription(), failures);
+
+      if (!failures.isEmpty()) {
+        verifier.displayFailures(failures);
+        throw getAssertionError(failures);
+      }
     }
 
     private ProviderInfo getProviderInfo() {
-        final ProviderInfo providerInfo = new ProviderInfo();
-        providerInfo.setPort(port);
-        providerInfo.setHost(host);
-        providerInfo.setProtocol(protocol);
-        providerInfo.setPath(path);
+      Provider provider = testClass.getAnnotation(Provider.class);
+      final ProviderInfo providerInfo = new ProviderInfo(provider.value());
+      providerInfo.setPort(port);
+      providerInfo.setHost(host);
+      providerInfo.setProtocol(protocol);
+      providerInfo.setPath(path);
 
       final List<FrameworkMethod> methods = testClass.getAnnotatedMethods(TargetRequestFilter.class);
       if (testClass != null && !methods.isEmpty()) {
@@ -122,36 +125,62 @@ public class HttpTarget implements TestClassAwareTarget {
               throw new AssertionError("Request filter method " + method.getName() + " failed with an exception", t);
             }
           }));
+      }
+
+      return providerInfo;
+    }
+
+  private AssertionError getAssertionError(final Map<String, Object> mismatches) {
+    String error = System.lineSeparator() + Seq.seq(mismatches.values()).zipWithIndex()
+      .map(i -> {
+        String errPrefix = String.valueOf(i.v2) + " - ";
+        if (i.v1 instanceof Throwable) {
+          return errPrefix + exceptionMessage((Throwable) i.v1, errPrefix.length());
+        } else if (i.v1 instanceof Map) {
+          return errPrefix + convertMapToErrorString((Map) i.v1);
+        } else {
+          return errPrefix + i.v1.toString();
         }
+      }).toString(System.lineSeparator());
+    return new AssertionError(error);
+  }
 
-        return providerInfo;
+  private String exceptionMessage(Throwable err, int prefixLength) {
+    String message = err.getMessage();
+    if (message.contains("\n")) {
+      String padString = StringUtils.leftPad("", prefixLength);
+      Tuple2<Optional<String>, Seq<String>> lines = Seq.of(message.split("\n")).splitAtHead();
+      return lines.v1.orElse("") + System.lineSeparator() + lines.v2.map(line -> padString + line)
+        .toString(System.lineSeparator());
+    } else {
+      return message;
     }
+  }
 
-    private AssertionError getAssertionError(final Seq<ResponsePartMismatch> mismatches) {
-        final StringBuilder result = new StringBuilder();
-        scala.collection.JavaConversions.seqAsJavaList(mismatches)
-                .stream()
-                .map(
-                        mismatch -> {
-                            if (mismatch instanceof StatusMismatch) {
-                                final StatusMismatch statusMismatch = (StatusMismatch) mismatch;
-                                return "StatusMismatch - Expected status " + statusMismatch.expected() + " but was " + statusMismatch.actual();
-                            } else if (mismatch instanceof HeaderMismatch) {
-                                return ((HeaderMismatch) mismatch).description();
-                            } else if (mismatch instanceof BodyTypeMismatch) {
-                                final BodyTypeMismatch bodyTypeMismatch = (BodyTypeMismatch) mismatch;
-                                return "BodyTypeMismatch - Expected body to have type '" + bodyTypeMismatch.expected() + "' but was '" + bodyTypeMismatch.actual() + "'";
-                            } else if (mismatch instanceof BodyMismatch) {
-                                return ((BodyMismatch) mismatch).description();
-                            } else {
-                                return mismatch.toString();
-                            }
-                        }
-                ).forEach(mismatch -> result.append(System.lineSeparator()).append(mismatch));
-        return new AssertionError(result.toString());
+  private String convertMapToErrorString(Map mismatches) {
+    if (mismatches.containsKey("comparison")) {
+      Object comparison = mismatches.get("comparison");
+      if (mismatches.containsKey("diff")) {
+        return mapToString((Map) comparison);
+      } else {
+        if (comparison instanceof Map) {
+          return mapToString((Map) comparison);
+        } else {
+          return String.valueOf(comparison);
+        }
+      }
+    } else {
+      return mapToString(mismatches);
     }
+  }
 
-    @Override
+  private String mapToString(Map comparison) {
+    return comparison.entrySet().stream()
+      .map(e -> String.valueOf(((Map.Entry)e).getKey()) + " -> " + ((Map.Entry)e).getValue())
+      .collect(Collectors.joining(System.lineSeparator())).toString();
+  }
+
+  @Override
     public void setTestClass(final TestClass testClass, final Object testTarget) {
       this.testClass = testClass;
       this.testTarget = testTarget;

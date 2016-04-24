@@ -177,7 +177,7 @@ class InteractionRunner extends Runner {
         Statement statement = new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                target.testInteraction(interaction);
+                target.testInteraction(pact.getConsumer().getName(), interaction);
             }
         };
         statement = withStateChanges(interaction, test, statement);

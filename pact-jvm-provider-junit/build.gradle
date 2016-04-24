@@ -6,7 +6,8 @@ dependencies {
       "org.apache.httpcomponents:httpclient:$httpClientVersion",
       'junit:junit:4.12',
       "org.apache.commons:commons-lang3:$commonsLang3Version",
-      'com.fasterxml.jackson.core:jackson-databind:2.6.3'
+      'com.fasterxml.jackson.core:jackson-databind:2.6.3',
+      'org.jooq:jool:0.9.11'
 
     testCompile 'com.github.rest-driver:rest-client-driver:1.1.36'
     testCompile 'ch.qos.logback:logback-classic:1.1.2'
