@@ -9,6 +9,7 @@ import au.com.dius.pact.provider.ProviderInfo
 /**
  * Pact verifier reporter that displays the results of the verification in a markdown document
  */
+@SuppressWarnings(['DuplicateStringLiteral', 'UnnecessaryObjectReferences'])
 class MarkdownReporter implements VerifierReporter {
 
   String name
@@ -22,8 +23,8 @@ class MarkdownReporter implements VerifierReporter {
     writer = reportFile.newPrintWriter()
     writer.println "# $provider.name"
     writer.println()
-    writer.println "| Description    | Value |"
-    writer.println "| -------------- | ----- |"
+    writer.println '| Description    | Value |'
+    writer.println '| -------------- | ----- |'
     writer.println "| Date Generated | ${new Date()} |"
     writer.println "| Pact Version   | ${PactWriter.lookupVersion()} |"
     writer.println()
@@ -72,8 +73,8 @@ class MarkdownReporter implements VerifierReporter {
 
   @Override
   void warnStateChangeIgnored(String state, ProviderInfo providerInfo, ConsumerInfo consumerInfo) {
-    writer.println '&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color: yellow\'>WARNING: State Change ignored as there is no stateChange URL' +
-      '</span>  '
+    writer.println '&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color: yellow\'>WARNING: State Change ignored as there is' +
+      ' no stateChange URL</span>  '
   }
 
   @Override
@@ -167,7 +168,7 @@ class MarkdownReporter implements VerifierReporter {
     if (comparison instanceof String) {
       writer.println "|\$|$comparison|"
     } else if (comparison.comparison instanceof Map) {
-      writer.println comparison.comparison.collect{ "|$it.key|$it.value|" }.join('\n')
+      writer.println comparison.comparison.collect { "|$it.key|$it.value|" }.join('\n')
     } else {
       writer.println "|\$|$comparison.comparison|"
     }
