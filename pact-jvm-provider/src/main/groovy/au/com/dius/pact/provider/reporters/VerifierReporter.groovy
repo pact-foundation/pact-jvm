@@ -9,9 +9,11 @@ import au.com.dius.pact.provider.ProviderInfo
  * Interface to verification reporters that can hook into the events of the PactVerifier
  */
 trait VerifierReporter {
+  String ext
+
   abstract void setReportDir(File reportDir)
   abstract void setReportFile(File reportFile)
-  String getExt() { "" }
+
   abstract void initialise(ProviderInfo provider)
   abstract void finaliseReport()
   abstract void reportVerificationForConsumer(ConsumerInfo consumer, ProviderInfo provider)

@@ -10,7 +10,7 @@ import au.com.dius.pact.provider.org.fusesource.jansi.AnsiConsole
 /**
  * Pact verifier reporter that displays the results of the verification to the console using ASCII escapes
  */
-@SuppressWarnings('DuplicateStringLiteral')
+@SuppressWarnings(['DuplicateStringLiteral', 'MethodCount'])
 class AnsiConsoleReporter implements VerifierReporter {
 
   @Override

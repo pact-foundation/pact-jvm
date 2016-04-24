@@ -14,10 +14,10 @@ class ReporterManager {
     REPORTERS.containsKey(name)
   }
 
-  @SuppressWarnings('FactoryMethodName')
+  @SuppressWarnings(['FactoryMethodName', 'ThrowRuntimeException'])
   static VerifierReporter createReporter(String name) {
     if (!reporterDefined(name)) {
-      throw new RuntimeException("No reporter with name '" + name + "' defined");
+      throw new IllegalArgumentException("No reporter with name '$name' defined")
     }
     def reporter = REPORTERS[name].newInstance()
     if (reporter.hasProperty('name')) {

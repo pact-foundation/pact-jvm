@@ -12,6 +12,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils
 /**
  * Pact verifier reporter that generates the results of the verification in JSON format
  */
+@SuppressWarnings('MethodCount')
 class JsonReporter implements VerifierReporter {
 
   private static final REPORT_FORMAT = '0.0.0'
@@ -21,11 +22,7 @@ class JsonReporter implements VerifierReporter {
   File reportDir
   File reportFile
   def jsonData
-
-  @Override
-  String getExt() {
-    return '.json'
-  }
+  String ext = '.json'
 
   @Override
   void initialise(ProviderInfo provider) {

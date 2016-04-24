@@ -9,18 +9,14 @@ import au.com.dius.pact.provider.ProviderInfo
 /**
  * Pact verifier reporter that displays the results of the verification in a markdown document
  */
-@SuppressWarnings(['DuplicateStringLiteral', 'UnnecessaryObjectReferences'])
+@SuppressWarnings(['DuplicateStringLiteral', 'UnnecessaryObjectReferences', 'MethodCount'])
 class MarkdownReporter implements VerifierReporter {
 
   String name
   File reportDir
   File reportFile
   PrintWriter writer
-
-  @Override
-  String getExt() {
-    return '.md'
-  }
+  String ext = '.md'
 
   @Override
   void initialise(ProviderInfo provider) {
