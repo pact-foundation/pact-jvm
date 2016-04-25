@@ -97,6 +97,7 @@ public class PactDslJsonBodyTest {
         DslPart body = new PactDslJsonBody()
                 .object("first")
                 .stringType("level1", "l1example")
+                .stringType("@level1")
                 .object("second")
                 .stringType("level2", "l2example")
                 .object("@third")
@@ -112,7 +113,8 @@ public class PactDslJsonBodyTest {
                 ".first.second['@third'].fourth.level4",
                 ".first.second['@third'].level3",
                 ".first.second.level2",
-                ".first.level1"
+                ".first.level1",
+                ".first['@level1']"
         ));
 
         assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
