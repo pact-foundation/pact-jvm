@@ -121,7 +121,7 @@ public class PactDslJsonBody extends DslPart {
     private String matcherKey(String name) {
         String key = root + name;
         if (!name.matches(Parser$.MODULE$.FieldRegex().toString())) {
-            key = StringUtils.strip(root, ".") + "['" + name + "']";
+            key = StringUtils.stripEnd(root, ".") + "['" + name + "']";
         }
         return key;
     }
