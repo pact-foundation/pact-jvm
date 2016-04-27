@@ -537,3 +537,33 @@ It will then validate that the returned contents matches the contents for the me
 To publish the plugin to the community portal:
 
     $ ./gradlew :pact-jvm-provider-gradle_2.11:publishPlugins
+
+# Verification Reports [versions 3.2.7/2.4.9+]
+
+The default behaviour is to display the verification being done to the console, and pass or fail the build via the normal
+Gradle mechanism. From versions 3.2.7/2.4.9+, additional reports can be generated from the verification.
+
+## Enabling additional reports
+
+The verification reports can be controlled by adding a reports section to the pact configuration in the gradle build file.
+
+For example:
+
+```groovy
+pact {
+
+    reports {
+      defaultReports() // adds the standard console output
+
+      markdown // report in markdown format
+      json // report in json format
+    }
+}
+```
+
+Any report files will be written to "build/reports/pact".
+
+## Additional Reports
+
+The following report types are available in addition to console output (which is enabled by default):
+`markdown`, `json`.

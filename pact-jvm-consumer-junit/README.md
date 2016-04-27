@@ -553,3 +553,43 @@ For testing a consumer of messages from a message queue, the `MessagePactProvide
 same way as the `PactProviderRule` class for Request-Response interactions, but will generate a V3 format message pact file.
 
 For an example, look at [ExampleMessageConsumerTest](https://github.com/DiUS/pact-jvm/blob/master/pact-jvm-consumer-junit%2Fsrc%2Ftest%2Fjava%2Fau%2Fcom%2Fdius%2Fpact%2Fconsumer%2Fv3%2FExampleMessageConsumerTest.java)
+
+# Verification Reports [versions 3.2.7/2.4.9+]
+
+The default test behaviour is to display the verification being done to the console, and pass or fail the test via the normal
+JUnit mechanism. From versions 3.2.7/2.4.9+, additional reports can be generated from the tests.
+
+## Enabling additional reports via annotations on the test classes
+
+A `@VerificationReports` annotation can be added to any pact test class which will control the verification output. The
+annotation takes a list report types and an optional report directory (defaults to "target/pact/reports").
+The currently supported report types are `console`, `markdown` and `json`.
+
+For example:
+
+```java
+@VerificationReports({"console", "markdown"})
+public class MyPactTest {
+```
+
+will enable the markdown report in addition to the normal console output. And,
+
+```java
+@VerificationReports(value = {"markdown"}, reportDir = "/myreports")
+public class MyPactTest {
+```
+
+will disable the normal console output and write the markdown reports to "/myreports".
+
+## Enabling additional reports via Java system properties or environment variables
+
+The additional reports can also be enabled with Java System properties or environment variables. The following two
+properties have been introduced: `pact.verification.reports` and `pact.verification.reportDir`.
+
+`pact.verification.reports` is the comma separated list of report types to enable (e.g. `console,json,markdown`).
+`pact.verification.reportDir` is the directory to write reports to (defaults to "target/pact/reports").
+
+## Additional Reports
+
+The following report types are available in addition to console output (`console`, which is enabled by default):
+`markdown`, `json`.
