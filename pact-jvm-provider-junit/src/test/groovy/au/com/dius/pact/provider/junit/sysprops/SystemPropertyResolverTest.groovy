@@ -36,11 +36,21 @@ class SystemPropertyResolverTest {
   @Test
   void 'Defaults To Any Default Value Provided If The Name Is Not Resolved'() {
     assertThat(resolver.resolveValue('value.that.should.not.be.found!:defaultValue'), is(equalTo('defaultValue')))
+    assertThat(resolver.resolveValue('value.that.should.not.be.found!:'), is(equalTo('')))
   }
 
-  @Test(expected = RuntimeException)
-  void 'Throws An Exception If The Name Is Not Resolved And The Default Value Is Empty'() {
-    resolver.resolveValue('value.that.should.not.be.found!:')
+  @Test
+  void 'Returns True if there is a System Property With The Provided Name'() {
+    assertThat(resolver.propertyDefined('java.version'), is(true))
   }
 
+  @Test
+  void 'Returns True if there is a environment variable With The Provided Name'() {
+    assertThat(resolver.propertyDefined('PATH'), is(true))
+  }
+
+  @Test
+  void 'Returns False if there is no property or environment variable With The Provided Name'() {
+    assertThat(resolver.propertyDefined('value.that.should.not.be.found!'), is(false))
+  }
 }

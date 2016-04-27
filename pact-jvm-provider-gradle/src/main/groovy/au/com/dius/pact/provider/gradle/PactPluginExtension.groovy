@@ -11,9 +11,10 @@ class PactPluginExtension {
     final NamedDomainObjectContainer<GradleProviderInfo> serviceProviders
 
     PactPublish publish
+    VerificationReports reports
 
     PactPluginExtension(serviceProviders) {
-        this.serviceProviders = serviceProviders
+      this.serviceProviders = serviceProviders
     }
 
     @SuppressWarnings('ConfusingMethodName')
@@ -26,4 +27,10 @@ class PactPluginExtension {
         publish = new PactPublish()
         ConfigureUtil.configure(closure, publish)
     }
+
+  @SuppressWarnings('ConfusingMethodName')
+  def reports(Closure closure) {
+    reports = new VerificationReports()
+    ConfigureUtil.configure(closure, reports)
+  }
 }

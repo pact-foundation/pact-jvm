@@ -1,29 +1,31 @@
 package au.com.dius.pact.provider.junit.target;
 
-import au.com.dius.pact.model.BodyMismatch;
-import au.com.dius.pact.model.BodyTypeMismatch;
-import au.com.dius.pact.model.HeaderMismatch;
 import au.com.dius.pact.model.Interaction;
-import au.com.dius.pact.model.OptionalBody;
 import au.com.dius.pact.model.RequestResponseInteraction;
-import au.com.dius.pact.model.Response;
-import au.com.dius.pact.model.ResponseMatching$;
-import au.com.dius.pact.model.ResponsePartMismatch;
-import au.com.dius.pact.model.StatusMismatch;
-import au.com.dius.pact.provider.ProviderClient;
+import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.ProviderInfo;
+import au.com.dius.pact.provider.ProviderVerifier;
+import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.TargetRequestFilter;
+import au.com.dius.pact.provider.junit.VerificationReports;
+import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver;
+import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
+import au.com.dius.pact.provider.reporters.ReporterManager;
+import au.com.dius.pact.provider.reporters.VerifierReporter;
 import org.apache.commons.collections.Closure;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.TestClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.collection.Seq;
 
+import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.lang.AssertionError;
 
 /**
  * Out-of-the-box implementation of {@link Target},
@@ -38,6 +40,7 @@ public class HttpTarget implements TestClassAwareTarget {
     private final String protocol;
     private TestClass testClass;
     private Object testTarget;
+    private ValueResolver valueResolver = new SystemPropertyResolver();
 
   /**
      * @param host host of tested service
@@ -92,32 +95,87 @@ public class HttpTarget implements TestClassAwareTarget {
      * {@inheritDoc}
      */
     @Override
-    public void testInteraction(final Interaction i) {
-        RequestResponseInteraction interaction = (RequestResponseInteraction) i;
-        final ProviderClient providerClient = new ProviderClient();
-        providerClient.setProvider(getProviderInfo());
-        providerClient.setRequest(interaction.getRequest());
-        final Map<String, Object> actualResponse = (Map<String, Object>) providerClient.makeRequest();
+    public void testInteraction(final String consumerName, final Interaction interaction) {
+      if (!(interaction instanceof RequestResponseInteraction)) {
+        throw new AssertionError("HttpTarget can only validate RequestResponseInteractions. Received a " +
+          interaction.getClass().getSimpleName());
+      }
 
-        final Seq<ResponsePartMismatch> mismatches = ResponseMatching$.MODULE$.responseMismatches(
-                interaction.getResponse(),
-                new Response(
-                        ((Integer) actualResponse.get("statusCode")).intValue(),
-                        (Map<String, String>) actualResponse.get("headers"),
-                        OptionalBody.body((String) actualResponse.get("data")))
-        );
+      RequestResponseInteraction rri = (RequestResponseInteraction) interaction;
+      ProviderInfo provider = getProviderInfo();
+      ConsumerInfo consumer = new ConsumerInfo(consumerName);
+      ProviderVerifier verifier = setupVerifier(rri, provider, consumer);
 
-        if (!mismatches.isEmpty()) {
-            throw getAssertionError(mismatches);
+      Map<String, Object> failures = new HashMap<String, Object>();
+      verifier.verifyResponseFromProvider(provider, interaction, interaction.getDescription(), failures);
+
+      try {
+        if (!failures.isEmpty()) {
+          verifier.displayFailures(failures);
+          throw getAssertionError(failures);
         }
+      } finally {
+        verifier.finialiseReports();
+      }
     }
 
-    private ProviderInfo getProviderInfo() {
-        final ProviderInfo providerInfo = new ProviderInfo();
-        providerInfo.setPort(port);
-        providerInfo.setHost(host);
-        providerInfo.setProtocol(protocol);
-        providerInfo.setPath(path);
+  private ProviderVerifier setupVerifier(RequestResponseInteraction interaction, ProviderInfo provider,
+                                         ConsumerInfo consumer) {
+    ProviderVerifier verifier = new ProviderVerifier();
+
+    setupReporters(verifier, provider.getName(), interaction.getDescription());
+
+    verifier.initialiseReporters(provider);
+    verifier.reportVerificationForConsumer(consumer, provider);
+
+    if (interaction.getProviderState() != null) {
+      verifier.reportStateForInteraction(interaction.getProviderState(), provider, consumer, true);
+    }
+
+    verifier.reportInteractionDescription(interaction);
+
+    return verifier;
+  }
+
+  private void setupReporters(ProviderVerifier verifier, String name, String description) {
+    String reportDirectory = "target/pact/reports";
+    String[] reports = new String[]{};
+    boolean reportingEnabled = false;
+
+    VerificationReports verificationReports = testClass.getAnnotation(VerificationReports.class);
+    if (verificationReports != null) {
+      reportingEnabled = true;
+      reportDirectory = verificationReports.reportDir();
+      reports = verificationReports.value();
+    } else if (valueResolver.propertyDefined("pact.verification.reports")) {
+      reportingEnabled = true;
+      reportDirectory = valueResolver.resolveValue("pact.verification.reportDir:" + reportDirectory);
+      reports = valueResolver.resolveValue("pact.verification.reports:").split(",");
+    }
+
+    if (reportingEnabled) {
+      File reportDir = new File(reportDirectory);
+      reportDir.mkdirs();
+      List<VerifierReporter> reportsList = new ArrayList<VerifierReporter>();
+      for (String report: reports) {
+        if (!report.isEmpty()) {
+          VerifierReporter reporter = ReporterManager.createReporter(report.trim());
+          reporter.setReportDir(reportDir);
+          reporter.setReportFile(new File(reportDir, name + " - " + description + reporter.getExt()));
+          reportsList.add(reporter);
+        }
+      }
+      verifier.setReporters(reportsList);
+    }
+  }
+
+  private ProviderInfo getProviderInfo() {
+      Provider provider = testClass.getAnnotation(Provider.class);
+      final ProviderInfo providerInfo = new ProviderInfo(provider.value());
+      providerInfo.setPort(port);
+      providerInfo.setHost(host);
+      providerInfo.setProtocol(protocol);
+      providerInfo.setPath(path);
 
       final List<FrameworkMethod> methods = testClass.getAnnotatedMethods(TargetRequestFilter.class);
       if (testClass != null && !methods.isEmpty()) {
@@ -136,35 +194,78 @@ public class HttpTarget implements TestClassAwareTarget {
           });
         }
 
-        return providerInfo;
+      return providerInfo;
     }
 
-    private AssertionError getAssertionError(final Seq<ResponsePartMismatch> mismatches) {
-        final StringBuilder result = new StringBuilder();
-        for (ResponsePartMismatch mismatch: scala.collection.JavaConversions.seqAsJavaList(mismatches)) {
-            result.append("\n");
-            if (mismatch instanceof StatusMismatch) {
-                final StatusMismatch statusMismatch = (StatusMismatch) mismatch;
-                result.append("StatusMismatch - Expected status " + statusMismatch.expected() + " but was " +
-                        statusMismatch.actual());
-            } else if (mismatch instanceof HeaderMismatch) {
-                result.append(((HeaderMismatch) mismatch).description());
-            } else if (mismatch instanceof BodyTypeMismatch) {
-                final BodyTypeMismatch bodyTypeMismatch = (BodyTypeMismatch) mismatch;
-                result.append("BodyTypeMismatch - Expected body to have type '" + bodyTypeMismatch.expected() +
-                        "' but was '" + bodyTypeMismatch.actual() + "'");
-            } else if (mismatch instanceof BodyMismatch) {
-                result.append(((BodyMismatch) mismatch).description());
-            } else {
-                result.append(mismatch.toString());
-            }
+  private AssertionError getAssertionError(final Map<String, Object> mismatches) {
+    String error = SystemUtils.LINE_SEPARATOR;
+
+    int count = 0;
+    for (Object mismatch: mismatches.values()) {
+      String errPrefix = String.valueOf(count++) + " - ";
+      if (mismatch instanceof Throwable) {
+        error += errPrefix + exceptionMessage((Throwable) mismatch, errPrefix.length());
+      } else if (mismatch instanceof Map) {
+        error += errPrefix + convertMapToErrorString((Map) mismatch);
+      } else {
+        error += errPrefix + mismatch.toString();
+      }
+      error += SystemUtils.LINE_SEPARATOR;
+    }
+
+    return new AssertionError(error);
+  }
+
+  private String exceptionMessage(Throwable err, int prefixLength) {
+    String message = err.getMessage();
+    if (message.contains("\n")) {
+      String padString = StringUtils.leftPad("", prefixLength);
+      String[] lines = message.split("\n");
+      message = lines[0] + SystemUtils.LINE_SEPARATOR;
+      for (int line = 1; line < lines.length; line++) {
+        message += padString + lines[line] + SystemUtils.LINE_SEPARATOR;
+      }
+    }
+    return message;
+  }
+
+  private String convertMapToErrorString(Map mismatches) {
+    if (mismatches.containsKey("comparison")) {
+      Object comparison = mismatches.get("comparison");
+      if (mismatches.containsKey("diff")) {
+        return mapToString((Map) comparison);
+      } else {
+        if (comparison instanceof Map) {
+          return mapToString((Map) comparison);
+        } else {
+          return String.valueOf(comparison);
         }
-        return new AssertionError(result.toString());
+      }
+    } else {
+      return mapToString(mismatches);
     }
+  }
 
-    @Override
-    public void setTestClass(final TestClass testClass, final Object testTarget) {
-      this.testClass = testClass;
-      this.testTarget = testTarget;
+  private String mapToString(Map comparison) {
+    String map = "";
+    for (Object o: comparison.entrySet()) {
+      Map.Entry e = (Map.Entry) o;
+      map += String.valueOf(e.getKey()) + " -> " + e.getValue() + SystemUtils.LINE_SEPARATOR;
     }
+    return map;
+  }
+
+  @Override
+  public void setTestClass(final TestClass testClass, final Object testTarget) {
+    this.testClass = testClass;
+    this.testTarget = testTarget;
+  }
+
+  public ValueResolver getValueResolver() {
+    return valueResolver;
+  }
+
+  public void setValueResolver(ValueResolver valueResolver) {
+    this.valueResolver = valueResolver;
+  }
 }

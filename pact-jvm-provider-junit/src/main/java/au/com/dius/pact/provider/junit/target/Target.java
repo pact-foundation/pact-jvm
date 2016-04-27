@@ -13,7 +13,8 @@ public interface Target {
      * <p>
      * Any exception will be caught by caller and reported as test failure
      *
+     * @param consumer consumer name that generated the interaction
      * @param interaction interaction to be tested
      */
-    void testInteraction(Interaction interaction);
+    void testInteraction(String consumer, Interaction interaction);
 }

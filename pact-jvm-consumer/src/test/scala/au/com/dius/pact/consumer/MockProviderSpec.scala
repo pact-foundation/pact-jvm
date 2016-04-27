@@ -2,10 +2,10 @@ package au.com.dius.pact.consumer
 
 import java.util.concurrent.Executors
 
-import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.consumer.Fixtures._
 import au.com.dius.pact.consumer.dispatch.HttpClient
 import au.com.dius.pact.model.{RequestResponseInteraction, _}
+import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import org.junit.runner.RunWith
 import org.specs2.concurrent.ExecutionEnv
 import org.specs2.execute.Result

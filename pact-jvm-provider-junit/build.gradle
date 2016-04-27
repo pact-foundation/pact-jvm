@@ -10,4 +10,8 @@ dependencies {
 
     testCompile 'com.github.rest-driver:rest-client-driver:1.1.36'
     testCompile 'ch.qos.logback:logback-classic:1.1.2'
+    testCompile ('org.spockframework:spock-core:1.0-groovy-2.4') {
+        exclude group: 'org.codehaus.groovy'
+    }
+    testCompile 'cglib:cglib:3.2.0'
 }

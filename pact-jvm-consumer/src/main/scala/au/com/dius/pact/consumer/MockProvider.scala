@@ -17,8 +17,11 @@ object DefaultMockProvider {
   
   // Constructor providing a default implementation of StatefulMockProvider.
   // Users should not explicitly be forced to choose a variety.
-  def apply(config: MockProviderConfig): StatefulMockProvider = 
-    new UnfilteredMockProvider(config)
+  def apply(config: MockProviderConfig): StatefulMockProvider =
+    config match {
+      case httpsConfig: MockHttpsProviderConfig => new UnfilteredHttpsMockProvider(httpsConfig)
+      case _ => new UnfilteredMockProvider(config)
+    }
 }
 
 // TODO: eliminate horrid state mutation and synchronisation.  Reactive stuff to the rescue?

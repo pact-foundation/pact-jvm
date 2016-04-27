@@ -14,33 +14,42 @@ public class SystemPropertyResolver implements ValueResolver {
     if (propertyValue == null) {
       propertyValue = tuple.getDefaultValue();
     }
-    if (StringUtils.isEmpty(propertyValue)) {
+    if (propertyValue == null) {
       throw new RuntimeException("Could not resolve property \"" + tuple.getPropertyName()
         + "\" in the system properties or environment variables and no default value is supplied");
     }
     return propertyValue;
   }
 
+  @Override
+  public boolean propertyDefined(String property) {
+    String propertyValue = System.getProperty(property);
+    if (propertyValue == null) {
+      propertyValue = System.getenv(property);
+    }
+    return propertyValue != null;
+  }
+
   private class PropertyValueTuple {
     private String propertyName;
     private String defaultValue;
 
-    public PropertyValueTuple(String property) {
+    PropertyValueTuple(String property) {
       this.propertyName = property;
       this.defaultValue = null;
     }
 
-    public String getPropertyName() {
+    String getPropertyName() {
       return propertyName;
     }
 
-    public String getDefaultValue() {
+    String getDefaultValue() {
       return defaultValue;
     }
 
-    public PropertyValueTuple invoke() {
+    PropertyValueTuple invoke() {
       if (propertyName.contains(":")) {
-        String[] kv = propertyName.split(":");
+        String[] kv = StringUtils.splitPreserveAllTokens(propertyName, ':');
         propertyName = kv[0];
         if (kv.length > 1) {
           defaultValue = kv[1];

@@ -22,7 +22,9 @@ public @interface PactVerification {
 
     /**
      * If a mismatch is expected. Use to test failure conditions
+     * @deprecated do not use this, it will be removed in a future version
      */
+    @Deprecated
     boolean expectMismatch() default false;
 
     /**

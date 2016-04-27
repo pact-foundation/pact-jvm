@@ -44,4 +44,15 @@ class ProviderUtils {
     consumers
   }
 
+  static boolean pactFileExists(def pactFile) {
+   pactFile && new File(pactFile as String).exists()
+ }
+
+  static PactVerification verificationType(ProviderInfo provider, ConsumerInfo consumer) {
+   consumer.verificationType ?: provider.verificationType
+ }
+
+  static List packagesToScan(ProviderInfo providerInfo, ConsumerInfo consumer) {
+   consumer.packagesToScan ?: providerInfo.packagesToScan
+ }
 }
