@@ -9,7 +9,9 @@ import static org.hamcrest.MatcherAssert.assertThat
 @SuppressWarnings('GStringExpressionWithinString')
 class PactRunnerExpressionParserTest {
 
-  private final ValueResolver valueResolver = { expression -> '[' + expression + ']' }
+  private final ValueResolver valueResolver = [
+    resolveValue: { expression -> '[' + expression + ']' }
+  ] as ValueResolver
 
   @Test
   void 'Does Not Modify Strings With No Expressions'() {

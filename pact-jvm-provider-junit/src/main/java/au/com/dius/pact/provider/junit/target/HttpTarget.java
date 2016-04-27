@@ -7,6 +7,8 @@ import au.com.dius.pact.provider.ProviderVerifier;
 import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.TargetRequestFilter;
 import au.com.dius.pact.provider.junit.VerificationReports;
+import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver;
+import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
 import au.com.dius.pact.provider.reporters.ReporterManager;
 import au.com.dius.pact.provider.reporters.VerifierReporter;
 import org.apache.commons.lang3.StringUtils;
@@ -37,6 +39,7 @@ public class HttpTarget implements TestClassAwareTarget {
     private final String protocol;
     private TestClass testClass;
     private Object testTarget;
+    private ValueResolver valueResolver = new SystemPropertyResolver();
 
   /**
      * @param host host of tested service
@@ -128,18 +131,32 @@ public class HttpTarget implements TestClassAwareTarget {
   }
 
   private void setupReporters(ProviderVerifier verifier, String name, String description) {
+    String reportDirectory = "target/pact/reports";
+    String[] reports = new String[]{};
+    boolean reportingEnabled = false;
+
     VerificationReports verificationReports = testClass.getAnnotation(VerificationReports.class);
     if (verificationReports != null) {
-      File reportDir = new File(verificationReports.reportDir());
+      reportingEnabled = true;
+      reportDirectory = verificationReports.reportDir();
+      reports = verificationReports.value();
+    } else if (valueResolver.propertyDefined("pact.verification.reports")) {
+      reportingEnabled = true;
+      reportDirectory = valueResolver.resolveValue("pact.verification.reportDir:" + reportDirectory);
+      reports = valueResolver.resolveValue("pact.verification.reports:").split(",");
+    }
+
+    if (reportingEnabled) {
+      File reportDir = new File(reportDirectory);
       reportDir.mkdirs();
-      verifier.setReporters(Seq.of(verificationReports.value())
+      verifier.setReporters(Seq.of(reports)
+        .filter(r -> !r.isEmpty())
         .map(r -> {
-          VerifierReporter reporter = ReporterManager.createReporter(r);
+          VerifierReporter reporter = ReporterManager.createReporter(r.trim());
           reporter.setReportDir(reportDir);
           reporter.setReportFile(new File(reportDir, name + " - " + description + reporter.getExt()));
           return reporter;
-        })
-        .toList());
+        }).toList());
     }
   }
 
@@ -216,8 +233,16 @@ public class HttpTarget implements TestClassAwareTarget {
   }
 
   @Override
-    public void setTestClass(final TestClass testClass, final Object testTarget) {
-      this.testClass = testClass;
-      this.testTarget = testTarget;
-    }
+  public void setTestClass(final TestClass testClass, final Object testTarget) {
+    this.testClass = testClass;
+    this.testTarget = testTarget;
+  }
+
+  public ValueResolver getValueResolver() {
+    return valueResolver;
+  }
+
+  public void setValueResolver(ValueResolver valueResolver) {
+    this.valueResolver = valueResolver;
+  }
 }
