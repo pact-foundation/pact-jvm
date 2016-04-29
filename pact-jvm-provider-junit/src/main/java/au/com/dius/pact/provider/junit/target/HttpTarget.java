@@ -151,15 +151,17 @@ public class HttpTarget implements TestClassAwareTarget {
       providerInfo.setProtocol(protocol);
       providerInfo.setPath(path);
 
-      final List<FrameworkMethod> methods = testClass.getAnnotatedMethods(TargetRequestFilter.class);
-      if (testClass != null && !methods.isEmpty()) {
+      if (testClass != null) {
+        final List<FrameworkMethod> methods = testClass.getAnnotatedMethods(TargetRequestFilter.class);
+        if (!methods.isEmpty()) {
           providerInfo.setRequestFilter((Consumer<HttpRequest>) httpRequest -> methods.forEach(method -> {
             try {
               method.invokeExplosively(testTarget, httpRequest);
             } catch (Throwable t) {
-              throw new AssertionError("Request filter method " + method.getName() + " failed with an exception", t);
+               throw new AssertionError("Request filter method " + method.getName() + " failed with an exception", t);
             }
           }));
+        }
       }
 
       return providerInfo;
