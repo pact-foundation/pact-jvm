@@ -319,4 +319,17 @@ class ProviderVerifierSpec extends Specification {
     then:
     1 * PactReader.loadPact(['authentication': ['basic', 'test', 'pwd']], pactFile) >> Mock(Pact)
   }
+
+  def 'when loading a pact file for a consumer, it handles a closure'() {
+    given:
+    def pactFile = new URL('http://some.pact.file/')
+    def consumer = new ConsumerInfo(pactFile: { pactFile })
+    GroovyMock(PactReader, global: true)
+
+    when:
+    verifier.loadPactFileForConsumer(consumer)
+
+    then:
+    1 * PactReader.loadPact([:], pactFile) >> Mock(Pact)
+  }
 }

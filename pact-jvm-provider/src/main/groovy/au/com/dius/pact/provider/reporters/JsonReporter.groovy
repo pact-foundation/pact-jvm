@@ -57,16 +57,16 @@ class JsonReporter implements VerifierReporter {
   }
 
   @Override
-  void verifyConsumerFromUrl(ConsumerInfo consumer) {
+  void verifyConsumerFromUrl(URL pactUrl, ConsumerInfo consumer) {
     jsonData.execution.last().consumer.source = [
-      url: consumer.pactFile as String
+      url: pactUrl as String
     ]
   }
 
   @Override
-  void verifyConsumerFromFile(ConsumerInfo consumer) {
+  void verifyConsumerFromFile(File pactFile, ConsumerInfo consumer) {
     jsonData.execution.last().consumer.source = [
-      file: consumer.pactFile as String
+      file: pactFile as String
     ]
   }
 

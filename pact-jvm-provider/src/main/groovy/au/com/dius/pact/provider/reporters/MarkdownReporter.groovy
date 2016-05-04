@@ -44,13 +44,13 @@ class MarkdownReporter implements VerifierReporter {
   }
 
   @Override
-  void verifyConsumerFromUrl(ConsumerInfo consumer) {
-    writer.println "From URL: ${consumer.pactFile}"
+  void verifyConsumerFromUrl(URL pactUrl, ConsumerInfo consumer) {
+    writer.println "From URL: $pactUrl"
   }
 
   @Override
-  void verifyConsumerFromFile(ConsumerInfo consumer) {
-    writer.println "From File: ${consumer.pactFile}"
+  void verifyConsumerFromFile(File pactFile, ConsumerInfo consumer) {
+    writer.println "From File: $pactFile"
     writer.println()
   }
 

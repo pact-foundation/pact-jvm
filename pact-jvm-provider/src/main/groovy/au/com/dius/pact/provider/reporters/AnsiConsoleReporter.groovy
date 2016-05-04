@@ -32,13 +32,13 @@ class AnsiConsoleReporter implements VerifierReporter {
   }
 
   @Override
-  void verifyConsumerFromUrl(ConsumerInfo consumer) {
-    AnsiConsole.out().println(Ansi.ansi().a("  [from URL ${consumer.pactFile}]"))
+  void verifyConsumerFromUrl(URL pactUrl, ConsumerInfo consumer) {
+    AnsiConsole.out().println(Ansi.ansi().a("  [from URL $pactUrl]"))
   }
 
   @Override
-  void verifyConsumerFromFile(ConsumerInfo consumer) {
-    AnsiConsole.out().println(Ansi.ansi().a("  [Using file ${consumer.pactFile}]"))
+  void verifyConsumerFromFile(File pactFile, ConsumerInfo consumer) {
+    AnsiConsole.out().println(Ansi.ansi().a("  [Using file $pactFile]"))
   }
 
   @Override
