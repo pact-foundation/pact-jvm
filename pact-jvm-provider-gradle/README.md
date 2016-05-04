@@ -100,6 +100,28 @@ pact {
 }
 ```
 
+## Specifying the pact file or URL at runtime [versions 3.2.7/2.4.9+]
+
+If you need to calculate the pact file or URL at runtime, you can give a Closure as the provider host.
+
+```groovy
+pact {
+
+    serviceProviders {
+
+        provider1 {
+            host = 'localhost'
+
+            hasPactWith('consumer1') {
+                pactFile = { lookupPactFile() }
+            }
+        }
+
+    }
+
+}
+```
+
 ## Starting and shutting down your provider
 
 If you need to start-up or shutdown your provider, you can define a start and terminate task for each provider.

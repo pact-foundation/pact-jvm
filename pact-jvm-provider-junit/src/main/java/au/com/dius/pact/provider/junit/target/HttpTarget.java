@@ -177,12 +177,13 @@ public class HttpTarget implements TestClassAwareTarget {
       providerInfo.setProtocol(protocol);
       providerInfo.setPath(path);
 
-      final List<FrameworkMethod> methods = testClass.getAnnotatedMethods(TargetRequestFilter.class);
-      if (testClass != null && !methods.isEmpty()) {
+      if (testClass != null) {
+        final List<FrameworkMethod> methods = testClass.getAnnotatedMethods(TargetRequestFilter.class);
+        if (!methods.isEmpty()) {
           providerInfo.setRequestFilter(new Closure() {
             @Override
             public void execute(Object httpRequest) {
-              for (FrameworkMethod method: methods) {
+              for (FrameworkMethod method : methods) {
                 try {
                   method.invokeExplosively(testTarget, httpRequest);
                 } catch (Throwable t) {
@@ -193,6 +194,7 @@ public class HttpTarget implements TestClassAwareTarget {
             }
           });
         }
+      }
 
       return providerInfo;
     }

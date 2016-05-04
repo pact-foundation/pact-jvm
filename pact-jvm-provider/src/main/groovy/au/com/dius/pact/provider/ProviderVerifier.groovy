@@ -81,27 +81,35 @@ class ProviderVerifier {
 
   @SuppressWarnings('ThrowRuntimeException')
   def loadPactFileForConsumer(ConsumerInfo consumer) {
-    if (consumer.pactFile instanceof URL) {
-      reporters.each { it.verifyConsumerFromUrl(consumer) }
+    def pactFile = consumer.pactFile
+    if (pactFile instanceof Closure) {
+      pactFile = pactFile.call()
+    }
+
+    if (pactFile instanceof URL) {
+      reporters.each { it.verifyConsumerFromUrl(pactFile, consumer) }
       def options = [:]
       if (consumer.pactFileAuthentication) {
         options.authentication = consumer.pactFileAuthentication
       }
-      PactReader.loadPact(options, consumer.pactFile)
-    } else if (consumer.pactFile instanceof File || ProviderUtils.pactFileExists(consumer.pactFile)) {
-      reporters.each { it.verifyConsumerFromFile(consumer) }
-      PactReader.loadPact(consumer.pactFile)
+      PactReader.loadPact(options, pactFile)
+    } else if (pactFile instanceof File || ProviderUtils.pactFileExists(pactFile)) {
+      reporters.each { it.verifyConsumerFromFile(pactFile, consumer) }
+      PactReader.loadPact(pactFile)
     } else {
-      String message
-      if (pactLoadFailureMessage instanceof Closure) {
-        message = pactLoadFailureMessage.call(consumer) as String
-      } else if (pactLoadFailureMessage instanceof Function1) {
-        message = pactLoadFailureMessage.apply(consumer) as String
-      } else {
-        message = pactLoadFailureMessage as String
-      }
+      String message = generateLoadFailureMessage(consumer)
       reporters.each { it.pactLoadFailureForConsumer(consumer, message) }
       throw new RuntimeException(message)
+    }
+  }
+
+  private generateLoadFailureMessage(ConsumerInfo consumer) {
+    if (pactLoadFailureMessage instanceof Closure) {
+      pactLoadFailureMessage.call(consumer) as String
+    } else if (pactLoadFailureMessage instanceof Function1) {
+      pactLoadFailureMessage.apply(consumer) as String
+    } else {
+      pactLoadFailureMessage as String
     }
   }
 
