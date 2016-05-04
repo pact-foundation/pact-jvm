@@ -10,7 +10,7 @@ object BuildSettings {
     val publishSettings = Seq(
         version := Common.version,
         organization := "au.com.dius",
-        scalaVersion := "2.10.5",
+        scalaVersion := "2.10.6",
 
         publishMavenStyle := true,
         isSnapshot := true,
