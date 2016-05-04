@@ -10,8 +10,8 @@ buildscript {
 subprojects {
 
     def scalaVersionLookup = [
-        '2.10': '2.10.5',
-        '2.11': '2.11.7'
+        '2.10': '2.10.6',
+        '2.11': '2.11.8'
     ]
 
     def m = project.name =~ /.*_(2\.1\d)(_0\.\d+)?/
