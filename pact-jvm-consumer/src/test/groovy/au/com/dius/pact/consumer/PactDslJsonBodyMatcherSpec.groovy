@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
+import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue
 import groovy.json.JsonSlurper
 import spock.lang.Specification
 
@@ -87,4 +88,72 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     result.data.every { it.keySet() == ['defDate', 'cost'] as Set }
   }
 
+  def 'each like allows examples that are not objects'() {
+    given:
+    subject = new PactDslJsonBody()
+      .stringType('preference')
+      .stringType('subscriptionId')
+      .eachLike('types', PactDslJsonRootValue.stringType('abc'), 2)
+
+    when:
+    def result = new JsonSlurper().parseText(subject.body.toString())
+    def keys = ['preference', 'subscriptionId', 'types'] as Set
+
+    then:
+    result.size() == 3
+    result.keySet() == keys
+    result.types == ['abc', 'abc']
+    subject.matchers == [
+      '.types': [min: 0, match: 'type'],
+      '.subscriptionId': [match: 'type'],
+      '.types[*]': [match: 'type'],
+      '.preference': [match: 'type']
+    ]
+  }
+
+  def 'min like allows examples that are not objects'() {
+    given:
+    subject = new PactDslJsonBody()
+      .stringType('preference')
+      .stringType('subscriptionId')
+      .minArrayLike('types', 2, PactDslJsonRootValue.stringType('abc'), 2)
+
+    when:
+    def result = new JsonSlurper().parseText(subject.body.toString())
+    def keys = ['preference', 'subscriptionId', 'types'] as Set
+
+    then:
+    result.size() == 3
+    result.keySet() == keys
+    result.types == ['abc', 'abc']
+    subject.matchers == [
+      '.types': [min: 2, match: 'type'],
+      '.subscriptionId': [match: 'type'],
+      '.types[*]': [match: 'type'],
+      '.preference': [match: 'type']
+    ]
+  }
+
+  def 'max like allows examples that are not objects'() {
+    given:
+    subject = new PactDslJsonBody()
+      .stringType('preference')
+      .stringType('subscriptionId')
+      .maxArrayLike('types', 10, PactDslJsonRootValue.stringType('abc'), 2)
+
+    when:
+    def result = new JsonSlurper().parseText(subject.body.toString())
+    def keys = ['preference', 'subscriptionId', 'types'] as Set
+
+    then:
+    result.size() == 3
+    result.keySet() == keys
+    result.types == ['abc', 'abc']
+    subject.matchers == [
+      '.types': [max: 10, match: 'type'],
+      '.subscriptionId': [match: 'type'],
+      '.types[*]': [match: 'type'],
+      '.preference': [match: 'type']
+    ]
+  }
 }

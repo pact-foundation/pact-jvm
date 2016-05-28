@@ -506,6 +506,29 @@ public class PactDslJsonBody extends DslPart {
     }
 
     /**
+     * Attribute that is an array of values that are not objects where each item must match the following example
+     * @param name field name
+     * @param value Value to use to match each item
+     */
+    public PactDslJsonBody eachLike(String name, PactDslJsonRootValue value) {
+      return eachLike(name, value, 1);
+    }
+
+    /**
+     * Attribute that is an array of values that are not objects where each item must match the following example
+     * @param name field name
+     * @param value Value to use to match each item
+     * @param numberExamples number of examples to generate
+     */
+    public PactDslJsonBody eachLike(String name, PactDslJsonRootValue value, int numberExamples) {
+      matchers.put(matcherKey(name), matchMin(0));
+      PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), this, true);
+      parent.setNumberExamples(numberExamples);
+      parent.putObject(value);
+      return (PactDslJsonBody) parent.closeArray();
+    }
+
+    /**
      * Attribute that is an array with a minimum size where each item must match the following example
      * @param name field name
      * @param size minimum size of the array
@@ -540,6 +563,31 @@ public class PactDslJsonBody extends DslPart {
     }
 
     /**
+     * Attribute that is an array of values with a minimum size that are not objects where each item must match the following example
+     * @param name field name
+     * @param size minimum size of the array
+     * @param value Value to use to match each item
+     */
+    public PactDslJsonBody minArrayLike(String name, Integer size, PactDslJsonRootValue value) {
+      return minArrayLike(name, size, value, 1);
+    }
+
+    /**
+     * Attribute that is an array of values with a minimum size that are not objects where each item must match the following example
+     * @param name field name
+     * @param size minimum size of the array
+     * @param value Value to use to match each item
+     * @param numberExamples number of examples to generate
+     */
+    public PactDslJsonBody minArrayLike(String name, Integer size, PactDslJsonRootValue value, int numberExamples) {
+      matchers.put(matcherKey(name), matchMin(size));
+      PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), this, true);
+      parent.setNumberExamples(numberExamples);
+      parent.putObject(value);
+      return (PactDslJsonBody) parent.closeArray();
+    }
+
+    /**
      * Attribute that is an array with a maximum size where each item must match the following example
      * @param name field name
      * @param size maximum size of the array
@@ -571,6 +619,31 @@ public class PactDslJsonBody extends DslPart {
     @Override
     public PactDslJsonBody maxArrayLike(Integer size, int numberExamples) {
       throw new UnsupportedOperationException("use the maxArrayLike(String name, Integer size, int numberExamples) form");
+    }
+
+    /**
+     * Attribute that is an array of values with a maximum size that are not objects where each item must match the following example
+     * @param name field name
+     * @param size maximum size of the array
+     * @param value Value to use to match each item
+     */
+    public PactDslJsonBody maxArrayLike(String name, Integer size, PactDslJsonRootValue value) {
+      return maxArrayLike(name, size, value, 1);
+    }
+
+    /**
+     * Attribute that is an array of values with a maximum size that are not objects where each item must match the following example
+     * @param name field name
+     * @param size maximum size of the array
+     * @param value Value to use to match each item
+     * @param numberExamples number of examples to generate
+     */
+    public PactDslJsonBody maxArrayLike(String name, Integer size, PactDslJsonRootValue value, int numberExamples) {
+      matchers.put(matcherKey(name), matchMax(size));
+      PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), this, true);
+      parent.setNumberExamples(numberExamples);
+      parent.putObject(value);
+      return (PactDslJsonBody) parent.closeArray();
     }
 
     /**
