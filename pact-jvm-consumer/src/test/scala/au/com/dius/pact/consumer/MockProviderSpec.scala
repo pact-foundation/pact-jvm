@@ -22,7 +22,7 @@ class MockProviderSpec extends Specification with StrictLogging {
 
   implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
   
-  implicit val timeout = FiniteDuration(10L, "second")
+  implicit val timeout = FiniteDuration(30L, "second")
 
   def verify:ConsumerTestVerification[Result] = { r:Result =>
     if(r.isSuccess) {
