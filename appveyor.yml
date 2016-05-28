@@ -6,3 +6,4 @@ build: false
 
 build_script:
   - java -version
+  - gradlew --stacktrace --no-daemon -i check
