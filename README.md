@@ -38,7 +38,7 @@ how to get going.
 
 ## Documentation
 
-Additional documentation can be found in the [Pact Wiki](https://github.com/realestate-com-au/pact/wiki),
+Additional documentation can be found at [docs.pact.io](http://docs.pact.io), in the [Pact Wiki](https://github.com/realestate-com-au/pact/wiki),
 and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki).
 
 ## Note about artifact names and versions
@@ -62,9 +62,9 @@ on (indy version).
 
 Pact-JVM has a number of ways you can write your service consumer tests.
 
-### I Use Scala and Specs 2
+### I Use Scala
 
-You want to look at: [pact-jvm-consumer-specs2](pact-jvm-consumer-specs2)
+You want to look at: [scala-pact](https://github.com/ITV/scala-pact) or [pact-jvm-consumer-specs2](pact-jvm-consumer-specs2)
 
 ### I Use Java
 
@@ -97,7 +97,7 @@ with these files.
 
 #### verify pacts with SBT
 
-You want to look at: [pact sbt plugin](pact-jvm-provider-sbt)
+You want to look at: [scala-pact](https://github.com/ITV/scala-pact) or [pact sbt plugin](pact-jvm-provider-sbt)
 
 #### verify pacts with Gradle
 
