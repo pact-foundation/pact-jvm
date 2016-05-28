@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.provider.ProviderInfo
+import org.gradle.api.GradleScriptException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -22,6 +23,17 @@ class PactPlugin implements Plugin<Project> {
             group: GROUP)
 
         project.afterEvaluate {
+
+            if (project.pact == null) {
+              throw new GradleScriptException('No pact block was found in the project', null)
+            } else if (!(project.pact instanceof PactPluginExtension)) {
+              throw new GradleScriptException('Your project is misconfigured, was expecting a \'pact\' configuration ' +
+                "in the build, but got a ${project.pact.class.simpleName} with value '${project.pact}' instead. " +
+                'Make sure there is no property that is overriding \'pact\'.', null)
+            } else if (project.pact.serviceProviders.empty) {
+              throw new GradleScriptException('No service providers are configured', null)
+            }
+
             project.pact.serviceProviders.all { ProviderInfo provider ->
                 def providerTask = project.task("pactVerify_${provider.name}",
                     description: "Verify the pacts against ${provider.name}", type: PactVerificationTask,
