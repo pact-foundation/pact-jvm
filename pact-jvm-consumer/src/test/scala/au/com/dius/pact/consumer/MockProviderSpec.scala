@@ -22,7 +22,7 @@ class MockProviderSpec extends Specification with StrictLogging {
 
   implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
   
-  implicit val timeout = FiniteDuration(30L, "second")
+  implicit val timeout = FiniteDuration(60L, "second")
 
   def verify:ConsumerTestVerification[Result] = { r:Result =>
     if(r.isSuccess) {
@@ -47,12 +47,12 @@ class MockProviderSpec extends Specification with StrictLogging {
         logger.debug("invalidRequest: " + invalidRequest.toString)
         val invalidResponse = HttpClient.run(invalidRequest)
         logger.debug("invalidResponse: " + invalidResponse.toString)
-        invalidResponse.map(_.getStatus) must be_==(500).awaitFor(timeout)
+        invalidResponse.map(_.getStatus) must be_==(500).await(3, timeout)
   
         //hit server with valid request
         val validResponse = HttpClient.run(validRequest)
         logger.debug("validResponse: " + validResponse.toString)
-        validResponse.map(_.getStatus) must be_==(response.getStatus).awaitFor(timeout)
+        validResponse.map(_.getStatus) must be_==(response.getStatus).await(3, timeout)
       }
 
       verify(codeResult) must beNone
