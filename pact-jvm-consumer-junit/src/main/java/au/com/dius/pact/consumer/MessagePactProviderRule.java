@@ -5,6 +5,7 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.v3.messaging.Message;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -58,12 +59,29 @@ public class MessagePactProviderRule extends ExternalResource {
 				}
 
 				Message providedMessage = null;
-				Map<String, Message> pacts = parsePacts();
-				if (pactDef.value().length == 2 && !pactDef.value()[1].trim().isEmpty()) {
-					providedMessage = pacts.get(pactDef.value()[1].trim());
-				} else if (!pacts.isEmpty()) {
-					providedMessage = pacts.values().iterator().next();
-				}
+				Map<String, Message> pacts;
+				if (StringUtils.isNoneEmpty(pactDef.fragment())) {
+          Optional<Method> possiblePactMethod = findPactMethod(pactDef);
+          if (!possiblePactMethod.isPresent()) {
+            throw new UnsupportedOperationException("Could not find method with @Pact for the provider " + provider);
+          }
+          pacts = new HashMap<>();
+          Method method = possiblePactMethod.get();
+          Pact pact = method.getAnnotation(Pact.class);
+          MessagePactBuilder builder = MessagePactBuilder.consumer(pact.consumer()).hasPactWith(provider);
+          messagePact = (MessagePact) method.invoke(testClassInstance, builder);
+          for (Message message : messagePact.getMessages()) {
+            pacts.put(message.getProviderState(), message);
+          }
+        } else {
+          pacts = parsePacts();
+        }
+
+        if (pactDef.value().length == 2 && !pactDef.value()[1].trim().isEmpty()) {
+          providedMessage = pacts.get(pactDef.value()[1].trim());
+        } else if (!pacts.isEmpty()) {
+          providedMessage = pacts.values().iterator().next();
+        }
 
 				if (providedMessage == null) {
 					base.evaluate();
