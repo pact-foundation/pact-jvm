@@ -5,5 +5,6 @@ package au.com.dius.pact.model
  */
 interface Interaction {
   String getDescription()
+  String getProviderState()
   boolean conflictsWith(Interaction other)
 }
