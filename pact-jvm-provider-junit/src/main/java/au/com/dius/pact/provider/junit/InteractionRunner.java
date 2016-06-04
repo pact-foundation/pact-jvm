@@ -3,8 +3,8 @@ package au.com.dius.pact.provider.junit;
 import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.model.RequestResponsePact;
 import au.com.dius.pact.provider.junit.target.Target;
-import au.com.dius.pact.provider.junit.target.TestTarget;
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget;
+import au.com.dius.pact.provider.junit.target.TestTarget;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.HttpRequest;
 import org.junit.After;
@@ -54,7 +54,7 @@ class InteractionRunner extends Runner {
 
     @Override
     public Description getDescription() {
-        final Description description = Description.createSuiteDescription(pact.getConsumer().getName());
+        final Description description = Description.createSuiteDescription(testClass.getJavaClass());
         for (RequestResponseInteraction i: pact.getInteractions()) {
             description.addChild(describeChild(i));
         }
@@ -62,11 +62,11 @@ class InteractionRunner extends Runner {
     }
 
     protected Description describeChild(final RequestResponseInteraction interaction) {
-        if (!childDescriptions.containsKey(interaction)) {
-            childDescriptions.put(interaction, Description.createTestDescription(pact.getConsumer().getName(),
-                interaction.getDescription()));
-        }
-        return childDescriptions.get(interaction);
+      if (!childDescriptions.containsKey(interaction)) {
+          childDescriptions.put(interaction, Description.createTestDescription(testClass.getJavaClass(),
+            pact.getConsumer().getName() + " - " + interaction.getDescription()));
+      }
+      return childDescriptions.get(interaction);
     }
 
     // Validation
