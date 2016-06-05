@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider.reporters
 
+import au.com.dius.pact.model.BasePact
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
-import au.com.dius.pact.model.PactWriter
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 
@@ -28,7 +28,7 @@ class MarkdownReporter implements VerifierReporter {
     writer.println '| Description    | Value |'
     writer.println '| -------------- | ----- |'
     writer.println "| Date Generated | ${new Date()} |"
-    writer.println "| Pact Version   | ${PactWriter.lookupVersion()} |"
+    writer.println "| Pact Version   | ${BasePact.lookupVersion()} |"
     writer.println()
   }
 

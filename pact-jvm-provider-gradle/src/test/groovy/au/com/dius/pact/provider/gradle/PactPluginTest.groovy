@@ -86,6 +86,7 @@ class PactPluginTest {
                     hasPactWith('ConsumerA') {
                         pactFile = url(pactFileUrl)
                         stateChange = url(stateChangeUrl)
+                        verificationType = 'REQUST_RESPONSE'
                     }
                 }
             }

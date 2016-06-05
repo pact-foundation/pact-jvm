@@ -49,10 +49,10 @@ class ProviderUtils {
  }
 
   static PactVerification verificationType(ProviderInfo provider, ConsumerInfo consumer) {
-   consumer.verificationType ?: provider.verificationType
- }
+   consumer.verificationType ?: provider.verificationType ?: PactVerification.REQUST_RESPONSE
+  }
 
   static List packagesToScan(ProviderInfo providerInfo, ConsumerInfo consumer) {
    consumer.packagesToScan ?: providerInfo.packagesToScan
- }
+  }
 }
