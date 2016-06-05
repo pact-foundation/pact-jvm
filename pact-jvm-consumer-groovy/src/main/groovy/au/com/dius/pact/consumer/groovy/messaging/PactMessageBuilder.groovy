@@ -106,7 +106,7 @@ class PactMessageBuilder extends BaseBuilder {
    * @param closure
    */
   void run(Closure closure) {
-    def pact = new MessagePact(consumer: consumer, provider: provider, messages: messages)
+    def pact = new MessagePact(provider, consumer, messages)
     def results = messages.collect {
       try {
         closure.call(it)

@@ -1,8 +1,11 @@
 package au.com.dius.pact.model.v3
 
+import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.InvalidPactException
 import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.model.Provider
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import spock.lang.Specification
@@ -22,23 +25,7 @@ class V3PactSpec extends Specification {
 
     def 'writing pacts should merge with any existing file'() {
         given:
-        def pact = new V3Pact() {
-            @Override
-            Map toMap() {
-                [
-                    consumer: [name: 'asis-trading-order-repository'],
-                    provider: [name: 'asis-core'],
-                    messages: [
-                        [
-                            providerState: 'a new message exists',
-                            contents: 'Hello',
-                            description: 'a new hello message'
-                        ]
-                    ],
-                    metadata: metadata
-                ]
-            }
-
+        def pact = new V3Pact(new Provider(), new Consumer(), V3Pact.DEFAULT_METADATA) {
             @SuppressWarnings('UnusedMethodParameter')
             protected File fileForPact(String pactDir) {
                 pactFile
@@ -51,6 +38,22 @@ class V3PactSpec extends Specification {
             @Override
             Pact sortInteractions() {
                 this
+            }
+
+            @Override
+            Map toMap(PactSpecVersion pactSpecVersion) {
+                [
+                  consumer: [name: 'asis-trading-order-repository'],
+                  provider: [name: 'asis-core'],
+                  messages: [
+                    [
+                      providerState: 'a new message exists',
+                      contents: 'Hello',
+                      description: 'a new hello message'
+                    ]
+                  ],
+                  metadata: metadata
+                ]
             }
         }
 
@@ -65,9 +68,9 @@ class V3PactSpec extends Specification {
 
     def 'when merging it should replace messages with the same description'() {
         given:
-        def pact = new V3Pact() {
+        def pact = new V3Pact(new Provider(), new Consumer(), V3Pact.DEFAULT_METADATA) {
             @Override
-            Map toMap() {
+            Map toMap(PactSpecVersion pactSpecVersion) {
                 [
                     consumer: [name: 'asis-trading-order-repository'],
                     provider: [name: 'asis-core'],
@@ -117,9 +120,9 @@ class V3PactSpec extends Specification {
         json.metadata['pact-specification'].version = '2.0.0'
         pactFile.write(new JsonBuilder(json).toPrettyString())
 
-        def pact = new V3Pact() {
+        def pact = new V3Pact(new Provider(), new Consumer(), V3Pact.DEFAULT_METADATA) {
             @Override
-            Map toMap() {
+            Map toMap(PactSpecVersion pactSpecVersion) {
                 [
                   consumer: [name: 'asis-trading-order-repository'],
                   provider: [name: 'asis-core'],
@@ -165,9 +168,9 @@ class V3PactSpec extends Specification {
         def pactUrl = V3PactSpec.classLoader.getResource('v3-pact.json')
         pactFile.write(pactUrl.text)
 
-        def pact = new V3Pact() {
+        def pact = new V3Pact(new Provider(), new Consumer(), V3Pact.DEFAULT_METADATA) {
             @Override
-            Map toMap() {
+            Map toMap(PactSpecVersion pactSpecVersion) {
                 [
                   consumer: [name: 'asis-trading-order-repository'],
                   provider: [name: 'asis-core'],

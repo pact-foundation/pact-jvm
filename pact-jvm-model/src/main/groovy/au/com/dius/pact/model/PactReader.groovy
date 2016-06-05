@@ -38,7 +38,7 @@ class PactReader {
   @SuppressWarnings('UnusedMethodParameter')
   static Pact loadV3Pact(def source, def pactJson) {
       if (pactJson.messages) {
-          new MessagePact().fromMap(pactJson)
+          MessagePact.fromMap(pactJson)
       } else {
         def transformedJson = recursiveTransformJson(pactJson)
         def provider = transformedJson.provider as Provider

@@ -1,5 +1,6 @@
 package au.com.dius.pact.model.v3.messaging
 
+import au.com.dius.pact.model.BasePact
 import au.com.dius.pact.model.HttpPart
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
@@ -34,7 +35,7 @@ class Message implements Interaction {
   }
 
   Map toMap() {
-    def map = MessagePact.toMap(this)
+    def map = BasePact.convertToMap(this)
     if (contents.present) {
       if (metaData.contentType == JSON) {
         map.contents = new JsonSlurper().parseText(contents.value.toString())

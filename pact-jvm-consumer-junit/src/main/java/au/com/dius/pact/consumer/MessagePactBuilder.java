@@ -133,11 +133,6 @@ public class MessagePactBuilder {
   }
 
   public MessagePact toPact() {
-    MessagePact pact = new MessagePact();
-    pact.setConsumer(consumer);
-    pact.setProvider(provider);
-    pact.setMessages(messages);
-
-    return pact;
+    return new MessagePact(provider, consumer, messages);
   }
 }
