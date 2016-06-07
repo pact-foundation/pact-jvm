@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.v3.messaging.Message
@@ -379,7 +380,7 @@ class ProviderVerifier {
   void verifyMessagePact(Set methods, Message message, String interactionMessage, Map failures) {
     methods.each {
       reporters.each { it.generatesAMessageWhich() }
-      def actualMessage = invokeProviderMethod(it)
+      def actualMessage = OptionalBody.body(invokeProviderMethod(it) as String)
       def comparison = ResponseComparison.compareMessage(message, actualMessage)
       def s = ' generates a message which'
       displayBodyResult(failures, comparison, interactionMessage + s)

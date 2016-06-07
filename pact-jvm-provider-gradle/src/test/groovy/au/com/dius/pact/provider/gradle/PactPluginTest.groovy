@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.provider.PactVerification
 import org.gradle.api.Project
+import org.gradle.api.ProjectConfigurationException
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Before
 import org.junit.Test
@@ -85,6 +86,7 @@ class PactPluginTest {
                     hasPactWith('ConsumerA') {
                         pactFile = url(pactFileUrl)
                         stateChange = url(stateChangeUrl)
+                        verificationType = 'REQUST_RESPONSE'
                     }
                 }
             }
@@ -127,6 +129,15 @@ class PactPluginTest {
     @Test
     void 'configures the publish task correctly'() {
         project.pact {
+
+            serviceProviders {
+              ProviderA {
+                hasPactWith('ConsumerA') {
+
+                }
+              }
+            }
+
             publish {
                 pactDirectory = '/pact/dir'
                 pactBrokerUrl = 'http://pactbroker:1234'
@@ -137,5 +148,26 @@ class PactPluginTest {
 
         assert project.pact.publish.pactDirectory == '/pact/dir'
         assert project.pact.publish.pactBrokerUrl == 'http://pactbroker:1234'
+    }
+
+    @Test(expected = ProjectConfigurationException)
+    void 'fails if there is no pact configuration block'() {
+      project.evaluate()
+    }
+
+    @Test(expected = ProjectConfigurationException)
+    void 'fails if there pact is not a valid configuration'() {
+      project.ext.pact = '123'
+      project.pact {
+        serviceProviders {
+          ProviderA {
+            hasPactWith('ConsumerA') {
+
+            }
+          }
+        }
+      }
+
+      project.evaluate()
     }
 }

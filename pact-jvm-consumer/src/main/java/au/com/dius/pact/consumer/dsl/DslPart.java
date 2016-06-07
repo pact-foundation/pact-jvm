@@ -208,7 +208,7 @@ public abstract class DslPart {
 
     protected Map<String, Object> matchMax(Integer max) {
         Map<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put("min", max);
+        jsonObject.put("max", max);
         jsonObject.put("match", "type");
         return jsonObject;
     }

@@ -1,11 +1,15 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.model.Consumer
+import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
+import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
+import au.com.dius.pact.provider.reporters.VerifierReporter
 import spock.lang.Specification
 
 class ProviderVerifierSpec extends Specification {
@@ -298,7 +302,7 @@ class ProviderVerifierSpec extends Specification {
   def 'extract interactions from a Message pact'() {
     given:
     def interaction = new Message('test message')
-    def pact = new MessagePact(messages: [ interaction ])
+    def pact = new MessagePact(new Provider(), new Consumer(), [interaction ])
 
     when:
     def result = verifier.interactions(pact)
@@ -331,5 +335,29 @@ class ProviderVerifierSpec extends Specification {
 
     then:
     1 * PactReader.loadPact([:], pactFile) >> Mock(Pact)
+  }
+
+  class TestSupport {
+    String testMethod() {
+      '\"test method result\"'
+    }
+  }
+
+  def 'is able to verify a message pact'() {
+    given:
+    def methods = [ TestSupport.getMethod('testMethod') ] as Set
+    Message message = new Message(contents: OptionalBody.body('\"test method result\"'))
+    def interactionMessage = 'test message interaction'
+    def failures = [:]
+    def reporter = Mock(VerifierReporter)
+    verifier.reporters << reporter
+
+    when:
+    verifier.verifyMessagePact(methods, message, interactionMessage, failures)
+
+    then:
+    1 * reporter.bodyComparisonOk()
+    1 * reporter.generatesAMessageWhich()
+    0 * reporter._
   }
 }

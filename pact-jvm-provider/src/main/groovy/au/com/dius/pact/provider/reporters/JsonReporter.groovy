@@ -1,9 +1,8 @@
 package au.com.dius.pact.provider.reporters
 
+import au.com.dius.pact.model.BasePact
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
-import au.com.dius.pact.model.PactSpecVersion
-import au.com.dius.pact.model.PactWriter
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 import groovy.json.JsonOutput
@@ -29,7 +28,7 @@ class JsonReporter implements VerifierReporter {
     jsonData = [
       metaData: [
         date: new Date(),
-        pactJvmVersion: PactWriter.lookupVersion(),
+        pactJvmVersion: BasePact.lookupVersion(),
         reportFormat: REPORT_FORMAT
       ],
       provider: [
@@ -87,7 +86,7 @@ class JsonReporter implements VerifierReporter {
   @Override
   void interactionDescription(Interaction interaction) {
     jsonData.execution.last().interactions << [
-      interaction: PactWriter.interactionToMap(interaction, PactSpecVersion.V3),
+      interaction: interaction,
       verification: [
         result: 'OK'
       ]

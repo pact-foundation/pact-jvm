@@ -20,5 +20,4 @@ class MessageSpec extends Specification {
         then:
         message.contentsAsBytes() == []
     }
-
 }

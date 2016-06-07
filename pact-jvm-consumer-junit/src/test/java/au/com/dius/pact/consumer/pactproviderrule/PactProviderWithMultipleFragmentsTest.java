@@ -57,23 +57,23 @@ public class PactProviderWithMultipleFragmentsTest {
                     .method("GET")
                 .willRespondWith()
                     .status(200)
-                    .body("{\"responsetest\": true, \"name\": \"harry\"}")
+                    .body("{\"responsetest\": true, \"name\": \"fred\"}")
                 .toFragment();
+    }
+
+    @Test
+    @PactVerification(value = "test_provider", fragment = "createFragment2")
+    public void runTestWithFragment2() throws IOException {
+        Map expectedResponse = new HashMap();
+        expectedResponse.put("responsetest", true);
+        expectedResponse.put("name", "fred");
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
     }
 
     @Test
     @PactVerification(value = "test_provider", fragment = "createFragment")
     public void runTestWithFragment1() throws IOException {
         Assert.assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).options("/second"), 200);
-        Map expectedResponse = new HashMap();
-        expectedResponse.put("responsetest", true);
-        expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
-    }
-
-    @Test
-    @PactVerification(value = "test_provider", fragment = "createFragment2")
-    public void runTestWithFragment2() throws IOException {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");

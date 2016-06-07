@@ -11,7 +11,7 @@ class ConsumerInfo {
     def pactFile
     def stateChange
     boolean stateChangeUsesBody = true
-    PactVerification verificationType = PactVerification.REQUST_RESPONSE
+    PactVerification verificationType
     List packagesToScan
     List pactFileAuthentication
 

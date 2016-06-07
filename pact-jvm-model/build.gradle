@@ -15,3 +15,5 @@ dependencies {
   testCompile 'cglib:cglib-nodep:3.1', 'org.objenesis:objenesis:2.1'
   testCompile 'ch.qos.logback:logback-classic:1.1.2'
 }
+
+compileTestGroovy.dependsOn compileTestScala

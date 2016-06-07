@@ -1,10 +1,10 @@
 package au.com.dius.pact.provider.junit;
 
-import au.com.dius.pact.model.Interaction;
+import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.model.RequestResponsePact;
 import au.com.dius.pact.provider.junit.target.Target;
-import au.com.dius.pact.provider.junit.target.TestTarget;
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget;
+import au.com.dius.pact.provider.junit.target.TestTarget;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.HttpRequest;
 import org.junit.After;
@@ -43,8 +43,7 @@ class InteractionRunner extends Runner {
     private final TestClass testClass;
     private final RequestResponsePact pact;
 
-    private final ConcurrentHashMap<Interaction, Description> childDescriptions =
-      new ConcurrentHashMap<Interaction, Description>();
+    private final ConcurrentHashMap<RequestResponseInteraction, Description> childDescriptions = new ConcurrentHashMap<RequestResponseInteraction, Description>();
 
     public InteractionRunner(final TestClass testClass, final RequestResponsePact pact) throws InitializationError {
         this.testClass = testClass;
@@ -55,19 +54,19 @@ class InteractionRunner extends Runner {
 
     @Override
     public Description getDescription() {
-        final Description description = Description.createSuiteDescription(pact.getConsumer().getName());
-        for (Interaction i: pact.getInteractions()) {
+        final Description description = Description.createSuiteDescription(testClass.getJavaClass());
+        for (RequestResponseInteraction i: pact.getInteractions()) {
             description.addChild(describeChild(i));
         }
         return description;
     }
 
-    protected Description describeChild(final Interaction interaction) {
-        if (!childDescriptions.containsKey(interaction)) {
-            childDescriptions.put(interaction, Description.createTestDescription(pact.getConsumer().getName(),
-                interaction.getDescription()));
-        }
-        return childDescriptions.get(interaction);
+    protected Description describeChild(final RequestResponseInteraction interaction) {
+      if (!childDescriptions.containsKey(interaction)) {
+          childDescriptions.put(interaction, Description.createTestDescription(testClass.getJavaClass(),
+            pact.getConsumer().getName() + " - " + interaction.getDescription()));
+      }
+      return childDescriptions.get(interaction);
     }
 
     // Validation
@@ -136,7 +135,7 @@ class InteractionRunner extends Runner {
 
     // Running
     public void run(final RunNotifier notifier) {
-        for (final Interaction interaction : pact.getInteractions()) {
+        for (final RequestResponseInteraction interaction : pact.getInteractions()) {
             final Description description = describeChild(interaction);
             notifier.fireTestStarted(description);
             try {
@@ -153,7 +152,7 @@ class InteractionRunner extends Runner {
         return testClass.getOnlyConstructor().newInstance();
     }
 
-    protected Statement interactionBlock(final Interaction interaction) {
+    protected Statement interactionBlock(final RequestResponseInteraction interaction) {
         //1. prepare object
         //2. get Target
         //3. run Rule`s
@@ -190,7 +189,7 @@ class InteractionRunner extends Runner {
         return statement;
     }
 
-    protected Statement withStateChanges(final Interaction interaction, final Object target, final Statement statement) {
+    protected Statement withStateChanges(final RequestResponseInteraction interaction, final Object target, final Statement statement) {
         if (interaction.getProviderState() != null && !interaction.getProviderState().isEmpty()) {
             final String state = interaction.getProviderState();
             final List<FrameworkMethod> onStateChange = new ArrayList<FrameworkMethod>();
@@ -205,17 +204,17 @@ class InteractionRunner extends Runner {
         }
     }
 
-    protected Statement withBefores(final Interaction interaction, final Object target, final Statement statement) {
+    protected Statement withBefores(final RequestResponseInteraction interaction, final Object target, final Statement statement) {
         final List<FrameworkMethod> befores = testClass.getAnnotatedMethods(Before.class);
         return befores.isEmpty() ? statement : new RunBefores(statement, befores, target);
     }
 
-    protected Statement withAfters(final Interaction interaction, final Object target, final Statement statement) {
+    protected Statement withAfters(final RequestResponseInteraction interaction, final Object target, final Statement statement) {
         final List<FrameworkMethod> afters = testClass.getAnnotatedMethods(After.class);
         return afters.isEmpty() ? statement : new RunAfters(statement, afters, target);
     }
 
-    protected Statement withRules(final Interaction interaction, final Object target, final Statement statement) {
+    protected Statement withRules(final RequestResponseInteraction interaction, final Object target, final Statement statement) {
         final List<TestRule> testRules = testClass.getAnnotatedMethodValues(target, Rule.class, TestRule.class);
         testRules.addAll(testClass.getAnnotatedFieldValues(target, Rule.class, TestRule.class));
         return testRules.isEmpty() ? statement : new RunRules(statement, testRules, describeChild(interaction));

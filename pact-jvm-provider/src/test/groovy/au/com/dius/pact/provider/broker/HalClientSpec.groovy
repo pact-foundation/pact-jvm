@@ -44,4 +44,55 @@ class HalClientSpec extends Specification {
     1 * authConfig.basic('1', '2')
   }
 
+  def 'throws an exception if the response is not JSON'() {
+    given:
+    def mockHttp = Mock(RESTClient) {
+      get([path: '/', requestContentType: 'application/json',
+                    headers: [Accept: 'application/hal+json']]) >> [headers: ['Content-Type': 'text/plain']]
+    }
+    client.newHttpClient() >> mockHttp
+
+    when:
+    client.navigate('pb:latest-provider-pacts')
+
+    then:
+    thrown(InvalidHalResponse)
+  }
+
+  def 'throws an exception if the _links is not found'() {
+    given:
+    def mockHttp = Mock(RESTClient) {
+      get([path: '/', requestContentType: 'application/json',
+           headers: [Accept: 'application/hal+json']]) >> [
+        headers: ['Content-Type': 'application/hal+json'],
+        data: [:]
+      ]
+    }
+    client.newHttpClient() >> mockHttp
+
+    when:
+    client.navigate('pb:latest-provider-pacts')
+
+    then:
+    thrown(InvalidHalResponse)
+  }
+
+  def 'throws an exception if the required link is not found'() {
+    given:
+    def mockHttp = Mock(RESTClient) {
+      get([path: '/', requestContentType: 'application/json',
+           headers: [Accept: 'application/hal+json']]) >> [
+        headers: ['Content-Type': 'application/hal+json'],
+        data: [_links: [:]]
+      ]
+    }
+    client.newHttpClient() >> mockHttp
+
+    when:
+    client.navigate('pb:latest-provider-pacts')
+
+    then:
+    thrown(InvalidHalResponse)
+  }
+
 }

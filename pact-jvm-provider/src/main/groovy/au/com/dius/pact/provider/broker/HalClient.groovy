@@ -9,6 +9,7 @@ import groovyx.net.http.RESTClient
  */
 @Slf4j
 @Canonical
+@SuppressWarnings('DuplicateStringLiteral')
 class HalClient {
   private static final String ROOT = '/'
 
@@ -50,7 +51,17 @@ class HalClient {
   }
 
   private fetchLink(String link, Map options) {
+    if (pathInfo == null || pathInfo['_links'] == null) {
+      throw new InvalidHalResponse('Expected a HAL+JSON response from the pact broker, but got ' +
+        "a response with no '_links'. URL: '${baseUrl}', LINK: '${link}'")
+    }
+
     def linkData = pathInfo.'_links'[link]
+    if (linkData == null) {
+      throw new InvalidHalResponse("Link '$link' was not found in the response, only the following links where " +
+        "found: ${pathInfo['_links'].keySet()}. URL: '${baseUrl}', LINK: '${link}'")
+    }
+
     if (linkData.templated) {
       fetch(parseLinkUrl(linkData.href, options))
     } else {
@@ -81,7 +92,14 @@ class HalClient {
   private fetch(String path) {
     setupHttpClient()
     log.debug "Fetching: $path"
-    http.get(path: path, requestContentType: 'application/json').data
+    def response = http.get(path: path, requestContentType: 'application/json',
+      headers: [Accept: 'application/hal+json'])
+    def contentType = response.headers.'Content-Type'
+    if (contentType != 'application/json' && contentType != 'application/hal+json') {
+      throw new InvalidHalResponse('Expected a HAL+JSON response from the pact broker, but got ' +
+        "'$contentType'. URL: '${baseUrl}', PATH: '${path}'")
+    }
+    response.data
   }
 
   def methodMissing(String name, args) {

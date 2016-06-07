@@ -1,5 +1,38 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.2.7 - Bugfix Release
+
+* 73e53ba - fix for a build anamoly (Ronald Holshausen, Wed May 4 14:32:11 2016 +1000)
+* 5ec6579 - update changelog for release 2.4.9 (Ronald Holshausen, Wed May 4 12:30:33 2016 +1000)
+* 69ac23d - updated readme about allowing the pact file/url to be determined with a closure #252 (Ronald Holshausen, Wed May 4 11:41:49 2016 +1000)
+* ef45418 - allow the pact file/url to be determined with a closure #252 (Ronald Holshausen, Wed May 4 11:37:08 2016 +1000)
+* bfe5956 - upgrade to gradle 2.11 (Ronald Holshausen, Wed May 4 11:36:29 2016 +1000)
+* 8293a8c - Merge pull request #253 from awojcicki/npe_jvm_provider (Ronald Holshausen, Sat Apr 30 15:52:04 2016 +1000)
+* b569427 - bugfix - fix possible NPE in HttpTarget when testClass is Null (Adam Wójcicki, Fri Apr 29 14:15:12 2016 +0200)
+* 9b0067c - corrected readmes for the verification reports #232 (Ronald Holshausen, Wed Apr 27 15:54:33 2016 +1000)
+* 7a15faf - updated readmes for the verification reports #232 (Ronald Holshausen, Wed Apr 27 15:51:27 2016 +1000)
+* 82ccb26 - deprecating the expectMismatch value on @PactVerification because it causes too much confusion #245 (Ronald Holshausen, Wed Apr 27 14:58:15 2016 +1000)
+* 978b450 - enable verification reports with Java system properties and environment variables #232 (Ronald Holshausen, Wed Apr 27 13:56:58 2016 +1000)
+* 8365c2e - Merge pull request #251 from awojcicki/fix_handling_nested_properties (Ronald Holshausen, Tue Apr 26 19:21:08 2016 +1000)
+* 68e702d - bugfix - fix handling nested properties in PactDslJsonBody (Adam Wójcicki, Mon Apr 25 15:15:26 2016 +0200)
+* 6803124 - damn code narc got me again #232 (Ronald Holshausen, Sun Apr 24 18:40:55 2016 +1000)
+* 5450ec0 - add reporting capability to junit verification controlled by annotations #232 (Ronald Holshausen, Sun Apr 24 18:25:38 2016 +1000)
+* 3290f36 - update HttpTarget to use the PactVerifier so we get access to the report capability #232 (Ronald Holshausen, Sun Apr 24 17:13:10 2016 +1000)
+* f4b372e - fixed code narc errors for markdown reporter #232 (Ronald Holshausen, Sun Apr 24 14:24:42 2016 +1000)
+* 340ed8b - implemented a markdown reporter #232 (Ronald Holshausen, Sun Apr 24 13:41:36 2016 +1000)
+* 8d88884 - first stab at a JSON report on verification #232 (Ronald Holshausen, Sat Apr 23 16:54:11 2016 +1000)
+* de96552 - extract the console output from the pact verifier into a reporter so that other reports formats can be implemented #232 (Ronald Holshausen, Sun Apr 10 17:29:55 2016 +1000)
+* a0eb0a4 - Expose the HTTPS mock server certificate via MockProviderConfig #241 (Ronald Holshausen, Sun Apr 10 15:31:25 2016 +1000)
+* e0aa1dd - Updated the consumer junit readme with https option #241 (Ronald Holshausen, Sun Apr 10 15:11:40 2016 +1000)
+* 0d4f7c5 - Implemented a https switch in the PactProviderRule to run the mock server with HTTPS and a self-signed cert #241 (Ronald Holshausen, Sun Apr 10 14:35:00 2016 +1000)
+* 5cde9ea - refactored MockProviderConfig into a trait and created a HTTP and HTTPS case class #241 (Ronald Holshausen, Sun Apr 10 12:52:41 2016 +1000)
+* 354d462 - update @PactFolder to be able to load pacts from a directory #236 (Ronald Holshausen, Sun Apr 10 11:47:07 2016 +1000)
+* 5096c9f - scala test code now needs to be compiled before groovy #235 (Ronald Holshausen, Tue Mar 29 21:17:20 2016 +1100)
+* 58f4734 - correct the static import of fixture function for pretty printer spec #235 (Ronald Holshausen, Tue Mar 29 21:00:39 2016 +1100)
+* 5301bd6 - fix for tests that fail on windows #235 (Ronald Holshausen, Tue Mar 29 19:53:39 2016 +1100)
+* 4e75f64 - updated mock server docker file for the latest gradle distribution format (Ronald Holshausen, Tue Mar 29 15:13:04 2016 +1100)
+* 00323df - bump version to 3.2.7 (Ronald Holshausen, Tue Mar 29 14:42:32 2016 +1100)
+
 # 2.4.9 - Bugfix Release
 
 * f6a94ee - Merge branch 'master' into v2.x (Ronald Holshausen, Wed May 4 11:49:01 2016 +1000)

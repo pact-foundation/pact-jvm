@@ -4,6 +4,7 @@ pact-jvm
 [![Join the chat at https://gitter.im/DiUS/pact-jvm](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/DiUS/pact-jvm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![Build Status](https://travis-ci.org/DiUS/pact-jvm.svg?branch=master)](https://travis-ci.org/DiUS/pact-jvm)
+[![Appveyor build status](https://ci.appveyor.com/api/projects/status/172049m2sa57takc?svg=true)](https://ci.appveyor.com/project/uglyog/pact-jvm)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-logging_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-logging_2.11)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11)
 
@@ -38,7 +39,7 @@ how to get going.
 
 ## Documentation
 
-Additional documentation can be found in the [Pact Wiki](https://github.com/realestate-com-au/pact/wiki),
+Additional documentation can be found at [docs.pact.io](http://docs.pact.io), in the [Pact Wiki](https://github.com/realestate-com-au/pact/wiki),
 and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki).
 
 ## Note about artifact names and versions
@@ -62,9 +63,9 @@ on (indy version).
 
 Pact-JVM has a number of ways you can write your service consumer tests.
 
-### I Use Scala and Specs 2
+### I Use Scala
 
-You want to look at: [pact-jvm-consumer-specs2](pact-jvm-consumer-specs2)
+You want to look at: [scala-pact](https://github.com/ITV/scala-pact) or [pact-jvm-consumer-specs2](pact-jvm-consumer-specs2)
 
 ### I Use Java
 
@@ -97,7 +98,7 @@ with these files.
 
 #### verify pacts with SBT
 
-You want to look at: [pact sbt plugin](pact-jvm-provider-sbt)
+You want to look at: [scala-pact](https://github.com/ITV/scala-pact) or [pact sbt plugin](pact-jvm-provider-sbt)
 
 #### verify pacts with Gradle
 

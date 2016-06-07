@@ -8,4 +8,8 @@ import groovy.transform.Canonical
 @Canonical
 class Provider {
   String name
+
+  static Provider fromMap(Map map) {
+    new Provider(map?.name ?: 'provider')
+  }
 }

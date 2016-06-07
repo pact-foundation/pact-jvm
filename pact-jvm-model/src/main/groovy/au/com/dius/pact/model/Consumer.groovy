@@ -8,4 +8,8 @@ import groovy.transform.Canonical
 @Canonical
 class Consumer {
   String name
+
+  static Consumer fromMap(Map map) {
+    new Consumer(map?.name ?: 'consumer')
+  }
 }

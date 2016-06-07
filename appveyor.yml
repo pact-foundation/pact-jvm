@@ -1,0 +1,9 @@
+# fix lineendings in Windows
+init:
+  - git config --global core.autocrlf input
+
+build: false
+
+build_script:
+  - java -version
+  - gradlew --stacktrace --no-daemon -i check

@@ -10,34 +10,34 @@ public class PactDslJsonArrayTest extends ConsumerPactTest {
     @Override
     protected PactFragment createFragment(PactDslWithProvider builder) {
         DslPart body = new PactDslJsonArray()
-                .object()
-                .id()
-                .stringValue("name", "Rogger the Dogger")
-                .timestamp()
-                .date("dob", "MM/dd/yyyy")
-                .closeObject()
-                .object()
-                .id()
-                .stringValue("name", "Cat in the Hat")
-                .timestamp()
-                .date("dob", "MM/dd/yyyy")
-                .closeObject();
+          .object()
+            .id()
+            .stringValue("name", "Rogger the Dogger")
+            .timestamp()
+            .date("dob", "MM/dd/yyyy")
+          .closeObject()
+          .object()
+            .id()
+            .stringValue("name", "Cat in the Hat")
+            .timestamp()
+            .date("dob", "MM/dd/yyyy")
+          .closeObject();
         PactFragment fragment = builder
-                .uponReceiving("java test interaction with a DSL array body")
-                .path("/")
-                .method("GET")
-                .willRespondWith()
-                .status(200)
-                .body(body)
-                .toFragment();
+          .uponReceiving("java test interaction with a DSL array body")
+            .path("/")
+            .method("GET")
+          .willRespondWith()
+            .status(200)
+            .body(body)
+          .toFragment();
 
         MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment,
-                "$.body[0].id",
-                "$.body[0].timestamp",
-                "$.body[0].dob",
-                "$.body[1].id",
-                "$.body[1].timestamp",
-                "$.body[1].dob"
+            "$.body[0].id",
+            "$.body[0].timestamp",
+            "$.body[0].dob",
+            "$.body[1].id",
+            "$.body[1].timestamp",
+            "$.body[1].dob"
         );
 
         return fragment;
