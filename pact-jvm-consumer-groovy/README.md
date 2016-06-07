@@ -152,7 +152,7 @@ An optional Map can be supplied to control how the body is generated. The option
 
 | Option | Description |
 |--------|-------------|
-| mimetype | The mimetype of the body. Defaults to `application/json` |
+| mimeType | The mime type of the body. Defaults to `application/json` |
 | prettyPrint | Boolean value controlling whether to pretty-print the body or not. Defaults to true |
 
 If the prettyPrint option is not specified, the bodies will be pretty printed unless the mime type corresponds to one
