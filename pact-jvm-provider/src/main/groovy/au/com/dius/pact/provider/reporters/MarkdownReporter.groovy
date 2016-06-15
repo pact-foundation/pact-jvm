@@ -49,7 +49,7 @@ class MarkdownReporter implements VerifierReporter {
   }
 
   @Override
-  void verifyConsumerFromFile(File pactFile, ConsumerInfo consumer) {
+  void verifyConsumerFromFile(def pactFile, ConsumerInfo consumer) {
     writer.println "From File: $pactFile"
     writer.println()
   }
