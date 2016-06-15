@@ -63,7 +63,7 @@ class JsonReporter implements VerifierReporter {
   }
 
   @Override
-  void verifyConsumerFromFile(File pactFile, ConsumerInfo consumer) {
+  void verifyConsumerFromFile(def pactFile, ConsumerInfo consumer) {
     jsonData.execution.last().consumer.source = [
       file: pactFile as String
     ]

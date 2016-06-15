@@ -37,7 +37,7 @@ class AnsiConsoleReporter implements VerifierReporter {
   }
 
   @Override
-  void verifyConsumerFromFile(File pactFile, ConsumerInfo consumer) {
+  void verifyConsumerFromFile(def pactFile, ConsumerInfo consumer) {
     AnsiConsole.out().println(Ansi.ansi().a("  [Using file $pactFile]"))
   }
 

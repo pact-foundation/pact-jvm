@@ -18,7 +18,7 @@ trait VerifierReporter {
   abstract void finaliseReport()
   abstract void reportVerificationForConsumer(ConsumerInfo consumer, ProviderInfo provider)
   abstract void verifyConsumerFromUrl(URL pactUrl, ConsumerInfo consumer)
-  abstract void verifyConsumerFromFile(File pactFile, ConsumerInfo consumer)
+  abstract void verifyConsumerFromFile(def pactFile, ConsumerInfo consumer)
   abstract void pactLoadFailureForConsumer(ConsumerInfo consumerInfo, String message)
   abstract void warnProviderHasNoConsumers(ProviderInfo providerInfo)
   abstract void warnPactFileHasNoInteractions(Pact pact)
