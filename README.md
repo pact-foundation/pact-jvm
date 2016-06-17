@@ -87,7 +87,7 @@ You want to look at: [Pact Consumer](pact-jvm-consumer)
 ### My Consumer interacts with a Message Queue
 
 As part of the V3 pact specification, we have defined a new pact file for interactions with message queues. For an
-  implementation of a Groovy consumer test with a message pact, have a look at [pact-jvm-consumer-groovy-v3](pact-jvm-consumer-groovy-v3).
+  implementation of a Groovy consumer test with a message pact, have a look at [PactMessageBuilderSpec.groovy](pact-jvm-consumer-groovy/src/test/groovy/au/com/dius/pact/consumer/groovy/messaging/PactMessageBuilderSpec.groovy).
 
 ## Service Providers
 
