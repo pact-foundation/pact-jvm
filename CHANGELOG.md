@@ -1,5 +1,33 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.2.8 - Bugfix Release
+
+* 893e7c2 - update changelog for release 2.4.10 (Ronald Holshausen, Wed Jun 15 11:38:53 2016 +1000)
+* 1284223 - Correct link in readme #267 (Ronald Holshausen, Sat Jun 18 07:11:16 2016 +1000)
+* 4d27a1e - Merge pull request #265 from olga-vasylchenko/master (Ronald Holshausen, Thu Jun 16 19:44:22 2016 +1000)
+* affa62d - add new line after a message 'Consumer 'x' has a pact with Provider 'x'' (Olga Vasylchenko, Thu Jun 16 10:29:39 2016 +0200)
+* aebef1b - Fix for an odd Groovy error where a string was getting through an instanceof check (Ronald Holshausen, Wed Jun 15 10:29:15 2016 +1000)
+* 0bb92d2 - Update README to have the correct case for the mime type key #263 (Ronald Holshausen, Tue Jun 7 14:23:23 2016 +1000)
+* 19a4b8d - do not default the verification type when loading pacts from a pact broker (Ronald Holshausen, Sun Jun 5 12:31:54 2016 +1000)
+* da481cc - consolidate the loading of V2 and V3 pacts so message pacts can be loaded from a pact broker #260 (Ronald Holshausen, Sun Jun 5 11:48:55 2016 +1000)
+* 0c4728b - Added appveyor badge (Ronald Holshausen, Sat Jun 4 14:27:15 2016 +1000)
+* 899c979 - add provider state getter to Interaction interface #262 (Ronald Holshausen, Sat Jun 4 13:35:54 2016 +1000)
+* c0ed05f - fix the provider junit runner so that it works with junit filters (Ronald Holshausen, Sat Jun 4 13:04:37 2016 +1000)
+* 6aba654 - fix for the "No signature of method" failure in the pact verifier for message pacts #259 (Ronald Holshausen, Fri Jun 3 16:02:56 2016 +1000)
+* 09e69ea - fix the MessagePactProviderRule to use the correct fragment method for the @PactVerification #258 (Ronald Holshausen, Fri Jun 3 14:41:29 2016 +1000)
+* a9a7147 - allow the eachLike matchers to be applied to arrays of non-objects #256 (Ronald Holshausen, Sat May 28 17:45:36 2016 +1000)
+* b987de4 - gradle plugin now detects if there is a property overriding the pact namespace #254 (Ronald Holshausen, Sat May 28 16:22:15 2016 +1000)
+* 7b06f73 - add more appropriate error message is the pact broker response is invalid #257 (Ronald Holshausen, Sat May 28 15:33:27 2016 +1000)
+* f240b80 - disabling MockProviderSpec as it fails on AppVeyor (Ronald Holshausen, Sat May 28 14:58:33 2016 +1000)
+* df82c97 - even more test timeout for appveyor build (Ronald Holshausen, Sat May 28 14:35:28 2016 +1000)
+* 1f1a7ec - increase test timeout for appveyor build (Ronald Holshausen, Sat May 28 13:46:17 2016 +1000)
+* 64f0ec1 - invoke gradle build in appveyor (Ronald Holshausen, Sat May 28 13:23:22 2016 +1000)
+* 539d499 - add appveoyor build config file (Ronald Holshausen, Sat May 28 13:10:44 2016 +1000)
+* 0ffddd7 - updated readme with references to scala-pact (Ronald Holshausen, Sat May 28 11:31:58 2016 +1000)
+* 348a8f0 - update scala to 2.10.6 (Ronald Holshausen, Wed May 4 16:43:18 2016 +1000)
+* b7f27d1 - update scala to 2.11.8 (Ronald Holshausen, Wed May 4 16:33:17 2016 +1000)
+* dc4ac25 - bump version to 3.2.8 (Ronald Holshausen, Wed May 4 15:10:17 2016 +1000)
+
 # 2.4.10 - Bugfix Release
 
 * 8e331d0 - Merge branch 'master' into v2.x (Ronald Holshausen, Wed Jun 15 11:10:34 2016 +1000)
