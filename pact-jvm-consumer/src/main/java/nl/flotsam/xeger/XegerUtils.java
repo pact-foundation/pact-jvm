@@ -22,6 +22,8 @@ import java.util.Random;
  */
 public class XegerUtils {
 
+    private XegerUtils() {}
+
     /**
      * Generates a random number within the given bounds.
      *

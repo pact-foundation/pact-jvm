@@ -7,6 +7,8 @@ public class PactRunnerExpressionParser {
   public static final String START_EXPRESSION = "${";
   public static final char END_EXPRESSION = '}';
 
+  private PactRunnerExpressionParser() {}
+
   public static String parseExpressions(final String value) {
     return parseExpressions(value, new SystemPropertyResolver());
   }

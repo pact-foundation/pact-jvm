@@ -23,6 +23,8 @@ public class MatcherTestUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatcherTestUtils.class);
 
+    private MatcherTestUtils() {}
+
     public static Set<String> asSet(String... strings) {
         return new TreeSet<String>(Arrays.asList(strings));
     }
