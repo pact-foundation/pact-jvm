@@ -41,17 +41,37 @@ import java.util.ArrayList;
 public class AnsiOutputStream extends FilterOutputStream {
 
     public static final byte [] REST_CODE = resetCode();
+	protected static final int ERASE_SCREEN_TO_END=0;
+	protected static final int ERASE_SCREEN_TO_BEGINING=1;
+	protected static final int ERASE_SCREEN=2;
+	protected static final int ERASE_LINE_TO_END=0;
+	protected static final int ERASE_LINE_TO_BEGINING=1;
+	protected static final int ERASE_LINE=2;
+	protected static final int ATTRIBUTE_INTENSITY_BOLD 	= 1; // 	Intensity: Bold
+	protected static final int ATTRIBUTE_INTENSITY_FAINT 	= 2; // 	Intensity; Faint 	not widely supported
+	protected static final int ATTRIBUTE_ITALIC 			= 3; // 	Italic; on 	not widely supported. Sometimes treated as inverse.
+	protected static final int ATTRIBUTE_UNDERLINE 			= 4; // 	Underline; Single
+	protected static final int ATTRIBUTE_BLINK_SLOW 		= 5; // 	Blink; Slow 	less than 150 per minute
+	protected static final int ATTRIBUTE_BLINK_FAST 		= 6; // 	Blink; Rapid 	MS-DOS ANSI.SYS; 150 per minute or more
+	protected static final int ATTRIBUTE_NEGATIVE_ON 		= 7; // 	Image; Negative 	inverse or reverse; swap foreground and background
+	protected static final int ATTRIBUTE_CONCEAL_ON 		= 8; // 	Conceal on
+	protected static final int ATTRIBUTE_UNDERLINE_DOUBLE 	= 21; // 	Underline; Double 	not widely supported
+	protected static final int ATTRIBUTE_INTENSITY_NORMAL 	= 22; // 	Intensity; Normal 	not bold and not faint
+	protected static final int ATTRIBUTE_UNDERLINE_OFF 		= 24; // 	Underline; None
+	protected static final int ATTRIBUTE_BLINK_OFF 			= 25; // 	Blink; off
+	protected static final int ATTRIBUTE_NEGATIVE_Off 		= 27; // 	Image; Positive
+	protected static final int ATTRIBUTE_CONCEAL_OFF 		= 28; // 	Reveal 	conceal off
+	protected static final int BLACK 	= 0;
 
-	public AnsiOutputStream(OutputStream os) {
-		super(os);
-	}
-
-	private  final static int MAX_ESCAPE_SEQUENCE_LENGTH=100;
-	private byte buffer[] = new byte[MAX_ESCAPE_SEQUENCE_LENGTH];
-	private int pos=0;
-	private int startOfValue;
-	private final ArrayList<Object> options = new ArrayList<Object>();
-
+	// TODO: implement to get perf boost: public void write(byte[] b, int off, int len)
+	protected static final int RED 		= 1;
+	protected static final int GREEN 	= 2;
+	protected static final int YELLOW 	= 3;
+	protected static final int BLUE 	= 4;
+	protected static final int MAGENTA 	= 5;
+	protected static final int CYAN 	= 6;
+	protected static final int WHITE 	= 7;
+	private static final int MAX_ESCAPE_SEQUENCE_LENGTH=100;
 	private static final int LOOKING_FOR_FIRST_ESC_CHAR = 0;
 	private static final int LOOKING_FOR_SECOND_ESC_CHAR = 1;
 	private static final int LOOKING_FOR_NEXT_ARG = 2;
@@ -61,17 +81,28 @@ public class AnsiOutputStream extends FilterOutputStream {
 	private static final int LOOKING_FOR_OSC_COMMAND_END = 6;
 	private static final int LOOKING_FOR_OSC_PARAM = 7;
 	private static final int LOOKING_FOR_ST = 8;
-
-	int state = LOOKING_FOR_FIRST_ESC_CHAR;
-	
 	private static final int FIRST_ESC_CHAR = 27;
 	private static final int SECOND_ESC_CHAR = '[';
 	private static final int SECOND_OSC_CHAR = ']';
 	private static final int BEL = 7;
 	private static final int SECOND_ST_CHAR = '\\';
+	private final ArrayList<Object> options = new ArrayList<Object>();
+	int state = LOOKING_FOR_FIRST_ESC_CHAR;
+	private byte buffer[] = new byte[MAX_ESCAPE_SEQUENCE_LENGTH];
+	private int pos=0;
+	private int startOfValue;
+	public AnsiOutputStream(OutputStream os) {
+		super(os);
+	}
 
-	// TODO: implement to get perf boost: public void write(byte[] b, int off, int len)
-	
+    static private byte[] resetCode() {
+        try {
+            return new Ansi().reset().toString().getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 	public void write(int data) throws IOException {
 		switch( state ) {
 		case LOOKING_FOR_FIRST_ESC_CHAR:
@@ -82,7 +113,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 				out.write(data);
 			}
 			break;
-			
+
 		case LOOKING_FOR_SECOND_ESC_CHAR:
 			buffer[pos++] = (byte) data;
 			if( data == SECOND_ESC_CHAR ) {
@@ -93,7 +124,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 				reset(false);
 			}
 			break;
-			
+
 		case LOOKING_FOR_NEXT_ARG:
 			buffer[pos++] = (byte)data;
 			if( '"' == data ) {
@@ -101,7 +132,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 				state = LOOKING_FOR_STR_ARG_END;
 			} else if( '0' <= data && data <= '9') {
 				startOfValue=pos-1;
-				state = LOOKING_FOR_INT_ARG_END;				
+				state = LOOKING_FOR_INT_ARG_END;
 			} else if( ';' == data ) {
 				options.add(null);
 			} else if( '?' == data ) {
@@ -126,7 +157,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 				}
 			}
 			break;
-			
+
 		case LOOKING_FOR_STR_ARG_END:
 			buffer[pos++] = (byte)data;
 			if( '"' != data ) {
@@ -139,17 +170,17 @@ public class AnsiOutputStream extends FilterOutputStream {
 				}
 			}
 			break;
-			
+
 		case LOOKING_FOR_OSC_COMMAND:
 			buffer[pos++] = (byte)data;
 			if( '0' <= data && data <= '9') {
 				startOfValue=pos-1;
-				state = LOOKING_FOR_OSC_COMMAND_END;				
+				state = LOOKING_FOR_OSC_COMMAND_END;
 			} else {
 				reset(false);
 			}
 			break;
-		
+
 		case LOOKING_FOR_OSC_COMMAND_END:
 			buffer[pos++] = (byte)data;
 			if ( ';' == data ) {
@@ -165,7 +196,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 				reset(false);
 			}
 			break;
-			
+
 		case LOOKING_FOR_OSC_PARAM:
 			buffer[pos++] = (byte)data;
 			if ( BEL == data ) {
@@ -178,7 +209,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 				// just keep looking while adding text
 			}
 			break;
-			
+
 		case LOOKING_FOR_ST:
 			buffer[pos++] = (byte)data;
 			if ( SECOND_ST_CHAR == data ) {
@@ -190,7 +221,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 			}
 			break;
 		}
-		
+
 		// Is it just too long?
 		if( pos >= buffer.length ) {
 			reset(false);
@@ -213,7 +244,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param options
 	 * @param command
 	 * @return true if the escape command was processed.
@@ -258,7 +289,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 			case 'T':
 				processScrollDown(optionInt(options, 0, 1));
 				return true;
-			case 'm':				
+			case 'm':
 				// Validate all options are ints...
 				for (Object next : options) {
 					if( next!=null && next.getClass()!=Integer.class) {
@@ -281,14 +312,14 @@ public class AnsiOutputStream extends FilterOutputStream {
 							processSetBackgroundColor(value-100, true);
 						} else {
 							switch ( value ) {
-							case 39: 
+							case 39:
 								processDefaultTextColor();
 								break;
 							case 49:
 								processDefaultBackgroundColor();
 								break;
-							case 0: 
-								processAttributeRest(); 
+							case 0:
+								processAttributeRest();
 								break;
 							default:
 								processSetAttribute(value);
@@ -306,7 +337,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 			case 'u':
 				processRestoreCursorPosition();
 				return true;
-				
+
 			default:
 				if( 'a' <= command && 'z' <=command ) {
 					processUnknownExtension(options, command);
@@ -324,7 +355,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param options
 	 * @return true if the operating system command was processed.
 	 */
@@ -344,7 +375,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 			case 2:
 				processChangeWindowTitle(label);
 				return true;
-				
+
 			default:
 				// not exactly unknown, but not supported through dedicated process methods:
 				processUnknownOperatingSystemCommand(command, label);
@@ -354,56 +385,27 @@ public class AnsiOutputStream extends FilterOutputStream {
 		}
 		return false;
 	}
-	
+
 	protected void processRestoreCursorPosition() throws IOException {
 	}
+
 	protected void processSaveCursorPosition() throws IOException {
 	}
+
 	protected void processScrollDown(int optionInt) throws IOException {
 	}
+
 	protected void processScrollUp(int optionInt) throws IOException {
 	}
 
-	protected static final int ERASE_SCREEN_TO_END=0;
-	protected static final int ERASE_SCREEN_TO_BEGINING=1;
-	protected static final int ERASE_SCREEN=2;
-	
 	protected void processEraseScreen(int eraseOption) throws IOException {
 	}
 
-	protected static final int ERASE_LINE_TO_END=0;
-	protected static final int ERASE_LINE_TO_BEGINING=1;
-	protected static final int ERASE_LINE=2;
-	
 	protected void processEraseLine(int eraseOption) throws IOException {
 	}
 
-	protected static final int ATTRIBUTE_INTENSITY_BOLD 	= 1; // 	Intensity: Bold 	
-	protected static final int ATTRIBUTE_INTENSITY_FAINT 	= 2; // 	Intensity; Faint 	not widely supported
-	protected static final int ATTRIBUTE_ITALIC 			= 3; // 	Italic; on 	not widely supported. Sometimes treated as inverse.
-	protected static final int ATTRIBUTE_UNDERLINE 			= 4; // 	Underline; Single 	
-	protected static final int ATTRIBUTE_BLINK_SLOW 		= 5; // 	Blink; Slow 	less than 150 per minute
-	protected static final int ATTRIBUTE_BLINK_FAST 		= 6; // 	Blink; Rapid 	MS-DOS ANSI.SYS; 150 per minute or more
-	protected static final int ATTRIBUTE_NEGATIVE_ON 		= 7; // 	Image; Negative 	inverse or reverse; swap foreground and background
-	protected static final int ATTRIBUTE_CONCEAL_ON 		= 8; // 	Conceal on
-	protected static final int ATTRIBUTE_UNDERLINE_DOUBLE 	= 21; // 	Underline; Double 	not widely supported
-	protected static final int ATTRIBUTE_INTENSITY_NORMAL 	= 22; // 	Intensity; Normal 	not bold and not faint
-	protected static final int ATTRIBUTE_UNDERLINE_OFF 		= 24; // 	Underline; None 	
-	protected static final int ATTRIBUTE_BLINK_OFF 			= 25; // 	Blink; off 	
-	protected static final int ATTRIBUTE_NEGATIVE_Off 		= 27; // 	Image; Positive 	
-	protected static final int ATTRIBUTE_CONCEAL_OFF 		= 28; // 	Reveal 	conceal off
-
 	protected void processSetAttribute(int attribute) throws IOException {
 	}
-
-	protected static final int BLACK 	= 0;
-	protected static final int RED 		= 1;
-	protected static final int GREEN 	= 2;
-	protected static final int YELLOW 	= 3;
-	protected static final int BLUE 	= 4;
-	protected static final int MAGENTA 	= 5;
-	protected static final int CYAN 	= 6;
-	protected static final int WHITE 	= 7;
 
 	protected void processSetForegroundColor(int color) throws IOException {
 		processSetForegroundColor(color, false);
@@ -415,13 +417,13 @@ public class AnsiOutputStream extends FilterOutputStream {
 	protected void processSetBackgroundColor(int color) throws IOException {
 		processSetBackgroundColor(color, false);
 	}
-
+	
 	protected void processSetBackgroundColor(int color, boolean bright) throws IOException {
 	}
 	
 	protected void processDefaultTextColor() throws IOException {
 	}
-	
+
 	protected void processDefaultBackgroundColor() throws IOException {
 	}
 
@@ -456,13 +458,13 @@ public class AnsiOutputStream extends FilterOutputStream {
 
 	protected void processCursorDown(int count) throws IOException {
 	}
-
+	
 	protected void processCursorUp(int count) throws IOException {
 	}
 	
 	protected void processUnknownExtension(ArrayList<Object> options, int command) {
 	}
-	
+
 	protected void processChangeIconNameAndWindowTitle(String label) {
         processChangeIconName(label);
         processChangeWindowTitle(label);
@@ -470,10 +472,10 @@ public class AnsiOutputStream extends FilterOutputStream {
 
 	protected void processChangeIconName(String label) {
 	}
-
+	
 	protected void processChangeWindowTitle(String label) {
 	}
-	
+
 	protected void processUnknownOperatingSystemCommand(int command, String param) {
 	}
 
@@ -487,7 +489,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 			throw new IllegalArgumentException();
 		return ((Integer)value).intValue();
 	}
-
+	
 	private int optionInt(ArrayList<Object> options, int index, int defaultValue) {
 		if( options.size() > index ) {
 			Object value = options.get(index);
@@ -496,7 +498,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 			}
 			return ((Integer)value).intValue();
 		}
-		return defaultValue;		
+		return defaultValue;
 	}
 	
 	@Override
@@ -505,13 +507,5 @@ public class AnsiOutputStream extends FilterOutputStream {
 	    flush();
 	    super.close();
 	}
-	
-    static private byte[] resetCode() {
-        try {
-            return new Ansi().reset().toString().getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 }

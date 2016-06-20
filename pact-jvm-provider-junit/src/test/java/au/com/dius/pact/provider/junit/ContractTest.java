@@ -20,11 +20,12 @@ import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 @Provider("myAwesomeService")
 @PactFolder("pacts")
 public class ContractTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ContractTest.class);
-
     // NOTE: this is just an example of embedded service that listens to requests, you should start here real service
     @ClassRule
     public static final ClientDriverRule embeddedService = new ClientDriverRule(8332);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContractTest.class);
+    @TestTarget
+    public final Target target = new HttpTarget(8332);
 
     @BeforeClass
     public static void setUpService() {
@@ -54,7 +55,4 @@ public class ContractTest {
     public void exampleRequestFilter(HttpRequest request) {
       LOGGER.info("exampleRequestFilter called: " + request);
     }
-
-    @TestTarget
-    public final Target target = new HttpTarget(8332);
 }

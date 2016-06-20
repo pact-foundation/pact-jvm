@@ -27,296 +27,24 @@ import java.util.concurrent.Callable;
  */
 public class Ansi {
 
-    private static final char FIRST_ESC_CHAR = 27;
-	private static final char SECOND_ESC_CHAR = '[';
-
-	public static enum Color {
-		BLACK(0, "BLACK"), 
-		RED(1, "RED"), 
-		GREEN(2, "GREEN"), 
-		YELLOW(3, "YELLOW"), 
-		BLUE(4, "BLUE"), 
-		MAGENTA(5, "MAGENTA"), 
-		CYAN(6, "CYAN"), 
-		WHITE(7,"WHITE"),
-		DEFAULT(9,"DEFAULT");
-
-		private final int value;
-		private final String name;
-
-		Color(int index, String name) {
-			this.value = index;
-			this.name = name;
-		}
-
-		@Override
-		public String toString() {
-			return name;
-		}
-
-		public int value() {
-			return value;
-		}
-
-		public int fg() {
-			return value + 30;
-		}
-
-		public int bg() {
-			return value + 40;
-		}
-		
-		public int fgBright() {
-			return value + 90;
-		}
-		
-		public int bgBright() {
-			return value + 100;
-		}
-	};
-
-	public static enum Attribute {
-		RESET						(  0, "RESET"), 
-		INTENSITY_BOLD				(  1, "INTENSITY_BOLD"), 
-		INTENSITY_FAINT				(  2, "INTENSITY_FAINT"), 
-		ITALIC						(  3, "ITALIC_ON"), 
-		UNDERLINE					(  4, "UNDERLINE_ON"), 
-		BLINK_SLOW					(  5, "BLINK_SLOW"), 
-		BLINK_FAST					(  6, "BLINK_FAST"), 
-		NEGATIVE_ON					(  7, "NEGATIVE_ON"), 
-		CONCEAL_ON					(  8, "CONCEAL_ON"),
-		STRIKETHROUGH_ON			(  9, "STRIKETHROUGH_ON"),
-		UNDERLINE_DOUBLE			( 21, "UNDERLINE_DOUBLE"), 
-		INTENSITY_BOLD_OFF			( 22, "INTENSITY_BOLD_OFF"),
-		ITALIC_OFF					( 23, "ITALIC_OFF"),
-		UNDERLINE_OFF				( 24, "UNDERLINE_OFF"), 
-		BLINK_OFF					( 25, "BLINK_OFF"), 
-		NEGATIVE_OFF				( 27, "NEGATIVE_OFF"), 
-		CONCEAL_OFF					( 28, "CONCEAL_OFF"),
-		STRIKETHROUGH_OFF			( 29, "STRIKETHROUGH_OFF");
-		
-		private final int value;
-		private final String name;
-
-		Attribute(int index, String name) {
-			this.value = index;
-			this.name = name;
-		}
-
-		@Override
-		public String toString() {
-			return name;
-		}
-
-		public int value() {
-			return value;
-		}
-
-	};
-
-	public static enum Erase {
-		FORWARD(0, "FORWARD"),
-		BACKWARD(1, "BACKWARD"), 
-		ALL(2, "ALL"); 
-
-		private final int value;
-		private final String name;
-
-		Erase(int index, String name) {
-			this.value = index;
-			this.name = name;
-		}
-
-		@Override
-		public String toString() {
-			return name;
-		}
-
-		public int value() {
-			return value;
-		}
-	};
-
     public static final String DISABLE = au.com.dius.pact.provider.org.fusesource.jansi.Ansi.class.getName() + ".disable";
-
+    private static final char FIRST_ESC_CHAR = 27;
+	private static final char SECOND_ESC_CHAR = '[';;
     private static Callable<Boolean> detector = new Callable<Boolean>() {
         public Boolean call() throws Exception {
             return !Boolean.getBoolean(DISABLE);
         }
-    };
-
-    public static void setDetector(final Callable<Boolean> detector) {
-        if (detector == null) throw new IllegalArgumentException();
-				au.com.dius.pact.provider.org.fusesource.jansi.Ansi.detector = detector;
-    }
-
-    public static boolean isDetected() {
-        try {
-            return detector.call();
-        }
-        catch (Exception e) {
-            return true;
-        }
-    }
-
+    };;
     private static final InheritableThreadLocal<Boolean> holder = new InheritableThreadLocal<Boolean>()
     {
         @Override
         protected Boolean initialValue() {
             return isDetected();
         }
-    };
-
-    public static void setEnabled(final boolean flag) {
-        holder.set(flag);
-    }
-
-    public static boolean isEnabled() {
-        return holder.get();
-    }
-
-    public static au.com.dius.pact.provider.org.fusesource.jansi.Ansi ansi() {
-        if (isEnabled()) {
-            return new au.com.dius.pact.provider.org.fusesource.jansi.Ansi();
-        }
-        else {
-            return new NoAnsi();
-        }
-    }
-
-    private static class NoAnsi
-        extends au.com.dius.pact.provider.org.fusesource.jansi.Ansi
-    {
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi fg(Color color) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi bg(Color color) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi fgBright(Color color) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi bgBright(Color color) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi a(Attribute attribute) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursor(int x, int y) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorToColumn(int x) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorUp(int y) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorRight(int x) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorDown(int y) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorLeft(int x) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorDownLine() {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorDownLine(final int n) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorUpLine() {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorUpLine(final int n) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi eraseScreen() {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi eraseScreen(Erase kind) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi eraseLine() {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi eraseLine(Erase kind) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi scrollUp(int rows) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi scrollDown(int rows) {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi saveCursorPosition() {
-            return this;
-        }
-
-        @Override
-        @Deprecated
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi restorCursorPosition() {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi restoreCursorPosition() {
-            return this;
-        }
-
-        @Override
-        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi reset() {
-            return this;
-        }
-    }
-
+    };;
 	private final StringBuilder builder;
 	private final ArrayList<Integer> attributeOptions = new ArrayList<Integer>(5);
-	
+
 	public Ansi() {
 		this(new StringBuilder());
 	}
@@ -334,9 +62,41 @@ public class Ansi {
 		this.builder = builder;
 	}
 
+    public static void setDetector(final Callable<Boolean> detector) {
+        if (detector == null) throw new IllegalArgumentException();
+				au.com.dius.pact.provider.org.fusesource.jansi.Ansi.detector = detector;
+    }
+
+    public static boolean isDetected() {
+        try {
+            return detector.call();
+        }
+        catch (Exception e) {
+            return true;
+        }
+    }
+
+    public static boolean isEnabled() {
+        return holder.get();
+    }
+
+    public static void setEnabled(final boolean flag) {
+        holder.set(flag);
+    }
+
+    public static au.com.dius.pact.provider.org.fusesource.jansi.Ansi ansi() {
+        if (isEnabled()) {
+            return new au.com.dius.pact.provider.org.fusesource.jansi.Ansi();
+        }
+        else {
+            return new NoAnsi();
+        }
+    }
+	
 	public static au.com.dius.pact.provider.org.fusesource.jansi.Ansi ansi(StringBuilder builder) {
 		return new au.com.dius.pact.provider.org.fusesource.jansi.Ansi(builder);
 	}
+
 	public static au.com.dius.pact.provider.org.fusesource.jansi.Ansi ansi(int size) {
 		return new au.com.dius.pact.provider.org.fusesource.jansi.Ansi(size);
 	}
@@ -365,7 +125,7 @@ public class Ansi {
 		attributeOptions.add(attribute.value());
 		return this;
 	}
-	
+
 	public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursor(final int x, final int y) {
 		return appendEscapeSequence('H', x, y);
 	}
@@ -381,7 +141,7 @@ public class Ansi {
 	public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorDown(final int y) {
 		return appendEscapeSequence('B', y);
 	}
-
+	
 	public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorRight(final int x) {
 		return appendEscapeSequence('C', x);
 	}
@@ -580,10 +340,6 @@ public class Ansi {
 		return builder.toString();
 	}
 
-	///////////////////////////////////////////////////////////////////
-	// Private Helper Methods
-	///////////////////////////////////////////////////////////////////
-	
 	private au.com.dius.pact.provider.org.fusesource.jansi.Ansi appendEscapeSequence(char command) {
 		flushAttributes();
 		builder.append(FIRST_ESC_CHAR);
@@ -591,7 +347,7 @@ public class Ansi {
 		builder.append(command);
 		return this;
 	}
-	
+
 	private au.com.dius.pact.provider.org.fusesource.jansi.Ansi appendEscapeSequence(char command, int option) {
 		flushAttributes();
 		builder.append(FIRST_ESC_CHAR);
@@ -600,7 +356,7 @@ public class Ansi {
 		builder.append(command);
 		return this;
 	}
-	
+
 	private au.com.dius.pact.provider.org.fusesource.jansi.Ansi appendEscapeSequence(char command, Object... options) {
 		flushAttributes();
 		return _appendEscapeSequence(command, options);
@@ -618,6 +374,10 @@ public class Ansi {
 		}
 		attributeOptions.clear();
 	}
+
+	///////////////////////////////////////////////////////////////////
+	// Private Helper Methods
+	///////////////////////////////////////////////////////////////////
 	
 	private au.com.dius.pact.provider.org.fusesource.jansi.Ansi _appendEscapeSequence(char command, Object... options) {
 		builder.append(FIRST_ESC_CHAR);
@@ -634,5 +394,242 @@ public class Ansi {
 		builder.append(command);
 		return this;
 	}
+	
+public static enum Color {
+		BLACK(0, "BLACK"),
+		RED(1, "RED"),
+		GREEN(2, "GREEN"),
+		YELLOW(3, "YELLOW"),
+		BLUE(4, "BLUE"),
+		MAGENTA(5, "MAGENTA"),
+		CYAN(6, "CYAN"),
+		WHITE(7,"WHITE"),
+		DEFAULT(9,"DEFAULT");
+
+		private final int value;
+		private final String name;
+
+		Color(int index, String name) {
+			this.value = index;
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return name;
+		}
+
+		public int value() {
+			return value;
+		}
+
+		public int fg() {
+			return value + 30;
+		}
+
+		public int bg() {
+			return value + 40;
+		}
+
+		public int fgBright() {
+			return value + 90;
+		}
+
+		public int bgBright() {
+			return value + 100;
+		}
+	}
+	
+public static enum Attribute {
+		RESET						(  0, "RESET"),
+		INTENSITY_BOLD				(  1, "INTENSITY_BOLD"),
+		INTENSITY_FAINT				(  2, "INTENSITY_FAINT"),
+		ITALIC						(  3, "ITALIC_ON"),
+		UNDERLINE					(  4, "UNDERLINE_ON"),
+		BLINK_SLOW					(  5, "BLINK_SLOW"),
+		BLINK_FAST					(  6, "BLINK_FAST"),
+		NEGATIVE_ON					(  7, "NEGATIVE_ON"),
+		CONCEAL_ON					(  8, "CONCEAL_ON"),
+		STRIKETHROUGH_ON			(  9, "STRIKETHROUGH_ON"),
+		UNDERLINE_DOUBLE			( 21, "UNDERLINE_DOUBLE"),
+		INTENSITY_BOLD_OFF			( 22, "INTENSITY_BOLD_OFF"),
+		ITALIC_OFF					( 23, "ITALIC_OFF"),
+		UNDERLINE_OFF				( 24, "UNDERLINE_OFF"),
+		BLINK_OFF					( 25, "BLINK_OFF"),
+		NEGATIVE_OFF				( 27, "NEGATIVE_OFF"),
+		CONCEAL_OFF					( 28, "CONCEAL_OFF"),
+		STRIKETHROUGH_OFF			( 29, "STRIKETHROUGH_OFF");
+
+		private final int value;
+		private final String name;
+
+		Attribute(int index, String name) {
+			this.value = index;
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return name;
+		}
+
+		public int value() {
+			return value;
+		}
+
+	}
+
+public static enum Erase {
+		FORWARD(0, "FORWARD"),
+		BACKWARD(1, "BACKWARD"),
+		ALL(2, "ALL");
+
+		private final int value;
+		private final String name;
+
+		Erase(int index, String name) {
+			this.value = index;
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return name;
+		}
+
+		public int value() {
+			return value;
+		}
+	}
+	
+    private static class NoAnsi
+        extends au.com.dius.pact.provider.org.fusesource.jansi.Ansi
+    {
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi fg(Color color) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi bg(Color color) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi fgBright(Color color) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi bgBright(Color color) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi a(Attribute attribute) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursor(int x, int y) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorToColumn(int x) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorUp(int y) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorRight(int x) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorDown(int y) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorLeft(int x) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorDownLine() {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorDownLine(final int n) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorUpLine() {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi cursorUpLine(final int n) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi eraseScreen() {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi eraseScreen(Erase kind) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi eraseLine() {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi eraseLine(Erase kind) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi scrollUp(int rows) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi scrollDown(int rows) {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi saveCursorPosition() {
+            return this;
+        }
+
+        @Override
+        @Deprecated
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi restorCursorPosition() {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi restoreCursorPosition() {
+            return this;
+        }
+
+        @Override
+        public au.com.dius.pact.provider.org.fusesource.jansi.Ansi reset() {
+            return this;
+        }
+    }
 
 }
