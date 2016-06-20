@@ -56,7 +56,7 @@ public class AnsiRenderer
     public static final String CODE_LIST_SEPARATOR = ",";
 
     static public String render(final String input) throws IllegalArgumentException {
-        StringBuffer buff = new StringBuffer();
+        StringBuilder buff = new StringBuilder();
 
         int i = 0;
         int j, k;
