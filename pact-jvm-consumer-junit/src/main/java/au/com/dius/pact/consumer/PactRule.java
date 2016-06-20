@@ -30,7 +30,7 @@ public class PactRule extends ExternalResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PactRule.class);
 
-    public static VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
+    public static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
 
     private Map <String, PactFragment> fragments;
     private Object target;
