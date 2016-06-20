@@ -144,10 +144,11 @@ public class PactDslRequestWithPath {
      * @param body Built using the Pact body DSL
      */
     public PactDslRequestWithPath body(DslPart body) {
-        for (String matcherName : body.matchers.keySet()) {
-            requestMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
+        DslPart parent = body.close();
+        for (String matcherName : parent.matchers.keySet()) {
+            requestMatchers.put("$.body" + matcherName, parent.matchers.get(matcherName));
         }
-        requestBody = OptionalBody.body(body.toString());
+        requestBody = OptionalBody.body(parent.toString());
         if (!requestHeaders.containsKey("Content-Type")) {
             requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
         }

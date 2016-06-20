@@ -100,12 +100,13 @@ public class PactDslResponse {
      * @param body Response body built using the Pact body DSL
      */
     public PactDslResponse body(DslPart body) {
-        for (String matcherName : body.matchers.keySet()) {
-            responseMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
+        DslPart parent = body.close();
+        for (String matcherName : parent.matchers.keySet()) {
+            responseMatchers.put("$.body" + matcherName, parent.matchers.get(matcherName));
         }
 
-        if (body.getBody() != null) {
-            responseBody = OptionalBody.body(body.getBody().toString());
+        if (parent.getBody() != null) {
+            responseBody = OptionalBody.body(parent.getBody().toString());
         } else {
             responseBody = OptionalBody.nullBody();
         }

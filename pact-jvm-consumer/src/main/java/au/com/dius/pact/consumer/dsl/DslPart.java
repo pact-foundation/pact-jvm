@@ -14,6 +14,7 @@ public abstract class DslPart {
     protected final DslPart parent;
     protected final String root;
     protected Map<String, Map<String, Object>> matchers = new HashMap<String, Map<String, Object>>();
+    protected boolean closed = false;
 
     public DslPart(DslPart parent, String root) {
         this.parent = parent;
@@ -220,4 +221,10 @@ public abstract class DslPart {
     public PactDslJsonArray asArray() {
         return (PactDslJsonArray) this;
     }
+
+  /**
+   * This closes off the object graph build from the DSL in case any close[Object|Array] methods have not been called.
+   * @return The root object of the object graph
+   */
+  public abstract DslPart close();
 }

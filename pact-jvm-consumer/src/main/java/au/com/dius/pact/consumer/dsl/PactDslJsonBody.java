@@ -429,11 +429,31 @@ public class PactDslJsonBody extends DslPart {
      * Closes the current JSON object
      */
     public DslPart closeObject() {
+      if (parent != null) {
         parent.putObject(this);
-        return parent;
+      }
+      closed = true;
+      return parent;
     }
 
-    /**
+  @Override
+  public DslPart close() {
+    DslPart parentToReturn = this;
+    if (!closed) {
+      DslPart parent = closeObject();
+      while (parent != null) {
+        parentToReturn = parent;
+        if (parent instanceof PactDslJsonArray) {
+          parent = parent.closeArray();
+        } else {
+          parent = parent.closeObject();
+        }
+      }
+    }
+    return parentToReturn;
+  }
+
+  /**
      * Attribute that is an array
      * @param name field name
      */

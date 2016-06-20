@@ -114,11 +114,12 @@ public class PactDslRequestWithoutPath {
      * @param body Built using the Pact body DSL
      */
     public PactDslRequestWithoutPath body(DslPart body) {
+        DslPart parent = body.close();
         requestMatchers = new HashMap<String, Map<String, Object>>();
-        for (String matcherName : body.matchers.keySet()) {
-            requestMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
+        for (String matcherName : parent.matchers.keySet()) {
+            requestMatchers.put("$.body" + matcherName, parent.matchers.get(matcherName));
         }
-        requestBody = OptionalBody.body(body.toString());
+        requestBody = OptionalBody.body(parent.toString());
         if (!requestHeaders.containsKey("Content-Type")) {
             requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
         }

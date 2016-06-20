@@ -194,6 +194,9 @@ public class PactDslJsonRootValue extends DslPart {
     throw new UnsupportedOperationException("Use PactDslJsonBody for objects");
   }
 
+  @Override
+  public DslPart close() { return this; }
+
   /**
    * Value that can be any string
    */

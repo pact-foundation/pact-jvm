@@ -22,8 +22,8 @@ public class PactDslJsonArray extends DslPart {
     private int numberExamples = 1;
 
     public PactDslJsonArray() {
-		this("", null, false);
-	}
+      this("", null, false);
+    }
 	
     public PactDslJsonArray(String root, DslPart parent) {
         this(root, parent, false);
@@ -39,8 +39,11 @@ public class PactDslJsonArray extends DslPart {
      * Closes the current array
      */
     public DslPart closeArray() {
+      if (parent != null) {
         parent.putArray(this);
-        return parent;
+      }
+      closed = true;
+      return parent;
     }
 
     @Override
@@ -480,7 +483,24 @@ public class PactDslJsonArray extends DslPart {
         throw new UnsupportedOperationException("can't call closeObject on an Array");
     }
 
-    public PactDslJsonArray array(String name) {
+  @Override
+  public DslPart close() {
+    DslPart parentToReturn = this;
+    if (!closed) {
+      DslPart parent = closeArray();
+      while (parent != null) {
+        parentToReturn = parent;
+        if (parent instanceof PactDslJsonArray) {
+          parent = parent.closeArray();
+        } else {
+          parent = parent.closeObject();
+        }
+      }
+    }
+    return parentToReturn;
+  }
+
+  public PactDslJsonArray array(String name) {
         throw new UnsupportedOperationException("use the array() form");
     }
 
