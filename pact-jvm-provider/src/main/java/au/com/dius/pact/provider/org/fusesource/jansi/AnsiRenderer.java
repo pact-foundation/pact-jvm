@@ -58,7 +58,7 @@ public class AnsiRenderer
     private AnsiRenderer() {}
 
     static public String render(final String input) throws IllegalArgumentException {
-        StringBuffer buff = new StringBuffer();
+        StringBuilder buff = new StringBuilder();
 
         int i = 0;
         int j, k;

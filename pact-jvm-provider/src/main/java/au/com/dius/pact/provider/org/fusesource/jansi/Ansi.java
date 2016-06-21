@@ -287,7 +287,7 @@ public class Ansi {
 		return this;
 	}
 
-	public au.com.dius.pact.provider.org.fusesource.jansi.Ansi a(StringBuffer value) {
+	public au.com.dius.pact.provider.org.fusesource.jansi.Ansi a(StringBuilder value) {
 		flushAttributes();
 		builder.append(value);
 		return this;
