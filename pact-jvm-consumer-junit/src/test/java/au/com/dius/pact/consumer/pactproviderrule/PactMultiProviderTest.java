@@ -68,84 +68,45 @@ public class PactMultiProviderTest {
     @Test
     @PactVerification({"test_provider", "test_provider2"})
     public void allPass() throws IOException {
-        Assert.assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).options("/second"), 200);
-        Map expectedResponse = new HashMap();
-        expectedResponse.put("responsetest", true);
-        expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
-
-        Map expectedResponse2 = new HashMap();
-        expectedResponse2.put("responsetest", true);
-        expectedResponse2.put("name", "larry");
-        assertEquals(new ConsumerClient(mockTestProvider2.getConfig().url()).putAsMap("/", "{\"name\": \"larry\"}"),
-                expectedResponse2);
-
+        doTest("/", "{\"name\": \"larry\"}");
     }
 
     @Test(expected = RuntimeException.class)
     @PactVerification({"test_provider", "test_provider2"})
     public void consumerTestFails() throws IOException, InterruptedException {
-        Assert.assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).options("/second"), 200);
-        Map expectedResponse = new HashMap();
-        expectedResponse.put("responsetest", true);
-        expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
-
-        Map expectedResponse2 = new HashMap();
-        expectedResponse2.put("responsetest", true);
-        expectedResponse2.put("name", "larry");
-        assertEquals(new ConsumerClient(mockTestProvider2.getConfig().url()).putAsMap("/", "{\"name\": \"larry\"}"),
-                expectedResponse2);
-
+        doTest("/", "{\"name\": \"larry\"}");
         throw new RuntimeException("Oops");
     }
 
     @Test(expected = RuntimeException.class)
     @PactVerification(value = {"test_provider", "test_provider2"}, expectMismatch = true)
     public void provider1Fails() throws IOException, InterruptedException {
-        Assert.assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).options("/second"), 200);
-        Map expectedResponse = new HashMap();
-        expectedResponse.put("responsetest", true);
-        expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/abc", ""), expectedResponse);
-
-        Map expectedResponse2 = new HashMap();
-        expectedResponse2.put("responsetest", true);
-        expectedResponse2.put("name", "larry");
-        assertEquals(new ConsumerClient(mockTestProvider2.getConfig().url()).putAsMap("/", "{\"name\": \"larry\"}"),
-                expectedResponse2);
+        doTest("/abc", "{\"name\": \"larry\"}");
     }
 
     @Test(expected = RuntimeException.class)
     @PactVerification(value = {"test_provider", "test_provider2"}, expectMismatch = true)
     public void provider2Fails() throws IOException, InterruptedException {
-        Assert.assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).options("/second"), 200);
-        Map expectedResponse = new HashMap();
-        expectedResponse.put("responsetest", true);
-        expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
-
-        Map expectedResponse2 = new HashMap();
-        expectedResponse2.put("responsetest", true);
-        expectedResponse2.put("name", "larry");
-        assertEquals(new ConsumerClient(mockTestProvider2.getConfig().url()).putAsMap("/", "{\"name\": \"farry\"}"),
-                expectedResponse2);
+        doTest("/", "{\"name\": \"farry\"}");
     }
 
     @Test(expected = RuntimeException.class)
     @PactVerification(value = {"test_provider", "test_provider2"}, expectMismatch = true)
     public void bothprovidersFail() throws IOException, InterruptedException {
+        doTest("/abc", "{\"name\": \"farry\"}");
+    }
+
+    private void doTest(String path, String json) throws IOException {
         Assert.assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).options("/second"), 200);
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/abc", ""), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap(path, ""), expectedResponse);
 
         Map expectedResponse2 = new HashMap();
         expectedResponse2.put("responsetest", true);
         expectedResponse2.put("name", "larry");
-        assertEquals(new ConsumerClient(mockTestProvider2.getConfig().url()).putAsMap("/", "{\"name\": \"farry\"}"),
+        assertEquals(new ConsumerClient(mockTestProvider2.getConfig().url()).putAsMap("/", json),
                 expectedResponse2);
     }
-
 }
