@@ -9,6 +9,8 @@ import java.util.function.Supplier;
 
 public class GroovyJavaUtils {
 
+  private GroovyJavaUtils() {}
+
   public static Consumer<HttpRequest> consumerRequestFilter() {
     return request -> request.addHeader("Java Consumer", "was called");
   }
