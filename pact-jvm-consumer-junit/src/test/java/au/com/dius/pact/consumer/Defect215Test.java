@@ -21,6 +21,8 @@ public class Defect215Test {
 
   private static final String MY_SERVICE = "MY_service";
   private static final String EXPECTED_USER_ID = "abcdefghijklmnop";
+  @Rule
+  public PactProviderRule mockProvider = new PactProviderRule(MY_SERVICE, "localhost", PORT, this);
 
   private String getUser() {
     JSONObject usr = new JSONObject();
@@ -32,9 +34,6 @@ public class Defect215Test {
 
     return usr.toString();
   }
-
-  @Rule
-  public PactProviderRule mockProvider = new PactProviderRule(MY_SERVICE, "localhost", PORT, this);
 
   @Pact(provider = MY_SERVICE, consumer="browser_consumer")
   public PactFragment createFragment(PactDslWithProvider builder) {

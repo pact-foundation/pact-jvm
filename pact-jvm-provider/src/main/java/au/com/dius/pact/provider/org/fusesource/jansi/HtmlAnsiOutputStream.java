@@ -27,27 +27,24 @@ import java.util.List;
  */
 public class HtmlAnsiOutputStream extends AnsiOutputStream {
 	
+	private static final String ANSI_COLOR_MAP[] = { "black", "red",
+			"green", "yellow", "blue", "magenta", "cyan", "white", };
+	private static final byte[] BYTES_QUOT = "&quot;".getBytes();
+	private static final byte[] BYTES_AMP = "&amp;".getBytes();
+	private static final byte[] BYTES_LT = "&lt;".getBytes();
+	private static final byte[] BYTES_GT = "&gt;".getBytes();
 	private boolean concealOn = false;
+	private List<String> closingAttributes = new ArrayList<String>();
+	
+	public HtmlAnsiOutputStream(OutputStream os) {
+		super(os);
+	}
 
 	@Override
 	public void close() throws IOException {
 		closeAttributes();
 		super.close();
 	}
-
-	private static final String ANSI_COLOR_MAP[] = { "black", "red",
-			"green", "yellow", "blue", "magenta", "cyan", "white", };
-
-	private static final byte[] BYTES_QUOT = "&quot;".getBytes();
-	private static final byte[] BYTES_AMP = "&amp;".getBytes();
-	private static final byte[] BYTES_LT = "&lt;".getBytes();
-	private static final byte[] BYTES_GT = "&gt;".getBytes();
-	
-	public HtmlAnsiOutputStream(OutputStream os) {
-		super(os);
-	}
-
-	private List<String> closingAttributes = new ArrayList<String>();
 
 	private void write(String s) throws IOException {
 		super.out.write(s.getBytes());

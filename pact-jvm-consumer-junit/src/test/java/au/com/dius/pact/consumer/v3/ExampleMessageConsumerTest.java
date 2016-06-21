@@ -19,6 +19,7 @@ public class ExampleMessageConsumerTest {
 
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
+    private byte[] currentMessage;
 
     @Pact(provider = "test_provider", consumer = "test_consumer_v3")
     public MessagePact createPact(MessagePactBuilder builder) {
@@ -45,6 +46,4 @@ public class ExampleMessageConsumerTest {
     public void setMessage(byte[] messageContents) {
         currentMessage = messageContents;
     }
-
-    private byte[] currentMessage;
 }
