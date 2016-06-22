@@ -11,6 +11,8 @@ import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Date;
@@ -18,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MatchingTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingTest.class);
+
     private static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
 
     @Test
@@ -106,6 +110,7 @@ public class MatchingTest {
                 try {
                     Assert.assertEquals(new ConsumerClient(config.url()).post(path, body, ContentType.APPLICATION_JSON), expectedResponse);
                 } catch (IOException e) {
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
         });

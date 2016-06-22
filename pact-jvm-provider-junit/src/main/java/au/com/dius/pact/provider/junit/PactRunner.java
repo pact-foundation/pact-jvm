@@ -14,6 +14,8 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.TestClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -48,6 +50,8 @@ import static java.util.stream.Collectors.toList;
  * all methods annotated by {@link State} with appropriate state listed will be invoked
  */
 public class PactRunner extends ParentRunner<InteractionRunner> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PactRunner.class);
+
     private final List<InteractionRunner> child;
 
     public PactRunner(final Class<?> clazz) throws InitializationError {
@@ -115,6 +119,7 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
                     contructorWithClass.setAccessible(true);
                     return contructorWithClass.newInstance(clazz.getJavaClass());
                 } catch(NoSuchMethodException e) {
+                    LOGGER.error(e.getMessage(), e);
                     return pactLoaderClass.newInstance();
                 }
             } else {
@@ -123,6 +128,7 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
                   .getConstructor(annotation.annotationType()).newInstance(annotation);
             }
         } catch (final InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+            LOGGER.error(e.getMessage(), e);
             throw new InitializationError("Error while creating pact source");
         }
     }
