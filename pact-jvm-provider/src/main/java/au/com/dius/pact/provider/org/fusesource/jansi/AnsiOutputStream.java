@@ -86,6 +86,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 	private static final int SECOND_OSC_CHAR = ']';
 	private static final int BEL = 7;
 	private static final int SECOND_ST_CHAR = '\\';
+	private static final String UTF_8 = "UTF-8";
 	private final ArrayList<Object> options = new ArrayList<Object>();
 	int state = LOOKING_FOR_FIRST_ESC_CHAR;
 	private byte buffer[] = new byte[MAX_ESCAPE_SEQUENCE_LENGTH];
@@ -97,7 +98,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 
     static private byte[] resetCode() {
         try {
-            return new Ansi().reset().toString().getBytes("UTF-8");
+            return new Ansi().reset().toString().getBytes(UTF_8);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -147,7 +148,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 		case LOOKING_FOR_INT_ARG_END:
 			buffer[pos++] = (byte)data;
 			if( !('0' <= data && data <= '9') ) {
-				String strValue = new String(buffer, startOfValue, (pos-1)-startOfValue, "UTF-8");
+				String strValue = new String(buffer, startOfValue, (pos-1)-startOfValue, UTF_8);
 				Integer value = new Integer(strValue);
 				options.add(value);
 				if( data == ';' ) {
@@ -161,7 +162,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 		case LOOKING_FOR_STR_ARG_END:
 			buffer[pos++] = (byte)data;
 			if( '"' != data ) {
-				String value = new String(buffer, startOfValue, (pos-1)-startOfValue, "UTF-8");
+				String value = new String(buffer, startOfValue, (pos-1)-startOfValue, UTF_8);
 				options.add(value);
 				if( data == ';' ) {
 					state = LOOKING_FOR_NEXT_ARG;
@@ -184,7 +185,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 		case LOOKING_FOR_OSC_COMMAND_END:
 			buffer[pos++] = (byte)data;
 			if ( ';' == data ) {
-				String strValue = new String(buffer, startOfValue, (pos-1)-startOfValue, "UTF-8");
+				String strValue = new String(buffer, startOfValue, (pos-1)-startOfValue, UTF_8);
 				Integer value = new Integer(strValue);
 				options.add(value);
 				startOfValue=pos;
@@ -200,7 +201,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 		case LOOKING_FOR_OSC_PARAM:
 			buffer[pos++] = (byte)data;
 			if ( BEL == data ) {
-				String value = new String(buffer, startOfValue, (pos-1)-startOfValue, "UTF-8");
+				String value = new String(buffer, startOfValue, (pos-1)-startOfValue, UTF_8);
 				options.add(value);
 				reset( processOperatingSystemCommand(options) );
 			} else if ( FIRST_ESC_CHAR == data ) {
@@ -213,7 +214,7 @@ public class AnsiOutputStream extends FilterOutputStream {
 		case LOOKING_FOR_ST:
 			buffer[pos++] = (byte)data;
 			if ( SECOND_ST_CHAR == data ) {
-				String value = new String(buffer, startOfValue, (pos-2)-startOfValue, "UTF-8");
+				String value = new String(buffer, startOfValue, (pos-2)-startOfValue, UTF_8);
 				options.add(value);
 				reset( processOperatingSystemCommand(options) );
 			} else {

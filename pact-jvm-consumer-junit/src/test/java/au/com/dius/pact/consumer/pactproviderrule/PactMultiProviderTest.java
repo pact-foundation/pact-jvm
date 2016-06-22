@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 
 public class PactMultiProviderTest {
 
+    private static final String NAME_LARRY_JSON = "{\"name\": \"larry\"}";
     @Rule
     public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", this);
 
@@ -58,7 +59,7 @@ public class PactMultiProviderTest {
                 .uponReceiving("PactProviderTest test interaction")
                 .path("/")
                 .method("PUT")
-                .body("{\"name\": \"larry\"}")
+                .body(NAME_LARRY_JSON)
                 .willRespondWith()
                 .status(200)
                 .body("{\"responsetest\": true, \"name\": \"larry\"}")
@@ -68,20 +69,20 @@ public class PactMultiProviderTest {
     @Test
     @PactVerification({"test_provider", "test_provider2"})
     public void allPass() throws IOException {
-        doTest("/", "{\"name\": \"larry\"}");
+        doTest("/", NAME_LARRY_JSON);
     }
 
     @Test(expected = RuntimeException.class)
     @PactVerification({"test_provider", "test_provider2"})
     public void consumerTestFails() throws IOException, InterruptedException {
-        doTest("/", "{\"name\": \"larry\"}");
+        doTest("/", NAME_LARRY_JSON);
         throw new RuntimeException("Oops");
     }
 
     @Test(expected = RuntimeException.class)
     @PactVerification(value = {"test_provider", "test_provider2"}, expectMismatch = true)
     public void provider1Fails() throws IOException, InterruptedException {
-        doTest("/abc", "{\"name\": \"larry\"}");
+        doTest("/abc", NAME_LARRY_JSON);
     }
 
     @Test(expected = RuntimeException.class)

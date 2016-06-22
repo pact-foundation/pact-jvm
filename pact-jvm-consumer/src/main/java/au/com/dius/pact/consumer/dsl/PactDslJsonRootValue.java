@@ -13,6 +13,10 @@ import java.util.UUID;
 
 public class PactDslJsonRootValue extends DslPart {
 
+  private static final String USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS = "Use PactDslJsonArray for arrays";
+  private static final String USE_PACT_DSL_JSON_BODY_FOR_OBJECTS = "Use PactDslJsonBody for objects";
+  private static final String EXAMPLE = "Example \"";
+
   private Object value;
 
   public PactDslJsonRootValue() {
@@ -39,7 +43,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray array(String name) {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -47,7 +51,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray array() {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -55,7 +59,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public DslPart closeArray() {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -63,7 +67,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody arrayLike(String name) {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -71,7 +75,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody arrayLike() {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -79,7 +83,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody eachLike(String name) {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -87,7 +91,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody eachLike(int numberExamples) {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -95,7 +99,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody eachLike(String name, int numberExamples) {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -103,7 +107,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody eachLike() {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -111,7 +115,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody minArrayLike(String name, Integer size) {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -119,7 +123,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody minArrayLike(Integer size) {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -127,7 +131,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody minArrayLike(String name, Integer size, int numberExamples) {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -135,7 +139,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody minArrayLike(Integer size, int numberExamples) {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -143,7 +147,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody maxArrayLike(String name, Integer size) {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -151,7 +155,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody maxArrayLike(Integer size) {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -159,7 +163,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody maxArrayLike(String name, Integer size, int numberExamples) {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -167,7 +171,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody maxArrayLike(Integer size, int numberExamples) {
-    throw new UnsupportedOperationException("Use PactDslJsonArray for arrays");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -175,7 +179,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody object(String name) {
-    throw new UnsupportedOperationException("Use PactDslJsonBody for objects");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_BODY_FOR_OBJECTS);
   }
 
   /**
@@ -183,7 +187,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonBody object() {
-    throw new UnsupportedOperationException("Use PactDslJsonBody for objects");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_BODY_FOR_OBJECTS);
   }
 
   /**
@@ -191,7 +195,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public DslPart closeObject() {
-    throw new UnsupportedOperationException("Use PactDslJsonBody for objects");
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_BODY_FOR_OBJECTS);
   }
 
   @Override
@@ -317,7 +321,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue stringMatcher(String regex, String value) {
     if (!value.matches(regex)) {
-      throw new InvalidMatcherException("Example \"" + value + "\" does not match regular expression \"" +
+      throw new InvalidMatcherException(EXAMPLE + value + "\" does not match regular expression \"" +
         regex + "\"");
     }
     PactDslJsonRootValue rootValue = new PactDslJsonRootValue();
@@ -456,7 +460,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue hexValue(String hexValue) {
     if (!hexValue.matches(HEXADECIMAL)) {
-      throw new InvalidMatcherException("Example \"" + hexValue + "\" is not a hexadecimal value");
+      throw new InvalidMatcherException(EXAMPLE + hexValue + "\" is not a hexadecimal value");
     }
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(hexValue);
@@ -485,7 +489,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue uuid(String uuid) {
     if (!uuid.matches(UUID_REGEX)) {
-      throw new InvalidMatcherException("Example \"" + uuid + "\" is not an UUID");
+      throw new InvalidMatcherException(EXAMPLE + uuid + "\" is not an UUID");
     }
 
     PactDslJsonRootValue value = new PactDslJsonRootValue();

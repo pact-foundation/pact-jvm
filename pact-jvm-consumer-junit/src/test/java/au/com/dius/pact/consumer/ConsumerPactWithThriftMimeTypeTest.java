@@ -20,6 +20,7 @@ public class ConsumerPactWithThriftMimeTypeTest {
         "}}},\"6\":{\"str\":\"http://xxx.com/Users:ggloin:PortraitUrl?AWSAccessKeyId=aaaa&Expires=" +
         "2147483647&Signature=aaaa4%2B4%3D\"},\"7\":{\"str\":\"2014-02-01T13:22:52.585Z\"},\"8\":" +
         "{\"str\":\"1\"}}";
+    private static final String APPLICATION_X_THRIFT_JSON = "application/x-thrift+json";
 
     @Rule
     public PactProviderRule provider = new PactProviderRule("test_provider", "localhost", 8080, this);
@@ -27,7 +28,7 @@ public class ConsumerPactWithThriftMimeTypeTest {
     @Pact(provider="test_provider", consumer="test_consumer")
     public PactFragment createFragment(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
-        headers.put("Accept", "application/x-thrift+json");
+        headers.put("Accept", APPLICATION_X_THRIFT_JSON);
 
         return builder
             .given("test state")
