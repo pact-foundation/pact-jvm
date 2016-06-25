@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PactDslRequestWithPath {
+    private static final String CONTENT_TYPE = "Content-Type";
     private final ConsumerPactBuilder consumerPactBuilder;
 
     Consumer consumer;
@@ -112,7 +113,7 @@ public class PactDslRequestWithPath {
      */
     public PactDslRequestWithPath body(String body, String mimeType) {
         requestBody = OptionalBody.body(body);
-        requestHeaders.put("Content-Type", mimeType);
+        requestHeaders.put(CONTENT_TYPE, mimeType);
         return this;
     }
 
@@ -132,8 +133,8 @@ public class PactDslRequestWithPath {
      */
     public PactDslRequestWithPath body(JSONObject body) {
         requestBody = OptionalBody.body(body.toString());
-        if (!requestHeaders.containsKey("Content-Type")) {
-            requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+            requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
         }
         return this;
     }
@@ -149,8 +150,8 @@ public class PactDslRequestWithPath {
             requestMatchers.put("$.body" + matcherName, parent.matchers.get(matcherName));
         }
         requestBody = OptionalBody.body(parent.toString());
-        if (!requestHeaders.containsKey("Content-Type")) {
-            requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+            requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
         }
         return this;
     }
@@ -162,8 +163,8 @@ public class PactDslRequestWithPath {
      */
     public PactDslRequestWithPath body(Document body) throws TransformerException {
         requestBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body));
-        if (!requestHeaders.containsKey("Content-Type")) {
-            requestHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
+        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+            requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_XML.toString());
         }
         return this;
     }

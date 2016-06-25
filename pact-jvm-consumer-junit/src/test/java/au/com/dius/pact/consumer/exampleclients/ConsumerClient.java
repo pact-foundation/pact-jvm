@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ConsumerClient{
+    private static final String TESTREQHEADER = "testreqheader";
+    private static final String TESTREQHEADERVALUE = "testreqheadervalue";
     private String url;
 
     public ConsumerClient(String url) {
@@ -36,7 +38,7 @@ public class ConsumerClient{
             uriBuilder.setParameters(parseQueryString(queryString));
         }
         return jsonToMap(Request.Get(uriBuilder.toString())
-                .addHeader("testreqheader", "testreqheadervalue")
+                .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
                 .execute().returnContent().asString());
     }
 
@@ -52,13 +54,13 @@ public class ConsumerClient{
 
     public List getAsList(String path) throws IOException {
 		return jsonToList(Request.Get(url + encodePath(path))
-                .addHeader("testreqheader", "testreqheadervalue")
+                .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
                 .execute().returnContent().asString());
 	}
 
     public Map post(String path, String body, ContentType mimeType) throws IOException {
         String respBody = Request.Post(url + encodePath(path))
-                .addHeader("testreqheader", "testreqheadervalue")
+                .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
                 .bodyString(body, mimeType)
                 .execute().returnContent().asString();
         return jsonToMap(respBody);
@@ -74,7 +76,7 @@ public class ConsumerClient{
 
     public int options(String path) throws IOException {
         return Request.Options(url + encodePath(path))
-                .addHeader("testreqheader", "testreqheadervalue")
+                .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
                 .execute().returnResponse().getStatusLine().getStatusCode();
     }
 
@@ -86,7 +88,7 @@ public class ConsumerClient{
 
     public Map putAsMap(String path, String body) throws IOException {
         String respBody = Request.Put(url + encodePath(path))
-                .addHeader("testreqheader", "testreqheadervalue")
+                .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
                 .bodyString(body, ContentType.APPLICATION_JSON)
                 .execute().returnContent().asString();
         return jsonToMap(respBody);

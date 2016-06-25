@@ -19,20 +19,24 @@ import java.util.Map;
 
 public class MatchingTest {
     private static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
+    private static final String HARRY = "harry";
+    private static final String HELLO = "/hello";
+    private static final String TEST_CONSUMER = "test_consumer";
+    private static final String TEST_PROVIDER = "test_provider";
 
     @Test
     public void testRegexpMatchingOnBody() {
         PactDslJsonBody body = new PactDslJsonBody()
-            .stringMatcher("name", "\\w+", "harry")
+            .stringMatcher("name", "\\w+", HARRY)
             .stringMatcher("position", "staff|contactor");
 
         PactDslJsonBody responseBody = new PactDslJsonBody()
-            .stringMatcher("name", "\\w+", "harry");
+            .stringMatcher("name", "\\w+", HARRY);
 
         HashMap<String, String> expectedResponse = new HashMap<String, String>();
-        expectedResponse.put("name", "harry");
+        expectedResponse.put("name", HARRY);
         runTest(buildPactFragment(body, responseBody, "a test interaction that requires regex matching"),
-            "{\"name\": \"Arnold\", \"position\": \"staff\"}", expectedResponse, "/hello");
+            "{\"name\": \"Arnold\", \"position\": \"staff\"}", expectedResponse, HELLO);
     }
 
     @Test
@@ -63,14 +67,14 @@ public class MatchingTest {
                 .put("age2", 200)
                 .put("timestamp", DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date()))
                 .toString(),
-            expectedResponse, "/hello");
+            expectedResponse, HELLO);
     }
 
     @Test
     public void testRegexpMatchingOnPath() {
         PactDslResponse fragment = ConsumerPactBuilder
-            .consumer("test_consumer")
-            .hasPactWith("test_provider")
+            .consumer(TEST_CONSUMER)
+            .hasPactWith(TEST_PROVIDER)
             .uponReceiving("a request to match on path")
             .matchPath("/hello/[0-9]{4}")
             .method("POST")
@@ -84,10 +88,10 @@ public class MatchingTest {
     @Test
     public void testRegexpMatchingOnHeaders() {
         PactDslResponse fragment = ConsumerPactBuilder
-                .consumer("test_consumer")
-                .hasPactWith("test_provider")
+                .consumer(TEST_CONSUMER)
+                .hasPactWith(TEST_PROVIDER)
                 .uponReceiving("a request to match on headers")
-                    .path("/hello")
+                    .path(HELLO)
                     .method("POST")
                     .matchHeader("testreqheader", "test.*value", "testreqheadervalue")
                 .body("{}", ContentType.APPLICATION_JSON)
@@ -95,7 +99,7 @@ public class MatchingTest {
                 .status(200)
                     .matchHeader("Location", ".*/hello/[0-9]+", "/hello/1234");
         Map expectedResponse = new HashMap();
-        runTest(fragment, "{}", expectedResponse, "/hello");
+        runTest(fragment, "{}", expectedResponse, HELLO);
     }
 
     private void runTest(PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
@@ -119,10 +123,10 @@ public class MatchingTest {
 
     private PactDslResponse buildPactFragment(PactDslJsonBody body, PactDslJsonBody responseBody, String description) {
         return ConsumerPactBuilder
-            .consumer("test_consumer")
-            .hasPactWith("test_provider")
+            .consumer(TEST_CONSUMER)
+            .hasPactWith(TEST_PROVIDER)
             .uponReceiving(description)
-                .path("/hello")
+                .path(HELLO)
                 .method("POST")
                 .body(body)
             .willRespondWith()

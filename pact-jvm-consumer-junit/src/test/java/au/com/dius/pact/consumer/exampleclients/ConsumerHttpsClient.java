@@ -20,7 +20,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ConsumerHttpsClient {
-  private String url;
+    private static final String TESTREQHEADERVALUE = "testreqheadervalue";
+    private static final String TESTREQHEADER = "testreqheader";
+    private String url;
 
   public ConsumerHttpsClient(String url) {
     this.url = url.replaceFirst("http:", "https:");
@@ -37,7 +39,7 @@ public class ConsumerHttpsClient {
           uriBuilder.setParameters(parseQueryString(queryString));
       }
       return jsonToMap(InsecureHttpsRequest.Get(uriBuilder.toString())
-              .addHeader("testreqheader", "testreqheadervalue")
+              .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
               .execute().returnContent().asString());
   }
 
@@ -53,13 +55,13 @@ public class ConsumerHttpsClient {
 
   public List getAsList(String path) throws IOException {
     return jsonToList(InsecureHttpsRequest.Get(url + encodePath(path))
-                .addHeader("testreqheader", "testreqheadervalue")
+                .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
                 .execute().returnContent().asString());
   }
 
   public Map post(String path, String body, ContentType mimeType) throws IOException {
       String respBody = InsecureHttpsRequest.Post(url + encodePath(path))
-              .addHeader("testreqheader", "testreqheadervalue")
+              .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
               .bodyString(body, mimeType)
               .execute().returnContent().asString();
       return jsonToMap(respBody);
@@ -75,7 +77,7 @@ public class ConsumerHttpsClient {
 
   public int options(String path) throws IOException {
       return InsecureHttpsRequest.Options(url + encodePath(path))
-              .addHeader("testreqheader", "testreqheadervalue")
+              .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
               .execute().returnResponse().getStatusLine().getStatusCode();
   }
 
@@ -87,7 +89,7 @@ public class ConsumerHttpsClient {
 
   public Map putAsMap(String path, String body) throws IOException {
       String respBody = InsecureHttpsRequest.Put(url + encodePath(path))
-              .addHeader("testreqheader", "testreqheadervalue")
+              .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
               .bodyString(body, ContentType.APPLICATION_JSON)
               .execute().returnContent().asString();
       return jsonToMap(respBody);
