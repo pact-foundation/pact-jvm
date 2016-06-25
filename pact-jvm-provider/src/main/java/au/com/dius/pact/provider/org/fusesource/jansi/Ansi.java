@@ -16,6 +16,9 @@
  */
 package au.com.dius.pact.provider.org.fusesource.jansi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
@@ -27,9 +30,11 @@ import java.util.concurrent.Callable;
  */
 public class Ansi {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Ansi.class);
+
     public static final String DISABLE = au.com.dius.pact.provider.org.fusesource.jansi.Ansi.class.getName() + ".disable";
     private static final char FIRST_ESC_CHAR = 27;
-	private static final char SECOND_ESC_CHAR = '[';;
+    private static final char SECOND_ESC_CHAR = '[';;
     private static Callable<Boolean> detector = new Callable<Boolean>() {
         public Boolean call() throws Exception {
             return !Boolean.getBoolean(DISABLE);
@@ -72,6 +77,7 @@ public class Ansi {
             return detector.call();
         }
         catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
             return true;
         }
     }
