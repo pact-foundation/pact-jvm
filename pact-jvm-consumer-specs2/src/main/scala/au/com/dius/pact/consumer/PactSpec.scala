@@ -13,8 +13,8 @@ trait PactSpec extends FragmentsFactory {
 
   def uponReceiving(description: String) = {
     val pact = PactFragment.consumer(consumer).hasPactWith(provider)
-    if (providerState.isDefined) pact.given(providerState.get)
-    pact.uponReceiving(description)
+    if (providerState.isDefined) pact.given(providerState.get).uponReceiving(description)
+    else pact.uponReceiving(description)
   }
 
   implicit def liftFragmentBuilder(builder: PactWithAtLeastOneRequest): ReadyForTest = {
