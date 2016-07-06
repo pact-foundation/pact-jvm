@@ -47,7 +47,7 @@ pluginBundle {
   website = 'https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle'
   vcsUrl = 'https://github.com/DiUS/pact-jvm.git'
   description = 'Gradle plugin for verifying pacts against a provider.'
-  tags = ['pact', 'provider', 'consumer driven contracts']
+  tags = ['pact', 'provider', 'consumerdrivencontracts', 'microservicetesting']
 
   plugins {
     pactProviderPlugin {
