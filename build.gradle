@@ -40,7 +40,9 @@ subprojects {
     apply plugin: 'codenarc'
     apply plugin: 'jacoco'
 
-    apply plugin: 'com.github.tkruse.groovysh'
+    if (javaMajor > 1 || javaMinor > 6) {
+        apply plugin: 'com.github.tkruse.groovysh'
+    }
 
     repositories {
         mavenLocal()
