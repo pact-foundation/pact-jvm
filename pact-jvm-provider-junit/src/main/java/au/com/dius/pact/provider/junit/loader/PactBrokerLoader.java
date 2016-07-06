@@ -94,11 +94,12 @@ public class PactBrokerLoader implements PactLoader {
       }
       URI brokerUri = uriBuilder.build();
       if (httpResponseCallable == null) {
-        httpResponseCallable = () -> Request.Get(brokerUri)
+        httpResponse = retryer.call(() -> Request.Get(brokerUri)
           .setHeader(HttpHeaders.ACCEPT, "application/hal+json")
-          .execute().returnResponse();
+          .execute().returnResponse());
+      } else {
+        httpResponse = retryer.call(httpResponseCallable);
       }
-      httpResponse = retryer.call(httpResponseCallable);
     } catch (final ExecutionException | RetryException | URISyntaxException e) {
         throw new IOException("Was not able load pacts from broker", e);
     }
