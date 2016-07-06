@@ -56,6 +56,9 @@ public class StatusServiceConsumerPactTest extends ConsumerPactTest {
         }
 
         public String getCurrentQuestionnairePage(Object page) throws IOException {
+            Request.Get(baseUrl + "/status")
+                .addHeader("testreqheader", "testreqheadervalue")
+                .execute();
             return "my_home_1";
         }
     }
