@@ -13,8 +13,8 @@ trait PactSpec extends FragmentsFactory {
 
   def uponReceiving(description: String) = {
     val pact = PactFragment.consumer(consumer).hasPactWith(provider)
-    if (providerState.isDefined) pact.given(providerState.get)
-    pact.uponReceiving(description)
+    if (providerState.isDefined) pact.given(providerState.get).uponReceiving(description)
+    else pact.uponReceiving(description)
   }
 
   implicit def liftFragmentBuilder(builder: PactWithAtLeastOneRequest): ReadyForTest = {
@@ -38,7 +38,7 @@ trait PactSpec extends FragmentsFactory {
     def withConsumerTest(test: MockProviderConfig => Result) = {
       val config = MockProviderConfig.createDefault(PactConfig(PactSpecVersion.V2))
       val description = s"Consumer '${pactFragment.consumer.getName}' has a pact with Provider '${pactFragment.provider.getName}': " +
-        pactFragment.interactions.map { i => i.getDescription }.mkString(" and ")
+        pactFragment.interactions.map { i => i.getDescription }.mkString(" and ") + sys.props("line.separator")
 
       fragmentFactory.example(description, {
         pactFragment.duringConsumerSpec(config)(test(config), verify)

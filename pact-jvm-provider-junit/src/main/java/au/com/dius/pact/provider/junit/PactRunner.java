@@ -120,6 +120,7 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
                     contructorWithClass.setAccessible(true);
                     return contructorWithClass.newInstance(clazz.getJavaClass());
                 } catch(NoSuchMethodException e) {
+                    LOGGER.error(e.getMessage(), e);
                     return pactLoaderClass.newInstance();
                 }
             } else {

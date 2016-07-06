@@ -9,6 +9,8 @@ import au.com.dius.pact.model.PactSpecVersion;
 import org.apache.http.entity.ContentType;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,6 +19,8 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 public class MimeTypeTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MimeTypeTest.class);
 
     private static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
 
@@ -66,7 +70,9 @@ public class MimeTypeTest {
             public void run(MockProviderConfig config) {
                 try {
                     assertEquals(new ConsumerClient(config.url()).postBody("/hello", body, mimeType), expectedResponse);
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
             }
         });
 

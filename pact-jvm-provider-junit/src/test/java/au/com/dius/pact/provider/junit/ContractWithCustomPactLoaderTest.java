@@ -6,7 +6,6 @@ import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
 import com.github.restdriver.clientdriver.ClientDriverRule;
 import org.apache.http.HttpRequest;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -23,11 +22,12 @@ import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 @Git("http://myhost/pacts")
 public class ContractWithCustomPactLoaderTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ContractTest.class);
-
     // NOTE: this is just an example of embedded service that listens to requests, you should start here real service
     @ClassRule
     public static final ClientDriverRule embeddedService = new ClientDriverRule(8332);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContractTest.class);
+    @TestTarget
+    public final Target target = new HttpTarget(8332);
 
     @BeforeClass
     public static void setUpService() {
@@ -57,8 +57,5 @@ public class ContractWithCustomPactLoaderTest {
     public void exampleRequestFilter(HttpRequest request) {
         LOGGER.info("exampleRequestFilter called: " + request);
     }
-
-    @TestTarget
-    public final Target target = new HttpTarget(8332);
 }
 

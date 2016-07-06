@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider.junit.target;
 
-import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.ProviderInfo;
@@ -38,6 +37,7 @@ public class HttpTarget implements TestClassAwareTarget {
     private final String host;
     private final int port;
     private final String protocol;
+    private final boolean insecure;
     private TestClass testClass;
     private Object testTarget;
     private ValueResolver valueResolver = new SystemPropertyResolver();
@@ -62,7 +62,7 @@ public class HttpTarget implements TestClassAwareTarget {
     /**
      * @param host host of tested service
      * @param port port of tested service
-     * @param protocol of tested service
+     * @param protocol protocol of tested service
      */
     public HttpTarget(final String protocol, final String host, final int port) {
         this(protocol, host, port, "/");
@@ -71,40 +71,58 @@ public class HttpTarget implements TestClassAwareTarget {
     /**
      * @param host host of tested service
      * @param port port of tested service
-     * @param protocol of tested service
-     * @param path of the tested service
+     * @param protocol protocol of tested service
+     * @param path protocol of the tested service
      */
     public HttpTarget(final String protocol, final String host, final int port, final String path) {
+        this(protocol, host, port, path, false);
+    }
+
+    /**
+     *
+     * @param host host of tested service
+     * @param port port of tested service
+     * @param protocol protocol of the tested service
+     * @param path path of the tested service
+     * @param insecure true if certificates should be ignored
+     */
+    public HttpTarget(final String protocol, final String host, final int port, final String path, final boolean insecure) {
         this.host = host;
         this.port = port;
         this.protocol = protocol;
         this.path = path;
+        this.insecure = insecure;
     }
 
     /**
-     * @param url of the tested service
+     * @param url url of the tested service
      */
     public HttpTarget(final URL url) {
+        this(url, false);
+    }
+
+    /**
+     *
+     * @param url url of the tested service
+     * @param insecure true if certificates should be ignored
+     */
+    public HttpTarget(final URL url, final boolean insecure) {
         this(url.getProtocol() == null ? "http" : url.getProtocol(),
                 url.getHost(),
                 url.getPort() == -1 ? 8080 : url.getPort(),
-                url.getPath() == null ? "/" : url.getPath());
+                url.getPath() == null ? "/" : url.getPath(),
+                insecure);
+
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void testInteraction(final String consumerName, final Interaction interaction) {
-      if (!(interaction instanceof RequestResponseInteraction)) {
-        throw new AssertionError("HttpTarget can only validate RequestResponseInteractions. Received a " +
-          interaction.getClass().getSimpleName());
-      }
-
-      RequestResponseInteraction rri = (RequestResponseInteraction) interaction;
+    public void testInteraction(final String consumerName, final RequestResponseInteraction interaction) {
       ProviderInfo provider = getProviderInfo();
       ConsumerInfo consumer = new ConsumerInfo(consumerName);
-      ProviderVerifier verifier = setupVerifier(rri, provider, consumer);
+      ProviderVerifier verifier = setupVerifier(interaction, provider, consumer);
 
       Map<String, Object> failures = new HashMap<String, Object>();
       verifier.verifyResponseFromProvider(provider, interaction, interaction.getDescription(), failures);
@@ -176,6 +194,7 @@ public class HttpTarget implements TestClassAwareTarget {
       providerInfo.setHost(host);
       providerInfo.setProtocol(protocol);
       providerInfo.setPath(path);
+      providerInfo.setInsecure(insecure);
 
       if (testClass != null) {
         final List<FrameworkMethod> methods = testClass.getAnnotatedMethods(TargetRequestFilter.class);

@@ -17,13 +17,14 @@ import java.util.UUID;
  */
 public class PactDslJsonArray extends DslPart {
 
+    private static final String EXAMPLE = "Example \"";
     private final JSONArray body;
     private boolean wildCard;
     private int numberExamples = 1;
 
     public PactDslJsonArray() {
-		this("", null, false);
-	}
+      this("", null, false);
+    }
 	
     public PactDslJsonArray(String root, DslPart parent) {
         this(root, parent, false);
@@ -39,8 +40,11 @@ public class PactDslJsonArray extends DslPart {
      * Closes the current array
      */
     public DslPart closeArray() {
+      if (parent != null) {
         parent.putArray(this);
-        return parent;
+      }
+      closed = true;
+      return parent;
     }
 
     @Override
@@ -342,7 +346,7 @@ public class PactDslJsonArray extends DslPart {
      */
     public PactDslJsonArray stringMatcher(String regex, String value) {
         if (!value.matches(regex)) {
-            throw new InvalidMatcherException("Example \"" + value + "\" does not match regular expression \"" +
+            throw new InvalidMatcherException(EXAMPLE + value + "\" does not match regular expression \"" +
                 regex + "\"");
         }
         body.put(value);
@@ -480,7 +484,24 @@ public class PactDslJsonArray extends DslPart {
         throw new UnsupportedOperationException("can't call closeObject on an Array");
     }
 
-    public PactDslJsonArray array(String name) {
+  @Override
+  public DslPart close() {
+    DslPart parentToReturn = this;
+    if (!closed) {
+      DslPart parent = closeArray();
+      while (parent != null) {
+        parentToReturn = parent;
+        if (parent instanceof PactDslJsonArray) {
+          parent = parent.closeArray();
+        } else {
+          parent = parent.closeObject();
+        }
+      }
+    }
+    return parentToReturn;
+  }
+
+  public PactDslJsonArray array(String name) {
         throw new UnsupportedOperationException("use the array() form");
     }
 
@@ -523,7 +544,7 @@ public class PactDslJsonArray extends DslPart {
      */
     public PactDslJsonArray hexValue(String hexValue) {
         if (!hexValue.matches(HEXADECIMAL)) {
-            throw new InvalidMatcherException("Example \"" + hexValue + "\" is not a hexadecimal value");
+            throw new InvalidMatcherException(EXAMPLE + hexValue + "\" is not a hexadecimal value");
         }
         body.put(hexValue);
         matchers.put(root + appendArrayIndex(0), regexp("[0-9a-fA-F]+"));
@@ -562,7 +583,7 @@ public class PactDslJsonArray extends DslPart {
      */
     public PactDslJsonArray uuid(String uuid) {
         if (!uuid.matches(UUID_REGEX)) {
-            throw new InvalidMatcherException("Example \"" + uuid + "\" is not an UUID");
+            throw new InvalidMatcherException(EXAMPLE + uuid + "\" is not an UUID");
         }
         body.put(uuid);
         matchers.put(root + appendArrayIndex(0), regexp(UUID_REGEX));

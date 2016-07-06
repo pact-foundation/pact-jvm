@@ -11,7 +11,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 public abstract class ConsumerPactTest {
-    public static VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
+    public static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
 
     protected abstract PactFragment createFragment(PactDslWithProvider builder);
     protected abstract String providerName();

@@ -20,6 +20,10 @@ import au.com.dius.pact.model.v3.messaging.MessagePact;
  */
 public class MessagePactBuilder {
   /**
+   * String constant "Content-type".
+   */
+  private static final String CONTENT_TYPE = "Content-Type";
+  /**
    * The consumer for the pact.
    */
   private Consumer consumer;
@@ -117,9 +121,9 @@ public class MessagePactBuilder {
     Map<String, String> metadata = message.getMetaData();
     if (metadata == null) {
       metadata = new HashMap<String, String>(1);
-      metadata.put("Content-Type", ContentType.APPLICATION_JSON.toString());
-    } else if (!metadata.containsKey("Content-Type")) {
-      metadata.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+      metadata.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+    } else if (!metadata.containsKey(CONTENT_TYPE)) {
+      metadata.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
     }
 
     message.setContents(OptionalBody.body(body.toString()));

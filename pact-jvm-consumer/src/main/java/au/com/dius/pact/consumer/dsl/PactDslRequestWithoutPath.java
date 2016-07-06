@@ -14,6 +14,7 @@ import java.util.Map;
 import static au.com.dius.pact.consumer.ConsumerPactBuilder.xmlToString;
 
 public class PactDslRequestWithoutPath {
+    private static final String CONTENT_TYPE = "Content-Type";
     private final ConsumerPactBuilder consumerPactBuilder;
     private PactDslWithState pactDslWithState;
     private String description;
@@ -82,7 +83,7 @@ public class PactDslRequestWithoutPath {
      */
     public PactDslRequestWithoutPath body(String body, String mimeType) {
         requestBody = OptionalBody.body(body);
-        requestHeaders.put("Content-Type", mimeType);
+        requestHeaders.put(CONTENT_TYPE, mimeType);
         return this;
     }
 
@@ -102,8 +103,8 @@ public class PactDslRequestWithoutPath {
      */
     public PactDslRequestWithoutPath body(JSONObject body) {
         requestBody = OptionalBody.body(body.toString());
-        if (!requestHeaders.containsKey("Content-Type")) {
-            requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+            requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
         }
         return this;
     }
@@ -114,13 +115,14 @@ public class PactDslRequestWithoutPath {
      * @param body Built using the Pact body DSL
      */
     public PactDslRequestWithoutPath body(DslPart body) {
+        DslPart parent = body.close();
         requestMatchers = new HashMap<String, Map<String, Object>>();
-        for (String matcherName : body.matchers.keySet()) {
-            requestMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
+        for (String matcherName : parent.matchers.keySet()) {
+            requestMatchers.put("$.body" + matcherName, parent.matchers.get(matcherName));
         }
-        requestBody = OptionalBody.body(body.toString());
-        if (!requestHeaders.containsKey("Content-Type")) {
-            requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+        requestBody = OptionalBody.body(parent.toString());
+        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+            requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
         }
         return this;
     }
@@ -132,8 +134,8 @@ public class PactDslRequestWithoutPath {
      */
     public PactDslRequestWithoutPath body(Document body) throws TransformerException {
         requestBody = OptionalBody.body(xmlToString(body));
-        if (!requestHeaders.containsKey("Content-Type")) {
-            requestHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
+        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+            requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_XML.toString());
         }
         return this;
     }

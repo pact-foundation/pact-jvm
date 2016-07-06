@@ -49,7 +49,12 @@ class PactDslJsonArrayMatcherSpec extends Specification {
         new JsonSlurper().parseText(subject.body.toString()) == [
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
-        subject.matchers.keySet() == ['', '[*].amount', '[*].clearedDate', '[*].status'] as Set
+        subject.matchers == [
+          '': [min: 0, match: 'type'],
+          '[*].amount': [match: 'decimal'],
+          '[*].clearedDate': [date: 'mm/dd/yyyy'],
+          '[*].status': [match: 'type']
+        ]
     }
 
     def 'Allows Like Min Matchers When The Array Is The Root'() {
@@ -65,7 +70,12 @@ class PactDslJsonArrayMatcherSpec extends Specification {
         new JsonSlurper().parseText(subject.body.toString()) == [
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
-        subject.matchers.keySet() == ['', '[*].amount', '[*].clearedDate', '[*].status'] as Set
+        subject.matchers == [
+          '': [min: 1, match: 'type'],
+          '[*].amount': [match: 'decimal'],
+          '[*].clearedDate': [date: 'mm/dd/yyyy'],
+          '[*].status': [match: 'type']
+        ]
     }
 
     def 'Allows Like Max Matchers When The Array Is The Root'() {
@@ -81,7 +91,12 @@ class PactDslJsonArrayMatcherSpec extends Specification {
         new JsonSlurper().parseText(subject.body.toString()) == [
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
-        subject.matchers.keySet() == ['', '[*].amount', '[*].clearedDate', '[*].status'] as Set
+        subject.matchers == [
+          '': [max: 10, match: 'type'],
+          '[*].amount': [match: 'decimal'],
+          '[*].clearedDate': [date: 'mm/dd/yyyy'],
+          '[*].status': [match: 'type']
+        ]
     }
 
   def 'root array each like allows the number of examples to be set'() {

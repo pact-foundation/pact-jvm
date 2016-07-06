@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PactDslResponse {
+    private static final String CONTENT_TYPE = "Content-Type";
     private final ConsumerPactBuilder consumerPactBuilder;
     private PactDslRequestWithPath request;
 
@@ -68,7 +69,7 @@ public class PactDslResponse {
      */
     public PactDslResponse body(String body, String mimeType) {
         responseBody = OptionalBody.body(body);
-        responseHeaders.put("Content-Type", mimeType);
+        responseHeaders.put(CONTENT_TYPE, mimeType);
         return this;
     }
 
@@ -88,8 +89,8 @@ public class PactDslResponse {
      */
     public PactDslResponse body(JSONObject body) {
         this.responseBody = OptionalBody.body(body.toString());
-        if (!responseHeaders.containsKey("Content-Type")) {
-            responseHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+        if (!responseHeaders.containsKey(CONTENT_TYPE)) {
+            responseHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
         }
         return this;
     }
@@ -100,18 +101,19 @@ public class PactDslResponse {
      * @param body Response body built using the Pact body DSL
      */
     public PactDslResponse body(DslPart body) {
-        for (String matcherName : body.matchers.keySet()) {
-            responseMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
+        DslPart parent = body.close();
+        for (String matcherName : parent.matchers.keySet()) {
+            responseMatchers.put("$.body" + matcherName, parent.matchers.get(matcherName));
         }
 
-        if (body.getBody() != null) {
-            responseBody = OptionalBody.body(body.getBody().toString());
+        if (parent.getBody() != null) {
+            responseBody = OptionalBody.body(parent.getBody().toString());
         } else {
             responseBody = OptionalBody.nullBody();
         }
 
-        if (!responseHeaders.containsKey("Content-Type")) {
-            responseHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+        if (!responseHeaders.containsKey(CONTENT_TYPE)) {
+            responseHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
         }
         return this;
     }
@@ -123,8 +125,8 @@ public class PactDslResponse {
      */
     public PactDslResponse body(Document body) throws TransformerException {
         responseBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body));
-        if (!responseHeaders.containsKey("Content-Type")) {
-            responseHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
+        if (!responseHeaders.containsKey(CONTENT_TYPE)) {
+            responseHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_XML.toString());
         }
         return this;
     }

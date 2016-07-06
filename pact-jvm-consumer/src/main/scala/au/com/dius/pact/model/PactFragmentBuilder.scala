@@ -81,12 +81,26 @@ object PactFragmentBuilder {
   }
 
   case class PactWithAtLeastOneRequest(consumer: Consumer, provider:Provider, state: Option[String], interactions: Seq[RequestResponseInteraction]) {
+    def given() = {
+      InState(None, this)
+    }
+
+    def given(newState: String) = {
+      InState(Some(newState), this)
+    }
+
     def uponReceiving(description: String) = {
       DescribingRequest(consumer, provider, state, description, CanBuildPactFragment.additionalBuild(this))
     }
 
     def duringConsumerSpec[T](config: MockProviderConfig)(test: => T, verification: ConsumerTestVerification[T]): VerificationResult = {
       PactFragment(consumer, provider, interactions).duringConsumerSpec(config)(test, verification)
+    }
+
+    case class InState(newState: Option[String], pactWithAtLeastOneRequest: PactWithAtLeastOneRequest) {
+      def uponReceiving(description: String) = {
+        DescribingRequest(consumer, provider, newState, description, CanBuildPactFragment.additionalBuild(pactWithAtLeastOneRequest))
+      }
     }
   }
 

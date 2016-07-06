@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
  */
 public class PactDslJsonBody extends DslPart {
 
+    private static final String EXAMPLE = "Example \"";
     private final JSONObject body;
 
     public PactDslJsonBody() {
@@ -255,7 +256,7 @@ public class PactDslJsonBody extends DslPart {
      */
     public PactDslJsonBody stringMatcher(String name, String regex, String value) {
         if (!value.matches(regex)) {
-            throw new InvalidMatcherException("Example \"" + value + "\" does not match regular expression \"" +
+            throw new InvalidMatcherException(EXAMPLE + value + "\" does not match regular expression \"" +
                 regex + "\"");
         }
         body.put(name, value);
@@ -429,11 +430,31 @@ public class PactDslJsonBody extends DslPart {
      * Closes the current JSON object
      */
     public DslPart closeObject() {
+      if (parent != null) {
         parent.putObject(this);
-        return parent;
+      }
+      closed = true;
+      return parent;
     }
 
-    /**
+  @Override
+  public DslPart close() {
+    DslPart parentToReturn = this;
+    if (!closed) {
+      DslPart parent = closeObject();
+      while (parent != null) {
+        parentToReturn = parent;
+        if (parent instanceof PactDslJsonArray) {
+          parent = parent.closeArray();
+        } else {
+          parent = parent.closeObject();
+        }
+      }
+    }
+    return parentToReturn;
+  }
+
+  /**
      * Attribute that is an array
      * @param name field name
      */
@@ -689,7 +710,7 @@ public class PactDslJsonBody extends DslPart {
      */
     public PactDslJsonBody hexValue(String name, String hexValue) {
         if (!hexValue.matches(HEXADECIMAL)) {
-            throw new InvalidMatcherException("Example \"" + hexValue + "\" is not a hexadecimal value");
+            throw new InvalidMatcherException(EXAMPLE + hexValue + "\" is not a hexadecimal value");
         }
         body.put(name, hexValue);
         matchers.put(matcherKey(name), regexp("[0-9a-fA-F]+"));
@@ -752,7 +773,7 @@ public class PactDslJsonBody extends DslPart {
      */
     public PactDslJsonBody uuid(String name, String uuid) {
         if (!uuid.matches(UUID_REGEX)) {
-            throw new InvalidMatcherException("Example \"" + uuid + "\" is not an UUID");
+            throw new InvalidMatcherException(EXAMPLE + uuid + "\" is not an UUID");
         }
         body.put(name, uuid);
         matchers.put(matcherKey(name), regexp(UUID_REGEX));

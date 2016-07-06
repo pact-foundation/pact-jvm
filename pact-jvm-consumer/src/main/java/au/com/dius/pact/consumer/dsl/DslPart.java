@@ -10,10 +10,12 @@ public abstract class DslPart {
     public static final String HEXADECIMAL = "[0-9a-fA-F]+";
     public static final String IP_ADDRESS = "(\\d{1,3}\\.)+\\d{1,3}";
     public static final String UUID_REGEX = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+    private static final String MATCH = "match";
 
     protected final DslPart parent;
     protected final String root;
     protected Map<String, Map<String, Object>> matchers = new HashMap<String, Map<String, Object>>();
+    protected boolean closed = false;
 
     public DslPart(DslPart parent, String root) {
         this.parent = parent;
@@ -171,7 +173,7 @@ public abstract class DslPart {
 
     protected Map<String, Object> matchType(String type) {
         Map<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put("match", type);
+        jsonObject.put(MATCH, type);
         return jsonObject;
     }
 
@@ -202,14 +204,14 @@ public abstract class DslPart {
     protected Map<String, Object> matchMin(Integer min) {
         Map<String, Object> jsonObject = new HashMap<String, Object>();
         jsonObject.put("min", min);
-        jsonObject.put("match", "type");
+        jsonObject.put(MATCH, "type");
         return jsonObject;
     }
 
     protected Map<String, Object> matchMax(Integer max) {
         Map<String, Object> jsonObject = new HashMap<String, Object>();
         jsonObject.put("max", max);
-        jsonObject.put("match", "type");
+        jsonObject.put(MATCH, "type");
         return jsonObject;
     }
 
@@ -220,4 +222,10 @@ public abstract class DslPart {
     public PactDslJsonArray asArray() {
         return (PactDslJsonArray) this;
     }
+
+  /**
+   * This closes off the object graph build from the DSL in case any close[Object|Array] methods have not been called.
+   * @return The root object of the object graph
+   */
+  public abstract DslPart close();
 }
