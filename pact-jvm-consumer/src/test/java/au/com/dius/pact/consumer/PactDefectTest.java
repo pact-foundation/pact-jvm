@@ -97,7 +97,6 @@ public class PactDefectTest {
             wr.flush();
             wr.close();
 
-            int responseCode = http.getResponseCode();
             BufferedReader in = new BufferedReader(
                 new InputStreamReader(http.getInputStream()));
             String inputLine;

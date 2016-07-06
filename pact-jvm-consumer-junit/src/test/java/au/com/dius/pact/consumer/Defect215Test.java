@@ -42,8 +42,6 @@ public class Defect215Test {
   @Pact(provider = MY_SERVICE, consumer="browser_consumer")
   public PactFragment createFragment(PactDslWithProvider builder) {
 
-    Map<String, String> headers = Collections.singletonMap("Content-Type", "application/json");
-
     return builder
       .given("An env")
       .uponReceiving("a new user")
