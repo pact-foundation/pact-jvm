@@ -1,5 +1,6 @@
 package specification
 
+@java.lang.SuppressWarnings('UnusedImport')
 import au.com.dius.pact.model.DiffConfig$
 import au.com.dius.pact.model.ResponseMatching
 import groovy.util.logging.Slf4j

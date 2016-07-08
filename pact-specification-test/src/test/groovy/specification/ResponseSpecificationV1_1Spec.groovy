@@ -1,5 +1,6 @@
 package specification
 
+@java.lang.SuppressWarnings('UnusedImport')
 import au.com.dius.pact.model.DiffConfig$
 import au.com.dius.pact.model.ResponseMatching
 import groovy.util.logging.Slf4j
@@ -16,6 +17,5 @@ class ResponseSpecificationV1_1Spec extends BaseResponseSpec {
     where:
     [type, test, match, matchDesc, expected, actual] << loadTestCases('/v1.1/response/')
   }
-
 
 }

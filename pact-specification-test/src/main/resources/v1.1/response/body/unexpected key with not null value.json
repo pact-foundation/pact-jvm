@@ -2,7 +2,7 @@
   "match": true,
   "comment": "Unexpected phone number",
   "expected" : {
-    "headers": { "Content-Type": "application/json" },
+    "headers": {},
     "body": {
       "alligator":{
         "name": "Mary"
@@ -10,7 +10,7 @@
     }
   },
   "actual": {
-    "headers": { "Content-Type": "application/json" },
+    "headers": {},
     "body": {
       "alligator":{
         "name": "Mary",
