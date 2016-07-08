@@ -2,7 +2,7 @@
 	"match": true,
 	"comment": "Comparisons should work even on nested objects",
 	"expected" : {
-		"headers": {},
+		"headers": { "Content-Type": "application/json" },
 		"body": {
 			"object1": {
 				"object2": { 
@@ -20,7 +20,7 @@
 		}
 	},
 	"actual": {
-		"headers": {},
+		"headers": { "Content-Type": "application/json" },
 		"body": {
 			"object1":{
 				"object2": { 
