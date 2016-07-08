@@ -1,5 +1,6 @@
 package specification
 
+import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.RequestMatching
 import groovy.util.logging.Slf4j
 import spock.lang.Unroll
@@ -13,7 +14,7 @@ class RequestSpecificationV1Spec extends BaseRequestSpec {
     RequestMatching.requestMismatches(expected, actual).isEmpty() == match
 
     where:
-    [type, test, match, matchDesc, expected, actual] << loadTestCases('/v1/request/')
+    [type, test, match, matchDesc, expected, actual] << loadTestCases('/v1/request/', PactSpecVersion.V1)
   }
 
 }

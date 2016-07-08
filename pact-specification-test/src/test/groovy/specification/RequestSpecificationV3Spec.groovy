@@ -6,7 +6,7 @@ import groovy.util.logging.Slf4j
 import spock.lang.Unroll
 
 @Slf4j
-class RequestSpecificationV1_1Spec extends BaseRequestSpec {
+class RequestSpecificationV3Spec extends BaseRequestSpec {
 
   @Unroll
   def '#type #test #matchDesc'() {
@@ -14,6 +14,7 @@ class RequestSpecificationV1_1Spec extends BaseRequestSpec {
     RequestMatching.requestMismatches(expected, actual).isEmpty() == match
 
     where:
-    [type, test, match, matchDesc, expected, actual] << loadTestCases('/v1.1/request/', PactSpecVersion.V1_1)
+    [type, test, match, matchDesc, expected, actual] << loadTestCases('/v3/request/', PactSpecVersion.V3)
   }
+
 }
