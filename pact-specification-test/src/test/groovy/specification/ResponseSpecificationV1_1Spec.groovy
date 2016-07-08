@@ -6,7 +6,7 @@ import groovy.util.logging.Slf4j
 import spock.lang.Unroll
 
 @Slf4j
-class ResponseSpecificationV1Spec extends BaseResponseSpec {
+class ResponseSpecificationV1_1Spec extends BaseResponseSpec {
 
   @Unroll
   def '#type #test #matchDesc'() {
@@ -14,7 +14,8 @@ class ResponseSpecificationV1Spec extends BaseResponseSpec {
     new ResponseMatching(DiffConfig$.MODULE$.apply(true, false)).responseMismatches(expected, actual).isEmpty() == match
 
     where:
-    [type, test, match, matchDesc, expected, actual] << loadTestCases('/v1/response/')
+    [type, test, match, matchDesc, expected, actual] << loadTestCases('/v1.1/response/')
   }
+
 
 }
