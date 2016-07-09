@@ -22,7 +22,7 @@ class PactReaderTransformSpec extends Specification {
       path: '/mallory',
       query: 'name=ron&status=good',
 	  body: [
-		  "id": "123", "method": "create"
+		  'id': '123', 'method': 'create'
 		  ]
     ]
     response = [
