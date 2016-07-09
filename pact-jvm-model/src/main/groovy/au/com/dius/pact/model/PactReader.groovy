@@ -125,19 +125,19 @@ class PactReader {
           entry = ['method', v ? v.toString().toUpperCase() : v]
             break
       }
-
-      if (v instanceof Map) {
-        entry[1] = recursiveTransformJson(v)
-      } else if (v instanceof Collection) {
-        entry[1] = v.collect {
-          if (it instanceof Map) {
-            recursiveTransformJson(it)
-          } else {
-            it
+      if (k != 'body') { // Skip recursing through request and response body elements
+        if (v instanceof Map) {
+          entry[1] = recursiveTransformJson(v)
+        } else if (v instanceof Collection) {
+          entry[1] = v.collect {
+            if (it instanceof Map) {
+              recursiveTransformJson(it)
+            } else {
+              it
+            }
           }
         }
       }
-
       entry
     }
   }

@@ -20,7 +20,10 @@ class PactReaderTransformSpec extends Specification {
     request = [
       method: 'GET',
       path: '/mallory',
-      query: 'name=ron&status=good'
+      query: 'name=ron&status=good',
+	  body: [
+		  "id": "123", "method": "create"
+		  ]
     ]
     response = [
       status: 200,
@@ -97,7 +100,7 @@ class PactReaderTransformSpec extends Specification {
 
   def 'converts the http methods to upper case'() {
     given:
-    jsonMap.interactions[0].request.method = 'GET'
+    jsonMap.interactions[0].request.method = 'get'
 
     when:
     def result = PactReader.recursiveTransformJson(jsonMap)
