@@ -40,7 +40,7 @@ class PactReader {
       if (pactJson.messages) {
           MessagePact.fromMap(pactJson)
       } else {
-        def transformedJson = recursiveTransformJson(pactJson)
+        def transformedJson = transformJson(pactJson)
         def provider = transformedJson.provider as Provider
         def consumer = transformedJson.consumer as Consumer
 
@@ -56,7 +56,7 @@ class PactReader {
 
   @SuppressWarnings('UnusedMethodParameter')
   static Pact loadV2Pact(def source, def pactJson) {
-    def transformedJson = recursiveTransformJson(pactJson)
+    def transformedJson = transformJson(pactJson)
     def provider = transformedJson.provider as Provider
     def consumer = transformedJson.consumer as Consumer
 
@@ -108,35 +108,39 @@ class PactReader {
   }
 
   @SuppressWarnings('DuplicateStringLiteral')
-  static recursiveTransformJson(def pactJson) {
-    pactJson.collectEntries { k, v ->
+  static transformJson(def pactJson) {
+    pactJson.interactions = pactJson.interactions*.collectEntries { k, v ->
       def entry = [k, v]
       switch (k) {
         case 'provider_state':
           entry = ['providerState', v]
-            break
+          break
+        case 'request':
+          entry = ['request', transformRequestResponseJson(v)]
+          break
+        case 'response':
+          entry = ['response', transformRequestResponseJson(v)]
+          break
+      }
+      entry
+    }
+    pactJson
+  }
+
+  @SuppressWarnings('DuplicateStringLiteral')
+  static transformRequestResponseJson(def requestJson) {
+    requestJson.collectEntries { k, v ->
+      def entry = [k, v]
+      switch (k) {
         case 'responseMatchingRules':
           entry = ['matchingRules', v]
-            break
+          break
         case 'requestMatchingRules':
           entry = ['matchingRules', v]
-            break
+          break
         case 'method':
           entry = ['method', v ? v.toString().toUpperCase() : v]
-            break
-      }
-      if (k != 'body') { // Skip recursing through request and response body elements
-        if (v instanceof Map) {
-          entry[1] = recursiveTransformJson(v)
-        } else if (v instanceof Collection) {
-          entry[1] = v.collect {
-            if (it instanceof Map) {
-              recursiveTransformJson(it)
-            } else {
-              it
-            }
-          }
-        }
+          break
       }
       entry
     }
