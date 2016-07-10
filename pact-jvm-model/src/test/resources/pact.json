@@ -11,7 +11,8 @@
       "request": {
         "method": "GET",
         "path": "/mallory",
-        "query": "name=ron&status=good"
+        "query": "name=ron&status=good",
+        "body" : {"id": "123", "method": "create"}
       },
       "response": {
         "status": 200,
