@@ -511,7 +511,7 @@ pact {
         messageProvider {
 
             verificationType = 'ANNOTATED_METHOD'
-            packagesToScan = ['au.com.example.messageprovider.*'] // This optional, but leaving it out will result in the entire
+            packagesToScan = ['au.com.example.messageprovider.*'] // This is optional, but leaving it out will result in the entire
                                                                   // test classpath being scanned
 
             hasPactWith('messageConsumer') {

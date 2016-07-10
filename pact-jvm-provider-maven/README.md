@@ -17,7 +17,7 @@ The Maven plugin provides a `verify` goal which will verify all configured pacts
       <plugin>
         <groupId>au.com.dius</groupId>
         <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-        <version>2.1.9</version>
+        <version>3.2.10</version>
       </plugin>
       [...]
     </plugins>
@@ -33,7 +33,7 @@ You define all the providers and consumers within the configuration element of t
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>2.1.9</version>
+    <version>3.2.10</version>
     <configuration>
       <serviceProviders>
         <!-- You can define as many as you need, but each must have a unique name -->
@@ -71,7 +71,7 @@ provider and define a consumer for each pact file in the directory. Consumer nam
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>2.1.9</version>
+    <version>3.2.10</version>
     <configuration>
       <serviceProviders>
         <!-- You can define as many as you need, but each must have a unique name -->
@@ -98,7 +98,7 @@ For providers that are running on SSL with self-signed certificates, you need to
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>2.2.8</version>
+    <version>3.2.10</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -119,7 +119,7 @@ For environments that are running their own certificate chains:
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>2.2.8</version>
+    <version>3.2.10</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -148,7 +148,7 @@ bound to a variable named `request` prior to it being executed.
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>2.1.9</version>
+    <version>3.2.10</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -182,7 +182,7 @@ For example:
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>2.2.6</version>
+    <version>3.2.10</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -226,7 +226,7 @@ Example in the configuration section:
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>2.1.9</version>
+    <version>3.2.10</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -258,7 +258,7 @@ These values can be set at the provider level, or for a specific consumer. Consu
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>2.1.9</version>
+    <version>3.2.10</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -303,7 +303,7 @@ For example:
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.1.1</version>
+    <version>3.2.10</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -324,3 +324,100 @@ consumers (consumer1 and consumer2). Adding `-Dpact.filter.description=a request
 whose descriptions start with 'a request for payment'. `-Dpact.filter.providerState=.*payment` will match any interaction that
 has a provider state that ends with payment, and `-Dpact.filter.providerState=` will match any interaction that does not have a
 provider state.
+
+# Verifying a message provider [version 2.2.12+]
+
+The Maven plugin has been updated to allow invoking test methods that can return the message contents from a message
+producer. To use it, set the way to invoke the verification to `ANNOTATED_METHOD`. This will allow the pact verification
+ task to scan for test methods that return the message contents.
+
+Add something like the following to your maven pom file:
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
+    <version>3.2.10</version>
+    <configuration>
+      <serviceProviders>
+        <serviceProvider>
+          <name>messageProvider</name>
+          <verificationType>ANNOTATED_METHOD</verificationType>
+          <!-- packagesToScan is optional, but leaving it out will result in the entire
+          test classpath being scanned. Set it to the packages where your annotated test method
+          can be found. -->
+          <packagesToScan>
+              <packageToScan>au.com.example.messageprovider.*</packageToScan>
+          </packagesToScan>
+          <consumers>
+            <consumer>
+              <name>consumer1</name>
+              <pactFile>path/to/messageprovider-consumer1-pact.json</pactFile>
+            </consumer>
+          </consumers>
+        </serviceProvider>
+      </serviceProviders>
+    </configuration>
+</plugin>
+```
+
+Now when the pact verify task is run, will look for methods annotated with `@PactVerifyProvider` in the test classpath
+that have a matching description to what is in the pact file.
+
+```groovy
+class ConfirmationKafkaMessageBuilderTest {
+
+  @PactVerifyProvider('an order confirmation message')
+  String verifyMessageForOrder() {
+      Order order = new Order()
+      order.setId(10000004)
+      order.setExchange('ASX')
+      order.setSecurityCode('CBA')
+      order.setPrice(BigDecimal.TEN)
+      order.setUnits(15)
+      order.setGst(new BigDecimal('15.0'))
+      odrer.setFees(BigDecimal.TEN)
+
+      def message = new ConfirmationKafkaMessageBuilder()
+              .withOrder(order)
+              .build()
+
+      JsonOutput.toJson(message)
+  }
+
+}
+```
+
+It will then validate that the returned contents matches the contents for the message in the pact file.
+
+## Changing the class path that is scanned
+
+By default, the test classpath is scanned for annotated methods. You can override this by setting
+ the `classpathElements` property:
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
+    <version>3.2.10</version>
+    <configuration>
+      <serviceProviders>
+        <serviceProvider>
+          <name>messageProvider</name>
+          <verificationType>ANNOTATED_METHOD</verificationType>
+          <consumers>
+            <consumer>
+              <name>consumer1</name>
+              <pactFile>path/to/messageprovider-consumer1-pact.json</pactFile>
+            </consumer>
+          </consumers>
+        </serviceProvider>
+      </serviceProviders>
+      <classpathElements>
+          <classpathElement>
+              build/classes/test
+          </classpathElement>
+      </classpathElements>
+    </configuration>
+</plugin>
+```

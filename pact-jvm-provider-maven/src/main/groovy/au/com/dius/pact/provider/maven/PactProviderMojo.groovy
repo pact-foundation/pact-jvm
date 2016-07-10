@@ -14,7 +14,7 @@ import org.apache.maven.plugins.annotations.Parameter
 @Mojo(name = 'verify')
 class PactProviderMojo extends AbstractMojo {
 
-  @Parameter(defaultValue = '${project.runtimeClasspathElements}', required = true, readonly = true)
+  @Parameter(defaultValue = '${project.testClasspathElements}', required = true)
   private List<String> classpathElements
 
   @Parameter
