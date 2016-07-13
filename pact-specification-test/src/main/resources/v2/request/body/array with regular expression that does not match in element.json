@@ -1,6 +1,6 @@
 {
   "match": false,
-  "comment": "Types and regular expressions",
+  "comment": "Types and regular expressions match",
   "expected" : {
     "method": "POST",
     "path": "/",

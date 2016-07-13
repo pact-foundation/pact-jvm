@@ -14,9 +14,11 @@ class BaseResponseSpec extends Specification {
       d.eachFile { f ->
         def json = new JsonSlurper().parse(f)
         def expected = PactReader.extractResponse(json.expected)
-        expected.setDefaultMimeType('application/json')
         def actual = PactReader.extractResponse(json.actual)
-        actual.setDefaultMimeType('application/json')
+        if (expected.body.present) {
+          expected.setDefaultMimeType(expected.detectContentType())
+        }
+        actual.setDefaultMimeType(actual.body.present ? actual.detectContentType() : 'application/json')
         result << [d.name, json.comment, json.match, json.match ? 'should match' : 'should not match',
                    expected, actual]
       }

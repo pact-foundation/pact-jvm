@@ -107,7 +107,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         val mismatches: List[BodyMismatch] = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
         mismatches must containMessage("Expected element foo but received bar")
-        mismatches must havePath("$.body")
+        mismatches must havePath("$.body.foo")
       }
 
       "when comparing an empty list to a non-empty one" in {
@@ -136,7 +136,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
 
         mismatches must containMessage("Expected element three but received four")
-        mismatches must havePath("$.body.foo[2]")
+        mismatches must havePath("$.body.foo.2.three")
       }
 
       "when comparing a list to one where the items are in the wrong order" in {
@@ -153,7 +153,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         actualBody = OptionalBody.body("<foo something=\"100\"/>")
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
-        mismatches must containMessage("Expected a Tag with at least 2 attributes but received 1 attributes")
+        mismatches must containMessage("Expected a Tag with 2 attributes but received 1 attributes")
       }
 
       "when comparing a tags attributes to one with more entries" in {
@@ -161,7 +161,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         actualBody = OptionalBody.body("<foo something=\"100\" somethingElse=\"101\"/>")
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
-        mismatches must containMessage("Expected a Tag with at least 1 attributes but received 2 attributes")
+        mismatches must containMessage("Expected a Tag with 1 attributes but received 2 attributes")
       }
 
       "when a tag is missing an attribute" in {
@@ -169,7 +169,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         actualBody = OptionalBody.body("<foo something=\"100\"/>")
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
-        mismatches must containMessage("Expected somethingElse=100 but was missing")
+        mismatches must containMessage("Expected somethingElse='100' but was missing")
       }
 
       "when a tag has the same number of attributes but different keys" in {
@@ -177,8 +177,8 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         actualBody = OptionalBody.body("<foo something=\"100\" somethingDifferent=\"100\"/>")
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
-        mismatches must containMessage("Expected somethingElse=100 but was missing")
-        mismatches must havePath("$.body.foo.somethingElse")
+        mismatches must containMessage("Expected somethingElse='100' but was missing")
+        mismatches must havePath("$.body.foo.@somethingElse")
       }
 
       "when a tag has an invalid value" in {
@@ -186,8 +186,8 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         actualBody = OptionalBody.body("<foo something=\"101\"/>")
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
-        mismatches must containMessage("Expected something=100 but received 101")
-        mismatches must havePath("$.body.foo.something")
+        mismatches must containMessage("Expected something='100' but received 101")
+        mismatches must havePath("$.body.foo.@something")
       }
 
       "when the content of an element does not match" in {
@@ -196,7 +196,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
         mismatches must containMessage("Expected value 'hello world' but received 'hello my friend'")
-        mismatches must havePath("$.body.foo[0]")
+        mismatches must havePath("$.body.foo.#text")
       }
     }
 
@@ -205,7 +205,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
       "delegate to the matcher" in {
         expectedBody = OptionalBody.body("<foo something=\"100\"/>")
         actualBody = OptionalBody.body("<foo something=\"101\"/>")
-        matchers = Map("$.body.foo.something" -> Map("regex" -> "\\d+"))
+        matchers = Map("$.body.foo['@something']" -> Map("regex" -> "\\d+"))
         matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
       }
 

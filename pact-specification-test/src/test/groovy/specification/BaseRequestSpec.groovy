@@ -22,8 +22,10 @@ class BaseRequestSpec extends Specification {
           expected = PactReader.extractRequestV2(json.expected)
           actual = PactReader.extractRequestV2(json.actual)
         }
-        expected.setDefaultMimeType('application/json')
-        actual.setDefaultMimeType('application/json')
+        if (expected.body.present) {
+          expected.setDefaultMimeType(expected.detectContentType())
+        }
+        actual.setDefaultMimeType(actual.body.present ? actual.detectContentType() : 'application/json')
         result << [d.name, json.comment, json.match, json.match ? 'should match' : 'should not match',
                    expected, actual]
       }

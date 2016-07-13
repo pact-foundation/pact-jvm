@@ -50,7 +50,7 @@ class ExampleGroovyConsumerPactTest {
             willRespondWith(status: 200, body: '"deleted"', headers: ['Content-Type': 'text/plain'])
 
             uponReceiving('an update alligators request')
-            withAttributes(method: 'put', path: '/alligators', body: [ ['name': 'Roger' ] ])
+            withAttributes(method: 'put', path: '/alligators', body: [ ['name': 'Roger' ] ], headers: ['Content-Type': 'application/json'])
             willRespondWith(status: 200, body: [ [name: 'Roger', age: 20] ],
                 headers: ['Content-Type': 'application/json'])
         }
