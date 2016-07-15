@@ -19,22 +19,21 @@ public class PactRuleWithRandomPortTest {
 
     @Pact(provider="test_provider", consumer="test_consumer")
     public PactFragment createFragment(PactDslWithProvider builder) {
-        return builder
-            .given("test state")
-            .uponReceiving("random port test interaction")
-                .path("/")
-                .method("GET")
-            .willRespondWith()
-                .status(200)
-                .body("{\"ok\": true}")
-            .toFragment();
+        PactFragment pactFragment = builder
+          .given("test state")
+          .uponReceiving("random port test interaction")
+          .path("/")
+          .method("GET")
+          .willRespondWith()
+          .status(200)
+          .toFragment();
+        return pactFragment;
     }
 
     @Test
     @PactVerification("test_provider")
     public void runTest() throws IOException {
         Map expectedResponse = new HashMap();
-        expectedResponse.put("ok", true);
         assertEquals(new ConsumerClient("http://localhost:" + rule.getConfig().port()).getAsMap("/", ""), expectedResponse);
     }
 }

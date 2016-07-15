@@ -9,12 +9,12 @@ import groovy.transform.Canonical
 class Request implements HttpPart {
   private static final String COOKIE_KEY = 'cookie'
 
-  String method
-  String path
-  Map<String, List<String>> query
-  Map<String, String> headers
+  String method = 'GET'
+  String path = '/'
+  Map<String, List<String>> query = [:]
+  Map<String, String> headers = [:]
   OptionalBody body = OptionalBody.missing()
-  Map<String, Map<String, Object>> matchingRules
+  Map<String, Map<String, Object>> matchingRules = [:]
 
   static Request fromMap(Map map) {
     new Request().with {

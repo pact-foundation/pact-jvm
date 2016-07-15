@@ -67,6 +67,9 @@ public class ConsumerClient{
     }
 
     private HashMap jsonToMap(String respBody) throws IOException {
+        if (respBody.isEmpty()) {
+          return new HashMap();
+        }
         return new ObjectMapper().readValue(respBody, HashMap.class);
     }
 	

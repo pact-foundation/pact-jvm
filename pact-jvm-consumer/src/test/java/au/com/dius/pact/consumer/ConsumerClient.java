@@ -38,7 +38,10 @@ public class ConsumerClient {
     }
 
     private HashMap jsonToMap(String respBody) throws IOException {
-        return new ObjectMapper().readValue(respBody, HashMap.class);
+      if (respBody.isEmpty()) {
+        return new HashMap();
+      }
+      return new ObjectMapper().readValue(respBody, HashMap.class);
     }
 	
 	private List jsonToList(String respBody) throws IOException {

@@ -25,22 +25,27 @@ class RequestResponsePact extends BasePact {
   }
 
   @Override
+  @SuppressWarnings('SpaceAroundMapEntryColon')
   Map toMap(PactSpecVersion pactSpecVersion) {
     [
-      provider: objectToMap(provider),
-      consumer: objectToMap(consumer),
-      interactions: interactions.collect { interactionToMap(it, pactSpecVersion) },
-      metadata: metaData(pactSpecVersion >= PactSpecVersion.V3 ? '3.0.0' : '2.0.0')
+      provider      : objectToMap(provider),
+      consumer      : objectToMap(consumer),
+      interactions  : interactions.collect { interactionToMap(it, pactSpecVersion) },
+      metadata      : metaData(pactSpecVersion >= PactSpecVersion.V3 ? '3.0.0' : '2.0.0')
     ]
   }
 
+  @SuppressWarnings('SpaceAroundMapEntryColon')
   static Map interactionToMap(RequestResponseInteraction interaction, PactSpecVersion pactSpecVersion) {
-    [
-      providerState: interaction.providerState,
-      description: interaction.description,
-      request: requestToMap(interaction.request, pactSpecVersion),
-      response: responseToMap(interaction.response)
+    def interactionJson = [
+      description  : interaction.description,
+      request      : requestToMap(interaction.request, pactSpecVersion),
+      response     : responseToMap(interaction.response)
     ]
+    if (interaction.providerState) {
+      interactionJson.providerState = interaction.providerState
+    }
+    interactionJson
   }
 
   static Map requestToMap(Request request, PactSpecVersion pactSpecVersion) {
@@ -54,7 +59,7 @@ class RequestResponsePact extends BasePact {
     if (request.query) {
       map.query = pactSpecVersion >= PactSpecVersion.V3 ? request.query : mapToQueryStr(request.query)
     }
-    if (request.body) {
+    if (!request.body.missing) {
       map.body = parseBody(request)
     }
     if (request.matchingRules) {
@@ -68,7 +73,7 @@ class RequestResponsePact extends BasePact {
     if (response.headers) {
       map.headers = response.headers as Map
     }
-    if (response.body) {
+    if (!response.body.missing) {
       map.body = parseBody(response)
     }
     if (response.matchingRules) {
