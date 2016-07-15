@@ -1,0 +1,24 @@
+{
+  "match": false,
+  "comment": "Types and regular expressions match",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/xml"},
+    "matchingRules": {
+      "$.body.animals": {"min": 1, "match": "type"},
+      "$.body.animals.0": {"match": "type"},
+      "$.body.animals.1": {"match": "type"},
+      "$.body.animals[*].alligator['@phoneNumber']": {"match": "regex", "regex": "\\d+"}
+    },
+    "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><animals><alligator phoneNumber=\"0415674567\"/></animals>"
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/xml"},
+    "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><animals><alligator phoneNumber=\"123\"/><alligator phoneNumber=\"abc\"/></animals>"
+  }
+}

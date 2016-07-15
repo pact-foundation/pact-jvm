@@ -110,11 +110,12 @@ public class MatchingTest {
         MockProviderConfig config = MockProviderConfig$.MODULE$.createDefault(new PactConfig(PactSpecVersion.V2));
         VerificationResult result = pactFragment.toFragment().runConsumer(config, new TestRun() {
             @Override
-            public void run(MockProviderConfig config) {
+            public void run(MockProviderConfig config) throws IOException {
                 try {
                     Assert.assertEquals(new ConsumerClient(config.url()).post(path, body, ContentType.APPLICATION_JSON), expectedResponse);
                 } catch (IOException e) {
                     LOGGER.error(e.getMessage(), e);
+                    throw e;
                 }
             }
         });

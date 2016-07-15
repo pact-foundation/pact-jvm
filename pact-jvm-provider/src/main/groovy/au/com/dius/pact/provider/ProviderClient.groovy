@@ -95,7 +95,7 @@ class ProviderClient {
     }
 
     private void setupHeaders(HttpRequest method) {
-        if (request.headers != null) {
+        if (request.headers) {
             request.headers.each { key, value ->
                 method.addHeader(key, value)
             }

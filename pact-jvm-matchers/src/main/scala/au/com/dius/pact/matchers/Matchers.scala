@@ -6,6 +6,8 @@ import io.gatling.jsonpath.Parser
 import org.apache.commons.lang3.time.{DateFormatUtils, DateUtils}
 import java.text.ParseException
 
+import scala.xml.Elem
+
 object Matchers extends StrictLogging {
 
   def matchesToken(pathElement: String, token: PathToken) = token match {
@@ -94,7 +96,10 @@ object Matchers extends StrictLogging {
 
   def safeToString(value: Any) = {
     if (value == null) ""
-    else value.toString
+    else value match {
+      case elem: Elem => elem.text
+      case _ => value.toString
+    }
   }
 }
 
@@ -134,6 +139,7 @@ object TypeMatcher extends Matcher with StrictLogging {
       case (a: Boolean, e: Boolean) => List[Mismatch]()
       case (a: List[_], e: List[_]) => List[Mismatch]()
       case (a: Map[_, _], e: Map[_, _]) => List[Mismatch]()
+      case (a: Elem, e: Elem) if a.label == e.label => List[Mismatch]()
       case (_, null) =>
         if (actual == null) {
           List[Mismatch]()
@@ -291,6 +297,12 @@ object MinimumMatcher extends Matcher with StrictLogging {
         } else {
           List()
         }
+      case v: Elem =>
+        if (v.child.size < value) {
+          List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to have minimum $value", path))
+        } else {
+          List()
+        }
       case _ => TypeMatcher.domatch[Mismatch](matcherDef, path, expected, actual, mismatchFn)
     }
   }
@@ -308,6 +320,12 @@ object MaximumMatcher extends Matcher with StrictLogging {
       case v: List[Any] =>
         if (v.size > value) {
           List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to have maximum $value", path))
+        } else {
+          List()
+        }
+      case v: Elem =>
+        if (v.child.size > value) {
+          List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to have minimum $value", path))
         } else {
           List()
         }

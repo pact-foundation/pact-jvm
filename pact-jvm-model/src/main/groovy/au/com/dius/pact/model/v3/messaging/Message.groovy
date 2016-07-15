@@ -1,6 +1,5 @@
 package au.com.dius.pact.model.v3.messaging
 
-import au.com.dius.pact.model.BasePact
 import au.com.dius.pact.model.HttpPart
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
@@ -35,13 +34,21 @@ class Message implements Interaction {
   }
 
   Map toMap() {
-    def map = BasePact.convertToMap(this)
-    if (contents.present) {
+    def map = [
+      description: description
+    ]
+    if (!contents.missing) {
       if (metaData.contentType == JSON) {
         map.contents = new JsonSlurper().parseText(contents.value.toString())
       } else {
         map.contents = contentsAsBytes().encodeBase64().toString()
       }
+    }
+    if (providerState) {
+      map.providerState = providerState
+    }
+    if (matchingRules) {
+      map.matchingRules = matchingRules
     }
     map
   }

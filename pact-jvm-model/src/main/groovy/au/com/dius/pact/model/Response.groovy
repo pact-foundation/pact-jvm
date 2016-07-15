@@ -9,9 +9,9 @@ import groovy.transform.Canonical
 class Response implements HttpPart {
 
   Integer status = 200
-  Map<String, String> headers
+  Map<String, String> headers = [:]
   OptionalBody body = OptionalBody.missing()
-  Map<String, Map<String, Object>> matchingRules
+  Map<String, Map<String, Object>> matchingRules = [:]
 
   static Response fromMap(def map) {
     new Response().with {

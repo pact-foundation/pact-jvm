@@ -7,14 +7,15 @@ import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
+import org.apache.maven.plugins.annotations.ResolutionScope
 
 /**
  * Pact Verify Maven Plugin
  */
-@Mojo(name = 'verify')
+@Mojo(name = 'verify', requiresDependencyResolution = ResolutionScope.TEST)
 class PactProviderMojo extends AbstractMojo {
 
-  @Parameter(defaultValue = '${project.runtimeClasspathElements}', required = true, readonly = true)
+  @Parameter(defaultValue = '${project.testClasspathElements}', required = true)
   private List<String> classpathElements
 
   @Parameter

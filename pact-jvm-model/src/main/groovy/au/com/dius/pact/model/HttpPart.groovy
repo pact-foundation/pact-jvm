@@ -5,7 +5,7 @@ package au.com.dius.pact.model
  */
 trait HttpPart {
 
-  private static String CONTENT_TYPE = 'Content-Type'
+  private static final String CONTENT_TYPE = 'Content-Type'
 
   abstract OptionalBody getBody()
   abstract Map<String, String> getHeaders()
@@ -25,24 +25,24 @@ trait HttpPart {
     mimeType().matches('application\\/.*json')
   }
 
-  static XMLREGEXP = /^\s*<\?xml\s*version.*/
-  static HTMLREGEXP = /^\s*(<!DOCTYPE)|(<HTML>).*/
-  static JSONREGEXP = /^\s*("(\.|[^"\\u000A\u000D])*?"|[,:{}\[\]0-9.\-+Eaeflnr-u \u000A\u000D\u0009])+/
-  static XMLREGEXP2 = /^\s*<\w+\s*(:\w+=[\"”][^\"”]+[\"”])?.*/
+  static final XMLREGEXP = /^\s*<\?xml\s*version.*/
+  static final HTMLREGEXP = /^\s*(<!DOCTYPE)|(<HTML>).*/
+  static final JSONREGEXP = /^\s*(true|false|null|[0-9]+|"\w*|\{\s*(}|"\w+)|\[\s*).*/
+  static final XMLREGEXP2 = /^\s*<\w+\s*(:\w+=[\"”][^\"”]+[\"”])?.*/
 
   String detectContentType() {
     if (body.present) {
-      def s = body.value.substring(0, Math.min(body.value.size(), 32)).replaceAll('\n', '')
+      def s = body.value[0..Math.min(body.value.size(), 32) - 1].replaceAll('\n', '')
       if (s ==~ XMLREGEXP) {
-        "application/xml"
+        'application/xml'
       } else if (s.toUpperCase() ==~ HTMLREGEXP) {
-        "text/html"
+        'text/html'
       } else if (s ==~ JSONREGEXP) {
-        "application/json"
+        'application/json'
       } else if (s ==~ XMLREGEXP2) {
-        "application/xml"
+        'application/xml'
       } else {
-        "text/plain"
+        'text/plain'
       }
     } else {
       'text/plain'

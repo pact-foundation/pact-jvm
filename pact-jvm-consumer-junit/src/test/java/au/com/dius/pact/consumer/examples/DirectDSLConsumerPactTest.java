@@ -9,6 +9,7 @@ import au.com.dius.pact.consumer.exampleclients.ProviderClient;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.MockProviderConfig$;
 import au.com.dius.pact.model.PactFragment;
+import org.apache.http.entity.ContentType;
 import org.junit.Test;
 
 import java.io.IOException;
