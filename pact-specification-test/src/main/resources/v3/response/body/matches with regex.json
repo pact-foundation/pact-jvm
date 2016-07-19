@@ -4,7 +4,16 @@
   "expected" : {
     "headers": {"Content-Type": "application/json"},
     "matchingRules": {
-      "$.body.alligator.name": {"match": "regex", "regex": "\\w+"}
+      "body": {
+        "$.alligator.name": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "\\w+"
+            }
+          ]
+        }
+      }
     },
     "body": {
       "alligator":{

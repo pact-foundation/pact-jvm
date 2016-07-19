@@ -13,9 +13,31 @@
       ]
     },
     "matchingRules": {
-      "$.body.animals": {"min": 1, "match": "type"},
-      "$.body.animals[*].*": {"match": "type"},
-      "$.body.animals[*].phoneNumber": {"match": "regex", "regex": "\\d+"}
+      "contents": {
+        "$.animals": {
+          "matchers": [
+            {
+              "min": 1,
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*].*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*].phoneNumber": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "\\d+"
+            }
+          ]
+        }
+      }
     }
   },
   "actual": {

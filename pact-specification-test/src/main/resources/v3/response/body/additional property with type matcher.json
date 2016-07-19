@@ -10,8 +10,14 @@
       }
     },
     "matchingRules" : {
-      "$.body.myPerson.*" : {
-        "match": "type"
+      "body": {
+        "$.myPerson.*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
       }
     }
   },
@@ -25,4 +31,4 @@
       }
     }    
   }
-}   
+}

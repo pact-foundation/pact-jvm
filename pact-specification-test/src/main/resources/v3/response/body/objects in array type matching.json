@@ -8,14 +8,28 @@
       "age": 50
     }],
     "matchingRules": {
-      "$.body": {
-        "match": "type"
-      },
-      "$.body[*]": {
-        "match": "type"
-      },
-      "$.body[*].*": {
-        "match": "type"
+      "body": {
+        "$": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$[*]": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$[*].*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
       }
     }
   },

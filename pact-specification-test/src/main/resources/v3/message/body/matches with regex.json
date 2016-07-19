@@ -13,9 +13,32 @@
       }
     },
     "matchingRules": {
-      "$.body.alligator.name": {"match": "regex", "regex": "\\w+"},
-      "$.body.alligator.favouriteColours[0]": {"match": "regex", "regex": "red|blue"},
-      "$.body.alligator.favouriteColours[1]": {"match": "regex", "regex": "red|blue"}
+      "contents": {
+        "$.alligator.name": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "\\w+"
+            }
+          ]
+        },
+        "$.alligator.favouriteColours[0]": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "red|blue"
+            }
+          ]
+        },
+        "$.alligator.favouriteColours[1]": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "red|blue"
+            }
+          ]
+        }
+      }
     }
   },
   "actual": {

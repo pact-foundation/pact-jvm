@@ -13,8 +13,22 @@
       }
     },
     "matchingRules": {
-      "$.body.alligator.name": {"match": "type"},
-      "$.body.alligator.feet": {"match": "type"}
+      "contents": {
+        "$.alligator.name": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$.alligator.feet": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
+      }
     }
   },
   "actual": {

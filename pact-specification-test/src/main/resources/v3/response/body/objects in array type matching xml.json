@@ -5,14 +5,28 @@
     "headers": {},
     "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><people><person name=\"John Smith\" age=\"50\"/></people>",
     "matchingRules": {
-      "$.body": {
-        "match": "type"
-      },
-      "$.body[*]": {
-        "match": "type"
-      },
-      "$.body[*].*": {
-        "match": "type"
+      "body": {
+        "$": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$[*]": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$[*].*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
       }
     }
   },

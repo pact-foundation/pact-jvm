@@ -7,8 +7,22 @@
     "query": {},
     "headers": {"Content-Type": "application/json"},
     "matchingRules": {
-      "$.body.alligator.name": {"match": "type"},
-      "$.body.alligator.feet": {"match": "type"}
+      "body": {
+        "$.alligator.name": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$.alligator.feet": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
+      }
     },
     "body": {
       "alligator":{

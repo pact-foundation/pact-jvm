@@ -7,7 +7,16 @@
       "Content-Type": "hippos"
     },
     "matchingRules": {
-      "$.headers.Accept": {"match": "regex", "regex": "\\w+"}
+      "headers": {
+        "Accept": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "\\w+"
+            }
+          ]
+        }
+      }
     }
   },
   "actual": {
@@ -17,4 +26,3 @@
     }
   }
 }
-        

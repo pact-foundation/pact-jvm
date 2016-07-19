@@ -9,7 +9,6 @@
       "hippo": ["John"]
     },
     "headers": {}
-
   },
   "actual": {
     "method": "GET",
@@ -19,6 +18,5 @@
       "hippo": ["John"]
     },
     "headers": {}
-
   }
 }
