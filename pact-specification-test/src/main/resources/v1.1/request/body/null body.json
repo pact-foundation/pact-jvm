@@ -1,18 +1,18 @@
 {
   "match": true,
-  "comment": "Empty body",
+  "comment": "NULL body",
   "expected" : {
     "method": "POST",
     "path": "/",
     "query": "",
     "headers": {"Content-Type": "application/json"},
-    "body": ""
+    "body": null
   },
   "actual": {
     "method": "POST",
     "path": "/",
     "query": "",
     "headers": {"Content-Type": "application/json"},
-    "body": ""
+    "body": null
   }
 }

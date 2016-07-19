@@ -5,13 +5,13 @@
     "method": "POST",
     "path": "/",
     "query": "",
-    "body": null
+    "body": ""
   },
   "actual": {
     "method": "POST",
     "path": "/",
     "query": "",
     "headers": {"Content-Type": "application/json"},
-    "body": null
+    "body": ""
   }
 }

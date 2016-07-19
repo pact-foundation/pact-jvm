@@ -3,10 +3,10 @@
   "comment": "Empty body",
   "expected" : {
     "headers": {"Content-Type": "application/json"},
-    "body": null
+    "body": ""
   },
   "actual": {
     "headers": {"Content-Type": "application/json"},
-    "body": null
+    "body": ""
   }
 }
