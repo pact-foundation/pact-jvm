@@ -161,8 +161,8 @@ class PactReaderSpec extends Specification {
     then:
     pact instanceof RequestResponsePact
     pact.interactions[0].providerStates == [
-      new ProviderState("test state", [name: "Testy"]),
-      new ProviderState("test state 2", [name: "Testy2"])
+      new ProviderState('test state', [name: 'Testy']),
+      new ProviderState('test state 2', [name: 'Testy2'])
     ]
   }
 
@@ -175,7 +175,7 @@ class PactReaderSpec extends Specification {
 
     then:
     pact instanceof RequestResponsePact
-    pact.interactions[0].providerStates == [ new ProviderState("test state") ]
+    pact.interactions[0].providerStates == [ new ProviderState('test state') ]
   }
 
 }

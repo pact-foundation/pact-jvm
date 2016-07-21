@@ -1,7 +1,6 @@
 package au.com.dius.pact.model
 
 import groovy.json.JsonSlurper
-import scala.collection.JavaConversions
 import spock.lang.Specification
 
 class PactSerialiserSpec extends Specification {
@@ -31,7 +30,7 @@ class PactSerialiserSpec extends Specification {
       [body: ['$.responsetest': [matchers: [[match: 'type']]]]]
     )
     interactionsWithMatcher = new RequestResponseInteraction('test interaction with matchers',
-      [new ProviderState("test state")], requestWithMatchers, responseWithMatchers)
+      [new ProviderState('test state')], requestWithMatchers, responseWithMatchers)
     pactWithMatchers = new RequestResponsePact(provider, consumer, [interactionsWithMatcher])
   }
 
