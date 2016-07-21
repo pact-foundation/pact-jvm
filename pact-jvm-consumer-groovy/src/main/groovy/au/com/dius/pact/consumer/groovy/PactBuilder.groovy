@@ -12,6 +12,7 @@ import au.com.dius.pact.model.PactFragment
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.Provider
+import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.Response
@@ -39,7 +40,7 @@ class PactBuilder extends BaseBuilder {
   List responseData = []
   List interactions = []
   StatefulMockProvider server
-  String providerState = ''
+  List<ProviderState> providerStates = []
   boolean requestState
 
   /**
@@ -75,7 +76,7 @@ class PactBuilder extends BaseBuilder {
    * @param providerState provider state description
    */
   PactBuilder given(String providerState) {
-    this.providerState = providerState
+    this.providerStates << new ProviderState(providerState)
     this
   }
 
@@ -100,7 +101,7 @@ class PactBuilder extends BaseBuilder {
       String path = setupPath(requestData[i].path ?: '/', requestMatchers)
       interactions << new RequestResponseInteraction(
         requestDescription,
-        providerState,
+        providerStates,
         new Request(requestData[i].method ?: 'get', path, requestData[i]?.query, headers,
           requestData[i].containsKey(BODY) ? OptionalBody.body(requestData[i].body) : OptionalBody.missing(),
           requestMatchers),

@@ -1,6 +1,9 @@
 package au.com.dius.pact.model
 
+import java.util
+
 import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 
 object ModelFixtures {
 
@@ -14,15 +17,6 @@ object ModelFixtures {
   val response = new Response(200,
     JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheaderval")),
     OptionalBody.body("{\"responsetest\":true}"))
-
-  val requestWithMatchers = new Request(HttpMethod.Get, "/", PactReader.queryStringToMap("q=p&q=p2&r=s"),
-    JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheadervalue")),
-    OptionalBody.body("{\"test\":true}"), CollectionUtils.scalaMMapToJavaMMap(Map("$.body.test" -> Map("match" -> "type"))))
-
-  val responseWithMatchers = new Response(200,
-    JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheaderval")),
-    OptionalBody.body("{\"responsetest\":true}"),
-    CollectionUtils.scalaMMapToJavaMMap(Map("$.body.responsetest" -> Map("match" -> "type"))))
 
   val requestNoBody = new Request(HttpMethod.Get, "/", PactReader.queryStringToMap("q=p&q=p2&r=s"),
     JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheadervalue")))
@@ -39,25 +33,22 @@ object ModelFixtures {
     JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheadervalue")),
     OptionalBody.body("{\"test\":true}"))
 
-  val interaction = new RequestResponseInteraction("test interaction", "test state", request, response)
+  val providerStates = Seq(new ProviderState("test state")).asJava
 
-  val interactionsWithMatchers = List(new RequestResponseInteraction("test interaction with matchers", "test state",
-    requestWithMatchers, responseWithMatchers))
+  val interaction = new RequestResponseInteraction("test interaction", providerStates, request, response)
 
-  val interactionsWithNoBodies = List(new RequestResponseInteraction("test interaction with no bodies", "test state",
+  val interactionsWithNoBodies = List(new RequestResponseInteraction("test interaction with no bodies", providerStates,
     requestNoBody, responseNoBody))
 
-  val interactionsWithDecodedQuery = List(new RequestResponseInteraction("test interaction", "test state",
+  val interactionsWithDecodedQuery = List(new RequestResponseInteraction("test interaction", providerStates,
     requestDecodedQuery, response))
 
-  val interactionsWithLowerCaseMethods = List(new RequestResponseInteraction("test interaction", "test state",
+  val interactionsWithLowerCaseMethods = List(new RequestResponseInteraction("test interaction", providerStates,
     requestLowerCaseMethod, response))
 
   val interactions = List(interaction)
 
   val pact: RequestResponsePact = new RequestResponsePact(provider, consumer, JavaConversions.seqAsJavaList(interactions.toSeq))
-
-  val pactWithMatchers: RequestResponsePact = new RequestResponsePact(provider, consumer, JavaConversions.seqAsJavaList(interactionsWithMatchers.toSeq))
 
   val pactWithNoBodies: RequestResponsePact = new RequestResponsePact(provider, consumer, JavaConversions.seqAsJavaList(interactionsWithNoBodies.toSeq))
 

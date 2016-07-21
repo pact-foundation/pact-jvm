@@ -1,5 +1,6 @@
 package au.com.dius.pact.model.v3
 
+import au.com.dius.pact.model.BasePact
 import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.InvalidPactException
@@ -25,7 +26,7 @@ class V3PactSpec extends Specification {
 
     def 'writing pacts should merge with any existing file'() {
         given:
-        def pact = new V3Pact(new Provider(), new Consumer(), V3Pact.DEFAULT_METADATA) {
+        def pact = new BasePact(new Provider(), new Consumer(), BasePact.DEFAULT_METADATA) {
             @SuppressWarnings('UnusedMethodParameter')
             protected File fileForPact(String pactDir) {
                 pactFile
@@ -68,7 +69,7 @@ class V3PactSpec extends Specification {
 
     def 'when merging it should replace messages with the same description'() {
         given:
-        def pact = new V3Pact(new Provider(), new Consumer(), V3Pact.DEFAULT_METADATA) {
+        def pact = new BasePact(new Provider(), new Consumer(), BasePact.DEFAULT_METADATA) {
             @Override
             Map toMap(PactSpecVersion pactSpecVersion) {
                 [
@@ -120,7 +121,7 @@ class V3PactSpec extends Specification {
         json.metadata['pact-specification'].version = '2.0.0'
         pactFile.write(new JsonBuilder(json).toPrettyString())
 
-        def pact = new V3Pact(new Provider(), new Consumer(), V3Pact.DEFAULT_METADATA) {
+        def pact = new BasePact(new Provider(), new Consumer(), BasePact.DEFAULT_METADATA) {
             @Override
             Map toMap(PactSpecVersion pactSpecVersion) {
                 [
@@ -168,7 +169,7 @@ class V3PactSpec extends Specification {
         def pactUrl = V3PactSpec.classLoader.getResource('v3-pact.json')
         pactFile.write(pactUrl.text)
 
-        def pact = new V3Pact(new Provider(), new Consumer(), V3Pact.DEFAULT_METADATA) {
+        def pact = new BasePact(new Provider(), new Consumer(), BasePact.DEFAULT_METADATA) {
             @Override
             Map toMap(PactSpecVersion pactSpecVersion) {
                 [

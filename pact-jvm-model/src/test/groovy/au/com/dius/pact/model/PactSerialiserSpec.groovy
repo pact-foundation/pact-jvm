@@ -1,12 +1,38 @@
 package au.com.dius.pact.model
 
 import groovy.json.JsonSlurper
+import scala.collection.JavaConversions
 import spock.lang.Specification
 
 class PactSerialiserSpec extends Specification {
 
+  private provider
+  private consumer
+  private requestWithMatchers
+  private responseWithMatchers
+  private interactionsWithMatcher
+  private pactWithMatchers
+
   def loadTestFile(String name) {
     PactSerialiserSpec.classLoader.getResourceAsStream(name)
+  }
+
+  def setup() {
+    provider = new Provider('test_provider')
+    consumer = new Consumer('test_consumer')
+    requestWithMatchers = new Request('GET', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
+      [testreqheader: 'testreqheadervalue'],
+      OptionalBody.body('{"test":true}'),
+      [body: ['$.test': [matchers: [[match: 'type']]]]]
+    )
+    responseWithMatchers = new Response(200,
+      [testreqheader: 'testreqheaderval'],
+      OptionalBody.body('{"responsetest":true}'),
+      [body: ['$.responsetest': [matchers: [[match: 'type']]]]]
+    )
+    interactionsWithMatcher = new RequestResponseInteraction('test interaction with matchers',
+      [new ProviderState("test state")], requestWithMatchers, responseWithMatchers)
+    pactWithMatchers = new RequestResponsePact(provider, consumer, [interactionsWithMatcher])
   }
 
   def 'PactSerialiser must serialise pact'() {
@@ -29,9 +55,21 @@ class PactSerialiserSpec extends Specification {
     def sw = new StringWriter()
     def testPactJson = loadTestFile('test_pact_v3.json').text.trim()
     def testPact = new JsonSlurper().parseText(testPactJson)
+    def expectedRequest = new Request('GET', '/',
+      ['q': ['p', 'p2'], 'r': ['s']], [testreqheader: 'testreqheadervalue'],
+      OptionalBody.body('{"test": true}'))
+    def expectedResponse = new Response(200, [testreqheader: 'testreqheaderval'],
+      OptionalBody.body('{"responsetest" : true}'))
+    def expectedPact = new RequestResponsePact(new Provider('test_provider'),
+      new Consumer('test_consumer'), [
+        new RequestResponseInteraction('test interaction', [
+          new ProviderState('test state', [name: 'Testy']),
+          new ProviderState('test state 2', [name: 'Testy2'])
+        ], expectedRequest, expectedResponse)
+      ])
 
     when:
-    PactWriter.writePact(ModelFixtures.pact(), new PrintWriter(sw), PactSpecVersion.V3)
+    PactWriter.writePact(expectedPact, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
     def actualPact = new JsonSlurper().parseText(actualPactJson)
 
@@ -46,7 +84,7 @@ class PactSerialiserSpec extends Specification {
     def testPact = new JsonSlurper().parseText(testPactJson)
 
     when:
-    PactWriter.writePact(ModelFixtures.pactWithMatchers(), new PrintWriter(sw), PactSpecVersion.V3)
+    PactWriter.writePact(pactWithMatchers, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
     def actualPact = new JsonSlurper().parseText(actualPactJson)
 
@@ -87,7 +125,7 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must de-serialise pact with matchers'() {
     expect:
-    pact == ModelFixtures.pactWithMatchers()
+    pact == pactWithMatchers
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact_matchers.json'))
@@ -95,7 +133,7 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must de-serialise pact matchers in old format'() {
     expect:
-    pact == ModelFixtures.pactWithMatchers()
+    pact == pactWithMatchers
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact_matchers_old_format.json'))

@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.OptionalBody;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactReader;
+import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.model.Request;
 import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.model.Response;
@@ -14,6 +15,8 @@ import org.w3c.dom.Document;
 import scala.collection.JavaConversions$;
 
 import javax.xml.transform.TransformerException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -159,7 +162,8 @@ public class PactDslResponse {
     private void addInteraction() {
         consumerPactBuilder.getInteractions().add(new RequestResponseInteraction(
           request.description,
-          request.state,
+          request.state == null || request.state.isEmpty()
+            ? Collections.EMPTY_LIST : Collections.singletonList(new ProviderState(request.state)),
           new Request(request.requestMethod, request.path, PactReader.queryStringToMap(request.query, false),
             request.requestHeaders, request.requestBody, request.requestMatchers),
           new Response(responseStatus, responseHeaders, responseBody, responseMatchers)

@@ -1,5 +1,6 @@
 package au.com.dius.pact.model
 
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
@@ -72,23 +73,53 @@ abstract class BasePact implements Pact {
     }
   }
 
-  static parseBody(HttpPart httpPart) {
-    if (httpPart.jsonBody() && httpPart.body.present) {
-      new JsonSlurper().parseText(httpPart.body.value)
-    } else {
-      httpPart.body.value
-    }
-  }
-
-  static String mapToQueryStr(Map<String, List<String>> query) {
-    query.collectMany { k, v -> v.collect { "$k=${URLEncoder.encode(it, 'UTF-8')}" } }.join('&')
-  }
-
   @SuppressWarnings(['ConfusingMethodName'])
   static Map metaData(String version) {
     [
       'pact-specification': [version: version],
       'pact-jvm': [version: lookupVersion()]
     ]
+  }
+
+  void write(String pactDir) {
+    def pactFile = fileForPact(pactDir)
+
+    def jsonMap = toMap(PactSpecVersion.V3)
+    if (pactFile.exists()) {
+      jsonMap = mergePacts(jsonMap, pactFile)
+    } else {
+      pactFile.parentFile.mkdirs()
+    }
+
+    jsonMap.metadata = jsonMap.metadata ? jsonMap.metadata + DEFAULT_METADATA : DEFAULT_METADATA
+    def json = JsonOutput.toJson(jsonMap)
+    pactFile.withWriter { writer ->
+      writer.print JsonOutput.prettyPrint(json)
+    }
+  }
+
+  Map mergePacts(Map pact, File pactFile) {
+    Map newPact = [:] + pact
+    def json = new JsonSlurper().parse(pactFile)
+
+    def pactSpec = 'pact-specification'
+    def version = json?.metadata?.get(pactSpec)?.version
+    def pactVersion = pact.metadata?.get(pactSpec)?.version
+    if (version && version != pactVersion) {
+      throw new InvalidPactException("Could not merge pact into '$pactFile': pact specification version is " +
+        "$pactVersion, while the file is version $version")
+    }
+
+    if (json.interactions != null) {
+      throw new InvalidPactException("Could not merge pact into '$pactFile': file is not a message pact " +
+        '(it contains request/response interactions)')
+    }
+
+    newPact.messages = (newPact.messages + json.messages).unique { it.description }
+    newPact
+  }
+
+  protected File fileForPact(String pactDir) {
+    new File(pactDir, "${consumer.name}-${provider.name}.json")
   }
 }

@@ -10,7 +10,12 @@
       "metaData": {
         "contentType": "application/json"
       },
-      "providerState": "message exists",
+      "providerStates": [
+        {
+          "name": "message exists",
+          "params": {}
+        }
+      ],
       "contents": "Hello",
       "matchingRules": {
 

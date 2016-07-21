@@ -68,7 +68,7 @@ public class MissingRequestConsumerPassesTest extends ExpectedToFailBase {
         assertThat(e.getMessage(),
             containsString("The following requests were not received:\n" +
                 "Interaction: MissingRequestConsumerPassesTest second test interaction\n" +
-                "\tin state None\n" +
+                "\tin states None\n" +
                 "request:\n" +
                 "\tmethod: OPTIONS\n" +
                 "\tpath: /second\n"));

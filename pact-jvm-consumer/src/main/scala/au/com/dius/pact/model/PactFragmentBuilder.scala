@@ -3,6 +3,7 @@ package au.com.dius.pact.model
 import au.com.dius.pact.consumer.{ConsumerTestVerification, VerificationResult}
 import au.com.dius.pact.model.HttpMethod._
 import org.json.JSONObject
+import scala.collection.JavaConverters._
 
 object PactFragmentBuilder {
   def apply(consumer: Consumer) = {
@@ -73,7 +74,7 @@ object PactFragmentBuilder {
           state,
           Seq(new RequestResponseInteraction(
             description,
-            state.orNull,
+            state.map(s => Seq(new ProviderState(s))).getOrElse(Seq[ProviderState]()).asJava,
             request,
             new Response(status, headers, OptionalBody.body(body), CollectionUtils.scalaMMapToJavaMMap(matchers)))))
       }

@@ -151,4 +151,31 @@ class PactReaderSpec extends Specification {
     pact.interactions[2].request.query == [options: ['delete.topic.enable=true'], broker: ['1']]
   }
 
+  def 'Defaults to V3 pact provider states'() {
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('test_pact_v3.json')
+
+    when:
+    def pact = PactReader.loadPact(pactUrl)
+
+    then:
+    pact instanceof RequestResponsePact
+    pact.interactions[0].providerStates == [
+      new ProviderState("test state", [name: "Testy"]),
+      new ProviderState("test state 2", [name: "Testy2"])
+    ]
+  }
+
+  def 'Falls back to the to V2 pact provider state'() {
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('test_pact_v3_old_provider_state.json')
+
+    when:
+    def pact = PactReader.loadPact(pactUrl)
+
+    then:
+    pact instanceof RequestResponsePact
+    pact.interactions[0].providerStates == [ new ProviderState("test state") ]
+  }
+
 }

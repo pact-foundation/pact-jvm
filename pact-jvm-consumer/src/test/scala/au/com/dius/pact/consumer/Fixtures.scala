@@ -7,6 +7,7 @@ import au.com.dius.pact.consumer.dispatch.HttpClient
 import au.com.dius.pact.model._
 
 import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 
 object Fixtures {
@@ -22,7 +23,8 @@ object Fixtures {
     JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*")),
     OptionalBody.body("{\"responsetest\": true}"))
 
-  val interaction = new RequestResponseInteraction("test interaction", "test state", request, response)
+  val interaction = new RequestResponseInteraction("test interaction", Seq(new ProviderState("test state")).asJava,
+    request, response)
 
   val pact: RequestResponsePact = new RequestResponsePact(provider, consumer, util.Arrays.asList(interaction))
 

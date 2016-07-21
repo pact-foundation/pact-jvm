@@ -6,7 +6,12 @@
     "name" : "test_consumer"
   },
   "interactions" : [ {
-    "providerState" : "test state",
+    "providerStates": [
+      {
+        "name": "test state",
+        "params": {}
+      }
+    ],
     "description" : "test interaction with matchers",
     "request" : {
       "method" : "GET",
@@ -22,8 +27,14 @@
         "test" : true
       },
       "matchingRules" : {
-        "$.body.test" : {
-          "match" : "type"
+        "body": {
+          "$.test": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
         }
       }
     },
@@ -36,8 +47,14 @@
         "responsetest" : true
       },
       "matchingRules" : {
-        "$.body.responsetest" : {
-          "match" : "type"
+        "body": {
+          "$.responsetest": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
         }
       }
     }

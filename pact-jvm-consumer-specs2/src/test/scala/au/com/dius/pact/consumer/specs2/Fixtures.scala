@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.specs2
 
 import java.util
-
+import scala.collection.JavaConverters._
 import au.com.dius.pact.model.{Consumer, Provider, RequestResponseInteraction, _}
 
 object Fixtures {
@@ -18,7 +18,8 @@ object Fixtures {
     Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*").asInstanceOf[java.util.Map[String, String]],
     OptionalBody.body("{\"responsetest\": true}"))
 
-  val interaction = new RequestResponseInteraction("test interaction", "test state", request, response)
+  val interaction = new RequestResponseInteraction("test interaction",
+    Seq(new ProviderState("test state")).asJava, request, response)
 
   val pact: RequestResponsePact = new RequestResponsePact(provider, consumer, util.Arrays.asList(interaction))
 }

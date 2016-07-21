@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.gradle
 import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Provider
+import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
@@ -152,7 +153,7 @@ class ProviderVerifierStateChangeSpec extends Specification {
 
   def 'if teardown is set then a statechage teardown request is made after the test'() {
     given:
-    def interaction = new RequestResponseInteraction('provider state test', 'state of the nation',
+    def interaction = new RequestResponseInteraction('provider state test', [new ProviderState('state of the nation')],
       new Request(), new Response(200, [:], OptionalBody.body('{}'), [:]))
     def pact = new RequestResponsePact(new Provider('Bob'), new Consumer('Bobbie'), [interaction])
     def failures = [:]
@@ -176,7 +177,7 @@ class ProviderVerifierStateChangeSpec extends Specification {
       closureArgs << [arg1, arg2]
       true
     }
-    def interaction = new RequestResponseInteraction('provider state test', 'state of the nation',
+    def interaction = new RequestResponseInteraction('provider state test', [new ProviderState('state of the nation')],
       new Request(), new Response(200, [:], OptionalBody.body('{}'), [:]))
     def pact = new RequestResponsePact(new Provider('Bob'), new Consumer('Bobbie'), [interaction])
     def failures = [:]

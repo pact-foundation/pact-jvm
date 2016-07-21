@@ -128,11 +128,11 @@ class PactResultSpec extends Specification {
 
       then:
         def e = thrown(PactFailedException)
-        e.message.contains('The following requests were not received:\n' +
-            'Interaction: a valid post request\n' +
-            '\tin state None\n' +
-            'request:\n' +
-            '\tmethod: post\n' +
-            '\tpath: /path')
+        e.message.contains('''|The following requests were not received:
+          |Interaction: a valid post request
+          |\tin states None
+          |request:
+          |\tmethod: post
+          |\tpath: /path'''.stripMargin())
     }
 }

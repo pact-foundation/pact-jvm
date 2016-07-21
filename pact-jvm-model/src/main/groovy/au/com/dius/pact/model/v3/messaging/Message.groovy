@@ -3,6 +3,8 @@ package au.com.dius.pact.model.v3.messaging
 import au.com.dius.pact.model.HttpPart
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.Response
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -16,7 +18,7 @@ class Message implements Interaction {
   private static final String JSON = 'application/json'
 
   String description
-  String providerState
+  List<ProviderState> providerStates = []
   OptionalBody contents = OptionalBody.missing()
   Map<String, Map<String, Object>> matchingRules = [:]
   Map<String, String> metaData = [:]
@@ -33,7 +35,8 @@ class Message implements Interaction {
     metaData.contentType ?: JSON
   }
 
-  Map toMap() {
+  @SuppressWarnings('UnusedMethodParameter')
+  Map toMap(PactSpecVersion pactSpecVersion = PactSpecVersion.V3) {
     def map = [
       description: description
     ]
@@ -55,7 +58,11 @@ class Message implements Interaction {
 
   Message fromMap(Map map) {
     description = map.description ?: ''
-    providerState = map.providerState
+    if (map.providerStates) {
+      providerStates = map.providerStates.collect { ProviderState.fromMap(it) }
+    } else {
+      providerStates = map.providerState ? [ new ProviderState(map.providerState.toString()) ] : []
+    }
     if (map.containsKey('contents')) {
       if (map.contents == null) {
         contents = OptionalBody.nullBody()
@@ -72,6 +79,12 @@ class Message implements Interaction {
 
   HttpPart asPactRequest() {
     new Response(200, ['Content-Type': contentType], contents, matchingRules)
+  }
+
+  @Override
+  @Deprecated
+  String getProviderState() {
+    providerStates.isEmpty() ? null : providerStates.first().name
   }
 
   @Override

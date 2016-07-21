@@ -14,7 +14,7 @@ class PactBuilderSpec extends Specification {
     }
   }
 
-  def 'should not define providerState when no given()'() {
+  def 'should not define providerStates when no given()'() {
     given:
     aliceService {
       uponReceiving('a retrieve Mallory request')
@@ -31,7 +31,7 @@ class PactBuilderSpec extends Specification {
 
     then:
     aliceService.interactions.size() == 1
-    aliceService.interactions[0].providerState == ''
+    aliceService.interactions[0].providerStates.empty
   }
 
   def 'allows matching on paths'() {

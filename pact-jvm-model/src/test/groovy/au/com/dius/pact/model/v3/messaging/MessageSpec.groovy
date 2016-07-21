@@ -1,6 +1,7 @@
 package au.com.dius.pact.model.v3.messaging
 
 import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.model.ProviderState
 import spock.lang.Specification
 
 class MessageSpec extends Specification {
@@ -20,4 +21,33 @@ class MessageSpec extends Specification {
         then:
         message.contentsAsBytes() == []
     }
+
+  def 'defaults to V3 provider state format when converting from a map'() {
+    given:
+    def map = [
+      providerState: 'test state',
+      providerStates: [
+        [name: 'V3 state']
+      ]
+    ]
+
+    when:
+    Message message = new Message().fromMap(map)
+
+    then:
+    message.providerState == 'V3 state'
+    message.providerStates == [new ProviderState('V3 state')]
+  }
+
+  def 'falls back to V2 provider state format when converting from a map'() {
+    given:
+    def map = [providerState: 'test state']
+
+    when:
+    Message message = new Message().fromMap(map)
+
+    then:
+    message.providerState == 'test state'
+    message.providerStates == [new ProviderState('test state')]
+  }
 }

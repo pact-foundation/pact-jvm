@@ -5,7 +5,7 @@ import spock.lang.Specification
 
 class RequestMatchingSpec extends Specification {
 
-  private request, response, interaction
+  private request, response, interaction, testState
 
   def setup() {
     request = new Request('GET', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
@@ -13,10 +13,12 @@ class RequestMatchingSpec extends Specification {
       OptionalBody.body('{"test": true}'))
 
     response = new Response(200, [testreqheader: 'testreqheaderval'], OptionalBody.body('{"responsetest": true}'))
+
+    testState = [new ProviderState('test state')]
   }
 
   def test(Request actual) {
-    interaction = new RequestResponseInteraction('test interaction', 'test state', request, response)
+    interaction = new RequestResponseInteraction('test interaction', testState, request, response)
     new RequestMatching(JavaConversions.asScalaBuffer([interaction]).toSeq()).findResponse(actual)
   }
 

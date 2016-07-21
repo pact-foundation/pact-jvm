@@ -47,7 +47,13 @@ class PactReader {
         def interactions = transformedJson.interactions.collect { i ->
           def request = extractRequestV3(i.request)
           def response = extractResponse(i.response)
-          new RequestResponseInteraction(i.description, i.providerState, request, response)
+          def providerStates = []
+          if (i.providerStates) {
+            providerStates = i.providerStates.collect { ProviderState.fromMap(it) }
+          } else if (i.providerState) {
+            providerStates << new ProviderState(i.providerState)
+          }
+          new RequestResponseInteraction(i.description, providerStates, request, response)
         }
 
         new RequestResponsePact(provider, consumer, interactions)
@@ -63,7 +69,7 @@ class PactReader {
     def interactions = transformedJson.interactions.collect { i ->
       def request = extractRequestV2(i.request ?: [:])
       def response = extractResponse(i.response ?: [:])
-      new RequestResponseInteraction(i.description, i.providerState, request, response)
+      new RequestResponseInteraction(i.description, [new ProviderState(i.providerState)], request, response)
     }
 
     new RequestResponsePact(provider, consumer, interactions)
@@ -109,20 +115,26 @@ class PactReader {
 
   @SuppressWarnings('DuplicateStringLiteral')
   static transformJson(def pactJson) {
-    pactJson.interactions = pactJson.interactions*.collectEntries { k, v ->
-      def entry = [k, v]
-      switch (k) {
-        case 'provider_state':
-          entry = ['providerState', v]
-          break
-        case 'request':
-          entry = ['request', transformRequestResponseJson(v)]
-          break
-        case 'response':
-          entry = ['response', transformRequestResponseJson(v)]
-          break
+    pactJson.interactions = pactJson.interactions.collect { i ->
+      def interaction = i.collectEntries { k, v ->
+        def entry = [k, v]
+        switch (k) {
+          case 'provider_state':
+            entry = ['providerState', v]
+            break
+          case 'request':
+            entry = ['request', transformRequestResponseJson(v)]
+            break
+          case 'response':
+            entry = ['response', transformRequestResponseJson(v)]
+            break
+        }
+        entry
       }
-      entry
+      if (i.providerState) {
+        interaction.providerState = i.providerState
+      }
+      interaction
     }
     pactJson
   }
