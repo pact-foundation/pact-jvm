@@ -6,6 +6,7 @@ import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.MockProviderConfig$;
 import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactSpecVersion;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
@@ -104,6 +105,17 @@ public class MatchingTest {
                     .matchHeader("Location", ".*/hello/[0-9]+", "/hello/1234");
         Map expectedResponse = new HashMap();
         runTest(fragment, "{}", expectedResponse, HELLO);
+    }
+
+    @Test
+    public void testRegexCharClassStringGenerator() {
+        PactDslJsonBody numeric = new PactDslJsonBody()
+                .stringMatcher("x", "\\d+");
+        Assert.assertTrue(NumberUtils.isNumber(new JSONObject(numeric.getBody().toString()).getString("x")));
+
+        PactDslJsonBody numericWithLimitedRep = new PactDslJsonBody()
+                .stringMatcher("x", "\\d{9}");
+        Assert.assertTrue(NumberUtils.isNumber(new JSONObject(numericWithLimitedRep.getBody().toString()).getString("x")));
     }
 
     private void runTest(PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
