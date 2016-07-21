@@ -11,7 +11,7 @@
       }
     },
     "matchingRules": {
-      "contents": {
+      "body": {
         "$['2'].str": {
           "matchers": [
             {

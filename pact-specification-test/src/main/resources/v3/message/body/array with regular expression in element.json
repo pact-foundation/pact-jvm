@@ -13,7 +13,7 @@
       ]
     },
     "matchingRules": {
-      "contents": {
+      "body": {
         "$.animals": {
           "matchers": [
             {

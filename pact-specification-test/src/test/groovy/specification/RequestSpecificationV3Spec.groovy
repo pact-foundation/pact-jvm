@@ -3,9 +3,11 @@ package specification
 import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.RequestMatching
 import groovy.util.logging.Slf4j
+import spock.lang.Ignore
 import spock.lang.Unroll
 
 @Slf4j
+@Ignore
 class RequestSpecificationV3Spec extends BaseRequestSpec {
 
   @Unroll

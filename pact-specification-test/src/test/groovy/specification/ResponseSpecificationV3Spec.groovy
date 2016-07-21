@@ -4,9 +4,11 @@ package specification
 import au.com.dius.pact.model.DiffConfig$
 import au.com.dius.pact.model.ResponseMatching
 import groovy.util.logging.Slf4j
+import spock.lang.Ignore
 import spock.lang.Unroll
 
 @Slf4j
+@Ignore
 class ResponseSpecificationV3Spec extends BaseResponseSpec {
 
   @Unroll
