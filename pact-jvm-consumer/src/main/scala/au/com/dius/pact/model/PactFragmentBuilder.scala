@@ -97,6 +97,10 @@ object PactFragmentBuilder {
       PactFragment(consumer, provider, interactions).duringConsumerSpec(config)(test, verification)
     }
 
+    def asPactFragment() = {
+      PactFragment(consumer, provider, interactions)
+    }
+
     case class InState(newState: Option[String], pactWithAtLeastOneRequest: PactWithAtLeastOneRequest) {
       def uponReceiving(description: String) = {
         DescribingRequest(consumer, provider, newState, description, CanBuildPactFragment.additionalBuild(pactWithAtLeastOneRequest))
