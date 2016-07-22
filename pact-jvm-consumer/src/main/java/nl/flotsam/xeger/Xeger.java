@@ -20,8 +20,7 @@ import dk.brics.automaton.RegExp;
 import dk.brics.automaton.State;
 import dk.brics.automaton.Transition;
 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * An object that will generate text from a regular expression. In a way, it's the opposite of a regular expression
@@ -33,6 +32,24 @@ public class Xeger {
     private final Random random;
 
     /**
+     * The predefined character classes supported.
+     * <p>
+     * An immutable map containing as keys the character classes and values the equivalent regular expression syntax.
+     */
+    private static final Map<String, String> PREDEFINED_CHARACTER_CLASSES;
+
+    static {
+        Map<String, String> characterClasses = new HashMap<String, String>();
+        characterClasses.put("\\\\d", "[0-9]");
+        characterClasses.put("\\\\D", "[^0-9]");
+        characterClasses.put("\\\\s", "[ \t\n\f\r]");
+        characterClasses.put("\\\\S", "[^ \t\n\f\r]");
+        characterClasses.put("\\\\w", "[a-zA-Z_0-9]");
+        characterClasses.put("\\\\W", "[^a-zA-Z_0-9]");
+        PREDEFINED_CHARACTER_CLASSES = Collections.unmodifiableMap(characterClasses);
+    }
+
+    /**
      * Constructs a new instance, accepting the regular expression and the randomizer.
      *
      * @param regex  The regular expression. (Not <code>null</code>.)
@@ -42,7 +59,13 @@ public class Xeger {
     public Xeger(String regex, Random random) {
         assert regex != null;
         assert random != null;
-        this.automaton = new RegExp(regex).toAutomaton();
+
+        String finalRegex = regex;
+        for (Map.Entry<String, String> charClass : PREDEFINED_CHARACTER_CLASSES.entrySet()) {
+            finalRegex = finalRegex.replaceAll(charClass.getKey(), charClass.getValue());
+        }
+
+        this.automaton = new RegExp(finalRegex).toAutomaton();
         this.random = random;
     }
 
