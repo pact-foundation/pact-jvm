@@ -1,5 +1,6 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.{ConsumerTestVerification, VerificationResult}
 import au.com.dius.pact.model.HttpMethod._
 import org.json.JSONObject
@@ -63,8 +64,8 @@ object PactFragmentBuilder {
         willRespondWith(status, headers.toMap, body, matchers)
       }
 
-      def willRespondWith(status:Int = 200,
-                          headers: Map[String,String] = Map(),
+      def willRespondWith(status: Int = 200,
+                          headers: Map[String, String] = Map(),
                           body: String = "",
                           matchers: Map[String, Map[String, String]] = Map()): PactWithAtLeastOneRequest = {
         builder(
@@ -76,6 +77,13 @@ object PactFragmentBuilder {
             state.orNull,
             request,
             new Response(status, headers, OptionalBody.body(body), CollectionUtils.scalaMMapToJavaMMap(matchers)))))
+      }
+
+      def willRespondWith(status: Int,
+                          headers: Map[String, String],
+                          bodyAndMatchers: DslPart): PactWithAtLeastOneRequest = {
+        val matchers = bodyAndMatchers.getMatchers.mapValues(_.mapValues(_.toString).toMap).toMap
+        willRespondWith(status, headers, bodyAndMatchers.getBody.toString, matchers)
       }
     }
   }
