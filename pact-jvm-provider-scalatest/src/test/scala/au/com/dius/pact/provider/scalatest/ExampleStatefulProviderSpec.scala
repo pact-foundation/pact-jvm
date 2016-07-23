@@ -5,7 +5,7 @@ import org.scalatest.junit.JUnitRunner
 
 /**
   * Provider will be tested against all the defined consumers in the configured default directory.
-  * The provider is not restarted before a new interaction is tested.
+  * The provider won't be restarted during the test suite.
   * Every interactions tests a provider which was started at the very beginning of the suite.
   * State will be initialised before a new interaction is tested.
   */
