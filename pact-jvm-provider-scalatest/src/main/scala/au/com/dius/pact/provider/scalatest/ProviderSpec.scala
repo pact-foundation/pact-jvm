@@ -7,6 +7,7 @@ import java.util.concurrent.Executors
 import au.com.dius.pact.model
 import au.com.dius.pact.model.{FullResponseMatch, RequestResponseInteraction, ResponseMatching, Pact => PactForConsumer}
 import au.com.dius.pact.provider.sbtsupport.HttpClient
+import au.com.dius.pact.provider.scalatest.ProviderDsl.defaultPactDirectory
 import au.com.dius.pact.provider.scalatest.Tags.ProviderTest
 import au.com.dius.pact.provider.{ConsumerInfo, ProviderUtils, ProviderVerifier}
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
@@ -85,26 +86,30 @@ trait ProviderSpec extends FlatSpec with BeforeAndAfterAll with ProviderDsl with
 }
 
 /**
-  * Convenient abstract class to run pacts from a given directory against a defined provider and all the consumer.
-  * Provider will be restarted and state will be set before every iteration.
+  * Convenient abstract class to run pacts from a given directory against a defined provider and consumer.
+  * Provider will be restarted and state will be set before every interaction.
+  *
   * @param provider
+  * @param directory
   * @param consumer
   */
-abstract class PactProviderRestartDslSpec(provider: String, consumer: Consumer = ProviderDsl.all) extends ProviderSpec {
+abstract class PactProviderRestartDslSpec(provider: String, directory: String = defaultPactDirectory.directory, consumer: Consumer = ProviderDsl.all) extends ProviderSpec {
   def serverStarter: ServerStarter
 
-  verify(provider complying consumer pacts from(defaultPactDirectory) testing (serverStarter) withRestart)
+  verify(provider complying consumer pacts from(directory) testing (serverStarter) withRestart)
 }
 
 /**
-  * Convenient abstract class to run pacts from a given directory against a defined provider and all the consumer.
-  * Provider won't be restarted just the state handler server method will be called before every iteration.
+  * Convenient abstract class to run pacts from a given directory against a defined provider and consumer.
+  * Provider won't be restarted just the state handler server method will be called before every interaction.
+  *
   * @param provider
+  * @param directory
   * @param consumer
   */
-abstract class PactProviderStatefulDslSpec(provider: String, consumer: Consumer = ProviderDsl.all) extends ProviderSpec {
+abstract class PactProviderStatefulDslSpec(provider: String, directory: String = defaultPactDirectory.directory, consumer: Consumer = ProviderDsl.all) extends ProviderSpec {
   def serverStarter: ServerStarter
 
-  verify(provider complying consumer pacts from(defaultPactDirectory) testing (serverStarter) withoutRestart)
+  verify(provider complying consumer pacts from(directory) testing (serverStarter) withoutRestart)
 }
 
