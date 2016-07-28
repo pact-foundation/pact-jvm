@@ -1,8 +1,8 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.InvalidMatcherException;
+import com.mifmif.common.regex.Generex;
 import io.gatling.jsonpath.Parser$;
-import nl.flotsam.xeger.Xeger;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -270,7 +270,7 @@ public class PactDslJsonBody extends DslPart {
      * @param regex regular expression
      */
     public PactDslJsonBody stringMatcher(String name, String regex) {
-        stringMatcher(name, regex, new Xeger(regex).generate());
+        stringMatcher(name, regex, new Generex(regex).random());
         return this;
     }
 

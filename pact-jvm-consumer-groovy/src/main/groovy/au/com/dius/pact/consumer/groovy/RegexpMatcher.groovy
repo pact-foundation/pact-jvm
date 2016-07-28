@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
-import nl.flotsam.xeger.Xeger
+import com.mifmif.common.regex.Generex
 
 /**
  * Regular Expression Matcher
@@ -13,7 +13,7 @@ class RegexpMatcher extends Matcher {
 
   def getValue() {
     if (values[1] == null) {
-      new Xeger(values[0].toString()).generate()
+      new Generex(values[0].toString()).random()
     } else {
       values[1]
     }
