@@ -391,7 +391,7 @@ class ProviderVerifier {
     m.invoke(m.declaringClass.newInstance())
   }
 
-  void displayFailures(def failures) {
+  void displayFailures(Map failures) {
     reporters.each { it.displayFailures(failures) }
   }
 

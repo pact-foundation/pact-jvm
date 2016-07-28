@@ -69,7 +69,7 @@
                             ) providers)]
     (if (not-empty failures)
       (do
-        (.displayFailures verifier failures)
+        (.displayFailures verifier (into {} failures))
         (throw (RuntimeException. (str "There were " (count failures) " pact failures")))))))
 
 (defn verify [verifier pact-info]

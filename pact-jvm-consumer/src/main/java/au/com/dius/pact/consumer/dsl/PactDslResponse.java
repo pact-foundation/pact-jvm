@@ -7,7 +7,7 @@ import au.com.dius.pact.model.PactReader;
 import au.com.dius.pact.model.Request;
 import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.model.Response;
-import nl.flotsam.xeger.Xeger;
+import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
@@ -138,7 +138,7 @@ public class PactDslResponse {
      * @param regexp Regular expression to match
      */
     public PactDslResponse matchHeader(String header, String regexp) {
-        return matchHeader(header, regexp, new Xeger(regexp).generate());
+        return matchHeader(header, regexp, new Generex(regexp).random());
     }
 
     /**

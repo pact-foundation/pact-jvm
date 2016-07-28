@@ -51,15 +51,15 @@ public class Defect215Test {
         .matchHeader(CONTENT_TYPE, APPLICATION_JSON, APPLICATION_JSON_CHARSET_UTF_8)
       .willRespondWith()
         .status(201)
-        .matchHeader("Location", "http(s)?://\\S+:\\d+//some-service/user/\\S{36}$")
+        .matchHeader("Location", "http(s)?://\\w+:\\d+//some-service/user/\\w{36}$")
       .given("An automation user with id: " + EXPECTED_USER_ID)
       .uponReceiving("existing user lookup")
         .path(SOME_SERVICE_USER + EXPECTED_USER_ID)
         .method("GET")
-        .matchHeader("Content-Type", "application/json.*", APPLICATION_JSON_CHARSET_UTF_8)
+        .matchHeader("Content-Type", APPLICATION_JSON, APPLICATION_JSON_CHARSET_UTF_8)
       .willRespondWith()
         .status(200)
-        .matchHeader("Content-Type", "application/json.*", APPLICATION_JSON_CHARSET_UTF_8)
+        .matchHeader("Content-Type", APPLICATION_JSON, APPLICATION_JSON_CHARSET_UTF_8)
         .body(getUser())
       .toFragment();
   }

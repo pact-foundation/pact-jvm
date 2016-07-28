@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.InvalidMatcherException;
-import nl.flotsam.xeger.Xeger;
+import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -359,7 +359,7 @@ public class PactDslJsonArray extends DslPart {
      * @param regex regular expression
      */
     public PactDslJsonArray stringMatcher(String regex) {
-        stringMatcher(regex, new Xeger(regex).generate());
+        stringMatcher(regex, new Generex(regex).random());
         return this;
     }
 
