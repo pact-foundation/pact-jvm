@@ -16,15 +16,12 @@
 
 package au.com.dius.pact.provider.org.fusesource.jansi;
 
-import au.com.dius.pact.provider.org.fusesource.jansi.AnsiRenderer;
-
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Locale;
 
-import static au.com.dius.pact.provider.org.fusesource.jansi.AnsiRenderer.render;
-import static au.com.dius.pact.provider.org.fusesource.jansi.AnsiRenderer.test;
+import static au.com.dius.pact.provider.org.fusesource.jansi.AnsiRenderer.*;
 
 /**
  * Print writer which supports automatic ANSI color rendering via {@link AnsiRenderer}.
@@ -34,8 +31,7 @@ import static au.com.dius.pact.provider.org.fusesource.jansi.AnsiRenderer.test;
  * @since 1.1
  */
 public class AnsiRenderWriter
-    extends PrintWriter
-{
+  extends PrintWriter {
 
     public AnsiRenderWriter(final OutputStream out) {
         super(out);
@@ -57,8 +53,7 @@ public class AnsiRenderWriter
     public void write(final String s) {
         if (test(s)) {
             super.write(render(s));
-        }
-        else {
+        } else {
             super.write(s);
         }
     }

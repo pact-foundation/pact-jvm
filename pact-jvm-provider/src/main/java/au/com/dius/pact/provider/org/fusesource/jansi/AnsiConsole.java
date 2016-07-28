@@ -17,32 +17,54 @@
 
 package au.com.dius.pact.provider.org.fusesource.jansi;
 
+import static org.fusesource.jansi.internal.CLibrary.STDERR_FILENO;
+import static org.fusesource.jansi.internal.CLibrary.STDOUT_FILENO;
+import static org.fusesource.jansi.internal.CLibrary.isatty;
+
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-import static org.fusesource.jansi.internal.CLibrary.STDERR_FILENO;
-import static org.fusesource.jansi.internal.CLibrary.STDOUT_FILENO;
-import static org.fusesource.jansi.internal.CLibrary.isatty;
-
 /**
  * Provides consistent access to an ANSI aware console PrintStream.
- * 
+ *
  * @author <a href="http://hiramchirino.com">Hiram Chirino</a>
  * @since 1.0
  */
 public class AnsiConsole {
 
 	public static final PrintStream system_out = System.out;
-    public static final PrintStream out = new PrintStream(wrapOutputStream(system_out));
+	public static final PrintStream out;
 
-    public static final PrintStream system_err = System.err;
-    public static final PrintStream err = new PrintStream(wrapOutputStream(system_err, STDERR_FILENO));
+	public static final PrintStream system_err = System.err;
+	public static final PrintStream err;
 
-    private static int installed;
+	private static int installed;
 
-	private AnsiConsole() {}
+	static
+	{
+		PrintStream jansiOut;
+		PrintStream jansiErr;
+
+		try
+		{
+			jansiOut = new PrintStream( wrapOutputStream( system_out ) );
+			jansiErr = new PrintStream( wrapOutputStream( system_err, STDERR_FILENO ) );
+		}
+		catch ( final UnsatisfiedLinkError e )
+		{
+			// Failure loading native library.
+			jansiOut = system_out;
+			jansiErr = system_err;
+		}
+
+		out = jansiOut;
+		err = jansiErr;
+	}
+
+	private AnsiConsole() {
+	}
 
 	public static OutputStream wrapOutputStream(final OutputStream stream) {
 		return wrapOutputStream(stream, STDOUT_FILENO);
@@ -50,20 +72,20 @@ public class AnsiConsole {
 
 	public static OutputStream wrapOutputStream(final OutputStream stream, int fileno) {
 
-        // If the jansi.passthrough property is set, then don't interpret
-        // any of the ansi sequences.
-        if( Boolean.getBoolean("jansi.passthrough") ) {
-          return stream;
-        }
+		// If the jansi.passthrough property is set, then don't interpret
+		// any of the ansi sequences.
+		if (Boolean.getBoolean("jansi.passthrough")) {
+			return stream;
+		}
 
-        // If the jansi.strip property is set, then we just strip the
-        // the ansi escapes.
-        if( Boolean.getBoolean("jansi.strip") ) {
-          return new AnsiOutputStream(stream);
-        }
+		// If the jansi.strip property is set, then we just strip the
+		// the ansi escapes.
+		if (Boolean.getBoolean("jansi.strip")) {
+			return new AnsiOutputStream(stream);
+		}
 
 		String os = System.getProperty("os.name");
-		if( os.startsWith("Windows") ) {
+		if (os.startsWith("Windows") && !isXterm()) {
 
 			// On windows we know the console does not interpret ANSI codes..
 			try {
@@ -77,7 +99,7 @@ public class AnsiConsole {
 			return new AnsiOutputStream(stream);
 		}
 
-		// We must be on some unix variant..
+		// We must be on some Unix variant, including Cygwin or MSYS(2) on Windows...
 		try {
 			// If the jansi.force property is set, then we force to output
 			// the ansi escapes for piping it into ansi color aware commands (e.g. less -r)
@@ -85,41 +107,45 @@ public class AnsiConsole {
 			// If we can detect that stdout is not a tty.. then setup
 			// to strip the ANSI sequences..
 			int rc = isatty(fileno);
-			if( !forceColored && rc==0 ) {
+			if (!isXterm() && !forceColored && rc == 0) {
 				return new AnsiOutputStream(stream);
 			}
-			
-        // These erros happen if the JNI lib is not available for your platform.
-        } catch (NoClassDefFoundError ignore) {
+
+			// These erros happen if the JNI lib is not available for your platform.
+		} catch (NoClassDefFoundError ignore) {
 		} catch (UnsatisfiedLinkError ignore) {
 		}
 
 		// By default we assume your Unix tty can handle ANSI codes.
-		// Just wrap it up so that when we get closed, we reset the 
+		// Just wrap it up so that when we get closed, we reset the
 		// attributes.
 		return new FilterOutputStream(stream) {
-		    @Override
-		    public void close() throws IOException {
-		        write(AnsiOutputStream.REST_CODE);
-		        flush();
-		        super.close();
-		    }
+			@Override
+			public void close() throws IOException {
+				write(AnsiOutputStream.REST_CODE);
+				flush();
+				super.close();
+			}
 		};
 	}
 
+	private static boolean isXterm() {
+		return "xterm".equals(System.getenv("TERM"));
+	}
+
 	/**
-	 * If the standard out natively supports ANSI escape codes, then this just 
+	 * If the standard out natively supports ANSI escape codes, then this just
 	 * returns System.out, otherwise it will provide an ANSI aware PrintStream
 	 * which strips out the ANSI escape sequences or which implement the escape
 	 * sequences.
-	 * 
+	 *
 	 * @return a PrintStream which is ANSI aware.
 	 */
 	public static PrintStream out() {
 		return out;
 	}
 
-    /**
+	/**
 	 * If the standard out natively supports ANSI escape codes, then this just
 	 * returns System.err, otherwise it will provide an ANSI aware PrintStream
 	 * which strips out the ANSI escape sequences or which implement the escape
@@ -127,32 +153,32 @@ public class AnsiConsole {
 	 *
 	 * @return a PrintStream which is ANSI aware.
 	 */
-    public static PrintStream err() {
-        return err;
-    }
-	
+	public static PrintStream err() {
+		return err;
+	}
+
 	/**
 	 * Install Console.out to System.out.
 	 */
 	synchronized static public void systemInstall() {
 		installed++;
-		if( installed==1 ) {
+		if (installed == 1) {
 			System.setOut(out);
-            System.setErr(err);
+			System.setErr(err);
 		}
 	}
-	
+
 	/**
-	 * undo a previous {@link #systemInstall()}.  If {@link #systemInstall()} was called 
+	 * undo a previous {@link #systemInstall()}.  If {@link #systemInstall()} was called
 	 * multiple times, it {@link #systemUninstall()} must call the same number of times before
 	 * it is actually uninstalled.
 	 */
 	synchronized public static void systemUninstall() {
 		installed--;
-		if( installed==0 ) {
+		if (installed == 0) {
 			System.setOut(system_out);
-            System.setErr(system_err);
+			System.setErr(system_err);
 		}
 	}
-	
+
 }
