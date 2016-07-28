@@ -89,7 +89,7 @@ object PactFragmentBuilder {
           state,
           Seq(new RequestResponseInteraction(
             description,
-            state.orNull,
+            state.map(s => Seq(new ProviderState(s))).getOrElse(Seq[ProviderState]()).asJava,
             request,
             new Response(status, headers, OptionalBody.body(bodyAndMatchers.toString), bodyAndMatchers.getMatchers))))
       }
