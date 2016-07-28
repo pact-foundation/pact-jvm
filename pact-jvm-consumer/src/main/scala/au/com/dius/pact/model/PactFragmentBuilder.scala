@@ -82,8 +82,15 @@ object PactFragmentBuilder {
       def willRespondWith(status: Int,
                           headers: Map[String, String],
                           bodyAndMatchers: DslPart): PactWithAtLeastOneRequest = {
-        val matchers = bodyAndMatchers.getMatchers.mapValues(_.mapValues(_.toString).toMap).toMap
-        willRespondWith(status, headers, bodyAndMatchers.getBody.toString, matchers)
+        builder(
+          consumer,
+          provider,
+          state,
+          Seq(new RequestResponseInteraction(
+            description,
+            state.orNull,
+            request,
+            new Response(status, headers, OptionalBody.body(bodyAndMatchers.toString), bodyAndMatchers.getMatchers))))
       }
     }
   }
