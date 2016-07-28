@@ -29,9 +29,18 @@ class PactPublishTask extends DefaultTask {
 
         def brokerClient = new PactBrokerClient(pactPublish.pactBrokerUrl)
         File pactDirectory = pactPublish.pactDirectory as File
+        boolean anyFailed = false
         pactDirectory.eachFileMatch(FileType.FILES, ~/.*\.json/) { pactFile ->
-            print "Publishing ${pactFile.name} ... "
-            println brokerClient.uploadPactFile(pactFile, pactPublish.version)
+          print "Publishing ${pactFile.name} ... "
+          def result = brokerClient.uploadPactFile(pactFile, pactPublish.version)
+          println result
+          if (!anyFailed && result.startsWith('FAILED!')) {
+            anyFailed = true
+          }
+        }
+
+        if (anyFailed) {
+          throw new GradleScriptException('One of more of the pact files were rejected by the pact broker', null)
         }
     }
 

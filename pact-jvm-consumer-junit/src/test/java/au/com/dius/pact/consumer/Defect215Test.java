@@ -56,10 +56,10 @@ public class Defect215Test {
       .uponReceiving("existing user lookup")
         .path(SOME_SERVICE_USER + EXPECTED_USER_ID)
         .method("GET")
-        .matchHeader("Content-Type", "application/json.*", APPLICATION_JSON_CHARSET_UTF_8)
+        .matchHeader("Content-Type", APPLICATION_JSON, APPLICATION_JSON_CHARSET_UTF_8)
       .willRespondWith()
         .status(200)
-        .matchHeader("Content-Type", "application/json.*", APPLICATION_JSON_CHARSET_UTF_8)
+        .matchHeader("Content-Type", APPLICATION_JSON, APPLICATION_JSON_CHARSET_UTF_8)
         .body(getUser())
       .toFragment();
   }

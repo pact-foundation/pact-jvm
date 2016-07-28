@@ -2,7 +2,7 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.OptionalBody;
-import nl.flotsam.xeger.Xeger;
+import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
@@ -156,7 +156,7 @@ public class PactDslRequestWithoutPath {
      * @param pathRegex string path regular expression to match with
      */
     public PactDslRequestWithPath matchPath(String pathRegex) {
-        return matchPath(pathRegex, new Xeger(pathRegex).generate());
+        return matchPath(pathRegex, new Generex(pathRegex).random());
     }
 
     /**

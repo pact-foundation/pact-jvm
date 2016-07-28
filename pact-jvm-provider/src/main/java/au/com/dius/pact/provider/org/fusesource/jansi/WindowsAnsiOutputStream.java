@@ -24,6 +24,7 @@ import static org.fusesource.jansi.internal.Kernel32.FOREGROUND_BLUE;
 import static org.fusesource.jansi.internal.Kernel32.FOREGROUND_GREEN;
 import static org.fusesource.jansi.internal.Kernel32.FOREGROUND_INTENSITY;
 import static org.fusesource.jansi.internal.Kernel32.FOREGROUND_RED;
+import static org.fusesource.jansi.internal.Kernel32.FillConsoleOutputAttribute;
 import static org.fusesource.jansi.internal.Kernel32.FillConsoleOutputCharacterW;
 import static org.fusesource.jansi.internal.Kernel32.GetConsoleScreenBufferInfo;
 import static org.fusesource.jansi.internal.Kernel32.GetStdHandle;
@@ -51,19 +52,19 @@ public final class WindowsAnsiOutputStream extends AnsiOutputStream {
 
 	private static final long console = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	private static final short FOREGROUND_BLACK   = 0;
-	private static final short FOREGROUND_YELLOW  = (short) (FOREGROUND_RED|FOREGROUND_GREEN);
-	private static final short FOREGROUND_MAGENTA = (short) (FOREGROUND_BLUE|FOREGROUND_RED);
-	private static final short FOREGROUND_CYAN    = (short) (FOREGROUND_BLUE|FOREGROUND_GREEN);
-	private static final short FOREGROUND_WHITE   = (short) (FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE);
+	private static final short FOREGROUND_BLACK = 0;
+	private static final short FOREGROUND_YELLOW = (short) (FOREGROUND_RED | FOREGROUND_GREEN);
+	private static final short FOREGROUND_MAGENTA = (short) (FOREGROUND_BLUE | FOREGROUND_RED);
+	private static final short FOREGROUND_CYAN = (short) (FOREGROUND_BLUE | FOREGROUND_GREEN);
+	private static final short FOREGROUND_WHITE = (short) (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 
-	private static final short BACKGROUND_BLACK   = 0;
-	private static final short BACKGROUND_YELLOW  = (short) (BACKGROUND_RED|BACKGROUND_GREEN);
-	private static final short BACKGROUND_MAGENTA = (short) (BACKGROUND_BLUE|BACKGROUND_RED);
-	private static final short BACKGROUND_CYAN    = (short) (BACKGROUND_BLUE|BACKGROUND_GREEN);
-	private static final short BACKGROUND_WHITE   = (short) (BACKGROUND_RED|BACKGROUND_GREEN|BACKGROUND_BLUE);
+	private static final short BACKGROUND_BLACK = 0;
+	private static final short BACKGROUND_YELLOW = (short) (BACKGROUND_RED | BACKGROUND_GREEN);
+	private static final short BACKGROUND_MAGENTA = (short) (BACKGROUND_BLUE | BACKGROUND_RED);
+	private static final short BACKGROUND_CYAN = (short) (BACKGROUND_BLUE | BACKGROUND_GREEN);
+	private static final short BACKGROUND_WHITE = (short) (BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE);
 
-	private static final short ANSI_FOREGROUND_COLOR_MAP[] = {
+	private static final short[] ANSI_FOREGROUND_COLOR_MAP = {
 		FOREGROUND_BLACK,
 		FOREGROUND_RED,
 		FOREGROUND_GREEN,
@@ -74,7 +75,7 @@ public final class WindowsAnsiOutputStream extends AnsiOutputStream {
 		FOREGROUND_WHITE,
 	};
 
-	private static final short ANSI_BACKGROUND_COLOR_MAP[] = {
+	private static final short[] ANSI_BACKGROUND_COLOR_MAP = {
 		BACKGROUND_BLACK,
 		BACKGROUND_RED,
 		BACKGROUND_GREEN,
@@ -100,10 +101,10 @@ public final class WindowsAnsiOutputStream extends AnsiOutputStream {
 
 	private void getConsoleInfo() throws IOException {
 		out.flush();
-		if( GetConsoleScreenBufferInfo(console, info) == 0 ) {
-			throw new IOException("Could not get the screen info: "+WindowsSupport.getLastErrorMessage());
+		if (GetConsoleScreenBufferInfo(console, info) == 0) {
+			throw new IOException("Could not get the screen info: " + WindowsSupport.getLastErrorMessage());
 		}
-		if( negative ) {
+		if (negative) {
 			info.attributes = invertAttributeColors(info.attributes);
 		}
 	}
@@ -111,26 +112,26 @@ public final class WindowsAnsiOutputStream extends AnsiOutputStream {
 	private void applyAttribute() throws IOException {
 		out.flush();
 		short attributes = info.attributes;
-		if( negative ) {
+		if (negative) {
 			attributes = invertAttributeColors(attributes);
 		}
-		if( SetConsoleTextAttribute(console, attributes) == 0 ) {
+		if (SetConsoleTextAttribute(console, attributes) == 0) {
 			throw new IOException(WindowsSupport.getLastErrorMessage());
 		}
 	}
 
-	private short invertAttributeColors(short attibutes) {
+	private short invertAttributeColors(short attributes) {
 		// Swap the the Foreground and Background bits.
-		int fg = 0x000F & attibutes;
+		int fg = 0x000F & attributes;
 		fg <<= 8;
-		int bg = 0X00F0 * attibutes;
-		bg >>=8;
-		attibutes = (short) ((attibutes & 0xFF00) | fg | bg);
-		return attibutes;
+		int bg = 0X00F0 * attributes;
+		bg >>= 8;
+		attributes = (short) ((attributes & 0xFF00) | fg | bg);
+		return attributes;
 	}
 
 	private void applyCursorPosition() throws IOException {
-		if( SetConsoleCursorPosition(console, info.cursorPosition.copy()) == 0 ) {
+		if (SetConsoleCursorPosition(console, info.cursorPosition.copy()) == 0) {
 			throw new IOException(WindowsSupport.getLastErrorMessage());
 		}
 	}
@@ -139,12 +140,13 @@ public final class WindowsAnsiOutputStream extends AnsiOutputStream {
 	protected void processEraseScreen(int eraseOption) throws IOException {
 		getConsoleInfo();
 		int[] written = new int[1];
-		switch(eraseOption) {
+		switch (eraseOption) {
 			case ERASE_SCREEN:
 				COORD topLeft = new COORD();
 				topLeft.x = 0;
 				topLeft.y = info.window.top;
 				int screenLength = info.window.height() * info.size.x;
+				FillConsoleOutputAttribute(console, originalColors, screenLength, topLeft, written);
 				FillConsoleOutputCharacterW(console, ' ', screenLength, topLeft, written);
 				break;
 			case ERASE_SCREEN_TO_BEGINING:
@@ -153,12 +155,17 @@ public final class WindowsAnsiOutputStream extends AnsiOutputStream {
 				topLeft2.y = info.window.top;
 				int lengthToCursor = (info.cursorPosition.y - info.window.top) * info.size.x
 					+ info.cursorPosition.x;
+				FillConsoleOutputAttribute(console, originalColors, lengthToCursor, topLeft2, written);
 				FillConsoleOutputCharacterW(console, ' ', lengthToCursor, topLeft2, written);
 				break;
 			case ERASE_SCREEN_TO_END:
 				int lengthToEnd = (info.window.bottom - info.cursorPosition.y) * info.size.x +
 					(info.size.x - info.cursorPosition.x);
+				FillConsoleOutputAttribute(console, originalColors, lengthToEnd, info.cursorPosition.copy(), written);
 				FillConsoleOutputCharacterW(console, ' ', lengthToEnd, info.cursorPosition.copy(), written);
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -166,105 +173,123 @@ public final class WindowsAnsiOutputStream extends AnsiOutputStream {
 	protected void processEraseLine(int eraseOption) throws IOException {
 		getConsoleInfo();
 		int[] written = new int[1];
-		switch(eraseOption) {
+		switch (eraseOption) {
 			case ERASE_LINE:
 				COORD leftColCurrRow = info.cursorPosition.copy();
 				leftColCurrRow.x = 0;
+				FillConsoleOutputAttribute(console, originalColors, info.size.x, leftColCurrRow, written);
 				FillConsoleOutputCharacterW(console, ' ', info.size.x, leftColCurrRow, written);
 				break;
 			case ERASE_LINE_TO_BEGINING:
 				COORD leftColCurrRow2 = info.cursorPosition.copy();
 				leftColCurrRow2.x = 0;
+				FillConsoleOutputAttribute(console, originalColors, info.cursorPosition.x, leftColCurrRow2, written);
 				FillConsoleOutputCharacterW(console, ' ', info.cursorPosition.x, leftColCurrRow2, written);
 				break;
 			case ERASE_LINE_TO_END:
 				int lengthToLastCol = info.size.x - info.cursorPosition.x;
+				FillConsoleOutputAttribute(console, originalColors, lengthToLastCol, info.cursorPosition.copy(), written);
 				FillConsoleOutputCharacterW(console, ' ', lengthToLastCol, info.cursorPosition.copy(), written);
+				break;
+			default:
+				break;
 		}
 	}
 
 	@Override
 	protected void processCursorLeft(int count) throws IOException {
 		getConsoleInfo();
-		info.cursorPosition.x = (short) Math.max(0, info.cursorPosition.x-count);
+		info.cursorPosition.x = (short) Math.max(0, info.cursorPosition.x - count);
 		applyCursorPosition();
 	}
 
 	@Override
 	protected void processCursorRight(int count) throws IOException {
 		getConsoleInfo();
-		info.cursorPosition.x = (short)Math.min(info.window.width(), info.cursorPosition.x+count);
+		info.cursorPosition.x = (short) Math.min(info.window.width(), info.cursorPosition.x + count);
 		applyCursorPosition();
 	}
 
 	@Override
 	protected void processCursorDown(int count) throws IOException {
 		getConsoleInfo();
-		info.cursorPosition.y = (short) Math.min(info.size.y, info.cursorPosition.y+count);
+		info.cursorPosition.y = (short) Math.min(info.size.y, info.cursorPosition.y + count);
 		applyCursorPosition();
 	}
 
 	@Override
 	protected void processCursorUp(int count) throws IOException {
 		getConsoleInfo();
-		info.cursorPosition.y = (short) Math.max(info.window.top, info.cursorPosition.y-count);
+		info.cursorPosition.y = (short) Math.max(info.window.top, info.cursorPosition.y - count);
 		applyCursorPosition();
 	}
 
 	@Override
 	protected void processCursorTo(int row, int col) throws IOException {
 		getConsoleInfo();
-		info.cursorPosition.y = (short) Math.max(info.window.top, Math.min(info.size.y, info.window.top+row-1));
-		info.cursorPosition.x = (short) Math.max(0, Math.min(info.window.width(), col-1));
+		info.cursorPosition.y = (short) Math.max(info.window.top, Math.min(info.size.y, info.window.top + row - 1));
+		info.cursorPosition.x = (short) Math.max(0, Math.min(info.window.width(), col - 1));
 		applyCursorPosition();
 	}
 
 	@Override
 	protected void processCursorToColumn(int x) throws IOException {
 		getConsoleInfo();
-		info.cursorPosition.x = (short) Math.max(0, Math.min(info.window.width(), x-1));
+		info.cursorPosition.x = (short) Math.max(0, Math.min(info.window.width(), x - 1));
 		applyCursorPosition();
 	}
 
 	@Override
-	protected void processSetForegroundColor(int color) throws IOException {
-		info.attributes = (short)((info.attributes & ~0x0007 ) | ANSI_FOREGROUND_COLOR_MAP[color]);
+	protected void processSetForegroundColor(int color, boolean bright) throws IOException {
+		info.attributes = (short) ((info.attributes & ~0x0007) | ANSI_FOREGROUND_COLOR_MAP[color]);
 		applyAttribute();
 	}
 
 	@Override
-	protected void processSetBackgroundColor(int color) throws IOException {
-		info.attributes = (short)((info.attributes & ~0x0070 ) | ANSI_BACKGROUND_COLOR_MAP[color]);
+	protected void processSetBackgroundColor(int color, boolean bright) throws IOException {
+		info.attributes = (short) ((info.attributes & ~0x0070) | ANSI_BACKGROUND_COLOR_MAP[color]);
+		applyAttribute();
+	}
+
+	@Override
+	protected void processDefaultTextColor() throws IOException {
+		info.attributes = (short) ((info.attributes & ~0x000F) | (originalColors & 0xF));
+		applyAttribute();
+	}
+
+	@Override
+	protected void processDefaultBackgroundColor() throws IOException {
+		info.attributes = (short) ((info.attributes & ~0x00F0) | (originalColors & 0xF0));
 		applyAttribute();
 	}
 
 	@Override
 	protected void processAttributeRest() throws IOException {
-		info.attributes = (short)((info.attributes & ~0x00FF ) | originalColors);
+		info.attributes = (short) ((info.attributes & ~0x00FF) | originalColors);
 		this.negative = false;
 		applyAttribute();
 	}
 
 	@Override
 	protected void processSetAttribute(int attribute) throws IOException {
-		switch(attribute) {
+		switch (attribute) {
 			case ATTRIBUTE_INTENSITY_BOLD:
-				info.attributes = (short)(info.attributes | FOREGROUND_INTENSITY );
+				info.attributes = (short) (info.attributes | FOREGROUND_INTENSITY);
 				applyAttribute();
 				break;
 			case ATTRIBUTE_INTENSITY_NORMAL:
-				info.attributes = (short)(info.attributes & ~FOREGROUND_INTENSITY );
+				info.attributes = (short) (info.attributes & ~FOREGROUND_INTENSITY);
 				applyAttribute();
 				break;
 
 			// Yeah, setting the background intensity is not underlining.. but it's best we can do
 			// using the Windows console API
 			case ATTRIBUTE_UNDERLINE:
-				info.attributes = (short)(info.attributes | BACKGROUND_INTENSITY );
+				info.attributes = (short) (info.attributes | BACKGROUND_INTENSITY);
 				applyAttribute();
 				break;
 			case ATTRIBUTE_UNDERLINE_OFF:
-				info.attributes = (short)(info.attributes & ~BACKGROUND_INTENSITY );
+				info.attributes = (short) (info.attributes & ~BACKGROUND_INTENSITY);
 				applyAttribute();
 				break;
 
@@ -275,6 +300,8 @@ public final class WindowsAnsiOutputStream extends AnsiOutputStream {
 			case ATTRIBUTE_NEGATIVE_Off:
 				negative = false;
 				applyAttribute();
+				break;
+			default:
 				break;
 		}
 	}

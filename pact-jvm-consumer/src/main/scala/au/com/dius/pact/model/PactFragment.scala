@@ -20,6 +20,10 @@ case class PactFragment(consumer: Consumer,
   def runConsumer(config: MockProviderConfig, test: TestRun): VerificationResult = {
     duringConsumerSpec(config)(test.run(config), (u:Unit) => None)
   }
+
+  def description = s"Consumer '${consumer.getName}' has a pact with Provider '${provider.getName}': " +
+    interactions.map { i => i.getDescription }.mkString(" and ") + sys.props("line.separator")
+
 }
 
 object PactFragment {

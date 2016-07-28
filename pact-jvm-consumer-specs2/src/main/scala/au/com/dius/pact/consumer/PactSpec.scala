@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer
 
 import au.com.dius.pact.model.PactFragmentBuilder.PactWithAtLeastOneRequest
-import au.com.dius.pact.model.{PactSpecVersion, PactConfig, MockProviderConfig, PactFragment}
+import au.com.dius.pact.model.{MockProviderConfig, PactConfig, PactFragment, PactSpecVersion}
 import org.specs2.execute.{AsResult, Failure, Result, Success}
 import org.specs2.specification.create.FragmentsFactory
 
@@ -55,4 +55,5 @@ trait PactSpec extends FragmentsFactory {
       Some(r)
     }
   }
+
 }
