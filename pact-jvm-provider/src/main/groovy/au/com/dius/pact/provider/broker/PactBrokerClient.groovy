@@ -38,11 +38,18 @@ class PactBrokerClient {
   def uploadPactFile(File pactFile, String version) {
     def pact = new JsonSlurper().parse(pactFile)
     def http = new HTTPBuilder(pactBrokerUrl)
-    def response = http.request(PUT) {
+    http.parser.'application/hal+json' = http.parser.'application/json'
+    http.request(PUT, JSON) {
       uri.path = "/pacts/provider/${pact.provider.name}/consumer/${pact.consumer.name}/version/$version"
       requestContentType = JSON
       body = pactFile.text
+
+      response.success = { resp -> resp.statusLine }
+
+      response.failure = { resp, json ->
+        def error = json?.errors?.join(', ') ?: 'Unknown error'
+        "FAILED! ${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${error}"
+      }
     }
-    response.statusLine
   }
 }
