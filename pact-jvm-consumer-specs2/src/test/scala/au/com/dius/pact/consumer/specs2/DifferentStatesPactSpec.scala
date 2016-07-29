@@ -21,10 +21,11 @@ class DifferentStatesPactSpec extends Specification with PactSpec {
 
   override def is = PactFragment.consumer(consumer).hasPactWith(provider)
     .given("foo_state")
+    .given("bar state", Map("ValueA" -> "A"))
     .uponReceiving("a request for foo")
       .matching(path = "/foo")
       .willRespondWith(body = "{}")
-    .given("bar_state")
+    .given("bar_state", Map("ValueA" -> "B"))
     .uponReceiving("an option request for bar")
       .matching(path = "/", method = "OPTION")
       .willRespondWith(headers = Map("Option" -> "Value-X"))

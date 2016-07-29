@@ -12,20 +12,31 @@ object PactFragmentBuilder {
   }
 
   case class WithConsumer(consumer: Consumer) {
+    import scala.collection.JavaConversions._
+
     def hasPactWith(provider: String) = {
       WithProvider(new Provider(provider))
     }
 
     case class WithProvider(provider: Provider) {
       def given(state: String) = {
-        InState(Some(state))
+        InState(List(new ProviderState(state)))
+      }
+
+      def given(state: String, params: Map[String, String]) = {
+        InState(List(new ProviderState(state)))
       }
 
       def uponReceiving(description: String) = {
-        InState(None).uponReceiving(description)
+        InState(List()).uponReceiving(description)
       }
 
-      case class InState(state: Option[String]) {
+      case class InState(state: List[ProviderState]) {
+
+        def given(stateDesc: String, params: Map[String, String]) = {
+          InState(state.+:(new ProviderState(stateDesc, params)))
+        }
+
         def uponReceiving(description: String) = {
           DescribingRequest(consumer, provider, state, description)
         }
@@ -33,7 +44,7 @@ object PactFragmentBuilder {
     }
   }
 
-  case class DescribingRequest(consumer: Consumer, provider: Provider, state: Option[String], description: String,
+  case class DescribingRequest(consumer: Consumer, provider: Provider, state: List[ProviderState], description: String,
                                builder: CanBuildPactFragment.Builder = CanBuildPactFragment.firstBuild) extends Optionals {
     import scala.collection.JavaConversions._
 
@@ -75,7 +86,7 @@ object PactFragmentBuilder {
           state,
           Seq(new RequestResponseInteraction(
             description,
-            state.map(s => Seq(new ProviderState(s))).getOrElse(Seq[ProviderState]()).asJava,
+            state.asJava,
             request,
             new Response(status, headers, OptionalBody.body(body), CollectionUtils.scalaMMapToJavaMMap(matchers)))))
       }
@@ -89,20 +100,26 @@ object PactFragmentBuilder {
           state,
           Seq(new RequestResponseInteraction(
             description,
-            state.map(s => Seq(new ProviderState(s))).getOrElse(Seq[ProviderState]()).asJava,
+            state.asJava,
             request,
             new Response(status, headers, OptionalBody.body(bodyAndMatchers.toString), bodyAndMatchers.getMatchers))))
       }
     }
   }
 
-  case class PactWithAtLeastOneRequest(consumer: Consumer, provider:Provider, state: Option[String], interactions: Seq[RequestResponseInteraction]) {
+  case class PactWithAtLeastOneRequest(consumer: Consumer, provider:Provider, state: List[ProviderState], interactions: Seq[RequestResponseInteraction]) {
+    import scala.collection.JavaConversions._
+
     def given() = {
-      InState(None, this)
+      InState(List(), this)
     }
 
     def given(newState: String) = {
-      InState(Some(newState), this)
+      InState(List(new ProviderState(newState)), this)
+    }
+
+    def given(state: String, params: Map[String, String]) = {
+      InState(List(new ProviderState(state, params)), this)
     }
 
     def uponReceiving(description: String) = {
@@ -117,7 +134,7 @@ object PactFragmentBuilder {
       PactFragment(consumer, provider, interactions)
     }
 
-    case class InState(newState: Option[String], pactWithAtLeastOneRequest: PactWithAtLeastOneRequest) {
+    case class InState(newState: List[ProviderState], pactWithAtLeastOneRequest: PactWithAtLeastOneRequest) {
       def uponReceiving(description: String) = {
         DescribingRequest(consumer, provider, newState, description, CanBuildPactFragment.additionalBuild(pactWithAtLeastOneRequest))
       }
@@ -125,7 +142,7 @@ object PactFragmentBuilder {
   }
 
   object CanBuildPactFragment {
-    type Builder = (Consumer, Provider, Option[String], Seq[RequestResponseInteraction]) => PactWithAtLeastOneRequest
+    type Builder = (Consumer, Provider, List[ProviderState], Seq[RequestResponseInteraction]) => PactWithAtLeastOneRequest
 
     val firstBuild: Builder = PactWithAtLeastOneRequest.apply
 
