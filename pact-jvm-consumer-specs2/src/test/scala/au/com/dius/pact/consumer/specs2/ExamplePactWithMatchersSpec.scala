@@ -36,7 +36,7 @@ class ExamplePactWithMatchersSpec extends Specification with PactSpec {
       val bodyJson = new JSONObject(body)
 
       (status ==== 200) and
-        (bodyJson.getInt("foo") must be > 0) and
+        (bodyJson.getInt("foo") must be >= 0) and
         ((bodyJson.getString("bar").length > 0) ==== true)
     })
 }
