@@ -21,7 +21,7 @@ class ExamplePactWithMatchersSpec extends Specification with PactSpec {
   val timeout = Duration(5000, MILLISECONDS)
 
   val body = new PactDslJsonBody()
-    .stringMatcher("foo", "\\d+")
+    .stringMatcher("foo", "\\d{1,9}")
     .stringMatcher("bar", "[aA]+")
 
   override def is = uponReceiving("a request for foo with a body")
