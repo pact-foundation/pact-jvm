@@ -6,6 +6,8 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class ExampleDslProviderSpec extends ProviderSpec {
 
+  import ScalaTest.strToConsumer
+
   /**
     * Runs 'test_provider' pact verifications from default 'pacts-dependents' directory with server restart just against 'test_consumer2' pacts
     */
