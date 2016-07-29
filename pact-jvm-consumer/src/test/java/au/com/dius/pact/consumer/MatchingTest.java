@@ -111,11 +111,13 @@ public class MatchingTest {
     public void testRegexCharClassStringGenerator() {
         PactDslJsonBody numeric = new PactDslJsonBody()
                 .stringMatcher("x", "\\d+");
-        Assert.assertTrue(NumberUtils.isNumber(new JSONObject(numeric.getBody().toString()).getString("x")));
+        String val = new JSONObject(numeric.getBody().toString()).getString("x");
+        Assert.assertTrue("'" + val + "' is not a number", NumberUtils.isDigits(val));
 
         PactDslJsonBody numericWithLimitedRep = new PactDslJsonBody()
                 .stringMatcher("x", "\\d{9}");
-        Assert.assertTrue(NumberUtils.isNumber(new JSONObject(numericWithLimitedRep.getBody().toString()).getString("x")));
+        val = new JSONObject(numericWithLimitedRep.getBody().toString()).getString("x");
+        Assert.assertTrue("'" + val + "' is not a number", NumberUtils.isDigits(val));
     }
 
     private void runTest(PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
