@@ -8,8 +8,7 @@
   "interactions" : [ {
     "providerStates": [
       {
-        "name": "test state",
-        "params": {}
+        "name": "test state"
       }
     ],
     "description" : "test interaction with matchers",

@@ -30,7 +30,7 @@ public class PactDslWithProvider {
      * @param state Provider state
      * @param params Data parameters for the state
      */
-    public PactDslWithState given(String state, Map<String, String> params) {
+    public PactDslWithState given(String state, Map<String, Object> params) {
         return new PactDslWithState(consumerPactBuilder, consumerPactBuilder.getConsumerName(), providerName,
           new ProviderState(state, params));
     }

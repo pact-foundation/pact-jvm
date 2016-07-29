@@ -207,7 +207,7 @@ public class PactDslResponse {
      * @param state Description of the state
      * @param params Data parameters for this state
      */
-    public PactDslWithState given(String state, Map<String, String> params) {
+    public PactDslWithState given(String state, Map<String, Object> params) {
       addInteraction();
       return new PactDslWithState(consumerPactBuilder, request.consumer.getName(), request.provider.getName(),
         new ProviderState(state, params));

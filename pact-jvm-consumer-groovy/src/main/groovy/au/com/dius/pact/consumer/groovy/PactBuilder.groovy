@@ -81,6 +81,16 @@ class PactBuilder extends BaseBuilder {
   }
 
   /**
+   * Defines the provider state the provider needs to be in for the interaction
+   * @param providerState provider state description
+   * @param params Data parameters for the provider state
+   */
+  PactBuilder given(String providerState, Map params) {
+    this.providerStates << new ProviderState(providerState, params)
+    this
+  }
+
+  /**
    * Defines the start of an interaction
    * @param requestDescription Description of the interaction. Must be unique.
    */

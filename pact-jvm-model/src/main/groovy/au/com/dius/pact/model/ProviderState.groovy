@@ -14,16 +14,19 @@ class ProviderState {
   /**
    * Provider state parameters as key value pairs
    */
-  Map<String, String> params = [:]
+  Map<String, Object> params = [:]
 
   static ProviderState fromMap(Map map) {
     new ProviderState(map)
   }
 
   Map toMap() {
-    [
-      name: name,
-      params: params
+    def map = [
+      name: name
     ]
+    if (params) {
+      map.params = params
+    }
+    map
   }
 }

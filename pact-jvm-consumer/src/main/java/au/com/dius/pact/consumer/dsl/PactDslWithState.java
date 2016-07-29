@@ -48,7 +48,7 @@ public class PactDslWithState {
      * @param stateDesc Description of the state
      * @param params State data parameters
      */
-    public PactDslWithState given(String stateDesc, Map<String, String> params) {
+    public PactDslWithState given(String stateDesc, Map<String, Object> params) {
         state.add(new ProviderState(stateDesc, params));
         return this;
     }

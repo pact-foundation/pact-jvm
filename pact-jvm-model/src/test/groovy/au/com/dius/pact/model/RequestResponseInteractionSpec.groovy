@@ -23,7 +23,7 @@ class RequestResponseInteractionSpec extends Specification {
       request: [method: 'GET', path: '/'],
       response: [status: 200],
       providerStates: [
-        [name: 'state one', params: [:]],
+        [name: 'state one'],
         [name: 'state two', params: [
           value: 'one', other: '2']
         ]
