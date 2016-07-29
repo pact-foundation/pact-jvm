@@ -162,8 +162,7 @@ public class PactDslResponse {
     private void addInteraction() {
         consumerPactBuilder.getInteractions().add(new RequestResponseInteraction(
           request.description,
-          request.state == null || request.state.isEmpty()
-            ? Collections.EMPTY_LIST : Collections.singletonList(new ProviderState(request.state)),
+          request.state,
           new Request(request.requestMethod, request.path, PactReader.queryStringToMap(request.query, false),
             request.requestHeaders, request.requestBody, request.requestMatchers),
           new Response(responseStatus, responseHeaders, responseBody, responseMatchers)
@@ -193,8 +192,24 @@ public class PactDslResponse {
         return new PactDslRequestWithPath(consumerPactBuilder, request, description);
     }
 
+    /**
+     * Adds a provider state to this interaction
+     * @param state Description of the state
+     */
     public PactDslWithState given(String state) {
         addInteraction();
-        return new PactDslWithState(consumerPactBuilder, request.consumer.getName(), request.provider.getName(), state);
+        return new PactDslWithState(consumerPactBuilder, request.consumer.getName(), request.provider.getName(),
+          new ProviderState(state));
+    }
+
+    /**
+     * Adds a provider state to this interaction
+     * @param state Description of the state
+     * @param params Data parameters for this state
+     */
+    public PactDslWithState given(String state, Map<String, String> params) {
+      addInteraction();
+      return new PactDslWithState(consumerPactBuilder, request.consumer.getName(), request.provider.getName(),
+        new ProviderState(state, params));
     }
 }

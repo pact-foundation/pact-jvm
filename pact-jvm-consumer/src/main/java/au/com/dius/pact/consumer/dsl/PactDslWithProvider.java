@@ -1,6 +1,9 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
+import au.com.dius.pact.model.ProviderState;
+
+import java.util.Map;
 
 public class PactDslWithProvider {
     private ConsumerPactBuilder consumerPactBuilder;
@@ -17,7 +20,19 @@ public class PactDslWithProvider {
      * @param state Provider state
      */
     public PactDslWithState given(String state) {
-        return new PactDslWithState(consumerPactBuilder, consumerPactBuilder.getConsumerName(), providerName, state);
+        return new PactDslWithState(consumerPactBuilder, consumerPactBuilder.getConsumerName(), providerName,
+          new ProviderState(state));
+    }
+
+    /**
+     * Describe the state the provider needs to be in for the pact test to be verified.
+     *
+     * @param state Provider state
+     * @param params Data parameters for the state
+     */
+    public PactDslWithState given(String state, Map<String, String> params) {
+        return new PactDslWithState(consumerPactBuilder, consumerPactBuilder.getConsumerName(), providerName,
+          new ProviderState(state, params));
     }
 
     /**
@@ -26,7 +41,7 @@ public class PactDslWithProvider {
      * @param description request description
      */
     public PactDslRequestWithoutPath uponReceiving(String description) {
-        return new PactDslWithState(consumerPactBuilder, consumerPactBuilder.getConsumerName(), providerName, null)
+        return new PactDslWithState(consumerPactBuilder, consumerPactBuilder.getConsumerName(), providerName)
                 .uponReceiving(description);
     }
 

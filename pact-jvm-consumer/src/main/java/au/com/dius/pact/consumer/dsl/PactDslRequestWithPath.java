@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.Consumer;
 import au.com.dius.pact.model.OptionalBody;
 import au.com.dius.pact.model.Provider;
+import au.com.dius.pact.model.ProviderState;
 import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
@@ -11,6 +12,7 @@ import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PactDslRequestWithPath {
@@ -20,7 +22,7 @@ public class PactDslRequestWithPath {
     Consumer consumer;
     Provider provider;
 
-    String state;
+    List<ProviderState> state;
     String description;
     String path = "/";
     String requestMethod = "GET";
@@ -29,17 +31,17 @@ public class PactDslRequestWithPath {
     OptionalBody requestBody = OptionalBody.missing();
     Map<String, Map<String, Object>> requestMatchers = new HashMap<String, Map<String, Object>>();
 
-    public PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
-                                  String consumerName,
-                                  String providerName,
-                                  String state,
-                                  String description,
-                                  String path,
-                                  String requestMethod,
-                                  Map<String, String> requestHeaders,
-                                  String query,
-                                  OptionalBody requestBody,
-                                  Map<String, Map<String, Object>> requestMatchers) {
+    PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
+                           String consumerName,
+                           String providerName,
+                           List<ProviderState> state,
+                           String description,
+                           String path,
+                           String requestMethod,
+                           Map<String, String> requestHeaders,
+                           String query,
+                           OptionalBody requestBody,
+                           Map<String, Map<String, Object>> requestMatchers) {
         this.consumerPactBuilder = consumerPactBuilder;
         this.requestMatchers = requestMatchers;
         this.consumer = new Consumer(consumerName);
@@ -56,9 +58,9 @@ public class PactDslRequestWithPath {
         this.requestMatchers = requestMatchers;
     }
 
-    public PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
-                                  PactDslRequestWithPath existing,
-                                  String description) {
+    PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
+                           PactDslRequestWithPath existing,
+                           String description) {
         this.consumerPactBuilder = consumerPactBuilder;
         this.consumer = existing.consumer;
         this.provider = existing.provider;
