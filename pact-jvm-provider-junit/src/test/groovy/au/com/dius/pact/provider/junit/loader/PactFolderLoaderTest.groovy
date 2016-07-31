@@ -17,7 +17,7 @@ class PactFolderLoaderTest {
 
   @Test
   void 'only includes json files'() {
-    assertThat(new PactFolderLoader(this.class.getAnnotation(PactFolder)).load('myAwesomeService'), hasSize(2))
+    assertThat(new PactFolderLoader(this.class.getAnnotation(PactFolder)).load('myAwesomeService'), hasSize(3))
   }
 
   @Test

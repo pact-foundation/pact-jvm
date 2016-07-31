@@ -30,6 +30,7 @@ import org.junit.runners.model.TestClass;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -77,7 +78,7 @@ class InteractionRunner extends Runner {
 
         validatePublicVoidNoArgMethods(Before.class, false, errors);
         validatePublicVoidNoArgMethods(After.class, false, errors);
-        validatePublicVoidNoArgMethods(State.class, false, errors);
+        validateStateChangeMethods(State.class, false, errors);
         validateConstructor(errors);
         validateTestTarget(errors);
         validateRules(errors);
@@ -87,6 +88,17 @@ class InteractionRunner extends Runner {
             throw new InitializationError(errors);
         }
     }
+
+  private void validateStateChangeMethods(final Class<? extends Annotation> annotation, final boolean isStatic, final List<Throwable> errors) {
+    testClass.getAnnotatedMethods(annotation).forEach(method -> {
+      method.validatePublicVoid(isStatic, errors);
+      if (method.getMethod().getParameterCount() == 1 && !Map.class.isAssignableFrom(method.getMethod().getParameterTypes()[0])) {
+        errors.add(new Exception("Method " + method.getName() + " should take only a single Map parameter"));
+      } else if (method.getMethod().getParameterCount() > 1) {
+        errors.add(new Exception("Method " + method.getName() + " should either take no parameters or a single Map parameter"));
+      }
+    });
+  }
 
   private void validateTargetRequestFilters(final List<Throwable> errors) {
     testClass.getAnnotatedMethods(TargetRequestFilter.class)
@@ -101,8 +113,8 @@ class InteractionRunner extends Runner {
   }
 
   protected void validatePublicVoidNoArgMethods(final Class<? extends Annotation> annotation, final boolean isStatic, final List<Throwable> errors) {
-        testClass.getAnnotatedMethods(annotation).stream().forEach(method -> method.validatePublicVoidNoArg(isStatic, errors));
-    }
+    testClass.getAnnotatedMethods(annotation).stream().forEach(method -> method.validatePublicVoidNoArg(isStatic, errors));
+  }
 
     protected void validateConstructor(final List<Throwable> errors) {
         if (!hasOneConstructor()) {
@@ -191,13 +203,14 @@ class InteractionRunner extends Runner {
 
     protected Statement withStateChanges(final RequestResponseInteraction interaction, final Object target, final Statement statement) {
         if (!interaction.getProviderStates().isEmpty()) {
-          final List<FrameworkMethod> onStateChange = new ArrayList<>();
+          Statement stateChange = statement;
           for (ProviderState state: interaction.getProviderStates()) {
-            onStateChange.addAll(testClass.getAnnotatedMethods(State.class)
-              .stream().filter(ann -> ArrayUtils.contains(ann.getAnnotation(State.class).value(), state.getName()))
-              .collect(Collectors.toList()));
+            stateChange = new RunStateChanges(stateChange,
+              testClass.getAnnotatedMethods(State.class)
+                .stream().filter(ann -> ArrayUtils.contains(ann.getAnnotation(State.class).value(), state.getName()))
+                .collect(Collectors.toList()), target, state);
           }
-          return onStateChange.isEmpty() ? statement : new RunBefores(statement, onStateChange, target);
+          return stateChange;
         } else {
             return statement;
         }

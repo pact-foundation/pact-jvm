@@ -16,7 +16,8 @@ once - before/after whole contract test suite.
 each test of an interaction.
 
 - **au.com.dius.pact.provider.junit.State** custom annotation - before each interaction that requires a state change,
-all methods annotated by `@State` with appropriate the state listed will be invoked.
+all methods annotated by `@State` with appropriate the state listed will be invoked. These methods must either take
+no parameters or a single Map parameter.
 
 ## Example of test
 
@@ -51,6 +52,14 @@ all methods annotated by `@State` with appropriate the state listed will be invo
             // Prepare service before interaction that require "default" state
             // ...
             System.out.println("Now service in default state");
+        }
+        
+        @State("with-data") // Method will be run before testing interactions that require "with-data" state
+        public void toStateWithData(Map data) {
+            // Prepare service before interaction that require "with-data" state. The provider state data will be passed 
+            // in the data parameter
+            // ...
+            System.out.println("Now service in state using data " + data);
         }
 
         @TestTarget // Annotation denotes Target that will be used for tests
