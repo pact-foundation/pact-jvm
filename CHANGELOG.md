@@ -1,5 +1,29 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.3.0-beta.0 - First V3 Implementation
+
+* 8288fe3 - update provider junit support to handle provider states with parameters (Ronald Holshausen, Sun Jul 31 17:58:13 2016 +1000)
+* afd4afd - update provider junit support to handle multiple provider states (Ronald Holshausen, Sun Jul 31 17:28:35 2016 +1000)
+* e2ebae6 - skip deploying the gradle plugin for beta versions (Ronald Holshausen, Sun Jul 31 17:12:42 2016 +1000)
+* 9201885 - update readmes (Ronald Holshausen, Sun Jul 31 17:12:12 2016 +1000)
+* 22cbbc0 - Merge branch 'master' into v3-spec (Ronald Holshausen, Sun Jul 31 16:53:59 2016 +1000)
+* 1b1b81f - bump version to 3.2.12 (Ronald Holshausen, Sun Jul 31 16:50:40 2016 +1000)
+* 8384e63 - implemented handling of multiple provider states with parameters in the provider verifer (Ronald Holshausen, Sun Jul 31 12:47:42 2016 +1000)
+* 997d416 - Update the Specs2 DSL to support V3 provider state format (Ronald Holshausen, Fri Jul 29 16:08:54 2016 +1000)
+* 5e686da - update Groovy DSL to allow multiple provider states with parameters (Ronald Holshausen, Fri Jul 29 12:45:17 2016 +1000)
+* ddd58bb - update the java DSL to allow multiple provider states with parameters (Ronald Holshausen, Fri Jul 29 11:22:35 2016 +1000)
+* 4727475 - Merge branch 'master' into v3-spec (Ronald Holshausen, Fri Jul 29 10:29:22 2016 +1000)
+* f9b4629 - Merge branch 'master' into v3-spec (Ronald Holshausen, Fri Jul 29 10:13:25 2016 +1000)
+* 74dc50a - fix for new V3 provider state structure (Ronald Holshausen, Thu Jul 28 16:22:03 2016 +1000)
+* d58281d - Merge branch 'master' into v3-spec (Ronald Holshausen, Thu Jul 28 16:12:52 2016 +1000)
+* bc9a7db - Merge branch 'master' into v3-spec (Ronald Holshausen, Fri Jul 22 10:47:13 2016 +1000)
+* f3614db - tag version as beta.0 (Ronald Holshausen, Thu Jul 21 16:44:47 2016 +1000)
+* add6092 - code narc fixes (Ronald Holshausen, Thu Jul 21 16:39:03 2016 +1000)
+* c18a2fb - ignoring the V3 spec tests until the implementation is more complete (Ronald Holshausen, Thu Jul 21 16:31:40 2016 +1000)
+* 861bcd9 - implemented models, reading and writing with new V3 provider state format (Ronald Holshausen, Thu Jul 21 16:19:54 2016 +1000)
+* 8efffa5 - updated the V3 test cases from the specification project (Ronald Holshausen, Tue Jul 19 16:02:04 2016 +1000)
+* f9a0ced - bump version for V3 spec changes (Ronald Holshausen, Tue Jul 19 15:58:54 2016 +1000)
+
 # 3.2.11 - Bugfix Release
 
 * a220b69 - add java version check to release script (Ronald Holshausen, Sun Jul 31 16:11:13 2016 +1000)
