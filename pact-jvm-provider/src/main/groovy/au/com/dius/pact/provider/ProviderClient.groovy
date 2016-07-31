@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.Request
 import groovy.json.JsonBuilder
 import groovy.util.logging.Slf4j
@@ -38,7 +39,7 @@ class ProviderClient {
     private static final String REQUEST = 'request'
     private static final String ACTION = 'action'
 
-  HttpClientFactory httpClientFactory = new HttpClientFactory()
+    HttpClientFactory httpClientFactory = new HttpClientFactory()
     Request request
     def provider
 
@@ -124,7 +125,7 @@ class ProviderClient {
         }
     }
 
-    CloseableHttpResponse makeStateChangeRequest(def stateChangeUrl, String state, boolean postStateInBody,
+    CloseableHttpResponse makeStateChangeRequest(def stateChangeUrl, ProviderState state, boolean postStateInBody,
                                                  boolean isSetup, boolean stateChangeTeardown) {
         if (stateChangeUrl) {
             CloseableHttpClient httpclient = httpClientFactory.newClient(provider)
@@ -138,14 +139,18 @@ class ProviderClient {
 
             if (postStateInBody) {
               method = new HttpPost(urlBuilder.build())
-              def map = [state: state]
+              def map = [state: state.name]
+              if (state.params) {
+                map.params = state.params
+              }
               if (stateChangeTeardown) {
                 map.action = isSetup ? 'setup' : 'teardown'
               }
               method.setEntity(new StringEntity(new JsonBuilder(map).toPrettyString(),
                         ContentType.APPLICATION_JSON))
             } else {
-              urlBuilder.setParameter('state', state)
+              urlBuilder.setParameter('state', state.name)
+              state.params.each { k, v -> urlBuilder.setParameter(k as String, v as String) }
               if (stateChangeTeardown) {
                 if (isSetup) {
                   urlBuilder.setParameter(ACTION, 'setup')
@@ -173,7 +178,7 @@ class ProviderClient {
         }
     }
 
-    def handleResponse(HttpResponse httpResponse) {
+    static handleResponse(HttpResponse httpResponse) {
         log.debug "Received response: ${httpResponse.statusLine}"
         def response = [statusCode: httpResponse.statusLine.statusCode]
 

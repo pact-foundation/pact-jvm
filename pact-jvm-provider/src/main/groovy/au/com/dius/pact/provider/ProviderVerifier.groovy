@@ -7,7 +7,6 @@ import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import org.reflections.Reflections
 import org.reflections.scanners.MethodAnnotationsScanner
 import org.reflections.util.ConfigurationBuilder
@@ -132,8 +131,8 @@ class ProviderVerifier {
   }
 
   private boolean matchState(interaction) {
-    if (interaction.providerState) {
-      interaction.providerState ==~ callProjectGetProperty(PACT_FILTER_PROVIDERSTATE)
+    if (interaction.providerStates) {
+      interaction.providerStates.any { it.name ==~ callProjectGetProperty(PACT_FILTER_PROVIDERSTATE) }
     } else {
       callProjectGetProperty(PACT_FILTER_PROVIDERSTATE).empty
     }
@@ -147,19 +146,10 @@ class ProviderVerifier {
     def interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name}" +
       " - ${interaction.description}"
 
-    def stateChangeOk = true
-    if (interaction.providerState) {
-      stateChangeOk = stateChange(interaction.providerState, provider, consumer)
-      log.debug "State Change: \"${interaction.providerState}\" -> ${stateChangeOk}"
-      if (stateChangeOk != true) {
-        failures[interactionMessage] = stateChangeOk
-        stateChangeOk = false
-      } else {
-        interactionMessage += " Given ${interaction.providerState}"
-      }
-    }
-
-    if (stateChangeOk) {
+    def stateChangeResult = StateChange.executeStateChange(this, provider, consumer, interaction, interactionMessage,
+      failures)
+    if (stateChangeResult.stateChangeOk) {
+      interactionMessage += stateChangeResult.message
       reportInteractionDescription(interaction)
 
       if (ProviderUtils.verificationType(provider, consumer) == PactVerification.REQUST_RESPONSE) {
@@ -171,7 +161,7 @@ class ProviderVerifier {
       }
 
       if (provider.stateChangeTeardown) {
-        stateChange(interaction.providerState, provider, consumer, false)
+        StateChange.executeStateChangeTeardown(this, interaction, provider, consumer)
       }
     }
   }
@@ -180,72 +170,8 @@ class ProviderVerifier {
     reporters.each { it.interactionDescription(interaction) }
   }
 
-  def stateChange(String state, ProviderInfo provider, ConsumerInfo consumer, boolean isSetup = true) {
-    reportStateForInteraction(state, provider, consumer, isSetup)
-    try {
-      def stateChangeHandler = consumer.stateChange
-      def stateChangeUsesBody = consumer.stateChangeUsesBody
-      if (stateChangeHandler == null) {
-        stateChangeHandler = provider.stateChangeUrl
-        stateChangeUsesBody = provider.stateChangeUsesBody
-      }
-      if (stateChangeHandler == null || (stateChangeHandler instanceof String
-        && StringUtils.isBlank(stateChangeHandler))) {
-        reporters.each { it.warnStateChangeIgnored(state, provider, consumer) }
-        return true
-      } else if (stateChangeHandler instanceof Closure) {
-        def result
-        if (provider.stateChangeTeardown) {
-          result = stateChangeHandler.call(state, isSetup ? 'setup' : 'teardown')
-        } else {
-          result = stateChangeHandler.call(state)
-        }
-        log.debug "Invoked state change closure -> ${result}"
-        if (!(result instanceof URL)) {
-          return result
-        }
-        stateChangeHandler = result
-      } else if (isBuildSpecificTask(stateChangeHandler)) {
-        log.debug "Invokeing build specific task ${stateChangeHandler}"
-        executeBuildSpecificTask(stateChangeHandler, state)
-        return true
-      }
-      return executeHttpStateChangeRequest(stateChangeHandler, stateChangeUsesBody, state, provider, isSetup)
-    } catch (e) {
-      reporters.each {
-        it.stateChangeRequestFailedWithException(state, provider, consumer, isSetup, e,
-          callProjectHasProperty(PACT_SHOW_STACKTRACE))
-      }
-      return e
-    }
-  }
-
   void reportStateForInteraction(String state, ProviderInfo provider, ConsumerInfo consumer, boolean isSetup) {
     reporters.each { it.stateForInteraction(state, provider, consumer, isSetup) }
-  }
-
-  private executeHttpStateChangeRequest(stateChangeHandler, useBody, String state, ProviderInfo provider,
-                                        boolean isSetup) {
-    try {
-      def url = stateChangeHandler instanceof URI ? stateChangeHandler
-        : new URI(stateChangeHandler.toString())
-      ProviderClient client = new ProviderClient(provider: provider)
-      def response = client.makeStateChangeRequest(url, state, useBody, isSetup, provider.stateChangeTeardown)
-      log.debug "Invoked state change $url -> ${response?.statusLine}"
-      if (response) {
-        try {
-          if (response.statusLine.statusCode >= 400) {
-            reporters.each { it.stateChangeRequestFailed(state, provider, isSetup, response.statusLine.toString()) }
-            return 'State Change Request Failed - ' + response.statusLine.toString()
-          }
-        } finally {
-          response.close()
-        }
-      }
-    } catch (URISyntaxException ex) {
-      reporters.each { it.warnStateChangeIgnoredDueToInvalidUrl(state, provider, isSetup, stateChangeHandler) }
-    }
-    true
   }
 
   void verifyResponseFromProvider(ProviderInfo provider, def interaction, String interactionMessage, Map failures) {

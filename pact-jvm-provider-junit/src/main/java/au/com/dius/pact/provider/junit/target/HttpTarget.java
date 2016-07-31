@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit.target;
 
+import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.ProviderInfo;
@@ -145,8 +146,10 @@ public class HttpTarget implements TestClassAwareTarget {
     verifier.initialiseReporters(provider);
     verifier.reportVerificationForConsumer(consumer, provider);
 
-    if (interaction.getProviderState() != null) {
-      verifier.reportStateForInteraction(interaction.getProviderState(), provider, consumer, true);
+    if (!interaction.getProviderStates().isEmpty()) {
+      for (ProviderState providerState: interaction.getProviderStates()) {
+        verifier.reportStateForInteraction(providerState.getName(), provider, consumer, true);
+      }
     }
 
     verifier.reportInteractionDescription(interaction);
