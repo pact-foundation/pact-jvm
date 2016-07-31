@@ -5,8 +5,8 @@ mainClassName = 'au.com.dius.pact.server.Server'
 dependencies {
     compile project(":pact-jvm-model_${project.scalaVersion}"),
       project(":pact-jvm-consumer_${project.scalaVersion}")
-    compile 'ch.qos.logback:logback-core:1.1.2',
-      'ch.qos.logback:logback-classic:1.1.2',
+    compile "ch.qos.logback:logback-core:${project.logbackVersion}",
+      "ch.qos.logback:logback-classic:${project.logbackVersion}",
       "com.github.scopt:scopt_${project.scalaVersion}:3.3.0"
 
     testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {

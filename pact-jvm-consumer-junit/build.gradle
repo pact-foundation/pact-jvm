@@ -16,15 +16,15 @@ dependencies {
   compile project(":pact-jvm-consumer_${project.scalaVersion}"),
     'junit:junit:4.12',
     'org.json:json:20140107',
-    "org.apache.commons:commons-lang3:$commonsLang3Version",
+    "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
     'com.google.guava:guava:18.0'
 
-  testCompile 'ch.qos.logback:logback-core:1.1.2',
-    'ch.qos.logback:logback-classic:1.1.2',
+  testCompile "ch.qos.logback:logback-core:${project.logbackVersion}",
+    "ch.qos.logback:logback-classic:${project.logbackVersion}",
     'org.apache.commons:commons-collections4:4.0',
     'com.google.code.gson:gson:2.3.1',
-    "org.apache.httpcomponents:fluent-hc:$httpClientVersion",
-    "org.apache.httpcomponents:httpclient:$httpClientVersion",
+    "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}",
+    "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
     'com.jayway.restassured:rest-assured:2.8.0',
     'org.hamcrest:hamcrest-all:1.3'
 

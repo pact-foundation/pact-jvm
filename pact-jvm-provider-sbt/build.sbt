@@ -3,7 +3,7 @@ isSnapshot := true
 
 libraryDependencies ++= Seq(
   "au.com.dius" %% "pact-jvm-provider" % Common.version,
-  "ch.qos.logback" % "logback-classic" % "1.1.3"
+  "ch.qos.logback" % "logback-classic" % "1.1.7"
 )
 
 scalacOptions ++= Seq("-deprecation", "-feature")
