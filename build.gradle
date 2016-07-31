@@ -61,8 +61,6 @@ subprojects {
     sourceCompatibility = '1.8'
 
     tasks.withType(ScalaCompile) {
-        scalaCompileOptions.useCompileDaemon = false
-        scalaCompileOptions.useAnt = false
         scalaCompileOptions.additionalParameters = ['-target:jvm-1.8']
         configure(scalaCompileOptions.forkOptions) {
           memoryMaximumSize = '256m'

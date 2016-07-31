@@ -6,11 +6,11 @@ buildscript {
     maven { url 'http://clojars.org/repo' }
   }
   dependencies {
-    classpath 'com.netflix.nebula:nebula-clojure-plugin:2.2.0'
+    classpath 'com.netflix.nebula:nebula-clojure-plugin:4.0.1'
   }
 }
 
-apply plugin: 'nebula.nebula-clojure'
+apply plugin: 'nebula.clojure'
 
 dependencies {
   compile project(":pact-jvm-provider_${project.scalaVersion}")
