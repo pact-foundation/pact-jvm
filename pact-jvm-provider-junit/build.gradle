@@ -4,7 +4,7 @@ dependencies {
       'com.github.rholder:guava-retrying:1.0.6',
       "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}",
       "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
-      'junit:junit:4.12',
+      "junit:junit:${project.junitVersion}",
       "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
       'com.fasterxml.jackson.core:jackson-databind:2.6.3',
       'org.jooq:jool:0.9.11'
