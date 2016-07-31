@@ -4,7 +4,6 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslResponse;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.MockProviderConfig$;
-import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactSpecVersion;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -121,7 +120,7 @@ public class MatchingTest {
     }
 
     private void runTest(PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
-        MockProviderConfig config = MockProviderConfig$.MODULE$.createDefault(PactConfig.apply(PactSpecVersion.V2));
+        MockProviderConfig config = MockProviderConfig$.MODULE$.createDefault(PactSpecVersion.V2);
         VerificationResult result = pactFragment.toFragment().runConsumer(config, new TestRun() {
             @Override
             public void run(MockProviderConfig config) throws IOException {

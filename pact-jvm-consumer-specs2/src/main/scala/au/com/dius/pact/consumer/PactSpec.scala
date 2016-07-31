@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer
 
 import au.com.dius.pact.model.PactFragmentBuilder.PactWithAtLeastOneRequest
-import au.com.dius.pact.model.{MockProviderConfig, PactConfig, PactFragment, PactSpecVersion}
+import au.com.dius.pact.model.{MockProviderConfig, PactFragment, PactSpecVersion}
 import org.specs2.execute.{AsResult, Failure, Result, Success}
 import org.specs2.specification.create.FragmentsFactory
 
@@ -36,7 +36,7 @@ trait PactSpec extends FragmentsFactory {
 
   class ReadyForTest(pactFragment: PactFragment) {
     def withConsumerTest(test: MockProviderConfig => Result) = {
-      val config = MockProviderConfig.createDefault(PactConfig(PactSpecVersion.V2))
+      val config = MockProviderConfig.createDefault(PactSpecVersion.V2)
       val description = s"Consumer '${pactFragment.consumer.getName}' has a pact with Provider '${pactFragment.provider.getName}': " +
         pactFragment.interactions.map { i => i.getDescription }.mkString(" and ") + sys.props("line.separator")
 
