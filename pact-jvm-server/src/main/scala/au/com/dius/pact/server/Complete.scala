@@ -31,7 +31,7 @@ object Complete {
     } yield {
       mockProvider.stop()
       
-      ConsumerPactRunner.writeIfMatching(pact, sessionResults, mockProvider.config.pactConfig) match {
+      ConsumerPactRunner.writeIfMatching(pact, sessionResults, mockProvider.config.pactVersion) match {
         case PactVerified => pactWritten(new Response(200, JavaConversions.mapAsJavaMap(ResponseUtils.CrossSiteHeaders)),
           mockProvider.config.port)
         case error => pactWritten(new Response(400,

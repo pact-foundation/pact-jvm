@@ -9,15 +9,15 @@ import scala.util.control.NonFatal
 trait MockProviderConfig {
   def port: Int
   def hostname: String
-  def pactConfig: PactConfig
+  def pactVersion: PactSpecVersion
   def url: String
 }
 
-case class MockHttpProviderConfig(port: Int, hostname: String, pactConfig: PactConfig) extends MockProviderConfig {
+case class MockHttpProviderConfig(port: Int, hostname: String, pactVersion: PactSpecVersion) extends MockProviderConfig {
   def url: String = s"http://$hostname:$port"
 }
 
-case class MockHttpsProviderConfig(port: Int, hostname: String, pactConfig: PactConfig) extends MockProviderConfig {
+case class MockHttpsProviderConfig(port: Int, hostname: String, pactVersion: PactSpecVersion) extends MockProviderConfig {
   def httpsCertificate: SelfSignedCertificate = new SelfSignedCertificate()
 
   def url: String = s"https://$hostname:$port"
@@ -27,13 +27,13 @@ object MockProviderConfig {
   val portLowerBound = 20000
   val portUpperBound = 40000
 
-  def createDefault() : MockProviderConfig = createDefault("localhost", PactConfig(PactSpecVersion.V2))
-  def createDefault(pactConfig: PactConfig) : MockProviderConfig = createDefault("localhost", pactConfig)
-  def createDefault(host: String, pactConfig: PactConfig) =
-    MockHttpProviderConfig(randomPort(portLowerBound, portUpperBound).get, host, pactConfig)
-  def create(lower: Int, upper: Int, pactConfig: PactConfig) =
-    MockHttpProviderConfig(randomPort(lower, upper).get, "localhost", pactConfig)
-  def apply(port: Int, hostname: String, pactConfig: PactConfig) = MockHttpProviderConfig(port, hostname, pactConfig)
+  def createDefault() : MockProviderConfig = createDefault("localhost", PactSpecVersion.V2)
+  def createDefault(pactVersion: PactSpecVersion) : MockProviderConfig = createDefault("localhost", pactVersion)
+  def createDefault(host: String, pactVersion: PactSpecVersion) =
+    MockHttpProviderConfig(randomPort(portLowerBound, portUpperBound).get, host, pactVersion)
+  def create(lower: Int, upper: Int, pactVersion: PactSpecVersion) =
+    MockHttpProviderConfig(randomPort(lower, upper).get, "localhost", pactVersion)
+  def apply(port: Int, hostname: String, pactVersion: PactSpecVersion) = MockHttpProviderConfig(port, hostname, pactVersion)
 
   def randomPort(lower: Int, upper: Int) = {
     import util.Random.nextInt

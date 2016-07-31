@@ -1,10 +1,14 @@
 package au.com.dius.pact.consumer.v3;
 
-import au.com.dius.pact.consumer.*;
+import au.com.dius.pact.consumer.MessagePactBuilder;
+import au.com.dius.pact.consumer.MessagePactProviderRule;
+import au.com.dius.pact.consumer.Pact;
+import au.com.dius.pact.consumer.PactProviderRule;
+import au.com.dius.pact.consumer.PactVerification;
+import au.com.dius.pact.consumer.PactVerifications;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
@@ -16,7 +20,9 @@ import java.util.Map;
 
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 public class PactVerificationsForMultipleHttpsAndMessagesTest {
 
@@ -28,11 +34,11 @@ public class PactVerificationsForMultipleHttpsAndMessagesTest {
 
     @Rule
     public PactProviderRule httpProvider =
-            new PactProviderRule(HTTP_PROVIDER_NAME, "localhost", 8075, new PactConfig(PactSpecVersion.V3), this);
+            new PactProviderRule(HTTP_PROVIDER_NAME, "localhost", 8075, PactSpecVersion.V3, this);
 
     @Rule
     public PactProviderRule otherHttpProvider =
-            new PactProviderRule(OTHER_HTTP_PROVIDER_NAME, "localhost", 8076, new PactConfig(PactSpecVersion.V3), this);
+            new PactProviderRule(OTHER_HTTP_PROVIDER_NAME, "localhost", 8076, PactSpecVersion.V3, this);
 
     @Rule
     public MessagePactProviderRule messageProvider = new MessagePactProviderRule(MESSAGE_PROVIDER_NAME, this);

@@ -1,9 +1,9 @@
 dependencies {
     compile project(":pact-jvm-consumer_${project.scalaVersion}")
-    compile "org.codehaus.groovy:groovy-all:$groovyVersion:indy"
+    compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
 
-    testCompile "org.codehaus.groovy.modules.http-builder:http-builder:$httpBuilderVersion",
-      'ch.qos.logback:logback-classic:1.1.2'
+    testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}",
+      "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile ('org.spockframework:spock-core:1.0-groovy-2.4') {
         exclude group: 'org.codehaus.groovy'
     }

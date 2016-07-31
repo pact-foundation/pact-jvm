@@ -5,12 +5,12 @@ dependencies {
       "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy",
       'com.googlecode.java-diff-utils:diffutils:1.3.0',
       'dk.brics.automaton:automaton:1.11-8',
-      "org.apache.httpcomponents:httpclient:$httpClientVersion",
-      'com.fasterxml.jackson.core:jackson-databind:2.6.3',
+      "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
+      "com.fasterxml.jackson.core:jackson-databind:${project.jacksonDatabindVersion}",
       'com.github.mifmif:generex:1.0.1'
 
-    testCompile 'org.apache.httpcomponents:fluent-hc:4.4',
-      'ch.qos.logback:logback-classic:1.1.2'
+    testCompile "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}",
+      "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile ('org.spockframework:spock-core:1.0-groovy-2.4') {
         exclude group: 'org.codehaus.groovy'
     }

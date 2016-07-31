@@ -2,7 +2,7 @@ package au.com.dius.pact.provider.scalatest
 
 import java.net.URL
 
-import au.com.dius.pact.model.{MockProviderConfig, PactConfig, PactSpecVersion}
+import au.com.dius.pact.model.{MockProviderConfig, PactSpecVersion}
 import unfiltered.netty.cycle.{Plan, SynchronousExecution}
 import unfiltered.netty.{Server, ServerErrorResponse}
 import unfiltered.response.ResponseString
@@ -18,7 +18,7 @@ class TestServer {
 
   def startServer(): Unit = {
 
-    val config = MockProviderConfig.createDefault(PactConfig(PactSpecVersion.V2))
+    val config = MockProviderConfig.createDefault(PactSpecVersion.V2)
     val server = Server.http(config.port, config.hostname).handler(new Plan with SynchronousExecution with ServerErrorResponse {
       def intent: Plan.Intent = {
         case req => {

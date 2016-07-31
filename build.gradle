@@ -41,15 +41,18 @@ subprojects {
 
     dependencies {
       if (project.hasProperty('scalaVersion')) {
-          compile 'org.slf4j:slf4j-api:1.7.7', "org.scala-lang:scala-library:${project.scalaFullVersion}",
+          compile "org.slf4j:slf4j-api:${project.slf4jVersion}",
+            "org.scala-lang:scala-library:${project.scalaFullVersion}",
             "org.scala-lang:scala-compiler:${project.scalaFullVersion}",
-            "com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.1.0"
+            "com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.4.0"
 
           testCompile "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}",
             "org.specs2:specs2-junit_${project.scalaVersion}:${project.specs2Version}"
       }
 
-      testCompile 'org.hamcrest:hamcrest-all:1.3', 'org.mockito:mockito-core:1.9.5', 'junit:junit:4.12'
+      testCompile 'org.hamcrest:hamcrest-all:1.3',
+        'org.mockito:mockito-core:1.10.19',
+        "junit:junit:${project.junitVersion}"
     }
 
     group = 'au.com.dius'
@@ -58,12 +61,9 @@ subprojects {
     sourceCompatibility = '1.8'
 
     tasks.withType(ScalaCompile) {
-        scalaCompileOptions.useCompileDaemon = false
-        scalaCompileOptions.useAnt = false
         scalaCompileOptions.additionalParameters = ['-target:jvm-1.8']
         configure(scalaCompileOptions.forkOptions) {
           memoryMaximumSize = '256m'
-          jvmArgs = ['-XX:MaxPermSize=512m']
         }
     }
 

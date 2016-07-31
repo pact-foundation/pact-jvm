@@ -1,8 +1,8 @@
 package au.com.dius.pact.server
 
-import com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.consumer.DefaultMockProvider
 import au.com.dius.pact.model._
+import com.typesafe.scalalogging.StrictLogging
 
 import scala.collection.JavaConversions
 
@@ -11,7 +11,7 @@ object Create extends StrictLogging {
   def create(state: String, requestBody: String, oldState: ServerState, config: Config): Result = {
     val pact = PactReader.loadPact(requestBody).asInstanceOf[RequestResponsePact]
     val mockConfig: MockProviderConfig = MockProviderConfig.create(config.portLowerBound, config.portUpperBound,
-      PactConfig(PactSpecVersion.fromInt(config.pactVersion))).copy(hostname = config.host)
+      PactSpecVersion.fromInt(config.pactVersion)).copy(hostname = config.host)
     val server = DefaultMockProvider.apply(mockConfig)
     val port = server.config.port
     val entry = port -> server

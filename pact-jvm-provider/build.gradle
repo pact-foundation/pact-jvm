@@ -1,8 +1,8 @@
 dependencies {
     compile project(":pact-jvm-model_${project.scalaVersion}"),
         project(":pact-jvm-matchers_${project.scalaVersion}"),
-        "org.scalatest:scalatest_${project.scalaVersion}:2.2.1",
-        'commons-io:commons-io:2.4',
+        "org.scalatest:scalatest_${project.scalaVersion}:2.2.6",
+        'commons-io:commons-io:2.5',
         "org.codehaus.groovy:groovy-all:${project.groovyVersion}",
         "org.fusesource.jansi:jansi:${project.jansiVersion}",
         "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}",
@@ -13,7 +13,7 @@ dependencies {
     testCompile ('org.spockframework:spock-core:1.0-groovy-2.4') {
         exclude group: 'org.codehaus.groovy'
     }
-    testCompile 'cglib:cglib:3.2.0'
+    testCompile "cglib:cglib:${project.cglibVersion}"
 }
 
 compileTestGroovy.dependsOn 'compileTestScala'
