@@ -1,6 +1,7 @@
 package au.com.dius.pact.model
 
 import groovy.json.JsonSlurper
+import scala.collection.JavaConversions
 import spock.lang.Specification
 
 class PactSerialiserSpec extends Specification {
@@ -59,9 +60,11 @@ class PactSerialiserSpec extends Specification {
     def sw = new StringWriter()
     def testPactJson = loadTestFile('test_pact.json').text.trim()
     def testPact = new JsonSlurper().parseText(testPactJson)
+    def pact = new RequestResponsePact(ModelFixtures.provider(), ModelFixtures.consumer(),
+      JavaConversions.seqAsJavaList(ModelFixtures.interactionsWithLowerCaseMethods().toSeq()))
 
     when:
-    PactWriter.writePact(ModelFixtures.pactWithLowercaseMethods(), new PrintWriter(sw), PactSpecVersion.V2)
+    PactWriter.writePact(pact, new PrintWriter(sw), PactSpecVersion.V2)
     def actualPactJson = sw.toString().trim()
     def actualPact = new JsonSlurper().parseText(actualPactJson)
 
