@@ -51,6 +51,13 @@ public class ContractTest {
       LOGGER.info("Now service in default state");
     }
 
+    @State("state 2")
+    public void toSecondState() {
+        // Prepare service before interaction that require "state 2" state
+        // ...
+        LOGGER.info("Now service in 'state 2' state");
+    }
+
     @TargetRequestFilter
     public void exampleRequestFilter(HttpRequest request) {
       LOGGER.info("exampleRequestFilter called: " + request);

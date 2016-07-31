@@ -3,10 +3,25 @@
     "name" : "myAwesomeService"
   },
   "consumer" : {
-    "name" : "anotherService2"
+    "name" : "anotherService3"
   },
   "interactions" : [ {
-    "providerState": "default",
+    "providerStates": [
+      {
+        "name": "default",
+        "params": {
+          "a": "b",
+          "c": 1
+        }
+      },
+      {
+        "name": "state 2",
+        "params": {
+          "a": "c",
+          "c": 100
+        }
+      }
+    ],
     "description" : "Get data",
     "request" : {
       "method" : "GET",
@@ -18,7 +33,7 @@
   } ],
   "metadata" : {
     "pact-specification" : {
-      "version" : "2.0.0"
+      "version" : "3.0.0"
     },
     "pact-jvm" : {
       "version" : "3.1.1"

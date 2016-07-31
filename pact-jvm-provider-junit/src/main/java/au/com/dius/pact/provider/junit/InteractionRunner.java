@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit;
 
+import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.model.RequestResponsePact;
 import au.com.dius.pact.provider.junit.target.Target;
@@ -30,6 +31,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_METHOD_VALIDATOR;
 import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_VALIDATOR;
@@ -188,15 +190,14 @@ class InteractionRunner extends Runner {
     }
 
     protected Statement withStateChanges(final RequestResponseInteraction interaction, final Object target, final Statement statement) {
-        if (interaction.getProviderState() != null && !interaction.getProviderState().isEmpty()) {
-            final String state = interaction.getProviderState();
-            final List<FrameworkMethod> onStateChange = new ArrayList<FrameworkMethod>();
-            for (FrameworkMethod ann: testClass.getAnnotatedMethods(State.class)) {
-                if (ArrayUtils.contains(ann.getAnnotation(State.class).value(), state)) {
-                    onStateChange.add(ann);
-                }
-            }
-            return onStateChange.isEmpty() ? statement : new RunBefores(statement, onStateChange, target);
+        if (!interaction.getProviderStates().isEmpty()) {
+          final List<FrameworkMethod> onStateChange = new ArrayList<>();
+          for (ProviderState state: interaction.getProviderStates()) {
+            onStateChange.addAll(testClass.getAnnotatedMethods(State.class)
+              .stream().filter(ann -> ArrayUtils.contains(ann.getAnnotation(State.class).value(), state.getName()))
+              .collect(Collectors.toList()));
+          }
+          return onStateChange.isEmpty() ? statement : new RunBefores(statement, onStateChange, target);
         } else {
             return statement;
         }
