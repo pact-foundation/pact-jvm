@@ -53,7 +53,7 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '3.3.0-beta.0'
+    version = '3.3.0-beta.1'
     targetCompatibility = '1.8'
     sourceCompatibility = '1.8'
 
