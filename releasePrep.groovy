@@ -7,7 +7,7 @@ def executeOnShell(String command, Closure closure = null) {
 }
 
 def executeOnShell(String command, File workingDir, Closure closure = null) {
-  println command
+  println "==>: $command"
   def process = new ProcessBuilder(['sh', '-c', command])
     .directory(workingDir)
     .redirectErrorStream(true)
@@ -34,6 +34,38 @@ void ask(String prompt, String defaultValue = 'Y', Closure cl) {
 }
 
 executeOnShell 'git pull'
+
+def javaVersion
+executeOnShell("./gradlew --version 2>/dev/null | awk '/^JVM:/ { print \$2 }'") {
+  javaVersion = Version.valueOf(it.trim().replace('_', '-b'))
+}
+if (!javaVersion?.satisfies('<1.7.0')) {
+  ask("You are building against Java $javaVersion. Do you want to exit?: [Y]") {
+    System.exit(1)
+  }
+}
+
+def javaOpts = System.getenv('JAVA_OPTS')
+if (!javaOpts?.contains('-XX:MaxPermSize=')) {
+  ask("No permgen parameter is set in JAVA_OPTS. Do you want to exit?: [Y]") {
+    System.exit(1)
+  }
+}
+
+def mavenVersion
+executeOnShell("mvn --version 2>/dev/null | awk '/^Apache Maven/ { print \$3 }'") {
+  mavenVersion = Version.valueOf(it.trim())
+}
+if (mavenVersion == null) {
+  ask("You are building with Maven that does not support JDK6. Do you want to exit?: [Y]") {
+    System.exit(1)
+  }
+}
+else if (!mavenVersion.satisfies('<3.3.0')) {
+  ask("You are building with Maven $mavenVersion. Do you want to exit?: [Y]") {
+    System.exit(1)
+  }
+}
 
 ask('Merge from master?: [Y]') {
   executeOnShell 'git merge master'
