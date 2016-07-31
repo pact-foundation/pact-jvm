@@ -7,7 +7,7 @@ def executeOnShell(String command, Closure closure = null) {
 }
 
 def executeOnShell(String command, File workingDir, Closure closure = null) {
-  println command
+  println "==>: $command"
   def process = new ProcessBuilder(['sh', '-c', command])
     .directory(workingDir)
     .redirectErrorStream(true)
@@ -34,6 +34,16 @@ void ask(String prompt, String defaultValue = 'Y', Closure cl) {
 }
 
 executeOnShell 'git pull'
+
+def javaVersion
+executeOnShell("./gradlew --version 2>/dev/null | awk '/^JVM:/ { print \$2 }'") {
+  javaVersion = Version.valueOf(it.trim().replace('_', '+b'))
+}
+if (!javaVersion?.satisfies('>=1.8.0')) {
+  ask("You are building against Java $javaVersion. Do you want to exit?: [Y]") {
+    System.exit(1)
+  }
+}
 
 ask('Execute Build?: [Y]') {
   executeOnShell './gradlew clean check install'
