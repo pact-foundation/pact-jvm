@@ -6,7 +6,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'com.gradle.publish:plugin-publish-plugin:0.9.3'
+    classpath 'com.gradle.publish:plugin-publish-plugin:0.9.5'
   }
 }
 
@@ -25,7 +25,7 @@ dependencies {
   testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
     exclude group: 'org.codehaus.groovy'
   }
-  testCompile 'cglib:cglib:3.2.1'
+  testCompile "cglib:cglib:${project.cglibVersion}"
 }
 
 publishing {
