@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-groovy_2.11`
-* version-id = `2.3.x` or `3.1.x`
+* version-id = `2.4.x` or `3.2.x`
 
 ##Usage
 
@@ -19,7 +19,7 @@ to define your pacts. For a full example, have a look at the example JUnit `Exam
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.1.0'
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.2.11'
     }
 
 Then create an instance of the `PactBuilder` in your test.
@@ -107,7 +107,13 @@ Sets the port that the mock server will run on. If not supplied, a random port w
 #### given(String providerState)
 
 Defines a state that the provider needs to be in for the request to succeed. For more info, see
-https://github.com/realestate-com-au/pact/wiki/Provider-states
+https://github.com/realestate-com-au/pact/wiki/Provider-states. Can be called multiple times.
+
+#### given(String providerState, Map params)
+
+Defines a state that the provider needs to be in for the request to succeed. For more info, see
+https://github.com/realestate-com-au/pact/wiki/Provider-states. Can be called multiple times, and the params
+map can contain the data required for the state.
 
 #### uponReceiving(String requestDescription)
 
@@ -373,6 +379,7 @@ Version 3 of the pact specification changes the format of pact files in the foll
 * Query parameters are stored in a map form and are un-encoded (see [#66](https://github.com/DiUS/pact-jvm/issues/66)
 and [#97](https://github.com/DiUS/pact-jvm/issues/97) for information on what this can cause).
 * Introduces a new message pact format for testing interactions via a message queue.
+* Multiple provider states can be defined with data parameters.
 
 ## Generating V3 spec pact files (3.1.0+, 2.3.0+)
 

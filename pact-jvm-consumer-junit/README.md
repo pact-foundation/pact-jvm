@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-junit_2.11`
-* version-id = `3.0.x`
+* version-id = `3.2.x`
 
 ##Usage
 
@@ -527,6 +527,7 @@ Version 3 of the pact specification changes the format of pact files in the foll
 * Query parameters are stored in a map form and are un-encoded (see [#66](https://github.com/DiUS/pact-jvm/issues/66)
 and [#97](https://github.com/DiUS/pact-jvm/issues/97) for information on what this can cause).
 * Introduces a new message pact format for testing interactions via a message queue.
+* Multiple provider states can be defined with data parameters.
 
 ## Generating V3 spec pact files (3.1.0+, 2.3.0+)
 

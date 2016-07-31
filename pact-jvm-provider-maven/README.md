@@ -17,7 +17,7 @@ The Maven plugin provides a `verify` goal which will verify all configured pacts
       <plugin>
         <groupId>au.com.dius</groupId>
         <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-        <version>3.2.10</version>
+        <version>3.2.11</version>
       </plugin>
       [...]
     </plugins>
@@ -33,7 +33,7 @@ You define all the providers and consumers within the configuration element of t
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.2.10</version>
+    <version>3.2.11</version>
     <configuration>
       <serviceProviders>
         <!-- You can define as many as you need, but each must have a unique name -->
@@ -71,7 +71,7 @@ provider and define a consumer for each pact file in the directory. Consumer nam
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.2.10</version>
+    <version>3.2.11</version>
     <configuration>
       <serviceProviders>
         <!-- You can define as many as you need, but each must have a unique name -->
@@ -98,7 +98,7 @@ For providers that are running on SSL with self-signed certificates, you need to
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.2.10</version>
+    <version>3.2.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -119,7 +119,7 @@ For environments that are running their own certificate chains:
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.2.10</version>
+    <version>3.2.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -148,7 +148,7 @@ bound to a variable named `request` prior to it being executed.
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.2.10</version>
+    <version>3.2.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -182,7 +182,7 @@ For example:
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.2.10</version>
+    <version>3.2.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -226,7 +226,7 @@ Example in the configuration section:
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.2.10</version>
+    <version>3.2.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -258,7 +258,7 @@ These values can be set at the provider level, or for a specific consumer. Consu
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.2.10</version>
+    <version>3.2.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -303,7 +303,7 @@ For example:
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.2.10</version>
+    <version>3.2.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -337,7 +337,7 @@ Add something like the following to your maven pom file:
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.2.10</version>
+    <version>3.2.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -399,7 +399,7 @@ By default, the test classpath is scanned for annotated methods. You can overrid
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.2.10</version>
+    <version>3.2.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>

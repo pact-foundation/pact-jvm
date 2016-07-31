@@ -17,7 +17,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'au.com.dius:pact-jvm-provider-gradle_2.10:3.2.4'
+        classpath 'au.com.dius:pact-jvm-provider-gradle_2.10:3.2.11'
     }
 }
 ```
@@ -32,7 +32,7 @@ apply plugin: 'au.com.dius.pact'
 
 ```groovy
 plugins {
-  id "au.com.dius.pact" version "3.2.4"
+  id "au.com.dius.pact" version "3.2.11"
 }
 ```
 
