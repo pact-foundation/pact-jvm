@@ -27,7 +27,7 @@ object MockProviderConfig {
   val portLowerBound = 20000
   val portUpperBound = 40000
 
-  def createDefault() : MockProviderConfig = createDefault("localhost", PactSpecVersion.V2)
+  def createDefault() : MockProviderConfig = createDefault("localhost", PactSpecVersion.V3)
   def createDefault(pactVersion: PactSpecVersion) : MockProviderConfig = createDefault("localhost", pactVersion)
   def createDefault(host: String, pactVersion: PactSpecVersion) =
     MockHttpProviderConfig(randomPort(portLowerBound, portUpperBound).get, host, pactVersion)

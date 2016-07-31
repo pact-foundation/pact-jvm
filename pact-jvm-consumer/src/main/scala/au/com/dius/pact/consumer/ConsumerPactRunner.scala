@@ -16,7 +16,7 @@ object ConsumerPactRunner {
     VerificationResult(tryResults)
   }
   
-  def runAndWritePact[T](pact: Pact, pactVersion: PactSpecVersion = PactSpecVersion.V2)(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
+  def runAndWritePact[T](pact: Pact, pactVersion: PactSpecVersion = PactSpecVersion.V3)(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
     val server = DefaultMockProvider.withDefaultConfig(pactVersion)
     new ConsumerPactRunner(server).runAndWritePact(pact, pactVersion)(userCode, userVerification)
   }

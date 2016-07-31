@@ -25,7 +25,7 @@ public class PactProviderHttpsTest {
 
     @Rule
     public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", "localhost", 8443, true,
-      PactSpecVersion.V2, this);
+      PactSpecVersion.V3, this);
 
     @Pact(provider="test_provider", consumer="test_consumer")
     public PactFragment createFragment(PactDslWithProvider builder) {

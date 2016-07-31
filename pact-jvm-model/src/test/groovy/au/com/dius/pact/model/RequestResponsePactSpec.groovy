@@ -28,7 +28,7 @@ class RequestResponsePactSpec extends Specification {
     ])
 
     when:
-    def result = pact.toMap(PactSpecVersion.V2)
+    def result = pact.toMap(PactSpecVersion.V3)
 
     then:
     result.interactions.first().request.body == '<?xml version="1.0"><root/>'
@@ -44,7 +44,7 @@ class RequestResponsePactSpec extends Specification {
     ])
 
     when:
-    def result = pact.toMap(PactSpecVersion.V2)
+    def result = pact.toMap(PactSpecVersion.V3)
 
     then:
     result.interactions.first().response.body.toString() == '{value=1234.0}'

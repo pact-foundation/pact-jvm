@@ -11,10 +11,10 @@ enum PactSpecVersion {
         switch (version) {
             case 1:
                 return V1
-            case 3:
-                return V3
+            case 2:
+                return V2
         }
 
-        V2
+        V3
     }
 }

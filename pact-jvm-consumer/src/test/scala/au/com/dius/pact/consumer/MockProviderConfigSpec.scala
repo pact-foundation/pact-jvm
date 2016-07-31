@@ -9,7 +9,7 @@ import org.specs2.runner.JUnitRunner
 class MockProviderConfigSpec extends Specification {
   "port server config" should {
     "select a random port" in {
-      val config = PactSpecVersion.V2
+      val config = PactSpecVersion.V3
       MockProviderConfig.createDefault(config).port must beGreaterThanOrEqualTo(MockProviderConfig.portLowerBound)
       MockProviderConfig.createDefault(config).port must beLessThanOrEqualTo(MockProviderConfig.portUpperBound)
     }

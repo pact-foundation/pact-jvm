@@ -218,7 +218,7 @@ class PactBuilder extends BaseBuilder {
     PactFragment fragment = fragment()
 
     MockProviderConfig config
-    def pactVersion = options.specificationVersion ?: PactSpecVersion.V2
+    def pactVersion = options.specificationVersion ?: PactSpecVersion.V3
     if (port == null) {
       config = MockProviderConfig$.MODULE$.createDefault(pactVersion)
     } else {

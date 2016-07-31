@@ -28,7 +28,7 @@ class MultipleExamplesPactSpec extends Specification with PactSpec with AroundEa
     .matching(path = "/", method = "OPTION")
     .willRespondWith(headers = Map("Option" -> "Value-X"))
     .asPactFragment()
-  val providerConfig = MockProviderConfig.createDefault(PactSpecVersion.V2)
+  val providerConfig = MockProviderConfig.createDefault(PactSpecVersion.V3)
 
   pact.description >> {
     "GET returns a 200 status and empty body" >> {

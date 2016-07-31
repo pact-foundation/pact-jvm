@@ -75,7 +75,7 @@ public class PactProviderRule extends ExternalResource {
      * @param target Target test to apply this rule to.
      */
     public PactProviderRule(String provider, String host, Integer port, Object target) {
-        this(provider, host, port, PactSpecVersion.V2, target);
+        this(provider, host, port, PactSpecVersion.V3, target);
     }
 
     /**
@@ -84,7 +84,7 @@ public class PactProviderRule extends ExternalResource {
      * @param target Target test to apply this rule to.
      */
     public PactProviderRule(String provider, Object target) {
-        this(provider, null, null, PactSpecVersion.V2, target);
+        this(provider, null, null, PactSpecVersion.V3, target);
     }
 
     /**

@@ -36,17 +36,17 @@ public class PactRule extends ExternalResource {
     private final MockProviderConfig config;
 
     public PactRule(String host, int port, Object target) {
-        config = MockProviderConfig$.MODULE$.apply(port, host, PactSpecVersion.V2);
+        config = MockProviderConfig$.MODULE$.apply(port, host, PactSpecVersion.V3);
         this.target = target;
     }
 
     public PactRule(String host, Object target) {
-        config = MockProviderConfig$.MODULE$.createDefault(host, PactSpecVersion.V2);
+        config = MockProviderConfig$.MODULE$.createDefault(host, PactSpecVersion.V3);
         this.target = target;
     }
 
     public PactRule(Object target) {
-        config = MockProviderConfig$.MODULE$.createDefault(PactSpecVersion.V2);
+        config = MockProviderConfig$.MODULE$.createDefault(PactSpecVersion.V3);
         this.target = target;
     }
 

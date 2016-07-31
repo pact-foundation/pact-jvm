@@ -41,7 +41,7 @@ class PactSerialiserSpec extends Specification {
     def testPact = new JsonSlurper().parseText(testPactJson)
 
     when:
-    PactWriter.writePact(ModelFixtures.pact(), new PrintWriter(sw), PactSpecVersion.V2)
+    PactWriter.writePact(ModelFixtures.pact(), new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
     def actualPact = new JsonSlurper().parseText(actualPactJson)
 
@@ -98,7 +98,7 @@ class PactSerialiserSpec extends Specification {
     def testPact = new JsonSlurper().parseText(testPactJson)
 
     when:
-    PactWriter.writePact(ModelFixtures.pactWithLowercaseMethods(), new PrintWriter(sw), PactSpecVersion.V2)
+    PactWriter.writePact(ModelFixtures.pactWithLowercaseMethods(), new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
     def actualPact = new JsonSlurper().parseText(actualPactJson)
 

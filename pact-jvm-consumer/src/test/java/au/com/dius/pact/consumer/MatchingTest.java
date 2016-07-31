@@ -120,7 +120,7 @@ public class MatchingTest {
     }
 
     private void runTest(PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
-        MockProviderConfig config = MockProviderConfig$.MODULE$.createDefault(PactSpecVersion.V2);
+        MockProviderConfig config = MockProviderConfig$.MODULE$.createDefault(PactSpecVersion.V3);
         VerificationResult result = pactFragment.toFragment().runConsumer(config, new TestRun() {
             @Override
             public void run(MockProviderConfig config) throws IOException {

@@ -49,7 +49,7 @@ class RequestResponseInteractionSpec extends Specification {
     when:
     interaction.providerStates = []
     def mapV3 = interaction.toMap()
-    def mapV2 = interaction.toMap(PactSpecVersion.V2)
+    def mapV2 = interaction.toMap(PactSpecVersion.V3)
 
     then:
     !mapV3.containsKey('providerStates')

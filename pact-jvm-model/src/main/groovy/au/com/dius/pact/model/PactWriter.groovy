@@ -15,7 +15,7 @@ class PactWriter {
    * @param writer Writer to write out with
    * @param pactSpecVersion Pact version to use to control writing
    */
-  static writePact(Pact pact, PrintWriter writer, PactSpecVersion pactSpecVersion = PactSpecVersion.V2) {
+  static writePact(Pact pact, PrintWriter writer, PactSpecVersion pactSpecVersion = PactSpecVersion.V3) {
     pact.sortInteractions()
     Map jsonData = pact.toMap(pactSpecVersion)
     writer.print(JsonOutput.prettyPrint(JsonOutput.toJson(jsonData)))
