@@ -6,13 +6,12 @@ import scala.collection.JavaConversions
 import scala.collection.JavaConverters._
 
 object Fixtures {
-  import HttpMethod._
 
   val provider = new Provider("test_provider")
   val consumer = new Consumer("test_consumer")
 
 
-  val request = new Request(Get, "/", PactReader.queryStringToMap("q=p&q=p2&r=s"),
+  val request = new Request("GET", "/", PactReader.queryStringToMap("q=p&q=p2&r=s"),
     JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheadervalue")),
     OptionalBody.body("{\"test\": true}"))
 

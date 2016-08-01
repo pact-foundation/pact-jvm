@@ -1,5 +1,6 @@
 package au.com.dius.pact.matchers
 
+import au.com.dius.pact.matchers.util.JsonUtils
 import au.com.dius.pact.model._
 import com.typesafe.scalalogging.StrictLogging
 
@@ -15,7 +16,7 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
         Some(s"Expected body '${expected.getBody.getValue}' but was missing")))
       case (_, _) => compare(Seq("$", "body"), JsonUtils.parseJsonString(expected.getBody.getValue),
         JsonUtils.parseJsonString(actual.getBody.getValue), diffConfig,
-        Option.apply(CollectionUtils.javaMMapToScalaMMap(expected.getMatchingRules)))
+        Option.apply(au.com.dius.pact.matchers.util.CollectionUtils.javaMMapToScalaMMap(expected.getMatchingRules)))
     }
   }
 
