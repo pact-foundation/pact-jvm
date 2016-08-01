@@ -1,7 +1,8 @@
 package au.com.dius.pact.provider.sbtsupport
 
-import au.com.dius.pact.model.unfiltered.Conversions
-import au.com.dius.pact.model.{CollectionUtils, Request, Response}
+import au.com.dius.pact.provider.unfiltered.Conversions
+import au.com.dius.pact.model.{Request, Response}
+import au.com.dius.pact.provider.CollectionUtils
 import com.typesafe.scalalogging.StrictLogging
 import com.ning.http.client.FluentStringsMap
 import dispatch.url

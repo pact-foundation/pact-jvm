@@ -34,5 +34,3 @@ class UnfilteredMockProvider(val config: MockProviderConfig) extends StatefulMoc
   
   def stop(): Unit = server.stop()
 }
-
-

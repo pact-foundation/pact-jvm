@@ -4,7 +4,6 @@ import au.com.dius.pact.model.unfiltered.Conversions
 import au.com.dius.pact.model.{MockHttpsProviderConfig, Request, Response}
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.handler.codec.{http => netty}
-import io.netty.handler.ssl.util.SelfSignedCertificate
 import unfiltered.netty.{SslContextProvider, cycle => unettyc}
 import unfiltered.{netty => unetty, request => ureq, response => uresp}
 
@@ -34,5 +33,4 @@ class UnfilteredHttpsMockProvider(val config: MockHttpsProviderConfig) extends S
   
   def stop(): Unit = server.stop()
 }
-
 
