@@ -1,6 +1,7 @@
 package au.com.dius.pact.server
 
 import au.com.dius.pact.consumer._
+import au.com.dius.pact.matchers.util.JsonUtils
 import au.com.dius.pact.model._
 
 import scala.collection.JavaConversions

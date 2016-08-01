@@ -1,4 +1,4 @@
-package au.com.dius.pact.model
+package au.com.dius.pact.matchers.util
 
 import groovy.json.JsonSlurper
 

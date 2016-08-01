@@ -4,9 +4,6 @@ import scala.collection.JavaConversions
 
 object ModelFixtures {
 
-  val provider = new Provider("test_provider")
-  val consumer = new Consumer("test_consumer")
-
   val request = new Request("GET", "/", PactReader.queryStringToMap("q=p&q=p2&r=s"),
     JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheadervalue")),
      OptionalBody.body("{\"test\":true}"))
@@ -40,19 +37,4 @@ object ModelFixtures {
     OptionalBody.body("{\"test\":true}"))
 
   val interaction = new RequestResponseInteraction("test interaction", "test state", request, response)
-
-  val interactionsWithMatchers = List(new RequestResponseInteraction("test interaction with matchers", "test state",
-    requestWithMatchers, responseWithMatchers))
-
-  val interactionsWithNoBodies = List(new RequestResponseInteraction("test interaction with no bodies", "test state",
-    requestNoBody, responseNoBody))
-
-  val interactionsWithDecodedQuery = List(new RequestResponseInteraction("test interaction", "test state",
-    requestDecodedQuery, response))
-
-  val interactionsWithLowerCaseMethods = List(new RequestResponseInteraction("test interaction", "test state",
-    requestLowerCaseMethod, response))
-
-  val interactions = List(interaction)
-
 }

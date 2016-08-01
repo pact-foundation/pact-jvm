@@ -49,7 +49,8 @@ object RequestMatching extends StrictLogging {
     (matchMethod(expected.getMethod, actual.getMethod)
       ++ matchPath(expected, actual)
       ++ matchQuery(expected, actual)
-      ++ matchCookie(CollectionUtils.toOptionalList(expected.cookie), CollectionUtils.toOptionalList(actual.cookie))
+      ++ matchCookie(au.com.dius.pact.matchers.util.CollectionUtils.toOptionalList(expected.cookie),
+      au.com.dius.pact.matchers.util.CollectionUtils.toOptionalList(actual.cookie))
       ++ matchRequestHeaders(expected, actual)
       ++ matchBody(expected, actual, diffConfig)).toSeq
   }
