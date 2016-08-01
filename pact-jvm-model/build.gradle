@@ -1,19 +1,20 @@
 dependencies {
-  compile 'org.json:json:20140107',
+  compile "org.json:json:${project.jsonVersion}",
     "org.codehaus.groovy:groovy-all:${project.groovyVersion}",
-    "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.8.2",
-    "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.1",
-    "org.apache.httpcomponents:httpclient:$httpClientVersion"
+    "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.8.4",
+    "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.3",
+    "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
   compile project(":pact-jvm-logging_${project.scalaVersion}")
   compile 'com.github.zafarkhaja:java-semver:0.9.0'
-  compile "org.codehaus.groovy.modules.http-builder:http-builder:$httpBuilderVersion"
+  compile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
 
-  testCompile "org.specs2:specs2-mock_${project.scalaVersion}:3.6.4"
+  testCompile "org.specs2:specs2-mock_${project.scalaVersion}:3.8.4"
   testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
     exclude group: 'org.codehaus.groovy'
   }
-  testCompile 'cglib:cglib-nodep:3.1', 'org.objenesis:objenesis:2.1'
-  testCompile 'ch.qos.logback:logback-classic:1.1.2'
+  testCompile "cglib:cglib-nodep:${project.cglibVersion}",
+    'org.objenesis:objenesis:2.4'
+  testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }
 
 compileTestGroovy.dependsOn compileTestScala

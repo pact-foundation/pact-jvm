@@ -1,17 +1,17 @@
 dependencies {
     compile project(":pact-jvm-model_${project.scalaVersion}"),
       project(":pact-jvm-provider_${project.scalaVersion}"),
-      'com.github.rholder:guava-retrying:1.0.6',
-      "org.apache.httpcomponents:fluent-hc:$httpClientVersion",
-      "org.apache.httpcomponents:httpclient:$httpClientVersion",
-      'junit:junit:4.12',
-      "org.apache.commons:commons-lang3:$commonsLang3Version",
-      'com.fasterxml.jackson.core:jackson-databind:2.6.3'
+      'com.github.rholder:guava-retrying:2.0.0',
+      "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}",
+      "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
+      "junit:junit:${project.junitVersion}",
+      "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
+      "com.fasterxml.jackson.core:jackson-databind:${project.jacksonDatabindVersion}"
 
-    testCompile 'com.github.rest-driver:rest-client-driver:1.1.36'
-    testCompile 'ch.qos.logback:logback-classic:1.1.2'
+    testCompile 'com.github.rest-driver:rest-client-driver:1.1.45'
+    testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile ('org.spockframework:spock-core:1.0-groovy-2.4') {
         exclude group: 'org.codehaus.groovy'
     }
-    testCompile 'cglib:cglib:3.2.0'
+    testCompile "cglib:cglib:${project.cglibVersion}"
 }

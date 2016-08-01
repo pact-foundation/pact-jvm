@@ -2,10 +2,8 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.MockHttpsProviderConfig;
-import au.com.dius.pact.model.MockHttpsProviderConfig$;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.MockProviderConfig$;
-import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
 import au.com.dius.pact.util.Optional;
@@ -41,16 +39,16 @@ public class PactProviderRule extends ExternalResource {
      * @param provider Provider name to mock
      * @param host Host to bind to. Defaults to localhost
      * @param port Port to bind to. Defaults to a random port.
-     * @param pactConfig Pact configuration
+     * @param pactVersion Pact specification version
      * @param target Target test to apply this rule to.
      */
-    public PactProviderRule(String provider, String host, Integer port, PactConfig pactConfig, Object target) {
+    public PactProviderRule(String provider, String host, Integer port, PactSpecVersion pactVersion, Object target) {
         this.provider = provider;
         this.target = target;
         if (host == null && port == null) {
-            config = MockProviderConfig$.MODULE$.createDefault(pactConfig);
+            config = MockProviderConfig$.MODULE$.createDefault(pactVersion);
         } else {
-            config = MockProviderConfig$.MODULE$.apply(port, host, pactConfig);
+            config = MockProviderConfig$.MODULE$.apply(port, host, pactVersion);
         }
     }
 
@@ -60,14 +58,14 @@ public class PactProviderRule extends ExternalResource {
      * @param host Host to bind to. Defaults to localhost
      * @param port Port to bind to. Defaults to a random port.
      * @param https Boolean flag to control starting HTTPS or HTTP mock server
-     * @param pactConfig Pact configuration
+     * @param pactVersion Pact specification version
      * @param target Target test to apply this rule to.
      */
-    public PactProviderRule(String provider, String host, Integer port, boolean https, PactConfig pactConfig,
+    public PactProviderRule(String provider, String host, Integer port, boolean https, PactSpecVersion pactVersion,
                             Object target) {
-      this(provider, host, port, pactConfig, target);
+      this(provider, host, port, pactVersion, target);
       if (https) {
-        config = MockHttpsProviderConfig$.MODULE$.apply(port, host, pactConfig);
+        config = new MockHttpsProviderConfig(port, host, pactVersion);
       }
     }
 
@@ -79,7 +77,7 @@ public class PactProviderRule extends ExternalResource {
      * @param target Target test to apply this rule to.
      */
     public PactProviderRule(String provider, String host, Integer port, Object target) {
-        this(provider, host, port, new PactConfig(PactSpecVersion.V2), target);
+        this(provider, host, port, PactSpecVersion.V2, target);
     }
 
     /**
@@ -88,7 +86,7 @@ public class PactProviderRule extends ExternalResource {
      * @param target Target test to apply this rule to.
      */
     public PactProviderRule(String provider, Object target) {
-        this(provider, null, null, new PactConfig(PactSpecVersion.V2), target);
+        this(provider, null, null, PactSpecVersion.V2, target);
     }
 
     /**
@@ -97,7 +95,7 @@ public class PactProviderRule extends ExternalResource {
      * @param target Target test to apply this rule to.
      */
     public PactProviderRule(String provider, PactSpecVersion pactSpecVersion, Object target) {
-        this(provider, null, null, new PactConfig(pactSpecVersion), target);
+        this(provider, null, null, pactSpecVersion, target);
     }
 
     public MockProviderConfig getConfig() {

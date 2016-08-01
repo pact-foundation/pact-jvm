@@ -2,7 +2,6 @@ package au.com.dius.pact.model
 
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.{ConsumerTestVerification, VerificationResult}
-import au.com.dius.pact.model.HttpMethod._
 import org.json.JSONObject
 
 object PactFragmentBuilder {
@@ -33,7 +32,7 @@ object PactFragmentBuilder {
   }
 
   case class DescribingRequest(consumer: Consumer, provider: Provider, state: Option[String], description: String,
-                               builder: CanBuildPactFragment.Builder = CanBuildPactFragment.firstBuild) extends Optionals {
+                               builder: CanBuildPactFragment.Builder = CanBuildPactFragment.firstBuild) {
     import scala.collection.JavaConversions._
 
     /**
@@ -46,7 +45,7 @@ object PactFragmentBuilder {
     }
 
     def matching(path: String,
-                 method: String = Get,
+                 method: String = "GET",
                  query: String = "",
                  headers: Map[String, String] = Map(),
                  body: String = "",

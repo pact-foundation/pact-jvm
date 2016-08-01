@@ -18,7 +18,7 @@ class XmlBodyMatcher extends BodyMatcher with StrictLogging {
       case (OptionalBody.State.EMPTY, OptionalBody.State.EMPTY) => List()
       case (_, _) => compareNode(Seq("$", "body"), parse(expected.getBody.orElse("")),
         parse(actual.getBody.orElse("")), diffConfig,
-        Option.apply(CollectionUtils.javaMMapToScalaMMap(expected.getMatchingRules)))
+        Option.apply(au.com.dius.pact.matchers.util.CollectionUtils.javaMMapToScalaMMap(expected.getMatchingRules)))
     }
   }
 

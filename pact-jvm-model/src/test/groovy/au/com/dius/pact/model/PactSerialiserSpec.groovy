@@ -16,7 +16,8 @@ class PactSerialiserSpec extends Specification {
     def testPact = new JsonSlurper().parseText(testPactJson)
 
     when:
-    PactWriter.writePact(ModelFixtures.pact(), new PrintWriter(sw), PactSpecVersion.V2)
+    PactWriter.writePact(new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [ModelFixtures.interaction()]), new PrintWriter(sw), PactSpecVersion.V2)
     def actualPactJson = sw.toString().trim()
     def actualPact = new JsonSlurper().parseText(actualPactJson)
 
@@ -31,7 +32,8 @@ class PactSerialiserSpec extends Specification {
     def testPact = new JsonSlurper().parseText(testPactJson)
 
     when:
-    PactWriter.writePact(ModelFixtures.pact(), new PrintWriter(sw), PactSpecVersion.V3)
+    PactWriter.writePact(new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [ModelFixtures.interaction()]), new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
     def actualPact = new JsonSlurper().parseText(actualPactJson)
 
@@ -46,7 +48,10 @@ class PactSerialiserSpec extends Specification {
     def testPact = new JsonSlurper().parseText(testPactJson)
 
     when:
-    PactWriter.writePact(ModelFixtures.pactWithMatchers(), new PrintWriter(sw), PactSpecVersion.V3)
+    PactWriter.writePact(new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [new RequestResponseInteraction('test interaction with matchers', 'test state',
+        ModelFixtures.requestWithMatchers(), ModelFixtures.responseWithMatchers())]),
+      new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
     def actualPact = new JsonSlurper().parseText(actualPactJson)
 
@@ -59,9 +64,12 @@ class PactSerialiserSpec extends Specification {
     def sw = new StringWriter()
     def testPactJson = loadTestFile('test_pact.json').text.trim()
     def testPact = new JsonSlurper().parseText(testPactJson)
+    def pact = new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [new RequestResponseInteraction('test interaction', 'test state', ModelFixtures.requestLowerCaseMethod(),
+        ModelFixtures.response())])
 
     when:
-    PactWriter.writePact(ModelFixtures.pactWithLowercaseMethods(), new PrintWriter(sw), PactSpecVersion.V2)
+    PactWriter.writePact(pact, new PrintWriter(sw), PactSpecVersion.V2)
     def actualPactJson = sw.toString().trim()
     def actualPact = new JsonSlurper().parseText(actualPactJson)
 
@@ -71,7 +79,8 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must de-serialise pact'() {
     expect:
-    pact == ModelFixtures.pact()
+    pact == new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [ModelFixtures.interaction()])
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact.json'))
@@ -79,7 +88,8 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must de-serialise V3 pact'() {
     expect:
-    pact == ModelFixtures.pact()
+    pact == new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [ModelFixtures.interaction()])
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact_v3.json'))
@@ -87,7 +97,9 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must de-serialise pact with matchers'() {
     expect:
-    pact == ModelFixtures.pactWithMatchers()
+    pact == new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [new RequestResponseInteraction('test interaction with matchers', 'test state',
+        ModelFixtures.requestWithMatchers(), ModelFixtures.responseWithMatchers())])
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact_matchers.json'))
@@ -95,7 +107,9 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must de-serialise pact matchers in old format'() {
     expect:
-    pact == ModelFixtures.pactWithMatchers()
+    pact == new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [new RequestResponseInteraction('test interaction with matchers', 'test state',
+        ModelFixtures.requestWithMatchers(), ModelFixtures.responseWithMatchers())])
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact_matchers_old_format.json'))
@@ -103,7 +117,8 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must convert http methods to upper case'() {
     expect:
-    pact == ModelFixtures.pact()
+    pact == new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [ModelFixtures.interaction()])
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact_lowercase_method.json'))
@@ -134,7 +149,9 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must deserialise pact with no bodies'() {
     expect:
-    pact == ModelFixtures.pactWithNoBodies()
+    pact == new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [new RequestResponseInteraction('test interaction with no bodies', 'test state',
+        ModelFixtures.requestNoBody(), ModelFixtures.responseNoBody())])
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact_no_bodies.json'))
@@ -142,7 +159,8 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must deserialise pact with query in old format'() {
     expect:
-    pact == ModelFixtures.pact()
+    pact == new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [ModelFixtures.interaction()])
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact_query_old_format.json'))
@@ -150,7 +168,8 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must deserialise pact with no version'() {
     expect:
-    pact == ModelFixtures.pact()
+    pact == new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [ModelFixtures.interaction()])
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact_no_version.json'))
@@ -158,7 +177,8 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must deserialise pact with no specification version'() {
     expect:
-    pact == ModelFixtures.pact()
+    pact == new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [ModelFixtures.interaction()])
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact_no_spec_version.json'))
@@ -166,7 +186,8 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must deserialise pact with no metadata'() {
     expect:
-    pact == ModelFixtures.pact()
+    pact == new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [ModelFixtures.interaction()])
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact_no_metadata.json'))
@@ -174,7 +195,9 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must deserialise pact with encoded query string'() {
     expect:
-    pact == ModelFixtures.pactDecodedQuery()
+    pact == new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [new RequestResponseInteraction('test interaction', 'test state',
+        ModelFixtures.requestDecodedQuery(), ModelFixtures.response())])
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact_encoded_query.json'))

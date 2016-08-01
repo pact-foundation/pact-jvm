@@ -54,7 +54,7 @@ case class PactGenerator(pacts: Map[String, Pact], conflicts: List[MergeConflict
     } 
   }
 
-  def writeAllToFile(config: PactConfig): Unit = {
+  def writeAllToFile(pactVersion: PactSpecVersion): Unit = {
     def createPactRootDir(): Unit = 
       new File(PactConsumerConfig.pactRootDir).mkdirs()
     
@@ -62,7 +62,7 @@ case class PactGenerator(pacts: Map[String, Pact], conflicts: List[MergeConflict
       val file = destinationFileForPact(pact)
       logger.debug(s"Writing pact ${pact.getConsumer.getName} -> ${pact.getProvider.getName} to file $file")
       val writer = new PrintWriter(file)
-      try PactWriter.writePact(pact, writer, config.pactVersion)
+      try PactWriter.writePact(pact, writer, pactVersion)
       finally writer.close()
     }
     require(!isEmpty, "Cannot write to file; no pacts have been recorded")

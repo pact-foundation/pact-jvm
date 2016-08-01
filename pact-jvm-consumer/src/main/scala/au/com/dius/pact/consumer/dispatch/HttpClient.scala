@@ -20,7 +20,7 @@ object HttpClient {
     val headers = if (request.getHeaders == null) None
     else Some(JavaConversions.mapAsScalaMap(request.getHeaders))
     val r = url(request.getPath).underlying(
-      _.setMethod(request.getMethod).setQueryParameters(query)
+      _.setMethod(request.getMethod).setQueryParams(query)
     ) <:< headers.getOrElse(Map())
     val body = if (request.getBody != null) request.getBody.orElse("") else null
     val httpRequest = if (body != null) r.setBody(body) else r
