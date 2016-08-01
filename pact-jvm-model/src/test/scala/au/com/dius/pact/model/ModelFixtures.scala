@@ -55,12 +55,4 @@ object ModelFixtures {
 
   val interactions = List(interaction)
 
-  val pact: RequestResponsePact = new RequestResponsePact(provider, consumer, JavaConversions.seqAsJavaList(interactions.toSeq))
-
-  val pactWithMatchers: RequestResponsePact = new RequestResponsePact(provider, consumer, JavaConversions.seqAsJavaList(interactionsWithMatchers.toSeq))
-
-  val pactWithNoBodies: RequestResponsePact = new RequestResponsePact(provider, consumer, JavaConversions.seqAsJavaList(interactionsWithNoBodies.toSeq))
-
-  val pactDecodedQuery = new RequestResponsePact(provider, consumer, JavaConversions.seqAsJavaList(interactionsWithDecodedQuery.toSeq))
-
 }
