@@ -6,15 +6,23 @@ import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 import org.specs2.specification.AllExpectations
 
+import scala.collection.JavaConversions
+
 @RunWith(classOf[JUnitRunner])
 class XmlBodyMatcherTest extends Specification with AllExpectations {
   isolated
+
+  private def scalaMMapToJavaMMap(map: Map[String, Map[String, AnyRef]]) : java.util.Map[String, java.util.Map[String, AnyRef]] = {
+    JavaConversions.mapAsJavaMap(map.mapValues {
+      case jmap: Map[String, _] => JavaConversions.mapAsJavaMap(jmap)
+    })
+  }
 
   var expectedBody = OptionalBody.missing()
   var actualBody = OptionalBody.missing()
   var matchers = Map[String, Map[String, String]]()
   val expected = () => new Request("", "", null, null, expectedBody,
-    CollectionUtils.scalaMMapToJavaMMap(matchers))
+    scalaMMapToJavaMMap(matchers))
   val actual = () => new Request("", "", null, null, actualBody)
 
   var diffconfig = DiffConfig(structural = true, allowUnexpectedKeys = false)
