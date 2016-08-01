@@ -1,7 +1,8 @@
 package au.com.dius.pact.provider.sbtsupport
 
-import au.com.dius.pact.model.unfiltered.Conversions
-import au.com.dius.pact.model.{CollectionUtils, Request, Response}
+import au.com.dius.pact.provider.unfiltered.Conversions
+import au.com.dius.pact.model.{Request, Response}
+import au.com.dius.pact.provider.CollectionUtils
 import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 import com.ning.http.client.FluentStringsMap
 import dispatch.url
@@ -22,7 +23,7 @@ object HttpClient extends StrictLogging {
     val headers = if (request.getHeaders == null) None
       else Some(JavaConversions.mapAsScalaMap(request.getHeaders))
     val r = url(request.getPath).underlying(
-      _.setMethod(request.getMethod).setQueryParams(query)
+      _.setMethod(request.getMethod).setQueryParameters(query)
     ) <:< headers.getOrElse(Map())
     val body = if (request.getBody != null) request.getBody.orElse("") else null
     val httpRequest = if (body != null) r.setBody(body) else r

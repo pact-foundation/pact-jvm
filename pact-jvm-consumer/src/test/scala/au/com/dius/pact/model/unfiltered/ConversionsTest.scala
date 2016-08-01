@@ -1,6 +1,6 @@
 package au.com.dius.pact.model.unfiltered
 
-import java.io.{StringReader, ByteArrayInputStream}
+import java.io.StringReader
 
 import au.com.dius.pact.model.CollectionUtils
 import org.junit.runner.RunWith
