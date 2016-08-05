@@ -104,10 +104,10 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     result.keySet() == keys
     result.types == ['abc', 'abc']
     subject.matchers == [
-      '.types': [min: 0, match: 'type'],
-      '.subscriptionId': [match: 'type'],
-      '.types[*]': [match: 'type'],
-      '.preference': [match: 'type']
+      '$.body.types': [min: 0, match: 'type'],
+      '$.body.subscriptionId': [match: 'type'],
+      '$.body.types[*]': [match: 'type'],
+      '$.body.preference': [match: 'type']
     ]
   }
 
@@ -127,10 +127,10 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     result.keySet() == keys
     result.types == ['abc', 'abc']
     subject.matchers == [
-      '.types': [min: 2, match: 'type'],
-      '.subscriptionId': [match: 'type'],
-      '.types[*]': [match: 'type'],
-      '.preference': [match: 'type']
+      '$.body.types': [min: 2, match: 'type'],
+      '$.body.subscriptionId': [match: 'type'],
+      '$.body.types[*]': [match: 'type'],
+      '$.body.preference': [match: 'type']
     ]
   }
 
@@ -150,10 +150,10 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     result.keySet() == keys
     result.types == ['abc', 'abc']
     subject.matchers == [
-      '.types': [max: 10, match: 'type'],
-      '.subscriptionId': [match: 'type'],
-      '.types[*]': [match: 'type'],
-      '.preference': [match: 'type']
+      '$.body.types': [max: 10, match: 'type'],
+      '$.body.subscriptionId': [match: 'type'],
+      '$.body.types[*]': [match: 'type'],
+      '$.body.preference': [match: 'type']
     ]
   }
 }
