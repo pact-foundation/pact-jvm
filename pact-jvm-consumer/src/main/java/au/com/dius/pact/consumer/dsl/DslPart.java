@@ -143,6 +143,30 @@ public abstract class DslPart {
     public abstract PactDslJsonBody maxArrayLike(Integer size, int numberExamples);
 
     /**
+     * Array field where each element is an array and must match the following object
+     * @param name field name
+     */
+    public abstract PactDslJsonArray eachArrayLike(String name);
+
+    /**
+     * Array element where each element of the array is an array and must match the following object
+     */
+    public abstract PactDslJsonArray eachArrayLike();
+
+    /**
+     * Array field where each element is an array and must match the following object
+     * @param name field name
+     * @param numberExamples number of examples to generate
+     */
+    public abstract PactDslJsonArray eachArrayLike(String name, int numberExamples);
+
+    /**
+     * Array element where each element of the array is an array and must match the following object
+     * @param numberExamples number of examples to generate
+     */
+    public abstract PactDslJsonArray eachArrayLike(int numberExamples);
+
+    /**
      * Object field
      * @param name field name
      */

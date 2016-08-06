@@ -703,4 +703,27 @@ public class PactDslJsonArray extends DslPart {
   public void setNumberExamples(int numberExamples) {
     this.numberExamples = numberExamples;
   }
+
+  @Override
+  public PactDslJsonArray eachArrayLike(String name) {
+    throw new UnsupportedOperationException("use the eachArrayLike() form");
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayLike(String name, int numberExamples) {
+    throw new UnsupportedOperationException("use the eachArrayLike(numberExamples) form");
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayLike() {
+    return eachArrayLike(1);
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayLike(int numberExamples) {
+    matchers.put(root + appendArrayIndex(1), matchMin(0));
+    PactDslJsonArray parent = new PactDslJsonArray(root, this, true);
+    parent.setNumberExamples(numberExamples);
+    return new PactDslJsonArray("", parent);
+  }
 }

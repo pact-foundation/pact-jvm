@@ -788,4 +788,27 @@ public class PactDslJsonBody extends DslPart {
         body.put(fieldName, JSONObject.NULL);
         return this;
     }
+
+  @Override
+  public PactDslJsonArray eachArrayLike(String name) {
+    return eachArrayLike(name, 1);
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayLike() {
+    throw new UnsupportedOperationException("use the eachArrayLike(String name) form");
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayLike(String name, int numberExamples) {
+    matchers.put(matcherKey(name), matchMin(0));
+    PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), this, true);
+    parent.setNumberExamples(numberExamples);
+    return new PactDslJsonArray("", parent);
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayLike(int numberExamples) {
+    throw new UnsupportedOperationException("use the eachArrayLike(String name, int numberExamples) form");
+  }
 }

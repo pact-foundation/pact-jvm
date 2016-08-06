@@ -156,4 +156,48 @@ class PactDslJsonBodyMatcherSpec extends Specification {
       '.preference': [match: 'type']
     ]
   }
+
+  def 'eachLike with GeoJSON'() {
+    given:
+    subject = new PactDslJsonBody()
+      .stringType('type', 'FeatureCollection')
+      .eachLike('features')
+        .stringType('type', 'Feature')
+        .object('geometry')
+          .stringType('type', 'Point')
+          .eachArrayLike('coordinates')
+            .decimalType(-7.55717)
+            .decimalType(49.766896)
+            .closeArray()
+          .closeArray()
+        .closeObject()
+        .object('properties')
+          .stringType('prop0', 'value0')
+        .closeObject()
+        .closeObject()
+      .closeArray()
+
+    when:
+    def bodyJson = subject.body.toString()
+    def result = new JsonSlurper().parseText(bodyJson)
+    def keys = ['type', 'features'] as Set
+
+    then:
+    bodyJson == '{"features":[{"geometry":{"coordinates":[[-7.55717,49.766896]],"type":"Point"},"type":"Feature",' +
+      '"properties":{"prop0":"value0"}}],"type":"FeatureCollection"}'
+    result.size() == 2
+    result.keySet() == keys
+    result.features[0].geometry.coordinates[0] == [-7.55717, 49.766896]
+    subject.matchers == [
+      '.type': [match: 'type'],
+      '.features': [min: 0, match: 'type'],
+      '.features[*].type': [match: 'type'],
+      '.features[*].properties.prop0': [match: 'type'],
+      '.features[*].geometry.type': [match: 'type'],
+      '.features[*].geometry.coordinates': [min: 0, match: 'type'],
+      '.features[*].geometry.coordinates[*][0]': [match: 'decimal'],
+      '.features[*].geometry.coordinates[*][1]': [match: 'decimal']
+    ]
+
+  }
 }
