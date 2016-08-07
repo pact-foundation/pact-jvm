@@ -23,7 +23,7 @@ class MultipleExamplesPactSpec extends Specification with PactSpec with AroundEa
 
   val pact = uponReceiving("a request for foo")
     .matching(path = "/foo")
-    .willRespondWith(body = "{}")
+    .willRespondWith(maybeBody = Some("{}"))
     .uponReceiving("an option request")
     .matching(path = "/", method = "OPTION")
     .willRespondWith(headers = Map("Option" -> "Value-X"))

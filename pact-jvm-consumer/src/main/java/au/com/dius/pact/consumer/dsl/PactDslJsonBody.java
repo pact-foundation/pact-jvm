@@ -788,4 +788,73 @@ public class PactDslJsonBody extends DslPart {
         body.put(fieldName, JSONObject.NULL);
         return this;
     }
+
+  @Override
+  public PactDslJsonArray eachArrayLike(String name) {
+    return eachArrayLike(name, 1);
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayLike() {
+    throw new UnsupportedOperationException("use the eachArrayLike(String name) form");
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayLike(String name, int numberExamples) {
+    matchers.put(matcherKey(name), matchMin(0));
+    PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), this, true);
+    parent.setNumberExamples(numberExamples);
+    return new PactDslJsonArray("", parent);
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayLike(int numberExamples) {
+    throw new UnsupportedOperationException("use the eachArrayLike(String name, int numberExamples) form");
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayWithMaxLike(String name, Integer size) {
+    return eachArrayWithMaxLike(name, 1, size);
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayWithMaxLike(Integer size) {
+    throw new UnsupportedOperationException("use the eachArrayWithMaxLike(String name, Integer size) form");
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayWithMaxLike(String name, int numberExamples, Integer size) {
+    matchers.put(matcherKey(name), matchMax(size));
+    PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), this, true);
+    parent.setNumberExamples(numberExamples);
+    return new PactDslJsonArray("", parent);
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayWithMaxLike(int numberExamples, Integer size) {
+    throw new UnsupportedOperationException("use the eachArrayWithMaxLike(String name, int numberExamples, Integer size) form");
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayWithMinLike(String name, Integer size) {
+    return eachArrayWithMinLike(name, 1, size);
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayWithMinLike(Integer size) {
+    throw new UnsupportedOperationException("use the eachArrayWithMinLike(String name, Integer size) form");
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayWithMinLike(String name, int numberExamples, Integer size) {
+    matchers.put(matcherKey(name), matchMin(size));
+    PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), this, true);
+    parent.setNumberExamples(numberExamples);
+    return new PactDslJsonArray("", parent);
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayWithMinLike(int numberExamples, Integer size) {
+    throw new UnsupportedOperationException("use the eachArrayWithMinLike(String name, int numberExamples, Integer size) form");
+  }
 }

@@ -21,7 +21,7 @@ class ExamplePactSpec extends Specification with PactSpec {
 
   override def is = uponReceiving("a request for foo")
       .matching(path = "/foo")
-      .willRespondWith(body = "{}")
+      .willRespondWith(maybeBody = Some("{}"))
     .uponReceiving("an option request")
       .matching(path = "/", method = "OPTION")
       .willRespondWith(headers = Map("Option" -> "Value-X"))

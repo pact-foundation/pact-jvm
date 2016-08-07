@@ -143,6 +143,86 @@ public abstract class DslPart {
     public abstract PactDslJsonBody maxArrayLike(Integer size, int numberExamples);
 
     /**
+     * Array field where each element is an array and must match the following object
+     * @param name field name
+     */
+    public abstract PactDslJsonArray eachArrayLike(String name);
+
+    /**
+     * Array element where each element of the array is an array and must match the following object
+     */
+    public abstract PactDslJsonArray eachArrayLike();
+
+    /**
+     * Array field where each element is an array and must match the following object
+     * @param name field name
+     * @param numberExamples number of examples to generate
+     */
+    public abstract PactDslJsonArray eachArrayLike(String name, int numberExamples);
+
+    /**
+     * Array element where each element of the array is an array and must match the following object
+     * @param numberExamples number of examples to generate
+     */
+    public abstract PactDslJsonArray eachArrayLike(int numberExamples);
+
+    /**
+     * Array field where each element is an array and must match the following object
+     * @param name field name
+     * @param size Maximum size of the outer array
+     */
+    public abstract PactDslJsonArray eachArrayWithMaxLike(String name, Integer size);
+
+    /**
+     * Array element where each element of the array is an array and must match the following object
+     * @param size Maximum size of the outer array
+     */
+    public abstract PactDslJsonArray eachArrayWithMaxLike(Integer size);
+
+    /**
+     * Array field where each element is an array and must match the following object
+     * @param name field name
+     * @param numberExamples number of examples to generate
+     * @param size Maximum size of the outer array
+     */
+    public abstract PactDslJsonArray eachArrayWithMaxLike(String name, int numberExamples, Integer size);
+
+    /**
+     * Array element where each element of the array is an array and must match the following object
+     * @param numberExamples number of examples to generate
+     * @param size Maximum size of the outer array
+     */
+    public abstract PactDslJsonArray eachArrayWithMaxLike(int numberExamples, Integer size);
+
+    /**
+     * Array field where each element is an array and must match the following object
+     * @param name field name
+     * @param size Minimum size of the outer array
+     */
+    public abstract PactDslJsonArray eachArrayWithMinLike(String name, Integer size);
+
+    /**
+     * Array element where each element of the array is an array and must match the following object
+     * @param size Minimum size of the outer array
+     */
+    public abstract PactDslJsonArray eachArrayWithMinLike(Integer size);
+
+    /**
+     * Array field where each element is an array and must match the following object
+     * @param name field name
+     * @param numberExamples number of examples to generate
+     * @param size Minimum size of the outer array
+     */
+    public abstract PactDslJsonArray eachArrayWithMinLike(String name, int numberExamples, Integer size);
+
+    /**
+     * Array element where each element of the array is an array and must match the following object
+     * @param numberExamples number of examples to generate
+     * @param size Minimum size of the outer array
+     */
+    public abstract PactDslJsonArray eachArrayWithMinLike(int numberExamples, Integer size);
+
+    /**
      * Object field
      * @param name field name
      */
@@ -160,7 +240,11 @@ public abstract class DslPart {
     public abstract DslPart closeObject();
 
     public Map<String, Map<String, Object>> getMatchers() {
-        return matchers;
+        Map<String, Map<String, Object>> matchersWithPrefix = new HashMap<String, Map<String, Object>>();
+        for (String matcherName : matchers.keySet()) {
+            matchersWithPrefix.put("$.body" + matcherName, matchers.get(matcherName));
+        }
+        return matchersWithPrefix;
     }
 
     public void setMatchers(Map<String, Map<String, Object>> matchers) {
