@@ -180,7 +180,6 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     when:
     def bodyJson = subject.body.toString()
     def result = new JsonSlurper().parseText(bodyJson)
-    def keys = ['type', 'features'] as Set
 
     then:
     result == [
