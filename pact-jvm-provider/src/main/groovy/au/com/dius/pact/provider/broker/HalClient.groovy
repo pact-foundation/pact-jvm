@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.broker
 import groovy.transform.Canonical
 import groovy.util.logging.Slf4j
 import groovyx.net.http.RESTClient
+import org.apache.http.message.BasicHeaderValueParser
 
 /**
  * HAL client for navigating the HAL links
@@ -95,7 +96,9 @@ class HalClient {
     def response = http.get(path: path, requestContentType: 'application/json',
       headers: [Accept: 'application/hal+json'])
     def contentType = response.headers.'Content-Type'
-    if (contentType != 'application/json' && contentType != 'application/hal+json') {
+    def headerParser = new BasicHeaderValueParser()
+    def headerElements = headerParser.parseElements(contentType as String, headerParser)
+    if (headerElements[0].name != 'application/json' && headerElements[0].name != 'application/hal+json') {
       throw new InvalidHalResponse('Expected a HAL+JSON response from the pact broker, but got ' +
         "'$contentType'. URL: '${baseUrl}', PATH: '${path}'")
     }

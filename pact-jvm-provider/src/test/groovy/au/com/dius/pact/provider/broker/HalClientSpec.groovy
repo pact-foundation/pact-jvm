@@ -95,4 +95,29 @@ class HalClientSpec extends Specification {
     thrown(InvalidHalResponse)
   }
 
+  def 'Handles responses with charset attributes'() {
+    given:
+    def mockHttp = Mock(RESTClient) {
+      get([path: '/', requestContentType: 'application/json',
+           headers: [Accept: 'application/hal+json']]) >> [
+        headers: ['Content-Type': 'application/hal+json;charset=UTF-8'],
+        data: [_links: [
+          'pb:latest-provider-pacts': [href: '/link']]
+        ]
+      ]
+      get([path: '/link', requestContentType: 'application/json',
+           headers: [Accept: 'application/hal+json']]) >> [
+        headers: ['Content-Type': 'application/hal+json;charset=UTF-8'],
+        data: [_links: []]
+      ]
+    }
+    client.newHttpClient() >> mockHttp
+
+    when:
+    client.navigate('pb:latest-provider-pacts')
+
+    then:
+    notThrown(InvalidHalResponse)
+  }
+
 }
