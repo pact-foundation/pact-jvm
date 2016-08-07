@@ -526,6 +526,70 @@ public class PactDslJsonRootValue extends DslPart {
    * @deprecated Use PactDslJsonArray for arrays
    */
   @Override
+  public PactDslJsonArray eachArrayWithMaxLike(String name, Integer size) {
+    return null;
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonArray eachArrayWithMaxLike(Integer size) {
+    return null;
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonArray eachArrayWithMaxLike(String name, int numberExamples, Integer size) {
+    return null;
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonArray eachArrayWithMaxLike(int numberExamples, Integer size) {
+    return null;
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonArray eachArrayWithMinLike(String name, Integer size) {
+    return null;
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonArray eachArrayWithMinLike(Integer size) {
+    return null;
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonArray eachArrayWithMinLike(String name, int numberExamples, Integer size) {
+    return null;
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonArray eachArrayWithMinLike(int numberExamples, Integer size) {
+    return null;
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
   public PactDslJsonArray eachArrayLike(String name, int numberExamples) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }

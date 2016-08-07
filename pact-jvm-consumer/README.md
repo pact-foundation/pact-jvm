@@ -229,6 +229,58 @@ This will then match a body like:
 } ]
 ```
 
+#### Matching arrays of arrays (version 3.2.12/2.4.14+)
+
+For the case where you have arrays of arrays (GeoJSON is an example), the following methods have been provided:
+
+| function | description |
+|----------|-------------|
+| `eachArrayLike` | Ensure that each item in the array is an array that matches the provided example |
+| `eachArrayWithMaxLike` | Ensure that each item in the array is an array that matches the provided example and the array is no bigger than the provided max |
+| `eachArrayWithMinLike` | Ensure that each item in the array is an array that matches the provided example and the array is no smaller than the provided min |
+
+For example (with GeoJSON structure):
+
+```java
+new PactDslJsonBody()
+  .stringType("type","FeatureCollection")
+  .eachLike("features")
+    .stringType("type","Feature")
+    .object("geometry")
+      .stringType("type","Point")
+      .eachArrayLike("coordinates") // coordinates is an array of arrays 
+        .decimalType(-7.55717)
+        .decimalType(49.766896)
+        .closeArray()
+      .closeArray()
+    .closeObject()
+    .object("properties")
+      .stringType("prop0","value0")
+      .closeObject()
+    .closeObject()
+  .closeArray()
+```
+
+This generated the following JSON:
+
+```json
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [[-7.55717, 49.766896]],
+        "type": "Point"
+      },
+      "type": "Feature",
+      "properties": { "prop0": "value0" }
+    }
+  ],
+  "type": "FeatureCollection"
+}
+```
+
+and will be able to match all coordinates regardless of the number of coordinates.
+
 ### Matching on paths (version 2.1.5+)
 
 You can use regular expressions to match incoming requests. The DSL has a `matchPath` method for this. You can provide

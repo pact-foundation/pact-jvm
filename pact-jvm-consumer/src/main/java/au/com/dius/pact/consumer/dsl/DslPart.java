@@ -167,6 +167,62 @@ public abstract class DslPart {
     public abstract PactDslJsonArray eachArrayLike(int numberExamples);
 
     /**
+     * Array field where each element is an array and must match the following object
+     * @param name field name
+     * @param size Maximum size of the outer array
+     */
+    public abstract PactDslJsonArray eachArrayWithMaxLike(String name, Integer size);
+
+    /**
+     * Array element where each element of the array is an array and must match the following object
+     * @param size Maximum size of the outer array
+     */
+    public abstract PactDslJsonArray eachArrayWithMaxLike(Integer size);
+
+    /**
+     * Array field where each element is an array and must match the following object
+     * @param name field name
+     * @param numberExamples number of examples to generate
+     * @param size Maximum size of the outer array
+     */
+    public abstract PactDslJsonArray eachArrayWithMaxLike(String name, int numberExamples, Integer size);
+
+    /**
+     * Array element where each element of the array is an array and must match the following object
+     * @param numberExamples number of examples to generate
+     * @param size Maximum size of the outer array
+     */
+    public abstract PactDslJsonArray eachArrayWithMaxLike(int numberExamples, Integer size);
+
+    /**
+     * Array field where each element is an array and must match the following object
+     * @param name field name
+     * @param size Minimum size of the outer array
+     */
+    public abstract PactDslJsonArray eachArrayWithMinLike(String name, Integer size);
+
+    /**
+     * Array element where each element of the array is an array and must match the following object
+     * @param size Minimum size of the outer array
+     */
+    public abstract PactDslJsonArray eachArrayWithMinLike(Integer size);
+
+    /**
+     * Array field where each element is an array and must match the following object
+     * @param name field name
+     * @param numberExamples number of examples to generate
+     * @param size Minimum size of the outer array
+     */
+    public abstract PactDslJsonArray eachArrayWithMinLike(String name, int numberExamples, Integer size);
+
+    /**
+     * Array element where each element of the array is an array and must match the following object
+     * @param numberExamples number of examples to generate
+     * @param size Minimum size of the outer array
+     */
+    public abstract PactDslJsonArray eachArrayWithMinLike(int numberExamples, Integer size);
+
+    /**
      * Object field
      * @param name field name
      */
