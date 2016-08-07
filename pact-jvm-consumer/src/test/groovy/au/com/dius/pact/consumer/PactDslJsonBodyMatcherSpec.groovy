@@ -183,11 +183,21 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     def keys = ['type', 'features'] as Set
 
     then:
-    bodyJson == '{"features":[{"geometry":{"coordinates":[[-7.55717,49.766896]],"type":"Point"},"type":"Feature",' +
-      '"properties":{"prop0":"value0"}}],"type":"FeatureCollection"}'
-    result.size() == 2
-    result.keySet() == keys
-    result.features[0].geometry.coordinates[0] == [-7.55717, 49.766896]
+    result == [
+      features: [
+        [
+          geometry: [
+            coordinates: [
+              [-7.55717, 49.766896]
+            ],
+            type: 'Point'
+          ],
+          type: 'Feature',
+          properties: [prop0: 'value0']
+        ]
+      ],
+      type: 'FeatureCollection'
+    ]
     subject.matchers == [
       '$.body.type': [match: 'type'],
       '$.body.features': [min: 0, match: 'type'],
