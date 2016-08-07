@@ -240,7 +240,11 @@ public abstract class DslPart {
     public abstract DslPart closeObject();
 
     public Map<String, Map<String, Object>> getMatchers() {
-        return matchers;
+        Map<String, Map<String, Object>> matchersWithPrefix = new HashMap<String, Map<String, Object>>();
+        for (String matcherName : matchers.keySet()) {
+            matchersWithPrefix.put("$.body" + matcherName, matchers.get(matcherName));
+        }
+        return matchersWithPrefix;
     }
 
     public void setMatchers(Map<String, Map<String, Object>> matchers) {

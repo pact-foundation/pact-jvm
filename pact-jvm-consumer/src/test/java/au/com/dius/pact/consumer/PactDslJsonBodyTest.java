@@ -52,14 +52,14 @@ public class PactDslJsonBodyTest {
             .closeArray();
 
         Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
-                ".id",
-                "['2'].id",
-                ".numbers[3]",
-                ".numbers[0]",
-                ".numbers[4].timestamp",
-                ".numbers[4].dob",
-                ".numbers[4].id",
-                ".numbers[4]['10k-depreciation-bips'].id"
+                "$.body.id",
+                "$.body['2'].id",
+                "$.body.numbers[3]",
+                "$.body.numbers[0]",
+                "$.body.numbers[4].timestamp",
+                "$.body.numbers[4].dob",
+                "$.body.numbers[4].id",
+                "$.body.numbers[4]['10k-depreciation-bips'].id"
         ));
         assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
 
@@ -76,7 +76,7 @@ public class PactDslJsonBodyTest {
                 .integerType(K_DEPRECIATION_BIPS);
 
         Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
-                "['200']", "['1']", "['@field']", "['10k-depreciation-bips']"
+                "$.body['200']", "$.body['1']", "$.body['@field']", "$.body['10k-depreciation-bips']"
         ));
         assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
 
@@ -93,8 +93,8 @@ public class PactDslJsonBodyTest {
                 .closeArray();
 
         Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
-                ".ids",
-                ".ids[*].id"
+                "$.body.ids",
+                "$.body.ids[*].id"
         ));
         assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
 
@@ -120,11 +120,11 @@ public class PactDslJsonBodyTest {
                 .closeObject();
 
         Set<String> expectedMatchers = new HashSet<>(Arrays.asList(
-                ".first.second['@third'].fourth.level4",
-                ".first.second['@third'].level3",
-                ".first.second.level2",
-                ".first.level1",
-                ".first['@level1']"
+                "$.body.first.second['@third'].fourth.level4",
+                "$.body.first.second['@third'].level3",
+                "$.body.first.second.level2",
+                "$.body.first.level1",
+                "$.body.first['@level1']"
         ));
 
         assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
@@ -163,8 +163,8 @@ public class PactDslJsonBodyTest {
                 .closeArray();
 
         Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
-                ".first[0]",
-                ".first[1][0]"
+                "$.body.first[0]",
+                "$.body.first[1][0]"
         ));
 
         assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
@@ -196,10 +196,10 @@ public class PactDslJsonBodyTest {
                 .closeObject();
 
         Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
-                ".first.level1",
-                ".first.second[1].level2",
-                ".first.second[0]",
-                ".first.second[1].third[0]"
+                "$.body.first.level1",
+                "$.body.first.second[1].level2",
+                "$.body.first.second[0]",
+                "$.body.first.second[1].third[0]"
         ));
 
         assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));

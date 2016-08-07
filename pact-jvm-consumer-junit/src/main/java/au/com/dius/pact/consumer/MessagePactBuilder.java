@@ -126,11 +126,7 @@ public class MessagePactBuilder {
     }
 
     message.setContents(OptionalBody.body(body.toString()));
-    Map<String, Map<String, Object>> matchingRules = new HashMap<String, Map<String, Object>>();
-    for (String matcherName : body.getMatchers().keySet()) {
-      matchingRules.put("$.body" + matcherName, body.getMatchers().get(matcherName));
-    }
-    message.setMatchingRules(matchingRules);
+    message.setMatchingRules(body.getMatchers());
 
     return this;
   }
