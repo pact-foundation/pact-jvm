@@ -20,7 +20,7 @@ class Issue219PactSpec extends Specification with PactSpec {
 
   override def is = uponReceiving("add a broker")
     .matching(path = "/api/broker/add", query = "options=delete.topic.enable%3Dtrue&broker=1")
-    .willRespondWith(body = "{}")
+    .willRespondWith(maybeBody = Some("{}"))
     .withConsumerTest(providerConfig => {
       val get = ConsumerService(providerConfig.url).simpleGet("/api/broker/add", "options=delete.topic.enable%3Dtrue&broker=1")
       Await.result(get, timeout) must be_==(200, "{}")
