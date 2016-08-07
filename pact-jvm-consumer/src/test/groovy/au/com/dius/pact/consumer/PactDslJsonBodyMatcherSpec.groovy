@@ -189,14 +189,14 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     result.keySet() == keys
     result.features[0].geometry.coordinates[0] == [-7.55717, 49.766896]
     subject.matchers == [
-      '.type': [match: 'type'],
-      '.features': [min: 0, match: 'type'],
-      '.features[*].type': [match: 'type'],
-      '.features[*].properties.prop0': [match: 'type'],
-      '.features[*].geometry.type': [match: 'type'],
-      '.features[*].geometry.coordinates': [min: 0, match: 'type'],
-      '.features[*].geometry.coordinates[*][0]': [match: 'decimal'],
-      '.features[*].geometry.coordinates[*][1]': [match: 'decimal']
+      '$.body.type': [match: 'type'],
+      '$.body.features': [min: 0, match: 'type'],
+      '$.body.features[*].type': [match: 'type'],
+      '$.body.features[*].properties.prop0': [match: 'type'],
+      '$.body.features[*].geometry.type': [match: 'type'],
+      '$.body.features[*].geometry.coordinates': [min: 0, match: 'type'],
+      '$.body.features[*].geometry.coordinates[*][0]': [match: 'decimal'],
+      '$.body.features[*].geometry.coordinates[*][1]': [match: 'decimal']
     ]
 
   }
