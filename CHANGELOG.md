@@ -1,5 +1,33 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.2.12 - Bugfix Release
+
+* 71f1d97 - update changelog for release 2.4.14 (Ronald Holshausen, Sun Aug 7 13:27:11 2016 +1000)
+* a8562e1 - correctly handle the content type header from the pact broker #287 (Ronald Holshausen, Sun Aug 7 12:13:14 2016 +1000)
+* f47e33e - Merge pull request #302 from alonpeer/missing-body (Ronald Holshausen, Sun Aug 7 11:34:30 2016 +1000)
+* 0a65c89 - fix for failing test after merge of a PR (Ronald Holshausen, Sun Aug 7 11:33:40 2016 +1000)
+* 1fc7fba - Merge pull request #303 from alonpeer/matchers-prefix (Ronald Holshausen, Sun Aug 7 11:25:39 2016 +1000)
+* edfc688 - Fix MessagePactBuilder.withContent to take a DslPart instead of PactDslJsonBody #301 (Ronald Holshausen, Sun Aug 7 11:18:12 2016 +1000)
+* aea02c7 - added min and max versions to the consumer body DSL for arrays of arrays #299 (Ronald Holshausen, Sun Aug 7 10:56:45 2016 +1000)
+* 1b5d56c - added a set of each like methods to the consumer body DSL for arrays of arrays #299 (Ronald Holshausen, Sat Aug 6 17:36:25 2016 +1000)
+* dc505b0 - Add the $.body prefix to DslPart matchers (Alon Pe'er, Fri Aug 5 14:27:11 2016 +0200)
+* fa01d7a - Provides a way to set the body to 'missing' in PactFragmentBuilder (Alon Pe'er, Fri Aug 5 12:10:07 2016 +0200)
+* 6256c3e - moved the unfiltered conversion code out of the model module (Ronald Holshausen, Mon Aug 1 21:42:58 2016 +1000)
+* a9554cf - inlined more fixtures and moved utils from the model module (Ronald Holshausen, Mon Aug 1 20:11:12 2016 +1000)
+* b6397d0 - inlined some Scala test fixtures (Ronald Holshausen, Mon Aug 1 12:40:13 2016 +1000)
+* 3f7b2e4 - removed some more unused code (Ronald Holshausen, Sun Jul 31 23:00:41 2016 +1000)
+* 97572b5 - removed PactConfig as it was providing no benefit (Ronald Holshausen, Sun Jul 31 22:29:39 2016 +1000)
+* 6ec8f54 - removed some unused classes (Ronald Holshausen, Sun Jul 31 21:47:52 2016 +1000)
+* 992e880 - update project deps (Ronald Holshausen, Sun Jul 31 21:41:33 2016 +1000)
+* f9759d3 - upgraded project deps (Ronald Holshausen, Sun Jul 31 21:24:08 2016 +1000)
+* 0927ed6 - upgrade gradle to 2.14.1 (Ronald Holshausen, Sun Jul 31 21:01:37 2016 +1000)
+* 6651619 - consolidate the logback versions across the sub-projects (Ronald Holshausen, Sun Jul 31 20:44:53 2016 +1000)
+* 07018d6 - upgrade groovy to 2.4.7 (Ronald Holshausen, Sun Jul 31 20:29:27 2016 +1000)
+* d38c9f5 - updated project dependencies (Ronald Holshausen, Sun Jul 31 20:17:38 2016 +1000)
+* a01725e - update readme (Ronald Holshausen, Sun Jul 31 19:36:40 2016 +1000)
+* 69a55ac - update changelog for release 3.3.0-beta.0 (Ronald Holshausen, Sun Jul 31 18:59:18 2016 +1000)
+* 1b1b81f - bump version to 3.2.12 (Ronald Holshausen, Sun Jul 31 16:50:40 2016 +1000)
+
 # 2.4.14 - Bugfix Release
 
 * 0f496ce - fix codenarc (Ronald Holshausen, Sun Aug 7 12:59:31 2016 +1000)
