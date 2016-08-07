@@ -50,10 +50,10 @@ class PactDslJsonArrayMatcherSpec extends Specification {
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
         subject.matchers == [
-          '': [min: 0, match: 'type'],
-          '[*].amount': [match: 'decimal'],
-          '[*].clearedDate': [date: 'mm/dd/yyyy'],
-          '[*].status': [match: 'type']
+          '$.body': [min: 0, match: 'type'],
+          '$.body[*].amount': [match: 'decimal'],
+          '$.body[*].clearedDate': [date: 'mm/dd/yyyy'],
+          '$.body[*].status': [match: 'type']
         ]
     }
 
@@ -71,10 +71,10 @@ class PactDslJsonArrayMatcherSpec extends Specification {
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
         subject.matchers == [
-          '': [min: 1, match: 'type'],
-          '[*].amount': [match: 'decimal'],
-          '[*].clearedDate': [date: 'mm/dd/yyyy'],
-          '[*].status': [match: 'type']
+          '$.body': [min: 1, match: 'type'],
+          '$.body[*].amount': [match: 'decimal'],
+          '$.body[*].clearedDate': [date: 'mm/dd/yyyy'],
+          '$.body[*].status': [match: 'type']
         ]
     }
 
@@ -92,10 +92,10 @@ class PactDslJsonArrayMatcherSpec extends Specification {
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
         subject.matchers == [
-          '': [max: 10, match: 'type'],
-          '[*].amount': [match: 'decimal'],
-          '[*].clearedDate': [date: 'mm/dd/yyyy'],
-          '[*].status': [match: 'type']
+          '$.body': [max: 10, match: 'type'],
+          '$.body[*].amount': [match: 'decimal'],
+          '$.body[*].clearedDate': [date: 'mm/dd/yyyy'],
+          '$.body[*].status': [match: 'type']
         ]
     }
 

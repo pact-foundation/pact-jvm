@@ -1,20 +1,19 @@
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.consumer.dsl.DslPart;
+import au.com.dius.pact.model.Consumer;
+import au.com.dius.pact.model.InvalidPactException;
+import au.com.dius.pact.model.OptionalBody;
+import au.com.dius.pact.model.Provider;
+import au.com.dius.pact.model.ProviderState;
+import au.com.dius.pact.model.v3.messaging.Message;
+import au.com.dius.pact.model.v3.messaging.MessagePact;
+import org.apache.http.entity.ContentType;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
-import au.com.dius.pact.model.InvalidPactException;
-import au.com.dius.pact.model.OptionalBody;
-import au.com.dius.pact.model.ProviderState;
-import org.apache.http.entity.ContentType;
-
-import au.com.dius.pact.model.Consumer;
-import au.com.dius.pact.model.Provider;
-import au.com.dius.pact.model.v3.messaging.Message;
-import au.com.dius.pact.model.v3.messaging.MessagePact;
 
 /**
  * PACT DSL builder for v3 specification
@@ -112,7 +111,7 @@ public class MessagePactBuilder {
     return this;
   }
 
-  public MessagePactBuilder withContent(PactDslJsonBody body) {
+  public MessagePactBuilder withContent(DslPart body) {
     if (messages == null || messages.isEmpty()) {
       throw new InvalidPactException("expectsToReceive is required before withMetaData");
     }
@@ -128,11 +127,7 @@ public class MessagePactBuilder {
     }
 
     message.setContents(OptionalBody.body(body.toString()));
-    Map<String, Map<String, Object>> matchingRules = new HashMap<String, Map<String, Object>>();
-    for (String matcherName : body.getMatchers().keySet()) {
-      matchingRules.put("$.body" + matcherName, body.getMatchers().get(matcherName));
-    }
-    message.setMatchingRules(matchingRules);
+    message.setMatchingRules(body.getMatchers());
 
     return this;
   }

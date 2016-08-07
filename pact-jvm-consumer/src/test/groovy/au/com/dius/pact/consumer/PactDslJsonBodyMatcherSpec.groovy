@@ -104,10 +104,10 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     result.keySet() == keys
     result.types == ['abc', 'abc']
     subject.matchers == [
-      '.types': [min: 0, match: 'type'],
-      '.subscriptionId': [match: 'type'],
-      '.types[*]': [match: 'type'],
-      '.preference': [match: 'type']
+      '$.body.types': [min: 0, match: 'type'],
+      '$.body.subscriptionId': [match: 'type'],
+      '$.body.types[*]': [match: 'type'],
+      '$.body.preference': [match: 'type']
     ]
   }
 
@@ -127,10 +127,10 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     result.keySet() == keys
     result.types == ['abc', 'abc']
     subject.matchers == [
-      '.types': [min: 2, match: 'type'],
-      '.subscriptionId': [match: 'type'],
-      '.types[*]': [match: 'type'],
-      '.preference': [match: 'type']
+      '$.body.types': [min: 2, match: 'type'],
+      '$.body.subscriptionId': [match: 'type'],
+      '$.body.types[*]': [match: 'type'],
+      '$.body.preference': [match: 'type']
     ]
   }
 
@@ -150,10 +150,54 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     result.keySet() == keys
     result.types == ['abc', 'abc']
     subject.matchers == [
-      '.types': [max: 10, match: 'type'],
-      '.subscriptionId': [match: 'type'],
-      '.types[*]': [match: 'type'],
-      '.preference': [match: 'type']
+      '$.body.types': [max: 10, match: 'type'],
+      '$.body.subscriptionId': [match: 'type'],
+      '$.body.types[*]': [match: 'type'],
+      '$.body.preference': [match: 'type']
     ]
+  }
+
+  def 'eachLike with GeoJSON'() {
+    given:
+    subject = new PactDslJsonBody()
+      .stringType('type', 'FeatureCollection')
+      .eachLike('features')
+        .stringType('type', 'Feature')
+        .object('geometry')
+          .stringType('type', 'Point')
+          .eachArrayLike('coordinates')
+            .decimalType(-7.55717)
+            .decimalType(49.766896)
+            .closeArray()
+          .closeArray()
+        .closeObject()
+        .object('properties')
+          .stringType('prop0', 'value0')
+        .closeObject()
+        .closeObject()
+      .closeArray()
+
+    when:
+    def bodyJson = subject.body.toString()
+    def result = new JsonSlurper().parseText(bodyJson)
+    def keys = ['type', 'features'] as Set
+
+    then:
+    bodyJson == '{"features":[{"geometry":{"coordinates":[[-7.55717,49.766896]],"type":"Point"},"type":"Feature",' +
+      '"properties":{"prop0":"value0"}}],"type":"FeatureCollection"}'
+    result.size() == 2
+    result.keySet() == keys
+    result.features[0].geometry.coordinates[0] == [-7.55717, 49.766896]
+    subject.matchers == [
+      '$.body.type': [match: 'type'],
+      '$.body.features': [min: 0, match: 'type'],
+      '$.body.features[*].type': [match: 'type'],
+      '$.body.features[*].properties.prop0': [match: 'type'],
+      '$.body.features[*].geometry.type': [match: 'type'],
+      '$.body.features[*].geometry.coordinates': [min: 0, match: 'type'],
+      '$.body.features[*].geometry.coordinates[*][0]': [match: 'decimal'],
+      '$.body.features[*].geometry.coordinates[*][1]': [match: 'decimal']
+    ]
+
   }
 }

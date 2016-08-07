@@ -24,7 +24,7 @@ class DifferentStatesPactSpec extends Specification with PactSpec {
     .given("bar state", Map("ValueA" -> "A"))
     .uponReceiving("a request for foo")
       .matching(path = "/foo")
-      .willRespondWith(body = "{}")
+      .willRespondWith(maybeBody = Some("{}"))
     .given("bar_state", Map("ValueA" -> "B"))
     .uponReceiving("an option request for bar")
       .matching(path = "/", method = "OPTION")
@@ -32,7 +32,7 @@ class DifferentStatesPactSpec extends Specification with PactSpec {
     .given()
     .uponReceiving("a stateless request for foobar")
       .matching(path = "/foobar")
-      .willRespondWith(body = "{}")
+      .willRespondWith(maybeBody = Some("{}"))
     .withConsumerTest(providerConfig => {
       val optionsResult = ConsumerService(providerConfig.url).options("/")
       val simpleGet = ConsumerService(providerConfig.url).simpleGet("/foo")

@@ -70,15 +70,20 @@ object PactFragmentBuilder {
       /**
        * supports java DSL
        */
-      def willRespondWith(status: Int, headers: java.util.Map[String, String], body: String, matchers: JSONObject): PactWithAtLeastOneRequest = {
+      def willRespondWith(status: Int, headers: java.util.Map[String, String], maybeBody: Option[String], matchers: JSONObject): PactWithAtLeastOneRequest = {
         import collection.JavaConversions._
-        willRespondWith(status, headers.toMap, body, matchers)
+        willRespondWith(status, headers.toMap, maybeBody, matchers)
       }
 
       def willRespondWith(status: Int = 200,
                           headers: Map[String, String] = Map(),
-                          body: String = "",
+                          maybeBody: Option[String] = None,
                           matchers: Map[String, Map[String, String]] = Map()): PactWithAtLeastOneRequest = {
+        val optionalBody = maybeBody match {
+          case Some(body) => OptionalBody.body(body)
+          case None => OptionalBody.missing()
+        }
+
         builder(
           consumer,
           provider,
@@ -87,7 +92,7 @@ object PactFragmentBuilder {
             description,
             state.asJava,
             request,
-            new Response(status, headers, OptionalBody.body(body), CollectionUtils.scalaMMapToJavaMMap(matchers)))))
+            new Response(status, headers, optionalBody, CollectionUtils.scalaMMapToJavaMMap(matchers)))))
       }
 
       def willRespondWith(status: Int,
