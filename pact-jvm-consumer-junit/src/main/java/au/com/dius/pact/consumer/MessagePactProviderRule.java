@@ -218,7 +218,7 @@ public class MessagePactProviderRule extends ExternalResource {
 
         if (!conforms && pact != null) {
             throw new UnsupportedOperationException("Method " + m.getName() +
-                " does not conform required method signature 'public PactFragment xxx(PactDslWithProvider builder)'");
+                " does not conform required method signature 'public MessagePact xxx(MessagePactBuilder builder)'");
         }
         return conforms;
     }
