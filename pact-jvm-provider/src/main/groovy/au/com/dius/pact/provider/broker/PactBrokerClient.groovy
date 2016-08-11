@@ -49,7 +49,7 @@ class PactBrokerClient {
       requestContentType = JSON
       body = pactFile.text
 
-      response.success = { resp -> resp.statusLine }
+      response.success = { resp -> resp.statusLine as String }
 
       response.failure = { resp, json ->
         def error = json?.errors?.join(', ') ?: 'Unknown error'
