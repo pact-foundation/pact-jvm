@@ -35,6 +35,13 @@ class RequestResponsePact extends BasePact {
     ]
   }
 
+  @Override
+  void mergeInteractions(List<Interaction> interactions) {
+    this.interactions = (this.interactions + (interactions as List<RequestResponseInteraction>))
+      .unique { it.description }
+    sortInteractions()
+  }
+
   RequestResponseInteraction interactionFor(String description, String providerState) {
     interactions.find { i ->
       i.description == description && i.providerStates.any { it.name == providerState }

@@ -122,4 +122,8 @@ abstract class BasePact implements Pact {
   protected File fileForPact(String pactDir) {
     new File(pactDir, "${consumer.name}-${provider.name}.json")
   }
+
+  boolean compatibleTo(Pact other) {
+    provider == other.provider && this.class.isAssignableFrom(other.class)
+  }
 }
