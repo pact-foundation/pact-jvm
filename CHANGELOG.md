@@ -1,5 +1,13 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.2.13 - Bugfix Release
+
+* a4c1d8d - update Groovy DSL to allow each like matchers to work with primitives #308 (Ronald Holshausen, Sun Aug 14 11:28:10 2016 +1000)
+* a130280 - Fix regression in gradle pact publish task #307 (Ronald Holshausen, Thu Aug 11 21:48:08 2016 +1000)
+* 31be3e4 - Merge pull request #309 from carwinz/fix-messagePactProviderRule-error (Ronald Holshausen, Thu Aug 11 19:50:51 2016 +1000)
+* a70279e - show the correct requirements when @Pact is used on a method that doesn't have the right signature (Carwin Zimmermann, Thu Aug 11 10:48:22 2016 +1000)
+* 7213bf6 - bump version to 3.2.13 (Ronald Holshausen, Sun Aug 7 15:04:28 2016 +1000)
+
 # 3.2.12 - Bugfix Release
 
 * 71f1d97 - update changelog for release 2.4.14 (Ronald Holshausen, Sun Aug 7 13:27:11 2016 +1000)
