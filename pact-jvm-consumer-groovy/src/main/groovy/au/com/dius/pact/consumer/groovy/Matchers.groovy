@@ -123,8 +123,12 @@ class Matchers {
    * @param max The maximum size of the array
    * @param numberExamples Optional number of examples to generate. Defaults to 1.
    */
-  static maxLike(Integer max, Integer numberExamples = 1, Closure closure) {
-    new MaxLikeMatcher(values: [max, closure], numberExamples: numberExamples)
+  static maxLike(Integer max, Integer numberExamples = 1, def arg) {
+    if (numberExamples > max) {
+      throw new InvalidMatcherException("The number of examples you have specified ($numberExamples) is " +
+        "greater than the maximum ($max)")
+    }
+    new MaxLikeMatcher(values: [max, arg], numberExamples: numberExamples)
   }
 
   /**
@@ -132,16 +136,20 @@ class Matchers {
    * @param min The minimum size of the array
    * @param numberExamples Optional number of examples to generate. Defaults to 1.
    */
-  static minLike(Integer min, Integer numberExamples = 1, Closure closure) {
-    new MinLikeMatcher(values: [min, closure], numberExamples: numberExamples)
+  static minLike(Integer min, Integer numberExamples = 1, def arg) {
+    if (numberExamples > 1 && numberExamples < min) {
+      throw new InvalidMatcherException("The number of examples you have specified ($numberExamples) is " +
+        "less than the minimum ($min)")
+    }
+    new MinLikeMatcher(values: [min, arg], numberExamples: numberExamples)
   }
 
   /**
    * Array where each element is like the following object
    * @param numberExamples Optional number of examples to generate. Defaults to 1.
    */
-  static eachLike(Integer numberExamples = 1, Closure closure) {
-    new EachLikeMatcher(values: [null,  closure], numberExamples: numberExamples)
+  static eachLike(Integer numberExamples = 1, def arg) {
+    new EachLikeMatcher(values: [null,  arg], numberExamples: numberExamples)
   }
 
 }
