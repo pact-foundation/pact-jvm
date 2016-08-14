@@ -19,7 +19,7 @@ class TestServer {
   def startServer(): Unit = {
 
     val config = MockProviderConfig.createDefault(PactSpecVersion.V3)
-    val server = Server.http(config.port, config.hostname).handler(new Plan with SynchronousExecution with ServerErrorResponse {
+    val server = Server.http(config.getPort, config.getHostname).handler(new Plan with SynchronousExecution with ServerErrorResponse {
       def intent: Plan.Intent = {
         case req => {
           ResponseString(s"""["All Done $state"]""")
@@ -27,11 +27,10 @@ class TestServer {
       }
     })
 
-    this.url = new URL(s"http://${config.hostname}:${config.port}")
+    this.url = new URL(s"http://${config.getHostname}:${config.getPort}")
     this.server = server.start()
   }
 
   def stopServer() = server.stop()
-
 
 }

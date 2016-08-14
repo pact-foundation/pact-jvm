@@ -3,7 +3,6 @@ package au.com.dius.pact.consumer;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.MockHttpsProviderConfig;
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.MockProviderConfig$;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
 import org.apache.commons.lang3.StringUtils;
@@ -44,9 +43,9 @@ public class PactProviderRule extends ExternalResource {
         this.provider = provider;
         this.target = target;
         if (host == null && port == null) {
-            config = MockProviderConfig$.MODULE$.createDefault(pactVersion);
+            config = MockProviderConfig.createDefault(pactVersion);
         } else {
-            config = MockProviderConfig$.MODULE$.apply(port, host, pactVersion);
+            config = MockProviderConfig.httpConfig(host, port, pactVersion);
         }
     }
 
@@ -63,7 +62,7 @@ public class PactProviderRule extends ExternalResource {
                             Object target) {
       this(provider, host, port, pactVersion, target);
       if (https) {
-        config = MockHttpsProviderConfig.apply(port, host, pactVersion);
+        config = MockHttpsProviderConfig.httpsConfig(host, port, pactVersion);
       }
     }
 

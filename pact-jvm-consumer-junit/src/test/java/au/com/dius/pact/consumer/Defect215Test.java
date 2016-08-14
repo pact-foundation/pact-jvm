@@ -9,9 +9,6 @@ import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.util.Collections;
-import java.util.Map;
-
 /**
  * @author bbarker
  * @since 2/17/16
@@ -69,7 +66,7 @@ public class Defect215Test {
   public void runTest() {
     RestAssured
       .given()
-      .port(mockProvider.getConfig().port())
+      .port(mockProvider.getConfig().getPort())
       .contentType(ContentType.JSON)
       .body(getUser())
       .post("/some-service/users")
@@ -81,7 +78,7 @@ public class Defect215Test {
 
     RestAssured
       .given()
-      .port(mockProvider.getConfig().port())
+      .port(mockProvider.getConfig().getPort())
       .contentType(ContentType.JSON)
       .get(SOME_SERVICE_USER + EXPECTED_USER_ID)
       .then()

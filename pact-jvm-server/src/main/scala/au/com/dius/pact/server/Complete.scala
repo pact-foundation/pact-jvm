@@ -32,12 +32,12 @@ object Complete {
     } yield {
       mockProvider.stop()
       
-      ConsumerPactRunner.writeIfMatching(pact, sessionResults, mockProvider.config.pactVersion) match {
+      ConsumerPactRunner.writeIfMatching(pact, sessionResults, mockProvider.config.getPactVersion) match {
         case PactVerified => pactWritten(new Response(200, JavaConversions.mapAsJavaMap(ResponseUtils.CrossSiteHeaders)),
-          mockProvider.config.port)
+          mockProvider.config.getPort)
         case error => pactWritten(new Response(400,
           JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/json")), toJson(error)),
-          mockProvider.config.port)
+          mockProvider.config.getPort)
       }
     }
     

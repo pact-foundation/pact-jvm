@@ -34,6 +34,6 @@ public class PactRuleWithRandomPortTest {
     @PactVerification("test_provider")
     public void runTest() throws IOException {
         Map expectedResponse = new HashMap();
-        assertEquals(new ConsumerClient("http://localhost:" + rule.getConfig().port()).getAsMap("/", ""), expectedResponse);
+        assertEquals(new ConsumerClient("http://localhost:" + rule.getConfig().getPort()).getAsMap("/", ""), expectedResponse);
     }
 }

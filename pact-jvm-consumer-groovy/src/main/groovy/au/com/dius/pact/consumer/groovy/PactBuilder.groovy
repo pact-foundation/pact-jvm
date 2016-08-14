@@ -5,7 +5,6 @@ import au.com.dius.pact.consumer.StatefulMockProvider
 import au.com.dius.pact.consumer.VerificationResult
 import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.MockProviderConfig
-import au.com.dius.pact.model.MockProviderConfig$
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.PactFragment
 import au.com.dius.pact.model.PactReader
@@ -220,9 +219,9 @@ class PactBuilder extends BaseBuilder {
     MockProviderConfig config
     def pactVersion = options.specificationVersion ?: PactSpecVersion.V3
     if (port == null) {
-      config = MockProviderConfig$.MODULE$.createDefault(pactVersion)
+      config = MockProviderConfig.createDefault(pactVersion)
     } else {
-      config = MockProviderConfig$.MODULE$.apply(port, 'localhost', pactVersion)
+      config = MockProviderConfig.httpConfig('localhost', port, pactVersion)
     }
 
     fragment.runConsumer(config, closure)

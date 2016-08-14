@@ -54,7 +54,7 @@ module has a Jar file named pact-jvm-consumer_2.10. The full name of the file is
 released, but is currently build against Scala 2.11. All Groovy code is compiled with Invoke Dynamic instruction turned
 on (indy version).
 
-3.2.x versions implement the V2 pact spec, while the 3.3.x versions implement the V3 spec.
+3.2.x/3.3.x versions implement the V2 pact spec, while the 3.5.x versions implement the V3 spec.
 
 ### 2.x branch [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-logging_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-logging_2.11)
 
