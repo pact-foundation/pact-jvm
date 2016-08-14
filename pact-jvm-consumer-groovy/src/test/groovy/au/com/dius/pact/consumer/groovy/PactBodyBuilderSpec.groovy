@@ -77,25 +77,25 @@ class PactBodyBuilderSpec extends Specification {
     then:
     service.interactions.size() == 1
     asJavaMap(service.interactions[0].request.matchingRules) == [
-      '$.body.name': [regex: '\\w+'],
-      '$.body.surname': ['regex': '\\w+'],
-      '$.body.position': ['regex': 'staff|contractor'],
-      '$.body.hexCode': [regex: '[0-9a-fA-F]+'],
-      '$.body.hexCode2': [regex: '[0-9a-fA-F]+'],
+      '$.body.name': [match: 'regex', regex: '\\w+'],
+      '$.body.surname': [match: 'regex', 'regex': '\\w+'],
+      '$.body.position': [match: 'regex', 'regex': 'staff|contractor'],
+      '$.body.hexCode': [match: 'regex', regex: '[0-9a-fA-F]+'],
+      '$.body.hexCode2': [match: 'regex', regex: '[0-9a-fA-F]+'],
       '$.body.id': [match: 'type'],
       '$.body.id2': [match: 'type'],
       '$.body.salary': [match: 'decimal'],
-      '$.body.localAddress': [regex: '(\\d{1,3}\\.)+\\d{1,3}'],
-      '$.body.localAddress2': [regex: '(\\d{1,3}\\.)+\\d{1,3}'],
+      '$.body.localAddress': [match: 'regex', regex: '(\\d{1,3}\\.)+\\d{1,3}'],
+      '$.body.localAddress2': [match: 'regex', regex: '(\\d{1,3}\\.)+\\d{1,3}'],
       '$.body.age2': [match: 'integer'],
       '$.body.ts': [timestamp: 'yyyy-MM-dd\'T\'HH:mm:ss'],
       '$.body.timestamp': [timestamp: 'yyyy/MM/dd - HH:mm:ss.S'],
       '$.body.values[3]': [match: 'number'],
       '$.body.role.dob': [date: 'MM/dd/yyyy'],
-      '$.body.role.id': [regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'],
-      '$.body.roles[0].id': [regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}']
+      '$.body.role.id': [match: 'regex', regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'],
+      '$.body.roles[0].id': [match: 'regex', regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}']
     ]
-    asJavaMap(service.interactions[0].response.matchingRules) == ['$.body.name': [regex: '\\w+']]
+    asJavaMap(service.interactions[0].response.matchingRules) == ['$.body.name': [match: 'regex', regex: '\\w+']]
 
     keys == ['name', 'surname', 'position', 'happy', 'hexCode', 'hexCode2', 'id', 'id2', 'localAddress',
       'localAddress2', 'age', 'age2', 'salary', 'timestamp', 'ts', 'values', 'role', 'roles'] as Set
@@ -193,6 +193,73 @@ class PactBodyBuilderSpec extends Specification {
     body.orders.first().lineItems.every { it.keySet() == ['id', 'amount', 'productCodes'] as Set }
     body.orders.first().lineItems.first().productCodes.size == 4
     body.orders.first().lineItems.first().productCodes.every { it.keySet() == ['code'] as Set }
+  }
+
+  def 'arrays of primitives with extra examples'() {
+    given:
+    service {
+      uponReceiving('a request with array matching with primitives')
+      withAttributes(method: 'get', path: '/')
+      withBody {
+        permissions eachLike(3, 'GRANT')
+        permissions2 minLike(2, 3, 100)
+        permissions3 maxLike(4, 3, 'GRANT')
+      }
+      willRespondWith(
+        status: 200,
+        headers: ['Content-Type': 'text/html']
+      )
+    }
+
+    when:
+    service.fragment()
+    def body = new JsonSlurper().parseText(service.interactions[0].request.body.value)
+
+    then:
+    service.interactions.size() == 1
+    asJavaMap(service.interactions[0].request.matchingRules) == [
+      '$.body.permissions': [match: 'type'],
+      '$.body.permissions2': [match: 'type', min: 2],
+      '$.body.permissions3': [match: 'type', max: 4]
+    ]
+    body.permissions == ['GRANT'] * 3
+    body.permissions2 == [100] * 3
+    body.permissions3 == ['GRANT'] * 3
+  }
+
+  def 'arrays of primitives with extra examples and matchers'() {
+    given:
+    service {
+      uponReceiving('a request with array matching with primitives and matchers')
+      withAttributes(method: 'get', path: '/')
+      withBody {
+        permissions eachLike(3, regexp(~/\w+/))
+        permissions2 minLike(2, 3, integer())
+        permissions3 maxLike(4, 3, ~/\d+/)
+      }
+      willRespondWith(
+        status: 200,
+        headers: ['Content-Type': 'text/html']
+      )
+    }
+
+    when:
+    service.fragment()
+    def body = new JsonSlurper().parseText(service.interactions[0].request.body.value)
+
+    then:
+    service.interactions.size() == 1
+    asJavaMap(service.interactions[0].request.matchingRules) == [
+      '$.body.permissions': [match: 'type'],
+      '$.body.permissions[*]': [match: 'regex', regex: '\\w+'],
+      '$.body.permissions2': [match: 'type', min: 2],
+      '$.body.permissions2[*]': [match: 'integer'],
+      '$.body.permissions3': [match: 'type', max: 4],
+      '$.body.permissions3[*]': [match: 'regex', regex: '\\d+']
+    ]
+    body.permissions.size == 3
+    body.permissions2.size == 3
+    body.permissions3.size == 3
   }
 
   def 'pretty prints bodies by default'() {

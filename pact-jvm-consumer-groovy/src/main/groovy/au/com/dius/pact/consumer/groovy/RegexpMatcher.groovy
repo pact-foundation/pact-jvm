@@ -8,7 +8,7 @@ import com.mifmif.common.regex.Generex
 class RegexpMatcher extends Matcher {
 
   def getMatcher() {
-    [regex: values[0].toString()]
+    [match: 'regex', regex: values[0].toString()]
   }
 
   def getValue() {
