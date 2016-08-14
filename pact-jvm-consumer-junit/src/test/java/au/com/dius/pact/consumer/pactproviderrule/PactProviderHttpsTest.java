@@ -59,7 +59,7 @@ public class PactProviderHttpsTest {
     public void runTest() throws IOException {
         LOGGER.info("Config: " + mockTestProvider.getConfig());
         MockHttpsProviderConfig config = (MockHttpsProviderConfig) mockTestProvider.getConfig();
-        LOGGER.info("Config Cert: " + config.httpsCertificate().certificate());
+        LOGGER.info("Config Cert: " + config.getHttpsCertificate().certificate());
         Assert.assertEquals(new ConsumerHttpsClient(mockTestProvider.getConfig().url()).options("/second"), 200);
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);

@@ -1,7 +1,6 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.MockProviderConfig$;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
 import org.junit.Assert;
@@ -65,7 +64,7 @@ public class PactDefectTest {
             .body(expectedResponseBody)
             .toFragment();
         VerificationResult result = pactFragment.runConsumer(
-            MockProviderConfig$.MODULE$.createDefault(PactSpecVersion.V2),
+            MockProviderConfig.createDefault(PactSpecVersion.V2),
             new TestRun() {
                 @Override
                 public void run(MockProviderConfig config) {

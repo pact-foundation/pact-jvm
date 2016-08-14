@@ -40,6 +40,6 @@ class ConsumerPactRunner(server: MockProvider) {
   }
   
   def runAndWritePact(pact: Pact, userCode: Runnable): VerificationResult =
-    runAndWritePact(pact, server.config.pactVersion)(userCode.run(), (u:Unit) => None)
+    runAndWritePact(pact, server.config.getPactVersion)(userCode.run(), (u:Unit) => None)
   
 }

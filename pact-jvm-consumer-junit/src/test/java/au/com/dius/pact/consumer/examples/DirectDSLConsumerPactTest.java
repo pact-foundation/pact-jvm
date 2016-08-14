@@ -7,9 +7,7 @@ import au.com.dius.pact.consumer.TestRun;
 import au.com.dius.pact.consumer.VerificationResult;
 import au.com.dius.pact.consumer.exampleclients.ProviderClient;
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.MockProviderConfig$;
 import au.com.dius.pact.model.PactFragment;
-import org.apache.http.entity.ContentType;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -38,7 +36,7 @@ public class DirectDSLConsumerPactTest {
                 .body("{\"hello\": \"harry\"}")
                 .toFragment();
 
-        MockProviderConfig config = MockProviderConfig$.MODULE$.createDefault();
+        MockProviderConfig config = MockProviderConfig.createDefault();
         VerificationResult result = pactFragment.runConsumer(config, new TestRun() {
             @Override
             public void run(MockProviderConfig config) {

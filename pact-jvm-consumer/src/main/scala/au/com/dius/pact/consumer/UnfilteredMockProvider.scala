@@ -14,7 +14,7 @@ class UnfilteredMockProvider(val config: MockProviderConfig) extends StatefulMoc
   type UnfilteredRequest = ureq.HttpRequest[unetty.ReceivedMessage]
   type UnfilteredResponse = uresp.ResponseFunction[netty.HttpResponse]
 
-  private val server = unetty.Server.http(config.port, config.hostname).chunked(1048576).handler(Routes)
+  private val server = unetty.Server.http(config.getPort, config.getHostname).chunked(1048576).handler(Routes)
   
   @Sharable
   object Routes extends unettyc.Plan
