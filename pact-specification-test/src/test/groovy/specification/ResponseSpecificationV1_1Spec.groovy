@@ -10,12 +10,12 @@ import spock.lang.Unroll
 class ResponseSpecificationV1_1Spec extends BaseResponseSpec {
 
   @Unroll
-  def '#type #test #matchDesc'() {
+  def '#type/#name - #test #matchDesc'() {
     expect:
     new ResponseMatching(DiffConfig$.MODULE$.apply(true, false)).responseMismatches(expected, actual).isEmpty() == match
 
     where:
-    [type, test, match, matchDesc, expected, actual] << loadTestCases('/v1.1/response/')
+    [type, name, test, match, matchDesc, expected, actual] << loadTestCases('/v1.1/response/')
   }
 
 }
