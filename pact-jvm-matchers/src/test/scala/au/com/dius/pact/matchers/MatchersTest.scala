@@ -36,9 +36,132 @@ class MatchersTest extends Specification {
 
   }
 
-  "should default to equality matching if the matcher is unknown" in {
-    Matchers.matcher(Map("other" -> "something")) must be(EqualsMatcher)
-    Matchers.matcher(Map()) must be(EqualsMatcher)
+  "matchers lookup" should {
+
+    "returns EqualsMatcher" should {
+
+      "if the definition is empty" in {
+        Matchers.matcher(Map()) must be(EqualsMatcher)
+      }
+
+      "if the definition is invalid" in {
+        Matchers.matcher(Map("other" -> "something")) must be(EqualsMatcher)
+      }
+
+      "if the matcher type is unknown" in {
+        Matchers.matcher(Map("match" -> "something")) must be(EqualsMatcher)
+      }
+
+      "if the matcher type is equality" in {
+        Matchers.matcher(Map("match" -> "equality")) must be(EqualsMatcher)
+      }
+
+    }
+
+    "returns RegexpMatcher" should {
+
+      "if the matcher type is regex" in {
+        Matchers.matcher(Map("match" -> "regex")) must be(RegexpMatcher)
+      }
+
+      "if the matcher definition contains a regex" in {
+        Matchers.matcher(Map("test" -> "regex", "regex" -> "\\w+")) must be(RegexpMatcher)
+      }
+
+    }
+
+    "returns TypeMatcher" should {
+
+      "if the matcher type is 'type' and there is no min or max" in {
+        Matchers.matcher(Map("match" -> "type")) must be(TypeMatcher)
+      }
+
+      "if the matcher type is 'number'" in {
+        Matchers.matcher(Map("match" -> "number")) must be(TypeMatcher)
+      }
+
+      "if the matcher type is 'integer'" in {
+        Matchers.matcher(Map("match" -> "integer")) must be(TypeMatcher)
+      }
+
+      "if the matcher type is 'real'" in {
+        Matchers.matcher(Map("match" -> "real")) must be(TypeMatcher)
+      }
+
+      "if the matcher type is 'decimal'" in {
+        Matchers.matcher(Map("match" -> "decimal")) must be(TypeMatcher)
+      }
+
+    }
+
+    "returns MinimumMatcher" should {
+
+      "if the matcher type is 'type' and there is a min" in {
+        Matchers.matcher(Map("match" -> "type", "min" -> "1")) must be(MinimumMatcher)
+      }
+
+      "if the matcher type is 'min'" in {
+        Matchers.matcher(Map("match" -> "min")) must be(MinimumMatcher)
+      }
+
+      "if the matcher definition contains a min" in {
+        Matchers.matcher(Map("test" -> "min", "min" -> "1")) must be(MinimumMatcher)
+      }
+
+    }
+
+    "returns MaximumMatcher" should {
+
+      "if the matcher type is 'type' and there is a max" in {
+        Matchers.matcher(Map("match" -> "type", "max" -> "1")) must be(MaximumMatcher)
+      }
+
+      "if the matcher type is 'max'" in {
+        Matchers.matcher(Map("match" -> "max")) must be(MaximumMatcher)
+      }
+
+      "if the matcher definition contains a max" in {
+        Matchers.matcher(Map("test" -> "max", "max" -> "1")) must be(MaximumMatcher)
+      }
+
+    }
+
+    "returns TimestampMatcher" should {
+
+      "if the matcher type is 'timestamp'" in {
+        Matchers.matcher(Map("match" -> "timestamp")) must be(TimestampMatcher)
+      }
+
+      "if the matcher definition contains a timestamp" in {
+        Matchers.matcher(Map("test" -> "max", "timestamp" -> "1")) must be(TimestampMatcher)
+      }
+
+    }
+
+    "returns TimeMatcher" should {
+
+      "if the matcher type is 'time'" in {
+        Matchers.matcher(Map("match" -> "time")) must be(TimeMatcher)
+      }
+
+      "if the matcher definition contains a time" in {
+        Matchers.matcher(Map("test" -> "max", "time" -> "1")) must be(TimeMatcher)
+      }
+
+    }
+
+    "returns DateMatcher" should {
+
+      "if the matcher type is 'date'" in {
+        Matchers.matcher(Map("match" -> "date")) must be(DateMatcher)
+      }
+
+      "if the matcher definition contains a date" in {
+        Matchers.matcher(Map("test" -> "max", "date" -> "1")) must be(DateMatcher)
+      }
+
+    }
+
   }
 
   "should default to a matching defined at a parent level" in {

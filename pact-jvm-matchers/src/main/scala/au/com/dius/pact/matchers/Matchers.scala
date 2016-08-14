@@ -62,7 +62,7 @@ object Matchers extends StrictLogging {
 
   def matcher(matcherDef: Map[String, Any]) : Matcher = {
     if (matcherDef.isEmpty) {
-      logger.warn(s"Unrecognised empty matcher, defaulting to equality matching")
+      logger.warn(s"Matcher definition is empty, defaulting to equality matching")
       EqualsMatcher
     } else if (matcherDef.contains("match")) {
       matcherDef("match") match {
@@ -75,23 +75,31 @@ object Matchers extends StrictLogging {
         case "integer" => TypeMatcher
         case "real" => TypeMatcher
         case "decimal" => TypeMatcher
-        case "timestamp" => TypeMatcher
+        case "timestamp" => TimestampMatcher
         case "time" => TimeMatcher
         case "date" => DateMatcher
         case "min" => MinimumMatcher
         case "max" => MaximumMatcher
+        case "equality" => EqualsMatcher
+        case m =>
+          logger.warn(s"Unrecognised matcher $m, defaulting to equality matching")
+          EqualsMatcher
       }
-    } else matcherDef.keys.head match {
-      case "regex" => RegexpMatcher
-      case "match" => TypeMatcher
-      case "timestamp" => TimestampMatcher
-      case "time" => TimeMatcher
-      case "date" => DateMatcher
-      case "min" => MinimumMatcher
-      case "max" => MaximumMatcher
-      case m =>
-        logger.warn(s"Unrecognised matcher $m, defaulting to equality matching")
-        EqualsMatcher
+    } else if (matcherDef.contains("regex")) {
+      RegexpMatcher
+    } else if (matcherDef.contains("min")) {
+      MinimumMatcher
+    } else if (matcherDef.contains("max")) {
+      MaximumMatcher
+    } else if (matcherDef.contains("timestamp")) {
+      TimestampMatcher
+    } else if (matcherDef.contains("time")) {
+      TimeMatcher
+    } else if (matcherDef.contains("date")) {
+      DateMatcher
+    } else {
+      logger.warn(s"Unrecognised matcher definition $matcherDef, defaulting to equality matching")
+      EqualsMatcher
     }
   }
 
@@ -119,7 +127,7 @@ object EqualsMatcher extends Matcher with StrictLogging {
 
 object RegexpMatcher extends Matcher with StrictLogging {
   def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-    val regex = matcherDef.get("regex").get.toString
+    val regex = matcherDef("regex").toString
     val matches: Boolean = Matchers.safeToString(actual).matches(regex)
     logger.debug(s"comparing ${valueOf(actual)} with regexp $regex at $path -> $matches")
     if (matches) {
@@ -228,7 +236,7 @@ object TypeMatcher extends Matcher with StrictLogging {
 
   def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
     if (matcherDef.contains("match")) {
-      matcherDef.get("match").get.toString match {
+      matcherDef("match").toString match {
         case "type" => matchType[Mismatch](path, expected, actual, mismatchFn)
         case "number" => matchNumber[Mismatch](path, expected, actual, mismatchFn)
         case "integer" => matchInteger[Mismatch](path, expected, actual, mismatchFn)
@@ -246,7 +254,7 @@ object TypeMatcher extends Matcher with StrictLogging {
 
 object TimestampMatcher extends Matcher with StrictLogging {
   def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-    val pattern = matcherDef.get("timestamp").get.toString
+    val pattern = matcherDef.getOrElse("timestamp", "yyyy-MM-dd HH:mm:ssZZZ").toString
     logger.debug(s"comparing ${valueOf(actual)} to timestamp pattern $pattern at $path")
     try {
       DateUtils.parseDate(Matchers.safeToString(actual), pattern)
@@ -259,7 +267,7 @@ object TimestampMatcher extends Matcher with StrictLogging {
 
 object TimeMatcher extends Matcher with StrictLogging {
   def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-    val pattern = matcherDef.get("time").get.toString
+    val pattern = matcherDef.getOrElse("time", "HH:mm:ss").toString
     logger.debug(s"comparing ${valueOf(actual)} to time pattern $pattern at $path")
     try {
       DateUtils.parseDate(Matchers.safeToString(actual), pattern)
@@ -272,7 +280,7 @@ object TimeMatcher extends Matcher with StrictLogging {
 
 object DateMatcher extends Matcher with StrictLogging {
   def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-    val pattern = matcherDef.get("date").get.toString
+    val pattern = matcherDef.getOrElse("date", "yyyy-MM-dd").toString
     logger.debug(s"comparing ${valueOf(actual)} to date pattern $pattern at $path")
     try {
       DateUtils.parseDate(Matchers.safeToString(actual), pattern)
@@ -285,7 +293,7 @@ object DateMatcher extends Matcher with StrictLogging {
 
 object MinimumMatcher extends Matcher with StrictLogging {
   def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-    val value = matcherDef.get("min").get match {
+    val value = matcherDef("min") match {
       case i: Int => i
       case j: Integer => j.toInt
       case o => o.toString.toInt
@@ -311,7 +319,7 @@ object MinimumMatcher extends Matcher with StrictLogging {
 
 object MaximumMatcher extends Matcher with StrictLogging {
   def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-    val value = matcherDef.get("max").get match {
+    val value = matcherDef("max") match {
       case i: Int => i
       case j: Integer => j.toInt
       case o => o.toString.toInt
