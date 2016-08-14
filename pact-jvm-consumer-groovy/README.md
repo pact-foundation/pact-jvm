@@ -349,6 +349,40 @@ __Version 3.2.4/2.4.6+__ You can specify the number of example items to generate
 
 This will create an example user list with 3 users.
 
+__Version 3.2.13/2.4.14__ The each like matchers have been updated to work with primitive types.
+
+```groovy
+withBody {
+        permissions eachLike(3, 'GRANT')
+}
+```
+
+will generate the following JSON
+
+```json
+{
+    "permissions": ["GRANT", "GRANT", "GRANT"]
+}
+```
+
+and matchers
+
+```json
+{
+    "$.body.permissions": {"match": "type"}
+}
+```
+
+and now you can even get more fancy
+
+```groovy
+withBody {
+        permissions eachLike(3, regexp(~/\w+/))
+        permissions2 minLike(2, 3, integer())
+        permissions3 maxLike(4, 3, ~/\d+/)
+}
+```
+
 ## Changing the directory pact files are written to (2.1.9+)
 
 By default, pact files are written to `target/pacts`, but this can be overwritten with the `pact.rootDir` system property.
