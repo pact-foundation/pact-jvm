@@ -35,6 +35,13 @@ class RequestResponsePact extends BasePact {
     ]
   }
 
+  @Override
+  void mergeInteractions(List<Interaction> interactions) {
+    this.interactions = (this.interactions + (interactions as List<RequestResponseInteraction>))
+      .unique { it.description }
+    sortInteractions()
+  }
+
   @SuppressWarnings('SpaceAroundMapEntryColon')
   static Map interactionToMap(RequestResponseInteraction interaction, PactSpecVersion pactSpecVersion) {
     def interactionJson = [

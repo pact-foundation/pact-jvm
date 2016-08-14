@@ -53,6 +53,12 @@ class MessagePact extends V3Pact {
     ]
   }
 
+  @Override
+  void mergeInteractions(List<Interaction> interactions) {
+    messages = (messages + (interactions as List<Message>)).unique { it.description }
+    sortInteractions()
+  }
+
   List<Interaction> getInteractions() {
     messages as List<Interaction>
   }
@@ -67,7 +73,7 @@ class MessagePact extends V3Pact {
     if (!(other instanceof MessagePact)) {
       throw new InvalidPactException("Unable to merge pact $other as it is not a MessagePact")
     }
-    messages = (messages + (other.interactions as List<Message>)).unique { it.description }
+    mergeInteractions(other.interactions)
     this
   }
 

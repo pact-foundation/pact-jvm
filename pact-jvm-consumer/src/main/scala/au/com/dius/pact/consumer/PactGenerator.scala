@@ -33,7 +33,7 @@ object PactGenerator {
     
 }
 
-case class PactGenerator(pacts: Map[String, Pact], conflicts: List[MergeConflict]) extends StrictLogging {
+case class PactGenerator(pacts: Map[String, Pact], conflicts: List[String]) extends StrictLogging {
   import PactGenerator._
   
   def failed: Boolean = conflicts.nonEmpty
@@ -47,11 +47,13 @@ case class PactGenerator(pacts: Map[String, Pact], conflicts: List[MergeConflict
       PactGenerator(pacts + (pactFileName -> p), conflicts)
 
     existingPact.fold(directlyAddPact(pact)) { existing =>
-      PactMerge.merge(pact, existing) match {
-        case MergeSuccess(merged) => directlyAddPact(merged)
-        case c @ MergeConflict(_) => PactGenerator(pacts, c :: conflicts)
+      val result = PactMerge.merge(pact, existing)
+      if (result.getOk) {
+        directlyAddPact(result.getResult)
+      } else {
+        PactGenerator(pacts, result.getMessage :: conflicts)
       }
-    } 
+    }
   }
 
   def writeAllToFile(pactVersion: PactSpecVersion): Unit = {

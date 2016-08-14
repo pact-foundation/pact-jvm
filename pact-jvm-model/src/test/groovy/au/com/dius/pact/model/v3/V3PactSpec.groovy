@@ -55,6 +55,11 @@ class V3PactSpec extends Specification {
                   metadata: metadata
                 ]
             }
+
+            @Override
+            void mergeInteractions(List<Interaction> interactions) {
+
+            }
         }
 
         when:
@@ -86,6 +91,11 @@ class V3PactSpec extends Specification {
                     ],
                     metadata: metadata
                 ]
+            }
+
+            @Override
+            void mergeInteractions(List<Interaction> interactions) {
+
             }
 
             @SuppressWarnings('UnusedMethodParameter')
@@ -140,6 +150,11 @@ class V3PactSpec extends Specification {
                 ]
             }
 
+            @Override
+            void mergeInteractions(List<Interaction> interactions) {
+
+            }
+
             @SuppressWarnings('UnusedMethodParameter')
             protected File fileForPact(String pactDir) {
                 pactFile
@@ -186,6 +201,11 @@ class V3PactSpec extends Specification {
                   ],
                   metadata: metadata
                 ]
+            }
+
+            @Override
+            void mergeInteractions(List<Interaction> interactions) {
+
             }
 
             @SuppressWarnings('UnusedMethodParameter')
