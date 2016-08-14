@@ -3,7 +3,6 @@ package specification
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.PactSpecVersion
 import groovy.json.JsonSlurper
-import groovy.util.logging.Slf4j
 import spock.lang.Specification
 
 class BaseRequestSpec extends Specification {

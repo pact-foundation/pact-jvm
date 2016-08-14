@@ -2,11 +2,8 @@ package specification
 
 import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.RequestMatching
-import groovy.util.logging.Slf4j
-import spock.lang.Ignore
 import spock.lang.Unroll
 
-@Slf4j
 class RequestSpecificationV3Spec extends BaseRequestSpec {
 
   public static final WIP_LIST = [
@@ -33,13 +30,14 @@ class RequestSpecificationV3Spec extends BaseRequestSpec {
     RequestMatching.requestMismatches(expected, actual).isEmpty() == match
 
     where:
-    [type, name, test, match, matchDesc, expected, actual] << wipFilter(loadTestCases('/v3/request/', PactSpecVersion.V3))
+    [type, name, test, match, matchDesc, expected, actual] << wipFilter(
+      loadTestCases('/v3/request/', PactSpecVersion.V3))
   }
 
   static List wipFilter(List tests) {
     tests.collect {
       def test = "${it[0]}/${it[1]}"
-      if (WIP_LIST.any{ it == test }) {
+      if (WIP_LIST.any { it == test }) {
         it[3] = !it[3]
         it[0] = 'WIP ' + it[0]
         it

@@ -35,7 +35,7 @@ class ResponseSpecificationV3Spec extends BaseResponseSpec {
   static List wipFilter(List tests) {
     tests.collect {
       def test = "${it[0]}/${it[1]}"
-      if (WIP_LIST.any{ it == test }) {
+      if (WIP_LIST.any { it == test }) {
         it[3] = !it[3]
         it[0] = 'WIP ' + it[0]
         it
