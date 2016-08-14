@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-groovy_2.11`
-* version-id = `2.3.x` or `3.1.x`
+* version-id = `2.4.x` or `3.2.x`
 
 ##Usage
 
@@ -19,7 +19,7 @@ to define your pacts. For a full example, have a look at the example JUnit `Exam
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.1.0'
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.2.14'
     }
 
 Then create an instance of the `PactBuilder` in your test.
@@ -349,7 +349,7 @@ __Version 3.2.4/2.4.6+__ You can specify the number of example items to generate
 
 This will create an example user list with 3 users.
 
-__Version 3.2.13/2.4.14__ The each like matchers have been updated to work with primitive types.
+__Version 3.2.13/2.4.14+__ The each like matchers have been updated to work with primitive types.
 
 ```groovy
 withBody {
