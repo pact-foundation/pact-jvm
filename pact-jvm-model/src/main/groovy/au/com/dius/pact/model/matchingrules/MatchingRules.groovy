@@ -80,8 +80,18 @@ class MatchingRules {
     }
   }
 
+  /**
+   * If the rules are empty
+   */
   boolean isEmpty() {
     rules.isEmpty()
+  }
+
+  /**
+   * If the rules are not empty
+   */
+  boolean isNotEmpty() {
+    !isEmpty()
   }
 
   boolean hasCategory(String category) {

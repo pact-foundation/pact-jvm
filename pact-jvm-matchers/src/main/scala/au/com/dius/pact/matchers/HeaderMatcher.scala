@@ -1,6 +1,7 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.{HeaderMismatchFactory, HeaderMismatch}
+import au.com.dius.pact.model.matchingrules.MatchingRules
+import au.com.dius.pact.model.{HeaderMismatch, HeaderMismatchFactory}
 
 object HeaderMatcher {
 
@@ -31,12 +32,11 @@ object HeaderMatcher {
     }
   }
 
-  def compareHeader(headerKey: String, expected: String, actual: String, matchers: Option[Map[String, Map[String, Any]]]) = {
+  def compareHeader(headerKey: String, expected: String, actual: String, matchers: MatchingRules) = {
     def stripWhiteSpaceAfterCommas(in: String): String = in.replaceAll(",[ ]*", ",")
 
-    if (Matchers.matcherDefined(Seq("$", "headers", headerKey), matchers)) {
-      Matchers.domatch[HeaderMismatch](matchers, Seq("$", "headers", headerKey), expected,
-        actual, HeaderMismatchFactory).headOption
+    if (Matchers.matcherDefined("header", Seq(headerKey), matchers)) {
+      Matchers.domatch[HeaderMismatch](matchers, "header", Seq(headerKey), expected, actual, HeaderMismatchFactory).headOption
     }
     else if (headerKey.equalsIgnoreCase("Content-Type")) matchContentType(expected, actual)
     else if (stripWhiteSpaceAfterCommas(expected) == stripWhiteSpaceAfterCommas(actual)) None
