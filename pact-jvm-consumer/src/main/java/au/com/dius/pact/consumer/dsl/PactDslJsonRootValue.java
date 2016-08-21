@@ -1,6 +1,9 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.InvalidMatcherException;
+import au.com.dius.pact.model.matchingrules.MatchingRule;
+import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
+import au.com.dius.pact.model.matchingrules.TypeMatcher;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -216,7 +219,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue stringType(String example) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(example);
-    value.setMatcher(value.matchType());
+    value.setMatcher(new TypeMatcher());
     return value;
   }
 
@@ -234,7 +237,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue numberType(Number number) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(number);
-    value.setMatcher(value.matchType());
+    value.setMatcher(new TypeMatcher());
     return value;
   }
 
@@ -252,7 +255,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue integerType(Long number) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(number);
-    value.setMatcher(value.matchType("integer"));
+    value.setMatcher(new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER));
     return value;
   }
 
@@ -263,7 +266,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue integerType(Integer number) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(number);
-    value.setMatcher(value.matchType("integer"));
+    value.setMatcher(new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER));
     return value;
   }
 
@@ -281,7 +284,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue decimalType(BigDecimal number) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(number);
-    value.setMatcher(value.matchType("decimal"));
+    value.setMatcher(new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL));
     return value;
   }
 
@@ -292,7 +295,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue decimalType(Double number) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(number);
-    value.setMatcher(value.matchType("decimal"));
+    value.setMatcher(new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL));
     return value;
   }
 
@@ -310,7 +313,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue booleanType(Boolean example) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(example);
-    value.setMatcher(value.matchType());
+    value.setMatcher(new TypeMatcher());
     return value;
   }
 
@@ -502,8 +505,8 @@ public class PactDslJsonRootValue extends DslPart {
     this.value = value;
   }
 
-  public void setMatcher(Map<String,Object> matcher) {
-    matchers.put("", matcher);
+  public void setMatcher(MatchingRule matcher) {
+    matchers.addRule(matcher);
   }
 
   /**

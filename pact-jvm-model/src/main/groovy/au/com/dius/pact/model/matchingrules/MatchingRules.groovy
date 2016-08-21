@@ -50,11 +50,16 @@ class MatchingRules {
     }
   }
 
-  private Category addCategory(String category) {
+  Category addCategory(String category) {
     if (!rules.containsKey(category)) {
       rules[category] = new Category(category)
     }
     rules[category]
+  }
+
+  Category addCategory(Category category) {
+    rules[category.name] = category
+    category
   }
 
   /**

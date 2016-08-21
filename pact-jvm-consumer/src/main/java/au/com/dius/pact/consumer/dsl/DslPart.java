@@ -1,6 +1,14 @@
 package au.com.dius.pact.consumer.dsl;
 
-import au.com.dius.pact.model.MatchingRules;
+import au.com.dius.pact.model.matchingrules.Category;
+import au.com.dius.pact.model.matchingrules.DateMatcher;
+import au.com.dius.pact.model.matchingrules.MatchingRules;
+import au.com.dius.pact.model.matchingrules.MaxTypeMatcher;
+import au.com.dius.pact.model.matchingrules.MinTypeMatcher;
+import au.com.dius.pact.model.matchingrules.RegexMatcher;
+import au.com.dius.pact.model.matchingrules.TimeMatcher;
+import au.com.dius.pact.model.matchingrules.TimestampMatcher;
+import au.com.dius.pact.model.matchingrules.TypeMatcher;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +24,7 @@ public abstract class DslPart {
 
     protected final DslPart parent;
     protected final String root;
-    protected MatchingRules matchers = new MatchingRules();
+    protected Category matchers = new Category("body");
     protected boolean closed = false;
 
     public DslPart(DslPart parent, String root) {
@@ -241,64 +249,36 @@ public abstract class DslPart {
      */
     public abstract DslPart closeObject();
 
-    public MatchingRules getMatchers() {
-        MatchingRules matchersWithPrefix = new MatchingRules();
-        for (String matcherName : matchers.keySet()) {
-            matchersWithPrefix.put("$.body" + matcherName, matchers.get(matcherName));
-        }
-        return matchersWithPrefix;
+    public Category getMatchers() {
+        return matchers;
     }
 
-    public void setMatchers(MatchingRules matchers) {
+    public void setMatchers(Category matchers) {
         this.matchers = matchers;
     }
 
-    protected Map<String, Object> matchType() {
-        return matchType("type");
+    protected RegexMatcher regexp(String regex) {
+        return new RegexMatcher(regex);
     }
 
-    protected Map<String, Object> matchType(String type) {
-        Map<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put(MATCH, type);
-        return jsonObject;
+    protected TimestampMatcher matchTimestamp(String format) {
+        return new TimestampMatcher(format);
     }
 
-    protected Map<String, Object> regexp(String regex) {
-        Map<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put("regex", regex);
-        return jsonObject;
+    protected DateMatcher matchDate(String format) {
+        return new DateMatcher(format);
     }
 
-    protected Map<String, Object> matchTimestamp(String format) {
-        Map<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put("timestamp", format);
-        return jsonObject;
+    protected TimeMatcher matchTime(String format) {
+        return new TimeMatcher(format);
     }
 
-    protected Map<String, Object> matchDate(String format) {
-        Map<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put("date", format);
-        return jsonObject;
+    protected MinTypeMatcher matchMin(Integer min) {
+        return new MinTypeMatcher(min);
     }
 
-    protected Map<String, Object> matchTime(String format) {
-        Map<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put("time", format);
-        return jsonObject;
-    }
-
-    protected Map<String, Object> matchMin(Integer min) {
-        Map<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put("min", min);
-        jsonObject.put(MATCH, "type");
-        return jsonObject;
-    }
-
-    protected Map<String, Object> matchMax(Integer max) {
-        Map<String, Object> jsonObject = new HashMap<String, Object>();
-        jsonObject.put("max", max);
-        jsonObject.put(MATCH, "type");
-        return jsonObject;
+    protected MaxTypeMatcher matchMax(Integer max) {
+        return new MaxTypeMatcher(max);
     }
 
     public PactDslJsonBody asBody() {

@@ -2,7 +2,9 @@ package au.com.dius.pact.model
 
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.{ConsumerTestVerification, VerificationResult}
+import au.com.dius.pact.model.matchingrules.MatchingRules
 import org.json.JSONObject
+
 import scala.collection.JavaConverters._
 
 object PactFragmentBuilder {
@@ -61,9 +63,9 @@ object PactFragmentBuilder {
                  query: String = "",
                  headers: Map[String, String] = Map(),
                  body: String = "",
-                 matchers: Map[String, Map[String, String]] = Map()): DescribingResponse = {
+                 matchers: MatchingRules = new MatchingRules()): DescribingResponse = {
       DescribingResponse(new Request(method, path, PactReader.queryStringToMap(query), headers, OptionalBody.body(body),
-        CollectionUtils.scalaMMapToJavaMMap(matchers)))
+        matchers))
     }
 
     case class DescribingResponse(request: Request) {
@@ -78,7 +80,7 @@ object PactFragmentBuilder {
       def willRespondWith(status: Int = 200,
                           headers: Map[String, String] = Map(),
                           maybeBody: Option[String] = None,
-                          matchers: Map[String, Map[String, String]] = Map()): PactWithAtLeastOneRequest = {
+                          matchers: MatchingRules = new MatchingRules()): PactWithAtLeastOneRequest = {
         val optionalBody = maybeBody match {
           case Some(body) => OptionalBody.body(body)
           case None => OptionalBody.missing()
@@ -92,12 +94,14 @@ object PactFragmentBuilder {
             description,
             state.asJava,
             request,
-            new Response(status, headers, optionalBody, CollectionUtils.scalaMMapToJavaMMap(matchers)))))
+            new Response(status, headers, optionalBody, matchers))))
       }
 
       def willRespondWith(status: Int,
                           headers: Map[String, String],
                           bodyAndMatchers: DslPart): PactWithAtLeastOneRequest = {
+        val rules = new MatchingRules()
+        rules.addCategory(bodyAndMatchers.getMatchers)
         builder(
           consumer,
           provider,
@@ -106,7 +110,7 @@ object PactFragmentBuilder {
             description,
             state.asJava,
             request,
-            new Response(status, headers, OptionalBody.body(bodyAndMatchers.toString), bodyAndMatchers.getMatchers))))
+            new Response(status, headers, OptionalBody.body(bodyAndMatchers.toString), rules))))
       }
     }
   }

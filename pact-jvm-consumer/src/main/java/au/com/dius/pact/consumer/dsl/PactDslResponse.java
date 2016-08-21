@@ -8,6 +8,8 @@ import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.model.Request;
 import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.model.Response;
+import au.com.dius.pact.model.matchingrules.MatchingRules;
+import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
@@ -28,7 +30,7 @@ public class PactDslResponse {
     private int responseStatus = 200;
     private Map<String, String> responseHeaders = new HashMap<String, String>();
     private OptionalBody responseBody = OptionalBody.missing();
-    private Map<String, Map<String, Object>> responseMatchers = new HashMap<String, Map<String, Object>>();
+    private MatchingRules responseMatchers = new MatchingRules();
 
     public PactDslResponse(ConsumerPactBuilder consumerPactBuilder, PactDslRequestWithPath request) {
         this.consumerPactBuilder = consumerPactBuilder;
@@ -105,10 +107,7 @@ public class PactDslResponse {
      */
     public PactDslResponse body(DslPart body) {
         DslPart parent = body.close();
-        for (String matcherName : parent.matchers.keySet()) {
-            responseMatchers.put("$.body" + matcherName, parent.matchers.get(matcherName));
-        }
-
+        responseMatchers.addCategory(parent.getMatchers());
         if (parent.getBody() != null) {
             responseBody = OptionalBody.body(parent.getBody().toString());
         } else {
@@ -152,9 +151,7 @@ public class PactDslResponse {
      * @param headerExample Example value to use
      */
     public PactDslResponse matchHeader(String header, String regexp, String headerExample) {
-        HashMap<String, Object> matcher = new HashMap<String, Object>();
-        matcher.put("regex", regexp);
-        responseMatchers.put("$.headers." + header, matcher);
+        responseMatchers.addCategory("header").addRule(header, new RegexMatcher(regexp));
         responseHeaders.put(header, headerExample);
         return this;
     }

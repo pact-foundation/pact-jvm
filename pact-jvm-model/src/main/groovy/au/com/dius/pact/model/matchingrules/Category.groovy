@@ -44,4 +44,11 @@ class Category {
   List<MatchingRule> allMatchingRules() {
     matchingRules.values().flatten()
   }
+
+  void addRules(String item, List<MatchingRule> rules) {
+    if (!matchingRules.containsKey(item)) {
+      matchingRules[item] = []
+    }
+    matchingRules[item].addAll(rules)
+  }
 }

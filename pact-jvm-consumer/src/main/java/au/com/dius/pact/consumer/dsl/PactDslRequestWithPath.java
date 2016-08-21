@@ -5,6 +5,8 @@ import au.com.dius.pact.model.Consumer;
 import au.com.dius.pact.model.OptionalBody;
 import au.com.dius.pact.model.Provider;
 import au.com.dius.pact.model.ProviderState;
+import au.com.dius.pact.model.matchingrules.MatchingRules;
+import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
@@ -29,7 +31,7 @@ public class PactDslRequestWithPath {
     Map<String, String> requestHeaders = new HashMap<String, String>();
     String query;
     OptionalBody requestBody = OptionalBody.missing();
-    Map<String, Map<String, Object>> requestMatchers = new HashMap<String, Map<String, Object>>();
+    MatchingRules requestMatchers = new MatchingRules();
 
     PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
                            String consumerName,
@@ -41,7 +43,7 @@ public class PactDslRequestWithPath {
                            Map<String, String> requestHeaders,
                            String query,
                            OptionalBody requestBody,
-                           Map<String, Map<String, Object>> requestMatchers) {
+                           MatchingRules requestMatchers) {
         this.consumerPactBuilder = consumerPactBuilder;
         this.requestMatchers = requestMatchers;
         this.consumer = new Consumer(consumerName);
@@ -148,9 +150,7 @@ public class PactDslRequestWithPath {
      */
     public PactDslRequestWithPath body(DslPart body) {
         DslPart parent = body.close();
-        for (String matcherName : parent.matchers.keySet()) {
-            requestMatchers.put("$.body" + matcherName, parent.matchers.get(matcherName));
-        }
+        requestMatchers.addCategory(parent.getMatchers());
         requestBody = OptionalBody.body(parent.toString());
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
             requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
@@ -197,9 +197,7 @@ public class PactDslRequestWithPath {
      * @param pathRegex regular expression to use to match paths
      */
     public PactDslRequestWithPath matchPath(String pathRegex, String path) {
-        HashMap<String, Object> matcher = new HashMap<String, Object>();
-        matcher.put("regex", pathRegex);
-        requestMatchers.put("$.path", matcher);
+        requestMatchers.addCategory("path").addRule(new RegexMatcher(pathRegex));
         this.path = path;
         return this;
     }
@@ -222,9 +220,7 @@ public class PactDslRequestWithPath {
      * @param headerExample Example value to use
      */
     public PactDslRequestWithPath matchHeader(String header, String regex, String headerExample) {
-        HashMap<String, Object> matcher = new HashMap<String, Object>();
-        matcher.put("regex", regex);
-        requestMatchers.put("$.headers." + header, matcher);
+        requestMatchers.addCategory("header").addRule(header, new RegexMatcher(regex));
         requestHeaders.put(header, headerExample);
         return this;
     }

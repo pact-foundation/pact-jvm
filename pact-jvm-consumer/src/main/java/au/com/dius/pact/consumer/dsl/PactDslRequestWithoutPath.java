@@ -2,6 +2,8 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.OptionalBody;
+import au.com.dius.pact.model.matchingrules.MatchingRules;
+import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
@@ -22,7 +24,7 @@ public class PactDslRequestWithoutPath {
     private Map<String, String> requestHeaders = new HashMap<String, String>();
     private String query;
     private OptionalBody requestBody = OptionalBody.missing();
-    private Map<String, Map<String, Object>> requestMatchers = new HashMap<String, Map<String, Object>>();
+    private MatchingRules requestMatchers = new MatchingRules();
     private String consumerName;
     private String providerName;
 
@@ -116,10 +118,7 @@ public class PactDslRequestWithoutPath {
      */
     public PactDslRequestWithoutPath body(DslPart body) {
         DslPart parent = body.close();
-        requestMatchers = new HashMap<String, Map<String, Object>>();
-        for (String matcherName : parent.matchers.keySet()) {
-            requestMatchers.put("$.body" + matcherName, parent.matchers.get(matcherName));
-        }
+        requestMatchers.addCategory(parent.matchers);
         requestBody = OptionalBody.body(parent.toString());
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
             requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
@@ -166,9 +165,7 @@ public class PactDslRequestWithoutPath {
      * @param pathRegex regular expression to use to match paths
      */
     public PactDslRequestWithPath matchPath(String pathRegex, String path) {
-        HashMap<String, Object> matcher = new HashMap<String, Object>();
-        matcher.put("regex", pathRegex);
-        requestMatchers.put("$.path", matcher);
+        requestMatchers.addCategory("path").addRule(new RegexMatcher(pathRegex));
         return new PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state, description, path,
                 requestMethod, requestHeaders, query, requestBody, requestMatchers);
     }
