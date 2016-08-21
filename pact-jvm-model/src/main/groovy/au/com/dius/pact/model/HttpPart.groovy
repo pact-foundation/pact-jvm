@@ -1,5 +1,7 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.model.matchingrules.MatchingRules
+
 /**
  * Base trait for an object that represents part of an http message
  */
@@ -10,7 +12,7 @@ trait HttpPart {
   abstract OptionalBody getBody()
   abstract Map<String, String> getHeaders()
   abstract void setHeaders(Map<String, String> headers)
-  abstract Map<String, Map<String, Object>> getMatchingRules()
+  abstract MatchingRules getMatchingRules()
 
   String mimeType() {
     def contentTypeKey = headers?.keySet()?.find { CONTENT_TYPE.equalsIgnoreCase(it) }

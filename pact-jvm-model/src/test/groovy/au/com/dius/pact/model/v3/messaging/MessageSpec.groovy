@@ -32,7 +32,7 @@ class MessageSpec extends Specification {
     ]
 
     when:
-    Message message = new Message().fromMap(map)
+    Message message = Message.fromMap(map)
 
     then:
     message.providerState == 'V3 state'
@@ -44,10 +44,26 @@ class MessageSpec extends Specification {
     def map = [providerState: 'test state']
 
     when:
-    Message message = new Message().fromMap(map)
+    Message message = Message.fromMap(map)
 
     then:
     message.providerState == 'test state'
     message.providerStates == [new ProviderState('test state')]
+  }
+
+  def 'delegates to the matching rules to parse matchers'() {
+    given:
+    def json = [
+      matchingRules: [
+        'stuff': [:]
+      ]
+    ]
+
+    when:
+    def message = Message.fromMap(json)
+
+    then:
+    !message.matchingRules.empty
+    message.matchingRules.hasCategory('stuff')
   }
 }

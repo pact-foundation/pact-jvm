@@ -1,5 +1,7 @@
 package au.com.dius.pact.consumer.dsl;
 
+import au.com.dius.pact.model.MatchingRules;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +16,7 @@ public abstract class DslPart {
 
     protected final DslPart parent;
     protected final String root;
-    protected Map<String, Map<String, Object>> matchers = new HashMap<String, Map<String, Object>>();
+    protected MatchingRules matchers = new MatchingRules();
     protected boolean closed = false;
 
     public DslPart(DslPart parent, String root) {
@@ -239,15 +241,15 @@ public abstract class DslPart {
      */
     public abstract DslPart closeObject();
 
-    public Map<String, Map<String, Object>> getMatchers() {
-        Map<String, Map<String, Object>> matchersWithPrefix = new HashMap<String, Map<String, Object>>();
+    public MatchingRules getMatchers() {
+        MatchingRules matchersWithPrefix = new MatchingRules();
         for (String matcherName : matchers.keySet()) {
             matchersWithPrefix.put("$.body" + matcherName, matchers.get(matcherName));
         }
         return matchersWithPrefix;
     }
 
-    public void setMatchers(Map<String, Map<String, Object>> matchers) {
+    public void setMatchers(MatchingRules matchers) {
         this.matchers = matchers;
     }
 

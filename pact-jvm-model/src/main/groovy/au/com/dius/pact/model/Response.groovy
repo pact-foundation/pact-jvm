@@ -1,5 +1,6 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.model.matchingrules.MatchingRules
 import groovy.transform.Canonical
 
 /**
@@ -11,14 +12,14 @@ class Response implements HttpPart {
   Integer status = 200
   Map<String, String> headers = [:]
   OptionalBody body = OptionalBody.missing()
-  Map<String, Map<String, Object>> matchingRules = [:]
+  MatchingRules matchingRules = new MatchingRules()
 
   static Response fromMap(def map) {
     new Response().with {
       status = map.status as Integer
       headers = map.headers
       body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
-      matchingRules = map.matchingRules
+      matchingRules = MatchingRules.fromMap(map.matchingRules)
       it
     }
   }

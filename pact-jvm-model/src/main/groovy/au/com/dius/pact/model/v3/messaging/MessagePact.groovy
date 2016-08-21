@@ -34,7 +34,7 @@ class MessagePact extends BasePact {
   static MessagePact fromMap(Map map) {
     def consumer = Consumer.fromMap(map.consumer as Map)
     def provider = Provider.fromMap(map.provider as Map)
-    def messages = map.messages.collect { new Message().fromMap((Map) it) }
+    def messages = map.messages.collect { Message.fromMap((Map) it) }
     def metadata = map.metadata as Map
     new MessagePact(provider, consumer, messages, metadata)
   }
