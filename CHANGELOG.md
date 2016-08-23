@@ -1,5 +1,12 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.4.15 - Bugfix Release
+
+* 8130e84 - update Groovy DSL to allow each like matchers to work with primitives #308 (Ronald Holshausen, Sun Aug 14 11:28:10 2016 +1000)
+* 78d0ef0 - Fix regression in gradle pact publish task #307 (Ronald Holshausen, Thu Aug 11 21:48:08 2016 +1000)
+* ab05763 - show the correct requirements when @Pact is used on a method that doesn't have the right signature (Carwin Zimmermann, Thu Aug 11 10:48:22 2016 +1000)
+* 73a3cb6 - bump version to 2.4.15 (Ronald Holshausen, Sun Aug 7 14:24:31 2016 +1000)
+
 # 2.4.14 - Bugfix Release
 
 * 0f496ce - fix codenarc (Ronald Holshausen, Sun Aug 7 12:59:31 2016 +1000)
