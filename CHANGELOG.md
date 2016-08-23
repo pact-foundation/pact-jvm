@@ -1,5 +1,12 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.4.15 - Bugfix Release
+
+* 8130e84 - update Groovy DSL to allow each like matchers to work with primitives #308 (Ronald Holshausen, Sun Aug 14 11:28:10 2016 +1000)
+* 78d0ef0 - Fix regression in gradle pact publish task #307 (Ronald Holshausen, Thu Aug 11 21:48:08 2016 +1000)
+* ab05763 - show the correct requirements when @Pact is used on a method that doesn't have the right signature (Carwin Zimmermann, Thu Aug 11 10:48:22 2016 +1000)
+* 73a3cb6 - bump version to 2.4.15 (Ronald Holshausen, Sun Aug 7 14:24:31 2016 +1000)
+
 # 3.2.13 - Bugfix Release
 
 * a4c1d8d - update Groovy DSL to allow each like matchers to work with primitives #308 (Ronald Holshausen, Sun Aug 14 11:28:10 2016 +1000)
@@ -190,6 +197,33 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 2d1c91a - converted the V1 spec tests to Groovy + Spock (Ronald Holshausen, Fri Jul 8 14:47:32 2016 +1000)
 * dacbb36 - update the tags for the gradle plugin (Ronald Holshausen, Wed Jul 6 15:55:04 2016 +1000)
 * 88583c9 - bump version to 3.2.10 (Ronald Holshausen, Wed Jul 6 15:51:12 2016 +1000)
+
+# 2.4.12 - Bugfix + Feature Release
+
+* 58c1032 - fixes to run on scala 2.10 (Ronald Holshausen, Fri Jul 15 12:14:13 2016 +1000)
+* e7bf921 - Merge branch 'master' into v2.x (Ronald Holshausen, Fri Jul 15 12:01:41 2016 +1000)
+* f0d93a0 - do not include optional missing attributes in the generated pact files #248 (Ronald Holshausen, Fri Jul 15 11:30:49 2016 +1000)
+* d41d1af - added the XML testcases to the V3 spec tests (Ronald Holshausen, Wed Jul 13 11:46:52 2016 +1000)
+* 2b8f5ac - codenarc fixes (Ronald Holshausen, Wed Jul 13 11:05:35 2016 +1000)
+* 63a782f - Implemented V2 matching on XML (Ronald Holshausen, Wed Jul 13 10:18:26 2016 +1000)
+* 1224b6a - make sure the test classpath is resolved before running the maven plugin (Ronald Holshausen, Sun Jul 10 15:13:02 2016 +1000)
+* c44d8e2 - do not use recursion when converting old pact formats (Ronald Holshausen, Sun Jul 10 14:23:48 2016 +1000)
+* 1cb3d56 - Merge pull request #286 from whahoo/prevent_pact_body_changes_on_json_transform (Ronald Holshausen, Sun Jul 10 13:43:25 2016 +1000)
+* 90dfced - set the classpath to the test classpath in the maven plugin, and allow it to be overridden #285 (Ronald Holshausen, Sun Jul 10 13:24:50 2016 +1000)
+* 482b88b - replicate the scala compiler sttings from v2.x branch for travis build (Ronald Holshausen, Sun Jul 10 12:24:23 2016 +1000)
+* 69c9613 - correct comment in v2 testcase (Ronald Holshausen, Sun Jul 10 12:18:19 2016 +1000)
+* 8954935 - Change double quotes to single quotes in body sample of PactReaderTransformSpec.groovy. After running CodeNarc check (Simon Harrison, Sat Jul 9 22:44:34 2016 +1000)
+* a3dc0eb - Merge branch 'master' into prevent_pact_body_changes_on_json_transform (Simon Harrison, Sat Jul 9 22:32:28 2016 +1000)
+* baf6a27 - Prevent recursion into the body elements of the pact file (Simon Harrison, Sat Jul 9 21:53:14 2016 +1000)
+* 4f59656 - converted the V2 spec tests to Groovy + Spock (Ronald Holshausen, Fri Jul 8 15:25:58 2016 +1000)
+* 1845eea - Fix codenarc errors in the spec tests (Ronald Holshausen, Fri Jul 8 15:15:34 2016 +1000)
+* c7a207c - converted the V1.1 spec tests to Groovy + Spock (Ronald Holshausen, Fri Jul 8 15:02:02 2016 +1000)
+* 2d1c91a - converted the V1 spec tests to Groovy + Spock (Ronald Holshausen, Fri Jul 8 14:47:32 2016 +1000)
+* dacbb36 - update the tags for the gradle plugin (Ronald Holshausen, Wed Jul 6 15:55:04 2016 +1000)
+* 88583c9 - bump version to 3.2.10 (Ronald Holshausen, Wed Jul 6 15:51:12 2016 +1000)
+* a3724b0 - update changelog for release 3.2.9 (Ronald Holshausen, Wed Jul 6 15:32:41 2016 +1000)
+* 6f884b7 - update changelog for release 2.4.11 (Ronald Holshausen, Wed Jul 6 15:05:06 2016 +1000)
+* 77dcda1 - bump version to 2.4.12 (Ronald Holshausen, Wed Jul 6 15:25:32 2016 +1000)
 
 # 3.2.9 - Bugfix Release
 
