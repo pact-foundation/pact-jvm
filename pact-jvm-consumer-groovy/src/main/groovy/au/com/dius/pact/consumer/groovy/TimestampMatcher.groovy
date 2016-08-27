@@ -15,7 +15,7 @@ class TimestampMatcher extends Matcher {
   }
 
   def getMatcher() {
-    [timestamp: getPattern()]
+    new au.com.dius.pact.model.matchingrules.TimestampMatcher(getPattern())
   }
 
   def getValue() {

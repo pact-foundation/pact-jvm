@@ -9,14 +9,15 @@ import java.util.regex.Pattern
 /**
  * Base class for DSL matcher methods
  */
-@SuppressWarnings('DuplicateNumberLiteral')
+@SuppressWarnings(['DuplicateNumberLiteral', 'ConfusingMethodName'])
 class Matchers {
 
   static final String HEXADECIMAL = '[0-9a-fA-F]+'
   static final String IP_ADDRESS = '(\\d{1,3}\\.)+\\d{1,3}'
   static final String UUID_REGEX = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
   private static final int TEN = 10
-  public static final String TYPE = 'type'
+  private static final String TYPE = 'type'
+  private static final String DECIMAL = 'decimal'
 
   static regexp(Pattern re, String value = null) {
     regexp(re.toString(), value)
@@ -56,11 +57,11 @@ class Matchers {
    */
   @Deprecated
   static real(Number value = null) {
-    new TypeMatcher(values: ['real', value ?: (RandomStringUtils.randomNumeric(TEN) as BigDecimal) / 100.0])
+    new TypeMatcher(values: [DECIMAL, value ?: (RandomStringUtils.randomNumeric(TEN) as BigDecimal) / 100.0])
   }
 
   static decimal(Number value = null) {
-    new TypeMatcher(values: ['decimal', value ?: (RandomStringUtils.randomNumeric(TEN) as BigDecimal) / 100.0])
+    new TypeMatcher(values: [DECIMAL, value ?: (RandomStringUtils.randomNumeric(TEN) as BigDecimal) / 100.0])
   }
 
   static integer(Long value = null) {

@@ -108,6 +108,6 @@ class MatchingRules {
   }
 
   Category rulesForCategory(String category) {
-    rules[category]
+    addCategory(category)
   }
 }

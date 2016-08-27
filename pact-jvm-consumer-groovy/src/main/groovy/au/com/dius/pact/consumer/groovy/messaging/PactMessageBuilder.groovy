@@ -97,7 +97,7 @@ class PactMessageBuilder extends BaseBuilder {
     closure.delegate = body
     closure.call()
     messages.last().contents = OptionalBody.body(body.body)
-    messages.last().matchingRules.putAll(body.matchers)
+    messages.last().matchingRules.addCategory(body.matchers)
 
     this
   }

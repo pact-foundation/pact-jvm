@@ -15,7 +15,7 @@ class DateMatcher extends Matcher {
   }
 
   def getMatcher() {
-    [date: getPattern()]
+    new au.com.dius.pact.model.matchingrules.DateMatcher(getPattern())
   }
 
   def getValue() {

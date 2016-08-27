@@ -1,9 +1,14 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.model.matchingrules.MaxTypeMatcher
+import au.com.dius.pact.model.matchingrules.MinTypeMatcher
+import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.model.matchingrules.RegexMatcher
+import au.com.dius.pact.model.matchingrules.TimestampMatcher
+import au.com.dius.pact.model.matchingrules.TypeMatcher
+import au.com.dius.pact.model.matchingrules.DateMatcher
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
-import scala.Option
-import scala.collection.JavaConverters
 import spock.lang.Specification
 
 class PactBodyBuilderSpec extends Specification {
@@ -73,29 +78,34 @@ class PactBodyBuilderSpec extends Specification {
     when:
     service.fragment()
     def keys = new JsonSlurper().parseText(service.interactions[0].request.body.value).keySet()
+    def requestMatchingRules = service.interactions[0].request.matchingRules
+    def bodyMatchingRules = requestMatchingRules.rulesForCategory('body').matchingRules
+    def responseMatchingRules = service.interactions[0].response.matchingRules
 
     then:
     service.interactions.size() == 1
-    asJavaMap(service.interactions[0].request.matchingRules) == [
-      '$.body.name': [match: 'regex', regex: '\\w+'],
-      '$.body.surname': [match: 'regex', 'regex': '\\w+'],
-      '$.body.position': [match: 'regex', 'regex': 'staff|contractor'],
-      '$.body.hexCode': [match: 'regex', regex: '[0-9a-fA-F]+'],
-      '$.body.hexCode2': [match: 'regex', regex: '[0-9a-fA-F]+'],
-      '$.body.id': [match: 'type'],
-      '$.body.id2': [match: 'type'],
-      '$.body.salary': [match: 'decimal'],
-      '$.body.localAddress': [match: 'regex', regex: '(\\d{1,3}\\.)+\\d{1,3}'],
-      '$.body.localAddress2': [match: 'regex', regex: '(\\d{1,3}\\.)+\\d{1,3}'],
-      '$.body.age2': [match: 'integer'],
-      '$.body.ts': [timestamp: 'yyyy-MM-dd\'T\'HH:mm:ss'],
-      '$.body.timestamp': [timestamp: 'yyyy/MM/dd - HH:mm:ss.S'],
-      '$.body.values[3]': [match: 'number'],
-      '$.body.role.dob': [date: 'MM/dd/yyyy'],
-      '$.body.role.id': [match: 'regex', regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'],
-      '$.body.roles[0].id': [match: 'regex', regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}']
-    ]
-    asJavaMap(service.interactions[0].response.matchingRules) == ['$.body.name': [match: 'regex', regex: '\\w+']]
+    requestMatchingRules.categories == ['body'] as Set
+    bodyMatchingRules['$.name'] == [new RegexMatcher('\\w+')]
+    bodyMatchingRules['$.surname'] == [new RegexMatcher('\\w+')]
+    bodyMatchingRules['$.position'] == [new RegexMatcher('staff|contractor')]
+    bodyMatchingRules['$.hexCode'] == [new RegexMatcher('[0-9a-fA-F]+')]
+    bodyMatchingRules['$.hexCode2'] == [new RegexMatcher('[0-9a-fA-F]+')]
+    bodyMatchingRules['$.id'] == [new TypeMatcher()]
+    bodyMatchingRules['$.id2'] == [new TypeMatcher()]
+    bodyMatchingRules['$.salary'] == [new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)]
+    bodyMatchingRules['$.localAddress'] == [new RegexMatcher('(\\d{1,3}\\.)+\\d{1,3}')]
+    bodyMatchingRules['$.localAddress2'] == [new RegexMatcher('(\\d{1,3}\\.)+\\d{1,3}')]
+    bodyMatchingRules['$.age2'] == [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)]
+    bodyMatchingRules['$.ts'] == [new TimestampMatcher('yyyy-MM-dd\'T\'HH:mm:ss')]
+    bodyMatchingRules['$.timestamp'] == [new TimestampMatcher('yyyy/MM/dd - HH:mm:ss.S')]
+    bodyMatchingRules['$.values[3]'] == [new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)]
+    bodyMatchingRules['$.role.dob'] == [new DateMatcher('MM/dd/yyyy')]
+    bodyMatchingRules['$.role.id'] == [
+      new RegexMatcher('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')]
+    bodyMatchingRules['$.roles[0].id'] == [
+      new RegexMatcher('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')]
+    responseMatchingRules.categories == ['body'] as Set
+    responseMatchingRules.rulesForCategory('body').matchingRules == ['$.name': [new RegexMatcher('\\w+')]]
 
     keys == ['name', 'surname', 'position', 'happy', 'hexCode', 'hexCode2', 'id', 'id2', 'localAddress',
       'localAddress2', 'age', 'age2', 'salary', 'timestamp', 'ts', 'values', 'role', 'roles'] as Set
@@ -130,14 +140,14 @@ class PactBodyBuilderSpec extends Specification {
 
     then:
     service.interactions.size() == 1
-    asJavaMap(service.interactions[0].request.matchingRules) == [
-        '$.body.orders': [max: 10, 'match': 'type'],
-        '$.body.orders[*].id': ['match': 'type'],
-        '$.body.orders[*].lineItems': ['min': 1, 'match': 'type'],
-        '$.body.orders[*].lineItems[*].id': [match: 'type'],
-        '$.body.orders[*].lineItems[*].amount': [match: 'number'],
-        '$.body.orders[*].lineItems[*].productCodes': ['match': 'type'],
-        '$.body.orders[*].lineItems[*].productCodes[*].code': [match: 'type']
+    service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules == [
+        '$.orders': [new MaxTypeMatcher(10)],
+        '$.orders[*].id': [new TypeMatcher()],
+        '$.orders[*].lineItems': [new MinTypeMatcher(1)],
+        '$.orders[*].lineItems[*].id': [new TypeMatcher()],
+        '$.orders[*].lineItems[*].amount': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)],
+        '$.orders[*].lineItems[*].productCodes': [new TypeMatcher()],
+        '$.orders[*].lineItems[*].productCodes[*].code': [new TypeMatcher()]
     ]
 
     keys == [
@@ -151,6 +161,7 @@ class PactBodyBuilderSpec extends Specification {
     ]
   }
 
+  @SuppressWarnings('AbcMetric')
   def 'arrays with matching with extra examples'() {
     given:
     service {
@@ -178,14 +189,14 @@ class PactBodyBuilderSpec extends Specification {
 
     then:
     service.interactions.size() == 1
-    asJavaMap(service.interactions[0].request.matchingRules) == [
-      '$.body.orders': [max: 10, 'match': 'type'],
-      '$.body.orders[*].id': ['match': 'type'],
-      '$.body.orders[*].lineItems': ['min': 1, 'match': 'type'],
-      '$.body.orders[*].lineItems[*].id': [match: 'type'],
-      '$.body.orders[*].lineItems[*].amount': [match: 'number'],
-      '$.body.orders[*].lineItems[*].productCodes': ['match': 'type'],
-      '$.body.orders[*].lineItems[*].productCodes[*].code': [match: 'type']
+    service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules == [
+      '$.orders': [new MaxTypeMatcher(10)],
+      '$.orders[*].id': [new TypeMatcher()],
+      '$.orders[*].lineItems': [new MinTypeMatcher(1)],
+      '$.orders[*].lineItems[*].id': [new TypeMatcher()],
+      '$.orders[*].lineItems[*].amount': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)],
+      '$.orders[*].lineItems[*].productCodes': [new TypeMatcher()],
+      '$.orders[*].lineItems[*].productCodes[*].code': [new TypeMatcher()]
     ]
     body.orders.size == 2
     body.orders.every { it.keySet() == ['id', 'lineItems'] as Set }
@@ -217,10 +228,10 @@ class PactBodyBuilderSpec extends Specification {
 
     then:
     service.interactions.size() == 1
-    asJavaMap(service.interactions[0].request.matchingRules) == [
-      '$.body.permissions': [match: 'type'],
-      '$.body.permissions2': [match: 'type', min: 2],
-      '$.body.permissions3': [match: 'type', max: 4]
+    service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules == [
+      '$.permissions': [new TypeMatcher()],
+      '$.permissions2': [new MinTypeMatcher(2)],
+      '$.permissions3': [new MaxTypeMatcher(4)]
     ]
     body.permissions == ['GRANT'] * 3
     body.permissions2 == [100] * 3
@@ -249,13 +260,13 @@ class PactBodyBuilderSpec extends Specification {
 
     then:
     service.interactions.size() == 1
-    asJavaMap(service.interactions[0].request.matchingRules) == [
-      '$.body.permissions': [match: 'type'],
-      '$.body.permissions[*]': [match: 'regex', regex: '\\w+'],
-      '$.body.permissions2': [match: 'type', min: 2],
-      '$.body.permissions2[*]': [match: 'integer'],
-      '$.body.permissions3': [match: 'type', max: 4],
-      '$.body.permissions3[*]': [match: 'regex', regex: '\\d+']
+    service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules == [
+      '$.permissions': [new TypeMatcher()],
+      '$.permissions[*]': [new RegexMatcher('\\w+')],
+      '$.permissions2': [new MinTypeMatcher(2)],
+      '$.permissions2[*]': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
+      '$.permissions3': [new MaxTypeMatcher(4)],
+      '$.permissions3[*]': [new RegexMatcher('\\d+')]
     ]
     body.permissions.size == 3
     body.permissions2.size == 3
@@ -411,14 +422,15 @@ class PactBodyBuilderSpec extends Specification {
 
     then:
     service.interactions.size() == 1
-    asJavaMap(service.interactions[0].request.matchingRules) == [
-      $/$.body['2']/$: [max: 10, 'match': 'type'],
-      $/$.body['2'][*].id/$: ['match': 'type'],
-      $/$.body['2'][*].lineItems/$: ['min': 1, 'match': 'type'],
-      $/$.body['2'][*].lineItems[*].id/$: [match: 'type'],
-      $/$.body['2'][*].lineItems[*]['10k-depreciation-bips']/$: [match: 'integer'],
-      $/$.body['2'][*].lineItems[*].productCodes/$: ['match': 'type'],
-      $/$.body['2'][*].lineItems[*].productCodes[*].code/$: [match: 'type']
+    service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules == [
+      $/$['2']/$: [new MaxTypeMatcher(10)],
+      $/$['2'][*].id/$: [new TypeMatcher()],
+      $/$['2'][*].lineItems/$: [new MinTypeMatcher(1)],
+      $/$['2'][*].lineItems[*].id/$: [new TypeMatcher()],
+      $/$['2'][*].lineItems[*]['10k-depreciation-bips']/$: [
+        new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
+      $/$['2'][*].lineItems[*].productCodes/$: [new TypeMatcher()],
+      $/$['2'][*].lineItems[*].productCodes[*].code/$: [new TypeMatcher()]
     ]
 
     keys == [
@@ -448,19 +460,4 @@ class PactBodyBuilderSpec extends Specification {
       set
   }
 
-  private asJavaMap(def map) {
-      if (map instanceof Option) {
-        if (map.defined) {
-          asJavaMap(map.get())
-        } else {
-          [:]
-        }
-      } else if (map instanceof scala.collection.Map) {
-        JavaConverters.mapAsJavaMapConverter(map).asJava().collectEntries {
-          [it.key, asJavaMap(it.value)]
-        }
-      } else {
-        map
-      }
-  }
 }

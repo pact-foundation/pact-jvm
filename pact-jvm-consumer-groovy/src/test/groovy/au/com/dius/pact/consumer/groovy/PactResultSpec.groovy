@@ -93,7 +93,7 @@ class PactResultSpec extends Specification {
          def e = thrown(PactFailedException)
          e.message.contains(
             'QueryMismatch(status,good,bad,Some(Expected \'good\' but received \'bad\' for query parameter ' +
-              '\'status\'),$.query.status.0)')
+              '\'status\'),status)')
     }
 
     def 'case when the test passes and there is a missing request'() {

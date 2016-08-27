@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.model.matchingrules.Category
 import groovy.json.JsonBuilder
 @SuppressWarnings('UnusedImport')
 import io.gatling.jsonpath.Parser$
@@ -16,12 +17,12 @@ class PactBodyBuilder extends BaseBuilder {
   public static final String END_LIST = ']'
   public static final String ALL_LIST_ITEMS = '[*]'
 
-  def matchers = [:]
+  def matchers = new Category('body')
   def mimetype = null
   Boolean prettyPrintBody = null
 
   private bodyRepresentation = [:]
-  private path = '$.body'
+  private path = '$'
   private final bodyStack = []
 
   String getBody() {
@@ -157,7 +158,7 @@ class PactBodyBuilder extends BaseBuilder {
 
   private setMatcherAttribute(Matcher value, String attributePath) {
     if (value.matcher) {
-      matchers[attributePath] = value.matcher
+      matchers.setRule(attributePath, value.matcher)
     }
     value.value
   }

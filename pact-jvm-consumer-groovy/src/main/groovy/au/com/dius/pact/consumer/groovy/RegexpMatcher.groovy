@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.model.matchingrules.RegexMatcher
 import com.mifmif.common.regex.Generex
 
 /**
@@ -8,7 +9,7 @@ import com.mifmif.common.regex.Generex
 class RegexpMatcher extends Matcher {
 
   def getMatcher() {
-    [match: 'regex', regex: values[0].toString()]
+    new RegexMatcher(values[0].toString())
   }
 
   def getValue() {

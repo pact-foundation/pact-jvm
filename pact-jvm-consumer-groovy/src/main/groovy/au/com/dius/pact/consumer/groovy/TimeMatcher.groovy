@@ -15,7 +15,7 @@ class TimeMatcher extends Matcher {
   }
 
   def getMatcher() {
-    [time: getPattern()]
+    new au.com.dius.pact.model.matchingrules.TimeMatcher(getPattern())
   }
 
   def getValue() {

@@ -1,12 +1,20 @@
 package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model.matchingrules.Category
+import au.com.dius.pact.model.matchingrules.DateMatcher
 import au.com.dius.pact.model.matchingrules.MatchingRule
+import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.model.matchingrules.RegexMatcher
 import au.com.dius.pact.model.matchingrules.RuleLogic
+import au.com.dius.pact.model.matchingrules.TimeMatcher
+import au.com.dius.pact.model.matchingrules.TimestampMatcher
+import au.com.dius.pact.model.matchingrules.TypeMatcher
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.time.DateUtils
 import scala.collection.Seq
 import scala.xml.Elem
+
+import java.text.ParseException
 
 @Slf4j
 class MatcherExecutor {
@@ -50,7 +58,17 @@ class MatcherExecutor {
   static <Mismatch> List<Mismatch> domatch(MatchingRule matcher, Seq<String> path, def expected, def actual,
                                            MismatchFactory<Mismatch> mismatchFn) {
     if (matcher instanceof RegexMatcher) {
-
+      matchRegex(matcher.regex, path, expected, actual, mismatchFn)
+    } else if (matcher instanceof TypeMatcher) {
+      matchType(path, expected, actual, mismatchFn)
+    } else if (matcher instanceof NumberTypeMatcher) {
+      matchNumber(matcher.numberType, path, expected, actual, mismatchFn)
+    } else if (matcher instanceof DateMatcher) {
+      matchDate(matcher.format, path, expected, actual, mismatchFn)
+    } else if (matcher instanceof TimeMatcher) {
+      matchTime(matcher.format, path, expected, actual, mismatchFn)
+    } else if (matcher instanceof TimestampMatcher) {
+      matchTimestamp(matcher.format, path, expected, actual, mismatchFn)
     } else {
       matchEquality(path, expected, actual, mismatchFn)
     }
@@ -66,87 +84,108 @@ class MatcherExecutor {
     }
   }
 
-  //object RegexpMatcher extends Matcher with StrictLogging {
-//  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-//    val regex = matcherDef("regex").toString
-//    val matches: Boolean = Matchers.safeToString(actual).matches(regex)
-//    logger.debug(s"comparing ${valueOf(actual)} with regexp $regex at $path -> $matches")
-//    if (matches) {
-//      List[Mismatch]()
-//    } else {
-//      List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to match '$regex'", path))
-//    }
-//  }
-//}
-//
-//object TypeMatcher extends Matcher with StrictLogging {
-//
-//  def matchType[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
-//    logger.debug(s"comparing type of ${valueOf(actual)} to ${valueOf(expected)} at $path")
-//    (actual, expected) match {
-//      case (a: String, e: String) => List[Mismatch]()
-//      case (a: Number, e: Number) => List[Mismatch]()
-//      case (a: Boolean, e: Boolean) => List[Mismatch]()
-//      case (a: List[_], e: List[_]) => List[Mismatch]()
-//      case (a: Map[_, _], e: Map[_, _]) => List[Mismatch]()
-//      case (a: Elem, e: Elem) if a.label == e.label => List[Mismatch]()
-//      case (_, null) =>
-//        if (actual == null) {
-//          List[Mismatch]()
-//        } else {
-//          List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to be null", path))
-//        }
-//      case default => List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to be the same type as ${valueOf(expected)}", path))
-//    }
-//  }
-//
-//  def matchNumber[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
-//    logger.debug(s"comparing type of ${valueOf(actual)} to Number at $path")
-//    (actual, expected) match {
-//      case (a: Number, _) => List[Mismatch]()
-//      case (_, null) =>
-//        if (actual == null) {
-//          List[Mismatch]()
-//        } else {
-//          List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to be null", path))
-//        }
-//      case default => List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to be a number", path))
-//    }
-//  }
-//
-//  def matchInteger[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
-//    logger.debug(s"comparing type of ${valueOf(actual)} to Integer at $path")
-//    (actual, expected) match {
-//      case (a: Integer, _) => List[Mismatch]()
-//      case (a: Long, _) => List[Mismatch]()
-//      case (a: BigInt, _) => List[Mismatch]()
-//      case (_, null) =>
-//        if (actual == null) {
-//          List[Mismatch]()
-//        } else {
-//          List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to be null", path))
-//        }
-//      case default => List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to be an integer", path))
-//    }
-//  }
-//
-//  def matchDecimal[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
-//    logger.debug(s"comparing type of ${valueOf(actual)} to Real at $path")
-//    (actual, expected) match {
-//      case (_: Float, _) => List[Mismatch]()
-//      case (_: Double, _) => List[Mismatch]()
-//      case (_: BigDecimal, _) => List[Mismatch]()
-//      case (_: java.math.BigDecimal, _) => List[Mismatch]()
-//      case (_, null) =>
-//        if (actual == null) {
-//          List[Mismatch]()
-//        } else {
-//          List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to be null", path))
-//        }
-//      case default => List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to be a decimal number", path))
-//    }
-//  }
-//
+  static <Mismatch> List<Mismatch> matchRegex(String regex, Seq<String> path, Object expected, Object actual, MismatchFactory<Mismatch> mismatchFactory) {
+    def matches = safeToString(actual).matches(regex)
+    log.debug("comparing ${valueOf(actual)} with regexp $regex at $path -> $matches")
+    if (matches) {
+      []
+    } else {
+      [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to match '$regex", path) ]
+    }
+  }
+
+  static <Mismatch> List<Mismatch> matchType(Seq<String> path, Object expected, Object actual,
+                                             MismatchFactory<Mismatch> mismatchFactory) {
+    log.debug("comparing type of ${valueOf(actual)} to ${valueOf(expected)} at $path")
+    if (expected instanceof String && actual instanceof String
+      || expected instanceof Number && actual instanceof Number
+      || expected instanceof Boolean && actual instanceof Boolean
+      || expected instanceof List && actual instanceof List
+      || expected instanceof Map && actual instanceof Map
+      || expected instanceof Elem && actual instanceof Elem && actual.label.equals(expected.label)) {
+      []
+    } else if (expected == null) {
+      if (actual == null) {
+        []
+      } else {
+        [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be null", path) ]
+      }
+    } else {
+      [ mismatchFactory.create(expected, actual,
+        "Expected ${valueOf(actual)} to be the same type as ${valueOf(expected)}", path) ]
+    }
+  }
+
+  static def <Mismatch, Mismatch> List<Mismatch> matchNumber(NumberTypeMatcher.NumberType numberType, Seq<String> path,
+                                                             def expected, def actual,
+                                                             MismatchFactory<Mismatch> mismatchFactory) {
+    if (expected == null && actual != null) {
+      return [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be null", path) ]
+    } else {
+      switch (numberType) {
+        case NumberTypeMatcher.NumberType.NUMBER:
+          log.debug("comparing type of ${valueOf(actual)} to a number at $path")
+          if (!(actual instanceof Number)) {
+            return [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be a number", path) ]
+          }
+          break
+        case NumberTypeMatcher.NumberType.INTEGER:
+          log.debug("comparing type of ${valueOf(actual)} to an integer at $path")
+          if (!(actual instanceof Integer) && !(actual instanceof Long) && !(actual instanceof BigInteger)) {
+            return [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be an integer", path) ]
+          }
+          break
+        case NumberTypeMatcher.NumberType.DECIMAL:
+          log.debug("comparing type of ${valueOf(actual)} to a decimal at $path")
+          if (!(actual instanceof Float) && !(actual instanceof Double) && !(actual instanceof BigDecimal)) {
+            return [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be a decimal number",
+              path) ]
+          }
+          break
+      }
+    }
+    []
+  }
+
+  static <Mismatch> List<Mismatch> matchDate(String format, Seq<String> path, Object expected, Object actual,
+                                             MismatchFactory<Mismatch> mismatchFactory) {
+    def pattern = format ?: 'yyyy-MM-dd'
+    log.debug("comparing ${valueOf(actual)} to date pattern $pattern at $path")
+    try {
+      DateUtils.parseDate(safeToString(actual), pattern)
+      []
+    } catch (ParseException e) {
+      [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to match a date of '$pattern': " +
+        "${e.getMessage()}", path) ]
+    }
+  }
+
+  static <Mismatch> List<Mismatch> matchTime(String format, Seq<String> path, Object expected, Object actual,
+                                             MismatchFactory<Mismatch> mismatchFactory) {
+    def pattern = format ?: 'HH:mm:ss'
+    log.debug("comparing ${valueOf(actual)} to time pattern $pattern at $path")
+    try {
+      DateUtils.parseDate(safeToString(actual), pattern)
+      []
+    } catch (ParseException e) {
+      [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to match a time of '$pattern': " +
+        "${e.getMessage()}", path) ]
+    }
+  }
+
+  static <Mismatch> List<Mismatch> matchTimestamp(String format, Seq<String> path, Object expected, Object actual,
+                                             MismatchFactory<Mismatch> mismatchFactory) {
+    def pattern = format ?: 'yyyy-MM-dd HH:mm:ssZZZ'
+    log.debug("comparing ${valueOf(actual)} to timestamp pattern $pattern at $path")
+    try {
+      DateUtils.parseDate(safeToString(actual), pattern)
+      []
+    } catch (ParseException e) {
+      [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to match a timestamp of '$pattern': " +
+        "${e.getMessage()}", path) ]
+    }
+  }
+
 //  def matchTimestamp[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
 //    logger.debug(s"comparing ${valueOf(actual)} as Timestamp at $path")
 //    try {
@@ -174,63 +213,6 @@ class MatcherExecutor {
 //      case _ => List(mismatchFn.create(expected, actual, s"Array matcher $matcher is not defined", path))
 //    }
 //  }
-//
-//  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-//    if (matcherDef.contains("match")) {
-//      matcherDef("match").toString match {
-//        case "type" => matchType[Mismatch](path, expected, actual, mismatchFn)
-//        case "number" => matchNumber[Mismatch](path, expected, actual, mismatchFn)
-//        case "integer" => matchInteger[Mismatch](path, expected, actual, mismatchFn)
-//        case "decimal" => matchDecimal[Mismatch](path, expected, actual, mismatchFn)
-//        case "real" => matchDecimal[Mismatch](path, expected, actual, mismatchFn)
-//        case "timestamp" => matchTimestamp[Mismatch](path, expected, actual, mismatchFn)
-//        case _ => List(mismatchFn.create(expected, actual, "type matcher is mis-configured", path))
-//      }
-//    } else {
-//      logger.warn("Matcher definition does not contain a 'match' element, defaulting to type matching")
-//      matchType[Mismatch](path, expected, actual, mismatchFn)
-//    }
-//  }
-//}
-//
-//object TimestampMatcher extends Matcher with StrictLogging {
-//  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-//    val pattern = matcherDef.getOrElse("timestamp", "yyyy-MM-dd HH:mm:ssZZZ").toString
-//    logger.debug(s"comparing ${valueOf(actual)} to timestamp pattern $pattern at $path")
-//    try {
-//      DateUtils.parseDate(Matchers.safeToString(actual), pattern)
-//      List[Mismatch]()
-//    } catch {
-//      case e: ParseException => List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to match a timestamp of '$pattern': ${e.getMessage}", path))
-//    }
-//  }
-//}
-//
-//object TimeMatcher extends Matcher with StrictLogging {
-//  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-//    val pattern = matcherDef.getOrElse("time", "HH:mm:ss").toString
-//    logger.debug(s"comparing ${valueOf(actual)} to time pattern $pattern at $path")
-//    try {
-//      DateUtils.parseDate(Matchers.safeToString(actual), pattern)
-//      List[Mismatch]()
-//    } catch {
-//      case e: ParseException => List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to match a time of '$pattern': ${e.getMessage}", path))
-//    }
-//  }
-//}
-//
-//object DateMatcher extends Matcher with StrictLogging {
-//  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-//    val pattern = matcherDef.getOrElse("date", "yyyy-MM-dd").toString
-//    logger.debug(s"comparing ${valueOf(actual)} to date pattern $pattern at $path")
-//    try {
-//      DateUtils.parseDate(Matchers.safeToString(actual), pattern)
-//      List[Mismatch]()
-//    } catch {
-//      case e: ParseException => List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to match a date of '$pattern': ${e.getMessage}", path))
-//    }
-//  }
-//}
 //
 //object MinimumMatcher extends Matcher with StrictLogging {
 //  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {

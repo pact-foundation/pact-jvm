@@ -25,6 +25,14 @@ class Category {
     addRule('', matchingRule)
   }
 
+  void setRule(String item, MatchingRule matchingRule) {
+    matchingRules[item] = [ matchingRule ]
+  }
+
+  void setRule(MatchingRule matchingRule) {
+    setRule('', matchingRule)
+  }
+
   boolean isEmpty() {
     matchingRules.isEmpty()
   }
@@ -38,7 +46,8 @@ class Category {
   }
 
   Category maxBy(ToIntFunction<String> fn) {
-    new Category(name, matchingRules.max{ k, v -> fn(k) } as Map<String, List<MatchingRule>>, ruleLogic)
+    def map = matchingRules.max { k, v -> fn(k) }
+    new Category(name, [(map.key): map.value], ruleLogic)
   }
 
   List<MatchingRule> allMatchingRules() {

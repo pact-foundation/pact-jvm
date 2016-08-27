@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
 import org.apache.commons.lang3.RandomStringUtils
 
 /**
@@ -8,7 +9,16 @@ import org.apache.commons.lang3.RandomStringUtils
 class TypeMatcher extends Matcher {
 
   def getMatcher() {
-    [match: values.first()]
+    switch (values.first()) {
+      case 'integer':
+        return new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)
+      case 'decimal':
+        return new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
+      case 'number':
+        return new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)
+      default:
+        return new au.com.dius.pact.model.matchingrules.TypeMatcher()
+    }
   }
 
   def getValue() {

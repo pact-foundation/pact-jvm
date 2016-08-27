@@ -6,7 +6,7 @@ package au.com.dius.pact.consumer.groovy
 class EachLikeMatcher extends LikeMatcher {
 
   def getMatcher() {
-    [match: 'type']
+    new au.com.dius.pact.model.matchingrules.TypeMatcher()
   }
 
   def getValue() {

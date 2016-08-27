@@ -14,6 +14,7 @@ import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.Response
+import au.com.dius.pact.model.matchingrules.MatchingRules
 import groovy.json.JsonBuilder
 import scala.collection.JavaConverters$
 
@@ -25,7 +26,6 @@ import java.util.regex.Pattern
 @SuppressWarnings('PropertyName')
 class PactBuilder extends BaseBuilder {
 
-  private static final String PATH_MATCHER = '$.path'
   private static final String CONTENT_TYPE = 'Content-Type'
   private static final String JSON = 'application/json'
   private static final String BODY = 'body'
@@ -102,8 +102,8 @@ class PactBuilder extends BaseBuilder {
   def buildInteractions() {
     int numInteractions = Math.min(requestData.size(), responseData.size())
     for (int i = 0; i < numInteractions; i++) {
-      Map requestMatchers = requestData[i].matchers ?: [:]
-      Map responseMatchers = responseData[i].matchers ?: [:]
+      MatchingRules requestMatchers = requestData[i].matchers
+      MatchingRules responseMatchers = responseData[i].matchers
       Map headers = setupHeaders(requestData[i].headers ?: [:], requestMatchers)
       Map responseHeaders = setupHeaders(responseData[i].headers ?: [:], responseMatchers)
       String path = setupPath(requestData[i].path ?: '/', requestMatchers)
@@ -122,14 +122,15 @@ class PactBuilder extends BaseBuilder {
     responseData = []
   }
 
-  private static Map setupHeaders(Map headers, Map matchers) {
+  private static Map setupHeaders(Map headers, MatchingRules matchers) {
     headers.collectEntries { key, value ->
+      def header = 'header'
       if (value instanceof Matcher) {
-        matchers["\$.headers.$key"] = value.matcher
+        matchers.addCategory(header).addRule(key, value.matcher)
         [key, value.value]
       } else if (value instanceof Pattern) {
         def matcher = new RegexpMatcher(values: [value])
-        matchers["\$.headers.$key"] = matcher.matcher
+        matchers.addCategory(header).addRule(key, matcher.matcher)
         [key, matcher.value]
       } else {
         [key, value]
@@ -137,13 +138,14 @@ class PactBuilder extends BaseBuilder {
     }
   }
 
-  private static String setupPath(def path, Map matchers) {
+  private static String setupPath(def path, MatchingRules matchers) {
+    def category = 'path'
     if (path instanceof Matcher) {
-      matchers[PATH_MATCHER] = path.matcher
+      matchers.addCategory(category).addRule(path.matcher)
       path.value
     } else if (path instanceof Pattern) {
       def matcher = new RegexpMatcher(values: [path])
-      matchers[PATH_MATCHER] = matcher.matcher
+      matchers.addCategory(category).addRule(matcher.matcher)
       matcher.value
     } else {
       path as String
@@ -154,9 +156,8 @@ class PactBuilder extends BaseBuilder {
    * Defines the request attributes (body, headers, etc.)
    * @param requestData Map of attributes
    */
-  @SuppressWarnings('DuplicateMapLiteral')
   PactBuilder withAttributes(Map requestData) {
-    def request = [matchers: [:]] + requestData
+    def request = [matchers: new MatchingRules()] + requestData
     setupBody(requestData, request)
     if (requestData.query instanceof String) {
       request.query = PactReader.queryStringToMap(requestData.query)
@@ -178,7 +179,7 @@ class PactBuilder extends BaseBuilder {
       def body = requestData.body
       if (body instanceof PactBodyBuilder) {
         request.body = body.body
-        request.matchers.putAll(body.matchers)
+        request.matchers.addCategory(body.matchers)
       } else if (body != null && !(body instanceof String)) {
         if (requestData.prettyPrint == null && !compactMimeTypes(requestData) || requestData.prettyPrint) {
           request.body = new JsonBuilder(body).toPrettyString()
@@ -196,7 +197,7 @@ class PactBuilder extends BaseBuilder {
    */
   @SuppressWarnings('DuplicateMapLiteral')
   PactBuilder willRespondWith(Map responseData) {
-    def response = [matchers: [:]] + responseData
+    def response = [matchers: new MatchingRules()] + responseData
     setupBody(responseData, response)
     this.responseData << response
     requestState = false
@@ -310,7 +311,7 @@ class PactBuilder extends BaseBuilder {
   private setupBody(PactBodyBuilder body, Map options) {
     if (requestState) {
       requestData.last().body = body.body
-      requestData.last().matchers.putAll(body.matchers)
+      requestData.last().matchers.addCategory(body.matchers)
       requestData.last().headers = requestData.last().headers ?: [:]
       if (options.mimeType) {
         requestData.last().headers[CONTENT_TYPE] = options.mimeType
@@ -319,7 +320,7 @@ class PactBuilder extends BaseBuilder {
       }
     } else {
       responseData.last().body = body.body
-      responseData.last().matchers.putAll(body.matchers)
+      responseData.last().matchers.addCategory(body.matchers)
       responseData.last().headers = responseData.last().headers ?: [:]
       if (options.mimeType) {
         responseData.last().headers[CONTENT_TYPE] = options.mimeType
