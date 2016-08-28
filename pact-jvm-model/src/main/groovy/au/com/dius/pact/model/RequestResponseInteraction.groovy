@@ -44,7 +44,7 @@ class RequestResponseInteraction implements Interaction {
     def interactionJson = [
       description     : description,
       request         : requestToMap(request, pactSpecVersion),
-      response        : responseToMap(response)
+      response        : responseToMap(response, pactSpecVersion)
     ]
     if (pactSpecVersion < PactSpecVersion.V3 && providerStates) {
       interactionJson.providerState = providerState
@@ -68,13 +68,13 @@ class RequestResponseInteraction implements Interaction {
     if (!request.body.missing) {
       map.body = parseBody(request)
     }
-    if (request.matchingRules) {
-      map.matchingRules = request.matchingRules
+    if (request.matchingRules?.notEmpty) {
+      map.matchingRules = request.matchingRules.toMap(pactSpecVersion)
     }
     map
   }
 
-  static Map responseToMap(Response response) {
+  static Map responseToMap(Response response, PactSpecVersion pactSpecVersion) {
     Map<String, Object> map = [status: response.status as Object]
     if (response.headers) {
       map.headers = response.headers as Map
@@ -82,8 +82,8 @@ class RequestResponseInteraction implements Interaction {
     if (!response.body.missing) {
       map.body = parseBody(response)
     }
-    if (response.matchingRules) {
-      map.matchingRules = response.matchingRules
+    if (response.matchingRules?.notEmpty) {
+      map.matchingRules = response.matchingRules.toMap(pactSpecVersion)
     }
     map
   }

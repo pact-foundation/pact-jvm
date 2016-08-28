@@ -8,4 +8,9 @@ import groovy.transform.Canonical
 @Canonical
 class IncludeMatcher implements MatchingRule {
   String value
+
+  @Override
+  Map toMap() {
+    [match: 'include', value: value]
+  }
 }

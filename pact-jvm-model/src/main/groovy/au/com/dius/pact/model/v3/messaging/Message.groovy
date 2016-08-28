@@ -51,8 +51,8 @@ class Message implements Interaction {
     if (providerState) {
       map.providerState = providerState
     }
-    if (matchingRules) {
-      map.matchingRules = matchingRules
+    if (matchingRules?.notEmpty) {
+      map.matchingRules = matchingRules.toMap(pactSpecVersion)
     }
     map
   }

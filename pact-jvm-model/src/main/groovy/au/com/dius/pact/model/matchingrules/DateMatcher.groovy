@@ -8,4 +8,9 @@ import groovy.transform.Canonical
 @Canonical
 class DateMatcher implements MatchingRule {
   String format
+
+  @Override
+  Map toMap() {
+    [match: 'date', date: format]
+  }
 }

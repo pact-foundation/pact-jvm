@@ -1,5 +1,6 @@
 package au.com.dius.pact.model.matchingrules
 
+import au.com.dius.pact.model.PactSpecVersion
 import groovy.transform.Canonical
 
 /**
@@ -127,5 +128,35 @@ class MatchingRules {
     }
 
     matchingRules
+  }
+
+  Map toMap(PactSpecVersion pactSpecVersion) {
+    if (pactSpecVersion < PactSpecVersion.V3) {
+      toV2Map()
+    } else {
+      toV3Map()
+    }
+  }
+
+  Map toV3Map() {
+    def map = [:]
+
+    rules.each {
+      map[it.key] = it.value.toMap(PactSpecVersion.V3)
+    }
+
+    map
+  }
+
+  Map toV2Map() {
+    def map = [:]
+
+    rules.each {
+      it.value.toMap(PactSpecVersion.V2).each {
+        map[it.key] = it.value
+      }
+    }
+
+    map
   }
 }

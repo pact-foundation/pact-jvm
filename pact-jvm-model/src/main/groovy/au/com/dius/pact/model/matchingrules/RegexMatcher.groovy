@@ -8,4 +8,9 @@ import groovy.transform.Canonical
 @Canonical
 class RegexMatcher implements MatchingRule {
   String regex
+
+  @Override
+  Map toMap() {
+    [match: 'regex', regex: regex]
+  }
 }

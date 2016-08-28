@@ -8,4 +8,9 @@ import groovy.transform.Canonical
 @Canonical
 class MinTypeMatcher implements MatchingRule {
   int min
+
+  @Override
+  Map toMap() {
+    [match: 'type', min: min]
+  }
 }

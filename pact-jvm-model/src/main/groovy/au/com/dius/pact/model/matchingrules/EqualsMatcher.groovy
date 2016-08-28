@@ -7,4 +7,8 @@ import groovy.transform.Canonical
  */
 @Canonical
 class EqualsMatcher implements MatchingRule {
+  @Override
+  Map toMap() {
+    [match: 'equality']
+  }
 }

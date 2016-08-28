@@ -8,4 +8,9 @@ import groovy.transform.Canonical
 @Canonical
 class MaxTypeMatcher implements MatchingRule {
   int max
+
+  @Override
+  Map toMap() {
+    [match: 'type', max: max]
+  }
 }

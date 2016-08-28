@@ -7,4 +7,9 @@ import groovy.transform.Canonical
  */
 @Canonical
 class TypeMatcher implements MatchingRule {
+
+  @Override
+  Map toMap() {
+    [match: 'type']
+  }
 }

@@ -8,4 +8,9 @@ import groovy.transform.Canonical
 @Canonical
 class TimeMatcher implements MatchingRule {
   String format
+
+  @Override
+  Map toMap() {
+    [match: 'time', time: format]
+  }
 }

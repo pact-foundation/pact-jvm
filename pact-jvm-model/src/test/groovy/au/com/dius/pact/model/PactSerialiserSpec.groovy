@@ -1,5 +1,7 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.model.matchingrules.MatchingRules
+import au.com.dius.pact.model.matchingrules.TypeMatcher
 import groovy.json.JsonSlurper
 import spock.lang.Specification
 
@@ -26,15 +28,15 @@ class PactSerialiserSpec extends Specification {
       OptionalBody.body('{"responsetest":true}'))
     provider = new Provider('test_provider')
     consumer = new Consumer('test_consumer')
+    def requestMatchers = new MatchingRules()
+    requestMatchers.addCategory('body').addRule('$.test', new TypeMatcher())
     requestWithMatchers = new Request('GET', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
-      [testreqheader: 'testreqheadervalue'],
-      OptionalBody.body('{"test":true}'),
-      [body: ['$.test': [matchers: [[match: 'type']]]]]
+      [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'), requestMatchers
     )
-    responseWithMatchers = new Response(200,
-      [testreqheader: 'testreqheaderval'],
-      OptionalBody.body('{"responsetest":true}'),
-      [body: ['$.responsetest': [matchers: [[match: 'type']]]]]
+    def responseMatchers = new MatchingRules()
+    responseMatchers.addCategory('body').addRule('$.responsetest', new TypeMatcher())
+    responseWithMatchers = new Response(200, [testreqheader: 'testreqheaderval'],
+      OptionalBody.body('{"responsetest":true}'), responseMatchers
     )
     interactionsWithMatcher = new RequestResponseInteraction('test interaction with matchers',
       [new ProviderState('test state')], requestWithMatchers, responseWithMatchers)

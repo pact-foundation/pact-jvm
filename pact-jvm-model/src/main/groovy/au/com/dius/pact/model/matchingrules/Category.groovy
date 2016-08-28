@@ -1,5 +1,6 @@
 package au.com.dius.pact.model.matchingrules
 
+import au.com.dius.pact.model.PactSpecVersion
 import groovy.transform.Canonical
 
 import java.util.function.Predicate
@@ -69,5 +70,17 @@ class Category {
 
   Category copy() {
     new Category(name, [:] + matchingRules, ruleLogic)
+  }
+
+  Map toMap(PactSpecVersion pactSpecVersion) {
+    if (pactSpecVersion < PactSpecVersion.V2) {
+      matchingRules.collectEntries {
+        [it.key.replaceFirst('^\\$', '$.' + name), it.value.first().toMap()]
+      }
+    } else {
+      matchingRules.collectEntries {
+        [it.key, [matchers: it.value*.toMap()]]
+      }
+    }
   }
 }

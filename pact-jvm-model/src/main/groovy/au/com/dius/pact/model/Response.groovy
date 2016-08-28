@@ -34,7 +34,7 @@ class Response implements HttpPart {
       status = r.status
       headers = r.headers ? [:] + r.headers : null
       body = r.body
-      matchingRules = r.matchingRules ? [:] + r.matchingRules : null
+      matchingRules = r.matchingRules.copy()
       it
     }
   }

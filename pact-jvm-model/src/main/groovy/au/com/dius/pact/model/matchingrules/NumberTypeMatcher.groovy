@@ -14,4 +14,9 @@ class NumberTypeMatcher implements MatchingRule {
   }
 
   NumberType numberType
+
+  @Override
+  Map toMap() {
+    [match: numberType.name().toLowerCase()]
+  }
 }
