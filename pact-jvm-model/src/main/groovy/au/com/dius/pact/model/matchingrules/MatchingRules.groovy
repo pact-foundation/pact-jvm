@@ -11,7 +11,7 @@ class MatchingRules {
   private static final String DOLLAR = '$'
   private static final int TWO = 2
 
-  private final Map rules = [:]
+  private final Map<String, Category> rules = [:]
 
   /**
    * Constructs the matching rules from a Map
@@ -93,14 +93,14 @@ class MatchingRules {
    * If the rules are empty
    */
   boolean isEmpty() {
-    rules.isEmpty()
+    rules.every { it.value.empty }
   }
 
   /**
    * If the rules are not empty
    */
   boolean isNotEmpty() {
-    !isEmpty()
+    rules.any { it.value.notEmpty }
   }
 
   boolean hasCategory(String category) {

@@ -34,12 +34,18 @@ class Category {
     setRule('', matchingRule)
   }
 
+  /**
+   * If the rules are empty
+   */
   boolean isEmpty() {
-    matchingRules.isEmpty()
+    matchingRules.every { it.value.empty }
   }
 
+  /**
+   * If the rules are not empty
+   */
   boolean isNotEmpty() {
-    !isEmpty()
+    matchingRules.any { !it.value.empty }
   }
 
   Category filter(Predicate<String> predicate) {

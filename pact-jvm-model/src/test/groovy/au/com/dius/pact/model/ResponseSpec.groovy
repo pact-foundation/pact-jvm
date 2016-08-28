@@ -8,7 +8,7 @@ class ResponseSpec extends Specification {
     given:
     def json = [
       matchingRules: [
-        'stuff': [:]
+        'stuff': ['': [matchers: [ [match: 'type'] ] ] ]
       ]
     ]
 
