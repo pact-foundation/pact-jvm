@@ -202,7 +202,10 @@ public class PactDslJsonRootValue extends DslPart {
   }
 
   @Override
-  public DslPart close() { return this; }
+  public DslPart close() {
+    getMatchers().applyMatcherRootPrefix("$");
+    return this;
+  }
 
   /**
    * Value that can be any string

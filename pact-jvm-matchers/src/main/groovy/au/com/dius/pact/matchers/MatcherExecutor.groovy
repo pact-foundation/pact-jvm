@@ -16,6 +16,9 @@ import scala.xml.Elem
 
 import java.text.ParseException
 
+/**
+ * Executor for matchers
+ */
 @Slf4j
 class MatcherExecutor {
   static <Mismatch> List<Mismatch> domatch(Category matchers, Seq<String> path, def expected, def actual,
@@ -74,8 +77,9 @@ class MatcherExecutor {
     }
   }
 
-  static <Mismatch> List<Mismatch> matchEquality(Seq<String> path, Object expected, Object actual, MismatchFactory<Mismatch> mismatchFactory) {
-    def matches = safeToString(actual).equals(expected)
+  static <Mismatch> List<Mismatch> matchEquality(Seq<String> path, Object expected, Object actual,
+                                                 MismatchFactory<Mismatch> mismatchFactory) {
+    def matches = safeToString(actual) == expected
     log.debug("comparing ${valueOf(actual)} to ${valueOf(expected)} at $path -> $matches")
     if (matches) {
       []
@@ -84,7 +88,8 @@ class MatcherExecutor {
     }
   }
 
-  static <Mismatch> List<Mismatch> matchRegex(String regex, Seq<String> path, Object expected, Object actual, MismatchFactory<Mismatch> mismatchFactory) {
+  static <Mismatch> List<Mismatch> matchRegex(String regex, Seq<String> path, Object expected, Object actual,
+                                              MismatchFactory<Mismatch> mismatchFactory) {
     def matches = safeToString(actual).matches(regex)
     log.debug("comparing ${valueOf(actual)} with regexp $regex at $path -> $matches")
     if (matches) {
@@ -102,7 +107,7 @@ class MatcherExecutor {
       || expected instanceof Boolean && actual instanceof Boolean
       || expected instanceof List && actual instanceof List
       || expected instanceof Map && actual instanceof Map
-      || expected instanceof Elem && actual instanceof Elem && actual.label.equals(expected.label)) {
+      || expected instanceof Elem && actual instanceof Elem && actual.label == expected.label) {
       []
     } else if (expected == null) {
       if (actual == null) {
@@ -121,28 +126,27 @@ class MatcherExecutor {
                                                              MismatchFactory<Mismatch> mismatchFactory) {
     if (expected == null && actual != null) {
       return [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be null", path) ]
-    } else {
-      switch (numberType) {
-        case NumberTypeMatcher.NumberType.NUMBER:
-          log.debug("comparing type of ${valueOf(actual)} to a number at $path")
-          if (!(actual instanceof Number)) {
-            return [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be a number", path) ]
-          }
-          break
-        case NumberTypeMatcher.NumberType.INTEGER:
-          log.debug("comparing type of ${valueOf(actual)} to an integer at $path")
-          if (!(actual instanceof Integer) && !(actual instanceof Long) && !(actual instanceof BigInteger)) {
-            return [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be an integer", path) ]
-          }
-          break
-        case NumberTypeMatcher.NumberType.DECIMAL:
-          log.debug("comparing type of ${valueOf(actual)} to a decimal at $path")
-          if (!(actual instanceof Float) && !(actual instanceof Double) && !(actual instanceof BigDecimal)) {
-            return [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be a decimal number",
-              path) ]
-          }
-          break
-      }
+    }
+    switch (numberType) {
+      case NumberTypeMatcher.NumberType.NUMBER:
+        log.debug("comparing type of ${valueOf(actual)} to a number at $path")
+        if (!(actual instanceof Number)) {
+          return [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be a number", path) ]
+        }
+        break
+      case NumberTypeMatcher.NumberType.INTEGER:
+        log.debug("comparing type of ${valueOf(actual)} to an integer at $path")
+        if (!(actual instanceof Integer) && !(actual instanceof Long) && !(actual instanceof BigInteger)) {
+          return [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be an integer", path) ]
+        }
+        break
+      case NumberTypeMatcher.NumberType.DECIMAL:
+        log.debug("comparing type of ${valueOf(actual)} to a decimal at $path")
+        if (!(actual instanceof Float) && !(actual instanceof Double) && !(actual instanceof BigDecimal)) {
+          return [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be a decimal number",
+            path) ]
+        }
+        break
     }
     []
   }
@@ -156,7 +160,7 @@ class MatcherExecutor {
       []
     } catch (ParseException e) {
       [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to match a date of '$pattern': " +
-        "${e.getMessage()}", path) ]
+        "${e.message}", path) ]
     }
   }
 
@@ -169,7 +173,7 @@ class MatcherExecutor {
       []
     } catch (ParseException e) {
       [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to match a time of '$pattern': " +
-        "${e.getMessage()}", path) ]
+        "${e.message}", path) ]
     }
   }
 
@@ -182,11 +186,12 @@ class MatcherExecutor {
       []
     } catch (ParseException e) {
       [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to match a timestamp of '$pattern': " +
-        "${e.getMessage()}", path) ]
+        "${e.message}", path) ]
     }
   }
 
-//  def matchTimestamp[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
+//  def matchTimestamp[Mismatch](path: Seq[String], expected: Any, actual: Any,
+// mismatchFn: MismatchFactory[Mismatch]) = {
 //    logger.debug(s"comparing ${valueOf(actual)} as Timestamp at $path")
 //    try {
 //      DateUtils.parseDate(Matchers.safeToString(actual), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern,
@@ -202,20 +207,24 @@ class MatcherExecutor {
 //    }
 //  }
 //
-//  def matchArray[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch], matcher: String, args: List[String]) = {
+//  def matchArray[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch],
+// matcher: String, args: List[String]) = {
 //    matcher match {
 //      case "atleast" => actual match {
 //        case v: List[Any] =>
-//          if (v.asInstanceOf[List[Any]].size < args.head.toInt) List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to have at least ${args.head} elements", path))
+//          if (v.asInstanceOf[List[Any]].size < args.head.toInt) List(mismatchFn.create(expected, actual,
+// s"Expected ${valueOf(actual)} to have at least ${args.head} elements", path))
 //          else List[Mismatch]()
-//        case _ => List(mismatchFn.create(expected, actual, s"Array matcher $matcher can only be applied to arrays", path))
+//        case _ => List(mismatchFn.create(expected, actual, s"Array matcher $matcher can only be applied to arrays",
+// path))
 //      }
 //      case _ => List(mismatchFn.create(expected, actual, s"Array matcher $matcher is not defined", path))
 //    }
 //  }
 //
 //object MinimumMatcher extends Matcher with StrictLogging {
-//  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
+//  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any,
+// mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
 //    val value = matcherDef("min") match {
 //      case i: Int => i
 //      case j: Integer => j.toInt
@@ -241,7 +250,8 @@ class MatcherExecutor {
 //}
 //
 //object MaximumMatcher extends Matcher with StrictLogging {
-//  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
+//  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any,
+// mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
 //    val value = matcherDef("max") match {
 //      case i: Int => i
 //      case j: Integer => j.toInt

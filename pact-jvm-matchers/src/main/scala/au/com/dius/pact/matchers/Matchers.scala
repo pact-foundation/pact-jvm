@@ -44,8 +44,12 @@ object Matchers extends StrictLogging {
       matchers.rulesForCategory(category).filter(new Predicate[String] {
         override def test(p: String): Boolean = matchesPath(p, items)
       })
-    else
-      matchers.rulesForCategory(category)
+    else if (category == "header" || category == "query")
+      matchers.rulesForCategory(category).filter(new Predicate[String] {
+        override def test(p: String): Boolean = items == Seq(p)
+      })
+    else matchers.rulesForCategory(category)
+
 
   def matcherDefined(category: String, path: Seq[String], matchers: MatchingRules): Boolean =
     resolveMatchers(matchers, category, path).isNotEmpty

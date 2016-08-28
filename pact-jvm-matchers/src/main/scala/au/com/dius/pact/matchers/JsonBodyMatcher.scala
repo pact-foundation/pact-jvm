@@ -15,7 +15,7 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
       case (OptionalBody.State.NULL, _) => List()
       case (_, OptionalBody.State.MISSING) => List(BodyMismatch(expected.getBody.getValue, None,
         Some(s"Expected body '${expected.getBody.getValue}' but was missing")))
-      case (_, _) => compare(Seq("$", "body"), JsonUtils.parseJsonString(expected.getBody.getValue),
+      case (_, _) => compare(Seq("$"), JsonUtils.parseJsonString(expected.getBody.getValue),
         JsonUtils.parseJsonString(actual.getBody.getValue), diffConfig, expected.getMatchingRules)
     }
   }

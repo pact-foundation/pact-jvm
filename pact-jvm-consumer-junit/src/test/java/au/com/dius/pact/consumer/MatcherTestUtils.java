@@ -1,6 +1,8 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.matchingrules.MatchingRule;
+import au.com.dius.pact.model.matchingrules.MatchingRules;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
@@ -29,9 +31,10 @@ public class MatcherTestUtils {
         return new TreeSet<String>(Arrays.asList(strings));
     }
 
-    public static void assertResponseMatcherKeysEqualTo(PactFragment fragment, String... matcherKeys) {
-        Map<String, Map<String, Object>> matchers = fragment.interactions().head().getResponse().getMatchingRules();
-        assertEquals(asSet(matcherKeys), new TreeSet<String>(matchers.keySet()));
+    public static void assertResponseMatcherKeysEqualTo(PactFragment fragment, String category, String... matcherKeys) {
+      MatchingRules matchingRules = fragment.interactions().head().getResponse().getMatchingRules();
+      Map<String, List<MatchingRule>> matchers = matchingRules.rulesForCategory(category).getMatchingRules();
+      assertEquals(asSet(matcherKeys), new TreeSet<String>(matchers.keySet()));
     }
 
     public static void assertResponseKeysEqualTo(PactFragment fragment, String... keys) {
@@ -48,9 +51,10 @@ public class MatcherTestUtils {
         assertEquals(list, extractKeys(hashMap));
     }
 
-    public static void assertMessageMatcherKeysEqualTo(MessagePact messagePact, String... matcherKeys) {
-        Map<String, Map<String,Object>> matchers = messagePact.getMessages().get(0).getMatchingRules();
-        assertEquals(asSet(matcherKeys), new TreeSet<String>(matchers.keySet()));
+    public static void assertMessageMatcherKeysEqualTo(MessagePact messagePact, String category, String... matcherKeys) {
+      MatchingRules matchingRules = messagePact.getMessages().get(0).getMatchingRules();
+      Map<String, List<MatchingRule>> matchers = matchingRules.rulesForCategory(category).getMatchingRules();
+      assertEquals(asSet(matcherKeys), new TreeSet<String>(matchers.keySet()));
     }
 
     private static List<String> extractKeys(Map hashMap) {

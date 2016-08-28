@@ -17,7 +17,7 @@ class XmlBodyMatcher extends BodyMatcher with StrictLogging {
       case (_, OptionalBody.State.MISSING) => List(BodyMismatch(expected.getBody.getValue, None,
         Some(s"Expected body '${expected.getBody.getValue}' but was missing")))
       case (OptionalBody.State.EMPTY, OptionalBody.State.EMPTY) => List()
-      case (_, _) => compareNode(Seq("$", "body"), parse(expected.getBody.orElse("")),
+      case (_, _) => compareNode(Seq("$"), parse(expected.getBody.orElse("")),
         parse(actual.getBody.orElse("")), diffConfig, expected.getMatchingRules)
     }
   }

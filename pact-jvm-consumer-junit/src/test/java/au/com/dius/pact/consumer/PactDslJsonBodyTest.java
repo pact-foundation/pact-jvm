@@ -44,14 +44,14 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
                 .body(body)
                 .toFragment();
 
-        MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment,
-            "$.body.id",
-            "$.body['2'].id",
-            "$.body.numbers[0]",
-            "$.body.numbers[3]",
-            "$.body.numbers[4].id",
-            "$.body.numbers[4].timestamp",
-            "$.body.numbers[4].dob");
+        MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment, "body",
+            "$.id",
+            "$['2'].id",
+            "$.numbers[0]",
+            "$.numbers[3]",
+            "$.numbers[4].id",
+            "$.numbers[4].timestamp",
+            "$.numbers[4].dob");
 
         return fragment;
     }

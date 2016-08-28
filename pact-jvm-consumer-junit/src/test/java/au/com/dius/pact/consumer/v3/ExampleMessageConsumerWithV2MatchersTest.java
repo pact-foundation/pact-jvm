@@ -42,13 +42,13 @@ public class ExampleMessageConsumerWithV2MatchersTest {
         .withMetadata(metaData)
         .toPact();
 
-      MatcherTestUtils.assertMessageMatcherKeysEqualTo(messagePact,
-        "$.body.workflowId",
-        "$.body.domain",
-        "$.body.values",
-        "$.body.values",
-        "$.body.values[*].key",
-        "$.body.values[*].value"
+      MatcherTestUtils.assertMessageMatcherKeysEqualTo(messagePact, "body",
+        "$.workflowId",
+        "$.domain",
+        "$.values",
+        "$.values",
+        "$.values[*].key",
+        "$.values[*].value"
       );
 
       return messagePact;

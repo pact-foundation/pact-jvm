@@ -52,16 +52,16 @@ public class PactDslJsonBodyTest {
             .closeArray();
 
         Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
-                "$.body.id",
-                "$.body['2'].id",
-                "$.body.numbers[3]",
-                "$.body.numbers[0]",
-                "$.body.numbers[4].timestamp",
-                "$.body.numbers[4].dob",
-                "$.body.numbers[4].id",
-                "$.body.numbers[4]['10k-depreciation-bips'].id"
+          ".id",
+          "['2'].id",
+          ".numbers[3]",
+          ".numbers[0]",
+          ".numbers[4].timestamp",
+          ".numbers[4].dob",
+          ".numbers[4].id",
+          ".numbers[4]['10k-depreciation-bips'].id"
         ));
-        assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
+        assertThat(body.getMatchers().getMatchingRules().keySet(), is(equalTo(expectedMatchers)));
 
         assertThat(((JSONObject) body.getBody()).keySet(), is(equalTo((Set)
                 new HashSet(Arrays.asList("2", NUMBERS, "id")))));
@@ -70,15 +70,15 @@ public class PactDslJsonBodyTest {
     @Test
     public void guardAgainstFieldNamesThatDontConformToGatlingFields() {
         DslPart body = new PactDslJsonBody()
-                .id("1")
-                .stringType("@field")
-                .hexValue("200", "abc")
-                .integerType(K_DEPRECIATION_BIPS);
+          .id("1")
+          .stringType("@field")
+          .hexValue("200", "abc")
+          .integerType(K_DEPRECIATION_BIPS);
 
         Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
-                "$.body['200']", "$.body['1']", "$.body['@field']", "$.body['10k-depreciation-bips']"
+          "['200']", "['1']", "['@field']", "['10k-depreciation-bips']"
         ));
-        assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
+        assertThat(body.getMatchers().getMatchingRules().keySet(), is(equalTo(expectedMatchers)));
 
         assertThat(((JSONObject) body.getBody()).keySet(), is(equalTo((Set)
                 new HashSet(Arrays.asList("200", K_DEPRECIATION_BIPS, "1", "@field")))));
@@ -87,16 +87,16 @@ public class PactDslJsonBodyTest {
     @Test
     public void eachLikeMatcherTest() {
         DslPart body = new PactDslJsonBody()
-                .eachLike("ids")
-                    .id()
-                    .closeObject()
-                .closeArray();
+          .eachLike("ids")
+              .id()
+              .closeObject()
+          .closeArray();
 
         Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
-                "$.body.ids",
-                "$.body.ids[*].id"
+          ".ids",
+          ".ids[*].id"
         ));
-        assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
+        assertThat(body.getMatchers().getMatchingRules().keySet(), is(equalTo(expectedMatchers)));
 
         assertThat(((JSONObject) body.getBody()).keySet(), is(equalTo((Set)
                 new HashSet(Arrays.asList("ids")))));
@@ -105,29 +105,29 @@ public class PactDslJsonBodyTest {
     @Test
     public void nestedObjectMatcherTest() {
         DslPart body = new PactDslJsonBody()
-                .object(FIRST)
-                .stringType(LEVEL_1, L_1_EXAMPLE)
-                .stringType("@level1")
-                .object(SECOND)
-                .stringType(LEVEL_2, L_2_EXAMPLE)
-                .object(THIRD)
+          .object(FIRST)
+            .stringType(LEVEL_1, L_1_EXAMPLE)
+            .stringType("@level1")
+            .object(SECOND)
+              .stringType(LEVEL_2, L_2_EXAMPLE)
+              .object(THIRD)
                 .stringType("level3", "l3example")
                 .object("fourth")
-                .stringType("level4", "l4example")
+                  .stringType("level4", "l4example")
                 .closeObject()
-                .closeObject()
-                .closeObject()
-                .closeObject();
+              .closeObject()
+            .closeObject()
+          .closeObject();
 
         Set<String> expectedMatchers = new HashSet<>(Arrays.asList(
-                "$.body.first.second['@third'].fourth.level4",
-                "$.body.first.second['@third'].level3",
-                "$.body.first.second.level2",
-                "$.body.first.level1",
-                "$.body.first['@level1']"
+          ".first.second['@third'].fourth.level4",
+          ".first.second['@third'].level3",
+          ".first.second.level2",
+          ".first.level1",
+          ".first['@level1']"
         ));
 
-        assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
+        assertThat(body.getMatchers().getMatchingRules().keySet(), is(equalTo(expectedMatchers)));
 
         assertThat(((JSONObject)body.getBody())
                 .getJSONObject(FIRST)
@@ -155,19 +155,19 @@ public class PactDslJsonBodyTest {
     @Test
     public void nestedArrayMatcherTest() {
         DslPart body = new PactDslJsonBody()
-                .array(FIRST)
-                .stringType(L_1_EXAMPLE)
-                .array()
-                .stringType(L_2_EXAMPLE)
-                .closeArray()
-                .closeArray();
+          .array(FIRST)
+            .stringType(L_1_EXAMPLE)
+            .array()
+              .stringType(L_2_EXAMPLE)
+            .closeArray()
+          .closeArray();
 
         Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
-                "$.body.first[0]",
-                "$.body.first[1][0]"
+          ".first[0]",
+          ".first[1][0]"
         ));
 
-        assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
+        assertThat(body.getMatchers().getMatchingRules().keySet(), is(equalTo(expectedMatchers)));
 
         assertThat(((JSONObject)body.getBody())
                 .getJSONArray(FIRST)
@@ -182,27 +182,27 @@ public class PactDslJsonBodyTest {
     @Test
     public void nestedArrayAndObjectMatcherTest() {
         DslPart body = new PactDslJsonBody()
-                .object(FIRST)
-                .stringType(LEVEL_1, L_1_EXAMPLE)
-                .array(SECOND)
-                .stringType("al2example")
-                .object()
+          .object(FIRST)
+            .stringType(LEVEL_1, L_1_EXAMPLE)
+            .array(SECOND)
+              .stringType("al2example")
+              .object()
                 .stringType(LEVEL_2, L_2_EXAMPLE)
                 .array("third")
-                .stringType("al3example")
+                  .stringType("al3example")
                 .closeArray()
-                .closeObject()
-                .closeArray()
-                .closeObject();
+              .closeObject()
+            .closeArray()
+          .closeObject();
 
         Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
-                "$.body.first.level1",
-                "$.body.first.second[1].level2",
-                "$.body.first.second[0]",
-                "$.body.first.second[1].third[0]"
+          ".first.level1",
+          ".first.second[1].level2",
+          ".first.second[0]",
+          ".first.second[1].third[0]"
         ));
 
-        assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
+        assertThat(body.getMatchers().getMatchingRules().keySet(), is(equalTo(expectedMatchers)));
 
         assertThat(((JSONObject)body.getBody())
                 .getJSONObject(FIRST)

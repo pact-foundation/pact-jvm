@@ -60,4 +60,10 @@ class Category {
     }
     matchingRules[item].addAll(rules)
   }
+
+  void applyMatcherRootPrefix(String prefix) {
+    matchingRules = matchingRules.collectEntries {
+      [prefix + it.key, it.value]
+    }
+  }
 }

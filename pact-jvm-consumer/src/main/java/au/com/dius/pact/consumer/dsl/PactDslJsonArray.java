@@ -502,6 +502,9 @@ public class PactDslJsonArray extends DslPart {
         }
       }
     }
+
+    parentToReturn.getMatchers().applyMatcherRootPrefix("$");
+
     return parentToReturn;
   }
 

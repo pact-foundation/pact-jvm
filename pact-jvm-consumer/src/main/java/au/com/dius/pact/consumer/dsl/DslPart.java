@@ -2,16 +2,11 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.model.matchingrules.Category;
 import au.com.dius.pact.model.matchingrules.DateMatcher;
-import au.com.dius.pact.model.matchingrules.MatchingRules;
 import au.com.dius.pact.model.matchingrules.MaxTypeMatcher;
 import au.com.dius.pact.model.matchingrules.MinTypeMatcher;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import au.com.dius.pact.model.matchingrules.TimeMatcher;
 import au.com.dius.pact.model.matchingrules.TimestampMatcher;
-import au.com.dius.pact.model.matchingrules.TypeMatcher;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Abstract base class to support Object and Array JSON DSL builders

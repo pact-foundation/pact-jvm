@@ -110,4 +110,10 @@ class MatchingRules {
   Category rulesForCategory(String category) {
     addCategory(category)
   }
+
+
+  @Override
+  public String toString() {
+    return "MatchingRules(rules=$rules)"
+  }
 }

@@ -27,16 +27,16 @@ public class PactDslJsonArrayTemplateTest extends ConsumerPactTest {
                 .body(body)
                 .toFragment();
 
-        MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment,
-                "$.body[0].id",
-                "$.body[0].name",
-                "$.body[0].dob",
-                "$.body[1].id",
-                "$.body[1].name",
-                "$.body[1].dob",
-                "$.body[2].id",
-                "$.body[2].name",
-                "$.body[2].dob"
+        MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment, "body",
+            "$[0].id",
+            "$[0].name",
+            "$[0].dob",
+            "$[1].id",
+            "$[1].name",
+            "$[1].dob",
+            "$[2].id",
+            "$[2].name",
+            "$[2].dob"
         );
 
         return fragment;

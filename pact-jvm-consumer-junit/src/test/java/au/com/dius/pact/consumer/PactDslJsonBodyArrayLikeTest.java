@@ -40,17 +40,17 @@ public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTest {
                 .body(body)
                 .toFragment();
 
-        MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment,
-            "$.body.id",
-            "$.body.data.array1",
-            "$.body.data.array1[*].id",
-            "$.body.data.array1[*].name",
-            "$.body.data.array1[*].dob",
-            "$.body.data.array2",
-            "$.body.data.array2[*].address",
-            "$.body.data.array2[*].name",
-            "$.body.data.array3[0]",
-            "$.body.data.array3[0][*].itemCount");
+        MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment, "body",
+            "$.id",
+            "$.data.array1",
+            "$.data.array1[*].id",
+            "$.data.array1[*].name",
+            "$.data.array1[*].dob",
+            "$.data.array2",
+            "$.data.array2[*].address",
+            "$.data.array2[*].name",
+            "$.data.array3[0]",
+            "$.data.array3[0][*].itemCount");
 
         MatcherTestUtils.assertResponseKeysEqualTo(fragment,
             "/data",

@@ -45,15 +45,15 @@ public class MatchingTest {
     @Test
     public void testMatchingByTypeOnBody() {
         PactDslJsonBody body = new PactDslJsonBody()
-                .stringType("name")
-                .booleanType("happy")
-                .hexValue("hexCode")
-                .id()
-                .ipAddress("localAddress")
-                .numberValue("age", 100)
-                .numberType("ageAverage", 150.0)
-                .integerType("age2", 200)
-                .timestamp();
+            .stringType("name")
+            .booleanType("happy")
+            .hexValue("hexCode")
+            .id()
+            .ipAddress("localAddress")
+            .numberValue("age", 100)
+            .numberType("ageAverage", 150.0)
+            .integerType("age2", 200)
+            .timestamp();
 
         PactDslJsonBody responseBody = new PactDslJsonBody();
 

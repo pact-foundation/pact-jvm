@@ -31,13 +31,13 @@ public class PactDslJsonArrayTest extends ConsumerPactTest {
             .body(body)
           .toFragment();
 
-        MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment,
-            "$.body[0].id",
-            "$.body[0].timestamp",
-            "$.body[0].dob",
-            "$.body[1].id",
-            "$.body[1].timestamp",
-            "$.body[1].dob"
+        MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment, "body",
+            "$[0].id",
+            "$[0].timestamp",
+            "$[0].dob",
+            "$[1].id",
+            "$[1].timestamp",
+            "$[1].dob"
         );
 
         return fragment;

@@ -453,6 +453,9 @@ public class PactDslJsonBody extends DslPart {
         }
       }
     }
+
+    parentToReturn.getMatchers().applyMatcherRootPrefix("$");
+
     return parentToReturn;
   }
 

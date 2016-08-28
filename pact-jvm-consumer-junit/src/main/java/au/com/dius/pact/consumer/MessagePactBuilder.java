@@ -126,8 +126,9 @@ public class MessagePactBuilder {
       metadata.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
     }
 
-    message.setContents(OptionalBody.body(body.toString()));
-    message.setMatchingRules(body.getMatchers());
+    DslPart parent = body.close();
+    message.setContents(OptionalBody.body(parent.toString()));
+    message.getMatchingRules().addCategory(parent.getMatchers());
 
     return this;
   }

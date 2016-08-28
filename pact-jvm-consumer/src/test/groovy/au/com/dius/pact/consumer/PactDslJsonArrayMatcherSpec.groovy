@@ -1,6 +1,11 @@
 package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray
+import au.com.dius.pact.model.matchingrules.DateMatcher
+import au.com.dius.pact.model.matchingrules.MaxTypeMatcher
+import au.com.dius.pact.model.matchingrules.MinTypeMatcher
+import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.model.matchingrules.TypeMatcher
 import groovy.json.JsonSlurper
 import spock.lang.Specification
 
@@ -49,11 +54,11 @@ class PactDslJsonArrayMatcherSpec extends Specification {
         new JsonSlurper().parseText(subject.body.toString()) == [
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
-        subject.matchers == [
-          '$.body': [min: 0, match: 'type'],
-          '$.body[*].amount': [match: 'decimal'],
-          '$.body[*].clearedDate': [date: 'mm/dd/yyyy'],
-          '$.body[*].status': [match: 'type']
+        subject.matchers.matchingRules == [
+          '': [new MinTypeMatcher(0)],
+          '[*].amount': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)],
+          '[*].clearedDate': [new DateMatcher('mm/dd/yyyy')],
+          '[*].status': [new TypeMatcher()]
         ]
     }
 
@@ -70,11 +75,11 @@ class PactDslJsonArrayMatcherSpec extends Specification {
         new JsonSlurper().parseText(subject.body.toString()) == [
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
-        subject.matchers == [
-          '$.body': [min: 1, match: 'type'],
-          '$.body[*].amount': [match: 'decimal'],
-          '$.body[*].clearedDate': [date: 'mm/dd/yyyy'],
-          '$.body[*].status': [match: 'type']
+        subject.matchers.matchingRules == [
+          '': [new MinTypeMatcher(1)],
+          '[*].amount': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)],
+          '[*].clearedDate': [new DateMatcher('mm/dd/yyyy')],
+          '[*].status': [new TypeMatcher()]
         ]
     }
 
@@ -91,11 +96,11 @@ class PactDslJsonArrayMatcherSpec extends Specification {
         new JsonSlurper().parseText(subject.body.toString()) == [
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
-        subject.matchers == [
-          '$.body': [max: 10, match: 'type'],
-          '$.body[*].amount': [match: 'decimal'],
-          '$.body[*].clearedDate': [date: 'mm/dd/yyyy'],
-          '$.body[*].status': [match: 'type']
+        subject.matchers.matchingRules == [
+          '': [new MaxTypeMatcher(10)],
+          '[*].amount': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)],
+          '[*].clearedDate': [new DateMatcher('mm/dd/yyyy')],
+          '[*].status': [new TypeMatcher()]
         ]
     }
 
