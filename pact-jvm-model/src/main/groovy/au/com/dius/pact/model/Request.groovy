@@ -37,7 +37,7 @@ class Request implements HttpPart {
       query = r.query ? [:] + r.query : null
       headers = r.headers ? [:] + r.headers : null
       body = r.body
-      matchingRules = r.matchingRules ? [:] + r.matchingRules : null
+      matchingRules = r.matchingRules.copy()
       it
     }
   }

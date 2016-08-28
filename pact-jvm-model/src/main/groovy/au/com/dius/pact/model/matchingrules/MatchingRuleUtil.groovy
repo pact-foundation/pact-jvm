@@ -6,15 +6,25 @@ import groovy.util.logging.Slf4j
  * Utility class for matching rules
  */
 @Slf4j
+@SuppressWarnings(['CyclomaticComplexity', 'UnusedObject'])
 class MatchingRuleUtil {
+
+  private static final String MATCH = 'match'
+  private static final String MIN = 'min'
+  private static final String MAX = 'max'
+  private static final String REGEX = 'regex'
+  private static final String TIMESTAMP = 'timestamp'
+  private static final String TIME = 'time'
+  private static final String DATE = 'date'
+
   static MatchingRule fromMap(Map map) {
     if (!map) {
       log.warn('Matcher definition is empty, defaulting to equality matching')
       new EqualsMatcher()
-    } else if (map.containsKey('match')) {
-      switch (map['match']) {
-        case 'regex':
-          new RegexMatcher(map['regex'] as String)
+    } else if (map.containsKey(MATCH)) {
+      switch (map[MATCH]) {
+        case REGEX:
+          new RegexMatcher(map[REGEX] as String)
           break
         case 'equality':
           new EqualsMatcher()
@@ -23,10 +33,10 @@ class MatchingRuleUtil {
           new IncludeMatcher(map['value'] as String)
           break
         case 'type':
-          if (map.containsKey('min')) {
-            new MinTypeMatcher(Integer.parseInt(map['min'] as String))
-          } else if (map.containsKey('max')) {
-            new MaxTypeMatcher(Integer.parseInt(map['max'] as String))
+          if (map.containsKey(MIN)) {
+            new MinTypeMatcher(Integer.parseInt(map[MIN] as String))
+          } else if (map.containsKey(MAX)) {
+            new MaxTypeMatcher(Integer.parseInt(map[MAX] as String))
           } else {
             new TypeMatcher()
           }
@@ -44,38 +54,38 @@ class MatchingRuleUtil {
           log.warn('The \'real\' type matcher is deprecated, use \'decimal\' instead')
           new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
           break
-        case 'min':
-          new MinTypeMatcher(Integer.parseInt(map['min'] as String))
+        case MIN:
+          new MinTypeMatcher(Integer.parseInt(map[MIN] as String))
           break
-        case 'max':
-          new MaxTypeMatcher(Integer.parseInt(map['max'] as String))
+        case MAX:
+          new MaxTypeMatcher(Integer.parseInt(map[MAX] as String))
           break
-        case 'timestamp':
-          new TimestampMatcher(map['timestamp'] as String)
+        case TIMESTAMP:
+          new TimestampMatcher(map[TIMESTAMP] as String)
           break
-        case 'time':
-          new TimeMatcher(map['time'] as String)
+        case TIME:
+          new TimeMatcher(map[TIME] as String)
           break
-        case 'date':
-          new DateMatcher(map['date'] as String)
+        case DATE:
+          new DateMatcher(map[DATE] as String)
           break
         default:
-          log.warn("Unrecognised matcher ${map['match']}, defaulting to equality matching")
+          log.warn("Unrecognised matcher ${map[MATCH]}, defaulting to equality matching")
           new EqualsMatcher()
           break
       }
-    } else if (map.containsKey('regex')) {
-      new RegexMatcher(map['regex'] as String)
-    } else if (map.containsKey('min')) {
-      new MinTypeMatcher(Integer.parseInt(map['min'] as String))
-    } else if (map.containsKey('max')) {
-      new MaxTypeMatcher(Integer.parseInt(map['max'] as String))
-    } else if (map.containsKey('timestamp')) {
-      new TimestampMatcher(map['timestamp'] as String)
-    } else if (map.containsKey('time')) {
-      new TimeMatcher(map['time'] as String)
-    } else if (map.containsKey('date')) {
-      new DateMatcher(map['date'] as String)
+    } else if (map.containsKey(REGEX)) {
+      new RegexMatcher(map[REGEX] as String)
+    } else if (map.containsKey(MIN)) {
+      new MinTypeMatcher(Integer.parseInt(map[MIN] as String))
+    } else if (map.containsKey(MAX)) {
+      new MaxTypeMatcher(Integer.parseInt(map[MAX] as String))
+    } else if (map.containsKey(TIMESTAMP)) {
+      new TimestampMatcher(map[TIMESTAMP] as String)
+    } else if (map.containsKey(TIME)) {
+      new TimeMatcher(map[TIME] as String)
+    } else if (map.containsKey(DATE)) {
+      new DateMatcher(map[DATE] as String)
     } else {
       log.warn("Unrecognised matcher definition $map, defaulting to equality matching")
       new EqualsMatcher()

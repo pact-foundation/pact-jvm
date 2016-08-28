@@ -1,28 +1,20 @@
 package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model._
+import au.com.dius.pact.model.matchingrules.{MatchingRules, MinTypeMatcher, RegexMatcher}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 import org.specs2.specification.AllExpectations
 
-import scala.collection.JavaConversions
-
 @RunWith(classOf[JUnitRunner])
 class JsonBodyMatcherTest extends Specification with AllExpectations {
   isolated
 
-  private def scalaMMapToJavaMMap(map: Map[String, Map[String, AnyRef]]) : java.util.Map[String, java.util.Map[String, AnyRef]] = {
-    JavaConversions.mapAsJavaMap(map.mapValues {
-      case jmap: Map[String, _] => JavaConversions.mapAsJavaMap(jmap)
-    })
-  }
-
   var expectedBody = OptionalBody.missing()
   var actualBody = OptionalBody.missing()
-  var matchers = Map[String, Map[String, String]]()
-  val expected = () => new Request("", "", null, null, expectedBody,
-    scalaMMapToJavaMMap(matchers))
+  val matchers = new MatchingRules()
+  val expected = () => new Request("", "", null, null, expectedBody, matchers)
   val actual = () => new Request("", "", null, null, actualBody)
 
   var diffconfig = DiffConfig(structural = true)
@@ -65,14 +57,14 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
       "with each like matcher on unequal lists" in {
         actualBody = OptionalBody.body("{\"list\": [100, 200, 300, 400]}")
         expectedBody = OptionalBody.body("{\"list\": [100]}")
-        matchers = Map("$.body.list" -> Map("min" -> "1","match" -> "type"))
+        matchers.addCategory("body").addRule("$.list", new MinTypeMatcher(1))
         matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
       }
 
       "with each like matcher on empty list" in {
         actualBody = OptionalBody.body("{\"list\": []}")
         expectedBody = OptionalBody.body("{\"list\": [100]}")
-        matchers = Map("$.body.list" -> Map("min" -> "0","match" -> "type"))
+        matchers.addCategory("body").addRule("$.list", new MinTypeMatcher(0))
         matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
       }
 
@@ -170,7 +162,7 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
       "delegate to the matcher" in {
         expectedBody = OptionalBody.body("{\"something\": 100}")
         actualBody = OptionalBody.body("{\"something\": 101}")
-        matchers = Map("$.body.something" -> Map("regex" -> "\\d+"))
+        matchers.addCategory("body").addRule("$.something", new RegexMatcher("\\d+"))
         matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
       }
 

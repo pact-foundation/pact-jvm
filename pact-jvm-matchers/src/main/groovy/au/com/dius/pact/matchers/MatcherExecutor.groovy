@@ -3,6 +3,8 @@ package au.com.dius.pact.matchers
 import au.com.dius.pact.model.matchingrules.Category
 import au.com.dius.pact.model.matchingrules.DateMatcher
 import au.com.dius.pact.model.matchingrules.MatchingRule
+import au.com.dius.pact.model.matchingrules.MaxTypeMatcher
+import au.com.dius.pact.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.model.matchingrules.RegexMatcher
 import au.com.dius.pact.model.matchingrules.RuleLogic
@@ -72,6 +74,10 @@ class MatcherExecutor {
       matchTime(matcher.format, path, expected, actual, mismatchFn)
     } else if (matcher instanceof TimestampMatcher) {
       matchTimestamp(matcher.format, path, expected, actual, mismatchFn)
+    } else if (matcher instanceof MinTypeMatcher) {
+      matchMinType(matcher.min, path, expected, actual, mismatchFn)
+    } else if (matcher instanceof MaxTypeMatcher) {
+      matchMaxType(matcher.max, path, expected, actual, mismatchFn)
     } else {
       matchEquality(path, expected, actual, mismatchFn)
     }
@@ -206,74 +212,57 @@ class MatcherExecutor {
 //        List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to be a timestamp", path))
 //    }
 //  }
-//
-//  def matchArray[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch],
-// matcher: String, args: List[String]) = {
-//    matcher match {
-//      case "atleast" => actual match {
-//        case v: List[Any] =>
-//          if (v.asInstanceOf[List[Any]].size < args.head.toInt) List(mismatchFn.create(expected, actual,
-// s"Expected ${valueOf(actual)} to have at least ${args.head} elements", path))
-//          else List[Mismatch]()
-//        case _ => List(mismatchFn.create(expected, actual, s"Array matcher $matcher can only be applied to arrays",
-// path))
-//      }
-//      case _ => List(mismatchFn.create(expected, actual, s"Array matcher $matcher is not defined", path))
-//    }
-//  }
-//
-//object MinimumMatcher extends Matcher with StrictLogging {
-//  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any,
-// mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-//    val value = matcherDef("min") match {
-//      case i: Int => i
-//      case j: Integer => j.toInt
-//      case o => o.toString.toInt
-//    }
-//    logger.debug(s"comparing ${valueOf(actual)} with minimum $value at $path")
-//    actual match {
-//      case v: List[Any] =>
-//        if (v.size < value) {
-//          List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to have minimum $value", path))
-//        } else {
-//          List()
-//        }
-//      case v: Elem =>
-//        if (v.child.size < value) {
-//          List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to have minimum $value", path))
-//        } else {
-//          List()
-//        }
-//      case _ => TypeMatcher.domatch[Mismatch](matcherDef, path, expected, actual, mismatchFn)
-//    }
-//  }
-//}
-//
-//object MaximumMatcher extends Matcher with StrictLogging {
-//  def domatch[Mismatch](matcherDef: Map[String, Any], path: Seq[String], expected: Any, actual: Any,
-// mismatchFn: MismatchFactory[Mismatch]): List[Mismatch] = {
-//    val value = matcherDef("max") match {
-//      case i: Int => i
-//      case j: Integer => j.toInt
-//      case o => o.toString.toInt
-//    }
-//    logger.debug(s"comparing ${valueOf(actual)} with maximum $value at $path")
-//    actual match {
-//      case v: List[Any] =>
-//        if (v.size > value) {
-//          List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to have maximum $value", path))
-//        } else {
-//          List()
-//        }
-//      case v: Elem =>
-//        if (v.child.size > value) {
-//          List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to have minimum $value", path))
-//        } else {
-//          List()
-//        }
-//      case _ => TypeMatcher.domatch[Mismatch](matcherDef, path, expected, actual, mismatchFn)
-//    }
-//  }
-//}
+
+  static <Mismatch> List<Mismatch> matchMinType(Integer min, Seq<String> path, Object expected, Object actual,
+                                                MismatchFactory<Mismatch> mismatchFactory) {
+    log.debug("comparing ${valueOf(actual)} with minimum $min at $path")
+    if (actual instanceof List) {
+      if (actual.size() < min) {
+        [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path) ]
+      } else {
+        []
+      }
+    } else if (actual instanceof scala.collection.immutable.List) {
+      if (actual.size() < min) {
+        [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path) ]
+      } else {
+        []
+      }
+    } else if (actual instanceof Elem) {
+      if (actual.child().size() < min) {
+        [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path) ]
+      } else {
+        []
+      }
+    } else {
+      matchType(path, expected, actual, mismatchFactory)
+    }
+  }
+
+  static <Mismatch> List<Mismatch> matchMaxType(Integer max, Seq<String> path, Object expected, Object actual,
+                                                MismatchFactory<Mismatch> mismatchFactory) {
+    log.debug("comparing ${valueOf(actual)} with maximum $max at $path")
+    if (actual instanceof List) {
+      if (actual.size() > max) {
+        [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path) ]
+      } else {
+        []
+      }
+    } else if (actual instanceof scala.collection.immutable.List) {
+      if (actual.size() > max) {
+        [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path) ]
+      } else {
+        []
+      }
+    } else if (actual instanceof Elem) {
+      if (actual.child().size() > max) {
+        [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path) ]
+      } else {
+        []
+      }
+    } else {
+      matchType(path, expected, actual, mismatchFactory)
+    }
+  }
 
 }

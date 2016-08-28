@@ -1,28 +1,20 @@
 package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model._
+import au.com.dius.pact.model.matchingrules.{MatchingRules, RegexMatcher}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 import org.specs2.specification.AllExpectations
 
-import scala.collection.JavaConversions
-
 @RunWith(classOf[JUnitRunner])
 class XmlBodyMatcherTest extends Specification with AllExpectations {
   isolated
 
-  private def scalaMMapToJavaMMap(map: Map[String, Map[String, AnyRef]]) : java.util.Map[String, java.util.Map[String, AnyRef]] = {
-    JavaConversions.mapAsJavaMap(map.mapValues {
-      case jmap: Map[String, _] => JavaConversions.mapAsJavaMap(jmap)
-    })
-  }
-
   var expectedBody = OptionalBody.missing()
   var actualBody = OptionalBody.missing()
-  var matchers = Map[String, Map[String, String]]()
-  val expected = () => new Request("", "", null, null, expectedBody,
-    scalaMMapToJavaMMap(matchers))
+  var matchers = new MatchingRules()
+  val expected = () => new Request("", "", null, null, expectedBody, matchers)
   val actual = () => new Request("", "", null, null, actualBody)
 
   var diffconfig = DiffConfig(structural = true, allowUnexpectedKeys = false)
@@ -115,7 +107,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         val mismatches: List[BodyMismatch] = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
         mismatches must containMessage("Expected element foo but received bar")
-        mismatches must havePath("$.body.foo")
+        mismatches must havePath("$.foo")
       }
 
       "when comparing an empty list to a non-empty one" in {
@@ -124,7 +116,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         val mismatches: List[BodyMismatch] = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
         mismatches must containMessage("Expected an empty List but received <item/>")
-        mismatches must havePath("$.body.foo")
+        mismatches must havePath("$.foo")
       }
 
       "when comparing a list to one with with different size" in {
@@ -135,7 +127,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         mismatches must have size 2
         mismatches must containMessage("Expected a List with 4 elements but received 3 elements")
         mismatches must containMessage("Expected <four/> but was missing")
-        mismatches must havePath("$.body.foo")
+        mismatches must havePath("$.foo")
       }
 
       "when comparing a list to one with with the same size but different children" in {
@@ -144,7 +136,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
 
         mismatches must containMessage("Expected element three but received four")
-        mismatches must havePath("$.body.foo.2.three")
+        mismatches must havePath("$.foo.2.three")
       }
 
       "when comparing a list to one where the items are in the wrong order" in {
@@ -186,7 +178,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
         mismatches must containMessage("Expected somethingElse='100' but was missing")
-        mismatches must havePath("$.body.foo.@somethingElse")
+        mismatches must havePath("$.foo.@somethingElse")
       }
 
       "when a tag has an invalid value" in {
@@ -195,7 +187,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
         mismatches must containMessage("Expected something='100' but received 101")
-        mismatches must havePath("$.body.foo.@something")
+        mismatches must havePath("$.foo.@something")
       }
 
       "when the content of an element does not match" in {
@@ -204,7 +196,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
         mismatches must containMessage("Expected value 'hello world' but received 'hello my friend'")
-        mismatches must havePath("$.body.foo.#text")
+        mismatches must havePath("$.foo.#text")
       }
     }
 
@@ -213,7 +205,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
       "delegate to the matcher" in {
         expectedBody = OptionalBody.body("<foo something=\"100\"/>")
         actualBody = OptionalBody.body("<foo something=\"101\"/>")
-        matchers = Map("$.body.foo['@something']" -> Map("regex" -> "\\d+"))
+        matchers.addCategory("body").addRule("$.foo['@something']", new RegexMatcher("\\d+"))
         matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
       }
 

@@ -52,7 +52,10 @@ object Matchers extends StrictLogging {
 
 
   def matcherDefined(category: String, path: Seq[String], matchers: MatchingRules): Boolean =
-    resolveMatchers(matchers, category, path).isNotEmpty
+    if (matchers != null)
+      resolveMatchers(matchers, category, path).isNotEmpty
+    else
+      false
 
   def domatch[Mismatch](matchers: MatchingRules, category: String, path: Seq[String], expected: Any, actual: Any,
                         mismatchFn: MismatchFactory[Mismatch]) : List[Mismatch] = {

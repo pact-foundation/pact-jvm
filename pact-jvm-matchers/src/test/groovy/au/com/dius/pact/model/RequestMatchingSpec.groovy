@@ -1,5 +1,6 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.model.matchingrules.RegexMatcher
 import scala.collection.JavaConversions
 import spock.lang.Specification
 
@@ -228,7 +229,7 @@ class RequestMatchingSpec extends Specification {
   def 'path matching should allow matching with a defined matcher'() {
     given:
     request = new Request('GET', '/path')
-    request.matchingRules = ['$.path': [regex: '/path[0-9]*']]
+    request.matchingRules.addCategory('path').addRule(new RegexMatcher('/path[0-9]*'))
     def requestWithMatcher = request.copy()
     requestWithMatcher.path = '/path2'
 
@@ -242,7 +243,7 @@ class RequestMatchingSpec extends Specification {
   def 'path matching should not match with the defined matcher'() {
     given:
     request = new Request('GET', '/path')
-    request.matchingRules = ['$.path': [regex: '/path[0-9]*']]
+    request.matchingRules.addCategory('path').addRule(new RegexMatcher('/path[0-9]*'))
     def requestWithDifferentPath = request.copy()
     requestWithDifferentPath.path = '/pathA'
 

@@ -7,7 +7,10 @@ import groovy.transform.Canonical
  */
 @Canonical
 class MatchingRules {
-  private Map rules = [:]
+  private static final String DOLLAR = '$'
+  private static final int TWO = 2
+
+  private final Map rules = [:]
 
   /**
    * Constructs the matching rules from a Map
@@ -16,7 +19,7 @@ class MatchingRules {
     def matchingRules = new MatchingRules()
 
     if (map) {
-      if (map.keySet().first().startsWith('$')) {
+      if (map.keySet().first().startsWith(DOLLAR)) {
         matchingRules.fromV2Map(map)
       } else {
         matchingRules.fromV3Map(map)
@@ -68,10 +71,10 @@ class MatchingRules {
   void fromV2Map(Map map) {
     map.each {
       if (it.key.startsWith('$.body')) {
-        addV2Rule('body', '$' + it.key[6..-1], it.value)
+        addV2Rule('body', DOLLAR + it.key[6..-1], it.value)
       } else {
         def path = it.key.split('\\.')
-        addV2Rule(path[1], path.size() > 2 ? path[2] : null, it.value)
+        addV2Rule(path[1], path.size() > TWO ? path[TWO] : null, it.value)
       }
     }
   }
@@ -111,9 +114,18 @@ class MatchingRules {
     addCategory(category)
   }
 
-
   @Override
-  public String toString() {
-    return "MatchingRules(rules=$rules)"
+  String toString() {
+    "MatchingRules(rules=$rules)"
+  }
+
+  MatchingRules copy() {
+    def matchingRules = new MatchingRules()
+
+    rules.each {
+      matchingRules.addCategory(it.value.copy())
+    }
+
+    matchingRules
   }
 }

@@ -92,8 +92,8 @@ class MatchingSpec extends Specification {
 
       "mismatch if the same key is repeated with values in different order"  in {
         matchQuery(query("a=1&a=2&b=3"), query("a=2&a=1&b=3")) must beEqualTo(
-          Seq(QueryMismatch("a", "1", "2", Some("Expected '1' but received '2' for query parameter 'a'"), "$.query.a.0"),
-              QueryMismatch("a", "2", "1", Some("Expected '2' but received '1' for query parameter 'a'"), "$.query.a.1")))
+          Seq(QueryMismatch("a", "1", "2", Some("Expected '1' but received '2' for query parameter 'a'"), "a"),
+              QueryMismatch("a", "2", "1", Some("Expected '2' but received '1' for query parameter 'a'"), "a")))
       }
     }
 

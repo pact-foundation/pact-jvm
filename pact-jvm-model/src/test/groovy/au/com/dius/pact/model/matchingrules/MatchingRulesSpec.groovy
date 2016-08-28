@@ -19,7 +19,7 @@ class MatchingRulesSpec extends Specification {
     then:
     matchingRules.empty
   }
-  
+
   def 'loads V2 matching rules'() {
     given:
     def matchingRulesMap = [

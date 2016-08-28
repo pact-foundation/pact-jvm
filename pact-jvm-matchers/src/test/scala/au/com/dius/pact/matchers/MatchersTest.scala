@@ -1,6 +1,7 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model._
+import au.com.dius.pact.model.{DiffConfig, OptionalBody, Request}
+import au.com.dius.pact.model.matchingrules.{MatchingRules, TypeMatcher}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -10,349 +11,59 @@ import scala.collection.JavaConversions
 @RunWith(classOf[JUnitRunner])
 class MatchersTest extends Specification {
 
-  private def scalaMMapToJavaMMap(map: Map[String, Map[String, AnyRef]]) : java.util.Map[String, java.util.Map[String, AnyRef]] = {
-    JavaConversions.mapAsJavaMap(map.mapValues {
-      case jmap: Map[String, _] => JavaConversions.mapAsJavaMap(jmap)
-    })
-  }
-
   "matchers defined" should {
 
     "should be false when there are no matchers" in {
-      Matchers.matcherDefined(Seq(""), None) must beFalse
+      Matchers.matcherDefined("body", Seq(""), new MatchingRules()) must beFalse
     }
 
     "should be false when the path does not have a matcher entry" in {
-      Matchers.matcherDefined(Seq("$", "body", "something"), Some(Map())) must beFalse
+      Matchers.matcherDefined("body", Seq("$", "something"), new MatchingRules()) must beFalse
     }
 
     "should be true when the path does have a matcher entry" in {
-      Matchers.matcherDefined(Seq("$", "body", "something"), Some(Map("$.body.something" -> Map[String, String]()))) must beTrue
+      val matchingRules = new MatchingRules()
+      matchingRules.addCategory("body").addRule("$.something", new TypeMatcher())
+      Matchers.matcherDefined("body", Seq("$", "something"), matchingRules) must beTrue
     }
 
     "should be true when a parent of the path has a matcher entry" in {
-      Matchers.matcherDefined(Seq("$", "body", "something"), Some(Map("$.body" -> Map[String, String]()))) must beTrue
-    }
-
-  }
-
-  "matchers lookup" should {
-
-    "returns EqualsMatcher" should {
-
-      "if the definition is empty" in {
-        Matchers.matcher(Map()) must be(EqualsMatcher)
-      }
-
-      "if the definition is invalid" in {
-        Matchers.matcher(Map("other" -> "something")) must be(EqualsMatcher)
-      }
-
-      "if the matcher type is unknown" in {
-        Matchers.matcher(Map("match" -> "something")) must be(EqualsMatcher)
-      }
-
-      "if the matcher type is equality" in {
-        Matchers.matcher(Map("match" -> "equality")) must be(EqualsMatcher)
-      }
-
-    }
-
-    "returns RegexpMatcher" should {
-
-      "if the matcher type is regex" in {
-        Matchers.matcher(Map("match" -> "regex")) must be(RegexpMatcher)
-      }
-
-      "if the matcher definition contains a regex" in {
-        Matchers.matcher(Map("test" -> "regex", "regex" -> "\\w+")) must be(RegexpMatcher)
-      }
-
-    }
-
-    "returns TypeMatcher" should {
-
-      "if the matcher type is 'type' and there is no min or max" in {
-        Matchers.matcher(Map("match" -> "type")) must be(TypeMatcher)
-      }
-
-      "if the matcher type is 'number'" in {
-        Matchers.matcher(Map("match" -> "number")) must be(TypeMatcher)
-      }
-
-      "if the matcher type is 'integer'" in {
-        Matchers.matcher(Map("match" -> "integer")) must be(TypeMatcher)
-      }
-
-      "if the matcher type is 'real'" in {
-        Matchers.matcher(Map("match" -> "real")) must be(TypeMatcher)
-      }
-
-      "if the matcher type is 'decimal'" in {
-        Matchers.matcher(Map("match" -> "decimal")) must be(TypeMatcher)
-      }
-
-    }
-
-    "returns MinimumMatcher" should {
-
-      "if the matcher type is 'type' and there is a min" in {
-        Matchers.matcher(Map("match" -> "type", "min" -> "1")) must be(MinimumMatcher)
-      }
-
-      "if the matcher type is 'min'" in {
-        Matchers.matcher(Map("match" -> "min")) must be(MinimumMatcher)
-      }
-
-      "if the matcher definition contains a min" in {
-        Matchers.matcher(Map("test" -> "min", "min" -> "1")) must be(MinimumMatcher)
-      }
-
-    }
-
-    "returns MaximumMatcher" should {
-
-      "if the matcher type is 'type' and there is a max" in {
-        Matchers.matcher(Map("match" -> "type", "max" -> "1")) must be(MaximumMatcher)
-      }
-
-      "if the matcher type is 'max'" in {
-        Matchers.matcher(Map("match" -> "max")) must be(MaximumMatcher)
-      }
-
-      "if the matcher definition contains a max" in {
-        Matchers.matcher(Map("test" -> "max", "max" -> "1")) must be(MaximumMatcher)
-      }
-
-    }
-
-    "returns TimestampMatcher" should {
-
-      "if the matcher type is 'timestamp'" in {
-        Matchers.matcher(Map("match" -> "timestamp")) must be(TimestampMatcher)
-      }
-
-      "if the matcher definition contains a timestamp" in {
-        Matchers.matcher(Map("test" -> "max", "timestamp" -> "1")) must be(TimestampMatcher)
-      }
-
-    }
-
-    "returns TimeMatcher" should {
-
-      "if the matcher type is 'time'" in {
-        Matchers.matcher(Map("match" -> "time")) must be(TimeMatcher)
-      }
-
-      "if the matcher definition contains a time" in {
-        Matchers.matcher(Map("test" -> "max", "time" -> "1")) must be(TimeMatcher)
-      }
-
-    }
-
-    "returns DateMatcher" should {
-
-      "if the matcher type is 'date'" in {
-        Matchers.matcher(Map("match" -> "date")) must be(DateMatcher)
-      }
-
-      "if the matcher definition contains a date" in {
-        Matchers.matcher(Map("test" -> "max", "date" -> "1")) must be(DateMatcher)
-      }
-
+      val matchingRules = new MatchingRules()
+      matchingRules.addCategory("body").addRule("$", new TypeMatcher())
+      Matchers.matcherDefined("body", Seq("$", "something"), matchingRules) must beTrue
     }
 
   }
 
   "should default to a matching defined at a parent level" in {
-    Matchers.selectBestMatcher(Some(Map("$.body" -> Map("match" -> "type"))), Seq("$", "body", "value")) must beEqualTo(Map("match" -> "type"))
-  }
-
-  "equal matcher" should {
-
-    "match using equals" in {
-      EqualsMatcher.domatch[BodyMismatch](null, Seq("/"), "100", "100", BodyMismatchFactory).isEmpty must beTrue
-      EqualsMatcher.domatch[BodyMismatch](null, Seq("/"), 100, "100", BodyMismatchFactory).isEmpty must beFalse
-    }
-
-  }
-
-  "regex matcher" should {
-
-    "match using the provided regex" in {
-      val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"Harry\"}"),
-        scalaMMapToJavaMMap(Map("$.body.value" -> Map("regex" -> "Ha[a-z]*"))))
-      val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"Harry\"}"), null)
-      new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
-    }
-
-    "handle null values" in {
-      val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"Harry\"}"),
-        scalaMMapToJavaMMap(Map("$.body.value" -> Map("regex" -> "Ha[a-z]*"))))
-      val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": null}"), null)
-      new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
-    }
-
+    val matchingRules = new MatchingRules()
+    matchingRules.addCategory("body").addRule("$", new TypeMatcher())
+    val rules = Matchers.selectBestMatcher(matchingRules, "body", Seq("$", "value")).getMatchingRules
+    JavaConversions.asScalaSet(rules.keySet()) must beEqualTo(Set("$"))
   }
 
   "type matcher" should {
 
     "match on type" should {
 
-      "accept strings" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"Harry\"}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"Some other string\"}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
-      }
-
-      "accept numbers" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": 100}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": 200.3}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
-      }
-
-      "accept booleans" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": true}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": false}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
-      }
-
-      "accept null" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": null}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": null}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
-      }
-
-      "not accept different types" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"200\"}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": 200}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
-      }
-
-      "not accept null/non-null" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": 200}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": null}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
-      }
-
-      "accept lists" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": [100, 200, 300]}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": [200.3]}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
-      }
-
-      "accept maps" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": {\"a\": 100}}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": {\"a\": 200.3, \"b\": 200, \"c\": 300} }"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
-      }
-
       "list elements should inherit the matcher from the parent" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": [100]}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
+        val matchingRules = new MatchingRules()
+        matchingRules.addCategory("body").addRule("$.value", new TypeMatcher())
+        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": [100]}"), matchingRules)
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": [\"200.3\"]}"), null)
         new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
       }
 
       "map elements should inherit the matchers from the parent" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": {\"a\": 100}}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": {\"a\": \"200.3\", \"b\": 200, \"c\": 300} }"), null)
+        val matchingRules = new MatchingRules()
+        matchingRules.addCategory("body").addRule("$.value", new TypeMatcher())
+        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": {\"a\": 100}}"), matchingRules)
+        val actual = new Request("get", "/", null, null,
+          OptionalBody.body("{\"value\": {\"a\": \"200.3\", \"b\": 200, \"c\": 300} }"), null)
         new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
       }
 
     }
-
-    "match timestamps" should {
-
-      "accept ISO formatted timestamps" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"2014-01-01 14:00:00+10:00\"}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "timestamp"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"2014-10-01 14:00:00+10:00\"}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
-      }
-
-      "not accept incorrect formatted timestamps" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"2014-01-01 14:00:00\"}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "timestamp"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"I'm a timestamp!\"}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
-      }
-
-      "accept timestamps with custom patterns" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"2014-01-01-14:00:00+10:00\"}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("timestamp" -> "yyyy-MM-dd-HH:mm:ssZZZ"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"2014-10-01-14:00:00+10:00\"}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
-      }
-
-      "handle null values" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"2014-01-01-14:00:00+10:00\"}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("timestamp" -> "yyyy-MM-dd-HH:mm:ssZZZ"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": null}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
-      }
-
-    }
-
-    "match times" should {
-
-      "not accept incorrect formatted times" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"00:00\"}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("time" -> "mm:ss"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"14:01:02\"}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
-      }
-
-      "accept times with custom patterns" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"00:00:14\"}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("time" -> "ss:mm:HH"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"05:10:14\"}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
-      }
-
-      "handle null values" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"14:00:00\"}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("time" -> "HH:mm:ss"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": null}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
-      }
-
-    }
-
-    "match dates" should {
-
-      "not accept incorrect formatted dates" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"01-01-1970\"}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("date" -> "dd-MM-yyyy"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"01011970\"}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
-      }
-
-      "accept dates with custom patterns" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"12/30/1970\"}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("date" -> "MM/dd/yyyy"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"12/30/1970\"}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
-      }
-
-      "handle null values" in {
-        val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"2014-01-01\"}"),
-          scalaMMapToJavaMMap(Map("$.body.value" -> Map("date" -> "yyyy-MM-dd"))))
-        val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": null}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
-      }
-
-    }
-
   }
 
   "path matching" should {

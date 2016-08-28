@@ -66,4 +66,8 @@ class Category {
       [prefix + it.key, it.value]
     }
   }
+
+  Category copy() {
+    new Category(name, [:] + matchingRules, ruleLogic)
+  }
 }
