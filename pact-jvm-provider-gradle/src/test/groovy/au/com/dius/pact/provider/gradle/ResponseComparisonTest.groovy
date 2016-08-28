@@ -20,7 +20,7 @@ class ResponseComparisonTest {
 
   @Before
   void setup() {
-    response = new Response(200, ['Content-Type': 'application/json'], OptionalBody.body('{"stuff": "is good"}'), [:])
+    response = new Response(200, ['Content-Type': 'application/json'], OptionalBody.body('{"stuff": "is good"}'))
     actualStatus = 200
     actualBody = '{"stuff": "is good"}'
     actualResponse = [contentType: ContentType.APPLICATION_JSON]
@@ -38,23 +38,23 @@ class ResponseComparisonTest {
 
   @Test
   void 'should not compare headers if there are no expected headers'() {
-    response = new Response(200, [:], OptionalBody.body(''), [:])
+    response = new Response(200, [:], OptionalBody.body(''))
     assert testSubject().headers == [:]
   }
 
   @Test
   void 'should only compare the expected headers'() {
     actualHeaders = ['A': 'B', 'C': 'D']
-    response = new Response(200, ['A': 'B'], OptionalBody.body(''), [:])
+    response = new Response(200, ['A': 'B'], OptionalBody.body(''))
     assert testSubject().headers == ['A': true]
-    response = new Response(200, ['A': 'D'], OptionalBody.body(''), [:])
+    response = new Response(200, ['A': 'D'], OptionalBody.body(''))
     assert testSubject().headers.A == 'Expected header \'A\' to have value \'D\' but was \'B\''
   }
 
   @Test
   void 'ignores case in header comparisons'() {
     actualHeaders = ['A': 'B', 'C': 'D']
-    response = new Response(200, ['a': 'B'], OptionalBody.body(''), [:])
+    response = new Response(200, ['a': 'B'], OptionalBody.body(''))
     assert testSubject().headers == ['a': true]
   }
 
@@ -73,7 +73,7 @@ class ResponseComparisonTest {
   @Test
   void 'comparing bodies should pass when the order of elements in the actual response is different'() {
     response = new Response(200, ['Content-Type': 'application/json'], OptionalBody.body(
-            '{"moar_stuff": {"a": "is also good", "b": "is even better"}, "stuff": "is good"}'), [:])
+            '{"moar_stuff": {"a": "is also good", "b": "is even better"}, "stuff": "is good"}'))
     actualBody = '{"stuff": "is good", "moar_stuff": {"b": "is even better", "a": "is also good"}}'
     assert testSubject().body == [:]
   }
@@ -82,7 +82,7 @@ class ResponseComparisonTest {
   void 'comparing bodies should show all the differences'() {
     actualBody = '{"stuff": "should make the test fail"}'
     def result = testSubject().body
-    assert result.comparison == ['$.body.stuff': "Expected 'is good' but received 'should make the test fail'"]
+    assert result.comparison == ['$.stuff': "Expected 'is good' but received 'should make the test fail'"]
     assert result.diff[0] == '@1'
     assert result.diff[1] == '-    "stuff": "is good"'
     assert result.diff[2] == '+    "stuff": "should make the test fail"'

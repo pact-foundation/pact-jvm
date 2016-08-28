@@ -119,7 +119,7 @@ class ProviderClientSpec extends Specification {
   def 'setting up body sets a string entity if it is not a url encoded form post and there is a body'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
-    client.request = new Request('PUT', '/', null, null, OptionalBody.body('{}'), [:])
+    client.request = new Request('PUT', '/', null, null, OptionalBody.body('{}'))
 
     when:
     client.setupBody(httpRequest)
@@ -133,7 +133,7 @@ class ProviderClientSpec extends Specification {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
     client.request = new Request('POST', '/', null, ['Content-Type': ContentType.APPLICATION_FORM_URLENCODED.mimeType],
-      OptionalBody.body('A=B'), [:])
+      OptionalBody.body('A=B'))
 
     when:
     client.setupBody(httpRequest)
@@ -147,7 +147,7 @@ class ProviderClientSpec extends Specification {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
     client.request = new Request('POST', '/', ['A': ['B', 'C']], ['Content-Type': 'application/x-www-form-urlencoded'],
-      OptionalBody.body('{}'), [:])
+      OptionalBody.body('{}'))
 
     when:
     client.setupBody(httpRequest)
@@ -162,7 +162,7 @@ class ProviderClientSpec extends Specification {
   def 'request is a url encoded form post'() {
     expect:
     def request = new Request(method, '/', ['A': ['B', 'C']], ['Content-Type': contentType],
-      OptionalBody.body('{}'), [:])
+      OptionalBody.body('{}'))
     ProviderClient.urlEncodedFormPost(request) == urlEncodedFormPost
 
     where:

@@ -9,7 +9,7 @@
       "Content-Type": "hippos"
     },
     "matchingRules": {
-      "headers": {
+      "header": {
         "Accept": {
           "matchers": [
             {

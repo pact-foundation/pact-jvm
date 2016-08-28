@@ -10,6 +10,8 @@ import groovy.transform.Canonical
 class MatchingRules {
   private static final String DOLLAR = '$'
   private static final int TWO = 2
+  private static final String DOLLAR_BODY = '$.body'
+  private static final String BODY = 'body'
 
   private final Map<String, Category> rules = [:]
 
@@ -71,10 +73,16 @@ class MatchingRules {
    */
   void fromV2Map(Map map) {
     map.each {
-      if (it.key.startsWith('$.body')) {
-        addV2Rule('body', DOLLAR + it.key[6..-1], it.value)
+      def path = it.key.split('\\.')
+      if (it.key.startsWith(DOLLAR_BODY)) {
+        if (it.key == DOLLAR_BODY) {
+          addV2Rule(BODY, DOLLAR, it.value)
+        } else {
+          addV2Rule(BODY, DOLLAR + it.key[6..-1], it.value)
+        }
+      } else if (it.key.startsWith('$.headers')) {
+        addV2Rule('header', path[TWO], it.value)
       } else {
-        def path = it.key.split('\\.')
         addV2Rule(path[1], path.size() > TWO ? path[TWO] : null, it.value)
       }
     }

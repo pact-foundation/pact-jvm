@@ -46,7 +46,7 @@ class ProviderVerifierStateChangeSpec extends Specification {
     def state = new ProviderState('state of the nation')
     given:
     def interaction = new RequestResponseInteraction('provider state test', [state],
-      new Request(), new Response(200, [:], OptionalBody.body('{}'), [:]))
+      new Request(), new Response(200, [:], OptionalBody.body('{}')))
     def pact = new RequestResponsePact(new Provider('Bob'), new Consumer('Bobbie'), [interaction])
     def failures = [:]
     consumerMap.stateChange = 'http://localhost:2000/hello'
@@ -71,7 +71,7 @@ class ProviderVerifierStateChangeSpec extends Specification {
     }
     def state = new ProviderState('state of the nation')
     def interaction = new RequestResponseInteraction('provider state test', [state],
-      new Request(), new Response(200, [:], OptionalBody.body('{}'), [:]))
+      new Request(), new Response(200, [:], OptionalBody.body('{}')))
     def pact = new RequestResponsePact(new Provider('Bob'), new Consumer('Bobbie'), [interaction])
     def failures = [:]
     providerInfo.stateChangeTeardown = true

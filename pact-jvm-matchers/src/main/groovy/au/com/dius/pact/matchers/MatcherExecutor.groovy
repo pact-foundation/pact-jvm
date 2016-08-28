@@ -44,7 +44,7 @@ class MatcherExecutor {
     if (value == null) {
       ''
     } else if (value instanceof Elem) {
-      value.text
+      value.text()
     } else {
       value as String
     }
@@ -98,10 +98,14 @@ class MatcherExecutor {
                                               MismatchFactory<Mismatch> mismatchFactory) {
     def matches = safeToString(actual).matches(regex)
     log.debug("comparing ${valueOf(actual)} with regexp $regex at $path -> $matches")
-    if (matches) {
+    if (matches
+      || expected instanceof List && actual instanceof List
+      || expected instanceof scala.collection.immutable.List && actual instanceof scala.collection.immutable.List
+      || expected instanceof Map && actual instanceof Map
+      || expected instanceof scala.collection.Map && actual instanceof scala.collection.Map) {
       []
     } else {
-      [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to match '$regex", path) ]
+      [ mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to match '$regex'", path) ]
     }
   }
 
@@ -112,7 +116,9 @@ class MatcherExecutor {
       || expected instanceof Number && actual instanceof Number
       || expected instanceof Boolean && actual instanceof Boolean
       || expected instanceof List && actual instanceof List
+      || expected instanceof scala.collection.immutable.List && actual instanceof scala.collection.immutable.List
       || expected instanceof Map && actual instanceof Map
+      || expected instanceof scala.collection.Map && actual instanceof scala.collection.Map
       || expected instanceof Elem && actual instanceof Elem && actual.label == expected.label) {
       []
     } else if (expected == null) {

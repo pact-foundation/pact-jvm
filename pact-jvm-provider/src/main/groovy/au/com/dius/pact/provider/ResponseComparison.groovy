@@ -43,7 +43,7 @@ class ResponseComparison {
         actualHeaders: actualHeaders.collectEntries { k, v -> [k.toUpperCase(), v] }, actualBody: actualBody)
     def mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(
         ResponseMatching$.MODULE$.responseMismatches(response, new Response(actualStatus,
-            actualHeaders, OptionalBody.body(actualBody), [:]))).asJava()
+            actualHeaders, OptionalBody.body(actualBody)))).asJava()
 
     result.method = comparison.compareStatus(mismatches)
     result.headers = comparison.compareHeaders(mismatches)
@@ -57,7 +57,7 @@ class ResponseComparison {
     }
     def mismatches = []
     def expected = message.asPactRequest()
-    def actualMessage = new Response(200, ['Content-Type': message.contentType], actual, [:])
+    def actualMessage = new Response(200, ['Content-Type': message.contentType], actual)
     if (result) {
       mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(result.value.matchBody(expected,
             actualMessage, DiffConfig.apply(true, false))).asJava()

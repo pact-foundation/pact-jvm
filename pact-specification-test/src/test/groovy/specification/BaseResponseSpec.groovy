@@ -2,8 +2,10 @@ package specification
 
 import au.com.dius.pact.model.PactReader
 import groovy.json.JsonSlurper
+import groovy.util.logging.Slf4j
 import spock.lang.Specification
 
+@Slf4j
 class BaseResponseSpec extends Specification {
 
   static List loadTestCases(String testDir) {

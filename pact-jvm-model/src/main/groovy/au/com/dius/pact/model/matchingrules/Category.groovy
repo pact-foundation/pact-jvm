@@ -53,7 +53,7 @@ class Category {
   }
 
   Category maxBy(ToIntFunction<String> fn) {
-    def map = matchingRules.max { k, v -> fn(k) }
+    def map = matchingRules.max { fn.applyAsInt(it.key) }
     new Category(name, [(map.key): map.value], ruleLogic)
   }
 
