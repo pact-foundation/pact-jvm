@@ -1,5 +1,22 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.3.0 - Unit style specification for specs2
+
+* e91ba6e - Merge pull request #314 from alonpeer/unit-specs (Ronald Holshausen, Fri Sep 2 07:49:58 2016 +1000)
+* 381b043 - handle loading a pact with invalid version metadata (Ronald Holshausen, Wed Aug 31 22:23:43 2016 +1000)
+* 8ab62d6 - Implementation of unit style specification for specs2, with only a single run of the mock provider (Alon Pe'er, Wed Aug 31 13:08:31 2016 +0200)
+* 01e8b34 - update changelog for release 3.5.0-beta.1 (Ronald Holshausen, Sun Aug 28 21:14:12 2016 +1000)
+* e222205 - update changelog for release 2.4.15 (Ronald Holshausen, Tue Aug 23 22:12:30 2016 +1000)
+* 208bafc - get check task to generate the code coverage reports (Ronald Holshausen, Sat Aug 20 13:56:25 2016 +1000)
+* 41bb277 - Removed the model module dependence on scala (Ronald Holshausen, Sun Aug 14 17:37:19 2016 +1000)
+* 19da565 - Converted PactMerge to Groovy (Ronald Holshausen, Sun Aug 14 17:08:13 2016 +1000)
+* 12be8a2 - bump version to 3.3.0 (Ronald Holshausen, Sun Aug 14 14:44:11 2016 +1000)
+* a17897d - converted the model fixtures to groovy (Ronald Holshausen, Sun Aug 14 14:42:18 2016 +1000)
+* 4335c76 - updated the versions in the groovy DSL readme (Ronald Holshausen, Sun Aug 14 14:17:06 2016 +1000)
+* d723220 - updated the Groovy DSL readme #308 (Ronald Holshausen, Sun Aug 14 14:15:33 2016 +1000)
+* b47d781 - Converted MockProviderConfig to a groovy object (Ronald Holshausen, Sun Aug 14 14:11:50 2016 +1000)
+* 54122ed - bump version to 3.2.14 (Ronald Holshausen, Sun Aug 14 12:34:07 2016 +1000)
+
 # 3.5.0-beta.1 - V3 Matcher Format
 
 * 70a6885 - build passing with new V3 matcher format (Ronald Holshausen, Sun Aug 28 21:07:03 2016 +1000)
