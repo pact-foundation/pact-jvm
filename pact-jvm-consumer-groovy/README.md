@@ -383,6 +383,43 @@ withBody {
 }
 ```
 
+### Matching any key in a map (3.3.1+)
+
+The DSL has been extended for cases where the keys in a map are IDs. For an example of this, see 
+[#313](https://github.com/DiUS/pact-jvm/issues/131). In this case you can use the `keyLike` method, which takes an 
+example key as a parameter.
+
+For example:
+
+```groovy
+withBody {
+  example {
+    one {
+      keyLike '001', 'value'            // key like an id mapped to a value
+    }
+    two {
+      keyLike 'ABC001', regexp('\\w+')  // key like an id mapped to a matcher
+    }
+    three {
+      keyLike 'XYZ001', {               // key like an id mapped to a closure
+        id identifier()
+      }
+    }
+    four {
+      keyLike '001XYZ', eachLike {      // key like an id mapped to an array where each item is matched by the following 
+        id identifier()                 // example
+      }
+    }  
+  }
+}
+```
+
+For an example, have a look at [WildcardPactSpec](src/test/au/com/dius/pact/consumer/groovy/WildcardPactSpec.groovy).
+
+**NOTE:** The `keyLike` method adds a `*` to the matching path, so the matching definition will be applied to all keys
+ of the map if there is not a more specific matcher defined for a particular key. Having more than one `keyLike` condition
+ applied to a map will result in only one being applied when the pact is verified (probably the last).
+
 ## Changing the directory pact files are written to (2.1.9+)
 
 By default, pact files are written to `target/pacts`, but this can be overwritten with the `pact.rootDir` system property.
