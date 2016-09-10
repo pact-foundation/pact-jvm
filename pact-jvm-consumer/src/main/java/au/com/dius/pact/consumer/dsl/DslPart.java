@@ -13,18 +13,21 @@ public abstract class DslPart {
     private static final String MATCH = "match";
 
     protected final DslPart parent;
-    protected final String root;
+    protected final String rootPath;
+    protected final String rootName;
     protected Map<String, Map<String, Object>> matchers = new HashMap<String, Map<String, Object>>();
     protected boolean closed = false;
 
-    public DslPart(DslPart parent, String root) {
+    public DslPart(DslPart parent, String rootPath, String rootName) {
         this.parent = parent;
-        this.root = root;
+        this.rootPath = rootPath;
+        this.rootName = rootName;
     }
 
-    public DslPart(String root) {
+    public DslPart(String rootPath, String rootName) {
         this.parent = null;
-        this.root = root;
+        this.rootPath = rootPath;
+        this.rootName = rootName;
     }
 
     protected abstract void putObject(DslPart object);
