@@ -301,19 +301,23 @@ class PactBuilder extends BaseBuilder {
       requestData.last().body = body.body
       requestData.last().matchers.putAll(body.matchers)
       requestData.last().headers = requestData.last().headers ?: [:]
-      if (options.mimeType) {
-        requestData.last().headers[CONTENT_TYPE] = options.mimeType
-      } else {
-        requestData.last().headers[CONTENT_TYPE] = JSON
+      if (!requestData.last().headers[CONTENT_TYPE]) {
+        if (options.mimeType) {
+          requestData.last().headers[CONTENT_TYPE] = options.mimeType
+        } else {
+          requestData.last().headers[CONTENT_TYPE] = JSON
+        }
       }
     } else {
       responseData.last().body = body.body
       responseData.last().matchers.putAll(body.matchers)
       responseData.last().headers = responseData.last().headers ?: [:]
-      if (options.mimeType) {
-        responseData.last().headers[CONTENT_TYPE] = options.mimeType
-      } else {
-        responseData.last().headers[CONTENT_TYPE] = JSON
+      if (!responseData.last().headers[CONTENT_TYPE]) {
+        if (options.mimeType) {
+          responseData.last().headers[CONTENT_TYPE] = options.mimeType
+        } else {
+          responseData.last().headers[CONTENT_TYPE] = JSON
+        }
       }
     }
   }
