@@ -66,6 +66,7 @@ public class WildcardKeysTest {
         "$.body.articles[*].variants",
         "$.body.articles[*].variants[*].*",
         "$.body.articles[*].variants[*].*[*].bundles",
+        "$.body.articles[*].variants[*].*[*].bundles[*].*",
         "$.body.articles[*].variants[*].*[*].bundles[*].*.description",
         "$.body.articles[*].variants[*].*[*].bundles[*].*.referencedArticles",
         "$.body.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*].*",
