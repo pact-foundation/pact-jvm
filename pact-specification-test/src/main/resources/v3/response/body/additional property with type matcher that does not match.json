@@ -1,6 +1,6 @@
 {
-  "match": true,
-  "comment": "additional property with type matcher wildcards",
+  "match": false,
+  "comment": "additional property with type matcher wildcards that don't match",
   "expected": {
     "headers": {},
     "body" : {
@@ -19,7 +19,7 @@
     "body": {
       "myPerson": {
         "name": "Jon Peterson",
-        "age": "39",
+        "age": 39,
         "nationality": "Australian"
       }
     }    

@@ -23,10 +23,16 @@ object Matchers extends StrictLogging {
   def matchesPath(pathExp: String, path: Seq[String]) =
     new Parser().compile(pathExp) match {
       case Parser.Success(q, _) =>
-        path.reverse.tails.filter(l => l.reverse.corresponds(q)((pathElement, pathToken) => matchesToken(pathElement, pathToken) != 0)).hasNext
+        val filter = path.reverse.tails.filter(l =>
+          l.reverse.corresponds(q)((pathElement, pathToken) => matchesToken(pathElement, pathToken) != 0))
+        if (filter.nonEmpty) {
+          filter.maxBy(seq => seq.length).length
+        } else {
+          0
+        }
       case ns: Parser.NoSuccess =>
         logger.warn(s"Path expression $pathExp is invalid, ignoring: $ns")
-        false
+        0
     }
 
   def calculatePathWeight(pathExp: String, path: Seq[String]) = {
@@ -40,10 +46,20 @@ object Matchers extends StrictLogging {
   }
 
   def resolveMatchers(matchers: Map[String, Map[String, Any]], path: Seq[String]) =
-    matchers.filterKeys(p => matchesPath(p, path))
+    matchers.filterKeys(p => matchesPath(p, path) > 0)
 
   def matcherDefined(path: Seq[String], matchers: Option[Map[String, Map[String, Any]]]): Boolean =
     matchers.isDefined && resolveMatchers(matchers.get, path).nonEmpty
+
+  def wildcardMatcherDefined(path: Seq[String], matchers: Option[Map[String, Map[String, Any]]]): Boolean = {
+    matchers match {
+      case Some(m) => {
+        val resolvedMatchers = m.filterKeys(p => matchesPath(p, path) == path.length)
+        resolvedMatchers.exists(entry => entry._1.endsWith(".*"))
+      }
+      case None => false
+    }
+  }
 
   def domatch[Mismatch](matchers: Option[Map[String, Map[String, Any]]], path: Seq[String], expected: Any, actual: Any,
                         mismatchFn: MismatchFactory[Mismatch]) : List[Mismatch] = {

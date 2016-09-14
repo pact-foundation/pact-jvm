@@ -112,14 +112,24 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
           Some(s"Expected a Map with ${expectedValues.size} elements but received ${actualValues.size} elements"),
           path.mkString("."))
       }
-      expectedValues.foreach(entry => {
-        if (actualValues.contains(entry._1)) {
-          result = result ++: compare(path :+ entry._1, entry._2, actualValues(entry._1), diffConfig, matchers)
-        } else {
-          result = result :+ BodyMismatch(a, b, Some(s"Expected ${entry._1}=${valueOf(entry._2)} but was missing"),
-            path.mkString("."))
-        }
-      })
+      if (Matchers.wildcardMatcherDefined(path :+ "any", matchers)) {
+        actualValues.foreach(entry => {
+          if (expectedValues.contains(entry._1)) {
+            result = result ++: compare(path :+ entry._1, expectedValues.apply(entry._1), entry._2, diffConfig, matchers)
+          } else {
+            result = result ++: compare(path :+ entry._1, expectedValues.values.head, entry._2, diffConfig, matchers)
+          }
+        })
+      } else {
+        expectedValues.foreach(entry => {
+          if (actualValues.contains(entry._1)) {
+            result = result ++: compare(path :+ entry._1, entry._2, actualValues(entry._1), diffConfig, matchers)
+          } else {
+            result = result :+ BodyMismatch(a, b, Some(s"Expected ${entry._1}=${valueOf(entry._2)} but was missing"),
+              path.mkString("."))
+          }
+        })
+      }
       result
     }
   }

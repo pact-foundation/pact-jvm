@@ -13,9 +13,6 @@
       },
       "$.body[*]": {
         "match": "type"
-      },
-      "$.body[*].*": {
-        "match": "type"
       }
     }
   },
