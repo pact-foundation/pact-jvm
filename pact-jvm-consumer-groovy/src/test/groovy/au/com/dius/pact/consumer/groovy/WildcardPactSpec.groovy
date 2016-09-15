@@ -67,6 +67,7 @@ class WildcardPactSpec extends Specification {
       '$.body.articles[*].variants': [match: 'type'],
       '$.body.articles[*].variants[*].*': [match: 'type'],
       '$.body.articles[*].variants[*].*[*].bundles': [match: 'type'],
+      '$.body.articles[*].variants[*].*[*].bundles[*].*': [match: 'type'],
       '$.body.articles[*].variants[*].*[*].bundles[*].*.description': [match: 'type'],
       '$.body.articles[*].variants[*].*[*].bundles[*].*.referencedArticles': [match: 'type'],
       '$.body.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*].bundleId': [match: 'type'],

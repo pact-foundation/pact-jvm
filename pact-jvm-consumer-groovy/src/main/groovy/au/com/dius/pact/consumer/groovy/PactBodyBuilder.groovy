@@ -132,6 +132,9 @@ class PactBodyBuilder extends BaseBuilder {
         }
       }
     } else if (value instanceof Closure) {
+      if (matcherName == STAR) {
+        setMatcherAttribute(new TypeMatcher(values: [TYPE, null]), path + buildPath(matcherName))
+      }
       bodyRepresentation[name] = invokeClosure(value, buildPath(matcherName))
     } else {
       bodyRepresentation[name] = value
