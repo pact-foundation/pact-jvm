@@ -314,7 +314,11 @@ class ProviderVerifier {
   }
 
   static invokeProviderMethod(Method m) {
-    m.invoke(m.declaringClass.newInstance())
+    try {
+      m.invoke(m.declaringClass.newInstance())
+    } catch (e) {
+      throw new RuntimeException("Failed to invoke provider method '${m.name}'", e)
+    }
   }
 
   void displayFailures(Map failures) {

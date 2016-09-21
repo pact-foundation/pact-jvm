@@ -223,8 +223,12 @@ class AnsiConsoleReporter implements VerifierReporter {
   }
 
   static void displayError(Throwable err) {
-    err.message.split('\n').each {
-      AnsiConsole.out().println("      $it")
+    if (err.message) {
+      err.message.split('\n').each {
+        AnsiConsole.out().println("      $it")
+      }
+    } else {
+      AnsiConsole.out().println("      ${err.class.name}")
     }
   }
 }
