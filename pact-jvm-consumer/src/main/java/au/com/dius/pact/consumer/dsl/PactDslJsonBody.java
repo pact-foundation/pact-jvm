@@ -881,7 +881,7 @@ public class PactDslJsonBody extends DslPart {
    * @param exampleKey Example key to use for generating bodies
    */
   public PactDslJsonBody eachKeyLike(String exampleKey) {
-    matchers.put(".*", matchType());
+    matchers.put(rootPath + "*", matchType());
     return new PactDslJsonBody(rootPath + "*.", exampleKey, this);
   }
 
