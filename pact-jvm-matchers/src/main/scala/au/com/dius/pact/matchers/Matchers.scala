@@ -23,10 +23,16 @@ object Matchers extends StrictLogging {
   def matchesPath(pathExp: String, path: Seq[String]) =
     new Parser().compile(pathExp) match {
       case Parser.Success(q, _) =>
-        path.reverse.tails.filter(l => l.reverse.corresponds(q)((pathElement, pathToken) => matchesToken(pathElement, pathToken) != 0)).hasNext
+        val filter = path.reverse.tails.filter(l =>
+          l.reverse.corresponds(q)((pathElement, pathToken) => matchesToken(pathElement, pathToken) != 0))
+        if (filter.nonEmpty) {
+          filter.maxBy(seq => seq.length).length
+        } else {
+          0
+        }
       case ns: Parser.NoSuccess =>
         logger.warn(s"Path expression $pathExp is invalid, ignoring: $ns")
-        false
+        0
     }
 
   def calculatePathWeight(pathExp: String, path: Seq[String]) = {
@@ -42,7 +48,7 @@ object Matchers extends StrictLogging {
   def resolveMatchers(matchers: MatchingRules, category: String, items: Seq[String]) =
     if (category == "body")
       matchers.rulesForCategory(category).filter(new Predicate[String] {
-        override def test(p: String): Boolean = matchesPath(p, items)
+        override def test(p: String): Boolean = matchesPath(p, items) > 0
       })
     else if (category == "header" || category == "query")
       matchers.rulesForCategory(category).filter(new Predicate[String] {
@@ -56,6 +62,16 @@ object Matchers extends StrictLogging {
       resolveMatchers(matchers, category, path).isNotEmpty
     else
       false
+
+  def wildcardMatcherDefined(path: Seq[String], category: String, matchers: MatchingRules): Boolean = {
+    if (matchers != null) {
+      val resolvedMatchers = matchers.rulesForCategory(category).filter(new Predicate[String] {
+        override def test(p: String): Boolean = matchesPath(p, path) == path.length
+      })
+      JavaConversions.asScalaSet(resolvedMatchers.getMatchingRules.keySet()).exists(entry => entry.endsWith(".*"))
+    } else
+      false
+  }
 
   def domatch[Mismatch](matchers: MatchingRules, category: String, path: Seq[String], expected: Any, actual: Any,
                         mismatchFn: MismatchFactory[Mismatch]) : List[Mismatch] = {

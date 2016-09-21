@@ -16,6 +16,8 @@ class PactBodyBuilder extends BaseBuilder {
   public static final String START_LIST = '['
   public static final String END_LIST = ']'
   public static final String ALL_LIST_ITEMS = '[*]'
+  public static final int TWO = 2
+  public static final String STAR = '*'
 
   def matchers = new Category('body')
   def mimetype = null
@@ -42,8 +44,10 @@ class PactBodyBuilder extends BaseBuilder {
   }
 
   def methodMissing(String name, args) {
-    if (args.size() > 0) {
-      addAttribute(name, args[0], args.size() > 1 ? args[1] : null)
+    if (name == 'keyLike') {
+      addAttribute(args[0], STAR, args[1], args.size() > TWO ? args[TWO] : null)
+    } else if (args.size() > 0) {
+      addAttribute(name, name, args[0], args.size() > 1 ? args[1] : null)
     } else {
       bodyRepresentation[name] = [:]
     }
@@ -91,44 +95,48 @@ class PactBodyBuilder extends BaseBuilder {
   }
 
   def propertyMissing(String name, def value) {
-    addAttribute(name, value)
+    addAttribute(name, name, value)
   }
 
-  private void addAttribute(String name, def value, def value2 = null) {
+  private void addAttribute(String name, String matcherName, def value, def value2 = null) {
     if (value instanceof Pattern) {
       def matcher = regexp(value as Pattern, value2)
-      bodyRepresentation[name] = setMatcherAttribute(matcher, path + buildPath(name))
+      bodyRepresentation[name] = setMatcherAttribute(matcher, path + buildPath(matcherName))
     } else if (value instanceof LikeMatcher) {
-      setMatcherAttribute(value, path + buildPath(name))
+      setMatcherAttribute(value, path + buildPath(matcherName))
       bodyRepresentation[name] = []
       value.numberExamples.times {
         def exampleValue = value.values.last()
         if (exampleValue instanceof Closure) {
-          bodyRepresentation[name] << invokeClosure(exampleValue, buildPath(name, ALL_LIST_ITEMS))
+          bodyRepresentation[name] << invokeClosure(exampleValue, buildPath(matcherName, ALL_LIST_ITEMS))
         } else if (exampleValue instanceof Matcher) {
-          bodyRepresentation[name] << setMatcherAttribute(exampleValue, path + buildPath(name, ALL_LIST_ITEMS))
+          bodyRepresentation[name] << setMatcherAttribute(exampleValue, path + buildPath(matcherName, ALL_LIST_ITEMS))
         } else if (exampleValue instanceof Pattern) {
           def matcher = regexp(exampleValue as Pattern, null)
-          bodyRepresentation[name] << setMatcherAttribute(matcher, path + buildPath(name, ALL_LIST_ITEMS))
+          bodyRepresentation[name] << setMatcherAttribute(matcher, path + buildPath(matcherName, ALL_LIST_ITEMS))
         } else {
           bodyRepresentation[name] << exampleValue
         }
       }
     } else if (value instanceof Matcher) {
-      bodyRepresentation[name] = setMatcherAttribute(value, path + buildPath(name))
+      bodyRepresentation[name] = setMatcherAttribute(value, path + buildPath(matcherName))
     } else if (value instanceof List) {
       bodyRepresentation[name] = []
       value.eachWithIndex { entry, i ->
         if (entry instanceof Matcher) {
-          bodyRepresentation[name] << setMatcherAttribute(entry, path + buildPath(name, START_LIST + i + END_LIST))
+          bodyRepresentation[name] << setMatcherAttribute(entry, path + buildPath(matcherName,
+            START_LIST + i + END_LIST))
         } else if (entry instanceof Closure) {
-          bodyRepresentation[name] << invokeClosure(entry, buildPath(name, START_LIST + i + END_LIST))
+          bodyRepresentation[name] << invokeClosure(entry, buildPath(matcherName, START_LIST + i + END_LIST))
         } else {
           bodyRepresentation[name] << entry
         }
       }
     } else if (value instanceof Closure) {
-      bodyRepresentation[name] = invokeClosure(value, buildPath(name))
+      if (matcherName == STAR) {
+        setMatcherAttribute(new TypeMatcher(values: [TYPE, null]), path + buildPath(matcherName))
+      }
+      bodyRepresentation[name] = invokeClosure(value, buildPath(matcherName))
     } else {
       bodyRepresentation[name] = value
     }
@@ -136,7 +144,7 @@ class PactBodyBuilder extends BaseBuilder {
 
   private String buildPath(String name, String children = '') {
     def key = PATH_SEP + name
-    if (!(name ==~ Parser$.MODULE$.FieldRegex().toString())) {
+    if (name != STAR && !(name ==~ Parser$.MODULE$.FieldRegex().toString())) {
       key = "['" + name + "']"
     }
     key + children

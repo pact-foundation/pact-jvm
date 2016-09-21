@@ -22,13 +22,6 @@
               "match": "type"
             }
           ]
-        },
-        "$[*].*": {
-          "matchers": [
-            {
-              "match": "type"
-            }
-          ]
         }
       }
     }

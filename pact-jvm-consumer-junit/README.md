@@ -27,8 +27,13 @@ overridden in your test class.
 Here is an example:
 
 ```java
+import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
+import au.com.dius.pact.consumer.ConsumerPactTest;
 import au.com.dius.pact.model.PactFragment;
+import org.junit.Assert;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,37 +42,52 @@ import static org.junit.Assert.assertEquals;
 public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
 
     @Override
-    protected PactFragment createFragment(ConsumerPactBuilder.PactDslWithProvider builder) {
+    protected PactFragment createFragment(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("testreqheader", "testreqheadervalue");
 
         return builder
             .given("test state") // NOTE: Using provider states are optional, you can leave it out
-            .uponReceiving("a request for something")
+            .uponReceiving("ExampleJavaConsumerPactTest test interaction")
                 .path("/")
                 .method("GET")
                 .headers(headers)
-                .body("{\"test\":true}")
             .willRespondWith()
                 .status(200)
                 .headers(headers)
-                .body("{\"responsetest\":true}").toFragment();
+                .body("{\"responsetest\": true, \"name\": \"harry\"}")
+            .given("test state 2") // NOTE: Using provider states are optional, you can leave it out
+            .uponReceiving("ExampleJavaConsumerPactTest second test interaction")
+                .method("OPTIONS")
+                .headers(headers)
+                .path("/second")
+                .body("")
+            .willRespondWith()
+                .status(200)
+                .headers(headers)
+                .body("")
+            .toFragment();
     }
 
 
     @Override
     protected String providerName() {
-        return "Some Provider";
+        return "test_provider";
     }
 
     @Override
     protected String consumerName() {
-        return "Some Consumer";
+        return "test_consumer";
     }
 
     @Override
-    protected void runTest(String url) {
-        assertEquals(new ProviderClient(url).getSomething(), "{\"responsetest\":true}");
+    protected void runTest(String url) throws IOException {
+        Assert.assertEquals(new ConsumerClient(url).options("/second"), 200);
+        Map expectedResponse = new HashMap();
+        expectedResponse.put("responsetest", true);
+        expectedResponse.put("name", "harry");
+        assertEquals(new ConsumerClient(url).getAsMap("/", ""), expectedResponse);
+        assertEquals(new ConsumerClient(url).options("/second"), 200);
     }
 }
 ```
@@ -422,6 +442,40 @@ For example:
         .status(200)
         .body(PactDslJsonRootValue.integerType())
 ```
+
+#### Matching any key in a map (3.3.1/2.5.0+)
+
+The DSL has been extended for cases where the keys in a map are IDs. For an example of this, see 
+[#313](https://github.com/DiUS/pact-jvm/issues/131). In this case you can use the `eachKeyLike` method, which takes an 
+example key as a parameter.
+
+For example:
+
+```java
+DslPart body = new PactDslJsonBody()
+  .object("one")
+    .eachKeyLike("001", PactDslJsonRootValue.id(12345L)) // key like an id mapped to a matcher
+  .closeObject()
+  .object("two")
+    .eachKeyLike("001-A") // key like an id where the value is matched by the following example
+      .stringType("description", "Some Description")
+    .closeObject()
+  .closeObject()
+  .object("three")
+    .eachKeyMappedToAnArrayLike("001") // key like an id mapped to an array where each item is matched by the following example
+      .id("someId", 23456L)
+      .closeObject()
+    .closeArray()
+  .closeObject();
+
+```
+
+For an example, have a look at [WildcardKeysTest](src/test/java/au/com/dius/pact/consumer/WildcardKeysTest.java).
+
+**NOTE:** The `eachKeyLike` method adds a `*` to the matching path, so the matching definition will be applied to all keys
+ of the map if there is not a more specific matcher defined for a particular key. Having more than one `eachKeyLike` condition
+ applied to a map will result in only one being applied when the pact is verified (probably the last).
+
 
 ### Matching on paths (version 2.1.5+)
 

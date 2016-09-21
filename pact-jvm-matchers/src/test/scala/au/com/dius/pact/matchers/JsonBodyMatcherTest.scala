@@ -1,7 +1,7 @@
 package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model._
-import au.com.dius.pact.model.matchingrules.{MatchingRules, MinTypeMatcher, RegexMatcher}
+import au.com.dius.pact.model.matchingrules.{MatchingRules, MinTypeMatcher, RegexMatcher, TypeMatcher}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -163,6 +163,13 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
         expectedBody = OptionalBody.body("{\"something\": 100}")
         actualBody = OptionalBody.body("{\"something\": 101}")
         matchers.addCategory("body").addRule("$.something", new RegexMatcher("\\d+"))
+        matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
+      }
+
+      "and when the actual body is missing a key, not be a mismatch" in {
+        expectedBody = OptionalBody.body("{\"somethingElse\": 100}")
+        actualBody = OptionalBody.body("{\"something\": 100, \"other\": 100}")
+        matchers.addCategory("body").addRule("$.*", new TypeMatcher())
         matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
       }
 

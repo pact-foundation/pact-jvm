@@ -23,7 +23,7 @@ public class PactDslJsonRootValue extends DslPart {
   private Object value;
 
   public PactDslJsonRootValue() {
-    super("");
+    super("", "");
   }
 
   @Override

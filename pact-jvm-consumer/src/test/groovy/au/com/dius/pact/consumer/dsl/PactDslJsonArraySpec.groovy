@@ -7,8 +7,8 @@ class PactDslJsonArraySpec extends Specification {
   def 'close must close off all parents and return the root'() {
     given:
       def root = new PactDslJsonArray()
-      def obj = new PactDslJsonBody('b', root)
-      def array = new PactDslJsonArray('c', obj)
+      def obj = new PactDslJsonBody('b', '', root)
+      def array = new PactDslJsonArray('c', '', obj)
 
     when:
       def result = array.close()

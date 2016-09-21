@@ -116,6 +116,18 @@ class PactReaderSpec extends Specification {
     0 * PactReader.loadV3Pact(pactString, _)
   }
 
+  def 'handles invalid version metadata'() {
+    given:
+    def pactString = PactReaderSpec.classLoader.getResourceAsStream('pact-invalid-version.json').text
+
+    when:
+    PactReader.loadPact(pactString)
+
+    then:
+    1 * PactReader.loadV2Pact(pactString, _)
+    0 * PactReader.loadV3Pact(pactString, _)
+  }
+
   @SuppressWarnings('UnnecessaryGetter')
   def 'if authentication is set, loads the pact file from a URL with auth'() {
     given:

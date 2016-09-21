@@ -1,7 +1,7 @@
 package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model.{DiffConfig, OptionalBody, Request}
-import au.com.dius.pact.model.matchingrules.{MatchingRules, TypeMatcher}
+import au.com.dius.pact.model.matchingrules.{Category, MatchingRules, TypeMatcher}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -31,6 +31,40 @@ class MatchersTest extends Specification {
       val matchingRules = new MatchingRules()
       matchingRules.addCategory("body").addRule("$", new TypeMatcher())
       Matchers.matcherDefined("body", Seq("$", "something"), matchingRules) must beTrue
+    }
+
+  }
+
+  "wildcardMatcherDefined defined" should {
+
+    "should be false when there are no matchers" in {
+      Matchers.wildcardMatcherDefined(Seq(""), "body", new MatchingRules()) must beFalse
+    }
+
+    "should be false when the path does not have a matcher entry" in {
+      Matchers.wildcardMatcherDefined(Seq("$", "something"), "body", new MatchingRules()) must beFalse
+    }
+
+    "should be false when the path does have a matcher entry and it is not a wildcard" in {
+      val matchingRules = new MatchingRules()
+      val category = matchingRules.addCategory("body")
+      category.addRule("$.some.thing", new TypeMatcher())
+      category.addRule("$.*", new TypeMatcher())
+      Matchers.wildcardMatcherDefined(Seq("$", "some", "thing"), "body", matchingRules) must beFalse
+    }
+
+    "should be true when the path does have a matcher entry and it is a wildcard" in {
+      val matchingRules = new MatchingRules()
+      val category = matchingRules.addCategory("body")
+      category.addRule("$.*", new TypeMatcher())
+      Matchers.wildcardMatcherDefined(Seq("$", "something"), "body", matchingRules) must beTrue
+    }
+
+    "should be false when a parent of the path has a matcher entry" in {
+      val matchingRules = new MatchingRules()
+      val category = matchingRules.addCategory("body")
+      category.addRule("$.*", new TypeMatcher())
+      Matchers.wildcardMatcherDefined(Seq("$", "some", "thing"), "body", matchingRules) must beFalse
     }
 
   }
@@ -69,35 +103,35 @@ class MatchersTest extends Specification {
   "path matching" should {
 
     "match root node" in {
-      Matchers.matchesPath("$", Seq("$")) must beTrue
-      Matchers.matchesPath("$", Seq()) must beFalse
+      Matchers.matchesPath("$", Seq("$")) must be_>(0)
+      Matchers.matchesPath("$", Seq()) must_== 0
     }
 
     "match field name" in {
-      Matchers.matchesPath("$.name", Seq("$", "name")) must beTrue
-      Matchers.matchesPath("$.name.other", Seq("$", "name", "other")) must beTrue
-      Matchers.matchesPath("$.name", Seq("$", "other")) must beFalse
-      Matchers.matchesPath("$.name", Seq("$", "name", "other")) must beTrue
-      Matchers.matchesPath("$.other", Seq("$", "name", "other")) must beFalse
-      Matchers.matchesPath("$.name.other", Seq("$", "name")) must beFalse
+      Matchers.matchesPath("$.name", Seq("$", "name")) must be_>(0)
+      Matchers.matchesPath("$.name.other", Seq("$", "name", "other")) must be_>(0)
+      Matchers.matchesPath("$.name", Seq("$", "other")) must_== 0
+      Matchers.matchesPath("$.name", Seq("$", "name", "other")) must be_>(0)
+      Matchers.matchesPath("$.other", Seq("$", "name", "other")) must_== 0
+      Matchers.matchesPath("$.name.other", Seq("$", "name")) must_== 0
     }
 
     "match array indices" in {
-      Matchers.matchesPath("$[0]", Seq("$", "0")) must beTrue
-      Matchers.matchesPath("$.name[1]", Seq("$", "name", "1")) must beTrue
-      Matchers.matchesPath("$.name", Seq("$", "0")) must beFalse
-      Matchers.matchesPath("$.name[1]", Seq("$", "name", "0")) must beFalse
-      Matchers.matchesPath("$[1].name", Seq("$", "name", "1")) must beFalse
+      Matchers.matchesPath("$[0]", Seq("$", "0")) must be_>(0)
+      Matchers.matchesPath("$.name[1]", Seq("$", "name", "1")) must be_>(0)
+      Matchers.matchesPath("$.name", Seq("$", "0")) must_== 0
+      Matchers.matchesPath("$.name[1]", Seq("$", "name", "0")) must_== 0
+      Matchers.matchesPath("$[1].name", Seq("$", "name", "1")) must_== 0
     }
 
     "match with wildcard" in {
-      Matchers.matchesPath("$[*]", Seq("$", "0")) must beTrue
-      Matchers.matchesPath("$.*", Seq("$", "name")) must beTrue
-      Matchers.matchesPath("$.*.name", Seq("$", "some", "name")) must beTrue
-      Matchers.matchesPath("$.name[*]", Seq("$", "name", "0")) must beTrue
-      Matchers.matchesPath("$.name[*].name", Seq("$", "name", "1", "name")) must beTrue
+      Matchers.matchesPath("$[*]", Seq("$", "0")) must be_>(0)
+      Matchers.matchesPath("$.*", Seq("$", "name")) must be_>(0)
+      Matchers.matchesPath("$.*.name", Seq("$", "some", "name")) must be_>(0)
+      Matchers.matchesPath("$.name[*]", Seq("$", "name", "0")) must be_>(0)
+      Matchers.matchesPath("$.name[*].name", Seq("$", "name", "1", "name")) must be_>(0)
 
-      Matchers.matchesPath("$[*]", Seq("$", "str")) must beFalse
+      Matchers.matchesPath("$[*]", Seq("$", "str")) must_== 0
     }
 
   }

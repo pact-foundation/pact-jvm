@@ -15,9 +15,9 @@ class Matchers {
   static final String HEXADECIMAL = '[0-9a-fA-F]+'
   static final String IP_ADDRESS = '(\\d{1,3}\\.)+\\d{1,3}'
   static final String UUID_REGEX = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
-  private static final int TEN = 10
-  private static final String TYPE = 'type'
-  private static final String DECIMAL = 'decimal'
+  public static final int TEN = 10
+  public static final String TYPE = 'type'
+  public static final String DECIMAL = 'decimal'
 
   static regexp(Pattern re, String value = null) {
     regexp(re.toString(), value)
