@@ -313,6 +313,7 @@ class ProviderVerifier {
     }
   }
 
+  @SuppressWarnings('ThrowRuntimeException')
   static invokeProviderMethod(Method m) {
     try {
       m.invoke(m.declaringClass.newInstance())
