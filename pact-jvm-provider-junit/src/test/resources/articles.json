@@ -1,0 +1,12 @@
+
+{
+  "articles": [
+    {
+      "variants": {
+        "1234": {
+          "description": "sample description"
+        }
+      }
+    }
+  ]
+}
