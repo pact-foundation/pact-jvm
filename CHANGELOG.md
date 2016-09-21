@@ -1,5 +1,32 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.0-beta.2 - Bugfix Release
+
+* 43f9a82 - fix codenarc error (Ronald Holshausen, Wed Sep 21 22:27:35 2016 +1000)
+* 86621b2 - handle provider method invokation errors more gracefully (Ronald Holshausen, Wed Sep 21 22:14:34 2016 +1000)
+* 02eeff2 - Merge branch 'master' into v3-spec (Ronald Holshausen, Wed Sep 21 21:44:40 2016 +1000)
+* 70c6261 - Fix for issue with eachKeyLike not setting the wildcard matcher correctly #313 (Ronald Holshausen, Wed Sep 21 20:24:58 2016 +1000)
+* 94657cb - Merge branch 'cochrane343-master' (Ronald Holshausen, Wed Sep 21 20:23:10 2016 +1000)
+* 7f49e74 - Add test case for #313 (Alexander Zottnick, Mon Sep 19 14:49:57 2016 +0200)
+* 555c0d8 - Merge pull request #317 from wojciechbulaty/master (Ronald Holshausen, Fri Sep 16 09:18:13 2016 +1000)
+* 83da230 - Created a VersionedPactUrl to be used to reference versioned pacts. (wojciechbulaty, Thu Sep 15 16:36:25 2016 +0100)
+* 9550ee4 - Update the pact-jvm-consumer-junit readme to have the correct class names and imports #316 (Ronald Holshausen, Thu Sep 15 12:05:12 2016 +1000)
+* 419441b - added JSON-RPC to the list of JSON mimetypes #315 (Ronald Holshausen, Thu Sep 15 11:55:31 2016 +1000)
+* b449675 - added the missing matcher for eachKey in Groovy DSL #313 (Ronald Holshausen, Thu Sep 15 11:07:03 2016 +1000)
+* 528e9a1 - when wildcard matcher is defined for a map, match all actual values to the expected one ignoring the keys #313 (Ronald Holshausen, Wed Sep 14 22:35:14 2016 +1000)
+* 350fb30 - added the missing matcher for eachKeyLike #313 (Ronald Holshausen, Wed Sep 14 20:43:28 2016 +1000)
+* 73fc34b - Fix the Groovy DSL to not overwrite the content type header if it has already been set #312 (Ronald Holshausen, Sat Sep 10 16:17:00 2016 +1000)
+* 3acffb5 - Implemented wildcards for map keys in the Java DSL #313 (Ronald Holshausen, Sat Sep 10 15:56:22 2016 +1000)
+* b483572 - Implemented wildcards for map keys in the Groovy DSL #313 (Ronald Holshausen, Sat Sep 10 12:25:29 2016 +1000)
+* 1fa05bd - bump version to 3.3.1 (Ronald Holshausen, Wed Sep 7 21:12:55 2016 +1000)
+* d00393b - update changelog for release 3.3.0 (Ronald Holshausen, Wed Sep 7 20:46:06 2016 +1000)
+* e91ba6e - Merge pull request #314 from alonpeer/unit-specs (Ronald Holshausen, Fri Sep 2 07:49:58 2016 +1000)
+* 381b043 - handle loading a pact with invalid version metadata (Ronald Holshausen, Wed Aug 31 22:23:43 2016 +1000)
+* 8ab62d6 - Implementation of unit style specification for specs2, with only a single run of the mock provider (Alon Pe'er, Wed Aug 31 13:08:31 2016 +0200)
+* 01e8b34 - update changelog for release 3.5.0-beta.1 (Ronald Holshausen, Sun Aug 28 21:14:12 2016 +1000)
+* e222205 - update changelog for release 2.4.15 (Ronald Holshausen, Tue Aug 23 22:12:30 2016 +1000)
+* 90c886e - bump version to 3.5.0-beta.2 (Ronald Holshausen, Sun Aug 28 21:39:06 2016 +1000)
+
 # 3.3.0 - Unit style specification for specs2
 
 * e91ba6e - Merge pull request #314 from alonpeer/unit-specs (Ronald Holshausen, Fri Sep 2 07:49:58 2016 +1000)
