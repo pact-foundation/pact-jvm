@@ -212,3 +212,6 @@ properties have been introduced: `pact.verification.reports` and `pact.verificat
 
 The following report types are available in addition to console output (`console`, which is enabled by default):
 `markdown`, `json`.
+
+You can also provide a fully qualified classname as report so custom reports are also supported.
+This class must implement `au.com.dius.pact.provider.reporters.VerifierReporter` interface in order to be correct custom implementation of a report.
