@@ -17,13 +17,16 @@ class ReporterManager {
   @SuppressWarnings(['FactoryMethodName', 'ThrowRuntimeException'])
   static VerifierReporter createReporter(String name) {
 
-    def reporter;
+    def reporter
 
-    if (!reporterDefined(name)) {
+    if (reporterDefined(name)) {
 
+      reporter = REPORTERS[name].newInstance()
+
+    } else {
       // maybe name is a fully qualified name
       try {
-        def loader = ReporterManager.class.classLoader
+        def loader = ReporterManager.classLoader
         def instance = loader.loadClass(name)?.newInstance()
 
         if (instance == null) {
@@ -39,9 +42,6 @@ class ReporterManager {
       } catch (e) {
         throw new IllegalArgumentException("No reporter with name '$name' defined")
       }
-
-    } else {
-      reporter = REPORTERS[name].newInstance()
     }
 
     if (reporter.hasProperty('name')) {
