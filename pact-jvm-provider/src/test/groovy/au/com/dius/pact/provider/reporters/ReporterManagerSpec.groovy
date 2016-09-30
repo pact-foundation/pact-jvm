@@ -43,9 +43,9 @@ class ReporterManagerSpec extends Specification {
 
   def 'should throw an exception for none reporter classes'() {
     when:
-      ReporterManager.createReporter("au.com.dius.pact.provider.ConsumerInfo")
+      ReporterManager.createReporter('au.com.dius.pact.provider.ConsumerInfo')
     then:
-      IllegalArgumentException ex = thrown()
+      thrown(IllegalArgumentException)
   }
 
 }
