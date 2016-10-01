@@ -11,9 +11,9 @@ class UnfilteredHttpsMockProvider(val config: MockHttpsProviderConfig) extends S
   type UnfilteredRequest = ureq.HttpRequest[unetty.ReceivedMessage]
   type UnfilteredResponse = uresp.ResponseFunction[netty.HttpResponse]
 
-  def sslContext: SslContextProvider = SslContextProvider.selfSigned(config.httpsCertificate)
+  def sslContext: SslContextProvider = SslContextProvider.selfSigned(config.getHttpsCertificate)
 
-  private val server = unetty.Server.https(config.port, config.hostname, sslContext).chunked(1048576).handler(Routes)
+  private val server = unetty.Server.https(config.getPort, config.getHostname, sslContext).chunked(1048576).handler(Routes)
   
   @Sharable
   object Routes extends unettyc.Plan
@@ -33,4 +33,3 @@ class UnfilteredHttpsMockProvider(val config: MockHttpsProviderConfig) extends S
   
   def stop(): Unit = server.stop()
 }
-

@@ -10,8 +10,8 @@ class MockProviderConfigSpec extends Specification {
   "port server config" should {
     "select a random port" in {
       val config = PactSpecVersion.V2
-      MockProviderConfig.createDefault(config).port must beGreaterThanOrEqualTo(MockProviderConfig.portLowerBound)
-      MockProviderConfig.createDefault(config).port must beLessThanOrEqualTo(MockProviderConfig.portUpperBound)
+      MockProviderConfig.createDefault(config).getPort must beGreaterThanOrEqualTo(MockProviderConfig.portLowerBound)
+      MockProviderConfig.createDefault(config).getPort must beLessThanOrEqualTo(MockProviderConfig.portUpperBound)
     }
   }
 }

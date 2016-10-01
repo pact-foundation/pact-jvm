@@ -12,7 +12,7 @@ import unfiltered.response.ResponseString
 case class TestServer(state: String) {
   def run[T](code: String => T):T = {
     val config = MockProviderConfig.createDefault(PactSpecVersion.V2)
-    val server = Server.http(config.port, config.hostname).handler(new Plan with SynchronousExecution with ServerErrorResponse {
+    val server = Server.http(config.getPort, config.getHostname).handler(new Plan with SynchronousExecution with ServerErrorResponse {
       def intent: Plan.Intent = {
         case req => {
           ResponseString("[\"All Done\"]")

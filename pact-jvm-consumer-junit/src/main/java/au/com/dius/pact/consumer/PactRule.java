@@ -2,7 +2,6 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithState;
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.MockProviderConfig$;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
 import org.junit.rules.ExternalResource;
@@ -36,17 +35,17 @@ public class PactRule extends ExternalResource {
     private final MockProviderConfig config;
 
     public PactRule(String host, int port, Object target) {
-        config = MockProviderConfig$.MODULE$.apply(port, host, PactSpecVersion.V2);
+        config = MockProviderConfig.httpConfig(host, port, PactSpecVersion.V2);
         this.target = target;
     }
 
     public PactRule(String host, Object target) {
-        config = MockProviderConfig$.MODULE$.createDefault(host, PactSpecVersion.V2);
+        config = MockProviderConfig.createDefault(host, PactSpecVersion.V2);
         this.target = target;
     }
 
     public PactRule(Object target) {
-        config = MockProviderConfig$.MODULE$.createDefault(PactSpecVersion.V2);
+        config = MockProviderConfig.createDefault(PactSpecVersion.V2);
         this.target = target;
     }
 

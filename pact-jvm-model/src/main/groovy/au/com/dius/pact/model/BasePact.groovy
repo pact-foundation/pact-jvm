@@ -91,4 +91,8 @@ abstract class BasePact implements Pact {
       'pact-jvm': [version: lookupVersion()]
     ]
   }
+
+  boolean compatibleTo(Pact other) {
+    provider == other.provider && this.class.isAssignableFrom(other.class)
+  }
 }

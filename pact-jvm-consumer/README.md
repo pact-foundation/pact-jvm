@@ -281,6 +281,39 @@ This generated the following JSON:
 
 and will be able to match all coordinates regardless of the number of coordinates.
 
+#### Matching any key in a map (3.3.1/2.5.0+)
+
+The DSL has been extended for cases where the keys in a map are IDs. For an example of this, see 
+[#313](https://github.com/DiUS/pact-jvm/issues/131). In this case you can use the `eachKeyLike` method, which takes an 
+example key as a parameter.
+
+For example:
+
+```java
+DslPart body = new PactDslJsonBody()
+  .object("one")
+    .eachKeyLike("001", PactDslJsonRootValue.id(12345L)) // key like an id mapped to a matcher
+  .closeObject()
+  .object("two")
+    .eachKeyLike("001-A") // key like an id where the value is matched by the following example
+      .stringType("description", "Some Description")
+    .closeObject()
+  .closeObject()
+  .object("three")
+    .eachKeyMappedToAnArrayLike("001") // key like an id mapped to an array where each item is matched by the following example
+      .id("someId", 23456L)
+      .closeObject()
+    .closeArray()
+  .closeObject();
+
+```
+
+For an example, have a look at [WildcardKeysTest](src/test/java/au/com/dius/pact/consumer/WildcardKeysTest.java).
+
+**NOTE:** The `eachKeyLike` method adds a `*` to the matching path, so the matching definition will be applied to all keys
+ of the map if there is not a more specific matcher defined for a particular key. Having more than one `eachKeyLike` condition
+ applied to a map will result in only one being applied when the pact is verified (probably the last).
+
 ### Matching on paths (version 2.1.5+)
 
 You can use regular expressions to match incoming requests. The DSL has a `matchPath` method for this. You can provide

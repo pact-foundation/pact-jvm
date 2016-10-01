@@ -21,18 +21,22 @@ class PactReader {
    * @param source a File or a URL
    */
   static Pact loadPact(Map options = [:], def source) {
-      def pact = loadFile(source, options)
-      def version = pact.metadata?.'pact-specification'?.version ?: '2.0.0'
-      if (version == '3.0') {
-          version = '3.0.0'
-      }
-      def specVersion = Version.valueOf(version)
-      switch (specVersion.majorVersion) {
-          case 3:
-              return loadV3Pact(source, pact)
-          default:
-              return loadV2Pact(source, pact)
-      }
+    def pact = loadFile(source, options)
+    def version = '2.0.0'
+    def specification = pact.metadata?.'pact-specification'
+    if (specification instanceof Map && specification.version) {
+      version = specification.version
+    }
+    if (version == '3.0') {
+        version = '3.0.0'
+    }
+    def specVersion = Version.valueOf(version)
+    switch (specVersion.majorVersion) {
+        case 3:
+            return loadV3Pact(source, pact)
+        default:
+            return loadV2Pact(source, pact)
+    }
   }
 
   @SuppressWarnings('UnusedMethodParameter')

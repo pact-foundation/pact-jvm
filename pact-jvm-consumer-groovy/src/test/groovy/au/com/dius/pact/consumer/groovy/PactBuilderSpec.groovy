@@ -296,4 +296,23 @@ class PactBuilderSpec extends Specification {
     request.body.value == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
     response.body.value == '{"name":"harry"}'
   }
+
+  def 'does not overwrite the content type if it has been set in a header'() {
+    given:
+    aliceService {
+      uponReceiving('a request for HAL')
+      withAttributes(method: 'get', path: '/')
+      willRespondWith(status: 200, headers: ['Content-Type': 'application/hal+json'])
+      withBody {
+        i 'am a body'
+      }
+    }
+
+    when:
+    aliceService.buildInteractions()
+    def response = aliceService.interactions.first().response
+
+    then:
+    response.headers['Content-Type'] == 'application/hal+json'
+  }
 }

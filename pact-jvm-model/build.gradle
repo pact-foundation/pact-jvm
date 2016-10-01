@@ -1,14 +1,12 @@
 dependencies {
   compile "org.json:json:${project.jsonVersion}",
     "org.codehaus.groovy:groovy-all:${project.groovyVersion}",
-    "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.8.4",
-    "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.1",
-    "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
-  compile project(":pact-jvm-logging_${project.scalaVersion}")
+    "io.netty:netty-handler:${project.nettyVersion}",
+    "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
+    "org.slf4j:slf4j-api:$slf4jVersion"
   compile 'com.github.zafarkhaja:java-semver:0.9.0'
   compile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
 
-  testCompile "org.specs2:specs2-mock_${project.scalaVersion}:3.8.4"
   testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
     exclude group: 'org.codehaus.groovy'
   }
@@ -16,5 +14,3 @@ dependencies {
     'org.objenesis:objenesis:2.4'
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }
-
-compileTestGroovy.dependsOn compileTestScala

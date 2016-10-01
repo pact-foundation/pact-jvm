@@ -5,7 +5,6 @@ import au.com.dius.pact.consumer.StatefulMockProvider
 import au.com.dius.pact.consumer.VerificationResult
 import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.MockProviderConfig
-import au.com.dius.pact.model.MockProviderConfig$
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.PactFragment
 import au.com.dius.pact.model.PactReader
@@ -209,9 +208,9 @@ class PactBuilder extends BaseBuilder {
     MockProviderConfig config
     def pactVersion = options.specificationVersion ?: PactSpecVersion.V2
     if (port == null) {
-      config = MockProviderConfig$.MODULE$.createDefault(pactVersion)
+      config = MockProviderConfig.createDefault(pactVersion)
     } else {
-      config = MockProviderConfig$.MODULE$.apply(port, 'localhost', pactVersion)
+      config = MockProviderConfig.httpConfig('localhost', port, pactVersion)
     }
 
     fragment.runConsumer(config, closure)
@@ -302,19 +301,23 @@ class PactBuilder extends BaseBuilder {
       requestData.last().body = body.body
       requestData.last().matchers.putAll(body.matchers)
       requestData.last().headers = requestData.last().headers ?: [:]
-      if (options.mimeType) {
-        requestData.last().headers[CONTENT_TYPE] = options.mimeType
-      } else {
-        requestData.last().headers[CONTENT_TYPE] = JSON
+      if (!requestData.last().headers[CONTENT_TYPE]) {
+        if (options.mimeType) {
+          requestData.last().headers[CONTENT_TYPE] = options.mimeType
+        } else {
+          requestData.last().headers[CONTENT_TYPE] = JSON
+        }
       }
     } else {
       responseData.last().body = body.body
       responseData.last().matchers.putAll(body.matchers)
       responseData.last().headers = responseData.last().headers ?: [:]
-      if (options.mimeType) {
-        responseData.last().headers[CONTENT_TYPE] = options.mimeType
-      } else {
-        responseData.last().headers[CONTENT_TYPE] = JSON
+      if (!responseData.last().headers[CONTENT_TYPE]) {
+        if (options.mimeType) {
+          responseData.last().headers[CONTENT_TYPE] = options.mimeType
+        } else {
+          responseData.last().headers[CONTENT_TYPE] = JSON
+        }
       }
     }
   }

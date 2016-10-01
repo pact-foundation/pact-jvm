@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-groovy_2.11`
-* version-id = `2.3.x` or `3.1.x`
+* version-id = `2.4.x` or `3.2.x`
 
 ##Usage
 
@@ -19,7 +19,7 @@ to define your pacts. For a full example, have a look at the example JUnit `Exam
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.1.0'
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.2.14'
     }
 
 Then create an instance of the `PactBuilder` in your test.
@@ -348,6 +348,77 @@ __Version 3.2.4/2.4.6+__ You can specify the number of example items to generate
 ```
 
 This will create an example user list with 3 users.
+
+__Version 3.2.13/2.4.14+__ The each like matchers have been updated to work with primitive types.
+
+```groovy
+withBody {
+        permissions eachLike(3, 'GRANT')
+}
+```
+
+will generate the following JSON
+
+```json
+{
+    "permissions": ["GRANT", "GRANT", "GRANT"]
+}
+```
+
+and matchers
+
+```json
+{
+    "$.body.permissions": {"match": "type"}
+}
+```
+
+and now you can even get more fancy
+
+```groovy
+withBody {
+        permissions eachLike(3, regexp(~/\w+/))
+        permissions2 minLike(2, 3, integer())
+        permissions3 maxLike(4, 3, ~/\d+/)
+}
+```
+
+### Matching any key in a map (3.3.1/2.5.0+)
+
+The DSL has been extended for cases where the keys in a map are IDs. For an example of this, see 
+[#313](https://github.com/DiUS/pact-jvm/issues/131). In this case you can use the `keyLike` method, which takes an 
+example key as a parameter.
+
+For example:
+
+```groovy
+withBody {
+  example {
+    one {
+      keyLike '001', 'value'            // key like an id mapped to a value
+    }
+    two {
+      keyLike 'ABC001', regexp('\\w+')  // key like an id mapped to a matcher
+    }
+    three {
+      keyLike 'XYZ001', {               // key like an id mapped to a closure
+        id identifier()
+      }
+    }
+    four {
+      keyLike '001XYZ', eachLike {      // key like an id mapped to an array where each item is matched by the following 
+        id identifier()                 // example
+      }
+    }  
+  }
+}
+```
+
+For an example, have a look at [WildcardPactSpec](src/test/au/com/dius/pact/consumer/groovy/WildcardPactSpec.groovy).
+
+**NOTE:** The `keyLike` method adds a `*` to the matching path, so the matching definition will be applied to all keys
+ of the map if there is not a more specific matcher defined for a particular key. Having more than one `keyLike` condition
+ applied to a map will result in only one being applied when the pact is verified (probably the last).
 
 ## Changing the directory pact files are written to (2.1.9+)
 

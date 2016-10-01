@@ -159,7 +159,7 @@ object Matching extends StrictLogging {
 
   def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig) = {
     if (expected.mimeType == actual.mimeType) {
-      val result = MatchingConfig.bodyMatchers.find(entry => actual.mimeType.matches(entry._1))
+      val result = MatchingConfig.lookupBodyMatcher(actual.mimeType)
       if (result.isDefined) {
         logger.debug("Found a matcher for " + actual.mimeType + " -> " + result)
         result.get._2.matchBody(expected, actual, diffConfig)

@@ -159,7 +159,7 @@ subprojects {
     deployer.pom.project(pomCustomisation)
 
     signing {
-        required { gradle.taskGraph.hasTask("uploadArchives") }
+        required { gradle.taskGraph.hasTask("uploadArchives") || gradle.taskGraph.hasTask("publishPlugins") }
         sign configurations.archives
     }
 
@@ -170,6 +170,8 @@ subprojects {
     codenarcTest {
         configFile = file('../config/codenarc/rulesetTest.groovy')
     }
+
+    check.dependsOn << 'jacocoTestReport'
 }
 
 tasks.addRule("Pattern: <Task>_<ScalaVersion>") { String taskName ->

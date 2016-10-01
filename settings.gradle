@@ -8,7 +8,6 @@ def crossCompileModules = [
   'pact-jvm-consumer-junit',
   'pact-jvm-consumer-specs2',
   'pact-jvm-consumer-groovy',
-  'pact-jvm-model',
   'pact-jvm-provider',
   'pact-jvm-provider-specs2',
   'pact-jvm-provider-scalatest',
@@ -25,6 +24,8 @@ if (major > 1 || minor > 6) {
 }
 
 rootProject.name = 'pact-jvm'
+
+include 'pact-jvm-model'
 
 crossCompileModules.each {
   include it + '_2.10'
