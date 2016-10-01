@@ -1,0 +1,55 @@
+{
+    "provider": {
+        "name": "ArticlesProvider"
+    },
+    "consumer": {
+        "name": "ArticlesConsumer"
+    },
+    "interactions": [
+        {
+            "description": "retrieving article data",
+            "request": {
+                "method": "GET",
+                "path": "/articles.json"
+            },
+            "response": {
+                "status": 200,
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": {
+                    "articles": [
+                        {
+                            "variants": {
+                                "0032": {
+                                    "description": "sample description"
+                                }
+                            }
+                        }
+                    ]
+                },
+                "matchingRules": {
+                    "$.body.articles[*].variants.*.description": {
+                        "match": "type"
+                    },
+                    "$.body.articles": {
+                        "min": 1,
+                        "match": "type"
+                    },
+                    "$.body.articles[*].variants.*": {
+                        "match": "type"
+                    }
+                }
+            },
+            "providerState": "Pact for Issue 313"
+        }
+    ],
+    "metadata": {
+        "pact-specification": {
+            "version": "3.0.0"
+        },
+        "pact-jvm": {
+            "version": "2.4.16"
+        }
+    }
+}
