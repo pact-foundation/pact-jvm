@@ -55,4 +55,8 @@ class ProviderUtils {
   static List packagesToScan(ProviderInfo providerInfo, ConsumerInfo consumer) {
    consumer.packagesToScan ?: providerInfo.packagesToScan
   }
+
+  static boolean isS3Url(def pactFile) {
+    pactFile && pactFile.toString().toLowerCase().startsWith('s3://')
+  }
 }
