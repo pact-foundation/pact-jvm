@@ -471,6 +471,31 @@ pact {
 }
 ```
 
+## Verifying pact files from a S3 bucket [version 3.3.2+/2.4.17+]
+
+Pact files stored in an S3 bucket can be verified by using an S3 URL to the pact file. I.e.,
+
+```groovy
+pact {
+
+    serviceProviders {
+
+        provider1 {
+
+            hasPactWith('consumer1') {
+                pactFile = 's3://bucketname/path/to/provider1-consumer1-pact.json'
+            }
+
+        }
+
+    }
+
+}
+```
+
+**NOTE:** you can't use the `url` function with S3 URLs, as the URL and URI classes from the Java SDK
+ don't support URLs with the s3 scheme.
+
 # Publishing pact files to a pact broker [version 2.2.7+]
 
 The pact gradle plugin provides a `pactPublish` task that can publish all pact files in a directory
