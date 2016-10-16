@@ -80,7 +80,7 @@ pact {
 
 ## Specifying the provider hostname at runtime
 
-If you need to calculate the provider hostname at runtime, you can give a Closure as the provider host.
+If you need to calculate the provider hostname at runtime, you can give a closure as the provider host.
 
 ```groovy
 pact {
@@ -99,6 +99,8 @@ pact {
 
 }
 ```
+
+_Since version 3.3.2+/2.4.17+_ you can also give a closure as the provider port. 
 
 ## Specifying the pact file or URL at runtime [versions 3.2.7/2.4.9+]
 
@@ -184,6 +186,7 @@ pact {
 
 }
 ```
+
 ## Specifying a custom trust store [version 2.2.8+]
 
 For environments that are running their own certificate chains:

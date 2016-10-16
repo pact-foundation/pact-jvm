@@ -11,7 +11,7 @@ import groovy.transform.ToString
 class ProviderInfo {
     String protocol = 'http'
     def host = 'localhost'
-    Integer port = 8080
+    def port = 8080
     String path = '/'
     String name = 'provider'
 
