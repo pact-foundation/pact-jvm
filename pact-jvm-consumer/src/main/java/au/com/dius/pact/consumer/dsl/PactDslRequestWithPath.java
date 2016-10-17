@@ -178,6 +178,45 @@ public class PactDslRequestWithPath {
     }
 
     /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslRequestWithPath bodyWithSingleQuotes(String body) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body);
+    }
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslRequestWithPath bodyWithSingleQuotes(String body, String mimeType) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body, mimeType);
+    }
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslRequestWithPath bodyWithSingleQuotes(String body, ContentType mimeType) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body, mimeType);
+    }
+
+    /**
      * The body of the request
      *
      * @param body Request body in JSON form
