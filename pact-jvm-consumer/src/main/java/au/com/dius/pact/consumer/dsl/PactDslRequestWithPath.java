@@ -11,6 +11,7 @@ import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class PactDslRequestWithPath {
@@ -73,6 +74,26 @@ public class PactDslRequestWithPath {
      */
     public PactDslRequestWithPath method(String method) {
         requestMethod = method;
+        return this;
+    }
+
+    /**
+     * Headers to be included in the request
+     *
+     * @param firstHeaderName      The name of the first header
+     * @param firstHeaderValue     The value of the first header
+     * @param headerNameValuePairs Additional headers in name-value pairs.
+     */
+    public PactDslRequestWithPath headers(String firstHeaderName, String firstHeaderValue, String... headerNameValuePairs) {
+        if (headerNameValuePairs.length % 2 != 0) {
+            throw new IllegalArgumentException("Pair key value should be provided, but there is one key without value.");
+        }
+        requestHeaders.put(firstHeaderName, firstHeaderValue);
+
+        for (int i = 0; i < headerNameValuePairs.length; i+=2) {
+            requestHeaders.put(headerNameValuePairs[i], headerNameValuePairs[i+1]);
+        }
+
         return this;
     }
 

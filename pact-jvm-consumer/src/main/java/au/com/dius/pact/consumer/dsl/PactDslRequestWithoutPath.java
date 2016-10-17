@@ -3,13 +3,16 @@ package au.com.dius.pact.consumer.dsl;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.OptionalBody;
 import com.mifmif.common.regex.Generex;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static au.com.dius.pact.consumer.ConsumerPactBuilder.xmlToString;
 
@@ -53,6 +56,26 @@ public class PactDslRequestWithoutPath {
      */
     public PactDslRequestWithoutPath headers(Map<String, String> headers) {
         requestHeaders = new HashMap<String, String>(headers);
+        return this;
+    }
+
+    /**
+     * Headers to be included in the request
+     *
+     * @param firstHeaderName      The name of the first header
+     * @param firstHeaderValue     The value of the first header
+     * @param headerNameValuePairs Additional headers in name-value pairs.
+     */
+    public PactDslRequestWithoutPath headers(String firstHeaderName, String firstHeaderValue, String... headerNameValuePairs) {
+        if (headerNameValuePairs.length % 2 != 0) {
+            throw new IllegalArgumentException("Pair key value should be provided, but there is one key without value.");
+        }
+        requestHeaders.put(firstHeaderName, firstHeaderValue);
+
+        for (int i = 0; i < headerNameValuePairs.length; i+=2) {
+            requestHeaders.put(headerNameValuePairs[i], headerNameValuePairs[i+1]);
+        }
+
         return this;
     }
 
