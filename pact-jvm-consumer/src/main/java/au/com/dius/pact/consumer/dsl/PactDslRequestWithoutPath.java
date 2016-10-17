@@ -12,6 +12,8 @@ import javax.xml.transform.TransformerException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static au.com.dius.pact.consumer.ConsumerPactBuilder.xmlToString;
@@ -116,6 +118,37 @@ public class PactDslRequestWithoutPath {
      * @param body Request body in string form
      */
     public PactDslRequestWithoutPath body(String body, ContentType mimeType) {
+        return body(body, mimeType.toString());
+    }
+
+
+    /**
+     * The body of the request
+     *
+     * @param body Request body in Java Functional Interface Supplier that must return a string
+     */
+    public PactDslRequestWithoutPath body(Supplier<String> body) {
+        requestBody = OptionalBody.body(body.get());
+        return this;
+    }
+
+    /**
+     * The body of the request
+     *
+     * @param body Request body in Java Functional Interface Supplier that must return a string
+     */
+    public PactDslRequestWithoutPath body(Supplier<String> body, String mimeType) {
+        requestBody = OptionalBody.body(body.get());
+        requestHeaders.put(CONTENT_TYPE, mimeType);
+        return this;
+    }
+
+    /**
+     * The body of the request
+     *
+     * @param body Request body in Java Functional Interface Supplier that must return a string
+     */
+    public PactDslRequestWithoutPath body(Supplier<String> body, ContentType mimeType) {
         return body(body, mimeType.toString());
     }
 
