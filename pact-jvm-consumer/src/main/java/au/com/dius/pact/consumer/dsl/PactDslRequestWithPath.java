@@ -12,6 +12,7 @@ import org.w3c.dom.Document;
 import javax.xml.transform.TransformerException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class PactDslRequestWithPath {
     private static final String CONTENT_TYPE = "Content-Type";
@@ -79,6 +80,26 @@ public class PactDslRequestWithPath {
     /**
      * Headers to be included in the request
      *
+     * @param firstHeaderName      The name of the first header
+     * @param firstHeaderValue     The value of the first header
+     * @param headerNameValuePairs Additional headers in name-value pairs.
+     */
+    public PactDslRequestWithPath headers(String firstHeaderName, String firstHeaderValue, String... headerNameValuePairs) {
+        if (headerNameValuePairs.length % 2 != 0) {
+            throw new IllegalArgumentException("Pair key value should be provided, but there is one key without value.");
+        }
+        requestHeaders.put(firstHeaderName, firstHeaderValue);
+
+        for (int i = 0; i < headerNameValuePairs.length; i+=2) {
+            requestHeaders.put(headerNameValuePairs[i], headerNameValuePairs[i+1]);
+        }
+
+        return this;
+    }
+
+    /**
+     * Headers to be included in the request
+     *
      * @param headers Key-value pairs
      */
     public PactDslRequestWithPath headers(Map<String, String> headers) {
@@ -124,6 +145,75 @@ public class PactDslRequestWithPath {
      */
     public PactDslRequestWithPath body(String body, ContentType mimeType) {
         return body(body, mimeType.toString());
+    }
+
+    /**
+     * The body of the request
+     *
+     * @param body Request body in Java Functional Interface Supplier that must return a string
+     */
+    public PactDslRequestWithPath body(Supplier<String> body) {
+        requestBody = OptionalBody.body(body.get());
+        return this;
+    }
+
+    /**
+     * The body of the request
+     *
+     * @param body Request body in Java Functional Interface Supplier that must return a string
+     */
+    public PactDslRequestWithPath body(Supplier<String> body, String mimeType) {
+        requestBody = OptionalBody.body(body.get());
+        requestHeaders.put(CONTENT_TYPE, mimeType);
+        return this;
+    }
+
+    /**
+     * The body of the request
+     *
+     * @param body Request body in Java Functional Interface Supplier that must return a string
+     */
+    public PactDslRequestWithPath body(Supplier<String> body, ContentType mimeType) {
+        return body(body, mimeType.toString());
+    }
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslRequestWithPath bodyWithSingleQuotes(String body) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body);
+    }
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslRequestWithPath bodyWithSingleQuotes(String body, String mimeType) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body, mimeType);
+    }
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslRequestWithPath bodyWithSingleQuotes(String body, ContentType mimeType) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body, mimeType);
     }
 
     /**

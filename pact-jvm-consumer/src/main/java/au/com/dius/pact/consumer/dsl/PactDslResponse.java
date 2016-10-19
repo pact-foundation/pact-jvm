@@ -16,6 +16,7 @@ import scala.collection.JavaConversions$;
 import javax.xml.transform.TransformerException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class PactDslResponse {
     private static final String CONTENT_TYPE = "Content-Type";
@@ -79,6 +80,73 @@ public class PactDslResponse {
      * @param body body in string form
      */
     public PactDslResponse body(String body, ContentType mimeType) {
+        return body(body, mimeType.toString());
+    }
+
+    /**
+     * The body of the request
+     *
+     * @param body Response body in Java Functional Interface Supplier that must return a string
+     */
+    public PactDslResponse body(Supplier<String> body) {
+        responseBody = OptionalBody.body(body.get());
+        return this;
+    }
+
+    /**
+     * The body of the request
+     *
+     * @param body Response body in Java Functional Interface Supplier that must return a string
+     */
+    public PactDslResponse body(Supplier<String> body, String mimeType) {
+        responseBody = OptionalBody.body(body.get());
+        responseHeaders.put(CONTENT_TYPE, mimeType);
+        return this;
+    }
+
+    /**
+     * The body of the request
+     *
+     * @param body Response body in Java Functional Interface Supplier that must return a string
+     */
+    public PactDslResponse body(Supplier<String> body, ContentType mimeType) {
+        return body(body, mimeType.toString());
+    }
+
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslResponse bodyWithSingleQuotes(String body) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body);
+    }
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslResponse bodyWithSingleQuotes(String body, String mimeType) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body, mimeType);
+    }
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslResponse bodyWithSingleQuotes(String body, ContentType mimeType) {
         return body(body, mimeType.toString());
     }
 
