@@ -2,16 +2,18 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import groovy.json.JsonSlurper
+import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
 /**
  * Provider Info Config
  */
 @ToString
+@EqualsAndHashCode
 class ProviderInfo {
     String protocol = 'http'
     def host = 'localhost'
-    Integer port = 8080
+    def port = 8080
     String path = '/'
     String name = 'provider'
 

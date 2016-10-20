@@ -1,6 +1,9 @@
 package au.com.dius.pact.model
 
 import au.com.dius.pact.model.v3.messaging.MessagePact
+import com.amazonaws.services.s3.AmazonS3Client
+import com.amazonaws.services.s3.model.S3Object
+import com.amazonaws.services.s3.model.S3ObjectInputStream
 import groovyx.net.http.AuthConfig
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
@@ -188,6 +191,23 @@ class PactReaderSpec extends Specification {
     then:
     pact instanceof RequestResponsePact
     pact.interactions[0].providerStates == [ new ProviderState('test state') ]
+  }
+
+  def 'correctly load pact file from S3'() {
+    given:
+    def pactUrl = 'S3://some/bucket/aFile.json'
+    def s3ClientMock = Mock(AmazonS3Client)
+    String pactJson = this.class.getResourceAsStream('/v2-pact.json').text
+    S3Object object = Mock()
+    object.objectContent >> new S3ObjectInputStream(new ByteArrayInputStream(pactJson.bytes), null)
+    PactReader.s3Client() >> s3ClientMock
+
+    when:
+    def pact = PactReader.loadPact(pactUrl)
+
+    then:
+    1 * s3ClientMock.getObject('some', 'bucket/aFile.json') >> object
+    pact instanceof RequestResponsePact
   }
 
 }

@@ -35,4 +35,17 @@ class ReporterManagerSpec extends Specification {
     expect:
     ReporterManager.createReporter('json').name == 'json'
   }
+
+  def 'can create an instance using fully qualified name'() {
+    expect:
+    ReporterManager.createReporter('au.com.dius.pact.provider.reporters.AnsiConsoleReporter') != null
+  }
+
+  def 'should throw an exception for none reporter classes'() {
+    when:
+      ReporterManager.createReporter('au.com.dius.pact.provider.ConsumerInfo')
+    then:
+      thrown(IllegalArgumentException)
+  }
+
 }

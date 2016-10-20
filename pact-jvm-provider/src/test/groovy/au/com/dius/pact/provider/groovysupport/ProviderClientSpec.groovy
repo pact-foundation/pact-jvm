@@ -17,7 +17,7 @@ import org.apache.http.impl.client.CloseableHttpClient
 import spock.lang.Specification
 import spock.lang.Unroll
 
-@SuppressWarnings('ClosureAsLastMethodParameter')
+@SuppressWarnings(['ClosureAsLastMethodParameter', 'MethodCount'])
 class ProviderClientSpec extends Specification {
 
   private ProviderClient client
@@ -392,6 +392,90 @@ class ProviderClientSpec extends Specification {
       it.method == 'POST' && it.requestLine.uri == 'http://state.change:1244?state=state+one&a=a&b=1&action=setup'
     })
     0 * _
+  }
+
+  def 'handles a string for the host'() {
+    given:
+    client.provider.host = 'my_host'
+    def pactRequest = new Request()
+
+    when:
+    def request = client.newRequest(pactRequest)
+
+    then:
+    request.URI.toString() == 'http://my_host:8080/'
+  }
+
+  def 'handles a closure for the host'() {
+    given:
+    client.provider.host = { 'my_host_from_closure' }
+    def pactRequest = new Request()
+
+    when:
+    def request = client.newRequest(pactRequest)
+
+    then:
+    request.URI.toString() == 'http://my_host_from_closure:8080/'
+  }
+
+  def 'handles non-strings for the host'() {
+    given:
+    client.provider.host = 12345678
+    def pactRequest = new Request()
+
+    when:
+    def request = client.newRequest(pactRequest)
+
+    then:
+    request.URI.toString() == 'http://12345678:8080/'
+  }
+
+  def 'handles a number for the port'() {
+    given:
+    client.provider.port = 1234
+    def pactRequest = new Request()
+
+    when:
+    def request = client.newRequest(pactRequest)
+
+    then:
+    request.URI.toString() == 'http://localhost:1234/'
+  }
+
+  def 'handles a closure for the port'() {
+    given:
+    client.provider.port = { 2345 }
+    def pactRequest = new Request()
+
+    when:
+    def request = client.newRequest(pactRequest)
+
+    then:
+    request.URI.toString() == 'http://localhost:2345/'
+  }
+
+  def 'handles strings for the port'() {
+    given:
+    client.provider.port = '2222'
+    def pactRequest = new Request()
+
+    when:
+    def request = client.newRequest(pactRequest)
+
+    then:
+    request.URI.toString() == 'http://localhost:2222/'
+  }
+
+  def 'fails in an appropriate way if the port is unable to be converted to an integer'() {
+    given:
+    client.provider.port = 'this is not a port'
+    def pactRequest = new Request()
+
+    when:
+    def request = client.newRequest(pactRequest)
+
+    then:
+    thrown(NumberFormatException)
   }
 
 }

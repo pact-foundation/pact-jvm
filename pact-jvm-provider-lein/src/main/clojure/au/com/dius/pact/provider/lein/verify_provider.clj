@@ -23,7 +23,7 @@
     (if (contains? provider-data :insecure) (.setInsecure provider (:insecure provider-data)))
     (if (contains? provider-data :trust-store) (.setTrustStore provider (:trust-store provider-data)))
     (if (contains? provider-data :trust-store-password) (.setTrustStorePassword provider (:trust-store-password provider-data)))
-    (if (contains? provider-data :state-change-url) (.setStateChangeUrl provider (:state-change-url provider-data)))
+    (if (contains? provider-data :state-change-url) (.setStateChangeUrl provider (-> provider-data :state-change-url io/as-url)))
     (if (contains? provider-data :state-change-uses-body) (.setStateChangeUsesBody provider (:state-change-uses-body provider-data)))
     (if (contains? provider-data :verification-type) (.setVerificationType provider (:verification-type provider-data)))
     (if (contains? provider-data :packages-to-scan) (.setPackagesToScan provider (:packages-to-scan provider-data)))

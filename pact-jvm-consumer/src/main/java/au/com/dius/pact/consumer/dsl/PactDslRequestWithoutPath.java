@@ -5,13 +5,18 @@ import au.com.dius.pact.model.OptionalBody;
 import au.com.dius.pact.model.matchingrules.MatchingRules;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import com.mifmif.common.regex.Generex;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static au.com.dius.pact.consumer.ConsumerPactBuilder.xmlToString;
 
@@ -59,6 +64,26 @@ public class PactDslRequestWithoutPath {
     }
 
     /**
+     * Headers to be included in the request
+     *
+     * @param firstHeaderName      The name of the first header
+     * @param firstHeaderValue     The value of the first header
+     * @param headerNameValuePairs Additional headers in name-value pairs.
+     */
+    public PactDslRequestWithoutPath headers(String firstHeaderName, String firstHeaderValue, String... headerNameValuePairs) {
+        if (headerNameValuePairs.length % 2 != 0) {
+            throw new IllegalArgumentException("Pair key value should be provided, but there is one key without value.");
+        }
+        requestHeaders.put(firstHeaderName, firstHeaderValue);
+
+        for (int i = 0; i < headerNameValuePairs.length; i+=2) {
+            requestHeaders.put(headerNameValuePairs[i], headerNameValuePairs[i+1]);
+        }
+
+        return this;
+    }
+
+    /**
      * The query string for the request
      *
      * @param query query string
@@ -96,6 +121,76 @@ public class PactDslRequestWithoutPath {
      */
     public PactDslRequestWithoutPath body(String body, ContentType mimeType) {
         return body(body, mimeType.toString());
+    }
+
+
+    /**
+     * The body of the request
+     *
+     * @param body Request body in Java Functional Interface Supplier that must return a string
+     */
+    public PactDslRequestWithoutPath body(Supplier<String> body) {
+        requestBody = OptionalBody.body(body.get());
+        return this;
+    }
+
+    /**
+     * The body of the request
+     *
+     * @param body Request body in Java Functional Interface Supplier that must return a string
+     */
+    public PactDslRequestWithoutPath body(Supplier<String> body, String mimeType) {
+        requestBody = OptionalBody.body(body.get());
+        requestHeaders.put(CONTENT_TYPE, mimeType);
+        return this;
+    }
+
+    /**
+     * The body of the request
+     *
+     * @param body Request body in Java Functional Interface Supplier that must return a string
+     */
+    public PactDslRequestWithoutPath body(Supplier<String> body, ContentType mimeType) {
+        return body(body, mimeType.toString());
+    }
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslRequestWithoutPath bodyWithSingleQuotes(String body) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body);
+    }
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslRequestWithoutPath bodyWithSingleQuotes(String body, String mimeType) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body, mimeType);
+    }
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslRequestWithoutPath bodyWithSingleQuotes(String body, ContentType mimeType) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body, mimeType);
     }
 
     /**

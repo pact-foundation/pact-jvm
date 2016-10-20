@@ -93,7 +93,7 @@ class ProviderVerifier {
         options.authentication = consumer.pactFileAuthentication
       }
       PactReader.loadPact(options, pactFile)
-    } else if (pactFile instanceof File || ProviderUtils.pactFileExists(pactFile)) {
+    } else if (pactFile instanceof File || ProviderUtils.pactFileExists(pactFile) || ProviderUtils.isS3Url(pactFile)) {
       reporters.each { it.verifyConsumerFromFile(pactFile, consumer) }
       PactReader.loadPact(pactFile)
     } else {
