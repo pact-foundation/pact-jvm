@@ -39,16 +39,20 @@ class PactBrokerClient {
     def pact = new JsonSlurper().parse(pactFile)
     def http = new HTTPBuilder(pactBrokerUrl)
     http.parser.'application/hal+json' = http.parser.'application/json'
-    http.request(PUT, JSON) {
+    http.request(PUT) {
       uri.path = "/pacts/provider/${pact.provider.name}/consumer/${pact.consumer.name}/version/$version"
-      requestContentType = JSON
       body = pactFile.text
+      requestContentType = JSON
 
       response.success = { resp -> resp.statusLine as String }
 
       response.failure = { resp, json ->
         def error = json?.errors?.join(', ') ?: 'Unknown error'
         "FAILED! ${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${error}"
+      }
+
+      response.'409' = { resp, body ->
+        "FAILED! ${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${body.readLine()}"
       }
     }
   }
