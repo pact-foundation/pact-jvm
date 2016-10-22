@@ -16,7 +16,6 @@ import javax.xml.transform.TransformerException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 public class PactDslRequestWithPath {
     private static final String CONTENT_TYPE = "Content-Type";
@@ -148,36 +147,6 @@ public class PactDslRequestWithPath {
      * @param body Request body in string form
      */
     public PactDslRequestWithPath body(String body, ContentType mimeType) {
-        return body(body, mimeType.toString());
-    }
-
-    /**
-     * The body of the request
-     *
-     * @param body Request body in Java Functional Interface Supplier that must return a string
-     */
-    public PactDslRequestWithPath body(Supplier<String> body) {
-        requestBody = OptionalBody.body(body.get());
-        return this;
-    }
-
-    /**
-     * The body of the request
-     *
-     * @param body Request body in Java Functional Interface Supplier that must return a string
-     */
-    public PactDslRequestWithPath body(Supplier<String> body, String mimeType) {
-        requestBody = OptionalBody.body(body.get());
-        requestHeaders.put(CONTENT_TYPE, mimeType);
-        return this;
-    }
-
-    /**
-     * The body of the request
-     *
-     * @param body Request body in Java Functional Interface Supplier that must return a string
-     */
-    public PactDslRequestWithPath body(Supplier<String> body, ContentType mimeType) {
         return body(body, mimeType.toString());
     }
 
