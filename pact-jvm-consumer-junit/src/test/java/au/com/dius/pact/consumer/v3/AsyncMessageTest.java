@@ -6,6 +6,7 @@ import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
+import groovy.json.JsonSlurper;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -14,6 +15,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
 
 public class AsyncMessageTest {
   @Rule
@@ -55,13 +57,15 @@ public class AsyncMessageTest {
   @PactVerification(value = "test_provider", fragment = "createPact")
   public void test() throws Exception {
     byte[] currentMessage = mockProvider.getMessage();
-    assertThat(new String(currentMessage), is("{\"testParam1\":\"value1\",\"testParam2\":\"value2\"}"));
+    assertThat(new JsonSlurper().parseText(new String(currentMessage)),
+      is(equalTo(new JsonSlurper().parseText("{\"testParam1\":\"value1\",\"testParam2\":\"value2\"}"))));
   }
 
   @Test
   @PactVerification(value = "test_provider", fragment = "createPact2")
   public void test2() {
     byte[] currentMessage = mockProvider.getMessage();
-    assertThat(new String(currentMessage), is("{\"testParam1\":\"value3\",\"testParam2\":\"value4\"}"));
+    assertThat(new JsonSlurper().parseText(new String(currentMessage)),
+      is(equalTo(new JsonSlurper().parseText("{\"testParam1\":\"value3\",\"testParam2\":\"value4\"}"))));
   }
 }
