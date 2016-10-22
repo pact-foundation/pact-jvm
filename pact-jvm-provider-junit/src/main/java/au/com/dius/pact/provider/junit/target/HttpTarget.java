@@ -1,45 +1,33 @@
 package au.com.dius.pact.provider.junit.target;
 
-import au.com.dius.pact.model.RequestResponseInteraction;
+import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.ProviderInfo;
 import au.com.dius.pact.provider.ProviderVerifier;
 import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.TargetRequestFilter;
-import au.com.dius.pact.provider.junit.VerificationReports;
 import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver;
 import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
-import au.com.dius.pact.provider.reporters.ReporterManager;
-import au.com.dius.pact.provider.reporters.VerifierReporter;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpRequest;
-import org.jooq.lambda.Seq;
-import org.jooq.lambda.tuple.Tuple2;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.TestClass;
 
-import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Out-of-the-box implementation of {@link Target},
- * that run {@link RequestResponseInteraction} against http service and verify response
+ * that run {@link Interaction} against http service and verify response
  */
-public class HttpTarget implements TestClassAwareTarget {
+public class HttpTarget extends BaseTarget {
     private final String path;
     private final String host;
     private final int port;
     private final String protocol;
     private final boolean insecure;
-    private TestClass testClass;
-    private Object testTarget;
-    private ValueResolver valueResolver = new SystemPropertyResolver();
 
   /**
      * @param host host of tested service
@@ -86,6 +74,7 @@ public class HttpTarget implements TestClassAwareTarget {
      * @param insecure true if certificates should be ignored
      */
     public HttpTarget(final String protocol, final String host, final int port, final String path, final boolean insecure){
+        super();
         this.host = host;
         this.port = port;
         this.protocol = protocol;
@@ -118,7 +107,7 @@ public class HttpTarget implements TestClassAwareTarget {
      * {@inheritDoc}
      */
     @Override
-    public void testInteraction(final String consumerName, final RequestResponseInteraction interaction) {
+    public void testInteraction(final String consumerName, final Interaction interaction) {
       ProviderInfo provider = getProviderInfo();
       ConsumerInfo consumer = new ConsumerInfo(consumerName);
       ProviderVerifier verifier = setupVerifier(interaction, provider, consumer);
@@ -136,7 +125,8 @@ public class HttpTarget implements TestClassAwareTarget {
       }
     }
 
-  private ProviderVerifier setupVerifier(RequestResponseInteraction interaction, ProviderInfo provider,
+    @Override
+  ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider,
                                          ConsumerInfo consumer) {
     ProviderVerifier verifier = new ProviderVerifier();
 
@@ -154,37 +144,7 @@ public class HttpTarget implements TestClassAwareTarget {
     return verifier;
   }
 
-  private void setupReporters(ProviderVerifier verifier, String name, String description) {
-    String reportDirectory = "target/pact/reports";
-    String[] reports = new String[]{};
-    boolean reportingEnabled = false;
-
-    VerificationReports verificationReports = testClass.getAnnotation(VerificationReports.class);
-    if (verificationReports != null) {
-      reportingEnabled = true;
-      reportDirectory = verificationReports.reportDir();
-      reports = verificationReports.value();
-    } else if (valueResolver.propertyDefined("pact.verification.reports")) {
-      reportingEnabled = true;
-      reportDirectory = valueResolver.resolveValue("pact.verification.reportDir:" + reportDirectory);
-      reports = valueResolver.resolveValue("pact.verification.reports:").split(",");
-    }
-
-    if (reportingEnabled) {
-      File reportDir = new File(reportDirectory);
-      reportDir.mkdirs();
-      verifier.setReporters(Seq.of(reports)
-        .filter(r -> !r.isEmpty())
-        .map(r -> {
-          VerifierReporter reporter = ReporterManager.createReporter(r.trim());
-          reporter.setReportDir(reportDir);
-          reporter.setReportFile(new File(reportDir, name + " - " + description + reporter.getExt()));
-          return reporter;
-        }).toList());
-    }
-  }
-
-  private ProviderInfo getProviderInfo() {
+  ProviderInfo getProviderInfo() {
       Provider provider = testClass.getAnnotation(Provider.class);
       final ProviderInfo providerInfo = new ProviderInfo(provider.value());
       providerInfo.setPort(port);
@@ -208,68 +168,4 @@ public class HttpTarget implements TestClassAwareTarget {
 
       return providerInfo;
     }
-
-  private AssertionError getAssertionError(final Map<String, Object> mismatches) {
-    String error = System.lineSeparator() + Seq.seq(mismatches.values()).zipWithIndex()
-      .map(i -> {
-        String errPrefix = String.valueOf(i.v2) + " - ";
-        if (i.v1 instanceof Throwable) {
-          return errPrefix + exceptionMessage((Throwable) i.v1, errPrefix.length());
-        } else if (i.v1 instanceof Map) {
-          return errPrefix + convertMapToErrorString((Map) i.v1);
-        } else {
-          return errPrefix + i.v1.toString();
-        }
-      }).toString(System.lineSeparator());
-    return new AssertionError(error);
-  }
-
-  private String exceptionMessage(Throwable err, int prefixLength) {
-    String message = err.getMessage();
-    if (message.contains("\n")) {
-      String padString = StringUtils.leftPad("", prefixLength);
-      Tuple2<Optional<String>, Seq<String>> lines = Seq.of(message.split("\n")).splitAtHead();
-      return lines.v1.orElse("") + System.lineSeparator() + lines.v2.map(line -> padString + line)
-        .toString(System.lineSeparator());
-    } else {
-      return message;
-    }
-  }
-
-  private String convertMapToErrorString(Map mismatches) {
-    if (mismatches.containsKey("comparison")) {
-      Object comparison = mismatches.get("comparison");
-      if (mismatches.containsKey("diff")) {
-        return mapToString((Map) comparison);
-      } else {
-        if (comparison instanceof Map) {
-          return mapToString((Map) comparison);
-        } else {
-          return String.valueOf(comparison);
-        }
-      }
-    } else {
-      return mapToString(mismatches);
-    }
-  }
-
-  private String mapToString(Map comparison) {
-    return comparison.entrySet().stream()
-      .map(e -> String.valueOf(((Map.Entry)e).getKey()) + " -> " + ((Map.Entry)e).getValue())
-      .collect(Collectors.joining(System.lineSeparator())).toString();
-  }
-
-  @Override
-  public void setTestClass(final TestClass testClass, final Object testTarget) {
-    this.testClass = testClass;
-    this.testTarget = testTarget;
-  }
-
-  public ValueResolver getValueResolver() {
-    return valueResolver;
-  }
-
-  public void setValueResolver(ValueResolver valueResolver) {
-    this.valueResolver = valueResolver;
-  }
 }

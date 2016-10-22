@@ -138,6 +138,7 @@ You want to look at: [pact-jvm-provider](pact-jvm-provider)
 
 As part of the V3 pact specification, we have defined a new pact file for interactions with message queues. The Gradle
 pact plugin supports a mechanism where you can verify V3 message pacts, have a look at [pact gradle plugin](pact-jvm-provider-gradle#verifying-a-message-provider).
+The JUnit pact library also supports verification of V3 message pacts, have a look at [pact-jvm-provider-junit](pact-jvm-provider-junit#verifying-a-message-provider).
 
 ### I Use Ruby or Go or something else
 The pact-jvm libraries are pure jvm technologies and do not have any native dependencies.
