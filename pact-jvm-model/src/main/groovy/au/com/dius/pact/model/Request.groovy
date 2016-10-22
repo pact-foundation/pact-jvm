@@ -23,7 +23,7 @@ class Request implements HttpPart {
       query = map.query
       headers = map.headers
       body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
-      matchingRules = map.matchingRules
+      matchingRules = map.matchingRules ?: [:]
       it
     }
   }
@@ -36,7 +36,7 @@ class Request implements HttpPart {
       query = r.query ? [:] + r.query : null
       headers = r.headers ? [:] + r.headers : null
       body = r.body
-      matchingRules = r.matchingRules ? [:] + r.matchingRules : null
+      matchingRules = r.matchingRules ? [:] + r.matchingRules : [:]
       it
     }
   }
