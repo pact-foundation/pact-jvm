@@ -70,8 +70,6 @@ class ProviderClient {
               provider.requestFilter.apply(method)
             } else if (provider.requestFilter instanceof org.apache.commons.collections.Closure) {
               provider.requestFilter.execute(method)
-            } else if (provider.requestFilter.class.interfaces.any { it.isAnnotationPresent(FunctionalInterface) }) {
-              invokeJavaFunctionalInterface(provider.requestFilter, method)
             } else {
                 Binding binding = new Binding()
                 binding.setVariable(REQUEST, method)
@@ -81,23 +79,7 @@ class ProviderClient {
         }
     }
 
-  private static void invokeJavaFunctionalInterface(def functionalInterface, HttpRequest httpRequest) {
-    def invokableMethods = functionalInterface.metaClass.methods - Object.metaClass.methods
-    if (invokableMethods.size() == 1) {
-      MetaMethod method = invokableMethods.first()
-      if (method.parameterTypes.size() > 0) {
-        def parameters = method.parameterTypes.collect { null }
-        parameters[0] = httpRequest
-        method.invoke(functionalInterface, parameters as Object[])
-        return
-      }
-    }
-
-    throw new IllegalArgumentException('Java request filters must be either a Consumer or Function that takes at ' +
-      'least one HttpRequest parameter')
-  }
-
-  private void setupBody(HttpRequest method) {
+    private void setupBody(HttpRequest method) {
         if (method instanceof HttpEntityEnclosingRequest) {
             if (urlEncodedFormPost(request) && request.query != null) {
                 def charset = Consts.UTF_8
