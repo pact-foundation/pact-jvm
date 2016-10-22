@@ -123,8 +123,13 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must de-serialise pact'() {
     expect:
-    pact == new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
-      [new RequestResponseInteraction('test interaction', [new ProviderState('test state')], request, response)])
+    pact.provider == new Provider('test_provider')
+    pact.consumer == new Consumer('test_consumer')
+    pact.interactions.size() == 1
+    pact.interactions[0].description == 'test interaction'
+    pact.interactions[0].providerStates == [new ProviderState('test state')]
+    pact.interactions[0].request == request
+    pact.interactions[0].response == response
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact.json'))
@@ -132,8 +137,14 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must de-serialise V3 pact'() {
     expect:
-    pact == new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
-      [new RequestResponseInteraction('test interaction', [new ProviderState('test state')], request, response)])
+    pact.provider == new Provider('test_provider')
+    pact.consumer == new Consumer('test_consumer')
+    pact.interactions.size() == 1
+    pact.interactions[0].description == 'test interaction'
+    pact.interactions[0].providerStates == [
+      new ProviderState('test state', [name: 'Testy']), new ProviderState('test state 2', [name: 'Testy2'])]
+    pact.interactions[0].request == request
+    pact.interactions[0].response == response
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact_v3.json'))

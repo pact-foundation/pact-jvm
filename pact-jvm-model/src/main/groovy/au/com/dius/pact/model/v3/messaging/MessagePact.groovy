@@ -55,7 +55,7 @@ class MessagePact extends BasePact {
 
   @Override
   void mergeInteractions(List<Interaction> interactions) {
-    messages = (messages + (interactions as List<Message>)).unique { it.description }
+    messages = (messages + (interactions as List<Message>)).unique { it.uniqueKey() }
     sortInteractions()
   }
 

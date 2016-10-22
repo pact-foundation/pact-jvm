@@ -1,11 +1,15 @@
 package au.com.dius.pact.model
 
 import groovy.transform.CompileStatic
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
 /**
  * Pact between a consumer and a provider
  */
 @CompileStatic
+@ToString(includeSuper = true)
+@EqualsAndHashCode(callSuper = true)
 class RequestResponsePact extends BasePact {
   List<RequestResponseInteraction> interactions
 
@@ -38,7 +42,7 @@ class RequestResponsePact extends BasePact {
   @Override
   void mergeInteractions(List<Interaction> interactions) {
     this.interactions = (this.interactions + (interactions as List<RequestResponseInteraction>))
-      .unique { it.description }
+      .unique { it.uniqueKey() }
     sortInteractions()
   }
 

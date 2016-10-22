@@ -30,4 +30,5 @@ interface Interaction {
    * Converts this interaction to a Map
    */
   Map toMap(PactSpecVersion pactSpecVersion)
+  String uniqueKey()
 }

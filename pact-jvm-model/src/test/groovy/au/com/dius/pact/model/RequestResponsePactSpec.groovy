@@ -50,4 +50,95 @@ class RequestResponsePactSpec extends Specification {
     result.interactions.first().response.body.toString() == '{value=1234.0}'
   }
 
+  @SuppressWarnings('ComparisonWithSelf')
+  def 'equality test'() {
+    expect:
+    pact == pact
+
+    where:
+    provider = new Provider()
+    consumer = new Consumer()
+    interaction = new RequestResponseInteraction(request: new Request(method: 'GET'),
+      response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
+        headers: ['Content-Type': 'application/json']))
+    pact = new RequestResponsePact(provider, consumer, [ interaction ])
+  }
+
+  def 'pacts are not equal if the providers are different'() {
+    expect:
+    pact != pact2
+
+    where:
+    provider = new Provider()
+    provider2 = new Provider('other provider')
+    consumer = new Consumer()
+    interaction = new RequestResponseInteraction(request: new Request(method: 'GET'),
+      response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
+        headers: ['Content-Type': 'application/json']))
+    pact = new RequestResponsePact(provider, consumer, [ interaction ])
+    pact2 = new RequestResponsePact(provider2, consumer, [ interaction ])
+  }
+
+  def 'pacts are not equal if the consumers are different'() {
+    expect:
+    pact != pact2
+
+    where:
+    provider = new Provider()
+    consumer = new Consumer()
+    consumer2 = new Consumer('other consumer')
+    interaction = new RequestResponseInteraction(request: new Request(method: 'GET'),
+      response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
+        headers: ['Content-Type': 'application/json']))
+    pact = new RequestResponsePact(provider, consumer, [ interaction ])
+    pact2 = new RequestResponsePact(provider, consumer2, [ interaction ])
+  }
+
+  def 'pacts are equal if the metadata is different'() {
+    expect:
+    pact == pact2
+
+    where:
+    provider = new Provider()
+    consumer = new Consumer()
+    interaction = new RequestResponseInteraction(request: new Request(method: 'GET'),
+      response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
+        headers: ['Content-Type': 'application/json']))
+    pact = new RequestResponsePact(provider, consumer, [ interaction ], [meta: 'data'])
+    pact2 = new RequestResponsePact(provider, consumer, [ interaction ], [meta: 'other data'])
+  }
+
+  def 'pacts are not equal if the interactions are different'() {
+    expect:
+    pact != pact2
+
+    where:
+    provider = new Provider()
+    consumer = new Consumer()
+    interaction = new RequestResponseInteraction(request: new Request(method: 'GET'),
+      response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
+        headers: ['Content-Type': 'application/json']))
+    interaction2 = new RequestResponseInteraction(request: new Request(method: 'POST'),
+      response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
+        headers: ['Content-Type': 'application/json']))
+    pact = new RequestResponsePact(provider, consumer, [ interaction ])
+    pact2 = new RequestResponsePact(provider, consumer, [ interaction2 ])
+  }
+
+  def 'pacts are not equal if the number of interactions are different'() {
+    expect:
+    pact != pact2
+
+    where:
+    provider = new Provider()
+    consumer = new Consumer()
+    interaction = new RequestResponseInteraction(request: new Request(method: 'GET'),
+      response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
+        headers: ['Content-Type': 'application/json']))
+    interaction2 = new RequestResponseInteraction(request: new Request(method: 'POST'),
+      response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
+        headers: ['Content-Type': 'application/json']))
+    pact = new RequestResponsePact(provider, consumer, [ interaction ])
+    pact2 = new RequestResponsePact(provider, consumer, [ interaction, interaction2 ])
+  }
 }

@@ -19,7 +19,7 @@ each test of an interaction.
 all methods annotated by `@State` with appropriate the state listed will be invoked. These methods must either take
 no parameters or a single Map parameter.
 
-## Example of test
+## Example of HTTP test
 
 ```java
     @RunWith(PactRunner.class) // Say JUnit to run tests with custom Runner
@@ -64,6 +64,47 @@ no parameters or a single Map parameter.
 
         @TestTarget // Annotation denotes Target that will be used for tests
         public final Target target = new HttpTarget(8332); // Out-of-the-box implementation of Target (for more information take a look at Test Target section)
+    }
+```
+
+## Example of AMQP Message test
+
+```java
+    @RunWith(PactRunner.class) // Say JUnit to run tests with custom Runner
+    @Provider("myAwesomeService") // Set up name of tested provider
+    @PactBroker(host="pactbroker", port = "80") 
+    public class ConfirmationKafkaContractTest {
+
+        @TestTarget // Annotation denotes Target that will be used for tests
+        public final Target target = new AmqpTarget(); // Out-of-the-box implementation of Target (for more information take a look at Test Target section)
+
+        @BeforeClass //Method will be run once: before whole contract test suite
+        public static void setUpService() {
+            //Run DB, create schema
+            //Run service
+            //...
+        }
+
+        @Before //Method will be run before each test of interaction
+        public void before() {
+            // Message data preparation
+            // ...
+        }
+
+        @PactVerifyProvider('an order confirmation message')
+        String verifyMessageForOrder() {
+            Order order = new Order()
+            order.setId(10000004)
+            order.setPrice(BigDecimal.TEN)
+            order.setUnits(15)
+
+            def message = new ConfirmationKafkaMessageBuilder()
+              .withOrder(order)
+              .build()
+
+            JsonOutput.toJson(message)
+        }
+
     }
 ```
 
@@ -158,6 +199,11 @@ will be used for actual Interaction execution and asserting of contract.
 that will play pacts as http request and assert response from service by matching rules from pact.
 
 _Version 3.2.2/2.4.3+_ you can also specify the protocol, defaults to "http".
+
+### AmqpTarget
+
+`au.com.dius.pact.provider.junit.target.AmqpTarget` - out-of-the-box implementation of `au.com.dius.pact.provider.junit.target.Target`
+that will play pacts as an AMQP message and assert response from service by matching rules from pact.
 
 #### Modifying the requests before they are sent [Version 3.2.3/2.4.5+]
 

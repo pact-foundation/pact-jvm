@@ -57,4 +57,24 @@ class RequestResponseInteractionSpec extends Specification {
     !mapV2.containsKey('providerStates')
     !mapV2.containsKey('providerState')
   }
+
+  def 'unique key test'() {
+    expect:
+    interaction1.uniqueKey() == interaction1.uniqueKey()
+    interaction1.uniqueKey() == interaction2.uniqueKey()
+    interaction1.uniqueKey() != interaction3.uniqueKey()
+    interaction1.uniqueKey() != interaction4.uniqueKey()
+    interaction1.uniqueKey() != interaction5.uniqueKey()
+    interaction3.uniqueKey() != interaction4.uniqueKey()
+    interaction3.uniqueKey() != interaction5.uniqueKey()
+    interaction4.uniqueKey() != interaction5.uniqueKey()
+
+    where:
+    interaction1 = new RequestResponseInteraction('description 1+2')
+    interaction2 = new RequestResponseInteraction('description 1+2')
+    interaction3 = new RequestResponseInteraction('description 1+2', [new ProviderState('state 3')])
+    interaction4 = new RequestResponseInteraction('description 4')
+    interaction5 = new RequestResponseInteraction('description 4', [new ProviderState('state 5')])
+  }
+
 }
