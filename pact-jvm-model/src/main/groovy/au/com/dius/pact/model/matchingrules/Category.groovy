@@ -2,9 +2,8 @@ package au.com.dius.pact.model.matchingrules
 
 import au.com.dius.pact.model.PactSpecVersion
 import groovy.transform.Canonical
-
-import java.util.function.Predicate
-import java.util.function.ToIntFunction
+import org.apache.commons.collections4.Predicate
+import org.apache.commons.collections4.Transformer
 
 /**
  * Matching rules category
@@ -49,11 +48,11 @@ class Category {
   }
 
   Category filter(Predicate<String> predicate) {
-    new Category(name, matchingRules.findAll { predicate.test(it.key) }, ruleLogic)
+    new Category(name, matchingRules.findAll { predicate.evaluate(it.key) }, ruleLogic)
   }
 
-  Category maxBy(ToIntFunction<String> fn) {
-    def map = matchingRules.max { fn.applyAsInt(it.key) }
+  Category maxBy(Transformer<String, Integer> fn) {
+    def map = matchingRules.max { fn.transform(it.key) }
     new Category(name, [(map.key): map.value], ruleLogic)
   }
 

@@ -1,11 +1,10 @@
 package au.com.dius.pact.matchers
 
-import java.util.function.{Predicate, ToIntFunction}
-
-import au.com.dius.pact.model.matchingrules.{MatchingRule, MatchingRules}
+import au.com.dius.pact.model.matchingrules.MatchingRules
 import com.typesafe.scalalogging.StrictLogging
 import io.gatling.jsonpath.AST._
 import io.gatling.jsonpath.Parser
+import org.apache.commons.collections4.{Predicate, Transformer}
 
 import scala.collection.JavaConversions
 
@@ -48,11 +47,11 @@ object Matchers extends StrictLogging {
   def resolveMatchers(matchers: MatchingRules, category: String, items: Seq[String]) =
     if (category == "body")
       matchers.rulesForCategory(category).filter(new Predicate[String] {
-        override def test(p: String): Boolean = matchesPath(p, items) > 0
+        override def evaluate(p: String): Boolean = matchesPath(p, items) > 0
       })
     else if (category == "header" || category == "query")
       matchers.rulesForCategory(category).filter(new Predicate[String] {
-        override def test(p: String): Boolean = items == Seq(p)
+        override def evaluate(p: String): Boolean = items == Seq(p)
       })
     else matchers.rulesForCategory(category)
 
@@ -66,7 +65,7 @@ object Matchers extends StrictLogging {
   def wildcardMatcherDefined(path: Seq[String], category: String, matchers: MatchingRules): Boolean = {
     if (matchers != null) {
       val resolvedMatchers = matchers.rulesForCategory(category).filter(new Predicate[String] {
-        override def test(p: String): Boolean = matchesPath(p, path) == path.length
+        override def evaluate(p: String): Boolean = matchesPath(p, path) == path.length
       })
       JavaConversions.asScalaSet(resolvedMatchers.getMatchingRules.keySet()).exists(entry => entry.endsWith(".*"))
     } else
@@ -82,8 +81,8 @@ object Matchers extends StrictLogging {
   def selectBestMatcher[Mismatch](matchers: MatchingRules, category: String, path: Seq[String]) = {
     val matcherCategory = resolveMatchers(matchers, category, path)
     if (category == "body")
-      matcherCategory.maxBy(new ToIntFunction[String] {
-        override def applyAsInt(value: String): Int = calculatePathWeight(value, path)
+      matcherCategory.maxBy(new Transformer[String, Integer] {
+        override def transform(value: String): Integer = calculatePathWeight(value, path)
       })
     else
       matcherCategory
