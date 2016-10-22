@@ -54,7 +54,7 @@ module has a Jar file named pact-jvm-consumer_2.10. The full name of the file is
 | ------ | ------------- | ------- | -------------- |
 | 3.3.x | V2 | 8 | 2.11 |
 | 3.5.x | V3 | 8 | 2.11 |
-| 2.5.x | V2 | 7 | 2.11 |
+| 2.5.x | V3 | 7 | 2.11 |
 | 2.4.x | V2 | 6 | 2.10, 2.11 |
 
 ## Service Consumers
