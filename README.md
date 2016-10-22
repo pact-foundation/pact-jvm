@@ -48,20 +48,14 @@ Pact-JVM is partially written in Scala. As Scala does not provide binary compati
 artifacts have the version of Scala they were built with in the artifact name. So, for example, the pact-jvm-consumer-junit
 module has a Jar file named pact-jvm-consumer_2.10. The full name of the file is pact-jvm-consumer_2.10-2.0.x.jar.
 
-### 3.x branch [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11)
+## Supported JDK and specification versions: 
 
-3.x branch drops support for JDK 6 and 7 as well as Scala 2.10. It will be cross-compiled with Scala 2.12 when that is
-released, but is currently build against Scala 2.11. All Groovy code is compiled with Invoke Dynamic instruction turned
-on (indy version).
-
-3.2.x/3.3.x versions implement the V2 pact spec, while the 3.5.x versions implement the V3 spec.
-
-### 2.x branch [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-logging_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-logging_2.11)
-
-2.x versions of pact support JDK 6 and Scala 2.10. We currently cross-compile all the artifacts against 2.10 and
-2.11 versions of Scala, except for the SBT modules.
-
-2.4.x versions implement the V2 pact spec, while the 2.5.x versions implement the V3 spec.
+| Branch | Specification | Min JDK | Scala Versions |
+| ------ | ------------- | ------- | -------------- |
+| 3.3.x | V2 | 8 | 2.11 |
+| 3.5.x | V3 | 8 | 2.11 |
+| 2.5.x | V2 | 7 | 2.11 |
+| 2.4.x | V2 | 6 | 2.10, 2.11 |
 
 ## Service Consumers
 
