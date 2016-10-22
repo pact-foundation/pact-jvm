@@ -23,6 +23,8 @@ import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 public class InsecureHttpsRequest extends Request {
   private CloseableHttpClient httpclient;
@@ -36,7 +38,12 @@ public class InsecureHttpsRequest extends Request {
 
     // setup a Trust Strategy that allows all certificates.
     //
-    TrustStrategy trustStrategy = (chain, authType) -> true;
+    TrustStrategy trustStrategy = new TrustStrategy() {
+      @Override
+      public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+        return true;
+      }
+    };
     SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, trustStrategy).build();
     b.setSSLContext(sslContext);
     // don't check Hostnames, either.

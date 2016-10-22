@@ -22,7 +22,11 @@ public abstract class ConsumerPactTest {
         PactFragment fragment = createFragment(ConsumerPactBuilder.consumer(consumerName()).hasPactWith(providerName()));
         final MockProviderConfig config = MockProviderConfig.createDefault(getSpecificationVersion());
 
-        VerificationResult result = fragment.runConsumer(config, config1 -> runTest(config1.url()));
+        VerificationResult result = fragment.runConsumer(config, new TestRun() {
+            public void run(MockProviderConfig config) throws IOException {
+                runTest(config.url());
+            }
+        });
 
         if (!result.equals(PACT_VERIFIED)) {
             if (result instanceof PactError) {

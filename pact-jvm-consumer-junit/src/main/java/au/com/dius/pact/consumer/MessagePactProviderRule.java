@@ -5,6 +5,7 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.v3.messaging.Message;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
+import au.com.dius.pact.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
@@ -12,7 +13,9 @@ import org.junit.runners.model.Statement;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -65,7 +68,7 @@ public class MessagePactProviderRule extends ExternalResource {
           if (!possiblePactMethod.isPresent()) {
             throw new UnsupportedOperationException("Could not find method with @Pact for the provider " + provider);
           }
-          pacts = new HashMap<>();
+          pacts = new HashMap<String, Message>();
           Method method = possiblePactMethod.get();
           Pact pact = method.getAnnotation(Pact.class);
           MessagePactBuilder builder = MessagePactBuilder.consumer(pact.consumer()).hasPactWith(provider);
@@ -129,15 +132,19 @@ public class MessagePactProviderRule extends ExternalResource {
 
 	private Optional<PactVerification> findPactVerification(PactVerifications pactVerifications) {
 		PactVerification[] pactVerificationValues = pactVerifications.value();
-		return Arrays.stream(pactVerificationValues).filter(p -> {
-			String[] providers = p.value();
-			if (providers.length != 1) {
-				throw new IllegalArgumentException(
-						"Each @PactVerification must specify one and only provider when using @PactVerifications");
-			}
-			String provider = providers[0];
-			return provider.equals(this.provider);
-		}).findFirst();
+    Optional<PactVerification> result = Optional.empty();
+    for (PactVerification verification: pactVerificationValues) {
+      String[] providers = verification.value();
+      if (providers.length != 1) {
+        throw new IllegalArgumentException(
+          "Each @PactVerification must specify one and only provider when using @PactVerifications");
+      }
+      String provider = providers[0];
+      if (provider.equals(this.provider)) {
+        result = Optional.of(verification);
+      }
+    }
+    return result;
 	}
 
 	private Optional<Method> findPactMethod(PactVerification pactVerification) {

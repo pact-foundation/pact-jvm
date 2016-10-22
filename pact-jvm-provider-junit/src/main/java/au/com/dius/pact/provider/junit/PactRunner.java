@@ -21,11 +21,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * JUnit Runner runs pacts against provider
@@ -49,8 +45,7 @@ import static java.util.stream.Collectors.toList;
  * all methods annotated by {@link State} with appropriate state listed will be invoked
  */
 public class PactRunner extends ParentRunner<InteractionRunner> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PactRunner.class);
-
+    private final Logger LOGGER = LoggerFactory.getLogger(PactRunner.class);
     private final List<InteractionRunner> child;
 
     public PactRunner(final Class<?> clazz) throws InitializationError {
@@ -68,16 +63,19 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         final TestClass testClass = new TestClass(clazz);
 
         this.child = new ArrayList<>();
-        final List<Pact> pacts;
+        final List<Pact> pacts = new ArrayList<>();
         try {
-            pacts = getPactSource(testClass).load(serviceName).stream()
-                  .filter(p -> consumerName == null || p.getConsumer().getName().equals(consumerName))
-                  .collect(Collectors.toList());
+            List<Pact> list = getPactSource(testClass).load(serviceName);
+            for (final Pact p : list) {
+                if (consumerName == null || p.getConsumer().getName().equals(consumerName)) {
+                    pacts.add(p);
+                }
+            }
         } catch (final IOException e) {
             throw new InitializationError(e);
         }
 
-        if (pacts == null || pacts.isEmpty()) {
+        if (pacts.isEmpty()) {
           throw new InitializationError("Did not find any pact files for provider " + providerInfo.value());
         }
 
@@ -103,9 +101,12 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
 
     protected PactLoader getPactSource(final TestClass clazz) throws InitializationError {
         final PactSource pactSource = clazz.getAnnotation(PactSource.class);
-        final List<Annotation> pactLoaders = Arrays.stream(clazz.getAnnotations())
-                .filter(annotation -> annotation.annotationType().getAnnotation(PactSource.class) != null)
-                .collect(toList());
+        List<Annotation> pactLoaders = new ArrayList<>();
+        for(Annotation annotation: clazz.getAnnotations()) {
+            if (annotation.annotationType().getAnnotation(PactSource.class) != null) {
+                pactLoaders.add(annotation);
+            }
+        }
         if ((pactSource == null ? 0 : 1) + pactLoaders.size() != 1) {
             throw new InitializationError("Exactly one pact source should be set");
         }

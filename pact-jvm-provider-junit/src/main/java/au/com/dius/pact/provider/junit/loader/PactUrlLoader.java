@@ -6,10 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * Implementation of {@link PactLoader} that downloads pacts from given urls
@@ -27,9 +25,10 @@ public class PactUrlLoader implements PactLoader {
     }
 
     public List<Pact> load(final String providerName) throws IOException {
-        return Arrays.stream(urls)
-                .map(PactReader::loadPact)
-                .map(obj -> (Pact) obj)
-                .collect(toList());
+      List<Pact> pacts = new ArrayList<>();
+      for (String url: urls) {
+        pacts.add(PactReader.loadPact(url));
+      }
+      return pacts;
     }
 }

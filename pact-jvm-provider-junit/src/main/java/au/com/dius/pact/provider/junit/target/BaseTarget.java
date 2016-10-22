@@ -10,14 +10,13 @@ import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
 import au.com.dius.pact.provider.reporters.ReporterManager;
 import au.com.dius.pact.provider.reporters.VerifierReporter;
 import org.apache.commons.lang3.StringUtils;
-import org.jooq.lambda.Seq;
-import org.jooq.lambda.tuple.Tuple2;
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.runners.model.TestClass;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * Out-of-the-box implementation of {@link Target},
@@ -58,29 +57,35 @@ public abstract class BaseTarget implements TestClassAwareTarget {
     if (reportingEnabled) {
       File reportDir = new File(reportDirectory);
       reportDir.mkdirs();
-      verifier.setReporters(Seq.of(reports)
-        .filter(r -> !r.isEmpty())
-        .map(r -> {
-          VerifierReporter reporter = ReporterManager.createReporter(r.trim());
+      List<VerifierReporter> reportsList = new ArrayList<>();
+      for (String report: reports) {
+        if (!report.isEmpty()) {
+          VerifierReporter reporter = ReporterManager.createReporter(report.trim());
           reporter.setReportDir(reportDir);
           reporter.setReportFile(new File(reportDir, name + " - " + description + reporter.getExt()));
-          return reporter;
-        }).toList());
+          reportsList.add(reporter);
+        }
+      }
+      verifier.setReporters(reportsList);
     }
   }
 
   AssertionError getAssertionError(final Map<String, Object> mismatches) {
-    String error = System.lineSeparator() + Seq.seq(mismatches.values()).zipWithIndex()
-      .map(i -> {
-        String errPrefix = String.valueOf(i.v2) + " - ";
-        if (i.v1 instanceof Throwable) {
-          return errPrefix + exceptionMessage((Throwable) i.v1, errPrefix.length());
-        } else if (i.v1 instanceof Map) {
-          return errPrefix + convertMapToErrorString((Map) i.v1);
-        } else {
-          return errPrefix + i.v1.toString();
-        }
-      }).toString(System.lineSeparator());
+    String error = SystemUtils.LINE_SEPARATOR;
+
+    int count = 0;
+    for (Object mismatch: mismatches.values()) {
+      String errPrefix = String.valueOf(count++) + " - ";
+      if (mismatch instanceof Throwable) {
+        error += errPrefix + exceptionMessage((Throwable) mismatch, errPrefix.length());
+      } else if (mismatch instanceof Map) {
+        error += errPrefix + convertMapToErrorString((Map) mismatch);
+      } else {
+        error += errPrefix + mismatch.toString();
+      }
+      error += SystemUtils.LINE_SEPARATOR;
+    }
+
     return new AssertionError(error);
   }
 
@@ -88,12 +93,13 @@ public abstract class BaseTarget implements TestClassAwareTarget {
     String message = err.getMessage();
     if (message.contains("\n")) {
       String padString = StringUtils.leftPad("", prefixLength);
-      Tuple2<Optional<String>, Seq<String>> lines = Seq.of(message.split("\n")).splitAtHead();
-      return lines.v1.orElse("") + System.lineSeparator() + lines.v2.map(line -> padString + line)
-        .toString(System.lineSeparator());
-    } else {
-      return message;
+      String[] lines = message.split("\n");
+      message = lines[0] + SystemUtils.LINE_SEPARATOR;
+      for (int line = 1; line < lines.length; line++) {
+        message += padString + lines[line] + SystemUtils.LINE_SEPARATOR;
+      }
     }
+    return message;
   }
 
   private String convertMapToErrorString(Map mismatches) {
@@ -114,9 +120,12 @@ public abstract class BaseTarget implements TestClassAwareTarget {
   }
 
   private String mapToString(Map comparison) {
-    return comparison.entrySet().stream()
-      .map(e -> String.valueOf(((Map.Entry)e).getKey()) + " -> " + ((Map.Entry)e).getValue())
-      .collect(Collectors.joining(System.lineSeparator())).toString();
+    String map = "";
+    for (Object o: comparison.entrySet()) {
+      Map.Entry e = (Map.Entry) o;
+      map += String.valueOf(e.getKey()) + " -> " + e.getValue() + SystemUtils.LINE_SEPARATOR;
+    }
+    return map;
   }
 
   @Override

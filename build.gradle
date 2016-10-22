@@ -56,12 +56,12 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '3.5.0-beta.3'
-    targetCompatibility = '1.8'
-    sourceCompatibility = '1.8'
+    version = '2.5.0-beta.0'
+    targetCompatibility = '1.7'
+    sourceCompatibility = '1.7'
 
     tasks.withType(ScalaCompile) {
-        scalaCompileOptions.additionalParameters = ['-target:jvm-1.8']
+        scalaCompileOptions.additionalParameters = ['-target:jvm-1.7']
         configure(scalaCompileOptions.forkOptions) {
           memoryMaximumSize = '256m'
         }

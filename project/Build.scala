@@ -3,7 +3,7 @@ import sbt.Keys._
 import com.typesafe.sbt.pgp.PgpKeys._
 
 object Common {
-    def version = "3.5.0-beta.3"
+    def version = "2.5.0-beta.0"
 }
 
 object BuildSettings {
@@ -64,7 +64,7 @@ object BuildSettings {
     )
 
     val javacSettings = Seq(
-        scalacOptions += "-target:jvm-1.6"
+        scalacOptions += "-target:jvm-1.7"
     )
 
     val commonSettings = Defaults.defaultSettings ++ publishSettings ++ testSettings ++ javacSettings

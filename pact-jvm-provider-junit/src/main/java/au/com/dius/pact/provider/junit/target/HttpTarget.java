@@ -7,23 +7,23 @@ import au.com.dius.pact.provider.ProviderInfo;
 import au.com.dius.pact.provider.ProviderVerifier;
 import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.TargetRequestFilter;
-import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver;
-import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
-import org.apache.http.HttpRequest;
+import org.apache.commons.collections.Closure;
 import org.junit.runners.model.FrameworkMethod;
-import org.junit.runners.model.TestClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 /**
  * Out-of-the-box implementation of {@link Target},
  * that run {@link Interaction} against http service and verify response
  */
 public class HttpTarget extends BaseTarget {
+  private static final Logger LOGGER = LoggerFactory.getLogger(HttpTarget.class);
+
     private final String path;
     private final String host;
     private final int port;
@@ -159,13 +159,19 @@ public class HttpTarget extends BaseTarget {
       if (testClass != null) {
         final List<FrameworkMethod> methods = testClass.getAnnotatedMethods(TargetRequestFilter.class);
         if (!methods.isEmpty()) {
-          providerInfo.setRequestFilter((Consumer<HttpRequest>) httpRequest -> methods.forEach(method -> {
-            try {
-              method.invokeExplosively(testTarget, httpRequest);
-            } catch (Throwable t) {
-               throw new AssertionError("Request filter method " + method.getName() + " failed with an exception", t);
+          providerInfo.setRequestFilter(new Closure() {
+            @Override
+            public void execute(Object httpRequest) {
+              for (FrameworkMethod method : methods) {
+                try {
+                  method.invokeExplosively(testTarget, httpRequest);
+                } catch (Throwable t) {
+                  LOGGER.error("Request filter failed with an exception", t);
+                  throw new AssertionError("Request filter method " + method.getName() + " failed with an exception");
+                }
+              }
             }
-          }));
+          });
         }
       }
 

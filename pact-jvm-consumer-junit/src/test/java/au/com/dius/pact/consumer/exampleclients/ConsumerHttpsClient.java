@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.exampleclients;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.escape.Escaper;
 import com.google.common.net.UrlEscapers;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
@@ -12,11 +13,9 @@ import org.apache.http.message.BasicNameValuePair;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ConsumerHttpsClient {
     private static final String TESTREQHEADERVALUE = "testreqheadervalue";
@@ -43,13 +42,21 @@ public class ConsumerHttpsClient {
   }
 
     private List<NameValuePair> parseQueryString(String queryString) {
-        return Arrays.asList(queryString.split("&")).stream().map(s -> s.split("="))
-                .map(p -> new BasicNameValuePair(p[0], p[1])).collect(Collectors.toList());
+      ArrayList<NameValuePair> queryParameters = new ArrayList<NameValuePair>();
+      for (String query: queryString.split("&")) {
+        String[] keyValue = query.split("=");
+        queryParameters.add(new BasicNameValuePair(keyValue[0], keyValue[1]));
+      }
+      return queryParameters;
     }
 
     private String encodePath(String path) {
-        return Arrays.asList(path.split("/"))
-                .stream().map(UrlEscapers.urlPathSegmentEscaper()::escape).collect(Collectors.joining("/"));
+      List<String> pathFragments = new ArrayList<String>();
+      Escaper escaper = UrlEscapers.urlPathSegmentEscaper();
+      for (String pathFragment: path.split("/")) {
+        pathFragments.add(escaper.escape(pathFragment));
+      }
+      return StringUtils.join(pathFragments, "/");
     }
 
   public List getAsList(String path) throws IOException {

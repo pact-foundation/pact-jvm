@@ -10,6 +10,7 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
+import com.google.common.base.Predicate;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -18,6 +19,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,10 +31,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.StreamSupport;
 
 import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseExpressions;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Out-of-the-box implementation of {@link PactLoader} that downloads pacts from Pact broker
@@ -50,7 +50,12 @@ public class PactBrokerLoader implements PactLoader {
     private final List<String> pactBrokerTags;
 
     private final Retryer<HttpResponse> retryer = RetryerBuilder.<HttpResponse>newBuilder()
-            .retryIfResult(response -> response.getStatusLine().getStatusCode() >= 500)
+            .retryIfResult(new Predicate<HttpResponse>() {
+                @Override
+                public boolean apply(@Nullable HttpResponse response) {
+                    return response.getStatusLine().getStatusCode() >= 500;
+                }
+            })
             .withWaitStrategy(WaitStrategies.exponentialWait(100, 1, TimeUnit.SECONDS))
             .withStopStrategy(StopStrategies.stopAfterDelay(5000))
             .build();
@@ -92,11 +97,16 @@ public class PactBrokerLoader implements PactLoader {
       } else {
         uriBuilder.setPath(MessageFormat.format(PACT_URL_PATTERN_WITH_TAG, providerName, tag));
       }
-      URI brokerUri = uriBuilder.build();
+      final URI brokerUri = uriBuilder.build();
       if (httpResponseCallable == null) {
-        httpResponse = retryer.call(() -> Request.Get(brokerUri)
-          .setHeader(HttpHeaders.ACCEPT, "application/hal+json")
-          .execute().returnResponse());
+        httpResponse = retryer.call(new Callable<HttpResponse>() {
+          @Override
+          public HttpResponse call() throws Exception {
+            return Request.Get(brokerUri)
+              .setHeader(HttpHeaders.ACCEPT, "application/hal+json")
+              .execute().returnResponse();
+          }
+        });
       } else {
         httpResponse = retryer.call(httpResponseCallable);
       }
@@ -115,12 +125,13 @@ public class PactBrokerLoader implements PactLoader {
                 "\n payload: '" + IOUtils.toString(httpResponse.getEntity().getContent()) + "'");
     }
 
-    final JsonNode fullList = OBJECT_MAPPER.readTree(httpResponse.getEntity().getContent());
-    return StreamSupport.stream(fullList.path("_links").path("pacts").spliterator(), false)
-            .map(jsonNode -> jsonNode.get("href").asText())
-            .map(PactReader::loadPact)
-            .map(obj -> (Pact) obj)
-            .collect(toList());
+      final JsonNode fullList = OBJECT_MAPPER.readTree(httpResponse.getEntity().getContent());
+      JsonNode path = fullList.path("_links").path("pacts");
+      List<Pact> pacts = new ArrayList<>();
+      for (JsonNode jsonNode: path) {
+          pacts.add(PactReader.loadPact(jsonNode.get("href").asText()));
+      }
+      return pacts;
   }
 
   public Callable<HttpResponse> getHttpResponseCallable() {

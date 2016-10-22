@@ -14,6 +14,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -91,7 +92,7 @@ public class WildcardKeysTest {
       List variants = (List) article.get("variants");
       assertThat(variants.size(), is(1));
       Map<String, Object> variant = (Map<String, Object>) variants.get(0);
-      assertThat(variant.keySet(), is(equalTo(Sets.newHashSet("001"))));
+      assertThat(variant.keySet(), is(equalTo((Set<String>) Sets.newHashSet("001"))));
       List variant001 = (List) variant.get("001");
       assertThat(variant001.size(), is(1));
       Map<String, Object> firstVariant001 = (Map<String, Object>) variant001.get(0);
@@ -99,7 +100,7 @@ public class WildcardKeysTest {
       List bundles = (List) firstVariant001.get("bundles");
       assertThat(bundles.size(), is(1));
       Map<String, Object> bundle = (Map<String, Object>) bundles.get(0);
-      assertThat(bundle.keySet(), is(equalTo(Sets.newHashSet("001-A"))));
+      assertThat(bundle.keySet(), is(equalTo((Set<String>) Sets.newHashSet("001-A"))));
       Map<String, Object> bundle001A = (Map<String, Object>) bundle.get("001-A");
       assertThat(bundle001A.get("description").toString(), is("Some Description"));
       assertThat(bundle001A, hasKey("referencedArticles"));

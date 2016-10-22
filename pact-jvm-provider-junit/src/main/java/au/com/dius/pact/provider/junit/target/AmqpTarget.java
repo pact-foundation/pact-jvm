@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.junit.target;
 
 import au.com.dius.pact.model.Interaction;
+import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.PactVerification;
 import au.com.dius.pact.provider.ProviderInfo;
@@ -10,21 +11,25 @@ import au.com.dius.pact.provider.junit.loader.PactBroker;
 import au.com.dius.pact.provider.junit.loader.PactFolder;
 import au.com.dius.pact.provider.junit.loader.PactFolderLoader;
 import org.codehaus.groovy.runtime.MethodClosure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Out-of-the-box implementation of {@link Target},
  * that run {@link Interaction} against message pact and verify response
  */
 public class AmqpTarget extends BaseTarget {
-    /**
+  private static final Logger LOGGER = LoggerFactory.getLogger(AmqpTarget.class);
+
+  /**
      * {@inheritDoc}
      */
     @Override
@@ -82,9 +87,13 @@ public class AmqpTarget extends BaseTarget {
       } else if (folder != null && folder.value() != null) {
         try {
           PactFolderLoader folderLoader = new PactFolderLoader(folder);
-          providerInfo.setConsumers(folderLoader.load(providerInfo.getName()).stream().map(pact -> new ConsumerInfo(pact.getConsumer().getName())).collect(Collectors.toList()));
+          List<ConsumerInfo> list = new ArrayList<>();
+          for (Pact pact: folderLoader.load(providerInfo.getName())) {
+            list.add(new ConsumerInfo(pact.getConsumer().getName()));
+          }
+          providerInfo.setConsumers(list);
         } catch (IOException e) {
-          e.printStackTrace();
+          LOGGER.warn("Failed to load pact files from " + folder.value(), e);
         }
       }
 

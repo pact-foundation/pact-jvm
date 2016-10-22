@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_METHOD_VALIDATOR;
 import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_VALIDATOR;
@@ -90,31 +89,33 @@ class InteractionRunner extends Runner {
     }
 
   private void validateStateChangeMethods(final Class<? extends Annotation> annotation, final boolean isStatic, final List<Throwable> errors) {
-    testClass.getAnnotatedMethods(annotation).forEach(method -> {
+    for (FrameworkMethod method: testClass.getAnnotatedMethods(annotation)) {
       method.validatePublicVoid(isStatic, errors);
       if (method.getMethod().getParameterCount() == 1 && !Map.class.isAssignableFrom(method.getMethod().getParameterTypes()[0])) {
         errors.add(new Exception("Method " + method.getName() + " should take only a single Map parameter"));
       } else if (method.getMethod().getParameterCount() > 1) {
         errors.add(new Exception("Method " + method.getName() + " should either take no parameters or a single Map parameter"));
       }
-    });
+    }
   }
 
   private void validateTargetRequestFilters(final List<Throwable> errors) {
-    testClass.getAnnotatedMethods(TargetRequestFilter.class)
-      .stream().forEach(method -> {
+    for (FrameworkMethod method : testClass.getAnnotatedMethods(TargetRequestFilter.class)) {
         method.validatePublicVoid(false, errors);
         if (method.getMethod().getParameterTypes().length != 1) {
           errors.add(new Exception("Method " + method.getName() + " should take only a single HttpRequest parameter"));
         } else if (!HttpRequest.class.isAssignableFrom(method.getMethod().getParameterTypes()[0])) {
           errors.add(new Exception("Method " + method.getName() + " should take only a single HttpRequest parameter"));
         }
-      });
+    }
   }
 
-  protected void validatePublicVoidNoArgMethods(final Class<? extends Annotation> annotation, final boolean isStatic, final List<Throwable> errors) {
-    testClass.getAnnotatedMethods(annotation).stream().forEach(method -> method.validatePublicVoidNoArg(isStatic, errors));
-  }
+    protected void validatePublicVoidNoArgMethods(final Class<? extends Annotation> annotation, final boolean isStatic,
+                                                  final List<Throwable> errors) {
+        for (FrameworkMethod method: testClass.getAnnotatedMethods(annotation)) {
+            method.validatePublicVoidNoArg(isStatic, errors);
+        }
+    }
 
     protected void validateConstructor(final List<Throwable> errors) {
         if (!hasOneConstructor()) {
@@ -205,10 +206,13 @@ class InteractionRunner extends Runner {
         if (!interaction.getProviderStates().isEmpty()) {
           Statement stateChange = statement;
           for (ProviderState state: interaction.getProviderStates()) {
-            stateChange = new RunStateChanges(stateChange,
-              testClass.getAnnotatedMethods(State.class)
-                .stream().filter(ann -> ArrayUtils.contains(ann.getAnnotation(State.class).value(), state.getName()))
-                .collect(Collectors.toList()), target, state);
+            List<FrameworkMethod> validStates = new ArrayList<>();
+            for (FrameworkMethod method: testClass.getAnnotatedMethods(State.class)) {
+              if (ArrayUtils.contains(method.getAnnotation(State.class).value(), state.getName())) {
+                validStates.add(method);
+              }
+            }
+            stateChange = new RunStateChanges(stateChange, validStates, target, state);
           }
           return stateChange;
         } else {

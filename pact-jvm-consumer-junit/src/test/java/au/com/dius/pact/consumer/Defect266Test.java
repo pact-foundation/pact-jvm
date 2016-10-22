@@ -19,6 +19,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,13 +48,13 @@ public class Defect266Test {
       .toFragment();
     MatchingRules matchingRules = pactFragment.interactions().head().getResponse().getMatchingRules();
     Map<String, List<MatchingRule>> bodyMatchingRules = matchingRules.rulesForCategory("body").getMatchingRules();
-    assertThat(bodyMatchingRules.keySet(), is(equalTo(Sets.newHashSet("$[0][*].userName", "$[0][*].id", "$[0]",
+    assertThat(bodyMatchingRules.keySet(), is(equalTo((Set<String>) Sets.newHashSet("$[0][*].userName", "$[0][*].id", "$[0]",
       "$[0][*].email"))));
-    assertThat(bodyMatchingRules.get("$[0][*].userName").get(0), is(equalTo(new TypeMatcher())));
+    assertThat(bodyMatchingRules.get("$[0][*].userName").get(0), is(equalTo((MatchingRule) new TypeMatcher())));
     assertThat(bodyMatchingRules.get("$[0][*].id").get(0),
-      is(equalTo(new RegexMatcher("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))));
-    assertThat(bodyMatchingRules.get("$[0]").get(0), is(equalTo(new MaxTypeMatcher(5))));
-    assertThat(bodyMatchingRules.get("$[0][*].email").get(0), is(equalTo(new TypeMatcher())));
+      is(equalTo((MatchingRule) new RegexMatcher("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))));
+    assertThat(bodyMatchingRules.get("$[0]").get(0), is(equalTo((MatchingRule) new MaxTypeMatcher(5))));
+    assertThat(bodyMatchingRules.get("$[0][*].email").get(0), is(equalTo((MatchingRule) new TypeMatcher())));
     return pactFragment;
   }
 
@@ -75,13 +76,13 @@ public class Defect266Test {
       .toFragment();
     MatchingRules matchingRules = pactFragment.interactions().head().getResponse().getMatchingRules();
     Map<String, List<MatchingRule>> bodyMatchingRules = matchingRules.rulesForCategory("body").getMatchingRules();
-    assertThat(bodyMatchingRules.keySet(), is(equalTo(Sets.newHashSet("$[0][*].userName", "$[0][*].id", "$[0]",
+    assertThat(bodyMatchingRules.keySet(), is(equalTo((Set<String>) Sets.newHashSet("$[0][*].userName", "$[0][*].id", "$[0]",
       "$[0][*].email"))));
-    assertThat(bodyMatchingRules.get("$[0][*].userName").get(0), is(equalTo(new TypeMatcher())));
+    assertThat(bodyMatchingRules.get("$[0][*].userName").get(0), is(equalTo((MatchingRule) new TypeMatcher())));
     assertThat(bodyMatchingRules.get("$[0][*].id").get(0),
-      is(equalTo(new RegexMatcher("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))));
-    assertThat(bodyMatchingRules.get("$[0]").get(0), is(equalTo(new MinTypeMatcher(5))));
-    assertThat(bodyMatchingRules.get("$[0][*].email").get(0), is(equalTo(new TypeMatcher())));
+      is(equalTo((MatchingRule) new RegexMatcher("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))));
+    assertThat(bodyMatchingRules.get("$[0]").get(0), is(equalTo((MatchingRule) new MinTypeMatcher(5))));
+    assertThat(bodyMatchingRules.get("$[0][*].email").get(0), is(equalTo((MatchingRule) new TypeMatcher())));
     return pactFragment;
   }
 

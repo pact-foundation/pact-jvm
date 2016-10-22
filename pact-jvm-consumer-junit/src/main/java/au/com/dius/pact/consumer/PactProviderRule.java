@@ -5,17 +5,19 @@ import au.com.dius.pact.model.MockHttpsProviderConfig;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
+import au.com.dius.pact.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.net.SocketException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * A junit rule that wraps every test annotated with {@link PactVerification}.
@@ -25,6 +27,7 @@ import java.util.Optional;
  * If no host is given, it will default to localhost. If no port is given, it will default to a random port.
  */
 public class PactProviderRule extends ExternalResource {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PactProviderRule.class);
 
     private static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
     private final String provider;
@@ -120,19 +123,22 @@ public class PactProviderRule extends ExternalResource {
                 }
 
                 Map<String, PactFragment> pacts = getPacts(pactDef.fragment());
-                Optional<PactFragment> fragment;
+                PactFragment fragment = null;
                 if (pactDef.value().length == 1 && StringUtils.isEmpty(pactDef.value()[0])) {
-                    fragment = pacts.values().stream().findFirst();
+                    fragment = pacts.values().iterator().next();
                 } else {
-                    fragment = Arrays.asList(pactDef.value()).stream().map(pacts::get)
-                            .filter(p -> p != null).findFirst();
+                    for (String provider: pactDef.value()) {
+                        if (fragment == null && pacts.containsKey(provider)) {
+                            fragment = pacts.get(provider);
+                        }
+                    }
                 }
-                if (!fragment.isPresent()) {
+                if (fragment == null) {
                     base.evaluate();
                     return;
                 }
 
-                VerificationResult result = runPactTest(base, fragment.get());
+                VerificationResult result = runPactTest(base, fragment);
                 validateResult(result, pactDef);
             }
         };
@@ -166,15 +172,19 @@ public class PactProviderRule extends ExternalResource {
 
     private Optional<PactVerification> findPactVerification(PactVerifications pactVerifications) {
         PactVerification[] pactVerificationValues = pactVerifications.value();
-        return Arrays.stream(pactVerificationValues).filter(p -> {
-            String[] providers = p.value();
+        Optional<PactVerification> result = Optional.empty();
+        for (PactVerification verification: pactVerificationValues) {
+            String[] providers = verification.value();
             if (providers.length != 1) {
                 throw new IllegalArgumentException(
-                        "Each @PactVerification must specify one and only provider when using @PactVerifications");
+                  "Each @PactVerification must specify one and only provider when using @PactVerifications");
             }
             String provider = providers[0];
-            return provider.equals(this.provider);
-        }).findFirst();
+            if (provider.equals(this.provider)) {
+                result = Optional.of(verification);
+            }
+        }
+        return result;
     }
 
     private Optional<Method> findPactMethod(PactVerification pactVerification) {
@@ -245,6 +255,7 @@ public class PactProviderRule extends ExternalResource {
                         try {
                             fragments.put(provider, (PactFragment) m.invoke(target, dslBuilder));
                         } catch (Exception e) {
+                            LOGGER.error("Failed to invoke pact method", e);
                             throw new RuntimeException("Failed to invoke pact method", e);
                         }
                     }

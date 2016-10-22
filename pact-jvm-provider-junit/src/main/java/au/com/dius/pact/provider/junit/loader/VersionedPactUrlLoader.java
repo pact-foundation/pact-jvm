@@ -4,12 +4,11 @@ import au.com.dius.pact.model.Pact;
 import com.google.common.annotations.VisibleForTesting;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
-import static java.util.Arrays.stream;
 
 /**
  * Implementation of {@link PactLoader} that downloads pacts from given urls containing versions to be filtered in from system properties.
@@ -35,10 +34,11 @@ public class VersionedPactUrlLoader implements PactLoader {
 
     @VisibleForTesting
     static String[] expandVariables(String[] urls) throws IOException {
-        return stream(urls)
-                .map(VersionedPactUrlLoader::expandVariables)
-                .collect(Collectors.toList())
-                .toArray(new String[urls.length]);
+        List<String> list = new ArrayList<>();
+        for (String url: urls) {
+          list.add(expandVariables(url));
+        }
+        return list.toArray(new String[urls.length]);
     }
 
     private static String expandVariables(String urlWithVariables) {
