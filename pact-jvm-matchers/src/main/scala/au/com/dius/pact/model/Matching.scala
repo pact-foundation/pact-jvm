@@ -1,7 +1,5 @@
 package au.com.dius.pact.model
 
-import java.util.Optional
-
 import au.com.dius.pact.matchers._
 import au.com.dius.pact.model.RequestPartMismatch._
 import au.com.dius.pact.model.ResponsePartMismatch._
