@@ -1,5 +1,29 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.4.17 - Bugfix Release
+
+* 470d4d6 - Merge branch 'master' into v2.x (Ronald Holshausen, Sat Oct 22 17:38:58 2016 +1100)
+* c17d806 - Updated readme with supported JDK versions (Ronald Holshausen, Sat Oct 22 17:36:05 2016 +1100)
+* 54b3b79 - Merge branch 'master' into v2.x (Ronald Holshausen, Sat Oct 22 17:26:42 2016 +1100)
+* a87f0fb - handle 409 text response when the publish to the broker fails #328 (Ronald Holshausen, Sat Oct 22 16:31:01 2016 +1100)
+* 361b428 - If the mock server fails to start, throw an appropriate error #334 (Ronald Holshausen, Sat Oct 22 15:21:50 2016 +1100)
+* dc17f17 - Merge pull request #337 from raceconditions/master (Ronald Holshausen, Sat Oct 22 14:45:42 2016 +1100)
+* 135d527 - Fixed a defect with merging pacts from different fragments #338 (Ronald Holshausen, Sat Oct 22 14:39:22 2016 +1100)
+* 8c6f6c6 - Updated READMEs to include updates for JUnit MessageContracts. (Travis Miller, Thu Oct 20 12:03:07 2016 -0400)
+* b56db87 - Added support for MessageContract to pact-jvm-provider-junit via new AmqpTarget.  Abstracted a BaseTarget to be shared between HttpTarget and AmqpTarget, and updated existing code to reference interfaces rather than implementations. (Travis Miller, Thu Oct 20 08:57:42 2016 -0400)
+* 1f8ca88 - Merge pull request #331 from lordofthejars/issue-330 (Ronald Holshausen, Wed Oct 19 20:00:46 2016 +1100)
+* 37beb2f - Add converter from single quote to double quotes (Alex Soto, Mon Oct 17 12:35:23 2016 +0200)
+* 8269e46 - Add java.util.functional.Supplier as supplier of a body (Alex Soto, Mon Oct 17 10:28:18 2016 +0200)
+* 6dccf7a - Add headers method with var-args (Alex Soto, Mon Oct 17 09:49:08 2016 +0200)
+* 1c90746 - correctly convert the state change URL in the lein plugin #322 (Ronald Holshausen, Sun Oct 16 15:20:21 2016 +1100)
+* 720af87 - Allow the provider port to be specified with a closure #325 (Ronald Holshausen, Sun Oct 16 12:48:20 2016 +1100)
+* 2324ad0 - added readme note about loading pacts from an S3 bucket (Ronald Holshausen, Sat Oct 15 15:38:47 2016 +1100)
+* 58a49d7 - enable provider verification to load pact files from S3 buckets (Ronald Holshausen, Sat Oct 15 15:30:15 2016 +1100)
+* 1a828e4 - update changelog for release 2.4.16 (Ronald Holshausen, Sat Oct 1 21:34:18 2016 +1000)
+* 1513b15 - bump version to 3.3.2 (Ronald Holshausen, Sun Oct 2 15:16:03 2016 +1100)
+* 871aa4d - update changelog for release 3.3.1 (Ronald Holshausen, Sun Oct 2 14:45:35 2016 +1100)
+* 98c0961 - bump version to 2.4.17 (Ronald Holshausen, Sun Oct 2 09:58:46 2016 +1100)
+
 # 3.3.1 - Bugfix + Small Feature
 
 * 37b05f4 - fix codenarc (Ronald Holshausen, Fri Sep 30 13:56:53 2016 +1000)
