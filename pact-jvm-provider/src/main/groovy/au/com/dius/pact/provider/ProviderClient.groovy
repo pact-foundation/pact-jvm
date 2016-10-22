@@ -182,12 +182,8 @@ class ProviderClient {
     private HttpRequest newRequest(Request request) {
         def urlBuilder = new URIBuilder()
         urlBuilder.scheme = provider.protocol
-        if (provider.host instanceof Closure) {
-            urlBuilder.host = provider.host.call()
-        } else {
-            urlBuilder.host = provider.host
-        }
-        urlBuilder.port = provider.port
+        urlBuilder.host = invokeIfClosure(provider.host)
+        urlBuilder.port = convertToInteger(invokeIfClosure(provider.port))
 
         String path = ''
         if (provider.path.size() > 0) {
@@ -229,7 +225,23 @@ class ProviderClient {
         }
     }
 
-    static boolean urlEncodedFormPost(Request request) {
+  static int convertToInteger(def port) {
+    if (port instanceof Number) {
+      port.intValue()
+    } else {
+      Integer.parseInt(port.toString())
+    }
+  }
+
+  private static invokeIfClosure(property) {
+    if (property instanceof Closure) {
+      property.call()
+    } else {
+      property
+    }
+  }
+
+  static boolean urlEncodedFormPost(Request request) {
         request.method.toLowerCase() == 'post' &&
                 request.mimeType() == ContentType.APPLICATION_FORM_URLENCODED.mimeType
     }

@@ -1,6 +1,8 @@
 package au.com.dius.pact.model
 
 import au.com.dius.pact.model.v3.messaging.MessagePact
+import com.amazonaws.services.s3.AmazonS3Client
+import com.amazonaws.services.s3.AmazonS3URI
 import com.github.zafarkhaja.semver.Version
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -155,8 +157,10 @@ class PactReader {
           new JsonSlurper().parse(source)
       } else if (source instanceof URL) {
         loadPactFromUrl(source, options)
-      } else if (source instanceof String && source ==~ '(https?|file)://.*') {
+      } else if (source instanceof String && source.toLowerCase() ==~ '(https?|file)://.*') {
         loadPactFromUrl(new URL(source), options)
+      } else if (source instanceof String && source.toLowerCase() ==~ 's3://.*') {
+        loadPactFromS3Bucket(source, options)
       } else if (source instanceof String && fileExists(source)) {
           new JsonSlurper().parse(source as File)
       } else {
@@ -169,6 +173,14 @@ class PactReader {
               e)
           }
       }
+  }
+
+  @SuppressWarnings('UnusedPrivateMethodParameter')
+  private static loadPactFromS3Bucket(String source, Map options) {
+    def s3Uri = new AmazonS3URI(source)
+    def client = s3Client()
+    def s3Pact = client.getObject(s3Uri.bucket, s3Uri.key)
+    new JsonSlurper().parse(s3Pact.objectContent)
   }
 
   @SuppressWarnings('DuplicateNumberLiteral')
@@ -196,5 +208,9 @@ class PactReader {
 
   private static boolean fileExists(String path) {
       new File(path).exists()
+  }
+
+  private static s3Client() {
+    new AmazonS3Client()
   }
 }

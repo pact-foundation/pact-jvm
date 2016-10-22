@@ -7,4 +7,5 @@ interface Interaction {
   String getDescription()
   String getProviderState()
   boolean conflictsWith(Interaction other)
+  String uniqueKey()
 }

@@ -57,6 +57,26 @@ public class PactDslRequestWithoutPath {
     }
 
     /**
+     * Headers to be included in the request
+     *
+     * @param firstHeaderName      The name of the first header
+     * @param firstHeaderValue     The value of the first header
+     * @param headerNameValuePairs Additional headers in name-value pairs.
+     */
+    public PactDslRequestWithoutPath headers(String firstHeaderName, String firstHeaderValue, String... headerNameValuePairs) {
+        if (headerNameValuePairs.length % 2 != 0) {
+            throw new IllegalArgumentException("Pair key value should be provided, but there is one key without value.");
+        }
+        requestHeaders.put(firstHeaderName, firstHeaderValue);
+
+        for (int i = 0; i < headerNameValuePairs.length; i+=2) {
+            requestHeaders.put(headerNameValuePairs[i], headerNameValuePairs[i+1]);
+        }
+
+        return this;
+    }
+
+    /**
      * The query string for the request
      *
      * @param query query string
@@ -94,6 +114,45 @@ public class PactDslRequestWithoutPath {
      */
     public PactDslRequestWithoutPath body(String body, ContentType mimeType) {
         return body(body, mimeType.toString());
+    }
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslRequestWithoutPath bodyWithSingleQuotes(String body) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body);
+    }
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslRequestWithoutPath bodyWithSingleQuotes(String body, String mimeType) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body, mimeType);
+    }
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslRequestWithoutPath bodyWithSingleQuotes(String body, ContentType mimeType) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body, mimeType);
     }
 
     /**

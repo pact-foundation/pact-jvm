@@ -80,7 +80,7 @@ pact {
 
 ## Specifying the provider hostname at runtime
 
-If you need to calculate the provider hostname at runtime, you can give a Closure as the provider host.
+If you need to calculate the provider hostname at runtime, you can give a closure as the provider host.
 
 ```groovy
 pact {
@@ -99,6 +99,8 @@ pact {
 
 }
 ```
+
+_Since version 3.3.2+/2.4.17+_ you can also give a closure as the provider port. 
 
 ## Specifying the pact file or URL at runtime [versions 3.2.7/2.4.9+]
 
@@ -184,6 +186,7 @@ pact {
 
 }
 ```
+
 ## Specifying a custom trust store [version 2.2.8+]
 
 For environments that are running their own certificate chains:
@@ -470,6 +473,31 @@ pact {
 
 }
 ```
+
+## Verifying pact files from a S3 bucket [version 3.3.2+/2.4.17+]
+
+Pact files stored in an S3 bucket can be verified by using an S3 URL to the pact file. I.e.,
+
+```groovy
+pact {
+
+    serviceProviders {
+
+        provider1 {
+
+            hasPactWith('consumer1') {
+                pactFile = 's3://bucketname/path/to/provider1-consumer1-pact.json'
+            }
+
+        }
+
+    }
+
+}
+```
+
+**NOTE:** you can't use the `url` function with S3 URLs, as the URL and URI classes from the Java SDK
+ don't support URLs with the s3 scheme.
 
 # Publishing pact files to a pact broker [version 2.2.7+]
 

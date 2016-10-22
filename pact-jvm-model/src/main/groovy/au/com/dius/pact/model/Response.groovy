@@ -18,7 +18,7 @@ class Response implements HttpPart {
       status = map.status as Integer
       headers = map.headers
       body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
-      matchingRules = map.matchingRules
+      matchingRules = map.matchingRules ?: [:]
       it
     }
   }
@@ -33,7 +33,7 @@ class Response implements HttpPart {
       status = r.status
       headers = r.headers ? [:] + r.headers : null
       body = r.body
-      matchingRules = r.matchingRules ? [:] + r.matchingRules : null
+      matchingRules = r.matchingRules ? [:] + r.matchingRules : [:]
       it
     }
   }

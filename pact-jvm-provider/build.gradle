@@ -16,9 +16,14 @@ dependencies {
         exclude group: 'org.codehaus.groovy'
     }
     testCompile "cglib:cglib:${project.cglibVersion}"
+    testCompile project(":pact-jvm-consumer-groovy_${project.scalaVersion}")
 }
 
 compileTestGroovy.dependsOn 'compileTestScala'
 
 sourceSets.main.java.srcDirs = []
 sourceSets.main.groovy.srcDirs += ["src/main/java"]
+
+test {
+  systemProperties['pact.rootDir'] = "$buildDir/pacts"
+}

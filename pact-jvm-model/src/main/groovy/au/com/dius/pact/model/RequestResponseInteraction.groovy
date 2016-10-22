@@ -13,6 +13,7 @@ class RequestResponseInteraction implements Interaction {
   Request request
   Response response
 
+  @Override
   String toString() {
     "Interaction: $description\n\tin state ${displayState()}\nrequest:\n$request\n\nresponse:\n$response"
   }
@@ -25,9 +26,15 @@ class RequestResponseInteraction implements Interaction {
     }
   }
 
+  @Override
   boolean conflictsWith(Interaction other) {
     description == other.description &&
       providerState == other.providerState &&
       (request != other.request || response != other.response)
+  }
+
+  @Override
+  String uniqueKey() {
+    "${displayState()}_$description"
   }
 }

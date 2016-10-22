@@ -7,14 +7,16 @@ import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.Provider
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import groovy.transform.Canonical
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 
 /**
  * Pact implementing V3 version of the spec
  */
 @Slf4j
-@Canonical
+@ToString(includeSuperProperties = true)
+@EqualsAndHashCode(callSuper = true)
 abstract class V3Pact extends BasePact {
 
   protected V3Pact(Provider provider, Consumer consumer, Map metadata) {
