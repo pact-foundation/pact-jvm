@@ -1,5 +1,7 @@
 package au.com.dius.pact.consumer
 
+import java.net.SocketException
+
 import au.com.dius.pact.model.{Pact, PactSpecVersion}
 
 import scala.util.{Failure, Success, Try}
@@ -29,7 +31,8 @@ class ConsumerPactRunner(server: MockProvider) {
     val tryResults = server.runAndClose(pact)(userCode)
     tryResults match {
       case Failure(e) =>
-        if (server.session.remainingResults.allMatched) PactError(e)
+        if (e.isInstanceOf[SocketException]) PactError(new MockServerException("Failed to start mock server: " + e.getMessage, e))
+        else if (server.session.remainingResults.allMatched) PactError(e)
         else PactMismatch(server.session.remainingResults, Some(e))
       case Success((codeResult, pactSessionResults)) =>
         userVerification(codeResult).fold(writeIfMatching(pact, pactSessionResults, pactVersion)) { error =>

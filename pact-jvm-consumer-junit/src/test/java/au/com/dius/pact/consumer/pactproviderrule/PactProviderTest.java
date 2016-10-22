@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 public class PactProviderTest {
 
     @Rule
-    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", this);
+    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", "localhost", 5050, this);
 
     @Pact(provider="test_provider", consumer="test_consumer")
     public PactFragment createFragment(PactDslWithProvider builder) {
