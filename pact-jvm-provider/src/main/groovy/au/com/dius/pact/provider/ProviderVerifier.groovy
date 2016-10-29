@@ -56,7 +56,7 @@ class ProviderVerifier {
   void runVerificationForConsumer(Map failures, ProviderInfo provider, ConsumerInfo consumer) {
     reportVerificationForConsumer(consumer, provider)
     def pact = loadPactFileForConsumer(consumer)
-    forEachInteraction(pact, this.&verifyInteraction.curry(provider, consumer, pact, failures))
+    forEachInteraction(pact, this.&verifyInteraction.curry(provider, consumer, failures))
   }
 
   void reportVerificationForConsumer(ConsumerInfo consumer, ProviderInfo provider) {
@@ -143,7 +143,7 @@ class ProviderVerifier {
     interaction.description ==~ callProjectGetProperty(PACT_FILTER_DESCRIPTION)
   }
 
-  void verifyInteraction(ProviderInfo provider, ConsumerInfo consumer, def pact, Map failures, def interaction) {
+  void verifyInteraction(ProviderInfo provider, ConsumerInfo consumer, Map failures, def interaction) {
     def interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name}" +
       " - ${interaction.description}"
 
@@ -167,7 +167,7 @@ class ProviderVerifier {
         verifyResponseFromProvider(provider, interaction, interactionMessage, failures)
       } else {
         log.debug('Verifying via annotated test method')
-        verifyResponseByInvokingProviderMethods(pact, provider, consumer, interaction, interactionMessage, failures)
+        verifyResponseByInvokingProviderMethods(provider, consumer, interaction, interactionMessage, failures)
       }
 
       if (provider.stateChangeTeardown) {
@@ -313,9 +313,8 @@ class ProviderVerifier {
   }
 
   @SuppressWarnings(['ThrowRuntimeException', 'ParameterCount'])
-  void verifyResponseByInvokingProviderMethods(def pact, ProviderInfo providerInfo, ConsumerInfo consumer,
-                                               def interaction, String interactionMessage,
-                                               Map failures) {
+  void verifyResponseByInvokingProviderMethods(ProviderInfo providerInfo, ConsumerInfo consumer,
+                                               def interaction, String interactionMessage, Map failures) {
     try {
       def urls = projectClasspath()
       URLClassLoader loader = new URLClassLoader(urls, GroovyObject.classLoader)
@@ -345,7 +344,7 @@ class ProviderVerifier {
         throw new RuntimeException('No annotated methods were found for interaction ' +
           "'${interaction.description}'")
       } else {
-        if (pact instanceof MessagePact) {
+        if (interaction instanceof Message) {
           verifyMessagePact(providerMethods, interaction as Message, interactionMessage, failures)
         } else {
           def expectedResponse = interaction.response

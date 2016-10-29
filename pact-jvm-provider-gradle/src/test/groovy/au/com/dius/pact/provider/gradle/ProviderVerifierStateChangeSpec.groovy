@@ -1,11 +1,8 @@
 package au.com.dius.pact.provider.gradle
 
-import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.OptionalBody
-import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.RequestResponseInteraction
-import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderClient
@@ -116,28 +113,6 @@ class ProviderVerifierStateChangeSpec extends Specification {
     closureArgs == ['there is a state']
   }
 
-//  @Test
-//  void 'if the state change is a Gradle task, executes it in a sub-build'() {
-//    def closureArgs = []
-//    otherTask.doLast { closureArgs << it.providerState; println ">>> [$it.providerState]" }
-//    consumerMap.stateChange = otherTask
-//    providerVerifier.isBuildSpecificTask = { true }
-//    providerVerifier.executeBuildSpecificTask = pactVerificationTask.&executeStateChangeTask
-//    assert providerVerifier.stateChange(state, providerInfo, consumer()) == true
-//    assert makeStateChangeRequestArgs == []
-//    assert closureArgs == ['there is a state']
-//  }
-
-//  @Test
-//  void 'if the state change is a string that names a gradle providerVerifier, executes it in a sub-build'() {
-//    def closureArgs = []
-//    otherTask.doLast { closureArgs << it.providerState; println ">>> [$it.providerState]" }
-//    consumerMap.stateChange = 'otherTask'
-//    assert providerVerifier.stateChange(state, providerInfo, consumer()) == true
-//    assert makeStateChangeRequestArgs == []
-//    assert closureArgs == ['there is a state']
-//  }
-
   def 'if the state change is a string that is not handled by the other conditions, does nothing'() {
     given:
     consumerMap.stateChange = 'blah blah blah'
@@ -154,13 +129,12 @@ class ProviderVerifierStateChangeSpec extends Specification {
     given:
     def interaction = new RequestResponseInteraction('provider state test', 'state of the nation',
       new Request(), new Response(200, [:], OptionalBody.body('{}'), [:]))
-    def pact = new RequestResponsePact(new Provider('Bob'), new Consumer('Bobbie'), [interaction])
     def failures = [:]
     consumerMap.stateChange = 'http://localhost:2000/hello'
     providerInfo.stateChangeTeardown = true
 
     when:
-    providerVerifier.verifyInteraction(providerInfo, consumer(), pact, failures, interaction)
+    providerVerifier.verifyInteraction(providerInfo, consumer(), failures, interaction)
 
     then:
     makeStateChangeRequestArgs == [
@@ -178,12 +152,11 @@ class ProviderVerifierStateChangeSpec extends Specification {
     }
     def interaction = new RequestResponseInteraction('provider state test', 'state of the nation',
       new Request(), new Response(200, [:], OptionalBody.body('{}'), [:]))
-    def pact = new RequestResponsePact(new Provider('Bob'), new Consumer('Bobbie'), [interaction])
     def failures = [:]
     providerInfo.stateChangeTeardown = true
 
     when:
-    providerVerifier.verifyInteraction(providerInfo, consumer(), pact, failures, interaction)
+    providerVerifier.verifyInteraction(providerInfo, consumer(), failures, interaction)
 
     then:
     makeStateChangeRequestArgs == []
