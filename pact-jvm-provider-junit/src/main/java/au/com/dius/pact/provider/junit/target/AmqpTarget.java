@@ -10,7 +10,9 @@ import org.codehaus.groovy.runtime.MethodClosure;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,7 +20,19 @@ import java.util.Map;
  * that run {@link Interaction} against message pact and verify response
  */
 public class AmqpTarget extends BaseTarget {
-    /**
+  private List<String> packagesToScan = Collections.emptyList();
+
+  public AmqpTarget() { }
+
+  /**
+   * Initialises the AMPQ target with the list of packages to scan
+   * @param packagesToScan List of JVM packages
+   */
+  public AmqpTarget(List<String> packagesToScan) {
+    this.packagesToScan = packagesToScan;
+  }
+
+  /**
      * {@inheritDoc}
      */
     @Override
@@ -68,6 +82,7 @@ public class AmqpTarget extends BaseTarget {
     Provider provider = testClass.getAnnotation(Provider.class);
     ProviderInfo providerInfo = new ProviderInfo(provider.value());
     providerInfo.setVerificationType(PactVerification.ANNOTATED_METHOD);
+    providerInfo.setPackagesToScan(packagesToScan);
     return providerInfo;
   }
 }

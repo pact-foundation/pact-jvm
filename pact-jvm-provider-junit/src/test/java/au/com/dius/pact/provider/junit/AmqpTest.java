@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Collections;
 
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
@@ -24,7 +25,7 @@ import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 @PactFolder("src/test/resources/amqp_pacts")
 public class AmqpTest {
   @TestTarget
-  public final Target target = new AmqpTarget();
+  public final Target target = new AmqpTarget(Collections.singletonList("au.com.dius.pact.provider.junit.*"));
 
   @PactVerifyProvider("a test message")
   public String verifyMessageForOrder() {
