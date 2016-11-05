@@ -214,6 +214,9 @@ For example:
 By default the paths loaded from the pact file will be decoded before the request is sent to the provider. To turn this
 behaviour off, set the system property `pact.verifier.disableUrlPathDecoding` to `true`.
 
+__*Important Note:*__ If you turn off the url path decoding, you need to ensure that the paths in the pact files are 
+correctly encoded. The verifier will not be able to make a request with an invalid encoded path.
+
 ## Plugin Properties
 
 The following plugin properties can be specified with `-Dproperty=value` on the command line or in the configuration section:
