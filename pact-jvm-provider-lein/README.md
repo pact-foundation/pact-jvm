@@ -133,6 +133,11 @@ The default HTTP client is used for all requests to providers (created with a ca
 This can be changed by specifying a function assigned to `:create-client` on the provider that returns a `CloseableHttpClient`.
 The function will receive the provider info as a parameter.
 
+## Turning off URL decoding of the paths in the pact file [version 3.3.3+]
+
+By default the paths loaded from the pact file will be decoded before the request is sent to the provider. To turn this
+behaviour off, set the system property `pact.verifier.disableUrlPathDecoding` to `true`.
+
 ## Plugin Properties
 
 The following plugin options can be specified on the command line:

@@ -210,12 +210,17 @@ class ProviderClient {
             }
         }
 
-        if(Boolean.getBoolean("disable.url.path.decoding"))
-            path += request.path
-        else
-            path += URLDecoder.decode(request.path, UTF8)
-
-        def urlBuilder = new URIBuilder(scheme+"://"+host+":"+port+path)
+        def urlBuilder = new URIBuilder()
+        if (systemPropertySet('pact.verifier.disableUrlPathDecoding')) {
+          path += request.path
+          urlBuilder = new URIBuilder("$scheme://$host:$port$path")
+        } else {
+          path += URLDecoder.decode(request.path, UTF8)
+          urlBuilder.scheme = provider.protocol
+          urlBuilder.host = invokeIfClosure(provider.host)
+          urlBuilder.port = convertToInteger(invokeIfClosure(provider.port))
+          urlBuilder.path = path
+        }
 
         if (request.query != null && !urlEncodedFormPost(request)) {
           request.query.each {
@@ -245,6 +250,11 @@ class ProviderClient {
                 return new HttpGet(url)
         }
     }
+
+  @SuppressWarnings('BooleanGetBoolean')
+  boolean systemPropertySet(String property) {
+    Boolean.getBoolean(property)
+  }
 
   static int convertToInteger(def port) {
     if (port instanceof Number) {

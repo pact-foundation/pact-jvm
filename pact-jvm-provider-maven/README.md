@@ -209,6 +209,11 @@ For example:
 </plugin>
 ```
 
+## Turning off URL decoding of the paths in the pact file [version 3.3.3+]
+
+By default the paths loaded from the pact file will be decoded before the request is sent to the provider. To turn this
+behaviour off, set the system property `pact.verifier.disableUrlPathDecoding` to `true`.
+
 ## Plugin Properties
 
 The following plugin properties can be specified with `-Dproperty=value` on the command line or in the configuration section:
