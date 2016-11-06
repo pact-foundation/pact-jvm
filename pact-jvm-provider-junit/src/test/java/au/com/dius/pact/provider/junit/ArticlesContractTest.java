@@ -34,4 +34,7 @@ public class ArticlesContractTest {
       onRequestTo("/articles.json"), giveResponse(json, "application/json")
     );
   }
+
+  @State("Pact for Issue 313")
+  public void stateChange() {}
 }

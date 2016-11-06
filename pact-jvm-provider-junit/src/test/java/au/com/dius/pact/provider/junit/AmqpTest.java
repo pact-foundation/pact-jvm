@@ -27,6 +27,9 @@ public class AmqpTest {
   @TestTarget
   public final Target target = new AmqpTarget(Collections.singletonList("au.com.dius.pact.provider.junit.*"));
 
+  @State("SomeProviderState")
+  public void someProviderState() {}
+
   @PactVerifyProvider("a test message")
   public String verifyMessageForOrder() {
     return "{\"testParam1\": \"value1\",\"testParam2\": \"value2\"}";
