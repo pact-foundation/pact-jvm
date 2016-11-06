@@ -1,5 +1,21 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.3.3 - Bugfix + small feature release
+
+* 191de47 - JUnit provider tests now fail if there is no state change method #345 (Ronald Holshausen, Sun Nov 6 13:39:37 2016 +1100)
+* 393429e - Validate the number of examnple against the min and max in the Java DSL #344 (Ronald Holshausen, Sun Nov 6 12:26:52 2016 +1100)
+* b1713cd - Add vararg convenience methods to PactDslJsonBody #343 (Ronald Holshausen, Sun Nov 6 11:40:49 2016 +1100)
+* af2e46c - Add a note to the readmes about paths needing to be correctly encoded when path decoding in the verifier is turned off #339 (Ronald Holshausen, Sat Nov 5 13:24:22 2016 +1100)
+* affae9c - Add a flag to turn off path decoding in the verifier request client #339 (Ronald Holshausen, Sat Nov 5 13:14:40 2016 +1100)
+* d7c6c72 - #339 Providing options for disabling the url path decoding (Nikhil Raman, Fri Nov 4 15:03:36 2016 +1100)
+* 47ffb3b - Fix for failing travis build where classpath scanning was blowing the memory limit (Ronald Holshausen, Sun Oct 30 10:22:50 2016 +1100)
+* f73b1e2 - Corrected the AmqpTarget which was incorrectly loading the pacts from the source a second time #341 (Ronald Holshausen, Sat Oct 29 17:09:41 2016 +1100)
+* 2ebefd0 - created an example JUnit test class with mutiple tests #342 (Ronald Holshausen, Sat Oct 29 16:03:20 2016 +1100)
+* 36e6ffc - update changelog for release 2.5.0-beta.0 (Ronald Holshausen, Sat Oct 22 23:49:15 2016 +1100)
+* f1443d5 - updated readme with latest versions (Ronald Holshausen, Sat Oct 22 22:19:14 2016 +1100)
+* 1818909 - bump version to 3.3.3 (Ronald Holshausen, Sat Oct 22 20:21:57 2016 +1100)
+* f5c268e - Update README.md (Ronald Holshausen, Sat Oct 22 19:55:21 2016 +1100)
+
 # 2.5.0-beta.0 - JDK 7 baseline branched from v3.5.x
 
 * 52db03f - removed Java 8 functional interfaces (Ronald Holshausen, Sat Oct 22 23:35:19 2016 +1100)
