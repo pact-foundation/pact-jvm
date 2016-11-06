@@ -117,6 +117,17 @@ public class PactDslJsonBody extends DslPart {
     }
 
     /**
+     * Attributes that can be any string
+     * @param names attribute names
+     */
+    public PactDslJsonBody stringType(String... names) {
+      for (String name: names) {
+        stringType(name);
+      }
+      return this;
+    }
+
+    /**
      * Attribute that can be any string
      * @param name attribute name
      * @param example example value to use for generated bodies
@@ -144,6 +155,17 @@ public class PactDslJsonBody extends DslPart {
     }
 
     /**
+     * Attributes that can be any number
+     * @param names attribute names
+     */
+    public PactDslJsonBody numberType(String... names) {
+      for (String name: names) {
+        numberType(name);
+      }
+      return this;
+    }
+
+    /**
      * Attribute that can be any number
      * @param name attribute name
      * @param number example number to use for generated bodies
@@ -160,6 +182,17 @@ public class PactDslJsonBody extends DslPart {
      */
     public PactDslJsonBody integerType(String name) {
         return integerType(name, Long.parseLong(RandomStringUtils.randomNumeric(9)));
+    }
+
+    /**
+     * Attributes that must be an integer
+     * @param names attribute names
+     */
+    public PactDslJsonBody integerType(String... names) {
+      for (String name: names) {
+        integerType(name);
+      }
+      return this;
     }
 
     /**
@@ -216,6 +249,17 @@ public class PactDslJsonBody extends DslPart {
   }
 
   /**
+   * Attributes that must be a decimal values
+   * @param names attribute names
+   */
+  public PactDslJsonBody decimalType(String... names) {
+    for (String name: names) {
+      decimalType(name);
+    }
+    return this;
+  }
+
+  /**
    * Attribute that must be a decimalType value
    * @param name attribute name
    * @param number example decimalType value
@@ -243,6 +287,17 @@ public class PactDslJsonBody extends DslPart {
      */
     public PactDslJsonBody booleanType(String name) {
         return booleanType(name, true);
+    }
+
+    /**
+     * Attributes that must be a boolean
+     * @param names attribute names
+     */
+    public PactDslJsonBody booleanType(String... names) {
+      for (String name: names) {
+        booleanType(name);
+      }
+      return this;
     }
 
     /**
