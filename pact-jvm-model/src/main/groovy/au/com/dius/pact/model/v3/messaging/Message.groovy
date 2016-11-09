@@ -36,14 +36,11 @@ class Message implements Interaction {
 
   Map toMap() {
     def map = [
-      description: description
+      description: description,
+      metaData: metaData
     ]
     if (!contents.missing) {
-      if (metaData.contentType == JSON) {
-        map.contents = new JsonSlurper().parseText(contents.value.toString())
-      } else {
-        map.contents = contentsAsBytes().encodeBase64().toString()
-      }
+      map.contents = formatContents()
     }
     if (providerState) {
       map.providerState = providerState
@@ -52,6 +49,14 @@ class Message implements Interaction {
       map.matchingRules = matchingRules
     }
     map
+  }
+
+  String formatContents() {
+    if (metaData.contentType == JSON) {
+      new JsonSlurper().parseText(contents.value.toString())
+    } else {
+      contentsAsBytes().encodeBase64().toString()
+    }
   }
 
   Message fromMap(Map map) {
@@ -80,7 +85,7 @@ class Message implements Interaction {
     if (other instanceof Message) {
       description == other.description &&
         providerState == other.providerState &&
-        contents != other.contents
+        formatContents() != other.formatContents()
     } else {
       false
     }
