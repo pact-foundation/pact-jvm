@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer
 
 import au.com.dius.pact.model.PactFragmentBuilder.PactWithAtLeastOneRequest
-import au.com.dius.pact.model.{MockProviderConfig, PactFragment, PactSpecVersion}
+import au.com.dius.pact.model._
 import org.specs2.execute.{AsResult, Failure, Result, Success}
 import org.specs2.specification.create.FragmentsFactory
 
@@ -46,14 +46,13 @@ trait PactSpec extends FragmentsFactory {
     }
   }
 
-  case class ConsumerTestFailed(r:Result) extends RuntimeException
+  case class ConsumerTestFailed(r: Result) extends RuntimeException
 
   def verify: ConsumerTestVerification[Result] = { r: Result =>
-    if(r.isSuccess) {
+    if (r.isSuccess) {
       None
     } else {
       Some(r)
     }
   }
-
 }
