@@ -7,6 +7,7 @@ import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget;
 import au.com.dius.pact.provider.junit.target.TestTarget;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpRequest;
 import org.junit.After;
 import org.junit.Before;
@@ -205,10 +206,15 @@ class InteractionRunner extends Runner {
         if (!interaction.getProviderStates().isEmpty()) {
           Statement stateChange = statement;
           for (ProviderState state: interaction.getProviderStates()) {
-            stateChange = new RunStateChanges(stateChange,
-              testClass.getAnnotatedMethods(State.class)
-                .stream().filter(ann -> ArrayUtils.contains(ann.getAnnotation(State.class).value(), state.getName()))
-                .collect(Collectors.toList()), target, state);
+            List<FrameworkMethod> methods = testClass.getAnnotatedMethods(State.class)
+              .stream().filter(ann -> ArrayUtils.contains(ann.getAnnotation(State.class).value(), state.getName()))
+              .collect(Collectors.toList());
+            if (methods.isEmpty()) {
+              return new Fail(new MissingStateChangeMethod("MissingStateChangeMethod: Did not find a test class method annotated with @State(\""
+                + state.getName() + "\")"));
+            } else {
+              stateChange = new RunStateChanges(stateChange, methods, target, state);
+            }
           }
           return stateChange;
         } else {

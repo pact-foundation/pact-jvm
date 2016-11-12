@@ -14,4 +14,5 @@ dependencies {
         exclude group: 'org.codehaus.groovy'
     }
     testCompile "cglib:cglib:${project.cglibVersion}"
+    testCompile 'org.apache.commons:commons-collections4:4.1'
 }

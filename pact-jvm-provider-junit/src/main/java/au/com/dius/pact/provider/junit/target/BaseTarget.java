@@ -24,15 +24,15 @@ import java.util.stream.Collectors;
  * that run {@link Interaction} against message pact and verify response
  */
 public abstract class BaseTarget implements TestClassAwareTarget {
-    protected TestClass testClass;
+  protected TestClass testClass;
   protected Object testTarget;
   protected ValueResolver valueResolver = new SystemPropertyResolver();
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public abstract void testInteraction(final String consumerName, final Interaction interaction);
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public abstract void testInteraction(final String consumerName, final Interaction interaction);
 
   abstract ProviderInfo getProviderInfo();
 

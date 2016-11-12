@@ -533,7 +533,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMaxLike(String name, Integer size) {
-    return null;
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -541,7 +541,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMaxLike(Integer size) {
-    return null;
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -549,7 +549,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMaxLike(String name, int numberExamples, Integer size) {
-    return null;
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -557,7 +557,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMaxLike(int numberExamples, Integer size) {
-    return null;
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -565,7 +565,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMinLike(String name, Integer size) {
-    return null;
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -573,7 +573,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMinLike(Integer size) {
-    return null;
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -581,7 +581,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMinLike(String name, int numberExamples, Integer size) {
-    return null;
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -589,7 +589,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMinLike(int numberExamples, Integer size) {
-    return null;
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**

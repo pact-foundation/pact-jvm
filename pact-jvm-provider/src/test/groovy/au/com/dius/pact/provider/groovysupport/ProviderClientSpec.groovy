@@ -36,7 +36,7 @@ class ProviderClientSpec extends Specification {
     ]
     httpClient = Mock CloseableHttpClient
     httpClientFactory = Mock HttpClientFactory
-    client = new ProviderClient(provider: provider, httpClientFactory: httpClientFactory)
+    client = GroovySpy(ProviderClient, constructorArgs: [[provider: provider, httpClientFactory: httpClientFactory]])
     httpRequest = Mock HttpRequest
     state = new ProviderState('provider state')
   }
@@ -328,6 +328,7 @@ class ProviderClientSpec extends Specification {
     client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
 
     then:
+    1 * client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
     0 * _
   }
 
@@ -339,6 +340,7 @@ class ProviderClientSpec extends Specification {
     client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
 
     then:
+    1 * client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
     1 * httpClientFactory.newClient(provider) >> httpClient
     1 * httpClient.execute({ it.method == 'POST' && it.requestLine.uri == stateChangeUrl })
     0 * _
@@ -352,6 +354,7 @@ class ProviderClientSpec extends Specification {
     client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
 
     then:
+    1 * client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
     1 * httpClientFactory.newClient(provider) >> httpClient
     1 * httpClient.execute({ it.method == 'POST' && it.requestLine.uri == stateChangeUrl.toString() })
     0 * _
@@ -371,6 +374,7 @@ class ProviderClientSpec extends Specification {
     client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
 
     then:
+    1 * client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
     1 * httpClientFactory.newClient(provider) >> httpClient
     1 * httpClient.execute({
       it.method == 'POST' && it.requestLine.uri == stateChangeUrl && it.entity.content.text == exepectedBody
@@ -387,6 +391,7 @@ class ProviderClientSpec extends Specification {
     client.makeStateChangeRequest(stateChangeUrl, state, false, true, true)
 
     then:
+    1 * client.makeStateChangeRequest(stateChangeUrl, state, false, true, true)
     1 * httpClientFactory.newClient(provider) >> httpClient
     1 * httpClient.execute({
       it.method == 'POST' && it.requestLine.uri == 'http://state.change:1244?state=state+one&a=a&b=1&action=setup'
@@ -476,6 +481,19 @@ class ProviderClientSpec extends Specification {
 
     then:
     thrown(NumberFormatException)
+  }
+
+  def 'does not decode the path if pact.verifier.disableUrlPathDecoding is set'() {
+    given:
+    def pactRequest = new Request()
+    pactRequest.path = '/tenants/tester%2Ftoken/jobs/external-id'
+    client.systemPropertySet('pact.verifier.disableUrlPathDecoding') >> true
+
+    when:
+    def request = client.newRequest(pactRequest)
+
+    then:
+    request.URI.toString() == 'http://localhost:8080/tenants/tester%2Ftoken/jobs/external-id'
   }
 
 }

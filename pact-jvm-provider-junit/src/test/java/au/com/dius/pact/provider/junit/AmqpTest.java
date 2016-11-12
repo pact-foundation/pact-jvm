@@ -1,10 +1,13 @@
 package au.com.dius.pact.provider.junit;
 
+import au.com.dius.pact.provider.PactVerifyProvider;
 import au.com.dius.pact.provider.junit.loader.PactFolder;
+import au.com.dius.pact.provider.junit.target.AmqpTarget;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
 import com.github.restdriver.clientdriver.ClientDriverRule;
+import groovy.json.JsonOutput;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -12,29 +15,23 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Collections;
 
-import static com.github.restdriver.clientdriver.RestClientDriver.giveEmptyResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 
 @RunWith(PactRunner.class)
-@Provider("ArticlesProvider")
-@PactFolder("../pact-jvm-consumer-junit/build/2.11/pacts")
-public class ArticlesContractTest {
+@Provider("AmqpProvider")
+@PactFolder("src/test/resources/amqp_pacts")
+public class AmqpTest {
   @TestTarget
-  public final Target target = new HttpTarget(8000);
+  public final Target target = new AmqpTarget(Collections.singletonList("au.com.dius.pact.provider.junit.*"));
 
-  @ClassRule
-  public static final ClientDriverRule embeddedService = new ClientDriverRule(8000);
+  @State("SomeProviderState")
+  public void someProviderState() {}
 
-  @Before
-  public void before() throws IOException {
-    String json = IOUtils.toString(getClass().getResourceAsStream("/articles.json"), Charset.defaultCharset());
-    embeddedService.addExpectation(
-      onRequestTo("/articles.json"), giveResponse(json, "application/json")
-    );
+  @PactVerifyProvider("a test message")
+  public String verifyMessageForOrder() {
+    return "{\"testParam1\": \"value1\",\"testParam2\": \"value2\"}";
   }
-
-  @State("Pact for Issue 313")
-  public void stateChange() {}
 }

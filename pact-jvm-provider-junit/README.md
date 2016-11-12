@@ -224,6 +224,14 @@ For example:
 __*Important Note:*__ You should only use this feature for things that can not be persisted in the pact file. By modifying
 the request, you are potentially modifying the contract from the consumer tests!
 
+#### Turning off URL decoding of the paths in the pact file [version 3.3.3+]
+
+By default the paths loaded from the pact file will be decoded before the request is sent to the provider. To turn this
+behaviour off, set the system property `pact.verifier.disableUrlPathDecoding` to `true`.
+
+__*Important Note:*__ If you turn off the url path decoding, you need to ensure that the paths in the pact files are 
+correctly encoded. The verifier will not be able to make a request with an invalid encoded path.
+
 ### Custom Test Target
 
 It's possible to use custom `Target`, for that interface `Target` should be implemented and this class can be used instead of `HttpTarget`.

@@ -84,13 +84,17 @@ abstract class BasePact implements Pact {
   void write(String pactDir) {
     def pactFile = fileForPact(pactDir)
 
-    def jsonMap = toMap(PactSpecVersion.V3)
     if (pactFile.exists()) {
-      jsonMap = mergePacts(jsonMap, pactFile)
+      def existingPact = PactReader.loadPact(pactFile)
+      def result = PactMerge.merge(existingPact, this)
+      if (!result.ok) {
+        throw new InvalidPactException(result.message)
+      }
     } else {
       pactFile.parentFile.mkdirs()
     }
 
+    def jsonMap = toMap(PactSpecVersion.V3)
     jsonMap.metadata = jsonMap.metadata ? jsonMap.metadata + DEFAULT_METADATA : DEFAULT_METADATA
     def json = JsonOutput.toJson(jsonMap)
     pactFile.withWriter { writer ->

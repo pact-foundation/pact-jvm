@@ -53,6 +53,11 @@ public class ContractWithCustomPactLoaderTest {
         LOGGER.info("Now service in default state");
     }
 
+    @State("state 2")
+    public void toState2() {
+        LOGGER.info("Now service in state 2");
+    }
+
     @TargetRequestFilter
     public void exampleRequestFilter(HttpRequest request) {
         LOGGER.info("exampleRequestFilter called: " + request);
