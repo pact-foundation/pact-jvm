@@ -58,7 +58,7 @@ You define all the providers and consumers within the configuration element of t
 </plugin>
 ```
 
-### 3. Execute `mvn au.com.dius:pact-jvm-provider-maven_2.11:verify`
+### 3. Execute `mvn pact:verify`
 
 You will have to have your provider running for this to pass.
 
@@ -450,7 +450,7 @@ For example:
     </configuration>
 </plugin>
 ```
-You can now execute `mvn au.com.dius:pact-jvm-provider-maven_2.11:publish` to publish the pact files.
+You can now execute `mvn pact:publish` to publish the pact files.
 
 _NOTE:_ The pact broker requires a version for all published pacts. The `publish` task will use the version of the
 project by default, but can be overwritten with the `projectVersion` property. Make sure you have set one otherwise the broker will reject the pact files.
