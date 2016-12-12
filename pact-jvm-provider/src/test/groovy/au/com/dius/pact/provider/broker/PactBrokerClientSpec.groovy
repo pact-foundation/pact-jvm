@@ -61,6 +61,43 @@ class PactBrokerClientSpec extends Specification {
     consumers.first().pactFileAuthentication == ['Basic', '1', '2']
   }
 
+  def 'fetches consumers with specified tag successfully'() {
+    given:
+    def halClient = GroovyMock(HalClient, global: true)
+    halClient.navigate(_, _) >> halClient
+    halClient.pacts(_) >> { args -> args.first().call([name: 'bob', href: 'http://bob.com/']) }
+
+    def client = GroovySpy(PactBrokerClient, global: true) {
+      newHalClient() >> halClient
+    }
+
+    when:
+    def consumers = client.fetchConsumersWithTag('provider', 'tag')
+
+    then:
+    consumers != []
+    consumers.first().name == 'bob'
+    consumers.first().pactFile == new URL('http://bob.com/')
+  }
+
+  def 'when fetching consumers with specified tag, sets the auth if there is any'() {
+    given:
+    def halClient = GroovyMock(HalClient, global: true)
+    halClient.navigate(_, _) >> halClient
+    halClient.pacts(_) >> { args -> args.first().call([name: 'bob', href: 'http://bob.com/']) }
+
+    def client = GroovySpy(PactBrokerClient, global: true) {
+      newHalClient() >> halClient
+    }
+    client.options.authentication = ['Basic', '1', '2']
+
+    when:
+    def consumers = client.fetchConsumersWithTag('provider', 'tag')
+
+    then:
+    consumers.first().pactFileAuthentication == ['Basic', '1', '2']
+  }
+
   def 'returns success when uploading a pact is ok'() {
     given:
     pactBroker {

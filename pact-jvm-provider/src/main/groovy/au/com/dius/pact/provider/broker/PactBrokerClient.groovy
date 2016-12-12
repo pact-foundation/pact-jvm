@@ -31,6 +31,20 @@ class PactBrokerClient {
     consumers
   }
 
+  List fetchConsumersWithTag(String provider, String tag) {
+    List consumers = []
+
+    HalClient halClient = newHalClient()
+      halClient.navigate('pb:latest-provider-pacts-with-tag', provider: provider, tag: tag).pacts { pact ->
+        consumers << new ConsumerInfo(pact.name, new URL(pact.href))
+      if (options.authentication) {
+        consumers.last().pactFileAuthentication = options.authentication
+      }
+    }
+
+    consumers
+  }
+
   private newHalClient() {
     new HalClient(pactBrokerUrl, options)
   }

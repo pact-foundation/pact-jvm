@@ -126,6 +126,21 @@ SbtProviderPlugin.config ++ Seq(
 )
 ```
 
+
+You can also verify all the latest pacts for a provider for all its consumer where pacts have a specified tag:
+
+
+```scala
+import au.com.dius.pact.provider.sbt._
+SbtProviderPlugin.config ++ Seq(
+  providers := Seq(
+    ProviderConfig(name = "Our Service")
+        .hasPactsFromPactBroker(new URL("http://pact-broker.local"), "tagName"))
+)
+```
+
+Working with tags requires pact-broker >= v1.12.0.
+
 ### Filtering the interactions that are verified
 
 You can filter the interactions that are run using three properties: `pact.filter.consumers`, `pact.filter.description` and `pact.filter.providerState`.
