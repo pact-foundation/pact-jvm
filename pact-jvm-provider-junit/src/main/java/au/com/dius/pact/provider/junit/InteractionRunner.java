@@ -193,8 +193,11 @@ class InteractionRunner extends Runner {
             final String state = interaction.getProviderState();
             final List<FrameworkMethod> onStateChange = new ArrayList<FrameworkMethod>();
             for (FrameworkMethod ann: testClass.getAnnotatedMethods(State.class)) {
-                if (ArrayUtils.contains(ann.getAnnotation(State.class).value(), state)) {
+                for(String annotationState : ann.getAnnotation(State.class).value()) {
+                  if(annotationState.equalsIgnoreCase(state)) {
                     onStateChange.add(ann);
+                    break;
+                  }
                 }
             }
             if (onStateChange.isEmpty()) {
