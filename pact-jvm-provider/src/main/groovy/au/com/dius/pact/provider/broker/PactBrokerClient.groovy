@@ -17,29 +17,41 @@ class PactBrokerClient {
   String pactBrokerUrl
   Map options = [:]
 
+  @SuppressWarnings('EmptyCatchBlock')
   List fetchConsumers(String provider) {
     List consumers = []
 
-    HalClient halClient = newHalClient()
-    halClient.navigate('pb:latest-provider-pacts', provider: provider).pacts { pact ->
-      consumers << new ConsumerInfo(pact.name, new URL(pact.href))
-      if (options.authentication) {
-        consumers.last().pactFileAuthentication = options.authentication
+    try {
+      HalClient halClient = newHalClient()
+      halClient.navigate('pb:latest-provider-pacts', provider: provider).pacts { pact ->
+        consumers << new ConsumerInfo(pact.name, new URL(pact.href))
+        if (options.authentication) {
+          consumers.last().pactFileAuthentication = options.authentication
+        }
       }
+    }
+    catch (NotFoundHalResponse e) {
+      // This means the provider is not defined in the broker, so fail gracefully.
     }
 
     consumers
   }
 
+  @SuppressWarnings('EmptyCatchBlock')
   List fetchConsumersWithTag(String provider, String tag) {
     List consumers = []
 
-    HalClient halClient = newHalClient()
+    try {
+      HalClient halClient = newHalClient()
       halClient.navigate('pb:latest-provider-pacts-with-tag', provider: provider, tag: tag).pacts { pact ->
         consumers << new ConsumerInfo(pact.name, new URL(pact.href))
-      if (options.authentication) {
-        consumers.last().pactFileAuthentication = options.authentication
+        if (options.authentication) {
+          consumers.last().pactFileAuthentication = options.authentication
+        }
       }
+    }
+    catch (NotFoundHalResponse e) {
+      // This means the provider is not defined in the broker, so fail gracefully.
     }
 
     consumers
