@@ -132,7 +132,7 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         return consumerInfo != null ? consumerInfo.value() : null;
     }
 
-    private String getProviderName(Class<?> clazz) throws InitializationError {
+    protected String getProviderName(Class<?> clazz) throws InitializationError {
         final Provider providerInfo = clazz.getAnnotation(Provider.class);
 
         if (providerInfo == null) {
