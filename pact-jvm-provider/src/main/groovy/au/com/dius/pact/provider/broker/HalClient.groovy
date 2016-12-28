@@ -96,7 +96,7 @@ class HalClient {
     def response = http.get(path: path, requestContentType: 'application/json',
       headers: [Accept: 'application/hal+json'])
     if (response.status == 404) {
-      throw new NotFoundHalResponse("404 Not Found response from the pact broker")
+      throw new NotFoundHalResponse('404 Not Found response from the pact broker')
     }
     def contentType = response.headers.'Content-Type'
     def headerParser = new BasicHeaderValueParser()

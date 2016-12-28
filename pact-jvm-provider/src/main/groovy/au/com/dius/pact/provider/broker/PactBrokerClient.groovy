@@ -17,6 +17,7 @@ class PactBrokerClient {
   String pactBrokerUrl
   Map options = [:]
 
+  @SuppressWarnings('EmptyCatchBlock')
   List fetchConsumers(String provider) {
     List consumers = []
 
@@ -36,6 +37,7 @@ class PactBrokerClient {
     consumers
   }
 
+  @SuppressWarnings('EmptyCatchBlock')
   List fetchConsumersWithTag(String provider, String tag) {
     List consumers = []
 
