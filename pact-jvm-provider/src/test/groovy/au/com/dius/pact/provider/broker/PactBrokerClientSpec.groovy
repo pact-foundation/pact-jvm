@@ -207,4 +207,27 @@ class PactBrokerClientSpec extends Specification {
     then:
     result == PactVerified$.MODULE$
   }
+
+  def 'handles non-json failure responses'() {
+    given:
+    pactBroker {
+      given('Non-JSON response')
+      uponReceiving('a pact publish request')
+      withAttributes(method: 'PUT',
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
+        body: pactContents
+      )
+      willRespondWith(status: 400, headers: ['Content-Type': 'text/plain'],
+        body: 'Enjoy this bit of text'
+      )
+    }
+
+    when:
+    def result = pactBroker.run {
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'FAILED! 400 Bad Request - Enjoy this bit of text'
+    }
+
+    then:
+    result == PactVerified$.MODULE$
+  }
 }

@@ -72,9 +72,13 @@ class PactBrokerClient {
 
       response.success = { resp -> resp.statusLine as String }
 
-      response.failure = { resp, json ->
-        def error = json?.errors?.join(', ') ?: 'Unknown error'
-        "FAILED! ${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${error}"
+      response.failure = { resp, body ->
+        if (body instanceof Reader) {
+          "FAILED! ${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${body.readLine()}"
+        } else {
+          def error = body?.errors?.join(', ') ?: 'Unknown error'
+          "FAILED! ${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${error}"
+        }
       }
 
       response.'409' = { resp, body ->
