@@ -61,6 +61,23 @@ class PactBrokerClientSpec extends Specification {
     consumers.first().pactFileAuthentication == ['Basic', '1', '2']
   }
 
+  def 'when fetching consumers for an unknown provider, returns an empty pacts list'() {
+    given:
+    def halClient = GroovyMock(HalClient, global: true)
+    halClient.navigate(_, _) >> halClient
+    halClient.pacts(_) >> { args -> throw new NotFoundHalResponse() }
+
+    def client = GroovySpy(PactBrokerClient, global: true) {
+      newHalClient() >> halClient
+    }
+
+    when:
+    def consumers = client.fetchConsumers('provider')
+
+    then:
+    consumers == []
+  }
+
   def 'fetches consumers with specified tag successfully'() {
     given:
     def halClient = GroovyMock(HalClient, global: true)
@@ -96,6 +113,23 @@ class PactBrokerClientSpec extends Specification {
 
     then:
     consumers.first().pactFileAuthentication == ['Basic', '1', '2']
+  }
+
+  def 'when fetching consumers with specified tag for an unknown provider, returns an empty pacts list'() {
+    given:
+    def halClient = GroovyMock(HalClient, global: true)
+    halClient.navigate(_, _) >> halClient
+    halClient.pacts(_) >> { args -> throw new NotFoundHalResponse() }
+
+    def client = GroovySpy(PactBrokerClient, global: true) {
+      newHalClient() >> halClient
+    }
+
+    when:
+    def consumers = client.fetchConsumersWithTag('provider', 'tag')
+
+    then:
+    consumers == []
   }
 
   def 'returns success when uploading a pact is ok'() {
