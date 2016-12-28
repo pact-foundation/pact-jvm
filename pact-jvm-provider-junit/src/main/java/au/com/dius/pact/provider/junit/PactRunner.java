@@ -56,11 +56,7 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
     public PactRunner(final Class<?> clazz) throws InitializationError {
         super(clazz);
 
-        final Provider providerInfo = clazz.getAnnotation(Provider.class);
-        if (providerInfo == null) {
-            throw new InitializationError("Provider name should be specified by using " + Provider.class.getName() + " annotation");
-        }
-        final String serviceName = providerInfo.value();
+        final String providerName = getProviderName(clazz);
 
         final String consumerName = getConsumerName(clazz);
 
@@ -69,7 +65,7 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         this.child = new ArrayList<>();
         final List<Pact> pacts;
         try {
-            pacts = getPactSource(testClass).load(serviceName).stream()
+            pacts = getPactSource(testClass).load(providerName).stream()
                   .filter(p -> consumerName == null || p.getConsumer().getName().equals(consumerName))
                   .collect(Collectors.toList());
         } catch (final IOException e) {
@@ -77,7 +73,7 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         }
 
         if (pacts == null || pacts.isEmpty()) {
-          throw new InitializationError("Did not find any pact files for provider " + providerInfo.value());
+          throw new InitializationError("Did not find any pact files for provider " + providerName);
         }
 
         for (final Pact pact : pacts) {
@@ -134,5 +130,15 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
     protected String getConsumerName(final Class<?> clazz) {
         final Consumer consumerInfo = clazz.getAnnotation(Consumer.class);
         return consumerInfo != null ? consumerInfo.value() : null;
+    }
+
+    private String getProviderName(Class<?> clazz) throws InitializationError {
+        final Provider providerInfo = clazz.getAnnotation(Provider.class);
+
+        if (providerInfo == null) {
+            throw new InitializationError("Provider name should be specified by using " + Provider.class.getName() + " annotation");
+        }
+
+        return providerInfo.value();
     }
 }
