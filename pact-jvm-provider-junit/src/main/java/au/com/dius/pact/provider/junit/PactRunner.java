@@ -62,8 +62,7 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         }
         final String serviceName = providerInfo.value();
 
-        final Consumer consumerInfo = clazz.getAnnotation(Consumer.class);
-        final String consumerName = consumerInfo != null ? consumerInfo.value() : null;
+        final String consumerName = getConsumerName(clazz);
 
         final TestClass testClass = new TestClass(clazz);
 
@@ -130,5 +129,10 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
             LOGGER.error("Error while creating pact source", e);
             throw new InitializationError(e);
         }
+    }
+
+    protected String getConsumerName(final Class<?> clazz) {
+        final Consumer consumerInfo = clazz.getAnnotation(Consumer.class);
+        return consumerInfo != null ? consumerInfo.value() : null;
     }
 }
