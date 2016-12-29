@@ -14,7 +14,7 @@ import org.apache.http.message.BasicHeaderValueParser
 class HalClient {
   private static final String ROOT = '/'
 
-  String baseUrl
+  def baseUrl
   Map options = [:]
   def http
   private pathInfo

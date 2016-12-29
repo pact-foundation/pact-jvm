@@ -14,11 +14,11 @@ import static groovyx.net.http.Method.PUT
 @Canonical
 class PactBrokerClient {
 
-  String pactBrokerUrl
+  def pactBrokerUrl
   Map options = [:]
 
   @SuppressWarnings('EmptyCatchBlock')
-  List fetchConsumers(String provider) {
+  List<ConsumerInfo> fetchConsumers(String provider) {
     List consumers = []
 
     try {
@@ -38,7 +38,7 @@ class PactBrokerClient {
   }
 
   @SuppressWarnings('EmptyCatchBlock')
-  List fetchConsumersWithTag(String provider, String tag) {
+  List<ConsumerInfo> fetchConsumersWithTag(String provider, String tag) {
     List consumers = []
 
     try {
