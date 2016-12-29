@@ -18,6 +18,7 @@ class HalClient {
   Map options = [:]
   def http
   private pathInfo
+  def lastUrl
 
   @SuppressWarnings('DuplicateNumberLiteral')
   private void setupHttpClient() {
@@ -42,6 +43,10 @@ class HalClient {
   private newHttpClient() {
     http = new RESTClient(baseUrl)
     http.parser.'application/hal+json' = http.parser.'application/json'
+    http.handler.'404' = {
+      throw new NotFoundHalResponse("404 Not Found response from the pact broker (URL: '${baseUrl}'," +
+        " LINK: '${lastUrl}')")
+    }
     http
   }
 
@@ -91,13 +96,11 @@ class HalClient {
   }
 
   private fetch(String path) {
+    lastUrl = path
     setupHttpClient()
     log.debug "Fetching: $path"
     def response = http.get(path: path, requestContentType: 'application/json',
       headers: [Accept: 'application/hal+json'])
-    if (response.status == 404) {
-      throw new NotFoundHalResponse('404 Not Found response from the pact broker')
-    }
     def contentType = response.headers.'Content-Type'
     def headerParser = new BasicHeaderValueParser()
     def headerElements = headerParser.parseElements(contentType as String, headerParser)
@@ -121,5 +124,9 @@ class HalClient {
       return matchingLink
     }
     throw new MissingMethodException(name, this.class, args)
+  }
+
+  String linkUrl(String name) {
+    pathInfo.'_links'[name]
   }
 }

@@ -4,6 +4,7 @@ import au.com.dius.pact.provider.ConsumerInfo
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import groovyx.net.http.HTTPBuilder
+import org.apache.commons.lang3.StringUtils
 
 import static groovyx.net.http.ContentType.JSON
 import static groovyx.net.http.Method.PUT
@@ -14,6 +15,9 @@ import static groovyx.net.http.Method.PUT
 @Canonical
 class PactBrokerClient {
 
+  private static final String LATEST_PROVIDER_PACTS = 'pb:latest-provider-pacts'
+  private static final String LATEST_PROVIDER_PACTS_WITH_TAG = 'pb:latest-provider-pacts-with-tag'
+
   def pactBrokerUrl
   Map options = [:]
 
@@ -23,7 +27,7 @@ class PactBrokerClient {
 
     try {
       HalClient halClient = newHalClient()
-      halClient.navigate('pb:latest-provider-pacts', provider: provider).pacts { pact ->
+      halClient.navigate(LATEST_PROVIDER_PACTS, provider: provider).pacts { pact ->
         consumers << new ConsumerInfo(pact.name, new URL(pact.href))
         if (options.authentication) {
           consumers.last().pactFileAuthentication = options.authentication
@@ -43,7 +47,7 @@ class PactBrokerClient {
 
     try {
       HalClient halClient = newHalClient()
-      halClient.navigate('pb:latest-provider-pacts-with-tag', provider: provider, tag: tag).pacts { pact ->
+      halClient.navigate(LATEST_PROVIDER_PACTS_WITH_TAG, provider: provider, tag: tag).pacts { pact ->
         consumers << new ConsumerInfo(pact.name, new URL(pact.href))
         if (options.authentication) {
           consumers.last().pactFileAuthentication = options.authentication
@@ -85,5 +89,15 @@ class PactBrokerClient {
         "FAILED! ${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${body.readLine()}"
       }
     }
+  }
+
+  String getUrlForProvider(String providerName, String tag) {
+    HalClient halClient = newHalClient()
+    if (StringUtils.isEmpty(tag)) {
+      halClient.navigate(LATEST_PROVIDER_PACTS, provider: providerName)
+    } else {
+      halClient.navigate(LATEST_PROVIDER_PACTS_WITH_TAG, provider: providerName, tag: tag)
+    }
+    halClient.linkUrl('pacts')
   }
 }

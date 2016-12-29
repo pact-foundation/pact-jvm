@@ -32,6 +32,7 @@ public class PactBrokerLoader implements PactLoader {
   private final String pactBrokerPort;
   private final String pactBrokerProtocol;
   private final List<String> pactBrokerTags;
+  private boolean failIfNoPactsFound;
 
   public PactBrokerLoader(final String pactBrokerHost, final String pactBrokerPort, final String pactBrokerProtocol) {
       this(pactBrokerHost, pactBrokerPort, pactBrokerProtocol, Collections.singletonList(LATEST));
@@ -43,15 +44,18 @@ public class PactBrokerLoader implements PactLoader {
     this.pactBrokerPort = pactBrokerPort;
     this.pactBrokerProtocol = pactBrokerProtocol;
     this.pactBrokerTags = tags;
+    this.failIfNoPactsFound = true;
   }
 
   public PactBrokerLoader(final PactBroker pactBroker) {
       this(pactBroker.host(), pactBroker.port(), pactBroker.protocol(), Arrays.asList(pactBroker.tags()));
+      this.failIfNoPactsFound = pactBroker.failIfNoPactsFound();
   }
 
   public List<Pact> load(final String providerName) throws IOException {
     List<Pact> pacts = new ArrayList<>();
-    if (pactBrokerTags == null || pactBrokerTags.isEmpty()) {
+    if (pactBrokerTags == null || pactBrokerTags.isEmpty() || pactBrokerTags.size() == 1 &&
+      pactBrokerTags.contains(LATEST)) {
       pacts.addAll(loadPactsForProvider(providerName, null));
     } else {
       for (String tag : pactBrokerTags) {
@@ -68,11 +72,18 @@ public class PactBrokerLoader implements PactLoader {
       .setPort(Integer.parseInt(parseExpressions(pactBrokerPort)));
     try {
       List<ConsumerInfo> consumers;
+      PactBrokerClient pactBrokerClient = newPactBrokerClient(uriBuilder.build());
       if (StringUtils.isEmpty(tag)) {
-        consumers = newPactBrokerClient(uriBuilder.build()).fetchConsumers(providerName);
+        consumers = pactBrokerClient.fetchConsumers(providerName);
       } else {
-        consumers = newPactBrokerClient(uriBuilder.build()).fetchConsumersWithTag(providerName, tag);
+        consumers = pactBrokerClient.fetchConsumersWithTag(providerName, tag);
       }
+
+      if (failIfNoPactsFound && consumers.isEmpty()) {
+        throw new NoPactsFoundException("No consumer pacts were found for provider '" + providerName + "' and tag '" +
+          tag + "'. (URL " + pactBrokerClient.getUrlForProvider(providerName, tag) + ")");
+      }
+
       return consumers.stream().map(this::loadPact).collect(toList());
     } catch (URISyntaxException e) {
       throw new IOException("Was not able load pacts from broker as the broker URL was invalid", e);
@@ -87,4 +98,11 @@ public class PactBrokerLoader implements PactLoader {
     return new PactBrokerClient(url, new HashMap());
   }
 
+  public boolean isFailIfNoPactsFound() {
+    return failIfNoPactsFound;
+  }
+
+  public void setFailIfNoPactsFound(boolean failIfNoPactsFound) {
+    this.failIfNoPactsFound = failIfNoPactsFound;
+  }
 }

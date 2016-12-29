@@ -48,10 +48,7 @@ class HalClientSpec extends Specification {
     given:
     def mockHttp = Mock(RESTClient) {
       get([path: '/', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json']]) >> [
-              status: 404,
-              data: [:]
-      ]
+           headers: [Accept: 'application/hal+json']]) >> { throw new NotFoundHalResponse('') }
     }
     client.newHttpClient() >> mockHttp
 

@@ -6,7 +6,7 @@ import au.com.dius.pact.provider.broker.InvalidHalResponse
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import spock.lang.Specification
 
-@PactBroker(host = 'pactbroker.host', port = '1000')
+@PactBroker(host = 'pactbroker.host', port = '1000', failIfNoPactsFound = false)
 class PactBrokerLoaderSpec extends Specification {
 
   private Closure<PactBrokerLoader> pactBrokerLoader
@@ -25,8 +25,8 @@ class PactBrokerLoaderSpec extends Specification {
     brokerClient = Mock(PactBrokerClient)
     mockPact = Mock(Pact)
 
-    pactBrokerLoader = {
-      new PactBrokerLoader(host, port, protocol, tags) {
+    pactBrokerLoader = { boolean failIfNoPactsFound = true ->
+      def loader = new PactBrokerLoader(host, port, protocol, tags) {
         @Override
         PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
           brokerClient
@@ -37,21 +37,32 @@ class PactBrokerLoaderSpec extends Specification {
           mockPact
         }
       }
+      loader.failIfNoPactsFound = failIfNoPactsFound
+      loader
     }
   }
 
-  def 'Returns Empty List if the pact broker client returns an empty list'() {
+  def 'Raises an exception if the pact broker client returns an empty list'() {
     when:
-    def result = pactBrokerLoader().load('test')
+    pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumersWithTag(_, _) >> []
+    1 * brokerClient.fetchConsumers('test') >> []
+    thrown(NoPactsFoundException)
+  }
+
+  def 'Returns Empty List if flagged to do so and the pact broker client returns an empty list'() {
+    when:
+    def result = pactBrokerLoader(false).load('test')
+
+    then:
+    1 * brokerClient.fetchConsumers('test') >> []
     result == []
   }
 
   def 'Throws any Exception On Execution Exception'() {
     given:
-    brokerClient.fetchConsumersWithTag(_, _) >> { throw new InvalidHalResponse('message') }
+    brokerClient.fetchConsumers('test') >> { throw new InvalidHalResponse('message') }
 
     when:
     pactBrokerLoader().load('test')
@@ -89,7 +100,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     result == []
-    1 * brokerClient.fetchConsumersWithTag(_, _) >> []
+    1 * brokerClient.fetchConsumers('test') >> []
   }
 
   def 'Loads pacts for each provided tag'() {
