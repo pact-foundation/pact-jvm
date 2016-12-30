@@ -20,7 +20,7 @@ overridden in your test class.
 
 * *providerName:* Returns the name of the API provider that Pact will mock
 * *consumerName:* Returns the name of the API consumer that we are testing.
-* *createFragment:* Returns the PactFrament containing the interactions that the test setup using the
+* *createFragment:* Returns the PactFragment containing the interactions that the test setup using the
   ConsumerPactBuilder DSL
 * *runTest:* The actual test run. It receives the URL to the mock server as a parameter.
 

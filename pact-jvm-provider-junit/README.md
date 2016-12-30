@@ -163,7 +163,11 @@ The pact broker allows different versions to be tagged. To load all the pacts:
 @PactBroker(host="pactbroker", port = "80", tags = {"latest", "dev", "prod"})
 ```
 
-The `latest` tag corresponds to the latest version ignoring the tags, and is the default.
+The default value for tags is `latest` which is not actually a tag but instead corresponds to the latest version ignoring the tags. If there are multiple consumers matching the name specified in the provider annotation then the latest pact for each of the consumers is loaded.
+
+For any other value the latest pact tagged with the specified tag is loaded.
+
+Specifying multiple tags is an OR operation. For example if you specify `tags = {"dev", "prod"}` then both the latest pact file tagged with `dev` and the latest pact file taggged with `prod` is loaded.
 
 ### Pact Url
 

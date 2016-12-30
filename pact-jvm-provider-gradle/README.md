@@ -59,14 +59,14 @@ pact {
                 pactFile = file('path/to/provider1-consumer1-pact.json')
 
             }
-            
+
             // Or if you have many pact files in a directory
             hasPactsWith('manyConsumers') {
 
-                // Will define a consumer for each pact file in the directory. 
-                // Consumer name is read from contents of pact file 
+                // Will define a consumer for each pact file in the directory.
+                // Consumer name is read from contents of pact file
                 pactFileLocation = file('path/to/pacts')
-                               
+
             }
 
         }
@@ -100,7 +100,7 @@ pact {
 }
 ```
 
-_Since version 3.3.2+/2.4.17+_ you can also give a closure as the provider port. 
+_Since version 3.3.2+/2.4.17+_ you can also give a closure as the provider port.
 
 ## Specifying the pact file or URL at runtime [versions 3.2.7/2.4.9+]
 
@@ -286,7 +286,7 @@ the request, you are potentially modifying the contract from the consumer tests!
 By default the paths loaded from the pact file will be decoded before the request is sent to the provider. To turn this
 behaviour off, set the system property `pact.verifier.disableUrlPathDecoding` to `true`.
 
-__*Important Note:*__ If you turn off the url path decoding, you need to ensure that the paths in the pact files are 
+__*Important Note:*__ If you turn off the url path decoding, you need to ensure that the paths in the pact files are
 correctly encoded. The verifier will not be able to make a request with an invalid encoded path.
 
 ## Project Properties
@@ -326,7 +326,7 @@ pact {
                     req.addHeader('Authorization', 'OAUTH eyJhbGciOiJSUzI1NiIsImN0eSI6ImFw...')
                 }
             }
-            
+
             // or
             hasPactsWith('consumers') {
                 pactFileLocation = file('path/to/pacts')                
@@ -530,6 +530,22 @@ _NOTE:_ The pact broker requires a version for all published pacts. The `pactPub
 gradle project by default. Make sure you have set one otherwise the broker will reject the pact files.
 
 _Version 3.2.2/2.4.3+_ you can override the version in the publish block.
+
+## Publishing to an authenticated pact broker
+
+To publish to a broker protected by basic auth, include the username/password in the `pactBrokerUrl`.
+
+For example:
+
+```groovy
+pact {
+
+    publish {
+        pactBrokerUrl = 'https://username:password@mypactbroker.com'
+    }
+
+}
+```
 
 # Verifying a message provider [version 2.2.12+]
 

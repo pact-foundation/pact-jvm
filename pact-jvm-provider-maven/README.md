@@ -58,7 +58,7 @@ You define all the providers and consumers within the configuration element of t
 </plugin>
 ```
 
-### 3. Execute `mvn au.com.dius:pact-jvm-provider-maven_2.11:verify`
+### 3. Execute `mvn pact:verify`
 
 You will have to have your provider running for this to pass.
 
@@ -429,3 +429,28 @@ By default, the test classpath is scanned for annotated methods. You can overrid
     </configuration>
 </plugin>
 ```
+
+# Publishing pact files to a pact broker [version 3.2.0+]
+
+The pact maven plugin provides a `publish` mojo that can publish all pact files in a directory
+to a pact broker. To use it, you need to add a publish configuration to the POM that defines the
+directory where the pact files are and the URL to the pact broker.
+
+For example:
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
+    <version>3.3.3</version>
+    <configuration>
+      <pactDirectory>path/to/pact/files</pactDirectory> <!-- Defaults to ${project.build.directory}/pacts -->
+      <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
+      <projectVersion>1.0.100</projectVersion> <!-- Defaults to ${project.version} -->
+    </configuration>
+</plugin>
+```
+You can now execute `mvn pact:publish` to publish the pact files.
+
+_NOTE:_ The pact broker requires a version for all published pacts. The `publish` task will use the version of the
+project by default, but can be overwritten with the `projectVersion` property. Make sure you have set one otherwise the broker will reject the pact files.
