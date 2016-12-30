@@ -31,6 +31,12 @@ task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider_${project.scal
             def buildNode = asNode().appendNode('build')
             buildNode.appendNode('directory', buildDir)
             buildNode.appendNode('outputDirectory', "$buildDir/classes/main")
+            //add and configure the maven-plugin-plugin so that we can use the shortened 'pact' prefix
+            //https://maven.apache.org/guides/introduction/introduction-to-plugin-prefix-mapping.html
+            def pluginNode = buildNode.appendNode('plugins').appendNode('plugin')
+            pluginNode.appendNode('artifactId', 'maven-plugin-plugin')
+            pluginNode.appendNode('version', project.mavenPluginPluginVersion)
+            pluginNode.appendNode('configuration').appendNode('goalPrefix', 'pact')
         }
         pom.writeTo( pomFile )
     }

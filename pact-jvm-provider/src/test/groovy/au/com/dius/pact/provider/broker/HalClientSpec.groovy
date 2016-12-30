@@ -44,6 +44,21 @@ class HalClientSpec extends Specification {
     1 * authConfig.basic('1', '2')
   }
 
+  def 'throws an exception if the response is 404 Not Found'() {
+    given:
+    def mockHttp = Mock(RESTClient) {
+      get([path: '/', requestContentType: 'application/json',
+           headers: [Accept: 'application/hal+json']]) >> { throw new NotFoundHalResponse('') }
+    }
+    client.newHttpClient() >> mockHttp
+
+    when:
+    client.navigate('pb:latest-provider-pacts')
+
+    then:
+    thrown(NotFoundHalResponse)
+  }
+
   def 'throws an exception if the response is not JSON'() {
     given:
     def mockHttp = Mock(RESTClient) {

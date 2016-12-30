@@ -5,7 +5,7 @@ import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget;
 import au.com.dius.pact.provider.junit.target.TestTarget;
-import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpRequest;
 import org.junit.After;
 import org.junit.Before;
@@ -190,15 +190,21 @@ class InteractionRunner extends Runner {
     }
 
     protected Statement withStateChanges(final Interaction interaction, final Object target, final Statement statement) {
-        if (interaction.getProviderState() != null && !interaction.getProviderState().isEmpty()) {
+        if (StringUtils.isNotEmpty(interaction.getProviderState())) {
             final String state = interaction.getProviderState();
             final List<FrameworkMethod> onStateChange = new ArrayList<FrameworkMethod>();
             for (FrameworkMethod ann: testClass.getAnnotatedMethods(State.class)) {
-                if (ArrayUtils.contains(ann.getAnnotation(State.class).value(), state)) {
+                for(String annotationState : ann.getAnnotation(State.class).value()) {
+                  if(annotationState.equalsIgnoreCase(state)) {
                     onStateChange.add(ann);
+                    break;
+                  }
                 }
             }
-            return onStateChange.isEmpty() ? statement : new RunBefores(statement, onStateChange, target);
+            if (onStateChange.isEmpty()) {
+              return new Fail(new MissingStateChangeMethod("MissingStateChangeMethod: Did not find a test class method annotated with @State(\"" + state + "\")"));
+            }
+            return new RunBefores(statement, onStateChange, target);
         } else {
             return statement;
         }

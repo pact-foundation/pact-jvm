@@ -13,7 +13,6 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import static com.github.restdriver.clientdriver.RestClientDriver.giveEmptyResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.giveResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 
@@ -34,4 +33,7 @@ public class ArticlesContractTest {
       onRequestTo("/articles.json"), giveResponse(json, "application/json")
     );
   }
+
+  @State("Pact for Issue 313")
+  public void stateChange() {}
 }

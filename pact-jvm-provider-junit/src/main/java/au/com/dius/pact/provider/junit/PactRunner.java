@@ -45,7 +45,8 @@ import java.util.List;
  * all methods annotated by {@link State} with appropriate state listed will be invoked
  */
 public class PactRunner extends ParentRunner<InteractionRunner> {
-    private final Logger LOGGER = LoggerFactory.getLogger(PactRunner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PactRunner.class);
+
     private final List<InteractionRunner> child;
 
     public PactRunner(final Class<?> clazz) throws InitializationError {
@@ -129,16 +130,16 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
             }
         } catch (final InstantiationException e) {
           LOGGER.error("Error while creating pact source", e);
-          throw new InitializationError("Error while creating pact source");
+          throw new InitializationError(e);
         } catch (final IllegalAccessException e) {
           LOGGER.error("Error while creating pact source", e);
-          throw new InitializationError("Error while creating pact source");
+          throw new InitializationError(e);
         } catch (final NoSuchMethodException e) {
           LOGGER.error("Error while creating pact source", e);
-          throw new InitializationError("Error while creating pact source");
+          throw new InitializationError(e);
         } catch (final InvocationTargetException e) {
           LOGGER.error("Error while creating pact source", e);
-          throw new InitializationError("Error while creating pact source");
+          throw new InitializationError(e);
         }
     }
 }

@@ -26,7 +26,7 @@ class ProviderClientSpec extends Specification {
       port: 8080,
       path: '/'
     ]
-    client = new ProviderClient(provider: provider)
+    client = GroovySpy(ProviderClient, constructorArgs: [[provider: provider]])
     httpRequest = Mock HttpRequest
   }
 
@@ -319,6 +319,19 @@ class ProviderClientSpec extends Specification {
 
     then:
     thrown(NumberFormatException)
+  }
+
+  def 'does not decode the path if pact.verifier.disableUrlPathDecoding is set'() {
+    given:
+    def pactRequest = new Request()
+    pactRequest.path = '/tenants/tester%2Ftoken/jobs/external-id'
+    client.systemPropertySet('pact.verifier.disableUrlPathDecoding') >> true
+
+    when:
+    def request = client.newRequest(pactRequest)
+
+    then:
+    request.URI.toString() == 'http://localhost:8080/tenants/tester%2Ftoken/jobs/external-id'
   }
 
 }

@@ -20,4 +20,60 @@ class PactDslJsonArraySpec extends Specification {
       result.is root
   }
 
+  def 'min array like function should set the example size to the min size'() {
+    expect:
+    obj.close().body.get(0).length() == 2
+
+    where:
+    obj = new PactDslJsonArray().minArrayLike(2).id()
+  }
+
+  def 'min array like function should validate the number of examples match the min size'() {
+    when:
+    new PactDslJsonArray().minArrayLike(3, 2)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  def 'max array like function should validate the number of examples match the max size'() {
+    when:
+    new PactDslJsonArray().maxArrayLike(3, 4)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  def 'static min array like function should validate the number of examples match the min size'() {
+    when:
+    PactDslJsonArray.arrayMinLike(3, 2)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  def 'static max array like function should validate the number of examples match the max size'() {
+    when:
+    PactDslJsonArray.arrayMaxLike(3, 4)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  def 'each array with max like function should validate the number of examples match the max size'() {
+    when:
+    new PactDslJsonArray().eachArrayWithMaxLike(4, 3)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  def 'each array with min function should validate the number of examples match the min size'() {
+    when:
+    new PactDslJsonArray().eachArrayWithMinLike(2, 3)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
 }

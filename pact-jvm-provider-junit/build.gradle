@@ -1,6 +1,5 @@
 dependencies {
     compile project(":pact-jvm-provider_${project.scalaVersion}"),
-      'com.github.rholder:guava-retrying:2.0.0',
       "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}",
       "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
       "junit:junit:${project.junitVersion}",
@@ -13,4 +12,5 @@ dependencies {
         exclude group: 'org.codehaus.groovy'
     }
     testCompile "cglib:cglib:${project.cglibVersion}"
+    testCompile 'org.apache.commons:commons-collections4:4.1'
 }

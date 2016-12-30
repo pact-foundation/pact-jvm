@@ -104,7 +104,7 @@ public class PactDslJsonArray extends DslPart {
      */
     @Override
     public PactDslJsonBody minArrayLike(Integer size) {
-        return minArrayLike(size, 1);
+        return minArrayLike(size, size);
     }
 
     @Override
@@ -119,6 +119,10 @@ public class PactDslJsonArray extends DslPart {
      */
     @Override
     public PactDslJsonBody minArrayLike(Integer size, int numberExamples) {
+      if (numberExamples < size) {
+        throw new IllegalArgumentException(String.format("Number of example %d is less than the minimum size of %d",
+          numberExamples, size));
+      }
       matchers.put(rootPath + appendArrayIndex(1), matchMin(size));
       PactDslJsonArray parent = new PactDslJsonArray("", "", this, true);
       parent.setNumberExamples(numberExamples);
@@ -151,6 +155,10 @@ public class PactDslJsonArray extends DslPart {
      */
     @Override
     public PactDslJsonBody maxArrayLike(Integer size, int numberExamples) {
+      if (numberExamples > size) {
+        throw new IllegalArgumentException(String.format("Number of example %d is more than the maximum size of %d",
+          numberExamples, size));
+      }
       matchers.put(rootPath + appendArrayIndex(1), matchMax(size));
       PactDslJsonArray parent = new PactDslJsonArray("", "", this, true);
       parent.setNumberExamples(numberExamples);
@@ -647,7 +655,7 @@ public class PactDslJsonArray extends DslPart {
    * @param minSize minimum size
    */
   public static PactDslJsonBody arrayMinLike(int minSize) {
-      return arrayMinLike(minSize, 1);
+      return arrayMinLike(minSize, minSize);
   }
 
   /**
@@ -656,6 +664,10 @@ public class PactDslJsonArray extends DslPart {
    * @param numberExamples Number of examples to generate
    */
   public static PactDslJsonBody arrayMinLike(int minSize, int numberExamples) {
+    if (numberExamples < minSize) {
+      throw new IllegalArgumentException(String.format("Number of example %d is less than the minimum size of %d",
+        numberExamples, minSize));
+    }
     PactDslJsonArray parent = new PactDslJsonArray("", "", null, true);
     parent.setNumberExamples(numberExamples);
     parent.matchers.put("", parent.matchMin(minSize));
@@ -676,6 +688,10 @@ public class PactDslJsonArray extends DslPart {
    * @param numberExamples Number of examples to generate
    */
   public static PactDslJsonBody arrayMaxLike(int maxSize, int numberExamples) {
+    if (numberExamples > maxSize) {
+      throw new IllegalArgumentException(String.format("Number of example %d is more than the maximum size of %d",
+        numberExamples, maxSize));
+    }
     PactDslJsonArray parent = new PactDslJsonArray("", "", null, true);
     parent.setNumberExamples(numberExamples);
     parent.matchers.put("", parent.matchMax(maxSize));
@@ -744,6 +760,10 @@ public class PactDslJsonArray extends DslPart {
 
   @Override
   public PactDslJsonArray eachArrayWithMaxLike(int numberExamples, Integer size) {
+    if (numberExamples > size) {
+      throw new IllegalArgumentException(String.format("Number of example %d is more than the maximum size of %d",
+        numberExamples, size));
+    }
     matchers.put(rootPath + appendArrayIndex(1), matchMax(size));
     PactDslJsonArray parent = new PactDslJsonArray(rootPath, "", this, true);
     parent.setNumberExamples(numberExamples);
@@ -762,11 +782,15 @@ public class PactDslJsonArray extends DslPart {
 
   @Override
   public PactDslJsonArray eachArrayWithMinLike(Integer size) {
-    return eachArrayWithMinLike(1, size);
+    return eachArrayWithMinLike(size, size);
   }
 
   @Override
   public PactDslJsonArray eachArrayWithMinLike(int numberExamples, Integer size) {
+    if (numberExamples < size) {
+      throw new IllegalArgumentException(String.format("Number of example %d is less than the minimum size of %d",
+        numberExamples, size));
+    }
     matchers.put(rootPath + appendArrayIndex(1), matchMin(size));
     PactDslJsonArray parent = new PactDslJsonArray(rootPath, "", this, true);
     parent.setNumberExamples(numberExamples);
