@@ -6,6 +6,8 @@ import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.Response
+import au.com.dius.pact.model.generators.ExampleGenerators
+import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.matchingrules.MatchingRules
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -23,6 +25,7 @@ class Message implements Interaction {
   List<ProviderState> providerStates = []
   OptionalBody contents = OptionalBody.missing()
   MatchingRules matchingRules = new MatchingRules()
+  Generators generators = new ExampleGenerators()
   Map<String, String> metaData = [:]
 
   byte[] contentsAsBytes() {

@@ -1,5 +1,7 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.model.generators.ExampleGenerators
+import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.matchingrules.MatchingRules
 import groovy.transform.Canonical
 
@@ -16,6 +18,7 @@ class Request implements HttpPart {
   Map<String, String> headers = [:]
   OptionalBody body = OptionalBody.missing()
   MatchingRules matchingRules = new MatchingRules()
+  Generators generators = new ExampleGenerators()
 
   static Request fromMap(Map map) {
     new Request().with {

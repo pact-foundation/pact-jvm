@@ -5,6 +5,7 @@ buildscript {
   dependencies {
     classpath "org.apache.commons:commons-lang3:$commonsLang3Version"
     classpath 'com.tkruse.gradle:gradle-groovysh-plugin:1.0.8'
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
   }
 }
 
@@ -31,6 +32,7 @@ subprojects {
     apply plugin: 'signing'
     apply plugin: 'codenarc'
     apply plugin: 'jacoco'
+    apply plugin: 'kotlin'
 
     apply plugin: 'com.github.tkruse.groovysh'
 
@@ -166,6 +168,8 @@ subprojects {
     }
 
     check.dependsOn << 'jacocoTestReport'
+
+    compileGroovy.dependsOn << 'copyMainKotlinClasses'
 }
 
 tasks.addRule("Pattern: <Task>_<ScalaVersion>") { String taskName ->
