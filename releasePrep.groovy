@@ -95,6 +95,7 @@ ask('Update Changelog?: [Y]') {
   }
 
   executeOnShell("git add CHANGELOG.md")
+  executeOnShell("git diff --cached")
   executeOnShell("git commit -m 'update changelog for release $releaseVer'")
   executeOnShell("git status")
 }
