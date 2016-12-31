@@ -1,7 +1,8 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.model.generators.ExampleGenerators
+import au.com.dius.pact.model.generators.Generator
 import au.com.dius.pact.model.generators.Generators
+import au.com.dius.pact.model.generators.Category
 import au.com.dius.pact.model.matchingrules.MatchingRules
 import groovy.transform.Canonical
 
@@ -15,7 +16,7 @@ class Response implements HttpPart {
   Map<String, String> headers = [:]
   OptionalBody body = OptionalBody.missing()
   MatchingRules matchingRules = new MatchingRules()
-  Generators generators = new ExampleGenerators()
+  Generators generators = new Generators()
 
   static Response fromMap(def map) {
     new Response().with {
@@ -23,12 +24,13 @@ class Response implements HttpPart {
       headers = map.headers
       body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
       matchingRules = MatchingRules.fromMap(map.matchingRules)
+      generators = Generators.fromMap(map.generators)
       it
     }
   }
 
   String toString() {
-    "\tstatus: $status \n\theaders: $headers \n\tmatchers: $matchingRules \n\tbody: $body"
+    "\tstatus: $status\n\theaders: $headers\n\tmatchers: $matchingRules\n\tgenerators: $generators\n\tbody: $body"
   }
 
   Response copy() {
@@ -38,7 +40,20 @@ class Response implements HttpPart {
       headers = r.headers ? [:] + r.headers : null
       body = r.body
       matchingRules = r.matchingRules.copy()
+      generators = r.generators.copy(r.generators.categories)
       it
     }
+  }
+
+  Response generatedResponse() {
+    def r = this.copy()
+    generators.applyGenerator(Category.STATUS) { String key, Generator g -> r.status = g.generate(r.status) as Integer }
+    generators.applyGenerator(Category.HEADER) { String key, Generator g ->
+      if (r.headers == null) {
+        r.headers = [:]
+      }
+      r.headers[key] = g.generate(r.headers[key])
+    }
+    r
   }
 }

@@ -1,6 +1,5 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.model.generators.ExampleGenerators
 import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.matchingrules.MatchingRules
 import groovy.transform.Canonical
@@ -18,7 +17,7 @@ class Request implements HttpPart {
   Map<String, String> headers = [:]
   OptionalBody body = OptionalBody.missing()
   MatchingRules matchingRules = new MatchingRules()
-  Generators generators = new ExampleGenerators()
+  Generators generators = new Generators()
 
   static Request fromMap(Map map) {
     new Request().with {
@@ -28,6 +27,7 @@ class Request implements HttpPart {
       headers = map.headers
       body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
       matchingRules = MatchingRules.fromMap(map.matchingRules)
+      generators = Generators.fromMap(map.generators)
       it
     }
   }
@@ -41,12 +41,14 @@ class Request implements HttpPart {
       headers = r.headers ? [:] + r.headers : null
       body = r.body
       matchingRules = r.matchingRules.copy()
+      generators = r.generators.copy(r.generators.categories)
       it
     }
   }
 
   String toString() {
-    "\tmethod: $method\n\tpath: $path\n\tquery: $query\n\theaders: $headers\n\tmatchers: $matchingRules\n\tbody: $body"
+    "\tmethod: $method\n\tpath: $path\n\tquery: $query\n\theaders: $headers\n\tmatchers: $matchingRules\n\t" +
+      "generators: $generators\n\tbody: $body"
   }
 
   Map<String, String> headersWithoutCookie() {
