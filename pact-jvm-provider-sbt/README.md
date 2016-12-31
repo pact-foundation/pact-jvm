@@ -135,7 +135,7 @@ import au.com.dius.pact.provider.sbt._
 SbtProviderPlugin.config ++ Seq(
   providers := Seq(
     ProviderConfig(name = "Our Service")
-        .hasPactsFromPactBroker(new URL("http://pact-broker.local"), "tagName"))
+        .hasPactsFromPactBroker(new URL("http://pact-broker.local"), Some("tagName")))
 )
 ```
 
