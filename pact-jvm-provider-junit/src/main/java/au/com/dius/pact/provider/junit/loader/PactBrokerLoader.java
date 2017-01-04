@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseExpressions;
 
@@ -86,8 +87,8 @@ public class PactBrokerLoader implements PactLoader {
       }
 
       List<Pact> pacts = new ArrayList<Pact>();
-      for (ConsumerInfo consumerInfo: consumers) {
-        pacts.add(loadPact(consumerInfo));
+      for (ConsumerInfo consumer: consumers) {
+        pacts.add(this.loadPact(consumer, pactBrokerClient.getOptions());
       }
       return pacts;
     } catch (URISyntaxException e) {
@@ -95,8 +96,8 @@ public class PactBrokerLoader implements PactLoader {
     }
   }
 
-  Pact loadPact(ConsumerInfo consumer) {
-    return PactReader.loadPact(consumer.getPactFile());
+  Pact loadPact(ConsumerInfo consumer, Map options) {
+    return PactReader.loadPact(options, consumer.getPactFile());
   }
 
   PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
