@@ -257,8 +257,8 @@ Example in the configuration section:
 ## Provider States
 
 For each provider you can specify a state change URL to use to switch the state of the provider. This URL will
-receive the providerState description from the pact file before each interaction via a POST. The stateChangeUsesBody
-controls if the state is passed in the request body or as a query parameter.
+receive the providerState description and parameters from the pact file before each interaction via a POST. The stateChangeUsesBody
+controls if the state is passed in the request body or as query parameters.
 
 These values can be set at the provider level, or for a specific consumer. Consumer values take precedent if both are given.
 
@@ -287,8 +287,8 @@ These values can be set at the provider level, or for a specific consumer. Consu
 </plugin>
 ```
 
-If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description will be sent as
- JSON in the body of the request. If it is set to false, it will passed as a query parameter.
+If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description and parameters will be sent as
+ JSON in the body of the request. If it is set to false, they will passed as query parameters.
 
 As for normal requests (see Modifying the requests before they are sent), a state change request can be modified before
 it is sent. Set `stateChangeRequestFilter` to a Groovy script on the provider that will be called before the request is made.

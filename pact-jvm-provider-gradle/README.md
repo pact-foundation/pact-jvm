@@ -307,8 +307,8 @@ For a description of what provider states are, see the pact documentations: http
 ### Using a state change URL
 
 For each provider you can specify a state change URL to use to switch the state of the provider. This URL will
-receive the providerState description from the pact file before each interaction via a POST. As for normal requests,
-a request filter (`stateChangeRequestFilter`) can also be set to manipulate the request before it is sent.
+receive the providerState description and all the parameters from the pact file before each interaction via a POST. 
+As for normal requests, a request filter (`stateChangeRequestFilter`) can also be set to manipulate the request before it is sent.
 
 ```groovy
 pact {
@@ -341,8 +341,8 @@ pact {
 }
 ```
 
-If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description will be sent as
- JSON in the body of the request. If it is set to false, it will passed as a query parameter.
+If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description and parameters 
+will be sent as JSON in the body of the request. If it is set to false, they will passed as query parameters.
 
 #### Teardown calls for state changes [version 3.2.5/2.4.7+]
 
@@ -353,7 +353,7 @@ then a teardown call will be made afterwards to the state change URL with `actio
 ### Using a Closure [version 2.2.2+]
 
 You can set a closure to be called before each verification with a defined provider state. The closure will be
-called with the state description from the pact file.
+called with the state description and parameters from the pact file.
 
 ```groovy
 pact {
@@ -367,6 +367,7 @@ pact {
                 // Load a fixture file based on the provider state and then setup some database
                 // data. Does not require a state change request so returns false
                 stateChange = { providerState ->
+                    // providerState is an instance of ProviderState
                     def fixture = loadFixtuerForProviderState(providerState)
                     setupDatabase(fixture)
                 }
