@@ -42,7 +42,7 @@ class PactPublishMojo extends AbstractMojo {
         }
 
         if (anyFailed) {
-          throw new MojoExecutionException('One of more of the pact files were rejected by the pact broker')
+          throw new MojoExecutionException('One or more of the pact files were rejected by the pact broker')
         }
     }
 }
