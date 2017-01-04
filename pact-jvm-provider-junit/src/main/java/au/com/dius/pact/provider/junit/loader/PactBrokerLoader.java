@@ -32,6 +32,7 @@ public class PactBrokerLoader implements PactLoader {
   private final String pactBrokerProtocol;
   private final List<String> pactBrokerTags;
   private boolean failIfNoPactsFound;
+  private PactBrokerAuth authentication;
 
   public PactBrokerLoader(final String pactBrokerHost, final String pactBrokerPort, final String pactBrokerProtocol) {
       this(pactBrokerHost, pactBrokerPort, pactBrokerProtocol, Collections.singletonList(LATEST));
@@ -49,6 +50,7 @@ public class PactBrokerLoader implements PactLoader {
   public PactBrokerLoader(final PactBroker pactBroker) {
       this(pactBroker.host(), pactBroker.port(), pactBroker.protocol(), Arrays.asList(pactBroker.tags()));
       this.failIfNoPactsFound = pactBroker.failIfNoPactsFound();
+      this.authentication = pactBroker.authentication();
   }
 
   public List<Pact> load(final String providerName) throws IOException {
@@ -98,7 +100,12 @@ public class PactBrokerLoader implements PactLoader {
   }
 
   PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
-    return new PactBrokerClient(url, new HashMap());
+    HashMap options = new HashMap();
+    if (this.authentication != null && !this.authentication.scheme().equalsIgnoreCase("none")) {
+      options.put("authentication", Arrays.asList(parseExpressions(this.authentication.scheme()),
+        parseExpressions(this.authentication.username()), parseExpressions(this.authentication.password())));
+    }
+    return new PactBrokerClient(url, options);
   }
 
   public boolean isFailIfNoPactsFound() {
