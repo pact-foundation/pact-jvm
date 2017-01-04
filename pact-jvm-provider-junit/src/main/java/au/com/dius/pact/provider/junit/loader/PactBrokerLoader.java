@@ -12,11 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseExpressions;
 import static java.util.stream.Collectors.toList;
@@ -86,14 +82,16 @@ public class PactBrokerLoader implements PactLoader {
           tag + "'. (URL " + pactBrokerClient.getUrlForProvider(providerName, tag) + ")");
       }
 
-      return consumers.stream().map(this::loadPact).collect(toList());
+      return consumers.stream()
+              .map(consumer -> this.loadPact(consumer, pactBrokerClient.getOptions()))
+              .collect(toList());
     } catch (URISyntaxException e) {
       throw new IOException("Was not able load pacts from broker as the broker URL was invalid", e);
     }
   }
 
-  Pact loadPact(ConsumerInfo consumer) {
-    return PactReader.loadPact(consumer.getPactFile());
+  Pact loadPact(ConsumerInfo consumer, Map options) {
+    return PactReader.loadPact(options, consumer.getPactFile());
   }
 
   PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
