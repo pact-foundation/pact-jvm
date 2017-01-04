@@ -160,6 +160,18 @@ For any other value the latest pact tagged with the specified tag is loaded.
 
 Specifying multiple tags is an OR operation. For example if you specify `tags = {"dev", "prod"}` then both the latest pact file tagged with `dev` and the latest pact file taggged with `prod` is loaded.
 
+#### _Version 3.3.4/2.4.19+_ - Using basic auth with the with the pact broker
+
+You can use basic authentication with the `@PactBroker` annotation by setting the `authentication` value to a `@PactBrokerAuth`
+annotation. For example:
+
+```java
+@PactBroker(host = "${pactbroker.url:localhost}", port = "1234", tags = {"latest", "prod", "dev"},
+  authentication = @PactBrokerAuth(username = "test", password = "test"))
+```
+
+The `username` and `password` values also take Java system property expressions.
+
 ### Pact Url
 
 To use pacts from urls annotate the test class with
