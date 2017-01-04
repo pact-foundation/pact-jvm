@@ -40,7 +40,7 @@ class PactPublishTask extends DefaultTask {
         }
 
         if (anyFailed) {
-          throw new GradleScriptException('One of more of the pact files were rejected by the pact broker', null)
+          throw new GradleScriptException('One or more of the pact files were rejected by the pact broker', null)
         }
     }
 
