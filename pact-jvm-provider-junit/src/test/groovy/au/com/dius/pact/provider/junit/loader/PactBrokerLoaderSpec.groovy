@@ -33,7 +33,7 @@ class PactBrokerLoaderSpec extends Specification {
         }
 
         @Override
-        Pact loadPact(ConsumerInfo consumer) {
+        Pact loadPact(ConsumerInfo consumer, Map options) {
           mockPact
         }
       }
