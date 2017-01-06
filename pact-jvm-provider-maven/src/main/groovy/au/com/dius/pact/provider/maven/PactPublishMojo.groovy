@@ -28,21 +28,26 @@ class PactPublishMojo extends AbstractMojo {
     @Override
     void execute() throws MojoExecutionException, MojoFailureException {
         if (brokerClient == null) {
-          brokerClient = new PactBrokerClient(pactBrokerUrl)
+            brokerClient = new PactBrokerClient(pactBrokerUrl)
         }
-        File pactDirectory = new File(pactDirectory)
-        boolean anyFailed = false
-        pactDirectory.eachFileMatch(FileType.FILES, ~/.*\.json/) { pactFile ->
-            print "Publishing ${pactFile.name} ... "
-            def result = brokerClient.uploadPactFile(pactFile, projectVersion)
-            println result
-            if (!anyFailed && result.startsWith('FAILED!')) {
-                anyFailed = true
-            }
-        }
+        try {
+            File pactDirectory = new File(pactDirectory)
 
-        if (anyFailed) {
-          throw new MojoExecutionException('One or more of the pact files were rejected by the pact broker')
+            boolean anyFailed = false
+            pactDirectory.eachFileMatch(FileType.FILES, ~/.*\.json/) { pactFile ->
+                print "Publishing ${pactFile.name} ... "
+                def result = brokerClient.uploadPactFile(pactFile, projectVersion)
+                println result
+                if (!anyFailed && result.startsWith('FAILED!')) {
+                    anyFailed = true
+                }
+            }
+
+            if (anyFailed) {
+                throw new MojoExecutionException('One or more of the pact files were rejected by the pact broker')
+            }
+        } catch (FileNotFoundException e) {
+            println "Pact directory ${pactDirectory} does not exist, skipping uploading of pacts"
         }
     }
 }
