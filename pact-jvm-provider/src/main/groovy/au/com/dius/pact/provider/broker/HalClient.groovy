@@ -114,7 +114,7 @@ class HalClient {
   def methodMissing(String name, args) {
     pathInfo = pathInfo ?: fetch(ROOT)
     def matchingLink = pathInfo.'_links'[name]
-    if (matchingLink) {
+    if (matchingLink != null) {
       if (args && args.last() instanceof Closure) {
         if (matchingLink instanceof Collection) {
           return matchingLink.each(args.last() as Closure)
