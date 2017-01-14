@@ -1,5 +1,17 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.3.5 - Improved Pact Broker support in Maven plugin
+
+* 9d2806d - Enable tag support in the maven plugin #364 (Ronald Holshausen, Sat Jan 14 17:06:52 2017 +1100)
+* 4f01f01 - Fix for HAL client throwing missing method exception when the pact links is empty (Ronald Holshausen, Sat Jan 14 16:40:01 2017 +1100)
+* 363285b - Merge pull request #363 from flaregames/maven-publish-skip (Ronald Holshausen, Fri Jan 6 15:55:52 2017 +1100)
+* 988cda3 - Do not fail if pact directory does not exist (Georg Meyer, Thu Jan 5 12:19:00 2017 +0100)
+* 4cc89d2 - Merge pull request #362 from Fitzoh/master (Ronald Holshausen, Thu Jan 5 12:34:52 2017 +1100)
+* 2a585c5 - Update `PactBrokerLoader` to propagate auth info to `loadPact` call (Fitzgerald, Andrew, Wed Jan 4 11:44:35 2017 -0500)
+* e20d7ed - Disabling PactSpec as it is failing on travis ci (Ronald Holshausen, Fri Dec 30 16:36:12 2016 +1100)
+* 095d634 - updated version in readme (Ronald Holshausen, Wed Jan 4 16:29:52 2017 +1100)
+* 7af35d6 - bump version to 3.3.5 (Ronald Holshausen, Wed Jan 4 16:26:14 2017 +1100)
+
 # 3.3.4 - Bugfix + Small Feature Release
 
 * 754be3b - Updated doco on using PactBrokerLoader to work with basic auth #360 (Ronald Holshausen, Wed Jan 4 15:42:44 2017 +1100)
