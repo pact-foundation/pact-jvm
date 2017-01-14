@@ -50,8 +50,8 @@ class PactProviderMojo extends AbstractMojo {
       if (provider.pactFileDirectory != null) {
           consumers.addAll(loadPactFiles(provider, provider.pactFileDirectory))
       }
-      if (provider.pactBrokerUrl != null) {
-        consumers.addAll(provider.hasPactsFromPactBroker(provider.pactBrokerUrl.toString()))
+      if (provider.pactBrokerUrl || provider.pactBroker) {
+        loadPactsFromPactBroker(provider, consumers)
       }
 
       provider.setConsumers(consumers)
@@ -62,6 +62,23 @@ class PactProviderMojo extends AbstractMojo {
     if (failures.size() > 0) {
       verifier.displayFailures(failures)
       throw new MojoFailureException("There were ${failures.size()} pact failures")
+    }
+  }
+
+  static void loadPactsFromPactBroker(Provider provider, List consumers) {
+    URL pactBrokerUrl = provider.pactBroker?.url ?: provider.pactBrokerUrl
+    def options = [:]
+    if (provider.pactBroker?.authentication) {
+      options.authentication = [
+        'basic', provider.pactBroker?.authentication.username, provider.pactBroker?.authentication.password
+      ]
+    }
+    if (provider.pactBroker?.tags) {
+      provider.pactBroker.tags.each { String tag ->
+        consumers.addAll(provider.hasPactsFromPactBrokerWithTag(options, pactBrokerUrl.toString(), tag))
+      }
+    } else {
+      consumers.addAll(provider.hasPactsFromPactBroker(options, pactBrokerUrl.toString()))
     }
   }
 

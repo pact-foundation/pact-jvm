@@ -135,4 +135,23 @@ class HalClientSpec extends Specification {
     notThrown(InvalidHalResponse)
   }
 
+  def 'does not throw an exception if the required link is empty'() {
+    given:
+    def mockHttp = Mock(RESTClient) {
+      get([path: '/', requestContentType: 'application/json',
+           headers: [Accept: 'application/hal+json']]) >> [
+        headers: ['Content-Type': 'application/hal+json'],
+        data: [_links: [pacts: []]]
+      ]
+    }
+    client.newHttpClient() >> mockHttp
+
+    when:
+    def called = false
+    client.pacts { called = true }
+
+    then:
+    !called
+  }
+
 }
