@@ -51,11 +51,15 @@ class Message implements Interaction {
     map
   }
 
-  String formatContents() {
-    if (metaData.contentType == JSON) {
-      new JsonSlurper().parseText(contents.value.toString())
+  def formatContents() {
+    if (contents.present) {
+      switch (contentType) {
+        case JSON: return new JsonSlurper().parseText(contents.value.toString())
+        case 'application/octet-stream': return contentsAsBytes().encodeBase64().toString()
+        default: return contents.value.toString()
+      }
     } else {
-      contentsAsBytes().encodeBase64().toString()
+      ''
     }
   }
 

@@ -149,7 +149,8 @@ class PactMergeSpec extends Specification {
     existingPact << [ new RequestResponsePact(provider, consumer, [
         new RequestResponseInteraction('test', 'test', new Request('POST'), new Response())
       ]),
-      new MessagePact(provider, consumer, [ new Message('test', 'test', OptionalBody.body('a b c')) ])
+      new MessagePact(provider, consumer, [ new Message('test', 'test', OptionalBody.body('a b c'), null,
+        [contentType: 'text/plain']) ])
     ]
     result = PactMerge.merge(newPact, existingPact)
   }
@@ -277,7 +278,8 @@ class PactMergeSpec extends Specification {
           new Request('Get', '/different', PactReader.queryStringToMap('q=p&q=p2&r=s'),
             [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}')), response)
       ]),
-      new MessagePact(provider, consumer, [ new Message('test interaction', 'test state', OptionalBody.body('a b c')) ])
+      new MessagePact(provider, consumer, [ new Message('test interaction', 'test state', OptionalBody.body('a b c'),
+        null, [contentType: 'text/plain']) ])
     ]
     result = PactMerge.merge(basePact, newPact)
   }

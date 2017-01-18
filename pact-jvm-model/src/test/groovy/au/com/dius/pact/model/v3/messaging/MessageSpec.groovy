@@ -2,24 +2,25 @@ package au.com.dius.pact.model.v3.messaging
 
 import au.com.dius.pact.model.OptionalBody
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class MessageSpec extends Specification {
 
-    def 'contentsAsBytes handles contents in string form'() {
-        when:
-        Message message = new Message(contents: OptionalBody.body('1 2 3 4'))
+  def 'contentsAsBytes handles contents in string form'() {
+      when:
+      Message message = new Message(contents: OptionalBody.body('1 2 3 4'))
 
-        then:
-        message.contentsAsBytes() == '1 2 3 4'.bytes
-    }
+      then:
+      message.contentsAsBytes() == '1 2 3 4'.bytes
+  }
 
-    def 'contentsAsBytes handles no contents'() {
-        when:
-        Message message = new Message(contents: OptionalBody.missing())
+  def 'contentsAsBytes handles no contents'() {
+      when:
+      Message message = new Message(contents: OptionalBody.missing())
 
-        then:
-        message.contentsAsBytes() == []
-    }
+      then:
+      message.contentsAsBytes() == []
+  }
 
   def 'unique key test'() {
     expect:
@@ -67,13 +68,28 @@ class MessageSpec extends Specification {
     message2 = new Message('description', 'state', OptionalBody.body('1 2 3'))
   }
 
-  def 'messages do not conflict if they have the same state and description but different bodies'() {
+  def 'messages do conflict if they have the same state and description but different bodies'() {
     expect:
     message1.conflictsWith(message2)
 
     where:
-    message1 = new Message('description', 'state', OptionalBody.body('1 2 3'))
-    message2 = new Message('description', 'state', OptionalBody.body('1 2 3 4'))
+    message1 = new Message('description', 'state', OptionalBody.body('1 2 3'), null, [contentType: 'text/plain'])
+    message2 = new Message('description', 'state', OptionalBody.body('1 2 3 4'), null, [contentType: 'text/plain'])
+  }
+
+  @Unroll
+  def 'message to map handles message content correctly'() {
+    expect:
+    message.toMap().contents == contents
+
+    where:
+
+    body                               | contentType                | contents
+    '{"A": "Value A", "B": "Value B"}' | 'application/json'         | [A: 'Value A', B: 'Value B']
+    '1 2 3 4'                          | 'text/plain'               | '1 2 3 4'
+    new String([1, 2, 3, 4] as byte[]) | 'application/octet-stream' | 'AQIDBA=='
+
+    message = new Message(contents: OptionalBody.body(body), metaData: [contentType: contentType])
   }
 
 }
