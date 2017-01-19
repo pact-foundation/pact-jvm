@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.InvalidMatcherException;
 import com.mifmif.common.regex.Generex;
+import groovy.json.JsonOutput;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -35,6 +36,9 @@ public class PactDslJsonRootValue extends DslPart {
 
   @Override
   public Object getBody() {
+    if (value instanceof String) {
+      return JsonOutput.toJson(value);
+    }
     return value;
   }
 
