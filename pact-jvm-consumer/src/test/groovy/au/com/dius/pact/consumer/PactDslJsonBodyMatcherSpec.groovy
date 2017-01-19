@@ -102,7 +102,7 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     then:
     result.size() == 3
     result.keySet() == keys
-    result.types == ['abc', 'abc']
+    result.types == ['"abc"', '"abc"']
     subject.matchers == [
       '$.body.types': [min: 0, match: 'type'],
       '$.body.subscriptionId': [match: 'type'],
@@ -125,7 +125,7 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     then:
     result.size() == 3
     result.keySet() == keys
-    result.types == ['abc', 'abc']
+    result.types == ['"abc"', '"abc"']
     subject.matchers == [
       '$.body.types': [min: 2, match: 'type'],
       '$.body.subscriptionId': [match: 'type'],
@@ -148,7 +148,7 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     then:
     result.size() == 3
     result.keySet() == keys
-    result.types == ['abc', 'abc']
+    result.types == ['"abc"', '"abc"']
     subject.matchers == [
       '$.body.types': [max: 10, match: 'type'],
       '$.body.subscriptionId': [match: 'type'],
