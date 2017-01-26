@@ -57,11 +57,15 @@ class Message implements Interaction {
     map
   }
 
-  String formatContents() {
-    if (metaData.contentType == JSON) {
-      new JsonSlurper().parseText(contents.value.toString())
+  def formatContents() {
+    if (contents.present) {
+      switch (contentType) {
+        case JSON: return new JsonSlurper().parseText(contents.value.toString())
+        case 'application/octet-stream': return contentsAsBytes().encodeBase64().toString()
+        default: return contents.value.toString()
+      }
     } else {
-      contentsAsBytes().encodeBase64().toString()
+      ''
     }
   }
 
@@ -103,13 +107,15 @@ class Message implements Interaction {
 
   @Override
   boolean conflictsWith(Interaction other) {
+//    TODO: Need to match the bodies
 //    if (other instanceof Message) {
 //      description == other.description &&
-//        providerStates == other.providerStates &&
+//        providerState == other.providerState &&
 //        formatContents() != other.formatContents()
 //    } else {
-      false
+//      false
 //    }
+    !(other instanceof Message)
   }
 
   @Override

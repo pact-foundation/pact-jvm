@@ -13,6 +13,8 @@ import au.com.dius.pact.provider.org.fusesource.jansi.AnsiConsole
 @SuppressWarnings(['DuplicateStringLiteral', 'MethodCount'])
 class AnsiConsoleReporter implements VerifierReporter {
 
+  boolean displayFullDiff = false
+
   @Override
   void setReportDir(File reportDir) { }
 
@@ -185,7 +187,8 @@ class AnsiConsoleReporter implements VerifierReporter {
       AnsiConsole.out().println("$i) ${err.key}")
       if (err.value instanceof Throwable) {
         displayError(err.value)
-      } else if (err.value instanceof Map && err.value.containsKey('diff')) {
+      } else if (err.value instanceof Map && err.value.containsKey('comparison') &&
+        err.value.comparison instanceof Map) {
         displayDiff(err)
       } else if (err.value instanceof String) {
         AnsiConsole.out().println("      ${err.value}")
@@ -200,25 +203,47 @@ class AnsiConsoleReporter implements VerifierReporter {
     }
   }
 
-  static void displayDiff(err) {
-    err.value.comparison.each { key, message ->
-      AnsiConsole.out().println("      $key -> $message")
+  @SuppressWarnings('AbcMetric')
+  void displayDiff(err) {
+    err.value.comparison.each { key, messageAndDiff ->
+      AnsiConsole.out().println("      $key -> $messageAndDiff.mismatch")
+      AnsiConsole.out().println()
+
+      if (messageAndDiff.diff) {
+        AnsiConsole.out().println('        Diff:')
+        AnsiConsole.out().println()
+
+        messageAndDiff.diff.eachLine { delta ->
+          if (delta.startsWith('@')) {
+            AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.CYAN).a(delta).reset())
+          } else if (delta.startsWith('-')) {
+            AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.RED).a(delta).reset())
+          } else if (delta.startsWith('+')) {
+            AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.GREEN).a(delta).reset())
+          } else {
+            AnsiConsole.out().println("        $delta")
+          }
+        }
+        AnsiConsole.out().println()
+      }
     }
 
-    AnsiConsole.out().println()
-    AnsiConsole.out().println('      Diff:')
-    AnsiConsole.out().println()
+    if (displayFullDiff) {
+      AnsiConsole.out().println('      Full Diff:')
+      AnsiConsole.out().println()
 
-    err.value.diff.each { delta ->
-      if (delta.startsWith('@')) {
-        AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.CYAN).a(delta).reset())
-      } else if (delta.startsWith('-')) {
-        AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a(delta).reset())
-      } else if (delta.startsWith('+')) {
-        AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.GREEN).a(delta).reset())
-      } else {
-        AnsiConsole.out().println("      $delta")
+      err.value.diff.each { delta ->
+        if (delta.startsWith('@')) {
+          AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.CYAN).a(delta).reset())
+        } else if (delta.startsWith('-')) {
+          AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a(delta).reset())
+        } else if (delta.startsWith('+')) {
+          AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.GREEN).a(delta).reset())
+        } else {
+          AnsiConsole.out().println("      $delta")
+        }
       }
+      AnsiConsole.out().println()
     }
   }
 

@@ -1,5 +1,15 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.3.6 - Bugfix Release
+
+* 3f3fbb6 - Display a smaller diff for some of the body mismatches #370 (Ronald Holshausen, Thu Jan 26 17:25:43 2017 +1100)
+* 4cfa287 - Disabling the message conflict check as it does not work with random generated body values (Ronald Holshausen, Thu Jan 26 16:10:08 2017 +1100)
+* 154fc65 - Small refactor in preparation of better diff output #370 (Ronald Holshausen, Thu Jan 26 15:40:53 2017 +1100)
+* b29279a - Correct the MessagePactProviderRule so that multiple rules can be used in one test #371 (Ronald Holshausen, Thu Jan 26 13:28:29 2017 +1100)
+* 17554aa - Correct the PactDslJsonRootValue to generate correctly encoded JSON strings #369 (Ronald Holshausen, Thu Jan 19 15:35:34 2017 +1100)
+* 1f9a90e - Fixed issue with message pacts generating invalid JSON for message contents #368 (Ronald Holshausen, Wed Jan 18 15:44:17 2017 +1100)
+* 683b0dc - bump version to 3.3.6 (Ronald Holshausen, Sat Jan 14 18:24:30 2017 +1100)
+
 # 3.3.5 - Improved Pact Broker support in Maven plugin
 
 * 9d2806d - Enable tag support in the maven plugin #364 (Ronald Holshausen, Sat Jan 14 17:06:52 2017 +1100)

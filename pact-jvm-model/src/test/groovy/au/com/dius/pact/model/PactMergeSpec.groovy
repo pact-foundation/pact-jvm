@@ -130,6 +130,7 @@ class PactMergeSpec extends Specification {
     result = PactMerge.merge(newPact, existingPact)
   }
 
+  // TODO: re-enable this test when message conflicts are corrected
   @Unroll
   def 'two compatible pacts do not merge if their interactions have conflicts for #type'() {
     expect:
@@ -263,6 +264,7 @@ class PactMergeSpec extends Specification {
     result = PactMerge.merge(identicalPact, identicalPact)
   }
 
+  // TODO: re-enable this test when message conflicts are corrected
   @Unroll
   def 'Pact merge should refuse different requests for identical description and states for #type'() {
     expect:
