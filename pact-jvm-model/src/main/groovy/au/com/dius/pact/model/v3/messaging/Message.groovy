@@ -86,13 +86,15 @@ class Message implements Interaction {
 
   @Override
   boolean conflictsWith(Interaction other) {
-    if (other instanceof Message) {
-      description == other.description &&
-        providerState == other.providerState &&
-        formatContents() != other.formatContents()
-    } else {
-      false
-    }
+//    TODO: Need to match the bodies
+//    if (other instanceof Message) {
+//      description == other.description &&
+//        providerState == other.providerState &&
+//        formatContents() != other.formatContents()
+//    } else {
+//      false
+//    }
+    !(other instanceof Message)
   }
 
   @Override
