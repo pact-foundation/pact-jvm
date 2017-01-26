@@ -210,18 +210,18 @@ class AnsiConsoleReporter implements VerifierReporter {
       AnsiConsole.out().println()
 
       if (messageAndDiff.diff) {
-        AnsiConsole.out().println('      Diff:')
+        AnsiConsole.out().println('        Diff:')
         AnsiConsole.out().println()
 
-        messageAndDiff.diff.each { delta ->
+        messageAndDiff.diff.eachLine { delta ->
           if (delta.startsWith('@')) {
-            AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.CYAN).a(delta).reset())
+            AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.CYAN).a(delta).reset())
           } else if (delta.startsWith('-')) {
-            AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a(delta).reset())
+            AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.RED).a(delta).reset())
           } else if (delta.startsWith('+')) {
-            AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.GREEN).a(delta).reset())
+            AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.GREEN).a(delta).reset())
           } else {
-            AnsiConsole.out().println("      $delta")
+            AnsiConsole.out().println("        $delta")
           }
         }
         AnsiConsole.out().println()

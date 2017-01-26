@@ -62,7 +62,7 @@ case class QueryMismatch(queryParameter: String, expected: String, actual: Strin
 
 object BodyMismatchFactory extends MismatchFactory[BodyMismatch] {
   def create(expected: scala.Any, actual: scala.Any, message: String, path: Seq[String]) =
-    BodyMismatch(expected, actual, Some(message), path.mkString("."))
+    BodyMismatch(expected, actual, Some(message), path.mkString("."), None)
 }
 
 object PathMismatchFactory extends MismatchFactory[PathMismatch] {
