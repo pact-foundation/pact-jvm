@@ -55,7 +55,7 @@ public class ExampleMessageConsumerWithV2MatchersTest {
     }
 
     @Test
-    @PactVerification({"test_provider_v3", "executing a workflow with rabbitmq"})
+    @PactVerification("test_provider_v3")
     public void test() throws Exception {
         Assert.assertNotNull(new String(currentMessage));
     }
