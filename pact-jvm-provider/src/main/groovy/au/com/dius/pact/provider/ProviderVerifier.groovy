@@ -26,6 +26,7 @@ class ProviderVerifier {
   static final String PACT_FILTER_DESCRIPTION = 'pact.filter.description'
   static final String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
   static final String PACT_SHOW_STACKTRACE = 'pact.showStacktrace'
+  static final String PACT_SHOW_FULLDIFF = 'pact.showFullDiff'
 
   def projectHasProperty = { }
   def projectGetProperty = { }
@@ -50,7 +51,12 @@ class ProviderVerifier {
   }
 
   void initialiseReporters(ProviderInfo provider) {
-    reporters.each { it.initialise(provider) }
+    reporters.each {
+      if (it.hasProperty('displayFullDiff')) {
+        it.displayFullDiff = callProjectHasProperty(PACT_SHOW_FULLDIFF)
+      }
+      it.initialise(provider)
+    }
   }
 
   void runVerificationForConsumer(Map failures, ProviderInfo provider, ConsumerInfo consumer) {

@@ -43,7 +43,7 @@ class PrettyPrinterSpec extends Specification {
 
     def 'body mismatch'() {
         expect:
-        print(new BodyMismatch('{"foo": "bar"}', '{"ork": "Bif"}', Option.empty(), '/')) ==
+        print(new BodyMismatch('{"foo": "bar"}', '{"ork": "Bif"}', Option.empty(), '/', Option.empty())) ==
               """--- Body
               |$plus
               |@@ -1,3 +1,3 @@
