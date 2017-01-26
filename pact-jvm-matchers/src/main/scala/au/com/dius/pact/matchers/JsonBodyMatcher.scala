@@ -51,11 +51,16 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
           (expected.isInstanceOf[List[Any]] && !actual.isInstanceOf[List[Any]])) {
           List(BodyMismatch(expected, actual,
             Some(s"Type mismatch: Expected ${typeOf(expected)} ${valueOf(expected)} but received ${typeOf(actual)} ${valueOf(actual)}"),
-            path.mkString(".")))
+            path.mkString("."), generateObjectDiff(expected, actual)))
         } else {
           compareValues(path, expected, actual, matchers)
         }
     }
+  }
+
+  private def generateObjectDiff(expected: Any, actual: Any) = {
+    Some(DiffUtils.generateObjectDiff(JsonUtils.scalaObjectGraphToJavaObjectGraph(expected),
+      JsonUtils.scalaObjectGraphToJavaObjectGraph(actual)))
   }
 
   def compareListContent(expectedValues: List[Any], actualValues: List[Any], path: Seq[String],
@@ -66,7 +71,7 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
         result = result ++: compare(path :+ index.toString, value, actualValues(index), diffConfig, matchers)
       } else if (!Matchers.matcherDefined(path, matchers)) {
         result = result :+ BodyMismatch(expectedValues, actualValues, Some(s"Expected ${valueOf(value)} but was missing"),
-          path.mkString("."))
+          path.mkString("."), generateObjectDiff(expectedValues, actualValues))
       }
     }
     result
@@ -84,13 +89,14 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
       result
     } else {
       if (expectedValues.isEmpty && actualValues.nonEmpty) {
-        List(BodyMismatch(a, b, Some(s"Expected an empty List but received ${valueOf(actualValues)}"), path.mkString(".")))
+        List(BodyMismatch(a, b, Some(s"Expected an empty List but received ${valueOf(actualValues)}"),
+          path.mkString("."), generateObjectDiff(expectedValues, actualValues)))
       } else {
         var result = compareListContent(expectedValues, actualValues, path, diffConfig, matchers)
         if (expectedValues.size != actualValues.size) {
           result = result :+ BodyMismatch(a, b,
             Some(s"Expected a List with ${expectedValues.size} elements but received ${actualValues.size} elements"),
-            path.mkString("."))
+            path.mkString("."), generateObjectDiff(expectedValues, actualValues))
         }
         result
       }
@@ -100,17 +106,18 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
   def compareMaps(expectedValues: Map[String, Any], actualValues: Map[String, Any], a: Any, b: Any, path: Seq[String],
                   diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     if (expectedValues.isEmpty && actualValues.nonEmpty) {
-      List(BodyMismatch(a, b, Some(s"Expected an empty Map but received ${valueOf(actualValues)}"), path.mkString(".")))
+      List(BodyMismatch(a, b, Some(s"Expected an empty Map but received ${valueOf(actualValues)}"), path.mkString("."),
+        generateObjectDiff(expectedValues, actualValues)))
     } else {
       var result = List[BodyMismatch]()
       if (diffConfig.allowUnexpectedKeys && expectedValues.size > actualValues.size) {
         result = result :+ BodyMismatch(a, b,
           Some(s"Expected a Map with at least ${expectedValues.size} elements but received ${actualValues.size} elements"),
-          path.mkString("."))
+          path.mkString("."), generateObjectDiff(expectedValues, actualValues))
       } else if (!diffConfig.allowUnexpectedKeys && expectedValues.size != actualValues.size) {
         result = result :+ BodyMismatch(a, b,
           Some(s"Expected a Map with ${expectedValues.size} elements but received ${actualValues.size} elements"),
-          path.mkString("."))
+          path.mkString("."), generateObjectDiff(expectedValues, actualValues))
       }
       if (Matchers.wildcardMatcherDefined(path :+ "any", matchers)) {
         actualValues.foreach(entry => {
@@ -126,7 +133,7 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
             result = result ++: compare(path :+ entry._1, entry._2, actualValues(entry._1), diffConfig, matchers)
           } else {
             result = result :+ BodyMismatch(a, b, Some(s"Expected ${entry._1}=${valueOf(entry._2)} but was missing"),
-              path.mkString("."))
+              path.mkString("."), generateObjectDiff(expectedValues, actualValues))
           }
         })
       }
@@ -144,7 +151,7 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
         List[BodyMismatch]()
       } else {
         List(BodyMismatch(expected, actual, Some(s"Expected ${valueOf(expected)} but received ${valueOf(actual)}"),
-          path.mkString(".")))
+          path.mkString("."), None))
       }
     }
   }
