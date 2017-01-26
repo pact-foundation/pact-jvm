@@ -41,7 +41,7 @@ case class HeaderMismatch(headerKey: String, expected: String, actual: String, m
   }
 }
 case class BodyTypeMismatch(expected: String, actual: String) extends RequestPartMismatch with ResponsePartMismatch
-case class BodyMismatch(expected: Any, actual: Any, mismatch: Option[String] = None, path: String = "/")
+case class BodyMismatch(expected: Any, actual: Any, mismatch: Option[String] = None, path: String = "/", diff: Option[String] = None)
   extends RequestPartMismatch with ResponsePartMismatch {
   override def description: String = mismatch match {
     case Some(message) => s"BodyMismatch - $message"

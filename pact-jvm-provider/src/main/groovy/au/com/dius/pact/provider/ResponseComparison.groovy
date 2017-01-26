@@ -12,10 +12,6 @@ import au.com.dius.pact.model.ResponseMatching$
 import au.com.dius.pact.model.ResponsePartMismatch
 import au.com.dius.pact.model.StatusMismatch
 import au.com.dius.pact.model.v3.messaging.Message
-import difflib.Delta
-import difflib.DiffUtils
-import difflib.Patch
-import groovy.json.JsonBuilder
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.apache.commons.lang3.StringUtils
@@ -28,9 +24,7 @@ import scala.collection.JavaConverters$
  */
 class ResponseComparison {
 
-    private static final String NL = '\n'
-
-    Response expected
+  Response expected
     Map actual
     int actualStatus
     Map actualHeaders
@@ -118,60 +112,43 @@ class ResponseComparison {
           "type was '${bodyTypeMismatch.actual()}'"]
     } else if (mismatches.any { it instanceof BodyMismatch }) {
       result.comparison = mismatches.findAll { it instanceof BodyMismatch }.collectEntries {
-          BodyMismatch bodyMismatch -> [bodyMismatch.path(), bodyMismatch.mismatch().defined ?
-              bodyMismatch.mismatch().get() : 'mismatch']
+          BodyMismatch bodyMismatch -> [
+            bodyMismatch.path(), [
+              mismatch: bodyMismatch.mismatch().defined ? bodyMismatch.mismatch().get() : 'mismatch',
+              diff: bodyMismatch.diff().defined ? bodyMismatch.diff().get() : ''
+            ]
+          ]
       }
 
-      String actualBodyString = ''
-      if (actualBody) {
-          if (actual.contentType.mimeType ==~ 'application/.*json') {
-              def bodyMap = new JsonSlurper().parseText(actualBody)
-              def bodyJson = JsonOutput.toJson(bodyMap)
-              actualBodyString = JsonOutput.prettyPrint(bodyJson)
-          } else {
-              actualBodyString = actualBody
-          }
-      }
-
-      String expectedBodyString = ''
-      if (expected.body.present) {
-          if (expected.jsonBody()) {
-              expectedBodyString = JsonOutput.prettyPrint(expected.body.value)
-          } else {
-              expectedBodyString = expected.body.value
-          }
-      }
-
-      def expectedLines = expectedBodyString.split(NL) as List
-      def actualLines = actualBodyString.split(NL) as List
-      Patch<String> patch = DiffUtils.diff(expectedLines, actualLines)
-
-      def diff = []
-
-      patch.deltas.each { Delta<String> delta ->
-          diff << "@${delta.original.position}"
-          if (delta.original.position > 1) {
-              diff << expectedLines[delta.original.position - 1]
-          }
-
-          delta.original.lines.each {
-              diff << "-$it"
-          }
-          delta.revised.lines.each {
-              diff << "+$it"
-          }
-
-          int pos = delta.original.position + delta.original.lines.size()
-          if (pos < expectedLines.size()) {
-              diff << expectedLines[pos]
-          }
-
-          diff << ''
-      }
-
-      result.diff = diff
+      result.diff = generateFullDiff(actualBody, this.actual.contentType.mimeType as String,
+        expected.body.present ? expected.body.value : '', expected.jsonBody())
     }
 
     result
   }
+
+  private static generateFullDiff(String actual, String mimeType, String response, Boolean jsonBody) {
+    String actualBodyString = ''
+    if (actual) {
+      if (mimeType ==~ 'application/.*json') {
+        def bodyMap = new JsonSlurper().parseText(actual)
+        def bodyJson = JsonOutput.toJson(bodyMap)
+        actualBodyString = JsonOutput.prettyPrint(bodyJson)
+      } else {
+        actualBodyString = actual
+      }
+    }
+
+    String expectedBodyString = ''
+    if (response) {
+      if (jsonBody) {
+        expectedBodyString = JsonOutput.prettyPrint(response)
+      } else {
+        expectedBodyString = response
+      }
+    }
+
+    DiffUtils.generateDiff(expectedBodyString, actualBodyString)
+  }
+
 }
