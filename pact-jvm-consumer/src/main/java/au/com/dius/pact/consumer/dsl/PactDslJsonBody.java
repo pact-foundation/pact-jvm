@@ -119,6 +119,17 @@ public class PactDslJsonBody extends DslPart {
     }
 
     /**
+     * Attributes that can be any string
+     * @param names attribute names
+     */
+    public PactDslJsonBody stringType(String... names) {
+      for (String name: names) {
+        stringType(name);
+      }
+      return this;
+    }
+
+    /**
      * Attribute that can be any string
      * @param name attribute name
      * @param example example value to use for generated bodies
@@ -146,6 +157,17 @@ public class PactDslJsonBody extends DslPart {
     }
 
     /**
+     * Attributes that can be any number
+     * @param names attribute names
+     */
+    public PactDslJsonBody numberType(String... names) {
+      for (String name: names) {
+        numberType(name);
+      }
+      return this;
+    }
+
+    /**
      * Attribute that can be any number
      * @param name attribute name
      * @param number example number to use for generated bodies
@@ -162,6 +184,17 @@ public class PactDslJsonBody extends DslPart {
      */
     public PactDslJsonBody integerType(String name) {
         return integerType(name, Long.parseLong(RandomStringUtils.randomNumeric(9)));
+    }
+
+    /**
+     * Attributes that must be an integer
+     * @param names attribute names
+     */
+    public PactDslJsonBody integerType(String... names) {
+      for (String name: names) {
+        integerType(name);
+      }
+      return this;
     }
 
     /**
@@ -218,6 +251,17 @@ public class PactDslJsonBody extends DslPart {
   }
 
   /**
+   * Attributes that must be a decimal values
+   * @param names attribute names
+   */
+  public PactDslJsonBody decimalType(String... names) {
+    for (String name: names) {
+      decimalType(name);
+    }
+    return this;
+  }
+
+  /**
    * Attribute that must be a decimalType value
    * @param name attribute name
    * @param number example decimalType value
@@ -245,6 +289,17 @@ public class PactDslJsonBody extends DslPart {
      */
     public PactDslJsonBody booleanType(String name) {
         return booleanType(name, true);
+    }
+
+    /**
+     * Attributes that must be a boolean
+     * @param names attribute names
+     */
+    public PactDslJsonBody booleanType(String... names) {
+      for (String name: names) {
+        booleanType(name);
+      }
+      return this;
     }
 
     /**
@@ -567,7 +622,7 @@ public class PactDslJsonBody extends DslPart {
      */
     @Override
     public PactDslJsonBody minArrayLike(String name, Integer size) {
-        return minArrayLike(name, size, 1);
+        return minArrayLike(name, size, size);
     }
 
     @Override
@@ -583,6 +638,10 @@ public class PactDslJsonBody extends DslPart {
      */
     @Override
     public PactDslJsonBody minArrayLike(String name, Integer size, int numberExamples) {
+      if (numberExamples < size) {
+        throw new IllegalArgumentException(String.format("Number of example %d is less than the minimum size of %d",
+          numberExamples, size));
+      }
       matchers.addRule(matcherKey(name), matchMin(size));
       PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), "", this, true);
       parent.setNumberExamples(numberExamples);
@@ -601,7 +660,7 @@ public class PactDslJsonBody extends DslPart {
      * @param value Value to use to match each item
      */
     public PactDslJsonBody minArrayLike(String name, Integer size, PactDslJsonRootValue value) {
-      return minArrayLike(name, size, value, 1);
+      return minArrayLike(name, size, value, 2);
     }
 
     /**
@@ -612,6 +671,10 @@ public class PactDslJsonBody extends DslPart {
      * @param numberExamples number of examples to generate
      */
     public PactDslJsonBody minArrayLike(String name, Integer size, PactDslJsonRootValue value, int numberExamples) {
+      if (numberExamples < size) {
+        throw new IllegalArgumentException(String.format("Number of example %d is less than the minimum size of %d",
+          numberExamples, size));
+      }
       matchers.addRule(matcherKey(name), matchMin(size));
       PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), "", this, true);
       parent.setNumberExamples(numberExamples);
@@ -642,6 +705,10 @@ public class PactDslJsonBody extends DslPart {
      */
     @Override
     public PactDslJsonBody maxArrayLike(String name, Integer size, int numberExamples) {
+      if (numberExamples > size) {
+        throw new IllegalArgumentException(String.format("Number of example %d is more than the maximum size of %d",
+          numberExamples, size));
+      }
       matchers.addRule(matcherKey(name), matchMax(size));
       PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), "", this, true);
       parent.setNumberExamples(numberExamples);
@@ -671,6 +738,10 @@ public class PactDslJsonBody extends DslPart {
      * @param numberExamples number of examples to generate
      */
     public PactDslJsonBody maxArrayLike(String name, Integer size, PactDslJsonRootValue value, int numberExamples) {
+      if (numberExamples > size) {
+        throw new IllegalArgumentException(String.format("Number of example %d is more than the maximum size of %d",
+          numberExamples, size));
+      }
       matchers.addRule(matcherKey(name), matchMax(size));
       PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), "", this, true);
       parent.setNumberExamples(numberExamples);
@@ -835,6 +906,10 @@ public class PactDslJsonBody extends DslPart {
 
   @Override
   public PactDslJsonArray eachArrayWithMaxLike(String name, int numberExamples, Integer size) {
+    if (numberExamples > size) {
+      throw new IllegalArgumentException(String.format("Number of example %d is more than the maximum size of %d",
+        numberExamples, size));
+    }
     matchers.addRule(matcherKey(name), matchMax(size));
     PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), "", this, true);
     parent.setNumberExamples(numberExamples);
@@ -848,7 +923,7 @@ public class PactDslJsonBody extends DslPart {
 
   @Override
   public PactDslJsonArray eachArrayWithMinLike(String name, Integer size) {
-    return eachArrayWithMinLike(name, 1, size);
+    return eachArrayWithMinLike(name, size, size);
   }
 
   @Override
@@ -858,6 +933,10 @@ public class PactDslJsonBody extends DslPart {
 
   @Override
   public PactDslJsonArray eachArrayWithMinLike(String name, int numberExamples, Integer size) {
+    if (numberExamples < size) {
+      throw new IllegalArgumentException(String.format("Number of example %d is less than the minimum size of %d",
+        numberExamples, size));
+    }
     matchers.addRule(matcherKey(name), matchMin(size));
     PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), "", this, true);
     parent.setNumberExamples(numberExamples);

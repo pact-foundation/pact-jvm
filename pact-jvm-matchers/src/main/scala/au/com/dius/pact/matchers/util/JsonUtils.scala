@@ -21,4 +21,14 @@ object JsonUtils {
     }
   }
 
+  def scalaObjectGraphToJavaObjectGraph(value: Any): Any = {
+    value match {
+      case map: Map[String, Any] =>
+        JavaConversions.mapAsJavaMap(map.mapValues(scalaObjectGraphToJavaObjectGraph))
+      case list: List[Any] =>
+        JavaConversions.seqAsJavaList(list.map(scalaObjectGraphToJavaObjectGraph))
+      case _ => value
+    }
+  }
+
 }

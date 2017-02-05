@@ -61,6 +61,77 @@ class PactBrokerClientSpec extends Specification {
     consumers.first().pactFileAuthentication == ['Basic', '1', '2']
   }
 
+  def 'when fetching consumers for an unknown provider, returns an empty pacts list'() {
+    given:
+    def halClient = GroovyMock(HalClient, global: true)
+    halClient.navigate(_, _) >> halClient
+    halClient.pacts(_) >> { args -> throw new NotFoundHalResponse() }
+
+    def client = GroovySpy(PactBrokerClient, global: true) {
+      newHalClient() >> halClient
+    }
+
+    when:
+    def consumers = client.fetchConsumers('provider')
+
+    then:
+    consumers == []
+  }
+
+  def 'fetches consumers with specified tag successfully'() {
+    given:
+    def halClient = GroovyMock(HalClient, global: true)
+    halClient.navigate(_, _) >> halClient
+    halClient.pacts(_) >> { args -> args.first().call([name: 'bob', href: 'http://bob.com/']) }
+
+    def client = GroovySpy(PactBrokerClient, global: true) {
+      newHalClient() >> halClient
+    }
+
+    when:
+    def consumers = client.fetchConsumersWithTag('provider', 'tag')
+
+    then:
+    consumers != []
+    consumers.first().name == 'bob'
+    consumers.first().pactFile == new URL('http://bob.com/')
+  }
+
+  def 'when fetching consumers with specified tag, sets the auth if there is any'() {
+    given:
+    def halClient = GroovyMock(HalClient, global: true)
+    halClient.navigate(_, _) >> halClient
+    halClient.pacts(_) >> { args -> args.first().call([name: 'bob', href: 'http://bob.com/']) }
+
+    def client = GroovySpy(PactBrokerClient, global: true) {
+      newHalClient() >> halClient
+    }
+    client.options.authentication = ['Basic', '1', '2']
+
+    when:
+    def consumers = client.fetchConsumersWithTag('provider', 'tag')
+
+    then:
+    consumers.first().pactFileAuthentication == ['Basic', '1', '2']
+  }
+
+  def 'when fetching consumers with specified tag for an unknown provider, returns an empty pacts list'() {
+    given:
+    def halClient = GroovyMock(HalClient, global: true)
+    halClient.navigate(_, _) >> halClient
+    halClient.pacts(_) >> { args -> throw new NotFoundHalResponse() }
+
+    def client = GroovySpy(PactBrokerClient, global: true) {
+      newHalClient() >> halClient
+    }
+
+    when:
+    def consumers = client.fetchConsumersWithTag('provider', 'tag')
+
+    then:
+    consumers == []
+  }
+
   def 'returns success when uploading a pact is ok'() {
     given:
     pactBroker {
@@ -131,6 +202,29 @@ class PactBrokerClientSpec extends Specification {
     when:
     def result = pactBroker.run {
       assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'FAILED! 409 Conflict - '
+    }
+
+    then:
+    result == PactVerified$.MODULE$
+  }
+
+  def 'handles non-json failure responses'() {
+    given:
+    pactBroker {
+      given('Non-JSON response')
+      uponReceiving('a pact publish request')
+      withAttributes(method: 'PUT',
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
+        body: pactContents
+      )
+      willRespondWith(status: 400, headers: ['Content-Type': 'text/plain'],
+        body: 'Enjoy this bit of text'
+      )
+    }
+
+    when:
+    def result = pactBroker.run {
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'FAILED! 400 Bad Request - Enjoy this bit of text'
     }
 
     then:

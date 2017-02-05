@@ -5,6 +5,7 @@ buildscript {
   dependencies {
     classpath "org.apache.commons:commons-lang3:$commonsLang3Version"
     classpath 'com.tkruse.gradle:gradle-groovysh-plugin:1.0.8'
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
   }
 }
 
@@ -31,12 +32,14 @@ subprojects {
     apply plugin: 'signing'
     apply plugin: 'codenarc'
     apply plugin: 'jacoco'
+    apply plugin: 'kotlin'
 
     apply plugin: 'com.github.tkruse.groovysh'
 
     repositories {
         mavenLocal()
         mavenCentral()
+        jcenter()
     }
 
     dependencies {
@@ -53,6 +56,11 @@ subprojects {
       testCompile 'org.hamcrest:hamcrest-all:1.3',
         'org.mockito:mockito-core:1.10.19',
         "junit:junit:${project.junitVersion}"
+
+      testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+        exclude group: 'org.codehaus.groovy'
+      }
+      testCompile "cglib:cglib:${project.cglibVersion}"
     }
 
     group = 'au.com.dius'
@@ -166,6 +174,8 @@ subprojects {
     }
 
     check.dependsOn << 'jacocoTestReport'
+
+    compileGroovy.dependsOn << 'copyMainKotlinClasses'
 }
 
 tasks.addRule("Pattern: <Task>_<ScalaVersion>") { String taskName ->

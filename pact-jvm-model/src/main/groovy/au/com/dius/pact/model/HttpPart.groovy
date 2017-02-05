@@ -27,6 +27,10 @@ trait HttpPart {
     mimeType().matches('application\\/.*json')
   }
 
+  boolean xmlBody() {
+    mimeType().matches('application\\/.*xml')
+  }
+
   static final XMLREGEXP = /^\s*<\?xml\s*version.*/
   static final HTMLREGEXP = /^\s*(<!DOCTYPE)|(<HTML>).*/
   static final JSONREGEXP = /^\s*(true|false|null|[0-9]+|"\w*|\{\s*(}|"\w+)|\[\s*).*/

@@ -106,7 +106,7 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     then:
     result.size() == 3
     result.keySet() == keys
-    result.types == ['abc', 'abc']
+    result.types == ['"abc"', '"abc"']
     subject.matchers.matchingRules == [
       '.types': [new MinTypeMatcher(0)],
       '.subscriptionId': [new TypeMatcher()],
@@ -129,7 +129,7 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     then:
     result.size() == 3
     result.keySet() == keys
-    result.types == ['abc', 'abc']
+    result.types == ['"abc"', '"abc"']
     subject.matchers.matchingRules == [
       '.types': [new MinTypeMatcher(2)],
       '.subscriptionId': [new TypeMatcher()],
@@ -152,7 +152,7 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     then:
     result.size() == 3
     result.keySet() == keys
-    result.types == ['abc', 'abc']
+    result.types == ['"abc"', '"abc"']
     subject.matchers.matchingRules == [
       '.types': [new MaxTypeMatcher(10)],
       '.subscriptionId': [new TypeMatcher()],

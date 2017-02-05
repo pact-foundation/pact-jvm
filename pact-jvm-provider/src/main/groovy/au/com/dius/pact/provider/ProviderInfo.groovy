@@ -65,6 +65,13 @@ class ProviderInfo {
       consumersFromBroker
     }
 
+    List hasPactsFromPactBrokerWithTag(Map options = [:], String pactBrokerUrl, String tag) {
+        PactBrokerClient client = new PactBrokerClient(pactBrokerUrl, options)
+        def consumersFromBroker = client.fetchConsumersWithTag(name, tag)
+        consumers.addAll(consumersFromBroker)
+        consumersFromBroker
+    }
+
     @SuppressWarnings('ThrowRuntimeException')
     private List setupConsumerListFromPactFiles(ConsumersGroup consumersGroup) {
         if (!consumersGroup.pactFileLocation) {

@@ -6,7 +6,7 @@ import groovy.util.logging.Slf4j
  * Utility class for matching rules
  */
 @Slf4j
-@SuppressWarnings(['CyclomaticComplexity', 'UnusedObject'])
+@SuppressWarnings(['CyclomaticComplexity', 'UnusedObject', 'AbcMetric'])
 class MatchingRuleUtil {
 
   private static final String MATCH = 'match'
@@ -33,7 +33,9 @@ class MatchingRuleUtil {
           new IncludeMatcher(map['value'] as String)
           break
         case 'type':
-          if (map.containsKey(MIN)) {
+          if (map.containsKey(MIN) && map.containsKey(MAX)) {
+            new MinMaxTypeMatcher(Integer.parseInt(map[MIN] as String), Integer.parseInt(map[MAX] as String))
+          } else if (map.containsKey(MIN)) {
             new MinTypeMatcher(Integer.parseInt(map[MIN] as String))
           } else if (map.containsKey(MAX)) {
             new MaxTypeMatcher(Integer.parseInt(map[MAX] as String))

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
+ * A junit rule that wraps every test annotated with {@link PactVerification}.
  */
 public class MessagePactProviderRule extends ExternalResource {
 	
@@ -56,6 +56,7 @@ public class MessagePactProviderRule extends ExternalResource {
 				}
 
 				PactVerification pactDef = description.getAnnotation(PactVerification.class);
+				// no pactVerification? execute the test normally
 				if (pactDef == null) {
 					base.evaluate();
 					return;
@@ -66,9 +67,11 @@ public class MessagePactProviderRule extends ExternalResource {
 				if (StringUtils.isNoneEmpty(pactDef.fragment())) {
           Optional<Method> possiblePactMethod = findPactMethod(pactDef);
           if (!possiblePactMethod.isPresent()) {
-            throw new UnsupportedOperationException("Could not find method with @Pact for the provider " + provider);
+            base.evaluate();
+            return;
           }
-          pacts = new HashMap<String, Message>();
+
+          pacts = new HashMap<>();
           Method method = possiblePactMethod.get();
           Pact pact = method.getAnnotation(Pact.class);
           MessagePactBuilder builder = MessagePactBuilder.consumer(pact.consumer()).hasPactWith(provider);

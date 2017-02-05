@@ -133,6 +133,14 @@ The default HTTP client is used for all requests to providers (created with a ca
 This can be changed by specifying a function assigned to `:create-client` on the provider that returns a `CloseableHttpClient`.
 The function will receive the provider info as a parameter.
 
+## Turning off URL decoding of the paths in the pact file [version 3.3.3+]
+
+By default the paths loaded from the pact file will be decoded before the request is sent to the provider. To turn this
+behaviour off, set the system property `pact.verifier.disableUrlPathDecoding` to `true`.
+
+__*Important Note:*__ If you turn off the url path decoding, you need to ensure that the paths in the pact files are 
+correctly encoded. The verifier will not be able to make a request with an invalid encoded path.
+
 ## Plugin Properties
 
 The following plugin options can be specified on the command line:
@@ -140,6 +148,7 @@ The following plugin options can be specified on the command line:
 |Property|Description|
 |--------|-----------|
 |:pact.showStacktrace|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
+|:pact.showFullDiff|This turns on displaying the full diff of the expected versus actual bodies [version 3.3.6+]|
 |:pact.filter.consumers|Comma seperated list of consumer names to verify|
 |:pact.filter.description|Only verify interactions whose description match the provided regular expression|
 |:pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|

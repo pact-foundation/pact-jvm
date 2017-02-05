@@ -1,7 +1,8 @@
 dependencies {
   compile project(":pact-jvm-model"),
     "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
-    "io.gatling:jsonpath_${project.scalaVersion}:0.6.4"
+    "io.gatling:jsonpath_${project.scalaVersion}:0.6.4",
+    'com.googlecode.java-diff-utils:diffutils:1.3.0'
   compile 'org.apache.commons:commons-collections4:4.1'
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"

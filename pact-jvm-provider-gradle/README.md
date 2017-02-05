@@ -59,14 +59,14 @@ pact {
                 pactFile = file('path/to/provider1-consumer1-pact.json')
 
             }
-            
+
             // Or if you have many pact files in a directory
             hasPactsWith('manyConsumers') {
 
-                // Will define a consumer for each pact file in the directory. 
-                // Consumer name is read from contents of pact file 
+                // Will define a consumer for each pact file in the directory.
+                // Consumer name is read from contents of pact file
                 pactFileLocation = file('path/to/pacts')
-                               
+
             }
 
         }
@@ -100,7 +100,7 @@ pact {
 }
 ```
 
-_Since version 3.3.2+/2.4.17+_ you can also give a closure as the provider port. 
+_Since version 3.3.2+/2.4.17+_ you can also give a closure as the provider port.
 
 ## Specifying the pact file or URL at runtime [versions 3.2.7/2.4.9+]
 
@@ -281,6 +281,14 @@ pact {
 __*Important Note:*__ You should only use this feature for things that can not be persisted in the pact file. By modifying
 the request, you are potentially modifying the contract from the consumer tests!
 
+## Turning off URL decoding of the paths in the pact file [version 3.3.3+]
+
+By default the paths loaded from the pact file will be decoded before the request is sent to the provider. To turn this
+behaviour off, set the system property `pact.verifier.disableUrlPathDecoding` to `true`.
+
+__*Important Note:*__ If you turn off the url path decoding, you need to ensure that the paths in the pact files are
+correctly encoded. The verifier will not be able to make a request with an invalid encoded path.
+
 ## Project Properties
 
 The following project properties can be specified with `-Pproperty=value` on the command line:
@@ -288,6 +296,7 @@ The following project properties can be specified with `-Pproperty=value` on the
 |Property|Description|
 |--------|-----------|
 |pact.showStacktrace|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
+|pact.showFullDiff|This turns on displaying the full diff of the expected versus actual bodies [version 3.3.6+]|
 |pact.filter.consumers|Comma seperated list of consumer names to verify|
 |pact.filter.description|Only verify interactions whose description match the provided regular expression|
 |pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
@@ -299,8 +308,8 @@ For a description of what provider states are, see the pact documentations: http
 ### Using a state change URL
 
 For each provider you can specify a state change URL to use to switch the state of the provider. This URL will
-receive the providerState description from the pact file before each interaction via a POST. As for normal requests,
-a request filter (`stateChangeRequestFilter`) can also be set to manipulate the request before it is sent.
+receive the providerState description and all the parameters from the pact file before each interaction via a POST. 
+As for normal requests, a request filter (`stateChangeRequestFilter`) can also be set to manipulate the request before it is sent.
 
 ```groovy
 pact {
@@ -318,7 +327,7 @@ pact {
                     req.addHeader('Authorization', 'OAUTH eyJhbGciOiJSUzI1NiIsImN0eSI6ImFw...')
                 }
             }
-            
+
             // or
             hasPactsWith('consumers') {
                 pactFileLocation = file('path/to/pacts')                
@@ -333,8 +342,8 @@ pact {
 }
 ```
 
-If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description will be sent as
- JSON in the body of the request. If it is set to false, it will passed as a query parameter.
+If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description and parameters 
+will be sent as JSON in the body of the request. If it is set to false, they will passed as query parameters.
 
 #### Teardown calls for state changes [version 3.2.5/2.4.7+]
 
@@ -345,7 +354,7 @@ then a teardown call will be made afterwards to the state change URL with `actio
 ### Using a Closure [version 2.2.2+]
 
 You can set a closure to be called before each verification with a defined provider state. The closure will be
-called with the state description from the pact file.
+called with the state description and parameters from the pact file.
 
 ```groovy
 pact {
@@ -359,6 +368,7 @@ pact {
                 // Load a fixture file based on the provider state and then setup some database
                 // data. Does not require a state change request so returns false
                 stateChange = { providerState ->
+                    // providerState is an instance of ProviderState
                     def fixture = loadFixtuerForProviderState(providerState)
                     setupDatabase(fixture)
                 }
@@ -522,6 +532,22 @@ _NOTE:_ The pact broker requires a version for all published pacts. The `pactPub
 gradle project by default. Make sure you have set one otherwise the broker will reject the pact files.
 
 _Version 3.2.2/2.4.3+_ you can override the version in the publish block.
+
+## Publishing to an authenticated pact broker
+
+To publish to a broker protected by basic auth, include the username/password in the `pactBrokerUrl`.
+
+For example:
+
+```groovy
+pact {
+
+    publish {
+        pactBrokerUrl = 'https://username:password@mypactbroker.com'
+    }
+
+}
+```
 
 # Verifying a message provider [version 2.2.12+]
 

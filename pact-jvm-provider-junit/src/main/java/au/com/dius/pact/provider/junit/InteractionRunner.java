@@ -7,6 +7,7 @@ import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget;
 import au.com.dius.pact.provider.junit.target.TestTarget;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpRequest;
 import org.junit.After;
 import org.junit.Before;
@@ -212,7 +213,12 @@ class InteractionRunner extends Runner {
                 validStates.add(method);
               }
             }
-            stateChange = new RunStateChanges(stateChange, validStates, target, state);
+            if (validStates.isEmpty()) {
+              return new Fail(new MissingStateChangeMethod("MissingStateChangeMethod: Did not find a test class method annotated with @State(\""
+                + state.getName() + "\")"));
+            } else {
+              stateChange = new RunStateChanges(stateChange, validStates, target, state);
+            }
           }
           return stateChange;
         } else {

@@ -128,8 +128,8 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
                   .getConstructor(annotation.annotationType()).newInstance(annotation);
             }
         } catch (final InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            LOGGER.error(e.getMessage(), e);
-            throw new InitializationError("Error while creating pact source");
+            LOGGER.error("Error while creating pact source", e);
+            throw new InitializationError(e);
         }
     }
 }

@@ -35,4 +35,14 @@ public @interface PactBroker {
      * Tags to use to fetch pacts for
      */
     String[] tags() default "latest";
+
+  /**
+   * If the test should fail if no pacts are found for the provider, default is true.
+   */
+  boolean failIfNoPactsFound() default true;
+
+  /**
+   * Authentication to use with the pact broker
+   */
+  PactBrokerAuth authentication() default @PactBrokerAuth(scheme = "none", username = "", password = "");
 }

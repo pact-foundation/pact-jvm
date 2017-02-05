@@ -5,6 +5,7 @@ import au.com.dius.pact.model.matchingrules.MatchingRule;
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
 import au.com.dius.pact.model.matchingrules.TypeMatcher;
 import com.mifmif.common.regex.Generex;
+import groovy.json.JsonOutput;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -38,6 +39,9 @@ public class PactDslJsonRootValue extends DslPart {
 
   @Override
   public Object getBody() {
+    if (value instanceof String) {
+      return JsonOutput.toJson(value);
+    }
     return value;
   }
 
@@ -533,7 +537,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMaxLike(String name, Integer size) {
-    return null;
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -541,7 +545,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMaxLike(Integer size) {
-    return null;
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -549,7 +553,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMaxLike(String name, int numberExamples, Integer size) {
-    return null;
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -557,7 +561,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMaxLike(int numberExamples, Integer size) {
-    return null;
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -565,7 +569,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMinLike(String name, Integer size) {
-    return null;
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -573,7 +577,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMinLike(Integer size) {
-    return null;
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -581,7 +585,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMinLike(String name, int numberExamples, Integer size) {
-    return null;
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
@@ -589,7 +593,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMinLike(int numberExamples, Integer size) {
-    return null;
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 
   /**
