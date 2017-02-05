@@ -37,7 +37,7 @@ class Response implements HttpPart {
     def r = this
     new Response().with {
       status = r.status
-      headers = r.headers ? [:] + r.headers : null
+      headers = r.headers ? [:] + r.headers : [:]
       body = r.body
       matchingRules = r.matchingRules.copy()
       generators = r.generators.copy(r.generators.categories)
@@ -49,11 +49,9 @@ class Response implements HttpPart {
     def r = this.copy()
     generators.applyGenerator(Category.STATUS) { String key, Generator g -> r.status = g.generate(r.status) as Integer }
     generators.applyGenerator(Category.HEADER) { String key, Generator g ->
-      if (r.headers == null) {
-        r.headers = [:]
-      }
       r.headers[key] = g.generate(r.headers[key])
     }
+    r.body = generators.applyBodyGenerators(r.body, new ContentType(mimeType()))
     r
   }
 }

@@ -153,7 +153,7 @@ class PactBodyBuilderSpec extends Specification {
     keys == [
         'orders', [0, [
                 'id', [], 'lineItems', [0, [
-                    'amount', [], 'id', [], 'productCodes', [0, [
+                    'id', [], 'amount', [], 'productCodes', [0, [
                         'code', []
                     ]]
                 ]]
@@ -436,7 +436,7 @@ class PactBodyBuilderSpec extends Specification {
     keys == [
       '2', [0, [
         'id', [], 'lineItems', [0, [
-          '10k-depreciation-bips', [], 'id', [], 'productCodes', [0, [
+            'id', [], '10k-depreciation-bips', [], 'productCodes', [0, [
             'code', []
           ]]
         ]]

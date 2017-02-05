@@ -89,7 +89,7 @@ class PactMergeSpec extends Specification {
         new RequestResponseInteraction('test', [new ProviderState('test')], new Request(), new Response())
       ]),
       new MessagePact(provider, consumer, [
-        new Message('test', [new ProviderState('test')], new OptionalBody())
+        new Message('test', [new ProviderState('test')], OptionalBody.empty())
       ])
     ]
     result = PactMerge.merge(newPact, existingPact)
@@ -108,7 +108,7 @@ class PactMergeSpec extends Specification {
         new RequestResponseInteraction('test', [new ProviderState('test')], new Request(), new Response())
       ]),
       new MessagePact(provider, consumer, [
-        new Message('test', [new ProviderState('test')], new OptionalBody())
+        new Message('test', [new ProviderState('test')], OptionalBody.empty())
       ])
     ]
     result = PactMerge.merge(newPact, existingPact)
