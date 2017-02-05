@@ -98,7 +98,7 @@ public class HttpTarget extends BaseTarget {
     public HttpTarget(final URL url, final boolean insecure) {
         this(url.getProtocol() == null ? "http" : url.getProtocol(),
                 url.getHost(),
-                url.getPort() == -1 ? 8080 : url.getPort(),
+                url.getPort() == -1 && url.getProtocol().equalsIgnoreCase("http") ? 8080 : url.getPort() == -1 && url.getProtocol().equalsIgnoreCase("https") ? 443 : url.getPort(),
                 url.getPath() == null ? "/" : url.getPath(),
                 insecure);
 
