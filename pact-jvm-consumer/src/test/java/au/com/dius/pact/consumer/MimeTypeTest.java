@@ -39,8 +39,9 @@ public class MimeTypeTest {
 
     @Test
     public void testMatchingText() {
-        String body = "Define a pact between service consumers and providers, enabling \"consumer driven contract\" testing.\n" +
-            "\nPact provides an RSpec DSL for service consumers to define the HTTP requests they will make to a service" +
+        String newLine = System.lineSeparator();
+        String body = "Define a pact between service consumers and providers, enabling \"consumer driven contract\" testing." + newLine +
+            newLine + "Pact provides an RSpec DSL for service consumers to define the HTTP requests they will make to a service" +
             " provider and the HTTP responses they expect back. These expectations are used in the consumers specs " +
             "to provide a mock service provider. The interactions are recorded, and played back in the service " +
             "provider specs to ensure the service provider actually does provide the response the consumer expects.";
