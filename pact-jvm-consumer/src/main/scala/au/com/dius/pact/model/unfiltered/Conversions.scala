@@ -68,7 +68,7 @@ object Conversions extends StrictLogging {
     } else {
       new BufferedReader(request.reader)
     }
-    Stream.continually(br.readLine()).takeWhile(_ != null).mkString("\n")
+    Stream.continually(br.readLine()).takeWhile(_ != null).mkString(System.lineSeparator())
   }
 
   implicit def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {
