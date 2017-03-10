@@ -68,7 +68,7 @@ object Conversions extends StrictLogging {
     } else {
       request.inputStream
     }
-    scala.io.Source.fromInputStream(is).mkString
+    if(is == null) "" else scala.io.Source.fromInputStream(is).mkString
   }
 
   implicit def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {
