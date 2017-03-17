@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 
 import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseExpressions;
+import static au.com.dius.pact.provider.junit.sysprops.PactRunnerTagListExpressionParser.parseTagListExpressions;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -40,7 +41,7 @@ public class PactBrokerLoader implements PactLoader {
     this.pactBrokerHost = pactBrokerHost;
     this.pactBrokerPort = pactBrokerPort;
     this.pactBrokerProtocol = pactBrokerProtocol;
-    this.pactBrokerTags = tags;
+    this.pactBrokerTags = parseTagListExpressions(tags);
     this.failIfNoPactsFound = true;
   }
 
