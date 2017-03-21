@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.InvalidMatcherException;
 import com.mifmif.common.regex.Generex;
+import groovy.json.JsonSlurper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -170,7 +171,11 @@ public class PactDslJsonArray extends DslPart {
           matchers.put(rootPath + appendArrayIndex(1) + matcherName, object.matchers.get(matcherName));
       }
       for (int i = 0; i < getNumberExamples(); i++) {
-        body.put(object.getBody());
+        Object objBody = object.getBody();
+        if (objBody instanceof String)
+            body.put(new JsonSlurper().parseText((String)objBody));
+        else
+            body.put(object.getBody());
       }
     }
 
