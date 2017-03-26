@@ -94,12 +94,13 @@ class PactBuilder extends BaseBuilder {
       Map requestMatchers = requestData[i].matchers ?: [:]
       Map responseMatchers = responseData[i].matchers ?: [:]
       Map headers = setupHeaders(requestData[i].headers ?: [:], requestMatchers)
+      Map query = setupQueryParameters(requestData[i].query ?: [:], requestMatchers)
       Map responseHeaders = setupHeaders(responseData[i].headers ?: [:], responseMatchers)
       String path = setupPath(requestData[i].path ?: '/', requestMatchers)
       interactions << new RequestResponseInteraction(
         requestDescription,
         providerState,
-        new Request(requestData[i].method ?: 'get', path, requestData[i]?.query, headers,
+        new Request(requestData[i].method ?: 'get', path, query, headers,
           requestData[i].containsKey(BODY) ? OptionalBody.body(requestData[i].body) : OptionalBody.missing(),
           requestMatchers),
         new Response(responseData[i].status ?: 200, responseHeaders,
@@ -136,6 +137,21 @@ class PactBuilder extends BaseBuilder {
       matcher.value
     } else {
       path as String
+    }
+  }
+
+  private static Map setupQueryParameters(Map query, Map matchers) {
+    query.collectEntries { key, value ->
+      if (value[0] instanceof Matcher) {
+        matchers["\$.query.${key}.*"] = value[0].matcher
+        [key, [value[0].value]]
+      } else if (value[0] instanceof Pattern) {
+        def matcher = new RegexpMatcher(values: [value[0]])
+        matchers["\$.query.${key}.*"] = matcher.matcher
+        [key, [matcher.value]]
+      } else {
+        [key, value]
+      }
     }
   }
 
