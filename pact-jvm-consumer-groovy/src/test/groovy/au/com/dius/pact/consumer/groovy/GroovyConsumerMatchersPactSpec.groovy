@@ -115,4 +115,31 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     then:
     result == PactVerified$.MODULE$
   }
+
+  def 'matching on query parameters'() {
+    given:
+    def matcherService = new PactBuilder()
+    matcherService {
+      serviceConsumer 'MatcherConsumer2'
+      hasPactWith 'MatcherService'
+      port 1235
+    }
+
+    matcherService {
+      uponReceiving('a request to match query parameters')
+      withAttributes(method: 'get', path: '/', query: [a: ~/\d+/, b: regexp('[A-Z]', 'X')])
+      willRespondWith(status: 200)
+    }
+
+    when:
+    VerificationResult result = matcherService.run {
+      def client = new RESTClient('http://localhost:1235/')
+      def response = client.get(query: [a: '100', b: 'Z'])
+
+      assert response.status == 200
+    }
+
+    then:
+    result == PactVerified$.MODULE$
+  }
 }

@@ -126,9 +126,9 @@ Defines the request for the interaction. The request data map can contain the fo
 | body | The body of the request. If it is not a string, it will be converted to JSON. Also accepts a PactBodyBuilder. | |
 | prettyPrint | Boolean value to control if the body is pretty printed. See note on Pretty Printed Bodies below |
 
-For the path and header attributes (version 2.2.2+ for headers), you can use regular expressions to match.
-You can either provide a regex `Pattern` class or use the `regexp` method to construct a `RegexpMatcher`
-(you can use any of the defined matcher methods, see DSL methods below).
+For the path, header attributes and query parameters (version 2.2.2+ for headers, 3.3.7+ for query parameters), 
+you can use regular expressions to match. You can either provide a regex `Pattern` class or use the `regexp` method 
+to construct a `RegexpMatcher` (you can use any of the defined matcher methods, see DSL methods below).
 If you use a `Pattern`, or the `regexp` method but don't provide a value, a random one will be generated from the
 regular expression. This value is used when generating requests.
 
