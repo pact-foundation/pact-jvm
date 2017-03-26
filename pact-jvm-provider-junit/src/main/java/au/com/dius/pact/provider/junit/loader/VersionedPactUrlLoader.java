@@ -43,12 +43,19 @@ public class VersionedPactUrlLoader implements PactLoader {
 
     private static String expandVariables(String urlWithVariables) {
         String urlWithVersions = urlWithVariables;
+        if (!variablesToExpandFound(urlWithVersions)) {
+            throw new IllegalArgumentException(urlWithVersions + " contains no variables to expand in the format ${...}. Consider using @PactUrl or providing expandable variables.");
+        }
         for (Map.Entry<Object, Object> property : System.getProperties().entrySet()) {
             urlWithVersions = urlWithVersions.replace(format("${%s}", property.getKey()), property.getValue().toString());
         }
-        if (urlWithVersions.matches(".*\\$\\{[a-z\\.]+\\}.*")) {
+        if (variablesToExpandFound(urlWithVersions)) {
             throw new IllegalArgumentException(urlWithVersions + " contains variables that could not be any of the system properties. Define a system property to replace them or remove the variables from the URL.");
         }
         return urlWithVersions;
+    }
+
+    private static boolean variablesToExpandFound(String urlWithVersions) {
+        return urlWithVersions.matches(".*\\$\\{[a-z\\.]+\\}.*");
     }
 }
