@@ -118,6 +118,24 @@ public class MatchingTest {
         Assert.assertTrue("'" + val + "' is not a number", NumberUtils.isDigits(val));
     }
 
+    @Test
+    public void testRegexpMatchingOnQueryParameters() {
+        PactDslResponse fragment = ConsumerPactBuilder
+          .consumer(TEST_CONSUMER)
+          .hasPactWith(TEST_PROVIDER)
+          .uponReceiving("a request to match on query parameters")
+          .path(HELLO)
+          .method("POST")
+          .matchQuery("a", "\\d+")
+          .matchQuery("b", "\\d+")
+          .matchQuery("c", "[A-Z]")
+          .body("{}", ContentType.APPLICATION_JSON)
+          .willRespondWith()
+          .status(200);
+        Map expectedResponse = new HashMap();
+        runTest(fragment, "{}", expectedResponse, HELLO + "?a=100&b=200&c=X");
+    }
+
     private void runTest(PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
         MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V2);
         VerificationResult result = pactFragment.toFragment().runConsumer(config, new TestRun() {

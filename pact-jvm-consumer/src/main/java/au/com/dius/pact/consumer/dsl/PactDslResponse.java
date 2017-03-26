@@ -196,7 +196,7 @@ public class PactDslResponse {
         consumerPactBuilder.getInteractions().add(new RequestResponseInteraction(
           request.description,
           request.state,
-          new Request(request.requestMethod, request.path, PactReader.queryStringToMap(request.query, false),
+          new Request(request.requestMethod, request.path, request.query,
             request.requestHeaders, request.requestBody, request.requestMatchers),
           new Response(responseStatus, responseHeaders, responseBody, responseMatchers)
         ));
