@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.OptionalBody;
+import au.com.dius.pact.model.PactReader;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.entity.ContentType;
@@ -11,6 +12,7 @@ import org.w3c.dom.Document;
 import javax.xml.transform.TransformerException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -24,10 +26,10 @@ public class PactDslRequestWithoutPath {
     private PactDslWithState pactDslWithState;
     private String description;
     private String requestMethod;
-    private Map<String, String> requestHeaders = new HashMap<String, String>();
-    private String query;
+    private Map<String, String> requestHeaders = new HashMap<>();
+    private Map<String, List<String>> query = new HashMap<>();
     private OptionalBody requestBody = OptionalBody.missing();
-    private Map<String, Map<String, Object>> requestMatchers = new HashMap<String, Map<String, Object>>();
+    private Map<String, Map<String, Object>> requestMatchers = new HashMap<>();
     private String consumerName;
     private String providerName;
 
@@ -87,7 +89,7 @@ public class PactDslRequestWithoutPath {
      * @param query query string
      */
     public PactDslRequestWithoutPath query(String query) {
-        this.query = query;
+        this.query = PactReader.queryStringToMap(query, false);
         return this;
     }
 

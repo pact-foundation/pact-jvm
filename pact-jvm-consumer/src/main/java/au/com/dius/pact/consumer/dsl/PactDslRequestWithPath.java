@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.dsl;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.Consumer;
 import au.com.dius.pact.model.OptionalBody;
+import au.com.dius.pact.model.PactReader;
 import au.com.dius.pact.model.Provider;
 import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
@@ -10,7 +11,9 @@ import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -25,10 +28,10 @@ public class PactDslRequestWithPath {
     String description;
     String path = "/";
     String requestMethod = "GET";
-    Map<String, String> requestHeaders = new HashMap<String, String>();
-    String query;
+    Map<String, String> requestHeaders = new HashMap<>();
+    Map<String, List<String>> query = new HashMap<>();
     OptionalBody requestBody = OptionalBody.missing();
-    Map<String, Map<String, Object>> requestMatchers = new HashMap<String, Map<String, Object>>();
+    Map<String, Map<String, Object>> requestMatchers = new HashMap<>();
 
     public PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
                                   String consumerName,
@@ -38,7 +41,7 @@ public class PactDslRequestWithPath {
                                   String path,
                                   String requestMethod,
                                   Map<String, String> requestHeaders,
-                                  String query,
+                                  Map<String, List<String>> query,
                                   OptionalBody requestBody,
                                   Map<String, Map<String, Object>> requestMatchers) {
         this.consumerPactBuilder = consumerPactBuilder;
@@ -113,7 +116,7 @@ public class PactDslRequestWithPath {
      * @param query query string
      */
     public PactDslRequestWithPath query(String query) {
-        this.query = query;
+        this.query = PactReader.queryStringToMap(query, false);
         return this;
     }
 
@@ -323,4 +326,27 @@ public class PactDslRequestWithPath {
     public PactDslResponse willRespondWith() {
         return new PactDslResponse(consumerPactBuilder, this);
     }
+
+  /**
+  * Match a query parameter with a regex. A random query parameter value will be generated from the regex.
+  * @param parameter Query parameter
+  * @param regex Regular expression to match with
+  */
+  public PactDslRequestWithPath matchQuery(String parameter, String regex) {
+    return matchQuery(parameter, regex, new Generex(regex).random());
+  }
+
+  /**
+   * Match a query parameter with a regex.
+   * @param parameter Query parameter
+   * @param regex Regular expression to match with
+   * @param example Example value to use for the query parameter
+   */
+  public PactDslRequestWithPath matchQuery(String parameter, String regex, String example) {
+    HashMap<String, Object> matcher = new HashMap<String, Object>();
+    matcher.put("regex", regex);
+    requestMatchers.put("$.query." + parameter + ".*", matcher);
+    query.put(parameter, Arrays.asList(example));
+    return this;
+  }
 }

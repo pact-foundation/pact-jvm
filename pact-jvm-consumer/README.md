@@ -353,3 +353,24 @@ For example:
         .body("{\"hello\": \"harry\"}")
         .matchHeader("Location", ".*/hello/[0-9]+", "/hello/1234")
 ```
+
+### Matching on query parameters (version 3.3.7+)
+
+You can use regular expressions to match request query parameters. The DSL has a `matchQuery` method for this. You can provide
+an example value to use when generating requests, and if you leave it out it will generate a random one
+from the regular expression.
+
+For example:
+
+```java
+  .given("test state")
+    .uponReceiving("a test interaction")
+        .path("/hello")
+        .method("POST")
+        .matchQuery("a", "\\d+", "100")
+        .matchQuery("b", "[A-Z]", "X")
+        .body("{\"name\": \"harry\"}")
+    .willRespondWith()
+        .status(200)
+        .body("{\"hello\": \"harry\"}")
+```
