@@ -35,6 +35,7 @@ class ProviderVerifier {
   def executeBuildSpecificTask = { }
   def projectClasspath = { }
   def reporters = [ new AnsiConsoleReporter() ]
+  def providerMethodInstance = { Method m -> m.declaringClass.newInstance() }
 
   Map verifyProvider(ProviderInfo provider) {
     Map failures = [:]
@@ -385,7 +386,7 @@ class ProviderVerifier {
   void verifyMessagePact(Set methods, Message message, String interactionMessage, Map failures) {
     methods.each {
       reporters.each { it.generatesAMessageWhich() }
-      def actualMessage = OptionalBody.body(invokeProviderMethod(it) as String)
+      def actualMessage = OptionalBody.body(invokeProviderMethod(it, providerMethodInstance(it)) as String)
       def comparison = ResponseComparison.compareMessage(message, actualMessage)
       def s = ' generates a message which'
       displayBodyResult(failures, comparison, interactionMessage + s)
@@ -393,9 +394,9 @@ class ProviderVerifier {
   }
 
   @SuppressWarnings('ThrowRuntimeException')
-  static invokeProviderMethod(Method m) {
+  static invokeProviderMethod(Method m, Object instance) {
     try {
-      m.invoke(m.declaringClass.newInstance())
+      m.invoke(instance)
     } catch (e) {
       throw new RuntimeException("Failed to invoke provider method '${m.name}'", e)
     }
