@@ -1,5 +1,29 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.3.7 - Small PRs and query parameter matching
+
+* 70da023 - Allow the instantation of objects for provider methods to be overwridden in the verifier (Ronald Holshausen, Mon Mar 27 14:14:13 2017 +1100)
+* da3b39f - Added query parameter matching support to the Groovy DSL #375 (Ronald Holshausen, Sun Mar 26 15:23:08 2017 +1100)
+* dede1f8 - Added query parameter matching support to the Java DSL #392 (Ronald Holshausen, Sun Mar 26 14:55:38 2017 +1100)
+* 32b4fec - Merge pull request #394 from tjheslin1/master (Ronald Holshausen, Sun Mar 26 14:05:17 2017 +1100)
+* d2b2cb4 - Merge pull request #393 from aniket-21/master (Ronald Holshausen, Sun Mar 26 14:04:08 2017 +1100)
+* 7fd77cb - Merge pull request #391 from Fitzoh/master (Ronald Holshausen, Sun Mar 26 14:01:59 2017 +1100)
+* a68222b - Added check to VersionedPactUrlLoader to blow up if the url provided does not contain any variables to expand. (Thomas Heslin, Fri Mar 24 22:23:11 2017 +0000)
+* d6121fe - Update PactBrokerLoader to accept tags from system properties. Currently there is no way to modify the list of tags which are pulled from the broker at runtime.  This commit makes the PactBrokerLoader honor system property expressions in a manner similar to the way it is handled for other parameters. If multiple tags are included in a system parameter they must be comma separated. (Fitzgerald, Andrew, Thu Mar 16 23:06:20 2017 -0400)
+* 317ccb7 - Revert "Fix for issue #385" (I337111, Wed Mar 22 10:02:01 2017 +0800)
+* 44d6a87 - Fix for issue #385 (I337111, Tue Mar 21 19:14:14 2017 +0800)
+* 195bb93 - handling null value o/p of mkstring (I337111, Fri Mar 10 15:39:30 2017 +0800)
+* 3349b08 - Simplifying line separator logic (I337111, Fri Mar 10 13:45:13 2017 +0800)
+* a53d1fb - Merge pull request #377 from aniket-21/master (Ronald Holshausen, Sun Feb 12 17:04:55 2017 +1100)
+* 61728fa - Update mime test (Aniket, Fri Feb 10 15:33:58 2017 +0800)
+* 82e3d54 - Update code to have platform specific line separator (Aniket, Fri Feb 10 15:13:11 2017 +0800)
+* 6f84e2a - Updated the versions in README (Ronald Holshausen, Sun Feb 5 17:24:02 2017 +1100)
+* b23ebfe - update changelog for release 3.5.0-beta.3 (Ronald Holshausen, Sun Feb 5 16:53:15 2017 +1100)
+* 70ea156 - Merge pull request #374 from aniket-21/master (Ronald Holshausen, Sun Feb 5 14:23:34 2017 +1100)
+* ff06104 - Fix logic for default port in case of https (Aniket, Thu Feb 2 18:15:16 2017 +0800)
+* 6453b81 - updated versions in README (Ronald Holshausen, Thu Jan 26 18:52:14 2017 +1100)
+* b358b33 - bump version to 3.3.7 (Ronald Holshausen, Thu Jan 26 18:50:25 2017 +1100)
+
 # 3.5.0-beta.3 - Interim V3 Release
 
 * f1182c1 - Merge branch 'master' into v3-spec (Ronald Holshausen, Sun Feb 5 16:44:30 2017 +1100)
