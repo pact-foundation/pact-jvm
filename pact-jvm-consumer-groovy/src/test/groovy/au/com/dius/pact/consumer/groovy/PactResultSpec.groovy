@@ -40,7 +40,7 @@ class PactResultSpec extends Specification {
         def testService = new PactBuilder().build  {
             serviceConsumer 'Consumer'
             hasPactWith 'Test Service'
-            port 1234
+            port 1235
 
             uponReceiving('a valid request')
             withAttributes(method: 'get', path: '/path', query: [status: 'good', name: 'ron'])
@@ -53,7 +53,7 @@ class PactResultSpec extends Specification {
       when:
         def response
         testService.runTestAndVerify {
-          def client = new RESTClient('http://localhost:1234/')
+          def client = new RESTClient('http://localhost:1235/')
           response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                 requestContentType: 'application/json')
 
@@ -70,7 +70,7 @@ class PactResultSpec extends Specification {
         def testService = new PactBuilder().build  {
             serviceConsumer 'Consumer'
             hasPactWith 'Test Service'
-            port 1234
+            port 1236
 
             uponReceiving('a valid request')
             withAttributes(method: 'get', path: '/path', query: [status: 'good', name: 'ron'])
@@ -83,7 +83,7 @@ class PactResultSpec extends Specification {
       when:
         def response
         testService.runTestAndVerify {
-            def client = new RESTClient('http://localhost:1234/')
+            def client = new RESTClient('http://localhost:1236/')
             response = client.get(path: '/path', query: [status: 'bad', name: 'ron'],
                 requestContentType: 'application/json')
             assert response.status == 200
@@ -101,7 +101,7 @@ class PactResultSpec extends Specification {
         def testService = new PactBuilder().build  {
             serviceConsumer 'Consumer'
             hasPactWith 'Test Service'
-            port 1234
+            port 1237
 
             uponReceiving('a valid request')
             withAttributes(method: 'get', path: '/path', query: [status: 'good', name: 'ron'])
@@ -120,7 +120,7 @@ class PactResultSpec extends Specification {
 
       when:
         testService.runTestAndVerify {
-            def client = new RESTClient('http://localhost:1234/')
+            def client = new RESTClient('http://localhost:1237/')
             def response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                 requestContentType: 'application/json')
             assert response.status == 200
