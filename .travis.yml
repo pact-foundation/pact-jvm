@@ -9,8 +9,8 @@ jdk:
   - openjdk7
   - oraclejdk8
 env:
-  - SCALA=2.10 JAVA_OPTS="-XX:MaxPermSize=512m -XX:ReservedCodeCacheSize=512m" GRADLE_OPTS="-Dorg.gradle.daemon=false -Xmx512m"
-  - SCALA=2.11 JAVA_OPTS="-XX:MaxPermSize=512m -XX:ReservedCodeCacheSize=512m" GRADLE_OPTS="-Dorg.gradle.daemon=false -Xmx512m"
+  - SCALA=2.10 JAVA_OPTS="-XX:MaxPermSize=512m -XX:ReservedCodeCacheSize=512m -Xmx512m -Xms256m" GRADLE_OPTS="-Dorg.gradle.daemon=false -Xmx128m"
+  - SCALA=2.11 JAVA_OPTS="-XX:MaxPermSize=512m -XX:ReservedCodeCacheSize=512m -Xmx512m -Xms256m" GRADLE_OPTS="-Dorg.gradle.daemon=false -Xmx128m"
 
 script:
   - ./gradlew --stacktrace --no-daemon -i check_$SCALA install_$SCALA
