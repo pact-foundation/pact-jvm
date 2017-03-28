@@ -21,7 +21,7 @@ class ExampleGroovyConsumerV3PactTest {
         aliceService {
             serviceConsumer 'V3Consumer'
             hasPactWith 'V3Service'
-            port 1234
+            port 1254
         }
 
         aliceService {
@@ -38,7 +38,7 @@ class ExampleGroovyConsumerV3PactTest {
         }
 
         VerificationResult result = aliceService.run(specificationVersion: PactSpecVersion.V3) {
-            def client = new RESTClient('http://localhost:1234/')
+            def client = new RESTClient('http://localhost:1254/')
             def aliceResponse = client.get(path: '/mallory', query: [status: 'good', name: 'ron'])
 
             assert aliceResponse.status == 200
