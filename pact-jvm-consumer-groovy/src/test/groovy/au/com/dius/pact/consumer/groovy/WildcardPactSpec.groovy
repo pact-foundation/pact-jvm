@@ -19,7 +19,7 @@ class WildcardPactSpec extends Specification {
     articleService {
       serviceConsumer 'ArticleConsumer'
       hasPactWith 'ArticleService'
-      port 1234
+      port 1244
     }
 
     articleService {
@@ -47,7 +47,7 @@ class WildcardPactSpec extends Specification {
 
     when:
     VerificationResult result = articleService.run(specificationVersion: PactSpecVersion.V3) {
-      def client = new RESTClient('http://localhost:1234/')
+      def client = new RESTClient('http://localhost:1244/')
       def response = client.get(requestContentType: JSON)
 
       assert response.status == 200
