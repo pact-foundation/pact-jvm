@@ -320,7 +320,7 @@ pact {
 
             hasPactWith('consumer1') {
                 pactFile = file('path/to/provider1-consumer1-pact.json')
-                stateChange = url('http://localhost:8001/tasks/pactStateChange')
+                stateChangeUrl = url('http://localhost:8001/tasks/pactStateChange')
                 stateChangeUsesBody = false // defaults to true
                 stateChangeRequestFilter = { req ->
                     // Add an authorization header to each request
@@ -331,7 +331,7 @@ pact {
             // or
             hasPactsWith('consumers') {
                 pactFileLocation = file('path/to/pacts')                
-                stateChange = url('http://localhost:8001/tasks/pactStateChange')
+                stateChangeUrl = url('http://localhost:8001/tasks/pactStateChange')
                 stateChangeUsesBody = false // defaults to true
             }
 
@@ -482,6 +482,24 @@ pact {
 
 }
 ```
+
+### Using an authenticated Pact Broker
+
+You can add the authentication details for the Pact Broker like so:
+
+```groovy
+pact {
+
+    serviceProviders {
+        provider1 {
+            hasPactsFromPactBroker('http://pact-broker:5000/', authentication: ['Basic', pactBrokerUser, pactBrokerPassword])
+        }
+    }
+
+}
+```
+
+`pactBrokerUser` and `pactBrokerPassword` can be defined in the gradle properties.
 
 ## Verifying pact files from a S3 bucket [version 3.3.2+/2.4.17+]
 
