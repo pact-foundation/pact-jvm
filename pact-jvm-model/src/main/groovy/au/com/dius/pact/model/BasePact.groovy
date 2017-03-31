@@ -74,7 +74,12 @@ abstract class BasePact implements Pact {
 
   static parseBody(HttpPart httpPart) {
     if (httpPart.jsonBody() && httpPart.body.present) {
-      new JsonSlurper().parseText(httpPart.body.value)
+      def body = new JsonSlurper().parseText(httpPart.body.value)
+      if (body instanceof String) {
+        httpPart.body.value
+      } else {
+        body
+      }
     } else {
       httpPart.body.value
     }

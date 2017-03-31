@@ -50,4 +50,23 @@ class PactWriterSpec extends Specification {
     !messageJson.containsKey('matchingRules')
   }
 
+  def 'when writing pacts, do not parse JSON string bodies'() {
+    def request = new Request(body: OptionalBody.body('"This is a string"'))
+    def response = new Response(body: OptionalBody.body('"This is a string"'))
+    def interaction = new RequestResponseInteraction('test interaction with JSON string bodies',
+      null, request, response)
+    def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),
+      new Consumer('PactWriterSpecConsumer'), [interaction])
+    def sw = new StringWriter()
+
+    when:
+    PactWriter.writePact(pact, new PrintWriter(sw))
+    def json = new JsonSlurper().parseText(sw.toString())
+    def interactionJson = json.interactions.first()
+
+    then:
+    interactionJson.request.body == '"This is a string"'
+    interactionJson.response.body == '"This is a string"'
+  }
+
 }
