@@ -2,6 +2,10 @@ package au.com.dius.pact.model.generators
 
 import au.com.dius.pact.model.ContentType
 import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.model.parsePath
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import org.apache.commons.lang.RandomStringUtils
 import org.apache.commons.lang.math.RandomUtils
 import java.util.*
 
@@ -10,11 +14,24 @@ enum class Category {
 }
 
 interface ContentTypeHandler {
-  fun processBody(value: String, fn: (ContentTypeHandler) -> Unit): OptionalBody
-  fun applyKey(key: String, generator: Generator)
+  fun processBody(value: String, fn: (Any) -> Unit): OptionalBody
+  fun applyKey(body: Any, key: String, generator: Generator)
 }
 
-val contentTypeHandlers: Map<String, ContentTypeHandler> = mutableMapOf()
+val contentTypeHandlers: Map<String, ContentTypeHandler> = mutableMapOf("application/json" to JsonContentTypeHandler)
+
+object JsonContentTypeHandler : ContentTypeHandler {
+  override fun processBody(value: String, fn: (Any) -> Unit): OptionalBody {
+    val bodyJson = JsonSlurper().parseText(value)
+    fn.invoke(bodyJson)
+    return OptionalBody.body(JsonOutput.toJson(bodyJson))
+  }
+
+  override fun applyKey(body: Any, key: String, generator: Generator) {
+    val pathExp = parsePath(key)
+  }
+
+}
 
 data class Generators(val categories: MutableMap<Category, MutableMap<String, Generator>> = HashMap()) {
 
@@ -60,10 +77,10 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
 
   private fun processBody(value: String, contentType: String): OptionalBody {
     val handler = contentTypeHandlers[contentType]
-    return handler?.processBody(value) { handler: ContentTypeHandler ->
+    return handler?.processBody(value) { body: Any ->
       applyGenerator(Category.BODY) { key: String, generator: Generator? ->
         if (generator != null) {
-          handler.applyKey(key, generator)
+          handler.applyKey(body, key, generator)
         }
       }
     } ?: OptionalBody.body(value)
@@ -78,6 +95,12 @@ interface Generator {
 data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
   override fun generate(base: Any?): Any {
     return min + RandomUtils.nextInt(max - min)
+  }
+}
+
+data class RandomStringGenerator(val size: Int = 20) : Generator {
+  override fun generate(base: Any?): Any {
+    return RandomStringUtils.randomAlphanumeric(size)
   }
 }
 

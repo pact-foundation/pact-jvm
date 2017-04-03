@@ -8,6 +8,7 @@ dependencies {
   compile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
   compile 'com.amazonaws:aws-java-sdk-s3:1.11.30'
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+  compile 'org.apache.commons:commons-collections4:4.1'
 
   testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
     exclude group: 'org.codehaus.groovy'
