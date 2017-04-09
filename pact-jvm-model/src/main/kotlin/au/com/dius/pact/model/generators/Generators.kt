@@ -7,10 +7,6 @@ import au.com.dius.pact.model.parsePath
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.apache.commons.collections4.IteratorUtils
-import org.apache.commons.lang.RandomStringUtils
-import org.apache.commons.lang.math.RandomUtils
-import java.util.*
-import kotlin.collections.HashMap
 
 enum class Category {
   METHOD, PATH, HEADER, QUERY, BODY, STATUS
@@ -151,26 +147,4 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     } ?: OptionalBody.body(value)
   }
 
-}
-
-interface Generator {
-  fun generate(base: Any?): Any
-}
-
-data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
-  override fun generate(base: Any?): Any {
-    return min + RandomUtils.nextInt(max - min)
-  }
-}
-
-data class RandomStringGenerator(val size: Int = 20) : Generator {
-  override fun generate(base: Any?): Any {
-    return RandomStringUtils.randomAlphanumeric(size)
-  }
-}
-
-class UuidGenerator : Generator {
-  override fun generate(base: Any?): Any {
-    return UUID.randomUUID().toString()
-  }
 }
