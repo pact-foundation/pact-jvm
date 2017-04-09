@@ -32,7 +32,7 @@ object JsonContentTypeHandler : ContentTypeHandler {
 
   override fun applyKey(body: QueryResult, key: String, generator: Generator) {
     val pathExp = parsePath(key)
-    queryObjectGraph(pathExp.drop(1).iterator(), body) { (value, valueKey, parent) ->
+    queryObjectGraph(pathExp.iterator(), body) { (value, valueKey, parent) ->
       if (parent is MutableMap<*, *>) {
         (parent as MutableMap<String, Any>)[valueKey.toString()] = generator.generate(value)
       } else if (parent is MutableList<*>) {
@@ -54,6 +54,15 @@ object JsonContentTypeHandler : ContentTypeHandler {
             val map = bodyCursor.value as Map<*, *>
             stack.push(bodyCursor)
             bodyCursor = QueryResult(map[token.name]!!, token.name, bodyCursor.value)
+          } else {
+            return
+          }
+        }
+        is PathToken.Index -> {
+          if (bodyCursor.value is List<*> && (bodyCursor.value as List<*>).size > token.index) {
+            val list = bodyCursor.value as List<*>
+            stack.push(bodyCursor)
+            bodyCursor = QueryResult(list[token.index]!!, token.index, bodyCursor.value)
           } else {
             return
           }
