@@ -32,7 +32,7 @@ public class PactVerificationsForMultipleFragmentsTest {
 
     @Rule
     public PactProviderRule httpProvider =
-            new PactProviderRule(HTTP_PROVIDER_NAME, "localhost", 8075, PactSpecVersion.V3, this);
+            new PactProviderRule(HTTP_PROVIDER_NAME, PactSpecVersion.V3, this);
 
     @Rule
     public MessagePactProviderRule messageProvider = new MessagePactProviderRule(MESSAGE_PROVIDER_NAME, this);
