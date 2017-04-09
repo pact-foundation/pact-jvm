@@ -2,6 +2,7 @@ package au.com.dius.pact.model.generators
 
 import au.com.dius.pact.model.ContentType
 import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.model.PathToken
 import au.com.dius.pact.model.parsePath
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -14,21 +15,53 @@ enum class Category {
 }
 
 interface ContentTypeHandler {
-  fun processBody(value: String, fn: (Any) -> Unit): OptionalBody
-  fun applyKey(body: Any, key: String, generator: Generator)
+  fun processBody(value: String, fn: (QueryResult) -> Unit): OptionalBody
+  fun applyKey(body: QueryResult, key: String, generator: Generator)
 }
 
 val contentTypeHandlers: Map<String, ContentTypeHandler> = mutableMapOf("application/json" to JsonContentTypeHandler)
 
+data class QueryResult(var value: Any, val key: Any? = null, val parent: Any? = null)
+
 object JsonContentTypeHandler : ContentTypeHandler {
-  override fun processBody(value: String, fn: (Any) -> Unit): OptionalBody {
-    val bodyJson = JsonSlurper().parseText(value)
+  override fun processBody(value: String, fn: (QueryResult) -> Unit): OptionalBody {
+    val bodyJson = QueryResult(JsonSlurper().parseText(value))
     fn.invoke(bodyJson)
-    return OptionalBody.body(JsonOutput.toJson(bodyJson))
+    return OptionalBody.body(JsonOutput.toJson(bodyJson.value))
   }
 
-  override fun applyKey(body: Any, key: String, generator: Generator) {
+  override fun applyKey(body: QueryResult, key: String, generator: Generator) {
     val pathExp = parsePath(key)
+    queryObjectGraph(pathExp.drop(1).iterator(), body) { (value, valueKey, parent) ->
+      if (parent is MutableMap<*, *>) {
+        (parent as MutableMap<String, Any>)[valueKey.toString()] = generator.generate(value)
+      } else if (parent is MutableList<*>) {
+        (parent as MutableList<Any>)[valueKey as Int] = generator.generate(value)
+      } else {
+        body.value = generator.generate(value)
+      }
+    }
+  }
+
+  private fun queryObjectGraph(pathExp: Iterator<PathToken>, body: QueryResult, fn: (QueryResult) -> Unit) {
+    var stack = Stack<QueryResult>()
+    var bodyCursor = body
+    while (pathExp.hasNext()) {
+      val token = pathExp.next()
+      when (token) {
+        is PathToken.Field -> {
+          if (bodyCursor.value is Map<*, *> && (bodyCursor.value as Map<*, *>).containsKey(token.name)) {
+            val map = bodyCursor.value as Map<*, *>
+            stack.push(bodyCursor)
+            bodyCursor = QueryResult(map[token.name]!!, token.name, bodyCursor.value)
+          } else {
+            return
+          }
+        }
+      }
+    }
+
+    fn(bodyCursor)
   }
 
 }
@@ -77,7 +110,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
 
   private fun processBody(value: String, contentType: String): OptionalBody {
     val handler = contentTypeHandlers[contentType]
-    return handler?.processBody(value) { body: Any ->
+    return handler?.processBody(value) { body: QueryResult ->
       applyGenerator(Category.BODY) { key: String, generator: Generator? ->
         if (generator != null) {
           handler.applyKey(body, key, generator)

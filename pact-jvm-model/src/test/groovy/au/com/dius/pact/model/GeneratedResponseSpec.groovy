@@ -7,7 +7,6 @@ import au.com.dius.pact.model.generators.RandomStringGenerator
 import au.com.dius.pact.model.generators.UuidGenerator
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import spock.lang.Ignore
 import spock.lang.Specification
 
 class GeneratedResponseSpec extends Specification {
@@ -18,7 +17,7 @@ class GeneratedResponseSpec extends Specification {
     generators = new Generators()
     generators.addGenerator(Category.STATUS, new RandomIntGenerator(400, 499))
     generators.addGenerator(Category.HEADER, 'A', new UuidGenerator())
-    generators.addGenerator(Category.BODY, 'a', new RandomStringGenerator())
+    generators.addGenerator(Category.BODY, '$.a', new RandomStringGenerator())
     response = new Response(generators: generators)
   }
 
@@ -45,7 +44,6 @@ class GeneratedResponseSpec extends Specification {
     generated.headers.B == 'b'
   }
 
-  @Ignore
   def 'applies body generators for body values to the copy of the response'() {
     given:
     def body = [a: 'A', b: 'B']
