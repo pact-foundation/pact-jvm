@@ -6,9 +6,11 @@ import au.com.dius.pact.model.PathToken
 import au.com.dius.pact.model.parsePath
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import org.apache.commons.collections4.IteratorUtils
 import org.apache.commons.lang.RandomStringUtils
 import org.apache.commons.lang.math.RandomUtils
 import java.util.*
+import kotlin.collections.HashMap
 
 enum class Category {
   METHOD, PATH, HEADER, QUERY, BODY, STATUS
@@ -44,7 +46,6 @@ object JsonContentTypeHandler : ContentTypeHandler {
   }
 
   private fun queryObjectGraph(pathExp: Iterator<PathToken>, body: QueryResult, fn: (QueryResult) -> Unit) {
-    var stack = Stack<QueryResult>()
     var bodyCursor = body
     while (pathExp.hasNext()) {
       val token = pathExp.next()
@@ -52,7 +53,6 @@ object JsonContentTypeHandler : ContentTypeHandler {
         is PathToken.Field -> {
           if (bodyCursor.value is Map<*, *> && (bodyCursor.value as Map<*, *>).containsKey(token.name)) {
             val map = bodyCursor.value as Map<*, *>
-            stack.push(bodyCursor)
             bodyCursor = QueryResult(map[token.name]!!, token.name, bodyCursor.value)
           } else {
             return
@@ -61,8 +61,31 @@ object JsonContentTypeHandler : ContentTypeHandler {
         is PathToken.Index -> {
           if (bodyCursor.value is List<*> && (bodyCursor.value as List<*>).size > token.index) {
             val list = bodyCursor.value as List<*>
-            stack.push(bodyCursor)
             bodyCursor = QueryResult(list[token.index]!!, token.index, bodyCursor.value)
+          } else {
+            return
+          }
+        }
+        is PathToken.Star -> {
+          if (bodyCursor.value is MutableMap<*, *>) {
+            val map = bodyCursor.value as MutableMap<*, *>
+            val pathIterator = IteratorUtils.toList(pathExp)
+            HashMap(map).forEach { (key, value) ->
+              queryObjectGraph(pathIterator.iterator(), QueryResult(value!!, key, map), fn)
+            }
+            return
+          } else {
+            return
+          }
+        }
+        is PathToken.StarIndex -> {
+          if (bodyCursor.value is List<*>) {
+            val list = bodyCursor.value as List<*>
+            val pathIterator = IteratorUtils.toList(pathExp)
+            list.forEachIndexed { index, item ->
+              queryObjectGraph(pathIterator.iterator(), QueryResult(item!!, index, list), fn)
+            }
+            return
           } else {
             return
           }

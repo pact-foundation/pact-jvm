@@ -128,4 +128,46 @@ class JsonContentTypeHandlerSpec extends Specification {
     body.value == [d: 'A', b: 'B', c: 'C']
   }
 
+  def 'applies the generator to all map entries'() {
+    given:
+    def map = [a: 'A', b: 'B', c: 'C']
+    QueryResult body = new QueryResult(map, null, null)
+    def key = '$.*'
+    def generator = { 'X' }
+
+    when:
+    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
+
+    then:
+    body.value == [a: 'X', b: 'X', c: 'X']
+  }
+
+  def 'applies the generator to all list items'() {
+    given:
+    def list = ['A', 'B', 'C']
+    QueryResult body = new QueryResult(list, null, null)
+    def key = '$[*]'
+    def generator = { 'X' }
+
+    when:
+    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
+
+    then:
+    body.value == ['X', 'X', 'X']
+  }
+
+  def 'applies the generator to the object graph with wildcard'() {
+    given:
+    def graph = [a: ['A', [a: 'A', b: ['1', '2'], c: 'C'], 'C'], b: 'B', c: 'C']
+    QueryResult body = new QueryResult(graph, null, null)
+    def key = '$.*[1].b[*]'
+    def generator = { 'X' }
+
+    when:
+    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
+
+    then:
+    body.value == [a: ['A', [a: 'A', b: ['X', 'X'], c: 'C'], 'C'], b: 'B', c: 'C']
+  }
+
 }
