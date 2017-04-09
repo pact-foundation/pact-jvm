@@ -24,10 +24,10 @@ public class ContractWithCustomPactLoaderTest {
 
     // NOTE: this is just an example of embedded service that listens to requests, you should start here real service
     @ClassRule
-    public static final ClientDriverRule embeddedService = new ClientDriverRule(8332);
+    public static final ClientDriverRule embeddedService = new ClientDriverRule(9332);
     private static final Logger LOGGER = LoggerFactory.getLogger(ContractTest.class);
     @TestTarget
-    public final Target target = new HttpTarget(8332);
+    public final Target target = new HttpTarget(9332);
 
     @BeforeClass
     public static void setUpService() {
