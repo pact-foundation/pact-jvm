@@ -27,7 +27,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 public class Defect266Test {
 
   @Rule
-  public PactProviderRule provider = new PactProviderRule("266_provider", "localhost", 8080, this);
+  public PactProviderRule provider = new PactProviderRule("266_provider", "localhost", 9354, this);
 
   @Pact(provider = "266_provider", consumer = "test_consumer")
   public PactFragment getUsersFragment(PactDslWithProvider builder) {
@@ -88,12 +88,12 @@ public class Defect266Test {
   @Test
   @PactVerification(value = "266_provider", fragment = "getUsersFragment")
   public void runTest() throws IOException {
-    Request.Get("http://localhost:8080/idm/user").execute().returnContent().asString();
+    Request.Get("http://localhost:9354/idm/user").execute().returnContent().asString();
   }
 
   @Test
   @PactVerification(value = "266_provider", fragment = "getUsersFragment2")
   public void runTest2() throws IOException {
-    Request.Get("http://localhost:8080/idm/user").execute().returnContent().asString();
+    Request.Get("http://localhost:9354/idm/user").execute().returnContent().asString();
   }
 }
