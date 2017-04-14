@@ -7,11 +7,6 @@ dependencies {
     compile "ch.qos.logback:logback-core:${project.logbackVersion}",
       "ch.qos.logback:logback-classic:${project.logbackVersion}",
       "com.github.scopt:scopt_${project.scalaVersion}:3.5.0"
-
-    testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
-        exclude group: 'org.codehaus.groovy'
-    }
-    testCompile "cglib:cglib:${project.cglibVersion}"
 }
 
 jar {

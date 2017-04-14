@@ -1,17 +1,10 @@
 dependencies {
   compile "org.json:json:${project.jsonVersion}",
-    "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy",
     "io.netty:netty-handler:${project.nettyVersion}",
-    "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
-    "org.slf4j:slf4j-api:$slf4jVersion"
+    "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
   compile 'com.github.zafarkhaja:java-semver:0.9.0'
   compile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
   compile 'com.amazonaws:aws-java-sdk-s3:1.11.30'
 
-  testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
-    exclude group: 'org.codehaus.groovy'
-  }
-  testCompile "cglib:cglib-nodep:${project.cglibVersion}",
-    'org.objenesis:objenesis:2.4'
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }

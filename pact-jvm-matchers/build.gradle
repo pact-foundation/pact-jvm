@@ -5,7 +5,4 @@ dependencies {
     'com.googlecode.java-diff-utils:diffutils:1.3.0'
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
-  testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
-    exclude group: 'org.codehaus.groovy'
-  }
 }
