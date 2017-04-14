@@ -1,5 +1,14 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.3.8 - Bugfix Release
+
+* cd860af - Upgrade gradle to 3.4.1 (Ronald Holshausen, Fri Apr 14 12:34:05 2017 +1000)
+* b12637a - Correct link in Matching any key in a map to refer to the right issue #402 (Ronald Holshausen, Fri Apr 14 11:41:31 2017 +1000)
+* 9c50125 - Update the message pact failure exception to include the failures in the exception message (Ronald Holshausen, Tue Apr 11 16:30:41 2017 +1000)
+* 1c5930a - Updated readme anout using an authenticated pact broker with the Gradle plugin (Ronald Holshausen, Fri Mar 31 16:28:19 2017 +1100)
+* 2bcfa1e - When writing pacts, do not parse JSON bodies that are strings (Ronald Holshausen, Fri Mar 31 11:53:13 2017 +1100)
+* 19f20c0 - bump version to 3.3.8 (Ronald Holshausen, Mon Mar 27 15:42:57 2017 +1100)
+
 # 3.3.7 - Small PRs and query parameter matching
 
 * 70da023 - Allow the instantation of objects for provider methods to be overwridden in the verifier (Ronald Holshausen, Mon Mar 27 14:14:13 2017 +1100)
