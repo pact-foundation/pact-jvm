@@ -89,6 +89,30 @@ class PactSerialiserSpec extends Specification {
     actualPact == testPact
   }
 
+  def 'Correctly handle non-ascii characters'() {
+    given:
+    def file = File.createTempFile('non-ascii-pact', '.json')
+    def fw = new FileWriter(file)
+    def request = new Request(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'))
+    def response = new Response(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'))
+    def interaction = new RequestResponseInteraction('test interaction with non-ascii characters in bodies',
+      null, request, response)
+    def pact = new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [interaction])
+
+    when:
+    def writer = new PrintWriter(fw)
+    PactWriter.writePact(pact, writer, PactSpecVersion.V2)
+    writer.close()
+    def pactJson = file.text
+
+    then:
+    pactJson.contains('This is a string with letters ä, ü, ö and ß')
+
+    cleanup:
+    file.delete()
+  }
+
   def 'PactSerialiser must de-serialise pact'() {
     expect:
     pact.provider == new Provider('test_provider')
