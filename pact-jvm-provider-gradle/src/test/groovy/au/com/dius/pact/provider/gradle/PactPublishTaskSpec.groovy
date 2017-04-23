@@ -71,4 +71,21 @@ class PactPublishTaskSpec extends Specification {
     thrown(GradleScriptException)
   }
 
+  def 'passes in any authentication creds to the broker client'() {
+    given:
+    project.pact {
+      publish {
+        pactBrokerUsername = 'my user name'
+      }
+    }
+    project.evaluate()
+
+    when:
+    task.publishPacts()
+
+    then:
+    1 * new PactBrokerClient(_, ['authentication':['basic', 'my user name', null]]) >> brokerClient
+    1 * brokerClient.uploadPactFile(_, _) >> 'HTTP/1.1 200 OK'
+  }
+
 }
