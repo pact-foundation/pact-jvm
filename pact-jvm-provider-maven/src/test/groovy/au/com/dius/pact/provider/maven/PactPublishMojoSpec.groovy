@@ -49,4 +49,23 @@ class PactPublishMojoSpec extends Specification {
     thrown(MojoExecutionException)
   }
 
+  def 'if the broker username is set, passes in the creds to the broker client'() {
+    given:
+    mojo.pactBrokerUsername = 'username'
+    mojo.pactBrokerPassword = 'password'
+    mojo.brokerClient = null
+    mojo.pactBrokerUrl = '/broker'
+    new File('some/dir') >> mockFile
+    mockFile.eachFileMatch(_, _, _)
+
+    when:
+    mojo.execute()
+
+    then:
+    new PactBrokerClient('/broker', _) >> { args ->
+      assert args[1] == [authentication: ['basic', 'username', 'password']]
+      brokerClient
+    }
+  }
+
 }

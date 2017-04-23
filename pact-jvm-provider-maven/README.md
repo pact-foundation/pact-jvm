@@ -517,3 +517,23 @@ You can now execute `mvn pact:publish` to publish the pact files.
 
 _NOTE:_ The pact broker requires a version for all published pacts. The `publish` task will use the version of the
 project by default, but can be overwritten with the `projectVersion` property. Make sure you have set one otherwise the broker will reject the pact files.
+
+## Publishing to an authenticated pact broker [version 3.3.9+]
+
+For an authenticated pact broker, you can pass in the credentials with the `pactBrokerUsername` and `pactBrokerPassword`
+properties. Currently it only supports basic authentication.
+
+For example:
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
+    <version>3.3.9</version>
+    <configuration>
+      <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
+      <pactBrokerUsername>USERNAME</pactBrokerUsername>
+      <pactBrokerPassword>PASSWORD</pactBrokerPassword>
+    </configuration>
+</plugin>
+```
