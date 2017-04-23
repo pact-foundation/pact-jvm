@@ -163,7 +163,8 @@ class PactBrokerClientSpec extends Specification {
     def result = client.uploadPactFile(pactFile, '10.0.0')
 
     then:
-    1 * halClient.uploadJson('/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0', pactContents, _) >> { args -> args[2].call('Failed', 'Error') }
+    1 * halClient.uploadJson('/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0', pactContents, _) >>
+      { args -> args[2].call('Failed', 'Error') }
     result == 'FAILED! Error'
   }
 
@@ -198,6 +199,7 @@ class PactBrokerClientSpec extends Specification {
     result == PactVerified$.MODULE$
   }
 
+  @SuppressWarnings('LineLength')
   def 'handles non-json failure responses'() {
     given:
     pactBroker {

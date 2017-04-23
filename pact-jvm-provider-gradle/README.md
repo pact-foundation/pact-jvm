@@ -566,6 +566,22 @@ pact {
 }
 ```
 
+### [version 3.3.9+]
+
+You can add the username and password as properties since version 3.3.9+
+
+```groovy
+pact {
+
+    publish {
+        pactBrokerUrl = 'https://mypactbroker.com'
+        pactBrokerUsername = 'username'
+        pactBrokerPassword = 'password'
+    }
+
+}
+```
+
 # Verifying a message provider [version 2.2.12+]
 
 The Gradle plugin has been updated to allow invoking test methods that can return the message contents from a message
