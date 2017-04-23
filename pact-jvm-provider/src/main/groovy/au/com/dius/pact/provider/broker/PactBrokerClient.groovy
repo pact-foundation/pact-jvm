@@ -66,27 +66,15 @@ class PactBrokerClient {
   }
 
   def uploadPactFile(File pactFile, String version) {
-    def pact = new JsonSlurper().parse(pactFile)
-    def http = new HTTPBuilder(pactBrokerUrl)
-    http.parser.'application/hal+json' = http.parser.'application/json'
-    http.request(PUT) {
-      uri.path = "/pacts/provider/${pact.provider.name}/consumer/${pact.consumer.name}/version/$version"
-      body = pactFile.text
-      requestContentType = JSON
-
-      response.success = { resp -> resp.statusLine as String }
-
-      response.failure = { resp, body ->
-        if (body instanceof Reader) {
-          "FAILED! ${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${body.readLine()}"
-        } else {
-          def error = body?.errors?.join(', ') ?: 'Unknown error'
-          "FAILED! ${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${error}"
-        }
-      }
-
-      response.'409' = { resp, body ->
-        "FAILED! ${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${body.readLine()}"
+    def pactText = pactFile.text
+    def pact = new JsonSlurper().parseText(pactText)
+    HalClient halClient = newHalClient()
+    halClient.uploadJson("/pacts/provider/${pact.provider.name}/consumer/${pact.consumer.name}/version/$version",
+      pactText) { result, status ->
+      if (result == 'OK') {
+        status
+      } else {
+        "FAILED! $status"
       }
     }
   }

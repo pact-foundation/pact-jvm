@@ -5,6 +5,9 @@ import groovy.util.logging.Slf4j
 import groovyx.net.http.RESTClient
 import org.apache.http.message.BasicHeaderValueParser
 
+import static groovyx.net.http.ContentType.JSON
+import static groovyx.net.http.Method.PUT
+
 /**
  * HAL client for navigating the HAL links
  */
@@ -128,5 +131,31 @@ class HalClient {
 
   String linkUrl(String name) {
     pathInfo.'_links'[name]
+  }
+
+  def uploadJson(String path, String bodyJson, Closure closure) {
+    setupHttpClient()
+    http.request(PUT) {
+      uri.path = path
+      body = bodyJson
+      requestContentType = JSON
+
+      response.success = { resp -> closure.call('OK', resp.statusLine as String) }
+
+      response.failure = { resp, body -> handleFailure(resp, body, closure) }
+
+      response.'409' = { resp, body ->
+        closure.call('FAILED', "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${body.readLine()}")
+      }
+    }
+  }
+
+  private def handleFailure(resp, body, Closure closure) {
+    if (body instanceof Reader) {
+      closure.call('FAILED', "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${body.readLine()}")
+    } else {
+      def error = body?.errors?.join(', ') ?: 'Unknown error'
+      closure.call('FAILED', "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${error}")
+    }
   }
 }

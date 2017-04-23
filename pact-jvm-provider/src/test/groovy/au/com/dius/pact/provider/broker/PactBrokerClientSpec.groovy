@@ -154,27 +154,17 @@ class PactBrokerClientSpec extends Specification {
 
   def 'returns an error when uploading a pact fails'() {
     given:
-    def delegate = [
-      uri: [:],
-      response: [:]
-    ]
-    def req = Mock(HttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 500, 'Bang')
-    }
-    GroovySpy(HTTPBuilder, global: true) {
-      request(_, _) >> { args ->
-        def closure = args.last()
-        closure.delegate = delegate
-        closure.call()
-        delegate.response.failure.call(req, null)
-      }
+    def halClient = GroovyMock(HalClient, global: true)
+    def client = GroovySpy(PactBrokerClient, global: true) {
+      newHalClient() >> halClient
     }
 
     when:
-    def result = pactBrokerClient.uploadPactFile(pactFile, '10.0.0')
+    def result = client.uploadPactFile(pactFile, '10.0.0')
 
     then:
-    result == 'FAILED! 500 Bang - Unknown error'
+    1 * halClient.uploadJson('/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0', pactContents, _) >> { args -> args[2].call('Failed', 'Error') }
+    result == 'FAILED! Error'
   }
 
   @SuppressWarnings('LineLength')
