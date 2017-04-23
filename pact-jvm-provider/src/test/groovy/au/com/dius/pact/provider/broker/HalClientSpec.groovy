@@ -179,7 +179,7 @@ class HalClientSpec extends Specification {
     def result = []
     def closure = { r, s -> result << r; result << s }
     client.uploadJson('', '', closure)
-    clientOptions.response.success.call([getStatusLine: { statusLine }] as HttpResponse)
+    clientOptions.response.success.call([getStatusLine: { statusLine } ] as HttpResponse)
 
     then:
     result == ['OK', 'HTTP/1.1 200 OK']
@@ -205,7 +205,7 @@ class HalClientSpec extends Specification {
     def result = []
     def closure = { r, s -> result << r; result << s }
     client.uploadJson('', '', closure)
-    clientOptions.response.failure.call([getStatusLine: { statusLine }] as HttpResponse, [errors: ['1', '2', '3']])
+    clientOptions.response.failure.call([getStatusLine: { statusLine } ] as HttpResponse, [errors: ['1', '2', '3']])
 
     then:
     result == ['FAILED', '400 Not OK - 1, 2, 3']
@@ -231,17 +231,18 @@ class HalClientSpec extends Specification {
     def result = []
     def closure = { r, s -> result << r; result << s }
     client.uploadJson('', '', closure)
-    clientOptions.response.'409'.call([getStatusLine: { statusLine }] as HttpResponse, new StringReader('error line'))
+    clientOptions.response.'409'.call([getStatusLine: { statusLine } ] as HttpResponse, new StringReader('error line'))
 
     then:
     result == ['FAILED', '409 Not OK - error line']
   }
 
   @Unroll
+  @SuppressWarnings('LineLength')
   def 'failure handling - #description'() {
     given:
     def statusLine = new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 400, 'Not OK')
-    def resp = [getStatusLine: { statusLine }] as HttpResponse
+    def resp = [getStatusLine: { statusLine } ] as HttpResponse
 
     expect:
     client.handleFailure(resp, body) { arg1, arg2 -> [arg1, arg2] } == [firstArg, secondArg]

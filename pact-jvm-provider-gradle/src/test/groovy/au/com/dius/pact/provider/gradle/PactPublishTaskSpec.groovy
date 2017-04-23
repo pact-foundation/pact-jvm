@@ -84,7 +84,7 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * new PactBrokerClient(_, ['authentication':['basic', 'my user name', null]]) >> brokerClient
+    1 * new PactBrokerClient(_, ['authentication': ['basic', 'my user name', null]]) >> brokerClient
     1 * brokerClient.uploadPactFile(_, _) >> 'HTTP/1.1 200 OK'
   }
 

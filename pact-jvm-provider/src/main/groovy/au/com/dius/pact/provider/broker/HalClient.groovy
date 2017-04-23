@@ -150,7 +150,7 @@ class HalClient {
     }
   }
 
-  private def handleFailure(resp, body, Closure closure) {
+  private handleFailure(resp, body, Closure closure) {
     if (body instanceof Reader) {
       closure.call('FAILED', "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${body.readLine()}")
     } else {

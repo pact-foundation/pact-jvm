@@ -3,11 +3,7 @@ package au.com.dius.pact.provider.broker
 import au.com.dius.pact.provider.ConsumerInfo
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
-import groovyx.net.http.HTTPBuilder
 import org.apache.commons.lang3.StringUtils
-
-import static groovyx.net.http.ContentType.JSON
-import static groovyx.net.http.Method.PUT
 
 /**
  * Client for the pact broker service
