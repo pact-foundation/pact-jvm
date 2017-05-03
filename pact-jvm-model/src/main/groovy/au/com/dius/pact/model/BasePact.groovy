@@ -1,5 +1,6 @@
 package au.com.dius.pact.model
 
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
@@ -99,5 +100,30 @@ abstract class BasePact implements Pact {
 
   boolean compatibleTo(Pact other) {
     provider == other.provider && this.class.isAssignableFrom(other.class)
+  }
+
+  void write(String pactDir, PactSpecVersion pactSpecVersion) {
+    def pactFile = fileForPact(pactDir)
+
+    if (pactFile.exists()) {
+      def existingPact = PactReader.loadPact(pactFile)
+      def result = PactMerge.merge(existingPact, this)
+      if (!result.ok) {
+        throw new InvalidPactException(result.message)
+      }
+    } else {
+      pactFile.parentFile.mkdirs()
+    }
+
+    def jsonMap = toMap(pactSpecVersion)
+    jsonMap.metadata = jsonMap.metadata ? [:] + DEFAULT_METADATA + jsonMap.metadata : DEFAULT_METADATA
+    def json = JsonOutput.toJson(jsonMap)
+    pactFile.withWriter { writer ->
+      writer.print JsonOutput.prettyPrint(json)
+    }
+  }
+
+  File fileForPact(String pactDir) {
+    new File(pactDir, "${consumer.name}-${provider.name}.json")
   }
 }

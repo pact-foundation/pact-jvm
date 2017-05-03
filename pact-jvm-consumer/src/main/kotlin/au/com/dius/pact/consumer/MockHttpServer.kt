@@ -100,6 +100,7 @@ abstract class MockServer(val pact: RequestResponsePact,
   fun runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun): PactVerificationResult {
     start()
     waitForServer()
+
     try {
       testFn.run(this)
     } catch(e: Exception) {
@@ -107,7 +108,15 @@ abstract class MockServer(val pact: RequestResponsePact,
     } finally {
       stop()
     }
-    return validateMockServerState()
+
+    val result = validateMockServerState()
+    if (result is PactVerificationResult.Ok) {
+      val pactDirectory = pactDirectory()
+      LOGGER.debug("Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file ${pact.fileForPact(pactDirectory)}")
+      pact.write(pactDirectory, pactVersion)
+    }
+
+    return result
   }
 
   private fun validateMockServerState(): PactVerificationResult {
@@ -137,3 +146,5 @@ fun calculateCharset(headers: Map<String, String>): Charset {
   }
   return default
 }
+
+fun pactDirectory() = System.getProperty("pact.rootDir", "target/pacts")!!

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.v3.messaging.Message;
@@ -12,7 +9,11 @@ import org.junit.runners.model.Statement;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * A junit rule that wraps every test annotated with {@link PactVerification}.
