@@ -2,8 +2,9 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.model.PactSpecVersion;
+import au.com.dius.pact.model.RequestResponsePact;
 import org.apache.http.entity.ContentType;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
@@ -33,7 +34,7 @@ public class MimeTypeTest {
 
         String responseBody = "{\"status\": \"OK\"}";
 
-        runTest(buildPactFragment(body, responseBody, "a test interaction with json", ContentType.APPLICATION_JSON),
+        runTest(buildPact(body, responseBody, "a test interaction with json", ContentType.APPLICATION_JSON),
             body, responseBody, ContentType.APPLICATION_JSON);
     }
 
@@ -48,7 +49,7 @@ public class MimeTypeTest {
 
         String responseBody = "status=OK";
 
-        runTest(buildPactFragment(body, responseBody, "a test interaction with text", ContentType.TEXT_PLAIN),
+        runTest(buildPact(body, responseBody, "a test interaction with text", ContentType.TEXT_PLAIN),
             body, responseBody, ContentType.TEXT_PLAIN);
     }
 
@@ -58,13 +59,13 @@ public class MimeTypeTest {
 
         String responseBody = "<status>OK</status>";
 
-        runTest(buildPactFragment(body, responseBody, "a test interaction with xml", ContentType.APPLICATION_XML),
+        runTest(buildPact(body, responseBody, "a test interaction with xml", ContentType.APPLICATION_XML),
             body, responseBody, ContentType.APPLICATION_XML);
     }
 
-    private void runTest(PactFragment pactFragment, final String body, final String expectedResponse, final ContentType mimeType) {
+    private void runTest(RequestResponsePact pact, final String body, final String expectedResponse, final ContentType mimeType) {
         MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V2);
-        PactVerificationResult result = runConsumerTest(pactFragment.toPact(), config, new PactTestRun() {
+        PactVerificationResult result = runConsumerTest(pact, config, new PactTestRun() {
             @Override
             public void run(@NotNull MockServer mockServer) throws IOException {
                 try {
@@ -82,7 +83,7 @@ public class MimeTypeTest {
         Assert.assertEquals(PactVerificationResult.Ok.INSTANCE, result);
     }
 
-    private PactFragment buildPactFragment(String body, String responseBody, String description, ContentType contentType) {
+    private RequestResponsePact buildPact(String body, String responseBody, String description, ContentType contentType) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Type", contentType.toString());
         return ConsumerPactBuilder
@@ -97,7 +98,7 @@ public class MimeTypeTest {
                 .status(200)
                 .body(responseBody)
                 .headers(headers)
-                .toFragment();
+                .toPact();
     }
 
 }

@@ -251,8 +251,6 @@ public class PactDslResponse {
 
     /**
      * Terminates the DSL and builds a pact to represent the interactions
-     *
-     * @return
      */
     public RequestResponsePact toPact() {
         addInteraction();

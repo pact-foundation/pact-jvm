@@ -129,6 +129,16 @@ abstract class MockServer(val pact: RequestResponsePact,
   private fun waitForServer() {
 
   }
+
+  fun getUrl(): String {
+    if (config.port == 0) {
+      return "${config.scheme}://${server.address.hostName}:${server.address.port}"
+    } else {
+      return config.url()
+    }
+  }
+
+  fun getPort(): Int = server.address.port
 }
 
 open class MockHttpServer(pact: RequestResponsePact, config: MockProviderConfig): MockServer(pact, config, HttpServer.create(config.address(), 0))

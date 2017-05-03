@@ -3,22 +3,24 @@ package au.com.dius.pact.consumer;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
+import au.com.dius.pact.model.RequestResponsePact;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
 import static org.junit.Assert.assertEquals;
 
 public class PactDefectTest {
     private static final String method = "POST";
     private static final String path = "/ping";
-    private static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
-
 
     @Test
     public void json() {
@@ -52,7 +54,7 @@ public class PactDefectTest {
 
     private void test(final String requestBody, final String expectedResponseBody, final String contentType) {
 
-        PactFragment pactFragment = ConsumerPactBuilder
+        RequestResponsePact pact = ConsumerPactBuilder
             .consumer("ping_consumer")
             .hasPactWith("ping_provider")
             .uponReceiving("Ping with " + contentType)
@@ -62,25 +64,26 @@ public class PactDefectTest {
             .willRespondWith()
             .status(200)
             .body(expectedResponseBody)
-            .toFragment();
-        VerificationResult result = pactFragment.runConsumer(
-            MockProviderConfig.createDefault(PactSpecVersion.V2),
-            new TestRun() {
-                @Override
-                public void run(MockProviderConfig config) {
-                    try {
-                        URL url = new URL(config.url() + path);
-                        String response = post(url, contentType, requestBody);
-                        assertEquals(expectedResponseBody, response);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            });
-        if (result instanceof PactError) {
-            throw new RuntimeException(((PactError) result).error());
-        }
-        Assert.assertEquals(PACT_VERIFIED, result);
+            .toPact();
+
+        PactVerificationResult result = runConsumerTest(pact, new MockProviderConfig("localhost", 0, PactSpecVersion.V2), new PactTestRun() {
+            @Override
+            public void run(@NotNull MockServer mockServer) throws IOException {
+              try {
+                  URL url = new URL(mockServer.getUrl() + path);
+                  String response = post(url, contentType, requestBody);
+                  assertEquals(expectedResponseBody, response);
+              } catch (Exception e) {
+                  throw new RuntimeException(e);
+              }
+            }
+        });
+
+      if (result instanceof PactVerificationResult.Error) {
+        throw new RuntimeException(((PactVerificationResult.Error)result).getError());
+      }
+
+      Assert.assertEquals(PactVerificationResult.Ok.INSTANCE, result);
     }
 
     private String post(URL url, String contentType, String requestBody) {

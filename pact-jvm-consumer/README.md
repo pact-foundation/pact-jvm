@@ -21,53 +21,53 @@ Example in a JUnit test:
 
 ```java
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
+import org.apache.http.entity.ContentType;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
 import static org.junit.Assert.assertEquals;
 
 public class PactTest {
 
-    @Test
-    public void testPact() {
-        PactFragment pactFragment = ConsumerPactBuilder
-            .consumer("Some Consumer")
-            .hasPactWith("Some Provider")
-            .uponReceiving("a request to say Hello")
-                .path("/hello")
-                .method("POST")
-                .body("{\"name\": \"harry\"}")
-            .willRespondWith()
-                .status(200)
-                .body("{\"hello\": \"harry\"}")
-                .toFragment();
+  @Test
+  public void testPact() {
+    RequestResponsePact pact = ConsumerPactBuilder
+      .consumer("Some Consumer")
+      .hasPactWith("Some Provider")
+      .uponReceiving("a request to say Hello")
+      .path("/hello")
+      .method("POST")
+      .body("{\"name\": \"harry\"}")
+      .willRespondWith()
+      .status(200)
+      .body("{\"hello\": \"harry\"}")
+      .toPact();
 
-        MockProviderConfig config = MockProviderConfig.createDefault();
-        VerificationResult result = pactFragment.runConsumer(config, new TestRun() {
-            @Override
-            public void run(MockProviderConfig config) {
-                Map expectedResponse = new HashMap();
-                expectedResponse.put("hello", "harry");
-                try {
-                    assertEquals(new ProviderClient(config.url()).hello("{\"name\": \"harry\"}"),
-                            expectedResponse);
-                } catch (IOException e) {}
-            }
-        });
+    MockProviderConfig config = MockProviderConfig.createDefault();
+    PactVerificationResult result = runConsumerTest(pact, config, new PactTestRun() {
+      @Override
+      public void run(@NotNull MockServer mockServer) throws IOException {
+        Map expectedResponse = new HashMap();
+        expectedResponse.put("hello", "harry");
+        assertEquals(expectedResponse, new ConsumerClient(mockServer.getUrl()).post("/hello",
+            "{\"name\": \"harry\"}", ContentType.APPLICATION_JSON));
+      }
+    });
 
-        if (result instanceof PactError) {
-            throw new RuntimeException(((PactError)result).error());
-        }
-
-        assertEquals(ConsumerPactTest.PACT_VERIFIED, result);
+    if (result instanceof PactVerificationResult.Error) {
+      throw new RuntimeException(((PactVerificationResult.Error)result).getError());
     }
 
-}
+    assertEquals(PactVerificationResult.Ok.INSTANCE, result);
+  }
 
+}
 ```
 
 The DSL has the following pattern:
@@ -93,7 +93,7 @@ The DSL has the following pattern:
     .
     .
     .
-.toFragment()
+.toPact()
 ```
 
 You can define as many interactions as required. Each interaction starts with `uponReceiving` followed by `willRespondWith`.
