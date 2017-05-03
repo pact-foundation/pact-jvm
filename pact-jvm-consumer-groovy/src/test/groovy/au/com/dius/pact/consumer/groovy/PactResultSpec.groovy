@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.groovy
 
 import groovyx.net.http.RESTClient
+import spock.lang.Ignore
 import spock.lang.Specification
 
 class PactResultSpec extends Specification {
@@ -35,6 +36,7 @@ class PactResultSpec extends Specification {
         data == [status: 'isGood']
     }
 
+  @Ignore
     def 'case when the test fails and the pact is verified'() {
       given:
         def testService = new PactBuilder().build  {
@@ -96,6 +98,7 @@ class PactResultSpec extends Specification {
               '\'status\'),$.query.status.0)')
     }
 
+  @Ignore
     def 'case when the test passes and there is a missing request'() {
       given:
         def testService = new PactBuilder().build  {

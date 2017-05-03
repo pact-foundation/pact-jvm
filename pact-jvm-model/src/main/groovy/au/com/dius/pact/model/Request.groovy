@@ -62,7 +62,8 @@ class Request extends HttpPart implements Comparable {
   }
 
   @Override
+  @SuppressWarnings('ExplicitCallToEqualsMethod')
   int compareTo(@NotNull Object o) {
-    return equals(o) ? 0 : 1
+    equals(o) ? 0 : 1
   }
 }

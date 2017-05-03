@@ -32,6 +32,7 @@ class PactBuilder extends BaseBuilder {
   private static final String CONTENT_TYPE = 'Content-Type'
   private static final String JSON = 'application/json'
   private static final String BODY = 'body'
+  private static final String LOCALHOST = 'localhost'
 
   Consumer consumer
   Provider provider
@@ -232,7 +233,7 @@ class PactBuilder extends BaseBuilder {
     if (port == null) {
       config = MockProviderConfig.createDefault(pactVersion)
     } else {
-      config = MockProviderConfig.httpConfig('localhost', port, pactVersion)
+      config = MockProviderConfig.httpConfig(LOCALHOST, port, pactVersion)
     }
 
     fragment.runConsumer(config, closure)
@@ -358,9 +359,9 @@ class PactBuilder extends BaseBuilder {
     MockProviderConfig config
     def pactVersion = options.specificationVersion ?: PactSpecVersion.V2
     if (port == null) {
-      config = MockProviderConfig.httpConfig('localhost', 0, pactVersion)
+      config = MockProviderConfig.httpConfig(LOCALHOST, 0, pactVersion)
     } else {
-      config = MockProviderConfig.httpConfig('localhost', port, pactVersion)
+      config = MockProviderConfig.httpConfig(LOCALHOST, port, pactVersion)
     }
 
     runConsumerTest(pact, config, closure)
@@ -373,7 +374,7 @@ class PactBuilder extends BaseBuilder {
    */
   void runTestAndVerify(Map options = [:], Closure closure) {
     PactVerificationResult result = runTest(options, closure)
-    if (result != PactVerificationResult.Ok) {
+    if (result != PactVerificationResult.Ok.INSTANCE) {
       throw new PactFailedException(result)
     }
   }
