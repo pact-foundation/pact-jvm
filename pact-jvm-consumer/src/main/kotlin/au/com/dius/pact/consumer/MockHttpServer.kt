@@ -91,7 +91,7 @@ abstract class MockServer(val pact: RequestResponsePact,
 
   fun start() = server.start()
 
-  fun stop() = server.stop(1)
+  fun stop() = server.stop(0)
 
   init {
     initServer()

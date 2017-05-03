@@ -5,6 +5,7 @@ import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
 import org.apache.http.entity.ContentType;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -14,13 +15,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
 import static org.junit.Assert.assertEquals;
 
 public class MimeTypeTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MimeTypeTest.class);
-
-    private static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
 
     @Test
     public void testMatchingJson() {
@@ -64,9 +64,9 @@ public class MimeTypeTest {
 
     private void runTest(PactFragment pactFragment, final String body, final String expectedResponse, final ContentType mimeType) {
         MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V2);
-        VerificationResult result = pactFragment.runConsumer(config, new TestRun() {
+        PactVerificationResult result = runConsumerTest(pactFragment.toPact(), config, new PactTestRun() {
             @Override
-            public void run(MockProviderConfig config) {
+            public void run(@NotNull MockServer mockServer) throws IOException {
                 try {
                     assertEquals(new ConsumerClient(config.url()).postBody("/hello", body, mimeType), expectedResponse);
                 } catch (IOException e) {
@@ -75,11 +75,11 @@ public class MimeTypeTest {
             }
         });
 
-        if (result instanceof PactError) {
-            throw new RuntimeException(((PactError)result).error());
+        if (result instanceof PactVerificationResult.Error) {
+            throw new RuntimeException(((PactVerificationResult.Error)result).getError());
         }
 
-        Assert.assertEquals(PACT_VERIFIED, result);
+        Assert.assertEquals(PactVerificationResult.Ok.INSTANCE, result);
     }
 
     private PactFragment buildPactFragment(String body, String responseBody, String description, ContentType contentType) {

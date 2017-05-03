@@ -1,6 +1,5 @@
 package au.com.dius.pact.model.unfiltered
 
-import java.io.{BufferedReader, InputStreamReader}
 import java.net.URI
 import java.util.zip.GZIPInputStream
 
@@ -14,8 +13,8 @@ import unfiltered.request.HttpRequest
 import unfiltered.response._
 
 import scala.collection.JavaConversions
-import scala.collection.immutable.Stream
 
+@Deprecated
 object Conversions extends StrictLogging {
 
   def toMap(map: FluentCaseInsensitiveStringsMap): java.util.Map[String, String] = {
