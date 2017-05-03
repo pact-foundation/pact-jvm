@@ -4,7 +4,3 @@ dependencies {
     testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}",
       "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }
-
-test {
-    systemProperties['pact.rootDir'] = "$buildDir/pacts"
-}

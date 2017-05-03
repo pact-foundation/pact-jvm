@@ -1,12 +1,13 @@
 package au.com.dius.pact.model
 
 import groovy.transform.Canonical
+import org.jetbrains.annotations.NotNull
 
 /**
  * Request made by a consumer to a provider
  */
 @Canonical
-class Request extends HttpPart {
+class Request extends HttpPart implements Comparable {
   private static final String COOKIE_KEY = 'cookie'
 
   String method = 'GET'
@@ -58,5 +59,10 @@ class Request extends HttpPart {
     } else {
       null
     }
+  }
+
+  @Override
+  int compareTo(@NotNull Object o) {
+    return equals(o) ? 0 : 1
   }
 }

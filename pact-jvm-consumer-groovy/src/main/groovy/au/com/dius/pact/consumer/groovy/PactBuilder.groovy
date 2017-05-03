@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.consumer.PactVerificationResult
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.consumer.StatefulMockProvider
 import au.com.dius.pact.consumer.VerificationResult
@@ -12,11 +13,14 @@ import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.RequestResponseInteraction
+import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.Response
 import groovy.json.JsonBuilder
 import scala.collection.JavaConverters$
 
 import java.util.regex.Pattern
+
+import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest
 
 /**
  * Builder DSL for Pact tests
@@ -217,7 +221,9 @@ class PactBuilder extends BaseBuilder {
    * @param options Optional map of options for the run
    * @param closure Test to execute
    * @return The result of the test run
+   * @deprecated use runTest instead
    */
+  @Deprecated
   VerificationResult run(Map options = [:], Closure closure) {
     PactFragment fragment = fragment()
 
@@ -232,6 +238,7 @@ class PactBuilder extends BaseBuilder {
     fragment.runConsumer(config, closure)
   }
 
+  @Deprecated
   PactFragment fragment() {
     buildInteractions()
     new PactFragment(consumer, provider, JavaConverters$.MODULE$.asScalaBufferConverter(interactions).asScala())
@@ -339,13 +346,34 @@ class PactBuilder extends BaseBuilder {
   }
 
   /**
-   * Runs the test (via the run method), and throws an exception if it was not successful.
+   * Executes the providers closure in the context of the interactions defined on this builder.
+   * @param options Optional map of options for the run
+   * @param closure Test to execute
+   * @return The result of the test run
+   */
+  PactVerificationResult runTest(Map options = [:], Closure closure) {
+    buildInteractions()
+    def pact = new RequestResponsePact(provider, consumer, interactions)
+
+    MockProviderConfig config
+    def pactVersion = options.specificationVersion ?: PactSpecVersion.V2
+    if (port == null) {
+      config = MockProviderConfig.httpConfig('localhost', 0, pactVersion)
+    } else {
+      config = MockProviderConfig.httpConfig('localhost', port, pactVersion)
+    }
+
+    runConsumerTest(pact, config, closure)
+  }
+
+  /**
+   * Runs the test (via the runTest method), and throws an exception if it was not successful.
    * @param options Optional map of options for the run
    * @param closure
    */
   void runTestAndVerify(Map options = [:], Closure closure) {
-    VerificationResult result = run(options, closure)
-    if (result != PACTVERIFIED) {
+    PactVerificationResult result = runTest(options, closure)
+    if (result != PactVerificationResult.Ok) {
       throw new PactFailedException(result)
     }
   }

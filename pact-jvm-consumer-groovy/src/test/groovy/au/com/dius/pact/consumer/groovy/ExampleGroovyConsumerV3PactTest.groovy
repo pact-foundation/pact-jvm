@@ -1,9 +1,7 @@
 package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactConsumerConfig
-@SuppressWarnings('UnusedImport')
-import au.com.dius.pact.consumer.PactVerified$
-import au.com.dius.pact.consumer.VerificationResult
+import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.model.PactSpecVersion
 import groovy.json.JsonSlurper
 import groovyx.net.http.RESTClient
@@ -31,7 +29,7 @@ class ExampleGroovyConsumerV3PactTest {
             )
         }
 
-        VerificationResult result = aliceService.run(specificationVersion: PactSpecVersion.V3) {
+        PactVerificationResult result = aliceService.runTest(specificationVersion: PactSpecVersion.V3) {
             def client = new RESTClient('http://localhost:1234/')
             def aliceResponse = client.get(path: '/mallory', query: [status: 'good', name: 'ron'])
 
@@ -41,7 +39,7 @@ class ExampleGroovyConsumerV3PactTest {
             def data = aliceResponse.data.text()
             assert data == '"That is some good Mallory."'
         }
-        assert result == PactVerified$.MODULE$
+        assert result == PactVerificationResult.Ok.INSTANCE
 
       def pactFile = new File("${PactConsumerConfig.pactRootDir()}/V3Consumer-V3Service.json")
       def json = new JsonSlurper().parse(pactFile)

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConversions
 import java.nio.charset.Charset
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentSkipListSet
 
 fun mockServer(pact: RequestResponsePact, config: MockProviderConfig): MockServer {
   return when (config) {
@@ -25,6 +26,7 @@ abstract class MockServer(val pact: RequestResponsePact,
                           val config: MockProviderConfig,
                           private val server: HttpServer) : HttpHandler {
   private val mismatchedRequests = ConcurrentHashMap<Request, MutableList<PactVerificationResult>>()
+  private val matchedRequests = ConcurrentSkipListSet<Request>()
   private val requestMatcher = RequestMatching.apply(JavaConversions.asScalaBuffer(pact.interactions).toSeq())
 
   override fun handle(exchange: HttpExchange) {
@@ -52,6 +54,7 @@ abstract class MockServer(val pact: RequestResponsePact,
     when (matchResult) {
       is FullRequestMatch -> {
         val interaction = matchResult.interaction() as RequestResponseInteraction
+        matchedRequests.add(interaction.request)
         return interaction.response
       }
       is PartialRequestMatch -> {
@@ -122,6 +125,10 @@ abstract class MockServer(val pact: RequestResponsePact,
   private fun validateMockServerState(): PactVerificationResult {
     if (mismatchedRequests.isNotEmpty()) {
       return PactVerificationResult.Mismatches(mismatchedRequests.values.flatten())
+    }
+    val expectedRequests = pact.interactions.map { it.request }.filter { !matchedRequests.contains(it) }
+    if (expectedRequests.isNotEmpty()) {
+      return PactVerificationResult.ExpectedButNotReceived(expectedRequests)
     }
     return PactVerificationResult.Ok
   }
