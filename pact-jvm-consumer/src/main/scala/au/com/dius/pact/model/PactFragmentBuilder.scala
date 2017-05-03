@@ -4,6 +4,10 @@ import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.{ConsumerTestVerification, VerificationResult}
 import org.json.JSONObject
 
+/**
+  * @deprecated Moved to Kotlin implementation
+  */
+@Deprecated
 object PactFragmentBuilder {
   def apply(consumer: Consumer) = {
     WithConsumer(consumer)

@@ -9,6 +9,7 @@ dependencies {
       'com.github.mifmif:generex:1.0.1',
       "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.8.4",
       "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.3"
+    compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
 
     testCompile "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}",
       "ch.qos.logback:logback-classic:${project.logbackVersion}"

@@ -107,4 +107,8 @@ class MockProviderConfig {
       }
     }
   }
+
+  InetSocketAddress address() {
+    new InetSocketAddress(hostname, port)
+  }
 }

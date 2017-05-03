@@ -2,10 +2,12 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.OptionalBody;
+import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactReader;
 import au.com.dius.pact.model.Request;
 import au.com.dius.pact.model.RequestResponseInteraction;
+import au.com.dius.pact.model.RequestResponsePact;
 import au.com.dius.pact.model.Response;
 import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
@@ -237,7 +239,7 @@ public class PactDslResponse {
     /**
      * Terminates the DSL and builds a pact fragment to represent the interactions
      *
-     * @return
+     * @deprecated Use toPact instead
      */
     public PactFragment toFragment() {
         addInteraction();
@@ -245,6 +247,16 @@ public class PactDslResponse {
                 request.consumer,
                 request.provider,
           JavaConversions$.MODULE$.asScalaBuffer(consumerPactBuilder.getInteractions()).toSeq());
+    }
+
+    /**
+     * Terminates the DSL and builds a pact to represent the interactions
+     *
+     * @return
+     */
+    public RequestResponsePact toPact() {
+        addInteraction();
+        return new RequestResponsePact(request.provider, request.consumer, consumerPactBuilder.getInteractions());
     }
 
     /**

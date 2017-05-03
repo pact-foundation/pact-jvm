@@ -6,6 +6,10 @@ import au.com.dius.pact.model.{Pact, PactSpecVersion}
 
 import scala.util.{Failure, Success, Try}
 
+/**
+  * @deprecated Moved to Kotlin implementation
+  */
+@Deprecated
 object ConsumerPactRunner {
   
   def writeIfMatching(pact: Pact, results: PactSessionResults, pactVersion: PactSpecVersion): VerificationResult =
@@ -24,6 +28,10 @@ object ConsumerPactRunner {
   }
 }
 
+/**
+  * @deprecated Moved to Kotlin implementation
+  */
+@Deprecated
 class ConsumerPactRunner(server: MockProvider) {
   import ConsumerPactRunner._
   

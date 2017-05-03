@@ -6,7 +6,7 @@ import groovy.transform.Canonical
  * Request made by a consumer to a provider
  */
 @Canonical
-class Request implements HttpPart {
+class Request extends HttpPart {
   private static final String COOKIE_KEY = 'cookie'
 
   String method = 'GET'

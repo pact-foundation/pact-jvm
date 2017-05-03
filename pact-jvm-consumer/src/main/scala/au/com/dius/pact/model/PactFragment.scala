@@ -2,6 +2,10 @@ package au.com.dius.pact.model
 
 import au.com.dius.pact.consumer._
 
+/**
+  * @deprecated Moved to Kotlin implementation
+  */
+@Deprecated
 case class PactFragment(consumer: Consumer,
                         provider: Provider,
                         interactions: Seq[RequestResponseInteraction]) {
@@ -26,6 +30,10 @@ case class PactFragment(consumer: Consumer,
 
 }
 
+/**
+  * @deprecated Moved to Kotlin implementation
+  */
+@Deprecated
 object PactFragment {
   def consumer(consumer: String) = {
     PactFragmentBuilder.apply(new Consumer(consumer))

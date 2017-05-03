@@ -9,7 +9,7 @@ buildscript {
 }
 
 plugins {
-  id "org.jetbrains.kotlin.jvm" version "1.1.1"
+  id "org.jetbrains.kotlin.jvm" version "1.1.2"
 }
 
 subprojects {
@@ -36,7 +36,6 @@ subprojects {
     apply plugin: 'codenarc'
     apply plugin: 'jacoco'
     apply plugin: 'org.jetbrains.kotlin.jvm'
-
     apply plugin: 'com.github.tkruse.groovysh'
 
     repositories {

@@ -3,7 +3,7 @@ package au.com.dius.pact.model
 /**
  * Base trait for an object that represents part of an http message
  */
-trait HttpPart {
+abstract class HttpPart {
 
   private static final String CONTENT_TYPE = 'Content-Type'
 

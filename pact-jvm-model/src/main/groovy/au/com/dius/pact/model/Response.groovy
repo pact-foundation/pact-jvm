@@ -6,7 +6,7 @@ import groovy.transform.Canonical
  * Response from a provider to a consumer
  */
 @Canonical
-class Response implements HttpPart {
+class Response extends HttpPart {
 
   Integer status = 200
   Map<String, String> headers = [:]
