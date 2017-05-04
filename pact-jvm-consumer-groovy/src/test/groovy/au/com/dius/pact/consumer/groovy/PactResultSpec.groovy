@@ -11,7 +11,6 @@ class PactResultSpec extends Specification {
         def testService = new PactBuilder().build  {
             serviceConsumer 'Consumer'
             hasPactWith 'Test Service'
-            port 1234
 
             uponReceiving('a valid request')
             withAttributes(method: 'get', path: '/path', query: [status: 'good', name: 'ron'])
@@ -24,8 +23,8 @@ class PactResultSpec extends Specification {
       when:
         def response
         def data
-        testService.runTestAndVerify {
-            def client = new RESTClient('http://localhost:1234/')
+        testService.runTestAndVerify { mockServer ->
+            def client = new RESTClient(mockServer.url)
             response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                 requestContentType: 'application/json')
             data = response.data
@@ -42,7 +41,6 @@ class PactResultSpec extends Specification {
         def testService = new PactBuilder().build  {
             serviceConsumer 'Consumer'
             hasPactWith 'Test Service'
-            port 1234
 
             uponReceiving('a valid request')
             withAttributes(method: 'get', path: '/path', query: [status: 'good', name: 'ron'])
@@ -54,8 +52,8 @@ class PactResultSpec extends Specification {
 
       when:
         def response
-        testService.runTestAndVerify {
-          def client = new RESTClient('http://localhost:1234/')
+        testService.runTestAndVerify { mockServer ->
+          def client = new RESTClient(mockServer.url)
           response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                 requestContentType: 'application/json')
 
@@ -72,7 +70,6 @@ class PactResultSpec extends Specification {
         def testService = new PactBuilder().build  {
             serviceConsumer 'Consumer'
             hasPactWith 'Test Service'
-            port 1234
 
             uponReceiving('a valid request')
             withAttributes(method: 'get', path: '/path', query: [status: 'good', name: 'ron'])
@@ -84,8 +81,8 @@ class PactResultSpec extends Specification {
 
       when:
         def response
-        testService.runTestAndVerify {
-            def client = new RESTClient('http://localhost:1234/')
+        testService.runTestAndVerify { mockServer ->
+            def client = new RESTClient(mockServer.url)
             response = client.get(path: '/path', query: [status: 'bad', name: 'ron'],
                 requestContentType: 'application/json')
             assert response.status == 200
@@ -104,7 +101,6 @@ class PactResultSpec extends Specification {
         def testService = new PactBuilder().build  {
             serviceConsumer 'Consumer'
             hasPactWith 'Test Service'
-            port 1234
 
             uponReceiving('a valid request')
             withAttributes(method: 'get', path: '/path', query: [status: 'good', name: 'ron'])
@@ -122,8 +118,8 @@ class PactResultSpec extends Specification {
         }
 
       when:
-        testService.runTestAndVerify {
-            def client = new RESTClient('http://localhost:1234/')
+        testService.runTestAndVerify { mockServer ->
+            def client = new RESTClient(mockServer.url)
             def response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                 requestContentType: 'application/json')
             assert response.status == 200

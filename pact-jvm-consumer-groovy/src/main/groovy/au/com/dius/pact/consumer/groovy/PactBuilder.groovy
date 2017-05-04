@@ -36,7 +36,7 @@ class PactBuilder extends BaseBuilder {
 
   Consumer consumer
   Provider provider
-  Integer port = null
+  Integer port = 0
   String requestDescription
   List requestData = []
   List responseData = []
