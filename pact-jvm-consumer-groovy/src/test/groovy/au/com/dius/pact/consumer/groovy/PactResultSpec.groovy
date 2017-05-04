@@ -1,7 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
 import groovyx.net.http.RESTClient
-import spock.lang.Ignore
 import spock.lang.Specification
 
 class PactResultSpec extends Specification {
@@ -35,7 +34,6 @@ class PactResultSpec extends Specification {
         data == [status: 'isGood']
     }
 
-  @Ignore
     def 'case when the test fails and the pact is verified'() {
       given:
         def testService = new PactBuilder().build  {
@@ -61,8 +59,12 @@ class PactResultSpec extends Specification {
         }
 
       then:
-      def e = thrown(PactFailedException)
-      e.message.contains('response.status == 201')
+      def e = thrown(AssertionError)
+      e.message.contains('Pact Test function failed with an exception: Condition not satisfied:\n' +
+        '\n' +
+        'response.status == 201\n' +
+        '|        |      |\n' +
+        '|        200    false')
     }
 
     def 'case when the test fails and the pact has a mismatch'() {
@@ -89,13 +91,12 @@ class PactResultSpec extends Specification {
         }
 
       then:
-         def e = thrown(PactFailedException)
+         def e = thrown(AssertionError)
          e.message.contains(
             'QueryMismatch(status,good,bad,Some(Expected \'good\' but received \'bad\' for query parameter ' +
               '\'status\'),$.query.status.0)')
     }
 
-  @Ignore
     def 'case when the test passes and there is a missing request'() {
       given:
         def testService = new PactBuilder().build  {
@@ -128,10 +129,13 @@ class PactResultSpec extends Specification {
       then:
         def e = thrown(PactFailedException)
         e.message.contains('The following requests were not received:\n' +
-            'Interaction: a valid post request\n' +
-            '\tin state None\n' +
-            'request:\n' +
-            '\tmethod: post\n' +
-            '\tpath: /path')
+          '\tmethod: post\n' +
+          '\tpath: /path\n' +
+          '\tquery: [:]\n' +
+          '\theaders: [Content-Type:application/json]\n' +
+          '\tmatchers: [:]\n' +
+          '\tbody: au.com.dius.pact.model.OptionalBody(PRESENT, {\n' +
+          '    "status": "isGood"\n' +
+          '})')
     }
 }

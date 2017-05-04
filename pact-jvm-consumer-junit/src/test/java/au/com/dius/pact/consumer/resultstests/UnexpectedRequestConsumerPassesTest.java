@@ -1,9 +1,10 @@
 package au.com.dius.pact.consumer.resultstests;
 
+import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.PactMismatchesException;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.consumer.PactMismatchException;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,11 +17,11 @@ import static org.junit.Assert.assertThat;
 public class UnexpectedRequestConsumerPassesTest extends ExpectedToFailBase {
 
     public UnexpectedRequestConsumerPassesTest() {
-        super(PactMismatchException.class);
+        super(PactMismatchesException.class);
     }
 
     @Override
-    protected PactFragment createFragment(PactDslWithProvider builder) {
+    protected RequestResponsePact createPact(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("testreqheader", "testreqheadervalue");
         return builder
@@ -31,7 +32,7 @@ public class UnexpectedRequestConsumerPassesTest extends ExpectedToFailBase {
                 .willRespondWith()
                 .status(200)
                 .body("{\"responsetest\": true, \"name\": \"fred\"}")
-            .toFragment();
+            .toPact();
     }
 
 
@@ -46,11 +47,11 @@ public class UnexpectedRequestConsumerPassesTest extends ExpectedToFailBase {
     }
 
     @Override
-    protected void runTest(String url) throws IOException {
+    protected void runTest(MockServer mockServer) throws IOException {
         Map<String, Object> expectedResponse = new HashMap<String, Object>();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "fred");
-        ConsumerClient consumerClient = new ConsumerClient(url);
+        ConsumerClient consumerClient = new ConsumerClient(mockServer.getUrl());
         assertEquals(consumerClient.getAsMap("/", ""), expectedResponse);
         consumerClient.options("/options");
     }
@@ -59,9 +60,10 @@ public class UnexpectedRequestConsumerPassesTest extends ExpectedToFailBase {
     @Override
     protected void assertException(Throwable e) {
         assertThat(e.getMessage(),
-            containsString("The following unexpected results were received:\n" +
-                "\tmethod: OPTIONS\n" +
-                "\tpath: /options\n"));
+            containsString("The following mismatched requests occurred:\n" +
+              "Unexpected Request:\n" +
+              "\tmethod: OPTIONS\n" +
+              "\tpath: /options"));
 
     }
 }

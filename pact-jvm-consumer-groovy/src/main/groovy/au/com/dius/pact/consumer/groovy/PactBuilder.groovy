@@ -375,6 +375,14 @@ class PactBuilder extends BaseBuilder {
   void runTestAndVerify(Map options = [:], Closure closure) {
     PactVerificationResult result = runTest(options, closure)
     if (result != PactVerificationResult.Ok.INSTANCE) {
+      if (result instanceof PactVerificationResult.Error) {
+        if (result.mockServerState != PactVerificationResult.Ok.INSTANCE) {
+          throw new AssertionError('Pact Test function failed with an exception, possibly due to ' +
+            result.mockServerState, result.error)
+        } else {
+          throw new AssertionError('Pact Test function failed with an exception: ' + result.error.message, result.error)
+        }
+      }
       throw new PactFailedException(result)
     }
   }

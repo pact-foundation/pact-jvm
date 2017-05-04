@@ -1,26 +1,26 @@
 package au.com.dius.pact.consumer.resultstests;
 
+import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.PactMismatchesException;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.consumer.PactMismatchException;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class PactMismatchConsumerPassesTest extends ExpectedToFailBase {
 
     public PactMismatchConsumerPassesTest() {
-        super(PactMismatchException.class);
+        super(AssertionError.class);
     }
 
     @Override
-    protected PactFragment createFragment(PactDslWithProvider builder) {
+    protected RequestResponsePact createPact(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("testreqheader", "someotherheader");
         return builder
@@ -31,7 +31,7 @@ public class PactMismatchConsumerPassesTest extends ExpectedToFailBase {
                 .willRespondWith()
                 .status(200)
                 .body("{\"responsetest\": true, \"name\": \"fred\"}")
-            .toFragment();
+            .toPact();
     }
 
 
@@ -46,16 +46,13 @@ public class PactMismatchConsumerPassesTest extends ExpectedToFailBase {
     }
 
     @Override
-    protected void runTest(String url) throws IOException {
-        Map<String, Object> expectedResponse = new HashMap<String, Object>();
-        expectedResponse.put("responsetest", true);
-        expectedResponse.put("name", "fred");
-        assertEquals(new ConsumerClient(url).getAsMap("/", ""), expectedResponse);
+    protected void runTest(MockServer mockServer) throws IOException {
+        new ConsumerClient(mockServer.getUrl()).getAsMap("/", "");
     }
 
     @Override
     protected void assertException(Throwable e) {
         assertThat(e.getMessage(),
-            containsString("HeaderMismatch - Expected header 'testreqheader' to have value 'someotherheader' but was 'testreqheadervalue'"));
+            containsString("Expected header 'testreqheader' to have value 'someotherheader' but was 'testreqheadervalue'"));
     }
 }

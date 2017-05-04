@@ -17,7 +17,7 @@ class PactFailedException extends RuntimeException {
     }
 
     PactFailedException(PactVerificationResult verificationResult) {
-        super(verificationResult.toString(), verificationResult.metaClass.respondsTo(verificationResult, 'getError')
+        super(verificationResult.description, verificationResult.metaClass.respondsTo(verificationResult, 'getError')
           ? verificationResult.error : null)
         this.pactVerificationResult = verificationResult
     }

@@ -106,7 +106,7 @@ abstract class MockServer(val pact: RequestResponsePact,
 
     try {
       testFn.run(this)
-    } catch(e: Exception) {
+    } catch(e: Throwable) {
       return PactVerificationResult.Error(e, validateMockServerState())
     } finally {
       stop()
