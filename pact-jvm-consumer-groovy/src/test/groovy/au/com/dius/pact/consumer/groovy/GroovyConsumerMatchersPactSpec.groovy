@@ -1,11 +1,10 @@
 package au.com.dius.pact.consumer.groovy
 
-@SuppressWarnings('UnusedImport')
-import au.com.dius.pact.consumer.PactVerified$
-import au.com.dius.pact.consumer.VerificationResult
+import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.model.PactSpecVersion
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
+
 import static groovyx.net.http.ContentType.JSON
 
 class GroovyConsumerMatchersPactSpec extends Specification {
@@ -17,7 +16,6 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     matcherService {
       serviceConsumer 'MatcherConsumer'
       hasPactWith 'MatcherService'
-      port 1234
     }
 
     matcherService {
@@ -67,8 +65,8 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     }
 
     when:
-    VerificationResult result = matcherService.run(specificationVersion: PactSpecVersion.V3) {
-      def client = new RESTClient('http://localhost:1234/')
+    PactVerificationResult result = matcherService.runTest(specificationVersion: PactSpecVersion.V3) {
+      def client = new RESTClient(it.url)
       def response = client.put(requestContentType: JSON, body: [
           'name': 'harry',
           'surname': 'larry',
@@ -113,7 +111,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     }
 
     then:
-    result == PactVerified$.MODULE$
+    result == PactVerificationResult.Ok.INSTANCE
   }
 
   def 'matching on query parameters'() {
@@ -132,14 +130,14 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     }
 
     when:
-    VerificationResult result = matcherService.run {
-      def client = new RESTClient('http://localhost:1235/')
+    PactVerificationResult result = matcherService.runTest {
+      def client = new RESTClient(it.url)
       def response = client.get(query: [a: '100', b: 'Z'])
 
       assert response.status == 200
     }
 
     then:
-    result == PactVerified$.MODULE$
+    result == PactVerificationResult.Ok.INSTANCE
   }
 }

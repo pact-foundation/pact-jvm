@@ -8,7 +8,7 @@ import spock.lang.Specification
 
 class PactBodyBuilderSpec extends Specification {
 
-  def service
+  PactBuilder service
 
   def setup() {
     service = new PactBuilder()
@@ -71,7 +71,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.fragment()
+    service.buildInteractions()
     def keys = new JsonSlurper().parseText(service.interactions[0].request.body.value).keySet()
 
     then:
@@ -125,7 +125,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.fragment()
+    service.buildInteractions()
     def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.value))
 
     then:
@@ -173,7 +173,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.fragment()
+    service.buildInteractions()
     def body = new JsonSlurper().parseText(service.interactions[0].request.body.value)
 
     then:
@@ -212,7 +212,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.fragment()
+    service.buildInteractions()
     def body = new JsonSlurper().parseText(service.interactions[0].request.body.value)
 
     then:
@@ -244,7 +244,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.fragment()
+    service.buildInteractions()
     def body = new JsonSlurper().parseText(service.interactions[0].request.body.value)
 
     then:
@@ -406,7 +406,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.fragment()
+    service.buildInteractions()
     def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.value))
 
     then:

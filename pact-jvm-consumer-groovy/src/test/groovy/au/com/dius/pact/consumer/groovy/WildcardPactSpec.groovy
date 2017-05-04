@@ -1,8 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
-@SuppressWarnings('UnusedImport')
-import au.com.dius.pact.consumer.PactVerified$
-import au.com.dius.pact.consumer.VerificationResult
+import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.model.PactSpecVersion
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
@@ -46,8 +44,8 @@ class WildcardPactSpec extends Specification {
     }
 
     when:
-    VerificationResult result = articleService.run(specificationVersion: PactSpecVersion.V3) {
-      def client = new RESTClient('http://localhost:1234/')
+    PactVerificationResult result = articleService.runTest(specificationVersion: PactSpecVersion.V3) {
+      def client = new RESTClient(it.url)
       def response = client.get(requestContentType: JSON)
 
       assert response.status == 200
@@ -60,7 +58,7 @@ class WildcardPactSpec extends Specification {
     }
 
     then:
-    result == PactVerified$.MODULE$
+    result == PactVerificationResult.Ok.INSTANCE
     articleService.interactions.size() == 1
     articleService.interactions[0].response.matchingRules == [
       '$.body.articles': [match: 'type'],
