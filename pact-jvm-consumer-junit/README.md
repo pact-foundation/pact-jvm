@@ -3,7 +3,7 @@ pact-jvm-consumer-junit
 
 Provides a DSL and a base test class for use with Junit to build consumer tests.
 
-##Dependency
+## Dependency
 
 The library is available on maven central using:
 
@@ -11,7 +11,7 @@ The library is available on maven central using:
 * artifact-id = `pact-jvm-consumer-junit_2.11`
 * version-id = `3.0.x`
 
-##Usage
+## Usage
 
 ### Using the base ConsumerPactTest
 
@@ -192,15 +192,30 @@ E.g.:
 ```java
     @Rule
     public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", "localhost", 8443, true,
-      PactConfig.apply(PactSpecVersion.V2), this);                                                   // ^^^^
+      PactSpecVersion.V2, this);                                                                     // ^^^^
 ```
 
-For an exmaple test doing this, see [PactProviderHttpsTest](src/test/java/au/com/dius/pact/consumer/pactproviderrule/PactProviderHttpsTest.java).
+For an example test doing this, see [PactProviderHttpsTest](src/test/java/au/com/dius/pact/consumer/pactproviderrule/PactProviderHttpsTest.java).
 
 **NOTE:** The provider will start handling HTTPS requests using a self-signed certificate. Most HTTP clients will not accept
 connections to a self-signed server as the certificate is untrusted. You may need to enable insecure HTTPS with your client
 for this test to work. For an example of how to enable insecure HTTPS client connections with Apache Http Client, have a
 look at [InsecureHttpsRequest](src/test/java/org/apache/http/client/fluent/InsecureHttpsRequest.java).
+
+### Requiring the mock server to run with HTTPS with a keystore [versions 3.4.1+]
+
+From versions 3.4.1+ the mock server can be started running with HTTPS using a keystore.
+To enable this set the `https` parameter to `true`, set the keystore path/file, and the keystore's password.
+
+E.g.:
+
+```java
+    @Rule
+    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", "localhost", 8443, true,
+            "/path/to/your/keystore.jks", "your-keystore-password", PactSpecVersion.V2, this);
+```
+
+For an example test doing this, see [PactProviderHttpsKeystoreTest](src/test/java/au/com/dius/pact/consumer/pactproviderrule/PactProviderHttpsKeystoreTest.java).
 
 ### Using the Pact DSL directly
 
