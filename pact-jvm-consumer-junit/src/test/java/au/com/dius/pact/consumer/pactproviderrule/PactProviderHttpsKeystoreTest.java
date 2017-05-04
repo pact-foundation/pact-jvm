@@ -22,14 +22,12 @@ import java.util.Map;
 import javax.net.ssl.SSLHandshakeException;
 
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jayway.restassured.RestAssured;
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactProviderRule;
 import au.com.dius.pact.consumer.PactVerification;
@@ -38,7 +36,6 @@ import au.com.dius.pact.consumer.exampleclients.ConsumerHttpsClient;
 import au.com.dius.pact.model.MockHttpsKeystoreProviderConfig;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
-import static org.junit.Assert.assertEquals;
 
 public class PactProviderHttpsKeystoreTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(PactProviderHttpsKeystoreTest.class);
