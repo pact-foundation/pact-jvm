@@ -1,10 +1,11 @@
 package au.com.dius.pact.consumer.v3;
 
+import au.com.dius.pact.consumer.ConsumerPactTestMk2;
+import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.consumer.ConsumerPactTest;
-import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
+import au.com.dius.pact.model.RequestResponsePact;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -12,10 +13,10 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-public class V3ConsumerPactTest extends ConsumerPactTest {
+public class V3ConsumerPactTest extends ConsumerPactTestMk2 {
 
     @Override
-    protected PactFragment createFragment(PactDslWithProvider builder) {
+    protected RequestResponsePact createPact(PactDslWithProvider builder) {
         return builder
             .uponReceiving("v3 test interaction")
                 .path("/")
@@ -23,7 +24,7 @@ public class V3ConsumerPactTest extends ConsumerPactTest {
             .willRespondWith()
                 .status(200)
                 .body("{\"responsetest\": true, \"version\": \"v3\"}")
-            .toFragment();
+            .toPact();
     }
 
     @Override
@@ -42,10 +43,10 @@ public class V3ConsumerPactTest extends ConsumerPactTest {
     }
 
     @Override
-    protected void runTest(String url) throws IOException {
+    protected void runTest(MockServer mockServer) throws IOException {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("version", "v3");
-        assertEquals(new ConsumerClient(url).getAsMap("/", ""), expectedResponse);
+        assertEquals(new ConsumerClient(mockServer.getUrl()).getAsMap("/", ""), expectedResponse);
     }
 }

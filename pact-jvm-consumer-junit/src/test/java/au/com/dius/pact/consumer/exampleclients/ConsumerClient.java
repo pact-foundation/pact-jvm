@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.exampleclients;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.UrlEscapers;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.fluent.Request;
@@ -43,8 +44,9 @@ public class ConsumerClient{
     }
 
     private List<NameValuePair> parseQueryString(String queryString) {
-        return Arrays.asList(queryString.split("&")).stream().map(s -> s.split("="))
-                .map(p -> new BasicNameValuePair(p[0], p[1])).collect(Collectors.toList());
+        return Arrays.stream(queryString.split("&")).map(s -> s.split("="))
+          .map(p -> new BasicNameValuePair(p[0], UrlEscapers.urlFormParameterEscaper().escape(p[1])))
+          .collect(Collectors.toList());
     }
 
     private String encodePath(String path) {

@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
@@ -30,22 +31,30 @@ public class MatcherTestUtils {
     }
 
     public static void assertResponseMatcherKeysEqualTo(PactFragment fragment, String... matcherKeys) {
-        Map<String, Map<String, Object>> matchers = fragment.interactions().head().getResponse().getMatchingRules();
+      assertResponseMatcherKeysEqualTo(fragment.toPact(), matcherKeys);
+    }
+
+    public static void assertResponseMatcherKeysEqualTo(RequestResponsePact pact, String... matcherKeys) {
+        Map<String, Map<String, Object>> matchers = pact.getInteractions().get(0).getResponse().getMatchingRules();
         assertEquals(asSet(matcherKeys), new TreeSet<String>(matchers.keySet()));
     }
 
     public static void assertResponseKeysEqualTo(PactFragment fragment, String... keys) {
-        String body = fragment.interactions().head().getResponse().getBody().getValue();
-        Map hashMap = null;
-        try {
-            hashMap = new ObjectMapper().readValue(body, HashMap.class);
-        } catch (IOException e) {
-            LOGGER.error("Failed to parse JSON", e);
-            Assert.fail(e.getMessage());
-        }
-        List<String> list = Arrays.asList(keys);
-        Collections.sort(list);
-        assertEquals(list, extractKeys(hashMap));
+      assertResponseKeysEqualTo(fragment.toPact(), keys);
+    }
+
+    public static void assertResponseKeysEqualTo(RequestResponsePact pact, String... keys) {
+      String body = pact.getInteractions().get(0).getResponse().getBody().getValue();
+      Map hashMap = null;
+      try {
+        hashMap = new ObjectMapper().readValue(body, HashMap.class);
+      } catch (IOException e) {
+        LOGGER.error("Failed to parse JSON", e);
+        Assert.fail(e.getMessage());
+      }
+      List<String> list = Arrays.asList(keys);
+      Collections.sort(list);
+      assertEquals(list, extractKeys(hashMap));
     }
 
     public static void assertMessageMatcherKeysEqualTo(MessagePact messagePact, String... matcherKeys) {

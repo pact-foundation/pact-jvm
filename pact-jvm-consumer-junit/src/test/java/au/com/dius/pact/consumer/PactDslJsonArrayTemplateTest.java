@@ -5,11 +5,11 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 
-public class PactDslJsonArrayTemplateTest extends ConsumerPactTest {
+public class PactDslJsonArrayTemplateTest extends ConsumerPactTestMk2 {
     @Override
-    protected PactFragment createFragment(PactDslWithProvider builder) {
+    protected RequestResponsePact createPact(PactDslWithProvider builder) {
         DslPart personTemplate = new PactDslJsonBody()
                 .id()
                 .stringType("name")
@@ -18,16 +18,16 @@ public class PactDslJsonArrayTemplateTest extends ConsumerPactTest {
         DslPart body = new PactDslJsonArray()
                 .template(personTemplate, 3);
 
-        PactFragment fragment = builder
+        RequestResponsePact pact = builder
                 .uponReceiving("java test interaction with a DSL array body with templates")
                 .path("/")
                 .method("GET")
                 .willRespondWith()
                 .status(200)
                 .body(body)
-                .toFragment();
+                .toPact();
 
-        MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment,
+        MatcherTestUtils.assertResponseMatcherKeysEqualTo(pact,
                 "$.body[0].id",
                 "$.body[0].name",
                 "$.body[0].dob",
@@ -39,7 +39,7 @@ public class PactDslJsonArrayTemplateTest extends ConsumerPactTest {
                 "$.body[2].dob"
         );
 
-        return fragment;
+        return pact;
     }
 
     @Override
@@ -53,9 +53,9 @@ public class PactDslJsonArrayTemplateTest extends ConsumerPactTest {
     }
 
     @Override
-    protected void runTest(String url) {
+    protected void runTest(MockServer mockServer) {
         try {
-            new ConsumerClient(url).getAsList("/");
+            new ConsumerClient(mockServer.getUrl()).getAsList("/");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -4,12 +4,12 @@ import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 
-public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTest {
+public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTestMk2 {
 
     @Override
-    protected PactFragment createFragment(PactDslWithProvider builder) {
+    protected RequestResponsePact createPact(PactDslWithProvider builder) {
         DslPart body = new PactDslJsonBody()
             .id()
             .object("data")
@@ -31,16 +31,16 @@ public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTest {
                     .closeArray()
                 .closeArray()
             .closeObject();
-        PactFragment fragment = builder
+        RequestResponsePact pact = builder
                 .uponReceiving("java test interaction with an array like matcher")
                 .path("/")
                 .method("GET")
                 .willRespondWith()
                 .status(200)
                 .body(body)
-                .toFragment();
+                .toPact();
 
-        MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment,
+        MatcherTestUtils.assertResponseMatcherKeysEqualTo(pact,
             "$.body.id",
             "$.body.data.array1",
             "$.body.data.array1[*].id",
@@ -52,7 +52,7 @@ public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTest {
             "$.body.data.array3[0]",
             "$.body.data.array3[0][*].itemCount");
 
-        MatcherTestUtils.assertResponseKeysEqualTo(fragment,
+        MatcherTestUtils.assertResponseKeysEqualTo(pact,
             "/data",
             "/data/array1",
             "/data/array1/0/dob",
@@ -65,7 +65,7 @@ public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTest {
             "/data/array3",
             "/id");
 
-        return fragment;
+        return pact;
     }
 
     @Override
@@ -79,9 +79,9 @@ public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTest {
     }
 
     @Override
-    protected void runTest(String url) {
+    protected void runTest(MockServer mockServer) {
         try {
-            new ConsumerClient(url).getAsMap("/", "");
+            new ConsumerClient(mockServer.getUrl()).getAsMap("/", "");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
