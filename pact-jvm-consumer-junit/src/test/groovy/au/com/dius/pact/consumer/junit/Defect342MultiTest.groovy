@@ -1,12 +1,12 @@
 package au.com.dius.pact.consumer.junit
 
 import au.com.dius.pact.consumer.Pact
-import au.com.dius.pact.consumer.PactProviderRule
+import au.com.dius.pact.consumer.PactProviderRuleMk2
 import au.com.dius.pact.consumer.PactVerification
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
-import au.com.dius.pact.model.PactFragment
+import au.com.dius.pact.model.RequestResponsePact
 import groovy.json.JsonOutput
 import groovyx.net.http.ContentType
 import groovyx.net.http.HTTPBuilder
@@ -24,7 +24,7 @@ class Defect342MultiTest {
   private static final String SOME_SERVICE_USER = '/some-service/user/'
 
   @Rule
-  public final PactProviderRule mockProvider = new PactProviderRule('multitest_provider', 'localhost', 8096, this)
+  public final PactProviderRuleMk2 mockProvider = new PactProviderRuleMk2('multitest_provider', 'localhost', 8096, this)
 
   private static user() {
     [
@@ -37,7 +37,7 @@ class Defect342MultiTest {
   }
 
   @Pact(provider = 'multitest_provider', consumer= 'browser_consumer')
-  PactFragment createFragment1(PactDslWithProvider builder) {
+  RequestResponsePact createFragment1(PactDslWithProvider builder) {
     builder
       .given('An env')
       .uponReceiving('a new user')
@@ -57,7 +57,7 @@ class Defect342MultiTest {
         .status(200)
         .matchHeader('Content-Type', APPLICATION_JSON, APPLICATION_JSON_CHARSET_UTF_8)
         .body(JsonOutput.toJson(user()))
-      .toFragment()
+      .toPact()
   }
 
   @Test
@@ -77,7 +77,7 @@ class Defect342MultiTest {
   }
 
   @Pact(provider= 'multitest_provider', consumer= 'test_consumer')
-  PactFragment createFragment2(PactDslWithProvider builder) {
+  RequestResponsePact createFragment2(PactDslWithProvider builder) {
     builder
       .given('test state')
       .uponReceiving('A request with double precision number')
@@ -87,7 +87,7 @@ class Defect342MultiTest {
       .willRespondWith()
         .status(200)
         .body('{"responsetest": true, "name": "harry","data": 1234.0 }', ContentType.JSON.toString())
-      .toFragment()
+      .toPact()
   }
 
   @Test
@@ -100,7 +100,7 @@ class Defect342MultiTest {
   }
 
   @Pact(provider = 'multitest_provider', consumer = 'test_consumer')
-  PactFragment getUsersFragment(PactDslWithProvider builder) {
+  RequestResponsePact getUsersFragment(PactDslWithProvider builder) {
     DslPart body = new PactDslJsonArray().maxArrayLike(5)
       .uuid('id')
       .stringType('userName')
@@ -114,11 +114,11 @@ class Defect342MultiTest {
       .willRespondWith()
         .status(200)
         .body(body)
-      .toFragment()
+      .toPact()
   }
 
   @Pact(provider = 'multitest_provider', consumer = 'test_consumer')
-  PactFragment getUsersFragment2(PactDslWithProvider builder) {
+  RequestResponsePact getUsersFragment2(PactDslWithProvider builder) {
     DslPart body = new PactDslJsonArray().minArrayLike(5)
       .uuid('id')
       .stringType('userName')
@@ -132,7 +132,7 @@ class Defect342MultiTest {
       .willRespondWith()
         .status(200)
         .body(body)
-      .toFragment()
+      .toPact()
   }
 
   @Test

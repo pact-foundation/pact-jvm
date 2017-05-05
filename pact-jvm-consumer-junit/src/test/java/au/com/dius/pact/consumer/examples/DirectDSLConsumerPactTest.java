@@ -37,17 +37,14 @@ public class DirectDSLConsumerPactTest {
                 .toPact();
 
         MockProviderConfig config = MockProviderConfig.createDefault();
-        PactVerificationResult result = runConsumerTest(pact, config, new PactTestRun() {
-            @Override
-            public void run(MockServer config) {
-                Map expectedResponse = new HashMap();
-                expectedResponse.put("hello", "harry");
-                try {
-                    assertEquals(new ProviderClient(config.getUrl()).hello("{\"name\": \"harry\"}"),
-                            expectedResponse);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+        PactVerificationResult result = runConsumerTest(pact, config, config1 -> {
+            Map expectedResponse = new HashMap();
+            expectedResponse.put("hello", "harry");
+            try {
+                assertEquals(new ProviderClient(config1.getUrl()).hello("{\"name\": \"harry\"}"),
+                        expectedResponse);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         });
 

@@ -7,12 +7,12 @@ import com.sun.net.httpserver.HttpServer
 import com.sun.net.httpserver.HttpsServer
 import org.apache.commons.lang3.StringEscapeUtils
 import org.apache.http.entity.ContentType
-import org.apache.http.impl.client.HttpClientBuilder
 import org.slf4j.LoggerFactory
 import scala.collection.JavaConversions
+import java.lang.Thread.sleep
 import java.nio.charset.Charset
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentSkipListSet
+import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
  * Returns a mock server for the pact and config
@@ -47,7 +47,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
                               val config: MockProviderConfig,
                               private val server: HttpServer) : HttpHandler, MockServer {
   private val mismatchedRequests = ConcurrentHashMap<Request, MutableList<PactVerificationResult>>()
-  private val matchedRequests = ConcurrentSkipListSet<Request>()
+  private val matchedRequests = ConcurrentLinkedQueue<Request>()
   private val requestMatcher = RequestMatching.apply(JavaConversions.asScalaBuffer(pact.interactions).toSeq())
 
   override fun handle(exchange: HttpExchange) {
@@ -133,6 +133,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
 
     try {
       testFn.run(this)
+      sleep(100) // give the mock server some time to have consistent state
     } catch(e: Throwable) {
       return PactVerificationResult.Error(e, validateMockServerState())
     } finally {

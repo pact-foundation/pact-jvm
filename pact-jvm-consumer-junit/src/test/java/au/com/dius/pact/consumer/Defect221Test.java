@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
 import org.junit.Rule;
@@ -15,10 +15,10 @@ public class Defect221Test {
 
     private static final String APPLICATION_JSON = "application/json";
     @Rule
-    public PactProviderRule provider = new PactProviderRule("221_provider", "localhost", 8081, this);
+    public PactProviderRuleMk2 provider = new PactProviderRuleMk2("221_provider", "localhost", 8081, this);
 
     @Pact(provider="221_provider", consumer="test_consumer")
-    public PactFragment createFragment(PactDslWithProvider builder) {
+    public RequestResponsePact createFragment(PactDslWithProvider builder) {
         return builder
             .given("test state")
             .uponReceiving("A request with double precision number")
@@ -28,7 +28,7 @@ public class Defect221Test {
             .willRespondWith()
                 .status(200)
                 .body("{\"responsetest\": true, \"name\": \"harry\",\"data\": 1234.0 }", APPLICATION_JSON)
-            .toFragment();
+            .toPact();
     }
 
     @Test

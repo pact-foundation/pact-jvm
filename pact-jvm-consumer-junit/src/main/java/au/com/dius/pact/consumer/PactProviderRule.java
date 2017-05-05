@@ -24,7 +24,10 @@ import java.util.Optional;
  * provider. After each test, it will be teared down.
  *
  * If no host is given, it will default to localhost. If no port is given, it will default to a random port.
+ *
+ * @deprecated Use PactProviderRuleMk2 or PactHttpsProviderRuleMk2 instead
  */
+@Deprecated
 public class PactProviderRule extends ExternalResource {
 
     private static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
@@ -240,12 +243,10 @@ public class PactProviderRule extends ExternalResource {
             if (result instanceof UserCodeFailed) {
                 throw ((UserCodeFailed<RuntimeException>)result).error();
             }
-            if (result instanceof PactMismatch && !pactVerification.expectMismatch()) {
+            if (result instanceof PactMismatch) {
                 PactMismatch mismatch = (PactMismatch) result;
                 throw new PactMismatchException(mismatch);
             }
-        } else if (pactVerification.expectMismatch()) {
-            throw new RuntimeException("Expected a pact mismatch (PactVerification.expectMismatch is set to true)");
         }
     }
 

@@ -3,7 +3,7 @@ package au.com.dius.pact.consumer;
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import groovy.json.JsonSlurper;
 import org.apache.http.client.fluent.Request;
 import org.junit.Rule;
@@ -19,10 +19,10 @@ import static org.hamcrest.core.IsEqual.equalTo;
 public class Defect266Test {
 
   @Rule
-  public PactProviderRule provider = new PactProviderRule("266_provider", "localhost", 8080, this);
+  public PactProviderRuleMk2 provider = new PactProviderRuleMk2("266_provider", "localhost", 8080, this);
 
   @Pact(provider = "266_provider", consumer = "test_consumer")
-  public PactFragment getUsersFragment(PactDslWithProvider builder) {
+  public RequestResponsePact getUsersFragment(PactDslWithProvider builder) {
     Map<String, Map<String, Object>> matchers = (Map<String, Map<String, Object>>) new JsonSlurper().parseText("{" +
       "\"$.body[0][*].userName\": {\"match\": \"type\"}," +
       "\"$.body[0][*].id\": {\"regex\": \"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\"}," +
@@ -34,7 +34,7 @@ public class Defect266Test {
       .stringType("userName")
       .stringType("email")
       .closeObject();
-    PactFragment pactFragment = builder
+    RequestResponsePact pact = builder
       .given("a user with an id named 'user' exists")
       .uponReceiving("get all users for max")
       .path("/idm/user")
@@ -42,13 +42,13 @@ public class Defect266Test {
       .willRespondWith()
       .status(200)
       .body(body)
-      .toFragment();
-    assertThat(pactFragment.interactions().head().getResponse().getMatchingRules(), is(equalTo(matchers)));
-    return pactFragment;
+      .toPact();
+    assertThat(pact.getInteractions().get(0).getResponse().getMatchingRules(), is(equalTo(matchers)));
+    return pact;
   }
 
   @Pact(provider = "266_provider", consumer = "test_consumer")
-  public PactFragment getUsersFragment2(PactDslWithProvider builder) {
+  public RequestResponsePact getUsersFragment2(PactDslWithProvider builder) {
     Map<String, Map<String, Object>> matchers = (Map<String, Map<String, Object>>) new JsonSlurper().parseText("{" +
       "\"$.body[0][*].userName\": {\"match\": \"type\"}," +
       "\"$.body[0][*].id\": {\"regex\": \"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\"}," +
@@ -60,7 +60,7 @@ public class Defect266Test {
       .stringType("userName")
       .stringType("email")
       .closeObject();
-    PactFragment pactFragment = builder
+    RequestResponsePact pact = builder
       .given("a user with an id named 'user' exists")
       .uponReceiving("get all users for min")
       .path("/idm/user")
@@ -68,9 +68,9 @@ public class Defect266Test {
       .willRespondWith()
       .status(200)
       .body(body)
-      .toFragment();
-    assertThat(pactFragment.interactions().head().getResponse().getMatchingRules(), is(equalTo(matchers)));
-    return pactFragment;
+      .toPact();
+    assertThat(pact.getInteractions().get(0).getResponse().getMatchingRules(), is(equalTo(matchers)));
+    return pact;
   }
 
   @Test
