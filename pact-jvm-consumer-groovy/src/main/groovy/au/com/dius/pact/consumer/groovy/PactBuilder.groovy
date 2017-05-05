@@ -356,13 +356,8 @@ class PactBuilder extends BaseBuilder {
     buildInteractions()
     def pact = new RequestResponsePact(provider, consumer, interactions)
 
-    MockProviderConfig config
     def pactVersion = options.specificationVersion ?: PactSpecVersion.V2
-    if (port == null) {
-      config = MockProviderConfig.httpConfig(LOCALHOST, 0, pactVersion)
-    } else {
-      config = MockProviderConfig.httpConfig(LOCALHOST, port, pactVersion)
-    }
+    MockProviderConfig config = MockProviderConfig.httpConfig(LOCALHOST, port ?: 0, pactVersion)
 
     runConsumerTest(pact, config, closure)
   }

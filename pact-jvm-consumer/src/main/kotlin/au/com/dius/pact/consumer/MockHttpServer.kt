@@ -7,12 +7,16 @@ import com.sun.net.httpserver.HttpServer
 import com.sun.net.httpserver.HttpsServer
 import org.apache.commons.lang3.StringEscapeUtils
 import org.apache.http.entity.ContentType
+import org.apache.http.impl.client.HttpClientBuilder
 import org.slf4j.LoggerFactory
 import scala.collection.JavaConversions
 import java.nio.charset.Charset
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListSet
 
+/**
+ * Returns a mock server for the pact and config
+ */
 fun mockServer(pact: RequestResponsePact, config: MockProviderConfig): MockServer {
   return when (config) {
     is MockHttpsProviderConfig -> MockHttpsServer(pact, config)
@@ -20,21 +24,44 @@ fun mockServer(pact: RequestResponsePact, config: MockProviderConfig): MockServe
   }
 }
 
-val LOGGER = LoggerFactory.getLogger(MockServer::class.java)!!
+val LOGGER = LoggerFactory.getLogger(BaseMockServer::class.java)!!
 
-abstract class MockServer(val pact: RequestResponsePact,
-                          val config: MockProviderConfig,
-                          private val server: HttpServer) : HttpHandler {
+interface MockServer {
+  /**
+   * Returns the URL for this mock server. The port will be the one bound by the server.
+   */
+  fun getUrl(): String
+
+  /**
+   * Returns the port of the mock server. This will be the port the server is bound to.
+   */
+  fun getPort(): Int
+
+  /**
+   * This will start the mock server and execute the test function. Returns the result of running the test.
+   */
+  fun runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun): PactVerificationResult
+}
+
+abstract class BaseMockServer(val pact: RequestResponsePact,
+                              val config: MockProviderConfig,
+                              private val server: HttpServer) : HttpHandler, MockServer {
   private val mismatchedRequests = ConcurrentHashMap<Request, MutableList<PactVerificationResult>>()
   private val matchedRequests = ConcurrentSkipListSet<Request>()
   private val requestMatcher = RequestMatching.apply(JavaConversions.asScalaBuffer(pact.interactions).toSeq())
 
   override fun handle(exchange: HttpExchange) {
-    val request = toPactRequest(exchange)
-    LOGGER.debug("Received request: $request")
-    val response = generatePactResponse(request)
-    LOGGER.debug("Generating response: $response")
-    pactResponseToHttpExchange(response, exchange)
+    if (exchange.requestMethod == "OPTIONS" && exchange.requestHeaders.containsKey("X-PACT-BOOTCHECK")) {
+      exchange.responseHeaders.add("X-PACT-BOOTCHECK", "true")
+      exchange.sendResponseHeaders(200, 0)
+      exchange.close()
+    } else {
+      val request = toPactRequest(exchange)
+      LOGGER.debug("Received request: $request")
+      val response = generatePactResponse(request)
+      LOGGER.debug("Generating response: $response")
+      pactResponseToHttpExchange(response, exchange)
+    }
   }
 
   private fun pactResponseToHttpExchange(response: Response, exchange: HttpExchange) {
@@ -100,7 +127,7 @@ abstract class MockServer(val pact: RequestResponsePact,
     initServer()
   }
 
-  fun runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun): PactVerificationResult {
+  override fun runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun): PactVerificationResult {
     start()
     waitForServer()
 
@@ -134,10 +161,12 @@ abstract class MockServer(val pact: RequestResponsePact,
   }
 
   private fun waitForServer() {
-
+    org.apache.http.client.fluent.Request.Options(getUrl())
+      .addHeader("X-PACT-BOOTCHECK", "true")
+      .execute()
   }
 
-  fun getUrl(): String {
+  override fun getUrl(): String {
     if (config.port == 0) {
       return "${config.scheme}://${server.address.hostName}:${server.address.port}"
     } else {
@@ -145,11 +174,11 @@ abstract class MockServer(val pact: RequestResponsePact,
     }
   }
 
-  fun getPort(): Int = server.address.port
+  override fun getPort(): Int = server.address.port
 }
 
-open class MockHttpServer(pact: RequestResponsePact, config: MockProviderConfig): MockServer(pact, config, HttpServer.create(config.address(), 0))
-open class MockHttpsServer(pact: RequestResponsePact, config: MockProviderConfig): MockServer(pact, config, HttpsServer.create(config.address(), 0))
+open class MockHttpServer(pact: RequestResponsePact, config: MockProviderConfig): BaseMockServer(pact, config, HttpServer.create(config.address(), 0))
+open class MockHttpsServer(pact: RequestResponsePact, config: MockProviderConfig): BaseMockServer(pact, config, HttpsServer.create(config.address(), 0))
 
 fun calculateCharset(headers: Map<String, String>): Charset {
   val contentType = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
