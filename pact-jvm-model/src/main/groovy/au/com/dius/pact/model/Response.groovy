@@ -16,7 +16,7 @@ class Response implements HttpPart {
   static Response fromMap(def map) {
     new Response().with {
       status = map.status as Integer
-      headers = map.headers
+      headers = map.headers ?: [:]
       body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
       matchingRules = map.matchingRules ?: [:]
       it

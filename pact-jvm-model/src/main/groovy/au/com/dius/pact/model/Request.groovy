@@ -21,7 +21,7 @@ class Request implements HttpPart {
       method = map.method as String
       path = map.path as String
       query = map.query
-      headers = map.headers
+      headers = map.headers ?: [:]
       body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
       matchingRules = map.matchingRules ?: [:]
       it
