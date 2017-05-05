@@ -3,7 +3,6 @@ package au.com.dius.pact.model
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import io.netty.handler.ssl.util.SelfSignedCertificate
 
 /**
  * Mock Provider configuration for HTTPS using a keystore
@@ -13,14 +12,14 @@ import io.netty.handler.ssl.util.SelfSignedCertificate
 @CompileStatic
 class MockHttpsKeystoreProviderConfig extends MockProviderConfig {
 
+  private final String keystore
+  private final String password
 
-  private final String keystore;
-  private final String password;
-
-    MockHttpsKeystoreProviderConfig(String hostname, int port, String keystore, String password, PactSpecVersion pactVersion) {
+  MockHttpsKeystoreProviderConfig(String hostname, int port, String keystore, String password,
+                                    PactSpecVersion pactVersion) {
       super(hostname, port, pactVersion, 'https')
-      this.keystore = keystore;
-      this.password = password;
+      this.keystore = keystore
+      this.password = password
   }
 
   /**
@@ -37,10 +36,10 @@ class MockHttpsKeystoreProviderConfig extends MockProviderConfig {
                                                 final String keystore,
                                                 final String password,
                                                 PactSpecVersion pactVersion = PactSpecVersion.V2) {
-    File keystoreFile = new File(keystore);
-    if(!keystoreFile.isFile()) {
+    File keystoreFile = new File(keystore)
+    if (!keystoreFile.isFile()) {
       throw new IllegalArgumentException(
-              String.format("Keystore path/file '%s' is not valid! It should be formatted similar to `/path/to/keystore.jks'", keystore))
+        "Keystore path/file '$keystore' is not valid! It should be formatted similar to `/path/to/keystore.jks'")
     }
     new MockHttpsKeystoreProviderConfig(hostname, port, keystore, password, pactVersion)
   }
@@ -49,15 +48,15 @@ class MockHttpsKeystoreProviderConfig extends MockProviderConfig {
    * @return The String value of the keystore path and file.
    * Example: '/path/to/keystore.jks'
    */
-  def String getKeystore() {
-    return keystore;
+  String getKeystore() {
+    keystore
   }
 
   /**
    * @return The password for the keystore
    */
-  def String getKeystorePassword() {
-    return password;
+  String getKeystorePassword() {
+    password
   }
 
 }
