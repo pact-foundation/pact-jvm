@@ -38,8 +38,8 @@ class PactMerge {
       existing.mergeInteractions(newPact.interactions)
       new MergeResult(true, '', existing)
     } else {
-      new MergeResult(false, "Cannot merge pacts as there were ${conflicts.size()} conflicts " +
-        'between the interactions')
+      new MergeResult(false, "Cannot merge pacts as there were ${conflicts.size()} conflict(s) " +
+        "between the interactions - ${conflicts.join('\n')}")
     }
   }
 }
