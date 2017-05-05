@@ -24,7 +24,7 @@ class Defect342MultiTest {
   private static final String SOME_SERVICE_USER = '/some-service/user/'
 
   @Rule
-  public final PactProviderRule mockProvider = new PactProviderRule('test_provider', 'localhost', 8096, this)
+  public final PactProviderRule mockProvider = new PactProviderRule('multitest_provider', 'localhost', 8096, this)
 
   private static user() {
     [
@@ -36,7 +36,7 @@ class Defect342MultiTest {
     ]
   }
 
-  @Pact(provider = 'test_provider', consumer= 'browser_consumer')
+  @Pact(provider = 'multitest_provider', consumer= 'browser_consumer')
   PactFragment createFragment1(PactDslWithProvider builder) {
     builder
       .given('An env')
@@ -76,7 +76,7 @@ class Defect342MultiTest {
     }
   }
 
-  @Pact(provider= 'test_provider', consumer= 'test_consumer')
+  @Pact(provider= 'multitest_provider', consumer= 'test_consumer')
   PactFragment createFragment2(PactDslWithProvider builder) {
     builder
       .given('test state')
@@ -99,7 +99,7 @@ class Defect342MultiTest {
       .execute().returnContent().asString() == '{"responsetest": true, "name": "harry","data": 1234.0 }'
   }
 
-  @Pact(provider = 'test_provider', consumer = 'test_consumer')
+  @Pact(provider = 'multitest_provider', consumer = 'test_consumer')
   PactFragment getUsersFragment(PactDslWithProvider builder) {
     DslPart body = new PactDslJsonArray().maxArrayLike(5)
       .uuid('id')
@@ -117,7 +117,7 @@ class Defect342MultiTest {
       .toFragment()
   }
 
-  @Pact(provider = 'test_provider', consumer = 'test_consumer')
+  @Pact(provider = 'multitest_provider', consumer = 'test_consumer')
   PactFragment getUsersFragment2(PactDslWithProvider builder) {
     DslPart body = new PactDslJsonArray().minArrayLike(5)
       .uuid('id')
