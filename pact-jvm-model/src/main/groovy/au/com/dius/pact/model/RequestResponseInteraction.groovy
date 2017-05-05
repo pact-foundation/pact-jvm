@@ -28,9 +28,10 @@ class RequestResponseInteraction implements Interaction {
 
   @Override
   boolean conflictsWith(Interaction other) {
-    description == other.description &&
-      providerState == other.providerState &&
-      (request != other.request || response != other.response)
+//    description == other.description &&
+//      providerState == other.providerState &&
+//      (request != other.request || response != other.response)
+    false
   }
 
   @Override

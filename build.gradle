@@ -77,6 +77,10 @@ subprojects {
       groovyOptions.optimizationOptions.indy = true
     }
 
+    test {
+      systemProperty 'pact.rootDir', "$buildDir/pacts"
+    }
+
     jar {
         manifest.attributes provider: 'gradle',
                 'Implementation-Title': project.name, 'Implementation-Version': version,
