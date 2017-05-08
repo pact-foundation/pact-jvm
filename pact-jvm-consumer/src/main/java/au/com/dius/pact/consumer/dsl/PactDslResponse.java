@@ -138,6 +138,11 @@ public class PactDslResponse {
      */
     public PactDslResponse body(DslPart body) {
         DslPart parent = body.close();
+
+        if (parent instanceof PactDslJsonRootValue) {
+          ((PactDslJsonRootValue)parent).setEncodeJson(true);
+        }
+
         for (String matcherName : parent.matchers.keySet()) {
             responseMatchers.put("$.body" + matcherName, parent.matchers.get(matcherName));
         }
