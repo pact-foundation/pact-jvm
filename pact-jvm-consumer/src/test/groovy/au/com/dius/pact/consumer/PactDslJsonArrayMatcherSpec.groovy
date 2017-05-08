@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray
+import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue
 import groovy.json.JsonSlurper
 import spock.lang.Specification
 
@@ -193,5 +194,27 @@ class PactDslJsonArrayMatcherSpec extends Specification {
     then:
     result.first().size == 2
     result.first().every { it.keySet() == ['defDate', 'cost'] as Set }
+  }
+
+  def 'eachlike supports matching arrays of basic values'() {
+    given:
+    subject = new PactDslJsonArray()
+      .eachLike(PactDslJsonRootValue.stringType('eachLike'))
+      .maxArrayLike(2, PactDslJsonRootValue.stringType('maxArrayLike'))
+      .minArrayLike(2, PactDslJsonRootValue.stringType('minArrayLike'))
+
+    when:
+    def result = subject.body.toString()
+
+    then:
+    result == '[["eachLike"],["maxArrayLike"],["minArrayLike","minArrayLike"]]'
+    subject.matchers == [
+      '$.body[1]': [max: 2, match: 'type'],
+      '$.body[2]': [min: 2, match: 'type'],
+      '$.body[0]': [min: 0, match: 'type'],
+      '$.body[1][*]': [match: 'type'],
+      '$.body[2][*]': [match: 'type'],
+      '$.body[0][*]': [match: 'type']
+    ]
   }
 }
