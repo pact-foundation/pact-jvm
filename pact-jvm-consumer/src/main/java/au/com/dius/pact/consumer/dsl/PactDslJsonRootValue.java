@@ -19,6 +19,7 @@ public class PactDslJsonRootValue extends DslPart {
   private static final String EXAMPLE = "Example \"";
 
   private Object value;
+  private boolean encodeJson = false;
 
   public PactDslJsonRootValue() {
     super("", "");
@@ -36,10 +37,24 @@ public class PactDslJsonRootValue extends DslPart {
 
   @Override
   public Object getBody() {
-    if (value instanceof String) {
+    if (encodeJson) {
       return JsonOutput.toJson(value);
     }
     return value;
+  }
+
+  /**
+   * If the value should be encoded to be safe as JSON
+   */
+  public boolean isEncodeJson() {
+    return encodeJson;
+  }
+
+  /**
+   * If the value should be encoded to be safe as JSON
+   */
+  public void setEncodeJson(boolean encodeJson) {
+    this.encodeJson = encodeJson;
   }
 
   /**
