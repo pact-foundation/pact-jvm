@@ -172,6 +172,40 @@ class PactBrokerClientSpec extends Specification {
   def 'returns an error if the pact broker rejects the pact'() {
     given:
     pactBroker {
+      given('No pact has been published between the Provider and Foo Consumer')
+      uponReceiving('a pact publish request with invalid version')
+      withAttributes(method: 'PUT',
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/XXXX',
+        body: pactContents
+      )
+      willRespondWith(status: 400, headers: ['Content-Type': 'application/json;charset=utf-8'],
+        body: '''
+        |{
+        |  "errors": {
+        |    "consumer_version_number": [
+        |      "Consumer version number 'XXX' cannot be parsed to a version number. The expected format (unless this configuration has been overridden) is a semantic version. eg. 1.3.0 or 2.0.4.rc1"
+        |    ]
+        |  }
+        |}
+        '''.stripMargin()
+      )
+    }
+
+    when:
+    def result = pactBroker.run {
+      assert pactBrokerClient.uploadPactFile(pactFile, 'XXXX') == 'FAILED! 400 Bad Request - ' +
+        'consumer_version_number: [Consumer version number \'XXX\' cannot be parsed to a version number. ' +
+        'The expected format (unless this configuration has been overridden) is a semantic version. eg. 1.3.0 or 2.0.4.rc1]'
+    }
+
+    then:
+    result == PactVerified$.MODULE$
+  }
+
+  @SuppressWarnings('LineLength')
+  def 'returns an error if the pact broker rejects the pact with a conflict'() {
+    given:
+    pactBroker {
       given('No pact has been published between the Provider and Foo Consumer and there is a similar consumer')
       uponReceiving('a pact publish request')
       withAttributes(method: 'PUT',
