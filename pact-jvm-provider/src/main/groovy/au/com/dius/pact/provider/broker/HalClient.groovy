@@ -154,7 +154,12 @@ class HalClient {
     if (body instanceof Reader) {
       closure.call('FAILED', "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${body.readLine()}")
     } else {
-      def error = body?.errors?.join(', ') ?: 'Unknown error'
+      def error = 'Unknown error'
+      if (body?.errors instanceof List) {
+        error = body.errors.join(', ')
+      } else if (body?.errors instanceof Map) {
+        error = body.errors.collect { entry -> "${entry.key}: ${entry.value}" }.join(', ')
+      }
       closure.call('FAILED', "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${error}")
     }
   }
