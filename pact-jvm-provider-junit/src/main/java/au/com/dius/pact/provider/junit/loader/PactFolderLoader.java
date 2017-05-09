@@ -8,7 +8,9 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Out-of-the-box implementation of {@link PactLoader}
@@ -52,6 +54,26 @@ public class PactFolderLoader implements PactLoader {
                 Pact pact = PactReader.loadPact(file);
                 if (pact.getProvider().getName().equals(providerName)) {
                     pacts.add(pact);
+                }
+            }
+        }
+        return pacts;
+    }
+
+    public Map<Pact, File> loadPactsWithFiles(final String providerName) throws IOException {
+        Map<Pact, File> pacts = new HashMap<Pact, File>();
+        File pactFolder = resolvePath();
+        File[] files = pactFolder.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".json");
+            }
+        });
+        if (files != null) {
+            for (File file : files) {
+                Pact pact = PactReader.loadPact(file);
+                if (pact.getProvider().getName().equals(providerName)) {
+                    pacts.put(pact, file);
                 }
             }
         }
