@@ -8,6 +8,7 @@ import au.com.dius.pact.provider.ProviderInfo
 /**
  * Interface to verification reporters that can hook into the events of the PactVerifier
  */
+@SuppressWarnings('MethodCount')
 trait VerifierReporter {
   String ext
 

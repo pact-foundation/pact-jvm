@@ -3,7 +3,6 @@ package au.com.dius.pact.provider.broker
 import au.com.dius.pact.provider.ConsumerInfo
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
-import groovy.transform.CompileStatic
 import org.apache.commons.lang3.StringUtils
 
 /**
