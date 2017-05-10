@@ -209,4 +209,16 @@ class MarkdownReporter implements VerifierReporter {
 
   @Override
   void displayFailures(Map failures) { }
+
+  @Override
+  void warnPublishVerificationEnabledButNoBrokerUrlProvided(ProviderInfo providerInfo) { }
+
+  @Override
+  void publishVerificationSuccess(String result) { }
+
+  @Override
+  void publishVerificationFailed(String result) {
+    writer.println '&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color: red\'>Failed to publish the verification results:' +
+      "  - $result</span>"
+  }
 }

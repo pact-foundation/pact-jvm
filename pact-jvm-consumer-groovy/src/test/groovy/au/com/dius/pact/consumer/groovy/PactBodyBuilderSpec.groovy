@@ -435,12 +435,12 @@ class PactBodyBuilderSpec extends Specification {
   private List walkGraph(def value) {
       def set = []
       if (value instanceof Map) {
-          value.each { k, v ->
+          value.keySet().sort().each { k ->
               set << k
-              set << walkGraph(v)
+              set << walkGraph(value[k])
           }
       } else if (value instanceof List) {
-          value.eachWithIndex { v, i ->
+          value.sort().eachWithIndex { v, i ->
               set << i
               set << walkGraph(v)
           }

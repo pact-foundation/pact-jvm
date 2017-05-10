@@ -11,11 +11,12 @@ dependencies {
         "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.8.4",
         "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.3"
 
-    testCompile ('org.spockframework:spock-core:1.0-groovy-2.4') {
+    testCompile ('org.spockframework:spock-core:1.1-groovy-2.4') {
         exclude group: 'org.codehaus.groovy'
     }
     testCompile "cglib:cglib:${project.cglibVersion}"
     testCompile project(":pact-jvm-consumer-groovy_${project.scalaVersion}")
+    testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }
 
 compileTestGroovy.dependsOn 'compileTestScala'

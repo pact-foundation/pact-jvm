@@ -192,4 +192,13 @@ class JsonReporter implements VerifierReporter {
 
   @Override
   void displayFailures(Map failures) { }
+
+  @Override
+  void warnPublishVerificationEnabledButNoBrokerUrlProvided(ProviderInfo providerInfo) { }
+
+  @Override
+  void publishVerificationSuccess(String result) { }
+
+  @Override
+  void publishVerificationFailed(String result) { }
 }

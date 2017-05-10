@@ -256,4 +256,22 @@ class AnsiConsoleReporter implements VerifierReporter {
       AnsiConsole.out().println("      ${err.class.name}")
     }
   }
+
+  @Override
+  void warnPublishVerificationEnabledButNoBrokerUrlProvided(ProviderInfo providerInfo) {
+    AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
+      .a("WARNING: You have enabled publishing of pact verification results for '$providerInfo.name', " +
+      'but no Pact Broker URL is configured.')
+      .reset())
+  }
+
+  @Override
+  void publishVerificationSuccess(String result) { }
+
+  @Override
+  void publishVerificationFailed(String result) {
+    AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.RED)
+      .a("Failed to publish the verification results: \"$result\"")
+      .reset())
+  }
 }

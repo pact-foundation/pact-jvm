@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.broker
 import au.com.dius.pact.provider.ConsumerInfo
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
+import groovy.transform.CompileStatic
 import org.apache.commons.lang3.StringUtils
 
 /**
@@ -13,6 +14,7 @@ class PactBrokerClient {
 
   private static final String LATEST_PROVIDER_PACTS = 'pb:latest-provider-pacts'
   private static final String LATEST_PROVIDER_PACTS_WITH_TAG = 'pb:latest-provider-pacts-with-tag'
+  private static final String PACTS = 'pacts'
 
   def pactBrokerUrl
   Map options = [:]
@@ -82,6 +84,19 @@ class PactBrokerClient {
     } else {
       halClient.navigate(LATEST_PROVIDER_PACTS_WITH_TAG, provider: providerName, tag: tag)
     }
-    halClient.linkUrl('pacts')
+    halClient.linkUrl(PACTS)
+  }
+
+  @SuppressWarnings(['UnusedMethodParameter', 'UnusedVariable'])
+  String publishVerificationResults(String providerName, String consumer, boolean result, String version,
+                                  String buildUrl) {
+    HalClient halClient = newHalClient()
+    def publishLink = halClient.navigate(LATEST_PROVIDER_PACTS, provider: providerName)
+      .navigate(PACTS, name: consumer).linkUrl('pb:publish-verification-results')
+    def verificationResult = [success: result, providerApplicationVersion: version]
+    if (StringUtils.isNotEmpty(buildUrl)) {
+      verificationResult.buildUrl = buildUrl
+    }
+    halClient.post(publishLink, verificationResult)
   }
 }

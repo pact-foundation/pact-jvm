@@ -5,6 +5,7 @@ import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
+import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
@@ -37,7 +38,15 @@ class ProviderVerifier {
   def reporters = [ new AnsiConsoleReporter() ]
   def providerMethodInstance = { Method m -> m.declaringClass.newInstance() }
 
-  Map verifyProvider(ProviderInfo provider) {
+  /**
+   * Executes the verification test for the given provider
+   * @param options The following options can be provided:
+   *    pactBrokerUrl: URL of the pact broker
+   *    authentication: Authentication for the broker. List of 3 values: Scheme, username, password
+   * @param provider Provider to verify
+   * @return Map of failures
+   */
+  Map verifyProvider(Map options = [:], ProviderInfo provider) {
     Map failures = [:]
 
     initialiseReporters(provider)
@@ -46,7 +55,7 @@ class ProviderVerifier {
     if (consumers.empty) {
       reporters.each { it.warnProviderHasNoConsumers(provider) }
     }
-    consumers.each(this.&runVerificationForConsumer.curry(failures, provider))
+    consumers.each(this.&runVerificationForConsumer.curry(failures, provider, options))
 
     failures
   }
@@ -60,10 +69,14 @@ class ProviderVerifier {
     }
   }
 
-  void runVerificationForConsumer(Map failures, ProviderInfo provider, ConsumerInfo consumer) {
+  void runVerificationForConsumer(Map failures, ProviderInfo provider, Map options, ConsumerInfo consumer) {
     reportVerificationForConsumer(consumer, provider)
     def pact = loadPactFileForConsumer(consumer)
-    forEachInteraction(pact, this.&verifyInteraction.curry(provider, consumer, failures))
+    def result = forEachInteraction(pact, this.&verifyInteraction.curry(provider, consumer, failures))
+
+    if (provider.publishVerificationResults) {
+      publishVerificationResults(provider, consumer, result, options)
+    }
   }
 
   void reportVerificationForConsumer(ConsumerInfo consumer, ProviderInfo provider) {
@@ -78,12 +91,13 @@ class ProviderVerifier {
     }
   }
 
-  void forEachInteraction(def pact, Closure verifyInteraction) {
+  boolean forEachInteraction(def pact, Closure<Boolean> verifyInteraction) {
     List interactions = interactions(pact)
     if (interactions.empty) {
       reporters.each { it.warnPactFileHasNoInteractions(pact) }
+      true
     } else {
-      interactions.each(verifyInteraction)
+      interactions.collect(verifyInteraction).every()
     }
   }
 
@@ -150,7 +164,7 @@ class ProviderVerifier {
     interaction.description ==~ callProjectGetProperty(PACT_FILTER_DESCRIPTION)
   }
 
-  void verifyInteraction(ProviderInfo provider, ConsumerInfo consumer, Map failures, def interaction) {
+  boolean verifyInteraction(ProviderInfo provider, ConsumerInfo consumer, Map failures, def interaction) {
     def interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name}" +
       " - ${interaction.description}"
 
@@ -169,17 +183,22 @@ class ProviderVerifier {
     if (stateChangeOk) {
       reportInteractionDescription(interaction)
 
+      def result = true
       if (ProviderUtils.verificationType(provider, consumer) == PactVerification.REQUST_RESPONSE) {
         log.debug('Verifying via request/response')
-        verifyResponseFromProvider(provider, interaction, interactionMessage, failures)
+        result = verifyResponseFromProvider(provider, interaction, interactionMessage, failures)
       } else {
         log.debug('Verifying via annotated test method')
-        verifyResponseByInvokingProviderMethods(provider, consumer, interaction, interactionMessage, failures)
+        result = verifyResponseByInvokingProviderMethods(provider, consumer, interaction, interactionMessage, failures)
       }
 
       if (provider.stateChangeTeardown) {
         stateChange(interaction.providerState, provider, consumer, false)
       }
+
+      result
+    } else {
+      false
     }
   }
 
@@ -255,7 +274,7 @@ class ProviderVerifier {
     true
   }
 
-  void verifyResponseFromProvider(ProviderInfo provider, def interaction, String interactionMessage, Map failures) {
+  boolean verifyResponseFromProvider(ProviderInfo provider, def interaction, String interactionMessage, Map failures) {
     try {
       ProviderClient client = new ProviderClient(request: interaction.request, provider: provider)
 
@@ -268,10 +287,11 @@ class ProviderVerifier {
       reporters.each {
         it.requestFailed(provider, interaction, interactionMessage, e, callProjectHasProperty(PACT_SHOW_STACKTRACE))
       }
+      false
     }
   }
 
-  void verifyRequestResponsePact(Response expectedResponse, Map actualResponse, String interactionMessage,
+  boolean verifyRequestResponsePact(Response expectedResponse, Map actualResponse, String interactionMessage,
                                  Map failures) {
     def comparison = ResponseComparison.compareResponse(expectedResponse, actualResponse,
       actualResponse.statusCode, actualResponse.headers, actualResponse.data)
@@ -279,24 +299,32 @@ class ProviderVerifier {
     reporters.each { it.returnsAResponseWhich() }
 
     def s = ' returns a response which'
-    displayStatusResult(failures, expectedResponse.status, comparison.method, interactionMessage + s)
-    displayHeadersResult(failures, expectedResponse.headers, comparison.headers, interactionMessage + s)
-    displayBodyResult(failures, comparison.body, interactionMessage + s)
+    def result = true
+    result = result && displayStatusResult(failures, expectedResponse.status, comparison.method, interactionMessage + s)
+    result = result && displayHeadersResult(failures, expectedResponse.headers, comparison.headers,
+      interactionMessage + s)
+    result = result && displayBodyResult(failures, comparison.body, interactionMessage + s)
+    result
   }
 
-  void displayStatusResult(Map failures, int status, def comparison, String comparisonDescription) {
+  boolean displayStatusResult(Map failures, int status, def comparison, String comparisonDescription) {
     if (comparison == true) {
       reporters.each { it.statusComparisonOk(status) }
+      true
     } else {
       reporters.each { it.statusComparisonFailed(status, comparison) }
       failures["$comparisonDescription has status code $status"] = comparison
+      false
     }
   }
 
-  void displayHeadersResult(Map failures, def expected, Map comparison, String comparisonDescription) {
-    if (!comparison.isEmpty()) {
+  boolean displayHeadersResult(Map failures, def expected, Map comparison, String comparisonDescription) {
+    if (comparison.isEmpty()) {
+      true
+    } else {
       reporters.each { it.includesHeaders() }
       Map expectedHeaders = expected
+      def result = true
       comparison.each { key, headerComparison ->
         def expectedHeaderValue = expectedHeaders[key]
         if (headerComparison == true) {
@@ -305,22 +333,26 @@ class ProviderVerifier {
           reporters.each { it.headerComparisonFailed(key, expectedHeaderValue, headerComparison) }
           failures["$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""] =
             headerComparison
+          result = false
         }
       }
+      result
     }
   }
 
-  void displayBodyResult(Map failures, def comparison, String comparisonDescription) {
+  boolean displayBodyResult(Map failures, def comparison, String comparisonDescription) {
     if (comparison.isEmpty()) {
       reporters.each { it.bodyComparisonOk() }
+      true
     } else {
       reporters.each { it.bodyComparisonFailed(comparison) }
       failures["$comparisonDescription has a matching body"] = comparison
+      false
     }
   }
 
   @SuppressWarnings(['ThrowRuntimeException', 'ParameterCount'])
-  void verifyResponseByInvokingProviderMethods(ProviderInfo providerInfo, ConsumerInfo consumer,
+  boolean verifyResponseByInvokingProviderMethods(ProviderInfo providerInfo, ConsumerInfo consumer,
                                                def interaction, String interactionMessage, Map failures) {
     try {
       def urls = projectClasspath()
@@ -355,15 +387,18 @@ class ProviderVerifier {
           verifyMessagePact(providerMethods, interaction as Message, interactionMessage, failures)
         } else {
           def expectedResponse = interaction.response
+          def result = true
           providerMethods.each {
             def actualResponse = invokeProviderMethod(it)
-            verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
+            result = result && verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
           }
+          result
         }
       }
     } catch (e) {
       failures[interactionMessage] = e
       reporters.each { it.verificationFailed(interaction, e, callProjectHasProperty(PACT_SHOW_STACKTRACE)) }
+      false
     }
   }
 
@@ -383,14 +418,16 @@ class ProviderVerifier {
     }
   }
 
-  void verifyMessagePact(Set methods, Message message, String interactionMessage, Map failures) {
+  boolean verifyMessagePact(Set methods, Message message, String interactionMessage, Map failures) {
+    def result = true
     methods.each {
       reporters.each { it.generatesAMessageWhich() }
       def actualMessage = OptionalBody.body(invokeProviderMethod(it, providerMethodInstance(it)) as String)
       def comparison = ResponseComparison.compareMessage(message, actualMessage)
       def s = ' generates a message which'
-      displayBodyResult(failures, comparison, interactionMessage + s)
+      result = result && displayBodyResult(failures, comparison, interactionMessage + s)
     }
+    result
   }
 
   @SuppressWarnings('ThrowRuntimeException')
@@ -408,5 +445,20 @@ class ProviderVerifier {
 
   void finialiseReports() {
     reporters.each { it.finaliseReport() }
+  }
+
+  void publishVerificationResults(ProviderInfo provider, ConsumerInfo consumer, boolean result, Map options) {
+    if (options.pactBrokerUrl) {
+      def brokerClient = new PactBrokerClient(options.pactBrokerUrl, options)
+      def publishResult = brokerClient.publishVerificationResults(provider.name, consumer.name, result,
+        callProjectGetProperty('version'), callProjectGetProperty('buildUrl'))
+      if (publishResult.startsWith('SUCCESS')) {
+        reporters.each { it.publishVerificationSuccess(publishResult) }
+      } else {
+        reporters.each { it.publishVerificationFailed(publishResult) }
+      }
+    } else {
+      reporters.each { it.warnPublishVerificationEnabledButNoBrokerUrlProvided(provider) }
+    }
   }
 }

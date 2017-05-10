@@ -46,4 +46,7 @@ trait VerifierReporter {
   abstract void verificationFailed(Interaction interaction, Exception e, boolean printStackTrace)
   abstract void generatesAMessageWhich()
   abstract void displayFailures(Map failures)
+  abstract void warnPublishVerificationEnabledButNoBrokerUrlProvided(ProviderInfo providerInfo)
+  abstract void publishVerificationSuccess(String result)
+  abstract void publishVerificationFailed(String result)
 }
