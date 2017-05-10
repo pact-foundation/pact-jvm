@@ -58,7 +58,7 @@ class PactBrokerClient {
     consumers
   }
 
-  private newHalClient() {
+  HalClient newHalClient() {
     new HalClient(pactBrokerUrl, options)
   }
 
