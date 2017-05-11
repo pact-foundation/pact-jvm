@@ -22,7 +22,10 @@ case class Config(port: Int = 29999,
                   portLowerBound: Int = 20000,
                   portUpperBound: Int = 40000,
                   debug: Boolean = false,
-                  pactVersion: Int = 2)
+                  pactVersion: Int = 2,
+                  keystorePath: String = "",
+                  keystorePassword: String = "",
+                  sslPort : Int = 8443)
 
 object Server extends App {
 
@@ -35,6 +38,9 @@ object Server extends App {
     opt[Unit]('d', "daemon") action { (_, c) => c.copy(daemon = true) } text("run as a daemon process")
     opt[Unit]("debug") action { (_, c) => c.copy(debug = true) } text("run with debug logging")
     opt[Int]('v', "pact-version") action { (x, c) => c.copy(pactVersion = x) } text("pact version to generate for (2 or 3)")
+    opt[String]('k', "keystore-path") action { (x, c) => c.copy(keystorePath = x) } text("Path to keystore")
+    opt[String]('p', "keystore-password") action { (x, c) => c.copy(keystorePassword = x) } text("Keystore password")
+    opt[Int]('s', "ssl-port") action { (x, c) => c.copy(sslPort = x) } text("Ssl port the mock server should run on. lower and upper bounds are ignored")
   }
 
   parser.parse(args, Config()) match {
@@ -47,6 +53,11 @@ object Server extends App {
       }
       val server = _root_.unfiltered.netty.Server.http(config.port, config.host)
         .handler(RequestHandler(new ServerStateStore(), config))
+
+      if(!config.keystorePath.isEmpty) {
+        println(s"Using keystore '${config.keystorePath}' for mock https server")
+      }
+
       println(s"starting unfiltered app at ${config.host} on port ${config.port}")
       server.start()
       if (!config.daemon) {
