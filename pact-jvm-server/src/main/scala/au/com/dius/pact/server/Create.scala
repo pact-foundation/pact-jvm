@@ -10,9 +10,21 @@ object Create extends StrictLogging {
   
   def create(state: String, requestBody: String, oldState: ServerState, config: Config): Result = {
     val pact = PactReader.loadPact(requestBody).asInstanceOf[RequestResponsePact]
-    val mockConfig: MockProviderConfig = MockProviderConfig.create(config.host, config.portLowerBound, config.portUpperBound,
-      PactSpecVersion.fromInt(config.pactVersion))
+
+    val mockConfig : MockProviderConfig = {
+      if(!config.keystorePath.isEmpty) {
+
+        MockHttpsKeystoreProviderConfig
+          .httpsKeystoreConfig(config.host, config.sslPort, config.keystorePath, config.keystorePassword,
+            PactSpecVersion.fromInt(config.pactVersion))
+      }
+      else {
+        MockProviderConfig.create(config.host, config.portLowerBound, config.portUpperBound,
+          PactSpecVersion.fromInt(config.pactVersion))
+      }
+    }
     val server = DefaultMockProvider.apply(mockConfig)
+
     val port = server.config.getPort
     val entry = port -> server
     val body = OptionalBody.body("{\"port\": " + port + "}")
