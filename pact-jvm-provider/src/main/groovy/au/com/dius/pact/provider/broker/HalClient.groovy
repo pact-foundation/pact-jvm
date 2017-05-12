@@ -6,7 +6,6 @@ import groovyx.net.http.RESTClient
 import org.apache.http.message.BasicHeaderValueParser
 
 import static groovyx.net.http.ContentType.JSON
-import static groovyx.net.http.Method.POST
 import static groovyx.net.http.Method.PUT
 
 /**
@@ -72,25 +71,10 @@ class HalClient {
         "found: ${pathInfo['_links'].keySet()}. URL: '${baseUrl}', LINK: '${link}'")
     }
 
-    if (linkData instanceof List) {
-      if (options.containsKey('name')) {
-        def linkByName = linkData.find { it.name == options.name }
-        if (linkByName?.templated) {
-          this.fetch(parseLinkUrl(linkByName.href, options))
-        } else if (linkByName) {
-          this.fetch(linkByName.href)
-        } else {
-          throw new InvalidNavigationRequest("Link '$link' does not have an entry with name '${options.name}'. " +
-            "URL: '${baseUrl}', LINK: '${link}'")
-        }
-      } else {
-        throw new InvalidNavigationRequest("Link '$link' has multiple entries. You need to filter by the link name. " +
-          "URL: '${baseUrl}', LINK: '${link}'")
-      }
-    } else if (linkData.templated) {
-      this.fetch(parseLinkUrl(linkData.href, options))
+    if (linkData.templated) {
+      fetch(parseLinkUrl(linkData.href, options))
     } else {
-      this.fetch(linkData.href)
+      fetch(linkData.href)
     }
   }
 
@@ -119,7 +103,7 @@ class HalClient {
     setupHttpClient()
     log.debug "Fetching: $path"
     def response = http.get(path: path, requestContentType: 'application/json',
-      headers: [Accept: 'application/hal+json, application/json'])
+      headers: [Accept: 'application/hal+json'])
     def contentType = response.headers.'Content-Type'
     def headerParser = new BasicHeaderValueParser()
     def headerElements = headerParser.parseElements(contentType as String, headerParser)
@@ -146,7 +130,7 @@ class HalClient {
   }
 
   String linkUrl(String name) {
-    pathInfo.'_links'[name].href
+    pathInfo.'_links'[name]
   }
 
   def uploadJson(String path, String bodyJson, Closure closure) {
@@ -177,22 +161,6 @@ class HalClient {
         error = body.errors.collect { entry -> "${entry.key}: ${entry.value}" }.join(', ')
       }
       closure.call('FAILED', "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${error}")
-    }
-  }
-
-  def post(String path, Map bodyJson) {
-    setupHttpClient()
-    http.request(POST) {
-      uri.path = path
-      body = bodyJson
-      requestContentType = JSON
-
-      response.success = { resp -> "SUCCESS - ${resp.statusLine as String}" }
-
-      response.failure = { resp, respBody ->
-        log.error("Request failed: $resp.statusLine $respBody")
-        "FAILED - ${resp.statusLine as String}"
-      }
     }
   }
 }

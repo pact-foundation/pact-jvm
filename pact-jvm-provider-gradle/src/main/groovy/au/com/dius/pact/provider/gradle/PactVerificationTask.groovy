@@ -34,21 +34,7 @@ class PactVerificationTask extends DefaultTask {
       }
     }
 
-    Map options = [:]
-    if (providerToVerify.publishVerificationResults) {
-      if (!project.pact.publish) {
-        throw new GradleScriptException('You must add a pact publish configuration to your build before you can ' +
-          'use publishing of verification results (publishVerificationResults is set to true)', null)
-      }
-      PactPublish pactPublish = project.pact.publish
-      options.pactBrokerUrl = pactPublish.pactBrokerUrl
-      if (pactPublish.pactBrokerUsername) {
-        options.authentication = [pactPublish.pactBrokerAuthenticationScheme, pactPublish.pactBrokerUsername,
-          pactPublish.pactBrokerPassword]
-      }
-    }
-
-    ext.failures = verifier.verifyProvider(options, providerToVerify)
+    ext.failures = verifier.verifyProvider(providerToVerify)
     try {
       if (ext.failures.size() > 0) {
         verifier.displayFailures(ext.failures)

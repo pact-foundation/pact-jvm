@@ -53,7 +53,7 @@ class HalClientSpec extends Specification {
     given:
     def mockHttp = Mock(RESTClient) {
       get([path: '/', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json, application/json']]) >> { throw new NotFoundHalResponse('') }
+           headers: [Accept: 'application/hal+json']]) >> { throw new NotFoundHalResponse('') }
     }
     client.newHttpClient() >> mockHttp
 
@@ -68,8 +68,7 @@ class HalClientSpec extends Specification {
     given:
     def mockHttp = Mock(RESTClient) {
       get([path: '/', requestContentType: 'application/json',
-                    headers: [Accept: 'application/hal+json, application/json']]) >> [headers:
-                    ['Content-Type': 'text/plain']]
+                    headers: [Accept: 'application/hal+json']]) >> [headers: ['Content-Type': 'text/plain']]
     }
     client.newHttpClient() >> mockHttp
 
@@ -84,7 +83,7 @@ class HalClientSpec extends Specification {
     given:
     def mockHttp = Mock(RESTClient) {
       get([path: '/', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json, application/json']]) >> [
+           headers: [Accept: 'application/hal+json']]) >> [
         headers: ['Content-Type': 'application/hal+json'],
         data: [:]
       ]
@@ -102,7 +101,7 @@ class HalClientSpec extends Specification {
     given:
     def mockHttp = Mock(RESTClient) {
       get([path: '/', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json, application/json']]) >> [
+           headers: [Accept: 'application/hal+json']]) >> [
         headers: ['Content-Type': 'application/hal+json'],
         data: [_links: [:]]
       ]
@@ -120,14 +119,14 @@ class HalClientSpec extends Specification {
     given:
     def mockHttp = Mock(RESTClient) {
       get([path: '/', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json, application/json']]) >> [
+           headers: [Accept: 'application/hal+json']]) >> [
         headers: ['Content-Type': 'application/hal+json;charset=UTF-8'],
         data: [_links: [
           'pb:latest-provider-pacts': [href: '/link']]
         ]
       ]
       get([path: '/link', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json, application/json']]) >> [
+           headers: [Accept: 'application/hal+json']]) >> [
         headers: ['Content-Type': 'application/hal+json;charset=UTF-8'],
         data: [_links: []]
       ]
@@ -145,7 +144,7 @@ class HalClientSpec extends Specification {
     given:
     def mockHttp = Mock(RESTClient) {
       get([path: '/', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json, application/json']]) >> [
+           headers: [Accept: 'application/hal+json']]) >> [
         headers: ['Content-Type': 'application/hal+json'],
         data: [_links: [pacts: []]]
       ]

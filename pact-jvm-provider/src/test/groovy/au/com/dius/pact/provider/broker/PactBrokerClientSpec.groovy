@@ -15,13 +15,10 @@ class PactBrokerClientSpec extends Specification {
   private PactBrokerClient pactBrokerClient
   private File pactFile
   private String pactContents
-  private pactBroker, halClient
+  private pactBroker
 
   def setup() {
-    halClient = Spy(HalClient, constructorArgs: ['http://localhost:8080'])
-    pactBrokerClient = new PactBrokerClient('http://localhost:8080') {
-      HalClient newHalClient() { halClient }
-    }
+    pactBrokerClient = new PactBrokerClient('http://localhost:8080')
     pactFile = File.createTempFile('pact', '.json')
     pactContents = '''
       {
@@ -253,64 +250,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def result = pactBroker.run {
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') ==
-        'FAILED! 400 Bad Request - Enjoy this bit of text'
-    }
-
-    then:
-    result == PactVerified$.MODULE$
-  }
-
-  def 'returns success when publishing verification result is ok'() {
-    given:
-    halClient.navigate(_, _) >> halClient
-    def url = '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/' +
-      '891812f5d5e6972283aa2ac7d5143382e1214a41/verification-results'
-    halClient.linkUrl(_) >> url
-    pactBroker {
-      uponReceiving('a pact publish request')
-      withAttributes(method: 'POST', path: url)
-      withBody {
-        success true
-        providerApplicationVersion '0.0.0'
-        buildUrl 'http://blah/blah'
-      }
-      willRespondWith(status: 200)
-    }
-
-    when:
-    def result = pactBroker.run {
-      assert pactBrokerClient.publishVerificationResults('Provider', 'Foo Consumer',
-        true, '0.0.0', 'http://blah/blah') == 'SUCCESS - HTTP/1.1 200 OK'
-    }
-
-    then:
-    result == PactVerified$.MODULE$
-  }
-
-  def 'returns failure when publishing verification result is is not ok'() {
-    given:
-    halClient.navigate(_, _) >> halClient
-    def url = '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/' +
-      '891812f5d5e6972283aa2ac7d5143382e1214a41/verification-results'
-    halClient.linkUrl(_) >> url
-    pactBroker {
-      uponReceiving('a pact publish request')
-      withAttributes(method: 'POST', path: url)
-      withBody {
-        success true
-        providerApplicationVersion ''
-      }
-      willRespondWith(status: 400)
-      withBody {
-        error "Error parsing JSON - 765: unexpected token at '{\n      success: true\n    }'"
-      }
-    }
-
-    when:
-    def result = pactBroker.run {
-      assert pactBrokerClient.publishVerificationResults('Provider', 'Foo Consumer',
-        true, '', '') == 'FAILED - HTTP/1.1 400 Bad Request'
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'FAILED! 400 Bad Request - Enjoy this bit of text'
     }
 
     then:

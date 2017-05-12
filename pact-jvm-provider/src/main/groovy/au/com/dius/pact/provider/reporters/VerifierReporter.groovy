@@ -8,7 +8,6 @@ import au.com.dius.pact.provider.ProviderInfo
 /**
  * Interface to verification reporters that can hook into the events of the PactVerifier
  */
-@SuppressWarnings('MethodCount')
 trait VerifierReporter {
   String ext
 
@@ -47,7 +46,4 @@ trait VerifierReporter {
   abstract void verificationFailed(Interaction interaction, Exception e, boolean printStackTrace)
   abstract void generatesAMessageWhich()
   abstract void displayFailures(Map failures)
-  abstract void warnPublishVerificationEnabledButNoBrokerUrlProvided(ProviderInfo providerInfo)
-  abstract void publishVerificationSuccess(String result)
-  abstract void publishVerificationFailed(String result)
 }

@@ -35,8 +35,6 @@ class ProviderInfo {
     List packagesToScan = []
     List<ConsumerInfo> consumers = []
 
-    boolean publishVerificationResults = false
-
     ProviderInfo() {
     }
 
