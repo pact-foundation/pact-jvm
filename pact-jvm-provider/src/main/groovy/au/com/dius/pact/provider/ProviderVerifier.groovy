@@ -28,6 +28,7 @@ class ProviderVerifier {
   static final String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
   static final String PACT_SHOW_STACKTRACE = 'pact.showStacktrace'
   static final String PACT_SHOW_FULLDIFF = 'pact.showFullDiff'
+  static final String BUILD_URL = 'buildUrl'
 
   def projectHasProperty = { }
   def projectGetProperty = { }
@@ -450,8 +451,15 @@ class ProviderVerifier {
   void publishVerificationResults(ProviderInfo provider, ConsumerInfo consumer, boolean result, Map options) {
     if (options.pactBrokerUrl) {
       def brokerClient = new PactBrokerClient(options.pactBrokerUrl, options)
-      def publishResult = brokerClient.publishVerificationResults(provider.name, consumer.name, result,
-        callProjectGetProperty('version'), callProjectGetProperty('buildUrl'))
+      def buildUrl = callProjectHasProperty(BUILD_URL) ? callProjectGetProperty(BUILD_URL) : null
+      def publishResult
+      try {
+        publishResult = brokerClient.publishVerificationResults(provider.name, consumer.name, result,
+          callProjectGetProperty('version'), buildUrl)
+      } catch (e) {
+        log.info('Failed to publish verification results to the pact broker', e)
+        publishResult = "FAILED - ${e.message}"
+      }
       if (publishResult.startsWith('SUCCESS')) {
         reporters.each { it.publishVerificationSuccess(publishResult) }
       } else {
