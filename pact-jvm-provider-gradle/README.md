@@ -17,7 +17,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'au.com.dius:pact-jvm-provider-gradle_2.10:3.2.4'
+        classpath 'au.com.dius:pact-jvm-provider-gradle_2.10:3.3.10'
     }
 }
 ```
@@ -32,7 +32,7 @@ apply plugin: 'au.com.dius.pact'
 
 ```groovy
 plugins {
-  id "au.com.dius.pact" version "3.2.4"
+  id "au.com.dius.pact" version "3.3.10"
 }
 ```
 
@@ -676,3 +676,37 @@ Any report files will be written to "build/reports/pact".
 
 The following report types are available in addition to console output (which is enabled by default):
 `markdown`, `json`.
+
+# Publishing pact verification results to a pact broker [version 3.3.10+]
+
+If you have a pact broker that accepts verification results (broker version 2.0.0+), you can enable publishing the 
+results of your verification test by setting `publishVerificationResults` on the provider to `true`. For this to work,
+you will also have to setup a publish configuration as specified in [Publishing pact files to a pact broker](#publishing-pact-files-to-a-pact-broker-version-227).
+
+For example:
+
+```groovy
+pact {
+
+    serviceProviders {
+
+        provider1 {
+        
+            publishVerificationResults = true // turn on publishing the verification results, needs the publish info below
+
+            hasPactWith('consumer1') {
+                pactFile = file('path/to/provider1-consumer1-pact.json')
+            }
+
+        }
+
+    }
+    
+    publish {
+        pactBrokerUrl = 'https://mypactbroker.com'
+        pactBrokerUsername = 'username'
+        pactBrokerPassword = 'password'
+    }
+
+}
+```
