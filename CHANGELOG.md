@@ -1,5 +1,22 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.3.9 - Bugfix Release
+
+* 0c3d776 - Add eachlike methods to PactDslJsonArray that take PactDslJsonRootValue matchers #256 (Ronald Holshausen, Mon May 8 21:09:36 2017 +1000)
+* d76ac26 - Only encode JSON values if the PactDslJsonRootValue is used at the body root #385 (Ronald Holshausen, Mon May 8 20:26:11 2017 +1000)
+* a6d9e57 - Disabled merge conflict implementation and tests (Ronald Holshausen, Fri May 5 13:00:28 2017 +1000)
+* a51a417 - Provide more info when a merge conflict occurs (Ronald Holshausen, Fri May 5 12:41:44 2017 +1000)
+* f2b3d4a - Fixed codenarc issues for PR #420 (Ronald Holshausen, Fri May 5 12:07:46 2017 +1000)
+* 171c995 - Removed unused dependency... #241 (Brent Barker, Thu May 4 15:56:14 2017 -0600)
+* b544278 - Added ability to use a keystore for the pact mock server #241 (Brent Barker, Thu May 4 15:41:10 2017 -0600)
+* 54f5a3d - Merge pull request #412 from yegeniy/patch-1 (Ronald Holshausen, Wed Apr 26 09:23:17 2017 +1000)
+* df8c40a - [maven] 3.3.x->3.3.8, except 3.3.9 (Eugene Wolfson, Tue Apr 25 14:25:09 2017 -0400)
+* 0df9df1 - Damn codenarc! (Ronald Holshausen, Sun Apr 23 15:19:22 2017 +1000)
+* 9f4d3ce - Add pact broker credidentials as properties to the gradle pact publish task (Ronald Holshausen, Sun Apr 23 15:00:51 2017 +1000)
+* 97d6dd2 - Added pact broker credidentials to the Maven publish plugin (Ronald Holshausen, Sun Apr 23 14:44:24 2017 +1000)
+* 3f32536 - Updated versions in readme (Ronald Holshausen, Fri Apr 14 14:17:07 2017 +1000)
+* c282f99 - bump version to 3.3.9 (Ronald Holshausen, Fri Apr 14 14:16:42 2017 +1000)
+
 # 3.3.8 - Bugfix Release
 
 * cd860af - Upgrade gradle to 3.4.1 (Ronald Holshausen, Fri Apr 14 12:34:05 2017 +1000)
