@@ -34,11 +34,11 @@ public class PactVerificationsForMultipleHttpsAndMessagesTest {
 
     @Rule
     public PactProviderRule httpProvider =
-            new PactProviderRule(HTTP_PROVIDER_NAME, "localhost", 8075, PactSpecVersion.V3, this);
+            new PactProviderRule(HTTP_PROVIDER_NAME, PactSpecVersion.V3, this);
 
     @Rule
     public PactProviderRule otherHttpProvider =
-            new PactProviderRule(OTHER_HTTP_PROVIDER_NAME, "localhost", 8076, PactSpecVersion.V3, this);
+            new PactProviderRule(OTHER_HTTP_PROVIDER_NAME, PactSpecVersion.V3, this);
 
     @Rule
     public MessagePactProviderRule messageProvider = new MessagePactProviderRule(MESSAGE_PROVIDER_NAME, this);

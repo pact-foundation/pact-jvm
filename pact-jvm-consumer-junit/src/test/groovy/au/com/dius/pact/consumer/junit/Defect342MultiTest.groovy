@@ -24,7 +24,7 @@ class Defect342MultiTest {
   private static final String SOME_SERVICE_USER = '/some-service/user/'
 
   @Rule
-  public final PactProviderRule mockProvider = new PactProviderRule('multitest_provider', 'localhost', 8096, this)
+  public final PactProviderRule mockProvider = new PactProviderRule('multitest_provider', this)
 
   private static user() {
     [
@@ -36,7 +36,7 @@ class Defect342MultiTest {
     ]
   }
 
-  @Pact(provider = 'test_provider', consumer= 'browser_consumer')
+  @Pact(provider = 'multitest_provider', consumer= 'browser_consumer')
   PactFragment createFragment1(PactDslWithProvider builder) {
     builder
       .given('An env')
@@ -76,7 +76,7 @@ class Defect342MultiTest {
     }
   }
 
-  @Pact(provider= 'test_provider', consumer= 'test_consumer')
+  @Pact(provider= 'multitest_provider', consumer= 'test_consumer')
   PactFragment createFragment2(PactDslWithProvider builder) {
     builder
       .given('test state')
@@ -93,13 +93,13 @@ class Defect342MultiTest {
   @Test
   @PactVerification(fragment = 'createFragment2')
   void runTest2() {
-    assert Request.Put('http://localhost:8096/numbertest')
+    assert Request.Put("${mockProvider.config.url()}/numbertest")
       .addHeader('Accept', ContentType.JSON.toString())
       .bodyString('{"name": "harry","data": 1234.0 }', org.apache.http.entity.ContentType.APPLICATION_JSON)
       .execute().returnContent().asString() == '{"responsetest": true, "name": "harry","data": 1234.0 }'
   }
 
-  @Pact(provider = 'test_provider', consumer = 'test_consumer')
+  @Pact(provider = 'multitest_provider', consumer = 'test_consumer')
   PactFragment getUsersFragment(PactDslWithProvider builder) {
     DslPart body = new PactDslJsonArray().maxArrayLike(5)
       .uuid('id')
@@ -117,7 +117,7 @@ class Defect342MultiTest {
       .toFragment()
   }
 
-  @Pact(provider = 'test_provider', consumer = 'test_consumer')
+  @Pact(provider = 'multitest_provider', consumer = 'test_consumer')
   PactFragment getUsersFragment2(PactDslWithProvider builder) {
     DslPart body = new PactDslJsonArray().minArrayLike(5)
       .uuid('id')
@@ -138,13 +138,13 @@ class Defect342MultiTest {
   @Test
   @PactVerification(fragment = 'getUsersFragment')
   void runTest3() {
-    assert Request.Get('http://localhost:8096/idm/user').execute().returnContent().asString()
+    assert Request.Get("${mockProvider.config.url()}/idm/user").execute().returnContent().asString()
   }
 
   @Test
   @PactVerification(fragment = 'getUsersFragment2')
   void runTest4() {
-    assert Request.Get('http://localhost:8096/idm/user').execute().returnContent().asString()
+    assert Request.Get("${mockProvider.config.url()}/idm/user").execute().returnContent().asString()
   }
 
 }
