@@ -5,7 +5,7 @@ pact-jvm
 
 [![Build Status](https://travis-ci.org/DiUS/pact-jvm.svg?branch=v3-spec)](https://travis-ci.org/DiUS/pact-jvm)
 [![Appveyor build status](https://ci.appveyor.com/api/projects/status/172049m2sa57takc?svg=true)](https://ci.appveyor.com/project/uglyog/pact-jvm)
-[![Codefresh build status]( https://g.codefresh.io/api/badges/build?repoOwner=DiUS&repoName=pact-jvm&branch=master&pipelineName=pact-jvm&accountName=uglyog&type=cf-1)]( https://g.codefresh.io/repositories/DiUS/pact-jvm/builds?filter=trigger:build;branch:v3-spec;service:59182913f2383500056367d7~pact-jvm)
+[![Codefresh build status]( https://g.codefresh.io/api/badges/build?repoOwner=DiUS&repoName=pact-jvm&branch=v3-spec&pipelineName=pact-jvm&accountName=uglyog&type=cf-1)]( https://g.codefresh.io/repositories/DiUS/pact-jvm/builds?filter=trigger:build;branch:v3-spec;service:59182913f2383500056367d7~pact-jvm)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-logging_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-logging_2.11)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11)
 
