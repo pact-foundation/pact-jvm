@@ -79,6 +79,10 @@ class RequestResponseInteraction implements Interaction {
     if (request.matchingRules?.notEmpty) {
       map.matchingRules = request.matchingRules.toMap(pactSpecVersion)
     }
+    if (request.generators?.notEmpty && pactSpecVersion >= PactSpecVersion.V3) {
+      map.generators = request.generators.toMap(pactSpecVersion)
+    }
+
     map
   }
 
@@ -92,6 +96,9 @@ class RequestResponseInteraction implements Interaction {
     }
     if (response.matchingRules?.notEmpty) {
       map.matchingRules = response.matchingRules.toMap(pactSpecVersion)
+    }
+    if (response.generators?.notEmpty && pactSpecVersion >= PactSpecVersion.V3) {
+      map.generators = response.generators.toMap(pactSpecVersion)
     }
     map
   }

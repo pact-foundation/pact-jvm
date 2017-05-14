@@ -9,7 +9,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def map = [a: 'A', b: 'B', c: 'C']
     QueryResult body = new QueryResult(map, null, null)
     def key = '$.b'
-    def generator = { 'X' }
+    def generator = { 'X' } as Generator
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
@@ -23,7 +23,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def map = [a: 'A', b: 'B', c: 'C']
     QueryResult body = new QueryResult(map, null, null)
     def key = '$.d'
-    def generator = { 'X' }
+    def generator = { 'X' } as Generator
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
@@ -36,7 +36,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     given:
     QueryResult body = new QueryResult(100, null, null)
     def key = '$.d'
-    def generator = { 'X' }
+    def generator = { 'X' } as Generator
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
@@ -50,7 +50,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def list = ['A', 'B', 'C']
     QueryResult body = new QueryResult(list, null, null)
     def key = '$[1]'
-    def generator = { 'X' }
+    def generator = { 'X' } as Generator
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
@@ -64,7 +64,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def list = ['A', 'B', 'C']
     QueryResult body = new QueryResult(list, null, null)
     def key = '$[3]'
-    def generator = { 'X' }
+    def generator = { 'X' } as Generator
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
@@ -77,7 +77,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     given:
     QueryResult body = new QueryResult(100, null, null)
     def key = '$[3]'
-    def generator = { 'X' }
+    def generator = { 'X' } as Generator
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
@@ -91,7 +91,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def bodyValue = 100
     QueryResult body = new QueryResult(bodyValue, null, null)
     def key = '$'
-    def generator = { 'X' }
+    def generator = { 'X' } as Generator
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
@@ -105,7 +105,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def graph = [a: ['A', [a: 'A', b: ['1': '1', '2': '2'], c: 'C'], 'C'], b: 'B', c: 'C']
     QueryResult body = new QueryResult(graph, null, null)
     def key = '$.a[1].b[\'2\']'
-    def generator = { 'X' }
+    def generator = { 'X' } as Generator
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
@@ -119,7 +119,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def graph = [d: 'A', b: 'B', c: 'C']
     QueryResult body = new QueryResult(graph, null, null)
     def key = '$.a[1].b[\'2\']'
-    def generator = { 'X' }
+    def generator = { 'X' } as Generator
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
@@ -133,7 +133,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def map = [a: 'A', b: 'B', c: 'C']
     QueryResult body = new QueryResult(map, null, null)
     def key = '$.*'
-    def generator = { 'X' }
+    def generator = { 'X' } as Generator
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
@@ -147,7 +147,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def list = ['A', 'B', 'C']
     QueryResult body = new QueryResult(list, null, null)
     def key = '$[*]'
-    def generator = { 'X' }
+    def generator = { 'X' } as Generator
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
@@ -161,7 +161,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def graph = [a: ['A', [a: 'A', b: ['1', '2'], c: 'C'], 'C'], b: 'B', c: 'C']
     QueryResult body = new QueryResult(graph, null, null)
     def key = '$.*[1].b[*]'
-    def generator = { 'X' }
+    def generator = { 'X' } as Generator
 
     when:
     JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)

@@ -32,7 +32,7 @@ class V3PactSpec extends Specification {
           provider: [name: 'provider'],
           messages: [
             [
-              providerState: 'a new message exists',
+              providerStates: [[name: 'a new message exists']],
               contents: 'Hello',
               description: 'a new hello message',
               metaData: [ contentType: 'application/json' ]
@@ -50,19 +50,19 @@ class V3PactSpec extends Specification {
         json.messages*.description.toSet() == ['a hello message', 'a new hello message'].toSet()
     }
 
-    def 'when merging it should replace messages with the same description an state'() {
+    def 'when merging it should replace messages with the same description and state'() {
         given:
         def pact = PactReader.loadV3Pact(null, [
             consumer: [name: 'consumer'],
             provider: [name: 'provider'],
             messages: [
               [
-                providerState: 'message exists',
+                providerStates: [[name: 'message exists']],
                 contents: 'Hello',
                 description: 'a hello message',
                 metaData: [ contentType: 'application/json' ]
               ], [
-                  providerState: 'a new message exists',
+                  providerStates: [[name: 'a new message exists']],
                   contents: 'Hello',
                   description: 'a new hello message',
                   metaData: [ contentType: 'application/json' ]
@@ -82,7 +82,7 @@ class V3PactSpec extends Specification {
         then:
         json.messages.size == 3
         json.messages*.description.toSet() == ['a hello message', 'a new hello message'].toSet()
-        json.messages.find { it.description == 'a hello message' && !it.providerState } == [contents: 'Hello',
+        json.messages.find { it.description == 'a hello message' && !it.providerStates } == [contents: 'Hello',
             description: 'a hello message', metaData: [ contentType: 'application/json' ]]
     }
 

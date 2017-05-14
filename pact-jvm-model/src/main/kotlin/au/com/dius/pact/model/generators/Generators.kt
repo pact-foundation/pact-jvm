@@ -1,9 +1,6 @@
 package au.com.dius.pact.model.generators
 
-import au.com.dius.pact.model.ContentType
-import au.com.dius.pact.model.OptionalBody
-import au.com.dius.pact.model.PathToken
-import au.com.dius.pact.model.parsePath
+import au.com.dius.pact.model.*
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.apache.commons.collections4.IteratorUtils
@@ -152,4 +149,29 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     } ?: OptionalBody.body(value)
   }
 
+  /**
+   * If there are no generators
+   */
+  fun isEmpty() = categories.isEmpty()
+
+  /**
+   * If there are generators
+   */
+  fun isNotEmpty() = categories.isNotEmpty()
+
+  fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+    if (pactSpecVersion < PactSpecVersion.V3) {
+      throw InvalidPactException("Generators are only supported with pact specification version 3+")
+    }
+    return categories.entries.associate { (key, value) ->
+      when (key) {
+        Category.METHOD, Category.PATH, Category.STATUS -> {
+          key.name.toLowerCase() to value[""]!!.toMap(pactSpecVersion)
+        }
+        else -> key.name.toLowerCase() to value.entries.associate { (genKey, generator) ->
+          genKey to generator.toMap(pactSpecVersion)
+        }
+      }
+    }
+  }
 }
