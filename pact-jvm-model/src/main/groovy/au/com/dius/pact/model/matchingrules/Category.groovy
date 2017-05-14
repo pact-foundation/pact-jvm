@@ -78,10 +78,16 @@ class Category {
     new Category(name, [:] + matchingRules, ruleLogic)
   }
 
+  @SuppressWarnings('UnnecessarySubstring')
   Map toMap(PactSpecVersion pactSpecVersion) {
-    if (pactSpecVersion < PactSpecVersion.V2) {
+    if (pactSpecVersion < PactSpecVersion.V3) {
       matchingRules.collectEntries {
-        [it.key.replaceFirst('^\\$', '$.' + name), it.value.first().toMap()]
+        def keyBase = '$.' + name
+        if (it.key.startsWith('$')) {
+          [keyBase + it.key.substring(1), it.value.first().toMap()]
+        } else {
+          [keyBase + it.key, it.value.first().toMap()]
+        }
       }
     } else {
       matchingRules.collectEntries {

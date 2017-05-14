@@ -10,7 +10,6 @@ class PactResultSpec extends Specification {
         def testService = new PactBuilder().build  {
             serviceConsumer 'Consumer'
             hasPactWith 'Test Service'
-            port 1255
 
             uponReceiving('a valid request')
             withAttributes(method: 'get', path: '/path', query: [status: 'good', name: 'ron'])
@@ -23,8 +22,8 @@ class PactResultSpec extends Specification {
       when:
         def response
         def data
-        testService.runTestAndVerify {
-            def client = new RESTClient('http://localhost:1255/')
+        testService.runTestAndVerify { mockServer ->
+            def client = new RESTClient(mockServer.url)
             response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                 requestContentType: 'application/json')
             data = response.data
@@ -40,7 +39,6 @@ class PactResultSpec extends Specification {
         def testService = new PactBuilder().build  {
             serviceConsumer 'Consumer'
             hasPactWith 'Test Service'
-            port 1235
 
             uponReceiving('a valid request')
             withAttributes(method: 'get', path: '/path', query: [status: 'good', name: 'ron'])
@@ -52,8 +50,8 @@ class PactResultSpec extends Specification {
 
       when:
         def response
-        testService.runTestAndVerify {
-          def client = new RESTClient('http://localhost:1235/')
+        testService.runTestAndVerify { mockServer ->
+          def client = new RESTClient(mockServer.url)
           response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                 requestContentType: 'application/json')
 
@@ -61,8 +59,12 @@ class PactResultSpec extends Specification {
         }
 
       then:
-      def e = thrown(PactFailedException)
-      e.message.contains('response.status == 201')
+      def e = thrown(AssertionError)
+      e.message.contains('Pact Test function failed with an exception: Condition not satisfied:\n' +
+        '\n' +
+        'response.status == 201\n' +
+        '|        |      |\n' +
+        '|        200    false')
     }
 
     def 'case when the test fails and the pact has a mismatch'() {
@@ -70,7 +72,6 @@ class PactResultSpec extends Specification {
         def testService = new PactBuilder().build  {
             serviceConsumer 'Consumer'
             hasPactWith 'Test Service'
-            port 1236
 
             uponReceiving('a valid request')
             withAttributes(method: 'get', path: '/path', query: [status: 'good', name: 'ron'])
@@ -82,15 +83,15 @@ class PactResultSpec extends Specification {
 
       when:
         def response
-        testService.runTestAndVerify {
-            def client = new RESTClient('http://localhost:1236/')
+        testService.runTestAndVerify { mockServer ->
+            def client = new RESTClient(mockServer.url)
             response = client.get(path: '/path', query: [status: 'bad', name: 'ron'],
                 requestContentType: 'application/json')
             assert response.status == 200
         }
 
       then:
-         def e = thrown(PactFailedException)
+         def e = thrown(AssertionError)
          e.message.contains(
             'QueryMismatch(status,good,bad,Some(Expected \'good\' but received \'bad\' for query parameter ' +
               '\'status\'),status)')
@@ -101,7 +102,6 @@ class PactResultSpec extends Specification {
         def testService = new PactBuilder().build  {
             serviceConsumer 'Consumer'
             hasPactWith 'Test Service'
-            port 1237
 
             uponReceiving('a valid request')
             withAttributes(method: 'get', path: '/path', query: [status: 'good', name: 'ron'])
@@ -119,8 +119,8 @@ class PactResultSpec extends Specification {
         }
 
       when:
-        testService.runTestAndVerify {
-            def client = new RESTClient('http://localhost:1237/')
+        testService.runTestAndVerify { mockServer ->
+            def client = new RESTClient(mockServer.url)
             def response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                 requestContentType: 'application/json')
             assert response.status == 200
@@ -128,11 +128,16 @@ class PactResultSpec extends Specification {
 
       then:
         def e = thrown(PactFailedException)
-        e.message.contains('''|The following requests were not received:
-          |Interaction: a valid post request
-          |\tin states None
-          |request:
-          |\tmethod: post
-          |\tpath: /path'''.stripMargin())
+        e.message.contains('The following requests were not received:\n' +
+          '\tmethod: post\n' +
+          '\tpath: /path\n' +
+          '\tquery: [:]\n' +
+          '\theaders: [Content-Type:application/json]\n' +
+          '\tmatchers: MatchingRules(rules=[body:au.com.dius.pact.model.matchingrules.Category(body, [:], AND), ' +
+            'path:au.com.dius.pact.model.matchingrules.Category(path, [:], AND)])\n' +
+          '\tgenerators: Generators(categories={})\n' +
+          '\tbody: OptionalBody(state=PRESENT, value={\n' +
+          '    "status": "isGood"\n' +
+          '})')
     }
 }

@@ -10,4 +10,7 @@ class PactPublish {
     def pactDirectory
     String pactBrokerUrl
     String version
+    String pactBrokerUsername
+    String pactBrokerPassword
+    String pactBrokerAuthenticationScheme = 'basic'
 }

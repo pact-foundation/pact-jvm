@@ -4,7 +4,4 @@ dependencies {
       project(":pact-jvm-provider_${project.scalaVersion}")
     testCompile "ch.qos.logback:logback-core:${project.logbackVersion}",
       "ch.qos.logback:logback-classic:${project.logbackVersion}"
-    testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
-        exclude group: 'org.codehaus.groovy'
-    }
 }

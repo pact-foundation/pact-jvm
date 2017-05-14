@@ -16,6 +16,10 @@ class GeneratorsSpec extends Specification {
     mockGenerator = Mock(Generator)
   }
 
+  def cleanupSpec() {
+    GeneratorsKt.setupDefaultContentTypeHandlers()
+  }
+
   def 'generators invoke the provided closure for each key-value pair'() {
     given:
     generators.addGenerator(Category.HEADER, 'A', mockGenerator)

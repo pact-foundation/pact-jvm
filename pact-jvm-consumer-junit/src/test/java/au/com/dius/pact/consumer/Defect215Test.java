@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
 import org.hamcrest.Matchers;
@@ -23,7 +23,7 @@ public class Defect215Test {
   private static final String APPLICATION_JSON_CHARSET_UTF_8 = "application/json; charset=UTF-8";
   private static final String SOME_SERVICE_USER = "/some-service/user/";
   @Rule
-  public PactProviderRule mockProvider = new PactProviderRule(MY_SERVICE, "localhost", PORT, this);
+  public PactProviderRuleMk2 mockProvider = new PactProviderRuleMk2(MY_SERVICE, "localhost", PORT, this);
 
   private String getUser() {
     JSONObject usr = new JSONObject();
@@ -37,7 +37,7 @@ public class Defect215Test {
   }
 
   @Pact(provider = MY_SERVICE, consumer="browser_consumer")
-  public PactFragment createFragment(PactDslWithProvider builder) {
+  public RequestResponsePact createFragment(PactDslWithProvider builder) {
 
     return builder
       .given("An env")
@@ -58,7 +58,7 @@ public class Defect215Test {
         .status(200)
         .matchHeader("Content-Type", APPLICATION_JSON, APPLICATION_JSON_CHARSET_UTF_8)
         .body(getUser())
-      .toFragment();
+      .toPact();
   }
 
   @Test
@@ -66,7 +66,7 @@ public class Defect215Test {
   public void runTest() {
     RestAssured
       .given()
-      .port(mockProvider.getConfig().getPort())
+      .port(mockProvider.getPort())
       .contentType(ContentType.JSON)
       .body(getUser())
       .post("/some-service/users")
@@ -78,7 +78,7 @@ public class Defect215Test {
 
     RestAssured
       .given()
-      .port(mockProvider.getConfig().getPort())
+      .port(mockProvider.getPort())
       .contentType(ContentType.JSON)
       .get(SOME_SERVICE_USER + EXPECTED_USER_ID)
       .then()

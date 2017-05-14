@@ -3,14 +3,14 @@ package au.com.dius.pact.consumer.v3;
 import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.consumer.MessagePactProviderRule;
 import au.com.dius.pact.consumer.Pact;
-import au.com.dius.pact.consumer.PactProviderRule;
+import au.com.dius.pact.consumer.PactProviderRuleMk2;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.PactVerifications;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
+import au.com.dius.pact.model.RequestResponsePact;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,14 +31,14 @@ public class PactVerificationsForMultipleFragmentsTest {
     private static final String PACT_VERIFICATIONS_CONSUMER_NAME = "pact_verifications_multiple_fragments_consumer";
 
     @Rule
-    public PactProviderRule httpProvider =
-            new PactProviderRule(HTTP_PROVIDER_NAME, PactSpecVersion.V3, this);
+    public PactProviderRuleMk2 httpProvider =
+            new PactProviderRuleMk2(HTTP_PROVIDER_NAME, PactSpecVersion.V3, this);
 
     @Rule
     public MessagePactProviderRule messageProvider = new MessagePactProviderRule(MESSAGE_PROVIDER_NAME, this);
 
     @Pact(provider = HTTP_PROVIDER_NAME, consumer = PACT_VERIFICATIONS_CONSUMER_NAME)
-    public PactFragment httpPact(PactDslWithProvider builder) {
+    public RequestResponsePact httpPact(PactDslWithProvider builder) {
         return builder
                 .given("a good state")
                 .uponReceiving("a query test interaction")
@@ -47,11 +47,11 @@ public class PactVerificationsForMultipleFragmentsTest {
                 .willRespondWith()
                 .status(200)
                 .body("{\"name\": \"harry\"}")
-                .toFragment();
+                .toPact();
     }
 
     @Pact(provider = HTTP_PROVIDER_NAME, consumer = PACT_VERIFICATIONS_CONSUMER_NAME)
-    public PactFragment otherHttpPact(PactDslWithProvider builder) {
+    public RequestResponsePact otherHttpPact(PactDslWithProvider builder) {
         return builder
                 .given("another good state")
                 .uponReceiving("another query test interaction")
@@ -60,7 +60,7 @@ public class PactVerificationsForMultipleFragmentsTest {
                 .willRespondWith()
                 .status(200)
                 .body("{\"name\": \"john\"}")
-                .toFragment();
+                .toPact();
     }
 
     @Pact(provider = MESSAGE_PROVIDER_NAME, consumer = PACT_VERIFICATIONS_CONSUMER_NAME)
@@ -102,7 +102,7 @@ public class PactVerificationsForMultipleFragmentsTest {
         assertNotNull(message);
         assertThat(new String(message), equalTo("{\"testParam1\":\"value1\"}"));
 
-        assertEquals(new ConsumerClient(httpProvider.getConfig().url()).getAsMap("/", ""),
+        assertEquals(new ConsumerClient(httpProvider.getUrl()).getAsMap("/", ""),
                      singletonMap("name", "harry"));
     }
 
@@ -115,7 +115,7 @@ public class PactVerificationsForMultipleFragmentsTest {
         assertNotNull(message);
         assertThat(new String(message), equalTo("{\"testParamA\":\"valueA\"}"));
 
-        assertEquals(new ConsumerClient(httpProvider.getConfig().url()).getAsMap("/other", ""),
+        assertEquals(new ConsumerClient(httpProvider.getUrl()).getAsMap("/other", ""),
                      singletonMap("name", "john"));
     }
 }

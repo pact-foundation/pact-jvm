@@ -21,13 +21,6 @@ public @interface PactVerification {
     String[] value() default "";
 
     /**
-     * If a mismatch is expected. Use to test failure conditions
-     * @deprecated do not use this, it will be removed in a future version
-     */
-    @Deprecated
-    boolean expectMismatch() default false;
-
-    /**
      * Method to call to get the pact fragment. Defaults to empty string which results in using the first one found
      */
     String fragment() default "";

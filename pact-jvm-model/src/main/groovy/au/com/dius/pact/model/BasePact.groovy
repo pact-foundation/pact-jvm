@@ -81,7 +81,7 @@ abstract class BasePact implements Pact {
     ]
   }
 
-  void write(String pactDir) {
+  void write(String pactDir, PactSpecVersion pactSpecVersion) {
     def pactFile = fileForPact(pactDir)
 
     if (pactFile.exists()) {
@@ -94,8 +94,8 @@ abstract class BasePact implements Pact {
       pactFile.parentFile.mkdirs()
     }
 
-    def jsonMap = toMap(PactSpecVersion.V3)
-    jsonMap.metadata = jsonMap.metadata ? jsonMap.metadata + DEFAULT_METADATA : DEFAULT_METADATA
+    def jsonMap = toMap(pactSpecVersion)
+    jsonMap.metadata = jsonMap.metadata ? [:] + DEFAULT_METADATA + jsonMap.metadata : DEFAULT_METADATA
     def json = JsonOutput.toJson(jsonMap)
     pactFile.withWriter { writer ->
       writer.print JsonOutput.prettyPrint(json)
@@ -123,7 +123,7 @@ abstract class BasePact implements Pact {
     newPact
   }
 
-  protected File fileForPact(String pactDir) {
+  File fileForPact(String pactDir) {
     new File(pactDir, "${consumer.name}-${provider.name}.json")
   }
 

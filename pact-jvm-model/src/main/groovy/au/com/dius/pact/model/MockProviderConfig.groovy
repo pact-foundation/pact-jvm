@@ -12,7 +12,7 @@ import org.apache.commons.lang.math.RandomUtils
 @Canonical
 @SuppressWarnings('FactoryMethodName')
 class MockProviderConfig {
-  private static final String LOCALHOST = 'localhost'
+  public static final String LOCALHOST = '127.0.0.1'
   private static final String HTTP = 'http'
 
   String hostname = LOCALHOST
@@ -106,5 +106,9 @@ class MockProviderConfig {
         } catch (ignored) { }
       }
     }
+  }
+
+  InetSocketAddress address() {
+    new InetSocketAddress(hostname, port)
   }
 }

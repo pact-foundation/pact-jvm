@@ -2,9 +2,8 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import org.apache.http.client.fluent.Request;
-import org.apache.http.entity.ContentType;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -18,10 +17,10 @@ public class Defect369Test {
 
     private static final String APPLICATION_JSON = "application/json";
     @Rule
-    public PactProviderRule provider = new PactProviderRule("369_provider", "localhost", 8081, this);
+    public PactProviderRuleMk2 provider = new PactProviderRuleMk2("369_provider", "localhost", 8081, this);
 
     @Pact(provider="369_provider", consumer="test_consumer")
-    public PactFragment createFragment(PactDslWithProvider builder) {
+    public RequestResponsePact createFragment(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Type", "application/json");
         return builder
@@ -32,7 +31,7 @@ public class Defect369Test {
           .status(200)
           .headers(headers)
           .body(PactDslJsonRootValue.stringType("Example"))
-          .toFragment();
+          .toPact();
     }
 
     @Test

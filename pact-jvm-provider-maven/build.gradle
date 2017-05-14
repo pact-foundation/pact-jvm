@@ -2,7 +2,6 @@ apply plugin: 'maven-publish'
 
 dependencies {
     compile project(":pact-jvm-provider_${project.scalaVersion}"),
-      "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy",
       'org.apache.maven:maven-plugin-api:3.3.9',
       'org.apache.maven.plugin-tools:maven-plugin-annotations:3.4'
 }

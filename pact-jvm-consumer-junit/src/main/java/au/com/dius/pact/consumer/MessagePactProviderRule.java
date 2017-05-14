@@ -1,8 +1,6 @@
-/**
- * 
- */
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.model.PactSpecVersion;
 import au.com.dius.pact.model.v3.messaging.Message;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +10,11 @@ import org.junit.runners.model.Statement;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * A junit rule that wraps every test annotated with {@link PactVerification}.
@@ -94,7 +96,7 @@ public class MessagePactProviderRule extends ExternalResource {
 				setMessage(providedMessage.contentsAsBytes(), description);
 				try {
 					base.evaluate();
-					messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir());
+					messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir(), PactSpecVersion.V3);
 				} catch (Throwable t) {
 					throw t;
 				}
@@ -127,7 +129,7 @@ public class MessagePactProviderRule extends ExternalResource {
 		MessagePact messagePact = (MessagePact) method.invoke(testClassInstance, builder);
 		setMessage(messagePact.getMessages().get(0).contentsAsBytes(), description);
 		base.evaluate();
-		messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir());
+		messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir(), PactSpecVersion.V3);
 	}
 
 	private Optional<PactVerification> findPactVerification(PactVerifications pactVerifications) {

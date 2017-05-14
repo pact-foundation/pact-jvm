@@ -7,6 +7,10 @@ import org.json.JSONObject
 
 import scala.collection.JavaConverters._
 
+/**
+  * @deprecated Moved to Kotlin implementation
+  */
+@Deprecated
 object PactFragmentBuilder {
   def apply(consumer: Consumer) = {
     WithConsumer(consumer)

@@ -17,7 +17,12 @@ interface ContentTypeHandler {
   fun applyKey(body: QueryResult, key: String, generator: Generator)
 }
 
-val contentTypeHandlers: Map<String, ContentTypeHandler> = mutableMapOf("application/json" to JsonContentTypeHandler)
+val contentTypeHandlers: MutableMap<String, ContentTypeHandler> = mutableMapOf("application/json" to JsonContentTypeHandler)
+
+fun setupDefaultContentTypeHandlers() {
+  contentTypeHandlers.clear()
+  contentTypeHandlers["application/json"] = JsonContentTypeHandler
+}
 
 data class QueryResult(var value: Any, val key: Any? = null, val parent: Any? = null)
 

@@ -154,31 +154,56 @@ class PactBrokerClientSpec extends Specification {
 
   def 'returns an error when uploading a pact fails'() {
     given:
-    def delegate = [
-      uri: [:],
-      response: [:]
-    ]
-    def req = Mock(HttpResponse) {
-      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 500, 'Bang')
-    }
-    GroovySpy(HTTPBuilder, global: true) {
-      request(_, _) >> { args ->
-        def closure = args.last()
-        closure.delegate = delegate
-        closure.call()
-        delegate.response.failure.call(req, null)
-      }
+    def halClient = GroovyMock(HalClient, global: true)
+    def client = GroovySpy(PactBrokerClient, global: true) {
+      newHalClient() >> halClient
     }
 
     when:
-    def result = pactBrokerClient.uploadPactFile(pactFile, '10.0.0')
+    def result = client.uploadPactFile(pactFile, '10.0.0')
 
     then:
-    result == 'FAILED! 500 Bang - Unknown error'
+    1 * halClient.uploadJson('/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0', pactContents, _) >>
+      { args -> args[2].call('Failed', 'Error') }
+    result == 'FAILED! Error'
   }
 
   @SuppressWarnings('LineLength')
   def 'returns an error if the pact broker rejects the pact'() {
+    given:
+    pactBroker {
+      given('No pact has been published between the Provider and Foo Consumer')
+      uponReceiving('a pact publish request with invalid version')
+      withAttributes(method: 'PUT',
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/XXXX',
+        body: pactContents
+      )
+      willRespondWith(status: 400, headers: ['Content-Type': 'application/json;charset=utf-8'],
+        body: '''
+        |{
+        |  "errors": {
+        |    "consumer_version_number": [
+        |      "Consumer version number 'XXX' cannot be parsed to a version number. The expected format (unless this configuration has been overridden) is a semantic version. eg. 1.3.0 or 2.0.4.rc1"
+        |    ]
+        |  }
+        |}
+        '''.stripMargin()
+      )
+    }
+
+    when:
+    def result = pactBroker.run {
+      assert pactBrokerClient.uploadPactFile(pactFile, 'XXXX') == 'FAILED! 400 Bad Request - ' +
+        'consumer_version_number: [Consumer version number \'XXX\' cannot be parsed to a version number. ' +
+        'The expected format (unless this configuration has been overridden) is a semantic version. eg. 1.3.0 or 2.0.4.rc1]'
+    }
+
+    then:
+    result == PactVerified$.MODULE$
+  }
+
+  @SuppressWarnings('LineLength')
+  def 'returns an error if the pact broker rejects the pact with a conflict'() {
     given:
     pactBroker {
       given('No pact has been published between the Provider and Foo Consumer and there is a similar consumer')
@@ -208,6 +233,7 @@ class PactBrokerClientSpec extends Specification {
     result == PactVerified$.MODULE$
   }
 
+  @SuppressWarnings('LineLength')
   def 'handles non-json failure responses'() {
     given:
     pactBroker {

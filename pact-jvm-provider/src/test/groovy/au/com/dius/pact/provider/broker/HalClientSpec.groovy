@@ -1,8 +1,13 @@
 package au.com.dius.pact.provider.broker
 
 import groovyx.net.http.AuthConfig
+import groovyx.net.http.Method
 import groovyx.net.http.RESTClient
+import org.apache.http.HttpResponse
+import org.apache.http.ProtocolVersion
+import org.apache.http.message.BasicStatusLine
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class HalClientSpec extends Specification {
 
@@ -152,6 +157,104 @@ class HalClientSpec extends Specification {
 
     then:
     !called
+  }
+
+  def 'uploading a JSON doc returns status line if successful'() {
+    given:
+    def clientOptions = [
+      uri: [:],
+      response: [:]
+    ]
+    def mockHttp = Mock(RESTClient) {
+      request(Method.PUT, _) >> { args ->
+        args[1].delegate = clientOptions
+        args[1].resolveStrategy = Closure.DELEGATE_ONLY
+        args[1].call()
+      }
+    }
+    client.newHttpClient() >> mockHttp
+
+    when:
+    def statusLine = new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 200, 'OK')
+    def result = []
+    def closure = { r, s -> result << r; result << s }
+    client.uploadJson('', '', closure)
+    clientOptions.response.success.call([getStatusLine: { statusLine } ] as HttpResponse)
+
+    then:
+    result == ['OK', 'HTTP/1.1 200 OK']
+  }
+
+  def 'uploading a JSON doc returns the error if unsuccessful'() {
+    given:
+    def clientOptions = [
+      uri: [:],
+      response: [:]
+    ]
+    def mockHttp = Mock(RESTClient) {
+      request(Method.PUT, _) >> { args ->
+        args[1].delegate = clientOptions
+        args[1].resolveStrategy = Closure.DELEGATE_ONLY
+        args[1].call()
+      }
+    }
+    client.newHttpClient() >> mockHttp
+
+    when:
+    def statusLine = new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 400, 'Not OK')
+    def result = []
+    def closure = { r, s -> result << r; result << s }
+    client.uploadJson('', '', closure)
+    clientOptions.response.failure.call([getStatusLine: { statusLine } ] as HttpResponse, [errors: ['1', '2', '3']])
+
+    then:
+    result == ['FAILED', '400 Not OK - 1, 2, 3']
+  }
+
+  def 'uploading a JSON doc returns the error if unsuccessful due to 409'() {
+    given:
+    def clientOptions = [
+      uri: [:],
+      response: [:]
+    ]
+    def mockHttp = Mock(RESTClient) {
+      request(Method.PUT, _) >> { args ->
+        args[1].delegate = clientOptions
+        args[1].resolveStrategy = Closure.DELEGATE_ONLY
+        args[1].call()
+      }
+    }
+    client.newHttpClient() >> mockHttp
+
+    when:
+    def statusLine = new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 409, 'Not OK')
+    def result = []
+    def closure = { r, s -> result << r; result << s }
+    client.uploadJson('', '', closure)
+    clientOptions.response.'409'.call([getStatusLine: { statusLine } ] as HttpResponse, new StringReader('error line'))
+
+    then:
+    result == ['FAILED', '409 Not OK - error line']
+  }
+
+  @Unroll
+  @SuppressWarnings('LineLength')
+  def 'failure handling - #description'() {
+    given:
+    def statusLine = new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 400, 'Not OK')
+    def resp = [getStatusLine: { statusLine } ] as HttpResponse
+
+    expect:
+    client.handleFailure(resp, body) { arg1, arg2 -> [arg1, arg2] } == [firstArg, secondArg]
+
+    where:
+
+    description                                | body                               | firstArg | secondArg
+    'body is a reader'                         | new StringReader('line 1\nline 2') | 'FAILED' | '400 Not OK - line 1'
+    'body is null'                             | null                               | 'FAILED' | '400 Not OK - Unknown error'
+    'body is a parsed json doc with no errors' | [:]                                | 'FAILED' | '400 Not OK - Unknown error'
+    'body is a parsed json doc with errors'    | [errors: ['one', 'two', 'three']]  | 'FAILED' | '400 Not OK - one, two, three'
+
   }
 
 }

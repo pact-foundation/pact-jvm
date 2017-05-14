@@ -1,11 +1,11 @@
 package au.com.dius.pact.consumer.pactproviderrule;
 
+import au.com.dius.pact.consumer.Pact;
+import au.com.dius.pact.consumer.PactProviderRuleMk2;
+import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.consumer.Pact;
-import au.com.dius.pact.consumer.PactProviderRule;
-import au.com.dius.pact.consumer.PactVerification;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,10 +19,10 @@ import static org.junit.Assert.assertEquals;
 public class PactProviderWithMultipleFragmentsTest {
 
     @Rule
-    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", this);
+    public PactProviderRuleMk2 mockTestProvider = new PactProviderRuleMk2("test_provider", this);
 
     @Pact(consumer="test_consumer")
-    public PactFragment createFragment(PactDslWithProvider builder) {
+    public RequestResponsePact createFragment(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("testreqheader", "testreqheadervalue");
 
@@ -45,11 +45,11 @@ public class PactProviderWithMultipleFragmentsTest {
                 .status(200)
                 .headers(headers)
                 .body("")
-            .toFragment();
+            .toPact();
     }
 
     @Pact(consumer="test_consumer")
-    public PactFragment createFragment2(PactDslWithProvider builder) {
+    public RequestResponsePact createFragment2(PactDslWithProvider builder) {
         return builder
                 .given("good state")
                 .uponReceiving("PactProviderTest test interaction 2")
@@ -58,7 +58,7 @@ public class PactProviderWithMultipleFragmentsTest {
                 .willRespondWith()
                     .status(200)
                     .body("{\"responsetest\": true, \"name\": \"fred\"}")
-                .toFragment();
+                .toPact();
     }
 
     @Test
@@ -67,16 +67,16 @@ public class PactProviderWithMultipleFragmentsTest {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "fred");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getUrl()).getAsMap("/", ""), expectedResponse);
     }
 
     @Test
     @PactVerification(value = "test_provider", fragment = "createFragment")
     public void runTestWithFragment1() throws IOException {
-        Assert.assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).options("/second"), 200);
+        Assert.assertEquals(new ConsumerClient(mockTestProvider.getUrl()).options("/second"), 200);
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(mockTestProvider.getConfig().url()).getAsMap("/", ""), expectedResponse);
+        assertEquals(new ConsumerClient(mockTestProvider.getUrl()).getAsMap("/", ""), expectedResponse);
     }
 }

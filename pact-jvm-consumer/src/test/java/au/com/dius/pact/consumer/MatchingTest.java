@@ -7,6 +7,7 @@ import au.com.dius.pact.model.PactSpecVersion;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.entity.ContentType;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,10 +19,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
+
 public class MatchingTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(MatchingTest.class);
 
-    private static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
     private static final String HARRY = "harry";
     private static final String HELLO = "/hello";
     private static final String TEST_CONSUMER = "test_consumer";
@@ -118,13 +120,31 @@ public class MatchingTest {
         Assert.assertTrue("'" + val + "' is not a number", NumberUtils.isDigits(val));
     }
 
+    @Test
+    public void testRegexpMatchingOnQueryParameters() {
+        PactDslResponse fragment = ConsumerPactBuilder
+          .consumer(TEST_CONSUMER)
+          .hasPactWith(TEST_PROVIDER)
+          .uponReceiving("a request to match on query parameters")
+          .path(HELLO)
+          .method("POST")
+          .matchQuery("a", "\\d+")
+          .matchQuery("b", "\\d+")
+          .matchQuery("c", "[A-Z]")
+          .body("{}", ContentType.APPLICATION_JSON)
+          .willRespondWith()
+          .status(200);
+        Map expectedResponse = new HashMap();
+        runTest(fragment, "{}", expectedResponse, HELLO + "?a=100&b=200&c=X");
+    }
+
     private void runTest(PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
         MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V3);
-        VerificationResult result = pactFragment.toFragment().runConsumer(config, new TestRun() {
+        PactVerificationResult result = runConsumerTest(pactFragment.toPact(), config, new PactTestRun() {
             @Override
-            public void run(MockProviderConfig config) throws IOException {
+            public void run(@NotNull MockServer mockServer) throws IOException {
                 try {
-                    Assert.assertEquals(new ConsumerClient(config.url()).post(path, body, ContentType.APPLICATION_JSON), expectedResponse);
+                    Assert.assertEquals(expectedResponse, new ConsumerClient(config.url()).post(path, body, ContentType.APPLICATION_JSON));
                 } catch (IOException e) {
                     LOGGER.error(e.getMessage(), e);
                     throw e;
@@ -132,11 +152,11 @@ public class MatchingTest {
             }
         });
 
-        if (result instanceof PactError) {
-            throw new RuntimeException(((PactError)result).error());
+        if (result instanceof PactVerificationResult.Error) {
+            throw new RuntimeException(((PactVerificationResult.Error)result).getError());
         }
 
-        Assert.assertEquals(PACT_VERIFIED, result);
+        Assert.assertEquals(PactVerificationResult.Ok.INSTANCE, result);
     }
 
     private PactDslResponse buildPactFragment(PactDslJsonBody body, PactDslJsonBody responseBody, String description) {

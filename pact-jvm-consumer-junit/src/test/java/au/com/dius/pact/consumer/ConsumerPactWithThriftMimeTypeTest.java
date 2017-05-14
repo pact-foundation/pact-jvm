@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import org.apache.http.client.fluent.Request;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,10 +23,10 @@ public class ConsumerPactWithThriftMimeTypeTest {
     private static final String APPLICATION_X_THRIFT_JSON = "application/x-thrift+json";
 
     @Rule
-    public PactProviderRule provider = new PactProviderRule("test_provider", "localhost", 8080, this);
+    public PactProviderRuleMk2 provider = new PactProviderRuleMk2("test_provider", "localhost", 8080, this);
 
     @Pact(provider="test_provider", consumer="test_consumer")
-    public PactFragment createFragment(PactDslWithProvider builder) {
+    public RequestResponsePact createFragment(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Accept", APPLICATION_X_THRIFT_JSON);
 
@@ -39,7 +39,7 @@ public class ConsumerPactWithThriftMimeTypeTest {
             .willRespondWith()
                 .status(200)
                 .body(BODY, "application/x-thrift+json")
-            .toFragment();
+            .toPact();
     }
 
     @Test

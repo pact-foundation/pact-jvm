@@ -5,7 +5,7 @@ import au.com.dius.pact.model.matchingrules.MatchingRules
 /**
  * Base trait for an object that represents part of an http message
  */
-trait HttpPart {
+abstract class HttpPart {
 
   private static final String CONTENT_TYPE = 'Content-Type'
 

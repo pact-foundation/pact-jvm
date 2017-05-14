@@ -1,5 +1,55 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.3.9 - Bugfix Release
+
+* 0c3d776 - Add eachlike methods to PactDslJsonArray that take PactDslJsonRootValue matchers #256 (Ronald Holshausen, Mon May 8 21:09:36 2017 +1000)
+* d76ac26 - Only encode JSON values if the PactDslJsonRootValue is used at the body root #385 (Ronald Holshausen, Mon May 8 20:26:11 2017 +1000)
+* a6d9e57 - Disabled merge conflict implementation and tests (Ronald Holshausen, Fri May 5 13:00:28 2017 +1000)
+* a51a417 - Provide more info when a merge conflict occurs (Ronald Holshausen, Fri May 5 12:41:44 2017 +1000)
+* f2b3d4a - Fixed codenarc issues for PR #420 (Ronald Holshausen, Fri May 5 12:07:46 2017 +1000)
+* 171c995 - Removed unused dependency... #241 (Brent Barker, Thu May 4 15:56:14 2017 -0600)
+* b544278 - Added ability to use a keystore for the pact mock server #241 (Brent Barker, Thu May 4 15:41:10 2017 -0600)
+* 54f5a3d - Merge pull request #412 from yegeniy/patch-1 (Ronald Holshausen, Wed Apr 26 09:23:17 2017 +1000)
+* df8c40a - [maven] 3.3.x->3.3.8, except 3.3.9 (Eugene Wolfson, Tue Apr 25 14:25:09 2017 -0400)
+* 0df9df1 - Damn codenarc! (Ronald Holshausen, Sun Apr 23 15:19:22 2017 +1000)
+* 9f4d3ce - Add pact broker credidentials as properties to the gradle pact publish task (Ronald Holshausen, Sun Apr 23 15:00:51 2017 +1000)
+* 97d6dd2 - Added pact broker credidentials to the Maven publish plugin (Ronald Holshausen, Sun Apr 23 14:44:24 2017 +1000)
+* 3f32536 - Updated versions in readme (Ronald Holshausen, Fri Apr 14 14:17:07 2017 +1000)
+* c282f99 - bump version to 3.3.9 (Ronald Holshausen, Fri Apr 14 14:16:42 2017 +1000)
+
+# 3.3.8 - Bugfix Release
+
+* cd860af - Upgrade gradle to 3.4.1 (Ronald Holshausen, Fri Apr 14 12:34:05 2017 +1000)
+* b12637a - Correct link in Matching any key in a map to refer to the right issue #402 (Ronald Holshausen, Fri Apr 14 11:41:31 2017 +1000)
+* 9c50125 - Update the message pact failure exception to include the failures in the exception message (Ronald Holshausen, Tue Apr 11 16:30:41 2017 +1000)
+* 1c5930a - Updated readme anout using an authenticated pact broker with the Gradle plugin (Ronald Holshausen, Fri Mar 31 16:28:19 2017 +1100)
+* 2bcfa1e - When writing pacts, do not parse JSON bodies that are strings (Ronald Holshausen, Fri Mar 31 11:53:13 2017 +1100)
+* 19f20c0 - bump version to 3.3.8 (Ronald Holshausen, Mon Mar 27 15:42:57 2017 +1100)
+
+# 3.3.7 - Small PRs and query parameter matching
+
+* 70da023 - Allow the instantation of objects for provider methods to be overwridden in the verifier (Ronald Holshausen, Mon Mar 27 14:14:13 2017 +1100)
+* da3b39f - Added query parameter matching support to the Groovy DSL #375 (Ronald Holshausen, Sun Mar 26 15:23:08 2017 +1100)
+* dede1f8 - Added query parameter matching support to the Java DSL #392 (Ronald Holshausen, Sun Mar 26 14:55:38 2017 +1100)
+* 32b4fec - Merge pull request #394 from tjheslin1/master (Ronald Holshausen, Sun Mar 26 14:05:17 2017 +1100)
+* d2b2cb4 - Merge pull request #393 from aniket-21/master (Ronald Holshausen, Sun Mar 26 14:04:08 2017 +1100)
+* 7fd77cb - Merge pull request #391 from Fitzoh/master (Ronald Holshausen, Sun Mar 26 14:01:59 2017 +1100)
+* a68222b - Added check to VersionedPactUrlLoader to blow up if the url provided does not contain any variables to expand. (Thomas Heslin, Fri Mar 24 22:23:11 2017 +0000)
+* d6121fe - Update PactBrokerLoader to accept tags from system properties. Currently there is no way to modify the list of tags which are pulled from the broker at runtime.  This commit makes the PactBrokerLoader honor system property expressions in a manner similar to the way it is handled for other parameters. If multiple tags are included in a system parameter they must be comma separated. (Fitzgerald, Andrew, Thu Mar 16 23:06:20 2017 -0400)
+* 317ccb7 - Revert "Fix for issue #385" (I337111, Wed Mar 22 10:02:01 2017 +0800)
+* 44d6a87 - Fix for issue #385 (I337111, Tue Mar 21 19:14:14 2017 +0800)
+* 195bb93 - handling null value o/p of mkstring (I337111, Fri Mar 10 15:39:30 2017 +0800)
+* 3349b08 - Simplifying line separator logic (I337111, Fri Mar 10 13:45:13 2017 +0800)
+* a53d1fb - Merge pull request #377 from aniket-21/master (Ronald Holshausen, Sun Feb 12 17:04:55 2017 +1100)
+* 61728fa - Update mime test (Aniket, Fri Feb 10 15:33:58 2017 +0800)
+* 82e3d54 - Update code to have platform specific line separator (Aniket, Fri Feb 10 15:13:11 2017 +0800)
+* 6f84e2a - Updated the versions in README (Ronald Holshausen, Sun Feb 5 17:24:02 2017 +1100)
+* b23ebfe - update changelog for release 3.5.0-beta.3 (Ronald Holshausen, Sun Feb 5 16:53:15 2017 +1100)
+* 70ea156 - Merge pull request #374 from aniket-21/master (Ronald Holshausen, Sun Feb 5 14:23:34 2017 +1100)
+* ff06104 - Fix logic for default port in case of https (Aniket, Thu Feb 2 18:15:16 2017 +0800)
+* 6453b81 - updated versions in README (Ronald Holshausen, Thu Jan 26 18:52:14 2017 +1100)
+* b358b33 - bump version to 3.3.7 (Ronald Holshausen, Thu Jan 26 18:50:25 2017 +1100)
+
 # 3.5.0-beta.3 - Interim V3 Release
 
 * f1182c1 - Merge branch 'master' into v3-spec (Ronald Holshausen, Sun Feb 5 16:44:30 2017 +1100)
@@ -372,33 +422,6 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 7213bf6 - bump version to 3.2.13 (Ronald Holshausen, Sun Aug 7 15:04:28 2016 +1000)
 * f1590bc - update changelog for release 3.2.12 (Ronald Holshausen, Sun Aug 7 14:34:25 2016 +1000)
 * 71f1d97 - update changelog for release 2.4.14 (Ronald Holshausen, Sun Aug 7 13:27:11 2016 +1000)
-
-# 3.5.0-beta.2 - Bugfix Release
-
-* 43f9a82 - fix codenarc error (Ronald Holshausen, Wed Sep 21 22:27:35 2016 +1000)
-* 86621b2 - handle provider method invokation errors more gracefully (Ronald Holshausen, Wed Sep 21 22:14:34 2016 +1000)
-* 02eeff2 - Merge branch 'master' into v3-spec (Ronald Holshausen, Wed Sep 21 21:44:40 2016 +1000)
-* 70c6261 - Fix for issue with eachKeyLike not setting the wildcard matcher correctly #313 (Ronald Holshausen, Wed Sep 21 20:24:58 2016 +1000)
-* 94657cb - Merge branch 'cochrane343-master' (Ronald Holshausen, Wed Sep 21 20:23:10 2016 +1000)
-* 7f49e74 - Add test case for #313 (Alexander Zottnick, Mon Sep 19 14:49:57 2016 +0200)
-* 555c0d8 - Merge pull request #317 from wojciechbulaty/master (Ronald Holshausen, Fri Sep 16 09:18:13 2016 +1000)
-* 83da230 - Created a VersionedPactUrl to be used to reference versioned pacts. (wojciechbulaty, Thu Sep 15 16:36:25 2016 +0100)
-* 9550ee4 - Update the pact-jvm-consumer-junit readme to have the correct class names and imports #316 (Ronald Holshausen, Thu Sep 15 12:05:12 2016 +1000)
-* 419441b - added JSON-RPC to the list of JSON mimetypes #315 (Ronald Holshausen, Thu Sep 15 11:55:31 2016 +1000)
-* b449675 - added the missing matcher for eachKey in Groovy DSL #313 (Ronald Holshausen, Thu Sep 15 11:07:03 2016 +1000)
-* 528e9a1 - when wildcard matcher is defined for a map, match all actual values to the expected one ignoring the keys #313 (Ronald Holshausen, Wed Sep 14 22:35:14 2016 +1000)
-* 350fb30 - added the missing matcher for eachKeyLike #313 (Ronald Holshausen, Wed Sep 14 20:43:28 2016 +1000)
-* 73fc34b - Fix the Groovy DSL to not overwrite the content type header if it has already been set #312 (Ronald Holshausen, Sat Sep 10 16:17:00 2016 +1000)
-* 3acffb5 - Implemented wildcards for map keys in the Java DSL #313 (Ronald Holshausen, Sat Sep 10 15:56:22 2016 +1000)
-* b483572 - Implemented wildcards for map keys in the Groovy DSL #313 (Ronald Holshausen, Sat Sep 10 12:25:29 2016 +1000)
-* 1fa05bd - bump version to 3.3.1 (Ronald Holshausen, Wed Sep 7 21:12:55 2016 +1000)
-* d00393b - update changelog for release 3.3.0 (Ronald Holshausen, Wed Sep 7 20:46:06 2016 +1000)
-* e91ba6e - Merge pull request #314 from alonpeer/unit-specs (Ronald Holshausen, Fri Sep 2 07:49:58 2016 +1000)
-* 381b043 - handle loading a pact with invalid version metadata (Ronald Holshausen, Wed Aug 31 22:23:43 2016 +1000)
-* 8ab62d6 - Implementation of unit style specification for specs2, with only a single run of the mock provider (Alon Pe'er, Wed Aug 31 13:08:31 2016 +0200)
-* 01e8b34 - update changelog for release 3.5.0-beta.1 (Ronald Holshausen, Sun Aug 28 21:14:12 2016 +1000)
-* e222205 - update changelog for release 2.4.15 (Ronald Holshausen, Tue Aug 23 22:12:30 2016 +1000)
-* 90c886e - bump version to 3.5.0-beta.2 (Ronald Holshausen, Sun Aug 28 21:39:06 2016 +1000)
 
 # 3.5.0-beta.2 - Bugfix Release
 

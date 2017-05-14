@@ -4,7 +4,7 @@ import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import com.google.common.collect.Sets;
 import groovy.json.JsonSlurper;
 import org.apache.http.client.fluent.Request;
@@ -25,10 +25,10 @@ public class WildcardKeysTest {
     private static final String APPLICATION_JSON = "application/json";
 
     @Rule
-    public PactProviderRule provider = new PactProviderRule("WildcardKeysProvider", "localhost", 8081, this);
+    public PactProviderRuleMk2 provider = new PactProviderRuleMk2("WildcardKeysProvider", "localhost", 8081, this);
 
     @Pact(provider="WildcardKeysProvider", consumer="WildcardKeysConsumer")
-    public PactFragment createFragment(PactDslWithProvider builder) {
+    public RequestResponsePact createFragment(PactDslWithProvider builder) {
       DslPart body = new PactDslJsonBody()
         .eachLike("articles")
           .eachLike("variants")
@@ -51,16 +51,16 @@ public class WildcardKeysTest {
           .closeObject()
         .closeArray();
 
-      PactFragment pactFragment = builder
+      RequestResponsePact pact = builder
         .uponReceiving("a request for an article")
         .path("/")
         .method("GET")
         .willRespondWith()
         .status(200)
         .body(body)
-        .toFragment();
+        .toPact();
 
-      MatcherTestUtils.assertResponseMatcherKeysEqualTo(pactFragment, "body",
+      MatcherTestUtils.assertResponseMatcherKeysEqualTo(pact, "body",
         "$.articles",
         "$.articles[*].variants",
         "$.articles[*].variants[*].*",
@@ -72,7 +72,7 @@ public class WildcardKeysTest {
         "$.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*].bundleId"
       );
 
-      return pactFragment;
+      return pact;
     }
 
     @Test

@@ -3,7 +3,7 @@ pact-jvm-consumer-junit
 
 Provides a DSL and a base test class for use with Junit to build consumer tests.
 
-##Dependency
+## Dependency
 
 The library is available on maven central using:
 
@@ -11,7 +11,7 @@ The library is available on maven central using:
 * artifact-id = `pact-jvm-consumer-junit_2.11`
 * version-id = `3.2.x`
 
-##Usage
+## Usage
 
 ### Using the base ConsumerPactTest
 
@@ -192,15 +192,30 @@ E.g.:
 ```java
     @Rule
     public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", "localhost", 8443, true,
-      PactConfig.apply(PactSpecVersion.V2), this);                                                   // ^^^^
+      PactSpecVersion.V2, this);                                                                     // ^^^^
 ```
 
-For an exmaple test doing this, see [PactProviderHttpsTest](src/test/java/au/com/dius/pact/consumer/pactproviderrule/PactProviderHttpsTest.java).
+For an example test doing this, see [PactProviderHttpsTest](src/test/java/au/com/dius/pact/consumer/pactproviderrule/PactProviderHttpsTest.java).
 
 **NOTE:** The provider will start handling HTTPS requests using a self-signed certificate. Most HTTP clients will not accept
 connections to a self-signed server as the certificate is untrusted. You may need to enable insecure HTTPS with your client
 for this test to work. For an example of how to enable insecure HTTPS client connections with Apache Http Client, have a
 look at [InsecureHttpsRequest](src/test/java/org/apache/http/client/fluent/InsecureHttpsRequest.java).
+
+### Requiring the mock server to run with HTTPS with a keystore [versions 3.4.1+]
+
+From versions 3.4.1+ the mock server can be started running with HTTPS using a keystore.
+To enable this set the `https` parameter to `true`, set the keystore path/file, and the keystore's password.
+
+E.g.:
+
+```java
+    @Rule
+    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", "localhost", 8443, true,
+            "/path/to/your/keystore.jks", "your-keystore-password", PactSpecVersion.V2, this);
+```
+
+For an example test doing this, see [PactProviderHttpsKeystoreTest](src/test/java/au/com/dius/pact/consumer/pactproviderrule/PactProviderHttpsKeystoreTest.java).
 
 ### Using the Pact DSL directly
 
@@ -446,7 +461,7 @@ For example:
 #### Matching any key in a map (3.3.1/2.5.0+)
 
 The DSL has been extended for cases where the keys in a map are IDs. For an example of this, see 
-[#313](https://github.com/DiUS/pact-jvm/issues/131). In this case you can use the `eachKeyLike` method, which takes an 
+[#313](https://github.com/DiUS/pact-jvm/issues/313). In this case you can use the `eachKeyLike` method, which takes an 
 example key as a parameter.
 
 For example:
@@ -515,6 +530,27 @@ For example:
         .status(200)
         .body("{\"hello\": \"harry\"}")
         .matchHeader("Location", ".*/hello/[0-9]+", "/hello/1234")
+```
+
+### Matching on query parameters (version 3.3.7+)
+
+You can use regular expressions to match request query parameters. The DSL has a `matchQuery` method for this. You can provide
+an example value to use when generating requests, and if you leave it out it will generate a random one
+from the regular expression.
+
+For example:
+
+```java
+  .given("test state")
+    .uponReceiving("a test interaction")
+        .path("/hello")
+        .method("POST")
+        .matchQuery("a", "\\d+", "100")
+        .matchQuery("b", "[A-Z]", "X")
+        .body("{\"name\": \"harry\"}")
+    .willRespondWith()
+        .status(200)
+        .body("{\"hello\": \"harry\"}")
 ```
 
 ## Debugging pact failures

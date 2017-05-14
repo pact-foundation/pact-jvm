@@ -13,7 +13,7 @@ import spock.lang.Specification
 
 class PactBodyBuilderSpec extends Specification {
 
-  def service
+  PactBuilder service
 
   def setup() {
     service = new PactBuilder()
@@ -76,7 +76,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.fragment()
+    service.buildInteractions()
     def keys = new JsonSlurper().parseText(service.interactions[0].request.body.value).keySet()
     def requestMatchingRules = service.interactions[0].request.matchingRules
     def bodyMatchingRules = requestMatchingRules.rulesForCategory('body').matchingRules
@@ -135,7 +135,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.fragment()
+    service.buildInteractions()
     def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.value))
 
     then:
@@ -153,7 +153,7 @@ class PactBodyBuilderSpec extends Specification {
     keys == [
         'orders', [0, [
                 'id', [], 'lineItems', [0, [
-                    'id', [], 'amount', [], 'productCodes', [0, [
+                    'amount', [], 'id', [], 'productCodes', [0, [
                         'code', []
                     ]]
                 ]]
@@ -184,7 +184,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.fragment()
+    service.buildInteractions()
     def body = new JsonSlurper().parseText(service.interactions[0].request.body.value)
 
     then:
@@ -223,7 +223,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.fragment()
+    service.buildInteractions()
     def body = new JsonSlurper().parseText(service.interactions[0].request.body.value)
 
     then:
@@ -255,7 +255,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.fragment()
+    service.buildInteractions()
     def body = new JsonSlurper().parseText(service.interactions[0].request.body.value)
 
     then:
@@ -417,7 +417,7 @@ class PactBodyBuilderSpec extends Specification {
     }
 
     when:
-    service.fragment()
+    service.buildInteractions()
     def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.value))
 
     then:
@@ -436,7 +436,7 @@ class PactBodyBuilderSpec extends Specification {
     keys == [
       '2', [0, [
         'id', [], 'lineItems', [0, [
-            'id', [], '10k-depreciation-bips', [], 'productCodes', [0, [
+            '10k-depreciation-bips', [], 'id', [], 'productCodes', [0, [
             'code', []
           ]]
         ]]
@@ -447,12 +447,12 @@ class PactBodyBuilderSpec extends Specification {
   private List walkGraph(def value) {
       def set = []
       if (value instanceof Map) {
-          value.each { k, v ->
+          value.keySet().sort().each { k ->
               set << k
-              set << walkGraph(v)
+              set << walkGraph(value[k])
           }
       } else if (value instanceof List) {
-          value.eachWithIndex { v, i ->
+          value.sort().eachWithIndex { v, i ->
               set << i
               set << walkGraph(v)
           }

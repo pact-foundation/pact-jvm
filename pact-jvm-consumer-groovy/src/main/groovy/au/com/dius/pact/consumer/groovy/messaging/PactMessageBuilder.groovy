@@ -7,6 +7,7 @@ import au.com.dius.pact.consumer.groovy.PactBodyBuilder
 import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.InvalidPactException
 import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.v3.messaging.Message
@@ -119,7 +120,7 @@ class PactMessageBuilder extends BaseBuilder {
     if (results.any { it instanceof Throwable }) {
       throw new MessagePactFailedException(results.findAll { it instanceof Throwable })
     } else {
-      pact.write(PactConsumerConfig$.MODULE$.pactRootDir())
+      pact.write(PactConsumerConfig$.MODULE$.pactRootDir(), PactSpecVersion.V3)
     }
   }
 

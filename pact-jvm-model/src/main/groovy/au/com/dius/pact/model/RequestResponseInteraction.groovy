@@ -35,9 +35,10 @@ class RequestResponseInteraction implements Interaction {
 
   @Override
   boolean conflictsWith(Interaction other) {
-    description == other.description &&
-      providerStates == other.providerStates &&
-      (request != other.request || response != other.response)
+//    description == other.description &&
+//      providerStates == other.providerStates &&
+//      (request != other.request || response != other.response)
+    false
   }
 
   @Override
@@ -101,7 +102,12 @@ class RequestResponseInteraction implements Interaction {
 
   static parseBody(HttpPart httpPart) {
     if (httpPart.jsonBody() && httpPart.body.present) {
-      new JsonSlurper().parseText(httpPart.body.value)
+      def body = new JsonSlurper().parseText(httpPart.body.value)
+      if (body instanceof String) {
+        httpPart.body.value
+      } else {
+        body
+      }
     } else {
       httpPart.body.value
     }

@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
-@SuppressWarnings('UnusedImport')
+import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.StatefulMockProvider
 import au.com.dius.pact.consumer.VerificationResult
 import au.com.dius.pact.model.Consumer
@@ -13,12 +13,15 @@ import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.RequestResponseInteraction
+import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.matchingrules.MatchingRules
 import groovy.json.JsonBuilder
 import scala.collection.JavaConverters$
 
 import java.util.regex.Pattern
+
+import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest
 
 /**
  * Builder DSL for Pact tests
@@ -29,10 +32,11 @@ class PactBuilder extends BaseBuilder {
   private static final String CONTENT_TYPE = 'Content-Type'
   private static final String JSON = 'application/json'
   private static final String BODY = 'body'
+  private static final String LOCALHOST = 'localhost'
 
   Consumer consumer
   Provider provider
-  Integer port = null
+  Integer port = 0
   String requestDescription
   List requestData = []
   List responseData = []
@@ -105,12 +109,13 @@ class PactBuilder extends BaseBuilder {
       MatchingRules requestMatchers = requestData[i].matchers
       MatchingRules responseMatchers = responseData[i].matchers
       Map headers = setupHeaders(requestData[i].headers ?: [:], requestMatchers)
+      Map query = setupQueryParameters(requestData[i].query ?: [:], requestMatchers)
       Map responseHeaders = setupHeaders(responseData[i].headers ?: [:], responseMatchers)
       String path = setupPath(requestData[i].path ?: '/', requestMatchers)
       interactions << new RequestResponseInteraction(
         requestDescription,
         providerStates,
-        new Request(requestData[i].method ?: 'get', path, requestData[i]?.query, headers,
+        new Request(requestData[i].method ?: 'get', path, query, headers,
           requestData[i].containsKey(BODY) ? OptionalBody.body(requestData[i].body) : OptionalBody.missing(),
           requestMatchers),
         new Response(responseData[i].status ?: 200, responseHeaders,
@@ -149,6 +154,22 @@ class PactBuilder extends BaseBuilder {
       matcher.value
     } else {
       path as String
+    }
+  }
+
+  private static Map setupQueryParameters(Map query, MatchingRules matchers) {
+    query.collectEntries { key, value ->
+      def category = 'query'
+      if (value[0] instanceof Matcher) {
+        matchers.addCategory(category).addRule(key, value[0].matcher)
+        [key, [value[0].value]]
+      } else if (value[0] instanceof Pattern) {
+        def matcher = new RegexpMatcher(values: [value[0]])
+        matchers.addCategory(category).addRule(key, matcher.matcher)
+        [key, [matcher.value]]
+      } else {
+        [key, value]
+      }
     }
   }
 
@@ -213,7 +234,9 @@ class PactBuilder extends BaseBuilder {
    * @param options Optional map of options for the run
    * @param closure Test to execute
    * @return The result of the test run
+   * @deprecated use runTest instead
    */
+  @Deprecated
   VerificationResult run(Map options = [:], Closure closure) {
     PactFragment fragment = fragment()
 
@@ -222,12 +245,13 @@ class PactBuilder extends BaseBuilder {
     if (port == null) {
       config = MockProviderConfig.createDefault(pactVersion)
     } else {
-      config = MockProviderConfig.httpConfig('localhost', port, pactVersion)
+      config = MockProviderConfig.httpConfig(LOCALHOST, port, pactVersion)
     }
 
     fragment.runConsumer(config, closure)
   }
 
+  @Deprecated
   PactFragment fragment() {
     buildInteractions()
     new PactFragment(consumer, provider, JavaConverters$.MODULE$.asScalaBufferConverter(interactions).asScala())
@@ -335,13 +359,37 @@ class PactBuilder extends BaseBuilder {
   }
 
   /**
-   * Runs the test (via the run method), and throws an exception if it was not successful.
+   * Executes the providers closure in the context of the interactions defined on this builder.
+   * @param options Optional map of options for the run
+   * @param closure Test to execute
+   * @return The result of the test run
+   */
+  PactVerificationResult runTest(Map options = [:], Closure closure) {
+    buildInteractions()
+    def pact = new RequestResponsePact(provider, consumer, interactions)
+
+    def pactVersion = options.specificationVersion ?: PactSpecVersion.V2
+    MockProviderConfig config = MockProviderConfig.httpConfig(LOCALHOST, port ?: 0, pactVersion)
+
+    runConsumerTest(pact, config, closure)
+  }
+
+  /**
+   * Runs the test (via the runTest method), and throws an exception if it was not successful.
    * @param options Optional map of options for the run
    * @param closure
    */
   void runTestAndVerify(Map options = [:], Closure closure) {
-    VerificationResult result = run(options, closure)
-    if (result != PACTVERIFIED) {
+    PactVerificationResult result = runTest(options, closure)
+    if (result != PactVerificationResult.Ok.INSTANCE) {
+      if (result instanceof PactVerificationResult.Error) {
+        if (result.mockServerState != PactVerificationResult.Ok.INSTANCE) {
+          throw new AssertionError('Pact Test function failed with an exception, possibly due to ' +
+            result.mockServerState, result.error)
+        } else {
+          throw new AssertionError('Pact Test function failed with an exception: ' + result.error.message, result.error)
+        }
+      }
       throw new PactFailedException(result)
     }
   }

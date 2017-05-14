@@ -21,7 +21,7 @@ import java.util.Map;
  *
  * If no host is given, it will default to localhost. If no port is given, it will default to a random port.
  *
- * @deprecated Use PactProviderRule instead
+ * @deprecated Use PactProviderRuleMk2 instead
  */
 @Deprecated
 public class PactRule extends ExternalResource {

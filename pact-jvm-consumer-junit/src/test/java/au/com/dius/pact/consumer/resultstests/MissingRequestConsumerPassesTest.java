@@ -1,9 +1,10 @@
 package au.com.dius.pact.consumer.resultstests;
 
+import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.PactMismatchesException;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.consumer.PactMismatchException;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,11 +17,11 @@ import static org.junit.Assert.assertThat;
 public class MissingRequestConsumerPassesTest extends ExpectedToFailBase {
 
     public MissingRequestConsumerPassesTest() {
-        super(PactMismatchException.class);
+        super(PactMismatchesException.class);
     }
 
     @Override
-    protected PactFragment createFragment(PactDslWithProvider builder) {
+    protected RequestResponsePact createPact(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("testreqheader", "testreqheadervalue");
         return builder
@@ -40,7 +41,7 @@ public class MissingRequestConsumerPassesTest extends ExpectedToFailBase {
                 .status(200)
                 .headers(headers)
                 .body("")
-            .toFragment();
+            .toPact();
     }
 
 
@@ -55,11 +56,11 @@ public class MissingRequestConsumerPassesTest extends ExpectedToFailBase {
     }
 
     @Override
-    protected void runTest(String url) throws IOException {
+    protected void runTest(MockServer mockServer) throws IOException {
         Map<String, Object> expectedResponse = new HashMap<String, Object>();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "fred");
-        ConsumerClient consumerClient = new ConsumerClient(url);
+        ConsumerClient consumerClient = new ConsumerClient(mockServer.getUrl());
         assertEquals(consumerClient.getAsMap("/", ""), expectedResponse);
     }
 
@@ -67,11 +68,14 @@ public class MissingRequestConsumerPassesTest extends ExpectedToFailBase {
     protected void assertException(Throwable e) {
         assertThat(e.getMessage(),
             containsString("The following requests were not received:\n" +
-                "Interaction: MissingRequestConsumerPassesTest second test interaction\n" +
-                "\tin states None\n" +
-                "request:\n" +
-                "\tmethod: OPTIONS\n" +
-                "\tpath: /second\n"));
+              "\tmethod: OPTIONS\n" +
+              "\tpath: /second\n" +
+              "\tquery: [:]\n" +
+              "\theaders: [testreqheader:testreqheadervalue]\n" +
+              "\tmatchers: MatchingRules(rules=[path:au.com.dius.pact.model.matchingrules.Category(path, [:], AND), " +
+                "header:au.com.dius.pact.model.matchingrules.Category(header, [:], AND)])\n" +
+              "\tgenerators: Generators(categories={})\n" +
+              "\tbody: OptionalBody(state=EMPTY, value=)"));
 
     }
 }

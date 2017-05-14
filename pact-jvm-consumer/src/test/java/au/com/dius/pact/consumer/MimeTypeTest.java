@@ -2,9 +2,11 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.model.PactSpecVersion;
+import au.com.dius.pact.model.RequestResponsePact;
 import org.apache.http.entity.ContentType;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -14,13 +16,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
 import static org.junit.Assert.assertEquals;
 
 public class MimeTypeTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MimeTypeTest.class);
-
-    private static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
 
     @Test
     public void testMatchingJson() {
@@ -33,21 +34,22 @@ public class MimeTypeTest {
 
         String responseBody = "{\"status\": \"OK\"}";
 
-        runTest(buildPactFragment(body, responseBody, "a test interaction with json", ContentType.APPLICATION_JSON),
+        runTest(buildPact(body, responseBody, "a test interaction with json", ContentType.APPLICATION_JSON),
             body, responseBody, ContentType.APPLICATION_JSON);
     }
 
     @Test
     public void testMatchingText() {
-        String body = "Define a pact between service consumers and providers, enabling \"consumer driven contract\" testing.\n" +
-            "\nPact provides an RSpec DSL for service consumers to define the HTTP requests they will make to a service" +
+        String newLine = System.lineSeparator();
+        String body = "Define a pact between service consumers and providers, enabling \"consumer driven contract\" testing." + newLine +
+            newLine + "Pact provides an RSpec DSL for service consumers to define the HTTP requests they will make to a service" +
             " provider and the HTTP responses they expect back. These expectations are used in the consumers specs " +
             "to provide a mock service provider. The interactions are recorded, and played back in the service " +
             "provider specs to ensure the service provider actually does provide the response the consumer expects.";
 
         String responseBody = "status=OK";
 
-        runTest(buildPactFragment(body, responseBody, "a test interaction with text", ContentType.TEXT_PLAIN),
+        runTest(buildPact(body, responseBody, "a test interaction with text", ContentType.TEXT_PLAIN),
             body, responseBody, ContentType.TEXT_PLAIN);
     }
 
@@ -57,15 +59,15 @@ public class MimeTypeTest {
 
         String responseBody = "<status>OK</status>";
 
-        runTest(buildPactFragment(body, responseBody, "a test interaction with xml", ContentType.APPLICATION_XML),
+        runTest(buildPact(body, responseBody, "a test interaction with xml", ContentType.APPLICATION_XML),
             body, responseBody, ContentType.APPLICATION_XML);
     }
 
-    private void runTest(PactFragment pactFragment, final String body, final String expectedResponse, final ContentType mimeType) {
+    private void runTest(RequestResponsePact pact, final String body, final String expectedResponse, final ContentType mimeType) {
         MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V3);
-        VerificationResult result = pactFragment.runConsumer(config, new TestRun() {
+        PactVerificationResult result = runConsumerTest(pact, config, new PactTestRun() {
             @Override
-            public void run(MockProviderConfig config) {
+            public void run(@NotNull MockServer mockServer) throws IOException {
                 try {
                     assertEquals(new ConsumerClient(config.url()).postBody("/hello", body, mimeType), expectedResponse);
                 } catch (IOException e) {
@@ -74,14 +76,14 @@ public class MimeTypeTest {
             }
         });
 
-        if (result instanceof PactError) {
-            throw new RuntimeException(((PactError)result).error());
+        if (result instanceof PactVerificationResult.Error) {
+            throw new RuntimeException(((PactVerificationResult.Error)result).getError());
         }
 
-        Assert.assertEquals(PACT_VERIFIED, result);
+        Assert.assertEquals(PactVerificationResult.Ok.INSTANCE, result);
     }
 
-    private PactFragment buildPactFragment(String body, String responseBody, String description, ContentType contentType) {
+    private RequestResponsePact buildPact(String body, String responseBody, String description, ContentType contentType) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Content-Type", contentType.toString());
         return ConsumerPactBuilder
@@ -96,7 +98,7 @@ public class MimeTypeTest {
                 .status(200)
                 .body(responseBody)
                 .headers(headers)
-                .toFragment();
+                .toPact();
     }
 
 }

@@ -58,4 +58,12 @@ data class OptionalBody(val state: State, val value: String? = null) {
       defaultValue
     }
   }
+
+  fun unwrap(): String {
+    if (isPresent()) {
+      return value!!
+    } else {
+      throw RuntimeException("Failed to unwrap value from a $state body")
+    }
+  }
 }

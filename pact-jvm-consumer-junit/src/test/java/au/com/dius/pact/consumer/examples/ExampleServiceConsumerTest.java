@@ -1,11 +1,11 @@
 package au.com.dius.pact.consumer.examples;
 
 import au.com.dius.pact.consumer.Pact;
-import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
-import au.com.dius.pact.consumer.PactProviderRule;
+import au.com.dius.pact.consumer.PactProviderRuleMk2;
 import au.com.dius.pact.consumer.PactVerification;
+import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
@@ -29,10 +29,10 @@ public class ExampleServiceConsumerTest {
         new String[]{"Content-Type", "application/json;charset=UTF-8"});
 
     @Rule
-    public PactProviderRule provider = new PactProviderRule("CarBookingProvider", "localhost", 1234, this);
+    public PactProviderRuleMk2 provider = new PactProviderRuleMk2("CarBookingProvider", "localhost", 1234, this);
 
     @Pact(provider = "CarBookingProvider", consumer = "CarBookingConsumer")
-    public PactFragment configurationFragment(PactDslWithProvider builder) {
+    public RequestResponsePact configurationFragment(PactDslWithProvider builder) {
         return builder
             .given("john smith books a civic")
             .uponReceiving("retrieve data from Service-A")
@@ -86,7 +86,7 @@ public class ExampleServiceConsumerTest {
                 new PactDslJsonBody()
                     .stringMatcher("id", "ORDER_ID_\\d+", "ORDER_ID_123456")
             )
-            .toFragment();
+            .toPact();
     }
 
     @PactVerification("CarBookingProvider")

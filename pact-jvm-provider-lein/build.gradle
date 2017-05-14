@@ -23,10 +23,6 @@ dependencies {
   compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
 
   testRuntime 'org.clojure:tools.nrepl:0.2.12'
-  testCompile ('org.spockframework:spock-core:1.0-groovy-2.4') {
-    exclude group: 'org.codehaus.groovy'
-  }
-  testCompile "cglib:cglib:${project.cglibVersion}"
 }
 
 clojure.aotCompile = true

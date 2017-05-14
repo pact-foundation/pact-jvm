@@ -12,7 +12,7 @@ class PactDslJsonRootValueSpec extends Specification {
   @Unroll
   def 'correctly converts the value #value to JSON'() {
     expect:
-    value.body as String == json
+    value.with { it.setEncodeJson(true); it }.body as String == json
 
     where:
 
