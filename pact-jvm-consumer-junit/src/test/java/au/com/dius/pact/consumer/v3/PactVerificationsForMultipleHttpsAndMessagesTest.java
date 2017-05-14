@@ -34,11 +34,11 @@ public class PactVerificationsForMultipleHttpsAndMessagesTest {
 
     @Rule
     public PactProviderRuleMk2 httpProvider =
-            new PactProviderRuleMk2(HTTP_PROVIDER_NAME, "localhost", 8075, PactSpecVersion.V3, this);
+            new PactProviderRuleMk2(HTTP_PROVIDER_NAME, PactSpecVersion.V3, this);
 
     @Rule
     public PactProviderRuleMk2 otherHttpProvider =
-            new PactProviderRuleMk2(OTHER_HTTP_PROVIDER_NAME, "localhost", 8076, PactSpecVersion.V3, this);
+            new PactProviderRuleMk2(OTHER_HTTP_PROVIDER_NAME, PactSpecVersion.V3, this);
 
     @Rule
     public MessagePactProviderRule messageProvider = new MessagePactProviderRule(MESSAGE_PROVIDER_NAME, this);
@@ -129,7 +129,7 @@ public class PactVerificationsForMultipleHttpsAndMessagesTest {
     @Test
     @PactVerifications({@PactVerification(HTTP_PROVIDER_NAME), @PactVerification(OTHER_HTTP_PROVIDER_NAME)})
     public void shouldTestAllHttpPacts() throws Exception {
-        assertEquals(new ConsumerClient(httpProvider.getConfig().url()).getAsMap("/", ""),
+        assertEquals(new ConsumerClient(httpProvider.getUrl()).getAsMap("/", ""),
                      singletonMap ("name", "harry"));
 
         assertEquals(new ConsumerClient(otherHttpProvider.getUrl()).getAsMap("/other", ""),
