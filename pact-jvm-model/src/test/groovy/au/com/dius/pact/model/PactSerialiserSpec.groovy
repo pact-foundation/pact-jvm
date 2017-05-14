@@ -61,7 +61,7 @@ class PactSerialiserSpec extends Specification {
     pactWithGenerators = new RequestResponsePact(provider, consumer, [interactionsWithGenerators])
 
     messagePactWithGenerators = new MessagePact(provider, consumer, [ new Message('Test Message',
-      [new ProviderState('message exists')], OptionalBody.body('"Test Message"'), null,
+      [new ProviderState('message exists')], OptionalBody.body('"Test Message"'), new MatchingRules(),
       new Generators([(Category.BODY): ['a': new UuidGenerator()]]), [contentType: 'application/json']) ])
   }
 
@@ -328,6 +328,22 @@ class PactSerialiserSpec extends Specification {
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact_encoded_query.json'))
+  }
+
+  def 'PactSerialiser must de-serialise pact with generators'() {
+    expect:
+    pact == pactWithGenerators
+
+    where:
+    pact = PactReader.loadPact(loadTestFile('test_pact_generators.json'))
+  }
+
+  def 'PactSerialiser must de-serialise message pact with generators'() {
+    expect:
+    pact == messagePactWithGenerators
+
+    where:
+    pact = PactReader.loadPact(loadTestFile('v3-message-pact-generators.json'))
   }
 
 }

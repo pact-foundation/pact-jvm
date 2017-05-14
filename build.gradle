@@ -49,6 +49,7 @@ subprojects {
       compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
       compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
       compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
+      compile 'io.github.microutils:kotlin-logging:1.4.4'
 
       if (project.hasProperty('scalaVersion')) {
           compile "org.scala-lang:scala-library:${project.scalaFullVersion}",

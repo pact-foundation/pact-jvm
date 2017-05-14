@@ -75,4 +75,26 @@ class GeneratorsSpec extends Specification {
 
   }
 
+  @Unroll
+  @SuppressWarnings('LineLength')
+  def 'load generator from map - #description'() {
+    expect:
+    Generators.fromMap(map) == generator
+
+    where:
+
+    description | map  | generator
+    'null map'  | null | new Generators()
+    'empty map' | [:]  | new Generators()
+    'invalid map key' | [other: [type: 'RandomInt', min: 1, max: 10]] | new Generators()
+    'invalid map entry' | [method: [min: 1, max: 10]] | new Generators()
+    'invalid generator class' | [method: [type: 'RandomXXX', min: 1, max: 10]]  | new Generators()
+    'method'    | [method: [type: 'RandomInt', min: 1, max: 10]]  | new Generators().addGenerator(Category.METHOD, '', new RandomIntGenerator(1, 10))
+    'path'      | [path: [type: 'RandomString', size: 10]]  | new Generators().addGenerator(Category.PATH, '', new RandomStringGenerator(10))
+    'header'    | [header: [A: [type: 'RandomString', size: 10]]]  | new Generators().addGenerator(Category.HEADER, 'A', new RandomStringGenerator(10))
+    'query'     | [query: [q: [type: 'RandomString', size: 10]]]  | new Generators().addGenerator(Category.QUERY, 'q', new RandomStringGenerator(10))
+    'body'      | [body: ['$.a.b.c': [type: 'RandomString', size: 10]]]  | new Generators().addGenerator(Category.BODY, '$.a.b.c', new RandomStringGenerator(10))
+    'status'    | [status: [type: 'RandomInt', min: 1, max: 3]]  | new Generators().addGenerator(Category.STATUS, '', new RandomIntGenerator(1, 3))
+  }
+
 }

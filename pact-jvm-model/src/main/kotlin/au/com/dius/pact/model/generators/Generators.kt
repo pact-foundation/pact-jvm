@@ -3,6 +3,7 @@ package au.com.dius.pact.model.generators
 import au.com.dius.pact.model.*
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import mu.KLogging
 import org.apache.commons.collections4.IteratorUtils
 
 enum class Category {
@@ -98,12 +99,49 @@ object JsonContentTypeHandler : ContentTypeHandler {
 
 data class Generators(val categories: MutableMap<Category, MutableMap<String, Generator>> = HashMap()) {
 
-  companion object {
+  companion object: KLogging() {
 
-    @JvmStatic fun fromMap(map: Map<String, Any>?): Generators {
-      return Generators()
+    @JvmStatic fun fromMap(map: Map<String, Map<String, Any>>?): Generators {
+      val generators = Generators()
+
+      map?.forEach { (key, generatorMap) ->
+        try {
+          val category = Category.valueOf(key.toUpperCase())
+          when (category) {
+            Category.STATUS, Category.PATH, Category.METHOD -> {
+              if (generatorMap.containsKey("type")) {
+                val generator = lookupGenerator(generatorMap)
+                if (generator != null) {
+                  generators.addGenerator(category, generator = generator)
+                } else {
+                  logger.warn { "Ignoring invalid generator config '$generatorMap'" }
+                }
+              } else {
+                logger.warn { "Ignoring invalid generator config '$generatorMap'" }
+              }
+            }
+            else -> {
+              generatorMap.forEach { (generatorKey, generatorValue) ->
+                if (generatorValue is Map<*, *> && generatorValue.containsKey("type")) {
+                  val generator = lookupGenerator(generatorValue as Map<String, Any>)
+                  if (generator != null) {
+                    generators.addGenerator(category, generatorKey, generator)
+                  } else {
+                    logger.warn { "Ignoring invalid generator config '$generatorMap'" }
+                  }
+                } else {
+                  logger.warn { "Ignoring invalid generator config '$generatorKey -> $generatorValue'" }
+                }
+              }
+            }
+          }
+        } catch(e: IllegalArgumentException) {
+          logger.warn(e) { "Ignoring generator with invalid category '$key'" }
+        }
+      }
+
+      return generators
     }
-
   }
 
   @JvmOverloads

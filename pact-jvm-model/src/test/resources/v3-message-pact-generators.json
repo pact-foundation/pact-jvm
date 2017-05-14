@@ -19,7 +19,7 @@
       "generators": {
         "body": {
           "a": {
-            "type": "UuidGenerator"
+            "type": "Uuid"
           }
         }
       },

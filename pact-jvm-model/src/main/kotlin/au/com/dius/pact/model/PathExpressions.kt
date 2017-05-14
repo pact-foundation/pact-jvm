@@ -147,5 +147,3 @@ fun parsePath(path: String) : List<PathToken> {
 
   return tokens
 }
-
-class InvalidPathExpression(message: String) : RuntimeException(message)
