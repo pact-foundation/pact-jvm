@@ -25,7 +25,7 @@ public class PactProviderHttpsTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(PactProviderHttpsTest.class);
 
     @Rule
-    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", "localhost", 8443, true,
+    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", "localhost", 10443, true,
       PactSpecVersion.V3, this);
 
     @Pact(provider="test_provider", consumer="test_consumer")

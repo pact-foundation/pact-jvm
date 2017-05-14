@@ -29,7 +29,7 @@ public class ExampleServiceConsumerTest {
         new String[]{"Content-Type", "application/json;charset=UTF-8"});
 
     @Rule
-    public PactProviderRuleMk2 provider = new PactProviderRuleMk2("CarBookingProvider", "localhost", 1234, this);
+    public PactProviderRuleMk2 provider = new PactProviderRuleMk2("CarBookingProvider", this);
 
     @Pact(provider = "CarBookingProvider", consumer = "CarBookingConsumer")
     public RequestResponsePact configurationFragment(PactDslWithProvider builder) {
@@ -93,7 +93,7 @@ public class ExampleServiceConsumerTest {
     @Test
     public void testBookCar() throws IOException {
         ProviderCarBookingRestClient providerRestClient = new ProviderCarBookingRestClient();
-        HttpResponse response = providerRestClient.placeOrder("http://localhost:1234", DATA_A_ID, DATA_B_ID, "2015-03-15");
+        HttpResponse response = providerRestClient.placeOrder(provider.getUrl(), DATA_A_ID, DATA_B_ID, "2015-03-15");
 
         Assert.assertEquals(201, response.getStatusLine().getStatusCode());
         String orderDetails = EntityUtils.toString(response.getEntity());
