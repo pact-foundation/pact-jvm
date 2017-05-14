@@ -1,0 +1,10 @@
+ version: '1.0'
+
+ steps:
+
+  gradle_build:
+    description: Execute gradle build
+    dockerfile: Dockerfile.build
+    image: openjdk:8-jdk-alpine
+    commands:
+      - ./gradlew --stacktrace --no-daemon -i build
