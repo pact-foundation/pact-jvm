@@ -126,8 +126,8 @@ public class HttpTarget extends BaseTarget {
     }
 
     @Override
-  ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider,
-                                         ConsumerInfo consumer) {
+    protected ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider,
+                                             ConsumerInfo consumer) {
     ProviderVerifier verifier = new ProviderVerifier();
 
     setupReporters(verifier, provider.getName(), interaction.getDescription());
@@ -144,7 +144,7 @@ public class HttpTarget extends BaseTarget {
     return verifier;
   }
 
-  ProviderInfo getProviderInfo() {
+  protected ProviderInfo getProviderInfo() {
       Provider provider = testClass.getAnnotation(Provider.class);
       final ProviderInfo providerInfo = new ProviderInfo(provider.value());
       providerInfo.setPort(port);

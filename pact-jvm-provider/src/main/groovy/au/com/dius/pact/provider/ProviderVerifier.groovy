@@ -22,11 +22,11 @@ import java.lang.reflect.Method
 @Slf4j
 class ProviderVerifier {
 
-  static final String PACT_FILTER_CONSUMERS = 'pact.filter.consumers'
-  static final String PACT_FILTER_DESCRIPTION = 'pact.filter.description'
-  static final String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
-  static final String PACT_SHOW_STACKTRACE = 'pact.showStacktrace'
-  static final String PACT_SHOW_FULLDIFF = 'pact.showFullDiff'
+  static final protected String PACT_FILTER_CONSUMERS = 'pact.filter.consumers'
+  static final protected String PACT_FILTER_DESCRIPTION = 'pact.filter.description'
+  static final protected String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
+  static final protected String PACT_SHOW_STACKTRACE = 'pact.showStacktrace'
+  static final protected String PACT_SHOW_FULLDIFF = 'pact.showFullDiff'
 
   def projectHasProperty = { }
   def projectGetProperty = { }
