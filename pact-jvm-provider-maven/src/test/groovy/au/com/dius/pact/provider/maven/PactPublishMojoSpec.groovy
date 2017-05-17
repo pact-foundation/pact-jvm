@@ -68,4 +68,43 @@ class PactPublishMojoSpec extends Specification {
     }
   }
 
+    def 'trimSnapshot=true removes the "-SNAPSHOT"'() {
+        given:
+        new File('some/dir') >> mockFile
+        mojo.projectVersion = '1.0.0-SNAPSHOT'
+        mojo.trimSnapshot = true
+
+        when:
+        mojo.execute()
+
+        then:
+        assert mojo.projectVersion == '1.0.0'
+    }
+
+    def 'trimSnapshot=false leaves version unchnaged'() {
+        given:
+        new File('some/dir') >> mockFile
+        mojo.projectVersion = '1.0.0-SNAPSHOT'
+        mojo.trimSnapshot = false
+
+        when:
+        mojo.execute()
+
+        then:
+        assert mojo.projectVersion == '1.0.0-SNAPSHOT'
+    }
+
+    def 'trimSnapshot=true leaves non-snapshot versions unchanged'() {
+        given:
+        new File('some/dir') >> mockFile
+        mojo.projectVersion = '1.0.0'
+        mojo.trimSnapshot = true
+
+        when:
+        mojo.execute()
+
+        then:
+        assert mojo.projectVersion == '1.0.0'
+    }
+
 }
