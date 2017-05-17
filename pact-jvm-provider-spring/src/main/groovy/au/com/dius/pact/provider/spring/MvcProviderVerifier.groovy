@@ -3,6 +3,8 @@ package au.com.dius.pact.provider.spring
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
 import groovy.transform.InheritConstructors
+import groovy.util.logging.Slf4j
+import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
@@ -12,6 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder
 /**
  * Verifies the providers against the defined consumers using Spring MockMvc
  */
+@Slf4j
 @InheritConstructors
 class MvcProviderVerifier extends ProviderVerifier {
     boolean debugRequestResponse = false
@@ -19,10 +22,10 @@ class MvcProviderVerifier extends ProviderVerifier {
     void verifyResponseFromProvider(ProviderInfo provider, def interaction,
                                     String interactionMessage, Map failures, MockMvc mockMvc) {
         try {
-            def request = interaction.request()
-            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromPath(request.path())
+            def request = interaction.request
+            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromPath(request.path)
 
-            Map<String, List<String>> query = request.query()
+            Map<String, List<String>> query = request.query
             if (query != null && !query.isEmpty()) {
                 query.each { key, value ->
                     uriBuilder.queryParam(key, value.toArray(new String[value.size()]))
@@ -32,14 +35,16 @@ class MvcProviderVerifier extends ProviderVerifier {
             MvcResult mvcResult = mockMvc.perform(
                     request.body.isMissing() || request.body.isNull() || request.body.isEmpty() ?
                             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request(
-                                    org.springframework.http.HttpMethod.valueOf(request.method()),
+                                    org.springframework.http.HttpMethod.valueOf(request.method),
                                     URI.create(uriBuilder.toUriString())
                             )
                             :
                             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request(
-                                    org.springframework.http.HttpMethod.valueOf(request.method()),
+                                    org.springframework.http.HttpMethod.valueOf(request.method),
                                     URI.create(uriBuilder.toUriString())
-                            ).contentType(MediaType.APPLICATION_JSON).content(request.body.value)
+                            )
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(request.body.value)
             ).andDo(new ResultHandler() {
                 @Override
                 void handle(MvcResult result) throws Exception {
@@ -67,8 +72,8 @@ class MvcProviderVerifier extends ProviderVerifier {
         def response = [statusCode: httpResponse.status]
 
         response.headers = [:]
-        httpResponse.headerNames().each { String headerName ->
-            response.headers[headerName] = httpResponse.header(headerName)
+        httpResponse.headerNames.each { String headerName ->
+            response.headers[headerName] = httpResponse.getHeader(headerName)
         }
 
         if (httpResponse.contentType) {
@@ -76,7 +81,7 @@ class MvcProviderVerifier extends ProviderVerifier {
         } else {
             response.contentType = org.apache.http.entity.ContentType.APPLICATION_JSON
         }
-        response.data = httpResponse.contentAsString()
+        response.data = httpResponse.contentAsString
 
         log.debug "Response: $response"
 
