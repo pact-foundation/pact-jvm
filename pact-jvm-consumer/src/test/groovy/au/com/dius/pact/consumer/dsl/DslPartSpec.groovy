@@ -5,7 +5,8 @@ import spock.lang.Unroll
 
 class DslPartSpec extends Specification {
 
-  private DslPart subject = new DslPart('', '') {
+  @SuppressWarnings('MethodCount')
+  private final DslPart subject = new DslPart('', '') {
 
     @Override
     protected void putObject(DslPart object) { }
@@ -13,8 +14,7 @@ class DslPartSpec extends Specification {
     @Override
     protected void putArray(DslPart object) { }
 
-    @Override
-    Object getBody() { null }
+    Object body = null
 
     @Override
     PactDslJsonArray array(String name) { null }
@@ -74,78 +74,50 @@ class DslPartSpec extends Specification {
     PactDslJsonArray eachArrayLike() { null }
 
     @Override
-    PactDslJsonArray eachArrayLike(String name, int numberExamples) {
-      return null
-    }
+    PactDslJsonArray eachArrayLike(String name, int numberExamples) { null }
 
     @Override
-    PactDslJsonArray eachArrayLike(int numberExamples) {
-      return null
-    }
+    PactDslJsonArray eachArrayLike(int numberExamples) { null }
 
     @Override
-    PactDslJsonArray eachArrayWithMaxLike(String name, Integer size) {
-      return null
-    }
+    PactDslJsonArray eachArrayWithMaxLike(String name, Integer size) { null }
 
     @Override
-    PactDslJsonArray eachArrayWithMaxLike(Integer size) {
-      return null
-    }
+    PactDslJsonArray eachArrayWithMaxLike(Integer size) { null }
 
     @Override
-    PactDslJsonArray eachArrayWithMaxLike(String name, int numberExamples, Integer size) {
-      return null
-    }
+    PactDslJsonArray eachArrayWithMaxLike(String name, int numberExamples, Integer size) { null }
 
     @Override
-    PactDslJsonArray eachArrayWithMaxLike(int numberExamples, Integer size) {
-      return null
-    }
+    PactDslJsonArray eachArrayWithMaxLike(int numberExamples, Integer size) { null }
 
     @Override
-    PactDslJsonArray eachArrayWithMinLike(String name, Integer size) {
-      return null
-    }
+    PactDslJsonArray eachArrayWithMinLike(String name, Integer size) { null }
 
     @Override
-    PactDslJsonArray eachArrayWithMinLike(Integer size) {
-      return null
-    }
+    PactDslJsonArray eachArrayWithMinLike(Integer size) { null }
 
     @Override
-    PactDslJsonArray eachArrayWithMinLike(String name, int numberExamples, Integer size) {
-      return null
-    }
+    PactDslJsonArray eachArrayWithMinLike(String name, int numberExamples, Integer size) { null }
 
     @Override
-    PactDslJsonArray eachArrayWithMinLike(int numberExamples, Integer size) {
-      return null
-    }
+    PactDslJsonArray eachArrayWithMinLike(int numberExamples, Integer size) { null }
 
     @Override
-    PactDslJsonBody object(String name) {
-      return null
-    }
+    PactDslJsonBody object(String name) { null }
 
     @Override
-    PactDslJsonBody object() {
-      return null
-    }
+    PactDslJsonBody object() { null }
 
     @Override
-    DslPart closeObject() {
-      return null
-    }
+    DslPart closeObject() { null }
 
     @Override
-    DslPart close() {
-      return null
-    }
+    DslPart close() { null }
   }
 
   @Unroll
-  def 'matcher methods generate the correct matcher definition - #matchType'() {
+  def 'matcher methods generate the correct matcher definition - #matcherMethod'() {
     expect:
     subject."$matcherMethod"(param) == matcherDefinition
 

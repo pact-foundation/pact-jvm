@@ -25,7 +25,7 @@ public class Defect266Test {
   public PactFragment getUsersFragment(PactDslWithProvider builder) {
     Map<String, Map<String, Object>> matchers = (Map<String, Map<String, Object>>) new JsonSlurper().parseText("{" +
       "\"$.body[0][*].userName\": {\"match\": \"type\"}," +
-      "\"$.body[0][*].id\": {\"regex\": \"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\"}," +
+      "\"$.body[0][*].id\": {\"match\": \"regex\", \"regex\": \"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\"}," +
       "\"$.body[0]\": {\"match\": \"type\", \"max\": 5}," +
       "\"$.body[0][*].email\": {\"match\": \"type\"}" +
       "}");
@@ -51,7 +51,7 @@ public class Defect266Test {
   public PactFragment getUsersFragment2(PactDslWithProvider builder) {
     Map<String, Map<String, Object>> matchers = (Map<String, Map<String, Object>>) new JsonSlurper().parseText("{" +
       "\"$.body[0][*].userName\": {\"match\": \"type\"}," +
-      "\"$.body[0][*].id\": {\"regex\": \"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\"}," +
+      "\"$.body[0][*].id\": {\"match\": \"regex\", \"regex\": \"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\"}," +
       "\"$.body[0]\": {\"match\": \"type\", \"min\": 5}," +
       "\"$.body[0][*].email\": {\"match\": \"type\"}" +
       "}");
