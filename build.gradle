@@ -13,6 +13,14 @@ plugins {
 }
 
 subprojects {
+    configurations.all {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'com.google.guava' && details.requested.name == 'guava' && details.requested.version > '19.0') {
+                //guava-retryer is pulling a transitive dependency of guava 21-rc which has breaking changes to Netflix OSS
+                details.useVersion '19.0'
+            }
+        }
+    }
 
     def scalaVersionLookup = [
         '2.11': '2.11.8'

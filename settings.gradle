@@ -10,6 +10,7 @@ def crossCompileModules = [
   'pact-specification-test',
   'pact-jvm-provider-gradle',
   'pact-jvm-provider-junit',
+  'pact-jvm-provider-spring',
   'pact-jvm-matchers',
   'pact-jvm-provider-maven',
   'pact-jvm-provider-lein'
