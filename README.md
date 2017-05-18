@@ -3,7 +3,7 @@ pact-jvm
 
 [![Join the chat at https://gitter.im/DiUS/pact-jvm](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/DiUS/pact-jvm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Build Status](https://travis-ci.org/DiUS/pact-jvm.svg?branch=master)](https://travis-ci.org/DiUS/pact-jvm)
+[![Build Status](https://travis-ci.org/DiUS/pact-jvm.svg?branch=v2.x)](https://travis-ci.org/DiUS/pact-jvm)
 [![Appveyor build status](https://ci.appveyor.com/api/projects/status/172049m2sa57takc?svg=true)](https://ci.appveyor.com/project/uglyog/pact-jvm)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-logging_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-logging_2.11)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11)
@@ -52,9 +52,9 @@ module has a Jar file named pact-jvm-consumer_2.10. The full name of the file is
 
 | Branch | Specification | Min JDK | Scala Versions | Latest Version |
 | ------ | ------------- | ------- | -------------- | -------------- |
-| 3.4.x (master)| V2 | 8 | 2.11 | 3.4.0 (WIP) |
-| 3.3.x (v2-spec)| V2 | 8 | 2.11 | 3.3.9 |
-| 3.5.x (v3-spec) | V3 | 8 | 2.11 | 3.5.0-beta.3 |
+| 3.4.x (v3.4.x)| V2 | 8 | 2.11 | 3.4.0 (WIP) |
+| 3.3.x (v2-spec)| V2 | 8 | 2.11 | 3.3.10 |
+| 3.5.x (v3-spec) | V3 | 8 | 2.11 | 3.5.0-beta.4 |
 | 2.5.x (v2.5.x) | V3 | 7 | 2.11 | 2.5.0-beta.0 |
 | 2.4.x (v2.x) | V2 | 6* | 2.10, 2.11 | 2.4.18 |
 
