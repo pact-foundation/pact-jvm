@@ -15,7 +15,7 @@ class TimestampMatcher extends Matcher {
   }
 
   def getMatcher() {
-    [timestamp: getPattern()]
+    [match: 'timestamp', timestamp: getPattern()]
   }
 
   def getValue() {

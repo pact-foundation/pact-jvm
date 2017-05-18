@@ -15,7 +15,7 @@ class TimeMatcher extends Matcher {
   }
 
   def getMatcher() {
-    [time: getPattern()]
+    [match: 'time', time: getPattern()]
   }
 
   def getValue() {

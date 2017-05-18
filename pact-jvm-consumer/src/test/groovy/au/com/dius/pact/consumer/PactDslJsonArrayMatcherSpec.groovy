@@ -53,7 +53,7 @@ class PactDslJsonArrayMatcherSpec extends Specification {
         subject.matchers == [
           '$.body': [min: 0, match: 'type'],
           '$.body[*].amount': [match: 'decimal'],
-          '$.body[*].clearedDate': [date: 'mm/dd/yyyy'],
+          '$.body[*].clearedDate': [match: 'date', date: 'mm/dd/yyyy'],
           '$.body[*].status': [match: 'type']
         ]
     }
@@ -74,7 +74,7 @@ class PactDslJsonArrayMatcherSpec extends Specification {
         subject.matchers == [
           '$.body': [min: 1, match: 'type'],
           '$.body[*].amount': [match: 'decimal'],
-          '$.body[*].clearedDate': [date: 'mm/dd/yyyy'],
+          '$.body[*].clearedDate': [match: 'date', date: 'mm/dd/yyyy'],
           '$.body[*].status': [match: 'type']
         ]
     }
@@ -95,7 +95,7 @@ class PactDslJsonArrayMatcherSpec extends Specification {
         subject.matchers == [
           '$.body': [max: 10, match: 'type'],
           '$.body[*].amount': [match: 'decimal'],
-          '$.body[*].clearedDate': [date: 'mm/dd/yyyy'],
+          '$.body[*].clearedDate': [match: 'date', date: 'mm/dd/yyyy'],
           '$.body[*].status': [match: 'type']
         ]
     }
