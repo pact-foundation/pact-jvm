@@ -1,0 +1,142 @@
+{
+  "provider" : {
+    "name" : "Books-Service"
+  },
+  "consumer" : {
+    "name" : "Authors-Service"
+  },
+  "interactions" : [ {
+    "provider_state": "create-book",
+    "description" : "Add book",
+    "request" : {
+      "method" : "POST",
+      "path" : "/books",
+      "body": {
+        "id": "5c761cf1-50e1-4604-9b0e-f2130e4064a0",
+        "author": "Ray Barrowman",
+        "bestSeller": true
+      },
+      "matchingRules": {
+        "$.body.id": {
+          "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+        },
+        "$.body.author": {
+          "match": "type"
+        },
+        "$.body.bestSeller": {
+          "match": "type"
+        }
+      },
+      "headers": {
+        "Cache-Control": "no-cache",
+        "Accept": "application/json",
+        "Content-Type": "application/json;charset=UTF-8"
+      }
+    },
+    "response" : {
+      "status" : 201
+    }
+  }, {
+      "provider_state": "create-book-bad-data",
+      "description" : "Add book bad data",
+      "request" : {
+        "method" : "POST",
+        "path" : "/books",
+        "body": {
+          "id": "5c761cf1-50e1-4604-9b0e-f2130e4064a0",
+          "author": "Ray Barrowman",
+          "bestSeller": true
+        },
+        "matchingRules": {
+          "$.body.id": {
+            "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+          },
+          "$.body.author": {
+            "match": "type"
+          },
+          "$.body.bestSeller": {
+            "match": "type"
+          }
+        },
+        "headers": {
+          "Cache-Control": "no-cache",
+          "Accept": "application/json",
+          "Content-Type": "application/json;charset=UTF-8"
+        }
+      },
+      "response" : {
+        "status" : 400
+      }
+    }, {
+    "provider_state": "update-book",
+    "description" : "Update book",
+    "request" : {
+      "method" : "PUT",
+      "path" : "/books/5c761cf1-50e1-4604-9b0e-f2130e4064a0",
+      "body": {
+        "author": "Ray Barrowman",
+        "bestSeller": true
+      },
+      "matchingRules": {
+        "$.body.author": {
+          "match": "type"
+        },
+        "$.body.bestSeller": {
+          "match": "type"
+        }
+      },
+      "headers": {
+        "Cache-Control": "no-cache",
+        "Accept": "application/json",
+        "Content-Type": "application/json;charset=UTF-8"
+      }
+    },
+    "response" : {
+      "status" : 204
+    }
+  }, {
+    "provider_state": "update-book-no-content-type",
+    "description" : "Update book no content type",
+    "request" : {
+      "method" : "PUT",
+      "path" : "/books/5c761cf1-50e1-4604-9b0e-f2130e4064a0",
+      "body": {
+        "author": "Ray Barrowman",
+        "bestSeller": true
+      },
+      "matchingRules": {
+        "$.body.author": {
+          "match": "type"
+        },
+        "$.body.bestSeller": {
+          "match": "type"
+        }
+      },
+      "headers": {
+        "Cache-Control": "no-cache",
+        "Accept": "application/json"
+      }
+    },
+    "response" : {
+      "status" : 204
+    }
+  }, {
+    "provider_state": "delete-book",
+    "description" : "Delete book",
+    "request" : {
+      "method" : "DELETE",
+      "path" : "/books/5c761cf1-50e1-4604-9b0e-f2130e4064a0"
+    },
+    "response" : {
+      "status" : 204
+    }
+  } ],
+  "metadata" : {
+    "pact-specification" : {
+      "version" : "2.0.0"
+    },
+    "pact-jvm" : {
+      "version" : "3.1.1"
+    }
+  }
+}

@@ -1,9 +1,11 @@
 package au.com.dius.pact.provider.spring
 
+import au.com.dius.pact.model.Request
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
 import groovy.transform.InheritConstructors
 import groovy.util.logging.Slf4j
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.web.servlet.MockMvc
@@ -23,27 +25,20 @@ class MvcProviderVerifier extends ProviderVerifier {
                                     String interactionMessage, Map failures, MockMvc mockMvc) {
         try {
             def request = interaction.request
-            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromPath(request.path)
-
-            Map<String, List<String>> query = request.query
-            if (query != null && !query.isEmpty()) {
-                query.each { key, value ->
-                    uriBuilder.queryParam(key, value.toArray(new String[value.size()]))
-                }
-            }
 
             MvcResult mvcResult = mockMvc.perform(
                     request.body.isMissing() || request.body.isNull() || request.body.isEmpty() ?
                             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request(
                                     org.springframework.http.HttpMethod.valueOf(request.method),
-                                    URI.create(uriBuilder.toUriString())
+                                    requestUriString(request)
                             )
+                            .headers(mapHeaders(request, false))
                             :
                             org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request(
                                     org.springframework.http.HttpMethod.valueOf(request.method),
-                                    URI.create(uriBuilder.toUriString())
+                                    requestUriString(request)
                             )
-                            .contentType(MediaType.APPLICATION_JSON)
+                            .headers(mapHeaders(request, true))
                             .content(request.body.value)
             ).andDo(new ResultHandler() {
                 @Override
@@ -65,6 +60,33 @@ class MvcProviderVerifier extends ProviderVerifier {
                         e, callProjectHasProperty(PACT_SHOW_STACKTRACE))
             }
         }
+    }
+
+    def requestUriString(Request request) {
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromPath(request.path)
+
+        Map<String, List<String>> query = request.query
+        if (query != null && !query.isEmpty()) {
+            query.each { key, value ->
+                uriBuilder.queryParam(key, value.toArray(new String[value.size()]))
+            }
+        }
+
+        URI.create(uriBuilder.toUriString())
+    }
+
+    def mapHeaders(Request request, boolean hasBody) {
+        HttpHeaders httpHeaders = new HttpHeaders()
+
+        request.headers.each { k, v ->
+            httpHeaders.add(k, v)
+        }
+
+        if (hasBody && !httpHeaders.containsKey(HttpHeaders.CONTENT_TYPE)) {
+            httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        }
+
+        httpHeaders
     }
 
     def handleResponse(MockHttpServletResponse httpResponse) {
