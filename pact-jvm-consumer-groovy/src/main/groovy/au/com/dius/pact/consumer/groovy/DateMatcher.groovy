@@ -15,7 +15,7 @@ class DateMatcher extends Matcher {
   }
 
   def getMatcher() {
-    [date: getPattern()]
+    [match: 'date', date: getPattern()]
   }
 
   def getValue() {
