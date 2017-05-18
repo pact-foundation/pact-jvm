@@ -31,8 +31,8 @@ how to get going.
 ## Contact
 
 * Twitter: [@pact_up](https://twitter.com/pact_up)
-* Google users group: https://groups.google.com/forum/#!forum/pact-support
 * Gitter: [![Join the chat at https://gitter.im/DiUS/pact-jvm](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/DiUS/pact-jvm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+* Stack Overflow: https://stackoverflow.com/questions/tagged/pact
 
 ## Links
 
@@ -41,7 +41,7 @@ how to get going.
 ## Documentation
 
 Additional documentation can be found at [docs.pact.io](http://docs.pact.io), in the [Pact Wiki](https://github.com/realestate-com-au/pact/wiki),
-and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki).
+and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overflow](https://stackoverflow.com/questions/tagged/pact) is also a good source of help.
 
 ## Note about artifact names and versions
 
