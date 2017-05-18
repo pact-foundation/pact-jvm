@@ -119,13 +119,11 @@ class DslPartSpec extends Specification {
   @Unroll
   def 'matcher methods generate the correct matcher definition - #matcherMethod'() {
     expect:
-    subject."$matcherMethod"(param) == matcherDefinition
+    subject."$matcherMethod"(param).toMap() == matcherDefinition
 
     where:
 
     matcherMethod    | param        | matcherDefinition
-    'matchType'      | 'type'       | [match: 'type']
-    'matchType'      | 'decimal'    | [match: 'decimal']
     'regexp'         | '[0-9]+'     | [match: 'regex', regex: '[0-9]+']
     'matchTimestamp' | 'yyyy-mm-dd' | [match: 'timestamp', timestamp: 'yyyy-mm-dd']
     'matchDate'      | 'yyyy-mm-dd' | [match: 'date', date: 'yyyy-mm-dd']

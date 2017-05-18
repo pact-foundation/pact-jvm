@@ -8,7 +8,7 @@ class MatchersSpec extends Specification {
   @Unroll
   def 'matcher methods generate the correct matcher definition - #matcherMethod'() {
     expect:
-    Matchers."$matcherMethod"(param).matcher == matcherDefinition
+    Matchers."$matcherMethod"(param).matcher.toMap() == matcherDefinition
 
     where:
 
