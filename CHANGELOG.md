@@ -1,5 +1,20 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.3.10 - Fix for matchers with missing "type" entries
+
+* a28124f - change port on test (Ronald Holshausen, Thu May 18 13:50:52 2017 +1000)
+* 8c2b05d - Fix some tests and correct the groovy matcher definitions (Ronald Holshausen, Thu May 18 13:35:37 2017 +1000)
+* 08ca44e - Correct the generated matchers which were missing the `"match": type` entries (Ronald Holshausen, Thu May 18 12:43:11 2017 +1000)
+* a5433b0 - Revert "Updated gradle readme with verification results" (Ronald Holshausen, Fri May 12 10:54:17 2017 +1000)
+* a7278ca - Updated gradle readme with verification results (Ronald Holshausen, Fri May 12 10:37:51 2017 +1000)
+* fa17a22 - Updated readme with publishing verification results (Ronald Holshausen, Fri May 12 10:26:48 2017 +1000)
+* 59a4fba - Implemented publishing pact verification with the Gradle plugin (Ronald Holshausen, Fri May 12 10:01:03 2017 +1000)
+* a0f7890 - Added tests around publishing verification results #417 (Ronald Holshausen, Wed May 10 13:49:57 2017 +1000)
+* 5f0ec96 - Fix the codez #417 (Ronald Holshausen, Wed May 10 12:40:38 2017 +1000)
+* e0d59dd - First stab at implementing publishing verification results to the pact broker #417 (Ronald Holshausen, Wed May 10 12:17:25 2017 +1000)
+* 13ad5ee - Correctly handle the error messages from the pact broker #421 (Ronald Holshausen, Wed May 10 09:48:37 2017 +1000)
+* 8e3d6c0 - bump version to 3.3.10 (Ronald Holshausen, Mon May 8 21:57:07 2017 +1000)
+
 # 3.3.9 - Bugfix Release
 
 * 0c3d776 - Add eachlike methods to PactDslJsonArray that take PactDslJsonRootValue matchers #256 (Ronald Holshausen, Mon May 8 21:09:36 2017 +1000)
