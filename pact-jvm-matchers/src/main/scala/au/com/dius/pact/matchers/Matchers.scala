@@ -230,6 +230,34 @@ object TypeMatcher extends Matcher with StrictLogging {
     }
   }
 
+  def matchTime[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
+    logger.debug(s"comparing ${valueOf(actual)} as Time at $path")
+    try {
+      DateUtils.parseDate(Matchers.safeToString(actual), DateFormatUtils.ISO_TIME_TIME_ZONE_FORMAT.getPattern,
+        DateFormatUtils.ISO_TIME_FORMAT.getPattern, DateFormatUtils.ISO_TIME_NO_T_FORMAT.getPattern)
+      List[Mismatch]()
+    }
+    catch {
+      case e: java.text.ParseException =>
+        logger.warn(s"failed to parse time value of ${valueOf(actual)}", e)
+        List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to be a time", path))
+    }
+  }
+
+  def matchDate[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch]) = {
+    logger.debug(s"comparing ${valueOf(actual)} as Date at $path")
+    try {
+      DateUtils.parseDate(Matchers.safeToString(actual), DateFormatUtils.ISO_DATE_FORMAT.getPattern,
+        DateFormatUtils.ISO_DATE_TIME_ZONE_FORMAT.getPattern)
+      List[Mismatch]()
+    }
+    catch {
+      case e: java.text.ParseException =>
+        logger.warn(s"failed to parse date value of ${valueOf(actual)}", e)
+        List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to be a date", path))
+    }
+  }
+
   def matchArray[Mismatch](path: Seq[String], expected: Any, actual: Any, mismatchFn: MismatchFactory[Mismatch], matcher: String, args: List[String]) = {
     matcher match {
       case "atleast" => actual match {
@@ -250,7 +278,18 @@ object TypeMatcher extends Matcher with StrictLogging {
         case "integer" => matchInteger[Mismatch](path, expected, actual, mismatchFn)
         case "decimal" => matchDecimal[Mismatch](path, expected, actual, mismatchFn)
         case "real" => matchDecimal[Mismatch](path, expected, actual, mismatchFn)
-        case "timestamp" => matchTimestamp[Mismatch](path, expected, actual, mismatchFn)
+        case "timestamp" => if (matcherDef.contains("timestamp"))
+            TimestampMatcher.domatch(matcherDef, path, expected, actual, mismatchFn)
+          else
+            matchTimestamp[Mismatch](path, expected, actual, mismatchFn)
+        case "time" => if (matcherDef.contains("time"))
+            TimeMatcher.domatch(matcherDef, path, expected, actual, mismatchFn)
+          else
+            matchTime[Mismatch](path, expected, actual, mismatchFn)
+        case "date" => if (matcherDef.contains("date"))
+            DateMatcher.domatch(matcherDef, path, expected, actual, mismatchFn)
+          else
+            matchDate[Mismatch](path, expected, actual, mismatchFn)
         case _ => List(mismatchFn.create(expected, actual, "type matcher is mis-configured", path))
       }
     } else {

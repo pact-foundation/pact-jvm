@@ -266,24 +266,28 @@ public abstract class DslPart {
 
     protected Map<String, Object> regexp(String regex) {
         Map<String, Object> jsonObject = new HashMap<String, Object>();
+        jsonObject.put(MATCH, "regex");
         jsonObject.put("regex", regex);
         return jsonObject;
     }
 
     protected Map<String, Object> matchTimestamp(String format) {
         Map<String, Object> jsonObject = new HashMap<String, Object>();
+        jsonObject.put(MATCH, "timestamp");
         jsonObject.put("timestamp", format);
         return jsonObject;
     }
 
     protected Map<String, Object> matchDate(String format) {
         Map<String, Object> jsonObject = new HashMap<String, Object>();
+      jsonObject.put(MATCH, "date");
         jsonObject.put("date", format);
         return jsonObject;
     }
 
     protected Map<String, Object> matchTime(String format) {
         Map<String, Object> jsonObject = new HashMap<String, Object>();
+        jsonObject.put(MATCH, "time");
         jsonObject.put("time", format);
         return jsonObject;
     }

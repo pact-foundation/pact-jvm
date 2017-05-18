@@ -88,10 +88,10 @@ class PactBodyBuilderSpec extends Specification {
       '$.body.localAddress': [match: 'regex', regex: '(\\d{1,3}\\.)+\\d{1,3}'],
       '$.body.localAddress2': [match: 'regex', regex: '(\\d{1,3}\\.)+\\d{1,3}'],
       '$.body.age2': [match: 'integer'],
-      '$.body.ts': [timestamp: 'yyyy-MM-dd\'T\'HH:mm:ss'],
-      '$.body.timestamp': [timestamp: 'yyyy/MM/dd - HH:mm:ss.S'],
+      '$.body.ts': [match: 'timestamp', timestamp: 'yyyy-MM-dd\'T\'HH:mm:ss'],
+      '$.body.timestamp': [match: 'timestamp', timestamp: 'yyyy/MM/dd - HH:mm:ss.S'],
       '$.body.values[3]': [match: 'number'],
-      '$.body.role.dob': [date: 'MM/dd/yyyy'],
+      '$.body.role.dob': [match: 'date', date: 'MM/dd/yyyy'],
       '$.body.role.id': [match: 'regex', regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'],
       '$.body.roles[0].id': [match: 'regex', regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}']
     ]
