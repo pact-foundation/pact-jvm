@@ -510,6 +510,7 @@ For example:
       <pactDirectory>path/to/pact/files</pactDirectory> <!-- Defaults to ${project.build.directory}/pacts -->
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <projectVersion>1.0.100</projectVersion> <!-- Defaults to ${project.version} -->
+      <trimSnapshot>true</trimSnapshot> <!-- Defaults to  false -->
     </configuration>
 </plugin>
 ```
@@ -518,6 +519,7 @@ You can now execute `mvn pact:publish` to publish the pact files.
 _NOTE:_ The pact broker requires a version for all published pacts. The `publish` task will use the version of the
 project by default, but can be overwritten with the `projectVersion` property. Make sure you have set one otherwise the broker will reject the pact files.
 
+_NOTE_: By default, the pact broker has issues parsing `SNAPSHOT` versions.  You can configure the publisher to automatically remove `-SNAPSHOT` from your version number by setting `trimSnapshot` to true. This setting does not modify non-snapshot versions.
 ## Publishing to an authenticated pact broker [version 3.3.9+]
 
 For an authenticated pact broker, you can pass in the credentials with the `pactBrokerUsername` and `pactBrokerPassword`

@@ -18,6 +18,9 @@ class PactPublishMojo extends AbstractMojo {
     @Parameter(required = true, defaultValue = '${project.version}')
     private String projectVersion
 
+    @Parameter(defaultValue = 'false')
+    private boolean trimSnapshot
+
     @Parameter(defaultValue = '${project.build.directory}/pacts')
     private String pactDirectory
 
@@ -37,6 +40,9 @@ class PactPublishMojo extends AbstractMojo {
 
     @Override
     void execute() throws MojoExecutionException, MojoFailureException {
+        if (trimSnapshot) {
+            projectVersion -= '-SNAPSHOT'
+        }
         if (brokerClient == null) {
           def options = [:]
           if (StringUtils.isNotEmpty(pactBrokerUsername)) {
@@ -64,4 +70,5 @@ class PactPublishMojo extends AbstractMojo {
             println "Pact directory ${pactDirectory} does not exist, skipping uploading of pacts"
         }
     }
+
 }

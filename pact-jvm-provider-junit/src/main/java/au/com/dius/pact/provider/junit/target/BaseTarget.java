@@ -34,12 +34,12 @@ public abstract class BaseTarget implements TestClassAwareTarget {
   @Override
   public abstract void testInteraction(final String consumerName, final Interaction interaction);
 
-  abstract ProviderInfo getProviderInfo();
+  protected abstract ProviderInfo getProviderInfo();
 
-  abstract ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider,
-                                         ConsumerInfo consumer);
+  protected abstract ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider,
+                                                    ConsumerInfo consumer);
 
-  void setupReporters(ProviderVerifier verifier, String name, String description) {
+  protected void setupReporters(ProviderVerifier verifier, String name, String description) {
     String reportDirectory = "target/pact/reports";
     String[] reports = new String[]{};
     boolean reportingEnabled = false;
@@ -69,7 +69,7 @@ public abstract class BaseTarget implements TestClassAwareTarget {
     }
   }
 
-  AssertionError getAssertionError(final Map<String, Object> mismatches) {
+  protected AssertionError getAssertionError(final Map<String, Object> mismatches) {
     String error = System.lineSeparator() + Seq.seq(mismatches.values()).zipWithIndex()
       .map(i -> {
         String errPrefix = String.valueOf(i.v2) + " - ";

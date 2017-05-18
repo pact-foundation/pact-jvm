@@ -62,8 +62,8 @@ public class AmqpTarget extends BaseTarget {
       }
     }
 
-    ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider,
-                                         ConsumerInfo consumer) {
+    protected ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider,
+                                             ConsumerInfo consumer) {
     ProviderVerifier verifier = new ProviderVerifier();
     verifier.setProjectClasspath(new MethodClosure(this, "getClassPathUrls"));
 
@@ -85,7 +85,7 @@ public class AmqpTarget extends BaseTarget {
     return ((URLClassLoader)ClassLoader.getSystemClassLoader()).getURLs();
   }
 
-  ProviderInfo getProviderInfo() {
+  protected ProviderInfo getProviderInfo() {
     Provider provider = testClass.getAnnotation(Provider.class);
     ProviderInfo providerInfo = new ProviderInfo(provider.value());
     providerInfo.setVerificationType(PactVerification.ANNOTATED_METHOD);

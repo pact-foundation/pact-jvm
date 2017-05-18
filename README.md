@@ -31,8 +31,8 @@ how to get going.
 ## Contact
 
 * Twitter: [@pact_up](https://twitter.com/pact_up)
-* Google users group: https://groups.google.com/forum/#!forum/pact-support
 * Gitter: [![Join the chat at https://gitter.im/DiUS/pact-jvm](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/DiUS/pact-jvm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+* Stack Overflow: https://stackoverflow.com/questions/tagged/pact
 
 ## Links
 
@@ -41,7 +41,7 @@ how to get going.
 ## Documentation
 
 Additional documentation can be found at [docs.pact.io](http://docs.pact.io), in the [Pact Wiki](https://github.com/realestate-com-au/pact/wiki),
-and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki).
+and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overflow](https://stackoverflow.com/questions/tagged/pact) is also a good source of help.
 
 ## Note about artifact names and versions
 
@@ -53,9 +53,8 @@ module has a Jar file named pact-jvm-consumer_2.10. The full name of the file is
 
 | Branch | Specification | Min JDK | Scala Versions | Latest Version |
 | ------ | ------------- | ------- | -------------- | -------------- |
-| 3.4.x (v3.4.x)| V2 | 8 | 2.11 | 3.4.0 (WIP) |
-| 3.3.x (v2-spec)| V2 | 8 | 2.11 | 3.3.9 |
-| 3.5.x (v3-spec) | V3 | 8 | 2.11 | 3.5.0-beta.3 |
+| 3.4.x (v3.4.x)| V2 | 8 | 2.11 | 3.4.0 |
+| 3.5.x (v3-spec) | V3 | 8 | 2.11 | 3.5.0-beta.4 |
 | 2.5.x (v2.5.x) | V3 | 7 | 2.11 | 2.5.0-beta.0 |
 | 2.4.x (v2.x) | V2 | 6 | 2.10, 2.11 | 2.4.18 |
 

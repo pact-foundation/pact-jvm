@@ -1,0 +1,79 @@
+{
+  "provider" : {
+    "name" : "Books-Service"
+  },
+  "consumer" : {
+    "name" : "Readers-Service"
+  },
+  "interactions" : [ {
+    "provider_state": "book-exists",
+    "description" : "Get book",
+    "request" : {
+      "method" : "GET",
+      "path" : "/books/90f1787e-9f39-4e42-b897-b59d29"
+    },
+    "response" : {
+      "status" : 200,
+      "body": {
+          "id": "90f1787e-9f39-4e42-b897-b59d29",
+          "author": "Ray Barrowman",
+          "bestSeller": true
+      },
+      "matchingRules": {
+        "$.body.id": {
+          "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+        },
+        "$.body.author": {
+          "match": "type"
+        },
+        "$.body.bestSeller": {
+          "match": "type"
+        }
+      }
+    }
+  }, {
+    "provider_state": "book-not-found",
+    "description" : "Get non-existent book",
+    "request" : {
+      "method" : "GET",
+      "path" : "/books/90f1787e-9f39-4e42-b897-b59d29"
+    },
+    "response" : {
+      "status" : 404
+    }
+  }, {
+    "provider_state": "novel-exists",
+    "description" : "Get novel",
+    "request" : {
+      "method" : "GET",
+      "path" : "/novels/90f1787e-9f39-4e42-b897-b59d29"
+    },
+    "response" : {
+      "status" : 200,
+      "body": {
+        "id": "90f1787e-9f39-4e42-b897-b59d29",
+        "author": "Ray Barrowman",
+        "bestSeller": true
+      },
+      "matchingRules": {
+        "$.body.id": {
+          "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+        },
+        "$.body.author": {
+          "match": "type"
+        },
+        "$.body.bestSeller": {
+          "match": "type"
+        }
+      }
+    }
+  } ],
+  "metadata" : {
+    "pact-specification" : {
+      "version" : "2.0.0"
+    },
+    "pact-jvm" : {
+      "version" : "3.1.1"
+    }
+  }
+}
