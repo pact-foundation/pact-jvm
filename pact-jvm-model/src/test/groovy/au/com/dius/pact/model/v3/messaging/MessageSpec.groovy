@@ -53,6 +53,25 @@ class MessageSpec extends Specification {
     message.providerStates == [new ProviderState('test state')]
   }
 
+  def 'Uses V3 provider state format when converting to a map'() {
+    given:
+    Message message = new Message(description: 'test', contents: OptionalBody.body('"1 2 3 4"'), providerStates: [
+      new ProviderState('Test', [a: 'A', b: 100])])
+
+    when:
+    def map = message.toMap()
+
+    then:
+    map == [
+      description: 'test',
+      metaData: [:],
+      contents: '1 2 3 4',
+      providerStates: [
+        [name: 'Test', params: [a: 'A', b: 100]]
+      ]
+    ]
+  }
+
   def 'delegates to the matching rules to parse matchers'() {
     given:
     def json = [

@@ -32,10 +32,6 @@ dependencies {
     'http-kit:http-kit:2.1.19'
 }
 
-test {
-    systemProperties['pact.rootDir'] = "$buildDir/pacts"
-}
-
 clojureTest {
   jvmOptions = {
     systemProperty('pact.rootDir', "$buildDir/pacts")

@@ -45,4 +45,14 @@ public class VersionedPactUrlLoaderTest {
             assertEquals("http://artifactory:8081/jupiter-hydra/${jupiter.version}/jupiter-hydra-${jupiter.version}.json contains variables that could not be any of the system properties. Define a system property to replace them or remove the variables from the URL.", e.getMessage());
         }
     }
+
+    @Test
+    public void failsWhenNoExpandableVariablesAreProvidedInAUrl() throws Exception {
+        try {
+            VersionedPactUrlLoader.expandVariables(new String[]{"http://artifactory:8081/jupiter-hydra/7/jupiter-hydra-7.json"});
+            fail("Expected an an exception as no variables to expand were provided.");
+        } catch (Exception e) {
+            assertEquals("http://artifactory:8081/jupiter-hydra/7/jupiter-hydra-7.json contains no variables to expand in the format ${...}. Consider using @PactUrl or providing expandable variables.", e.getMessage());
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer;
 
+@Deprecated
 public class PactMismatchException extends AssertionError {
     private final PactMismatch result;
 

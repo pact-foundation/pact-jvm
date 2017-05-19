@@ -1,8 +1,6 @@
-/**
- * 
- */
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.model.PactSpecVersion;
 import au.com.dius.pact.model.v3.messaging.Message;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import au.com.dius.pact.util.Optional;
@@ -97,7 +95,7 @@ public class MessagePactProviderRule extends ExternalResource {
 				setMessage(providedMessage.contentsAsBytes(), description);
 				try {
 					base.evaluate();
-					messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir());
+					messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir(), PactSpecVersion.V3);
 				} catch (Throwable t) {
 					throw t;
 				}
@@ -130,7 +128,7 @@ public class MessagePactProviderRule extends ExternalResource {
 		MessagePact messagePact = (MessagePact) method.invoke(testClassInstance, builder);
 		setMessage(messagePact.getMessages().get(0).contentsAsBytes(), description);
 		base.evaluate();
-		messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir());
+		messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir(), PactSpecVersion.V3);
 	}
 
 	private Optional<PactVerification> findPactVerification(PactVerifications pactVerifications) {

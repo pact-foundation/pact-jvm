@@ -1,6 +1,5 @@
 package au.com.dius.pact.model.unfiltered
 
-import java.io.{BufferedReader, InputStreamReader}
 import java.net.URI
 import java.util.zip.GZIPInputStream
 
@@ -14,8 +13,8 @@ import unfiltered.request.HttpRequest
 import unfiltered.response._
 
 import scala.collection.JavaConversions
-import scala.collection.immutable.Stream
 
+@Deprecated
 object Conversions extends StrictLogging {
 
   def toMap(map: FluentCaseInsensitiveStringsMap): java.util.Map[String, String] = {
@@ -63,12 +62,12 @@ object Conversions extends StrictLogging {
   def toPath(uri: String) = new URI(uri).getPath
 
   def toBody(request: HttpRequest[ReceivedMessage], charset: String = "UTF-8") = {
-    val br = if (request.headers(ContentEncoding.GZip.name).contains("gzip")) {
-      new BufferedReader(new InputStreamReader(new GZIPInputStream(request.inputStream)))
+    val is = if (request.headers(ContentEncoding.GZip.name).contains("gzip")) {
+      new GZIPInputStream(request.inputStream)
     } else {
-      new BufferedReader(request.reader)
+      request.inputStream
     }
-    Stream.continually(br.readLine()).takeWhile(_ != null).mkString("\n")
+    if(is == null) "" else scala.io.Source.fromInputStream(is).mkString
   }
 
   implicit def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {

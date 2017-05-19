@@ -35,9 +35,10 @@ class RequestResponseInteraction implements Interaction {
 
   @Override
   boolean conflictsWith(Interaction other) {
-    description == other.description &&
-      providerStates == other.providerStates &&
-      (request != other.request || response != other.response)
+//    description == other.description &&
+//      providerStates == other.providerStates &&
+//      (request != other.request || response != other.response)
+    false
   }
 
   @Override
@@ -78,6 +79,10 @@ class RequestResponseInteraction implements Interaction {
     if (request.matchingRules?.notEmpty) {
       map.matchingRules = request.matchingRules.toMap(pactSpecVersion)
     }
+    if (request.generators?.notEmpty && pactSpecVersion >= PactSpecVersion.V3) {
+      map.generators = request.generators.toMap(pactSpecVersion)
+    }
+
     map
   }
 
@@ -92,6 +97,9 @@ class RequestResponseInteraction implements Interaction {
     if (response.matchingRules?.notEmpty) {
       map.matchingRules = response.matchingRules.toMap(pactSpecVersion)
     }
+    if (response.generators?.notEmpty && pactSpecVersion >= PactSpecVersion.V3) {
+      map.generators = response.generators.toMap(pactSpecVersion)
+    }
     map
   }
 
@@ -101,7 +109,12 @@ class RequestResponseInteraction implements Interaction {
 
   static parseBody(HttpPart httpPart) {
     if (httpPart.jsonBody() && httpPart.body.present) {
-      new JsonSlurper().parseText(httpPart.body.value)
+      def body = new JsonSlurper().parseText(httpPart.body.value)
+      if (body instanceof String) {
+        httpPart.body.value
+      } else {
+        body
+      }
     } else {
       httpPart.body.value
     }

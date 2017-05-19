@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import groovy.io.FileType
+import org.apache.commons.lang3.StringUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
 import org.gradle.api.tasks.TaskAction
@@ -27,7 +28,12 @@ class PactPublishTask extends DefaultTask {
             pactPublish.version = project.version
         }
 
-        def brokerClient = new PactBrokerClient(pactPublish.pactBrokerUrl)
+        def options = [:]
+        if (StringUtils.isNotEmpty(pactPublish.pactBrokerUsername)) {
+          options.authentication = [pactPublish.pactBrokerAuthenticationScheme ?: 'basic',
+                                    pactPublish.pactBrokerUsername, pactPublish.pactBrokerPassword]
+        }
+        def brokerClient = new PactBrokerClient(pactPublish.pactBrokerUrl, options)
         File pactDirectory = pactPublish.pactDirectory as File
         boolean anyFailed = false
         pactDirectory.eachFileMatch(FileType.FILES, ~/.*\.json/) { pactFile ->

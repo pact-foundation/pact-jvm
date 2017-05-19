@@ -3,8 +3,9 @@ pact-jvm
 
 [![Join the chat at https://gitter.im/DiUS/pact-jvm](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/DiUS/pact-jvm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Build Status](https://travis-ci.org/DiUS/pact-jvm.svg?branch=master)](https://travis-ci.org/DiUS/pact-jvm)
+[![Build Status](https://travis-ci.org/DiUS/pact-jvm.svg?branch=v3-spec)](https://travis-ci.org/DiUS/pact-jvm)
 [![Appveyor build status](https://ci.appveyor.com/api/projects/status/172049m2sa57takc?svg=true)](https://ci.appveyor.com/project/uglyog/pact-jvm)
+[![Codefresh build status]( https://g.codefresh.io/api/badges/build?repoOwner=DiUS&repoName=pact-jvm&branch=v3-spec&pipelineName=pact-jvm&accountName=uglyog&type=cf-1)]( https://g.codefresh.io/repositories/DiUS/pact-jvm/builds?filter=trigger:build;branch:v3-spec;service:59182913f2383500056367d7~pact-jvm)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-logging_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-logging_2.11)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11)
 
@@ -30,8 +31,8 @@ how to get going.
 ## Contact
 
 * Twitter: [@pact_up](https://twitter.com/pact_up)
-* Google users group: https://groups.google.com/forum/#!forum/pact-support
 * Gitter: [![Join the chat at https://gitter.im/DiUS/pact-jvm](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/DiUS/pact-jvm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+* Stack Overflow: https://stackoverflow.com/questions/tagged/pact
 
 ## Links
 
@@ -40,7 +41,7 @@ how to get going.
 ## Documentation
 
 Additional documentation can be found at [docs.pact.io](http://docs.pact.io), in the [Pact Wiki](https://github.com/realestate-com-au/pact/wiki),
-and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki).
+and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overflow](https://stackoverflow.com/questions/tagged/pact) is also a good source of help.
 
 ## Note about artifact names and versions
 
@@ -52,8 +53,8 @@ module has a Jar file named pact-jvm-consumer_2.10. The full name of the file is
 
 | Branch | Specification | Min JDK | Scala Versions | Latest Version |
 | ------ | ------------- | ------- | -------------- | -------------- |
-| 3.3.x (v2-spec)| V2 | 8 | 2.11 | 3.3.6 |
-| 3.5.x (v3-spec) | V3 | 8 | 2.11 | 3.5.0-beta.2 |
+| 3.4.x (v3.4.x)| V2 | 8 | 2.11 | 3.4.0 |
+| 3.5.x (v3-spec) | V3 | 8 | 2.11 | 3.5.0-beta.4 |
 | 2.5.x (v2.5.x) | V3 | 7 | 2.11 | 2.5.0-beta.0 |
 | 2.4.x (v2.x) | V2 | 6 | 2.10, 2.11 | 2.4.18 |
 

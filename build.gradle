@@ -5,11 +5,22 @@ buildscript {
   dependencies {
     classpath "org.apache.commons:commons-lang3:$commonsLang3Version"
     classpath 'com.tkruse.gradle:gradle-groovysh-plugin:1.0.8'
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
   }
 }
 
+plugins {
+  id "org.jetbrains.kotlin.jvm" version "1.1.2"
+}
+
 subprojects {
+    configurations.all {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'com.google.guava' && details.requested.name == 'guava' && details.requested.version > '19.0') {
+                //guava-retryer is pulling a transitive dependency of guava 21-rc which has breaking changes to Netflix OSS
+                details.useVersion '19.0'
+            }
+        }
+    }
 
     def scalaVersionLookup = [
         '2.11': '2.11.8'
@@ -32,8 +43,7 @@ subprojects {
     apply plugin: 'signing'
     apply plugin: 'codenarc'
     apply plugin: 'jacoco'
-    apply plugin: 'kotlin'
-
+    apply plugin: 'org.jetbrains.kotlin.jvm'
     apply plugin: 'com.github.tkruse.groovysh'
 
     repositories {
@@ -43,9 +53,14 @@ subprojects {
     }
 
     dependencies {
+      compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion"
+      compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+      compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
+      compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
+      compile 'io.github.microutils:kotlin-logging:1.4.4'
+
       if (project.hasProperty('scalaVersion')) {
-          compile "org.slf4j:slf4j-api:${project.slf4jVersion}",
-            "org.scala-lang:scala-library:${project.scalaFullVersion}",
+          compile "org.scala-lang:scala-library:${project.scalaFullVersion}",
             "org.scala-lang:scala-compiler:${project.scalaFullVersion}",
             "com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.4.0"
 
@@ -57,10 +72,12 @@ subprojects {
         'org.mockito:mockito-core:1.10.19',
         "junit:junit:${project.junitVersion}"
 
-      testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+      testCompile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
+      testCompile('org.spockframework:spock-core:1.1-groovy-2.4') {
         exclude group: 'org.codehaus.groovy'
       }
       testCompile "cglib:cglib:${project.cglibVersion}"
+      testCompile 'org.objenesis:objenesis:2.4'
     }
 
     group = 'au.com.dius'
@@ -77,6 +94,10 @@ subprojects {
 
     tasks.withType(GroovyCompile) {
       groovyOptions.optimizationOptions.indy = true
+    }
+
+    test {
+      systemProperty 'pact.rootDir', "$buildDir/pacts"
     }
 
     jar {
@@ -186,4 +207,17 @@ tasks.addRule("Pattern: <Task>_<ScalaVersion>") { String taskName ->
         .collect { it.value.getTasksByName(m.group(1), false) }.flatten()
     }
   }
+}
+
+if (System.env.TRAVIS == 'true') {
+    allprojects {
+        tasks.withType(GroovyCompile) {
+            groovyOptions.fork = false
+        }
+        tasks.withType(Test) {
+            // containers (currently) have 2 dedicated cores and 4GB of memory
+            maxParallelForks = 2
+            minHeapSize = '128m'
+        }
+    }
 }

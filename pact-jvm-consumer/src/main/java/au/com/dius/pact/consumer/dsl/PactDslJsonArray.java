@@ -803,4 +803,79 @@ public class PactDslJsonArray extends DslPart {
     parent.setNumberExamples(numberExamples);
     return new PactDslJsonArray("", "", parent);
   }
+
+  /**
+   * Array of values that are not objects where each item must match the provided example
+   * @param value Value to use to match each item
+   */
+  public PactDslJsonArray eachLike(PactDslJsonRootValue value) {
+    return eachLike(value, 1);
+  }
+
+  /**
+   * Array of values that are not objects where each item must match the provided example
+   * @param value Value to use to match each item
+   * @param numberExamples number of examples to generate
+   */
+  public PactDslJsonArray eachLike(PactDslJsonRootValue value, int numberExamples) {
+    matchers.addRule(rootPath + appendArrayIndex(1), matchMin(0));
+    PactDslJsonArray parent = new PactDslJsonArray(rootPath, "", this, true);
+    parent.setNumberExamples(numberExamples);
+    parent.putObject(value);
+    return (PactDslJsonArray) parent.closeArray();
+  }
+
+  /**
+   * Array of values with a minimum size that are not objects where each item must match the provided example
+   * @param size minimum size of the array
+   * @param value Value to use to match each item
+   */
+  public PactDslJsonArray minArrayLike(Integer size, PactDslJsonRootValue value) {
+    return minArrayLike(size, value, size);
+  }
+
+  /**
+   * Array of values with a minimum size that are not objects where each item must match the provided example
+   * @param size minimum size of the array
+   * @param value Value to use to match each item
+   * @param numberExamples number of examples to generate
+   */
+  public PactDslJsonArray minArrayLike(Integer size, PactDslJsonRootValue value, int numberExamples) {
+    if (numberExamples < size) {
+      throw new IllegalArgumentException(String.format("Number of example %d is less than the minimum size of %d",
+        numberExamples, size));
+    }
+    matchers.addRule(rootPath + appendArrayIndex(1), matchMin(size));
+    PactDslJsonArray parent = new PactDslJsonArray(rootPath, "", this, true);
+    parent.setNumberExamples(numberExamples);
+    parent.putObject(value);
+    return (PactDslJsonArray) parent.closeArray();
+  }
+
+  /**
+   * Array of values with a maximum size that are not objects where each item must match the provided example
+   * @param size maximum size of the array
+   * @param value Value to use to match each item
+   */
+  public PactDslJsonArray maxArrayLike(Integer size, PactDslJsonRootValue value) {
+    return maxArrayLike(size, value, 1);
+  }
+
+  /**
+   * Array of values with a maximum size that are not objects where each item must match the provided example
+   * @param size maximum size of the array
+   * @param value Value to use to match each item
+   * @param numberExamples number of examples to generate
+   */
+  public PactDslJsonArray maxArrayLike(Integer size, PactDslJsonRootValue value, int numberExamples) {
+    if (numberExamples > size) {
+      throw new IllegalArgumentException(String.format("Number of example %d is more than the maximum size of %d",
+        numberExamples, size));
+    }
+    matchers.addRule(rootPath + appendArrayIndex(1), matchMax(size));
+    PactDslJsonArray parent = new PactDslJsonArray(rootPath, "", this, true);
+    parent.setNumberExamples(numberExamples);
+    parent.putObject(value);
+    return (PactDslJsonArray) parent.closeArray();
+  }
 }

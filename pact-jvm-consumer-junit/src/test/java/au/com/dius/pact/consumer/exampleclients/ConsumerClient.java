@@ -45,7 +45,7 @@ public class ConsumerClient{
         ArrayList<NameValuePair> queryParameters = new ArrayList<NameValuePair>();
         for (String query: queryString.split("&")) {
             String[] keyValue = query.split("=");
-            queryParameters.add(new BasicNameValuePair(keyValue[0], keyValue[1]));
+            queryParameters.add(new BasicNameValuePair(keyValue[0], UrlEscapers.urlFormParameterEscaper().escape(keyValue[1])));
         }
         return queryParameters;
     }

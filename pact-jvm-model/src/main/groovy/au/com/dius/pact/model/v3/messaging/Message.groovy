@@ -36,7 +36,7 @@ class Message implements Interaction {
   }
 
   String getContentType() {
-    metaData.contentType ?: JSON
+    metaData?.contentType ?: JSON
   }
 
   @SuppressWarnings('UnusedMethodParameter')
@@ -48,11 +48,14 @@ class Message implements Interaction {
     if (!contents.missing) {
       map.contents = formatContents()
     }
-    if (providerState) {
-      map.providerState = providerState
+    if (providerStates) {
+      map.providerStates = providerStates*.toMap()
     }
     if (matchingRules?.notEmpty) {
       map.matchingRules = matchingRules.toMap(pactSpecVersion)
+    }
+    if (generators?.notEmpty) {
+      map.generators = generators.toMap(pactSpecVersion)
     }
     map
   }

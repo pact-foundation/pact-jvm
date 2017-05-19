@@ -1,8 +1,9 @@
 package au.com.dius.pact.consumer.resultstests;
 
+import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.io.IOException;
@@ -20,7 +21,7 @@ public class PactVerifiedConsumerFailsTest extends ExpectedToFailBase {
     }
 
     @Override
-    protected PactFragment createFragment(PactDslWithProvider builder) {
+    protected RequestResponsePact createPact(PactDslWithProvider builder) {
         return builder
             .uponReceiving("PactVerifiedConsumerPassesTest test interaction")
                 .path("/")
@@ -28,7 +29,7 @@ public class PactVerifiedConsumerFailsTest extends ExpectedToFailBase {
                 .willRespondWith()
                 .status(200)
                 .body("{\"responsetest\": true, \"name\": \"harry\"}")
-            .toFragment();
+            .toPact();
     }
 
 
@@ -43,11 +44,11 @@ public class PactVerifiedConsumerFailsTest extends ExpectedToFailBase {
     }
 
     @Override
-    protected void runTest(String url) throws IOException {
+    protected void runTest(MockServer mockServer) throws IOException {
         Map<String, Object> expectedResponse = new HashMap<String, Object>();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "fred");
-        assertEquals(new ConsumerClient(url).getAsMap("/", ""), expectedResponse);
+        assertEquals(new ConsumerClient(mockServer.getUrl()).getAsMap("/", ""), expectedResponse);
     }
 
     @Override

@@ -210,4 +210,17 @@ class PactReaderSpec extends Specification {
     pact instanceof RequestResponsePact
   }
 
+  def 'correctly loads V2 pact with string bodies'() {
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('test_pact_with_string_body.json')
+
+    when:
+    def pact = PactReader.loadPact(pactUrl)
+
+    then:
+    pact instanceof RequestResponsePact
+    pact.interactions[0].request.body.value == '"This is a string"'
+    pact.interactions[0].response.body.value == '"This is a string"'
+  }
+
 }

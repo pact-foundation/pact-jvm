@@ -6,7 +6,4 @@ dependencies {
   compile 'org.apache.commons:commons-collections4:4.1'
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
-  testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
-    exclude group: 'org.codehaus.groovy'
-  }
 }

@@ -49,4 +49,62 @@ class PactPublishMojoSpec extends Specification {
     thrown(MojoExecutionException)
   }
 
+  def 'if the broker username is set, passes in the creds to the broker client'() {
+    given:
+    mojo.pactBrokerUsername = 'username'
+    mojo.pactBrokerPassword = 'password'
+    mojo.brokerClient = null
+    mojo.pactBrokerUrl = '/broker'
+    new File('some/dir') >> mockFile
+    mockFile.eachFileMatch(_, _, _)
+
+    when:
+    mojo.execute()
+
+    then:
+    new PactBrokerClient('/broker', _) >> { args ->
+      assert args[1] == [authentication: ['basic', 'username', 'password']]
+      brokerClient
+    }
+  }
+
+    def 'trimSnapshot=true removes the "-SNAPSHOT"'() {
+        given:
+        new File('some/dir') >> mockFile
+        mojo.projectVersion = '1.0.0-SNAPSHOT'
+        mojo.trimSnapshot = true
+
+        when:
+        mojo.execute()
+
+        then:
+        assert mojo.projectVersion == '1.0.0'
+    }
+
+    def 'trimSnapshot=false leaves version unchnaged'() {
+        given:
+        new File('some/dir') >> mockFile
+        mojo.projectVersion = '1.0.0-SNAPSHOT'
+        mojo.trimSnapshot = false
+
+        when:
+        mojo.execute()
+
+        then:
+        assert mojo.projectVersion == '1.0.0-SNAPSHOT'
+    }
+
+    def 'trimSnapshot=true leaves non-snapshot versions unchanged'() {
+        given:
+        new File('some/dir') >> mockFile
+        mojo.projectVersion = '1.0.0'
+        mojo.trimSnapshot = true
+
+        when:
+        mojo.execute()
+
+        then:
+        assert mojo.projectVersion == '1.0.0'
+    }
+
 }

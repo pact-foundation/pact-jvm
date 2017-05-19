@@ -10,7 +10,7 @@ import groovy.transform.Canonical
  * Response from a provider to a consumer
  */
 @Canonical
-class Response implements HttpPart {
+class Response extends HttpPart {
 
   Integer status = 200
   Map<String, String> headers = [:]
@@ -21,7 +21,7 @@ class Response implements HttpPart {
   static Response fromMap(def map) {
     new Response().with {
       status = map.status as Integer
-      headers = map.headers
+      headers = map.headers ?: [:]
       body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
       matchingRules = MatchingRules.fromMap(map.matchingRules)
       generators = Generators.fromMap(map.generators)

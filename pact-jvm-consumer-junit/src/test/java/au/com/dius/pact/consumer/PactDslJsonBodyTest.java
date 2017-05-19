@@ -4,7 +4,7 @@ import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 
 import java.util.Map;
 
@@ -13,10 +13,10 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
-public class PactDslJsonBodyTest extends ConsumerPactTest {
+public class PactDslJsonBodyTest extends ConsumerPactTestMk2 {
 
     @Override
-    protected PactFragment createFragment(PactDslWithProvider builder) {
+    protected RequestResponsePact createPact(PactDslWithProvider builder) {
         DslPart body = new PactDslJsonBody()
             .id()
             .object("2")
@@ -35,16 +35,16 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
                     .date("dob", "MM/dd/yyyy")
                 .closeObject()
             .closeArray();
-        PactFragment fragment = builder
+        RequestResponsePact pact = builder
                 .uponReceiving("java test interaction with a DSL body")
                 .path("/")
                 .method("GET")
                 .willRespondWith()
                 .status(200)
                 .body(body)
-                .toFragment();
+                .toPact();
 
-        MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment, "body",
+        MatcherTestUtils.assertResponseMatcherKeysEqualTo(pact, "body",
             "$.id",
             "$['2'].id",
             "$.numbers[0]",
@@ -53,7 +53,7 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
             "$.numbers[4].timestamp",
             "$.numbers[4].dob");
 
-        return fragment;
+        return pact;
     }
 
     @Override
@@ -67,10 +67,10 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
     }
 
     @Override
-    protected void runTest(String url) {
+    protected void runTest(MockServer mockServer) {
         Map response;
         try {
-            response = new ConsumerClient(url).getAsMap("/", "");
+            response = new ConsumerClient(mockServer.getUrl()).getAsMap("/", "");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

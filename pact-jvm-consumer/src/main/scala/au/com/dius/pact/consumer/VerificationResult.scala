@@ -14,6 +14,10 @@ object VerificationResult {
   }
 }
 
+/**
+  * @deprecated Moved to Kotlin implementation
+  */
+@Deprecated
 sealed trait VerificationResult {
   // Temporary.  Should belong somewhere else.
   override def toString() = this match {
@@ -27,7 +31,15 @@ sealed trait VerificationResult {
   }
 }
 
+/**
+  * @deprecated Moved to Kotlin implementation
+  */
+@Deprecated
 object PactVerified extends VerificationResult
+/**
+  * @deprecated Moved to Kotlin implementation
+  */
+@Deprecated
 case class PactMismatch(results: PactSessionResults, userError: Option[Throwable] = None) extends VerificationResult {
   override def toString() = {
     var s = "Pact verification failed for the following reasons:\n"
@@ -49,5 +61,13 @@ case class PactMismatch(results: PactSessionResults, userError: Option[Throwable
     s
   }
 }
+/**
+  * @deprecated Moved to Kotlin implementation
+  */
+@Deprecated
 case class PactError(error: Throwable) extends VerificationResult
+/**
+  * @deprecated Moved to Kotlin implementation
+  */
+@Deprecated
 case class UserCodeFailed[T](error: T) extends VerificationResult

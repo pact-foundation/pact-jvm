@@ -5,10 +5,11 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 
-public class PactDslJsonArrayTest extends ConsumerPactTest {
+public class PactDslJsonArrayTest extends ConsumerPactTestMk2 {
     @Override
-    protected PactFragment createFragment(PactDslWithProvider builder) {
+    protected RequestResponsePact createPact(PactDslWithProvider builder) {
         DslPart body = new PactDslJsonArray()
           .object()
             .id()
@@ -22,16 +23,16 @@ public class PactDslJsonArrayTest extends ConsumerPactTest {
             .timestamp()
             .date("dob", "MM/dd/yyyy")
           .closeObject();
-        PactFragment fragment = builder
+        RequestResponsePact pact = builder
           .uponReceiving("java test interaction with a DSL array body")
             .path("/")
             .method("GET")
           .willRespondWith()
             .status(200)
             .body(body)
-          .toFragment();
+          .toPact();
 
-        MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment, "body",
+        MatcherTestUtils.assertResponseMatcherKeysEqualTo(pact, "body",
             "$[0].id",
             "$[0].timestamp",
             "$[0].dob",
@@ -40,7 +41,7 @@ public class PactDslJsonArrayTest extends ConsumerPactTest {
             "$[1].dob"
         );
 
-        return fragment;
+        return pact;
     }
 
     @Override
@@ -54,9 +55,9 @@ public class PactDslJsonArrayTest extends ConsumerPactTest {
     }
 
     @Override
-    protected void runTest(String url) {
+    protected void runTest(MockServer mockServer) {
         try {
-            new ConsumerClient(url).getAsList("/");
+            new ConsumerClient(mockServer.getUrl()).getAsList("/");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

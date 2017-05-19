@@ -4,6 +4,7 @@ import au.com.dius.pact.model.{RequestResponseInteraction, _}
 import difflib.DiffUtils
 import groovy.json.JsonOutput
 
+@Deprecated
 object PrettyPrinter {
   //TODO: allow configurable context lines
   val defaultContextLines = 3

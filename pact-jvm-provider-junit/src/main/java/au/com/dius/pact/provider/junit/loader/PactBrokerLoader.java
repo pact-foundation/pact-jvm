@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseExpressions;
+import static au.com.dius.pact.provider.junit.sysprops.PactRunnerTagListExpressionParser.parseTagListExpressions;
 
 /**
  * Out-of-the-box implementation of {@link PactLoader} that downloads pacts from Pact broker
@@ -44,7 +45,7 @@ public class PactBrokerLoader implements PactLoader {
     this.pactBrokerHost = pactBrokerHost;
     this.pactBrokerPort = pactBrokerPort;
     this.pactBrokerProtocol = pactBrokerProtocol;
-    this.pactBrokerTags = tags;
+    this.pactBrokerTags = parseTagListExpressions(tags);
     this.failIfNoPactsFound = true;
   }
 

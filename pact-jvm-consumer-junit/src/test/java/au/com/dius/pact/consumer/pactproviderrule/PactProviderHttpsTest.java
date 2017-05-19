@@ -9,6 +9,7 @@ import au.com.dius.pact.model.MockHttpsProviderConfig;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -24,7 +25,7 @@ public class PactProviderHttpsTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(PactProviderHttpsTest.class);
 
     @Rule
-    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", "localhost", 8443, true,
+    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", "localhost", 10443, true,
       PactSpecVersion.V3, this);
 
     @Pact(provider="test_provider", consumer="test_consumer")
@@ -78,7 +79,8 @@ public class PactProviderHttpsTest {
     }
 
     @Test
-    @PactVerification(value = "test_provider", expectMismatch = true)
+    @Ignore("Re-enable when test converted to new rule")
+    @PactVerification(value = "test_provider")
     public void runTestWithPactError() throws IOException {
         Assert.assertEquals(new ConsumerHttpsClient(mockTestProvider.getConfig().url()).options("/second"), 200);
     }

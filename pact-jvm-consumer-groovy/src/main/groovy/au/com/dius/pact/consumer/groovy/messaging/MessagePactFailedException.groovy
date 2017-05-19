@@ -7,6 +7,7 @@ class MessagePactFailedException extends RuntimeException {
     private final List validationFailures
 
     MessagePactFailedException(List validationFailures) {
-        this.validationFailures = validationFailures
+      super("Message pact failed with validation failures: ${validationFailures.join('\n')}")
+      this.validationFailures = validationFailures
     }
 }

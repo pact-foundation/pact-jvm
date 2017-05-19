@@ -1,12 +1,12 @@
 package au.com.dius.pact.consumer.junit
 
 import au.com.dius.pact.consumer.Pact
-import au.com.dius.pact.consumer.PactProviderRule
+import au.com.dius.pact.consumer.PactProviderRuleMk2
 import au.com.dius.pact.consumer.PactVerification
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
-import au.com.dius.pact.model.PactFragment
+import au.com.dius.pact.model.RequestResponsePact
 import groovy.json.JsonOutput
 import groovyx.net.http.ContentType
 import groovyx.net.http.HTTPBuilder
@@ -24,7 +24,7 @@ class Defect342MultiTest {
   private static final String SOME_SERVICE_USER = '/some-service/user/'
 
   @Rule
-  public final PactProviderRule mockProvider = new PactProviderRule('test_provider', 'localhost', 8080, this)
+  public final PactProviderRuleMk2 mockProvider = new PactProviderRuleMk2('multitest_provider', this)
 
   private static user() {
     [
@@ -36,8 +36,8 @@ class Defect342MultiTest {
     ]
   }
 
-  @Pact(provider = 'test_provider', consumer= 'browser_consumer')
-  PactFragment createFragment1(PactDslWithProvider builder) {
+  @Pact(provider = 'multitest_provider', consumer= 'browser_consumer')
+  RequestResponsePact createFragment1(PactDslWithProvider builder) {
     builder
       .given('An env')
       .uponReceiving('a new user')
@@ -57,13 +57,13 @@ class Defect342MultiTest {
         .status(200)
         .matchHeader('Content-Type', APPLICATION_JSON, APPLICATION_JSON_CHARSET_UTF_8)
         .body(JsonOutput.toJson(user()))
-      .toFragment()
+      .toPact()
   }
 
   @Test
   @PactVerification(fragment = 'createFragment1')
   void runTest1() {
-    def http = new HTTPBuilder(mockProvider.config.url())
+    def http = new HTTPBuilder(mockProvider.url)
 
     http.post(path: '/some-service/users', body: user(), requestContentType: ContentType.JSON) { response ->
       assert response.status == 201
@@ -76,8 +76,8 @@ class Defect342MultiTest {
     }
   }
 
-  @Pact(provider= 'test_provider', consumer= 'test_consumer')
-  PactFragment createFragment2(PactDslWithProvider builder) {
+  @Pact(provider= 'multitest_provider', consumer= 'test_consumer')
+  RequestResponsePact createFragment2(PactDslWithProvider builder) {
     builder
       .given('test state')
       .uponReceiving('A request with double precision number')
@@ -87,20 +87,20 @@ class Defect342MultiTest {
       .willRespondWith()
         .status(200)
         .body('{"responsetest": true, "name": "harry","data": 1234.0 }', ContentType.JSON.toString())
-      .toFragment()
+      .toPact()
   }
 
   @Test
   @PactVerification(fragment = 'createFragment2')
   void runTest2() {
-    assert Request.Put('http://localhost:8080/numbertest')
+    assert Request.Put(mockProvider.url + '/numbertest')
       .addHeader('Accept', ContentType.JSON.toString())
       .bodyString('{"name": "harry","data": 1234.0 }', org.apache.http.entity.ContentType.APPLICATION_JSON)
       .execute().returnContent().asString() == '{"responsetest": true, "name": "harry","data": 1234.0 }'
   }
 
-  @Pact(provider = 'test_provider', consumer = 'test_consumer')
-  PactFragment getUsersFragment(PactDslWithProvider builder) {
+  @Pact(provider = 'multitest_provider', consumer = 'test_consumer')
+  RequestResponsePact getUsersFragment(PactDslWithProvider builder) {
     DslPart body = new PactDslJsonArray().maxArrayLike(5)
       .uuid('id')
       .stringType('userName')
@@ -114,11 +114,11 @@ class Defect342MultiTest {
       .willRespondWith()
         .status(200)
         .body(body)
-      .toFragment()
+      .toPact()
   }
 
-  @Pact(provider = 'test_provider', consumer = 'test_consumer')
-  PactFragment getUsersFragment2(PactDslWithProvider builder) {
+  @Pact(provider = 'multitest_provider', consumer = 'test_consumer')
+  RequestResponsePact getUsersFragment2(PactDslWithProvider builder) {
     DslPart body = new PactDslJsonArray().minArrayLike(5)
       .uuid('id')
       .stringType('userName')
@@ -132,19 +132,19 @@ class Defect342MultiTest {
       .willRespondWith()
         .status(200)
         .body(body)
-      .toFragment()
+      .toPact()
   }
 
   @Test
   @PactVerification(fragment = 'getUsersFragment')
   void runTest3() {
-    assert Request.Get('http://localhost:8080/idm/user').execute().returnContent().asString()
+    assert Request.Get(mockProvider.url + '/idm/user').execute().returnContent().asString()
   }
 
   @Test
   @PactVerification(fragment = 'getUsersFragment2')
   void runTest4() {
-    assert Request.Get('http://localhost:8080/idm/user').execute().returnContent().asString()
+    assert Request.Get(mockProvider.url + '/idm/user').execute().returnContent().asString()
   }
 
 }

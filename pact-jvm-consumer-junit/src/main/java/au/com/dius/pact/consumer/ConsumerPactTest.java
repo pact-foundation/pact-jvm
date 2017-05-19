@@ -8,6 +8,10 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+/**
+ * @deprecated Use ConsumerPactTestMk2 which uses the new mock server implementation
+ */
+@Deprecated
 public abstract class ConsumerPactTest {
     public static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
 

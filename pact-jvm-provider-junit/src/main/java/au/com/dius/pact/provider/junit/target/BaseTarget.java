@@ -10,7 +10,6 @@ import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
 import au.com.dius.pact.provider.reporters.ReporterManager;
 import au.com.dius.pact.provider.reporters.VerifierReporter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.junit.runners.model.TestClass;
 
 import java.io.File;
@@ -33,12 +32,12 @@ public abstract class BaseTarget implements TestClassAwareTarget {
   @Override
   public abstract void testInteraction(final String consumerName, final Interaction interaction);
 
-  abstract ProviderInfo getProviderInfo();
+  protected abstract ProviderInfo getProviderInfo();
 
-  abstract ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider,
-                                         ConsumerInfo consumer);
+  protected abstract ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider,
+                                                    ConsumerInfo consumer);
 
-  void setupReporters(ProviderVerifier verifier, String name, String description) {
+  protected void setupReporters(ProviderVerifier verifier, String name, String description) {
     String reportDirectory = "target/pact/reports";
     String[] reports = new String[]{};
     boolean reportingEnabled = false;
@@ -70,8 +69,8 @@ public abstract class BaseTarget implements TestClassAwareTarget {
     }
   }
 
-  AssertionError getAssertionError(final Map<String, Object> mismatches) {
-    String error = SystemUtils.LINE_SEPARATOR;
+  protected AssertionError getAssertionError(final Map<String, Object> mismatches) {
+    String error = System.lineSeparator();
 
     int count = 0;
     for (Object mismatch: mismatches.values()) {
@@ -83,9 +82,8 @@ public abstract class BaseTarget implements TestClassAwareTarget {
       } else {
         error += errPrefix + mismatch.toString();
       }
-      error += SystemUtils.LINE_SEPARATOR;
+      error += System.lineSeparator();
     }
-
     return new AssertionError(error);
   }
 
@@ -94,9 +92,9 @@ public abstract class BaseTarget implements TestClassAwareTarget {
     if (message.contains("\n")) {
       String padString = StringUtils.leftPad("", prefixLength);
       String[] lines = message.split("\n");
-      message = lines[0] + SystemUtils.LINE_SEPARATOR;
+      message = lines[0] + System.lineSeparator();
       for (int line = 1; line < lines.length; line++) {
-        message += padString + lines[line] + SystemUtils.LINE_SEPARATOR;
+        message += padString + lines[line] + System.lineSeparator();
       }
     }
     return message;
@@ -123,7 +121,7 @@ public abstract class BaseTarget implements TestClassAwareTarget {
     String map = "";
     for (Object o: comparison.entrySet()) {
       Map.Entry e = (Map.Entry) o;
-      map += String.valueOf(e.getKey()) + " -> " + e.getValue() + SystemUtils.LINE_SEPARATOR;
+      map += String.valueOf(e.getKey()) + " -> " + e.getValue() + System.lineSeparator();
     }
     return map;
   }

@@ -79,9 +79,13 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
           throw new InitializationError("Did not find any pact files for provider " + providerInfo.value());
         }
 
-        for (final Pact pact : pacts) {
+        for (final Pact pact : filterPacts(pacts)) {
             this.child.add(new InteractionRunner(testClass, pact));
         }
+    }
+
+    protected List<Pact> filterPacts(List<Pact> pacts){
+        return pacts;
     }
 
     @Override

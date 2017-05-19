@@ -2,11 +2,13 @@ package au.com.dius.pact.consumer.examples;
 
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactProviderRule;
+import au.com.dius.pact.consumer.PactProviderRuleMk2;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ArticlesRestClient;
 import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import org.apache.commons.collections4.MapUtils;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,10 +25,10 @@ public class ArticlesTest {
         new String[]{"Content-Type", "application/json"});
 
     @Rule
-    public PactProviderRule provider = new PactProviderRule("ArticlesProvider", "localhost", 1234, this);
+    public PactProviderRuleMk2 provider = new PactProviderRuleMk2("ArticlesProvider", "localhost", 1234, this);
 
     @Pact(provider = "ArticlesProvider", consumer = "ArticlesConsumer")
-    public PactFragment articlesFragment(PactDslWithProvider builder) {
+    public RequestResponsePact articlesFragment(PactDslWithProvider builder) {
         return builder
             .given("Pact for Issue 313")
             .uponReceiving("retrieving article data")
@@ -46,7 +48,7 @@ public class ArticlesTest {
                     .closeObject()
                     .closeArray()
             )
-            .toFragment();
+            .toPact();
     }
 
     @PactVerification("ArticlesProvider")

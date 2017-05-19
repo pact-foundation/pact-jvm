@@ -105,6 +105,8 @@ class PactReader {
         }
         map
       }
+    } else {
+      [:]
     }
   }
 

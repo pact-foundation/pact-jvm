@@ -1,25 +1,13 @@
-buildscript {
-  repositories {
-    jcenter()
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  dependencies {
-    classpath 'com.gradle.publish:plugin-publish-plugin:0.9.5'
-  }
+plugins {
+  id "com.gradle.plugin-publish" version "0.9.7"
 }
 
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'maven-publish'
-apply plugin: 'com.gradle.plugin-publish'
 
 dependencies {
-  compile localGroovy(),
-    "org.codehaus.groovy.modules.http-builder:http-builder:$httpBuilderVersion"
-  compile(project(":pact-jvm-provider_${project.scalaVersion}")) {
-    exclude module: 'groovy-all'
-  }
+  compile "org.codehaus.groovy.modules.http-builder:http-builder:$httpBuilderVersion"
+  compile project(":pact-jvm-provider_${project.scalaVersion}")
   compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
 }
 

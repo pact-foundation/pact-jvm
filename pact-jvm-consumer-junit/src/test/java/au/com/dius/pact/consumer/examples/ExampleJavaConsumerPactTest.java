@@ -1,9 +1,10 @@
 package au.com.dius.pact.consumer.examples;
 
+import au.com.dius.pact.consumer.ConsumerPactTestMk2;
+import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.consumer.ConsumerPactTest;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import org.junit.Assert;
 
 import java.io.IOException;
@@ -12,10 +13,10 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
+public class ExampleJavaConsumerPactTest extends ConsumerPactTestMk2 {
 
     @Override
-    protected PactFragment createFragment(PactDslWithProvider builder) {
+    protected RequestResponsePact createPact(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("testreqheader", "testreqheadervalue");
 
@@ -39,9 +40,8 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
                 .status(200)
                 .headers(headers)
                 .body("")
-            .toFragment();
+            .toPact();
     }
-
 
     @Override
     protected String providerName() {
@@ -54,12 +54,12 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
     }
 
     @Override
-    protected void runTest(String url) throws IOException {
-        Assert.assertEquals(new ConsumerClient(url).options("/second"), 200);
+    protected void runTest(MockServer mockServer) throws IOException {
+        Assert.assertEquals(new ConsumerClient(mockServer.getUrl()).options("/second"), 200);
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(url).getAsMap("/", ""), expectedResponse);
-        assertEquals(new ConsumerClient(url).options("/second"), 200);
+        assertEquals(new ConsumerClient(mockServer.getUrl()).getAsMap("/", ""), expectedResponse);
+        assertEquals(new ConsumerClient(mockServer.getUrl()).options("/second"), 200);
     }
 }

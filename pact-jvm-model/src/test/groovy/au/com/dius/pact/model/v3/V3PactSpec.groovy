@@ -32,7 +32,7 @@ class V3PactSpec extends Specification {
           provider: [name: 'provider'],
           messages: [
             [
-              providerState: 'a new message exists',
+              providerStates: [[name: 'a new message exists']],
               contents: 'Hello',
               description: 'a new hello message',
               metaData: [ contentType: 'application/json' ]
@@ -42,7 +42,7 @@ class V3PactSpec extends Specification {
         ])
 
         when:
-        pact.write(pactFile.parentFile.toString())
+        pact.write(pactFile.parentFile.toString(), PactSpecVersion.V3)
         def json = new JsonSlurper().parse(pactFile)
 
         then:
@@ -50,19 +50,19 @@ class V3PactSpec extends Specification {
         json.messages*.description.toSet() == ['a hello message', 'a new hello message'].toSet()
     }
 
-    def 'when merging it should replace messages with the same description an state'() {
+    def 'when merging it should replace messages with the same description and state'() {
         given:
         def pact = PactReader.loadV3Pact(null, [
             consumer: [name: 'consumer'],
             provider: [name: 'provider'],
             messages: [
               [
-                providerState: 'message exists',
+                providerStates: [[name: 'message exists']],
                 contents: 'Hello',
                 description: 'a hello message',
                 metaData: [ contentType: 'application/json' ]
               ], [
-                  providerState: 'a new message exists',
+                  providerStates: [[name: 'a new message exists']],
                   contents: 'Hello',
                   description: 'a new hello message',
                   metaData: [ contentType: 'application/json' ]
@@ -76,13 +76,13 @@ class V3PactSpec extends Specification {
         ])
 
         when:
-        pact.write(pactFile.parentFile.toString())
+        pact.write(pactFile.parentFile.toString(), PactSpecVersion.V3)
         def json = new JsonSlurper().parse(pactFile)
 
         then:
         json.messages.size == 3
         json.messages*.description.toSet() == ['a hello message', 'a new hello message'].toSet()
-        json.messages.find { it.description == 'a hello message' && !it.providerState } == [contents: 'Hello',
+        json.messages.find { it.description == 'a hello message' && !it.providerStates } == [contents: 'Hello',
             description: 'a hello message', metaData: [ contentType: 'application/json' ]]
     }
 
@@ -116,7 +116,8 @@ class V3PactSpec extends Specification {
             void mergeInteractions(List<Interaction> interactions) { }
 
             @SuppressWarnings('UnusedMethodParameter')
-            protected File fileForPact(String pactDir) { pactFile }
+            @Override
+            File fileForPact(String pactDir) { pactFile }
 
             List<Interaction> getInteractions() { [] }
 
@@ -125,7 +126,7 @@ class V3PactSpec extends Specification {
         }
 
         when:
-        pact.write('/some/pact/dir')
+        pact.write('/some/pact/dir', PactSpecVersion.V3)
 
         then:
         InvalidPactException e = thrown()
@@ -161,7 +162,8 @@ class V3PactSpec extends Specification {
             void mergeInteractions(List<Interaction> interactions) { }
 
             @SuppressWarnings('UnusedMethodParameter')
-            protected File fileForPact(String pactDir) { pactFile }
+            @Override
+            File fileForPact(String pactDir) { pactFile }
 
             List<Interaction> getInteractions() { [] }
 
@@ -170,7 +172,7 @@ class V3PactSpec extends Specification {
         }
 
         when:
-        pact.write('/some/pact/dir')
+        pact.write('/some/pact/dir', PactSpecVersion.V3)
 
         then:
         InvalidPactException e = thrown()

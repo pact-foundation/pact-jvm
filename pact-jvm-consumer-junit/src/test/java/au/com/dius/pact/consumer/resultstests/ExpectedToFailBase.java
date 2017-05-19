@@ -1,10 +1,10 @@
 package au.com.dius.pact.consumer.resultstests;
 
-import au.com.dius.pact.consumer.ConsumerPactTest;
+import au.com.dius.pact.consumer.ConsumerPactTestMk2;
 
 import static org.junit.Assert.fail;
 
-public abstract class ExpectedToFailBase extends ConsumerPactTest {
+public abstract class ExpectedToFailBase extends ConsumerPactTestMk2 {
 
     private final Class expectedException;
 

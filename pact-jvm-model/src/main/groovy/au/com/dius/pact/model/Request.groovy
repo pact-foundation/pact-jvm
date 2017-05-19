@@ -3,12 +3,13 @@ package au.com.dius.pact.model
 import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.matchingrules.MatchingRules
 import groovy.transform.Canonical
+import org.jetbrains.annotations.NotNull
 
 /**
  * Request made by a consumer to a provider
  */
 @Canonical
-class Request implements HttpPart {
+class Request extends HttpPart implements Comparable {
   private static final String COOKIE_KEY = 'cookie'
 
   String method = 'GET'
@@ -24,7 +25,7 @@ class Request implements HttpPart {
       method = map.method as String
       path = map.path as String
       query = map.query
-      headers = map.headers
+      headers = map.headers ?: [:]
       body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
       matchingRules = MatchingRules.fromMap(map.matchingRules)
       generators = Generators.fromMap(map.generators)
@@ -64,5 +65,11 @@ class Request implements HttpPart {
     } else {
       null
     }
+  }
+
+  @Override
+  @SuppressWarnings('ExplicitCallToEqualsMethod')
+  int compareTo(@NotNull Object o) {
+    equals(o) ? 0 : 1
   }
 }

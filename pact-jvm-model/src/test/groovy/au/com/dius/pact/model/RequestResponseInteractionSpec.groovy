@@ -1,15 +1,19 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.model.generators.Category
+import au.com.dius.pact.model.generators.Generators
+import au.com.dius.pact.model.generators.RandomStringGenerator
 import spock.lang.Specification
 
 class RequestResponseInteractionSpec extends Specification {
 
-  def interaction
+  def interaction, generators
 
   def setup() {
+    generators = new Generators([(Category.HEADER): [a: new RandomStringGenerator(4)]])
     interaction = new RequestResponseInteraction('test interaction', [
       new ProviderState('state one'), new ProviderState('state two', [value: 'one', other: '2'])],
-      new Request(), new Response()
+      new Request(generators: generators), new Response(generators: generators)
     )
   }
 
@@ -20,8 +24,8 @@ class RequestResponseInteractionSpec extends Specification {
     then:
     map == [
       description: 'test interaction',
-      request: [method: 'GET', path: '/'],
-      response: [status: 200],
+      request: [method: 'GET', path: '/', generators: [header: [a: [type: 'RandomString', size: 4]]]],
+      response: [status: 200, generators: [header: [a: [type: 'RandomString', size: 4]]]],
       providerStates: [
         [name: 'state one'],
         [name: 'state two', params: [

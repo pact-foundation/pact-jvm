@@ -1,7 +1,14 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.model.generators.Generators
+import au.com.dius.pact.model.generators.Category
+import au.com.dius.pact.model.generators.RandomIntGenerator
+import au.com.dius.pact.model.generators.RandomStringGenerator
+import au.com.dius.pact.model.generators.UuidGenerator
 import au.com.dius.pact.model.matchingrules.MatchingRules
 import au.com.dius.pact.model.matchingrules.TypeMatcher
+import au.com.dius.pact.model.v3.messaging.Message
+import au.com.dius.pact.model.v3.messaging.MessagePact
 import groovy.json.JsonSlurper
 import spock.lang.Specification
 
@@ -15,7 +22,10 @@ class PactSerialiserSpec extends Specification {
   private requestWithMatchers
   private responseWithMatchers
   private interactionsWithMatcher
+  private interactionsWithGenerators
   private pactWithMatchers
+  private pactWithGenerators
+  private messagePactWithGenerators
 
   def loadTestFile(String name) {
     PactSerialiserSpec.classLoader.getResourceAsStream(name)
@@ -41,6 +51,18 @@ class PactSerialiserSpec extends Specification {
     interactionsWithMatcher = new RequestResponseInteraction('test interaction with matchers',
       [new ProviderState('test state')], requestWithMatchers, responseWithMatchers)
     pactWithMatchers = new RequestResponsePact(provider, consumer, [interactionsWithMatcher])
+
+    def requestWithGenerators = request.copy()
+    requestWithGenerators.generators = new Generators([(Category.BODY): ['a': new RandomIntGenerator(10, 20)]])
+    def responseWithGenerators = response.copy()
+    responseWithGenerators.generators = new Generators([(Category.PATH): ['': new RandomStringGenerator(20)]])
+    interactionsWithGenerators = new RequestResponseInteraction('test interaction with generators',
+      [new ProviderState('test state')], requestWithGenerators, responseWithGenerators)
+    pactWithGenerators = new RequestResponsePact(provider, consumer, [interactionsWithGenerators])
+
+    messagePactWithGenerators = new MessagePact(provider, consumer, [ new Message('Test Message',
+      [new ProviderState('message exists')], OptionalBody.body('"Test Message"'), new MatchingRules(),
+      new Generators([(Category.BODY): ['a': new UuidGenerator()]]), [contentType: 'application/json']) ])
   }
 
   def 'PactSerialiser must serialise pact'() {
@@ -119,6 +141,60 @@ class PactSerialiserSpec extends Specification {
 
     then:
     actualPact == testPact
+  }
+
+  def 'PactSerialiser must serialise pact with generators'() {
+    given:
+    def sw = new StringWriter()
+    def testPactJson = loadTestFile('test_pact_generators.json').text.trim()
+    def testPact = new JsonSlurper().parseText(testPactJson)
+
+    when:
+    PactWriter.writePact(pactWithGenerators, new PrintWriter(sw), PactSpecVersion.V3)
+    def actualPactJson = sw.toString().trim()
+    def actualPact = new JsonSlurper().parseText(actualPactJson)
+
+    then:
+    actualPact == testPact
+  }
+
+  def 'PactSerialiser must serialise message pact with generators'() {
+    given:
+    def sw = new StringWriter()
+    def testPactJson = loadTestFile('v3-message-pact-generators.json').text.trim()
+    def testPact = new JsonSlurper().parseText(testPactJson)
+
+    when:
+    PactWriter.writePact(messagePactWithGenerators, new PrintWriter(sw), PactSpecVersion.V3)
+    def actualPactJson = sw.toString().trim()
+    def actualPact = new JsonSlurper().parseText(actualPactJson)
+
+    then:
+    actualPact == testPact
+  }
+
+  def 'Correctly handle non-ascii characters'() {
+    given:
+    def file = File.createTempFile('non-ascii-pact', '.json')
+    def fw = new FileWriter(file)
+    def request = new Request(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'))
+    def response = new Response(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'))
+    def interaction = new RequestResponseInteraction('test interaction with non-ascii characters in bodies',
+      null, request, response)
+    def pact = new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+      [interaction])
+
+    when:
+    def writer = new PrintWriter(fw)
+    PactWriter.writePact(pact, writer, PactSpecVersion.V2)
+    writer.close()
+    def pactJson = file.text
+
+    then:
+    pactJson.contains('This is a string with letters ä, ü, ö and ß')
+
+    cleanup:
+    file.delete()
   }
 
   def 'PactSerialiser must de-serialise pact'() {
@@ -252,6 +328,22 @@ class PactSerialiserSpec extends Specification {
 
     where:
     pact = PactReader.loadPact(loadTestFile('test_pact_encoded_query.json'))
+  }
+
+  def 'PactSerialiser must de-serialise pact with generators'() {
+    expect:
+    pact == pactWithGenerators
+
+    where:
+    pact = PactReader.loadPact(loadTestFile('test_pact_generators.json'))
+  }
+
+  def 'PactSerialiser must de-serialise message pact with generators'() {
+    expect:
+    pact == messagePactWithGenerators
+
+    where:
+    pact = PactReader.loadPact(loadTestFile('v3-message-pact-generators.json'))
   }
 
 }

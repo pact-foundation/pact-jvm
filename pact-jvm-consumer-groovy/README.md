@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-groovy_2.11`
-* version-id = `2.4.x` or `3.2.x`
+* version-id = `2.4.x` or `3.3.x`
 
 ##Usage
 
@@ -19,7 +19,7 @@ to define your pacts. For a full example, have a look at the example JUnit `Exam
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.2.14'
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.3.8'
     }
 
 Then create an instance of the `PactBuilder` in your test.
@@ -47,7 +47,7 @@ Then create an instance of the `PactBuilder` in your test.
 
 	      // Execute the run method to have the mock server run.
 	      // It takes a closure to execute your requests and returns a Pact VerificationResult.
-	      VerificationResult result = alice_service.run() {
+	      PactVerificationResult result = alice_service.runTest {
             def client = new RESTClient('http://localhost:1234/')
             def alice_response = client.get(path: '/mallory')
 
@@ -57,7 +57,7 @@ Then create an instance of the `PactBuilder` in your test.
             def data = alice_response.data.text()
             assert data == '"That is some good Mallory."'
         }
-        assert result == PactVerified$.MODULE$  // This means it is all good in weird Scala speak.
+        assert result == PactVerificationResult.Ok.INSTANCE  // This means it is all good
 
     }
 ```
@@ -132,9 +132,9 @@ Defines the request for the interaction. The request data map can contain the fo
 | body | The body of the request. If it is not a string, it will be converted to JSON. Also accepts a PactBodyBuilder. | |
 | prettyPrint | Boolean value to control if the body is pretty printed. See note on Pretty Printed Bodies below |
 
-For the path and header attributes (version 2.2.2+ for headers), you can use regular expressions to match.
-You can either provide a regex `Pattern` class or use the `regexp` method to construct a `RegexpMatcher`
-(you can use any of the defined matcher methods, see DSL methods below).
+For the path, header attributes and query parameters (version 2.2.2+ for headers, 3.3.7+ for query parameters), 
+you can use regular expressions to match. You can either provide a regex `Pattern` class or use the `regexp` method 
+to construct a `RegexpMatcher` (you can use any of the defined matcher methods, see DSL methods below).
 If you use a `Pattern`, or the `regexp` method but don't provide a value, a random one will be generated from the
 regular expression. This value is used when generating requests.
 
@@ -203,16 +203,16 @@ For example:
     .willRespondWith(headers: [LOCATION: regexp('/transaction/[0-9]+', '/transaction/1234567890')])
 ```
 
-#### VerificationResult run(Closure closure)
+#### PactVerificationResult runTest(Closure closure)
 
-The `run` method starts the mock server, and then executes the provided closure. It then returns the pact verification
+The `runTest` method starts the mock server, and then executes the provided closure. It then returns the pact verification
 result for the pact run. If you require access to the mock server configuration for the URL, it is passed into the
 closure, e.g.,
 
 ```groovy
 
-VerificationResult result = alice_service.run() { config ->
-  def client = new RESTClient(config.url())
+PactVerificationResult result = alice_service.runTest() { mockServer ->
+  def client = new RESTClient(mockServer.url)
   def alice_response = client.get(path: '/mallory')
 }
 ```
@@ -457,8 +457,8 @@ and [#97](https://github.com/DiUS/pact-jvm/issues/97) for information on what th
 To have your consumer tests generate V3 format pacts, you can pass an option into the `run` method. For example:
 
 ```groovy
-VerificationResult result = service.run(specificationVersion: PactSpecVersion.V3) { config ->
-  def client = new RESTClient(config.url())
+PactVerificationResult result = service.runTest(specificationVersion: PactSpecVersion.V3) { config ->
+  def client = new RESTClient(config.url)
   def response = client.get(path: '/')
 }
 ```

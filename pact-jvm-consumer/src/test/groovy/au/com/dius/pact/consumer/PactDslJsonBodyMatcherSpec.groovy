@@ -43,7 +43,7 @@ class PactDslJsonBodyMatcherSpec extends Specification {
 
   def 'each like allows the number of examples to be set'() {
     given:
-    subject = new PactDslJsonBody()
+    subject
       .eachLike('data', 2)
         .date('defDate')
         .decimalType('cost')
@@ -106,7 +106,7 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     then:
     result.size() == 3
     result.keySet() == keys
-    result.types == ['"abc"', '"abc"']
+    result.types == ['abc', 'abc']
     subject.matchers.matchingRules == [
       '.types': [new MinTypeMatcher(0)],
       '.subscriptionId': [new TypeMatcher()],
@@ -129,7 +129,7 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     then:
     result.size() == 3
     result.keySet() == keys
-    result.types == ['"abc"', '"abc"']
+    result.types == ['abc', 'abc']
     subject.matchers.matchingRules == [
       '.types': [new MinTypeMatcher(2)],
       '.subscriptionId': [new TypeMatcher()],
@@ -152,7 +152,7 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     then:
     result.size() == 3
     result.keySet() == keys
-    result.types == ['"abc"', '"abc"']
+    result.types == ['abc', 'abc']
     subject.matchers.matchingRules == [
       '.types': [new MaxTypeMatcher(10)],
       '.subscriptionId': [new TypeMatcher()],
@@ -213,5 +213,22 @@ class PactDslJsonBodyMatcherSpec extends Specification {
       '.features[*].geometry.coordinates[*][1]': [
         new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)]
     ]
+  }
+
+  def 'each like generates the correct JSON for arrays of strings'() {
+    given:
+    subject
+      .object('dataStorePathInfo')
+        .stringMatcher('basePath', String.format('%s/%s/training-data/[a-z0-9]{20,24}', 'CUSTOMER', 'TRAINING'),
+          'CUSTOMER/TRAINING/training-data/12345678901234567890')
+        .eachLike('fileNames', PactDslJsonRootValue.stringType('abc.txt'), 1)
+      .closeObject()
+
+    when:
+    def bodyJson = subject.body.toString()
+
+    then:
+    bodyJson == '{"dataStorePathInfo":{"basePath":"CUSTOMER/TRAINING/training-data/12345678901234567890",' +
+      '"fileNames":["abc.txt"]}}'
   }
 }
