@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 public class ExampleJavaConsumerPactRuleTest {
 
     @Rule
-    public PactProviderRule provider = new PactProviderRule("test_provider", "localhost", 8080, this);
+    public PactProviderRule provider = new PactProviderRule("test_provider", this);
 
     @Pact(provider="test_provider", consumer="test_consumer")
     public PactFragment createFragment(PactDslWithProvider builder) {
@@ -52,10 +52,10 @@ public class ExampleJavaConsumerPactRuleTest {
     @Test
     @PactVerification("test_provider")
     public void runTest() throws IOException {
-        Assert.assertEquals(new ConsumerClient("http://localhost:8080").options("/second"), 200);
+        Assert.assertEquals(new ConsumerClient(provider.getConfig().url()).options("/second"), 200);
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient("http://localhost:8080").getAsMap("/", ""), expectedResponse);
+        assertEquals(new ConsumerClient(provider.getConfig().url()).getAsMap("/", ""), expectedResponse);
     }
 }
