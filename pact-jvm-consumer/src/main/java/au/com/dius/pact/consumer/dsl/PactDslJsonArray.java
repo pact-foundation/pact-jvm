@@ -1,10 +1,18 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.InvalidMatcherException;
+import au.com.dius.pact.model.generators.Category;
+import au.com.dius.pact.model.generators.DateGenerator;
+import au.com.dius.pact.model.generators.DateTimeGenerator;
+import au.com.dius.pact.model.generators.RandomDecimalGenerator;
+import au.com.dius.pact.model.generators.RandomHexadecimalGenerator;
+import au.com.dius.pact.model.generators.RandomIntGenerator;
+import au.com.dius.pact.model.generators.RandomStringGenerator;
+import au.com.dius.pact.model.generators.TimeGenerator;
+import au.com.dius.pact.model.generators.UuidGenerator;
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
 import au.com.dius.pact.model.matchingrules.TypeMatcher;
 import com.mifmif.common.regex.Generex;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.json.JSONArray;
@@ -172,6 +180,7 @@ public class PactDslJsonArray extends DslPart {
           matchers.addRules(rootPath + appendArrayIndex(1) + matcherName,
             object.matchers.getMatchingRules().get(matcherName));
       }
+      generators.addGenerators(object.generators, rootPath + appendArrayIndex(1));
       for (int i = 0; i < getNumberExamples(); i++) {
         body.put(object.getBody());
       }
@@ -182,6 +191,7 @@ public class PactDslJsonArray extends DslPart {
             matchers.addRules(rootPath + appendArrayIndex(1) + matcherName,
               object.matchers.getMatchingRules().get(matcherName));
         }
+        generators.addGenerators(object.generators, rootPath + appendArrayIndex(1));
         body.put(object.getBody());
     }
 
@@ -237,9 +247,10 @@ public class PactDslJsonArray extends DslPart {
      * Element that can be any string
      */
     public PactDslJsonArray stringType() {
-        body.put(RandomStringUtils.randomAlphabetic(20));
-        matchers.addRule(rootPath + appendArrayIndex(0), new TypeMatcher());
-        return this;
+      body.put("string");
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new RandomStringGenerator(20));
+      matchers.addRule(rootPath + appendArrayIndex(0), new TypeMatcher());
+      return this;
     }
 
     /**
@@ -256,7 +267,8 @@ public class PactDslJsonArray extends DslPart {
      * Element that can be any number
      */
     public PactDslJsonArray numberType() {
-        return numberType(Long.parseLong(RandomStringUtils.randomNumeric(9)));
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new RandomIntGenerator(0, Integer.MAX_VALUE));
+      return numberType(100);
     }
 
     /**
@@ -273,7 +285,8 @@ public class PactDslJsonArray extends DslPart {
      * Element that must be an integer
      */
     public PactDslJsonArray integerType() {
-        return integerType(Long.parseLong(RandomStringUtils.randomNumeric(9)));
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new RandomIntGenerator(0, Integer.MAX_VALUE));
+      return integerType(100L);
     }
 
     /**
@@ -309,7 +322,8 @@ public class PactDslJsonArray extends DslPart {
    * Element that must be a decimal value
    */
   public PactDslJsonArray decimalType() {
-      return decimalType(new BigDecimal(RandomStringUtils.randomNumeric(10)));
+    generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new RandomDecimalGenerator(10));
+    return decimalType(new BigDecimal("100"));
   }
 
   /**
@@ -369,19 +383,24 @@ public class PactDslJsonArray extends DslPart {
     /**
      * Element that must match the regular expression
      * @param regex regular expression
+     * @deprecated Use the version that takes an example value
      */
+    @Deprecated
     public PactDslJsonArray stringMatcher(String regex) {
-        stringMatcher(regex, new Generex(regex).random());
-        return this;
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new RandomStringGenerator(10));
+      stringMatcher(regex, new Generex(regex).random());
+      return this;
     }
 
     /**
      * Element that must be an ISO formatted timestamp
      */
     public PactDslJsonArray timestamp() {
-        body.put(DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date()));
-        matchers.addRule(rootPath + appendArrayIndex(0), matchTimestamp(DateFormatUtils.ISO_DATETIME_FORMAT.getPattern()));
-        return this;
+      String pattern = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern();
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new DateTimeGenerator(pattern));
+      body.put(DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date(DATE_2000)));
+      matchers.addRule(rootPath + appendArrayIndex(0), matchTimestamp(pattern));
+      return this;
     }
 
     /**
@@ -389,10 +408,11 @@ public class PactDslJsonArray extends DslPart {
      * @param format timestamp format
      */
     public PactDslJsonArray timestamp(String format) {
-        FastDateFormat instance = FastDateFormat.getInstance(format);
-        body.put(instance.format(new Date()));
-        matchers.addRule(rootPath + appendArrayIndex(0), matchTimestamp(format));
-        return this;
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new DateTimeGenerator(format));
+      FastDateFormat instance = FastDateFormat.getInstance(format);
+      body.put(instance.format(new Date(DATE_2000)));
+      matchers.addRule(rootPath + appendArrayIndex(0), matchTimestamp(format));
+      return this;
     }
 
     /**
@@ -411,9 +431,11 @@ public class PactDslJsonArray extends DslPart {
      * Element that must be formatted as an ISO date
      */
     public PactDslJsonArray date() {
-        body.put(DateFormatUtils.ISO_DATE_FORMAT.format(new Date()));
-        matchers.addRule(rootPath + appendArrayIndex(0), matchDate(DateFormatUtils.ISO_DATE_FORMAT.getPattern()));
-        return this;
+      String pattern = DateFormatUtils.ISO_DATE_FORMAT.getPattern();
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new DateGenerator(pattern));
+      body.put(DateFormatUtils.ISO_DATE_FORMAT.format(new Date(DATE_2000)));
+      matchers.addRule(rootPath + appendArrayIndex(0), matchDate(pattern));
+      return this;
     }
 
     /**
@@ -421,10 +443,11 @@ public class PactDslJsonArray extends DslPart {
      * @param format date format to match
      */
     public PactDslJsonArray date(String format) {
-        FastDateFormat instance = FastDateFormat.getInstance(format);
-        body.put(instance.format(new Date()));
-        matchers.addRule(rootPath + appendArrayIndex(0), matchDate(format));
-        return this;
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new DateTimeGenerator(format));
+      FastDateFormat instance = FastDateFormat.getInstance(format);
+      body.put(instance.format(new Date(DATE_2000)));
+      matchers.addRule(rootPath + appendArrayIndex(0), matchDate(format));
+      return this;
     }
 
     /**
@@ -443,9 +466,11 @@ public class PactDslJsonArray extends DslPart {
      * Element that must be an ISO formatted time
      */
     public PactDslJsonArray time() {
-        body.put(DateFormatUtils.ISO_TIME_FORMAT.format(new Date()));
-        matchers.addRule(rootPath + appendArrayIndex(0), matchTime(DateFormatUtils.ISO_TIME_FORMAT.getPattern()));
-        return this;
+      String pattern = DateFormatUtils.ISO_TIME_FORMAT.getPattern();
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new TimeGenerator(pattern));
+      body.put(DateFormatUtils.ISO_TIME_FORMAT.format(new Date(DATE_2000)));
+      matchers.addRule(rootPath + appendArrayIndex(0), matchTime(pattern));
+      return this;
     }
 
     /**
@@ -453,10 +478,11 @@ public class PactDslJsonArray extends DslPart {
      * @param format time format to match
      */
     public PactDslJsonArray time(String format) {
-        FastDateFormat instance = FastDateFormat.getInstance(format);
-        body.put(instance.format(new Date()));
-        matchers.addRule(rootPath + appendArrayIndex(0), matchTime(format));
-        return this;
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new TimeGenerator(format));
+      FastDateFormat instance = FastDateFormat.getInstance(format);
+      body.put(instance.format(new Date(DATE_2000)));
+      matchers.addRule(rootPath + appendArrayIndex(0), matchTime(format));
+      return this;
     }
 
     /**
@@ -512,6 +538,7 @@ public class PactDslJsonArray extends DslPart {
     }
 
     parentToReturn.getMatchers().applyMatcherRootPrefix("$");
+    parentToReturn.getGenerators().applyRootPrefix("$");
 
     return parentToReturn;
   }
@@ -531,9 +558,10 @@ public class PactDslJsonArray extends DslPart {
      * Element that must be a numeric identifier
      */
     public PactDslJsonArray id() {
-        body.put(Long.parseLong(RandomStringUtils.randomNumeric(10)));
-        matchers.addRule(rootPath + appendArrayIndex(0), new TypeMatcher());
-        return this;
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new RandomIntGenerator(0, Integer.MAX_VALUE));
+      body.put(100L);
+      matchers.addRule(rootPath + appendArrayIndex(0), new TypeMatcher());
+      return this;
     }
 
     /**
@@ -550,7 +578,8 @@ public class PactDslJsonArray extends DslPart {
      * Element that must be encoded as a hexadecimal value
      */
     public PactDslJsonArray hexValue() {
-        return hexValue(RandomStringUtils.random(10, "0123456789abcdef"));
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new RandomHexadecimalGenerator(10));
+      return hexValue("1234");
     }
 
     /**
@@ -589,7 +618,8 @@ public class PactDslJsonArray extends DslPart {
      * Element that must be encoded as an UUID
      */
     public PactDslJsonArray uuid() {
-        return uuid(UUID.randomUUID().toString());
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new UuidGenerator());
+      return uuid("e2490de5-5bd3-43d5-b7c4-526e33f71304");
     }
 
     /**

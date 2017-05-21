@@ -10,6 +10,7 @@ import au.com.dius.pact.model.Request;
 import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.model.RequestResponsePact;
 import au.com.dius.pact.model.Response;
+import au.com.dius.pact.model.generators.Generators;
 import au.com.dius.pact.model.matchingrules.MatchingRules;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import com.mifmif.common.regex.Generex;
@@ -34,6 +35,7 @@ public class PactDslResponse {
     private Map<String, String> responseHeaders = new HashMap<String, String>();
     private OptionalBody responseBody = OptionalBody.missing();
     private MatchingRules responseMatchers = new MatchingRules();
+    private Generators responseGenerators = new Generators();
 
     public PactDslResponse(ConsumerPactBuilder consumerPactBuilder, PactDslRequestWithPath request) {
         this.consumerPactBuilder = consumerPactBuilder;
@@ -183,6 +185,7 @@ public class PactDslResponse {
         }
 
         responseMatchers.addCategory(parent.getMatchers());
+        responseGenerators.addGenerators(parent.generators);
         if (parent.getBody() != null) {
             responseBody = OptionalBody.body(parent.getBody().toString());
         } else {
@@ -236,8 +239,8 @@ public class PactDslResponse {
           request.description,
           request.state,
           new Request(request.requestMethod, request.path, request.query,
-            request.requestHeaders, request.requestBody, request.requestMatchers),
-          new Response(responseStatus, responseHeaders, responseBody, responseMatchers)
+            request.requestHeaders, request.requestBody, request.requestMatchers, request.requestGenerators),
+          new Response(responseStatus, responseHeaders, responseBody, responseMatchers, responseGenerators)
         ));
     }
 

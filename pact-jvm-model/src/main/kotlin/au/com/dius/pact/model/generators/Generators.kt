@@ -34,12 +34,10 @@ object JsonContentTypeHandler : ContentTypeHandler {
   override fun applyKey(body: QueryResult, key: String, generator: Generator) {
     val pathExp = parsePath(key)
     queryObjectGraph(pathExp.iterator(), body) { (value, valueKey, parent) ->
-      if (parent is MutableMap<*, *>) {
-        (parent as MutableMap<String, Any>)[valueKey.toString()] = generator.generate(value)
-      } else if (parent is MutableList<*>) {
-        (parent as MutableList<Any>)[valueKey as Int] = generator.generate(value)
-      } else {
-        body.value = generator.generate(value)
+      when (parent) {
+        is MutableMap<*, *> -> (parent as MutableMap<String, Any>)[valueKey.toString()] = generator.generate(value)
+        is MutableList<*> -> (parent as MutableList<Any>)[valueKey as Int] = generator.generate(value)
+        else -> body.value = generator.generate(value)
       }
     }
   }
@@ -154,6 +152,16 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     return this
   }
 
+  @JvmOverloads
+  fun addGenerators(generators: Generators, keyPrefix: String = ""): Generators {
+    generators.categories.forEach { (category, map) ->
+      map.forEach { (key, generator) ->
+        addGenerator(category, keyPrefix + key, generator)
+      }
+    }
+    return this
+  }
+
   fun applyGenerator(category: Category, closure: (String, Generator?) -> Unit) {
     if (categories.containsKey(category) && categories[category] != null) {
       val categoryValues = categories[category]
@@ -210,6 +218,12 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
           genKey to generator.toMap(pactSpecVersion)
         }
       }
+    }
+  }
+
+  fun applyRootPrefix(prefix: String) {
+    categories.keys.forEach { category ->
+      categories[category] = categories[category]!!.mapKeys { entry -> prefix + entry.key }.toMutableMap()
     }
   }
 }
