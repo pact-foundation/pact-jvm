@@ -11,6 +11,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +66,12 @@ public class BooksPactProviderTest {
     @State("book-not-found")
     public void bookNotFound() {
         when(bookLogic.getBookById(any(UUID.class)))
-                .then(i -> { throw new BookNotFoundException(i.getArgumentAt(0, UUID.class)); });
+                .then(new Answer<Object>() {
+                    @Override
+                    public Object answer(InvocationOnMock i) throws Throwable {
+                        throw new BookNotFoundException(i.getArgumentAt(0, UUID.class));
+                    }
+                });
     }
 
     @State("create-book")
@@ -75,7 +82,12 @@ public class BooksPactProviderTest {
     @State("create-book-bad-data")
     public void createBookBadData() {
         when(bookLogic.createBook(any(Book.class)))
-                .then(i -> { throw new BookValidationException(i.getArgumentAt(0, Book.class)); });
+                .then(new Answer<Object>() {
+                    @Override
+                    public Object answer(InvocationOnMock i) throws Throwable {
+                        throw new BookValidationException(i.getArgumentAt(0, Book.class));
+                    }
+                });
     }
 
     @State("update-book")

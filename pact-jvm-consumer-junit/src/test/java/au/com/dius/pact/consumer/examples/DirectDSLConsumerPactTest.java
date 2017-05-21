@@ -1,10 +1,13 @@
 package au.com.dius.pact.consumer.examples;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
+import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.PactTestRun;
 import au.com.dius.pact.consumer.PactVerificationResult;
 import au.com.dius.pact.consumer.exampleclients.ProviderClient;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.RequestResponsePact;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -35,14 +38,17 @@ public class DirectDSLConsumerPactTest {
                 .toPact();
 
         MockProviderConfig config = MockProviderConfig.createDefault();
-        PactVerificationResult result = runConsumerTest(pact, config, mockServer -> {
-            Map expectedResponse = new HashMap();
-            expectedResponse.put("hello", "harry");
-            try {
-                assertEquals(new ProviderClient(mockServer.getUrl()).hello("{\"name\": \"harry\"}"),
-                        expectedResponse);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+        PactVerificationResult result = runConsumerTest(pact, config, new PactTestRun() {
+            @Override
+            public void run(@NotNull MockServer mockServer) throws Throwable {
+                Map expectedResponse = new HashMap();
+                expectedResponse.put("hello", "harry");
+                try {
+                    assertEquals(new ProviderClient(mockServer.getUrl()).hello("{\"name\": \"harry\"}"),
+                      expectedResponse);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 

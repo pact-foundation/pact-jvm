@@ -67,14 +67,17 @@ public class PactProviderTest {
     @Test
     @PactVerification("test_provider")
     public void runTestWithUserCodeFailure() throws IOException {
-      mockTestProvider.validateResultWith((result, t) -> {
-        assertThat(t, is(instanceOf(AssertionError.class)));
-        assertThat(t.getMessage(), is("Pact Test function failed with an exception: expected:" +
-          "<{responsetest=true, name=harry}> but was:<{responsetest=true, name=fred}>"));
-        assertThat(result, is(instanceOf(PactVerificationResult.Error.class)));
-        PactVerificationResult.Error error = (PactVerificationResult.Error) result;
-        assertThat(error.getMockServerState(), is(instanceOf(PactVerificationResult.Ok.INSTANCE.getClass())));
-        assertThat(error.getError(), is(instanceOf(AssertionError.class)));
+      mockTestProvider.validateResultWith(new TestFailureProviderRule.BiConsumer() {
+        @Override
+        public void accept(PactVerificationResult result, Throwable t) {
+          assertThat(t, is(instanceOf(AssertionError.class)));
+          assertThat(t.getMessage(), is("Pact Test function failed with an exception: expected:" +
+            "<{responsetest=true, name=harry}> but was:<{responsetest=true, name=fred}>"));
+          assertThat(result, is(instanceOf(PactVerificationResult.Error.class)));
+          PactVerificationResult.Error error = (PactVerificationResult.Error) result;
+          assertThat(error.getMockServerState(), is(instanceOf(PactVerificationResult.Ok.INSTANCE.getClass())));
+          assertThat(error.getError(), is(instanceOf(AssertionError.class)));
+        }
       });
       Assert.assertEquals(new ConsumerClient(mockTestProvider.getUrl()).options("/second"), 200);
       Map expectedResponse = new HashMap();
@@ -86,7 +89,9 @@ public class PactProviderTest {
     @Test
     @PactVerification(value = "test_provider")
     public void runTestWithPactError() throws IOException {
-      mockTestProvider.validateResultWith((result, t) -> {
+      mockTestProvider.validateResultWith(new TestFailureProviderRule.BiConsumer() {
+        @Override
+        public void accept(PactVerificationResult result, Throwable t) {
           assertThat(t, is(instanceOf(AssertionError.class)));
           assertThat(t.getMessage(), startsWith("The following requests were not received:\n" +
             "\tmethod: GET\n" +
@@ -96,6 +101,7 @@ public class PactProviderTest {
           assertThat(error.getExpectedRequests(), hasSize(1));
           Request request = error.getExpectedRequests().get(0);
           assertThat(request.getPath(), is("/"));
+        }
       });
       Assert.assertEquals(new ConsumerClient(mockTestProvider.getUrl()).options("/second"), 200);
     }

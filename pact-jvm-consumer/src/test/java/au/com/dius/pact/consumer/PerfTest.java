@@ -17,11 +17,11 @@ public class PerfTest {
 
   @Test
   public void test() {
-    StopWatch stopWatch = new StopWatch();
+    final StopWatch stopWatch = new StopWatch();
     stopWatch.start();
 
     // Define the test data:
-    String path = "/mypath/abc/";
+    final String path = "/mypath/abc/";
 
     //Header data:
     Map<String, String> headerData = new HashMap<String, String>();
@@ -49,7 +49,7 @@ public class PerfTest {
     stopWatch.split();
     System.out.println("Setup Fragment: " + stopWatch.getSplitTime());
 
-    MockProviderConfig config = MockProviderConfig.createDefault();
+    final MockProviderConfig config = MockProviderConfig.createDefault();
     PactVerificationResult result = runConsumerTest(pactFragment.toPact(), config, new PactTestRun() {
       @Override
       public void run(@NotNull MockServer mockServer) throws IOException {

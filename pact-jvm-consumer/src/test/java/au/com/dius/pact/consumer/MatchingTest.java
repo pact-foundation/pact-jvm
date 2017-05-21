@@ -139,7 +139,7 @@ public class MatchingTest {
     }
 
     private void runTest(PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
-        MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V3);
+        final MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V3);
         PactVerificationResult result = runConsumerTest(pactFragment.toPact(), config, new PactTestRun() {
             @Override
             public void run(@NotNull MockServer mockServer) throws IOException {

@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactSpecVersion;
 import au.com.dius.pact.model.RequestResponsePact;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -18,12 +19,26 @@ public abstract class ConsumerPactTestMk2 {
 
     protected abstract void runTest(MockServer mockServer) throws IOException;
 
+    class PactTestRunner implements PactTestRun {
+
+      private final ConsumerPactTestMk2 consumerPactTestMk2;
+
+      PactTestRunner(ConsumerPactTestMk2 consumerPactTestMk2) {
+        this.consumerPactTestMk2 = consumerPactTestMk2;
+      }
+
+      @Override
+      public void run(@NotNull MockServer mockServer) throws Throwable {
+        consumerPactTestMk2.runTest(mockServer);
+      }
+    }
+
     @Test
     public void testPact() throws Throwable {
         RequestResponsePact pact = createPact(ConsumerPactBuilder.consumer(consumerName()).hasPactWith(providerName()));
         final MockProviderConfig config = MockProviderConfig.createDefault(getSpecificationVersion());
 
-        PactVerificationResult result = runConsumerTest(pact, config, this::runTest);
+      PactVerificationResult result = runConsumerTest(pact, config, new PactTestRunner(this));
 
         if (!result.equals(PactVerificationResult.Ok.INSTANCE)) {
             if (result instanceof PactVerificationResult.Error) {

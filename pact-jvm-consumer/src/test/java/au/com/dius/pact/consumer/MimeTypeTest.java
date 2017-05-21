@@ -2,7 +2,6 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.model.PactSpecVersion;
 import au.com.dius.pact.model.RequestResponsePact;
 import org.apache.http.entity.ContentType;
@@ -64,7 +63,7 @@ public class MimeTypeTest {
     }
 
     private void runTest(RequestResponsePact pact, final String body, final String expectedResponse, final ContentType mimeType) {
-        MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V3);
+        final MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V3);
         PactVerificationResult result = runConsumerTest(pact, config, new PactTestRun() {
             @Override
             public void run(@NotNull MockServer mockServer) throws IOException {

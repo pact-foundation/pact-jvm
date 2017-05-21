@@ -11,6 +11,8 @@ import au.com.dius.pact.provider.junit.TargetRequestFilter;
 import au.com.dius.pact.provider.junit.target.BaseTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.spring.MvcProviderVerifier;
+import au.com.dius.pact.util.Optional;
+import org.apache.commons.collections4.Closure;
 import org.apache.http.HttpRequest;
 import org.codehaus.groovy.runtime.MethodClosure;
 import org.junit.runners.model.FrameworkMethod;
@@ -18,8 +20,13 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
 
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
@@ -51,7 +58,7 @@ public class MockMvcTarget extends BaseTarget {
 
     public MockMvcTarget(List<Object> controllers, List<Object> controllerAdvice, boolean printRequestResponse, int runTimes) {
         Optional<List<Object>> c = Optional.ofNullable(controllers);
-        this.controllers = c.orElseThrow(() -> new IllegalArgumentException("controllers cannot be null"));
+        this.controllers = c.orElseThrow(new IllegalArgumentException("controllers cannot be null"));
         this.controllerAdvice = Optional.ofNullable(controllerAdvice).orElse(Collections.emptyList());
         this.printRequestResponse = printRequestResponse;
         this.runTimes = runTimes;
@@ -67,7 +74,7 @@ public class MockMvcTarget extends BaseTarget {
 
     public void setControllers(Object... controllers) {
         Optional<Object[]> c = Optional.ofNullable(controllers);
-        this.controllers = Arrays.asList(c.orElseThrow(() -> new IllegalArgumentException("controllers cannot be null")));
+        this.controllers = Arrays.asList(c.orElseThrow(new IllegalArgumentException("controllers cannot be null")));
     }
 
     public void setControllerAdvice(Object... controllerAdvice) {
@@ -139,17 +146,21 @@ public class MockMvcTarget extends BaseTarget {
         if (testClass != null) {
             final List<FrameworkMethod> methods = testClass.getAnnotatedMethods(TargetRequestFilter.class);
             if (!methods.isEmpty()) {
-                providerInfo.setRequestFilter((Consumer<HttpRequest>) httpRequest -> methods.forEach(method -> {
-                    try {
-                        method.invokeExplosively(testTarget, httpRequest);
-                    } catch (Throwable t) {
-                        throw new AssertionError("Request filter method " + method.getName() + " failed with an exception", t);
+                providerInfo.setRequestFilter(new Closure<HttpRequest>() {
+                    @Override
+                    public void execute(HttpRequest httpRequest) {
+                        for (FrameworkMethod method: methods) {
+                            try {
+                                method.invokeExplosively(testTarget, httpRequest);
+                            } catch (Throwable t) {
+                                throw new AssertionError("Request filter method " + method.getName() + " failed with an exception", t);
+                            }
+                        }
                     }
-                }));
+                });
             }
         }
 
         return providerInfo;
     }
 }
-

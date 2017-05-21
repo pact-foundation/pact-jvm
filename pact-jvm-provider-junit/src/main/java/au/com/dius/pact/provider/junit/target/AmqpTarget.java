@@ -16,11 +16,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Out-of-the-box implementation of {@link Target},
@@ -99,9 +99,11 @@ public class AmqpTarget extends BaseTarget {
       try {
         PactFolderLoader folderLoader = new PactFolderLoader(folder);
         Map<Pact, File> pactFileMap = folderLoader.loadPactsWithFiles(providerInfo.getName());
-        providerInfo.setConsumers(pactFileMap.entrySet().stream()
-          .map(e -> new ConsumerInfo(e.getKey().getConsumer().getName(), e.getValue()))
-          .collect(Collectors.toList()));
+        List<ConsumerInfo> consumers = new ArrayList<>();
+        for (Map.Entry<Pact, File> e: pactFileMap.entrySet()) {
+          consumers.add(new ConsumerInfo(e.getKey().getConsumer().getName(), e.getValue()));
+        }
+        providerInfo.setConsumers(consumers);
       } catch (IOException e) {
         e.printStackTrace();
       }

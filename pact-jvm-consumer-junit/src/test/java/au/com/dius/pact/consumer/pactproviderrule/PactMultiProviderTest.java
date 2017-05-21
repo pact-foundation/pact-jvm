@@ -8,6 +8,7 @@ import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.model.BodyMismatch;
 import au.com.dius.pact.model.RequestPartMismatch;
 import au.com.dius.pact.model.RequestResponsePact;
+import org.hamcrest.CoreMatchers;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -75,9 +76,12 @@ public class PactMultiProviderTest {
     @Test
     @PactVerification({"test_provider", "test_provider2"})
     public void allPass() throws IOException {
-      mockTestProvider.validateResultWith((result, t) -> {
-        assertThat(t, is(nullValue()));
-        assertThat(result, is(PactVerificationResult.Ok.INSTANCE));
+      mockTestProvider.validateResultWith(new TestFailureProviderRule.BiConsumer() {
+        @Override
+        public void accept(PactVerificationResult result, Throwable t) {
+          assertThat(t, is(nullValue()));
+          assertThat(result, CoreMatchers.<PactVerificationResult>is(PactVerificationResult.Ok.INSTANCE));
+        }
       });
       doTest("/", NAME_LARRY_JSON);
     }
@@ -85,14 +89,17 @@ public class PactMultiProviderTest {
     @Test
     @PactVerification({"test_provider", "test_provider2"})
     public void consumerTestFails() throws IOException, InterruptedException {
-      mockTestProvider.validateResultWith((result, t) -> {
-        assertThat(t, is(instanceOf(AssertionError.class)));
-        assertThat(t.getMessage(), is("Pact Test function failed with an exception: Oops"));
-        assertThat(result, is(instanceOf(PactVerificationResult.Error.class)));
-        PactVerificationResult.Error error = (PactVerificationResult.Error) result;
-        assertThat(error.getError(), is(instanceOf(RuntimeException.class)));
-        assertThat(error.getError().getMessage(), is("Oops"));
-        assertThat(error.getMockServerState(), is(PactVerificationResult.Ok.INSTANCE));
+      mockTestProvider.validateResultWith(new TestFailureProviderRule.BiConsumer() {
+        @Override
+        public void accept(PactVerificationResult result, Throwable t) {
+          assertThat(t, is(instanceOf(AssertionError.class)));
+          assertThat(t.getMessage(), is("Pact Test function failed with an exception: Oops"));
+          assertThat(result, is(instanceOf(PactVerificationResult.Error.class)));
+          PactVerificationResult.Error error = (PactVerificationResult.Error) result;
+          assertThat(error.getError(), is(instanceOf(RuntimeException.class)));
+          assertThat(error.getError().getMessage(), is("Oops"));
+          assertThat(error.getMockServerState(), CoreMatchers.<PactVerificationResult>is(PactVerificationResult.Ok.INSTANCE));
+        }
       });
       doTest("/", NAME_LARRY_JSON);
       throw new RuntimeException("Oops");
@@ -101,7 +108,52 @@ public class PactMultiProviderTest {
     @Test
     @PactVerification(value = {"test_provider", "test_provider2"})
     public void provider1Fails() throws IOException, InterruptedException {
-        mockTestProvider.validateResultWith((result, t) -> {
+        mockTestProvider.validateResultWith(new TestFailureProviderRule.BiConsumer() {
+          @Override
+          public void accept(PactVerificationResult result, Throwable t) {
+            assertThat(t, is(instanceOf(AssertionError.class)));
+            assertThat(t.getMessage(), startsWith("The following mismatched requests occurred:\nUnexpected Request:\n\tmethod: GET\n\tpath: /abc"));
+            assertThat(result, is(instanceOf(PactVerificationResult.Mismatches.class)));
+            PactVerificationResult.Mismatches error = (PactVerificationResult.Mismatches) result;
+            assertThat(error.getMismatches(), hasSize(1));
+            PactVerificationResult result1 = error.getMismatches().get(0);
+            assertThat(result1, is(instanceOf(PactVerificationResult.UnexpectedRequest.class)));
+            PactVerificationResult.UnexpectedRequest unexpectedRequest = (PactVerificationResult.UnexpectedRequest) result1;
+            assertThat(unexpectedRequest.getRequest().getPath(), is("/abc"));
+          }
+        });
+        doTest("/abc", NAME_LARRY_JSON);
+    }
+
+    @Test
+    @PactVerification(value = {"test_provider", "test_provider2"})
+    public void provider2Fails() throws IOException, InterruptedException {
+      mockTestProvider2.validateResultWith(new TestFailureProviderRule.BiConsumer() {
+        @Override
+        public void accept(PactVerificationResult result, Throwable t) {
+          assertThat(t, is(instanceOf(AssertionError.class)));
+          assertThat(t.getMessage(), is("The following mismatched requests occurred:\n" +
+            "PartialMismatch(mismatches=[BodyMismatch(larry,farry,Some(Expected 'larry' but received 'farry'),$.name,None)])"));
+          assertThat(result, is(instanceOf(PactVerificationResult.Mismatches.class)));
+          PactVerificationResult.Mismatches error = (PactVerificationResult.Mismatches) result;
+          assertThat(error.getMismatches(), hasSize(1));
+          PactVerificationResult result1 = error.getMismatches().get(0);
+          assertThat(result1, is(instanceOf(PactVerificationResult.PartialMismatch.class)));
+          PactVerificationResult.PartialMismatch error1 = (PactVerificationResult.PartialMismatch) result1;
+          assertThat(error1.getMismatches(), hasSize(1));
+          RequestPartMismatch mismatch = error1.getMismatches().get(0);
+          assertThat(mismatch, is(instanceOf(BodyMismatch.class)));
+        }
+      });
+      doTest("/", "{\"name\": \"farry\"}");
+    }
+
+    @Test
+    @PactVerification(value = {"test_provider", "test_provider2"})
+    public void bothprovidersFail() throws IOException, InterruptedException {
+      mockTestProvider.validateResultWith(new TestFailureProviderRule.BiConsumer() {
+        @Override
+        public void accept(PactVerificationResult result, Throwable t) {
           assertThat(t, is(instanceOf(AssertionError.class)));
           assertThat(t.getMessage(), startsWith("The following mismatched requests occurred:\nUnexpected Request:\n\tmethod: GET\n\tpath: /abc"));
           assertThat(result, is(instanceOf(PactVerificationResult.Mismatches.class)));
@@ -111,57 +163,24 @@ public class PactMultiProviderTest {
           assertThat(result1, is(instanceOf(PactVerificationResult.UnexpectedRequest.class)));
           PactVerificationResult.UnexpectedRequest unexpectedRequest = (PactVerificationResult.UnexpectedRequest) result1;
           assertThat(unexpectedRequest.getRequest().getPath(), is("/abc"));
-        });
-        doTest("/abc", NAME_LARRY_JSON);
-    }
-
-    @Test
-    @PactVerification(value = {"test_provider", "test_provider2"})
-    public void provider2Fails() throws IOException, InterruptedException {
-      mockTestProvider2.validateResultWith((result, t) -> {
-        assertThat(t, is(instanceOf(AssertionError.class)));
-        assertThat(t.getMessage(), is("The following mismatched requests occurred:\n" +
-          "PartialMismatch(mismatches=[BodyMismatch(larry,farry,Some(Expected 'larry' but received 'farry'),$.name,None)])"));
-        assertThat(result, is(instanceOf(PactVerificationResult.Mismatches.class)));
-        PactVerificationResult.Mismatches error = (PactVerificationResult.Mismatches) result;
-        assertThat(error.getMismatches(), hasSize(1));
-        PactVerificationResult result1 = error.getMismatches().get(0);
-        assertThat(result1, is(instanceOf(PactVerificationResult.PartialMismatch.class)));
-        PactVerificationResult.PartialMismatch error1 = (PactVerificationResult.PartialMismatch) result1;
-        assertThat(error1.getMismatches(), hasSize(1));
-        RequestPartMismatch mismatch = error1.getMismatches().get(0);
-        assertThat(mismatch, is(instanceOf(BodyMismatch.class)));
+        }
       });
-      doTest("/", "{\"name\": \"farry\"}");
-    }
-
-    @Test
-    @PactVerification(value = {"test_provider", "test_provider2"})
-    public void bothprovidersFail() throws IOException, InterruptedException {
-      mockTestProvider.validateResultWith((result, t) -> {
-        assertThat(t, is(instanceOf(AssertionError.class)));
-        assertThat(t.getMessage(), startsWith("The following mismatched requests occurred:\nUnexpected Request:\n\tmethod: GET\n\tpath: /abc"));
-        assertThat(result, is(instanceOf(PactVerificationResult.Mismatches.class)));
-        PactVerificationResult.Mismatches error = (PactVerificationResult.Mismatches) result;
-        assertThat(error.getMismatches(), hasSize(1));
-        PactVerificationResult result1 = error.getMismatches().get(0);
-        assertThat(result1, is(instanceOf(PactVerificationResult.UnexpectedRequest.class)));
-        PactVerificationResult.UnexpectedRequest unexpectedRequest = (PactVerificationResult.UnexpectedRequest) result1;
-        assertThat(unexpectedRequest.getRequest().getPath(), is("/abc"));
-      });
-      mockTestProvider2.validateResultWith((result, t) -> {
-        assertThat(t, is(instanceOf(AssertionError.class)));
-        assertThat(t.getMessage(), is("The following mismatched requests occurred:\n" +
-          "PartialMismatch(mismatches=[BodyMismatch(larry,farry,Some(Expected 'larry' but received 'farry'),$.name,None)])"));
-        assertThat(result, is(instanceOf(PactVerificationResult.Mismatches.class)));
-        PactVerificationResult.Mismatches error = (PactVerificationResult.Mismatches) result;
-        assertThat(error.getMismatches(), hasSize(1));
-        PactVerificationResult result1 = error.getMismatches().get(0);
-        assertThat(result1, is(instanceOf(PactVerificationResult.PartialMismatch.class)));
-        PactVerificationResult.PartialMismatch error1 = (PactVerificationResult.PartialMismatch) result1;
-        assertThat(error1.getMismatches(), hasSize(1));
-        RequestPartMismatch mismatch = error1.getMismatches().get(0);
-        assertThat(mismatch, is(instanceOf(BodyMismatch.class)));
+      mockTestProvider2.validateResultWith(new TestFailureProviderRule.BiConsumer() {
+        @Override
+        public void accept(PactVerificationResult result, Throwable t) {
+          assertThat(t, is(instanceOf(AssertionError.class)));
+          assertThat(t.getMessage(), is("The following mismatched requests occurred:\n" +
+            "PartialMismatch(mismatches=[BodyMismatch(larry,farry,Some(Expected 'larry' but received 'farry'),$.name,None)])"));
+          assertThat(result, is(instanceOf(PactVerificationResult.Mismatches.class)));
+          PactVerificationResult.Mismatches error = (PactVerificationResult.Mismatches) result;
+          assertThat(error.getMismatches(), hasSize(1));
+          PactVerificationResult result1 = error.getMismatches().get(0);
+          assertThat(result1, is(instanceOf(PactVerificationResult.PartialMismatch.class)));
+          PactVerificationResult.PartialMismatch error1 = (PactVerificationResult.PartialMismatch) result1;
+          assertThat(error1.getMismatches(), hasSize(1));
+          RequestPartMismatch mismatch = error1.getMismatches().get(0);
+          assertThat(mismatch, is(instanceOf(BodyMismatch.class)));
+        }
       });
       doTest("/abc", "{\"name\": \"farry\"}");
     }

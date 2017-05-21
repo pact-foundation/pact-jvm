@@ -4,7 +4,9 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactSpecVersion;
 import au.com.dius.pact.model.RequestResponsePact;
+import au.com.dius.pact.util.Optional;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -14,7 +16,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
 
@@ -61,12 +62,15 @@ public class BaseProviderRule extends ExternalResource {
               }
 
               Map<String, RequestResponsePact> pacts = getPacts(pactDef.fragment());
-              Optional<RequestResponsePact> pact;
+              Optional<RequestResponsePact> pact = Optional.empty();
               if (pactDef.value().length == 1 && StringUtils.isEmpty(pactDef.value()[0])) {
-                  pact = pacts.values().stream().findFirst();
+                  pact = Optional.of(pacts.values().iterator().next());
               } else {
-                  pact = Arrays.stream(pactDef.value()).map(pacts::get)
-                          .filter(Objects::nonNull).findFirst();
+                for (String verification: pactDef.value()) {
+                  if (pacts.containsKey(verification)) {
+                    pact = Optional.of(pacts.get(verification));
+                  }
+                }
               }
               if (!pact.isPresent()) {
                   base.evaluate();
@@ -107,15 +111,19 @@ public class BaseProviderRule extends ExternalResource {
 
   private Optional<PactVerification> findPactVerification(PactVerifications pactVerifications) {
       PactVerification[] pactVerificationValues = pactVerifications.value();
-      return Arrays.stream(pactVerificationValues).filter(p -> {
-          String[] providers = p.value();
-          if (providers.length != 1) {
-              throw new IllegalArgumentException(
-                      "Each @PactVerification must specify one and only provider when using @PactVerifications");
-          }
-          String provider = providers[0];
-          return provider.equals(this.provider);
-      }).findFirst();
+      Optional<PactVerification> optional = Optional.empty();
+      for (PactVerification p: pactVerificationValues) {
+        String[] providers = p.value();
+        if (providers.length != 1) {
+          throw new IllegalArgumentException(
+            "Each @PactVerification must specify one and only provider when using @PactVerifications");
+        }
+        String provider = providers[0];
+        if (provider.equals(this.provider)) {
+          optional = Optional.of(p);
+        }
+      }
+      return optional;
   }
 
   private Optional<Method> findPactMethod(PactVerification pactVerification) {
@@ -144,12 +152,26 @@ public class BaseProviderRule extends ExternalResource {
       }
   }
 
+  class PactTestRunner implements PactTestRun {
+
+    private final BaseProviderRule baseProviderRule;
+    private final Statement base;
+
+    PactTestRunner(BaseProviderRule baseProviderRule, Statement base) {
+      this.baseProviderRule = baseProviderRule;
+      this.base = base;
+    }
+
+    @Override
+    public void run(@NotNull MockServer mockServer) throws Throwable {
+      baseProviderRule.mockServer = mockServer;
+      base.evaluate();
+      baseProviderRule.mockServer = null;
+    }
+  }
+
   private PactVerificationResult runPactTest(final Statement base, RequestResponsePact pact) {
-      return runConsumerTest(pact, config, mockServer -> {
-        this.mockServer = mockServer;
-        base.evaluate();
-        this.mockServer = null;
-      });
+      return runConsumerTest(pact, config, new PactTestRunner(this, base));
   }
 
   protected void validateResult(PactVerificationResult result, PactVerification pactVerification) throws Throwable {
