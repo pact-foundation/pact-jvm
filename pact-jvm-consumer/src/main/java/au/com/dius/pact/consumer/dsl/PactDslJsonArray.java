@@ -20,7 +20,6 @@ import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * DSL to define a JSON array
@@ -579,7 +578,7 @@ public class PactDslJsonArray extends DslPart {
      */
     public PactDslJsonArray hexValue() {
       generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new RandomHexadecimalGenerator(10));
-      return hexValue("1234");
+      return hexValue("1234a");
     }
 
     /**
