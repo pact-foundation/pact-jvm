@@ -241,7 +241,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue stringType() {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "$", new RandomStringGenerator(20));
+    value.generators.addGenerator(Category.BODY, "", new RandomStringGenerator(20));
     value.setValue("string");
     value.setMatcher(new TypeMatcher());
     return value;
@@ -264,7 +264,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue numberType() {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "$", new RandomIntGenerator(0, Integer.MAX_VALUE));
+    value.generators.addGenerator(Category.BODY, "", new RandomIntGenerator(0, Integer.MAX_VALUE));
     value.setValue(100);
     value.setMatcher(new TypeMatcher());
     return value;
@@ -286,7 +286,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue integerType() {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "$", new RandomIntGenerator(0, Integer.MAX_VALUE));
+    value.generators.addGenerator(Category.BODY, "", new RandomIntGenerator(0, Integer.MAX_VALUE));
     value.setValue(100);
     value.setMatcher(new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER));
     return value;
@@ -319,7 +319,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue decimalType() {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "$", new RandomDecimalGenerator(10));
+    value.generators.addGenerator(Category.BODY, "", new RandomDecimalGenerator(10));
     value.setValue(100);
     value.setMatcher(new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL));
     return value;
@@ -389,7 +389,7 @@ public class PactDslJsonRootValue extends DslPart {
   @Deprecated
   public static PactDslJsonRootValue stringMatcher(String regex) {
     PactDslJsonRootValue rootValue = new PactDslJsonRootValue();
-    rootValue.generators.addGenerator(Category.BODY, "$", new RegexGenerator(regex));
+    rootValue.generators.addGenerator(Category.BODY, "", new RegexGenerator(regex));
     rootValue.setValue(new Generex(regex).random());
     rootValue.setMatcher(rootValue.regexp(regex));
     return rootValue;
@@ -408,7 +408,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue timestamp(String format) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "$", new DateTimeGenerator(format));
+    value.generators.addGenerator(Category.BODY, "", new DateTimeGenerator(format));
     FastDateFormat instance = FastDateFormat.getInstance(format);
     value.setValue(instance.format(new Date(DATE_2000)));
     value.setMatcher(value.matchTimestamp(format));
@@ -442,7 +442,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue date(String format) {
     FastDateFormat instance = FastDateFormat.getInstance(format);
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "$", new DateGenerator(format));
+    value.generators.addGenerator(Category.BODY, "", new DateGenerator(format));
     value.setValue(instance.format(new Date(DATE_2000)));
     value.setMatcher(value.matchDate(format));
     return value;
@@ -475,7 +475,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue time(String format) {
     FastDateFormat instance = FastDateFormat.getInstance(format);
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "$", new TimeGenerator(format));
+    value.generators.addGenerator(Category.BODY, "", new TimeGenerator(format));
     value.setValue(instance.format(new Date(DATE_2000)));
     value.setMatcher(value.matchTime(format));
     return value;
@@ -524,7 +524,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue hexValue() {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "$", new RandomHexadecimalGenerator(10));
+    value.generators.addGenerator(Category.BODY, "", new RandomHexadecimalGenerator(10));
     value.setValue("1234a");
     value.setMatcher(value.regexp("[0-9a-fA-F]+"));
     return value;
@@ -549,7 +549,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue uuid() {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "$", new UuidGenerator());
+    value.generators.addGenerator(Category.BODY, "", new UuidGenerator());
     value.setValue("e2490de5-5bd3-43d5-b7c4-526e33f71304");
     value.setMatcher(value.regexp(UUID_REGEX));
     return value;
