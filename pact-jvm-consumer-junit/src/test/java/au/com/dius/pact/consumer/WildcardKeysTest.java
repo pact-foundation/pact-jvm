@@ -51,7 +51,10 @@ public class WildcardKeysTest {
             .closeObject()
           .closeArray()
           .closeObject()
-        .closeArray();
+        .closeArray()
+        .object("foo")
+          .eachKeyLike("001", PactDslJsonRootValue.numberType(42))
+        .closeObject();
 
       PactFragment pactFragment = builder
         .uponReceiving("a request for an article")
@@ -72,7 +75,8 @@ public class WildcardKeysTest {
         "$.body.articles[*].variants[*].*[*].bundles[*].*.description",
         "$.body.articles[*].variants[*].*[*].bundles[*].*.referencedArticles",
         "$.body.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*].*",
-        "$.body.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*].bundleId"
+        "$.body.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*].bundleId",
+        "$.body.foo.*"
       );
 
       return pactFragment;
@@ -86,6 +90,10 @@ public class WildcardKeysTest {
         .execute().returnContent().asString();
       Map<String, Object> body = (Map<String, Object>) new JsonSlurper().parseText(result);
 
+      assertThat(body, hasKey("foo"));
+      Map<String, Object> foo = (Map<String, Object>) body.get("foo");
+      assertThat(foo, hasKey("001"));
+      assertThat(foo.get("001"), is(42));
       assertThat(body, hasKey("articles"));
       List articles = (List) body.get("articles");
       assertThat(articles.size(), is(1));
