@@ -1,5 +1,10 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.model.generators.DateGenerator
+import au.com.dius.pact.model.generators.RandomDecimalGenerator
+import au.com.dius.pact.model.generators.RandomHexadecimalGenerator
+import au.com.dius.pact.model.generators.RandomIntGenerator
+import au.com.dius.pact.model.generators.UuidGenerator
 import au.com.dius.pact.model.matchingrules.MaxTypeMatcher
 import au.com.dius.pact.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
@@ -10,6 +15,8 @@ import au.com.dius.pact.model.matchingrules.DateMatcher
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import spock.lang.Specification
+
+import static au.com.dius.pact.model.generators.Category.BODY
 
 class PactBodyBuilderSpec extends Specification {
 
@@ -23,7 +30,7 @@ class PactBodyBuilderSpec extends Specification {
     }
   }
 
-  @SuppressWarnings('AbcMetric')
+  @SuppressWarnings(['AbcMetric', 'MethodSize'])
   void dsl() {
     given:
     service {
@@ -81,6 +88,7 @@ class PactBodyBuilderSpec extends Specification {
     def requestMatchingRules = service.interactions[0].request.matchingRules
     def bodyMatchingRules = requestMatchingRules.rulesForCategory('body').matchingRules
     def responseMatchingRules = service.interactions[0].response.matchingRules
+    def requestGenerators = service.interactions[0].request.generators.categories[BODY]
 
     then:
     service.interactions.size() == 1
@@ -90,8 +98,8 @@ class PactBodyBuilderSpec extends Specification {
     bodyMatchingRules['$.position'] == [new RegexMatcher('staff|contractor')]
     bodyMatchingRules['$.hexCode'] == [new RegexMatcher('[0-9a-fA-F]+')]
     bodyMatchingRules['$.hexCode2'] == [new RegexMatcher('[0-9a-fA-F]+')]
-    bodyMatchingRules['$.id'] == [new TypeMatcher()]
-    bodyMatchingRules['$.id2'] == [new TypeMatcher()]
+    bodyMatchingRules['$.id'] == [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)]
+    bodyMatchingRules['$.id2'] == [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)]
     bodyMatchingRules['$.salary'] == [new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)]
     bodyMatchingRules['$.localAddress'] == [new RegexMatcher('(\\d{1,3}\\.)+\\d{1,3}')]
     bodyMatchingRules['$.localAddress2'] == [new RegexMatcher('(\\d{1,3}\\.)+\\d{1,3}')]
@@ -111,6 +119,17 @@ class PactBodyBuilderSpec extends Specification {
       'localAddress2', 'age', 'age2', 'salary', 'timestamp', 'ts', 'values', 'role', 'roles'] as Set
 
     service.interactions[0].response.body.value == new JsonBuilder([name: 'harry']).toPrettyString()
+
+    requestGenerators.keySet() == ['$.hexCode', '$.id', '$.age2', '$.salary', '$.ts', '$.timestamp', '$.values[3]',
+                                   '$.role.id', '$.role.dob', '$.roles[0].id'] as Set
+    requestGenerators['$.hexCode'].class == RandomHexadecimalGenerator
+    requestGenerators['$.id'].class == RandomIntGenerator
+    requestGenerators['$.age2'].class == RandomIntGenerator
+    requestGenerators['$.salary'].class == RandomDecimalGenerator
+    requestGenerators['$.values[3]'].class == RandomDecimalGenerator
+    requestGenerators['$.role.id'].class == UuidGenerator
+    requestGenerators['$.role.dob'].class == DateGenerator
+    requestGenerators['$.roles[0].id'].class == UuidGenerator
   }
 
   def 'arrays with matching'() {
@@ -142,9 +161,9 @@ class PactBodyBuilderSpec extends Specification {
     service.interactions.size() == 1
     service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules == [
         '$.orders': [new MaxTypeMatcher(10)],
-        '$.orders[*].id': [new TypeMatcher()],
+        '$.orders[*].id': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
         '$.orders[*].lineItems': [new MinTypeMatcher(1)],
-        '$.orders[*].lineItems[*].id': [new TypeMatcher()],
+        '$.orders[*].lineItems[*].id': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
         '$.orders[*].lineItems[*].amount': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)],
         '$.orders[*].lineItems[*].productCodes': [new TypeMatcher()],
         '$.orders[*].lineItems[*].productCodes[*].code': [new TypeMatcher()]
@@ -191,9 +210,9 @@ class PactBodyBuilderSpec extends Specification {
     service.interactions.size() == 1
     service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules == [
       '$.orders': [new MaxTypeMatcher(10)],
-      '$.orders[*].id': [new TypeMatcher()],
+      '$.orders[*].id': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
       '$.orders[*].lineItems': [new MinTypeMatcher(1)],
-      '$.orders[*].lineItems[*].id': [new TypeMatcher()],
+      '$.orders[*].lineItems[*].id': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
       '$.orders[*].lineItems[*].amount': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)],
       '$.orders[*].lineItems[*].productCodes': [new TypeMatcher()],
       '$.orders[*].lineItems[*].productCodes[*].code': [new TypeMatcher()]
@@ -424,9 +443,9 @@ class PactBodyBuilderSpec extends Specification {
     service.interactions.size() == 1
     service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules == [
       $/$['2']/$: [new MaxTypeMatcher(10)],
-      $/$['2'][*].id/$: [new TypeMatcher()],
+      $/$['2'][*].id/$: [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
       $/$['2'][*].lineItems/$: [new MinTypeMatcher(1)],
-      $/$['2'][*].lineItems[*].id/$: [new TypeMatcher()],
+      $/$['2'][*].lineItems[*].id/$: [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
       $/$['2'][*].lineItems[*]['10k-depreciation-bips']/$: [
         new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
       $/$['2'][*].lineItems[*].productCodes/$: [new TypeMatcher()],

@@ -1,5 +1,8 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.model.generators.DateTimeGenerator
+import au.com.dius.pact.model.generators.Generator
+import au.com.dius.pact.model.matchingrules.MatchingRule
 import org.apache.commons.lang3.time.DateFormatUtils
 
 /**
@@ -14,16 +17,16 @@ class TimestampMatcher extends Matcher {
     pattern ?: DateFormatUtils.ISO_DATETIME_FORMAT.pattern
   }
 
-  def getMatcher() {
+  MatchingRule getMatcher() {
     new au.com.dius.pact.model.matchingrules.TimestampMatcher(getPattern())
   }
 
   def getValue() {
-    if (values == null) {
-      DateFormatUtils.format(new Date(), getPattern())
-    } else {
-      values
-    }
+    super.@value ?: DateFormatUtils.format(new Date(Matchers.DATE_2000), getPattern())
+  }
+
+  Generator getGenerator() {
+    super.@value == null ? new DateTimeGenerator(getPattern()) : null
   }
 
 }

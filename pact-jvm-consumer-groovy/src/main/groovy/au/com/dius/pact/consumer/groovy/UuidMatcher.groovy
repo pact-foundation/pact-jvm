@@ -1,28 +1,25 @@
 package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.model.generators.Generator
-import au.com.dius.pact.model.generators.RegexGenerator
+import au.com.dius.pact.model.generators.UuidGenerator
 import au.com.dius.pact.model.matchingrules.MatchingRule
 import au.com.dius.pact.model.matchingrules.RegexMatcher
-import com.mifmif.common.regex.Generex
 
 /**
- * Regular Expression Matcher
+ * Matcher for universally unique IDs
  */
-class RegexpMatcher extends Matcher {
-
-  String regex
+class UuidMatcher extends Matcher {
 
   MatchingRule getMatcher() {
-    new RegexMatcher(regex)
+    new RegexMatcher(Matchers.UUID_REGEX)
   }
 
   Generator getGenerator() {
-    value == null ? new RegexGenerator(regex) : null
+    new UuidGenerator()
   }
 
   def getValue() {
-    super.@value ?: new Generex(regex).random()
+    super.@value ?: 'e2490de5-5bd3-43d5-b7c4-526e33f71304'
   }
 
 }

@@ -15,6 +15,7 @@ import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.Response
+import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.matchingrules.MatchingRules
 import groovy.json.JsonBuilder
 import scala.collection.JavaConverters$
@@ -108,6 +109,8 @@ class PactBuilder extends BaseBuilder {
     for (int i = 0; i < numInteractions; i++) {
       MatchingRules requestMatchers = requestData[i].matchers
       MatchingRules responseMatchers = responseData[i].matchers
+      Generators requestGenerators = requestData[i].generators
+      Generators responseGenerators = responseData[i].generators
       Map headers = setupHeaders(requestData[i].headers ?: [:], requestMatchers)
       Map query = setupQueryParameters(requestData[i].query ?: [:], requestMatchers)
       Map responseHeaders = setupHeaders(responseData[i].headers ?: [:], responseMatchers)
@@ -117,10 +120,10 @@ class PactBuilder extends BaseBuilder {
         providerStates,
         new Request(requestData[i].method ?: 'get', path, query, headers,
           requestData[i].containsKey(BODY) ? OptionalBody.body(requestData[i].body) : OptionalBody.missing(),
-          requestMatchers),
+          requestMatchers, requestGenerators),
         new Response(responseData[i].status ?: 200, responseHeaders,
           responseData[i].containsKey(BODY) ? OptionalBody.body(responseData[i].body) : OptionalBody.missing(),
-          responseMatchers)
+          responseMatchers, responseGenerators)
       )
     }
     requestData = []
@@ -134,7 +137,7 @@ class PactBuilder extends BaseBuilder {
         matchers.addCategory(header).addRule(key, value.matcher)
         [key, value.value]
       } else if (value instanceof Pattern) {
-        def matcher = new RegexpMatcher(values: [value])
+        def matcher = new RegexpMatcher(regex: value)
         matchers.addCategory(header).addRule(key, matcher.matcher)
         [key, matcher.value]
       } else {
@@ -149,7 +152,7 @@ class PactBuilder extends BaseBuilder {
       matchers.addCategory(category).addRule(path.matcher)
       path.value
     } else if (path instanceof Pattern) {
-      def matcher = new RegexpMatcher(values: [path])
+      def matcher = new RegexpMatcher(regex: path)
       matchers.addCategory(category).addRule(matcher.matcher)
       matcher.value
     } else {
@@ -164,7 +167,7 @@ class PactBuilder extends BaseBuilder {
         matchers.addCategory(category).addRule(key, value[0].matcher)
         [key, [value[0].value]]
       } else if (value[0] instanceof Pattern) {
-        def matcher = new RegexpMatcher(values: [value[0]])
+        def matcher = new RegexpMatcher(regex: value[0].toString())
         matchers.addCategory(category).addRule(key, matcher.matcher)
         [key, [matcher.value]]
       } else {
@@ -178,7 +181,7 @@ class PactBuilder extends BaseBuilder {
    * @param requestData Map of attributes
    */
   PactBuilder withAttributes(Map requestData) {
-    def request = [matchers: new MatchingRules()] + requestData
+    def request = [matchers: new MatchingRules(), generators: new Generators()] + requestData
     setupBody(requestData, request)
     if (requestData.query instanceof String) {
       request.query = PactReader.queryStringToMap(requestData.query)
@@ -201,6 +204,7 @@ class PactBuilder extends BaseBuilder {
       if (body instanceof PactBodyBuilder) {
         request.body = body.body
         request.matchers.addCategory(body.matchers)
+        request.generators.addGenerators(body.generators)
       } else if (body != null && !(body instanceof String)) {
         if (requestData.prettyPrint == null && !compactMimeTypes(requestData) || requestData.prettyPrint) {
           request.body = new JsonBuilder(body).toPrettyString()
@@ -218,7 +222,7 @@ class PactBuilder extends BaseBuilder {
    */
   @SuppressWarnings('DuplicateMapLiteral')
   PactBuilder willRespondWith(Map responseData) {
-    def response = [matchers: new MatchingRules()] + responseData
+    def response = [matchers: new MatchingRules(), generators: new Generators()] + responseData
     setupBody(responseData, response)
     this.responseData << response
     requestState = false
@@ -336,6 +340,7 @@ class PactBuilder extends BaseBuilder {
     if (requestState) {
       requestData.last().body = body.body
       requestData.last().matchers.addCategory(body.matchers)
+      requestData.last().generators.addGenerators(body.generators)
       requestData.last().headers = requestData.last().headers ?: [:]
       if (!requestData.last().headers[CONTENT_TYPE]) {
         if (options.mimeType) {
@@ -347,6 +352,7 @@ class PactBuilder extends BaseBuilder {
     } else {
       responseData.last().body = body.body
       responseData.last().matchers.addCategory(body.matchers)
+      responseData.last().generators.addGenerators(body.generators)
       responseData.last().headers = responseData.last().headers ?: [:]
       if (!responseData.last().headers[CONTENT_TYPE]) {
         if (options.mimeType) {
@@ -368,7 +374,7 @@ class PactBuilder extends BaseBuilder {
     buildInteractions()
     def pact = new RequestResponsePact(provider, consumer, interactions)
 
-    def pactVersion = options.specificationVersion ?: PactSpecVersion.V2
+    def pactVersion = options.specificationVersion ?: PactSpecVersion.V3
     MockProviderConfig config = MockProviderConfig.httpConfig(LOCALHOST, port ?: 0, pactVersion)
 
     runConsumerTest(pact, config, closure)

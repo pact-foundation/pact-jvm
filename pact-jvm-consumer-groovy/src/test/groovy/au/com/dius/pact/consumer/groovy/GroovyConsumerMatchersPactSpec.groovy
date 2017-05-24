@@ -30,7 +30,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
         hexCode(hexValue)
         hexCode2 hexValue('01234AB')
         id(identifier)
-        id2 identifier('1234567890')
+        id2 identifier(1234567890)
         localAddress(ipAddress)
         localAddress2 ipAddress('192.169.0.2')
         age(100)
@@ -75,7 +75,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
           'hexCode': '9d1883afcd',
           'hexCode2': '01234AB',
           'id': 6444667731,
-          'id2': '1234567890',
+          'id2': 1234567890,
           'localAddress': '127.0.0.1',
           'localAddress2': '192.169.0.2',
           'age': 100,

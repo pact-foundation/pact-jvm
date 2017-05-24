@@ -14,7 +14,7 @@ class MatchersSpec extends Specification {
 
     matcherMethod | param        | matcherDefinition
     'string'      | 'type'       | [match: 'type']
-    'identifier'  | ''           | [match: 'type']
+    'identifier'  | ''           | [match: 'integer']
     'numeric'     | 1            | [match: 'number']
     'decimal'     | 1            | [match: 'decimal']
     'integer'     | 1            | [match: 'integer']

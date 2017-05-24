@@ -162,6 +162,13 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     return this
   }
 
+  fun addCategory(category: Category): Generators {
+    if (!categories.containsKey(category)) {
+      categories[category] = mutableMapOf()
+    }
+    return this
+  }
+
   fun applyGenerator(category: Category, closure: (String, Generator?) -> Unit) {
     if (categories.containsKey(category) && categories[category] != null) {
       val categoryValues = categories[category]

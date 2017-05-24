@@ -1,28 +1,25 @@
 package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.model.generators.Generator
-import au.com.dius.pact.model.generators.RegexGenerator
+import au.com.dius.pact.model.generators.RandomHexadecimalGenerator
 import au.com.dius.pact.model.matchingrules.MatchingRule
 import au.com.dius.pact.model.matchingrules.RegexMatcher
-import com.mifmif.common.regex.Generex
 
 /**
- * Regular Expression Matcher
+ * Matcher for hexadecimal values
  */
-class RegexpMatcher extends Matcher {
-
-  String regex
+class HexadecimalMatcher extends Matcher {
 
   MatchingRule getMatcher() {
-    new RegexMatcher(regex)
+    new RegexMatcher(Matchers.HEXADECIMAL)
   }
 
   Generator getGenerator() {
-    value == null ? new RegexGenerator(regex) : null
+    super.@value == null ? new RandomHexadecimalGenerator(10) : null
   }
 
   def getValue() {
-    super.@value ?: new Generex(regex).random()
+    super.@value ?: '1234a'
   }
 
 }

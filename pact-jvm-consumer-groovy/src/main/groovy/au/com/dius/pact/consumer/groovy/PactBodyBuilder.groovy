@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.matchingrules.Category
 import groovy.json.JsonBuilder
 @SuppressWarnings('UnusedImport')
@@ -20,6 +21,7 @@ class PactBodyBuilder extends BaseBuilder {
   public static final String STAR = '*'
 
   def matchers = new Category('body')
+  def generators = new Generators().addCategory(au.com.dius.pact.model.generators.Category.BODY)
   def mimetype = null
   Boolean prettyPrintBody = null
 
@@ -106,7 +108,7 @@ class PactBodyBuilder extends BaseBuilder {
       setMatcherAttribute(value, path + buildPath(matcherName))
       bodyRepresentation[name] = []
       value.numberExamples.times {
-        def exampleValue = value.values.last()
+        def exampleValue = value.value
         if (exampleValue instanceof Closure) {
           bodyRepresentation[name] << invokeClosure(exampleValue, buildPath(matcherName, ALL_LIST_ITEMS))
         } else if (exampleValue instanceof Matcher) {
@@ -134,7 +136,7 @@ class PactBodyBuilder extends BaseBuilder {
       }
     } else if (value instanceof Closure) {
       if (matcherName == STAR) {
-        setMatcherAttribute(new TypeMatcher(values: [TYPE, null]), path + buildPath(matcherName))
+        setMatcherAttribute(new TypeMatcher(), path + buildPath(matcherName))
       }
       bodyRepresentation[name] = invokeClosure(value, buildPath(matcherName))
     } else {
@@ -168,6 +170,9 @@ class PactBodyBuilder extends BaseBuilder {
     if (value.matcher) {
       matchers.setRule(attributePath, value.matcher)
     }
+    if (value.generator) {
+      generators.addGenerator(au.com.dius.pact.model.generators.Category.BODY, attributePath, value.generator)
+    }
     value.value
   }
 
@@ -186,7 +191,7 @@ class PactBodyBuilder extends BaseBuilder {
 
   def build(LikeMatcher matcher) {
     setMatcherAttribute(matcher, path)
-    bodyRepresentation = [ invokeClosure(matcher.values.last(), ALL_LIST_ITEMS) ]
+    bodyRepresentation = [ invokeClosure(matcher.value, ALL_LIST_ITEMS) ]
     this
   }
 
