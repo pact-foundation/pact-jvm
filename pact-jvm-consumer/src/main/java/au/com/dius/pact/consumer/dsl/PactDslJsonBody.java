@@ -972,7 +972,7 @@ public class PactDslJsonBody extends DslPart {
   public PactDslJsonBody eachKeyLike(String exampleKey, PactDslJsonRootValue value) {
     body.put(exampleKey, value.getBody());
     for(String matcherName: value.matchers.keySet()) {
-      matchers.put(matcherName + ".*", value.matchers.get(matcherName));
+      matchers.put(rootPath + "*" + matcherName, value.matchers.get(matcherName));
     }
     return this;
   }
