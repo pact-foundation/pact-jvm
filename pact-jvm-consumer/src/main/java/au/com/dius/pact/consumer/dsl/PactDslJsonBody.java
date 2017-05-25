@@ -1002,7 +1002,7 @@ public class PactDslJsonBody extends DslPart {
   public PactDslJsonBody eachKeyLike(String exampleKey, PactDslJsonRootValue value) {
     body.put(exampleKey, value.getBody());
     for(String matcherName: value.matchers.getMatchingRules().keySet()) {
-      matchers.addRules(matcherName + ".*", value.matchers.getMatchingRules().get(matcherName));
+      matchers.addRules(rootPath + "*" + matcherName, value.matchers.getMatchingRules().get(matcherName));
     }
     return this;
   }
