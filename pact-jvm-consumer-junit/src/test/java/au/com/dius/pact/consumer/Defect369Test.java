@@ -17,7 +17,7 @@ public class Defect369Test {
 
     private static final String APPLICATION_JSON = "application/json";
     @Rule
-    public PactProviderRuleMk2 provider = new PactProviderRuleMk2("369_provider", "localhost", 8081, this);
+    public PactProviderRuleMk2 provider = new PactProviderRuleMk2("369_provider", this);
 
     @Pact(provider="369_provider", consumer="test_consumer")
     public RequestResponsePact createFragment(PactDslWithProvider builder) {
@@ -37,7 +37,7 @@ public class Defect369Test {
     @Test
     @PactVerification("369_provider")
     public void runTest() throws IOException {
-        assertEquals("\"Example\"", Request.Get("http://localhost:8081/provider/uri")
+        assertEquals("\"Example\"", Request.Get(provider.getUrl() + "/provider/uri")
             .addHeader("Accept", APPLICATION_JSON)
             .execute().returnContent().asString());
     }
