@@ -455,7 +455,7 @@ and [#97](https://github.com/DiUS/pact-jvm/issues/97) for information on what th
 
 ## Generating V3 spec pact files (3.1.0+, 2.3.0+)
 
-To have your consumer tests generate V3 format pacts, you can pass an option into the `run` method. For example:
+To have your consumer tests generate V3 format pacts, you can pass an option into the `runTest` method. For example:
 
 ```groovy
 PactVerificationResult result = service.runTest(specificationVersion: PactSpecVersion.V3) { config ->
