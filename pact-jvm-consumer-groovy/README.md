@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-groovy_2.11`
-* version-id = `2.4.x` or `3.3.x`
+* version-id = `2.4.x` or `3.4.x`
 
 ## Usage
 
@@ -19,7 +19,7 @@ to define your pacts. For a full example, have a look at the example JUnit `Exam
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.3.8'
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.4.0'
     }
 
 Then create an instance of the `PactBuilder` in your test.
