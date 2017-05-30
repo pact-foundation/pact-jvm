@@ -3,7 +3,7 @@ pact-jvm-consumer-groovy
 
 Groovy DSL for Pact JVM
 
-##Dependency
+## Dependency
 
 The library is available on maven central using:
 
@@ -11,7 +11,7 @@ The library is available on maven central using:
 * artifact-id = `pact-jvm-consumer-groovy_2.11`
 * version-id = `2.4.x` or `3.3.x`
 
-##Usage
+## Usage
 
 Add the `pact-jvm-consumer-groovy` library to your test class path. This provides a `PactBuilder` class for you to use
 to define your pacts. For a full example, have a look at the example JUnit `ExampleGroovyConsumerPactTest`.
