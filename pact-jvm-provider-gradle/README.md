@@ -344,7 +344,11 @@ pact {
 ```
 
 If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description will be sent as
- JSON in the body of the request. If it is set to false, it will passed as a query parameter.
+ JSON in the body of the request :
+```json
+{ "state" : "a provider state description" }
+```  
+If it is set to false, it will be passed as query parameters.
 
 #### Teardown calls for state changes [version 3.2.5/2.4.7+]
 
