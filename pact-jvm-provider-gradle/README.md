@@ -133,13 +133,17 @@ You could use the jetty tasks here if you provider is built as a WAR file.
 ```groovy
 
 // This will be called before the provider task
-task('startTheApp') << {
-  // start up your provider here
+task('startTheApp') {
+  doLast {
+    // start up your provider here
+  }
 }
 
 // This will be called after the provider task
-task('killTheApp') << {
-  // kill your provider here
+task('killTheApp') {
+  doLast {
+    // kill your provider here
+  }
 }
 
 pact {
