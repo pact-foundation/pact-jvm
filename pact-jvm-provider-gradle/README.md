@@ -80,7 +80,7 @@ pact {
 
 ## Specifying the provider hostname at runtime
 
-If you need to calculate the provider hostname at runtime, you can give a closure as the provider host.
+If you need to calculate the provider hostname at runtime, you can give a Closure as the provider `host`.
 
 ```groovy
 pact {
@@ -100,11 +100,11 @@ pact {
 }
 ```
 
-_Since version 3.3.2+/2.4.17+_ you can also give a closure as the provider port.
+_Since version 3.3.2+/2.4.17+_ you can also give a Closure as the provider `port`.
 
 ## Specifying the pact file or URL at runtime [versions 3.2.7/2.4.9+]
 
-If you need to calculate the pact file or URL at runtime, you can give a Closure as the provider host.
+If you need to calculate the pact file or URL at runtime, you can give a Closure as the provider `pactFile`.
 
 ```groovy
 pact {
@@ -126,7 +126,8 @@ pact {
 
 ## Starting and shutting down your provider
 
-If you need to start-up or shutdown your provider, you can define a start and terminate task for each provider.
+If you need to start-up or shutdown your provider, define Gradle tasks for each action and set  
+`startProviderTask` and `terminateProviderTask` properties of each provider.
 You could use the jetty tasks here if you provider is built as a WAR file.
 
 ```groovy
