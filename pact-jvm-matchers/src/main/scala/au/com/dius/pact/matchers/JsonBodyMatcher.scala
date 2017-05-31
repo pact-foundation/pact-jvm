@@ -44,6 +44,8 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
   def compare(path: Seq[String], expected: Any, actual: Any, diffConfig: DiffConfig,
               matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     (expected, actual) match {
+      case (e: Map[String, Any], _) if e.get("json_class").exists(_ == "Pact::SomethingLike") =>
+        TypeMatcher.matchType(path, e.get("contents").get, actual, BodyMismatchFactory)
       case (a: Map[String, Any], b: Map[String, Any]) => compareMaps(a, b, a, b, path, diffConfig, matchers)
       case (a: List[Any], b: List[Any]) => compareLists(a, b, a, b, path, diffConfig, matchers)
       case (_, _) =>

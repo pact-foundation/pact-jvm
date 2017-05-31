@@ -76,6 +76,11 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
         matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
       }
 
+      "with SomethingLike matcher if types match" in {
+        actualBody = OptionalBody.body("\"Blah\"")
+        expectedBody = OptionalBody.body("""{ "json_class": "Pact::SomethingLike", "contents": "hello" }""")
+        matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
+      }
     }
 
     "returns a mismatch" should {
@@ -161,6 +166,14 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
         val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
         mismatches must not(beEmpty)
         mismatches must containMessage("Type mismatch: Expected List List(100, 100) but received Integer 100")
+      }
+
+      "with SomethingLike matcher if types do not match" in {
+        actualBody = OptionalBody.body("\"Blah\"")
+        expectedBody = OptionalBody.body("""{ "json_class": "Pact::SomethingLike", "contents": 5 }""")
+        val mismatches = matcher.matchBody(expected(), actual(), diffconfig)
+        mismatches must not(beEmpty)
+        mismatches must containMessage("Expected 'Blah' to be the same type as 5")
       }
 
     }
