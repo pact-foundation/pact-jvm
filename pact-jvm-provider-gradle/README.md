@@ -164,6 +164,37 @@ pact {
 Following typical Gradle behaviour, you can set the provider task properties to the actual tasks, or to the task names
 as a string (for the case when they haven't been defined yet).
 
+## Preventing the chaining of provider verify task to `pactVerify` [version 3.4.1+]
+
+Normally a gradle task named `pactVerify_${provider.name}` is created and added as a task dependency for `pactVerify`.  You 
+can disable this dependency on a provider by setting `isDependencyForPactVerify` to `false` (defaults to `true`).
+
+```groovy
+pact {
+
+    serviceProviders {
+
+        provider1 {
+
+            isDependencyForPactVerify = false
+
+            hasPactWith('consumer1') {
+                pactFile = file('path/to/provider1-consumer1-pact.json')
+            }
+
+        }
+
+    }
+
+}
+```
+
+To run this task, you would then have to explicitly name it as in ```gradle pactVerify_provider1```, a normal ```gradle pactVerify``` 
+would skip it.  This can be useful when you want to define two providers, one with `startProviderTask`/`terminateProviderTask` 
+and as second without, so you can manually start your provider (to debug it from your IDE, for example) but still want a `pactVerify` 
+ to run normally from your CI build.
+
+
 ## Enabling insecure SSL [version 2.2.8+]
 
 For providers that are running on SSL with self-signed certificates, you need to enable insecure SSL mode by setting
