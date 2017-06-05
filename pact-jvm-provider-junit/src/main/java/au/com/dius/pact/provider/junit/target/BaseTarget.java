@@ -9,11 +9,13 @@ import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver;
 import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
 import au.com.dius.pact.provider.reporters.ReporterManager;
 import au.com.dius.pact.provider.reporters.VerifierReporter;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.runners.model.TestClass;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -91,6 +93,12 @@ public abstract class BaseTarget implements TestClassAwareTarget {
 
   private String exceptionMessage(Throwable err, int prefixLength) {
     String message = err.getMessage();
+
+    Throwable cause = err.getCause();
+    String details = "";
+    if(cause != null)
+      details = ExceptionUtils.getStackTrace(cause);
+
     if (message.contains("\n")) {
       String padString = StringUtils.leftPad("", prefixLength);
       String[] lines = message.split("\n");
