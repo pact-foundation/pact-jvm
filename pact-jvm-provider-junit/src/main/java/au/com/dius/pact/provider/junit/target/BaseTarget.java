@@ -96,7 +96,7 @@ public abstract class BaseTarget implements TestClassAwareTarget {
 
     if (message.contains("\n")) {
       String padString = StringUtils.leftPad("", prefixLength);
-      Tuple2<Optional<String>, Seq<String>> lines = Seq.seq(Arrays.asList(message.split("\n"))).splitAtHead();
+      Tuple2<Optional<String>, Seq<String>> lines = Seq.of(message.split("\n")).splitAtHead();
       return lines.v1.orElse("") + System.lineSeparator() + lines.v2.map(line -> padString + line)
               .toString(System.lineSeparator()) + "\n" + details;
     } else {
