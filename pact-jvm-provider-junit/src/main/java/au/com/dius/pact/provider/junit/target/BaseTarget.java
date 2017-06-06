@@ -96,8 +96,9 @@ public abstract class BaseTarget implements TestClassAwareTarget {
 
     Throwable cause = err.getCause();
     String details = "";
-    if(cause != null)
+    if (cause != null) {
       details = ExceptionUtils.getStackTrace(cause);
+    }
 
     if (message.contains("\n")) {
       String padString = StringUtils.leftPad("", prefixLength);
