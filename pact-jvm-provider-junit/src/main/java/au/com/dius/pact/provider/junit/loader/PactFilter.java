@@ -1,9 +1,4 @@
-package com.cisco.lockhart.pact;
-
-/*
- * Copyright (c) Cisco Systems 2017. All rights reserved.
- *
- */
+package au.com.dius.pact.provider.junit.loader;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
