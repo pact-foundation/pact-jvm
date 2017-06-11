@@ -31,6 +31,8 @@ class ProviderInfo {
     boolean stateChangeUsesBody = true
     boolean stateChangeTeardown = false
 
+    boolean isDependencyForPactVerify = true
+
     PactVerification verificationType
     List packagesToScan = []
     List<ConsumerInfo> consumers = []

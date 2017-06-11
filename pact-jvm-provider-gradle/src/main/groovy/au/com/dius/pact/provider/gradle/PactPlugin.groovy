@@ -51,7 +51,9 @@ class PactPlugin implements Plugin<Project> {
                     providerTask.finalizedBy(provider.terminateProviderTask)
                 }
 
-                it.pactVerify.dependsOn(providerTask)
+                if (provider.isDependencyForPactVerify) {
+                    it.pactVerify.dependsOn(providerTask)
+                }
             }
         }
     }

@@ -47,8 +47,8 @@ class PactReader {
           MessagePact.fromMap(pactJson)
       } else {
         def transformedJson = transformJson(pactJson)
-        def provider = transformedJson.provider as Provider
-        def consumer = transformedJson.consumer as Consumer
+        def provider = Provider.fromMap(transformedJson.provider as Map)
+        def consumer = Consumer.fromMap(transformedJson.consumer as Map)
 
         def interactions = transformedJson.interactions.collect { i ->
           def request = extractRequestV3(i.request)
@@ -69,8 +69,8 @@ class PactReader {
   @SuppressWarnings('UnusedMethodParameter')
   static Pact loadV2Pact(def source, def pactJson) {
     def transformedJson = transformJson(pactJson)
-    def provider = transformedJson.provider as Provider
-    def consumer = transformedJson.consumer as Consumer
+    def provider = Provider.fromMap(transformedJson.provider as Map)
+    def consumer = Consumer.fromMap(transformedJson.consumer as Map)
 
     def interactions = transformedJson.interactions.collect { i ->
       def request = extractRequestV2(i.request ?: [:])
