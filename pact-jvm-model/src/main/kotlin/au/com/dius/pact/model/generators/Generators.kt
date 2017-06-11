@@ -34,6 +34,7 @@ object JsonContentTypeHandler : ContentTypeHandler {
   override fun applyKey(body: QueryResult, key: String, generator: Generator) {
     val pathExp = parsePath(key)
     queryObjectGraph(pathExp.iterator(), body) { (value, valueKey, parent) ->
+      @Suppress("UNCHECKED_CAST")
       when (parent) {
         is MutableMap<*, *> -> (parent as MutableMap<String, Any>)[valueKey.toString()] = generator.generate(value)
         is MutableList<*> -> (parent as MutableList<Any>)[valueKey as Int] = generator.generate(value)
@@ -121,6 +122,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
             else -> {
               generatorMap.forEach { (generatorKey, generatorValue) ->
                 if (generatorValue is Map<*, *> && generatorValue.containsKey("type")) {
+                  @Suppress("UNCHECKED_CAST")
                   val generator = lookupGenerator(generatorValue as Map<String, Any>)
                   if (generator != null) {
                     generators.addGenerator(category, generatorKey, generator)

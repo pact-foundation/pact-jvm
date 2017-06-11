@@ -155,6 +155,7 @@ class UuidGenerator : Generator {
   override fun hashCode() = super.hashCode()
 
   companion object {
+    @Suppress("UNUSED_PARAMETER")
     fun fromMap(map: Map<String, Any>) : UuidGenerator {
       return UuidGenerator()
     }
