@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-groovy_2.11`
-* version-id = `2.4.x` or `3.4.x`
+* version-id = `3.5.x`
 
 ## Usage
 
@@ -19,7 +19,7 @@ to define your pacts. For a full example, have a look at the example JUnit `Exam
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.4.0'
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.5.0'
     }
 
 Then create an instance of the `PactBuilder` in your test.
@@ -295,9 +295,9 @@ Defines a matcher that accepts any numerical values. If the value is not provide
 
 Defines a matcher that accepts any integer values. If the value is not provided, a random integer will be used.
 
-* real(def value = null)
+* decimal(def value = null)
 
-Defines a matcher that accepts any real numbers. If the value is not provided, a random double will be used.
+Defines a matcher that accepts any decimal numbers. If the value is not provided, a random decimal will be used.
 
 * timestamp(String pattern = null, def value = null)
 
@@ -314,6 +314,15 @@ If pattern is not provided the ISO_DATE_FORMAT is used ("yyyy-MM-dd") . If the v
 * uuid(String value = null)
 
 Defines a matcher that accepts UUIDs. A random one will be generated if no value is provided.
+
+* equalTo(def value)
+
+Defines an equality matcher that always matches the provided value using `equals`. This is useful for resetting cascading
+type matchers.
+
+* includesStr(def value)
+
+Defines a matcher that accepts any value where its string form includes the provided string.
 
 #### What if a field matches a matcher name in the DSL?
 
