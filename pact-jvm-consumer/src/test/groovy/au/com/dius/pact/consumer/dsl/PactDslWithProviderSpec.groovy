@@ -20,8 +20,8 @@ class PactDslWithProviderSpec extends Specification {
         .path('/request')
       .willRespondWith()
         .body(PactDslJsonRootValue.numberType())
-      .toFragment()
-    interaction = pact.interactions().head()
+      .toPact()
+    interaction = pact.interactions.first()
   }
 
   def 'allow multiple states parameters'() {
@@ -41,8 +41,8 @@ class PactDslWithProviderSpec extends Specification {
         .path('/request')
       .willRespondWith()
         .body(PactDslJsonRootValue.numberType())
-      .toFragment()
-    interaction = pact.interactions().head()
+      .toPact()
+    interaction = pact.interactions.first()
   }
 
 }

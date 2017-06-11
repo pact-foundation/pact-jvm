@@ -3,6 +3,8 @@ package au.com.dius.pact.consumer.dsl;
 import au.com.dius.pact.model.generators.Generators;
 import au.com.dius.pact.model.matchingrules.Category;
 import au.com.dius.pact.model.matchingrules.DateMatcher;
+import au.com.dius.pact.model.matchingrules.EqualsMatcher;
+import au.com.dius.pact.model.matchingrules.IncludeMatcher;
 import au.com.dius.pact.model.matchingrules.MaxTypeMatcher;
 import au.com.dius.pact.model.matchingrules.MinTypeMatcher;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
@@ -280,6 +282,10 @@ public abstract class DslPart {
 
     protected MaxTypeMatcher matchMax(Integer max) {
         return new MaxTypeMatcher(max);
+    }
+
+    protected IncludeMatcher includesMatcher(Object value) {
+      return new IncludeMatcher(String.valueOf(value));
     }
 
     public PactDslJsonBody asBody() {

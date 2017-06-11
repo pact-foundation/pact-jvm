@@ -11,6 +11,7 @@ import au.com.dius.pact.model.generators.RandomStringGenerator;
 import au.com.dius.pact.model.generators.RegexGenerator;
 import au.com.dius.pact.model.generators.TimeGenerator;
 import au.com.dius.pact.model.generators.UuidGenerator;
+import au.com.dius.pact.model.matchingrules.EqualsMatcher;
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
 import au.com.dius.pact.model.matchingrules.TypeMatcher;
 import com.mifmif.common.regex.Generex;
@@ -1004,6 +1005,28 @@ public class PactDslJsonBody extends DslPart {
     for(String matcherName: value.matchers.getMatchingRules().keySet()) {
       matchers.addRules(rootPath + "*" + matcherName, value.matchers.getMatchingRules().get(matcherName));
     }
+    return this;
+  }
+
+  /**
+   * Attribute that must include the provided string value
+   * @param name attribute name
+   * @param value Value that must be included
+   */
+  public PactDslJsonBody includesStr(String name, String value) {
+    body.put(name, value);
+    matchers.addRule(matcherKey(name), includesMatcher(value));
+    return this;
+  }
+
+  /**
+   * Attribute that must be equal to the provided value.
+   * @param name attribute name
+   * @param value Value that will be used for comparisons
+   */
+  public PactDslJsonBody equalTo(String name, Object value) {
+    body.put(name, value);
+    matchers.addRule(matcherKey(name), new EqualsMatcher());
     return this;
   }
 }

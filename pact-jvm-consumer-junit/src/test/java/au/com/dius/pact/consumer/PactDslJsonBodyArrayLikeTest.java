@@ -27,6 +27,7 @@ public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTestMk2 {
                 .array("array3")
                     .maxArrayLike(5)
                         .integerType("itemCount")
+                        .equalTo("V", "test")
                         .closeObject()
                     .closeArray()
                 .closeArray()
@@ -50,7 +51,8 @@ public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTestMk2 {
             "$.data.array2[*].address",
             "$.data.array2[*].name",
             "$.data.array3[0]",
-            "$.data.array3[0][*].itemCount");
+            "$.data.array3[0][*].itemCount",
+            "$.data.array3[0][*].V");
 
         MatcherTestUtils.assertResponseKeysEqualTo(pact,
             "/data",
@@ -61,6 +63,7 @@ public class PactDslJsonBodyArrayLikeTest extends ConsumerPactTestMk2 {
             "/data/array2",
             "/data/array2/0/address",
             "/data/array2/0/name",
+            "/data/array3/0/0/V",
             "/data/array3/0/0/itemCount",
             "/data/array3",
             "/id");

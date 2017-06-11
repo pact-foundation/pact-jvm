@@ -22,6 +22,7 @@ public class PactDslJsonBodyTest extends ConsumerPactTestMk2 {
             .object("2")
                 .id()
                 .stringValue("test", null)
+                .includesStr("v1", "test")
             .closeObject()
             .array("numbers")
                 .id()
@@ -47,6 +48,7 @@ public class PactDslJsonBodyTest extends ConsumerPactTestMk2 {
         MatcherTestUtils.assertResponseMatcherKeysEqualTo(pact, "body",
             "$.id",
             "$['2'].id",
+            "$['2'].v1",
             "$.numbers[0]",
             "$.numbers[3]",
             "$.numbers[4].id",

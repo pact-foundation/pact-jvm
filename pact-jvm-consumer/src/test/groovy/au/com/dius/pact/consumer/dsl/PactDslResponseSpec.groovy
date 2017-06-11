@@ -17,8 +17,8 @@ class PactDslResponseSpec extends Specification {
       .path('/startWorkflowProcessInstance')
       .willRespondWith()
       .body(PactDslJsonRootValue.numberType())
-      .toFragment()
-    interaction = pact.interactions().head()
+      .toPact()
+    interaction = pact.interactions.first()
     response = interaction.response
   }
 

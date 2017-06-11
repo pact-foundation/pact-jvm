@@ -10,6 +10,7 @@ import au.com.dius.pact.model.generators.RandomIntGenerator;
 import au.com.dius.pact.model.generators.RandomStringGenerator;
 import au.com.dius.pact.model.generators.TimeGenerator;
 import au.com.dius.pact.model.generators.UuidGenerator;
+import au.com.dius.pact.model.matchingrules.EqualsMatcher;
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
 import au.com.dius.pact.model.matchingrules.TypeMatcher;
 import com.mifmif.common.regex.Generex;
@@ -209,7 +210,7 @@ public class PactDslJsonArray extends DslPart {
       } else {
         body.put(value);
       }
-        return this;
+      return this;
     }
 
     /**
@@ -906,5 +907,25 @@ public class PactDslJsonArray extends DslPart {
     parent.setNumberExamples(numberExamples);
     parent.putObject(value);
     return (PactDslJsonArray) parent.closeArray();
+  }
+
+  /**
+   * List item that must include the provided string
+   * @param value Value that must be included
+   */
+  public PactDslJsonArray includesStr(String value) {
+    body.put(value);
+    matchers.addRule(rootPath + appendArrayIndex(0), includesMatcher(value));
+    return this;
+  }
+
+  /**
+   * Attribute that must be equal to the provided value.
+   * @param value Value that will be used for comparisons
+   */
+  public PactDslJsonArray equalsTo(Object value) {
+    body.put(value);
+    matchers.addRule(rootPath + appendArrayIndex(0), new EqualsMatcher());
+    return this;
   }
 }

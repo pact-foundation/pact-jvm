@@ -11,9 +11,12 @@ public class PactDslJsonArrayTest extends ConsumerPactTestMk2 {
     @Override
     protected RequestResponsePact createPact(PactDslWithProvider builder) {
         DslPart body = new PactDslJsonArray()
+          .includesStr("test")
+          .equalsTo("Test")
           .object()
             .id()
             .stringValue("name", "Rogger the Dogger")
+            .includesStr("v1", "test")
             .timestamp()
             .date("dob", "MM/dd/yyyy")
           .closeObject()
@@ -33,12 +36,15 @@ public class PactDslJsonArrayTest extends ConsumerPactTestMk2 {
           .toPact();
 
         MatcherTestUtils.assertResponseMatcherKeysEqualTo(pact, "body",
-            "$[0].id",
-            "$[0].timestamp",
-            "$[0].dob",
-            "$[1].id",
-            "$[1].timestamp",
-            "$[1].dob"
+            "$[0]",
+            "$[1]",
+            "$[2].id",
+            "$[2].timestamp",
+            "$[2].dob",
+            "$[2].v1",
+            "$[3].id",
+            "$[3].timestamp",
+            "$[3].dob"
         );
 
         return pact;
