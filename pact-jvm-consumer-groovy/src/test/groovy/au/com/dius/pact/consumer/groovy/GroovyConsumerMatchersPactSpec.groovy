@@ -23,7 +23,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
       withAttributes(method: 'put', path: '/')
       withBody(mimeType: JSON.toString()) {
         name(~/\w+/, 'harry')
-        surname regexp(~/\w+/, 'larry')
+        surname includesStr('larry')
         position regexp(~/staff|contractor/, 'staff')
         happy(true)
 
@@ -46,17 +46,15 @@ class GroovyConsumerMatchersPactSpec extends Specification {
           name('admin')
           id(uuid)
           kind {
-            id(100)
+            id equalTo(100)
           }
           dob date('MM/dd/yyyy')
         }
 
-        roles([
-          {
-            name('dev')
-            id(uuid)
-          }
-        ])
+        roles eachLike {
+          name('dev')
+          id(uuid)
+        }
       }
       willRespondWith(status: 200)
       withBody(mimeType: JSON.toString()) {

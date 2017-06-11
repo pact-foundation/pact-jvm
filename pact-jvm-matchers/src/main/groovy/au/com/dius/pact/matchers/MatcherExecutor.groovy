@@ -71,7 +71,7 @@ class MatcherExecutor {
 
   static <Mismatch> List<Mismatch> matchEquality(List<String> path, Object expected, Object actual,
                                                  MismatchFactory<Mismatch> mismatchFactory) {
-    def matches = safeToString(actual) == expected
+    def matches = actual == expected
     log.debug("comparing ${valueOf(actual)} to ${valueOf(expected)} at $path -> $matches")
     if (matches) {
       []

@@ -35,6 +35,10 @@ class MatcherExecutorSpec extends Specification {
     expected | actual || mustBeEmpty
     '100'    | '100'  || true
     100      | '100'  || false
+    100      | 100    || true
+    null     | null   || true
+    '100'    | null   || false
+    null     | 100    || false
   }
 
   @Unroll
