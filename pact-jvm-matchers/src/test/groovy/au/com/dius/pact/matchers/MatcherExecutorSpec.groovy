@@ -2,15 +2,20 @@ package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model.matchingrules.DateMatcher
 import au.com.dius.pact.model.matchingrules.EqualsMatcher
+import au.com.dius.pact.model.matchingrules.IncludeMatcher
+import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.model.matchingrules.RegexMatcher
 import au.com.dius.pact.model.matchingrules.TimeMatcher
 import au.com.dius.pact.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.model.matchingrules.TypeMatcher
-import scala.collection.JavaConversions
 import spock.lang.Specification
 import spock.lang.Unroll
 
-@SuppressWarnings('UnnecessaryBooleanExpression')
+import static au.com.dius.pact.model.matchingrules.NumberTypeMatcher.NumberType.DECIMAL
+import static au.com.dius.pact.model.matchingrules.NumberTypeMatcher.NumberType.INTEGER
+import static au.com.dius.pact.model.matchingrules.NumberTypeMatcher.NumberType.NUMBER
+
+@SuppressWarnings(['UnnecessaryBooleanExpression', 'CyclomaticComplexity'])
 class MatcherExecutorSpec extends Specification {
 
   def mismatchFactory
@@ -18,7 +23,7 @@ class MatcherExecutorSpec extends Specification {
 
   def setup() {
     mismatchFactory = [create: { p0, p1, p2, p3 -> 'mismatch' } ] as MismatchFactory
-    path = JavaConversions.asScalaBuffer(['/']).toSeq()
+    path = ['/']
   }
 
   @Unroll
@@ -41,6 +46,7 @@ class MatcherExecutorSpec extends Specification {
     expected | actual  | regex      || mustBeEmpty
     'Harry'  | 'Happy' | 'Ha[a-z]*' || true
     'Harry'  | null    | 'Ha[a-z]*' || false
+    '100'    | 20123   | '\\d+'     || true
   }
 
   @Unroll
@@ -58,6 +64,37 @@ class MatcherExecutorSpec extends Specification {
     200             | null                       || false
     [100, 200, 300] | [200.3]                    || true
     [a: 100]        | [a: 200.3, b: 200, c: 300] || true
+  }
+
+  @Unroll
+  def 'number type matcher matches on types'() {
+    expect:
+    MatcherExecutor.domatch(new NumberTypeMatcher(numberType), path, expected, actual, mismatchFactory).empty ==
+      mustBeEmpty
+
+    where:
+    numberType | expected | actual                     || mustBeEmpty
+    INTEGER    | 100      | 'Some other string'        || false
+    DECIMAL    | 100.0    | 'Some other string'        || false
+    NUMBER     | 100      | 'Some other string'        || false
+    INTEGER    | 100      | 200.3                      || false
+    NUMBER     | 100      | 200.3                      || true
+    DECIMAL    | 100.0    | 200.3                      || true
+    INTEGER    | 100      | 200                        || true
+    NUMBER     | 100      | 200                        || true
+    DECIMAL    | 100.0    | 200                        || false
+    INTEGER    | 100      | false                      || false
+    DECIMAL    | 100.0    | false                      || false
+    NUMBER     | 100      | false                      || false
+    INTEGER    | 100      | null                       || false
+    DECIMAL    | 100.0    | null                       || false
+    NUMBER     | 100      | null                       || false
+    INTEGER    | 100      | [200.3]                    || false
+    DECIMAL    | 100.0    | [200.3]                    || false
+    NUMBER     | 100      | [200.3]                    || false
+    INTEGER    | 100      | [a: 200.3, b: 200, c: 300] || false
+    DECIMAL    | 100.0    | [a: 200.3, b: 200, c: 300] || false
+    NUMBER     | 100      | [a: 200.3, b: 200, c: 300] || false
   }
 
   @Unroll
@@ -97,6 +134,22 @@ class MatcherExecutorSpec extends Specification {
     '01-01-1970' | '01011970'   | 'dd-MM-yyyy' || false
     '12/30/1970' | '01/14/2001' | 'MM/dd/yyyy' || true
     '2014-01-01' | null         | null         || false
+  }
+
+  @Unroll
+  def 'include matcher matches if the expected is included in the actual'() {
+    expect:
+    MatcherExecutor.domatch(new IncludeMatcher(expected), path, expected, actual, mismatchFactory).empty == mustBeEmpty
+
+    where:
+    expected | actual           || mustBeEmpty
+    'Harry'  | 'Harry'          || true
+    'Harry'  | 'HarryBob'       || true
+    'Harry'  | 'BobHarry'       || true
+    'Harry'  | 'BobHarryGeorge' || true
+    'Harry'  | 'Tom'            || false
+    'Harry'  | null             || false
+    '100'    | 2010023          || true
   }
 
 }

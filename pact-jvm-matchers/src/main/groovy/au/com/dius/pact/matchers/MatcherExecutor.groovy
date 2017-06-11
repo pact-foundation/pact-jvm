@@ -2,6 +2,7 @@ package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model.matchingrules.Category
 import au.com.dius.pact.model.matchingrules.DateMatcher
+import au.com.dius.pact.model.matchingrules.IncludeMatcher
 import au.com.dius.pact.model.matchingrules.MatchingRule
 import au.com.dius.pact.model.matchingrules.MaxTypeMatcher
 import au.com.dius.pact.model.matchingrules.MinTypeMatcher
@@ -13,17 +14,20 @@ import au.com.dius.pact.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.model.matchingrules.TypeMatcher
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.time.DateUtils
-import scala.collection.Seq
 import scala.xml.Elem
 
 import java.text.ParseException
+
+import static au.com.dius.pact.matchers.MatcherExecutorKt.matchInclude
+import static au.com.dius.pact.matchers.MatcherExecutorKt.valueOf
+import static au.com.dius.pact.matchers.MatcherExecutorKt.safeToString
 
 /**
  * Executor for matchers
  */
 @Slf4j
 class MatcherExecutor {
-  static <Mismatch> List<Mismatch> domatch(Category matchers, Seq<String> path, def expected, def actual,
+  static <Mismatch> List<Mismatch> domatch(Category matchers, List<String> path, def expected, def actual,
                                            MismatchFactory<Mismatch> mismatchFn) {
     def result = matchers.allMatchingRules().collect { matchingRule ->
       domatch(matchingRule, path, expected, actual, mismatchFn)
@@ -40,27 +44,7 @@ class MatcherExecutor {
     }
   }
 
-  static String safeToString(def value) {
-    if (value == null) {
-      ''
-    } else if (value instanceof Elem) {
-      value.text()
-    } else {
-      value as String
-    }
-  }
-
-  static String valueOf(def value) {
-    if (value == null) {
-      'null'
-    } else if (value instanceof String) {
-      "'$value'"
-    } else {
-      value as String
-    }
-  }
-
-  static <Mismatch> List<Mismatch> domatch(MatchingRule matcher, Seq<String> path, def expected, def actual,
+  static <Mismatch> List<Mismatch> domatch(MatchingRule matcher, List<String> path, def expected, def actual,
                                            MismatchFactory<Mismatch> mismatchFn) {
     if (matcher instanceof RegexMatcher) {
       matchRegex(matcher.regex, path, expected, actual, mismatchFn)
@@ -78,12 +62,14 @@ class MatcherExecutor {
       matchMinType(matcher.min, path, expected, actual, mismatchFn)
     } else if (matcher instanceof MaxTypeMatcher) {
       matchMaxType(matcher.max, path, expected, actual, mismatchFn)
+    } else if (matcher instanceof IncludeMatcher) {
+      matchInclude(matcher.value, path, expected, actual, mismatchFn)
     } else {
       matchEquality(path, expected, actual, mismatchFn)
     }
   }
 
-  static <Mismatch> List<Mismatch> matchEquality(Seq<String> path, Object expected, Object actual,
+  static <Mismatch> List<Mismatch> matchEquality(List<String> path, Object expected, Object actual,
                                                  MismatchFactory<Mismatch> mismatchFactory) {
     def matches = safeToString(actual) == expected
     log.debug("comparing ${valueOf(actual)} to ${valueOf(expected)} at $path -> $matches")
@@ -94,7 +80,7 @@ class MatcherExecutor {
     }
   }
 
-  static <Mismatch> List<Mismatch> matchRegex(String regex, Seq<String> path, Object expected, Object actual,
+  static <Mismatch> List<Mismatch> matchRegex(String regex, List<String> path, Object expected, Object actual,
                                               MismatchFactory<Mismatch> mismatchFactory) {
     def matches = safeToString(actual).matches(regex)
     log.debug("comparing ${valueOf(actual)} with regexp $regex at $path -> $matches")
@@ -109,7 +95,7 @@ class MatcherExecutor {
     }
   }
 
-  static <Mismatch> List<Mismatch> matchType(Seq<String> path, Object expected, Object actual,
+  static <Mismatch> List<Mismatch> matchType(List<String> path, Object expected, Object actual,
                                              MismatchFactory<Mismatch> mismatchFactory) {
     log.debug("comparing type of ${valueOf(actual)} to ${valueOf(expected)} at $path")
     if (expected instanceof String && actual instanceof String
@@ -133,7 +119,7 @@ class MatcherExecutor {
     }
   }
 
-  static def <Mismatch, Mismatch> List<Mismatch> matchNumber(NumberTypeMatcher.NumberType numberType, Seq<String> path,
+  static def <Mismatch, Mismatch> List<Mismatch> matchNumber(NumberTypeMatcher.NumberType numberType, List<String> path,
                                                              def expected, def actual,
                                                              MismatchFactory<Mismatch> mismatchFactory) {
     if (expected == null && actual != null) {
@@ -163,7 +149,7 @@ class MatcherExecutor {
     []
   }
 
-  static <Mismatch> List<Mismatch> matchDate(String format, Seq<String> path, Object expected, Object actual,
+  static <Mismatch> List<Mismatch> matchDate(String format, List<String> path, Object expected, Object actual,
                                              MismatchFactory<Mismatch> mismatchFactory) {
     def pattern = format ?: 'yyyy-MM-dd'
     log.debug("comparing ${valueOf(actual)} to date pattern $pattern at $path")
@@ -176,7 +162,7 @@ class MatcherExecutor {
     }
   }
 
-  static <Mismatch> List<Mismatch> matchTime(String format, Seq<String> path, Object expected, Object actual,
+  static <Mismatch> List<Mismatch> matchTime(String format, List<String> path, Object expected, Object actual,
                                              MismatchFactory<Mismatch> mismatchFactory) {
     def pattern = format ?: 'HH:mm:ss'
     log.debug("comparing ${valueOf(actual)} to time pattern $pattern at $path")
@@ -189,7 +175,7 @@ class MatcherExecutor {
     }
   }
 
-  static <Mismatch> List<Mismatch> matchTimestamp(String format, Seq<String> path, Object expected, Object actual,
+  static <Mismatch> List<Mismatch> matchTimestamp(String format, List<String> path, Object expected, Object actual,
                                              MismatchFactory<Mismatch> mismatchFactory) {
     def pattern = format ?: 'yyyy-MM-dd HH:mm:ssZZZ'
     log.debug("comparing ${valueOf(actual)} to timestamp pattern $pattern at $path")
@@ -202,24 +188,7 @@ class MatcherExecutor {
     }
   }
 
-//  def matchTimestamp[Mismatch](path: Seq[String], expected: Any, actual: Any,
-// mismatchFn: MismatchFactory[Mismatch]) = {
-//    logger.debug(s"comparing ${valueOf(actual)} as Timestamp at $path")
-//    try {
-//      DateUtils.parseDate(Matchers.safeToString(actual), DateFormatUtils.ISO_DATETIME_TIME_ZONE_FORMAT.getPattern,
-//        DateFormatUtils.ISO_DATETIME_FORMAT.getPattern, DateFormatUtils.SMTP_DATETIME_FORMAT.getPattern,
-//        "yyyy-MM-dd HH:mm:ssZZ", "yyyy-MM-dd HH:mm:ss"
-//      )
-//      List[Mismatch]()
-//    }
-//    catch {
-//      case e: java.text.ParseException =>
-//        logger.warn(s"failed to parse timestamp value of ${valueOf(actual)}", e)
-//        List(mismatchFn.create(expected, actual, s"Expected ${valueOf(actual)} to be a timestamp", path))
-//    }
-//  }
-
-  static <Mismatch> List<Mismatch> matchMinType(Integer min, Seq<String> path, Object expected, Object actual,
+  static <Mismatch> List<Mismatch> matchMinType(Integer min, List<String> path, Object expected, Object actual,
                                                 MismatchFactory<Mismatch> mismatchFactory) {
     log.debug("comparing ${valueOf(actual)} with minimum $min at $path")
     if (actual instanceof List) {
@@ -245,7 +214,7 @@ class MatcherExecutor {
     }
   }
 
-  static <Mismatch> List<Mismatch> matchMaxType(Integer max, Seq<String> path, Object expected, Object actual,
+  static <Mismatch> List<Mismatch> matchMaxType(Integer max, List<String> path, Object expected, Object actual,
                                                 MismatchFactory<Mismatch> mismatchFactory) {
     log.debug("comparing ${valueOf(actual)} with maximum $max at $path")
     if (actual instanceof List) {

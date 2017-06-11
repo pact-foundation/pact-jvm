@@ -1,7 +1,6 @@
 package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model.matchingrules.MinTypeMatcher
-import scala.collection.JavaConversions
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -13,7 +12,7 @@ class MinimumMatcherSpec extends Specification {
 
   def setup() {
     mismatchFactory = [create: { p0, p1, p2, p3 -> 'mismatch' } ] as MismatchFactory
-    path = JavaConversions.asScalaBuffer(['$', 'animals', '0']).toSeq()
+    path = ['$', 'animals', '0']
   }
 
   @Unroll

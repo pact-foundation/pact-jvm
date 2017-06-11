@@ -1,7 +1,5 @@
 package au.com.dius.pact.model
 
-import java.util.Optional
-
 import au.com.dius.pact.matchers._
 import au.com.dius.pact.model.RequestPartMismatch._
 import au.com.dius.pact.model.ResponsePartMismatch._
@@ -62,24 +60,27 @@ case class MethodMismatch(expected: Method, actual: Method) extends RequestPartM
 case class QueryMismatch(queryParameter: String, expected: String, actual: String, mismatch: Option[String] = None, path: String = "/") extends RequestPartMismatch
 
 object BodyMismatchFactory extends MismatchFactory[BodyMismatch] {
-  def create(expected: Object, actual: Object, message: String, path: Seq[String]) =
-    BodyMismatch(expected, actual, Some(message), path.mkString("."), None)
+  import JavaConversions._
+  def create(expected: Object, actual: Object, message: String, path: java.util.List[String]) =
+    BodyMismatch(expected, actual, Some(message), path.toList.mkString("."), None)
 }
 
 object PathMismatchFactory extends MismatchFactory[PathMismatch] {
-  def create(expected: Object, actual: Object, message: String, path: Seq[String]) =
+  def create(expected: Object, actual: Object, message: String, path: java.util.List[String]) =
     PathMismatch(expected.toString, actual.toString, Some(message))
 }
 
 object HeaderMismatchFactory extends MismatchFactory[HeaderMismatch] {
-  def create(expected: Object, actual: Object, message: String, path: Seq[String]) = {
-    HeaderMismatch(path.last, expected.toString, actual.toString, Some(message))
+  import JavaConversions._
+  def create(expected: Object, actual: Object, message: String, path: java.util.List[String]) = {
+    HeaderMismatch(path.toList.last, expected.toString, actual.toString, Some(message))
   }
 }
 
 object QueryMismatchFactory extends MismatchFactory[QueryMismatch] {
-  def create(expected: Object, actual: Object, message: String, path: Seq[String]) = {
-    QueryMismatch(path.last, expected.toString, actual.toString, Some(message))
+  import JavaConversions._
+  def create(expected: Object, actual: Object, message: String, path: java.util.List[String]) = {
+    QueryMismatch(path.toList.last, expected.toString, actual.toString, Some(message))
   }
 }
 

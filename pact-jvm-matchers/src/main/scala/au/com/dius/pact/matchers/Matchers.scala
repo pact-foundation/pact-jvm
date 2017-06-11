@@ -7,7 +7,7 @@ import com.typesafe.scalalogging.StrictLogging
 import io.gatling.jsonpath.AST._
 import io.gatling.jsonpath.Parser
 
-import scala.collection.JavaConversions
+import scala.collection.JavaConversions._
 
 object Matchers extends StrictLogging {
 
@@ -68,7 +68,7 @@ object Matchers extends StrictLogging {
       val resolvedMatchers = matchers.rulesForCategory(category).filter(new Predicate[String] {
         override def test(p: String): Boolean = matchesPath(p, path) == path.length
       })
-      JavaConversions.asScalaSet(resolvedMatchers.getMatchingRules.keySet()).exists(entry => entry.endsWith(".*"))
+      asScalaSet(resolvedMatchers.getMatchingRules.keySet()).exists(entry => entry.endsWith(".*"))
     } else
       false
   }
@@ -76,7 +76,7 @@ object Matchers extends StrictLogging {
   def domatch[Mismatch](matchers: MatchingRules, category: String, path: Seq[String], expected: Any, actual: Any,
                         mismatchFn: MismatchFactory[Mismatch]) : List[Mismatch] = {
     val matcherDef = selectBestMatcher(matchers, category, path)
-    JavaConversions.asScalaBuffer(MatcherExecutor.domatch(matcherDef, path, expected, actual, mismatchFn)).toList
+    asScalaBuffer(MatcherExecutor.domatch(matcherDef, path, expected, actual, mismatchFn)).toList
   }
 
   def selectBestMatcher[Mismatch](matchers: MatchingRules, category: String, path: Seq[String]) = {
