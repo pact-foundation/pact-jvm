@@ -115,7 +115,7 @@ class Matchers {
   }
 
   static string(String value = null) {
-    new TypeMatcher(values: [TYPE, value ?: RandomStringUtils.randomAlphanumeric(TEN)])
+    new TypeMatcher(values: [TYPE, (value != null) ? value : RandomStringUtils.randomAlphanumeric(TEN)])
   }
 
   /**
