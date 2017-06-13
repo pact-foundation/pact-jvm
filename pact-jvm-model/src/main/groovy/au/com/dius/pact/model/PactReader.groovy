@@ -69,13 +69,14 @@ class PactReader {
   @SuppressWarnings('UnusedMethodParameter')
   static Pact loadV2Pact(def source, def pactJson) {
     def transformedJson = transformJson(pactJson)
-    def provider = Provider.fromMap(transformedJson.provider as Map)
-    def consumer = Consumer.fromMap(transformedJson.consumer as Map)
+    def provider = Provider.fromMap(transformedJson.provider ?: [:])
+    def consumer = Consumer.fromMap(transformedJson.consumer ?: [:])
 
     def interactions = transformedJson.interactions.collect { i ->
       def request = extractRequestV2(i.request ?: [:])
       def response = extractResponse(i.response ?: [:])
-      new RequestResponseInteraction(i.description, [new ProviderState(i.providerState)], request, response)
+      new RequestResponseInteraction(i.description, i.providerState ? [ new ProviderState(i.providerState) ] : [],
+        request, response)
     }
 
     new RequestResponsePact(provider, consumer, interactions)
