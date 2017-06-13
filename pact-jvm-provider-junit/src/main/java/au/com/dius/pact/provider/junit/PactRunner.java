@@ -67,23 +67,24 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
 
         final TestClass testClass = new TestClass(clazz);
 
-        this.child = new ArrayList<>();
-        final List<Pact> pacts;
-        try {
-            pacts = getPactSource(testClass).load(serviceName).stream()
-                  .filter(p -> consumerName == null || p.getConsumer().getName().equals(consumerName))
-                  .collect(Collectors.toList());
-        } catch (final IOException e) {
-            throw new InitializationError(e);
-        }
+      this.child = new ArrayList<>();
+      final List<Pact> pacts;
+      PactLoader pactLoader = getPactSource(testClass);
+      try {
+        pacts = pactLoader.load(serviceName).stream()
+                .filter(p -> consumerName == null || p.getConsumer().getName().equals(consumerName))
+                .collect(Collectors.toList());
+      } catch (final IOException e) {
+        throw new InitializationError(e);
+      }
 
-        if (pacts == null || pacts.isEmpty()) {
-          throw new InitializationError("Did not find any pact files for provider " + providerInfo.value());
-        }
+      if (pacts == null || pacts.isEmpty()) {
+        throw new InitializationError("Did not find any pact files for provider " + providerInfo.value());
+      }
 
-        for (final Pact pact : filterPacts(pacts)) {
-            this.child.add(new InteractionRunner(testClass, pact));
-        }
+      for (final Pact pact : filterPacts(pacts)) {
+        this.child.add(new InteractionRunner(testClass, pact, pactLoader.getPactSource()));
+      }
     }
 
     protected List<Pact> filterPacts(List<Pact> pacts){

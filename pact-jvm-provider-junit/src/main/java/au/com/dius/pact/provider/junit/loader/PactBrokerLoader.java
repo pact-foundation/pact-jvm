@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.junit.loader;
 
-import au.com.dius.pact.model.Pact;
-import au.com.dius.pact.model.PactReader;
+import au.com.dius.pact.model.*;
+import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.broker.PactBrokerClient;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +31,7 @@ public class PactBrokerLoader implements PactLoader {
   private final List<String> pactBrokerTags;
   private boolean failIfNoPactsFound;
   private PactBrokerAuth authentication;
+  private PactBrokerSource pactSource;
 
   public PactBrokerLoader(final String pactBrokerHost, final String pactBrokerPort, final String pactBrokerProtocol) {
       this(pactBrokerHost, pactBrokerPort, pactBrokerProtocol, Collections.singletonList(LATEST));
@@ -43,6 +44,7 @@ public class PactBrokerLoader implements PactLoader {
     this.pactBrokerProtocol = pactBrokerProtocol;
     this.pactBrokerTags = parseTagListExpressions(tags);
     this.failIfNoPactsFound = true;
+    this.pactSource = new PactBrokerSource(this.pactBrokerHost, this.pactBrokerPort);
   }
 
   public PactBrokerLoader(final PactBroker pactBroker) {
@@ -62,6 +64,11 @@ public class PactBrokerLoader implements PactLoader {
       }
     }
     return pacts;
+  }
+
+  @Override
+  public PactSource getPactSource() {
+    return pactSource;
   }
 
   private List<Pact> loadPactsForProvider(final String providerName, final String tag) throws IOException {
@@ -92,7 +99,13 @@ public class PactBrokerLoader implements PactLoader {
   }
 
   Pact loadPact(ConsumerInfo consumer, Map options) {
-    return PactReader.loadPact(options, consumer.getPactFile());
+    Pact pact = PactReader.loadPact(options, consumer.getPactFile());
+    Map<Consumer, List<Pact>> pacts = this.pactSource.getPacts();
+    Consumer pactConsumer = consumer.toPactConsumer();
+    List<Pact> pactList = pacts.getOrDefault(pactConsumer, new ArrayList<>());
+    pactList.add(pact);
+    pacts.put(pactConsumer, pactList);
+    return pact;
   }
 
   PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {

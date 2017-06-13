@@ -2,6 +2,8 @@ package au.com.dius.pact.provider.junit.target;
 
 import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.model.Pact;
+import au.com.dius.pact.model.PactSource;
+import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.PactVerification;
 import au.com.dius.pact.provider.ProviderInfo;
@@ -43,8 +45,8 @@ public class AmqpTarget extends BaseTarget {
      * {@inheritDoc}
      */
     @Override
-    public void testInteraction(final String consumerName, final Interaction interaction) {
-      ProviderInfo provider = getProviderInfo();
+    public void testInteraction(final String consumerName, final Interaction interaction, final PactSource source) {
+      ProviderInfo provider = getProviderInfo(source);
       ConsumerInfo consumer = new ConsumerInfo(consumerName);
       ProviderVerifier verifier = setupVerifier(interaction, provider, consumer);
 
@@ -72,8 +74,10 @@ public class AmqpTarget extends BaseTarget {
     verifier.initialiseReporters(provider);
     verifier.reportVerificationForConsumer(consumer, provider);
 
-    if (interaction.getProviderState() != null) {
-      verifier.reportStateForInteraction(interaction.getProviderState(), provider, consumer, true);
+    if (!interaction.getProviderStates().isEmpty()) {
+      for (ProviderState providerState: interaction.getProviderStates()) {
+        verifier.reportStateForInteraction(providerState.getName(), provider, consumer, true);
+      }
     }
 
     verifier.reportInteractionDescription(interaction);
@@ -85,13 +89,14 @@ public class AmqpTarget extends BaseTarget {
     return ((URLClassLoader)ClassLoader.getSystemClassLoader()).getURLs();
   }
 
-  protected ProviderInfo getProviderInfo() {
+  protected ProviderInfo getProviderInfo(PactSource source) {
     Provider provider = testClass.getAnnotation(Provider.class);
     ProviderInfo providerInfo = new ProviderInfo(provider.value());
     providerInfo.setVerificationType(PactVerification.ANNOTATED_METHOD);
     providerInfo.setPackagesToScan(packagesToScan);
     PactBroker annotation = testClass.getAnnotation(PactBroker.class);
     PactFolder folder = testClass.getAnnotation(PactFolder.class);
+
     if(annotation != null && annotation.host() != null) {
       List list = providerInfo.hasPactsFromPactBroker(annotation.protocol() + "://" + annotation.host() + (annotation.port() != null ? ":" + annotation.port() : ""));
       providerInfo.setConsumers(list);

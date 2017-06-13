@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.model.Consumer
 import groovy.transform.Canonical
 
 /**
@@ -17,5 +18,9 @@ class ConsumerInfo {
 
     def url(String path) {
         new URL(path)
+    }
+
+    Consumer toPactConsumer() {
+      new Consumer(name)
     }
 }

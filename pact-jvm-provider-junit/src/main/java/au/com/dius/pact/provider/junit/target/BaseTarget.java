@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.junit.target;
 
 import au.com.dius.pact.model.Interaction;
+import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.ProviderInfo;
 import au.com.dius.pact.provider.ProviderVerifier;
@@ -16,7 +17,6 @@ import org.jooq.lambda.tuple.Tuple2;
 import org.junit.runners.model.TestClass;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,9 +34,9 @@ public abstract class BaseTarget implements TestClassAwareTarget {
    * {@inheritDoc}
    */
   @Override
-  public abstract void testInteraction(final String consumerName, final Interaction interaction);
+  public abstract void testInteraction(final String consumerName, final Interaction interaction, PactSource source);
 
-  protected abstract ProviderInfo getProviderInfo();
+  protected abstract ProviderInfo getProviderInfo(PactSource source);
 
   protected abstract ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider,
                                                     ConsumerInfo consumer);
