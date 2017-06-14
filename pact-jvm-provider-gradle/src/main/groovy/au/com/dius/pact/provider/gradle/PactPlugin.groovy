@@ -12,8 +12,9 @@ class PactPlugin implements Plugin<Project> {
 
   private static final GROUP = 'Pact'
   private static final String PACT_VERIFY = 'pactVerify'
+  private static final String TEST_CLASSES = 'testClasses'
 
-    @Override
+  @Override
     void apply(Project project) {
 
         // Create and install the extension object
@@ -43,8 +44,8 @@ class PactPlugin implements Plugin<Project> {
                     providerToVerify = provider
                 }
 
-                if (project.tasks.findByName('testClasses')) {
-                  providerTask.dependsOn 'testClasses'
+                if (project.tasks.findByName(TEST_CLASSES)) {
+                  providerTask.dependsOn TEST_CLASSES
                 }
 
                 if (provider.startProviderTask != null) {
