@@ -2,7 +2,7 @@ package au.com.dius.pact.provider
 
 import groovy.io.FileType
 import groovy.json.JsonSlurper
-import au.com.dius.pact.provider.org.fusesource.jansi.AnsiConsole
+import org.fusesource.jansi.AnsiConsole
 
 /**
  * Common provider utils

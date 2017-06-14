@@ -4,8 +4,8 @@ import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
-import au.com.dius.pact.provider.org.fusesource.jansi.Ansi
-import au.com.dius.pact.provider.org.fusesource.jansi.AnsiConsole
+import org.fusesource.jansi.Ansi
+import org.fusesource.jansi.AnsiConsole
 
 /**
  * Pact verifier reporter that displays the results of the verification to the console using ASCII escapes
