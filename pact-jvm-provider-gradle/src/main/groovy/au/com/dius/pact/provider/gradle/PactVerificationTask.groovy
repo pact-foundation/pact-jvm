@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
+import org.fusesource.jansi.AnsiConsole
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Task
@@ -17,6 +18,7 @@ class PactVerificationTask extends DefaultTask {
 
   @TaskAction
   void verifyPact() {
+    AnsiConsole.systemInstall()
     ProviderVerifier verifier = new ProviderVerifier()
     verifier.with {
       projectHasProperty = { project.hasProperty(it) }
@@ -43,6 +45,7 @@ class PactVerificationTask extends DefaultTask {
       }
     } finally {
       verifier.finialiseReports()
+      AnsiConsole.systemUninstall()
     }
   }
 
