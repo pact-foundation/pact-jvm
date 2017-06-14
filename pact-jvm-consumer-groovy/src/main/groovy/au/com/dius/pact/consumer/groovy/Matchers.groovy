@@ -64,7 +64,7 @@ class Matchers {
   }
 
   static integer(Long value = null) {
-    new TypeMatcher(values: ['integer', value ?: RandomStringUtils.randomNumeric(TEN) as Long])
+    new TypeMatcher(values: ['integer', value ?: RandomStringUtils.randomNumeric(9) as Long])
   }
 
   static timestamp(String pattern = null, def value = null) {
