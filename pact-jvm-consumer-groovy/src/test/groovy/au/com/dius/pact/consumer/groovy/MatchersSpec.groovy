@@ -33,7 +33,7 @@ class MatchersSpec extends Specification {
     Matchers.string(value).value == value
 
     where:
-    value << [ "", " ", "example" ]
+    value << ['', ' ', 'example']
   }
 
   def 'string matcher should generate value when not provided'() {
