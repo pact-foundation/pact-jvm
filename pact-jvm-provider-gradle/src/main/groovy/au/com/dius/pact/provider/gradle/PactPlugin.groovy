@@ -39,8 +39,12 @@ class PactPlugin implements Plugin<Project> {
             it.pact.serviceProviders.all { ProviderInfo provider ->
                 def providerTask = project.task("pactVerify_${provider.name}",
                     description: "Verify the pacts against ${provider.name}", type: PactVerificationTask,
-                    group: GROUP, dependsOn: 'testClasses') {
+                    group: GROUP) {
                     providerToVerify = provider
+                }
+
+                if (project.tasks.findByName('testClasses')) {
+                  providerTask.dependsOn 'testClasses'
                 }
 
                 if (provider.startProviderTask != null) {
