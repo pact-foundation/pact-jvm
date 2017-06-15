@@ -27,4 +27,17 @@ class MatchersSpec extends Specification {
 
   }
 
+  @Unroll
+  def 'string matcher should use provided value - `#value`'() {
+    expect:
+    Matchers.string(value).value == value
+
+    where:
+    value << ['', ' ', 'example']
+  }
+
+  def 'string matcher should generate value when not provided'() {
+    expect:
+    !Matchers.string().value.isEmpty()
+  }
 }
