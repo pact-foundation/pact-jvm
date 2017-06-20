@@ -178,7 +178,7 @@ class Matchers {
    * @param value Example value, if not provided a random one will be generated
    */
   static string(String value = null) {
-    if (value) {
+    if (value != null) {
       new TypeMatcher(value: value)
     } else {
       new TypeMatcher(value: 'string', generator: new RandomStringGenerator(10))
