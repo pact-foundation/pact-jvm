@@ -5,8 +5,11 @@ buildscript {
   dependencies {
     classpath "org.apache.commons:commons-lang3:$commonsLang3Version"
     classpath 'com.tkruse.gradle:gradle-groovysh-plugin:1.0.8'
+    classpath 'org.apache.commons:commons-text:1.1'
   }
 }
+
+import org.apache.commons.text.StringEscapeUtils
 
 subprojects {
 
@@ -47,6 +50,7 @@ subprojects {
     repositories {
         mavenLocal()
         mavenCentral()
+        jcenter()
     }
 
     dependencies {
@@ -63,11 +67,12 @@ subprojects {
         'org.mockito:mockito-core:1.10.19',
         "junit:junit:${project.junitVersion}"
 
-      testCompile('org.spockframework:spock-core:1.1-groovy-2.4-rc-4') {
+      testCompile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
+      testCompile('org.spockframework:spock-core:1.1-groovy-2.4') {
         exclude group: 'org.codehaus.groovy'
       }
-      testCompile 'org.objenesis:objenesis:2.4'
       testCompile "cglib:cglib:${project.cglibVersion}"
+      testCompile 'org.objenesis:objenesis:2.4'
     }
 
     group = 'au.com.dius'
@@ -81,6 +86,10 @@ subprojects {
           memoryMaximumSize = '256m'
           jvmArgs = ['-XX:MaxPermSize=512m']
         }
+    }
+
+    test {
+      systemProperty 'pact.rootDir', "$buildDir/pacts"
     }
 
     jar {
@@ -109,7 +118,7 @@ subprojects {
 
     def pomCustomisation = {
         name project.name
-        description new File(projectDir, 'README.md').text
+        description StringEscapeUtils.escapeXml11(new File(projectDir, 'README.md').text)
         url 'https://github.com/DiUS/pact-jvm'
         licenses {
             license {
