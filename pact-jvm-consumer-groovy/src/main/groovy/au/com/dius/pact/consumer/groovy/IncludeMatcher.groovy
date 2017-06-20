@@ -7,6 +7,6 @@ import au.com.dius.pact.model.matchingrules.MatchingRule
  */
 class IncludeMatcher extends Matcher {
   MatchingRule getMatcher() {
-    new au.com.dius.pact.model.matchingrules.IncludeMatcher(value: value)
+    new au.com.dius.pact.model.matchingrules.IncludeMatcher(value)
   }
 }

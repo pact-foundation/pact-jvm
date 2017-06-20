@@ -56,7 +56,6 @@ object Matchers extends StrictLogging {
       })
     else matchers.rulesForCategory(category)
 
-
   def matcherDefined(category: String, path: Seq[String], matchers: MatchingRules): Boolean =
     if (matchers != null)
       resolveMatchers(matchers, category, path).isNotEmpty
@@ -86,6 +85,6 @@ object Matchers extends StrictLogging {
         override def applyAsInt(value: String): Int = calculatePathWeight(value, path)
       })
     else
-      matcherCategory
+      matcherCategory.getMatchingRules.iterator.next()._2
   }
 }

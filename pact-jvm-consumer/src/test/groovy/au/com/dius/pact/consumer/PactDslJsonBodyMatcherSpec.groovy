@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue
+import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.model.matchingrules.MaxTypeMatcher
 import au.com.dius.pact.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
@@ -108,10 +109,10 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     result.keySet() == keys
     result.types == ['abc', 'abc']
     subject.matchers.matchingRules == [
-      '.types': [new MinTypeMatcher(0)],
-      '.subscriptionId': [new TypeMatcher()],
-      '.types[*]': [new TypeMatcher()],
-      '.preference': [new TypeMatcher()]
+      '.types': new MatchingRuleGroup([new MinTypeMatcher(0)]),
+      '.subscriptionId': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '.types[*]': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '.preference': new MatchingRuleGroup([TypeMatcher.INSTANCE])
     ]
   }
 
@@ -131,10 +132,10 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     result.keySet() == keys
     result.types == ['abc', 'abc']
     subject.matchers.matchingRules == [
-      '.types': [new MinTypeMatcher(2)],
-      '.subscriptionId': [new TypeMatcher()],
-      '.types[*]': [new TypeMatcher()],
-      '.preference': [new TypeMatcher()]
+      '.types': new MatchingRuleGroup([new MinTypeMatcher(2)]),
+      '.subscriptionId': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '.types[*]': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '.preference': new MatchingRuleGroup([TypeMatcher.INSTANCE])
     ]
   }
 
@@ -154,10 +155,10 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     result.keySet() == keys
     result.types == ['abc', 'abc']
     subject.matchers.matchingRules == [
-      '.types': [new MaxTypeMatcher(10)],
-      '.subscriptionId': [new TypeMatcher()],
-      '.types[*]': [new TypeMatcher()],
-      '.preference': [new TypeMatcher()]
+      '.types': new MatchingRuleGroup([new MaxTypeMatcher(10)]),
+      '.subscriptionId': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '.types[*]': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '.preference': new MatchingRuleGroup([TypeMatcher.INSTANCE])
     ]
   }
 
@@ -193,16 +194,16 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     result.keySet() == keys
     result.features[0].geometry.coordinates[0] == [-7.55717, 49.766896]
     subject.matchers.matchingRules == [
-      '.type': [new TypeMatcher()],
-      '.features': [new MinTypeMatcher(0)],
-      '.features[*].type': [new TypeMatcher()],
-      '.features[*].properties.prop0': [new TypeMatcher()],
-      '.features[*].geometry.type': [new TypeMatcher()],
-      '.features[*].geometry.coordinates': [new MinTypeMatcher(0)],
-      '.features[*].geometry.coordinates[*][0]': [
-        new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)],
-      '.features[*].geometry.coordinates[*][1]': [
-        new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)]
+      '.type': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '.features': new MatchingRuleGroup([new MinTypeMatcher(0)]),
+      '.features[*].type': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '.features[*].properties.prop0': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '.features[*].geometry.type': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '.features[*].geometry.coordinates': new MatchingRuleGroup([new MinTypeMatcher(0)]),
+      '.features[*].geometry.coordinates[*][0]': new MatchingRuleGroup([
+        new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)]),
+      '.features[*].geometry.coordinates[*][1]': new MatchingRuleGroup([
+        new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)])
     ]
 
   }

@@ -23,13 +23,13 @@ class MatchersTest extends Specification {
 
     "should be true when the path does have a matcher entry" in {
       val matchingRules = new MatchingRules()
-      matchingRules.addCategory("body").addRule("$.something", new TypeMatcher())
+      matchingRules.addCategory("body").addRule("$.something", TypeMatcher.INSTANCE)
       Matchers.matcherDefined("body", Seq("$", "something"), matchingRules) must beTrue
     }
 
     "should be true when a parent of the path has a matcher entry" in {
       val matchingRules = new MatchingRules()
-      matchingRules.addCategory("body").addRule("$", new TypeMatcher())
+      matchingRules.addCategory("body").addRule("$", TypeMatcher.INSTANCE)
       Matchers.matcherDefined("body", Seq("$", "something"), matchingRules) must beTrue
     }
 
@@ -48,22 +48,22 @@ class MatchersTest extends Specification {
     "should be false when the path does have a matcher entry and it is not a wildcard" in {
       val matchingRules = new MatchingRules()
       val category = matchingRules.addCategory("body")
-      category.addRule("$.some.thing", new TypeMatcher())
-      category.addRule("$.*", new TypeMatcher())
+      category.addRule("$.some.thing", TypeMatcher.INSTANCE)
+      category.addRule("$.*", TypeMatcher.INSTANCE)
       Matchers.wildcardMatcherDefined(Seq("$", "some", "thing"), "body", matchingRules) must beFalse
     }
 
     "should be true when the path does have a matcher entry and it is a wildcard" in {
       val matchingRules = new MatchingRules()
       val category = matchingRules.addCategory("body")
-      category.addRule("$.*", new TypeMatcher())
+      category.addRule("$.*", TypeMatcher.INSTANCE)
       Matchers.wildcardMatcherDefined(Seq("$", "something"), "body", matchingRules) must beTrue
     }
 
     "should be false when a parent of the path has a matcher entry" in {
       val matchingRules = new MatchingRules()
       val category = matchingRules.addCategory("body")
-      category.addRule("$.*", new TypeMatcher())
+      category.addRule("$.*", TypeMatcher.INSTANCE)
       Matchers.wildcardMatcherDefined(Seq("$", "some", "thing"), "body", matchingRules) must beFalse
     }
 
@@ -71,9 +71,9 @@ class MatchersTest extends Specification {
 
   "should default to a matching defined at a parent level" in {
     val matchingRules = new MatchingRules()
-    matchingRules.addCategory("body").addRule("$", new TypeMatcher())
-    val rules = Matchers.selectBestMatcher(matchingRules, "body", Seq("$", "value")).getMatchingRules
-    JavaConversions.asScalaSet(rules.keySet()) must beEqualTo(Set("$"))
+    matchingRules.addCategory("body").addRule("$", TypeMatcher.INSTANCE)
+    val rules = Matchers.selectBestMatcher(matchingRules, "body", Seq("$", "value"))
+    rules.getRules.get(0) must beEqualTo(TypeMatcher.INSTANCE)
   }
 
   "type matcher" should {
@@ -82,7 +82,7 @@ class MatchersTest extends Specification {
 
       "list elements should inherit the matcher from the parent" in {
         val matchingRules = new MatchingRules()
-        matchingRules.addCategory("body").addRule("$.value", new TypeMatcher())
+        matchingRules.addCategory("body").addRule("$.value", TypeMatcher.INSTANCE)
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": [100]}"), matchingRules)
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": [\"200.3\"]}"), null)
         new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
@@ -90,7 +90,7 @@ class MatchersTest extends Specification {
 
       "map elements should inherit the matchers from the parent" in {
         val matchingRules = new MatchingRules()
-        matchingRules.addCategory("body").addRule("$.value", new TypeMatcher())
+        matchingRules.addCategory("body").addRule("$.value", TypeMatcher.INSTANCE)
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": {\"a\": 100}}"), matchingRules)
         val actual = new Request("get", "/", null, null,
           OptionalBody.body("{\"value\": {\"a\": \"200.3\", \"b\": 200, \"c\": 300} }"), null)

@@ -2,6 +2,7 @@ package au.com.dius.pact.model.matchingrules
 
 import au.com.dius.pact.model.PactSpecVersion
 import groovy.transform.Canonical
+import groovy.transform.CompileStatic
 
 /**
  * Class that encapsulates the matching rules to be applied
@@ -42,18 +43,7 @@ class MatchingRules {
   }
 
   private void addRules(String categoryName, Map matcherDef) {
-    def category = addCategory(categoryName)
-    if (categoryName == 'path') {
-      matcherDef.matchers.each {
-        category.addRule(MatchingRuleUtil.fromMap(it))
-      }
-    } else {
-      matcherDef.each { matcher ->
-        matcher.value.matchers.each {
-          category.addRule(matcher.key, MatchingRuleUtil.fromMap(it))
-        }
-      }
-    }
+    addCategory(categoryName).fromMap(matcherDef)
   }
 
   Category addCategory(String category) {
@@ -88,12 +78,13 @@ class MatchingRules {
     }
   }
 
-  private void addV2Rule(String categoryName, String item, Map matcher) {
+  @CompileStatic
+  private void addV2Rule(String categoryName, String item, Map<String, Object> matcher) {
     def category = addCategory(categoryName)
     if (item) {
-      category.addRule(item, MatchingRuleUtil.fromMap(matcher))
+      category.addRule(item, MatchingRuleGroup.ruleFromMap(matcher))
     } else {
-      category.addRule(MatchingRuleUtil.fromMap(matcher))
+      category.addRule(MatchingRuleGroup.ruleFromMap(matcher))
     }
   }
 
@@ -132,7 +123,7 @@ class MatchingRules {
     def matchingRules = new MatchingRules()
 
     rules.each {
-      matchingRules.addCategory(it.value.copy())
+      matchingRules.addCategory(it.value /*.copy()*/)
     }
 
     matchingRules

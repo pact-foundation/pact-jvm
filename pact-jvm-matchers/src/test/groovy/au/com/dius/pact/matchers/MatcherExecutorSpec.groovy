@@ -104,7 +104,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'timestamp matcher'() {
     expect:
-    MatcherExecutor.domatch(new TimestampMatcher(pattern), path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutor.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
     expected                    | actual                      | pattern               || mustBeEmpty
@@ -112,12 +112,14 @@ class MatcherExecutorSpec extends Specification {
     '2014-01-01 14:00:00+10:00' | 'I\'m a timestamp!'         | null                  || false
     '2014-01-01 14:00:00+10:00' | '2013#12#01#14#00#00'       | 'yyyy#MM#dd#HH#mm#ss' || true
     '2014-01-01 14:00:00+10:00' | null                        | null                  || false
+
+    matcher = pattern ? new TimestampMatcher(pattern) : new TimestampMatcher()
   }
 
   @Unroll
   def 'time matcher'() {
     expect:
-    MatcherExecutor.domatch(new TimeMatcher(pattern), path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutor.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
     expected         | actual     | pattern    || mustBeEmpty
@@ -125,12 +127,14 @@ class MatcherExecutorSpec extends Specification {
     '00:00'          | '14:01:02' | 'mm:ss'    || false
     '00:00:14'       | '05:10:14' | 'ss:mm:HH' || true
     '14:00:00+10:00' | null       | null       || false
+
+    matcher = pattern ? new TimeMatcher(pattern) : new TimeMatcher()
   }
 
   @Unroll
   def 'date matcher'() {
     expect:
-    MatcherExecutor.domatch(new DateMatcher(pattern), path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutor.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
     expected     | actual       | pattern      || mustBeEmpty
@@ -138,6 +142,8 @@ class MatcherExecutorSpec extends Specification {
     '01-01-1970' | '01011970'   | 'dd-MM-yyyy' || false
     '12/30/1970' | '01/14/2001' | 'MM/dd/yyyy' || true
     '2014-01-01' | null         | null         || false
+
+    matcher = pattern ? new DateMatcher(pattern) : new DateMatcher()
   }
 
   @Unroll

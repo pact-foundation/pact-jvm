@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.RequestResponsePact;
 import au.com.dius.pact.model.matchingrules.MatchingRule;
+import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.model.matchingrules.MatchingRules;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,7 +39,7 @@ public class MatcherTestUtils {
 
     public static void assertResponseMatcherKeysEqualTo(RequestResponsePact pact, String category, String... matcherKeys) {
       MatchingRules matchingRules = pact.getInteractions().get(0).getResponse().getMatchingRules();
-      Map<String, List<MatchingRule>> matchers = matchingRules.rulesForCategory(category).getMatchingRules();
+      Map<String, MatchingRuleGroup> matchers = matchingRules.rulesForCategory(category).getMatchingRules();
       assertEquals(asSet(matcherKeys), new TreeSet<>(matchers.keySet()));
     }
 
@@ -62,7 +63,7 @@ public class MatcherTestUtils {
 
     public static void assertMessageMatcherKeysEqualTo(MessagePact messagePact, String category, String... matcherKeys) {
       MatchingRules matchingRules = messagePact.getMessages().get(0).getMatchingRules();
-      Map<String, List<MatchingRule>> matchers = matchingRules.rulesForCategory(category).getMatchingRules();
+      Map<String, MatchingRuleGroup> matchers = matchingRules.rulesForCategory(category).getMatchingRules();
       assertEquals(asSet(matcherKeys), new TreeSet<String>(matchers.keySet()));
     }
 

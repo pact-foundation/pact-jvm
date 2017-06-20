@@ -6,6 +6,7 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.RequestResponsePact;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.matchingrules.MatchingRule;
+import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.model.matchingrules.MatchingRules;
 import au.com.dius.pact.model.matchingrules.MaxTypeMatcher;
 import au.com.dius.pact.model.matchingrules.MinTypeMatcher;
@@ -47,14 +48,14 @@ public class Defect266Test {
       .body(body)
       .toPact();
     MatchingRules matchingRules = pact.getInteractions().get(0).getResponse().getMatchingRules();
-    Map<String, List<MatchingRule>> bodyMatchingRules = matchingRules.rulesForCategory("body").getMatchingRules();
+    Map<String, MatchingRuleGroup> bodyMatchingRules = matchingRules.rulesForCategory("body").getMatchingRules();
     assertThat(bodyMatchingRules.keySet(), is(equalTo(Sets.newHashSet("$[0][*].userName", "$[0][*].id", "$[0]",
       "$[0][*].email"))));
-    assertThat(bodyMatchingRules.get("$[0][*].userName").get(0), is(equalTo(new TypeMatcher())));
-    assertThat(bodyMatchingRules.get("$[0][*].id").get(0),
+    assertThat(bodyMatchingRules.get("$[0][*].userName").getRules().get(0), is(equalTo(TypeMatcher.INSTANCE)));
+    assertThat(bodyMatchingRules.get("$[0][*].id").getRules().get(0),
       is(equalTo(new RegexMatcher("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))));
-    assertThat(bodyMatchingRules.get("$[0]").get(0), is(equalTo(new MaxTypeMatcher(5))));
-    assertThat(bodyMatchingRules.get("$[0][*].email").get(0), is(equalTo(new TypeMatcher())));
+    assertThat(bodyMatchingRules.get("$[0]").getRules().get(0), is(equalTo(new MaxTypeMatcher(5))));
+    assertThat(bodyMatchingRules.get("$[0][*].email").getRules().get(0), is(equalTo(TypeMatcher.INSTANCE)));
     return pact;
   }
 
@@ -75,14 +76,14 @@ public class Defect266Test {
       .body(body)
       .toPact();
     MatchingRules matchingRules = pact.getInteractions().get(0).getResponse().getMatchingRules();
-    Map<String, List<MatchingRule>> bodyMatchingRules = matchingRules.rulesForCategory("body").getMatchingRules();
+    Map<String, MatchingRuleGroup> bodyMatchingRules = matchingRules.rulesForCategory("body").getMatchingRules();
     assertThat(bodyMatchingRules.keySet(), is(equalTo(Sets.newHashSet("$[0][*].userName", "$[0][*].id", "$[0]",
       "$[0][*].email"))));
-    assertThat(bodyMatchingRules.get("$[0][*].userName").get(0), is(equalTo(new TypeMatcher())));
-    assertThat(bodyMatchingRules.get("$[0][*].id").get(0),
+    assertThat(bodyMatchingRules.get("$[0][*].userName").getRules().get(0), is(equalTo(TypeMatcher.INSTANCE)));
+    assertThat(bodyMatchingRules.get("$[0][*].id").getRules().get(0),
       is(equalTo(new RegexMatcher("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"))));
-    assertThat(bodyMatchingRules.get("$[0]").get(0), is(equalTo(new MinTypeMatcher(5))));
-    assertThat(bodyMatchingRules.get("$[0][*].email").get(0), is(equalTo(new TypeMatcher())));
+    assertThat(bodyMatchingRules.get("$[0]").getRules().get(0), is(equalTo(new MinTypeMatcher(5))));
+    assertThat(bodyMatchingRules.get("$[0][*].email").getRules().get(0), is(equalTo(TypeMatcher.INSTANCE)));
     return pact;
   }
 

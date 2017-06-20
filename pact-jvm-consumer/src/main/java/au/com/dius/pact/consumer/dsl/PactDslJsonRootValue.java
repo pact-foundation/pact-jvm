@@ -243,7 +243,7 @@ public class PactDslJsonRootValue extends DslPart {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.generators.addGenerator(Category.BODY, "", new RandomStringGenerator(20));
     value.setValue("string");
-    value.setMatcher(new TypeMatcher());
+    value.setMatcher(TypeMatcher.INSTANCE);
     return value;
   }
 
@@ -255,7 +255,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue stringType(String example) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(example);
-    value.setMatcher(new TypeMatcher());
+    value.setMatcher(TypeMatcher.INSTANCE);
     return value;
   }
 
@@ -266,7 +266,7 @@ public class PactDslJsonRootValue extends DslPart {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.generators.addGenerator(Category.BODY, "", new RandomIntGenerator(0, Integer.MAX_VALUE));
     value.setValue(100);
-    value.setMatcher(new TypeMatcher());
+    value.setMatcher(TypeMatcher.INSTANCE);
     return value;
   }
 
@@ -277,7 +277,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue numberType(Number number) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(number);
-    value.setMatcher(new TypeMatcher());
+    value.setMatcher(TypeMatcher.INSTANCE);
     return value;
   }
 
@@ -361,7 +361,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue booleanType(Boolean example) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(example);
-    value.setMatcher(new TypeMatcher());
+    value.setMatcher(TypeMatcher.INSTANCE);
     return value;
   }
 

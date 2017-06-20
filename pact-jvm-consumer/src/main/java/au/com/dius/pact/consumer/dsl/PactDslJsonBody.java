@@ -51,7 +51,7 @@ public class PactDslJsonBody extends DslPart {
 
     protected void putObject(DslPart object) {
         for (String matcherName: object.matchers.getMatchingRules().keySet()) {
-            matchers.addRules(matcherName, object.matchers.getMatchingRules().get(matcherName));
+            matchers.addRules(matcherName, object.matchers.getMatchingRules().get(matcherName).getRules());
         }
         generators.addGenerators(object.generators);
         String elementBase = StringUtils.difference(this.rootPath, object.rootPath);
@@ -71,7 +71,7 @@ public class PactDslJsonBody extends DslPart {
 
     protected void putArray(DslPart object) {
         for(String matcherName: object.matchers.getMatchingRules().keySet()) {
-            matchers.addRules(matcherName, object.matchers.getMatchingRules().get(matcherName));
+            matchers.addRules(matcherName, object.matchers.getMatchingRules().get(matcherName).getRules());
         }
         generators.addGenerators(object.generators);
         if (StringUtils.isNotEmpty(object.rootName)) {
@@ -147,7 +147,7 @@ public class PactDslJsonBody extends DslPart {
      */
     public PactDslJsonBody stringType(String name, String example) {
         body.put(name, example);
-        matchers.addRule(matcherKey(name), new TypeMatcher());
+        matchers.addRule(matcherKey(name), TypeMatcher.INSTANCE);
         return this;
     }
 
@@ -321,7 +321,7 @@ public class PactDslJsonBody extends DslPart {
      */
     public PactDslJsonBody booleanType(String name, Boolean example) {
         body.put(name, example);
-        matchers.addRule(matcherKey(name), new TypeMatcher());
+        matchers.addRule(matcherKey(name), TypeMatcher.INSTANCE);
         return this;
     }
 
@@ -575,7 +575,7 @@ public class PactDslJsonBody extends DslPart {
     @Override
     @Deprecated
     public PactDslJsonBody arrayLike(String name) {
-        matchers.addRule(matcherKey(name), new TypeMatcher());
+        matchers.addRule(matcherKey(name), TypeMatcher.INSTANCE);
         return new PactDslJsonBody(".", ".", new PactDslJsonArray(matcherKey(name), "", this, true));
     }
 
@@ -788,7 +788,7 @@ public class PactDslJsonBody extends DslPart {
     public PactDslJsonBody id(String name) {
       generators.addGenerator(Category.BODY, matcherKey(name), new RandomIntGenerator(0, Integer.MAX_VALUE));
       body.put(name, 1234567890L);
-      matchers.addRule(matcherKey(name), new TypeMatcher());
+      matchers.addRule(matcherKey(name), TypeMatcher.INSTANCE);
       return this;
     }
 
@@ -799,7 +799,7 @@ public class PactDslJsonBody extends DslPart {
      */
     public PactDslJsonBody id(String name, Long id) {
         body.put(name, id);
-        matchers.addRule(matcherKey(name), new TypeMatcher());
+        matchers.addRule(matcherKey(name), TypeMatcher.INSTANCE);
         return this;
     }
 
@@ -991,7 +991,7 @@ public class PactDslJsonBody extends DslPart {
    * @param exampleKey Example key to use for generating bodies
    */
   public PactDslJsonBody eachKeyLike(String exampleKey) {
-    matchers.addRule(rootPath + "*", new TypeMatcher());
+    matchers.addRule(rootPath + "*", TypeMatcher.INSTANCE);
     return new PactDslJsonBody(rootPath + "*.", exampleKey, this);
   }
 
@@ -1003,7 +1003,7 @@ public class PactDslJsonBody extends DslPart {
   public PactDslJsonBody eachKeyLike(String exampleKey, PactDslJsonRootValue value) {
     body.put(exampleKey, value.getBody());
     for(String matcherName: value.matchers.getMatchingRules().keySet()) {
-      matchers.addRules(rootPath + "*" + matcherName, value.matchers.getMatchingRules().get(matcherName));
+      matchers.addRules(rootPath + "*" + matcherName, value.matchers.getMatchingRules().get(matcherName).getRules());
     }
     return this;
   }
@@ -1026,7 +1026,7 @@ public class PactDslJsonBody extends DslPart {
    */
   public PactDslJsonBody equalTo(String name, Object value) {
     body.put(name, value);
-    matchers.addRule(matcherKey(name), new EqualsMatcher());
+    matchers.addRule(matcherKey(name), EqualsMatcher.INSTANCE);
     return this;
   }
 }

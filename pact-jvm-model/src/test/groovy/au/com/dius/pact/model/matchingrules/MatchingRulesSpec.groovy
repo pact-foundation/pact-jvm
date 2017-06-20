@@ -38,14 +38,17 @@ class MatchingRulesSpec extends Specification {
     then:
     !matchingRules.empty
     matchingRules.categories == ['path', 'query', 'header', 'body'] as Set
-    matchingRules.rulesForCategory('path') == new Category('path', ['': [ new RegexMatcher('\\w+') ] ])
-    matchingRules.rulesForCategory('query') == new Category('query', [Q1: [ new RegexMatcher('\\d+') ] ])
-    matchingRules.rulesForCategory('header') == new Category('header', [HEADERY: [ new IncludeMatcher('ValueA') ] ])
+    matchingRules.rulesForCategory('path') == new Category('path', [
+      '': new MatchingRuleGroup([ new RegexMatcher('\\w+') ]) ])
+    matchingRules.rulesForCategory('query') == new Category('query', [
+      Q1: new MatchingRuleGroup([ new RegexMatcher('\\d+') ]) ])
+    matchingRules.rulesForCategory('header') == new Category('header', [
+      HEADERY: new MatchingRuleGroup([ new IncludeMatcher('ValueA') ]) ])
     matchingRules.rulesForCategory('body') == new Category('body', [
-      '$.animals': [ new MinTypeMatcher(1) ],
-      '$.animals[*].*': [ new TypeMatcher() ],
-      '$.animals[*].children': [ new MinTypeMatcher(1) ],
-      '$.animals[*].children[*].*': [ new TypeMatcher() ]
+      '$.animals': new MatchingRuleGroup([ new MinTypeMatcher(1) ]),
+      '$.animals[*].*': new MatchingRuleGroup([ TypeMatcher.INSTANCE ]),
+      '$.animals[*].children': new MatchingRuleGroup([ new MinTypeMatcher(1) ]),
+      '$.animals[*].children[*].*': new MatchingRuleGroup([ TypeMatcher.INSTANCE ])
     ])
   }
 
@@ -95,16 +98,18 @@ class MatchingRulesSpec extends Specification {
     then:
     !matchingRules.empty
     matchingRules.categories == ['path', 'query', 'header', 'body'] as Set
-    matchingRules.rulesForCategory('path') == new Category('path', ['': [ new RegexMatcher('\\w+') ] ])
-    matchingRules.rulesForCategory('query') == new Category('query', [Q1: [ new RegexMatcher('\\d+') ] ])
+    matchingRules.rulesForCategory('path') == new Category('path', [
+      '': new MatchingRuleGroup([ new RegexMatcher('\\w+') ]) ])
+    matchingRules.rulesForCategory('query') == new Category('query', [
+      Q1: new MatchingRuleGroup([ new RegexMatcher('\\d+') ]) ])
     matchingRules.rulesForCategory('header') == new Category('header', [
-      HEADERY: [ new IncludeMatcher('ValueA'), new IncludeMatcher('ValueB') ]
+      HEADERY: new MatchingRuleGroup([ new IncludeMatcher('ValueA'), new IncludeMatcher('ValueB') ])
     ])
     matchingRules.rulesForCategory('body') == new Category('body', [
-      '$.animals': [ new MinTypeMatcher(1) ],
-      '$.animals[*].*': [ new TypeMatcher() ],
-      '$.animals[*].children': [ new MinTypeMatcher(1) ],
-      '$.animals[*].children[*].*': [ new TypeMatcher() ]
+      '$.animals': new MatchingRuleGroup([ new MinTypeMatcher(1) ]),
+      '$.animals[*].*': new MatchingRuleGroup([ TypeMatcher.INSTANCE ]),
+      '$.animals[*].children': new MatchingRuleGroup([ new MinTypeMatcher(1) ]),
+      '$.animals[*].children[*].*': new MatchingRuleGroup([ TypeMatcher.INSTANCE ])
     ])
   }
 

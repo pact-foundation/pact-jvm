@@ -235,4 +235,20 @@ class Matchers {
     new IncludeMatcher(value: value?.toString())
   }
 
+  /**
+   * Matches if any of the provided matches match
+   * @param example Example value to use
+   */
+  static or(def example, Object... values) {
+    new OrMatcher(value: example, matchers: values)
+  }
+
+  /**
+   * Matches if all of the provided matches match
+   * @param example Example value to use
+   */
+  static and(def example, Object... values) {
+    new AndMatcher(value: example, matchers: values)
+  }
+
 }

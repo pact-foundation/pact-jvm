@@ -1,9 +1,9 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.matchingrules.Category
 import au.com.dius.pact.model.matchingrules.DateMatcher
 import au.com.dius.pact.model.matchingrules.IncludeMatcher
 import au.com.dius.pact.model.matchingrules.MatchingRule
+import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.model.matchingrules.MaxTypeMatcher
 import au.com.dius.pact.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
@@ -19,17 +19,17 @@ import scala.xml.Elem
 import java.text.ParseException
 
 import static au.com.dius.pact.matchers.MatcherExecutorKt.matchInclude
-import static au.com.dius.pact.matchers.MatcherExecutorKt.valueOf
 import static au.com.dius.pact.matchers.MatcherExecutorKt.safeToString
+import static au.com.dius.pact.matchers.MatcherExecutorKt.valueOf
 
 /**
  * Executor for matchers
  */
 @Slf4j
 class MatcherExecutor {
-  static <Mismatch> List<Mismatch> domatch(Category matchers, List<String> path, def expected, def actual,
+  static <Mismatch> List<Mismatch> domatch(MatchingRuleGroup matchers, List<String> path, def expected, def actual,
                                            MismatchFactory<Mismatch> mismatchFn) {
-    def result = matchers.allMatchingRules().collect { matchingRule ->
+    def result = matchers.rules.collect { matchingRule ->
       domatch(matchingRule, path, expected, actual, mismatchFn)
     }
 

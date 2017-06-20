@@ -5,6 +5,7 @@ import au.com.dius.pact.model.generators.RandomDecimalGenerator
 import au.com.dius.pact.model.generators.RandomHexadecimalGenerator
 import au.com.dius.pact.model.generators.RandomIntGenerator
 import au.com.dius.pact.model.generators.UuidGenerator
+import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.model.matchingrules.MaxTypeMatcher
 import au.com.dius.pact.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
@@ -17,6 +18,8 @@ import groovy.json.JsonSlurper
 import spock.lang.Specification
 
 import static au.com.dius.pact.model.generators.Category.BODY
+import static au.com.dius.pact.model.matchingrules.NumberTypeMatcher.NumberType.INTEGER
+import static au.com.dius.pact.model.matchingrules.NumberTypeMatcher.NumberType.NUMBER
 
 class PactBodyBuilderSpec extends Specification {
 
@@ -93,27 +96,28 @@ class PactBodyBuilderSpec extends Specification {
     then:
     service.interactions.size() == 1
     requestMatchingRules.categories == ['body'] as Set
-    bodyMatchingRules['$.name'] == [new RegexMatcher('\\w+')]
-    bodyMatchingRules['$.surname'] == [new RegexMatcher('\\w+')]
-    bodyMatchingRules['$.position'] == [new RegexMatcher('staff|contractor')]
-    bodyMatchingRules['$.hexCode'] == [new RegexMatcher('[0-9a-fA-F]+')]
-    bodyMatchingRules['$.hexCode2'] == [new RegexMatcher('[0-9a-fA-F]+')]
-    bodyMatchingRules['$.id'] == [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)]
-    bodyMatchingRules['$.id2'] == [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)]
-    bodyMatchingRules['$.salary'] == [new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)]
-    bodyMatchingRules['$.localAddress'] == [new RegexMatcher('(\\d{1,3}\\.)+\\d{1,3}')]
-    bodyMatchingRules['$.localAddress2'] == [new RegexMatcher('(\\d{1,3}\\.)+\\d{1,3}')]
-    bodyMatchingRules['$.age2'] == [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)]
-    bodyMatchingRules['$.ts'] == [new TimestampMatcher('yyyy-MM-dd\'T\'HH:mm:ss')]
-    bodyMatchingRules['$.timestamp'] == [new TimestampMatcher('yyyy/MM/dd - HH:mm:ss.S')]
-    bodyMatchingRules['$.values[3]'] == [new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)]
-    bodyMatchingRules['$.role.dob'] == [new DateMatcher('MM/dd/yyyy')]
-    bodyMatchingRules['$.role.id'] == [
+    bodyMatchingRules['$.name'].rules == [new RegexMatcher('\\w+')]
+    bodyMatchingRules['$.surname'].rules == [new RegexMatcher('\\w+')]
+    bodyMatchingRules['$.position'].rules == [new RegexMatcher('staff|contractor')]
+    bodyMatchingRules['$.hexCode'].rules == [new RegexMatcher('[0-9a-fA-F]+')]
+    bodyMatchingRules['$.hexCode2'].rules == [new RegexMatcher('[0-9a-fA-F]+')]
+    bodyMatchingRules['$.id'].rules == [new NumberTypeMatcher(INTEGER)]
+    bodyMatchingRules['$.id2'].rules == [new NumberTypeMatcher(INTEGER)]
+    bodyMatchingRules['$.salary'].rules == [new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)]
+    bodyMatchingRules['$.localAddress'].rules == [new RegexMatcher('(\\d{1,3}\\.)+\\d{1,3}')]
+    bodyMatchingRules['$.localAddress2'].rules == [new RegexMatcher('(\\d{1,3}\\.)+\\d{1,3}')]
+    bodyMatchingRules['$.age2'].rules == [new NumberTypeMatcher(INTEGER)]
+    bodyMatchingRules['$.ts'].rules == [new TimestampMatcher('yyyy-MM-dd\'T\'HH:mm:ss')]
+    bodyMatchingRules['$.timestamp'].rules == [new TimestampMatcher('yyyy/MM/dd - HH:mm:ss.S')]
+    bodyMatchingRules['$.values[3]'].rules == [new NumberTypeMatcher(NUMBER)]
+    bodyMatchingRules['$.role.dob'].rules == [new DateMatcher('MM/dd/yyyy')]
+    bodyMatchingRules['$.role.id'].rules == [
       new RegexMatcher('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')]
-    bodyMatchingRules['$.roles[0].id'] == [
+    bodyMatchingRules['$.roles[0].id'].rules == [
       new RegexMatcher('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')]
     responseMatchingRules.categories == ['body'] as Set
-    responseMatchingRules.rulesForCategory('body').matchingRules == ['$.name': [new RegexMatcher('\\w+')]]
+    responseMatchingRules.rulesForCategory('body').matchingRules == [
+      '$.name': new MatchingRuleGroup([new RegexMatcher('\\w+')])]
 
     keys == ['name', 'surname', 'position', 'happy', 'hexCode', 'hexCode2', 'id', 'id2', 'localAddress',
       'localAddress2', 'age', 'age2', 'salary', 'timestamp', 'ts', 'values', 'role', 'roles'] as Set
@@ -156,18 +160,17 @@ class PactBodyBuilderSpec extends Specification {
     when:
     service.buildInteractions()
     def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.value))
+    def rules = service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules
 
     then:
     service.interactions.size() == 1
-    service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules == [
-        '$.orders': [new MaxTypeMatcher(10)],
-        '$.orders[*].id': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
-        '$.orders[*].lineItems': [new MinTypeMatcher(1)],
-        '$.orders[*].lineItems[*].id': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
-        '$.orders[*].lineItems[*].amount': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)],
-        '$.orders[*].lineItems[*].productCodes': [new TypeMatcher()],
-        '$.orders[*].lineItems[*].productCodes[*].code': [new TypeMatcher()]
-    ]
+    rules['$.orders'] == new MatchingRuleGroup([new MaxTypeMatcher(10)])
+    rules['$.orders[*].id'] == new MatchingRuleGroup([new NumberTypeMatcher(INTEGER)])
+    rules['$.orders[*].lineItems'] == new MatchingRuleGroup([new MinTypeMatcher(1)])
+    rules['$.orders[*].lineItems[*].id'] == new MatchingRuleGroup([new NumberTypeMatcher(INTEGER)])
+    rules['$.orders[*].lineItems[*].amount'] == new MatchingRuleGroup([new NumberTypeMatcher(NUMBER)])
+    rules['$.orders[*].lineItems[*].productCodes'] == new MatchingRuleGroup([TypeMatcher.INSTANCE])
+    rules['$.orders[*].lineItems[*].productCodes[*].code'] == new MatchingRuleGroup([TypeMatcher.INSTANCE])
 
     keys == [
         'orders', [0, [
@@ -209,13 +212,13 @@ class PactBodyBuilderSpec extends Specification {
     then:
     service.interactions.size() == 1
     service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules == [
-      '$.orders': [new MaxTypeMatcher(10)],
-      '$.orders[*].id': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
-      '$.orders[*].lineItems': [new MinTypeMatcher(1)],
-      '$.orders[*].lineItems[*].id': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
-      '$.orders[*].lineItems[*].amount': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)],
-      '$.orders[*].lineItems[*].productCodes': [new TypeMatcher()],
-      '$.orders[*].lineItems[*].productCodes[*].code': [new TypeMatcher()]
+      '$.orders': new MatchingRuleGroup([new MaxTypeMatcher(10)]),
+      '$.orders[*].id': new MatchingRuleGroup([new NumberTypeMatcher(INTEGER)]),
+      '$.orders[*].lineItems': new MatchingRuleGroup([new MinTypeMatcher(1)]),
+      '$.orders[*].lineItems[*].id': new MatchingRuleGroup([new NumberTypeMatcher(INTEGER)]),
+      '$.orders[*].lineItems[*].amount': new MatchingRuleGroup([new NumberTypeMatcher(NUMBER)]),
+      '$.orders[*].lineItems[*].productCodes': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.orders[*].lineItems[*].productCodes[*].code': new MatchingRuleGroup([TypeMatcher.INSTANCE])
     ]
     body.orders.size == 2
     body.orders.every { it.keySet() == ['id', 'lineItems'] as Set }
@@ -248,9 +251,9 @@ class PactBodyBuilderSpec extends Specification {
     then:
     service.interactions.size() == 1
     service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules == [
-      '$.permissions': [new TypeMatcher()],
-      '$.permissions2': [new MinTypeMatcher(2)],
-      '$.permissions3': [new MaxTypeMatcher(4)]
+      '$.permissions': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.permissions2': new MatchingRuleGroup([new MinTypeMatcher(2)]),
+      '$.permissions3': new MatchingRuleGroup([new MaxTypeMatcher(4)])
     ]
     body.permissions == ['GRANT'] * 3
     body.permissions2 == [100] * 3
@@ -280,12 +283,12 @@ class PactBodyBuilderSpec extends Specification {
     then:
     service.interactions.size() == 1
     service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules == [
-      '$.permissions': [new TypeMatcher()],
-      '$.permissions[*]': [new RegexMatcher('\\w+')],
-      '$.permissions2': [new MinTypeMatcher(2)],
-      '$.permissions2[*]': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
-      '$.permissions3': [new MaxTypeMatcher(4)],
-      '$.permissions3[*]': [new RegexMatcher('\\d+')]
+      '$.permissions': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.permissions[*]': new MatchingRuleGroup([new RegexMatcher('\\w+')]),
+      '$.permissions2': new MatchingRuleGroup([new MinTypeMatcher(2)]),
+      '$.permissions2[*]': new MatchingRuleGroup([new NumberTypeMatcher(INTEGER)]),
+      '$.permissions3': new MatchingRuleGroup([new MaxTypeMatcher(4)]),
+      '$.permissions3[*]': new MatchingRuleGroup([new RegexMatcher('\\d+')])
     ]
     body.permissions.size == 3
     body.permissions2.size == 3
@@ -442,14 +445,14 @@ class PactBodyBuilderSpec extends Specification {
     then:
     service.interactions.size() == 1
     service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules == [
-      $/$['2']/$: [new MaxTypeMatcher(10)],
-      $/$['2'][*].id/$: [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
-      $/$['2'][*].lineItems/$: [new MinTypeMatcher(1)],
-      $/$['2'][*].lineItems[*].id/$: [new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
-      $/$['2'][*].lineItems[*]['10k-depreciation-bips']/$: [
-        new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)],
-      $/$['2'][*].lineItems[*].productCodes/$: [new TypeMatcher()],
-      $/$['2'][*].lineItems[*].productCodes[*].code/$: [new TypeMatcher()]
+      $/$['2']/$: new MatchingRuleGroup([new MaxTypeMatcher(10)]),
+      $/$['2'][*].id/$: new MatchingRuleGroup([new NumberTypeMatcher(INTEGER)]),
+      $/$['2'][*].lineItems/$: new MatchingRuleGroup([new MinTypeMatcher(1)]),
+      $/$['2'][*].lineItems[*].id/$: new MatchingRuleGroup([new NumberTypeMatcher(INTEGER)]),
+      $/$['2'][*].lineItems[*]['10k-depreciation-bips']/$: new MatchingRuleGroup([
+        new NumberTypeMatcher(INTEGER)]),
+      $/$['2'][*].lineItems[*].productCodes/$: new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      $/$['2'][*].lineItems[*].productCodes[*].code/$: new MatchingRuleGroup([TypeMatcher.INSTANCE])
     ]
 
     keys == [

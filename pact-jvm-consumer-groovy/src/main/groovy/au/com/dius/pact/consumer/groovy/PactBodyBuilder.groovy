@@ -120,6 +120,12 @@ class PactBodyBuilder extends BaseBuilder {
           bodyRepresentation[name] << exampleValue
         }
       }
+//    } else if (value instanceof OrMatcher) {
+//      bodyRepresentation[name] = value.value
+//      matchers.setRule(path + buildPath(matcherName), value.setupMatchers())
+//
+//    } else if (value instanceof AndMatcher) {
+//      def notEmptyIf = true
     } else if (value instanceof Matcher) {
       bodyRepresentation[name] = setMatcherAttribute(value, path + buildPath(matcherName))
     } else if (value instanceof List) {

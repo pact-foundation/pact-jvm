@@ -178,7 +178,7 @@ public class PactDslJsonArray extends DslPart {
     protected void putObject(DslPart object) {
       for(String matcherName: object.matchers.getMatchingRules().keySet()) {
           matchers.addRules(rootPath + appendArrayIndex(1) + matcherName,
-            object.matchers.getMatchingRules().get(matcherName));
+            object.matchers.getMatchingRules().get(matcherName).getRules());
       }
       generators.addGenerators(object.generators, rootPath + appendArrayIndex(1));
       for (int i = 0; i < getNumberExamples(); i++) {
@@ -189,7 +189,7 @@ public class PactDslJsonArray extends DslPart {
     protected void putArray(DslPart object) {
         for(String matcherName: object.matchers.getMatchingRules().keySet()) {
             matchers.addRules(rootPath + appendArrayIndex(1) + matcherName,
-              object.matchers.getMatchingRules().get(matcherName));
+              object.matchers.getMatchingRules().get(matcherName).getRules());
         }
         generators.addGenerators(object.generators, rootPath + appendArrayIndex(1));
         body.put(object.getBody());
@@ -249,7 +249,7 @@ public class PactDslJsonArray extends DslPart {
     public PactDslJsonArray stringType() {
       body.put("string");
       generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new RandomStringGenerator(20));
-      matchers.addRule(rootPath + appendArrayIndex(0), new TypeMatcher());
+      matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher.INSTANCE);
       return this;
     }
 
@@ -259,7 +259,7 @@ public class PactDslJsonArray extends DslPart {
      */
     public PactDslJsonArray stringType(String example) {
         body.put(example);
-        matchers.addRule(rootPath + appendArrayIndex(0), new TypeMatcher());
+        matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher.INSTANCE);
         return this;
     }
 
@@ -351,7 +351,7 @@ public class PactDslJsonArray extends DslPart {
      */
     public PactDslJsonArray booleanType() {
         body.put(true);
-        matchers.addRule(rootPath + appendArrayIndex(0), new TypeMatcher());
+        matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher.INSTANCE);
         return this;
     }
 
@@ -361,7 +361,7 @@ public class PactDslJsonArray extends DslPart {
      */
     public PactDslJsonArray booleanType(Boolean example) {
         body.put(example);
-        matchers.addRule(rootPath + appendArrayIndex(0), new TypeMatcher());
+        matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher.INSTANCE);
         return this;
     }
 
@@ -560,7 +560,7 @@ public class PactDslJsonArray extends DslPart {
     public PactDslJsonArray id() {
       generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new RandomIntGenerator(0, Integer.MAX_VALUE));
       body.put(100L);
-      matchers.addRule(rootPath + appendArrayIndex(0), new TypeMatcher());
+      matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher.INSTANCE);
       return this;
     }
 
@@ -570,7 +570,7 @@ public class PactDslJsonArray extends DslPart {
      */
     public PactDslJsonArray id(Long id) {
         body.put(id);
-        matchers.addRule(rootPath + appendArrayIndex(0), new TypeMatcher());
+        matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher.INSTANCE);
         return this;
     }
 
@@ -925,7 +925,7 @@ public class PactDslJsonArray extends DslPart {
    */
   public PactDslJsonArray equalsTo(Object value) {
     body.put(value);
-    matchers.addRule(rootPath + appendArrayIndex(0), new EqualsMatcher());
+    matchers.addRule(rootPath + appendArrayIndex(0), EqualsMatcher.INSTANCE);
     return this;
   }
 }

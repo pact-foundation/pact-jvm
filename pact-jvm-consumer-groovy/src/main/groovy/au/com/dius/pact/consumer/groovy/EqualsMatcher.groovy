@@ -7,6 +7,6 @@ import au.com.dius.pact.model.matchingrules.MatchingRule
  */
 class EqualsMatcher extends Matcher {
   MatchingRule getMatcher() {
-    new au.com.dius.pact.model.matchingrules.EqualsMatcher()
+    au.com.dius.pact.model.matchingrules.EqualsMatcher.INSTANCE
   }
 }

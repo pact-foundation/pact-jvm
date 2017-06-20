@@ -19,7 +19,7 @@ class TypeMatcher extends Matcher {
       case 'number':
         return new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)
       default:
-        return new au.com.dius.pact.model.matchingrules.TypeMatcher()
+        return au.com.dius.pact.model.matchingrules.TypeMatcher.INSTANCE
     }
   }
 

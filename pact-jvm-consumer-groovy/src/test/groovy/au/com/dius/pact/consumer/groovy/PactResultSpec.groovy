@@ -97,6 +97,7 @@ class PactResultSpec extends Specification {
               '\'status\'),status)')
     }
 
+    @SuppressWarnings('LineLength')
     def 'case when the test passes and there is a missing request'() {
       given:
         def testService = new PactBuilder().build  {
@@ -133,8 +134,7 @@ class PactResultSpec extends Specification {
           '\tpath: /path\n' +
           '\tquery: [:]\n' +
           '\theaders: [Content-Type:application/json]\n' +
-          '\tmatchers: MatchingRules(rules=[body:au.com.dius.pact.model.matchingrules.Category(body, [:], AND), ' +
-            'path:au.com.dius.pact.model.matchingrules.Category(path, [:], AND)])\n' +
+          '\tmatchers: MatchingRules(rules=[body:Category(name=body, matchingRules={}), path:Category(name=path, matchingRules={})])\n' +
           '\tgenerators: Generators(categories={})\n' +
           '\tbody: OptionalBody(state=PRESENT, value={\n' +
           '    "status": "isGood"\n' +
