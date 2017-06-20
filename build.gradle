@@ -5,12 +5,15 @@ buildscript {
   dependencies {
     classpath "org.apache.commons:commons-lang3:$commonsLang3Version"
     classpath 'com.tkruse.gradle:gradle-groovysh-plugin:1.0.8'
+    classpath 'org.apache.commons:commons-text:1.1'
   }
 }
 
 plugins {
   id "org.jetbrains.kotlin.jvm" version "1.1.2"
 }
+
+import org.apache.commons.text.StringEscapeUtils
 
 subprojects {
     configurations.all {
@@ -72,7 +75,7 @@ subprojects {
         "junit:junit:${project.junitVersion}"
 
       testCompile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
-      testCompile('org.spockframework:spock-core:1.1-groovy-2.4-rc-4') {
+      testCompile('org.spockframework:spock-core:1.1-groovy-2.4') {
         exclude group: 'org.codehaus.groovy'
       }
       testCompile "cglib:cglib:${project.cglibVersion}"
@@ -125,7 +128,7 @@ subprojects {
 
     def pomCustomisation = {
         name project.name
-        description new File(projectDir, 'README.md').text
+        description StringEscapeUtils.escapeXml11(new File(projectDir, 'README.md').text)
         url 'https://github.com/DiUS/pact-jvm'
         licenses {
             license {
@@ -213,10 +216,10 @@ if (System.env.TRAVIS == 'true') {
         tasks.withType(GroovyCompile) {
             groovyOptions.fork = false
         }
-//        tasks.withType(Test) {
-//            // containers (currently) have 2 dedicated cores and 4GB of memory
-//            maxParallelForks = 2
-//            minHeapSize = '128m'
-//        }
+        tasks.withType(Test) {
+            // containers (currently) have 2 dedicated cores and 4GB of memory
+            maxParallelForks = 2
+            minHeapSize = '128m'
+        }
     }
 }
