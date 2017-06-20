@@ -1,5 +1,29 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.0-rc.3 - Third V3 Spec release candidate
+
+* 9902194 - Implemented and and or for Groovy DSL (Ronald Holshausen, Tue Jun 20 21:56:39 2017 +1000)
+* 04d906a - Fix for failing test (Ronald Holshausen, Tue Jun 20 21:20:39 2017 +1000)
+* 346578d - Merge branch 'master' into v3-spec (Ronald Holshausen, Tue Jun 20 19:51:43 2017 +1000)
+* b14d585 - Merge pull request #465 from andreschaffer/consumer-message-pact-metadata (Ronald Holshausen, Tue Jun 20 16:16:42 2017 +1000)
+* ff98627 - Implemented the And and Or matchers (Ronald Holshausen, Tue Jun 20 16:10:57 2017 +1000)
+* 29e6745 - Make message pact metadata available from MessagePactProviderRule (Andre Schaffer, Mon Jun 19 18:45:14 2017 +0200)
+* 5ee2cae - Merge pull request #461 from jon-ruckwood/groovy-allow-empty-string-matcher (Ronald Holshausen, Thu Jun 15 10:40:21 2017 +1000)
+* 5ef8162 - Fix CodeNarc violation, UnnecessaryGString (jon-ruckwood, Wed Jun 14 08:32:43 2017 +0100)
+* c0536f5 - Merge branch 'v3.4.x' into v3-spec (Ronald Holshausen, Wed Jun 14 14:57:00 2017 +1000)
+* c1e8aed - Removed the inlined jansi classes due to an issue with Maven 3.5.0 #453 (Ronald Holshausen, Wed Jun 14 14:42:40 2017 +1000)
+* b21f059 - Fix codenarc error (Ronald Holshausen, Wed Jun 14 12:58:27 2017 +1000)
+* 916963b - Only add the testClasses task as a dependency to the verification task if the testClasses task is defined #460 (Ronald Holshausen, Wed Jun 14 12:33:28 2017 +1000)
+* 8234159 - Allow string matcher to accept empty string (jon-ruckwood, Tue Jun 13 16:56:23 2017 +0100)
+* fbfbab3 - Update AmqpTarget to get the consumers from the pact source (Ronald Holshausen, Tue Jun 13 15:27:46 2017 +1000)
+* 4684296 - Added various pact sources and wired them into the JUnit loaders (Ronald Holshausen, Tue Jun 13 14:55:25 2017 +1000)
+* 9085cea - Converted some of the core classes and interfaces to Kotlin and introduced a PactSource interface (Ronald Holshausen, Tue Jun 13 11:12:22 2017 +1000)
+* afb5d9f - Update versions in readme (Ronald Holshausen, Sun Jun 11 17:45:33 2017 +1000)
+* f4d61f7 - update changelog for release 3.5.0-rc.2 (Ronald Holshausen, Sun Jun 11 17:05:40 2017 +1000)
+* 3441250 - update changelog for release 3.5.0-rc.1 (Ronald Holshausen, Thu May 25 13:37:07 2017 +1000)
+* 062eddf - supression some kotlin warnings (Ronald Holshausen, Sun Jun 11 17:39:34 2017 +1000)
+* 69577f2 - bump version to 3.5.0-rc.3 (Ronald Holshausen, Sun Jun 11 17:36:36 2017 +1000)
+
 # 3.5.0-rc.2 - V3 spec release candidate
 
 * d226cc3 - Added equalsTo and includesStr matcher methods to the Java DSL (Ronald Holshausen, Sun Jun 11 16:03:08 2017 +1000)
