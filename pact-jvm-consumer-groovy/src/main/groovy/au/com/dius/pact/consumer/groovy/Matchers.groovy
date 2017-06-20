@@ -240,7 +240,13 @@ class Matchers {
    * @param example Example value to use
    */
   static or(def example, Object... values) {
-    new OrMatcher(value: example, matchers: values)
+    new OrMatcher(value: example, matchers: values.collect {
+      if (it instanceof Matcher) {
+        it
+      } else {
+        new EqualsMatcher(value: it)
+      }
+    })
   }
 
   /**
@@ -248,7 +254,20 @@ class Matchers {
    * @param example Example value to use
    */
   static and(def example, Object... values) {
-    new AndMatcher(value: example, matchers: values)
+    new AndMatcher(value: example, matchers: values.collect {
+      if (it instanceof Matcher) {
+        it
+      } else {
+        new EqualsMatcher(value: it)
+      }
+    })
+  }
+
+  /**
+   * Matches a null value
+   */
+  static nullValue() {
+    new NullMatcher()
   }
 
 }

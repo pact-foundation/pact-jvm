@@ -18,7 +18,7 @@ class MaximumMatcherSpec extends Specification {
   @Unroll
   def 'with an array match if the array #condition'() {
     expect:
-    MatcherExecutor.domatch(new MaxTypeMatcher(2), path, expected, actual, mismatchFactory).empty
+    MatcherExecutorKt.domatch(new MaxTypeMatcher(2), path, expected, actual, mismatchFactory).empty
 
     where:
     condition    | expected | actual
@@ -29,7 +29,7 @@ class MaximumMatcherSpec extends Specification {
   @Unroll
   def 'with an array not match if the array #condition'() {
     expect:
-    !MatcherExecutor.domatch(new MaxTypeMatcher(2), path, expected, actual, mismatchFactory).empty
+    !MatcherExecutorKt.domatch(new MaxTypeMatcher(2), path, expected, actual, mismatchFactory).empty
 
     where:
     condition   | expected | actual
@@ -39,7 +39,7 @@ class MaximumMatcherSpec extends Specification {
   @Unroll
   def 'with a non array default to a type matcher'() {
     expect:
-    MatcherExecutor.domatch(new MaxTypeMatcher(2), path, expected, actual, mismatchFactory).empty == beEmpty
+    MatcherExecutorKt.domatch(new MaxTypeMatcher(2), path, expected, actual, mismatchFactory).empty == beEmpty
 
     where:
     expected | actual   || beEmpty

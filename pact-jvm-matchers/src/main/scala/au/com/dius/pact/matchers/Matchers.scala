@@ -75,7 +75,7 @@ object Matchers extends StrictLogging {
   def domatch[Mismatch](matchers: MatchingRules, category: String, path: Seq[String], expected: Any, actual: Any,
                         mismatchFn: MismatchFactory[Mismatch]) : List[Mismatch] = {
     val matcherDef = selectBestMatcher(matchers, category, path)
-    asScalaBuffer(MatcherExecutor.domatch(matcherDef, path, expected, actual, mismatchFn)).toList
+    asScalaBuffer(MatcherExecutorKt.domatch(matcherDef, path, expected, actual, mismatchFn)).toList
   }
 
   def selectBestMatcher[Mismatch](matchers: MatchingRules, category: String, path: Seq[String]) = {

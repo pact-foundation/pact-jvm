@@ -324,6 +324,10 @@ type matchers.
 
 Defines a matcher that accepts any value where its string form includes the provided string.
 
+* nullValue()
+
+Defines a matcher that accepts only null values.
+
 #### What if a field matches a matcher name in the DSL?
 
 When using the body DSL, if there is a field that matches a matcher name (e.g. a field named 'date') then you can do the following:
@@ -442,6 +446,21 @@ For an example, have a look at [WildcardPactSpec](src/test/au/com/dius/pact/cons
 **NOTE:** The `keyLike` method adds a `*` to the matching path, so the matching definition will be applied to all keys
  of the map if there is not a more specific matcher defined for a particular key. Having more than one `keyLike` condition
  applied to a map will result in only one being applied when the pact is verified (probably the last).
+
+### Matching with an OR (3.5.0+)
+
+The V3 spec allows multiple matchers to be combined using either AND or OR for a value. The main use of this would be to
+ either be able to match a value or a null, or to combine different matchers.
+ 
+For example:
+
+```groovy
+    withBody {
+        valueA and('AB', includeStr('A'), includeStr('B')) // valueA must include both A and B
+        valueB or('100', regex(~/\d+/), nullValue()) // valueB must either match a regular expression or be null
+        valueC or('12345678', regex(~/\d{8}/), regex(~/X\d{13}/)) // valueC must match either 8 or X followed by 13 digits 
+    }
+```
 
 ## Changing the directory pact files are written to (2.1.9+)
 

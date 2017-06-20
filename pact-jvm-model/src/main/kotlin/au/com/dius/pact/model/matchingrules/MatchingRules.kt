@@ -101,6 +101,13 @@ object TypeMatcher: MatchingRule {
   override fun toMap() = mapOf("match" to "type")
 }
 
+/**
+ * Matcher for null values
+ */
+object NullMatcher: MatchingRule {
+  override fun toMap() = mapOf("match" to "null")
+}
+
 data class MatchingRuleGroup @JvmOverloads constructor(val rules: MutableList<MatchingRule> = mutableListOf(),
                                                        val ruleLogic: RuleLogic = RuleLogic.AND) {
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
@@ -157,6 +164,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(val rules: MutableList<Ma
         return when (map[MATCH]) {
           REGEX -> RegexMatcher(map[REGEX] as String)
           "equality" -> EqualsMatcher
+          "null" -> NullMatcher
           "include" -> IncludeMatcher(map["value"].toString())
           "type" -> {
             if (map.containsKey(MIN) && map.containsKey(MAX)) {

@@ -2,6 +2,8 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.matchingrules.Category
+import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.model.matchingrules.RuleLogic
 import groovy.json.JsonBuilder
 @SuppressWarnings('UnusedImport')
 import io.gatling.jsonpath.Parser$
@@ -120,12 +122,12 @@ class PactBodyBuilder extends BaseBuilder {
           bodyRepresentation[name] << exampleValue
         }
       }
-//    } else if (value instanceof OrMatcher) {
-//      bodyRepresentation[name] = value.value
-//      matchers.setRule(path + buildPath(matcherName), value.setupMatchers())
-//
-//    } else if (value instanceof AndMatcher) {
-//      def notEmptyIf = true
+    } else if (value instanceof OrMatcher) {
+      bodyRepresentation[name] = value.value
+      matchers.setRules(path + buildPath(matcherName), new MatchingRuleGroup(value.matchers*.matcher, RuleLogic.OR))
+    } else if (value instanceof AndMatcher) {
+      bodyRepresentation[name] = value.value
+      matchers.setRules(path + buildPath(matcherName), new MatchingRuleGroup(value.matchers*.matcher, RuleLogic.AND))
     } else if (value instanceof Matcher) {
       bodyRepresentation[name] = setMatcherAttribute(value, path + buildPath(matcherName))
     } else if (value instanceof List) {

@@ -29,7 +29,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'equals matcher matches using equals'() {
     expect:
-    MatcherExecutor.domatch(new EqualsMatcher(), path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(new EqualsMatcher(), path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
     expected | actual || mustBeEmpty
@@ -44,7 +44,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'regex matcher matches using the provided regex'() {
     expect:
-    MatcherExecutor.domatch(new RegexMatcher(regex), path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(new RegexMatcher(regex), path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
     expected | actual  | regex      || mustBeEmpty
@@ -56,7 +56,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'type matcher matches on types'() {
     expect:
-    MatcherExecutor.domatch(new TypeMatcher(), path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(new TypeMatcher(), path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
     expected        | actual                     || mustBeEmpty
@@ -73,7 +73,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'number type matcher matches on types'() {
     expect:
-    MatcherExecutor.domatch(new NumberTypeMatcher(numberType), path, expected, actual, mismatchFactory).empty ==
+    MatcherExecutorKt.domatch(new NumberTypeMatcher(numberType), path, expected, actual, mismatchFactory).empty ==
       mustBeEmpty
 
     where:
@@ -104,7 +104,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'timestamp matcher'() {
     expect:
-    MatcherExecutor.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
     expected                    | actual                      | pattern               || mustBeEmpty
@@ -119,7 +119,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'time matcher'() {
     expect:
-    MatcherExecutor.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
     expected         | actual     | pattern    || mustBeEmpty
@@ -134,7 +134,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'date matcher'() {
     expect:
-    MatcherExecutor.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
     expected     | actual       | pattern      || mustBeEmpty
@@ -149,7 +149,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'include matcher matches if the expected is included in the actual'() {
     expect:
-    MatcherExecutor.domatch(new IncludeMatcher(expected), path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
     expected | actual           || mustBeEmpty
@@ -160,6 +160,8 @@ class MatcherExecutorSpec extends Specification {
     'Harry'  | 'Tom'            || false
     'Harry'  | null             || false
     '100'    | 2010023          || true
+
+    matcher = new IncludeMatcher(expected)
   }
 
 }

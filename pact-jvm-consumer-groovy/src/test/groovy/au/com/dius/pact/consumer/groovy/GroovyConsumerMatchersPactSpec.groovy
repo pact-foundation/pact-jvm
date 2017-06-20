@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.model.PactSpecVersion
+import groovy.json.JsonOutput
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
 
@@ -131,6 +132,39 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     PactVerificationResult result = matcherService.runTest {
       def client = new RESTClient(it.url)
       def response = client.get(query: [a: '100', b: 'Z'])
+
+      assert response.status == 200
+    }
+
+    then:
+    result == PactVerificationResult.Ok.INSTANCE
+  }
+
+  def 'matching with and and or'() {
+    given:
+    def matcherService = new PactBuilder()
+    matcherService {
+      serviceConsumer 'MatcherConsumer2'
+      hasPactWith 'MatcherService'
+      port 1235
+    }
+
+    matcherService {
+      uponReceiving('a request to match with and and or')
+      withAttributes(method: 'put', path: '/')
+      withBody {
+        valueA 100
+        valueB and('AB', includesStr('A'), includesStr('B'))
+        valueC or('2000-01-01', date(), nullValue())
+      }
+      willRespondWith(status: 200)
+    }
+
+    when:
+    PactVerificationResult result = matcherService.runTest {
+      def client = new RESTClient(it.url)
+      def response = client.put(requestContentType: JSON, body: JsonOutput.toJson([
+        valueA: 100, valueB: 'AZB', valueC: null]))
 
       assert response.status == 200
     }
