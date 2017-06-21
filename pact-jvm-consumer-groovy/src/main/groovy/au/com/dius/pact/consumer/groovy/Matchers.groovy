@@ -4,6 +4,7 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.time.DateUtils
 
 import java.text.ParseException
+import java.util.concurrent.ThreadLocalRandom
 import java.util.regex.Pattern
 
 /**
@@ -118,6 +119,10 @@ class Matchers {
     new TypeMatcher(values: [TYPE, (value != null) ? value : RandomStringUtils.randomAlphanumeric(TEN)])
   }
 
+  static bool(boolean value = null) {
+    new TypeMatcher(values: [TYPE, (value != null) ? value : ThreadLocalRandom.current().nextBoolean()])
+  }
+
   /**
    * Array with maximum size and each element like the following object
    * @param max The maximum size of the array
@@ -151,5 +156,4 @@ class Matchers {
   static eachLike(Integer numberExamples = 1, def arg) {
     new EachLikeMatcher(values: [null,  arg], numberExamples: numberExamples)
   }
-
 }
