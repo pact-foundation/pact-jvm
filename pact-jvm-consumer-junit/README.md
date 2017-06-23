@@ -493,6 +493,18 @@ For an example, have a look at [WildcardKeysTest](src/test/java/au/com/dius/pact
  of the map if there is not a more specific matcher defined for a particular key. Having more than one `eachKeyLike` condition
  applied to a map will result in only one being applied when the pact is verified (probably the last).
 
+#### Combining matching rules with AND/OR
+
+Matching rules can be combined with AND/OR. There are two methods available on the DSL for this. For example:
+
+```java
+DslPart body = new PactDslJsonBody()
+  .numberValue("valueA", 100)
+  .and("valueB","AB", PM.includesStr("A"), PM.includesStr("B")) // Must match both matching rules
+  .or("valueC", null, PM.date(), PM.nullValue()) // will match either a valid date or a null value
+```
+
+The `and` and `or` methods take a variable number of matchers (varargs).
 
 ### Matching on paths (version 2.1.5+)
 
