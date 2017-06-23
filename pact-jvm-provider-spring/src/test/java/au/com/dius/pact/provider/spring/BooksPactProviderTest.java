@@ -94,8 +94,8 @@ public class BooksPactProviderTest {
         // no setup needed
     }
 
-    @State("get-books-for-page")
-    public void getBooksForPage() {
+    @State("get-books-by-type")
+    public void getBooksByType() {
         // Prove that we can provide MockMvcTarget with our own pre-build MockMvc for situations where we need greater control over
         // how MockMvc is configured; in this instance the request needs a custom argum
         target.setMockMvc(MockMvcBuilders.standaloneSetup(bookController)
