@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,6 +92,21 @@ public class BooksPactProviderTest {
     @State("update-book-no-content-type")
     public void updateBookNoContentType() {
         // no setup needed
+    }
+
+    @State("get-books-for-page")
+    public void getBooksForPage() {
+        // Prove that we can provide MockMvcTarget with our own pre-build MockMvc for situations where we need greater control over
+        // how MockMvc is configured; in this instance the request needs a custom argum
+        target.setMockMvc(MockMvcBuilders.standaloneSetup(bookController)
+                                         .setCustomArgumentResolvers(new BookTypeArgumentResolver())
+                                         .build());
+
+        List<Book> bookList = new ArrayList<>();
+        bookList.add(new Book(UUID.randomUUID(), "Bob Jones", true));
+        bookList.add(new Book(UUID.randomUUID(), "Eric Reynolds", true));
+
+        when(bookLogic.getBooks(any(BookType.class))).thenReturn(bookList);
     }
 
     @State("get-books")

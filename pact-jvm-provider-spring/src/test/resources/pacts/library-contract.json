@@ -35,6 +35,37 @@
         }
       }
     }
+  },{
+    "provider_state": "get-books-for-page",
+    "description" : "Get all books for page",
+    "request" : {
+      "method" : "GET",
+      "path" : "/books",
+      "query": "type=fiction",
+    },
+    "response" : {
+      "status" : 200,
+      "body": [{
+        "id": "90f1787e-9f39-4e42-b897-b59d29",
+        "author": "Ray Barrowman",
+        "bestSeller": true
+      }],
+      "matchingRules": {
+        "$.body": {
+          "min": 2,
+          "match": "type"
+        },
+        "$.body[*].id": {
+          "regex": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+        },
+        "$.body[*].author": {
+          "match": "type"
+        },
+        "$.body[*].bestSeller": {
+          "match": "type"
+        }
+      }
+    }
   }, {
     "provider_state": "get-best-selling-books",
     "description" : "Get best selling books",
