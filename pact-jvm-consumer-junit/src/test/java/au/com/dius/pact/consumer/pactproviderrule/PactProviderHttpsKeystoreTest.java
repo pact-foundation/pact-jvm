@@ -41,7 +41,7 @@ public class PactProviderHttpsKeystoreTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(PactProviderHttpsKeystoreTest.class);
 
     @Rule
-    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", "localhost", 11443, true,
+    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", "localhost", 8447, true,
             //Generated jks with the following command:
             //keytool -genkeypair -alias localhost -keyalg RSA -validity 36500 -keysize 512 -keystore pact-jvm-512.jks
             Paths.get("src/test/resources/keystore/pact-jvm-512.jks").toFile().getAbsolutePath(),"brentwashere", PactSpecVersion.V2, this);

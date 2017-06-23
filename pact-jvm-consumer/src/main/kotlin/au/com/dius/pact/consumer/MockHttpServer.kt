@@ -1,6 +1,17 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.model.*
+import au.com.dius.pact.model.FullRequestMatch
+import au.com.dius.pact.model.MockHttpsProviderConfig
+import au.com.dius.pact.model.MockProviderConfig
+import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.model.PactReader
+import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.model.PartialRequestMatch
+import au.com.dius.pact.model.Request
+import au.com.dius.pact.model.RequestMatching
+import au.com.dius.pact.model.RequestResponseInteraction
+import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.model.Response
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
@@ -134,7 +145,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
     try {
       testFn.run(this)
       sleep(100) // give the mock server some time to have consistent state
-    } catch(e: Throwable) {
+    } catch (e: Throwable) {
       return PactVerificationResult.Error(e, validateMockServerState())
     } finally {
       stop()
@@ -178,8 +189,8 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
   override fun getPort(): Int = server.address.port
 }
 
-open class MockHttpServer(pact: RequestResponsePact, config: MockProviderConfig): BaseMockServer(pact, config, HttpServer.create(config.address(), 0))
-open class MockHttpsServer(pact: RequestResponsePact, config: MockProviderConfig): BaseMockServer(pact, config, HttpsServer.create(config.address(), 0))
+open class MockHttpServer(pact: RequestResponsePact, config: MockProviderConfig) : BaseMockServer(pact, config, HttpServer.create(config.address(), 0))
+open class MockHttpsServer(pact: RequestResponsePact, config: MockProviderConfig) : BaseMockServer(pact, config, HttpsServer.create(config.address(), 0))
 
 fun calculateCharset(headers: Map<String, String>): Charset {
   val contentType = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
@@ -187,7 +198,7 @@ fun calculateCharset(headers: Map<String, String>): Charset {
   if (contentType != null) {
     try {
       return ContentType.parse(contentType.value)?.charset ?: default
-    } catch(e: Exception) {
+    } catch (e: Exception) {
       LOGGER.debug("Failed to parse the charset from the content type header", e)
     }
   }

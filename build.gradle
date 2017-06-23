@@ -1,21 +1,32 @@
 buildscript {
   repositories {
+    jcenter()
     mavenCentral()
+    mavenLocal()
   }
   dependencies {
     classpath "org.apache.commons:commons-lang3:$commonsLang3Version"
-    classpath 'com.tkruse.gradle:gradle-groovysh-plugin:1.0.8'
     classpath 'org.apache.commons:commons-text:1.1'
   }
 }
 
 plugins {
-  id "org.jetbrains.kotlin.jvm" version "1.1.2"
+  id 'nebula.kotlin' version '1.1.2-5.1'
+  id 'org.jmailen.kotlinter' version '1.1.0'
+  id 'io.gitlab.arturbosch.detekt' version '1.0.0.M11'
 }
 
 import org.apache.commons.text.StringEscapeUtils
 
 subprojects {
+  buildscript {
+    repositories {
+      jcenter()
+      mavenCentral()
+      mavenLocal()
+    }
+  }
+
     configurations.all {
         resolutionStrategy.eachDependency { DependencyResolveDetails details ->
             if (details.requested.group == 'com.google.guava' && details.requested.name == 'guava' && details.requested.version > '19.0') {
@@ -47,7 +58,8 @@ subprojects {
     apply plugin: 'codenarc'
     apply plugin: 'jacoco'
     apply plugin: 'org.jetbrains.kotlin.jvm'
-    apply plugin: 'com.github.tkruse.groovysh'
+    apply plugin: 'org.jmailen.kotlinter'
+    apply plugin: 'io.gitlab.arturbosch.detekt'
 
     repositories {
         mavenLocal()
@@ -154,11 +166,6 @@ subprojects {
                 name 'Ronald Holshausen'
                 email 'rholshausen@dius.com.au'
             }
-            developer {
-                id 'kenbot'
-                name 'Ken Scambler'
-                email 'ken.scambler@gmail.com'
-            }
         }
     }
 
@@ -200,6 +207,17 @@ subprojects {
     check.dependsOn << 'jacocoTestReport'
 
     compileGroovy.dependsOn << 'copyMainKotlinClasses'
+
+  kotlinter {
+    indentSize = 2
+  }
+
+  detekt {
+    config = "${project.parent.projectDir}/config/detekt-config.yml"
+  }
+
+  check.dependsOn << 'detektCheck'
+
 }
 
 tasks.addRule("Pattern: <Task>_<ScalaVersion>") { String taskName ->

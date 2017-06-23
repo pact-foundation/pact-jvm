@@ -28,6 +28,7 @@ class MatchersSpec extends Specification {
     'uuid'        | '12345678-1234-1234-1234-123456789012' | [match: 'regex', regex: '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}']
     'equalTo'     | 'value'                                | [match: 'equality']
     'includesStr' | 'value'                                | [match: 'include', value: 'value']
+    'bool'        | true                                   | [match: 'type']
   }
 
   @Unroll
@@ -59,5 +60,10 @@ class MatchersSpec extends Specification {
   def 'string matcher should generate value when not provided'() {
     expect:
     !Matchers.string().value.isEmpty()
+  }
+
+  def 'bool matcher should generate value when not provided'() {
+    expect:
+    Matchers.bool().value instanceof Boolean
   }
 }
