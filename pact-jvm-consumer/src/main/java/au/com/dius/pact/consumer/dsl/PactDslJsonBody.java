@@ -12,7 +12,11 @@ import au.com.dius.pact.model.generators.RegexGenerator;
 import au.com.dius.pact.model.generators.TimeGenerator;
 import au.com.dius.pact.model.generators.UuidGenerator;
 import au.com.dius.pact.model.matchingrules.EqualsMatcher;
+import au.com.dius.pact.model.matchingrules.IncludeMatcher;
+import au.com.dius.pact.model.matchingrules.MatchingRule;
+import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
+import au.com.dius.pact.model.matchingrules.RuleLogic;
 import au.com.dius.pact.model.matchingrules.TypeMatcher;
 import com.mifmif.common.regex.Generex;
 import io.gatling.jsonpath.Parser$;
@@ -22,6 +26,7 @@ import org.apache.commons.lang3.time.FastDateFormat;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -1027,6 +1032,38 @@ public class PactDslJsonBody extends DslPart {
   public PactDslJsonBody equalTo(String name, Object value) {
     body.put(name, value);
     matchers.addRule(matcherKey(name), EqualsMatcher.INSTANCE);
+    return this;
+  }
+
+  /**
+   * Combine all the matchers using AND
+   * @param name Attribute name
+   * @param value Attribute example value
+   * @param rules Matching rules to apply
+   */
+  public PactDslJsonBody and(String name, Object value, MatchingRule... rules) {
+    if (value != null) {
+      body.put(name, value);
+    } else {
+      body.put(name, JSONObject.NULL);
+    }
+    matchers.setRules(matcherKey(name), new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.AND));
+    return this;
+  }
+
+  /**
+   * Combine all the matchers using OR
+   * @param name Attribute name
+   * @param value Attribute example value
+   * @param rules Matching rules to apply
+   */
+  public PactDslJsonBody or(String name, Object value, MatchingRule... rules) {
+    if (value != null) {
+      body.put(name, value);
+    } else {
+      body.put(name, JSONObject.NULL);
+    }
+    matchers.setRules(matcherKey(name), new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.OR));
     return this;
   }
 }
