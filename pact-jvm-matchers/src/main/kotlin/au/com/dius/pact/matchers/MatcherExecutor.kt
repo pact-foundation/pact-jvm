@@ -1,6 +1,18 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.matchingrules.*
+import au.com.dius.pact.model.matchingrules.DateMatcher
+import au.com.dius.pact.model.matchingrules.IncludeMatcher
+import au.com.dius.pact.model.matchingrules.MatchingRule
+import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.model.matchingrules.MaxTypeMatcher
+import au.com.dius.pact.model.matchingrules.MinTypeMatcher
+import au.com.dius.pact.model.matchingrules.NullMatcher
+import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.model.matchingrules.RegexMatcher
+import au.com.dius.pact.model.matchingrules.RuleLogic
+import au.com.dius.pact.model.matchingrules.TimeMatcher
+import au.com.dius.pact.model.matchingrules.TimestampMatcher
+import au.com.dius.pact.model.matchingrules.TypeMatcher
 import mu.KotlinLogging
 import org.apache.commons.lang3.time.DateUtils
 import scala.xml.Elem
@@ -79,7 +91,7 @@ fun <Mismatch> domatch(matcher: MatchingRule, path: List<String>, expected: Any?
 
 fun <Mismatch> matchEquality(path: List<String>, expected: Any?, actual: Any?, mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
   val matches = actual == null && expected == null || actual != null && actual == expected
-  logger.debug{ "comparing ${valueOf(actual)} to ${valueOf(expected)} at $path -> $matches" }
+  logger.debug { "comparing ${valueOf(actual)} to ${valueOf(expected)} at $path -> $matches" }
   return if (matches) {
     emptyList()
   } else {
@@ -89,7 +101,7 @@ fun <Mismatch> matchEquality(path: List<String>, expected: Any?, actual: Any?, m
 
 fun <Mismatch> matchRegex(regex: String, path: List<String>, expected: Any?, actual: Any?, mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
   val matches = safeToString(actual).matches(Regex(regex))
-  logger.debug{ "comparing ${valueOf(actual)} with regexp $regex at $path -> $matches" }
+  logger.debug { "comparing ${valueOf(actual)} with regexp $regex at $path -> $matches" }
   return if (matches
     || expected is List<*> && actual is List<*>
     || expected is scala.collection.immutable.List<*> && actual is scala.collection.immutable.List<*>
@@ -102,7 +114,7 @@ fun <Mismatch> matchRegex(regex: String, path: List<String>, expected: Any?, act
 }
 
 fun <Mismatch> matchType(path: List<String>, expected: Any?, actual: Any?, mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
-  logger.debug{ "comparing type of ${valueOf(actual)} to ${valueOf(expected)} at $path" }
+  logger.debug { "comparing type of ${valueOf(actual)} to ${valueOf(expected)} at $path" }
   return if (expected is String && actual is String
     || expected is Number && actual is Number
     || expected is Boolean && actual is Boolean
@@ -130,19 +142,19 @@ fun <Mismatch> matchNumber(numberType: NumberTypeMatcher.NumberType, path: List<
   }
   when (numberType) {
     NumberTypeMatcher.NumberType.NUMBER -> {
-      logger.debug{ "comparing type of ${valueOf(actual)} to a number at $path" }
+      logger.debug { "comparing type of ${valueOf(actual)} to a number at $path" }
       if (actual !is Number) {
         return listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be a number", path))
       }
     }
     NumberTypeMatcher.NumberType.INTEGER -> {
-      logger.debug{ "comparing type of ${valueOf(actual)} to an integer at $path" }
+      logger.debug { "comparing type of ${valueOf(actual)} to an integer at $path" }
       if (actual !is Int && actual !is Long && actual !is BigInteger) {
         return listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be an integer", path))
       }
     }
     NumberTypeMatcher.NumberType.DECIMAL -> {
-      logger.debug{ "comparing type of ${valueOf(actual)} to a decimal at $path" }
+      logger.debug { "comparing type of ${valueOf(actual)} to a decimal at $path" }
       if (actual !is Float && actual !is Double && actual !is BigDecimal) {
         return listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be a decimal number",
           path))
@@ -154,7 +166,7 @@ fun <Mismatch> matchNumber(numberType: NumberTypeMatcher.NumberType, path: List<
 
 fun <Mismatch> matchDate(pattern: String, path: List<String>, expected: Any?, actual: Any?,
                          mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
-  logger.debug{ "comparing ${valueOf(actual)} to date pattern $pattern at $path" }
+  logger.debug { "comparing ${valueOf(actual)} to date pattern $pattern at $path" }
   try {
     DateUtils.parseDate(safeToString(actual), pattern)
     return emptyList()
@@ -166,7 +178,7 @@ fun <Mismatch> matchDate(pattern: String, path: List<String>, expected: Any?, ac
 
 fun <Mismatch> matchTime(pattern: String, path: List<String>, expected: Any?, actual: Any?,
                          mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
-  logger.debug{ "comparing ${valueOf(actual)} to time pattern $pattern at $path" }
+  logger.debug { "comparing ${valueOf(actual)} to time pattern $pattern at $path" }
   try {
     DateUtils.parseDate(safeToString(actual), pattern)
     return emptyList()
@@ -178,7 +190,7 @@ fun <Mismatch> matchTime(pattern: String, path: List<String>, expected: Any?, ac
 
 fun <Mismatch> matchTimestamp(pattern: String, path: List<String>, expected: Any?, actual: Any?,
                               mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
-  logger.debug{ "comparing ${valueOf(actual)} to timestamp pattern $pattern at $path" }
+  logger.debug { "comparing ${valueOf(actual)} to timestamp pattern $pattern at $path" }
   try {
     DateUtils.parseDate(safeToString(actual), pattern)
     return emptyList()
@@ -190,7 +202,7 @@ fun <Mismatch> matchTimestamp(pattern: String, path: List<String>, expected: Any
 
 fun <Mismatch> matchMinType(min: Int, path: List<String>, expected: Any?, actual: Any?,
                             mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
-  logger.debug{ "comparing ${valueOf(actual)} with minimum $min at $path" }
+  logger.debug { "comparing ${valueOf(actual)} with minimum $min at $path" }
   return if (actual is List<*>) {
     if (actual.size < min) {
       listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
@@ -216,7 +228,7 @@ fun <Mismatch> matchMinType(min: Int, path: List<String>, expected: Any?, actual
 
 fun <Mismatch> matchMaxType(max: Int, path: List<String>, expected: Any?, actual: Any?,
                             mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
-  logger.debug{ "comparing ${valueOf(actual)} with maximum $max at $path" }
+  logger.debug { "comparing ${valueOf(actual)} with maximum $max at $path" }
   return if (actual is List<*>) {
     if (actual.size > max) {
       listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
@@ -242,7 +254,7 @@ fun <Mismatch> matchMaxType(max: Int, path: List<String>, expected: Any?, actual
 
 fun <Mismatch> matchNull(path: List<String>, actual: Any?, mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
   val matches = actual == null
-  logger.debug{ "comparing ${valueOf(actual)} to null at $path -> $matches" }
+  logger.debug { "comparing ${valueOf(actual)} to null at $path -> $matches" }
   return if (matches) {
     emptyList()
   } else {

@@ -10,7 +10,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.UUID
+import java.util.concurrent.ThreadLocalRandom
 import kotlin.reflect.full.companionObject
 import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.declaredMemberFunctions
@@ -28,7 +29,7 @@ fun lookupGenerator(generatorMap: Map<String, Any>): Generator? {
     } else {
       logger.warn { "Could not invoke generator class 'fromMap' for generator config '$generatorMap'" }
     }
-  } catch(e: ClassNotFoundException) {
+  } catch (e: ClassNotFoundException) {
     logger.warn(e) { "Could not find generator class for generator config '$generatorMap'" }
   }
 
@@ -232,4 +233,22 @@ data class DateTimeGenerator(val format: String? = null) : Generator {
     }
   }
 
+}
+
+object RandomBooleanGenerator : Generator {
+  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+    return mapOf("type" to "RandomBoolean")
+  }
+
+  override fun generate(base: Any?): Any {
+    return ThreadLocalRandom.current().nextBoolean()
+  }
+
+  override fun equals(other: Any?) = other is RandomBooleanGenerator
+  override fun hashCode() = super.hashCode()
+
+  @Suppress("UNUSED_PARAMETER")
+  fun fromMap(map: Map<String, Any>) : RandomBooleanGenerator {
+    return RandomBooleanGenerator
+  }
 }

@@ -1,6 +1,11 @@
 package au.com.dius.pact.model.generators
 
-import au.com.dius.pact.model.*
+import au.com.dius.pact.model.ContentType
+import au.com.dius.pact.model.InvalidPactException
+import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.model.PathToken
+import au.com.dius.pact.model.parsePath
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import mu.KLogging
@@ -98,7 +103,7 @@ object JsonContentTypeHandler : ContentTypeHandler {
 
 data class Generators(val categories: MutableMap<Category, MutableMap<String, Generator>> = HashMap()) {
 
-  companion object: KLogging() {
+  companion object : KLogging() {
 
     @JvmStatic fun fromMap(map: Map<String, Map<String, Any>>?): Generators {
       val generators = Generators()
@@ -135,7 +140,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
               }
             }
           }
-        } catch(e: IllegalArgumentException) {
+        } catch (e: IllegalArgumentException) {
           logger.warn(e) { "Ignoring generator with invalid category '$key'" }
         }
       }

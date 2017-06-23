@@ -11,7 +11,7 @@ import java.util.function.ToIntFunction
 data class Category @JvmOverloads constructor(val name: String,
                                               var matchingRules: MutableMap<String, MatchingRuleGroup> = mutableMapOf()) {
 
-  companion object: KLogging()
+  companion object : KLogging()
 
   fun addRule(item: String, matchingRule: MatchingRule) {
     if (!matchingRules.containsKey(item)) {

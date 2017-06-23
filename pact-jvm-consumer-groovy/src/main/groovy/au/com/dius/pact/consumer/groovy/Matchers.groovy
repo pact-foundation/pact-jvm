@@ -1,12 +1,12 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.model.generators.RandomBooleanGenerator
 import au.com.dius.pact.model.generators.RandomDecimalGenerator
 import au.com.dius.pact.model.generators.RandomIntGenerator
 import au.com.dius.pact.model.generators.RandomStringGenerator
 import org.apache.commons.lang3.time.DateUtils
 
 import java.text.ParseException
-import java.util.concurrent.ThreadLocalRandom
 import java.util.regex.Pattern
 
 /**
@@ -187,15 +187,23 @@ class Matchers {
   }
 
   /**
+   * Match any boolean
+   * @param value Example value, if not provided a random one will be generated
+   */
+  static bool(Boolean value = null) {
+    if (value != null) {
+      new TypeMatcher(value: value)
+    } else {
+      new TypeMatcher(value: true, generator: RandomBooleanGenerator.INSTANCE)
+    }
+  }
+
+  /**
    * Array where each element like the following object
    * @param numberExamples Optional number of examples to generate. Defaults to 1.
    */
   static eachLike(Integer numberExamples = 1, def arg) {
     new EachLikeMatcher(value: arg, numberExamples: numberExamples)
-  }
-
-  static bool(boolean value = null) {
-    new TypeMatcher(values: [TYPE, (value != null) ? value : ThreadLocalRandom.current().nextBoolean()])
   }
 
   /**

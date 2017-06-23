@@ -2,7 +2,7 @@ autoCorrect: true
 
 build:
   warningThreshold: 5
-  failThreshold: 10
+  failThreshold: 20
   weights:
     complexity: 2
     formatting: 0

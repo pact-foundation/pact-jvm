@@ -21,49 +21,49 @@ interface MatchingRule {
 /**
  * Matching Rule for dates
  */
-data class DateMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-dd"): MatchingRule {
+data class DateMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-dd") : MatchingRule {
   override fun toMap() = mapOf("match" to "date", "date" to format)
 }
 
 /**
  * Matching rule for equality
  */
-object EqualsMatcher: MatchingRule {
+object EqualsMatcher : MatchingRule {
   override fun toMap() = mapOf("match" to "equality")
 }
 
 /**
  * Matcher for a substring in a string
  */
-data class IncludeMatcher(val value: String): MatchingRule {
+data class IncludeMatcher(val value: String) : MatchingRule {
   override fun toMap() = mapOf("match" to "include", "value" to value)
 }
 
 /**
  * Type matching with a maximum size
  */
-data class MaxTypeMatcher(val max: Int): MatchingRule {
+data class MaxTypeMatcher(val max: Int) : MatchingRule {
   override fun toMap() = mapOf("match" to "type", "max" to max)
 }
 
 /**
  * Type matcher with a minimum size and maximum size
  */
-data class MinMaxTypeMatcher(val min: Int, val max: Int): MatchingRule {
+data class MinMaxTypeMatcher(val min: Int, val max: Int) : MatchingRule {
   override fun toMap() = mapOf("match" to "type", "min" to min, "max" to max)
 }
 
 /**
  * Type matcher with a minimum size
  */
-data class MinTypeMatcher(val min: Int): MatchingRule {
+data class MinTypeMatcher(val min: Int) : MatchingRule {
   override fun toMap() = mapOf("match" to "type", "min" to min)
 }
 
 /**
  * Type matching for numbers
  */
-data class NumberTypeMatcher(val numberType: NumberType): MatchingRule {
+data class NumberTypeMatcher(val numberType: NumberType) : MatchingRule {
   enum class NumberType {
     NUMBER,
     INTEGER,
@@ -76,35 +76,35 @@ data class NumberTypeMatcher(val numberType: NumberType): MatchingRule {
 /**
  * Regular Expression Matcher
  */
-data class RegexMatcher(val regex: String): MatchingRule {
+data class RegexMatcher(val regex: String) : MatchingRule {
   override fun toMap() = mapOf("match" to "regex", "regex" to regex)
 }
 
 /**
  * Matcher for time values
  */
-data class TimeMatcher @JvmOverloads constructor(val format: String = "HH:mm:ss"): MatchingRule {
+data class TimeMatcher @JvmOverloads constructor(val format: String = "HH:mm:ss") : MatchingRule {
   override fun toMap() = mapOf("match" to "time", "time" to format)
 }
 
 /**
  * Matcher for time values
  */
-data class TimestampMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-dd HH:mm:ssZZZ"): MatchingRule {
+data class TimestampMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-dd HH:mm:ssZZZ") : MatchingRule {
   override fun toMap() = mapOf("match" to "timestamp", "timestamp" to format)
 }
 
 /**
  * Matcher for types
  */
-object TypeMatcher: MatchingRule {
+object TypeMatcher : MatchingRule {
   override fun toMap() = mapOf("match" to "type")
 }
 
 /**
  * Matcher for null values
  */
-object NullMatcher: MatchingRule {
+object NullMatcher : MatchingRule {
   override fun toMap() = mapOf("match" to "null")
 }
 
@@ -118,13 +118,13 @@ data class MatchingRuleGroup @JvmOverloads constructor(val rules: MutableList<Ma
     }
   }
 
-  companion object: KLogging() {
+  companion object : KLogging() {
     fun fromMap(map: Map<String, Any?>): MatchingRuleGroup {
       var ruleLogic = RuleLogic.AND
       if (map.containsKey("combine")) {
         try {
           ruleLogic = RuleLogic.valueOf(map["combine"] as String)
-        } catch(e: IllegalArgumentException) {
+        } catch (e: IllegalArgumentException) {
           logger.warn { "${map["combine"]} is not a valid matcher rule logic value" }
         }
       }
@@ -181,7 +181,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(val rules: MutableList<Ma
           "integer" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)
           "decimal" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
           "real" -> {
-            logger.warn{ "The 'real' type matcher is deprecated, use 'decimal' instead" }
+            logger.warn { "The 'real' type matcher is deprecated, use 'decimal' instead" }
             NumberTypeMatcher (NumberTypeMatcher.NumberType.DECIMAL)
           }
           MIN -> MinTypeMatcher(mapEntryToInt(map, MIN))
@@ -196,7 +196,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(val rules: MutableList<Ma
             if (map.containsKey(DATE)) DateMatcher(map[DATE].toString())
             else DateMatcher()
           else -> {
-            logger.warn{ "Unrecognised matcher ${map[MATCH]}, defaulting to equality matching" }
+            logger.warn { "Unrecognised matcher ${map[MATCH]}, defaulting to equality matching" }
             EqualsMatcher
           }
         }
@@ -214,7 +214,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(val rules: MutableList<Ma
         return DateMatcher(map[DATE] as String)
       }
 
-      logger.warn{ "Unrecognised matcher definition $map, defaulting to equality matching" }
+      logger.warn { "Unrecognised matcher definition $map, defaulting to equality matching" }
       return EqualsMatcher
     }
   }
