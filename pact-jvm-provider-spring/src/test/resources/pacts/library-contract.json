@@ -36,8 +36,8 @@
       }
     }
   },{
-    "provider_state": "get-books-for-page",
-    "description" : "Get all books for page",
+    "provider_state": "get-books-by-type",
+    "description" : "Get all books by type",
     "request" : {
       "method" : "GET",
       "path" : "/books",
