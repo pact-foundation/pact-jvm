@@ -12,15 +12,19 @@ import au.com.dius.pact.model.generators.RegexGenerator;
 import au.com.dius.pact.model.generators.TimeGenerator;
 import au.com.dius.pact.model.generators.UuidGenerator;
 import au.com.dius.pact.model.matchingrules.MatchingRule;
+import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
+import au.com.dius.pact.model.matchingrules.RuleLogic;
 import au.com.dius.pact.model.matchingrules.TypeMatcher;
 import com.mifmif.common.regex.Generex;
 import groovy.json.JsonOutput;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
+import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
@@ -680,6 +684,38 @@ public class PactDslJsonRootValue extends DslPart {
   @Override
   public PactDslJsonArray eachArrayLike() {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * Combine all the matchers using AND
+   * @param example Attribute example value
+   * @param rules Matching rules to apply
+   */
+  public static PactDslJsonRootValue and(Object example, MatchingRule... rules) {
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    if (example != null) {
+      value.setValue(example);
+    } else {
+      value.setValue(JSONObject.NULL);
+    }
+    value.matchers.setRules("", new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.AND));
+    return value;
+  }
+
+  /**
+   * Combine all the matchers using OR
+   * @param example Attribute name
+   * @param rules Matching rules to apply
+   */
+  public static PactDslJsonRootValue or(Object example, MatchingRule... rules) {
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    if (example != null) {
+      value.setValue(example);
+    } else {
+      value.setValue(JSONObject.NULL);
+    }
+    value.matchers.setRules("", new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.OR));
+    return value;
   }
 
 }

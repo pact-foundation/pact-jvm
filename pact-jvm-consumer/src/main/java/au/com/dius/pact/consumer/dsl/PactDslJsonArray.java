@@ -11,7 +11,10 @@ import au.com.dius.pact.model.generators.RandomStringGenerator;
 import au.com.dius.pact.model.generators.TimeGenerator;
 import au.com.dius.pact.model.generators.UuidGenerator;
 import au.com.dius.pact.model.matchingrules.EqualsMatcher;
+import au.com.dius.pact.model.matchingrules.MatchingRule;
+import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
+import au.com.dius.pact.model.matchingrules.RuleLogic;
 import au.com.dius.pact.model.matchingrules.TypeMatcher;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -20,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -926,6 +930,36 @@ public class PactDslJsonArray extends DslPart {
   public PactDslJsonArray equalsTo(Object value) {
     body.put(value);
     matchers.addRule(rootPath + appendArrayIndex(0), EqualsMatcher.INSTANCE);
+    return this;
+  }
+
+  /**
+   * Combine all the matchers using AND
+   * @param value Attribute example value
+   * @param rules Matching rules to apply
+   */
+  public PactDslJsonArray and(Object value, MatchingRule... rules) {
+    if (value != null) {
+      body.put(value);
+    } else {
+      body.put(JSONObject.NULL);
+    }
+    matchers.setRules(rootPath + appendArrayIndex(0), new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.AND));
+    return this;
+  }
+
+  /**
+   * Combine all the matchers using OR
+   * @param value Attribute example value
+   * @param rules Matching rules to apply
+   */
+  public PactDslJsonArray or(Object value, MatchingRule... rules) {
+    if (value != null) {
+      body.put(value);
+    } else {
+      body.put(JSONObject.NULL);
+    }
+    matchers.setRules(rootPath + appendArrayIndex(0), new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.OR));
     return this;
   }
 }
