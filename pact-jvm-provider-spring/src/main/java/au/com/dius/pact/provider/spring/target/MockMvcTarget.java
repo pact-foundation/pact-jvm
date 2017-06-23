@@ -33,6 +33,7 @@ public class MockMvcTarget extends BaseTarget {
     private List<Object> controllerAdvice;
     private boolean printRequestResponse;
     private int runTimes;
+    private MockMvc mockMvc;
 
     public MockMvcTarget() {
         this(Collections.emptyList());
@@ -75,7 +76,11 @@ public class MockMvcTarget extends BaseTarget {
         this.controllerAdvice = Arrays.asList(Optional.ofNullable(controllerAdvice).orElse(new Object[0]));
     }
 
-    /**
+    public void setMockMvc(MockMvc mockMvc) {
+        this.mockMvc = mockMvc;
+    }
+
+  /**
      * {@inheritDoc}
      */
     @Override
@@ -84,9 +89,7 @@ public class MockMvcTarget extends BaseTarget {
         ConsumerInfo consumer = new ConsumerInfo(consumerName);
         provider.setVerificationType(PactVerification.ANNOTATED_METHOD);
 
-        MockMvc mockMvc = standaloneSetup(controllers.toArray())
-                .setControllerAdvice(controllerAdvice.toArray())
-                .build();
+        MockMvc mockMvc = buildMockMvc();
 
         MvcProviderVerifier verifier = (MvcProviderVerifier)setupVerifier(interaction, provider, consumer);
 
@@ -104,6 +107,15 @@ public class MockMvcTarget extends BaseTarget {
         } finally {
             verifier.finialiseReports();
         }
+    }
+
+    private MockMvc buildMockMvc() {
+        if (mockMvc != null) {
+            return mockMvc;
+        }
+
+        return standaloneSetup(controllers.toArray())
+            .setControllerAdvice(controllerAdvice.toArray()).build();
     }
 
     private URL[] getClassPathUrls() {
