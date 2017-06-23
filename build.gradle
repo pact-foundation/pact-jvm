@@ -4,13 +4,12 @@ buildscript {
   }
   dependencies {
     classpath "org.apache.commons:commons-lang3:$commonsLang3Version"
-    classpath 'com.tkruse.gradle:gradle-groovysh-plugin:1.0.8'
     classpath 'org.apache.commons:commons-text:1.1'
   }
 }
 
 plugins {
-  id "org.jetbrains.kotlin.jvm" version "1.1.2"
+  id "nebula.kotlin" version "1.1.2-5.1"
 }
 
 import org.apache.commons.text.StringEscapeUtils
@@ -47,7 +46,6 @@ subprojects {
     apply plugin: 'codenarc'
     apply plugin: 'jacoco'
     apply plugin: 'org.jetbrains.kotlin.jvm'
-    apply plugin: 'com.github.tkruse.groovysh'
 
     repositories {
         mavenLocal()
