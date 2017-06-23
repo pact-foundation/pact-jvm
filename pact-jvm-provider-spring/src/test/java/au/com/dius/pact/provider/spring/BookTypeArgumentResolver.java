@@ -8,19 +8,18 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 public class BookTypeArgumentResolver implements HandlerMethodArgumentResolver {
 
-	public BookTypeArgumentResolver() {
-	}
+    public BookTypeArgumentResolver() {}
 
-  @Override
-  public boolean supportsParameter(MethodParameter parameter) {
-    return parameter.getGenericParameterType().equals(BookType.class);
-  }
+    @Override
+    public boolean supportsParameter(MethodParameter parameter) {
+        return parameter.getGenericParameterType().equals(BookType.class);
+    }
 
-  @Override
-  public BookType resolveArgument(MethodParameter methodParameter, ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+    @Override
+    public BookType resolveArgument(MethodParameter methodParameter, ModelAndViewContainer mavContainer,
+                                    NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
 
-		String type = webRequest.getParameter("type");
-		return new BookType(type);
-	}
+		    String type = webRequest.getParameter("type");
+		    return new BookType(type);
+	  }
 }
