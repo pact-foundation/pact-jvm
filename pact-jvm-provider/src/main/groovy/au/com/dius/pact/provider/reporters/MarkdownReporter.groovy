@@ -170,7 +170,7 @@ class MarkdownReporter implements VerifierReporter {
     if (comparison instanceof String) {
       writer.println "|\$|$comparison|"
     } else if (comparison.comparison instanceof Map) {
-      writer.println comparison.comparison.collect { "|$it.key|$it.value|" }.join('\n')
+      writer.println comparison.comparison.collect { "|$it.key|${it.value*.mismatch.join('; ')}|" }.join('\n')
     } else {
       writer.println "|\$|$comparison.comparison|"
     }
