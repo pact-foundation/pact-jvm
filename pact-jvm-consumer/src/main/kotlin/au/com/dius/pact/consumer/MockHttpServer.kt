@@ -93,7 +93,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
       is FullRequestMatch -> {
         val interaction = matchResult.interaction() as RequestResponseInteraction
         matchedRequests.add(interaction.request)
-        return interaction.response
+        return interaction.response.generatedResponse()
       }
       is PartialRequestMatch -> {
         val interaction = matchResult.problems().keys().head() as RequestResponseInteraction

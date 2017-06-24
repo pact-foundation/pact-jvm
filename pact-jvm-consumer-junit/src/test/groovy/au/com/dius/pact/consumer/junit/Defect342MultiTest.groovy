@@ -96,7 +96,7 @@ class Defect342MultiTest {
     assert Request.Put(mockProvider.url + '/numbertest')
       .addHeader('Accept', ContentType.JSON.toString())
       .bodyString('{"name": "harry","data": 1234.0 }', org.apache.http.entity.ContentType.APPLICATION_JSON)
-      .execute().returnContent().asString() == '{"responsetest": true, "name": "harry","data": 1234.0 }'
+      .execute().returnContent().asString() == '{"responsetest":true,"name":"harry","data":1234.0}'
   }
 
   @Pact(provider = 'multitest_provider', consumer = 'test_consumer')
