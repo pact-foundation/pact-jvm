@@ -42,4 +42,9 @@ public class BookController {
             return new ResponseEntity(bookLogic.getBooks(bestSeller), HttpStatus.OK);
         }
     }
+
+    @RequestMapping(value = {"/books"}, params = "type", method = RequestMethod.GET)
+    ResponseEntity<List<Book>> getAllForType(BookType bookType) throws Exception {
+        return new ResponseEntity(bookLogic.getBooks(bookType), HttpStatus.OK);
+    }
 }
