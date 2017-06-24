@@ -115,7 +115,8 @@ class ResponseComparison {
       result.comparison = mismatches
         .findAll { it instanceof BodyMismatch }
         .groupBy { bm -> bm.path() }
-        .collectEntries { path, m -> [
+        .collectEntries { path, m ->
+          [
             path, m.collect { bm ->
               [
                 mismatch: bm.mismatch().defined ? bm.mismatch().get() : 'mismatch',
@@ -123,7 +124,7 @@ class ResponseComparison {
               ]
             }
           ]
-      }
+        }
 
       result.diff = generateFullDiff(actualBody, this.actual.contentType.mimeType as String,
         expected.body.present ? expected.body.value : '', expected.jsonBody())

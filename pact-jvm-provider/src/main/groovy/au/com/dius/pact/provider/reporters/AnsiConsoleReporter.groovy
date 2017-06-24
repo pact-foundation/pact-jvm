@@ -203,7 +203,7 @@ class AnsiConsoleReporter implements VerifierReporter {
     }
   }
 
-  @SuppressWarnings('AbcMetric')
+  @SuppressWarnings(['AbcMetric', 'NestedBlockDepth'])
   void displayDiff(err) {
     err.value.comparison.each { key, messageAndDiff ->
       messageAndDiff.each { mismatch ->
