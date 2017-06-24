@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.reporters
 import au.com.dius.pact.model.BasePact
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 import groovy.json.JsonOutput
@@ -86,7 +87,7 @@ class JsonReporter implements VerifierReporter {
   @Override
   void interactionDescription(Interaction interaction) {
     jsonData.execution.last().interactions << [
-      interaction: interaction,
+      interaction: interaction.toMap(PactSpecVersion.V3),
       verification: [
         result: 'OK'
       ]
