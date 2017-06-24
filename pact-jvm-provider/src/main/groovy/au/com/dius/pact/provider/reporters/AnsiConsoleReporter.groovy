@@ -206,25 +206,29 @@ class AnsiConsoleReporter implements VerifierReporter {
   @SuppressWarnings('AbcMetric')
   void displayDiff(err) {
     err.value.comparison.each { key, messageAndDiff ->
-      AnsiConsole.out().println("      $key -> $messageAndDiff.mismatch")
-      AnsiConsole.out().println()
-
-      if (messageAndDiff.diff) {
-        AnsiConsole.out().println('        Diff:')
+      messageAndDiff.each { mismatch ->
+        AnsiConsole.out().println("      $key -> ${mismatch.mismatch}")
         AnsiConsole.out().println()
 
-        messageAndDiff.diff.eachLine { delta ->
-          if (delta.startsWith('@')) {
-            AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.CYAN).a(delta).reset())
-          } else if (delta.startsWith('-')) {
-            AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.RED).a(delta).reset())
-          } else if (delta.startsWith('+')) {
-            AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.GREEN).a(delta).reset())
-          } else {
-            AnsiConsole.out().println("        $delta")
+        if (mismatch.diff.any()) {
+          AnsiConsole.out().println('        Diff:')
+          AnsiConsole.out().println()
+
+          mismatch.diff.findAll().each {
+            it.eachLine { delta ->
+              if (delta.startsWith('@')) {
+                AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.CYAN).a(delta).reset())
+              } else if (delta.startsWith('-')) {
+                AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.RED).a(delta).reset())
+              } else if (delta.startsWith('+')) {
+                AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.GREEN).a(delta).reset())
+              } else {
+                AnsiConsole.out().println("        $delta")
+              }
+            }
+            AnsiConsole.out().println()
           }
         }
-        AnsiConsole.out().println()
       }
     }
 
