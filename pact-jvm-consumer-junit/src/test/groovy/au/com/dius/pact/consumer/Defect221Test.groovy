@@ -12,11 +12,13 @@ class Defect221Test {
     private static final String APPLICATION_JSON = 'application/json'
 
     @Rule
-    public PactProviderRuleMk2 provider = new PactProviderRuleMk2('221_provider', 'localhost', 8081, this)
+    @SuppressWarnings('PublicInstanceField')
+    public final PactProviderRuleMk2 provider = new PactProviderRuleMk2('221_provider', 'localhost', 8081, this)
 
     @Pact(provider= '221_provider', consumer= 'test_consumer')
+    @SuppressWarnings('JUnitPublicNonTestMethod')
     RequestResponsePact createFragment(PactDslWithProvider builder) {
-        return builder
+        builder
             .given('test state')
             .uponReceiving('A request with double precision number')
                 .path('/numbertest')
@@ -30,7 +32,7 @@ class Defect221Test {
 
     @Test
     @PactVerification('221_provider')
-    void runTest() throws IOException {
+    void runTest() {
         assert '{"responsetest":true,"name":"harry","data":1234.0}' ==
           Request.Put('http://localhost:8081/numbertest')
             .addHeader('Accept', APPLICATION_JSON)
