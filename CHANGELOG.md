@@ -1,5 +1,36 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.0-jre7 - V3 JDK7 Release
+
+* 69d4913 - on Travis need to clean the test classes first after switching jdks (Ronald Holshausen, Sat Jun 24 21:11:41 2017 +1000)
+* 1480bff - Force kotlin to compile for jdk 1.6 (Ronald Holshausen, Sat Jun 24 21:05:34 2017 +1000)
+* a0f942b - Update travis to rerun tests on jdk7 (Ronald Holshausen, Sat Jun 24 20:51:48 2017 +1000)
+* 2811ba1 - Update travis build file to switch jdks (Ronald Holshausen, Sat Jun 24 20:34:25 2017 +1000)
+* ee48f86 - create a jdk7 build file because kotlin gradle plugin only runs on jdk8 (Ronald Holshausen, Sat Jun 24 20:29:54 2017 +1000)
+* bb1a6eb - JDK 7 fixes (Ronald Holshausen, Sat Jun 24 20:19:17 2017 +1000)
+* 147c2fb - Merge branch 'v3.5.x' into v3.5.x-jre7 (Ronald Holshausen, Sat Jun 24 18:52:27 2017 +1000)
+* 64febe9 - bump version to 3.5.1 (Ronald Holshausen, Sat Jun 24 18:39:37 2017 +1000)
+* fceb186 - Correct the release script for 3.5.0 (Ronald Holshausen, Sat Jun 24 18:38:49 2017 +1000)
+* 641deac - Need non-jdk8 kotlin libs (Ronald Holshausen, Sun May 21 14:34:30 2017 +1000)
+* f851d86 - Fixes to run on JDK 7 (Ronald Holshausen, Sun May 21 14:23:56 2017 +1000)
+* b976a37 - Merge branch 'v3-spec' into v2.5.x (Ronald Holshausen, Fri May 19 10:29:16 2017 +1000)
+* 90d1654 - Merge branch 'v3-spec' into v2.5.x (Ronald Holshausen, Fri May 19 10:23:31 2017 +1000)
+* a31a71c - JDK 7 returns map keys in different order (Ronald Holshausen, Sun Feb 5 19:08:24 2017 +1100)
+* 748a1f1 - Merge branch 'v3-spec' into v2.5.x (Ronald Holshausen, Sun Feb 5 17:48:41 2017 +1100)
+* bf972ad - updated release prep script to update readme versions (Ronald Holshausen, Sun Oct 23 00:08:10 2016 +1100)
+* 058115d - bump version to 2.5.0-beta.1 (Ronald Holshausen, Sun Oct 23 00:07:07 2016 +1100)
+* f2efa23 - update changelog for release 2.5.0-beta.0 (Ronald Holshausen, Sat Oct 22 23:49:15 2016 +1100)
+* 52db03f - removed Java 8 functional interfaces (Ronald Holshausen, Sat Oct 22 23:35:19 2016 +1100)
+* 1d3a399 - downgrade rest-client-driver to run on JDK 7 (Ronald Holshausen, Sat Oct 22 23:21:41 2016 +1100)
+* 4c65a9b - JDK 7 fixes (Ronald Holshausen, Sat Oct 22 23:09:49 2016 +1100)
+* 5ef1326 - More JDK 7 hash map order fixes (Ronald Holshausen, Sat Oct 22 22:56:19 2016 +1100)
+* 0370cf8 - JDK 7 hash map order fixes (Ronald Holshausen, Sat Oct 22 22:46:24 2016 +1100)
+* b461fff - More JDK 7 fixes (Ronald Holshausen, Sat Oct 22 22:35:04 2016 +1100)
+* 1df2e08 - More JDK 7 fixes (Ronald Holshausen, Sat Oct 22 22:24:52 2016 +1100)
+* f10d2b8 - Merge branch 'master' into v2.5.x (Ronald Holshausen, Sat Oct 22 22:21:49 2016 +1100)
+* 04efc56 - More jdk 7 fixes (Ronald Holshausen, Sat Oct 22 22:13:42 2016 +1100)
+* ba76baa - changes to get build working with JDK 7 (Ronald Holshausen, Sat Oct 22 21:51:48 2016 +1100)
+
 # 3.5.0 - V3 Specification Release
 
 * 1aa4833 - Update the readme and project versions for the 3.5.x release (Ronald Holshausen, Sat Jun 24 17:52:06 2017 +1000)
