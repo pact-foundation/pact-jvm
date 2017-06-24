@@ -67,11 +67,17 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
       exchange.sendResponseHeaders(200, 0)
       exchange.close()
     } else {
-      val request = toPactRequest(exchange)
-      LOGGER.debug("Received request: $request")
-      val response = generatePactResponse(request)
-      LOGGER.debug("Generating response: $response")
-      pactResponseToHttpExchange(response, exchange)
+      try {
+        val request = toPactRequest(exchange)
+        LOGGER.debug("Received request: $request")
+        val response = generatePactResponse(request)
+        LOGGER.debug("Generating response: $response")
+        pactResponseToHttpExchange(response, exchange)
+      } catch(e: Exception) {
+        LOGGER.error("Failed to generate response", e)
+        pactResponseToHttpExchange(Response(500, mutableMapOf("Content-Type" to "application/json"),
+          OptionalBody.body("{\"error\": ${e.message}}")), exchange)
+      }
     }
   }
 
