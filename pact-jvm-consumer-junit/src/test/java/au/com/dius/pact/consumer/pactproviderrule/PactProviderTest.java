@@ -72,7 +72,7 @@ public class PactProviderTest {
         public void accept(PactVerificationResult result, Throwable t) {
           assertThat(t, is(instanceOf(AssertionError.class)));
           assertThat(t.getMessage(), is("Pact Test function failed with an exception: expected:" +
-            "<{responsetest=true, name=harry}> but was:<{responsetest=true, name=fred}>"));
+            "<{name=harry, responsetest=true}> but was:<{name=fred, responsetest=true}>"));
           assertThat(result, is(instanceOf(PactVerificationResult.Error.class)));
           PactVerificationResult.Error error = (PactVerificationResult.Error) result;
           assertThat(error.getMockServerState(), is(instanceOf(PactVerificationResult.Ok.INSTANCE.getClass())));

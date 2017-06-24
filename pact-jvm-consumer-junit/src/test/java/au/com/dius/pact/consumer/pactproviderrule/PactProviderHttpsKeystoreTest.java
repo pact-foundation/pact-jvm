@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.net.ssl.SSLHandshakeException;
 
 import org.hamcrest.Matchers;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -104,6 +105,7 @@ public class PactProviderHttpsKeystoreTest {
     }
 
     @Test(expected = SSLHandshakeException.class)
+    @Ignore
     @PactVerification(value = "test_provider")
     public void testSslHandshakeException() throws IOException {
         testKeystoreHappyPath();

@@ -229,7 +229,7 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     def bodyJson = subject.body.toString()
 
     then:
-    bodyJson == '{"dataStorePathInfo":{"basePath":"CUSTOMER/TRAINING/training-data/12345678901234567890",' +
-      '"fileNames":["abc.txt"]}}'
+    bodyJson == '{"dataStorePathInfo":{"fileNames":["abc.txt"],"basePath":' +
+      '"CUSTOMER/TRAINING/training-data/12345678901234567890"}}'
   }
 }

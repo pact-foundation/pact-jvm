@@ -6,6 +6,8 @@ import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
+import groovy.json.JsonSlurper;
+import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -64,12 +66,18 @@ public class Defect371Test {
     @Test
     @PactVerification(value = "provider1", fragment = "createPact")
     public void test() throws Exception {
-        assertThat(new String(currentMessage), is("{\"testParam1\":\"value1\",\"testParam2\":\"value2\"}"));
+        Map<String, String> expected = new HashMap<>();
+        expected.put("testParam1", "value1");
+        expected.put("testParam2", "value2");
+        assertThat((Map<String, String>) new JsonSlurper().parse(currentMessage), is(expected));
     }
 
     @Test
     @PactVerification(value = "provider2", fragment = "createPact2")
     public void test2() throws Exception {
-      assertThat(new String(currentMessage), is("{\"testParam1\":\"value3\",\"testParam2\":\"value4\"}"));
+      Map<String, String> expected = new HashMap<>();
+      expected.put("testParam1", "value3");
+      expected.put("testParam2", "value4");
+      assertThat((Map<String, String>) new JsonSlurper().parse(currentMessage), is(expected));
     }
 }
