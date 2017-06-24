@@ -52,12 +52,12 @@ module has a Jar file named pact-jvm-consumer_2.10. The full name of the file is
 
 | Branch | Specification | Min JDK | Scala Versions | Latest Version |
 | ------ | ------------- | ------- | -------------- | -------------- |
-| 3.4.x (v3.4.x)| V2 | 8 | 2.11 | 3.4.1 |
-| 3.5.x (v3-spec) | V3 | 8 | 2.11 | 3.5.0-rc.3 |
-| 2.5.x (v2.5.x) | V3 | 7 | 2.11 | 2.5.0-beta.0 |
+| 3.5.x | V3 | 8 | 2.11 | 3.5.0 |
+| 3.5.x-jre7 | V3 | 7 | 2.11 | 3.5.0-jre7.1 |
 | 2.4.x (v2.x) | V2 | 6* | 2.10, 2.11 | 2.4.18 |
 
 **NOTE on JDK 6:** It is no longer possible to execute the build on JDK6 due to issues with HTTPS certificates.
+
 
 ## Service Consumers
 
