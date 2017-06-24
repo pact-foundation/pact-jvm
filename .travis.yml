@@ -11,9 +11,8 @@ jdk:
 env:
   - SCALA=2.11 JAVA_OPTS="-XX:MaxPermSize=512m -XX:ReservedCodeCacheSize=512m -Xmx512m" GRADLE_OPTS="-Xms128m"
 script:
-  - env
   - jdk_switcher use oraclejdk8
   - ./gradlew --stacktrace --no-daemon -i assemble_$SCALA
   - jdk_switcher use $TRAVIS_JDK_VERSION
-  - ./gradlew --stacktrace --no-daemon -i -b build-jre7.gradle check_$SCALA
+  - ./gradlew --stacktrace --no-daemon --rerun-tasks -i -b build-jre7.gradle test_$SCALA
 install: true
