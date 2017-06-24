@@ -111,6 +111,12 @@ subprojects {
       groovyOptions.optimizationOptions.indy = true
     }
 
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+      kotlinOptions {
+        jvmTarget = "1.6"
+      }
+    }
+
     test {
       systemProperty 'pact.rootDir', "$buildDir/pacts"
     }
