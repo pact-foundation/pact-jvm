@@ -14,6 +14,6 @@ script:
   - ./gradlew --stacktrace --no-daemon -i assemble_$SCALA
   - jdk_switcher use $TRAVIS_JDK_VERSION
   - cp build-jre7.gradle build.gradle
-  - ./gradlew --stacktrace --no-daemon --rerun-tasks -i :pact-jvm-model:test
-  - ./gradlew --stacktrace --no-daemon --rerun-tasks -i test_$SCALA
+  - ./gradlew --stacktrace --no-daemon -i :pact-jvm-model:test
+  - ./gradlew --stacktrace --no-daemon -i test_$SCALA
 install: true
