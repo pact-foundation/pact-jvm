@@ -111,7 +111,7 @@ ask('Publish artifacts to maven central?: [Y]') {
   executeOnShell './gradlew clean uploadArchives'
 }
 
-def nextVer = Version.valueOf(releaseVer).incrementPatchVersion()
+def nextVer = Version.valueOf(releaseVer).incrementPatchVersion('jre7.1')
 ask("Bump version to $nextVer?: [Y]") {
   executeOnShell "sed -i -e \"s/version = '${releaseVer}'/version = '${nextVer}'/\" build.gradle"
   executeOnShell "sed -i -e \"s/version = '${releaseVer}'/version = '${nextVer}'/\" build-jre7.gradle"
