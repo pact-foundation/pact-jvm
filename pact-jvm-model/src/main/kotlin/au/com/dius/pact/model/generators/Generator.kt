@@ -1,14 +1,17 @@
 package au.com.dius.pact.model.generators
 
 import au.com.dius.pact.model.PactSpecVersion
+import com.mifmif.common.regex.Generex
 import mu.KotlinLogging
 import org.apache.commons.lang.RandomStringUtils
 import org.apache.commons.lang.math.RandomUtils
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.UUID
+import java.util.concurrent.ThreadLocalRandom
 import kotlin.reflect.full.companionObject
 import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.declaredMemberFunctions
@@ -26,7 +29,7 @@ fun lookupGenerator(generatorMap: Map<String, Any>): Generator? {
     } else {
       logger.warn { "Could not invoke generator class 'fromMap' for generator config '$generatorMap'" }
     }
-  } catch(e: ClassNotFoundException) {
+  } catch (e: ClassNotFoundException) {
     logger.warn(e) { "Could not find generator class for generator config '$generatorMap'" }
   }
 
@@ -66,6 +69,46 @@ data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
   }
 }
 
+data class RandomDecimalGenerator(val digits: Int) : Generator {
+  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+    return mapOf("type" to "RandomDecimal", "digits" to digits)
+  }
+
+  override fun generate(base: Any?): Any = BigDecimal(RandomStringUtils.randomNumeric(digits))
+
+  companion object {
+    fun fromMap(map: Map<String, Any>) : RandomDecimalGenerator {
+      val digits = if (map["digits"] is Number) {
+        (map["digits"] as Number).toInt()
+      } else {
+        logger.warn { "Ignoring invalid value for digits: '${map["digits"]}'" }
+        10
+      }
+      return RandomDecimalGenerator(digits)
+    }
+  }
+}
+
+data class RandomHexadecimalGenerator(val digits: Int) : Generator {
+  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+    return mapOf("type" to "RandomHexadecimal", "digits" to digits)
+  }
+
+  override fun generate(base: Any?): Any = RandomStringUtils.random(digits, "0123456789abcdef")
+
+  companion object {
+    fun fromMap(map: Map<String, Any>) : RandomHexadecimalGenerator {
+      val digits = if (map["digits"] is Number) {
+        (map["digits"] as Number).toInt()
+      } else {
+        logger.warn { "Ignoring invalid value for digits: '${map["digits"]}'" }
+        10
+      }
+      return RandomHexadecimalGenerator(digits)
+    }
+  }
+}
+
 data class RandomStringGenerator(val size: Int = 20) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     return mapOf("type" to "RandomString", "size" to size)
@@ -88,6 +131,18 @@ data class RandomStringGenerator(val size: Int = 20) : Generator {
   }
 }
 
+data class RegexGenerator(val regex: String) : Generator {
+  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+    return mapOf("type" to "Regex", "regex" to regex)
+  }
+
+  override fun generate(base: Any?): Any = Generex(regex).random()
+
+  companion object {
+    fun fromMap(map: Map<String, Any>) = RegexGenerator(map["regex"]!! as String)
+  }
+}
+
 class UuidGenerator : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     return mapOf("type" to "Uuid")
@@ -101,6 +156,7 @@ class UuidGenerator : Generator {
   override fun hashCode() = super.hashCode()
 
   companion object {
+    @Suppress("UNUSED_PARAMETER")
     fun fromMap(map: Map<String, Any>) : UuidGenerator {
       return UuidGenerator()
     }
@@ -177,4 +233,22 @@ data class DateTimeGenerator(val format: String? = null) : Generator {
     }
   }
 
+}
+
+object RandomBooleanGenerator : Generator {
+  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+    return mapOf("type" to "RandomBoolean")
+  }
+
+  override fun generate(base: Any?): Any {
+    return ThreadLocalRandom.current().nextBoolean()
+  }
+
+  override fun equals(other: Any?) = other is RandomBooleanGenerator
+  override fun hashCode() = super.hashCode()
+
+  @Suppress("UNUSED_PARAMETER")
+  fun fromMap(map: Map<String, Any>) : RandomBooleanGenerator {
+    return RandomBooleanGenerator
+  }
 }

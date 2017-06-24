@@ -1,18 +1,31 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.InvalidMatcherException;
+import au.com.dius.pact.model.generators.Category;
+import au.com.dius.pact.model.generators.DateGenerator;
+import au.com.dius.pact.model.generators.DateTimeGenerator;
+import au.com.dius.pact.model.generators.RandomDecimalGenerator;
+import au.com.dius.pact.model.generators.RandomHexadecimalGenerator;
+import au.com.dius.pact.model.generators.RandomIntGenerator;
+import au.com.dius.pact.model.generators.RandomStringGenerator;
+import au.com.dius.pact.model.generators.RegexGenerator;
+import au.com.dius.pact.model.generators.TimeGenerator;
+import au.com.dius.pact.model.generators.UuidGenerator;
 import au.com.dius.pact.model.matchingrules.MatchingRule;
+import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
+import au.com.dius.pact.model.matchingrules.RuleLogic;
 import au.com.dius.pact.model.matchingrules.TypeMatcher;
 import com.mifmif.common.regex.Generex;
 import groovy.json.JsonOutput;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
+import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 
 public class PactDslJsonRootValue extends DslPart {
@@ -223,6 +236,7 @@ public class PactDslJsonRootValue extends DslPart {
   @Override
   public DslPart close() {
     getMatchers().applyMatcherRootPrefix("$");
+    getGenerators().applyRootPrefix("$");
     return this;
   }
 
@@ -230,7 +244,11 @@ public class PactDslJsonRootValue extends DslPart {
    * Value that can be any string
    */
   public static PactDslJsonRootValue stringType() {
-    return stringType(RandomStringUtils.randomAlphabetic(20));
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    value.generators.addGenerator(Category.BODY, "", new RandomStringGenerator(20));
+    value.setValue("string");
+    value.setMatcher(TypeMatcher.INSTANCE);
+    return value;
   }
 
   /**
@@ -241,7 +259,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue stringType(String example) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(example);
-    value.setMatcher(new TypeMatcher());
+    value.setMatcher(TypeMatcher.INSTANCE);
     return value;
   }
 
@@ -249,7 +267,11 @@ public class PactDslJsonRootValue extends DslPart {
    * Value that can be any number
    */
   public static PactDslJsonRootValue numberType() {
-    return numberType(Long.parseLong(RandomStringUtils.randomNumeric(9)));
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    value.generators.addGenerator(Category.BODY, "", new RandomIntGenerator(0, Integer.MAX_VALUE));
+    value.setValue(100);
+    value.setMatcher(TypeMatcher.INSTANCE);
+    return value;
   }
 
   /**
@@ -259,7 +281,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue numberType(Number number) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(number);
-    value.setMatcher(new TypeMatcher());
+    value.setMatcher(TypeMatcher.INSTANCE);
     return value;
   }
 
@@ -267,7 +289,11 @@ public class PactDslJsonRootValue extends DslPart {
    * Value that must be an integer
    */
   public static PactDslJsonRootValue integerType() {
-    return integerType(Long.parseLong(RandomStringUtils.randomNumeric(9)));
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    value.generators.addGenerator(Category.BODY, "", new RandomIntGenerator(0, Integer.MAX_VALUE));
+    value.setValue(100);
+    value.setMatcher(new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER));
+    return value;
   }
 
   /**
@@ -296,7 +322,11 @@ public class PactDslJsonRootValue extends DslPart {
    * Value that must be a decimal value
    */
   public static PactDslJsonRootValue decimalType() {
-    return decimalType(new BigDecimal(RandomStringUtils.randomNumeric(10)));
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    value.generators.addGenerator(Category.BODY, "", new RandomDecimalGenerator(10));
+    value.setValue(100);
+    value.setMatcher(new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL));
+    return value;
   }
 
   /**
@@ -335,7 +365,7 @@ public class PactDslJsonRootValue extends DslPart {
   public static PactDslJsonRootValue booleanType(Boolean example) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(example);
-    value.setMatcher(new TypeMatcher());
+    value.setMatcher(TypeMatcher.INSTANCE);
     return value;
   }
 
@@ -358,9 +388,15 @@ public class PactDslJsonRootValue extends DslPart {
   /**
    * Value that must match the regular expression
    * @param regex regular expression
+   * @deprecated Use the version that takes an example value
    */
+  @Deprecated
   public static PactDslJsonRootValue stringMatcher(String regex) {
-    return stringMatcher(regex, new Generex(regex).random());
+    PactDslJsonRootValue rootValue = new PactDslJsonRootValue();
+    rootValue.generators.addGenerator(Category.BODY, "", new RegexGenerator(regex));
+    rootValue.setValue(new Generex(regex).random());
+    rootValue.setMatcher(rootValue.regexp(regex));
+    return rootValue;
   }
 
   /**
@@ -375,7 +411,12 @@ public class PactDslJsonRootValue extends DslPart {
    * @param format timestamp format
    */
   public static PactDslJsonRootValue timestamp(String format) {
-    return timestamp(format, new Date());
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    value.generators.addGenerator(Category.BODY, "", new DateTimeGenerator(format));
+    FastDateFormat instance = FastDateFormat.getInstance(format);
+    value.setValue(instance.format(new Date(DATE_2000)));
+    value.setMatcher(value.matchTimestamp(format));
+    return value;
   }
 
   /**
@@ -403,7 +444,12 @@ public class PactDslJsonRootValue extends DslPart {
    * @param format date format to match
    */
   public static PactDslJsonRootValue date(String format) {
-    return date(format, new Date());
+    FastDateFormat instance = FastDateFormat.getInstance(format);
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    value.generators.addGenerator(Category.BODY, "", new DateGenerator(format));
+    value.setValue(instance.format(new Date(DATE_2000)));
+    value.setMatcher(value.matchDate(format));
+    return value;
   }
 
   /**
@@ -431,7 +477,12 @@ public class PactDslJsonRootValue extends DslPart {
    * @param format time format to match
    */
   public static PactDslJsonRootValue time(String format) {
-    return time(format, new Date());
+    FastDateFormat instance = FastDateFormat.getInstance(format);
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    value.generators.addGenerator(Category.BODY, "", new TimeGenerator(format));
+    value.setValue(instance.format(new Date(DATE_2000)));
+    value.setMatcher(value.matchTime(format));
+    return value;
   }
 
   /**
@@ -476,7 +527,11 @@ public class PactDslJsonRootValue extends DslPart {
    * Value that must be encoded as a hexadecimal value
    */
   public static PactDslJsonRootValue hexValue() {
-    return hexValue(RandomStringUtils.random(10, "0123456789abcdef"));
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    value.generators.addGenerator(Category.BODY, "", new RandomHexadecimalGenerator(10));
+    value.setValue("1234a");
+    value.setMatcher(value.regexp("[0-9a-fA-F]+"));
+    return value;
   }
 
   /**
@@ -497,7 +552,11 @@ public class PactDslJsonRootValue extends DslPart {
    * Value that must be encoded as an UUID
    */
   public static PactDslJsonRootValue uuid() {
-    return uuid(UUID.randomUUID().toString());
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    value.generators.addGenerator(Category.BODY, "", new UuidGenerator());
+    value.setValue("e2490de5-5bd3-43d5-b7c4-526e33f71304");
+    value.setMatcher(value.regexp(UUID_REGEX));
+    return value;
   }
 
   /**
@@ -625,6 +684,38 @@ public class PactDslJsonRootValue extends DslPart {
   @Override
   public PactDslJsonArray eachArrayLike() {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * Combine all the matchers using AND
+   * @param example Attribute example value
+   * @param rules Matching rules to apply
+   */
+  public static PactDslJsonRootValue and(Object example, MatchingRule... rules) {
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    if (example != null) {
+      value.setValue(example);
+    } else {
+      value.setValue(JSONObject.NULL);
+    }
+    value.matchers.setRules("", new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.AND));
+    return value;
+  }
+
+  /**
+   * Combine all the matchers using OR
+   * @param example Attribute name
+   * @param rules Matching rules to apply
+   */
+  public static PactDslJsonRootValue or(Object example, MatchingRule... rules) {
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    if (example != null) {
+      value.setValue(example);
+    } else {
+      value.setValue(JSONObject.NULL);
+    }
+    value.matchers.setRules("", new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.OR));
+    return value;
   }
 
 }

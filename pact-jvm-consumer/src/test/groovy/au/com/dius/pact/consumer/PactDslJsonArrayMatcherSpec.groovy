@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonArray
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue
 import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.matchingrules.DateMatcher
+import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.model.matchingrules.MaxTypeMatcher
 import au.com.dius.pact.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
@@ -57,10 +58,10 @@ class PactDslJsonArrayMatcherSpec extends Specification {
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
         subject.matchers.matchingRules == [
-          '': [new MinTypeMatcher(0)],
-          '[*].amount': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)],
-          '[*].clearedDate': [new DateMatcher('mm/dd/yyyy')],
-          '[*].status': [new TypeMatcher()]
+          '': new MatchingRuleGroup([new MinTypeMatcher(0)]),
+          '[*].amount': new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)]),
+          '[*].clearedDate': new MatchingRuleGroup([new DateMatcher('mm/dd/yyyy')]),
+          '[*].status': new MatchingRuleGroup([TypeMatcher.INSTANCE])
         ]
     }
 
@@ -78,10 +79,10 @@ class PactDslJsonArrayMatcherSpec extends Specification {
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
         subject.matchers.matchingRules == [
-          '': [new MinTypeMatcher(1)],
-          '[*].amount': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)],
-          '[*].clearedDate': [new DateMatcher('mm/dd/yyyy')],
-          '[*].status': [new TypeMatcher()]
+          '': new MatchingRuleGroup([new MinTypeMatcher(1)]),
+          '[*].amount': new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)]),
+          '[*].clearedDate': new MatchingRuleGroup([new DateMatcher('mm/dd/yyyy')]),
+          '[*].status': new MatchingRuleGroup([TypeMatcher.INSTANCE])
         ]
     }
 
@@ -99,10 +100,10 @@ class PactDslJsonArrayMatcherSpec extends Specification {
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
         subject.matchers.matchingRules == [
-          '': [new MaxTypeMatcher(10)],
-          '[*].amount': [new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)],
-          '[*].clearedDate': [new DateMatcher('mm/dd/yyyy')],
-          '[*].status': [new TypeMatcher()]
+          '': new MatchingRuleGroup([new MaxTypeMatcher(10)]),
+          '[*].amount': new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)]),
+          '[*].clearedDate': new MatchingRuleGroup([new DateMatcher('mm/dd/yyyy')]),
+          '[*].status': new MatchingRuleGroup([TypeMatcher.INSTANCE])
         ]
     }
 

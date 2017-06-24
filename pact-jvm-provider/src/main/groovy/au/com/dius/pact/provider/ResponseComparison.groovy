@@ -112,14 +112,19 @@ class ResponseComparison {
       result = [comparison: "Expected a response type of '${bodyTypeMismatch.expected()}' but the actual " +
           "type was '${bodyTypeMismatch.actual()}'"]
     } else if (mismatches.any { it instanceof BodyMismatch }) {
-      result.comparison = mismatches.findAll { it instanceof BodyMismatch }.collectEntries {
-          BodyMismatch bodyMismatch -> [
-            bodyMismatch.path(), [
-              mismatch: bodyMismatch.mismatch().defined ? bodyMismatch.mismatch().get() : 'mismatch',
-              diff: bodyMismatch.diff().defined ? bodyMismatch.diff().get() : ''
-            ]
+      result.comparison = mismatches
+        .findAll { it instanceof BodyMismatch }
+        .groupBy { bm -> bm.path() }
+        .collectEntries { path, m ->
+          [
+            path, m.collect { bm ->
+              [
+                mismatch: bm.mismatch().defined ? bm.mismatch().get() : 'mismatch',
+                diff: bm.diff().defined ? bm.diff().get() : ''
+              ]
+            }
           ]
-      }
+        }
 
       result.diff = generateFullDiff(actualBody, this.actual.contentType.mimeType as String,
         expected.body.present ? expected.body.value : '', expected.jsonBody())

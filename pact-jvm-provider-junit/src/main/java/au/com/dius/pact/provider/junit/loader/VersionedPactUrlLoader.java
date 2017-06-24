@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider.junit.loader;
 
-import au.com.dius.pact.model.Pact;
 import com.google.common.annotations.VisibleForTesting;
 
 import java.io.IOException;
@@ -15,11 +14,10 @@ import static java.lang.String.format;
  *
  * @see VersionedPactUrl usage instructions
  */
-public class VersionedPactUrlLoader implements PactLoader {
-    private final String[] urls;
+public class VersionedPactUrlLoader extends PactUrlLoader {
 
     public VersionedPactUrlLoader(String[] urls) {
-        this.urls = urls;
+      super(expandVariables(urls));
     }
 
     @SuppressWarnings("unused")
@@ -27,13 +25,8 @@ public class VersionedPactUrlLoader implements PactLoader {
         this(pactUrl.urls());
     }
 
-    @Override
-    public List<Pact> load(String providerName) throws IOException {
-        return new PactUrlLoader(expandVariables(urls)).load(providerName);
-    }
-
     @VisibleForTesting
-    static String[] expandVariables(String[] urls) throws IOException {
+    static String[] expandVariables(String[] urls) {
         List<String> list = new ArrayList<>();
         for (String url: urls) {
           list.add(expandVariables(url));

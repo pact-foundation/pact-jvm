@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.spring.target;
 
 import au.com.dius.pact.model.Interaction;
+import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.PactVerification;
@@ -39,6 +40,7 @@ public class MockMvcTarget extends BaseTarget {
     private List<Object> controllerAdvice;
     private boolean printRequestResponse;
     private int runTimes;
+    private MockMvc mockMvc;
 
     public MockMvcTarget() {
         this(Collections.emptyList());
@@ -81,18 +83,20 @@ public class MockMvcTarget extends BaseTarget {
         this.controllerAdvice = Arrays.asList(Optional.ofNullable(controllerAdvice).orElse(new Object[0]));
     }
 
-    /**
+    public void setMockMvc(MockMvc mockMvc) {
+        this.mockMvc = mockMvc;
+    }
+
+  /**
      * {@inheritDoc}
      */
     @Override
-    public void testInteraction(final String consumerName, final Interaction interaction) {
-        ProviderInfo provider = getProviderInfo();
+    public void testInteraction(final String consumerName, final Interaction interaction, PactSource source) {
+        ProviderInfo provider = getProviderInfo(source);
         ConsumerInfo consumer = new ConsumerInfo(consumerName);
         provider.setVerificationType(PactVerification.ANNOTATED_METHOD);
 
-        MockMvc mockMvc = standaloneSetup(controllers.toArray())
-                .setControllerAdvice(controllerAdvice.toArray())
-                .build();
+        MockMvc mockMvc = buildMockMvc();
 
         MvcProviderVerifier verifier = (MvcProviderVerifier)setupVerifier(interaction, provider, consumer);
 
@@ -110,6 +114,15 @@ public class MockMvcTarget extends BaseTarget {
         } finally {
             verifier.finialiseReports();
         }
+    }
+
+    private MockMvc buildMockMvc() {
+        if (mockMvc != null) {
+            return mockMvc;
+        }
+
+        return standaloneSetup(controllers.toArray())
+            .setControllerAdvice(controllerAdvice.toArray()).build();
     }
 
     private URL[] getClassPathUrls() {
@@ -139,7 +152,7 @@ public class MockMvcTarget extends BaseTarget {
     }
 
     @Override
-    protected ProviderInfo getProviderInfo() {
+    protected ProviderInfo getProviderInfo(PactSource source) {
         Provider provider = testClass.getAnnotation(Provider.class);
         final ProviderInfo providerInfo = new ProviderInfo(provider.value());
 

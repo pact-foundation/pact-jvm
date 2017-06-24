@@ -111,8 +111,7 @@ ask('Publish artifacts to maven central?: [Y]') {
   executeOnShell './gradlew clean uploadArchives'
 }
 
-def relVer = Version.valueOf(releaseVer)
-def nextVer = relVer.incrementPreReleaseVersion()
+def nextVer = Version.valueOf(releaseVer).incrementPatchVersion()
 ask("Bump version to $nextVer?: [Y]") {
   executeOnShell "sed -i -e \"s/version = '${releaseVer}'/version = '${nextVer}'/\" build.gradle"
   executeOnShell "sed -i -e \"s/def version = \\\"${releaseVer}\\\"/def version = \\\"${nextVer}\\\"/\" project/Build.scala"
@@ -120,17 +119,6 @@ ask("Bump version to $nextVer?: [Y]") {
   executeOnShell("git diff --cached")
   ask("Commit and push this change?: [Y]") {
     executeOnShell("git commit -m 'bump version to $nextVer'")
-    executeOnShell("git push")
-  }
-
-  def m = releaseVer =~ /(.*beta\.)(\d+)/
-  def i = m[0][2] as Integer
-  def prevVersion = m[0][1] + (i - 1)
-  executeOnShell "sed -i -e \"s/| ${prevVersion} |/| ${releaseVer} |/\" README.md"
-  executeOnShell("git add README.md")
-  executeOnShell("git diff --cached")
-  ask("Commit and push this change?: [Y]") {
-    executeOnShell("git commit -m 'bump version to $releaseVer in readme'")
     executeOnShell("git push")
   }
 }

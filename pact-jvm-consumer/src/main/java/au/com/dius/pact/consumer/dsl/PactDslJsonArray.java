@@ -1,18 +1,31 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.InvalidMatcherException;
+import au.com.dius.pact.model.generators.Category;
+import au.com.dius.pact.model.generators.DateGenerator;
+import au.com.dius.pact.model.generators.DateTimeGenerator;
+import au.com.dius.pact.model.generators.RandomBooleanGenerator;
+import au.com.dius.pact.model.generators.RandomDecimalGenerator;
+import au.com.dius.pact.model.generators.RandomHexadecimalGenerator;
+import au.com.dius.pact.model.generators.RandomIntGenerator;
+import au.com.dius.pact.model.generators.RandomStringGenerator;
+import au.com.dius.pact.model.generators.TimeGenerator;
+import au.com.dius.pact.model.generators.UuidGenerator;
+import au.com.dius.pact.model.matchingrules.EqualsMatcher;
+import au.com.dius.pact.model.matchingrules.MatchingRule;
+import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
+import au.com.dius.pact.model.matchingrules.RuleLogic;
 import au.com.dius.pact.model.matchingrules.TypeMatcher;
 import com.mifmif.common.regex.Generex;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * DSL to define a JSON array
@@ -170,8 +183,9 @@ public class PactDslJsonArray extends DslPart {
     protected void putObject(DslPart object) {
       for(String matcherName: object.matchers.getMatchingRules().keySet()) {
           matchers.addRules(rootPath + appendArrayIndex(1) + matcherName,
-            object.matchers.getMatchingRules().get(matcherName));
+            object.matchers.getMatchingRules().get(matcherName).getRules());
       }
+      generators.addGenerators(object.generators, rootPath + appendArrayIndex(1));
       for (int i = 0; i < getNumberExamples(); i++) {
         body.put(object.getBody());
       }
@@ -180,8 +194,9 @@ public class PactDslJsonArray extends DslPart {
     protected void putArray(DslPart object) {
         for(String matcherName: object.matchers.getMatchingRules().keySet()) {
             matchers.addRules(rootPath + appendArrayIndex(1) + matcherName,
-              object.matchers.getMatchingRules().get(matcherName));
+              object.matchers.getMatchingRules().get(matcherName).getRules());
         }
+        generators.addGenerators(object.generators, rootPath + appendArrayIndex(1));
         body.put(object.getBody());
     }
 
@@ -200,7 +215,7 @@ public class PactDslJsonArray extends DslPart {
       } else {
         body.put(value);
       }
-        return this;
+      return this;
     }
 
     /**
@@ -237,9 +252,10 @@ public class PactDslJsonArray extends DslPart {
      * Element that can be any string
      */
     public PactDslJsonArray stringType() {
-        body.put(RandomStringUtils.randomAlphabetic(20));
-        matchers.addRule(rootPath + appendArrayIndex(0), new TypeMatcher());
-        return this;
+      body.put("string");
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new RandomStringGenerator(20));
+      matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher.INSTANCE);
+      return this;
     }
 
     /**
@@ -248,7 +264,7 @@ public class PactDslJsonArray extends DslPart {
      */
     public PactDslJsonArray stringType(String example) {
         body.put(example);
-        matchers.addRule(rootPath + appendArrayIndex(0), new TypeMatcher());
+        matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher.INSTANCE);
         return this;
     }
 
@@ -256,7 +272,8 @@ public class PactDslJsonArray extends DslPart {
      * Element that can be any number
      */
     public PactDslJsonArray numberType() {
-        return numberType(Long.parseLong(RandomStringUtils.randomNumeric(9)));
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(1), new RandomIntGenerator(0, Integer.MAX_VALUE));
+      return numberType(100);
     }
 
     /**
@@ -273,7 +290,8 @@ public class PactDslJsonArray extends DslPart {
      * Element that must be an integer
      */
     public PactDslJsonArray integerType() {
-        return integerType(Long.parseLong(RandomStringUtils.randomNumeric(9)));
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(1), new RandomIntGenerator(0, Integer.MAX_VALUE));
+      return integerType(100L);
     }
 
     /**
@@ -309,7 +327,8 @@ public class PactDslJsonArray extends DslPart {
    * Element that must be a decimal value
    */
   public PactDslJsonArray decimalType() {
-      return decimalType(new BigDecimal(RandomStringUtils.randomNumeric(10)));
+    generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(1), new RandomDecimalGenerator(10));
+    return decimalType(new BigDecimal("100"));
   }
 
   /**
@@ -336,8 +355,9 @@ public class PactDslJsonArray extends DslPart {
      * Element that must be a boolean
      */
     public PactDslJsonArray booleanType() {
-        body.put(true);
-        matchers.addRule(rootPath + appendArrayIndex(0), new TypeMatcher());
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(1), RandomBooleanGenerator.INSTANCE);
+      body.put(true);
+        matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher.INSTANCE);
         return this;
     }
 
@@ -347,7 +367,7 @@ public class PactDslJsonArray extends DslPart {
      */
     public PactDslJsonArray booleanType(Boolean example) {
         body.put(example);
-        matchers.addRule(rootPath + appendArrayIndex(0), new TypeMatcher());
+        matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher.INSTANCE);
         return this;
     }
 
@@ -369,19 +389,24 @@ public class PactDslJsonArray extends DslPart {
     /**
      * Element that must match the regular expression
      * @param regex regular expression
+     * @deprecated Use the version that takes an example value
      */
+    @Deprecated
     public PactDslJsonArray stringMatcher(String regex) {
-        stringMatcher(regex, new Generex(regex).random());
-        return this;
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(1), new RandomStringGenerator(10));
+      stringMatcher(regex, new Generex(regex).random());
+      return this;
     }
 
     /**
      * Element that must be an ISO formatted timestamp
      */
     public PactDslJsonArray timestamp() {
-        body.put(DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date()));
-        matchers.addRule(rootPath + appendArrayIndex(0), matchTimestamp(DateFormatUtils.ISO_DATETIME_FORMAT.getPattern()));
-        return this;
+      String pattern = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern();
+      body.put(DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date(DATE_2000)));
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new DateTimeGenerator(pattern));
+      matchers.addRule(rootPath + appendArrayIndex(0), matchTimestamp(pattern));
+      return this;
     }
 
     /**
@@ -389,10 +414,11 @@ public class PactDslJsonArray extends DslPart {
      * @param format timestamp format
      */
     public PactDslJsonArray timestamp(String format) {
-        FastDateFormat instance = FastDateFormat.getInstance(format);
-        body.put(instance.format(new Date()));
-        matchers.addRule(rootPath + appendArrayIndex(0), matchTimestamp(format));
-        return this;
+      FastDateFormat instance = FastDateFormat.getInstance(format);
+      body.put(instance.format(new Date(DATE_2000)));
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new DateTimeGenerator(format));
+      matchers.addRule(rootPath + appendArrayIndex(0), matchTimestamp(format));
+      return this;
     }
 
     /**
@@ -411,9 +437,11 @@ public class PactDslJsonArray extends DslPart {
      * Element that must be formatted as an ISO date
      */
     public PactDslJsonArray date() {
-        body.put(DateFormatUtils.ISO_DATE_FORMAT.format(new Date()));
-        matchers.addRule(rootPath + appendArrayIndex(0), matchDate(DateFormatUtils.ISO_DATE_FORMAT.getPattern()));
-        return this;
+      String pattern = DateFormatUtils.ISO_DATE_FORMAT.getPattern();
+      body.put(DateFormatUtils.ISO_DATE_FORMAT.format(new Date(DATE_2000)));
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new DateGenerator(pattern));
+      matchers.addRule(rootPath + appendArrayIndex(0), matchDate(pattern));
+      return this;
     }
 
     /**
@@ -421,10 +449,11 @@ public class PactDslJsonArray extends DslPart {
      * @param format date format to match
      */
     public PactDslJsonArray date(String format) {
-        FastDateFormat instance = FastDateFormat.getInstance(format);
-        body.put(instance.format(new Date()));
-        matchers.addRule(rootPath + appendArrayIndex(0), matchDate(format));
-        return this;
+      FastDateFormat instance = FastDateFormat.getInstance(format);
+      body.put(instance.format(new Date(DATE_2000)));
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new DateTimeGenerator(format));
+      matchers.addRule(rootPath + appendArrayIndex(0), matchDate(format));
+      return this;
     }
 
     /**
@@ -443,9 +472,11 @@ public class PactDslJsonArray extends DslPart {
      * Element that must be an ISO formatted time
      */
     public PactDslJsonArray time() {
-        body.put(DateFormatUtils.ISO_TIME_FORMAT.format(new Date()));
-        matchers.addRule(rootPath + appendArrayIndex(0), matchTime(DateFormatUtils.ISO_TIME_FORMAT.getPattern()));
-        return this;
+      String pattern = DateFormatUtils.ISO_TIME_FORMAT.getPattern();
+      body.put(DateFormatUtils.ISO_TIME_FORMAT.format(new Date(DATE_2000)));
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new TimeGenerator(pattern));
+      matchers.addRule(rootPath + appendArrayIndex(0), matchTime(pattern));
+      return this;
     }
 
     /**
@@ -453,10 +484,11 @@ public class PactDslJsonArray extends DslPart {
      * @param format time format to match
      */
     public PactDslJsonArray time(String format) {
-        FastDateFormat instance = FastDateFormat.getInstance(format);
-        body.put(instance.format(new Date()));
-        matchers.addRule(rootPath + appendArrayIndex(0), matchTime(format));
-        return this;
+      FastDateFormat instance = FastDateFormat.getInstance(format);
+      body.put(instance.format(new Date(DATE_2000)));
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new TimeGenerator(format));
+      matchers.addRule(rootPath + appendArrayIndex(0), matchTime(format));
+      return this;
     }
 
     /**
@@ -512,6 +544,7 @@ public class PactDslJsonArray extends DslPart {
     }
 
     parentToReturn.getMatchers().applyMatcherRootPrefix("$");
+    parentToReturn.getGenerators().applyRootPrefix("$");
 
     return parentToReturn;
   }
@@ -531,9 +564,10 @@ public class PactDslJsonArray extends DslPart {
      * Element that must be a numeric identifier
      */
     public PactDslJsonArray id() {
-        body.put(Long.parseLong(RandomStringUtils.randomNumeric(10)));
-        matchers.addRule(rootPath + appendArrayIndex(0), new TypeMatcher());
-        return this;
+      body.put(100L);
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new RandomIntGenerator(0, Integer.MAX_VALUE));
+      matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher.INSTANCE);
+      return this;
     }
 
     /**
@@ -542,7 +576,7 @@ public class PactDslJsonArray extends DslPart {
      */
     public PactDslJsonArray id(Long id) {
         body.put(id);
-        matchers.addRule(rootPath + appendArrayIndex(0), new TypeMatcher());
+        matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher.INSTANCE);
         return this;
     }
 
@@ -550,7 +584,8 @@ public class PactDslJsonArray extends DslPart {
      * Element that must be encoded as a hexadecimal value
      */
     public PactDslJsonArray hexValue() {
-        return hexValue(RandomStringUtils.random(10, "0123456789abcdef"));
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(1), new RandomHexadecimalGenerator(10));
+      return hexValue("1234a");
     }
 
     /**
@@ -589,7 +624,8 @@ public class PactDslJsonArray extends DslPart {
      * Element that must be encoded as an UUID
      */
     public PactDslJsonArray uuid() {
-        return uuid(UUID.randomUUID().toString());
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(1), new UuidGenerator());
+      return uuid("e2490de5-5bd3-43d5-b7c4-526e33f71304");
     }
 
     /**
@@ -877,5 +913,55 @@ public class PactDslJsonArray extends DslPart {
     parent.setNumberExamples(numberExamples);
     parent.putObject(value);
     return (PactDslJsonArray) parent.closeArray();
+  }
+
+  /**
+   * List item that must include the provided string
+   * @param value Value that must be included
+   */
+  public PactDslJsonArray includesStr(String value) {
+    body.put(value);
+    matchers.addRule(rootPath + appendArrayIndex(0), includesMatcher(value));
+    return this;
+  }
+
+  /**
+   * Attribute that must be equal to the provided value.
+   * @param value Value that will be used for comparisons
+   */
+  public PactDslJsonArray equalsTo(Object value) {
+    body.put(value);
+    matchers.addRule(rootPath + appendArrayIndex(0), EqualsMatcher.INSTANCE);
+    return this;
+  }
+
+  /**
+   * Combine all the matchers using AND
+   * @param value Attribute example value
+   * @param rules Matching rules to apply
+   */
+  public PactDslJsonArray and(Object value, MatchingRule... rules) {
+    if (value != null) {
+      body.put(value);
+    } else {
+      body.put(JSONObject.NULL);
+    }
+    matchers.setRules(rootPath + appendArrayIndex(0), new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.AND));
+    return this;
+  }
+
+  /**
+   * Combine all the matchers using OR
+   * @param value Attribute example value
+   * @param rules Matching rules to apply
+   */
+  public PactDslJsonArray or(Object value, MatchingRule... rules) {
+    if (value != null) {
+      body.put(value);
+    } else {
+      body.put(JSONObject.NULL);
+    }
+    matchers.setRules(rootPath + appendArrayIndex(0), new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.OR));
+    return this;
   }
 }

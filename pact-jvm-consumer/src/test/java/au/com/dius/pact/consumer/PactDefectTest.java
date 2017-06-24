@@ -24,12 +24,12 @@ public class PactDefectTest {
 
     @Test
     public void json() {
-        test("{\"msg\" : \"ping\"}", "{\"msg\" : \"pong\"}", "application/json");
+        test("{\"msg\" : \"ping\"}", "{\"msg\":\"pong\"}", "application/json");
     }
 
     @Test
     public void jsonWithCharset() {
-        test("{\"msg\" : \"ping\"}", "{\"msg\" : \"pong\"}", "application/json; charset=utf8");
+        test("{\"msg\" : \"ping\"}", "{\"msg\":\"pong\"}", "application/json; charset=utf8");
     }
 
     @Test

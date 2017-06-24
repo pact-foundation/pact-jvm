@@ -8,6 +8,7 @@ import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.plugins.annotations.ResolutionScope
+import org.fusesource.jansi.AnsiConsole
 
 /**
  * Pact Verify Maven Plugin
@@ -27,6 +28,8 @@ class PactProviderMojo extends AbstractMojo {
 
   @Override
   void execute() throws MojoExecutionException, MojoFailureException {
+    AnsiConsole.systemInstall()
+
     Map failures = [:]
     ProviderVerifier verifier = new ProviderVerifier()
     verifier.projectHasProperty = { this.propertyDefined(it) }
@@ -61,6 +64,7 @@ class PactProviderMojo extends AbstractMojo {
 
     if (failures.size() > 0) {
       verifier.displayFailures(failures)
+      AnsiConsole.systemUninstall()
       throw new MojoFailureException("There were ${failures.size()} pact failures")
     }
   }

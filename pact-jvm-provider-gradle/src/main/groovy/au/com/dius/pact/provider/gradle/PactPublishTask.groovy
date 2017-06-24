@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.gradle
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import groovy.io.FileType
 import org.apache.commons.lang3.StringUtils
+import org.fusesource.jansi.AnsiConsole
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
 import org.gradle.api.tasks.TaskAction
@@ -15,6 +16,7 @@ class PactPublishTask extends DefaultTask {
 
     @TaskAction
     void publishPacts() {
+        AnsiConsole.systemInstall()
         if (!project.pact.publish) {
             throw new GradleScriptException('You must add a pact publish configuration to your build before you can ' +
                 'use the pactPublish task', null)
@@ -44,6 +46,8 @@ class PactPublishTask extends DefaultTask {
             anyFailed = true
           }
         }
+
+        AnsiConsole.systemUninstall()
 
         if (anyFailed) {
           throw new GradleScriptException('One or more of the pact files were rejected by the pact broker', null)

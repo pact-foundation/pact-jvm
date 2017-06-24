@@ -2,8 +2,9 @@ apply plugin: 'maven-publish'
 
 dependencies {
     compile project(":pact-jvm-provider_${project.scalaVersion}"),
-      'org.apache.maven:maven-plugin-api:3.3.9',
-      'org.apache.maven.plugin-tools:maven-plugin-annotations:3.4'
+      'org.apache.maven:maven-plugin-api:3.5.0',
+      'org.apache.maven.plugin-tools:maven-plugin-annotations:3.5'
+    compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -18,7 +19,7 @@ task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider_${project.scal
     if (isWindows()) {
         mvn = 'mvn.bat'
     }
-    commandLine mvn, '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.4:descriptor'
+    commandLine mvn, '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.5:descriptor'
     doFirst {
         def pomFile = file("${buildDir}/poms/pom.xml")
         def pom = install.repositories.mavenInstaller.pom

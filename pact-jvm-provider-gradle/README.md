@@ -80,7 +80,7 @@ pact {
 
 ## Specifying the provider hostname at runtime
 
-If you need to calculate the provider hostname at runtime, you can give a closure as the provider host.
+If you need to calculate the provider hostname at runtime, you can give a Closure as the provider `host`.
 
 ```groovy
 pact {
@@ -100,11 +100,11 @@ pact {
 }
 ```
 
-_Since version 3.3.2+/2.4.17+_ you can also give a closure as the provider port.
+_Since version 3.3.2+/2.4.17+_ you can also give a Closure as the provider `port`.
 
 ## Specifying the pact file or URL at runtime [versions 3.2.7/2.4.9+]
 
-If you need to calculate the pact file or URL at runtime, you can give a Closure as the provider host.
+If you need to calculate the pact file or URL at runtime, you can give a Closure as the provider `pactFile`.
 
 ```groovy
 pact {
@@ -126,19 +126,24 @@ pact {
 
 ## Starting and shutting down your provider
 
-If you need to start-up or shutdown your provider, you can define a start and terminate task for each provider.
+If you need to start-up or shutdown your provider, define Gradle tasks for each action and set  
+`startProviderTask` and `terminateProviderTask` properties of each provider.
 You could use the jetty tasks here if you provider is built as a WAR file.
 
 ```groovy
 
 // This will be called before the provider task
-task('startTheApp') << {
-  // start up your provider here
+task('startTheApp') {
+  doLast {
+    // start up your provider here
+  }
 }
 
 // This will be called after the provider task
-task('killTheApp') << {
-  // kill your provider here
+task('killTheApp') {
+  doLast {
+    // kill your provider here
+  }
 }
 
 pact {
@@ -163,6 +168,37 @@ pact {
 
 Following typical Gradle behaviour, you can set the provider task properties to the actual tasks, or to the task names
 as a string (for the case when they haven't been defined yet).
+
+## Preventing the chaining of provider verify task to `pactVerify` [version 3.4.1+]
+
+Normally a gradle task named `pactVerify_${provider.name}` is created and added as a task dependency for `pactVerify`.  You 
+can disable this dependency on a provider by setting `isDependencyForPactVerify` to `false` (defaults to `true`).
+
+```groovy
+pact {
+
+    serviceProviders {
+
+        provider1 {
+
+            isDependencyForPactVerify = false
+
+            hasPactWith('consumer1') {
+                pactFile = file('path/to/provider1-consumer1-pact.json')
+            }
+
+        }
+
+    }
+
+}
+```
+
+To run this task, you would then have to explicitly name it as in ```gradle pactVerify_provider1```, a normal ```gradle pactVerify``` 
+would skip it.  This can be useful when you want to define two providers, one with `startProviderTask`/`terminateProviderTask` 
+and as second without, so you can manually start your provider (to debug it from your IDE, for example) but still want a `pactVerify` 
+ to run normally from your CI build.
+
 
 ## Enabling insecure SSL [version 2.2.8+]
 
@@ -343,7 +379,11 @@ pact {
 ```
 
 If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description and parameters 
-will be sent as JSON in the body of the request. If it is set to false, they will passed as query parameters.
+will be sent as JSON in the body of the request :
+```json
+{ "state" : "a provider state description", "params": { "a": "1", "b": "2" } }
+```  
+If it is set to false, they will be passed as query parameters.
 
 #### Teardown calls for state changes [version 3.2.5/2.4.7+]
 

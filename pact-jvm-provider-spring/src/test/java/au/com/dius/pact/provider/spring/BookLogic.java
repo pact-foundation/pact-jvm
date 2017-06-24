@@ -1,11 +1,8 @@
 package au.com.dius.pact.provider.spring;
 
-import org.joda.time.DateTime;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +18,10 @@ public class BookLogic {
 
     public List<Book> getBooks(Boolean bestSellers) {
         return new ArrayList<Book>();
+    }
+
+    public List<Book> getBooks(BookType bookType) {
+      return new ArrayList<Book>();
     }
 
     public Book createBook(Book book) {

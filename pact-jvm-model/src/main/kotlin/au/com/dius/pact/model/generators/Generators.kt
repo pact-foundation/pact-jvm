@@ -1,6 +1,11 @@
 package au.com.dius.pact.model.generators
 
-import au.com.dius.pact.model.*
+import au.com.dius.pact.model.ContentType
+import au.com.dius.pact.model.InvalidPactException
+import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.model.PathToken
+import au.com.dius.pact.model.parsePath
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import mu.KLogging
@@ -34,12 +39,11 @@ object JsonContentTypeHandler : ContentTypeHandler {
   override fun applyKey(body: QueryResult, key: String, generator: Generator) {
     val pathExp = parsePath(key)
     queryObjectGraph(pathExp.iterator(), body) { (value, valueKey, parent) ->
-      if (parent is MutableMap<*, *>) {
-        (parent as MutableMap<String, Any>)[valueKey.toString()] = generator.generate(value)
-      } else if (parent is MutableList<*>) {
-        (parent as MutableList<Any>)[valueKey as Int] = generator.generate(value)
-      } else {
-        body.value = generator.generate(value)
+      @Suppress("UNCHECKED_CAST")
+      when (parent) {
+        is MutableMap<*, *> -> (parent as MutableMap<String, Any>)[valueKey.toString()] = generator.generate(value)
+        is MutableList<*> -> (parent as MutableList<Any>)[valueKey as Int] = generator.generate(value)
+        else -> body.value = generator.generate(value)
       }
     }
   }
@@ -99,7 +103,7 @@ object JsonContentTypeHandler : ContentTypeHandler {
 
 data class Generators(val categories: MutableMap<Category, MutableMap<String, Generator>> = HashMap()) {
 
-  companion object: KLogging() {
+  companion object : KLogging() {
 
     @JvmStatic fun fromMap(map: Map<String, Map<String, Any>>?): Generators {
       val generators = Generators()
@@ -123,6 +127,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
             else -> {
               generatorMap.forEach { (generatorKey, generatorValue) ->
                 if (generatorValue is Map<*, *> && generatorValue.containsKey("type")) {
+                  @Suppress("UNCHECKED_CAST")
                   val generator = lookupGenerator(generatorValue as Map<String, Any>)
                   if (generator != null) {
                     generators.addGenerator(category, generatorKey, generator)
@@ -135,7 +140,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
               }
             }
           }
-        } catch(e: IllegalArgumentException) {
+        } catch (e: IllegalArgumentException) {
           logger.warn(e) { "Ignoring generator with invalid category '$key'" }
         }
       }
@@ -150,6 +155,23 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
       categories[category]?.put((key ?: ""), generator)
     } else {
       categories[category] = mutableMapOf((key ?: "") to generator)
+    }
+    return this
+  }
+
+  @JvmOverloads
+  fun addGenerators(generators: Generators, keyPrefix: String = ""): Generators {
+    generators.categories.forEach { (category, map) ->
+      map.forEach { (key, generator) ->
+        addGenerator(category, keyPrefix + key, generator)
+      }
+    }
+    return this
+  }
+
+  fun addCategory(category: Category): Generators {
+    if (!categories.containsKey(category)) {
+      categories[category] = mutableMapOf()
     }
     return this
   }
@@ -210,6 +232,12 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
           genKey to generator.toMap(pactSpecVersion)
         }
       }
+    }
+  }
+
+  fun applyRootPrefix(prefix: String) {
+    categories.keys.forEach { category ->
+      categories[category] = categories[category]!!.mapKeys { entry -> prefix + entry.key }.toMutableMap()
     }
   }
 }

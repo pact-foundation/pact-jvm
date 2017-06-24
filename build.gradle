@@ -1,18 +1,32 @@
 buildscript {
   repositories {
+    jcenter()
     mavenCentral()
+    mavenLocal()
   }
   dependencies {
     classpath "org.apache.commons:commons-lang3:$commonsLang3Version"
-    classpath 'com.tkruse.gradle:gradle-groovysh-plugin:1.0.8'
+    classpath 'org.apache.commons:commons-text:1.1'
   }
 }
 
 plugins {
-  id "org.jetbrains.kotlin.jvm" version "1.1.2"
+  id 'nebula.kotlin' version '1.1.2-5.1'
+  id 'org.jmailen.kotlinter' version '1.1.0'
+  id 'io.gitlab.arturbosch.detekt' version '1.0.0.M11'
 }
 
+import org.apache.commons.text.StringEscapeUtils
+
 subprojects {
+  buildscript {
+    repositories {
+      jcenter()
+      mavenCentral()
+      mavenLocal()
+    }
+  }
+
     configurations.all {
         resolutionStrategy.eachDependency { DependencyResolveDetails details ->
             if (details.requested.group == 'com.google.guava' && details.requested.name == 'guava' && details.requested.version > '19.0') {
@@ -44,7 +58,8 @@ subprojects {
     apply plugin: 'codenarc'
     apply plugin: 'jacoco'
     apply plugin: 'org.jetbrains.kotlin.jvm'
-    apply plugin: 'com.github.tkruse.groovysh'
+    apply plugin: 'org.jmailen.kotlinter'
+    apply plugin: 'io.gitlab.arturbosch.detekt'
 
     repositories {
         mavenLocal()
@@ -53,7 +68,7 @@ subprojects {
     }
 
     dependencies {
-      compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+      compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
       compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
       compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
       compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
@@ -81,7 +96,7 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '2.5.0-beta.1'
+    version = '3.5.0-jre7'
     targetCompatibility = '1.7'
     sourceCompatibility = '1.7'
 
@@ -126,7 +141,7 @@ subprojects {
 
     def pomCustomisation = {
         name project.name
-        description new File(projectDir, 'README.md').text
+        description StringEscapeUtils.escapeXml11(new File(projectDir, 'README.md').text)
         url 'https://github.com/DiUS/pact-jvm'
         licenses {
             license {
@@ -150,11 +165,6 @@ subprojects {
                 id 'rholshausen'
                 name 'Ronald Holshausen'
                 email 'rholshausen@dius.com.au'
-            }
-            developer {
-                id 'kenbot'
-                name 'Ken Scambler'
-                email 'ken.scambler@gmail.com'
             }
         }
     }
@@ -197,6 +207,17 @@ subprojects {
     check.dependsOn << 'jacocoTestReport'
 
     compileGroovy.dependsOn << 'copyMainKotlinClasses'
+
+  kotlinter {
+    indentSize = 2
+  }
+
+  detekt {
+    config = "${project.parent.projectDir}/config/detekt-config.yml"
+  }
+
+  check.dependsOn << 'detektCheck'
+
 }
 
 tasks.addRule("Pattern: <Task>_<ScalaVersion>") { String taskName ->

@@ -52,7 +52,7 @@ class PactBuilderSpec extends Specification {
     then:
     aliceService.interactions.size() == 1
     aliceService.interactions[0].request.path =~ '/mallory/[0-9]+'
-    aliceService.interactions[0].request.matchingRules.rulesForCategory('path').matchingRules[''][0].regex ==
+    aliceService.interactions[0].request.matchingRules.rulesForCategory('path').matchingRules[''].rules.first().regex ==
       '/mallory/[0-9]+'
   }
 
@@ -74,7 +74,7 @@ class PactBuilderSpec extends Specification {
     then:
     aliceService.interactions.size() == 1
     aliceService.interactions[0].request.path == '/mallory/1234567890'
-    aliceService.interactions[0].request.matchingRules.rulesForCategory('path').matchingRules[''][0].regex ==
+    aliceService.interactions[0].request.matchingRules.rulesForCategory('path').matchingRules[''].rules.first().regex ==
       '/mallory/[0-9]+'
   }
 
@@ -98,11 +98,11 @@ class PactBuilderSpec extends Specification {
     aliceService.interactions.size() == 1
 
     firstInteraction.request.headers.MALLORY =~ 'mallory:[0-9]+'
-    firstInteraction.request.matchingRules.rulesForCategory('header').matchingRules['MALLORY'][0].regex ==
+    firstInteraction.request.matchingRules.rulesForCategory('header').matchingRules['MALLORY'].rules.first().regex ==
       'mallory:[0-9]+'
     firstInteraction.response.headers['Content-Type'] == 'text/html'
-    firstInteraction.response.matchingRules.rulesForCategory('header').matchingRules['Content-Type'][0].regex ==
-      'text/.*'
+    firstInteraction.response.matchingRules.rulesForCategory('header').matchingRules['Content-Type'].
+      rules.first().regex == 'text/.*'
   }
 
   def 'allow arrays as the root of the body'() {

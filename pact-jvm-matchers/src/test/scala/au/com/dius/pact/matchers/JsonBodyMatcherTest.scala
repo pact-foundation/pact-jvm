@@ -169,7 +169,7 @@ class JsonBodyMatcherTest extends Specification with AllExpectations {
       "and when the actual body is missing a key, not be a mismatch" in {
         expectedBody = OptionalBody.body("{\"somethingElse\": 100}")
         actualBody = OptionalBody.body("{\"something\": 100, \"other\": 100}")
-        matchers.addCategory("body").addRule("$.*", new TypeMatcher())
+        matchers.addCategory("body").addRule("$.*", TypeMatcher.INSTANCE)
         matcher.matchBody(expected(), actual(), diffconfig) must beEmpty
       }
 

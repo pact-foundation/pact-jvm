@@ -1,7 +1,10 @@
 package au.com.dius.pact.consumer.dsl;
 
+import au.com.dius.pact.model.generators.Generators;
 import au.com.dius.pact.model.matchingrules.Category;
 import au.com.dius.pact.model.matchingrules.DateMatcher;
+import au.com.dius.pact.model.matchingrules.EqualsMatcher;
+import au.com.dius.pact.model.matchingrules.IncludeMatcher;
 import au.com.dius.pact.model.matchingrules.MaxTypeMatcher;
 import au.com.dius.pact.model.matchingrules.MinTypeMatcher;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
@@ -16,11 +19,13 @@ public abstract class DslPart {
     public static final String IP_ADDRESS = "(\\d{1,3}\\.)+\\d{1,3}";
     public static final String UUID_REGEX = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
     private static final String MATCH = "match";
+    public static final long DATE_2000 = 949323600000L;
 
     protected final DslPart parent;
     protected final String rootPath;
     protected final String rootName;
     protected Category matchers = new Category("body");
+    protected Generators generators = new Generators();
     protected boolean closed = false;
 
     public DslPart(DslPart parent, String rootPath, String rootName) {
@@ -279,6 +284,10 @@ public abstract class DslPart {
         return new MaxTypeMatcher(max);
     }
 
+    protected IncludeMatcher includesMatcher(Object value) {
+      return new IncludeMatcher(String.valueOf(value));
+    }
+
     public PactDslJsonBody asBody() {
         return (PactDslJsonBody) this;
     }
@@ -292,4 +301,12 @@ public abstract class DslPart {
    * @return The root object of the object graph
    */
   public abstract DslPart close();
+
+  public Generators getGenerators() {
+    return generators;
+  }
+
+  public void setGenerators(Generators generators) {
+    this.generators = generators;
+  }
 }

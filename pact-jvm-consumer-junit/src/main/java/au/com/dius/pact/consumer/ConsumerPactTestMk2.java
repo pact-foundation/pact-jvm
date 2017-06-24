@@ -57,7 +57,7 @@ public abstract class ConsumerPactTestMk2 {
     }
 
     protected PactSpecVersion getSpecificationVersion() {
-        return PactSpecVersion.V2;
+        return PactSpecVersion.V3;
     }
 
 }

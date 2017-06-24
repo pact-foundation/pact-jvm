@@ -8,6 +8,7 @@ import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
+import org.fusesource.jansi.AnsiConsole
 
 /**
  * Task to push pact files to a pact broker
@@ -40,6 +41,7 @@ class PactPublishMojo extends AbstractMojo {
 
     @Override
     void execute() throws MojoExecutionException, MojoFailureException {
+        AnsiConsole.systemInstall()
         if (trimSnapshot) {
             projectVersion -= '-SNAPSHOT'
         }
@@ -68,6 +70,8 @@ class PactPublishMojo extends AbstractMojo {
             }
         } catch (FileNotFoundException e) {
             println "Pact directory ${pactDirectory} does not exist, skipping uploading of pacts"
+        } finally {
+          AnsiConsole.systemUninstall()
         }
     }
 

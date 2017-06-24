@@ -1,15 +1,17 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.model.matchingrules.MatchingRule
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
-import org.apache.commons.lang3.RandomStringUtils
 
 /**
  * Matcher for validating same types
  */
 class TypeMatcher extends Matcher {
 
-  def getMatcher() {
-    switch (values.first()) {
+  String type = 'type'
+
+  MatchingRule getMatcher() {
+    switch (type) {
       case 'integer':
         return new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)
       case 'decimal':
@@ -17,15 +19,7 @@ class TypeMatcher extends Matcher {
       case 'number':
         return new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)
       default:
-        return new au.com.dius.pact.model.matchingrules.TypeMatcher()
-    }
-  }
-
-  def getValue() {
-    if (values == null || values.empty || values.last() == null) {
-      RandomStringUtils.randomNumeric(10)
-    } else {
-      values.last()
+        return au.com.dius.pact.model.matchingrules.TypeMatcher.INSTANCE
     }
   }
 

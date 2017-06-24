@@ -4,8 +4,8 @@ import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
-import au.com.dius.pact.provider.org.fusesource.jansi.Ansi
-import au.com.dius.pact.provider.org.fusesource.jansi.AnsiConsole
+import org.fusesource.jansi.Ansi
+import org.fusesource.jansi.AnsiConsole
 
 /**
  * Pact verifier reporter that displays the results of the verification to the console using ASCII escapes
@@ -203,28 +203,32 @@ class AnsiConsoleReporter implements VerifierReporter {
     }
   }
 
-  @SuppressWarnings('AbcMetric')
+  @SuppressWarnings(['AbcMetric', 'NestedBlockDepth'])
   void displayDiff(err) {
     err.value.comparison.each { key, messageAndDiff ->
-      AnsiConsole.out().println("      $key -> $messageAndDiff.mismatch")
-      AnsiConsole.out().println()
-
-      if (messageAndDiff.diff) {
-        AnsiConsole.out().println('        Diff:')
+      messageAndDiff.each { mismatch ->
+        AnsiConsole.out().println("      $key -> ${mismatch.mismatch}")
         AnsiConsole.out().println()
 
-        messageAndDiff.diff.eachLine { delta ->
-          if (delta.startsWith('@')) {
-            AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.CYAN).a(delta).reset())
-          } else if (delta.startsWith('-')) {
-            AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.RED).a(delta).reset())
-          } else if (delta.startsWith('+')) {
-            AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.GREEN).a(delta).reset())
-          } else {
-            AnsiConsole.out().println("        $delta")
+        if (mismatch.diff.any()) {
+          AnsiConsole.out().println('        Diff:')
+          AnsiConsole.out().println()
+
+          mismatch.diff.findAll().each {
+            it.eachLine { delta ->
+              if (delta.startsWith('@')) {
+                AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.CYAN).a(delta).reset())
+              } else if (delta.startsWith('-')) {
+                AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.RED).a(delta).reset())
+              } else if (delta.startsWith('+')) {
+                AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.GREEN).a(delta).reset())
+              } else {
+                AnsiConsole.out().println("        $delta")
+              }
+            }
+            AnsiConsole.out().println()
           }
         }
-        AnsiConsole.out().println()
       }
     }
 

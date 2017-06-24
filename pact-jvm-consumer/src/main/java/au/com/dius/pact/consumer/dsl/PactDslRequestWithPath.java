@@ -6,6 +6,7 @@ import au.com.dius.pact.model.OptionalBody;
 import au.com.dius.pact.model.PactReader;
 import au.com.dius.pact.model.Provider;
 import au.com.dius.pact.model.ProviderState;
+import au.com.dius.pact.model.generators.Generators;
 import au.com.dius.pact.model.matchingrules.MatchingRules;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import com.mifmif.common.regex.Generex;
@@ -35,18 +36,20 @@ public class PactDslRequestWithPath {
     Map<String, List<String>> query = new HashMap<>();
     OptionalBody requestBody = OptionalBody.missing();
     MatchingRules requestMatchers = new MatchingRules();
+    Generators requestGenerators = new Generators();
 
      PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
-                                  String consumerName,
-                                  String providerName,
-                                  List<ProviderState> state,
-                                  String description,
-                                  String path,
-                                  String requestMethod,
-                                  Map<String, String> requestHeaders,
-                                  Map<String, List<String>> query,
-                                  OptionalBody requestBody,
-                                  MatchingRules requestMatchers) {
+                            String consumerName,
+                            String providerName,
+                            List<ProviderState> state,
+                            String description,
+                            String path,
+                            String requestMethod,
+                            Map<String, String> requestHeaders,
+                            Map<String, List<String>> query,
+                            OptionalBody requestBody,
+                            MatchingRules requestMatchers,
+                            Generators requestGenerators) {
         this.consumerPactBuilder = consumerPactBuilder;
         this.requestMatchers = requestMatchers;
         this.consumer = new Consumer(consumerName);
@@ -61,6 +64,7 @@ public class PactDslRequestWithPath {
         this.query = query;
         this.requestBody = requestBody;
         this.requestMatchers = requestMatchers;
+        this.requestGenerators = requestGenerators;
     }
 
     PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
@@ -213,6 +217,7 @@ public class PactDslRequestWithPath {
     public PactDslRequestWithPath body(DslPart body) {
         DslPart parent = body.close();
         requestMatchers.addCategory(parent.getMatchers());
+        requestGenerators.addGenerators(parent.generators);
         requestBody = OptionalBody.body(parent.toString());
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
             requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());

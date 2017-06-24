@@ -1,0 +1,125 @@
+autoCorrect: true
+
+build:
+  warningThreshold: 5
+  failThreshold: 20
+  weights:
+    complexity: 2
+    formatting: 0
+    LongParameterList: 1
+    comments: 0.5
+
+potential-bugs:
+  active: true
+  DuplicateCaseInWhenExpression:
+    active: true
+  EqualsWithHashCodeExist:
+    active: true
+  ExplicitGarbageCollectionCall:
+    active: true
+
+exceptions:
+  active: true
+
+empty-blocks:
+  active: true
+
+complexity:
+  active: true
+  LongMethod:
+    threshold: 20
+  LongParameterList:
+    threshold: 5
+  LargeClass:
+    threshold: 150
+  ComplexMethod:
+    threshold: 10
+  TooManyFunctions:
+    threshold: 10
+  ComplexCondition:
+    threshold: 3
+
+code-smell:
+  active: true
+  FeatureEnvy:
+    threshold: 0.5
+    weight: 0.45
+    base: 0.5
+
+formatting:
+  active: true
+  useTabs: false
+  Indentation:
+    active: false
+    indentSize: 2
+  ConsecutiveBlankLines:
+    active: true
+    autoCorrect: true
+  MultipleSpaces:
+    active: true
+    autoCorrect: true
+  SpacingAfterComma:
+    active: true
+    autoCorrect: true
+  SpacingAfterKeyword:
+    active: true
+    autoCorrect: true
+  SpacingAroundColon:
+    active: true
+    autoCorrect: true
+  SpacingAroundCurlyBraces:
+    active: true
+    autoCorrect: true
+  SpacingAroundOperator:
+    active: true
+    autoCorrect: true
+  TrailingSpaces:
+    active: true
+    autoCorrect: true
+  UnusedImports:
+    active: true
+    autoCorrect: true
+  OptionalSemicolon:
+    active: true
+    autoCorrect: true
+  OptionalUnit:
+    active: true
+    autoCorrect: true
+  ExpressionBodySyntax:
+    active: false
+    autoCorrect: true
+  ExpressionBodySyntaxLineBreaks:
+    active: false
+    autoCorrect: true
+
+style:
+  active: true
+  WildcardImport:
+    active: true
+  NamingConventionViolation:
+    active: true
+    variablePattern: '^(_)?[a-z$][a-zA-Z$0-9]*$'
+    constantPattern: '^([A-Z_]*|serialVersionUID)$'
+    methodPattern: '^[a-z$][a-zA-Z$0-9]*$'
+    classPattern: '[A-Z$][a-zA-Z$]*'
+    enumEntryPattern: '^[A-Z$][a-zA-Z_$]*$'
+
+comments:
+  active: true
+  CommentOverPrivateMethod:
+    active: true
+  CommentOverPrivateProperty:
+    active: true
+  NoDocOverPublicClass:
+    active: false
+  NoDocOverPublicMethod:
+    active: false
+
+# *experimental feature*
+# Migration rules can be defined in the same config file or a new one
+migration:
+  active: true
+  imports:
+    # your.package.Class: new.package.or.Class
+    # for example:
+    # io.gitlab.arturbosch.detekt.api.Rule: io.gitlab.arturbosch.detekt.rule.Rule

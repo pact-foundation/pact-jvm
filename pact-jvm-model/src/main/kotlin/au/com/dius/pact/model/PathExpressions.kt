@@ -56,12 +56,12 @@ fun indexPath(ch: IndexedValue<Char>, chars: PushbackIterator<IndexedValue<Char>
   tokens.add(PathToken.Index(id.toInt()))
 }
 
-// identifier -> a-zA-Z0-9+
+// identifier -> a-zA-Z0-9\-+
 fun identifier(ch: Char, chars: PushbackIterator<IndexedValue<Char>>, tokens: MutableList<PathToken>, path: String) {
   var id = String() + ch
   while (chars.hasNext()) {
     val c = chars.next()
-    if (c.value.isLetterOrDigit()) {
+    if (c.value.isLetterOrDigit() || c.value == '-') {
       id += c.value
     } else if (c.value == '.' || c.value == '\'' || c.value == '[') {
       chars.pushback(c)

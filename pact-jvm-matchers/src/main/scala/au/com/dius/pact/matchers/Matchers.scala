@@ -6,7 +6,7 @@ import io.gatling.jsonpath.AST._
 import io.gatling.jsonpath.Parser
 import org.apache.commons.collections4.{Predicate, Transformer}
 
-import scala.collection.JavaConversions
+import scala.collection.JavaConversions._
 
 object Matchers extends StrictLogging {
 
@@ -55,7 +55,6 @@ object Matchers extends StrictLogging {
       })
     else matchers.rulesForCategory(category)
 
-
   def matcherDefined(category: String, path: Seq[String], matchers: MatchingRules): Boolean =
     if (matchers != null)
       resolveMatchers(matchers, category, path).isNotEmpty
@@ -67,7 +66,7 @@ object Matchers extends StrictLogging {
       val resolvedMatchers = matchers.rulesForCategory(category).filter(new Predicate[String] {
         override def evaluate(p: String): Boolean = matchesPath(p, path) == path.length
       })
-      JavaConversions.asScalaSet(resolvedMatchers.getMatchingRules.keySet()).exists(entry => entry.endsWith(".*"))
+      asScalaSet(resolvedMatchers.getMatchingRules.keySet()).exists(entry => entry.endsWith(".*"))
     } else
       false
   }
@@ -75,7 +74,7 @@ object Matchers extends StrictLogging {
   def domatch[Mismatch](matchers: MatchingRules, category: String, path: Seq[String], expected: Any, actual: Any,
                         mismatchFn: MismatchFactory[Mismatch]) : List[Mismatch] = {
     val matcherDef = selectBestMatcher(matchers, category, path)
-    JavaConversions.asScalaBuffer(MatcherExecutor.domatch(matcherDef, path, expected, actual, mismatchFn)).toList
+    asScalaBuffer(MatcherExecutorKt.domatch(matcherDef, path, expected, actual, mismatchFn)).toList
   }
 
   def selectBestMatcher[Mismatch](matchers: MatchingRules, category: String, path: Seq[String]) = {
@@ -85,6 +84,6 @@ object Matchers extends StrictLogging {
         override def transform(value: String): Integer = calculatePathWeight(value, path)
       })
     else
-      matcherCategory
+      matcherCategory.getMatchingRules.iterator.next()._2
   }
 }

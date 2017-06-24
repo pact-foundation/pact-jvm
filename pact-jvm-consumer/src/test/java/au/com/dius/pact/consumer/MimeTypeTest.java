@@ -31,7 +31,7 @@ public class MimeTypeTest {
             .closeObject()
             .toString();
 
-        String responseBody = "{\"status\": \"OK\"}";
+        String responseBody = "{\"status\":\"OK\"}";
 
         runTest(buildPact(body, responseBody, "a test interaction with json", ContentType.APPLICATION_JSON),
             body, responseBody, ContentType.APPLICATION_JSON);

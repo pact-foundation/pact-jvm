@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit.target;
 
+import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.provider.ConsumerInfo;
@@ -108,8 +109,8 @@ public class HttpTarget extends BaseTarget {
      * {@inheritDoc}
      */
     @Override
-    public void testInteraction(final String consumerName, final Interaction interaction) {
-      ProviderInfo provider = getProviderInfo();
+    public void testInteraction(final String consumerName, final Interaction interaction, PactSource source) {
+      ProviderInfo provider = getProviderInfo(source);
       ConsumerInfo consumer = new ConsumerInfo(consumerName);
       ProviderVerifier verifier = setupVerifier(interaction, provider, consumer);
 
@@ -147,7 +148,7 @@ public class HttpTarget extends BaseTarget {
     return verifier;
   }
 
-  protected ProviderInfo getProviderInfo() {
+  protected ProviderInfo getProviderInfo(PactSource source) {
       Provider provider = testClass.getAnnotation(Provider.class);
       final ProviderInfo providerInfo = new ProviderInfo(provider.value());
       providerInfo.setPort(port);

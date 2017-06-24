@@ -32,7 +32,8 @@
               {
                 "match": "type"
               }
-            ]
+            ],
+            "combine": "AND"
           }
         }
       }
@@ -52,7 +53,8 @@
               {
                 "match": "type"
               }
-            ]
+            ],
+            "combine": "AND"
           }
         }
       }

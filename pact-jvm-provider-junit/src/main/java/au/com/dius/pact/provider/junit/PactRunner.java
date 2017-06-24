@@ -63,25 +63,25 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         final TestClass testClass = new TestClass(clazz);
 
         this.child = new ArrayList<>();
-        final List<Pact> pacts = new ArrayList<>();
-        try {
-            List<Pact> list = getPactSource(testClass).load(serviceName);
-            for (final Pact p : list) {
-                if (consumerName == null || p.getConsumer().getName().equals(consumerName)) {
-                    pacts.add(p);
+        final List<Pact> pacts= new ArrayList<>();
+      PactLoader pactLoader = getPactSource(testClass);  try {
+            List<Pact> list = pactLoader.load(serviceName);
+                  for (final Pactp : list) {
+                if ( consumerName == null || p.getConsumer().getName().equals(consumerName)){
+                  pacts.add(p);
                 }
             }
         } catch (final IOException e) {
             throw new InitializationError(e);
         }
 
-        if (pacts.isEmpty()) {
-          throw new InitializationError("Did not find any pact files for provider " + providerInfo.value());
-        }
+      if (pacts.isEmpty()) {
+        throw new InitializationError("Did not find any pact files for provider " + providerInfo.value());
+      }
 
-        for (final Pact pact : filterPacts(pacts)) {
-            this.child.add(new InteractionRunner(testClass, pact));
-        }
+      for (final Pact pact : filterPacts(pacts)) {
+        this.child.add(new InteractionRunner(testClass, pact, pactLoader.getPactSource()));
+      }
     }
 
     protected List<Pact> filterPacts(List<Pact> pacts){

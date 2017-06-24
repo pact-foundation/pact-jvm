@@ -1,30 +1,33 @@
 package au.com.dius.pact.provider.junit.loader;
 
+import au.com.dius.pact.model.DirectorySource;
 import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.model.PactReader;
+import au.com.dius.pact.model.PactSource;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Out-of-the-box implementation of {@link PactLoader}
  * that loads pacts from either a subfolder of project resource folder or a directory
  */
 public class PactFolderLoader implements PactLoader {
-    private final String path;
+    private final File path;
+    private DirectorySource pactSource;
 
     public PactFolderLoader(final File path) {
-        this(path.getPath());
+      this.path = path;
+      this.pactSource = new DirectorySource(path);
     }
 
     public PactFolderLoader(final String path) {
-      this.path = path;
+      this(new File(path));
     }
 
     /**
@@ -43,46 +46,32 @@ public class PactFolderLoader implements PactLoader {
     public List<Pact> load(final String providerName) throws IOException {
         List<Pact> pacts = new ArrayList<Pact>();
         File pactFolder = resolvePath();
-        File[] files = pactFolder.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".json");
-            }
-        });
+        File[] files = pactFolder.listFiles((dir, name) -> name.endsWith(".json"));
         if (files != null) {
             for (File file : files) {
                 Pact pact = PactReader.loadPact(file);
                 if (pact.getProvider().getName().equals(providerName)) {
-                    pacts.add(pact);
+                  pacts.add(pact);
+                  this.pactSource.getPacts().put(file, pact);
                 }
             }
         }
         return pacts;
+    }
+
+    @Override
+    public PactSource getPactSource() {
+        return this.pactSource;
     }
 
     public Map<Pact, File> loadPactsWithFiles(final String providerName) throws IOException {
-        Map<Pact, File> pacts = new HashMap<Pact, File>();
-        File pactFolder = resolvePath();
-        File[] files = pactFolder.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".json");
-            }
-        });
-        if (files != null) {
-            for (File file : files) {
-                Pact pact = PactReader.loadPact(file);
-                if (pact.getProvider().getName().equals(providerName)) {
-                    pacts.put(pact, file);
-                }
-            }
-        }
-        return pacts;
+      return this.pactSource.getPacts().entrySet().stream()
+        .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
     }
 
   private File resolvePath() {
-    File file = new File(path);
-    URL resourcePath = PactFolderLoader.class.getClassLoader().getResource(path);
+    File file = path;
+    URL resourcePath = PactFolderLoader.class.getClassLoader().getResource(path.getPath());
     if (resourcePath != null) {
       file = new File(resourcePath.getPath());
     }
