@@ -1,0 +1,222 @@
+buildscript {
+  repositories {
+    jcenter()
+    mavenCentral()
+    mavenLocal()
+  }
+  dependencies {
+    classpath "org.apache.commons:commons-lang3:$commonsLang3Version"
+    classpath 'org.apache.commons:commons-text:1.1'
+  }
+}
+
+import org.apache.commons.text.StringEscapeUtils
+
+subprojects {
+  buildscript {
+    repositories {
+      jcenter()
+      mavenCentral()
+      mavenLocal()
+    }
+  }
+
+    configurations.all {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'com.google.guava' && details.requested.name == 'guava' && details.requested.version > '19.0') {
+                //guava-retryer is pulling a transitive dependency of guava 21-rc which has breaking changes to Netflix OSS
+                details.useVersion '19.0'
+            }
+        }
+    }
+
+    def scalaVersionLookup = [
+        '2.11': '2.11.8'
+    ]
+
+    def m = project.name =~ /.*_(2\.1\d)(_0\.\d+)?/
+    if (m.matches()) {
+      project.ext {
+          scalaVersion = m.group(1)
+          scalaFullVersion = scalaVersionLookup[m.group(1)]
+      }
+
+      buildDir = new File(projectDir, "build/$project.scalaVersion")
+    }
+
+    apply plugin: 'java'
+    apply plugin: 'scala'
+    apply plugin: 'groovy'
+    apply plugin: 'maven'
+    apply plugin: 'signing'
+    apply plugin: 'codenarc'
+    apply plugin: 'jacoco'
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+      compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
+      compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+      compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
+      compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
+      compile 'io.github.microutils:kotlin-logging:1.4.4'
+
+      if (project.hasProperty('scalaVersion')) {
+          compile "org.scala-lang:scala-library:${project.scalaFullVersion}",
+            "org.scala-lang:scala-compiler:${project.scalaFullVersion}",
+            "com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.4.0"
+
+          testCompile "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}",
+            "org.specs2:specs2-junit_${project.scalaVersion}:${project.specs2Version}"
+      }
+
+      testCompile 'org.hamcrest:hamcrest-all:1.3',
+        'org.mockito:mockito-core:1.10.19',
+        "junit:junit:${project.junitVersion}"
+
+      testCompile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
+      testCompile('org.spockframework:spock-core:1.1-groovy-2.4') {
+        exclude group: 'org.codehaus.groovy'
+      }
+      testCompile "cglib:cglib:${project.cglibVersion}"
+      testCompile 'org.objenesis:objenesis:2.4'
+    }
+
+    group = 'au.com.dius'
+    version = '3.5.0-jre7'
+    targetCompatibility = '1.7'
+    sourceCompatibility = '1.7'
+
+    tasks.withType(ScalaCompile) {
+        scalaCompileOptions.additionalParameters = ['-target:jvm-1.7']
+        configure(scalaCompileOptions.forkOptions) {
+          memoryMaximumSize = '256m'
+        }
+    }
+
+    tasks.withType(GroovyCompile) {
+      groovyOptions.optimizationOptions.indy = true
+    }
+
+    test {
+      systemProperty 'pact.rootDir', "$buildDir/pacts"
+    }
+
+    jar {
+        manifest.attributes provider: 'gradle',
+                'Implementation-Title': project.name, 'Implementation-Version': version,
+                'Implementation-Vendor': project.group, 'Implementation-Vendor-Id': project.group,
+                'Specification-Vendor': project.group,
+                'Specification-Title': project.name,
+                'Specification-Version': version
+    }
+
+    task javadocJar(type: Jar, dependsOn: [javadoc, scaladoc, groovydoc]) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir, scaladoc.destinationDir, groovydoc.destinationDir
+    }
+
+    task sourceJar(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives javadocJar
+        archives sourceJar
+    }
+
+    def pomCustomisation = {
+        name project.name
+        description StringEscapeUtils.escapeXml11(new File(projectDir, 'README.md').text)
+        url 'https://github.com/DiUS/pact-jvm'
+        licenses {
+            license {
+                name 'Apache 2'
+	            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+	            distribution 'repo'
+            }
+        }
+        scm {
+            url 'https://github.com/DiUS/pact-jvm'
+            connection 'https://github.com/DiUS/pact-jvm.git'
+        }
+
+	    developers {
+            developer {
+                id 'thetrav'
+                name 'Travis Dixon'
+                email 'the.trav@gmail.com'
+            }
+            developer {
+                id 'rholshausen'
+                name 'Ronald Holshausen'
+                email 'rholshausen@dius.com.au'
+            }
+        }
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+
+                beforeDeployment { def deployment -> signing.signPom(deployment) }
+
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    if (project.hasProperty('sonatypeUsername')) {
+                        authentication(userName: sonatypeUsername, password: sonatypePassword)
+                    }
+//                     proxy(host: 'localhost', port: 3128, type: 'http')
+                }
+
+            }
+        }
+    }
+
+    ext.installer = install.repositories.mavenInstaller
+    ext.deployer = uploadArchives.repositories.mavenDeployer
+    installer.pom.project(pomCustomisation)
+    deployer.pom.project(pomCustomisation)
+
+    signing {
+        required { gradle.taskGraph.hasTask("uploadArchives") || gradle.taskGraph.hasTask("publishPlugins") }
+        sign configurations.archives
+    }
+
+    codenarcMain {
+        configFile = file('../config/codenarc/ruleset.groovy')
+    }
+
+    codenarcTest {
+        configFile = file('../config/codenarc/rulesetTest.groovy')
+    }
+
+    check.dependsOn << 'jacocoTestReport'
+}
+
+tasks.addRule("Pattern: <Task>_<ScalaVersion>") { String taskName ->
+  def m = taskName =~ $/(.*)_(\d\.\d+)/$
+  if (m.matches()) {
+    task(taskName) {
+      dependsOn project.childProjects.findAll { it.key.endsWith('_' + m.group(2)) }
+        .collect { it.value.getTasksByName(m.group(1), false) }.flatten()
+    }
+  }
+}
+
+if (System.env.TRAVIS == 'true') {
+    allprojects {
+        tasks.withType(GroovyCompile) {
+            groovyOptions.fork = false
+        }
+        tasks.withType(Test) {
+            // containers (currently) have 2 dedicated cores and 4GB of memory
+            maxParallelForks = 2
+            minHeapSize = '128m'
+        }
+    }
+}

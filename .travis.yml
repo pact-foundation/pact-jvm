@@ -10,5 +10,8 @@ jdk:
   - oraclejdk8
 env:
   - SCALA=2.11 JAVA_OPTS="-XX:MaxPermSize=512m -XX:ReservedCodeCacheSize=512m -Xmx512m" GRADLE_OPTS="-Xms128m"
-script: ./gradlew --stacktrace --no-daemon -i check_$SCALA
+script:
+  - env
+  - jdk_switcher use oraclejdk8
+  - ./gradlew --stacktrace --no-daemon -i assemble_$SCALA
 install: true
