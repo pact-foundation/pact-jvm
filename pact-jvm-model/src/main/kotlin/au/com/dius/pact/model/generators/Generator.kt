@@ -5,11 +5,11 @@ import com.mifmif.common.regex.Generex
 import mu.KotlinLogging
 import org.apache.commons.lang.RandomStringUtils
 import org.apache.commons.lang.math.RandomUtils
+import org.joda.time.LocalDate
+import org.joda.time.LocalDateTime
+import org.joda.time.LocalTime
+import org.joda.time.format.DateTimeFormatterBuilder
 import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.reflect.full.companionObject
@@ -173,7 +173,7 @@ data class DateGenerator(val format: String? = null) : Generator {
 
   override fun generate(base: Any?): Any {
     if (format != null) {
-      return LocalDate.now().format(DateTimeFormatter.ofPattern(format))
+      return LocalDate.now().toString(DateTimeFormatterBuilder().appendPattern(format).toFormatter())
     } else {
       return LocalDate.now().toString()
     }
@@ -197,7 +197,7 @@ data class TimeGenerator(val format: String? = null) : Generator {
 
   override fun generate(base: Any?): Any {
     if (format != null) {
-      return LocalTime.now().format(DateTimeFormatter.ofPattern(format))
+      return LocalTime.now().toString(DateTimeFormatterBuilder().appendPattern(format).toFormatter())
     } else {
       return LocalTime.now().toString()
     }
@@ -221,7 +221,7 @@ data class DateTimeGenerator(val format: String? = null) : Generator {
 
   override fun generate(base: Any?): Any {
     if (format != null) {
-      return LocalDateTime.now().format(DateTimeFormatter.ofPattern(format))
+      return LocalDateTime.now().toString(DateTimeFormatterBuilder().appendPattern(format).toFormatter())
     } else {
       return LocalDateTime.now().toString()
     }
