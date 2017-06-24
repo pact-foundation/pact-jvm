@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.junit.loader;
 
 import au.com.dius.pact.model.*;
 import au.com.dius.pact.model.PactSource;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,7 +23,7 @@ public class PactUrlLoader implements PactLoader {
 
   public PactUrlLoader(final String[] urls) {
     this.urls = urls;
-    this.pactSource = new UrlsSource(Arrays.stream(urls).collect(Collectors.toList()));
+    this.pactSource = new UrlsSource(Arrays.asList(urls));
   }
 
   public PactUrlLoader(final PactUrl pactUrl) {
@@ -29,13 +31,13 @@ public class PactUrlLoader implements PactLoader {
     }
 
   public List<Pact> load(final String providerName) throws IOException {
-      return Arrays.stream(urls)
-        .map(url -> {
-          Pact pact = PactReader.loadPact(url);
-          this.getPactSource().getPacts().put(url, pact);
-          return pact;
-        })
-        .collect(toList());
+      List<Pact> pacts = new ArrayList<>();
+      for(String url: urls) {
+        Pact pact = PactReader.loadPact(url);
+        this.getPactSource().getPacts().put(url, pact);
+        pacts.add(pact);
+      }
+      return pacts;
   }
 
   @Override

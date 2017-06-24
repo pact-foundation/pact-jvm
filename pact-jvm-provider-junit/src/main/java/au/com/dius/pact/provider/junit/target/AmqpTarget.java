@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit.target;
 
+import au.com.dius.pact.model.Consumer;
 import au.com.dius.pact.model.DirectorySource;
 import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.model.Pact;
@@ -98,16 +99,21 @@ public class AmqpTarget extends BaseTarget {
     providerInfo.setPackagesToScan(packagesToScan);
 
     if (source instanceof PactBrokerSource) {
+      List<ConsumerInfo> consumers = new ArrayList<>();
       PactBrokerSource brokerSource = (PactBrokerSource) source;
-      providerInfo.setConsumers(brokerSource.getPacts().entrySet().stream()
-        .flatMap(e -> e.getValue().stream().map(p -> new ConsumerInfo(e.getKey().getName(), p)))
-        .collect(Collectors.toList()));
+      for (Map.Entry<Consumer, List<Pact>> entry: brokerSource.getPacts().entrySet()) {
+        for (Pact pact: entry.getValue()) {
+          consumers.add(new ConsumerInfo(entry.getKey().getName(), pact));
+        }
+      }
+      providerInfo.setConsumers(consumers);
     } else if (source instanceof DirectorySource) {
+      List<ConsumerInfo> consumers = new ArrayList<>();
       DirectorySource directorySource = (DirectorySource) source;
-      providerInfo.setConsumers(directorySource.getPacts().entrySet().stream()
-        .map(e -> new ConsumerInfo(e.getValue().getConsumer().getName(), e.getValue()))
-        .collect(Collectors.toList())
-      );
+      for (Pact pact: directorySource.getPacts().values()) {
+        consumers.add(new ConsumerInfo(pact.getConsumer().getName(), pact));
+      }
+      providerInfo.setConsumers(consumers);
     }
 
     return providerInfo;

@@ -10,12 +10,16 @@ import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver;
 import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
 import au.com.dius.pact.provider.reporters.ReporterManager;
 import au.com.dius.pact.provider.reporters.VerifierReporter;
+import au.com.dius.pact.util.Optional;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.Transformer;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.runners.model.TestClass;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -99,10 +103,20 @@ public abstract class BaseTarget implements TestClassAwareTarget {
     }
 
     if (message.contains("\n")) {
-      String padString = StringUtils.leftPad("", prefixLength);
-      Tuple2<Optional<String>, Seq<String>> lines = Seq.of(message.split("\n")).splitAtHead();
-      return lines.v1.orElse("") + System.lineSeparator() + lines.v2.map(line -> padString + line)
-              .toString(System.lineSeparator()) + "\n" + details;
+      final String padString = StringUtils.leftPad("", prefixLength);
+      List<String> lines = Arrays.asList(message.split("\n"));
+      String first = lines.isEmpty() ? "" : lines.get(0);
+      List<String> rest = ListUtils.transformedList(lines, new Transformer<String, String>() {
+        @Override
+        public String transform(String input) {
+          return padString + input;
+        }
+      });
+      StringBuilder result = new StringBuilder(first + System.lineSeparator());
+      for (String line: rest) {
+        result.append(line).append(System.lineSeparator());
+      }
+      return result + "\n" + details;
     } else {
       return message + "\n" + details;
     }

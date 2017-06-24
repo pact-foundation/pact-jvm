@@ -4,14 +4,15 @@ import au.com.dius.pact.model.DirectorySource;
 import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.model.PactReader;
 import au.com.dius.pact.model.PactSource;
+import org.apache.commons.collections4.MapUtils;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Out-of-the-box implementation of {@link PactLoader}
@@ -46,7 +47,12 @@ public class PactFolderLoader implements PactLoader {
     public List<Pact> load(final String providerName) throws IOException {
         List<Pact> pacts = new ArrayList<Pact>();
         File pactFolder = resolvePath();
-        File[] files = pactFolder.listFiles((dir, name) -> name.endsWith(".json"));
+        File[] files = pactFolder.listFiles(new FilenameFilter() {
+          @Override
+          public boolean accept(File dir, String name) {
+            return name.endsWith(".json");
+          }
+        });
         if (files != null) {
             for (File file : files) {
                 Pact pact = PactReader.loadPact(file);
@@ -65,8 +71,7 @@ public class PactFolderLoader implements PactLoader {
     }
 
     public Map<Pact, File> loadPactsWithFiles(final String providerName) throws IOException {
-      return this.pactSource.getPacts().entrySet().stream()
-        .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+      return MapUtils.invertMap(this.pactSource.getPacts());
     }
 
   private File resolvePath() {

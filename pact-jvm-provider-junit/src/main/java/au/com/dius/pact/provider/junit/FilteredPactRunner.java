@@ -1,12 +1,16 @@
 package au.com.dius.pact.provider.junit;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
+import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.provider.junit.loader.PactFilter;
 
+import au.com.dius.pact.util.Optional;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.Predicate;
 import org.junit.runners.model.InitializationError;
 
 import com.google.common.collect.Sets;
@@ -20,15 +24,19 @@ public class FilteredPactRunner extends PactRunner {
     @Override
     public List<Pact> filterPacts(List<Pact> pacts){
         Optional<PactFilter> pactFilterOpt = Optional.ofNullable(this.getTestClass().getJavaClass().getAnnotation(PactFilter.class));
-
-        return pactFilterOpt.map(pactFilter -> {
-            Set<String> requiredInteractions = Sets.newHashSet(pactFilter.value());
-
-            if (requiredInteractions != null && requiredInteractions.size() > 0) {
-                pacts.forEach(pact ->
-                        pact.getInteractions().removeIf(interaction -> !requiredInteractions.contains(interaction.getProviderState())));
+        if (pactFilterOpt.isPresent()) {
+          final Set<String> requiredInteractions = Sets.newHashSet(pactFilterOpt.get().value());
+          if (!requiredInteractions.isEmpty()) {
+            for (Pact pact: pacts) {
+              List<Interaction> interactions = new ArrayList<>(pact.getInteractions());
+              for (Interaction interaction: interactions) {
+                if (!requiredInteractions.contains(interaction.getProviderState())) {
+                  pact.getInteractions().remove(interaction);
+                }
+              }
             }
-            return pacts;
-        }).orElse(pacts);
+          }
+        }
+        return pacts;
     }
 }

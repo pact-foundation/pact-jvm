@@ -35,7 +35,12 @@ public class GitPactLoader implements PactLoader {
   @Override
   public List<Pact> load(final String providerName) throws IOException {
     List<Pact> pacts = new ArrayList<Pact>();
-    File[] files = path.listFiles((dir, name) -> name.endsWith(".json"));
+    File[] files = path.listFiles(new FilenameFilter() {
+      @Override
+      public boolean accept(File dir, String name) {
+        return name.endsWith(".json");
+      }
+    });
     if (files != null) {
       for (File file : files) {
         Pact pact = PactReader.loadPact(file);

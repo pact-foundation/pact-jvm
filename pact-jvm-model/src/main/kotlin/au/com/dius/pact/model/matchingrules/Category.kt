@@ -2,8 +2,8 @@ package au.com.dius.pact.model.matchingrules
 
 import au.com.dius.pact.model.PactSpecVersion
 import mu.KLogging
-import java.util.function.Predicate
-import java.util.function.ToIntFunction
+import org.apache.commons.collections4.Predicate
+import org.apache.commons.collections4.Transformer
 
 /**
  * Matching rules category
@@ -49,10 +49,10 @@ data class Category @JvmOverloads constructor(val name: String,
    */
   fun isNotEmpty() = matchingRules.any { it.value.rules.isNotEmpty() }
 
-  fun filter(predicate: Predicate<String>) = copy(matchingRules = matchingRules.filter { predicate.test(it.key) }.toMutableMap())
+  fun filter(predicate: Predicate<String>) = copy(matchingRules = matchingRules.filter { predicate.evaluate(it.key) }.toMutableMap())
 
-  fun maxBy(fn: ToIntFunction<String>): MatchingRuleGroup {
-    val max = matchingRules.maxBy { fn.applyAsInt(it.key) }
+  fun maxBy(fn: Transformer<String, Int>): MatchingRuleGroup {
+    val max = matchingRules.maxBy { fn.transform(it.key) }
     if (max != null) {
       return max.value
     } else {

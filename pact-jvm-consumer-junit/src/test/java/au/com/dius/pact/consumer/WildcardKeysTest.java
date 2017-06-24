@@ -8,6 +8,7 @@ import au.com.dius.pact.model.RequestResponsePact;
 import com.google.common.collect.Sets;
 import groovy.json.JsonSlurper;
 import org.apache.http.client.fluent.Request;
+import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -91,7 +92,7 @@ public class WildcardKeysTest {
       assertThat(body, hasKey("foo"));
       Map<String, Object> foo = (Map<String, Object>) body.get("foo");
       assertThat(foo, hasKey("001"));
-      assertThat(foo.get("001"), is(42));
+      assertThat(foo.get("001"), Matchers.<Object>is(42));
       assertThat(body, hasKey("articles"));
       List articles = (List) body.get("articles");
       assertThat(articles.size(), is(1));

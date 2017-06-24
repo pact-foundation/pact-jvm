@@ -64,9 +64,10 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
 
         this.child = new ArrayList<>();
         final List<Pact> pacts= new ArrayList<>();
-      PactLoader pactLoader = getPactSource(testClass);  try {
+        PactLoader pactLoader = getPactSource(testClass);
+        try {
             List<Pact> list = pactLoader.load(serviceName);
-                  for (final Pactp : list) {
+            for (final Pact p : list) {
                 if ( consumerName == null || p.getConsumer().getName().equals(consumerName)){
                   pacts.add(p);
                 }
