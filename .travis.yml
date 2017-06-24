@@ -14,5 +14,5 @@ script:
   - jdk_switcher use oraclejdk8
   - ./gradlew --stacktrace --no-daemon -i assemble_$SCALA
   - jdk_switcher use $TRAVIS_JDK_VERSION
-  - ./gradlew --stacktrace --no-daemon --rerun-tasks -i -b build-jre7.gradle test_$SCALA
+  - ./gradlew --stacktrace --no-daemon --rerun-tasks -i -b build-jre7.gradle cleanTest test_$SCALA
 install: true
