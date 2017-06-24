@@ -1,5 +1,14 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.0-jre7.1 - V3 JDK7 Release
+
+* cb2dac2 - JDK7 fixes (Ronald Holshausen, Sat Jun 24 23:06:43 2017 +1000)
+* 659e9ce - include the jdk7 build file when updating the versions (Ronald Holshausen, Sat Jun 24 22:42:11 2017 +1000)
+* a8a902f - Use joda time as Java time classes are jdk8+ (Ronald Holshausen, Sat Jun 24 22:41:29 2017 +1000)
+* f543bc2 - set the version to next 3.5.0-jre7 (Ronald Holshausen, Sat Jun 24 22:40:21 2017 +1000)
+* 19adc3a - update travis to run on jdk 7 (Ronald Holshausen, Sat Jun 24 22:02:37 2017 +1000)
+* 80e5b2f - bump version to 3.5.1-jre7 (Ronald Holshausen, Sat Jun 24 21:52:02 2017 +1000)
+
 # 3.5.0-jre7 - V3 JDK7 Release
 
 * 69d4913 - on Travis need to clean the test classes first after switching jdks (Ronald Holshausen, Sat Jun 24 21:11:41 2017 +1000)
