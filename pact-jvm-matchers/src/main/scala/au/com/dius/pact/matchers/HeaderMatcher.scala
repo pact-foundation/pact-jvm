@@ -2,10 +2,13 @@ package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model.matchingrules.MatchingRules
 import au.com.dius.pact.model.{HeaderMismatch, HeaderMismatchFactory}
+import com.typesafe.scalalogging.StrictLogging
 
-object HeaderMatcher {
+object HeaderMatcher extends StrictLogging {
 
   def matchContentType(expected: String, actual: String) = {
+    logger.debug(s"Comparing content type header: '$actual' to '$expected'")
+
     val expectedValues = expected.split(';').map(_.trim)
     val actualValues = actual.split(';').map(_.trim)
     val expectedContentType = expectedValues.head
@@ -33,6 +36,8 @@ object HeaderMatcher {
   }
 
   def compareHeader(headerKey: String, expected: String, actual: String, matchers: MatchingRules) = {
+    logger.debug(s"Comparing header '$headerKey': '$actual' to '$expected'")
+
     def stripWhiteSpaceAfterCommas(in: String): String = in.replaceAll(",[ ]*", ",")
 
     if (Matchers.matcherDefined("header", Seq(headerKey), matchers)) {
