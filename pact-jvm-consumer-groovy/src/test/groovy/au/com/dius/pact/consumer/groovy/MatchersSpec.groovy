@@ -24,7 +24,25 @@ class MatchersSpec extends Specification {
     'timestamp'   | 'yyyy-mm-dd' | [match: 'timestamp', timestamp: 'yyyy-mm-dd']
     'date'        | 'yyyy-mm-dd' | [match: 'date', date: 'yyyy-mm-dd']
     'time'        | 'yyyy-mm-dd' | [match: 'time', time: 'yyyy-mm-dd']
-
+    'bool'        | true         | [match: 'type']
   }
 
+  @Unroll
+  def 'string matcher should use provided value - `#value`'() {
+    expect:
+    Matchers.string(value).value == value
+
+    where:
+    value << ['', ' ', 'example']
+  }
+
+  def 'string matcher should generate value when not provided'() {
+    expect:
+    !Matchers.string().value.isEmpty()
+  }
+
+  def 'bool matcher should generate value when not provided'() {
+    expect:
+    Matchers.bool().value instanceof Boolean
+  }
 }

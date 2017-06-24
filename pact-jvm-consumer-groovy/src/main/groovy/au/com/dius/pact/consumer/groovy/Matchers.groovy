@@ -4,6 +4,7 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.time.DateUtils
 
 import java.text.ParseException
+import java.util.concurrent.ThreadLocalRandom
 import java.util.regex.Pattern
 
 /**
@@ -115,7 +116,11 @@ class Matchers {
   }
 
   static string(String value = null) {
-    new TypeMatcher(values: [TYPE, value ?: RandomStringUtils.randomAlphanumeric(TEN)])
+    new TypeMatcher(values: [TYPE, (value != null) ? value : RandomStringUtils.randomAlphanumeric(TEN)])
+  }
+
+  static bool(boolean value = null) {
+    new TypeMatcher(values: [TYPE, (value != null) ? value : ThreadLocalRandom.current().nextBoolean()])
   }
 
   /**
@@ -151,5 +156,4 @@ class Matchers {
   static eachLike(Integer numberExamples = 1, def arg) {
     new EachLikeMatcher(values: [null,  arg], numberExamples: numberExamples)
   }
-
 }
