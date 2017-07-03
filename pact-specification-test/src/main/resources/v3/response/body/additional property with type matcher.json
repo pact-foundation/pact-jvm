@@ -25,7 +25,7 @@
     "body": {
       "myPerson": {
         "name": "Jon Peterson",
-        "age": "39",
+        "age": 39,
         "nationality": "Australian"
       }
     }    
