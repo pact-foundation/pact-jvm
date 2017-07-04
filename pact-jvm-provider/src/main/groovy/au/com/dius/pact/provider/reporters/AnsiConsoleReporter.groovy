@@ -214,7 +214,7 @@ class AnsiConsoleReporter implements VerifierReporter {
           AnsiConsole.out().println('        Diff:')
           AnsiConsole.out().println()
 
-          mismatch.diff.findAll().each {
+          (mismatch.diff instanceof List ? mismatch.diff : [mismatch.diff]).findAll().each {
             it.eachLine { delta ->
               if (delta.startsWith('@')) {
                 AnsiConsole.out().println(Ansi.ansi().a('        ').fg(Ansi.Color.CYAN).a(delta).reset())
