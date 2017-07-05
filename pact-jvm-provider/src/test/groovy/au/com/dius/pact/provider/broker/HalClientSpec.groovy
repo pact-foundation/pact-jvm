@@ -175,13 +175,14 @@ class HalClientSpec extends Specification {
       }
     }
     client.newHttpClient() >> mockHttp
+    client.consumeEntity() >> null
 
     when:
     def statusLine = new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 200, 'OK')
     def result = []
     def closure = { r, s -> result << r; result << s }
     client.uploadJson('', '', closure)
-    clientOptions.response.success.call([getStatusLine: { statusLine } ] as HttpResponse)
+    clientOptions.response.success.call([getStatusLine: { statusLine }, getEntity: { } ] as HttpResponse)
 
     then:
     result == ['OK', 'HTTP/1.1 200 OK']

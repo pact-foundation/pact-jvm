@@ -4,6 +4,7 @@ import groovy.transform.Canonical
 import groovy.util.logging.Slf4j
 import groovyx.net.http.RESTClient
 import org.apache.http.message.BasicHeaderValueParser
+import org.apache.http.util.EntityUtils
 
 import static groovyx.net.http.ContentType.JSON
 import static groovyx.net.http.Method.POST
@@ -149,21 +150,28 @@ class HalClient {
     pathInfo.'_links'[name].href
   }
 
-  def uploadJson(String path, String bodyJson, Closure closure) {
+  def uploadJson(String path, String bodyJson, Closure closure = null) {
     setupHttpClient()
     http.request(PUT) {
       uri.path = path
       body = bodyJson
       requestContentType = JSON
 
-      response.success = { resp -> closure.call('OK', resp.statusLine as String) }
+      response.success = { resp ->
+        consumeEntity(resp)
+        closure?.call('OK', resp.statusLine as String)
+      }
 
       response.failure = { resp, body -> handleFailure(resp, body, closure) }
 
       response.'409' = { resp, body ->
-        closure.call('FAILED', "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${body.readLine()}")
+        closure?.call('FAILED', "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${body.readLine()}")
       }
     }
+  }
+
+  private consumeEntity(resp) {
+    EntityUtils.consume(resp.entity)
   }
 
   private handleFailure(resp, body, Closure closure) {

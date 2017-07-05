@@ -61,17 +61,26 @@ class PactBrokerClient {
     new HalClient(pactBrokerUrl, options)
   }
 
-  def uploadPactFile(File pactFile, String version) {
+  def uploadPactFile(File pactFile, String version, List<String> tags = []) {
     def pactText = pactFile.text
     def pact = new JsonSlurper().parseText(pactText)
     HalClient halClient = newHalClient()
-    halClient.uploadJson("/pacts/provider/${pact.provider.name}/consumer/${pact.consumer.name}/version/$version",
-      pactText) { result, status ->
+    def uploadPath = "/pacts/provider/${pact.provider.name}/consumer/${pact.consumer.name}/version/$version"
+    halClient.uploadJson(uploadPath, pactText) { result, status ->
       if (result == 'OK') {
+        if (tags) {
+          uploadTags(halClient, pact.provider.name, version, tags)
+        }
         status
       } else {
         "FAILED! $status"
       }
+    }
+  }
+
+  def uploadTags(HalClient halClient, String provider, String version, List<String> tags) {
+    tags.each {
+      halClient.uploadJson("/pacticipants/$provider/versions/$version/tags/$it", '')
     }
   }
 
