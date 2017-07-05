@@ -39,8 +39,13 @@ class PactPublishTask extends DefaultTask {
         File pactDirectory = pactPublish.pactDirectory as File
         boolean anyFailed = false
         pactDirectory.eachFileMatch(FileType.FILES, ~/.*\.json/) { pactFile ->
-          print "Publishing ${pactFile.name} ... "
-          def result = brokerClient.uploadPactFile(pactFile, pactPublish.version)
+          def result
+          if (pactPublish.tags) {
+            print "Publishing ${pactFile.name} with tags ${pactPublish.tags.join(', ')} ... "
+          } else {
+            print "Publishing ${pactFile.name} ... "
+          }
+          result = brokerClient.uploadPactFile(pactFile, pactPublish.version, pactPublish.tags)
           println result
           if (!anyFailed && result.startsWith('FAILED!')) {
             anyFailed = true

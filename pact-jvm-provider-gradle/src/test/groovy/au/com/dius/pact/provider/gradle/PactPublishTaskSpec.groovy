@@ -51,7 +51,7 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _) >> 'HTTP/1.1 200 OK'
+    1 * brokerClient.uploadPactFile(_, _, _) >> 'HTTP/1.1 200 OK'
   }
 
   def 'failure to publish'() {
@@ -67,7 +67,7 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _) >> 'FAILED! 500 BOOM - It went boom, Mate!'
+    1 * brokerClient.uploadPactFile(_, _, _) >> 'FAILED! 500 BOOM - It went boom, Mate!'
     thrown(GradleScriptException)
   }
 
@@ -85,7 +85,23 @@ class PactPublishTaskSpec extends Specification {
 
     then:
     1 * new PactBrokerClient(_, ['authentication': ['basic', 'my user name', null]]) >> brokerClient
-    1 * brokerClient.uploadPactFile(_, _) >> 'HTTP/1.1 200 OK'
+    1 * brokerClient.uploadPactFile(_, _, _) >> 'HTTP/1.1 200 OK'
+  }
+
+  def 'passes in any tags to the broker client'() {
+    given:
+    project.pact {
+      publish {
+        tags = ['tag1']
+      }
+    }
+    project.evaluate()
+
+    when:
+    task.publishPacts()
+
+    then:
+    1 * brokerClient.uploadPactFile(_, _, ['tag1']) >> 'HTTP/1.1 200 OK'
   }
 
 }
