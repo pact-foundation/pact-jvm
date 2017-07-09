@@ -239,13 +239,17 @@ public class BaseProviderRule extends ExternalResource {
   }
 
   /**
-   * Returns the URL for the mock server
-   * @return String URL
+   * Returns the URL for the mock server. Returns null if the mock server is not running.
+   * @return String URL or null if mock server not running
    */
   public String getUrl() {
     return mockServer == null ? null : mockServer.getUrl();
   }
 
+  /**
+   * Returns the port number for the mock server. Returns null if the mock server is not running.
+   * @return port number or null if mock server not running
+   */
   public Integer getPort() {
     return mockServer == null ? null : mockServer.getPort();
   }

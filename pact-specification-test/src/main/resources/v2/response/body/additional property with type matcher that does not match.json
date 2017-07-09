@@ -18,8 +18,8 @@
     "headers": {},
     "body": {
       "myPerson": {
-        "name": "Jon Peterson",
-        "age": 39,
+        "name": 39,
+        "age": "39",
         "nationality": "Australian"
       }
     }    

@@ -123,7 +123,7 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
         actualValues.foreach(entry => {
           if (expectedValues.contains(entry._1)) {
             result = result ++: compare(path :+ entry._1, expectedValues.apply(entry._1), entry._2, diffConfig, matchers)
-          } else {
+          } else if (!diffConfig.allowUnexpectedKeys) {
             result = result ++: compare(path :+ entry._1, expectedValues.values.head, entry._2, diffConfig, matchers)
           }
         })
