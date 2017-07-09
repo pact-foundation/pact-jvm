@@ -1,5 +1,21 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.1-jre7.1 - Bugfix Release
+
+* bec9b39 - Merge branch 'v3.5.x' into v3.5.x-jre7 (Ronald Holshausen, Sun Jul 9 16:32:15 2017 +1000)
+* ea6a95b - Update the javadocs for base provider rule getUrl() and getPort() methods (Ronald Holshausen, Sun Jul 9 13:16:40 2017 +1000)
+* 19fb55d - Updated the Gradle plugin to support publishing pacts with tags (Ronald Holshausen, Wed Jul 5 14:48:38 2017 +1000)
+* c1d702c - Fix for displaying a diff which may not be a list (Ronald Holshausen, Tue Jul 4 16:39:03 2017 +1000)
+* e50c5c2 - Fix for pacts with wildcard matchers and providers returning additional fields (Ronald Holshausen, Mon Jul 3 16:54:47 2017 +1000)
+* 9ff90e0 - Updated the versions in the readme (Ronald Holshausen, Sat Jun 24 23:47:01 2017 +1000)
+* 8f37708 - update changelog for release 3.5.0-jre7.1 (Ronald Holshausen, Sat Jun 24 23:11:31 2017 +1000)
+* b88df7d - update changelog for release 3.5.0-jre7 (Ronald Holshausen, Sat Jun 24 21:20:11 2017 +1000)
+* 6e3ee04 - correct the version in the release script (Ronald Holshausen, Sat Jun 24 23:44:16 2017 +1000)
+* e92c864 - bump version to 3.5.1-jre7.1 (Ronald Holshausen, Sat Jun 24 23:43:20 2017 +1000)
+* e444820 - Removed the rebuild parameter from the travis build (Ronald Holshausen, Sat Jun 24 23:37:51 2017 +1000)
+* 0a3eab7 - Can't run jdk7 build on jdk8 (Ronald Holshausen, Sat Jun 24 23:29:11 2017 +1000)
+* 96f3d7c - force kotlin to compile to jdk 8 (Ronald Holshausen, Sat Jun 24 21:09:27 2017 +1000)
+
 # 3.5.0-jre7.1 - V3 JDK7 Release
 
 * cb2dac2 - JDK7 fixes (Ronald Holshausen, Sat Jun 24 23:06:43 2017 +1000)
