@@ -2,10 +2,12 @@ package au.com.dius.pact.model
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 
+import java.nio.channels.FileLock
 import java.util.jar.JarInputStream
 
 /**
@@ -20,6 +22,7 @@ abstract class BasePact implements Pact {
     'pact-specification': ['version': '3.0.0'],
     'pact-jvm'          : ['version': lookupVersion()]
   ]
+  private static final String METADATA = 'metadata'
 
   Consumer consumer
   Provider provider
@@ -81,25 +84,41 @@ abstract class BasePact implements Pact {
     ]
   }
 
+  @CompileStatic
   void write(String pactDir, PactSpecVersion pactSpecVersion) {
     def pactFile = fileForPact(pactDir)
-
     if (pactFile.exists()) {
-      def existingPact = PactReader.loadPact(pactFile)
-      def result = PactMerge.merge(existingPact, this)
-      if (!result.ok) {
-        throw new InvalidPactException(result.message)
+      synchronized (pactFile) {
+        RandomAccessFile raf = new RandomAccessFile(pactFile, 'rw')
+        FileLock lock = raf.channel.lock()
+        try {
+          def existingPact = PactReader.loadPact(pactFile)
+          def result = PactMerge.merge(existingPact, this)
+          if (!result.ok) {
+            throw new InvalidPactException(result.message)
+          }
+          pactFile.withWriter { it.print(JsonOutput.prettyPrint(this.toJson(pactSpecVersion))) }
+        } finally {
+          lock.release()
+        }
       }
     } else {
       pactFile.parentFile.mkdirs()
+      pactFile.withWriter { it.print(JsonOutput.prettyPrint(this.toJson(pactSpecVersion))) }
     }
+  }
 
+  @CompileStatic
+  private String toJson(PactSpecVersion pactSpecVersion) {
     def jsonMap = toMap(pactSpecVersion)
-    jsonMap.metadata = jsonMap.metadata ? [:] + DEFAULT_METADATA + jsonMap.metadata : DEFAULT_METADATA
-    def json = JsonOutput.toJson(jsonMap)
-    pactFile.withWriter { writer ->
-      writer.print JsonOutput.prettyPrint(json)
+    if (jsonMap.containsKey(METADATA)) {
+      def map = [:] + DEFAULT_METADATA
+      map.putAll(jsonMap[METADATA] as Map)
+      jsonMap.put(METADATA, map)
+    } else {
+      jsonMap.put(METADATA, DEFAULT_METADATA)
     }
+    JsonOutput.toJson(jsonMap)
   }
 
   Map mergePacts(Map pact, File pactFile) {

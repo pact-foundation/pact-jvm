@@ -90,7 +90,7 @@ interface Pact {
   /**
    * Returns a Map representation of this pact for the purpose of generating a JSON document.
    */
-  fun toMap(pactSpecVersion: PactSpecVersion): Map<*, *>
+  fun toMap(pactSpecVersion: PactSpecVersion): Map<String, *>
 
   /**
    * If this pact is compatible with the other pact. Pacts are compatible if they have the
