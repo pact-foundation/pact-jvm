@@ -96,7 +96,7 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '3.5.1-jre7.1'
+    version = '3.5.2-jre7.1'
     targetCompatibility = '1.7'
     sourceCompatibility = '1.7'
 
