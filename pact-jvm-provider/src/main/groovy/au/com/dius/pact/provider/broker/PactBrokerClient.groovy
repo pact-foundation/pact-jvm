@@ -69,7 +69,7 @@ class PactBrokerClient {
     halClient.uploadJson(uploadPath, pactText) { result, status ->
       if (result == 'OK') {
         if (tags) {
-          uploadTags(halClient, pact.provider.name, version, tags)
+          uploadTags(halClient, pact.consumer.name, version, tags)
         }
         status
       } else {
