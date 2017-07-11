@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -71,8 +72,7 @@ public class PactProviderTest {
         @Override
         public void accept(PactVerificationResult result, Throwable t) {
           assertThat(t, is(instanceOf(AssertionError.class)));
-          assertThat(t.getMessage(), is("Pact Test function failed with an exception: expected:" +
-            "<{name=harry, responsetest=true}> but was:<{name=fred, responsetest=true}>"));
+          assertThat(t.getMessage(), containsString("Pact Test function failed with an exception"));
           assertThat(result, is(instanceOf(PactVerificationResult.Error.class)));
           PactVerificationResult.Error error = (PactVerificationResult.Error) result;
           assertThat(error.getMockServerState(), is(instanceOf(PactVerificationResult.Ok.INSTANCE.getClass())));
