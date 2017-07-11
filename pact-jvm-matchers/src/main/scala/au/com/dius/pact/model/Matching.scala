@@ -151,12 +151,12 @@ object Matching extends StrictLogging {
     else Some(MethodMismatch(expected, actual))
   }
 
-  def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig) = {
+  def matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean) = {
     if (expected.mimeType == actual.mimeType) {
       val result = MatchingConfig.lookupBodyMatcher(actual.mimeType)
       if (result.isDefined) {
         logger.debug("Found a matcher for " + actual.mimeType + " -> " + result)
-        result.get._2.matchBody(expected, actual, diffConfig)
+        result.get._2.matchBody(expected, actual, allowUnexpectedKeys)
       } else {
         logger.debug("No matcher for " + actual.mimeType + ", using equality")
         (expected.getBody.getState, actual.getBody.getState) match {
