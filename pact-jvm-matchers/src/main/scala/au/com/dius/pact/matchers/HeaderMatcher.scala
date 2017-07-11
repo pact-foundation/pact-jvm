@@ -12,8 +12,8 @@ object HeaderMatcher extends StrictLogging {
     val actualValues = actual.split(';').map(_.trim)
     val expectedContentType = expectedValues.head
     val actualContentType = actualValues.head
-    val expectedParameters = parseParameters(expectedValues.tail)
-    val actualParameters = parseParameters(actualValues.tail)
+    val expectedParameters = parseParameters(expectedValues.toList.tail)
+    val actualParameters = parseParameters(actualValues.toList.tail)
     val headerMismatch = Some(HeaderMismatch("Content-Type", expected, actual,
       Some(s"Expected header 'Content-Type' to have value '$expected' but was '$actual'")))
 
@@ -28,7 +28,7 @@ object HeaderMatcher extends StrictLogging {
     else headerMismatch
   }
 
-  def parseParameters(values: Array[String]): Map[String, String] = {
+  def parseParameters(values: List[String]): Map[String, String] = {
     values.map(_.split('=').map(_.trim)).foldLeft(Map[String, String]()) {
       (m, v) => m + (v(0) -> v(1))
     }
