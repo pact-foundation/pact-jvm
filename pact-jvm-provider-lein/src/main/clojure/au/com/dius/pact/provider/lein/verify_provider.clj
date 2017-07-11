@@ -3,7 +3,8 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [leiningen.core.main :as lein])
-  (:import (au.com.dius.pact.provider ProviderInfo ConsumerInfo)))
+  (:import (au.com.dius.pact.provider ProviderInfo ConsumerInfo)
+           (au.com.dius.pact.model UrlSource)))
 
 (defn wrap-task [verifier task-name]
   #(lein/resolve-and-apply (.getProject verifier) [task-name]))
@@ -40,6 +41,7 @@
   (let [consumer (ConsumerInfo. (-> consumer-info key str))
         consumer-data (val consumer-info)]
     (if (contains? consumer-data :pact-file) (.setPactFile consumer (-> consumer-data :pact-file io/as-url)))
+    (if (contains? consumer-data :pact-source) (.setPactSource consumer (-> consumer-data :pact-source UrlSource.)))
     (if (contains? consumer-data :state-change-url) (.setStateChange consumer (:state-change-url consumer-data)))
     (if (contains? consumer-data :state-change-uses-body) (.setStateChangeUsesBody consumer (:state-change-uses-body consumer-data)))
     (if (contains? consumer-data :verification-type) (.setVerificationType consumer (:verification-type consumer-data)))

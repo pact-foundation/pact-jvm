@@ -16,35 +16,35 @@ class MatchingSpec extends Specification {
     import au.com.dius.pact.model.Matching._
 
     "Body Matching" should {
-      val config = DiffConfig()
+      val allowUnexpectedKeys = true
 
       "Handle both None" in {
         matchBody(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a"))),
-          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a"))), config) must beEmpty
+          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a"))), allowUnexpectedKeys) must beEmpty
       }
 
       "Handle left None" in {
         val expected = List(BodyMismatch(request.getBody.orElse(""), None, Some("Expected body '{\"test\": true}' but was missing")))
         matchBody(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a")), request.getBody),
-          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a"))), config) must beEqualTo(expected)
+          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a"))), allowUnexpectedKeys) must beEqualTo(expected)
       }
 
       "Handle right None" in {
         matchBody(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a"))),
-          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a")), request.getBody), config) must beEmpty
+          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a")), request.getBody), allowUnexpectedKeys) must beEmpty
       }
 
       "Handle different mime types" in {
         val expected = List(BodyTypeMismatch("a", "b"))
         matchBody(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "a")), request.getBody),
-          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "b")), request.getBody), config) must beEqualTo(expected)
+          new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "b")), request.getBody), allowUnexpectedKeys) must beEqualTo(expected)
       }
 
       "match different mimetypes by regexp" in {
         matchBody(new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/x+json")),
           OptionalBody.body("{ \"name\":  \"bob\" }")),
           new Request("", "", emptyQuery, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/x+json")),
-            OptionalBody.body("{\"name\":\"bob\"}")), config) must beEmpty
+            OptionalBody.body("{\"name\":\"bob\"}")), allowUnexpectedKeys) must beEmpty
       }
 
     }

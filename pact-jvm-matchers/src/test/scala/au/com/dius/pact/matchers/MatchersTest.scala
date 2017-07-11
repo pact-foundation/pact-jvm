@@ -1,12 +1,10 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.{DiffConfig, OptionalBody, Request}
-import au.com.dius.pact.model.matchingrules.{Category, MatchingRules, TypeMatcher}
+import au.com.dius.pact.model.matchingrules.{MatchingRules, TypeMatcher}
+import au.com.dius.pact.model.{OptionalBody, Request}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
-
-import scala.collection.JavaConversions
 
 @RunWith(classOf[JUnitRunner])
 class MatchersTest extends Specification {
@@ -85,7 +83,7 @@ class MatchersTest extends Specification {
         matchingRules.addCategory("body").addRule("$.value", TypeMatcher.INSTANCE)
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": [100]}"), matchingRules)
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": [\"200.3\"]}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+        new JsonBodyMatcher().matchBody(expected, actual, true) must not(beEmpty)
       }
 
       "map elements should inherit the matchers from the parent" in {
@@ -94,7 +92,7 @@ class MatchersTest extends Specification {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": {\"a\": 100}}"), matchingRules)
         val actual = new Request("get", "/", null, null,
           OptionalBody.body("{\"value\": {\"a\": \"200.3\", \"b\": 200, \"c\": 300} }"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+        new JsonBodyMatcher().matchBody(expected, actual, true) must not(beEmpty)
       }
 
     }

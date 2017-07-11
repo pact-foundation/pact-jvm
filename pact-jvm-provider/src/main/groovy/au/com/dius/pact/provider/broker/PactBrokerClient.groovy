@@ -1,5 +1,7 @@
 package au.com.dius.pact.provider.broker
 
+import au.com.dius.pact.model.BrokerUrlSource
+import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.provider.ConsumerInfo
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
@@ -24,7 +26,7 @@ class PactBrokerClient {
     try {
       HalClient halClient = newHalClient()
       halClient.navigate(LATEST_PROVIDER_PACTS, provider: provider).pacts { pact ->
-        consumers << new ConsumerInfo(pact.name, new URL(pact.href))
+        consumers << new ConsumerInfo(pact.name, new UrlSource(pact.href))
         if (options.authentication) {
           consumers.last().pactFileAuthentication = options.authentication
         }
@@ -44,7 +46,7 @@ class PactBrokerClient {
     try {
       HalClient halClient = newHalClient()
       halClient.navigate(LATEST_PROVIDER_PACTS_WITH_TAG, provider: provider, tag: tag).pacts { pact ->
-        consumers << new ConsumerInfo(pact.name, new URL(pact.href))
+        consumers << new ConsumerInfo(pact.name, new BrokerUrlSource(pact.href, pact))
         if (options.authentication) {
           consumers.last().pactFileAuthentication = options.authentication
         }
@@ -69,7 +71,7 @@ class PactBrokerClient {
     halClient.uploadJson(uploadPath, pactText) { result, status ->
       if (result == 'OK') {
         if (tags) {
-          uploadTags(halClient, pact.provider.name, version, tags)
+          uploadTags(halClient, pact.consumer.name, version, tags)
         }
         status
       } else {

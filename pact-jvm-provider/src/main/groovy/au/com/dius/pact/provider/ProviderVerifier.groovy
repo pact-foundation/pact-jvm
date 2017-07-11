@@ -1,8 +1,10 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.model.FileSource
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.Response
+import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
@@ -88,21 +90,22 @@ class ProviderVerifier {
 
   @SuppressWarnings('ThrowRuntimeException')
   def loadPactFileForConsumer(ConsumerInfo consumer) {
-    def pactFile = consumer.pactFile
-    if (pactFile instanceof Closure) {
-      pactFile = pactFile.call()
+    def pactSource = consumer.pactSource
+    if (pactSource instanceof Closure) {
+      pactSource = pactSource.call()
     }
 
-    if (pactFile instanceof URL) {
-      reporters.each { it.verifyConsumerFromUrl(pactFile, consumer) }
+    if (pactSource instanceof UrlPactSource) {
+      reporters.each { it.verifyConsumerFromUrl(pactSource, consumer) }
       def options = [:]
       if (consumer.pactFileAuthentication) {
         options.authentication = consumer.pactFileAuthentication
       }
-      PactReader.loadPact(options, pactFile)
-    } else if (pactFile instanceof File || ProviderUtils.pactFileExists(pactFile) || ProviderUtils.isS3Url(pactFile)) {
-      reporters.each { it.verifyConsumerFromFile(pactFile, consumer) }
-      PactReader.loadPact(pactFile)
+      PactReader.loadPact(options, pactSource)
+    } else if (pactSource instanceof FileSource || ProviderUtils.pactFileExists(pactSource) ||
+        ProviderUtils.isS3Url(pactSource)) {
+      reporters.each { it.verifyConsumerFromFile(pactSource, consumer) }
+      PactReader.loadPact(pactSource)
     } else {
       String message = generateLoadFailureMessage(consumer)
       reporters.each { it.pactLoadFailureForConsumer(consumer, message) }

@@ -105,7 +105,7 @@ public class PactBrokerLoader implements PactLoader {
   }
 
   Pact loadPact(ConsumerInfo consumer, Map options) {
-    Pact pact = PactReader.loadPact(options, consumer.getPactFile());
+    Pact pact = PactReader.loadPact(options, consumer.getPactSource());
     Map<Consumer, List<Pact>> pacts = this.pactSource.getPacts();
     Consumer pactConsumer = consumer.toPactConsumer();
     List<Pact> pactList = pacts.get(pactConsumer);

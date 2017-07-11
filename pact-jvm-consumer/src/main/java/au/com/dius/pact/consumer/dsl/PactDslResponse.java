@@ -75,6 +75,7 @@ public class PactDslResponse {
      * Response body to return
      *
      * @param body body in string form
+     * @param mimeType the Content-Type response header value
      */
     public PactDslResponse body(String body, String mimeType) {
         responseBody = OptionalBody.body(body);
@@ -86,6 +87,7 @@ public class PactDslResponse {
      * Response body to return
      *
      * @param body body in string form
+     * @param mimeType the Content-Type response header value
      */
     public PactDslResponse body(String body, ContentType mimeType) {
         return body(body, mimeType.toString());
@@ -109,6 +111,7 @@ public class PactDslResponse {
      * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
      *
      * @param body Request body in string form
+     * @param mimeType the Content-Type response header value
      */
     public PactDslResponse bodyWithSingleQuotes(String body, String mimeType) {
         if (body != null) {
@@ -122,9 +125,10 @@ public class PactDslResponse {
      * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
      *
      * @param body Request body in string form
+     * @param mimeType the Content-Type response header value
      */
     public PactDslResponse bodyWithSingleQuotes(String body, ContentType mimeType) {
-        return body(body, mimeType.toString());
+        return bodyWithSingleQuotes(body, mimeType.toString());
     }
 
     /**

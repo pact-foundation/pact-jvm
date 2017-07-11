@@ -11,6 +11,7 @@ dependencies {
   compile 'org.apache.commons:commons-collections4:4.1'
   compile 'com.github.mifmif:generex:1.0.1'
   compile 'joda-time:joda-time:2.9.9'
+  compile 'com.google.guava:guava:22.0'
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }

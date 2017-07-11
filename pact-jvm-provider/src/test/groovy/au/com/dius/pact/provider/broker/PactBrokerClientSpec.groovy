@@ -3,10 +3,8 @@ package au.com.dius.pact.provider.broker
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.consumer.PactVerified$
 import au.com.dius.pact.consumer.groovy.PactBuilder
-import groovyx.net.http.HTTPBuilder
-import org.apache.http.HttpResponse
-import org.apache.http.ProtocolVersion
-import org.apache.http.message.BasicStatusLine
+import au.com.dius.pact.model.BrokerUrlSource
+import au.com.dius.pact.model.UrlSource
 import spock.lang.Specification
 
 @SuppressWarnings('UnnecessaryGetter')
@@ -57,7 +55,7 @@ class PactBrokerClientSpec extends Specification {
     then:
     consumers != []
     consumers.first().name == 'bob'
-    consumers.first().pactFile == new URL('http://bob.com/')
+    consumers.first().pactSource == new UrlSource('http://bob.com/')
     consumers.first().pactFileAuthentication == ['Basic', '1', '2']
   }
 
@@ -94,7 +92,7 @@ class PactBrokerClientSpec extends Specification {
     then:
     consumers != []
     consumers.first().name == 'bob'
-    consumers.first().pactFile == new URL('http://bob.com/')
+    consumers.first().pactSource.url == 'http://bob.com/'
   }
 
   def 'when fetching consumers with specified tag, sets the auth if there is any'() {
