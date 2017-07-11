@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.maven
 
+import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.provider.ConsumerInfo
 import groovy.transform.ToString
 
@@ -10,11 +11,15 @@ import groovy.transform.ToString
 class Consumer extends ConsumerInfo {
 
   URL getPactUrl() {
-    new URL(pactFile.toString())
+    if (pactSource instanceof UrlSource) {
+      new URL(pactSource.url)
+    } else {
+      new URL(pactFile.toString())
+    }
   }
 
   void setPactUrl(URL pactUrl) {
-    pactFile = pactUrl
+    pactSource = new UrlSource(pactUrl.toString())
   }
 
   URL getStateChangeUrl() {

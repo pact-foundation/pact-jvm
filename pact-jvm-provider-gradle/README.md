@@ -56,7 +56,7 @@ pact {
             hasPactWith('consumer1') {
 
                 // currently supports a file path using file() or a URL using url()
-                pactFile = file('path/to/provider1-consumer1-pact.json')
+                pactSource = file('path/to/provider1-consumer1-pact.json')
 
             }
 

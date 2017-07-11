@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.reporters
 
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 import org.fusesource.jansi.Ansi
@@ -34,8 +35,8 @@ class AnsiConsoleReporter implements VerifierReporter {
   }
 
   @Override
-  void verifyConsumerFromUrl(URL pactUrl, ConsumerInfo consumer) {
-    AnsiConsole.out().println(Ansi.ansi().a("  [from URL $pactUrl]"))
+  void verifyConsumerFromUrl(UrlPactSource pactUrl, ConsumerInfo consumer) {
+    AnsiConsole.out().println(Ansi.ansi().a("  [from URL $pactUrl.url]"))
   }
 
   @Override
