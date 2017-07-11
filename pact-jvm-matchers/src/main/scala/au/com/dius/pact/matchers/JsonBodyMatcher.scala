@@ -6,7 +6,7 @@ import au.com.dius.pact.com.typesafe.scalalogging.StrictLogging
 
 class JsonBodyMatcher extends BodyMatcher with StrictLogging {
 
-  def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig): List[BodyMismatch] = {
+  def matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): List[BodyMismatch] = {
     (expected.getBody.getState, actual.getBody.getState) match {
       case (OptionalBody.State.MISSING, _) => List()
       case (OptionalBody.State.NULL, OptionalBody.State.PRESENT) => List(BodyMismatch(None, actual.getBody.getValue,
@@ -15,7 +15,7 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
       case (_, OptionalBody.State.MISSING) => List(BodyMismatch(expected.getBody.getValue, None,
         Some(s"Expected body '${expected.getBody.getValue}' but was missing")))
       case (_, _) => compare(Seq("$", "body"), JsonUtils.parseJsonString(expected.getBody.getValue),
-        JsonUtils.parseJsonString(actual.getBody.getValue), diffConfig,
+        JsonUtils.parseJsonString(actual.getBody.getValue), allowUnexpectedKeys,
         Option.apply(au.com.dius.pact.matchers.util.CollectionUtils.javaMMapToScalaMMap(expected.getMatchingRules)))
     }
   }
@@ -41,11 +41,11 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
     }
   }
 
-  def compare(path: Seq[String], expected: Any, actual: Any, diffConfig: DiffConfig,
+  def compare(path: Seq[String], expected: Any, actual: Any, allowUnexpectedKeys: Boolean,
               matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     (expected, actual) match {
-      case (a: Map[String, Any], b: Map[String, Any]) => compareMaps(a, b, a, b, path, diffConfig, matchers)
-      case (a: List[Any], b: List[Any]) => compareLists(a, b, a, b, path, diffConfig, matchers)
+      case (a: Map[String, Any], b: Map[String, Any]) => compareMaps(a, b, a, b, path, allowUnexpectedKeys, matchers)
+      case (a: List[Any], b: List[Any]) => compareLists(a, b, a, b, path, allowUnexpectedKeys, matchers)
       case (_, _) =>
         if ((expected.isInstanceOf[Map[String, Any]] && !actual.isInstanceOf[Map[String, Any]]) ||
           (expected.isInstanceOf[List[Any]] && !actual.isInstanceOf[List[Any]])) {
@@ -64,11 +64,11 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
   }
 
   def compareListContent(expectedValues: List[Any], actualValues: List[Any], path: Seq[String],
-                         diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, Any]]]) = {
+                         allowUnexpectedKeys: Boolean, matchers: Option[Map[String, Map[String, Any]]]) = {
     var result = List[BodyMismatch]()
     for ((value, index) <- expectedValues.view.zipWithIndex) {
       if (index < actualValues.size) {
-        result = result ++: compare(path :+ index.toString, value, actualValues(index), diffConfig, matchers)
+        result = result ++: compare(path :+ index.toString, value, actualValues(index), allowUnexpectedKeys, matchers)
       } else if (!Matchers.matcherDefined(path, matchers)) {
         result = result :+ BodyMismatch(expectedValues, actualValues, Some(s"Expected ${valueOf(value)} but was missing"),
           path.mkString("."), generateObjectDiff(expectedValues, actualValues))
@@ -78,13 +78,13 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
   }
 
   def compareLists(expectedValues: List[Any], actualValues: List[Any], a: Any, b: Any, path: Seq[String],
-                   diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
+                   allowUnexpectedKeys: Boolean, matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     if (Matchers.matcherDefined(path, matchers)) {
       logger.debug("compareLists: Matcher defined for path " + path)
       var result = Matchers.domatch[BodyMismatch](matchers, path, expectedValues, actualValues, BodyMismatchFactory)
       if (expectedValues.nonEmpty) {
         result = result ++ compareListContent(expectedValues.padTo(actualValues.length, expectedValues.head),
-          actualValues, path, diffConfig, matchers)
+          actualValues, path, allowUnexpectedKeys, matchers)
       }
       result
     } else {
@@ -92,7 +92,7 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
         List(BodyMismatch(a, b, Some(s"Expected an empty List but received ${valueOf(actualValues)}"),
           path.mkString("."), generateObjectDiff(expectedValues, actualValues)))
       } else {
-        var result = compareListContent(expectedValues, actualValues, path, diffConfig, matchers)
+        var result = compareListContent(expectedValues, actualValues, path, allowUnexpectedKeys, matchers)
         if (expectedValues.size != actualValues.size) {
           result = result :+ BodyMismatch(a, b,
             Some(s"Expected a List with ${expectedValues.size} elements but received ${actualValues.size} elements"),
@@ -104,17 +104,17 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
   }
 
   def compareMaps(expectedValues: Map[String, Any], actualValues: Map[String, Any], a: Any, b: Any, path: Seq[String],
-                  diffConfig: DiffConfig, matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
+                  allowUnexpectedKeys: Boolean, matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     if (expectedValues.isEmpty && actualValues.nonEmpty) {
       List(BodyMismatch(a, b, Some(s"Expected an empty Map but received ${valueOf(actualValues)}"), path.mkString("."),
         generateObjectDiff(expectedValues, actualValues)))
     } else {
       var result = List[BodyMismatch]()
-      if (diffConfig.allowUnexpectedKeys && expectedValues.size > actualValues.size) {
+      if (allowUnexpectedKeys && expectedValues.size > actualValues.size) {
         result = result :+ BodyMismatch(a, b,
           Some(s"Expected a Map with at least ${expectedValues.size} elements but received ${actualValues.size} elements"),
           path.mkString("."), generateObjectDiff(expectedValues, actualValues))
-      } else if (!diffConfig.allowUnexpectedKeys && expectedValues.size != actualValues.size) {
+      } else if (!allowUnexpectedKeys && expectedValues.size != actualValues.size) {
         result = result :+ BodyMismatch(a, b,
           Some(s"Expected a Map with ${expectedValues.size} elements but received ${actualValues.size} elements"),
           path.mkString("."), generateObjectDiff(expectedValues, actualValues))
@@ -122,15 +122,15 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
       if (Matchers.wildcardMatcherDefined(path :+ "any", matchers)) {
         actualValues.foreach(entry => {
           if (expectedValues.contains(entry._1)) {
-            result = result ++: compare(path :+ entry._1, expectedValues.apply(entry._1), entry._2, diffConfig, matchers)
-          } else if (!diffConfig.allowUnexpectedKeys) {
-            result = result ++: compare(path :+ entry._1, expectedValues.values.head, entry._2, diffConfig, matchers)
+            result = result ++: compare(path :+ entry._1, expectedValues.apply(entry._1), entry._2, allowUnexpectedKeys, matchers)
+          } else if (!allowUnexpectedKeys) {
+            result = result ++: compare(path :+ entry._1, expectedValues.values.head, entry._2, allowUnexpectedKeys, matchers)
           }
         })
       } else {
         expectedValues.foreach(entry => {
           if (actualValues.contains(entry._1)) {
-            result = result ++: compare(path :+ entry._1, entry._2, actualValues(entry._1), diffConfig, matchers)
+            result = result ++: compare(path :+ entry._1, entry._2, actualValues(entry._1), allowUnexpectedKeys, matchers)
           } else {
             result = result :+ BodyMismatch(a, b, Some(s"Expected ${entry._1}=${valueOf(entry._2)} but was missing"),
               path.mkString("."), generateObjectDiff(expectedValues, actualValues))

@@ -7,7 +7,7 @@ import scala.xml._
 
 class XmlBodyMatcher extends BodyMatcher with StrictLogging {
 
-  override def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig): List[BodyMismatch] = {
+  override def matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): List[BodyMismatch] = {
     (expected.getBody.getState, actual.getBody.getState) match {
       case (OptionalBody.State.MISSING, _) => List()
       case (OptionalBody.State.NULL, OptionalBody.State.PRESENT) => List(BodyMismatch(None, actual.getBody.getValue,
@@ -17,7 +17,7 @@ class XmlBodyMatcher extends BodyMatcher with StrictLogging {
         Some(s"Expected body '${expected.getBody.getValue}' but was missing")))
       case (OptionalBody.State.EMPTY, OptionalBody.State.EMPTY) => List()
       case (_, _) => compareNode(Seq("$", "body"), parse(expected.getBody.orElse("")),
-        parse(actual.getBody.orElse("")), diffConfig,
+        parse(actual.getBody.orElse("")), allowUnexpectedKeys,
         Option.apply(au.com.dius.pact.matchers.util.CollectionUtils.javaMMapToScalaMMap(expected.getMatchingRules)))
     }
   }
@@ -38,7 +38,7 @@ class XmlBodyMatcher extends BodyMatcher with StrictLogging {
   def mkPathString(path:Seq[String]) = path.mkString(".")
 
 
-  def compareText(path: Seq[String], expected: Node, actual: Node, config: DiffConfig,
+  def compareText(path: Seq[String], expected: Node, actual: Node, allowUnexpectedKeys: Boolean,
                   matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     val textpath = path :+ "#text"
     val expectedText = expected.child.filter(n => n.isInstanceOf[Text]).map(n => n.text).mkString
@@ -53,7 +53,7 @@ class XmlBodyMatcher extends BodyMatcher with StrictLogging {
     }
   }
 
-  def compareNode(path: Seq[String], expected: Node, actual: Node, config: DiffConfig,
+  def compareNode(path: Seq[String], expected: Node, actual: Node, allowUnexpectedKeys: Boolean,
                   matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     val nodePath = path :+ expected.label
     val mismatches = if (Matchers.matcherDefined(nodePath, matchers)) {
@@ -66,30 +66,30 @@ class XmlBodyMatcher extends BodyMatcher with StrictLogging {
     }
 
     if (mismatches.isEmpty) {
-      compareAttributes(nodePath, expected, actual, config, matchers) ++
-        compareChildren(nodePath, expected, actual, config, matchers) ++
-        compareText(nodePath, expected, actual, config, matchers)
+      compareAttributes(nodePath, expected, actual, allowUnexpectedKeys, matchers) ++
+        compareChildren(nodePath, expected, actual, allowUnexpectedKeys, matchers) ++
+        compareText(nodePath, expected, actual, allowUnexpectedKeys, matchers)
     } else {
       mismatches
     }
   }
 
-  private def compareChildren(path: Seq[String], expected: Node, actual: Node, config: DiffConfig,
+  private def compareChildren(path: Seq[String], expected: Node, actual: Node, allowUnexpectedKeys: Boolean,
                            matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     var expectedChildren = expected.child.filter(n => n.isInstanceOf[Elem])
     val actualChildren = actual.child.filter(n => n.isInstanceOf[Elem])
     val mismatches = if (Matchers.matcherDefined(path, matchers)) {
       if (expectedChildren.nonEmpty) expectedChildren = expectedChildren.padTo(actualChildren.length, expectedChildren.head)
       List()
-    } else if (expected.child.isEmpty && actual.child.nonEmpty && !config.allowUnexpectedKeys) {
+    } else if (expected.child.isEmpty && actual.child.nonEmpty && !allowUnexpectedKeys) {
         List(BodyMismatch(expected, actual, Some(s"Expected an empty List but received ${actual.child.mkString(",")}"), mkPathString(path)))
     } else if (expected.child.size != actual.child.size) {
         val missingChilds = expected.child.diff(actual.child)
         val result = missingChilds.map(child => BodyMismatch(expected, actual, Some(s"Expected $child but was missing"), mkPathString(path)))
-        if (config.allowUnexpectedKeys && expected.child.size > actual.child.size) {
+        if (allowUnexpectedKeys && expected.child.size > actual.child.size) {
           result.toList :+ BodyMismatch(expected, actual,
             Some(s"Expected a List with atleast ${expected.child.size} elements but received ${actual.child.size} elements"), mkPathString(path))
-        } else if (!config.allowUnexpectedKeys && expected.child.size != actual.child.size) {
+        } else if (!allowUnexpectedKeys && expected.child.size != actual.child.size) {
           result.toList :+ BodyMismatch(expected, actual,
             Some(s"Expected a List with ${expected.child.size} elements but received ${actual.child.size} elements"), mkPathString(path))
         } else {
@@ -100,23 +100,23 @@ class XmlBodyMatcher extends BodyMatcher with StrictLogging {
     mismatches ++: expectedChildren
         .zipWithIndex
         .zip(actualChildren)
-        .flatMap(x => compareNode(appendIndex(path, x._1._2), x._1._1, x._2, config, matchers)).toList
+        .flatMap(x => compareNode(appendIndex(path, x._1._2), x._1._1, x._2, allowUnexpectedKeys, matchers)).toList
   }
 
-  private def compareAttributes(path: Seq[String], expected: Node, actual: Node, config: DiffConfig,
+  private def compareAttributes(path: Seq[String], expected: Node, actual: Node, allowUnexpectedKeys: Boolean,
                               matchers: Option[Map[String, Map[String, Any]]]): List[BodyMismatch] = {
     val expectedAttrs = expected.attributes.asAttrMap
     val actualAttrs = actual.attributes.asAttrMap
 
-    if (expectedAttrs.isEmpty && actualAttrs.nonEmpty && !config.allowUnexpectedKeys) {
+    if (expectedAttrs.isEmpty && actualAttrs.nonEmpty && !allowUnexpectedKeys) {
       List(BodyMismatch(expected, actual,
         Some(s"Expected a Tag with at least ${expectedAttrs.size} attributes but received ${actual.attributes.size} attributes"),
         mkPathString(path)))
     } else {
-      val mismatches = if (config.allowUnexpectedKeys && expectedAttrs.size > actualAttrs.size) {
+      val mismatches = if (allowUnexpectedKeys && expectedAttrs.size > actualAttrs.size) {
         List(BodyMismatch(expected, actual, Some(s"Expected a Tag with at least ${expected.attributes.size} attributes but received ${actual.attributes.size} attributes"),
           mkPathString(path)))
-      } else if (!config.allowUnexpectedKeys && expectedAttrs.size != actualAttrs.size) {
+      } else if (!allowUnexpectedKeys && expectedAttrs.size != actualAttrs.size) {
         List(BodyMismatch(expected, actual, Some(s"Expected a Tag with ${expected.attributes.size} attributes but received ${actual.attributes.size} attributes"),
           mkPathString(path)))
       } else {
