@@ -1,5 +1,22 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.2 - Bugfix Release
+
+* fdb8fe9 - update changelog for release 3.5.2-jre7.0 (Ronald Holshausen, Wed Jul 12 10:30:26 2017 +1000)
+* b9db93a - Converted Scala test to Groovy (Ronald Holshausen, Tue Jul 11 22:04:39 2017 +1000)
+* fe69a60 - Converted Scala test to Groovy (Ronald Holshausen, Tue Jul 11 21:16:27 2017 +1000)
+* 7c57abe - Converted Scala test to Groovy (Ronald Holshausen, Tue Jul 11 20:53:47 2017 +1000)
+* f3f8c34 - Inlined DiffConfig as only one attribute was ever used (Ronald Holshausen, Tue Jul 11 20:40:07 2017 +1000)
+* 8029490 - Fix bodyWithSingleQuotes with ContentType param (Jeff Myers, Mon Jul 10 18:27:53 2017 -0400)
+* f6fd607 - Wired in the use of the pact source classes into the pact loader and verifier (Ronald Holshausen, Tue Jul 11 10:08:20 2017 +1000)
+* e66db1d - Updated the file system lock code to work on windows #475 (Ronald Holshausen, Mon Jul 10 14:06:44 2017 +1000)
+* 1c635e6 - Use the correct pacticipant name when publishing a tag (Ronald Holshausen, Mon Jul 10 10:58:25 2017 +1000)
+* 262db0f - Add a synchanisation block and file system lock around merging a pact with an existing one on the file system #475 (Ronald Holshausen, Sun Jul 9 20:37:18 2017 +1000)
+* 9b29aea - Converted PactWriter and PactMerge to kotlin (Ronald Holshausen, Sun Jul 9 19:24:15 2017 +1000)
+* 749630b - update versions in readme (Ronald Holshausen, Sun Jul 9 19:15:12 2017 +1000)
+* 6278563 - update changelog for release 3.5.1-jre7.1 (Ronald Holshausen, Sun Jul 9 16:50:27 2017 +1000)
+* d26b2f9 - bump version to 3.5.2 (Ronald Holshausen, Sun Jul 9 19:11:08 2017 +1000)
+
 # 3.5.2-jre7.0 - Bugfix Release
 
 * 164c906 - Correct a test to pass on both JDK7 and JDK8 (Ronald Holshausen, Wed Jul 12 09:55:20 2017 +1000)
