@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.lein
 
+import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
@@ -91,14 +92,15 @@ class VerifyProviderSpec extends Specification {
     given:
     def consumerInfo = Clojure.read('''{
       :consumer1 {
-        :pact-file "file:///path/to/pact.json"
+        :pact-source "file:///path/to/pact.json"
         :state-change-url "http://statechange:8080"
         :state-change-uses-body true
         ;:verification-type au.com.dius.pact.provider.PactVerification/ANNOTATED_METHOD
         :packages-to-scan ["au.com.dius.pact.provider.lein"]
       }
     }''').entrySet().first()
-    def expected = new ConsumerInfo(':consumer1', new URL('file:/path/to/pact.json'), 'http://statechange:8080', true,
+    def expected = new ConsumerInfo(':consumer1', new UrlSource('file:///path/to/pact.json'),
+      'http://statechange:8080', true,
       null, ['au.com.dius.pact.provider.lein'], null)
 
     when:
@@ -106,7 +108,7 @@ class VerifyProviderSpec extends Specification {
 
     then:
     consumer.name == expected.name
-    consumer.pactFile == expected.pactFile
+    consumer.pactSource == expected.pactSource
     consumer.stateChange == expected.stateChange
     consumer.stateChangeUsesBody == expected.stateChangeUsesBody
     consumer.verificationType == expected.verificationType

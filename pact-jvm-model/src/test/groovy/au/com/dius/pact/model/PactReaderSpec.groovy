@@ -134,7 +134,7 @@ class PactReaderSpec extends Specification {
   @SuppressWarnings('UnnecessaryGetter')
   def 'if authentication is set, loads the pact file from a URL with auth'() {
     given:
-    def pactUrl = new URL('http://url.that.requires.auth:8080/')
+    def pactUrl = new UrlSource('http://url.that.requires.auth:8080/')
     def mockAuth = Mock(AuthConfig)
     def mockHttp = Mock(RESTClient) {
       getAuth() >> mockAuth

@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.model.FileSource
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import groovy.json.JsonSlurper
 import groovy.transform.EqualsAndHashCode
@@ -90,7 +91,7 @@ class ProviderInfo {
             if (file.file && file.name ==~ consumersGroup.include) {
               consumers << new ConsumerInfo(
                 name: new JsonSlurper().parse(file).consumer.name,
-                pactFile: file,
+                pactSource: new FileSource(file),
                 stateChange: consumersGroup.stateChange,
                 stateChangeUsesBody: consumersGroup.stateChangeUsesBody
               )

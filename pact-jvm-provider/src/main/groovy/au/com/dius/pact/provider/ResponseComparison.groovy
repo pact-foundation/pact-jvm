@@ -4,7 +4,6 @@ import au.com.dius.pact.matchers.DiffUtils
 import au.com.dius.pact.matchers.MatchingConfig
 import au.com.dius.pact.model.BodyMismatch
 import au.com.dius.pact.model.BodyTypeMismatch
-import au.com.dius.pact.model.DiffConfig
 import au.com.dius.pact.model.HeaderMismatch
 import au.com.dius.pact.model.OptionalBody
 @SuppressWarnings('UnusedImport')
@@ -55,7 +54,7 @@ class ResponseComparison {
     def actualMessage = new Response(200, ['Content-Type': message.contentType], actual)
     if (result) {
       mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(result.value.matchBody(expected,
-            actualMessage, DiffConfig.apply(true, false))).asJava()
+            actualMessage, true)).asJava()
     } else {
       def expectedBody = message.contents.orElse('')
       if (!StringUtils.isEmpty(expectedBody) && StringUtils.isEmpty(actual)) {

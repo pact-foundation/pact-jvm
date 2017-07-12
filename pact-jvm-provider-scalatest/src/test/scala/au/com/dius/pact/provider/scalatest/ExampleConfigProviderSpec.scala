@@ -9,5 +9,6 @@ class ExampleConfigProviderSpec extends ProviderSpec {
   /**
     * Runs 'test_provider' pact verifications from 'pacts-dependents' directory with server restart just against 'test_consumer' pacts
     */
-  verify(VerificationConfig(Pact(provider = "test_provider", consumer = "test_consumer", uri = "pacts-dependents"), ServerConfig(serverStarter = new ProviderServerStarter, restartServer = true)))
+  verify(VerificationConfig(Pact(provider = "test_provider", consumer = "test_consumer", uri = "pacts-dependents"),
+    ServerConfig(serverStarter = new ProviderServerStarter, restartServer = true)))
 }

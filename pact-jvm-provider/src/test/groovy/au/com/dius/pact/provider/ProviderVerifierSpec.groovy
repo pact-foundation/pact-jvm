@@ -8,6 +8,7 @@ import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
 import au.com.dius.pact.provider.reporters.VerifierReporter
@@ -327,8 +328,8 @@ class ProviderVerifierSpec extends Specification {
 
   def 'when loading a pact file for a consumer, it should pass on any authentication options'() {
     given:
-    def pactFile = new URL('http://some.pact.file/')
-    def consumer = new ConsumerInfo(pactFile: pactFile, pactFileAuthentication: ['basic', 'test', 'pwd'])
+    def pactFile = new UrlSource('http://some.pact.file/')
+    def consumer = new ConsumerInfo(pactSource: pactFile, pactFileAuthentication: ['basic', 'test', 'pwd'])
     GroovyMock(PactReader, global: true)
 
     when:
@@ -340,8 +341,8 @@ class ProviderVerifierSpec extends Specification {
 
   def 'when loading a pact file for a consumer, it handles a closure'() {
     given:
-    def pactFile = new URL('http://some.pact.file/')
-    def consumer = new ConsumerInfo(pactFile: { pactFile })
+    def pactFile = new UrlSource('http://some.pact.file/')
+    def consumer = new ConsumerInfo(pactSource: { pactFile })
     GroovyMock(PactReader, global: true)
 
     when:

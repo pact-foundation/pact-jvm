@@ -168,12 +168,14 @@ class PactReader {
   }
 
   private static loadFile(def source, Map options = [:]) {
-      if (source instanceof InputStream || source instanceof Reader || source instanceof File) {
-          new JsonSlurper().parse(source)
-      } else if (source instanceof URL) {
-        loadPactFromUrl(source, options)
+      if (source instanceof FileSource) {
+        new JsonSlurper().parse(source.file)
+      } else if (source instanceof InputStream || source instanceof Reader || source instanceof File) {
+        new JsonSlurper().parse(source)
+      } else if (source instanceof URL || source instanceof UrlPactSource) {
+        loadPactFromUrl(source instanceof URL ? new UrlSource(source.toString()) : source, options)
       } else if (source instanceof String && source.toLowerCase() ==~ '(https?|file)://.*') {
-        loadPactFromUrl(new URL(source), options)
+        loadPactFromUrl(new UrlSource(source), options)
       } else if (source instanceof String && source.toLowerCase() ==~ 's3://.*') {
         loadPactFromS3Bucket(source, options)
       } else if (source instanceof String && fileExists(source)) {
@@ -199,7 +201,7 @@ class PactReader {
   }
 
   @SuppressWarnings('DuplicateNumberLiteral')
-  private static loadPactFromUrl(URL source, Map options) {
+  private static loadPactFromUrl(UrlPactSource source, Map options) {
     if (options.authentication) {
       def http = newHttpClient(source)
       switch (options.authentication.first().toLowerCase()) {
@@ -213,12 +215,12 @@ class PactReader {
       }
       http.get(headers: [Accept: JSON]).data
     } else {
-      new JsonSlurper().parse(source, ACCEPT_JSON)
+      new JsonSlurper().parse(new URL(source.url), ACCEPT_JSON)
     }
   }
 
-  private static newHttpClient(URL source) {
-    new RESTClient(source)
+  private static newHttpClient(UrlPactSource source) {
+    new RESTClient(source.url)
   }
 
   private static boolean fileExists(String path) {

@@ -24,8 +24,7 @@ public class Defect464Test {
   private static final String PROVIDER_URI = "/provider/uri";
 
   @Rule
-  public PactProviderRuleMk2 provider
-    = new PactProviderRuleMk2(PROVIDER_NAME, "localhost", 48_464, this);
+  public PactProviderRuleMk2 provider = new PactProviderRuleMk2(PROVIDER_NAME, this);
 
   @Pact(provider = PROVIDER_NAME, consumer = "test_consumer")
   public RequestResponsePact createFragment(PactDslWithProvider builder) {
