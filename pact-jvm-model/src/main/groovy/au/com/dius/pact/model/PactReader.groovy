@@ -174,7 +174,7 @@ class PactReader {
         new JsonSlurper().parse(source)
       } else if (source instanceof URL || source instanceof UrlPactSource) {
         loadPactFromUrl(source instanceof URL ? new UrlSource(source.toString()) : source, options)
-      } else if (source instanceof String && source.toLowerCase() ==~ '(https?|file)://.*') {
+      } else if (source instanceof String && source.toLowerCase() ==~ '(https?|file)://?.*') {
         loadPactFromUrl(new UrlSource(source), options)
       } else if (source instanceof String && source.toLowerCase() ==~ 's3://.*') {
         loadPactFromS3Bucket(source, options)
