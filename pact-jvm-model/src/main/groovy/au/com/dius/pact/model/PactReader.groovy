@@ -99,6 +99,8 @@ class PactReader {
         }
         map
       }
+    } else {
+      [:]
     }
   }
 
@@ -115,20 +117,26 @@ class PactReader {
 
   @SuppressWarnings('DuplicateStringLiteral')
   static transformJson(def pactJson) {
-    pactJson.interactions = pactJson.interactions*.collectEntries { k, v ->
-      def entry = [k, v]
-      switch (k) {
-        case 'provider_state':
-          entry = ['providerState', v]
-          break
-        case 'request':
-          entry = ['request', transformRequestResponseJson(v)]
-          break
-        case 'response':
-          entry = ['response', transformRequestResponseJson(v)]
-          break
+    pactJson.interactions = pactJson.interactions.collect { i ->
+      def interaction = i.collectEntries { k, v ->
+        def entry = [k, v]
+        switch (k) {
+          case 'provider_state':
+            entry = ['providerState', v]
+            break
+          case 'request':
+            entry = ['request', transformRequestResponseJson(v)]
+            break
+          case 'response':
+            entry = ['response', transformRequestResponseJson(v)]
+            break
+        }
+        entry
       }
-      entry
+      if (i.providerState) {
+        interaction.providerState = i.providerState
+      }
+      interaction
     }
     pactJson
   }
@@ -157,7 +165,7 @@ class PactReader {
           new JsonSlurper().parse(source)
       } else if (source instanceof URL) {
         loadPactFromUrl(source, options)
-      } else if (source instanceof String && source.toLowerCase() ==~ '(https?|file)://.*') {
+      } else if (source instanceof String && source.toLowerCase() ==~ '(https?|file)://?.*') {
         loadPactFromUrl(new URL(source), options)
       } else if (source instanceof String && source.toLowerCase() ==~ 's3://.*') {
         loadPactFromS3Bucket(source, options)
