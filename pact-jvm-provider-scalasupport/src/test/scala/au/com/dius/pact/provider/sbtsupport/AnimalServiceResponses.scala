@@ -1,4 +1,4 @@
-package au.com.dius.pact.provider
+package au.com.dius.pact.provider.sbtsupport
 
 import au.com.dius.pact.model.{OptionalBody, Response}
 
