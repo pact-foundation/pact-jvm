@@ -1,13 +1,14 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.model.FileSource
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.Response
+import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import org.reflections.Reflections
 import org.reflections.scanners.MethodAnnotationsScanner
 import org.reflections.util.ConfigurationBuilder
@@ -22,11 +23,11 @@ import java.lang.reflect.Method
 @Slf4j
 class ProviderVerifier {
 
-  static final String PACT_FILTER_CONSUMERS = 'pact.filter.consumers'
-  static final String PACT_FILTER_DESCRIPTION = 'pact.filter.description'
-  static final String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
-  static final String PACT_SHOW_STACKTRACE = 'pact.showStacktrace'
-  static final String PACT_SHOW_FULLDIFF = 'pact.showFullDiff'
+  static final protected String PACT_FILTER_CONSUMERS = 'pact.filter.consumers'
+  static final protected String PACT_FILTER_DESCRIPTION = 'pact.filter.description'
+  static final protected String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
+  static final protected String PACT_SHOW_STACKTRACE = 'pact.showStacktrace'
+  static final protected String PACT_SHOW_FULLDIFF = 'pact.showFullDiff'
 
   def projectHasProperty = { }
   def projectGetProperty = { }
@@ -89,21 +90,22 @@ class ProviderVerifier {
 
   @SuppressWarnings('ThrowRuntimeException')
   def loadPactFileForConsumer(ConsumerInfo consumer) {
-    def pactFile = consumer.pactFile
-    if (pactFile instanceof Closure) {
-      pactFile = pactFile.call()
+    def pactSource = consumer.pactSource
+    if (pactSource instanceof Closure) {
+      pactSource = pactSource.call()
     }
 
-    if (pactFile instanceof URL) {
-      reporters.each { it.verifyConsumerFromUrl(pactFile, consumer) }
+    if (pactSource instanceof UrlPactSource) {
+      reporters.each { it.verifyConsumerFromUrl(pactSource, consumer) }
       def options = [:]
       if (consumer.pactFileAuthentication) {
         options.authentication = consumer.pactFileAuthentication
       }
-      PactReader.loadPact(options, pactFile)
-    } else if (pactFile instanceof File || ProviderUtils.pactFileExists(pactFile) || ProviderUtils.isS3Url(pactFile)) {
-      reporters.each { it.verifyConsumerFromFile(pactFile, consumer) }
-      PactReader.loadPact(pactFile)
+      PactReader.loadPact(options, pactSource)
+    } else if (pactSource instanceof FileSource || ProviderUtils.pactFileExists(pactSource) ||
+        ProviderUtils.isS3Url(pactSource)) {
+      reporters.each { it.verifyConsumerFromFile(pactSource, consumer) }
+      PactReader.loadPact(pactSource)
     } else {
       String message = generateLoadFailureMessage(consumer)
       reporters.each { it.pactLoadFailureForConsumer(consumer, message) }
@@ -139,8 +141,8 @@ class ProviderVerifier {
   }
 
   private boolean matchState(interaction) {
-    if (interaction.providerState) {
-      interaction.providerState ==~ callProjectGetProperty(PACT_FILTER_PROVIDERSTATE)
+    if (interaction.providerStates) {
+      interaction.providerStates.any { it.name ==~ callProjectGetProperty(PACT_FILTER_PROVIDERSTATE) }
     } else {
       callProjectGetProperty(PACT_FILTER_PROVIDERSTATE).empty
     }
@@ -154,19 +156,10 @@ class ProviderVerifier {
     def interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name}" +
       " - ${interaction.description}"
 
-    def stateChangeOk = true
-    if (interaction.providerState) {
-      stateChangeOk = stateChange(interaction.providerState, provider, consumer)
-      log.debug "State Change: \"${interaction.providerState}\" -> ${stateChangeOk}"
-      if (stateChangeOk != true) {
-        failures[interactionMessage] = stateChangeOk
-        stateChangeOk = false
-      } else {
-        interactionMessage += " Given ${interaction.providerState}"
-      }
-    }
-
-    if (stateChangeOk) {
+    def stateChangeResult = StateChange.executeStateChange(this, provider, consumer, interaction, interactionMessage,
+      failures)
+    if (stateChangeResult.stateChangeOk) {
+      interactionMessage += stateChangeResult.message
       reportInteractionDescription(interaction)
 
       if (ProviderUtils.verificationType(provider, consumer) == PactVerification.REQUST_RESPONSE) {
@@ -178,7 +171,7 @@ class ProviderVerifier {
       }
 
       if (provider.stateChangeTeardown) {
-        stateChange(interaction.providerState, provider, consumer, false)
+        StateChange.executeStateChangeTeardown(this, interaction, provider, consumer)
       }
     }
   }
@@ -187,72 +180,8 @@ class ProviderVerifier {
     reporters.each { it.interactionDescription(interaction) }
   }
 
-  def stateChange(String state, ProviderInfo provider, ConsumerInfo consumer, boolean isSetup = true) {
-    reportStateForInteraction(state, provider, consumer, isSetup)
-    try {
-      def stateChangeHandler = consumer.stateChange
-      def stateChangeUsesBody = consumer.stateChangeUsesBody
-      if (stateChangeHandler == null) {
-        stateChangeHandler = provider.stateChangeUrl
-        stateChangeUsesBody = provider.stateChangeUsesBody
-      }
-      if (stateChangeHandler == null || (stateChangeHandler instanceof String
-        && StringUtils.isBlank(stateChangeHandler))) {
-        reporters.each { it.warnStateChangeIgnored(state, provider, consumer) }
-        return true
-      } else if (stateChangeHandler instanceof Closure) {
-        def result
-        if (provider.stateChangeTeardown) {
-          result = stateChangeHandler.call(state, isSetup ? 'setup' : 'teardown')
-        } else {
-          result = stateChangeHandler.call(state)
-        }
-        log.debug "Invoked state change closure -> ${result}"
-        if (!(result instanceof URL)) {
-          return result
-        }
-        stateChangeHandler = result
-      } else if (isBuildSpecificTask(stateChangeHandler)) {
-        log.debug "Invokeing build specific task ${stateChangeHandler}"
-        executeBuildSpecificTask(stateChangeHandler, state)
-        return true
-      }
-      return executeHttpStateChangeRequest(stateChangeHandler, stateChangeUsesBody, state, provider, isSetup)
-    } catch (e) {
-      reporters.each {
-        it.stateChangeRequestFailedWithException(state, provider, consumer, isSetup, e,
-          callProjectHasProperty(PACT_SHOW_STACKTRACE))
-      }
-      return e
-    }
-  }
-
   void reportStateForInteraction(String state, ProviderInfo provider, ConsumerInfo consumer, boolean isSetup) {
     reporters.each { it.stateForInteraction(state, provider, consumer, isSetup) }
-  }
-
-  private executeHttpStateChangeRequest(stateChangeHandler, useBody, String state, ProviderInfo provider,
-                                        boolean isSetup) {
-    try {
-      def url = stateChangeHandler instanceof URI ? stateChangeHandler
-        : new URI(stateChangeHandler.toString())
-      ProviderClient client = new ProviderClient(provider: provider)
-      def response = client.makeStateChangeRequest(url, state, useBody, isSetup, provider.stateChangeTeardown)
-      log.debug "Invoked state change $url -> ${response?.statusLine}"
-      if (response) {
-        try {
-          if (response.statusLine.statusCode >= 400) {
-            reporters.each { it.stateChangeRequestFailed(state, provider, isSetup, response.statusLine.toString()) }
-            return 'State Change Request Failed - ' + response.statusLine.toString()
-          }
-        } finally {
-          response.close()
-        }
-      }
-    } catch (URISyntaxException ex) {
-      reporters.each { it.warnStateChangeIgnoredDueToInvalidUrl(state, provider, isSetup, stateChangeHandler) }
-    }
-    true
   }
 
   void verifyResponseFromProvider(ProviderInfo provider, def interaction, String interactionMessage, Map failures) {

@@ -24,10 +24,10 @@ public class ContractWithCustomPactLoaderTest {
 
     // NOTE: this is just an example of embedded service that listens to requests, you should start here real service
     @ClassRule
-    public static final ClientDriverRule embeddedService = new ClientDriverRule(8332);
+    public static final ClientDriverRule embeddedService = new ClientDriverRule(10332);
     private static final Logger LOGGER = LoggerFactory.getLogger(ContractTest.class);
     @TestTarget
-    public final Target target = new HttpTarget(8332);
+    public final Target target = new HttpTarget(10332);
 
     @BeforeClass
     public static void setUpService() {
@@ -51,6 +51,11 @@ public class ContractWithCustomPactLoaderTest {
         // Prepare service before interaction that require "default" state
         // ...
         LOGGER.info("Now service in default state");
+    }
+
+    @State("state 2")
+    public void toState2() {
+        LOGGER.info("Now service in state 2");
     }
 
     @TargetRequestFilter

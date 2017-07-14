@@ -3,7 +3,11 @@ package au.com.dius.pact.model.v3.messaging
 import au.com.dius.pact.model.HttpPart
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.Response
+import au.com.dius.pact.model.generators.Generators
+import au.com.dius.pact.model.matchingrules.MatchingRules
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
@@ -17,9 +21,10 @@ class Message implements Interaction {
   private static final String JSON = 'application/json'
 
   String description
-  String providerState
+  List<ProviderState> providerStates = []
   OptionalBody contents = OptionalBody.missing()
-  Map<String, Map<String, Object>> matchingRules = [:]
+  MatchingRules matchingRules = new MatchingRules()
+  Generators generators = new Generators()
   Map<String, String> metaData = [:]
 
   byte[] contentsAsBytes() {
@@ -31,10 +36,11 @@ class Message implements Interaction {
   }
 
   String getContentType() {
-    metaData.contentType ?: JSON
+    metaData?.contentType ?: JSON
   }
 
-  Map toMap() {
+  @SuppressWarnings('UnusedMethodParameter')
+  Map toMap(PactSpecVersion pactSpecVersion = PactSpecVersion.V3) {
     def map = [
       description: description,
       metaData: metaData
@@ -42,11 +48,14 @@ class Message implements Interaction {
     if (!contents.missing) {
       map.contents = formatContents()
     }
-    if (providerState) {
-      map.providerState = providerState
+    if (providerStates) {
+      map.providerStates = providerStates*.toMap()
     }
-    if (matchingRules) {
-      map.matchingRules = matchingRules
+    if (matchingRules?.notEmpty) {
+      map.matchingRules = matchingRules.toMap(pactSpecVersion)
+    }
+    if (generators?.notEmpty) {
+      map.generators = generators.toMap(pactSpecVersion)
     }
     map
   }
@@ -63,25 +72,40 @@ class Message implements Interaction {
     }
   }
 
-  Message fromMap(Map map) {
-    description = map.description ?: ''
-    providerState = map.providerState
+  /**
+   * Builds a message from a Map
+   */
+  static Message fromMap(Map map) {
+    Message message = new Message()
+    message.description = map.description ?: ''
+    if (map.providerStates) {
+      message.providerStates = map.providerStates.collect { ProviderState.fromMap(it) }
+    } else {
+      message.providerStates = map.providerState ? [ new ProviderState(map.providerState.toString()) ] : []
+    }
     if (map.containsKey('contents')) {
       if (map.contents == null) {
-        contents = OptionalBody.nullBody()
+        message.contents = OptionalBody.nullBody()
       } else if (map.contents instanceof String && map.contents.empty) {
-        contents = OptionalBody.empty()
+        message.contents = OptionalBody.empty()
       } else {
-        contents = OptionalBody.body(JsonOutput.toJson(map.contents))
+        message.contents = OptionalBody.body(JsonOutput.toJson(map.contents))
       }
     }
-    matchingRules = map.matchingRules ?: [:]
-    metaData = map.metaData ?: [:]
-    this
+    message.matchingRules = MatchingRules.fromMap(map.matchingRules)
+    message.generators = Generators.fromMap(map.generators)
+    message.metaData = map.metaData ?: [:]
+    message
   }
 
   HttpPart asPactRequest() {
     new Response(200, ['Content-Type': contentType], contents, matchingRules)
+  }
+
+  @Override
+  @Deprecated
+  String getProviderState() {
+    providerStates.isEmpty() ? null : providerStates.first().name
   }
 
   @Override

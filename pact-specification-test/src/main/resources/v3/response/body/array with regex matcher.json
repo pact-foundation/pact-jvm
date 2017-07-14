@@ -9,11 +9,22 @@
       ]
     },
     "matchingRules" : {
-      "$.body.myDates": {
-        "match": "type"
-      },
-      "$.body.myDates[*]" : {
-        "match": "regex", "regex" : "\\d{2}/\\d{2}/\\d{4}"
+      "body": {
+        "$.myDates": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$.myDates[*]": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "\\d{2}/\\d{2}/\\d{4}"
+            }
+          ]
+        }
       }
     }
   },
@@ -27,4 +38,4 @@
       ]
     }    
   }
-}   
+}

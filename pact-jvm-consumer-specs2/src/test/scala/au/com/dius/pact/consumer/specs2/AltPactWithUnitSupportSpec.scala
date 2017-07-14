@@ -28,8 +28,8 @@ class AltPactWithUnitSupportSpec extends Specification with PactSpec with UnitSp
     consumer = consumer,
     provider = provider,
     interactions = List(
-      buildInteraction("a request for foo", None, fooRequest, fooResponse),
-      buildInteraction("an option request", None, optionRequest, optionResponse)
+      buildInteraction("a request for foo", List(), fooRequest, fooResponse),
+      buildInteraction("an option request", List(), optionRequest, optionResponse)
     )
   )
 

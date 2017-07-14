@@ -49,7 +49,10 @@ public class WildcardKeysTest {
             .closeObject()
           .closeArray()
           .closeObject()
-        .closeArray();
+        .closeArray()
+        .object("foo")
+          .eachKeyLike("001", PactDslJsonRootValue.numberType(42))
+        .closeObject();
 
       RequestResponsePact pact = builder
         .uponReceiving("a request for an article")
@@ -60,17 +63,17 @@ public class WildcardKeysTest {
         .body(body)
         .toPact();
 
-      Map<String, Map<String, Object>> matchingRules = pact.getInteractions().get(0).getResponse().getMatchingRules();
-      MatcherTestUtils.assertResponseMatcherKeysEqualTo(pact,
-        "$.body.articles",
-        "$.body.articles[*].variants",
-        "$.body.articles[*].variants[*].*",
-        "$.body.articles[*].variants[*].*[*].bundles",
-        "$.body.articles[*].variants[*].*[*].bundles[*].*",
-        "$.body.articles[*].variants[*].*[*].bundles[*].*.description",
-        "$.body.articles[*].variants[*].*[*].bundles[*].*.referencedArticles",
-        "$.body.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*].*",
-        "$.body.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*].bundleId"
+      MatcherTestUtils.assertResponseMatcherKeysEqualTo(pact, "body",
+        "$.articles",
+        "$.articles[*].variants",
+        "$.articles[*].variants[*].*",
+        "$.articles[*].variants[*].*[*].bundles",
+        "$.articles[*].variants[*].*[*].bundles[*].*",
+        "$.articles[*].variants[*].*[*].bundles[*].*.description",
+        "$.articles[*].variants[*].*[*].bundles[*].*.referencedArticles",
+        "$.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*].*",
+        "$.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*].bundleId",
+        "$.foo.*"
       );
 
       return pact;
@@ -84,6 +87,10 @@ public class WildcardKeysTest {
         .execute().returnContent().asString();
       Map<String, Object> body = (Map<String, Object>) new JsonSlurper().parseText(result);
 
+      assertThat(body, hasKey("foo"));
+      Map<String, Object> foo = (Map<String, Object>) body.get("foo");
+      assertThat(foo, hasKey("001"));
+      assertThat(foo.get("001"), is(42));
       assertThat(body, hasKey("articles"));
       List articles = (List) body.get("articles");
       assertThat(articles.size(), is(1));

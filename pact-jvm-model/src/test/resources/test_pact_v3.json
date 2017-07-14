@@ -6,7 +6,16 @@
     "name" : "test_consumer"
   },
   "interactions" : [ {
-    "providerState" : "test state",
+    "providerStates": [
+      {
+        "name": "test state",
+        "params": { "name": "Testy" }
+      },
+      {
+        "name": "test state 2",
+        "params": { "name": "Testy2" }
+      }
+    ],
     "description" : "test interaction",
     "request" : {
       "method" : "GET",

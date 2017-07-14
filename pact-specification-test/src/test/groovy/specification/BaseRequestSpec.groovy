@@ -26,7 +26,7 @@ class BaseRequestSpec extends Specification {
           expected.setDefaultMimeType(expected.detectContentType())
         }
         actual.setDefaultMimeType(actual.body.present ? actual.detectContentType() : 'application/json')
-        result << [d.name, json.comment, json.match, json.match ? 'should match' : 'should not match',
+        result << [d.name, f.name, json.comment, json.match, json.match ? 'should match' : 'should not match',
                    expected, actual]
       }
     }

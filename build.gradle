@@ -1,18 +1,40 @@
 buildscript {
   repositories {
+    jcenter()
     mavenCentral()
+    mavenLocal()
   }
   dependencies {
     classpath "org.apache.commons:commons-lang3:$commonsLang3Version"
-    classpath 'com.tkruse.gradle:gradle-groovysh-plugin:1.0.8'
+    classpath 'org.apache.commons:commons-text:1.1'
   }
 }
 
 plugins {
-  id "org.jetbrains.kotlin.jvm" version "1.1.2"
+  id 'nebula.kotlin' version '1.1.2-5.1'
+  id 'org.jmailen.kotlinter' version '1.1.0'
+  id 'io.gitlab.arturbosch.detekt' version '1.0.0.M11'
 }
 
+import org.apache.commons.text.StringEscapeUtils
+
 subprojects {
+  buildscript {
+    repositories {
+      jcenter()
+      mavenCentral()
+      mavenLocal()
+    }
+  }
+
+    configurations.all {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'com.google.guava' && details.requested.name == 'guava' && details.requested.version > '19.0') {
+                //guava-retryer is pulling a transitive dependency of guava 21-rc which has breaking changes to Netflix OSS
+                details.useVersion '19.0'
+            }
+        }
+    }
 
     def scalaVersionLookup = [
         '2.11': '2.11.8'
@@ -36,7 +58,8 @@ subprojects {
     apply plugin: 'codenarc'
     apply plugin: 'jacoco'
     apply plugin: 'org.jetbrains.kotlin.jvm'
-    apply plugin: 'com.github.tkruse.groovysh'
+    apply plugin: 'org.jmailen.kotlinter'
+    apply plugin: 'io.gitlab.arturbosch.detekt'
 
     repositories {
         mavenLocal()
@@ -49,6 +72,7 @@ subprojects {
       compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
       compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
       compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
+      compile 'io.github.microutils:kotlin-logging:1.4.4'
 
       if (project.hasProperty('scalaVersion')) {
           compile "org.scala-lang:scala-library:${project.scalaFullVersion}",
@@ -64,7 +88,7 @@ subprojects {
         "junit:junit:${project.junitVersion}"
 
       testCompile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
-      testCompile('org.spockframework:spock-core:1.1-groovy-2.4-rc-4') {
+      testCompile('org.spockframework:spock-core:1.1-groovy-2.4') {
         exclude group: 'org.codehaus.groovy'
       }
       testCompile "cglib:cglib:${project.cglibVersion}"
@@ -72,7 +96,7 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '3.4.0'
+    version = '3.5.3'
     targetCompatibility = '1.8'
     sourceCompatibility = '1.8'
 
@@ -85,6 +109,12 @@ subprojects {
 
     tasks.withType(GroovyCompile) {
       groovyOptions.optimizationOptions.indy = true
+    }
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+      kotlinOptions {
+        jvmTarget = "1.8"
+      }
     }
 
     test {
@@ -117,7 +147,7 @@ subprojects {
 
     def pomCustomisation = {
         name project.name
-        description new File(projectDir, 'README.md').text
+        description StringEscapeUtils.escapeXml11(new File(projectDir, 'README.md').text)
         url 'https://github.com/DiUS/pact-jvm'
         licenses {
             license {
@@ -141,11 +171,6 @@ subprojects {
                 id 'rholshausen'
                 name 'Ronald Holshausen'
                 email 'rholshausen@dius.com.au'
-            }
-            developer {
-                id 'kenbot'
-                name 'Ken Scambler'
-                email 'ken.scambler@gmail.com'
             }
         }
     }
@@ -188,6 +213,17 @@ subprojects {
     check.dependsOn << 'jacocoTestReport'
 
     compileGroovy.dependsOn << 'copyMainKotlinClasses'
+
+  kotlinter {
+    indentSize = 2
+  }
+
+  detekt {
+    config = "${project.parent.projectDir}/config/detekt-config.yml"
+  }
+
+  check.dependsOn << 'detektCheck'
+
 }
 
 tasks.addRule("Pattern: <Task>_<ScalaVersion>") { String taskName ->
@@ -205,10 +241,10 @@ if (System.env.TRAVIS == 'true') {
         tasks.withType(GroovyCompile) {
             groovyOptions.fork = false
         }
-//        tasks.withType(Test) {
-//            // containers (currently) have 2 dedicated cores and 4GB of memory
-//            maxParallelForks = 2
-//            minHeapSize = '128m'
-//        }
+        tasks.withType(Test) {
+            // containers (currently) have 2 dedicated cores and 4GB of memory
+            maxParallelForks = 2
+            minHeapSize = '128m'
+        }
     }
 }

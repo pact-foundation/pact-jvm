@@ -32,7 +32,7 @@ public class MimeTypeTest {
             .closeObject()
             .toString();
 
-        String responseBody = "{\"status\": \"OK\"}";
+        String responseBody = "{\"status\":\"OK\"}";
 
         runTest(buildPact(body, responseBody, "a test interaction with json", ContentType.APPLICATION_JSON),
             body, responseBody, ContentType.APPLICATION_JSON);
@@ -64,7 +64,7 @@ public class MimeTypeTest {
     }
 
     private void runTest(RequestResponsePact pact, final String body, final String expectedResponse, final ContentType mimeType) {
-        MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V2);
+        MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V3);
         PactVerificationResult result = runConsumerTest(pact, config, new PactTestRun() {
             @Override
             public void run(@NotNull MockServer mockServer) throws IOException {

@@ -1,10 +1,9 @@
 package au.com.dius.pact.model
 
-import java.util.Optional
-
 import au.com.dius.pact.matchers._
 import au.com.dius.pact.model.RequestPartMismatch._
 import au.com.dius.pact.model.ResponsePartMismatch._
+import au.com.dius.pact.model.matchingrules.MatchingRules
 import com.typesafe.scalalogging.StrictLogging
 
 import scala.collection.JavaConversions
@@ -61,30 +60,33 @@ case class MethodMismatch(expected: Method, actual: Method) extends RequestPartM
 case class QueryMismatch(queryParameter: String, expected: String, actual: String, mismatch: Option[String] = None, path: String = "/") extends RequestPartMismatch
 
 object BodyMismatchFactory extends MismatchFactory[BodyMismatch] {
-  def create(expected: scala.Any, actual: scala.Any, message: String, path: Seq[String]) =
-    BodyMismatch(expected, actual, Some(message), path.mkString("."), None)
+  import JavaConversions._
+  def create(expected: Object, actual: Object, message: String, path: java.util.List[String]) =
+    BodyMismatch(expected, actual, Some(message), path.toList.mkString("."), None)
 }
 
 object PathMismatchFactory extends MismatchFactory[PathMismatch] {
-  def create(expected: scala.Any, actual: scala.Any, message: String, path: Seq[String]) =
+  def create(expected: Object, actual: Object, message: String, path: java.util.List[String]) =
     PathMismatch(expected.toString, actual.toString, Some(message))
 }
 
 object HeaderMismatchFactory extends MismatchFactory[HeaderMismatch] {
-  def create(expected: scala.Any, actual: scala.Any, message: String, path: Seq[String]) = {
-    HeaderMismatch(path.last, expected.toString, actual.toString, Some(message))
+  import JavaConversions._
+  def create(expected: Object, actual: Object, message: String, path: java.util.List[String]) = {
+    HeaderMismatch(path.toList.last, expected.toString, actual.toString, Some(message))
   }
 }
 
 object QueryMismatchFactory extends MismatchFactory[QueryMismatch] {
-  def create(expected: scala.Any, actual: scala.Any, message: String, path: Seq[String]) = {
-    QueryMismatch(path.last, expected.toString, actual.toString, Some(message))
+  import JavaConversions._
+  def create(expected: Object, actual: Object, message: String, path: java.util.List[String]) = {
+    QueryMismatch(path.toList.last, expected.toString, actual.toString, Some(message))
   }
 }
 
 object Matching extends StrictLogging {
   
-  def matchHeaders(expected: Option[Headers], actual: Option[Headers], matchers: Option[Map[String, Map[String, Any]]]): Seq[HeaderMismatch] = {
+  def matchHeaders(expected: Option[Headers], actual: Option[Headers], matchers: MatchingRules): Seq[HeaderMismatch] = {
 
     def compareHeaders(e: Map[String, String], a: Map[String, String]): Seq[HeaderMismatch] = {
       e.foldLeft(Seq[HeaderMismatch]()) {
@@ -116,16 +118,6 @@ object Matching extends StrictLogging {
     }
   }
 
-  def javaMapToScalaMap2(map: java.util.Map[String, java.util.Map[String, AnyRef]]) : Option[Map[String, Map[String, Any]]] = {
-    if (map == null) {
-      None
-    } else {
-      Some(JavaConversions.mapAsScalaMap(map).mapValues {
-          case jmap: java.util.Map[String, _] => JavaConversions.mapAsScalaMap(jmap).toMap
-        }.toMap)
-    }
-  }
-
   def javaMapToScalaMap3(map: java.util.Map[String, java.util.List[String]]) : Option[Map[String, List[String]]] = {
     if (map == null) {
       None
@@ -138,12 +130,12 @@ object Matching extends StrictLogging {
 
   def matchRequestHeaders(expected: Request, actual: Request) = {
     matchHeaders(javaMapToScalaMap(expected.headersWithoutCookie), javaMapToScalaMap(actual.headersWithoutCookie),
-      javaMapToScalaMap2(expected.getMatchingRules))
+      expected.getMatchingRules)
   }
 
   def matchHeaders(expected: HttpPart, actual: HttpPart) : Seq[HeaderMismatch] = {
     matchHeaders(javaMapToScalaMap(expected.getHeaders), javaMapToScalaMap(actual.getHeaders),
-      javaMapToScalaMap2(expected.getMatchingRules))
+      expected.getMatchingRules)
   }
 
   def matchCookie(expected: Option[Cookies], actual: Option[Cookies]): Option[CookieMismatch] = {
@@ -159,12 +151,12 @@ object Matching extends StrictLogging {
     else Some(MethodMismatch(expected, actual))
   }
 
-  def matchBody(expected: HttpPart, actual: HttpPart, diffConfig: DiffConfig) = {
+  def matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean) = {
     if (expected.mimeType == actual.mimeType) {
       val result = MatchingConfig.lookupBodyMatcher(actual.mimeType)
       if (result.isDefined) {
         logger.debug("Found a matcher for " + actual.mimeType + " -> " + result)
-        result.get._2.matchBody(expected, actual, diffConfig)
+        result.get._2.matchBody(expected, actual, allowUnexpectedKeys)
       } else {
         logger.debug("No matcher for " + actual.mimeType + ", using equality")
         (expected.getBody.getState, actual.getBody.getState) match {
@@ -190,9 +182,9 @@ object Matching extends StrictLogging {
   def matchPath(expected: Request, actual: Request): Option[PathMismatch] = {
     val pathFilter = "http[s]*://([^/]*)"
     val replacedActual = actual.getPath.replaceFirst(pathFilter, "")
-    val matchers: Option[Map[String, Map[String, Any]]] = javaMapToScalaMap2(expected.getMatchingRules)
-    if (Matchers.matcherDefined(Seq("$", "path"), matchers)) {
-      val mismatch = Matchers.domatch[PathMismatch](matchers, Seq("$", "path"), expected.getPath,
+    val matchers = expected.getMatchingRules
+    if (Matchers.matcherDefined("path", Seq(), matchers)) {
+      val mismatch = Matchers.domatch[PathMismatch](matchers, "path", Seq(), expected.getPath,
         replacedActual, PathMismatchFactory)
       mismatch.headOption
     }
@@ -208,7 +200,7 @@ object Matching extends StrictLogging {
   def matchQuery(expected: Request, actual: Request) = {
     javaMapToScalaMap3(expected.getQuery).getOrElse(Map()).foldLeft(Seq[QueryMismatch]()) {
       (seq, values) => javaMapToScalaMap3(actual.getQuery).getOrElse(Map()).get(values._1) match {
-        case Some(value) => seq ++ QueryMatcher.compareQuery(values._1, values._2, value, javaMapToScalaMap2(expected.getMatchingRules))
+        case Some(value) => seq ++ QueryMatcher.compareQuery(values._1, values._2, value, expected.getMatchingRules)
         case None => seq :+ QueryMismatch(values._1, values._2.mkString(","), "",
           Some(s"Expected query parameter '${values._1}' but was missing"), Seq("$", "query", values._1).mkString("."))
       }

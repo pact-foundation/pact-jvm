@@ -4,7 +4,6 @@ import au.com.dius.pact.matchers.DiffUtils
 import au.com.dius.pact.matchers.MatchingConfig
 import au.com.dius.pact.model.BodyMismatch
 import au.com.dius.pact.model.BodyTypeMismatch
-import au.com.dius.pact.model.DiffConfig
 import au.com.dius.pact.model.HeaderMismatch
 import au.com.dius.pact.model.OptionalBody
 @SuppressWarnings('UnusedImport')
@@ -38,7 +37,7 @@ class ResponseComparison {
         actualHeaders: actualHeaders.collectEntries { k, v -> [k.toUpperCase(), v] }, actualBody: actualBody)
     def mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(
         ResponseMatching$.MODULE$.responseMismatches(response, new Response(actualStatus,
-            actualHeaders, OptionalBody.body(actualBody), [:]))).asJava()
+            actualHeaders, OptionalBody.body(actualBody)))).asJava()
 
     result.method = comparison.compareStatus(mismatches)
     result.headers = comparison.compareHeaders(mismatches)
@@ -52,10 +51,10 @@ class ResponseComparison {
     }
     def mismatches = []
     def expected = message.asPactRequest()
-    def actualMessage = new Response(200, ['Content-Type': message.contentType], actual, [:])
+    def actualMessage = new Response(200, ['Content-Type': message.contentType], actual)
     if (result) {
       mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(result.value.matchBody(expected,
-            actualMessage, DiffConfig.apply(true, false))).asJava()
+            actualMessage, true)).asJava()
     } else {
       def expectedBody = message.contents.orElse('')
       if (!StringUtils.isEmpty(expectedBody) && StringUtils.isEmpty(actual)) {
@@ -112,14 +111,19 @@ class ResponseComparison {
       result = [comparison: "Expected a response type of '${bodyTypeMismatch.expected()}' but the actual " +
           "type was '${bodyTypeMismatch.actual()}'"]
     } else if (mismatches.any { it instanceof BodyMismatch }) {
-      result.comparison = mismatches.findAll { it instanceof BodyMismatch }.collectEntries {
-          BodyMismatch bodyMismatch -> [
-            bodyMismatch.path(), [
-              mismatch: bodyMismatch.mismatch().defined ? bodyMismatch.mismatch().get() : 'mismatch',
-              diff: bodyMismatch.diff().defined ? bodyMismatch.diff().get() : ''
-            ]
+      result.comparison = mismatches
+        .findAll { it instanceof BodyMismatch }
+        .groupBy { bm -> bm.path() }
+        .collectEntries { path, m ->
+          [
+            path, m.collect { bm ->
+              [
+                mismatch: bm.mismatch().defined ? bm.mismatch().get() : 'mismatch',
+                diff: bm.diff().defined ? bm.diff().get() : ''
+              ]
+            }
           ]
-      }
+        }
 
       result.diff = generateFullDiff(actualBody, this.actual.contentType.mimeType as String,
         expected.body.present ? expected.body.value : '', expected.jsonBody())

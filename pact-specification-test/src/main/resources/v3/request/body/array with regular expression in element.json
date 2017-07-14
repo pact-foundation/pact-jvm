@@ -7,9 +7,31 @@
     "query": {},
     "headers": {"Content-Type": "application/json"},
     "matchingRules": {
-      "$.body.animals": {"min": 1, "match": "type"},
-      "$.body.animals[*].*": {"match": "type"},
-      "$.body.animals[*].phoneNumber": {"match": "regex", "regex": "\\d+"}
+      "body": {
+        "$.animals": {
+          "matchers": [
+            {
+              "min": 1,
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*].*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*].phoneNumber": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "\\d+"
+            }
+          ]
+        }
+      }
     },
     "body": {
       "animals": [

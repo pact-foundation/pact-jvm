@@ -47,15 +47,15 @@ public class MatchingTest {
     @Test
     public void testMatchingByTypeOnBody() {
         PactDslJsonBody body = new PactDslJsonBody()
-                .stringType("name")
-                .booleanType("happy")
-                .hexValue("hexCode")
-                .id()
-                .ipAddress("localAddress")
-                .numberValue("age", 100)
-                .numberType("ageAverage", 150.0)
-                .integerType("age2", 200)
-                .timestamp();
+            .stringType("name")
+            .booleanType("happy")
+            .hexValue("hexCode")
+            .id()
+            .ipAddress("localAddress")
+            .numberValue("age", 100)
+            .numberType("ageAverage", 150.0)
+            .integerType("age2", 200)
+            .timestamp();
 
         PactDslJsonBody responseBody = new PactDslJsonBody();
 
@@ -139,7 +139,7 @@ public class MatchingTest {
     }
 
     private void runTest(PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
-        MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V2);
+        MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V3);
         PactVerificationResult result = runConsumerTest(pactFragment.toPact(), config, new PactTestRun() {
             @Override
             public void run(@NotNull MockServer mockServer) throws IOException {

@@ -7,10 +7,38 @@
     "query": {},
     "headers": {"Content-Type": "application/xml"},
     "matchingRules": {
-      "$.body.animals": {"min": 1, "match": "type"},
-      "$.body.animals[0]": {"match": "type"},
-      "$.body.animals[1]": {"match": "type"},
-      "$.body.animals[*]['@phoneNumber']": {"match": "regex", "regex": "\\d+"}
+      "body": {
+        "$.animals": {
+          "matchers": [
+            {
+              "min": 1,
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[0]": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[1]": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*]['@phoneNumber']": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "\\d+"
+            }
+          ]
+        }
+      }
     },
     "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><animals><alligator phoneNumber=\"0415674567\"/></animals>"
   },

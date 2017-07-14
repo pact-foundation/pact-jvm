@@ -10,7 +10,7 @@ configured pacts against your provider.
 ```clojure
   :profiles {
              :pact {
-                    :plugins [[au.com.dius/pact-jvm-provider-lein_2.11 "3.0.3" :exclusions [commons-logging]]]
+                    :plugins [[au.com.dius/pact-jvm-provider-lein_2.11 "3.2.11" :exclusions [commons-logging]]]
                     :dependencies [[ch.qos.logback/logback-core "1.1.3"]
                                    [ch.qos.logback/logback-classic "1.1.3"]
                                    [org.apache.httpcomponents/httpclient "4.4.1"]]

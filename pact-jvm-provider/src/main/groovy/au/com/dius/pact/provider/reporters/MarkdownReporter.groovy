@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.reporters
 import au.com.dius.pact.model.BasePact
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 
@@ -44,8 +45,8 @@ class MarkdownReporter implements VerifierReporter {
   }
 
   @Override
-  void verifyConsumerFromUrl(URL pactUrl, ConsumerInfo consumer) {
-    writer.println "From URL: $pactUrl"
+  void verifyConsumerFromUrl(UrlPactSource pactUrl, ConsumerInfo consumer) {
+    writer.println "From URL: $pactUrl.url"
   }
 
   @Override
@@ -170,7 +171,7 @@ class MarkdownReporter implements VerifierReporter {
     if (comparison instanceof String) {
       writer.println "|\$|$comparison|"
     } else if (comparison.comparison instanceof Map) {
-      writer.println comparison.comparison.collect { "|$it.key|$it.value|" }.join('\n')
+      writer.println comparison.comparison.collect { "|$it.key|${it.value*.mismatch.join('; ')}|" }.join('\n')
     } else {
       writer.println "|\$|$comparison.comparison|"
     }

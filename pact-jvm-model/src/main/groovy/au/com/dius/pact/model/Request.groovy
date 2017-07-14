@@ -1,5 +1,7 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.model.generators.Generators
+import au.com.dius.pact.model.matchingrules.MatchingRules
 import groovy.transform.Canonical
 import org.jetbrains.annotations.NotNull
 
@@ -15,7 +17,8 @@ class Request extends HttpPart implements Comparable {
   Map<String, List<String>> query = [:]
   Map<String, String> headers = [:]
   OptionalBody body = OptionalBody.missing()
-  Map<String, Map<String, Object>> matchingRules = [:]
+  MatchingRules matchingRules = new MatchingRules()
+  Generators generators = new Generators()
 
   static Request fromMap(Map map) {
     new Request().with {
@@ -24,7 +27,8 @@ class Request extends HttpPart implements Comparable {
       query = map.query
       headers = map.headers ?: [:]
       body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
-      matchingRules = map.matchingRules ?: [:]
+      matchingRules = MatchingRules.fromMap(map.matchingRules)
+      generators = Generators.fromMap(map.generators)
       it
     }
   }
@@ -37,13 +41,15 @@ class Request extends HttpPart implements Comparable {
       query = r.query ? [:] + r.query : null
       headers = r.headers ? [:] + r.headers : null
       body = r.body
-      matchingRules = r.matchingRules ? [:] + r.matchingRules : [:]
+      matchingRules = r.matchingRules.copy()
+      generators = r.generators.copy(r.generators.categories)
       it
     }
   }
 
   String toString() {
-    "\tmethod: $method\n\tpath: $path\n\tquery: $query\n\theaders: $headers\n\tmatchers: $matchingRules\n\tbody: $body"
+    "\tmethod: $method\n\tpath: $path\n\tquery: $query\n\theaders: $headers\n\tmatchers: $matchingRules\n\t" +
+      "generators: $generators\n\tbody: $body"
   }
 
   Map<String, String> headersWithoutCookie() {

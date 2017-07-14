@@ -24,12 +24,12 @@ public class PactDefectTest {
 
     @Test
     public void json() {
-        test("{\"msg\" : \"ping\"}", "{\"msg\" : \"pong\"}", "application/json");
+        test("{\"msg\" : \"ping\"}", "{\"msg\":\"pong\"}", "application/json");
     }
 
     @Test
     public void jsonWithCharset() {
-        test("{\"msg\" : \"ping\"}", "{\"msg\" : \"pong\"}", "application/json; charset=utf8");
+        test("{\"msg\" : \"ping\"}", "{\"msg\":\"pong\"}", "application/json; charset=utf8");
     }
 
     @Test
@@ -66,7 +66,7 @@ public class PactDefectTest {
             .body(expectedResponseBody)
             .toPact();
 
-        PactVerificationResult result = runConsumerTest(pact, new MockProviderConfig("localhost", 0, PactSpecVersion.V2), new PactTestRun() {
+        PactVerificationResult result = runConsumerTest(pact, new MockProviderConfig("localhost", 0, PactSpecVersion.V3), new PactTestRun() {
             @Override
             public void run(@NotNull MockServer mockServer) throws IOException {
               try {

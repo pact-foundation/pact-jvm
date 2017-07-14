@@ -1,6 +1,9 @@
 package au.com.dius.pact.consumer.groovy
 
-import org.apache.commons.lang3.RandomStringUtils
+import au.com.dius.pact.model.generators.RandomBooleanGenerator
+import au.com.dius.pact.model.generators.RandomDecimalGenerator
+import au.com.dius.pact.model.generators.RandomIntGenerator
+import au.com.dius.pact.model.generators.RandomStringGenerator
 import org.apache.commons.lang3.time.DateUtils
 
 import java.text.ParseException
@@ -9,46 +12,77 @@ import java.util.regex.Pattern
 /**
  * Base class for DSL matcher methods
  */
-@SuppressWarnings('DuplicateNumberLiteral')
+@SuppressWarnings(['DuplicateNumberLiteral', 'ConfusingMethodName'])
 class Matchers {
 
   static final String HEXADECIMAL = '[0-9a-fA-F]+'
   static final String IP_ADDRESS = '(\\d{1,3}\\.)+\\d{1,3}'
   static final String UUID_REGEX = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
-  private static final int TEN = 10
-  public static final String TYPE = 'type'
+  static final int TEN = 10
+  static final String TYPE = 'type'
+  static final String DECIMAL = 'decimal'
+  static final long DATE_2000 = 949323600000L
+  static final String INTEGER = 'integer'
 
+  /**
+   * Match a regular expression
+   * @param re Regular expression pattern
+   * @param value Example value, if not provided a random one will be generated
+   */
   static regexp(Pattern re, String value = null) {
     regexp(re.toString(), value)
   }
 
+  /**
+   * Match a regular expression
+   * @param re Regular expression pattern
+   * @param value Example value, if not provided a random one will be generated
+   */
   static regexp(String regexp, String value = null) {
     if (value && !value.matches(regexp)) {
       throw new InvalidMatcherException("Example \"$value\" does not match regular expression \"$regexp\"")
     }
-    new RegexpMatcher(values: [regexp, value])
+    new RegexpMatcher(regex: regexp, value: value)
   }
 
+  /**
+   * Match a hexadecimal value
+   * @param value Example value, if not provided a random one will be generated
+   */
   static hexValue(String value = null) {
     if (value && !value.matches(HEXADECIMAL)) {
       throw new InvalidMatcherException("Example \"$value\" is not a hexadecimal value")
     }
-    new RegexpMatcher(values: [HEXADECIMAL, value ?: RandomStringUtils.random(TEN, '0123456789abcdef')])
+    new HexadecimalMatcher(value: value)
   }
 
+  /**
+   * Match a numeric identifier (integer)
+   * @param value Example value, if not provided a random one will be generated
+   */
   static identifier(def value = null) {
-    new TypeMatcher(values: [TYPE, value ?: RandomStringUtils.randomNumeric(TEN) as Long])
+    new TypeMatcher(value: value ?: 12345678, type: INTEGER,
+      generator: value == null ? new RandomIntGenerator(0, Integer.MAX_VALUE) : null)
   }
 
+  /**
+   * Match an IP Address
+   * @param value Example value, if not provided 127.0.0.1 will be generated
+   */
   static ipAddress(String value = null) {
     if (value && !value.matches(IP_ADDRESS)) {
       throw new InvalidMatcherException("Example \"$value\" is not an ip adress")
     }
-    new RegexpMatcher(values: [IP_ADDRESS, value ?: '127.0.0.1'])
+    new RegexpMatcher(value: '127.0.0.1', regex: IP_ADDRESS)
   }
 
+  /**
+   * Match a numeric value
+   * @param value Example value, if not provided a random one will be generated
+   */
   static numeric(Number value = null) {
-    new TypeMatcher(values: ['number', value ?: RandomStringUtils.randomNumeric(TEN) as Long])
+    new TypeMatcher(type: 'number', value: value ?: 100,
+      generator: value == null ? new RandomDecimalGenerator(6) : null)
   }
 
   /**
@@ -56,20 +90,35 @@ class Matchers {
    */
   @Deprecated
   static real(Number value = null) {
-    new TypeMatcher(values: ['real', value ?: (RandomStringUtils.randomNumeric(TEN) as BigDecimal) / 100.0])
+    decimal(value)
   }
 
+  /**
+   * Match a decimal value
+   * @param value Example value, if not provided a random one will be generated
+   */
   static decimal(Number value = null) {
-    new TypeMatcher(values: ['decimal', value ?: (RandomStringUtils.randomNumeric(TEN) as BigDecimal) / 100.0])
+    new TypeMatcher(type: DECIMAL, value: value ?: 100.0,
+      generator: value == null ? new RandomDecimalGenerator(6) : null)
   }
 
+  /**
+   * Match a integer value
+   * @param value Example value, if not provided a random one will be generated
+   */
   static integer(Long value = null) {
-    new TypeMatcher(values: ['integer', value ?: RandomStringUtils.randomNumeric(TEN) as Long])
+    new TypeMatcher(type: INTEGER, value: value ?: 100,
+      generator: value == null ? new RandomIntGenerator(0, Integer.MAX_VALUE) : null)
   }
 
+  /**
+   * Match a timestamp
+   * @param pattern Pattern to use to match. If not provided, an ISO pattern will be used.
+   * @param value Example value, if not provided the current date and time will be used
+   */
   static timestamp(String pattern = null, def value = null) {
     validateTimeValue(value, pattern)
-    new TimestampMatcher(values: value, pattern: pattern)
+    new TimestampMatcher(value: value, pattern: pattern)
   }
 
   private static validateTimeValue(String value, String pattern) {
@@ -82,14 +131,25 @@ class Matchers {
     }
   }
 
+  /**
+   * Match a time
+   * @param pattern Pattern to use to match. If not provided, an ISO pattern will be used.
+   * @param value Example value, if not provided the current time will be used
+   */
   static time(String pattern = null, def value = null) {
     validateTimeValue(value, pattern)
-    new TimeMatcher(values: value, pattern: pattern)
+    new TimeMatcher(value: value, pattern: pattern)
   }
+
+  /**
+   * Match a date
+   * @param pattern Pattern to use to match. If not provided, an ISO pattern will be used.
+   * @param value Example value, if not provided the current date will be used
+   */
 
   static date(String pattern = null, def value = null) {
     validateTimeValue(value, pattern)
-    new DateMatcher(values: value, pattern: pattern)
+    new DateMatcher(value: value, pattern: pattern)
   }
 
   /**
@@ -111,11 +171,39 @@ class Matchers {
     if (value && !value.matches(UUID_REGEX)) {
       throw new InvalidMatcherException("Example \"$value\" is not a UUID")
     }
-    new RegexpMatcher(values: [UUID_REGEX, value ?: UUID.randomUUID().toString()])
+    new UuidMatcher(value: value)
   }
 
+  /**
+   * Match any string value
+   * @param value Example value, if not provided a random one will be generated
+   */
   static string(String value = null) {
-    new TypeMatcher(values: [TYPE, value ?: RandomStringUtils.randomAlphanumeric(TEN)])
+    if (value != null) {
+      new TypeMatcher(value: value)
+    } else {
+      new TypeMatcher(value: 'string', generator: new RandomStringGenerator(10))
+    }
+  }
+
+  /**
+   * Match any boolean
+   * @param value Example value, if not provided a random one will be generated
+   */
+  static bool(Boolean value = null) {
+    if (value != null) {
+      new TypeMatcher(value: value)
+    } else {
+      new TypeMatcher(value: true, generator: RandomBooleanGenerator.INSTANCE)
+    }
+  }
+
+  /**
+   * Array where each element like the following object
+   * @param numberExamples Optional number of examples to generate. Defaults to 1.
+   */
+  static eachLike(Integer numberExamples = 1, def arg) {
+    new EachLikeMatcher(value: arg, numberExamples: numberExamples)
   }
 
   /**
@@ -128,7 +216,7 @@ class Matchers {
       throw new InvalidMatcherException("The number of examples you have specified ($numberExamples) is " +
         "greater than the maximum ($max)")
     }
-    new MaxLikeMatcher(values: [max, arg], numberExamples: numberExamples)
+    new MaxLikeMatcher(max: max, value: arg, numberExamples: numberExamples)
   }
 
   /**
@@ -141,15 +229,57 @@ class Matchers {
       throw new InvalidMatcherException("The number of examples you have specified ($numberExamples) is " +
         "less than the minimum ($min)")
     }
-    new MinLikeMatcher(values: [min, arg], numberExamples: numberExamples)
+    new MinLikeMatcher(min: min, value: arg, numberExamples: numberExamples)
   }
 
   /**
-   * Array where each element is like the following object
-   * @param numberExamples Optional number of examples to generate. Defaults to 1.
+   * Match Equality
+   * @param value Value to match to
    */
-  static eachLike(Integer numberExamples = 1, def arg) {
-    new EachLikeMatcher(values: [null,  arg], numberExamples: numberExamples)
+  static equalTo(def value) {
+    new EqualsMatcher(value: value)
   }
 
+  /**
+   * Matches if the string is included in the value
+   * @param value String value that must be present
+   */
+  static includesStr(def value) {
+    new IncludeMatcher(value: value?.toString())
+  }
+
+  /**
+   * Matches if any of the provided matches match
+   * @param example Example value to use
+   */
+  static or(def example, Object... values) {
+    new OrMatcher(value: example, matchers: values.collect {
+      if (it instanceof Matcher) {
+        it
+      } else {
+        new EqualsMatcher(value: it)
+      }
+    })
+  }
+
+  /**
+   * Matches if all of the provided matches match
+   * @param example Example value to use
+   */
+  static and(def example, Object... values) {
+    new AndMatcher(value: example, matchers: values.collect {
+      if (it instanceof Matcher) {
+        it
+      } else {
+        new EqualsMatcher(value: it)
+      }
+    })
+  }
+
+  /**
+   * Matches a null value
+   */
+  static nullValue() {
+    new NullMatcher()
+  }
 }

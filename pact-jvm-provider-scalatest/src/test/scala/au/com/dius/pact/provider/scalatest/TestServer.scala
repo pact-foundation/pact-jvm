@@ -18,7 +18,7 @@ class TestServer {
 
   def startServer(): Unit = {
 
-    val config = MockProviderConfig.createDefault(PactSpecVersion.V2)
+    val config = MockProviderConfig.createDefault(PactSpecVersion.V3)
     val server = Server.http(config.getPort, config.getHostname).handler(new Plan with SynchronousExecution with ServerErrorResponse {
       def intent: Plan.Intent = {
         case req => {

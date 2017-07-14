@@ -5,6 +5,7 @@ import au.com.dius.pact.model.Consumer;
 import au.com.dius.pact.model.InvalidPactException;
 import au.com.dius.pact.model.OptionalBody;
 import au.com.dius.pact.model.Provider;
+import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.model.v3.messaging.Message;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import org.apache.http.entity.ContentType;
@@ -28,14 +29,14 @@ public class MessagePactBuilder {
   private Consumer consumer;
 
   /**
-   * The producer for the pact.
+   * The provider for the pact.
    */
   private Provider provider;
 
   /**
-   * Producer state
+   * Provider states
    */
-  private String providerState;
+  private List<ProviderState> providerStates = new ArrayList<>();
 
   /**
    * Messages for the pact
@@ -78,7 +79,7 @@ public class MessagePactBuilder {
    * @return this builder.
    */
   public MessagePactBuilder given(String providerState) {
-    this.providerState = providerState;
+    this.providerStates.add(new ProviderState(providerState));
     return this;
   }
 
@@ -88,7 +89,7 @@ public class MessagePactBuilder {
    * @param description message description.
    */
   public MessagePactBuilder expectsToReceive(String description) {
-    Message message = new Message(description, providerState);
+    Message message = new Message(description, providerStates);
     if (messages == null) {
       messages = new ArrayList<Message>();
     }
@@ -125,8 +126,9 @@ public class MessagePactBuilder {
       metadata.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
     }
 
-    message.setContents(OptionalBody.body(body.toString()));
-    message.setMatchingRules(body.getMatchers());
+    DslPart parent = body.close();
+    message.setContents(OptionalBody.body(parent.toString()));
+    message.getMatchingRules().addCategory(parent.getMatchers());
 
     return this;
   }

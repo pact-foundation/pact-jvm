@@ -2,6 +2,13 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue
+import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.model.matchingrules.DateMatcher
+import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.model.matchingrules.MaxTypeMatcher
+import au.com.dius.pact.model.matchingrules.MinTypeMatcher
+import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.model.matchingrules.TypeMatcher
 import groovy.json.JsonSlurper
 import spock.lang.Specification
 
@@ -50,11 +57,11 @@ class PactDslJsonArrayMatcherSpec extends Specification {
         new JsonSlurper().parseText(subject.body.toString()) == [
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
-        subject.matchers == [
-          '$.body': [min: 0, match: 'type'],
-          '$.body[*].amount': [match: 'decimal'],
-          '$.body[*].clearedDate': [date: 'mm/dd/yyyy'],
-          '$.body[*].status': [match: 'type']
+        subject.matchers.matchingRules == [
+          '': new MatchingRuleGroup([new MinTypeMatcher(0)]),
+          '[*].amount': new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)]),
+          '[*].clearedDate': new MatchingRuleGroup([new DateMatcher('mm/dd/yyyy')]),
+          '[*].status': new MatchingRuleGroup([TypeMatcher.INSTANCE])
         ]
     }
 
@@ -71,11 +78,11 @@ class PactDslJsonArrayMatcherSpec extends Specification {
         new JsonSlurper().parseText(subject.body.toString()) == [
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
-        subject.matchers == [
-          '$.body': [min: 1, match: 'type'],
-          '$.body[*].amount': [match: 'decimal'],
-          '$.body[*].clearedDate': [date: 'mm/dd/yyyy'],
-          '$.body[*].status': [match: 'type']
+        subject.matchers.matchingRules == [
+          '': new MatchingRuleGroup([new MinTypeMatcher(1)]),
+          '[*].amount': new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)]),
+          '[*].clearedDate': new MatchingRuleGroup([new DateMatcher('mm/dd/yyyy')]),
+          '[*].status': new MatchingRuleGroup([TypeMatcher.INSTANCE])
         ]
     }
 
@@ -92,11 +99,11 @@ class PactDslJsonArrayMatcherSpec extends Specification {
         new JsonSlurper().parseText(subject.body.toString()) == [
           [amount: 100, clearedDate: date.format('mm/dd/yyyy'), status: 'STATUS']
         ]
-        subject.matchers == [
-          '$.body': [max: 10, match: 'type'],
-          '$.body[*].amount': [match: 'decimal'],
-          '$.body[*].clearedDate': [date: 'mm/dd/yyyy'],
-          '$.body[*].status': [match: 'type']
+        subject.matchers.matchingRules == [
+          '': new MatchingRuleGroup([new MaxTypeMatcher(10)]),
+          '[*].amount': new MatchingRuleGroup([new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)]),
+          '[*].clearedDate': new MatchingRuleGroup([new DateMatcher('mm/dd/yyyy')]),
+          '[*].status': new MatchingRuleGroup([TypeMatcher.INSTANCE])
         ]
     }
 
@@ -208,7 +215,7 @@ class PactDslJsonArrayMatcherSpec extends Specification {
 
     then:
     result == '[["eachLike"],["maxArrayLike"],["minArrayLike","minArrayLike"]]'
-    subject.matchers == [
+    subject.matchers.toMap(PactSpecVersion.V2) == [
       '$.body[1]': [max: 2, match: 'type'],
       '$.body[2]': [min: 2, match: 'type'],
       '$.body[0]': [min: 0, match: 'type'],

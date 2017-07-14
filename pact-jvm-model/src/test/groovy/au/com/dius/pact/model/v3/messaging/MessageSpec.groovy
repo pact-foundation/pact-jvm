@@ -1,6 +1,7 @@
 package au.com.dius.pact.model.v3.messaging
 
 import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.model.ProviderState
 import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -23,6 +24,70 @@ class MessageSpec extends Specification {
       message.contentsAsBytes() == []
   }
 
+  def 'defaults to V3 provider state format when converting from a map'() {
+    given:
+    def map = [
+      providerState: 'test state',
+      providerStates: [
+        [name: 'V3 state']
+      ]
+    ]
+
+    when:
+    Message message = Message.fromMap(map)
+
+    then:
+    message.providerState == 'V3 state'
+    message.providerStates == [new ProviderState('V3 state')]
+  }
+
+  def 'falls back to V2 provider state format when converting from a map'() {
+    given:
+    def map = [providerState: 'test state']
+
+    when:
+    Message message = Message.fromMap(map)
+
+    then:
+    message.providerState == 'test state'
+    message.providerStates == [new ProviderState('test state')]
+  }
+
+  def 'Uses V3 provider state format when converting to a map'() {
+    given:
+    Message message = new Message(description: 'test', contents: OptionalBody.body('"1 2 3 4"'), providerStates: [
+      new ProviderState('Test', [a: 'A', b: 100])])
+
+    when:
+    def map = message.toMap()
+
+    then:
+    map == [
+      description: 'test',
+      metaData: [:],
+      contents: '1 2 3 4',
+      providerStates: [
+        [name: 'Test', params: [a: 'A', b: 100]]
+      ]
+    ]
+  }
+
+  def 'delegates to the matching rules to parse matchers'() {
+    given:
+    def json = [
+      matchingRules: [
+        'stuff': ['': [matchers: [ [match: 'type'] ] ] ]
+      ]
+    ]
+
+    when:
+    def message = Message.fromMap(json)
+
+    then:
+    !message.matchingRules.empty
+    message.matchingRules.hasCategory('stuff')
+  }
+
   def 'unique key test'() {
     expect:
     interaction1.uniqueKey() == interaction1.uniqueKey()
@@ -37,9 +102,9 @@ class MessageSpec extends Specification {
     where:
     interaction1 = new Message('description 1+2')
     interaction2 = new Message('description 1+2')
-    interaction3 = new Message('description 1+2', 'state 3')
+    interaction3 = new Message('description 1+2', [new ProviderState('state 3')])
     interaction4 = new Message('description 4')
-    interaction5 = new Message('description 4', 'state 5')
+    interaction5 = new Message('description 4', [new ProviderState('state 5')])
   }
 
   def 'messages do not conflict if they have different states'() {
@@ -47,8 +112,8 @@ class MessageSpec extends Specification {
     !message1.conflictsWith(message2)
 
     where:
-    message1 = new Message('description', 'state')
-    message2 = new Message('description', 'state 2')
+    message1 = new Message('description', [new ProviderState('state')])
+    message2 = new Message('description', [new ProviderState('state 2')])
   }
 
   def 'messages do not conflict if they have different descriptions'() {
@@ -56,8 +121,8 @@ class MessageSpec extends Specification {
     !message1.conflictsWith(message2)
 
     where:
-    message1 = new Message('description', 'state')
-    message2 = new Message('description 2', 'state')
+    message1 = new Message('description', [new ProviderState('state')])
+    message2 = new Message('description 2', [new ProviderState('state')])
   }
 
   def 'messages do not conflict if they are identical'() {
@@ -65,8 +130,8 @@ class MessageSpec extends Specification {
     !message1.conflictsWith(message2)
 
     where:
-    message1 = new Message('description', 'state', OptionalBody.body('1 2 3'))
-    message2 = new Message('description', 'state', OptionalBody.body('1 2 3'))
+    message1 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3'))
+    message2 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3'))
   }
 
   @Ignore('Message conflicts do not work with generated values')
@@ -75,8 +140,8 @@ class MessageSpec extends Specification {
     message1.conflictsWith(message2)
 
     where:
-    message1 = new Message('description', 'state', OptionalBody.body('1 2 3'), null, [contentType: 'text/plain'])
-    message2 = new Message('description', 'state', OptionalBody.body('1 2 3 4'), null, [contentType: 'text/plain'])
+    message1 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3'))
+    message2 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3 4'))
   }
 
   @Unroll

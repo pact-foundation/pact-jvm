@@ -94,9 +94,10 @@ class PactResultSpec extends Specification {
          def e = thrown(AssertionError)
          e.message.contains(
             'QueryMismatch(status,good,bad,Some(Expected \'good\' but received \'bad\' for query parameter ' +
-              '\'status\'),$.query.status.0)')
+              '\'status\'),status)')
     }
 
+    @SuppressWarnings('LineLength')
     def 'case when the test passes and there is a missing request'() {
       given:
         def testService = new PactBuilder().build  {
@@ -133,8 +134,9 @@ class PactResultSpec extends Specification {
           '\tpath: /path\n' +
           '\tquery: [:]\n' +
           '\theaders: [Content-Type:application/json]\n' +
-          '\tmatchers: [:]\n' +
-          '\tbody: au.com.dius.pact.model.OptionalBody(PRESENT, {\n' +
+          '\tmatchers: MatchingRules(rules=[body:Category(name=body, matchingRules={}), path:Category(name=path, matchingRules={})])\n' +
+          '\tgenerators: Generators(categories={})\n' +
+          '\tbody: OptionalBody(state=PRESENT, value={\n' +
           '    "status": "isGood"\n' +
           '})')
     }

@@ -13,7 +13,16 @@
       ]
     },
     "matchingRules": {
-      "$.body.animals": {"min": 1}
+      "body": {
+        "$.animals": {
+          "matchers": [
+            {
+              "min": 1,
+              "match": "type"
+            }
+          ]
+        }
+      }
     }
   },
   "actual": {

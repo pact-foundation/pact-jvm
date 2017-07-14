@@ -36,7 +36,7 @@ trait PactSpec extends FragmentsFactory {
 
   class ReadyForTest(pactFragment: PactFragment) {
     def withConsumerTest(test: MockProviderConfig => Result) = {
-      val config = MockProviderConfig.createDefault(PactSpecVersion.V2)
+      val config = MockProviderConfig.createDefault(PactSpecVersion.V3)
       val description = s"Consumer '${pactFragment.consumer.getName}' has a pact with Provider '${pactFragment.provider.getName}': " +
         pactFragment.interactions.map { i => i.getDescription }.mkString(" and ") + sys.props("line.separator")
 

@@ -24,7 +24,7 @@ class Defect342MultiTest {
   private static final String SOME_SERVICE_USER = '/some-service/user/'
 
   @Rule
-  public final PactProviderRuleMk2 mockProvider = new PactProviderRuleMk2('multitest_provider', 'localhost', 8096, this)
+  public final PactProviderRuleMk2 mockProvider = new PactProviderRuleMk2('multitest_provider', this)
 
   private static user() {
     [
@@ -63,7 +63,7 @@ class Defect342MultiTest {
   @Test
   @PactVerification(fragment = 'createFragment1')
   void runTest1() {
-    def http = new HTTPBuilder(mockProvider.config.url())
+    def http = new HTTPBuilder(mockProvider.url)
 
     http.post(path: '/some-service/users', body: user(), requestContentType: ContentType.JSON) { response ->
       assert response.status == 201
@@ -93,10 +93,10 @@ class Defect342MultiTest {
   @Test
   @PactVerification(fragment = 'createFragment2')
   void runTest2() {
-    assert Request.Put('http://localhost:8096/numbertest')
+    assert Request.Put(mockProvider.url + '/numbertest')
       .addHeader('Accept', ContentType.JSON.toString())
       .bodyString('{"name": "harry","data": 1234.0 }', org.apache.http.entity.ContentType.APPLICATION_JSON)
-      .execute().returnContent().asString() == '{"responsetest": true, "name": "harry","data": 1234.0 }'
+      .execute().returnContent().asString() == '{"responsetest":true,"name":"harry","data":1234.0}'
   }
 
   @Pact(provider = 'multitest_provider', consumer = 'test_consumer')
@@ -138,13 +138,13 @@ class Defect342MultiTest {
   @Test
   @PactVerification(fragment = 'getUsersFragment')
   void runTest3() {
-    assert Request.Get('http://localhost:8096/idm/user').execute().returnContent().asString()
+    assert Request.Get(mockProvider.url + '/idm/user').execute().returnContent().asString()
   }
 
   @Test
   @PactVerification(fragment = 'getUsersFragment2')
   void runTest4() {
-    assert Request.Get('http://localhost:8096/idm/user').execute().returnContent().asString()
+    assert Request.Get(mockProvider.url + '/idm/user').execute().returnContent().asString()
   }
 
 }

@@ -12,8 +12,9 @@ class PactPlugin implements Plugin<Project> {
 
   private static final GROUP = 'Pact'
   private static final String PACT_VERIFY = 'pactVerify'
+  private static final String TEST_CLASSES = 'testClasses'
 
-    @Override
+  @Override
     void apply(Project project) {
 
         // Create and install the extension object
@@ -39,8 +40,12 @@ class PactPlugin implements Plugin<Project> {
             it.pact.serviceProviders.all { ProviderInfo provider ->
                 def providerTask = project.task("pactVerify_${provider.name}",
                     description: "Verify the pacts against ${provider.name}", type: PactVerificationTask,
-                    group: GROUP, dependsOn: 'testClasses') {
+                    group: GROUP) {
                     providerToVerify = provider
+                }
+
+                if (project.tasks.findByName(TEST_CLASSES)) {
+                  providerTask.dependsOn TEST_CLASSES
                 }
 
                 if (provider.startProviderTask != null) {
@@ -51,7 +56,9 @@ class PactPlugin implements Plugin<Project> {
                     providerTask.finalizedBy(provider.terminateProviderTask)
                 }
 
-                it.pactVerify.dependsOn(providerTask)
+                if (provider.isDependencyForPactVerify) {
+                    it.pactVerify.dependsOn(providerTask)
+                }
             }
         }
     }

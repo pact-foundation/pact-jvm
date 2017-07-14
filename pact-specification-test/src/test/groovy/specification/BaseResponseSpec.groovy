@@ -2,8 +2,10 @@ package specification
 
 import au.com.dius.pact.model.PactReader
 import groovy.json.JsonSlurper
+import groovy.util.logging.Slf4j
 import spock.lang.Specification
 
+@Slf4j
 class BaseResponseSpec extends Specification {
 
   static List loadTestCases(String testDir) {
@@ -19,7 +21,7 @@ class BaseResponseSpec extends Specification {
           expected.setDefaultMimeType(expected.detectContentType())
         }
         actual.setDefaultMimeType(actual.body.present ? actual.detectContentType() : 'application/json')
-        result << [d.name, json.comment, json.match, json.match ? 'should match' : 'should not match',
+        result << [d.name, f.name, json.comment, json.match, json.match ? 'should match' : 'should not match',
                    expected, actual]
       }
     }

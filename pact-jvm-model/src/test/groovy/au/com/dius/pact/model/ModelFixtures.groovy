@@ -1,5 +1,8 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.model.matchingrules.MatchingRules
+import au.com.dius.pact.model.matchingrules.TypeMatcher
+
 @Singleton
 class ModelFixtures {
 
@@ -8,12 +11,24 @@ class ModelFixtures {
 
   static response = new Response(200, [testreqheader: 'testreqheaderval'], OptionalBody.body('{"responsetest":true}'))
 
+  static requestMatchers = {
+    def rules = new MatchingRules()
+    rules.addCategory('body').addRule('$.test', new TypeMatcher())
+    rules
+  }
+
   static requestWithMatchers = new Request('GET', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
     [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'),
-    ['$.body.test': [match: 'type']])
+    requestMatchers())
+
+  static responseMatchers = {
+    def rules = new MatchingRules()
+    rules.addCategory('body').addRule('$.responsetest', new TypeMatcher())
+    rules
+  }
 
   static responseWithMatchers = new Response(200, [testreqheader: 'testreqheaderval'],
-    OptionalBody.body('{"responsetest":true}'), ['$.body.responsetest': [match: 'type']])
+    OptionalBody.body('{"responsetest":true}'), responseMatchers())
 
   static requestNoBody = new Request('GET', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
     [testreqheader: 'testreqheadervalue'])

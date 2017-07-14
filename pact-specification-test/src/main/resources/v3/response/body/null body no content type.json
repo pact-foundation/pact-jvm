@@ -1,0 +1,11 @@
+{
+  "match": true,
+  "comment": "NULL body, no content-type",
+  "expected" : {
+    "body": null
+  },
+  "actual": {
+    "headers": {"Content-Type": "application/json"},
+    "body": null
+  }
+}

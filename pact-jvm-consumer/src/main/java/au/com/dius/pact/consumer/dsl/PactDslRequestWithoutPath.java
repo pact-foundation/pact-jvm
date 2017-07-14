@@ -2,6 +2,9 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.OptionalBody;
+import au.com.dius.pact.model.generators.Generators;
+import au.com.dius.pact.model.matchingrules.MatchingRules;
+import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import au.com.dius.pact.model.PactReader;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.ArrayUtils;
@@ -29,7 +32,8 @@ public class PactDslRequestWithoutPath {
     private Map<String, String> requestHeaders = new HashMap<>();
     private Map<String, List<String>> query = new HashMap<>();
     private OptionalBody requestBody = OptionalBody.missing();
-    private Map<String, Map<String, Object>> requestMatchers = new HashMap<>();
+    private MatchingRules requestMatchers = new MatchingRules();
+    private Generators requestGenerators = new Generators();
     private String consumerName;
     private String providerName;
 
@@ -213,10 +217,8 @@ public class PactDslRequestWithoutPath {
      */
     public PactDslRequestWithoutPath body(DslPart body) {
         DslPart parent = body.close();
-        requestMatchers = new HashMap<String, Map<String, Object>>();
-        for (String matcherName : parent.matchers.keySet()) {
-            requestMatchers.put("$.body" + matcherName, parent.matchers.get(matcherName));
-        }
+        requestMatchers.addCategory(parent.matchers);
+        requestGenerators.addGenerators(parent.generators);
         requestBody = OptionalBody.body(parent.toString());
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
             requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
@@ -244,7 +246,7 @@ public class PactDslRequestWithoutPath {
      */
     public PactDslRequestWithPath path(String path) {
         return new PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state, description, path,
-                requestMethod, requestHeaders, query, requestBody, requestMatchers);
+                requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators);
     }
 
     /**
@@ -263,10 +265,8 @@ public class PactDslRequestWithoutPath {
      * @param pathRegex regular expression to use to match paths
      */
     public PactDslRequestWithPath matchPath(String pathRegex, String path) {
-        HashMap<String, Object> matcher = new HashMap<String, Object>();
-        matcher.put("regex", pathRegex);
-        requestMatchers.put("$.path", matcher);
+        requestMatchers.addCategory("path").addRule(new RegexMatcher(pathRegex));
         return new PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state, description, path,
-                requestMethod, requestHeaders, query, requestBody, requestMatchers);
+                requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators);
     }
 }

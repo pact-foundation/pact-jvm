@@ -9,7 +9,8 @@ class PactSpec extends Specification {
     request = new Request('Get', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
       [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'))
     response = new Response(200, [testreqheader: 'testreqheaderval'], OptionalBody.body('{"responsetest":true}'))
-    interaction = new RequestResponseInteraction('test interaction', 'test state', request, response)
+    interaction = new RequestResponseInteraction('test interaction', [new ProviderState('test state')],
+      request, response)
     provider = new Provider('test_provider')
     consumer = new Consumer('test_consumer')
     pact = new RequestResponsePact(provider, consumer, [interaction])
@@ -18,11 +19,11 @@ class PactSpec extends Specification {
   def 'Pact should Locate Interactions'() {
     given:
     def description = 'descriptiondata'
-    def state = 'stateData'
+    def state = new ProviderState('stateData')
 
     def interaction = new RequestResponseInteraction(
       description,
-      state,
+      [state],
       new Request('Get', ''),
       new Response(200)
     )
@@ -34,7 +35,7 @@ class PactSpec extends Specification {
     )
 
     when:
-    def result = pact.interactionFor(description, state)
+    def result = pact.interactionFor(description, state.name)
 
     then:
     result == interaction

@@ -3,6 +3,7 @@ package au.com.dius.pact.model
 import java.util
 
 import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 
 object Fixtures {
 
@@ -17,7 +18,8 @@ object Fixtures {
   val response = new Response(200, JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheaderval")),
     OptionalBody.body("{\"responsetest\": true}"))
 
-  val interaction = new RequestResponseInteraction("test interaction", "test state", request, response)
+  val interaction = new RequestResponseInteraction("test interaction", Seq(new ProviderState("test state")).asJava,
+    request, response)
 
   val interactions = util.Arrays.asList(interaction)
 

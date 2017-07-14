@@ -9,6 +9,7 @@ import org.apache.http.message.BasicStatusLine
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings('LineLength')
 class HalClientSpec extends Specification {
 
   private HalClient client
@@ -53,7 +54,7 @@ class HalClientSpec extends Specification {
     given:
     def mockHttp = Mock(RESTClient) {
       get([path: '/', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json']]) >> { throw new NotFoundHalResponse('') }
+           headers: [Accept: 'application/hal+json, application/json']]) >> { throw new NotFoundHalResponse('') }
     }
     client.newHttpClient() >> mockHttp
 
@@ -68,7 +69,8 @@ class HalClientSpec extends Specification {
     given:
     def mockHttp = Mock(RESTClient) {
       get([path: '/', requestContentType: 'application/json',
-                    headers: [Accept: 'application/hal+json']]) >> [headers: ['Content-Type': 'text/plain']]
+                    headers: [Accept: 'application/hal+json, application/json']]) >> [
+        headers: ['Content-Type': 'text/plain']]
     }
     client.newHttpClient() >> mockHttp
 
@@ -83,7 +85,7 @@ class HalClientSpec extends Specification {
     given:
     def mockHttp = Mock(RESTClient) {
       get([path: '/', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json']]) >> [
+           headers: [Accept: 'application/hal+json, application/json']]) >> [
         headers: ['Content-Type': 'application/hal+json'],
         data: [:]
       ]
@@ -101,7 +103,7 @@ class HalClientSpec extends Specification {
     given:
     def mockHttp = Mock(RESTClient) {
       get([path: '/', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json']]) >> [
+           headers: [Accept: 'application/hal+json, application/json']]) >> [
         headers: ['Content-Type': 'application/hal+json'],
         data: [_links: [:]]
       ]
@@ -119,14 +121,14 @@ class HalClientSpec extends Specification {
     given:
     def mockHttp = Mock(RESTClient) {
       get([path: '/', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json']]) >> [
+           headers: [Accept: 'application/hal+json, application/json']]) >> [
         headers: ['Content-Type': 'application/hal+json;charset=UTF-8'],
         data: [_links: [
           'pb:latest-provider-pacts': [href: '/link']]
         ]
       ]
       get([path: '/link', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json']]) >> [
+           headers: [Accept: 'application/hal+json, application/json']]) >> [
         headers: ['Content-Type': 'application/hal+json;charset=UTF-8'],
         data: [_links: []]
       ]
@@ -144,7 +146,7 @@ class HalClientSpec extends Specification {
     given:
     def mockHttp = Mock(RESTClient) {
       get([path: '/', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json']]) >> [
+           headers: [Accept: 'application/hal+json, application/json']]) >> [
         headers: ['Content-Type': 'application/hal+json'],
         data: [_links: [pacts: []]]
       ]
@@ -173,13 +175,14 @@ class HalClientSpec extends Specification {
       }
     }
     client.newHttpClient() >> mockHttp
+    client.consumeEntity() >> null
 
     when:
     def statusLine = new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 200, 'OK')
     def result = []
     def closure = { r, s -> result << r; result << s }
     client.uploadJson('', '', closure)
-    clientOptions.response.success.call([getStatusLine: { statusLine } ] as HttpResponse)
+    clientOptions.response.success.call([getStatusLine: { statusLine }, getEntity: { } ] as HttpResponse)
 
     then:
     result == ['OK', 'HTTP/1.1 200 OK']
@@ -238,7 +241,6 @@ class HalClientSpec extends Specification {
   }
 
   @Unroll
-  @SuppressWarnings('LineLength')
   def 'failure handling - #description'() {
     given:
     def statusLine = new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 400, 'Not OK')

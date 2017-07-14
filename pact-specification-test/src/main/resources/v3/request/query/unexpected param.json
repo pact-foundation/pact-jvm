@@ -9,17 +9,15 @@
       "hippo": ["John"]
     },
     "headers": {}
-
   },
   "actual": {
     "method": "GET",
     "path": "/path",
     "query": {
       "alligator": ["Mary"],
-      "hippo": ["Fred"],
+      "hippo": ["John"],
       "elephant": ["unexpected"]
     },
     "headers": {}
-
   }
 }

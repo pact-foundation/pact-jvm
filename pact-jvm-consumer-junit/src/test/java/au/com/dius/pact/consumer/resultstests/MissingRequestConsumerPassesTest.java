@@ -72,8 +72,9 @@ public class MissingRequestConsumerPassesTest extends ExpectedToFailBase {
               "\tpath: /second\n" +
               "\tquery: [:]\n" +
               "\theaders: [testreqheader:testreqheadervalue]\n" +
-              "\tmatchers: [:]\n" +
-              "\tbody: au.com.dius.pact.model.OptionalBody(EMPTY, )"));
+              "\tmatchers: MatchingRules(rules=[path:Category(name=path, matchingRules={}), header:Category(name=header, matchingRules={})])\n" +
+              "\tgenerators: Generators(categories={})\n" +
+              "\tbody: OptionalBody(state=EMPTY, value=)"));
 
     }
 }

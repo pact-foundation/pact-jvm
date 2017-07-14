@@ -1,0 +1,21 @@
+{
+  "match": true,
+  "comment": "Missing body",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"}
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "alligator": {
+        "age": 3
+      }
+    }
+  }
+}

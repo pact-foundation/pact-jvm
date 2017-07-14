@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-junit_2.11`
-* version-id = `3.0.x`
+* version-id = `3.2.x`
 
 ## Usage
 
@@ -39,10 +39,10 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
+public class ExampleJavaConsumerPactTest extends ConsumerPactTestMk2 {
 
     @Override
-    protected PactFragment createFragment(PactDslWithProvider builder) {
+    protected RequestResponsePact createFragment(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("testreqheader", "testreqheadervalue");
 
@@ -66,7 +66,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
                 .status(200)
                 .headers(headers)
                 .body("")
-            .toFragment();
+            .toPact();
     }
 
 
@@ -81,13 +81,13 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
     }
 
     @Override
-    protected void runTest(String url) throws IOException {
-        Assert.assertEquals(new ConsumerClient(url).options("/second"), 200);
+    protected void runTest(MockServer mockServer) throws IOException {
+        Assert.assertEquals(new ConsumerClient(mockServer.getUrl()).options("/second"), 200);
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "harry");
-        assertEquals(new ConsumerClient(url).getAsMap("/", ""), expectedResponse);
-        assertEquals(new ConsumerClient(url).options("/second"), 200);
+        assertEquals(new ConsumerClient(mockServer.getUrl()).getAsMap("/", ""), expectedResponse);
+        assertEquals(new ConsumerClient(mockServer.getUrl()).options("/second"), 200);
     }
 }
 ```
@@ -101,16 +101,17 @@ and then add the rule:
 
 ```java
     @Rule
-    public PactProviderRule mockProvider = new PactProviderRule("test_provider", "localhost", 8080, this);
+    public PactProviderRuleMk2 mockProvider = new PactProviderRuleMk2("test_provider", "localhost", 8080, this);
 ```
 
-The hostname and port are optional. If left out, it will default to localhost and a random available port.
+The hostname and port are optional. If left out, it will default to 127.0.0.1 and a random available port. You can get 
+the URL and port from the pact provider rule.
 
 #### 2. Annotate a method with Pact that returns a pact fragment for the provider and consumer
 
 ```java
     @Pact(provider="test_provider", consumer="test_consumer")
-    public PactFragment createFragment(PactDslWithProvider builder) {
+    public RequestResponsePact createPact(PactDslWithProvider builder) {
         return builder
             .given("test state")
             .uponReceiving("ExampleJavaConsumerPactRuleTest test interaction")
@@ -119,7 +120,7 @@ The hostname and port are optional. If left out, it will default to localhost an
             .willRespondWith()
                 .status(200)
                 .body("{\"responsetest\": true}")
-            .toFragment();
+            .toPact();
     }
 ```
 
@@ -129,7 +130,7 @@ You can leave the provider name out. It will then use the provider name of the f
 
 ```java
     @Pact(consumer="test_consumer") // will default to the provider name from mockProvider
-    public PactFragment createFragment(PactDslWithProvider builder) {
+    public RequestResponsePact createFragment(PactDslWithProvider builder) {
         return builder
             .given("test state")
             .uponReceiving("ExampleJavaConsumerPactRuleTest test interaction")
@@ -138,7 +139,7 @@ You can leave the provider name out. It will then use the provider name of the f
             .willRespondWith()
                 .status(200)
                 .body("{\"responsetest\": true}")
-            .toFragment();
+            .toPact();
     }
 ```
 
@@ -150,7 +151,7 @@ You can leave the provider name out. It will then use the provider name of the f
     public void runTest() {
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
-        assertEquals(new ConsumerClient("http://localhost:8080").get("/"), expectedResponse);
+        assertEquals(new ConsumerClient(mockProvider.getUrl()).get("/"), expectedResponse);
     }
 ```
 
@@ -226,57 +227,56 @@ Example:
 
 ```java
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
-import au.com.dius.pact.consumer.ConsumerPactTest;
-import au.com.dius.pact.consumer.PactError;
-import au.com.dius.pact.consumer.TestRun;
-import au.com.dius.pact.consumer.VerificationResult;
-import au.com.dius.pact.consumer.examples.client.ProviderClient;
+import au.com.dius.pact.consumer.PactVerificationResult;
+import au.com.dius.pact.consumer.exampleclients.ProviderClient;
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
 import static org.junit.Assert.assertEquals;
 
-public class PactTest {
+/**
+ * Sometimes it is not convenient to use the ConsumerPactTest as it only allows one test per test class.
+ * The DSL can be used directly in this case.
+ */
+public class DirectDSLConsumerPactTest {
 
     @Test
     public void testPact() {
-        PactFragment pactFragment = ConsumerPactBuilder
-            .consumer("Some Consumer")
-            .hasPactWith("Some Provider")
-            .uponReceiving("a request to say Hello")
+        RequestResponsePact pact = ConsumerPactBuilder
+                .consumer("Some Consumer")
+                .hasPactWith("Some Provider")
+                .uponReceiving("a request to say Hello")
                 .path("/hello")
                 .method("POST")
                 .body("{\"name\": \"harry\"}")
-            .willRespondWith()
+                .willRespondWith()
                 .status(200)
                 .body("{\"hello\": \"harry\"}")
-                .toFragment();
+                .toPact();
 
         MockProviderConfig config = MockProviderConfig.createDefault();
-        VerificationResult result = pactFragment.runConsumer(config, new TestRun() {
-            @Override
-            public void run(MockProviderConfig config) {
-                Map expectedResponse = new HashMap();
-                expectedResponse.put("hello", "harry");
-                try {
-                    assertEquals(new ProviderClient(config.url()).hello("{\"name\": \"harry\"}"),
-                            expectedResponse);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+        PactVerificationResult result = runConsumerTest(pact, config, mockServer -> {
+            Map expectedResponse = new HashMap();
+            expectedResponse.put("hello", "harry");
+            try {
+                assertEquals(new ProviderClient(mockServer.getUrl()).hello("{\"name\": \"harry\"}"),
+                        expectedResponse);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         });
 
-        if (result instanceof PactError) {
-            throw new RuntimeException(((PactError)result).error());
+        if (result instanceof PactVerificationResult.Error) {
+            throw new RuntimeException(((PactVerificationResult.Error)result).getError());
         }
 
-        assertEquals(ConsumerPactTest.PACT_VERIFIED, result);
+        assertEquals(PactVerificationResult.Ok.INSTANCE, result);
     }
 
 }
@@ -308,7 +308,7 @@ The DSL has the following pattern:
     .
     .
     .
-.toFragment()
+.toPact()
 ```
 
 You can define as many interactions as required. Each interaction starts with `uponReceiving` followed by `willRespondWith`.
@@ -357,6 +357,8 @@ one will be generated.
 | id | Will match all numbers by type |
 | hexValue | Will match all hexadecimal encoded strings |
 | uuid | Will match strings containing UUIDs |
+| includesStr | Will match strings containing the provided string |
+| equalsTo | Will match using equals |
 
 _\* Note:_ JSON only supports double precision floating point values. Depending on the language implementation, they
 may parsed as integer, floating point or decimal numbers.
@@ -491,6 +493,18 @@ For an example, have a look at [WildcardKeysTest](src/test/java/au/com/dius/pact
  of the map if there is not a more specific matcher defined for a particular key. Having more than one `eachKeyLike` condition
  applied to a map will result in only one being applied when the pact is verified (probably the last).
 
+#### Combining matching rules with AND/OR
+
+Matching rules can be combined with AND/OR. There are two methods available on the DSL for this. For example:
+
+```java
+DslPart body = new PactDslJsonBody()
+  .numberValue("valueA", 100)
+  .and("valueB","AB", PM.includesStr("A"), PM.includesStr("B")) // Must match both matching rules
+  .or("valueC", null, PM.date(), PM.nullValue()) // will match either a valid date or a null value
+```
+
+The `and` and `or` methods take a variable number of matchers (varargs).
 
 ### Matching on paths (version 2.1.5+)
 
@@ -617,6 +631,7 @@ Version 3 of the pact specification changes the format of pact files in the foll
 * Query parameters are stored in a map form and are un-encoded (see [#66](https://github.com/DiUS/pact-jvm/issues/66)
 and [#97](https://github.com/DiUS/pact-jvm/issues/97) for information on what this can cause).
 * Introduces a new message pact format for testing interactions via a message queue.
+* Multiple provider states can be defined with data parameters.
 
 ## Generating V3 spec pact files (3.1.0+, 2.3.0+)
 
@@ -630,11 +645,11 @@ To have your consumer tests generate V3 format pacts, you can set the specificat
     }
 ```
 
-If you are using the `PactProviderRule`, you can pass the version into the constructor for the rule.
+If you are using the `PactProviderRuleMk2`, you can pass the version into the constructor for the rule.
 
 ```java
     @Rule
-    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", PactSpecVersion.V3, this);
+    public PactProviderRuleMk2 mockTestProvider = new PactProviderRuleMk2("test_provider", PactSpecVersion.V3, this);
 ```
 
 ## Consumer test for a message consumer

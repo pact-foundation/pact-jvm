@@ -134,7 +134,7 @@ class PactReaderSpec extends Specification {
   @SuppressWarnings('UnnecessaryGetter')
   def 'if authentication is set, loads the pact file from a URL with auth'() {
     given:
-    def pactUrl = new URL('http://url.that.requires.auth:8080/')
+    def pactUrl = new UrlSource('http://url.that.requires.auth:8080/')
     def mockAuth = Mock(AuthConfig)
     def mockHttp = Mock(RESTClient) {
       getAuth() >> mockAuth
@@ -164,6 +164,33 @@ class PactReaderSpec extends Specification {
     pact.interactions[0].request.query == [q: ['p', 'p2'], r: ['s']]
     pact.interactions[1].request.query == [datetime: ['2011-12-03T10:15:30+01:00'], description: ['hello world!']]
     pact.interactions[2].request.query == [options: ['delete.topic.enable=true'], broker: ['1']]
+  }
+
+  def 'Defaults to V3 pact provider states'() {
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('test_pact_v3.json')
+
+    when:
+    def pact = PactReader.loadPact(pactUrl)
+
+    then:
+    pact instanceof RequestResponsePact
+    pact.interactions[0].providerStates == [
+      new ProviderState('test state', [name: 'Testy']),
+      new ProviderState('test state 2', [name: 'Testy2'])
+    ]
+  }
+
+  def 'Falls back to the to V2 pact provider state'() {
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('test_pact_v3_old_provider_state.json')
+
+    when:
+    def pact = PactReader.loadPact(pactUrl)
+
+    then:
+    pact instanceof RequestResponsePact
+    pact.interactions[0].providerStates == [ new ProviderState('test state') ]
   }
 
   def 'correctly load pact file from S3'() {

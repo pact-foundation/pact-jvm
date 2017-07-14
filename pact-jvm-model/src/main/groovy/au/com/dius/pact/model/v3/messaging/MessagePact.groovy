@@ -1,12 +1,12 @@
 package au.com.dius.pact.model.v3.messaging
 
+import au.com.dius.pact.model.BasePact
 import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.InvalidPactException
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.Provider
-import au.com.dius.pact.model.v3.V3Pact
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
@@ -19,7 +19,7 @@ import groovy.util.logging.Slf4j
 @ToString(includeSuperProperties = true)
 @EqualsAndHashCode(callSuper = true)
 @CompileStatic
-class MessagePact extends V3Pact {
+class MessagePact extends BasePact {
   List<Message> messages = []
 
   MessagePact(Provider provider, Consumer consumer, List<Message> messages) {
@@ -34,7 +34,7 @@ class MessagePact extends V3Pact {
   static MessagePact fromMap(Map map) {
     def consumer = Consumer.fromMap(map.consumer as Map)
     def provider = Provider.fromMap(map.provider as Map)
-    def messages = map.messages.collect { new Message().fromMap((Map) it) }
+    def messages = map.messages.collect { Message.fromMap((Map) it) }
     def metadata = map.metadata as Map
     new MessagePact(provider, consumer, messages, metadata)
   }

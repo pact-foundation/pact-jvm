@@ -13,6 +13,8 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 import static com.github.restdriver.clientdriver.RestClientDriver.giveEmptyResponse;
 import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 
@@ -49,6 +51,13 @@ public class ContractTest {
         // Prepare service before interaction that require "default" state
         // ...
       LOGGER.info("Now service in default state");
+    }
+
+    @State("state 2")
+    public void toSecondState(Map params) {
+        // Prepare service before interaction that require "state 2" state
+        // ...
+        LOGGER.info("Now service in 'state 2' state: " + params);
     }
 
     @TargetRequestFilter

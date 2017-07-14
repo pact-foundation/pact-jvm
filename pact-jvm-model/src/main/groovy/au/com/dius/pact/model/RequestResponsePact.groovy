@@ -34,7 +34,7 @@ class RequestResponsePact extends BasePact {
     [
       provider      : objectToMap(provider),
       consumer      : objectToMap(consumer),
-      interactions  : interactions.collect { interactionToMap(it, pactSpecVersion) },
+      interactions  : interactions*.toMap(pactSpecVersion),
       metadata      : metaData(pactSpecVersion >= PactSpecVersion.V3 ? '3.0.0' : '2.0.0')
     ]
   }
@@ -46,56 +46,9 @@ class RequestResponsePact extends BasePact {
     sortInteractions()
   }
 
-  @SuppressWarnings('SpaceAroundMapEntryColon')
-  static Map interactionToMap(RequestResponseInteraction interaction, PactSpecVersion pactSpecVersion) {
-    def interactionJson = [
-      description  : interaction.description,
-      request      : requestToMap(interaction.request, pactSpecVersion),
-      response     : responseToMap(interaction.response)
-    ]
-    if (interaction.providerState) {
-      interactionJson.providerState = interaction.providerState
-    }
-    interactionJson
-  }
-
-  static Map requestToMap(Request request, PactSpecVersion pactSpecVersion) {
-    Map<String, Object> map = [
-      method: request.method.toUpperCase() as Object,
-      path: request.path as Object
-    ]
-    if (request.headers) {
-      map.headers = request.headers as Map
-    }
-    if (request.query) {
-      map.query = pactSpecVersion >= PactSpecVersion.V3 ? request.query : mapToQueryStr(request.query)
-    }
-    if (!request.body.missing) {
-      map.body = parseBody(request)
-    }
-    if (request.matchingRules) {
-      map.matchingRules = request.matchingRules
-    }
-    map
-  }
-
-  static Map responseToMap(Response response) {
-    Map<String, Object> map = [status: response.status as Object]
-    if (response.headers) {
-      map.headers = response.headers as Map
-    }
-    if (!response.body.missing) {
-      map.body = parseBody(response)
-    }
-    if (response.matchingRules) {
-      map.matchingRules = response.matchingRules
-    }
-    map
-  }
-
   RequestResponseInteraction interactionFor(String description, String providerState) {
     interactions.find { i ->
-      i.description == description && i.providerState == providerState
+      i.description == description && i.providerStates.any { it.name == providerState }
     }
   }
 }

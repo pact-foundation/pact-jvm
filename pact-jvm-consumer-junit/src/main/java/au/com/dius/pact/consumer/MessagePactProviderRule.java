@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.model.PactSpecVersion;
 import au.com.dius.pact.model.v3.messaging.Message;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +26,7 @@ public class MessagePactProviderRule extends ExternalResource {
 	private byte[] message;
 	private Map<String, Message> providerStateMessages;
 	private MessagePact messagePact;
+	private Map<String, String> metadata;
 
 	/**
 	 * @param testClassInstance
@@ -92,10 +94,10 @@ public class MessagePactProviderRule extends ExternalResource {
 					return;
 				}
 
-				setMessage(providedMessage.contentsAsBytes(), description);
+				setMessage(providedMessage, description);
 				try {
 					base.evaluate();
-					messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir());
+					messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir(), PactSpecVersion.V3);
 				} catch (Throwable t) {
 					throw t;
 				}
@@ -126,9 +128,9 @@ public class MessagePactProviderRule extends ExternalResource {
 		Pact pact = method.getAnnotation(Pact.class);
 		MessagePactBuilder builder = MessagePactBuilder.consumer(pact.consumer()).hasPactWith(provider);
 		MessagePact messagePact = (MessagePact) method.invoke(testClassInstance, builder);
-		setMessage(messagePact.getMessages().get(0).contentsAsBytes(), description);
+		setMessage(messagePact.getMessages().get(0), description);
 		base.evaluate();
-		messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir());
+		messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir(), PactSpecVersion.V3);
 	}
 
 	private Optional<PactVerification> findPactVerification(PactVerifications pactVerifications) {
@@ -223,15 +225,24 @@ public class MessagePactProviderRule extends ExternalResource {
 	public byte[] getMessage() {
 		if (message == null) {
 			throw new UnsupportedOperationException("Message was not created and cannot be retrieved." +
-															" Check @Pact and @PactVerification match the provider.");
+								" Check @Pact and @PactVerification match.");
 		}
 		return message;
 	}
 
-	private void setMessage(byte[] message, Description description)
+	public Map<String, String> getMetadata() {
+		if (metadata == null) {
+			throw new UnsupportedOperationException("Message metadata was not created and cannot be retrieved." +
+								" Check @Pact and @PactVerification match.");
+		}
+		return metadata;
+	}
+
+	private void setMessage(Message message, Description description)
 			throws InvocationTargetException, IllegalAccessException {
 
-		this.message = message;
+		this.message = message.contentsAsBytes();
+		this.metadata = message.getMetaData();
 		Method messageSetter;
 		try {
 			messageSetter = description.getTestClass().getMethod("setMessage", byte[].class);
@@ -239,6 +250,6 @@ public class MessagePactProviderRule extends ExternalResource {
 			//ignore
 			return;
 		}
-		messageSetter.invoke(testClassInstance, message);
+		messageSetter.invoke(testClassInstance, message.contentsAsBytes());
 	}
 }

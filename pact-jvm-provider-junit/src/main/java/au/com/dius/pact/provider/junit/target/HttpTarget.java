@@ -1,16 +1,15 @@
 package au.com.dius.pact.provider.junit.target;
 
+import au.com.dius.pact.model.PactSource;
+import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.ProviderInfo;
 import au.com.dius.pact.provider.ProviderVerifier;
 import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.TargetRequestFilter;
-import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver;
-import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
 import org.apache.http.HttpRequest;
 import org.junit.runners.model.FrameworkMethod;
-import org.junit.runners.model.TestClass;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -107,8 +106,8 @@ public class HttpTarget extends BaseTarget {
      * {@inheritDoc}
      */
     @Override
-    public void testInteraction(final String consumerName, final Interaction interaction) {
-      ProviderInfo provider = getProviderInfo();
+    public void testInteraction(final String consumerName, final Interaction interaction, PactSource source) {
+      ProviderInfo provider = getProviderInfo(source);
       ConsumerInfo consumer = new ConsumerInfo(consumerName);
       ProviderVerifier verifier = setupVerifier(interaction, provider, consumer);
 
@@ -126,8 +125,8 @@ public class HttpTarget extends BaseTarget {
     }
 
     @Override
-  ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider,
-                                         ConsumerInfo consumer) {
+    protected ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider,
+                                             ConsumerInfo consumer) {
     ProviderVerifier verifier = new ProviderVerifier();
 
     setupReporters(verifier, provider.getName(), interaction.getDescription());
@@ -135,8 +134,10 @@ public class HttpTarget extends BaseTarget {
     verifier.initialiseReporters(provider);
     verifier.reportVerificationForConsumer(consumer, provider);
 
-    if (interaction.getProviderState() != null) {
-      verifier.reportStateForInteraction(interaction.getProviderState(), provider, consumer, true);
+    if (!interaction.getProviderStates().isEmpty()) {
+      for (ProviderState providerState: interaction.getProviderStates()) {
+        verifier.reportStateForInteraction(providerState.getName(), provider, consumer, true);
+      }
     }
 
     verifier.reportInteractionDescription(interaction);
@@ -144,7 +145,7 @@ public class HttpTarget extends BaseTarget {
     return verifier;
   }
 
-  ProviderInfo getProviderInfo() {
+  protected ProviderInfo getProviderInfo(PactSource source) {
       Provider provider = testClass.getAnnotation(Provider.class);
       final ProviderInfo providerInfo = new ProviderInfo(provider.value());
       providerInfo.setPort(port);

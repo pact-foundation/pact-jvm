@@ -6,7 +6,7 @@
     "name" : "anotherService2"
   },
   "interactions" : [ {
-    "provider_state": "default",
+    "providerState": "default",
     "description" : "Get data",
     "request" : {
       "method" : "GET",

@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.junit.target;
 
 import au.com.dius.pact.model.Interaction;
+import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.ProviderInfo;
 import au.com.dius.pact.provider.ProviderVerifier;
@@ -9,6 +10,7 @@ import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver;
 import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
 import au.com.dius.pact.provider.reporters.ReporterManager;
 import au.com.dius.pact.provider.reporters.VerifierReporter;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.lambda.Seq;
 import org.jooq.lambda.tuple.Tuple2;
@@ -32,14 +34,14 @@ public abstract class BaseTarget implements TestClassAwareTarget {
    * {@inheritDoc}
    */
   @Override
-  public abstract void testInteraction(final String consumerName, final Interaction interaction);
+  public abstract void testInteraction(final String consumerName, final Interaction interaction, PactSource source);
 
-  abstract ProviderInfo getProviderInfo();
+  protected abstract ProviderInfo getProviderInfo(PactSource source);
 
-  abstract ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider,
-                                         ConsumerInfo consumer);
+  protected abstract ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider,
+                                                    ConsumerInfo consumer);
 
-  void setupReporters(ProviderVerifier verifier, String name, String description) {
+  protected void setupReporters(ProviderVerifier verifier, String name, String description) {
     String reportDirectory = "target/pact/reports";
     String[] reports = new String[]{};
     boolean reportingEnabled = false;
@@ -69,7 +71,7 @@ public abstract class BaseTarget implements TestClassAwareTarget {
     }
   }
 
-  AssertionError getAssertionError(final Map<String, Object> mismatches) {
+  protected AssertionError getAssertionError(final Map<String, Object> mismatches) {
     String error = System.lineSeparator() + Seq.seq(mismatches.values()).zipWithIndex()
       .map(i -> {
         String errPrefix = String.valueOf(i.v2) + " - ";
@@ -86,13 +88,20 @@ public abstract class BaseTarget implements TestClassAwareTarget {
 
   private String exceptionMessage(Throwable err, int prefixLength) {
     String message = err.getMessage();
+
+    Throwable cause = err.getCause();
+    String details = "";
+    if (cause != null) {
+      details = ExceptionUtils.getStackTrace(cause);
+    }
+
     if (message.contains("\n")) {
       String padString = StringUtils.leftPad("", prefixLength);
       Tuple2<Optional<String>, Seq<String>> lines = Seq.of(message.split("\n")).splitAtHead();
       return lines.v1.orElse("") + System.lineSeparator() + lines.v2.map(line -> padString + line)
-        .toString(System.lineSeparator());
+              .toString(System.lineSeparator()) + "\n" + details;
     } else {
-      return message;
+      return message + "\n" + details;
     }
   }
 

@@ -9,8 +9,14 @@
       }
     },
     "matchingRules" : {
-      "$.body.myPerson.*" : {
-        "match": "type"
+      "body": {
+        "$.myPerson.*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
       }
     }
   },
@@ -19,7 +25,7 @@
     "body": {
       "myPerson": {
         "name": "Jon Peterson",
-        "age": "39",
+        "age": 39,
         "nationality": "Australian"
       }
     }    

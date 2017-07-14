@@ -66,7 +66,7 @@ You can build an application bundle with gradle by running (for 2.11 version):
 
 This will create an app bundle in `build/2.11/install/pact-jvm-server_2.11`. You can then execute it with:
 
-    $ java -jar pact-jvm-server/build/2.10/install/pact-jvm-server_2.11/lib/pact-jvm-server_2.11-2.2.4.jar
+    $ java -jar pact-jvm-server/build/2.10/install/pact-jvm-server_2.11/lib/pact-jvm-server_2.11-3.2.11.jar
 
 or with the generated bundle script file:
 

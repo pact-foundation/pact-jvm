@@ -22,10 +22,10 @@ public class ProviderStateTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProviderStateTest.class);
 
     @ClassRule
-    public static final ClientDriverRule embeddedService = new ClientDriverRule(8332);
+    public static final ClientDriverRule embeddedService = new ClientDriverRule(8333);
 
     @TestTarget
-    public final Target target = new HttpTarget(8332);
+    public final Target target = new HttpTarget(8333);
 
     @Before
     public void before() {

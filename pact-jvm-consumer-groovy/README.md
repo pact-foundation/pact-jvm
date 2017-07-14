@@ -3,15 +3,15 @@ pact-jvm-consumer-groovy
 
 Groovy DSL for Pact JVM
 
-##Dependency
+## Dependency
 
 The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-groovy_2.11`
-* version-id = `2.4.x` or `3.3.x`
+* version-id = `3.5.x`
 
-##Usage
+## Usage
 
 Add the `pact-jvm-consumer-groovy` library to your test class path. This provides a `PactBuilder` class for you to use
 to define your pacts. For a full example, have a look at the example JUnit `ExampleGroovyConsumerPactTest`.
@@ -19,46 +19,54 @@ to define your pacts. For a full example, have a look at the example JUnit `Exam
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.3.8'
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.5.0'
     }
 
 Then create an instance of the `PactBuilder` in your test.
 
 ```groovy
-    @Test
-    void "A service consumer side of a pact goes a little something like this"() {
+    import au.com.dius.pact.consumer.PactVerificationResult
+    import au.com.dius.pact.consumer.groovy.PactBuilder
+    import groovyx.net.http.RESTClient
+    import org.junit.Test
 
-        def alice_service = new PactBuilder() // Create a new PactBuilder
-        alice_service {
-            serviceConsumer "Consumer" 	// Define the service consumer by name
-            hasPactWith "Alice Service"   // Define the service provider that it has a pact with
-            port 1234                       // The port number for the service. It is optional, leave it out to
-                                            // to use a random one
+    class AliceServiceConsumerPactTest {
 
-            given('there is some good mallory') // defines a provider state. It is optional.
-            uponReceiving('a retrieve Mallory request') // upon_receiving starts a new interaction
-            withAttributes(method: 'get', path: '/mallory')		// define the request, a GET request to '/mallory'
-            willRespondWith(						// define the response we want returned
-                status: 200,
-                headers: ['Content-Type': 'text/html'],
-                body: '"That is some good Mallory."'
-            )
+        @Test
+        void "A service consumer side of a pact goes a little something like this"() {
+
+            def alice_service = new PactBuilder() // Create a new PactBuilder
+            alice_service {
+                serviceConsumer "Consumer" 	// Define the service consumer by name
+                hasPactWith "Alice Service"   // Define the service provider that it has a pact with
+                port 1234                       // The port number for the service. It is optional, leave it out to
+                                                // to use a random one
+
+                given('there is some good mallory') // defines a provider state. It is optional.
+                uponReceiving('a retrieve Mallory request') // upon_receiving starts a new interaction
+                withAttributes(method: 'get', path: '/mallory')		// define the request, a GET request to '/mallory'
+                willRespondWith(						// define the response we want returned
+                    status: 200,
+                    headers: ['Content-Type': 'text/html'],
+                    body: '"That is some good Mallory."'
+                )
+            }
+
+            // Execute the run method to have the mock server run.
+            // It takes a closure to execute your requests and returns a PactVerificationResult.
+            PactVerificationResult result = alice_service.runTest {
+                def client = new RESTClient('http://localhost:1234/')
+                def alice_response = client.get(path: '/mallory')
+
+                assert alice_response.status == 200
+                assert alice_response.contentType == 'text/html'
+
+                def data = alice_response.data.text()
+                assert data == '"That is some good Mallory."'
+            }
+            assert result == PactVerificationResult.Ok.INSTANCE  // This means it is all good
+
         }
-
-	      // Execute the run method to have the mock server run.
-	      // It takes a closure to execute your requests and returns a Pact VerificationResult.
-	      PactVerificationResult result = alice_service.runTest {
-            def client = new RESTClient('http://localhost:1234/')
-            def alice_response = client.get(path: '/mallory')
-
-            assert alice_response.status == 200
-            assert alice_response.contentType == 'text/html'
-
-            def data = alice_response.data.text()
-            assert data == '"That is some good Mallory."'
-        }
-        assert result == PactVerificationResult.Ok.INSTANCE  // This means it is all good
-
     }
 ```
 
@@ -107,7 +115,13 @@ Sets the port that the mock server will run on. If not supplied, a random port w
 #### given(String providerState)
 
 Defines a state that the provider needs to be in for the request to succeed. For more info, see
-https://github.com/realestate-com-au/pact/wiki/Provider-states
+https://github.com/realestate-com-au/pact/wiki/Provider-states. Can be called multiple times.
+
+#### given(String providerState, Map params)
+
+Defines a state that the provider needs to be in for the request to succeed. For more info, see
+https://github.com/realestate-com-au/pact/wiki/Provider-states. Can be called multiple times, and the params
+map can contain the data required for the state.
 
 #### uponReceiving(String requestDescription)
 
@@ -281,9 +295,9 @@ Defines a matcher that accepts any numerical values. If the value is not provide
 
 Defines a matcher that accepts any integer values. If the value is not provided, a random integer will be used.
 
-* real(def value = null)
+* decimal(def value = null)
 
-Defines a matcher that accepts any real numbers. If the value is not provided, a random double will be used.
+Defines a matcher that accepts any decimal numbers. If the value is not provided, a random decimal will be used.
 
 * timestamp(String pattern = null, def value = null)
 
@@ -300,6 +314,19 @@ If pattern is not provided the ISO_DATE_FORMAT is used ("yyyy-MM-dd") . If the v
 * uuid(String value = null)
 
 Defines a matcher that accepts UUIDs. A random one will be generated if no value is provided.
+
+* equalTo(def value)
+
+Defines an equality matcher that always matches the provided value using `equals`. This is useful for resetting cascading
+type matchers.
+
+* includesStr(def value)
+
+Defines a matcher that accepts any value where its string form includes the provided string.
+
+* nullValue()
+
+Defines a matcher that accepts only null values.
 
 #### What if a field matches a matcher name in the DSL?
 
@@ -420,6 +447,21 @@ For an example, have a look at [WildcardPactSpec](src/test/au/com/dius/pact/cons
  of the map if there is not a more specific matcher defined for a particular key. Having more than one `keyLike` condition
  applied to a map will result in only one being applied when the pact is verified (probably the last).
 
+### Matching with an OR (3.5.0+)
+
+The V3 spec allows multiple matchers to be combined using either AND or OR for a value. The main use of this would be to
+ either be able to match a value or a null, or to combine different matchers.
+ 
+For example:
+
+```groovy
+    withBody {
+        valueA and('AB', includeStr('A'), includeStr('B')) // valueA must include both A and B
+        valueB or('100', regex(~/\d+/), nullValue()) // valueB must either match a regular expression or be null
+        valueC or('12345678', regex(~/\d{8}/), regex(~/X\d{13}/)) // valueC must match either 8 or X followed by 13 digits 
+    }
+```
+
 ## Changing the directory pact files are written to (2.1.9+)
 
 By default, pact files are written to `target/pacts`, but this can be overwritten with the `pact.rootDir` system property.
@@ -444,10 +486,11 @@ Version 3 of the pact specification changes the format of pact files in the foll
 * Query parameters are stored in a map form and are un-encoded (see [#66](https://github.com/DiUS/pact-jvm/issues/66)
 and [#97](https://github.com/DiUS/pact-jvm/issues/97) for information on what this can cause).
 * Introduces a new message pact format for testing interactions via a message queue.
+* Multiple provider states can be defined with data parameters.
 
 ## Generating V3 spec pact files (3.1.0+, 2.3.0+)
 
-To have your consumer tests generate V3 format pacts, you can pass an option into the `run` method. For example:
+To have your consumer tests generate V3 format pacts, you can pass an option into the `runTest` method. For example:
 
 ```groovy
 PactVerificationResult result = service.runTest(specificationVersion: PactSpecVersion.V3) { config ->

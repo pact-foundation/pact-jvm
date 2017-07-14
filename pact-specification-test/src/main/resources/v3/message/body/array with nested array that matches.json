@@ -18,10 +18,38 @@
       ]
     },
     "matchingRules": {
-      "$.body.animals": {"min": 1, "match": "type"},
-      "$.body.animals[*].*": {"match": "type"},
-      "$.body.animals[*].children": {"min": 1, "match": "type"},
-      "$.body.animals[*].children[*].*": {"match": "type"}
+      "body": {
+        "$.animals": {
+          "matchers": [
+            {
+              "min": 1,
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*].*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*].children": {
+          "matchers": [
+            {
+              "min": 1,
+              "match": "type"
+            }
+          ]
+        },
+        "$.animals[*].children[*].*": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
+      }
     }
   },
   "actual": {

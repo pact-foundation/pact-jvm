@@ -13,4 +13,5 @@ class PactPublish {
     String pactBrokerUsername
     String pactBrokerPassword
     String pactBrokerAuthenticationScheme = 'basic'
+    List<String> tags = []
 }

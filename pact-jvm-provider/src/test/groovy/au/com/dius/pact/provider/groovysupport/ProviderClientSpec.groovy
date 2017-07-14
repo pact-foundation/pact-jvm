@@ -1,23 +1,31 @@
 package au.com.dius.pact.provider.groovysupport
 
 import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.Request
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.provider.GroovyScalaUtils$
+import au.com.dius.pact.provider.HttpClientFactory
 import au.com.dius.pact.provider.ProviderClient
+import groovy.json.JsonBuilder
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpRequest
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
+import org.apache.http.impl.client.CloseableHttpClient
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings(['ClosureAsLastMethodParameter', 'MethodCount'])
 class ProviderClientSpec extends Specification {
 
   private ProviderClient client
   private provider
   private HttpRequest httpRequest
+  private ProviderState state
+  private HttpClientFactory httpClientFactory
+  private CloseableHttpClient httpClient
 
   def setup() {
     provider = [
@@ -26,8 +34,11 @@ class ProviderClientSpec extends Specification {
       port: 8080,
       path: '/'
     ]
-    client = GroovySpy(ProviderClient, constructorArgs: [[provider: provider]])
+    httpClient = Mock CloseableHttpClient
+    httpClientFactory = Mock HttpClientFactory
+    client = GroovySpy(ProviderClient, constructorArgs: [[provider: provider, httpClientFactory: httpClientFactory]])
     httpRequest = Mock HttpRequest
+    state = new ProviderState('provider state')
   }
 
   def 'setting up headers does nothing if there are no headers'() {
@@ -108,7 +119,7 @@ class ProviderClientSpec extends Specification {
   def 'setting up body sets a string entity if it is not a url encoded form post and there is a body'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
-    client.request = new Request('PUT', '/', null, null, OptionalBody.body('{}'), [:])
+    client.request = new Request('PUT', '/', null, null, OptionalBody.body('{}'))
 
     when:
     client.setupBody(httpRequest)
@@ -122,7 +133,7 @@ class ProviderClientSpec extends Specification {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
     client.request = new Request('POST', '/', null, ['Content-Type': ContentType.APPLICATION_FORM_URLENCODED.mimeType],
-      OptionalBody.body('A=B'), [:])
+      OptionalBody.body('A=B'))
 
     when:
     client.setupBody(httpRequest)
@@ -136,7 +147,7 @@ class ProviderClientSpec extends Specification {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
     client.request = new Request('POST', '/', ['A': ['B', 'C']], ['Content-Type': 'application/x-www-form-urlencoded'],
-      OptionalBody.body('{}'), [:])
+      OptionalBody.body('{}'))
 
     when:
     client.setupBody(httpRequest)
@@ -151,7 +162,7 @@ class ProviderClientSpec extends Specification {
   def 'request is a url encoded form post'() {
     expect:
     def request = new Request(method, '/', ['A': ['B', 'C']], ['Content-Type': contentType],
-      OptionalBody.body('{}'), [:])
+      OptionalBody.body('{}'))
     ProviderClient.urlEncodedFormPost(request) == urlEncodedFormPost
 
     where:
@@ -306,6 +317,85 @@ class ProviderClientSpec extends Specification {
 
     then:
     1 * httpRequest.addHeader('Apache Collections Closure', 'Was Called')
+    0 * _
+  }
+
+  def 'makeStateChangeRequest does nothing if there is no state change URL'() {
+    given:
+    def stateChangeUrl = null
+
+    when:
+    client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
+
+    then:
+    1 * client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
+    0 * _
+  }
+
+  def 'makeStateChangeRequest posts the state change if there is a state change URL'() {
+    given:
+    def stateChangeUrl = 'http://state.change:1244'
+
+    when:
+    client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
+
+    then:
+    1 * client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
+    1 * httpClientFactory.newClient(provider) >> httpClient
+    1 * httpClient.execute({ it.method == 'POST' && it.requestLine.uri == stateChangeUrl })
+    0 * _
+  }
+
+  def 'makeStateChangeRequest posts the state change if there is a state change URL and it is a URI'() {
+    given:
+    def stateChangeUrl = new URI('http://state.change:1244')
+
+    when:
+    client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
+
+    then:
+    1 * client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
+    1 * httpClientFactory.newClient(provider) >> httpClient
+    1 * httpClient.execute({ it.method == 'POST' && it.requestLine.uri == stateChangeUrl.toString() })
+    0 * _
+  }
+
+  def 'makeStateChangeRequest adds the state change values to the body if postStateInBody is true'() {
+    given:
+    state = new ProviderState('state one', [a: 'a', b: 1])
+    def stateChangeUrl = 'http://state.change:1244'
+    def exepectedBody = new JsonBuilder([
+      state: 'state one',
+      params: [a: 'a', b: 1],
+      action: 'setup'
+    ]).toPrettyString()
+
+    when:
+    client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
+
+    then:
+    1 * client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
+    1 * httpClientFactory.newClient(provider) >> httpClient
+    1 * httpClient.execute({
+      it.method == 'POST' && it.requestLine.uri == stateChangeUrl && it.entity.content.text == exepectedBody
+    })
+    0 * _
+  }
+
+  def 'makeStateChangeRequest adds the state change values to the query parameters if postStateInBody is false'() {
+    given:
+    state = new ProviderState('state one', [a: 'a', b: 1])
+    def stateChangeUrl = 'http://state.change:1244'
+
+    when:
+    client.makeStateChangeRequest(stateChangeUrl, state, false, true, true)
+
+    then:
+    1 * client.makeStateChangeRequest(stateChangeUrl, state, false, true, true)
+    1 * httpClientFactory.newClient(provider) >> httpClient
+    1 * httpClient.execute({
+      it.method == 'POST' && it.requestLine.uri == 'http://state.change:1244?state=state+one&a=a&b=1&action=setup'
+    })
     0 * _
   }
 

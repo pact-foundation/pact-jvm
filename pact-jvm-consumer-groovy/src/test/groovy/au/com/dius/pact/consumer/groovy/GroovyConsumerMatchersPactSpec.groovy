@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.model.PactSpecVersion
+import groovy.json.JsonOutput
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
 
@@ -23,14 +24,14 @@ class GroovyConsumerMatchersPactSpec extends Specification {
       withAttributes(method: 'put', path: '/')
       withBody(mimeType: JSON.toString()) {
         name(~/\w+/, 'harry')
-        surname regexp(~/\w+/, 'larry')
+        surname includesStr('larry')
         position regexp(~/staff|contractor/, 'staff')
         happy(true)
 
         hexCode(hexValue)
         hexCode2 hexValue('01234AB')
         id(identifier)
-        id2 identifier('1234567890')
+        id2 identifier(1234567890)
         localAddress(ipAddress)
         localAddress2 ipAddress('192.169.0.2')
         age(100)
@@ -46,17 +47,15 @@ class GroovyConsumerMatchersPactSpec extends Specification {
           name('admin')
           id(uuid)
           kind {
-            id(100)
+            id equalTo(100)
           }
           dob date('MM/dd/yyyy')
         }
 
-        roles([
-          {
-            name('dev')
-            id(uuid)
-          }
-        ])
+        roles eachLike {
+          name('dev')
+          id(uuid)
+        }
       }
       willRespondWith(status: 200)
       withBody(mimeType: JSON.toString()) {
@@ -75,7 +74,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
           'hexCode': '9d1883afcd',
           'hexCode2': '01234AB',
           'id': 6444667731,
-          'id2': '1234567890',
+          'id2': 1234567890,
           'localAddress': '127.0.0.1',
           'localAddress2': '192.169.0.2',
           'age': 100,
@@ -133,6 +132,39 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     PactVerificationResult result = matcherService.runTest {
       def client = new RESTClient(it.url)
       def response = client.get(query: [a: '100', b: 'Z'])
+
+      assert response.status == 200
+    }
+
+    then:
+    result == PactVerificationResult.Ok.INSTANCE
+  }
+
+  def 'matching with and and or'() {
+    given:
+    def matcherService = new PactBuilder()
+    matcherService {
+      serviceConsumer 'MatcherConsumer2'
+      hasPactWith 'MatcherService'
+      port 1235
+    }
+
+    matcherService {
+      uponReceiving('a request to match with and and or')
+      withAttributes(method: 'put', path: '/')
+      withBody {
+        valueA 100
+        valueB and('AB', includesStr('A'), includesStr('B'))
+        valueC or('2000-01-01', date(), nullValue())
+      }
+      willRespondWith(status: 200)
+    }
+
+    when:
+    PactVerificationResult result = matcherService.runTest {
+      def client = new RESTClient(it.url)
+      def response = client.put(requestContentType: JSON, body: JsonOutput.toJson([
+        valueA: 100, valueB: 'AZB', valueC: null]))
 
       assert response.status == 200
     }

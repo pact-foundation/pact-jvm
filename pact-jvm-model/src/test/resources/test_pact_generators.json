@@ -1,0 +1,69 @@
+{
+  "provider": {
+    "name": "test_provider"
+  },
+  "consumer": {
+    "name": "test_consumer"
+  },
+  "interactions": [
+    {
+      "providerStates": [
+        {
+          "name": "test state"
+        }
+      ],
+      "description": "test interaction with generators",
+      "request": {
+        "method": "GET",
+        "path": "/",
+        "headers": {
+          "testreqheader": "testreqheadervalue"
+        },
+        "query": {
+          "q": [
+            "p",
+            "p2"
+          ],
+          "r": [
+            "s"
+          ]
+        },
+        "body": {
+          "test": true
+        },
+        "generators": {
+          "body": {
+            "a": {
+              "max": 20,
+              "min": 10,
+              "type": "RandomInt"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "testreqheader": "testreqheaderval"
+        },
+        "body": {
+          "responsetest": true
+        },
+        "generators": {
+          "path": {
+            "size": 20,
+            "type": "RandomString"
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pact-specification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": ""
+    }
+  }
+}

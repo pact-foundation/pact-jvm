@@ -258,8 +258,8 @@ Example in the configuration section:
 ## Provider States
 
 For each provider you can specify a state change URL to use to switch the state of the provider. This URL will
-receive the providerState description from the pact file before each interaction via a POST. The stateChangeUsesBody
-controls if the state is passed in the request body or as a query parameter.
+receive the providerState description and parameters from the pact file before each interaction via a POST. The stateChangeUsesBody
+controls if the state is passed in the request body or as query parameters.
 
 These values can be set at the provider level, or for a specific consumer. Consumer values take precedent if both are given.
 
@@ -288,8 +288,8 @@ These values can be set at the provider level, or for a specific consumer. Consu
 </plugin>
 ```
 
-If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description will be sent as
- JSON in the body of the request. If it is set to false, it will passed as a query parameter.
+If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description and parameters will be sent as
+ JSON in the body of the request. If it is set to false, they will passed as query parameters.
 
 As for normal requests (see Modifying the requests before they are sent), a state change request can be modified before
 it is sent. Set `stateChangeRequestFilter` to a Groovy script on the provider that will be called before the request is made.
@@ -510,6 +510,7 @@ For example:
       <pactDirectory>path/to/pact/files</pactDirectory> <!-- Defaults to ${project.build.directory}/pacts -->
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <projectVersion>1.0.100</projectVersion> <!-- Defaults to ${project.version} -->
+      <trimSnapshot>true</trimSnapshot> <!-- Defaults to  false -->
     </configuration>
 </plugin>
 ```
@@ -518,6 +519,7 @@ You can now execute `mvn pact:publish` to publish the pact files.
 _NOTE:_ The pact broker requires a version for all published pacts. The `publish` task will use the version of the
 project by default, but can be overwritten with the `projectVersion` property. Make sure you have set one otherwise the broker will reject the pact files.
 
+_NOTE_: By default, the pact broker has issues parsing `SNAPSHOT` versions.  You can configure the publisher to automatically remove `-SNAPSHOT` from your version number by setting `trimSnapshot` to true. This setting does not modify non-snapshot versions.
 ## Publishing to an authenticated pact broker [version 3.3.9+]
 
 For an authenticated pact broker, you can pass in the credentials with the `pactBrokerUsername` and `pactBrokerPassword`

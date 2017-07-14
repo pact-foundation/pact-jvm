@@ -19,7 +19,8 @@ class PactMergeSpec extends Specification {
     request = new Request('Get', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
       [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'))
     response = new Response(200, [testreqheader: 'testreqheaderval'], OptionalBody.body('{"responsetest":true}'))
-    interaction = new RequestResponseInteraction('test interaction', 'test state', request, response)
+    interaction = new RequestResponseInteraction('test interaction',
+      [new ProviderState('test state')], request, response)
     provider = new Provider('test_provider')
     provider2 = new Provider('other provider')
     consumer = new Consumer('test_consumer')
@@ -86,10 +87,10 @@ class PactMergeSpec extends Specification {
     newPact << [new RequestResponsePact(provider, consumer, []), new MessagePact(provider, consumer, [])]
     existingPact << [
       new RequestResponsePact(provider, consumer, [
-        new RequestResponseInteraction('test', 'test', new Request(), new Response())
+        new RequestResponseInteraction('test', [new ProviderState('test')], new Request(), new Response())
       ]),
       new MessagePact(provider, consumer, [
-        new Message('test', 'test', new OptionalBody())
+        new Message('test', [new ProviderState('test')], OptionalBody.empty())
       ])
     ]
     result = PactMerge.merge(newPact, existingPact)
@@ -105,10 +106,10 @@ class PactMergeSpec extends Specification {
     existingPact << [new RequestResponsePact(provider, consumer, []), new MessagePact(provider, consumer, [])]
     newPact << [
       new RequestResponsePact(provider, consumer, [
-        new RequestResponseInteraction('test', 'test', new Request(), new Response())
+        new RequestResponseInteraction('test', [new ProviderState('test')], new Request(), new Response())
       ]),
       new MessagePact(provider, consumer, [
-        new Message('test', 'test', new OptionalBody())
+        new Message('test', [new ProviderState('test')], OptionalBody.empty())
       ])
     ]
     result = PactMerge.merge(newPact, existingPact)
@@ -122,11 +123,11 @@ class PactMergeSpec extends Specification {
     where:
     type << [RequestResponsePact, MessagePact]
     newPact << [ new RequestResponsePact(provider, consumer, [
-      new RequestResponseInteraction('test', 'test', new Request(), new Response()) ]),
-      new MessagePact(provider, consumer, [ new Message('test', 'test') ]) ]
+      new RequestResponseInteraction('test', [new ProviderState('test')], new Request(), new Response()) ]),
+      new MessagePact(provider, consumer, [ new Message('test', [new ProviderState('test')]) ]) ]
     existingPact << [ new RequestResponsePact(provider, consumer, [
-      new RequestResponseInteraction('test', 'test', new Request(), new Response()) ]),
-      new MessagePact(provider, consumer, [ new Message('test', 'test') ]) ]
+      new RequestResponseInteraction('test', [new ProviderState('test')], new Request(), new Response()) ]),
+      new MessagePact(provider, consumer, [ new Message('test', [new ProviderState('test')]) ]) ]
     result = PactMerge.merge(newPact, existingPact)
   }
 
@@ -140,19 +141,19 @@ class PactMergeSpec extends Specification {
     where:
     type << [RequestResponsePact, MessagePact]
     newPact << [ new RequestResponsePact(provider, consumer, [
-        new RequestResponseInteraction('test', 'test', new Request(), new Response()),
-        new RequestResponseInteraction('test 2', 'test', new Request(), new Response()),
+        new RequestResponseInteraction('test', [new ProviderState('test')], new Request(), new Response()),
+        new RequestResponseInteraction('test 2', [new ProviderState('test')], new Request(), new Response()),
       ]),
       new MessagePact(provider, consumer, [
-        new Message('test', 'test'),
-        new Message('test 2', 'test')
+        new Message('test', [new ProviderState('test')]),
+        new Message('test 2', [new ProviderState('test')])
       ])
     ]
     existingPact << [ new RequestResponsePact(provider, consumer, [
-        new RequestResponseInteraction('test', 'test', new Request('POST'), new Response())
+        new RequestResponseInteraction('test', [new ProviderState('test')], new Request('POST'), new Response())
       ]),
-      new MessagePact(provider, consumer, [ new Message('test', 'test', OptionalBody.body('a b c'), null,
-        [contentType: 'text/plain']) ])
+      new MessagePact(provider, consumer, [ new Message('test', [new ProviderState('test')],
+        OptionalBody.body('a b c')) ])
     ]
     result = PactMerge.merge(newPact, existingPact)
   }
@@ -168,20 +169,20 @@ class PactMergeSpec extends Specification {
     type << [RequestResponsePact, MessagePact]
     newPact << [
       new RequestResponsePact(provider, consumer, [
-        new RequestResponseInteraction('test', 'test', new Request(), new Response()),
-        new RequestResponseInteraction('test 2', 'test', new Request('POST'), new Response()),
+        new RequestResponseInteraction('test', [new ProviderState('test')], new Request(), new Response()),
+        new RequestResponseInteraction('test 2', [new ProviderState('test')], new Request('POST'), new Response()),
       ]),
       new MessagePact(provider, consumer, [
-        new Message('test', 'test'),
-        new Message('test 2', 'test', OptionalBody.body('1 2 3'))
+        new Message('test', [new ProviderState('test')]),
+        new Message('test 2', [new ProviderState('test')], OptionalBody.body('1 2 3'))
       ])
     ]
     existingPact << [
       new RequestResponsePact(provider, consumer, [
-        new RequestResponseInteraction('test', 'test', new Request(), new Response())
+        new RequestResponseInteraction('test', [new ProviderState('test')], new Request(), new Response())
       ]),
       new MessagePact(provider, consumer, [
-        new Message('test', 'test')
+        new Message('test', [new ProviderState('test')])
       ])
     ]
     result = PactMerge.merge(newPact, existingPact)
@@ -199,21 +200,21 @@ class PactMergeSpec extends Specification {
     type << [RequestResponsePact, MessagePact]
     oldPact << [
       new RequestResponsePact(provider, consumer, [interaction]),
-      new MessagePact(provider, consumer, [ new Message('test interaction', 'test state') ])
+      new MessagePact(provider, consumer, [ new Message('test interaction', [new ProviderState('test state')]) ])
     ]
     newPact << [
       new RequestResponsePact(provider, consumer, [
-        new RequestResponseInteraction('different', 'test state', request, response)
+        new RequestResponseInteraction('different', [new ProviderState('test state')], request, response)
       ]),
-      new MessagePact(provider, consumer, [ new Message('different', 'test state') ])
+      new MessagePact(provider, consumer, [ new Message('different', [new ProviderState('test state')]) ])
     ]
     result = PactMerge.merge(oldPact, newPact)
     expected << [
       new RequestResponsePact(provider, consumer, [interaction] +
-        new RequestResponseInteraction('different', 'test state', request, response)),
+        new RequestResponseInteraction('different', [new ProviderState('test state')], request, response)),
       new MessagePact(provider, consumer, [
-        new Message('test interaction', 'test state'),
-        new Message('different', 'test state')
+        new Message('test interaction', [new ProviderState('test state')]),
+        new Message('different', [new ProviderState('test state')])
       ])
     ]
   }
@@ -230,21 +231,21 @@ class PactMergeSpec extends Specification {
     type << [RequestResponsePact, MessagePact]
     oldPact << [
       new RequestResponsePact(provider, consumer, [interaction]),
-      new MessagePact(provider, consumer, [ new Message('test interaction', 'test state') ])
+      new MessagePact(provider, consumer, [ new Message('test interaction', [new ProviderState('test state')]) ])
     ]
     newPact << [
       new RequestResponsePact(provider, consumer, [
-        new RequestResponseInteraction('test interaction', 'different', request, response)
+        new RequestResponseInteraction('test interaction', [new ProviderState('different')], request, response)
       ]),
-      new MessagePact(provider, consumer, [ new Message('test interaction', 'different') ])
+      new MessagePact(provider, consumer, [ new Message('test interaction', [new ProviderState('different')]) ])
     ]
     result = PactMerge.merge(oldPact, newPact)
     expected << [
       new RequestResponsePact(provider, consumer, [interaction] +
-        new RequestResponseInteraction('test interaction', 'different', request, response)),
+        new RequestResponseInteraction('test interaction', [new ProviderState('different')], request, response)),
       new MessagePact(provider, consumer, [
-        new Message('test interaction', 'test state'),
-        new Message('test interaction', 'different')
+        new Message('test interaction', [new ProviderState('test state')]),
+        new Message('test interaction', [new ProviderState('different')])
       ])
     ]
   }
@@ -259,7 +260,7 @@ class PactMergeSpec extends Specification {
     type << [RequestResponsePact, MessagePact]
     identicalPact << [
       pact,
-      new MessagePact(provider, consumer, [ new Message('test interaction', 'test state') ])
+      new MessagePact(provider, consumer, [ new Message('test interaction', [new ProviderState('test state')]) ])
     ]
     result = PactMerge.merge(identicalPact, identicalPact)
   }
@@ -273,16 +274,17 @@ class PactMergeSpec extends Specification {
     where:
     type << [RequestResponsePact, MessagePact]
     basePact << [
-      pact, new MessagePact(provider, consumer, [ new Message('test interaction', 'test state') ])
+      pact,
+      new MessagePact(provider, consumer, [ new Message('test interaction', [new ProviderState('test state')]) ])
     ]
     newPact << [
       new RequestResponsePact(pact.provider, pact.consumer, [
-        new RequestResponseInteraction('test interaction', 'test state',
+        new RequestResponseInteraction('test interaction', [new ProviderState('test state')],
           new Request('Get', '/different', PactReader.queryStringToMap('q=p&q=p2&r=s'),
             [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}')), response)
       ]),
-      new MessagePact(provider, consumer, [ new Message('test interaction', 'test state', OptionalBody.body('a b c'),
-        null, [contentType: 'text/plain']) ])
+      new MessagePact(provider, consumer, [ new Message('test interaction', [new ProviderState('test state')],
+        OptionalBody.body('a b c')) ])
     ]
     result = PactMerge.merge(basePact, newPact)
   }
@@ -292,7 +294,8 @@ class PactMergeSpec extends Specification {
     given:
     def differentResponse = response.copy()
     differentResponse.status = 503
-    def newInteraction = new RequestResponseInteraction('test interaction', 'test state', request, differentResponse)
+    def newInteraction = new RequestResponseInteraction('test interaction',
+      [new ProviderState('test state')], request, differentResponse)
     def pactCopy = new RequestResponsePact(pact.provider, pact.consumer, [newInteraction])
 
     when:

@@ -1,12 +1,13 @@
 package au.com.dius.pact.provider.junit;
 
+import au.com.dius.pact.model.PactSource;
+import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget;
 import au.com.dius.pact.provider.junit.target.TestTarget;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpRequest;
 import org.junit.After;
 import org.junit.Before;
@@ -30,7 +31,9 @@ import org.junit.runners.model.TestClass;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_METHOD_VALIDATOR;
 import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_VALIDATOR;
@@ -41,17 +44,19 @@ import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_VALIDATO
  * Developed with {@link org.junit.runners.BlockJUnit4ClassRunner} in mind
  */
 class InteractionRunner extends Runner {
-    private final TestClass testClass;
-    private final Pact pact;
+  private final TestClass testClass;
+  private final Pact pact;
+  private final PactSource pactSource;
 
-    private final ConcurrentHashMap<Interaction, Description> childDescriptions = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Interaction, Description> childDescriptions = new ConcurrentHashMap<>();
 
-    public InteractionRunner(final TestClass testClass, final Pact pact) throws InitializationError {
-        this.testClass = testClass;
-        this.pact = pact;
+  public InteractionRunner(final TestClass testClass, final Pact pact, final PactSource pactSource) throws InitializationError {
+    this.testClass = testClass;
+    this.pact = pact;
+    this.pactSource = pactSource;
 
-        validate();
-    }
+    validate();
+  }
 
     @Override
     public Description getDescription() {
@@ -76,7 +81,7 @@ class InteractionRunner extends Runner {
 
         validatePublicVoidNoArgMethods(Before.class, false, errors);
         validatePublicVoidNoArgMethods(After.class, false, errors);
-        validatePublicVoidNoArgMethods(State.class, false, errors);
+        validateStateChangeMethods(State.class, false, errors);
         validateConstructor(errors);
         validateTestTarget(errors);
         validateRules(errors);
@@ -87,9 +92,19 @@ class InteractionRunner extends Runner {
         }
     }
 
+  private void validateStateChangeMethods(final Class<? extends Annotation> annotation, final boolean isStatic, final List<Throwable> errors) {
+    testClass.getAnnotatedMethods(annotation).forEach(method -> {
+      method.validatePublicVoid(isStatic, errors);
+      if (method.getMethod().getParameterCount() == 1 && !Map.class.isAssignableFrom(method.getMethod().getParameterTypes()[0])) {
+        errors.add(new Exception("Method " + method.getName() + " should take only a single Map parameter"));
+      } else if (method.getMethod().getParameterCount() > 1) {
+        errors.add(new Exception("Method " + method.getName() + " should either take no parameters or a single Map parameter"));
+      }
+    });
+  }
+
   private void validateTargetRequestFilters(final List<Throwable> errors) {
-    testClass.getAnnotatedMethods(TargetRequestFilter.class)
-      .stream().forEach(method -> {
+    testClass.getAnnotatedMethods(TargetRequestFilter.class).forEach(method -> {
         method.validatePublicVoid(false, errors);
         if (method.getMethod().getParameterTypes().length != 1) {
           errors.add(new Exception("Method " + method.getName() + " should take only a single HttpRequest parameter"));
@@ -100,8 +115,8 @@ class InteractionRunner extends Runner {
   }
 
   protected void validatePublicVoidNoArgMethods(final Class<? extends Annotation> annotation, final boolean isStatic, final List<Throwable> errors) {
-        testClass.getAnnotatedMethods(annotation).stream().forEach(method -> method.validatePublicVoidNoArg(isStatic, errors));
-    }
+    testClass.getAnnotatedMethods(annotation).forEach(method -> method.validatePublicVoidNoArg(isStatic, errors));
+  }
 
     protected void validateConstructor(final List<Throwable> errors) {
         if (!hasOneConstructor()) {
@@ -138,7 +153,7 @@ class InteractionRunner extends Runner {
             final Description description = describeChild(interaction);
             notifier.fireTestStarted(description);
             try {
-                interactionBlock(interaction).evaluate();
+                interactionBlock(interaction, pactSource).evaluate();
             } catch (final Throwable e) {
                 notifier.fireTestFailure(new Failure(description, e));
             } finally {
@@ -151,7 +166,7 @@ class InteractionRunner extends Runner {
         return testClass.getOnlyConstructor().newInstance();
     }
 
-    protected Statement interactionBlock(final Interaction interaction) {
+    protected Statement interactionBlock(final Interaction interaction, final PactSource source) {
         //1. prepare object
         //2. get Target
         //3. run Rule`s
@@ -178,7 +193,7 @@ class InteractionRunner extends Runner {
         Statement statement = new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                target.testInteraction(pact.getConsumer().getName(), interaction);
+                target.testInteraction(pact.getConsumer().getName(), interaction, source);
             }
         };
         statement = withStateChanges(interaction, test, statement);
@@ -189,21 +204,20 @@ class InteractionRunner extends Runner {
     }
 
     protected Statement withStateChanges(final Interaction interaction, final Object target, final Statement statement) {
-        if (StringUtils.isNotEmpty(interaction.getProviderState())) {
-            final String state = interaction.getProviderState();
-            final List<FrameworkMethod> onStateChange = new ArrayList<FrameworkMethod>();
-            for (FrameworkMethod ann: testClass.getAnnotatedMethods(State.class)) {
-                for(String annotationState : ann.getAnnotation(State.class).value()) {
-                  if(annotationState.equalsIgnoreCase(state)) {
-                    onStateChange.add(ann);
-                    break;
-                  }
-                }
+        if (!interaction.getProviderStates().isEmpty()) {
+          Statement stateChange = statement;
+          for (ProviderState state: interaction.getProviderStates()) {
+            List<FrameworkMethod> methods = testClass.getAnnotatedMethods(State.class)
+              .stream().filter(ann -> ArrayUtils.contains(ann.getAnnotation(State.class).value(), state.getName()))
+              .collect(Collectors.toList());
+            if (methods.isEmpty()) {
+              return new Fail(new MissingStateChangeMethod("MissingStateChangeMethod: Did not find a test class method annotated with @State(\""
+                + state.getName() + "\")"));
+            } else {
+              stateChange = new RunStateChanges(stateChange, methods, target, state);
             }
-            if (onStateChange.isEmpty()) {
-              return new Fail(new MissingStateChangeMethod("MissingStateChangeMethod: Did not find a test class method annotated with @State(\"" + state + "\")"));
-            }
-            return new RunBefores(statement, onStateChange, target);
+          }
+          return stateChange;
         } else {
             return statement;
         }

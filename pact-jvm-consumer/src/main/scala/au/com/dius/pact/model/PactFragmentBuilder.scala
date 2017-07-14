@@ -2,7 +2,10 @@ package au.com.dius.pact.model
 
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.{ConsumerTestVerification, VerificationResult}
+import au.com.dius.pact.model.matchingrules.MatchingRules
 import org.json.JSONObject
+
+import scala.collection.JavaConverters._
 
 /**
   * @deprecated Moved to Kotlin implementation
@@ -14,20 +17,31 @@ object PactFragmentBuilder {
   }
 
   case class WithConsumer(consumer: Consumer) {
+    import scala.collection.JavaConversions._
+
     def hasPactWith(provider: String) = {
       WithProvider(new Provider(provider))
     }
 
     case class WithProvider(provider: Provider) {
       def given(state: String) = {
-        InState(Some(state))
+        InState(List(new ProviderState(state)))
+      }
+
+      def given(state: String, params: Map[String, String]) = {
+        InState(List(new ProviderState(state)))
       }
 
       def uponReceiving(description: String) = {
-        InState(None).uponReceiving(description)
+        InState(List()).uponReceiving(description)
       }
 
-      case class InState(state: Option[String]) {
+      case class InState(state: List[ProviderState]) {
+
+        def given(stateDesc: String, params: Map[String, String]) = {
+          InState(state.+:(new ProviderState(stateDesc, params)))
+        }
+
         def uponReceiving(description: String) = {
           DescribingRequest(consumer, provider, state, description)
         }
@@ -35,7 +49,7 @@ object PactFragmentBuilder {
     }
   }
 
-  case class DescribingRequest(consumer: Consumer, provider: Provider, state: Option[String], description: String,
+  case class DescribingRequest(consumer: Consumer, provider: Provider, state: List[ProviderState], description: String,
                                builder: CanBuildPactFragment.Builder = CanBuildPactFragment.firstBuild) {
     import scala.collection.JavaConversions._
 
@@ -53,9 +67,9 @@ object PactFragmentBuilder {
                  query: String = "",
                  headers: Map[String, String] = Map(),
                  body: String = "",
-                 matchers: Map[String, Map[String, String]] = Map()): DescribingResponse = {
+                 matchers: MatchingRules = new MatchingRules()): DescribingResponse = {
       DescribingResponse(new Request(method, path, PactReader.queryStringToMap(query), headers, OptionalBody.body(body),
-        CollectionUtils.scalaMMapToJavaMMap(matchers)))
+        matchers))
     }
 
     case class DescribingResponse(request: Request) {
@@ -70,7 +84,7 @@ object PactFragmentBuilder {
       def willRespondWith(status: Int = 200,
                           headers: Map[String, String] = Map(),
                           maybeBody: Option[String] = None,
-                          matchers: Map[String, Map[String, String]] = Map()): PactWithAtLeastOneRequest = {
+                          matchers: MatchingRules = new MatchingRules()): PactWithAtLeastOneRequest = {
         val optionalBody = maybeBody match {
           case Some(body) => OptionalBody.body(body)
           case None => OptionalBody.missing()
@@ -82,34 +96,42 @@ object PactFragmentBuilder {
           state,
           Seq(new RequestResponseInteraction(
             description,
-            state.orNull,
+            state.asJava,
             request,
-            new Response(status, headers, optionalBody, CollectionUtils.scalaMMapToJavaMMap(matchers)))))
+            new Response(status, headers, optionalBody, matchers))))
       }
 
       def willRespondWith(status: Int,
                           headers: Map[String, String],
                           bodyAndMatchers: DslPart): PactWithAtLeastOneRequest = {
+        val rules = new MatchingRules()
+        rules.addCategory(bodyAndMatchers.getMatchers)
         builder(
           consumer,
           provider,
           state,
           Seq(new RequestResponseInteraction(
             description,
-            state.orNull,
+            state.asJava,
             request,
-            new Response(status, headers, OptionalBody.body(bodyAndMatchers.toString), bodyAndMatchers.getMatchers))))
+            new Response(status, headers, OptionalBody.body(bodyAndMatchers.toString), rules))))
       }
     }
   }
 
-  case class PactWithAtLeastOneRequest(consumer: Consumer, provider:Provider, state: Option[String], interactions: Seq[RequestResponseInteraction]) {
+  case class PactWithAtLeastOneRequest(consumer: Consumer, provider:Provider, state: List[ProviderState], interactions: Seq[RequestResponseInteraction]) {
+    import scala.collection.JavaConversions._
+
     def given() = {
-      InState(None, this)
+      InState(List(), this)
     }
 
     def given(newState: String) = {
-      InState(Some(newState), this)
+      InState(List(new ProviderState(newState)), this)
+    }
+
+    def given(state: String, params: Map[String, String]) = {
+      InState(List(new ProviderState(state, params)), this)
     }
 
     def uponReceiving(description: String) = {
@@ -124,7 +146,7 @@ object PactFragmentBuilder {
       PactFragment(consumer, provider, interactions)
     }
 
-    case class InState(newState: Option[String], pactWithAtLeastOneRequest: PactWithAtLeastOneRequest) {
+    case class InState(newState: List[ProviderState], pactWithAtLeastOneRequest: PactWithAtLeastOneRequest) {
       def uponReceiving(description: String) = {
         DescribingRequest(consumer, provider, newState, description, CanBuildPactFragment.additionalBuild(pactWithAtLeastOneRequest))
       }
@@ -132,7 +154,7 @@ object PactFragmentBuilder {
   }
 
   object CanBuildPactFragment {
-    type Builder = (Consumer, Provider, Option[String], Seq[RequestResponseInteraction]) => PactWithAtLeastOneRequest
+    type Builder = (Consumer, Provider, List[ProviderState], Seq[RequestResponseInteraction]) => PactWithAtLeastOneRequest
 
     val firstBuild: Builder = PactWithAtLeastOneRequest.apply
 

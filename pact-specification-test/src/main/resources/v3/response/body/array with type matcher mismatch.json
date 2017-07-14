@@ -9,8 +9,14 @@
       ]
     },
     "matchingRules" : {
-      "$.body.myDates[*]" : {
-        "match": "type"
+      "body": {
+        "$.myDates[*]": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
       }
     }
   },

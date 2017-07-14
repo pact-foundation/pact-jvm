@@ -27,9 +27,10 @@ class PactWriterSpec extends Specification {
     !interactionJson.request.containsKey('query')
     !interactionJson.request.containsKey('headers')
     !interactionJson.request.containsKey('matchingRules')
+    !interactionJson.request.containsKey('generators')
     !interactionJson.response.containsKey('body')
     !interactionJson.response.containsKey('headers')
-    !interactionJson.response.containsKey('matchingRules')
+    !interactionJson.response.containsKey('generators')
   }
 
   def 'when writing message pacts, do not include optional items that are missing'() {
@@ -48,6 +49,7 @@ class PactWriterSpec extends Specification {
     !messageJson.containsKey('providerState')
     !messageJson.containsKey('contents')
     !messageJson.containsKey('matchingRules')
+    !messageJson.containsKey('generators')
   }
 
   def 'when writing pacts, do not parse JSON string bodies'() {

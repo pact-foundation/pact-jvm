@@ -34,7 +34,7 @@ public class PactProviderRuleMk2 extends BaseProviderRule {
      * @param target Target test to apply this rule to.
      */
     public PactProviderRuleMk2(String provider, String hostInterface, Integer port, Object target) {
-        this(provider, hostInterface, port, PactSpecVersion.V2, target);
+        this(provider, hostInterface, port, PactSpecVersion.V3, target);
     }
 
     /**
@@ -43,7 +43,7 @@ public class PactProviderRuleMk2 extends BaseProviderRule {
      * @param target Target test to apply this rule to.
      */
     public PactProviderRuleMk2(String provider, Object target) {
-        this(provider, MockProviderConfig.LOCALHOST, 0, PactSpecVersion.V2, target);
+        this(provider, MockProviderConfig.LOCALHOST, 0, PactSpecVersion.V3, target);
     }
 
     /**

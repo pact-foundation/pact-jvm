@@ -9,12 +9,12 @@ import spock.lang.Unroll
 class RequestSpecificationV2Spec extends BaseRequestSpec {
 
   @Unroll
-  def '#type #test #matchDesc'() {
+  def '#type/#name #test #matchDesc'() {
     expect:
     RequestMatching.requestMismatches(expected, actual).isEmpty() == match
 
     where:
-    [type, test, match, matchDesc, expected, actual] << loadTestCases('/v2/request/', PactSpecVersion.V2)
+    [type, name, test, match, matchDesc, expected, actual] << loadTestCases('/v2/request/', PactSpecVersion.V2)
   }
 
 }
