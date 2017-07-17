@@ -13,7 +13,8 @@ def crossCompileModules = [
   'pact-jvm-provider-spring',
   'pact-jvm-matchers',
   'pact-jvm-provider-maven',
-  'pact-jvm-provider-lein'
+  'pact-jvm-provider-lein',
+  'pact-jvm-provider-scalasupport'
 ]
 
 rootProject.name = 'pact-jvm'
