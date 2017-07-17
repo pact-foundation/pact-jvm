@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.dsl
 
+import au.com.dius.pact.model.matchingrules.RuleLogic
 import spock.lang.Specification
 
 class PactDslJsonArraySpec extends Specification {
@@ -74,6 +75,20 @@ class PactDslJsonArraySpec extends Specification {
 
     then:
     thrown(IllegalArgumentException)
+  }
+
+  def 'with nested objects, the rule logic value should be copied'() {
+    expect:
+    body.matchers.matchingRules['[0][*].foo.bar'].ruleLogic == RuleLogic.OR
+
+    where:
+    body = new PactDslJsonArray()
+      .eachLike()
+        .object('foo')
+          .or('bar', 42, PM.numberType(), PM.nullValue())
+        .closeObject()
+      .closeObject()
+      .closeArray()
   }
 
 }
