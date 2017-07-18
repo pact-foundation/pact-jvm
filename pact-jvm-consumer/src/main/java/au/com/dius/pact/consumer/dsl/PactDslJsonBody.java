@@ -56,7 +56,7 @@ public class PactDslJsonBody extends DslPart {
 
     protected void putObject(DslPart object) {
         for (String matcherName: object.matchers.getMatchingRules().keySet()) {
-            matchers.addRules(matcherName, object.matchers.getMatchingRules().get(matcherName).getRules());
+            matchers.setRules(matcherName, object.matchers.getMatchingRules().get(matcherName));
         }
         generators.addGenerators(object.generators);
         String elementBase = StringUtils.difference(this.rootPath, object.rootPath);
@@ -76,7 +76,7 @@ public class PactDslJsonBody extends DslPart {
 
     protected void putArray(DslPart object) {
         for(String matcherName: object.matchers.getMatchingRules().keySet()) {
-            matchers.addRules(matcherName, object.matchers.getMatchingRules().get(matcherName).getRules());
+            matchers.setRules(matcherName, object.matchers.getMatchingRules().get(matcherName));
         }
         generators.addGenerators(object.generators);
         if (StringUtils.isNotEmpty(object.rootName)) {

@@ -1,9 +1,9 @@
-package au.com.dius.pact.provider
+package au.com.dius.pact.provider.sbtsupport
 
 import com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.provider.unfiltered.Conversions
 import au.com.dius.pact.model.{Request, Response}
-import au.com.dius.pact.provider.AnimalServiceResponses.responses
+import au.com.dius.pact.provider.sbtsupport.AnimalServiceResponses.responses
 import groovy.json.JsonSlurper
 import io.netty.channel.ChannelHandler.Sharable
 import _root_.unfiltered.netty.{ReceivedMessage, ServerErrorResponse, cycle}

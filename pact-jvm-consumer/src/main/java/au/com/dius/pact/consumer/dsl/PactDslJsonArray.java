@@ -182,8 +182,8 @@ public class PactDslJsonArray extends DslPart {
 
     protected void putObject(DslPart object) {
       for(String matcherName: object.matchers.getMatchingRules().keySet()) {
-          matchers.addRules(rootPath + appendArrayIndex(1) + matcherName,
-            object.matchers.getMatchingRules().get(matcherName).getRules());
+          matchers.setRules(rootPath + appendArrayIndex(1) + matcherName,
+            object.matchers.getMatchingRules().get(matcherName));
       }
       generators.addGenerators(object.generators, rootPath + appendArrayIndex(1));
       for (int i = 0; i < getNumberExamples(); i++) {
@@ -193,8 +193,8 @@ public class PactDslJsonArray extends DslPart {
 
     protected void putArray(DslPart object) {
         for(String matcherName: object.matchers.getMatchingRules().keySet()) {
-            matchers.addRules(rootPath + appendArrayIndex(1) + matcherName,
-              object.matchers.getMatchingRules().get(matcherName).getRules());
+            matchers.setRules(rootPath + appendArrayIndex(1) + matcherName,
+              object.matchers.getMatchingRules().get(matcherName));
         }
         generators.addGenerators(object.generators, rootPath + appendArrayIndex(1));
         body.put(object.getBody());
