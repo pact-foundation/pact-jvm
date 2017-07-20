@@ -217,4 +217,49 @@ class PactDslJsonArrayMatcherSpec extends Specification {
       '$.body[0][*]': [match: 'type']
     ]
   }
+
+  def 'matching root level arrays of basic values'() {
+    given:
+    subject = PactDslJsonArray.arrayEachLike(PactDslJsonRootValue.stringType('eachLike'))
+
+    when:
+    def result = subject.body.toString()
+
+    then:
+    result == '["eachLike"]'
+    subject.matchers.toMap(PactSpecVersion.V2) == [
+      '$.body': [match: 'type', min: 0],
+      '$.body[*]': [match: 'type']
+    ]
+  }
+
+  def 'matching root level arrays of basic values with max'() {
+    given:
+    subject = PactDslJsonArray.arrayMaxLike(2, PactDslJsonRootValue.stringType('maxLike'))
+
+    when:
+    def result = subject.body.toString()
+
+    then:
+    result == '["maxLike"]'
+    subject.matchers.toMap(PactSpecVersion.V2) == [
+      '$.body': [match: 'type', max: 2],
+      '$.body[*]': [match: 'type']
+    ]
+  }
+
+  def 'matching root level arrays of basic values with min'() {
+    given:
+    subject = PactDslJsonArray.arrayMinLike(2, PactDslJsonRootValue.stringType('minLike'))
+
+    when:
+    def result = subject.body.toString()
+
+    then:
+    result == '["minLike","minLike"]'
+    subject.matchers.toMap(PactSpecVersion.V2) == [
+      '$.body': [match: 'type', min: 2],
+      '$.body[*]': [match: 'type']
+    ]
+  }
 }

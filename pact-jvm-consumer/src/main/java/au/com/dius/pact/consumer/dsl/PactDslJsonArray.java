@@ -651,6 +651,25 @@ public class PactDslJsonArray extends DslPart {
   }
 
   /**
+   * Root level array where each item must match the provided matcher
+   */
+  public static PactDslJsonArray arrayEachLike(PactDslJsonRootValue rootValue) {
+    return arrayEachLike(1, rootValue);
+  }
+
+  /**
+   * Root level array where each item must match the provided matcher
+   * @param numberExamples Number of examples to generate
+   */
+  public static PactDslJsonArray arrayEachLike(Integer numberExamples, PactDslJsonRootValue value) {
+    PactDslJsonArray parent = new PactDslJsonArray("", "", null, true);
+    parent.setNumberExamples(numberExamples);
+    parent.matchers.addRule("", parent.matchMin(0));
+    parent.putObject(value);
+    return parent;
+  }
+
+  /**
    * Array with a minimum size where each item must match the following example
    * @param minSize minimum size
    */
@@ -675,6 +694,31 @@ public class PactDslJsonArray extends DslPart {
   }
 
   /**
+   * Root level array with minimum size where each item must match the provided matcher
+   * @param minSize minimum size
+   */
+  public static PactDslJsonArray arrayMinLike(int minSize, PactDslJsonRootValue value) {
+    return arrayMinLike(minSize, minSize, value);
+  }
+
+  /**
+   * Root level array with minimum size where each item must match the provided matcher
+   * @param minSize minimum size
+   * @param numberExamples Number of examples to generate
+   */
+  public static PactDslJsonArray arrayMinLike(int minSize, int numberExamples, PactDslJsonRootValue value) {
+    if (numberExamples < minSize) {
+      throw new IllegalArgumentException(String.format("Number of example %d is less than the minimum size of %d",
+        numberExamples, minSize));
+    }
+    PactDslJsonArray parent = new PactDslJsonArray("", "", null, true);
+    parent.setNumberExamples(numberExamples);
+    parent.matchers.addRule("", parent.matchMin(minSize));
+    parent.putObject(value);
+    return parent;
+  }
+
+  /**
    * Array with a maximum size where each item must match the following example
    * @param maxSize maximum size
    */
@@ -696,6 +740,31 @@ public class PactDslJsonArray extends DslPart {
     parent.setNumberExamples(numberExamples);
     parent.matchers.put("", parent.matchMax(maxSize));
     return new PactDslJsonBody(".", "", parent);
+  }
+
+  /**
+   * Root level array with maximum size where each item must match the provided matcher
+   * @param maxSize maximum size
+   */
+  public static PactDslJsonArray arrayMaxLike(int maxSize, PactDslJsonRootValue value) {
+    return arrayMaxLike(maxSize, 1, value);
+  }
+
+  /**
+   * Root level array with maximum size where each item must match the provided matcher
+   * @param maxSize maximum size
+   * @param numberExamples Number of examples to generate
+   */
+  public static PactDslJsonArray arrayMaxLike(int maxSize, int numberExamples, PactDslJsonRootValue value) {
+    if (numberExamples > maxSize) {
+      throw new IllegalArgumentException(String.format("Number of example %d is more than the maximum size of %d",
+        numberExamples, maxSize));
+    }
+    PactDslJsonArray parent = new PactDslJsonArray("", "", null, true);
+    parent.setNumberExamples(numberExamples);
+    parent.matchers.addRule("", parent.matchMax(maxSize));
+    parent.putObject(value);
+    return parent;
   }
 
   /**
