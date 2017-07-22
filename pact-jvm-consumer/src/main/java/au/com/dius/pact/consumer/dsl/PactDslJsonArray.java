@@ -664,7 +664,7 @@ public class PactDslJsonArray extends DslPart {
   public static PactDslJsonArray arrayEachLike(Integer numberExamples, PactDslJsonRootValue value) {
     PactDslJsonArray parent = new PactDslJsonArray("", "", null, true);
     parent.setNumberExamples(numberExamples);
-    parent.matchers.addRule("", parent.matchMin(0));
+    parent.matchers.put("", parent.matchMin(0));
     parent.putObject(value);
     return parent;
   }
@@ -713,7 +713,7 @@ public class PactDslJsonArray extends DslPart {
     }
     PactDslJsonArray parent = new PactDslJsonArray("", "", null, true);
     parent.setNumberExamples(numberExamples);
-    parent.matchers.addRule("", parent.matchMin(minSize));
+    parent.matchers.put("", parent.matchMin(minSize));
     parent.putObject(value);
     return parent;
   }
@@ -762,7 +762,7 @@ public class PactDslJsonArray extends DslPart {
     }
     PactDslJsonArray parent = new PactDslJsonArray("", "", null, true);
     parent.setNumberExamples(numberExamples);
-    parent.matchers.addRule("", parent.matchMax(maxSize));
+    parent.matchers.put("", parent.matchMax(maxSize));
     parent.putObject(value);
     return parent;
   }

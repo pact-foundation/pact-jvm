@@ -1,5 +1,6 @@
 package au.com.dius.pact.model
 
+@SuppressWarnings('UnusedImport')
 import scala.None$
 import scala.Some
 import spock.lang.Specification

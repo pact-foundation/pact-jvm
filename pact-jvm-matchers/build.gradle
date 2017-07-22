@@ -10,3 +10,5 @@ dependencies {
     exclude group: 'org.codehaus.groovy'
   }
 }
+
+compileTestGroovy.dependsOn(compileTestScala)

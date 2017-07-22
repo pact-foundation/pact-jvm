@@ -227,7 +227,7 @@ class PactDslJsonArrayMatcherSpec extends Specification {
 
     then:
     result == '["eachLike"]'
-    subject.matchers.toMap(PactSpecVersion.V2) == [
+    subject.matchers == [
       '$.body': [match: 'type', min: 0],
       '$.body[*]': [match: 'type']
     ]
@@ -242,7 +242,7 @@ class PactDslJsonArrayMatcherSpec extends Specification {
 
     then:
     result == '["maxLike"]'
-    subject.matchers.toMap(PactSpecVersion.V2) == [
+    subject.matchers == [
       '$.body': [match: 'type', max: 2],
       '$.body[*]': [match: 'type']
     ]
@@ -257,7 +257,7 @@ class PactDslJsonArrayMatcherSpec extends Specification {
 
     then:
     result == '["minLike","minLike"]'
-    subject.matchers.toMap(PactSpecVersion.V2) == [
+    subject.matchers == [
       '$.body': [match: 'type', min: 2],
       '$.body[*]': [match: 'type']
     ]

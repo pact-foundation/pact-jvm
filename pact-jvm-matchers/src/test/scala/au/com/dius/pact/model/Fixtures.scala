@@ -22,4 +22,7 @@ object Fixtures {
   val interactions = util.Arrays.asList(interaction)
 
   val pact: RequestResponsePact = new RequestResponsePact(provider, consumer, interactions)
+
+  val headerMatcher = Map("$.headers.HEADER" -> Map("regex" -> ".*"))
+  val contentTypeHeaderMatcher = Map("$.headers.CONTENT-TYPE" -> Map("regex" -> "[a-z]+\\/[a-z]+"))
 }
