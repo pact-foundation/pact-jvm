@@ -2,9 +2,6 @@ package au.com.dius.pact.provider.junit.sysprops;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.lang.StringBuffer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
