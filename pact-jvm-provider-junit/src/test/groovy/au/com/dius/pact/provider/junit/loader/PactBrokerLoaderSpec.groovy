@@ -5,6 +5,9 @@ import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.broker.InvalidHalResponse
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import spock.lang.Specification
+import spock.util.environment.RestoreSystemProperties
+
+import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.VALUES_SEPARATOR
 
 @PactBroker(host = 'pactbroker.host', port = '1000', failIfNoPactsFound = false)
 class PactBrokerLoaderSpec extends Specification {
@@ -116,6 +119,22 @@ class PactBrokerLoaderSpec extends Specification {
     1 * brokerClient.fetchConsumersWithTag('test', 'b') >> [ new ConsumerInfo('test', 'b') ]
     1 * brokerClient.fetchConsumersWithTag('test', 'c') >> [ new ConsumerInfo('test', 'c') ]
     result.size() == 4
+  }
+
+  @RestoreSystemProperties
+  @SuppressWarnings('GStringExpressionWithinString')
+  def 'Processes tags before pact load'() {
+    given:
+    System.setProperty('composite', "one${VALUES_SEPARATOR}two")
+    tags = ['${composite}']
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    1 * brokerClient.fetchConsumersWithTag('test', 'one') >> [ new ConsumerInfo('test', 'one') ]
+    1 * brokerClient.fetchConsumersWithTag('test', 'two') >> [ new ConsumerInfo('test', 'two') ]
+    result.size() == 2
   }
 
   def 'Loads the latest pacts if no tag is provided'() {

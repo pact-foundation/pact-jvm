@@ -14,8 +14,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
-import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseExpressions;
-import static au.com.dius.pact.provider.junit.sysprops.PactRunnerTagListExpressionParser.parseTagListExpressions;
+import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseExpression;
+import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseListExpression;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -42,7 +42,7 @@ public class PactBrokerLoader implements PactLoader {
     this.pactBrokerHost = pactBrokerHost;
     this.pactBrokerPort = pactBrokerPort;
     this.pactBrokerProtocol = pactBrokerProtocol;
-    this.pactBrokerTags = parseTagListExpressions(tags);
+    this.pactBrokerTags = tags.stream().flatMap(tag -> parseListExpression(tag).stream()).collect(toList());
     this.failIfNoPactsFound = true;
     this.pactSource = new PactBrokerSource(this.pactBrokerHost, this.pactBrokerPort);
   }
@@ -73,9 +73,9 @@ public class PactBrokerLoader implements PactLoader {
 
   private List<Pact> loadPactsForProvider(final String providerName, final String tag) throws IOException {
     LOGGER.debug("Loading pacts from pact broker for provider " + providerName + " and tag " + tag);
-    URIBuilder uriBuilder = new URIBuilder().setScheme(parseExpressions(pactBrokerProtocol))
-      .setHost(parseExpressions(pactBrokerHost))
-      .setPort(Integer.parseInt(parseExpressions(pactBrokerPort)));
+    URIBuilder uriBuilder = new URIBuilder().setScheme(parseExpression(pactBrokerProtocol))
+      .setHost(parseExpression(pactBrokerHost))
+      .setPort(Integer.parseInt(parseExpression(pactBrokerPort)));
     try {
       List<ConsumerInfo> consumers;
       PactBrokerClient pactBrokerClient = newPactBrokerClient(uriBuilder.build());
@@ -111,8 +111,8 @@ public class PactBrokerLoader implements PactLoader {
   PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
     HashMap options = new HashMap();
     if (this.authentication != null && !this.authentication.scheme().equalsIgnoreCase("none")) {
-      options.put("authentication", Arrays.asList(parseExpressions(this.authentication.scheme()),
-        parseExpressions(this.authentication.username()), parseExpressions(this.authentication.password())));
+      options.put("authentication", Arrays.asList(parseExpression(this.authentication.scheme()),
+        parseExpression(this.authentication.username()), parseExpression(this.authentication.password())));
     }
     return new PactBrokerClient(url, options);
   }
