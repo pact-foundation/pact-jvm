@@ -20,17 +20,6 @@ class PlainTextBodyMatcher extends BodyMatcher with StrictLogging {
     }
   }
 
-  def appendIndex(path:Seq[String], index:Integer): Seq[String] = {
-    path :+ index.toString
-  }
-
-  def appendAttribute(path:Seq[String], attribute: String) : Seq[String] = {
-    path :+ "@" + attribute
-  }
-
-  def mkPathString(path:Seq[String]) = path.mkString(".")
-
-
   def compareText(expected: String, actual: String, matchers: MatchingRules): List[BodyMismatch] = {
     val regex = matchers.rulesForCategory("body").getMatchingRules.get("$")
 
