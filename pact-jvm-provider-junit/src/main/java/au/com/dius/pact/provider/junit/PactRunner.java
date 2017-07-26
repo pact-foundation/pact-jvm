@@ -78,7 +78,7 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         throw new InitializationError(e);
       }
 
-      if (pacts == null || pacts.isEmpty()) {
+      if (pacts == null) {
         throw new InitializationError("Did not find any pact files for provider " + providerInfo.value());
       }
 
