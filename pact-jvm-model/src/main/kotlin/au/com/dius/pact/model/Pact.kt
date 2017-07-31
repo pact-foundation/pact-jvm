@@ -1,5 +1,7 @@
 package au.com.dius.pact.model
 
+import java.util.function.Predicate
+
 /**
  * Pact Provider
  */
@@ -103,4 +105,9 @@ interface Pact {
    * @param interactions
    */
   fun mergeInteractions(interactions: List<Interaction>)
+
+  /**
+   * Returns a new Pact with all the interactions filtered by the provided predicate
+   */
+  fun filterInteractions(predicate: Predicate<Interaction>): Pact
 }

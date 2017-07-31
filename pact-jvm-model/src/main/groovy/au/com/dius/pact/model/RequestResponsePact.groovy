@@ -4,6 +4,8 @@ import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
+import java.util.function.Predicate
+
 /**
  * Pact between a consumer and a provider
  */
@@ -50,5 +52,10 @@ class RequestResponsePact extends BasePact {
     interactions.find { i ->
       i.description == description && i.providerStates.any { it.name == providerState }
     }
+  }
+
+  @Override
+  Pact filterInteractions(Predicate<Interaction> predicate) {
+    new RequestResponsePact(provider, consumer, interactions.findAll { predicate.test(it) }, metadata)
   }
 }
