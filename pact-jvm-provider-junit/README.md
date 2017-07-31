@@ -202,6 +202,37 @@ To use pacts from a resource folder of the project annotate test class with
 It's possible to use a custom Pact source. For this, implement interface `au.com.dius.pact.provider.junit.loader.PactLoader`
 and annotate the test class with `@PactSource(MyOwnPactLoader.class)`. **Note:** class `MyOwnPactLoader` must have a default empty constructor or a constructor with one argument of class `Class` which at runtime will be the test class so you can get custom annotations of test class.
 
+### Filtering the interactions that are verified [version 3.5.3+]
+
+You can filter the interactions that are executed by adding a `@PactFilter` annotation to your test class and set the
+JUnit runner to `FilteredPactRunner`. The pact filter annotation will then only verify interactions that have a matching
+provider state. You can provide multiple states to match with.
+
+For example: 
+
+```java
+@RunWith(FilteredPactRunner.class)
+@Provider("Activity Service")
+@PactBroker(host = "localhost", port = "80")
+@PactFilter('Activity 100 exists in the database')
+public class PactJUnitTest {
+
+  @TestTarget
+  public final Target target = new HttpTarget(5050);
+
+}
+```
+
+You can also use regular expressions with the filter. For example:
+
+```java
+@RunWith(FilteredPactRunner.class)
+@PactFilter('Activity \\d+ exists in the database')
+public class PactJUnitTest {
+
+}
+```
+
 ## Test target
 
 The field in test class of type `au.com.dius.pact.provider.junit.target.Target` annotated with `au.com.dius.pact.provider.junit.target.TestTarget`
