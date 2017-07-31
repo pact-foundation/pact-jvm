@@ -37,6 +37,14 @@ class FilteredPactRunnerSpec extends Specification {
 
   @Provider('myAwesomeService')
   @PactFolder('pacts')
+  @PactFilter(['', '', ''])
+  class TestClassEmptyFilters {
+    @TestTarget
+    Target target
+  }
+
+  @Provider('myAwesomeService')
+  @PactFolder('pacts')
   @PactFilter('')
   class TestClassNoFilterAnnotations {
     @TestTarget
@@ -47,6 +55,14 @@ class FilteredPactRunnerSpec extends Specification {
   @PactFolder('pacts')
   @PactFilter(['State 1', 'State 3'])
   class TestMultipleStatesClass {
+    @TestTarget
+    Target target
+  }
+
+  @Provider('myAwesomeService')
+  @PactFolder('pacts')
+  @PactFilter('State \\d+')
+  class TestRegexClass {
     @TestTarget
     Target target
   }
@@ -67,6 +83,9 @@ class FilteredPactRunnerSpec extends Specification {
     interactions2 = [
       new RequestResponseInteraction('Req 3', [
         new ProviderState('State 3')
+      ], new Request(), new Response()),
+      new RequestResponseInteraction('Req 4', [
+        new ProviderState('State X')
       ], new Request(), new Response())
     ]
     pacts = [
@@ -89,12 +108,15 @@ class FilteredPactRunnerSpec extends Specification {
   def 'handles a test class with an empty filter annotation'() {
     given:
     FilteredPactRunner filteredPactRunner = new FilteredPactRunner(TestClassEmptyFilter)
+    FilteredPactRunner filteredPactRunner2 = new FilteredPactRunner(TestClassEmptyFilters)
 
     when:
     def result = filteredPactRunner.filterPacts(pacts)
+    def result2 = filteredPactRunner2.filterPacts(pacts)
 
     then:
     result.is pacts
+    result2.is pacts
   }
 
   def 'filters the interactions by provider state'() {
@@ -112,6 +134,18 @@ class FilteredPactRunnerSpec extends Specification {
   def 'filters the interactions correctly when given multiple provider states'() {
     given:
     FilteredPactRunner filteredPactRunner = new FilteredPactRunner(TestMultipleStatesClass)
+
+    when:
+    def result = filteredPactRunner.filterPacts(pacts)
+
+    then:
+    result.size() == 2
+    result*.interactions*.description.flatten() == ['Req 1', 'Req 2', 'Req 3']
+  }
+
+  def 'filters the interactions correctly when given a regex'() {
+    given:
+    FilteredPactRunner filteredPactRunner = new FilteredPactRunner(TestRegexClass)
 
     when:
     def result = filteredPactRunner.filterPacts(pacts)

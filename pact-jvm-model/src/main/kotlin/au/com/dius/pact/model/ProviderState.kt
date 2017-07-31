@@ -28,4 +28,6 @@ data class ProviderState(val name: String, val params: Map<String, Any> = mapOf(
       }
     }
   }
+
+  fun matches(state: String) = name.matches(Regex(state))
 }

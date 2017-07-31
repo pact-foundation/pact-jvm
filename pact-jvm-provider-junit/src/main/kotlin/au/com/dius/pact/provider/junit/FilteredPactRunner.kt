@@ -15,7 +15,7 @@ open class FilteredPactRunner(clazz: Class<*>) : PactRunner(clazz) {
     return if (pactFilterValues != null && pactFilterValues.filter { !it.isNullOrEmpty() }.isNotEmpty()) {
       pacts.map { pact ->
         pact.filterInteractions(Predicate<Interaction> { interaction ->
-          pactFilterValues.filter { value -> interaction.providerStates.map { it.name }.contains(value) }.isNotEmpty()
+          pactFilterValues.filter { value -> interaction.providerStates.any { it.matches(value) } }.isNotEmpty()
         })
       }.filter { pact -> pact.interactions.isNotEmpty() }
     } else pacts
