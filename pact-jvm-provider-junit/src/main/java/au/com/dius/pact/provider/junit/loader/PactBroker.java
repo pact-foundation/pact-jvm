@@ -38,7 +38,9 @@ public @interface PactBroker {
 
   /**
    * If the test should fail if no pacts are found for the provider, default is true.
+   * @deprecated Use a @IgnoreNoPactsToVerify annotation on the test class instead
    */
+  @Deprecated
   boolean failIfNoPactsFound() default true;
 
   /**
