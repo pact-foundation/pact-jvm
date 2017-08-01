@@ -1,13 +1,11 @@
 package au.com.dius.pact.provider.junit.loader;
 
-import au.com.dius.pact.model.*;
-import au.com.dius.pact.model.PactSource;
-import org.apache.commons.lang3.tuple.Pair;
+import au.com.dius.pact.model.Pact;
+import au.com.dius.pact.model.PactReader;
+import au.com.dius.pact.model.UrlsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,7 +29,7 @@ public class PactUrlLoader implements PactLoader {
         this(pactUrl.urls());
     }
 
-  public List<Pact> load(final String providerName) throws IOException {
+  public List<Pact> load(final String providerName) {
       return Arrays.stream(urls)
         .map(url -> {
           Pact pact = PactReader.loadPact(url);

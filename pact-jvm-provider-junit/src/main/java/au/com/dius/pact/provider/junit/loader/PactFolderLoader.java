@@ -43,7 +43,7 @@ public class PactFolderLoader implements PactLoader {
     }
 
     @Override
-    public List<Pact> load(final String providerName) throws IOException {
+    public List<Pact> load(final String providerName) {
         List<Pact> pacts = new ArrayList<Pact>();
         File pactFolder = resolvePath();
         File[] files = pactFolder.listFiles((dir, name) -> name.endsWith(".json"));

@@ -8,6 +8,7 @@ import au.com.dius.pact.provider.junit.loader.PactSource;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
+import groovy.json.JsonException;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
@@ -54,18 +55,19 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
     private final List<InteractionRunner> child;
 
     public PactRunner(final Class<?> clazz) throws InitializationError {
-        super(clazz);
+      super(clazz);
 
-        final Provider providerInfo = clazz.getAnnotation(Provider.class);
-        if (providerInfo == null) {
-            throw new InitializationError("Provider name should be specified by using " + Provider.class.getName() + " annotation");
-        }
-        final String serviceName = providerInfo.value();
+      final Provider providerInfo = clazz.getAnnotation(Provider.class);
+      if (providerInfo == null) {
+          throw new InitializationError("Provider name should be specified by using " +
+            Provider.class.getName() + " annotation");
+      }
+      final String serviceName = providerInfo.value();
 
-        final Consumer consumerInfo = clazz.getAnnotation(Consumer.class);
-        final String consumerName = consumerInfo != null ? consumerInfo.value() : null;
+      final Consumer consumerInfo = clazz.getAnnotation(Consumer.class);
+      final String consumerName = consumerInfo != null ? consumerInfo.value() : null;
 
-        final TestClass testClass = new TestClass(clazz);
+      final TestClass testClass = new TestClass(clazz);
 
       this.child = new ArrayList<>();
       final List<Pact> pacts;
@@ -74,12 +76,16 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         pacts = pactLoader.load(serviceName).stream()
                 .filter(p -> consumerName == null || p.getConsumer().getName().equals(consumerName))
                 .collect(Collectors.toList());
-      } catch (final IOException e) {
+      } catch (final IOException | JsonException e) {
         throw new InitializationError(e);
       }
 
       if (pacts == null || pacts.isEmpty()) {
-        throw new InitializationError("Did not find any pact files for provider " + providerInfo.value());
+        if (clazz.isAnnotationPresent(IgnoreNoPactsToVerify.class)) {
+          LOGGER.warn("Did not find any pact files for provider " + providerInfo.value());
+        } else {
+          throw new InitializationError("Did not find any pact files for provider " + providerInfo.value());
+        }
       }
 
       for (final Pact pact : filterPacts(pacts)) {
