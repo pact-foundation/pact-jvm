@@ -233,6 +233,11 @@ public class PactJUnitTest {
 }
 ```
 
+### Setting the test to not fail when no pacts are found [version 3.5.3+]
+
+By default the pact runner will fail the verification test if no pact files are found to verify. To change the
+failure into a warning, add a `@IgnoreNoPactsToVerify` annotation to your test class.
+
 ## Test target
 
 The field in test class of type `au.com.dius.pact.provider.junit.target.Target` annotated with `au.com.dius.pact.provider.junit.target.TestTarget`
