@@ -204,6 +204,30 @@ and annotate the test class with `@PactSource(MyOwnPactLoader.class)`. **Note:**
 
 ### Filtering the interactions that are verified [version 3.5.3+]
 
+By default, the pact runner will verify all pacts for the given provider. You can filter the pacts and interactions by
+the following methods.
+
+#### Filtering by Consumer
+
+You can run only those pacts for a particular consumer by adding a `@Consumer` annotation to the test class.
+
+For example:
+
+```java
+@RunWith(PactRunner.class)
+@Provider("Activity Service")
+@Consumer("Activity Consumer")
+@PactBroker(host = "localhost", port = "80")
+public class PactJUnitTest {
+
+  @TestTarget
+  public final Target target = new HttpTarget(5050);
+
+}
+```
+
+#### Filtering by Provider State
+
 You can filter the interactions that are executed by adding a `@PactFilter` annotation to your test class and set the
 JUnit runner to `FilteredPactRunner`. The pact filter annotation will then only verify interactions that have a matching
 provider state. You can provide multiple states to match with.
@@ -223,7 +247,7 @@ public class PactJUnitTest {
 }
 ```
 
-You can also use regular expressions with the filter. For example:
+You can also use regular expressions with the filter [version 3.5.3+]. For example:
 
 ```java
 @RunWith(FilteredPactRunner.class)
