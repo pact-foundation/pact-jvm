@@ -107,6 +107,15 @@ subprojects {
         }
     }
 
+    compileScala {
+      classpath = classpath.plus(files(compileGroovy.destinationDir)).plus(files(compileKotlin.destinationDir))
+      dependsOn compileGroovy, compileKotlin
+    }
+
+    compileTestGroovy {
+      dependsOn compileTestKotlin
+    }
+
     tasks.withType(GroovyCompile) {
       groovyOptions.optimizationOptions.indy = true
     }

@@ -32,7 +32,7 @@ task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider_${project.scal
         pom.withXml {
             def buildNode = asNode().appendNode('build')
             buildNode.appendNode('directory', buildDir)
-            buildNode.appendNode('outputDirectory', "$buildDir/classes/main")
+            buildNode.appendNode('outputDirectory', "$buildDir/classes/groovy/main")
             //add and configure the maven-plugin-plugin so that we can use the shortened 'pact' prefix
             //https://maven.apache.org/guides/introduction/introduction-to-plugin-prefix-mapping.html
             def pluginNode = buildNode.appendNode('plugins').appendNode('plugin')
