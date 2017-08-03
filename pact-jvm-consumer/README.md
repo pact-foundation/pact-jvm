@@ -165,7 +165,7 @@ For example:
         .minArrayLike("users")
             .id()
             .stringType("name")
-            .closeObject()
+        .closeObject()
         .closeArray();
 ```
 
@@ -207,7 +207,7 @@ PactDslJsonArray.arrayEachLike()
     .date("clearedDate", "mm/dd/yyyy", date)
     .stringType("status", "STATUS")
     .decimalType("amount", 100.0)
-    .closeObject()
+.closeObject()
 ```
 
 This will then match a body like:
@@ -251,13 +251,13 @@ new PactDslJsonBody()
       .eachArrayLike("coordinates") // coordinates is an array of arrays 
         .decimalType(-7.55717)
         .decimalType(49.766896)
-        .closeArray()
+      .closeArray()
       .closeArray()
     .closeObject()
     .object("properties")
       .stringType("prop0","value0")
-      .closeObject()
     .closeObject()
+  .closeObject()
   .closeArray()
 ```
 
