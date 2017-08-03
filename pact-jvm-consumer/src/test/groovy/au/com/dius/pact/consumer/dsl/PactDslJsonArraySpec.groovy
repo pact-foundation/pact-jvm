@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.model.matchingrules.RuleLogic
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class PactDslJsonArraySpec extends Specification {
 
@@ -89,6 +90,28 @@ class PactDslJsonArraySpec extends Specification {
         .closeObject()
       .closeObject()
       .closeArray()
+  }
+
+  @Unroll
+  def 'The #function functions should auto-close the inner object'() {
+    expect:
+    obj.closeArray() is body
+    obj.closed
+    !body.closed
+    array.closed
+
+    where:
+
+    function << ['eachLike', 'minArrayLike', 'maxArrayLike']
+    args << [['myArr'], ['myArr', 1], ['myArr', 1]]
+
+    body = new PactDslJsonBody()
+    obj = body."$function"(*args)
+        .stringType('myString2')
+        .object('myArrSubObj')
+          .stringType('myString3')
+        .closeObject()
+    array = obj.parent
   }
 
 }

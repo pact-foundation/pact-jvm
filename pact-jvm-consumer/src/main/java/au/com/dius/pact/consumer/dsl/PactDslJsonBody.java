@@ -569,7 +569,12 @@ public class PactDslJsonBody extends DslPart {
      */
     @Override
     public DslPart closeArray() {
+      if (parent instanceof PactDslJsonArray) {
+        closeObject();
+        return parent.closeArray();
+      } else {
         throw new UnsupportedOperationException("can't call closeArray on an Object");
+      }
     }
 
     /**
