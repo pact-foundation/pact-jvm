@@ -29,3 +29,11 @@ data class UrlsSource @JvmOverloads constructor(val url: List<String>,
                                                 val pacts: MutableMap<String, Pact> = mutableMapOf()) : PactSource
 
 data class BrokerUrlSource @JvmOverloads constructor(override val url: String, val attributes: Map<String, String> = mapOf()) : UrlPactSource
+
+object InputStreamPactSource : PactSource
+
+object ReaderPactSource : PactSource
+
+object UnknownPactSource : PactSource
+
+data class S3PactSource(override val url: String) : UrlPactSource

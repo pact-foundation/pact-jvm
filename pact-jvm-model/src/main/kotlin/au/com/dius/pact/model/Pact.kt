@@ -85,6 +85,11 @@ interface Pact {
   val interactions: List<Interaction>
 
   /**
+   * The source that this pact was loaded from
+   */
+  val source: PactSource
+
+  /**
    * Returns a pact with the interactions sorted
    */
   fun sortInteractions(): Pact

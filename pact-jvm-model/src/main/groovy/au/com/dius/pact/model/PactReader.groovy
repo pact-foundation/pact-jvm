@@ -8,6 +8,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import groovyx.net.http.RESTClient
+import kotlin.Pair
 
 /**
  * Class to load a Pact from a JSON source using a version strategy
@@ -23,9 +24,9 @@ class PactReader {
    * @param source a File or a URL
    */
   static Pact loadPact(Map options = [:], def source) {
-    def pact = loadFile(source, options)
+    Pair<Object, PactSource> pactInfo = loadFile(source, options)
     def version = '2.0.0'
-    def specification = pact.metadata?.'pact-specification'
+    def specification = pactInfo.first.metadata?.'pact-specification'
     if (specification instanceof Map && specification.version) {
       version = specification.version
     }
@@ -35,16 +36,18 @@ class PactReader {
     def specVersion = Version.valueOf(version)
     switch (specVersion.majorVersion) {
         case 3:
-            return loadV3Pact(source, pact)
+            return loadV3Pact(pactInfo.second, pactInfo.first)
         default:
-            return loadV2Pact(source, pact)
+            return loadV2Pact(pactInfo.second, pactInfo.first)
     }
   }
 
   @SuppressWarnings('UnusedMethodParameter')
   static Pact loadV3Pact(def source, def pactJson) {
       if (pactJson.messages) {
-          MessagePact.fromMap(pactJson)
+        def pact = MessagePact.fromMap(pactJson)
+        pact.source = source
+        pact
       } else {
         def transformedJson = transformJson(pactJson)
         def provider = Provider.fromMap(transformedJson.provider as Map)
@@ -62,7 +65,9 @@ class PactReader {
           new RequestResponseInteraction(i.description, providerStates, request, response)
         }
 
-        new RequestResponsePact(provider, consumer, interactions)
+        def pact = new RequestResponsePact(provider, consumer, interactions)
+        pact.source = source
+        pact
       }
   }
 
@@ -79,7 +84,9 @@ class PactReader {
         request, response)
     }
 
-    new RequestResponsePact(provider, consumer, interactions)
+    def pact = new RequestResponsePact(provider, consumer, interactions)
+    pact.source = source
+    pact
   }
 
   static Response extractResponse(responseJson) {
@@ -167,11 +174,11 @@ class PactReader {
     }
   }
 
-  private static loadFile(def source, Map options = [:]) {
+  private static Pair<Object, PactSource> loadFile(def source, Map options = [:]) {
       if (source instanceof FileSource) {
-        new JsonSlurper().parse(source.file)
+        new Pair(new JsonSlurper().parse(source.file), source)
       } else if (source instanceof InputStream || source instanceof Reader || source instanceof File) {
-        new JsonSlurper().parse(source)
+        loadPactFromFile(source)
       } else if (source instanceof URL || source instanceof UrlPactSource) {
         loadPactFromUrl(source instanceof URL ? new UrlSource(source.toString()) : source, options)
       } else if (source instanceof String && source.toLowerCase() ==~ '(https?|file)://?.*') {
@@ -179,10 +186,11 @@ class PactReader {
       } else if (source instanceof String && source.toLowerCase() ==~ 's3://.*') {
         loadPactFromS3Bucket(source, options)
       } else if (source instanceof String && fileExists(source)) {
-          new JsonSlurper().parse(source as File)
+        def file = source as File
+        new Pair(new JsonSlurper().parse(file), new FileSource(file))
       } else {
           try {
-            new JsonSlurper().parseText(source)
+            new Pair(new JsonSlurper().parseText(source), UnknownPactSource.INSTANCE)
           } catch (e) {
             throw new UnsupportedOperationException(
               "Unable to load pact file from '$source' as it is neither a json document, file, input stream, " +
@@ -192,16 +200,29 @@ class PactReader {
       }
   }
 
+  static Pair<Object, PactSource> loadPactFromFile(def source) {
+    def pactData = new JsonSlurper().parse(source)
+    if (source instanceof InputStream) {
+      new Pair(pactData, InputStreamPactSource.INSTANCE)
+    } else if (source instanceof Reader) {
+      new Pair(pactData, ReaderPactSource.INSTANCE)
+    } else if (source instanceof File) {
+      new Pair(pactData, new FileSource(source))
+    } else {
+      new Pair(pactData, UnknownPactSource.INSTANCE)
+    }
+  }
+
   @SuppressWarnings('UnusedPrivateMethodParameter')
-  private static loadPactFromS3Bucket(String source, Map options) {
+  private static Pair<Object, PactSource> loadPactFromS3Bucket(String source, Map options) {
     def s3Uri = new AmazonS3URI(source)
     def client = s3Client()
     def s3Pact = client.getObject(s3Uri.bucket, s3Uri.key)
-    new JsonSlurper().parse(s3Pact.objectContent)
+    new Pair(new JsonSlurper().parse(s3Pact.objectContent), new S3PactSource(source))
   }
 
   @SuppressWarnings('DuplicateNumberLiteral')
-  private static loadPactFromUrl(UrlPactSource source, Map options) {
+  private static Pair<Object, PactSource> loadPactFromUrl(UrlPactSource source, Map options) {
     if (options.authentication) {
       def http = newHttpClient(source)
       switch (options.authentication.first().toLowerCase()) {
@@ -213,9 +234,9 @@ class PactReader {
           }
           break
       }
-      http.get(headers: [Accept: JSON]).data
+      new Pair(http.get(headers: [Accept: JSON]).data, source)
     } else {
-      new JsonSlurper().parse(new URL(source.url), ACCEPT_JSON)
+      new Pair(new JsonSlurper().parse(new URL(source.url), ACCEPT_JSON), source)
     }
   }
 
