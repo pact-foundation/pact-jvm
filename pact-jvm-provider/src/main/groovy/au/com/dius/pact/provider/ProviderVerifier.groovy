@@ -37,6 +37,7 @@ class ProviderVerifier {
   def projectClasspath = { }
   def reporters = [ new AnsiConsoleReporter() ]
   def providerMethodInstance = { Method m -> m.declaringClass.newInstance() }
+  def providerVersion = { }
 
   Map verifyProvider(ProviderInfo provider) {
     Map failures = [:]
@@ -69,7 +70,7 @@ class ProviderVerifier {
       reporters.each { it.warnPactFileHasNoInteractions(pact) }
     } else {
       def result = interactions.every(this.&verifyInteraction.curry(provider, consumer, failures))
-      ProviderVerifierKt.reportVerificationResults(pact, result)
+      ProviderVerifierKt.reportVerificationResults(pact, result, providerVersion() ?: '0.0.0')
     }
   }
 

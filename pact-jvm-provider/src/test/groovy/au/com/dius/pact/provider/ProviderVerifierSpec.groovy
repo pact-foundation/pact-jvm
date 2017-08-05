@@ -402,7 +402,7 @@ class ProviderVerifierSpec extends Specification {
     verifier.runVerificationForConsumer([:], provider, consumer)
 
     then:
-    1 * ProviderVerifierKt.reportVerificationResults(mockPact, finalResult)
+    1 * ProviderVerifierKt.reportVerificationResults(mockPact, finalResult, '0.0.0')
 
     where:
 

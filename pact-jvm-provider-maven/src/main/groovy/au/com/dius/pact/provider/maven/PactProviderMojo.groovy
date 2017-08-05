@@ -26,6 +26,9 @@ class PactProviderMojo extends AbstractMojo {
   @SuppressWarnings('PrivateFieldCouldBeFinal')
   private Map<String, String> configuration = [:]
 
+  @Parameter(required = true, defaultValue = '${project.version}')
+  private String projectVersion
+
   @Override
   void execute() throws MojoExecutionException, MojoFailureException {
     AnsiConsole.systemInstall()
@@ -38,6 +41,7 @@ class PactProviderMojo extends AbstractMojo {
       "You must specify the pactfile to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
     }
     verifier.isBuildSpecificTask = { false }
+    verifier.providerVersion = { projectVersion }
 
     verifier.projectClasspath = {
       List<URL> urls = []
