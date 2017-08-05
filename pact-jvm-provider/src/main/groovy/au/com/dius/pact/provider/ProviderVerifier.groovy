@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.FileSource
 import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.UrlPactSource
@@ -64,27 +64,24 @@ class ProviderVerifier {
   void runVerificationForConsumer(Map failures, ProviderInfo provider, ConsumerInfo consumer) {
     reportVerificationForConsumer(consumer, provider)
     def pact = loadPactFileForConsumer(consumer)
-    forEachInteraction(pact, this.&verifyInteraction.curry(provider, consumer, failures))
+    List interactions = interactions(pact)
+    if (interactions.empty) {
+      reporters.each { it.warnPactFileHasNoInteractions(pact) }
+    } else {
+      def result = interactions.every(this.&verifyInteraction.curry(provider, consumer, failures))
+      ProviderVerifierKt.reportVerificationResults(pact, result)
+    }
   }
 
   void reportVerificationForConsumer(ConsumerInfo consumer, ProviderInfo provider) {
     reporters.each { it.reportVerificationForConsumer(consumer, provider) }
   }
 
-  List interactions(def pact) {
+  List interactions(Pact pact) {
     if (pact instanceof MessagePact) {
       pact.messages.findAll(this.&filterInteractions)
     } else {
       pact.interactions.findAll(this.&filterInteractions)
-    }
-  }
-
-  void forEachInteraction(def pact, Closure verifyInteraction) {
-    List interactions = interactions(pact)
-    if (interactions.empty) {
-      reporters.each { it.warnPactFileHasNoInteractions(pact) }
-    } else {
-      interactions.each(verifyInteraction)
     }
   }
 
@@ -102,14 +99,17 @@ class ProviderVerifier {
         options.authentication = consumer.pactFileAuthentication
       }
       PactReader.loadPact(options, pactSource)
-    } else if (pactSource instanceof FileSource || ProviderUtils.pactFileExists(pactSource) ||
-        ProviderUtils.isS3Url(pactSource)) {
-      reporters.each { it.verifyConsumerFromFile(pactSource, consumer) }
-      PactReader.loadPact(pactSource)
     } else {
-      String message = generateLoadFailureMessage(consumer)
-      reporters.each { it.pactLoadFailureForConsumer(consumer, message) }
-      throw new RuntimeException(message)
+      try {
+        def pact = PactReader.loadPact(pactSource)
+        reporters.each { it.verifyConsumerFromFile(pactSource, consumer) }
+        pact
+      } catch (e) {
+        log.error('Failed to load pact file', e)
+        String message = generateLoadFailureMessage(consumer)
+        reporters.each { it.pactLoadFailureForConsumer(consumer, message) }
+        throw new RuntimeException(message)
+      }
     }
   }
 
