@@ -36,6 +36,7 @@ class ProviderVerifier {
   def projectClasspath = { }
   def reporters = [ new AnsiConsoleReporter() ]
   def providerMethodInstance = { Method m -> m.declaringClass.newInstance() }
+  def providerVersion = { }
 
   Map verifyProvider(ProviderInfo provider) {
     Map failures = [:]
