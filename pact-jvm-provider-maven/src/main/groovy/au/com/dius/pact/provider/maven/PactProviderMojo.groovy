@@ -34,21 +34,22 @@ class PactProviderMojo extends AbstractMojo {
     AnsiConsole.systemInstall()
 
     Map failures = [:]
-    ProviderVerifier verifier = new ProviderVerifier()
-    verifier.projectHasProperty = { this.propertyDefined(it) }
-    verifier.projectGetProperty =  { this.property(it) }
-    verifier.pactLoadFailureMessage = { consumer ->
-      "You must specify the pactfile to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
-    }
-    verifier.isBuildSpecificTask = { false }
-    verifier.providerVersion = { projectVersion }
-
-    verifier.projectClasspath = {
-      List<URL> urls = []
-      for (element in classpathElements) {
-        urls.add(new File(element).toURI().toURL())
+    ProviderVerifier verifier = new ProviderVerifier().with {
+      projectHasProperty = { this.propertyDefined(it) }
+      projectGetProperty = { this.property(it) }
+      pactLoadFailureMessage = { consumer ->
+        "You must specify the pactfile to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
       }
-      urls as URL[]
+      isBuildSpecificTask = { false }
+      providerVersion = { projectVersion }
+
+      projectClasspath = {
+        List<URL> urls = []
+        for (element in classpathElements) {
+          urls.add(new File(element).toURI().toURL())
+        }
+        urls as URL[]
+      }
     }
 
     serviceProviders.each { provider ->
