@@ -368,11 +368,12 @@ class ProviderVerifierSpec extends Specification {
     verifier.reporters << reporter
 
     when:
-    verifier.verifyMessagePact(methods, message, interactionMessage, failures)
+    def result = verifier.verifyMessagePact(methods, message, interactionMessage, failures)
 
     then:
     1 * reporter.bodyComparisonOk()
     1 * reporter.generatesAMessageWhich()
     0 * reporter._
+    result
   }
 }
