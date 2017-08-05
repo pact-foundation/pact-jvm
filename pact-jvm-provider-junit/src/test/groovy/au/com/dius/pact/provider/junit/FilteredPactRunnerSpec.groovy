@@ -10,6 +10,7 @@ import au.com.dius.pact.provider.junit.loader.PactFilter
 import au.com.dius.pact.provider.junit.loader.PactFolder
 import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestTarget
+import org.junit.runners.model.InitializationError
 import spock.lang.Specification
 
 class FilteredPactRunnerSpec extends Specification {
@@ -22,6 +23,7 @@ class FilteredPactRunnerSpec extends Specification {
   @Provider('myAwesomeService')
   @PactFolder('pacts')
   @PactFilter('State 1')
+  @IgnoreNoPactsToVerify
   class TestClass {
     @TestTarget
     Target target
@@ -54,6 +56,7 @@ class FilteredPactRunnerSpec extends Specification {
   @Provider('myAwesomeService')
   @PactFolder('pacts')
   @PactFilter(['State 1', 'State 3'])
+  @IgnoreNoPactsToVerify
   class TestMultipleStatesClass {
     @TestTarget
     Target target
@@ -62,7 +65,25 @@ class FilteredPactRunnerSpec extends Specification {
   @Provider('myAwesomeService')
   @PactFolder('pacts')
   @PactFilter('State \\d+')
+  @IgnoreNoPactsToVerify
   class TestRegexClass {
+    @TestTarget
+    Target target
+  }
+
+  @Provider('myAwesomeService')
+  @PactFolder('pacts')
+  @PactFilter(['State 6'])
+  class TestFilterOutAllPactsClass {
+    @TestTarget
+    Target target
+  }
+
+  @Provider('myAwesomeService')
+  @PactFolder('pacts')
+  @PactFilter(['State 6'])
+  @IgnoreNoPactsToVerify
+  class TestFilterOutAllPactsIgnoreNoPactsToVerifyClass {
     @TestTarget
     Target target
   }
@@ -153,6 +174,24 @@ class FilteredPactRunnerSpec extends Specification {
     then:
     result.size() == 2
     result*.interactions*.description.flatten() == ['Req 1', 'Req 2', 'Req 3']
+  }
+
+  @SuppressWarnings('UnusedObject')
+  def 'Throws an initialisation error if all pacts are filtered out'() {
+    when:
+    new FilteredPactRunner(TestFilterOutAllPactsClass)
+
+    then:
+    thrown(InitializationError)
+  }
+
+  @SuppressWarnings('UnusedObject')
+  def 'Does not throw an initialisation error if all pacts are filtered out but @IgnoreNoPactsToVerify is present'() {
+    when:
+    new FilteredPactRunner(TestFilterOutAllPactsIgnoreNoPactsToVerifyClass)
+
+    then:
+    notThrown(InitializationError)
   }
 
 }

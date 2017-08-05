@@ -73,9 +73,9 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
       final List<Pact> pacts;
       PactLoader pactLoader = getPactSource(testClass);
       try {
-        pacts = pactLoader.load(serviceName).stream()
+        pacts = filterPacts(pactLoader.load(serviceName).stream()
                 .filter(p -> consumerName == null || p.getConsumer().getName().equals(consumerName))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
       } catch (final IOException | JsonException e) {
         throw new InitializationError(e);
       }
@@ -88,8 +88,10 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         }
       }
 
-      for (final Pact pact : filterPacts(pacts)) {
-        this.child.add(new InteractionRunner(testClass, pact, pactLoader.getPactSource()));
+      if (pacts != null) {
+        for (final Pact pact : pacts) {
+          this.child.add(new InteractionRunner(testClass, pact, pactLoader.getPactSource()));
+        }
       }
     }
 
