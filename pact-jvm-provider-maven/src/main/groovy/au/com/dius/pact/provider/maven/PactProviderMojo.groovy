@@ -8,6 +8,7 @@ import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.plugins.annotations.ResolutionScope
+import org.fusesource.jansi.AnsiConsole
 
 /**
  * Pact Verify Maven Plugin
@@ -25,23 +26,31 @@ class PactProviderMojo extends AbstractMojo {
   @SuppressWarnings('PrivateFieldCouldBeFinal')
   private Map<String, String> configuration = [:]
 
+  @Parameter(required = true, defaultValue = '${project.version}')
+  private String projectVersion
+
   @Override
   void execute() throws MojoExecutionException, MojoFailureException {
-    Map failures = [:]
-    ProviderVerifier verifier = new ProviderVerifier()
-    verifier.projectHasProperty = { this.propertyDefined(it) }
-    verifier.projectGetProperty =  { this.property(it) }
-    verifier.pactLoadFailureMessage = { consumer ->
-      "You must specify the pactfile to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
-    }
-    verifier.isBuildSpecificTask = { false }
+    AnsiConsole.systemInstall()
 
-    verifier.projectClasspath = {
-      List<URL> urls = []
-      for (element in classpathElements) {
-        urls.add(new File(element).toURI().toURL())
+    Map failures = [:]
+    ProviderVerifier verifier = new ProviderVerifier().with {
+      projectHasProperty = { this.propertyDefined(it) }
+      projectGetProperty = { this.property(it) }
+      pactLoadFailureMessage = { consumer ->
+        "You must specify the pactfile to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
       }
-      urls as URL[]
+      isBuildSpecificTask = { false }
+      providerVersion = { projectVersion }
+
+      projectClasspath = {
+        List<URL> urls = []
+        for (element in classpathElements) {
+          urls.add(new File(element).toURI().toURL())
+        }
+        urls as URL[]
+      }
+      it
     }
 
     serviceProviders.each { provider ->
@@ -61,6 +70,7 @@ class PactProviderMojo extends AbstractMojo {
 
     if (failures.size() > 0) {
       verifier.displayFailures(failures)
+      AnsiConsole.systemUninstall()
       throw new MojoFailureException("There were ${failures.size()} pact failures")
     }
   }
