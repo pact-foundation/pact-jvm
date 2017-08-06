@@ -14,7 +14,7 @@ class PactRunnerSpec extends Specification {
   }
 
   @Provider('Bob')
-  @PactUrl(urls = ["http://doesn't exist/I hope?"])
+  @PactUrl(urls = ['http://doesnt%20exist/I%20hope?'])
   class FailsTestClass {
 
   }
@@ -57,7 +57,7 @@ class PactRunnerSpec extends Specification {
 
     then:
     InitializationError e = thrown()
-    e.causes*.message == ["Unable to process url: http://doesn't exist/I hope?"]
+    e.causes*.message == ['Unable to process url: http://doesnt%20exist/I%20hope?']
   }
 
   def 'PactRunner throws an exception if there are no pacts to verify'() {

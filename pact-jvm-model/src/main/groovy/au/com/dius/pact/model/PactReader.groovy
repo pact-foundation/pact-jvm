@@ -16,9 +16,6 @@ import kotlin.Pair
 @Slf4j
 class PactReader {
 
-  private static final String JSON = 'application/json'
-  private static final Map ACCEPT_JSON = [requestProperties: [Accept: JSON]]
-
   /**
    * Loads a pact file from either a File or a URL
    * @param source a File or a URL
@@ -183,9 +180,11 @@ class PactReader {
       } else if (source instanceof InputStream || source instanceof Reader || source instanceof File) {
         loadPactFromFile(source)
       } else if (source instanceof URL || source instanceof UrlPactSource) {
-        loadPactFromUrl(source instanceof URL ? new UrlSource(source.toString()) : source, options)
+        def urlSource = source instanceof URL ? new UrlSource(source.toString()) : source
+        PactReaderKt.loadPactFromUrl(urlSource, options, newHttpClient(urlSource))
       } else if (source instanceof String && source.toLowerCase() ==~ '(https?|file)://?.*') {
-        loadPactFromUrl(new UrlSource(source), options)
+        def urlSource = new UrlSource(source)
+        PactReaderKt.loadPactFromUrl(urlSource, options, newHttpClient(urlSource))
       } else if (source instanceof String && source.toLowerCase() ==~ 's3://.*') {
         loadPactFromS3Bucket(source, options)
       } else if (source instanceof String && fileExists(source)) {
@@ -223,25 +222,6 @@ class PactReader {
     def client = s3Client()
     def s3Pact = client.getObject(s3Uri.bucket, s3Uri.key)
     new Pair(new JsonSlurper().parse(s3Pact.objectContent), new S3PactSource(source))
-  }
-
-  @SuppressWarnings('DuplicateNumberLiteral')
-  private static Pair<Object, PactSource> loadPactFromUrl(UrlPactSource source, Map options) {
-    if (options.authentication) {
-      def http = newHttpClient(source)
-      switch (options.authentication.first().toLowerCase()) {
-        case 'basic':
-          if (options.authentication.size() > 2) {
-            http.auth.basic(options.authentication[1].toString(), options.authentication[2].toString())
-          } else {
-            log.warn('Basic authentication requires a username and password, ignoring.')
-          }
-          break
-      }
-      new Pair(http.get(headers: [Accept: JSON]).data, source)
-    } else {
-      new Pair(new JsonSlurper().parse(new URL(source.url), ACCEPT_JSON), source)
-    }
   }
 
   private static newHttpClient(UrlPactSource source) {
