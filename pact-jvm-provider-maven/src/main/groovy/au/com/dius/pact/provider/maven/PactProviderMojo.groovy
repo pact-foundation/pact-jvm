@@ -50,6 +50,7 @@ class PactProviderMojo extends AbstractMojo {
         }
         urls as URL[]
       }
+      it
     }
 
     serviceProviders.each { provider ->
