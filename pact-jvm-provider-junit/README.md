@@ -155,6 +155,19 @@ You can provide a default value by separating the property name with a colon (`:
 @PactBroker(host="${pactbroker.hostname:localhost}", port = "80")
 ```
 
+#### _Version ???/???+_ - More Java System properties
+
+The default values of the `@PactBroker` annotation now enable variable interpolation.
+The following keys may be managed through the environment
+* `pactbroker.host`
+* `pactbroker.port`
+* `pactbroker.protocol`
+* `pactbroker.tags` (comma separated)
+* `pactbroker.auth.scheme`
+* `pactbroker.auth.username`
+* `pactbroker.auth.password`
+
+
 #### _Version 3.2.4/2.4.6+_ - Using tags with the pact broker
 
 The pact broker allows different versions to be tagged. To load all the pacts:
