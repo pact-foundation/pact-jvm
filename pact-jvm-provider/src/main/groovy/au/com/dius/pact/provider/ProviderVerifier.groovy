@@ -103,7 +103,7 @@ class ProviderVerifier {
     } else {
       try {
         def pact = PactReader.loadPact(pactSource)
-        reporters.each { it.verifyConsumerFromFile(pactSource, consumer) }
+        reporters.each { it.verifyConsumerFromFile(pact.source, consumer) }
         pact
       } catch (e) {
         log.error('Failed to load pact file', e)

@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.reporters
 
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.PactSource
 import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
@@ -36,12 +37,12 @@ class AnsiConsoleReporter implements VerifierReporter {
 
   @Override
   void verifyConsumerFromUrl(UrlPactSource pactUrl, ConsumerInfo consumer) {
-    AnsiConsole.out().println(Ansi.ansi().a("  [from URL $pactUrl.url]"))
+    AnsiConsole.out().println(Ansi.ansi().a("  [from ${pactUrl.description()}]"))
   }
 
   @Override
-  void verifyConsumerFromFile(def pactFile, ConsumerInfo consumer) {
-    AnsiConsole.out().println(Ansi.ansi().a("  [Using file $pactFile]"))
+  void verifyConsumerFromFile(PactSource pactFile, ConsumerInfo consumer) {
+    AnsiConsole.out().println(Ansi.ansi().a("  [Using ${pactFile.description()}]"))
   }
 
   @Override

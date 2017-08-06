@@ -1,8 +1,10 @@
 package au.com.dius.pact.provider.reporters
 
 import au.com.dius.pact.model.BasePact
+import au.com.dius.pact.model.FileSource
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.PactSource
 import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.provider.ConsumerInfo
@@ -65,9 +67,9 @@ class JsonReporter implements VerifierReporter {
   }
 
   @Override
-  void verifyConsumerFromFile(def pactFile, ConsumerInfo consumer) {
+  void verifyConsumerFromFile(PactSource pactFile, ConsumerInfo consumer) {
     jsonData.execution.last().consumer.source = [
-      file: pactFile as String
+      file: pactFile instanceof FileSource ? pactFile.file : pactFile.description()
     ]
   }
 

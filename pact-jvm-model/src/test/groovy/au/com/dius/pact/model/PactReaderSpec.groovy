@@ -231,4 +231,18 @@ class PactReaderSpec extends Specification {
     pact.interactions[0].response.body.value == '"This is a string"'
   }
 
+  def 'loads a pact where the source is a closure'() {
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('pact.json')
+
+    when:
+    def pact = PactReader.loadPact(new ClosurePactSource({ pactUrl }))
+
+    then:
+    1 * PactReader.loadV2Pact({ it.url == pactUrl.toString() }, _)
+    0 * PactReader.loadV3Pact(_, _)
+    pact instanceof RequestResponsePact
+    pact.source instanceof UrlPactSource
+  }
+
 }

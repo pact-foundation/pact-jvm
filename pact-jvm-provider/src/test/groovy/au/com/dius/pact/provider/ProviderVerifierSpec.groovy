@@ -5,11 +5,11 @@ import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
-import au.com.dius.pact.model.PactSource
 import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.model.UnknownPactSource
 import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
@@ -381,16 +381,19 @@ class ProviderVerifierSpec extends Specification {
   }
 
   @Unroll
+  @SuppressWarnings('UnnecessaryGetter')
   def 'after verifying a pact, the results are reported back using reportVerificationResults'() {
     given:
     ProviderInfo provider = new ProviderInfo('Test Provider')
-    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: [:] as PactSource)
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
     GroovyMock(PactReader, global: true)
     GroovyMock(ProviderVerifierKt, global: true)
     GroovyMock(StateChange, global: true)
     def interaction1 = Mock(Interaction)
     def interaction2 = Mock(Interaction)
-    def mockPact = Mock(Pact)
+    def mockPact = Mock(Pact) {
+      getSource() >> UnknownPactSource.INSTANCE
+    }
 
     PactReader.loadPact(_) >> mockPact
     mockPact.interactions >> [interaction1, interaction2]

@@ -175,6 +175,9 @@ class PactReader {
   }
 
   private static Pair<Object, PactSource> loadFile(def source, Map options = [:]) {
+    if (source instanceof ClosurePactSource) {
+      loadFile(source.closure.get(), options)
+    } else {
       if (source instanceof FileSource) {
         new Pair(new JsonSlurper().parse(source.file), source)
       } else if (source instanceof InputStream || source instanceof Reader || source instanceof File) {
@@ -189,15 +192,16 @@ class PactReader {
         def file = source as File
         new Pair(new JsonSlurper().parse(file), new FileSource(file))
       } else {
-          try {
-            new Pair(new JsonSlurper().parseText(source), UnknownPactSource.INSTANCE)
-          } catch (e) {
-            throw new UnsupportedOperationException(
-              "Unable to load pact file from '$source' as it is neither a json document, file, input stream, " +
-                'reader or an URL',
-              e)
-          }
+        try {
+          new Pair(new JsonSlurper().parseText(source), UnknownPactSource.INSTANCE)
+        } catch (e) {
+          throw new UnsupportedOperationException(
+            "Unable to load pact file from '$source' as it is neither a json document, file, input stream, " +
+              'reader or an URL',
+            e)
+        }
       }
+    }
   }
 
   static Pair<Object, PactSource> loadPactFromFile(def source) {
