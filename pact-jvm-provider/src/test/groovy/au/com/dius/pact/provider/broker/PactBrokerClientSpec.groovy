@@ -55,7 +55,7 @@ class PactBrokerClientSpec extends Specification {
     then:
     consumers != []
     consumers.first().name == 'bob'
-    consumers.first().pactSource == new UrlSource('http://bob.com/')
+    consumers.first().pactSource == new BrokerUrlSource('http://bob.com/')
     consumers.first().pactFileAuthentication == ['Basic', '1', '2']
   }
 
