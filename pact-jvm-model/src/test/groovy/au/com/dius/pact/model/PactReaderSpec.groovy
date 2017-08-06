@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectInputStream
 import groovyx.net.http.AuthConfig
+import groovyx.net.http.HttpResponseDecorator
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
 
@@ -144,7 +145,7 @@ class PactReaderSpec extends Specification {
     def mockAuth = Mock(AuthConfig)
     def mockHttp = Mock(RESTClient) {
       getAuth() >> mockAuth
-      get(_) >> [data: [:]]
+      get(_) >> new HttpResponseDecorator(null, [:])
     }
     PactReader.newHttpClient(pactUrl) >> mockHttp
 

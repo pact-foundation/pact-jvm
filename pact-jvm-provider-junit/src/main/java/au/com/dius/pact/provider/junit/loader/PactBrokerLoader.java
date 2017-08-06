@@ -1,6 +1,9 @@
 package au.com.dius.pact.provider.junit.loader;
 
-import au.com.dius.pact.model.*;
+import au.com.dius.pact.model.Consumer;
+import au.com.dius.pact.model.Pact;
+import au.com.dius.pact.model.PactBrokerSource;
+import au.com.dius.pact.model.PactReader;
 import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.broker.PactBrokerClient;
@@ -12,7 +15,12 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseExpression;
 import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseListExpression;
@@ -80,9 +88,11 @@ public class PactBrokerLoader implements PactLoader {
       List<ConsumerInfo> consumers;
       PactBrokerClient pactBrokerClient = newPactBrokerClient(uriBuilder.build());
       if (StringUtils.isEmpty(tag)) {
-        consumers = pactBrokerClient.fetchConsumers(providerName);
+        consumers = pactBrokerClient.fetchConsumers(providerName).stream()
+          .map(ConsumerInfo::from).collect(toList());
       } else {
-        consumers = pactBrokerClient.fetchConsumersWithTag(providerName, tag);
+        consumers = pactBrokerClient.fetchConsumersWithTag(providerName, tag).stream()
+          .map(ConsumerInfo::from).collect(toList());
       }
 
       if (failIfNoPactsFound && consumers.isEmpty()) {

@@ -1,0 +1,4 @@
+dependencies {
+  compile "org.apache.commons:commons-lang3:$commonsLang3Version"
+  compile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
+}

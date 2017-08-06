@@ -19,6 +19,7 @@ def crossCompileModules = [
 
 rootProject.name = 'pact-jvm'
 
+include 'pact-jvm-pact-broker'
 include 'pact-jvm-model'
 
 crossCompileModules.each {

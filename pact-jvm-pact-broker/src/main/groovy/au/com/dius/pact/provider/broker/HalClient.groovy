@@ -152,10 +152,10 @@ class HalClient {
 
   def uploadJson(String path, String bodyJson, Closure closure = null) {
     setupHttpClient()
-    http.request(PUT) {
+    http.request(groovyx.net.http.Method.PUT) {
       uri.path = path
       body = bodyJson
-      requestContentType = JSON
+      requestContentType = groovyx.net.http.ContentType.JSON
 
       response.success = { resp ->
         consumeEntity(resp)
@@ -190,10 +190,10 @@ class HalClient {
 
   def post(String path, Map bodyJson) {
     setupHttpClient()
-    http.request(POST) {
+    http.request(groovyx.net.http.Method.POST) {
       uri.path = path
       body = bodyJson
-      requestContentType = JSON
+      requestContentType = groovyx.net.http.ContentType.JSON
 
       response.success = { resp -> "SUCCESS - ${resp.statusLine as String}" }
 

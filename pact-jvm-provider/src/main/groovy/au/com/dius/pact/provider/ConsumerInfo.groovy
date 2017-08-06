@@ -1,10 +1,12 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.model.BrokerUrlSource
 import au.com.dius.pact.model.ClosurePactSource
 import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.FileSource
 import au.com.dius.pact.model.PactSource
 import au.com.dius.pact.model.UrlSource
+import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import groovy.transform.Canonical
 
 import java.util.function.Supplier
@@ -53,5 +55,10 @@ class ConsumerInfo {
   @Deprecated
   def getPactFile() {
     pactSource
+  }
+
+  static ConsumerInfo from(PactBrokerConsumer consumer) {
+    new ConsumerInfo(name: consumer.name, pactSource: new BrokerUrlSource(consumer.source),
+      pactFileAuthentication: consumer.pactFileAuthentication)
   }
 }

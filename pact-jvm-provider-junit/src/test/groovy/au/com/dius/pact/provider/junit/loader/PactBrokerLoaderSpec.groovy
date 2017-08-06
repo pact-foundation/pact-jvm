@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.junit.loader
 
 import au.com.dius.pact.model.Pact
+import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.broker.InvalidHalResponse
 import au.com.dius.pact.provider.broker.PactBrokerClient
@@ -114,10 +115,10 @@ class PactBrokerLoaderSpec extends Specification {
     def result = pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumersWithTag('test', 'latest') >> [ new ConsumerInfo('test', 'latest') ]
-    1 * brokerClient.fetchConsumersWithTag('test', 'a') >> [ new ConsumerInfo('test', 'a') ]
-    1 * brokerClient.fetchConsumersWithTag('test', 'b') >> [ new ConsumerInfo('test', 'b') ]
-    1 * brokerClient.fetchConsumersWithTag('test', 'c') >> [ new ConsumerInfo('test', 'c') ]
+    1 * brokerClient.fetchConsumersWithTag('test', 'latest') >> [ new PactBrokerConsumer('test', 'latest', []) ]
+    1 * brokerClient.fetchConsumersWithTag('test', 'a') >> [ new PactBrokerConsumer('test', 'a', []) ]
+    1 * brokerClient.fetchConsumersWithTag('test', 'b') >> [ new PactBrokerConsumer('test', 'b', []) ]
+    1 * brokerClient.fetchConsumersWithTag('test', 'c') >> [ new PactBrokerConsumer('test', 'c', []) ]
     result.size() == 4
   }
 
@@ -132,8 +133,8 @@ class PactBrokerLoaderSpec extends Specification {
     def result = pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumersWithTag('test', 'one') >> [ new ConsumerInfo('test', 'one') ]
-    1 * brokerClient.fetchConsumersWithTag('test', 'two') >> [ new ConsumerInfo('test', 'two') ]
+    1 * brokerClient.fetchConsumersWithTag('test', 'one') >> [ new PactBrokerConsumer('test', 'one', []) ]
+    1 * brokerClient.fetchConsumersWithTag('test', 'two') >> [ new PactBrokerConsumer('test', 'two', []) ]
     result.size() == 2
   }
 
@@ -146,7 +147,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     result.size() == 1
-    1 * brokerClient.fetchConsumers('test') >> [ new ConsumerInfo('test', 'latest') ]
+    1 * brokerClient.fetchConsumers('test') >> [ new PactBrokerConsumer('test', 'latest', []) ]
   }
 
 }

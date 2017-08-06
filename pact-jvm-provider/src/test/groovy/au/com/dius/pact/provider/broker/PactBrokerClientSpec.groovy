@@ -1,10 +1,7 @@
 package au.com.dius.pact.provider.broker
 
-@SuppressWarnings('UnusedImport')
-import au.com.dius.pact.consumer.PactVerified$
+import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.groovy.PactBuilder
-import au.com.dius.pact.model.BrokerUrlSource
-import au.com.dius.pact.model.UrlSource
 import spock.lang.Specification
 
 @SuppressWarnings('UnnecessaryGetter')
@@ -13,7 +10,7 @@ class PactBrokerClientSpec extends Specification {
   private PactBrokerClient pactBrokerClient
   private File pactFile
   private String pactContents
-  private pactBroker
+  private PactBuilder pactBroker
 
   def setup() {
     pactBrokerClient = new PactBrokerClient('http://localhost:8080')
@@ -38,98 +35,6 @@ class PactBrokerClientSpec extends Specification {
     }
   }
 
-  def 'when fetching consumers, sets the auth if there is any'() {
-    given:
-    def halClient = GroovyMock(HalClient, global: true)
-    halClient.navigate(_, _) >> halClient
-    halClient.pacts(_) >> { args -> args.first().call([name: 'bob', href: 'http://bob.com/']) }
-
-    def client = GroovySpy(PactBrokerClient, global: true) {
-      newHalClient() >> halClient
-    }
-    client.options.authentication = ['Basic', '1', '2']
-
-    when:
-    def consumers = client.fetchConsumers('provider')
-
-    then:
-    consumers != []
-    consumers.first().name == 'bob'
-    consumers.first().pactSource == new BrokerUrlSource('http://bob.com/')
-    consumers.first().pactFileAuthentication == ['Basic', '1', '2']
-  }
-
-  def 'when fetching consumers for an unknown provider, returns an empty pacts list'() {
-    given:
-    def halClient = GroovyMock(HalClient, global: true)
-    halClient.navigate(_, _) >> halClient
-    halClient.pacts(_) >> { args -> throw new NotFoundHalResponse() }
-
-    def client = GroovySpy(PactBrokerClient, global: true) {
-      newHalClient() >> halClient
-    }
-
-    when:
-    def consumers = client.fetchConsumers('provider')
-
-    then:
-    consumers == []
-  }
-
-  def 'fetches consumers with specified tag successfully'() {
-    given:
-    def halClient = GroovyMock(HalClient, global: true)
-    halClient.navigate(_, _) >> halClient
-    halClient.pacts(_) >> { args -> args.first().call([name: 'bob', href: 'http://bob.com/']) }
-
-    def client = GroovySpy(PactBrokerClient, global: true) {
-      newHalClient() >> halClient
-    }
-
-    when:
-    def consumers = client.fetchConsumersWithTag('provider', 'tag')
-
-    then:
-    consumers != []
-    consumers.first().name == 'bob'
-    consumers.first().pactSource.url == 'http://bob.com/'
-  }
-
-  def 'when fetching consumers with specified tag, sets the auth if there is any'() {
-    given:
-    def halClient = GroovyMock(HalClient, global: true)
-    halClient.navigate(_, _) >> halClient
-    halClient.pacts(_) >> { args -> args.first().call([name: 'bob', href: 'http://bob.com/']) }
-
-    def client = GroovySpy(PactBrokerClient, global: true) {
-      newHalClient() >> halClient
-    }
-    client.options.authentication = ['Basic', '1', '2']
-
-    when:
-    def consumers = client.fetchConsumersWithTag('provider', 'tag')
-
-    then:
-    consumers.first().pactFileAuthentication == ['Basic', '1', '2']
-  }
-
-  def 'when fetching consumers with specified tag for an unknown provider, returns an empty pacts list'() {
-    given:
-    def halClient = GroovyMock(HalClient, global: true)
-    halClient.navigate(_, _) >> halClient
-    halClient.pacts(_) >> { args -> throw new NotFoundHalResponse() }
-
-    def client = GroovySpy(PactBrokerClient, global: true) {
-      newHalClient() >> halClient
-    }
-
-    when:
-    def consumers = client.fetchConsumersWithTag('provider', 'tag')
-
-    then:
-    consumers == []
-  }
-
   def 'returns success when uploading a pact is ok'() {
     given:
     pactBroker {
@@ -142,28 +47,12 @@ class PactBrokerClientSpec extends Specification {
     }
 
     when:
-    def result = pactBroker.run {
+    def result = pactBroker.runTest {
       assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'HTTP/1.1 200 OK'
     }
 
     then:
-    result == PactVerified$.MODULE$
-  }
-
-  def 'returns an error when uploading a pact fails'() {
-    given:
-    def halClient = GroovyMock(HalClient, global: true)
-    def client = GroovySpy(PactBrokerClient, global: true) {
-      newHalClient() >> halClient
-    }
-
-    when:
-    def result = client.uploadPactFile(pactFile, '10.0.0')
-
-    then:
-    1 * halClient.uploadJson('/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0', pactContents, _) >>
-      { args -> args[2].call('Failed', 'Error') }
-    result == 'FAILED! Error'
+    result == PactVerificationResult.Ok.INSTANCE
   }
 
   @SuppressWarnings('LineLength')
@@ -190,14 +79,14 @@ class PactBrokerClientSpec extends Specification {
     }
 
     when:
-    def result = pactBroker.run {
+    def result = pactBroker.runTest {
       assert pactBrokerClient.uploadPactFile(pactFile, 'XXXX') == 'FAILED! 400 Bad Request - ' +
         'consumer_version_number: [Consumer version number \'XXX\' cannot be parsed to a version number. ' +
         'The expected format (unless this configuration has been overridden) is a semantic version. eg. 1.3.0 or 2.0.4.rc1]'
     }
 
     then:
-    result == PactVerified$.MODULE$
+    result == PactVerificationResult.Ok.INSTANCE
   }
 
   @SuppressWarnings('LineLength')
@@ -223,12 +112,12 @@ class PactBrokerClientSpec extends Specification {
     }
 
     when:
-    def result = pactBroker.run {
+    def result = pactBroker.runTest {
       assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'FAILED! 409 Conflict - '
     }
 
     then:
-    result == PactVerified$.MODULE$
+    result == PactVerificationResult.Ok.INSTANCE
   }
 
   @SuppressWarnings('LineLength')
@@ -247,11 +136,11 @@ class PactBrokerClientSpec extends Specification {
     }
 
     when:
-    def result = pactBroker.run {
+    def result = pactBroker.runTest {
       assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'FAILED! 400 Bad Request - Enjoy this bit of text'
     }
 
     then:
-    result == PactVerified$.MODULE$
+    result == PactVerificationResult.Ok.INSTANCE
   }
 }

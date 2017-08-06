@@ -1,7 +1,6 @@
 package au.com.dius.pact.provider.broker
 
-import au.com.dius.pact.model.BrokerUrlSource
-import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import org.apache.commons.lang3.StringUtils
@@ -19,15 +18,16 @@ class PactBrokerClient {
   Map options = [:]
 
   @SuppressWarnings('EmptyCatchBlock')
-  List<ConsumerInfo> fetchConsumers(String provider) {
+  List<PactBrokerConsumer> fetchConsumers(String provider) {
     List consumers = []
 
     try {
       HalClient halClient = newHalClient()
       halClient.navigate(LATEST_PROVIDER_PACTS, provider: provider).pacts { pact ->
-        consumers << new ConsumerInfo(pact.name, new BrokerUrlSource(pact.href))
         if (options.authentication) {
-          consumers.last().pactFileAuthentication = options.authentication
+          consumers << new PactBrokerConsumer(pact.name, pact.href, options.authentication)
+        } else {
+          consumers << new PactBrokerConsumer(pact.name, pact.href, [])
         }
       }
     }
@@ -39,15 +39,16 @@ class PactBrokerClient {
   }
 
   @SuppressWarnings('EmptyCatchBlock')
-  List<ConsumerInfo> fetchConsumersWithTag(String provider, String tag) {
+  List<PactBrokerConsumer> fetchConsumersWithTag(String provider, String tag) {
     List consumers = []
 
     try {
       HalClient halClient = newHalClient()
       halClient.navigate(LATEST_PROVIDER_PACTS_WITH_TAG, provider: provider, tag: tag).pacts { pact ->
-        consumers << new ConsumerInfo(pact.name, new BrokerUrlSource(pact.href))
         if (options.authentication) {
-          consumers.last().pactFileAuthentication = options.authentication
+          consumers << new PactBrokerConsumer(pact.name, pact.href, options.authentication)
+        } else {
+          consumers << new PactBrokerConsumer(pact.name, pact.href, [])
         }
       }
     }
