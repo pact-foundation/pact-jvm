@@ -15,7 +15,7 @@ The library is available on maven central using:
 
 ### Using the base ConsumerPactTest
 
-To write a pact spec extend ConsumerPactTest. This base class defines the following four methods which must be
+To write a pact spec extend ConsumerPactTestMk2. This base class defines the following four methods which must be
 overridden in your test class.
 
 * *providerName:* Returns the name of the API provider that Pact will mock
