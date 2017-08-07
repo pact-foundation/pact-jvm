@@ -12,6 +12,8 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 
+import java.util.function.Predicate
+
 /**
  * Pact for a sequences of messages
  */
@@ -77,4 +79,8 @@ class MessagePact extends BasePact {
     this
   }
 
+  @Override
+  Pact filterInteractions(Predicate<Interaction> predicate) {
+    new MessagePact(provider, consumer, messages.findAll { predicate.test(it) }, metadata)
+  }
 }

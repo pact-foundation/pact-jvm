@@ -16,7 +16,7 @@ import java.util.jar.JarInputStream
 @SuppressWarnings(['AbstractClassWithoutAbstractMethod', 'SpaceAroundMapEntryColon'])
 @Slf4j
 @ToString
-@EqualsAndHashCode(excludes = ['metadata'])
+@EqualsAndHashCode(excludes = ['metadata', 'source'])
 abstract class BasePact implements Pact {
   protected static final Map DEFAULT_METADATA = [
     'pact-specification': ['version': '3.0.0'],
@@ -27,6 +27,7 @@ abstract class BasePact implements Pact {
   Consumer consumer
   Provider provider
   Map metadata = DEFAULT_METADATA
+  PactSource source
 
   protected BasePact(Provider provider, Consumer consumer, Map metadata) {
     this.consumer = consumer

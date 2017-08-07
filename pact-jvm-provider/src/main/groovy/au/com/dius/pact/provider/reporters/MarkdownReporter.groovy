@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.reporters
 import au.com.dius.pact.model.BasePact
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.PactSource
 import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
@@ -46,12 +47,12 @@ class MarkdownReporter implements VerifierReporter {
 
   @Override
   void verifyConsumerFromUrl(UrlPactSource pactUrl, ConsumerInfo consumer) {
-    writer.println "From URL: $pactUrl.url"
+    writer.println "From ${pactUrl.description()}"
   }
 
   @Override
-  void verifyConsumerFromFile(def pactFile, ConsumerInfo consumer) {
-    writer.println "From File: $pactFile"
+  void verifyConsumerFromFile(PactSource pactFile, ConsumerInfo consumer) {
+    writer.println "From ${pactFile.description()}"
     writer.println()
   }
 

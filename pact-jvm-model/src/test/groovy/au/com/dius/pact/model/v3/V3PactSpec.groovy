@@ -12,6 +12,8 @@ import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import spock.lang.Specification
 
+import java.util.function.Predicate
+
 class V3PactSpec extends Specification {
     private File pactFile
 
@@ -112,9 +114,6 @@ class V3PactSpec extends Specification {
                 ]
             }
 
-            @Override
-            void mergeInteractions(List<Interaction> interactions) { }
-
             @SuppressWarnings('UnusedMethodParameter')
             @Override
             File fileForPact(String pactDir) { pactFile }
@@ -123,6 +122,12 @@ class V3PactSpec extends Specification {
 
             @Override
             Pact sortInteractions() { this }
+
+          @Override
+          void mergeInteractions(List<Interaction> interactions) { }
+
+          @Override
+          Pact filterInteractions(Predicate<Interaction> predicate) { this }
         }
 
         when:
@@ -169,6 +174,9 @@ class V3PactSpec extends Specification {
 
             @Override
             Pact sortInteractions() { this }
+
+          @Override
+          Pact filterInteractions(Predicate<Interaction> predicate) { this }
         }
 
         when:

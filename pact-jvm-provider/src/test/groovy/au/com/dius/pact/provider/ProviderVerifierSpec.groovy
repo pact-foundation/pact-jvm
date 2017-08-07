@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider
 
 import au.com.dius.pact.model.Consumer
+import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
@@ -8,18 +9,20 @@ import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.model.UnknownPactSource
 import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class ProviderVerifierSpec extends Specification {
 
   ProviderVerifier verifier
 
   def setup() {
-    verifier = new ProviderVerifier()
+    verifier = Spy(ProviderVerifier)
   }
 
   def 'if no consumer filter is defined, returns true'() {
@@ -368,11 +371,48 @@ class ProviderVerifierSpec extends Specification {
     verifier.reporters << reporter
 
     when:
-    verifier.verifyMessagePact(methods, message, interactionMessage, failures)
+    def result = verifier.verifyMessagePact(methods, message, interactionMessage, failures)
 
     then:
     1 * reporter.bodyComparisonOk()
     1 * reporter.generatesAMessageWhich()
     0 * reporter._
+    result
+  }
+
+  @Unroll
+  @SuppressWarnings('UnnecessaryGetter')
+  def 'after verifying a pact, the results are reported back using reportVerificationResults'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    GroovyMock(PactReader, global: true)
+    GroovyMock(ProviderVerifierKt, global: true)
+    GroovyMock(StateChange, global: true)
+    def interaction1 = Mock(Interaction)
+    def interaction2 = Mock(Interaction)
+    def mockPact = Mock(Pact) {
+      getSource() >> UnknownPactSource.INSTANCE
+    }
+
+    PactReader.loadPact(_) >> mockPact
+    mockPact.interactions >> [interaction1, interaction2]
+    StateChange.executeStateChange(*_) >> new StateChange.StateChangeResult(true)
+    verifier.verifyResponseFromProvider(provider, interaction1, _, _) >> result1
+    verifier.verifyResponseFromProvider(provider, interaction2, _, _) >> result2
+
+    when:
+    verifier.runVerificationForConsumer([:], provider, consumer)
+
+    then:
+    1 * ProviderVerifierKt.reportVerificationResults(mockPact, finalResult, '0.0.0')
+
+    where:
+
+    result1 | result2 | finalResult
+    true    | true    | true
+    true    | false   | false
+    false   | true    | false
+    false   | false   | false
   }
 }

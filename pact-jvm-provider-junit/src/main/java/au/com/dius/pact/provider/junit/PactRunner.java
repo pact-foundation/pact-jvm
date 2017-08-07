@@ -8,6 +8,7 @@ import au.com.dius.pact.provider.junit.loader.PactSource;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
+import groovy.json.JsonException;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
@@ -57,30 +58,34 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         }
         final String serviceName = providerInfo.value();
 
-        final Consumer consumerInfo = clazz.getAnnotation(Consumer.class);
-        final String consumerName = consumerInfo != null ? consumerInfo.value() : null;
+      final Consumer consumerInfo = clazz.getAnnotation(Consumer.class);
+      final String consumerName = consumerInfo != null ? consumerInfo.value() : null;
 
-        final TestClass testClass = new TestClass(clazz);
+      final TestClass testClass = new TestClass(clazz);
 
         this.child = new ArrayList<>();
-        final List<Pact> pacts= new ArrayList<>();
+        final List<Pact> pacts = new ArrayList<>();
         PactLoader pactLoader = getPactSource(testClass);
         try {
-            List<Pact> list = pactLoader.load(serviceName);
+            List<Pact> list = filterPacts(pactLoader.load(serviceName));
             for (final Pact p : list) {
                 if ( consumerName == null || p.getConsumer().getName().equals(consumerName)){
                   pacts.add(p);
                 }
             }
-        } catch (final IOException e) {
+        } catch (final IOException | JsonException e) {
             throw new InitializationError(e);
         }
 
       if (pacts.isEmpty()) {
-        throw new InitializationError("Did not find any pact files for provider " + providerInfo.value());
+        if (clazz.isAnnotationPresent(IgnoreNoPactsToVerify.class)) {
+          LOGGER.warn("Did not find any pact files for provider " + providerInfo.value());
+        } else {
+          throw new InitializationError("Did not find any pact files for provider " + providerInfo.value());
+        }
       }
 
-      for (final Pact pact : filterPacts(pacts)) {
+      for (final Pact pact : pacts) {
         this.child.add(new InteractionRunner(testClass, pact, pactLoader.getPactSource()));
       }
     }

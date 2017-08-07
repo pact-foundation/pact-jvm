@@ -6,7 +6,7 @@ buildscript {
     maven { url 'http://clojars.org/repo' }
   }
   dependencies {
-    classpath 'com.netflix.nebula:nebula-clojure-plugin:4.0.2'
+    classpath 'com.netflix.nebula:nebula-clojure-plugin:4.3.0'
   }
 }
 
@@ -28,7 +28,15 @@ dependencies {
 clojure.aotCompile = true
 clojureTest.junit = true
 clojureRepl.port = '7888'
-compileClojure.dependsOn 'compileGroovy'
+
+compileClojure {
+  dependsOn compileGroovy
+  classpath = classpath.plus(files(compileGroovy.destinationDir))
+}
+
+clojureTest {
+  classpath = classpath.plus(files(compileGroovy.destinationDir))
+}
 
 processResources {
   expand project.properties

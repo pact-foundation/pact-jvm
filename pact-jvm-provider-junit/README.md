@@ -155,6 +155,19 @@ You can provide a default value by separating the property name with a colon (`:
 @PactBroker(host="${pactbroker.hostname:localhost}", port = "80")
 ```
 
+#### _Version 3.5.3+_ - More Java System properties
+
+The default values of the `@PactBroker` annotation now enable variable interpolation.
+The following keys may be managed through the environment
+* `pactbroker.host`
+* `pactbroker.port`
+* `pactbroker.protocol`
+* `pactbroker.tags` (comma separated)
+* `pactbroker.auth.scheme`
+* `pactbroker.auth.username`
+* `pactbroker.auth.password`
+
+
 #### _Version 3.2.4/2.4.6+_ - Using tags with the pact broker
 
 The pact broker allows different versions to be tagged. To load all the pacts:
@@ -201,6 +214,66 @@ To use pacts from a resource folder of the project annotate test class with
 
 It's possible to use a custom Pact source. For this, implement interface `au.com.dius.pact.provider.junit.loader.PactLoader`
 and annotate the test class with `@PactSource(MyOwnPactLoader.class)`. **Note:** class `MyOwnPactLoader` must have a default empty constructor or a constructor with one argument of class `Class` which at runtime will be the test class so you can get custom annotations of test class.
+
+### Filtering the interactions that are verified [version 3.5.3+]
+
+By default, the pact runner will verify all pacts for the given provider. You can filter the pacts and interactions by
+the following methods.
+
+#### Filtering by Consumer
+
+You can run only those pacts for a particular consumer by adding a `@Consumer` annotation to the test class.
+
+For example:
+
+```java
+@RunWith(PactRunner.class)
+@Provider("Activity Service")
+@Consumer("Activity Consumer")
+@PactBroker(host = "localhost", port = "80")
+public class PactJUnitTest {
+
+  @TestTarget
+  public final Target target = new HttpTarget(5050);
+
+}
+```
+
+#### Filtering by Provider State
+
+You can filter the interactions that are executed by adding a `@PactFilter` annotation to your test class and set the
+JUnit runner to `FilteredPactRunner`. The pact filter annotation will then only verify interactions that have a matching
+provider state. You can provide multiple states to match with.
+
+For example: 
+
+```java
+@RunWith(FilteredPactRunner.class)
+@Provider("Activity Service")
+@PactBroker(host = "localhost", port = "80")
+@PactFilter('Activity 100 exists in the database')
+public class PactJUnitTest {
+
+  @TestTarget
+  public final Target target = new HttpTarget(5050);
+
+}
+```
+
+You can also use regular expressions with the filter [version 3.5.3+]. For example:
+
+```java
+@RunWith(FilteredPactRunner.class)
+@PactFilter('Activity \\d+ exists in the database')
+public class PactJUnitTest {
+
+}
+```
+
+### Setting the test to not fail when no pacts are found [version 3.5.3+]
+
+By default the pact runner will fail the verification test if no pact files are found to verify. To change the
+failure into a warning, add a `@IgnoreNoPactsToVerify` annotation to your test class.
 
 ## Test target
 

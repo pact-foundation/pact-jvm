@@ -7,8 +7,6 @@ import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.provider.junit.loader.PactLoader;
 
 import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -33,7 +31,7 @@ public class GitPactLoader implements PactLoader {
   }
 
   @Override
-  public List<Pact> load(final String providerName) throws IOException {
+  public List<Pact> load(final String providerName) {
     List<Pact> pacts = new ArrayList<Pact>();
     File[] files = path.listFiles(new FilenameFilter() {
       @Override

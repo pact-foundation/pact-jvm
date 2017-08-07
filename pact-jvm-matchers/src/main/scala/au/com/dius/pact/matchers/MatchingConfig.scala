@@ -7,7 +7,8 @@ object MatchingConfig {
     "application/.*xml" -> new XmlBodyMatcher(),
     "application/.*json" -> new JsonBodyMatcher(),
     "application/json-rpc" -> new JsonBodyMatcher(),
-    "application/jsonrequest" -> new JsonBodyMatcher()
+    "application/jsonrequest" -> new JsonBodyMatcher(),
+    "text/plain" -> new PlainTextBodyMatcher()
   )
 
   def lookupBodyMatcher(mimeType: String): Option[(String, BodyMatcher)] = {

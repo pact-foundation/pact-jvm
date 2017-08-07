@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectInputStream
 import groovyx.net.http.AuthConfig
+import groovyx.net.http.HttpResponseDecorator
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
 
@@ -23,9 +24,10 @@ class PactReaderSpec extends Specification {
       def pact = PactReader.loadPact(pactUrl)
 
       then:
-      1 * PactReader.loadV2Pact(pactUrl, _)
-      0 * PactReader.loadV3Pact(pactUrl, _)
+      1 * PactReader.loadV2Pact({ it.url == pactUrl.toString() }, _)
+      0 * PactReader.loadV3Pact(_, _)
       pact instanceof RequestResponsePact
+      pact.source instanceof UrlPactSource
   }
 
   def 'loads a pact with V1 version using existing loader'() {
@@ -36,9 +38,10 @@ class PactReaderSpec extends Specification {
       def pact = PactReader.loadPact(pactUrl)
 
       then:
-      1 * PactReader.loadV2Pact(pactUrl, _)
-      0 * PactReader.loadV3Pact(pactUrl, _)
+      1 * PactReader.loadV2Pact({ it.url == pactUrl.toString() }, _)
+      0 * PactReader.loadV3Pact(_, _)
       pact instanceof RequestResponsePact
+      pact.source instanceof UrlPactSource
   }
 
   def 'loads a pact with V2 version using existing loader'() {
@@ -49,8 +52,8 @@ class PactReaderSpec extends Specification {
       def pact = PactReader.loadPact(pactUrl)
 
       then:
-      1 * PactReader.loadV2Pact(pactUrl, _)
-      0 * PactReader.loadV3Pact(pactUrl, _)
+      1 * PactReader.loadV2Pact({ it.url == pactUrl.toString() }, _)
+      0 * PactReader.loadV3Pact(_, _)
       pact instanceof RequestResponsePact
   }
 
@@ -62,9 +65,10 @@ class PactReaderSpec extends Specification {
       def pact = PactReader.loadPact(pactUrl)
 
       then:
-      0 * PactReader.loadV2Pact(pactUrl, _)
-      1 * PactReader.loadV3Pact(pactUrl, _)
+      0 * PactReader.loadV2Pact(_, _)
+      1 * PactReader.loadV3Pact({ it.url == pactUrl.toString() }, _)
       pact instanceof RequestResponsePact
+      pact.source instanceof UrlPactSource
   }
 
   def 'loads a message pact with V3 version using V3 loader'() {
@@ -75,9 +79,10 @@ class PactReaderSpec extends Specification {
       def pact = PactReader.loadPact(pactUrl)
 
       then:
-      1 * PactReader.loadV3Pact(pactUrl, _)
-      0 * PactReader.loadV2Pact(pactUrl, _)
+      1 * PactReader.loadV3Pact({ it.url == pactUrl.toString() }, _)
+      0 * PactReader.loadV2Pact(_, _)
       pact instanceof MessagePact
+      pact.source instanceof UrlPactSource
   }
 
   def 'loads a pact from an inputstream'() {
@@ -88,9 +93,10 @@ class PactReaderSpec extends Specification {
       def pact = PactReader.loadPact(pactInputStream)
 
       then:
-      1 * PactReader.loadV2Pact(pactInputStream, _)
-      0 * PactReader.loadV3Pact(pactInputStream, _)
+      1 * PactReader.loadV2Pact(_, _)
+      0 * PactReader.loadV3Pact(_, _)
       pact instanceof RequestResponsePact
+      pact.source instanceof InputStreamPactSource
   }
 
   def 'loads a pact from a json string'() {
@@ -101,9 +107,10 @@ class PactReaderSpec extends Specification {
     def pact = PactReader.loadPact(pactString)
 
     then:
-    1 * PactReader.loadV2Pact(pactString, _)
-    0 * PactReader.loadV3Pact(pactString, _)
+    1 * PactReader.loadV2Pact(_, _)
+    0 * PactReader.loadV3Pact(_, _)
     pact instanceof RequestResponsePact
+    pact.source instanceof UnknownPactSource
   }
 
   def 'throws an exception if it can not load the pact file'() {
@@ -127,8 +134,8 @@ class PactReaderSpec extends Specification {
     PactReader.loadPact(pactString)
 
     then:
-    1 * PactReader.loadV2Pact(pactString, _)
-    0 * PactReader.loadV3Pact(pactString, _)
+    1 * PactReader.loadV2Pact(_, _)
+    0 * PactReader.loadV3Pact(_, _)
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -138,7 +145,7 @@ class PactReaderSpec extends Specification {
     def mockAuth = Mock(AuthConfig)
     def mockHttp = Mock(RESTClient) {
       getAuth() >> mockAuth
-      get(_) >> [data: [:]]
+      get(_) >> new HttpResponseDecorator(null, [:])
     }
     PactReader.newHttpClient(pactUrl) >> mockHttp
 
@@ -150,6 +157,7 @@ class PactReaderSpec extends Specification {
     1 * PactReader.loadV2Pact(pactUrl, _)
     0 * PactReader.loadV3Pact(pactUrl, _)
     pact instanceof RequestResponsePact
+    pact.source == pactUrl
   }
 
   def 'correctly loads V2 pact query strings'() {
@@ -208,6 +216,7 @@ class PactReaderSpec extends Specification {
     then:
     1 * s3ClientMock.getObject('some', 'bucket/aFile.json') >> object
     pact instanceof RequestResponsePact
+    pact.source instanceof S3PactSource
   }
 
   def 'correctly loads V2 pact with string bodies'() {
@@ -221,6 +230,20 @@ class PactReaderSpec extends Specification {
     pact instanceof RequestResponsePact
     pact.interactions[0].request.body.value == '"This is a string"'
     pact.interactions[0].response.body.value == '"This is a string"'
+  }
+
+  def 'loads a pact where the source is a closure'() {
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('pact.json')
+
+    when:
+    def pact = PactReader.loadPact(new ClosurePactSource({ pactUrl }))
+
+    then:
+    1 * PactReader.loadV2Pact({ it.url == pactUrl.toString() }, _)
+    0 * PactReader.loadV3Pact(_, _)
+    pact instanceof RequestResponsePact
+    pact.source instanceof UrlPactSource
   }
 
 }

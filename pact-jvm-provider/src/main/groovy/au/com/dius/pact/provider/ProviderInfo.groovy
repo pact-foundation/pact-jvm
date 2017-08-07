@@ -63,14 +63,14 @@ class ProviderInfo {
 
     List hasPactsFromPactBroker(Map options = [:], String pactBrokerUrl) {
       PactBrokerClient client = new PactBrokerClient(pactBrokerUrl, options)
-      def consumersFromBroker = client.fetchConsumers(name)
+      def consumersFromBroker = client.fetchConsumers(name).collect { ConsumerInfo.from(it) }
       consumers.addAll(consumersFromBroker)
       consumersFromBroker
     }
 
     List hasPactsFromPactBrokerWithTag(Map options = [:], String pactBrokerUrl, String tag) {
         PactBrokerClient client = new PactBrokerClient(pactBrokerUrl, options)
-        def consumersFromBroker = client.fetchConsumersWithTag(name, tag)
+        def consumersFromBroker = client.fetchConsumersWithTag(name, tag).collect { ConsumerInfo.from(it) }
         consumers.addAll(consumersFromBroker)
         consumersFromBroker
     }

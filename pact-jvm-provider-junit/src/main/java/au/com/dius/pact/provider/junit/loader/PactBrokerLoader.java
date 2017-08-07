@@ -1,6 +1,9 @@
 package au.com.dius.pact.provider.junit.loader;
 
-import au.com.dius.pact.model.*;
+import au.com.dius.pact.model.Consumer;
+import au.com.dius.pact.model.Pact;
+import au.com.dius.pact.model.PactBrokerSource;
+import au.com.dius.pact.model.PactReader;
 import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.broker.PactBrokerClient;
@@ -19,8 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseExpressions;
-import static au.com.dius.pact.provider.junit.sysprops.PactRunnerTagListExpressionParser.parseTagListExpressions;
+import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseExpression;
+import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseListExpression;
 
 /**
  * Out-of-the-box implementation of {@link PactLoader} that downloads pacts from Pact broker
@@ -46,7 +49,7 @@ public class PactBrokerLoader implements PactLoader {
     this.pactBrokerHost = pactBrokerHost;
     this.pactBrokerPort = pactBrokerPort;
     this.pactBrokerProtocol = pactBrokerProtocol;
-    this.pactBrokerTags = parseTagListExpressions(tags);
+    this.pactBrokerTags = tags.stream().flatMap(tag -> parseListExpression(tag).stream()).collect(toList());
     this.failIfNoPactsFound = true;
     this.pactSource = new PactBrokerSource(this.pactBrokerHost, this.pactBrokerPort);
   }
@@ -77,16 +80,18 @@ public class PactBrokerLoader implements PactLoader {
 
   private List<Pact> loadPactsForProvider(final String providerName, final String tag) throws IOException {
     LOGGER.debug("Loading pacts from pact broker for provider " + providerName + " and tag " + tag);
-    URIBuilder uriBuilder = new URIBuilder().setScheme(parseExpressions(pactBrokerProtocol))
-      .setHost(parseExpressions(pactBrokerHost))
-      .setPort(Integer.parseInt(parseExpressions(pactBrokerPort)));
+    URIBuilder uriBuilder = new URIBuilder().setScheme(parseExpression(pactBrokerProtocol))
+      .setHost(parseExpression(pactBrokerHost))
+      .setPort(Integer.parseInt(parseExpression(pactBrokerPort)));
     try {
       List<ConsumerInfo> consumers;
       PactBrokerClient pactBrokerClient = newPactBrokerClient(uriBuilder.build());
       if (StringUtils.isEmpty(tag)) {
-        consumers = pactBrokerClient.fetchConsumers(providerName);
+        consumers = pactBrokerClient.fetchConsumers(providerName).stream()
+          .map(ConsumerInfo::from).collect(toList());
       } else {
-        consumers = pactBrokerClient.fetchConsumersWithTag(providerName, tag);
+        consumers = pactBrokerClient.fetchConsumersWithTag(providerName, tag).stream()
+          .map(ConsumerInfo::from).collect(toList());
       }
 
       if (failIfNoPactsFound && consumers.isEmpty()) {
@@ -121,8 +126,8 @@ public class PactBrokerLoader implements PactLoader {
   PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
     HashMap options = new HashMap();
     if (this.authentication != null && !this.authentication.scheme().equalsIgnoreCase("none")) {
-      options.put("authentication", Arrays.asList(parseExpressions(this.authentication.scheme()),
-        parseExpressions(this.authentication.username()), parseExpressions(this.authentication.password())));
+      options.put("authentication", Arrays.asList(parseExpression(this.authentication.scheme()),
+        parseExpression(this.authentication.username()), parseExpression(this.authentication.password())));
     }
     return new PactBrokerClient(url, options);
   }

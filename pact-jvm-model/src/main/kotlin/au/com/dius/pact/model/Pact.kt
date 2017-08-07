@@ -1,5 +1,7 @@
 package au.com.dius.pact.model
 
+import java.util.function.Predicate
+
 /**
  * Pact Provider
  */
@@ -83,6 +85,11 @@ interface Pact {
   val interactions: List<Interaction>
 
   /**
+   * The source that this pact was loaded from
+   */
+  val source: PactSource
+
+  /**
    * Returns a pact with the interactions sorted
    */
   fun sortInteractions(): Pact
@@ -103,4 +110,9 @@ interface Pact {
    * @param interactions
    */
   fun mergeInteractions(interactions: List<Interaction>)
+
+  /**
+   * Returns a new Pact with all the interactions filtered by the provided predicate
+   */
+  fun filterInteractions(predicate: Predicate<Interaction>): Pact
 }

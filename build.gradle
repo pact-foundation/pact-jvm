@@ -11,9 +11,10 @@ buildscript {
 }
 
 plugins {
-  id 'nebula.kotlin' version '1.1.2-5.1'
-  id 'org.jmailen.kotlinter' version '1.1.0'
+  id 'nebula.kotlin' version '1.1.3-2'
+  id 'org.jmailen.kotlinter' version '1.2.0'
   id 'io.gitlab.arturbosch.detekt' version '1.0.0.M11'
+  id 'org.jetbrains.dokka' version '0.9.15'
 }
 
 import org.apache.commons.text.StringEscapeUtils
@@ -60,6 +61,7 @@ subprojects {
     apply plugin: 'org.jetbrains.kotlin.jvm'
     apply plugin: 'org.jmailen.kotlinter'
     apply plugin: 'io.gitlab.arturbosch.detekt'
+    apply plugin: 'org.jetbrains.dokka'
 
     repositories {
         mavenLocal()
@@ -107,6 +109,15 @@ subprojects {
         }
     }
 
+    compileScala {
+      classpath = classpath.plus(files(compileGroovy.destinationDir)).plus(files(compileKotlin.destinationDir))
+      dependsOn compileGroovy, compileKotlin
+    }
+
+    compileTestGroovy {
+      dependsOn compileTestKotlin
+    }
+
     tasks.withType(GroovyCompile) {
       groovyOptions.optimizationOptions.indy = true
     }
@@ -115,6 +126,11 @@ subprojects {
       kotlinOptions {
         jvmTarget = "1.6"
       }
+    }
+
+    task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+      outputFormat = 'javadoc'
+      outputDirectory = "$buildDir/docs/dokkaJavadoc"
     }
 
     test {
@@ -130,9 +146,9 @@ subprojects {
                 'Specification-Version': version
     }
 
-    task javadocJar(type: Jar, dependsOn: [javadoc, scaladoc, groovydoc]) {
+    task javadocJar(type: Jar, dependsOn: [javadoc, scaladoc, groovydoc, dokkaJavadoc]) {
         classifier = 'javadoc'
-        from javadoc.destinationDir, scaladoc.destinationDir, groovydoc.destinationDir
+        from javadoc.destinationDir, scaladoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
     }
 
     task sourceJar(type: Jar) {

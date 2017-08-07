@@ -1,5 +1,5 @@
 dependencies {
-    compile project(":pact-jvm-model"),
+    compile project(":pact-jvm-model"), project(":pact-jvm-pact-broker"),
         project(":pact-jvm-matchers_${project.scalaVersion}"),
         "org.scalatest:scalatest_${project.scalaVersion}:2.2.6",
         'commons-io:commons-io:2.5',
@@ -13,10 +13,10 @@ dependencies {
     testCompile project(":pact-jvm-consumer-groovy_${project.scalaVersion}")
 }
 
-compileTestGroovy.dependsOn 'compileTestScala'
-
-sourceSets.main.java.srcDirs = []
-sourceSets.main.groovy.srcDirs += ["src/main/java"]
+compileTestGroovy{
+  dependsOn compileTestScala
+  classpath = classpath.plus(files(compileTestScala.destinationDir))
+}
 
 test {
   systemProperties['pact.rootDir'] = "$buildDir/pacts"
