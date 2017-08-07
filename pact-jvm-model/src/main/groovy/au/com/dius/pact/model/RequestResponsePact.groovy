@@ -3,8 +3,7 @@ package au.com.dius.pact.model
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-
-import java.util.function.Predicate
+import org.apache.commons.collections4.Predicate
 
 /**
  * Pact between a consumer and a provider
@@ -56,6 +55,6 @@ class RequestResponsePact extends BasePact {
 
   @Override
   Pact filterInteractions(Predicate<Interaction> predicate) {
-    new RequestResponsePact(provider, consumer, interactions.findAll { predicate.test(it) }, metadata)
+    new RequestResponsePact(provider, consumer, interactions.findAll { predicate.evaluate(it) }, metadata)
   }
 }

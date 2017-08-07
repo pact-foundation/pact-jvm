@@ -1,6 +1,6 @@
 package au.com.dius.pact.model
 
-import java.util.function.Predicate
+import org.apache.commons.collections4.Predicate
 
 /**
  * Pact Provider

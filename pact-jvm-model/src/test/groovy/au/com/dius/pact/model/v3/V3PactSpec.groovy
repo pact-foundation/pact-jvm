@@ -10,9 +10,8 @@ import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.Provider
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
+import org.apache.commons.collections4.Predicate
 import spock.lang.Specification
-
-import java.util.function.Predicate
 
 class V3PactSpec extends Specification {
     private File pactFile

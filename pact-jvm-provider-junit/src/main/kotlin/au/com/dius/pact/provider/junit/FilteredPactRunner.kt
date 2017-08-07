@@ -3,7 +3,7 @@ package au.com.dius.pact.provider.junit
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.provider.junit.loader.PactFilter
-import java.util.function.Predicate
+import org.apache.commons.collections4.Predicate
 
 /**
  * Pact Runner that uses annotations to filter the interactions that are executed
