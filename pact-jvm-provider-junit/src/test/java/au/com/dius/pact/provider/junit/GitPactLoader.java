@@ -7,6 +7,7 @@ import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.provider.junit.loader.PactLoader;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;

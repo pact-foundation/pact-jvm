@@ -5,6 +5,7 @@ import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.model.PactBrokerSource;
 import au.com.dius.pact.model.PactReader;
 import au.com.dius.pact.model.PactSource;
+import au.com.dius.pact.pactbroker.PactBrokerConsumer;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.broker.PactBrokerClient;
 import org.apache.commons.lang3.StringUtils;
@@ -49,9 +50,17 @@ public class PactBrokerLoader implements PactLoader {
     this.pactBrokerHost = pactBrokerHost;
     this.pactBrokerPort = pactBrokerPort;
     this.pactBrokerProtocol = pactBrokerProtocol;
-    this.pactBrokerTags = tags.stream().flatMap(tag -> parseListExpression(tag).stream()).collect(toList());
+    this.pactBrokerTags = processTagExpressions(tags);
     this.failIfNoPactsFound = true;
     this.pactSource = new PactBrokerSource(this.pactBrokerHost, this.pactBrokerPort);
+  }
+
+  private static List<String> processTagExpressions(List<String> tags) {
+    List<String> processedTags = new ArrayList();
+    for (String tag: tags) {
+      processedTags.addAll(parseListExpression(tag));
+    }
+    return processedTags;
   }
 
   public PactBrokerLoader(final PactBroker pactBroker) {
@@ -84,14 +93,17 @@ public class PactBrokerLoader implements PactLoader {
       .setHost(parseExpression(pactBrokerHost))
       .setPort(Integer.parseInt(parseExpression(pactBrokerPort)));
     try {
-      List<ConsumerInfo> consumers;
+      List<ConsumerInfo> consumers = new ArrayList<>();
       PactBrokerClient pactBrokerClient = newPactBrokerClient(uriBuilder.build());
+      List<PactBrokerConsumer> pactBrokerConsumers;
       if (StringUtils.isEmpty(tag)) {
-        consumers = pactBrokerClient.fetchConsumers(providerName).stream()
-          .map(ConsumerInfo::from).collect(toList());
+        pactBrokerConsumers = pactBrokerClient.fetchConsumers(providerName);
       } else {
-        consumers = pactBrokerClient.fetchConsumersWithTag(providerName, tag).stream()
-          .map(ConsumerInfo::from).collect(toList());
+        pactBrokerConsumers = pactBrokerClient.fetchConsumersWithTag(providerName, tag);
+      }
+
+      for (PactBrokerConsumer consumer: pactBrokerConsumers) {
+        consumers.add(ConsumerInfo.from(consumer));
       }
 
       if (failIfNoPactsFound && consumers.isEmpty()) {

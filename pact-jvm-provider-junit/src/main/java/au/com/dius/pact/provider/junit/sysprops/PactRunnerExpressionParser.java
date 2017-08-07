@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit.sysprops;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.lang.StringBuffer;
 import java.util.stream.Collectors;
@@ -24,9 +25,14 @@ public class PactRunnerExpressionParser {
   }
 
   public static List<String> parseListExpression(final String value, final ValueResolver valueResolver) {
-    return Stream.of(replaceExpressions(value, valueResolver).split(VALUES_SEPARATOR))
-            .filter(str -> !isNullOrEmpty(str))
-            .collect(Collectors.toList());
+    String[] values = replaceExpressions(value, valueResolver).split(VALUES_SEPARATOR);
+    List<String> result =new ArrayList<>();
+    for (String str: values) {
+      if (!isNullOrEmpty(str)) {
+        result.add(str);
+      }
+    }
+    return result;
   }
 
   public static String parseExpression(final String value, final ValueResolver valueResolver) {
@@ -37,7 +43,7 @@ public class PactRunnerExpressionParser {
   }
 
   private static String replaceExpressions(final String value, final ValueResolver valueResolver) {
-    StringBuffer joiner = new StringBuffer();
+    StringBuilder joiner = new StringBuilder();
 
     String buffer = value;
     int position = buffer.indexOf(START_EXPRESSION);
