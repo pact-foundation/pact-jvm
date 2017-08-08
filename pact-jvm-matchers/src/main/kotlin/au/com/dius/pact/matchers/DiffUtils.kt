@@ -12,7 +12,7 @@ fun generateDiff(expectedBodyString: String, actualBodyString: String): List<Str
   val diff = mutableListOf<String>()
 
   patch.deltas.forEach { delta ->
-    if (delta.original.position > 1 && (diff.isEmpty() || expectedLines[delta.original.position - 1] != diff.last())) {
+    if (delta.original.position >= 1 && (diff.isEmpty() || expectedLines[delta.original.position - 1] != diff.last())) {
       diff.add(expectedLines[delta.original.position - 1])
     }
 
