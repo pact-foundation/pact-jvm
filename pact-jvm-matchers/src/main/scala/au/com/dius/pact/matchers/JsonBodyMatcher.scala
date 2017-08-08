@@ -59,7 +59,7 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
   }
 
   private def generateObjectDiff(expected: Any, actual: Any) = {
-    Some(DiffUtils.generateObjectDiff(JsonUtils.scalaObjectGraphToJavaObjectGraph(expected),
+    Some(DiffUtilsKt.generateObjectDiff(JsonUtils.scalaObjectGraphToJavaObjectGraph(expected),
       JsonUtils.scalaObjectGraphToJavaObjectGraph(actual)))
   }
 
