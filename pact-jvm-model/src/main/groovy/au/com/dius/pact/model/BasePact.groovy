@@ -88,8 +88,8 @@ abstract class BasePact implements Pact {
   @CompileStatic
   void write(String pactDir, PactSpecVersion pactSpecVersion) {
     def pactFile = fileForPact(pactDir)
-    if (pactFile.exists()) {
-      synchronized (pactFile) {
+    synchronized (pactFile) {
+      if (pactFile.exists() && pactFile.length() > 0) {
         RandomAccessFile raf = new RandomAccessFile(pactFile, 'rw')
         FileLock lock = raf.channel.lock()
         try {
@@ -106,10 +106,10 @@ abstract class BasePact implements Pact {
           lock.release()
           raf.close()
         }
+      } else {
+        pactFile.parentFile.mkdirs()
+        pactFile.withWriter { it.print(JsonOutput.prettyPrint(this.toJson(pactSpecVersion))) }
       }
-    } else {
-      pactFile.parentFile.mkdirs()
-      pactFile.withWriter { it.print(JsonOutput.prettyPrint(this.toJson(pactSpecVersion))) }
     }
   }
 
