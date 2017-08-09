@@ -1,7 +1,7 @@
 package au.com.dius.pact.model
 
+import org.apache.commons.collections4.Factory
 import java.io.File
-import java.util.function.Supplier
 
 /**
  * Represents the source of a Pact
@@ -49,4 +49,4 @@ data class S3PactSource(override val url: String) : UrlPactSource() {
   override fun description() = "S3 Bucket $url"
 }
 
-data class ClosurePactSource(val closure: Supplier<Any>) : PactSource()
+data class ClosurePactSource(val closure: Factory<Any>) : PactSource()

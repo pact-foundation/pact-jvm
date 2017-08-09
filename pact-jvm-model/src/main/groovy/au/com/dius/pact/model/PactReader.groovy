@@ -173,7 +173,7 @@ class PactReader {
 
   private static Pair<Object, PactSource> loadFile(def source, Map options = [:]) {
     if (source instanceof ClosurePactSource) {
-      loadFile(source.closure.get(), options)
+      loadFile(source.closure.create(), options)
     } else {
       if (source instanceof FileSource) {
         new Pair(new JsonSlurper().parse(source.file), source)

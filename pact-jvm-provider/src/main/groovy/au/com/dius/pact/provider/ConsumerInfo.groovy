@@ -8,8 +8,7 @@ import au.com.dius.pact.model.PactSource
 import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import groovy.transform.Canonical
-
-import java.util.function.Supplier
+import org.apache.commons.collections4.Factory
 
 /**
  * Consumer Info
@@ -42,7 +41,7 @@ class ConsumerInfo {
     if (file instanceof PactSource) {
       pactSource = file
     } else if (file instanceof Closure) {
-      pactSource = new ClosurePactSource(file as Supplier)
+      pactSource = new ClosurePactSource(file as Factory)
     } else {
       pactSource = new FileSource(file as File)
     }
