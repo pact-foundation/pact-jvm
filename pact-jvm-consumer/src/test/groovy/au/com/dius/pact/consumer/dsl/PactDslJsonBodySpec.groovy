@@ -92,4 +92,15 @@ class PactDslJsonBodySpec extends Specification {
       .closeObject()
   }
 
+  def 'generate the correct JSON when the attribute name is a number'() {
+    expect:
+    new PactDslJsonBody()
+      .stringType('asdf')
+      .array('0').closeArray()
+      .eachArrayLike('1').closeArray().closeArray()
+      .eachArrayWithMaxLike('2', 10).closeArray().closeArray()
+      .eachArrayWithMinLike('3', 10).closeArray().closeArray()
+      .close().toString() == '{"0":[],"1":[[]],"2":[[]],"3":[[]],"asdf":"string"}'
+  }
+
 }
