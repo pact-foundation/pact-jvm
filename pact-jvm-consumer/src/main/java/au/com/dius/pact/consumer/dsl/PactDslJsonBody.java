@@ -522,7 +522,7 @@ public class PactDslJsonBody extends DslPart {
      * @param name field name
      */
     public PactDslJsonArray array(String name) {
-        return new PactDslJsonArray(matcherKey(name), "", this);
+        return new PactDslJsonArray(matcherKey(name), name, this);
     }
 
     public PactDslJsonArray array() {
@@ -886,7 +886,7 @@ public class PactDslJsonBody extends DslPart {
   @Override
   public PactDslJsonArray eachArrayLike(String name, int numberExamples) {
     matchers.put(matcherKey(name), matchMin(0));
-    PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), "", this, true);
+    PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), name, this, true);
     parent.setNumberExamples(numberExamples);
     return new PactDslJsonArray("", "", parent);
   }
@@ -913,7 +913,7 @@ public class PactDslJsonBody extends DslPart {
         numberExamples, size));
     }
     matchers.put(matcherKey(name), matchMax(size));
-    PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), "", this, true);
+    PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), name, this, true);
     parent.setNumberExamples(numberExamples);
     return new PactDslJsonArray("", "", parent);
   }
@@ -940,7 +940,7 @@ public class PactDslJsonBody extends DslPart {
         numberExamples, size));
     }
     matchers.put(matcherKey(name), matchMin(size));
-    PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), "", this, true);
+    PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), name, this, true);
     parent.setNumberExamples(numberExamples);
     return new PactDslJsonArray("", "", parent);
   }
