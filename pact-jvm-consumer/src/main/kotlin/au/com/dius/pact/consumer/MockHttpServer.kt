@@ -16,9 +16,9 @@ import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
 import com.sun.net.httpserver.HttpsServer
+import mu.KLogging
 import org.apache.commons.lang3.StringEscapeUtils
 import org.apache.http.entity.ContentType
-import org.slf4j.LoggerFactory
 import scala.collection.JavaConversions
 import java.lang.Thread.sleep
 import java.nio.charset.Charset
@@ -35,8 +35,6 @@ fun mockServer(pact: RequestResponsePact, config: MockProviderConfig): MockServe
   }
 }
 
-val LOGGER = LoggerFactory.getLogger(BaseMockServer::class.java)!!
-
 interface MockServer {
   /**
    * Returns the URL for this mock server. The port will be the one bound by the server.
@@ -51,7 +49,8 @@ interface MockServer {
   /**
    * This will start the mock server and execute the test function. Returns the result of running the test.
    */
-  fun runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun): PactVerificationResult
+  fun runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun)
+    : PactVerificationResult
 }
 
 abstract class BaseMockServer(val pact: RequestResponsePact,
@@ -69,12 +68,12 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
     } else {
       try {
         val request = toPactRequest(exchange)
-        LOGGER.debug("Received request: $request")
+        logger.debug { "Received request: $request" }
         val response = generatePactResponse(request)
-        LOGGER.debug("Generating response: $response")
+        logger.debug { "Generating response: $response" }
         pactResponseToHttpExchange(response, exchange)
       } catch (e: Exception) {
-        LOGGER.error("Failed to generate response", e)
+        logger.error(e) { "Failed to generate response" }
         pactResponseToHttpExchange(Response(500, mutableMapOf("Content-Type" to "application/json"),
           OptionalBody.body("{\"error\": ${e.message}}")), exchange)
       }
@@ -144,7 +143,8 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
     initServer()
   }
 
-  override fun runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun): PactVerificationResult {
+  override fun runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun)
+    : PactVerificationResult {
     start()
     waitForServer()
 
@@ -160,7 +160,8 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
     val result = validateMockServerState()
     if (result is PactVerificationResult.Ok) {
       val pactDirectory = pactDirectory()
-      LOGGER.debug("Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file ${pact.fileForPact(pactDirectory)}")
+      logger.debug { "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file " +
+        "${pact.fileForPact(pactDirectory)}" }
       pact.write(pactDirectory, pactVersion)
     }
 
@@ -193,10 +194,14 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
   }
 
   override fun getPort(): Int = server.address.port
+
+  companion object : KLogging()
 }
 
-open class MockHttpServer(pact: RequestResponsePact, config: MockProviderConfig) : BaseMockServer(pact, config, HttpServer.create(config.address(), 0))
-open class MockHttpsServer(pact: RequestResponsePact, config: MockProviderConfig) : BaseMockServer(pact, config, HttpsServer.create(config.address(), 0))
+open class MockHttpServer(pact: RequestResponsePact, config: MockProviderConfig)
+  : BaseMockServer(pact, config, HttpServer.create(config.address(), 0))
+open class MockHttpsServer(pact: RequestResponsePact, config: MockProviderConfig)
+  : BaseMockServer(pact, config, HttpsServer.create(config.address(), 0))
 
 fun calculateCharset(headers: Map<String, String>): Charset {
   val contentType = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
@@ -205,7 +210,7 @@ fun calculateCharset(headers: Map<String, String>): Charset {
     try {
       return ContentType.parse(contentType.value)?.charset ?: default
     } catch (e: Exception) {
-      LOGGER.debug("Failed to parse the charset from the content type header", e)
+      BaseMockServer.Companion.logger.debug(e) { "Failed to parse the charset from the content type header" }
     }
   }
   return default

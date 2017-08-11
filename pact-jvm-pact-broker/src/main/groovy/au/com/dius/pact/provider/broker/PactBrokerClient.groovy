@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.broker
 
 import au.com.dius.pact.pactbroker.PactBrokerConsumer
+import au.com.dius.pact.pactbroker.PactResponse
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import org.apache.commons.lang3.StringUtils
@@ -25,9 +26,9 @@ class PactBrokerClient {
       HalClient halClient = newHalClient()
       halClient.navigate(LATEST_PROVIDER_PACTS, provider: provider).pacts { pact ->
         if (options.authentication) {
-          consumers << new PactBrokerConsumer(pact.name, pact.href, options.authentication)
+          consumers << new PactBrokerConsumer(pact.name, pact.href, pactBrokerUrl, options.authentication)
         } else {
-          consumers << new PactBrokerConsumer(pact.name, pact.href, [])
+          consumers << new PactBrokerConsumer(pact.name, pact.href, pactBrokerUrl, [])
         }
       }
     }
@@ -46,9 +47,9 @@ class PactBrokerClient {
       HalClient halClient = newHalClient()
       halClient.navigate(LATEST_PROVIDER_PACTS_WITH_TAG, provider: provider, tag: tag).pacts { pact ->
         if (options.authentication) {
-          consumers << new PactBrokerConsumer(pact.name, pact.href, options.authentication)
+          consumers << new PactBrokerConsumer(pact.name, pact.href, pactBrokerUrl, options.authentication)
         } else {
-          consumers << new PactBrokerConsumer(pact.name, pact.href, [])
+          consumers << new PactBrokerConsumer(pact.name, pact.href, pactBrokerUrl, [])
         }
       }
     }
@@ -94,5 +95,11 @@ class PactBrokerClient {
       halClient.navigate(LATEST_PROVIDER_PACTS_WITH_TAG, provider: providerName, tag: tag)
     }
     halClient.linkUrl('pacts')
+  }
+
+  PactResponse fetchPact(String url) {
+    HalClient halClient = newHalClient()
+    def halDoc = halClient.fetchDocument(url)
+    new PactResponse(halDoc, halDoc.'_links')
   }
 }

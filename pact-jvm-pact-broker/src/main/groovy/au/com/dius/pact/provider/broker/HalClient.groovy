@@ -115,7 +115,7 @@ class HalClient {
     result
   }
 
-  private fetch(String path) {
+  def fetch(String path) {
     lastUrl = path
     setupHttpClient()
     log.debug "Fetching: $path"
@@ -152,10 +152,10 @@ class HalClient {
 
   def uploadJson(String path, String bodyJson, Closure closure = null) {
     setupHttpClient()
-    http.request(groovyx.net.http.Method.PUT) {
+    http.request(PUT) {
       uri.path = path
       body = bodyJson
-      requestContentType = groovyx.net.http.ContentType.JSON
+      requestContentType = JSON
 
       response.success = { resp ->
         consumeEntity(resp)
@@ -190,10 +190,10 @@ class HalClient {
 
   def post(String path, Map bodyJson) {
     setupHttpClient()
-    http.request(groovyx.net.http.Method.POST) {
+    http.request(POST) {
       uri.path = path
       body = bodyJson
-      requestContentType = groovyx.net.http.ContentType.JSON
+      requestContentType = JSON
 
       response.success = { resp -> "SUCCESS - ${resp.statusLine as String}" }
 
@@ -203,5 +203,4 @@ class HalClient {
       }
     }
   }
-
 }

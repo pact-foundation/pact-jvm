@@ -32,7 +32,7 @@ class PactBrokerClientSpec extends Specification {
     halClient.navigate(_, _) >> halClient
     halClient.pacts(_) >> { args -> args.first().call([name: 'bob', href: 'http://bob.com/']) }
 
-    def client = GroovySpy(PactBrokerClient, global: true) {
+    def client = GroovySpy(PactBrokerClient, global: true, constructorArgs: ['http://pactBrokerUrl']) {
       newHalClient() >> halClient
     }
     client.options.authentication = ['Basic', '1', '2']
@@ -70,7 +70,7 @@ class PactBrokerClientSpec extends Specification {
     halClient.navigate(_, _) >> halClient
     halClient.pacts(_) >> { args -> args.first().call([name: 'bob', href: 'http://bob.com/']) }
 
-    def client = GroovySpy(PactBrokerClient, global: true) {
+    def client = GroovySpy(PactBrokerClient, global: true, constructorArgs: ['http://pactBrokerUrl']) {
       newHalClient() >> halClient
     }
 
@@ -89,7 +89,7 @@ class PactBrokerClientSpec extends Specification {
     halClient.navigate(_, _) >> halClient
     halClient.pacts(_) >> { args -> args.first().call([name: 'bob', href: 'http://bob.com/']) }
 
-    def client = GroovySpy(PactBrokerClient, global: true) {
+    def client = GroovySpy(PactBrokerClient, global: true, constructorArgs: ['http://pactBrokerUrl']) {
       newHalClient() >> halClient
     }
     client.options.authentication = ['Basic', '1', '2']

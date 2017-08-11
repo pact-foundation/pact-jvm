@@ -35,7 +35,9 @@ data class UrlSource @JvmOverloads constructor(override val url: String, val pac
 data class UrlsSource @JvmOverloads constructor(val url: List<String>,
                                                 val pacts: MutableMap<String, Pact> = mutableMapOf()) : PactSource()
 
-data class BrokerUrlSource @JvmOverloads constructor(override val url: String, val attributes: Map<String, String> = mapOf()) : UrlPactSource() {
+data class BrokerUrlSource @JvmOverloads constructor(override val url: String,
+                                                     val pactBrokerUrl: String,
+                                                     val attributes: Map<String, Any> = mapOf()) : UrlPactSource() {
   override fun description() = "Pact Broker $url"
 }
 
