@@ -2,7 +2,6 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue
-import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import spock.lang.Specification
 
@@ -224,11 +223,6 @@ class PactDslJsonBodyMatcherSpec extends Specification {
     def bodyJson = subject.body.toString()
 
     then:
-    bodyJson == JsonOutput.toJson([
-      dataStorePathInfo: [
-        basePath: 'CUSTOMER/TRAINING/training-data/12345678901234567890',
-        fileNames: ['abc.txt']
-      ]
-    ])
+    bodyJson.contains('"fileNames":["abc.txt"]')
   }
 }

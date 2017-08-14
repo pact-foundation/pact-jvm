@@ -27,7 +27,7 @@ public class WildcardKeysTest {
     private static final String APPLICATION_JSON = "application/json";
 
     @Rule
-    public PactProviderRule provider = new PactProviderRule("WildcardKeysProvider", "localhost", 8081, this);
+    public PactProviderRule provider = new PactProviderRule("WildcardKeysProvider", this);
 
     @Pact(provider="WildcardKeysProvider", consumer="WildcardKeysConsumer")
     public PactFragment createFragment(PactDslWithProvider builder) {
@@ -85,7 +85,7 @@ public class WildcardKeysTest {
     @Test
     @PactVerification("WildcardKeysProvider")
     public void runTest() throws IOException {
-      String result = Request.Get("http://localhost:8081/")
+      String result = Request.Get(provider.getConfig().url())
         .addHeader("Accept", APPLICATION_JSON)
         .execute().returnContent().asString();
       Map<String, Object> body = (Map<String, Object>) new JsonSlurper().parseText(result);
@@ -93,7 +93,7 @@ public class WildcardKeysTest {
       assertThat(body, hasKey("foo"));
       Map<String, Object> foo = (Map<String, Object>) body.get("foo");
       assertThat(foo, hasKey("001"));
-      assertThat(foo.get("001"), is(42));
+      assertThat(foo.get("001"), Matchers.<Object>is(42));
       assertThat(body, hasKey("articles"));
       List articles = (List) body.get("articles");
       assertThat(articles.size(), is(1));
