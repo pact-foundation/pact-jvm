@@ -34,14 +34,6 @@ Usage: pact-jvm-server [options] [port]
         upper bound to allocate mock ports (defaults to 40000)
   -d | --daemon
         run as a daemon process
-  -v <value> | --pact-version <value>
-        pact version to generate for (2 or 3)
-  -k <value> | --keystore-path <value>
-        Path to keystore
-  -p <value> | --keystore-password <value>
-        Keystore password
-  -s <value> | --ssl-port <value>   
-        Ssl port the mock server should run on. lower and upper bounds are ignored
   --debug
         run with debug logging
 ```
