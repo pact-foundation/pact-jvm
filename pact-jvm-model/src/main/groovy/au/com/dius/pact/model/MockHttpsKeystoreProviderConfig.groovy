@@ -3,6 +3,7 @@ package au.com.dius.pact.model
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import io.netty.handler.ssl.util.SelfSignedCertificate
 
 /**
  * Mock Provider configuration for HTTPS using a keystore
@@ -12,14 +13,14 @@ import groovy.transform.ToString
 @CompileStatic
 class MockHttpsKeystoreProviderConfig extends MockProviderConfig {
 
-  private final String keystore
-  private final String password
 
-  MockHttpsKeystoreProviderConfig(String hostname, int port, String keystore, String password,
-                                    PactSpecVersion pactVersion) {
+  private final String keystore;
+  private final String password;
+
+    MockHttpsKeystoreProviderConfig(String hostname, int port, String keystore, String password, PactSpecVersion pactVersion) {
       super(hostname, port, pactVersion, 'https')
-      this.keystore = keystore
-      this.password = password
+      this.keystore = keystore;
+      this.password = password;
   }
 
   /**
@@ -36,10 +37,10 @@ class MockHttpsKeystoreProviderConfig extends MockProviderConfig {
                                                 final String keystore,
                                                 final String password,
                                                 PactSpecVersion pactVersion = PactSpecVersion.V2) {
-    File keystoreFile = new File(keystore)
-    if (!keystoreFile.isFile()) {
+    File keystoreFile = new File(keystore);
+    if(!keystoreFile.isFile()) {
       throw new IllegalArgumentException(
-        "Keystore path/file '$keystore' is not valid! It should be formatted similar to `/path/to/keystore.jks'")
+              String.format("Keystore path/file '%s' is not valid! It should be formatted similar to `/path/to/keystore.jks'", keystore))
     }
     new MockHttpsKeystoreProviderConfig(hostname, port, keystore, password, pactVersion)
   }
@@ -48,15 +49,15 @@ class MockHttpsKeystoreProviderConfig extends MockProviderConfig {
    * @return The String value of the keystore path and file.
    * Example: '/path/to/keystore.jks'
    */
-  String getKeystore() {
-    keystore
+  def String getKeystore() {
+    return keystore;
   }
 
   /**
    * @return The password for the keystore
    */
-  String getKeystorePassword() {
-    password
+  def String getKeystorePassword() {
+    return password;
   }
 
 }
