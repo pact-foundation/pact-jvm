@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.PactFragment;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -11,6 +12,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
+@Ignore
 public class Defect221Test {
 
     private static final String APPLICATION_JSON = "application/json";

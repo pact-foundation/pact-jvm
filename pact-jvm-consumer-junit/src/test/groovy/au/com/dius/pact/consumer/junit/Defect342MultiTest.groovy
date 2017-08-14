@@ -11,10 +11,12 @@ import groovy.json.JsonOutput
 import groovyx.net.http.ContentType
 import groovyx.net.http.HTTPBuilder
 import org.apache.http.client.fluent.Request
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
 @SuppressWarnings(['PublicInstanceField', 'JUnitPublicNonTestMethod', 'FactoryMethodName'])
+@Ignore
 class Defect342MultiTest {
 
   private static final String EXPECTED_USER_ID = 'abcdefghijklmnop'

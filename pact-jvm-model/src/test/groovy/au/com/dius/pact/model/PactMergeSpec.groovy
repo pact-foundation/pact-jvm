@@ -133,7 +133,7 @@ class PactMergeSpec extends Specification {
   def 'two compatible pacts do not merge if their interactions have conflicts for #type'() {
     expect:
     !result.ok
-    result.message == 'Cannot merge pacts as there were 1 conflicts between the interactions'
+    result.message.startsWith('Cannot merge pacts as there were 1 conflict(s) between the interactions')
 
     where:
     type << [RequestResponsePact, MessagePact]
