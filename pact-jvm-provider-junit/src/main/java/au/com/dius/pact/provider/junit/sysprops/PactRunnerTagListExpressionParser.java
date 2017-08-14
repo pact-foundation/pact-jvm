@@ -1,11 +1,13 @@
 package au.com.dius.pact.provider.junit.sysprops;
 
 import com.google.common.base.Strings;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.Predicate;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.START_EXPRESSION;
 
@@ -17,18 +19,24 @@ public class PactRunnerTagListExpressionParser {
     }
 
     public static List<String> parseTagListExpressions(final List<String> values, ValueResolver valueResolver) {
-        return values.stream()
-                .flatMap(value -> substituteIfExpression(value, valueResolver))
-                .collect(Collectors.toList());
+        List<String> list = new ArrayList<String>();
+        for (String value: values) {
+          list.addAll(substituteIfExpression(value, valueResolver));
+        }
+        return list;
     }
 
-    private static Stream<String> substituteIfExpression(String value, ValueResolver valueResolver) {
+    private static List<String> substituteIfExpression(String value, ValueResolver valueResolver) {
         if (value.contains(START_EXPRESSION)) {
             String[] split = valueResolver.resolveValue(value).split(",");
-            return Arrays.stream(split)
-                    .filter(str -> ! Strings.isNullOrEmpty(str));
+            return ListUtils.select(Arrays.asList(split), new Predicate<String>() {
+              @Override
+              public boolean evaluate(String str) {
+                return ! Strings.isNullOrEmpty(str);
         }
-        return Stream.of(value);
+            });
+        }
+        return Collections.singletonList(value);
 
     }
 }

@@ -5,6 +5,7 @@ dependencies {
       "junit:junit:${project.junitVersion}",
       "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
       "com.fasterxml.jackson.core:jackson-databind:${project.jacksonDatabindVersion}"
+    compile 'org.apache.commons:commons-collections4:4.1'
 
     testCompile 'com.github.rest-driver:rest-client-driver:1.1.36'
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
