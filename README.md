@@ -55,7 +55,9 @@ module has a Jar file named pact-jvm-consumer_2.10. The full name of the file is
 | 3.3.x (v2-spec)| V2 | 8 | 2.11 | 3.3.3 |
 | 3.5.x (v3-spec) | V3 | 8 | 2.11 | 3.5.0-beta.2 |
 | 2.5.x (v2.5.x) | V3 | 7 | 2.11 | 2.5.0-beta.0 |
-| 2.4.x (v2.x) | V2 | 6 | 2.10, 2.11 | 2.4.18 |
+| 2.4.x (v2.x) | V2 | 6* | 2.10, 2.11 | 2.4.18 |
+
+**NOTE on JDK 6:** It is no longer possible to execute the build on JDK6 due to issues with HTTPS certificates.
 
 ## Service Consumers
 
