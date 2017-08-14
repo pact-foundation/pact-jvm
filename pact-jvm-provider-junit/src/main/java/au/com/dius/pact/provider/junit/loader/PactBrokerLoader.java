@@ -88,7 +88,7 @@ public class PactBrokerLoader implements PactLoader {
 
       List<Pact> pacts = new ArrayList<Pact>();
       for (ConsumerInfo consumer: consumers) {
-        pacts.add(this.loadPact(consumer, pactBrokerClient.getOptions());
+        pacts.add(this.loadPact(consumer, pactBrokerClient.getOptions()));
       }
       return pacts;
     } catch (URISyntaxException e) {
