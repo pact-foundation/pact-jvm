@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.model.MockProviderConfig
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
 
@@ -7,10 +8,9 @@ class PactResultSpec extends Specification {
 
     def 'case when the test passes and the pact is verified'() {
       given:
-        def testService = new PactBuilder().build  {
+      PactBuilder testService = new PactBuilder().build  {
             serviceConsumer 'Consumer'
             hasPactWith 'Test Service'
-            port 1234
 
             uponReceiving('a valid request')
             withAttributes(method: 'get', path: '/path', query: [status: 'good', name: 'ron'])
@@ -23,8 +23,8 @@ class PactResultSpec extends Specification {
       when:
         def response
         def data
-        testService.runTestAndVerify {
-            def client = new RESTClient('http://localhost:1234/')
+        testService.runTestAndVerify { MockProviderConfig config ->
+            def client = new RESTClient(config.url())
             response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                 requestContentType: 'application/json')
             data = response.data
@@ -37,10 +37,9 @@ class PactResultSpec extends Specification {
 
     def 'case when the test fails and the pact is verified'() {
       given:
-        def testService = new PactBuilder().build  {
+        def testService = new PactBuilder().build {
             serviceConsumer 'Consumer'
             hasPactWith 'Test Service'
-            port 1235
 
             uponReceiving('a valid request')
             withAttributes(method: 'get', path: '/path', query: [status: 'good', name: 'ron'])
@@ -52,8 +51,8 @@ class PactResultSpec extends Specification {
 
       when:
         def response
-        testService.runTestAndVerify {
-          def client = new RESTClient('http://localhost:1235/')
+        testService.runTestAndVerify { MockProviderConfig config ->
+          def client = new RESTClient(config.url())
           response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                 requestContentType: 'application/json')
 
@@ -70,7 +69,6 @@ class PactResultSpec extends Specification {
         def testService = new PactBuilder().build  {
             serviceConsumer 'Consumer'
             hasPactWith 'Test Service'
-            port 1236
 
             uponReceiving('a valid request')
             withAttributes(method: 'get', path: '/path', query: [status: 'good', name: 'ron'])
@@ -82,8 +80,8 @@ class PactResultSpec extends Specification {
 
       when:
         def response
-        testService.runTestAndVerify {
-            def client = new RESTClient('http://localhost:1236/')
+        testService.runTestAndVerify { MockProviderConfig config ->
+            def client = new RESTClient(config.url())
             response = client.get(path: '/path', query: [status: 'bad', name: 'ron'],
                 requestContentType: 'application/json')
             assert response.status == 200
@@ -101,7 +99,6 @@ class PactResultSpec extends Specification {
         def testService = new PactBuilder().build  {
             serviceConsumer 'Consumer'
             hasPactWith 'Test Service'
-            port 1237
 
             uponReceiving('a valid request')
             withAttributes(method: 'get', path: '/path', query: [status: 'good', name: 'ron'])
@@ -119,8 +116,8 @@ class PactResultSpec extends Specification {
         }
 
       when:
-        testService.runTestAndVerify {
-            def client = new RESTClient('http://localhost:1237/')
+        testService.runTestAndVerify { MockProviderConfig config ->
+            def client = new RESTClient(config.url())
             def response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                 requestContentType: 'application/json')
             assert response.status == 200
