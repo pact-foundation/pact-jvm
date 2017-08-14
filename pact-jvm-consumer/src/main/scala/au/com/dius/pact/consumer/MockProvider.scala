@@ -23,7 +23,6 @@ object DefaultMockProvider {
   def apply(config: MockProviderConfig): StatefulMockProvider =
     config match {
       case httpsConfig: MockHttpsProviderConfig => new UnfilteredHttpsMockProvider(httpsConfig)
-      case httpsKeystoreConfig: MockHttpsKeystoreProviderConfig => new UnfilteredHttpsKeystoreMockProvider(httpsKeystoreConfig)
       case _ => new UnfilteredMockProvider(config)
     }
 }

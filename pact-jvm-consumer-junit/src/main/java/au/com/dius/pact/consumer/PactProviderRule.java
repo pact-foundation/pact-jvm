@@ -1,7 +1,6 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.model.MockHttpsKeystoreProviderConfig;
 import au.com.dius.pact.model.MockHttpsProviderConfig;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactFragment;
@@ -68,25 +67,6 @@ public class PactProviderRule extends ExternalResource {
       this(provider, host, port, pactVersion, target);
       if (https) {
         config = MockHttpsProviderConfig.httpsConfig(host, port, pactVersion);
-      }
-    }
-
-    /**
-     * Creates a mock provider by the given name
-     * @param provider Provider name to mock
-     * @param host Host to bind to. Defaults to localhost
-     * @param port Port to bind to. Defaults to a random port.
-     * @param https Boolean flag to control starting HTTPS or HTTP mock server
-     * @param keystore Path to keystore, example: <code>/path/to/keystore.jks</code>
-     * @param password Password for the keystore.
-     * @param pactVersion Pact specification version
-     * @param target Target test to apply this rule to.
-     */
-    public PactProviderRule(String provider, String host, Integer port, boolean https, String keystore, String password, PactSpecVersion pactVersion,
-                            Object target) {
-      this(provider, host, port, pactVersion, target);
-      if (https) {
-        config = MockHttpsKeystoreProviderConfig.httpsKeystoreConfig(host, port, keystore, password, pactVersion);
       }
     }
 
