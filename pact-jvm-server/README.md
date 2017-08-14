@@ -45,8 +45,6 @@ Usage: pact-jvm-server [options] [port]
   --debug
         run with debug logging
 ```
-### Using trust store 3.4.0+
-Trust store can be used. However, it is limited to a single port for the time being.
 
 ### Prior to version 2.2.6
 
