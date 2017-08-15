@@ -4,7 +4,6 @@ buildscript {
   }
   dependencies {
     classpath "org.apache.commons:commons-lang3:$commonsLang3Version"
-    classpath 'com.tkruse.gradle:gradle-groovysh-plugin:1.0.8'
     classpath 'org.apache.commons:commons-text:1.1'
   }
 }
@@ -42,10 +41,6 @@ subprojects {
     apply plugin: 'signing'
     apply plugin: 'codenarc'
     apply plugin: 'jacoco'
-
-    if (javaMajor > 1 || javaMinor > 6) {
-        apply plugin: 'com.github.tkruse.groovysh'
-    }
 
     repositories {
         mavenLocal()
