@@ -83,7 +83,7 @@ class ResponseComparisonTest {
     actualBody = '{"stuff": "should make the test fail"}'
     def result = testSubject().body
     assert result.comparison == [
-      '$.body.stuff': [mismatch: "Expected 'is good' but received 'should make the test fail'", diff: '']
+      '$.body.stuff': [[mismatch: "Expected 'is good' but received 'should make the test fail'", diff: '']]
     ]
     assert result.diff[1] == '-    "stuff": "is good"'
     assert result.diff[2] == '+    "stuff": "should make the test fail"'

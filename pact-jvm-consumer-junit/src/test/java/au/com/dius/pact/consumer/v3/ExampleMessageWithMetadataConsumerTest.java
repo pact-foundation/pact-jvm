@@ -26,7 +26,7 @@ public class ExampleMessageWithMetadataConsumerTest {
         body.stringValue("testParam1", "value1");
         body.stringValue("testParam2", "value2");
 
-        Map<String, String> metadata = new HashMap<>();
+        Map<String, String> metadata = new HashMap<String, String>();
         metadata.put("metadata1", "metadataValue1");
         metadata.put("metadata2", "metadataValue2");
 

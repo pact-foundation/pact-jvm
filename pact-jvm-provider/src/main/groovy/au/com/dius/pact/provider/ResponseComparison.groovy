@@ -115,13 +115,14 @@ class ResponseComparison {
       result.comparison = mismatches
         .findAll { it instanceof BodyMismatch }
         .groupBy { bm -> bm.path() }
-        .collectEntries { path, m -> [
-            path, m.collect { bm ->
-              [
-                mismatch: bm.mismatch().defined ? bm.mismatch().get() : 'mismatch',
-                diff: bm.diff().defined ? bm.diff().get() : ''
-              ]
-            }
+        .collectEntries { path, m ->
+          [
+              path, m.collect { bm ->
+                [
+                  mismatch: bm.mismatch().defined ? bm.mismatch().get() : 'mismatch',
+                  diff: bm.diff().defined ? bm.diff().get() : ''
+                ]
+              }
           ]
       }
 

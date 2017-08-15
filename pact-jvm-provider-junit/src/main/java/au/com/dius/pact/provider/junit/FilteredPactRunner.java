@@ -1,9 +1,9 @@
 package au.com.dius.pact.provider.junit;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
+import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.provider.junit.loader.PactFilter;
 
@@ -19,16 +19,22 @@ public class FilteredPactRunner extends PactRunner {
 
     @Override
     public List<Pact> filterPacts(List<Pact> pacts){
-        Optional<PactFilter> pactFilterOpt = Optional.ofNullable(this.getTestClass().getJavaClass().getAnnotation(PactFilter.class));
+        PactFilter pactFilterOpt = this.getTestClass().getJavaClass().getAnnotation(PactFilter.class);
 
-        return pactFilterOpt.map(pactFilter -> {
-            Set<String> requiredInteractions = Sets.newHashSet(pactFilter.value());
-
-            if (requiredInteractions != null && requiredInteractions.size() > 0) {
-                pacts.forEach(pact ->
-                        pact.getInteractions().removeIf(interaction -> !requiredInteractions.contains(interaction.getProviderState())));
-            }
+        if (pactFilterOpt == null) {
             return pacts;
-        }).orElse(pacts);
+        }
+
+        Set<String> requiredInteractions = Sets.newHashSet(pactFilterOpt.value());
+        if (requiredInteractions.size() > 0) {
+            for (Pact pact: pacts) {
+                for (Interaction interaction: pact.getInteractions()) {
+                    if (!requiredInteractions.contains(interaction.getProviderState())) {
+                        pact.getInteractions().remove(interaction);
+                    }
+                }
+            }
+        }
+        return pacts;
     }
 }
