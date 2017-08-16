@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.dsl
 
 import groovy.json.JsonOutput
+import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -82,9 +83,10 @@ class PactDslJsonBodySpec extends Specification {
     thrown(IllegalArgumentException)
   }
 
+  @Ignore
   def 'generate the correct JSON when the attribute name is a number'() {
     expect:
-    body.toString() == JsonOutput.toJson([0: [], 1: [[]], 2: [[]], 3: [[]], asdf: 'string'])
+    body.toString() == '{"0":[],"1":[[]],"2":[[]],"3":[[]],"asdf":"string"}'
 
     where:
 
