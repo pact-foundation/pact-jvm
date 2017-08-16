@@ -14,6 +14,6 @@ class ResponseMatchingSpec extends Specification {
 
   def 'response matching - mismatch statuses'() {
     expect:
-    Matching.matchStatus(200, 300) == Some.apply(StatusMismatch.apply(200, 300))
+    Matching.matchStatus(200, 300) == Some.apply(new StatusMismatch(200, 300))
   }
 }
