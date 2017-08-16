@@ -5,6 +5,8 @@ import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 
+import scala.collection.JavaConversions
+
 @RunWith(classOf[JUnitRunner])
 class MatchersTest extends Specification {
 
@@ -83,14 +85,14 @@ class MatchersTest extends Specification {
       val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"Harry\"}"),
         scalaMMapToJavaMMap(Map("$.body.value" -> Map("regex" -> "Ha[a-z]*"))))
       val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"Harry\"}"), null)
-      new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+      new JsonBodyMatcher().matchBody(expected, actual, allowUnexpectedKeys = true) must beEmpty
     }
 
     "handle null values" in {
       val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"Harry\"}"),
         scalaMMapToJavaMMap(Map("$.body.value" -> Map("regex" -> "Ha[a-z]*"))))
       val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": null}"), null)
-      new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+      new JsonBodyMatcher().matchBody(expected, actual, allowUnexpectedKeys = true) must not(beEmpty)
     }
 
   }
@@ -103,56 +105,56 @@ class MatchersTest extends Specification {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"Harry\"}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"Some other string\"}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+        new JsonBodyMatcher().matchBody(expected, actual, true) must beEmpty
       }
 
       "accept numbers" in {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": 100}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": 200.3}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+        new JsonBodyMatcher().matchBody(expected, actual, true) must beEmpty
       }
 
       "accept booleans" in {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": true}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": false}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+        new JsonBodyMatcher().matchBody(expected, actual, true) must beEmpty
       }
 
       "accept null" in {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": null}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": null}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+        new JsonBodyMatcher().matchBody(expected, actual, true) must beEmpty
       }
 
       "not accept different types" in {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"200\"}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": 200}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+        new JsonBodyMatcher().matchBody(expected, actual, true) must not(beEmpty)
       }
 
       "not accept null/non-null" in {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": 200}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": null}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+        new JsonBodyMatcher().matchBody(expected, actual, true) must not(beEmpty)
       }
 
       "accept lists" in {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": [100, 200, 300]}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": [200.3]}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+        new JsonBodyMatcher().matchBody(expected, actual, true) must beEmpty
       }
 
       "accept maps" in {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": {\"a\": 100}}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "type"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": {\"a\": 200.3, \"b\": 200, \"c\": 300} }"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+        new JsonBodyMatcher().matchBody(expected, actual, true) must beEmpty
       }
 
       "list elements should inherit the matcher from the parent" in {
@@ -177,28 +179,28 @@ class MatchersTest extends Specification {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"2014-01-01 14:00:00+10:00\"}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "timestamp"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"2014-10-01 14:00:00+10:00\"}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+        new JsonBodyMatcher().matchBody(expected, actual, true) must beEmpty
       }
 
       "not accept incorrect formatted timestamps" in {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"2014-01-01 14:00:00\"}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("match" -> "timestamp"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"I'm a timestamp!\"}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+        new JsonBodyMatcher().matchBody(expected, actual, true) must not(beEmpty)
       }
 
       "accept timestamps with custom patterns" in {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"2014-01-01-14:00:00+10:00\"}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("timestamp" -> "yyyy-MM-dd-HH:mm:ssZZZ"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"2014-10-01-14:00:00+10:00\"}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+        new JsonBodyMatcher().matchBody(expected, actual, true) must beEmpty
       }
 
       "handle null values" in {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"2014-01-01-14:00:00+10:00\"}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("timestamp" -> "yyyy-MM-dd-HH:mm:ssZZZ"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": null}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+        new JsonBodyMatcher().matchBody(expected, actual, true) must not(beEmpty)
       }
 
     }
@@ -209,21 +211,21 @@ class MatchersTest extends Specification {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"00:00\"}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("time" -> "mm:ss"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"14:01:02\"}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+        new JsonBodyMatcher().matchBody(expected, actual, true) must not(beEmpty)
       }
 
       "accept times with custom patterns" in {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"00:00:14\"}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("time" -> "ss:mm:HH"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"05:10:14\"}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+        new JsonBodyMatcher().matchBody(expected, actual, true) must beEmpty
       }
 
       "handle null values" in {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"14:00:00\"}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("time" -> "HH:mm:ss"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": null}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+        new JsonBodyMatcher().matchBody(expected, actual, true) must not(beEmpty)
       }
 
     }
@@ -234,21 +236,21 @@ class MatchersTest extends Specification {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"01-01-1970\"}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("date" -> "dd-MM-yyyy"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"01011970\"}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+        new JsonBodyMatcher().matchBody(expected, actual, true) must not(beEmpty)
       }
 
       "accept dates with custom patterns" in {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"12/30/1970\"}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("date" -> "MM/dd/yyyy"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"12/30/1970\"}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must beEmpty
+        new JsonBodyMatcher().matchBody(expected, actual, true) must beEmpty
       }
 
       "handle null values" in {
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": \"2014-01-01\"}"),
           scalaMMapToJavaMMap(Map("$.body.value" -> Map("date" -> "yyyy-MM-dd"))))
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": null}"), null)
-        new JsonBodyMatcher().matchBody(expected, actual, DiffConfig()) must not(beEmpty)
+        new JsonBodyMatcher().matchBody(expected, actual, true) must not(beEmpty)
       }
 
     }

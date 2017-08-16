@@ -1,8 +1,6 @@
-/**
- * 
- */
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.model.PactSpecVersion;
 import au.com.dius.pact.model.v3.messaging.Message;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import au.com.dius.pact.util.Optional;
@@ -17,9 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- *
- */
 public class MessagePactProviderRule extends ExternalResource {
 	
 	private final String provider;
@@ -93,18 +88,13 @@ public class MessagePactProviderRule extends ExternalResource {
 				}
 
 				setMessage(providedMessage, description);
-				try {
-					base.evaluate();
-					messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir());
-				} catch (Throwable t) {
-					throw t;
-				}
+        base.evaluate();
+        messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir(), PactSpecVersion.V3);
 			}
 		};
 	}
 
-	private void evaluatePactVerifications(PactVerifications pactVerifications, Statement base, Description description)
-			throws Throwable {
+	private void evaluatePactVerifications(PactVerifications pactVerifications, Statement base, Description description) {
 
 		if (provider == null) {
 			throw new UnsupportedOperationException("This provider name cannot be null when using @PactVerifications");
@@ -112,7 +102,15 @@ public class MessagePactProviderRule extends ExternalResource {
 
 		Optional<PactVerification> possiblePactVerification = findPactVerification(pactVerifications);
 		if (!possiblePactVerification.isPresent()) {
-			base.evaluate();
+			try {
+				base.evaluate();
+			} catch (Throwable throwable) {
+				if (throwable instanceof RuntimeException) {
+					throw (RuntimeException) throwable;
+				} else {
+				  throw new RuntimeException(throwable);
+        }
+			}
 			return;
 		}
 
@@ -122,14 +120,22 @@ public class MessagePactProviderRule extends ExternalResource {
 			throw new UnsupportedOperationException("Could not find method with @Pact for the provider " + provider);
 		}
 
-		Method method = possiblePactMethod.get();
-		Pact pact = method.getAnnotation(Pact.class);
-		MessagePactBuilder builder = MessagePactBuilder.consumer(pact.consumer()).hasPactWith(provider);
-		MessagePact messagePact = (MessagePact) method.invoke(testClassInstance, builder);
-		setMessage(messagePact.getMessages().get(0), description);
-		base.evaluate();
-		messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir());
-	}
+    try {
+      Method method = possiblePactMethod.get();
+      Pact pact = method.getAnnotation(Pact.class);
+      MessagePactBuilder builder = MessagePactBuilder.consumer(pact.consumer()).hasPactWith(provider);
+      MessagePact messagePact = (MessagePact) method.invoke(testClassInstance, builder);
+      setMessage(messagePact.getMessages().get(0), description);
+      base.evaluate();
+      messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir(), PactSpecVersion.V3);
+    } catch (Throwable throwable) {
+      if (throwable instanceof RuntimeException) {
+        throw (RuntimeException) throwable;
+      } else {
+        throw new RuntimeException(throwable);
+      }
+    }
+  }
 
 	private Optional<PactVerification> findPactVerification(PactVerifications pactVerifications) {
 		PactVerification[] pactVerificationValues = pactVerifications.value();

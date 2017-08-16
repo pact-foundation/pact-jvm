@@ -41,7 +41,7 @@ class V3PactSpec extends Specification {
         ])
 
         when:
-        pact.write(pactFile.parentFile.toString())
+        pact.write(pactFile.parentFile.toString(), PactSpecVersion.V3)
         def json = new JsonSlurper().parse(pactFile)
 
         then:
@@ -75,7 +75,7 @@ class V3PactSpec extends Specification {
         ])
 
         when:
-        pact.write(pactFile.parentFile.toString())
+        pact.write(pactFile.parentFile.toString(), PactSpecVersion.V3)
         def json = new JsonSlurper().parse(pactFile)
 
         then:
@@ -115,7 +115,7 @@ class V3PactSpec extends Specification {
             void mergeInteractions(List<Interaction> interactions) { }
 
             @SuppressWarnings('UnusedMethodParameter')
-            protected File fileForPact(String pactDir) { pactFile }
+            File fileForPact(String pactDir) { pactFile }
 
             List<Interaction> getInteractions() { [] }
 
@@ -160,7 +160,7 @@ class V3PactSpec extends Specification {
             void mergeInteractions(List<Interaction> interactions) { }
 
             @SuppressWarnings('UnusedMethodParameter')
-            protected File fileForPact(String pactDir) { pactFile }
+            File fileForPact(String pactDir) { pactFile }
 
             List<Interaction> getInteractions() { [] }
 

@@ -23,6 +23,7 @@ abstract class BasePact implements Pact {
     'pact-jvm'          : ['version': lookupVersion()]
   ]
   private static final String METADATA = 'metadata'
+  private static final String UTF8 = 'UTF-8'
 
   Consumer consumer
   Provider provider
@@ -90,7 +91,7 @@ abstract class BasePact implements Pact {
   }
 
   static String mapToQueryStr(Map<String, List<String>> query) {
-    query.collectMany { k, v -> v.collect { "$k=${URLEncoder.encode(it, 'UTF-8')}" } }.join('&')
+    query.collectMany { k, v -> v.collect { "$k=${URLEncoder.encode(it, UTF8)}" } }.join('&')
   }
 
   @SuppressWarnings(['ConfusingMethodName'])
@@ -102,7 +103,7 @@ abstract class BasePact implements Pact {
   }
 
   @CompileStatic
-  void write(String pactDir, PactSpecVersion pactSpecVersion) {
+  void write(String pactDir, PactSpecVersion pactSpecVersion = PactSpecVersion.V2) {
     def pactFile = fileForPact(pactDir)
     if (pactFile.exists()) {
       synchronized (pactFile) {
@@ -115,7 +116,7 @@ abstract class BasePact implements Pact {
             throw new InvalidPactException(result.message)
           }
           raf.seek(0)
-          def bytes = JsonOutput.prettyPrint(this.toJson(pactSpecVersion)).getBytes('UTF-8')
+          def bytes = JsonOutput.prettyPrint(this.toJson(pactSpecVersion)).getBytes(UTF8)
           raf.setLength(bytes.length)
           raf.write(bytes)
         } finally {
@@ -143,7 +144,7 @@ abstract class BasePact implements Pact {
   }
 
   @CompileStatic
-  private String toJson(PactSpecVersion pactSpecVersion) {
+  protected String toJson(PactSpecVersion pactSpecVersion) {
     def jsonMap = toMap(pactSpecVersion)
     if (jsonMap.containsKey(METADATA)) {
       def map = [:] + DEFAULT_METADATA
