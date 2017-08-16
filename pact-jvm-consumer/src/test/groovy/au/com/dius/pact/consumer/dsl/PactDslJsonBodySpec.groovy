@@ -1,6 +1,5 @@
 package au.com.dius.pact.consumer.dsl
 
-import groovy.json.JsonOutput
 import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
