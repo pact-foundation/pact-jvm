@@ -55,6 +55,8 @@ public class PactDslResponse {
     /**
      * Response headers to return
      *
+     * Provide the headers you want to validate, other headers will be ignored.
+     *
      * @param headers key-value pairs of headers
      */
     public PactDslResponse headers(Map<String, String> headers) {
