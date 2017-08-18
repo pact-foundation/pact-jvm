@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.model.BrokerUrlSource
 import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
@@ -13,7 +14,9 @@ import au.com.dius.pact.model.UnknownPactSource
 import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
+import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.VerifierReporter
+import com.github.kittinunf.result.Result
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -414,5 +417,36 @@ class ProviderVerifierSpec extends Specification {
     true    | false   | false
     false   | true    | false
     false   | false   | false
+  }
+
+  @SuppressWarnings('UnnecessaryGetter')
+  def 'If the pact source is from a pact broker, publish the verification results back'() {
+    given:
+    def links = ['publish': 'true']
+    def pact = Mock(Pact) {
+      getSource() >> new BrokerUrlSource('url', 'url', links)
+    }
+    def client = Mock(PactBrokerClient)
+
+    when:
+    ProviderVerifierKt.reportVerificationResults(pact, true, '0', client)
+
+    then:
+    1 * client.publishVerificationResults(links, true, '0', null) >> new Result.Success(true)
+  }
+
+  @SuppressWarnings('UnnecessaryGetter')
+  def 'If the pact source is not from a pact broker, ignore the verification results'() {
+    given:
+    def pact = Mock(Pact) {
+      getSource() >> new UrlSource('url', null)
+    }
+    def client = Mock(PactBrokerClient)
+
+    when:
+    ProviderVerifierKt.reportVerificationResults(pact, true, '0', client)
+
+    then:
+    0 * client.publishVerificationResults(_, true, '0', null)
   }
 }

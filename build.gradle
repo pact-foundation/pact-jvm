@@ -11,9 +11,9 @@ buildscript {
 }
 
 plugins {
-  id 'nebula.kotlin' version '1.1.3-2'
+  id 'nebula.kotlin' version '1.1.4'
   id 'org.jmailen.kotlinter' version '1.2.0'
-  id 'io.gitlab.arturbosch.detekt' version '1.0.0.M11'
+  id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC2'
   id 'org.jetbrains.dokka' version '0.9.15'
 }
 
@@ -107,6 +107,11 @@ subprojects {
         configure(scalaCompileOptions.forkOptions) {
           memoryMaximumSize = '256m'
         }
+    }
+
+    compileGroovy {
+      classpath = classpath.plus(files(compileKotlin.destinationDir))
+      dependsOn compileKotlin
     }
 
     compileScala {
@@ -228,18 +233,17 @@ subprojects {
 
     check.dependsOn << 'jacocoTestReport'
 
-    compileGroovy.dependsOn << 'copyMainKotlinClasses'
-
   kotlinter {
     indentSize = 2
   }
 
   detekt {
-    config = "${project.parent.projectDir}/config/detekt-config.yml"
+    profile("main") {
+      config = "${project.parent.projectDir}/config/detekt-config.yml"
+    }
   }
 
   check.dependsOn << 'detektCheck'
-
 }
 
 tasks.addRule("Pattern: <Task>_<ScalaVersion>") { String taskName ->

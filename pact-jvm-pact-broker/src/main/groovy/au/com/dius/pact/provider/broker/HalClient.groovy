@@ -1,13 +1,20 @@
 package au.com.dius.pact.provider.broker
 
+import au.com.dius.pact.pactbroker.HalClientBase
+import au.com.dius.pact.pactbroker.IHalClient
+import au.com.dius.pact.pactbroker.InvalidHalResponse
+import au.com.dius.pact.pactbroker.NotFoundHalResponse
 import groovy.transform.Canonical
 import groovy.util.logging.Slf4j
+import groovyx.net.http.Method
 import groovyx.net.http.RESTClient
 import org.apache.http.message.BasicHeaderValueParser
 import org.apache.http.util.EntityUtils
 
+import java.util.function.BiFunction
+import java.util.function.Consumer
+
 import static groovyx.net.http.ContentType.JSON
-import static groovyx.net.http.Method.POST
 import static groovyx.net.http.Method.PUT
 
 /**
@@ -16,17 +23,25 @@ import static groovyx.net.http.Method.PUT
 @Slf4j
 @Canonical
 @SuppressWarnings('DuplicateStringLiteral')
-class HalClient {
+class HalClient extends HalClientBase {
   private static final String ROOT = '/'
 
-  def baseUrl
-  Map options = [:]
   def http
   private pathInfo
   def lastUrl
 
+  HalClient(
+    String baseUrl,
+    Map<String, ?> options) {
+    super(baseUrl, options)
+  }
+
+  HalClient(String baseUrl) {
+    super(baseUrl)
+  }
+
   @SuppressWarnings('DuplicateNumberLiteral')
-  private void setupHttpClient() {
+  private void setupRestClient() {
     if (http == null) {
       http = newHttpClient()
       if (options.authentication instanceof List) {
@@ -45,7 +60,7 @@ class HalClient {
     }
   }
 
-  private newHttpClient() {
+  private RESTClient newHttpClient() {
     http = new RESTClient(baseUrl)
     http.parser.'application/hal+json' = http.parser.'application/json'
     http.handler.'404' = {
@@ -55,7 +70,7 @@ class HalClient {
     http
   }
 
-  HalClient navigate(Map options = [:], String link) {
+  IHalClient navigate(Map options = [:], String link) {
     pathInfo = pathInfo ?: fetch(ROOT)
     pathInfo = fetchLink(link, options)
     this
@@ -115,9 +130,9 @@ class HalClient {
     result
   }
 
-  private fetch(String path) {
+  def fetch(String path) {
     lastUrl = path
-    setupHttpClient()
+    setupRestClient()
     log.debug "Fetching: $path"
     def response = http.get(path: path, requestContentType: 'application/json',
       headers: [Accept: 'application/hal+json, application/json'])
@@ -146,37 +161,56 @@ class HalClient {
     throw new MissingMethodException(name, this.class, args)
   }
 
+  @Override
+  void forAll(String linkName, Consumer<Map<String, Object>> just) {
+    pathInfo = pathInfo ?: fetch(ROOT)
+    def matchingLink = pathInfo.'_links'[linkName]
+    if (matchingLink != null) {
+      if (matchingLink instanceof Collection) {
+        matchingLink.each { just.accept(it) }
+      } else {
+        just.accept(matchingLink as Map<String, Object>)
+      }
+    }
+  }
+
   String linkUrl(String name) {
     pathInfo.'_links'[name].href
   }
 
-  def uploadJson(String path, String bodyJson, Closure closure = null) {
-    setupHttpClient()
-    http.request(groovyx.net.http.Method.PUT) {
+  def uploadJson(String path, String bodyJson, BiFunction<String, String, Object> closure = null) {
+    setupRestClient()
+    executeUpload(PUT, path, bodyJson, closure)
+  }
+
+  protected executeUpload(Method method, String path, String bodyJson,
+                               BiFunction<String, String, Object> closure) {
+    http.request(method) {
       uri.path = path
       body = bodyJson
-      requestContentType = groovyx.net.http.ContentType.JSON
+      requestContentType = JSON
 
       response.success = { resp ->
         consumeEntity(resp)
-        closure?.call('OK', resp.statusLine as String)
+        closure?.apply('OK', resp.statusLine as String)
       }
 
       response.failure = { resp, body -> handleFailure(resp, body, closure) }
 
       response.'409' = { resp, body ->
-        closure?.call('FAILED', "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${body.readLine()}")
+        closure?.apply('FAILED',
+          "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${body.readLine()}")
       }
     }
   }
 
-  private consumeEntity(resp) {
+  private static consumeEntity(resp) {
     EntityUtils.consume(resp.entity)
   }
 
-  private handleFailure(resp, body, Closure closure) {
+  private static handleFailure(resp, body, BiFunction<String, String, Object> closure) {
     if (body instanceof Reader) {
-      closure.call('FAILED', "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${body.readLine()}")
+      closure.apply('FAILED', "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${body.readLine()}")
     } else {
       def error = 'Unknown error'
       if (body?.errors instanceof List) {
@@ -184,24 +218,7 @@ class HalClient {
       } else if (body?.errors instanceof Map) {
         error = body.errors.collect { entry -> "${entry.key}: ${entry.value}" }.join(', ')
       }
-      closure.call('FAILED', "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${error}")
+      closure.apply('FAILED', "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - ${error}")
     }
   }
-
-  def post(String path, Map bodyJson) {
-    setupHttpClient()
-    http.request(groovyx.net.http.Method.POST) {
-      uri.path = path
-      body = bodyJson
-      requestContentType = groovyx.net.http.ContentType.JSON
-
-      response.success = { resp -> "SUCCESS - ${resp.statusLine as String}" }
-
-      response.failure = { resp, respBody ->
-        log.error("Request failed: $resp.statusLine $respBody")
-        "FAILED - ${resp.statusLine as String}"
-      }
-    }
-  }
-
 }

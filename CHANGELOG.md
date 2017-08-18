@@ -1,5 +1,34 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.4 - Implemented publishing of verification results to the pact broker
+
+* 2df8536 - Updated the readmes on publishing verification results to the broker #417 (Ronald Holshausen, Fri Aug 18 14:31:45 2017 +1000)
+* b8006c8 - Updated the JUnit runner to publish verification results to the broker #417 (Ronald Holshausen, Fri Aug 18 14:31:21 2017 +1000)
+* ff7ddc1 - No need to create a Rest Client if fetching pacts from a broker #417 (Ronald Holshausen, Fri Aug 18 13:55:17 2017 +1000)
+* bc14b0f - HRefs from the broker should be decoded to avoid double encoding issues #417 (Ronald Holshausen, Fri Aug 18 13:23:18 2017 +1000)
+* 57526d6 - Missed a needed @JvmOverloads annotation #417 (Ronald Holshausen, Fri Aug 18 12:53:45 2017 +1000)
+* e64ee8e - Cleaned up the broker client code and use case-insenstive lookups of HAL links when publishing verification results to the pact broker #417 (Ronald Holshausen, Fri Aug 18 12:23:29 2017 +1000)
+* 3afc007 - Merge branch 'master' into v3.5.x (Ronald Holshausen, Fri Aug 18 10:55:36 2017 +1000)
+* 59e368e - Merge branch 'Windowsfreak-patch-1' (Ronald Holshausen, Fri Aug 18 10:54:10 2017 +1000)
+* ecf97ee - Correct a test after the changing the detail charset (Ronald Holshausen, Fri Aug 18 10:53:32 2017 +1000)
+* 1597e2b - Merge branch 'patch-1' of https://github.com/Windowsfreak/pact-jvm into Windowsfreak-patch-1 (Ronald Holshausen, Fri Aug 18 10:40:00 2017 +1000)
+* a9ad587 - Implemented publishing verification results to the pact broker #417 (Ronald Holshausen, Fri Aug 18 10:38:23 2017 +1000)
+* 6e7b34e - Merge branch 'master' into v3.5.x (Ronald Holshausen, Thu Aug 17 11:37:35 2017 +1000)
+* 7d1f3f8 - Merge pull request #518 from ehmkah/master (Ronald Holshausen, Wed Aug 16 14:18:00 2017 +1000)
+* 0477429 - Use UTF-8 as a default charset in MockServer (Björn Eberhardt, Tue Aug 15 15:55:47 2017 +0200)
+* dfcba58 - Update PactDslResponse.java (Michael Krauße, Tue Aug 15 09:18:06 2017 +0200)
+* 60355f4 - https://github.com/DiUS/pact-jvm/issues/512 (Michael Krauße, Tue Aug 15 09:08:52 2017 +0200)
+* 4cdd138 - Use the pact broker client to fetch pacts when they need to be loaded from a pact broker (Ronald Holshausen, Fri Aug 11 16:39:00 2017 +1000)
+* 53d0a4f - Updated versions in readme (Ronald Holshausen, Fri Aug 11 12:45:31 2017 +1000)
+* b8fc1a1 - generate the correct JSON when the attribute name is a number #513 (Ronald Holshausen, Fri Aug 11 12:44:53 2017 +1000)
+* f1bf535 - update changelog for release 3.5.3-jre7.0 (Ronald Holshausen, Thu Aug 10 10:20:21 2017 +1000)
+* eec0c60 - Small fix to diff utils (Ronald Holshausen, Wed Aug 9 09:11:36 2017 +1000)
+* c916f28 - Converted DiffUtils to kotlin (Ronald Holshausen, Wed Aug 9 08:39:33 2017 +1000)
+* 5ce0961 - When merging a pact file, check if the target file is not empty (Ronald Holshausen, Wed Aug 9 12:28:03 2017 +1000)
+* 21d3b7d - Merge pull request #511 from ehmkah/master (Ronald Holshausen, Mon Aug 7 11:48:05 2017 +1000)
+* c27b814 - Documentation should match implementation (Michael Krauße, Sun Aug 6 19:20:00 2017 +0200)
+* 7c1f6d3 - bump version to 3.5.4 (Ronald Holshausen, Sun Aug 6 19:54:00 2017 +1000)
+
 # 3.5.3-jre7.0 - Enhancement and Bugfixes Release
 
 * 98346e6 - Correct the build order in pact-jvm-provider-scalasupport (Ronald Holshausen, Thu Aug 10 10:05:51 2017 +1000)
@@ -134,27 +163,6 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 749630b - update versions in readme (Ronald Holshausen, Sun Jul 9 19:15:12 2017 +1000)
 * 6278563 - update changelog for release 3.5.1-jre7.1 (Ronald Holshausen, Sun Jul 9 16:50:27 2017 +1000)
 * d26b2f9 - bump version to 3.5.2 (Ronald Holshausen, Sun Jul 9 19:11:08 2017 +1000)
-
-# 3.5.2-jre7.0 - Bugfix Release
-
-* 164c906 - Correct a test to pass on both JDK7 and JDK8 (Ronald Holshausen, Wed Jul 12 09:55:20 2017 +1000)
-* 6bdce49 - Merge branch 'v3.5.x' into v3.5.x-jre7 (Ronald Holshausen, Wed Jul 12 09:50:55 2017 +1000)
-* 107388c - Correct the version (Ronald Holshausen, Wed Jul 12 09:48:01 2017 +1000)
-* b9db93a - Converted Scala test to Groovy (Ronald Holshausen, Tue Jul 11 22:04:39 2017 +1000)
-* fe69a60 - Converted Scala test to Groovy (Ronald Holshausen, Tue Jul 11 21:16:27 2017 +1000)
-* 7c57abe - Converted Scala test to Groovy (Ronald Holshausen, Tue Jul 11 20:53:47 2017 +1000)
-* f3f8c34 - Inlined DiffConfig as only one attribute was ever used (Ronald Holshausen, Tue Jul 11 20:40:07 2017 +1000)
-* 8029490 - Fix bodyWithSingleQuotes with ContentType param (Jeff Myers, Mon Jul 10 18:27:53 2017 -0400)
-* f6fd607 - Wired in the use of the pact source classes into the pact loader and verifier (Ronald Holshausen, Tue Jul 11 10:08:20 2017 +1000)
-* e66db1d - Updated the file system lock code to work on windows #475 (Ronald Holshausen, Mon Jul 10 14:06:44 2017 +1000)
-* 1c635e6 - Use the correct pacticipant name when publishing a tag (Ronald Holshausen, Mon Jul 10 10:58:25 2017 +1000)
-* 262db0f - Add a synchanisation block and file system lock around merging a pact with an existing one on the file system #475 (Ronald Holshausen, Sun Jul 9 20:37:18 2017 +1000)
-* 9b29aea - Converted PactWriter and PactMerge to kotlin (Ronald Holshausen, Sun Jul 9 19:24:15 2017 +1000)
-* 749630b - update versions in readme (Ronald Holshausen, Sun Jul 9 19:15:12 2017 +1000)
-* 6278563 - update changelog for release 3.5.1-jre7.1 (Ronald Holshausen, Sun Jul 9 16:50:27 2017 +1000)
-* d26b2f9 - bump version to 3.5.2 (Ronald Holshausen, Sun Jul 9 19:11:08 2017 +1000)
-* 704acb2 - update changelog for release 3.5.1 (Ronald Holshausen, Sun Jul 9 18:12:23 2017 +1000)
-* 92747f6 - bump version to 3.5.2-jre7.1 (Ronald Holshausen, Sun Jul 9 17:29:40 2017 +1000)
 
 # 3.5.2-jre7.0 - Bugfix Release
 

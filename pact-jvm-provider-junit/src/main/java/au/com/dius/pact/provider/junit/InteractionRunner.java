@@ -4,6 +4,7 @@ import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.model.Pact;
+import au.com.dius.pact.provider.ProviderVerifierKt;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget;
 import au.com.dius.pact.provider.junit.target.TestTarget;
@@ -27,6 +28,8 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.junit.runners.model.TestClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -43,6 +46,8 @@ import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_VALIDATO
  * Developed with {@link org.junit.runners.BlockJUnit4ClassRunner} in mind
  */
 class InteractionRunner extends Runner {
+  private static final Logger LOGGER = LoggerFactory.getLogger(InteractionRunner.class);
+
   private final TestClass testClass;
   private final Pact pact;
   private final PactSource pactSource;
@@ -151,18 +156,31 @@ class InteractionRunner extends Runner {
 
     // Running
     public void run(final RunNotifier notifier) {
-        for (final Interaction interaction : pact.getInteractions()) {
-            final Description description = describeChild(interaction);
-            notifier.fireTestStarted(description);
-            try {
-                interactionBlock(interaction, pactSource).evaluate();
-            } catch (final Throwable e) {
-                notifier.fireTestFailure(new Failure(description, e));
-            } finally {
-                notifier.fireTestFinished(description);
-            }
+      Boolean allPassed = true;
+      for (final Interaction interaction : pact.getInteractions()) {
+        final Description description = describeChild(interaction);
+        notifier.fireTestStarted(description);
+        try {
+          interactionBlock(interaction, pactSource).evaluate();
+        } catch (final Throwable e) {
+          notifier.fireTestFailure(new Failure(description, e));
+          allPassed = false;
+        } finally {
+          notifier.fireTestFinished(description);
         }
+      }
+
+      ProviderVerifierKt.reportVerificationResults(pact, allPassed, providerVersion());
     }
+
+  private String providerVersion() {
+    String version = System.getProperty("pact.provider.version");
+    if (version != null) {
+      return version;
+    }
+    LOGGER.warn("Set the provider version using the pact.provider.version property");
+    return "0.0.0";
+  }
 
     protected Object createTest() throws Exception {
         return testClass.getOnlyConstructor().newInstance();

@@ -179,6 +179,8 @@ class PactReader {
         new Pair(new JsonSlurper().parse(source.file), source)
       } else if (source instanceof InputStream || source instanceof Reader || source instanceof File) {
         loadPactFromFile(source)
+      } else if (source instanceof BrokerUrlSource) {
+        PactReaderKt.loadPactFromUrl(source, options, null)
       } else if (source instanceof URL || source instanceof UrlPactSource) {
         def urlSource = source instanceof URL ? new UrlSource(source.toString()) : source
         PactReaderKt.loadPactFromUrl(urlSource, options, newHttpClient(urlSource))
@@ -225,7 +227,7 @@ class PactReader {
   }
 
   private static newHttpClient(UrlPactSource source) {
-    new RESTClient(source.url)
+    new RESTClient(new URI(source.url))
   }
 
   private static boolean fileExists(String path) {

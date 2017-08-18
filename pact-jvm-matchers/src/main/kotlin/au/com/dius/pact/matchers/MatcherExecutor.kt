@@ -42,13 +42,15 @@ fun safeToString(value: Any?): String {
   }
 }
 
-fun <Mismatch> matchInclude(includedValue: String, path: List<String>, expected: Any?, actual: Any?, mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
+fun <Mismatch> matchInclude(includedValue: String, path: List<String>, expected: Any?, actual: Any?,
+                            mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
   val matches = safeToString(actual).contains(includedValue)
   logger.debug { "comparing if ${valueOf(actual)} includes '$includedValue' at $path -> $matches" }
   if (matches) {
     return listOf()
   } else {
-    return listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to include ${valueOf(includedValue)}", path))
+    return listOf(mismatchFactory.create(expected, actual,
+      "Expected ${valueOf(actual)} to include ${valueOf(includedValue)}", path))
   }
 }
 
@@ -89,7 +91,8 @@ fun <Mismatch> domatch(matcher: MatchingRule, path: List<String>, expected: Any?
   }
 }
 
-fun <Mismatch> matchEquality(path: List<String>, expected: Any?, actual: Any?, mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
+fun <Mismatch> matchEquality(path: List<String>, expected: Any?, actual: Any?,
+                             mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
   val matches = actual == null && expected == null || actual != null && actual == expected
   logger.debug { "comparing ${valueOf(actual)} to ${valueOf(expected)} at $path -> $matches" }
   return if (matches) {
@@ -99,7 +102,8 @@ fun <Mismatch> matchEquality(path: List<String>, expected: Any?, actual: Any?, m
   }
 }
 
-fun <Mismatch> matchRegex(regex: String, path: List<String>, expected: Any?, actual: Any?, mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
+fun <Mismatch> matchRegex(regex: String, path: List<String>, expected: Any?, actual: Any?,
+                          mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
   val matches = safeToString(actual).matches(Regex(regex))
   logger.debug { "comparing ${valueOf(actual)} with regexp $regex at $path -> $matches" }
   return if (matches
@@ -113,7 +117,8 @@ fun <Mismatch> matchRegex(regex: String, path: List<String>, expected: Any?, act
   }
 }
 
-fun <Mismatch> matchType(path: List<String>, expected: Any?, actual: Any?, mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
+fun <Mismatch> matchType(path: List<String>, expected: Any?, actual: Any?,
+                         mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
   logger.debug { "comparing type of ${valueOf(actual)} to ${valueOf(expected)} at $path" }
   return if (expected is String && actual is String
     || expected is Number && actual is Number
@@ -131,7 +136,8 @@ fun <Mismatch> matchType(path: List<String>, expected: Any?, actual: Any?, misma
       listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be null", path))
     }
   } else {
-    listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be the same type as ${valueOf(expected)}", path))
+    listOf(mismatchFactory.create(expected, actual,
+      "Expected ${valueOf(actual)} to be the same type as ${valueOf(expected)}", path))
   }
 }
 
@@ -144,19 +150,22 @@ fun <Mismatch> matchNumber(numberType: NumberTypeMatcher.NumberType, path: List<
     NumberTypeMatcher.NumberType.NUMBER -> {
       logger.debug { "comparing type of ${valueOf(actual)} to a number at $path" }
       if (actual !is Number) {
-        return listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be a number", path))
+        return listOf(mismatchFactory.create(expected, actual,
+          "Expected ${valueOf(actual)} to be a number", path))
       }
     }
     NumberTypeMatcher.NumberType.INTEGER -> {
       logger.debug { "comparing type of ${valueOf(actual)} to an integer at $path" }
       if (actual !is Int && actual !is Long && actual !is BigInteger) {
-        return listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be an integer", path))
+        return listOf(mismatchFactory.create(expected, actual,
+          "Expected ${valueOf(actual)} to be an integer", path))
       }
     }
     NumberTypeMatcher.NumberType.DECIMAL -> {
       logger.debug { "comparing type of ${valueOf(actual)} to a decimal at $path" }
       if (actual !is Float && actual !is Double && actual !is BigDecimal) {
-        return listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be a decimal number",
+        return listOf(mismatchFactory.create(expected, actual,
+          "Expected ${valueOf(actual)} to be a decimal number",
           path))
       }
     }
@@ -171,7 +180,8 @@ fun <Mismatch> matchDate(pattern: String, path: List<String>, expected: Any?, ac
     DateUtils.parseDate(safeToString(actual), pattern)
     return emptyList()
   } catch (e: ParseException) {
-    return listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to match a date of '$pattern': " +
+    return listOf(mismatchFactory.create(expected, actual,
+      "Expected ${valueOf(actual)} to match a date of '$pattern': " +
       "${e.message}", path))
   }
 }
@@ -183,7 +193,8 @@ fun <Mismatch> matchTime(pattern: String, path: List<String>, expected: Any?, ac
     DateUtils.parseDate(safeToString(actual), pattern)
     return emptyList()
   } catch (e: ParseException) {
-    return listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to match a time of '$pattern': " +
+    return listOf(mismatchFactory.create(expected, actual,
+      "Expected ${valueOf(actual)} to match a time of '$pattern': " +
       "${e.message}", path))
   }
 }
@@ -195,7 +206,8 @@ fun <Mismatch> matchTimestamp(pattern: String, path: List<String>, expected: Any
     DateUtils.parseDate(safeToString(actual), pattern)
     return emptyList()
   } catch (e: ParseException) {
-    return listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to match a timestamp of '$pattern': " +
+    return listOf(mismatchFactory.create(expected, actual,
+      "Expected ${valueOf(actual)} to match a timestamp of '$pattern': " +
       "${e.message}", path))
   }
 }

@@ -1,10 +1,15 @@
 package au.com.dius.pact.provider.broker
 
+import au.com.dius.pact.pactbroker.InvalidHalResponse
+import au.com.dius.pact.pactbroker.NotFoundHalResponse
+import com.github.kittinunf.result.Result
 import groovyx.net.http.AuthConfig
 import groovyx.net.http.Method
 import groovyx.net.http.RESTClient
 import org.apache.http.HttpResponse
 import org.apache.http.ProtocolVersion
+import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.message.BasicStatusLine
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -15,7 +20,7 @@ class HalClientSpec extends Specification {
   private HalClient client
 
   def setup() {
-    client = GroovySpy(HalClient, global: true)
+    client = GroovySpy(HalClient, global: true, constructorArgs: ['baseUrl'])
   }
 
   @SuppressWarnings(['LineLength', 'UnnecessaryBooleanExpression'])
@@ -44,7 +49,7 @@ class HalClientSpec extends Specification {
     mockHttp.getAuth() >> authConfig
 
     when:
-    client.setupHttpClient()
+    client.setupRestClient()
 
     then:
     1 * authConfig.basic('1', '2')
@@ -257,6 +262,55 @@ class HalClientSpec extends Specification {
     'body is a parsed json doc with no errors' | [:]                                | 'FAILED' | '400 Not OK - Unknown error'
     'body is a parsed json doc with errors'    | [errors: ['one', 'two', 'three']]  | 'FAILED' | '400 Not OK - one, two, three'
 
+  }
+
+  @Unroll
+  @SuppressWarnings('UnnecessaryGetter')
+  def 'post URL returns #success if the response is #status'() {
+    given:
+    def mockClient = Mock(CloseableHttpClient)
+    client.httpClient = mockClient
+    def mockResponse = Mock(CloseableHttpResponse)
+    1 * mockClient.execute(_) >> mockResponse
+    1 * mockResponse.getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), status, 'OK')
+
+    expect:
+    client.postJson('path', 'body') == expectedResult
+
+    where:
+
+    success   | status | expectedResult
+    'success' | 200    | new Result.Success(true)
+    'failure' | 400    | new Result.Success(false)
+  }
+
+  def 'post URL returns a failure result if an exception is thrown'() {
+    given:
+    def mockClient = Mock(CloseableHttpClient)
+    client.httpClient = mockClient
+
+    when:
+    def result = client.postJson('path', 'body')
+
+    then:
+    1 * mockClient.execute(_) >> { throw new IOException('Boom!') }
+    result instanceof Result.Failure
+  }
+
+  @SuppressWarnings('UnnecessaryGetter')
+  def 'post URL delegates to a handler if one is supplied'() {
+    given:
+    def mockClient = Mock(CloseableHttpClient)
+    client.httpClient = mockClient
+    def mockResponse = Mock(CloseableHttpResponse)
+    1 * mockClient.execute(_) >> mockResponse
+    1 * mockResponse.getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
+
+    when:
+    def result = client.postJson('path', 'body') { status, resp -> false }
+
+    then:
+    result == new Result.Success(false)
   }
 
 }

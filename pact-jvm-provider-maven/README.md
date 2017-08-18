@@ -539,3 +539,8 @@ For example:
     </configuration>
 </plugin>
 ```
+
+# Publishing verification results to a Pact Broker [version 3.5.4+]
+
+For pacts that are loaded from a Pact Broker, the results of running the verification will be published back to the
+ broker against the URL for the pact. You will be able to see the result on the Pact Broker home screen.

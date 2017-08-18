@@ -57,7 +57,7 @@ class ConsumerInfo {
   }
 
   static ConsumerInfo from(PactBrokerConsumer consumer) {
-    new ConsumerInfo(name: consumer.name, pactSource: new BrokerUrlSource(consumer.source),
+    new ConsumerInfo(name: consumer.name, pactSource: new BrokerUrlSource(consumer.source, consumer.pactBrokerUrl),
       pactFileAuthentication: consumer.pactFileAuthentication)
   }
 }

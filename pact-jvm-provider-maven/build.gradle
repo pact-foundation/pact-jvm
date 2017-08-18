@@ -22,7 +22,8 @@ task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider_${project.scal
     if (isWindows()) {
         mvn = 'mvn.bat'
     }
-    commandLine mvn, '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.5:descriptor'
+    commandLine mvn, '-f', "${buildDir}/poms/pom.xml", '--settings',
+      'src/main/resources/settings.xml', '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.5:descriptor'
     doFirst {
         def pomFile = file("${buildDir}/poms/pom.xml")
         def pom = install.repositories.mavenInstaller.pom
