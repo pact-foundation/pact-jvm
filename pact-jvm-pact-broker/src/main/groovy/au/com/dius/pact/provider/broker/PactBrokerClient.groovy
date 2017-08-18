@@ -18,6 +18,7 @@ class PactBrokerClient extends PactBrokerClientBase {
   private static final String LATEST_PROVIDER_PACTS = 'pb:latest-provider-pacts'
   private static final String LATEST_PROVIDER_PACTS_WITH_TAG = 'pb:latest-provider-pacts-with-tag'
   private static final String PACTS = 'pacts'
+  private static final String UTF8 = 'UTF-8'
 
   PactBrokerClient(String pactBrokerUrl, Map<String, ?> options) {
     super(pactBrokerUrl, options)
@@ -34,10 +35,11 @@ class PactBrokerClient extends PactBrokerClientBase {
     try {
       IHalClient halClient = newHalClient()
       halClient.navigate(LATEST_PROVIDER_PACTS, provider: provider).forAll(PACTS) { pact ->
+        def href = URLDecoder.decode(pact.href, UTF8)
         if (options.authentication) {
-          consumers << new PactBrokerConsumer(pact.name, pact.href, pactBrokerUrl, options.authentication)
+          consumers << new PactBrokerConsumer(pact.name, href, pactBrokerUrl, options.authentication)
         } else {
-          consumers << new PactBrokerConsumer(pact.name, pact.href, pactBrokerUrl, [])
+          consumers << new PactBrokerConsumer(pact.name, href, pactBrokerUrl, [])
         }
       }
     }
@@ -55,10 +57,11 @@ class PactBrokerClient extends PactBrokerClientBase {
     try {
       IHalClient halClient = newHalClient()
       halClient.navigate(LATEST_PROVIDER_PACTS_WITH_TAG, provider: provider, tag: tag).forAll(PACTS) { pact ->
+        def href = URLDecoder.decode(pact.href, UTF8)
         if (options.authentication) {
-          consumers << new PactBrokerConsumer(pact.name, pact.href, pactBrokerUrl, options.authentication)
+          consumers << new PactBrokerConsumer(pact.name, href, pactBrokerUrl, options.authentication)
         } else {
-          consumers << new PactBrokerConsumer(pact.name, pact.href, pactBrokerUrl, [])
+          consumers << new PactBrokerConsumer(pact.name, href, pactBrokerUrl, [])
         }
       }
     }
