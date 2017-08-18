@@ -162,14 +162,14 @@ class HalClient extends HalClientBase {
   }
 
   @Override
-  void forAll(String linkName, Consumer<Map<String, Object>> closure) {
+  void forAll(String linkName, Consumer<Map<String, Object>> just) {
     pathInfo = pathInfo ?: fetch(ROOT)
     def matchingLink = pathInfo.'_links'[linkName]
     if (matchingLink != null) {
       if (matchingLink instanceof Collection) {
-        matchingLink.each(closure as Closure)
+        matchingLink.each { just.accept(it) }
       } else {
-        closure.accept(matchingLink as Map<String, Object>)
+        just.accept(matchingLink as Map<String, Object>)
       }
     }
   }

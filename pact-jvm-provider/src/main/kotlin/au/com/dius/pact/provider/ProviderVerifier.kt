@@ -8,6 +8,7 @@ import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
+@JvmOverloads
 fun reportVerificationResults(pact: Pact, result: Boolean, version: String, client: PactBrokerClient? = null) {
   val source = pact.source
   when (source) {
