@@ -11,6 +11,7 @@ dependencies {
         "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.3"
 
     testCompile project(":pact-jvm-consumer-groovy_${project.scalaVersion}")
+    testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }
 
 compileTestGroovy{

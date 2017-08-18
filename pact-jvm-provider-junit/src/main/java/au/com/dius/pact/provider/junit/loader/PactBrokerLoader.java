@@ -124,7 +124,7 @@ public class PactBrokerLoader implements PactLoader {
       options.put("authentication", Arrays.asList(parseExpression(this.authentication.scheme()),
         parseExpression(this.authentication.username()), parseExpression(this.authentication.password())));
     }
-    return new PactBrokerClient(url, options);
+    return new PactBrokerClient(url.toString(), options);
   }
 
   public boolean isFailIfNoPactsFound() {

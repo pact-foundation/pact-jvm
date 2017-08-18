@@ -27,7 +27,7 @@ class PactPublishTaskSpec extends Specification {
       IOUtils.copy(PactPublishTaskSpec.getResourceAsStream('/pacts/foo_pact.json'), it, Charset.forName('UTF-8'))
     }
 
-    brokerClient = GroovySpy(PactBrokerClient, global: true)
+    brokerClient = GroovySpy(PactBrokerClient, global: true, constructorArgs: ['baseUrl'])
   }
 
   def 'rasies an exception if no pact publish configuration is found'() {
@@ -42,7 +42,7 @@ class PactPublishTaskSpec extends Specification {
     given:
     project.pact {
       publish {
-
+        pactBrokerUrl = 'pactBrokerUrl'
       }
     }
     project.evaluate()
@@ -58,7 +58,7 @@ class PactPublishTaskSpec extends Specification {
     given:
     project.pact {
       publish {
-
+        pactBrokerUrl = 'pactBrokerUrl'
       }
     }
     project.evaluate()
@@ -76,6 +76,7 @@ class PactPublishTaskSpec extends Specification {
     project.pact {
       publish {
         pactBrokerUsername = 'my user name'
+        pactBrokerUrl = 'pactBrokerUrl'
       }
     }
     project.evaluate()
@@ -93,6 +94,7 @@ class PactPublishTaskSpec extends Specification {
     project.pact {
       publish {
         tags = ['tag1']
+        pactBrokerUrl = 'pactBrokerUrl'
       }
     }
     project.evaluate()
