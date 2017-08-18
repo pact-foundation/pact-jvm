@@ -1,9 +1,9 @@
 package au.com.dius.pact.provider.junit.loader
 
 import au.com.dius.pact.model.Pact
+import au.com.dius.pact.pactbroker.InvalidHalResponse
 import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import au.com.dius.pact.provider.ConsumerInfo
-import au.com.dius.pact.provider.broker.InvalidHalResponse
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties

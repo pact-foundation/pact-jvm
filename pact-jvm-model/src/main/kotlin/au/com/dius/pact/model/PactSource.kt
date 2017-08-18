@@ -37,7 +37,7 @@ data class UrlsSource @JvmOverloads constructor(val url: List<String>,
 
 data class BrokerUrlSource @JvmOverloads constructor(override val url: String,
                                                      val pactBrokerUrl: String,
-                                                     val attributes: Map<String, Any> = mapOf(),
+                                                     val attributes: Map<String, Map<String, Any>> = mapOf(),
                                                      val options: Map<String, Any> = mapOf()) : UrlPactSource() {
   override fun description() = "Pact Broker $url"
 }

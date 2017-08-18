@@ -156,5 +156,6 @@ class PactBrokerClientSpec extends Specification {
     'there is no verification link'     | [:]                                                | Result.Failure.simpleName
     'the verification link has no href' | ['pb:publish-verification-results': [:]]           | Result.Failure.simpleName
     'the broker client returns success' | ['pb:publish-verification-results': [href: 'URL']] | Result.Success.simpleName
+    'the links have different case'     | ['pb:Publish-Verification-Results': [HREF: 'URL']] | Result.Success.simpleName
   }
 }

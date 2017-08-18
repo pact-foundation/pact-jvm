@@ -15,19 +15,74 @@ import java.net.URI
 import java.util.function.BiFunction
 import java.util.function.Consumer
 
+/**
+ * Interface to a HAL Client
+ */
 interface IHalClient {
+  /**
+   * Navigates the URL associated with the given link using the current HAL document
+   * @param options Map of key-value pairs to use for parsing templated links
+   * @param link Link name to navigate
+   */
   fun navigate(options: Map<String, Any> = mapOf(), link: String): IHalClient
+
+  /**
+   * Navigates the URL associated with the given link using the current HAL document
+   * @param link Link name to navigate
+   */
   fun navigate(link: String): IHalClient
+
+  /**
+   * Returns the HREF of the named link from the current HAL document
+   */
   fun linkUrl(name: String): String
+
+  /**
+   * Calls the closure with a Map of attributes for all links associated with the link name
+   * @param linkName Name of the link to loop over
+   * @param closure Closure to invoke with the link attributes
+   */
   fun forAll(linkName: String, closure: Consumer<Map<String, Any>>)
 
+  /**
+   * Upload the JSON document to the provided path, using a PUT request
+   * @param path Path to upload the document
+   * @param bodyJson JSON contents for the body
+   */
   fun uploadJson(path: String, bodyJson: String): Any?
+
+  /**
+   * Upload the JSON document to the provided path, using a PUT request
+   * @param path Path to upload the document
+   * @param bodyJson JSON contents for the body
+   * @param closure Closure that will be invoked with details about the response. The result from the closure will be
+   * returned.
+   */
   fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>): Any?
 
+  /**
+   * Upload the JSON document to the provided URL, using a POST request
+   * @param url Url to upload the document to
+   * @param body JSON contents for the body
+   * @return Returns a Success result object with a boolean value to indicate if the request was successful or not. Any
+   * exception will be wrapped in a Failure
+   */
   fun postJson(url: String, body: String): Result<Boolean, Exception>
-  fun postJson(url: String, body: String, handler: ((status: Int, response: CloseableHttpResponse) -> Boolean)? = null): Result<Boolean, Exception>
+
+  /**
+   * Upload the JSON document to the provided URL, using a POST request
+   * @param url Url to upload the document to
+   * @param body JSON contents for the body
+   * @param handler Response handler
+   * @return Returns a Success result object with the boolean value returned from the handler closure. Any
+   * exception will be wrapped in a Failure
+   */
+  fun postJson(url: String, body: String, handler: ((status: Int, response: CloseableHttpResponse) -> Boolean)?): Result<Boolean, Exception>
 }
 
+/**
+ * HAL client base class
+ */
 abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
                                                        var options: Map<String, Any> = mapOf()) : IHalClient {
 

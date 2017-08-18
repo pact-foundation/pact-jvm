@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.broker
 
+import au.com.dius.pact.pactbroker.InvalidHalResponse
 import au.com.dius.pact.pactbroker.NotFoundHalResponse
 import com.github.kittinunf.result.Result
 import groovyx.net.http.AuthConfig
