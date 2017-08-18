@@ -205,7 +205,7 @@ open class MockHttpsServer(pact: RequestResponsePact, config: MockProviderConfig
 
 fun calculateCharset(headers: Map<String, String>): Charset {
   val contentType = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
-  val default = Charset.forName("ISO-8859-1")
+  val default = Charset.forName("UTF-8")
   if (contentType != null) {
     try {
       return ContentType.parse(contentType.value)?.charset ?: default
