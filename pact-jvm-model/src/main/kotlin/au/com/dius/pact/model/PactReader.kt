@@ -13,7 +13,7 @@ private val ACCEPT_JSON = mutableMapOf("requestProperties" to mutableMapOf("Acce
 
 data class InvalidHttpResponseException(override val message: String) : RuntimeException(message)
 
-fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: RESTClient): Pair<Any, PactSource> {
+fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: RESTClient?): Pair<Any, PactSource> {
   when (source) {
     is BrokerUrlSource -> {
       val brokerClient = PactBrokerClient(source.pactBrokerUrl, options)
@@ -24,11 +24,11 @@ fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: REST
       if (options.containsKey("authentication")) {
         val auth = options["authentication"]
         if (auth is List<*>) {
-          setupHttpAuthentication(auth, http)
+          setupHttpAuthentication(auth, http!!)
         } else {
           logger.warn { "Ignoring invalid authentication values '$auth' - it should be a list" }
         }
-        val response = http.get(mutableMapOf("headers" to mutableMapOf("Accept" to "application/json")))
+        val response = http!!.get(mutableMapOf("headers" to mutableMapOf("Accept" to "application/json")))
         if (response is HttpResponseDecorator) {
           return response.data!! to source
         } else {
