@@ -53,9 +53,11 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
     private static final Logger LOGGER = LoggerFactory.getLogger(PactRunner.class);
 
     private final List<InteractionRunner> child;
+    protected Class clazz;
 
     public PactRunner(final Class<?> clazz) throws InitializationError {
       super(clazz);
+      this.clazz = clazz;
 
       final Provider providerInfo = clazz.getAnnotation(Provider.class);
       if (providerInfo == null) {
