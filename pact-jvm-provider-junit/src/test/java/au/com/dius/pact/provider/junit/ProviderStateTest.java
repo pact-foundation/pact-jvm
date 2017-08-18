@@ -19,7 +19,6 @@ import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 @RunWith(ExpectedToFailPactRunner.class)
 @Provider("myAwesomeService")
 @PactFolder("pacts")
-@Ignore("Needs an upgrade to ClientDriverRule")
 public class ProviderStateTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProviderStateTest.class);
 
@@ -31,7 +30,7 @@ public class ProviderStateTest {
 
     @Before
     public void before() {
-//      embeddedService.noFailFastOnUnexpectedRequest();
+      embeddedService.noFailFastOnUnexpectedRequest();
       embeddedService.addExpectation(
         onRequestTo("/data"), giveEmptyResponse()
       );
@@ -39,6 +38,6 @@ public class ProviderStateTest {
 
     @After
     public void after() {
-//      embeddedService.reset();
+      embeddedService.reset();
     }
 }
