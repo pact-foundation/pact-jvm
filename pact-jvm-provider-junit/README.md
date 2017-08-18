@@ -367,3 +367,9 @@ The following report types are available in addition to console output (`console
 
 You can also provide a fully qualified classname as report so custom reports are also supported.
 This class must implement `au.com.dius.pact.provider.reporters.VerifierReporter` interface in order to be correct custom implementation of a report.
+
+# Publishing verification results to a Pact Broker [version 3.5.4+]
+
+For pacts that are loaded from a Pact Broker, the results of running the verification will be published back to the
+ broker against the URL for the pact. You will be able to see the result on the Pact Broker home screen. You need to
+ set the version of the provider that is verified using the `pact.provider.version` system property.
