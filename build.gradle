@@ -13,7 +13,7 @@ buildscript {
 plugins {
   id 'nebula.kotlin' version '1.1.4'
   id 'org.jmailen.kotlinter' version '1.2.0'
-  id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC2'
+//  id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC2'
   id 'org.jetbrains.dokka' version '0.9.15'
 }
 
@@ -60,7 +60,7 @@ subprojects {
     apply plugin: 'jacoco'
     apply plugin: 'org.jetbrains.kotlin.jvm'
     apply plugin: 'org.jmailen.kotlinter'
-    apply plugin: 'io.gitlab.arturbosch.detekt'
+//    apply plugin: 'io.gitlab.arturbosch.detekt'
     apply plugin: 'org.jetbrains.dokka'
 
     repositories {
@@ -98,7 +98,7 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '3.5.4-jre7.0'
+    version = '3.5.5-jre7.0'
     targetCompatibility = '1.7'
     sourceCompatibility = '1.7'
 
@@ -237,13 +237,13 @@ subprojects {
     indentSize = 2
   }
 
-  detekt {
-    profile("main") {
-      config = "${project.parent.projectDir}/config/detekt-config.yml"
-    }
-  }
-
-  check.dependsOn << 'detektCheck'
+//  detekt {
+//    profile("main") {
+//      config = "${project.parent.projectDir}/config/detekt-config.yml"
+//    }
+//  }
+//
+//  check.dependsOn << 'detektCheck'
 }
 
 tasks.addRule("Pattern: <Task>_<ScalaVersion>") { String taskName ->
