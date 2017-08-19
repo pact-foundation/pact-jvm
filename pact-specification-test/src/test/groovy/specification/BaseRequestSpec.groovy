@@ -8,7 +8,7 @@ import spock.lang.Specification
 class BaseRequestSpec extends Specification {
 
   static List loadTestCases(String testDir, PactSpecVersion version) {
-    def resources = RequestSpecificationV1_1Spec.getResource(testDir)
+    def resources = BaseRequestSpec.getResource(testDir)
     def file = new File(resources.toURI())
     def result = []
     file.eachDir { d ->

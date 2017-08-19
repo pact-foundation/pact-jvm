@@ -12,7 +12,9 @@ import groovy.transform.Canonical
 @Canonical
 class Response extends HttpPart {
 
-  Integer status = 200
+  public static final int DEFAULT_STATUS = 200
+
+  Integer status = DEFAULT_STATUS
   Map<String, String> headers = [:]
   OptionalBody body = OptionalBody.missing()
   MatchingRules matchingRules = new MatchingRules()
@@ -20,7 +22,7 @@ class Response extends HttpPart {
 
   static Response fromMap(def map) {
     new Response().with {
-      status = map.status as Integer
+      status = (map.status ?: DEFAULT_STATUS) as Integer
       headers = map.headers ?: [:]
       body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
       matchingRules = MatchingRules.fromMap(map.matchingRules)

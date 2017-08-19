@@ -20,4 +20,18 @@ class RequestSpec extends Specification {
     request.matchingRules.hasCategory('stuff')
   }
 
+  def 'fromMap sets defaults for attributes missing from the map'() {
+    expect:
+    request.method == 'GET'
+    request.path == '/'
+    request.query.isEmpty()
+    request.headers.isEmpty()
+    request.body.isMissing()
+    request.matchingRules.empty
+    request.generators.empty
+
+    where:
+    request = Request.fromMap([:])
+  }
+
 }
