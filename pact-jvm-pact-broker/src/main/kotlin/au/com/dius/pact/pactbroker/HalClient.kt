@@ -2,6 +2,7 @@ package au.com.dius.pact.pactbroker
 
 import com.github.kittinunf.result.Result
 import mu.KLogging
+import org.apache.commons.collections4.Closure
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
 import org.apache.http.client.methods.CloseableHttpResponse
@@ -12,8 +13,18 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
 import java.net.URI
-import java.util.function.BiFunction
-import java.util.function.Consumer
+
+interface BiFunction<T, U, R> {
+
+  /**
+   * Applies this function to the given arguments.
+   *
+   * @param t the first function argument
+   * @param u the second function argument
+   * @return the function result
+   */
+  fun apply(t: T, u: U): R
+}
 
 /**
  * Interface to a HAL Client
@@ -42,7 +53,7 @@ interface IHalClient {
    * @param linkName Name of the link to loop over
    * @param closure Closure to invoke with the link attributes
    */
-  fun forAll(linkName: String, closure: Consumer<Map<String, Any>>)
+  fun forAll(linkName: String, closure: Closure<Map<String, Any>>)
 
   /**
    * Upload the JSON document to the provided path, using a PUT request

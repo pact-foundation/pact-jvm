@@ -4,4 +4,5 @@ dependencies {
   compile 'com.github.kittinunf.result:result:1.1.0'
   compile 'com.github.salomonbrys.kotson:kotson:2.5.0'
   compile 'org.apache.httpcomponents:httpclient:4.5.2'
+  compile 'org.apache.commons:commons-collections4:4.1'
 }

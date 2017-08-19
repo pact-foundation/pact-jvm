@@ -34,7 +34,7 @@ class PactBrokerClientSpec extends Specification {
     given:
     def halClient = Mock(IHalClient)
     halClient.navigate(_, _) >> halClient
-    halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/']) }
+    halClient.forAll(_, _) >> { args -> args[1].execute([name: 'bob', href: 'http://bob.com/']) }
 
     def client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
       newHalClient() >> halClient
@@ -72,7 +72,7 @@ class PactBrokerClientSpec extends Specification {
     given:
     def halClient = Mock(IHalClient)
     halClient.navigate(_, _) >> halClient
-    halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/a%20b']) }
+    halClient.forAll(_, _) >> { args -> args[1].execute([name: 'bob', href: 'http://bob.com/a%20b']) }
 
     def client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
       newHalClient() >> halClient
@@ -91,7 +91,7 @@ class PactBrokerClientSpec extends Specification {
     given:
     def halClient = Mock(IHalClient)
     halClient.navigate(_, _) >> halClient
-    halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/']) }
+    halClient.forAll(_, _) >> { args -> args[1].execute([name: 'bob', href: 'http://bob.com/']) }
 
     def client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
       newHalClient() >> halClient
@@ -110,7 +110,7 @@ class PactBrokerClientSpec extends Specification {
     given:
     def halClient = Mock(IHalClient)
     halClient.navigate(_, _) >> halClient
-    halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/']) }
+    halClient.forAll(_, _) >> { args -> args[1].execute([name: 'bob', href: 'http://bob.com/']) }
 
     def client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
       newHalClient() >> halClient
@@ -128,7 +128,7 @@ class PactBrokerClientSpec extends Specification {
     given:
     def halClient = Mock(IHalClient)
     halClient.navigate(_, _) >> halClient
-    halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/a%20b']) }
+    halClient.forAll(_, _) >> { args -> args[1].execute([name: 'bob', href: 'http://bob.com/a%20b']) }
 
     def client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
       newHalClient() >> halClient

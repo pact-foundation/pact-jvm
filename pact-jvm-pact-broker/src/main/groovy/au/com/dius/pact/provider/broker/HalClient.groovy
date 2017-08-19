@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.broker
 
+import au.com.dius.pact.pactbroker.BiFunction
 import au.com.dius.pact.pactbroker.HalClientBase
 import au.com.dius.pact.pactbroker.IHalClient
 import au.com.dius.pact.pactbroker.InvalidHalResponse
@@ -10,9 +11,6 @@ import groovyx.net.http.Method
 import groovyx.net.http.RESTClient
 import org.apache.http.message.BasicHeaderValueParser
 import org.apache.http.util.EntityUtils
-
-import java.util.function.BiFunction
-import java.util.function.Consumer
 
 import static groovyx.net.http.ContentType.JSON
 import static groovyx.net.http.Method.PUT
@@ -162,7 +160,7 @@ class HalClient extends HalClientBase {
   }
 
   @Override
-  void forAll(String linkName, Consumer<Map<String, Object>> just) {
+  void forAll(String linkName, org.apache.commons.collections4.Closure<Map<String, Object>> just) {
     pathInfo = pathInfo ?: fetch(ROOT)
     def matchingLink = pathInfo.'_links'[linkName]
     if (matchingLink != null) {
