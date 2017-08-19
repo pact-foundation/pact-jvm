@@ -1,0 +1,33 @@
+{
+  "match": true,
+  "comment": "Request match with integers",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": "",
+    "headers": {"Content-Type": "application/json"},
+    "matchingRules": {
+      "$.body.alligator.feet": {"match": "regex", "regex": "[0-9]"}
+    },
+    "body": {
+      "alligator":{
+        "name": "Mary",
+        "feet": 4,
+        "favouriteColours": ["red","blue"]
+      }
+    }
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": "",
+    "headers": {"Content-Type": "application/json"},
+    "body": {
+      "alligator":{
+        "feet": 4,
+        "name": "Mary",
+       "favouriteColours": ["red","blue"]
+      }
+    }
+  }
+}
