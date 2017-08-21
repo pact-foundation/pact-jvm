@@ -11,9 +11,9 @@ buildscript {
 }
 
 plugins {
-  id 'nebula.kotlin' version '1.1.3-2'
+  id 'nebula.kotlin' version '1.1.4-2'
   id 'org.jmailen.kotlinter' version '1.2.0'
-  id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC1'
+  id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC3'
   id 'org.jetbrains.dokka' version '0.9.15'
 }
 
@@ -109,12 +109,18 @@ subprojects {
         }
     }
 
+    compileGroovy {
+      classpath = classpath.plus(files(compileKotlin.destinationDir))
+      dependsOn compileKotlin
+    }
+
     compileScala {
       classpath = classpath.plus(files(compileGroovy.destinationDir)).plus(files(compileKotlin.destinationDir))
       dependsOn compileGroovy, compileKotlin
     }
 
     compileTestGroovy {
+      classpath = classpath.plus(files(compileTestKotlin.destinationDir))
       dependsOn compileTestKotlin
     }
 
@@ -227,8 +233,6 @@ subprojects {
     }
 
     check.dependsOn << 'jacocoTestReport'
-
-    compileGroovy.dependsOn << 'copyMainKotlinClasses'
 
   kotlinter {
     indentSize = 2
