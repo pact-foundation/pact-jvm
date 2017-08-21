@@ -4,9 +4,21 @@ import spock.lang.Specification
 
 class RequestResponsePactSpec extends Specification {
 
+  private static Provider provider
+  private static Consumer consumer
+  private static RequestResponseInteraction interaction
+
+  def setupSpec() {
+    provider = new Provider()
+    consumer = new Consumer()
+    interaction = new RequestResponseInteraction(request: new Request(method: 'GET'),
+      response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
+        headers: ['Content-Type': 'application/json']))
+  }
+
   def 'when writing V2 spec, query parameters must be encoded appropriately'() {
     given:
-    def pact = new RequestResponsePact(new Provider(), new Consumer(), [
+    def pact = new RequestResponsePact(provider, consumer, [
       new RequestResponseInteraction(request: new Request(method: 'GET', query: [a: ['b=c&d']]),
         response: new Response())
     ])
@@ -20,7 +32,7 @@ class RequestResponsePactSpec extends Specification {
 
   def 'should handle body types other than JSON'() {
     given:
-    def pact = new RequestResponsePact(new Provider(), new Consumer(), [
+    def pact = new RequestResponsePact(provider, consumer, [
       new RequestResponseInteraction(request: new Request(method: 'PUT',
         body: OptionalBody.body('<?xml version="1.0"><root/>'),
         headers: ['Content-Type': 'application/xml']),
@@ -37,7 +49,7 @@ class RequestResponsePactSpec extends Specification {
 
   def 'does not lose the scale for decimal numbers'() {
     given:
-    def pact = new RequestResponsePact(new Provider(), new Consumer(), [
+    def pact = new RequestResponsePact(provider, consumer, [
       new RequestResponseInteraction(request: new Request(method: 'GET'),
         response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
           headers: ['Content-Type': 'application/json']))
@@ -56,11 +68,6 @@ class RequestResponsePactSpec extends Specification {
     pact == pact
 
     where:
-    provider = new Provider()
-    consumer = new Consumer()
-    interaction = new RequestResponseInteraction(request: new Request(method: 'GET'),
-      response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
-        headers: ['Content-Type': 'application/json']))
     pact = new RequestResponsePact(provider, consumer, [ interaction ])
   }
 
@@ -69,12 +76,7 @@ class RequestResponsePactSpec extends Specification {
     pact != pact2
 
     where:
-    provider = new Provider()
     provider2 = new Provider('other provider')
-    consumer = new Consumer()
-    interaction = new RequestResponseInteraction(request: new Request(method: 'GET'),
-      response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
-        headers: ['Content-Type': 'application/json']))
     pact = new RequestResponsePact(provider, consumer, [ interaction ])
     pact2 = new RequestResponsePact(provider2, consumer, [ interaction ])
   }
@@ -84,12 +86,7 @@ class RequestResponsePactSpec extends Specification {
     pact != pact2
 
     where:
-    provider = new Provider()
-    consumer = new Consumer()
     consumer2 = new Consumer('other consumer')
-    interaction = new RequestResponseInteraction(request: new Request(method: 'GET'),
-      response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
-        headers: ['Content-Type': 'application/json']))
     pact = new RequestResponsePact(provider, consumer, [ interaction ])
     pact2 = new RequestResponsePact(provider, consumer2, [ interaction ])
   }
@@ -99,11 +96,6 @@ class RequestResponsePactSpec extends Specification {
     pact == pact2
 
     where:
-    provider = new Provider()
-    consumer = new Consumer()
-    interaction = new RequestResponseInteraction(request: new Request(method: 'GET'),
-      response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
-        headers: ['Content-Type': 'application/json']))
     pact = new RequestResponsePact(provider, consumer, [ interaction ], [meta: 'data'])
     pact2 = new RequestResponsePact(provider, consumer, [ interaction ], [meta: 'other data'])
   }
@@ -113,11 +105,6 @@ class RequestResponsePactSpec extends Specification {
     pact != pact2
 
     where:
-    provider = new Provider()
-    consumer = new Consumer()
-    interaction = new RequestResponseInteraction(request: new Request(method: 'GET'),
-      response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
-        headers: ['Content-Type': 'application/json']))
     interaction2 = new RequestResponseInteraction(request: new Request(method: 'POST'),
       response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
         headers: ['Content-Type': 'application/json']))
@@ -130,15 +117,23 @@ class RequestResponsePactSpec extends Specification {
     pact != pact2
 
     where:
-    provider = new Provider()
-    consumer = new Consumer()
-    interaction = new RequestResponseInteraction(request: new Request(method: 'GET'),
-      response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
-        headers: ['Content-Type': 'application/json']))
     interaction2 = new RequestResponseInteraction(request: new Request(method: 'POST'),
       response: new Response(body: OptionalBody.body('{"value": 1234.0}'),
         headers: ['Content-Type': 'application/json']))
     pact = new RequestResponsePact(provider, consumer, [ interaction ])
     pact2 = new RequestResponsePact(provider, consumer, [ interaction, interaction2 ])
+  }
+
+  def 'when filtering the pact, do not loose the source of the pact'() {
+    given:
+    def source = new BrokerUrlSource('url', 'brokerUrl')
+    def pact = new RequestResponsePact(provider, consumer, [ interaction ])
+    pact.source = source
+
+    when:
+    pact.filterInteractions { true }
+
+    then:
+    pact.source == source
   }
 }

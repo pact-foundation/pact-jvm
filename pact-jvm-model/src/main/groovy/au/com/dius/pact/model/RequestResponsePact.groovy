@@ -56,6 +56,8 @@ class RequestResponsePact extends BasePact {
 
   @Override
   Pact filterInteractions(Predicate<Interaction> predicate) {
-    new RequestResponsePact(provider, consumer, interactions.findAll { predicate.test(it) }, metadata)
+    def pact = new RequestResponsePact(provider, consumer, interactions.findAll { predicate.test(it) }, metadata)
+    pact.source = source
+    pact
   }
 }
