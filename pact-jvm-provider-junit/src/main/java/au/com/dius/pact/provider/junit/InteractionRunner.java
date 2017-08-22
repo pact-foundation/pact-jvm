@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit;
 
+import au.com.dius.pact.model.FilteredPact;
 import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.model.Interaction;
@@ -168,8 +169,16 @@ class InteractionRunner extends Runner {
         }
       }
 
-      ProviderVerifierKt.reportVerificationResults(pact, allPassed, providerVersion());
+      if (!(pact instanceof FilteredPact) || ((FilteredPact) pact).isNotFiltered()) {
+        reportVerificationResults(allPassed);
+      } else {
+        LOGGER.warn("Skipping publishing of verification results as the interactions have been filtered");
+      }
     }
+
+  public void reportVerificationResults(Boolean allPassed) {
+    ProviderVerifierKt.reportVerificationResults(pact, allPassed, providerVersion());
+  }
 
   private String providerVersion() {
     String version = System.getProperty("pact.provider.version");

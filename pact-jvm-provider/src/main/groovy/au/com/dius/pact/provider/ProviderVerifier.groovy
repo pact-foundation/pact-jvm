@@ -1,12 +1,11 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.model.FilteredPact
 import au.com.dius.pact.model.OptionalBody
-import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.model.v3.messaging.Message
-import au.com.dius.pact.model.v3.messaging.MessagePact
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import groovy.util.logging.Slf4j
 import org.reflections.Reflections
@@ -64,26 +63,21 @@ class ProviderVerifier {
 
   void runVerificationForConsumer(Map failures, ProviderInfo provider, ConsumerInfo consumer) {
     reportVerificationForConsumer(consumer, provider)
-    def pact = loadPactFileForConsumer(consumer)
-    List interactions = interactions(pact)
-    if (interactions.empty) {
+    def pact = new FilteredPact(loadPactFileForConsumer(consumer), this.&filterInteractions)
+    if (pact.interactions.empty) {
       reporters.each { it.warnPactFileHasNoInteractions(pact) }
     } else {
-      def result = interactions.every(this.&verifyInteraction.curry(provider, consumer, failures))
-      ProviderVerifierKt.reportVerificationResults(pact, result, providerVersion() ?: '0.0.0')
+      def result = pact.interactions.every(this.&verifyInteraction.curry(provider, consumer, failures))
+      if (pact.isNotFiltered()) {
+        ProviderVerifierKt.reportVerificationResults(pact, result, providerVersion() ?: '0.0.0')
+      } else {
+        log.warn('Skipping publishing of verification results as the interactions have been filtered')
+      }
     }
   }
 
   void reportVerificationForConsumer(ConsumerInfo consumer, ProviderInfo provider) {
     reporters.each { it.reportVerificationForConsumer(consumer, provider) }
-  }
-
-  List interactions(Pact pact) {
-    if (pact instanceof MessagePact) {
-      pact.messages.findAll(this.&filterInteractions)
-    } else {
-      pact.interactions.findAll(this.&filterInteractions)
-    }
   }
 
   @SuppressWarnings('ThrowRuntimeException')

@@ -1,19 +1,14 @@
 package au.com.dius.pact.provider
 
 import au.com.dius.pact.model.BrokerUrlSource
-import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
-import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.ProviderState
-import au.com.dius.pact.model.RequestResponseInteraction
-import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.UnknownPactSource
 import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.Message
-import au.com.dius.pact.model.v3.messaging.MessagePact
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import com.github.kittinunf.result.Result
@@ -308,30 +303,6 @@ class ProviderVerifierSpec extends Specification {
     !result
   }
 
-  def 'extract interactions from a V2 pact'() {
-    given:
-    def interaction = new RequestResponseInteraction('test interaction')
-    def pact = new RequestResponsePact(null, null, [interaction])
-
-    when:
-    def result = verifier.interactions(pact)
-
-    then:
-    result == [interaction]
-  }
-
-  def 'extract interactions from a Message pact'() {
-    given:
-    def interaction = new Message('test message')
-    def pact = new MessagePact(new Provider(), new Consumer(), [interaction ])
-
-    when:
-    def result = verifier.interactions(pact)
-
-    then:
-    result == [interaction]
-  }
-
   def 'when loading a pact file for a consumer, it should pass on any authentication options'() {
     given:
     def pactFile = new UrlSource('http://some.pact.file/')
@@ -408,7 +379,7 @@ class ProviderVerifierSpec extends Specification {
     verifier.runVerificationForConsumer([:], provider, consumer)
 
     then:
-    1 * ProviderVerifierKt.reportVerificationResults(mockPact, finalResult, '0.0.0')
+    1 * ProviderVerifierKt.reportVerificationResults(_, finalResult, '0.0.0')
 
     where:
 
@@ -417,6 +388,40 @@ class ProviderVerifierSpec extends Specification {
     true    | false   | false
     false   | true    | false
     false   | false   | false
+  }
+
+  @SuppressWarnings('UnnecessaryGetter')
+  def 'Do not publish verification results if the pact interactions have been filtered'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    GroovyMock(PactReader, global: true)
+    GroovyMock(ProviderVerifierKt, global: true)
+    GroovyMock(StateChange, global: true)
+    def interaction1 = Mock(Interaction) {
+      getDescription() >> 'Interaction 1'
+    }
+    def interaction2 = Mock(Interaction) {
+      getDescription() >> 'Interaction 2'
+    }
+    def mockPact = Mock(Pact) {
+      getSource() >> UnknownPactSource.INSTANCE
+    }
+
+    PactReader.loadPact(_) >> mockPact
+    mockPact.interactions >> [interaction1, interaction2]
+    StateChange.executeStateChange(*_) >> new StateChange.StateChangeResult(true)
+    verifier.verifyResponseFromProvider(provider, interaction1, _, _) >> true
+    verifier.verifyResponseFromProvider(provider, interaction2, _, _) >> true
+
+    verifier.projectHasProperty = { it == ProviderVerifier.PACT_FILTER_DESCRIPTION }
+    verifier.projectGetProperty = { 'Interaction 2' }
+
+    when:
+    verifier.runVerificationForConsumer([:], provider, consumer)
+
+    then:
+    0 * ProviderVerifierKt.reportVerificationResults(_, _, _)
   }
 
   @SuppressWarnings('UnnecessaryGetter')
