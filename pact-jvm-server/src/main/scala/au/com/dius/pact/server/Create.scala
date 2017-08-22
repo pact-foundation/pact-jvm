@@ -1,8 +1,8 @@
 package au.com.dius.pact.server
 
-import com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.consumer.DefaultMockProvider
 import au.com.dius.pact.model._
+import com.typesafe.scalalogging.StrictLogging
 
 import scala.collection.JavaConversions
 
@@ -10,10 +10,22 @@ object Create extends StrictLogging {
   
   def create(state: String, requestBody: String, oldState: ServerState, config: Config): Result = {
     val pact = PactReader.loadPact(requestBody).asInstanceOf[RequestResponsePact]
-    val mockConfig: MockProviderConfig = MockProviderConfig.create(config.portLowerBound, config.portUpperBound,
-      PactConfig(PactSpecVersion.fromInt(config.pactVersion))).copy(hostname = config.host)
+
+    val mockConfig : MockProviderConfig = {
+      if(!config.keystorePath.isEmpty) {
+
+        MockHttpsKeystoreProviderConfig
+          .httpsKeystoreConfig(config.host, config.sslPort, config.keystorePath, config.keystorePassword,
+            PactSpecVersion.fromInt(config.pactVersion))
+      }
+      else {
+        MockProviderConfig.create(config.host, config.portLowerBound, config.portUpperBound,
+          PactSpecVersion.fromInt(config.pactVersion))
+      }
+    }
     val server = DefaultMockProvider.apply(mockConfig)
-    val port = server.config.port
+
+    val port = server.config.getPort
     val entry = port -> server
     val body = OptionalBody.body("{\"port\": " + port + "}")
 

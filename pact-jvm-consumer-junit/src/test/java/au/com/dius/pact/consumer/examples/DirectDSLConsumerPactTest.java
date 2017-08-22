@@ -1,20 +1,17 @@
 package au.com.dius.pact.consumer.examples;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
-import au.com.dius.pact.consumer.ConsumerPactTest;
-import au.com.dius.pact.consumer.PactError;
-import au.com.dius.pact.consumer.TestRun;
-import au.com.dius.pact.consumer.VerificationResult;
+import au.com.dius.pact.consumer.PactVerificationResult;
 import au.com.dius.pact.consumer.exampleclients.ProviderClient;
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.MockProviderConfig$;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -25,7 +22,7 @@ public class DirectDSLConsumerPactTest {
 
     @Test
     public void testPact() {
-        PactFragment pactFragment = ConsumerPactBuilder
+        RequestResponsePact pact = ConsumerPactBuilder
                 .consumer("Some Consumer")
                 .hasPactWith("Some Provider")
                 .uponReceiving("a request to say Hello")
@@ -35,28 +32,25 @@ public class DirectDSLConsumerPactTest {
                 .willRespondWith()
                 .status(200)
                 .body("{\"hello\": \"harry\"}")
-                .toFragment();
+                .toPact();
 
-        MockProviderConfig config = MockProviderConfig$.MODULE$.createDefault();
-        VerificationResult result = pactFragment.runConsumer(config, new TestRun() {
-            @Override
-            public void run(MockProviderConfig config) {
-                Map expectedResponse = new HashMap();
-                expectedResponse.put("hello", "harry");
-                try {
-                    assertEquals(new ProviderClient(config.url()).hello("{\"name\": \"harry\"}"),
-                            expectedResponse);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+        MockProviderConfig config = MockProviderConfig.createDefault();
+        PactVerificationResult result = runConsumerTest(pact, config, mockServer -> {
+            Map expectedResponse = new HashMap();
+            expectedResponse.put("hello", "harry");
+            try {
+                assertEquals(new ProviderClient(mockServer.getUrl()).hello("{\"name\": \"harry\"}"),
+                        expectedResponse);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         });
 
-        if (result instanceof PactError) {
-            throw new RuntimeException(((PactError)result).error());
+        if (result instanceof PactVerificationResult.Error) {
+            throw new RuntimeException(((PactVerificationResult.Error)result).getError());
         }
 
-        assertEquals(ConsumerPactTest.PACT_VERIFIED, result);
+        assertEquals(PactVerificationResult.Ok.INSTANCE, result);
     }
 
 }

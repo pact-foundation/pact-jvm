@@ -2,7 +2,7 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -15,26 +15,25 @@ import static org.junit.Assert.assertEquals;
 public class PactRuleWithRandomPortTest {
 
     @Rule
-    public PactProviderRule rule = new PactProviderRule("test_provider", this);
+    public PactProviderRuleMk2 rule = new PactProviderRuleMk2("test_provider", this);
 
     @Pact(provider="test_provider", consumer="test_consumer")
-    public PactFragment createFragment(PactDslWithProvider builder) {
-        return builder
-            .given("test state")
-            .uponReceiving("random port test interaction")
-                .path("/")
-                .method("GET")
-            .willRespondWith()
-                .status(200)
-                .body("{\"ok\": true}")
-            .toFragment();
+    public RequestResponsePact createFragment(PactDslWithProvider builder) {
+        RequestResponsePact pact = builder
+          .given("test state")
+          .uponReceiving("random port test interaction")
+          .path("/")
+          .method("GET")
+          .willRespondWith()
+          .status(200)
+          .toPact();
+        return pact;
     }
 
     @Test
     @PactVerification("test_provider")
     public void runTest() throws IOException {
         Map expectedResponse = new HashMap();
-        expectedResponse.put("ok", true);
-        assertEquals(new ConsumerClient("http://localhost:" + rule.getConfig().port()).getAsMap("/", ""), expectedResponse);
+        assertEquals(new ConsumerClient("http://localhost:" + rule.getPort()).getAsMap("/", ""), expectedResponse);
     }
 }

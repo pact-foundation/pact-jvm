@@ -49,7 +49,7 @@ case class ConsumersFromDirectory(dir: File,
                                   verificationType: PactVerification = PactVerification.REQUST_RESPONSE,
                                   packagesToScan: List[String] = List()
                           ) extends ConsumerConfigInfo
-case class ConsumersFromPactBroker(pactBrokerUrl: URL) extends ConsumerConfigInfo
+case class ConsumersFromPactBroker(pactBrokerUrl: URL, tag: Option[String] = None) extends ConsumerConfigInfo
 
 case class ProviderConfig(protocol: String = "http",
                           host: String = "localhost",
@@ -86,8 +86,8 @@ case class ProviderConfig(protocol: String = "http",
     this
   }
 
-  def hasPactsFromPactBroker(pactBrokerUrl: URL) = {
-    consumers += ConsumersFromPactBroker(pactBrokerUrl)
+  def hasPactsFromPactBroker(pactBrokerUrl: URL, tag:  Option[String] = None) = {
+    consumers += ConsumersFromPactBroker(pactBrokerUrl, tag)
     this
   }
 
@@ -133,7 +133,8 @@ object Verification {
       case dir: ConsumersFromDirectory => provInfo.getConsumers.addAll(
         ProviderUtils.loadPactFiles(provInfo, dir.dir, dir.stateChange.orNull, dir.stateChangeUsesBody,
         dir.verificationType, JavaConversions.seqAsJavaList(dir.packagesToScan)).asInstanceOf[util.List[ConsumerInfo]])
-      case ConsumersFromPactBroker(pactBrokerUrl) => provInfo.hasPactsFromPactBroker(pactBrokerUrl.toString)
+      case ConsumersFromPactBroker(pactBrokerUrl, None) => provInfo.hasPactsFromPactBroker(pactBrokerUrl.toString)
+      case ConsumersFromPactBroker(pactBrokerUrl, Some(tag)) => provInfo.hasPactsFromPactBrokerWithTag(pactBrokerUrl.toString, tag)
     }
 
     provInfo

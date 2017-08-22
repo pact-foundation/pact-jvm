@@ -1,13 +1,21 @@
 {
   "match": false,
-  "comment": "Empty array",
+  "comment": "Array must have at least 2 elements",
   "expected" : {
     "method": "POST",
     "path": "/",
     "query": {},
     "headers": {"Content-Type": "application/json"},
     "matchingRules": {
-      "$.body.animals": {"min": 1}
+      "body": {
+        "$.animals": {
+          "matchers": [
+            {
+              "min": 2
+            }
+          ]
+        }
+      }
     },
     "body": {
       "animals": [
@@ -23,7 +31,11 @@
     "query": {},
     "headers": {"Content-Type": "application/json"},
     "body": {
-      "animals": []
+      "animals": [
+        {
+          "name" : "Fred"
+        }
+      ]
     }
   }
 }

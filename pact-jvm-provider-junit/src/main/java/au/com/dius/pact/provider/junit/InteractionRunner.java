@@ -1,7 +1,11 @@
 package au.com.dius.pact.provider.junit;
 
-import au.com.dius.pact.model.RequestResponseInteraction;
-import au.com.dius.pact.model.RequestResponsePact;
+import au.com.dius.pact.model.FilteredPact;
+import au.com.dius.pact.model.PactSource;
+import au.com.dius.pact.model.ProviderState;
+import au.com.dius.pact.model.Interaction;
+import au.com.dius.pact.model.Pact;
+import au.com.dius.pact.provider.ProviderVerifierKt;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget;
 import au.com.dius.pact.provider.junit.target.TestTarget;
@@ -25,11 +29,15 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.junit.runners.model.TestClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_METHOD_VALIDATOR;
 import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_VALIDATOR;
@@ -40,28 +48,32 @@ import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_VALIDATO
  * Developed with {@link org.junit.runners.BlockJUnit4ClassRunner} in mind
  */
 class InteractionRunner extends Runner {
-    private final TestClass testClass;
-    private final RequestResponsePact pact;
+  private static final Logger LOGGER = LoggerFactory.getLogger(InteractionRunner.class);
 
-    private final ConcurrentHashMap<RequestResponseInteraction, Description> childDescriptions = new ConcurrentHashMap<>();
+  private final TestClass testClass;
+  private final Pact pact;
+  private final PactSource pactSource;
 
-    public InteractionRunner(final TestClass testClass, final RequestResponsePact pact) throws InitializationError {
-        this.testClass = testClass;
-        this.pact = pact;
+  private final ConcurrentHashMap<Interaction, Description> childDescriptions = new ConcurrentHashMap<>();
 
-        validate();
-    }
+  public InteractionRunner(final TestClass testClass, final Pact pact, final PactSource pactSource) throws InitializationError {
+    this.testClass = testClass;
+    this.pact = pact;
+    this.pactSource = pactSource;
+
+    validate();
+  }
 
     @Override
     public Description getDescription() {
         final Description description = Description.createSuiteDescription(testClass.getJavaClass());
-        for (RequestResponseInteraction i: pact.getInteractions()) {
+        for (Interaction i: pact.getInteractions()) {
             description.addChild(describeChild(i));
         }
         return description;
     }
 
-    protected Description describeChild(final RequestResponseInteraction interaction) {
+    protected Description describeChild(final Interaction interaction) {
       if (!childDescriptions.containsKey(interaction)) {
           childDescriptions.put(interaction, Description.createTestDescription(testClass.getJavaClass(),
             pact.getConsumer().getName() + " - " + interaction.getDescription()));
@@ -75,7 +87,7 @@ class InteractionRunner extends Runner {
 
         validatePublicVoidNoArgMethods(Before.class, false, errors);
         validatePublicVoidNoArgMethods(After.class, false, errors);
-        validatePublicVoidNoArgMethods(State.class, false, errors);
+        validateStateChangeMethods(State.class, false, errors);
         validateConstructor(errors);
         validateTestTarget(errors);
         validateRules(errors);
@@ -86,9 +98,19 @@ class InteractionRunner extends Runner {
         }
     }
 
+  private void validateStateChangeMethods(final Class<? extends Annotation> annotation, final boolean isStatic, final List<Throwable> errors) {
+    testClass.getAnnotatedMethods(annotation).forEach(method -> {
+      method.validatePublicVoid(isStatic, errors);
+      if (method.getMethod().getParameterCount() == 1 && !Map.class.isAssignableFrom(method.getMethod().getParameterTypes()[0])) {
+        errors.add(new Exception("Method " + method.getName() + " should take only a single Map parameter"));
+      } else if (method.getMethod().getParameterCount() > 1) {
+        errors.add(new Exception("Method " + method.getName() + " should either take no parameters or a single Map parameter"));
+      }
+    });
+  }
+
   private void validateTargetRequestFilters(final List<Throwable> errors) {
-    testClass.getAnnotatedMethods(TargetRequestFilter.class)
-      .stream().forEach(method -> {
+    testClass.getAnnotatedMethods(TargetRequestFilter.class).forEach(method -> {
         method.validatePublicVoid(false, errors);
         if (method.getMethod().getParameterTypes().length != 1) {
           errors.add(new Exception("Method " + method.getName() + " should take only a single HttpRequest parameter"));
@@ -99,8 +121,8 @@ class InteractionRunner extends Runner {
   }
 
   protected void validatePublicVoidNoArgMethods(final Class<? extends Annotation> annotation, final boolean isStatic, final List<Throwable> errors) {
-        testClass.getAnnotatedMethods(annotation).stream().forEach(method -> method.validatePublicVoidNoArg(isStatic, errors));
-    }
+    testClass.getAnnotatedMethods(annotation).forEach(method -> method.validatePublicVoidNoArg(isStatic, errors));
+  }
 
     protected void validateConstructor(final List<Throwable> errors) {
         if (!hasOneConstructor()) {
@@ -133,24 +155,45 @@ class InteractionRunner extends Runner {
 
     // Running
     public void run(final RunNotifier notifier) {
-        for (final RequestResponseInteraction interaction : pact.getInteractions()) {
-            final Description description = describeChild(interaction);
-            notifier.fireTestStarted(description);
-            try {
-                interactionBlock(interaction).evaluate();
-            } catch (final Throwable e) {
-                notifier.fireTestFailure(new Failure(description, e));
-            } finally {
-                notifier.fireTestFinished(description);
-            }
+      Boolean allPassed = true;
+      for (final Interaction interaction : pact.getInteractions()) {
+        final Description description = describeChild(interaction);
+        notifier.fireTestStarted(description);
+        try {
+          interactionBlock(interaction, pactSource).evaluate();
+        } catch (final Throwable e) {
+          notifier.fireTestFailure(new Failure(description, e));
+          allPassed = false;
+        } finally {
+          notifier.fireTestFinished(description);
         }
+      }
+
+      if (!(pact instanceof FilteredPact) || ((FilteredPact) pact).isNotFiltered()) {
+        reportVerificationResults(allPassed);
+      } else {
+        LOGGER.warn("Skipping publishing of verification results as the interactions have been filtered");
+      }
     }
+
+  public void reportVerificationResults(Boolean allPassed) {
+    ProviderVerifierKt.reportVerificationResults(pact, allPassed, providerVersion());
+  }
+
+  private String providerVersion() {
+    String version = System.getProperty("pact.provider.version");
+    if (version != null) {
+      return version;
+    }
+    LOGGER.warn("Set the provider version using the pact.provider.version property");
+    return "0.0.0";
+  }
 
     protected Object createTest() throws Exception {
         return testClass.getOnlyConstructor().newInstance();
     }
 
-    protected Statement interactionBlock(final RequestResponseInteraction interaction) {
+    protected Statement interactionBlock(final Interaction interaction, final PactSource source) {
         //1. prepare object
         //2. get Target
         //3. run Rule`s
@@ -177,7 +220,7 @@ class InteractionRunner extends Runner {
         Statement statement = new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                target.testInteraction(pact.getConsumer().getName(), interaction);
+                target.testInteraction(pact.getConsumer().getName(), interaction, source);
             }
         };
         statement = withStateChanges(interaction, test, statement);
@@ -187,32 +230,37 @@ class InteractionRunner extends Runner {
         return statement;
     }
 
-    protected Statement withStateChanges(final RequestResponseInteraction interaction, final Object target, final Statement statement) {
-        if (interaction.getProviderState() != null && !interaction.getProviderState().isEmpty()) {
-            final String state = interaction.getProviderState();
-            final List<FrameworkMethod> onStateChange = new ArrayList<FrameworkMethod>();
-            for (FrameworkMethod ann: testClass.getAnnotatedMethods(State.class)) {
-                if (ArrayUtils.contains(ann.getAnnotation(State.class).value(), state)) {
-                    onStateChange.add(ann);
-                }
+    protected Statement withStateChanges(final Interaction interaction, final Object target, final Statement statement) {
+        if (!interaction.getProviderStates().isEmpty()) {
+          Statement stateChange = statement;
+          for (ProviderState state: interaction.getProviderStates()) {
+            List<FrameworkMethod> methods = testClass.getAnnotatedMethods(State.class)
+              .stream().filter(ann -> ArrayUtils.contains(ann.getAnnotation(State.class).value(), state.getName()))
+              .collect(Collectors.toList());
+            if (methods.isEmpty()) {
+              return new Fail(new MissingStateChangeMethod("MissingStateChangeMethod: Did not find a test class method annotated with @State(\""
+                + state.getName() + "\")"));
+            } else {
+              stateChange = new RunStateChanges(stateChange, methods, target, state);
             }
-            return onStateChange.isEmpty() ? statement : new RunBefores(statement, onStateChange, target);
+          }
+          return stateChange;
         } else {
             return statement;
         }
     }
 
-    protected Statement withBefores(final RequestResponseInteraction interaction, final Object target, final Statement statement) {
+    protected Statement withBefores(final Interaction interaction, final Object target, final Statement statement) {
         final List<FrameworkMethod> befores = testClass.getAnnotatedMethods(Before.class);
         return befores.isEmpty() ? statement : new RunBefores(statement, befores, target);
     }
 
-    protected Statement withAfters(final RequestResponseInteraction interaction, final Object target, final Statement statement) {
+    protected Statement withAfters(final Interaction interaction, final Object target, final Statement statement) {
         final List<FrameworkMethod> afters = testClass.getAnnotatedMethods(After.class);
         return afters.isEmpty() ? statement : new RunAfters(statement, afters, target);
     }
 
-    protected Statement withRules(final RequestResponseInteraction interaction, final Object target, final Statement statement) {
+    protected Statement withRules(final Interaction interaction, final Object target, final Statement statement) {
         final List<TestRule> testRules = testClass.getAnnotatedMethodValues(target, Rule.class, TestRule.class);
         testRules.addAll(testClass.getAnnotatedFieldValues(target, Rule.class, TestRule.class));
         return testRules.isEmpty() ? statement : new RunRules(statement, testRules, describeChild(interaction));

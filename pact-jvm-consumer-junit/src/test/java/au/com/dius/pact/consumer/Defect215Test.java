@@ -1,16 +1,13 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
 import org.hamcrest.Matchers;
 import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
-
-import java.util.Collections;
-import java.util.Map;
 
 /**
  * @author bbarker
@@ -21,6 +18,12 @@ public class Defect215Test {
 
   private static final String MY_SERVICE = "MY_service";
   private static final String EXPECTED_USER_ID = "abcdefghijklmnop";
+  private static final String CONTENT_TYPE = "Content-Type";
+  private static final String APPLICATION_JSON = "application/json.*";
+  private static final String APPLICATION_JSON_CHARSET_UTF_8 = "application/json; charset=UTF-8";
+  private static final String SOME_SERVICE_USER = "/some-service/user/";
+  @Rule
+  public PactProviderRuleMk2 mockProvider = new PactProviderRuleMk2(MY_SERVICE, "localhost", PORT, this);
 
   private String getUser() {
     JSONObject usr = new JSONObject();
@@ -33,13 +36,8 @@ public class Defect215Test {
     return usr.toString();
   }
 
-  @Rule
-  public PactProviderRule mockProvider = new PactProviderRule(MY_SERVICE, "localhost", PORT, this);
-
   @Pact(provider = MY_SERVICE, consumer="browser_consumer")
-  public PactFragment createFragment(PactDslWithProvider builder) {
-
-    Map<String, String> headers = Collections.singletonMap("Content-Type", "application/json");
+  public RequestResponsePact createFragment(PactDslWithProvider builder) {
 
     return builder
       .given("An env")
@@ -47,20 +45,20 @@ public class Defect215Test {
         .path("/some-service/users")
         .method("POST")
         .body(getUser())
-        .matchHeader("Content-Type", "application/json.*", "application/json; charset=UTF-8")
+        .matchHeader(CONTENT_TYPE, APPLICATION_JSON, APPLICATION_JSON_CHARSET_UTF_8)
       .willRespondWith()
         .status(201)
-        .matchHeader("Location", "http(s)?://\\S+:\\d+//some-service/user/\\S{36}$")
+        .matchHeader("Location", "http(s)?://\\w+:\\d+//some-service/user/\\w{36}$")
       .given("An automation user with id: " + EXPECTED_USER_ID)
       .uponReceiving("existing user lookup")
-        .path("/some-service/user/" + EXPECTED_USER_ID)
+        .path(SOME_SERVICE_USER + EXPECTED_USER_ID)
         .method("GET")
-        .matchHeader("Content-Type", "application/json.*", "application/json; charset=UTF-8")
+        .matchHeader("Content-Type", APPLICATION_JSON, APPLICATION_JSON_CHARSET_UTF_8)
       .willRespondWith()
         .status(200)
-        .matchHeader("Content-Type", "application/json.*", "application/json; charset=UTF-8")
+        .matchHeader("Content-Type", APPLICATION_JSON, APPLICATION_JSON_CHARSET_UTF_8)
         .body(getUser())
-      .toFragment();
+      .toPact();
   }
 
   @Test
@@ -68,21 +66,21 @@ public class Defect215Test {
   public void runTest() {
     RestAssured
       .given()
-      .port(mockProvider.getConfig().port())
+      .port(mockProvider.getPort())
       .contentType(ContentType.JSON)
       .body(getUser())
       .post("/some-service/users")
       .then()
       .statusCode(201)
-      .header("location", Matchers.containsString("/some-service/user/"));
+      .header("location", Matchers.containsString(SOME_SERVICE_USER));
 
     RestAssured.reset();
 
     RestAssured
       .given()
-      .port(mockProvider.getConfig().port())
+      .port(mockProvider.getPort())
       .contentType(ContentType.JSON)
-      .get("/some-service/user/" + EXPECTED_USER_ID)
+      .get(SOME_SERVICE_USER + EXPECTED_USER_ID)
       .then()
       .statusCode(200);
 

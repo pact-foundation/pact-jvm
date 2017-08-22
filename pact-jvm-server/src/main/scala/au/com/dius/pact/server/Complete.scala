@@ -1,6 +1,7 @@
 package au.com.dius.pact.server
 
 import au.com.dius.pact.consumer._
+import au.com.dius.pact.matchers.util.JsonUtils
 import au.com.dius.pact.model._
 
 import scala.collection.JavaConversions
@@ -31,12 +32,12 @@ object Complete {
     } yield {
       mockProvider.stop()
       
-      ConsumerPactRunner.writeIfMatching(pact, sessionResults, mockProvider.config.pactConfig) match {
+      ConsumerPactRunner.writeIfMatching(pact, sessionResults, mockProvider.config.getPactVersion) match {
         case PactVerified => pactWritten(new Response(200, JavaConversions.mapAsJavaMap(ResponseUtils.CrossSiteHeaders)),
-          mockProvider.config.port)
+          mockProvider.config.getPort)
         case error => pactWritten(new Response(400,
           JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/json")), toJson(error)),
-          mockProvider.config.port)
+          mockProvider.config.getPort)
       }
     }
     

@@ -8,7 +8,6 @@
       "animal": ["alligator", "hippo"]
     },
     "headers": {}
-
   },
   "actual": {
     "method": "GET",
@@ -17,6 +16,5 @@
       "animal": ["alligator", "elephant"]
     },
     "headers": {}
-
   }
 }

@@ -14,7 +14,7 @@ class PactBuilderSpec extends Specification {
     }
   }
 
-  def 'should not define providerState when no given()'() {
+  def 'should not define providerStates when no given()'() {
     given:
     aliceService {
       uponReceiving('a retrieve Mallory request')
@@ -31,7 +31,7 @@ class PactBuilderSpec extends Specification {
 
     then:
     aliceService.interactions.size() == 1
-    aliceService.interactions[0].providerState == ''
+    aliceService.interactions[0].providerStates.empty
   }
 
   def 'allows matching on paths'() {
@@ -52,7 +52,8 @@ class PactBuilderSpec extends Specification {
     then:
     aliceService.interactions.size() == 1
     aliceService.interactions[0].request.path =~ '/mallory/[0-9]+'
-    aliceService.interactions[0].request.matchingRules['$.path'].regex == '/mallory/[0-9]+'
+    aliceService.interactions[0].request.matchingRules.rulesForCategory('path').matchingRules[''].rules.first().regex ==
+      '/mallory/[0-9]+'
   }
 
   def 'allows using the defined matcher on paths'() {
@@ -73,7 +74,8 @@ class PactBuilderSpec extends Specification {
     then:
     aliceService.interactions.size() == 1
     aliceService.interactions[0].request.path == '/mallory/1234567890'
-    aliceService.interactions[0].request.matchingRules['$.path'].regex == '/mallory/[0-9]+'
+    aliceService.interactions[0].request.matchingRules.rulesForCategory('path').matchingRules[''].rules.first().regex ==
+      '/mallory/[0-9]+'
   }
 
   def 'allows matching on headers'() {
@@ -96,9 +98,11 @@ class PactBuilderSpec extends Specification {
     aliceService.interactions.size() == 1
 
     firstInteraction.request.headers.MALLORY =~ 'mallory:[0-9]+'
-    firstInteraction.request.matchingRules['$.headers.MALLORY'].regex == 'mallory:[0-9]+'
+    firstInteraction.request.matchingRules.rulesForCategory('header').matchingRules['MALLORY'].rules.first().regex ==
+      'mallory:[0-9]+'
     firstInteraction.response.headers['Content-Type'] == 'text/html'
-    firstInteraction.response.matchingRules['$.headers.Content-Type'].regex == 'text/.*'
+    firstInteraction.response.matchingRules.rulesForCategory('header').matchingRules['Content-Type'].
+      rules.first().regex == 'text/.*'
   }
 
   def 'allow arrays as the root of the body'() {
@@ -160,7 +164,8 @@ class PactBuilderSpec extends Specification {
       '        "name": "item2"\n' +
       '    }\n' +
       ']'
-    firstInteraction.response.matchingRules.keySet().toString() == '[$.body[0].id, $.body[1].id]'
+    firstInteraction.response.matchingRules.rulesForCategory('body').matchingRules.keySet().toString() ==
+      '[$[0].id, $[1].id]'
   }
 
   def 'allow like matcher as the root of the body'() {
@@ -188,7 +193,8 @@ class PactBuilderSpec extends Specification {
       '        "name": "item1"\n' +
       '    }\n' +
       ']'
-    firstInteraction.response.matchingRules.keySet().toString() == '[$.body, $.body[*].id]'
+    firstInteraction.response.matchingRules.rulesForCategory('body').matchingRules.keySet().toString() ==
+      '[$, $[*].id]'
   }
 
   def 'pretty prints bodies by default'() {
@@ -295,5 +301,24 @@ class PactBuilderSpec extends Specification {
     then:
     request.body.value == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
     response.body.value == '{"name":"harry"}'
+  }
+
+  def 'does not overwrite the content type if it has been set in a header'() {
+    given:
+    aliceService {
+      uponReceiving('a request for HAL')
+      withAttributes(method: 'get', path: '/')
+      willRespondWith(status: 200, headers: ['Content-Type': 'application/hal+json'])
+      withBody {
+        i 'am a body'
+      }
+    }
+
+    when:
+    aliceService.buildInteractions()
+    def response = aliceService.interactions.first().response
+
+    then:
+    response.headers['Content-Type'] == 'application/hal+json'
   }
 }

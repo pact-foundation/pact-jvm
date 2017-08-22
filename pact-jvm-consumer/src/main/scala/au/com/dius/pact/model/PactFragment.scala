@@ -2,6 +2,10 @@ package au.com.dius.pact.model
 
 import au.com.dius.pact.consumer._
 
+/**
+  * @deprecated Moved to Kotlin implementation
+  */
+@Deprecated
 case class PactFragment(consumer: Consumer,
                         provider: Provider,
                         interactions: Seq[RequestResponseInteraction]) {
@@ -10,7 +14,7 @@ case class PactFragment(consumer: Consumer,
 
   def duringConsumerSpec[T](config: MockProviderConfig)(test: => T, verification: ConsumerTestVerification[T]): VerificationResult = {
     val server = DefaultMockProvider(config)
-    new ConsumerPactRunner(server).runAndWritePact(toPact, config.pactConfig)(test, verification)
+    new ConsumerPactRunner(server).runAndWritePact(toPact, config.getPactVersion)(test, verification)
   }
 
   //TODO: it would be a good idea to ensure that all interactions in the fragment have the same state
@@ -20,8 +24,16 @@ case class PactFragment(consumer: Consumer,
   def runConsumer(config: MockProviderConfig, test: TestRun): VerificationResult = {
     duringConsumerSpec(config)(test.run(config), (u:Unit) => None)
   }
+
+  def description = s"Consumer '${consumer.getName}' has a pact with Provider '${provider.getName}': " +
+    interactions.map { i => i.getDescription }.mkString(" and ") + sys.props("line.separator")
+
 }
 
+/**
+  * @deprecated Moved to Kotlin implementation
+  */
+@Deprecated
 object PactFragment {
   def consumer(consumer: String) = {
     PactFragmentBuilder.apply(new Consumer(consumer))

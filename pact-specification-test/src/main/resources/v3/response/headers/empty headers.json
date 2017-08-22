@@ -3,7 +3,6 @@
   "comment": "Empty headers match",
   "expected" : {
     "headers": {}
-
   },
   "actual": {
     "headers": {}

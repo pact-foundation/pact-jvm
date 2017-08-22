@@ -1,9 +1,9 @@
 
 dependencies {
     compile project(":pact-jvm-consumer_${project.scalaVersion}"),
-      "org.specs2:specs2-core_${project.scalaVersion}:3.6.4"
+      "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}"
 
-    testCompile "org.specs2:specs2-junit_${project.scalaVersion}:3.6.4",
-      'ch.qos.logback:logback-core:1.1.2',
-      'ch.qos.logback:logback-classic:1.1.2'
+    testCompile "org.specs2:specs2-junit_${project.scalaVersion}:${project.specs2Version}",
+      "ch.qos.logback:logback-core:${project.logbackVersion}",
+      "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }

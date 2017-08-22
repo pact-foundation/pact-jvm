@@ -1,18 +1,17 @@
 dependencies {
-  compile 'org.json:json:20140107',
+  compile project(":pact-jvm-pact-broker")
+  compile "org.json:json:${project.jsonVersion}",
     "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy",
-    "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.8.2",
-    "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.3",
-    "org.apache.httpcomponents:httpclient:$httpClientVersion"
+    "io.netty:netty-handler:${project.nettyVersion}",
+    "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
   compile 'com.github.zafarkhaja:java-semver:0.9.0'
-  compile "org.codehaus.groovy.modules.http-builder:http-builder:$httpBuilderVersion"
+  compile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
+  compile 'com.amazonaws:aws-java-sdk-s3:1.11.30'
+  compile 'com.google.code.gson:gson:2.8.0'
+  compile "org.jetbrains.kotlin:kotlin-stdlib-jre8"
+  compile 'org.apache.commons:commons-collections4:4.1'
+  compile 'com.github.mifmif:generex:1.0.1'
+  compile 'com.google.guava:guava:22.0'
 
-  testCompile "org.specs2:specs2-mock_${project.scalaVersion}:3.6.4"
-  testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
-    exclude group: 'org.codehaus.groovy'
-  }
-  testCompile 'cglib:cglib-nodep:3.1', 'org.objenesis:objenesis:2.1'
-  testCompile 'ch.qos.logback:logback-classic:1.1.2'
+  testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }
-
-compileTestGroovy.dependsOn compileTestScala

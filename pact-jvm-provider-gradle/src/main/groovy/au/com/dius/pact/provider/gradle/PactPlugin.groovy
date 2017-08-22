@@ -10,35 +10,42 @@ import org.gradle.api.Project
  */
 class PactPlugin implements Plugin<Project> {
 
-    private static final GROUP = 'Pact'
+  private static final GROUP = 'Pact'
+  private static final String PACT_VERIFY = 'pactVerify'
+  private static final String TEST_CLASSES = 'testClasses'
 
-    @Override
+  @Override
     void apply(Project project) {
 
         // Create and install the extension object
         project.extensions.create('pact', PactPluginExtension, project.container(GradleProviderInfo))
 
-        project.task('pactVerify', description: 'Verify your pacts against your providers', group: GROUP)
+        project.task(PACT_VERIFY, description: 'Verify your pacts against your providers', group: GROUP)
         project.task('pactPublish', description: 'Publish your pacts to a pact broker', type: PactPublishTask,
             group: GROUP)
 
         project.afterEvaluate {
 
-            if (project.pact == null) {
+            if (it.pact == null) {
               throw new GradleScriptException('No pact block was found in the project', null)
-            } else if (!(project.pact instanceof PactPluginExtension)) {
+            } else if (!(it.pact instanceof PactPluginExtension)) {
               throw new GradleScriptException('Your project is misconfigured, was expecting a \'pact\' configuration ' +
-                "in the build, but got a ${project.pact.class.simpleName} with value '${project.pact}' instead. " +
+                "in the build, but got a ${it.pact.class.simpleName} with value '${it.pact}' instead. " +
                 'Make sure there is no property that is overriding \'pact\'.', null)
-            } else if (project.pact.serviceProviders.empty) {
+            } else if (it.pact.serviceProviders.empty
+              && it.gradle.startParameter.taskNames.any { it.equalsIgnoreCase(PACT_VERIFY) }) {
               throw new GradleScriptException('No service providers are configured', null)
             }
 
-            project.pact.serviceProviders.all { ProviderInfo provider ->
+            it.pact.serviceProviders.all { ProviderInfo provider ->
                 def providerTask = project.task("pactVerify_${provider.name}",
                     description: "Verify the pacts against ${provider.name}", type: PactVerificationTask,
-                    group: GROUP, dependsOn: 'testClasses') {
+                    group: GROUP) {
                     providerToVerify = provider
+                }
+
+                if (project.tasks.findByName(TEST_CLASSES)) {
+                  providerTask.dependsOn TEST_CLASSES
                 }
 
                 if (provider.startProviderTask != null) {
@@ -49,7 +56,9 @@ class PactPlugin implements Plugin<Project> {
                     providerTask.finalizedBy(provider.terminateProviderTask)
                 }
 
-                project.pactVerify.dependsOn(providerTask)
+                if (provider.isDependencyForPactVerify) {
+                    it.pactVerify.dependsOn(providerTask)
+                }
             }
         }
     }

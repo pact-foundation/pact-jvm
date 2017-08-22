@@ -7,22 +7,23 @@ import au.com.dius.pact.consumer.dispatch.HttpClient
 import au.com.dius.pact.model._
 
 import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 
 object Fixtures {
-  import au.com.dius.pact.model.HttpMethod._
 
   val provider = new Provider("test_provider")
   val consumer = new Consumer("test_consumer")
 
   val headers = Map("testreqheader" -> "testreqheadervalue", "Content-Type" -> "application/json")
-  val request = new Request(Post, "/", null, JavaConversions.mapAsJavaMap(headers), OptionalBody.body("{\"test\": true}"))
+  val request = new Request("POST", "/", null, JavaConversions.mapAsJavaMap(headers), OptionalBody.body("{\"test\": true}"))
 
   val response = new Response(200,
     JavaConversions.mapAsJavaMap(Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*")),
     OptionalBody.body("{\"responsetest\": true}"))
 
-  val interaction = new RequestResponseInteraction("test interaction", "test state", request, response)
+  val interaction = new RequestResponseInteraction("test interaction", Seq(new ProviderState("test state")).asJava,
+    request, response)
 
   val pact: RequestResponsePact = new RequestResponsePact(provider, consumer, util.Arrays.asList(interaction))
 
@@ -42,7 +43,7 @@ object Fixtures {
     }
 
     def simpleGet(path: String): Future[(Int, Option[String])] = {
-      HttpClient.run(new Request(Get, serverUrl + path)).map { response =>
+      HttpClient.run(new Request("GET", serverUrl + path)).map { response =>
         (response.getStatus, Some(response.getBody.orElse("")))
       }
     }

@@ -1,13 +1,13 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.model.FilteredPact
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.Response
+import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.model.v3.messaging.Message
-import au.com.dius.pact.model.v3.messaging.MessagePact
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import org.reflections.Reflections
 import org.reflections.scanners.MethodAnnotationsScanner
 import org.reflections.util.ConfigurationBuilder
@@ -22,10 +22,11 @@ import java.lang.reflect.Method
 @Slf4j
 class ProviderVerifier {
 
-  static final String PACT_FILTER_CONSUMERS = 'pact.filter.consumers'
-  static final String PACT_FILTER_DESCRIPTION = 'pact.filter.description'
-  static final String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
-  static final String PACT_SHOW_STACKTRACE = 'pact.showStacktrace'
+  static final protected String PACT_FILTER_CONSUMERS = 'pact.filter.consumers'
+  static final protected String PACT_FILTER_DESCRIPTION = 'pact.filter.description'
+  static final protected String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
+  static final protected String PACT_SHOW_STACKTRACE = 'pact.showStacktrace'
+  static final protected String PACT_SHOW_FULLDIFF = 'pact.showFullDiff'
 
   def projectHasProperty = { }
   def projectGetProperty = { }
@@ -34,6 +35,8 @@ class ProviderVerifier {
   def executeBuildSpecificTask = { }
   def projectClasspath = { }
   def reporters = [ new AnsiConsoleReporter() ]
+  def providerMethodInstance = { Method m -> m.declaringClass.newInstance() }
+  def providerVersion = { }
 
   Map verifyProvider(ProviderInfo provider) {
     Map failures = [:]
@@ -50,57 +53,58 @@ class ProviderVerifier {
   }
 
   void initialiseReporters(ProviderInfo provider) {
-    reporters.each { it.initialise(provider) }
+    reporters.each {
+      if (it.hasProperty('displayFullDiff')) {
+        it.displayFullDiff = callProjectHasProperty(PACT_SHOW_FULLDIFF)
+      }
+      it.initialise(provider)
+    }
   }
 
   void runVerificationForConsumer(Map failures, ProviderInfo provider, ConsumerInfo consumer) {
     reportVerificationForConsumer(consumer, provider)
-    def pact = loadPactFileForConsumer(consumer)
-    forEachInteraction(pact, this.&verifyInteraction.curry(provider, consumer, pact, failures))
+    def pact = new FilteredPact(loadPactFileForConsumer(consumer), this.&filterInteractions)
+    if (pact.interactions.empty) {
+      reporters.each { it.warnPactFileHasNoInteractions(pact) }
+    } else {
+      def result = pact.interactions.every(this.&verifyInteraction.curry(provider, consumer, failures))
+      if (pact.isNotFiltered()) {
+        ProviderVerifierKt.reportVerificationResults(pact, result, providerVersion() ?: '0.0.0')
+      } else {
+        log.warn('Skipping publishing of verification results as the interactions have been filtered')
+      }
+    }
   }
 
   void reportVerificationForConsumer(ConsumerInfo consumer, ProviderInfo provider) {
     reporters.each { it.reportVerificationForConsumer(consumer, provider) }
   }
 
-  List interactions(def pact) {
-    if (pact instanceof MessagePact) {
-      pact.messages.findAll(this.&filterInteractions)
-    } else {
-      pact.interactions.findAll(this.&filterInteractions)
-    }
-  }
-
-  void forEachInteraction(def pact, Closure verifyInteraction) {
-    List interactions = interactions(pact)
-    if (interactions.empty) {
-      reporters.each { it.warnPactFileHasNoInteractions(pact) }
-    } else {
-      interactions.each(verifyInteraction)
-    }
-  }
-
   @SuppressWarnings('ThrowRuntimeException')
   def loadPactFileForConsumer(ConsumerInfo consumer) {
-    def pactFile = consumer.pactFile
-    if (pactFile instanceof Closure) {
-      pactFile = pactFile.call()
+    def pactSource = consumer.pactSource
+    if (pactSource instanceof Closure) {
+      pactSource = pactSource.call()
     }
 
-    if (pactFile instanceof URL) {
-      reporters.each { it.verifyConsumerFromUrl(pactFile, consumer) }
+    if (pactSource instanceof UrlPactSource) {
+      reporters.each { it.verifyConsumerFromUrl(pactSource, consumer) }
       def options = [:]
       if (consumer.pactFileAuthentication) {
         options.authentication = consumer.pactFileAuthentication
       }
-      PactReader.loadPact(options, pactFile)
-    } else if (pactFile instanceof File || ProviderUtils.pactFileExists(pactFile)) {
-      reporters.each { it.verifyConsumerFromFile(pactFile, consumer) }
-      PactReader.loadPact(pactFile)
+      PactReader.loadPact(options, pactSource)
     } else {
-      String message = generateLoadFailureMessage(consumer)
-      reporters.each { it.pactLoadFailureForConsumer(consumer, message) }
-      throw new RuntimeException(message)
+      try {
+        def pact = PactReader.loadPact(pactSource)
+        reporters.each { it.verifyConsumerFromFile(pact.source, consumer) }
+        pact
+      } catch (e) {
+        log.error('Failed to load pact file', e)
+        String message = generateLoadFailureMessage(consumer)
+        reporters.each { it.pactLoadFailureForConsumer(consumer, message) }
+        throw new RuntimeException(message)
+      }
     }
   }
 
@@ -132,8 +136,8 @@ class ProviderVerifier {
   }
 
   private boolean matchState(interaction) {
-    if (interaction.providerState) {
-      interaction.providerState ==~ callProjectGetProperty(PACT_FILTER_PROVIDERSTATE)
+    if (interaction.providerStates) {
+      interaction.providerStates.any { it.name ==~ callProjectGetProperty(PACT_FILTER_PROVIDERSTATE) }
     } else {
       callProjectGetProperty(PACT_FILTER_PROVIDERSTATE).empty
     }
@@ -143,36 +147,32 @@ class ProviderVerifier {
     interaction.description ==~ callProjectGetProperty(PACT_FILTER_DESCRIPTION)
   }
 
-  void verifyInteraction(ProviderInfo provider, ConsumerInfo consumer, def pact, Map failures, def interaction) {
+  boolean verifyInteraction(ProviderInfo provider, ConsumerInfo consumer, Map failures, def interaction) {
     def interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name}" +
       " - ${interaction.description}"
 
-    def stateChangeOk = true
-    if (interaction.providerState) {
-      stateChangeOk = stateChange(interaction.providerState, provider, consumer)
-      log.debug "State Change: \"${interaction.providerState}\" -> ${stateChangeOk}"
-      if (stateChangeOk != true) {
-        failures[interactionMessage] = stateChangeOk
-        stateChangeOk = false
-      } else {
-        interactionMessage += " Given ${interaction.providerState}"
-      }
-    }
-
-    if (stateChangeOk) {
+    def stateChangeResult = StateChange.executeStateChange(this, provider, consumer, interaction, interactionMessage,
+      failures)
+    if (stateChangeResult.stateChangeOk) {
+      interactionMessage += stateChangeResult.message
       reportInteractionDescription(interaction)
 
+      boolean result = false
       if (ProviderUtils.verificationType(provider, consumer) == PactVerification.REQUST_RESPONSE) {
         log.debug('Verifying via request/response')
-        verifyResponseFromProvider(provider, interaction, interactionMessage, failures)
+        result = verifyResponseFromProvider(provider, interaction, interactionMessage, failures)
       } else {
         log.debug('Verifying via annotated test method')
-        verifyResponseByInvokingProviderMethods(pact, provider, consumer, interaction, interactionMessage, failures)
+        result = verifyResponseByInvokingProviderMethods(provider, consumer, interaction, interactionMessage, failures)
       }
 
       if (provider.stateChangeTeardown) {
-        stateChange(interaction.providerState, provider, consumer, false)
+        StateChange.executeStateChangeTeardown(this, interaction, provider, consumer)
       }
+
+      result
+    } else {
+      false
     }
   }
 
@@ -180,75 +180,11 @@ class ProviderVerifier {
     reporters.each { it.interactionDescription(interaction) }
   }
 
-  def stateChange(String state, ProviderInfo provider, ConsumerInfo consumer, boolean isSetup = true) {
-    reportStateForInteraction(state, provider, consumer, isSetup)
-    try {
-      def stateChangeHandler = consumer.stateChange
-      def stateChangeUsesBody = consumer.stateChangeUsesBody
-      if (stateChangeHandler == null) {
-        stateChangeHandler = provider.stateChangeUrl
-        stateChangeUsesBody = provider.stateChangeUsesBody
-      }
-      if (stateChangeHandler == null || (stateChangeHandler instanceof String
-        && StringUtils.isBlank(stateChangeHandler))) {
-        reporters.each { it.warnStateChangeIgnored(state, provider, consumer) }
-        return true
-      } else if (stateChangeHandler instanceof Closure) {
-        def result
-        if (provider.stateChangeTeardown) {
-          result = stateChangeHandler.call(state, isSetup ? 'setup' : 'teardown')
-        } else {
-          result = stateChangeHandler.call(state)
-        }
-        log.debug "Invoked state change closure -> ${result}"
-        if (!(result instanceof URL)) {
-          return result
-        }
-        stateChangeHandler = result
-      } else if (isBuildSpecificTask(stateChangeHandler)) {
-        log.debug "Invokeing build specific task ${stateChangeHandler}"
-        executeBuildSpecificTask(stateChangeHandler, state)
-        return true
-      }
-      return executeHttpStateChangeRequest(stateChangeHandler, stateChangeUsesBody, state, provider, isSetup)
-    } catch (e) {
-      reporters.each {
-        it.stateChangeRequestFailedWithException(state, provider, consumer, isSetup, e,
-          callProjectHasProperty(PACT_SHOW_STACKTRACE))
-      }
-      return e
-    }
-  }
-
   void reportStateForInteraction(String state, ProviderInfo provider, ConsumerInfo consumer, boolean isSetup) {
     reporters.each { it.stateForInteraction(state, provider, consumer, isSetup) }
   }
 
-  private executeHttpStateChangeRequest(stateChangeHandler, useBody, String state, ProviderInfo provider,
-                                        boolean isSetup) {
-    try {
-      def url = stateChangeHandler instanceof URI ? stateChangeHandler
-        : new URI(stateChangeHandler.toString())
-      ProviderClient client = new ProviderClient(provider: provider)
-      def response = client.makeStateChangeRequest(url, state, useBody, isSetup, provider.stateChangeTeardown)
-      log.debug "Invoked state change $url -> ${response?.statusLine}"
-      if (response) {
-        try {
-          if (response.statusLine.statusCode >= 400) {
-            reporters.each { it.stateChangeRequestFailed(state, provider, isSetup, response.statusLine.toString()) }
-            return 'State Change Request Failed - ' + response.statusLine.toString()
-          }
-        } finally {
-          response.close()
-        }
-      }
-    } catch (URISyntaxException ex) {
-      reporters.each { it.warnStateChangeIgnoredDueToInvalidUrl(state, provider, isSetup, stateChangeHandler) }
-    }
-    true
-  }
-
-  void verifyResponseFromProvider(ProviderInfo provider, def interaction, String interactionMessage, Map failures) {
+  boolean verifyResponseFromProvider(ProviderInfo provider, def interaction, String interactionMessage, Map failures) {
     try {
       ProviderClient client = new ProviderClient(request: interaction.request, provider: provider)
 
@@ -261,10 +197,11 @@ class ProviderVerifier {
       reporters.each {
         it.requestFailed(provider, interaction, interactionMessage, e, callProjectHasProperty(PACT_SHOW_STACKTRACE))
       }
+      false
     }
   }
 
-  void verifyRequestResponsePact(Response expectedResponse, Map actualResponse, String interactionMessage,
+  boolean verifyRequestResponsePact(Response expectedResponse, Map actualResponse, String interactionMessage,
                                  Map failures) {
     def comparison = ResponseComparison.compareResponse(expectedResponse, actualResponse,
       actualResponse.statusCode, actualResponse.headers, actualResponse.data)
@@ -272,24 +209,31 @@ class ProviderVerifier {
     reporters.each { it.returnsAResponseWhich() }
 
     def s = ' returns a response which'
-    displayStatusResult(failures, expectedResponse.status, comparison.method, interactionMessage + s)
-    displayHeadersResult(failures, expectedResponse.headers, comparison.headers, interactionMessage + s)
-    displayBodyResult(failures, comparison.body, interactionMessage + s)
+    def result = true
+    result &= displayStatusResult(failures, expectedResponse.status, comparison.method, interactionMessage + s)
+    result &= displayHeadersResult(failures, expectedResponse.headers, comparison.headers, interactionMessage + s)
+    result &= displayBodyResult(failures, comparison.body, interactionMessage + s)
+    result
   }
 
-  void displayStatusResult(Map failures, int status, def comparison, String comparisonDescription) {
+  boolean displayStatusResult(Map failures, int status, def comparison, String comparisonDescription) {
     if (comparison == true) {
       reporters.each { it.statusComparisonOk(status) }
+      true
     } else {
       reporters.each { it.statusComparisonFailed(status, comparison) }
       failures["$comparisonDescription has status code $status"] = comparison
+      false
     }
   }
 
-  void displayHeadersResult(Map failures, def expected, Map comparison, String comparisonDescription) {
-    if (!comparison.isEmpty()) {
+  boolean displayHeadersResult(Map failures, def expected, Map comparison, String comparisonDescription) {
+    if (comparison.isEmpty()) {
+      true
+    } else {
       reporters.each { it.includesHeaders() }
       Map expectedHeaders = expected
+      boolean result = true
       comparison.each { key, headerComparison ->
         def expectedHeaderValue = expectedHeaders[key]
         if (headerComparison == true) {
@@ -298,24 +242,27 @@ class ProviderVerifier {
           reporters.each { it.headerComparisonFailed(key, expectedHeaderValue, headerComparison) }
           failures["$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""] =
             headerComparison
+          result = false
         }
       }
+      result
     }
   }
 
-  void displayBodyResult(Map failures, def comparison, String comparisonDescription) {
+  boolean displayBodyResult(Map failures, def comparison, String comparisonDescription) {
     if (comparison.isEmpty()) {
       reporters.each { it.bodyComparisonOk() }
+      true
     } else {
       reporters.each { it.bodyComparisonFailed(comparison) }
       failures["$comparisonDescription has a matching body"] = comparison
+      false
     }
   }
 
   @SuppressWarnings(['ThrowRuntimeException', 'ParameterCount'])
-  void verifyResponseByInvokingProviderMethods(def pact, ProviderInfo providerInfo, ConsumerInfo consumer,
-                                               def interaction, String interactionMessage,
-                                               Map failures) {
+  boolean verifyResponseByInvokingProviderMethods(ProviderInfo providerInfo, ConsumerInfo consumer,
+                                               def interaction, String interactionMessage, Map failures) {
     try {
       def urls = projectClasspath()
       URLClassLoader loader = new URLClassLoader(urls, GroovyObject.classLoader)
@@ -345,19 +292,22 @@ class ProviderVerifier {
         throw new RuntimeException('No annotated methods were found for interaction ' +
           "'${interaction.description}'")
       } else {
-        if (pact instanceof MessagePact) {
+        if (interaction instanceof Message) {
           verifyMessagePact(providerMethods, interaction as Message, interactionMessage, failures)
         } else {
           def expectedResponse = interaction.response
+          boolean result = true
           providerMethods.each {
             def actualResponse = invokeProviderMethod(it)
-            verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
+            result &= verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
           }
+          result
         }
       }
     } catch (e) {
       failures[interactionMessage] = e
       reporters.each { it.verificationFailed(interaction, e, callProjectHasProperty(PACT_SHOW_STACKTRACE)) }
+      false
     }
   }
 
@@ -377,21 +327,28 @@ class ProviderVerifier {
     }
   }
 
-  void verifyMessagePact(Set methods, Message message, String interactionMessage, Map failures) {
+  boolean verifyMessagePact(Set methods, Message message, String interactionMessage, Map failures) {
+    boolean result = true
     methods.each {
       reporters.each { it.generatesAMessageWhich() }
-      def actualMessage = OptionalBody.body(invokeProviderMethod(it) as String)
+      def actualMessage = OptionalBody.body(invokeProviderMethod(it, providerMethodInstance(it)) as String)
       def comparison = ResponseComparison.compareMessage(message, actualMessage)
       def s = ' generates a message which'
-      displayBodyResult(failures, comparison, interactionMessage + s)
+      result &= displayBodyResult(failures, comparison, interactionMessage + s)
+    }
+    result
+  }
+
+  @SuppressWarnings('ThrowRuntimeException')
+  static invokeProviderMethod(Method m, Object instance) {
+    try {
+      m.invoke(instance)
+    } catch (e) {
+      throw new RuntimeException("Failed to invoke provider method '${m.name}'", e)
     }
   }
 
-  static invokeProviderMethod(Method m) {
-    m.invoke(m.declaringClass.newInstance())
-  }
-
-  void displayFailures(def failures) {
+  void displayFailures(Map failures) {
     reporters.each { it.displayFailures(failures) }
   }
 

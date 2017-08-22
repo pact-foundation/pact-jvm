@@ -1,0 +1,30 @@
+{
+  "match": true,
+  "comment": "array with type matcher",
+  "expected": {
+    "headers": {},
+    "body" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?><people><person>Fred</person></people>",
+    "matchingRules" : {
+      "body": {
+        "$.people": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$.people[*]": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "actual": {
+    "headers": {},
+    "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><people><person>Fred</person><person>George</person><person>Cat</person></people>"
+  }
+}

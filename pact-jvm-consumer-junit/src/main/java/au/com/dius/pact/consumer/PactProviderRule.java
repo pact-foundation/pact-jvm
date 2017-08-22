@@ -1,10 +1,9 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.model.MockHttpsKeystoreProviderConfig;
 import au.com.dius.pact.model.MockHttpsProviderConfig;
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.MockProviderConfig$;
-import au.com.dius.pact.model.PactConfig;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.PactSpecVersion;
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +12,7 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import java.lang.reflect.Method;
+import java.net.SocketException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +24,10 @@ import java.util.Optional;
  * provider. After each test, it will be teared down.
  *
  * If no host is given, it will default to localhost. If no port is given, it will default to a random port.
+ *
+ * @deprecated Use PactProviderRuleMk2 or PactHttpsProviderRuleMk2 instead
  */
+@Deprecated
 public class PactProviderRule extends ExternalResource {
 
     private static final VerificationResult PACT_VERIFIED = PactVerified$.MODULE$;
@@ -38,16 +41,16 @@ public class PactProviderRule extends ExternalResource {
      * @param provider Provider name to mock
      * @param host Host to bind to. Defaults to localhost
      * @param port Port to bind to. Defaults to a random port.
-     * @param pactConfig Pact configuration
+     * @param pactVersion Pact specification version
      * @param target Target test to apply this rule to.
      */
-    public PactProviderRule(String provider, String host, Integer port, PactConfig pactConfig, Object target) {
+    public PactProviderRule(String provider, String host, Integer port, PactSpecVersion pactVersion, Object target) {
         this.provider = provider;
         this.target = target;
         if (host == null && port == null) {
-            config = MockProviderConfig$.MODULE$.createDefault(pactConfig);
+            config = MockProviderConfig.createDefault(pactVersion);
         } else {
-            config = MockProviderConfig$.MODULE$.apply(port, host, pactConfig);
+            config = MockProviderConfig.httpConfig(host, port, pactVersion);
         }
     }
 
@@ -57,14 +60,33 @@ public class PactProviderRule extends ExternalResource {
      * @param host Host to bind to. Defaults to localhost
      * @param port Port to bind to. Defaults to a random port.
      * @param https Boolean flag to control starting HTTPS or HTTP mock server
-     * @param pactConfig Pact configuration
+     * @param pactVersion Pact specification version
      * @param target Target test to apply this rule to.
      */
-    public PactProviderRule(String provider, String host, Integer port, boolean https, PactConfig pactConfig,
+    public PactProviderRule(String provider, String host, Integer port, boolean https, PactSpecVersion pactVersion,
                             Object target) {
-      this(provider, host, port, pactConfig, target);
+      this(provider, host, port, pactVersion, target);
       if (https) {
-        config = MockHttpsProviderConfig.apply(port, host, pactConfig);
+        config = MockHttpsProviderConfig.httpsConfig(host, port, pactVersion);
+      }
+    }
+
+    /**
+     * Creates a mock provider by the given name
+     * @param provider Provider name to mock
+     * @param host Host to bind to. Defaults to localhost
+     * @param port Port to bind to. Defaults to a random port.
+     * @param https Boolean flag to control starting HTTPS or HTTP mock server
+     * @param keystore Path to keystore, example: <code>/path/to/keystore.jks</code>
+     * @param password Password for the keystore.
+     * @param pactVersion Pact specification version
+     * @param target Target test to apply this rule to.
+     */
+    public PactProviderRule(String provider, String host, Integer port, boolean https, String keystore, String password, PactSpecVersion pactVersion,
+                            Object target) {
+      this(provider, host, port, pactVersion, target);
+      if (https) {
+        config = MockHttpsKeystoreProviderConfig.httpsKeystoreConfig(host, port, keystore, password, pactVersion);
       }
     }
 
@@ -76,7 +98,7 @@ public class PactProviderRule extends ExternalResource {
      * @param target Target test to apply this rule to.
      */
     public PactProviderRule(String provider, String host, Integer port, Object target) {
-        this(provider, host, port, PactConfig.apply(PactSpecVersion.V2), target);
+        this(provider, host, port, PactSpecVersion.V3, target);
     }
 
     /**
@@ -85,7 +107,7 @@ public class PactProviderRule extends ExternalResource {
      * @param target Target test to apply this rule to.
      */
     public PactProviderRule(String provider, Object target) {
-        this(provider, null, null, PactConfig.apply(PactSpecVersion.V2), target);
+        this(provider, null, null, PactSpecVersion.V3, target);
     }
 
     /**
@@ -94,7 +116,7 @@ public class PactProviderRule extends ExternalResource {
      * @param target Target test to apply this rule to.
      */
     public PactProviderRule(String provider, PactSpecVersion pactSpecVersion, Object target) {
-        this(provider, null, null, PactConfig.apply(pactSpecVersion), target);
+        this(provider, null, null, pactSpecVersion, target);
     }
 
     public MockProviderConfig getConfig() {
@@ -221,12 +243,10 @@ public class PactProviderRule extends ExternalResource {
             if (result instanceof UserCodeFailed) {
                 throw ((UserCodeFailed<RuntimeException>)result).error();
             }
-            if (result instanceof PactMismatch && !pactVerification.expectMismatch()) {
+            if (result instanceof PactMismatch) {
                 PactMismatch mismatch = (PactMismatch) result;
                 throw new PactMismatchException(mismatch);
             }
-        } else if (pactVerification.expectMismatch()) {
-            throw new RuntimeException("Expected a pact mismatch (PactVerification.expectMismatch is set to true)");
         }
     }
 

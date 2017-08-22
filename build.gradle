@@ -1,13 +1,41 @@
 buildscript {
   repositories {
+    jcenter()
     mavenCentral()
+    mavenLocal()
   }
   dependencies {
     classpath "org.apache.commons:commons-lang3:$commonsLang3Version"
+    classpath 'org.apache.commons:commons-text:1.1'
   }
 }
 
+plugins {
+  id 'nebula.kotlin' version '1.1.4-2'
+  id 'org.jmailen.kotlinter' version '1.2.0'
+  id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC3'
+  id 'org.jetbrains.dokka' version '0.9.15'
+}
+
+import org.apache.commons.text.StringEscapeUtils
+
 subprojects {
+  buildscript {
+    repositories {
+      jcenter()
+      mavenCentral()
+      mavenLocal()
+    }
+  }
+
+    configurations.all {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'com.google.guava' && details.requested.name == 'guava' && details.requested.version > '19.0') {
+                //guava-retryer is pulling a transitive dependency of guava 21-rc which has breaking changes to Netflix OSS
+                details.useVersion '19.0'
+            }
+        }
+    }
 
     def scalaVersionLookup = [
         '2.11': '2.11.8',
@@ -31,40 +59,89 @@ subprojects {
     apply plugin: 'signing'
     apply plugin: 'codenarc'
     apply plugin: 'jacoco'
+    apply plugin: 'org.jetbrains.kotlin.jvm'
+    apply plugin: 'org.jmailen.kotlinter'
+    apply plugin: 'io.gitlab.arturbosch.detekt'
+    apply plugin: 'org.jetbrains.dokka'
 
     repositories {
         mavenLocal()
         mavenCentral()
+        jcenter()
     }
 
     dependencies {
-      if (project.hasProperty('scalaVersion')) {
-          compile 'org.slf4j:slf4j-api:1.7.7', "org.scala-lang:scala-library:${project.scalaFullVersion}",
-            "org.scala-lang:scala-compiler:${project.scalaFullVersion}"
+      compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion"
+      compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+      compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
+      compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
+      compile 'io.github.microutils:kotlin-logging:1.4.4'
 
-          testCompile "org.specs2:specs2-core_${project.scalaVersion}:3.6.4", "org.specs2:specs2-junit_${project.scalaVersion}:3.6.4"
+      if (project.hasProperty('scalaVersion')) {
+          compile "org.scala-lang:scala-library:${project.scalaFullVersion}",
+            "org.scala-lang:scala-compiler:${project.scalaFullVersion}",
+            "com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.4.0"
+
+          testCompile "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}",
+            "org.specs2:specs2-junit_${project.scalaVersion}:${project.specs2Version}"
       }
 
-      testCompile 'org.hamcrest:hamcrest-all:1.3', 'org.mockito:mockito-core:1.9.5', 'junit:junit:4.12'
+      testCompile 'org.hamcrest:hamcrest-all:1.3',
+        'org.mockito:mockito-core:1.10.19',
+        "junit:junit:${project.junitVersion}"
+
+      testCompile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
+      testCompile('org.spockframework:spock-core:1.1-groovy-2.4') {
+        exclude group: 'org.codehaus.groovy'
+      }
+      testCompile "cglib:cglib:${project.cglibVersion}"
+      testCompile 'org.objenesis:objenesis:2.4'
     }
 
     group = 'au.com.dius'
-    version = '3.2.8'
+    version = '3.5.5'
     targetCompatibility = '1.8'
     sourceCompatibility = '1.8'
 
     tasks.withType(ScalaCompile) {
-        scalaCompileOptions.useCompileDaemon = false
-        scalaCompileOptions.useAnt = false
         scalaCompileOptions.additionalParameters = ['-target:jvm-1.8']
         configure(scalaCompileOptions.forkOptions) {
-          memoryInitialSize = '256m'
-          memoryMaximumSize = '512m'
+          memoryMaximumSize = '256m'
         }
+    }
+
+    compileGroovy {
+      classpath = classpath.plus(files(compileKotlin.destinationDir))
+      dependsOn compileKotlin
+    }
+
+    compileScala {
+      classpath = classpath.plus(files(compileGroovy.destinationDir)).plus(files(compileKotlin.destinationDir))
+      dependsOn compileGroovy, compileKotlin
+    }
+
+    compileTestGroovy {
+      classpath = classpath.plus(files(compileTestKotlin.destinationDir))
+      dependsOn compileTestKotlin
     }
 
     tasks.withType(GroovyCompile) {
       groovyOptions.optimizationOptions.indy = true
+    }
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+      kotlinOptions {
+        jvmTarget = "1.8"
+      }
+    }
+
+    task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+      outputFormat = 'javadoc'
+      outputDirectory = "$buildDir/docs/dokkaJavadoc"
+    }
+
+    test {
+      systemProperty 'pact.rootDir', "$buildDir/pacts"
     }
 
     jar {
@@ -76,9 +153,9 @@ subprojects {
                 'Specification-Version': version
     }
 
-    task javadocJar(type: Jar, dependsOn: [javadoc, scaladoc, groovydoc]) {
+    task javadocJar(type: Jar, dependsOn: [javadoc, scaladoc, groovydoc, dokkaJavadoc]) {
         classifier = 'javadoc'
-        from javadoc.destinationDir, scaladoc.destinationDir, groovydoc.destinationDir
+        from javadoc.destinationDir, scaladoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
     }
 
     task sourceJar(type: Jar) {
@@ -93,7 +170,7 @@ subprojects {
 
     def pomCustomisation = {
         name project.name
-        description new File(projectDir, 'README.md').text
+        description StringEscapeUtils.escapeXml11(new File(projectDir, 'README.md').text)
         url 'https://github.com/DiUS/pact-jvm'
         licenses {
             license {
@@ -117,11 +194,6 @@ subprojects {
                 id 'rholshausen'
                 name 'Ronald Holshausen'
                 email 'rholshausen@dius.com.au'
-            }
-            developer {
-                id 'kenbot'
-                name 'Ken Scambler'
-                email 'ken.scambler@gmail.com'
             }
         }
     }
@@ -149,7 +221,7 @@ subprojects {
     deployer.pom.project(pomCustomisation)
 
     signing {
-        required { gradle.taskGraph.hasTask("uploadArchives") }
+        required { gradle.taskGraph.hasTask("uploadArchives") || gradle.taskGraph.hasTask("publishPlugins") }
         sign configurations.archives
     }
 
@@ -160,6 +232,21 @@ subprojects {
     codenarcTest {
         configFile = file('../config/codenarc/rulesetTest.groovy')
     }
+
+    check.dependsOn << 'jacocoTestReport'
+
+  kotlinter {
+    indentSize = 2
+  }
+
+  detekt {
+    profile("main") {
+      config = "${project.parent.projectDir}/config/detekt-config.yml"
+    }
+  }
+
+  check.dependsOn << 'detektCheck'
+
 }
 
 tasks.addRule("Pattern: <Task>_<ScalaVersion>") { String taskName ->
@@ -170,4 +257,17 @@ tasks.addRule("Pattern: <Task>_<ScalaVersion>") { String taskName ->
         .collect { it.value.getTasksByName(m.group(1), false) }.flatten()
     }
   }
+}
+
+if (System.env.TRAVIS == 'true') {
+    allprojects {
+        tasks.withType(GroovyCompile) {
+            groovyOptions.fork = false
+        }
+        tasks.withType(Test) {
+            // containers (currently) have 2 dedicated cores and 4GB of memory
+            maxParallelForks = 2
+            minHeapSize = '128m'
+        }
+    }
 }

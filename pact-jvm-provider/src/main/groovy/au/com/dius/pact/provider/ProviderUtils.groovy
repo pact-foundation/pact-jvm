@@ -1,8 +1,9 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.model.FileSource
 import groovy.io.FileType
 import groovy.json.JsonSlurper
-import au.com.dius.pact.provider.org.fusesource.jansi.AnsiConsole
+import org.fusesource.jansi.AnsiConsole
 
 /**
  * Common provider utils
@@ -32,9 +33,9 @@ class ProviderUtils {
     pactFileDir.eachFileMatch FileType.FILES, ~/.*\.json/, {
       def pactJson = new JsonSlurper().parse(it)
       if (pactJson.provider.name == provider.name) {
-        consumers << new ConsumerInfo(name: pactJson.consumer.name, pactFile: it, stateChange: stateChange,
-          stateChangeUsesBody: stateChangeUsesBody, verificationType: verificationType, packagesToScan: packagesToScan,
-          pactFileAuthentication: pactFileAuthentication)
+        consumers << new ConsumerInfo(name: pactJson.consumer.name, pactSource: new FileSource(it),
+          stateChange: stateChange, stateChangeUsesBody: stateChangeUsesBody, verificationType: verificationType,
+          packagesToScan: packagesToScan, pactFileAuthentication: pactFileAuthentication)
       } else {
         AnsiConsole.out().println("Skipping ${it} as the provider names don't match provider.name: " +
           "${provider.name} vs pactJson.provider.name: ${pactJson.provider.name}")
@@ -44,8 +45,8 @@ class ProviderUtils {
     consumers
   }
 
-  static boolean pactFileExists(def pactFile) {
-   pactFile && new File(pactFile as String).exists()
+  static boolean pactFileExists(FileSource pactFile) {
+   pactFile?.file?.exists()
  }
 
   static PactVerification verificationType(ProviderInfo provider, ConsumerInfo consumer) {
@@ -54,5 +55,9 @@ class ProviderUtils {
 
   static List packagesToScan(ProviderInfo providerInfo, ConsumerInfo consumer) {
    consumer.packagesToScan ?: providerInfo.packagesToScan
+  }
+
+  static boolean isS3Url(def pactFile) {
+    pactFile && pactFile.toString().toLowerCase().startsWith('s3://')
   }
 }

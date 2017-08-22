@@ -1,16 +1,21 @@
 {
   "consumer": {
-    "name": "asis-trading-order-repository"
+    "name": "consumer"
   },
   "provider": {
-    "name": "asis-core"
+    "name": "provider"
   },
   "messages": [
     {
       "metaData": {
         "contentType": "application/json"
       },
-      "providerState": "message exists",
+      "providerStates": [
+        {
+          "name": "message exists",
+          "params": {}
+        }
+      ],
       "contents": "Hello",
       "matchingRules": {
 

@@ -4,8 +4,7 @@ import au.com.dius.pact.model.{RequestResponseInteraction, _}
 import difflib.DiffUtils
 import groovy.json.JsonOutput
 
-import scala.Some
-
+@Deprecated
 object PrettyPrinter {
   //TODO: allow configurable context lines
   val defaultContextLines = 3
@@ -44,7 +43,7 @@ object PrettyPrinter {
   def printProblem(interaction:Interaction, partial: Seq[RequestPartMismatch]): String = {
     partial.flatMap {
       case HeaderMismatch(key, expected, actual, mismatch) => printStringMismatch("Header " + key, expected, actual)
-      case BodyMismatch(expected, actual, mismatch, path) => printStringMismatch("Body",
+      case BodyMismatch(expected, actual, mismatch, path, _) => printStringMismatch("Body",
         JsonOutput.prettyPrint(expected.toString), JsonOutput.prettyPrint(actual.toString))
       case CookieMismatch(expected, actual) => printDiff("Cookies", expected.sorted, actual.sorted)
       case PathMismatch(expected, actual, _) => printDiff("Path", List(expected), List(actual), 0)

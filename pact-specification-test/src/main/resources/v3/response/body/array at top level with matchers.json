@@ -15,29 +15,67 @@
       "timestamp" : "2015-06-11T13:17:29"
     } ],
     "matchingRules" : {
-      "$.body[0].id" : {
-        "match" : "type"
-      },
-      "$.body[1].id" : {
-        "match" : "type"
-      },
-      "$.body[0].name" : {
-        "match" : "type"
-      },
-      "$.body[1].name" : {
-        "match" : "type"
-      },
-      "$.body[1].dob" : {
-        "match": "regex", "regex" : "\\d{2}/\\d{2}/\\d{4}"
-      },
-      "$.body[1].timestamp" : {
-        "match": "regex", "regex" : "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}"
-      },
-      "$.body[0].timestamp" : {
-        "match": "regex", "regex" : "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}"
-      },
-      "$.body[0].dob" : {
-        "match": "regex", "regex" : "\\d{2}/\\d{2}/\\d{4}"
+      "body": {
+        "$[0].id": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$[1].id": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$[0].name": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$[1].name": {
+          "matchers": [
+            {
+              "match": "type"
+            }
+          ]
+        },
+        "$[1].dob": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "\\d{2}/\\d{2}/\\d{4}"
+            }
+          ]
+        },
+        "$[1].timestamp": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}"
+            }
+          ]
+        },
+        "$[0].timestamp": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}"
+            }
+          ]
+        },
+        "$[0].dob": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "\\d{2}/\\d{2}/\\d{4}"
+            }
+          ]
+        }
       }
     }
   },

@@ -7,7 +7,9 @@ import au.com.dius.pact.consumer.groovy.PactBodyBuilder
 import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.InvalidPactException
 import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.Provider
+import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
 
@@ -17,7 +19,7 @@ import au.com.dius.pact.model.v3.messaging.MessagePact
 class PactMessageBuilder extends BaseBuilder {
   Consumer consumer
   Provider provider
-  String providerState = ''
+  List<ProviderState> providerStates = []
   List messages = []
 
   /**
@@ -43,7 +45,7 @@ class PactMessageBuilder extends BaseBuilder {
    * @param providerState
    */
   PactMessageBuilder given(String providerState) {
-    this.providerState = providerState
+    this.providerStates << new ProviderState(providerState)
     this
   }
 
@@ -52,7 +54,7 @@ class PactMessageBuilder extends BaseBuilder {
    * @param description
    */
   PactMessageBuilder expectsToReceive(String description) {
-    messages << new Message(description, providerState)
+    messages << new Message(description, providerStates)
     this
   }
 
@@ -96,7 +98,7 @@ class PactMessageBuilder extends BaseBuilder {
     closure.delegate = body
     closure.call()
     messages.last().contents = OptionalBody.body(body.body)
-    messages.last().matchingRules.putAll(body.matchers)
+    messages.last().matchingRules.addCategory(body.matchers)
 
     this
   }
@@ -118,7 +120,7 @@ class PactMessageBuilder extends BaseBuilder {
     if (results.any { it instanceof Throwable }) {
       throw new MessagePactFailedException(results.findAll { it instanceof Throwable })
     } else {
-      pact.write(PactConsumerConfig$.MODULE$.pactRootDir())
+      pact.write(PactConsumerConfig$.MODULE$.pactRootDir(), PactSpecVersion.V3)
     }
   }
 

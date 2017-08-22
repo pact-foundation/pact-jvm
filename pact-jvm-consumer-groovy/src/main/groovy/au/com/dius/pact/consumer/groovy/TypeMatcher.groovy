@@ -1,21 +1,25 @@
 package au.com.dius.pact.consumer.groovy
 
-import org.apache.commons.lang3.RandomStringUtils
+import au.com.dius.pact.model.matchingrules.MatchingRule
+import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
 
 /**
  * Matcher for validating same types
  */
 class TypeMatcher extends Matcher {
 
-  def getMatcher() {
-    [match: values.first()]
-  }
+  String type = 'type'
 
-  def getValue() {
-    if (values == null || values.empty || values.last() == null) {
-      RandomStringUtils.randomNumeric(10)
-    } else {
-      values.last()
+  MatchingRule getMatcher() {
+    switch (type) {
+      case 'integer':
+        return new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER)
+      case 'decimal':
+        return new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
+      case 'number':
+        return new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)
+      default:
+        return au.com.dius.pact.model.matchingrules.TypeMatcher.INSTANCE
     }
   }
 

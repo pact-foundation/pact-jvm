@@ -15,12 +15,13 @@ class ExamplePactSpec extends Specification with PactSpec {
 
   val consumer = "My Consumer"
   val provider = "My Provider"
+  override val providerState = Some("foo_state")
 
   val timeout = Duration(5000, MILLISECONDS)
 
   override def is = uponReceiving("a request for foo")
       .matching(path = "/foo")
-      .willRespondWith(body = "{}")
+      .willRespondWith(maybeBody = Some("{}"))
     .uponReceiving("an option request")
       .matching(path = "/", method = "OPTION")
       .willRespondWith(headers = Map("Option" -> "Value-X"))

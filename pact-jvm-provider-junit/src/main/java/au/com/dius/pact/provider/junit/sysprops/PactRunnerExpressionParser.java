@@ -1,17 +1,35 @@
 package au.com.dius.pact.provider.junit.sysprops;
 
+import java.util.List;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 public class PactRunnerExpressionParser {
 
+  public static final String VALUES_SEPARATOR = ",";
   public static final String START_EXPRESSION = "${";
   public static final char END_EXPRESSION = '}';
 
-  public static String parseExpressions(final String value) {
-    return parseExpressions(value, new SystemPropertyResolver());
+  private PactRunnerExpressionParser() {}
+
+  public static String parseExpression(final String value) {
+    return parseExpression(value, new SystemPropertyResolver());
   }
 
-  public static String parseExpressions(final String value, final ValueResolver valueResolver) {
+  public static List<String> parseListExpression(final String value) {
+    return parseListExpression(value, new SystemPropertyResolver());
+  }
+
+  public static List<String> parseListExpression(final String value, final ValueResolver valueResolver) {
+    return Stream.of(replaceExpressions(value, valueResolver).split(VALUES_SEPARATOR))
+            .filter(str -> !isNullOrEmpty(str))
+            .collect(Collectors.toList());
+  }
+
+  public static String parseExpression(final String value, final ValueResolver valueResolver) {
     if (value.contains(START_EXPRESSION)) {
       return replaceExpressions(value, valueResolver);
     }
@@ -43,5 +61,4 @@ public class PactRunnerExpressionParser {
 
     return joiner.toString();
   }
-
 }

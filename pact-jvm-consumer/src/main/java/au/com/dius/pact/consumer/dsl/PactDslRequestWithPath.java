@@ -3,42 +3,54 @@ package au.com.dius.pact.consumer.dsl;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.Consumer;
 import au.com.dius.pact.model.OptionalBody;
+import au.com.dius.pact.model.PactReader;
 import au.com.dius.pact.model.Provider;
-import nl.flotsam.xeger.Xeger;
+import au.com.dius.pact.model.ProviderState;
+import au.com.dius.pact.model.generators.Generators;
+import au.com.dius.pact.model.matchingrules.MatchingRules;
+import au.com.dius.pact.model.matchingrules.RegexMatcher;
+import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class PactDslRequestWithPath {
+    private static final String CONTENT_TYPE = "Content-Type";
     private final ConsumerPactBuilder consumerPactBuilder;
 
     Consumer consumer;
     Provider provider;
 
-    String state;
+    List<ProviderState> state;
     String description;
     String path = "/";
     String requestMethod = "GET";
-    Map<String, String> requestHeaders = new HashMap<String, String>();
-    String query;
+    Map<String, String> requestHeaders = new HashMap<>();
+    Map<String, List<String>> query = new HashMap<>();
     OptionalBody requestBody = OptionalBody.missing();
-    Map<String, Map<String, Object>> requestMatchers = new HashMap<String, Map<String, Object>>();
+    MatchingRules requestMatchers = new MatchingRules();
+    Generators requestGenerators = new Generators();
 
-    public PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
-                                  String consumerName,
-                                  String providerName,
-                                  String state,
-                                  String description,
-                                  String path,
-                                  String requestMethod,
-                                  Map<String, String> requestHeaders,
-                                  String query,
-                                  OptionalBody requestBody,
-                                  Map<String, Map<String, Object>> requestMatchers) {
+     PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
+                            String consumerName,
+                            String providerName,
+                            List<ProviderState> state,
+                            String description,
+                            String path,
+                            String requestMethod,
+                            Map<String, String> requestHeaders,
+                            Map<String, List<String>> query,
+                            OptionalBody requestBody,
+                            MatchingRules requestMatchers,
+                            Generators requestGenerators) {
         this.consumerPactBuilder = consumerPactBuilder;
         this.requestMatchers = requestMatchers;
         this.consumer = new Consumer(consumerName);
@@ -53,11 +65,12 @@ public class PactDslRequestWithPath {
         this.query = query;
         this.requestBody = requestBody;
         this.requestMatchers = requestMatchers;
+        this.requestGenerators = requestGenerators;
     }
 
-    public PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
-                                  PactDslRequestWithPath existing,
-                                  String description) {
+    PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
+                           PactDslRequestWithPath existing,
+                           String description) {
         this.consumerPactBuilder = consumerPactBuilder;
         this.consumer = existing.consumer;
         this.provider = existing.provider;
@@ -78,6 +91,26 @@ public class PactDslRequestWithPath {
     /**
      * Headers to be included in the request
      *
+     * @param firstHeaderName      The name of the first header
+     * @param firstHeaderValue     The value of the first header
+     * @param headerNameValuePairs Additional headers in name-value pairs.
+     */
+    public PactDslRequestWithPath headers(String firstHeaderName, String firstHeaderValue, String... headerNameValuePairs) {
+        if (headerNameValuePairs.length % 2 != 0) {
+            throw new IllegalArgumentException("Pair key value should be provided, but there is one key without value.");
+        }
+        requestHeaders.put(firstHeaderName, firstHeaderValue);
+
+        for (int i = 0; i < headerNameValuePairs.length; i+=2) {
+            requestHeaders.put(headerNameValuePairs[i], headerNameValuePairs[i+1]);
+        }
+
+        return this;
+    }
+
+    /**
+     * Headers to be included in the request
+     *
      * @param headers Key-value pairs
      */
     public PactDslRequestWithPath headers(Map<String, String> headers) {
@@ -91,7 +124,7 @@ public class PactDslRequestWithPath {
      * @param query query string
      */
     public PactDslRequestWithPath query(String query) {
-        this.query = query;
+        this.query = PactReader.queryStringToMap(query, false);
         return this;
     }
 
@@ -112,7 +145,7 @@ public class PactDslRequestWithPath {
      */
     public PactDslRequestWithPath body(String body, String mimeType) {
         requestBody = OptionalBody.body(body);
-        requestHeaders.put("Content-Type", mimeType);
+        requestHeaders.put(CONTENT_TYPE, mimeType);
         return this;
     }
 
@@ -128,12 +161,81 @@ public class PactDslRequestWithPath {
     /**
      * The body of the request
      *
+     * @param body Request body in Java Functional Interface Supplier that must return a string
+     */
+    public PactDslRequestWithPath body(Supplier<String> body) {
+        requestBody = OptionalBody.body(body.get());
+        return this;
+    }
+
+    /**
+     * The body of the request
+     *
+     * @param body Request body in Java Functional Interface Supplier that must return a string
+     */
+    public PactDslRequestWithPath body(Supplier<String> body, String mimeType) {
+        requestBody = OptionalBody.body(body.get());
+        requestHeaders.put(CONTENT_TYPE, mimeType);
+        return this;
+    }
+
+    /**
+     * The body of the request
+     *
+     * @param body Request body in Java Functional Interface Supplier that must return a string
+     */
+    public PactDslRequestWithPath body(Supplier<String> body, ContentType mimeType) {
+        return body(body, mimeType.toString());
+    }
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslRequestWithPath bodyWithSingleQuotes(String body) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body);
+    }
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslRequestWithPath bodyWithSingleQuotes(String body, String mimeType) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body, mimeType);
+    }
+
+    /**
+     * The body of the request with possible single quotes as delimiters
+     * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
+     *
+     * @param body Request body in string form
+     */
+    public PactDslRequestWithPath bodyWithSingleQuotes(String body, ContentType mimeType) {
+        if (body != null) {
+            body = QuoteUtil.convert(body);
+        }
+        return body(body, mimeType);
+    }
+
+    /**
+     * The body of the request
+     *
      * @param body Request body in JSON form
      */
     public PactDslRequestWithPath body(JSONObject body) {
         requestBody = OptionalBody.body(body.toString());
-        if (!requestHeaders.containsKey("Content-Type")) {
-            requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+            requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
         }
         return this;
     }
@@ -144,12 +246,12 @@ public class PactDslRequestWithPath {
      * @param body Built using the Pact body DSL
      */
     public PactDslRequestWithPath body(DslPart body) {
-        for (String matcherName : body.matchers.keySet()) {
-            requestMatchers.put("$.body" + matcherName, body.matchers.get(matcherName));
-        }
-        requestBody = OptionalBody.body(body.toString());
-        if (!requestHeaders.containsKey("Content-Type")) {
-            requestHeaders.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+        DslPart parent = body.close();
+        requestMatchers.addCategory(parent.getMatchers());
+        requestGenerators.addGenerators(parent.generators);
+        requestBody = OptionalBody.body(parent.toString());
+        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+            requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
         }
         return this;
     }
@@ -161,8 +263,8 @@ public class PactDslRequestWithPath {
      */
     public PactDslRequestWithPath body(Document body) throws TransformerException {
         requestBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body));
-        if (!requestHeaders.containsKey("Content-Type")) {
-            requestHeaders.put("Content-Type", ContentType.APPLICATION_XML.toString());
+        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+            requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_XML.toString());
         }
         return this;
     }
@@ -183,7 +285,7 @@ public class PactDslRequestWithPath {
      * @param pathRegex string path regular expression to match with
      */
     public PactDslRequestWithPath matchPath(String pathRegex) {
-        return matchPath(pathRegex, new Xeger(pathRegex).generate());
+        return matchPath(pathRegex, new Generex(pathRegex).random());
     }
 
     /**
@@ -193,9 +295,7 @@ public class PactDslRequestWithPath {
      * @param pathRegex regular expression to use to match paths
      */
     public PactDslRequestWithPath matchPath(String pathRegex, String path) {
-        HashMap<String, Object> matcher = new HashMap<String, Object>();
-        matcher.put("regex", pathRegex);
-        requestMatchers.put("$.path", matcher);
+        requestMatchers.addCategory("path").addRule(new RegexMatcher(pathRegex));
         this.path = path;
         return this;
     }
@@ -207,7 +307,7 @@ public class PactDslRequestWithPath {
      * @param regex  Regular expression to match
      */
     public PactDslRequestWithPath matchHeader(String header, String regex) {
-        return matchHeader(header, regex, new Xeger(regex).generate());
+        return matchHeader(header, regex, new Generex(regex).random());
     }
 
     /**
@@ -218,9 +318,7 @@ public class PactDslRequestWithPath {
      * @param headerExample Example value to use
      */
     public PactDslRequestWithPath matchHeader(String header, String regex, String headerExample) {
-        HashMap<String, Object> matcher = new HashMap<String, Object>();
-        matcher.put("regex", regex);
-        requestMatchers.put("$.headers." + header, matcher);
+        requestMatchers.addCategory("header").addRule(header, new RegexMatcher(regex));
         requestHeaders.put(header, headerExample);
         return this;
     }
@@ -231,4 +329,25 @@ public class PactDslRequestWithPath {
     public PactDslResponse willRespondWith() {
         return new PactDslResponse(consumerPactBuilder, this);
     }
+
+  /**
+  * Match a query parameter with a regex. A random query parameter value will be generated from the regex.
+  * @param parameter Query parameter
+  * @param regex Regular expression to match with
+  */
+  public PactDslRequestWithPath matchQuery(String parameter, String regex) {
+    return matchQuery(parameter, regex, new Generex(regex).random());
+  }
+
+  /**
+   * Match a query parameter with a regex.
+   * @param parameter Query parameter
+   * @param regex Regular expression to match with
+   * @param example Example value to use for the query parameter
+   */
+  public PactDslRequestWithPath matchQuery(String parameter, String regex, String example) {
+    requestMatchers.addCategory("query").addRule(parameter, new RegexMatcher(regex));
+    query.put(parameter, Collections.singletonList(example));
+    return this;
+  }
 }

@@ -8,18 +8,22 @@ import scala.util.Try
 trait MockProvider {
   def config: MockProviderConfig
   def session: PactSession
+  def start(pact: Pact): Unit
+  def run[T](code: => T): Try[T]
   def runAndClose[T](pact: Pact)(code: => T): Try[(T, PactSessionResults)]
+  def stop(): Unit
 }
 
 object DefaultMockProvider {
   
-  def withDefaultConfig(pactConfig: PactConfig = PactConfig(PactSpecVersion.V2)) = apply(MockProviderConfig.createDefault(pactConfig))
+  def withDefaultConfig(pactVersion: PactSpecVersion = PactSpecVersion.V3) = apply(MockProviderConfig.createDefault(pactVersion))
   
   // Constructor providing a default implementation of StatefulMockProvider.
   // Users should not explicitly be forced to choose a variety.
   def apply(config: MockProviderConfig): StatefulMockProvider =
     config match {
       case httpsConfig: MockHttpsProviderConfig => new UnfilteredHttpsMockProvider(httpsConfig)
+      case httpsKeystoreConfig: MockHttpsKeystoreProviderConfig => new UnfilteredHttpsKeystoreMockProvider(httpsKeystoreConfig)
       case _ => new UnfilteredMockProvider(config)
     }
 }
@@ -28,21 +32,29 @@ object DefaultMockProvider {
 abstract class StatefulMockProvider extends MockProvider with StrictLogging {
   private var sessionVar = PactSession.empty
   private var pactVar: Option[Pact] = None
-  
+
+  private def waitForRequestsToFinish() = Thread.sleep(100)
+
   def session: PactSession  = sessionVar
   def pact: Option[Pact] = pactVar
   
-  def stop(): Unit
   def start(): Unit
   
-  final def start(pact: Pact): Unit = synchronized {
+  override def start(pact: Pact): Unit = synchronized {
     pactVar = Some(pact)
     sessionVar = PactSession.forPact(pact)
     start()
   }
-  
+
+  override def run[T](code: => T): Try[T] = {
+    Try {
+      val codeResult = code
+      waitForRequestsToFinish()
+      codeResult
+    }
+  }
+
   override def runAndClose[T](pact: Pact)(code: => T): Try[(T, PactSessionResults)] = {
-    def waitForRequestsToFinish() = Thread.sleep(100)
     Try {
       try {
         start(pact)
@@ -54,7 +66,7 @@ abstract class StatefulMockProvider extends MockProvider with StrictLogging {
       }
     }
   }
-  
+
   final def handleRequest(req: Request): Response = synchronized {
     logger.debug("Received request: " + req)
     val (response, newSession) = session.receiveRequest(req)

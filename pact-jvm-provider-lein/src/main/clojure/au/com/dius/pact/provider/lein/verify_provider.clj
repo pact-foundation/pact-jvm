@@ -3,7 +3,8 @@
             [clojure.java.io :as io]
             [clojure.string :as str]
             [leiningen.core.main :as lein])
-  (:import (au.com.dius.pact.provider ProviderInfo ConsumerInfo)))
+  (:import (au.com.dius.pact.provider ProviderInfo ConsumerInfo)
+           (au.com.dius.pact.model UrlSource)))
 
 (defn wrap-task [verifier task-name]
   #(lein/resolve-and-apply (.getProject verifier) [task-name]))
@@ -23,7 +24,7 @@
     (if (contains? provider-data :insecure) (.setInsecure provider (:insecure provider-data)))
     (if (contains? provider-data :trust-store) (.setTrustStore provider (:trust-store provider-data)))
     (if (contains? provider-data :trust-store-password) (.setTrustStorePassword provider (:trust-store-password provider-data)))
-    (if (contains? provider-data :state-change-url) (.setStateChangeUrl provider (:state-change-url provider-data)))
+    (if (contains? provider-data :state-change-url) (.setStateChangeUrl provider (-> provider-data :state-change-url io/as-url)))
     (if (contains? provider-data :state-change-uses-body) (.setStateChangeUsesBody provider (:state-change-uses-body provider-data)))
     (if (contains? provider-data :verification-type) (.setVerificationType provider (:verification-type provider-data)))
     (if (contains? provider-data :packages-to-scan) (.setPackagesToScan provider (:packages-to-scan provider-data)))
@@ -40,6 +41,7 @@
   (let [consumer (ConsumerInfo. (-> consumer-info key str))
         consumer-data (val consumer-info)]
     (if (contains? consumer-data :pact-file) (.setPactFile consumer (-> consumer-data :pact-file io/as-url)))
+    (if (contains? consumer-data :pact-source) (.setPactSource consumer (-> consumer-data :pact-source UrlSource.)))
     (if (contains? consumer-data :state-change-url) (.setStateChange consumer (:state-change-url consumer-data)))
     (if (contains? consumer-data :state-change-uses-body) (.setStateChangeUsesBody consumer (:state-change-uses-body consumer-data)))
     (if (contains? consumer-data :verification-type) (.setVerificationType consumer (:verification-type consumer-data)))
@@ -69,7 +71,7 @@
                             ) providers)]
     (if (not-empty failures)
       (do
-        (.displayFailures verifier failures)
+        (.displayFailures verifier (into {} failures))
         (throw (RuntimeException. (str "There were " (count failures) " pact failures")))))))
 
 (defn verify [verifier pact-info]

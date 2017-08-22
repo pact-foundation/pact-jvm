@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.exampleclients;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.UrlEscapers;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.fluent.Request;
@@ -19,6 +20,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ConsumerClient{
+    private static final String TESTREQHEADER = "testreqheader";
+    private static final String TESTREQHEADERVALUE = "testreqheadervalue";
     private String url;
 
     public ConsumerClient(String url) {
@@ -36,13 +39,14 @@ public class ConsumerClient{
             uriBuilder.setParameters(parseQueryString(queryString));
         }
         return jsonToMap(Request.Get(uriBuilder.toString())
-                .addHeader("testreqheader", "testreqheadervalue")
+                .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
                 .execute().returnContent().asString());
     }
 
     private List<NameValuePair> parseQueryString(String queryString) {
-        return Arrays.asList(queryString.split("&")).stream().map(s -> s.split("="))
-                .map(p -> new BasicNameValuePair(p[0], p[1])).collect(Collectors.toList());
+        return Arrays.stream(queryString.split("&")).map(s -> s.split("="))
+          .map(p -> new BasicNameValuePair(p[0], UrlEscapers.urlFormParameterEscaper().escape(p[1])))
+          .collect(Collectors.toList());
     }
 
     private String encodePath(String path) {
@@ -52,19 +56,22 @@ public class ConsumerClient{
 
     public List getAsList(String path) throws IOException {
 		return jsonToList(Request.Get(url + encodePath(path))
-                .addHeader("testreqheader", "testreqheadervalue")
+                .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
                 .execute().returnContent().asString());
 	}
 
     public Map post(String path, String body, ContentType mimeType) throws IOException {
         String respBody = Request.Post(url + encodePath(path))
-                .addHeader("testreqheader", "testreqheadervalue")
+                .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
                 .bodyString(body, mimeType)
                 .execute().returnContent().asString();
         return jsonToMap(respBody);
     }
 
     private HashMap jsonToMap(String respBody) throws IOException {
+        if (respBody.isEmpty()) {
+          return new HashMap();
+        }
         return new ObjectMapper().readValue(respBody, HashMap.class);
     }
 	
@@ -74,7 +81,7 @@ public class ConsumerClient{
 
     public int options(String path) throws IOException {
         return Request.Options(url + encodePath(path))
-                .addHeader("testreqheader", "testreqheadervalue")
+                .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
                 .execute().returnResponse().getStatusLine().getStatusCode();
     }
 
@@ -86,7 +93,7 @@ public class ConsumerClient{
 
     public Map putAsMap(String path, String body) throws IOException {
         String respBody = Request.Put(url + encodePath(path))
-                .addHeader("testreqheader", "testreqheadervalue")
+                .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
                 .bodyString(body, ContentType.APPLICATION_JSON)
                 .execute().returnContent().asString();
         return jsonToMap(respBody);

@@ -19,6 +19,7 @@ public class ExampleMessageConsumerWithV2MatchersTest {
 
     @Rule
     public MessagePactProviderRule mockProvider = new MessagePactProviderRule(this);
+    private byte[] currentMessage;
 
     @Pact(provider = "test_provider_v3", consumer = "test_consumer_v3")
     public MessagePact createPact(MessagePactBuilder builder) {
@@ -41,20 +42,20 @@ public class ExampleMessageConsumerWithV2MatchersTest {
         .withMetadata(metaData)
         .toPact();
 
-      MatcherTestUtils.assertMessageMatcherKeysEqualTo(messagePact,
-        "$.body.workflowId",
-        "$.body.domain",
-        "$.body.values",
-        "$.body.values",
-        "$.body.values[*].key",
-        "$.body.values[*].value"
+      MatcherTestUtils.assertMessageMatcherKeysEqualTo(messagePact, "body",
+        "$.workflowId",
+        "$.domain",
+        "$.values",
+        "$.values",
+        "$.values[*].key",
+        "$.values[*].value"
       );
 
       return messagePact;
     }
 
     @Test
-    @PactVerification({"test_provider_v3", "executing a workflow with rabbitmq"})
+    @PactVerification("test_provider_v3")
     public void test() throws Exception {
         Assert.assertNotNull(new String(currentMessage));
     }
@@ -62,6 +63,4 @@ public class ExampleMessageConsumerWithV2MatchersTest {
     public void setMessage(byte[] messageContents) {
         currentMessage = messageContents;
     }
-
-    private byte[] currentMessage;
 }

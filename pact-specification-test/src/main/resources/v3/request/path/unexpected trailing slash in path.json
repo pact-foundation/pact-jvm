@@ -6,13 +6,11 @@
     "path": "/path/to/something",
     "query": {},
     "headers": {}
-
   },
   "actual": {
     "method": "POST",
     "path": "/path/to/something/",
     "query": {},
     "headers": {}
-
   }
 }

@@ -1,0 +1,31 @@
+{
+  "match": true,
+  "comment": "Request matches with floats",
+  "expected": {
+    "headers": {"Content-Type": "application/json"},
+    "matchingRules": {
+      "$.body.product.price": {"match": "regex", "regex": "\\d(\\.\\d{1,2})"}
+    },
+    "body": [
+      {
+        "product": {
+            "id": 123,
+            "description": "Television",
+            "price": 500.55
+        }
+      }
+    ]
+  },
+  "actual": {
+    "headers": {"Content-Type": "application/json"},
+    "body": [
+      {
+        "product": {
+            "id": 123,
+            "description": "Television",
+            "price": 500.55
+        }
+      }
+    ]
+  }
+}

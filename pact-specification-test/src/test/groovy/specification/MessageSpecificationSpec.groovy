@@ -5,9 +5,11 @@ import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.provider.ResponseComparison
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
+import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@Ignore
 class MessageSpecificationSpec extends Specification {
 
   @Unroll

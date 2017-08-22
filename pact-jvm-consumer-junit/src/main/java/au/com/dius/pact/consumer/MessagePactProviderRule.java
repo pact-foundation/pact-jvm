@@ -1,8 +1,6 @@
-/**
- * 
- */
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.model.PactSpecVersion;
 import au.com.dius.pact.model.v3.messaging.Message;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import org.apache.commons.lang3.StringUtils;
@@ -12,10 +10,14 @@ import org.junit.runners.model.Statement;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
- *
+ * A junit rule that wraps every test annotated with {@link PactVerification}.
  */
 public class MessagePactProviderRule extends ExternalResource {
 	
@@ -24,6 +26,7 @@ public class MessagePactProviderRule extends ExternalResource {
 	private byte[] message;
 	private Map<String, Message> providerStateMessages;
 	private MessagePact messagePact;
+	private Map<String, String> metadata;
 
 	/**
 	 * @param testClassInstance
@@ -53,6 +56,7 @@ public class MessagePactProviderRule extends ExternalResource {
 				}
 
 				PactVerification pactDef = description.getAnnotation(PactVerification.class);
+				// no pactVerification? execute the test normally
 				if (pactDef == null) {
 					base.evaluate();
 					return;
@@ -63,8 +67,10 @@ public class MessagePactProviderRule extends ExternalResource {
 				if (StringUtils.isNoneEmpty(pactDef.fragment())) {
           Optional<Method> possiblePactMethod = findPactMethod(pactDef);
           if (!possiblePactMethod.isPresent()) {
-            throw new UnsupportedOperationException("Could not find method with @Pact for the provider " + provider);
+            base.evaluate();
+            return;
           }
+
           pacts = new HashMap<>();
           Method method = possiblePactMethod.get();
           Pact pact = method.getAnnotation(Pact.class);
@@ -88,10 +94,10 @@ public class MessagePactProviderRule extends ExternalResource {
 					return;
 				}
 
-				setMessage(providedMessage.contentsAsBytes(), description);
+				setMessage(providedMessage, description);
 				try {
 					base.evaluate();
-					messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir());
+					messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir(), PactSpecVersion.V3);
 				} catch (Throwable t) {
 					throw t;
 				}
@@ -122,9 +128,9 @@ public class MessagePactProviderRule extends ExternalResource {
 		Pact pact = method.getAnnotation(Pact.class);
 		MessagePactBuilder builder = MessagePactBuilder.consumer(pact.consumer()).hasPactWith(provider);
 		MessagePact messagePact = (MessagePact) method.invoke(testClassInstance, builder);
-		setMessage(messagePact.getMessages().get(0).contentsAsBytes(), description);
+		setMessage(messagePact.getMessages().get(0), description);
 		base.evaluate();
-		messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir());
+		messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir(), PactSpecVersion.V3);
 	}
 
 	private Optional<PactVerification> findPactVerification(PactVerifications pactVerifications) {
@@ -211,7 +217,7 @@ public class MessagePactProviderRule extends ExternalResource {
 
         if (!conforms && pact != null) {
             throw new UnsupportedOperationException("Method " + m.getName() +
-                " does not conform required method signature 'public PactFragment xxx(PactDslWithProvider builder)'");
+                " does not conform required method signature 'public MessagePact xxx(MessagePactBuilder builder)'");
         }
         return conforms;
     }
@@ -219,15 +225,24 @@ public class MessagePactProviderRule extends ExternalResource {
 	public byte[] getMessage() {
 		if (message == null) {
 			throw new UnsupportedOperationException("Message was not created and cannot be retrieved." +
-															" Check @Pact and @PactVerification match the provider.");
+								" Check @Pact and @PactVerification match.");
 		}
 		return message;
 	}
 
-	private void setMessage(byte[] message, Description description)
+	public Map<String, String> getMetadata() {
+		if (metadata == null) {
+			throw new UnsupportedOperationException("Message metadata was not created and cannot be retrieved." +
+								" Check @Pact and @PactVerification match.");
+		}
+		return metadata;
+	}
+
+	private void setMessage(Message message, Description description)
 			throws InvocationTargetException, IllegalAccessException {
 
-		this.message = message;
+		this.message = message.contentsAsBytes();
+		this.metadata = message.getMetaData();
 		Method messageSetter;
 		try {
 			messageSetter = description.getTestClass().getMethod("setMessage", byte[].class);
@@ -235,6 +250,6 @@ public class MessagePactProviderRule extends ExternalResource {
 			//ignore
 			return;
 		}
-		messageSetter.invoke(testClassInstance, message);
+		messageSetter.invoke(testClassInstance, message.contentsAsBytes());
 	}
 }

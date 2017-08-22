@@ -93,4 +93,19 @@ class MatchersTest {
     matchers.uuid('74a7c275-ee8b-4019-b4eb-3e37f7cde95f')
   }
 
+  @Test(expected = InvalidMatcherException)
+  void 'min like matcher fails if the the number of examples is less than the min'() {
+    matchers.minLike(3, 2, 100)
+  }
+
+  @Test
+  void 'min like matcher does not fail if the the number of examples is the default'() {
+    matchers.minLike(3, 100)
+  }
+
+  @Test(expected = InvalidMatcherException)
+  void 'max like matcher fails if the the number of examples is more than the max'() {
+    matchers.maxLike(3, 4, 100)
+  }
+
 }

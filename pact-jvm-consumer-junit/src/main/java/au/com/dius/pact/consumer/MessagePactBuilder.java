@@ -1,38 +1,42 @@
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.consumer.dsl.DslPart;
+import au.com.dius.pact.model.Consumer;
+import au.com.dius.pact.model.InvalidPactException;
+import au.com.dius.pact.model.OptionalBody;
+import au.com.dius.pact.model.Provider;
+import au.com.dius.pact.model.ProviderState;
+import au.com.dius.pact.model.v3.messaging.Message;
+import au.com.dius.pact.model.v3.messaging.MessagePact;
+import org.apache.http.entity.ContentType;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
-import au.com.dius.pact.model.InvalidPactException;
-import au.com.dius.pact.model.OptionalBody;
-import org.apache.http.entity.ContentType;
-
-import au.com.dius.pact.model.Consumer;
-import au.com.dius.pact.model.Provider;
-import au.com.dius.pact.model.v3.messaging.Message;
-import au.com.dius.pact.model.v3.messaging.MessagePact;
 
 /**
  * PACT DSL builder for v3 specification
  */
 public class MessagePactBuilder {
   /**
+   * String constant "Content-type".
+   */
+  private static final String CONTENT_TYPE = "Content-Type";
+  /**
    * The consumer for the pact.
    */
   private Consumer consumer;
 
   /**
-   * The producer for the pact.
+   * The provider for the pact.
    */
   private Provider provider;
 
   /**
-   * Producer state
+   * Provider states
    */
-  private String providerState;
+  private List<ProviderState> providerStates = new ArrayList<>();
 
   /**
    * Messages for the pact
@@ -75,7 +79,7 @@ public class MessagePactBuilder {
    * @return this builder.
    */
   public MessagePactBuilder given(String providerState) {
-    this.providerState = providerState;
+    this.providerStates.add(new ProviderState(providerState));
     return this;
   }
 
@@ -85,7 +89,7 @@ public class MessagePactBuilder {
    * @param description message description.
    */
   public MessagePactBuilder expectsToReceive(String description) {
-    Message message = new Message(description, providerState);
+    Message message = new Message(description, providerStates);
     if (messages == null) {
       messages = new ArrayList<Message>();
     }
@@ -107,7 +111,7 @@ public class MessagePactBuilder {
     return this;
   }
 
-  public MessagePactBuilder withContent(PactDslJsonBody body) {
+  public MessagePactBuilder withContent(DslPart body) {
     if (messages == null || messages.isEmpty()) {
       throw new InvalidPactException("expectsToReceive is required before withMetaData");
     }
@@ -117,17 +121,14 @@ public class MessagePactBuilder {
     Map<String, String> metadata = message.getMetaData();
     if (metadata == null) {
       metadata = new HashMap<String, String>(1);
-      metadata.put("Content-Type", ContentType.APPLICATION_JSON.toString());
-    } else if (!metadata.containsKey("Content-Type")) {
-      metadata.put("Content-Type", ContentType.APPLICATION_JSON.toString());
+      metadata.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+    } else if (!metadata.containsKey(CONTENT_TYPE)) {
+      metadata.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
     }
 
-    message.setContents(OptionalBody.body(body.toString()));
-    Map<String, Map<String, Object>> matchingRules = new HashMap<String, Map<String, Object>>();
-    for (String matcherName : body.getMatchers().keySet()) {
-      matchingRules.put("$.body" + matcherName, body.getMatchers().get(matcherName));
-    }
-    message.setMatchingRules(matchingRules);
+    DslPart parent = body.close();
+    message.setContents(OptionalBody.body(parent.toString()));
+    message.getMatchingRules().addCategory(parent.getMatchers());
 
     return this;
   }

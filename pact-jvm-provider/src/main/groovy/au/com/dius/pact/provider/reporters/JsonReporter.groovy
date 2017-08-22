@@ -1,8 +1,12 @@
 package au.com.dius.pact.provider.reporters
 
 import au.com.dius.pact.model.BasePact
+import au.com.dius.pact.model.FileSource
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.PactSource
+import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 import groovy.json.JsonOutput
@@ -56,16 +60,16 @@ class JsonReporter implements VerifierReporter {
   }
 
   @Override
-  void verifyConsumerFromUrl(URL pactUrl, ConsumerInfo consumer) {
+  void verifyConsumerFromUrl(UrlPactSource pactUrl, ConsumerInfo consumer) {
     jsonData.execution.last().consumer.source = [
-      url: pactUrl as String
+      url: pactUrl.url
     ]
   }
 
   @Override
-  void verifyConsumerFromFile(File pactFile, ConsumerInfo consumer) {
+  void verifyConsumerFromFile(PactSource pactFile, ConsumerInfo consumer) {
     jsonData.execution.last().consumer.source = [
-      file: pactFile as String
+      file: pactFile instanceof FileSource ? pactFile.file : pactFile.description()
     ]
   }
 
@@ -86,7 +90,7 @@ class JsonReporter implements VerifierReporter {
   @Override
   void interactionDescription(Interaction interaction) {
     jsonData.execution.last().interactions << [
-      interaction: interaction,
+      interaction: interaction.toMap(PactSpecVersion.V3),
       verification: [
         result: 'OK'
       ]

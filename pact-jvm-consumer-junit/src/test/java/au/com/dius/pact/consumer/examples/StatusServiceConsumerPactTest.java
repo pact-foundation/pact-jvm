@@ -5,16 +5,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import au.com.dius.pact.consumer.ConsumerPactTest;
+import au.com.dius.pact.consumer.ConsumerPactTestMk2;
+import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
 import org.apache.http.client.fluent.Request;
 
 import static org.junit.Assert.assertEquals;
 
-public class StatusServiceConsumerPactTest extends ConsumerPactTest {
+public class StatusServiceConsumerPactTest extends ConsumerPactTestMk2 {
 
     @Override
-    protected PactFragment createFragment(PactDslWithProvider builder) {
+    protected RequestResponsePact createPact(PactDslWithProvider builder) {
         Map<String, String> headers = new HashMap();
         headers.put("testreqheader", "testreqheadervalue");
 
@@ -26,7 +29,7 @@ public class StatusServiceConsumerPactTest extends ConsumerPactTest {
             .willRespondWith()
             .status(200)
             .headers(headers)
-            .body("{\"responsetest\":true}").toFragment();
+            .body("{\"responsetest\":true}").toPact();
     }
 
     @Override
@@ -40,8 +43,8 @@ public class StatusServiceConsumerPactTest extends ConsumerPactTest {
     }
 
     @Override
-    protected void runTest(String baseUrl) throws IOException {
-        StatusServiceClient statusServiceClient = new StatusServiceClient(baseUrl);
+    protected void runTest(MockServer mockServer) throws IOException {
+        StatusServiceClient statusServiceClient = new StatusServiceClient(mockServer.getUrl());
 
         String currentQuestionnairePage = statusServiceClient.getCurrentQuestionnairePage(null);
 
@@ -56,10 +59,9 @@ public class StatusServiceConsumerPactTest extends ConsumerPactTest {
         }
 
         public String getCurrentQuestionnairePage(Object page) throws IOException {
-            String response = Request.Get(baseUrl + "/status")
+            Request.Get(baseUrl + "/status")
                 .addHeader("testreqheader", "testreqheadervalue")
-                .execute().returnContent().asString();
-
+                .execute();
             return "my_home_1";
         }
     }

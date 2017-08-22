@@ -1,9 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
-import au.com.dius.pact.consumer.PactMismatch
-@SuppressWarnings('UnusedImport')
-import au.com.dius.pact.consumer.PactVerified$
-import au.com.dius.pact.consumer.VerificationResult
+import au.com.dius.pact.consumer.PactVerificationResult
 import groovy.json.JsonBuilder
 import groovyx.net.http.RESTClient
 import org.junit.Test
@@ -50,12 +47,13 @@ class ExampleGroovyConsumerPactTest {
             willRespondWith(status: 200, body: '"deleted"', headers: ['Content-Type': 'text/plain'])
 
             uponReceiving('an update alligators request')
-            withAttributes(method: 'put', path: '/alligators', body: [ ['name': 'Roger' ] ])
+            withAttributes(method: 'put', path: '/alligators', body: [ ['name': 'Roger' ] ],
+              headers: ['Content-Type': 'application/json'])
             willRespondWith(status: 200, body: [ [name: 'Roger', age: 20] ],
                 headers: ['Content-Type': 'application/json'])
         }
 
-        VerificationResult result = aliceService.run {
+        PactVerificationResult result = aliceService.runTest {
             def client = new RESTClient('http://localhost:1234/')
             def aliceResponse = client.get(path: '/mallory', query: [status: 'good', name: 'ron'])
 
@@ -65,10 +63,10 @@ class ExampleGroovyConsumerPactTest {
             def data = aliceResponse.data.text()
             assert data == '"That is some good Mallory."'
         }
-        assert result == PactVerified$.MODULE$
+        assert result == PactVerificationResult.Ok.INSTANCE
 
-        result = bobService.run { config ->
-            def client = new RESTClient(config.url())
+        result = bobService.runTest { mockServer ->
+            def client = new RESTClient(mockServer.url)
             def body = new JsonBuilder([name: 'Bobby'])
             def bobPostResponse = client.post(path: '/donuts', requestContentType: 'application/json',
                 headers: [
@@ -88,7 +86,7 @@ class ExampleGroovyConsumerPactTest {
             assert bobPutResponse.status == 200
             assert bobPutResponse.data == [ [age: 20, name: 'Roger'] ]
         }
-        assert result instanceof PactMismatch
-        assert result.results.missing.size() == 1
+        assert result instanceof PactVerificationResult.ExpectedButNotReceived
+        assert result.expectedRequests.size() == 1
     }
 }

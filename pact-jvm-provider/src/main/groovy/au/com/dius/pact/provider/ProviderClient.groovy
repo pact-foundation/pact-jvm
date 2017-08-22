@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.Request
 import groovy.json.JsonBuilder
 import groovy.util.logging.Slf4j
@@ -38,7 +39,7 @@ class ProviderClient {
     private static final String REQUEST = 'request'
     private static final String ACTION = 'action'
 
-  HttpClientFactory httpClientFactory = new HttpClientFactory()
+    HttpClientFactory httpClientFactory = new HttpClientFactory()
     Request request
     def provider
 
@@ -113,7 +114,7 @@ class ProviderClient {
     }
 
     private void setupHeaders(HttpRequest method) {
-        if (request.headers != null) {
+        if (request.headers) {
             request.headers.each { key, value ->
                 method.addHeader(key, value)
             }
@@ -124,7 +125,7 @@ class ProviderClient {
         }
     }
 
-    CloseableHttpResponse makeStateChangeRequest(def stateChangeUrl, String state, boolean postStateInBody,
+    CloseableHttpResponse makeStateChangeRequest(def stateChangeUrl, ProviderState state, boolean postStateInBody,
                                                  boolean isSetup, boolean stateChangeTeardown) {
         if (stateChangeUrl) {
             CloseableHttpClient httpclient = httpClientFactory.newClient(provider)
@@ -138,14 +139,18 @@ class ProviderClient {
 
             if (postStateInBody) {
               method = new HttpPost(urlBuilder.build())
-              def map = [state: state]
+              def map = [state: state.name]
+              if (state.params) {
+                map.params = state.params
+              }
               if (stateChangeTeardown) {
                 map.action = isSetup ? 'setup' : 'teardown'
               }
               method.setEntity(new StringEntity(new JsonBuilder(map).toPrettyString(),
                         ContentType.APPLICATION_JSON))
             } else {
-              urlBuilder.setParameter('state', state)
+              urlBuilder.setParameter('state', state.name)
+              state.params.each { k, v -> urlBuilder.setParameter(k as String, v as String) }
               if (stateChangeTeardown) {
                 if (isSetup) {
                   urlBuilder.setParameter(ACTION, 'setup')
@@ -173,7 +178,7 @@ class ProviderClient {
         }
     }
 
-    def handleResponse(HttpResponse httpResponse) {
+    static handleResponse(HttpResponse httpResponse) {
         log.debug "Received response: ${httpResponse.statusLine}"
         def response = [statusCode: httpResponse.statusLine.statusCode]
 
@@ -198,14 +203,9 @@ class ProviderClient {
     }
 
     private HttpRequest newRequest(Request request) {
-        def urlBuilder = new URIBuilder()
-        urlBuilder.scheme = provider.protocol
-        if (provider.host instanceof Closure) {
-            urlBuilder.host = provider.host.call()
-        } else {
-            urlBuilder.host = provider.host
-        }
-        urlBuilder.port = provider.port
+        String scheme = provider.protocol
+        String host = invokeIfClosure(provider.host)
+        int port = convertToInteger(invokeIfClosure(provider.port))
 
         String path = ''
         if (provider.path.size() > 0) {
@@ -215,8 +215,17 @@ class ProviderClient {
             }
         }
 
-        path += URLDecoder.decode(request.path, UTF8)
-        urlBuilder.path = path
+        def urlBuilder = new URIBuilder()
+        if (systemPropertySet('pact.verifier.disableUrlPathDecoding')) {
+          path += request.path
+          urlBuilder = new URIBuilder("$scheme://$host:$port$path")
+        } else {
+          path += URLDecoder.decode(request.path, UTF8)
+          urlBuilder.scheme = provider.protocol
+          urlBuilder.host = invokeIfClosure(provider.host)
+          urlBuilder.port = convertToInteger(invokeIfClosure(provider.port))
+          urlBuilder.path = path
+        }
 
         if (request.query != null && !urlEncodedFormPost(request)) {
           request.query.each {
@@ -247,7 +256,28 @@ class ProviderClient {
         }
     }
 
-    static boolean urlEncodedFormPost(Request request) {
+  @SuppressWarnings('BooleanGetBoolean')
+  boolean systemPropertySet(String property) {
+    Boolean.getBoolean(property)
+  }
+
+  static int convertToInteger(def port) {
+    if (port instanceof Number) {
+      port.intValue()
+    } else {
+      Integer.parseInt(port.toString())
+    }
+  }
+
+  private static invokeIfClosure(property) {
+    if (property instanceof Closure) {
+      property.call()
+    } else {
+      property
+    }
+  }
+
+  static boolean urlEncodedFormPost(Request request) {
         request.method.toLowerCase() == 'post' &&
                 request.mimeType() == ContentType.APPLICATION_FORM_URLENCODED.mimeType
     }

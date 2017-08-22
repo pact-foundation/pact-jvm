@@ -34,9 +34,19 @@ Usage: pact-jvm-server [options] [port]
         upper bound to allocate mock ports (defaults to 40000)
   -d | --daemon
         run as a daemon process
+  -v <value> | --pact-version <value>
+        pact version to generate for (2 or 3)
+  -k <value> | --keystore-path <value>
+        Path to keystore
+  -p <value> | --keystore-password <value>
+        Keystore password
+  -s <value> | --ssl-port <value>   
+        Ssl port the mock server should run on. lower and upper bounds are ignored
   --debug
         run with debug logging
 ```
+### Using trust store 3.4.0+
+Trust store can be used. However, it is limited to a single port for the time being.
 
 ### Prior to version 2.2.6
 
@@ -56,7 +66,7 @@ You can build an application bundle with gradle by running (for 2.11 version):
 
 This will create an app bundle in `build/2.11/install/pact-jvm-server_2.11`. You can then execute it with:
 
-    $ java -jar pact-jvm-server/build/2.10/install/pact-jvm-server_2.11/lib/pact-jvm-server_2.11-2.2.4.jar
+    $ java -jar pact-jvm-server/build/2.10/install/pact-jvm-server_2.11/lib/pact-jvm-server_2.11-3.2.11.jar
 
 or with the generated bundle script file:
 

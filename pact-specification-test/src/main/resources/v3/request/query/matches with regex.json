@@ -1,0 +1,34 @@
+{
+  "match": true,
+  "comment": "Queries match with regex",
+  "expected" : {
+    "method": "GET",
+    "path": "/path",
+    "query": {
+      "alligator": ["Mary"],
+      "hippo": ["John"]
+    },
+    "headers": {},
+    "matchingRules": {
+      "query": {
+        "hippo": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "\\w+"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "actual": {
+    "method": "GET",
+    "path": "/path",
+    "query": {
+      "alligator": ["Mary"],
+      "hippo": ["Fred"]
+    },
+    "headers": {}
+  }
+}

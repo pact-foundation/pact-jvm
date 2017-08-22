@@ -21,53 +21,53 @@ Example in a JUnit test:
 
 ```java
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.RequestResponsePact;
+import org.apache.http.entity.ContentType;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
 import static org.junit.Assert.assertEquals;
 
 public class PactTest {
 
-    @Test
-    public void testPact() {
-        PactFragment pactFragment = ConsumerPactBuilder
-            .consumer("Some Consumer")
-            .hasPactWith("Some Provider")
-            .uponReceiving("a request to say Hello")
-                .path("/hello")
-                .method("POST")
-                .body("{\"name\": \"harry\"}")
-            .willRespondWith()
-                .status(200)
-                .body("{\"hello\": \"harry\"}")
-                .toFragment();
+  @Test
+  public void testPact() {
+    RequestResponsePact pact = ConsumerPactBuilder
+      .consumer("Some Consumer")
+      .hasPactWith("Some Provider")
+      .uponReceiving("a request to say Hello")
+      .path("/hello")
+      .method("POST")
+      .body("{\"name\": \"harry\"}")
+      .willRespondWith()
+      .status(200)
+      .body("{\"hello\": \"harry\"}")
+      .toPact();
 
-        MockProviderConfig config = MockProviderConfig.createDefault();
-        VerificationResult result = pactFragment.runConsumer(config, new TestRun() {
-            @Override
-            public void run(MockProviderConfig config) {
-                Map expectedResponse = new HashMap();
-                expectedResponse.put("hello", "harry");
-                try {
-                    assertEquals(new ProviderClient(config.url()).hello("{\"name\": \"harry\"}"),
-                            expectedResponse);
-                } catch (IOException e) {}
-            }
-        });
+    MockProviderConfig config = MockProviderConfig.createDefault();
+    PactVerificationResult result = runConsumerTest(pact, config, new PactTestRun() {
+      @Override
+      public void run(@NotNull MockServer mockServer) throws IOException {
+        Map expectedResponse = new HashMap();
+        expectedResponse.put("hello", "harry");
+        assertEquals(expectedResponse, new ConsumerClient(mockServer.getUrl()).post("/hello",
+            "{\"name\": \"harry\"}", ContentType.APPLICATION_JSON));
+      }
+    });
 
-        if (result instanceof PactError) {
-            throw new RuntimeException(((PactError)result).error());
-        }
-
-        assertEquals(ConsumerPactTest.PACT_VERIFIED, result);
+    if (result instanceof PactVerificationResult.Error) {
+      throw new RuntimeException(((PactVerificationResult.Error)result).getError());
     }
 
-}
+    assertEquals(PactVerificationResult.Ok.INSTANCE, result);
+  }
 
+}
 ```
 
 The DSL has the following pattern:
@@ -93,7 +93,7 @@ The DSL has the following pattern:
     .
     .
     .
-.toFragment()
+.toPact()
 ```
 
 You can define as many interactions as required. Each interaction starts with `uponReceiving` followed by `willRespondWith`.
@@ -142,6 +142,8 @@ one will be generated.
 | id | Will match all numbers by type |
 | hexValue | Will match all hexadecimal encoded strings |
 | uuid | Will match strings containing UUIDs |
+| includesStr | Will match strings containing the provided string |
+| equalsTo | Will match using equals |
 
 _\* Note:_ JSON only supports double precision floating point values. Depending on the language implementation, they
 may parsed as integer, floating point or decimal numbers.
@@ -165,7 +167,7 @@ For example:
         .minArrayLike("users")
             .id()
             .stringType("name")
-            .closeObject()
+        .closeObject()
         .closeArray();
 ```
 
@@ -207,7 +209,7 @@ PactDslJsonArray.arrayEachLike()
     .date("clearedDate", "mm/dd/yyyy", date)
     .stringType("status", "STATUS")
     .decimalType("amount", 100.0)
-    .closeObject()
+.closeObject()
 ```
 
 This will then match a body like:
@@ -228,6 +230,91 @@ This will then match a body like:
   "amount" : 15.0
 } ]
 ```
+
+#### Matching arrays of arrays (version 3.2.12/2.4.14+)
+
+For the case where you have arrays of arrays (GeoJSON is an example), the following methods have been provided:
+
+| function | description |
+|----------|-------------|
+| `eachArrayLike` | Ensure that each item in the array is an array that matches the provided example |
+| `eachArrayWithMaxLike` | Ensure that each item in the array is an array that matches the provided example and the array is no bigger than the provided max |
+| `eachArrayWithMinLike` | Ensure that each item in the array is an array that matches the provided example and the array is no smaller than the provided min |
+
+For example (with GeoJSON structure):
+
+```java
+new PactDslJsonBody()
+  .stringType("type","FeatureCollection")
+  .eachLike("features")
+    .stringType("type","Feature")
+    .object("geometry")
+      .stringType("type","Point")
+      .eachArrayLike("coordinates") // coordinates is an array of arrays 
+        .decimalType(-7.55717)
+        .decimalType(49.766896)
+      .closeArray()
+      .closeArray()
+    .closeObject()
+    .object("properties")
+      .stringType("prop0","value0")
+    .closeObject()
+  .closeObject()
+  .closeArray()
+```
+
+This generated the following JSON:
+
+```json
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [[-7.55717, 49.766896]],
+        "type": "Point"
+      },
+      "type": "Feature",
+      "properties": { "prop0": "value0" }
+    }
+  ],
+  "type": "FeatureCollection"
+}
+```
+
+and will be able to match all coordinates regardless of the number of coordinates.
+
+#### Matching any key in a map (3.3.1/2.5.0+)
+
+The DSL has been extended for cases where the keys in a map are IDs. For an example of this, see 
+[#313](https://github.com/DiUS/pact-jvm/issues/131). In this case you can use the `eachKeyLike` method, which takes an 
+example key as a parameter.
+
+For example:
+
+```java
+DslPart body = new PactDslJsonBody()
+  .object("one")
+    .eachKeyLike("001", PactDslJsonRootValue.id(12345L)) // key like an id mapped to a matcher
+  .closeObject()
+  .object("two")
+    .eachKeyLike("001-A") // key like an id where the value is matched by the following example
+      .stringType("description", "Some Description")
+    .closeObject()
+  .closeObject()
+  .object("three")
+    .eachKeyMappedToAnArrayLike("001") // key like an id mapped to an array where each item is matched by the following example
+      .id("someId", 23456L)
+      .closeObject()
+    .closeArray()
+  .closeObject();
+
+```
+
+For an example, have a look at [WildcardKeysTest](src/test/java/au/com/dius/pact/consumer/WildcardKeysTest.java).
+
+**NOTE:** The `eachKeyLike` method adds a `*` to the matching path, so the matching definition will be applied to all keys
+ of the map if there is not a more specific matcher defined for a particular key. Having more than one `eachKeyLike` condition
+ applied to a map will result in only one being applied when the pact is verified (probably the last).
 
 ### Matching on paths (version 2.1.5+)
 
@@ -267,4 +354,25 @@ For example:
         .status(200)
         .body("{\"hello\": \"harry\"}")
         .matchHeader("Location", ".*/hello/[0-9]+", "/hello/1234")
+```
+
+### Matching on query parameters (version 3.3.7+)
+
+You can use regular expressions to match request query parameters. The DSL has a `matchQuery` method for this. You can provide
+an example value to use when generating requests, and if you leave it out it will generate a random one
+from the regular expression.
+
+For example:
+
+```java
+  .given("test state")
+    .uponReceiving("a test interaction")
+        .path("/hello")
+        .method("POST")
+        .matchQuery("a", "\\d+", "100")
+        .matchQuery("b", "[A-Z]", "X")
+        .body("{\"name\": \"harry\"}")
+    .willRespondWith()
+        .status(200)
+        .body("{\"hello\": \"harry\"}")
 ```

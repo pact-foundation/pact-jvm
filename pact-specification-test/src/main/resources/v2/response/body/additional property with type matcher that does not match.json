@@ -1,0 +1,27 @@
+{
+  "match": false,
+  "comment": "additional property with type matcher wildcards that don't match",
+  "expected": {
+    "headers": {},
+    "body" : {
+      "myPerson": {
+        "name": "Any name"
+      }
+    },
+    "matchingRules" : {
+      "$.body.myPerson.*" : {
+        "match": "type"
+      }
+    }
+  },
+  "actual": {
+    "headers": {},
+    "body": {
+      "myPerson": {
+        "name": 39,
+        "age": "39",
+        "nationality": "Australian"
+      }
+    }    
+  }
+}

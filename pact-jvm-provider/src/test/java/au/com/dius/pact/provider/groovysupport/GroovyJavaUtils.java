@@ -9,27 +9,32 @@ import java.util.function.Supplier;
 
 public class GroovyJavaUtils {
 
+  private static final String WAS_CALLED = "was called";
+  private static final String JAVA_FUNCTION = "Java Function";
+
+  private GroovyJavaUtils() {}
+
   public static Consumer<HttpRequest> consumerRequestFilter() {
-    return request -> request.addHeader("Java Consumer", "was called");
+    return request -> request.addHeader("Java Consumer", WAS_CALLED);
   }
 
   public static Function<HttpRequest, HttpRequest> functionRequestFilter() {
     return request -> {
-      request.addHeader("Java Function", "was called");
+      request.addHeader(JAVA_FUNCTION, WAS_CALLED);
       return request;
     };
   }
 
   public static BiFunction<HttpRequest, Object, HttpRequest> function2RequestFilter() {
     return (request, other) -> {
-      request.addHeader("Java Function", "was called");
+      request.addHeader(JAVA_FUNCTION, WAS_CALLED);
       return request;
     };
   }
 
   public static BiFunction<Object, HttpRequest, HttpRequest> function2RequestFilterWithParametersSwapped() {
     return (other, request) -> {
-      request.addHeader("Java Function", "was called");
+      request.addHeader(JAVA_FUNCTION, WAS_CALLED);
       return request;
     };
   }

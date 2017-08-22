@@ -1,22 +1,28 @@
 package au.com.dius.pact.consumer.groovy
 
-import nl.flotsam.xeger.Xeger
+import au.com.dius.pact.model.generators.Generator
+import au.com.dius.pact.model.generators.RegexGenerator
+import au.com.dius.pact.model.matchingrules.MatchingRule
+import au.com.dius.pact.model.matchingrules.RegexMatcher
+import com.mifmif.common.regex.Generex
 
 /**
  * Regular Expression Matcher
  */
 class RegexpMatcher extends Matcher {
 
-  def getMatcher() {
-    [regex: values[0].toString()]
+  String regex
+
+  MatchingRule getMatcher() {
+    new RegexMatcher(regex)
+  }
+
+  Generator getGenerator() {
+    value == null ? new RegexGenerator(regex) : null
   }
 
   def getValue() {
-    if (values[1] == null) {
-      new Xeger(values[0].toString()).generate()
-    } else {
-      values[1]
-    }
+    super.@value ?: new Generex(regex).random()
   }
 
 }

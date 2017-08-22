@@ -23,7 +23,7 @@ case class RequestMatching(expectedInteractions: Seq[RequestResponseInteraction]
 object RequestMatching extends StrictLogging {
   import au.com.dius.pact.model.Matching._
 
-  var diffConfig = DiffConfig(allowUnexpectedKeys = false, structural = false)
+  var allowUnexpectedKeys = false
 
   implicit def liftPactForMatching(pact: RequestResponsePact): RequestMatching =
     RequestMatching(JavaConversions.collectionAsScalaIterable(pact.getInteractions).toSeq)
@@ -49,8 +49,9 @@ object RequestMatching extends StrictLogging {
     (matchMethod(expected.getMethod, actual.getMethod)
       ++ matchPath(expected, actual)
       ++ matchQuery(expected, actual)
-      ++ matchCookie(CollectionUtils.toOptionalList(expected.cookie), CollectionUtils.toOptionalList(actual.cookie))
+      ++ matchCookie(au.com.dius.pact.matchers.util.CollectionUtils.toOptionalList(expected.cookie),
+      au.com.dius.pact.matchers.util.CollectionUtils.toOptionalList(actual.cookie))
       ++ matchRequestHeaders(expected, actual)
-      ++ matchBody(expected, actual, diffConfig)).toSeq
+      ++ matchBody(expected, actual, allowUnexpectedKeys)).toSeq
   }
 }

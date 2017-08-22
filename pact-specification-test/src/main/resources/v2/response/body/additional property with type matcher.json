@@ -5,8 +5,7 @@
     "headers": {},
     "body" : {
       "myPerson": {
-        "name": "Any name",
-        "age": 10
+        "name": "Any name"
       }
     },
     "matchingRules" : {
@@ -25,4 +24,4 @@
       }
     }    
   }
-}   
+}

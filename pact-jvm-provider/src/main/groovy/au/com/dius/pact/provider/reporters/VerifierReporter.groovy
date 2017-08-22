@@ -2,6 +2,8 @@ package au.com.dius.pact.provider.reporters
 
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.PactSource
+import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 
@@ -17,8 +19,8 @@ trait VerifierReporter {
   abstract void initialise(ProviderInfo provider)
   abstract void finaliseReport()
   abstract void reportVerificationForConsumer(ConsumerInfo consumer, ProviderInfo provider)
-  abstract void verifyConsumerFromUrl(URL pactUrl, ConsumerInfo consumer)
-  abstract void verifyConsumerFromFile(File pactFile, ConsumerInfo consumer)
+  abstract void verifyConsumerFromUrl(UrlPactSource pactUrl, ConsumerInfo consumer)
+  abstract void verifyConsumerFromFile(PactSource pactFile, ConsumerInfo consumer)
   abstract void pactLoadFailureForConsumer(ConsumerInfo consumerInfo, String message)
   abstract void warnProviderHasNoConsumers(ProviderInfo providerInfo)
   abstract void warnPactFileHasNoInteractions(Pact pact)

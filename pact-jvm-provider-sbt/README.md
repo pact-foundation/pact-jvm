@@ -5,7 +5,7 @@ The sbt plugin adds an sbt task for running all provider pacts against a running
 
 To use the pact sbt plugin, add the following to your project/plugins.sbt
 
-    addSbtPlugin("au.com.dius" %% "pact-jvm-provider-sbt" % "2.4.4")
+    addSbtPlugin("au.com.dius" %% "pact-jvm-provider-sbt" % "2.4.13")
 
 ## Using the old verifyPacts task
 
@@ -126,6 +126,21 @@ SbtProviderPlugin.config ++ Seq(
 )
 ```
 
+
+You can also verify all the latest pacts for a provider for all its consumer where pacts have a specified tag:
+
+
+```scala
+import au.com.dius.pact.provider.sbt._
+SbtProviderPlugin.config ++ Seq(
+  providers := Seq(
+    ProviderConfig(name = "Our Service")
+        .hasPactsFromPactBroker(new URL("http://pact-broker.local"), Some("tagName")))
+)
+```
+
+Working with tags requires pact-broker >= v1.12.0.
+
 ### Filtering the interactions that are verified
 
 You can filter the interactions that are run using three properties: `pact.filter.consumers`, `pact.filter.description` and `pact.filter.providerState`.
@@ -146,6 +161,7 @@ The following project properties can be specified with `-Dproperty=value` on the
 |Property|Description|
 |--------|-----------|
 |pact.showStacktrace|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
+|pact.showFullDiff|This turns on displaying the full diff of the expected versus actual bodies [version 3.3.6+]|
 |pact.filter.consumers|Comma separated list of consumer names to verify|
 |pact.filter.description|Only verify interactions whose description match the provided regular expression|
 |pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|

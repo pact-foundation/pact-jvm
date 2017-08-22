@@ -5,7 +5,6 @@ import com.google.common.net.UrlEscapers;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.fluent.InsecureHttpsRequest;
-import org.apache.http.client.fluent.Request;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicNameValuePair;
@@ -20,7 +19,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ConsumerHttpsClient {
-  private String url;
+    private static final String TESTREQHEADERVALUE = "testreqheadervalue";
+    private static final String TESTREQHEADER = "testreqheader";
+    private String url;
 
   public ConsumerHttpsClient(String url) {
     this.url = url.replaceFirst("http:", "https:");
@@ -36,8 +37,8 @@ public class ConsumerHttpsClient {
       if (StringUtils.isNotEmpty(queryString)) {
           uriBuilder.setParameters(parseQueryString(queryString));
       }
-      return jsonToMap(InsecureHttpsRequest.Get(uriBuilder.toString())
-              .addHeader("testreqheader", "testreqheadervalue")
+      return jsonToMap(InsecureHttpsRequest.get(uriBuilder.toString())
+              .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
               .execute().returnContent().asString());
   }
 
@@ -52,14 +53,14 @@ public class ConsumerHttpsClient {
     }
 
   public List getAsList(String path) throws IOException {
-    return jsonToList(InsecureHttpsRequest.Get(url + encodePath(path))
-                .addHeader("testreqheader", "testreqheadervalue")
+    return jsonToList(InsecureHttpsRequest.get(url + encodePath(path))
+                .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
                 .execute().returnContent().asString());
   }
 
   public Map post(String path, String body, ContentType mimeType) throws IOException {
-      String respBody = InsecureHttpsRequest.Post(url + encodePath(path))
-              .addHeader("testreqheader", "testreqheadervalue")
+      String respBody = InsecureHttpsRequest.post(url + encodePath(path))
+              .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
               .bodyString(body, mimeType)
               .execute().returnContent().asString();
       return jsonToMap(respBody);
@@ -74,20 +75,20 @@ public class ConsumerHttpsClient {
 	}
 
   public int options(String path) throws IOException {
-      return InsecureHttpsRequest.Options(url + encodePath(path))
-              .addHeader("testreqheader", "testreqheadervalue")
+      return InsecureHttpsRequest.options(url + encodePath(path))
+              .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
               .execute().returnResponse().getStatusLine().getStatusCode();
   }
 
   public String postBody(String path, String body, ContentType mimeType) throws IOException {
-      return InsecureHttpsRequest.Post(url + encodePath(path))
+      return InsecureHttpsRequest.post(url + encodePath(path))
           .bodyString(body, mimeType)
           .execute().returnContent().asString();
   }
 
   public Map putAsMap(String path, String body) throws IOException {
-      String respBody = InsecureHttpsRequest.Put(url + encodePath(path))
-              .addHeader("testreqheader", "testreqheadervalue")
+      String respBody = InsecureHttpsRequest.put(url + encodePath(path))
+              .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
               .bodyString(body, ContentType.APPLICATION_JSON)
               .execute().returnContent().asString();
       return jsonToMap(respBody);

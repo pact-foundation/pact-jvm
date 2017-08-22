@@ -3,19 +3,24 @@ def crossCompileModules = [
   'pact-jvm-consumer-junit',
   'pact-jvm-consumer-specs2',
   'pact-jvm-consumer-groovy',
-  'pact-jvm-model',
   'pact-jvm-provider',
   'pact-jvm-provider-specs2',
+  'pact-jvm-provider-scalatest',
   'pact-jvm-server',
   'pact-specification-test',
   'pact-jvm-provider-gradle',
   'pact-jvm-provider-junit',
+  'pact-jvm-provider-spring',
   'pact-jvm-matchers',
   'pact-jvm-provider-maven',
-  'pact-jvm-provider-lein'
+  'pact-jvm-provider-lein',
+  'pact-jvm-provider-scalasupport'
 ]
 
 rootProject.name = 'pact-jvm'
+
+include 'pact-jvm-pact-broker'
+include 'pact-jvm-model'
 
 crossCompileModules.each {
   include it + '_2.11'

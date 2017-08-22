@@ -8,14 +8,14 @@ pact-jvm-consumer-specs2
 In the root folder of your project in build.sbt add the line:
 
 ```scala
-libraryDependencies += "au.com.dius" %% "pact-jvm-consumer-specs2" % "3.2.2"
+libraryDependencies += "au.com.dius" %% "pact-jvm-consumer-specs2" % "3.2.11"
 ```
 
 or if you are using Gradle:
 
 ```groovy
 dependencies {
-    testCompile "au.com.dius:pact-jvm-consumer-specs2_2.11:3.2.2"
+    testCompile "au.com.dius:pact-jvm-consumer-specs2_2.11:3.2.11"
 }
 
 ```

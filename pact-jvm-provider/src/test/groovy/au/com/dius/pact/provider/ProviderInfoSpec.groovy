@@ -54,34 +54,4 @@ class ProviderInfoSpec extends Specification {
     thrown(RuntimeException)
   }
 
-//  def 'loading pacts from a directory skips directories'() {
-//    given:
-//    def mockPactFile = Mock(File) {
-//      isDirectory() >> false
-//      isFile() >> true
-//      getName() >> 'mockPactFile.json'
-//    }
-//    def mockPactFile2 = Mock(File) {
-//      isDirectory() >> false
-//      isFile() >> true
-//      getName() >> 'mockPactFile2.json'
-//    }
-//    def mockDir = Mock(File) {
-//      isDirectory() >> true
-//      isFile() >> false
-//      getName() >> 'mockDir'
-//    }
-//    fileList = [
-//      mockDir, mockPactFile, mockPactFile2
-//    ]
-//
-//    when:
-//    def consumers = providerInfo.hasPactsWith('testGroup') {
-//      pactFileLocation = mockPactDir
-//    }
-//
-//    then:
-//    consumers != []
-//  }
-
 }

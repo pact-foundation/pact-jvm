@@ -2,9 +2,11 @@ apply plugin: 'maven-publish'
 
 dependencies {
     compile project(":pact-jvm-provider_${project.scalaVersion}"),
-      "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy",
-      'org.apache.maven:maven-plugin-api:3.3.3',
-      'org.apache.maven.plugin-tools:maven-plugin-annotations:3.3'
+      'org.apache.maven:maven-plugin-api:3.5.0',
+      'org.apache.maven.plugin-tools:maven-plugin-annotations:3.5'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+    compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -13,13 +15,14 @@ def isWindows() {
 }
 
 task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider_${project.scalaVersion}:install",
-                                              ":pact-jvm-model_${project.scalaVersion}:install",
+                                              ':pact-jvm-model:install',
                                               ":pact-jvm-matchers_${project.scalaVersion}:install"]) {
     String mvn = 'mvn'
     if (isWindows()) {
         mvn = 'mvn.bat'
     }
-    commandLine mvn, '-f', "${buildDir}/poms/pom.xml", '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.4:descriptor'
+    commandLine mvn, '-f', "${buildDir}/poms/pom.xml", '--settings',
+      'src/main/resources/settings.xml', '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.5:descriptor'
     doFirst {
         def pomFile = file("${buildDir}/poms/pom.xml")
         def pom = install.repositories.mavenInstaller.pom
@@ -30,7 +33,13 @@ task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider_${project.scal
         pom.withXml {
             def buildNode = asNode().appendNode('build')
             buildNode.appendNode('directory', buildDir)
-            buildNode.appendNode('outputDirectory', "$buildDir/classes/main")
+            buildNode.appendNode('outputDirectory', "$buildDir/classes/groovy/main")
+            //add and configure the maven-plugin-plugin so that we can use the shortened 'pact' prefix
+            //https://maven.apache.org/guides/introduction/introduction-to-plugin-prefix-mapping.html
+            def pluginNode = buildNode.appendNode('plugins').appendNode('plugin')
+            pluginNode.appendNode('artifactId', 'maven-plugin-plugin')
+            pluginNode.appendNode('version', project.mavenPluginPluginVersion)
+            pluginNode.appendNode('configuration').appendNode('goalPrefix', 'pact')
         }
         pom.writeTo( pomFile )
     }

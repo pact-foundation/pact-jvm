@@ -48,10 +48,4 @@ class PactProviderMojoTest {
         assert mojo.property('pact.test.105') == null
     }
 
-//    @Test
-//    void 'filter consumers returns false if there is no defined consumers property'() {
-//        assert !mojo.propertyDefined('pact.filter.consumers')
-//        assert !mojo.filterConsumers(consumer)
-//    }
-
 }

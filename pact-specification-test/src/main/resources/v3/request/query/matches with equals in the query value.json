@@ -9,7 +9,6 @@
       "broker": ["1"]
     },
     "headers": {}
-
   },
   "actual": {
     "method": "GET",
@@ -19,6 +18,5 @@
       "broker": ["1"]
     },
     "headers": {}
-
   }
 }

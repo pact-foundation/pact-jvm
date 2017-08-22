@@ -1,7 +1,6 @@
 package au.com.dius.pact.provider.junit;
 
 import au.com.dius.pact.model.Pact;
-import au.com.dius.pact.model.RequestResponsePact;
 import au.com.dius.pact.provider.junit.loader.PactBroker;
 import au.com.dius.pact.provider.junit.loader.PactFolder;
 import au.com.dius.pact.provider.junit.loader.PactLoader;
@@ -9,11 +8,14 @@ import au.com.dius.pact.provider.junit.loader.PactSource;
 import au.com.dius.pact.provider.junit.target.HttpTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestTarget;
+import groovy.json.JsonException;
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.TestClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -48,39 +50,53 @@ import static java.util.stream.Collectors.toList;
  * all methods annotated by {@link State} with appropriate state listed will be invoked
  */
 public class PactRunner extends ParentRunner<InteractionRunner> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PactRunner.class);
+
     private final List<InteractionRunner> child;
 
     public PactRunner(final Class<?> clazz) throws InitializationError {
-        super(clazz);
+      super(clazz);
 
-        final Provider providerInfo = clazz.getAnnotation(Provider.class);
-        if (providerInfo == null) {
-            throw new InitializationError("Provider name should be specified by using " + Provider.class.getName() + " annotation");
-        }
-        final String serviceName = providerInfo.value();
+      final Provider providerInfo = clazz.getAnnotation(Provider.class);
+      if (providerInfo == null) {
+          throw new InitializationError("Provider name should be specified by using " +
+            Provider.class.getName() + " annotation");
+      }
+      final String serviceName = providerInfo.value();
 
-        final Consumer consumerInfo = clazz.getAnnotation(Consumer.class);
-        final String consumerName = consumerInfo != null ? consumerInfo.value() : null;
+      final Consumer consumerInfo = clazz.getAnnotation(Consumer.class);
+      final String consumerName = consumerInfo != null ? consumerInfo.value() : null;
 
-        final TestClass testClass = new TestClass(clazz);
+      final TestClass testClass = new TestClass(clazz);
 
-        this.child = new ArrayList<>();
-        final List<Pact> pacts;
-        try {
-            pacts = getPactSource(testClass).load(serviceName).stream()
-                  .filter(p -> consumerName == null || p.getConsumer().getName().equals(consumerName))
-                  .collect(Collectors.toList());
-        } catch (final IOException e) {
-            throw new InitializationError(e);
-        }
+      this.child = new ArrayList<>();
+      final List<Pact> pacts;
+      PactLoader pactLoader = getPactSource(testClass);
+      try {
+        pacts = filterPacts(pactLoader.load(serviceName).stream()
+                .filter(p -> consumerName == null || p.getConsumer().getName().equals(consumerName))
+                .collect(Collectors.toList()));
+      } catch (final IOException | JsonException e) {
+        throw new InitializationError(e);
+      }
 
-        if (pacts == null || pacts.isEmpty()) {
+      if (pacts == null || pacts.isEmpty()) {
+        if (clazz.isAnnotationPresent(IgnoreNoPactsToVerify.class)) {
+          LOGGER.warn("Did not find any pact files for provider " + providerInfo.value());
+        } else {
           throw new InitializationError("Did not find any pact files for provider " + providerInfo.value());
         }
+      }
 
+      if (pacts != null) {
         for (final Pact pact : pacts) {
-            this.child.add(new InteractionRunner(testClass, (RequestResponsePact) pact));
+          this.child.add(new InteractionRunner(testClass, pact, pactLoader.getPactSource()));
         }
+      }
+    }
+
+    protected List<Pact> filterPacts(List<Pact> pacts){
+        return pacts;
     }
 
     @Override
@@ -115,6 +131,7 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
                     contructorWithClass.setAccessible(true);
                     return contructorWithClass.newInstance(clazz.getJavaClass());
                 } catch(NoSuchMethodException e) {
+                    LOGGER.error(e.getMessage(), e);
                     return pactLoaderClass.newInstance();
                 }
             } else {
@@ -123,7 +140,8 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
                   .getConstructor(annotation.annotationType()).newInstance(annotation);
             }
         } catch (final InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-            throw new InitializationError("Error while creating pact source");
+            LOGGER.error("Error while creating pact source", e);
+            throw new InitializationError(e);
         }
     }
 }

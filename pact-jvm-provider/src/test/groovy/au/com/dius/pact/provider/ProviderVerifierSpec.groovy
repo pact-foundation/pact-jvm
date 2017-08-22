@@ -1,23 +1,26 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.Consumer
+import au.com.dius.pact.model.BrokerUrlSource
+import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
-import au.com.dius.pact.model.Provider
-import au.com.dius.pact.model.RequestResponseInteraction
-import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.model.UnknownPactSource
+import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.Message
-import au.com.dius.pact.model.v3.messaging.MessagePact
+import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.VerifierReporter
+import com.github.kittinunf.result.Result
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class ProviderVerifierSpec extends Specification {
 
   ProviderVerifier verifier
 
   def setup() {
-    verifier = new ProviderVerifier()
+    verifier = Spy(ProviderVerifier)
   }
 
   def 'if no consumer filter is defined, returns true'() {
@@ -138,7 +141,7 @@ class ProviderVerifierSpec extends Specification {
     given:
     verifier.projectHasProperty = { it == ProviderVerifier.PACT_FILTER_PROVIDERSTATE }
     verifier.projectGetProperty = { 'fred' }
-    def interaction = [providerState: 'bob']
+    def interaction = [providerStates: [new ProviderState('bob')]]
 
     when:
     boolean result = verifier.filterInteractions(interaction)
@@ -151,7 +154,20 @@ class ProviderVerifierSpec extends Specification {
     given:
     verifier.projectHasProperty = { it == ProviderVerifier.PACT_FILTER_PROVIDERSTATE }
     verifier.projectGetProperty = { 'bob' }
-    def interaction = [providerState: 'bob']
+    def interaction = [providerStates: [new ProviderState('bob')]]
+
+    when:
+    boolean result = verifier.filterInteractions(interaction)
+
+    then:
+    result
+  }
+
+  def 'if a state filter is defined, returns true if any interaction state does match'() {
+    given:
+    verifier.projectHasProperty = { it == ProviderVerifier.PACT_FILTER_PROVIDERSTATE }
+    verifier.projectGetProperty = { 'bob' }
+    def interaction = [providerStates: [new ProviderState('fred'), new ProviderState('bob')]]
 
     when:
     boolean result = verifier.filterInteractions(interaction)
@@ -164,7 +180,7 @@ class ProviderVerifierSpec extends Specification {
     given:
     verifier.projectHasProperty = { it == ProviderVerifier.PACT_FILTER_PROVIDERSTATE }
     verifier.projectGetProperty = { 'bob.*' }
-    def interaction = [providerState: 'bobby']
+    def interaction = [providerStates: [new ProviderState('bobby')]]
 
     when:
     boolean result = verifier.filterInteractions(interaction)
@@ -177,7 +193,7 @@ class ProviderVerifierSpec extends Specification {
     given:
     verifier.projectHasProperty = { it == ProviderVerifier.PACT_FILTER_PROVIDERSTATE }
     verifier.projectGetProperty = { '' }
-    def interaction = [providerState: 'bob']
+    def interaction = [providerStates: [new ProviderState('bob')]]
 
     when:
     boolean result = verifier.filterInteractions(interaction)
@@ -190,7 +206,7 @@ class ProviderVerifierSpec extends Specification {
     given:
     verifier.projectHasProperty = { it == ProviderVerifier.PACT_FILTER_PROVIDERSTATE }
     verifier.projectGetProperty = { '' }
-    def interaction = [providerState: null]
+    def interaction = [providerStates: []]
 
     when:
     boolean result = verifier.filterInteractions(interaction)
@@ -212,7 +228,7 @@ class ProviderVerifierSpec extends Specification {
           break
       }
     }
-    def interaction = [providerState: 'bobby', description: 'freddy']
+    def interaction = [providerStates: [new ProviderState('bobby')], description: 'freddy']
 
     when:
     boolean result = verifier.filterInteractions(interaction)
@@ -234,7 +250,7 @@ class ProviderVerifierSpec extends Specification {
           break
       }
     }
-    def interaction = [providerState: 'boddy', description: 'freddy']
+    def interaction = [providerStates: [new ProviderState('boddy')], description: 'freddy']
 
     when:
     boolean result = verifier.filterInteractions(interaction)
@@ -256,7 +272,7 @@ class ProviderVerifierSpec extends Specification {
           break
       }
     }
-    def interaction = [providerState: 'bobby', description: 'frebby']
+    def interaction = [providerStates: [new ProviderState('bobby')], description: 'frebby']
 
     when:
     boolean result = verifier.filterInteractions(interaction)
@@ -278,7 +294,7 @@ class ProviderVerifierSpec extends Specification {
           break
       }
     }
-    def interaction = [providerState: 'joe', description: 'authur']
+    def interaction = [providerStates: [new ProviderState('joe')], description: 'authur']
 
     when:
     boolean result = verifier.filterInteractions(interaction)
@@ -287,34 +303,10 @@ class ProviderVerifierSpec extends Specification {
     !result
   }
 
-  def 'extract interactions from a V2 pact'() {
-    given:
-    def interaction = new RequestResponseInteraction('test interaction')
-    def pact = new RequestResponsePact(null, null, [interaction])
-
-    when:
-    def result = verifier.interactions(pact)
-
-    then:
-    result == [interaction]
-  }
-
-  def 'extract interactions from a Message pact'() {
-    given:
-    def interaction = new Message('test message')
-    def pact = new MessagePact(new Provider(), new Consumer(), [interaction ])
-
-    when:
-    def result = verifier.interactions(pact)
-
-    then:
-    result == [interaction]
-  }
-
   def 'when loading a pact file for a consumer, it should pass on any authentication options'() {
     given:
-    def pactFile = new URL('http://some.pact.file/')
-    def consumer = new ConsumerInfo(pactFile: pactFile, pactFileAuthentication: ['basic', 'test', 'pwd'])
+    def pactFile = new UrlSource('http://some.pact.file/')
+    def consumer = new ConsumerInfo(pactSource: pactFile, pactFileAuthentication: ['basic', 'test', 'pwd'])
     GroovyMock(PactReader, global: true)
 
     when:
@@ -326,8 +318,8 @@ class ProviderVerifierSpec extends Specification {
 
   def 'when loading a pact file for a consumer, it handles a closure'() {
     given:
-    def pactFile = new URL('http://some.pact.file/')
-    def consumer = new ConsumerInfo(pactFile: { pactFile })
+    def pactFile = new UrlSource('http://some.pact.file/')
+    def consumer = new ConsumerInfo(pactSource: { pactFile })
     GroovyMock(PactReader, global: true)
 
     when:
@@ -353,11 +345,113 @@ class ProviderVerifierSpec extends Specification {
     verifier.reporters << reporter
 
     when:
-    verifier.verifyMessagePact(methods, message, interactionMessage, failures)
+    def result = verifier.verifyMessagePact(methods, message, interactionMessage, failures)
 
     then:
     1 * reporter.bodyComparisonOk()
     1 * reporter.generatesAMessageWhich()
     0 * reporter._
+    result
+  }
+
+  @Unroll
+  @SuppressWarnings('UnnecessaryGetter')
+  def 'after verifying a pact, the results are reported back using reportVerificationResults'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    GroovyMock(PactReader, global: true)
+    GroovyMock(ProviderVerifierKt, global: true)
+    GroovyMock(StateChange, global: true)
+    def interaction1 = Mock(Interaction)
+    def interaction2 = Mock(Interaction)
+    def mockPact = Mock(Pact) {
+      getSource() >> UnknownPactSource.INSTANCE
+    }
+
+    PactReader.loadPact(_) >> mockPact
+    mockPact.interactions >> [interaction1, interaction2]
+    StateChange.executeStateChange(*_) >> new StateChange.StateChangeResult(true)
+    verifier.verifyResponseFromProvider(provider, interaction1, _, _) >> result1
+    verifier.verifyResponseFromProvider(provider, interaction2, _, _) >> result2
+
+    when:
+    verifier.runVerificationForConsumer([:], provider, consumer)
+
+    then:
+    1 * ProviderVerifierKt.reportVerificationResults(_, finalResult, '0.0.0')
+
+    where:
+
+    result1 | result2 | finalResult
+    true    | true    | true
+    true    | false   | false
+    false   | true    | false
+    false   | false   | false
+  }
+
+  @SuppressWarnings('UnnecessaryGetter')
+  def 'Do not publish verification results if the pact interactions have been filtered'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    GroovyMock(PactReader, global: true)
+    GroovyMock(ProviderVerifierKt, global: true)
+    GroovyMock(StateChange, global: true)
+    def interaction1 = Mock(Interaction) {
+      getDescription() >> 'Interaction 1'
+    }
+    def interaction2 = Mock(Interaction) {
+      getDescription() >> 'Interaction 2'
+    }
+    def mockPact = Mock(Pact) {
+      getSource() >> UnknownPactSource.INSTANCE
+    }
+
+    PactReader.loadPact(_) >> mockPact
+    mockPact.interactions >> [interaction1, interaction2]
+    StateChange.executeStateChange(*_) >> new StateChange.StateChangeResult(true)
+    verifier.verifyResponseFromProvider(provider, interaction1, _, _) >> true
+    verifier.verifyResponseFromProvider(provider, interaction2, _, _) >> true
+
+    verifier.projectHasProperty = { it == ProviderVerifier.PACT_FILTER_DESCRIPTION }
+    verifier.projectGetProperty = { 'Interaction 2' }
+
+    when:
+    verifier.runVerificationForConsumer([:], provider, consumer)
+
+    then:
+    0 * ProviderVerifierKt.reportVerificationResults(_, _, _)
+  }
+
+  @SuppressWarnings('UnnecessaryGetter')
+  def 'If the pact source is from a pact broker, publish the verification results back'() {
+    given:
+    def links = ['publish': 'true']
+    def pact = Mock(Pact) {
+      getSource() >> new BrokerUrlSource('url', 'url', links)
+    }
+    def client = Mock(PactBrokerClient)
+
+    when:
+    ProviderVerifierKt.reportVerificationResults(pact, true, '0', client)
+
+    then:
+    1 * client.publishVerificationResults(links, true, '0', null) >> new Result.Success(true)
+  }
+
+  @SuppressWarnings('UnnecessaryGetter')
+  def 'If the pact source is not from a pact broker, ignore the verification results'() {
+    given:
+    def pact = Mock(Pact) {
+      getSource() >> new UrlSource('url', null)
+    }
+    def client = Mock(PactBrokerClient)
+
+    when:
+    ProviderVerifierKt.reportVerificationResults(pact, true, '0', client)
+
+    then:
+    0 * client.publishVerificationResults(_, true, '0', null)
   }
 }

@@ -1,0 +1,46 @@
+{
+  "match": true,
+  "comment": "XML Requests match with regex",
+  "expected" : {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/xml"},
+    "matchingRules": {
+      "body": {
+        "$.alligator['@name']": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "\\w+"
+            }
+          ]
+        },
+        "$.alligator[0].favouriteColours[0].favouriteColour": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "red|blue"
+            }
+          ]
+        },
+        "$.alligator[0].favouriteColours[1].favouriteColour": {
+          "matchers": [
+            {
+              "match": "regex",
+              "regex": "red|blue"
+            }
+          ]
+        }
+      }
+    },
+    "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><alligator name=\"Mary\" feet=\"4\"><favouriteColours><favouriteColour>red</favouriteColour><favouriteColour>blue</favouriteColour></favouriteColours></alligator>"
+  },
+  "actual": {
+    "method": "POST",
+    "path": "/",
+    "query": {},
+    "headers": {"Content-Type": "application/xml"},
+    "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><alligator name=\"Harry\" feet=\"4\"><favouriteColours><favouriteColour>blue</favouriteColour><favouriteColour>red</favouriteColour></favouriteColours></alligator>"
+  }
+}

@@ -17,7 +17,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'au.com.dius:pact-jvm-provider-gradle_2.10:3.2.4'
+        classpath 'au.com.dius:pact-jvm-provider-gradle_2.10:3.2.11'
     }
 }
 ```
@@ -32,7 +32,7 @@ apply plugin: 'au.com.dius.pact'
 
 ```groovy
 plugins {
-  id "au.com.dius.pact" version "3.2.4"
+  id "au.com.dius.pact" version "3.2.11"
 }
 ```
 
@@ -56,17 +56,17 @@ pact {
             hasPactWith('consumer1') {
 
                 // currently supports a file path using file() or a URL using url()
-                pactFile = file('path/to/provider1-consumer1-pact.json')
+                pactSource = file('path/to/provider1-consumer1-pact.json')
 
             }
-            
+
             // Or if you have many pact files in a directory
             hasPactsWith('manyConsumers') {
 
-                // Will define a consumer for each pact file in the directory. 
-                // Consumer name is read from contents of pact file 
+                // Will define a consumer for each pact file in the directory.
+                // Consumer name is read from contents of pact file
                 pactFileLocation = file('path/to/pacts')
-                               
+
             }
 
         }
@@ -80,7 +80,7 @@ pact {
 
 ## Specifying the provider hostname at runtime
 
-If you need to calculate the provider hostname at runtime, you can give a Closure as the provider host.
+If you need to calculate the provider hostname at runtime, you can give a Closure as the provider `host`.
 
 ```groovy
 pact {
@@ -100,9 +100,11 @@ pact {
 }
 ```
 
+_Since version 3.3.2+/2.4.17+_ you can also give a Closure as the provider `port`.
+
 ## Specifying the pact file or URL at runtime [versions 3.2.7/2.4.9+]
 
-If you need to calculate the pact file or URL at runtime, you can give a Closure as the provider host.
+If you need to calculate the pact file or URL at runtime, you can give a Closure as the provider `pactFile`.
 
 ```groovy
 pact {
@@ -124,19 +126,24 @@ pact {
 
 ## Starting and shutting down your provider
 
-If you need to start-up or shutdown your provider, you can define a start and terminate task for each provider.
+If you need to start-up or shutdown your provider, define Gradle tasks for each action and set  
+`startProviderTask` and `terminateProviderTask` properties of each provider.
 You could use the jetty tasks here if you provider is built as a WAR file.
 
 ```groovy
 
 // This will be called before the provider task
-task('startTheApp') << {
-  // start up your provider here
+task('startTheApp') {
+  doLast {
+    // start up your provider here
+  }
 }
 
 // This will be called after the provider task
-task('killTheApp') << {
-  // kill your provider here
+task('killTheApp') {
+  doLast {
+    // kill your provider here
+  }
 }
 
 pact {
@@ -162,6 +169,37 @@ pact {
 Following typical Gradle behaviour, you can set the provider task properties to the actual tasks, or to the task names
 as a string (for the case when they haven't been defined yet).
 
+## Preventing the chaining of provider verify task to `pactVerify` [version 3.4.1+]
+
+Normally a gradle task named `pactVerify_${provider.name}` is created and added as a task dependency for `pactVerify`.  You 
+can disable this dependency on a provider by setting `isDependencyForPactVerify` to `false` (defaults to `true`).
+
+```groovy
+pact {
+
+    serviceProviders {
+
+        provider1 {
+
+            isDependencyForPactVerify = false
+
+            hasPactWith('consumer1') {
+                pactFile = file('path/to/provider1-consumer1-pact.json')
+            }
+
+        }
+
+    }
+
+}
+```
+
+To run this task, you would then have to explicitly name it as in ```gradle pactVerify_provider1```, a normal ```gradle pactVerify``` 
+would skip it.  This can be useful when you want to define two providers, one with `startProviderTask`/`terminateProviderTask` 
+and as second without, so you can manually start your provider (to debug it from your IDE, for example) but still want a `pactVerify` 
+ to run normally from your CI build.
+
+
 ## Enabling insecure SSL [version 2.2.8+]
 
 For providers that are running on SSL with self-signed certificates, you need to enable insecure SSL mode by setting
@@ -184,6 +222,7 @@ pact {
 
 }
 ```
+
 ## Specifying a custom trust store [version 2.2.8+]
 
 For environments that are running their own certificate chains:
@@ -278,6 +317,14 @@ pact {
 __*Important Note:*__ You should only use this feature for things that can not be persisted in the pact file. By modifying
 the request, you are potentially modifying the contract from the consumer tests!
 
+## Turning off URL decoding of the paths in the pact file [version 3.3.3+]
+
+By default the paths loaded from the pact file will be decoded before the request is sent to the provider. To turn this
+behaviour off, set the system property `pact.verifier.disableUrlPathDecoding` to `true`.
+
+__*Important Note:*__ If you turn off the url path decoding, you need to ensure that the paths in the pact files are
+correctly encoded. The verifier will not be able to make a request with an invalid encoded path.
+
 ## Project Properties
 
 The following project properties can be specified with `-Pproperty=value` on the command line:
@@ -285,6 +332,7 @@ The following project properties can be specified with `-Pproperty=value` on the
 |Property|Description|
 |--------|-----------|
 |pact.showStacktrace|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
+|pact.showFullDiff|This turns on displaying the full diff of the expected versus actual bodies [version 3.3.6+]|
 |pact.filter.consumers|Comma seperated list of consumer names to verify|
 |pact.filter.description|Only verify interactions whose description match the provided regular expression|
 |pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
@@ -296,8 +344,8 @@ For a description of what provider states are, see the pact documentations: http
 ### Using a state change URL
 
 For each provider you can specify a state change URL to use to switch the state of the provider. This URL will
-receive the providerState description from the pact file before each interaction via a POST. As for normal requests,
-a request filter (`stateChangeRequestFilter`) can also be set to manipulate the request before it is sent.
+receive the providerState description and all the parameters from the pact file before each interaction via a POST. 
+As for normal requests, a request filter (`stateChangeRequestFilter`) can also be set to manipulate the request before it is sent.
 
 ```groovy
 pact {
@@ -308,18 +356,18 @@ pact {
 
             hasPactWith('consumer1') {
                 pactFile = file('path/to/provider1-consumer1-pact.json')
-                stateChange = url('http://localhost:8001/tasks/pactStateChange')
+                stateChangeUrl = url('http://localhost:8001/tasks/pactStateChange')
                 stateChangeUsesBody = false // defaults to true
                 stateChangeRequestFilter = { req ->
                     // Add an authorization header to each request
                     req.addHeader('Authorization', 'OAUTH eyJhbGciOiJSUzI1NiIsImN0eSI6ImFw...')
                 }
             }
-            
+
             // or
             hasPactsWith('consumers') {
                 pactFileLocation = file('path/to/pacts')                
-                stateChange = url('http://localhost:8001/tasks/pactStateChange')
+                stateChangeUrl = url('http://localhost:8001/tasks/pactStateChange')
                 stateChangeUsesBody = false // defaults to true
             }
 
@@ -330,8 +378,12 @@ pact {
 }
 ```
 
-If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description will be sent as
- JSON in the body of the request. If it is set to false, it will passed as a query parameter.
+If the `stateChangeUsesBody` is not specified, or is set to true, then the provider state description and parameters 
+will be sent as JSON in the body of the request :
+```json
+{ "state" : "a provider state description", "params": { "a": "1", "b": "2" } }
+```  
+If it is set to false, they will be passed as query parameters.
 
 #### Teardown calls for state changes [version 3.2.5/2.4.7+]
 
@@ -342,7 +394,7 @@ then a teardown call will be made afterwards to the state change URL with `actio
 ### Using a Closure [version 2.2.2+]
 
 You can set a closure to be called before each verification with a defined provider state. The closure will be
-called with the state description from the pact file.
+called with the state description and parameters from the pact file.
 
 ```groovy
 pact {
@@ -356,6 +408,7 @@ pact {
                 // Load a fixture file based on the provider state and then setup some database
                 // data. Does not require a state change request so returns false
                 stateChange = { providerState ->
+                    // providerState is an instance of ProviderState
                     def fixture = loadFixtuerForProviderState(providerState)
                     setupDatabase(fixture)
                 }
@@ -471,6 +524,49 @@ pact {
 }
 ```
 
+### Using an authenticated Pact Broker
+
+You can add the authentication details for the Pact Broker like so:
+
+```groovy
+pact {
+
+    serviceProviders {
+        provider1 {
+            hasPactsFromPactBroker('http://pact-broker:5000/', authentication: ['Basic', pactBrokerUser, pactBrokerPassword])
+        }
+    }
+
+}
+```
+
+`pactBrokerUser` and `pactBrokerPassword` can be defined in the gradle properties.
+
+## Verifying pact files from a S3 bucket [version 3.3.2+/2.4.17+]
+
+Pact files stored in an S3 bucket can be verified by using an S3 URL to the pact file. I.e.,
+
+```groovy
+pact {
+
+    serviceProviders {
+
+        provider1 {
+
+            hasPactWith('consumer1') {
+                pactFile = 's3://bucketname/path/to/provider1-consumer1-pact.json'
+            }
+
+        }
+
+    }
+
+}
+```
+
+**NOTE:** you can't use the `url` function with S3 URLs, as the URL and URI classes from the Java SDK
+ don't support URLs with the s3 scheme.
+
 # Publishing pact files to a pact broker [version 2.2.7+]
 
 The pact gradle plugin provides a `pactPublish` task that can publish all pact files in a directory
@@ -495,6 +591,38 @@ gradle project by default. Make sure you have set one otherwise the broker will 
 
 _Version 3.2.2/2.4.3+_ you can override the version in the publish block.
 
+## Publishing to an authenticated pact broker
+
+To publish to a broker protected by basic auth, include the username/password in the `pactBrokerUrl`.
+
+For example:
+
+```groovy
+pact {
+
+    publish {
+        pactBrokerUrl = 'https://username:password@mypactbroker.com'
+    }
+
+}
+```
+
+### [version 3.3.9+]
+
+You can add the username and password as properties since version 3.3.9+
+
+```groovy
+pact {
+
+    publish {
+        pactBrokerUrl = 'https://mypactbroker.com'
+        pactBrokerUsername = 'username'
+        pactBrokerPassword = 'password'
+    }
+
+}
+```
+
 # Verifying a message provider [version 2.2.12+]
 
 The Gradle plugin has been updated to allow invoking test methods that can return the message contents from a message
@@ -511,7 +639,7 @@ pact {
         messageProvider {
 
             verificationType = 'ANNOTATED_METHOD'
-            packagesToScan = ['au.com.example.messageprovider.*'] // This optional, but leaving it out will result in the entire
+            packagesToScan = ['au.com.example.messageprovider.*'] // This is optional, but leaving it out will result in the entire
                                                                   // test classpath being scanned
 
             hasPactWith('messageConsumer') {
@@ -589,3 +717,8 @@ Any report files will be written to "build/reports/pact".
 
 The following report types are available in addition to console output (which is enabled by default):
 `markdown`, `json`.
+
+# Publishing verification results to a Pact Broker [version 3.5.4+]
+
+For pacts that are loaded from a Pact Broker, the results of running the verification will be published back to the
+ broker against the URL for the pact. You will be able to see the result on the Pact Broker home screen.

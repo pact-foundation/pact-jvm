@@ -3,15 +3,15 @@ pact-jvm-consumer-groovy
 
 Groovy DSL for Pact JVM
 
-##Dependency
+## Dependency
 
 The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-groovy_2.11`
-* version-id = `2.3.x` or `3.1.x`
+* version-id = `3.5.x`
 
-##Usage
+## Usage
 
 Add the `pact-jvm-consumer-groovy` library to your test class path. This provides a `PactBuilder` class for you to use
 to define your pacts. For a full example, have a look at the example JUnit `ExampleGroovyConsumerPactTest`.
@@ -19,46 +19,54 @@ to define your pacts. For a full example, have a look at the example JUnit `Exam
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.1.0'
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.5.0'
     }
 
 Then create an instance of the `PactBuilder` in your test.
 
 ```groovy
-    @Test
-    void "A service consumer side of a pact goes a little something like this"() {
+    import au.com.dius.pact.consumer.PactVerificationResult
+    import au.com.dius.pact.consumer.groovy.PactBuilder
+    import groovyx.net.http.RESTClient
+    import org.junit.Test
 
-        def alice_service = new PactBuilder() // Create a new PactBuilder
-        alice_service {
-            serviceConsumer "Consumer" 	// Define the service consumer by name
-            hasPactWith "Alice Service"   // Define the service provider that it has a pact with
-            port 1234                       // The port number for the service. It is optional, leave it out to
-                                            // to use a random one
+    class AliceServiceConsumerPactTest {
 
-            given('there is some good mallory') // defines a provider state. It is optional.
-            uponReceiving('a retrieve Mallory request') // upon_receiving starts a new interaction
-            withAttributes(method: 'get', path: '/mallory')		// define the request, a GET request to '/mallory'
-            willRespondWith(						// define the response we want returned
-                status: 200,
-                headers: ['Content-Type': 'text/html'],
-                body: '"That is some good Mallory."'
-            )
+        @Test
+        void "A service consumer side of a pact goes a little something like this"() {
+
+            def alice_service = new PactBuilder() // Create a new PactBuilder
+            alice_service {
+                serviceConsumer "Consumer" 	// Define the service consumer by name
+                hasPactWith "Alice Service"   // Define the service provider that it has a pact with
+                port 1234                       // The port number for the service. It is optional, leave it out to
+                                                // to use a random one
+
+                given('there is some good mallory') // defines a provider state. It is optional.
+                uponReceiving('a retrieve Mallory request') // upon_receiving starts a new interaction
+                withAttributes(method: 'get', path: '/mallory')		// define the request, a GET request to '/mallory'
+                willRespondWith(						// define the response we want returned
+                    status: 200,
+                    headers: ['Content-Type': 'text/html'],
+                    body: '"That is some good Mallory."'
+                )
+            }
+
+            // Execute the run method to have the mock server run.
+            // It takes a closure to execute your requests and returns a PactVerificationResult.
+            PactVerificationResult result = alice_service.runTest {
+                def client = new RESTClient('http://localhost:1234/')
+                def alice_response = client.get(path: '/mallory')
+
+                assert alice_response.status == 200
+                assert alice_response.contentType == 'text/html'
+
+                def data = alice_response.data.text()
+                assert data == '"That is some good Mallory."'
+            }
+            assert result == PactVerificationResult.Ok.INSTANCE  // This means it is all good
+
         }
-
-	      // Execute the run method to have the mock server run.
-	      // It takes a closure to execute your requests and returns a Pact VerificationResult.
-	      VerificationResult result = alice_service.run() {
-            def client = new RESTClient('http://localhost:1234/')
-            def alice_response = client.get(path: '/mallory')
-
-            assert alice_response.status == 200
-            assert alice_response.contentType == 'text/html'
-
-            def data = alice_response.data.text()
-            assert data == '"That is some good Mallory."'
-        }
-        assert result == PactVerified$.MODULE$  // This means it is all good in weird Scala speak.
-
     }
 ```
 
@@ -107,7 +115,13 @@ Sets the port that the mock server will run on. If not supplied, a random port w
 #### given(String providerState)
 
 Defines a state that the provider needs to be in for the request to succeed. For more info, see
-https://github.com/realestate-com-au/pact/wiki/Provider-states
+https://github.com/realestate-com-au/pact/wiki/Provider-states. Can be called multiple times.
+
+#### given(String providerState, Map params)
+
+Defines a state that the provider needs to be in for the request to succeed. For more info, see
+https://github.com/realestate-com-au/pact/wiki/Provider-states. Can be called multiple times, and the params
+map can contain the data required for the state.
 
 #### uponReceiving(String requestDescription)
 
@@ -126,9 +140,9 @@ Defines the request for the interaction. The request data map can contain the fo
 | body | The body of the request. If it is not a string, it will be converted to JSON. Also accepts a PactBodyBuilder. | |
 | prettyPrint | Boolean value to control if the body is pretty printed. See note on Pretty Printed Bodies below |
 
-For the path and header attributes (version 2.2.2+ for headers), you can use regular expressions to match.
-You can either provide a regex `Pattern` class or use the `regexp` method to construct a `RegexpMatcher`
-(you can use any of the defined matcher methods, see DSL methods below).
+For the path, header attributes and query parameters (version 2.2.2+ for headers, 3.3.7+ for query parameters), 
+you can use regular expressions to match. You can either provide a regex `Pattern` class or use the `regexp` method 
+to construct a `RegexpMatcher` (you can use any of the defined matcher methods, see DSL methods below).
 If you use a `Pattern`, or the `regexp` method but don't provide a value, a random one will be generated from the
 regular expression. This value is used when generating requests.
 
@@ -197,16 +211,16 @@ For example:
     .willRespondWith(headers: [LOCATION: regexp('/transaction/[0-9]+', '/transaction/1234567890')])
 ```
 
-#### VerificationResult run(Closure closure)
+#### PactVerificationResult runTest(Closure closure)
 
-The `run` method starts the mock server, and then executes the provided closure. It then returns the pact verification
+The `runTest` method starts the mock server, and then executes the provided closure. It then returns the pact verification
 result for the pact run. If you require access to the mock server configuration for the URL, it is passed into the
 closure, e.g.,
 
 ```groovy
 
-VerificationResult result = alice_service.run() { config ->
-  def client = new RESTClient(config.url())
+PactVerificationResult result = alice_service.runTest() { mockServer ->
+  def client = new RESTClient(mockServer.url)
   def alice_response = client.get(path: '/mallory')
 }
 ```
@@ -281,9 +295,9 @@ Defines a matcher that accepts any numerical values. If the value is not provide
 
 Defines a matcher that accepts any integer values. If the value is not provided, a random integer will be used.
 
-* real(def value = null)
+* decimal(def value = null)
 
-Defines a matcher that accepts any real numbers. If the value is not provided, a random double will be used.
+Defines a matcher that accepts any decimal numbers. If the value is not provided, a random decimal will be used.
 
 * timestamp(String pattern = null, def value = null)
 
@@ -300,6 +314,19 @@ If pattern is not provided the ISO_DATE_FORMAT is used ("yyyy-MM-dd") . If the v
 * uuid(String value = null)
 
 Defines a matcher that accepts UUIDs. A random one will be generated if no value is provided.
+
+* equalTo(def value)
+
+Defines an equality matcher that always matches the provided value using `equals`. This is useful for resetting cascading
+type matchers.
+
+* includesStr(def value)
+
+Defines a matcher that accepts any value where its string form includes the provided string.
+
+* nullValue()
+
+Defines a matcher that accepts only null values.
 
 #### What if a field matches a matcher name in the DSL?
 
@@ -349,6 +376,92 @@ __Version 3.2.4/2.4.6+__ You can specify the number of example items to generate
 
 This will create an example user list with 3 users.
 
+__Version 3.2.13/2.4.14+__ The each like matchers have been updated to work with primitive types.
+
+```groovy
+withBody {
+        permissions eachLike(3, 'GRANT')
+}
+```
+
+will generate the following JSON
+
+```json
+{
+    "permissions": ["GRANT", "GRANT", "GRANT"]
+}
+```
+
+and matchers
+
+```json
+{
+    "$.body.permissions": {"match": "type"}
+}
+```
+
+and now you can even get more fancy
+
+```groovy
+withBody {
+        permissions eachLike(3, regexp(~/\w+/))
+        permissions2 minLike(2, 3, integer())
+        permissions3 maxLike(4, 3, ~/\d+/)
+}
+```
+
+### Matching any key in a map (3.3.1/2.5.0+)
+
+The DSL has been extended for cases where the keys in a map are IDs. For an example of this, see 
+[#313](https://github.com/DiUS/pact-jvm/issues/131). In this case you can use the `keyLike` method, which takes an 
+example key as a parameter.
+
+For example:
+
+```groovy
+withBody {
+  example {
+    one {
+      keyLike '001', 'value'            // key like an id mapped to a value
+    }
+    two {
+      keyLike 'ABC001', regexp('\\w+')  // key like an id mapped to a matcher
+    }
+    three {
+      keyLike 'XYZ001', {               // key like an id mapped to a closure
+        id identifier()
+      }
+    }
+    four {
+      keyLike '001XYZ', eachLike {      // key like an id mapped to an array where each item is matched by the following 
+        id identifier()                 // example
+      }
+    }  
+  }
+}
+```
+
+For an example, have a look at [WildcardPactSpec](src/test/au/com/dius/pact/consumer/groovy/WildcardPactSpec.groovy).
+
+**NOTE:** The `keyLike` method adds a `*` to the matching path, so the matching definition will be applied to all keys
+ of the map if there is not a more specific matcher defined for a particular key. Having more than one `keyLike` condition
+ applied to a map will result in only one being applied when the pact is verified (probably the last).
+
+### Matching with an OR (3.5.0+)
+
+The V3 spec allows multiple matchers to be combined using either AND or OR for a value. The main use of this would be to
+ either be able to match a value or a null, or to combine different matchers.
+ 
+For example:
+
+```groovy
+    withBody {
+        valueA and('AB', includeStr('A'), includeStr('B')) // valueA must include both A and B
+        valueB or('100', regex(~/\d+/), nullValue()) // valueB must either match a regular expression or be null
+        valueC or('12345678', regex(~/\d{8}/), regex(~/X\d{13}/)) // valueC must match either 8 or X followed by 13 digits 
+    }
+```
+
 ## Changing the directory pact files are written to (2.1.9+)
 
 By default, pact files are written to `target/pacts`, but this can be overwritten with the `pact.rootDir` system property.
@@ -373,14 +486,15 @@ Version 3 of the pact specification changes the format of pact files in the foll
 * Query parameters are stored in a map form and are un-encoded (see [#66](https://github.com/DiUS/pact-jvm/issues/66)
 and [#97](https://github.com/DiUS/pact-jvm/issues/97) for information on what this can cause).
 * Introduces a new message pact format for testing interactions via a message queue.
+* Multiple provider states can be defined with data parameters.
 
 ## Generating V3 spec pact files (3.1.0+, 2.3.0+)
 
-To have your consumer tests generate V3 format pacts, you can pass an option into the `run` method. For example:
+To have your consumer tests generate V3 format pacts, you can pass an option into the `runTest` method. For example:
 
 ```groovy
-VerificationResult result = service.run(specificationVersion: PactSpecVersion.V3) { config ->
-  def client = new RESTClient(config.url())
+PactVerificationResult result = service.runTest(specificationVersion: PactSpecVersion.V3) { config ->
+  def client = new RESTClient(config.url)
   def response = client.get(path: '/')
 }
 ```
