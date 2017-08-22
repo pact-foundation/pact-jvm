@@ -39,7 +39,7 @@ subprojects {
 
     def scalaVersionLookup = [
         '2.11': '2.11.8',
-        '2.12': '2.12.0-M4'
+        '2.12': '2.12.3'
     ]
 
     def m = project.name =~ /.*_(2\.1\d)(_0\.\d+)?/
@@ -80,7 +80,7 @@ subprojects {
       if (project.hasProperty('scalaVersion')) {
           compile "org.scala-lang:scala-library:${project.scalaFullVersion}",
             "org.scala-lang:scala-compiler:${project.scalaFullVersion}",
-            "com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.4.0"
+            "com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.7.2"
 
           testCompile "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}",
             "org.specs2:specs2-junit_${project.scalaVersion}:${project.specs2Version}"
