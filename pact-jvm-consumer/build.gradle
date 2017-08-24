@@ -12,7 +12,7 @@ dependencies {
     compile "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}"
 
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
-    testCompile "org.specs2:specs2-mock_${project.scalaVersion}:3.8.4"
+    testCompile "org.specs2:specs2-mock_${project.scalaVersion}:${project.specs2Version}"
 }
 
 sourceSets.main.scala.srcDir "src/main/java"
