@@ -30,5 +30,4 @@ pkgdiff_reports/
 .gradle/
 
 out/
-gradle.properties
 
