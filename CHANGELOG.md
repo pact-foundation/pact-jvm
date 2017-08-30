@@ -1,5 +1,35 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.4-rc.0 - Scala 2.12 Version
+
+* f2c8913 - Setup release prep script for RC release (Ronald Holshausen, Wed Aug 30 11:31:38 2017 +1000)
+* 450af8b - Set the versions to a RC version (Ronald Holshausen, Wed Aug 30 11:29:07 2017 +1000)
+* 87e5708 - Scala 2.12 build passing, yay! (Ronald Holshausen, Wed Aug 30 11:20:54 2017 +1000)
+* d2db2ce - Merge pull request #526 from soundcloud/upgrade-dependencies-for-scala-2.12 (Ronald Holshausen, Tue Aug 29 08:36:32 2017 +1000)
+* 86b67a4 - Upgrade dispatch-core from 0.11.3 to 0.12.3 (Benjamin Debeerst, Thu Aug 24 17:36:04 2017 +0200)
+* 28d70ab - Upgrade unfiltered-netty-server from 0.8.4 to 0.9.1 (Benjamin Debeerst, Thu Aug 24 17:34:22 2017 +0200)
+* d6792ad - Upgrade scalatest from 2.2.6 to 3.0.4 (Benjamin Debeerst, Thu Aug 24 17:32:15 2017 +0200)
+* a33b3e3 - Upgrade specs2 from 3.8.4 to 3.8.9 (Benjamin Debeerst, Thu Aug 24 17:31:10 2017 +0200)
+* ded0c97 - Don't gitignore gradle.properties (Benjamin Debeerst, Thu Aug 24 17:24:00 2017 +0200)
+* 02bb075 - Merge branch 'prepare-scala-2.12-support' of https://github.com/soundcloud/pact-jvm into scala-2.12 (Ronald Holshausen, Wed Aug 23 08:47:41 2017 +1000)
+* 881406a - Updated scala to 2.12.3 (Ronald Holshausen, Wed Aug 23 08:47:34 2017 +1000)
+* 78cdb24 - Merge branch 'upgrade-jsonpath-dependency' of https://github.com/soundcloud/pact-jvm into scala-2.12 (Ronald Holshausen, Wed Aug 23 08:45:00 2017 +1000)
+* 89df063 - Merge branch 'master' into scala-2.12 (Ronald Holshausen, Wed Aug 23 08:35:08 2017 +1000)
+* 5093a63 - Upgrade net.databinder.dispatch:dispatch-core from 0.11.3 to 0.12.3 (Benjamin Debeerst, Thu Aug 17 12:37:06 2017 +0200)
+* 1d7d2db - Upgrade scala-logging from 3.4.0 to 3.7.2 (Benjamin Debeerst, Thu Aug 17 09:47:12 2017 +0200)
+* 0297506 - Update io.gatling:jsonpath dependency to 0.6.9 (Benjamin Debeerst, Mon Aug 21 17:52:35 2017 +0200)
+* d413338 - Do not publish verification results if the interactions have been filtered #522 (Ronald Holshausen, Tue Aug 22 17:17:10 2017 +1000)
+* 125f285 - Handle timezones in the date and time generators #523 (Ronald Holshausen, Tue Aug 22 10:19:20 2017 +1000)
+* 17ee855 - Upgrade kotlin to 1.1.4 (Ronald Holshausen, Tue Aug 22 09:40:08 2017 +1000)
+* c428501 - when filtering pacts, copy the pact source #522 (Ronald Holshausen, Tue Aug 22 08:58:30 2017 +1000)
+* 3e67db3 - Updated versions in README (Ronald Holshausen, Sat Aug 19 16:13:25 2017 +1000)
+* f81c070 - Updated V3 spec test cases from specification project (Ronald Holshausen, Sat Aug 19 15:59:39 2017 +1000)
+* dc1f444 - Updated V3 spec test cases from the V2 ones (Ronald Holshausen, Sat Aug 19 15:57:55 2017 +1000)
+* 1a8c602 - Fix parsing requests and responses after updating spec testcases (Ronald Holshausen, Sat Aug 19 15:48:01 2017 +1000)
+* eba9bb7 - Updated spec tests from spec project (Ronald Holshausen, Sat Aug 19 15:24:30 2017 +1000)
+* a84494d - bump version to 3.5.5 (Ronald Holshausen, Fri Aug 18 15:46:46 2017 +1000)
+* 5d19bd6 - add scala 2.12.0-M4 as a 2.12 build (Ronald Holshausen, Tue Jun 7 16:37:38 2016 +1000)
+
 # 3.5.4 - Implemented publishing of verification results to the pact broker
 
 * 2df8536 - Updated the readmes on publishing verification results to the broker #417 (Ronald Holshausen, Fri Aug 18 14:31:45 2017 +1000)
