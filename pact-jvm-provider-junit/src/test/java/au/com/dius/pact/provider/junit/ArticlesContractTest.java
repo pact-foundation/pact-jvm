@@ -19,7 +19,7 @@ import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 
 @RunWith(PactRunner.class)
 @Provider("ArticlesProvider")
-@PactFolder("../pact-jvm-consumer-junit/build/2.11/pacts")
+@PactFolder("src/test/resources/wildcards")
 public class ArticlesContractTest {
   @TestTarget
   public final Target target = new HttpTarget(8000);
