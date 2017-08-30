@@ -13,7 +13,7 @@ buildscript {
 plugins {
   id 'nebula.kotlin' version '1.1.4-2'
   id 'org.jmailen.kotlinter' version '1.2.0'
-  id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC3'
+//  id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC3'
   id 'org.jetbrains.dokka' version '0.9.15'
 }
 
@@ -68,7 +68,7 @@ subprojects {
     apply plugin: 'jacoco'
     apply plugin: 'org.jetbrains.kotlin.jvm'
     apply plugin: 'org.jmailen.kotlinter'
-    apply plugin: 'io.gitlab.arturbosch.detekt'
+//    apply plugin: 'io.gitlab.arturbosch.detekt'
     apply plugin: 'org.jetbrains.dokka'
 
     repositories {
@@ -107,7 +107,7 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '3.5.4-rc.0'
+    version = '3.5.4-rc.1'
     targetCompatibility = '1.8'
     sourceCompatibility = '1.8'
 
@@ -254,13 +254,14 @@ subprojects {
     indentSize = 2
   }
 
-  detekt {
-    profile("main") {
-      config = "${project.parent.projectDir}/config/detekt-config.yml"
-    }
-  }
+//  detekt {
+//    profile("main") {
+//      config = "${project.parent.projectDir}/config/detekt-config.yml"
+//
+//    }
+//  }
 
-  check.dependsOn << 'detektCheck'
+//  check.dependsOn << 'detektCheck'
 
 }
 
