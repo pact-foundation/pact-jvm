@@ -1,32 +1,45 @@
 package au.com.dius.pact.provider.sbtsupport
 
-import au.com.dius.pact.provider.unfiltered.Conversions
-import au.com.dius.pact.model.{Request, Response}
-import au.com.dius.pact.provider.CollectionUtils
-import com.typesafe.scalalogging.StrictLogging
-import com.ning.http.client.FluentStringsMap
-import dispatch.url
+import java.nio.charset.Charset
+import java.util
 
-import scala.collection.JavaConversions
-import scala.concurrent.{ExecutionContext, Future}
+import au.com.dius.pact.model.{OptionalBody, Request, Response}
+import com.typesafe.scalalogging.StrictLogging
+import org.apache.commons.lang3.StringUtils
+import org.asynchttpclient.{DefaultAsyncHttpClient, RequestBuilder}
+
+import scala.compat.java8.FutureConverters
+import scala.concurrent.Future
 
 object HttpClient extends StrictLogging {
-  def run(request:Request)(implicit executionContext: ExecutionContext):Future[Response] = {
+
+  def run(request: Request): Future[Response] = {
     logger.debug("request=" + request)
-    val query = new FluentStringsMap()
-    if (request.getQuery != null) {
-      val queryMap = CollectionUtils.javaLMapToScalaLMap(request.getQuery)
-      queryMap.foldLeft(query) {
-        (fsm, q) => q._2.foldLeft(fsm) { (m, a) => m.add(q._1, a) }
-      }
+    val req = new RequestBuilder(request.getMethod)
+      .setUrl(request.getPath)
+      .setQueryParams(request.getQuery)
+    if (request.getHeaders != null) {
+      request.getHeaders.forEach((name, value) => req.addHeader(name, value))
     }
-    val headers = if (request.getHeaders == null) None
-      else Some(JavaConversions.mapAsScalaMap(request.getHeaders))
-    val r = url(request.getPath).underlying(
-      _.setMethod(request.getMethod).setQueryParams(query)
-    ) <:< headers.getOrElse(Map())
-    val body = if (request.getBody != null) request.getBody.orElse("") else null
-    val httpRequest = if (body != null) r.setBody(body) else r
-    dispatch.Http(httpRequest).map(Conversions.dispatchResponseToPactResponse)
+    if (request.getBody.isPresent) {
+      req.setBody(request.getBody.getValue)
+    }
+
+    val asyncHttpClient = new DefaultAsyncHttpClient
+    FutureConverters.toScala[Response](asyncHttpClient.executeRequest(req).toCompletableFuture.thenApply(res => {
+      val headers = new util.HashMap[String, String]()
+      res.getHeaders.names().forEach(name => headers.put(name, res.getHeader(name)))
+      val contentType = if (StringUtils.isEmpty(res.getContentType))
+        org.apache.http.entity.ContentType.APPLICATION_JSON
+      else
+        org.apache.http.entity.ContentType.parse(res.getContentType)
+      val charset = if (contentType.getCharset == null) Charset.forName("UTF-8") else contentType.getCharset
+      val body = if (res.hasResponseBody) {
+        OptionalBody.body(res.getResponseBody(charset))
+      } else {
+        OptionalBody.empty()
+      }
+      new Response(res.getStatusCode, headers, body)
+    }))
   }
 }

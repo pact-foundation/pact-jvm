@@ -5,9 +5,11 @@ import java.util.concurrent.Executors
 
 import au.com.dius.pact.consumer.dispatch.HttpClient
 import au.com.dius.pact.model._
+import specs2.run
 
 import scala.collection.JavaConversions
 import scala.collection.JavaConverters._
+import scala.compat.java8.FutureConverters
 import scala.concurrent.{ExecutionContext, Future}
 
 object Fixtures {
@@ -37,13 +39,13 @@ object Fixtures {
     def extractResponseTest(path: String = request.getPath): Future[Boolean] = {
       val r = request.copy
       r.setPath("$serverUrl$path")
-      HttpClient.run(r).map { response =>
+      FutureConverters.toScala(HttpClient.run(r)).map { response =>
         response.getStatus == 200 && extractFrom(response.getBody)
       }
     }
 
     def simpleGet(path: String): Future[(Int, Option[String])] = {
-      HttpClient.run(new Request("GET", serverUrl + path)).map { response =>
+      FutureConverters.toScala(HttpClient.run(new Request("GET", serverUrl + path))).map { response =>
         (response.getStatus, Some(response.getBody.orElse("")))
       }
     }

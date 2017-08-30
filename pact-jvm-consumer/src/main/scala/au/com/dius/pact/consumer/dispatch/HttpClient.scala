@@ -1,29 +1,39 @@
 package au.com.dius.pact.consumer.dispatch
 
-import au.com.dius.pact.model.unfiltered.Conversions
-import au.com.dius.pact.model.{CollectionUtils, Request, Response}
-import com.ning.http.client.FluentStringsMap
-import dispatch.url
+import java.nio.charset.Charset
+import java.util
+import java.util.concurrent.CompletableFuture
 
-import scala.collection.JavaConversions
-import scala.concurrent.{ExecutionContext, Future}
+import au.com.dius.pact.model.{OptionalBody, Request, Response}
+import org.apache.commons.lang3.StringUtils
+import org.asynchttpclient.{DefaultAsyncHttpClient, RequestBuilder}
 
 object HttpClient {
-  def run(request:Request)(implicit executionContext: ExecutionContext):Future[Response] = {
-    val query = new FluentStringsMap()
-    if (request.getQuery != null) {
-      val queryMap = CollectionUtils.javaLMapToScalaLMap(request.getQuery)
-      queryMap.foldLeft(query) {
-        (fsm, q) => q._2.foldLeft(fsm) { (m, a) => m.add(q._1, a) }
-      }
+
+  def run(request: Request): CompletableFuture[Response] = {
+    val req = new RequestBuilder(request.getMethod)
+      .setUrl(request.getPath)
+      .setQueryParams(request.getQuery)
+    request.getHeaders.forEach((name, value) => req.addHeader(name, value))
+    if (request.getBody.isPresent) {
+      req.setBody(request.getBody.getValue)
     }
-    val headers = if (request.getHeaders == null) None
-    else Some(JavaConversions.mapAsScalaMap(request.getHeaders))
-    val r = url(request.getPath).underlying(
-      _.setMethod(request.getMethod).setQueryParams(query)
-    ) <:< headers.getOrElse(Map())
-    val body = if (request.getBody != null) request.getBody.orElse("") else null
-    val httpRequest = if (body != null) r.setBody(body) else r
-    dispatch.Http(httpRequest).map(Conversions.dispatchResponseToPactResponse)
+
+    val asyncHttpClient = new DefaultAsyncHttpClient
+    asyncHttpClient.executeRequest(req).toCompletableFuture.thenApply(res => {
+      val headers = new util.HashMap[String, String]()
+      res.getHeaders.names().forEach(name => headers.put(name, res.getHeader(name)))
+      val contentType = if (StringUtils.isEmpty(res.getContentType))
+        org.apache.http.entity.ContentType.APPLICATION_JSON
+      else
+        org.apache.http.entity.ContentType.parse(res.getContentType)
+      val charset = if (contentType.getCharset == null) Charset.forName("UTF-8") else contentType.getCharset
+      val body = if (res.hasResponseBody) {
+        OptionalBody.body(res.getResponseBody(charset))
+      } else {
+        OptionalBody.empty()
+      }
+      new Response(res.getStatusCode, headers, body)
+    })
   }
 }

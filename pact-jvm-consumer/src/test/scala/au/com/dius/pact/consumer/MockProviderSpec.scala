@@ -13,6 +13,7 @@ import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 
 import scala.collection.JavaConversions
+import scala.compat.java8.FutureConverters
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Success
@@ -46,12 +47,12 @@ class MockProviderSpec extends Specification with StrictLogging {
       val Success((codeResult, results)) = server.runAndClose[Result](pact) {
 
         logger.debug("invalidRequest: " + invalidRequest.toString)
-        val invalidResponse = HttpClient.run(invalidRequest)
+        val invalidResponse = FutureConverters.toScala(HttpClient.run(invalidRequest))
         logger.debug("invalidResponse: " + invalidResponse.toString)
         invalidResponse.map(_.getStatus) must be_==(500).await(3, timeout)
   
         //hit server with valid request
-        val validResponse = HttpClient.run(validRequest)
+        val validResponse = FutureConverters.toScala(HttpClient.run(validRequest))
         logger.debug("validResponse: " + validResponse.toString)
         validResponse.map(_.getStatus) must be_==(response.getStatus).await(3, timeout)
       }

@@ -17,6 +17,12 @@ plugins {
   id 'org.jetbrains.dokka' version '0.9.15'
 }
 
+repositories {
+  mavenLocal()
+  mavenCentral()
+  jcenter()
+}
+
 import org.apache.commons.text.StringEscapeUtils
 
 subprojects {
@@ -38,7 +44,6 @@ subprojects {
     }
 
     def scalaVersionLookup = [
-        '2.11': '2.11.8',
         '2.12': '2.12.3'
     ]
 
@@ -53,7 +58,9 @@ subprojects {
     }
 
     apply plugin: 'java'
-    apply plugin: 'scala'
+    if (project.hasProperty('scalaVersion')) {
+      apply plugin: 'scala'
+    }
     apply plugin: 'groovy'
     apply plugin: 'maven'
     apply plugin: 'signing'
@@ -115,9 +122,11 @@ subprojects {
       dependsOn compileKotlin
     }
 
-    compileScala {
-      classpath = classpath.plus(files(compileGroovy.destinationDir)).plus(files(compileKotlin.destinationDir))
-      dependsOn compileGroovy, compileKotlin
+    if (project.hasProperty('scalaVersion')) {
+      compileScala {
+        classpath = classpath.plus(files(compileGroovy.destinationDir)).plus(files(compileKotlin.destinationDir))
+        dependsOn compileGroovy, compileKotlin
+      }
     }
 
     compileTestGroovy {
@@ -153,9 +162,14 @@ subprojects {
                 'Specification-Version': version
     }
 
-    task javadocJar(type: Jar, dependsOn: [javadoc, scaladoc, groovydoc, dokkaJavadoc]) {
+    task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc, dokkaJavadoc]) {
         classifier = 'javadoc'
+      if (project.hasProperty('scalaVersion')) {
         from javadoc.destinationDir, scaladoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
+        dependsOn << scaladoc
+      } else {
+        from javadoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
+      }
     }
 
     task sourceJar(type: Jar) {

@@ -23,7 +23,6 @@ include 'pact-jvm-pact-broker'
 include 'pact-jvm-model'
 
 crossCompileModules.each {
-  include it + '_2.11'
   include it + '_2.12'
 }
 
