@@ -143,4 +143,52 @@ class PactBrokerClientSpec extends Specification {
     then:
     result == PactVerificationResult.Ok.INSTANCE
   }
+
+  def 'pact broker navigation test'() {
+    given:
+    pactBroker {
+      given('Two consumer pacts exist for the provider', [
+        provider: 'Activity Service',
+        consumer1: 'Foo Web Client',
+        consumer2: 'Foo Web Client 2'
+      ])
+      uponReceiving('a request to the root')
+      withAttributes(path: '/')
+      willRespondWith(status: 200)
+      withBody('application/hal+json') {
+        '_links' {
+          'pb:latest-provider-pacts' {
+            href url('http://localhost:8080', 'pacts', 'provider', '{provider}', 'latest')
+            title 'Latest pacts by provider'
+            templated true
+          }
+        }
+      }
+      uponReceiving('a request for the provider pacts')
+      withAttributes(path: '/pacts/provider/Activity Service/latest')
+      willRespondWith(status: 200)
+      withBody('application/hal+json') {
+        '_links' {
+          provider {
+            href url('http://localhost:8080', 'pacticipants', 'Activity Service')
+            title string('Activity Service')
+          }
+          pacts eachLike(2) {
+            href url('http://localhost:8080', 'pacts', 'provider', 'Activity Service', 'consumer', 'Foo Web Client',
+              'version', '0.1.380')
+            title string('Pact between Foo Web Client (v0.1.380) and Activity Service')
+            name string('Foo Web Client')
+          }
+        }
+      }
+    }
+
+    when:
+    def result = pactBroker.runTest {
+      assert pactBrokerClient.fetchConsumers('Activity Service').size() == 2
+    }
+
+    then:
+    result == PactVerificationResult.Ok.INSTANCE
+  }
 }
