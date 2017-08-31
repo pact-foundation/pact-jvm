@@ -49,7 +49,7 @@ ask('Execute Build?: [Y]') {
   executeOnShell './gradlew clean check install'
 }
 
-def projectProps = './gradlew :pact-jvm-consumer_2.11:properties'.execute().text.split('\n').inject([:]) { acc, v ->
+def projectProps = './gradlew :pact-jvm-consumer_2.12:properties'.execute().text.split('\n').inject([:]) { acc, v ->
   if (v ==~ /\w+: .*/) {
     def kv = v.split(':')
     acc[kv[0].trim()] = kv[1].trim()
@@ -107,8 +107,8 @@ ask('Tag and Push commits?: [Y]') {
 }
 
 ask('Publish artifacts to maven central?: [Y]') {
-//  executeOnShell './gradlew clean uploadArchives :pact-jvm-provider-gradle_2.11:publishPlugins -S'
-  executeOnShell './gradlew clean uploadArchives -S'
+//  executeOnShell './gradlew clean uploadArchives :pact-jvm-provider-gradle_2.12:publishPlugins -S'
+  executeOnShell './gradlew clean uploadArchives_2.12 -S'
 }
 
 def nextVer = Version.valueOf(releaseVer).incrementPreReleaseVersion()
