@@ -165,18 +165,19 @@ class PactBrokerClientSpec extends Specification {
         }
       }
       uponReceiving('a request for the provider pacts')
-      withAttributes(path: '/pacts/provider/Activity Service/latest')
+      withAttributes(path: '/pacts/provider/Activity%20Service/latest')
       willRespondWith(status: 200)
       withBody('application/hal+json') {
         '_links' {
           provider {
-            href url('http://localhost:8080', 'pacticipants', 'Activity Service')
+            href url('http://localhost:8080', 'pacticipants', regexp('[^\\/]+', 'Activity%20Service'))
             title string('Activity Service')
           }
           pacts eachLike(2) {
-            href url('http://localhost:8080', 'pacts', 'provider', 'Activity Service', 'consumer', 'Foo Web Client',
-              'version', '0.1.380')
-            title string('Pact between Foo Web Client (v0.1.380) and Activity Service')
+            href url('http://localhost:8080', 'pacts', 'provider', regexp('[^\\/]+', 'Activity%20Service'),
+              'consumer', regexp('[^\\/]+', 'Foo Web Client'),
+              'version', regexp('\\d+\\.\\d+\\.\\d+', '0.1.380'))
+            title string('Pact between Foo Web Client (v0.1.380) and Activity%20Service')
             name string('Foo Web Client')
           }
         }
@@ -185,7 +186,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def result = pactBroker.runTest {
-      assert pactBrokerClient.fetchConsumers('Activity Service').size() == 2
+      assert pactBrokerClient.fetchConsumers('Activity%20Service').size() == 2
     }
 
     then:
