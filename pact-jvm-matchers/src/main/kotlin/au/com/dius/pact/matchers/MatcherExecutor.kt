@@ -23,22 +23,18 @@ import java.text.ParseException
 private val logger = KotlinLogging.logger {}
 
 fun valueOf(value: Any?): String {
-  if (value == null) {
-    return "null"
-  } else if (value is String) {
-    return "'$value'"
-  } else {
-    return value.toString()
+  return when (value) {
+    null -> "null"
+    is String -> "'$value'"
+    else -> value.toString()
   }
 }
 
 fun safeToString(value: Any?): String {
-  if (value == null) {
-    return ""
-  } else if (value is Elem) {
-    return value.text()
-  } else {
-    return value.toString()
+  return when (value) {
+    null -> ""
+    is Elem -> value.text()
+    else -> value.toString()
   }
 }
 
@@ -46,10 +42,10 @@ fun <Mismatch> matchInclude(includedValue: String, path: List<String>, expected:
                             mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
   val matches = safeToString(actual).contains(includedValue)
   logger.debug { "comparing if ${valueOf(actual)} includes '$includedValue' at $path -> $matches" }
-  if (matches) {
-    return listOf()
+  return if (matches) {
+    listOf()
   } else {
-    return listOf(mismatchFactory.create(expected, actual,
+    listOf(mismatchFactory.create(expected, actual,
       "Expected ${valueOf(actual)} to include ${valueOf(includedValue)}", path))
   }
 }
@@ -176,39 +172,39 @@ fun <Mismatch> matchNumber(numberType: NumberTypeMatcher.NumberType, path: List<
 fun <Mismatch> matchDate(pattern: String, path: List<String>, expected: Any?, actual: Any?,
                          mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
   logger.debug { "comparing ${valueOf(actual)} to date pattern $pattern at $path" }
-  try {
+  return try {
     DateUtils.parseDate(safeToString(actual), pattern)
-    return emptyList()
+    emptyList()
   } catch (e: ParseException) {
-    return listOf(mismatchFactory.create(expected, actual,
+    listOf(mismatchFactory.create(expected, actual,
       "Expected ${valueOf(actual)} to match a date of '$pattern': " +
-      "${e.message}", path))
+        "${e.message}", path))
   }
 }
 
 fun <Mismatch> matchTime(pattern: String, path: List<String>, expected: Any?, actual: Any?,
                          mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
   logger.debug { "comparing ${valueOf(actual)} to time pattern $pattern at $path" }
-  try {
+  return try {
     DateUtils.parseDate(safeToString(actual), pattern)
-    return emptyList()
+    emptyList()
   } catch (e: ParseException) {
-    return listOf(mismatchFactory.create(expected, actual,
+    listOf(mismatchFactory.create(expected, actual,
       "Expected ${valueOf(actual)} to match a time of '$pattern': " +
-      "${e.message}", path))
+        "${e.message}", path))
   }
 }
 
 fun <Mismatch> matchTimestamp(pattern: String, path: List<String>, expected: Any?, actual: Any?,
                               mismatchFactory: MismatchFactory<Mismatch>): List<Mismatch> {
   logger.debug { "comparing ${valueOf(actual)} to timestamp pattern $pattern at $path" }
-  try {
+  return try {
     DateUtils.parseDate(safeToString(actual), pattern)
-    return emptyList()
+    emptyList()
   } catch (e: ParseException) {
-    return listOf(mismatchFactory.create(expected, actual,
+    listOf(mismatchFactory.create(expected, actual,
       "Expected ${valueOf(actual)} to match a timestamp of '$pattern': " +
-      "${e.message}", path))
+        "${e.message}", path))
   }
 }
 

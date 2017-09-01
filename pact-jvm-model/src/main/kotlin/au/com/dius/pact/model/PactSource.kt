@@ -22,7 +22,8 @@ data class DirectorySource @JvmOverloads constructor(val dir: File,
 
 data class PactBrokerSource @JvmOverloads constructor(val host: String,
                                                       val port: String,
-                                                      val pacts: MutableMap<Consumer, List<Pact>> = mutableMapOf()) : PactSource()
+                                                      val pacts: MutableMap<Consumer, List<Pact>> = mutableMapOf())
+  : PactSource()
 
 data class FileSource @JvmOverloads constructor(val file: File, val pact: Pact? = null) : PactSource() {
   override fun description() = "File $file"
@@ -48,6 +49,7 @@ object ReaderPactSource : PactSource()
 
 object UnknownPactSource : PactSource()
 
+@Suppress("ClassNaming")
 data class S3PactSource(override val url: String) : UrlPactSource() {
   override fun description() = "S3 Bucket $url"
 }
