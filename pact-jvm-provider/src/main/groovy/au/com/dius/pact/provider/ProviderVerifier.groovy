@@ -67,7 +67,9 @@ class ProviderVerifier {
     if (pact.interactions.empty) {
       reporters.each { it.warnPactFileHasNoInteractions(pact) }
     } else {
-      def result = pact.interactions.every(this.&verifyInteraction.curry(provider, consumer, failures))
+      def result = pact.interactions
+        .collect(this.&verifyInteraction.curry(provider, consumer, failures))
+        .inject(true) { acc, val -> acc && val }
       if (pact.isNotFiltered()) {
         ProviderVerifierKt.reportVerificationResults(pact, result, providerVersion() ?: '0.0.0')
       } else {
