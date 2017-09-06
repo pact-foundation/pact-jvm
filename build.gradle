@@ -107,7 +107,11 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '3.5.4-rc.1'
+    if (project.name in ['pact-jvm-model', 'pact-jvm-pact-broker']) {
+      version = '3.5.4'
+    } else {
+      version = '3.5.4-rc.1'
+    }
     targetCompatibility = '1.8'
     sourceCompatibility = '1.8'
 
