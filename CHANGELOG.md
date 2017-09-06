@@ -1,5 +1,12 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.4-rc.1 - Corrected Dependency Versions
+
+* 36dd3cd - Correct the dependencies on pact-jvm-model (Ronald Holshausen, Wed Sep 6 12:16:01 2017 +1000)
+* 38dc95e - Correct the release script for the 2.12 version (Ronald Holshausen, Thu Aug 31 13:56:45 2017 +1000)
+* 915edd7 - Fix for flacky test on windows (Ronald Holshausen, Wed Aug 30 13:12:46 2017 +1000)
+* afbaf42 - bump version to 3.5.4-rc.1 (Ronald Holshausen, Wed Aug 30 13:01:58 2017 +1000)
+
 # 3.5.4-rc.0 - Scala 2.12 Version
 
 * f2c8913 - Setup release prep script for RC release (Ronald Holshausen, Wed Aug 30 11:31:38 2017 +1000)
