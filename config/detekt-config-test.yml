@@ -54,7 +54,7 @@ potential-bugs:
     active: false
   UnsafeCast:
     active: false
-  UselessIncrement:
+  UselessPostfixExpression:
     active: false
 
 performance:
@@ -68,7 +68,12 @@ performance:
 
 exceptions:
   active: true
-  TooGenericExceptionCatched:
+  ExceptionRaisedInUnexpectedLocation:
+    active: false
+    methodNames: 'toString,hashCode,equals,finalize'
+  SwallowedException:
+    active: false
+  TooGenericExceptionCaught:
     active: true
     exceptions:
       - ArrayIndexOutOfBoundsException
@@ -76,6 +81,7 @@ exceptions:
       - Exception
       - IllegalMonitorStateException
       - IndexOutOfBoundsException
+      - InterruptedException
       - NullPointerException
       - RuntimeException
   TooGenericExceptionThrown:
@@ -87,6 +93,22 @@ exceptions:
       - ThrowNullPointerException
       - ThrowRuntimeException
       - ThrowThrowable
+  InstanceOfCheckForException:
+    active: false
+  IteratorNotThrowingNoSuchElementException:
+    active: false
+  PrintExceptionStackTrace:
+    active: false
+  RethrowCaughtException:
+    active: false
+  ReturnFromFinally:
+    active: false
+  ThrowingExceptionFromFinally:
+    active: false
+  ThrowingExceptionInMain:
+    active: false
+  ThrowingNewInstanceOfSameException:
+    active: false
 
 empty-blocks:
   active: true
@@ -215,6 +237,8 @@ style:
   ForbiddenImport:
     active: false
     imports: ''
+  PackageDeclarationStyle:
+    active: false
   ModifierOrder:
     active: true
   MagicNumber:
@@ -241,7 +265,7 @@ style:
   EnumNaming:
     active: true
     enumEntryPattern: '^[A-Z$][a-zA-Z_$]*$'
-  FunctionNaming :
+  FunctionNaming:
     active: true
     functionPattern: '^[a-z$][a-zA-Z$0-9]*$'
   FunctionMaxLength:
@@ -250,10 +274,10 @@ style:
   FunctionMinLength:
     active: false
     minimumFunctionNameLength: 3
-  VariableNaming :
+  VariableNaming:
     active: true
     variablePattern: '^(_)?[a-z$][a-zA-Z$0-9]*$'
-  ConstantNaming :
+  ConstantNaming:
     active: true
     constantPattern: '^([A-Z_]*|serialVersionUID)$'
   VariableMaxLength:
@@ -262,9 +286,18 @@ style:
   VariableMinLength:
     active: false
     minimumVariableNameLength: 3
+  ForbiddenClassName:
+    active: false
+    forbiddenName: ''
   ProtectedMemberInFinalClass:
     active: false
   UnnecessaryParentheses:
+    active: false
+  DataClassContainsFunctions:
+    active: false
+  UseDataClass:
+    active: false
+  UnnecessaryAbstractClass:
     active: false
 
 comments:
@@ -277,6 +310,7 @@ comments:
     active: false
     searchInNestedClass: true
     searchInInnerClass: true
+    searchInInnerObject: true
     searchInInnerInterface: true
   UndocumentedPublicFunction:
     active: false
