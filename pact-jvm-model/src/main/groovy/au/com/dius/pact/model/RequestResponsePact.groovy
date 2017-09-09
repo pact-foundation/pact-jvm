@@ -54,8 +54,12 @@ class RequestResponsePact extends BasePact {
     }
   }
 
+  /**
+   * @deprecated Wrap the pact in a FilteredPact instead
+   */
   @Override
+  @Deprecated
   Pact filterInteractions(Predicate<Interaction> predicate) {
-    new RequestResponsePact(provider, consumer, interactions.findAll { predicate.test(it) }, metadata)
+    new FilteredPact(this, predicate)
   }
 }

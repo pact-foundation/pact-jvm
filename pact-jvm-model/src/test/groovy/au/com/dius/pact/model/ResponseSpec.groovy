@@ -20,4 +20,16 @@ class ResponseSpec extends Specification {
     response.matchingRules.hasCategory('stuff')
   }
 
+  def 'fromMap sets defaults for attributes missing from the map'() {
+    expect:
+    response.status == 200
+    response.headers.isEmpty()
+    response.body.isMissing()
+    response.matchingRules.empty
+    response.generators.empty
+
+    where:
+    response = Response.fromMap([:])
+  }
+
 }

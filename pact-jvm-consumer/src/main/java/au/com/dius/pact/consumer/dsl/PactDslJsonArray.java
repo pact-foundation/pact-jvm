@@ -24,6 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -1031,6 +1032,18 @@ public class PactDslJsonArray extends DslPart {
       body.put(JSONObject.NULL);
     }
     matchers.setRules(rootPath + appendArrayIndex(0), new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.OR));
+    return this;
+  }
+
+  /**
+   * Matches a URL that is composed of a base path and a sequence of path expressions
+   * @param basePath The base path for the URL (like "http://localhost:8080/") which will be excluded from the matching
+   * @param pathFragments Series of path fragments to match on. These can be strings or regular expressions.
+   */
+  public PactDslJsonArray matchUrl(String basePath, Object... pathFragments) {
+    UrlMatcherSupport urlMatcher = new UrlMatcherSupport(basePath, Arrays.asList(pathFragments));
+    body.put(urlMatcher.getExampleValue());
+    matchers.addRule(rootPath + appendArrayIndex(0), regexp(urlMatcher.getRegexExpression()));
     return this;
   }
 }

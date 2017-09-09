@@ -9,6 +9,9 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.OffsetDateTime
+import java.time.OffsetTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
@@ -172,10 +175,10 @@ data class DateGenerator(val format: String? = null) : Generator {
   }
 
   override fun generate(base: Any?): Any {
-    if (format != null) {
-      return LocalDate.now().format(DateTimeFormatter.ofPattern(format))
+    return if (format != null) {
+      OffsetDateTime.now().format(DateTimeFormatter.ofPattern(format))
     } else {
-      return LocalDate.now().toString()
+      LocalDate.now().toString()
     }
   }
 
@@ -196,10 +199,10 @@ data class TimeGenerator(val format: String? = null) : Generator {
   }
 
   override fun generate(base: Any?): Any {
-    if (format != null) {
-      return LocalTime.now().format(DateTimeFormatter.ofPattern(format))
+    return if (format != null) {
+      OffsetTime.now().format(DateTimeFormatter.ofPattern(format))
     } else {
-      return LocalTime.now().toString()
+      LocalTime.now().toString()
     }
   }
 
@@ -220,10 +223,10 @@ data class DateTimeGenerator(val format: String? = null) : Generator {
   }
 
   override fun generate(base: Any?): Any {
-    if (format != null) {
-      return LocalDateTime.now().format(DateTimeFormatter.ofPattern(format))
+    return if (format != null) {
+      ZonedDateTime.now().format(DateTimeFormatter.ofPattern(format))
     } else {
-      return LocalDateTime.now().toString()
+      LocalDateTime.now().toString()
     }
   }
 

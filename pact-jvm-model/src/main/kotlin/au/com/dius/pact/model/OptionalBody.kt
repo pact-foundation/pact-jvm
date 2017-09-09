@@ -63,7 +63,7 @@ data class OptionalBody(val state: State, val value: String? = null) {
     if (isPresent()) {
       return value!!
     } else {
-      throw RuntimeException("Failed to unwrap value from a $state body")
+      throw UnwrapMissingBodyException("Failed to unwrap value from a $state body")
     }
   }
 }

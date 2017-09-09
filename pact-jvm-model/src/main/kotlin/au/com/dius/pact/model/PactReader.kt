@@ -20,23 +20,21 @@ fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: REST
       val pactResponse = brokerClient.fetchPact(source.url)
       return pactResponse.pactFile to source.copy(attributes = pactResponse.links, options = options)
     }
-    else -> {
-      if (options.containsKey("authentication")) {
-        val auth = options["authentication"]
-        if (auth is List<*>) {
-          setupHttpAuthentication(auth, http!!)
-        } else {
-          logger.warn { "Ignoring invalid authentication values '$auth' - it should be a list" }
-        }
-        val response = http!!.get(mutableMapOf("headers" to mutableMapOf("Accept" to "application/json")))
-        if (response is HttpResponseDecorator) {
-          return response.data!! to source
-        } else {
-          throw InvalidHttpResponseException("Received an invalid response from the HTTP client: $response")
-        }
+    else -> if (options.containsKey("authentication")) {
+      val auth = options["authentication"]
+      if (auth is List<*>) {
+        setupHttpAuthentication(auth, http!!)
       } else {
-        return JsonSlurper().parse(URL(source.url), ACCEPT_JSON) to source
+        logger.warn { "Ignoring invalid authentication values '$auth' - it should be a list" }
       }
+      val response = http!!.get(mutableMapOf("headers" to mutableMapOf("Accept" to "application/json")))
+      if (response is HttpResponseDecorator) {
+        return response.data!! to source
+      } else {
+        throw InvalidHttpResponseException("Received an invalid response from the HTTP client: $response")
+      }
+    } else {
+      return JsonSlurper().parse(URL(source.url), ACCEPT_JSON) to source
     }
   }
 }

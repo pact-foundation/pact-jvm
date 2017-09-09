@@ -9,7 +9,8 @@ import java.util.function.ToIntFunction
  * Matching rules category
  */
 data class Category @JvmOverloads constructor(val name: String,
-                                              var matchingRules: MutableMap<String, MatchingRuleGroup> = mutableMapOf()) {
+                                              var matchingRules: MutableMap<String, MatchingRuleGroup> =
+                                              mutableMapOf()) {
 
   companion object : KLogging()
 
@@ -49,7 +50,8 @@ data class Category @JvmOverloads constructor(val name: String,
    */
   fun isNotEmpty() = matchingRules.any { it.value.rules.isNotEmpty() }
 
-  fun filter(predicate: Predicate<String>) = copy(matchingRules = matchingRules.filter { predicate.test(it.key) }.toMutableMap())
+  fun filter(predicate: Predicate<String>) =
+    copy(matchingRules = matchingRules.filter { predicate.test(it.key) }.toMutableMap())
 
   fun maxBy(fn: ToIntFunction<String>): MatchingRuleGroup {
     val max = matchingRules.maxBy { fn.applyAsInt(it.key) }
