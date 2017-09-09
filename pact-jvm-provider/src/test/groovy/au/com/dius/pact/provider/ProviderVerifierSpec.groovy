@@ -372,14 +372,14 @@ class ProviderVerifierSpec extends Specification {
     PactReader.loadPact(_) >> mockPact
     mockPact.interactions >> [interaction1, interaction2]
     StateChange.executeStateChange(*_) >> new StateChange.StateChangeResult(true)
-    verifier.verifyResponseFromProvider(provider, interaction1, _, _) >> result1
-    verifier.verifyResponseFromProvider(provider, interaction2, _, _) >> result2
 
     when:
     verifier.runVerificationForConsumer([:], provider, consumer)
 
     then:
     1 * ProviderVerifierKt.reportVerificationResults(_, finalResult, '0.0.0')
+    1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _) >> result1
+    1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _) >> result2
 
     where:
 

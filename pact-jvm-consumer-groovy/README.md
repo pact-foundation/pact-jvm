@@ -328,6 +328,17 @@ Defines a matcher that accepts any value where its string form includes the prov
 
 Defines a matcher that accepts only null values.
 
+* url(String basePath, Object... pathFragments)
+
+Defines a matcher for URLs, given the base URL path and a sequence of path fragments. The path fragments could be
+strings or regular expression matchers. For example:
+
+```groovy
+  url('http://localhost:8080', 'pacticipants', regexp('[^\\/]+', 'Activity%20Service'))
+```
+
+Defines a matcher that accepts only null values.
+
 #### What if a field matches a matcher name in the DSL?
 
 When using the body DSL, if there is a field that matches a matcher name (e.g. a field named 'date') then you can do the following:

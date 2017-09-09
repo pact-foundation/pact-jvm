@@ -2,11 +2,11 @@ package au.com.dius.pact.matchers
 
 import groovy.json.JsonOutput
 
-private const val NL = '\n'
+private const val NEW_LINE = '\n'
 
 fun generateDiff(expectedBodyString: String, actualBodyString: String): List<String> {
-  val expectedLines = expectedBodyString.split(NL)
-  val actualLines = actualBodyString.split(NL)
+  val expectedLines = expectedBodyString.split(NEW_LINE)
+  val actualLines = actualBodyString.split(NEW_LINE)
   val patch = difflib.DiffUtils.diff(expectedLines, actualLines)
 
   val diff = mutableListOf<String>()
@@ -42,5 +42,5 @@ fun generateObjectDiff(expected: Any?, actual: Any?): String {
       expectedJson = JsonOutput.prettyPrint(JsonOutput.toJson(expected))
     }
 
-    return generateDiff(expectedJson, actualJson).joinToString(separator = NL.toString())
+    return generateDiff(expectedJson, actualJson).joinToString(separator = NEW_LINE.toString())
 }

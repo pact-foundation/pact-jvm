@@ -668,7 +668,7 @@ class ConfirmationKafkaMessageBuilderTest {
       order.setPrice(BigDecimal.TEN)
       order.setUnits(15)
       order.setGst(new BigDecimal('15.0'))
-      odrer.setFees(BigDecimal.TEN)
+      order.setFees(BigDecimal.TEN)
 
       def message = new ConfirmationKafkaMessageBuilder()
               .withOrder(order)

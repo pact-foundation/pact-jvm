@@ -718,4 +718,17 @@ public class PactDslJsonRootValue extends DslPart {
     return value;
   }
 
+  /**
+   * Matches a URL that is composed of a base path and a sequence of path expressions
+   * @param basePath The base path for the URL (like "http://localhost:8080/") which will be excluded from the matching
+   * @param pathFragments Series of path fragments to match on. These can be strings or regular expressions.
+   */
+  public PactDslJsonRootValue matchUrl(String basePath, Object... pathFragments) {
+    UrlMatcherSupport urlMatcher = new UrlMatcherSupport(basePath, Arrays.asList(pathFragments));
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    value.setValue(urlMatcher.getExampleValue());
+    value.setMatcher(value.regexp(urlMatcher.getRegexExpression()));
+    return value;
+  }
+
 }

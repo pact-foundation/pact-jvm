@@ -282,4 +282,11 @@ class Matchers {
   static nullValue() {
     new NullMatcher()
   }
+
+  /**
+   * Matches a URL composed of a base path and a list of path fragments
+   */
+  static url(String basePath, Object... pathFragments) {
+    new UrlMatcher(basePath, pathFragments as List)
+  }
 }

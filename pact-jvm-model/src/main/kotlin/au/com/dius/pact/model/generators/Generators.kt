@@ -20,7 +20,9 @@ interface ContentTypeHandler {
   fun applyKey(body: QueryResult, key: String, generator: Generator)
 }
 
-val contentTypeHandlers: MutableMap<String, ContentTypeHandler> = mutableMapOf("application/json" to JsonContentTypeHandler)
+val contentTypeHandlers: MutableMap<String, ContentTypeHandler> = mutableMapOf(
+  "application/json" to JsonContentTypeHandler
+)
 
 fun setupDefaultContentTypeHandlers() {
   contentTypeHandlers.clear()
@@ -53,45 +55,38 @@ object JsonContentTypeHandler : ContentTypeHandler {
     while (pathExp.hasNext()) {
       val token = pathExp.next()
       when (token) {
-        is PathToken.Field -> {
-          if (bodyCursor.value is Map<*, *> && (bodyCursor.value as Map<*, *>).containsKey(token.name)) {
-            val map = bodyCursor.value as Map<*, *>
-            bodyCursor = QueryResult(map[token.name]!!, token.name, bodyCursor.value)
-          } else {
-            return
-          }
+        is PathToken.Field -> if (bodyCursor.value is Map<*, *> &&
+          (bodyCursor.value as Map<*, *>).containsKey(token.name)) {
+          val map = bodyCursor.value as Map<*, *>
+          bodyCursor = QueryResult(map[token.name]!!, token.name, bodyCursor.value)
+        } else {
+          return
         }
-        is PathToken.Index -> {
-          if (bodyCursor.value is List<*> && (bodyCursor.value as List<*>).size > token.index) {
-            val list = bodyCursor.value as List<*>
-            bodyCursor = QueryResult(list[token.index]!!, token.index, bodyCursor.value)
-          } else {
-            return
-          }
+        is PathToken.Index -> if (bodyCursor.value is List<*> && (bodyCursor.value as List<*>).size > token.index) {
+          val list = bodyCursor.value as List<*>
+          bodyCursor = QueryResult(list[token.index]!!, token.index, bodyCursor.value)
+        } else {
+          return
         }
-        is PathToken.Star -> {
-          if (bodyCursor.value is MutableMap<*, *>) {
-            val map = bodyCursor.value as MutableMap<*, *>
-            val pathIterator = IteratorUtils.toList(pathExp)
-            HashMap(map).forEach { (key, value) ->
-              queryObjectGraph(pathIterator.iterator(), QueryResult(value!!, key, map), fn)
-            }
-            return
-          } else {
-            return
+        is PathToken.Star -> if (bodyCursor.value is MutableMap<*, *>) {
+          val map = bodyCursor.value as MutableMap<*, *>
+          val pathIterator = IteratorUtils.toList(pathExp)
+          HashMap(map).forEach { (key, value) ->
+            queryObjectGraph(pathIterator.iterator(), QueryResult(value!!, key, map), fn)
           }
+          return
+        } else {
+          return
         }
-        is PathToken.StarIndex -> {
-          if (bodyCursor.value is List<*>) {
-            val list = bodyCursor.value as List<*>
-            val pathIterator = IteratorUtils.toList(pathExp)
-            list.forEachIndexed { index, item ->
-              queryObjectGraph(pathIterator.iterator(), QueryResult(item!!, index, list), fn)
-            }
-            return
-          } else {
-            return
+        is PathToken.StarIndex -> if (bodyCursor.value is List<*>) {
+          val list = bodyCursor.value as List<*>
+          val pathIterator = IteratorUtils.toList(pathExp)
+          list.forEachIndexed { index, item ->
+            queryObjectGraph(pathIterator.iterator(), QueryResult(item!!, index, list), fn)
           }
+          return
+        } else {
+          return
         }
       }
     }
@@ -112,31 +107,27 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
         try {
           val category = Category.valueOf(key.toUpperCase())
           when (category) {
-            Category.STATUS, Category.PATH, Category.METHOD -> {
-              if (generatorMap.containsKey("type")) {
-                val generator = lookupGenerator(generatorMap)
+            Category.STATUS, Category.PATH, Category.METHOD -> if (generatorMap.containsKey("type")) {
+              val generator = lookupGenerator(generatorMap)
+              if (generator != null) {
+                generators.addGenerator(category, generator = generator)
+              } else {
+                logger.warn { "Ignoring invalid generator config '$generatorMap'" }
+              }
+            } else {
+              logger.warn { "Ignoring invalid generator config '$generatorMap'" }
+            }
+            else -> generatorMap.forEach { (generatorKey, generatorValue) ->
+              if (generatorValue is Map<*, *> && generatorValue.containsKey("type")) {
+                @Suppress("UNCHECKED_CAST")
+                val generator = lookupGenerator(generatorValue as Map<String, Any>)
                 if (generator != null) {
-                  generators.addGenerator(category, generator = generator)
+                  generators.addGenerator(category, generatorKey, generator)
                 } else {
                   logger.warn { "Ignoring invalid generator config '$generatorMap'" }
                 }
               } else {
-                logger.warn { "Ignoring invalid generator config '$generatorMap'" }
-              }
-            }
-            else -> {
-              generatorMap.forEach { (generatorKey, generatorValue) ->
-                if (generatorValue is Map<*, *> && generatorValue.containsKey("type")) {
-                  @Suppress("UNCHECKED_CAST")
-                  val generator = lookupGenerator(generatorValue as Map<String, Any>)
-                  if (generator != null) {
-                    generators.addGenerator(category, generatorKey, generator)
-                  } else {
-                    logger.warn { "Ignoring invalid generator config '$generatorMap'" }
-                  }
-                } else {
-                  logger.warn { "Ignoring invalid generator config '$generatorKey -> $generatorValue'" }
-                }
+                logger.warn { "Ignoring invalid generator config '$generatorKey -> $generatorValue'" }
               }
             }
           }
@@ -152,7 +143,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
   @JvmOverloads
   fun addGenerator(category: Category, key: String? = "", generator: Generator): Generators {
     if (categories.containsKey(category) && categories[category] != null) {
-      categories[category]?.put((key ?: ""), generator)
+      categories[category]?.put(key ?: "", generator)
     } else {
       categories[category] = mutableMapOf((key ?: "") to generator)
     }
@@ -225,9 +216,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     }
     return categories.entries.associate { (key, value) ->
       when (key) {
-        Category.METHOD, Category.PATH, Category.STATUS -> {
-          key.name.toLowerCase() to value[""]!!.toMap(pactSpecVersion)
-        }
+        Category.METHOD, Category.PATH, Category.STATUS -> key.name.toLowerCase() to value[""]!!.toMap(pactSpecVersion)
         else -> key.name.toLowerCase() to value.entries.associate { (genKey, generator) ->
           genKey to generator.toMap(pactSpecVersion)
         }
