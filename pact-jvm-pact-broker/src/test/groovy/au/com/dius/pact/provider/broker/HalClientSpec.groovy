@@ -18,8 +18,10 @@ import spock.lang.Unroll
 class HalClientSpec extends Specification {
 
   private HalClient client
+  private RESTClient mockHttp
 
   def setup() {
+    mockHttp = Mock(RESTClient)
     client = GroovySpy(HalClient, global: true, constructorArgs: ['baseUrl'])
   }
 
@@ -43,7 +45,6 @@ class HalClientSpec extends Specification {
   def 'matches authentication scheme case insensitive'() {
     given:
     client.options = [authentication: ['BASIC', '1', '2']]
-    def mockHttp = Mock(RESTClient)
     client.newHttpClient() >> mockHttp
     def authConfig = Mock(AuthConfig)
     mockHttp.getAuth() >> authConfig
@@ -311,6 +312,71 @@ class HalClientSpec extends Specification {
 
     then:
     result == new Result.Success(false)
+  }
+
+  def 'forAll does nothing if there is no matching link'() {
+    given:
+    def response = [
+      headers: [
+        'Content-Type': 'application/json'
+      ],
+      data: [
+        '_links': [:]
+      ]
+    ]
+    client.http = mockHttp
+    def closure = Mock(org.apache.commons.collections4.Closure)
+
+    when:
+    client.forAll('missingLink', closure)
+
+    then:
+    1 * mockHttp.get(_) >> response
+    0 * closure.execute(_)
+  }
+
+  def 'forAll calls the closure with the link data'() {
+    given:
+    def response = [
+      headers: [
+        'Content-Type': 'application/json'
+      ],
+      data: [
+        '_links': [simpleLink: [link: 'linkData']]
+      ]
+    ]
+    client.http = mockHttp
+    def closure = Mock(org.apache.commons.collections4.Closure)
+
+    when:
+    client.forAll('simpleLink', closure)
+
+    then:
+    1 * mockHttp.get(_) >> response
+    1 * closure.execute([link: 'linkData'])
+  }
+
+  def 'forAll calls the closure with each link data when the link is a collection'() {
+    given:
+    def response = [
+      headers: [
+        'Content-Type': 'application/json'
+      ],
+      data: [
+        '_links': [multipleLink: ['one', 'two', 'three']]
+      ]
+    ]
+    client.http = mockHttp
+    def closure = Mock(org.apache.commons.collections4.Closure)
+
+    when:
+    client.forAll('multipleLink', closure)
+
+    then:
+    1 * mockHttp.get(_) >> response
+    1 * closure.execute('one')
+    1 * closure.execute('two')
+    1 * closure.execute('three')
   }
 
 }
