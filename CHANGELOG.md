@@ -1,5 +1,30 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.5 - Bugfix Release
+
+* b754b7a - More hack because of Travis (Ronald Holshausen, Mon Sep 11 08:35:30 2017 +1000)
+* 0b50a52 - Add a test for HalClient forAll method #533 (Ronald Holshausen, Sun Sep 10 12:21:42 2017 +1000)
+* 486c091 - Inlined com.github.kittinunf.result as it is not published to maven central #521 (Ronald Holshausen, Sun Sep 10 11:36:41 2017 +1000)
+* 7687651 - Accidential overide of standard Gradle tasks (Ronald Holshausen, Sun Sep 10 10:57:52 2017 +1000)
+* 2ff8b8e - Merged 2.12 into v3.5.x (Ronald Holshausen, Sun Sep 10 10:53:55 2017 +1000)
+* 631dff3 - Merge branch 'v3.5.x' into scala-2.12 (Ronald Holshausen, Sun Sep 10 10:43:00 2017 +1000)
+* 9e6dc86 - Debugging build on travis (Ronald Holshausen, Sun Sep 10 10:28:13 2017 +1000)
+* b9c6f3b - execute the non-scala modules in parallel in travis build (Ronald Holshausen, Sun Sep 10 10:16:49 2017 +1000)
+* 71c489e - Split travis build into non-scala and scala (Ronald Holshausen, Sun Sep 10 10:10:17 2017 +1000)
+* 177d377 - Correct the travis build for Scala 2.12 (Ronald Holshausen, Sun Sep 10 09:46:37 2017 +1000)
+* d8a5707 - Merge branch 'v3.5.x' into scala-2.12 (Ronald Holshausen, Sun Sep 10 09:44:14 2017 +1000)
+* 47d4741 - Update the detekt config (Ronald Holshausen, Sun Sep 10 09:41:39 2017 +1000)
+* efecdcd - Merge branch 'master' into v3.5.x (Ronald Holshausen, Sun Sep 10 09:30:29 2017 +1000)
+* 91dc9b6 - Correct a regression introduced when implementing publishing of verification results the verifier short circuits as soon as an interation fails (Ronald Holshausen, Sat Sep 2 10:37:36 2017 +1000)
+* 6ea6ed3 - Added the URL matching support to the Java DSL #100 (Ronald Holshausen, Fri Sep 1 14:00:53 2017 +1000)
+* fb01446 - Update detekt and fix static code analysis errors (Ronald Holshausen, Fri Sep 1 12:50:28 2017 +1000)
+* 3c147d7 - Use a regex to match the path portion of the URL #100 (Ronald Holshausen, Fri Sep 1 10:10:52 2017 +1000)
+* a131237 - Support absolute URLs in response bodies with a URL matcher #100 (Ronald Holshausen, Thu Aug 31 15:27:12 2017 +1000)
+* d9a350a - Add Scala 2.12 version (Ronald Holshausen, Wed Aug 30 13:14:11 2017 +1000)
+* 99f814a - Correct typo in readme (Ronald Holshausen, Tue Aug 29 08:37:11 2017 +1000)
+* 427292a - Upgrade Gradle to 4.1 (Ronald Holshausen, Fri Aug 18 16:25:47 2017 +1000)
+* a96a519 - Upgraded Kotlin to 1.1.4 (Ronald Holshausen, Fri Aug 18 16:16:22 2017 +1000)
+
 # 3.5.4-rc.1 - Corrected Dependency Versions
 
 * 36dd3cd - Correct the dependencies on pact-jvm-model (Ronald Holshausen, Wed Sep 6 12:16:01 2017 +1000)
