@@ -283,6 +283,11 @@ tasks.addRule("Pattern: <Task>_<ScalaVersion>") { String taskName ->
       dependsOn project.childProjects.findAll { it.key.endsWith('_' + m.group(2)) }
         .collect { it.value.getTasksByName(m.group(1), false) }.flatten()
     }
+  } else {
+    task(taskName) {
+      dependsOn project.childProjects.findAll { !(it.key ==~ /.*_\d\.\d+$/) }
+        .collect { it.value.getTasksByName(taskName.split('_').first(), false) }.flatten()
+    }
   }
 }
 
