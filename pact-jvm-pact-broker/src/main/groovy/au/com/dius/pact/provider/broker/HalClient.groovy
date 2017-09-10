@@ -165,9 +165,9 @@ class HalClient extends HalClientBase {
     def matchingLink = pathInfo.'_links'[linkName]
     if (matchingLink != null) {
       if (matchingLink instanceof Collection) {
-        matchingLink.each { just.accept(it) }
+        matchingLink.each { just.execute(it) }
       } else {
-        just.accept(matchingLink as Map<String, Object>)
+        just.execute(matchingLink as Map<String, Object>)
       }
     }
   }
