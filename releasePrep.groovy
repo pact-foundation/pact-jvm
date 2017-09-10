@@ -107,14 +107,14 @@ ask('Tag and Push commits?: [Y]') {
 }
 
 ask('Publish artifacts to maven central?: [Y]') {
-//  executeOnShell './gradlew clean uploadArchives :pact-jvm-provider-gradle_2.12:publishPlugins -S'
-  executeOnShell './gradlew clean uploadArchives_2.12 -S'
+  executeOnShell './gradlew clean uploadArchives :pact-jvm-provider-gradle_2.12:publishPlugins -S'
 }
 
-def nextVer = Version.valueOf(releaseVer).incrementPreReleaseVersion()
+def nextVer = Version.valueOf(releaseVer).incrementPatchVersion()
 ask("Bump version to $nextVer?: [Y]") {
   executeOnShell "sed -i -e \"s/version = '${releaseVer}'/version = '${nextVer}'/\" build.gradle"
-  executeOnShell("git add build.gradle")
+  executeOnShell "sed -i -e \"s/def version = \\\"${releaseVer}\\\"/def version = \\\"${nextVer}\\\"/\" project/Build.scala"
+  executeOnShell("git add build.gradle project/Build.scala")
   executeOnShell("git diff --cached")
   ask("Commit and push this change?: [Y]") {
     executeOnShell("git commit -m 'bump version to $nextVer'")
