@@ -10,5 +10,7 @@ env:
   - SCALA=2.11 JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m"
   - SCALA=nonscala JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m"
 script:
+  - unset _JAVA_OPTIONS
+  - env
   - ./gradlew --stacktrace --no-daemon -i check_$SCALA
 install: true
