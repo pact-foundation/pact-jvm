@@ -296,8 +296,9 @@ if (System.env.TRAVIS == 'true') {
         }
         tasks.withType(Test) {
             // containers (currently) have 2 dedicated cores and 4GB of memory
-            maxParallelForks = 2
+//            maxParallelForks = 2
             minHeapSize = '128m'
+            maxHeapSize = '768m'
         }
     }
 }
