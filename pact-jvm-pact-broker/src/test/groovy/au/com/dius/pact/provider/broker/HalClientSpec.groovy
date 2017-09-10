@@ -2,7 +2,7 @@ package au.com.dius.pact.provider.broker
 
 import au.com.dius.pact.pactbroker.InvalidHalResponse
 import au.com.dius.pact.pactbroker.NotFoundHalResponse
-import com.github.kittinunf.result.Result
+import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import groovyx.net.http.AuthConfig
 import groovyx.net.http.Method
 import groovyx.net.http.RESTClient
