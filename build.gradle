@@ -17,6 +17,12 @@ plugins {
   id 'org.jetbrains.dokka' version '0.9.15'
 }
 
+repositories {
+  mavenLocal()
+  mavenCentral()
+  jcenter()
+}
+
 import org.apache.commons.text.StringEscapeUtils
 
 subprojects {
@@ -52,7 +58,9 @@ subprojects {
     }
 
     apply plugin: 'java'
-    apply plugin: 'scala'
+    if (project.hasProperty('scalaVersion')) {
+      apply plugin: 'scala'
+    }
     apply plugin: 'groovy'
     apply plugin: 'maven'
     apply plugin: 'signing'
@@ -75,6 +83,7 @@ subprojects {
       compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
       compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
       compile 'io.github.microutils:kotlin-logging:1.4.4'
+      compile 'com.github.zafarkhaja:java-semver:0.9.0'
 
       if (project.hasProperty('scalaVersion')) {
           compile "org.scala-lang:scala-library:${project.scalaFullVersion}",
@@ -114,9 +123,11 @@ subprojects {
       dependsOn compileKotlin
     }
 
-    compileScala {
-      classpath = classpath.plus(files(compileGroovy.destinationDir)).plus(files(compileKotlin.destinationDir))
-      dependsOn compileGroovy, compileKotlin
+    if (project.hasProperty('scalaVersion')) {
+      compileScala {
+        classpath = classpath.plus(files(compileGroovy.destinationDir)).plus(files(compileKotlin.destinationDir))
+        dependsOn compileGroovy, compileKotlin
+      }
     }
 
     compileTestGroovy {
@@ -152,9 +163,14 @@ subprojects {
                 'Specification-Version': version
     }
 
-    task javadocJar(type: Jar, dependsOn: [javadoc, scaladoc, groovydoc, dokkaJavadoc]) {
+    task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc, dokkaJavadoc]) {
         classifier = 'javadoc'
+      if (project.hasProperty('scalaVersion')) {
         from javadoc.destinationDir, scaladoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
+        dependsOn << scaladoc
+      } else {
+        from javadoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
+      }
     }
 
     task sourceJar(type: Jar) {
