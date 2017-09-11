@@ -1,0 +1,76 @@
+{
+    "provider": {
+        "name": "ArticlesProvider"
+    },
+    "consumer": {
+        "name": "ArticlesConsumer"
+    },
+    "interactions": [
+        {
+            "description": "retrieving article data",
+            "request": {
+                "method": "GET",
+                "path": "/articles.json"
+            },
+            "response": {
+                "status": 200,
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": {
+                    "articles": [
+                        {
+                            "variants": {
+                                "0032": {
+                                    "description": "sample description"
+                                }
+                            }
+                        }
+                    ]
+                },
+                "matchingRules": {
+                    "body": {
+                        "$.articles": {
+                            "matchers": [
+                                {
+                                    "match": "type",
+                                    "min": 1
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.articles[*].variants.*": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        },
+                        "$.articles[*].variants.*.description": {
+                            "matchers": [
+                                {
+                                    "match": "type"
+                                }
+                            ],
+                            "combine": "AND"
+                        }
+                    }
+                }
+            },
+            "providerStates": [
+                {
+                    "name": "Pact for Issue 313"
+                }
+            ]
+        }
+    ],
+    "metadata": {
+        "pact-specification": {
+            "version": "3.0.0"
+        },
+        "pact-jvm": {
+            "version": "3.5.5"
+        }
+    }
+}

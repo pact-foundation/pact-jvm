@@ -12,6 +12,7 @@ dependencies {
   compile 'org.apache.commons:commons-collections4:4.1'
   compile 'com.github.mifmif:generex:1.0.1'
   compile 'com.google.guava:guava:22.0'
+  compile 'org.asynchttpclient:async-http-client:2.1.0-alpha24'
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }

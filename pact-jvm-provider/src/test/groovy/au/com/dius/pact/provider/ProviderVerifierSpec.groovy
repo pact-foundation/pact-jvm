@@ -11,7 +11,7 @@ import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.VerifierReporter
-import com.github.kittinunf.result.Result
+import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import spock.lang.Specification
 import spock.lang.Unroll
 

@@ -19,26 +19,24 @@ case class ConsumerService(serverUrl: String) {
   def extractResponseTest(path: String = request.getPath): Future[Boolean] = {
     val r = request.copy()
     r.setPath(s"$serverUrl$path")
-    HttpClient.run(r).map { response =>
-      response.getStatus == 200 && extractFrom(response.getBody)
-    }
+    toScala[Boolean](HttpClient.run(r).thenApply(response => response.getStatus == 200 && extractFrom(response.getBody)))
   }
 
   def simpleGet(path: String): Future[(Int, String)] = {
-    HttpClient.run(new Request("GET", serverUrl + path)).map { response =>
+    toScala[(Int, String)](HttpClient.run(new Request("GET", serverUrl + path)).thenApply { response =>
       (response.getStatus, response.getBody.getValue)
-    }
+    })
   }
 
   def simpleGet(path: String, query: String): Future[(Int, String)] = {
-    HttpClient.run(new Request("GET", serverUrl + path, PactReader.queryStringToMap(query, true))).map { response =>
+    toScala[(Int, String)](HttpClient.run(new Request("GET", serverUrl + path, PactReader.queryStringToMap(query, true))).thenApply { response =>
       (response.getStatus, response.getBody.getValue)
-    }
+    })
   }
 
   def options(path: String): Future[(Int, String, Map[String, String])] = {
-    HttpClient.run(new Request("OPTION", serverUrl + path)).map { response =>
+    toScala[(Int, String, Map[String, String])](HttpClient.run(new Request("OPTION", serverUrl + path)).thenApply { response =>
       (response.getStatus, response.getBody.orElse(""), JavaConversions.mapAsScalaMap(response.getHeaders).toMap)
-    }
+    })
   }
 }
