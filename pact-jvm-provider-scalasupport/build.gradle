@@ -1,3 +1,8 @@
 dependencies {
   compile project(":pact-jvm-model"), project(":pact-jvm-provider_${project.scalaVersion}")
 }
+
+compileTestScala {
+  dependsOn compileTestKotlin
+  classpath = classpath.plus(files(compileTestKotlin.destinationDir))
+}
