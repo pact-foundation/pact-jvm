@@ -2,6 +2,13 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 
 # 3.5.5 - Bugfix Release
 
+* 21fd4b2 - Converted Scala 2.12 code to support 2.11 (Ronald Holshausen, Mon Sep 11 17:26:11 2017 +1000)
+* 94fa706 - Merge branch 'v3.5.x' into v3.5.x-2.11 (Ronald Holshausen, Mon Sep 11 12:43:00 2017 +1000)
+* ea18df6 - bump version to 3.5.6 (Ronald Holshausen, Mon Sep 11 10:23:19 2017 +1000)
+* 42a091b - Merged in build changes from 2.12 branch (Ronald Holshausen, Sun Sep 10 10:48:38 2017 +1000)
+
+# 3.5.5 - Bugfix Release
+
 * b754b7a - More hack because of Travis (Ronald Holshausen, Mon Sep 11 08:35:30 2017 +1000)
 * 0b50a52 - Add a test for HalClient forAll method #533 (Ronald Holshausen, Sun Sep 10 12:21:42 2017 +1000)
 * 486c091 - Inlined com.github.kittinunf.result as it is not published to maven central #521 (Ronald Holshausen, Sun Sep 10 11:36:41 2017 +1000)
