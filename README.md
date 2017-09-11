@@ -5,7 +5,7 @@ pact-jvm
 
 [![Build Status](https://travis-ci.org/DiUS/pact-jvm.svg?branch=master)](https://travis-ci.org/DiUS/pact-jvm)
 [![Appveyor build status](https://ci.appveyor.com/api/projects/status/172049m2sa57takc?svg=true)](https://ci.appveyor.com/project/uglyog/pact-jvm)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-consumer_2.11)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-model/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-model)
 
 JVM implementation of the consumer driven contract library [pact](https://github.com/bethesque/pact_specification).
 
@@ -43,17 +43,16 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 
 ## Note about artifact names and versions
 
-Pact-JVM is partially written in Scala. As Scala does not provide binary compatibility between major versions, all the Pact-JVM
+Pact-JVM is partially written in Scala. As Scala does not provide binary compatibility between major versions, most of the Pact-JVM
 artifacts have the version of Scala they were built with in the artifact name. So, for example, the pact-jvm-consumer-junit
-module has a Jar file named pact-jvm-consumer_2.10. The full name of the file is pact-jvm-consumer_2.10-2.0.x.jar.
+module has a Jar file named pact-jvm-consumer_2.12. The full name of the file is pact-jvm-consumer_2.12-3.5.x.jar.
 
 ## Supported JDK and specification versions: 
 
 | Branch | Specification | Min JDK | Scala Versions | Latest Version |
 | ------ | ------------- | ------- | -------------- | -------------- |
-| 3.5.x | V3 | 8 | 2.11 | 3.5.4 |
-| 3.5.x-jre7 | V3 | 7 | 2.11 | 3.5.4-jre7.0 |
-| scala-2.12 | V3 | 8 | 2.12 | 3.5.4-rc.0 |
+| 3.5.x | V3 | 8 | 2.12, 2.11 | 3.5.5 |
+| 3.5.x-jre7 | V3 | 7 | 2.11 | 3.5.5-jre7.0 |
 | 2.4.x (v2.x) | V2 | 6 | 2.10, 2.11 | 2.4.19 |
 
 ## Service Consumers
