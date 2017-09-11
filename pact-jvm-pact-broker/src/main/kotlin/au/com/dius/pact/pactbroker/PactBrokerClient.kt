@@ -1,6 +1,6 @@
 package au.com.dius.pact.pactbroker
 
-import com.github.kittinunf.result.Result
+import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.toJson
 

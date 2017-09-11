@@ -3,7 +3,7 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.model.BrokerUrlSource
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.provider.broker.PactBrokerClient
-import com.github.kittinunf.result.Result
+import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}

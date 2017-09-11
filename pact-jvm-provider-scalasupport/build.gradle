@@ -6,3 +6,8 @@ compileScala {
   dependsOn compileGroovy
   classpath = classpath.plus(files(compileGroovy.destinationDir))
 }
+
+compileTestScala {
+  dependsOn compileTestKotlin
+  classpath = classpath.plus(files(compileTestKotlin.destinationDir))
+}

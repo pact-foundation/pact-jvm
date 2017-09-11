@@ -4,8 +4,6 @@ import java.net.URI
 import java.util.zip.GZIPInputStream
 
 import au.com.dius.pact.model.{OptionalBody, Request, Response}
-import com.ning.http.client
-import com.ning.http.client.FluentCaseInsensitiveStringsMap
 import com.typesafe.scalalogging.StrictLogging
 import io.netty.handler.codec.http.{HttpResponse => NHttpResponse}
 import unfiltered.netty.ReceivedMessage
@@ -16,23 +14,6 @@ import scala.collection.JavaConversions
 
 @Deprecated
 object Conversions extends StrictLogging {
-
-  def toMap(map: FluentCaseInsensitiveStringsMap): java.util.Map[String, String] = {
-    import collection.JavaConversions._
-    JavaConversions.mapAsJavaMap(map.entrySet().map(e => e.getKey -> e.getValue.mkString(",")).toMap)
-  }
-
-  implicit def dispatchResponseToPactResponse(response: client.Response): Response = {
-    val contentType = if (response.getContentType == null)
-        org.apache.http.entity.ContentType.APPLICATION_JSON
-      else
-        org.apache.http.entity.ContentType.parse(response.getContentType)
-    val charset = if (contentType.getCharset == null) "UTF-8" else contentType.getCharset.name()
-    val body = OptionalBody.body(response.getResponseBody(charset))
-    val r = new Response(response.getStatusCode, toMap(response.getHeaders), body)
-    logger.debug("response=" + r)
-    r
-  }
 
   case class Headers(headers: java.util.Map[String, String]) extends unfiltered.response.Responder[Any] {
     def respond(res: HttpResponse[Any]) {

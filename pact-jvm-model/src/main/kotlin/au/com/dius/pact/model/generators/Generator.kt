@@ -172,10 +172,10 @@ data class DateGenerator(val format: String? = null) : Generator {
   }
 
   override fun generate(base: Any?): Any {
-    if (format != null) {
-      return LocalDate.now().toString(DateTimeFormatterBuilder().appendPattern(format).toFormatter())
+    return if (format != null) {
+      LocalDate.now().toString(DateTimeFormatterBuilder().appendPattern(format).toFormatter())
     } else {
-      return LocalDate.now().toString()
+      LocalDate.now().toString()
     }
   }
 
@@ -196,10 +196,10 @@ data class TimeGenerator(val format: String? = null) : Generator {
   }
 
   override fun generate(base: Any?): Any {
-    if (format != null) {
-      return LocalTime.now().toString(DateTimeFormatterBuilder().appendPattern(format).toFormatter())
+    return if (format != null) {
+      LocalTime.now().toString(DateTimeFormatterBuilder().appendPattern(format).toFormatter())
     } else {
-      return LocalTime.now().toString()
+      LocalTime.now().toString()
     }
   }
 
@@ -220,10 +220,10 @@ data class DateTimeGenerator(val format: String? = null) : Generator {
   }
 
   override fun generate(base: Any?): Any {
-    if (format != null) {
-      return LocalDateTime.now().toString(DateTimeFormatterBuilder().appendPattern(format).toFormatter())
+    return if (format != null) {
+      LocalDateTime.now().toString(DateTimeFormatterBuilder().appendPattern(format).toFormatter())
     } else {
-      return LocalDateTime.now().toString()
+      LocalDateTime.now().toString()
     }
   }
 

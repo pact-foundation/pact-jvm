@@ -1,20 +1,19 @@
 dependencies {
     compile project(":pact-jvm-model"), project(":pact-jvm-pact-broker"),
         project(":pact-jvm-matchers_${project.scalaVersion}"),
-        "org.scalatest:scalatest_${project.scalaVersion}:2.2.6",
+        "org.scalatest:scalatest_${project.scalaVersion}:${project.scalatestVersion}",
         'commons-io:commons-io:2.5',
         "org.fusesource.jansi:jansi:${project.jansiVersion}",
         "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}",
         "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
-        'org.reflections:reflections:0.9.10',
-        "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.8.4",
-        "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.3"
+        'org.reflections:reflections:0.9.10'
+    compile "ws.unfiltered:unfiltered-netty-server_${project.scalaVersion}:0.9.1"
 
     testCompile project(":pact-jvm-consumer-groovy_${project.scalaVersion}")
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }
 
-compileTestGroovy{
+compileTestGroovy {
   dependsOn compileTestScala
   classpath = classpath.plus(files(compileTestScala.destinationDir))
 }

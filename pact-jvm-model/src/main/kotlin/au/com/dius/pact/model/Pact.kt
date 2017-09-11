@@ -113,6 +113,8 @@ interface Pact {
 
   /**
    * Returns a new Pact with all the interactions filtered by the provided predicate
+   * @deprecated Wrap the pact in a FilteredPact instead
    */
+  @Deprecated("Wrap the pact in a FilteredPact instead")
   fun filterInteractions(predicate: Predicate<Interaction>): Pact
 }

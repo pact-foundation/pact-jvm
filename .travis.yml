@@ -9,7 +9,9 @@ jdk:
   - openjdk7
 env:
   - SCALA=2.11 JAVA_OPTS="-XX:MaxPermSize=512m -XX:ReservedCodeCacheSize=512m -Xmx512m" GRADLE_OPTS="-Xms128m"
+  - SCALA=nonscala JAVA_OPTS="-XX:MaxPermSize=512m -XX:ReservedCodeCacheSize=512m -Xmx512m" GRADLE_OPTS="-Xms128m"
 script:
+  - unset _JAVA_OPTIONS
   - jdk_switcher use oraclejdk8
   - ./gradlew --stacktrace --no-daemon -i assemble_$SCALA
   - jdk_switcher use $TRAVIS_JDK_VERSION

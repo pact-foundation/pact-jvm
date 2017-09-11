@@ -2,6 +2,7 @@ package au.com.dius.pact.model.v3.messaging
 
 import au.com.dius.pact.model.BasePact
 import au.com.dius.pact.model.Consumer
+import au.com.dius.pact.model.FilteredPact
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.InvalidPactException
 import au.com.dius.pact.model.Pact
@@ -78,8 +79,12 @@ class MessagePact extends BasePact {
     this
   }
 
+  /**
+   * @deprecated Wrap the pact in a FilteredPact instead
+   */
   @Override
+  @Deprecated
   Pact filterInteractions(Predicate<Interaction> predicate) {
-    new MessagePact(provider, consumer, messages.findAll { predicate.evaluate(it) }, metadata)
+    new FilteredPact(this, predicate)
   }
 }

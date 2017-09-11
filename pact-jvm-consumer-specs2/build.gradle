@@ -7,3 +7,8 @@ dependencies {
       "ch.qos.logback:logback-core:${project.logbackVersion}",
       "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }
+
+compileTestScala {
+  classpath = classpath.plus(files(compileTestKotlin.destinationDir))
+  dependsOn compileTestKotlin
+}

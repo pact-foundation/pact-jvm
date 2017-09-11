@@ -12,8 +12,11 @@ import org.jetbrains.annotations.NotNull
 class Request extends HttpPart implements Comparable {
   private static final String COOKIE_KEY = 'cookie'
 
-  String method = 'GET'
-  String path = '/'
+  public static final String DEFAULT_METHOD = 'GET'
+  public static final String DEFAULT_PATH = '/'
+
+  String method = DEFAULT_METHOD
+  String path = DEFAULT_PATH
   Map<String, List<String>> query = [:]
   Map<String, String> headers = [:]
   OptionalBody body = OptionalBody.missing()
@@ -22,9 +25,9 @@ class Request extends HttpPart implements Comparable {
 
   static Request fromMap(Map map) {
     new Request().with {
-      method = map.method as String
-      path = map.path as String
-      query = map.query
+      method = (map.method ?: DEFAULT_METHOD) as String
+      path = (map.path == null ? DEFAULT_PATH : map.path) as String
+      query = map.query ?: [:]
       headers = map.headers ?: [:]
       body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
       matchingRules = MatchingRules.fromMap(map.matchingRules)

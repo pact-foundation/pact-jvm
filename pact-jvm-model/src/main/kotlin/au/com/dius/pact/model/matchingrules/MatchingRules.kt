@@ -76,7 +76,7 @@ data class NumberTypeMatcher(val numberType: NumberType) : MatchingRule {
 /**
  * Regular Expression Matcher
  */
-data class RegexMatcher(val regex: String) : MatchingRule {
+data class RegexMatcher @JvmOverloads constructor (val regex: String, val example: String? = null) : MatchingRule {
   override fun toMap() = mapOf("match" to "regex", "regex" to regex)
 }
 
