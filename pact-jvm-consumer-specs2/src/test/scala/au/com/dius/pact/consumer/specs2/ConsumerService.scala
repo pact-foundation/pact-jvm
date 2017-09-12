@@ -1,14 +1,11 @@
 package au.com.dius.pact.consumer.specs2
 
 import java.util.concurrent.Executors
-import java.util.function
 
 import au.com.dius.pact.consumer.dispatch.HttpClient
-import au.com.dius.pact.model.{OptionalBody, PactReader, Request, Response}
+import au.com.dius.pact.model.{OptionalBody, PactReader, Request}
 
 import scala.collection.JavaConversions
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 
 case class ConsumerService(serverUrl: String) {
@@ -20,29 +17,28 @@ case class ConsumerService(serverUrl: String) {
   }
 
   def extractResponseTest(path: String = request.getPath): Future[Boolean] = {
-    Future {
-      TestHttpSupport.INSTANCE.extractResponseTest(serverUrl, path, request)
+    val r = request.copy()
+    r.setPath(s"$serverUrl$path")
+    HttpClient.run(r).map { response =>
+      response.getStatus == 200 && extractFrom(response.getBody)
     }
   }
 
   def simpleGet(path: String): Future[(Int, String)] = {
-    Future {
-      val result = TestHttpSupport.INSTANCE.simpleGet(serverUrl, path)
-      (result.getFirst, result.getSecond)
+    HttpClient.run(new Request("GET", serverUrl + path)).map { response =>
+      (response.getStatus, response.getBody.getValue)
     }
   }
 
   def simpleGet(path: String, query: String): Future[(Int, String)] = {
-    Future {
-      val result = TestHttpSupport.INSTANCE.simpleGet(serverUrl, path, query)
-      (result.getFirst, result.getSecond)
+    HttpClient.run(new Request("GET", serverUrl + path, PactReader.queryStringToMap(query, true))).map { response =>
+      (response.getStatus, response.getBody.getValue)
     }
   }
 
   def options(path: String): Future[(Int, String, Map[String, String])] = {
-    Future {
-      val result = TestHttpSupport.INSTANCE.options(serverUrl, path)
-      (result.getFirst, result.getSecond, result.getThird.toMap)
+    HttpClient.run(new Request("OPTION", serverUrl + path)).map { response =>
+      (response.getStatus, response.getBody.orElse(""), JavaConversions.mapAsScalaMap(response.getHeaders).toMap)
     }
   }
 }
