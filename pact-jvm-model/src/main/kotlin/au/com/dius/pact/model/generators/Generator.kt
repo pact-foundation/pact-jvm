@@ -5,9 +5,7 @@ import com.mifmif.common.regex.Generex
 import mu.KotlinLogging
 import org.apache.commons.lang.RandomStringUtils
 import org.apache.commons.lang.math.RandomUtils
-import org.joda.time.LocalDate
-import org.joda.time.LocalDateTime
-import org.joda.time.LocalTime
+import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormatterBuilder
 import java.math.BigDecimal
 import java.util.UUID
@@ -173,9 +171,9 @@ data class DateGenerator(val format: String? = null) : Generator {
 
   override fun generate(base: Any?): Any {
     return if (format != null) {
-      LocalDate.now().toString(DateTimeFormatterBuilder().appendPattern(format).toFormatter())
+      DateTime.now().toString(DateTimeFormatterBuilder().appendPattern(format).toFormatter())
     } else {
-      LocalDate.now().toString()
+      DateTime.now().toString()
     }
   }
 
@@ -197,9 +195,9 @@ data class TimeGenerator(val format: String? = null) : Generator {
 
   override fun generate(base: Any?): Any {
     return if (format != null) {
-      LocalTime.now().toString(DateTimeFormatterBuilder().appendPattern(format).toFormatter())
+      DateTime.now().toString(DateTimeFormatterBuilder().appendPattern(format).toFormatter())
     } else {
-      LocalTime.now().toString()
+      DateTime.now().toString()
     }
   }
 
@@ -221,9 +219,9 @@ data class DateTimeGenerator(val format: String? = null) : Generator {
 
   override fun generate(base: Any?): Any {
     return if (format != null) {
-      LocalDateTime.now().toString(DateTimeFormatterBuilder().appendPattern(format).toFormatter())
+      DateTime.now().toString(DateTimeFormatterBuilder().appendPattern(format).toFormatter())
     } else {
-      LocalDateTime.now().toString()
+      DateTime.now().toString()
     }
   }
 
