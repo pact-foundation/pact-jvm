@@ -16,6 +16,6 @@ script:
   - ./gradlew --stacktrace --no-daemon -i assemble_$SCALA
   - jdk_switcher use $TRAVIS_JDK_VERSION
   - cp build-jre7.gradle build.gradle
-  - ./gradlew --stacktrace --no-daemon -i :pact-jvm-model:test :pact-jvm-pact-broker:test
-  - ./gradlew --stacktrace --no-daemon -i test_$SCALA
+  - ./gradlew --stacktrace --no-daemon -i :pact-jvm-model:test :pact-jvm-pact-broker:test -x :pact-jvm-provider-maven_2.11:pluginDescriptor
+  - ./gradlew --stacktrace --no-daemon -i test_$SCALA -x :pact-jvm-provider-maven_2.11:pluginDescriptor
 install: true
