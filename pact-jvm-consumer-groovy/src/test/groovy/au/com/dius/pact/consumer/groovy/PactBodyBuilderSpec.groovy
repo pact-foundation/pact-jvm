@@ -417,7 +417,7 @@ class PactBodyBuilderSpec extends Specification {
     response.body.value == '{"name":"harry"}'
   }
 
-  def 'No Special Handling For Field Names Formerly Not Conforming Gatling Fields'() {
+  def 'Guard Against Field Names That Don\'t Conform To Gatling Fields'() {
     given:
     service {
       uponReceiving('a request with invalid gatling fields')
@@ -445,14 +445,14 @@ class PactBodyBuilderSpec extends Specification {
     then:
     service.interactions.size() == 1
     service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules == [
-      $/$.2/$: new MatchingRuleGroup([new MaxTypeMatcher(10)]),
-      $/$.2[*].id/$: new MatchingRuleGroup([new NumberTypeMatcher(INTEGER)]),
-      $/$.2[*].lineItems/$: new MatchingRuleGroup([new MinTypeMatcher(1)]),
-      $/$.2[*].lineItems[*].id/$: new MatchingRuleGroup([new NumberTypeMatcher(INTEGER)]),
-      $/$.2[*].lineItems[*].10k-depreciation-bips/$: new MatchingRuleGroup([
+      $/$['2']/$: new MatchingRuleGroup([new MaxTypeMatcher(10)]),
+      $/$['2'][*].id/$: new MatchingRuleGroup([new NumberTypeMatcher(INTEGER)]),
+      $/$['2'][*].lineItems/$: new MatchingRuleGroup([new MinTypeMatcher(1)]),
+      $/$['2'][*].lineItems[*].id/$: new MatchingRuleGroup([new NumberTypeMatcher(INTEGER)]),
+      $/$['2'][*].lineItems[*]['10k-depreciation-bips']/$: new MatchingRuleGroup([
         new NumberTypeMatcher(INTEGER)]),
-      $/$.2[*].lineItems[*].productCodes/$: new MatchingRuleGroup([TypeMatcher.INSTANCE]),
-      $/$.2[*].lineItems[*].productCodes[*].code/$: new MatchingRuleGroup([TypeMatcher.INSTANCE])
+      $/$['2'][*].lineItems[*].productCodes/$: new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      $/$['2'][*].lineItems[*].productCodes[*].code/$: new MatchingRuleGroup([TypeMatcher.INSTANCE])
     ]
 
     keys == [

@@ -28,7 +28,7 @@ public class PactDslJsonBodyTest {
     private static final String THIRD = "@third";
 
     @Test
-    public void noSpecialHandlingForObjectNamesFormerlyNotConformingToGatling() {
+    public void guardAgainstObjectNamesThatDontConformToGatlingFields() {
         DslPart body = new PactDslJsonBody()
             .id()
             .object("2")
@@ -53,13 +53,13 @@ public class PactDslJsonBodyTest {
 
         Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
           ".id",
-          ".2.id",
+          "['2'].id",
           ".numbers[3]",
           ".numbers[0]",
           ".numbers[4].timestamp",
           ".numbers[4].dob",
           ".numbers[4].id",
-          ".numbers[4].10k-depreciation-bips.id"
+          ".numbers[4]['10k-depreciation-bips'].id"
         ));
         assertThat(body.getMatchers().getMatchingRules().keySet(), is(equalTo(expectedMatchers)));
 
@@ -76,7 +76,7 @@ public class PactDslJsonBodyTest {
           .integerType(K_DEPRECIATION_BIPS);
 
         Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
-          ".200", ".1", "['@field']", ".10k-depreciation-bips"
+          "['200']", "['1']", "['@field']", "['10k-depreciation-bips']"
         ));
         assertThat(body.getMatchers().getMatchingRules().keySet(), is(equalTo(expectedMatchers)));
 

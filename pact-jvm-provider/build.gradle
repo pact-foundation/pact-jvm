@@ -7,7 +7,8 @@ dependencies {
         "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}",
         "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
         'org.reflections:reflections:0.9.10'
-    compile "ws.unfiltered:unfiltered-netty-server_${project.scalaVersion}:0.9.1"
+    compile "net.databinder:unfiltered-netty-server_${project.scalaVersion}:0.8.4",
+      "net.databinder.dispatch:dispatch-core_${project.scalaVersion}:0.11.3"
 
     testCompile project(":pact-jvm-consumer-groovy_${project.scalaVersion}")
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"

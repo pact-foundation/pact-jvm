@@ -5,6 +5,7 @@ import java.net.URI
 import java.util.zip.GZIPInputStream
 
 import au.com.dius.pact.model.{OptionalBody, Request, Response}
+import com.ning.http.client.{Response => AResponse}
 import com.typesafe.scalalogging.StrictLogging
 import io.netty.handler.codec.http.{HttpResponse => NHttpResponse}
 import unfiltered.netty.ReceivedMessage
@@ -23,6 +24,11 @@ object Conversions extends StrictLogging {
         headers.foreach { case (key, value) => res.header(key, value) }
       }
     }
+  }
+
+  implicit def dispatchResponseToPactResponse(response: AResponse): Response = {
+    new Response(response.getStatusCode, ConversionsKt.toMap(response.getHeaders),
+      OptionalBody.body(response.getResponseBody))
   }
 
   implicit def pactToUnfilteredResponse(response: Response): ResponseFunction[NHttpResponse] = {
