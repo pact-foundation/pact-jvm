@@ -8,7 +8,9 @@ dependencies {
       "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }
 
-compileTestScala {
-  classpath = classpath.plus(files(compileTestKotlin.destinationDir))
-  dependsOn compileTestKotlin
+if (project.tasks.findByName('compileTestKotlin')) {
+  compileTestScala {
+    classpath = classpath.plus(files(compileTestKotlin.destinationDir))
+    dependsOn compileTestKotlin
+  }
 }
