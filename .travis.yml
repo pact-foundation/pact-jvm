@@ -5,7 +5,6 @@ addons:
     packages:
       - oracle-java8-installer
 jdk:
-  - oraclejdk7
   - openjdk7
 env:
   - SCALA=2.11 JAVA_OPTS="-XX:MaxPermSize=512m -XX:ReservedCodeCacheSize=512m -Xmx512m" GRADLE_OPTS="-Xms128m"
