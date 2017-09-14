@@ -45,7 +45,9 @@ subprojects {
     }
 
     apply plugin: 'java'
-    apply plugin: 'scala'
+    if (project.hasProperty('scalaVersion')) {
+      apply plugin: 'scala'
+    }
     apply plugin: 'groovy'
     apply plugin: 'maven'
     apply plugin: 'signing'
@@ -115,9 +117,14 @@ subprojects {
                 'Specification-Version': version
     }
 
-    task javadocJar(type: Jar, dependsOn: [javadoc, scaladoc, groovydoc]) {
+    task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc]) {
         classifier = 'javadoc'
+      if (project.hasProperty('scalaVersion')) {
         from javadoc.destinationDir, scaladoc.destinationDir, groovydoc.destinationDir
+        dependsOn << scaladoc
+      } else {
+        from javadoc.destinationDir, groovydoc.destinationDir
+      }
     }
 
     task sourceJar(type: Jar) {
@@ -199,11 +206,18 @@ subprojects {
 }
 
 tasks.addRule("Pattern: <Task>_<ScalaVersion>") { String taskName ->
-  def m = taskName =~ $/(.*)_(\d\.\d+)/$
-  if (m.matches()) {
-    task(taskName) {
-      dependsOn project.childProjects.findAll { it.key.endsWith('_' + m.group(2)) }
-        .collect { it.value.getTasksByName(m.group(1), false) }.flatten()
+  if (taskName.contains('_')) {
+    def m = taskName =~ $/(.*)_(\d\.\d+)/$
+    if (m.matches()) {
+      task(taskName) {
+        dependsOn project.childProjects.findAll { it.key.endsWith('_' + m.group(2)) }
+          .collect { it.value.getTasksByName(m.group(1), false) }.flatten()
+      }
+    } else {
+      task(taskName) {
+        dependsOn project.childProjects.findAll { !(it.key ==~ /.*_\d\.\d+$/) }
+          .collect { it.value.getTasksByName(taskName.split('_').first(), false) }.flatten()
+      }
     }
   }
 }
@@ -215,8 +229,9 @@ if (System.env.TRAVIS == 'true') {
         }
         tasks.withType(Test) {
             // containers (currently) have 2 dedicated cores and 4GB of memory
-            maxParallelForks = 2
+//            maxParallelForks = 2
             minHeapSize = '128m'
+            maxHeapSize = '768m'
         }
     }
 }
