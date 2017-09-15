@@ -404,7 +404,7 @@ class HalClientSpec extends Specification {
     1 * mockClient.execute({ it.URI.path == '/' }) >> mockRootResponse
     1 * mockClient.execute({ it.URI.rawPath == '/test%2Fprovider%20name-1/tag/test%2Ftag%20name-1' }) >> mockResponse
     _ * mockClient.execute(_) >> notFoundResponse
-    client.pathInfo == [_links: [linkA: 'ValueA']]
+    client.pathInfo['_links']['linkA'].toString() == '"ValueA"'
   }
 
   def 'handles invalid URL characters when fetching documents from the broker'() {
@@ -421,7 +421,7 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute({ it.URI.toString() == 'https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client%202/version/1.0.2' }) >> mockResponse
-    result == [_links: [multipleLink: ['one', 'two', 'three']]]
+    result['_links']['multipleLink']*.toString() == ['"one"', '"two"', '"three"']
   }
 
   @Unroll

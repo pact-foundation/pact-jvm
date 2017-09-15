@@ -1,9 +1,15 @@
 package au.com.dius.pact.pactbroker
 
 import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
-import com.github.salomonbrys.kotson.fromJson
+import com.github.salomonbrys.kotson.bool
+import com.github.salomonbrys.kotson.get
+import com.github.salomonbrys.kotson.nullObj
+import com.github.salomonbrys.kotson.obj
+import com.github.salomonbrys.kotson.keys
+import com.github.salomonbrys.kotson.string
 import com.google.common.net.UrlEscapers
-import com.google.gson.Gson
+import com.google.gson.JsonElement
+import com.google.gson.JsonParser
 import mu.KLogging
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
@@ -93,7 +99,7 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
                                                        var options: Map<String, Any> = mapOf()) : IHalClient {
 
   var httpClient: CloseableHttpClient? = null
-  var pathInfo: Map<String, Any>? = null
+  var pathInfo: JsonElement? = null
   var lastUrl: String? = null
 
   override fun postJson(url: String, body: String) = postJson(url, body, null)
@@ -156,17 +162,17 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
   override fun navigate(link: String) = navigate(mapOf(), link)
 
   @JvmOverloads
-  fun fetch(path: String, encodePath: Boolean = true): Map<String, Any> {
+  fun fetch(path: String, encodePath: Boolean = true): JsonElement {
     lastUrl = path
     logger.debug { "Fetching: $path" }
     val response = getJson(path, encodePath)
     when (response) {
-      is Result.Success -> return response.value as Map<String, Any>
+      is Result.Success -> return response.value
       is Result.Failure -> throw response.error
     }
   }
 
-  private fun getJson(path: String, encodePath: Boolean = true): Result<Map<*, *>, Exception> {
+  private fun getJson(path: String, encodePath: Boolean = true): Result<JsonElement, Exception> {
     setupHttpClient()
     return Result.of {
       val httpGet = HttpGet(buildUrl(path, encodePath))
@@ -177,7 +183,7 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
       if (response.statusLine.statusCode < 300) {
         val contentType = ContentType.getOrDefault(response.entity)
         if (isJsonResponse(contentType)) {
-          return@of Gson().fromJson<Map<*, *>>(EntityUtils.toString(response.entity))
+          return@of JsonParser().parse(EntityUtils.toString(response.entity))
         } else {
           throw InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got '$contentType'")
         }
@@ -216,27 +222,28 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
   private fun isJsonResponse(contentType: ContentType) = contentType.mimeType == "application/json" ||
     contentType.mimeType == "application/hal+json"
 
-  private fun fetchLink(link: String, options: Map<String, Any>): Map<String, Any> {
-    if (pathInfo == null || pathInfo!!["_links"] == null) {
+  private fun fetchLink(link: String, options: Map<String, Any>): JsonElement {
+    if (pathInfo?.nullObj?.get("_links") == null) {
       throw InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got " +
         "a response with no '_links'. URL: '$baseUrl', LINK: '$link'")
     }
 
     val links = pathInfo!!["_links"]
-    if (links is Map<*, *>) {
-      val linkData = links[link]
-      if (linkData == null) {
+    if (links.isJsonObject) {
+      if (!links.obj.has(link)) {
         throw InvalidHalResponse("Link '$link' was not found in the response, only the following links where " +
-          "found: ${links.keys}. URL: '$baseUrl', LINK: '$link'")
+          "found: ${links.obj.keys()}. URL: '$baseUrl', LINK: '$link'")
       }
+      val linkData = links[link]
 
-      if (linkData is List<*>) {
+      if (linkData.isJsonArray) {
         if (options.containsKey("name")) {
-          val linkByName = linkData.find { it is Map<*, *> && it["name"] == options["name"] }
-          return if (linkByName is Map<*, *> && linkByName["templated"] as Boolean) {
+          val linkByName = linkData.asJsonArray.find { it.isJsonObject && it["name"] == options["name"] }
+          return if (linkByName != null && linkByName.isJsonObject && linkByName["templated"].isJsonPrimitive &&
+            linkByName["templated"].bool) {
             this.fetch(parseLinkUrl(linkByName["href"].toString(), options), false)
-          } else if (linkByName is Map<*, *>) {
-            this.fetch(linkByName["href"].toString())
+          } else if (linkByName != null && linkByName.isJsonObject) {
+            this.fetch(linkByName["href"].string)
           } else {
             throw InvalidNavigationRequest("Link '$link' does not have an entry with name '${options["name"]}'. " +
               "URL: '$baseUrl', LINK: '$link'")
@@ -245,11 +252,12 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
           throw InvalidNavigationRequest ("Link '$link' has multiple entries. You need to filter by the link name. " +
             "URL: '$baseUrl', LINK: '$link'")
         }
-      } else if (linkData is Map<*, *>) {
-        return if (linkData.containsKey("templated") && linkData["templated"] as Boolean) {
-          fetch(parseLinkUrl(linkData["href"].toString(), options), false)
+      } else if (linkData.isJsonObject) {
+        return if (linkData.obj.has("templated") && linkData["templated"].isJsonPrimitive &&
+          linkData["templated"].bool) {
+          fetch(parseLinkUrl(linkData["href"].string, options), false)
         } else {
-          fetch(linkData["href"].toString())
+          fetch(linkData["href"].string)
         }
       } else {
         throw InvalidHalResponse("Expected link in map form in the response, but " +
