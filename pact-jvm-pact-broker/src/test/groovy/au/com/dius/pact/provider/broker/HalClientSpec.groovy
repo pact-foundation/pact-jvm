@@ -30,7 +30,7 @@ class HalClientSpec extends Specification {
   def setup() {
     mockHttp = Mock(RESTClient)
     mockClient = Mock(CloseableHttpClient)
-    client = GroovySpy(HalClient, global: true, constructorArgs: ['baseUrl'])
+    client = GroovySpy(HalClient, global: true, constructorArgs: ['http://localhost:1234/'])
   }
 
   @SuppressWarnings(['LineLength', 'UnnecessaryBooleanExpression'])
@@ -405,6 +405,39 @@ class HalClientSpec extends Specification {
     1 * mockClient.execute({ it.URI.rawPath == '/test%2Fprovider%20name-1/tag/test%2Ftag%20name-1' }) >> mockResponse
     _ * mockClient.execute(_) >> notFoundResponse
     client.pathInfo == [_links: [linkA: 'ValueA']]
+  }
+
+  def 'handles invalid URL characters when fetching documents from the broker'() {
+    given:
+    client.httpClient = mockClient
+    def mockResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+      getEntity() >> new StringEntity('{"_links":{"multipleLink": ["one", "two", "three"]}}',
+        ContentType.create('application/hal+json'))
+    }
+
+    when:
+    def result = client.fetch('https://test.pact.dius.com.au/pacts/provider/Activity Service/consumer/Foo Web Client 2/version/1.0.2')
+
+    then:
+    1 * mockClient.execute({ it.URI.toString() == 'https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client%202/version/1.0.2' }) >> mockResponse
+    result == [_links: [multipleLink: ['one', 'two', 'three']]]
+  }
+
+  @Unroll
+  def 'build url - #desc'() {
+    expect:
+    client.buildUrl(url).toString() == expectedUrl
+
+    where:
+
+    desc                      | url                                      | expectedUrl
+    'normal URL'              | 'http://localhost:8080/path'             | 'http://localhost:8080/path'
+    'normal URL with no path' | 'http://localhost:8080'                  | 'http://localhost:8080'
+    'just a path'             | '/path/to/get'                           | 'http://localhost:1234/path/to/get'
+    'URL with spaces'         | 'http://localhost:8080/path/with spaces' | 'http://localhost:8080/path/with%20spaces'
+    'path with spaces'        | '/path/with spaces'                      | 'http://localhost:1234/path/with%20spaces'
+    'no port'                 | 'http://localhost/path/with spaces'      | 'http://localhost/path/with%20spaces'
   }
 
 }

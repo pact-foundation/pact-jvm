@@ -155,22 +155,21 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
 
   override fun navigate(link: String) = navigate(mapOf(), link)
 
-  fun fetch(path: String): Map<String, Any> {
+  @JvmOverloads
+  fun fetch(path: String, encodePath: Boolean = true): Map<String, Any> {
     lastUrl = path
     logger.debug { "Fetching: $path" }
-    val response = getJson(path)
+    val response = getJson(path, encodePath)
     when (response) {
       is Result.Success -> return response.value as Map<String, Any>
       is Result.Failure -> throw response.error
     }
   }
 
-  private fun getJson(path: String): Result<Map<*, *>, Exception> {
+  private fun getJson(path: String, encodePath: Boolean = true): Result<Map<*, *>, Exception> {
     setupHttpClient()
     return Result.of {
-      val pathUrl = URI(path)
-      val url = if (pathUrl.isAbsolute) pathUrl else URIBuilder(baseUrl).setPath(path).build()
-      val httpGet = HttpGet(url)
+      val httpGet = HttpGet(buildUrl(path, encodePath))
       httpGet.addHeader("Content-Type", "application/json")
       httpGet.addHeader("Accept", "application/hal+json, application/json")
 
@@ -187,6 +186,29 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
           404 -> throw NotFoundHalResponse("No HAL document found at path '$path'")
           else -> throw RequestFailedException("Request to path '$path' failed with response '${response.statusLine}'")
         }
+      }
+    }
+  }
+
+  @JvmOverloads
+  fun buildUrl(url: String, encodePath: Boolean = true): URI {
+    val match = URL_REGEX.matchEntire(url)
+    return if (match != null) {
+      val (scheme, host, port, path) = match.destructured
+      val builder = URIBuilder().setScheme(scheme).setHost(host)
+      if (port.isNotEmpty()) {
+        builder.port = port.substring(1).toInt()
+      }
+      if (encodePath) {
+        builder.setPath(path).build()
+      } else {
+        URI(builder.build().toString() + path)
+      }
+    } else {
+      if (encodePath) {
+        URIBuilder(baseUrl).setPath(url).build()
+      } else {
+        URI(baseUrl + url)
       }
     }
   }
@@ -212,7 +234,7 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
         if (options.containsKey("name")) {
           val linkByName = linkData.find { it is Map<*, *> && it["name"] == options["name"] }
           return if (linkByName is Map<*, *> && linkByName["templated"] as Boolean) {
-            this.fetch(parseLinkUrl(linkByName["href"].toString(), options))
+            this.fetch(parseLinkUrl(linkByName["href"].toString(), options), false)
           } else if (linkByName is Map<*, *>) {
             this.fetch(linkByName["href"].toString())
           } else {
@@ -225,7 +247,7 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
         }
       } else if (linkData is Map<*, *>) {
         return if (linkData.containsKey("templated") && linkData["templated"] as Boolean) {
-          fetch(parseLinkUrl(linkData["href"].toString(), options))
+          fetch(parseLinkUrl(linkData["href"].toString(), options), false)
         } else {
           fetch(linkData["href"].toString())
         }
@@ -271,5 +293,6 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
   companion object : KLogging() {
     const val ROOT = "/"
     val URL_TEMPLATE_REGEX = Regex("\\{(\\w+)\\}")
+    val URL_REGEX = Regex("([^:]+):\\/\\/([^\\/:]+)(:\\d+)?(.*)")
   }
 }
