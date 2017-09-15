@@ -17,7 +17,7 @@ dependencies {
     "junit:junit:${project.junitVersion}",
     "org.json:json:${project.jsonVersion}",
     "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
-    'com.google.guava:guava:19.0'
+    'com.google.guava:guava:23.0'
 
   testCompile "ch.qos.logback:logback-core:${project.logbackVersion}",
     "ch.qos.logback:logback-classic:${project.logbackVersion}",

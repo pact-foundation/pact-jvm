@@ -96,16 +96,16 @@ class PactBodyBuilderSpec extends Specification {
     then:
     service.interactions.size() == 1
     requestMatchingRules.categories == ['body'] as Set
-    bodyMatchingRules['$.name'].rules == [new RegexMatcher('\\w+')]
-    bodyMatchingRules['$.surname'].rules == [new RegexMatcher('\\w+')]
-    bodyMatchingRules['$.position'].rules == [new RegexMatcher('staff|contractor')]
+    bodyMatchingRules['$.name'].rules == [new RegexMatcher('\\w+', 'harry')]
+    bodyMatchingRules['$.surname'].rules == [new RegexMatcher('\\w+', 'larry')]
+    bodyMatchingRules['$.position'].rules == [new RegexMatcher('staff|contractor', 'staff')]
     bodyMatchingRules['$.hexCode'].rules == [new RegexMatcher('[0-9a-fA-F]+')]
     bodyMatchingRules['$.hexCode2'].rules == [new RegexMatcher('[0-9a-fA-F]+')]
     bodyMatchingRules['$.id'].rules == [new NumberTypeMatcher(INTEGER)]
     bodyMatchingRules['$.id2'].rules == [new NumberTypeMatcher(INTEGER)]
     bodyMatchingRules['$.salary'].rules == [new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)]
-    bodyMatchingRules['$.localAddress'].rules == [new RegexMatcher('(\\d{1,3}\\.)+\\d{1,3}')]
-    bodyMatchingRules['$.localAddress2'].rules == [new RegexMatcher('(\\d{1,3}\\.)+\\d{1,3}')]
+    bodyMatchingRules['$.localAddress'].rules == [new RegexMatcher('(\\d{1,3}\\.)+\\d{1,3}', '127.0.0.1')]
+    bodyMatchingRules['$.localAddress2'].rules == [new RegexMatcher('(\\d{1,3}\\.)+\\d{1,3}', '127.0.0.1')]
     bodyMatchingRules['$.age2'].rules == [new NumberTypeMatcher(INTEGER)]
     bodyMatchingRules['$.ts'].rules == [new TimestampMatcher('yyyy-MM-dd\'T\'HH:mm:ss')]
     bodyMatchingRules['$.timestamp'].rules == [new TimestampMatcher('yyyy/MM/dd - HH:mm:ss.S')]
@@ -117,7 +117,7 @@ class PactBodyBuilderSpec extends Specification {
       new RegexMatcher('[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')]
     responseMatchingRules.categories == ['body'] as Set
     responseMatchingRules.rulesForCategory('body').matchingRules == [
-      '$.name': new MatchingRuleGroup([new RegexMatcher('\\w+')])]
+      '$.name': new MatchingRuleGroup([new RegexMatcher('\\w+', 'harry')])]
 
     keys == ['name', 'surname', 'position', 'happy', 'hexCode', 'hexCode2', 'id', 'id2', 'localAddress',
       'localAddress2', 'age', 'age2', 'salary', 'timestamp', 'ts', 'values', 'role', 'roles'] as Set
