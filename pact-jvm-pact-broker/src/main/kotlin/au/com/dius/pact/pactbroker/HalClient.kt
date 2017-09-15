@@ -90,6 +90,19 @@ interface IHalClient {
    * exception will be wrapped in a Failure
    */
   fun postJson(url: String, body: String, handler: ((status: Int, response: CloseableHttpResponse) -> Boolean)?): Result<Boolean, Exception>
+
+  /**
+   * Fetches the HAL document from the provided path
+   * @param path The path to the HAL document. If it is a relative path, it is relative to the base URL
+   * @param encodePath If the path should be encoded to make a valid URL
+   */
+  fun fetch(path: String, encodePath: Boolean): JsonElement
+
+  /**
+   * Fetches the HAL document from the provided path
+   * @param path The path to the HAL document. If it is a relative path, it is relative to the base URL
+   */
+  fun fetch(path: String): JsonElement
 }
 
 /**
@@ -161,8 +174,9 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
 
   override fun navigate(link: String) = navigate(mapOf(), link)
 
-  @JvmOverloads
-  fun fetch(path: String, encodePath: Boolean = true): JsonElement {
+  override fun fetch(path: String) = fetch(path, true)
+
+  override fun fetch(path: String, encodePath: Boolean): JsonElement {
     lastUrl = path
     logger.debug { "Fetching: $path" }
     val response = getJson(path, encodePath)

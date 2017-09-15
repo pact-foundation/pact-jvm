@@ -110,8 +110,7 @@ class PactBrokerClient extends PactBrokerClientBase {
   }
 
   PactResponse fetchPact(String url) {
-    HalClient halClient = newHalClient()
-    def halDoc = halClient.fetch(url)
-    new PactResponse(halDoc, halDoc.'_links')
+    def halDoc = newHalClient().fetch(url)
+    new PactResponse(HalClient.asMap(halDoc), HalClient.asMap(halDoc['_links']))
   }
 }
