@@ -6,11 +6,17 @@ import au.com.dius.pact.provider.junit.State;
 import au.com.dius.pact.provider.junit.loader.PactFolder;
 import au.com.dius.pact.provider.junit.target.TestTarget;
 import au.com.dius.pact.provider.spring.target.MockMvcTarget;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
@@ -48,18 +54,28 @@ public class BooksPactProviderTest {
     @TestTarget
     public final MockMvcTarget target = new MockMvcTarget();
 
+    private final DateTime DATE_TIME = DateTime.now(DateTimeZone.UTC).withTimeAtStartOfDay();
+
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         target.setControllers(bookController, novelController);
         target.setControllerAdvice(bookControllerAdviceOne, bookControllerAdviceTwo);
+
+        target.setMessageConvertors(
+            new MappingJackson2HttpMessageConverter(
+                new ObjectMapper()
+                    .registerModule(new JodaModule())
+                    .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            )
+        );
     }
 
     @State("book-exists")
     public void bookFound() {
         when(bookLogic.getBookById(any(UUID.class)))
-                .thenReturn(new Book(UUID.randomUUID(), "Nick Hoftsettler", true));
+                .thenReturn(new Book(UUID.randomUUID(), "Nick Hoftsettler", true, DATE_TIME));
     }
 
     @State("book-not-found")
@@ -103,8 +119,8 @@ public class BooksPactProviderTest {
                                          .build());
 
         List<Book> bookList = new ArrayList<>();
-        bookList.add(new Book(UUID.randomUUID(), "Bob Jones", true));
-        bookList.add(new Book(UUID.randomUUID(), "Eric Reynolds", true));
+        bookList.add(new Book(UUID.randomUUID(), "Bob Jones", true, DATE_TIME));
+        bookList.add(new Book(UUID.randomUUID(), "Eric Reynolds", true, DATE_TIME.plusDays(1)));
 
         when(bookLogic.getBooks(any(BookType.class))).thenReturn(bookList);
     }
@@ -114,9 +130,9 @@ public class BooksPactProviderTest {
 
         List<Book> bookList = new ArrayList<Book>();
 
-        bookList.add(new Book(UUID.randomUUID(), "Bob Jones", true));
-        bookList.add(new Book(UUID.randomUUID(), "Jerry Duff", false));
-        bookList.add(new Book(UUID.randomUUID(), "Eric Reynolds", true));
+        bookList.add(new Book(UUID.randomUUID(), "Bob Jones", true, DATE_TIME));
+        bookList.add(new Book(UUID.randomUUID(), "Jerry Duff", false, DATE_TIME.plusDays(1)));
+        bookList.add(new Book(UUID.randomUUID(), "Eric Reynolds", true, DATE_TIME.plusDays(2)));
 
         when(bookLogic.getBooks())
                 .thenReturn(bookList);
@@ -127,8 +143,8 @@ public class BooksPactProviderTest {
 
         List<Book> bookList = new ArrayList<Book>();
 
-        bookList.add(new Book(UUID.randomUUID(), "Bob Jones", true));
-        bookList.add(new Book(UUID.randomUUID(), "Eric Reynolds", true));
+        bookList.add(new Book(UUID.randomUUID(), "Bob Jones", true, DATE_TIME));
+        bookList.add(new Book(UUID.randomUUID(), "Eric Reynolds", true, DATE_TIME.plusDays(1)));
 
         when(bookLogic.getBooks(true))
                 .thenReturn(bookList);
@@ -137,6 +153,6 @@ public class BooksPactProviderTest {
     @State("novel-exists")
     public void novelFound() {
         when(bookLogic.getBookById(any(UUID.class)))
-                .thenReturn(new Book(UUID.randomUUID(), "Nick Hoftsettler", true));
+                .thenReturn(new Book(UUID.randomUUID(), "Nick Hoftsettler", true, DATE_TIME));
     }
 }
