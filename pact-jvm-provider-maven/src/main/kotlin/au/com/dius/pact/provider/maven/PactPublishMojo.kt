@@ -16,7 +16,7 @@ import java.io.File
  * Task to push pact files to a pact broker
  */
 @Mojo(name = "publish")
-open class PactPublishMojo: AbstractMojo() {
+open class PactPublishMojo : AbstractMojo() {
 
     @Parameter(required = true, defaultValue = "\${project.version}")
     private lateinit var projectVersion: String
@@ -75,7 +75,7 @@ open class PactPublishMojo: AbstractMojo() {
       val pactDirectory = File(pactDirectory)
 
       if (!pactDirectory.exists()) {
-        println("Pact directory ${pactDirectory} does not exist, skipping uploading of pacts")
+        println("Pact directory $pactDirectory does not exist, skipping uploading of pacts")
       } else {
 
         try {
