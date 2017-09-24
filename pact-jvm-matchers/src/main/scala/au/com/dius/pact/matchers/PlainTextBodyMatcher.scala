@@ -23,7 +23,7 @@ class PlainTextBodyMatcher extends BodyMatcher with StrictLogging {
   def compareText(expected: String, actual: String, matchers: MatchingRules): List[BodyMismatch] = {
     val regex = matchers.rulesForCategory("body").getMatchingRules.get("$")
 
-    if(regex == null) {
+    if(regex == null || regex.getRules.isEmpty || !regex.getRules.get(0).isInstanceOf[RegexMatcher]) {
       logger.debug("No regex for " + expected + ", using equality")
 
       if(expected == actual) {
@@ -34,7 +34,7 @@ class PlainTextBodyMatcher extends BodyMatcher with StrictLogging {
         Some(s"Expected body '${expected}' to match '${actual}' using equality but did not match")))
     }
 
-    if(actual.matches(regex.getRules.get(0).asInstanceOf[RegexMatcher].getRegex)) {
+    if (actual.matches(regex.getRules.get(0).asInstanceOf[RegexMatcher].getRegex)) {
       return List()
     }
 
