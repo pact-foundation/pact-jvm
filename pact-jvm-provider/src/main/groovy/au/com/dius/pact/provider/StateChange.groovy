@@ -69,9 +69,9 @@ class StateChange {
           return result
         }
         stateChangeHandler = result
-      } else if (verifier.isBuildSpecificTask(stateChangeHandler)) {
+      } else if (verifier.isBuildSpecificTask.apply(stateChangeHandler)) {
         log.debug "Invokeing build specific task ${stateChangeHandler}"
-        verifier.executeBuildSpecificTask(stateChangeHandler, state)
+        verifier.executeBuildSpecificTask.accept(stateChangeHandler, state)
         return true
       }
       return executeHttpStateChangeRequest(verifier, stateChangeHandler, stateChangeUsesBody, state, provider, isSetup)

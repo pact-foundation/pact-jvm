@@ -5,6 +5,7 @@ import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
+import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.model.v3.messaging.Message
@@ -20,6 +21,8 @@ import org.reflections.util.FilterBuilder
 import scala.Function1
 
 import java.lang.reflect.Method
+import java.util.function.BiConsumer
+import java.util.function.Function
 import java.util.function.Predicate
 import java.util.function.Supplier
 
@@ -37,14 +40,14 @@ class ProviderVerifier {
   static final protected String PACT_SHOW_STACKTRACE = 'pact.showStacktrace'
   static final protected String PACT_SHOW_FULLDIFF = 'pact.showFullDiff'
 
-  def projectHasProperty = { }
-  def projectGetProperty = { }
+  Function<String, Boolean> projectHasProperty = { null }
+  Function<String, String> projectGetProperty = { null }
   def pactLoadFailureMessage
-  def isBuildSpecificTask = { }
-  def executeBuildSpecificTask = { }
-  def projectClasspath = { }
-  List<VerifierReporter> reporters = [new AnsiConsoleReporter() ]
-  def providerMethodInstance = { Method m -> m.declaringClass.newInstance() }
+  Function<Object, Boolean> isBuildSpecificTask = { null }
+  BiConsumer<Object, ProviderState> executeBuildSpecificTask = { } as BiConsumer<Object, ProviderState>
+  Supplier<URL[]> projectClasspath = { }
+  List<VerifierReporter> reporters = [ new AnsiConsoleReporter() ]
+  Function<Method, Object> providerMethodInstance = { Method m -> m.declaringClass.newInstance() }
   Supplier<String> providerVersion = { null }
 
   Map verifyProvider(ProviderInfo provider) {
@@ -125,6 +128,8 @@ class ProviderVerifier {
   private generateLoadFailureMessage(ConsumerInfo consumer) {
     if (pactLoadFailureMessage instanceof Closure) {
       pactLoadFailureMessage.call(consumer) as String
+    } else if (pactLoadFailureMessage instanceof Function) {
+      pactLoadFailureMessage.apply(consumer) as String
     } else if (pactLoadFailureMessage instanceof Function1) {
       pactLoadFailureMessage.apply(consumer) as String
     } else {
@@ -278,7 +283,7 @@ class ProviderVerifier {
   boolean verifyResponseByInvokingProviderMethods(ProviderInfo providerInfo, ConsumerInfo consumer,
                                                def interaction, String interactionMessage, Map failures) {
     try {
-      def urls = projectClasspath()
+      def urls = projectClasspath.get()
       URLClassLoader loader = new URLClassLoader(urls, GroovyObject.classLoader)
       def configurationBuilder = new ConfigurationBuilder()
         .setScanners(new MethodAnnotationsScanner())
@@ -326,26 +331,18 @@ class ProviderVerifier {
   }
 
   boolean callProjectHasProperty(String property) {
-    if (projectHasProperty instanceof Function1) {
-      projectHasProperty.apply(property)
-    } else {
-      projectHasProperty(property)
-    }
+    projectHasProperty.apply(property)
   }
 
   String callProjectGetProperty(String property) {
-    if (projectGetProperty instanceof Function1) {
-      projectGetProperty.apply(property)
-    } else {
-      projectGetProperty(property)
-    }
+    projectGetProperty.apply(property)
   }
 
   boolean verifyMessagePact(Set methods, Message message, String interactionMessage, Map failures) {
     boolean result = true
     methods.each {
       reporters.each { it.generatesAMessageWhich() }
-      def actualMessage = OptionalBody.body(invokeProviderMethod(it, providerMethodInstance(it)) as String)
+      def actualMessage = OptionalBody.body(invokeProviderMethod(it, providerMethodInstance.apply(it)) as String)
       def comparison = ResponseComparison.compareMessage(message, actualMessage)
       def s = ' generates a message which'
       result &= displayBodyResult(failures, comparison, interactionMessage + s)

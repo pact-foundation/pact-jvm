@@ -13,14 +13,19 @@ import au.com.dius.pact.provider.junit.target.BaseTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.spring.MvcProviderVerifier;
 import org.apache.http.HttpRequest;
-import org.codehaus.groovy.runtime.MethodClosure;
 import org.junit.runners.model.FrameworkMethod;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
@@ -155,7 +160,7 @@ public class MockMvcTarget extends BaseTarget {
 
         setupReporters(verifier, provider.getName(), interaction.getDescription());
 
-        verifier.setProjectClasspath(new MethodClosure(this, "getClassPathUrls"));
+        verifier.setProjectClasspath(this::getClassPathUrls);
 
         verifier.initialiseReporters(provider);
         verifier.reportVerificationForConsumer(consumer, provider);

@@ -15,6 +15,7 @@ import org.apache.maven.settings.crypto.DefaultSettingsDecryptionRequest
 import org.apache.maven.settings.crypto.SettingsDecrypter
 import org.fusesource.jansi.AnsiConsole
 import java.io.File
+import java.util.function.Function
 import java.util.function.Supplier
 
 /**
@@ -46,15 +47,15 @@ open class PactProviderMojo : AbstractMojo() {
 
     val failures = mutableMapOf<Any, Any>()
     val verifier = ProviderVerifier().let {
-      it.projectHasProperty = { p: String -> this.propertyDefined(p) }
-      it.projectGetProperty = { p: String -> this.property(p) }
-      it.pactLoadFailureMessage = { consumer: Consumer ->
+      it.projectHasProperty = Function { p: String -> this.propertyDefined(p) }
+      it.projectGetProperty = Function { p: String -> this.property(p) }
+      it.pactLoadFailureMessage = Function { consumer: Consumer ->
         "You must specify the pactfile to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
       }
-      it.isBuildSpecificTask = { false }
+      it.isBuildSpecificTask = Function { false }
       it.providerVersion = Supplier { projectVersion }
 
-      it.projectClasspath = {
+      it.projectClasspath = Supplier {
         val urls = classpathElements.map { File(it).toURI().toURL() }
         urls.toTypedArray()
       }
