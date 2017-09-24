@@ -14,7 +14,12 @@ dependencies {
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }
 
-compileTestGroovy{
+compileGroovy {
+  classpath = classpath.plus(files(compileKotlin.destinationDir))
+  dependsOn compileKotlin
+}
+
+compileTestGroovy {
   dependsOn compileTestScala
   classpath = classpath.plus(files(compileTestScala.destinationDir))
 }

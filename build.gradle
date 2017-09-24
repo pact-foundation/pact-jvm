@@ -109,11 +109,6 @@ subprojects {
         }
     }
 
-    compileGroovy {
-      classpath = classpath.plus(files(compileKotlin.destinationDir))
-      dependsOn compileKotlin
-    }
-
     if (project.hasProperty('scalaVersion')) {
       compileScala {
         classpath = classpath.plus(files(compileGroovy.destinationDir)).plus(files(compileKotlin.destinationDir))

@@ -360,13 +360,13 @@ class ProviderVerifierSpec extends Specification {
     given:
     ProviderInfo provider = new ProviderInfo('Test Provider')
     ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    PactBrokerClient pactBrokerClient = Mock()
     GroovyMock(PactReader, global: true)
-    GroovyMock(ProviderVerifierKt, global: true)
     GroovyMock(StateChange, global: true)
     def interaction1 = Mock(Interaction)
     def interaction2 = Mock(Interaction)
     def mockPact = Mock(Pact) {
-      getSource() >> UnknownPactSource.INSTANCE
+      getSource() >> new BrokerUrlSource('http://localhost', 'http://pact-broker')
     }
 
     PactReader.loadPact(_) >> mockPact
@@ -374,10 +374,10 @@ class ProviderVerifierSpec extends Specification {
     StateChange.executeStateChange(*_) >> new StateChange.StateChangeResult(true)
 
     when:
-    verifier.runVerificationForConsumer([:], provider, consumer)
+    verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
 
     then:
-    1 * ProviderVerifierKt.reportVerificationResults(_, finalResult, '0.0.0')
+    1 * pactBrokerClient.publishVerificationResults(_, finalResult, '0.0.0', _)
     1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _) >> result1
     1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _) >> result2
 

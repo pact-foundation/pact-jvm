@@ -1,14 +1,16 @@
 package au.com.dius.pact.provider
 
+import groovy.transform.Canonical
 import groovy.transform.ToString
 
 /**
  * Consumers grouped by pacts in a directory or an S3 bucket
  */
 @ToString
+@Canonical
 class ConsumersGroup {
     def name
-    def pactFileLocation
+    File pactFileLocation
     def stateChange
     boolean stateChangeUsesBody = false
     boolean stateChangeTeardown = false

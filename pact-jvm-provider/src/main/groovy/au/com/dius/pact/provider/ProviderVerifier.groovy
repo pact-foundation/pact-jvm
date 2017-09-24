@@ -1,12 +1,17 @@
 package au.com.dius.pact.provider
 
 import au.com.dius.pact.model.FilteredPact
+import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.model.v3.messaging.Message
+import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
+import au.com.dius.pact.provider.reporters.VerifierReporter
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.reflections.Reflections
 import org.reflections.scanners.MethodAnnotationsScanner
@@ -15,6 +20,10 @@ import org.reflections.util.FilterBuilder
 import scala.Function1
 
 import java.lang.reflect.Method
+import java.util.function.Predicate
+import java.util.function.Supplier
+
+import static au.com.dius.pact.provider.ProviderVerifierKt.reportVerificationResults
 
 /**
  * Verifies the providers against the defined consumers in the context of a build plugin
@@ -34,9 +43,9 @@ class ProviderVerifier {
   def isBuildSpecificTask = { }
   def executeBuildSpecificTask = { }
   def projectClasspath = { }
-  def reporters = [ new AnsiConsoleReporter() ]
+  List<VerifierReporter> reporters = [new AnsiConsoleReporter() ]
   def providerMethodInstance = { Method m -> m.declaringClass.newInstance() }
-  def providerVersion = { }
+  Supplier<String> providerVersion = { null }
 
   Map verifyProvider(ProviderInfo provider) {
     Map failures = [:]
@@ -61,17 +70,20 @@ class ProviderVerifier {
     }
   }
 
-  void runVerificationForConsumer(Map failures, ProviderInfo provider, ConsumerInfo consumer) {
+  @CompileStatic
+  void runVerificationForConsumer(Map failures, ProviderInfo provider, ConsumerInfo consumer,
+                                  PactBrokerClient client = null) {
     reportVerificationForConsumer(consumer, provider)
-    def pact = new FilteredPact(loadPactFileForConsumer(consumer), this.&filterInteractions)
+    FilteredPact pact = new FilteredPact(loadPactFileForConsumer(consumer),
+      this.&filterInteractions as Predicate<Interaction>)
     if (pact.interactions.empty) {
       reporters.each { it.warnPactFileHasNoInteractions(pact) }
     } else {
-      def result = pact.interactions
+      boolean result = pact.interactions
         .collect(this.&verifyInteraction.curry(provider, consumer, failures))
         .inject(true) { acc, val -> acc && val }
       if (pact.isNotFiltered()) {
-        ProviderVerifierKt.reportVerificationResults(pact, result, providerVersion() ?: '0.0.0')
+        reportVerificationResults(pact, result, providerVersion?.get() ?: '0.0.0', client)
       } else {
         log.warn('Skipping publishing of verification results as the interactions have been filtered')
       }
@@ -83,7 +95,7 @@ class ProviderVerifier {
   }
 
   @SuppressWarnings('ThrowRuntimeException')
-  def loadPactFileForConsumer(ConsumerInfo consumer) {
+  Pact loadPactFileForConsumer(ConsumerInfo consumer) {
     def pactSource = consumer.pactSource
     if (pactSource instanceof Closure) {
       pactSource = pactSource.call()

@@ -45,10 +45,17 @@ task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider_${project.scal
         pom.writeTo( pomFile )
     }
     doLast {
-        final  pluginDescriptor = file("${project.compileGroovy.destinationDir}/META-INF/maven/plugin.xml")
+        final  pluginDescriptor = file("${project.compileKotlin.destinationDir}/META-INF/maven/plugin.xml")
         assert pluginDescriptor.file, "[$pluginDescriptor.canonicalPath] was not created"
     }
 }
 
 pluginDescriptor.shouldRunAfter project.jar
 project.jar.dependsOn pluginDescriptor
+
+compileGroovy.dependsOn = []
+
+compileKotlin {
+    classpath = classpath.plus(files(compileGroovy.destinationDir))
+    dependsOn compileGroovy
+}

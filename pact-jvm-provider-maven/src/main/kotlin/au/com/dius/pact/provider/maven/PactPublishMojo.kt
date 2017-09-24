@@ -44,7 +44,7 @@ open class PactPublishMojo : AbstractMojo() {
 
     private var brokerClient: PactBrokerClient? = null
 
-    @Component
+    @Parameter(defaultValue = "\${settings}", readonly = true)
     private lateinit var settings: Settings
 
     @Component
