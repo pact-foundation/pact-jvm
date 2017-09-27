@@ -53,7 +53,7 @@ class ProviderInfo {
         consumerInfo
     }
 
-    List hasPactsWith(String consumersGroupName, Closure closure) {
+    List<ConsumerInfo> hasPactsWith(String consumersGroupName, Closure closure) {
         def consumersGroup = new ConsumersGroup(name: consumersGroupName)
         closure.delegate = consumersGroup
         closure(consumersGroup)
@@ -61,14 +61,14 @@ class ProviderInfo {
         setupConsumerListFromPactFiles(consumersGroup)
     }
 
-    List hasPactsFromPactBroker(Map options = [:], String pactBrokerUrl) {
+    List<ConsumerInfo> hasPactsFromPactBroker(Map options = [:], String pactBrokerUrl) {
       PactBrokerClient client = new PactBrokerClient(pactBrokerUrl, options)
       def consumersFromBroker = client.fetchConsumers(name).collect { ConsumerInfo.from(it) }
       consumers.addAll(consumersFromBroker)
       consumersFromBroker
     }
 
-    List hasPactsFromPactBrokerWithTag(Map options = [:], String pactBrokerUrl, String tag) {
+    List<ConsumerInfo> hasPactsFromPactBrokerWithTag(Map options = [:], String pactBrokerUrl, String tag) {
         PactBrokerClient client = new PactBrokerClient(pactBrokerUrl, options)
         def consumersFromBroker = client.fetchConsumersWithTag(name, tag).collect { ConsumerInfo.from(it) }
         consumers.addAll(consumersFromBroker)
@@ -76,7 +76,7 @@ class ProviderInfo {
     }
 
     @SuppressWarnings('ThrowRuntimeException')
-    private List setupConsumerListFromPactFiles(ConsumersGroup consumersGroup) {
+    private List<ConsumerInfo> setupConsumerListFromPactFiles(ConsumersGroup consumersGroup) {
         if (!consumersGroup.pactFileLocation) {
             return []
         }

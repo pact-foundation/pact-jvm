@@ -70,7 +70,7 @@ public class AmqpTarget extends BaseTarget {
     protected ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider,
                                              ConsumerInfo consumer) {
     ProviderVerifier verifier = new ProviderVerifier();
-    verifier.setProjectClasspath(new MethodClosure(this, "getClassPathUrls"));
+    verifier.setProjectClasspath(this::getClassPathUrls);
 
     setupReporters(verifier, provider.getName(), interaction.getDescription());
 

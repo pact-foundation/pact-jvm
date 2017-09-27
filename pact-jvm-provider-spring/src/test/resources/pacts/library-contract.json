@@ -17,7 +17,8 @@
       "body": [{
         "id": "90f1787e-9f39-4e42-b897-b59d29",
         "author": "Ray Barrowman",
-        "bestSeller": true
+        "bestSeller": true,
+        "createdOn": "2018-01-01T00:00:00.000Z"
       }],
       "matchingRules": {
         "$.body": {
@@ -32,6 +33,10 @@
         },
         "$.body[*].bestSeller": {
           "match": "type"
+        },
+        "$.body[*].createdOn": {
+          "match": "regex",
+          "regex": "^\\d{4}-[01]\\d-[0-3]\\d.*Z$"
         }
       }
     }
@@ -48,7 +53,8 @@
       "body": [{
         "id": "90f1787e-9f39-4e42-b897-b59d29",
         "author": "Ray Barrowman",
-        "bestSeller": true
+        "bestSeller": true,
+        "createdOn": 1505865600000
       }],
       "matchingRules": {
         "$.body": {
@@ -62,6 +68,9 @@
           "match": "type"
         },
         "$.body[*].bestSeller": {
+          "match": "type"
+        },
+        "$.body[*].createdOn": {
           "match": "type"
         }
       }
@@ -79,7 +88,8 @@
       "body": [{
         "id": "90f1787e-9f39-4e42-b897-b59d29",
         "author": "Ray Barrowman",
-        "bestSeller": true
+        "bestSeller": true,
+        "createdOn": "2018-01-01T00:00:00.000Z"
       }],
       "matchingRules": {
         "$.body": {
@@ -94,6 +104,10 @@
         },
         "$.body[*].bestSeller": {
           "match": "type"
+        },
+        "$.body[*].createdOn": {
+          "match": "regex",
+          "regex": "^\\d{4}-[01]\\d-[0-3]\\d.*Z$"
         }
       }
     }

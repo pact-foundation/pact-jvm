@@ -19,6 +19,7 @@ abstract class PactBrokerClientBase(val pactBrokerUrl: String, val options: Map<
   /**
    * Publishes the result to the "pb:publish-verification-results" link in the document attributes.
    */
+  @JvmOverloads
   open fun publishVerificationResults(docAttributes: Map<String, Map<String, Any>>, result: Boolean, version: String,
                                       buildUrl: String? = null): Result<Boolean, Exception> {
     val halClient = newHalClient()

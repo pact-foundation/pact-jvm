@@ -4,42 +4,47 @@ import au.com.dius.pact.provider.broker.PactBrokerClient
 import org.apache.maven.plugin.MojoExecutionException
 import spock.lang.Specification
 
+import java.nio.file.Files
+
 class PactPublishMojoSpec extends Specification {
 
   private PactPublishMojo mojo
   private PactBrokerClient brokerClient
-  private File mockFile
 
   def setup() {
-    brokerClient = GroovyMock(PactBrokerClient, global: true)
-    mojo = new PactPublishMojo(pactDirectory: 'some/dir', brokerClient: brokerClient)
-    mockFile = GroovyStub(File, global: true)
+    brokerClient = Mock(PactBrokerClient)
+    mojo = new PactPublishMojo(pactDirectory: 'some/dir', brokerClient: brokerClient, projectVersion: '0.0.0')
   }
 
   def 'uploads all pacts to the pact broker'() {
     given:
-    new File('some/dir') >> mockFile
-    mockFile.eachFileMatch(_, _, _) >> { args ->
-      args[2].call(mockFile)
-      args[2].call(mockFile)
-      args[2].call(mockFile)
+    def dir = Files.createTempDirectory('pacts')
+    def pact = PactPublishMojoSpec.classLoader.getResourceAsStream('pacts/contract.json').text
+    3.times {
+      def file = Files.createTempFile(dir, 'pactfile', '.json')
+      file.write(pact)
     }
+    mojo.pactDirectory = dir.toString()
 
     when:
     mojo.execute()
 
     then:
     3 * brokerClient.uploadPactFile(_, _) >> 'OK'
+
+    cleanup:
+    dir.deleteDir()
   }
 
   def 'Fails with an exception if any pacts fail to upload'() {
     given:
-    new File('some/dir') >> mockFile
-    mockFile.eachFileMatch(_, _, _) >> { args ->
-      args[2].call(mockFile)
-      args[2].call(mockFile)
-      args[2].call(mockFile)
+    def dir = Files.createTempDirectory('pacts')
+    def pact = PactPublishMojoSpec.classLoader.getResourceAsStream('pacts/contract.json').text
+    3.times {
+      def file = Files.createTempFile(dir, 'pactfile', '.json')
+      file.write(pact)
     }
+    mojo.pactDirectory = dir.toString()
 
     when:
     mojo.execute()
@@ -47,6 +52,9 @@ class PactPublishMojoSpec extends Specification {
     then:
     3 * brokerClient.uploadPactFile(_, _) >> 'OK' >> 'FAILED! Bang' >> 'OK'
     thrown(MojoExecutionException)
+
+    cleanup:
+    dir.deleteDir()
   }
 
   def 'if the broker username is set, passes in the creds to the broker client'() {
@@ -55,8 +63,6 @@ class PactPublishMojoSpec extends Specification {
     mojo.pactBrokerPassword = 'password'
     mojo.brokerClient = null
     mojo.pactBrokerUrl = '/broker'
-    new File('some/dir') >> mockFile
-    mockFile.eachFileMatch(_, _, _)
 
     when:
     mojo.execute()
@@ -70,7 +76,6 @@ class PactPublishMojoSpec extends Specification {
 
     def 'trimSnapshot=true removes the "-SNAPSHOT"'() {
         given:
-        new File('some/dir') >> mockFile
         mojo.projectVersion = '1.0.0-SNAPSHOT'
         mojo.trimSnapshot = true
 
@@ -81,9 +86,8 @@ class PactPublishMojoSpec extends Specification {
         assert mojo.projectVersion == '1.0.0'
     }
 
-    def 'trimSnapshot=false leaves version unchnaged'() {
+    def 'trimSnapshot=false leaves version unchanged'() {
         given:
-        new File('some/dir') >> mockFile
         mojo.projectVersion = '1.0.0-SNAPSHOT'
         mojo.trimSnapshot = false
 
@@ -96,7 +100,6 @@ class PactPublishMojoSpec extends Specification {
 
     def 'trimSnapshot=true leaves non-snapshot versions unchanged'() {
         given:
-        new File('some/dir') >> mockFile
         mojo.projectVersion = '1.0.0'
         mojo.trimSnapshot = true
 

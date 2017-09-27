@@ -4,6 +4,7 @@ dependencies {
     compile project(":pact-jvm-provider_${project.scalaVersion}"),
       'org.apache.maven:maven-plugin-api:3.5.0',
       'org.apache.maven.plugin-tools:maven-plugin-annotations:3.5'
+    compile 'org.apache.maven:maven-core:3.5.0'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
@@ -33,7 +34,7 @@ task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider_${project.scal
         pom.withXml {
             def buildNode = asNode().appendNode('build')
             buildNode.appendNode('directory', buildDir)
-            buildNode.appendNode('outputDirectory', "$buildDir/classes/groovy/main")
+            buildNode.appendNode('outputDirectory', "$buildDir/classes/kotlin/main")
             //add and configure the maven-plugin-plugin so that we can use the shortened 'pact' prefix
             //https://maven.apache.org/guides/introduction/introduction-to-plugin-prefix-mapping.html
             def pluginNode = buildNode.appendNode('plugins').appendNode('plugin')
@@ -44,10 +45,17 @@ task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider_${project.scal
         pom.writeTo( pomFile )
     }
     doLast {
-        final  pluginDescriptor = file("${project.compileGroovy.destinationDir}/META-INF/maven/plugin.xml")
+        final  pluginDescriptor = file("${project.compileKotlin.destinationDir}/META-INF/maven/plugin.xml")
         assert pluginDescriptor.file, "[$pluginDescriptor.canonicalPath] was not created"
     }
 }
 
 pluginDescriptor.shouldRunAfter project.jar
 project.jar.dependsOn pluginDescriptor
+
+compileGroovy.dependsOn = []
+
+compileKotlin {
+    classpath = classpath.plus(files(compileGroovy.destinationDir))
+    dependsOn compileGroovy
+}

@@ -1,9 +1,19 @@
 package au.com.dius.pact.provider.maven
 
+import org.apache.maven.settings.Server
+import org.apache.maven.settings.Settings
+import org.apache.maven.settings.crypto.SettingsDecrypter
+import org.apache.maven.settings.crypto.SettingsDecryptionResult
 import spock.lang.Specification
 
-@SuppressWarnings('UnnecessaryGetter')
+@SuppressWarnings(['UnnecessaryGetter', 'ClosureAsLastMethodParameter'])
 class PactProviderMojoSpec extends Specification {
+
+  private PactProviderMojo mojo
+
+  def setup() {
+    mojo = new PactProviderMojo()
+  }
 
   def 'load pacts from pact broker uses the provider pactBrokerUrl'() {
     given:
@@ -14,7 +24,7 @@ class PactProviderMojoSpec extends Specification {
     def list = []
 
     when:
-    PactProviderMojo.loadPactsFromPactBroker(provider, list)
+    mojo.loadPactsFromPactBroker(provider, list)
 
     then:
     1 * provider.hasPactsFromPactBroker([:], 'http://broker:1234') >> [ new Consumer(name: 'test consumer') ]
@@ -31,7 +41,7 @@ class PactProviderMojoSpec extends Specification {
     def list = []
 
     when:
-    PactProviderMojo.loadPactsFromPactBroker(provider, list)
+    mojo.loadPactsFromPactBroker(provider, list)
 
     then:
     1 * provider.hasPactsFromPactBroker([:], 'http://broker:1234') >> [ new Consumer() ]
@@ -47,7 +57,7 @@ class PactProviderMojoSpec extends Specification {
     def list = []
 
     when:
-    PactProviderMojo.loadPactsFromPactBroker(provider, list)
+    mojo.loadPactsFromPactBroker(provider, list)
 
     then:
     1 * provider.hasPactsFromPactBroker([:], 'http://broker:1234') >> [ new Consumer() ]
@@ -63,7 +73,7 @@ class PactProviderMojoSpec extends Specification {
     def list = []
 
     when:
-    PactProviderMojo.loadPactsFromPactBroker(provider, list)
+    mojo.loadPactsFromPactBroker(provider, list)
 
     then:
     1 * provider.hasPactsFromPactBroker([authentication: ['basic', 'test', 'test']], 'http://broker:1234') >> [
@@ -81,13 +91,40 @@ class PactProviderMojoSpec extends Specification {
     def list = []
 
     when:
-    PactProviderMojo.loadPactsFromPactBroker(provider, list)
+    mojo.loadPactsFromPactBroker(provider, list)
 
     then:
     1 * provider.hasPactsFromPactBrokerWithTag([:], 'http://broker:1234', '1') >> [new Consumer()]
     1 * provider.hasPactsFromPactBrokerWithTag([:], 'http://broker:1234', '2') >> []
     1 * provider.hasPactsFromPactBrokerWithTag([:], 'http://broker:1234', '3') >> []
     list.size() == 1
+  }
+
+  def 'load pacts from pact broker using the Maven server info if the serverId is set'() {
+    given:
+    def settings = Mock(Settings)
+    mojo.settings = settings
+    def decrypter = Mock(SettingsDecrypter)
+    mojo.decrypter = decrypter
+    def provider = Mock(Provider) {
+      getPactBrokerUrl() >> null
+      getPactBroker() >> new PactBroker(new URL('http://broker:1234'), null, null, 'test-server')
+    }
+    def list = []
+    def serverDetails = new Server(username: 'MavenTest')
+    def decryptResult = [getServer: { new Server(password: 'MavenPassword') } ] as SettingsDecryptionResult
+
+    when:
+    mojo.loadPactsFromPactBroker(provider, list)
+
+    then:
+    1 * settings.getServer('test-server') >> serverDetails
+    1 * decrypter.decrypt({ it.servers == [serverDetails] }) >> decryptResult
+    1 * provider.hasPactsFromPactBroker([authentication: ['basic', 'MavenTest', 'MavenPassword']],
+      'http://broker:1234') >> [
+      new Consumer()
+    ]
+    list
   }
 
 }

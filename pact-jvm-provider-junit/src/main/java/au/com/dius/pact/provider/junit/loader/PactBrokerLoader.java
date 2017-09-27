@@ -97,7 +97,7 @@ public class PactBrokerLoader implements PactLoader {
 
       if (failIfNoPactsFound && consumers.isEmpty()) {
         throw new NoPactsFoundException("No consumer pacts were found for provider '" + providerName + "' and tag '" +
-          tag + "'. (URL " + pactBrokerClient.getUrlForProvider(providerName, tag) + ")");
+          tag + "'. (URL " + getUrlForProvider(providerName, tag, pactBrokerClient) + ")");
       }
 
       return consumers.stream()
@@ -105,6 +105,15 @@ public class PactBrokerLoader implements PactLoader {
               .collect(toList());
     } catch (URISyntaxException e) {
       throw new IOException("Was not able load pacts from broker as the broker URL was invalid", e);
+    }
+  }
+
+  private String getUrlForProvider(String providerName, String tag, PactBrokerClient pactBrokerClient) {
+    try {
+      return pactBrokerClient.getUrlForProvider(providerName, tag);
+    } catch (Exception e) {
+      LOGGER.debug("Failed to get provider URL from the pact broker", e);
+      return "Unknown";
     }
   }
 

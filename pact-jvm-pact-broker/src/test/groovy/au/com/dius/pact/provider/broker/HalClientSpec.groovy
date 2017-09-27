@@ -6,25 +6,31 @@ import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import groovyx.net.http.AuthConfig
 import groovyx.net.http.Method
 import groovyx.net.http.RESTClient
+import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.ProtocolVersion
 import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.entity.ContentType
+import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.message.BasicHeader
 import org.apache.http.message.BasicStatusLine
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.util.function.Consumer
 
-@SuppressWarnings('LineLength')
+@SuppressWarnings(['LineLength', 'UnnecessaryGetter', 'ClosureAsLastMethodParameter'])
 class HalClientSpec extends Specification {
 
   private HalClient client
   private RESTClient mockHttp
+  private CloseableHttpClient mockClient
 
   def setup() {
     mockHttp = Mock(RESTClient)
-    client = GroovySpy(HalClient, global: true, constructorArgs: ['baseUrl'])
+    mockClient = Mock(CloseableHttpClient)
+    client = GroovySpy(HalClient, global: true, constructorArgs: ['http://localhost:1234/'])
   }
 
   @SuppressWarnings(['LineLength', 'UnnecessaryBooleanExpression'])
@@ -36,11 +42,11 @@ class HalClientSpec extends Specification {
     url                                                   | options              || parsedUrl
     ''                                                    | [:]                  || ''
     'http://localhost:8080/123456'                        | [:]                  || 'http://localhost:8080/123456'
-    'http://docker:5000/pacts/provider/{provider}/latest' | [:]                  || 'http://docker:5000/pacts/provider/{provider}/latest'
+    'http://docker:5000/pacts/provider/{provider}/latest' | [:]                  || 'http://docker:5000/pacts/provider/%7Bprovider%7D/latest'
     'http://docker:5000/pacts/provider/{provider}/latest' | [provider: 'test']   || 'http://docker:5000/pacts/provider/test/latest'
     'http://docker:5000/{b}/provider/{a}/latest'          | [a: 'a', b: 'b']     || 'http://docker:5000/b/provider/a/latest'
     '{a}://docker:5000/pacts/provider/{b}/latest'         | [a: 'test', b: 'b']  || 'test://docker:5000/pacts/provider/b/latest'
-    'http://docker:5000/pacts/provider/{a}{b}'            | [a: 'test/', b: 'b'] || 'http://docker:5000/pacts/provider/test/b'
+    'http://docker:5000/pacts/provider/{a}{b}'            | [a: 'test/', b: 'b'] || 'http://docker:5000/pacts/provider/test%2Fb'
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -60,112 +66,113 @@ class HalClientSpec extends Specification {
 
   def 'throws an exception if the response is 404 Not Found'() {
     given:
-    def mockHttp = Mock(RESTClient) {
-      get([path: '/', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json, application/json']]) >> { throw new NotFoundHalResponse('') }
+    client.httpClient = mockClient
+    def mockResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 404, 'Not Found')
     }
-    client.newHttpClient() >> mockHttp
 
     when:
     client.navigate('pb:latest-provider-pacts')
 
     then:
+    1 * mockClient.execute(_) >> mockResponse
     thrown(NotFoundHalResponse)
   }
 
   def 'throws an exception if the response is not JSON'() {
     given:
-    def mockHttp = Mock(RESTClient) {
-      get([path: '/', requestContentType: 'application/json',
-                    headers: [Accept: 'application/hal+json, application/json']]) >> [
-        headers: ['Content-Type': 'text/plain']]
+    client.httpClient = mockClient
+    def contentType = new BasicHeader('Content-Type', 'text/plain')
+    def mockBody = Mock(HttpEntity) {
+      getContentType() >> contentType
     }
-    client.newHttpClient() >> mockHttp
+    def mockRootResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+      getEntity() >> mockBody
+    }
 
     when:
     client.navigate('pb:latest-provider-pacts')
 
     then:
+    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockRootResponse
     thrown(InvalidHalResponse)
   }
 
   def 'throws an exception if the _links is not found'() {
     given:
-    def mockHttp = Mock(RESTClient) {
-      get([path: '/', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json, application/json']]) >> [
-        headers: ['Content-Type': 'application/hal+json'],
-        data: [:]
-      ]
+    client.httpClient = mockClient
+    def body = new StringEntity('{}', ContentType.APPLICATION_JSON)
+    def mockRootResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+      getEntity() >> body
     }
-    client.newHttpClient() >> mockHttp
 
     when:
     client.navigate('pb:latest-provider-pacts')
 
     then:
+    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockRootResponse
     thrown(InvalidHalResponse)
   }
 
   def 'throws an exception if the required link is not found'() {
     given:
-    def mockHttp = Mock(RESTClient) {
-      get([path: '/', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json, application/json']]) >> [
-        headers: ['Content-Type': 'application/hal+json'],
-        data: [_links: [:]]
-      ]
+    client.httpClient = mockClient
+    def body = new StringEntity('{"_links":{}}', ContentType.APPLICATION_JSON)
+    def mockRootResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+      getEntity() >> body
     }
-    client.newHttpClient() >> mockHttp
 
     when:
     client.navigate('pb:latest-provider-pacts')
 
     then:
+    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockRootResponse
     thrown(InvalidHalResponse)
   }
 
   def 'Handles responses with charset attributes'() {
     given:
-    def mockHttp = Mock(RESTClient) {
-      get([path: '/', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json, application/json']]) >> [
-        headers: ['Content-Type': 'application/hal+json;charset=UTF-8'],
-        data: [_links: [
-          'pb:latest-provider-pacts': [href: '/link']]
-        ]
-      ]
-      get([path: '/link', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json, application/json']]) >> [
-        headers: ['Content-Type': 'application/hal+json;charset=UTF-8'],
-        data: [_links: []]
-      ]
+    client.httpClient = mockClient
+    def contentType = new BasicHeader('Content-Type', 'application/hal+json;charset=UTF-8')
+    def mockBody = Mock(HttpEntity) {
+      getContentType() >> contentType
+      getContent() >> new ByteArrayInputStream('{"_links": {"pb:latest-provider-pacts":{"href":"/link"}}}'.bytes)
     }
-    client.newHttpClient() >> mockHttp
+    def mockRootResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+      getEntity() >> mockBody
+    }
+    def mockResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+      getEntity() >> new StringEntity('{"_links":{}}', ContentType.create('application/hal+json'))
+    }
 
     when:
     client.navigate('pb:latest-provider-pacts')
 
     then:
+    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockRootResponse
+    1 * mockClient.execute({ it.getURI().path == '/link' }) >> mockResponse
     notThrown(InvalidHalResponse)
   }
 
   def 'does not throw an exception if the required link is empty'() {
     given:
-    def mockHttp = Mock(RESTClient) {
-      get([path: '/', requestContentType: 'application/json',
-           headers: [Accept: 'application/hal+json, application/json']]) >> [
-        headers: ['Content-Type': 'application/hal+json'],
-        data: [_links: [pacts: []]]
-      ]
+    client.httpClient = mockClient
+    def mockResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+      getEntity() >> new StringEntity('{"_links":{"pacts": []}}', ContentType.create('application/hal+json'))
     }
-    client.newHttpClient() >> mockHttp
 
     when:
     def called = false
     client.pacts { called = true }
 
     then:
+    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockResponse
     !called
   }
 
@@ -318,67 +325,119 @@ class HalClientSpec extends Specification {
 
   def 'forAll does nothing if there is no matching link'() {
     given:
-    def response = [
-      headers: [
-        'Content-Type': 'application/json'
-      ],
-      data: [
-        '_links': [:]
-      ]
-    ]
-    client.http = mockHttp
+    client.httpClient = mockClient
+    def mockResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+      getEntity() >> new StringEntity('{"_links":{}}', ContentType.create('application/hal+json'))
+    }
     def closure = Mock(Consumer)
 
     when:
     client.forAll('missingLink', closure)
 
     then:
-    1 * mockHttp.get(_) >> response
+    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockResponse
     0 * closure.accept(_)
   }
 
   def 'forAll calls the closure with the link data'() {
     given:
-    def response = [
-      headers: [
-        'Content-Type': 'application/json'
-      ],
-      data: [
-        '_links': [simpleLink: [link: 'linkData']]
-      ]
-    ]
-    client.http = mockHttp
+    client.httpClient = mockClient
+    def mockResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+      getEntity() >> new StringEntity('{"_links":{"simpleLink": {"link": "linkData"}}}',
+        ContentType.create('application/hal+json'))
+    }
     def closure = Mock(Consumer)
 
     when:
     client.forAll('simpleLink', closure)
 
     then:
-    1 * mockHttp.get(_) >> response
+    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockResponse
     1 * closure.accept([link: 'linkData'])
   }
 
   def 'forAll calls the closure with each link data when the link is a collection'() {
     given:
-    def response = [
-      headers: [
-        'Content-Type': 'application/json'
-      ],
-      data: [
-        '_links': [multipleLink: ['one', 'two', 'three']]
-      ]
-    ]
-    client.http = mockHttp
+    client.httpClient = mockClient
+    def mockResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+      getEntity() >> new StringEntity('{"_links":{"multipleLink": ["one", "two", "three"]}}',
+        ContentType.create('application/hal+json'))
+    }
     def closure = Mock(Consumer)
 
     when:
     client.forAll('multipleLink', closure)
 
     then:
-    1 * mockHttp.get(_) >> response
+    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockResponse
     1 * closure.accept('one')
     1 * closure.accept('two')
     1 * closure.accept('three')
+  }
+
+  def 'supports templated URLs with slashes in the expanded values'() {
+    given:
+    def providerName = 'test/provider name-1'
+    def tag = 'test/tag name-1'
+    client.httpClient = mockClient
+    def body = new StringEntity('{"_links":{"pb:latest-provider-pacts-with-tag": ' +
+      '{"href": "http://localhost/{provider}/tag/{tag}", "templated": true}}}', ContentType.APPLICATION_JSON)
+    def mockRootResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+      getEntity() >> body
+    }
+    def mockResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+      getEntity() >> new StringEntity('{"_links":{"linkA": "ValueA"}}', ContentType.create('application/hal+json'))
+    }
+    def notFoundResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 404, 'Not Found')
+    }
+
+    when:
+    client.navigate('pb:latest-provider-pacts-with-tag', provider: providerName, tag: tag)
+
+    then:
+    1 * mockClient.execute({ it.URI.path == '/' }) >> mockRootResponse
+    1 * mockClient.execute({ it.URI.rawPath == '/test%2Fprovider%20name-1/tag/test%2Ftag%20name-1' }) >> mockResponse
+    _ * mockClient.execute(_) >> notFoundResponse
+    client.pathInfo['_links']['linkA'].toString() == '"ValueA"'
+  }
+
+  def 'handles invalid URL characters when fetching documents from the broker'() {
+    given:
+    client.httpClient = mockClient
+    def mockResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
+      getEntity() >> new StringEntity('{"_links":{"multipleLink": ["one", "two", "three"]}}',
+        ContentType.create('application/hal+json'))
+    }
+
+    when:
+    def result = client.fetch('https://test.pact.dius.com.au/pacts/provider/Activity Service/consumer/Foo Web Client 2/version/1.0.2')
+
+    then:
+    1 * mockClient.execute({ it.URI.toString() == 'https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client%202/version/1.0.2' }) >> mockResponse
+    result['_links']['multipleLink']*.toString() == ['"one"', '"two"', '"three"']
+  }
+
+  @Unroll
+  def 'build url - #desc'() {
+    expect:
+    client.buildUrl(url).toString() == expectedUrl
+
+    where:
+
+    desc                      | url                                      | expectedUrl
+    'normal URL'              | 'http://localhost:8080/path'             | 'http://localhost:8080/path'
+    'normal URL with no path' | 'http://localhost:8080'                  | 'http://localhost:8080'
+    'just a path'             | '/path/to/get'                           | 'http://localhost:1234/path/to/get'
+    'URL with spaces'         | 'http://localhost:8080/path/with spaces' | 'http://localhost:8080/path/with%20spaces'
+    'path with spaces'        | '/path/with spaces'                      | 'http://localhost:1234/path/with%20spaces'
+    'no port'                 | 'http://localhost/path/with spaces'      | 'http://localhost/path/with%20spaces'
   }
 
 }

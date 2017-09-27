@@ -11,10 +11,11 @@ import org.fusesource.jansi.AnsiConsole
 class ProviderUtils {
 
   @SuppressWarnings('ParameterCount')
-  static List loadPactFiles(def provider, File pactFileDir, def stateChange = null, boolean stateChangeUsesBody = true,
-                            PactVerification verificationType = PactVerification.REQUST_RESPONSE,
-                            List packagesToScan = [],
-                            List pactFileAuthentication = []) {
+  static List<ConsumerInfo> loadPactFiles(def provider, File pactFileDir, def stateChange = null,
+                                          boolean stateChangeUsesBody = true,
+                                          PactVerification verificationType = PactVerification.REQUST_RESPONSE,
+                                          List packagesToScan = [],
+                                          List pactFileAuthentication = []) {
     if (!pactFileDir.exists()) {
       throw new PactVerifierException("Pact file directory ($pactFileDir) does not exist")
     }

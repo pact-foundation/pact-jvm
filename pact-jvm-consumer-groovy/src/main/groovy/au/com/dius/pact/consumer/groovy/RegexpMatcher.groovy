@@ -14,7 +14,7 @@ class RegexpMatcher extends Matcher {
   String regex
 
   MatchingRule getMatcher() {
-    new RegexMatcher(regex)
+    new RegexMatcher(regex, super.@value)
   }
 
   Generator getGenerator() {

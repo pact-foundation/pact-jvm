@@ -10,4 +10,5 @@ class PactBroker {
   URL url
   List<String> tags = []
   BasicAuth authentication
+  String serverId
 }

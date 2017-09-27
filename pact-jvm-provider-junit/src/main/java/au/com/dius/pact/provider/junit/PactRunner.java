@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.junit;
 
 import au.com.dius.pact.model.Pact;
+import au.com.dius.pact.provider.junit.loader.NoPactsFoundException;
 import au.com.dius.pact.provider.junit.loader.PactBroker;
 import au.com.dius.pact.provider.junit.loader.PactFolder;
 import au.com.dius.pact.provider.junit.loader.PactLoader;
@@ -70,7 +71,7 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
       final TestClass testClass = new TestClass(clazz);
 
       this.child = new ArrayList<>();
-      final List<Pact> pacts;
+      List<Pact> pacts = null;
       PactLoader pactLoader = getPactSource(testClass);
       try {
         pacts = filterPacts(pactLoader.load(serviceName).stream()
@@ -78,6 +79,8 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
                 .collect(Collectors.toList()));
       } catch (final IOException | JsonException e) {
         throw new InitializationError(e);
+      } catch (NoPactsFoundException e) {
+        LOGGER.debug("No pacts found", e);
       }
 
       if (pacts == null || pacts.isEmpty()) {

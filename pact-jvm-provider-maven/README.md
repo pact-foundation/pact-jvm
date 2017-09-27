@@ -355,6 +355,32 @@ For example:
 </plugin>
 ```
 
+#### Using the Maven servers configuration [version 3.5.6+]
+
+From version 3.5.6, you can use the servers setup in the Maven settings. To do this, setup a server as per the 
+[Maven Server Settings](https://maven.apache.org/settings.html#Servers). Then set the server ID in the pact broker
+configuration in your POM.
+ 
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.6</version>
+    <configuration>
+      <serviceProviders>
+        <serviceProvider>
+          <name>provider1</name>
+          <stateChangeUrl>http://localhost:8080/tasks/pactStateChange</stateChangeUrl>
+          <pactBroker>
+              <url>http://pactbroker:1234</url>
+              <serverId>test-pact-broker</serverId> <!-- This must match the server id in the maven settings -->
+          </pactBroker>
+        </serviceProvider>
+      </serviceProviders>
+    </configuration>
+</plugin>
+```
+
 ### Verifying pacts from an pact broker that match particular tags [version 3.3.5+]
 
 If your pacts in your pact broker have been tagged, you can set the tags to fetch by configuring the `tags` 
@@ -510,7 +536,7 @@ For example:
       <pactDirectory>path/to/pact/files</pactDirectory> <!-- Defaults to ${project.build.directory}/pacts -->
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <projectVersion>1.0.100</projectVersion> <!-- Defaults to ${project.version} -->
-      <trimSnapshot>true</trimSnapshot> <!-- Defaults to  false -->
+      <trimSnapshot>true</trimSnapshot> <!-- Defaults to false -->
     </configuration>
 </plugin>
 ```
@@ -519,7 +545,9 @@ You can now execute `mvn pact:publish` to publish the pact files.
 _NOTE:_ The pact broker requires a version for all published pacts. The `publish` task will use the version of the
 project by default, but can be overwritten with the `projectVersion` property. Make sure you have set one otherwise the broker will reject the pact files.
 
-_NOTE_: By default, the pact broker has issues parsing `SNAPSHOT` versions.  You can configure the publisher to automatically remove `-SNAPSHOT` from your version number by setting `trimSnapshot` to true. This setting does not modify non-snapshot versions.
+_NOTE_: By default, the pact broker has issues parsing `SNAPSHOT` versions.  You can configure the publisher to 
+automatically remove `-SNAPSHOT` from your version number by setting `trimSnapshot` to true. This setting does not modify non-snapshot versions.
+
 ## Publishing to an authenticated pact broker [version 3.3.9+]
 
 For an authenticated pact broker, you can pass in the credentials with the `pactBrokerUsername` and `pactBrokerPassword`
@@ -540,7 +568,27 @@ For example:
 </plugin>
 ```
 
+#### Using the Maven servers configuration [version 3.5.6+]
+
+From version 3.5.6, you can use the servers setup in the Maven settings. To do this, setup a server as per the 
+[Maven Server Settings](https://maven.apache.org/settings.html#Servers). Then set the server ID in the pact broker
+configuration in your POM.
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
+    <version>3.3.9</version>
+    <configuration>
+      <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
+      <pactBrokerServerId>test-pact-broker</pactBrokerServerId>  <!-- This must match the server id in the maven settings -->
+    </configuration>
+</plugin>
+```
+
 # Publishing verification results to a Pact Broker [version 3.5.4+]
 
 For pacts that are loaded from a Pact Broker, the results of running the verification will be published back to the
  broker against the URL for the pact. You will be able to see the result on the Pact Broker home screen.
+ 
+Note: be aware that there is not yet a configuration option to turn off the verification publishing when running from your local machine, so make sure that your CI always runs after your local tests. This feature will be added soon.
