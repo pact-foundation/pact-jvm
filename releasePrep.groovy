@@ -113,8 +113,7 @@ ask('Publish artifacts to maven central?: [Y]') {
 def nextVer = Version.valueOf(releaseVer).incrementPatchVersion()
 ask("Bump version to $nextVer?: [Y]") {
   executeOnShell "sed -i -e \"s/version = '${releaseVer}'/version = '${nextVer}'/\" build.gradle"
-  executeOnShell "sed -i -e \"s/def version = \\\"${releaseVer}\\\"/def version = \\\"${nextVer}\\\"/\" project/Build.scala"
-  executeOnShell("git add build.gradle project/Build.scala")
+  executeOnShell("git add build.gradle")
   executeOnShell("git diff --cached")
   ask("Commit and push this change?: [Y]") {
     executeOnShell("git commit -m 'bump version to $nextVer'")
