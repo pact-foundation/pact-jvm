@@ -178,6 +178,35 @@ class PactBrokerClientSpec extends Specification {
     result == 'FAILED! Error'
   }
 
+  def 'encode the provider name, consumer name and tags when uploading a pact'() {
+    given:
+    def halClient = Mock(IHalClient)
+    def client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+    def tag = 'A/B'
+    pactContents = '''
+      {
+          "provider" : {
+              "name" : "Provider/A"
+          },
+          "consumer" : {
+              "name" : "Foo Consumer/A"
+          },
+          "interactions" : []
+      }
+    '''
+    pactFile.write pactContents
+
+    when:
+    client.uploadPactFile(pactFile, '10.0.0', [tag])
+
+    then:
+    1 * halClient.uploadJson('/pacts/provider/Provider%2FA/consumer/Foo%20Consumer%2FA/version/10.0.0', pactContents, _) >>
+      { args -> args[2].apply('OK', 'OK') }
+    1 * halClient.uploadJson('/pacticipants/Foo%20Consumer%2FA/versions/10.0.0/tags/A%2FB', '')
+  }
+
   @Unroll
   def 'when publishing verification results, return a #result if #reason'() {
     given:
