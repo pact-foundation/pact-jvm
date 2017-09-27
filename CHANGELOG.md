@@ -2,6 +2,21 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 
 # 3.5.6 - Bugfixes and an enhancement to the maven plugin
 
+* 17ba627 - Revert "update changelog for release 3.5.7" (Ronald Holshausen, Wed Sep 27 11:35:44 2017 +1000)
+* f41810c - Revert "bump version to 3.5.7" (Ronald Holshausen, Wed Sep 27 11:35:12 2017 +1000)
+* 19d98ef - update changelog for release 3.5.7 (Ronald Holshausen, Wed Sep 27 11:15:07 2017 +1000)
+* 9cc470a - Merge branch 'v3.5.x' into v3.5.x-2.11 (Ronald Holshausen, Wed Sep 27 11:03:54 2017 +1000)
+* 05f8738 - Correct the release script (Ronald Holshausen, Wed Sep 27 11:00:09 2017 +1000)
+* f5c3ad8 - bump version to 3.5.7 (Ronald Holshausen, Wed Sep 27 10:59:38 2017 +1000)
+* efb45e5 - Updated release prep script for 2.11 (Ronald Holshausen, Tue Sep 12 09:22:14 2017 +1000)
+* d729e58 - bump version to 3.5.6 (Ronald Holshausen, Tue Sep 12 09:21:18 2017 +1000)
+* 66d364b - update changelog for release 3.5.5 (Ronald Holshausen, Tue Sep 12 08:59:45 2017 +1000)
+* 21fd4b2 - Converted Scala 2.12 code to support 2.11 (Ronald Holshausen, Mon Sep 11 17:26:11 2017 +1000)
+* 94fa706 - Merge branch 'v3.5.x' into v3.5.x-2.11 (Ronald Holshausen, Mon Sep 11 12:43:00 2017 +1000)
+* 42a091b - Merged in build changes from 2.12 branch (Ronald Holshausen, Sun Sep 10 10:48:38 2017 +1000)
+
+# 3.5.6 - Bugfixes and an enhancement to the maven plugin
+
 * 718498f - docs(pact-jvm-provider-maven readme): Added warning about publishing verifications from local machine (Beth Skurrie, Tue Sep 26 09:21:41 2017 +1000)
 * 4c5dd51 - Guard against other types of matchers being applied to plain text responses #517 (Ronald Holshausen, Sun Sep 24 15:42:51 2017 +1000)
 * a8ac3ec - Correct the JUnit pact runner to not fail when no pacts are found and the IgnoreNoPactsToVerify is present #535 (Ronald Holshausen, Sun Sep 24 15:11:46 2017 +1000)
