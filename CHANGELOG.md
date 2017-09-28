@@ -1,5 +1,38 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.6-jre7.0 - Bugfix Release
+
+* 5deb784 - can not depend on kotlin compile path when building on jdk 7 (Ronald Holshausen, Thu Sep 28 14:22:30 2017 +1000)
+* 4b65799 - can not depend on kotlin compile path when building on jdk 7 (Ronald Holshausen, Thu Sep 28 14:18:56 2017 +1000)
+* 0f52781 - can not depend on kotlin compile path when building on jdk 7 (Ronald Holshausen, Thu Sep 28 14:06:21 2017 +1000)
+* ce9fe5c - Merge branch 'v3.5.x-2.11' into v3.5.x-jre7 (Ronald Holshausen, Thu Sep 28 11:32:16 2017 +1000)
+* 815be21 - bump version to 3.5.7 (Ronald Holshausen, Wed Sep 27 13:34:25 2017 +1000)
+* 34b6947 - update changelog for release 3.5.6 (Ronald Holshausen, Wed Sep 27 11:44:04 2017 +1000)
+* 17ba627 - Revert "update changelog for release 3.5.7" (Ronald Holshausen, Wed Sep 27 11:35:44 2017 +1000)
+* f41810c - Revert "bump version to 3.5.7" (Ronald Holshausen, Wed Sep 27 11:35:12 2017 +1000)
+* 19d98ef - update changelog for release 3.5.7 (Ronald Holshausen, Wed Sep 27 11:15:07 2017 +1000)
+* 9cc470a - Merge branch 'v3.5.x' into v3.5.x-2.11 (Ronald Holshausen, Wed Sep 27 11:03:54 2017 +1000)
+* 05f8738 - Correct the release script (Ronald Holshausen, Wed Sep 27 11:00:09 2017 +1000)
+* f5c3ad8 - bump version to 3.5.7 (Ronald Holshausen, Wed Sep 27 10:59:38 2017 +1000)
+* 0c62ea0 - update changelog for release 3.5.6 (Ronald Holshausen, Wed Sep 27 10:42:28 2017 +1000)
+* 718498f - docs(pact-jvm-provider-maven readme): Added warning about publishing verifications from local machine (Beth Skurrie, Tue Sep 26 09:21:41 2017 +1000)
+* 4c5dd51 - Guard against other types of matchers being applied to plain text responses #517 (Ronald Holshausen, Sun Sep 24 15:42:51 2017 +1000)
+* a8ac3ec - Correct the JUnit pact runner to not fail when no pacts are found and the IgnoreNoPactsToVerify is present #535 (Ronald Holshausen, Sun Sep 24 15:11:46 2017 +1000)
+* d9fa23c - Update the readme about the Maven pact plugin being able to use the maven server credentials #534 (Ronald Holshausen, Sun Sep 24 14:45:09 2017 +1000)
+* cdc54eb - Convert all the callbacks in the Verifier to Java functional interfaces to support callbacks from other languages #534 (Ronald Holshausen, Sun Sep 24 14:16:42 2017 +1000)
+* a166b98 - Enhance the Maven pact verify plugin to use the maven server credentials #534 (Ronald Holshausen, Sun Sep 24 13:30:48 2017 +1000)
+* d799d3f - Fix for failing test #534 (Ronald Holshausen, Fri Sep 22 15:48:12 2017 +1000)
+* 8073cea - Enhance the Maven pact publish plugin to use the maven server credentials #534 (Ronald Holshausen, Fri Sep 22 15:08:29 2017 +1000)
+* 1e407a3 - Merge pull request #544 from MattTYXM/master (Ronald Holshausen, Fri Sep 22 10:09:04 2017 +1000)
+* 2fa80e0 - added the ability to set MessageConvertors on the MockMvcTarget instance via constuctor or setter (Matt Baumgartner, Wed Sep 20 10:10:02 2017 -0400)
+* 043ee22 - Return the correct data structure when fetching a pact from the pact broker #536 (Ronald Holshausen, Fri Sep 15 17:03:44 2017 +1000)
+* 75467f2 - Use the low level Gson json parser for better control over primitives #536 (Ronald Holshausen, Fri Sep 15 16:27:24 2017 +1000)
+* e21f960 - Need to publish all the jars for the JDK7 version (Ronald Holshausen, Fri Sep 15 14:21:06 2017 +1000)
+* eff6d4b - Guard against double encoding url unsafe characters #536 (Ronald Holshausen, Fri Sep 15 14:06:19 2017 +1000)
+* f15f255 - With HAL templated URLs, encode the expanded template values #536 (Ronald Holshausen, Fri Sep 15 12:07:16 2017 +1000)
+* f2a2602 - bump version to 3.5.6-jre7.0 (Ronald Holshausen, Thu Sep 14 12:44:59 2017 +1000)
+* b2edaa9 - Updated readme (Ronald Holshausen, Tue Sep 12 09:22:52 2017 +1000)
+
 # 3.5.6 - Bugfixes and an enhancement to the maven plugin
 
 * 17ba627 - Revert "update changelog for release 3.5.7" (Ronald Holshausen, Wed Sep 27 11:35:44 2017 +1000)
