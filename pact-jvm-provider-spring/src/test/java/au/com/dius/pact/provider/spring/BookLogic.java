@@ -1,5 +1,7 @@
 package au.com.dius.pact.provider.spring;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -8,8 +10,11 @@ import java.util.UUID;
 
 @Component
 public class BookLogic {
+
+    private final DateTime DATE_TIME = DateTime.now(DateTimeZone.UTC).withTimeAtStartOfDay();
+
     public Book getBookById(UUID id) {
-        return new Book(id, "Bob Jones", true);
+        return new Book(id, "Bob Jones", true, DATE_TIME);
     }
 
     public List<Book> getBooks() {

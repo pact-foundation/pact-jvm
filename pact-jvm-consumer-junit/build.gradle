@@ -17,12 +17,12 @@ dependencies {
     "junit:junit:${project.junitVersion}",
     "org.json:json:${project.jsonVersion}",
     "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
-    'com.google.guava:guava:19.0'
+    'com.google.guava:guava:23.0'
 
   testCompile "ch.qos.logback:logback-core:${project.logbackVersion}",
     "ch.qos.logback:logback-classic:${project.logbackVersion}",
     'org.apache.commons:commons-collections4:4.1',
-    'com.google.code.gson:gson:2.7',
+    'com.google.code.gson:gson:2.8.1',
     "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}",
     "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
     'com.jayway.restassured:rest-assured:2.9.0',

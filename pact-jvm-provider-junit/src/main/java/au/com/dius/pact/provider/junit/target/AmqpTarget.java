@@ -11,6 +11,7 @@ import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.PactVerification;
 import au.com.dius.pact.provider.ProviderInfo;
 import au.com.dius.pact.provider.ProviderVerifier;
+import au.com.dius.pact.provider.Supplier;
 import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.loader.PactBroker;
 import au.com.dius.pact.provider.junit.loader.PactFolder;
@@ -70,7 +71,12 @@ public class AmqpTarget extends BaseTarget {
     protected ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider,
                                              ConsumerInfo consumer) {
     ProviderVerifier verifier = new ProviderVerifier();
-    verifier.setProjectClasspath(new MethodClosure(this, "getClassPathUrls"));
+    verifier.setProjectClasspath(new Supplier<URL[]>() {
+      @Override
+      public URL[] get() {
+        return getClassPathUrls();
+      }
+    });
 
     setupReporters(verifier, provider.getName(), interaction.getDescription());
 

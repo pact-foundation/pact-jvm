@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.junit;
 
 import au.com.dius.pact.model.Pact;
+import au.com.dius.pact.provider.junit.loader.NoPactsFoundException;
 import au.com.dius.pact.provider.junit.loader.PactBroker;
 import au.com.dius.pact.provider.junit.loader.PactFolder;
 import au.com.dius.pact.provider.junit.loader.PactLoader;
@@ -75,6 +76,8 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
             }
         } catch (final IOException | JsonException e) {
             throw new InitializationError(e);
+        } catch (NoPactsFoundException e) {
+          LOGGER.debug("No pacts found", e);
         }
 
       if (pacts.isEmpty()) {

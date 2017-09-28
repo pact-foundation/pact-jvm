@@ -1,12 +1,12 @@
 dependencies {
     compile project(":pact-jvm-provider_${project.scalaVersion}"),
-      'com.github.rholder:guava-retrying:2.0.0',
       "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}",
       "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
       "junit:junit:${project.junitVersion}",
       "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
       "com.fasterxml.jackson.core:jackson-databind:${project.jacksonDatabindVersion}",
       'org.jooq:jool:0.9.11'
+    compile('com.github.rholder:guava-retrying:2.0.0')
 
     testCompile 'com.github.rest-driver:rest-client-driver:1.1.36'
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"

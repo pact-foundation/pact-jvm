@@ -7,6 +7,7 @@ import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.PactVerification;
 import au.com.dius.pact.provider.ProviderInfo;
 import au.com.dius.pact.provider.ProviderVerifier;
+import au.com.dius.pact.provider.Supplier;
 import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.TargetRequestFilter;
 import au.com.dius.pact.provider.junit.target.BaseTarget;
@@ -15,8 +16,8 @@ import au.com.dius.pact.provider.spring.MvcProviderVerifier;
 import au.com.dius.pact.util.Optional;
 import org.apache.commons.collections4.Closure;
 import org.apache.http.HttpRequest;
-import org.codehaus.groovy.runtime.MethodClosure;
 import org.junit.runners.model.FrameworkMethod;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URL;
@@ -38,6 +39,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 public class MockMvcTarget extends BaseTarget {
     private List<Object> controllers;
     private List<Object> controllerAdvice;
+    private List<HttpMessageConverter> messageConverters;
     private boolean printRequestResponse;
     private int runTimes;
     private MockMvc mockMvc;
@@ -51,7 +53,11 @@ public class MockMvcTarget extends BaseTarget {
     }
 
     public MockMvcTarget(List<Object> controllers, boolean printRequestResponse) {
-        this(controllers, new ArrayList<Object>() {}, printRequestResponse);
+        this(controllers, printRequestResponse, 1);
+    }
+
+    public MockMvcTarget(List<Object> controllers, boolean printRequestResponse, int runTimes) {
+        this(controllers, new ArrayList<Object>() {}, printRequestResponse, runTimes);
     }
 
     public MockMvcTarget(List<Object> controllers, List<Object> controllerAdvice, boolean printRequestResponse) {
@@ -59,9 +65,18 @@ public class MockMvcTarget extends BaseTarget {
     }
 
     public MockMvcTarget(List<Object> controllers, List<Object> controllerAdvice, boolean printRequestResponse, int runTimes) {
+        this(controllers, controllerAdvice, new ArrayList<HttpMessageConverter>() {}, printRequestResponse, runTimes);
+    }
+
+    public MockMvcTarget(List<Object> controllers, List<Object> controllerAdvice, List<HttpMessageConverter> messageConverters, boolean printRequestResponse) {
+        this(controllers, controllerAdvice, messageConverters, printRequestResponse, 1);
+    }
+
+    public MockMvcTarget(List<Object> controllers, List<Object> controllerAdvice, List<HttpMessageConverter> messageConverters, boolean printRequestResponse, int runTimes) {
         Optional<List<Object>> c = Optional.ofNullable(controllers);
         this.controllers = c.orElseThrow(new IllegalArgumentException("controllers cannot be null"));
         this.controllerAdvice = Optional.ofNullable(controllerAdvice).orElse(Collections.emptyList());
+        this.messageConverters = Optional.ofNullable(messageConverters).orElse(new ArrayList<HttpMessageConverter>());
         this.printRequestResponse = printRequestResponse;
         this.runTimes = runTimes;
     }
@@ -81,6 +96,14 @@ public class MockMvcTarget extends BaseTarget {
 
     public void setControllerAdvice(Object... controllerAdvice) {
         this.controllerAdvice = Arrays.asList(Optional.ofNullable(controllerAdvice).orElse(new Object[0]));
+    }
+
+    public void setMessageConvertors(HttpMessageConverter... messageConverters) {
+        this.messageConverters = Arrays.asList(
+            Optional
+                .ofNullable(messageConverters)
+                .orElse(new HttpMessageConverter[0])
+        );
     }
 
     public void setMockMvc(MockMvc mockMvc) {
@@ -122,7 +145,9 @@ public class MockMvcTarget extends BaseTarget {
         }
 
         return standaloneSetup(controllers.toArray())
-            .setControllerAdvice(controllerAdvice.toArray()).build();
+            .setControllerAdvice(controllerAdvice.toArray())
+            .setMessageConverters(getMessageConverterArray())
+            .build();
     }
 
     private URL[] getClassPathUrls() {
@@ -137,7 +162,12 @@ public class MockMvcTarget extends BaseTarget {
 
         setupReporters(verifier, provider.getName(), interaction.getDescription());
 
-        verifier.setProjectClasspath(new MethodClosure(this, "getClassPathUrls"));
+        verifier.setProjectClasspath(new Supplier<URL[]>() {
+            @Override
+            public URL[] get() {
+                return getClassPathUrls();
+            }
+        });
 
         verifier.initialiseReporters(provider);
         verifier.reportVerificationForConsumer(consumer, provider);
@@ -176,4 +206,11 @@ public class MockMvcTarget extends BaseTarget {
 
         return providerInfo;
     }
+
+    private HttpMessageConverter[] getMessageConverterArray() {
+        return messageConverters.toArray(
+            new HttpMessageConverter[messageConverters.size()]
+        );
+    }
+
 }

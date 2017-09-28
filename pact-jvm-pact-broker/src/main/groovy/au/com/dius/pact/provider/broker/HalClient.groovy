@@ -2,14 +2,14 @@ package au.com.dius.pact.provider.broker
 
 import au.com.dius.pact.pactbroker.BiFunction
 import au.com.dius.pact.pactbroker.HalClientBase
-import au.com.dius.pact.pactbroker.IHalClient
-import au.com.dius.pact.pactbroker.InvalidHalResponse
 import au.com.dius.pact.pactbroker.NotFoundHalResponse
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import groovy.transform.Canonical
 import groovy.util.logging.Slf4j
 import groovyx.net.http.Method
 import groovyx.net.http.RESTClient
-import org.apache.http.message.BasicHeaderValueParser
 import org.apache.http.util.EntityUtils
 
 import static groovyx.net.http.ContentType.JSON
@@ -22,11 +22,12 @@ import static groovyx.net.http.Method.PUT
 @Canonical
 @SuppressWarnings('DuplicateStringLiteral')
 class HalClient extends HalClientBase {
-  private static final String ROOT = '/'
 
+  /**
+   * @deprecated Use httpClient from the base class
+   */
+  @Deprecated
   def http
-  private pathInfo
-  def lastUrl
 
   HalClient(
     String baseUrl,
@@ -38,7 +39,11 @@ class HalClient extends HalClientBase {
     super(baseUrl)
   }
 
+  /**
+   * @deprecated Use setupHttpClient from the base class
+   */
   @SuppressWarnings('DuplicateNumberLiteral')
+  @Deprecated
   private void setupRestClient() {
     if (http == null) {
       http = newHttpClient()
@@ -58,6 +63,7 @@ class HalClient extends HalClientBase {
     }
   }
 
+  @Deprecated
   private RESTClient newHttpClient() {
     http = new RESTClient(baseUrl)
     http.parser.'application/hal+json' = http.parser.'application/json'
@@ -68,88 +74,12 @@ class HalClient extends HalClientBase {
     http
   }
 
-  IHalClient navigate(Map options = [:], String link) {
-    pathInfo = pathInfo ?: fetch(ROOT)
-    pathInfo = fetchLink(link, options)
-    this
-  }
-
-  private fetchLink(String link, Map options) {
-    if (pathInfo == null || pathInfo['_links'] == null) {
-      throw new InvalidHalResponse('Expected a HAL+JSON response from the pact broker, but got ' +
-        "a response with no '_links'. URL: '${baseUrl}', LINK: '${link}'")
-    }
-
-    def linkData = pathInfo.'_links'[link]
-    if (linkData == null) {
-      throw new InvalidHalResponse("Link '$link' was not found in the response, only the following links where " +
-        "found: ${pathInfo['_links'].keySet()}. URL: '${baseUrl}', LINK: '${link}'")
-    }
-
-    if (linkData instanceof List) {
-      if (options.containsKey('name')) {
-        def linkByName = linkData.find { it.name == options.name }
-        if (linkByName?.templated) {
-          this.fetch(parseLinkUrl(linkByName.href, options))
-        } else if (linkByName) {
-          this.fetch(linkByName.href)
-        } else {
-          throw new InvalidNavigationRequest("Link '$link' does not have an entry with name '${options.name}'. " +
-            "URL: '${baseUrl}', LINK: '${link}'")
-        }
-      } else {
-        throw new InvalidNavigationRequest("Link '$link' has multiple entries. You need to filter by the link name. " +
-          "URL: '${baseUrl}', LINK: '${link}'")
-      }
-    } else if (linkData.templated) {
-      this.fetch(parseLinkUrl(linkData.href, options))
-    } else {
-      this.fetch(linkData.href)
-    }
-  }
-
-  static String parseLinkUrl(String linkUrl, Map options) {
-    def m = linkUrl =~ /\{(\w+)\}/
-    def result = ''
-    int index = 0
-    while (m.find()) {
-      def start = m.start() - 1
-      if (start >= index) {
-        result += linkUrl[index..start]
-      }
-      index = m.end()
-      def key = m.group(1)
-      result += options[key] ?: m.group(0)
-    }
-
-    if (index < linkUrl.size()) {
-      result += linkUrl[index..-1]
-    }
-    result
-  }
-
-  def fetch(String path) {
-    lastUrl = path
-    setupRestClient()
-    log.debug "Fetching: $path"
-    def response = http.get(path: path, requestContentType: 'application/json',
-      headers: [Accept: 'application/hal+json, application/json'])
-    def contentType = response.headers.'Content-Type'
-    def headerParser = new BasicHeaderValueParser()
-    def headerElements = headerParser.parseElements(contentType as String, headerParser)
-    if (headerElements[0].name != 'application/json' && headerElements[0].name != 'application/hal+json') {
-      throw new InvalidHalResponse('Expected a HAL+JSON response from the pact broker, but got ' +
-        "'$contentType'. URL: '${baseUrl}', PATH: '${path}'")
-    }
-    response.data
-  }
-
   def methodMissing(String name, args) {
-    pathInfo = pathInfo ?: fetch(ROOT)
-    def matchingLink = pathInfo.'_links'[name]
+    super.initPathInfo()
+    JsonElement matchingLink = super.pathInfo['_links'][name]
     if (matchingLink != null) {
       if (args && args.last() instanceof Closure) {
-        if (matchingLink instanceof Collection) {
+        if (matchingLink.isJsonArray()) {
           return matchingLink.each(args.last() as Closure)
         }
         return args.last().call(matchingLink)
@@ -161,13 +91,38 @@ class HalClient extends HalClientBase {
 
   @Override
   void forAll(String linkName, org.apache.commons.collections4.Closure<Map<String, Object>> just) {
-    pathInfo = pathInfo ?: fetch(ROOT)
-    def matchingLink = pathInfo.'_links'[linkName]
+    super.initPathInfo()
+    JsonElement matchingLink = pathInfo['_links'][linkName]
     if (matchingLink != null) {
-      if (matchingLink instanceof Collection) {
-        matchingLink.each { just.execute(it) }
+      if (matchingLink.isJsonArray()) {
+        matchingLink.asJsonArray.each { just.execute(fromJson(it)) }
       } else {
-        just.execute(matchingLink as Map<String, Object>)
+        just.execute(fromJson(matchingLink.asJsonObject))
+      }
+    }
+  }
+
+  static Map<String, Object> asMap(JsonObject jsonObject) {
+    jsonObject.entrySet().collectEntries { Map.Entry<String, JsonElement> entry ->
+      [entry.key, fromJson(entry.value)]
+    }
+  }
+
+  static fromJson(JsonElement jsonValue) {
+    if (jsonValue.jsonObject) {
+      asMap(jsonValue.asJsonObject)
+    } else if (jsonValue.jsonArray) {
+      jsonValue.asJsonArray.collect { fromJson(it) }
+    } else if (jsonValue.jsonNull) {
+      null
+    } else {
+      JsonPrimitive primitive = jsonValue.asJsonPrimitive
+      if (primitive.isBoolean()) {
+        primitive.asBoolean
+      } else if (primitive.isNumber()) {
+        primitive.asBigDecimal
+      } else {
+        primitive.asString
       }
     }
   }

@@ -4,4 +4,10 @@ dependencies {
   compile 'com.github.salomonbrys.kotson:kotson:2.5.0'
   compile 'org.apache.httpcomponents:httpclient:4.5.2'
   compile 'org.apache.commons:commons-collections4:4.1'
+  compile 'com.google.guava:guava:23.0'
+}
+
+compileGroovy {
+  classpath = classpath.plus(files(compileKotlin.destinationDir))
+  dependsOn compileKotlin
 }

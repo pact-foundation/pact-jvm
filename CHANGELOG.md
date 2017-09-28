@@ -1,5 +1,39 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.6 - Bugfixes and an enhancement to the maven plugin
+
+* 17ba627 - Revert "update changelog for release 3.5.7" (Ronald Holshausen, Wed Sep 27 11:35:44 2017 +1000)
+* f41810c - Revert "bump version to 3.5.7" (Ronald Holshausen, Wed Sep 27 11:35:12 2017 +1000)
+* 19d98ef - update changelog for release 3.5.7 (Ronald Holshausen, Wed Sep 27 11:15:07 2017 +1000)
+* 9cc470a - Merge branch 'v3.5.x' into v3.5.x-2.11 (Ronald Holshausen, Wed Sep 27 11:03:54 2017 +1000)
+* 05f8738 - Correct the release script (Ronald Holshausen, Wed Sep 27 11:00:09 2017 +1000)
+* f5c3ad8 - bump version to 3.5.7 (Ronald Holshausen, Wed Sep 27 10:59:38 2017 +1000)
+* efb45e5 - Updated release prep script for 2.11 (Ronald Holshausen, Tue Sep 12 09:22:14 2017 +1000)
+* d729e58 - bump version to 3.5.6 (Ronald Holshausen, Tue Sep 12 09:21:18 2017 +1000)
+* 66d364b - update changelog for release 3.5.5 (Ronald Holshausen, Tue Sep 12 08:59:45 2017 +1000)
+* 21fd4b2 - Converted Scala 2.12 code to support 2.11 (Ronald Holshausen, Mon Sep 11 17:26:11 2017 +1000)
+* 94fa706 - Merge branch 'v3.5.x' into v3.5.x-2.11 (Ronald Holshausen, Mon Sep 11 12:43:00 2017 +1000)
+* 42a091b - Merged in build changes from 2.12 branch (Ronald Holshausen, Sun Sep 10 10:48:38 2017 +1000)
+
+# 3.5.6 - Bugfixes and an enhancement to the maven plugin
+
+* 718498f - docs(pact-jvm-provider-maven readme): Added warning about publishing verifications from local machine (Beth Skurrie, Tue Sep 26 09:21:41 2017 +1000)
+* 4c5dd51 - Guard against other types of matchers being applied to plain text responses #517 (Ronald Holshausen, Sun Sep 24 15:42:51 2017 +1000)
+* a8ac3ec - Correct the JUnit pact runner to not fail when no pacts are found and the IgnoreNoPactsToVerify is present #535 (Ronald Holshausen, Sun Sep 24 15:11:46 2017 +1000)
+* d9fa23c - Update the readme about the Maven pact plugin being able to use the maven server credentials #534 (Ronald Holshausen, Sun Sep 24 14:45:09 2017 +1000)
+* cdc54eb - Convert all the callbacks in the Verifier to Java functional interfaces to support callbacks from other languages #534 (Ronald Holshausen, Sun Sep 24 14:16:42 2017 +1000)
+* a166b98 - Enhance the Maven pact verify plugin to use the maven server credentials #534 (Ronald Holshausen, Sun Sep 24 13:30:48 2017 +1000)
+* d799d3f - Fix for failing test #534 (Ronald Holshausen, Fri Sep 22 15:48:12 2017 +1000)
+* 8073cea - Enhance the Maven pact publish plugin to use the maven server credentials #534 (Ronald Holshausen, Fri Sep 22 15:08:29 2017 +1000)
+* 1e407a3 - Merge pull request #544 from MattTYXM/master (Ronald Holshausen, Fri Sep 22 10:09:04 2017 +1000)
+* 2fa80e0 - added the ability to set MessageConvertors on the MockMvcTarget instance via constuctor or setter (Matt Baumgartner, Wed Sep 20 10:10:02 2017 -0400)
+* 043ee22 - Return the correct data structure when fetching a pact from the pact broker #536 (Ronald Holshausen, Fri Sep 15 17:03:44 2017 +1000)
+* 75467f2 - Use the low level Gson json parser for better control over primitives #536 (Ronald Holshausen, Fri Sep 15 16:27:24 2017 +1000)
+* eff6d4b - Guard against double encoding url unsafe characters #536 (Ronald Holshausen, Fri Sep 15 14:06:19 2017 +1000)
+* f15f255 - With HAL templated URLs, encode the expanded template values #536 (Ronald Holshausen, Fri Sep 15 12:07:16 2017 +1000)
+* b2edaa9 - Updated readme (Ronald Holshausen, Tue Sep 12 09:22:52 2017 +1000)
+* ea18df6 - bump version to 3.5.6 (Ronald Holshausen, Mon Sep 11 10:23:19 2017 +1000)
+
 # 3.5.5-jre7.0 - Bugfix Release
 
 * 8ff26ba - Remove oraclejdk7 from travis build (Ronald Holshausen, Thu Sep 14 12:04:31 2017 +1000)
@@ -151,42 +185,6 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * eba9bb7 - Updated spec tests from spec project (Ronald Holshausen, Sat Aug 19 15:24:30 2017 +1000)
 * a84494d - bump version to 3.5.5 (Ronald Holshausen, Fri Aug 18 15:46:46 2017 +1000)
 * 5d19bd6 - add scala 2.12.0-M4 as a 2.12 build (Ronald Holshausen, Tue Jun 7 16:37:38 2016 +1000)
-
-# 3.5.4-jdk7.0 - Implemented publishing of verification results to the pact broker
-
-* f1e63a0 - Fixes to build on JDK7 (Ronald Holshausen, Sat Aug 19 17:11:14 2017 +1000)
-* ca59a59 - Update rest client driver which was causing a JVM failure (Ronald Holshausen, Fri Aug 18 16:58:52 2017 +1000)
-* 7836fa3 - Merge branch 'v3.5.x' into v3.5.x-jre7 (Ronald Holshausen, Fri Aug 18 16:44:32 2017 +1000)
-* 427292a - Upgrade Gradle to 4.1 (Ronald Holshausen, Fri Aug 18 16:25:47 2017 +1000)
-* a96a519 - Upgraded Kotlin to 1.1.4 (Ronald Holshausen, Fri Aug 18 16:16:22 2017 +1000)
-* a84494d - bump version to 3.5.5 (Ronald Holshausen, Fri Aug 18 15:46:46 2017 +1000)
-* 726cf3d - update changelog for release 3.5.4 (Ronald Holshausen, Fri Aug 18 15:00:29 2017 +1000)
-* 2df8536 - Updated the readmes on publishing verification results to the broker #417 (Ronald Holshausen, Fri Aug 18 14:31:45 2017 +1000)
-* b8006c8 - Updated the JUnit runner to publish verification results to the broker #417 (Ronald Holshausen, Fri Aug 18 14:31:21 2017 +1000)
-* ff7ddc1 - No need to create a Rest Client if fetching pacts from a broker #417 (Ronald Holshausen, Fri Aug 18 13:55:17 2017 +1000)
-* bc14b0f - HRefs from the broker should be decoded to avoid double encoding issues #417 (Ronald Holshausen, Fri Aug 18 13:23:18 2017 +1000)
-* 57526d6 - Missed a needed @JvmOverloads annotation #417 (Ronald Holshausen, Fri Aug 18 12:53:45 2017 +1000)
-* e64ee8e - Cleaned up the broker client code and use case-insenstive lookups of HAL links when publishing verification results to the pact broker #417 (Ronald Holshausen, Fri Aug 18 12:23:29 2017 +1000)
-* 3afc007 - Merge branch 'master' into v3.5.x (Ronald Holshausen, Fri Aug 18 10:55:36 2017 +1000)
-* 59e368e - Merge branch 'Windowsfreak-patch-1' (Ronald Holshausen, Fri Aug 18 10:54:10 2017 +1000)
-* ecf97ee - Correct a test after the changing the detail charset (Ronald Holshausen, Fri Aug 18 10:53:32 2017 +1000)
-* 1597e2b - Merge branch 'patch-1' of https://github.com/Windowsfreak/pact-jvm into Windowsfreak-patch-1 (Ronald Holshausen, Fri Aug 18 10:40:00 2017 +1000)
-* a9ad587 - Implemented publishing verification results to the pact broker #417 (Ronald Holshausen, Fri Aug 18 10:38:23 2017 +1000)
-* 6e7b34e - Merge branch 'master' into v3.5.x (Ronald Holshausen, Thu Aug 17 11:37:35 2017 +1000)
-* 7d1f3f8 - Merge pull request #518 from ehmkah/master (Ronald Holshausen, Wed Aug 16 14:18:00 2017 +1000)
-* 0477429 - Use UTF-8 as a default charset in MockServer (Björn Eberhardt, Tue Aug 15 15:55:47 2017 +0200)
-* dfcba58 - Update PactDslResponse.java (Michael Krauße, Tue Aug 15 09:18:06 2017 +0200)
-* 60355f4 - https://github.com/DiUS/pact-jvm/issues/512 (Michael Krauße, Tue Aug 15 09:08:52 2017 +0200)
-* 4cdd138 - Use the pact broker client to fetch pacts when they need to be loaded from a pact broker (Ronald Holshausen, Fri Aug 11 16:39:00 2017 +1000)
-* 53d0a4f - Updated versions in readme (Ronald Holshausen, Fri Aug 11 12:45:31 2017 +1000)
-* b8fc1a1 - generate the correct JSON when the attribute name is a number #513 (Ronald Holshausen, Fri Aug 11 12:44:53 2017 +1000)
-* f1bf535 - update changelog for release 3.5.3-jre7.0 (Ronald Holshausen, Thu Aug 10 10:20:21 2017 +1000)
-* eec0c60 - Small fix to diff utils (Ronald Holshausen, Wed Aug 9 09:11:36 2017 +1000)
-* c916f28 - Converted DiffUtils to kotlin (Ronald Holshausen, Wed Aug 9 08:39:33 2017 +1000)
-* 5ce0961 - When merging a pact file, check if the target file is not empty (Ronald Holshausen, Wed Aug 9 12:28:03 2017 +1000)
-* 64bc4cc - bump version to 3.5.4-jre7.0 (Ronald Holshausen, Thu Aug 10 10:56:41 2017 +1000)
-* 21d3b7d - Merge pull request #511 from ehmkah/master (Ronald Holshausen, Mon Aug 7 11:48:05 2017 +1000)
-* c27b814 - Documentation should match implementation (Michael Krauße, Sun Aug 6 19:20:00 2017 +0200)
 
 # 3.5.4 - Implemented publishing of verification results to the pact broker
 
