@@ -1,22 +1,25 @@
 package au.com.dius.pact.pactbroker
 
 import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
+import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.bool
 import com.github.salomonbrys.kotson.get
+import com.github.salomonbrys.kotson.keys
 import com.github.salomonbrys.kotson.nullObj
 import com.github.salomonbrys.kotson.obj
-import com.github.salomonbrys.kotson.keys
 import com.github.salomonbrys.kotson.string
 import com.google.common.net.UrlEscapers
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import mu.KLogging
+import org.apache.http.HttpResponse
 import org.apache.commons.collections4.Closure
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
+import org.apache.http.client.methods.HttpPut
 import org.apache.http.client.utils.URIBuilder
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
@@ -82,6 +85,16 @@ interface IHalClient {
    * returned.
    */
   fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>): Any?
+
+  /**
+   * Upload the JSON document to the provided path, using a PUT request
+   * @param path Path to upload the document
+   * @param bodyJson JSON contents for the body
+   * @param closure Closure that will be invoked with details about the response. The result from the closure will be
+   * returned.
+   * @param encodePath If the path must be encoded beforehand.
+   */
+  fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>, encodePath: Boolean): Any?
 
   /**
    * Upload the JSON document to the provided URL, using a POST request
@@ -321,6 +334,68 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
 
   fun initPathInfo() {
     pathInfo = pathInfo ?: fetch(ROOT)
+  }
+
+  override fun uploadJson(path: String, bodyJson: String) = uploadJson(path, bodyJson,
+    BiFunction { _: String, _: String -> null }, true)
+
+  override fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>) =
+    uploadJson(path, bodyJson, closure, true)
+
+  override fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>,
+                          encodePath: Boolean): Any? {
+    val client = setupHttpClient()
+    val httpPut = HttpPut(buildUrl(path, encodePath))
+    httpPut.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
+    httpPut.entity = StringEntity(bodyJson, ContentType.APPLICATION_JSON)
+
+    client.execute(httpPut).use {
+      return when {
+        it.statusLine.statusCode < 300 -> {
+          EntityUtils.consume(it.entity)
+          closure.apply("OK", it.statusLine.toString())
+        }
+        it.statusLine.statusCode == 409 -> {
+          val body = it.entity.content.bufferedReader().readText()
+          closure.apply("FAILED",
+            "${it.statusLine.statusCode} ${it.statusLine.reasonPhrase} - $body")
+        }
+        else -> {
+          val body = it.entity.content.bufferedReader().readText()
+          handleFailure(it, body, closure)
+        }
+      }
+    }
+  }
+
+  fun handleFailure(resp: HttpResponse, body: String?, closure: BiFunction<String, String, Any?>): Any? {
+    if (resp.entity.contentType != null) {
+      val contentType = ContentType.getOrDefault(resp.entity)
+      if (isJsonResponse(contentType)) {
+        var error = "Unknown error"
+        if (body != null) {
+          val jsonBody = JsonParser().parse(body)
+          if (jsonBody != null && jsonBody.obj.has("errors")) {
+            if (jsonBody["errors"].isJsonArray) {
+              error = jsonBody["errors"].asJsonArray.joinToString(", ") { it.asString }
+            } else if (jsonBody["errors"].isJsonObject) {
+              error = jsonBody["errors"].asJsonObject.entrySet().joinToString(", ") {
+                if (it.value.isJsonArray) {
+                  "${it.key}: ${it.value.array.joinToString(", ") { it.asString }}"
+                } else {
+                  "${it.key}: ${it.value.asString}"
+                }
+              }
+            }
+          }
+        }
+        return closure.apply("FAILED", "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - $error")
+      } else {
+        return closure.apply("FAILED", "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - $body")
+      }
+    } else {
+      return closure.apply("FAILED", "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - $body")
+    }
   }
 
   companion object : KLogging() {

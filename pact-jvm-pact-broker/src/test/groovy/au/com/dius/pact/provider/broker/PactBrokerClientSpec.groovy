@@ -173,7 +173,7 @@ class PactBrokerClientSpec extends Specification {
     def result = client.uploadPactFile(pactFile, '10.0.0')
 
     then:
-    1 * halClient.uploadJson('/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0', pactContents, _) >>
+    1 * halClient.uploadJson('/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0', pactContents, _) >>
       { args -> args[2].apply('Failed', 'Error') }
     result == 'FAILED! Error'
   }
@@ -202,9 +202,9 @@ class PactBrokerClientSpec extends Specification {
     client.uploadPactFile(pactFile, '10.0.0', [tag])
 
     then:
-    1 * halClient.uploadJson('/pacts/provider/Provider%2FA/consumer/Foo%20Consumer%2FA/version/10.0.0', pactContents, _) >>
-      { args -> args[2].apply('OK', 'OK') }
-    1 * halClient.uploadJson('/pacticipants/Foo%20Consumer%2FA/versions/10.0.0/tags/A%2FB', '')
+    1 * halClient.uploadJson('/pacts/provider/Provider%2FA/consumer/Foo%20Consumer%2FA/version/10.0.0',
+      pactContents, _) >> { args -> args[2].apply('OK', 'OK') }
+    1 * halClient.uploadJson('/pacticipants/Foo%20Consumer%2FA/versions/10.0.0/tags/A%2FB', '', _, false)
   }
 
   @Unroll
