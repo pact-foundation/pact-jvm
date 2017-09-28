@@ -7,7 +7,9 @@ dependencies {
   compile 'com.google.guava:guava:23.0'
 }
 
-compileGroovy {
-  classpath = classpath.plus(files(compileKotlin.destinationDir))
-  dependsOn compileKotlin
+if (project.tasks.findByName('compileKotlin')) {
+  compileGroovy {
+    classpath = classpath.plus(files(compileKotlin.destinationDir))
+    dependsOn compileKotlin
+  }
 }
