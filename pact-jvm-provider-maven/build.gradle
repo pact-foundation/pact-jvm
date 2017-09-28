@@ -56,7 +56,9 @@ project.jar.dependsOn pluginDescriptor
 
 compileGroovy.dependsOn = []
 
-compileKotlin {
+if (project.tasks.findByName('compileKotlin')) {
+  compileKotlin {
     classpath = classpath.plus(files(compileGroovy.destinationDir))
     dependsOn compileGroovy
+  }
 }
