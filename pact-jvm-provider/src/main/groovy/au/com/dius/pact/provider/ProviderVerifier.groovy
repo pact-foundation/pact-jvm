@@ -48,7 +48,7 @@ class ProviderVerifier {
   Supplier<URL[]> projectClasspath = { }
   List<VerifierReporter> reporters = [ new AnsiConsoleReporter() ]
   Function<Method, Object> providerMethodInstance = { Method m -> m.declaringClass.newInstance() }
-  Supplier<String> providerVersion = { null }
+  Supplier<String> providerVersion = { System.getProperty('pact.provider.version') }
 
   Map verifyProvider(ProviderInfo provider) {
     Map failures = [:]
