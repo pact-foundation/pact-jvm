@@ -10,6 +10,8 @@ import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import org.apache.commons.lang3.StringUtils
 
+import java.util.function.BiFunction
+
 /**
  * Client for the pact broker service
  */
@@ -96,10 +98,11 @@ class PactBrokerClient extends PactBrokerClientBase {
     }
   }
 
-  static def uploadTags(IHalClient halClient, String consumerName, String version, List<String> tags) {
+  static uploadTags(IHalClient halClient, String consumerName, String version, List<String> tags) {
     tags.each {
       def tag = UrlEscapers.urlPathSegmentEscaper().escape(it)
-      halClient.uploadJson("/pacticipants/$consumerName/versions/$version/tags/$tag", '')
+      halClient.uploadJson("/pacticipants/$consumerName/versions/$version/tags/$tag", '',
+        { p1, p2 -> null } as BiFunction<String, String, Object>, false)
     }
   }
 

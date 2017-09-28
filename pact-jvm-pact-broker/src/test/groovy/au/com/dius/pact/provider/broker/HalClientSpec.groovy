@@ -3,15 +3,13 @@ package au.com.dius.pact.provider.broker
 import au.com.dius.pact.pactbroker.InvalidHalResponse
 import au.com.dius.pact.pactbroker.NotFoundHalResponse
 import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
-import groovyx.net.http.AuthConfig
-import groovyx.net.http.Method
-import groovyx.net.http.RESTClient
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.ProtocolVersion
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
+import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.message.BasicHeader
 import org.apache.http.message.BasicStatusLine
@@ -24,11 +22,9 @@ import java.util.function.Consumer
 class HalClientSpec extends Specification {
 
   private HalClient client
-  private RESTClient mockHttp
   private CloseableHttpClient mockClient
 
   def setup() {
-    mockHttp = Mock(RESTClient)
     mockClient = Mock(CloseableHttpClient)
     client = GroovySpy(HalClient, global: true, constructorArgs: ['http://localhost:1234/'])
   }
@@ -53,15 +49,12 @@ class HalClientSpec extends Specification {
   def 'matches authentication scheme case insensitive'() {
     given:
     client.options = [authentication: ['BASIC', '1', '2']]
-    client.newHttpClient() >> mockHttp
-    def authConfig = Mock(AuthConfig)
-    mockHttp.getAuth() >> authConfig
 
     when:
-    client.setupRestClient()
+    client.setupHttpClient()
 
     then:
-    1 * authConfig.basic('1', '2')
+    client.httpClient.credentialsProvider instanceof BasicCredentialsProvider
   }
 
   def 'throws an exception if the response is 404 Not Found'() {
@@ -178,88 +171,66 @@ class HalClientSpec extends Specification {
 
   def 'uploading a JSON doc returns status line if successful'() {
     given:
-    def clientOptions = [
-      uri: [:],
-      response: [:]
-    ]
-    def mockHttp = Mock(RESTClient) {
-      request(Method.PUT, _) >> { args ->
-        args[1].delegate = clientOptions
-        args[1].resolveStrategy = Closure.DELEGATE_ONLY
-        args[1].call()
-      }
+    client.httpClient = mockClient
+    def mockResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
     }
-    client.newHttpClient() >> mockHttp
-    client.consumeEntity() >> null
 
     when:
-    def statusLine = new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 200, 'OK')
     def result = []
     def closure = { r, s -> result << r; result << s }
-    client.uploadJson('', '', closure)
-    clientOptions.response.success.call([getStatusLine: { statusLine }, getEntity: { } ] as HttpResponse)
+    client.uploadJson('/', '', closure)
 
     then:
-    result == ['OK', 'HTTP/1.1 200 OK']
+    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockResponse
+    result == ['OK', 'http/1.1 200 Ok']
   }
 
   def 'uploading a JSON doc returns the error if unsuccessful'() {
     given:
-    def clientOptions = [
-      uri: [:],
-      response: [:]
-    ]
-    def mockHttp = Mock(RESTClient) {
-      request(Method.PUT, _) >> { args ->
-        args[1].delegate = clientOptions
-        args[1].resolveStrategy = Closure.DELEGATE_ONLY
-        args[1].call()
-      }
+    client.httpClient = mockClient
+    def mockResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 400, 'Not OK')
+      getEntity() >> new StringEntity('{"errors":["1","2","3"]}', ContentType.create('application/json'))
     }
-    client.newHttpClient() >> mockHttp
 
     when:
-    def statusLine = new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 400, 'Not OK')
     def result = []
     def closure = { r, s -> result << r; result << s }
-    client.uploadJson('', '', closure)
-    clientOptions.response.failure.call([getStatusLine: { statusLine } ] as HttpResponse, [errors: ['1', '2', '3']])
+    client.uploadJson('/', '', closure)
 
     then:
     result == ['FAILED', '400 Not OK - 1, 2, 3']
+    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockResponse
   }
 
   def 'uploading a JSON doc returns the error if unsuccessful due to 409'() {
     given:
-    def clientOptions = [
-      uri: [:],
-      response: [:]
-    ]
-    def mockHttp = Mock(RESTClient) {
-      request(Method.PUT, _) >> { args ->
-        args[1].delegate = clientOptions
-        args[1].resolveStrategy = Closure.DELEGATE_ONLY
-        args[1].call()
-      }
+    client.httpClient = mockClient
+    def mockResponse = Mock(CloseableHttpResponse) {
+      getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 409, 'Not OK')
+      getEntity() >> new StringEntity('error line')
     }
-    client.newHttpClient() >> mockHttp
 
     when:
-    def statusLine = new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 409, 'Not OK')
     def result = []
     def closure = { r, s -> result << r; result << s }
-    client.uploadJson('', '', closure)
-    clientOptions.response.'409'.call([getStatusLine: { statusLine } ] as HttpResponse, new StringReader('error line'))
+    client.uploadJson('/', '', closure)
 
     then:
+    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockResponse
     result == ['FAILED', '409 Not OK - error line']
   }
 
   @Unroll
   def 'failure handling - #description'() {
     given:
+    client.httpClient = mockClient
     def statusLine = new BasicStatusLine(new ProtocolVersion('HTTP', 1, 1), 400, 'Not OK')
-    def resp = [getStatusLine: { statusLine } ] as HttpResponse
+    def resp = [
+      getStatusLine: { statusLine },
+      getEntity: { [getContentType: { new BasicHeader('Content-Type', 'application/json') } ] as HttpEntity }
+    ] as HttpResponse
 
     expect:
     client.handleFailure(resp, body) { arg1, arg2 -> [arg1, arg2] } == [firstArg, secondArg]
@@ -267,10 +238,9 @@ class HalClientSpec extends Specification {
     where:
 
     description                                | body                               | firstArg | secondArg
-    'body is a reader'                         | new StringReader('line 1\nline 2') | 'FAILED' | '400 Not OK - line 1'
     'body is null'                             | null                               | 'FAILED' | '400 Not OK - Unknown error'
-    'body is a parsed json doc with no errors' | [:]                                | 'FAILED' | '400 Not OK - Unknown error'
-    'body is a parsed json doc with errors'    | [errors: ['one', 'two', 'three']]  | 'FAILED' | '400 Not OK - one, two, three'
+    'body is a parsed json doc with no errors' | '{}'                               | 'FAILED' | '400 Not OK - Unknown error'
+    'body is a parsed json doc with errors'    | '{"errors":["one","two","three"]}' | 'FAILED' | '400 Not OK - one, two, three'
 
   }
 

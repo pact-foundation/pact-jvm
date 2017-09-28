@@ -40,7 +40,7 @@ class PactBrokerClientPactSpec extends Specification {
     pactBroker {
       uponReceiving('a pact publish request')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
+        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0',
         body: pactContents
       )
       willRespondWith(status: 200)
@@ -62,7 +62,7 @@ class PactBrokerClientPactSpec extends Specification {
       given('No pact has been published between the Provider and Foo Consumer')
       uponReceiving('a pact publish request with invalid version')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/XXXX',
+        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/XXXX',
         body: pactContents
       )
       willRespondWith(status: 400, headers: ['Content-Type': 'application/json;charset=utf-8'],
@@ -81,8 +81,8 @@ class PactBrokerClientPactSpec extends Specification {
     when:
     def result = pactBroker.runTest {
       assert pactBrokerClient.uploadPactFile(pactFile, 'XXXX') == 'FAILED! 400 Bad Request - ' +
-        'consumer_version_number: [Consumer version number \'XXX\' cannot be parsed to a version number. ' +
-        'The expected format (unless this configuration has been overridden) is a semantic version. eg. 1.3.0 or 2.0.4.rc1]'
+        'consumer_version_number: Consumer version number \'XXX\' cannot be parsed to a version number. ' +
+        'The expected format (unless this configuration has been overridden) is a semantic version. eg. 1.3.0 or 2.0.4.rc1'
     }
 
     then:
@@ -96,7 +96,7 @@ class PactBrokerClientPactSpec extends Specification {
       given('No pact has been published between the Provider and Foo Consumer and there is a similar consumer')
       uponReceiving('a pact publish request')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
+        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0',
         body: pactContents
       )
       willRespondWith(status: 409, headers: ['Content-Type': 'text/plain'],
@@ -113,7 +113,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest {
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'FAILED! 409 Conflict - '
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').startsWith('FAILED! 409 Conflict - ')
     }
 
     then:
@@ -127,7 +127,7 @@ class PactBrokerClientPactSpec extends Specification {
       given('Non-JSON response')
       uponReceiving('a pact publish request')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
+        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0',
         body: pactContents
       )
       willRespondWith(status: 400, headers: ['Content-Type': 'text/plain'],
