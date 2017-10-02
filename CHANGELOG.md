@@ -1,5 +1,20 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.7 - Spring Runner, plus fixes to publishing and tags with slashes
+
+* 412533d - Added a spring message pact runner (Ronald Holshausen, Tue Oct 3 10:23:07 2017 +1100)
+* 2623201 - Update to the latest kotlin version (Ronald Holshausen, Tue Oct 3 10:12:02 2017 +1100)
+* 18195d1 - Updated the readmes with details on the system property to disable publishing of verification results #540 (Ronald Holshausen, Mon Oct 2 16:24:24 2017 +1100)
+* 4ab1e9f - Add a system property to disable publishing of verification results #540 (Ronald Holshausen, Mon Oct 2 16:19:32 2017 +1100)
+* 702d4ca - Add note in the readme about the spring runner (Ronald Holshausen, Mon Oct 2 14:32:17 2017 +1100)
+* 8afe0ed - Allow the decimal type matcher to include zero (Ronald Holshausen, Mon Oct 2 13:58:43 2017 +1100)
+* 39181d9 - Added a Spring runner that correctly setups the spring context (Ronald Holshausen, Mon Oct 2 13:36:11 2017 +1100)
+* d91a9d3 - Default the provider version to the system property (Ronald Holshausen, Thu Sep 28 15:45:12 2017 +1000)
+* ae931dd - when publishing pacts, encode the tag names in case they have slashes #356 (Ronald Holshausen, Thu Sep 28 10:13:00 2017 +1000)
+* ec92b0e - Encode the parameters when uploading a pact, incase the tag has a slash #536 (Ronald Holshausen, Wed Sep 27 14:11:35 2017 +1000)
+* 05f8738 - Correct the release script (Ronald Holshausen, Wed Sep 27 11:00:09 2017 +1000)
+* f5c3ad8 - bump version to 3.5.7 (Ronald Holshausen, Wed Sep 27 10:59:38 2017 +1000)
+
 # 3.5.6-jre7.0 - Bugfix Release
 
 * 5deb784 - can not depend on kotlin compile path when building on jdk 7 (Ronald Holshausen, Thu Sep 28 14:22:30 2017 +1000)
