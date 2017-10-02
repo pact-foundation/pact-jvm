@@ -159,7 +159,7 @@ fun <Mismatch> matchNumber(numberType: NumberTypeMatcher.NumberType, path: List<
     }
     NumberTypeMatcher.NumberType.DECIMAL -> {
       logger.debug { "comparing type of ${valueOf(actual)} to a decimal at $path" }
-      if (actual !is Float && actual !is Double && actual !is BigDecimal) {
+      if (actual !is Float && actual !is Double && actual !is BigDecimal && actual != 0) {
         return listOf(mismatchFactory.create(expected, actual,
           "Expected ${valueOf(actual)} to be a decimal number",
           path))
