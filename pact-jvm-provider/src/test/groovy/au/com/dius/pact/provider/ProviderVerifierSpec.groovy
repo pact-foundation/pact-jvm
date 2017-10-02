@@ -1,11 +1,15 @@
 package au.com.dius.pact.provider
 
 import au.com.dius.pact.model.BrokerUrlSource
+import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
+import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.model.RequestResponseInteraction
+import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.UnknownPactSource
 import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.Message
@@ -453,5 +457,59 @@ class ProviderVerifierSpec extends Specification {
 
     then:
     0 * client.publishVerificationResults(_, true, '0', null)
+  }
+
+  @SuppressWarnings('UnnecessaryGetter')
+  def 'Ignore the verification results if publishing is disabled'() {
+    given:
+    def client = Mock(PactBrokerClient)
+    GroovyMock(PactReader, global: true)
+    GroovyMock(StateChange, global: true)
+
+    def providerInfo = new ProviderInfo(verificationType: PactVerification.ANNOTATED_METHOD)
+    def consumerInfo = new ConsumerInfo()
+
+    def interaction = new RequestResponseInteraction(description: 'Test Interaction')
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [interaction])
+    pact.source = new BrokerUrlSource('url', 'url', [publish: [:]])
+
+    verifier.projectHasProperty = {
+      it == ProviderVerifier.PACT_VERIFIER_PUBLISHRESUTS
+    }
+    verifier.projectGetProperty = {
+      switch (it) {
+        case ProviderVerifier.PACT_VERIFIER_PUBLISHRESUTS:
+          return 'false'
+      }
+    }
+
+    when:
+    verifier.runVerificationForConsumer([:], providerInfo, consumerInfo, client)
+
+    then:
+    1 * PactReader.loadPact(_) >> pact
+    1 * StateChange.executeStateChange(_, _, _, _, _, _) >> new StateChange.StateChangeResult(true, '')
+    1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _) >> true
+    0 * client.publishVerificationResults(_, true, _, _)
+  }
+
+  @Unroll
+  def 'test for pact.verifier.publishResults - #description'() {
+    given:
+    verifier.projectHasProperty = { value != null }
+    verifier.projectGetProperty = { value }
+
+    expect:
+    verifier.publishingResultsDisabled() == result
+
+    where:
+
+    description                  | value       | result
+    'Property is missing'        | null        | false
+    'Property is true'           | 'true'      | false
+    'Property is TRUE'           | 'TRUE'      | false
+    'Property is false'          | 'false'     | true
+    'Property is False'          | 'False'     | true
+    'Property is something else' | 'not false' | false
   }
 }

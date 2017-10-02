@@ -57,7 +57,7 @@ class MvcProviderVerifier extends ProviderVerifier {
             failures[interactionMessage] = e
             reporters.each {
                 it.requestFailed(provider, interaction, interactionMessage,
-                        e, callProjectHasProperty(PACT_SHOW_STACKTRACE))
+                        e, projectHasProperty.apply(PACT_SHOW_STACKTRACE))
             }
         }
     }

@@ -78,7 +78,7 @@ class StateChange {
     } catch (e) {
       verifier.reporters.each {
         it.stateChangeRequestFailedWithException(state.name, provider, consumer, isSetup, e,
-          verifier.callProjectHasProperty(verifier.PACT_SHOW_STACKTRACE))
+          verifier.projectHasProperty.apply(verifier.PACT_SHOW_STACKTRACE))
       }
       return e
     }

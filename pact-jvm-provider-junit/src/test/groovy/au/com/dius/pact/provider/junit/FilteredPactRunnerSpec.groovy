@@ -150,6 +150,8 @@ class FilteredPactRunnerSpec extends Specification {
     then:
     result.size() == 1
     result*.interactions*.description.flatten() == ['Req 1', 'Req 2']
+    result[0].isNotFiltered()
+    !result[0].isFiltered()
   }
 
   def 'filters the interactions correctly when given multiple provider states'() {
@@ -162,6 +164,10 @@ class FilteredPactRunnerSpec extends Specification {
     then:
     result.size() == 2
     result*.interactions*.description.flatten() == ['Req 1', 'Req 2', 'Req 3']
+    result[0].isNotFiltered()
+    !result[0].isFiltered()
+    !result[1].isNotFiltered()
+    result[1].isFiltered()
   }
 
   def 'filters the interactions correctly when given a regex'() {
@@ -174,6 +180,10 @@ class FilteredPactRunnerSpec extends Specification {
     then:
     result.size() == 2
     result*.interactions*.description.flatten() == ['Req 1', 'Req 2', 'Req 3']
+    result[0].isNotFiltered()
+    !result[0].isFiltered()
+    !result[1].isNotFiltered()
+    result[1].isFiltered()
   }
 
   @SuppressWarnings('UnusedObject')
