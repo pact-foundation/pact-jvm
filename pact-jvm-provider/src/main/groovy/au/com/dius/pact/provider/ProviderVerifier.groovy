@@ -32,7 +32,7 @@ import static au.com.dius.pact.provider.ProviderVerifierKt.reportVerificationRes
  * Verifies the providers against the defined consumers in the context of a build plugin
  */
 @Slf4j
-class ProviderVerifier {
+class ProviderVerifier extends ProviderVerifierBase {
 
   static final protected String PACT_FILTER_CONSUMERS = 'pact.filter.consumers'
   static final protected String PACT_FILTER_DESCRIPTION = 'pact.filter.description'
@@ -40,15 +40,13 @@ class ProviderVerifier {
   static final protected String PACT_SHOW_STACKTRACE = 'pact.showStacktrace'
   static final protected String PACT_SHOW_FULLDIFF = 'pact.showFullDiff'
 
-  Function<String, Boolean> projectHasProperty = { null }
-  Function<String, String> projectGetProperty = { null }
   def pactLoadFailureMessage
   Function<Object, Boolean> isBuildSpecificTask = { null }
   BiConsumer<Object, ProviderState> executeBuildSpecificTask = { } as BiConsumer<Object, ProviderState>
   Supplier<URL[]> projectClasspath = { }
   List<VerifierReporter> reporters = [ new AnsiConsoleReporter() ]
   Function<Method, Object> providerMethodInstance = { Method m -> m.declaringClass.newInstance() }
-  Supplier<String> providerVersion = { null }
+  Supplier<String> providerVersion = { System.getProperty('pact.provider.version') }
 
   Map verifyProvider(ProviderInfo provider) {
     Map failures = [:]
@@ -67,7 +65,7 @@ class ProviderVerifier {
   void initialiseReporters(ProviderInfo provider) {
     reporters.each {
       if (it.hasProperty('displayFullDiff')) {
-        it.displayFullDiff = callProjectHasProperty(PACT_SHOW_FULLDIFF)
+        it.displayFullDiff = projectHasProperty.apply(PACT_SHOW_FULLDIFF)
       }
       it.initialise(provider)
     }
@@ -85,10 +83,13 @@ class ProviderVerifier {
       boolean result = pact.interactions
         .collect(this.&verifyInteraction.curry(provider, consumer, failures))
         .inject(true) { acc, val -> acc && val }
-      if (pact.isNotFiltered()) {
-        reportVerificationResults(pact, result, providerVersion?.get() ?: '0.0.0', client)
-      } else {
+      if (pact.isFiltered()) {
         log.warn('Skipping publishing of verification results as the interactions have been filtered')
+      } else if (publishingResultsDisabled()) {
+        log.warn('Skipping publishing of verification results as it has been disabled ' +
+          "(${PACT_VERIFIER_PUBLISHRESUTS} is false)")
+      } else {
+        reportVerificationResults(pact, result, providerVersion?.get() ?: '0.0.0', client)
       }
     }
   }
@@ -138,16 +139,16 @@ class ProviderVerifier {
   }
 
   boolean filterConsumers(def consumer) {
-    !callProjectHasProperty(PACT_FILTER_CONSUMERS) ||
-      consumer.name in callProjectGetProperty(PACT_FILTER_CONSUMERS).split(',')*.trim()
+    !projectHasProperty.apply(PACT_FILTER_CONSUMERS) ||
+      consumer.name in projectGetProperty.apply(PACT_FILTER_CONSUMERS).split(',')*.trim()
   }
 
   boolean filterInteractions(def interaction) {
-    if (callProjectHasProperty(PACT_FILTER_DESCRIPTION) && callProjectHasProperty(PACT_FILTER_PROVIDERSTATE)) {
+    if (projectHasProperty.apply(PACT_FILTER_DESCRIPTION) && projectHasProperty.apply(PACT_FILTER_PROVIDERSTATE)) {
       matchDescription(interaction) && matchState(interaction)
-    } else if (callProjectHasProperty(PACT_FILTER_DESCRIPTION)) {
+    } else if (projectHasProperty.apply(PACT_FILTER_DESCRIPTION)) {
       matchDescription(interaction)
-    } else if (callProjectHasProperty(PACT_FILTER_PROVIDERSTATE)) {
+    } else if (projectHasProperty.apply(PACT_FILTER_PROVIDERSTATE)) {
       matchState(interaction)
     } else {
       true
@@ -156,14 +157,14 @@ class ProviderVerifier {
 
   private boolean matchState(interaction) {
     if (interaction.providerStates) {
-      interaction.providerStates.any { it.name ==~ callProjectGetProperty(PACT_FILTER_PROVIDERSTATE) }
+      interaction.providerStates.any { it.name ==~ projectGetProperty.apply(PACT_FILTER_PROVIDERSTATE) }
     } else {
-      callProjectGetProperty(PACT_FILTER_PROVIDERSTATE).empty
+      projectGetProperty.apply(PACT_FILTER_PROVIDERSTATE).empty
     }
   }
 
   private boolean matchDescription(interaction) {
-    interaction.description ==~ callProjectGetProperty(PACT_FILTER_DESCRIPTION)
+    interaction.description ==~ projectGetProperty.apply(PACT_FILTER_DESCRIPTION)
   }
 
   boolean verifyInteraction(ProviderInfo provider, ConsumerInfo consumer, Map failures, def interaction) {
@@ -214,7 +215,7 @@ class ProviderVerifier {
     } catch (e) {
       failures[interactionMessage] = e
       reporters.each {
-        it.requestFailed(provider, interaction, interactionMessage, e, callProjectHasProperty(PACT_SHOW_STACKTRACE))
+        it.requestFailed(provider, interaction, interactionMessage, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE))
       }
       false
     }
@@ -325,17 +326,9 @@ class ProviderVerifier {
       }
     } catch (e) {
       failures[interactionMessage] = e
-      reporters.each { it.verificationFailed(interaction, e, callProjectHasProperty(PACT_SHOW_STACKTRACE)) }
+      reporters.each { it.verificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)) }
       false
     }
-  }
-
-  boolean callProjectHasProperty(String property) {
-    projectHasProperty.apply(property)
-  }
-
-  String callProjectGetProperty(String property) {
-    projectGetProperty.apply(property)
   }
 
   boolean verifyMessagePact(Set methods, Message message, String interactionMessage, Map failures) {

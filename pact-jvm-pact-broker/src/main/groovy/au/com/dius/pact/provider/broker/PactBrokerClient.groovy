@@ -5,9 +5,12 @@ import au.com.dius.pact.pactbroker.NotFoundHalResponse
 import au.com.dius.pact.pactbroker.PactBrokerClientBase
 import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import au.com.dius.pact.pactbroker.PactResponse
+import com.google.common.net.UrlEscapers
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import org.apache.commons.lang3.StringUtils
+
+import java.util.function.BiFunction
 
 /**
  * Client for the pact broker service
@@ -80,11 +83,13 @@ class PactBrokerClient extends PactBrokerClientBase {
     def pactText = pactFile.text
     def pact = new JsonSlurper().parseText(pactText)
     IHalClient halClient = newHalClient()
-    def uploadPath = "/pacts/provider/${pact.provider.name}/consumer/${pact.consumer.name}/version/$version"
+    def providerName = UrlEscapers.urlPathSegmentEscaper().escape(pact.provider.name)
+    def consumerName = UrlEscapers.urlPathSegmentEscaper().escape(pact.consumer.name)
+    def uploadPath = "/pacts/provider/$providerName/consumer/$consumerName/version/$version"
     halClient.uploadJson(uploadPath, pactText) { result, status ->
       if (result == 'OK') {
         if (tags) {
-          uploadTags(halClient, pact.consumer.name, version, tags)
+          uploadTags(halClient, consumerName, version, tags)
         }
         status
       } else {
@@ -93,9 +98,11 @@ class PactBrokerClient extends PactBrokerClientBase {
     }
   }
 
-  def uploadTags(HalClient halClient, String provider, String version, List<String> tags) {
+  static uploadTags(IHalClient halClient, String consumerName, String version, List<String> tags) {
     tags.each {
-      halClient.uploadJson("/pacticipants/$provider/versions/$version/tags/$it", '')
+      def tag = UrlEscapers.urlPathSegmentEscaper().escape(it)
+      halClient.uploadJson("/pacticipants/$consumerName/versions/$version/tags/$tag", '',
+        { p1, p2 -> null } as BiFunction<String, String, Object>, false)
     }
   }
 

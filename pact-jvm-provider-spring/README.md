@@ -10,7 +10,7 @@ Supports:
 
 - Easy way to change assertion strategy
 
-- Spring Test MockMVC Controllers and ControllerAdvice using MockMvc standalonesetup.
+- Spring Test MockMVC Controllers and ControllerAdvice using MockMvc standalone setup.
 
 - MockMvc debugger output
 
@@ -70,4 +70,45 @@ all methods annotated by `@State` with appropriate the state listed will be invo
                 .then(i -> { throw new NotCoolException(i.getArgumentAt(0, UUID.class).toString()); });
         }
     }
+```
+
+## Using a Spring runner (version 3.5.7+)
+
+You can use `SpringRestPactRunner` instead of the default Pact runner to use the Spring test annotations. This will
+allow you to inject or mock spring beans.
+
+For example:
+
+```java
+@RunWith(SpringRestPactRunner.class)
+@Provider("pricing")
+@PactBroker(protocol = "https", host = "${pactBrokerHost}", port = "443",
+authentication = @PactBrokerAuth(username = "${pactBrokerUser}", password = "${pactBrokerPassword}"))
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+public class PricingServiceProviderPactTest {
+
+  @MockBean
+  private ProductClient productClient;  // This will replace the bean with a mock in the application context
+
+  @TestTarget
+  @SuppressWarnings(value = "VisibilityModifier")
+  public final Target target = new HttpTarget(8091);
+
+  @State("Product X010000021 exists")
+  public void setupProductX010000021() throws IOException {
+    reset(productClient);
+    ProductBuilder product = new ProductBuilder()
+      .withProductCode("X010000021");
+    when(productClient.fetch((Set<String>) argThat(contains("X010000021")), any())).thenReturn(product);
+  }
+
+  @State("the product code X00001 can be priced")
+  public void theProductCodeX00001CanBePriced() throws IOException {
+    reset(productClient);
+    ProductBuilder product = new ProductBuilder()
+      .withProductCode("X00001");
+    when(productClient.find((Set<String>) argThat(contains("X00001")), any())).thenReturn(product);
+  }
+
+}
 ```
