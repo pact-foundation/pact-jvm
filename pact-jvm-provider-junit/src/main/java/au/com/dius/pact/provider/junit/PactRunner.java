@@ -88,12 +88,26 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
         }
       }
 
+      setupInteractionRunners(testClass, pacts, pactLoader);
+    }
+
+  protected void setupInteractionRunners(TestClass testClass, List<Pact> pacts, PactLoader pactLoader) throws InitializationError {
+    if (pacts != null) {
+      for (final Pact pact : pacts) {
+        this.child.add(newInteractionRunner(testClass, pact, pactLoader.getPactSource()));
+      }
+    }
+  }
       for (final Pact pact : pacts) {
         this.child.add(new InteractionRunner(testClass, pact, pactLoader.getPactSource()));
       }
     }
 
-    protected List<Pact> filterPacts(List<Pact> pacts){
+  protected InteractionRunner newInteractionRunner(TestClass testClass, Pact pact, au.com.dius.pact.model.PactSource pactSource) throws InitializationError {
+    return new InteractionRunner(testClass, pact, pactSource);
+  }
+
+  protected List<Pact> filterPacts(List<Pact> pacts){
         return pacts;
     }
 
