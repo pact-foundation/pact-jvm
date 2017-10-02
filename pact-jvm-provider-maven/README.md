@@ -228,6 +228,7 @@ The following plugin properties can be specified with `-Dproperty=value` on the 
 |pact.filter.consumers|Comma seperated list of consumer names to verify|
 |pact.filter.description|Only verify interactions whose description match the provided regular expression|
 |pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
+|pact.verifier.publishResults|Publishing of verification results will be skipped if this property is set to false|
 
 Example in the configuration section:
 
