@@ -5,6 +5,7 @@ import au.com.dius.pact.model.Pact
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import mu.KotlinLogging
+import java.util.function.Function
 
 private val logger = KotlinLogging.logger {}
 
@@ -21,4 +22,23 @@ fun reportVerificationResults(pact: Pact, result: Boolean, version: String, clie
       }
     }
   }
+}
+
+open class ProviderVerifierBase {
+
+  var projectHasProperty = Function<String, Boolean> { false }
+  var projectGetProperty = Function<String, String?> { null }
+
+  /**
+   * This will return true if the pact.verifier.publishResults property is present and has the value of "false"
+   */
+  open fun publishingResultsDisabled(): Boolean {
+    return projectHasProperty.apply(PACT_VERIFIER_PUBLISHRESUTS) &&
+      projectGetProperty.apply(PACT_VERIFIER_PUBLISHRESUTS)?.toLowerCase() == "false"
+  }
+
+  companion object {
+    const val PACT_VERIFIER_PUBLISHRESUTS = "pact.verifier.publishResults"
+  }
+
 }
