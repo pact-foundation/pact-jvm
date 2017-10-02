@@ -47,7 +47,7 @@ import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_VALIDATO
  * <p>
  * Developed with {@link org.junit.runners.BlockJUnit4ClassRunner} in mind
  */
-class InteractionRunner extends Runner {
+public class InteractionRunner extends Runner {
   private static final Logger LOGGER = LoggerFactory.getLogger(InteractionRunner.class);
 
   private final TestClass testClass;
@@ -194,40 +194,40 @@ class InteractionRunner extends Runner {
     }
 
     protected Statement interactionBlock(final Interaction interaction, final PactSource source) {
-        //1. prepare object
-        //2. get Target
-        //3. run Rule`s
-        //4. run Before`s
-        //5. run OnStateChange`s
-        //6. run test
-        //7. run After`s
-        final Object test;
-        try {
-            test = new ReflectiveCallable() {
+      //1. prepare object
+      //2. get Target
+      //3. run Rule`s
+      //4. run Before`s
+      //5. run OnStateChange`s
+      //6. run test
+      //7. run After`s
+      Object testInstance;
+      try {
+            testInstance = new ReflectiveCallable() {
                 @Override
                 protected Object runReflectiveCall() throws Throwable {
                     return createTest();
                 }
             }.run();
-        } catch (Throwable e) {
-            return new Fail(e);
-        }
-        final Target target = testClass.getAnnotatedFieldValues(test, TestTarget.class, Target.class).get(0);
-        if (target instanceof TestClassAwareTarget) {
-          ((TestClassAwareTarget) target).setTestClass(testClass, test);
-        }
+      } catch (Throwable e) {
+          return new Fail(e);
+      }
+      final Target target = testClass.getAnnotatedFieldValues(testInstance, TestTarget.class, Target.class).get(0);
+      if (target instanceof TestClassAwareTarget) {
+        ((TestClassAwareTarget) target).setTestClass(testClass, testInstance);
+      }
 
-        Statement statement = new Statement() {
-            @Override
-            public void evaluate() throws Throwable {
-                target.testInteraction(pact.getConsumer().getName(), interaction, source);
-            }
-        };
-        statement = withStateChanges(interaction, test, statement);
-        statement = withBefores(interaction, test, statement);
-        statement = withRules(interaction, test, statement);
-        statement = withAfters(interaction, test, statement);
-        return statement;
+      Statement statement = new Statement() {
+          @Override
+          public void evaluate() throws Throwable {
+              target.testInteraction(pact.getConsumer().getName(), interaction, source);
+          }
+      };
+      statement = withStateChanges(interaction, testInstance, statement);
+      statement = withBefores(interaction, testInstance, statement);
+      statement = withRules(interaction, testInstance, statement);
+      statement = withAfters(interaction, testInstance, statement);
+      return statement;
     }
 
     protected Statement withStateChanges(final Interaction interaction, final Object target, final Statement statement) {
