@@ -1,5 +1,22 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.7-jre7.0 - Bugfix Release
+
+* 443925c - fixes after merge in from master (Ronald Holshausen, Tue Oct 3 15:45:11 2017 +1100)
+* 8135c08 - update changelog for release 3.5.7 (Ronald Holshausen, Tue Oct 3 11:39:02 2017 +1100)
+* 61f0bd3 - update changelog for release 3.5.7 (Ronald Holshausen, Tue Oct 3 10:35:11 2017 +1100)
+* b3f3989 - Added a spring message pact runner (Ronald Holshausen, Tue Oct 3 10:23:07 2017 +1100)
+* 29a6a12 - Update to the latest kotlin version (Ronald Holshausen, Tue Oct 3 10:12:02 2017 +1100)
+* dd238f8 - Updated the readmes with details on the system property to disable publishing of verification results #540 (Ronald Holshausen, Mon Oct 2 16:24:24 2017 +1100)
+* 3faf710 - Add a system property to disable publishing of verification results #540 (Ronald Holshausen, Mon Oct 2 16:19:32 2017 +1100)
+* dd4a91b - Add note in the readme about the spring runner (Ronald Holshausen, Mon Oct 2 14:32:17 2017 +1100)
+* 7761d26 - Allow the decimal type matcher to include zero (Ronald Holshausen, Mon Oct 2 13:58:43 2017 +1100)
+* e4776b2 - Added a Spring runner that correctly setups the spring context (Ronald Holshausen, Mon Oct 2 13:36:11 2017 +1100)
+* 93a858a - Default the provider version to the system property (Ronald Holshausen, Thu Sep 28 15:45:12 2017 +1000)
+* f837b17 - when publishing pacts, encode the tag names in case they have slashes #356 (Ronald Holshausen, Thu Sep 28 10:13:00 2017 +1000)
+* b5c064e - Encode the parameters when uploading a pact, incase the tag has a slash #536 (Ronald Holshausen, Wed Sep 27 14:11:35 2017 +1000)
+* be9ee18 - bump version to 3.5.7-jre7.0 (Ronald Holshausen, Thu Sep 28 15:24:09 2017 +1000)
+
 # 3.5.7 - Spring Runner, plus fixes to publishing and tags with slashes
 
 * f725d40 - Revert "bump version to 3.5.8" (Ronald Holshausen, Tue Oct 3 11:20:52 2017 +1100)
