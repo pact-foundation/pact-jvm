@@ -98,10 +98,6 @@ public class PactRunner extends ParentRunner<InteractionRunner> {
       }
     }
   }
-      for (final Pact pact : pacts) {
-        this.child.add(new InteractionRunner(testClass, pact, pactLoader.getPactSource()));
-      }
-    }
 
   protected InteractionRunner newInteractionRunner(TestClass testClass, Pact pact, au.com.dius.pact.model.PactSource pactSource) throws InitializationError {
     return new InteractionRunner(testClass, pact, pactSource);

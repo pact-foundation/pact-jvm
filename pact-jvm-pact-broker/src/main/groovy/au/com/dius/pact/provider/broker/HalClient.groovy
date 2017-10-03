@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider.broker
 
-import au.com.dius.pact.pactbroker.BiFunction
 import au.com.dius.pact.pactbroker.HalClientBase
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject

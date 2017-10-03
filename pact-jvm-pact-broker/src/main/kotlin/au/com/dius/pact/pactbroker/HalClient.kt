@@ -29,18 +29,6 @@ import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
 import java.net.URI
 
-interface BiFunction<T, U, R> {
-
-  /**
-   * Applies this function to the given arguments.
-   *
-   * @param t the first function argument
-   * @param u the second function argument
-   * @return the function result
-   */
-  fun apply(t: T, u: U): R
-}
-
 /**
  * Interface to a HAL Client
  */
@@ -84,7 +72,7 @@ interface IHalClient {
    * @param closure Closure that will be invoked with details about the response. The result from the closure will be
    * returned.
    */
-  fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>): Any?
+  fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>?): Any?
 
   /**
    * Upload the JSON document to the provided path, using a PUT request
@@ -94,7 +82,7 @@ interface IHalClient {
    * returned.
    * @param encodePath If the path must be encoded beforehand.
    */
-  fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>, encodePath: Boolean): Any?
+  fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>?, encodePath: Boolean): Any?
 
   /**
    * Upload the JSON document to the provided URL, using a POST request
@@ -336,13 +324,12 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
     pathInfo = pathInfo ?: fetch(ROOT)
   }
 
-  override fun uploadJson(path: String, bodyJson: String) = uploadJson(path, bodyJson,
-    BiFunction { _: String, _: String -> null }, true)
+  override fun uploadJson(path: String, bodyJson: String) = uploadJson(path, bodyJson, null, true)
 
-  override fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>) =
+  override fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>?) =
     uploadJson(path, bodyJson, closure, true)
 
-  override fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>,
+  override fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>?,
                           encodePath: Boolean): Any? {
     val client = setupHttpClient()
     val httpPut = HttpPut(buildUrl(path, encodePath))
@@ -353,16 +340,20 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
       return when {
         it.statusLine.statusCode < 300 -> {
           EntityUtils.consume(it.entity)
-          closure.apply("OK", it.statusLine.toString())
+          closure?.apply("OK", it.statusLine.toString())
         }
         it.statusLine.statusCode == 409 -> {
           val body = it.entity.content.bufferedReader().readText()
-          closure.apply("FAILED",
+          closure?.apply("FAILED",
             "${it.statusLine.statusCode} ${it.statusLine.reasonPhrase} - $body")
         }
         else -> {
-          val body = it.entity.content.bufferedReader().readText()
-          handleFailure(it, body, closure)
+          if (closure != null) {
+            val body = it.entity.content.bufferedReader().readText()
+            handleFailure(it, body, closure)
+          } else {
+            null
+          }
         }
       }
     }

@@ -5,7 +5,6 @@ import au.com.dius.pact.model.Pact
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import mu.KotlinLogging
-import java.util.function.Function
 
 private val logger = KotlinLogging.logger {}
 
