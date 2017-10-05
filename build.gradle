@@ -256,6 +256,8 @@ subprojects {
   }
 
   check.dependsOn << 'detektCheck'
+
+  task allDeps(type: DependencyReportTask) {}
 }
 
 tasks.addRule("Pattern: <Task>_<ScalaVersion>") { String taskName ->

@@ -1,3 +1,4 @@
 dependencies {
-  compile project(":pact-jvm-model"), project(":pact-jvm-provider_${project.scalaVersion}")
+  compile project(":pact-jvm-model"), project(":pact-jvm-provider_${project.scalaVersion}"),
+    "org.scalatest:scalatest_${project.scalaVersion}:${project.scalatestVersion}"
 }
