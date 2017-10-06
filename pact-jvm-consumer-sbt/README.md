@@ -1,3 +1,0 @@
-pact-jvm-consumer-sbt
-=====================
-
