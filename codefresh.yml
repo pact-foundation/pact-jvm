@@ -1,9 +1,0 @@
- version: '1.0'
-
- steps:
-
-  gradle_build:
-    description: Execute gradle build
-    image: maven:latest
-    commands:
-      - ./gradlew --stacktrace --no-daemon -i build
