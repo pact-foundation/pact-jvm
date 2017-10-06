@@ -11,7 +11,7 @@ import au.com.dius.pact.model.matchingrules.MatchingRules
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
 
 /**
  * Message in a Message Pact

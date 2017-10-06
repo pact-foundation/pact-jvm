@@ -305,7 +305,7 @@ class ProviderClientSpec extends Specification {
 
   def 'execute request filter executes any google collection closure'() {
     given:
-    provider.requestFilter = new org.apache.commons.collections.Closure() {
+    provider.requestFilter = new org.apache.commons.collections4.Closure() {
       @Override
       void execute(Object request) {
         request.addHeader('Apache Collections Closure', 'Was Called')

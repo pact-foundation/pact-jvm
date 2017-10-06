@@ -1,7 +1,7 @@
 package au.com.dius.pact.model
 
 import groovy.transform.Canonical
-import org.apache.commons.lang.math.RandomUtils
+import org.apache.commons.lang3.RandomUtils
 
 /**
  * Configuration of the Pact Mock Server.
@@ -78,7 +78,7 @@ class MockProviderConfig {
     Integer port = null
     int count = 0
     while (port == null && count < 20) {
-      int randomPort = RandomUtils.nextInt(upper - lower) + lower
+      int randomPort = RandomUtils.nextInt(lower, upper)
       if (portAvailable(randomPort)) {
         port = randomPort
       }

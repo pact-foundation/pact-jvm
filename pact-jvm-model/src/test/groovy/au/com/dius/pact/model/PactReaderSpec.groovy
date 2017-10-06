@@ -4,9 +4,7 @@ import au.com.dius.pact.model.v3.messaging.MessagePact
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectInputStream
-import groovyx.net.http.AuthConfig
-import groovyx.net.http.HttpResponseDecorator
-import groovyx.net.http.RESTClient
+import org.apache.http.impl.client.BasicCredentialsProvider
 import spock.lang.Specification
 
 @SuppressWarnings('DuplicateMapLiteral')
@@ -139,25 +137,18 @@ class PactReaderSpec extends Specification {
   }
 
   @SuppressWarnings('UnnecessaryGetter')
-  def 'if authentication is set, loads the pact file from a URL with auth'() {
+  def 'if authentication is set, sets up the http client with auth'() {
     given:
     def pactUrl = new UrlSource('http://url.that.requires.auth:8080/')
-    def mockAuth = Mock(AuthConfig)
-    def mockHttp = Mock(RESTClient) {
-      getAuth() >> mockAuth
-      get(_) >> new HttpResponseDecorator(null, [:])
-    }
-    PactReader.newHttpClient(pactUrl) >> mockHttp
 
     when:
-    def pact = PactReader.loadPact(pactUrl, authentication: ['basic', 'user', 'pwd'])
+    def client = PactReaderKt.newHttpClient(pactUrl.url, [authentication: ['basic', 'user', 'pwd']])
+    def creds = client.credentialsProvider.credMap.entrySet().first().getValue()
 
     then:
-    1 * mockAuth.basic('user', 'pwd')
-    1 * PactReader.loadV2Pact(pactUrl, _)
-    0 * PactReader.loadV3Pact(pactUrl, _)
-    pact instanceof RequestResponsePact
-    pact.source == pactUrl
+    client.credentialsProvider instanceof BasicCredentialsProvider
+    creds.principal.username == 'user'
+    creds.password == 'pwd'
   }
 
   def 'correctly loads V2 pact query strings'() {

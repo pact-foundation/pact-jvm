@@ -394,20 +394,4 @@ class HalClientSpec extends Specification {
     result['_links']['multipleLink']*.toString() == ['"one"', '"two"', '"three"']
   }
 
-  @Unroll
-  def 'build url - #desc'() {
-    expect:
-    client.buildUrl(url).toString() == expectedUrl
-
-    where:
-
-    desc                      | url                                      | expectedUrl
-    'normal URL'              | 'http://localhost:8080/path'             | 'http://localhost:8080/path'
-    'normal URL with no path' | 'http://localhost:8080'                  | 'http://localhost:8080'
-    'just a path'             | '/path/to/get'                           | 'http://localhost:1234/path/to/get'
-    'URL with spaces'         | 'http://localhost:8080/path/with spaces' | 'http://localhost:8080/path/with%20spaces'
-    'path with spaces'        | '/path/with spaces'                      | 'http://localhost:1234/path/with%20spaces'
-    'no port'                 | 'http://localhost/path/with spaces'      | 'http://localhost/path/with%20spaces'
-  }
-
 }
