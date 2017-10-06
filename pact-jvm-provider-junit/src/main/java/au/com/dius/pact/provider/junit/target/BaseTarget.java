@@ -10,7 +10,7 @@ import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver;
 import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
 import au.com.dius.pact.provider.reporters.ReporterManager;
 import au.com.dius.pact.provider.reporters.VerifierReporter;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.lambda.Seq;
 import org.jooq.lambda.tuple.Tuple2;

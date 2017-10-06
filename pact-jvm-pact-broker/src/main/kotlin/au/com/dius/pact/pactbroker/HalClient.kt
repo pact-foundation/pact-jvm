@@ -1,6 +1,8 @@
 package au.com.dius.pact.pactbroker
 
 import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
+import au.com.dius.pact.util.HttpClientUtils.buildUrl
+import au.com.dius.pact.util.HttpClientUtils.isJsonResponse
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.bool
 import com.github.salomonbrys.kotson.get
@@ -19,7 +21,6 @@ import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpPut
-import org.apache.http.client.utils.URIBuilder
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.BasicCredentialsProvider
@@ -202,7 +203,7 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
   private fun getJson(path: String, encodePath: Boolean = true): Result<JsonElement, Exception> {
     setupHttpClient()
     return Result.of {
-      val httpGet = HttpGet(buildUrl(path, encodePath))
+      val httpGet = HttpGet(buildUrl(baseUrl, path, encodePath))
       httpGet.addHeader("Content-Type", "application/json")
       httpGet.addHeader("Accept", "application/hal+json, application/json")
 
@@ -222,32 +223,6 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
       }
     }
   }
-
-  @JvmOverloads
-  fun buildUrl(url: String, encodePath: Boolean = true): URI {
-    val match = URL_REGEX.matchEntire(url)
-    return if (match != null) {
-      val (scheme, host, port, path) = match.destructured
-      val builder = URIBuilder().setScheme(scheme).setHost(host)
-      if (port.isNotEmpty()) {
-        builder.port = port.substring(1).toInt()
-      }
-      if (encodePath) {
-        builder.setPath(path).build()
-      } else {
-        URI(builder.build().toString() + path)
-      }
-    } else {
-      if (encodePath) {
-        URIBuilder(baseUrl).setPath(url).build()
-      } else {
-        URI(baseUrl + url)
-      }
-    }
-  }
-
-  private fun isJsonResponse(contentType: ContentType) = contentType.mimeType == "application/json" ||
-    contentType.mimeType == "application/hal+json"
 
   private fun fetchLink(link: String, options: Map<String, Any>): JsonElement {
     if (pathInfo?.nullObj?.get("_links") == null) {
@@ -318,8 +293,9 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
     return result
   }
 
-  private fun encodePathParameter(options: Map<String, Any>, key: String, value: String) =
-    UrlEscapers.urlPathSegmentEscaper().escape(options[key]?.toString() ?: value)
+  private fun encodePathParameter(options: Map<String, Any>, key: String, value: String): String? {
+    return UrlEscapers.urlPathSegmentEscaper().escape(options[key]?.toString() ?: value)
+  }
 
   fun initPathInfo() {
     pathInfo = pathInfo ?: fetch(ROOT)
@@ -334,7 +310,7 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
   override fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>,
                           encodePath: Boolean): Any? {
     val client = setupHttpClient()
-    val httpPut = HttpPut(buildUrl(path, encodePath))
+    val httpPut = HttpPut(buildUrl(baseUrl, path, encodePath))
     httpPut.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
     httpPut.entity = StringEntity(bodyJson, ContentType.APPLICATION_JSON)
 
@@ -390,6 +366,5 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
   companion object : KLogging() {
     const val ROOT = "/"
     val URL_TEMPLATE_REGEX = Regex("\\{(\\w+)\\}")
-    val URL_REGEX = Regex("([^:]+):\\/\\/([^\\/:]+)(:\\d+)?(.*)")
   }
 }

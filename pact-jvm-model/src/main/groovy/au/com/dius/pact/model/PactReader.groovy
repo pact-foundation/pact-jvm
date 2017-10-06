@@ -7,8 +7,9 @@ import com.github.zafarkhaja.semver.Version
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
-import groovyx.net.http.RESTClient
 import kotlin.Pair
+
+import static au.com.dius.pact.model.PactReaderKt.newHttpClient
 
 /**
  * Class to load a Pact from a JSON source using a version strategy
@@ -182,11 +183,11 @@ class PactReader {
       } else if (source instanceof BrokerUrlSource) {
         PactReaderKt.loadPactFromUrl(source, options, null)
       } else if (source instanceof URL || source instanceof UrlPactSource) {
-        def urlSource = source instanceof URL ? new UrlSource(source.toString()) : source
-        PactReaderKt.loadPactFromUrl(urlSource, options, newHttpClient(urlSource))
+        UrlPactSource urlSource = source instanceof URL ? new UrlSource(source.toString()) : source as UrlPactSource
+        PactReaderKt.loadPactFromUrl(urlSource as UrlPactSource, options, newHttpClient(urlSource.url, options))
       } else if (source instanceof String && source.toLowerCase() ==~ '(https?|file)://?.*') {
         def urlSource = new UrlSource(source)
-        PactReaderKt.loadPactFromUrl(urlSource, options, newHttpClient(urlSource))
+        PactReaderKt.loadPactFromUrl(urlSource, options, newHttpClient(urlSource.url, options))
       } else if (source instanceof String && source.toLowerCase() ==~ 's3://.*') {
         loadPactFromS3Bucket(source, options)
       } else if (source instanceof String && fileExists(source)) {
@@ -224,10 +225,6 @@ class PactReader {
     def client = s3Client()
     def s3Pact = client.getObject(s3Uri.bucket, s3Uri.key)
     new Pair(new JsonSlurper().parse(s3Pact.objectContent), new S3PactSource(source))
-  }
-
-  private static newHttpClient(UrlPactSource source) {
-    new RESTClient(new URI(source.url))
   }
 
   private static boolean fileExists(String path) {

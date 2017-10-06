@@ -3,8 +3,8 @@ package au.com.dius.pact.model.generators
 import au.com.dius.pact.model.PactSpecVersion
 import com.mifmif.common.regex.Generex
 import mu.KotlinLogging
-import org.apache.commons.lang.RandomStringUtils
-import org.apache.commons.lang.math.RandomUtils
+import org.apache.commons.lang3.RandomStringUtils
+import org.apache.commons.lang3.RandomUtils
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -50,7 +50,7 @@ data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
   }
 
   override fun generate(base: Any?): Any {
-    return min + RandomUtils.nextInt(max - min)
+    return RandomUtils.nextInt(min, max)
   }
 
   companion object {
@@ -156,7 +156,6 @@ class UuidGenerator : Generator {
   }
 
   override fun equals(other: Any?) = other is UuidGenerator
-  override fun hashCode() = super.hashCode()
 
   companion object {
     @Suppress("UNUSED_PARAMETER")
@@ -248,7 +247,6 @@ object RandomBooleanGenerator : Generator {
   }
 
   override fun equals(other: Any?) = other is RandomBooleanGenerator
-  override fun hashCode() = super.hashCode()
 
   @Suppress("UNUSED_PARAMETER")
   fun fromMap(map: Map<String, Any>) : RandomBooleanGenerator {

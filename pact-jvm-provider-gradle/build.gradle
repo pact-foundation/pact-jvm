@@ -6,7 +6,6 @@ apply plugin: 'java-gradle-plugin'
 apply plugin: 'maven-publish'
 
 dependencies {
-  compile "org.codehaus.groovy.modules.http-builder:http-builder:$httpBuilderVersion"
   compile project(":pact-jvm-provider_${project.scalaVersion}")
   compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
 }

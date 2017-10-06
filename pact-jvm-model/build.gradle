@@ -5,15 +5,16 @@ dependencies {
     "io.netty:netty-handler:${project.nettyVersion}",
     "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
   compile 'com.github.zafarkhaja:java-semver:0.9.0'
-  compile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
   compile 'com.amazonaws:aws-java-sdk-s3:1.11.30'
   compile 'com.google.code.gson:gson:2.8.1'
   compile 'org.apache.commons:commons-collections4:4.1'
+  compile "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   compile 'com.github.mifmif:generex:1.0.1'
   compile "com.google.guava:guava:${project.guavaVersion}"
   compile 'org.asynchttpclient:async-http-client:2.1.0-alpha24'
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
+  testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
 }
 
 compileGroovy {
