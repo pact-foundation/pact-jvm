@@ -925,7 +925,8 @@ public class PactDslJsonArray extends DslPart {
    */
   public PactDslJsonArray eachLike(PactDslJsonRootValue value, int numberExamples) {
     if (numberExamples == 0) {
-      System.err.println("Testing Zero examples may be unsafe. Please make sure to provide at least one example in the Pact provider implementation. See https://github.com/DiUS/pact-jvm/issues/546");
+      throw new IllegalArgumentException("Testing Zero examples is unsafe. Please make sure to provide at least one " +
+        "example in the Pact provider implementation. See https://github.com/DiUS/pact-jvm/issues/546");
     }
 
     matchers.addRule(rootPath + appendArrayIndex(1), matchMin(0));
