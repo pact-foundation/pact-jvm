@@ -5,7 +5,6 @@ dependencies {
         "org.fusesource.jansi:jansi:${project.jansiVersion}",
         "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
         'org.reflections:reflections:0.9.10'
-    compile "ws.unfiltered:unfiltered-netty-server_${project.scalaVersion}:0.9.1"
     compile 'org.scala-lang.modules:scala-java8-compat_2.12:0.8.0'
 
     testCompile project(":pact-jvm-consumer-groovy_${project.scalaVersion}")
