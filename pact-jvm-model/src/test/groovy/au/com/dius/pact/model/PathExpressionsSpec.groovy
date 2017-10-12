@@ -76,6 +76,8 @@ class PathExpressionsSpec extends Specification {
     expression | result
     '$.a'      | [PathToken.Root.INSTANCE, new PathToken.Field('a')]
     '$.a-b'    | [PathToken.Root.INSTANCE, new PathToken.Field('a-b')]
+    '$.a_b'    | [PathToken.Root.INSTANCE, new PathToken.Field('a_b')]
+    '$._b'     | [PathToken.Root.INSTANCE, new PathToken.Field('_b')]
     '$.a.b.c'  | [PathToken.Root.INSTANCE, new PathToken.Field('a'), new PathToken.Field('b'),
                   new PathToken.Field('c')]
   }
