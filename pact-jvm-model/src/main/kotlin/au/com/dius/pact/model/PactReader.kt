@@ -25,7 +25,7 @@ private val ACCEPT_JSON = mutableMapOf("requestProperties" to mutableMapOf("Acce
 
 data class InvalidHttpResponseException(override val message: String) : RuntimeException(message)
 
-fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: CloseableHttpClient): Pair<Any, PactSource> {
+fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: CloseableHttpClient?): Pair<Any, PactSource> {
   return when (source) {
     is BrokerUrlSource -> {
       val brokerClient = PactBrokerClient(source.pactBrokerUrl, options)
@@ -33,7 +33,7 @@ fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: Clos
       pactResponse.pactFile to source.copy(attributes = pactResponse.links, options = options)
     }
     else -> if (options.containsKey("authentication")) {
-      val jsonResource = fetchJsonResource(http, options, source)
+      val jsonResource = fetchJsonResource(http!!, options, source)
       when (jsonResource) {
         is Result.Success -> jsonResource.value
         is Result.Failure -> throw jsonResource.error
