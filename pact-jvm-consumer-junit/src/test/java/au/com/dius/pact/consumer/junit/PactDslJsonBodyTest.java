@@ -34,9 +34,9 @@ public class PactDslJsonBodyTest extends ConsumerPactTestMk2 {
                 .hexValue()
                 .object()
                     .id()
-                    .stringValue("name", "Rogger the Dogger")
+                    .stringValue("full_name", "Rogger the Dogger")
                     .timestamp()
-                    .date("dob", "MM/dd/yyyy")
+                    .date("date_of_birth", "MM/dd/yyyy")
                 .closeObject()
             .closeArray();
         RequestResponsePact pact = builder
@@ -56,7 +56,7 @@ public class PactDslJsonBodyTest extends ConsumerPactTestMk2 {
             "$.numbers[3]",
             "$.numbers[4].id",
             "$.numbers[4].timestamp",
-            "$.numbers[4].dob");
+            "$.numbers[4].date_of_birth");
 
         return pact;
     }

@@ -61,7 +61,7 @@ fun identifier(ch: Char, chars: PushbackIterator<IndexedValue<Char>>, tokens: Mu
   var id = String() + ch
   while (chars.hasNext()) {
     val c = chars.next()
-    if (c.value.isLetterOrDigit() || c.value == '-') {
+    if (c.value.isLetterOrDigit() || c.value == '-' || c.value == '_') {
       id += c.value
     } else if (c.value == '.' || c.value == '\'' || c.value == '[') {
       chars.pushback(c)
@@ -80,7 +80,7 @@ fun pathIdentifier(chars: PushbackIterator<IndexedValue<Char>>, tokens: MutableL
     val ch = chars.next()
     when {
       ch.value == '*' -> tokens.add(PathToken.Star)
-      ch.value.isLetterOrDigit() -> identifier(ch.value, chars, tokens, path)
+      ch.value.isLetterOrDigit() || ch.value == '_' -> identifier(ch.value, chars, tokens, path)
       else -> throw InvalidPathExpression("Expected either a \"*\" or path identifier in path expression \"$path\"" +
         " at index ${ch.index}")
     }
