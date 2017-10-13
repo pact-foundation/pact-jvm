@@ -15,7 +15,6 @@ import java.net.URLClassLoader
 import java.util.function.Function
 import java.util.function.Supplier
 
-
 /**
  * Out-of-the-box implementation of [Target], that run [Interaction] against message pact and verify response
  * By default it will scan all packages for annotated methods, but a list of packages can be provided to reduce
