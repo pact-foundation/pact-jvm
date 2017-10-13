@@ -1,5 +1,28 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.8 - Bugfix and dependency issues
+
+* c8adefb - Correct Kotlin lint error (Ronald Holshausen, Fri Oct 13 12:08:31 2017 +1100)
+* 0d82fab - Added a spring context aware target that can look up instances from the spring context (Ronald Holshausen, Fri Oct 13 11:16:08 2017 +1100)
+* 1601052 - Update AmqpTarget to default to the test instance to support spring autowired dependencies in the test (Ronald Holshausen, Fri Oct 13 11:15:30 2017 +1100)
+* cefe0df - Fix for matcher paths with underscores #548 (Ronald Holshausen, Fri Oct 13 09:03:54 2017 +1100)
+* 8753684 - Merge branch 'v3.5.x' (Ronald Holshausen, Thu Oct 12 16:54:52 2017 +1100)
+* a5fe884 - Http client needs to be optional, as the pact broker client will use its own http client (Ronald Holshausen, Thu Oct 12 16:44:16 2017 +1100)
+* f4b0992 - Removed codefresh config file as it is not being used (Ronald Holshausen, Fri Oct 6 16:57:11 2017 +1100)
+* ea6ba44 - Converted the zero examples warning to an error #546 (Ronald Holshausen, Fri Oct 6 16:50:37 2017 +1100)
+* 64622a9 - Merge pull request #552 from ptornhult/master (Ronald Holshausen, Fri Oct 6 16:47:58 2017 +1100)
+* 5d7efab - Moved the unfiltered-netty-server to the provider scala support module (Ronald Holshausen, Fri Oct 6 16:45:59 2017 +1100)
+* 4921a0c - Removed pact-jvm-consumer-sbt as it did not provide any benefit (Ronald Holshausen, Fri Oct 6 16:23:26 2017 +1100)
+* 58300e8 - Moved async-http-client dependency to the scala modules (Ronald Holshausen, Fri Oct 6 16:22:42 2017 +1100)
+* 753c31d - Correct the kotlin version (Ronald Holshausen, Fri Oct 6 15:35:41 2017 +1100)
+* 2495e82 - Removed http-builder in favour of apache http client (Ronald Holshausen, Fri Oct 6 15:34:52 2017 +1100)
+* 1e1f849 - Downgrade google guava to the lowest common version (Ronald Holshausen, Fri Oct 6 10:37:55 2017 +1100)
+* 6a24713 - Update readme about turning off verification publishing (Ronald Holshausen, Fri Oct 6 10:06:22 2017 +1100)
+* da18346 - Removed some unused deps (Ronald Holshausen, Fri Oct 6 09:52:10 2017 +1100)
+* c8a2aa2 - update changelog for release 3.5.7-jre7.0 (Ronald Holshausen, Tue Oct 3 16:45:53 2017 +1100)
+* 3939d1f - bump version to 3.5.8 (Ronald Holshausen, Tue Oct 3 10:55:19 2017 +1100)
+* dadb719 - Print error when eachLike matcher is used with 0 examples (Peter Törnhult, Thu Sep 28 13:42:08 2017 +0200)
+
 # 3.5.7-jre7.0 - Bugfix Release
 
 * 443925c - fixes after merge in from master (Ronald Holshausen, Tue Oct 3 15:45:11 2017 +1100)
