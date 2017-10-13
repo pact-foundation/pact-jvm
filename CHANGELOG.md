@@ -1,5 +1,28 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.8 - Scala 2.11 - Bugfix and dependency issues
+
+* 0536b3c - Updated versions in README (Ronald Holshausen, Fri Oct 13 12:28:17 2017 +1100)
+* 4191e53 - update changelog for release 3.5.8 (Ronald Holshausen, Fri Oct 13 12:12:41 2017 +1100)
+* fc6a620 - Correct Kotlin lint error (Ronald Holshausen, Fri Oct 13 12:08:31 2017 +1100)
+* 2b1088c - Added a spring context aware target that can look up instances from the spring context (Ronald Holshausen, Fri Oct 13 11:16:08 2017 +1100)
+* 5e78573 - Update AmqpTarget to default to the test instance to support spring autowired dependencies in the test (Ronald Holshausen, Fri Oct 13 11:15:30 2017 +1100)
+* bfc78ec - Fix for matcher paths with underscores #548 (Ronald Holshausen, Fri Oct 13 09:03:54 2017 +1100)
+* eb5e8ae - Http client needs to be optional, as the pact broker client will use its own http client (Ronald Holshausen, Thu Oct 12 16:44:16 2017 +1100)
+* 1c3eeaf - Removed codefresh config file as it is not being used (Ronald Holshausen, Fri Oct 6 16:57:11 2017 +1100)
+* adb244d - Converted the zero examples warning to an error #546 (Ronald Holshausen, Fri Oct 6 16:50:37 2017 +1100)
+* acb1478 - Print error when eachLike matcher is used with 0 examples (Peter Törnhult, Thu Sep 28 13:42:08 2017 +0200)
+* 8998779 - Moved the unfiltered-netty-server to the provider scala support module (Ronald Holshausen, Fri Oct 6 16:45:59 2017 +1100)
+* 963dbb0 - Removed pact-jvm-consumer-sbt as it did not provide any benefit (Ronald Holshausen, Fri Oct 6 16:23:26 2017 +1100)
+* 331784f - Moved async-http-client dependency to the scala modules (Ronald Holshausen, Fri Oct 6 16:22:42 2017 +1100)
+* a64ff62 - Correct the kotlin version (Ronald Holshausen, Fri Oct 6 15:35:41 2017 +1100)
+* b499186 - Removed http-builder in favour of apache http client (Ronald Holshausen, Fri Oct 6 15:34:52 2017 +1100)
+* 0256bb7 - Downgrade google guava to the lowest common version (Ronald Holshausen, Fri Oct 6 10:37:55 2017 +1100)
+* 06eb00c - Update readme about turning off verification publishing (Ronald Holshausen, Fri Oct 6 10:06:22 2017 +1100)
+* ab5925a - Removed some unused deps (Ronald Holshausen, Fri Oct 6 09:52:10 2017 +1100)
+* 4afa55b - update changelog for release 3.5.7-jre7.0 (Ronald Holshausen, Tue Oct 3 16:45:53 2017 +1100)
+* 770bc9d - bump version to 3.5.8 (Ronald Holshausen, Tue Oct 3 11:57:26 2017 +1100)
+
 # 3.5.8 - Bugfix and dependency issues
 
 * c8adefb - Correct Kotlin lint error (Ronald Holshausen, Fri Oct 13 12:08:31 2017 +1100)
