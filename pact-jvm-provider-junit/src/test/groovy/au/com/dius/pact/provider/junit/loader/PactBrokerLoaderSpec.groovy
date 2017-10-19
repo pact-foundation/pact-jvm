@@ -10,7 +10,6 @@ import spock.util.environment.RestoreSystemProperties
 
 import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.VALUES_SEPARATOR
 
-@PactBroker(host = 'pactbroker.host', port = '1000', failIfNoPactsFound = false)
 class PactBrokerLoaderSpec extends Specification {
 
   private Closure<PactBrokerLoader> pactBrokerLoader
@@ -89,7 +88,7 @@ class PactBrokerLoaderSpec extends Specification {
   void 'Loads Pacts Configured From A Pact Broker Annotation'() {
     given:
     pactBrokerLoader = {
-      new PactBrokerLoader(this.class.getAnnotation(PactBroker)) {
+      new PactBrokerLoader(FullPactBrokerAnnotation.getAnnotation(PactBroker)) {
         @Override
         PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
           assert url.host == 'pactbroker.host'
@@ -105,6 +104,52 @@ class PactBrokerLoaderSpec extends Specification {
     then:
     result == []
     1 * brokerClient.fetchConsumers('test') >> []
+  }
+
+  void 'Uses fallback PactBroker System Properties'() {
+    given:
+    System.setProperty('pactbroker.host', 'my.pactbroker.host')
+    System.setProperty('pactbroker.port', '4711')
+    pactBrokerLoader = {
+      new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
+        @Override
+        PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
+          assert url.host == 'my.pactbroker.host'
+          assert url.port == 4711
+          brokerClient
+        }
+      }
+    }
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    result == []
+    1 * brokerClient.fetchConsumers('test') >> []
+  }
+
+  void 'Fails when no fallback system properties are set'() {
+    given:
+    System.clearProperty('pactbroker.host')
+    System.clearProperty('pactbroker.port')
+    pactBrokerLoader = {
+      new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)){
+        @Override
+        PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
+          assert url.host == 'my.pactbroker.host'
+          assert url.port == 4711
+          brokerClient
+        }
+      }
+    }
+
+    when:
+    pactBrokerLoader().load('test')
+
+    then:
+    final Exception exception = thrown(Exception)
+    exception.message.startsWith("Invalid pact broker port")
   }
 
   def 'Loads pacts for each provided tag'() {
@@ -148,6 +193,16 @@ class PactBrokerLoaderSpec extends Specification {
     then:
     result.size() == 1
     1 * brokerClient.fetchConsumers('test') >> [ new PactBrokerConsumer('test', 'latest', '', []) ]
+  }
+
+  @PactBroker(host = 'pactbroker.host', port = '1000', failIfNoPactsFound = false)
+  static class FullPactBrokerAnnotation {
+
+  }
+
+  @PactBroker(failIfNoPactsFound = false)
+  static class MinimalPactBrokerAnnotation {
+
   }
 
 }
