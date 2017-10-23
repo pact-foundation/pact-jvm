@@ -343,7 +343,7 @@ public class PactDslRequestWithPath {
    * Match a query parameter with a regex.
    * @param parameter Query parameter
    * @param regex Regular expression to match with
-   * @param example Example value to use for the query parameter
+   * @param example Example value to use for the query parameter (unencoded)
    */
   public PactDslRequestWithPath matchQuery(String parameter, String regex, String example) {
     requestMatchers.addCategory("query").addRule(parameter, new RegexMatcher(regex));
