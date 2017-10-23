@@ -129,6 +129,16 @@ public class PactDslRequestWithPath {
     }
 
     /**
+     * The encoded query string for the request
+     *
+     * @param query query string
+     */
+    public PactDslRequestWithPath encodedQuery(String query) {
+        this.query = PactReader.queryStringToMap(query, true);
+        return this;
+    }
+
+    /**
      * The body of the request
      *
      * @param body Request body in string form

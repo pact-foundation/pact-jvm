@@ -65,6 +65,55 @@ public class PactQueryParameterTest {
         verifyRequestMatches(pact, encodedFullPath);
     }
 
+    @Test
+    public void testEncodedQueryWithSimpleQueryParameter() throws Throwable {
+        // Given a pact expecting GET /hello?q=simple, created using the .query(...) method
+        String path = "/hello";
+        String parameterName = "q";
+        String encodedValue = "simple";
+        String encodedQuery = parameterName + "=" + encodedValue;
+        String encodedFullPath = path + "?" + encodedQuery;
+
+        RequestResponsePact pact = ConsumerPactBuilder
+            .consumer("Some Consumer")
+            .hasPactWith("Some Provider")
+            .uponReceiving(encodedFullPath)
+            .path(path)
+            .encodedQuery(encodedQuery)
+            .method("GET")
+            .willRespondWith()
+            .status(200)
+            .toPact();
+
+        // When sending the request, we expect no errors
+        verifyRequestMatches(pact, encodedFullPath);
+    }
+
+    @Test
+    public void testEncodedQueryWithComplexQueryParameter() throws Throwable {
+        // Given a pact expecting GET /hello?q=query%20containing%20%26%20and%20%3F%20characters,
+        // created using the .query(...) method
+        String path = "/hello";
+        String parameterName = "q";
+        String encodedValue = "query%20containing%20%26%20and%20%3F%20characters";
+        String encodedQuery = parameterName + "=" + encodedValue;
+        String encodedFullPath = path + "?" + encodedQuery;
+
+        RequestResponsePact pact = ConsumerPactBuilder
+            .consumer("Some Consumer")
+            .hasPactWith("Some Provider")
+            .uponReceiving(encodedFullPath)
+            .path(path)
+            .encodedQuery(encodedQuery)
+            .method("GET")
+            .willRespondWith()
+            .status(200)
+            .toPact();
+
+        // When sending the request, we expect no errors
+        verifyRequestMatches(pact, encodedFullPath);
+    }
+
     private void verifyRequestMatches(RequestResponsePact pact, String fullPath) {
         MockProviderConfig config = MockProviderConfig.createDefault();
         PactVerificationResult result = runConsumerTest(pact, config, new PactTestRun() {
