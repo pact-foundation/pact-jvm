@@ -122,10 +122,11 @@ class ProviderClientSpec extends Specification {
     0 * httpRequest._
   }
 
+  @Unroll
   def 'setting up body sets a string entity if it is not a url encoded form post and there is a body'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
-    request = new Request('PUT', '/', null, null, OptionalBody.body('{}'))
+    request = new Request('PUT', '/', query, [:], OptionalBody.body('{}'))
 
     when:
     client.setupBody(request, httpRequest)
@@ -133,12 +134,17 @@ class ProviderClientSpec extends Specification {
     then:
     1 * httpRequest.setEntity { it instanceof StringEntity && it.content.text == '{}' }
     0 * httpRequest._
+
+    where:
+
+    query << [ [:], null ]
   }
 
+  @Unroll
   def 'setting up body sets a string entity if it is a url encoded form post and there is no query string'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
-    request = new Request('POST', '/', null, ['Content-Type': ContentType.APPLICATION_FORM_URLENCODED.mimeType],
+    request = new Request('POST', '/', query, ['Content-Type': ContentType.APPLICATION_FORM_URLENCODED.mimeType],
       OptionalBody.body('A=B'))
 
     when:
@@ -147,6 +153,10 @@ class ProviderClientSpec extends Specification {
     then:
     1 * httpRequest.setEntity { it instanceof StringEntity && it.content.text == 'A=B' }
     0 * httpRequest._
+
+    where:
+
+    query << [ [:], null ]
   }
 
   def 'setting up body sets a UrlEncodedFormEntity entity if it is urlencoded form post and there is a query string'() {

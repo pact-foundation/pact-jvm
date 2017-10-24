@@ -137,11 +137,11 @@ open class ProviderClient(val provider: IProviderInfo,
 
   open fun setupBody(request: Request, method: HttpRequest) {
     if (method is HttpEntityEnclosingRequest) {
-      if (urlEncodedFormPost(request) && request.query != null) {
+      if (urlEncodedFormPost(request) && request.query != null && request.query.isNotEmpty()) {
         val charset = Consts.UTF_8
         val parameters = request.query.flatMap { entry -> entry.value.map { BasicNameValuePair(entry.key, it) } }
         method.entity = UrlEncodedFormEntity(parameters, charset)
-      } else if (!request.body.isMissing()) {
+      } else if (request.body.isPresent()) {
         method.entity = StringEntity(request.body.orElse(""))
       }
     }
