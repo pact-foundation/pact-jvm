@@ -21,10 +21,10 @@ data class ProviderState(val name: String, val params: Map<String, Any> = mapOf(
   companion object {
     @JvmStatic
     fun fromMap(map: Map<String, Any>): ProviderState {
-      if (map.containsKey("params") && map["params"] is Map<*, *>) {
-        return ProviderState(map["name"].toString(), map["params"] as Map<String, Any>)
+      return if (map.containsKey("params") && map["params"] is Map<*, *>) {
+        ProviderState(map["name"].toString(), map["params"] as Map<String, Any>)
       } else {
-        return ProviderState(map["name"].toString())
+        ProviderState(map["name"].toString())
       }
     }
   }

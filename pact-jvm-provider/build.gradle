@@ -24,3 +24,9 @@ compileTestGroovy {
 test {
   systemProperties['pact.rootDir'] = "$buildDir/pacts"
 }
+
+compileKotlin {
+  kotlinOptions {
+    apiVersion = "1.1"
+  }
+}
