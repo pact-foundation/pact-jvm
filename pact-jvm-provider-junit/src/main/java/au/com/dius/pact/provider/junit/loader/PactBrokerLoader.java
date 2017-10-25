@@ -81,9 +81,16 @@ public class PactBrokerLoader implements PactLoader {
 
   private List<Pact> loadPactsForProvider(final String providerName, final String tag) throws IOException {
     LOGGER.debug("Loading pacts from pact broker for provider " + providerName + " and tag " + tag);
-    URIBuilder uriBuilder = new URIBuilder().setScheme(parseExpression(pactBrokerProtocol))
-      .setHost(parseExpression(pactBrokerHost))
-      .setPort(Integer.parseInt(parseExpression(pactBrokerPort)));
+    String protocol = parseExpression(pactBrokerProtocol);
+    String host = parseExpression(pactBrokerHost);
+    String port = parseExpression(pactBrokerPort);
+    if(!port.matches("^[0-9]+")){
+      throw new IllegalArgumentException(String.format("Invalid pact broker port specified ('%s'). "
+          + "Please provide a valid port number or specify the system property 'pactbroker.port'.", pactBrokerPort));
+    }
+    URIBuilder uriBuilder = new URIBuilder().setScheme(protocol)
+      .setHost(parseExpression(host))
+      .setPort(Integer.parseInt(port));
     try {
       List<ConsumerInfo> consumers;
       PactBrokerClient pactBrokerClient = newPactBrokerClient(uriBuilder.build());
