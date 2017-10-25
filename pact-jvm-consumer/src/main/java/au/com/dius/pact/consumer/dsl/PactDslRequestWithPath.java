@@ -129,6 +129,16 @@ public class PactDslRequestWithPath {
     }
 
     /**
+     * The encoded query string for the request
+     *
+     * @param query query string
+     */
+    public PactDslRequestWithPath encodedQuery(String query) {
+        this.query = PactReader.queryStringToMap(query, true);
+        return this;
+    }
+
+    /**
      * The body of the request
      *
      * @param body Request body in string form
@@ -343,7 +353,7 @@ public class PactDslRequestWithPath {
    * Match a query parameter with a regex.
    * @param parameter Query parameter
    * @param regex Regular expression to match with
-   * @param example Example value to use for the query parameter
+   * @param example Example value to use for the query parameter (unencoded)
    */
   public PactDslRequestWithPath matchQuery(String parameter, String regex, String example) {
     requestMatchers.addCategory("query").addRule(parameter, new RegexMatcher(regex));

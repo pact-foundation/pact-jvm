@@ -128,7 +128,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
       OptionalBody.body(bodyContents)
     }
     return Request(exchange.requestMethod, exchange.requestURI.path,
-      PactReader.queryStringToMap(exchange.requestURI.query), headers, body)
+      PactReader.queryStringToMap(exchange.requestURI.rawQuery), headers, body)
   }
 
   private fun initServer() {

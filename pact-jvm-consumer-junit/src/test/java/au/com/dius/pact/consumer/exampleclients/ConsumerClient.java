@@ -45,7 +45,7 @@ public class ConsumerClient{
 
     private List<NameValuePair> parseQueryString(String queryString) {
         return Arrays.stream(queryString.split("&")).map(s -> s.split("="))
-          .map(p -> new BasicNameValuePair(p[0], UrlEscapers.urlFormParameterEscaper().escape(p[1])))
+          .map(p -> new BasicNameValuePair(p[0], p[1]))
           .collect(Collectors.toList());
     }
 
