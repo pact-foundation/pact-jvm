@@ -134,7 +134,7 @@ class PactBrokerLoaderSpec extends Specification {
     System.clearProperty('pactbroker.host')
     System.clearProperty('pactbroker.port')
     pactBrokerLoader = {
-      new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)){
+      new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
         @Override
         PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
           assert url.host == 'my.pactbroker.host'
@@ -148,8 +148,8 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader().load('test')
 
     then:
-    final Exception exception = thrown(Exception)
-    exception.message.startsWith("Invalid pact broker port")
+    Exception exception = thrown(Exception)
+    exception.message.startsWith('Invalid pact broker port')
   }
 
   def 'Loads pacts for each provided tag'() {
