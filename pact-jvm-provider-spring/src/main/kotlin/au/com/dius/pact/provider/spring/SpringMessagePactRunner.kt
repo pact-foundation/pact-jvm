@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.spring
 
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactSource
+import au.com.dius.pact.provider.junit.InteractionRunner
 import au.com.dius.pact.provider.junit.MessagePactRunner
 import org.junit.runners.model.Statement
 import org.junit.runners.model.TestClass
@@ -38,6 +39,7 @@ open class SpringMessagePactRunner(clazz: Class<*>) : MessagePactRunner(clazz) {
     return testContextManager!!
   }
 
-  override fun newInteractionRunner(testClass: TestClass, pact: Pact, pactSource: PactSource?)
-    = SpringInteractionRunner(testClass, pact, pactSource, initTestContextManager(testClass.javaClass))
+  override fun newInteractionRunner(testClass: TestClass, pact: Pact, pactSource: PactSource): InteractionRunner {
+    return SpringInteractionRunner(testClass, pact, pactSource, initTestContextManager(testClass.javaClass))
+  }
 }

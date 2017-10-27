@@ -117,10 +117,10 @@ class FilteredPactRunnerSpec extends Specification {
 
   def 'handles a test class with no filter annotations'() {
     given:
-    FilteredPactRunner filteredPactRunner = new FilteredPactRunner(TestClassNoFilterAnnotations)
+    PactRunner pactRunner = new PactRunner(TestClassNoFilterAnnotations)
 
     when:
-    def result = filteredPactRunner.filterPacts(pacts)
+    def result = pactRunner.filterPacts(pacts)
 
     then:
     result.is pacts
@@ -128,12 +128,12 @@ class FilteredPactRunnerSpec extends Specification {
 
   def 'handles a test class with an empty filter annotation'() {
     given:
-    FilteredPactRunner filteredPactRunner = new FilteredPactRunner(TestClassEmptyFilter)
-    FilteredPactRunner filteredPactRunner2 = new FilteredPactRunner(TestClassEmptyFilters)
+    PactRunner pactRunner = new PactRunner(TestClassEmptyFilter)
+    PactRunner pactRunner2 = new PactRunner(TestClassEmptyFilters)
 
     when:
-    def result = filteredPactRunner.filterPacts(pacts)
-    def result2 = filteredPactRunner2.filterPacts(pacts)
+    def result = pactRunner.filterPacts(pacts)
+    def result2 = pactRunner2.filterPacts(pacts)
 
     then:
     result.is pacts
@@ -142,10 +142,10 @@ class FilteredPactRunnerSpec extends Specification {
 
   def 'filters the interactions by provider state'() {
     given:
-    FilteredPactRunner filteredPactRunner = new FilteredPactRunner(TestClass)
+    PactRunner pactRunner = new PactRunner(TestClass)
 
     when:
-    def result = filteredPactRunner.filterPacts(pacts)
+    def result = pactRunner.filterPacts(pacts)
 
     then:
     result.size() == 1
@@ -156,10 +156,10 @@ class FilteredPactRunnerSpec extends Specification {
 
   def 'filters the interactions correctly when given multiple provider states'() {
     given:
-    FilteredPactRunner filteredPactRunner = new FilteredPactRunner(TestMultipleStatesClass)
+    PactRunner pactRunner = new PactRunner(TestMultipleStatesClass)
 
     when:
-    def result = filteredPactRunner.filterPacts(pacts)
+    def result = pactRunner.filterPacts(pacts)
 
     then:
     result.size() == 2
@@ -172,10 +172,10 @@ class FilteredPactRunnerSpec extends Specification {
 
   def 'filters the interactions correctly when given a regex'() {
     given:
-    FilteredPactRunner filteredPactRunner = new FilteredPactRunner(TestRegexClass)
+    PactRunner pactRunner = new PactRunner(TestRegexClass)
 
     when:
-    def result = filteredPactRunner.filterPacts(pacts)
+    def result = pactRunner.filterPacts(pacts)
 
     then:
     result.size() == 2
@@ -189,7 +189,7 @@ class FilteredPactRunnerSpec extends Specification {
   @SuppressWarnings('UnusedObject')
   def 'Throws an initialisation error if all pacts are filtered out'() {
     when:
-    new FilteredPactRunner(TestFilterOutAllPactsClass)
+    new PactRunner(TestFilterOutAllPactsClass)
 
     then:
     thrown(InitializationError)
@@ -198,7 +198,7 @@ class FilteredPactRunnerSpec extends Specification {
   @SuppressWarnings('UnusedObject')
   def 'Does not throw an initialisation error if all pacts are filtered out but @IgnoreNoPactsToVerify is present'() {
     when:
-    new FilteredPactRunner(TestFilterOutAllPactsIgnoreNoPactsToVerifyClass)
+    new PactRunner(TestFilterOutAllPactsIgnoreNoPactsToVerifyClass)
 
     then:
     notThrown(InitializationError)

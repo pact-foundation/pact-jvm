@@ -8,8 +8,8 @@ import java.util.function.Predicate
 /**
  * Pact Runner that uses annotations to filter the interactions that are executed
  */
+@Deprecated("This functionality has been moved to the base PactRunner")
 open class FilteredPactRunner(clazz: Class<*>) : PactRunner(clazz) {
-
   public override fun filterPacts(pacts: List<Pact>): List<Pact> {
     val pactFilterValues = this.testClass.javaClass.getAnnotation(PactFilter::class.java)?.value
     return if (pactFilterValues != null && pactFilterValues.any { !it.isEmpty() }) {
