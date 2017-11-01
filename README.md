@@ -7,7 +7,7 @@ pact-jvm
 [![Appveyor build status](https://ci.appveyor.com/api/projects/status/172049m2sa57takc?svg=true)](https://ci.appveyor.com/project/uglyog/pact-jvm)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-model/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-model)
 
-JVM implementation of the consumer driven contract library [pact](https://github.com/bethesque/pact_specification).
+JVM implementation of the consumer driven contract library [pact](https://github.com/pact-foundation/pact-specification).
 
 From the [Ruby Pact website](https://github.com/realestate-com-au/pact):
 
@@ -151,7 +151,7 @@ There's a limit to how much we can help, however check out [pact-jvm-server](pac
 ## How do I transport my pacts from consumers to providers?
 
 You want to look at:
-[Pact Broker](https://github.com/bethesque/pact_broker)
+[Pact Broker](https://github.com/pact-foundation/pact_broker)
 
 Which is a project that aims at providing tooling to coordinate pact generation and delivery between projects.
 
