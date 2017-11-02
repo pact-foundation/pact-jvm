@@ -36,4 +36,9 @@ class PactFolderLoaderTest {
     assertThat(new PactFolderLoader(tmpDir.path).load('myAwesomeService'), hasSize(1))
   }
 
+  @Test
+  void 'is able to load files from a directory with spaces in the path'() {
+    assert new PactFolderLoader('dir with spaces!').load('myAwesomeService').size() == 1
+  }
+
 }

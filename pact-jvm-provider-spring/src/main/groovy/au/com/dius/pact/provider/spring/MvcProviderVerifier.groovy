@@ -6,11 +6,14 @@ import au.com.dius.pact.provider.ProviderVerifier
 import groovy.transform.InheritConstructors
 import groovy.util.logging.Slf4j
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.ResultHandler
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 import org.springframework.web.util.UriComponentsBuilder
 
 /**
@@ -28,14 +31,14 @@ class MvcProviderVerifier extends ProviderVerifier {
 
             MvcResult mvcResult = mockMvc.perform(
                     request.body.isMissing() || request.body.isNull() || request.body.isEmpty() ?
-                            org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request(
-                                    org.springframework.http.HttpMethod.valueOf(request.method),
+                            MockMvcRequestBuilders.request(
+                                    HttpMethod.valueOf(request.method),
                                     requestUriString(request)
                             )
                             .headers(mapHeaders(request, false))
                             :
-                            org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request(
-                                    org.springframework.http.HttpMethod.valueOf(request.method),
+                            MockMvcRequestBuilders.request(
+                                    HttpMethod.valueOf(request.method),
                                     requestUriString(request)
                             )
                             .headers(mapHeaders(request, true))
@@ -44,7 +47,7 @@ class MvcProviderVerifier extends ProviderVerifier {
                 @Override
                 void handle(MvcResult result) throws Exception {
                     if (debugRequestResponse) {
-                        org.springframework.test.web.servlet.result.MockMvcResultHandlers.print().handle(result)
+                        MockMvcResultHandlers.print().handle(result)
                     }
                 }
             }).andReturn()
