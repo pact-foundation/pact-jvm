@@ -210,7 +210,7 @@ class ProviderVerifier extends ProviderVerifierBase {
                                      ProviderClient client) {
     try {
       def expectedResponse = interaction.response
-      def actualResponse = client.makeRequest(interaction.request)
+      def actualResponse = client.makeRequest(interaction.request.generatedRequest())
 
       verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
     } catch (e) {

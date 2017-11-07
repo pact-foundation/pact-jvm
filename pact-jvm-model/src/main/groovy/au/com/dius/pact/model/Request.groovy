@@ -1,5 +1,7 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.model.generators.Category
+import au.com.dius.pact.model.generators.Generator
 import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.matchingrules.MatchingRules
 import groovy.transform.Canonical
@@ -41,13 +43,26 @@ class Request extends HttpPart implements Comparable {
     new Request().with {
       method = r.method
       path = r.path
-      query = r.query ? [:] + r.query : null
-      headers = r.headers ? [:] + r.headers : null
+      query = r.query ? [:] + r.query : [:]
+      headers = r.headers ? [:] + r.headers : [:]
       body = r.body
       matchingRules = r.matchingRules.copy()
       generators = r.generators.copy(r.generators.categories)
       it
     }
+  }
+
+  Request generatedRequest() {
+    def r = this.copy()
+    generators.applyGenerator(Category.PATH) { String key, Generator g -> r.path = g.generate(r.path) }
+    generators.applyGenerator(Category.HEADER) { String key, Generator g ->
+      r.headers[key] = g.generate(r.headers[key])
+    }
+    generators.applyGenerator(Category.QUERY) { String key, Generator g ->
+      r.query[key] = r.query[key].collect { g.generate(it) }
+    }
+    r.body = generators.applyBodyGenerators(r.body, new ContentType(mimeType()))
+    r
   }
 
   String toString() {
