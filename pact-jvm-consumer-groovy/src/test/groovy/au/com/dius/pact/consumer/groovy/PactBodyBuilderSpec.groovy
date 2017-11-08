@@ -466,6 +466,29 @@ class PactBodyBuilderSpec extends Specification {
     ]
   }
 
+  def 'supports matching arrays of arrays'() {
+    given:
+    service {
+      uponReceiving('a request with arrays of arrays')
+      withAttributes(method: 'get', path: '/')
+      withBody PactBodyBuilder.eachLike([ regexp('[0-9a-f]{8}', 'e8cda07e'), regexp(~/\w+/, 'sony') ]),
+        prettyPrint: false
+      willRespondWith(status: 200)
+    }
+
+    when:
+    service.buildInteractions()
+    def request = service.interactions.first().request
+
+    then:
+    request.body.value == '[["e8cda07e","sony"]]'
+    request.matchingRules.rulesForCategory('body').matchingRules == [
+      '$': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$[0]': new MatchingRuleGroup([new RegexMatcher('[0-9a-f]{8}', 'e8cda07e')]),
+      '$[1]': new MatchingRuleGroup([new RegexMatcher('\\w+', 'sony')]),
+    ]
+  }
+
   private List walkGraph(def value) {
       def set = []
       if (value instanceof Map) {

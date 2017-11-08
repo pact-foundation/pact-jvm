@@ -109,7 +109,7 @@ class PactBodyBuilder extends BaseBuilder {
     } else if (value instanceof LikeMatcher) {
       setMatcherAttribute(value, path + buildPath(matcherName))
       bodyRepresentation[name] = []
-      value.numberExamples.times {
+      value.numberExamples.times { index ->
         def exampleValue = value.value
         if (exampleValue instanceof Closure) {
           bodyRepresentation[name] << invokeClosure(exampleValue, buildPath(matcherName, ALL_LIST_ITEMS))
@@ -118,6 +118,18 @@ class PactBodyBuilder extends BaseBuilder {
         } else if (exampleValue instanceof Pattern) {
           def matcher = regexp(exampleValue as Pattern, null)
           bodyRepresentation[name] << setMatcherAttribute(matcher, path + buildPath(matcherName, ALL_LIST_ITEMS))
+        } else if (exampleValue instanceof List) {
+          def list = []
+          exampleValue.eachWithIndex { entry, i ->
+            if (entry instanceof Matcher) {
+              list << setMatcherAttribute(entry, path + buildPath(matcherName, START_LIST + i + END_LIST))
+            } else if (entry instanceof Closure) {
+              list << invokeClosure(entry, buildPath(matcherName, START_LIST + i + END_LIST))
+            } else {
+              list << entry
+            }
+          }
+          bodyRepresentation[name] << list
         } else {
           bodyRepresentation[name] << exampleValue
         }
@@ -184,11 +196,13 @@ class PactBodyBuilder extends BaseBuilder {
     value.value
   }
 
-  def build(List array) {
+  def build(List array, String path = '') {
     def index = 0
     bodyRepresentation = array.collect {
       if (it instanceof Closure) {
         invokeClosure(it, START_LIST + (index++) + END_LIST)
+      } else if (it instanceof Matcher) {
+        setMatcherAttribute(it, path + START_LIST + (index++) + END_LIST)
       } else {
         index++
         it
@@ -199,7 +213,12 @@ class PactBodyBuilder extends BaseBuilder {
 
   def build(LikeMatcher matcher) {
     setMatcherAttribute(matcher, path)
-    bodyRepresentation = [ invokeClosure(matcher.value, ALL_LIST_ITEMS) ]
+    if (matcher.value instanceof List) {
+      build(matcher.value as List, path)
+      bodyRepresentation = [ bodyRepresentation ]
+    } else {
+      bodyRepresentation = [ invokeClosure(matcher.value, ALL_LIST_ITEMS) ]
+    }
     this
   }
 
