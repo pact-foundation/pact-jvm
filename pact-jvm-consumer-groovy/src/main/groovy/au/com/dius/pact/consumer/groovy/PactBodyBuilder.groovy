@@ -216,8 +216,12 @@ class PactBodyBuilder extends BaseBuilder {
     if (matcher.value instanceof List) {
       build(matcher.value as List, path)
       bodyRepresentation = [ bodyRepresentation ]
-    } else {
+    } else if (matcher.value instanceof Closure) {
       bodyRepresentation = [ invokeClosure(matcher.value, ALL_LIST_ITEMS) ]
+    } else if (matcher.value instanceof Matcher) {
+      bodyRepresentation = [ setMatcherAttribute(matcher.value, path + START_LIST + STAR + END_LIST) ]
+    } else {
+      bodyRepresentation = [ matcher.value ]
     }
     this
   }

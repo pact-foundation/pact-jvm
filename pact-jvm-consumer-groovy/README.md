@@ -421,6 +421,18 @@ withBody {
 }
 ```
 
+You can also match arrays at the root level, for instance, 
+
+```groovy
+withBody PactBodyBuilder.eachLike(regexp(~/\w+/))
+```
+
+or if you have arrays of arrays
+
+```groovy
+withBody PactBodyBuilder.eachLike([ regexp('[0-9a-f]{8}', 'e8cda07e'), regexp(~/\w+/, 'sony') ])
+```
+
 ### Matching any key in a map (3.3.1/2.5.0+)
 
 The DSL has been extended for cases where the keys in a map are IDs. For an example of this, see 

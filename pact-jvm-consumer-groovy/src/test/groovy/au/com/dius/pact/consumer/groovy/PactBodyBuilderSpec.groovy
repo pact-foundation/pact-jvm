@@ -474,18 +474,27 @@ class PactBodyBuilderSpec extends Specification {
       withBody PactBodyBuilder.eachLike([ regexp('[0-9a-f]{8}', 'e8cda07e'), regexp(~/\w+/, 'sony') ]),
         prettyPrint: false
       willRespondWith(status: 200)
+      withBody PactBodyBuilder.eachLike(regexp('\\w+', 'test')), prettyPrint: false
     }
+    def expectedMatchingRules = [
+      '$': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$[0]': new MatchingRuleGroup([new RegexMatcher('[0-9a-f]{8}', 'e8cda07e')]),
+      '$[1]': new MatchingRuleGroup([new RegexMatcher('\\w+', 'sony')]),
+    ]
 
     when:
     service.buildInteractions()
     def request = service.interactions.first().request
+    def response = service.interactions.first().response
 
     then:
     request.body.value == '[["e8cda07e","sony"]]'
-    request.matchingRules.rulesForCategory('body').matchingRules == [
+    request.matchingRules.rulesForCategory('body').matchingRules == expectedMatchingRules
+
+    response.body.value == '["test"]'
+    response.matchingRules.rulesForCategory('body').matchingRules == [
       '$': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
-      '$[0]': new MatchingRuleGroup([new RegexMatcher('[0-9a-f]{8}', 'e8cda07e')]),
-      '$[1]': new MatchingRuleGroup([new RegexMatcher('\\w+', 'sony')]),
+      '$[*]': new MatchingRuleGroup([new RegexMatcher('\\w+', 'test')])
     ]
   }
 
