@@ -505,22 +505,22 @@ class PactBodyBuilderSpec extends Specification {
       withAttributes(method: 'get', path: '/')
       withBody(prettyPrint: false) {
         answers minLike(1) {
-          questionId string("books")
+          questionId string('books')
           answer eachLike([
             {
-              questionId string("title")
-              answer string("BBBB")
+              questionId string('title')
+              answer string('BBBB')
             },
             {
-              questionId string("author")
-              answer string("B.B.")
+              questionId string('author')
+              answer string('B.B.')
             }
           ])
           answer2 eachLike(2,
-            eachLike(2, {
-              questionId string("title")
-              answer string("BBBB")
-            })
+            eachLike(2) {
+              questionId string('title')
+              answer string('BBBB')
+            }
           )
         }
       }
