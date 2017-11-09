@@ -522,6 +522,10 @@ class PactBodyBuilderSpec extends Specification {
               answer string('BBBB')
             }
           )
+          answer3 eachArrayLike {
+            questionId string("title")
+            answer string("BBBB")
+          }
         }
       }
       willRespondWith(status: 200)
@@ -537,7 +541,11 @@ class PactBodyBuilderSpec extends Specification {
       '$.answers[*].answer2': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
       '$.answers[*].answer2[*]': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
       '$.answers[*].answer2[*][*].questionId': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
-      '$.answers[*].answer2[*][*].answer': new MatchingRuleGroup([TypeMatcher.INSTANCE])
+      '$.answers[*].answer2[*][*].answer': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer3': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer3[*]': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer3[*][*].questionId': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer3[*][*].answer': new MatchingRuleGroup([TypeMatcher.INSTANCE])
     ]
 
     when:
@@ -548,7 +556,7 @@ class PactBodyBuilderSpec extends Specification {
     request.body.value == '{"answers":[{"questionId":"books","answer":[[{"questionId":"title","answer":"BBBB"},' +
       '{"questionId":"author","answer":"B.B."}]],"answer2":[[{"questionId":"title","answer":"BBBB"},' +
       '{"questionId":"title","answer":"BBBB"}],[{"questionId":"title","answer":"BBBB"},' +
-      '{"questionId":"title","answer":"BBBB"}]]}]}'
+      '{"questionId":"title","answer":"BBBB"}]],"answer3":[[{"questionId":"title","answer":"BBBB"}]]}]}'
     request.matchingRules.rulesForCategory('body').matchingRules == expectedMatchingRules
   }
 
