@@ -433,6 +433,21 @@ or if you have arrays of arrays
 withBody PactBodyBuilder.eachLike([ regexp('[0-9a-f]{8}', 'e8cda07e'), regexp(~/\w+/, 'sony') ])
 ```
 
+__Version 3.5.9+__ A `eachArrayLike` method has been added to handle matching of arrays of arrays.
+
+```groovy
+{
+  answers minLike(1) {
+    questionId string("books")
+    answer eachArrayLike {
+          questionId string("title")
+          answer string("BBBB")
+    }
+}
+```
+
+This will generate an array of arrays for the `answer` attribute.
+
 ### Matching any key in a map (3.3.1/2.5.0+)
 
 The DSL has been extended for cases where the keys in a map are IDs. For an example of this, see 
