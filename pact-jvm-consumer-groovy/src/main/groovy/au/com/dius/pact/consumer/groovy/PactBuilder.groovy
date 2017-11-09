@@ -318,7 +318,8 @@ class PactBuilder extends BaseBuilder {
    * @param array body
    */
   PactBuilder withBody(Map options = [:], List array) {
-    def body = new PactBodyBuilder(mimetype: options.mimeType, prettyPrintBody: options.prettyPrint).build(array)
+    def body = new PactBodyBuilder(mimetype: options.mimeType, prettyPrintBody: options.prettyPrint)
+    body.bodyRepresentation = body.build(array)
     setupBody(body, options)
     this
   }
@@ -331,7 +332,8 @@ class PactBuilder extends BaseBuilder {
    * @param matcher body
    */
   PactBuilder withBody(Map options = [:], LikeMatcher matcher) {
-    def body = new PactBodyBuilder(mimetype: options.mimetype, prettyPrintBody: options.prettyPrint).build(matcher)
+    def body = new PactBodyBuilder(mimetype: options.mimetype, prettyPrintBody: options.prettyPrint)
+    body.bodyRepresentation = body.build(matcher)
     setupBody(body, options)
     this
   }

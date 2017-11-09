@@ -113,6 +113,8 @@ class PactBodyBuilder extends BaseBuilder {
         def exampleValue = value.value
         if (exampleValue instanceof Closure) {
           bodyRepresentation[name] << invokeClosure(exampleValue, buildPath(matcherName, ALL_LIST_ITEMS))
+        } else if (exampleValue instanceof LikeMatcher) {
+          bodyRepresentation[name] << invoke(exampleValue, buildPath(matcherName, ALL_LIST_ITEMS))
         } else if (exampleValue instanceof Matcher) {
           bodyRepresentation[name] << setMatcherAttribute(exampleValue, path + buildPath(matcherName, ALL_LIST_ITEMS))
         } else if (exampleValue instanceof Pattern) {
@@ -186,6 +188,29 @@ class PactBodyBuilder extends BaseBuilder {
     tmp
   }
 
+  private invoke(LikeMatcher matcher, String subPath) {
+    def oldpath = path
+    path += subPath
+    bodyStack.push(bodyRepresentation)
+    bodyRepresentation = []
+    def value = setMatcherAttribute(matcher, path)
+    matcher.numberExamples.times { index ->
+      if (value instanceof List) {
+        bodyRepresentation << build(value as List, path)
+      } else if (value instanceof Closure) {
+        bodyRepresentation << invokeClosure(value, ALL_LIST_ITEMS)
+      } else if (value instanceof Matcher) {
+        bodyRepresentation << setMatcherAttribute(value, path + START_LIST + STAR + END_LIST)
+      } else {
+        bodyRepresentation << matcher.value
+      }
+    }
+    path = oldpath
+    def tmp = bodyRepresentation
+    bodyRepresentation = bodyStack.pop()
+    tmp
+  }
+
   private setMatcherAttribute(Matcher value, String attributePath) {
     if (value.matcher) {
       matchers.setRule(attributePath, value.matcher)
@@ -198,7 +223,7 @@ class PactBodyBuilder extends BaseBuilder {
 
   def build(List array, String path = '') {
     def index = 0
-    bodyRepresentation = array.collect {
+    array.collect {
       if (it instanceof Closure) {
         invokeClosure(it, START_LIST + (index++) + END_LIST)
       } else if (it instanceof Matcher) {
@@ -208,22 +233,19 @@ class PactBodyBuilder extends BaseBuilder {
         it
       }
     }
-    this
   }
 
   def build(LikeMatcher matcher) {
     setMatcherAttribute(matcher, path)
     if (matcher.value instanceof List) {
-      build(matcher.value as List, path)
-      bodyRepresentation = [ bodyRepresentation ]
+      [ build(matcher.value as List, path) ]
     } else if (matcher.value instanceof Closure) {
-      bodyRepresentation = [ invokeClosure(matcher.value, ALL_LIST_ITEMS) ]
+      [ invokeClosure(matcher.value, ALL_LIST_ITEMS) ]
     } else if (matcher.value instanceof Matcher) {
-      bodyRepresentation = [ setMatcherAttribute(matcher.value, path + START_LIST + STAR + END_LIST) ]
+      [ setMatcherAttribute(matcher.value, path + START_LIST + STAR + END_LIST) ]
     } else {
-      bodyRepresentation = [ matcher.value ]
+      [ matcher.value ]
     }
-    this
   }
 
 }
