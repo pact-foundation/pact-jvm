@@ -498,6 +498,7 @@ class PactBodyBuilderSpec extends Specification {
     ]
   }
 
+  @SuppressWarnings('AbcMetric')
   def 'supports matching arrays of arrays'() {
     given:
     service {
@@ -523,8 +524,8 @@ class PactBodyBuilderSpec extends Specification {
             }
           )
           answer3 eachArrayLike {
-            questionId string("title")
-            answer string("BBBB")
+            questionId string('title')
+            answer string('BBBB')
           }
         }
       }
