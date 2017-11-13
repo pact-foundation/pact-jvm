@@ -106,7 +106,7 @@ public class PactBrokerLoader implements PactLoader {
     try {
       List<ConsumerInfo> consumers;
       PactBrokerClient pactBrokerClient = newPactBrokerClient(uriBuilder.build());
-      if (StringUtils.isEmpty(tag)) {
+      if (StringUtils.isEmpty(tag) || tag.equals(LATEST)) {
         consumers = pactBrokerClient.fetchConsumers(providerName).stream()
           .map(ConsumerInfo::from).collect(toList());
       } else {
