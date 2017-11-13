@@ -7,6 +7,8 @@ import au.com.dius.pact.model.PactReader;
 import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.broker.PactBrokerClient;
+import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver;
+import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
@@ -40,6 +42,7 @@ public class PactBrokerLoader implements PactLoader {
   private boolean failIfNoPactsFound;
   private PactBrokerAuth authentication;
   private PactBrokerSource pactSource;
+  private Class<? extends ValueResolver> valueResolver;
 
   public PactBrokerLoader(final String pactBrokerHost, final String pactBrokerPort, final String pactBrokerProtocol) {
       this(pactBrokerHost, pactBrokerPort, pactBrokerProtocol, Collections.singletonList(LATEST));
@@ -59,6 +62,7 @@ public class PactBrokerLoader implements PactLoader {
       this(pactBroker.host(), pactBroker.port(), pactBroker.protocol(), Arrays.asList(pactBroker.tags()));
       this.failIfNoPactsFound = pactBroker.failIfNoPactsFound();
       this.authentication = pactBroker.authentication();
+      this.valueResolver = pactBroker.valueResolver();
   }
 
   public List<Pact> load(final String providerName) throws IOException {
@@ -81,15 +85,23 @@ public class PactBrokerLoader implements PactLoader {
 
   private List<Pact> loadPactsForProvider(final String providerName, final String tag) throws IOException {
     LOGGER.debug("Loading pacts from pact broker for provider " + providerName + " and tag " + tag);
-    String protocol = parseExpression(pactBrokerProtocol);
-    String host = parseExpression(pactBrokerHost);
-    String port = parseExpression(pactBrokerPort);
+    ValueResolver resolver = new SystemPropertyResolver();
+    if (valueResolver != null) {
+      try {
+        resolver = valueResolver.newInstance();
+      } catch (InstantiationException | IllegalAccessException e) {
+        LOGGER.warn("Failed to instantiate the value resolver, using the default", e);
+      }
+    }
+    String protocol = parseExpression(pactBrokerProtocol, resolver);
+    String host = parseExpression(pactBrokerHost, resolver);
+    String port = parseExpression(pactBrokerPort, resolver);
     if(!port.matches("^[0-9]+")){
       throw new IllegalArgumentException(String.format("Invalid pact broker port specified ('%s'). "
           + "Please provide a valid port number or specify the system property 'pactbroker.port'.", pactBrokerPort));
     }
     URIBuilder uriBuilder = new URIBuilder().setScheme(protocol)
-      .setHost(parseExpression(host))
+      .setHost(parseExpression(host, resolver))
       .setPort(Integer.parseInt(port));
     try {
       List<ConsumerInfo> consumers;

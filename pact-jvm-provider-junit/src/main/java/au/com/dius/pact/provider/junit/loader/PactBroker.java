@@ -1,5 +1,8 @@
 package au.com.dius.pact.provider.junit.loader;
 
+import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver;
+import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -47,4 +50,9 @@ public @interface PactBroker {
    * Authentication to use with the pact broker, by default no authentication is used
    */
   PactBrokerAuth authentication() default @PactBrokerAuth(scheme = "${pactbroker.auth.scheme:basic}", username = "${pactbroker.auth.username:}", password = "${pactbroker.auth.password:}");
+
+  /**
+   * Override the default value resolver for resolving the values in the expressions
+   */
+  Class<? extends ValueResolver> valueResolver() default SystemPropertyResolver.class;
 }
