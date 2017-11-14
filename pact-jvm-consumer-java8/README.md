@@ -3,7 +3,7 @@ Provides a Java8 lambda based DSL for use with Junit to build consumer tests.
 
 # A Lambda DSL for Pact
 
-This is an extension for the pact DSL provided by [pact-jvm-consumer](pact-jvm-consumer). The difference between
+This is an extension for the pact DSL provided by [pact-jvm-consumer](../pact-jvm-consumer). The difference between
 the default pact DSL and this lambda DSL is, as the name suggests, the usage of lambdas. The use of lambdas makes the code much cleaner.
 
 ## Why a new DSL implementation?
