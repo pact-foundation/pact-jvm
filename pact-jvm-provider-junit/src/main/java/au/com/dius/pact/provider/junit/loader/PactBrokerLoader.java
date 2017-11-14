@@ -67,8 +67,7 @@ public class PactBrokerLoader implements PactLoader {
 
   public List<Pact> load(final String providerName) throws IOException {
     List<Pact> pacts = new ArrayList<>();
-    if (pactBrokerTags == null || pactBrokerTags.isEmpty() || pactBrokerTags.size() == 1 &&
-      pactBrokerTags.contains(LATEST)) {
+    if (pactBrokerTags == null || pactBrokerTags.isEmpty()) {
       pacts.addAll(loadPactsForProvider(providerName, null));
     } else {
       for (String tag : pactBrokerTags) {
