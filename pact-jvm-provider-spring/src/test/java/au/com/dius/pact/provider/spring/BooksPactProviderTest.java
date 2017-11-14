@@ -17,6 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
@@ -62,6 +64,7 @@ public class BooksPactProviderTest {
 
         target.setControllers(bookController, novelController);
         target.setControllerAdvice(bookControllerAdviceOne, bookControllerAdviceTwo);
+        target.setServletPath("/api");
 
         target.setMessageConvertors(
             new MappingJackson2HttpMessageConverter(
@@ -115,8 +118,9 @@ public class BooksPactProviderTest {
         // Prove that we can provide MockMvcTarget with our own pre-build MockMvc for situations where we need greater control over
         // how MockMvc is configured; in this instance the request needs a custom argum
         target.setMockMvc(MockMvcBuilders.standaloneSetup(bookController)
-                                         .setCustomArgumentResolvers(new BookTypeArgumentResolver())
-                                         .build());
+          .setCustomArgumentResolvers(new BookTypeArgumentResolver())
+          .defaultRequest(MockMvcRequestBuilders.get("/").servletPath("/api"))
+          .build());
 
         List<Book> bookList = new ArrayList<>();
         bookList.add(new Book(UUID.randomUUID(), "Bob Jones", true, DATE_TIME));

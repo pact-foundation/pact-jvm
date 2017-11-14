@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.spring.target;
 
 import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.model.PactSource;
+import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.PactVerification;
@@ -12,10 +13,13 @@ import au.com.dius.pact.provider.junit.TargetRequestFilter;
 import au.com.dius.pact.provider.junit.target.BaseTarget;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.spring.MvcProviderVerifier;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpRequest;
 import org.junit.runners.model.FrameworkMethod;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -41,8 +45,9 @@ public class MockMvcTarget extends BaseTarget {
     private boolean printRequestResponse;
     private int runTimes;
     private MockMvc mockMvc;
+    private String servletPath;
 
-    public MockMvcTarget() {
+  public MockMvcTarget() {
         this(Collections.emptyList());
     }
 
@@ -104,9 +109,17 @@ public class MockMvcTarget extends BaseTarget {
         );
     }
 
-    public void setMockMvc(MockMvc mockMvc) {
+  public void setMockMvc(MockMvc mockMvc) {
         this.mockMvc = mockMvc;
     }
+
+  /**
+   * Sets the servlet path on the default request, if one is required
+   * @param servletPath The servlet path prefix
+   */
+  public void setServletPath(String servletPath) {
+    this.servletPath = servletPath;
+  }
 
   /**
      * {@inheritDoc}
@@ -142,9 +155,14 @@ public class MockMvcTarget extends BaseTarget {
             return mockMvc;
         }
 
-        return standaloneSetup(controllers.toArray())
+      MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/");
+      if (StringUtils.isNoneEmpty(servletPath)) {
+        requestBuilder.servletPath(servletPath);
+      }
+      return standaloneSetup(controllers.toArray())
             .setControllerAdvice(controllerAdvice.toArray())
             .setMessageConverters(getMessageConverterArray())
+            .defaultRequest(requestBuilder)
             .build();
     }
 
@@ -165,8 +183,10 @@ public class MockMvcTarget extends BaseTarget {
         verifier.initialiseReporters(provider);
         verifier.reportVerificationForConsumer(consumer, provider);
 
-        if (interaction.getProviderState() != null) {
-            verifier.reportStateForInteraction(interaction.getProviderState(), provider, consumer, true);
+        if (!interaction.getProviderStates().isEmpty()) {
+          for (ProviderState state: interaction.getProviderStates()) {
+            verifier.reportStateForInteraction(state.getName(), provider, consumer, true);
+          }
         }
 
         verifier.reportInteractionDescription(interaction);
@@ -202,4 +222,3 @@ public class MockMvcTarget extends BaseTarget {
     }
 
 }
-

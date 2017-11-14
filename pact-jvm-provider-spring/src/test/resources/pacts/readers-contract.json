@@ -10,7 +10,7 @@
     "description" : "Get book",
     "request" : {
       "method" : "GET",
-      "path" : "/books/90f1787e-9f39-4e42-b897-b59d29"
+      "path" : "/api/books/90f1787e-9f39-4e42-b897-b59d29"
     },
     "response" : {
       "status" : 200,
@@ -41,7 +41,7 @@
     "description" : "Get non-existent book",
     "request" : {
       "method" : "GET",
-      "path" : "/books/90f1787e-9f39-4e42-b897-b59d29"
+      "path" : "/api/books/90f1787e-9f39-4e42-b897-b59d29"
     },
     "response" : {
       "status" : 404
@@ -51,7 +51,7 @@
     "description" : "Get novel",
     "request" : {
       "method" : "GET",
-      "path" : "/novels/90f1787e-9f39-4e42-b897-b59d29"
+      "path" : "/api/novels/90f1787e-9f39-4e42-b897-b59d29"
     },
     "response" : {
       "status" : 200,
