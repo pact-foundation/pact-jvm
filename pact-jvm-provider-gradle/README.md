@@ -587,6 +587,21 @@ pact {
 }
 ```
 
+You can set any tags that the pacts should be published with by setting the `tags` property. A common use of this
+is setting the tag to the current source control branch. This supports using pact with feature branches.
+
+```groovy
+pact {
+
+    publish {
+        pactDirectory = '/pact/dir' // defaults to $buildDir/pacts
+        pactBrokerUrl = 'http://pactbroker:1234'
+        tags = [project.pactBrokerTag]
+    }
+
+}
+```
+
 _NOTE:_ The pact broker requires a version for all published pacts. The `pactPublish` task will use the version of the
 gradle project by default. Make sure you have set one otherwise the broker will reject the pact files.
 
