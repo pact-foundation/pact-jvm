@@ -154,17 +154,32 @@ class PactBrokerLoaderSpec extends Specification {
 
   def 'Loads pacts for each provided tag'() {
     given:
-    tags = ['latest', 'a', 'b', 'c']
+    tags = ['a', 'b', 'c']
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumersWithTag('test', 'latest') >> [ new PactBrokerConsumer('test', 'latest', '', []) ]
     1 * brokerClient.fetchConsumersWithTag('test', 'a') >> [ new PactBrokerConsumer('test', 'a', '', []) ]
     1 * brokerClient.fetchConsumersWithTag('test', 'b') >> [ new PactBrokerConsumer('test', 'b', '', []) ]
     1 * brokerClient.fetchConsumersWithTag('test', 'c') >> [ new PactBrokerConsumer('test', 'c', '', []) ]
-    result.size() == 4
+    0 * _
+    result.size() == 3
+  }
+
+  def 'Loads latest pacts together with other tags'() {
+    given:
+    tags = ['a', 'latest', 'b']
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    1 * brokerClient.fetchConsumersWithTag('test', 'a') >> [ new PactBrokerConsumer('test', 'a', '', []) ]
+    1 * brokerClient.fetchConsumers('test') >> [ new PactBrokerConsumer('test', 'latest', '', []) ]
+    1 * brokerClient.fetchConsumersWithTag('test', 'b') >> [ new PactBrokerConsumer('test', 'b', '', []) ]
+    0 * _
+    result.size() == 3
   }
 
   @RestoreSystemProperties
