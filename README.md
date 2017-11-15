@@ -7,7 +7,7 @@ pact-jvm
 [![Appveyor build status](https://ci.appveyor.com/api/projects/status/172049m2sa57takc?svg=true)](https://ci.appveyor.com/project/uglyog/pact-jvm)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-model/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-model)
 
-JVM implementation of the consumer driven contract library [pact](https://github.com/bethesque/pact_specification).
+JVM implementation of the consumer driven contract library [pact](https://github.com/pact-foundation/pact-specification).
 
 From the [Ruby Pact website](https://github.com/realestate-com-au/pact):
 
@@ -52,7 +52,7 @@ module has a Jar file named pact-jvm-consumer_2.12. The full name of the file is
 | Branch | Specification | Min JDK | Scala Versions | Latest Version |
 | ------ | ------------- | ------- | -------------- | -------------- |
 | 3.5.x | V3 | 8 | 2.12, 2.11 | 3.5.8 |
-| 3.5.x-jre7 | V3 | 7 | 2.11 | 3.5.8-jre7.0 |
+| 3.5.x-jre7 | V3 | 7 | 2.11 | 3.5.7-jre7.0 |
 | 2.4.x (v2.x) | V2 | 6 | 2.10, 2.11 | 2.4.19 |
 
 ## Service Consumers
@@ -65,7 +65,8 @@ You want to look at: [scala-pact](https://github.com/ITV/scala-pact) or [pact-jv
 
 ### I Use Java
 
-You want to look at: [pact-jvm-consumer-junit](pact-jvm-consumer-junit)
+You want to look at: [pact-jvm-consumer-junit](pact-jvm-consumer-junit). Also, if you are using Java 8, there is [an
+updated DSL for consumer tests](pact-jvm-consumer-java8).
 
 ### I Use Groovy or Grails
 
@@ -151,7 +152,7 @@ There's a limit to how much we can help, however check out [pact-jvm-server](pac
 ## How do I transport my pacts from consumers to providers?
 
 You want to look at:
-[Pact Broker](https://github.com/bethesque/pact_broker)
+[Pact Broker](https://github.com/pact-foundation/pact_broker)
 
 Which is a project that aims at providing tooling to coordinate pact generation and delivery between projects.
 

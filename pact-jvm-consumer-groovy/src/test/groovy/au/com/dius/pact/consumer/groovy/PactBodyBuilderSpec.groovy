@@ -466,6 +466,101 @@ class PactBodyBuilderSpec extends Specification {
     ]
   }
 
+  def 'supports matching arrays of arrays at root level'() {
+    given:
+    service {
+      uponReceiving('a request with arrays of arrays at the root')
+      withAttributes(method: 'get', path: '/')
+      withBody PactBodyBuilder.eachLike([ regexp('[0-9a-f]{8}', 'e8cda07e'), regexp(~/\w+/, 'sony') ]),
+        prettyPrint: false
+      willRespondWith(status: 200)
+      withBody PactBodyBuilder.eachLike(regexp('\\w+', 'test')), prettyPrint: false
+    }
+    def expectedMatchingRules = [
+      '$': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$[0]': new MatchingRuleGroup([new RegexMatcher('[0-9a-f]{8}', 'e8cda07e')]),
+      '$[1]': new MatchingRuleGroup([new RegexMatcher('\\w+', 'sony')]),
+    ]
+
+    when:
+    service.buildInteractions()
+    def request = service.interactions.first().request
+    def response = service.interactions.first().response
+
+    then:
+    request.body.value == '[["e8cda07e","sony"]]'
+    request.matchingRules.rulesForCategory('body').matchingRules == expectedMatchingRules
+
+    response.body.value == '["test"]'
+    response.matchingRules.rulesForCategory('body').matchingRules == [
+      '$': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$[*]': new MatchingRuleGroup([new RegexMatcher('\\w+', 'test')])
+    ]
+  }
+
+  @SuppressWarnings('AbcMetric')
+  def 'supports matching arrays of arrays'() {
+    given:
+    service {
+      uponReceiving('a request with arrays of arrays')
+      withAttributes(method: 'get', path: '/')
+      withBody(prettyPrint: false) {
+        answers minLike(1) {
+          questionId string('books')
+          answer eachLike([
+            {
+              questionId string('title')
+              answer string('BBBB')
+            },
+            {
+              questionId string('author')
+              answer string('B.B.')
+            }
+          ])
+          answer2 eachLike(2,
+            eachLike(2) {
+              questionId string('title')
+              answer string('BBBB')
+            }
+          )
+          answer3 eachArrayLike {
+            questionId string('title')
+            answer string('BBBB')
+          }
+        }
+      }
+      willRespondWith(status: 200)
+    }
+    def expectedMatchingRules = [
+      '$.answers': new MatchingRuleGroup([new MinTypeMatcher(1)]),
+      '$.answers[*].questionId': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer[0].questionId': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer[0].answer': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer[1].questionId': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer[1].answer': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer2': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer2[*]': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer2[*][*].questionId': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer2[*][*].answer': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer3': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer3[*]': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer3[*][*].questionId': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.answers[*].answer3[*][*].answer': new MatchingRuleGroup([TypeMatcher.INSTANCE])
+    ]
+
+    when:
+    service.buildInteractions()
+    def request = service.interactions.first().request
+
+    then:
+    request.body.value == '{"answers":[{"questionId":"books","answer":[[{"questionId":"title","answer":"BBBB"},' +
+      '{"questionId":"author","answer":"B.B."}]],"answer2":[[{"questionId":"title","answer":"BBBB"},' +
+      '{"questionId":"title","answer":"BBBB"}],[{"questionId":"title","answer":"BBBB"},' +
+      '{"questionId":"title","answer":"BBBB"}]],"answer3":[[{"questionId":"title","answer":"BBBB"}]]}]}'
+    request.matchingRules.rulesForCategory('body').matchingRules == expectedMatchingRules
+  }
+
   private List walkGraph(def value) {
       def set = []
       if (value instanceof Map) {

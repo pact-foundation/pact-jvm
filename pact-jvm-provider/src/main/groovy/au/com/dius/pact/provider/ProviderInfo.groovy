@@ -11,7 +11,7 @@ import groovy.transform.ToString
  */
 @ToString
 @EqualsAndHashCode
-class ProviderInfo {
+class ProviderInfo implements IProviderInfo {
     String protocol = 'http'
     def host = 'localhost'
     def port = 8080

@@ -1,6 +1,7 @@
 def crossCompileModules = [
   'pact-jvm-consumer',
   'pact-jvm-consumer-junit',
+  'pact-jvm-consumer-java8',
   'pact-jvm-consumer-specs2',
   'pact-jvm-consumer-groovy',
   'pact-jvm-provider',

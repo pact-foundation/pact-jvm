@@ -9,59 +9,45 @@ import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.StateChange
 import spock.lang.Specification
 
 class ProviderVerifierStateChangeSpec extends Specification {
 
   private ProviderVerifier providerVerifier
   private ProviderInfo providerInfo
-  private Closure consumer
-  private makeStateChangeRequestArgs
-  private final consumerMap = [name: 'bob']
-  private mockProviderClient
+  private ConsumerInfo consumer
+  private ProviderClient providerClient
 
   def setup() {
     providerInfo = new ProviderInfo()
-    consumer = { consumerMap as ConsumerInfo }
+    consumer = new ConsumerInfo(name: 'Bob')
     providerVerifier = new ProviderVerifier()
-    makeStateChangeRequestArgs = []
-    mockProviderClient = [
-      makeStateChangeRequest: { arg1, arg2, arg3, arg4, arg5 ->
-        makeStateChangeRequestArgs << [arg1, arg2, arg3, arg4, arg5]
-        null
-      },
-      makeRequest: { [statusCode: 200, headers: [:], data: '{}', contentType: 'application/json'] }
-    ] as ProviderClient
-    ProviderClient.metaClass.constructor = { args -> mockProviderClient }
-  }
-
-  def cleanup() {
-    GroovySystem.metaClassRegistry.setMetaClass(ProviderClient, null)
+    providerClient = Mock()
   }
 
   def 'if teardown is set then a statechage teardown request is made after the test'() {
-    def state = new ProviderState('state of the nation')
     given:
+    def state = new ProviderState('state of the nation')
     def interaction = new RequestResponseInteraction('provider state test', [state],
       new Request(), new Response(200, [:], OptionalBody.body('{}')))
     def failures = [:]
-    consumerMap.stateChange = 'http://localhost:2000/hello'
+    consumer.stateChange = 'http://localhost:2000/hello'
     providerInfo.stateChangeTeardown = true
+    GroovyMock(StateChange, global: true)
 
     when:
-    providerVerifier.verifyInteraction(providerInfo, consumer(), failures, interaction)
+    providerVerifier.verifyInteraction(providerInfo, consumer, failures, interaction)
 
     then:
-    makeStateChangeRequestArgs == [
-      [new URI('http://localhost:2000/hello'), state, true, true, true],
-      [new URI('http://localhost:2000/hello'), state, true, false, true]
-    ]
+    1 * StateChange.executeStateChange(*_) >> new StateChange.StateChangeResult(true, 'interactionMessage')
+    1 * StateChange.executeStateChangeTeardown(providerVerifier, interaction, providerInfo, consumer, _)
   }
 
   def 'if the state change is a closure and teardown is set, executes it with the state change as a parameter'() {
     given:
     def closureArgs = []
-    consumerMap.stateChange = { arg1, arg2 ->
+    consumer.stateChange = { arg1, arg2 ->
       closureArgs << [arg1, arg2]
       true
     }
@@ -72,10 +58,11 @@ class ProviderVerifierStateChangeSpec extends Specification {
     providerInfo.stateChangeTeardown = true
 
     when:
-    providerVerifier.verifyInteraction(providerInfo, consumer(), failures, interaction)
+    StateChange.executeStateChange(providerVerifier, providerInfo, consumer, interaction, 'state of the nation',
+      failures, providerClient)
+    StateChange.executeStateChangeTeardown(providerVerifier, interaction, providerInfo, consumer, providerClient)
 
     then:
-    makeStateChangeRequestArgs == []
     closureArgs == [[state, 'setup'], [state, 'teardown']]
   }
 

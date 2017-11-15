@@ -71,7 +71,7 @@ object JsonContentTypeHandler : ContentTypeHandler {
         is PathToken.Star -> if (bodyCursor.value is MutableMap<*, *>) {
           val map = bodyCursor.value as MutableMap<*, *>
           val pathIterator = IteratorUtils.toList(pathExp)
-          HashMap(map).forEach { (key, value) ->
+          map.forEach { (key, value) ->
             queryObjectGraph(pathIterator.iterator(), QueryResult(value!!, key, map), fn)
           }
           return
@@ -96,7 +96,7 @@ object JsonContentTypeHandler : ContentTypeHandler {
 
 }
 
-data class Generators(val categories: MutableMap<Category, MutableMap<String, Generator>> = HashMap()) {
+data class Generators(val categories: MutableMap<Category, MutableMap<String, Generator>> = mutableMapOf()) {
 
   companion object : KLogging() {
 

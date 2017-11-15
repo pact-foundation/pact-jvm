@@ -241,14 +241,14 @@ public class PactJUnitTest {
 
 #### Filtering by Provider State
 
-You can filter the interactions that are executed by adding a `@PactFilter` annotation to your test class and set the
-JUnit runner to `FilteredPactRunner`. The pact filter annotation will then only verify interactions that have a matching
-provider state. You can provide multiple states to match with.
+You can filter the interactions that are executed by adding a `@PactFilter` annotation to your test class. The pact 
+filter annotation will then only verify interactions that have a matching provider state. You can provide multiple 
+states to match with.
 
 For example: 
 
 ```java
-@RunWith(FilteredPactRunner.class)
+@RunWith(PactRunner.class)
 @Provider("Activity Service")
 @PactBroker(host = "localhost", port = "80")
 @PactFilter('Activity 100 exists in the database')
@@ -263,7 +263,7 @@ public class PactJUnitTest {
 You can also use regular expressions with the filter [version 3.5.3+]. For example:
 
 ```java
-@RunWith(FilteredPactRunner.class)
+@RunWith(PactRunner.class)
 @PactFilter('Activity \\d+ exists in the database')
 public class PactJUnitTest {
 

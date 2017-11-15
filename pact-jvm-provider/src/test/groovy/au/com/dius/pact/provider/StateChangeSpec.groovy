@@ -12,7 +12,7 @@ class StateChangeSpec extends Specification {
   private ProviderState state
   private makeStateChangeRequestArgs
   private final consumerMap = [name: 'bob']
-  private mockProviderClient
+  private ProviderClient mockProviderClient
 
   def setup() {
     state = new ProviderState('there is a state')
@@ -20,18 +20,13 @@ class StateChangeSpec extends Specification {
     consumer = { consumerMap as ConsumerInfo }
     providerVerifier = new ProviderVerifier()
     makeStateChangeRequestArgs = []
-    mockProviderClient = [
-      makeStateChangeRequest: { arg1, arg2, arg3, arg4, arg5 ->
-        makeStateChangeRequestArgs << [arg1, arg2, arg3, arg4, arg5]
+    mockProviderClient = Mock(ProviderClient) {
+      makeStateChangeRequest(_, _, _, _, _) >> { args ->
+        makeStateChangeRequestArgs << args
         null
-      },
-      makeRequest: { [statusCode: 200, headers: [:], data: '{}', contentType: 'application/json'] }
-    ] as ProviderClient
-    ProviderClient.metaClass.constructor = { args -> mockProviderClient }
-  }
-
-  def cleanup() {
-    GroovySystem.metaClassRegistry.setMetaClass(ProviderClient, null)
+      }
+      makeRequest(_) >> [statusCode: 200, headers: [:], data: '{}', contentType: 'application/json']
+    }
   }
 
   def 'if the state change is null, does nothing'() {
@@ -39,7 +34,8 @@ class StateChangeSpec extends Specification {
     consumerMap.stateChange = null
 
     when:
-    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true)
+    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true,
+      mockProviderClient)
 
     then:
     result
@@ -51,7 +47,8 @@ class StateChangeSpec extends Specification {
     consumerMap.stateChange = ''
 
     when:
-    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true)
+    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true,
+      mockProviderClient)
 
     then:
     result
@@ -63,7 +60,8 @@ class StateChangeSpec extends Specification {
     consumerMap.stateChange = '      '
 
     when:
-    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true)
+    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true,
+      mockProviderClient)
 
     then:
     result
@@ -75,7 +73,8 @@ class StateChangeSpec extends Specification {
     consumerMap.stateChange = 'http://localhost:2000/hello'
 
     when:
-    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true)
+    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true,
+      mockProviderClient)
 
     then:
     result
@@ -90,7 +89,8 @@ class StateChangeSpec extends Specification {
     consumerMap.stateChange = { arg -> closureArgs << arg; true }
 
     when:
-    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true)
+    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true,
+      mockProviderClient)
 
     then:
     result
@@ -103,7 +103,8 @@ class StateChangeSpec extends Specification {
     consumerMap.stateChange = 'blah blah blah'
 
     when:
-    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true)
+    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true,
+      mockProviderClient)
 
     then:
     result
@@ -120,7 +121,8 @@ class StateChangeSpec extends Specification {
     ] as Interaction
 
     when:
-    def result = StateChange.executeStateChange(providerVerifier, providerInfo, consumer(), interaction, '', [:])
+    def result = StateChange.executeStateChange(providerVerifier, providerInfo, consumer(), interaction,
+      '', [:], mockProviderClient)
 
     then:
     result.stateChangeOk

@@ -20,7 +20,7 @@ import java.security.cert.X509Certificate
  * HTTP Client Factory
  */
 @SuppressWarnings('FactoryMethodName')
-class HttpClientFactory {
+class HttpClientFactory implements IHttpClientFactory {
 
     CloseableHttpClient newClient(def provider) {
         if (provider?.createClient != null) {

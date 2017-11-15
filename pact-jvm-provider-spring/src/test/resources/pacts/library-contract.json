@@ -10,7 +10,7 @@
     "description" : "Get all books",
     "request" : {
       "method" : "GET",
-      "path" : "/books"
+      "path" : "/api/books"
     },
     "response" : {
       "status" : 200,
@@ -45,7 +45,7 @@
     "description" : "Get all books by type",
     "request" : {
       "method" : "GET",
-      "path" : "/books",
+      "path" : "/api/books",
       "query": "type=fiction",
     },
     "response" : {
@@ -80,7 +80,7 @@
     "description" : "Get best selling books",
     "request" : {
       "method" : "GET",
-      "path" : "/books",
+      "path" : "/api/books",
       "query": "bestSeller=true",
     },
     "response" : {

@@ -20,8 +20,6 @@ class PactBrokerClient extends PactBrokerClientBase {
 
   private static final String LATEST_PROVIDER_PACTS = 'pb:latest-provider-pacts'
   private static final String LATEST_PROVIDER_PACTS_WITH_TAG = 'pb:latest-provider-pacts-with-tag'
-  private static final String PACTS = 'pacts'
-  private static final String UTF8 = 'UTF-8'
 
   PactBrokerClient(String pactBrokerUrl, Map<String, ?> options) {
     super(pactBrokerUrl, options)

@@ -6,7 +6,10 @@ import au.com.dius.pact.model.Request
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.provider.GroovyScalaUtils$
 import au.com.dius.pact.provider.HttpClientFactory
+import au.com.dius.pact.provider.IHttpClientFactory
+import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.ProviderClient
+import au.com.dius.pact.provider.ProviderInfo
 import groovy.json.JsonBuilder
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpRequest
@@ -17,36 +20,39 @@ import org.apache.http.impl.client.CloseableHttpClient
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.lang.reflect.InvocationTargetException
+
 @SuppressWarnings(['ClosureAsLastMethodParameter', 'MethodCount'])
 class ProviderClientSpec extends Specification {
 
   private ProviderClient client
-  private provider
+  private IProviderInfo provider
   private HttpRequest httpRequest
   private ProviderState state
-  private HttpClientFactory httpClientFactory
+  private IHttpClientFactory httpClientFactory
   private CloseableHttpClient httpClient
+  private Request request
 
   def setup() {
-    provider = [
+    provider = new ProviderInfo(
       protocol: 'http',
       host: 'localhost',
       port: 8080,
       path: '/'
-    ]
+    )
     httpClient = Mock CloseableHttpClient
-    httpClientFactory = Mock HttpClientFactory
-    client = GroovySpy(ProviderClient, constructorArgs: [[provider: provider, httpClientFactory: httpClientFactory]])
+    httpClientFactory = Mock IHttpClientFactory
+    client = Spy(ProviderClient, constructorArgs: [provider, httpClientFactory])
     httpRequest = Mock HttpRequest
     state = new ProviderState('provider state')
   }
 
   def 'setting up headers does nothing if there are no headers'() {
     given:
-    client.request = new Request('PUT', '/')
+    request = new Request('PUT', '/')
 
     when:
-    client.setupHeaders(httpRequest)
+    client.setupHeaders(request, httpRequest)
 
     then:
     0 * httpRequest._
@@ -60,10 +66,10 @@ class ProviderClientSpec extends Specification {
       B: 'b',
       C: 'c'
     ]
-    client.request = new Request('PUT', '/', null, headers)
+    request = new Request('PUT', '/', null, headers)
 
     when:
-    client.setupHeaders(httpRequest)
+    client.setupHeaders(request, httpRequest)
 
     then:
     1 * httpRequest.containsHeader('Content-Type') >> true
@@ -81,10 +87,10 @@ class ProviderClientSpec extends Specification {
       B: 'b',
       C: 'c'
     ]
-    client.request = new Request('PUT', '/', null, headers)
+    request = new Request('PUT', '/', null, headers)
 
     when:
-    client.setupHeaders(httpRequest)
+    client.setupHeaders(request, httpRequest)
 
     then:
     1 * httpRequest.containsHeader('Content-Type') >> false
@@ -98,7 +104,7 @@ class ProviderClientSpec extends Specification {
 
   def 'setting up body does nothing if the request is not an instance of HttpEntityEnclosingRequest'() {
     when:
-    client.setupBody(httpRequest)
+    client.setupBody(new Request(), httpRequest)
 
     then:
     0 * httpRequest._
@@ -107,50 +113,60 @@ class ProviderClientSpec extends Specification {
   def 'setting up body does nothing if it is not a post and there is no body'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
-    client.request = new Request('PUT', '/')
+    request = new Request('PUT', '/')
 
     when:
-    client.setupBody(httpRequest)
+    client.setupBody(request, httpRequest)
 
     then:
     0 * httpRequest._
   }
 
+  @Unroll
   def 'setting up body sets a string entity if it is not a url encoded form post and there is a body'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
-    client.request = new Request('PUT', '/', null, null, OptionalBody.body('{}'))
+    request = new Request('PUT', '/', query, [:], OptionalBody.body('{}'))
 
     when:
-    client.setupBody(httpRequest)
+    client.setupBody(request, httpRequest)
 
     then:
     1 * httpRequest.setEntity { it instanceof StringEntity && it.content.text == '{}' }
     0 * httpRequest._
+
+    where:
+
+    query << [ [:], null ]
   }
 
+  @Unroll
   def 'setting up body sets a string entity if it is a url encoded form post and there is no query string'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
-    client.request = new Request('POST', '/', null, ['Content-Type': ContentType.APPLICATION_FORM_URLENCODED.mimeType],
+    request = new Request('POST', '/', query, ['Content-Type': ContentType.APPLICATION_FORM_URLENCODED.mimeType],
       OptionalBody.body('A=B'))
 
     when:
-    client.setupBody(httpRequest)
+    client.setupBody(request, httpRequest)
 
     then:
     1 * httpRequest.setEntity { it instanceof StringEntity && it.content.text == 'A=B' }
     0 * httpRequest._
+
+    where:
+
+    query << [ [:], null ]
   }
 
   def 'setting up body sets a UrlEncodedFormEntity entity if it is urlencoded form post and there is a query string'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
-    client.request = new Request('POST', '/', ['A': ['B', 'C']], ['Content-Type': 'application/x-www-form-urlencoded'],
+    request = new Request('POST', '/', ['A': ['B', 'C']], ['Content-Type': 'application/x-www-form-urlencoded'],
       OptionalBody.body('{}'))
 
     when:
-    client.setupBody(httpRequest)
+    client.setupBody(request, httpRequest)
 
     then:
     1 * httpRequest.setEntity { it instanceof UrlEncodedFormEntity && it.content.text == 'A=B&A=C' }
@@ -187,6 +203,7 @@ class ProviderClientSpec extends Specification {
     client.executeRequestFilter(httpRequest)
 
     then:
+    1 * client.executeRequestFilter(_)
     0 * _
   }
 
@@ -204,6 +221,7 @@ class ProviderClientSpec extends Specification {
     then:
     closureCalled
     1 * httpRequest.addHeader('A', 'B')
+    1 * client.executeRequestFilter(_)
     0 * _
   }
 
@@ -216,6 +234,7 @@ class ProviderClientSpec extends Specification {
 
     then:
     1 * httpRequest.addHeader('Scala', 'Was Called')
+    1 * client.executeRequestFilter(_)
     0 * _
   }
 
@@ -228,6 +247,7 @@ class ProviderClientSpec extends Specification {
 
     then:
     1 * httpRequest.addHeader('Groovy', 'Was Called')
+    1 * client.executeRequestFilter(_)
     0 * _
   }
 
@@ -240,6 +260,7 @@ class ProviderClientSpec extends Specification {
 
     then:
     1 * httpRequest.addHeader('Java Consumer', 'was called')
+    1 * client.executeRequestFilter(_)
     0 * _
   }
 
@@ -252,6 +273,7 @@ class ProviderClientSpec extends Specification {
 
     then:
     1 * httpRequest.addHeader('Java Function', 'was called')
+    1 * client.executeRequestFilter(_)
     0 * _
   }
 
@@ -264,6 +286,19 @@ class ProviderClientSpec extends Specification {
 
     then:
     1 * httpRequest.addHeader('Java Function', 'was called')
+    1 * client.executeRequestFilter(_)
+    0 * _
+  }
+
+  def 'execute request filter executes any Callable Function'() {
+    given:
+    provider.requestFilter = GroovyJavaUtils.callableRequestFilter()
+
+    when:
+    client.executeRequestFilter(httpRequest)
+
+    then:
+    1 * client.executeRequestFilter(_)
     0 * _
   }
 
@@ -275,7 +310,8 @@ class ProviderClientSpec extends Specification {
     client.executeRequestFilter(httpRequest)
 
     then:
-    thrown(RuntimeException)
+    thrown(InvocationTargetException)
+    1 * client.executeRequestFilter(_)
     0 * _
   }
 
@@ -287,11 +323,12 @@ class ProviderClientSpec extends Specification {
     client.executeRequestFilter(httpRequest)
 
     then:
-    thrown(RuntimeException)
+    thrown(InvocationTargetException)
+    1 * client.executeRequestFilter(_)
     0 * _
   }
 
-  def 'execute request filter throws an exception for invalid java functions'() {
+  def 'execute request filter executes any java functions that take no parameters'() {
     given:
     provider.requestFilter = GroovyJavaUtils.supplierRequestFilter()
 
@@ -299,7 +336,8 @@ class ProviderClientSpec extends Specification {
     client.executeRequestFilter(httpRequest)
 
     then:
-    thrown(IllegalArgumentException)
+    notThrown(IllegalArgumentException)
+    1 * client.executeRequestFilter(_)
     0 * _
   }
 
@@ -317,6 +355,7 @@ class ProviderClientSpec extends Specification {
 
     then:
     1 * httpRequest.addHeader('Apache Collections Closure', 'Was Called')
+    1 * client.executeRequestFilter(_)
     0 * _
   }
 

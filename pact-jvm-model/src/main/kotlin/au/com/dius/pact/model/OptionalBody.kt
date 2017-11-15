@@ -24,15 +24,12 @@ data class OptionalBody(val state: State, val value: String? = null) {
     }
 
     @JvmStatic fun body(body: String?): OptionalBody {
-      return if (body == null) {
-        nullBody()
-      } else if (body.isEmpty()) {
-        empty()
-      } else {
-        OptionalBody(State.PRESENT, body)
+      return when {
+        body == null -> nullBody()
+        body.isEmpty() -> empty()
+        else -> OptionalBody(State.PRESENT, body)
       }
     }
-
   }
 
   fun isMissing(): Boolean {

@@ -289,4 +289,13 @@ class Matchers {
   static url(String basePath, Object... pathFragments) {
     new UrlMatcher(basePath, pathFragments as List)
   }
+
+  /**
+   * Array of arrays where each element like the following object
+   * @param numberExamples Optional number of examples to generate. Defaults to 1.
+   */
+  static eachArrayLike(Integer numberExamples = 1, def arg) {
+    new EachLikeMatcher(value: new EachLikeMatcher(value: arg, numberExamples: numberExamples),
+      numberExamples: numberExamples)
+  }
 }

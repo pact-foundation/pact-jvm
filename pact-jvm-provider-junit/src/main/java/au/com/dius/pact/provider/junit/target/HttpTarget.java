@@ -3,7 +3,10 @@ package au.com.dius.pact.provider.junit.target;
 import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.model.Interaction;
+import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.provider.ConsumerInfo;
+import au.com.dius.pact.provider.HttpClientFactory;
+import au.com.dius.pact.provider.ProviderClient;
 import au.com.dius.pact.provider.ProviderInfo;
 import au.com.dius.pact.provider.ProviderVerifier;
 import au.com.dius.pact.provider.junit.Provider;
@@ -112,7 +115,8 @@ public class HttpTarget extends BaseTarget {
       ProviderVerifier verifier = setupVerifier(interaction, provider, consumer);
 
       Map<String, Object> failures = new HashMap<>();
-      verifier.verifyResponseFromProvider(provider, interaction, interaction.getDescription(), failures);
+      ProviderClient client = new ProviderClient(provider, new HttpClientFactory());
+      verifier.verifyResponseFromProvider(provider, interaction, interaction.getDescription(), failures, client);
 
       try {
         if (!failures.isEmpty()) {

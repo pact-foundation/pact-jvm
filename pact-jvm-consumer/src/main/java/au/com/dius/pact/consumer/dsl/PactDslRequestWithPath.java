@@ -129,6 +129,16 @@ public class PactDslRequestWithPath {
     }
 
     /**
+     * The encoded query string for the request
+     *
+     * @param query query string
+     */
+    public PactDslRequestWithPath encodedQuery(String query) {
+        this.query = PactReader.queryStringToMap(query, true);
+        return this;
+    }
+
+    /**
      * The body of the request
      *
      * @param body Request body in string form
@@ -330,24 +340,39 @@ public class PactDslRequestWithPath {
         return new PactDslResponse(consumerPactBuilder, this);
     }
 
-  /**
-  * Match a query parameter with a regex. A random query parameter value will be generated from the regex.
-  * @param parameter Query parameter
-  * @param regex Regular expression to match with
-  */
-  public PactDslRequestWithPath matchQuery(String parameter, String regex) {
-    return matchQuery(parameter, regex, new Generex(regex).random());
-  }
+    /**
+     * Match a query parameter with a regex. A random query parameter value will be generated from the regex.
+     *
+     * @param parameter Query parameter
+     * @param regex     Regular expression to match with
+     */
+    public PactDslRequestWithPath matchQuery(String parameter, String regex) {
+        return matchQuery(parameter, regex, new Generex(regex).random());
+    }
 
-  /**
-   * Match a query parameter with a regex.
-   * @param parameter Query parameter
-   * @param regex Regular expression to match with
-   * @param example Example value to use for the query parameter
-   */
-  public PactDslRequestWithPath matchQuery(String parameter, String regex, String example) {
-    requestMatchers.addCategory("query").addRule(parameter, new RegexMatcher(regex));
-    query.put(parameter, Collections.singletonList(example));
-    return this;
-  }
+    /**
+     * Match a query parameter with a regex.
+     *
+     * @param parameter Query parameter
+     * @param regex     Regular expression to match with
+     * @param example   Example value to use for the query parameter (unencoded)
+     */
+    public PactDslRequestWithPath matchQuery(String parameter, String regex, String example) {
+        requestMatchers.addCategory("query").addRule(parameter, new RegexMatcher(regex));
+        query.put(parameter, Collections.singletonList(example));
+        return this;
+    }
+
+    /**
+     * Match a repeating query parameter with a regex.
+     *
+     * @param parameter Query parameter
+     * @param regex     Regular expression to match with each element
+     * @param example   Example value list to use for the query parameter (unencoded)
+     */
+    public PactDslRequestWithPath matchQuery(String parameter, String regex, List<String> example) {
+        requestMatchers.addCategory("query").addRule(parameter, new RegexMatcher(regex));
+        query.put(parameter, example);
+        return this;
+    }
 }

@@ -8,7 +8,7 @@ import au.com.dius.pact.model.matchingrules.MatchingRule
 class EachLikeMatcher extends LikeMatcher {
 
   MatchingRule getMatcher() {
-    new au.com.dius.pact.model.matchingrules.TypeMatcher()
+    au.com.dius.pact.model.matchingrules.TypeMatcher.INSTANCE
   }
 
 }

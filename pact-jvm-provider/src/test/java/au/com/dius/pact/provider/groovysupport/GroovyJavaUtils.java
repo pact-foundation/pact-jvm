@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.groovysupport;
 
 import org.apache.http.HttpRequest;
 
+import java.util.concurrent.Callable;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -16,6 +17,10 @@ public class GroovyJavaUtils {
 
   public static Consumer<HttpRequest> consumerRequestFilter() {
     return request -> request.addHeader("Java Consumer", WAS_CALLED);
+  }
+
+  public static Callable<String> callableRequestFilter() {
+    return () -> "Java Callable was called";
   }
 
   public static Function<HttpRequest, HttpRequest> functionRequestFilter() {
@@ -40,10 +45,10 @@ public class GroovyJavaUtils {
   }
 
   public static BiFunction<Boolean, Long, Object> invalidFunction2RequestFilter() {
-    return (p1, p2) -> { return null; };
+    return (p1, p2) -> null;
   }
 
   public static Supplier<HttpRequest> supplierRequestFilter() {
-    return () -> { return null; };
+    return () -> null;
   }
 }

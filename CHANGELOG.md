@@ -1,5 +1,50 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.9 - Bugfix Release
+
+* 980d1cf5 - Correct version in readme (Ronald Holshausen, Wed Nov 15 13:29:38 2017 +1100)
+* a34eaddf - add readme note about publishing pacts with tags with the Gradle plugin #403 (Ronald Holshausen, Wed Nov 15 12:55:18 2017 +1100)
+* 1fd7e558 - Merge pull request #584 from artamonovkirill/master (Ronald Holshausen, Wed Nov 15 12:31:50 2017 +1100)
+* 2f76ff65 - corrected relative links in readmes (Ronald Holshausen, Wed Nov 15 10:30:59 2017 +1100)
+* 85fea9fa - Updated readmes to link to the internal pact-jvm-consumer-java8 (Ronald Holshausen, Wed Nov 15 10:28:55 2017 +1100)
+* 4545aef6 - Add pact-jvm-consumer-java8 to the project (Ronald Holshausen, Wed Nov 15 10:25:56 2017 +1100)
+* 15326cc9 - Merge commit 'e7d778f43a573abbcbc5c03a9dc26f1bbcc86c49' as 'pact-jvm-consumer-java8' (Ronald Holshausen, Wed Nov 15 09:47:11 2017 +1100)
+* e7d778f4 - Squashed 'pact-jvm-consumer-java8/' content from commit caf2ee33 (Ronald Holshausen, Wed Nov 15 09:47:11 2017 +1100)
+* 492f76fd - Allow the servlet path to be set with MockMvcTarget #580 (Ronald Holshausen, Wed Nov 15 09:36:34 2017 +1100)
+* 8dff8715 - refactor(provider-junit): removed redundant condition as it's handled in else section (Kirill Artamonov, Tue Nov 14 10:57:29 2017 +0100)
+* 49b6e12b - fix(provider-junit): fixes #527 (Kirill Artamonov, Mon Nov 13 16:01:15 2017 +0100)
+* 13555a58 - Allow the value resolver to be configured from the annotation in the PactBrokerLoader #578 (Ronald Holshausen, Mon Nov 13 13:37:52 2017 +1100)
+* 992ec596 - Merge pull request #579 from shashidesai/update-readme (Ronald Holshausen, Mon Nov 13 09:31:42 2017 +1100)
+* 85fef5a1 - Merge pull request #577 from Mordavolt/same-query-param-multiple-times (Ronald Holshausen, Mon Nov 13 09:29:19 2017 +1100)
+* b3d0553d - Fixed codenarc violation #574 (Ronald Holshausen, Thu Nov 9 14:29:39 2017 +1100)
+* e1cffe4e - updated readme for the Groovy DSL #574 (Ronald Holshausen, Thu Nov 9 14:24:59 2017 +1100)
+* 7531f753 - Added an eachArrayLike method #574 (Ronald Holshausen, Thu Nov 9 14:15:55 2017 +1100)
+* f41ae572 - Fixed codenarc violation #574 (Ronald Holshausen, Thu Nov 9 14:00:59 2017 +1100)
+* 87256e60 - Updated the Groovy DSL eachLike for arrays of arrays #574 (Ronald Holshausen, Thu Nov 9 13:43:49 2017 +1100)
+* c5cd5377 - Updated the Groovy DSL to handle eachLike at the root level #574 (Ronald Holshausen, Thu Nov 9 12:18:26 2017 +1100)
+* 4f38db41 - Handle eachLike with an array in the Groovy DSL #574 (Ronald Holshausen, Wed Nov 8 16:16:37 2017 +1100)
+* 0d9482d5 - Apply generators to the requests made by the verifier (Ronald Holshausen, Tue Nov 7 17:36:21 2017 +1100)
+* e220a9c2 - Update the readme with links to the new Java 8 DSL (Ronald Holshausen, Thu Nov 2 13:15:12 2017 +1100)
+* 55c3db97 - Correctly load pact files from paths with spaces #563 (Ronald Holshausen, Thu Nov 2 12:58:08 2017 +1100)
+* b2889bf8 - update pact broker and pact spec links (Shashi Desai, Wed Nov 1 12:45:49 2017 -0700)
+* 6a945b82 - Add matchQuery with List as example (Arturs Drozdovs, Tue Oct 31 21:37:46 2017 +0200)
+* 60f8fecd - Merge the filtering of pacts into the base pact runner #572 (Ronald Holshausen, Fri Oct 27 15:23:04 2017 +1100)
+* d625a05d - Added method to pact broker client to fetch the latest untagged pacts (Ronald Holshausen, Thu Oct 26 12:36:34 2017 +1100)
+* 1b2c3d20 - Merge branch 'thombergs-invalid-port-error' (Ronald Holshausen, Wed Oct 25 16:04:21 2017 +1100)
+* 67ccce3d - Fix codenarc errors (Ronald Holshausen, Wed Oct 25 16:03:31 2017 +1100)
+* 80b5f42d - Merge branch 'invalid-port-error' of https://github.com/thombergs/pact-jvm into thombergs-invalid-port-error (Ronald Holshausen, Wed Oct 25 15:59:21 2017 +1100)
+* 3eb3b57f - Small code cleanup in OptionalBody (Ronald Holshausen, Wed Oct 25 15:58:44 2017 +1100)
+* ab290f34 - Converted JsonBodyMatcherTest to spock (Ronald Holshausen, Wed Oct 25 15:48:22 2017 +1100)
+* cc7bb98d - Merge pull request #570 from remen/query-encoding (Ronald Holshausen, Wed Oct 25 15:52:11 2017 +1100)
+* f1ba5eb9 - Add .encodedQuery(String query) method to DSL (Petter Remen, Mon Oct 23 18:08:55 2017 +0200)
+* 8d96b481 - Fix double-decoding of query parameters (Petter Remen, Mon Oct 23 18:08:06 2017 +0200)
+* fe8bce3d - Fix regression when verifying form posts with the form parameters in the body #560 (Ronald Holshausen, Tue Oct 24 16:21:16 2017 +1100)
+* e5ab3669 - Converted ProviderClient to Kotlin and added a test for encoded form posts #560 (Ronald Holshausen, Tue Oct 24 15:51:07 2017 +1100)
+* 4b65c71c - improved error handling when not specifying a pact broker port (fixes #565) (Tom Hombergs, Thu Oct 19 21:35:17 2017 +0200)
+* d1747c8e - update changelog for release 3.5.8 (Ronald Holshausen, Fri Oct 13 13:37:22 2017 +1100)
+* 8a367feb - Updated versions in README (Ronald Holshausen, Fri Oct 13 12:28:17 2017 +1100)
+* b541003f - bump version to 3.5.9 (Ronald Holshausen, Fri Oct 13 12:27:27 2017 +1100)
+
 # 3.5.8 - Scala 2.11 - Bugfix and dependency issues
 
 * 0536b3c - Updated versions in README (Ronald Holshausen, Fri Oct 13 12:28:17 2017 +1100)
@@ -63,7 +108,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * b5c064e - Encode the parameters when uploading a pact, incase the tag has a slash #536 (Ronald Holshausen, Wed Sep 27 14:11:35 2017 +1000)
 * be9ee18 - bump version to 3.5.7-jre7.0 (Ronald Holshausen, Thu Sep 28 15:24:09 2017 +1000)
 
-# 3.5.7 - Scala 2.11 - Spring Runner, plus fixes to publishing and tags with slashes
+# 3.5.7 - Spring Runner, plus fixes to publishing and tags with slashes
 
 * f725d40 - Revert "bump version to 3.5.8" (Ronald Holshausen, Tue Oct 3 11:20:52 2017 +1100)
 * b1410ea - Merge branch 'v3.5.x' into v3.5.x-2.11 (Ronald Holshausen, Tue Oct 3 10:56:05 2017 +1100)
@@ -129,7 +174,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * f2a2602 - bump version to 3.5.6-jre7.0 (Ronald Holshausen, Thu Sep 14 12:44:59 2017 +1000)
 * b2edaa9 - Updated readme (Ronald Holshausen, Tue Sep 12 09:22:52 2017 +1000)
 
-# 3.5.6 - Scala 2.11 - Bugfixes and an enhancement to the maven plugin
+# 3.5.6 - Bugfixes and an enhancement to the maven plugin
 
 * 17ba627 - Revert "update changelog for release 3.5.7" (Ronald Holshausen, Wed Sep 27 11:35:44 2017 +1000)
 * f41810c - Revert "bump version to 3.5.7" (Ronald Holshausen, Wed Sep 27 11:35:12 2017 +1000)
@@ -246,7 +291,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 04efc56 - More jdk 7 fixes (Ronald Holshausen, Sat Oct 22 22:13:42 2016 +1100)
 * ba76baa - changes to get build working with JDK 7 (Ronald Holshausen, Sat Oct 22 21:51:48 2016 +1100)
 
-# 3.5.5 - Scala 2.11 - Bugfix Release
+# 3.5.5 - Bugfix Release
 
 * 21fd4b2 - Converted Scala 2.12 code to support 2.11 (Ronald Holshausen, Mon Sep 11 17:26:11 2017 +1000)
 * 94fa706 - Merge branch 'v3.5.x' into v3.5.x-2.11 (Ronald Holshausen, Mon Sep 11 12:43:00 2017 +1000)

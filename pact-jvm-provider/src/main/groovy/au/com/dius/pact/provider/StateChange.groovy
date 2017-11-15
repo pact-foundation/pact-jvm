@@ -20,14 +20,15 @@ class StateChange {
 
   @SuppressWarnings('ParameterCount')
   static StateChangeResult executeStateChange(ProviderVerifier verifier, ProviderInfo provider, ConsumerInfo consumer,
-                                              Interaction interaction, String interactionMessage, Map failures) {
+                                              Interaction interaction, String interactionMessage, Map failures,
+                                              ProviderClient providerClient) {
     def stateChangeOk = true
     if (interaction.providerStates) {
       def iter = interaction.providerStates.iterator()
       boolean first = true
       while (stateChangeOk && iter.hasNext()) {
         def providerState = iter.next()
-        stateChangeOk = stateChange(verifier, providerState, provider, consumer, true)
+        stateChangeOk = stateChange(verifier, providerState, provider, consumer, true, providerClient)
         log.debug "State Change: \"${providerState}\" -> ${stateChangeOk}"
         if (!stateChangeOk) {
           failures[interactionMessage] = stateChangeOk
@@ -44,7 +45,7 @@ class StateChange {
 
   @SuppressWarnings('ParameterCount')
   static stateChange(ProviderVerifier verifier, ProviderState state, ProviderInfo provider,
-                             ConsumerInfo consumer, boolean isSetup) {
+                     ConsumerInfo consumer, boolean isSetup, ProviderClient providerClient) {
     verifier.reportStateForInteraction(state.name, provider, consumer, isSetup)
     try {
       def stateChangeHandler = consumer.stateChange
@@ -74,7 +75,8 @@ class StateChange {
         verifier.executeBuildSpecificTask.accept(stateChangeHandler, state)
         return true
       }
-      return executeHttpStateChangeRequest(verifier, stateChangeHandler, stateChangeUsesBody, state, provider, isSetup)
+      return executeHttpStateChangeRequest(verifier, stateChangeHandler, stateChangeUsesBody, state, provider, isSetup,
+        providerClient)
     } catch (e) {
       verifier.reporters.each {
         it.stateChangeRequestFailedWithException(state.name, provider, consumer, isSetup, e,
@@ -85,20 +87,20 @@ class StateChange {
   }
 
   static void executeStateChangeTeardown(ProviderVerifier verifier, Interaction interaction, ProviderInfo provider,
-                                         ConsumerInfo consumer) {
+                                         ConsumerInfo consumer, ProviderClient providerClient) {
     for (ProviderState providerState: interaction.providerStates) {
-      stateChange(verifier, providerState, provider, consumer, false)
+      stateChange(verifier, providerState, provider, consumer, false, providerClient)
     }
   }
 
   @SuppressWarnings('ParameterCount')
   private static executeHttpStateChangeRequest(ProviderVerifier verifier, stateChangeHandler, useBody,
-                                               ProviderState state, ProviderInfo provider, boolean isSetup) {
+                                               ProviderState state, ProviderInfo provider, boolean isSetup,
+                                               ProviderClient providerClient) {
     try {
       def url = stateChangeHandler instanceof URI ? stateChangeHandler
         : new URI(stateChangeHandler.toString())
-      ProviderClient client = new ProviderClient(provider: provider)
-      def response = client.makeStateChangeRequest(url, state, useBody, isSetup, provider.stateChangeTeardown)
+      def response = providerClient.makeStateChangeRequest(url, state, useBody, isSetup, provider.stateChangeTeardown)
       log.debug "Invoked state change $url -> ${response?.statusLine}"
       if (response) {
         try {

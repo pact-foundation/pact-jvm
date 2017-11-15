@@ -3,6 +3,8 @@ package au.com.dius.pact.pactbroker
 import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.toJson
+import java.net.URLDecoder
+import java.util.function.Consumer
 
 /**
  * Wraps the response for a Pact from the broker with the link data associated with the Pact document.
@@ -40,5 +42,32 @@ abstract class PactBrokerClientBase(val pactBrokerUrl: String, val options: Map<
       Result.Failure(RuntimeException("Unable to publish verification results as there is no " +
         "pb:publish-verification-results link"))
     }
+  }
+
+  open fun fetchLatestConsumersWithNoTag(provider: String): List<PactBrokerConsumer> {
+    return try {
+      val halClient = newHalClient()
+      val consumers = mutableListOf<PactBrokerConsumer>()
+      halClient.navigate(mapOf("provider" to provider), LATEST_PROVIDER_PACTS_WITH_NO_TAG)
+        .forAll(PACTS, Consumer { pact ->
+          val href = URLDecoder.decode(pact["href"].toString(), UTF8)
+          val name = pact["name"].toString()
+          if (options.containsKey("authentication")) {
+            consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl, options["authentication"] as List<String>))
+          } else {
+            consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl, emptyList()))
+          }
+        })
+      consumers
+    } catch (_: NotFoundHalResponse) {
+      // This means the provider is not defined in the broker, so fail gracefully.
+      emptyList()
+    }
+  }
+
+  companion object {
+    const val LATEST_PROVIDER_PACTS_WITH_NO_TAG = "pb:latest-untagged-pact-version"
+    const val PACTS = "pacts"
+    const val UTF8 = "UTF-8"
   }
 }

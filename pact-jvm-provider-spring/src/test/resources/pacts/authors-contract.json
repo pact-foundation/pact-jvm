@@ -10,7 +10,7 @@
     "description" : "Add book",
     "request" : {
       "method" : "POST",
-      "path" : "/books",
+      "path" : "/api/books",
       "body": {
         "id": "5c761cf1-50e1-4604-9b0e-f2130e4064a0",
         "author": "Ray Barrowman",
@@ -46,7 +46,7 @@
       "description" : "Add book bad data",
       "request" : {
         "method" : "POST",
-        "path" : "/books",
+        "path" : "/api/books",
         "body": {
           "id": "5c761cf1-50e1-4604-9b0e-f2130e4064a0",
           "author": "Ray Barrowman",
@@ -82,7 +82,7 @@
     "description" : "Update book",
     "request" : {
       "method" : "PUT",
-      "path" : "/books/5c761cf1-50e1-4604-9b0e-f2130e4064a0",
+      "path" : "/api/books/5c761cf1-50e1-4604-9b0e-f2130e4064a0",
       "body": {
         "author": "Ray Barrowman",
         "bestSeller": true
@@ -109,7 +109,7 @@
     "description" : "Update book no content type",
     "request" : {
       "method" : "PUT",
-      "path" : "/books/5c761cf1-50e1-4604-9b0e-f2130e4064a0",
+      "path" : "/api/books/5c761cf1-50e1-4604-9b0e-f2130e4064a0",
       "body": {
         "author": "Ray Barrowman",
         "bestSeller": true
@@ -135,7 +135,7 @@
     "description" : "Delete book",
     "request" : {
       "method" : "DELETE",
-      "path" : "/books/5c761cf1-50e1-4604-9b0e-f2130e4064a0"
+      "path" : "/api/books/5c761cf1-50e1-4604-9b0e-f2130e4064a0"
     },
     "response" : {
       "status" : 204

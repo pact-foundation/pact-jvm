@@ -10,7 +10,6 @@ import spock.util.environment.RestoreSystemProperties
 
 import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.VALUES_SEPARATOR
 
-@PactBroker(host = 'pactbroker.host', port = '1000', failIfNoPactsFound = false)
 class PactBrokerLoaderSpec extends Specification {
 
   private Closure<PactBrokerLoader> pactBrokerLoader
@@ -89,7 +88,7 @@ class PactBrokerLoaderSpec extends Specification {
   void 'Loads Pacts Configured From A Pact Broker Annotation'() {
     given:
     pactBrokerLoader = {
-      new PactBrokerLoader(this.class.getAnnotation(PactBroker)) {
+      new PactBrokerLoader(FullPactBrokerAnnotation.getAnnotation(PactBroker)) {
         @Override
         PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
           assert url.host == 'pactbroker.host'
@@ -107,19 +106,80 @@ class PactBrokerLoaderSpec extends Specification {
     1 * brokerClient.fetchConsumers('test') >> []
   }
 
-  def 'Loads pacts for each provided tag'() {
+  void 'Uses fallback PactBroker System Properties'() {
     given:
-    tags = ['latest', 'a', 'b', 'c']
+    System.setProperty('pactbroker.host', 'my.pactbroker.host')
+    System.setProperty('pactbroker.port', '4711')
+    pactBrokerLoader = {
+      new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
+        @Override
+        PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
+          assert url.host == 'my.pactbroker.host'
+          assert url.port == 4711
+          brokerClient
+        }
+      }
+    }
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumersWithTag('test', 'latest') >> [ new PactBrokerConsumer('test', 'latest', '', []) ]
+    result == []
+    1 * brokerClient.fetchConsumers('test') >> []
+  }
+
+  void 'Fails when no fallback system properties are set'() {
+    given:
+    System.clearProperty('pactbroker.host')
+    System.clearProperty('pactbroker.port')
+    pactBrokerLoader = {
+      new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
+        @Override
+        PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
+          assert url.host == 'my.pactbroker.host'
+          assert url.port == 4711
+          brokerClient
+        }
+      }
+    }
+
+    when:
+    pactBrokerLoader().load('test')
+
+    then:
+    Exception exception = thrown(Exception)
+    exception.message.startsWith('Invalid pact broker port')
+  }
+
+  def 'Loads pacts for each provided tag'() {
+    given:
+    tags = ['a', 'b', 'c']
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
     1 * brokerClient.fetchConsumersWithTag('test', 'a') >> [ new PactBrokerConsumer('test', 'a', '', []) ]
     1 * brokerClient.fetchConsumersWithTag('test', 'b') >> [ new PactBrokerConsumer('test', 'b', '', []) ]
     1 * brokerClient.fetchConsumersWithTag('test', 'c') >> [ new PactBrokerConsumer('test', 'c', '', []) ]
-    result.size() == 4
+    0 * _
+    result.size() == 3
+  }
+
+  def 'Loads latest pacts together with other tags'() {
+    given:
+    tags = ['a', 'latest', 'b']
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    1 * brokerClient.fetchConsumersWithTag('test', 'a') >> [ new PactBrokerConsumer('test', 'a', '', []) ]
+    1 * brokerClient.fetchConsumers('test') >> [ new PactBrokerConsumer('test', 'latest', '', []) ]
+    1 * brokerClient.fetchConsumersWithTag('test', 'b') >> [ new PactBrokerConsumer('test', 'b', '', []) ]
+    0 * _
+    result.size() == 3
   }
 
   @RestoreSystemProperties
@@ -148,6 +208,16 @@ class PactBrokerLoaderSpec extends Specification {
     then:
     result.size() == 1
     1 * brokerClient.fetchConsumers('test') >> [ new PactBrokerConsumer('test', 'latest', '', []) ]
+  }
+
+  @PactBroker(host = 'pactbroker.host', port = '1000', failIfNoPactsFound = false)
+  static class FullPactBrokerAnnotation {
+
+  }
+
+  @PactBroker(failIfNoPactsFound = false)
+  static class MinimalPactBrokerAnnotation {
+
   }
 
 }

@@ -57,6 +57,7 @@ class ProviderVerifier extends ProviderVerifierBase {
     if (consumers.empty) {
       reporters.each { it.warnProviderHasNoConsumers(provider) }
     }
+
     consumers.each(this.&runVerificationForConsumer.curry(failures, provider))
 
     failures
@@ -171,8 +172,9 @@ class ProviderVerifier extends ProviderVerifierBase {
     def interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name}" +
       " - ${interaction.description}"
 
+    ProviderClient providerClient = new ProviderClient(provider, new HttpClientFactory())
     def stateChangeResult = StateChange.executeStateChange(this, provider, consumer, interaction, interactionMessage,
-      failures)
+      failures, providerClient)
     if (stateChangeResult.stateChangeOk) {
       interactionMessage += stateChangeResult.message
       reportInteractionDescription(interaction)
@@ -180,14 +182,14 @@ class ProviderVerifier extends ProviderVerifierBase {
       boolean result = false
       if (ProviderUtils.verificationType(provider, consumer) == PactVerification.REQUST_RESPONSE) {
         log.debug('Verifying via request/response')
-        result = verifyResponseFromProvider(provider, interaction, interactionMessage, failures)
+        result = verifyResponseFromProvider(provider, interaction, interactionMessage, failures, providerClient)
       } else {
         log.debug('Verifying via annotated test method')
         result = verifyResponseByInvokingProviderMethods(provider, consumer, interaction, interactionMessage, failures)
       }
 
       if (provider.stateChangeTeardown) {
-        StateChange.executeStateChangeTeardown(this, interaction, provider, consumer)
+        StateChange.executeStateChangeTeardown(this, interaction, provider, consumer, providerClient)
       }
 
       result
@@ -204,12 +206,11 @@ class ProviderVerifier extends ProviderVerifierBase {
     reporters.each { it.stateForInteraction(state, provider, consumer, isSetup) }
   }
 
-  boolean verifyResponseFromProvider(ProviderInfo provider, def interaction, String interactionMessage, Map failures) {
+  boolean verifyResponseFromProvider(ProviderInfo provider, def interaction, String interactionMessage, Map failures,
+                                     ProviderClient client) {
     try {
-      ProviderClient client = new ProviderClient(request: interaction.request, provider: provider)
-
       def expectedResponse = interaction.response
-      def actualResponse = client.makeRequest()
+      def actualResponse = client.makeRequest(interaction.request.generatedRequest())
 
       verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
     } catch (e) {
