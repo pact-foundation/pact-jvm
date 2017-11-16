@@ -3,9 +3,6 @@ configurations {
    provided
 }
 
-sourceSets.main.java.srcDirs = []
-sourceSets.main.groovy.srcDirs += ["src/main/java"]
-
 dependencies {
     compile project(":pact-jvm-provider-junit_${project.scalaVersion}")
 

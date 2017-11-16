@@ -25,7 +25,7 @@ fun reportVerificationResults(pact: Pact, result: Boolean, version: String, clie
   }
 }
 
-open class ProviderVerifierBase: GroovyObjectSupport() {
+open class ProviderVerifierBase : GroovyObjectSupport() {
 
   var projectHasProperty = Function<String, Boolean> { false }
   var projectGetProperty = Function<String, String?> { null }

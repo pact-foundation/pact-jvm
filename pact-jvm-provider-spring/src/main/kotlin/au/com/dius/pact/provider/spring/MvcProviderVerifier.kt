@@ -4,7 +4,6 @@ import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
-import groovy.lang.MetaClass
 import mu.KLogging
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -19,7 +18,7 @@ import java.net.URI
 /**
  * Verifies the providers against the defined consumers using Spring MockMvc
  */
-open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false): ProviderVerifier() {
+open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false) : ProviderVerifier() {
 
   fun verifyResponseFromProvider(provider: ProviderInfo, interaction: RequestResponseInteraction,
                                  interactionMessage: String, failures: MutableMap<String, Any>, mockMvc: MockMvc) {
