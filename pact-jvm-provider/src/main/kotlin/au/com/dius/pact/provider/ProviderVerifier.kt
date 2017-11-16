@@ -4,6 +4,7 @@ import au.com.dius.pact.model.BrokerUrlSource
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
+import groovy.lang.GroovyObjectSupport
 import mu.KotlinLogging
 import java.util.function.Function
 
@@ -24,7 +25,7 @@ fun reportVerificationResults(pact: Pact, result: Boolean, version: String, clie
   }
 }
 
-open class ProviderVerifierBase {
+open class ProviderVerifierBase: GroovyObjectSupport() {
 
   var projectHasProperty = Function<String, Boolean> { false }
   var projectGetProperty = Function<String, String?> { null }
