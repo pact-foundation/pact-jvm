@@ -26,10 +26,10 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
       val request = interaction.request
 
       val mvcResult = mockMvc.perform(
-        if (request.body.isPresent()) {
+        if (request.body != null && request.body!!.isPresent()) {
           MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
             .headers(mapHeaders(request, true))
-            .content(request.body.value)
+            .content(request.body!!.value)
         } else {
           MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
             .headers(mapHeaders(request, false))
@@ -68,7 +68,7 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
   fun mapHeaders(request: Request, hasBody: Boolean): HttpHeaders {
     val httpHeaders = HttpHeaders()
 
-    request.headers.forEach { k, v ->
+    request.headers?.forEach { k, v ->
       httpHeaders.add(k, v)
     }
 
