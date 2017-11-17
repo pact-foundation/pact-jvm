@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.OptionalBody;
 import au.com.dius.pact.model.generators.Generators;
 import au.com.dius.pact.model.matchingrules.MatchingRules;
+import au.com.dius.pact.model.matchingrules.MatchingRulesImpl;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import au.com.dius.pact.model.PactReader;
 import com.mifmif.common.regex.Generex;
@@ -32,7 +33,7 @@ public class PactDslRequestWithoutPath {
     private Map<String, String> requestHeaders = new HashMap<>();
     private Map<String, List<String>> query = new HashMap<>();
     private OptionalBody requestBody = OptionalBody.missing();
-    private MatchingRules requestMatchers = new MatchingRules();
+    private MatchingRules requestMatchers = new MatchingRulesImpl();
     private Generators requestGenerators = new Generators();
     private String consumerName;
     private String providerName;

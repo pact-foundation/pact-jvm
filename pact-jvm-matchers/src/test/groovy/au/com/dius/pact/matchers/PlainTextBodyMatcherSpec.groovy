@@ -1,6 +1,6 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.matchingrules.MatchingRules
+import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
 import spock.lang.Specification
 
 class PlainTextBodyMatcherSpec extends Specification {
@@ -13,7 +13,7 @@ class PlainTextBodyMatcherSpec extends Specification {
 
   def 'Compares using equality if there is no matcher defined'() {
     expect:
-    matcher.compareText(expected, actual, new MatchingRules()).empty == result
+    matcher.compareText(expected, actual, new MatchingRulesImpl()).empty == result
 
     where:
 
@@ -24,7 +24,7 @@ class PlainTextBodyMatcherSpec extends Specification {
 
   def 'Uses the matcher if there is a matcher defined'() {
     expect:
-    matcher.compareText(expected, actual, MatchingRules.fromMap(rules)).empty == result
+    matcher.compareText(expected, actual, MatchingRulesImpl.fromMap(rules)).empty == result
 
     where:
 

@@ -81,9 +81,13 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
   }
 
   private fun pactResponseToHttpExchange(response: Response, exchange: HttpExchange) {
-    exchange.responseHeaders.putAll(response.headers.mapValues { listOf(it.value) })
-    if (response.body.isPresent()) {
-      val bytes = response.body.unwrap().toByteArray()
+    val headers = response.headers
+    if (headers != null) {
+      exchange.responseHeaders.putAll(headers.mapValues { listOf(it.value) })
+    }
+    val body = response.body
+    if (body != null && body.isPresent()) {
+      val bytes = body.unwrap().toByteArray()
       exchange.sendResponseHeaders(response.status, bytes.size.toLong())
       exchange.responseBody.write(bytes)
     } else {

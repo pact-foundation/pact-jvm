@@ -1,7 +1,7 @@
 package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model._
-import au.com.dius.pact.model.matchingrules.{MatchingRules, RegexMatcher}
+import au.com.dius.pact.model.matchingrules.{MatchingRulesImpl, RegexMatcher}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -13,7 +13,7 @@ class XmlBodyMatcherTest extends Specification with AllExpectations {
 
   var expectedBody = OptionalBody.missing()
   var actualBody = OptionalBody.missing()
-  var matchers = new MatchingRules()
+  var matchers = new MatchingRulesImpl()
   val expected = () => new Request("", "", null, null, expectedBody, matchers)
   val actual = () => new Request("", "", null, null, actualBody)
 

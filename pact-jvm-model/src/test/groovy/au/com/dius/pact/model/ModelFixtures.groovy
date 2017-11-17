@@ -1,6 +1,6 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.model.matchingrules.MatchingRules
+import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.model.matchingrules.TypeMatcher
 
 @Singleton
@@ -12,7 +12,7 @@ class ModelFixtures {
   static response = new Response(200, [testreqheader: 'testreqheaderval'], OptionalBody.body('{"responsetest":true}'))
 
   static requestMatchers = {
-    def rules = new MatchingRules()
+    def rules = new MatchingRulesImpl()
     rules.addCategory('body').addRule('$.test', new TypeMatcher())
     rules
   }
@@ -22,7 +22,7 @@ class ModelFixtures {
     requestMatchers())
 
   static responseMatchers = {
-    def rules = new MatchingRules()
+    def rules = new MatchingRulesImpl()
     rules.addCategory('body').addRule('$.responsetest', new TypeMatcher())
     rules
   }

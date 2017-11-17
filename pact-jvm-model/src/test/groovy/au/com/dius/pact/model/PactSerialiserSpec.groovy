@@ -1,11 +1,11 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.generators.Category
+import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.generators.RandomIntGenerator
 import au.com.dius.pact.model.generators.RandomStringGenerator
 import au.com.dius.pact.model.generators.UuidGenerator
-import au.com.dius.pact.model.matchingrules.MatchingRules
+import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.model.matchingrules.TypeMatcher
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
@@ -38,12 +38,12 @@ class PactSerialiserSpec extends Specification {
       OptionalBody.body('{"responsetest":true}'))
     provider = new Provider('test_provider')
     consumer = new Consumer('test_consumer')
-    def requestMatchers = new MatchingRules()
+    def requestMatchers = new MatchingRulesImpl()
     requestMatchers.addCategory('body').addRule('$.test', new TypeMatcher())
     requestWithMatchers = new Request('GET', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
       [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'), requestMatchers
     )
-    def responseMatchers = new MatchingRules()
+    def responseMatchers = new MatchingRulesImpl()
     responseMatchers.addCategory('body').addRule('$.responsetest', new TypeMatcher())
     responseWithMatchers = new Response(200, [testreqheader: 'testreqheaderval'],
       OptionalBody.body('{"responsetest":true}'), responseMatchers
@@ -61,7 +61,7 @@ class PactSerialiserSpec extends Specification {
     pactWithGenerators = new RequestResponsePact(provider, consumer, [interactionsWithGenerators])
 
     messagePactWithGenerators = new MessagePact(provider, consumer, [ new Message('Test Message',
-      [new ProviderState('message exists')], OptionalBody.body('"Test Message"'), new MatchingRules(),
+      [new ProviderState('message exists')], OptionalBody.body('"Test Message"'), new MatchingRulesImpl(),
       new Generators([(Category.BODY): ['a': new UuidGenerator()]]), [contentType: 'application/json']) ])
   }
 

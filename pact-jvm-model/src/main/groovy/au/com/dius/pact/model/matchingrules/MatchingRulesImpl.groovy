@@ -8,7 +8,7 @@ import groovy.transform.CompileStatic
  * Class that encapsulates the matching rules to be applied
  */
 @Canonical
-class MatchingRules {
+class MatchingRulesImpl implements MatchingRules {
   private static final String DOLLAR = '$'
   private static final int TWO = 2
   private static final String DOLLAR_BODY = '$.body'
@@ -20,7 +20,7 @@ class MatchingRules {
    * Constructs the matching rules from a Map
    */
   static MatchingRules fromMap(Map map) {
-    def matchingRules = new MatchingRules()
+    def matchingRules = new MatchingRulesImpl()
 
     if (map) {
       if (map.keySet().first().startsWith(DOLLAR)) {
@@ -120,7 +120,7 @@ class MatchingRules {
   }
 
   MatchingRules copy() {
-    def matchingRules = new MatchingRules()
+    def matchingRules = new MatchingRulesImpl()
 
     rules.each {
       matchingRules.addCategory(it.value /*.copy()*/)

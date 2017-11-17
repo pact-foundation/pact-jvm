@@ -3,7 +3,7 @@ package au.com.dius.pact.matchers
 import au.com.dius.pact.model.BodyMismatch
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Request
-import au.com.dius.pact.model.matchingrules.MatchingRules
+import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.model.matchingrules.RegexMatcher
 import au.com.dius.pact.model.matchingrules.TypeMatcher
@@ -18,7 +18,7 @@ class JsonBodyMatcherSpec extends Specification {
   private expected, actual
 
   def setup() {
-    matchers = new MatchingRules()
+    matchers = new MatchingRulesImpl()
     expected = { body -> new Request('', '', null, null, body, matchers) }
     actual = { body -> new Request('', '', null, null, body) }
   }
