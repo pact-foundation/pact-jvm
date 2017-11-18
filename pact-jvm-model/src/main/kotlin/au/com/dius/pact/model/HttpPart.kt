@@ -12,12 +12,14 @@ abstract class HttpPart : GroovyObjectSupport() {
   abstract var headers: MutableMap<String, String>?
   abstract var matchingRules: MatchingRules?
 
-  fun mimeType(): String {
+  fun mimeType(): String = contentTypeHeader()?.split(Regex("\\s*;\\s*"))?.first().orEmpty()
+
+  fun contentTypeHeader(): String? {
     val contentTypeKey = headers?.keys?.find { CONTENT_TYPE.equals(it, ignoreCase = true) }
     return if (contentTypeKey.isNullOrEmpty()) {
       detectContentType()
     } else {
-      headers?.get(contentTypeKey)?.split(Regex("\\s*;\\s*"))?.first().orEmpty()
+      headers?.get(contentTypeKey)
     }
   }
 

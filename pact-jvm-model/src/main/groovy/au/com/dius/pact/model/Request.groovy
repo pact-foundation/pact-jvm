@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull
  * Request made by a consumer to a provider
  */
 @Canonical
-class Request extends HttpPart implements Comparable {
+class Request extends BaseRequest implements Comparable {
   private static final String COOKIE_KEY = 'cookie'
 
   public static final String DEFAULT_METHOD = 'GET'

@@ -1,8 +1,3 @@
-configurations {
-    //only build against spring, don't include it
-   provided
-}
-
 dependencies {
     compile project(":pact-jvm-provider-junit_${project.scalaVersion}")
 

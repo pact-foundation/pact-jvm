@@ -11,7 +11,7 @@ import groovy.transform.Canonical
  * Response from a provider to a consumer
  */
 @Canonical
-class Response extends HttpPart {
+class Response extends BaseResponse {
 
   public static final int DEFAULT_STATUS = 200
 
