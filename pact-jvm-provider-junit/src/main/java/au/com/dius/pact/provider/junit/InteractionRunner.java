@@ -5,10 +5,12 @@ import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.model.Pact;
+import au.com.dius.pact.provider.ProviderVerifier;
 import au.com.dius.pact.provider.ProviderVerifierKt;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget;
 import au.com.dius.pact.provider.junit.target.TestTarget;
+import kotlin.Pair;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.HttpRequest;
 import org.junit.After;
@@ -34,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,6 +56,7 @@ public class InteractionRunner extends Runner {
   private final TestClass testClass;
   private final Pact pact;
   private final PactSource pactSource;
+  private final Map<Interaction, Pair<Boolean, ProviderVerifier>> results = new HashMap<>();
 
   private final ConcurrentHashMap<Interaction, Description> childDescriptions = new ConcurrentHashMap<>();
 
@@ -169,7 +173,9 @@ public class InteractionRunner extends Runner {
         }
       }
 
-      if (!(pact instanceof FilteredPact) || ((FilteredPact) pact).isNotFiltered()) {
+      Boolean publishingDisabled = results.values()
+        .stream().anyMatch(pair -> pair.getSecond().publishingResultsDisabled());
+      if (!publishingDisabled && !(pact instanceof FilteredPact) || ((FilteredPact) pact).isNotFiltered()) {
         reportVerificationResults(allPassed);
       } else {
         LOGGER.warn("Skipping publishing of verification results as the interactions have been filtered");
@@ -220,7 +226,8 @@ public class InteractionRunner extends Runner {
       Statement statement = new Statement() {
           @Override
           public void evaluate() throws Throwable {
-              target.testInteraction(pact.getConsumer().getName(), interaction, source);
+            target.addResultCallback((result, verifier) -> results.put(interaction, new Pair<>(result, verifier)));
+            target.testInteraction(pact.getConsumer().getName(), interaction, source);
           }
       };
       statement = withStateChanges(interaction, testInstance, statement);

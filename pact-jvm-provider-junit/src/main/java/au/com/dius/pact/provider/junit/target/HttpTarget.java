@@ -117,6 +117,7 @@ public class HttpTarget extends BaseTarget {
       Map<String, Object> failures = new HashMap<>();
       ProviderClient client = new ProviderClient(provider, new HttpClientFactory());
       verifier.verifyResponseFromProvider(provider, interaction, interaction.getDescription(), failures, client);
+      reportTestResult(failures.isEmpty(), verifier);
 
       try {
         if (!failures.isEmpty()) {

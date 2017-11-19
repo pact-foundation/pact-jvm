@@ -18,6 +18,7 @@ import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import spock.lang.Specification
 import spock.lang.Unroll
+import spock.util.environment.RestoreSystemProperties
 
 class ProviderVerifierSpec extends Specification {
 
@@ -511,5 +512,17 @@ class ProviderVerifierSpec extends Specification {
     'Property is false'          | 'false'     | true
     'Property is False'          | 'False'     | true
     'Property is something else' | 'not false' | false
+  }
+
+  @RestoreSystemProperties
+  def 'defaults to system properties'() {
+    given:
+    System.properties['provider.verifier.test'] = 'true'
+
+    expect:
+    verifier.projectHasProperty.apply('provider.verifier.test')
+    verifier.projectGetProperty.apply('provider.verifier.test') == 'true'
+    !verifier.projectHasProperty.apply('provider.verifier.test.other')
+    verifier.projectGetProperty.apply('provider.verifier.test.other') == null
   }
 }

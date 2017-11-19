@@ -36,6 +36,7 @@ open class AmqpTarget @JvmOverloads constructor(val packagesToScan: List<String>
     val failures = mutableMapOf<String, Any>()
     verifier.verifyResponseByInvokingProviderMethods(provider, consumer, interaction, interaction.description,
       failures)
+    reportTestResult(failures.isEmpty(), verifier)
 
     try {
       if (failures.isNotEmpty()) {

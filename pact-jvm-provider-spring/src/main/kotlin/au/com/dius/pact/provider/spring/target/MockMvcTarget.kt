@@ -68,6 +68,8 @@ class MockMvcTarget @JvmOverloads constructor(var controllers: List<Any> = mutab
         failures, mockMvc)
     }
 
+    reportTestResult(failures.isEmpty(), verifier)
+
     try {
       if (failures.isNotEmpty()) {
         verifier.displayFailures(failures)
