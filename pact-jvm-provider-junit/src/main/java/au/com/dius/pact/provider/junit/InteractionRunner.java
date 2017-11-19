@@ -175,7 +175,7 @@ public class InteractionRunner extends Runner {
 
       Boolean publishingDisabled = results.values()
         .stream().anyMatch(pair -> pair.getSecond().publishingResultsDisabled());
-      if (!publishingDisabled && !(pact instanceof FilteredPact) || ((FilteredPact) pact).isNotFiltered()) {
+      if (!publishingDisabled && (!(pact instanceof FilteredPact) || ((FilteredPact) pact).isNotFiltered())) {
         reportVerificationResults(allPassed);
       } else {
         LOGGER.warn("Skipping publishing of verification results as the interactions have been filtered");
