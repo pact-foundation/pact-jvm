@@ -1,5 +1,21 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.10 - 2.11 - Junit verification fixes
+
+* d7131ecf - Fixes after merge from master (Ronald Holshausen, Mon Nov 20 15:32:08 2017 +1100)
+* 9363fbf1 - Merge tag '3_5_10' into v3.5.x-2.11 (Ronald Holshausen, Mon Nov 20 15:15:49 2017 +1100)
+* d991d725 - update changelog for release 3.5.10 (Ronald Holshausen, Mon Nov 20 14:49:12 2017 +1100)
+* 685438bd - Set the javax.mail dependency to version 1.5.0-b01 (Ronald Holshausen, Mon Nov 20 14:38:45 2017 +1100)
+* d711487a - Correct the precedence on checking if results can be published to avoid class cast exceptions (Ronald Holshausen, Mon Nov 20 10:50:29 2017 +1100)
+* 9c648308 - Fix for JUnit verifier tests which where not taking the pact.verifier.publishResults system property into account when publishing results (Ronald Holshausen, Mon Nov 20 10:42:18 2017 +1100)
+* e91f4efe - Enabled the MockMvcTarget to work with multipart file uploads (Ronald Holshausen, Sat Nov 18 13:31:16 2017 +1100)
+* 4fa08a2f - Fix kotlin compile errors (Ronald Holshausen, Fri Nov 17 14:00:00 2017 +1100)
+* 31b07aec - Converted HttpPart base class to Kotlin (Ronald Holshausen, Fri Nov 17 13:28:27 2017 +1100)
+* a3d1c8b1 - Add file that was excluded by git ignore (Ronald Holshausen, Fri Nov 17 09:25:21 2017 +1100)
+* ffb1a643 - Remove the sourceset overridde after move to kotlin in pact-jvm-provider-spring (Ronald Holshausen, Fri Nov 17 08:57:24 2017 +1100)
+* b8dbff9a - Converted the remaining pact-jvm-provider-spring code to kotlin (Ronald Holshausen, Thu Nov 16 17:33:36 2017 +1100)
+* 084a33c3 - bump version to 3.5.10 (Ronald Holshausen, Wed Nov 15 15:13:02 2017 +1100)
+
 # 3.5.10 - Junit verification fixes
 
 * 685438bd - Set the javax.mail dependency to version 1.5.0-b01 (Ronald Holshausen, Mon Nov 20 14:38:45 2017 +1100)
