@@ -1,5 +1,18 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.10 - Junit verification fixes
+
+* 685438bd - Set the javax.mail dependency to version 1.5.0-b01 (Ronald Holshausen, Mon Nov 20 14:38:45 2017 +1100)
+* d711487a - Correct the precedence on checking if results can be published to avoid class cast exceptions (Ronald Holshausen, Mon Nov 20 10:50:29 2017 +1100)
+* 9c648308 - Fix for JUnit verifier tests which where not taking the pact.verifier.publishResults system property into account when publishing results (Ronald Holshausen, Mon Nov 20 10:42:18 2017 +1100)
+* e91f4efe - Enabled the MockMvcTarget to work with multipart file uploads (Ronald Holshausen, Sat Nov 18 13:31:16 2017 +1100)
+* 4fa08a2f - Fix kotlin compile errors (Ronald Holshausen, Fri Nov 17 14:00:00 2017 +1100)
+* 31b07aec - Converted HttpPart base class to Kotlin (Ronald Holshausen, Fri Nov 17 13:28:27 2017 +1100)
+* a3d1c8b1 - Add file that was excluded by git ignore (Ronald Holshausen, Fri Nov 17 09:25:21 2017 +1100)
+* ffb1a643 - Remove the sourceset overridde after move to kotlin in pact-jvm-provider-spring (Ronald Holshausen, Fri Nov 17 08:57:24 2017 +1100)
+* b8dbff9a - Converted the remaining pact-jvm-provider-spring code to kotlin (Ronald Holshausen, Thu Nov 16 17:33:36 2017 +1100)
+* 0ae7cb8f - bump version to 3.5.10 (Ronald Holshausen, Wed Nov 15 13:52:53 2017 +1100)
+
 # 3.5.9 - Bugfix Release
 
 * 32a650b2 - Merge branch 'master' into v3.5.x-2.11 (Ronald Holshausen, Wed Nov 15 13:58:17 2017 +1100)

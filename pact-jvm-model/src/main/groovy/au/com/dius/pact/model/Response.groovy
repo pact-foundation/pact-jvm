@@ -4,20 +4,21 @@ import au.com.dius.pact.model.generators.Generator
 import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.generators.Category
 import au.com.dius.pact.model.matchingrules.MatchingRules
+import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
 import groovy.transform.Canonical
 
 /**
  * Response from a provider to a consumer
  */
 @Canonical
-class Response extends HttpPart {
+class Response extends BaseResponse {
 
   public static final int DEFAULT_STATUS = 200
 
   Integer status = DEFAULT_STATUS
   Map<String, String> headers = [:]
   OptionalBody body = OptionalBody.missing()
-  MatchingRules matchingRules = new MatchingRules()
+  MatchingRules matchingRules = new MatchingRulesImpl()
   Generators generators = new Generators()
 
   static Response fromMap(def map) {
@@ -25,7 +26,7 @@ class Response extends HttpPart {
       status = (map.status ?: DEFAULT_STATUS) as Integer
       headers = map.headers ?: [:]
       body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
-      matchingRules = MatchingRules.fromMap(map.matchingRules)
+      matchingRules = MatchingRulesImpl.fromMap(map.matchingRules)
       generators = Generators.fromMap(map.generators)
       it
     }

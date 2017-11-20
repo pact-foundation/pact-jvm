@@ -2,7 +2,7 @@ package au.com.dius.pact.model
 
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.{ConsumerTestVerification, VerificationResult}
-import au.com.dius.pact.model.matchingrules.MatchingRules
+import au.com.dius.pact.model.matchingrules.{MatchingRules, MatchingRulesImpl}
 import org.json.JSONObject
 
 import scala.collection.JavaConverters._
@@ -67,7 +67,7 @@ object PactFragmentBuilder {
                  query: String = "",
                  headers: Map[String, String] = Map(),
                  body: String = "",
-                 matchers: MatchingRules = new MatchingRules()): DescribingResponse = {
+                 matchers: MatchingRules = new MatchingRulesImpl()): DescribingResponse = {
       DescribingResponse(new Request(method, path, PactReader.queryStringToMap(query), headers, OptionalBody.body(body),
         matchers))
     }
@@ -84,7 +84,7 @@ object PactFragmentBuilder {
       def willRespondWith(status: Int = 200,
                           headers: Map[String, String] = Map(),
                           maybeBody: Option[String] = None,
-                          matchers: MatchingRules = new MatchingRules()): PactWithAtLeastOneRequest = {
+                          matchers: MatchingRules = new MatchingRulesImpl()): PactWithAtLeastOneRequest = {
         val optionalBody = maybeBody match {
           case Some(body) => OptionalBody.body(body)
           case None => OptionalBody.missing()
@@ -104,7 +104,7 @@ object PactFragmentBuilder {
       def willRespondWith(status: Int,
                           headers: Map[String, String],
                           bodyAndMatchers: DslPart): PactWithAtLeastOneRequest = {
-        val rules = new MatchingRules()
+        val rules = new MatchingRulesImpl()
         rules.addCategory(bodyAndMatchers.getMatchers)
         builder(
           consumer,

@@ -206,7 +206,8 @@ class ProviderVerifier extends ProviderVerifierBase {
     reporters.each { it.stateForInteraction(state, provider, consumer, isSetup) }
   }
 
-  boolean verifyResponseFromProvider(ProviderInfo provider, def interaction, String interactionMessage, Map failures,
+  boolean verifyResponseFromProvider(ProviderInfo provider, Interaction interaction, String interactionMessage,
+                                     Map failures,
                                      ProviderClient client) {
     try {
       def expectedResponse = interaction.response

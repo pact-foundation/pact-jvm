@@ -6,7 +6,7 @@ class MatchingRulesSpec extends Specification {
 
   def 'fromMap handles a null map'() {
     when:
-    def matchingRules = MatchingRules.fromMap(null)
+    def matchingRules = MatchingRulesImpl.fromMap(null)
 
     then:
     matchingRules.empty
@@ -14,7 +14,7 @@ class MatchingRulesSpec extends Specification {
 
   def 'fromMap handles an empty map'() {
     when:
-    def matchingRules = MatchingRules.fromMap([:])
+    def matchingRules = MatchingRulesImpl.fromMap([:])
 
     then:
     matchingRules.empty
@@ -33,7 +33,7 @@ class MatchingRulesSpec extends Specification {
     ]
 
     when:
-    def matchingRules = MatchingRules.fromMap(matchingRulesMap)
+    def matchingRules = MatchingRulesImpl.fromMap(matchingRulesMap)
 
     then:
     !matchingRules.empty
@@ -93,7 +93,7 @@ class MatchingRulesSpec extends Specification {
     ]
 
     when:
-    def matchingRules = MatchingRules.fromMap(matchingRulesMap)
+    def matchingRules = MatchingRulesImpl.fromMap(matchingRulesMap)
 
     then:
     !matchingRules.empty

@@ -12,6 +12,7 @@ import au.com.dius.pact.model.RequestResponsePact;
 import au.com.dius.pact.model.Response;
 import au.com.dius.pact.model.generators.Generators;
 import au.com.dius.pact.model.matchingrules.MatchingRules;
+import au.com.dius.pact.model.matchingrules.MatchingRulesImpl;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
@@ -34,7 +35,7 @@ public class PactDslResponse {
     private int responseStatus = 200;
     private Map<String, String> responseHeaders = new HashMap<String, String>();
     private OptionalBody responseBody = OptionalBody.missing();
-    private MatchingRules responseMatchers = new MatchingRules();
+    private MatchingRules responseMatchers = new MatchingRulesImpl();
     private Generators responseGenerators = new Generators();
 
     public PactDslResponse(ConsumerPactBuilder consumerPactBuilder, PactDslRequestWithPath request) {

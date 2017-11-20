@@ -219,3 +219,23 @@ data class MatchingRuleGroup @JvmOverloads constructor(val rules: MutableList<Ma
     }
   }
 }
+
+/**
+ * Collection of all matching rules
+ */
+interface MatchingRules {
+  /**
+   * Get all the rules for a given category
+   */
+  fun rulesForCategory(category: String): Category
+
+  /**
+   * Adds a new category with the given name to the collection
+   */
+  fun addCategory(category: String): Category
+
+  /**
+   * Adds the category to the collection
+   */
+  fun addCategory(category: Category): Category
+}

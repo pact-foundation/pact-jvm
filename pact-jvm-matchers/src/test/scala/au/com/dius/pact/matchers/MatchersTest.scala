@@ -1,6 +1,6 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.matchingrules.{MatchingRules, TypeMatcher}
+import au.com.dius.pact.model.matchingrules.{MatchingRulesImpl, TypeMatcher}
 import au.com.dius.pact.model.{OptionalBody, Request}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
@@ -12,21 +12,21 @@ class MatchersTest extends Specification {
   "matchers defined" should {
 
     "should be false when there are no matchers" in {
-      Matchers.matcherDefined("body", Seq(""), new MatchingRules()) must beFalse
+      Matchers.matcherDefined("body", Seq(""), new MatchingRulesImpl()) must beFalse
     }
 
     "should be false when the path does not have a matcher entry" in {
-      Matchers.matcherDefined("body", Seq("$", "something"), new MatchingRules()) must beFalse
+      Matchers.matcherDefined("body", Seq("$", "something"), new MatchingRulesImpl()) must beFalse
     }
 
     "should be true when the path does have a matcher entry" in {
-      val matchingRules = new MatchingRules()
+      val matchingRules = new MatchingRulesImpl()
       matchingRules.addCategory("body").addRule("$.something", TypeMatcher.INSTANCE)
       Matchers.matcherDefined("body", Seq("$", "something"), matchingRules) must beTrue
     }
 
     "should be true when a parent of the path has a matcher entry" in {
-      val matchingRules = new MatchingRules()
+      val matchingRules = new MatchingRulesImpl()
       matchingRules.addCategory("body").addRule("$", TypeMatcher.INSTANCE)
       Matchers.matcherDefined("body", Seq("$", "something"), matchingRules) must beTrue
     }
@@ -36,15 +36,15 @@ class MatchersTest extends Specification {
   "wildcardMatcherDefined defined" should {
 
     "should be false when there are no matchers" in {
-      Matchers.wildcardMatcherDefined(Seq(""), "body", new MatchingRules()) must beFalse
+      Matchers.wildcardMatcherDefined(Seq(""), "body", new MatchingRulesImpl()) must beFalse
     }
 
     "should be false when the path does not have a matcher entry" in {
-      Matchers.wildcardMatcherDefined(Seq("$", "something"), "body", new MatchingRules()) must beFalse
+      Matchers.wildcardMatcherDefined(Seq("$", "something"), "body", new MatchingRulesImpl()) must beFalse
     }
 
     "should be false when the path does have a matcher entry and it is not a wildcard" in {
-      val matchingRules = new MatchingRules()
+      val matchingRules = new MatchingRulesImpl()
       val category = matchingRules.addCategory("body")
       category.addRule("$.some.thing", TypeMatcher.INSTANCE)
       category.addRule("$.*", TypeMatcher.INSTANCE)
@@ -52,14 +52,14 @@ class MatchersTest extends Specification {
     }
 
     "should be true when the path does have a matcher entry and it is a wildcard" in {
-      val matchingRules = new MatchingRules()
+      val matchingRules = new MatchingRulesImpl()
       val category = matchingRules.addCategory("body")
       category.addRule("$.*", TypeMatcher.INSTANCE)
       Matchers.wildcardMatcherDefined(Seq("$", "something"), "body", matchingRules) must beTrue
     }
 
     "should be false when a parent of the path has a matcher entry" in {
-      val matchingRules = new MatchingRules()
+      val matchingRules = new MatchingRulesImpl()
       val category = matchingRules.addCategory("body")
       category.addRule("$.*", TypeMatcher.INSTANCE)
       Matchers.wildcardMatcherDefined(Seq("$", "some", "thing"), "body", matchingRules) must beFalse
@@ -68,7 +68,7 @@ class MatchersTest extends Specification {
   }
 
   "should default to a matching defined at a parent level" in {
-    val matchingRules = new MatchingRules()
+    val matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory("body").addRule("$", TypeMatcher.INSTANCE)
     val rules = Matchers.selectBestMatcher(matchingRules, "body", Seq("$", "value"))
     rules.getRules.get(0) must beEqualTo(TypeMatcher.INSTANCE)
@@ -79,7 +79,7 @@ class MatchersTest extends Specification {
     "match on type" should {
 
       "list elements should inherit the matcher from the parent" in {
-        val matchingRules = new MatchingRules()
+        val matchingRules = new MatchingRulesImpl()
         matchingRules.addCategory("body").addRule("$.value", TypeMatcher.INSTANCE)
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": [100]}"), matchingRules)
         val actual = new Request("get", "/", null, null, OptionalBody.body("{\"value\": [\"200.3\"]}"), null)
@@ -87,7 +87,7 @@ class MatchersTest extends Specification {
       }
 
       "map elements should inherit the matchers from the parent" in {
-        val matchingRules = new MatchingRules()
+        val matchingRules = new MatchingRulesImpl()
         matchingRules.addCategory("body").addRule("$.value", TypeMatcher.INSTANCE)
         val expected = new Request("get", "/", null, null, OptionalBody.body("{\"value\": {\"a\": 100}}"), matchingRules)
         val actual = new Request("get", "/", null, null,

@@ -34,4 +34,17 @@ class RequestSpec extends Specification {
     request = Request.fromMap([:])
   }
 
+  def 'detects multipart file uploads based on the content type'() {
+    expect:
+    new Request(headers: ['Content-Type': contentType]).isMultipartFileUpload() == multipartFileUpload
+
+    where:
+
+    contentType                                    | multipartFileUpload
+    'multipart/form-data'                          | true
+    'text/plain'                                   | false
+    'multipart/form-data; boundary=boundaryMarker' | true
+    'multipart/form-data;boundary=boundaryMarker'  | true
+    'MULTIPART/FORM-DATA; boundary=boundaryMarker' | true
+  }
 }

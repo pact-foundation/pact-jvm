@@ -3,7 +3,7 @@ package au.com.dius.pact.consumer
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.specs2.VerificationResultAsResult
 import au.com.dius.pact.model._
-import au.com.dius.pact.model.matchingrules.MatchingRules
+import au.com.dius.pact.model.matchingrules.{MatchingRules, MatchingRulesImpl}
 import org.specs2.mutable.Specification
 import org.specs2.specification.core.Fragments
 
@@ -33,13 +33,13 @@ trait UnitSpecsSupport extends Specification {
                    query: String = "",
                    headers: Map[String, String] = Map(),
                    body: String = "",
-                   matchers: MatchingRules = new MatchingRules()): Request =
+                   matchers: MatchingRules = new MatchingRulesImpl()): Request =
     new Request(method, path, PactReader.queryStringToMap(query), headers.asJava, OptionalBody.body(body), matchers)
 
   def buildResponse(status: Int = 200,
                     headers: Map[String, String] = Map(),
                     maybeBody: Option[String] = None,
-                    matchers: MatchingRules = new MatchingRules()): Response = {
+                    matchers: MatchingRules = new MatchingRulesImpl()): Response = {
     val optionalBody = maybeBody match {
       case Some(body) => OptionalBody.body(body)
       case None => OptionalBody.missing()
@@ -51,7 +51,7 @@ trait UnitSpecsSupport extends Specification {
   def buildResponse(status: Int,
                     headers: Map[String, String],
                     bodyAndMatchers: DslPart): Response = {
-    val matchers = new MatchingRules()
+    val matchers = new MatchingRulesImpl()
     matchers.addCategory(bodyAndMatchers.getMatchers)
     new Response(status, headers.asJava, OptionalBody.body(bodyAndMatchers.toString), matchers)
   }

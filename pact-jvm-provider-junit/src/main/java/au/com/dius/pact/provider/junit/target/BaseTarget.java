@@ -10,15 +10,18 @@ import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver;
 import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
 import au.com.dius.pact.provider.reporters.ReporterManager;
 import au.com.dius.pact.provider.reporters.VerifierReporter;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jooq.lambda.Seq;
 import org.jooq.lambda.tuple.Tuple2;
 import org.junit.runners.model.TestClass;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 /**
@@ -29,6 +32,7 @@ public abstract class BaseTarget implements TestClassAwareTarget {
   protected TestClass testClass;
   protected Object testTarget;
   protected ValueResolver valueResolver = new SystemPropertyResolver();
+  private List<BiConsumer<Boolean, ProviderVerifier>> callbacks = new ArrayList<>();
 
   /**
    * {@inheritDoc}
@@ -140,5 +144,14 @@ public abstract class BaseTarget implements TestClassAwareTarget {
 
   public void setValueResolver(ValueResolver valueResolver) {
     this.valueResolver = valueResolver;
+  }
+
+  @Override
+  public void addResultCallback(BiConsumer<Boolean, ProviderVerifier> callback) {
+    this.callbacks.add(callback);
+  }
+
+  protected void reportTestResult(Boolean result, ProviderVerifier verifier) {
+    this.callbacks.forEach(callback -> callback.accept(result, verifier));
   }
 }

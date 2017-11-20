@@ -17,6 +17,7 @@ import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.matchingrules.MatchingRules
+import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
 import groovy.json.JsonBuilder
 import scala.collection.JavaConverters$
 
@@ -181,7 +182,7 @@ class PactBuilder extends BaseBuilder {
    * @param requestData Map of attributes
    */
   PactBuilder withAttributes(Map requestData) {
-    def request = [matchers: new MatchingRules(), generators: new Generators()] + requestData
+    def request = [matchers: new MatchingRulesImpl(), generators: new Generators()] + requestData
     setupBody(requestData, request)
     if (requestData.query instanceof String) {
       request.query = PactReader.queryStringToMap(requestData.query)
@@ -222,7 +223,7 @@ class PactBuilder extends BaseBuilder {
    */
   @SuppressWarnings('DuplicateMapLiteral')
   PactBuilder willRespondWith(Map responseData) {
-    def response = [matchers: new MatchingRules(), generators: new Generators()] + responseData
+    def response = [matchers: new MatchingRulesImpl(), generators: new Generators()] + responseData
     setupBody(responseData, response)
     this.responseData << response
     requestState = false

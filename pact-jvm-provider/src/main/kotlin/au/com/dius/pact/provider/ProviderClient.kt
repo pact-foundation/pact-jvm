@@ -141,15 +141,16 @@ open class ProviderClient(val provider: IProviderInfo,
         val charset = Consts.UTF_8
         val parameters = request.query.flatMap { entry -> entry.value.map { BasicNameValuePair(entry.key, it) } }
         method.entity = UrlEncodedFormEntity(parameters, charset)
-      } else if (request.body.isPresent()) {
-        method.entity = StringEntity(request.body.orElse(""))
+      } else if (request.body != null && request.body!!.isPresent()) {
+        method.entity = StringEntity(request.body!!.orElse(""))
       }
     }
   }
 
   open fun setupHeaders(request: Request, method: HttpRequest) {
-    if (request.headers.isNotEmpty()) {
-      request.headers.forEach { key, value ->
+    val headers = request.headers
+    if (headers != null && headers.isNotEmpty()) {
+      headers.forEach { key, value ->
         method.addHeader(key, value)
       }
 
