@@ -7,6 +7,7 @@ dependencies {
       "com.fasterxml.jackson.core:jackson-databind:${project.jacksonDatabindVersion}",
       'org.jooq:jool:0.9.11'
     compile('com.github.rholder:guava-retrying:2.0.0')
+    compile 'javax.mail:mail:1.5.0-b01'
 
     testCompile 'com.github.rest-driver:rest-client-driver:1.1.45'
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"

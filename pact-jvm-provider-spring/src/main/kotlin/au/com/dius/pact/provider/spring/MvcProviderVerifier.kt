@@ -66,6 +66,7 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
       MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
         .headers(mapHeaders(request, false))
     }
+
     return mockMvc.perform(requestBuilder).andDo({
       if (debugRequestResponse) {
         MockMvcResultHandlers.print().handle(it)

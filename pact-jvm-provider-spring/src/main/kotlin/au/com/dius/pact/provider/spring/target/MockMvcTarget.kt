@@ -89,6 +89,7 @@ class MockMvcTarget @JvmOverloads constructor(var controllers: List<Any> = mutab
     if (!servletPath.isNullOrEmpty()) {
       requestBuilder.servletPath(servletPath)
     }
+
     return standaloneSetup(*controllers.toTypedArray())
       .setControllerAdvice(*controllerAdvice.toTypedArray())
       .setMessageConverters(*messageConverters.toTypedArray())
