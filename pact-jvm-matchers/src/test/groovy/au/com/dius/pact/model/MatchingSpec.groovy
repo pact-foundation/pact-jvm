@@ -1,5 +1,6 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.matchers.HeaderMismatch
 import scala.None$
 import scala.Some
 import scala.collection.JavaConversions
@@ -162,7 +163,7 @@ class MatchingSpec extends Specification {
 
     where:
     mismatch = JavaConversions.asScalaBuffer([
-      HeaderMismatch.apply('C', 'D', '', Some.apply("Expected a header 'C' but was missing"))
+      new HeaderMismatch('C', 'D', '', "Expected a header 'C' but was missing")
     ]).toSeq()
   }
 
@@ -173,7 +174,7 @@ class MatchingSpec extends Specification {
 
     where:
     mismatch = JavaConversions.asScalaBuffer([
-      HeaderMismatch.apply('A', 'B', 'C', Some.apply("Expected header 'A' to have value 'B' but was 'C'"))
+      new HeaderMismatch('A', 'B', 'C', "Expected header 'A' to have value 'B' but was 'C'")
     ]).toSeq()
   }
 

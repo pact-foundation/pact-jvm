@@ -1,5 +1,7 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.matchers.Mismatch
+
 sealed trait RequestMatch extends Ordered[RequestMatch] {
   def allMatched = false
   
@@ -28,11 +30,11 @@ case class FullRequestMatch(interaction: Interaction) extends RequestMatch {
 }
 
 object PartialRequestMatch {
-  def apply(expected: Interaction, mismatches: Seq[RequestPartMismatch]): PartialRequestMatch =
+  def apply(expected: Interaction, mismatches: Seq[Mismatch]): PartialRequestMatch =
     PartialRequestMatch(Map(expected -> mismatches))
 }
 
-case class PartialRequestMatch(problems: Map[Interaction, Seq[RequestPartMismatch]]) extends RequestMatch {
+case class PartialRequestMatch(problems: Map[Interaction, Seq[Mismatch]]) extends RequestMatch {
   def description() = {
     var s = ""
     for (problem <- problems) {

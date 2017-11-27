@@ -5,8 +5,8 @@ import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.PactVerificationResult;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
+import au.com.dius.pact.matchers.Mismatch;
 import au.com.dius.pact.model.BodyMismatch;
-import au.com.dius.pact.model.RequestPartMismatch;
 import au.com.dius.pact.model.RequestResponsePact;
 import org.junit.Rule;
 import org.junit.Test;
@@ -129,7 +129,7 @@ public class PactMultiProviderTest {
         assertThat(result1, is(instanceOf(PactVerificationResult.PartialMismatch.class)));
         PactVerificationResult.PartialMismatch error1 = (PactVerificationResult.PartialMismatch) result1;
         assertThat(error1.getMismatches(), hasSize(1));
-        RequestPartMismatch mismatch = error1.getMismatches().get(0);
+        Mismatch mismatch = error1.getMismatches().get(0);
         assertThat(mismatch, is(instanceOf(BodyMismatch.class)));
       });
       doTest("/", "{\"name\": \"farry\"}");
@@ -160,7 +160,7 @@ public class PactMultiProviderTest {
         assertThat(result1, is(instanceOf(PactVerificationResult.PartialMismatch.class)));
         PactVerificationResult.PartialMismatch error1 = (PactVerificationResult.PartialMismatch) result1;
         assertThat(error1.getMismatches(), hasSize(1));
-        RequestPartMismatch mismatch = error1.getMismatches().get(0);
+        Mismatch mismatch = error1.getMismatches().get(0);
         assertThat(mismatch, is(instanceOf(BodyMismatch.class)));
       });
       doTest("/abc", "{\"name\": \"farry\"}");

@@ -4,6 +4,7 @@ import au.com.dius.pact.matchers.util.JsonUtils
 import au.com.dius.pact.model._
 import au.com.dius.pact.model.matchingrules.MatchingRules
 import com.typesafe.scalalogging.StrictLogging
+import scala.collection.JavaConverters._
 
 class JsonBodyMatcher extends BodyMatcher with StrictLogging {
 
@@ -69,7 +70,7 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
     for ((value, index) <- expectedValues.view.zipWithIndex) {
       if (index < actualValues.size) {
         result = result ++: compare(path :+ index.toString, value, actualValues(index), allowUnexpectedKeys, matchers)
-      } else if (!Matchers.matcherDefined("body", path, matchers)) {
+      } else if (!Matchers.matcherDefined("body", path.asJava, matchers)) {
         result = result :+ BodyMismatch(expectedValues, actualValues, Some(s"Expected ${valueOf(value)} but was missing"),
           path.mkString("."), generateObjectDiff(expectedValues, actualValues))
       }
@@ -79,9 +80,9 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
 
   def compareLists(expectedValues: List[Any], actualValues: List[Any], a: Any, b: Any, path: Seq[String],
                    allowUnexpectedKeys: Boolean, matchers: MatchingRules): List[BodyMismatch] = {
-    if (Matchers.matcherDefined("body", path, matchers)) {
+    if (Matchers.matcherDefined("body", path.asJava, matchers)) {
       logger.debug("compareLists: Matcher defined for path " + path)
-      var result = Matchers.domatch[BodyMismatch](matchers, "body", path, expectedValues, actualValues, BodyMismatchFactory)
+      var result = Matchers.domatch[BodyMismatch](matchers, "body", path.asJava, expectedValues, actualValues, BodyMismatchFactory).asScala.toList
       if (expectedValues.nonEmpty) {
         result = result ++ compareListContent(expectedValues.padTo(actualValues.length, expectedValues.head),
           actualValues, path, allowUnexpectedKeys, matchers)
@@ -119,7 +120,7 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
           Some(s"Expected a Map with ${expectedValues.size} elements but received ${actualValues.size} elements"),
           path.mkString("."), generateObjectDiff(expectedValues, actualValues))
       }
-      if (Matchers.wildcardMatcherDefined(path :+ "any", "body", matchers)) {
+      if (Matchers.wildcardMatcherDefined((path :+ "any").asJava, "body", matchers)) {
         actualValues.foreach(entry => {
           if (expectedValues.contains(entry._1)) {
             result = result ++: compare(path :+ entry._1, expectedValues.apply(entry._1), entry._2, allowUnexpectedKeys, matchers)
@@ -142,9 +143,9 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
   }
 
   def compareValues(path: Seq[String], expected: Any, actual: Any, matchers: MatchingRules): List[BodyMismatch] = {
-    if (Matchers.matcherDefined("body", path, matchers)) {
+    if (Matchers.matcherDefined("body", path.asJava, matchers)) {
       logger.debug("compareValues: Matcher defined for path " + path)
-      Matchers.domatch[BodyMismatch](matchers, "body", path, expected, actual, BodyMismatchFactory)
+      Matchers.domatch[BodyMismatch](matchers, "body", path.asJava, expected, actual, BodyMismatchFactory).asScala.toList
     } else {
       logger.debug("compareValues: No matcher defined for path " + path + ", using equality")
       if (expected == actual) {

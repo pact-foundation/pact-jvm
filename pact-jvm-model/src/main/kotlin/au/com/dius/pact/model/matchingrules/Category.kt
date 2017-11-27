@@ -14,12 +14,13 @@ data class Category @JvmOverloads constructor(val name: String,
 
   companion object : KLogging()
 
-  fun addRule(item: String, matchingRule: MatchingRule) {
+  fun addRule(item: String, matchingRule: MatchingRule): Category {
     if (!matchingRules.containsKey(item)) {
       matchingRules[item] = MatchingRuleGroup(mutableListOf(matchingRule))
     } else {
       matchingRules[item]!!.rules.add(matchingRule)
     }
+    return this
   }
 
   fun addRule(matchingRule: MatchingRule) = addRule("", matchingRule)
@@ -55,11 +56,7 @@ data class Category @JvmOverloads constructor(val name: String,
 
   fun maxBy(fn: ToIntFunction<String>): MatchingRuleGroup {
     val max = matchingRules.maxBy { fn.applyAsInt(it.key) }
-    if (max != null) {
-      return max.value
-    } else {
-      return MatchingRuleGroup()
-    }
+    return max?.value ?: MatchingRuleGroup()
   }
 
   fun allMatchingRules() = matchingRules.flatMap { it.value.rules }

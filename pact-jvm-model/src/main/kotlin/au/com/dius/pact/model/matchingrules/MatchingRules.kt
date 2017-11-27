@@ -111,10 +111,10 @@ object NullMatcher : MatchingRule {
 data class MatchingRuleGroup @JvmOverloads constructor(val rules: MutableList<MatchingRule> = mutableListOf(),
                                                        val ruleLogic: RuleLogic = RuleLogic.AND) {
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
-    if (pactSpecVersion < PactSpecVersion.V3) {
-      return rules.first().toMap()
+    return if (pactSpecVersion < PactSpecVersion.V3) {
+      rules.first().toMap()
     } else {
-      return mapOf("matchers" to rules.map { it.toMap() }, "combine" to ruleLogic.name)
+      mapOf("matchers" to rules.map { it.toMap() }, "combine" to ruleLogic.name)
     }
   }
 

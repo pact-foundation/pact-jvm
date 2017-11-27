@@ -11,7 +11,7 @@ class MaximumMatcherSpec extends Specification {
   def path
 
   def setup() {
-    mismatchFactory = [create: { p0, p1, p2, p3 -> 'mismatch' } ] as MismatchFactory
+    mismatchFactory = [create: { p0, p1, p2, p3 -> [:] as Mismatch } ] as MismatchFactory
     path = ['$', 'animals', '0']
   }
 
@@ -21,8 +21,8 @@ class MaximumMatcherSpec extends Specification {
     MatcherExecutorKt.domatch(new MaxTypeMatcher(2), path, expected, actual, mismatchFactory).empty
 
     where:
-    condition    | expected | actual
-    'is smaller' | [1, 2]   | [1]
+    condition             | expected | actual
+    'is smaller'          | [1, 2]   | [1]
     'is the correct size' | [1, 2]   | [1, 3]
   }
 

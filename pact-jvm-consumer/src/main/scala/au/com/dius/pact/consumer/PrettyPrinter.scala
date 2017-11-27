@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer
 
+import au.com.dius.pact.matchers.{HeaderMismatch, Mismatch}
 import au.com.dius.pact.model.{RequestResponseInteraction, _}
 import difflib.DiffUtils
 import groovy.json.JsonOutput
@@ -40,9 +41,9 @@ object PrettyPrinter {
     printDiff(label, stringify(anyToString(expected)), stringify(anyToString(actual)))
   }
 
-  def printProblem(interaction:Interaction, partial: Seq[RequestPartMismatch]): String = {
+  def printProblem(interaction:Interaction, partial: Seq[Mismatch]): String = {
     partial.flatMap {
-      case HeaderMismatch(key, expected, actual, mismatch) => printStringMismatch("Header " + key, expected, actual)
+      case hm: HeaderMismatch => printStringMismatch("Header " + hm.getHeaderKey, hm.getExpected, hm.getActual)
       case BodyMismatch(expected, actual, mismatch, path, _) => printStringMismatch("Body",
         JsonOutput.prettyPrint(expected.toString), JsonOutput.prettyPrint(actual.toString))
       case CookieMismatch(expected, actual) => printDiff("Cookies", expected.sorted, actual.sorted)
@@ -54,7 +55,7 @@ object PrettyPrinter {
   def printAlmost(almost: List[PartialRequestMatch]): String = {
 
     def partialRequestMatch(p:PartialRequestMatch): Iterable[String] = {
-      val map: Map[Interaction, Seq[RequestPartMismatch]] = p.problems
+      val map: Map[Interaction, Seq[Mismatch]] = p.problems
       map.flatMap {
         case (_, Nil) => None
         case (i, mismatches) => Some(printProblem(i, mismatches))

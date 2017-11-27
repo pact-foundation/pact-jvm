@@ -1,10 +1,10 @@
 package au.com.dius.pact.provider
 
 import au.com.dius.pact.matchers.DiffUtilsKt
+import au.com.dius.pact.matchers.HeaderMismatch
 import au.com.dius.pact.matchers.MatchingConfig
 import au.com.dius.pact.model.BodyMismatch
 import au.com.dius.pact.model.BodyTypeMismatch
-import au.com.dius.pact.model.HeaderMismatch
 import au.com.dius.pact.model.OptionalBody
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.model.Response
@@ -92,7 +92,7 @@ class ResponseComparison {
       } else {
         expected.headers.each { headerKey, value ->
               if (headerMismatchers[headerKey]) {
-                  headerResult[headerKey] = headerMismatchers[headerKey].first().mismatch.get()
+                  headerResult[headerKey] = headerMismatchers[headerKey].first().mismatch
               } else {
                   headerResult[headerKey] = true
               }
