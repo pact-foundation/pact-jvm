@@ -4,7 +4,6 @@ import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.model.matchingrules.TypeMatcher
-import scala.collection.JavaConverters
 import spock.lang.Specification
 
 class MatchersSpec extends Specification {
@@ -117,7 +116,7 @@ class MatchersSpec extends Specification {
 
     then:
     !mismatches.empty
-    JavaConverters.asJavaCollection(mismatches)*.mismatch()*.get() == ['Expected \'200.3\' to be the same type as 100']
+    mismatches*.mismatch == ['Expected \'200.3\' to be the same type as 100']
   }
 
   def 'type matcher - match on type - map elements should inherit the matchers from the parent'() {
@@ -134,7 +133,7 @@ class MatchersSpec extends Specification {
 
     then:
     !mismatches.empty
-    JavaConverters.asJavaCollection(mismatches)*.mismatch()*.get() == ['Expected \'200.3\' to be the same type as 100']
+    mismatches*.mismatch == ['Expected \'200.3\' to be the same type as 100']
   }
 
   def 'path matching - match root node'() {

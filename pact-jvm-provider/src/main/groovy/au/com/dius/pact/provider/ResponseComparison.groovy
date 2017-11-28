@@ -1,9 +1,9 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.matchers.BodyMismatch
 import au.com.dius.pact.matchers.DiffUtilsKt
 import au.com.dius.pact.matchers.HeaderMismatch
 import au.com.dius.pact.matchers.MatchingConfig
-import au.com.dius.pact.model.BodyMismatch
 import au.com.dius.pact.model.BodyTypeMismatch
 import au.com.dius.pact.model.OptionalBody
 @SuppressWarnings('UnusedImport')
@@ -46,21 +46,18 @@ class ResponseComparison {
   }
 
   static compareMessage(Message message, OptionalBody actual) {
-    def result = JavaConverters$.MODULE$.mutableMapAsJavaMapConverter(MatchingConfig.bodyMatchers()).asJava().find {
-          message.contentType ==~ it.key
-    }
+    def result = MatchingConfig.lookupBodyMatcher(message.contentType)
     def mismatches = []
     def expected = message.asPactRequest()
     def actualMessage = new Response(200, ['Content-Type': message.contentType], actual)
     if (result) {
-      mismatches = JavaConverters$.MODULE$.seqAsJavaListConverter(result.value.matchBody(expected,
-            actualMessage, true)).asJava()
+      mismatches = result.matchBody(expected, actualMessage, true)
     } else {
       def expectedBody = message.contents.orElse('')
-      if (!StringUtils.isEmpty(expectedBody) && StringUtils.isEmpty(actual)) {
-          mismatches << BodyMismatch.apply(expectedBody, None$.MODULE$.get())
+      if (!StringUtils.isEmpty(expectedBody) && StringUtils.isEmpty(actual.value)) {
+          mismatches << new BodyMismatch(expectedBody, null)
       } else if (actual.orElse('') != expectedBody) {
-          mismatches << BodyMismatch(expectedBody, actual.orElse(''))
+          mismatches << new BodyMismatch(expectedBody, actual.orElse(''))
       }
     }
 
@@ -113,13 +110,13 @@ class ResponseComparison {
     } else if (mismatches.any { it instanceof BodyMismatch }) {
       result.comparison = mismatches
         .findAll { it instanceof BodyMismatch }
-        .groupBy { bm -> bm.path() }
+        .groupBy { bm -> bm.path }
         .collectEntries { path, m ->
           [
             path, m.collect { bm ->
               [
-                mismatch: bm.mismatch().defined ? bm.mismatch().get() : 'mismatch',
-                diff: bm.diff().defined ? bm.diff().get() : ''
+                mismatch: bm.mismatch ?: 'mismatch',
+                diff: bm.diff ?: ''
               ]
             }
           ]

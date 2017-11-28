@@ -39,13 +39,6 @@ sealed trait ResponsePartMismatch extends Mismatch {
 
 case class StatusMismatch(expected: Status, actual: Status) extends ResponsePartMismatch
 case class BodyTypeMismatch(expected: String, actual: String) extends RequestPartMismatch with ResponsePartMismatch
-case class BodyMismatch(expected: Any, actual: Any, mismatch: Option[String] = None, path: String = "/", diff: Option[String] = None)
-  extends RequestPartMismatch with ResponsePartMismatch {
-  override def description: String = mismatch match {
-    case Some(message) => s"BodyMismatch - $message"
-    case _ => toString
-  }
-}
 case class CookieMismatch(expected: Cookies, actual: Cookies) extends RequestPartMismatch
 case class PathMismatch(expected: Path, actual: Path, mismatch: Option[String] = None) extends RequestPartMismatch {
   override def description: String = mismatch match {
@@ -55,12 +48,6 @@ case class PathMismatch(expected: Path, actual: Path, mismatch: Option[String] =
 }
 case class MethodMismatch(expected: Method, actual: Method) extends RequestPartMismatch
 case class QueryMismatch(queryParameter: String, expected: String, actual: String, mismatch: Option[String] = None, path: String = "/") extends RequestPartMismatch
-
-object BodyMismatchFactory extends MismatchFactory[BodyMismatch] {
-  import JavaConversions._
-  def create(expected: Object, actual: Object, message: String, path: java.util.List[String]) =
-    BodyMismatch(expected, actual, Some(message), path.toList.mkString("."), None)
-}
 
 object PathMismatchFactory extends MismatchFactory[PathMismatch] {
   def create(expected: Object, actual: Object, message: String, path: java.util.List[String]) =
@@ -141,26 +128,26 @@ object Matching extends StrictLogging {
     else Some(MethodMismatch(expected, actual))
   }
 
-  def matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean) = {
+  def matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): List[Mismatch] = {
     if (expected.mimeType == actual.mimeType) {
-      val result = MatchingConfig.lookupBodyMatcher(actual.mimeType)
-      if (result.isDefined) {
-        logger.debug("Found a matcher for " + actual.mimeType + " -> " + result)
-        result.get._2.matchBody(expected, actual, allowUnexpectedKeys)
+      val matcher = MatchingConfig.lookupBodyMatcher(actual.mimeType)
+      if (matcher != null) {
+        logger.debug("Found a matcher for " + actual.mimeType + " -> " + matcher)
+        matcher.matchBody(expected, actual, allowUnexpectedKeys).asScala.toList
       } else {
         logger.debug("No matcher for " + actual.mimeType + ", using equality")
         (expected.getBody.getState, actual.getBody.getState) match {
           case (OptionalBody.State.MISSING, _) => List()
-          case (OptionalBody.State.NULL, OptionalBody.State.PRESENT) => List(BodyMismatch(None, actual.getBody.getValue,
-            Some(s"Expected empty body but received '${actual.getBody.getValue}'")))
+          case (OptionalBody.State.NULL, OptionalBody.State.PRESENT) => List(new BodyMismatch(null, actual.getBody.getValue,
+            s"Expected empty body but received '${actual.getBody.getValue}'"))
           case (OptionalBody.State.NULL, _) => List()
-          case (_, OptionalBody.State.MISSING) => List(BodyMismatch(expected.getBody.getValue, None,
-            Some(s"Expected body '${expected.getBody.getValue}' but was missing")))
+          case (_, OptionalBody.State.MISSING) => List(new BodyMismatch(expected.getBody.getValue, null,
+            s"Expected body '${expected.getBody.getValue}' but was missing"))
           case (_, _) =>
             if (expected.getBody.getValue == actual.getBody.getValue)
               List()
             else
-              List(BodyMismatch(expected.getBody.getValue, actual.getBody.getValue))
+              List(new BodyMismatch(expected.getBody.getValue, actual.getBody.getValue))
         }
       }
     } else {

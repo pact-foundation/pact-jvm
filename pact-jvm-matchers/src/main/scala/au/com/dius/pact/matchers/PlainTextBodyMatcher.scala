@@ -1,22 +1,24 @@
 package au.com.dius.pact.matchers
 
+import java.util.Collections
+
 import au.com.dius.pact.model._
 import au.com.dius.pact.model.matchingrules.{MatchingRules, RegexMatcher}
 import com.typesafe.scalalogging.StrictLogging
+import scala.collection.JavaConverters._
 
 class PlainTextBodyMatcher extends BodyMatcher with StrictLogging {
 
-  override def matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): List[BodyMismatch] = {
+  override def matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): java.util.List[BodyMismatch] = {
     (expected.getBody.getState, actual.getBody.getState) match {
-      case (OptionalBody.State.MISSING, _) => List()
-      case (OptionalBody.State.NULL, OptionalBody.State.PRESENT) => List(BodyMismatch(None, actual.getBody.getValue,
-        Some(s"Expected empty body but received '${actual.getBody.getValue}'")))
-      case (OptionalBody.State.NULL, _) => List()
-      case (_, OptionalBody.State.MISSING) => List(BodyMismatch(expected.getBody.getValue, None,
-        Some(s"Expected body '${expected.getBody.getValue}' but was missing")))
-      case (OptionalBody.State.EMPTY, OptionalBody.State.EMPTY) => List()
-      case (_, _) => compareText(expected.getBody.orElse(""),
-        actual.getBody.orElse(""), expected.getMatchingRules)
+      case (OptionalBody.State.MISSING, _) => Collections.emptyList()
+      case (OptionalBody.State.NULL, OptionalBody.State.PRESENT) => Collections.singletonList(new BodyMismatch(null, actual.getBody.getValue,
+        s"Expected empty body but received '${actual.getBody.getValue}'"))
+      case (OptionalBody.State.NULL, _) => Collections.emptyList()
+      case (_, OptionalBody.State.MISSING) => Collections.singletonList(new BodyMismatch(expected.getBody.getValue, null,
+        s"Expected body '${expected.getBody.getValue}' but was missing"))
+      case (OptionalBody.State.EMPTY, OptionalBody.State.EMPTY) => Collections.emptyList()
+      case (_, _) => compareText(expected.getBody.orElse(""), actual.getBody.orElse(""), expected.getMatchingRules).asJava
     }
   }
 
@@ -30,15 +32,15 @@ class PlainTextBodyMatcher extends BodyMatcher with StrictLogging {
         return List()
       }
 
-      return List(BodyMismatch(expected, actual,
-        Some(s"Expected body '${expected}' to match '${actual}' using equality but did not match")))
+      return List(new BodyMismatch(expected, actual,
+        s"Expected body '${expected}' to match '${actual}' using equality but did not match"))
     }
 
     if (actual.matches(regex.getRules.get(0).asInstanceOf[RegexMatcher].getRegex)) {
       return List()
     }
 
-    List(BodyMismatch(expected, actual,
-      Some(s"Expected body '${expected}' to match '${actual}' using regex '${regex.toString()}' but did not match")))
+    List(new BodyMismatch(expected, actual,
+      s"Expected body '${expected}' to match '${actual}' using regex '${regex.toString()}' but did not match"))
   }
 }

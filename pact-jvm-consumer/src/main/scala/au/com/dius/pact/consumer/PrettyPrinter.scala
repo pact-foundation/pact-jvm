@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.matchers.{HeaderMismatch, Mismatch}
+import au.com.dius.pact.matchers.{BodyMismatch, HeaderMismatch, Mismatch}
 import au.com.dius.pact.model.{RequestResponseInteraction, _}
 import difflib.DiffUtils
 import groovy.json.JsonOutput
@@ -44,8 +44,8 @@ object PrettyPrinter {
   def printProblem(interaction:Interaction, partial: Seq[Mismatch]): String = {
     partial.flatMap {
       case hm: HeaderMismatch => printStringMismatch("Header " + hm.getHeaderKey, hm.getExpected, hm.getActual)
-      case BodyMismatch(expected, actual, mismatch, path, _) => printStringMismatch("Body",
-        JsonOutput.prettyPrint(expected.toString), JsonOutput.prettyPrint(actual.toString))
+      case bm: BodyMismatch => printStringMismatch("Body",
+        JsonOutput.prettyPrint(bm.getExpected.toString), JsonOutput.prettyPrint(bm.getActual.toString))
       case CookieMismatch(expected, actual) => printDiff("Cookies", expected.sorted, actual.sorted)
       case PathMismatch(expected, actual, _) => printDiff("Path", List(expected), List(actual), 0)
       case MethodMismatch(expected, actual) => printDiff("Method", List(expected), List(actual), 0)
