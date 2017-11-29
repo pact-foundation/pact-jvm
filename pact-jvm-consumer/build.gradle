@@ -13,6 +13,7 @@ dependencies {
 
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile "org.specs2:specs2-mock_${project.scalaVersion}:${project.specs2Version}"
+    testCompile 'org.cthul:cthul-matchers:1.1.0'
 }
 
 sourceSets.main.scala.srcDir "src/main/java"
