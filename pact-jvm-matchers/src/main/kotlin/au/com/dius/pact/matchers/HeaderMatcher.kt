@@ -2,7 +2,6 @@ package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model.matchingrules.MatchingRules
 import mu.KLogging
-import scala.collection.JavaConverters
 
 object HeaderMatcher : KLogging() {
 
@@ -37,21 +36,17 @@ object HeaderMatcher : KLogging() {
 
   fun stripWhiteSpaceAfterCommas(str: String): String = Regex(",\\s*").replace(str, ",")
 
-  private fun toScalaSeq(value: String) = JavaConverters.asScalaIterator(listOf(value).iterator()).toSeq()
-
   @JvmStatic
   fun compareHeader(headerKey: String, expected: String, actual: String, matchers: MatchingRules): HeaderMismatch? {
     logger.debug { "Comparing header '$headerKey': '$actual' to '$expected'" }
 
-    if (Matchers.matcherDefined("header", listOf(headerKey), matchers)) {
-      return Matchers.domatch<HeaderMismatch>(matchers, "header", listOf(headerKey), expected, actual,
-        HeaderMismatchFactory).firstOrNull()
-    } else if (headerKey.equals("Content-Type", ignoreCase = true)) {
-      return matchContentType(expected, actual)
-    } else if (stripWhiteSpaceAfterCommas(expected) == stripWhiteSpaceAfterCommas(actual)) {
-      return null
-    } else {
-      return HeaderMismatch(headerKey, expected, actual, "Expected header '$headerKey' to have value '$expected' but was '$actual'")
+    return when {
+      Matchers.matcherDefined("header", listOf(headerKey), matchers) ->
+        Matchers.domatch<HeaderMismatch>(matchers, "header", listOf(headerKey), expected, actual,
+          HeaderMismatchFactory).firstOrNull()
+      headerKey.equals("Content-Type", ignoreCase = true) -> matchContentType(expected, actual)
+      stripWhiteSpaceAfterCommas(expected) == stripWhiteSpaceAfterCommas(actual) -> null
+      else -> HeaderMismatch(headerKey, expected, actual, "Expected header '$headerKey' to have value '$expected' but was '$actual'")
     }
   }
 }
