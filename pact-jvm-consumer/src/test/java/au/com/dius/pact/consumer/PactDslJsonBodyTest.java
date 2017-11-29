@@ -253,4 +253,15 @@ public class PactDslJsonBodyTest {
         assertThat(numbers.get(1), is(JSONObject.NULL));
         assertThat(numbers.get(2), is(JSONObject.NULL));
     }
+
+    @Test
+    public void testLargeDateFormat() {
+      String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss +HHMM 'GMT'";
+      final PactDslJsonBody response = new PactDslJsonBody();
+      response
+        .date("lastUpdate", DATE_FORMAT)
+        .date("creationDate", DATE_FORMAT);
+      JSONObject jsonObject = (JSONObject) response.getBody();
+      assertThat(jsonObject.get("lastUpdate"), is(equalTo("Tue, 01 Feb 2000 00:00:00 +0002 GMT")));
+    }
 }
