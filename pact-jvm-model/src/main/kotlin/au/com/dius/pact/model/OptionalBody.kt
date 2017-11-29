@@ -48,6 +48,10 @@ data class OptionalBody(val state: State, val value: String? = null) {
     return state == State.PRESENT
   }
 
+  fun isNotPresent(): Boolean {
+    return state != State.PRESENT
+  }
+
   fun orElse(defaultValue: String) : String {
     return if (state == State.EMPTY || state == State.PRESENT) {
       this.value!!
@@ -72,5 +76,7 @@ fun OptionalBody?.isEmpty() = this != null && this.isEmpty()
 fun OptionalBody?.isNull() = this == null || this.isNull()
 
 fun OptionalBody?.isPresent() = this != null && this.isPresent()
+
+fun OptionalBody?.isNotPresent() = this == null || this.isNotPresent()
 
 fun OptionalBody?.orElse(defaultValue: String) = this?.orElse(defaultValue) ?: defaultValue

@@ -6,7 +6,8 @@ object MatchingConfig {
     "application/.*json" to "au.com.dius.pact.matchers.JsonBodyMatcher",
     "application/json-rpc" to "au.com.dius.pact.matchers.JsonBodyMatcher",
     "application/jsonrequest" to "au.com.dius.pact.matchers.JsonBodyMatcher",
-    "text/plain" to "au.com.dius.pact.matchers.PlainTextBodyMatcher"
+    "text/plain" to "au.com.dius.pact.matchers.PlainTextBodyMatcher",
+    "multipart/form-data" to "au.com.dius.pact.matchers.MultipartFormBodyMatcher"
   )
 
   @JvmStatic
