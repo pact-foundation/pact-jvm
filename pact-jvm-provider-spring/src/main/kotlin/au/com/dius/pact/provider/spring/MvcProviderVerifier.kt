@@ -13,18 +13,23 @@ import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
+import org.springframework.test.web.servlet.RequestBuilder
+import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.request
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import javax.mail.internet.ContentDisposition
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
-
+import org.hamcrest.Matchers.anything
 /**
  * Verifies the providers against the defined consumers using Spring MockMvc
  */
 open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false) : ProviderVerifier() {
+
 
   fun verifyResponseFromProvider(provider: ProviderInfo, interaction: RequestResponseInteraction,
                                  interactionMessage: String, failures: MutableMap<String, Any>, mockMvc: MockMvc) {
@@ -66,12 +71,22 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
       MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
         .headers(mapHeaders(request, false))
     }
-
-    return mockMvc.perform(requestBuilder).andDo({
+      return performRequest(mockMvc, requestBuilder).andDo({
       if (debugRequestResponse) {
         MockMvcResultHandlers.print().handle(it)
       }
     }).andReturn()
+  }
+
+  private fun performRequest(mockMvc: MockMvc, requestBuilder : RequestBuilder) : ResultActions {
+    val resultActions = mockMvc.perform(requestBuilder);
+    if (resultActions.andReturn().request.isAsyncStarted) {
+      return mockMvc.perform(asyncDispatch(resultActions
+          .andExpect(request().asyncResult(anything()))
+          .andReturn()));
+    } else {
+      return resultActions;
+    }
   }
 
   fun requestUriString(request: Request): URI {
