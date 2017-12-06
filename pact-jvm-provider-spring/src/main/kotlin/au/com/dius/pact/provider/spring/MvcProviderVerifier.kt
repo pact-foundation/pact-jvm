@@ -30,7 +30,6 @@ import org.hamcrest.Matchers.anything
  */
 open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false) : ProviderVerifier() {
 
-
   fun verifyResponseFromProvider(provider: ProviderInfo, interaction: RequestResponseInteraction,
                                  interactionMessage: String, failures: MutableMap<String, Any>, mockMvc: MockMvc) {
     try {
@@ -79,13 +78,13 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
   }
 
   private fun performRequest(mockMvc: MockMvc, requestBuilder : RequestBuilder) : ResultActions {
-    val resultActions = mockMvc.perform(requestBuilder);
-    if (resultActions.andReturn().request.isAsyncStarted) {
-      return mockMvc.perform(asyncDispatch(resultActions
-          .andExpect(request().asyncResult(anything()))
-          .andReturn()));
+    val resultActions = mockMvc.perform(requestBuilder)
+    return if (resultActions.andReturn().request.isAsyncStarted) {
+      mockMvc.perform(asyncDispatch(resultActions
+        .andExpect(request().asyncResult(anything()))
+        .andReturn()))
     } else {
-      return resultActions;
+      resultActions
     }
   }
 
