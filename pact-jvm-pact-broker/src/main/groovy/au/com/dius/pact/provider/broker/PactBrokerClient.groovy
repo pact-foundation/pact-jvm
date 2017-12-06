@@ -10,8 +10,6 @@ import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import org.apache.commons.lang3.StringUtils
 
-import java.util.function.BiFunction
-
 /**
  * Client for the pact broker service
  */
@@ -77,14 +75,15 @@ class PactBrokerClient extends PactBrokerClientBase {
     new HalClient(pactBrokerUrl, options)
   }
 
-  def uploadPactFile(File pactFile, String version, List<String> tags = []) {
+  def uploadPactFile(File pactFile, String unescapedVersion, List<String> tags = []) {
     def pactText = pactFile.text
     def pact = new JsonSlurper().parseText(pactText)
     IHalClient halClient = newHalClient()
     def providerName = UrlEscapers.urlPathSegmentEscaper().escape(pact.provider.name)
     def consumerName = UrlEscapers.urlPathSegmentEscaper().escape(pact.consumer.name)
+    def version =  UrlEscapers.urlPathSegmentEscaper().escape(unescapedVersion)
     def uploadPath = "/pacts/provider/$providerName/consumer/$consumerName/version/$version"
-    halClient.uploadJson(uploadPath, pactText) { result, status ->
+    halClient.uploadJson(uploadPath, pactText, { result, status ->
       if (result == 'OK') {
         if (tags) {
           uploadTags(halClient, consumerName, version, tags)
@@ -93,14 +92,14 @@ class PactBrokerClient extends PactBrokerClientBase {
       } else {
         "FAILED! $status"
       }
-    }
+    }, false)
   }
 
   static uploadTags(IHalClient halClient, String consumerName, String version, List<String> tags) {
     tags.each {
       def tag = UrlEscapers.urlPathSegmentEscaper().escape(it)
       halClient.uploadJson("/pacticipants/$consumerName/versions/$version/tags/$tag", '',
-        { p1, p2 -> null } as BiFunction<String, String, Object>, false)
+        { p1, p2 -> null }, false)
     }
   }
 

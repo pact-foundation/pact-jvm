@@ -173,12 +173,14 @@ class PactBrokerClientSpec extends Specification {
     def result = client.uploadPactFile(pactFile, '10.0.0')
 
     then:
-    1 * halClient.uploadJson('/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0', pactContents, _) >>
+    1 * halClient.uploadJson(
+      '/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0',
+      pactContents, _, false) >>
       { args -> args[2].apply('Failed', 'Error') }
     result == 'FAILED! Error'
   }
 
-  def 'encode the provider name, consumer name and tags when uploading a pact'() {
+  def 'encode the provider name, consumer name, tags and version when uploading a pact'() {
     given:
     def halClient = Mock(IHalClient)
     def client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
@@ -199,12 +201,12 @@ class PactBrokerClientSpec extends Specification {
     pactFile.write pactContents
 
     when:
-    client.uploadPactFile(pactFile, '10.0.0', [tag])
+    client.uploadPactFile(pactFile, '10.0.0/B', [tag])
 
     then:
-    1 * halClient.uploadJson('/pacts/provider/Provider%2FA/consumer/Foo%20Consumer%2FA/version/10.0.0',
-      pactContents, _) >> { args -> args[2].apply('OK', 'OK') }
-    1 * halClient.uploadJson('/pacticipants/Foo%20Consumer%2FA/versions/10.0.0/tags/A%2FB', '', _, false)
+    1 * halClient.uploadJson('/pacts/provider/Provider%2FA/consumer/Foo%20Consumer%2FA/version/10.0.0%2FB',
+      pactContents, _, false) >> { args -> args[2].apply('OK', 'OK') }
+    1 * halClient.uploadJson('/pacticipants/Foo%20Consumer%2FA/versions/10.0.0%2FB/tags/A%2FB', '', _, false)
   }
 
   @Unroll
