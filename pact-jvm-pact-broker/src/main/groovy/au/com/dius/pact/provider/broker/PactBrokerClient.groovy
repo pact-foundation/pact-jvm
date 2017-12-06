@@ -94,7 +94,7 @@ class PactBrokerClient extends PactBrokerClientBase {
       } else {
         "FAILED! $status"
       }
-    } as BiFunction<String,String, Object>, false)
+    }, false)
   }
 
   static uploadTags(IHalClient halClient, String consumerName, String version, List<String> tags) {
