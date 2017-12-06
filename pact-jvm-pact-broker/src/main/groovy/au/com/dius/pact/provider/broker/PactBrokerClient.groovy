@@ -77,14 +77,15 @@ class PactBrokerClient extends PactBrokerClientBase {
     new HalClient(pactBrokerUrl, options)
   }
 
-  def uploadPactFile(File pactFile, String version, List<String> tags = []) {
+  def uploadPactFile(File pactFile, String unescapedVersion, List<String> tags = []) {
     def pactText = pactFile.text
     def pact = new JsonSlurper().parseText(pactText)
     IHalClient halClient = newHalClient()
     def providerName = UrlEscapers.urlPathSegmentEscaper().escape(pact.provider.name)
     def consumerName = UrlEscapers.urlPathSegmentEscaper().escape(pact.consumer.name)
+    def version =  UrlEscapers.urlPathSegmentEscaper().escape(unescapedVersion)
     def uploadPath = "/pacts/provider/$providerName/consumer/$consumerName/version/$version"
-    halClient.uploadJson(uploadPath, pactText) { result, status ->
+    halClient.uploadJson(uploadPath, pactText, { result, status ->
       if (result == 'OK') {
         if (tags) {
           uploadTags(halClient, consumerName, version, tags)
@@ -93,7 +94,7 @@ class PactBrokerClient extends PactBrokerClientBase {
       } else {
         "FAILED! $status"
       }
-    }
+    } as BiFunction<String,String, Object>, false)
   }
 
   static uploadTags(IHalClient halClient, String consumerName, String version, List<String> tags) {
