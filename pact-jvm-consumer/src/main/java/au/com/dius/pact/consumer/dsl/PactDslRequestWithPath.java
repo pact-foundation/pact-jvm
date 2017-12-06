@@ -11,11 +11,17 @@ import au.com.dius.pact.model.matchingrules.MatchingRules;
 import au.com.dius.pact.model.matchingrules.MatchingRulesImpl;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import com.mifmif.common.regex.Generex;
+import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +31,7 @@ import java.util.function.Supplier;
 
 public class PactDslRequestWithPath {
     private static final String CONTENT_TYPE = "Content-Type";
+    public static final String MULTIPART_HEADER_REGEX = "multipart/form-data;\\s*boundary=.*";
     private final ConsumerPactBuilder consumerPactBuilder;
 
     Consumer consumer;
@@ -375,5 +382,29 @@ public class PactDslRequestWithPath {
         requestMatchers.addCategory("query").addRule(parameter, new RegexMatcher(regex));
         query.put(parameter, example);
         return this;
+    }
+
+    /**
+     * Sets up a file upload request. This will add the correct content type header to the request
+     * @param partName This is the name of the part in the multipart body.
+     * @param fileName This is the name of the file that was uploaded
+     * @param fileContentType This is the content type of the uploaded file
+     * @param data This is the actual file contents
+     */
+    public PactDslRequestWithPath withFileUpload(String partName, String fileName, String fileContentType, byte[] data)
+      throws IOException {
+      HttpEntity multipart = MultipartEntityBuilder.create()
+        .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+        .addBinaryBody(partName, data, ContentType.create(fileContentType), fileName)
+        .build();
+      OutputStream os = new ByteArrayOutputStream();
+      multipart.writeTo(os);
+
+      requestBody = OptionalBody.body(os.toString());
+      requestMatchers.addCategory("header").addRule(CONTENT_TYPE, new RegexMatcher(MULTIPART_HEADER_REGEX,
+        multipart.getContentType().getValue()));
+      requestHeaders.put(CONTENT_TYPE, multipart.getContentType().getValue());
+
+      return this;
     }
 }
