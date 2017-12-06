@@ -15,7 +15,7 @@ class UuidMatcher extends Matcher {
   }
 
   Generator getGenerator() {
-    new UuidGenerator()
+    super.@value == null ? UuidGenerator.INSTANCE : null
   }
 
   def getValue() {

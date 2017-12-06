@@ -538,7 +538,7 @@ public class PactDslRootValue extends DslPart {
    */
   public static PactDslRootValue uuid() {
     PactDslRootValue value = new PactDslRootValue();
-    value.generators.addGenerator(Category.BODY, "", new UuidGenerator());
+    value.generators.addGenerator(Category.BODY, "", UuidGenerator.INSTANCE);
     value.setValue("e2490de5-5bd3-43d5-b7c4-526e33f71304");
     value.setMatcher(value.regexp(UUID_REGEX));
     return value;

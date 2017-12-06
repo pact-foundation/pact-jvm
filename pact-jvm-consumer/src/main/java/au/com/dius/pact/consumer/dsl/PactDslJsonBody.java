@@ -873,7 +873,7 @@ public class PactDslJsonBody extends DslPart {
      * @param name attribute name
      */
     public PactDslJsonBody uuid(String name) {
-      generators.addGenerator(Category.BODY, matcherKey(name), new UuidGenerator());
+      generators.addGenerator(Category.BODY, matcherKey(name), UuidGenerator.INSTANCE);
       return uuid(name, "e2490de5-5bd3-43d5-b7c4-526e33f71304");
     }
 

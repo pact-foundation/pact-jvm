@@ -625,7 +625,7 @@ public class PactDslJsonArray extends DslPart {
      * Element that must be encoded as an UUID
      */
     public PactDslJsonArray uuid() {
-      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(1), new UuidGenerator());
+      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(1), UuidGenerator.INSTANCE);
       return uuid("e2490de5-5bd3-43d5-b7c4-526e33f71304");
     }
 
