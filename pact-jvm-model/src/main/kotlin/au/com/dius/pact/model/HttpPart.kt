@@ -2,6 +2,9 @@ package au.com.dius.pact.model
 
 import au.com.dius.pact.model.matchingrules.MatchingRules
 import groovy.lang.GroovyObjectSupport
+import mu.KLogging
+import org.apache.http.entity.ContentType
+import java.nio.charset.Charset
 
 /**
  * Base trait for an object that represents part of an http message
@@ -50,12 +53,21 @@ abstract class HttpPart : GroovyObjectSupport() {
     }
   }
 
-  companion object {
+  companion object : KLogging() {
     private const val CONTENT_TYPE = "Content-Type"
 
     val XMLREGEXP = """^\s*<\?xml\s*version.*""".toRegex()
     val HTMLREGEXP = """^\s*(<!DOCTYPE)|(<HTML>).*""".toRegex()
     val JSONREGEXP = """^\s*(true|false|null|[0-9]+|"\w*|\{\s*(}|"\w+)|\[\s*).*""".toRegex()
     val XMLREGEXP2 = """^\s*<\w+\s*(:\w+=[\"”][^\"”]+[\"”])?.*""".toRegex()
+  }
+
+  fun charset(): Charset? {
+    return try {
+      ContentType.parse(contentTypeHeader())?.charset
+    } catch (e: Exception) {
+      logger.debug { "Failed to parse content type '${contentTypeHeader()}'" }
+      null
+    }
   }
 }
