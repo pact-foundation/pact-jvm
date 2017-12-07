@@ -2,5 +2,7 @@ dependencies {
   compile project(":pact-jvm-model"), project(":pact-jvm-provider_${project.scalaVersion}"),
     "org.scalatest:scalatest_${project.scalaVersion}:${project.scalatestVersion}"
   compile 'org.asynchttpclient:async-http-client:2.1.0-alpha24'
-  compile "ws.unfiltered:unfiltered-netty-server_${project.scalaVersion}:0.9.1"
+  compile("ws.unfiltered:unfiltered-netty-server_${project.scalaVersion}:0.9.1") {
+    exclude group: 'org.scala-lang'
+  }
 }
