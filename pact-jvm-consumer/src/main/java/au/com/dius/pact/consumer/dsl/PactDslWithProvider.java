@@ -10,6 +10,9 @@ public class PactDslWithProvider {
     private ConsumerPactBuilder consumerPactBuilder;
     private String providerName;
 
+    private PactDslRequestWithoutPath defaultRequestValues;
+    private PactDslResponse defaultResponseValues;
+
     public PactDslWithProvider(ConsumerPactBuilder consumerPactBuilder, String provider) {
         this.consumerPactBuilder = consumerPactBuilder;
         this.providerName = provider;
@@ -22,7 +25,7 @@ public class PactDslWithProvider {
      */
     public PactDslWithState given(String state) {
         return new PactDslWithState(consumerPactBuilder, consumerPactBuilder.getConsumerName(), providerName,
-          new ProviderState(state));
+          new ProviderState(state), defaultRequestValues, defaultResponseValues);
     }
 
     /**
@@ -33,7 +36,7 @@ public class PactDslWithProvider {
      */
     public PactDslWithState given(String state, Map<String, Object> params) {
         return new PactDslWithState(consumerPactBuilder, consumerPactBuilder.getConsumerName(), providerName,
-          new ProviderState(state, params));
+          new ProviderState(state, params), defaultRequestValues, defaultResponseValues);
     }
 
     /**
@@ -57,7 +60,7 @@ public class PactDslWithProvider {
         }
 
         return new PactDslWithState(consumerPactBuilder, consumerPactBuilder.getConsumerName(), providerName,
-                new ProviderState(state, params));
+                new ProviderState(state, params), defaultRequestValues, defaultResponseValues);
     }
 
     /**
@@ -66,8 +69,20 @@ public class PactDslWithProvider {
      * @param description request description
      */
     public PactDslRequestWithoutPath uponReceiving(String description) {
-        return new PactDslWithState(consumerPactBuilder, consumerPactBuilder.getConsumerName(), providerName)
-                .uponReceiving(description);
+        return new PactDslWithState(consumerPactBuilder, consumerPactBuilder.getConsumerName(), providerName,
+          defaultRequestValues, defaultResponseValues)
+          .uponReceiving(description);
     }
 
+  public ConsumerPactBuilder getConsumerPactBuilder() {
+    return consumerPactBuilder;
+  }
+
+  public void setDefaultRequestValues(PactDslRequestWithoutPath defaultRequestValues) {
+    this.defaultRequestValues = defaultRequestValues;
+  }
+
+  public void setDefaultResponseValues(PactDslResponse defaultResponseValues) {
+    this.defaultResponseValues = defaultResponseValues;
+  }
 }

@@ -218,6 +218,33 @@ E.g.:
 
 For an example test doing this, see [PactProviderHttpsKeystoreTest](src/test/java/au/com/dius/pact/consumer/pactproviderrule/PactProviderHttpsKeystoreTest.java).
 
+### Setting default expected request and response values [versions 3.5.10+]
+
+If you have a lot of tests that may share some values (like headers), you can setup default values that will be applied
+to all the expected requests and responses for the tests. To do this, you need to create a method that takes single
+parameter of the appropriate type (`PactDslRequestWithoutPath` or `PactDslResponse`) and annotate it with the default
+marker annotation (`@DefaultRequestValues` or `@DefaultResponseValues`).
+
+For example:
+
+```java
+    @DefaultRequestValues
+    public void defaultRequestValues(PactDslRequestWithoutPath request) {
+      Map<String, String> headers = new HashMap<String, String>();
+      headers.put("testreqheader", "testreqheadervalue");
+      request.headers(headers);
+    }
+
+    @DefaultResponseValues
+    public void defaultResponseValues(PactDslResponse response) {
+      Map<String, String> headers = new HashMap<String, String>();
+      headers.put("testresheader", "testresheadervalue");
+      response.headers(headers);
+    }
+```
+
+For an example test that uses these, have a look at [PactProviderWithMultipleFragmentsTest](src/test/java/au/com/dius/pact/consumer/pactproviderrule/PactProviderWithMultipleFragmentsTest.java)
+
 ### Using the Pact DSL directly
 
 Sometimes it is not convenient to use the ConsumerPactTest as it only allows one test per test class. The DSL can be

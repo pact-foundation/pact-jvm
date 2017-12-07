@@ -12,16 +12,23 @@ public class PactDslWithState {
     List<ProviderState> state;
     String consumerName;
     String providerName;
+  private final PactDslRequestWithoutPath defaultRequestValues;
+  private final PactDslResponse defaultResponseValues;
 
-    PactDslWithState(ConsumerPactBuilder consumerPactBuilder, String consumerName, String providerName, ProviderState state) {
-        this(consumerPactBuilder, consumerName, providerName);
+  PactDslWithState(ConsumerPactBuilder consumerPactBuilder, String consumerName, String providerName,
+                     ProviderState state, PactDslRequestWithoutPath defaultRequestValues,
+                     PactDslResponse defaultResponseValues) {
+        this(consumerPactBuilder, consumerName, providerName, defaultRequestValues, defaultResponseValues);
         this.state.add(state);
     }
 
-    PactDslWithState(ConsumerPactBuilder consumerPactBuilder, String consumerName, String providerName) {
+    PactDslWithState(ConsumerPactBuilder consumerPactBuilder, String consumerName, String providerName,
+                     PactDslRequestWithoutPath defaultRequestValues, PactDslResponse defaultResponseValues) {
       this.consumerPactBuilder = consumerPactBuilder;
       this.consumerName = consumerName;
       this.providerName = providerName;
+      this.defaultRequestValues = defaultRequestValues;
+      this.defaultResponseValues = defaultResponseValues;
       this.state = new ArrayList<>();
     }
 
@@ -31,7 +38,8 @@ public class PactDslWithState {
      * @param description request description
      */
     public PactDslRequestWithoutPath uponReceiving(String description) {
-        return new PactDslRequestWithoutPath(consumerPactBuilder, this, description);
+        return new PactDslRequestWithoutPath(consumerPactBuilder, this, description, defaultRequestValues,
+          defaultResponseValues);
     }
 
     /**

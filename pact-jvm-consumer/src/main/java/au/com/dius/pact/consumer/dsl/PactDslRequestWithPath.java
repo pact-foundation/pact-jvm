@@ -46,6 +46,8 @@ public class PactDslRequestWithPath {
     OptionalBody requestBody = OptionalBody.missing();
     MatchingRules requestMatchers = new MatchingRulesImpl();
     Generators requestGenerators = new Generators();
+  private final PactDslRequestWithoutPath defaultRequestValues;
+  private final PactDslResponse defaultResponseValues;
 
      PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
                             String consumerName,
@@ -58,7 +60,9 @@ public class PactDslRequestWithPath {
                             Map<String, List<String>> query,
                             OptionalBody requestBody,
                             MatchingRules requestMatchers,
-                            Generators requestGenerators) {
+                            Generators requestGenerators,
+                            PactDslRequestWithoutPath defaultRequestValues,
+                            PactDslResponse defaultResponseValues) {
         this.consumerPactBuilder = consumerPactBuilder;
         this.requestMatchers = requestMatchers;
         this.consumer = new Consumer(consumerName);
@@ -74,16 +78,22 @@ public class PactDslRequestWithPath {
         this.requestBody = requestBody;
         this.requestMatchers = requestMatchers;
         this.requestGenerators = requestGenerators;
-    }
+    this.defaultRequestValues = defaultRequestValues;
+    this.defaultResponseValues = defaultResponseValues;
+  }
 
     PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
                            PactDslRequestWithPath existing,
-                           String description) {
+                           String description,
+                           PactDslRequestWithoutPath defaultRequestValues,
+                           PactDslResponse defaultResponseValues) {
         this.consumerPactBuilder = consumerPactBuilder;
         this.consumer = existing.consumer;
         this.provider = existing.provider;
         this.state = existing.state;
         this.description = description;
+      this.defaultRequestValues = defaultRequestValues;
+      this.defaultResponseValues = defaultResponseValues;
     }
 
     /**
@@ -345,7 +355,7 @@ public class PactDslRequestWithPath {
      * Define the response to return
      */
     public PactDslResponse willRespondWith() {
-        return new PactDslResponse(consumerPactBuilder, this);
+        return new PactDslResponse(consumerPactBuilder, this, defaultRequestValues, defaultResponseValues);
     }
 
     /**

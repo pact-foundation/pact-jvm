@@ -1,8 +1,12 @@
 package au.com.dius.pact.consumer.pactproviderrule;
 
+import au.com.dius.pact.consumer.DefaultRequestValues;
+import au.com.dius.pact.consumer.DefaultResponseValues;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactProviderRuleMk2;
 import au.com.dius.pact.consumer.PactVerification;
+import au.com.dius.pact.consumer.dsl.PactDslRequestWithoutPath;
+import au.com.dius.pact.consumer.dsl.PactDslResponse;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.model.RequestResponsePact;
@@ -21,29 +25,36 @@ public class PactProviderWithMultipleFragmentsTest {
     @Rule
     public PactProviderRuleMk2 mockTestProvider = new PactProviderRuleMk2("test_provider", this);
 
+    @DefaultRequestValues
+    public void defaultRequestValues(PactDslRequestWithoutPath request) {
+      Map<String, String> headers = new HashMap<String, String>();
+      headers.put("testreqheader", "testreqheadervalue");
+      request.headers(headers);
+    }
+
+    @DefaultResponseValues
+    public void defaultResponseValues(PactDslResponse response) {
+      Map<String, String> headers = new HashMap<String, String>();
+      headers.put("testresheader", "testresheadervalue");
+      response.headers(headers);
+    }
+
     @Pact(consumer="test_consumer")
     public RequestResponsePact createFragment(PactDslWithProvider builder) {
-        Map<String, String> headers = new HashMap<String, String>();
-        headers.put("testreqheader", "testreqheadervalue");
-
         return builder
             .given("good state")
             .uponReceiving("PactProviderTest test interaction")
                 .path("/")
                 .method("GET")
-                .headers(headers)
             .willRespondWith()
                 .status(200)
-                .headers(headers)
                 .body("{\"responsetest\": true, \"name\": \"harry\"}")
             .uponReceiving("PactProviderTest second test interaction")
                 .method("OPTIONS")
-                .headers(headers)
                 .path("/second")
                 .body("")
             .willRespondWith()
                 .status(200)
-                .headers(headers)
                 .body("")
             .toPact();
     }

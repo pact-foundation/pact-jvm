@@ -9,6 +9,7 @@ import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import au.com.dius.pact.model.PactReader;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
@@ -44,18 +45,39 @@ public class PactDslRequestWithoutPath {
     private Generators requestGenerators = new Generators();
     private String consumerName;
     private String providerName;
+  private final PactDslRequestWithoutPath defaultRequestValues;
+  private final PactDslResponse defaultResponseValues;
 
-    public PactDslRequestWithoutPath(ConsumerPactBuilder consumerPactBuilder,
+  public PactDslRequestWithoutPath(ConsumerPactBuilder consumerPactBuilder,
                                      PactDslWithState pactDslWithState,
-                                     String description) {
+                                     String description,
+                                     PactDslRequestWithoutPath defaultRequestValues,
+                                     PactDslResponse defaultResponseValues) {
         this.consumerPactBuilder = consumerPactBuilder;
         this.pactDslWithState = pactDslWithState;
         this.description = description;
         this.consumerName = pactDslWithState.consumerName;
         this.providerName = pactDslWithState.providerName;
-    }
+    this.defaultRequestValues = defaultRequestValues;
+    this.defaultResponseValues = defaultResponseValues;
 
-    /**
+    setupDefaultValues();
+  }
+
+  private void setupDefaultValues() {
+    if (defaultRequestValues != null) {
+      if (StringUtils.isNotEmpty(defaultRequestValues.requestMethod)) {
+        requestMethod = defaultRequestValues.requestMethod;
+      }
+      requestHeaders.putAll(defaultRequestValues.requestHeaders);
+      query.putAll(defaultRequestValues.query);
+      requestBody = defaultRequestValues.requestBody;
+      requestMatchers = ((MatchingRulesImpl) defaultRequestValues.requestMatchers).copy();
+      requestGenerators = new Generators(defaultRequestValues.requestGenerators.getCategories());
+    }
+  }
+
+  /**
      * The HTTP method for the request
      *
      * @param method Valid HTTP method
@@ -253,8 +275,9 @@ public class PactDslRequestWithoutPath {
      * @param path string path
      */
     public PactDslRequestWithPath path(String path) {
-        return new PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state, description, path,
-                requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators);
+        return new PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state,
+          description, path, requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators,
+          defaultRequestValues, defaultResponseValues);
     }
 
     /**
@@ -274,8 +297,9 @@ public class PactDslRequestWithoutPath {
      */
     public PactDslRequestWithPath matchPath(String pathRegex, String path) {
         requestMatchers.addCategory("path").addRule(new RegexMatcher(pathRegex));
-        return new PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state, description, path,
-                requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators);
+        return new PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state,
+          description, path, requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators,
+          defaultRequestValues, defaultResponseValues);
     }
 
     /**
