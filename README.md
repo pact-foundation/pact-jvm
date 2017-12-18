@@ -141,7 +141,9 @@ You'll want to look at: [Ruby Pact](https://github.com/realestate-com-au/pact).
 
 For .Net, there is [Pact-net](https://github.com/SEEK-Jobs/pact-net).
 
-For Go, there is [Pact-go](https://github.com/seek-jobs/pact-go).
+For JS, there is [Pact-JS](https://github.com/pact-foundation/pact-js).
+
+For Go, there is [Pact-go](https://github.com/pact-foundation/pact-go).
 
 Have a look at [implementations in other languages](https://github.com/realestate-com-au/pact/wiki#implementations-in-other-languages).
 
