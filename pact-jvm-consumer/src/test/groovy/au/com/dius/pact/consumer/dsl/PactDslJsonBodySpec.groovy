@@ -103,4 +103,14 @@ class PactDslJsonBodySpec extends Specification {
       .close().toString() == '{"0":[],"1":[[]],"2":[[]],"3":[[]],"asdf":"string"}'
   }
 
+  def 'generate the correct JSON when the attribute name has a space'() {
+    expect:
+    new PactDslJsonBody()
+      .array("available Options")
+        .object()
+        .stringType("Material", "Gold")
+      . closeObject()
+      .closeArray().toString() == '{"available Options":[{"Material":"Gold"}]}'
+  }
+
 }

@@ -3,7 +3,7 @@ buildscript {
     mavenLocal()
     jcenter()
     mavenCentral()
-    maven { url 'http://clojars.org/repo' }
+    maven { url 'https://clojars.org/repo' }
   }
   dependencies {
     classpath 'com.netflix.nebula:nebula-clojure-plugin:4.3.0'
