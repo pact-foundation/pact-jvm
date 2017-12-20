@@ -225,6 +225,13 @@ PactVerificationResult result = alice_service.runTest() { mockServer ->
 }
 ```
 
+### Note on HTTP clients and persistent connections
+
+Some HTTP clients may keep the connection open, based on the live connections settings or if they use a connection cache. This could
+cause your tests to fail if the client you are testing lives longer than an individual test, as the mock server will be started
+and shutdown for each test. This will result in the HTTP client connection cache having invalid connections. For an example of this where
+the there was a failure for every second test, see [Issue #342](https://github.com/DiUS/pact-jvm/issues/342).
+
 ### Body DSL
 
 For building JSON bodies there is a `PactBodyBuilder` that provides as DSL that includes matching with regular expressions
