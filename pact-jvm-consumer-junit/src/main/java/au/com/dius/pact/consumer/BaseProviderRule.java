@@ -1,5 +1,7 @@
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.consumer.dsl.PactDslRequestWithoutPath;
+import au.com.dius.pact.consumer.dsl.PactDslResponse;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactSpecVersion;
@@ -9,6 +11,7 @@ import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -178,12 +181,14 @@ public class BaseProviderRule extends ExternalResource {
         pacts = new HashMap<>();
           for (Method m: target.getClass().getMethods()) {
               if (conformsToSignature(m) && methodMatchesFragment(m, fragment)) {
-                  Pact pact = m.getAnnotation(Pact.class);
-                  if (StringUtils.isEmpty(pact.provider()) || provider.equals(pact.provider())) {
-                      PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(pact.consumer())
+                  Pact pactAnnotation = m.getAnnotation(Pact.class);
+                  if (StringUtils.isEmpty(pactAnnotation.provider()) || provider.equals(pactAnnotation.provider())) {
+                      PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(pactAnnotation.consumer())
                           .hasPactWith(provider);
+                      updateAnyDefaultValues(dslBuilder);
                       try {
-                        pacts.put(provider, (RequestResponsePact) m.invoke(target, dslBuilder));
+                        RequestResponsePact pact = (RequestResponsePact) m.invoke(target, dslBuilder);
+                        pacts.put(provider, pact);
                       } catch (Exception e) {
                           throw new RuntimeException("Failed to invoke pact method", e);
                       }
@@ -192,6 +197,50 @@ public class BaseProviderRule extends ExternalResource {
           }
       }
       return pacts;
+  }
+
+  private void updateAnyDefaultValues(PactDslWithProvider dslBuilder) {
+    for (Method m: target.getClass().getMethods()) {
+      if (m.isAnnotationPresent(DefaultRequestValues.class)) {
+        setupDefaultRequestValues(dslBuilder, m);
+      } else if (m.isAnnotationPresent(DefaultResponseValues.class)) {
+        setupDefaultResponseValues(dslBuilder, m);
+      }
+    }
+  }
+
+  private void setupDefaultRequestValues(PactDslWithProvider dslBuilder, Method m) {
+    if (m.getParameterTypes().length == 1
+      && m.getParameterTypes()[0].isAssignableFrom(PactDslRequestWithoutPath.class)) {
+      PactDslRequestWithoutPath defaults = dslBuilder.uponReceiving("defaults");
+      try {
+        m.invoke(target, defaults);
+      } catch (IllegalAccessException| InvocationTargetException e) {
+        throw new RuntimeException("Failed to invoke default request method", e);
+      }
+      dslBuilder.setDefaultRequestValues(defaults);
+    } else {
+      throw new UnsupportedOperationException("Method " + m.getName() +
+        " does not conform required method signature 'public void " + m.getName() +
+        "(PactDslRequestWithoutPath defaultRequest)'");
+    }
+  }
+
+  private void setupDefaultResponseValues(PactDslWithProvider dslBuilder, Method m) {
+    if (m.getParameterTypes().length == 1
+      && m.getParameterTypes()[0].isAssignableFrom(PactDslResponse.class)) {
+      PactDslResponse defaults = new PactDslResponse(dslBuilder.getConsumerPactBuilder(), null, null, null);
+      try {
+        m.invoke(target, defaults);
+      } catch (IllegalAccessException| InvocationTargetException e) {
+        throw new RuntimeException("Failed to invoke default response method", e);
+      }
+      dslBuilder.setDefaultResponseValues(defaults);
+    } else {
+      throw new UnsupportedOperationException("Method " + m.getName() +
+        " does not conform required method signature 'public void " + m.getName() +
+        "(PactDslResponse defaultResponse)'");
+    }
   }
 
   private boolean methodMatchesFragment(Method m, String fragment) {

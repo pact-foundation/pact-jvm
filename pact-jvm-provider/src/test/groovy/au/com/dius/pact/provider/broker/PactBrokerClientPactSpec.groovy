@@ -40,7 +40,7 @@ class PactBrokerClientPactSpec extends Specification {
     pactBroker {
       uponReceiving('a pact publish request')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0',
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
         body: pactContents
       )
       willRespondWith(status: 200)
@@ -62,7 +62,7 @@ class PactBrokerClientPactSpec extends Specification {
       given('No pact has been published between the Provider and Foo Consumer')
       uponReceiving('a pact publish request with invalid version')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/XXXX',
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/XXXX',
         body: pactContents
       )
       willRespondWith(status: 400, headers: ['Content-Type': 'application/json;charset=utf-8'],
@@ -96,7 +96,7 @@ class PactBrokerClientPactSpec extends Specification {
       given('No pact has been published between the Provider and Foo Consumer and there is a similar consumer')
       uponReceiving('a pact publish request')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0',
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
         body: pactContents
       )
       willRespondWith(status: 409, headers: ['Content-Type': 'text/plain'],
@@ -127,7 +127,7 @@ class PactBrokerClientPactSpec extends Specification {
       given('Non-JSON response')
       uponReceiving('a pact publish request')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0',
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
         body: pactContents
       )
       willRespondWith(status: 400, headers: ['Content-Type': 'text/plain'],

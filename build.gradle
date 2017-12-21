@@ -11,7 +11,7 @@ buildscript {
 }
 
 plugins {
-  id 'nebula.kotlin' version '1.1.51'
+  id 'nebula.kotlin' version '1.2.0'
   id 'org.jmailen.kotlinter' version '1.3.2'
   id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC4'
   id 'org.jetbrains.dokka' version '0.9.15'
@@ -73,12 +73,16 @@ subprojects {
       compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
       compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
       compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
-      compile 'io.github.microutils:kotlin-logging:1.4.4'
+      compile('io.github.microutils:kotlin-logging:1.4.4') {
+        exclude group: 'org.jetbrains.kotlin'
+      }
 
       if (project.hasProperty('scalaVersion')) {
           compile "org.scala-lang:scala-library:${project.scalaFullVersion}",
-            "org.scala-lang:scala-compiler:${project.scalaFullVersion}",
-            "com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.4.0"
+            "org.scala-lang:scala-compiler:${project.scalaFullVersion}"
+          compile("com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.4.0") {
+            exclude group: 'org.scala-lang'
+          }
 
           testCompile "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}",
             "org.specs2:specs2-junit_${project.scalaVersion}:${project.specs2Version}"
@@ -94,6 +98,7 @@ subprojects {
       }
       testCompile "cglib:cglib:${project.cglibVersion}"
       testCompile 'org.objenesis:objenesis:2.4'
+      testCompile 'io.kotlintest:kotlintest:2.0.7'
     }
 
     group = 'au.com.dius'

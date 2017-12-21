@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.cthul.matchers.CthulMatchers.matchesPattern;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
@@ -252,5 +253,16 @@ public class PactDslJsonBodyTest {
         assertThat(numbers.get(0), is(notNullValue()));
         assertThat(numbers.get(1), is(JSONObject.NULL));
         assertThat(numbers.get(2), is(JSONObject.NULL));
+    }
+
+    @Test
+    public void testLargeDateFormat() {
+      String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss +HHMM 'GMT'";
+      final PactDslJsonBody response = new PactDslJsonBody();
+      response
+        .date("lastUpdate", DATE_FORMAT)
+        .date("creationDate", DATE_FORMAT);
+      JSONObject jsonObject = (JSONObject) response.getBody();
+      assertThat(jsonObject.get("lastUpdate").toString(), matchesPattern("\\w{3}, \\d{2} \\w{3} \\d{4} \\d{2}:00:00 \\+\\d+ GMT"));
     }
 }

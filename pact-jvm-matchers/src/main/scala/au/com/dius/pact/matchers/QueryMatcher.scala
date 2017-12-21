@@ -3,13 +3,14 @@ package au.com.dius.pact.matchers
 import au.com.dius.pact.model.matchingrules.MatchingRules
 import au.com.dius.pact.model.{QueryMismatch, QueryMismatchFactory}
 import com.typesafe.scalalogging.StrictLogging
+import scala.collection.JavaConverters._
 
 object QueryMatcher extends StrictLogging {
 
   def compare(parameter: String, path: Seq[String], expected: String, actual: String, matchers: MatchingRules) = {
-    if (Matchers.matcherDefined("query", Seq(parameter), matchers)) {
+    if (Matchers.matcherDefined("query", Seq(parameter).asJava, matchers)) {
       logger.debug("compareQueryParameterValues: Matcher defined for query parameter " + parameter)
-      Matchers.domatch[QueryMismatch](matchers, "query", Seq(parameter), expected, actual, QueryMismatchFactory)
+      Matchers.domatch[QueryMismatch](matchers, "query", Seq(parameter).asJava, expected, actual, QueryMismatchFactory).asScala.toList
     } else {
       logger.debug("compareQueryParameterValues: No matcher defined for query parameter " + parameter + ", using equality")
       if (expected == actual) {
@@ -27,7 +28,7 @@ object QueryMatcher extends StrictLogging {
     for ((value, index) <- expected.view.zipWithIndex) {
       if (index < actual.size) {
         result = result ++: compare(parameter, path :+ index.toString, value, actual(index), matchers)
-      } else if (!Matchers.matcherDefined("query", path, matchers)) {
+      } else if (!Matchers.matcherDefined("query", path.asJava, matchers)) {
         result = result :+ QueryMismatch(parameter, expected.toString(), actual.toString(),
           Some(s"Expected query parameter $parameter value $value but was missing"),
           path.mkString("."))
@@ -39,9 +40,9 @@ object QueryMatcher extends StrictLogging {
   def compareQuery(parameter: String, expected: List[String], actual: List[String], matchers: MatchingRules) = {
     var result = Seq[QueryMismatch]()
     val path = Seq(parameter)
-    if (Matchers.matcherDefined("query", path, matchers)) {
+    if (Matchers.matcherDefined("query", path.asJava, matchers)) {
       logger.debug("compareQuery: Matcher defined for query parameter " + parameter)
-      result = Matchers.domatch[QueryMismatch](matchers, "query", path, expected, actual, QueryMismatchFactory) ++
+      result = Matchers.domatch[QueryMismatch](matchers, "query", path.asJava, expected, actual, QueryMismatchFactory).asScala.toList ++
         compareQueryParameterValues(parameter, expected, actual, path, matchers)
     } else {
       if (expected.isEmpty && actual.nonEmpty) {

@@ -26,9 +26,15 @@ fun lookupGenerator(generatorMap: Map<String, Any>): Generator? {
 
   try {
     val generatorClass = Class.forName("au.com.dius.pact.model.generators.${generatorMap["type"]}Generator").kotlin
-    val fromMap = generatorClass.companionObject?.declaredMemberFunctions?.find { it.name == "fromMap" }
-    if (fromMap != null) {
-      generator = fromMap.call(generatorClass.companionObjectInstance, generatorMap) as Generator?
+    val fromMap = when {
+      generatorClass.companionObject != null ->
+        generatorClass.companionObjectInstance to generatorClass.companionObject?.declaredMemberFunctions?.find { it.name == "fromMap" }
+      generatorClass.objectInstance != null ->
+        generatorClass.objectInstance to generatorClass.declaredMemberFunctions.find { it.name == "fromMap" }
+      else -> null
+    }
+    if (fromMap?.second != null) {
+      generator = fromMap.second!!.call(fromMap.first, generatorMap) as Generator?
     } else {
       logger.warn { "Could not invoke generator class 'fromMap' for generator config '$generatorMap'" }
     }
@@ -146,7 +152,7 @@ data class RegexGenerator(val regex: String) : Generator {
   }
 }
 
-class UuidGenerator : Generator {
+object UuidGenerator : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     return mapOf("type" to "Uuid")
   }
@@ -155,13 +161,9 @@ class UuidGenerator : Generator {
     return UUID.randomUUID().toString()
   }
 
-  override fun equals(other: Any?) = other is UuidGenerator
-
-  companion object {
-    @Suppress("UNUSED_PARAMETER")
-    fun fromMap(map: Map<String, Any>) : UuidGenerator {
-      return UuidGenerator()
-    }
+  @Suppress("UNUSED_PARAMETER")
+  fun fromMap(map: Map<String, Any>) : UuidGenerator {
+    return UuidGenerator
   }
 }
 

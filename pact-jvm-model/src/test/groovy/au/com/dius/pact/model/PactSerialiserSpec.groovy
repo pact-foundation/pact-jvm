@@ -62,7 +62,7 @@ class PactSerialiserSpec extends Specification {
 
     messagePactWithGenerators = new MessagePact(provider, consumer, [ new Message('Test Message',
       [new ProviderState('message exists')], OptionalBody.body('"Test Message"'), new MatchingRulesImpl(),
-      new Generators([(Category.BODY): ['a': new UuidGenerator()]]), [contentType: 'application/json']) ])
+      new Generators([(Category.BODY): ['a': UuidGenerator.INSTANCE]]), [contentType: 'application/json']) ])
   }
 
   def 'PactSerialiser must serialise pact'() {

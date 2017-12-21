@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer
 
+import au.com.dius.pact.matchers.Mismatch
 import au.com.dius.pact.model.Request
-import au.com.dius.pact.model.RequestPartMismatch
 
 sealed class PactVerificationResult {
   open fun getDescription() = toString()
@@ -10,7 +10,7 @@ sealed class PactVerificationResult {
 
   data class Error(val error: Throwable, val mockServerState: PactVerificationResult) : PactVerificationResult()
 
-  data class PartialMismatch(val mismatches: List<RequestPartMismatch>) : PactVerificationResult()
+  data class PartialMismatch(val mismatches: List<Mismatch>) : PactVerificationResult()
 
   data class Mismatches(val mismatches: List<PactVerificationResult>) : PactVerificationResult() {
     override fun getDescription(): String {

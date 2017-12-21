@@ -1,5 +1,6 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.matchers.Mismatch
 import com.typesafe.scalalogging.StrictLogging
 
 import scala.collection.JavaConversions
@@ -28,23 +29,23 @@ object RequestMatching extends StrictLogging {
   implicit def liftPactForMatching(pact: RequestResponsePact): RequestMatching =
     RequestMatching(JavaConversions.collectionAsScalaIterable(pact.getInteractions).toSeq)
                      
-  def isPartialMatch(problems: Seq[RequestPartMismatch]): Boolean = !problems.exists {
+  def isPartialMatch(problems: Seq[Mismatch]): Boolean = !problems.exists {
     case PathMismatch(_,_,_) | MethodMismatch(_,_) => true
     case _ => false
   }
     
-  def decideRequestMatch(expected: RequestResponseInteraction, problems: Seq[RequestPartMismatch]): RequestMatch =
+  def decideRequestMatch(expected: RequestResponseInteraction, problems: Seq[Mismatch]): RequestMatch =
     if (problems.isEmpty) FullRequestMatch(expected)
     else if (isPartialMatch(problems)) PartialRequestMatch(expected, problems) 
     else RequestMismatch
     
   def compareRequest(expected: RequestResponseInteraction, actual: Request): RequestMatch = {
-    val mismatches: Seq[RequestPartMismatch] = requestMismatches(expected.getRequest, actual)
+    val mismatches: Seq[Mismatch] = requestMismatches(expected.getRequest, actual)
     logger.debug("Request mismatch: " + mismatches)
     decideRequestMatch(expected, mismatches)
   }
                                               
-  def requestMismatches(expected: Request, actual: Request): Seq[RequestPartMismatch] = {
+  def requestMismatches(expected: Request, actual: Request): Seq[Mismatch] = {
     logger.debug("comparing to expected request: \n" + expected)
     (matchMethod(expected.getMethod, actual.getMethod)
       ++ matchPath(expected, actual)

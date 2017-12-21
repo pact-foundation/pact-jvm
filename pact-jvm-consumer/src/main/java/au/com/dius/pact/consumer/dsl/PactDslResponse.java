@@ -31,6 +31,8 @@ public class PactDslResponse {
     private static final String CONTENT_TYPE = "Content-Type";
     private final ConsumerPactBuilder consumerPactBuilder;
     private PactDslRequestWithPath request;
+  private final PactDslRequestWithoutPath defaultRequestValues;
+  private final PactDslResponse defaultResponseValues;
 
     private int responseStatus = 200;
     private Map<String, String> responseHeaders = new HashMap<String, String>();
@@ -38,12 +40,28 @@ public class PactDslResponse {
     private MatchingRules responseMatchers = new MatchingRulesImpl();
     private Generators responseGenerators = new Generators();
 
-    public PactDslResponse(ConsumerPactBuilder consumerPactBuilder, PactDslRequestWithPath request) {
+    public PactDslResponse(ConsumerPactBuilder consumerPactBuilder, PactDslRequestWithPath request,
+                           PactDslRequestWithoutPath defaultRequestValues,
+                           PactDslResponse defaultResponseValues) {
         this.consumerPactBuilder = consumerPactBuilder;
         this.request = request;
+      this.defaultRequestValues = defaultRequestValues;
+      this.defaultResponseValues = defaultResponseValues;
+
+      setupDefaultValues();
     }
 
-    /**
+  private void setupDefaultValues() {
+    if (defaultResponseValues != null) {
+      responseStatus = defaultResponseValues.responseStatus;
+      responseHeaders.putAll(defaultResponseValues.responseHeaders);
+      responseBody = defaultResponseValues.responseBody;
+      responseMatchers = ((MatchingRulesImpl) defaultResponseValues.responseMatchers).copy();
+      responseGenerators = new Generators(defaultResponseValues.responseGenerators.getCategories());
+    }
+  }
+
+  /**
      * Response status code
      *
      * @param status HTTP status code
@@ -281,7 +299,8 @@ public class PactDslResponse {
      */
     public PactDslRequestWithPath uponReceiving(String description) {
         addInteraction();
-        return new PactDslRequestWithPath(consumerPactBuilder, request, description);
+        return new PactDslRequestWithPath(consumerPactBuilder, request, description, defaultRequestValues,
+          defaultResponseValues);
     }
 
     /**
@@ -291,7 +310,7 @@ public class PactDslResponse {
     public PactDslWithState given(String state) {
         addInteraction();
         return new PactDslWithState(consumerPactBuilder, request.consumer.getName(), request.provider.getName(),
-          new ProviderState(state));
+          new ProviderState(state), defaultRequestValues, defaultResponseValues);
     }
 
     /**
@@ -302,6 +321,6 @@ public class PactDslResponse {
     public PactDslWithState given(String state, Map<String, Object> params) {
       addInteraction();
       return new PactDslWithState(consumerPactBuilder, request.consumer.getName(), request.provider.getName(),
-        new ProviderState(state, params));
+        new ProviderState(state, params), defaultRequestValues, defaultResponseValues);
     }
 }

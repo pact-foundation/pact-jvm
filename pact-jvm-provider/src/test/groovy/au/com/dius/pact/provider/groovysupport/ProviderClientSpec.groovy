@@ -433,7 +433,7 @@ class ProviderClientSpec extends Specification {
     1 * client.makeStateChangeRequest(stateChangeUrl, state, false, true, true)
     1 * httpClientFactory.newClient(provider) >> httpClient
     1 * httpClient.execute({
-      it.method == 'POST' && it.requestLine.uri == 'http://state.change:1244?state=state+one&a=a&b=1&action=setup'
+      it.method == 'POST' && it.requestLine.uri == 'http://state.change:1244/?state=state+one&a=a&b=1&action=setup'
     })
     0 * _
   }

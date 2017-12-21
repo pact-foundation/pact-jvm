@@ -18,7 +18,11 @@ import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.matchingrules.MatchingRules
 import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.model.matchingrules.RegexMatcher
 import groovy.json.JsonBuilder
+import org.apache.http.entity.ContentType
+import org.apache.http.entity.mime.HttpMultipartMode
+import org.apache.http.entity.mime.MultipartEntityBuilder
 import scala.collection.JavaConverters$
 
 import java.util.regex.Pattern
@@ -35,6 +39,8 @@ class PactBuilder extends BaseBuilder {
   private static final String JSON = 'application/json'
   private static final String BODY = 'body'
   private static final String LOCALHOST = 'localhost'
+  public static final String HEADER = 'header'
+  public static final String MULTIPART_HEADER_REGEX = 'multipart/form-data;\\s*boundary=.*'
 
   Consumer consumer
   Provider provider
@@ -133,7 +139,7 @@ class PactBuilder extends BaseBuilder {
 
   private static Map setupHeaders(Map headers, MatchingRules matchers) {
     headers.collectEntries { key, value ->
-      def header = 'header'
+      def header = HEADER
       if (value instanceof Matcher) {
         matchers.addCategory(header).addRule(key, value.matcher)
         [key, value.value]
@@ -400,6 +406,35 @@ class PactBuilder extends BaseBuilder {
         }
       }
       throw new PactFailedException(result)
+    }
+  }
+
+  /**
+   * Sets up a file upload request. This will add the correct content type header to the request
+   * @param partName This is the name of the part in the multipart body.
+   * @param fileName This is the name of the file that was uploaded
+   * @param fileContentType This is the content type of the uploaded file
+   * @param data This is the actual file contents
+   */
+  void withFileUpload(String partName, String fileName, String fileContentType, byte[] data) {
+    def multipart = MultipartEntityBuilder.create()
+      .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+      .addBinaryBody(partName, data, ContentType.create(fileContentType), fileName)
+      .build()
+    def os = new ByteArrayOutputStream()
+    multipart.writeTo(os)
+    if (requestState) {
+      requestData.last().body = os.toString()
+      requestData.last().headers = requestData.last().headers ?: [:]
+      requestData.last().headers[CONTENT_TYPE] = multipart.contentType.value
+      au.com.dius.pact.model.matchingrules.Category category  = requestData.last().matchers.addCategory(HEADER)
+      category.addRule(CONTENT_TYPE, new RegexMatcher(MULTIPART_HEADER_REGEX, multipart.contentType.value))
+    } else {
+      responseData.last().body = os.toString()
+      responseData.last().headers = responseData.last().headers ?: [:]
+      responseData.last().headers[CONTENT_TYPE] = multipart.contentType.value
+      au.com.dius.pact.model.matchingrules.Category category  = responseData.last().matchers.addCategory(HEADER)
+      category.addRule(CONTENT_TYPE, new RegexMatcher(MULTIPART_HEADER_REGEX, multipart.contentType.value))
     }
   }
 }

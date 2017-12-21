@@ -738,3 +738,5 @@ The following report types are available in addition to console output (which is
 
 For pacts that are loaded from a Pact Broker, the results of running the verification will be published back to the
  broker against the URL for the pact. You will be able to see the result on the Pact Broker home screen.
+
+To turn off the verification publishing when running from your local machine, set the system property `pact.verifier.publishResults` to `false`.

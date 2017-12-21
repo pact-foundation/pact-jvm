@@ -8,6 +8,8 @@ import com.typesafe.scalalogging.StrictLogging
 
 import scala.collection.JavaConversions
 import scala.collection.immutable.TreeMap
+import java.util.ArrayList
+import scala.collection.JavaConverters._
 
 trait SharedMismatch {
   type Body = Option[String]
@@ -27,28 +29,16 @@ object ResponsePartMismatch extends SharedMismatch {
 }
 
 // Overlapping ADTs.  The body and headers can mismatch for both of them.
-sealed trait RequestPartMismatch {
-  def description: String = toString
+sealed trait RequestPartMismatch extends Mismatch {
+  override def description: String = toString
 }
 
-sealed trait ResponsePartMismatch
+sealed trait ResponsePartMismatch extends Mismatch {
+  override def description: String = toString
+}
 
 case class StatusMismatch(expected: Status, actual: Status) extends ResponsePartMismatch
-case class HeaderMismatch(headerKey: String, expected: String, actual: String, mismatch: Option[String] = None)
-  extends RequestPartMismatch with ResponsePartMismatch {
-  override def description: String = mismatch match {
-    case Some(message) => s"HeaderMismatch - $message"
-    case _ => toString
-  }
-}
 case class BodyTypeMismatch(expected: String, actual: String) extends RequestPartMismatch with ResponsePartMismatch
-case class BodyMismatch(expected: Any, actual: Any, mismatch: Option[String] = None, path: String = "/", diff: Option[String] = None)
-  extends RequestPartMismatch with ResponsePartMismatch {
-  override def description: String = mismatch match {
-    case Some(message) => s"BodyMismatch - $message"
-    case _ => toString
-  }
-}
 case class CookieMismatch(expected: Cookies, actual: Cookies) extends RequestPartMismatch
 case class PathMismatch(expected: Path, actual: Path, mismatch: Option[String] = None) extends RequestPartMismatch {
   override def description: String = mismatch match {
@@ -59,22 +49,9 @@ case class PathMismatch(expected: Path, actual: Path, mismatch: Option[String] =
 case class MethodMismatch(expected: Method, actual: Method) extends RequestPartMismatch
 case class QueryMismatch(queryParameter: String, expected: String, actual: String, mismatch: Option[String] = None, path: String = "/") extends RequestPartMismatch
 
-object BodyMismatchFactory extends MismatchFactory[BodyMismatch] {
-  import JavaConversions._
-  def create(expected: Object, actual: Object, message: String, path: java.util.List[String]) =
-    BodyMismatch(expected, actual, Some(message), path.toList.mkString("."), None)
-}
-
 object PathMismatchFactory extends MismatchFactory[PathMismatch] {
   def create(expected: Object, actual: Object, message: String, path: java.util.List[String]) =
     PathMismatch(expected.toString, actual.toString, Some(message))
-}
-
-object HeaderMismatchFactory extends MismatchFactory[HeaderMismatch] {
-  import JavaConversions._
-  def create(expected: Object, actual: Object, message: String, path: java.util.List[String]) = {
-    HeaderMismatch(path.toList.last, expected.toString, actual.toString, Some(message))
-  }
 }
 
 object QueryMismatchFactory extends MismatchFactory[QueryMismatch] {
@@ -91,11 +68,11 @@ object Matching extends StrictLogging {
     def compareHeaders(e: Map[String, String], a: Map[String, String]): Seq[HeaderMismatch] = {
       e.foldLeft(Seq[HeaderMismatch]()) {
         (seq, values) => a.get(values._1) match {
-          case Some(value) => HeaderMatcher.compareHeader(values._1, values._2, value, matchers) match {
+          case Some(value) => Option.apply(HeaderMatcher.compareHeader(values._1, values._2, value, matchers)) match {
             case Some(mismatch) => seq :+ mismatch
             case None => seq
           }
-          case None => seq :+ HeaderMismatch(values._1, values._2, "", Some(s"Expected a header '${values._1}' but was missing"))
+          case None => seq :+ new HeaderMismatch(values._1, values._2, "", s"Expected a header '${values._1}' but was missing")
         }
       }
     }
@@ -151,26 +128,26 @@ object Matching extends StrictLogging {
     else Some(MethodMismatch(expected, actual))
   }
 
-  def matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean) = {
+  def matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): List[Mismatch] = {
     if (expected.mimeType == actual.mimeType) {
-      val result = MatchingConfig.lookupBodyMatcher(actual.mimeType)
-      if (result.isDefined) {
-        logger.debug("Found a matcher for " + actual.mimeType + " -> " + result)
-        result.get._2.matchBody(expected, actual, allowUnexpectedKeys)
+      val matcher = MatchingConfig.lookupBodyMatcher(actual.mimeType)
+      if (matcher != null) {
+        logger.debug("Found a matcher for " + actual.mimeType + " -> " + matcher)
+        matcher.matchBody(expected, actual, allowUnexpectedKeys).asScala.toList
       } else {
         logger.debug("No matcher for " + actual.mimeType + ", using equality")
         (expected.getBody.getState, actual.getBody.getState) match {
           case (OptionalBody.State.MISSING, _) => List()
-          case (OptionalBody.State.NULL, OptionalBody.State.PRESENT) => List(BodyMismatch(None, actual.getBody.getValue,
-            Some(s"Expected empty body but received '${actual.getBody.getValue}'")))
+          case (OptionalBody.State.NULL, OptionalBody.State.PRESENT) => List(new BodyMismatch(null, actual.getBody.getValue,
+            s"Expected empty body but received '${actual.getBody.getValue}'"))
           case (OptionalBody.State.NULL, _) => List()
-          case (_, OptionalBody.State.MISSING) => List(BodyMismatch(expected.getBody.getValue, None,
-            Some(s"Expected body '${expected.getBody.getValue}' but was missing")))
+          case (_, OptionalBody.State.MISSING) => List(new BodyMismatch(expected.getBody.getValue, null,
+            s"Expected body '${expected.getBody.getValue}' but was missing"))
           case (_, _) =>
             if (expected.getBody.getValue == actual.getBody.getValue)
               List()
             else
-              List(BodyMismatch(expected.getBody.getValue, actual.getBody.getValue))
+              List(new BodyMismatch(expected.getBody.getValue, actual.getBody.getValue))
         }
       }
     } else {
@@ -183,9 +160,9 @@ object Matching extends StrictLogging {
     val pathFilter = "http[s]*://([^/]*)"
     val replacedActual = actual.getPath.replaceFirst(pathFilter, "")
     val matchers = expected.getMatchingRules
-    if (Matchers.matcherDefined("path", Seq(), matchers)) {
-      val mismatch = Matchers.domatch[PathMismatch](matchers, "path", Seq(), expected.getPath,
-        replacedActual, PathMismatchFactory)
+    if (Matchers.matcherDefined("path", new ArrayList[String](), matchers)) {
+      val mismatch = Matchers.domatch[PathMismatch](matchers, "path", new ArrayList[String](), expected.getPath,
+        replacedActual, PathMismatchFactory).asScala
       mismatch.headOption
     }
     else if(expected.getPath == replacedActual || replacedActual.matches(expected.getPath)) None

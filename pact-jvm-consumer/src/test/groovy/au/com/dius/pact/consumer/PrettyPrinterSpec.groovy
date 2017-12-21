@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.model.BodyMismatch
-import au.com.dius.pact.model.HeaderMismatch
+import au.com.dius.pact.matchers.BodyMismatch
+import au.com.dius.pact.matchers.HeaderMismatch
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.PartialRequestMatch
 import au.com.dius.pact.model.PathMismatch
@@ -33,7 +33,7 @@ class PrettyPrinterSpec extends Specification {
 
     def 'header mismatch'() {
         expect:
-        print(new HeaderMismatch('foo', 'bar', '', Option.empty())) ==
+        print(new HeaderMismatch('foo', 'bar', '', null)) ==
                 """--- Header foo
                 |$plus
                 |@@ -1,1 +1,1 @@
@@ -53,7 +53,7 @@ class PrettyPrinterSpec extends Specification {
 
     def 'body mismatch'() {
         expect:
-        print(new BodyMismatch('{"foo": "bar"}', '{"ork": "Bif"}', Option.empty(), '/', Option.empty())) ==
+        print(new BodyMismatch('{"foo": "bar"}', '{"ork": "Bif"}')) ==
               """--- Body
               |$plus
               |@@ -1,3 +1,3 @@

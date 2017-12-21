@@ -62,6 +62,21 @@ class OptionalBodySpec extends Specification {
   }
 
   @Unroll
+  def 'returns the appropriate state for not present'() {
+    expect:
+    body.notPresent == value
+
+    where:
+    body | value
+    OptionalBody.missing() | true
+    OptionalBody.empty() | true
+    OptionalBody.nullBody() | true
+    OptionalBody.body('') | true
+    OptionalBody.body(null) | true
+    OptionalBody.body('a') | false
+  }
+
+  @Unroll
   def 'returns the appropriate value for orElse'() {
     expect:
     body.orElse('default') == value

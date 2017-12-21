@@ -5,8 +5,8 @@ import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.PactVerificationResult;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.model.BodyMismatch;
-import au.com.dius.pact.model.RequestPartMismatch;
+import au.com.dius.pact.matchers.BodyMismatch;
+import au.com.dius.pact.matchers.Mismatch;
 import au.com.dius.pact.model.RequestResponsePact;
 import org.junit.Rule;
 import org.junit.Test;
@@ -121,7 +121,8 @@ public class PactMultiProviderTest {
       mockTestProvider2.validateResultWith((result, t) -> {
         assertThat(t, is(instanceOf(AssertionError.class)));
         assertThat(t.getMessage(), is("The following mismatched requests occurred:\n" +
-          "PartialMismatch(mismatches=[BodyMismatch(larry,farry,Some(Expected 'larry' but received 'farry'),$.name,None)])"));
+          "PartialMismatch(mismatches=[BodyMismatch(expected=larry, actual=farry, mismatch=Expected 'larry'" +
+          " but received 'farry', path=$.name, diff=null)])"));
         assertThat(result, is(instanceOf(PactVerificationResult.Mismatches.class)));
         PactVerificationResult.Mismatches error = (PactVerificationResult.Mismatches) result;
         assertThat(error.getMismatches(), hasSize(1));
@@ -129,7 +130,7 @@ public class PactMultiProviderTest {
         assertThat(result1, is(instanceOf(PactVerificationResult.PartialMismatch.class)));
         PactVerificationResult.PartialMismatch error1 = (PactVerificationResult.PartialMismatch) result1;
         assertThat(error1.getMismatches(), hasSize(1));
-        RequestPartMismatch mismatch = error1.getMismatches().get(0);
+        Mismatch mismatch = error1.getMismatches().get(0);
         assertThat(mismatch, is(instanceOf(BodyMismatch.class)));
       });
       doTest("/", "{\"name\": \"farry\"}");
@@ -152,7 +153,8 @@ public class PactMultiProviderTest {
       mockTestProvider2.validateResultWith((result, t) -> {
         assertThat(t, is(instanceOf(AssertionError.class)));
         assertThat(t.getMessage(), is("The following mismatched requests occurred:\n" +
-          "PartialMismatch(mismatches=[BodyMismatch(larry,farry,Some(Expected 'larry' but received 'farry'),$.name,None)])"));
+          "PartialMismatch(mismatches=[BodyMismatch(expected=larry, actual=farry, mismatch=Expected 'larry' " +
+          "but received 'farry', path=$.name, diff=null)])"));
         assertThat(result, is(instanceOf(PactVerificationResult.Mismatches.class)));
         PactVerificationResult.Mismatches error = (PactVerificationResult.Mismatches) result;
         assertThat(error.getMismatches(), hasSize(1));
@@ -160,7 +162,7 @@ public class PactMultiProviderTest {
         assertThat(result1, is(instanceOf(PactVerificationResult.PartialMismatch.class)));
         PactVerificationResult.PartialMismatch error1 = (PactVerificationResult.PartialMismatch) result1;
         assertThat(error1.getMismatches(), hasSize(1));
-        RequestPartMismatch mismatch = error1.getMismatches().get(0);
+        Mismatch mismatch = error1.getMismatches().get(0);
         assertThat(mismatch, is(instanceOf(BodyMismatch.class)));
       });
       doTest("/abc", "{\"name\": \"farry\"}");

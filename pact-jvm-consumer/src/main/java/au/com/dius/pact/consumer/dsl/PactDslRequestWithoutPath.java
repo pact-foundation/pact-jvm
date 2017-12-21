@@ -9,11 +9,18 @@ import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import au.com.dius.pact.model.PactReader;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,6 +33,7 @@ import static au.com.dius.pact.consumer.ConsumerPactBuilder.xmlToString;
 
 public class PactDslRequestWithoutPath {
     private static final String CONTENT_TYPE = "Content-Type";
+    public static final String MULTIPART_HEADER_REGEX = "multipart/form-data;\\s*boundary=.*";
     private final ConsumerPactBuilder consumerPactBuilder;
     private PactDslWithState pactDslWithState;
     private String description;
@@ -37,18 +45,39 @@ public class PactDslRequestWithoutPath {
     private Generators requestGenerators = new Generators();
     private String consumerName;
     private String providerName;
+  private final PactDslRequestWithoutPath defaultRequestValues;
+  private final PactDslResponse defaultResponseValues;
 
-    public PactDslRequestWithoutPath(ConsumerPactBuilder consumerPactBuilder,
+  public PactDslRequestWithoutPath(ConsumerPactBuilder consumerPactBuilder,
                                      PactDslWithState pactDslWithState,
-                                     String description) {
+                                     String description,
+                                     PactDslRequestWithoutPath defaultRequestValues,
+                                     PactDslResponse defaultResponseValues) {
         this.consumerPactBuilder = consumerPactBuilder;
         this.pactDslWithState = pactDslWithState;
         this.description = description;
         this.consumerName = pactDslWithState.consumerName;
         this.providerName = pactDslWithState.providerName;
-    }
+    this.defaultRequestValues = defaultRequestValues;
+    this.defaultResponseValues = defaultResponseValues;
 
-    /**
+    setupDefaultValues();
+  }
+
+  private void setupDefaultValues() {
+    if (defaultRequestValues != null) {
+      if (StringUtils.isNotEmpty(defaultRequestValues.requestMethod)) {
+        requestMethod = defaultRequestValues.requestMethod;
+      }
+      requestHeaders.putAll(defaultRequestValues.requestHeaders);
+      query.putAll(defaultRequestValues.query);
+      requestBody = defaultRequestValues.requestBody;
+      requestMatchers = ((MatchingRulesImpl) defaultRequestValues.requestMatchers).copy();
+      requestGenerators = new Generators(defaultRequestValues.requestGenerators.getCategories());
+    }
+  }
+
+  /**
      * The HTTP method for the request
      *
      * @param method Valid HTTP method
@@ -246,8 +275,9 @@ public class PactDslRequestWithoutPath {
      * @param path string path
      */
     public PactDslRequestWithPath path(String path) {
-        return new PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state, description, path,
-                requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators);
+        return new PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state,
+          description, path, requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators,
+          defaultRequestValues, defaultResponseValues);
     }
 
     /**
@@ -267,7 +297,32 @@ public class PactDslRequestWithoutPath {
      */
     public PactDslRequestWithPath matchPath(String pathRegex, String path) {
         requestMatchers.addCategory("path").addRule(new RegexMatcher(pathRegex));
-        return new PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state, description, path,
-                requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators);
+        return new PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state,
+          description, path, requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators,
+          defaultRequestValues, defaultResponseValues);
+    }
+
+    /**
+     * Sets up a file upload request. This will add the correct content type header to the request
+     * @param partName This is the name of the part in the multipart body.
+     * @param fileName This is the name of the file that was uploaded
+     * @param fileContentType This is the content type of the uploaded file
+     * @param data This is the actual file contents
+     */
+    public PactDslRequestWithoutPath withFileUpload(String partName, String fileName, String fileContentType, byte[] data)
+      throws IOException {
+        HttpEntity multipart = MultipartEntityBuilder.create()
+          .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+          .addBinaryBody(partName, data, ContentType.create(fileContentType), fileName)
+          .build();
+        OutputStream os = new ByteArrayOutputStream();
+        multipart.writeTo(os);
+
+        requestBody = OptionalBody.body(os.toString());
+        requestMatchers.addCategory("header").addRule(CONTENT_TYPE, new RegexMatcher(MULTIPART_HEADER_REGEX,
+          multipart.getContentType().getValue()));
+        requestHeaders.put(CONTENT_TYPE, multipart.getContentType().getValue());
+
+        return this;
     }
 }

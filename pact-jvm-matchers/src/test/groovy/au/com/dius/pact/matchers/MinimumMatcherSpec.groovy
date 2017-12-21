@@ -11,7 +11,7 @@ class MinimumMatcherSpec extends Specification {
   def path
 
   def setup() {
-    mismatchFactory = [create: { p0, p1, p2, p3 -> 'mismatch' } ] as MismatchFactory
+    mismatchFactory = [create: { p0, p1, p2, p3 -> [:] as Mismatch } ] as MismatchFactory
     path = ['$', 'animals', '0']
   }
 

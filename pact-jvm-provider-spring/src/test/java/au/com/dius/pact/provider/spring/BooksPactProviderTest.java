@@ -83,7 +83,7 @@ public class BooksPactProviderTest {
     @State("book-not-found")
     public void bookNotFound() {
         when(bookLogic.getBookById(any(UUID.class)))
-                .then(i -> { throw new BookNotFoundException(i.getArgumentAt(0, UUID.class)); });
+                .then(i -> { throw new BookNotFoundException(i.getArgument(0)); });
     }
 
     @State("create-book")
@@ -94,7 +94,7 @@ public class BooksPactProviderTest {
     @State("create-book-bad-data")
     public void createBookBadData() {
         when(bookLogic.createBook(any(Book.class)))
-                .then(i -> { throw new BookValidationException(i.getArgumentAt(0, Book.class)); });
+                .then(i -> { throw new BookValidationException(i.getArgument(0)); });
     }
 
     @State("update-book")
