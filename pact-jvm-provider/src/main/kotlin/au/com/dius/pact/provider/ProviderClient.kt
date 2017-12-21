@@ -244,7 +244,7 @@ open class ProviderClient(val provider: IProviderInfo,
     if (provider.path.isNotEmpty()) {
       path = provider.path
       if (path.last() == '/') {
-        path = if (path.length > 1) path.substring(0, path.length - 2) else ""
+        path = if (path.length > 1) path.substring(0, path.length - 1) else ""
       }
     }
 
