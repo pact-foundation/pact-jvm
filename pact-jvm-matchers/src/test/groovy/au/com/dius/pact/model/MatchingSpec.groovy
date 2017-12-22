@@ -26,9 +26,9 @@ class MatchingSpec extends Specification {
 
   def 'Body Matching - Handle left None'() {
     expect:
-    JavaConverters.asJavaCollection(
+    JavaConverters.asJavaCollectionConverter(
       Matching.matchBody(new Request('', '', null, ['Content-Type': 'a'], request.body),
-      new Request('', '', null, ['Content-Type': 'a']), true)).contains(mismatch)
+      new Request('', '', null, ['Content-Type': 'a']), true)).asJavaCollection().contains(mismatch)
 
     where:
     mismatch = new BodyMismatch(request.body.value, null, 'Expected body \'{"test": true}\' but was missing')

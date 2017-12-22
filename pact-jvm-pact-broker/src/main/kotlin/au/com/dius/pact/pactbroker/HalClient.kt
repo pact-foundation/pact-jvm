@@ -294,7 +294,8 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
   }
 
   private fun encodePathParameter(options: Map<String, Any>, key: String, value: String): String? {
-    return UrlEscapers.urlPathSegmentEscaper().escape(options[key]?.toString() ?: value)
+    val s = options[key]?.toString() ?: value
+    return UrlEscapers.urlPathSegmentEscaper().escape(s)
   }
 
   fun initPathInfo() {

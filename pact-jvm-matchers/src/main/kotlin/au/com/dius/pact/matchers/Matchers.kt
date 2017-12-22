@@ -49,7 +49,7 @@ object Matchers : KLogging() {
   fun calculatePathWeight(pathExp: String, path: List<String>): Int {
     val parseResult = Parser().compile(pathExp)
     return when (parseResult) {
-      is Parsers.Success -> path.zip(JavaConverters.asJavaCollection(parseResult.result())).map {
+      is Parsers.Success -> path.zip(JavaConverters.asJavaCollectionConverter(parseResult.result()).asJavaCollection()).map {
         matchesToken(it.first, it.second)
       }.reduce { acc, i -> acc * i }
       else -> {
