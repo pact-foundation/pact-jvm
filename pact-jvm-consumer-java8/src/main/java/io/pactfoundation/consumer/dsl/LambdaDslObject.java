@@ -209,7 +209,7 @@ public class LambdaDslObject {
     /**
      * Attribute that must be an ISO formatted timestamp
      *
-     * @param name
+     * @param name attribute name
      */
     public LambdaDslObject timestamp(String name) {
         object.timestamp(name);
@@ -270,8 +270,11 @@ public class LambdaDslObject {
      *
      * @param name field name
      */
-    public LambdaDslObject eachLike(String name) {
-        object.eachLike(name);
+    public LambdaDslObject eachLike(String name, Consumer<LambdaDslObject> nestedObject) {
+        final PactDslJsonBody arrayLike = object.eachLike(name);
+        final LambdaDslObject dslObject = new LambdaDslObject(arrayLike);
+        nestedObject.accept(dslObject);
+        arrayLike.closeArray();
         return this;
     }
 
@@ -281,8 +284,11 @@ public class LambdaDslObject {
      * @param name           field name
      * @param numberExamples number of examples to generate
      */
-    public LambdaDslObject eachLike(String name, int numberExamples) {
-        object.eachLike(name, numberExamples);
+    public LambdaDslObject eachLike(String name, int numberExamples, Consumer<LambdaDslObject> nestedObject) {
+        final PactDslJsonBody arrayLike = object.eachLike(name, numberExamples);
+        final LambdaDslObject dslObject = new LambdaDslObject(arrayLike);
+        nestedObject.accept(dslObject);
+        arrayLike.closeArray();
         return this;
     }
 
@@ -292,8 +298,11 @@ public class LambdaDslObject {
      * @param name field name
      * @param size minimum size of the array
      */
-    public LambdaDslObject minArrayLike(String name, Integer size) {
-        object.minArrayLike(name, size);
+    public LambdaDslObject minArrayLike(String name, Integer size, Consumer<LambdaDslObject> nestedObject) {
+        final PactDslJsonBody minArrayLike = object.minArrayLike(name, size);
+        final LambdaDslObject dslObject = new LambdaDslObject(minArrayLike);
+        nestedObject.accept(dslObject);
+        minArrayLike.closeArray();
         return this;
     }
 
@@ -304,8 +313,12 @@ public class LambdaDslObject {
      * @param size           minimum size of the array
      * @param numberExamples number of examples to generate
      */
-    public LambdaDslObject minArrayLike(String name, Integer size, int numberExamples) {
-        object.minArrayLike(name, size, numberExamples);
+    public LambdaDslObject minArrayLike(String name, Integer size, int numberExamples,
+                                        Consumer<LambdaDslObject> nestedObject) {
+        final PactDslJsonBody minArrayLike = object.minArrayLike(name, size, numberExamples);
+        final LambdaDslObject dslObject = new LambdaDslObject(minArrayLike);
+        nestedObject.accept(dslObject);
+        minArrayLike.closeArray();
         return this;
     }
 
@@ -315,8 +328,11 @@ public class LambdaDslObject {
      * @param name field name
      * @param size maximum size of the array
      */
-    public LambdaDslObject maxArrayLike(String name, Integer size) {
-        object.minArrayLike(name, size);
+    public LambdaDslObject maxArrayLike(String name, Integer size, Consumer<LambdaDslObject> nestedObject) {
+        final PactDslJsonBody maxArrayLike = object.maxArrayLike(name, size);
+        final LambdaDslObject dslObject = new LambdaDslObject(maxArrayLike);
+        nestedObject.accept(dslObject);
+        maxArrayLike.closeArray();
         return this;
     }
 
@@ -327,8 +343,12 @@ public class LambdaDslObject {
      * @param size           maximum size of the array
      * @param numberExamples number of examples to generate
      */
-    public LambdaDslObject maxArrayLike(String name, Integer size, int numberExamples) {
-        object.maxArrayLike(name, size, numberExamples);
+    public LambdaDslObject maxArrayLike(String name, Integer size, int numberExamples,
+                                        Consumer<LambdaDslObject> nestedObject) {
+        final PactDslJsonBody maxArrayLike = object.maxArrayLike(name, size, numberExamples);
+        final LambdaDslObject dslObject = new LambdaDslObject(maxArrayLike);
+        nestedObject.accept(dslObject);
+        maxArrayLike.closeArray();
         return this;
     }
 
@@ -342,36 +362,56 @@ public class LambdaDslObject {
         return this;
     }
 
-    public LambdaDslObject eachArrayLike(String name) {
-        object.eachArrayLike(name);
+    public LambdaDslObject eachArrayLike(String name, Consumer<LambdaDslJsonArray> nestedArray) {
+        final PactDslJsonArray arrayLike = object.eachArrayLike(name);
+        final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(arrayLike);
+        nestedArray.accept(dslArray);
+        arrayLike.closeArray().closeArray();
         return this;
     }
 
-    public LambdaDslObject eachArrayLike(String name, int numberExamples) {
-        object.eachArrayLike(name, numberExamples);
+    public LambdaDslObject eachArrayLike(String name, int numberExamples, Consumer<LambdaDslJsonArray> nestedArray) {
+        final PactDslJsonArray arrayLike = object.eachArrayLike(name, numberExamples);
+        final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(arrayLike);
+        nestedArray.accept(dslArray);
+        arrayLike.closeArray().closeArray();
         return this;
     }
 
-    public LambdaDslObject eachArrayWithMaxLike(String name, Integer size) {
-        object.eachArrayWithMaxLike(name, size);
-        return this;
-    }
-
-
-    public LambdaDslObject eachArrayWithMaxLike(String name, int numberExamples, Integer size) {
-        object.eachArrayWithMaxLike(name, numberExamples, size);
-        return this;
-    }
-
-
-    public LambdaDslObject eachArrayWithMinLike(String name, Integer size) {
-        object.eachArrayWithMinLike(name, size);
+    public LambdaDslObject eachArrayWithMaxLike(String name, Integer size, Consumer<LambdaDslJsonArray> nestedArray) {
+        final PactDslJsonArray arrayLike = object.eachArrayWithMaxLike(name, size);
+        final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(arrayLike);
+        nestedArray.accept(dslArray);
+        arrayLike.closeArray().closeArray();
         return this;
     }
 
 
-    public LambdaDslObject eachArrayWithMinLike(String name, int numberExamples, Integer size) {
-        object.eachArrayWithMinLike(name, numberExamples, size);
+    public LambdaDslObject eachArrayWithMaxLike(String name, int numberExamples, Integer size,
+                                                Consumer<LambdaDslJsonArray> nestedArray) {
+        final PactDslJsonArray arrayLike = object.eachArrayWithMaxLike(name, numberExamples, size);
+        final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(arrayLike);
+        nestedArray.accept(dslArray);
+        arrayLike.closeArray().closeArray();
+        return this;
+    }
+
+
+    public LambdaDslObject eachArrayWithMinLike(String name, Integer size, Consumer<LambdaDslJsonArray> nestedArray) {
+        final PactDslJsonArray arrayLike = object.eachArrayWithMinLike(name, size);
+        final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(arrayLike);
+        nestedArray.accept(dslArray);
+        arrayLike.closeArray().closeArray();
+        return this;
+    }
+
+
+    public LambdaDslObject eachArrayWithMinLike(String name, int numberExamples, Integer size,
+                                                Consumer<LambdaDslJsonArray> nestedArray) {
+        final PactDslJsonArray arrayLike = object.eachArrayWithMinLike(name, numberExamples, size);
+        final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(arrayLike);
+        nestedArray.accept(dslArray);
+        arrayLike.closeArray().closeArray();
         return this;
     }
 
