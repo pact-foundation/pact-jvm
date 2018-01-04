@@ -679,4 +679,51 @@ public class LambdaDslObjectTest {
         final Map<String, Object> arrayObjectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
         assertThat(arrayObjectRule.get("match"), is("type"));
     }
+
+    @Test
+    public void testEachKeyLike() {
+        // Old DSL
+        final String pactDslJson = new PactDslJsonBody()
+                .object("one")
+                .eachKeyLike("001-A") // key like an id where the value is matched by the following example
+                .stringType("description", "Some Description")
+                .closeObject()
+                .closeObject()
+                .getBody()
+                .toString();
+
+        // Lambda DSL
+        final PactDslJsonBody actualPactDsl = new PactDslJsonBody();
+        final LambdaDslObject object = new LambdaDslJsonBody(actualPactDsl);
+        object.object("one",
+                      o -> o.eachKeyLike("001-A",
+                                         nested -> nested.stringType("description", "Some Description")));
+
+        String actualJson = actualPactDsl.getBody().toString();
+        assertThat(actualJson, is(pactDslJson));
+    }
+
+    @Test
+    public void testEachKeyMappedToAnArrayLike() {
+        // Old DSL
+        final String pactDslJson = new PactDslJsonBody()
+                .object("one")
+                .eachKeyMappedToAnArrayLike("001")
+                .id("someId", 23456L)
+                .closeObject()
+                .closeArray()
+                .closeObject()
+                .getBody()
+                .toString();
+
+        // Lambda DSL
+        final PactDslJsonBody actualPactDsl = new PactDslJsonBody();
+        final LambdaDslObject object = new LambdaDslJsonBody(actualPactDsl);
+        object.object("one",
+                      o -> o.eachKeyMappedToAnArrayLike("001",
+                                                        nested -> nested.id("someId", 23456L)));
+
+        String actualJson = actualPactDsl.getBody().toString();
+        assertThat(actualJson, is(pactDslJson));
+    }
 }

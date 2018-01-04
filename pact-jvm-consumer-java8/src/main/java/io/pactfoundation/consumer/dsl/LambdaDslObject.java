@@ -420,8 +420,11 @@ public class LambdaDslObject {
      *
      * @param exampleKey Example key to use for generating bodies
      */
-    public LambdaDslObject eachKeyMappedToAnArrayLike(String exampleKey) {
-        object.eachKeyMappedToAnArrayLike(exampleKey);
+    public LambdaDslObject eachKeyMappedToAnArrayLike(String exampleKey, Consumer<LambdaDslObject> nestedObject) {
+        final PactDslJsonBody objectLike = object.eachKeyMappedToAnArrayLike(exampleKey);
+        final LambdaDslObject dslObject = new LambdaDslObject(objectLike);
+        nestedObject.accept(dslObject);
+        objectLike.closeObject().closeArray();
         return this;
     }
 
@@ -430,8 +433,11 @@ public class LambdaDslObject {
      *
      * @param exampleKey Example key to use for generating bodies
      */
-    public LambdaDslObject eachKeyLike(String exampleKey) {
-        object.eachKeyLike(exampleKey);
+    public LambdaDslObject eachKeyLike(String exampleKey, Consumer<LambdaDslObject> nestedObject) {
+        final PactDslJsonBody objectLike = object.eachKeyLike(exampleKey);
+        final LambdaDslObject dslObject = new LambdaDslObject(objectLike);
+        nestedObject.accept(dslObject);
+        objectLike.closeObject();
         return this;
     }
 
