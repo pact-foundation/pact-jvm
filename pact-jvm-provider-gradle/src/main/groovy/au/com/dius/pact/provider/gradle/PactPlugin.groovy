@@ -4,6 +4,7 @@ import au.com.dius.pact.provider.ProviderInfo
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.util.NameValidator
 
 /**
  * Main plugin class
@@ -38,7 +39,7 @@ class PactPlugin implements Plugin<Project> {
             }
 
             it.pact.serviceProviders.all { ProviderInfo provider ->
-                def providerTask = project.task("pactVerify_${provider.name}",
+                def providerTask = project.task(NameValidator.asValidName("pactVerify_${provider.name}"),
                     description: "Verify the pacts against ${provider.name}", type: PactVerificationTask,
                     group: GROUP) {
                     providerToVerify = provider
