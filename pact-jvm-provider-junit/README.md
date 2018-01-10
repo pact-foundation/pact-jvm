@@ -374,5 +374,5 @@ For pacts that are loaded from a Pact Broker, the results of running the verific
  broker against the URL for the pact. You will be able to see the result on the Pact Broker home screen. You need to
  set the version of the provider that is verified using the `pact.provider.version` system property.
  
-To disable publishing of results, set the property `pact.verifier.publishResults` to `false`.
+To disable publishing of results, set the property `pact.verifier.publishResults` to `false` [version 3.5.7+].
 
