@@ -4,7 +4,7 @@ import au.com.dius.pact.provider.ProviderInfo
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.util.NameValidator
+import org.gradle.api.invocation.Gradle
 
 /**
  * Main plugin class
@@ -15,6 +15,7 @@ class PactPlugin implements Plugin<Project> {
   private static final String PACT_VERIFY = 'pactVerify'
   private static final String TEST_CLASSES = 'testClasses'
 
+  @SuppressWarnings(['EmptyCatchBlock'])
   @Override
     void apply(Project project) {
 
@@ -39,7 +40,16 @@ class PactPlugin implements Plugin<Project> {
             }
 
             it.pact.serviceProviders.all { ProviderInfo provider ->
-                def providerTask = project.task(NameValidator.asValidName("pactVerify_${provider.name}"),
+                def taskName = "pactVerify_${provider.name}"
+                try {
+                  def nameValidator = this.getClass().classLoader.loadClass('org.gradle.util.NameValidator').newInstance()
+                  taskName = nameValidator.asValidName(taskName)
+                } catch (ClassNotFoundException e) {
+                  // Earlier versions of Gradle don't have NameValidator
+                  // Without it, we just don't change the task name
+                }
+
+                def providerTask = project.task(taskName,
                     description: "Verify the pacts against ${provider.name}", type: PactVerificationTask,
                     group: GROUP) {
                     providerToVerify = provider
