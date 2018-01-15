@@ -534,6 +534,7 @@ public class PactDslJsonBody extends DslPart {
   @Override
   public DslPart close() {
     DslPart parentToReturn = this;
+
     if (!closed) {
       DslPart parent = closeObject();
       while (parent != null) {
@@ -544,10 +545,10 @@ public class PactDslJsonBody extends DslPart {
           parent = parent.closeObject();
         }
       }
-    }
 
-    parentToReturn.getMatchers().applyMatcherRootPrefix("$");
-    parentToReturn.getGenerators().applyRootPrefix("$");
+      parentToReturn.getMatchers().applyMatcherRootPrefix("$");
+      parentToReturn.getGenerators().applyRootPrefix("$");
+    }
 
     return parentToReturn;
   }

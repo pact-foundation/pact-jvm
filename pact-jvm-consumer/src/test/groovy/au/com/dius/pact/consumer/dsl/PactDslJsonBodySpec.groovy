@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.dsl
 
+import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.matchingrules.RuleLogic
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -111,6 +112,25 @@ class PactDslJsonBodySpec extends Specification {
         .stringType('Material', 'Gold')
       . closeObject()
       .closeArray().toString() == '{"available Options":[{"Material":"Gold"}]}'
+  }
+
+  def 'test for behaviour of close for issue #619'() {
+    given:
+    PactDslJsonBody pactDslJsonBody = new PactDslJsonBody()
+    PactDslJsonBody contactDetailsPactDslJsonBody = pactDslJsonBody.object('contactDetails')
+    contactDetailsPactDslJsonBody.object('mobile')
+      .stringType('countryCode', '64')
+      .stringType('prefix', '21')
+      .stringType('subscriberNumber', '123456')
+      .closeObject()
+    pactDslJsonBody = contactDetailsPactDslJsonBody.closeObject().close()
+
+    expect:
+    pactDslJsonBody.close().matchers.toMap(PactSpecVersion.V2) == [
+      '$.body.contactDetails.mobile.countryCode': [match: 'type'],
+      '$.body.contactDetails.mobile.prefix': [match: 'type'],
+      '$.body.contactDetails.mobile.subscriberNumber': [match: 'type']
+    ]
   }
 
 }
