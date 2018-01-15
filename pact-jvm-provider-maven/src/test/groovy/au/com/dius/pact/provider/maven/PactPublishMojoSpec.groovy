@@ -30,7 +30,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    3 * brokerClient.uploadPactFile(_, _) >> 'OK'
+    3 * brokerClient.uploadPactFile(_, _, []) >> 'OK'
 
     cleanup:
     dir.deleteDir()
@@ -50,7 +50,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    3 * brokerClient.uploadPactFile(_, _) >> 'OK' >> 'FAILED! Bang' >> 'OK'
+    3 * brokerClient.uploadPactFile(_, _, []) >> 'OK' >> 'FAILED! Bang' >> 'OK'
     thrown(MojoExecutionException)
 
     cleanup:
@@ -109,5 +109,26 @@ class PactPublishMojoSpec extends Specification {
         then:
         assert mojo.projectVersion == '1.0.0'
     }
+
+  def 'Published the pacts to the pact broker with tags if any tags are specified'() {
+    given:
+    def dir = Files.createTempDirectory('pacts')
+    def pact = PactPublishMojoSpec.classLoader.getResourceAsStream('pacts/contract.json').text
+    def file = Files.createTempFile(dir, 'pactfile', '.json')
+    file.write(pact)
+    mojo.pactDirectory = dir.toString()
+
+    def tags = ['one', 'two', 'three']
+    mojo.tags = tags
+
+    when:
+    mojo.execute()
+
+    then:
+    1 * brokerClient.uploadPactFile(_, _, tags) >> 'OK'
+
+    cleanup:
+    dir.deleteDir()
+  }
 
 }
