@@ -15,7 +15,6 @@ class PactPlugin implements Plugin<Project> {
   private static final String PACT_VERIFY = 'pactVerify'
   private static final String TEST_CLASSES = 'testClasses'
 
-  @SuppressWarnings(['EmptyCatchBlock'])
   @Override
     void apply(Project project) {
 
@@ -40,14 +39,18 @@ class PactPlugin implements Plugin<Project> {
             }
 
             it.pact.serviceProviders.all { ProviderInfo provider ->
-                def taskName = "pactVerify_${provider.name}"
-                try {
-                  def nameValidator = this.getClass().classLoader.loadClass('org.gradle.util.NameValidator').newInstance()
-                  taskName = nameValidator.asValidName(taskName)
-                } catch (ClassNotFoundException e) {
-                  // Earlier versions of Gradle don't have NameValidator
-                  // Without it, we just don't change the task name
-                }
+                def taskName = {
+                  def defaultName = "pactVerify_${provider.name}"
+                  try {
+                    def nameValidator =
+                      this.getClass().classLoader.loadClass('org.gradle.util.NameValidator').newInstance()
+                    return nameValidator.asValidName(defaultName)
+                  } catch (ClassNotFoundException e) {
+                    // Earlier versions of Gradle don't have NameValidator
+                    // Without it, we just don't change the task name
+                    return defaultName
+                  }
+                } ()
 
                 def providerTask = project.task(taskName,
                     description: "Verify the pacts against ${provider.name}", type: PactVerificationTask,
