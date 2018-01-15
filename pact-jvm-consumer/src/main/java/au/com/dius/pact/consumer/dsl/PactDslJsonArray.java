@@ -24,7 +24,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -198,7 +197,9 @@ public class PactDslJsonArray extends DslPart {
               object.matchers.getMatchingRules().get(matcherName));
         }
         generators.addGenerators(object.generators, rootPath + appendArrayIndex(1));
-        body.put(object.getBody());
+        for (int i = 0; i < getNumberExamples(); i++) {
+            body.put(object.getBody());
+        }
     }
 
     @Override
