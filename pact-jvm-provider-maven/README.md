@@ -549,6 +549,25 @@ project by default, but can be overwritten with the `projectVersion` property. M
 _NOTE_: By default, the pact broker has issues parsing `SNAPSHOT` versions.  You can configure the publisher to 
 automatically remove `-SNAPSHOT` from your version number by setting `trimSnapshot` to true. This setting does not modify non-snapshot versions.
 
+You can set any tags that the pacts should be published with by setting the `tags` list property (version 3.5.12+). A common use of this
+is setting the tag to the current source control branch. This supports using pact with feature branches.
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.12</version>
+    <configuration>
+      <pactDirectory>path/to/pact/files</pactDirectory> <!-- Defaults to ${project.build.directory}/pacts -->
+      <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
+      <projectVersion>1.0.100</projectVersion> <!-- Defaults to ${project.version} -->
+      <tags>
+        <tag>feature/feature_name</tag>
+      </tags>
+    </configuration>
+</plugin>
+```
+
 ## Publishing to an authenticated pact broker [version 3.3.9+]
 
 For an authenticated pact broker, you can pass in the credentials with the `pactBrokerUsername` and `pactBrokerPassword`
