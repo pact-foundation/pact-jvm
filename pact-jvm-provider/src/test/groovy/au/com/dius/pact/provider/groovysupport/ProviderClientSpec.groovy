@@ -535,4 +535,23 @@ class ProviderClientSpec extends Specification {
     request.URI.toString() == 'http://localhost:8080/tenants/tester%2Ftoken/jobs/external-id'
   }
 
+  @Unroll
+  def 'Provider base path should be stripped of any trailing slash - #basePath'() {
+    expect:
+    ProviderClient.stripTrailingSlash(basePath) == path
+
+    where:
+
+    basePath     | path
+    ''           | ''
+    'path'       | 'path'
+    '/path'      | '/path'
+    'path/path'  | 'path/path'
+    '/'          | ''
+    'path/'      | 'path'
+    '/path/'     | '/path'
+    'path/path/' | 'path/path'
+
+  }
+
 }
