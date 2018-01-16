@@ -79,6 +79,15 @@ open class ProviderClient(val provider: IProviderInfo,
 
     private fun isFunctionalInterface(requestFilter: Any) =
       requestFilter::class.java.interfaces.any { it.isAnnotationPresent(FunctionalInterface::class.java) }
+
+    @JvmStatic
+    private fun stripTrailingSlash(basePath: String): String {
+      return when {
+        basePath == "/" -> ""
+        basePath.isNotEmpty() && basePath.last() == '/' -> basePath.substring(0, basePath.length - 1)
+        else -> basePath
+      }
+    }
   }
 
   open fun makeRequest(request: Request): Map<String, Any> {
@@ -239,14 +248,7 @@ open class ProviderClient(val provider: IProviderInfo,
     val scheme = provider.protocol
     val host = invokeIfClosure(provider.host)
     val port = convertToInteger(invokeIfClosure(provider.port))
-
-    var path = ""
-    if (provider.path.isNotEmpty()) {
-      path = provider.path
-      if (path.last() == '/') {
-        path = if (path.length > 1) path.substring(0, path.length - 2) else ""
-      }
-    }
+    var path = stripTrailingSlash(provider.path)
 
     var urlBuilder = URIBuilder()
     if (systemPropertySet("pact.verifier.disableUrlPathDecoding")) {
