@@ -12,27 +12,30 @@ import sbt._
 import scala.collection.JavaConversions
 import scala.collection.mutable.ArrayBuffer
 
-object SbtProviderPlugin extends Plugin {
+object SbtProviderPlugin extends AutoPlugin {
+  object autoImport {
+    lazy val pactProviders = SettingKey[Seq[ProviderConfig]]("providers", "Providers to verify")
+    lazy val pactVerify = taskKey[Unit]("Verify the pacts for all defined providers")
 
-  val providers = SettingKey[Seq[ProviderConfig]]("providers", "Providers to verify")
-  val pactVerify = taskKey[Unit]("Verify the pacts for all defined providers")
+    lazy val pactProvidersConfig = Seq(
+      pactProviders := Seq(),
+      pactVerify := {
+        val s: TaskStreams = Keys.streams.value
 
-  val config = Seq(
-    providers := Seq(),
-    pactVerify := {
-      val s: TaskStreams = Keys.streams.value
+        if (System.getProperty("pact.logLevel") != null) {
+          LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).asInstanceOf[Logger].setLevel(
+            Level.toLevel(System.getProperty("pact.logLevel"))
+          )
+        }
 
-      if (System.getProperty("pact.logLevel") != null) {
-        LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).asInstanceOf[Logger].setLevel(
-          Level.toLevel(System.getProperty("pact.logLevel"))
-        )
-      }
+        if (pactProviders.value.isEmpty)
+          sys.error("No providers have been defined. Configure them by setting the providers build setting.")
+        else
+          Verification.verify(pactProviders.value)
+      })
+  }
 
-      if (providers.value.isEmpty)
-        sys.error("No providers have been defined. Configure them by setting the providers build setting.")
-      else
-        Verification.verify(providers.value)
-    })
+  override def trigger: PluginTrigger = allRequirements
 }
 
 trait ConsumerConfigInfo
