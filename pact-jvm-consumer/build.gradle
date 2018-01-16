@@ -14,10 +14,6 @@ dependencies {
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile "org.specs2:specs2-mock_${project.scalaVersion}:${project.specs2Version}"
     testCompile 'org.cthul:cthul-matchers:1.1.0'
-    testCompile 'org.glassfish.jersey.core:jersey-client:2.26'
-    testCompile 'org.glassfish.jersey.ext:jersey-proxy-client:2.26'
-    testCompile 'org.glassfish.jersey.inject:jersey-hk2:2.26'
-    testCompile 'org.glassfish.jersey.media:jersey-media-json-jackson:2.26'
 }
 
 sourceSets.main.scala.srcDir "src/main/java"
