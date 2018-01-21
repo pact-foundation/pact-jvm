@@ -4,7 +4,7 @@ isSnapshot := true
 scalaVersion := "2.12.4"
 organization := "au.com.dius"
 
-val currentVersion = "3.5.12"
+val currentVersion = "3.5.13"
 version := currentVersion
 
 libraryDependencies ++= Seq(
