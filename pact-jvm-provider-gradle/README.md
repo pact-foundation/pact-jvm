@@ -478,7 +478,10 @@ pact {
 
     serviceProviders {
         provider1 {
+            // You can get the latest pacts from the broker
             hasPactsFromPactBroker('http://pact-broker:5000/')
+            // And/or you can get the latest pact with a specific tag
+            hasPactsFromPactBrokerWithTag('http://pact-broker:5000/',"tagname")
         }
     }
 
