@@ -34,7 +34,7 @@ how to get going.
 
 ## Links
 
-* For an example of using pact-jvm with spring boot, have a look at https://github.com/mstine/microservices-pact
+* For examples of using pact-jvm with spring boot, have a look at https://github.com/Mikuu/Pact-JVM-Example and https://github.com/mstine/microservices-pact
 
 ## Documentation
 
