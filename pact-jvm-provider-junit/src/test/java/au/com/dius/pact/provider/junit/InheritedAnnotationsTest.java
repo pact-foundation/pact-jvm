@@ -21,21 +21,17 @@ public class InheritedAnnotationsTest {
                 .map(Annotation::annotationType)
                 .collect(Collectors.toList());
 
-        Assert.assertTrue(list.containsAll(Arrays.asList(Provider.class, Consumer.class)));
+        Assert.assertTrue(list.containsAll(
+                Arrays.asList(
+                        PactBroker.class,
+                        Provider.class,
+                        Consumer.class,
+                        PactFolder.class,
+                        IgnoreNoPactsToVerify.class,
+                        PactFilter.class)));
     }
 
-    @PactBroker
     private class SampleProviderTest extends ParentClazz {
-
-    }
-
-    @Provider("testProvider")
-    @Consumer("testConsumer")
-    @PactFolder("pactFolder")
-    @IgnoreNoPactsToVerify
-    @PactFilter("myFilter")
-    abstract class ParentClazz {
-
         @State("has no data")
         public void hasNoData() {
             System.out.println("Has no data state");
@@ -45,5 +41,15 @@ public class InheritedAnnotationsTest {
         public void requestFilter(HttpRequest  httpRequest) {
 
         }
+    }
+
+    @PactBroker
+    @Provider("testProvider")
+    @Consumer("testConsumer")
+    @PactFolder("pactFolder")
+    @IgnoreNoPactsToVerify
+    @PactFilter("myFilter")
+    abstract class ParentClazz {
+
     }
 }
