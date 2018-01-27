@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.dsl
 
+import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.matchingrules.RuleLogic
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -100,7 +101,36 @@ class PactDslJsonBodySpec extends Specification {
       .eachArrayLike('1').closeArray().closeArray()
       .eachArrayWithMaxLike('2', 10).closeArray().closeArray()
       .eachArrayWithMinLike('3', 10).closeArray().closeArray()
-      .close().toString() == '{"0":[],"1":[[]],"2":[[]],"3":[[]],"asdf":"string"}'
+            .close().toString() == '{"0":[],"1":[[]],"2":[[]],"3":[[],[],[],[],[],[],[],[],[],[]],"asdf":"string"}'
+  }
+
+  def 'generate the correct JSON when the attribute name has a space'() {
+    expect:
+    new PactDslJsonBody()
+      .array('available Options')
+        .object()
+        .stringType('Material', 'Gold')
+      . closeObject()
+      .closeArray().toString() == '{"available Options":[{"Material":"Gold"}]}'
+  }
+
+  def 'test for behaviour of close for issue #619'() {
+    given:
+    PactDslJsonBody pactDslJsonBody = new PactDslJsonBody()
+    PactDslJsonBody contactDetailsPactDslJsonBody = pactDslJsonBody.object('contactDetails')
+    contactDetailsPactDslJsonBody.object('mobile')
+      .stringType('countryCode', '64')
+      .stringType('prefix', '21')
+      .stringType('subscriberNumber', '123456')
+      .closeObject()
+    pactDslJsonBody = contactDetailsPactDslJsonBody.closeObject().close()
+
+    expect:
+    pactDslJsonBody.close().matchers.toMap(PactSpecVersion.V2) == [
+      '$.body.contactDetails.mobile.countryCode': [match: 'type'],
+      '$.body.contactDetails.mobile.prefix': [match: 'type'],
+      '$.body.contactDetails.mobile.subscriberNumber': [match: 'type']
+    ]
   }
 
 }

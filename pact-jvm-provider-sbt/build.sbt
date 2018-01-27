@@ -1,9 +1,15 @@
 sbtPlugin := true
 isSnapshot := true
 
+scalaVersion := "2.12.4"
+organization := "au.com.dius"
+
+val currentVersion = "3.5.12"
+version := currentVersion
+
 libraryDependencies ++= Seq(
-  "au.com.dius" %% "pact-jvm-provider-sbtsupport" % Common.version,
-  "ch.qos.logback" % "logback-classic" % "1.1.7"
+  "au.com.dius" %% "pact-jvm-provider-scalasupport" % currentVersion,
+  "ch.qos.logback" % "logback-classic" % "1.2.3"
 )
 
 scalacOptions ++= Seq("-deprecation", "-feature")

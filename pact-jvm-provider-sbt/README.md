@@ -5,7 +5,7 @@ The sbt plugin adds an sbt task for running all provider pacts against a running
 
 To use the pact sbt plugin, add the following to your project/plugins.sbt
 
-    addSbtPlugin("au.com.dius" %% "pact-jvm-provider-sbt" % "2.4.13")
+    addSbtPlugin("au.com.dius" %% "pact-jvm-provider-sbt" % "3.5.12")
 
 ## Using the old verifyPacts task
 
@@ -22,7 +22,7 @@ Two new keys are added to configure this task:
 ## Using the newer task [version 2.4.4+]
 
 The pact SBT is being updated to bring it inline with the functionality available in the other build plugins. A new
-task is added called `pactVerify`. To use it, add config to your build.sbt that configures `SbtProviderPlugin.config`
+task is added called `pactVerify`. To use it, add config to your build.sbt that configures `pactProvidersConfig`
 with the providers and consumers.
 
 For example:
@@ -30,8 +30,8 @@ For example:
 ```scala
 import au.com.dius.pact.provider.sbt._
 // This defines a single provider and two consumers. The pact files are stored in the src/test/resources directory.
-SbtProviderPlugin.config ++ Seq(
-  providers := Seq(
+pactProvidersConfig ++ Seq(
+  pactProviders := Seq(
     ProviderConfig(name = "Our Service", port = 5050)
         .hasPactWith(ConsumerConfig(name = "sampleconsumer", pactFile = file("src/test/resources/sample-pact.json")))
         .hasPactWith(ConsumerConfig(name = "sampleconsumer2", pactFile = file("src/test/resources/sample-pact2.json")))
@@ -39,7 +39,7 @@ SbtProviderPlugin.config ++ Seq(
 )
 ```
 
-and then execute `verifyPacts`.
+and then execute `pactVerify`.
 
 ### Enabling insecure SSL
 
@@ -91,8 +91,8 @@ For example:
 ```scala
 import au.com.dius.pact.provider.sbt._
 // This defines a single provider and all the consumers from the src/test/resources directory.
-SbtProviderPlugin.config ++ Seq(
-  providers := Seq(
+pactProvidersConfig ++ Seq(
+  pactProviders := Seq(
     ProviderConfig(name = "Our Service")
         .hasPactsInDirectory(file("src/test/resources")))
 )
@@ -119,8 +119,8 @@ For example:
 
 ```scala
 import au.com.dius.pact.provider.sbt._
-SbtProviderPlugin.config ++ Seq(
-  providers := Seq(
+pactProvidersConfig ++ Seq(
+  pactProviders := Seq(
     ProviderConfig(name = "Our Service")
         .hasPactsFromPactBroker(new URL("http://pact-broker.local")))
 )
@@ -132,8 +132,8 @@ You can also verify all the latest pacts for a provider for all its consumer whe
 
 ```scala
 import au.com.dius.pact.provider.sbt._
-SbtProviderPlugin.config ++ Seq(
-  providers := Seq(
+pactProvidersConfig ++ Seq(
+  pactProviders := Seq(
     ProviderConfig(name = "Our Service")
         .hasPactsFromPactBroker(new URL("http://pact-broker.local"), Some("tagName")))
 )
@@ -166,7 +166,7 @@ The following project properties can be specified with `-Dproperty=value` on the
 |pact.filter.description|Only verify interactions whose description match the provided regular expression|
 |pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
 |pact.logLevel|Set the log level for the pact verification (DEBUG, INFO, etc).|
-|pact.verifier.publishResults|Publishing of verification results will be skipped if this property is set to false|
+|pact.verifier.publishResults|Publishing of verification results will be skipped if this property is set to false [version 3.5.7+]|
 
 ## Modifying the requests before they are sent
 
@@ -181,8 +181,8 @@ For example:
 
 ```scala
 import au.com.dius.pact.provider.sbt._
-SbtProviderPlugin.config ++ Seq(
-  providers := Seq(
+pactProvidersConfig ++ Seq(
+  pactProviders := Seq(
     ProviderConfig(name = "Our Service", requestFilter = Some(request =>
        // request is an instance of org.apache.http.HttpRequest
        request.addHeader("Authorization", "OAUTH eyJhbGciOiJSUzI1NiIsImN0eSI6ImFw...")

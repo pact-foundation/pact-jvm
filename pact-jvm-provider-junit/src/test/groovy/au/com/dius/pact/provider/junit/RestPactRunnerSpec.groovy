@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit
 
+import au.com.dius.pact.model.FilteredPact
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.ProviderState
@@ -33,6 +34,13 @@ class RestPactRunnerSpec extends Specification {
     Target target
   }
 
+  @Provider('myAwesomeService')
+  @PactFolder('pacts')
+  class TestClass2 {
+    @TestTarget
+    Target target
+  }
+
   def setup() {
     consumer = new au.com.dius.pact.model.Consumer('Consumer 1')
     consumer2 = new au.com.dius.pact.model.Consumer('Consumer 2')
@@ -61,7 +69,7 @@ class RestPactRunnerSpec extends Specification {
     ]
   }
 
-  def 'only verifies message pacts'() {
+  def 'only verifies request response pacts'() {
     given:
     RestPactRunner pactRunner = new RestPactRunner(TestClass)
 
@@ -70,7 +78,19 @@ class RestPactRunnerSpec extends Specification {
 
     then:
     result.size() == 1
-    result.contains(reqResPact)
+    result*.pact == [ reqResPact ]
+  }
+
+  def 'handles filtered pacts'() {
+    given:
+    RestPactRunner pactRunner = new RestPactRunner(TestClass2)
+    pacts = [ new FilteredPact(reqResPact, { true }) ]
+
+    when:
+    def result = pactRunner.filterPacts(pacts)
+
+    then:
+    result.size() == 1
   }
 
 }

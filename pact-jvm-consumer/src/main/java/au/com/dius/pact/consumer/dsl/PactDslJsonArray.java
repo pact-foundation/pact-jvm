@@ -24,7 +24,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -198,7 +197,9 @@ public class PactDslJsonArray extends DslPart {
               object.matchers.getMatchingRules().get(matcherName));
         }
         generators.addGenerators(object.generators, rootPath + appendArrayIndex(1));
-        body.put(object.getBody());
+        for (int i = 0; i < getNumberExamples(); i++) {
+            body.put(object.getBody());
+        }
     }
 
     @Override
@@ -532,6 +533,7 @@ public class PactDslJsonArray extends DslPart {
   @Override
   public DslPart close() {
     DslPart parentToReturn = this;
+
     if (!closed) {
       DslPart parent = closeArray();
       while (parent != null) {
@@ -542,10 +544,10 @@ public class PactDslJsonArray extends DslPart {
           parent = parent.closeObject();
         }
       }
-    }
 
-    parentToReturn.getMatchers().applyMatcherRootPrefix("$");
-    parentToReturn.getGenerators().applyRootPrefix("$");
+      parentToReturn.getMatchers().applyMatcherRootPrefix("$");
+      parentToReturn.getGenerators().applyRootPrefix("$");
+    }
 
     return parentToReturn;
   }

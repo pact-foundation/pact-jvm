@@ -1,5 +1,5 @@
-Maven plugin to verify a provider [version 2.1.9+]
-==================================================
+Maven plugin to verify a provider
+=================================
 
 Maven plugin for verifying pacts against a provider.
 
@@ -16,8 +16,8 @@ The Maven plugin provides a `verify` goal which will verify all configured pacts
       [...]
       <plugin>
         <groupId>au.com.dius</groupId>
-        <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-        <version>3.3.8</version>
+        <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+        <version>3.5.11</version>
       </plugin>
       [...]
     </plugins>
@@ -32,8 +32,8 @@ You define all the providers and consumers within the configuration element of t
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.8</version>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.11</version>
     <configuration>
       <serviceProviders>
         <!-- You can define as many as you need, but each must have a unique name -->
@@ -62,7 +62,7 @@ You define all the providers and consumers within the configuration element of t
 
 You will have to have your provider running for this to pass.
 
-## Verifying all pact files in a directory for a provider. [2.1.10+]
+## Verifying all pact files in a directory for a provider
 
 You can specify a directory that contains pact files, and the Pact plugin will scan for all pact files that match that
 provider and define a consumer for each pact file in the directory. Consumer name is read from contents of pact file.
@@ -70,8 +70,8 @@ provider and define a consumer for each pact file in the directory. Consumer nam
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.8</version>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.11</version>
     <configuration>
       <serviceProviders>
         <!-- You can define as many as you need, but each must have a unique name -->
@@ -89,7 +89,7 @@ provider and define a consumer for each pact file in the directory. Consumer nam
 </plugin>
 ```
 
-## Enabling insecure SSL [version 2.2.8+]
+## Enabling insecure SSL
 
 For providers that are running on SSL with self-signed certificates, you need to enable insecure SSL mode by setting
 `<insecure>true</insecure>` on the provider.
@@ -97,8 +97,8 @@ For providers that are running on SSL with self-signed certificates, you need to
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.8</version>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -111,15 +111,15 @@ For providers that are running on SSL with self-signed certificates, you need to
 </plugin>
 ```
 
-## Specifying a custom trust store [version 2.2.8+]
+## Specifying a custom trust store
 
 For environments that are running their own certificate chains:
 
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.8</version>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -147,8 +147,8 @@ bound to a variable named `request` prior to it being executed.
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.8</version>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -172,7 +172,7 @@ bound to a variable named `request` prior to it being executed.
 __*Important Note:*__ You should only use this feature for things that can not be persisted in the pact file. By modifying
 the request, you are potentially modifying the contract from the consumer tests!
 
-## Modifying the HTTP Client Used [version 2.2.4+]
+## Modifying the HTTP Client Used
 
 The default HTTP client is used for all requests to providers (created with a call to `HttpClients.createDefault()`).
 This can be changed by specifying a closure assigned to createClient on the provider that returns a CloseableHttpClient.
@@ -181,8 +181,8 @@ For example:
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.8</version>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -209,7 +209,7 @@ For example:
 </plugin>
 ```
 
-## Turning off URL decoding of the paths in the pact file [version 3.3.3+]
+## Turning off URL decoding of the paths in the pact file
 
 By default the paths loaded from the pact file will be decoded before the request is sent to the provider. To turn this
 behaviour off, set the system property `pact.verifier.disableUrlPathDecoding` to `true`.
@@ -224,19 +224,19 @@ The following plugin properties can be specified with `-Dproperty=value` on the 
 |Property|Description|
 |--------|-----------|
 |pact.showStacktrace|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
-|pact.showFullDiff|This turns on displaying the full diff of the expected versus actual bodies [version 3.3.6+]|
+|pact.showFullDiff|This turns on displaying the full diff of the expected versus actual bodies|
 |pact.filter.consumers|Comma seperated list of consumer names to verify|
 |pact.filter.description|Only verify interactions whose description match the provided regular expression|
 |pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
-|pact.verifier.publishResults|Publishing of verification results will be skipped if this property is set to false|
+|pact.verifier.publishResults|Publishing of verification results will be skipped if this property is set to false [version 3.5.7+]|
 
 Example in the configuration section:
 
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.8</version>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -267,8 +267,8 @@ These values can be set at the provider level, or for a specific consumer. Consu
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.8</version>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -295,13 +295,13 @@ If the `stateChangeUsesBody` is not specified, or is set to true, then the provi
 As for normal requests (see Modifying the requests before they are sent), a state change request can be modified before
 it is sent. Set `stateChangeRequestFilter` to a Groovy script on the provider that will be called before the request is made.
 
-#### Teardown calls for state changes [version 3.2.5/2.4.7+]
+#### Teardown calls for state changes
 
 You can enable teardown state change calls by setting the property `<stateChangeTeardown>true</stateChangeTeardown>` on the provider. This
 will add an `action` parameter to the state change call. The setup call before the test will receive `action=setup`, and
 then a teardown call will be made afterwards to the state change URL with `action=teardown`.
 
-## Verifying pact files from a pact broker [version 3.1.1+/2.3.1+]
+## Verifying pact files from a pact broker
 
 You can setup your build to validate against the pacts stored in a pact broker. The pact plugin will query
 the pact broker for all consumers that have a pact with the provider based on its name. To use it, just configure the
@@ -312,8 +312,8 @@ For example:
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.8</version>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -326,7 +326,7 @@ For example:
 </plugin>
 ```
 
-### Verifying pacts from an authenticated pact broker [version 3.3.5+]
+### Verifying pacts from an authenticated pact broker
 
 If your pact broker requires authentication (basic authentication is only supported), you can configure the username
 and password to use by configuring the `authentication` element of the `pactBroker` element of your provider.
@@ -336,8 +336,8 @@ For example:
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.8</version>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -382,7 +382,7 @@ configuration in your POM.
 </plugin>
 ```
 
-### Verifying pacts from an pact broker that match particular tags [version 3.3.5+]
+### Verifying pacts from an pact broker that match particular tags
 
 If your pacts in your pact broker have been tagged, you can set the tags to fetch by configuring the `tags` 
 element of the `pactBroker` element of your provider.
@@ -392,8 +392,8 @@ For example:
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.8</version>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -423,7 +423,7 @@ whose descriptions start with 'a request for payment'. `-Dpact.filter.providerSt
 has a provider state that ends with payment, and `-Dpact.filter.providerState=` will match any interaction that does not have a
 provider state.
 
-# Verifying a message provider [version 2.2.12+]
+# Verifying a message provider
 
 The Maven plugin has been updated to allow invoking test methods that can return the message contents from a message
 producer. To use it, set the way to invoke the verification to `ANNOTATED_METHOD`. This will allow the pact verification
@@ -434,8 +434,8 @@ Add something like the following to your maven pom file:
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.8</version>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -496,8 +496,8 @@ By default, the test classpath is scanned for annotated methods. You can overrid
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.8</version>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.11</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -520,7 +520,7 @@ By default, the test classpath is scanned for annotated methods. You can overrid
 </plugin>
 ```
 
-# Publishing pact files to a pact broker [version 3.2.0+]
+# Publishing pact files to a pact broker
 
 The pact maven plugin provides a `publish` mojo that can publish all pact files in a directory
 to a pact broker. To use it, you need to add a publish configuration to the POM that defines the
@@ -531,8 +531,8 @@ For example:
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.8</version>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.11</version>
     <configuration>
       <pactDirectory>path/to/pact/files</pactDirectory> <!-- Defaults to ${project.build.directory}/pacts -->
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
@@ -549,7 +549,26 @@ project by default, but can be overwritten with the `projectVersion` property. M
 _NOTE_: By default, the pact broker has issues parsing `SNAPSHOT` versions.  You can configure the publisher to 
 automatically remove `-SNAPSHOT` from your version number by setting `trimSnapshot` to true. This setting does not modify non-snapshot versions.
 
-## Publishing to an authenticated pact broker [version 3.3.9+]
+You can set any tags that the pacts should be published with by setting the `tags` list property (version 3.5.12+). A common use of this
+is setting the tag to the current source control branch. This supports using pact with feature branches.
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.12</version>
+    <configuration>
+      <pactDirectory>path/to/pact/files</pactDirectory> <!-- Defaults to ${project.build.directory}/pacts -->
+      <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
+      <projectVersion>1.0.100</projectVersion> <!-- Defaults to ${project.version} -->
+      <tags>
+        <tag>feature/feature_name</tag>
+      </tags>
+    </configuration>
+</plugin>
+```
+
+## Publishing to an authenticated pact broker
 
 For an authenticated pact broker, you can pass in the credentials with the `pactBrokerUsername` and `pactBrokerPassword`
 properties. Currently it only supports basic authentication.
@@ -559,8 +578,8 @@ For example:
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.9</version>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.11</version>
     <configuration>
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <pactBrokerUsername>USERNAME</pactBrokerUsername>

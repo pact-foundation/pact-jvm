@@ -90,7 +90,7 @@ public abstract class BaseTarget implements TestClassAwareTarget {
     return new AssertionError(error);
   }
 
-  private String exceptionMessage(Throwable err, int prefixLength) {
+  private static String exceptionMessage(Throwable err, int prefixLength) {
     String message = err.getMessage();
 
     Throwable cause = err.getCause();
@@ -99,13 +99,13 @@ public abstract class BaseTarget implements TestClassAwareTarget {
       details = ExceptionUtils.getStackTrace(cause);
     }
 
-    if (message.contains("\n")) {
+    if (message != null && message.contains("\n")) {
       String padString = StringUtils.leftPad("", prefixLength);
       Tuple2<Optional<String>, Seq<String>> lines = Seq.of(message.split("\n")).splitAtHead();
       return lines.v1.orElse("") + System.lineSeparator() + lines.v2.map(line -> padString + line)
               .toString(System.lineSeparator()) + "\n" + details;
     } else {
-      return message + "\n" + details;
+      return String.valueOf(message) + "\n" + details;
     }
   }
 

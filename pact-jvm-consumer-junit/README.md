@@ -245,6 +245,13 @@ For example:
 
 For an example test that uses these, have a look at [PactProviderWithMultipleFragmentsTest](src/test/java/au/com/dius/pact/consumer/pactproviderrule/PactProviderWithMultipleFragmentsTest.java)
 
+### Note on HTTP clients and persistent connections
+
+Some HTTP clients may keep the connection open, based on the live connections settings or if they use a connection cache. This could
+cause your tests to fail if the client you are testing lives longer than an individual test, as the mock server will be started
+and shutdown for each test. This will result in the HTTP client connection cache having invalid connections. For an example of this where
+the there was a failure for every second test, see [Issue #342](https://github.com/DiUS/pact-jvm/issues/342).
+
 ### Using the Pact DSL directly
 
 Sometimes it is not convenient to use the ConsumerPactTest as it only allows one test per test class. The DSL can be

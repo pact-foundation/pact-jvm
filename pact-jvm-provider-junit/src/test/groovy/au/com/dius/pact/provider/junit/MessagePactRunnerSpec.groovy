@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit
 
+import au.com.dius.pact.model.FilteredPact
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.ProviderState
@@ -33,6 +34,14 @@ class MessagePactRunnerSpec extends Specification {
     Target target
   }
 
+  @Provider('myAwesomeService')
+  @PactFolder('pacts')
+  @IgnoreNoPactsToVerify
+  class TestClass2 {
+    @TestTarget
+    Target target
+  }
+
   def setup() {
     consumer = new au.com.dius.pact.model.Consumer('Consumer 1')
     consumer2 = new au.com.dius.pact.model.Consumer('Consumer 2')
@@ -48,7 +57,7 @@ class MessagePactRunnerSpec extends Specification {
     ]
     interactions2 = [
       new Message('Req 3', [
-        new ProviderState('State 3')
+        new ProviderState('State 1')
       ], OptionalBody.body('{}')),
       new Message('Req 4', [
         new ProviderState('State X')
@@ -70,7 +79,19 @@ class MessagePactRunnerSpec extends Specification {
 
     then:
     result.size() == 1
-    result.contains(messagePact)
+    result*.pact.contains(messagePact)
+  }
+
+  def 'handles filtered pacts'() {
+    given:
+    MessagePactRunner pactRunner = new MessagePactRunner(TestClass2)
+    pacts = [ new FilteredPact(messagePact, { true }) ]
+
+    when:
+    def result = pactRunner.filterPacts(pacts)
+
+    then:
+    result.size() == 1
   }
 
 }

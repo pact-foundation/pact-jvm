@@ -50,6 +50,9 @@ open class PactPublishMojo : AbstractMojo() {
     @Component
     private lateinit var decrypter: SettingsDecrypter
 
+    @Parameter
+    private var tags: MutableList<String> = mutableListOf()
+
     override fun execute() {
       AnsiConsole.systemInstall()
 
@@ -82,7 +85,7 @@ open class PactPublishMojo : AbstractMojo() {
           var anyFailed = false
           pactDirectory.walkTopDown().filter { it.isFile && it.extension == "json" }.forEach { pactFile ->
             print("Publishing ${pactFile.name} ... ")
-            val result = brokerClient!!.uploadPactFile(pactFile, projectVersion).toString()
+            val result = brokerClient!!.uploadPactFile(pactFile, projectVersion, tags).toString()
             println(result)
             if (!anyFailed && result.startsWith("FAILED!")) {
               anyFailed = true
