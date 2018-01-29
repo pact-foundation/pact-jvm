@@ -13,6 +13,7 @@ import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestTarget
 import groovy.json.JsonException
 import mu.KLogging
+import org.junit.Ignore
 import org.junit.runner.notification.RunNotifier
 import org.junit.runners.ParentRunner
 import org.junit.runners.model.InitializationError
@@ -52,37 +53,42 @@ open class PactRunner(clazz: Class<*>) : ParentRunner<InteractionRunner>(clazz) 
   private val child = mutableListOf<InteractionRunner>()
 
   init {
-    val providerInfo = clazz.getAnnotation(Provider::class.java) ?: throw InitializationError(
-      "Provider name should be specified by using ${Provider::class.java.name} annotation")
-    val serviceName = providerInfo.value
+    if (clazz.getAnnotation(Ignore::class.java) != null) {
+      logger.info("Ignore annotation detected, exiting")
+    } else {
 
-    val consumerInfo = clazz.getAnnotation(Consumer::class.java)
-    val consumerName = consumerInfo?.value
+      val providerInfo = clazz.getAnnotation(Provider::class.java) ?: throw InitializationError(
+              "Provider name should be specified by using ${Provider::class.java.name} annotation")
+      val serviceName = providerInfo.value
 
-    val testClass = TestClass(clazz)
+      val consumerInfo = clazz.getAnnotation(Consumer::class.java)
+      val consumerName = consumerInfo?.value
 
-    var pacts: List<Pact>? = null
-    val pactLoader = getPactSource(testClass)
-    try {
-      pacts = filterPacts(pactLoader.load(serviceName)
-        .filter { p -> consumerName == null || p.consumer.name == consumerName })
-    } catch (e: IOException) {
-      throw InitializationError(e)
-    } catch (e: JsonException) {
-      throw InitializationError(e)
-    } catch (e: NoPactsFoundException) {
-      logger.debug(e) { "No pacts found" }
-    }
+      val testClass = TestClass(clazz)
 
-    if (pacts == null || pacts.isEmpty()) {
-      if (clazz.isAnnotationPresent(IgnoreNoPactsToVerify::class.java)) {
-        logger.warn { "Did not find any pact files for provider ${providerInfo.value}" }
-      } else {
-        throw InitializationError("Did not find any pact files for provider ${providerInfo.value}")
+      var pacts: List<Pact>? = null
+      val pactLoader = getPactSource(testClass)
+      try {
+        pacts = filterPacts(pactLoader.load(serviceName)
+                .filter { p -> consumerName == null || p.consumer.name == consumerName })
+      } catch (e: IOException) {
+        throw InitializationError(e)
+      } catch (e: JsonException) {
+        throw InitializationError(e)
+      } catch (e: NoPactsFoundException) {
+        logger.debug(e) { "No pacts found" }
       }
-    }
 
-    setupInteractionRunners(testClass, pacts, pactLoader)
+      if (pacts == null || pacts.isEmpty()) {
+        if (clazz.isAnnotationPresent(IgnoreNoPactsToVerify::class.java)) {
+          logger.warn { "Did not find any pact files for provider ${providerInfo.value}" }
+        } else {
+          throw InitializationError("Did not find any pact files for provider ${providerInfo.value}")
+        }
+      }
+
+      setupInteractionRunners(testClass, pacts, pactLoader)
+    }
   }
 
   protected open fun setupInteractionRunners(testClass: TestClass, pacts: List<Pact>?, pactLoader: PactLoader) {
