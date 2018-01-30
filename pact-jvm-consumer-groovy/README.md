@@ -458,7 +458,7 @@ This will generate an array of arrays for the `answer` attribute.
 ### Matching any key in a map (3.3.1/2.5.0+)
 
 The DSL has been extended for cases where the keys in a map are IDs. For an example of this, see 
-[#313](https://github.com/DiUS/pact-jvm/issues/131). In this case you can use the `keyLike` method, which takes an 
+[#313](https://github.com/DiUS/pact-jvm/issues/313). In this case you can use the `keyLike` method, which takes an
 example key as a parameter.
 
 For example:
