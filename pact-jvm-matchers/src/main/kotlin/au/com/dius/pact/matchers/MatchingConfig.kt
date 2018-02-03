@@ -3,6 +3,7 @@ package au.com.dius.pact.matchers
 object MatchingConfig {
   val bodyMatchers = mapOf(
     "application/.*xml" to "au.com.dius.pact.matchers.XmlBodyMatcher",
+    "text/xml" to "au.com.dius.pact.matchers.XmlBodyMatcher",
     "application/.*json" to "au.com.dius.pact.matchers.JsonBodyMatcher",
     "application/json-rpc" to "au.com.dius.pact.matchers.JsonBodyMatcher",
     "application/jsonrequest" to "au.com.dius.pact.matchers.JsonBodyMatcher",
