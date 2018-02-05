@@ -40,7 +40,7 @@ class PactBuilder extends BaseBuilder {
   private static final String BODY = 'body'
   private static final String LOCALHOST = 'localhost'
   public static final String HEADER = 'header'
-  public static final String MULTIPART_HEADER_REGEX = 'multipart/form-data;\\s*boundary=.*'
+  public static final String MULTIPART_HEADER_REGEX = 'multipart/(mixed|form-data);\\s*boundary=.*'
 
   Consumer consumer
   Provider provider
