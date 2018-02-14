@@ -34,7 +34,7 @@ class PactBrokerClient extends PactBrokerClientBase {
     try {
       IHalClient halClient = newHalClient()
       halClient.navigate(LATEST_PROVIDER_PACTS, provider: provider).forAll(PACTS) { pact ->
-        def href = URLDecoder.decode(pact.href, UTF8)
+        def href = new URI(pact.href).getPath()
         if (options.authentication) {
           consumers << new PactBrokerConsumer(pact.name, href, pactBrokerUrl, options.authentication)
         } else {
