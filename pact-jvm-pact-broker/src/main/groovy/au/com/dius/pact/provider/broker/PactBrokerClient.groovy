@@ -5,15 +5,18 @@ import au.com.dius.pact.pactbroker.NotFoundHalResponse
 import au.com.dius.pact.pactbroker.PactBrokerClientBase
 import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import au.com.dius.pact.pactbroker.PactResponse
-import com.google.common.net.UrlEscapers
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
+import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
+
+import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper
 
 /**
  * Client for the pact broker service
  */
 @Canonical
+@Slf4j
 class PactBrokerClient extends PactBrokerClientBase {
 
   private static final String LATEST_PROVIDER_PACTS = 'pb:latest-provider-pacts'
@@ -44,6 +47,10 @@ class PactBrokerClient extends PactBrokerClientBase {
     }
     catch (NotFoundHalResponse e) {
       // This means the provider is not defined in the broker, so fail gracefully.
+    }
+    catch (URISyntaxException e) {
+      log.error("URL to the pact is invalid", e)
+      throw new RuntimeException("URL to the pact is invalid", e)
     }
 
     consumers
@@ -79,9 +86,9 @@ class PactBrokerClient extends PactBrokerClientBase {
     def pactText = pactFile.text
     def pact = new JsonSlurper().parseText(pactText)
     IHalClient halClient = newHalClient()
-    def providerName = UrlEscapers.urlPathSegmentEscaper().escape(pact.provider.name)
-    def consumerName = UrlEscapers.urlPathSegmentEscaper().escape(pact.consumer.name)
-    def version =  UrlEscapers.urlPathSegmentEscaper().escape(unescapedVersion)
+    def providerName = urlPathSegmentEscaper().escape(pact.provider.name)
+    def consumerName = urlPathSegmentEscaper().escape(pact.consumer.name)
+    def version =  urlPathSegmentEscaper().escape(unescapedVersion)
     def uploadPath = "/pacts/provider/$providerName/consumer/$consumerName/version/$version"
     halClient.uploadJson(uploadPath, pactText, { result, status ->
       if (result == 'OK') {
@@ -97,7 +104,7 @@ class PactBrokerClient extends PactBrokerClientBase {
 
   static uploadTags(IHalClient halClient, String consumerName, String version, List<String> tags) {
     tags.each {
-      def tag = UrlEscapers.urlPathSegmentEscaper().escape(it)
+      def tag = urlPathSegmentEscaper().escape(it)
       halClient.uploadJson("/pacticipants/$consumerName/versions/$version/tags/$tag", '',
         { p1, p2 -> null }, false)
     }
