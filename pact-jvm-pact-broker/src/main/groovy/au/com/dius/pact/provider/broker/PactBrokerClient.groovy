@@ -1,10 +1,13 @@
 package au.com.dius.pact.provider.broker
 
-import au.com.dius.pact.pactbroker.*
+import au.com.dius.pact.pactbroker.IHalClient
+import au.com.dius.pact.pactbroker.NotFoundHalResponse
+import au.com.dius.pact.pactbroker.PactBrokerClientBase
+import au.com.dius.pact.pactbroker.PactBrokerConsumer
+import au.com.dius.pact.pactbroker.PactResponse
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import groovy.util.logging.Slf4j
-import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.net.URLCodec
 import org.apache.commons.lang3.StringUtils
 
@@ -46,10 +49,6 @@ class PactBrokerClient extends PactBrokerClientBase {
     catch (NotFoundHalResponse e) {
       // This means the provider is not defined in the broker, so fail gracefully.
     }
-    catch (DecoderException e) {
-      log.error("URL to the pact is invalid", e)
-      throw new RuntimeException("URL to the pact is invalid", e)
-    }
 
     consumers
   }
@@ -61,7 +60,7 @@ class PactBrokerClient extends PactBrokerClientBase {
     try {
       IHalClient halClient = newHalClient()
       halClient.navigate(LATEST_PROVIDER_PACTS_WITH_TAG, provider: provider, tag: tag).forAll(PACTS) { pact ->
-        def href = URLDecoder.decode(pact.href, UTF8)
+        def href = new URLCodec().decode(pact.href)
         if (options.authentication) {
           consumers << new PactBrokerConsumer(pact.name, href, pactBrokerUrl, options.authentication)
         } else {
