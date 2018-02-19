@@ -8,8 +8,8 @@ import au.com.dius.pact.pactbroker.PactResponse
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import groovy.util.logging.Slf4j
-import org.apache.commons.codec.net.URLCodec
 import org.apache.commons.lang3.StringUtils
+import org.dmfs.rfc3986.encoding.Precoded
 
 import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper
 
@@ -38,7 +38,7 @@ class PactBrokerClient extends PactBrokerClientBase {
     try {
       IHalClient halClient = newHalClient()
       halClient.navigate(LATEST_PROVIDER_PACTS, provider: provider).forAll(PACTS) { pact ->
-        def href = new URLCodec().decode(pact.href)
+        def href = new Precoded(pact.href).decoded()
         if (options.authentication) {
           consumers << new PactBrokerConsumer(pact.name, href, pactBrokerUrl, options.authentication)
         } else {
@@ -60,7 +60,7 @@ class PactBrokerClient extends PactBrokerClientBase {
     try {
       IHalClient halClient = newHalClient()
       halClient.navigate(LATEST_PROVIDER_PACTS_WITH_TAG, provider: provider, tag: tag).forAll(PACTS) { pact ->
-        def href = new URLCodec().decode(pact.href)
+        def href = new Precoded(pact.href).decoded()
         if (options.authentication) {
           consumers << new PactBrokerConsumer(pact.name, href, pactBrokerUrl, options.authentication)
         } else {

@@ -74,7 +74,7 @@ class PactBrokerClientSpec extends Specification {
     given:
     def halClient = Mock(IHalClient)
     halClient.navigate(_, _) >> halClient
-    halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/a%20b']) }
+    halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/a%20b/100+ab']) }
 
     def client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
       newHalClient() >> halClient
@@ -86,7 +86,7 @@ class PactBrokerClientSpec extends Specification {
     then:
     consumers != []
     consumers.first().name == 'bob'
-    consumers.first().source == 'http://bob.com/a b'
+    consumers.first().source == 'http://bob.com/a b/100+ab'
   }
 
   def 'fetches consumers with specified tag successfully'() {
@@ -130,7 +130,7 @@ class PactBrokerClientSpec extends Specification {
     given:
     def halClient = Mock(IHalClient)
     halClient.navigate(_, _) >> halClient
-    halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/a%20b']) }
+    halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/a%20b/100+ab']) }
 
     def client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
       newHalClient() >> halClient
@@ -142,7 +142,7 @@ class PactBrokerClientSpec extends Specification {
     then:
     consumers != []
     consumers.first().name == 'bob'
-    consumers.first().source == 'http://bob.com/a b'
+    consumers.first().source == 'http://bob.com/a b/100+ab'
   }
 
   def 'when fetching consumers with specified tag for an unknown provider, returns an empty pacts list'() {
