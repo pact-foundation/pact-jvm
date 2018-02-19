@@ -1,13 +1,10 @@
 package au.com.dius.pact.provider.broker
 
-import au.com.dius.pact.pactbroker.IHalClient
-import au.com.dius.pact.pactbroker.NotFoundHalResponse
-import au.com.dius.pact.pactbroker.PactBrokerClientBase
-import au.com.dius.pact.pactbroker.PactBrokerConsumer
-import au.com.dius.pact.pactbroker.PactResponse
+import au.com.dius.pact.pactbroker.*
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import groovy.util.logging.Slf4j
+import org.apache.commons.codec.DecoderException
 import org.apache.commons.codec.net.URLCodec
 import org.apache.commons.lang3.StringUtils
 
@@ -49,7 +46,7 @@ class PactBrokerClient extends PactBrokerClientBase {
     catch (NotFoundHalResponse e) {
       // This means the provider is not defined in the broker, so fail gracefully.
     }
-    catch (URISyntaxException e) {
+    catch (DecoderException e) {
       log.error("URL to the pact is invalid", e)
       throw new RuntimeException("URL to the pact is invalid", e)
     }
