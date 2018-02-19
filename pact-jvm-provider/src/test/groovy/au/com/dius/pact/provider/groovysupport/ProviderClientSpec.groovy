@@ -55,6 +55,7 @@ class ProviderClientSpec extends Specification {
     client.setupHeaders(request, httpRequest)
 
     then:
+    1 * httpRequest.containsHeader('Content-Type') >> false
     0 * httpRequest._
   }
 
@@ -80,7 +81,29 @@ class ProviderClientSpec extends Specification {
     0 * httpRequest._
   }
 
-  def 'setting up headers adds an JSON content type if none was provided'() {
+  def 'setting up headers adds an JSON content type if none was provided and there is a body'() {
+    given:
+    def headers = [
+      A: 'a',
+      B: 'b',
+      C: 'c'
+    ]
+    request = new Request('PUT', '/', null, headers, OptionalBody.body('{}'))
+
+    when:
+    client.setupHeaders(request, httpRequest)
+
+    then:
+    1 * httpRequest.containsHeader('Content-Type') >> false
+    headers.each {
+      1 * httpRequest.addHeader(it.key, it.value)
+    }
+    1 * httpRequest.addHeader('Content-Type', 'application/json')
+
+    0 * httpRequest._
+  }
+
+  def 'setting up headers does not add an JSON content type if there is no body'() {
     given:
     def headers = [
       A: 'a',
@@ -97,7 +120,29 @@ class ProviderClientSpec extends Specification {
     headers.each {
       1 * httpRequest.addHeader(it.key, it.value)
     }
-    1 * httpRequest.addHeader('Content-Type', 'application/json')
+    0 * httpRequest.addHeader('Content-Type', 'application/json')
+
+    0 * httpRequest._
+  }
+
+  def 'setting up headers does not add an JSON content type if there is already one'() {
+    given:
+    def headers = [
+      A: 'a',
+      B: 'b',
+      'content-type': 'c'
+    ]
+    request = new Request('PUT', '/', null, headers, OptionalBody.body('C'))
+
+    when:
+    client.setupHeaders(request, httpRequest)
+
+    then:
+    1 * httpRequest.containsHeader('Content-Type') >> true
+    headers.each {
+      1 * httpRequest.addHeader(it.key, it.value)
+    }
+    0 * httpRequest.addHeader('Content-Type', 'application/json')
 
     0 * httpRequest._
   }
