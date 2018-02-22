@@ -4,13 +4,13 @@ import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Request
 import spock.lang.Specification
 
-class MultipartFormBodyMatcherSpec extends Specification {
+class MultipartMessageBodyMatcherSpec extends Specification {
 
-  private MultipartFormBodyMatcher matcher
+  private MultipartMessageBodyMatcher matcher
   private expected, actual
 
   def setup() {
-    matcher = new MultipartFormBodyMatcher()
+    matcher = new MultipartMessageBodyMatcher()
     expected = { body -> new Request('', '', null, ['Content-Type': 'multipart/form-data; boundary=XXX'], body) }
     actual = { body -> new Request('', '', null, ['Content-Type': 'multipart/form-data; boundary=XXX'], body) }
   }

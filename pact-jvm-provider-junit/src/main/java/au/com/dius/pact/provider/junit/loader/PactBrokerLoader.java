@@ -71,7 +71,11 @@ public class PactBrokerLoader implements PactLoader {
       pacts.addAll(loadPactsForProvider(providerName, null));
     } else {
       for (String tag : pactBrokerTags) {
-        pacts.addAll(loadPactsForProvider(providerName, tag));
+        try {
+          pacts.addAll(loadPactsForProvider(providerName, tag));
+        } catch (NoPactsFoundException e) {
+          // Ignoring exception at this point, it will be handled at a higher level
+        }
       }
     }
     return pacts;

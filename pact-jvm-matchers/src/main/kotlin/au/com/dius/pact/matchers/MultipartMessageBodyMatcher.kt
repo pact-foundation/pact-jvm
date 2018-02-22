@@ -12,7 +12,7 @@ import javax.mail.Header
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
 
-class MultipartFormBodyMatcher : BodyMatcher {
+class MultipartMessageBodyMatcher : BodyMatcher {
 
   override fun matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): List<BodyMismatch> {
     val expectedBody = expected.body

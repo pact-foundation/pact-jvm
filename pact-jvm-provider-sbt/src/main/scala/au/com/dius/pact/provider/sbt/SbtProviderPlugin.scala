@@ -5,7 +5,7 @@ import java.util
 import au.com.dius.pact.provider.{ProviderInfo, ConsumerInfo, PactVerification, ProviderVerifier, ProviderUtils}
 import org.apache.http.HttpRequest
 import org.slf4j.LoggerFactory
-import ch.qos.logback.classic.{Logger, Level}
+import ch.qos.logback.classic.{Logger => LogbackLogger, Level}
 import sbt.Keys.TaskStreams
 import sbt._
 
@@ -23,7 +23,7 @@ object SbtProviderPlugin extends AutoPlugin {
         val s: TaskStreams = Keys.streams.value
 
         if (System.getProperty("pact.logLevel") != null) {
-          LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).asInstanceOf[Logger].setLevel(
+          LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).asInstanceOf[LogbackLogger].setLevel(
             Level.toLevel(System.getProperty("pact.logLevel"))
           )
         }

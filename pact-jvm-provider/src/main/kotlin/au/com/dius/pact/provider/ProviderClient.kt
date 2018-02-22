@@ -162,10 +162,10 @@ open class ProviderClient(val provider: IProviderInfo,
       headers.forEach { key, value ->
         method.addHeader(key, value)
       }
+    }
 
-      if (!method.containsHeader(CONTENT_TYPE)) {
-        method.addHeader(CONTENT_TYPE, "application/json")
-      }
+    if (!method.containsHeader(CONTENT_TYPE) && request.body?.isPresent() == true) {
+      method.addHeader(CONTENT_TYPE, "application/json")
     }
   }
 

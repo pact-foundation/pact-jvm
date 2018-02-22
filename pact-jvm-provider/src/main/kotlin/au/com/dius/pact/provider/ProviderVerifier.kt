@@ -20,6 +20,8 @@ fun reportVerificationResults(pact: Pact, result: Boolean, version: String, clie
       if (publishResult is Result.Failure) {
         logger.warn { "Failed to publish verification results - ${publishResult.error.localizedMessage}" }
         logger.debug(publishResult.error) {}
+      } else {
+        logger.info { "Published verification result of '$result' for consumer '${pact.consumer}'" }
       }
     }
   }

@@ -45,13 +45,14 @@ class PactBrokerLoaderSpec extends Specification {
     }
   }
 
-  def 'Raises an exception if the pact broker client returns an empty list'() {
+  def 'Returns an empty list if the pact broker client returns an empty list'() {
     when:
-    pactBrokerLoader().load('test')
+    def list = pactBrokerLoader().load('test')
 
     then:
     1 * brokerClient.fetchConsumers('test') >> []
-    thrown(NoPactsFoundException)
+    notThrown(NoPactsFoundException)
+    list.empty
   }
 
   def 'Returns Empty List if flagged to do so and the pact broker client returns an empty list'() {
