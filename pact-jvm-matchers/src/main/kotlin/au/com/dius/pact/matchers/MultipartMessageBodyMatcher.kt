@@ -65,5 +65,4 @@ class MultipartMessageBodyMatcher : BodyMatcher {
     val multipart = MimeMultipart(ByteArrayDataSource(body, contentType))
     return multipart.getBodyPart(0)
   }
-
 }

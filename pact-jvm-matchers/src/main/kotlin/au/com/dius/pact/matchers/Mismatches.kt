@@ -12,7 +12,7 @@ interface Mismatch {
  *
  * @param <Mismatch> Type of mismatch to create
  */
-interface MismatchFactory<out M: Mismatch> {
+interface MismatchFactory<out M : Mismatch> {
   fun create(expected: Any?, actual: Any?, message: String, path: List<String>): M
 }
 

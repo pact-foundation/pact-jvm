@@ -74,8 +74,7 @@ object Matchers : KLogging() {
   fun matcherDefined(category: String, path: List<String>, matchers: MatchingRules?): Boolean =
     if (matchers != null)
       resolveMatchers(matchers, category, path).isNotEmpty()
-    else
-      false
+    else false
 
   @JvmStatic
   fun wildcardMatcherDefined(path: List<String>, category: String, matchers: MatchingRules?) =
@@ -89,8 +88,8 @@ object Matchers : KLogging() {
     }
 
   @JvmStatic
-  fun <M: Mismatch> domatch(matchers: MatchingRules, category: String, path: List<String>, expected: Any?, actual: Any?,
-                        mismatchFn: MismatchFactory<M>) : List<M> {
+  fun <M : Mismatch> domatch(matchers: MatchingRules, category: String, path: List<String>, expected: Any?,
+                             actual: Any?, mismatchFn: MismatchFactory<M>): List<M> {
     val matcherDef = selectBestMatcher(matchers, category, path)
     return domatch(matcherDef, path, expected, actual, mismatchFn)
   }

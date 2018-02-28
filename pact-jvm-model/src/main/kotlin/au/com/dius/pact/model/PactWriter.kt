@@ -23,5 +23,4 @@ object PactWriter : KLogging() {
     val gson = GsonBuilder().setPrettyPrinting().create()
     gson.toJson(jsonData, writer)
   }
-
 }

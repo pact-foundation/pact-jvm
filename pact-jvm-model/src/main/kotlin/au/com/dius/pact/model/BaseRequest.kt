@@ -41,5 +41,4 @@ abstract class BaseRequest : HttpPart() {
    * If this request represents a multipart file upload
    */
   fun isMultipartFileUpload() = mimeType().equals("multipart/form-data", ignoreCase = true)
-
 }

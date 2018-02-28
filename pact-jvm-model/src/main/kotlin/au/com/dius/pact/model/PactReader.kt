@@ -44,8 +44,8 @@ fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: Clos
   }
 }
 
-fun fetchJsonResource(http: CloseableHttpClient, options: Map<String, Any>, source: UrlPactSource)
-  : Result<Pair<JsonElement, UrlPactSource>, Exception> {
+fun fetchJsonResource(http: CloseableHttpClient, options: Map<String, Any>, source: UrlPactSource):
+        Result<Pair<JsonElement, UrlPactSource>, Exception> {
   return Result.of {
     val httpGet = HttpGet(HttpClientUtils.buildUrl("", source.url, true))
     httpGet.addHeader("Content-Type", "application/json")

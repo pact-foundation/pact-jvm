@@ -130,7 +130,7 @@ fun pathExp(chars: PushbackIterator<IndexedValue<Char>>, tokens: MutableList<Pat
   }
 }
 
-fun parsePath(path: String) : List<PathToken> {
+fun parsePath(path: String): List<PathToken> {
   val tokens = ArrayList<PathToken>()
 
   // parse_path_exp -> $ path_exp | empty

@@ -52,7 +52,7 @@ data class OptionalBody(val state: State, val value: String? = null) {
     return state != State.PRESENT
   }
 
-  fun orElse(defaultValue: String) : String {
+  fun orElse(defaultValue: String): String {
     return if (state == State.EMPTY || state == State.PRESENT) {
       this.value!!
     } else {

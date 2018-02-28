@@ -31,7 +31,7 @@ open class SpringMessagePactRunner(clazz: Class<*>) : MessagePactRunner(clazz) {
     return RunAfterTestClassCallbacks(withAfterClasses, testContextManager)
   }
 
-  private fun initTestContextManager(clazz: Class<*>) : TestContextManager {
+  private fun initTestContextManager(clazz: Class<*>): TestContextManager {
     if (testContextManager == null) {
       testContextManager = TestContextManager(clazz)
     }

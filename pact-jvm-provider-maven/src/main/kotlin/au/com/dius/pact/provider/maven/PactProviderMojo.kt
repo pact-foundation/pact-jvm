@@ -119,5 +119,4 @@ open class PactProviderMojo : AbstractMojo() {
   private fun propertyDefined(key: String) = System.getProperty(key) != null || configuration.containsKey(key)
 
   private fun property(key: String) = System.getProperty(key, configuration.get(key))
-
 }

@@ -43,5 +43,4 @@ open class ProviderVerifierBase : GroovyObjectSupport() {
   companion object {
     const val PACT_VERIFIER_PUBLISHRESUTS = "pact.verifier.publishResults"
   }
-
 }
