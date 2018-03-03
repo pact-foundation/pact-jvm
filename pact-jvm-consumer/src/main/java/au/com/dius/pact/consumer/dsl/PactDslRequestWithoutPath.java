@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
+import au.com.dius.pact.consumer.Headers;
 import au.com.dius.pact.model.OptionalBody;
 import au.com.dius.pact.model.generators.Generators;
 import au.com.dius.pact.model.matchingrules.MatchingRules;
@@ -32,8 +33,8 @@ import java.util.stream.Stream;
 import static au.com.dius.pact.consumer.ConsumerPactBuilder.xmlToString;
 
 public class PactDslRequestWithoutPath {
-    private static final String CONTENT_TYPE = "Content-Type";
-    public static final String MULTIPART_HEADER_REGEX = "multipart/form-data;\\s*boundary=.*";
+  private static final String CONTENT_TYPE = "Content-Type";
+
     private final ConsumerPactBuilder consumerPactBuilder;
     private PactDslWithState pactDslWithState;
     private String description;
@@ -319,7 +320,7 @@ public class PactDslRequestWithoutPath {
         multipart.writeTo(os);
 
         requestBody = OptionalBody.body(os.toString());
-        requestMatchers.addCategory("header").addRule(CONTENT_TYPE, new RegexMatcher(MULTIPART_HEADER_REGEX,
+        requestMatchers.addCategory("header").addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX,
           multipart.getContentType().getValue()));
         requestHeaders.put(CONTENT_TYPE, multipart.getContentType().getValue());
 
