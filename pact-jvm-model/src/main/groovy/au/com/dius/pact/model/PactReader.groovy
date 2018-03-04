@@ -21,7 +21,7 @@ class PactReader {
    * Loads a pact file from either a File or a URL
    * @param source a File or a URL
    */
-  static Pact loadPact(Map options = [:], def source) {
+  static Pact<? extends Interaction> loadPact(Map options = [:], def source) {
     Pair<Object, PactSource> pactInfo = loadFile(source, options)
     def version = '2.0.0'
     def specification = pactInfo.first.metadata?.'pact-specification'
@@ -41,7 +41,7 @@ class PactReader {
   }
 
   @SuppressWarnings('UnusedMethodParameter')
-  static Pact loadV3Pact(def source, def pactJson) {
+  static Pact<? extends Interaction> loadV3Pact(def source, def pactJson) {
       if (pactJson.messages) {
         def pact = MessagePact.fromMap(pactJson)
         pact.source = source
@@ -70,7 +70,7 @@ class PactReader {
   }
 
   @SuppressWarnings('UnusedMethodParameter')
-  static Pact loadV2Pact(def source, def pactJson) {
+  static Pact<? extends Interaction> loadV2Pact(def source, def pactJson) {
     def transformedJson = transformJson(pactJson)
     def provider = Provider.fromMap(transformedJson.provider ?: [:])
     def consumer = Consumer.fromMap(transformedJson.consumer ?: [:])

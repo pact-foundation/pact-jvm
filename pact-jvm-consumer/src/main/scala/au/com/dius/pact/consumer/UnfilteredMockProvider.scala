@@ -1,16 +1,15 @@
 package au.com.dius.pact.consumer
 
 import io.netty.handler.codec.{http => netty}
-
-import au.com.dius.pact.model.{MockProviderConfig, Request, Response}
+import au.com.dius.pact.model._
 import au.com.dius.pact.model.unfiltered.Conversions
-import unfiltered.{netty => unetty}
-import unfiltered.netty.{cycle => unettyc}
-import unfiltered.{request => ureq}
-import unfiltered.{response => uresp}
+import _root_.unfiltered.{netty => unetty}
+import _root_.unfiltered.netty.{cycle => unettyc}
+import _root_.unfiltered.{request => ureq}
+import _root_.unfiltered.{response => uresp}
 import io.netty.channel.ChannelHandler.Sharable
 
-class UnfilteredMockProvider(val config: MockProviderConfig) extends StatefulMockProvider {
+class UnfilteredMockProvider(val config: MockProviderConfig) extends StatefulMockProvider[RequestResponseInteraction] {
   type UnfilteredRequest = ureq.HttpRequest[unetty.ReceivedMessage]
   type UnfilteredResponse = uresp.ResponseFunction[netty.HttpResponse]
 

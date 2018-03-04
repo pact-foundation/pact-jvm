@@ -55,13 +55,13 @@ public class InteractionRunner extends Runner {
   private static final Logger LOGGER = LoggerFactory.getLogger(InteractionRunner.class);
 
   private final TestClass testClass;
-  private final Pact pact;
+  private final Pact<? extends Interaction> pact;
   private final PactSource pactSource;
   private final Map<Interaction, Pair<Boolean, ProviderVerifier>> results = new HashMap<>();
 
   private final ConcurrentHashMap<Interaction, Description> childDescriptions = new ConcurrentHashMap<>();
 
-  public InteractionRunner(final TestClass testClass, final Pact pact, final PactSource pactSource) throws InitializationError {
+  public InteractionRunner(final TestClass testClass, final Pact<? extends Interaction> pact, final PactSource pactSource) throws InitializationError {
     this.testClass = testClass;
     this.pact = pact;
     this.pactSource = pactSource;

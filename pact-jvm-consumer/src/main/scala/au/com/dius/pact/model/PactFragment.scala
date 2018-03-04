@@ -3,14 +3,14 @@ package au.com.dius.pact.model
 import au.com.dius.pact.consumer._
 
 /**
-  * @deprecated Moved to Kotlin implementation
+  * @deprecated Moved to Kotlin implementation: Use Pact interface instead
   */
 @Deprecated
 case class PactFragment(consumer: Consumer,
                         provider: Provider,
                         interactions: Seq[RequestResponseInteraction]) {
   import scala.collection.JavaConversions._
-  def toPact: RequestResponsePact = new RequestResponsePact(provider, consumer, interactions)
+  def toPact = new RequestResponsePact(provider, consumer, interactions)
 
   def duringConsumerSpec[T](config: MockProviderConfig)(test: => T, verification: ConsumerTestVerification[T]): VerificationResult = {
     val server = DefaultMockProvider(config)

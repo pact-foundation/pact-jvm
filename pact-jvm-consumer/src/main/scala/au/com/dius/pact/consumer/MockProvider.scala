@@ -5,22 +5,23 @@ import com.typesafe.scalalogging.StrictLogging
 
 import scala.util.Try
 
-trait MockProvider {
+trait MockProvider[I <: Interaction] {
   def config: MockProviderConfig
   def session: PactSession
-  def start(pact: Pact): Unit
+  def start(pact: Pact[I]): Unit
   def run[T](code: => T): Try[T]
-  def runAndClose[T](pact: Pact)(code: => T): Try[(T, PactSessionResults)]
+  def runAndClose[T](pact: Pact[I])(code: => T): Try[(T, PactSessionResults)]
   def stop(): Unit
 }
 
 object DefaultMockProvider {
   
-  def withDefaultConfig(pactVersion: PactSpecVersion = PactSpecVersion.V3) = apply(MockProviderConfig.createDefault(pactVersion))
+  def withDefaultConfig(pactVersion: PactSpecVersion = PactSpecVersion.V3) =
+    apply(MockProviderConfig.createDefault(pactVersion))
   
   // Constructor providing a default implementation of StatefulMockProvider.
   // Users should not explicitly be forced to choose a variety.
-  def apply(config: MockProviderConfig): StatefulMockProvider =
+  def apply(config: MockProviderConfig): StatefulMockProvider[RequestResponseInteraction] =
     config match {
       case httpsConfig: MockHttpsProviderConfig => new UnfilteredHttpsMockProvider(httpsConfig)
       case httpsKeystoreConfig: MockHttpsKeystoreProviderConfig => new UnfilteredHttpsKeystoreMockProvider(httpsKeystoreConfig)
@@ -29,18 +30,18 @@ object DefaultMockProvider {
 }
 
 // TODO: eliminate horrid state mutation and synchronisation.  Reactive stuff to the rescue?
-abstract class StatefulMockProvider extends MockProvider with StrictLogging {
+abstract class StatefulMockProvider[I <: Interaction] extends MockProvider[I] with StrictLogging {
   private var sessionVar = PactSession.empty
-  private var pactVar: Option[Pact] = None
+  private var pactVar: Option[Pact[I]] = None
 
   private def waitForRequestsToFinish() = Thread.sleep(100)
 
   def session: PactSession  = sessionVar
-  def pact: Option[Pact] = pactVar
+  def pact: Option[Pact[I]] = pactVar
   
   def start(): Unit
   
-  override def start(pact: Pact): Unit = synchronized {
+  override def start(pact: Pact[I]): Unit = synchronized {
     pactVar = Some(pact)
     sessionVar = PactSession.forPact(pact)
     start()
@@ -54,7 +55,7 @@ abstract class StatefulMockProvider extends MockProvider with StrictLogging {
     }
   }
 
-  override def runAndClose[T](pact: Pact)(code: => T): Try[(T, PactSessionResults)] = {
+  override def runAndClose[T](pact: Pact[I])(code: => T): Try[(T, PactSessionResults)] = {
     Try {
       try {
         start(pact)

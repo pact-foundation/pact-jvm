@@ -22,7 +22,7 @@ import java.util.function.Predicate
 @ToString(includeSuperProperties = true)
 @EqualsAndHashCode(callSuper = true)
 @CompileStatic
-class MessagePact extends BasePact {
+class MessagePact extends BasePact<Message> {
   List<Message> messages = []
 
   MessagePact(Provider provider, Consumer consumer, List<Message> messages) {
@@ -51,23 +51,23 @@ class MessagePact extends BasePact {
     [
       consumer: [name: consumer.name],
       provider: [name: provider.name],
-      messages: messages*.toMap(),
+      messages: messages*.toMap(pactSpecVersion),
       metadata: metadata
     ]
   }
 
   @Override
-  void mergeInteractions(List<Interaction> interactions) {
+  void mergeInteractions(List interactions) {
     messages = (messages + (interactions as List<Message>)).unique { it.uniqueKey() }
     sortInteractions()
   }
 
-  List<Interaction> getInteractions() {
-    messages as List<Interaction>
+  List<? extends Interaction> getInteractions() {
+    messages
   }
 
   @Override
-  Pact sortInteractions() {
+  Pact<Message> sortInteractions() {
     messages.sort { it.providerState + it.description }
     this
   }
@@ -85,7 +85,7 @@ class MessagePact extends BasePact {
    */
   @Override
   @Deprecated
-  Pact filterInteractions(Predicate<Interaction> predicate) {
+  Pact<Message> filterInteractions(Predicate predicate) {
     new FilteredPact(this, predicate)
   }
 }

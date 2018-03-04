@@ -17,7 +17,7 @@ import java.util.jar.JarInputStream
 @Slf4j
 @ToString
 @EqualsAndHashCode(excludes = ['metadata', 'source'])
-abstract class BasePact implements Pact {
+abstract class BasePact<I extends Interaction> implements Pact<I> {
   protected static final Map DEFAULT_METADATA = [
     'pact-specification': ['version': '3.0.0'],
     'pact-jvm'          : ['version': lookupVersion()]

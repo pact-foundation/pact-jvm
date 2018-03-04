@@ -83,10 +83,10 @@ open class AmqpTarget @JvmOverloads constructor(val packagesToScan: List<String>
     providerInfo.verificationType = PactVerification.ANNOTATED_METHOD
     providerInfo.packagesToScan = packagesToScan
 
-    if (source is PactBrokerSource) {
+    if (source is PactBrokerSource<*>) {
       val (_, _, pacts) = source
       providerInfo.consumers = pacts.entries.flatMap { e -> e.value.map { p -> ConsumerInfo(e.key.name, p) } }
-    } else if (source is DirectorySource) {
+    } else if (source is DirectorySource<*>) {
       val (_, pacts) = source
       providerInfo.consumers = pacts.entries.map { e -> ConsumerInfo(e.value.consumer.name, e.value) }
     }

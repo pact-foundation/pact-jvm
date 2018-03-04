@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.junit
 
 import au.com.dius.pact.model.FilteredPact
+import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.provider.junit.loader.PactFilter
 import java.util.function.Predicate
@@ -9,8 +10,8 @@ import java.util.function.Predicate
  * Pact Runner that uses annotations to filter the interactions that are executed
  */
 @Deprecated("This functionality has been moved to the base PactRunner")
-open class FilteredPactRunner(clazz: Class<*>) : PactRunner(clazz) {
-  public override fun filterPacts(pacts: List<Pact>): List<Pact> {
+open class FilteredPactRunner<I>(clazz: Class<*>) : PactRunner<I>(clazz) where I: Interaction {
+  public override fun filterPacts(pacts: List<Pact<I>>): List<Pact<I>> {
     val pactFilterValues = this.testClass.javaClass.getAnnotation(PactFilter::class.java)?.value
     return if (pactFilterValues != null && pactFilterValues.any { !it.isEmpty() }) {
       pacts.map { pact ->

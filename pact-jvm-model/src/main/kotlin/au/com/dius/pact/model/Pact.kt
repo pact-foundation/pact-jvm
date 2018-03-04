@@ -70,7 +70,7 @@ interface Interaction {
 /**
  * Interface to a pact
  */
-interface Pact {
+interface Pact<I> where I: Interaction {
   /**
    * Returns the provider of the service for the pact
    */
@@ -82,7 +82,7 @@ interface Pact {
   /**
    * Returns all the interactions of the pact
    */
-  val interactions: List<Interaction>
+  val interactions: List<I>
 
   /**
    * The source that this pact was loaded from
@@ -92,7 +92,7 @@ interface Pact {
   /**
    * Returns a pact with the interactions sorted
    */
-  fun sortInteractions(): Pact
+  fun sortInteractions(): Pact<I>
 
   /**
    * Returns a Map representation of this pact for the purpose of generating a JSON document.
@@ -103,18 +103,18 @@ interface Pact {
    * If this pact is compatible with the other pact. Pacts are compatible if they have the
    * same provider and they are the same type
    */
-  fun compatibleTo(other: Pact): Boolean
+  fun compatibleTo(other: Pact<I>): Boolean
 
   /**
    * Merges all the interactions into this Pact
    * @param interactions
    */
-  fun mergeInteractions(interactions: List<Interaction>)
+  fun mergeInteractions(interactions: List<I>)
 
   /**
    * Returns a new Pact with all the interactions filtered by the provided predicate
    * @deprecated Wrap the pact in a FilteredPact instead
    */
   @Deprecated("Wrap the pact in a FilteredPact instead")
-  fun filterInteractions(predicate: Predicate<Interaction>): Pact
+  fun filterInteractions(predicate: Predicate<I>): Pact<I>
 }

@@ -12,7 +12,7 @@ import java.util.function.Predicate
 @CompileStatic
 @ToString(includeSuper = true)
 @EqualsAndHashCode(callSuper = true)
-class RequestResponsePact extends BasePact {
+class RequestResponsePact extends BasePact<RequestResponseInteraction> {
   List<RequestResponseInteraction> interactions
 
   RequestResponsePact(Provider provider, Consumer consumer, List<RequestResponseInteraction> interactions) {
@@ -25,7 +25,7 @@ class RequestResponsePact extends BasePact {
     this.interactions = interactions
   }
 
-  Pact sortInteractions() {
+  Pact<RequestResponseInteraction> sortInteractions() {
     interactions = new ArrayList<RequestResponseInteraction>(interactions).sort { it.providerState + it.description }
     this
   }
@@ -42,7 +42,7 @@ class RequestResponsePact extends BasePact {
   }
 
   @Override
-  void mergeInteractions(List<Interaction> interactions) {
+  void mergeInteractions(List interactions) {
     this.interactions = (this.interactions + (interactions as List<RequestResponseInteraction>))
       .unique { it.uniqueKey() }
     sortInteractions()
@@ -59,7 +59,7 @@ class RequestResponsePact extends BasePact {
    */
   @Override
   @Deprecated
-  Pact filterInteractions(Predicate<Interaction> predicate) {
+  Pact<RequestResponseInteraction> filterInteractions(Predicate predicate) {
     new FilteredPact(this, predicate)
   }
 }

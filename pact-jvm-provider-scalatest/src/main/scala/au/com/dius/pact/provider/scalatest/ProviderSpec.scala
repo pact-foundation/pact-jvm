@@ -35,9 +35,11 @@ trait ProviderSpec extends FlatSpec with BeforeAndAfterAll with ProviderDsl with
     import verificationConfig.serverConfig._
 
     val verifier = new ProviderVerifier
-    ProviderUtils.loadPactFiles(new model.Provider(provider), new File(uri)).asInstanceOf[java.util.List[ConsumerInfo]]
+    ProviderUtils.loadPactFiles(new model.Provider(provider), new File(uri))
       .filter(consumer.filter)
-      .flatMap(c => verifier.loadPactFileForConsumer(c).asInstanceOf[PactForConsumer].getInteractions.map(i => (c.getName, i.asInstanceOf[RequestResponseInteraction])))
+      .flatMap(c => verifier.loadPactFileForConsumer(c)
+        .asInstanceOf[PactForConsumer[RequestResponseInteraction]]
+        .getInteractions.map(i => (c.getName, i)))
       .foreach { case (consumerName, interaction) =>
         val description = new StringBuilder(s"${interaction.getDescription} for '$consumerName'")
         if (interaction.getProviderState != null) description.append(s" given ${interaction.getProviderState}")

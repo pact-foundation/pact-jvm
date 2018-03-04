@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.spring
 
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactSource
+import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.provider.junit.InteractionRunner
 import au.com.dius.pact.provider.junit.MessagePactRunner
 import org.junit.runners.model.Statement
@@ -13,7 +14,7 @@ import org.springframework.test.context.junit4.statements.RunBeforeTestClassCall
 /**
  * Pact runner for REST providers that boots up the spring context
  */
-open class SpringMessagePactRunner(clazz: Class<*>) : MessagePactRunner(clazz) {
+open class SpringMessagePactRunner(clazz: Class<*>) : MessagePactRunner<Message>(clazz) {
 
   private var testContextManager: TestContextManager? = null
 
@@ -39,7 +40,7 @@ open class SpringMessagePactRunner(clazz: Class<*>) : MessagePactRunner(clazz) {
     return testContextManager!!
   }
 
-  override fun newInteractionRunner(testClass: TestClass, pact: Pact, pactSource: PactSource): InteractionRunner {
+  override fun newInteractionRunner(testClass: TestClass, pact: Pact<Message>, pactSource: PactSource): InteractionRunner {
     return SpringInteractionRunner(testClass, pact, pactSource, initTestContextManager(testClass.javaClass))
   }
 }
