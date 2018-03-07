@@ -5,6 +5,7 @@ dependencies {
     exclude group: 'org.scala-lang'
   }
   compile 'com.googlecode.java-diff-utils:diffutils:1.3.0'
+  compile "org.scala-lang.modules:scala-xml_${project.scalaVersion}:1.0.6"
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }
