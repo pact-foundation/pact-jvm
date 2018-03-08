@@ -59,7 +59,7 @@ public class PactBrokerLoader implements PactLoader {
   }
 
   public PactBrokerLoader(final PactBroker pactBroker) {
-      this(pactBroker.host(), pactBroker.port(), pactBroker.protocol(), Arrays.asList(pactBroker.tags()));
+      this(System.getProperty("pactbroker.host", pactBroker.host()), System.getProperty("pactbroker.port",pactBroker.port()), pactBroker.protocol(), Arrays.asList(pactBroker.tags()));
       this.failIfNoPactsFound = pactBroker.failIfNoPactsFound();
       this.authentication = pactBroker.authentication();
       this.valueResolver = pactBroker.valueResolver();

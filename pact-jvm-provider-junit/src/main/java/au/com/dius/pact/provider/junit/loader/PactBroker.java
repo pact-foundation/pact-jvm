@@ -23,12 +23,12 @@ public @interface PactBroker {
     /**
      * @return host of pact broker
      */
-    String host() default "${pactbroker.host:}";
+    String host() default "";
 
     /**
      * @return port of pact broker
      */
-    String port() default "${pactbroker.port:}";
+    String port() default "";
 
     /**
      * HTTP protocol, defaults to http

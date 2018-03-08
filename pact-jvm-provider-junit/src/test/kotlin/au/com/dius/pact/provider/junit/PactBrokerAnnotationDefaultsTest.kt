@@ -35,20 +35,8 @@ class PactBrokerAnnotationDefaultsTest {
     }
 
     @Test
-    fun `can set host`() {
-        props.setProperty("pactbroker.host", "myHost")
-        assertThat(parseExpression(annotation.host), `is`("myHost"))
-    }
-
-    @Test
     fun `default port is empty`() {
         assertThat(parseExpression(annotation.port), `is`(""))
-    }
-
-    @Test
-    fun `can set port`() {
-        props.setProperty("pactbroker.port", "myPort")
-        assertThat(parseExpression(annotation.port), `is`("myPort"))
     }
 
     @Test

@@ -107,12 +107,12 @@ class PactBrokerLoaderSpec extends Specification {
     1 * brokerClient.fetchConsumers('test') >> []
   }
 
-  void 'Uses fallback PactBroker System Properties'() {
+  void 'PackBroker annotation values should be overridable with System Properties'() {
     given:
     System.setProperty('pactbroker.host', 'my.pactbroker.host')
     System.setProperty('pactbroker.port', '4711')
     pactBrokerLoader = {
-      new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
+      new PactBrokerLoader(FullPactBrokerAnnotation.getAnnotation(PactBroker)) {
         @Override
         PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
           assert url.host == 'my.pactbroker.host'
