@@ -78,8 +78,7 @@ subprojects {
       }
 
       if (project.hasProperty('scalaVersion')) {
-          compile "org.scala-lang:scala-library:${project.scalaFullVersion}",
-            "org.scala-lang:scala-compiler:${project.scalaFullVersion}"
+          compile "org.scala-lang:scala-library:${project.scalaFullVersion}"
           compile("com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.7.2") {
             exclude group: 'org.scala-lang'
           }

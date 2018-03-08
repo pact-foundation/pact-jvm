@@ -6,6 +6,9 @@ dependencies {
       'dk.brics.automaton:automaton:1.11-8',
       "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
       "com.fasterxml.jackson.core:jackson-databind:${project.jacksonDatabindVersion}"
+    compile "org.json:json:${project.jsonVersion}"
+    compile "io.netty:netty-handler:${project.nettyVersion}"
+    compile "org.apache.httpcomponents:httpmime:${project.httpClientVersion}"
     compile "ws.unfiltered:unfiltered-netty-server_${project.scalaVersion}:0.9.1"
     compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
     compile "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}"
@@ -19,4 +22,9 @@ dependencies {
 sourceSets.main.scala.srcDir "src/main/java"
 sourceSets.main.java.srcDirs = []
 
+compileKotlin {
+    dependsOn tasks.getByPath('compileGroovy')
+    classpath += files(compileGroovy.destinationDir)
+}
+compileGroovy.dependsOn.remove("compileJava")
 compileTestGroovy.dependsOn compileTestScala
