@@ -63,7 +63,10 @@
       "version": "3.0.0"
     },
     "pact-jvm": {
-      "version": ""
+      "version": "",
+      "features": {
+        "pact.feature.matchers.useMatchValuesMatcher": false
+      }
     }
   }
 }
