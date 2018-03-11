@@ -19,8 +19,8 @@ import java.util.jar.JarInputStream
 @EqualsAndHashCode(excludes = ['metadata', 'source'])
 abstract class BasePact<I extends Interaction> implements Pact<I> {
   protected static final Map DEFAULT_METADATA = [
-    'pact-specification': ['version': '3.0.0'],
-    'pact-jvm'          : ['version': lookupVersion()]
+    'pact-specification': [version: '3.0.0'],
+    'pact-jvm'          : [version: lookupVersion(), features: FeatureToggles.features()]
   ]
   private static final String METADATA = 'metadata'
 
@@ -81,7 +81,7 @@ abstract class BasePact<I extends Interaction> implements Pact<I> {
   static Map metaData(String version) {
     [
       'pact-specification': [version: version],
-      'pact-jvm': [version: lookupVersion()]
+      'pact-jvm': [version: lookupVersion(), features: FeatureToggles.features()]
     ]
   }
 

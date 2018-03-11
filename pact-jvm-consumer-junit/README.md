@@ -8,8 +8,8 @@ Provides a DSL and a base test class for use with Junit to build consumer tests.
 The library is available on maven central using:
 
 * group-id = `au.com.dius`
-* artifact-id = `pact-jvm-consumer-junit_2.11`
-* version-id = `3.2.x`
+* artifact-id = `pact-jvm-consumer-junit_2.12`
+* version-id = `3.5.x`
 
 ## Usage
 
