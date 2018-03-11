@@ -8,6 +8,7 @@ import au.com.dius.pact.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.model.matchingrules.RegexMatcher
 import au.com.dius.pact.model.matchingrules.RuleLogic
 import au.com.dius.pact.model.matchingrules.TypeMatcher
+import au.com.dius.pact.model.matchingrules.ValuesMatcher
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -175,8 +176,41 @@ class PactDslJsonBodySpec extends Specification {
     FeatureToggles.reset()
   }
 
-//  def 'eachKey - generate a match values matcher if useMatchValuesMatcher is set'() {
-//
-//  }
+  def 'eachKey - generate a match values matcher if useMatchValuesMatcher is set'() {
+    given:
+    FeatureToggles.toggleFeature(Feature.UseMatchValuesMatcher, true)
+
+    def pactDslJsonBody = new PactDslJsonBody()
+      .object('one')
+      .eachKeyLike('key1')
+      .id()
+      .closeObject()
+      .closeObject()
+      .object('two')
+      .eachKeyLike('key2', PactDslJsonRootValue.stringMatcher('\\w+', 'test'))
+      .closeObject()
+      .object('three')
+      .eachKeyMappedToAnArrayLike('key3')
+      .id('key3-id')
+      .closeObject()
+      .closeArray()
+      .closeObject()
+
+    when:
+    pactDslJsonBody.close()
+
+    then:
+    pactDslJsonBody.matchers.matchingRules == [
+      '$.one': new MatchingRuleGroup([ValuesMatcher.INSTANCE]),
+      '$.one.*.id': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.two': new MatchingRuleGroup([ValuesMatcher.INSTANCE]),
+      '$.two.*': new MatchingRuleGroup([new RegexMatcher('\\w+')]),
+      '$.three': new MatchingRuleGroup([ValuesMatcher.INSTANCE]),
+      '$.three.*[*].key3-id': new MatchingRuleGroup([TypeMatcher.INSTANCE])
+    ]
+
+    cleanup:
+    FeatureToggles.reset()
+  }
 
 }

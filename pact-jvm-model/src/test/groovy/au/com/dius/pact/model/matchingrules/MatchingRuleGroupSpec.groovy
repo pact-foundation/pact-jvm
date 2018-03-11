@@ -37,6 +37,7 @@ class MatchingRuleGroupSpec extends Specification {
     [match: 'date']                  | DateMatcher       | 'if the matcher type is \'date\''
     [date: '1']                      | DateMatcher       | 'if the matcher definition contains a date'
     [match: 'include', include: 'A'] | IncludeMatcher    | 'if the matcher type is include'
+    [match: 'values']                | ValuesMatcher     | 'if the matcher type is values'
   }
 
   def 'defaults to AND for combining rules'() {

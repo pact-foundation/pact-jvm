@@ -1,6 +1,8 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.InvalidMatcherException;
+import au.com.dius.pact.model.Feature;
+import au.com.dius.pact.model.FeatureToggles;
 import au.com.dius.pact.model.generators.Category;
 import au.com.dius.pact.model.generators.DateGenerator;
 import au.com.dius.pact.model.generators.DateTimeGenerator;
@@ -18,6 +20,7 @@ import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
 import au.com.dius.pact.model.matchingrules.RuleLogic;
 import au.com.dius.pact.model.matchingrules.TypeMatcher;
+import au.com.dius.pact.model.matchingrules.ValuesMatcher;
 import com.mifmif.common.regex.Generex;
 import io.gatling.jsonpath.Parser$;
 import org.apache.commons.lang3.StringUtils;
@@ -992,7 +995,11 @@ public class PactDslJsonBody extends DslPart {
    * @param exampleKey Example key to use for generating bodies
    */
   public PactDslJsonBody eachKeyMappedToAnArrayLike(String exampleKey) {
-    matchers.addRule(rootPath + "*", matchMin(0));
+    if (FeatureToggles.isFeatureSet(Feature.UseMatchValuesMatcher)) {
+      matchers.addRule(rootPath.endsWith(".") ? rootPath.substring(0, rootPath.length() - 1) : rootPath, ValuesMatcher.INSTANCE);
+    } else {
+      matchers.addRule(rootPath + "*", matchMin(0));
+    }
     PactDslJsonArray parent = new PactDslJsonArray(rootPath + "*", exampleKey, this, true);
     return new PactDslJsonBody(".", "", parent);
   }
@@ -1002,7 +1009,11 @@ public class PactDslJsonBody extends DslPart {
    * @param exampleKey Example key to use for generating bodies
    */
   public PactDslJsonBody eachKeyLike(String exampleKey) {
-    matchers.addRule(rootPath + "*", TypeMatcher.INSTANCE);
+    if (FeatureToggles.isFeatureSet(Feature.UseMatchValuesMatcher)) {
+      matchers.addRule(rootPath.endsWith(".") ? rootPath.substring(0, rootPath.length() - 1) : rootPath, ValuesMatcher.INSTANCE);
+    } else {
+      matchers.addRule(rootPath + "*", TypeMatcher.INSTANCE);
+    }
     return new PactDslJsonBody(rootPath + "*.", exampleKey, this);
   }
 
@@ -1013,6 +1024,9 @@ public class PactDslJsonBody extends DslPart {
    */
   public PactDslJsonBody eachKeyLike(String exampleKey, PactDslJsonRootValue value) {
     body.put(exampleKey, value.getBody());
+    if (FeatureToggles.isFeatureSet(Feature.UseMatchValuesMatcher)) {
+      matchers.addRule(rootPath.endsWith(".") ? rootPath.substring(0, rootPath.length() - 1) : rootPath, ValuesMatcher.INSTANCE);
+    }
     for(String matcherName: value.matchers.getMatchingRules().keySet()) {
       matchers.addRules(rootPath + "*" + matcherName, value.matchers.getMatchingRules().get(matcherName).getRules());
     }

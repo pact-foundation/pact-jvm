@@ -1,5 +1,7 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.model.Feature
+import au.com.dius.pact.model.FeatureToggles
 import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.matchingrules.Category
 import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
@@ -48,9 +50,7 @@ class PactBodyBuilder extends BaseBuilder {
   }
 
   def methodMissing(String name, args) {
-    if (name == 'keyLike') {
-      addAttribute(args[0], STAR, args[1], args.size() > TWO ? args[TWO] : null)
-    } else if (args.size() > 0) {
+    if (args.size() > 0) {
       addAttribute(name, name, args[0], args.size() > 1 ? args[1] : null)
     } else {
       bodyRepresentation[name] = [:]
@@ -245,6 +245,19 @@ class PactBodyBuilder extends BaseBuilder {
       [ setMatcherAttribute(matcher.value, path + START_LIST + STAR + END_LIST) ]
     } else {
       [ matcher.value ]
+    }
+  }
+
+  def keyLike(String key, def value) {
+    if (FeatureToggles.isFeatureSet(Feature.UseMatchValuesMatcher)) {
+      setMatcherAttribute(new ValuesMatcher(), path)
+      if (value instanceof Closure) {
+        bodyRepresentation[key] = invokeClosure(value, buildPath(STAR))
+      } else {
+        addAttribute(key, STAR, value)
+      }
+    } else {
+      addAttribute(key, STAR, value)
     }
   }
 

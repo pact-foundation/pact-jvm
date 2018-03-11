@@ -9,12 +9,16 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.FeatureToggles;
 import au.com.dius.pact.model.RequestResponsePact;
+import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
+import au.com.dius.pact.model.matchingrules.TypeMatcher;
+import au.com.dius.pact.model.matchingrules.ValuesMatcher;
 import org.apache.http.entity.ContentType;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,13 +38,13 @@ public class EventsRepositoryDictionaryNestedArrayConsumerTest {
   @Rule
   public PactProviderRuleMk2 mockProvider = new PactProviderRuleMk2("EventsProvider", "localhost", PORT, this);
 
-  @Before
-  public void setup() {
+  @BeforeClass
+  public static void setup() {
     FeatureToggles.toggleFeature("pact.feature.matchers.useMatchValuesMatcher", true);
   }
 
-  @After
-  public void cleanup() {
+  @AfterClass
+  public static void cleanup() {
     FeatureToggles.reset();
   }
 
@@ -69,12 +73,15 @@ public class EventsRepositoryDictionaryNestedArrayConsumerTest {
       .toPact();
 
     MatcherTestUtils.assertResponseMatcherKeysEqualTo(pact, "body",
-      "$.events.*",
+      "$.events",
       "$.events.*[*].title"
     );
 
-//    assertThat(pact.getInteractions().get(0).getResponse().getMatchingRules().rulesForCategory("body").getMatchingRules(),
-//      is(equalTo(new HashMap<>())));
+    HashMap<String, MatchingRuleGroup> matchingRules = new HashMap<>();
+    matchingRules.put("$.events", new MatchingRuleGroup(Collections.singletonList(ValuesMatcher.INSTANCE)));
+    matchingRules.put("$.events.*[*].title", new MatchingRuleGroup(Collections.singletonList(TypeMatcher.INSTANCE)));
+    assertThat(pact.getInteractions().get(0).getResponse().getMatchingRules().rulesForCategory("body").getMatchingRules(),
+      is(equalTo(matchingRules)));
 
     return pact;
   }
