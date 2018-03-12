@@ -5,6 +5,7 @@ import au.com.dius.pact.pactbroker.InvalidHalResponse
 import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.broker.PactBrokerClient
+import au.com.dius.pact.provider.junit.sysprops.ValueResolver
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 
@@ -31,7 +32,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = { boolean failIfNoPactsFound = true ->
       def loader = new PactBrokerLoader(host, port, protocol, tags) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
+        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
           brokerClient
         }
 
@@ -91,7 +92,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = {
       new PactBrokerLoader(FullPactBrokerAnnotation.getAnnotation(PactBroker)) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
+        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
           assert url.host == 'pactbroker.host'
           assert url.port == 1000
           brokerClient
@@ -114,7 +115,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = {
       new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
+        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
           assert url.host == 'my.pactbroker.host'
           assert url.port == 4711
           brokerClient
@@ -137,7 +138,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = {
       new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
+        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
           assert url.host == 'my.pactbroker.host'
           assert url.port == 4711
           brokerClient
