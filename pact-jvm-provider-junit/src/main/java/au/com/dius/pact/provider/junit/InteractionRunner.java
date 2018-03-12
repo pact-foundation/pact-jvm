@@ -224,14 +224,12 @@ public class InteractionRunner extends Runner {
       } catch (Throwable e) {
           return new Fail(e);
       }
-      final Target target = testClass.getAnnotatedFieldValues(testInstance, TestTarget.class, Target.class).get(0);
-      if (target instanceof TestClassAwareTarget) {
-        ((TestClassAwareTarget) target).setTestClass(testClass, testInstance);
-      }
+      final Target target = lookupTarget(testInstance);
 
       Statement statement = new Statement() {
           @Override
           public void evaluate() throws Throwable {
+            setupTargetForInteraction(target);
             target.addResultCallback((result, verifier) -> results.put(interaction, new Pair<>(result, verifier)));
             target.testInteraction(pact.getConsumer().getName(), interaction, source);
           }
@@ -243,7 +241,19 @@ public class InteractionRunner extends Runner {
       return statement;
     }
 
-    protected Statement withStateChanges(final Interaction interaction, final Object target, final Statement statement) {
+  protected void setupTargetForInteraction(Target target) {
+
+  }
+
+  protected Target lookupTarget(Object testInstance) {
+    final Target target = testClass.getAnnotatedFieldValues(testInstance, TestTarget.class, Target.class).get(0);
+    if (target instanceof TestClassAwareTarget) {
+      ((TestClassAwareTarget) target).setTestClass(testClass, testInstance);
+    }
+    return target;
+  }
+
+  protected Statement withStateChanges(final Interaction interaction, final Object target, final Statement statement) {
         if (!interaction.getProviderStates().isEmpty()) {
           Statement stateChange = statement;
           for (ProviderState state: interaction.getProviderStates()) {
