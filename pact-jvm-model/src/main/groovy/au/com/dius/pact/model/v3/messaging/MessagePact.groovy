@@ -52,7 +52,7 @@ class MessagePact extends BasePact<Message> {
       consumer: [name: consumer.name],
       provider: [name: provider.name],
       messages: messages*.toMap(pactSpecVersion),
-      metadata: metadata
+      metadata: metaData(pactSpecVersion)
     ]
   }
 

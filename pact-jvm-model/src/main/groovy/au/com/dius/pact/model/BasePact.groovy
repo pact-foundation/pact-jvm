@@ -20,7 +20,7 @@ import java.util.jar.JarInputStream
 abstract class BasePact<I extends Interaction> implements Pact<I> {
   protected static final Map DEFAULT_METADATA = [
     'pact-specification': [version: '3.0.0'],
-    'pact-jvm'          : [version: lookupVersion(), features: FeatureToggles.features()]
+    'pact-jvm'          : [version: lookupVersion()]
   ]
   private static final String METADATA = 'metadata'
 
@@ -78,10 +78,15 @@ abstract class BasePact<I extends Interaction> implements Pact<I> {
   }
 
   @SuppressWarnings(['ConfusingMethodName'])
-  static Map metaData(String version) {
+  static Map metaData(PactSpecVersion pactSpecVersion) {
+    def pactJvmMetadata = [version: lookupVersion()]
+    def updatedToggles = FeatureToggles.updatedToggles()
+    if (!updatedToggles.isEmpty()) {
+      pactJvmMetadata.features = updatedToggles
+    }
     [
-      'pact-specification': [version: version],
-      'pact-jvm': [version: lookupVersion(), features: FeatureToggles.features()]
+      'pact-specification': [version: pactSpecVersion >= PactSpecVersion.V3 ? '3.0.0' : '2.0.0'],
+      'pact-jvm': pactJvmMetadata
     ]
   }
 

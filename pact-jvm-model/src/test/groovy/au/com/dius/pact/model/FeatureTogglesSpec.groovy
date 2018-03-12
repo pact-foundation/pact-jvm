@@ -29,4 +29,12 @@ class FeatureTogglesSpec extends Specification {
     'pact.test.2'                                 | false
   }
 
+  def 'updated toogles only returns the toogles that are different'() {
+    expect:
+    FeatureToggles.updatedToggles() == [
+      'pact.test': true,
+      'pact.test.2': false
+    ]
+  }
+
 }

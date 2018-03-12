@@ -29,9 +29,20 @@ object FeatureToggles {
 
   @JvmStatic
   fun reset() {
-    features = mutableMapOf(Feature.UseMatchValuesMatcher.featureKey to false)
+    features = default()
   }
 
   @JvmStatic
+  fun default(): MutableMap<String, Any> = mutableMapOf(Feature.UseMatchValuesMatcher.featureKey to false)
+
+  @JvmStatic
   fun features() = features.toMap()
+
+  @JvmStatic
+  fun updatedToggles(): Map<String, Any> {
+    val defaultFeatures = default()
+    return features.filter {
+      !defaultFeatures.containsKey(it.key) || defaultFeatures[it.key] != it.value
+    }
+  }
 }
