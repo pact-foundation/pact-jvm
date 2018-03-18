@@ -26,7 +26,7 @@ object PactSession {
 
   val empty = PactSession(Seq(), PactSessionResults.empty)
   
-  def forPact(pact: Pact) = PactSession(pact.getInteractions, PactSessionResults.empty)
+  def forPact[I <: Interaction](pact: Pact[I]) = PactSession(pact.getInteractions, PactSessionResults.empty)
 }
 
 case class PactSession(expected: Seq[Interaction], results: PactSessionResults) {

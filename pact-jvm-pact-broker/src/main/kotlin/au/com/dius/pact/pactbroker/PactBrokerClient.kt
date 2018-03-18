@@ -25,7 +25,7 @@ abstract class PactBrokerClientBase(val pactBrokerUrl: String, val options: Map<
   open fun publishVerificationResults(docAttributes: Map<String, Map<String, Any>>, result: Boolean, version: String,
                                       buildUrl: String? = null): Result<Boolean, Exception> {
     val halClient = newHalClient()
-    val publishLink = docAttributes.mapKeys { it.key.toLowerCase() } ["pb:publish-verification-results"]
+    val publishLink = docAttributes.mapKeys { it.key.toLowerCase() } ["pb:publish-verification-results"] // ktlint-disable curly-spacing
     return if (publishLink != null) {
       val jsonObject = jsonObject("success" to result, "providerApplicationVersion" to version)
       if (buildUrl != null) {

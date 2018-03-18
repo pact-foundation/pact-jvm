@@ -19,12 +19,12 @@ import au.com.dius.pact.model._
  */
 object PactGenerator {
 
-  def defaultFilename(pact: Pact): String = s"${pact.getConsumer.getName}-${pact.getProvider.getName}.json"
+  def defaultFilename[I <: Interaction](pact: Pact[I]): String = s"${pact.getConsumer.getName}-${pact.getProvider.getName}.json"
 
-  def destinationFileForPact(pact: Pact): File = destinationFile(defaultFilename(pact))
+  def destinationFileForPact[I <: Interaction](pact: Pact[I]): File = destinationFile(defaultFilename(pact))
   def destinationFile(filename: String): File = new File(s"${PactConsumerConfig.pactRootDir}/$filename")
   
-  def merge(pact: Pact): PactGenerator = synchronized {
+  def merge(pact: Pact[RequestResponseInteraction]): PactGenerator = synchronized {
     pactGen = pactGen merge pact
     pactGen
   }
@@ -33,21 +33,21 @@ object PactGenerator {
     
 }
 
-case class PactGenerator(pacts: Map[String, Pact], conflicts: List[String]) extends StrictLogging {
+case class PactGenerator(pacts: Map[String, Pact[RequestResponseInteraction]], conflicts: List[String]) extends StrictLogging {
   import PactGenerator._
   
   def failed: Boolean = conflicts.nonEmpty
   
   def isEmpty: Boolean = pacts.isEmpty
-  
-  def merge(pact: Pact): PactGenerator = {
+
+  def merge[I <: Interaction](pact: Pact[RequestResponseInteraction]): PactGenerator = {
     val pactFileName = defaultFilename(pact)
     val existingPact = pacts get pactFileName
-    def directlyAddPact(p: Pact) = 
+    def directlyAddPact(p: Pact[RequestResponseInteraction]) =
       PactGenerator(pacts + (pactFileName -> p), conflicts)
 
     existingPact.fold(directlyAddPact(pact)) { existing =>
-      val result = PactMerge.merge(pact, existing)
+      val result = PactMerge.merge[RequestResponseInteraction](pact, existing)
       if (result.getOk) {
         directlyAddPact(result.getResult)
       } else {
@@ -60,11 +60,11 @@ case class PactGenerator(pacts: Map[String, Pact], conflicts: List[String]) exte
     def createPactRootDir(): Unit = 
       new File(PactConsumerConfig.pactRootDir).mkdirs()
     
-    def writeToFile(pact: Pact, filename: String): Unit = {
+    def writeToFile[I <: Interaction](pact: Pact[I], filename: String): Unit = {
       val file = destinationFileForPact(pact)
       logger.debug(s"Writing pact ${pact.getConsumer.getName} -> ${pact.getProvider.getName} to file $file")
       val writer = new PrintWriter(file)
-      try PactWriter.writePact(pact, writer, pactVersion)
+      try PactWriter.writePact[I](pact, writer, pactVersion)
       finally writer.close()
     }
     require(!isEmpty, "Cannot write to file; no pacts have been recorded")

@@ -13,15 +13,17 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.message.BasicHeader
 import org.apache.http.message.BasicStatusLine
+import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
+import com.google.gson.JsonParser
 
 import java.util.function.Consumer
 
 @SuppressWarnings(['LineLength', 'UnnecessaryGetter', 'ClosureAsLastMethodParameter'])
 class HalClientSpec extends Specification {
 
-  private HalClient client
+  private @Shared HalClient client
   private CloseableHttpClient mockClient
 
   def setup() {
@@ -333,7 +335,7 @@ class HalClientSpec extends Specification {
     client.httpClient = mockClient
     def mockResponse = Mock(CloseableHttpResponse) {
       getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
-      getEntity() >> new StringEntity('{"_links":{"multipleLink": ["one", "two", "three"]}}',
+      getEntity() >> new StringEntity('{"_links":{"multipleLink": [{"href":"one"}, {"href":"two"}, {"href":"three"}]}}',
         ContentType.create('application/hal+json'))
     }
     def closure = Mock(Consumer)
@@ -343,9 +345,9 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute({ it.getURI().path == '/' }) >> mockResponse
-    1 * closure.accept('one')
-    1 * closure.accept('two')
-    1 * closure.accept('three')
+    1 * closure.accept([href: 'one'])
+    1 * closure.accept([href: 'two'])
+    1 * closure.accept([href: 'three'])
   }
 
   def 'supports templated URLs with slashes in the expanded values'() {
@@ -392,6 +394,49 @@ class HalClientSpec extends Specification {
     then:
     1 * mockClient.execute({ it.URI.toString() == 'https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client%202/version/1.0.2' }) >> mockResponse
     result['_links']['multipleLink']*.toString() == ['"one"', '"two"', '"three"']
+  }
+
+  @Unroll
+  def 'link url test'() {
+    given:
+    client.pathInfo = new JsonParser().parse(json)
+
+    expect:
+    client.linkUrl(name) == url
+
+    where:
+
+    json                                        | name   | url
+    '{}'                                        | 'test' | null
+    '{"_links": null}'                          | 'test' | null
+    '{"_links": "null"}'                        | 'test' | null
+    '{"_links": {}}'                            | 'test' | null
+    '{"_links": { "test": null }}'              | 'test' | null
+    '{"_links": { "test": "null" }}'            | 'test' | null
+    '{"_links": { "test": {} }}'                | 'test' | null
+    '{"_links": { "test": { "blah": "123" } }}' | 'test' | null
+    '{"_links": { "test": { "href": "123" } }}' | 'test' | '123'
+    '{"_links": { "test": { "href": 123 } }}'   | 'test' | '123'
+  }
+
+  @Unroll
+  def 'from JSON test'() {
+    expect:
+    HalClient.fromJson(new JsonParser().parse(json)) == value
+
+    where:
+
+    json                                                    | value
+    'null'                                                  | null
+    '100'                                                   | 100
+    '100.3'                                                 | 100.3
+    'true'                                                  | true
+    '"a string value"'                                      | 'a string value'
+    '[]'                                                    | []
+    '["a string value"]'                                    | ['a string value']
+    '["a string value", 2]'                                 | ['a string value', 2]
+    '{}'                                                    | [:]
+    '{"a": "A", "b": 1, "c": [100], "d": {"href": "blah"}}' | [a: 'A', b: 1, c: [100], d: [href: 'blah']]
   }
 
 }

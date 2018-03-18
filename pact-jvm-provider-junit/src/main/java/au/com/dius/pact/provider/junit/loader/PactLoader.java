@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.junit.loader;
 
 import au.com.dius.pact.model.*;
 import au.com.dius.pact.model.PactSource;
+import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,4 +23,11 @@ public interface PactLoader {
    * Returns the source object that the pacts where loaded from
    */
   PactSource getPactSource();
+
+  /**
+   * Sets the value resolver to use to resolve property expressions. By default a system property resolver will be used.
+   *
+   * @param valueResolver Value Resolver
+   */
+  default void setValueResolver(ValueResolver valueResolver) { }
 }

@@ -93,7 +93,6 @@ object JsonContentTypeHandler : ContentTypeHandler {
 
     fn(bodyCursor)
   }
-
 }
 
 data class Generators(val categories: MutableMap<Category, MutableMap<String, Generator>> = mutableMapOf()) {

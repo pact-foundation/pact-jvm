@@ -21,8 +21,7 @@ open class SpringAwareAmqpTarget : AmqpTarget(), BeanFactoryAware {
     this.beanFactory = beanFactory
   }
 
-  override fun setupVerifier(interaction: Interaction, provider: ProviderInfo, consumer: ConsumerInfo)
-    : ProviderVerifier {
+  override fun setupVerifier(interaction: Interaction, provider: ProviderInfo, consumer: ConsumerInfo): ProviderVerifier {
     val verifier = super.setupVerifier(interaction, provider, consumer)
     verifier.providerMethodInstance = Function<Method, Any?> { m -> beanFactory.getBean(m.declaringClass) }
     return verifier

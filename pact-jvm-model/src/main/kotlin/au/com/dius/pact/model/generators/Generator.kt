@@ -60,7 +60,7 @@ data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
   }
 
   companion object {
-    fun fromMap(map: Map<String, Any>) : RandomIntGenerator {
+    fun fromMap(map: Map<String, Any>): RandomIntGenerator {
       val min = if (map["min"] is Number) {
         (map["min"] as Number).toInt()
       } else {
@@ -86,7 +86,7 @@ data class RandomDecimalGenerator(val digits: Int) : Generator {
   override fun generate(base: Any?): Any = BigDecimal(RandomStringUtils.randomNumeric(digits))
 
   companion object {
-    fun fromMap(map: Map<String, Any>) : RandomDecimalGenerator {
+    fun fromMap(map: Map<String, Any>): RandomDecimalGenerator {
       val digits = if (map["digits"] is Number) {
         (map["digits"] as Number).toInt()
       } else {
@@ -106,7 +106,7 @@ data class RandomHexadecimalGenerator(val digits: Int) : Generator {
   override fun generate(base: Any?): Any = RandomStringUtils.random(digits, "0123456789abcdef")
 
   companion object {
-    fun fromMap(map: Map<String, Any>) : RandomHexadecimalGenerator {
+    fun fromMap(map: Map<String, Any>): RandomHexadecimalGenerator {
       val digits = if (map["digits"] is Number) {
         (map["digits"] as Number).toInt()
       } else {
@@ -128,7 +128,7 @@ data class RandomStringGenerator(val size: Int = 20) : Generator {
   }
 
   companion object {
-    fun fromMap(map: Map<String, Any>) : RandomStringGenerator {
+    fun fromMap(map: Map<String, Any>): RandomStringGenerator {
       val size = if (map["size"] is Number) {
         (map["size"] as Number).toInt()
       } else {
@@ -162,7 +162,7 @@ object UuidGenerator : Generator {
   }
 
   @Suppress("UNUSED_PARAMETER")
-  fun fromMap(map: Map<String, Any>) : UuidGenerator {
+  fun fromMap(map: Map<String, Any>): UuidGenerator {
     return UuidGenerator
   }
 }
@@ -184,11 +184,10 @@ data class DateGenerator(val format: String? = null) : Generator {
   }
 
   companion object {
-    fun fromMap(map: Map<String, Any>) : DateGenerator {
+    fun fromMap(map: Map<String, Any>): DateGenerator {
       return DateGenerator(map["format"] as String?)
     }
   }
-
 }
 
 data class TimeGenerator(val format: String? = null) : Generator {
@@ -208,11 +207,10 @@ data class TimeGenerator(val format: String? = null) : Generator {
   }
 
   companion object {
-    fun fromMap(map: Map<String, Any>) : TimeGenerator {
+    fun fromMap(map: Map<String, Any>): TimeGenerator {
       return TimeGenerator(map["format"] as String?)
     }
   }
-
 }
 
 data class DateTimeGenerator(val format: String? = null) : Generator {
@@ -232,11 +230,10 @@ data class DateTimeGenerator(val format: String? = null) : Generator {
   }
 
   companion object {
-    fun fromMap(map: Map<String, Any>) : DateTimeGenerator {
+    fun fromMap(map: Map<String, Any>): DateTimeGenerator {
       return DateTimeGenerator(map["format"] as String?)
     }
   }
-
 }
 
 object RandomBooleanGenerator : Generator {
@@ -251,7 +248,7 @@ object RandomBooleanGenerator : Generator {
   override fun equals(other: Any?) = other is RandomBooleanGenerator
 
   @Suppress("UNUSED_PARAMETER")
-  fun fromMap(map: Map<String, Any>) : RandomBooleanGenerator {
+  fun fromMap(map: Map<String, Any>): RandomBooleanGenerator {
     return RandomBooleanGenerator
   }
 }

@@ -106,5 +106,4 @@ class MatchingRulesImpl : MatchingRules {
             category.addRule(MatchingRuleGroup.ruleFromMap(matcher))
         }
     }
-
 }

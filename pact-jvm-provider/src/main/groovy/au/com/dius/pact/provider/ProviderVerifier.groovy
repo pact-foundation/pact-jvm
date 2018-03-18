@@ -100,7 +100,7 @@ class ProviderVerifier extends ProviderVerifierBase {
   }
 
   @SuppressWarnings('ThrowRuntimeException')
-  Pact loadPactFileForConsumer(ConsumerInfo consumer) {
+  Pact<? extends Interaction> loadPactFileForConsumer(ConsumerInfo consumer) {
     def pactSource = consumer.pactSource
     if (pactSource instanceof Closure) {
       pactSource = pactSource.call()

@@ -112,7 +112,5 @@ class OptionalBodyTest : StringSpec() {
     "a present body or else returns the body" {
       presentBody.orElse("else") shouldBe "present"
     }
-
   }
-
 }

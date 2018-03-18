@@ -97,8 +97,8 @@ class MockMvcTarget @JvmOverloads constructor(var controllers: List<Any> = mutab
       .build()
   }
 
-  override fun setupVerifier(interaction: Interaction, provider: ProviderInfo, consumer: ConsumerInfo)
-    : ProviderVerifier {
+  override fun setupVerifier(interaction: Interaction, provider: ProviderInfo, consumer: ConsumerInfo):
+          ProviderVerifier {
     val verifier = MvcProviderVerifier(printRequestResponse)
 
     setupReporters(verifier, provider.name, interaction.description)
@@ -140,5 +140,4 @@ class MockMvcTarget @JvmOverloads constructor(var controllers: List<Any> = mutab
 
     return providerInfo
   }
-
 }

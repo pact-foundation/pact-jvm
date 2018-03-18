@@ -112,3 +112,54 @@ public class PricingServiceProviderPactTest {
 
 }
 ```
+
+### Using Spring Context Properties (version 3.5.14+)
+
+From version 3.5.14 onwards, the SpringRestPactRunner will look up any annotation expressions (like `${pactBrokerHost}`)
+above) from the Spring context. For Springboot, this will allow you to define the properties in the application test properties.
+
+For instance, if you create the following `application.yml` in the test resources:
+
+```yaml
+pactbroker:
+  host: "your.broker.local"
+  port: "443"
+  protocol: "https"
+  auth:
+    username: "<your broker username>"
+    password: "<your broker password>"
+
+```
+
+Then you can use the defaults on the `@PactBroker` annotation.
+
+```java
+@RunWith(SpringRestPactRunner.class)
+@Provider("My Service")
+@PactBroker(
+  authentication =  @PactBrokerAuth(username = "${pactbroker.auth.username}", password = "${pactbroker.auth.password}")
+)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class PactVerificationTest {
+
+```
+
+### Using a random port with a Springboot test (version 3.5.14+)
+
+If you use a random port in a springboot test (by setting `SpringBootTest.WebEnvironment.RANDOM_PORT`), you can use the
+`SpringBootHttpTarget` which will get the application port from the spring application context.
+
+For example:
+
+```java
+@RunWith(SpringRestPactRunner.class)
+@Provider("My Service")
+@PactBroker
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class PactVerificationTest {
+
+  @TestTarget
+  public final Target target = new SpringBootHttpTarget();
+
+}
+```
