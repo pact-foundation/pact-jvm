@@ -42,7 +42,8 @@ public class PactBrokerLoader implements PactLoader {
   private boolean failIfNoPactsFound;
   private PactBrokerAuth authentication;
   private PactBrokerSource pactSource;
-  private Class<? extends ValueResolver> valueResolver;
+  private Class<? extends ValueResolver> valueResolverClass;
+  private ValueResolver valueResolver;
 
   public PactBrokerLoader(final String pactBrokerHost, final String pactBrokerPort, final String pactBrokerProtocol) {
       this(pactBrokerHost, pactBrokerPort, pactBrokerProtocol, Collections.singletonList(LATEST));
@@ -62,7 +63,7 @@ public class PactBrokerLoader implements PactLoader {
       this(pactBroker.host(), pactBroker.port(), pactBroker.protocol(), Arrays.asList(pactBroker.tags()));
       this.failIfNoPactsFound = pactBroker.failIfNoPactsFound();
       this.authentication = pactBroker.authentication();
-      this.valueResolver = pactBroker.valueResolver();
+      this.valueResolverClass = pactBroker.valueResolver();
   }
 
   public List<Pact> load(final String providerName) throws IOException {
@@ -86,12 +87,19 @@ public class PactBrokerLoader implements PactLoader {
     return pactSource;
   }
 
+  @Override
+  public void setValueResolver(ValueResolver valueResolver) {
+    this.valueResolver = valueResolver;
+  }
+
   private List<Pact> loadPactsForProvider(final String providerName, final String tag) throws IOException {
     LOGGER.debug("Loading pacts from pact broker for provider " + providerName + " and tag " + tag);
     ValueResolver resolver = new SystemPropertyResolver();
     if (valueResolver != null) {
+      resolver = valueResolver;
+    } else if (valueResolverClass != null) {
       try {
-        resolver = valueResolver.newInstance();
+        resolver = valueResolverClass.newInstance();
       } catch (InstantiationException | IllegalAccessException e) {
         LOGGER.warn("Failed to instantiate the value resolver, using the default", e);
       }
@@ -108,7 +116,7 @@ public class PactBrokerLoader implements PactLoader {
       .setPort(Integer.parseInt(port));
     try {
       List<ConsumerInfo> consumers;
-      PactBrokerClient pactBrokerClient = newPactBrokerClient(uriBuilder.build());
+      PactBrokerClient pactBrokerClient = newPactBrokerClient(uriBuilder.build(), resolver);
       if (StringUtils.isEmpty(tag) || tag.equals(LATEST)) {
         consumers = pactBrokerClient.fetchConsumers(providerName).stream()
           .map(ConsumerInfo::from).collect(toList());
@@ -149,11 +157,12 @@ public class PactBrokerLoader implements PactLoader {
     return pact;
   }
 
-  PactBrokerClient newPactBrokerClient(URI url) throws URISyntaxException {
+  PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
     HashMap options = new HashMap();
     if (this.authentication != null && !this.authentication.scheme().equalsIgnoreCase("none")) {
-      options.put("authentication", Arrays.asList(parseExpression(this.authentication.scheme()),
-        parseExpression(this.authentication.username()), parseExpression(this.authentication.password())));
+      options.put("authentication", Arrays.asList(parseExpression(this.authentication.scheme(), resolver),
+        parseExpression(this.authentication.username(), resolver),
+        parseExpression(this.authentication.password(), resolver)));
     }
     return new PactBrokerClient(url.toString(), options);
   }

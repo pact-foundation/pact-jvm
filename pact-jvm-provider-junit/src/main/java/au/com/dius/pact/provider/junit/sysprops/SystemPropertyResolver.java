@@ -30,24 +30,24 @@ public class SystemPropertyResolver implements ValueResolver {
     return propertyValue != null;
   }
 
-  private class PropertyValueTuple {
+  public static class PropertyValueTuple {
     private String propertyName;
     private String defaultValue;
 
-    PropertyValueTuple(String property) {
+    public PropertyValueTuple(String property) {
       this.propertyName = property;
       this.defaultValue = null;
     }
 
-    String getPropertyName() {
+    public String getPropertyName() {
       return propertyName;
     }
 
-    String getDefaultValue() {
+    public String getDefaultValue() {
       return defaultValue;
     }
 
-    PropertyValueTuple invoke() {
+    public PropertyValueTuple invoke() {
       if (propertyName.contains(":")) {
         String[] kv = StringUtils.splitPreserveAllTokens(propertyName, ':');
         propertyName = kv[0];

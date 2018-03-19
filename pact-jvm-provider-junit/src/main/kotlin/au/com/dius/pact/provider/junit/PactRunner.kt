@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.junit
 
 import au.com.dius.pact.model.FilteredPact
+import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.provider.junit.loader.NoPactsFoundException
 import au.com.dius.pact.provider.junit.loader.PactBroker
@@ -48,7 +49,7 @@ import kotlin.reflect.full.findAnnotation
  * - [State] - before each interaction that require state change,
  * all methods annotated by [State] with appropriate state listed will be invoked
  */
-open class PactRunner(clazz: Class<*>) : ParentRunner<InteractionRunner>(clazz) {
+open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner>(clazz) where I: Interaction {
 
   private val child = mutableListOf<InteractionRunner>()
 
@@ -66,11 +67,11 @@ open class PactRunner(clazz: Class<*>) : ParentRunner<InteractionRunner>(clazz) 
 
       val testClass = TestClass(clazz)
 
-      var pacts: List<Pact>? = null
+      var pacts: List<Pact<I>>? = null
       val pactLoader = getPactSource(testClass)
       try {
         pacts = filterPacts(pactLoader.load(serviceName)
-                .filter { p -> consumerName == null || p.consumer.name == consumerName })
+          .filter { p -> consumerName == null || p.consumer.name == consumerName } as List<Pact<I>>)
       } catch (e: IOException) {
         throw InitializationError(e)
       } catch (e: JsonException) {
@@ -91,7 +92,7 @@ open class PactRunner(clazz: Class<*>) : ParentRunner<InteractionRunner>(clazz) 
     }
   }
 
-  protected open fun setupInteractionRunners(testClass: TestClass, pacts: List<Pact>?, pactLoader: PactLoader) {
+  protected open fun setupInteractionRunners(testClass: TestClass, pacts: List<Pact<I>>?, pactLoader: PactLoader) {
     if (pacts != null) {
       for (pact in pacts) {
         this.child.add(newInteractionRunner(testClass, pact, pactLoader.pactSource))
@@ -99,12 +100,12 @@ open class PactRunner(clazz: Class<*>) : ParentRunner<InteractionRunner>(clazz) 
     }
   }
 
-  protected open fun newInteractionRunner(testClass: TestClass, pact: Pact,
+  protected open fun newInteractionRunner(testClass: TestClass, pact: Pact<I>,
                                           pactSource: au.com.dius.pact.model.PactSource): InteractionRunner {
     return InteractionRunner(testClass, pact, pactSource)
   }
 
-  protected open fun filterPacts(pacts: List<Pact>): List<Pact> {
+  protected open fun filterPacts(pacts: List<Pact<I>>): List<Pact<I>> {
     val pactFilterValues = this.testClass.javaClass.getAnnotation(PactFilter::class.java)?.value
     return if (pactFilterValues != null && pactFilterValues.any { !it.isEmpty() }) {
       pacts.map { pact ->

@@ -8,5 +8,4 @@ data class ContentType(val contentType: String) {
   fun isJson(): Boolean = jsonRegex.matches(contentType.toLowerCase())
 
   fun isXml(): Boolean = xmlRegex.matches(contentType.toLowerCase())
-
 }

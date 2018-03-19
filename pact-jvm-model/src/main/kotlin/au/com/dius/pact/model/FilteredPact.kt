@@ -2,8 +2,9 @@ package au.com.dius.pact.model
 
 import java.util.function.Predicate
 
-class FilteredPact(val pact: Pact, private val interactionPredicate: Predicate<Interaction>) : Pact by pact {
-  override val interactions: List<Interaction>
+class FilteredPact<I>(val pact: Pact<I>, private val interactionPredicate: Predicate<I>) : Pact<I> by pact
+  where I: Interaction {
+  override val interactions: List<I>
     get() = pact.interactions.filter { interactionPredicate.test(it) }
 
   fun isNotFiltered() = pact.interactions.all { interactionPredicate.test(it) }
@@ -13,5 +14,4 @@ class FilteredPact(val pact: Pact, private val interactionPredicate: Predicate<I
   override fun toString(): String {
     return "FilteredPact(pact=$pact, filtered=${isFiltered()})"
   }
-
 }

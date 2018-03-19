@@ -4,6 +4,8 @@ import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactSource
 import au.com.dius.pact.provider.junit.InteractionRunner
+import au.com.dius.pact.provider.junit.target.Target
+import au.com.dius.pact.provider.spring.target.SpringBootHttpTarget
 import org.junit.After
 import org.junit.Before
 import org.junit.runners.model.FrameworkMethod
@@ -59,11 +61,11 @@ open class SpringAfterRunner(private val next: Statement,
   }
 }
 
-open class SpringInteractionRunner(private val testClass: TestClass,
-                                   pact: Pact,
-                                   pactSource: PactSource?,
-                                   private val testContextManager: TestContextManager)
-  : InteractionRunner(testClass, pact, pactSource) {
+open class SpringInteractionRunner<I>(private val testClass: TestClass,
+                                      pact: Pact<I>,
+                                      pactSource: PactSource?,
+                                      private val testContextManager: TestContextManager)
+  : InteractionRunner(testClass, pact, pactSource) where I: Interaction {
 
   override fun withBefores(interaction: Interaction, testInstance: Any, statement: Statement): Statement {
     val befores = testClass.getAnnotatedMethods(Before::class.java)
@@ -87,5 +89,15 @@ open class SpringInteractionRunner(private val testClass: TestClass,
     val test = super.createTest()
     testContextManager.prepareTestInstance(test)
     return test
+  }
+
+  override fun setupTargetForInteraction(target: Target) {
+    super.setupTargetForInteraction(target)
+
+    if (target is SpringBootHttpTarget) {
+      val environment = testContextManager.testContext.applicationContext.environment
+      val port = environment.getProperty("local.server.port")
+      target.setPort(Integer.parseInt(port))
+    }
   }
 }

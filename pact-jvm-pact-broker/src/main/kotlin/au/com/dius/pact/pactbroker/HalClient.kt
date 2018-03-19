@@ -12,6 +12,7 @@ import com.github.salomonbrys.kotson.obj
 import com.github.salomonbrys.kotson.string
 import com.google.common.net.UrlEscapers
 import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import mu.KLogging
 import org.apache.http.HttpResponse
@@ -51,14 +52,14 @@ interface IHalClient {
   /**
    * Returns the HREF of the named link from the current HAL document
    */
-  fun linkUrl(name: String): String
+  fun linkUrl(name: String): String?
 
   /**
    * Calls the closure with a Map of attributes for all links associated with the link name
    * @param linkName Name of the link to loop over
    * @param closure Closure to invoke with the link attributes
    */
-  fun forAll(linkName: String, closure: Consumer<Map<String, Any>>)
+  fun forAll(linkName: String, closure: Consumer<Map<String, Any?>>)
 
   /**
    * Upload the JSON document to the provided path, using a PUT request
@@ -225,12 +226,12 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
   }
 
   private fun fetchLink(link: String, options: Map<String, Any>): JsonElement {
-    if (pathInfo?.nullObj?.get("_links") == null) {
+    if (pathInfo?.nullObj?.get(LINKS) == null) {
       throw InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got " +
         "a response with no '_links'. URL: '$baseUrl', LINK: '$link'")
     }
 
-    val links = pathInfo!!["_links"]
+    val links = pathInfo!![LINKS]
     if (links.isJsonObject) {
       if (!links.obj.has(link)) {
         throw InvalidHalResponse("Link '$link' was not found in the response, only the following links where " +
@@ -364,8 +365,57 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
     }
   }
 
+  override fun linkUrl(name: String): String? {
+    if (pathInfo!!.obj.has(LINKS)) {
+      val links = pathInfo!![LINKS]
+      if (links.isJsonObject && links.obj.has(name)) {
+        val linkData = links[name]
+        if (linkData.isJsonObject && linkData.obj.has("href")) {
+          return fromJson(linkData["href"]).toString()
+        }
+      }
+    }
+
+    return null
+  }
+
+  override fun forAll(linkName: String, just: Consumer<Map<String, Any?>>) {
+    initPathInfo()
+    val links = pathInfo!![LINKS]
+    if (links.isJsonObject && links.obj.has(linkName)) {
+      val matchingLink = links[linkName]
+      if (matchingLink.isJsonArray) {
+        matchingLink.asJsonArray.forEach { just.accept(asMap(it.asJsonObject)) }
+      } else {
+        just.accept(asMap(matchingLink.asJsonObject))
+      }
+    }
+  }
+
   companion object : KLogging() {
     const val ROOT = "/"
+    const val LINKS = "_links"
     val URL_TEMPLATE_REGEX = Regex("\\{(\\w+)\\}")
+
+    @JvmStatic
+    fun asMap(jsonObject: JsonObject) = jsonObject.entrySet().associate { entry -> entry.key to fromJson(entry.value) }
+
+    @JvmStatic
+    fun fromJson(jsonValue: JsonElement): Any? {
+      return if (jsonValue.isJsonObject) {
+        asMap(jsonValue.asJsonObject)
+      } else if (jsonValue.isJsonArray) {
+        jsonValue.asJsonArray.map { fromJson(it) }
+      } else if (jsonValue.isJsonNull) {
+        null
+      } else {
+        val primitive = jsonValue.asJsonPrimitive
+        when {
+            primitive.isBoolean -> primitive.asBoolean
+            primitive.isNumber -> primitive.asBigDecimal
+            else -> primitive.asString
+        }
+      }
+    }
   }
 }

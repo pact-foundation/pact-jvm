@@ -128,7 +128,6 @@ object PM {
    */
   @JvmStatic
   fun includesStr(value: String) = IncludeMatcher(value)
-
 }
 
 data class UrlMatcherSupport(val basePath: String, val pathFragments: List<Any>) {

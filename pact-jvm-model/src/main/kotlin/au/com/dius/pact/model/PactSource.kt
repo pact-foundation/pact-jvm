@@ -17,24 +17,31 @@ sealed class UrlPactSource : PactSource() {
   abstract val url: String
 }
 
-data class DirectorySource @JvmOverloads constructor(val dir: File,
-                                                     val pacts: MutableMap<File, Pact> = mutableMapOf()) : PactSource()
+data class DirectorySource<I> @JvmOverloads constructor(
+  val dir: File,
+  val pacts: MutableMap<File, Pact<I>> = mutableMapOf()) : PactSource()
+  where I: Interaction
 
-data class PactBrokerSource @JvmOverloads constructor(val host: String,
-                                                      val port: String,
-                                                      val pacts: MutableMap<Consumer, List<Pact>> = mutableMapOf())
-  : PactSource()
+data class PactBrokerSource<I> @JvmOverloads constructor(
+  val host: String,
+  val port: String,
+  val pacts: MutableMap<Consumer, List<Pact<I>>> = mutableMapOf()) : PactSource()
+  where I: Interaction
 
-data class FileSource @JvmOverloads constructor(val file: File, val pact: Pact? = null) : PactSource() {
+data class FileSource<I> @JvmOverloads constructor(val file: File, val pact: Pact<I>? = null)
+  : PactSource() where I: Interaction {
   override fun description() = "File $file"
 }
 
-data class UrlSource @JvmOverloads constructor(override val url: String, val pact: Pact? = null) : UrlPactSource() {
+data class UrlSource<I> @JvmOverloads constructor(override val url: String, val pact: Pact<I>? = null)
+  : UrlPactSource() where I: Interaction {
   override fun description() = "URL $url"
 }
 
-data class UrlsSource @JvmOverloads constructor(val url: List<String>,
-                                                val pacts: MutableMap<String, Pact> = mutableMapOf()) : PactSource()
+data class UrlsSource<I> @JvmOverloads constructor(
+  val url: List<String>,
+  val pacts: MutableMap<String, Pact<I>> = mutableMapOf())
+  : PactSource() where I: Interaction
 
 data class BrokerUrlSource @JvmOverloads constructor(override val url: String,
                                                      val pactBrokerUrl: String,

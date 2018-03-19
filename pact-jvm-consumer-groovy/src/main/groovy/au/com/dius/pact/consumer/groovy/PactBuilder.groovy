@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.consumer.Headers
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.StatefulMockProvider
 import au.com.dius.pact.consumer.VerificationResult
@@ -40,7 +41,6 @@ class PactBuilder extends BaseBuilder {
   private static final String BODY = 'body'
   private static final String LOCALHOST = 'localhost'
   public static final String HEADER = 'header'
-  public static final String MULTIPART_HEADER_REGEX = 'multipart/(mixed|form-data);\\s*boundary=.*'
 
   Consumer consumer
   Provider provider
@@ -428,13 +428,13 @@ class PactBuilder extends BaseBuilder {
       requestData.last().headers = requestData.last().headers ?: [:]
       requestData.last().headers[CONTENT_TYPE] = multipart.contentType.value
       au.com.dius.pact.model.matchingrules.Category category  = requestData.last().matchers.addCategory(HEADER)
-      category.addRule(CONTENT_TYPE, new RegexMatcher(MULTIPART_HEADER_REGEX, multipart.contentType.value))
+      category.addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX, multipart.contentType.value))
     } else {
       responseData.last().body = os.toString()
       responseData.last().headers = responseData.last().headers ?: [:]
       responseData.last().headers[CONTENT_TYPE] = multipart.contentType.value
       au.com.dius.pact.model.matchingrules.Category category  = responseData.last().matchers.addCategory(HEADER)
-      category.addRule(CONTENT_TYPE, new RegexMatcher(MULTIPART_HEADER_REGEX, multipart.contentType.value))
+      category.addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX, multipart.contentType.value))
     }
   }
 }

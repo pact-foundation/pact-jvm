@@ -38,7 +38,7 @@ fun safeToString(value: Any?): String {
   }
 }
 
-fun <M: Mismatch> matchInclude(includedValue: String, path: List<String>, expected: Any?, actual: Any?,
+fun <M : Mismatch> matchInclude(includedValue: String, path: List<String>, expected: Any?, actual: Any?,
                             mismatchFactory: MismatchFactory<M>): List<M> {
   val matches = safeToString(actual).contains(includedValue)
   logger.debug { "comparing if ${valueOf(actual)} includes '$includedValue' at $path -> $matches" }
@@ -53,7 +53,7 @@ fun <M: Mismatch> matchInclude(includedValue: String, path: List<String>, expect
 /**
  * Executor for matchers
  */
-fun <M: Mismatch> domatch(matchers: MatchingRuleGroup, path: List<String>, expected: Any?, actual: Any?,
+fun <M : Mismatch> domatch(matchers: MatchingRuleGroup, path: List<String>, expected: Any?, actual: Any?,
                           mismatchFn: MismatchFactory<M>): List<M> {
   val result = matchers.rules.map { matchingRule ->
     domatch(matchingRule, path, expected, actual, mismatchFn)
@@ -70,7 +70,7 @@ fun <M: Mismatch> domatch(matchers: MatchingRuleGroup, path: List<String>, expec
   }
 }
 
-fun <M: Mismatch> domatch(matcher: MatchingRule, path: List<String>, expected: Any?, actual: Any?,
+fun <M : Mismatch> domatch(matcher: MatchingRule, path: List<String>, expected: Any?, actual: Any?,
                           mismatchFn: MismatchFactory<M>): List<M> {
   return when (matcher) {
     is RegexMatcher -> matchRegex(matcher.regex, path, expected, actual, mismatchFn)
@@ -87,7 +87,7 @@ fun <M: Mismatch> domatch(matcher: MatchingRule, path: List<String>, expected: A
   }
 }
 
-fun <M: Mismatch> matchEquality(path: List<String>, expected: Any?, actual: Any?,
+fun <M : Mismatch> matchEquality(path: List<String>, expected: Any?, actual: Any?,
                                 mismatchFactory: MismatchFactory<M>): List<M> {
   val matches = actual == null && expected == null || actual != null && actual == expected
   logger.debug { "comparing ${valueOf(actual)} to ${valueOf(expected)} at $path -> $matches" }
@@ -98,8 +98,8 @@ fun <M: Mismatch> matchEquality(path: List<String>, expected: Any?, actual: Any?
   }
 }
 
-fun <M: Mismatch> matchRegex(regex: String, path: List<String>, expected: Any?, actual: Any?,
-                             mismatchFactory: MismatchFactory<M>): List<M> {
+fun <M : Mismatch> matchRegex(regex: String, path: List<String>, expected: Any?, actual: Any?,
+                              mismatchFactory: MismatchFactory<M>): List<M> {
   val matches = safeToString(actual).matches(Regex(regex))
   logger.debug { "comparing ${valueOf(actual)} with regexp $regex at $path -> $matches" }
   return if (matches
@@ -113,7 +113,7 @@ fun <M: Mismatch> matchRegex(regex: String, path: List<String>, expected: Any?, 
   }
 }
 
-fun <M: Mismatch> matchType(path: List<String>, expected: Any?, actual: Any?,
+fun <M : Mismatch> matchType(path: List<String>, expected: Any?, actual: Any?,
                             mismatchFactory: MismatchFactory<M>): List<M> {
   logger.debug { "comparing type of ${valueOf(actual)} to ${valueOf(expected)} at $path" }
   return if (expected is String && actual is String
@@ -137,7 +137,7 @@ fun <M: Mismatch> matchType(path: List<String>, expected: Any?, actual: Any?,
   }
 }
 
-fun <M: Mismatch> matchNumber(numberType: NumberTypeMatcher.NumberType, path: List<String>, expected: Any?, actual: Any?,
+fun <M : Mismatch> matchNumber(numberType: NumberTypeMatcher.NumberType, path: List<String>, expected: Any?, actual: Any?,
                               mismatchFactory: MismatchFactory<M>): List<M> {
   if (expected == null && actual != null) {
     return listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be null", path))
@@ -169,7 +169,7 @@ fun <M: Mismatch> matchNumber(numberType: NumberTypeMatcher.NumberType, path: Li
   return emptyList()
 }
 
-fun <M: Mismatch> matchDate(pattern: String, path: List<String>, expected: Any?, actual: Any?,
+fun <M : Mismatch> matchDate(pattern: String, path: List<String>, expected: Any?, actual: Any?,
                             mismatchFactory: MismatchFactory<M>): List<M> {
   logger.debug { "comparing ${valueOf(actual)} to date pattern $pattern at $path" }
   return try {
@@ -182,7 +182,7 @@ fun <M: Mismatch> matchDate(pattern: String, path: List<String>, expected: Any?,
   }
 }
 
-fun <M: Mismatch> matchTime(pattern: String, path: List<String>, expected: Any?, actual: Any?,
+fun <M : Mismatch> matchTime(pattern: String, path: List<String>, expected: Any?, actual: Any?,
                             mismatchFactory: MismatchFactory<M>): List<M> {
   logger.debug { "comparing ${valueOf(actual)} to time pattern $pattern at $path" }
   return try {
@@ -195,8 +195,8 @@ fun <M: Mismatch> matchTime(pattern: String, path: List<String>, expected: Any?,
   }
 }
 
-fun <M: Mismatch> matchTimestamp(pattern: String, path: List<String>, expected: Any?, actual: Any?,
-                                 mismatchFactory: MismatchFactory<M>): List<M> {
+fun <M : Mismatch> matchTimestamp(pattern: String, path: List<String>, expected: Any?, actual: Any?,
+                                  mismatchFactory: MismatchFactory<M>): List<M> {
   logger.debug { "comparing ${valueOf(actual)} to timestamp pattern $pattern at $path" }
   return try {
     DateUtils.parseDate(safeToString(actual), pattern)
@@ -208,8 +208,8 @@ fun <M: Mismatch> matchTimestamp(pattern: String, path: List<String>, expected: 
   }
 }
 
-fun <M: Mismatch> matchMinType(min: Int, path: List<String>, expected: Any?, actual: Any?,
-                               mismatchFactory: MismatchFactory<M>): List<M> {
+fun <M : Mismatch> matchMinType(min: Int, path: List<String>, expected: Any?, actual: Any?,
+                                mismatchFactory: MismatchFactory<M>): List<M> {
   logger.debug { "comparing ${valueOf(actual)} with minimum $min at $path" }
   return if (actual is List<*>) {
     if (actual.size < min) {
@@ -234,8 +234,8 @@ fun <M: Mismatch> matchMinType(min: Int, path: List<String>, expected: Any?, act
   }
 }
 
-fun <M: Mismatch> matchMaxType(max: Int, path: List<String>, expected: Any?, actual: Any?,
-                               mismatchFactory: MismatchFactory<M>): List<M> {
+fun <M : Mismatch> matchMaxType(max: Int, path: List<String>, expected: Any?, actual: Any?,
+                                mismatchFactory: MismatchFactory<M>): List<M> {
   logger.debug { "comparing ${valueOf(actual)} with maximum $max at $path" }
   return if (actual is List<*>) {
     if (actual.size > max) {
@@ -260,7 +260,7 @@ fun <M: Mismatch> matchMaxType(max: Int, path: List<String>, expected: Any?, act
   }
 }
 
-fun <M: Mismatch> matchNull(path: List<String>, actual: Any?, mismatchFactory: MismatchFactory<M>): List<M> {
+fun <M : Mismatch> matchNull(path: List<String>, actual: Any?, mismatchFactory: MismatchFactory<M>): List<M> {
   val matches = actual == null
   logger.debug { "comparing ${valueOf(actual)} to null at $path -> $matches" }
   return if (matches) {

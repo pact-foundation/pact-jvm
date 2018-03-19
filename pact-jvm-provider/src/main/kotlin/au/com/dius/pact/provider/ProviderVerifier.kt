@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider
 
 import au.com.dius.pact.model.BrokerUrlSource
+import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
@@ -11,7 +12,8 @@ import java.util.function.Function
 private val logger = KotlinLogging.logger {}
 
 @JvmOverloads
-fun reportVerificationResults(pact: Pact, result: Boolean, version: String, client: PactBrokerClient? = null) {
+fun <I> reportVerificationResults(pact: Pact<I>, result: Boolean, version: String, client: PactBrokerClient? = null)
+  where I: Interaction {
   val source = pact.source
   when (source) {
     is BrokerUrlSource -> {
@@ -43,5 +45,4 @@ open class ProviderVerifierBase : GroovyObjectSupport() {
   companion object {
     const val PACT_VERIFIER_PUBLISHRESUTS = "pact.verifier.publishResults"
   }
-
 }

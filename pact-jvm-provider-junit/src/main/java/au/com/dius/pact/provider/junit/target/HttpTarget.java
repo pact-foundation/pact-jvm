@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 public class HttpTarget extends BaseTarget {
     private final String path;
     private final String host;
-    private final int port;
+    protected int port;
     private final String protocol;
     private final boolean insecure;
 

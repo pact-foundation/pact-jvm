@@ -108,6 +108,13 @@ object NullMatcher : MatchingRule {
   override fun toMap() = mapOf("match" to "null")
 }
 
+/**
+ * Matcher for values in a map, ignoring the keys
+ */
+object ValuesMatcher : MatchingRule {
+  override fun toMap() = mapOf("match" to "values")
+}
+
 data class MatchingRuleGroup @JvmOverloads constructor(val rules: MutableList<MatchingRule> = mutableListOf(),
                                                        val ruleLogic: RuleLogic = RuleLogic.AND) {
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
@@ -160,8 +167,8 @@ data class MatchingRuleGroup @JvmOverloads constructor(val rules: MutableList<Ma
 
     @JvmStatic
     fun ruleFromMap(map: Map<String, Any?>): MatchingRule {
-      if (map.containsKey(MATCH)) {
-        return when (map[MATCH]) {
+      return when {
+        map.containsKey(MATCH) -> when (map[MATCH]) {
           REGEX -> RegexMatcher(map[REGEX] as String)
           "equality" -> EqualsMatcher
           "null" -> NullMatcher
@@ -195,27 +202,23 @@ data class MatchingRuleGroup @JvmOverloads constructor(val rules: MutableList<Ma
           DATE ->
             if (map.containsKey(DATE)) DateMatcher(map[DATE].toString())
             else DateMatcher()
+          "values" -> ValuesMatcher
           else -> {
             logger.warn { "Unrecognised matcher ${map[MATCH]}, defaulting to equality matching" }
             EqualsMatcher
           }
         }
-      } else if (map.containsKey(REGEX)) {
-        return RegexMatcher(map[REGEX] as String)
-      } else if (map.containsKey(MIN)) {
-        return MinTypeMatcher(mapEntryToInt(map, MIN))
-      } else if (map.containsKey(MAX)) {
-        return MaxTypeMatcher(mapEntryToInt(map, MAX))
-      } else if (map.containsKey(TIMESTAMP)) {
-        return TimestampMatcher(map[TIMESTAMP] as String)
-      } else if (map.containsKey(TIME)) {
-        return TimeMatcher(map[TIME] as String)
-      } else if (map.containsKey(DATE)) {
-        return DateMatcher(map[DATE] as String)
+        map.containsKey(REGEX) -> RegexMatcher(map[REGEX] as String)
+        map.containsKey(MIN) -> MinTypeMatcher(mapEntryToInt(map, MIN))
+        map.containsKey(MAX) -> MaxTypeMatcher(mapEntryToInt(map, MAX))
+        map.containsKey(TIMESTAMP) -> TimestampMatcher(map[TIMESTAMP] as String)
+        map.containsKey(TIME) -> TimeMatcher(map[TIME] as String)
+        map.containsKey(DATE) -> DateMatcher(map[DATE] as String)
+        else -> {
+          logger.warn { "Unrecognised matcher definition $map, defaulting to equality matching" }
+          EqualsMatcher
+        }
       }
-
-      logger.warn { "Unrecognised matcher definition $map, defaulting to equality matching" }
-      return EqualsMatcher
     }
   }
 }

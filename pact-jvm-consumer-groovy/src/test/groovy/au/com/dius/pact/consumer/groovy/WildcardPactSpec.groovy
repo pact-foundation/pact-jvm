@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
+import au.com.dius.pact.model.FeatureToggles
 import au.com.dius.pact.model.PactSpecVersion
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
@@ -71,6 +72,63 @@ class WildcardPactSpec extends Specification {
       '$.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*].bundleId',
       '$.articles[*].variants[*].*[*].bundles[*].*.referencedArticles[*].*'
     ] as Set
+
+  }
+
+  @SuppressWarnings(['NestedBlockDepth'])
+  def 'key like test with useMatchValuesMatcher turned on'() {
+    given:
+    FeatureToggles.toggleFeature('pact.feature.matchers.useMatchValuesMatcher', true)
+    def articleService = new PactBuilder()
+    articleService {
+      serviceConsumer 'ArticleConsumer'
+      hasPactWith 'ArticleService'
+      port 1244
+    }
+
+    articleService {
+      uponReceiving('a request for events with useMatchValuesMatcher turned on')
+      withAttributes(method: 'get', path: '/')
+      willRespondWith(status: 200)
+      withBody(mimeType: JSON.toString()) {
+        events {
+          keyLike('001') {
+            description string('some description')
+            eventId identifier()
+            references {
+              keyLike 'a', eachLike {
+                eventId identifier()
+              }
+            }
+          }
+        }
+      }
+    }
+
+    when:
+    PactVerificationResult result = articleService.runTest {
+      def client = new RESTClient(it.url)
+      def response = client.get(requestContentType: JSON)
+
+      assert response.status == 200
+      assert response.data.events.size() == 1
+      assert response.data.events.keySet() == ['001'] as Set
+    }
+
+    then:
+    result == PactVerificationResult.Ok.INSTANCE
+    articleService.interactions.size() == 1
+    articleService.interactions[0].response.matchingRules.rulesForCategory('body').matchingRules.keySet() == [
+      '$.events',
+      '$.events.*.description',
+      '$.events.*.eventId',
+      '$.events.*.references',
+      '$.events.*.references.*',
+      '$.events.*.references.*[*].eventId'
+    ] as Set
+
+    cleanup:
+    FeatureToggles.reset()
 
   }
 }

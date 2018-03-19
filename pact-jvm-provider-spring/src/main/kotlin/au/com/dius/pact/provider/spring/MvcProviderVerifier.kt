@@ -77,7 +77,7 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     }).andReturn()
   }
 
-  private fun performRequest(mockMvc: MockMvc, requestBuilder : RequestBuilder) : ResultActions {
+  private fun performRequest(mockMvc: MockMvc, requestBuilder: RequestBuilder): ResultActions {
     val resultActions = mockMvc.perform(requestBuilder)
     return if (resultActions.andReturn().request.isAsyncStarted) {
       mockMvc.perform(asyncDispatch(resultActions

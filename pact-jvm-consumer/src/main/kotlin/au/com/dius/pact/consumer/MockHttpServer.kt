@@ -49,8 +49,8 @@ interface MockServer {
   /**
    * This will start the mock server and execute the test function. Returns the result of running the test.
    */
-  fun runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun)
-    : PactVerificationResult
+  fun runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun):
+          PactVerificationResult
 }
 
 abstract class BaseMockServer(val pact: RequestResponsePact,
@@ -147,8 +147,8 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
     initServer()
   }
 
-  override fun runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun)
-    : PactVerificationResult {
+  override fun runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun):
+          PactVerificationResult {
     start()
     waitForServer()
 

@@ -8,8 +8,8 @@ Provides a DSL and a base test class for use with Junit to build consumer tests.
 The library is available on maven central using:
 
 * group-id = `au.com.dius`
-* artifact-id = `pact-jvm-consumer-junit_2.11`
-* version-id = `3.2.x`
+* artifact-id = `pact-jvm-consumer-junit_2.12`
+* version-id = `3.5.x`
 
 ## Usage
 
@@ -671,15 +671,15 @@ and [#97](https://github.com/DiUS/pact-jvm/issues/97) for information on what th
 * Introduces a new message pact format for testing interactions via a message queue.
 * Multiple provider states can be defined with data parameters.
 
-## Generating V3 spec pact files (3.1.0+, 2.3.0+)
+## Generating V2 spec pact files (3.1.0+, 2.3.0+)
 
-To have your consumer tests generate V3 format pacts, you can set the specification version to V3. If you're using the
+To have your consumer tests generate V2 format pacts, you can set the specification version to V2. If you're using the
 `ConsumerPactTest` base class, you can override the `getSpecificationVersion` method. For example:
 
 ```java
     @Override
     protected PactSpecVersion getSpecificationVersion() {
-        return PactSpecVersion.V3;
+        return PactSpecVersion.V2;
     }
 ```
 
@@ -687,7 +687,7 @@ If you are using the `PactProviderRuleMk2`, you can pass the version into the co
 
 ```java
     @Rule
-    public PactProviderRuleMk2 mockTestProvider = new PactProviderRuleMk2("test_provider", PactSpecVersion.V3, this);
+    public PactProviderRuleMk2 mockTestProvider = new PactProviderRuleMk2("test_provider", PactSpecVersion.V2, this);
 ```
 
 ## Consumer test for a message consumer
