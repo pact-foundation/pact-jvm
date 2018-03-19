@@ -1,5 +1,35 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.14 - Spring enhancements + bugfixes
+
+* ccfee394 - Merge branch 'master' into v3.5.x (Ronald Holshausen, Mon Mar 19 10:29:41 2018 +1100)
+* 65dbf925 - Update the readme on the spring properties and application port support #631 #632 (Ronald Holshausen, Mon Mar 12 17:29:01 2018 +1100)
+* c351926e - Add SpringBootHttpTarget which was excluded by gitignore #631 (Ronald Holshausen, Mon Mar 12 17:21:53 2018 +1100)
+* b50a0a59 - Added a Target that receives the server port at runtime from the spring context #631 (Ronald Holshausen, Mon Mar 12 17:07:29 2018 +1100)
+* 8960bc88 - Added a spring context expression resolver for spring tests #632 (Ronald Holshausen, Mon Mar 12 16:14:38 2018 +1100)
+* 1ef5488c - Only write out feature toggles that have changed from the defaults (Ronald Holshausen, Mon Mar 12 12:34:48 2018 +1100)
+* 61d96470 - Added new values matcher and updated the Groovy and Java DSLs to use it is the toggle is set (Ronald Holshausen, Sun Mar 11 19:37:16 2018 +1100)
+* 50390066 - Correct the Java DSL which was generating incorrect matcher keys for eachKeyLike... #401 (Ronald Holshausen, Sun Mar 11 15:59:05 2018 +1100)
+* 240aab9b - Update all the test pact fixtures to have the correct meta-data #401 (Ronald Holshausen, Sun Mar 11 15:57:58 2018 +1100)
+* 3ade3854 - Added a feature toggle for the new matchValues matcher #401 (Ronald Holshausen, Sun Mar 11 15:01:02 2018 +1100)
+* 7980a0f4 - Added a note about generating V2 format pact files (Ronald Holshausen, Sun Mar 11 14:01:28 2018 +1100)
+* c4623792 - Merge pull request #648 from slu-it/dependencies-cleanup (Ronald Holshausen, Thu Mar 8 12:10:26 2018 +1100)
+* f223f7c5 - Removed scala-compiler as a generall dependency in favor of using the xml module directly (Stefan Ludwig, Wed Mar 7 22:48:20 2018 +0100)
+* d1804dcb - Moved Mock*ProviderConfig classes to pact-jvm-consumer (Stefan Ludwig, Wed Mar 7 22:05:27 2018 +0100)
+* c5dcd5d5 - (Re)moved unused dependencies from pact-jvm-model (Stefan Ludwig, Wed Mar 7 21:15:38 2018 +0100)
+* 377ee1d2 - Revert "Correct the getting started with Pact link" (Ronald Holshausen, Tue Mar 6 11:05:38 2018 +1100)
+* 082c344a - Correct the getting started with Pact link (Ronald Holshausen, Tue Mar 6 09:25:33 2018 +1100)
+* de28599e - Added an upper trait bound on all uses of the Pact interface #644 (Ronald Holshausen, Sun Mar 4 13:06:10 2018 +1100)
+* a08980ef - Adjust MULTIPART_HEADER_REGEX to include an optional charset attribute #645 (Ronald Holshausen, Sun Mar 4 10:20:29 2018 +1100)
+* 5062cacc - Upgraded kotlin, kotlinter and detekt to the latest versions (Ronald Holshausen, Wed Feb 28 12:32:08 2018 +1100)
+* a925efb9 - Converted HalClient methods from Groovy -> Kotlin (Ronald Holshausen, Tue Feb 27 16:19:40 2018 +1100)
+* 66f02599 - bump version to 3.5.14 (Ronald Holshausen, Tue Feb 20 19:24:22 2018 +1100)
+* de835890 - update changelog for release 3.5.13 (Ronald Holshausen, Tue Feb 20 18:37:07 2018 +1100)
+* abb60d15 - Update README.md (Ronald Holshausen, Thu Feb 22 11:35:44 2018 +1100)
+* 72939f66 - Merge pull request #643 from bbarke/master (Ronald Holshausen, Thu Feb 22 11:27:31 2018 +1100)
+* 2a9881af - #642 upgrade scala (Brent Barker, Tue Feb 20 16:40:50 2018 -0700)
+* db74479f - bump version to 3.5.14 (Ronald Holshausen, Tue Feb 20 19:24:22 2018 +1100)
+
 # 3.5.13 - Bugfix Release
 
 * 83f7b4db - Missed a test from the last change (Ronald Holshausen, Tue Feb 20 15:53:49 2018 +1100)
