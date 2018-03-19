@@ -15,10 +15,11 @@ object HttpClientSupport {
     return asyncHttpClient.executeRequest(request).toCompletableFuture().thenApply({ res ->
       val headers = mutableMapOf<String, String>()
       res.headers.names().forEach({ name -> headers.put(name, res.getHeader(name)) })
-      val contentType = if (StringUtils.isEmpty(res.contentType))
+      val contentType = if (StringUtils.isEmpty(res.contentType)) {
         org.apache.http.entity.ContentType.APPLICATION_JSON
-      else
+      } else {
         org.apache.http.entity.ContentType.parse(res.contentType)
+      }
       val charset = if (contentType.charset == null) Charset.forName("UTF-8") else contentType.charset
       val body = if (res.hasResponseBody()) {
         OptionalBody.body(res.getResponseBody(charset))
@@ -28,5 +29,4 @@ object HttpClientSupport {
       Response(res.statusCode, headers, body)
     })
   }
-
 }
