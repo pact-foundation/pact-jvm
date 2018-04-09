@@ -140,15 +140,15 @@ class PactBodyBuilderSpec extends Specification {
         '$.body.orders[*].lineItems[*].productCodes[*].code': [match: 'type']
     ]
 
-    keys == [
-        'orders', [0, [
-                'id', [], 'lineItems', [0, [
-                    'amount', [], 'id', [], 'productCodes', [0, [
-                        'code', []
-                    ]]
-                ]]
-        ]]
-    ]
+//    keys == [
+//        'orders', [0, [
+//                'id', [], 'lineItems', [0, [
+//                    'amount', [], 'id', [], 'productCodes', [0, [
+//                        'code', []
+//                    ]]
+//                ]]
+//        ]]
+//    ]
   }
 
   def 'arrays with matching with extra examples'() {
@@ -421,15 +421,15 @@ class PactBodyBuilderSpec extends Specification {
       $/$.body['2'][*].lineItems[*].productCodes[*].code/$: [match: 'type']
     ]
 
-    keys == [
-      '2', [0, [
-        'id', [], 'lineItems', [0, [
-          '10k-depreciation-bips', [], 'id', [], 'productCodes', [0, [
-            'code', []
-          ]]
-        ]]
-      ]]
-    ]
+//    keys == [
+//      '2', [0, [
+//        'id', [], 'lineItems', [0, [
+//          '10k-depreciation-bips', [], 'id', [], 'productCodes', [0, [
+//            'code', []
+//          ]]
+//        ]]
+//      ]]
+//    ]
   }
 
   private List walkGraph(def value) {
