@@ -5,8 +5,6 @@ addons:
     packages:
       - oracle-java8-installer
 jdk:
-  - oraclejdk7
-  - openjdk7
   - oraclejdk8
 env:
   - SCALA=2.10 JAVA_OPTS="-XX:MaxPermSize=512m -XX:ReservedCodeCacheSize=512m -Xmx512m -XX:-UseConcMarkSweepGC" GRADLE_OPTS="-Dorg.gradle.daemon=false -Xmx512m"
