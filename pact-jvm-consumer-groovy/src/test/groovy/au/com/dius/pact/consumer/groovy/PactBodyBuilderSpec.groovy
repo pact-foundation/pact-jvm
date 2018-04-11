@@ -411,15 +411,15 @@ class PactBodyBuilderSpec extends Specification {
 
     then:
     service.interactions.size() == 1
-    asJavaMap(service.interactions[0].request.matchingRules) == [
-      $/$.body['2']/$: [max: 10, 'match': 'type'],
-      $/$.body['2'][*].id/$: ['match': 'type'],
-      $/$.body['2'][*].lineItems/$: ['min': 1, 'match': 'type'],
-      $/$.body['2'][*].lineItems[*].id/$: [match: 'type'],
-      $/$.body['2'][*].lineItems[*]['10k-depreciation-bips']/$: [match: 'integer'],
-      $/$.body['2'][*].lineItems[*].productCodes/$: ['match': 'type'],
-      $/$.body['2'][*].lineItems[*].productCodes[*].code/$: [match: 'type']
-    ]
+    asJavaMap(service.interactions[0].request.matchingRules).sort() == [
+      $/$.body.2/$: [max: 10, 'match': 'type'],
+      $/$.body.2[*].id/$: ['match': 'type'],
+      $/$.body.2[*].lineItems/$: ['min': 1, 'match': 'type'],
+      $/$.body.2[*].lineItems[*].id/$: [match: 'type'],
+      $/$.body.2[*].lineItems[*].10k-depreciation-bips/$: [match: 'integer'],
+      $/$.body.2[*].lineItems[*].productCodes/$: ['match': 'type'],
+      $/$.body.2[*].lineItems[*].productCodes[*].code/$: [match: 'type']
+    ].sort()
 
 //    keys == [
 //      '2', [0, [

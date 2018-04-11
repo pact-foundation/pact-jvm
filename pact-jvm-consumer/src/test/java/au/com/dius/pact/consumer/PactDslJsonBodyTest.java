@@ -53,13 +53,13 @@ public class PactDslJsonBodyTest {
 
         Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
                 "$.body.id",
-                "$.body['2'].id",
+                "$.body.2.id",
                 "$.body.numbers[3]",
                 "$.body.numbers[0]",
                 "$.body.numbers[4].timestamp",
                 "$.body.numbers[4].dob",
                 "$.body.numbers[4].id",
-                "$.body.numbers[4]['10k-depreciation-bips'].id"
+                "$.body.numbers[4].10k-depreciation-bips.id"
         ));
         assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
 
@@ -76,7 +76,7 @@ public class PactDslJsonBodyTest {
                 .integerType(K_DEPRECIATION_BIPS);
 
         Set<String> expectedMatchers = new HashSet<String>(Arrays.asList(
-                "$.body['200']", "$.body['1']", "$.body['@field']", "$.body['10k-depreciation-bips']"
+                "$.body.200", "$.body.1", "$.body['@field']", "$.body.10k-depreciation-bips"
         ));
         assertThat(body.getMatchers().keySet(), is(equalTo(expectedMatchers)));
 

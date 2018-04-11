@@ -46,7 +46,7 @@ public class PactDslJsonBodyTest extends ConsumerPactTest {
 
         MatcherTestUtils.assertResponseMatcherKeysEqualTo(fragment,
             "$.body.id",
-            "$.body['2'].id",
+            "$.body.2.id",
             "$.body.numbers[0]",
             "$.body.numbers[3]",
             "$.body.numbers[4].id",
