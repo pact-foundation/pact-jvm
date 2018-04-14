@@ -1,5 +1,21 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 2.4.20 - Bugfix Release
+
+* 772d10f2 - Merge pull request #663 from jaspreetParhar/v2.x (Ronald Holshausen, Sat Apr 14 21:25:46 2018 +1000)
+* a4fb87d8 - Fix to build pact-jvm-maven plugin #662 (Jaspreet Kaur, Fri Apr 13 12:56:28 2018 +0200)
+* 00fc72df - Fix for failing tests #662 (Ronald Holshausen, Wed Apr 11 22:30:54 2018 +1000)
+* 4459f4e7 - Removed test assertions that fail due to hash ordering on different jdks (Ronald Holshausen, Mon Apr 9 14:16:15 2018 +1000)
+* 2bb4213e - Removed JDK 7 from travis build as it is broken (Ronald Holshausen, Mon Apr 9 14:08:21 2018 +1000)
+* c80e17fb - Revert "Upgrade Gradle to version 3.5" (Ronald Holshausen, Mon Apr 9 14:02:45 2018 +1000)
+* c4d69e99 - In matchers module, Groovy code should be compiled first #662 (Ronald Holshausen, Mon Apr 9 13:52:07 2018 +1000)
+* 1e47da43 - Disabling codenarc due to false errors #662 (Ronald Holshausen, Mon Apr 9 13:51:33 2018 +1000)
+* bbbed339 - add the provider version #662 (Ronald Holshausen, Sat Aug 5 19:44:08 2017 +1000)
+* 453a1fc1 - Upgrade Scala and Groovy to the latest versions and correct the Scala dependencies (Ronald Holshausen, Mon Apr 9 13:20:16 2018 +1000)
+* 7206ecac - Upgrade Gradle to version 3.5 (Ronald Holshausen, Mon Apr 9 13:18:17 2018 +1000)
+* b74ea8d1 - Revert "Update SBT plugins" (Ronald Holshausen, Thu Aug 17 10:21:08 2017 +1000)
+* f7023003 - bump version to 2.4.20 (Ronald Holshausen, Thu Aug 17 10:17:29 2017 +1000)
+
 # 2.4.19 - Backported fixes from 3.5.x
 
 * 847d8cb - Update SBT plugins (Ronald Holshausen, Wed Aug 16 16:19:16 2017 +1000)
