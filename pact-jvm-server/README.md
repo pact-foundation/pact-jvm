@@ -98,16 +98,21 @@ The following actions are expected to occur
 
 ### /create
 
-The client will need `POST` to `/create` the generated `JSON` interactions, also providing a state as a query parameter.
+The client will need `POST` to `/create` the generated `JSON` interactions, also providing a state as a query parameter
+and a path.
 
 For example:
 
-    POST http://localhost:29999/create?state=NoUsers '{ "provider": { "name": "Animal_Service"}, ... }'
+    POST http://localhost:29999/create?state=NoUsers&path=/sub/ref/path '{ "provider": { "name": "Animal_Service"}, ... }'
 
 This will create a new running mock service provider on a randomly generated port.  The port will be returned in the
 `201` response:
 
     { "port" : 34423 }
+
+But you can also reference the path from `/sub/ref/path` using the server port.  The service will not strip
+the prefix path, but instead will use it as a differentiator.  If your services do not have differences
+in the prefix of their path, then you will have to use the port method.
 
 ### /complete
 

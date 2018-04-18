@@ -13,7 +13,9 @@ class CreateSpec extends Specification {
     def pact = CreateSpec.getResourceAsStream('/create-pact.json').text
 
     when:
-    def result = Create.create('test state', pact, new scala.collection.immutable.HashMap(),
+    def result = Create.create('test state',
+      JavaConversions.asScalaBuffer(['/data']).toList(),
+      pact, new scala.collection.immutable.HashMap(),
       new Config(4444, 'localhost', false, 20000, 40000, true,
               2, '', '', 8444))
 
@@ -22,8 +24,12 @@ class CreateSpec extends Specification {
     result.response().body.value != '{"port": 8444}'
 
     cleanup:
-    JavaConversions.asJavaCollection(result.newState().values()).each {
-      it.stop()
+    if (result != null) {
+      def state = result.newState()
+      def values = state.values()
+      JavaConversions.asJavaCollection(values).each {
+        it.stop()
+      }
     }
   }
 
@@ -34,9 +40,11 @@ class CreateSpec extends Specification {
     def password = 'brentwashere'
 
     when:
-    def result = Create.create('test state', pact, new scala.collection.immutable.HashMap(),
-            new Config(4444, 'localhost', false, 20000, 40000, true,
-                    2, keystorePath, password, 8444))
+    def result = Create.create('test state',
+      JavaConversions.asScalaBuffer([]).toList(),
+      pact, new scala.collection.immutable.HashMap(),
+      new Config(4444, 'localhost', false, 20000, 40000, true,
+              2, keystorePath, password, 8444))
 
     then:
     result.response().status == 201
