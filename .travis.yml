@@ -1,9 +1,11 @@
 language: java
 sudo: false
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
 jdk:
   - oraclejdk8
-  - oraclejdk9
-  - openjdk8
 env:
   - SCALA=2.12 JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m"
   - SCALA=nonscala JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m"
