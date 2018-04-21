@@ -1,16 +1,6 @@
-buildscript {
-  repositories {
-    mavenLocal()
-    jcenter()
-    mavenCentral()
-    maven { url 'https://clojars.org/repo' }
-  }
-  dependencies {
-    classpath 'com.netflix.nebula:nebula-clojure-plugin:4.3.0'
-  }
+plugins {
+  id "nebula.clojure" version "5.0.6"
 }
-
-apply plugin: 'nebula.clojure'
 
 dependencies {
   compile project(":pact-jvm-provider_${project.scalaVersion}")

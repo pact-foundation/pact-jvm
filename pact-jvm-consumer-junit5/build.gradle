@@ -1,0 +1,17 @@
+dependencies {
+  compile project(":pact-jvm-consumer-junit_${project.scalaVersion}")
+  compile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
+
+  testCompile "ch.qos.logback:logback-core:${project.logbackVersion}",
+    "ch.qos.logback:logback-classic:${project.logbackVersion}"
+  testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
+}
+
+test {
+  useJUnitPlatform()
+
+  // Show test results.
+  testLogging {
+    events "passed", "skipped", "failed"
+  }
+}

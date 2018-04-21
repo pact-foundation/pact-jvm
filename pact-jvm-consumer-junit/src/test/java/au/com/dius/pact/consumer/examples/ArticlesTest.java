@@ -1,13 +1,11 @@
 package au.com.dius.pact.consumer.examples;
 
 import au.com.dius.pact.consumer.Pact;
-import au.com.dius.pact.consumer.PactProviderRule;
 import au.com.dius.pact.consumer.PactProviderRuleMk2;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ArticlesRestClient;
-import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.RequestResponsePact;
 import org.apache.commons.collections4.MapUtils;
 import org.junit.Rule;

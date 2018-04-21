@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer;
 import au.com.dius.pact.consumer.dsl.PactDslRequestWithoutPath;
 import au.com.dius.pact.consumer.dsl.PactDslResponse;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
+import au.com.dius.pact.consumer.junit.JUnitTestSupport;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactSpecVersion;
 import au.com.dius.pact.model.RequestResponsePact;
@@ -155,21 +156,12 @@ public class BaseProviderRule extends ExternalResource {
       });
   }
 
+  /**
+   * @deprecated Use the static method JUnitTestSupport.validateMockServerResult
+   */
+  @Deprecated
   protected void validateResult(PactVerificationResult result, PactVerification pactVerification) throws Throwable {
-    if (!result.equals(PactVerificationResult.Ok.INSTANCE)) {
-      if (result instanceof PactVerificationResult.Error) {
-        PactVerificationResult.Error error = (PactVerificationResult.Error) result;
-        if (error.getMockServerState() != PactVerificationResult.Ok.INSTANCE) {
-          throw new AssertionError("Pact Test function failed with an exception, possibly due to " +
-            error.getMockServerState(), ((PactVerificationResult.Error) result).getError());
-        } else {
-          throw new AssertionError("Pact Test function failed with an exception: " +
-            error.getError().getMessage(), error.getError());
-        }
-      } else {
-        throw new PactMismatchesException(result);
-      }
-    }
+    JUnitTestSupport.validateMockServerResult(result);
   }
 
   /**
@@ -180,7 +172,7 @@ public class BaseProviderRule extends ExternalResource {
       if (pacts == null) {
         pacts = new HashMap<>();
           for (Method m: target.getClass().getMethods()) {
-              if (conformsToSignature(m) && methodMatchesFragment(m, fragment)) {
+              if (JUnitTestSupport.conformsToSignature(m) && methodMatchesFragment(m, fragment)) {
                   Pact pactAnnotation = m.getAnnotation(Pact.class);
                   if (StringUtils.isEmpty(pactAnnotation.provider()) || provider.equals(pactAnnotation.provider())) {
                       PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(pactAnnotation.consumer())
@@ -245,24 +237,6 @@ public class BaseProviderRule extends ExternalResource {
 
   private boolean methodMatchesFragment(Method m, String fragment) {
       return StringUtils.isEmpty(fragment) || m.getName().equals(fragment);
-  }
-
-  /**
-   * validates method signature as described at {@link Pact}
-   */
-  private boolean conformsToSignature(Method m) {
-      Pact pact = m.getAnnotation(Pact.class);
-      boolean conforms =
-          pact != null
-          && RequestResponsePact.class.isAssignableFrom(m.getReturnType())
-          && m.getParameterTypes().length == 1
-          && m.getParameterTypes()[0].isAssignableFrom(PactDslWithProvider.class);
-
-      if (!conforms && pact != null) {
-          throw new UnsupportedOperationException("Method " + m.getName() +
-              " does not conform required method signature 'public RequestResponsePact xxx(PactDslWithProvider builder)'");
-      }
-      return conforms;
   }
 
   /**
