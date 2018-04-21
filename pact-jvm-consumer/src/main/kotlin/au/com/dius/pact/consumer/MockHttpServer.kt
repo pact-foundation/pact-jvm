@@ -172,7 +172,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
     return result
   }
 
-  private fun validateMockServerState(): PactVerificationResult {
+  fun validateMockServerState(): PactVerificationResult {
     if (mismatchedRequests.isNotEmpty()) {
       return PactVerificationResult.Mismatches(mismatchedRequests.values.flatten())
     }
@@ -183,7 +183,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
     return PactVerificationResult.Ok
   }
 
-  private fun waitForServer() {
+  fun waitForServer() {
     org.apache.http.client.fluent.Request.Options(getUrl())
       .addHeader("X-PACT-BOOTCHECK", "true")
       .execute()
