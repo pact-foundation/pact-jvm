@@ -80,6 +80,20 @@ an example.
 If you set the `pactMethod` on the `@PactTestFor` annotation, then the method with the provided name will be used (it still
 needs a `@Pact` annotation). See [MultiTest](src/test/groovy/au/com/dius/pact/consumer/junit5/MultiTest.groovy) for an example.
 
+### Injecting the mock server into the test
+
+You can get the mock server injected into the test method by adding an annotated parameter to the test method.
+
+```java
+  @Test
+  void test(@PactMockServer MockServer mockServer) {
+    HttpResponse httpResponse = Request.Get(mockServer.getUrl() + "/articles.json").execute().returnResponse();
+    assertThat(httpResponse.getStatusLine().getStatusCode(), is(equalTo(200)));
+  }
+```
+
+This helps with getting the base URL of the mock server, especially when a random port is used.
+
 ## Unsupported
 
 The current implementation does not support tests with multiple providers. This will be added in a later release.
