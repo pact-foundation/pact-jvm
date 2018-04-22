@@ -26,7 +26,7 @@ import java.lang.annotation.Inherited
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 @Inherited
-annotation class PactTestFor(val providerName: String = "provider",
+annotation class PactTestFor(val providerName: String = "",
                              val hostInterface: String = "localhost",
                              val port: String = "8080",
                              val pactVersion: PactSpecVersion = PactSpecVersion.V3,
@@ -35,7 +35,7 @@ annotation class PactTestFor(val providerName: String = "provider",
 @Retention(AnnotationRetention.RUNTIME)
 annotation class PactMockServer
 
-data class ProviderInfo(val providerName: String = "provider",
+data class ProviderInfo(val providerName: String = "",
                         val hostInterface: String = "localhost",
                         val port: String = "8080",
                         val pactVersion: PactSpecVersion = PactSpecVersion.V3) {
@@ -90,17 +90,25 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
   }
 
   fun lookupPact(providerInfo: ProviderInfo, pactMethod: String, context: ExtensionContext): RequestResponsePact {
-    val method = if (pactMethod.isEmpty()) {
-      logger.debug { "Looking for first @Pact method for provider '${providerInfo.providerName}'" }
+    val providerName = if (providerInfo.providerName.isEmpty()) "default" else providerInfo.providerName
+    val methods = if (pactMethod.isEmpty()) {
+      logger.debug { "Looking for first @Pact method for provider '$providerName'" }
       AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java, HierarchyTraversalMode.TOP_DOWN)
-        .firstOrNull {
-          AnnotationSupport.findAnnotation(it, Pact::class.java).get().provider == providerInfo.providerName
-        }
     } else {
-      logger.debug { "Looking for @Pact method named '$pactMethod' for provider '${providerInfo.providerName}'" }
+      logger.debug { "Looking for @Pact method named '$pactMethod' for provider '$providerName'" }
       ReflectionSupport.findMethods(context.requiredTestClass, { method ->
         isAnnotated(method, Pact::class.java) && method.name == pactMethod
-      }, HierarchyTraversalMode.TOP_DOWN).firstOrNull {
+      }, HierarchyTraversalMode.TOP_DOWN)
+    }
+
+    val method = if (providerInfo.providerName.isEmpty() && pactMethod.isNotEmpty()) {
+      methods.firstOrNull {
+        it.name == pactMethod
+      }
+    } else if (providerInfo.providerName.isEmpty()) {
+      methods.firstOrNull()
+    } else {
+      methods.firstOrNull {
         AnnotationSupport.findAnnotation(it, Pact::class.java).get().provider == providerInfo.providerName
       }
     }
