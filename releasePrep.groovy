@@ -107,7 +107,8 @@ ask('Tag and Push commits?: [Y]') {
 }
 
 ask('Publish artifacts to maven central?: [Y]') {
-  executeOnShell './gradlew clean uploadArchives :pact-jvm-provider-gradle_2.12:publishPlugins -S'
+//  executeOnShell './gradlew clean uploadArchives :pact-jvm-provider-gradle:publishPlugins -S'
+  executeOnShell './gradlew clean uploadArchives -S'
 }
 
 def nextVer = Version.valueOf(releaseVer).incrementPreReleaseVersion()

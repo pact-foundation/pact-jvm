@@ -43,11 +43,7 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 
 ## Note about artifact names and versions
 
-Pact-JVM is partially written in Scala. As Scala does not provide binary compatibility between major versions, most of the Pact-JVM
-artifacts have the version of Scala they were built with in the artifact name. So, for example, the pact-jvm-consumer-junit
-module has a Jar file named pact-jvm-consumer_2.12. The full name of the file is pact-jvm-consumer_2.12-3.5.x.jar.
-
-## Supported JDK and specification versions: 
+## Supported JDK and specification versions:
 
 | Branch | Specification | Min JDK | Scala Versions | Latest Version |
 | ------ | ------------- | ------- | -------------- | -------------- |
