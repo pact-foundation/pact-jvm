@@ -65,7 +65,8 @@ You want to look at: [scala-pact](https://github.com/ITV/scala-pact) or [pact-jv
 
 ### I Use Java
 
-You want to look at: [pact-jvm-consumer-junit](pact-jvm-consumer-junit). Also, if you are using Java 8, there is [an
+You want to look at: [pact-jvm-consumer-junit](pact-jvm-consumer-junit) for JUnit 4 tests and
+[pact-jvm-consumer-junit5](pact-jvm-consumer-junit5) for JUnit 5 tests. Also, if you are using Java 8, there is [an
 updated DSL for consumer tests](pact-jvm-consumer-java8).
 
 ### I Use Groovy or Grails

@@ -48,7 +48,7 @@ interactions for the test.
 Then the final step is to use the `@PactTestFor` annotation to tell the Pact extension how to setup the Pact test. You
 can either put this annotation on the test class, or on the test method. For examples see
 [ArticlesTest](src/test/java/au/com/dius/pact/consumer/junit5/ArticlesTest.java) and
-[MultiTest](/home/ronald/Development/Projects/Pact/pact-jvm/pact-jvm-consumer-junit5/src/test/groovy/au/com/dius/pact/consumer/junit5/MultiTest.groovy).
+[MultiTest](src/test/groovy/au/com/dius/pact/consumer/junit5/MultiTest.groovy).
 
 The `@PactTestFor` annotation allows you to control the mock server in the same way as the JUnit 4 `PactProviderRule`. It
 allows you to set the hostname to bind to (default is `localhost`) and the port (default is to use a random port). You
@@ -63,7 +63,7 @@ public class ExampleJavaConsumerPactTest {
 **NOTE on the hostname**: The mock server runs in the same JVM as the test, so the only valid values for hostname are:
 
 | hostname | result |
-| ======== | ====== |
+| -------- | ------ |
 | `localhost` | binds to the address that localhost points to (normally the loopback adapter) |
 | `127.0.0.1` or `::1` | binds to the loopback adapter |
 | host name | binds to the default interface that the host machines DNS name resolves to |
@@ -72,12 +72,13 @@ public class ExampleJavaConsumerPactTest {
 #### Matching the interactions by provider name
 
 If you set the `providerName` on the `@PactTestFor` annotation, then the first method with a `@Pact` annotation with the
-same provider name will be used.
+same provider name will be used. See [ArticlesTest](src/test/java/au/com/dius/pact/consumer/junit5/ArticlesTest.java) for
+an example.
 
 #### Matching the interactions by method name
 
 If you set the `pactMethod` on the `@PactTestFor` annotation, then the method with the provided name will be used (it still
-needs a `@Pact` annotation).
+needs a `@Pact` annotation). See [MultiTest](src/test/groovy/au/com/dius/pact/consumer/junit5/MultiTest.groovy) for an example.
 
 ## Unsupported
 
