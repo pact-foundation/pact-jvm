@@ -1,7 +1,7 @@
 
 dependencies {
-    compile project(":pact-jvm-provider_${project.scalaVersion}"),
-            project(":pact-jvm-provider-scalasupport_${project.scalaVersion}"),
+    compile project(":pact-jvm-provider"),
+            project(":pact-jvm-provider-scalasupport"),
             "org.scalatest:scalatest_${project.scalaVersion}:${project.scalatestVersion}"
-    testCompile project(":pact-jvm-consumer_${project.scalaVersion}")
+    testCompile project(":pact-jvm-consumer")
 }

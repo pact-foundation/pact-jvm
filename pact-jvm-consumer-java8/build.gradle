@@ -7,5 +7,5 @@ repositories {
 }
 
 dependencies {
-  compile project(":pact-jvm-consumer-junit_${project.scalaVersion}")
+  compile project(":pact-jvm-consumer-junit")
 }

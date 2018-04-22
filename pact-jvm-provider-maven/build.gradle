@@ -1,11 +1,11 @@
 apply plugin: 'maven-publish'
 
 dependencies {
-    compile project(":pact-jvm-provider_${project.scalaVersion}"),
+    compile project(":pact-jvm-provider"),
       'org.apache.maven:maven-plugin-api:3.5.0',
       'org.apache.maven.plugin-tools:maven-plugin-annotations:3.5'
     compile 'org.apache.maven:maven-core:3.5.0'
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
 }
@@ -15,9 +15,9 @@ def isWindows() {
     Os.isFamily(Os.FAMILY_WINDOWS)
 }
 
-task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider_${project.scalaVersion}:install",
+task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider:install",
                                               ':pact-jvm-model:install',
-                                              ":pact-jvm-matchers_${project.scalaVersion}:install",
+                                              ":pact-jvm-matchers:install",
                                               ':pact-jvm-pact-broker:install']) {
     String mvn = 'mvn'
     if (isWindows()) {

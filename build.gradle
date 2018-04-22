@@ -34,24 +34,13 @@ subprojects {
     }
   }
 
-    def scalaVersionLookup = [
-        '2.12': '2.12.4'
-    ]
-
-    def m = project.name =~ /.*_(2\.1\d)(_0\.\d+)?/
-    if (m.matches()) {
-      project.ext {
-          scalaVersion = m.group(1)
-          scalaFullVersion = scalaVersionLookup[m.group(1)]
-      }
-
-      buildDir = new File(projectDir, "build/$project.scalaVersion")
+    project.ext {
+        scalaVersion = '2.12'
+        scalaFullVersion = '2.12.4'
     }
 
     apply plugin: 'java'
-    if (project.hasProperty('scalaVersion')) {
-      apply plugin: 'scala'
-    }
+    apply plugin: 'scala'
     apply plugin: 'groovy'
     apply plugin: 'maven'
     apply plugin: 'signing'
@@ -100,7 +89,7 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '3.5.16'
+    version = '4.0.0-beta.0'
     targetCompatibility = '1.8'
     sourceCompatibility = '1.8'
 
@@ -111,11 +100,9 @@ subprojects {
         }
     }
 
-    if (project.hasProperty('scalaVersion')) {
-      compileScala {
-        classpath = classpath.plus(files(compileGroovy.destinationDir)).plus(files(compileKotlin.destinationDir))
-        dependsOn compileGroovy, compileKotlin
-      }
+    compileScala {
+      classpath = classpath.plus(files(compileGroovy.destinationDir)).plus(files(compileKotlin.destinationDir))
+      dependsOn compileGroovy, compileKotlin
     }
 
     compileTestGroovy {
@@ -212,7 +199,6 @@ subprojects {
                     if (project.hasProperty('sonatypeUsername')) {
                         authentication(userName: sonatypeUsername, password: sonatypePassword)
                     }
-//                     proxy(host: 'localhost', port: 3128, type: 'http')
                 }
 
             }
@@ -263,23 +249,6 @@ subprojects {
   check.dependsOn << 'detektCheck'
 
   task allDeps(type: DependencyReportTask) {}
-}
-
-tasks.addRule("Pattern: <Task>_<ScalaVersion>") { String taskName ->
-  if (taskName.contains('_')) {
-    def m = taskName =~ $/(.*)_(\d\.\d+)/$
-    if (m.matches()) {
-      task(taskName) {
-        dependsOn project.childProjects.findAll { it.key.endsWith('_' + m.group(2)) }
-          .collect { it.value.getTasksByName(m.group(1), false) }.flatten()
-      }
-    } else {
-      task(taskName) {
-        dependsOn project.childProjects.findAll { !(it.key ==~ /.*_\d\.\d+$/) }
-          .collect { it.value.getTasksByName(taskName.split('_').first(), false) }.flatten()
-      }
-    }
-  }
 }
 
 if (System.env.TRAVIS == 'true') {
