@@ -1,5 +1,26 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.15 - JUnit 5 Consumer Test implementation
+
+* 6933fc29 - Cleanup of JUnit 5 implementation #576 (Ronald Holshausen, Sun Apr 22 15:37:24 2018 +1000)
+* fb64e863 - Added a nore in the readme for JUnit 5 tests about injecting the mock server #576 (Ronald Holshausen, Sun Apr 22 14:50:58 2018 +1000)
+* 7970910e - Corrected the readme for JUnit 5 tests #576 (Ronald Holshausen, Sun Apr 22 14:43:01 2018 +1000)
+* 611d98a5 - Updated the readme for JUnit 5 tests #576 (Ronald Holshausen, Sun Apr 22 14:35:53 2018 +1000)
+* 11d13607 - Support for JUnit5 consumer tests with mutiple tests in the test class #576 (Ronald Holshausen, Sun Apr 22 13:56:46 2018 +1000)
+* bc8c63b4 - Merge branch 'junit5' (Ronald Holshausen, Sat Apr 21 17:19:08 2018 +1000)
+* 60cd2681 - First implementation of a JUnit5 consumer test #576 (Ronald Holshausen, Sat Apr 21 17:18:35 2018 +1000)
+* 4f121944 - Revert "Added Java 9 to travis build" (Ronald Holshausen, Fri Apr 20 12:55:45 2018 +1000)
+* 41a4c903 - Need to add jaxb-api as a dependency for Java 9 (Ronald Holshausen, Fri Apr 20 12:33:38 2018 +1000)
+* a64833cb - Added Java 9 to travis build (Ronald Holshausen, Fri Apr 20 12:12:26 2018 +1000)
+* 258f4c1d - Upgraded Gradle to 4.6 in prep of supporting JUnit 5 (Ronald Holshausen, Fri Apr 20 12:07:49 2018 +1000)
+* 59323b32 - Merge pull request #666 from groboclown/server-enhancement (Ronald Holshausen, Wed Apr 18 11:47:03 2018 +1000)
+* fa0476b0 - Merge pull request #665 from groboclown/dockerfile-fix (Ronald Holshausen, Wed Apr 18 09:26:33 2018 +1000)
+* 64f73774 - Add in the capability to register a pact file to be accessible from the main server API. (Groboclown, Mon Apr 16 14:11:20 2018 -0500)
+* 65e66fa6 - Fix the version number in the pact server Docker file. (Groboclown, Tue Apr 17 11:22:01 2018 -0500)
+* 0945ea6c - Updated versions (Ronald Holshausen, Sun Apr 15 09:38:54 2018 +1000)
+* 59ce4b92 - Updated versions in readme (Ronald Holshausen, Mon Mar 26 15:37:24 2018 +1100)
+* 18ca9d5b - bump version to 3.5.15 (Ronald Holshausen, Mon Mar 19 12:27:06 2018 +1100)
+
 # 3.5.14 - Spring enhancements + bugfixes
 
 * ccfee394 - Merge branch 'master' into v3.5.x (Ronald Holshausen, Mon Mar 19 10:29:41 2018 +1100)
