@@ -51,11 +51,17 @@ interface MockServer {
    */
   fun runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun):
           PactVerificationResult
+
+  /**
+   * Returns the results of validating the mock server state
+   */
+  fun validateMockServerState(): PactVerificationResult
 }
 
 abstract class BaseMockServer(val pact: RequestResponsePact,
                               val config: MockProviderConfig,
-                              private val server: HttpServer) : HttpHandler, MockServer {
+                              private val server: HttpServer,
+                              private var stopped: Boolean = false) : HttpHandler, MockServer {
   private val mismatchedRequests = ConcurrentHashMap<Request, MutableList<PactVerificationResult>>()
   private val matchedRequests = ConcurrentLinkedQueue<Request>()
   private val requestMatcher = RequestMatching.apply(JavaConversions.asScalaBuffer(pact.interactions).toSeq())
@@ -141,7 +147,12 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
 
   fun start() = server.start()
 
-  fun stop() = server.stop(0)
+  fun stop() {
+    if (!stopped) {
+      stopped = true
+      server.stop(0)
+    }
+  }
 
   init {
     initServer()
@@ -172,7 +183,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
     return result
   }
 
-  private fun validateMockServerState(): PactVerificationResult {
+  override fun validateMockServerState(): PactVerificationResult {
     if (mismatchedRequests.isNotEmpty()) {
       return PactVerificationResult.Mismatches(mismatchedRequests.values.flatten())
     }
@@ -183,17 +194,17 @@ abstract class BaseMockServer(val pact: RequestResponsePact,
     return PactVerificationResult.Ok
   }
 
-  private fun waitForServer() {
+  fun waitForServer() {
     org.apache.http.client.fluent.Request.Options(getUrl())
       .addHeader("X-PACT-BOOTCHECK", "true")
       .execute()
   }
 
   override fun getUrl(): String {
-    if (config.port == 0) {
-      return "${config.scheme}://${server.address.hostName}:${server.address.port}"
+    return if (config.port == 0) {
+      "${config.scheme}://${server.address.hostName}:${server.address.port}"
     } else {
-      return config.url()
+      config.url()
     }
   }
 

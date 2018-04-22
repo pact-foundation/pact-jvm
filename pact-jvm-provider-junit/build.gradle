@@ -12,4 +12,6 @@ dependencies {
     testCompile 'com.github.rest-driver:rest-client-driver:1.1.45'
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile 'org.apache.commons:commons-collections4:4.1'
+    // Required for Java 9
+    testCompile 'javax.xml.bind:jaxb-api:2.3.0'
 }

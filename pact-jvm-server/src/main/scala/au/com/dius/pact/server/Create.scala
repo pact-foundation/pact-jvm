@@ -7,8 +7,8 @@ import com.typesafe.scalalogging.StrictLogging
 import scala.collection.JavaConversions
 
 object Create extends StrictLogging {
-  
-  def create(state: String, requestBody: String, oldState: ServerState, config: Config): Result = {
+
+  def create(state: String, path: List[String], requestBody: String, oldState: ServerState, config: Config): Result = {
     val pact = PactReader.loadPact(requestBody).asInstanceOf[RequestResponsePact]
 
     val mockConfig : MockProviderConfig = {
@@ -26,17 +26,24 @@ object Create extends StrictLogging {
     val server = DefaultMockProvider.apply(mockConfig)
 
     val port = server.config.getPort
-    val entry = port -> server
+    val portEntry = port.toString -> server
+
+    // Not very scala...
+    val newState = (oldState + portEntry) ++
+      (for (
+        pathValue <- path
+      ) yield (pathValue -> server))
+
     val body = OptionalBody.body("{\"port\": " + port + "}")
 
     server.start(pact)
 
     Result(new Response(201, JavaConversions.mapAsJavaMap(ResponseUtils.CrossSiteHeaders ++
-      Map("Content-Type" -> "application/json")), body), oldState + entry)
+      Map("Content-Type" -> "application/json")), body), newState)
   }
 
   def apply(request: Request, oldState: ServerState, config: Config): Result = {
-    def errorJson = OptionalBody.body("{\"error\": \"please provide state param and pact body\"}")
+    def errorJson = OptionalBody.body("{\"error\": \"please provide state param and path param and pact body\"}")
     def clientError = Result(new Response(400, JavaConversions.mapAsJavaMap(ResponseUtils.CrossSiteHeaders), errorJson),
       oldState)
 
@@ -48,8 +55,9 @@ object Create extends StrictLogging {
       for {
         stateList <- CollectionUtils.javaLMapToScalaLMap(request.getQuery).get("state")
         state <- stateList.headOption
+        paths <- CollectionUtils.javaLMapToScalaLMap(request.getQuery).get("path")
         body <- Option(request.getBody)
-      } yield create(state, body.getValue, oldState, config)
+      } yield create(state, paths, body.getValue, oldState, config)
     } else None
 
     result getOrElse clientError

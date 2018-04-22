@@ -51,9 +51,9 @@ module has a Jar file named pact-jvm-consumer_2.12. The full name of the file is
 
 | Branch | Specification | Min JDK | Scala Versions | Latest Version |
 | ------ | ------------- | ------- | -------------- | -------------- |
-| 3.5.x | V3 | 8 | 2.12, 2.11 | 3.5.13 |
+| 3.5.x | V3 | 8 | 2.12, 2.11 | 3.5.14 |
 | 3.5.x-jre7 | V3 | 7 | 2.11 | 3.5.7-jre7.0 |
-| 2.4.x (v2.x) | V2 | 6 | 2.10, 2.11 | 2.4.19 |
+| 2.4.x (v2.x) | V2 | 6 | 2.10, 2.11 | 2.4.20 |
 
 ## Service Consumers
 
@@ -65,7 +65,8 @@ You want to look at: [scala-pact](https://github.com/ITV/scala-pact) or [pact-jv
 
 ### I Use Java
 
-You want to look at: [pact-jvm-consumer-junit](pact-jvm-consumer-junit). Also, if you are using Java 8, there is [an
+You want to look at: [pact-jvm-consumer-junit](pact-jvm-consumer-junit) for JUnit 4 tests and
+[pact-jvm-consumer-junit5](pact-jvm-consumer-junit5) for JUnit 5 tests. Also, if you are using Java 8, there is [an
 updated DSL for consumer tests](pact-jvm-consumer-java8).
 
 ### I Use Groovy or Grails
