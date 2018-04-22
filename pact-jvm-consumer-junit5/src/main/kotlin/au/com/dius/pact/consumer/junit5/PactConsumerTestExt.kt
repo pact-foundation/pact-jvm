@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.junit5
 
 import au.com.dius.pact.consumer.BaseMockServer
 import au.com.dius.pact.consumer.ConsumerPactBuilder
+import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.Pact
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.junit.JUnitTestSupport
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolver
 import org.junit.platform.commons.support.AnnotationSupport
-import org.junit.platform.commons.support.AnnotationSupport.isAnnotated
 import org.junit.platform.commons.support.HierarchyTraversalMode
 import org.junit.platform.commons.support.ReflectionSupport
 import java.lang.annotation.Inherited
@@ -31,9 +31,6 @@ annotation class PactTestFor(val providerName: String = "",
                              val port: String = "8080",
                              val pactVersion: PactSpecVersion = PactSpecVersion.V3,
                              val pactMethod: String = "")
-
-@Retention(AnnotationRetention.RUNTIME)
-annotation class PactMockServer
 
 data class ProviderInfo(val providerName: String = "",
                         val hostInterface: String = "localhost",
@@ -50,10 +47,17 @@ data class ProviderInfo(val providerName: String = "",
   }
 }
 
+class JUnit5MockServerSupport(private val baseMockServer: BaseMockServer) : MockServer by baseMockServer,
+  ExtensionContext.Store.CloseableResource {
+  override fun close() {
+    baseMockServer.stop()
+  }
+}
+
 class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, AfterEachCallback {
 
   override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext) =
-    parameterContext.isAnnotated(PactMockServer::class.java)
+    parameterContext.parameter.type.isAssignableFrom(MockServer::class.java)
 
   override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any {
     val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
@@ -86,30 +90,28 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
     val mockServer = mockServer(pact, config) as BaseMockServer
     mockServer.start()
     mockServer.waitForServer()
-    store.put("mockServer", mockServer)
+    store.put("mockServer", JUnit5MockServerSupport(mockServer))
   }
 
   fun lookupPact(providerInfo: ProviderInfo, pactMethod: String, context: ExtensionContext): RequestResponsePact {
     val providerName = if (providerInfo.providerName.isEmpty()) "default" else providerInfo.providerName
-    val methods = if (pactMethod.isEmpty()) {
-      logger.debug { "Looking for first @Pact method for provider '$providerName'" }
-      AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java, HierarchyTraversalMode.TOP_DOWN)
-    } else {
-      logger.debug { "Looking for @Pact method named '$pactMethod' for provider '$providerName'" }
-      ReflectionSupport.findMethods(context.requiredTestClass, { method ->
-        isAnnotated(method, Pact::class.java) && method.name == pactMethod
-      }, HierarchyTraversalMode.TOP_DOWN)
-    }
+    val methods = AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java,
+      HierarchyTraversalMode.TOP_DOWN)
 
-    val method = if (providerInfo.providerName.isEmpty() && pactMethod.isNotEmpty()) {
-      methods.firstOrNull {
-        it.name == pactMethod
+    val method = when {
+      pactMethod.isNotEmpty() -> {
+        logger.debug { "Looking for @Pact method named '$pactMethod' for provider '$providerName'" }
+        methods.firstOrNull { it.name == pactMethod }
       }
-    } else if (providerInfo.providerName.isEmpty()) {
-      methods.firstOrNull()
-    } else {
-      methods.firstOrNull {
-        AnnotationSupport.findAnnotation(it, Pact::class.java).get().provider == providerInfo.providerName
+      providerInfo.providerName.isEmpty() -> {
+        logger.debug { "Looking for first @Pact method" }
+        methods.firstOrNull()
+      }
+      else -> {
+        logger.debug { "Looking for first @Pact method for provider '$providerName'" }
+        methods.firstOrNull {
+          AnnotationSupport.findAnnotation(it, Pact::class.java).get().provider == providerInfo.providerName
+        }
       }
     }
 
@@ -130,11 +132,11 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
 
   override fun afterEach(context: ExtensionContext) {
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
-    val mockServer = store["mockServer"] as BaseMockServer
+    val mockServer = store["mockServer"] as JUnit5MockServerSupport
     val pact = store["pact"] as RequestResponsePact
     val config = store["mockServerConfig"] as MockProviderConfig
     Thread.sleep(100) // give the mock server some time to have consistent state
-    mockServer.stop()
+    mockServer.close()
     val result = mockServer.validateMockServerState()
     if (result === PactVerificationResult.Ok) {
       val pactDirectory = pactDirectory()

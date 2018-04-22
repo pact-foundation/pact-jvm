@@ -82,11 +82,11 @@ needs a `@Pact` annotation). See [MultiTest](src/test/groovy/au/com/dius/pact/co
 
 ### Injecting the mock server into the test
 
-You can get the mock server injected into the test method by adding an annotated parameter to the test method.
+You can get the mock server injected into the test method by adding a `MockServer` parameter to the test method.
 
 ```java
   @Test
-  void test(@PactMockServer MockServer mockServer) {
+  void test(MockServer mockServer) {
     HttpResponse httpResponse = Request.Get(mockServer.getUrl() + "/articles.json").execute().returnResponse();
     assertThat(httpResponse.getStatusLine().getStatusCode(), is(equalTo(200)));
   }

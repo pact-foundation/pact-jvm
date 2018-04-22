@@ -51,7 +51,7 @@ public class ArticlesTest {
   }
 
   @Test
-  void testArticles(@PactMockServer MockServer mockServer) throws IOException {
+  void testArticles(MockServer mockServer) throws IOException {
     HttpResponse httpResponse = Request.Get(mockServer.getUrl() + "/articles.json").execute().returnResponse();
     assertThat(httpResponse.getStatusLine().getStatusCode(), is(equalTo(200)));
   }

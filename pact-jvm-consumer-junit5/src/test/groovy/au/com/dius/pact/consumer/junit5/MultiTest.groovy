@@ -59,7 +59,7 @@ class MultiTest {
 
   @Test
   @PactTestFor(pactMethod = 'createFragment1')
-  void runTest1(@PactMockServer MockServer mockServer) {
+  void runTest1(MockServer mockServer) {
     def http = new HTTPBuilder(mockServer.url)
 
     http.post(path: '/some-service/users', body: user(), requestContentType: ContentType.JSON) { response ->
@@ -89,7 +89,7 @@ class MultiTest {
 
   @Test
   @PactTestFor(pactMethod = 'createFragment2')
-  void runTest2(@PactMockServer MockServer mockServer) {
+  void runTest2(MockServer mockServer) {
     assert Request.Put(mockServer.url + '/numbertest')
       .addHeader('Accept', ContentType.JSON.toString())
       .bodyString('{"name": "harry","data": 1234.0 }', org.apache.http.entity.ContentType.APPLICATION_JSON)
@@ -134,13 +134,13 @@ class MultiTest {
 
   @Test
   @PactTestFor(pactMethod = 'getUsersFragment')
-  void runTest3(@PactMockServer MockServer mockServer) {
+  void runTest3(MockServer mockServer) {
     assert Request.Get(mockServer.url + '/idm/user').execute().returnContent().asString()
   }
 
   @Test
   @PactTestFor(pactMethod = 'getUsersFragment2')
-  void runTest4(@PactMockServer MockServer mockServer) {
+  void runTest4(MockServer mockServer) {
     assert Request.Get(mockServer.url + '/idm/user').execute().returnContent().asString()
   }
 
