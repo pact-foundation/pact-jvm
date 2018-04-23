@@ -1,0 +1,18 @@
+dependencies {
+    compile project(":pact-jvm-provider-junit_${project.scalaVersion}")
+    compile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
+
+    testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
+    testCompile 'ru.lanwen.wiremock:wiremock-junit5:1.1.1'
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
+    testCompile 'com.github.tomakehurst:wiremock:2.17.0'
+}
+
+test {
+    useJUnitPlatform()
+
+    // Show test results.
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
