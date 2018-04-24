@@ -8,6 +8,7 @@ import au.com.dius.pact.provider.junit.Provider
 import au.com.dius.pact.provider.junit.loader.PactLoader
 import au.com.dius.pact.provider.junit.loader.PactSource
 import mu.KLogging
+import org.junit.jupiter.api.extension.Extension
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.TestTemplateInvocationContext
 import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider
@@ -17,13 +18,19 @@ import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 
 class PactVerificationContext(private val pact: Pact<Interaction>,
-                              private val interaction: Interaction): TestTemplateInvocationContext {
+                              private val interaction: Interaction) : TestTemplateInvocationContext {
   override fun getDisplayName(invocationIndex: Int): String {
     return "${pact.consumer.name} - ${interaction.description}"
   }
+
+  override fun getAdditionalExtensions(): MutableList<Extension> {
+    return mutableListOf(PactInteractionVerificationExtension(pact, interaction))
+  }
 }
 
-class PactVerificationInvocationContextProvider: TestTemplateInvocationContextProvider {
+class PactInteractionVerificationExtension(pact: Pact<Interaction>, interaction: Interaction) : Extension
+
+class PactVerificationInvocationContextProvider : TestTemplateInvocationContextProvider {
   override fun provideTestTemplateInvocationContexts(context: ExtensionContext): Stream<TestTemplateInvocationContext> {
     logger.debug { "provideTestTemplateInvocationContexts called" }
 
@@ -86,5 +93,4 @@ class PactVerificationInvocationContextProvider: TestTemplateInvocationContextPr
   }
 
   companion object : KLogging()
-
 }
