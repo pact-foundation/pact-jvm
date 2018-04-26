@@ -25,7 +25,7 @@ public class WildcardKeysTest {
     private static final String APPLICATION_JSON = "application/json";
 
     @Rule
-    public PactProviderRuleMk2 provider = new PactProviderRuleMk2("WildcardKeysProvider", "localhost", 8081, this);
+    public PactProviderRuleMk2 provider = new PactProviderRuleMk2("WildcardKeysProvider", "localhost", 8111, this);
 
     @Pact(provider="WildcardKeysProvider", consumer="WildcardKeysConsumer")
     public RequestResponsePact createFragment(PactDslWithProvider builder) {
@@ -82,7 +82,7 @@ public class WildcardKeysTest {
     @Test
     @PactVerification("WildcardKeysProvider")
     public void runTest() throws IOException {
-      String result = Request.Get("http://localhost:8081/")
+      String result = Request.Get("http://localhost:8111/")
         .addHeader("Accept", APPLICATION_JSON)
         .execute().returnContent().asString();
       Map<String, Object> body = (Map<String, Object>) new JsonSlurper().parseText(result);
