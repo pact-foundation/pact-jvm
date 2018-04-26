@@ -19,13 +19,15 @@ sealed class UrlPactSource : PactSource() {
 
 data class DirectorySource<I> @JvmOverloads constructor(
   val dir: File,
-  val pacts: MutableMap<File, Pact<I>> = mutableMapOf()) : PactSource()
+  val pacts: MutableMap<File, Pact<I>> = mutableMapOf()
+) : PactSource()
   where I: Interaction
 
 data class PactBrokerSource<I> @JvmOverloads constructor(
   val host: String,
   val port: String,
-  val pacts: MutableMap<Consumer, List<Pact<I>>> = mutableMapOf()) : PactSource()
+  val pacts: MutableMap<Consumer, List<Pact<I>>> = mutableMapOf()
+) : PactSource()
   where I: Interaction
 
 data class FileSource<I> @JvmOverloads constructor(val file: File, val pact: Pact<I>? = null)
@@ -40,13 +42,15 @@ data class UrlSource<I> @JvmOverloads constructor(override val url: String, val 
 
 data class UrlsSource<I> @JvmOverloads constructor(
   val url: List<String>,
-  val pacts: MutableMap<String, Pact<I>> = mutableMapOf())
-  : PactSource() where I: Interaction
+  val pacts: MutableMap<String, Pact<I>> = mutableMapOf()
+) : PactSource() where I: Interaction
 
-data class BrokerUrlSource @JvmOverloads constructor(override val url: String,
-                                                     val pactBrokerUrl: String,
-                                                     val attributes: Map<String, Map<String, Any>> = mapOf(),
-                                                     val options: Map<String, Any> = mapOf()) : UrlPactSource() {
+data class BrokerUrlSource @JvmOverloads constructor(
+  override val url: String,
+  val pactBrokerUrl: String,
+  val attributes: Map<String, Map<String, Any>> = mapOf(),
+  val options: Map<String, Any> = mapOf()
+) : UrlPactSource() {
   override fun description() = "Pact Broker $url"
 }
 

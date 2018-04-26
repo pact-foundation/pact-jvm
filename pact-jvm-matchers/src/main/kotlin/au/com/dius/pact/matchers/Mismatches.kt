@@ -29,8 +29,13 @@ object HeaderMismatchFactory : MismatchFactory<HeaderMismatch> {
     HeaderMismatch(path.last(), expected.toString(), actual.toString(), message)
 }
 
-data class BodyMismatch @JvmOverloads constructor(val expected: Any?, val actual: Any?, val mismatch: String? = null,
-                                                  val path: String = "/", val diff: String? = null)
+data class BodyMismatch @JvmOverloads constructor(
+  val expected: Any?,
+  val actual: Any?,
+  val mismatch: String? = null,
+  val path: String = "/",
+  val diff: String? = null
+)
   : Mismatch {
   override fun description(): String = if (mismatch != null) {
     "BodyMismatch - $mismatch"
