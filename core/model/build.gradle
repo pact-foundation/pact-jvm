@@ -1,3 +1,20 @@
+task pactsJar(type: Jar, dependsOn: testClasses) {
+  baseName = "pacts-jar"
+  into('jar-pacts') {
+    from(sourceSets.test.output) {
+      include 'test_pact_v3.json'
+    }
+  }
+}
+
+configurations {
+  testJars
+}
+
+artifacts {
+  testJars pactsJar
+}
+
 dependencies {
   compile project(":pact-jvm-pact-broker")
   compile 'com.github.zafarkhaja:java-semver:0.9.0'
@@ -8,6 +25,7 @@ dependencies {
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
+  testRuntime project(path: project.path, configuration: 'testJars')
 }
 
 compileGroovy {
