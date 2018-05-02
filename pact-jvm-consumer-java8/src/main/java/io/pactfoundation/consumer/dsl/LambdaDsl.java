@@ -2,6 +2,8 @@ package io.pactfoundation.consumer.dsl;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
+import au.com.dius.pact.model.matchingrules.MaxTypeMatcher;
+import au.com.dius.pact.model.matchingrules.MinTypeMatcher;
 
 import java.util.function.Consumer;
 
@@ -17,12 +19,31 @@ public class LambdaDsl {
         return dslArray;
     }
 
+    public static LambdaDslJsonArray newJsonArrayMinLike(Integer size, Consumer<LambdaDslJsonArray> array) {
+        final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray();
+        pactDslJsonArray.setNumberExamples(size);
+        pactDslJsonArray.getMatchers().addRule(new MinTypeMatcher(size));
+
+        final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(pactDslJsonArray);
+        array.accept(dslArray);
+        return dslArray;
+    }
+
+    public static LambdaDslJsonArray newJsonArrayMaxLike(Integer size, Consumer<LambdaDslJsonArray> array) {
+        final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray();
+        pactDslJsonArray.setNumberExamples(1);
+        pactDslJsonArray.getMatchers().addRule(new MaxTypeMatcher(size));
+
+        final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(pactDslJsonArray);
+        array.accept(dslArray);
+        return dslArray;
+    }
+
     public static LambdaDslJsonBody newJsonBody(Consumer<LambdaDslJsonBody> array) {
         final PactDslJsonBody pactDslJsonBody = new PactDslJsonBody();
         final LambdaDslJsonBody dslBody = new LambdaDslJsonBody(pactDslJsonBody);
         array.accept(dslBody);
         return dslBody;
     }
-
 
 }
