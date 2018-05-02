@@ -14,7 +14,7 @@ plugins {
   id 'nebula.kotlin' version '1.2.21'
   id 'org.jmailen.kotlinter' version '1.7.0'
   id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC6-3'
-  id 'org.jetbrains.dokka' version '0.9.16'
+//  id 'org.jetbrains.dokka' version '0.9.16'
 }
 
 repositories {
@@ -25,6 +25,18 @@ repositories {
 
 import org.apache.commons.text.StringEscapeUtils
 
+String buildName(Project project) {
+  if (project.name.startsWith('pact-jvm')) {
+    project.name
+  } else {
+    if (project.parent) {
+      buildName(project.parent) + '-' + project.name
+    } else {
+      project.name
+    }
+  }
+}
+
 subprojects {
   buildscript {
     repositories {
@@ -34,10 +46,11 @@ subprojects {
     }
   }
 
-    project.ext {
-        scalaVersion = '2.12'
-        scalaFullVersion = '2.12.4'
-    }
+  project.ext {
+    scalaVersion = '2.12'
+    scalaFullVersion = '2.12.4'
+    fullName = buildName(project)
+  }
 
     apply plugin: 'java'
     apply plugin: 'scala'
@@ -49,7 +62,7 @@ subprojects {
     apply plugin: 'org.jetbrains.kotlin.jvm'
     apply plugin: 'org.jmailen.kotlinter'
     apply plugin: 'io.gitlab.arturbosch.detekt'
-    apply plugin: 'org.jetbrains.dokka'
+//    apply plugin: 'org.jetbrains.dokka'
 
     repositories {
         mavenLocal()
@@ -121,10 +134,10 @@ subprojects {
       }
     }
 
-    task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
-      outputFormat = 'javadoc'
-      outputDirectory = "$buildDir/docs/dokkaJavadoc"
-    }
+//    task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+//      outputFormat = 'javadoc'
+//      outputDirectory = "$buildDir/docs/dokkaJavadoc"
+//    }
 
     test {
       systemProperty 'pact.rootDir', "$buildDir/pacts"
@@ -137,15 +150,16 @@ subprojects {
                 'Specification-Vendor': project.group,
                 'Specification-Title': project.name,
                 'Specification-Version': version
+        baseName = buildName(project)
     }
 
-    task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc, dokkaJavadoc]) {
+    task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc/*, dokkaJavadoc*/]) {
         classifier = 'javadoc'
       if (project.hasProperty('scalaVersion')) {
-        from javadoc.destinationDir, scaladoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
+        from javadoc.destinationDir, scaladoc.destinationDir, groovydoc.destinationDir //, dokkaJavadoc.outputDirectory
         dependsOn << scaladoc
       } else {
-        from javadoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
+        from javadoc.destinationDir, groovydoc.destinationDir //, dokkaJavadoc.outputDirectory
       }
     }
 
@@ -160,7 +174,7 @@ subprojects {
     }
 
     def pomCustomisation = {
-        name project.name
+        name project.fullName
         description StringEscapeUtils.escapeXml11(new File(projectDir, 'README.md').text)
         url 'https://github.com/DiUS/pact-jvm'
         licenses {
@@ -216,11 +230,11 @@ subprojects {
     }
 
     codenarcMain {
-        configFile = file('../config/codenarc/ruleset.groovy')
+        configFile = file("${project.rootDir}/config/codenarc/ruleset.groovy")
     }
 
     codenarcTest {
-        configFile = file('../config/codenarc/rulesetTest.groovy')
+        configFile = file("${project.rootDir}/config/codenarc/rulesetTest.groovy")
     }
 
     check.dependsOn << 'jacocoTestReport'
@@ -233,13 +247,13 @@ subprojects {
 
   detekt {
     profile("main") {
-      config = "${project.parent.projectDir}/config/detekt-config.yml"
+      config = "${project.rootDir}/config/detekt-config.yml"
       if (file("$projectDir/src/main/kotlin").exists()) {
         input = "$projectDir/src/main/kotlin"
       }
     }
     profile("test") {
-      config = "${project.parent.projectDir}/config/detekt-config-test.yml"
+      config = "${project.rootDir}/config/detekt-config-test.yml"
       if (file("$projectDir/src/test/kotlin").exists()) {
         input = "$projectDir/src/test/kotlin"
       }

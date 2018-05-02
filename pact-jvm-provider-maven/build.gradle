@@ -16,7 +16,7 @@ def isWindows() {
 }
 
 task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider:install",
-                                              ':pact-jvm-model:install',
+                                              ':core:model:install',
                                               ":pact-jvm-matchers:install",
                                               ':pact-jvm-pact-broker:install']) {
     String mvn = 'mvn'
