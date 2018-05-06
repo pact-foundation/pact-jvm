@@ -39,6 +39,10 @@ import java.util.stream.Stream
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 
+/**
+ * The instance that holds the context for the test of an interaction. The test target will need to be set on it in
+ * the before each phase of the test, and the verifyInteraction method must be called in the test template method.
+ */
 data class PactVerificationContext(
   private val store: ExtensionContext.Store,
   private val context: ExtensionContext,
@@ -50,6 +54,11 @@ data class PactVerificationContext(
   val interaction: Interaction
 ) {
 
+  /**
+   * Called to verify the interaction from the test template method.
+   *
+   * @throws AssertionError Throws an assertion error if the verification fails.
+   */
   fun verifyInteraction() {
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val client = store.get("client")
@@ -90,6 +99,9 @@ data class PactVerificationContext(
   }
 }
 
+/**
+ * JUnit 5 test extension class used to inject parameters and execute the test for a Pact interaction.
+ */
 class PactVerificationExtension(
   private val pact: Pact<Interaction>,
   private val pactSource: au.com.dius.pact.model.PactSource,
@@ -219,6 +231,9 @@ class PactVerificationExtension(
   companion object : KLogging()
 }
 
+/**
+ * JUnit 5 test extension class for executing state change callbacks
+ */
 class PactVerificationStateChangeExtension(private val interaction: Interaction) : BeforeEachCallback {
   override fun beforeEach(context: ExtensionContext) {
     logger.debug { "beforeEach for interaction '${interaction.description}'" }
@@ -257,6 +272,10 @@ class PactVerificationStateChangeExtension(private val interaction: Interaction)
   companion object : KLogging()
 }
 
+/**
+ * Main TestTemplateInvocationContextProvider for JUnit 5 Pact verification tests. This class needs to be applied to
+ * a test template method on a test class annotated with a @Provider annotation.
+ */
 class PactVerificationInvocationContextProvider : TestTemplateInvocationContextProvider {
   override fun provideTestTemplateInvocationContexts(context: ExtensionContext): Stream<TestTemplateInvocationContext> {
     logger.debug { "provideTestTemplateInvocationContexts called" }

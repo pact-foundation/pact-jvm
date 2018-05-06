@@ -19,14 +19,47 @@ import java.net.URLClassLoader
 import java.util.function.Supplier
 import java.util.function.Function
 
+/**
+ * Interface to a test target
+ */
 interface TestTarget {
+  /**
+   * Returns information about the provider
+   */
   fun getProviderInfo(serviceName: String, pactSource: PactSource? = null): ProviderInfo
+
+  /**
+   * Prepares the request for the interaction.
+   *
+   * @return a pair of the client class and request to use for the test, or null if there is none
+   */
   fun prepareRequest(interaction: Interaction): Pair<Any, Any>?
+
+  /**
+   * If this is a request response (HTTP or HTTPS) target
+   */
   fun isHttpTarget(): Boolean
+
+  /**
+   * Executes the test (using the client and request from prepareRequest, if any)
+   *
+   * @return Map of failures, or an empty map if there were not any
+   */
   fun executeInteraction(client: Any?, request: Any?): Map<String, Any>
+
+  /**
+   * Prepares the verifier for use during the test
+   */
   fun prepareVerifier(verifier: ProviderVerifier, testInstance: Any)
 }
 
+/**
+ * Test target for HTTP tests. This is the default target.
+ *
+ * @property host Host to bind to. Defaults to localhost.
+ * @property port Port that the provider is running on. Defaults to 8080.
+ * @property path The path that the provider is mounted on. Defaults to the root path.
+ */
 open class HttpTestTarget @JvmOverloads constructor (
   val host: String = "localhost",
   val port: Int = 8080,
@@ -61,6 +94,9 @@ open class HttpTestTarget @JvmOverloads constructor (
   }
 
   companion object {
+    /**
+     * Creates a HttpTestTarget from a URL. If the URL does not contain a port, 8080 will be used.
+     */
     @JvmStatic
     fun fromUrl(url: URL) = HttpTestTarget(url.host,
         if (url.port == -1) 8080 else url.port,
@@ -68,6 +104,15 @@ open class HttpTestTarget @JvmOverloads constructor (
   }
 }
 
+/**
+ * Test target for providers using HTTPS.
+ *
+ * @property host Host to bind to. Defaults to localhost.
+ * @property port Port that the provider is running on. Defaults to 8080.
+ * @property path The path that the provider is mounted on. Defaults to the root path.
+ * @property insecure Supports using certs that will not be verified. You need this enabled if you are using self-signed
+ * or untrusted certificates. Defaults to false.
+ */
 open class HttpsTestTarget @JvmOverloads constructor (
   host: String = "localhost",
   port: Int = 8443,
@@ -83,6 +128,12 @@ open class HttpsTestTarget @JvmOverloads constructor (
   }
 
   companion object {
+    /**
+     * Creates a HttpsTestTarget from a URL. If the URL does not contain a port, 443 will be used.
+     *
+     * @param insecure Supports using certs that will not be verified. You need this enabled if you are using self-signed
+     * or untrusted certificates. Defaults to false.
+     */
     @JvmStatic
     @JvmOverloads
     fun fromUrl(url: URL, insecure: Boolean = false) = HttpsTestTarget(url.host,
@@ -90,6 +141,15 @@ open class HttpsTestTarget @JvmOverloads constructor (
   }
 }
 
+/**
+ * Test target for use with asynchronous providers (like with message queues).
+ *
+ * This target will look for methods with a @PactVerifyProvider annotation where the value is the description of the
+ * interaction.
+ *
+ * @property packagesToScan List of packages to scan for methods with @PactVerifyProvider annotations. Defaults to the
+ * full test classpath.
+ */
 open class AmpqTestTarget(val packagesToScan: List<String> = emptyList()) : TestTarget {
   override fun isHttpTarget() = false
 
