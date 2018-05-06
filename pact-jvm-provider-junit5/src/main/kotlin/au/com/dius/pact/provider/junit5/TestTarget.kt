@@ -16,7 +16,11 @@ interface TestTarget {
   fun executeInteraction(client: Any, request: Any): Map<String, Any>
 }
 
-data class HttpTestTarget (val host: String = "localhost", val port: Int = 8080, val path: String = "/") : TestTarget {
+open class HttpTestTarget @JvmOverloads constructor (
+  val host: String = "localhost",
+  val port: Int = 8080,
+  val path: String = "/"
+) : TestTarget {
   override fun isHttpTarget() = true
 
   override fun getProviderInfo(serviceName: String): ProviderInfo {
@@ -50,30 +54,31 @@ data class HttpTestTarget (val host: String = "localhost", val port: Int = 8080,
   }
 }
 
-data class HttpsTestTarget(val host: String = "localhost", val port: Int = 8443, val path: String = "", val insecure: Boolean = false) : TestTarget {
-  override fun isHttpTarget() = true
+open class HttpsTestTarget @JvmOverloads constructor (
+  host: String = "localhost",
+  port: Int = 8443,
+  path: String = "",
+  val insecure: Boolean = false
+) : HttpTestTarget(host, port, path) {
 
   override fun getProviderInfo(serviceName: String): ProviderInfo {
-    val providerInfo = ProviderInfo(serviceName)
-    providerInfo.setPort(port)
-    providerInfo.setHost(host)
+    val providerInfo = super.getProviderInfo(serviceName)
     providerInfo.setProtocol("https")
-    providerInfo.setPath(path)
     providerInfo.isInsecure = insecure
     return providerInfo
   }
 
-  override fun prepareRequest(interaction: Interaction): Pair<Any, Any> {
-    val providerClient = ProviderClient(getProviderInfo("provider"), HttpClientFactory())
-    if (interaction is RequestResponseInteraction) {
-      return providerClient.prepareRequest(interaction.request.generatedRequest()) to providerClient
-    }
-    throw UnsupportedOperationException("Only request/response interactions can be used with an HTTPS test target")
-  }
-
-  override fun executeInteraction(client: Any, request: Any): Map<String, Any> {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
+//  override fun prepareRequest(interaction: Interaction): Pair<Any, Any> {
+//    val providerClient = ProviderClient(getProviderInfo("provider"), HttpClientFactory())
+//    if (interaction is RequestResponseInteraction) {
+//      return providerClient.prepareRequest(interaction.request.generatedRequest()) to providerClient
+//    }
+//    throw UnsupportedOperationException("Only request/response interactions can be used with an HTTPS test target")
+//  }
+//
+//  override fun executeInteraction(client: Any, request: Any): Map<String, Any> {
+//    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+//  }
 
   companion object {
     @JvmStatic
@@ -83,7 +88,7 @@ data class HttpsTestTarget(val host: String = "localhost", val port: Int = 8443,
   }
 }
 
-data class AmpqTestTarget(val packagesToScan: List<String> = emptyList()) : TestTarget {
+open class AmpqTestTarget(val packagesToScan: List<String> = emptyList()) : TestTarget {
   override fun isHttpTarget() = false
 
   override fun getProviderInfo(serviceName: String): ProviderInfo {
