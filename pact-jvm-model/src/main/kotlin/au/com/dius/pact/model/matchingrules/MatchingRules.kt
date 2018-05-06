@@ -115,8 +115,10 @@ object ValuesMatcher : MatchingRule {
   override fun toMap() = mapOf("match" to "values")
 }
 
-data class MatchingRuleGroup @JvmOverloads constructor(val rules: MutableList<MatchingRule> = mutableListOf(),
-                                                       val ruleLogic: RuleLogic = RuleLogic.AND) {
+data class MatchingRuleGroup @JvmOverloads constructor(
+  val rules: MutableList<MatchingRule> = mutableListOf(),
+  val ruleLogic: RuleLogic = RuleLogic.AND
+) {
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
     return if (pactSpecVersion < PactSpecVersion.V3) {
       rules.first().toMap()

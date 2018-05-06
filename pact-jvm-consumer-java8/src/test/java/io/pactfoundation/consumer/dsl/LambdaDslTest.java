@@ -156,4 +156,55 @@ public class LambdaDslTest {
         assertThat(actualJson, is(pactDslJson));
     }
 
+    @Test
+    public void testArrayMinLike() {
+        /*
+            [
+                {
+                    "foo": "string"
+                },
+                {
+                    "foo": "string"
+                }
+            ]
+         */
+
+        String pactDslJson = PactDslJsonArray.arrayMinLike(2)
+            .stringType("foo")
+            .close()
+            .getBody()
+            .toString();
+
+        DslPart actualPactDsl = LambdaDsl.newJsonArrayMinLike(2, o -> o.object(
+            oo -> oo.stringType("foo")
+        )).build();
+
+        String actualJson = actualPactDsl.getBody().toString();
+        assertThat(actualJson, is(pactDslJson));
+    }
+
+    @Test
+    public void testArrayMaxLike() {
+        /*
+            [
+                {
+                    "foo": "string"
+                }
+            ]
+         */
+
+        String pactDslJson = PactDslJsonArray.arrayMaxLike(2)
+            .stringType("foo")
+            .close()
+            .getBody()
+            .toString();
+
+        DslPart actualPactDsl = LambdaDsl.newJsonArrayMaxLike(2, o -> o.object(
+            oo -> oo.stringType("foo")
+        )).build();
+
+        String actualJson = actualPactDsl.getBody().toString();
+        assertThat(actualJson, is(pactDslJson));
+    }
+
 }

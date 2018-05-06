@@ -52,8 +52,10 @@ interface IProviderInfo {
 /**
  * Client HTTP utility for providers
  */
-open class ProviderClient(val provider: IProviderInfo,
-                          private val httpClientFactory: IHttpClientFactory) {
+open class ProviderClient(
+  val provider: IProviderInfo,
+  private val httpClientFactory: IHttpClientFactory
+) {
 
   companion object : KLogging() {
     const val CONTENT_TYPE = "Content-Type"
@@ -169,8 +171,13 @@ open class ProviderClient(val provider: IProviderInfo,
     }
   }
 
-  open fun makeStateChangeRequest(stateChangeUrl: Any?, state: ProviderState, postStateInBody: Boolean,
-                                  isSetup: Boolean, stateChangeTeardown: Boolean): CloseableHttpResponse? {
+  open fun makeStateChangeRequest(
+    stateChangeUrl: Any?,
+    state: ProviderState,
+    postStateInBody: Boolean,
+    isSetup: Boolean,
+    stateChangeTeardown: Boolean
+  ): CloseableHttpResponse? {
     if (stateChangeUrl != null) {
       val httpclient = httpClientFactory.newClient(provider)
       val urlBuilder = if (stateChangeUrl is URI) {

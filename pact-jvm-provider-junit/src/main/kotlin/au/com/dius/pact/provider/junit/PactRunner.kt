@@ -98,8 +98,11 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner>(claz
     }
   }
 
-  protected open fun newInteractionRunner(testClass: TestClass, pact: Pact<I>,
-                                          pactSource: au.com.dius.pact.model.PactSource): InteractionRunner {
+  protected open fun newInteractionRunner(
+    testClass: TestClass,
+    pact: Pact<I>,
+    pactSource: au.com.dius.pact.model.PactSource
+  ): InteractionRunner {
     return InteractionRunner(testClass, pact, pactSource)
   }
 

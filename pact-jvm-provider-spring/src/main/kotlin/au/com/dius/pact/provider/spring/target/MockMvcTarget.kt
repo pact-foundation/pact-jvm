@@ -29,13 +29,15 @@ import java.util.function.Supplier
  *
  * To sets the servlet path on the default request, if one is required, set the servletPath to the servlet path prefix
  */
-class MockMvcTarget @JvmOverloads constructor(var controllers: List<Any> = mutableListOf(),
-                                              var controllerAdvice: List<Any> = mutableListOf(),
-                                              var messageConverters: List<HttpMessageConverter<*>> = mutableListOf(),
-                                              var printRequestResponse: Boolean = false,
-                                              var runTimes: Int = 1,
-                                              var mockMvc: MockMvc? = null,
-                                              var servletPath: String? = null) : BaseTarget() {
+class MockMvcTarget @JvmOverloads constructor(
+  var controllers: List<Any> = mutableListOf(),
+  var controllerAdvice: List<Any> = mutableListOf(),
+  var messageConverters: List<HttpMessageConverter<*>> = mutableListOf(),
+  var printRequestResponse: Boolean = false,
+  var runTimes: Int = 1,
+  var mockMvc: MockMvc? = null,
+  var servletPath: String? = null
+) : BaseTarget() {
 
   fun setControllers(vararg controllers: Any) {
     this.controllers = controllers.asList()

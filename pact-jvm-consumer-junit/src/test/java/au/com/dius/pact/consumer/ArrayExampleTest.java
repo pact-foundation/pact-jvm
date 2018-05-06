@@ -22,7 +22,7 @@ public class ArrayExampleTest {
     private static final String APPLICATION_JSON = "application/json";
 
     @Rule
-    public PactProviderRuleMk2 provider = new PactProviderRuleMk2("ArrayExampleProvider", "localhost", 8082, this);
+    public PactProviderRuleMk2 provider = new PactProviderRuleMk2("ArrayExampleProvider", "localhost", 8113, this);
 
     @Pact(consumer = "ArrayExampleConsumer")
     public RequestResponsePact createFragment(PactDslWithProvider builder) {
@@ -47,7 +47,7 @@ public class ArrayExampleTest {
     @Test
     @PactVerification
     public void examplesAreGeneratedForArray() throws IOException {
-        final String response = Request.Get("http://localhost:8082/")
+        final String response = Request.Get("http://localhost:8113/")
                                        .addHeader("Accept", APPLICATION_JSON)
                                        .execute()
                                        .returnContent()
