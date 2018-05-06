@@ -92,7 +92,7 @@ public class InteractionRunner extends Runner {
 
         validatePublicVoidNoArgMethods(Before.class, false, errors);
         validatePublicVoidNoArgMethods(After.class, false, errors);
-        validateStateChangeMethods(State.class, false, errors);
+        validateStateChangeMethods(testClass, State.class, errors);
         validateConstructor(errors);
         validateTestTarget(errors);
         validateRules(errors);
@@ -103,9 +103,10 @@ public class InteractionRunner extends Runner {
         }
     }
 
-  private void validateStateChangeMethods(final Class<? extends Annotation> annotation, final boolean isStatic, final List<Throwable> errors) {
+  private static void validateStateChangeMethods(TestClass testClass, final Class<? extends Annotation> annotation,
+                                                 final List<Throwable> errors) {
     testClass.getAnnotatedMethods(annotation).forEach(method -> {
-      method.validatePublicVoid(isStatic, errors);
+      method.validatePublicVoid(false, errors);
       if (method.getMethod().getParameterCount() == 1 && !Map.class.isAssignableFrom(method.getMethod().getParameterTypes()[0])) {
         errors.add(new Exception("Method " + method.getName() + " should take only a single Map parameter"));
       } else if (method.getMethod().getParameterCount() > 1) {

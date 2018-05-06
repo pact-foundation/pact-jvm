@@ -93,19 +93,28 @@ open class ProviderClient(
   }
 
   open fun makeRequest(request: Request): Map<String, Any> {
+    val httpclient = getHttpClient()
+    val method = prepareRequest(request)
+    return executeRequest(httpclient, method)
+  }
+
+  open fun executeRequest(httpclient: CloseableHttpClient, method: HttpUriRequest): Map<String, Any> {
+    return httpclient.execute(method).use {
+      handleResponse(it)
+    }
+  }
+
+  open fun prepareRequest(request: Request): HttpUriRequest {
     logger.debug { "Making request for provider $provider:" }
     logger.debug { request.toString() }
 
-    val httpclient = httpClientFactory.newClient(provider)
     val method = newRequest(request)
     setupHeaders(request, method)
     setupBody(request, method)
 
     executeRequestFilter(method)
 
-    httpclient.execute(method).use {
-      return handleResponse(it)
-    }
+    return method
   }
 
   open fun executeRequestFilter(method: HttpRequest) {
@@ -179,7 +188,7 @@ open class ProviderClient(
     stateChangeTeardown: Boolean
   ): CloseableHttpResponse? {
     if (stateChangeUrl != null) {
-      val httpclient = httpClientFactory.newClient(provider)
+      val httpclient = getHttpClient()
       val urlBuilder = if (stateChangeUrl is URI) {
         URIBuilder(stateChangeUrl)
       } else {
@@ -228,6 +237,8 @@ open class ProviderClient(
       return null
     }
   }
+
+  fun getHttpClient() = httpClientFactory.newClient(provider)
 
   private fun handleResponse(httpResponse: HttpResponse): Map<String, Any> {
     logger.debug { "Received response: ${httpResponse.statusLine}" }

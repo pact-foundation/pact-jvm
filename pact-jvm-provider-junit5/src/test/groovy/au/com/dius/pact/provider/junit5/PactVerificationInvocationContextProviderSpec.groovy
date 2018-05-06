@@ -2,26 +2,63 @@ package au.com.dius.pact.provider.junit5
 
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.provider.junit.Provider
+import au.com.dius.pact.provider.junit.State
 import au.com.dius.pact.provider.junit.loader.PactFilter
 import au.com.dius.pact.provider.junit.loader.PactFolder
 import au.com.dius.pact.provider.junit.loader.PactFolderLoader
 import au.com.dius.pact.provider.junit.loader.PactLoader
 import au.com.dius.pact.provider.junit.loader.PactSource
+import au.com.dius.pact.provider.junit.target.Target
+import au.com.dius.pact.provider.junit.target.TestTarget
 import org.junit.jupiter.api.extension.ExtensionContext
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings(['EmptyMethod', 'UnusedMethodParameter'])
 class PactVerificationInvocationContextProviderSpec extends Specification {
 
   @Provider('myAwesomeService')
   @PactFolder('pacts')
-  class TestClassWithAnnotation {
-
+  static class TestClassWithAnnotation {
+    @TestTarget
+    Target target
   }
 
   @PactSource(TestPactLoader)
   @PactFilter('state 2')
-  class ChildClass extends TestClassWithAnnotation {
+  static class ChildClass extends TestClassWithAnnotation {
+
+  }
+
+  static class InvalidStateChangeTestClass {
+
+    @State('one')
+    protected void incorrectStateChangeParameters(int one, String two, Map three) {
+
+    }
+
+  }
+
+  static class InvalidStateChangeTestClass2 extends InvalidStateChangeTestClass {
+
+    @State('two')
+    void incorrectStateChangeParameter(List list) {
+
+    }
+
+  }
+
+  static class ValidStateChangeTestClass {
+
+    @State('three')
+    void correctStateChange() {
+
+    }
+
+    @State('three')
+    void correctStateChange2(Map parameters) {
+
+    }
 
   }
 
@@ -109,6 +146,27 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
 
     then:
     extensions.count() == 1
+  }
+
+  @Unroll
+  def 'throws an exception if there are invalid state change methods'() {
+    when:
+    provider.validateStateChangeMethods(testClass)
+
+    then:
+    thrown(UnsupportedOperationException)
+
+    where:
+
+    testClass << [InvalidStateChangeTestClass, InvalidStateChangeTestClass2]
+  }
+
+  def 'does not throws an exception if there are valid state change methods'() {
+    when:
+    provider.validateStateChangeMethods(ValidStateChangeTestClass)
+
+    then:
+    notThrown(UnsupportedOperationException)
   }
 
 }
