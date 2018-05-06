@@ -48,8 +48,11 @@ open class AmqpTarget @JvmOverloads constructor(val packagesToScan: List<String>
     }
   }
 
-  override fun setupVerifier(interaction: Interaction, provider: ProviderInfo,
-                             consumer: ConsumerInfo): ProviderVerifier {
+  override fun setupVerifier(
+    interaction: Interaction,
+    provider: ProviderInfo,
+    consumer: ConsumerInfo
+  ): ProviderVerifier {
     val verifier = ProviderVerifier()
     verifier.projectClasspath = Supplier<Array<URL>> { this.classPathUrls() }
     val defaultProviderMethodInstance = verifier.providerMethodInstance

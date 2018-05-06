@@ -14,10 +14,12 @@ import org.junit.runners.model.Statement
 import org.junit.runners.model.TestClass
 import org.springframework.test.context.TestContextManager
 
-open class SpringBeforeRunner(private val next: Statement,
-                              private val befores: List<FrameworkMethod>,
-                              private val testInstance: Any,
-                              private val testContextManager: TestContextManager) : Statement() {
+open class SpringBeforeRunner(
+  private val next: Statement,
+  private val befores: List<FrameworkMethod>,
+  private val testInstance: Any,
+  private val testContextManager: TestContextManager
+) : Statement() {
 
   override fun evaluate() {
     for (before in befores) {
@@ -28,10 +30,12 @@ open class SpringBeforeRunner(private val next: Statement,
   }
 }
 
-open class SpringAfterRunner(private val next: Statement,
-                             private val afters: List<FrameworkMethod>,
-                             private val testInstance: Any,
-                             private val testContextManager: TestContextManager) : Statement() {
+open class SpringAfterRunner(
+  private val next: Statement,
+  private val afters: List<FrameworkMethod>,
+  private val testInstance: Any,
+  private val testContextManager: TestContextManager
+) : Statement() {
 
   override fun evaluate() {
     val errors: MutableList<Throwable> = mutableListOf()
@@ -61,11 +65,12 @@ open class SpringAfterRunner(private val next: Statement,
   }
 }
 
-open class SpringInteractionRunner<I>(private val testClass: TestClass,
-                                      pact: Pact<I>,
-                                      pactSource: PactSource?,
-                                      private val testContextManager: TestContextManager)
-  : InteractionRunner(testClass, pact, pactSource) where I: Interaction {
+open class SpringInteractionRunner<I>(
+  private val testClass: TestClass,
+  pact: Pact<I>,
+  pactSource: PactSource?,
+  private val testContextManager: TestContextManager
+) : InteractionRunner(testClass, pact, pactSource) where I : Interaction {
 
   override fun withBefores(interaction: Interaction, testInstance: Any, statement: Statement): Statement {
     val befores = testClass.getAnnotatedMethods(Before::class.java)
