@@ -23,7 +23,7 @@ public class ConsumerPactWithThriftMimeTypeTest {
     private static final String APPLICATION_X_THRIFT_JSON = "application/x-thrift+json";
 
     @Rule
-    public PactProviderRuleMk2 provider = new PactProviderRuleMk2("test_provider", "localhost", 8080, this);
+    public PactProviderRuleMk2 provider = new PactProviderRuleMk2("test_provider", "localhost", 8114, this);
 
     @Pact(provider="test_provider", consumer="test_consumer")
     public RequestResponsePact createFragment(PactDslWithProvider builder) {
@@ -45,7 +45,7 @@ public class ConsumerPactWithThriftMimeTypeTest {
     @Test
     @PactVerification("test_provider")
     public void runTest() throws IOException {
-        assertEquals(Request.Get("http://localhost:8080/persons/429605785802342400")
+        assertEquals(Request.Get("http://localhost:8114/persons/429605785802342400")
             .addHeader("Accept", "application/x-thrift+json")
             .execute().returnContent().getType().getMimeType(), "application/x-thrift+json");
     }

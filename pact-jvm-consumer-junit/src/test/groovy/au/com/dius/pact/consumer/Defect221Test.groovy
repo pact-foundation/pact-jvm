@@ -13,7 +13,7 @@ class Defect221Test {
 
     @Rule
     @SuppressWarnings('PublicInstanceField')
-    public final PactProviderRuleMk2 provider = new PactProviderRuleMk2('221_provider', 'localhost', 8081, this)
+    public final PactProviderRuleMk2 provider = new PactProviderRuleMk2('221_provider', 'localhost', 8112, this)
 
     @Pact(provider= '221_provider', consumer= 'test_consumer')
     @SuppressWarnings('JUnitPublicNonTestMethod')
@@ -34,7 +34,7 @@ class Defect221Test {
     @PactVerification('221_provider')
     void runTest() {
         assert '{"responsetest":true,"name":"harry","data":1234.0}' ==
-          Request.Put('http://localhost:8081/numbertest')
+          Request.Put('http://localhost:8112/numbertest')
             .addHeader('Accept', APPLICATION_JSON)
             .bodyString('{"name": "harry","data": 1234.0 }', ContentType.APPLICATION_JSON)
             .execute().returnContent().asString()
