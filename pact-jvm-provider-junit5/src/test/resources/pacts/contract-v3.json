@@ -1,0 +1,42 @@
+{
+  "provider" : {
+    "name" : "myAwesomeService"
+  },
+  "consumer" : {
+    "name" : "anotherService3"
+  },
+  "interactions" : [ {
+    "providerStates": [
+      {
+        "name": "default",
+        "params": {
+          "a": "b",
+          "c": 1
+        }
+      },
+      {
+        "name": "state 2",
+        "params": {
+          "a": "c",
+          "c": 100
+        }
+      }
+    ],
+    "description" : "Get data",
+    "request" : {
+      "method" : "GET",
+      "path" : "/data"
+    },
+    "response" : {
+      "status" : 204
+    }
+  } ],
+  "metadata" : {
+    "pact-specification" : {
+      "version" : "3.0.0"
+    },
+    "pact-jvm" : {
+      "version" : "3.1.1"
+    }
+  }
+}

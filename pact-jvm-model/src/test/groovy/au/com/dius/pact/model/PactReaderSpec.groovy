@@ -210,6 +210,33 @@ class PactReaderSpec extends Specification {
     pact.source instanceof S3PactSource
   }
 
+  def 'reads from classpath inside jar'() {
+    given:
+    def pactUrl = 'classpath:jar-pacts/test_pact_v3.json'
+
+    when:
+    def pact = PactReader.loadPact(pactUrl)
+
+    then:
+    pact instanceof RequestResponsePact
+    pact.interactions[0].providerStates == [
+        new ProviderState('test state', [name: 'Testy']),
+        new ProviderState('test state 2', [name: 'Testy2'])
+    ]
+  }
+
+  def 'throws a meaningful exception when reading from non-existent classpath'() {
+    given:
+    def pactUrl = 'classpath:no_such_pact.json'
+
+    when:
+    PactReader.loadPact(pactUrl)
+
+    then:
+    def e = thrown(RuntimeException)
+    e.message.contains('no_such_pact.json')
+  }
+
   def 'correctly loads V2 pact with string bodies'() {
     given:
     def pactUrl = PactReaderSpec.classLoader.getResource('test_pact_with_string_body.json')

@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.AmazonS3URI
 import com.github.zafarkhaja.semver.Version
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import kotlin.Pair
 
@@ -16,6 +17,8 @@ import static au.com.dius.pact.model.PactReaderKt.newHttpClient
  */
 @Slf4j
 class PactReader {
+
+  private static final String CLASSPATH_URI_START = 'classpath:'
 
   /**
    * Loads a pact file from either a File or a URL
@@ -172,6 +175,7 @@ class PactReader {
     }
   }
 
+  @CompileStatic
   private static Pair<Object, PactSource> loadFile(def source, Map options = [:]) {
     if (source instanceof ClosurePactSource) {
       loadFile(source.closure.get(), options)
@@ -190,12 +194,14 @@ class PactReader {
         PactReaderKt.loadPactFromUrl(urlSource, options, newHttpClient(urlSource.url, options))
       } else if (source instanceof String && source.toLowerCase() ==~ 's3://.*') {
         loadPactFromS3Bucket(source, options)
-      } else if (source instanceof String && fileExists(source)) {
+      } else if (source instanceof String && source.startsWith(CLASSPATH_URI_START)) {
+        loadPactFromClasspath((source as String) - CLASSPATH_URI_START)
+      }  else if (source instanceof String && fileExists(source)) {
         def file = source as File
         new Pair(new JsonSlurper().parse(file), new FileSource(file))
       } else {
         try {
-          new Pair(new JsonSlurper().parseText(source), UnknownPactSource.INSTANCE)
+          new Pair(new JsonSlurper().parseText(source.toString()), UnknownPactSource.INSTANCE)
         } catch (e) {
           throw new UnsupportedOperationException(
             "Unable to load pact file from '$source' as it is neither a json document, file, input stream, " +
@@ -225,6 +231,14 @@ class PactReader {
     def client = s3Client()
     def s3Pact = client.getObject(s3Uri.bucket, s3Uri.key)
     new Pair(new JsonSlurper().parse(s3Pact.objectContent), new S3PactSource(source))
+  }
+
+  private static Pair<Object, PactSource> loadPactFromClasspath(String source) {
+    InputStream inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(source)
+    if (inputStream == null) {
+      throw new IllegalStateException("not found on classpath: $source")
+    }
+    inputStream.withCloseable { loadPactFromFile(it) }
   }
 
   private static boolean fileExists(String path) {

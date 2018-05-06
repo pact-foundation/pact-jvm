@@ -123,8 +123,10 @@ interface IHalClient {
 /**
  * HAL client base class
  */
-abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
-                                                       var options: Map<String, Any> = mapOf()) : IHalClient {
+abstract class HalClientBase @JvmOverloads constructor(
+  val baseUrl: String,
+  var options: Map<String, Any> = mapOf()
+) : IHalClient {
 
   var httpClient: CloseableHttpClient? = null
   var pathInfo: JsonElement? = null
@@ -132,8 +134,11 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
 
   override fun postJson(url: String, body: String) = postJson(url, body, null)
 
-  override fun postJson(url: String, body: String,
-                        handler: ((status: Int, response: CloseableHttpResponse) -> Boolean)?): Result<Boolean, Exception> {
+  override fun postJson(
+    url: String,
+    body: String,
+    handler: ((status: Int, response: CloseableHttpResponse) -> Boolean)?
+  ): Result<Boolean, Exception> {
     val client = setupHttpClient()
 
     return Result.of {
@@ -309,8 +314,12 @@ abstract class HalClientBase @JvmOverloads constructor(val baseUrl: String,
   override fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>) =
     uploadJson(path, bodyJson, closure, true)
 
-  override fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>,
-                          encodePath: Boolean): Any? {
+  override fun uploadJson(
+    path: String,
+    bodyJson: String,
+    closure: BiFunction<String, String, Any?>,
+    encodePath: Boolean
+  ): Any? {
     val client = setupHttpClient()
     val httpPut = HttpPut(buildUrl(baseUrl, path, encodePath))
     httpPut.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())

@@ -5,6 +5,7 @@ import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.ProviderInfo;
 import au.com.dius.pact.provider.ProviderVerifier;
+import au.com.dius.pact.provider.junit.JUnitProviderTestSupport;
 import au.com.dius.pact.provider.junit.VerificationReports;
 import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver;
 import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
@@ -76,60 +77,7 @@ public abstract class BaseTarget implements TestClassAwareTarget {
   }
 
   protected AssertionError getAssertionError(final Map<String, Object> mismatches) {
-    String error = System.lineSeparator() + Seq.seq(mismatches.values()).zipWithIndex()
-      .map(i -> {
-        String errPrefix = String.valueOf(i.v2) + " - ";
-        if (i.v1 instanceof Throwable) {
-          return errPrefix + exceptionMessage((Throwable) i.v1, errPrefix.length());
-        } else if (i.v1 instanceof Map) {
-          return errPrefix + convertMapToErrorString((Map) i.v1);
-        } else {
-          return errPrefix + i.v1.toString();
-        }
-      }).toString(System.lineSeparator());
-    return new AssertionError(error);
-  }
-
-  private static String exceptionMessage(Throwable err, int prefixLength) {
-    String message = err.getMessage();
-
-    Throwable cause = err.getCause();
-    String details = "";
-    if (cause != null) {
-      details = ExceptionUtils.getStackTrace(cause);
-    }
-
-    if (message != null && message.contains("\n")) {
-      String padString = StringUtils.leftPad("", prefixLength);
-      Tuple2<Optional<String>, Seq<String>> lines = Seq.of(message.split("\n")).splitAtHead();
-      return lines.v1.orElse("") + System.lineSeparator() + lines.v2.map(line -> padString + line)
-              .toString(System.lineSeparator()) + "\n" + details;
-    } else {
-      return String.valueOf(message) + "\n" + details;
-    }
-  }
-
-  private String convertMapToErrorString(Map mismatches) {
-    if (mismatches.containsKey("comparison")) {
-      Object comparison = mismatches.get("comparison");
-      if (mismatches.containsKey("diff")) {
-        return mapToString((Map) comparison);
-      } else {
-        if (comparison instanceof Map) {
-          return mapToString((Map) comparison);
-        } else {
-          return String.valueOf(comparison);
-        }
-      }
-    } else {
-      return mapToString(mismatches);
-    }
-  }
-
-  private String mapToString(Map comparison) {
-    return comparison.entrySet().stream()
-      .map(e -> String.valueOf(((Map.Entry)e).getKey()) + " -> " + ((Map.Entry)e).getValue())
-      .collect(Collectors.joining(System.lineSeparator())).toString();
+    return new AssertionError(JUnitProviderTestSupport.generateErrorStringFromMismatches(mismatches));
   }
 
   @Override
