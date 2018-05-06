@@ -110,8 +110,8 @@ For publishing pacts to a pact broker, have a look at https://github.com/warmuuh
 
 #### verify pacts with JUnit tests [version 2.3.3+, 3.1.3+]
 
-You want to look at: [junit provider support](pact-jvm-provider-junit)for JUnit 4 tests and
-            [pact-jvm-provider-junit5](pact-jvm-provider-junit5) for JUnit 5 tests
+You want to look at: [junit provider support](pact-jvm-provider-junit) for JUnit 4 tests and 
+ [pact-jvm-provider-junit5](pact-jvm-provider-junit5) for JUnit 5 tests
 
 #### verify pacts with Leiningen [version 2.2.14+, 3.0.3+]
 
