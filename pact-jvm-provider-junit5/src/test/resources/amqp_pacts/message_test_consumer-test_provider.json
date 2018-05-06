@@ -1,0 +1,26 @@
+{
+    "consumer": {
+        "name": "test_consumer"
+    },
+    "provider": {
+        "name": "AmqpProvider"
+    },
+    "messages": [
+        {
+            "description": "a test message",
+            "contents": {
+                "testParam1": "value1",
+                "testParam2": "value2"
+            },
+            "providerState": "SomeProviderState"
+        }
+    ],
+    "metadata": {
+        "pact-specification": {
+            "version": "3.0.0"
+        },
+        "pact-jvm": {
+            "version": "3.3.3"
+        }
+    }
+}

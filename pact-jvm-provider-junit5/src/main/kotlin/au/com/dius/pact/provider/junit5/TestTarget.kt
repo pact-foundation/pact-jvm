@@ -1,19 +1,30 @@
 package au.com.dius.pact.provider.junit5
 
+import au.com.dius.pact.model.DirectorySource
 import au.com.dius.pact.model.Interaction
+import au.com.dius.pact.model.PactBrokerSource
+import au.com.dius.pact.model.PactSource
 import au.com.dius.pact.model.RequestResponseInteraction
+import au.com.dius.pact.model.v3.messaging.Message
+import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.HttpClientFactory
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
+import au.com.dius.pact.provider.ProviderVerifier
 import org.apache.http.client.methods.HttpUriRequest
+import java.lang.reflect.Method
 import java.net.URL
+import java.net.URLClassLoader
+import java.util.function.Supplier
+import java.util.function.Function
 
 interface TestTarget {
-  fun getProviderInfo(serviceName: String): ProviderInfo
-  fun prepareRequest(interaction: Interaction): Pair<Any, Any>
+  fun getProviderInfo(serviceName: String, pactSource: PactSource? = null): ProviderInfo
+  fun prepareRequest(interaction: Interaction): Pair<Any, Any>?
   fun isHttpTarget(): Boolean
-  fun executeInteraction(client: Any, request: Any): Map<String, Any>
+  fun executeInteraction(client: Any?, request: Any?): Map<String, Any>
+  fun prepareVerifier(verifier: ProviderVerifier, testInstance: Any)
 }
 
 open class HttpTestTarget @JvmOverloads constructor (
@@ -23,7 +34,7 @@ open class HttpTestTarget @JvmOverloads constructor (
 ) : TestTarget {
   override fun isHttpTarget() = true
 
-  override fun getProviderInfo(serviceName: String): ProviderInfo {
+  override fun getProviderInfo(serviceName: String, pactSource: PactSource?): ProviderInfo {
     val providerInfo = ProviderInfo(serviceName)
     providerInfo.setPort(port)
     providerInfo.setHost(host)
@@ -32,7 +43,7 @@ open class HttpTestTarget @JvmOverloads constructor (
     return providerInfo
   }
 
-  override fun prepareRequest(interaction: Interaction): Pair<Any, Any> {
+  override fun prepareRequest(interaction: Interaction): Pair<Any, Any>? {
     val providerClient = ProviderClient(getProviderInfo("provider"), HttpClientFactory())
     if (interaction is RequestResponseInteraction) {
       return providerClient.prepareRequest(interaction.request.generatedRequest()) to providerClient
@@ -40,7 +51,10 @@ open class HttpTestTarget @JvmOverloads constructor (
     throw UnsupportedOperationException("Only request/response interactions can be used with an HTTP test target")
   }
 
-  override fun executeInteraction(client: Any, request: Any): Map<String, Any> {
+  override fun prepareVerifier(verifier: ProviderVerifier, testInstance: Any) {
+  }
+
+  override fun executeInteraction(client: Any?, request: Any?): Map<String, Any> {
     val providerClient = client as ProviderClient
     val httpRequest = request as HttpUriRequest
     return providerClient.executeRequest(providerClient.getHttpClient(), httpRequest)
@@ -61,24 +75,12 @@ open class HttpsTestTarget @JvmOverloads constructor (
   val insecure: Boolean = false
 ) : HttpTestTarget(host, port, path) {
 
-  override fun getProviderInfo(serviceName: String): ProviderInfo {
-    val providerInfo = super.getProviderInfo(serviceName)
+  override fun getProviderInfo(serviceName: String, pactSource: PactSource?): ProviderInfo {
+    val providerInfo = super.getProviderInfo(serviceName, pactSource)
     providerInfo.setProtocol("https")
     providerInfo.isInsecure = insecure
     return providerInfo
   }
-
-//  override fun prepareRequest(interaction: Interaction): Pair<Any, Any> {
-//    val providerClient = ProviderClient(getProviderInfo("provider"), HttpClientFactory())
-//    if (interaction is RequestResponseInteraction) {
-//      return providerClient.prepareRequest(interaction.request.generatedRequest()) to providerClient
-//    }
-//    throw UnsupportedOperationException("Only request/response interactions can be used with an HTTPS test target")
-//  }
-//
-//  override fun executeInteraction(client: Any, request: Any): Map<String, Any> {
-//    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-//  }
 
   companion object {
     @JvmStatic
@@ -91,26 +93,41 @@ open class HttpsTestTarget @JvmOverloads constructor (
 open class AmpqTestTarget(val packagesToScan: List<String> = emptyList()) : TestTarget {
   override fun isHttpTarget() = false
 
-  override fun getProviderInfo(serviceName: String): ProviderInfo {
+  override fun getProviderInfo(serviceName: String, pactSource: PactSource?): ProviderInfo {
     val providerInfo = ProviderInfo(serviceName)
     providerInfo.verificationType = PactVerification.ANNOTATED_METHOD
     providerInfo.packagesToScan = packagesToScan
 
-//    if (source is PactBrokerSource<*>) {
-//      val (_, _, pacts) = source
-//      providerInfo.consumers = pacts.entries.flatMap { e -> e.value.map { p -> ConsumerInfo(e.key.name, p) } }
-//    } else if (source is DirectorySource<*>) {
-//      val (_, pacts) = source
-//      providerInfo.consumers = pacts.entries.map { e -> ConsumerInfo(e.value.consumer.name, e.value) }
-//    }
+    if (pactSource is PactBrokerSource<*>) {
+      val (_, _, pacts) = pactSource
+      providerInfo.consumers = pacts.entries.flatMap { e -> e.value.map { p -> ConsumerInfo(e.key.name, p) } }
+    } else if (pactSource is DirectorySource<*>) {
+      val (_, pacts) = pactSource
+      providerInfo.consumers = pacts.entries.map { e -> ConsumerInfo(e.value.consumer.name, e.value) }
+    }
     return providerInfo
   }
 
-  override fun prepareRequest(interaction: Interaction): Pair<Any, Any> {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  override fun prepareRequest(interaction: Interaction): Pair<Any, Any>? {
+    if (interaction is Message) {
+      return null
+    }
+    throw UnsupportedOperationException("Only message interactions can be used with an Ampq test target")
   }
 
-  override fun executeInteraction(client: Any, request: Any): Map<String, Any> {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  override fun prepareVerifier(verifier: ProviderVerifier, testInstance: Any) {
+    verifier.projectClasspath = Supplier<Array<URL>> { (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs }
+    val defaultProviderMethodInstance = verifier.providerMethodInstance
+    verifier.providerMethodInstance = Function<Method, Any?> { m ->
+      if (m.declaringClass == testInstance.javaClass) {
+        testInstance
+      } else {
+        defaultProviderMethodInstance.apply(m)
+      }
+    }
+  }
+
+  override fun executeInteraction(client: Any?, request: Any?): Map<String, Any> {
+    return emptyMap()
   }
 }

@@ -312,7 +312,8 @@ class ProviderVerifier extends ProviderVerifierBase {
       if (providerMethods.empty) {
         reporters.each { it.errorHasNoAnnotatedMethodsFoundForInteraction(interaction) }
         throw new RuntimeException('No annotated methods were found for interaction ' +
-          "'${interaction.description}'")
+          "'${interaction.description}'. You need to provide a method annotated with " +
+          "@PactVerifyProvider(\"${interaction.description}\") that returns the message contents.")
       } else {
         if (interaction instanceof Message) {
           verifyMessagePact(providerMethods, interaction as Message, interactionMessage, failures)

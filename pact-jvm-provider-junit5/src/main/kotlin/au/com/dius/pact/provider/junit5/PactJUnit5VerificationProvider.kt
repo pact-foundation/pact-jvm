@@ -49,6 +49,7 @@ data class PactVerificationContext(
   val consumerName: String,
   val interaction: Interaction
 ) {
+
   fun verifyInteraction() {
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val client = store.get("client")
@@ -64,7 +65,7 @@ data class PactVerificationContext(
     }
   }
 
-  private fun validateTestExecution(client: Any, request: Any, failures: MutableMap<String, Any>): Boolean {
+  private fun validateTestExecution(client: Any?, request: Any?, failures: MutableMap<String, Any>): Boolean {
     if (providerInfo.verificationType == null || providerInfo.verificationType == PactVerification.REQUST_RESPONSE) {
       val interactionMessage = "Verifying a pact between $consumerName and ${providerInfo.name}" +
         " - ${interaction.description}"
@@ -83,7 +84,8 @@ data class PactVerificationContext(
         false
       }
     } else {
-      return false
+      return verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, ConsumerInfo(consumerName), interaction,
+        interaction.description, failures)
     }
   }
 }
@@ -139,17 +141,20 @@ class PactVerificationExtension(
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val testContext = store.get("interactionContext") as PactVerificationContext
 
-    val providerInfo = testContext.target.getProviderInfo(serviceName)
+    val providerInfo = testContext.target.getProviderInfo(serviceName, pactSource)
     testContext.providerInfo = providerInfo
 
     prepareVerifier(testContext, context)
     store.put("verifier", testContext.verifier)
 
-    val (request, client) = testContext.target.prepareRequest(interaction)
-    store.put("request", request)
-    store.put("client", client)
-    if (testContext.target.isHttpTarget()) {
-      store.put("httpRequest", request)
+    val requestAndClient = testContext.target.prepareRequest(interaction)
+    if (requestAndClient != null) {
+      val (request, client) = requestAndClient
+      store.put("request", request)
+      store.put("client", client)
+      if (testContext.target.isHttpTarget()) {
+        store.put("httpRequest", request)
+      }
     }
   }
 
@@ -157,6 +162,7 @@ class PactVerificationExtension(
     val consumer = ConsumerInfo(consumerName ?: pact.consumer.name)
 
     val verifier = ProviderVerifier()
+    testContext.target.prepareVerifier(verifier, extContext.requiredTestInstance)
 
     setupReporters(verifier, serviceName, interaction.description, extContext, testContext.valueResolver)
 
