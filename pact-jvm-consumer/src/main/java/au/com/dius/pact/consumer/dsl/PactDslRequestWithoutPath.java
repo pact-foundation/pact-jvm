@@ -32,50 +32,31 @@ import java.util.stream.Stream;
 
 import static au.com.dius.pact.consumer.ConsumerPactBuilder.xmlToString;
 
-public class PactDslRequestWithoutPath {
+public class PactDslRequestWithoutPath extends PactDslRequestBase {
   private static final String CONTENT_TYPE = "Content-Type";
 
-    private final ConsumerPactBuilder consumerPactBuilder;
-    private PactDslWithState pactDslWithState;
-    private String description;
-    private String requestMethod;
-    private Map<String, String> requestHeaders = new HashMap<>();
-    private Map<String, List<String>> query = new HashMap<>();
-    private OptionalBody requestBody = OptionalBody.missing();
-    private MatchingRules requestMatchers = new MatchingRulesImpl();
-    private Generators requestGenerators = new Generators();
-    private String consumerName;
-    private String providerName;
-  private final PactDslRequestWithoutPath defaultRequestValues;
+  private final ConsumerPactBuilder consumerPactBuilder;
+  private PactDslWithState pactDslWithState;
+  private String description;
+  private String consumerName;
+  private String providerName;
   private final PactDslResponse defaultResponseValues;
 
   public PactDslRequestWithoutPath(ConsumerPactBuilder consumerPactBuilder,
-                                     PactDslWithState pactDslWithState,
-                                     String description,
-                                     PactDslRequestWithoutPath defaultRequestValues,
-                                     PactDslResponse defaultResponseValues) {
-        this.consumerPactBuilder = consumerPactBuilder;
-        this.pactDslWithState = pactDslWithState;
-        this.description = description;
-        this.consumerName = pactDslWithState.consumerName;
-        this.providerName = pactDslWithState.providerName;
-    this.defaultRequestValues = defaultRequestValues;
+                                   PactDslWithState pactDslWithState,
+                                   String description,
+                                   PactDslRequestWithoutPath defaultRequestValues,
+                                   PactDslResponse defaultResponseValues) {
+    super(defaultRequestValues);
+
+    this.consumerPactBuilder = consumerPactBuilder;
+    this.pactDslWithState = pactDslWithState;
+    this.description = description;
+    this.consumerName = pactDslWithState.consumerName;
+    this.providerName = pactDslWithState.providerName;
     this.defaultResponseValues = defaultResponseValues;
 
     setupDefaultValues();
-  }
-
-  private void setupDefaultValues() {
-    if (defaultRequestValues != null) {
-      if (StringUtils.isNotEmpty(defaultRequestValues.requestMethod)) {
-        requestMethod = defaultRequestValues.requestMethod;
-      }
-      requestHeaders.putAll(defaultRequestValues.requestHeaders);
-      query.putAll(defaultRequestValues.query);
-      requestBody = defaultRequestValues.requestBody;
-      requestMatchers = ((MatchingRulesImpl) defaultRequestValues.requestMatchers).copy();
-      requestGenerators = new Generators(defaultRequestValues.requestGenerators.getCategories());
-    }
   }
 
   /**

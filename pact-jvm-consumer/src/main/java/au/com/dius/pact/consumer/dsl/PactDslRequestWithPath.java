@@ -30,72 +30,73 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class PactDslRequestWithPath {
+public class PactDslRequestWithPath extends PactDslRequestBase {
   private static final String CONTENT_TYPE = "Content-Type";
 
-    private final ConsumerPactBuilder consumerPactBuilder;
+  private final ConsumerPactBuilder consumerPactBuilder;
 
-    Consumer consumer;
-    Provider provider;
+  Consumer consumer;
+  Provider provider;
 
-    List<ProviderState> state;
-    String description;
-    String path = "/";
-    String requestMethod = "GET";
-    Map<String, String> requestHeaders = new HashMap<>();
-    Map<String, List<String>> query = new HashMap<>();
-    OptionalBody requestBody = OptionalBody.missing();
-    MatchingRules requestMatchers = new MatchingRulesImpl();
-    Generators requestGenerators = new Generators();
-  private final PactDslRequestWithoutPath defaultRequestValues;
+  List<ProviderState> state;
+  String description;
+  String path = "/";
   private final PactDslResponse defaultResponseValues;
 
-     PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
-                            String consumerName,
-                            String providerName,
-                            List<ProviderState> state,
-                            String description,
-                            String path,
-                            String requestMethod,
-                            Map<String, String> requestHeaders,
-                            Map<String, List<String>> query,
-                            OptionalBody requestBody,
-                            MatchingRules requestMatchers,
-                            Generators requestGenerators,
-                            PactDslRequestWithoutPath defaultRequestValues,
-                            PactDslResponse defaultResponseValues) {
-        this.consumerPactBuilder = consumerPactBuilder;
-        this.requestMatchers = requestMatchers;
-        this.consumer = new Consumer(consumerName);
-        this.provider = new Provider(providerName);
+  PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
+                        String consumerName,
+                        String providerName,
+                        List<ProviderState> state,
+                        String description,
+                        String path,
+                        String requestMethod,
+                        Map<String, String> requestHeaders,
+                        Map<String, List<String>> query,
+                        OptionalBody requestBody,
+                        MatchingRules requestMatchers,
+                        Generators requestGenerators,
+                        PactDslRequestWithoutPath defaultRequestValues,
+                        PactDslResponse defaultResponseValues) {
+    super(defaultRequestValues);
 
-        this.state = state;
+    this.consumerPactBuilder = consumerPactBuilder;
+    this.requestMatchers = requestMatchers;
+    this.consumer = new Consumer(consumerName);
+    this.provider = new Provider(providerName);
 
-        this.description = description;
-        this.path = path;
-        this.requestMethod = requestMethod;
-        this.requestHeaders = requestHeaders;
-        this.query = query;
-        this.requestBody = requestBody;
-        this.requestMatchers = requestMatchers;
-        this.requestGenerators = requestGenerators;
-    this.defaultRequestValues = defaultRequestValues;
+    this.state = state;
+
+    this.description = description;
+    this.path = path;
+    this.requestMethod = requestMethod;
+    this.requestHeaders = requestHeaders;
+    this.query = query;
+    this.requestBody = requestBody;
+    this.requestMatchers = requestMatchers;
+    this.requestGenerators = requestGenerators;
     this.defaultResponseValues = defaultResponseValues;
+
+    setupDefaultValues();
   }
 
-    PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
-                           PactDslRequestWithPath existing,
-                           String description,
-                           PactDslRequestWithoutPath defaultRequestValues,
-                           PactDslResponse defaultResponseValues) {
-        this.consumerPactBuilder = consumerPactBuilder;
-        this.consumer = existing.consumer;
-        this.provider = existing.provider;
-        this.state = existing.state;
-        this.description = description;
-      this.defaultRequestValues = defaultRequestValues;
-      this.defaultResponseValues = defaultResponseValues;
-    }
+  PactDslRequestWithPath(ConsumerPactBuilder consumerPactBuilder,
+                         PactDslRequestWithPath existing,
+                         String description,
+                         PactDslRequestWithoutPath defaultRequestValues,
+                         PactDslResponse defaultResponseValues) {
+    super(defaultRequestValues);
+
+    this.requestMethod = "GET";
+
+    this.consumerPactBuilder = consumerPactBuilder;
+    this.consumer = existing.consumer;
+    this.provider = existing.provider;
+    this.state = existing.state;
+    this.description = description;
+    this.defaultResponseValues = defaultResponseValues;
+
+    setupDefaultValues();
+  }
 
     /**
      * The HTTP method for the request
