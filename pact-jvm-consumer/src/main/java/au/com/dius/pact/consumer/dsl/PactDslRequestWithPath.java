@@ -405,18 +405,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      */
     public PactDslRequestWithPath withFileUpload(String partName, String fileName, String fileContentType, byte[] data)
       throws IOException {
-      HttpEntity multipart = MultipartEntityBuilder.create()
-        .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
-        .addBinaryBody(partName, data, ContentType.create(fileContentType), fileName)
-        .build();
-      OutputStream os = new ByteArrayOutputStream();
-      multipart.writeTo(os);
-
-      requestBody = OptionalBody.body(os.toString());
-      requestMatchers.addCategory("header").addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX,
-        multipart.getContentType().getValue()));
-      requestHeaders.put(CONTENT_TYPE, multipart.getContentType().getValue());
-
+      setupFileUpload(partName, fileName, fileContentType, data);
       return this;
     }
 }
