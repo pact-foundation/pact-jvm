@@ -12,8 +12,8 @@ class PactDslRequestWithPathSpec extends Specification {
     given:
     ConsumerPactBuilder consumerPactBuilder = ConsumerPactBuilder.consumer('spec')
     PactDslWithState pactDslWithState = new PactDslWithState(consumerPactBuilder, 'spec', 'spec', null, null)
-    PactDslRequestWithoutPath defaultRequestValues = new PactDslRequestWithoutPath(consumerPactBuilder, pactDslWithState,
-      'test', null, null)
+    PactDslRequestWithoutPath defaultRequestValues = new PactDslRequestWithoutPath(consumerPactBuilder,
+      pactDslWithState, 'test', null, null)
       .method('PATCH')
       .headers('test', 'test')
       .query('test=true')
@@ -22,7 +22,8 @@ class PactDslRequestWithPathSpec extends Specification {
     when:
     PactDslRequestWithPath subject = new PactDslRequestWithPath(consumerPactBuilder, 'spec', 'spec', [], 'test', '/',
       'GET', [:], [:], OptionalBody.empty(), new MatchingRulesImpl(), new Generators(), defaultRequestValues, null)
-    PactDslRequestWithPath subject2 = new PactDslRequestWithPath(consumerPactBuilder, subject, 'test', defaultRequestValues, null)
+    PactDslRequestWithPath subject2 = new PactDslRequestWithPath(consumerPactBuilder, subject, 'test',
+      defaultRequestValues, null)
 
     then:
     subject.requestMethod == 'PATCH'
