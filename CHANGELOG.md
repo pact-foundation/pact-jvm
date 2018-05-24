@@ -1,5 +1,32 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.16 - Bugfixes + JUnit 5 provider test support
+
+* 83306b9a - feat: Added link to JUnit 5 verification tests from the README (Ronald Holshausen, Sun May 6 18:12:17 2018 +1000)
+* bfe159c0 - feat: Added link to JUnit 5 verification tests from the README - #576 (Ronald Holshausen, Sun May 6 18:10:49 2018 +1000)
+* 177e0626 - feat: Added documentation onJUnit 5 verification tests - #576 (Ronald Holshausen, Sun May 6 18:00:53 2018 +1000)
+* 54284131 - feat: Implemented AMQP verification test with JUnit 5 - #576 (Ronald Holshausen, Sun May 6 16:33:06 2018 +1000)
+* 2803d7b1 - feat: Implemented HTTPS verification test with JUnit 5 - #576 (Ronald Holshausen, Sun May 6 15:42:03 2018 +1000)
+* 64b9ba48 - feat: First working version of a basic JUnit 5 verification test - #576 (Ronald Holshausen, Sun May 6 14:51:08 2018 +1000)
+* 4ac3b2bf - Merge branch 'master' into junit5 (Ronald Holshausen, Sun May 6 13:57:30 2018 +1000)
+* 82d5a0bd - chore: use parallel builds in gradle (Ronald Holshausen, Sun May 6 13:16:17 2018 +1000)
+* b8edcbf0 - Merge pull request #674 from pkubowicz/static-groovy (Ronald Holshausen, Sun May 6 13:12:58 2018 +1000)
+* f7da3efd - Merge pull request #673 from pkubowicz/test-ports (Ronald Holshausen, Sun May 6 13:11:52 2018 +1000)
+* e3ab78ef - chore: correct the httpclient version used in the broker module (Ronald Holshausen, Sun May 6 13:06:45 2018 +1000)
+* 83175365 - Merge pull request #672 from pkubowicz/libs-update (Ronald Holshausen, Sun May 6 12:37:45 2018 +1000)
+* 586c669a - Merge pull request #671 from softarn/lambda-dsl-json-array-min-max-like (Ronald Holshausen, Wed May 2 16:06:45 2018 +1000)
+* 4dea85e5 - Merge pull request #670 from pkubowicz/jar-classpath (Ronald Holshausen, Wed May 2 16:02:22 2018 +1000)
+* 4f6a320f - Added methods newJsonArrayMinLike and newJsonArrayMaxLike to LambdaDsl (Marcus Hojvall, Thu Apr 26 12:50:54 2018 +0200)
+* 83812854 - Don't run servers on commonly used ports during tests (Piotr Kubowicz, Thu Apr 26 08:47:31 2018 +0200)
+* 2bba8adf - Update minor Scala and Kotlin versions (Piotr Kubowicz, Thu Apr 26 11:32:56 2018 +0200)
+* 9b8582a5 - Update httpclient (Piotr Kubowicz, Thu Apr 26 11:31:46 2018 +0200)
+* 9a172ca2 - Load pact from classpath inside a JAR #669 (Piotr Kubowicz, Thu Apr 26 10:17:14 2018 +0200)
+* 5ce500c9 - Use @CompileStatic for PactReader.loadFile() (Piotr Kubowicz, Thu Apr 26 10:32:16 2018 +0200)
+* c6832e47 - Implemented the main test template provider for pact verification tests - #576 (Ronald Holshausen, Tue Apr 24 16:33:06 2018 +1000)
+* ca7a988a - Setup basic JUnit 5 provider test support #576 (Ronald Holshausen, Tue Apr 24 09:14:16 2018 +1000)
+* e8f0ffee - Update versions in readme (Ronald Holshausen, Sun Apr 22 16:30:14 2018 +1000)
+* 65c98414 - bump version to 3.5.16 (Ronald Holshausen, Sun Apr 22 16:27:45 2018 +1000)
+
 # 3.5.15 - JUnit 5 Consumer Test implementation
 
 * 6933fc29 - Cleanup of JUnit 5 implementation #576 (Ronald Holshausen, Sun Apr 22 15:37:24 2018 +1000)

@@ -19,6 +19,9 @@ Supports:
 - **au.com.dius.pact.provider.junit.State** custom annotation - before each interaction that requires a state change,
 all methods annotated by `@State` with appropriate the state listed will be invoked.
 
+**NOTE:** For publishing provider verification results to a pact broker, make sure the Java system property `pact.provider.version`
+is set with the version of your provider. 
+
 ## Example of MockMvc test
 
 ```java

@@ -26,16 +26,20 @@ import java.lang.annotation.Inherited
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 @Inherited
-annotation class PactTestFor(val providerName: String = "",
-                             val hostInterface: String = "localhost",
-                             val port: String = "8080",
-                             val pactVersion: PactSpecVersion = PactSpecVersion.V3,
-                             val pactMethod: String = "")
+annotation class PactTestFor(
+  val providerName: String = "",
+  val hostInterface: String = "localhost",
+  val port: String = "8080",
+  val pactVersion: PactSpecVersion = PactSpecVersion.V3,
+  val pactMethod: String = ""
+)
 
-data class ProviderInfo(val providerName: String = "",
-                        val hostInterface: String = "localhost",
-                        val port: String = "8080",
-                        val pactVersion: PactSpecVersion = PactSpecVersion.V3) {
+data class ProviderInfo(
+  val providerName: String = "",
+  val hostInterface: String = "localhost",
+  val port: String = "8080",
+  val pactVersion: PactSpecVersion = PactSpecVersion.V3
+) {
 
   fun mockServerConfig() =
     MockProviderConfig.httpConfig(if (hostInterface.isEmpty()) MockProviderConfig.LOCALHOST else hostInterface,

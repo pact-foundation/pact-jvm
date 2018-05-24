@@ -1,9 +1,8 @@
 package au.com.dius.pact.provider.junit.target;
 
+import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.model.ProviderState;
-import au.com.dius.pact.model.Interaction;
-import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.HttpClientFactory;
 import au.com.dius.pact.provider.ProviderClient;
@@ -35,7 +34,7 @@ public class HttpTarget extends BaseTarget {
      * @param host host of tested service
      * @param port port of tested service
      */
-    public HttpTarget(final String host, final int port) {
+    public  HttpTarget(final String host, final int port) {
         this("http", host, port);
     }
 

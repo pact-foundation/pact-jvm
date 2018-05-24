@@ -12,8 +12,8 @@ buildscript {
 
 plugins {
   id 'nebula.kotlin' version '1.2.21'
-  id 'org.jmailen.kotlinter' version '1.7.0'
-  id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC6-3'
+  id 'org.jmailen.kotlinter' version '1.11.2'
+  id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC6-4'
 //  id 'org.jetbrains.dokka' version '0.9.16'
 }
 
@@ -48,7 +48,7 @@ subprojects {
 
   project.ext {
     scalaVersion = '2.12'
-    scalaFullVersion = '2.12.4'
+    scalaFullVersion = '2.12.5'
     fullName = buildName(project)
   }
 

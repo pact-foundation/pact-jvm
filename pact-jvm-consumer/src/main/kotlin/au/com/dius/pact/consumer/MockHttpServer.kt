@@ -58,10 +58,12 @@ interface MockServer {
   fun validateMockServerState(): PactVerificationResult
 }
 
-abstract class BaseMockServer(val pact: RequestResponsePact,
-                              val config: MockProviderConfig,
-                              private val server: HttpServer,
-                              private var stopped: Boolean = false) : HttpHandler, MockServer {
+abstract class BaseMockServer(
+  val pact: RequestResponsePact,
+  val config: MockProviderConfig,
+  private val server: HttpServer,
+  private var stopped: Boolean = false
+) : HttpHandler, MockServer {
   private val mismatchedRequests = ConcurrentHashMap<Request, MutableList<PactVerificationResult>>()
   private val matchedRequests = ConcurrentLinkedQueue<Request>()
   private val requestMatcher = RequestMatching.apply(JavaConversions.asScalaBuffer(pact.interactions).toSeq())

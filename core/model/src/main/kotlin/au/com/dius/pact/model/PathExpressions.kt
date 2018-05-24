@@ -37,8 +37,12 @@ fun stringPath(chars: PushbackIterator<IndexedValue<Char>>, tokens: MutableList<
 }
 
 // index_path -> [0-9]+
-fun indexPath(ch: IndexedValue<Char>, chars: PushbackIterator<IndexedValue<Char>>, tokens: MutableList<PathToken>,
-              path: String) {
+fun indexPath(
+  ch: IndexedValue<Char>,
+  chars: PushbackIterator<IndexedValue<Char>>,
+  tokens: MutableList<PathToken>,
+  path: String
+) {
   var id = String() + ch.value
   loop@ while (chars.hasNext()) {
     val c = chars.next()

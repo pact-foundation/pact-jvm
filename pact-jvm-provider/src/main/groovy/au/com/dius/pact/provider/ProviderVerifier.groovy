@@ -34,11 +34,11 @@ import static au.com.dius.pact.provider.ProviderVerifierKt.reportVerificationRes
 @Slf4j
 class ProviderVerifier extends ProviderVerifierBase {
 
-  static final protected String PACT_FILTER_CONSUMERS = 'pact.filter.consumers'
-  static final protected String PACT_FILTER_DESCRIPTION = 'pact.filter.description'
-  static final protected String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
-  static final protected String PACT_SHOW_STACKTRACE = 'pact.showStacktrace'
-  static final protected String PACT_SHOW_FULLDIFF = 'pact.showFullDiff'
+  static final public String PACT_FILTER_CONSUMERS = 'pact.filter.consumers'
+  static final public String PACT_FILTER_DESCRIPTION = 'pact.filter.description'
+  static final public String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
+  static final public String PACT_SHOW_STACKTRACE = 'pact.showStacktrace'
+  static final public String PACT_SHOW_FULLDIFF = 'pact.showFullDiff'
 
   def pactLoadFailureMessage
   Function<Object, Boolean> isBuildSpecificTask = { null }
@@ -312,7 +312,8 @@ class ProviderVerifier extends ProviderVerifierBase {
       if (providerMethods.empty) {
         reporters.each { it.errorHasNoAnnotatedMethodsFoundForInteraction(interaction) }
         throw new RuntimeException('No annotated methods were found for interaction ' +
-          "'${interaction.description}'")
+          "'${interaction.description}'. You need to provide a method annotated with " +
+          "@PactVerifyProvider(\"${interaction.description}\") that returns the message contents.")
       } else {
         if (interaction instanceof Message) {
           verifyMessagePact(providerMethods, interaction as Message, interactionMessage, failures)

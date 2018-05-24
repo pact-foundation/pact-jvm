@@ -28,10 +28,12 @@ class FormPostBodyMatcher : BodyMatcher {
     }
   }
 
-  private fun compareParameters(expectedParameters: List<NameValuePair>,
-                                actualParameters: List<NameValuePair>,
-                                matchingRules: MatchingRules?,
-                                allowUnexpectedKeys: Boolean): List<BodyMismatch> {
+  private fun compareParameters(
+    expectedParameters: List<NameValuePair>,
+    actualParameters: List<NameValuePair>,
+    matchingRules: MatchingRules?,
+    allowUnexpectedKeys: Boolean
+  ): List<BodyMismatch> {
     val expectedMap = expectedParameters.groupBy { it.name }
     val actualMap = actualParameters.groupBy { it.name }
     val result = mutableListOf<BodyMismatch>()

@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.AmazonS3URI
 import com.github.zafarkhaja.semver.Version
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import kotlin.Pair
 
@@ -174,6 +175,7 @@ class PactReader {
     }
   }
 
+  @CompileStatic
   private static Pair<Object, PactSource> loadFile(def source, Map options = [:]) {
     if (source instanceof ClosurePactSource) {
       loadFile(source.closure.get(), options)
@@ -199,7 +201,7 @@ class PactReader {
         new Pair(new JsonSlurper().parse(file), new FileSource(file))
       } else {
         try {
-          new Pair(new JsonSlurper().parseText(source), UnknownPactSource.INSTANCE)
+          new Pair(new JsonSlurper().parseText(source.toString()), UnknownPactSource.INSTANCE)
         } catch (e) {
           throw new UnsupportedOperationException(
             "Unable to load pact file from '$source' as it is neither a json document, file, input stream, " +

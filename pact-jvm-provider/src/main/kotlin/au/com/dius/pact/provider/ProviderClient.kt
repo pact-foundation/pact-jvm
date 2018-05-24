@@ -52,8 +52,10 @@ interface IProviderInfo {
 /**
  * Client HTTP utility for providers
  */
-open class ProviderClient(val provider: IProviderInfo,
-                          private val httpClientFactory: IHttpClientFactory) {
+open class ProviderClient(
+  val provider: IProviderInfo,
+  private val httpClientFactory: IHttpClientFactory
+) {
 
   companion object : KLogging() {
     const val CONTENT_TYPE = "Content-Type"
@@ -91,19 +93,28 @@ open class ProviderClient(val provider: IProviderInfo,
   }
 
   open fun makeRequest(request: Request): Map<String, Any> {
+    val httpclient = getHttpClient()
+    val method = prepareRequest(request)
+    return executeRequest(httpclient, method)
+  }
+
+  open fun executeRequest(httpclient: CloseableHttpClient, method: HttpUriRequest): Map<String, Any> {
+    return httpclient.execute(method).use {
+      handleResponse(it)
+    }
+  }
+
+  open fun prepareRequest(request: Request): HttpUriRequest {
     logger.debug { "Making request for provider $provider:" }
     logger.debug { request.toString() }
 
-    val httpclient = httpClientFactory.newClient(provider)
     val method = newRequest(request)
     setupHeaders(request, method)
     setupBody(request, method)
 
     executeRequestFilter(method)
 
-    httpclient.execute(method).use {
-      return handleResponse(it)
-    }
+    return method
   }
 
   open fun executeRequestFilter(method: HttpRequest) {
@@ -169,10 +180,15 @@ open class ProviderClient(val provider: IProviderInfo,
     }
   }
 
-  open fun makeStateChangeRequest(stateChangeUrl: Any?, state: ProviderState, postStateInBody: Boolean,
-                                  isSetup: Boolean, stateChangeTeardown: Boolean): CloseableHttpResponse? {
+  open fun makeStateChangeRequest(
+    stateChangeUrl: Any?,
+    state: ProviderState,
+    postStateInBody: Boolean,
+    isSetup: Boolean,
+    stateChangeTeardown: Boolean
+  ): CloseableHttpResponse? {
     if (stateChangeUrl != null) {
-      val httpclient = httpClientFactory.newClient(provider)
+      val httpclient = getHttpClient()
       val urlBuilder = if (stateChangeUrl is URI) {
         URIBuilder(stateChangeUrl)
       } else {
@@ -221,6 +237,8 @@ open class ProviderClient(val provider: IProviderInfo,
       return null
     }
   }
+
+  fun getHttpClient() = httpClientFactory.newClient(provider)
 
   private fun handleResponse(httpResponse: HttpResponse): Map<String, Any> {
     logger.debug { "Received response: ${httpResponse.statusLine}" }

@@ -8,9 +8,11 @@ import java.util.function.ToIntFunction
 /**
  * Matching rules category
  */
-data class Category @JvmOverloads constructor(val name: String,
-                                              var matchingRules: MutableMap<String, MatchingRuleGroup> =
-                                              mutableMapOf()) {
+data class Category @JvmOverloads constructor(
+  val name: String,
+  var matchingRules: MutableMap<String, MatchingRuleGroup> =
+    mutableMapOf()
+) {
 
   companion object : KLogging()
 

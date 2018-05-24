@@ -47,7 +47,7 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 
 | Branch | Specification | Min JDK | Scala Versions | Latest Version |
 | ------ | ------------- | ------- | -------------- | -------------- |
-| 3.5.x | V3 | 8 | 2.12, 2.11 | 3.5.15 |
+| 3.5.x | V3 | 8 | 2.12, 2.11 | 3.5.16 |
 | 3.5.x-jre7 | V3 | 7 | 2.11 | 3.5.7-jre7.0 |
 | 2.4.x (v2.x) | V2 | 6 | 2.10, 2.11 | 2.4.20 |
 
@@ -106,7 +106,8 @@ For publishing pacts to a pact broker, have a look at https://github.com/warmuuh
 
 #### verify pacts with JUnit tests [version 2.3.3+, 3.1.3+]
 
-You want to look at: [junit provider support](pact-jvm-provider-junit)
+You want to look at: [junit provider support](pact-jvm-provider-junit) for JUnit 4 tests and 
+ [pact-jvm-provider-junit5](pact-jvm-provider-junit5) for JUnit 5 tests
 
 #### verify pacts with Leiningen [version 2.2.14+, 3.0.3+]
 

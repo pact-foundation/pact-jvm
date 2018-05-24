@@ -30,8 +30,13 @@ import org.hamcrest.Matchers.anything
  */
 open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false) : ProviderVerifier() {
 
-  fun verifyResponseFromProvider(provider: ProviderInfo, interaction: RequestResponseInteraction,
-                                 interactionMessage: String, failures: MutableMap<String, Any>, mockMvc: MockMvc) {
+  fun verifyResponseFromProvider(
+    provider: ProviderInfo,
+    interaction: RequestResponseInteraction,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    mockMvc: MockMvc
+  ) {
     try {
       val request = interaction.request
 
