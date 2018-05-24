@@ -49,7 +49,6 @@ subprojects {
   project.ext {
     scalaVersion = '2.12'
     scalaFullVersion = '2.12.5'
-    fullName = buildName(project)
   }
 
     apply plugin: 'java'
@@ -150,7 +149,6 @@ subprojects {
                 'Specification-Vendor': project.group,
                 'Specification-Title': project.name,
                 'Specification-Version': version
-        baseName = buildName(project)
     }
 
     task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc/*, dokkaJavadoc*/]) {
@@ -174,7 +172,7 @@ subprojects {
     }
 
     def pomCustomisation = {
-        name project.fullName
+        name project.name
         description StringEscapeUtils.escapeXml11(new File(projectDir, 'README.md').text)
         url 'https://github.com/DiUS/pact-jvm'
         licenses {

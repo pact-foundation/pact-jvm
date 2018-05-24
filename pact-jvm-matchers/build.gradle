@@ -1,5 +1,5 @@
 dependencies {
-  compile project(":core:model"),
+  compile project(":core:pact-jvm-core-model"),
     "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   compile("io.gatling:jsonpath_${project.scalaVersion}:0.6.9") {
     exclude group: 'org.scala-lang'

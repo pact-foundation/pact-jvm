@@ -1,5 +1,5 @@
 dependencies {
-    compile project(":core:model"), project(":pact-jvm-pact-broker"),
+    compile project(":core:pact-jvm-core-model"), project(":pact-jvm-pact-broker"),
         project(":pact-jvm-matchers"),
         'commons-io:commons-io:2.5',
         "org.fusesource.jansi:jansi:${project.jansiVersion}",

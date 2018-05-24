@@ -1,5 +1,5 @@
 task pactsJar(type: Jar, dependsOn: testClasses) {
-  baseName = "pacts-jar"
+  classifier = 'pacts'
   into('jar-pacts') {
     from(sourceSets.test.output) {
       include 'test_pact_v3.json'
