@@ -2,9 +2,7 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.OptionalBody;
-import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.model.PactFragment;
-import au.com.dius.pact.model.PactReader;
 import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.model.Request;
 import au.com.dius.pact.model.RequestResponseInteraction;
@@ -21,18 +19,18 @@ import org.w3c.dom.Document;
 import scala.collection.JavaConversions$;
 
 import javax.xml.transform.TransformerException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public class PactDslResponse {
     private static final String CONTENT_TYPE = "Content-Type";
+    static final String DEFAULT_JSON_CONTENT_TYPE_REGEX = "application/json;\\s?charset=(utf|UTF)-8";
+
     private final ConsumerPactBuilder consumerPactBuilder;
     private PactDslRequestWithPath request;
-  private final PactDslRequestWithoutPath defaultRequestValues;
-  private final PactDslResponse defaultResponseValues;
+    private final PactDslRequestWithoutPath defaultRequestValues;
+    private final PactDslResponse defaultResponseValues;
 
     private int responseStatus = 200;
     private Map<String, String> responseHeaders = new HashMap<String, String>();
@@ -194,7 +192,7 @@ public class PactDslResponse {
     public PactDslResponse body(JSONObject body) {
         this.responseBody = OptionalBody.body(body.toString());
         if (!responseHeaders.containsKey(CONTENT_TYPE)) {
-            responseHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+            matchHeader(CONTENT_TYPE, DEFAULT_JSON_CONTENT_TYPE_REGEX, ContentType.APPLICATION_JSON.toString());
         }
         return this;
     }
@@ -220,7 +218,7 @@ public class PactDslResponse {
         }
 
         if (!responseHeaders.containsKey(CONTENT_TYPE)) {
-            responseHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+            matchHeader(CONTENT_TYPE, DEFAULT_JSON_CONTENT_TYPE_REGEX, ContentType.APPLICATION_JSON.toString());
         }
         return this;
     }
