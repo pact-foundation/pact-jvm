@@ -6,7 +6,11 @@ import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.model.matchingrules.TypeMatcher
+import com.google.common.net.MediaType
+import org.apache.http.entity.ContentType
 import spock.lang.Specification
+
+import static au.com.dius.pact.consumer.dsl.PactDslResponse.DEFAULT_JSON_CONTENT_TYPE_REGEX
 
 class PactDslResponseSpec extends Specification {
 
@@ -25,6 +29,22 @@ class PactDslResponseSpec extends Specification {
       .toPact()
     interaction = pact.interactions.first()
     response = interaction.response
+  }
+
+  def 'default json content type should match common variants'() {
+      def acceptableDefaultContentTypes = [
+              'application/json;charset=utf-8',
+              'application/json; charset=UTF-8',
+              'application/json; charset=utf-8',
+
+              ContentType.APPLICATION_JSON.toString(),
+              MediaType.JSON_UTF_8.toString(),
+      ]
+
+      expect:
+        acceptableDefaultContentTypes.each {
+            it.matches(DEFAULT_JSON_CONTENT_TYPE_REGEX)
+        }
   }
 
   def 'sets up any default state when created'() {
