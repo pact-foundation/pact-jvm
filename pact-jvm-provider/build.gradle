@@ -1,6 +1,6 @@
 dependencies {
     compile project(":core:pact-jvm-core-model"), project(":core:pact-jvm-core-pact-broker"),
-        project(":pact-jvm-matchers"),
+        project(":core:pact-jvm-core-matchers"),
         'commons-io:commons-io:2.5',
         "org.fusesource.jansi:jansi:${project.jansiVersion}",
         "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",

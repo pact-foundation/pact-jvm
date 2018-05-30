@@ -2,9 +2,11 @@ rootProject.name = 'pact-jvm'
 
 include 'core:pact-jvm-core-pact-broker'
 include 'core:pact-jvm-core-model'
+include 'core:pact-jvm-core-matchers'
 
 project(':core:pact-jvm-core-pact-broker').projectDir = file('core/pact-broker')
 project(':core:pact-jvm-core-model').projectDir = file('core/model')
+project(':core:pact-jvm-core-matchers').projectDir = file('core/matchers')
 
 include   'pact-jvm-consumer'
 include   'pact-jvm-consumer-junit'
@@ -20,7 +22,6 @@ include   'pact-specification-test'
 include   'pact-jvm-provider-gradle'
 include   'pact-jvm-provider-junit'
 include   'pact-jvm-provider-spring'
-include   'pact-jvm-matchers'
 include   'pact-jvm-provider-maven'
 include   'pact-jvm-provider-lein'
 include   'pact-jvm-provider-scalasupport'
