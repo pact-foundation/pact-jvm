@@ -1,8 +1,9 @@
 rootProject.name = 'pact-jvm'
 
-include 'pact-jvm-pact-broker'
+include 'core:pact-jvm-core-pact-broker'
 include 'core:pact-jvm-core-model'
 
+project(':core:pact-jvm-core-pact-broker').projectDir = file('core/pact-broker')
 project(':core:pact-jvm-core-model').projectDir = file('core/model')
 
 include   'pact-jvm-consumer'
