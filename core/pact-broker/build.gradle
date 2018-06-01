@@ -4,4 +4,5 @@ dependencies {
   compile "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
   compile "com.google.guava:guava:${project.guavaVersion}"
   compile 'org.dmfs:rfc3986-uri:0.8'
+  compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
 }

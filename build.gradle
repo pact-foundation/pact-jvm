@@ -14,7 +14,7 @@ plugins {
   id 'nebula.kotlin' version '1.2.21'
   id 'org.jmailen.kotlinter' version '1.11.2'
   id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC6-4'
-//  id 'org.jetbrains.dokka' version '0.9.16'
+  id 'org.jetbrains.dokka' version '0.9.17'
 }
 
 repositories {
@@ -73,19 +73,8 @@ subprojects {
       compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion"
       compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
       compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
-      compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
       compile('io.github.microutils:kotlin-logging:1.4.4') {
         exclude group: 'org.jetbrains.kotlin'
-      }
-
-      if (project.hasProperty('scalaVersion')) {
-          compile "org.scala-lang:scala-library:${project.scalaFullVersion}"
-          compile("com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.7.2") {
-            exclude group: 'org.scala-lang'
-          }
-
-          testCompile "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}",
-            "org.specs2:specs2-junit_${project.scalaVersion}:${project.specs2Version}"
       }
 
       testCompile 'org.hamcrest:hamcrest-all:1.3',

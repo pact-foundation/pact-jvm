@@ -1,6 +1,12 @@
 dependencies {
   compile project(":core:pact-jvm-core-model"), project(":pact-jvm-provider"),
     "org.scalatest:scalatest_${project.scalaVersion}:${project.scalatestVersion}"
+  compile "org.scala-lang:scala-library:${project.scalaFullVersion}"
+  compile("com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.7.2") {
+    exclude group: 'org.scala-lang'
+  }
+  testCompile "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}",
+    "org.specs2:specs2-junit_${project.scalaVersion}:${project.specs2Version}"
   compile 'org.asynchttpclient:async-http-client:2.1.0-alpha24'
   compile("ws.unfiltered:unfiltered-netty-server_${project.scalaVersion}:0.9.1") {
     exclude group: 'org.scala-lang'
