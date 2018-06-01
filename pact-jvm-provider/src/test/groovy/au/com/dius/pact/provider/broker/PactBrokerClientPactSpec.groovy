@@ -2,7 +2,7 @@ package au.com.dius.pact.provider.broker
 
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.groovy.PactBuilder
-import au.com.dius.pact.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import spock.lang.Specification
 
 @SuppressWarnings('UnnecessaryGetter')

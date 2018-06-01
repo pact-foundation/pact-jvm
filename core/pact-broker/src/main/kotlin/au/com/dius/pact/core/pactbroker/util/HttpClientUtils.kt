@@ -1,4 +1,4 @@
-package au.com.dius.pact.util
+package au.com.dius.pact.core.pactbroker.util
 
 import org.apache.http.client.utils.URIBuilder
 import org.apache.http.entity.ContentType

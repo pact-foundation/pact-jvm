@@ -9,7 +9,7 @@ import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.model.v3.messaging.Message
-import au.com.dius.pact.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import groovy.transform.CompileStatic

@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider.gradle
 
-import au.com.dius.pact.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import org.apache.commons.io.IOUtils
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project

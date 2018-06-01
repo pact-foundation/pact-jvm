@@ -1,4 +1,4 @@
-package au.com.dius.pact.util
+package au.com.dius.pact.core.pactbroker.util
 
 import spock.lang.Specification
 import spock.lang.Unroll

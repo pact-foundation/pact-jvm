@@ -1,4 +1,4 @@
-package au.com.dius.pact.pactbroker
+package au.com.dius.pact.core.pactbroker
 
 data class PactBrokerConsumer(
   val name: String,

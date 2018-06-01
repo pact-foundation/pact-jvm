@@ -3,8 +3,8 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.model.BrokerUrlSource
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
-import au.com.dius.pact.pactbroker.PactBrokerClient
-import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
+import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.com.github.kittinunf.result.Result
 import groovy.lang.GroovyObjectSupport
 import mu.KotlinLogging
 import java.util.function.Function

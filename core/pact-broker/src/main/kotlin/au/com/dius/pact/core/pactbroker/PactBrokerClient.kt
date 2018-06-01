@@ -1,6 +1,6 @@
-package au.com.dius.pact.pactbroker
+package au.com.dius.pact.core.pactbroker
 
-import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
+import au.com.dius.pact.core.pactbroker.com.github.kittinunf.result.Result
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.toJson
 import com.google.common.net.UrlEscapers.urlPathSegmentEscaper

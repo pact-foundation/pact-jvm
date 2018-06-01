@@ -1,9 +1,9 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.pactbroker.PactBrokerClient
-import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
-import au.com.dius.pact.util.HttpClientUtils
-import au.com.dius.pact.util.HttpClientUtils.isJsonResponse
+import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.com.github.kittinunf.result.Result
+import au.com.dius.pact.core.pactbroker.util.HttpClientUtils
+import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import groovy.json.JsonSlurper
@@ -45,7 +45,7 @@ fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: Clos
 }
 
 fun fetchJsonResource(http: CloseableHttpClient, options: Map<String, Any>, source: UrlPactSource):
-        Result<Pair<JsonElement, UrlPactSource>, Exception> {
+  Result<Pair<JsonElement, UrlPactSource>, Exception> {
   return Result.of {
     val httpGet = HttpGet(HttpClientUtils.buildUrl("", source.url, true))
     httpGet.addHeader("Content-Type", "application/json")

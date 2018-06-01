@@ -5,7 +5,7 @@ import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.model.PactBrokerSource;
 import au.com.dius.pact.model.PactReader;
 import au.com.dius.pact.model.PactSource;
-import au.com.dius.pact.pactbroker.PactBrokerClient;
+import au.com.dius.pact.core.pactbroker.PactBrokerClient;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver;
 import au.com.dius.pact.provider.junit.sysprops.ValueResolver;

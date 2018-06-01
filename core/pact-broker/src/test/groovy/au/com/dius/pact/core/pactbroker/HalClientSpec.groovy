@@ -1,9 +1,7 @@
-package au.com.dius.pact.provider.broker
+package au.com.dius.pact.core.pactbroker
 
-import au.com.dius.pact.pactbroker.HalClient
-import au.com.dius.pact.pactbroker.InvalidHalResponse
-import au.com.dius.pact.pactbroker.NotFoundHalResponse
-import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
+import au.com.dius.pact.core.pactbroker.com.github.kittinunf.result.Result
+import com.google.gson.JsonParser
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.ProtocolVersion
@@ -17,7 +15,6 @@ import org.apache.http.message.BasicStatusLine
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
-import com.google.gson.JsonParser
 
 import java.util.function.Consumer
 

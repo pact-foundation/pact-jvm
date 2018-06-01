@@ -13,8 +13,8 @@ import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.UnknownPactSource
 import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.Message
-import au.com.dius.pact.pactbroker.PactBrokerClient
-import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
+import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.com.github.kittinunf.result.Result
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import spock.lang.Specification
 import spock.lang.Unroll

@@ -1,4 +1,4 @@
-package au.com.dius.pact.pactbroker
+package au.com.dius.pact.core.pactbroker
 
 /**
  * This exception is thrown when we don't receive a HAL response from the broker

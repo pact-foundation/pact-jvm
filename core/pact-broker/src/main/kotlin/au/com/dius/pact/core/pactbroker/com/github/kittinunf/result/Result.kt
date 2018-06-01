@@ -1,7 +1,7 @@
 /**
  * This file inlined from https://github.com/kittinunf/Result
  */
-package au.com.dius.pact.provider.broker.com.github.kittinunf.result
+package au.com.dius.pact.core.pactbroker.com.github.kittinunf.result
 
 inline fun <reified X> Result<*, *>.getAs() = when (this) {
     is Result.Success -> value as? X
@@ -107,9 +107,9 @@ sealed class Result<out V : Any, out E : Exception> {
         }
 
         fun <V : Any> of(f: () -> V): Result<V, Exception> = try {
-          Success(f())
+            Success(f())
         } catch (ex: Exception) {
-          Failure(ex)
+            Failure(ex)
         }
     }
 }

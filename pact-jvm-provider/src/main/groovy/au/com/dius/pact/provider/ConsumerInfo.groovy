@@ -6,7 +6,7 @@ import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.FileSource
 import au.com.dius.pact.model.PactSource
 import au.com.dius.pact.model.UrlSource
-import au.com.dius.pact.pactbroker.PactBrokerConsumer
+import au.com.dius.pact.core.pactbroker.PactBrokerConsumer
 import groovy.transform.Canonical
 
 import java.util.function.Supplier

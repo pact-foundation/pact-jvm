@@ -1,8 +1,8 @@
-package au.com.dius.pact.pactbroker
+package au.com.dius.pact.core.pactbroker
 
-import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
-import au.com.dius.pact.util.HttpClientUtils.buildUrl
-import au.com.dius.pact.util.HttpClientUtils.isJsonResponse
+import au.com.dius.pact.core.pactbroker.com.github.kittinunf.result.Result
+import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.buildUrl
+import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.bool
 import com.github.salomonbrys.kotson.get

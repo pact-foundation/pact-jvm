@@ -1,10 +1,10 @@
 package au.com.dius.pact.provider.junit.loader
 
 import au.com.dius.pact.model.Pact
-import au.com.dius.pact.pactbroker.IHalClient
-import au.com.dius.pact.pactbroker.InvalidHalResponse
-import au.com.dius.pact.pactbroker.PactBrokerClient
-import au.com.dius.pact.pactbroker.PactBrokerConsumer
+import au.com.dius.pact.core.pactbroker.IHalClient
+import au.com.dius.pact.core.pactbroker.InvalidHalResponse
+import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.PactBrokerConsumer
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.junit.sysprops.ValueResolver
 import spock.lang.Specification
