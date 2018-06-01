@@ -13,7 +13,7 @@ import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.UnknownPactSource
 import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.Message
-import au.com.dius.pact.provider.broker.PactBrokerClient
+import au.com.dius.pact.pactbroker.PactBrokerClient
 import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import spock.lang.Specification
@@ -365,7 +365,7 @@ class ProviderVerifierSpec extends Specification {
     given:
     ProviderInfo provider = new ProviderInfo('Test Provider')
     ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
-    PactBrokerClient pactBrokerClient = Mock(PactBrokerClient)
+    PactBrokerClient pactBrokerClient = Mock(PactBrokerClient, constructorArgs: [''])
     GroovyMock(PactReader, global: true)
     GroovyMock(StateChange, global: true)
     def interaction1 = Mock(Interaction)

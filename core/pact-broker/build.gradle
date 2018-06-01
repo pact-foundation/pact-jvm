@@ -5,8 +5,3 @@ dependencies {
   compile "com.google.guava:guava:${project.guavaVersion}"
   compile 'org.dmfs:rfc3986-uri:0.8'
 }
-
-compileGroovy {
-  classpath = classpath.plus(files(compileKotlin.destinationDir))
-  dependsOn compileKotlin
-}

@@ -1,6 +1,6 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.provider.broker.PactBrokerClient
+import au.com.dius.pact.pactbroker.PactBrokerClient
 import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import au.com.dius.pact.util.HttpClientUtils
 import au.com.dius.pact.util.HttpClientUtils.isJsonResponse

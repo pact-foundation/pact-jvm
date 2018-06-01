@@ -121,9 +121,9 @@ interface IHalClient {
 }
 
 /**
- * HAL client base class
+ * HAL client for navigating the HAL links
  */
-abstract class HalClientBase @JvmOverloads constructor(
+open class HalClient @JvmOverloads constructor(
   val baseUrl: String,
   var options: Map<String, Any> = mapOf()
 ) : IHalClient {

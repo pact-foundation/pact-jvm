@@ -1,10 +1,11 @@
 package au.com.dius.pact.provider.junit.loader
 
 import au.com.dius.pact.model.Pact
+import au.com.dius.pact.pactbroker.IHalClient
 import au.com.dius.pact.pactbroker.InvalidHalResponse
+import au.com.dius.pact.pactbroker.PactBrokerClient
 import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import au.com.dius.pact.provider.ConsumerInfo
-import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.junit.sysprops.ValueResolver
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
@@ -26,7 +27,9 @@ class PactBrokerLoaderSpec extends Specification {
     port = '1234'
     protocol = 'http'
     tags = ['latest']
-    brokerClient = Mock(PactBrokerClient)
+    brokerClient = Mock(PactBrokerClient, constructorArgs: ['']) {
+      newHalClient() >> Stub(IHalClient)
+    }
     mockPact = Mock(Pact)
 
     pactBrokerLoader = { boolean failIfNoPactsFound = true ->

@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.broker
 
+import au.com.dius.pact.pactbroker.HalClient
 import au.com.dius.pact.pactbroker.InvalidHalResponse
 import au.com.dius.pact.pactbroker.NotFoundHalResponse
 import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
@@ -164,7 +165,7 @@ class HalClientSpec extends Specification {
 
     when:
     def called = false
-    client.pacts { called = true }
+    client.forAll('pacts') { called = true }
 
     then:
     1 * mockClient.execute({ it.getURI().path == '/' }) >> mockResponse

@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider.gradle
 
-import au.com.dius.pact.provider.broker.PactBrokerClient
+import au.com.dius.pact.pactbroker.PactBrokerClient
 import groovy.io.FileType
 import org.apache.commons.lang3.StringUtils
 import org.fusesource.jansi.AnsiConsole

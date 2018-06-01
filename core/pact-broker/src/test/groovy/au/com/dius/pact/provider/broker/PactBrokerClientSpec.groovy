@@ -2,9 +2,12 @@ package au.com.dius.pact.provider.broker
 
 import au.com.dius.pact.pactbroker.IHalClient
 import au.com.dius.pact.pactbroker.NotFoundHalResponse
+import au.com.dius.pact.pactbroker.PactBrokerClient
 import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import kotlin.Pair
+import kotlin.collections.MapsKt
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -38,10 +41,10 @@ class PactBrokerClientSpec extends Specification {
     halClient.navigate(_, _) >> halClient
     halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/']) }
 
-    def client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
+    def client = Spy(PactBrokerClient, constructorArgs: [
+      'http://pactBrokerUrl', MapsKt.mapOf(new Pair('authentication', ['Basic', '1', '2']))]) {
       newHalClient() >> halClient
     }
-    client.options.authentication = ['Basic', '1', '2']
 
     when:
     def consumers = client.fetchConsumers('provider')
@@ -114,10 +117,10 @@ class PactBrokerClientSpec extends Specification {
     halClient.navigate(_, _) >> halClient
     halClient.forAll(_, _) >> { args -> args[1].accept([name: 'bob', href: 'http://bob.com/']) }
 
-    def client = Spy(PactBrokerClient, constructorArgs: ['http://pactBrokerUrl']) {
+    def client = Spy(PactBrokerClient, constructorArgs: [
+      'http://pactBrokerUrl', MapsKt.mapOf(new Pair('authentication', ['Basic', '1', '2']))]) {
       newHalClient() >> halClient
     }
-    client.options.authentication = ['Basic', '1', '2']
 
     when:
     def consumers = client.fetchConsumersWithTag('provider', 'tag')
