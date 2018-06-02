@@ -114,6 +114,46 @@ class DslPartSpec extends Specification {
 
     @Override
     DslPart close() { null }
+
+    @Override
+    PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize) {
+      null
+    }
+
+    @Override
+    PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize) {
+      null
+    }
+
+    @Override
+    PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, int numberExamples) {
+      null
+    }
+
+    @Override
+    PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize, int numberExamples) {
+      null
+    }
+
+    @Override
+    PactDslJsonArray eachArrayWithMinMaxLike(String name, Integer minSize, Integer maxSize) {
+      null
+    }
+
+    @Override
+    PactDslJsonArray eachArrayWithMinMaxLike(Integer minSize, Integer maxSize) {
+      null
+    }
+
+    @Override
+    PactDslJsonArray eachArrayWithMinMaxLike(String name, int numberExamples, Integer minSize, Integer maxSize) {
+      null
+    }
+
+    @Override
+    PactDslJsonArray eachArrayWithMinMaxLike(int numberExamples, Integer minSize, Integer maxSize) {
+      null
+    }
   }
 
   @Unroll

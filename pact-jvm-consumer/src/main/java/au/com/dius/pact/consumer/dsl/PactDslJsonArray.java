@@ -814,6 +814,65 @@ public class PactDslJsonArray extends DslPart {
   }
 
   /**
+   * Array with a minimum and maximum size where each item must match the following example
+   * @param minSize minimum size
+   * @param maxSize maximum size
+   */
+  public static PactDslJsonBody arrayMinMaxLike(int minSize, int maxSize) {
+    return arrayMinMaxLike(minSize, maxSize, minSize);
+  }
+
+  /**
+   * Array with a minimum and maximum size where each item must match the following example
+   * @param minSize minimum size
+   * @param maxSize maximum size
+   * @param numberExamples Number of examples to generate
+   */
+  public static PactDslJsonBody arrayMinMaxLike(int minSize, int maxSize, int numberExamples) {
+    if (numberExamples < minSize) {
+      throw new IllegalArgumentException(String.format("Number of example %d is less than the minimum size of %d",
+        numberExamples, minSize));
+    } else if (numberExamples > maxSize) {
+      throw new IllegalArgumentException(String.format("Number of example %d is more than the maximum size of %d",
+        numberExamples, maxSize));
+    }
+    PactDslJsonArray parent = new PactDslJsonArray("", "", null, true);
+    parent.setNumberExamples(numberExamples);
+    parent.matchers.addRule("", parent.matchMinMax(minSize, maxSize));
+    return new PactDslJsonBody(".", "", parent);
+  }
+
+  /**
+   * Root level array with minimum and maximum size where each item must match the provided matcher
+   * @param minSize minimum size
+   * @param maxSize maximum size
+   */
+  public static PactDslJsonArray arrayMinMaxLike(int minSize, int maxSize, PactDslJsonRootValue value) {
+    return arrayMinMaxLike(minSize, maxSize, minSize, value);
+  }
+
+  /**
+   * Root level array with minimum and maximum size where each item must match the provided matcher
+   * @param minSize minimum size
+   * @param maxSize maximum size
+   * @param numberExamples Number of examples to generate
+   */
+  public static PactDslJsonArray arrayMinMaxLike(int minSize, int maxSize, int numberExamples, PactDslJsonRootValue value) {
+    if (numberExamples < minSize) {
+      throw new IllegalArgumentException(String.format("Number of example %d is less than the minimum size of %d",
+        numberExamples, minSize));
+    } if (numberExamples > maxSize) {
+      throw new IllegalArgumentException(String.format("Number of example %d is more than the maximum size of %d",
+        numberExamples, maxSize));
+    }
+    PactDslJsonArray parent = new PactDslJsonArray("", "", null, true);
+    parent.setNumberExamples(numberExamples);
+    parent.matchers.addRule("", parent.matchMinMax(minSize, maxSize));
+    parent.putObject(value);
+    return parent;
+  }
+
+  /**
    * Adds a null value to the list
    */
   public PactDslJsonArray nullValue() {
@@ -1052,5 +1111,71 @@ public class PactDslJsonArray extends DslPart {
     body.put(urlMatcher.getExampleValue());
     matchers.addRule(rootPath + appendArrayIndex(0), regexp(urlMatcher.getRegexExpression()));
     return this;
+  }
+
+  @Override
+  public PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize) {
+    throw new UnsupportedOperationException("use the minMaxArrayLike(minSize, maxSize) form");
+  }
+
+  @Override
+  public PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize) {
+    return minMaxArrayLike(minSize, maxSize, minSize);
+  }
+
+  @Override
+  public PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, int numberExamples) {
+    throw new UnsupportedOperationException("use the minMaxArrayLike(minSize, maxSize, numberExamples) form");
+  }
+
+  @Override
+  public PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize, int numberExamples) {
+    if (minSize > maxSize) {
+      throw new IllegalArgumentException(String.format("The minimum size of %d is greater than the maximum of %d",
+        minSize, maxSize));
+    } else if (numberExamples < minSize) {
+      throw new IllegalArgumentException(String.format("Number of example %d is less than the minimum size of %d",
+        numberExamples, minSize));
+    } else if (numberExamples > maxSize) {
+      throw new IllegalArgumentException(String.format("Number of example %d is more than the maximum size of %d",
+        numberExamples, maxSize));
+    }
+    PactDslJsonArray parent = new PactDslJsonArray("", "", null, true);
+    parent.setNumberExamples(numberExamples);
+    parent.matchers.addRule("", parent.matchMinMax(minSize, maxSize));
+    return new PactDslJsonBody(".", "", parent);
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayWithMinMaxLike(String name, Integer minSize, Integer maxSize) {
+    throw new UnsupportedOperationException("use the eachArrayWithMinMaxLike(minSize, maxSize) form");
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayWithMinMaxLike(Integer minSize, Integer maxSize) {
+    return eachArrayWithMinMaxLike(minSize, minSize, maxSize);
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayWithMinMaxLike(String name, int numberExamples, Integer minSize, Integer maxSize) {
+    throw new UnsupportedOperationException("use the eachArrayWithMinMaxLike(numberExamples, minSize, maxSize) form");
+  }
+
+  @Override
+  public PactDslJsonArray eachArrayWithMinMaxLike(int numberExamples, Integer minSize, Integer maxSize) {
+    if (minSize > maxSize) {
+      throw new IllegalArgumentException(String.format("The minimum size of %d is greater than the maximum of %d",
+        minSize, maxSize));
+    } else if (numberExamples < minSize) {
+      throw new IllegalArgumentException(String.format("Number of example %d is less than the minimum size of %d",
+        numberExamples, minSize));
+    } else if (numberExamples > maxSize) {
+      throw new IllegalArgumentException(String.format("Number of example %d is more than the maximum size of %d",
+        numberExamples, maxSize));
+    }
+    matchers.addRule(rootPath + appendArrayIndex(1), matchMinMax(minSize, maxSize));
+    PactDslJsonArray parent = new PactDslJsonArray(rootPath, "", this, true);
+    parent.setNumberExamples(numberExamples);
+    return new PactDslJsonArray("", "", parent);
   }
 }
