@@ -1140,9 +1140,9 @@ public class PactDslJsonArray extends DslPart {
       throw new IllegalArgumentException(String.format("Number of example %d is more than the maximum size of %d",
         numberExamples, maxSize));
     }
-    PactDslJsonArray parent = new PactDslJsonArray("", "", null, true);
+    matchers.addRule(rootPath + appendArrayIndex(1), matchMinMax(minSize, maxSize));
+    PactDslJsonArray parent = new PactDslJsonArray("", "", this, true);
     parent.setNumberExamples(numberExamples);
-    parent.matchers.addRule("", parent.matchMinMax(minSize, maxSize));
     return new PactDslJsonBody(".", "", parent);
   }
 

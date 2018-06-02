@@ -207,4 +207,20 @@ public class LambdaDslTest {
         assertThat(actualJson, is(pactDslJson));
     }
 
+    @Test
+    public void testArrayMinMaxLike() {
+        String pactDslJson = PactDslJsonArray.arrayMinMaxLike(2, 10)
+          .stringType("foo")
+          .close()
+          .getBody()
+          .toString();
+
+        DslPart actualPactDsl = LambdaDsl.newJsonArrayMinMaxLike(2, 10, o -> o.object(
+          oo -> oo.stringType("foo")
+        )).build();
+
+        String actualJson = actualPactDsl.getBody().toString();
+        assertThat(actualJson, is(pactDslJson));
+    }
+
 }
