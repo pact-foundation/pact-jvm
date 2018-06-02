@@ -108,4 +108,24 @@ class MatchersTest {
     matchers.maxLike(3, 4, 100)
   }
 
+  @Test(expected = InvalidMatcherException)
+  void 'minmax like matcher fails if the the number of examples is less than the min'() {
+    matchers.minMaxLike(3, 4, 2, 100)
+  }
+
+  @Test
+  void 'minmax like matcher does not fail if the the number of examples is the default'() {
+    matchers.minMaxLike(3, 4, 100)
+  }
+
+  @Test(expected = InvalidMatcherException)
+  void 'minmax like matcher fails if the the number of examples is more than the max'() {
+    matchers.minMaxLike(2, 3, 4, 100)
+  }
+
+  @Test(expected = InvalidMatcherException)
+  void 'minmax like matcher fails if the min is more than the max'() {
+    matchers.minMaxLike(4, 3, 3, 100)
+  }
+
 }

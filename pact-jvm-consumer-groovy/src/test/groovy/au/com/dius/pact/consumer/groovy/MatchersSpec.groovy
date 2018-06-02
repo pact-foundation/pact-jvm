@@ -34,13 +34,14 @@ class MatchersSpec extends Specification {
   @Unroll
   def 'like matcher methods generate the correct matcher definition - #matcherMethod'() {
     expect:
-    Matchers."$matcherMethod"(param, [:]).matcher.toMap() == matcherDefinition
+    Matchers."$matcherMethod"(*param).matcher.toMap() == matcherDefinition
 
     where:
 
-    matcherMethod | param | matcherDefinition
-    'maxLike'     | 10    | [match: 'type', max: 10]
-    'minLike'     | 10    | [match: 'type', min: 10]
+    matcherMethod | param         | matcherDefinition
+    'maxLike'     | [10, [:]]     | [match: 'type', max: 10]
+    'minLike'     | [10, [:]]     | [match: 'type', min: 10]
+    'minMaxLike'  | [10, 20, [:]] | [match: 'type', min: 10, max: 20]
   }
 
   def 'each like matcher method generates the correct matcher definition'() {
