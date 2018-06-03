@@ -233,6 +233,26 @@ class Matchers {
   }
 
   /**
+   * Array with minimum and maximum size and each element like the following object
+   * @param min The minimum size of the array
+   * @param max The maximum size of the array
+   * @param numberExamples Optional number of examples to generate. Defaults to 1.
+   */
+  static minMaxLike(Integer min, Integer max, Integer numberExamples = 1, def arg) {
+    if (min > max) {
+      throw new InvalidMatcherException("The minimum you have specified ($min) is " +
+        "greater than the maximum ($max)")
+    } else if (numberExamples > 1 && numberExamples < min) {
+      throw new InvalidMatcherException("The number of examples you have specified ($numberExamples) is " +
+        "less than the minimum ($min)")
+    } else if (numberExamples > 1 && numberExamples > max) {
+      throw new InvalidMatcherException("The number of examples you have specified ($numberExamples) is " +
+        "greater than the maximum ($max)")
+    }
+    new MinMaxLikeMatcher(min: min, max: max, value: arg, numberExamples: numberExamples)
+  }
+
+  /**
    * Match Equality
    * @param value Value to match to
    */

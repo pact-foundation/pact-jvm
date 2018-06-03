@@ -3,6 +3,7 @@ package io.pactfoundation.consumer.dsl;
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.matchingrules.MaxTypeMatcher;
+import au.com.dius.pact.model.matchingrules.MinMaxTypeMatcher;
 import au.com.dius.pact.model.matchingrules.MinTypeMatcher;
 
 import java.util.function.Consumer;
@@ -33,6 +34,16 @@ public class LambdaDsl {
         final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray();
         pactDslJsonArray.setNumberExamples(1);
         pactDslJsonArray.getMatchers().addRule(new MaxTypeMatcher(size));
+
+        final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(pactDslJsonArray);
+        array.accept(dslArray);
+        return dslArray;
+    }
+
+    public static LambdaDslJsonArray newJsonArrayMinMaxLike(Integer minSize, Integer maxSize, Consumer<LambdaDslJsonArray> array) {
+        final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray();
+        pactDslJsonArray.setNumberExamples(minSize);
+        pactDslJsonArray.getMatchers().addRule(new MinMaxTypeMatcher(minSize, maxSize));
 
         final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(pactDslJsonArray);
         array.accept(dslArray);

@@ -1,5 +1,30 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.17 - Bugfix Release
+
+* 16634edd - JUnit Interaction runner now uses its pact source not the one associated with the pact #667 (Ronald Holshausen, Sun Jun 3 13:58:54 2018 +1000)
+* 2fb44945 - Avoid a port conflict when running build in parallel (Ronald Holshausen, Sun Jun 3 11:36:26 2018 +1000)
+* 9cb041c6 - Disable parallel build (Ronald Holshausen, Sun Jun 3 11:35:30 2018 +1000)
+* f0946735 - Cleaned up some spurious codenarc errors (Ronald Holshausen, Sun Jun 3 11:35:08 2018 +1000)
+* f0cd5c74 - Add a log statement when pact verification publishing is skipped #667 (Ronald Holshausen, Sun Jun 3 11:20:42 2018 +1000)
+* a81522b5 - Implemented minMax array matching in the Java 8 DSL #676 (Ronald Holshausen, Sat Jun 2 18:14:51 2018 +1000)
+* a34a25b7 - Implemented minMax array matching in the Groovy DSL #676 (Ronald Holshausen, Sat Jun 2 17:35:14 2018 +1000)
+* edaf0934 - Implemented minMax array matching in the Java DSL #676 (Ronald Holshausen, Sat Jun 2 15:16:20 2018 +1000)
+* 2234e878 - removed gitter badge (Ronald Holshausen, Fri Jun 1 16:01:42 2018 +1000)
+* 07fd31f2 - Merge pull request #688 from jan-berge-ommedal/lenient-default-content-type (Ronald Holshausen, Wed May 30 09:56:42 2018 +1000)
+* 4168e3c2 - made default content-type more lenient to common variants (Jan Berge Ommedal, Mon May 28 11:05:09 2018 +0200)
+* 2b37801d - Merge pull request #685 from thombergs/646-default-interface-junit5 (Ronald Holshausen, Thu May 24 09:38:25 2018 +1000)
+* 51d9b22d - moved PactJUnit5VerificationProvider from BeforeEach to BeforeTestExecution to allow initialization of class variables on @BeforeEach (Tom Hombergs, Wed May 23 22:21:14 2018 +0200)
+* 578362d6 - Merge pull request #682 from thombergs/646-default-interfaces (Ronald Holshausen, Tue May 22 19:08:45 2018 +1000)
+* 6962eea9 - chore: removed lein module to get build passing on travis (Ronald Holshausen, Mon May 21 13:35:41 2018 +1000)
+* 3f1f2656 - fix: correct the codenarc failures (Ronald Holshausen, Mon May 21 13:35:08 2018 +1000)
+* 2aeb240a - fix: cleaned up some duplicated code (Ronald Holshausen, Mon May 21 13:26:53 2018 +1000)
+* 0030fa5c - fix: Java DSL now applies the default values to all requests, not just the first #680 (Ronald Holshausen, Mon May 21 13:19:24 2018 +1000)
+* f16f76d4 - removed accidentally pushed file (Tom Hombergs, Mon May 21 00:01:32 2018 +0200)
+* 469bb82e - evaluate @State annotations from implemented interfaces (Tom Hombergs, Sun May 20 23:54:35 2018 +0200)
+* 09c8e16d - doc: added note about setting the provider version when using the spring runner (Ronald Holshausen, Sun May 13 16:52:21 2018 +1000)
+* f27ed9db - bump version to 3.5.17 (Ronald Holshausen, Sun May 6 19:16:55 2018 +1000)
+
 # 3.5.16 - Scala 2.11 - Bugfixes + JUnit 5 provider test support
 
 * 652e8fae - Merge tag '3_5_16' into v3.5.x-2.11 (Ronald Holshausen, Sun May 6 19:27:22 2018 +1000)

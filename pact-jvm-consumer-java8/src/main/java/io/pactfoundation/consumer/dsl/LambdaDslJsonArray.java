@@ -302,6 +302,36 @@ public class LambdaDslJsonArray {
         return this;
     }
 
+  /**
+   * Element that is an array with a minimum and maximum size where each item must match the following example
+   *
+   * @param minSize minimum size of the array
+   * @param maxSize maximum size of the array
+   */
+  public LambdaDslJsonArray minMaxArrayLike(Integer minSize, Integer maxSize, Consumer<LambdaDslJsonBody> nestedObject) {
+    final PactDslJsonBody arrayLike = pactArray.minMaxArrayLike(minSize, maxSize);
+    final LambdaDslJsonBody dslBody = new LambdaDslJsonBody(arrayLike);
+    nestedObject.accept(dslBody);
+    arrayLike.closeArray();
+    return this;
+  }
+
+  /**
+   * Element that is an array with a minimum and maximum size where each item must match the following example
+   *
+   * @param minSize minimum size of the array
+   * @param maxSize maximum size of the array
+   * @param numberExamples number of examples to generate
+   */
+  public LambdaDslJsonArray minMaxArrayLike(Integer minSize, Integer maxSize, int numberExamples,
+                                         Consumer<LambdaDslJsonBody> nestedObject) {
+    final PactDslJsonBody arrayLike = pactArray.minMaxArrayLike(minSize, maxSize, numberExamples);
+    final LambdaDslJsonBody dslBody = new LambdaDslJsonBody(arrayLike);
+    nestedObject.accept(dslBody);
+    arrayLike.closeArray();
+    return this;
+  }
+
     /**
      * Adds a null value to the list
      */
@@ -359,6 +389,23 @@ public class LambdaDslJsonArray {
         arrayLike.closeArray().closeArray();
         return this;
     }
+
+  public LambdaDslJsonArray eachArrayWithMinMaxLike(Integer minSize, Integer maxSize, Consumer<LambdaDslJsonArray> nestedArray) {
+    final PactDslJsonArray arrayLike = pactArray.eachArrayWithMinMaxLike(minSize, maxSize);
+    final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(arrayLike);
+    nestedArray.accept(dslArray);
+    arrayLike.closeArray().closeArray();
+    return this;
+  }
+
+  public LambdaDslJsonArray eachArrayWithMinMaxLike(Integer minSize, Integer maxSize, int numberExamples,
+                                                 Consumer<LambdaDslJsonArray> nestedArray) {
+    final PactDslJsonArray arrayLike = pactArray.eachArrayWithMinMaxLike(numberExamples, minSize, maxSize);
+    final LambdaDslJsonArray dslArray = new LambdaDslJsonArray(arrayLike);
+    nestedArray.accept(dslArray);
+    arrayLike.closeArray().closeArray();
+    return this;
+  }
 
     public DslPart build() {
         return pactArray;

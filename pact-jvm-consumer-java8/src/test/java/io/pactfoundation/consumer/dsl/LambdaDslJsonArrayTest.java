@@ -349,6 +349,60 @@ public class LambdaDslJsonArrayTest {
     }
 
     @Test
+    public void testEachArrayWithMinMaxLike() {
+        // Old DSL
+        final String pactDslJson = new PactDslJsonArray()
+          .eachArrayWithMinMaxLike(2, 10)
+          .stringType("Foo")
+          .closeArray()
+          .closeArray()
+          .getBody()
+          .toString();
+
+        final PactDslJsonArray actualPactDsl = new PactDslJsonArray();
+        final LambdaDslJsonArray array = new LambdaDslJsonArray(actualPactDsl);
+        array
+          .eachArrayWithMinMaxLike(2, 10, a -> a.stringType("Foo"))
+          .build();
+
+        final String actualJson = actualPactDsl.getBody().toString();
+        assertThat(actualJson, is(pactDslJson));
+        assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        assertThat(arrayRule.get("min"), is(2));
+        assertThat(arrayRule.get("max"), is(10));
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        assertThat(objectRule.get("match"), is("type"));
+    }
+
+    @Test
+    public void testEachArrayWithMinMaxLikeWithExample() {
+        // Old DSL
+        final String pactDslJson = new PactDslJsonArray()
+          .eachArrayWithMinMaxLike(2, 2, 10)
+          .stringType("Foo")
+          .closeArray()
+          .closeArray()
+          .getBody()
+          .toString();
+
+        final PactDslJsonArray actualPactDsl = new PactDslJsonArray();
+        final LambdaDslJsonArray array = new LambdaDslJsonArray(actualPactDsl);
+        array
+          .eachArrayWithMinMaxLike(2, 10, 2, a -> a.stringType("Foo"))
+          .build();
+
+        final String actualJson = actualPactDsl.getBody().toString();
+        assertThat(actualJson, is(pactDslJson));
+        assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        assertThat(arrayRule.get("min"), is(2));
+        assertThat(arrayRule.get("max"), is(10));
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        assertThat(objectRule.get("match"), is("type"));
+    }
+
+    @Test
     public void testEachLike() {
         /*
             [
@@ -569,6 +623,58 @@ public class LambdaDslJsonArrayTest {
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
         final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
         assertThat(arrayRule.get("max"), is(3));
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        assertThat(objectRule.get("match"), is("type"));
+    }
+
+    @Test
+    public void testMinMaxArrayLike() {
+        // Old DSL
+        final String pactDslJson = new PactDslJsonArray()
+          .minMaxArrayLike(2, 5)
+          .stringType("foo")
+          .closeArray()
+          .getBody()
+          .toString();
+
+        final PactDslJsonArray actualPactDsl = new PactDslJsonArray();
+        final LambdaDslJsonArray array = new LambdaDslJsonArray(actualPactDsl);
+        array
+          .minMaxArrayLike(2, 5, o -> o.stringType("foo"))
+          .build();
+
+        final String actualJson = actualPactDsl.getBody().toString();
+        assertThat(actualJson, is(pactDslJson));
+        assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        assertThat(arrayRule.get("min"), is(2));
+        assertThat(arrayRule.get("max"), is(5));
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        assertThat(objectRule.get("match"), is("type"));
+    }
+
+    @Test
+    public void testMinMaxArrayLikeWithExample() {
+        // Old DSL
+        final String pactDslJson = new PactDslJsonArray()
+          .minMaxArrayLike(3, 8, 4)
+          .stringType("foo")
+          .closeArray()
+          .getBody()
+          .toString();
+
+        final PactDslJsonArray actualPactDsl = new PactDslJsonArray();
+        final LambdaDslJsonArray array = new LambdaDslJsonArray(actualPactDsl);
+        array
+          .minMaxArrayLike(3, 8, 4, o -> o.stringType("foo"))
+          .build();
+
+        final String actualJson = actualPactDsl.getBody().toString();
+        assertThat(actualJson, is(pactDslJson));
+        assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        assertThat(arrayRule.get("min"), is(3));
+        assertThat(arrayRule.get("max"), is(8));
         final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
         assertThat(objectRule.get("match"), is("type"));
     }

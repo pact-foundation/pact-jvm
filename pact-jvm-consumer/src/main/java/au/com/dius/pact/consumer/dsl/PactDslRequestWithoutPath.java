@@ -1,81 +1,46 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
-import au.com.dius.pact.consumer.Headers;
 import au.com.dius.pact.model.OptionalBody;
-import au.com.dius.pact.model.generators.Generators;
-import au.com.dius.pact.model.matchingrules.MatchingRules;
-import au.com.dius.pact.model.matchingrules.MatchingRulesImpl;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import au.com.dius.pact.model.PactReader;
 import com.mifmif.common.regex.Generex;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import static au.com.dius.pact.consumer.ConsumerPactBuilder.xmlToString;
 
-public class PactDslRequestWithoutPath {
-  private static final String CONTENT_TYPE = "Content-Type";
+public class PactDslRequestWithoutPath extends PactDslRequestBase {
 
-    private final ConsumerPactBuilder consumerPactBuilder;
-    private PactDslWithState pactDslWithState;
-    private String description;
-    private String requestMethod;
-    private Map<String, String> requestHeaders = new HashMap<>();
-    private Map<String, List<String>> query = new HashMap<>();
-    private OptionalBody requestBody = OptionalBody.missing();
-    private MatchingRules requestMatchers = new MatchingRulesImpl();
-    private Generators requestGenerators = new Generators();
-    private String consumerName;
-    private String providerName;
-  private final PactDslRequestWithoutPath defaultRequestValues;
+  private final ConsumerPactBuilder consumerPactBuilder;
+  private PactDslWithState pactDslWithState;
+  private String description;
+  private String consumerName;
+  private String providerName;
   private final PactDslResponse defaultResponseValues;
 
   public PactDslRequestWithoutPath(ConsumerPactBuilder consumerPactBuilder,
-                                     PactDslWithState pactDslWithState,
-                                     String description,
-                                     PactDslRequestWithoutPath defaultRequestValues,
-                                     PactDslResponse defaultResponseValues) {
-        this.consumerPactBuilder = consumerPactBuilder;
-        this.pactDslWithState = pactDslWithState;
-        this.description = description;
-        this.consumerName = pactDslWithState.consumerName;
-        this.providerName = pactDslWithState.providerName;
-    this.defaultRequestValues = defaultRequestValues;
+                                   PactDslWithState pactDslWithState,
+                                   String description,
+                                   PactDslRequestWithoutPath defaultRequestValues,
+                                   PactDslResponse defaultResponseValues) {
+    super(defaultRequestValues);
+
+    this.consumerPactBuilder = consumerPactBuilder;
+    this.pactDslWithState = pactDslWithState;
+    this.description = description;
+    this.consumerName = pactDslWithState.consumerName;
+    this.providerName = pactDslWithState.providerName;
     this.defaultResponseValues = defaultResponseValues;
 
     setupDefaultValues();
-  }
-
-  private void setupDefaultValues() {
-    if (defaultRequestValues != null) {
-      if (StringUtils.isNotEmpty(defaultRequestValues.requestMethod)) {
-        requestMethod = defaultRequestValues.requestMethod;
-      }
-      requestHeaders.putAll(defaultRequestValues.requestHeaders);
-      query.putAll(defaultRequestValues.query);
-      requestBody = defaultRequestValues.requestBody;
-      requestMatchers = ((MatchingRulesImpl) defaultRequestValues.requestMatchers).copy();
-      requestGenerators = new Generators(defaultRequestValues.requestGenerators.getCategories());
-    }
   }
 
   /**
@@ -312,18 +277,8 @@ public class PactDslRequestWithoutPath {
      */
     public PactDslRequestWithoutPath withFileUpload(String partName, String fileName, String fileContentType, byte[] data)
       throws IOException {
-        HttpEntity multipart = MultipartEntityBuilder.create()
-          .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
-          .addBinaryBody(partName, data, ContentType.create(fileContentType), fileName)
-          .build();
-        OutputStream os = new ByteArrayOutputStream();
-        multipart.writeTo(os);
-
-        requestBody = OptionalBody.body(os.toString());
-        requestMatchers.addCategory("header").addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX,
-          multipart.getContentType().getValue()));
-        requestHeaders.put(CONTENT_TYPE, multipart.getContentType().getValue());
-
-        return this;
+      setupFileUpload(partName, fileName, fileContentType, data);
+      return this;
     }
+
 }

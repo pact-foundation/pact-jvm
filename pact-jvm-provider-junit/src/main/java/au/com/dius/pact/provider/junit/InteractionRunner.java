@@ -10,6 +10,7 @@ import au.com.dius.pact.provider.ProviderVerifierKt;
 import au.com.dius.pact.provider.junit.target.Target;
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget;
 import au.com.dius.pact.provider.junit.target.TestTarget;
+import java.lang.reflect.Method;
 import kotlin.Pair;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.HttpRequest;
@@ -92,7 +93,7 @@ public class InteractionRunner extends Runner {
 
         validatePublicVoidNoArgMethods(Before.class, false, errors);
         validatePublicVoidNoArgMethods(After.class, false, errors);
-        validateStateChangeMethods(testClass, State.class, errors);
+        validateStateChangeMethods(testClass, errors);
         validateConstructor(errors);
         validateTestTarget(errors);
         validateRules(errors);
@@ -103,9 +104,8 @@ public class InteractionRunner extends Runner {
         }
     }
 
-  private static void validateStateChangeMethods(TestClass testClass, final Class<? extends Annotation> annotation,
-                                                 final List<Throwable> errors) {
-    testClass.getAnnotatedMethods(annotation).forEach(method -> {
+  private static void validateStateChangeMethods(TestClass testClass, final List<Throwable> errors) {
+    getAnnotatedMethods(testClass, State.class).forEach(method -> {
       method.validatePublicVoid(false, errors);
       if (method.getMethod().getParameterCount() == 1 && !Map.class.isAssignableFrom(method.getMethod().getParameterTypes()[0])) {
         errors.add(new Exception("Method " + method.getName() + " should take only a single Map parameter"));
@@ -178,7 +178,7 @@ public class InteractionRunner extends Runner {
       Boolean publishingDisabled = results.values()
         .stream().anyMatch(pair -> pair.getSecond().publishingResultsDisabled());
       if (!publishingDisabled && (!(pact instanceof FilteredPact) || ((FilteredPact) pact).isNotFiltered())) {
-        reportVerificationResults(allPassed);
+        reportVerificationResults(allPassed, pact, pactSource);
       } else {
           if (publishingDisabled) {
               LOGGER.warn("Skipping publishing of verification results (" + PACT_VERIFIER_PUBLISHRESUTS +
@@ -189,8 +189,8 @@ public class InteractionRunner extends Runner {
       }
     }
 
-  public void reportVerificationResults(Boolean allPassed) {
-    ProviderVerifierKt.reportVerificationResults(pact, allPassed, providerVersion());
+  public void reportVerificationResults(Boolean allPassed, Pact<? extends Interaction> pact, PactSource pactSource) {
+    ProviderVerifierKt.reportVerificationResults(pact, allPassed, providerVersion(), null, pactSource);
   }
 
   private String providerVersion() {
@@ -258,7 +258,7 @@ public class InteractionRunner extends Runner {
         if (!interaction.getProviderStates().isEmpty()) {
           Statement stateChange = statement;
           for (ProviderState state: interaction.getProviderStates()) {
-            List<FrameworkMethod> methods = testClass.getAnnotatedMethods(State.class)
+            List<FrameworkMethod> methods = getAnnotatedMethods(testClass, State.class)
               .stream().filter(ann -> ArrayUtils.contains(ann.getAnnotation(State.class).value(), state.getName()))
               .collect(Collectors.toList());
             if (methods.isEmpty()) {
@@ -272,6 +272,27 @@ public class InteractionRunner extends Runner {
         } else {
             return statement;
         }
+    }
+
+    private static List<FrameworkMethod> getAnnotatedMethods(TestClass testClass, Class<? extends Annotation> annotation){
+      List<FrameworkMethod> methodsFromTestClass = testClass.getAnnotatedMethods(annotation);
+      List<FrameworkMethod> allMethods = new ArrayList<>();
+      allMethods.addAll(methodsFromTestClass);
+      allMethods.addAll(getAnnotatedMethodsFromInterfaces(testClass, annotation));
+      return allMethods;
+    }
+
+    private static List<FrameworkMethod> getAnnotatedMethodsFromInterfaces(TestClass testClass, Class<? extends Annotation> annotation){
+      List<FrameworkMethod> stateMethods = new ArrayList<>();
+      Class<?>[] interfaces = testClass.getJavaClass().getInterfaces();
+      for(Class<?> interfaceClass : interfaces){
+        for(Method method : interfaceClass.getDeclaredMethods()){
+          if(method.isAnnotationPresent(annotation)){
+            stateMethods.add(new FrameworkMethod(method));
+          }
+        }
+      }
+      return stateMethods;
     }
 
     protected Statement withBefores(final Interaction interaction, final Object target, final Statement statement) {
