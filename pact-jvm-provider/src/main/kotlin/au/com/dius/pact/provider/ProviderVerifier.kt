@@ -3,6 +3,7 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.model.BrokerUrlSource
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.PactSource
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import groovy.lang.GroovyObjectSupport
@@ -12,9 +13,14 @@ import java.util.function.Function
 private val logger = KotlinLogging.logger {}
 
 @JvmOverloads
-fun <I> reportVerificationResults(pact: Pact<I>, result: Boolean, version: String, client: PactBrokerClient? = null)
-  where I: Interaction {
-  val source = pact.source
+fun <I> reportVerificationResults(
+  pact: Pact<I>,
+  result: Boolean,
+  version: String,
+  client: PactBrokerClient? = null,
+  pactSource: PactSource? = null
+) where I: Interaction {
+  val source = pactSource ?: pact.source
   when (source) {
     is BrokerUrlSource -> {
       val brokerClient = client ?: PactBrokerClient(source.pactBrokerUrl, source.options)
