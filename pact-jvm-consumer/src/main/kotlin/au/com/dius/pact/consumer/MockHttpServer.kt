@@ -18,7 +18,10 @@ import com.sun.net.httpserver.HttpServer
 import com.sun.net.httpserver.HttpsServer
 import mu.KLogging
 import org.apache.commons.lang3.StringEscapeUtils
+import org.apache.http.client.methods.HttpOptions
 import org.apache.http.entity.ContentType
+import org.apache.http.impl.client.HttpClients
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager
 import scala.collection.JavaConversions
 import java.lang.Thread.sleep
 import java.nio.charset.Charset
@@ -197,9 +200,10 @@ abstract class BaseMockServer(
   }
 
   fun waitForServer() {
-    org.apache.http.client.fluent.Request.Options(getUrl())
-      .addHeader("X-PACT-BOOTCHECK", "true")
-      .execute()
+    val httpclient = HttpClients.createMinimal(BasicHttpClientConnectionManager())
+    val httpOptions = HttpOptions(getUrl())
+    httpOptions.addHeader("X-PACT-BOOTCHECK", "true")
+    httpclient.execute(httpOptions).close()
   }
 
   override fun getUrl(): String {

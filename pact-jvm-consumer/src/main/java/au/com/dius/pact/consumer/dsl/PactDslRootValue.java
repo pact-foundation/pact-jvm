@@ -195,6 +195,38 @@ public class PactDslRootValue extends DslPart {
   }
 
   /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, int numberExamples) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize, int numberExamples) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
    * @deprecated Use PactDslJsonBody for objects
    */
   @Override
@@ -652,6 +684,38 @@ public class PactDslRootValue extends DslPart {
    */
   @Override
   public PactDslJsonArray eachArrayWithMinLike(int numberExamples, Integer size) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonArray eachArrayWithMinMaxLike(String name, Integer minSize, Integer maxSize) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonArray eachArrayWithMinMaxLike(Integer minSize, Integer maxSize) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonArray eachArrayWithMinMaxLike(String name, int numberExamples, Integer minSize, Integer maxSize) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  public PactDslJsonArray eachArrayWithMinMaxLike(int numberExamples, Integer minSize, Integer maxSize) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
 

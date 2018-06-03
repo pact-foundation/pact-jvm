@@ -178,7 +178,7 @@ public class InteractionRunner extends Runner {
       Boolean publishingDisabled = results.values()
         .stream().anyMatch(pair -> pair.getSecond().publishingResultsDisabled());
       if (!publishingDisabled && (!(pact instanceof FilteredPact) || ((FilteredPact) pact).isNotFiltered())) {
-        reportVerificationResults(allPassed);
+        reportVerificationResults(allPassed, pact, pactSource);
       } else {
           if (publishingDisabled) {
               LOGGER.warn("Skipping publishing of verification results (" + PACT_VERIFIER_PUBLISHRESUTS +
@@ -189,8 +189,8 @@ public class InteractionRunner extends Runner {
       }
     }
 
-  public void reportVerificationResults(Boolean allPassed) {
-    ProviderVerifierKt.reportVerificationResults(pact, allPassed, providerVersion());
+  public void reportVerificationResults(Boolean allPassed, Pact<? extends Interaction> pact, PactSource pactSource) {
+    ProviderVerifierKt.reportVerificationResults(pact, allPassed, providerVersion(), null, pactSource);
   }
 
   private String providerVersion() {

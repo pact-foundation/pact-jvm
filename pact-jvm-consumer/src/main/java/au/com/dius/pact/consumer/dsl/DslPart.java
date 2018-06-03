@@ -6,6 +6,7 @@ import au.com.dius.pact.model.matchingrules.DateMatcher;
 import au.com.dius.pact.model.matchingrules.EqualsMatcher;
 import au.com.dius.pact.model.matchingrules.IncludeMatcher;
 import au.com.dius.pact.model.matchingrules.MaxTypeMatcher;
+import au.com.dius.pact.model.matchingrules.MinMaxTypeMatcher;
 import au.com.dius.pact.model.matchingrules.MinTypeMatcher;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import au.com.dius.pact.model.matchingrules.TimeMatcher;
@@ -18,7 +19,6 @@ public abstract class DslPart {
     public static final String HEXADECIMAL = "[0-9a-fA-F]+";
     public static final String IP_ADDRESS = "(\\d{1,3}\\.)+\\d{1,3}";
     public static final String UUID_REGEX = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
-    private static final String MATCH = "match";
     public static final long DATE_2000 = 949323600000L;
 
     protected final DslPart parent;
@@ -156,6 +156,38 @@ public abstract class DslPart {
     public abstract PactDslJsonBody maxArrayLike(Integer size, int numberExamples);
 
     /**
+     * Array field with a minimum and maximum size and each element must match the provided object
+     * @param name field name
+     * @param minSize minimum size
+     * @param maxSize maximum size
+     */
+    public abstract PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize);
+
+    /**
+     * Array element with a minimum and maximum size and each element of the array must match the provided object
+     * @param minSize minimum size
+     * @param maxSize maximum size
+     */
+    public abstract PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize);
+
+    /**
+     * Array field with a minimum and maximum size and each element must match the provided object
+     * @param name field name
+     * @param minSize minimum size
+     * @param maxSize maximum size
+     * @param numberExamples number of examples to generate
+     */
+    public abstract PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, int numberExamples);
+
+    /**
+     * Array element with a minimum and maximum size and each element of the array must match the provided object
+     * @param minSize minimum size
+     * @param maxSize maximum size
+     * @param numberExamples number of examples to generate
+     */
+    public abstract PactDslJsonBody minMaxArrayLike(Integer minSize, Integer maxSize, int numberExamples);
+
+    /**
      * Array field where each element is an array and must match the following object
      * @param name field name
      */
@@ -235,6 +267,39 @@ public abstract class DslPart {
      */
     public abstract PactDslJsonArray eachArrayWithMinLike(int numberExamples, Integer size);
 
+  /**
+   * Array field where each element is an array and must match the following object
+   * @param name field name
+   * @param minSize minimum size
+   * @param maxSize maximum size
+   */
+  public abstract PactDslJsonArray eachArrayWithMinMaxLike(String name, Integer minSize, Integer maxSize);
+
+  /**
+   * Array element where each element of the array is an array and must match the following object
+   * @param minSize minimum size
+   * @param maxSize maximum size
+   */
+  public abstract PactDslJsonArray eachArrayWithMinMaxLike(Integer minSize, Integer maxSize);
+
+  /**
+   * Array field where each element is an array and must match the following object
+   * @param name field name
+   * @param numberExamples number of examples to generate
+   * @param minSize minimum size
+   * @param maxSize maximum size
+   */
+  public abstract PactDslJsonArray eachArrayWithMinMaxLike(String name, int numberExamples, Integer minSize,
+                                                           Integer maxSize);
+
+  /**
+   * Array element where each element of the array is an array and must match the following object
+   * @param numberExamples number of examples to generate
+   * @param minSize minimum size
+   * @param maxSize maximum size
+   */
+  public abstract PactDslJsonArray eachArrayWithMinMaxLike(int numberExamples, Integer minSize, Integer maxSize);
+
     /**
      * Object field
      * @param name field name
@@ -283,6 +348,10 @@ public abstract class DslPart {
     protected MaxTypeMatcher matchMax(Integer max) {
         return new MaxTypeMatcher(max);
     }
+
+  protected MinMaxTypeMatcher matchMinMax(Integer minSize, Integer maxSize) {
+    return new MinMaxTypeMatcher(minSize, maxSize);
+  }
 
     protected IncludeMatcher includesMatcher(Object value) {
       return new IncludeMatcher(String.valueOf(value));

@@ -11,7 +11,7 @@ buildscript {
 }
 
 plugins {
-  id 'nebula.kotlin' version '1.2.21'
+  id 'nebula.kotlin' version '1.2.41'
   id 'org.jmailen.kotlinter' version '1.11.2'
   id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC6-4'
   id 'org.jetbrains.dokka' version '0.9.17'
@@ -85,7 +85,7 @@ subprojects {
         exclude group: 'org.codehaus.groovy'
       }
       testCompile "cglib:cglib:${project.cglibVersion}"
-      testCompile 'org.objenesis:objenesis:2.4'
+      testCompile 'org.objenesis:objenesis:2.6'
       testCompile 'io.kotlintest:kotlintest:2.0.7'
     }
 

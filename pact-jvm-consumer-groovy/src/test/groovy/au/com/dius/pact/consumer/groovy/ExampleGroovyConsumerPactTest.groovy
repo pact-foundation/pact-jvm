@@ -14,7 +14,7 @@ class ExampleGroovyConsumerPactTest {
         aliceService {
             serviceConsumer 'Consumer'
             hasPactWith 'Alice Service'
-            port 1234
+            port 1233
         }
 
         def bobService = new PactBuilder().build {
@@ -54,7 +54,7 @@ class ExampleGroovyConsumerPactTest {
         }
 
         PactVerificationResult result = aliceService.runTest {
-            def client = new RESTClient('http://localhost:1234/')
+            def client = new RESTClient('http://localhost:1233/')
             def aliceResponse = client.get(path: '/mallory', query: [status: 'good', name: 'ron'])
 
             assert aliceResponse.status == 200

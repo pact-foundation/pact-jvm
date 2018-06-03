@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit
 
+import au.com.dius.pact.model.BrokerUrlSource
 import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.FilteredPact
 import au.com.dius.pact.model.Provider
@@ -36,6 +37,23 @@ class InteractionRunnerSpec extends Specification {
 
     then:
     0 * runner.reportVerificationResults(false)
+  }
+
+  def 'use the pact source passed into the interaction runner constructor'() {
+    given:
+    def interaction1 = new RequestResponseInteraction(description: 'Interaction 1')
+    def interaction2 = new RequestResponseInteraction(description: 'Interaction 2')
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction1, interaction2 ])
+
+    def clazz = new TestClass(InteractionRunnerTestClass)
+    def source = new BrokerUrlSource('url', 'url', ['publish': 'true'])
+    def runner = Spy(InteractionRunner, constructorArgs: [clazz, pact, source])
+
+    when:
+    runner.run([:] as RunNotifier)
+
+    then:
+    1 * runner.reportVerificationResults(false, pact, source)
   }
 
 }

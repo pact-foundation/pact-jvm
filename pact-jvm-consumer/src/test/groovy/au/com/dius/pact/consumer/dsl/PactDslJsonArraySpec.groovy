@@ -46,6 +46,30 @@ class PactDslJsonArraySpec extends Specification {
     thrown(IllegalArgumentException)
   }
 
+  def 'minMax array like function should validate the min and max size'() {
+    when:
+    new PactDslJsonArray().minMaxArrayLike(3, 2)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  def 'minMax array like function should validate the number of examples match the min size'() {
+    when:
+    new PactDslJsonArray().minMaxArrayLike(2, 3, 1)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  def 'minMax array like function should validate the number of examples match the max size'() {
+    when:
+    new PactDslJsonArray().minMaxArrayLike(2, 3, 4)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
   def 'static min array like function should validate the number of examples match the min size'() {
     when:
     PactDslJsonArray.arrayMinLike(3, 2)
@@ -62,6 +86,30 @@ class PactDslJsonArraySpec extends Specification {
     thrown(IllegalArgumentException)
   }
 
+  def 'static minmax array like function should validate the number of examples match the max size'() {
+    when:
+    PactDslJsonArray.arrayMinMaxLike(2, 3, 4)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  def 'static minmax array like function should validate the number of examples match the min size'() {
+    when:
+    PactDslJsonArray.arrayMinMaxLike(2, 3, 1)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  def 'static minmax array like function should validate the min and max size'() {
+    when:
+    PactDslJsonArray.arrayMinMaxLike(4, 3)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
   def 'each array with max like function should validate the number of examples match the max size'() {
     when:
     new PactDslJsonArray().eachArrayWithMaxLike(4, 3)
@@ -73,6 +121,30 @@ class PactDslJsonArraySpec extends Specification {
   def 'each array with min function should validate the number of examples match the min size'() {
     when:
     new PactDslJsonArray().eachArrayWithMinLike(2, 3)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  def 'each array with min and max like function should validate the number of examples match the max size'() {
+    when:
+    new PactDslJsonArray().eachArrayWithMinMaxLike(5, 3, 4)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  def 'each array with min and max like function should validate the number of examples match the min size'() {
+    when:
+    new PactDslJsonArray().eachArrayWithMinMaxLike(1, 3, 4)
+
+    then:
+    thrown(IllegalArgumentException)
+  }
+
+  def 'each array with min and max like function should validate the min and max size'() {
+    when:
+    new PactDslJsonArray().eachArrayWithMinMaxLike(4, 3)
 
     then:
     thrown(IllegalArgumentException)

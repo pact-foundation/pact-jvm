@@ -7,6 +7,7 @@ import au.com.dius.pact.model.generators.RandomIntGenerator
 import au.com.dius.pact.model.generators.UuidGenerator
 import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.model.matchingrules.MaxTypeMatcher
+import au.com.dius.pact.model.matchingrules.MinMaxTypeMatcher
 import au.com.dius.pact.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.model.matchingrules.RegexMatcher
@@ -558,6 +559,38 @@ class PactBodyBuilderSpec extends Specification {
       '{"questionId":"author","answer":"B.B."}]],"answer2":[[{"questionId":"title","answer":"BBBB"},' +
       '{"questionId":"title","answer":"BBBB"}],[{"questionId":"title","answer":"BBBB"},' +
       '{"questionId":"title","answer":"BBBB"}]],"answer3":[[{"questionId":"title","answer":"BBBB"}]]}]}'
+    request.matchingRules.rulesForCategory('body').matchingRules == expectedMatchingRules
+  }
+
+  def 'array with min and max'() {
+    given:
+    service {
+      uponReceiving('a request with an array with min and max')
+      withAttributes(method: 'get', path: '/')
+      withBody {
+        items minMaxLike(1, 10) {
+          id string('100abc')
+        }
+      }
+      willRespondWith(status: 200)
+    }
+    def expectedMatchingRules = [
+      '$.items': new MatchingRuleGroup([new MinMaxTypeMatcher(1, 10)]),
+      '$.items[*].id': new MatchingRuleGroup([TypeMatcher.INSTANCE])
+    ]
+
+    when:
+    service.buildInteractions()
+    def request = service.interactions.first().request
+
+    then:
+    request.body.value == '''|{
+                             |    "items": [
+                             |        {
+                             |            "id": "100abc"
+                             |        }
+                             |    ]
+                             |}'''.stripMargin()
     request.matchingRules.rulesForCategory('body').matchingRules == expectedMatchingRules
   }
 
