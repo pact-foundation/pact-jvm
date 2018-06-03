@@ -26,6 +26,7 @@ fun <I> reportVerificationResults(pact: Pact<I>, result: Boolean, version: Strin
         logger.info { "Published verification result of '$result' for consumer '${pact.consumer}'" }
       }
     }
+    else -> logger.info { "Skipping publishing verification results for source $source" }
   }
 }
 
