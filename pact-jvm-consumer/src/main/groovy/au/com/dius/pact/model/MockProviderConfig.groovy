@@ -17,7 +17,7 @@ class MockProviderConfig {
 
   String hostname = LOCALHOST
   int port = 0
-  PactSpecVersion pactVersion = PactSpecVersion.V2
+  PactSpecVersion pactVersion = PactSpecVersion.V3
   String scheme = HTTP
 
   String url() {
@@ -25,12 +25,12 @@ class MockProviderConfig {
   }
 
   static MockProviderConfig httpConfig(String hostname = LOCALHOST, int port = 0,
-                                       PactSpecVersion pactVersion = PactSpecVersion.V2) {
+                                       PactSpecVersion pactVersion = PactSpecVersion.V3) {
     new MockProviderConfig(hostname, port, pactVersion, HTTP)
   }
 
   static MockProviderConfig createDefault() {
-    createDefault(LOCALHOST, PactSpecVersion.V2)
+    createDefault(LOCALHOST, PactSpecVersion.V3)
   }
 
   static MockProviderConfig createDefault(PactSpecVersion pactVersion) {
