@@ -1,5 +1,5 @@
 plugins {
-  id "nebula.clojure" version "5.0.6"
+  id "nebula.clojure" version "5.1.0"
 }
 
 dependencies {
