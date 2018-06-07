@@ -42,15 +42,38 @@ public class PactDslJsonBody extends DslPart {
   private static final String EXAMPLE = "Example \"";
   private final JSONObject body;
 
-    public PactDslJsonBody() {
-        super(".", "");
-        body = new JSONObject();
-    }
+  /**
+   * Constructs a new body as a root
+   */
+  public PactDslJsonBody() {
+      super(".", "");
+      body = new JSONObject();
+  }
 
-    public PactDslJsonBody(String rootPath, String rootName, DslPart parent) {
-        super(parent, rootPath, rootName);
-        body = new JSONObject();
-    }
+  /**
+   * Constructs a new body as a child
+   * @param rootPath Path to prefix to this child
+   * @param rootName Name to associate this object as in the parent
+   * @param parent Parent to attach to
+   */
+  public PactDslJsonBody(String rootPath, String rootName, DslPart parent) {
+      super(parent, rootPath, rootName);
+      body = new JSONObject();
+  }
+
+  /**
+   * Constructs a new body as a child as a copy of an existing one
+   * @param rootPath Path to prefix to this child
+   * @param rootName Name to associate this object as in the parent
+   * @param parent Parent to attach to
+   * @param body Body to copy values from
+   */
+  public PactDslJsonBody(String rootPath, String rootName, DslPart parent, PactDslJsonBody body) {
+    super(parent, rootPath, rootName);
+    this.body = body.body;
+    this.matchers = body.matchers.copyWithUpdatedMatcherRootPrefix(rootPath);
+    this.generators = body.generators.copyWithUpdatedMatcherRootPrefix(rootPath);
+  }
 
     public String toString() {
         return body.toString();
@@ -521,6 +544,26 @@ public class PactDslJsonBody extends DslPart {
     public PactDslJsonBody object() {
         throw new UnsupportedOperationException("use the object(String name) form");
     }
+
+  /**
+   * Attribute that is a JSON object defined from a DSL part
+   * @param name field name
+   * @param value DSL Part to set the value as
+   */
+  public PactDslJsonBody object(String name, DslPart value) {
+    String base = rootPath + name;
+    if (!name.matches(Parser$.MODULE$.FieldRegex().toString())) {
+      base = StringUtils.substringBeforeLast(rootPath, ".") + "['" + name + "']";
+    }
+    if (value instanceof PactDslJsonBody) {
+      PactDslJsonBody object = new PactDslJsonBody(base, "", this, (PactDslJsonBody) value);
+      putObject(object);
+    } else if (value instanceof PactDslJsonArray) {
+      PactDslJsonArray object = new PactDslJsonArray(base, "", this, (PactDslJsonArray) value);
+      putArray(object);
+    }
+    return this;
+  }
 
     /**
      * Closes the current JSON object

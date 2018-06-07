@@ -262,4 +262,36 @@ class PactDslJsonBodySpec extends Specification {
     FeatureToggles.reset()
   }
 
+  def 'Allow an attribute to be defined from a DSL part'() {
+    given:
+    PactDslJsonBody contactDetailsPactDslJsonBody = new PactDslJsonBody()
+    contactDetailsPactDslJsonBody.object('mobile')
+      .stringType('countryCode', '64')
+      .stringType('prefix', '21')
+      .numberType('subscriberNumber')
+      .closeObject()
+    PactDslJsonBody pactDslJsonBody = new PactDslJsonBody()
+      .object('contactDetails', contactDetailsPactDslJsonBody)
+      .object('contactDetails2', contactDetailsPactDslJsonBody)
+      .close()
+
+    expect:
+    pactDslJsonBody.matchers.toMap(PactSpecVersion.V2) == [
+      '$.body.contactDetails.mobile.countryCode': [match: 'type'],
+      '$.body.contactDetails.mobile.prefix': [match: 'type'],
+      '$.body.contactDetails.mobile.subscriberNumber': [match: 'number'],
+      '$.body.contactDetails2.mobile.countryCode': [match: 'type'],
+      '$.body.contactDetails2.mobile.prefix': [match: 'type'],
+      '$.body.contactDetails2.mobile.subscriberNumber': [match: 'number']
+    ]
+    pactDslJsonBody.generators.toMap(PactSpecVersion.V3) == [
+      body: [
+        '$.contactDetails.mobile.subscriberNumber': [type: 'RandomInt', min: 0, max: 2147483647],
+        '$.contactDetails2.mobile.subscriberNumber': [type: 'RandomInt', min: 0, max: 2147483647]
+      ]
+    ]
+    pactDslJsonBody.toString() == '{"contactDetails2":{"mobile":{"countryCode":"64","prefix":"21","subscriberNumber":' +
+      '100}},"contactDetails":{"mobile":{"countryCode":"64","prefix":"21","subscriberNumber":100}}}'
+  }
+
 }

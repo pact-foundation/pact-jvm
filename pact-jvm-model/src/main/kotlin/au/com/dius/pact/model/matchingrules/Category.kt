@@ -10,8 +10,7 @@ import java.util.function.ToIntFunction
  */
 data class Category @JvmOverloads constructor(
   val name: String,
-  var matchingRules: MutableMap<String, MatchingRuleGroup> =
-    mutableMapOf()
+  var matchingRules: MutableMap<String, MatchingRuleGroup> = mutableMapOf()
 ) {
 
   companion object : KLogging()
@@ -73,6 +72,12 @@ data class Category @JvmOverloads constructor(
 
   fun applyMatcherRootPrefix(prefix: String) {
     matchingRules = matchingRules.mapKeys { e -> prefix + e.key }.toMutableMap()
+  }
+
+  fun copyWithUpdatedMatcherRootPrefix(prefix: String): Category {
+    val category = copy()
+    category.applyMatcherRootPrefix(prefix)
+    return category
   }
 
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {

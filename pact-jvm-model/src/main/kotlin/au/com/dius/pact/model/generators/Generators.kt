@@ -228,4 +228,10 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
       categories[category] = categories[category]!!.mapKeys { entry -> prefix + entry.key }.toMutableMap()
     }
   }
+
+  fun copyWithUpdatedMatcherRootPrefix(rootPath: String): Generators {
+    val generators = this.copy(categories = this.categories.toMutableMap())
+    generators.applyRootPrefix(rootPath)
+    return generators
+  }
 }
