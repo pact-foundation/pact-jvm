@@ -23,7 +23,7 @@ class MarkdownReporter implements VerifierReporter {
   @Override
   void initialise(ProviderInfo provider) {
     reportDir.mkdirs()
-    reportFile = reportFile ?: new File(reportDir, (provider.name + ext))
+    reportFile = new File(reportDir, (provider.name + ext))
     writer = reportFile.newPrintWriter()
     writer.println "# $provider.name"
     writer.println()
