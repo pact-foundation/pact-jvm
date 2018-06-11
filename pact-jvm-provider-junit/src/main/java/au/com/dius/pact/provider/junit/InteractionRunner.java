@@ -198,7 +198,7 @@ public class InteractionRunner extends Runner {
     if (version != null) {
       return version;
     }
-    LOGGER.warn("Set the provider version using the pact.provider.version property");
+    LOGGER.warn("Set the provider version using the 'pact.provider.version' property. Defaulting to '0.0.0'");
     return "0.0.0";
   }
 

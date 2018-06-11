@@ -109,7 +109,7 @@ class PactBrokerClient extends PactBrokerClientBase {
 
   String getUrlForProvider(String providerName, String tag) {
     IHalClient halClient = newHalClient()
-    if (StringUtils.isEmpty(tag)) {
+    if (StringUtils.isEmpty(tag) || 'latest'.equalsIgnoreCase(tag)) {
       halClient.navigate(LATEST_PROVIDER_PACTS, provider: providerName)
     } else {
       halClient.navigate(LATEST_PROVIDER_PACTS_WITH_TAG, provider: providerName, tag: tag)
