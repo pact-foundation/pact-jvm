@@ -87,7 +87,7 @@ open class AmqpTarget @JvmOverloads constructor(val packagesToScan: List<String>
     providerInfo.packagesToScan = packagesToScan
 
     if (source is PactBrokerSource<*>) {
-      val (_, _, pacts) = source
+      val (_, _, _, pacts) = source
       providerInfo.consumers = pacts.entries.flatMap { e -> e.value.map { p -> ConsumerInfo(e.key.name, p) } }
     } else if (source is DirectorySource<*>) {
       val (_, pacts) = source

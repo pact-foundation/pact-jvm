@@ -20,7 +20,6 @@ import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
 
-@SuppressWarnings('MethodCount')
 class ProviderVerifierSpec extends Specification {
 
   ProviderVerifier verifier
@@ -459,23 +458,6 @@ class ProviderVerifierSpec extends Specification {
 
     then:
     0 * client.publishVerificationResults(_, true, '0', null)
-  }
-
-  @SuppressWarnings('UnnecessaryGetter')
-  def 'Default the pact source to the source passed in over the one assciated to the pact'() {
-    given:
-    def links = ['publish': 'true']
-    def pact = Mock(Pact) {
-      getSource() >> new UrlSource('url')
-    }
-    def client = Mock(PactBrokerClient)
-
-    when:
-    ProviderVerifierKt.reportVerificationResults(pact, true, '0', client,
-      new BrokerUrlSource('url', 'url', links))
-
-    then:
-    1 * client.publishVerificationResults(links, true, '0', null) >> new Result.Success(true)
   }
 
   @SuppressWarnings('UnnecessaryGetter')

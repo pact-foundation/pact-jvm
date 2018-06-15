@@ -14,7 +14,6 @@ import au.com.dius.pact.model.generators.RegexGenerator;
 import au.com.dius.pact.model.generators.TimeGenerator;
 import au.com.dius.pact.model.generators.UuidGenerator;
 import au.com.dius.pact.model.matchingrules.EqualsMatcher;
-import au.com.dius.pact.model.matchingrules.IncludeMatcher;
 import au.com.dius.pact.model.matchingrules.MatchingRule;
 import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
@@ -43,15 +42,38 @@ public class PactDslJsonBody extends DslPart {
   private static final String EXAMPLE = "Example \"";
   private final JSONObject body;
 
-    public PactDslJsonBody() {
-        super(".", "");
-        body = new JSONObject();
-    }
+  /**
+   * Constructs a new body as a root
+   */
+  public PactDslJsonBody() {
+      super(".", "");
+      body = new JSONObject();
+  }
 
-    public PactDslJsonBody(String rootPath, String rootName, DslPart parent) {
-        super(parent, rootPath, rootName);
-        body = new JSONObject();
-    }
+  /**
+   * Constructs a new body as a child
+   * @param rootPath Path to prefix to this child
+   * @param rootName Name to associate this object as in the parent
+   * @param parent Parent to attach to
+   */
+  public PactDslJsonBody(String rootPath, String rootName, DslPart parent) {
+      super(parent, rootPath, rootName);
+      body = new JSONObject();
+  }
+
+  /**
+   * Constructs a new body as a child as a copy of an existing one
+   * @param rootPath Path to prefix to this child
+   * @param rootName Name to associate this object as in the parent
+   * @param parent Parent to attach to
+   * @param body Body to copy values from
+   */
+  public PactDslJsonBody(String rootPath, String rootName, DslPart parent, PactDslJsonBody body) {
+    super(parent, rootPath, rootName);
+    this.body = body.body;
+    this.matchers = body.matchers.copyWithUpdatedMatcherRootPrefix(rootPath);
+    this.generators = body.generators.copyWithUpdatedMatcherRootPrefix(rootPath);
+  }
 
     public String toString() {
         return body.toString();
@@ -522,6 +544,26 @@ public class PactDslJsonBody extends DslPart {
     public PactDslJsonBody object() {
         throw new UnsupportedOperationException("use the object(String name) form");
     }
+
+  /**
+   * Attribute that is a JSON object defined from a DSL part
+   * @param name field name
+   * @param value DSL Part to set the value as
+   */
+  public PactDslJsonBody object(String name, DslPart value) {
+    String base = rootPath + name;
+    if (!name.matches(Parser$.MODULE$.FieldRegex().toString())) {
+      base = StringUtils.substringBeforeLast(rootPath, ".") + "['" + name + "']";
+    }
+    if (value instanceof PactDslJsonBody) {
+      PactDslJsonBody object = new PactDslJsonBody(base, "", this, (PactDslJsonBody) value);
+      putObject(object);
+    } else if (value instanceof PactDslJsonArray) {
+      PactDslJsonArray object = new PactDslJsonArray(base, "", this, (PactDslJsonArray) value);
+      putArray(object);
+    }
+    return this;
+  }
 
     /**
      * Closes the current JSON object
@@ -1112,6 +1154,14 @@ public class PactDslJsonBody extends DslPart {
 
   @Override
   public PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, int numberExamples) {
+    validateMinAndMaxAndExamples(minSize, maxSize, numberExamples);
+    matchers.addRule(matcherKey(name), matchMinMax(minSize, maxSize));
+    PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), "", this, true);
+    parent.setNumberExamples(numberExamples);
+    return new PactDslJsonBody(".", "", parent);
+  }
+
+  private void validateMinAndMaxAndExamples(Integer minSize, Integer maxSize, int numberExamples) {
     if (minSize > maxSize) {
       throw new IllegalArgumentException(String.format("The minimum size %d is more than the maximum size of %d",
         minSize, maxSize));
@@ -1122,10 +1172,6 @@ public class PactDslJsonBody extends DslPart {
       throw new IllegalArgumentException(String.format("Number of example %d is more than the maximum size of %d",
         numberExamples, maxSize));
     }
-    matchers.addRule(matcherKey(name), matchMinMax(minSize, maxSize));
-    PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), "", this, true);
-    parent.setNumberExamples(numberExamples);
-    return new PactDslJsonBody(".", "", parent);
   }
 
   @Override
@@ -1145,16 +1191,7 @@ public class PactDslJsonBody extends DslPart {
 
   @Override
   public PactDslJsonArray eachArrayWithMinMaxLike(String name, int numberExamples, Integer minSize, Integer maxSize) {
-    if (minSize > maxSize) {
-      throw new IllegalArgumentException(String.format("The minimum size %d is more than the maximum size of %d",
-        minSize, maxSize));
-    } else if (numberExamples < minSize) {
-      throw new IllegalArgumentException(String.format("Number of example %d is less than the minimum size of %d",
-        numberExamples, minSize));
-    } else if (numberExamples > maxSize) {
-      throw new IllegalArgumentException(String.format("Number of example %d is more than the maximum size of %d",
-        numberExamples, maxSize));
-    }
+    validateMinAndMaxAndExamples(minSize, maxSize, numberExamples);
     matchers.addRule(matcherKey(name), matchMinMax(minSize, maxSize));
     PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), name, this, true);
     parent.setNumberExamples(numberExamples);
@@ -1177,16 +1214,7 @@ public class PactDslJsonBody extends DslPart {
    */
   public PactDslJsonBody minMaxArrayLike(String name, Integer minSize, Integer maxSize, PactDslJsonRootValue value,
                                          int numberExamples) {
-    if (minSize > maxSize) {
-      throw new IllegalArgumentException(String.format("The minimum size %d is more than the maximum size of %d",
-        minSize, maxSize));
-    } else if (numberExamples < minSize) {
-      throw new IllegalArgumentException(String.format("Number of example %d is less than the minimum size of %d",
-        numberExamples, minSize));
-    } else if (numberExamples > maxSize) {
-      throw new IllegalArgumentException(String.format("Number of example %d is more than the maximum size of %d",
-        numberExamples, maxSize));
-    }
+    validateMinAndMaxAndExamples(minSize, maxSize, numberExamples);
     matchers.addRule(matcherKey(name), matchMinMax(minSize, maxSize));
     PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), "", this, true);
     parent.setNumberExamples(numberExamples);

@@ -97,7 +97,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
 
   open fun getUrlForProvider(providerName: String, tag: String): String? {
     val halClient = newHalClient()
-    if (tag.isEmpty()) {
+    if (tag.isEmpty() || tag == "latest") {
       halClient.navigate(mapOf("provider" to providerName), LATEST_PROVIDER_PACTS)
     } else {
       halClient.navigate(mapOf("provider" to providerName, "tag" to tag), LATEST_PROVIDER_PACTS_WITH_TAG)
