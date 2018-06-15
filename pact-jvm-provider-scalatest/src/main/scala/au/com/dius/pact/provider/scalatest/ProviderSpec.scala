@@ -4,12 +4,12 @@ import java.io.File
 import java.net.URL
 import java.util.concurrent.Executors
 
-import au.com.dius.pact.model
-import au.com.dius.pact.model.{FullResponseMatch, RequestResponseInteraction, ResponseMatching, Pact => PactForConsumer}
+import au.com.dius.pact.core.model.{Pact => PactForConsumer}
+import au.com.dius.pact.model.{FullResponseMatch, RequestResponseInteraction, ResponseMatching}
 import au.com.dius.pact.provider.sbtsupport.HttpClient
 import au.com.dius.pact.provider.scalatest.ProviderDsl.defaultPactDirectory
 import au.com.dius.pact.provider.scalatest.Tags.ProviderTest
-import au.com.dius.pact.provider.{ConsumerInfo, ProviderUtils, ProviderVerifier}
+import au.com.dius.pact.provider.{ProviderUtils, ProviderVerifier}
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 import scala.collection.JavaConversions._
@@ -35,7 +35,7 @@ trait ProviderSpec extends FlatSpec with BeforeAndAfterAll with ProviderDsl with
     import verificationConfig.serverConfig._
 
     val verifier = new ProviderVerifier
-    ProviderUtils.loadPactFiles(new model.Provider(provider), new File(uri))
+    ProviderUtils.loadPactFiles(new au.com.dius.pact.core.model.Provider(provider), new File(uri))
       .filter(consumer.filter)
       .flatMap(c => verifier.loadPactFileForConsumer(c)
         .asInstanceOf[PactForConsumer[RequestResponseInteraction]]

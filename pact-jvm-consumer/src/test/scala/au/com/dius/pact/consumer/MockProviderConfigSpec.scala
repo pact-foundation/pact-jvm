@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.model.{MockProviderConfig, PactSpecVersion}
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.model.MockProviderConfig
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner

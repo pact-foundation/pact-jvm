@@ -1,9 +1,9 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.model.Request
-import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
-import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import spock.lang.Specification
 
 class TypeMatcherSpec extends Specification {

@@ -1,5 +1,10 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.FilteredPact
+import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.Provider
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString

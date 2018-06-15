@@ -1,4 +1,4 @@
-package au.com.dius.pact.model
+package au.com.dius.pact.core.model
 
 enum class Feature(val featureKey: String) {
   UseMatchValuesMatcher("pact.feature.matchers.useMatchValuesMatcher")

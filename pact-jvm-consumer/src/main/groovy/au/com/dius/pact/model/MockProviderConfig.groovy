@@ -1,5 +1,6 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.core.model.PactSpecVersion
 import groovy.transform.Canonical
 import org.apache.commons.lang3.RandomUtils
 

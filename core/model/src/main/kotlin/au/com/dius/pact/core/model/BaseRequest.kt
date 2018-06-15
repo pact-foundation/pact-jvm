@@ -1,4 +1,4 @@
-package au.com.dius.pact.model
+package au.com.dius.pact.core.model
 
 import java.io.ByteArrayOutputStream
 import javax.mail.internet.InternetHeaders

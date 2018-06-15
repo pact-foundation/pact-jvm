@@ -4,22 +4,23 @@ import au.com.dius.pact.consumer.Headers
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.StatefulMockProvider
 import au.com.dius.pact.consumer.VerificationResult
-import au.com.dius.pact.model.Consumer
+import au.com.dius.pact.core.model.matchingrules.Category
+import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.model.MockProviderConfig
-import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.model.PactFragment
 import au.com.dius.pact.model.PactReader
-import au.com.dius.pact.model.PactSpecVersion
-import au.com.dius.pact.model.Provider
-import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.Provider
+import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.Response
-import au.com.dius.pact.model.generators.Generators
-import au.com.dius.pact.model.matchingrules.MatchingRules
-import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
-import au.com.dius.pact.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import groovy.json.JsonBuilder
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
@@ -427,13 +428,13 @@ class PactBuilder extends BaseBuilder {
       requestData.last().body = os.toString()
       requestData.last().headers = requestData.last().headers ?: [:]
       requestData.last().headers[CONTENT_TYPE] = multipart.contentType.value
-      au.com.dius.pact.model.matchingrules.Category category  = requestData.last().matchers.addCategory(HEADER)
+      Category category  = requestData.last().matchers.addCategory(HEADER)
       category.addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX, multipart.contentType.value))
     } else {
       responseData.last().body = os.toString()
       responseData.last().headers = responseData.last().headers ?: [:]
       responseData.last().headers[CONTENT_TYPE] = multipart.contentType.value
-      au.com.dius.pact.model.matchingrules.Category category  = responseData.last().matchers.addCategory(HEADER)
+      Category category  = responseData.last().matchers.addCategory(HEADER)
       category.addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX, multipart.contentType.value))
     }
   }

@@ -1,4 +1,4 @@
-package au.com.dius.pact.model
+package au.com.dius.pact.core.model
 
 private val jsonRegex = Regex("application\\/.*json")
 private val xmlRegex = Regex("application\\/.*xml")

@@ -1,16 +1,15 @@
 package au.com.dius.pact.consumer.dsl;
 
-import au.com.dius.pact.model.generators.Generators;
-import au.com.dius.pact.model.matchingrules.Category;
-import au.com.dius.pact.model.matchingrules.DateMatcher;
-import au.com.dius.pact.model.matchingrules.EqualsMatcher;
-import au.com.dius.pact.model.matchingrules.IncludeMatcher;
-import au.com.dius.pact.model.matchingrules.MaxTypeMatcher;
-import au.com.dius.pact.model.matchingrules.MinMaxTypeMatcher;
-import au.com.dius.pact.model.matchingrules.MinTypeMatcher;
-import au.com.dius.pact.model.matchingrules.RegexMatcher;
-import au.com.dius.pact.model.matchingrules.TimeMatcher;
-import au.com.dius.pact.model.matchingrules.TimestampMatcher;
+import au.com.dius.pact.core.model.generators.Generators;
+import au.com.dius.pact.core.model.matchingrules.Category;
+import au.com.dius.pact.core.model.matchingrules.DateMatcher;
+import au.com.dius.pact.core.model.matchingrules.IncludeMatcher;
+import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher;
+import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher;
+import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher;
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
+import au.com.dius.pact.core.model.matchingrules.TimeMatcher;
+import au.com.dius.pact.core.model.matchingrules.TimestampMatcher;
 
 /**
  * Abstract base class to support Object and Array JSON DSL builders

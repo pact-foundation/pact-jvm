@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.Interaction
-import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.ProviderState
 import groovy.transform.Canonical
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils

@@ -1,7 +1,8 @@
 package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.dsl.UrlMatcherSupport
-import au.com.dius.pact.model.matchingrules.MatchingRule
+import au.com.dius.pact.core.model.matchingrules.MatchingRule
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 
 /**
  * Match a URL by specifying the base and a series of paths.
@@ -22,6 +23,6 @@ class UrlMatcher extends Matcher {
   }
 
   MatchingRule getMatcher() {
-    new au.com.dius.pact.model.matchingrules.RegexMatcher(urlMatcherSupport.regexExpression)
+    new RegexMatcher(urlMatcherSupport.regexExpression)
   }
 }

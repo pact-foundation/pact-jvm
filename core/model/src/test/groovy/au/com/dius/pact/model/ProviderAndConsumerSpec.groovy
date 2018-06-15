@@ -1,5 +1,7 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.Provider
 import spock.lang.Specification
 import spock.lang.Unroll
 

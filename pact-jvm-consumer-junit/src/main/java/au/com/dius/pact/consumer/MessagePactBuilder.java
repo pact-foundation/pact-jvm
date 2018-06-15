@@ -1,11 +1,11 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.DslPart;
-import au.com.dius.pact.model.Consumer;
-import au.com.dius.pact.model.InvalidPactException;
-import au.com.dius.pact.model.OptionalBody;
-import au.com.dius.pact.model.Provider;
-import au.com.dius.pact.model.ProviderState;
+import au.com.dius.pact.core.model.Consumer;
+import au.com.dius.pact.core.model.InvalidPactException;
+import au.com.dius.pact.core.model.OptionalBody;
+import au.com.dius.pact.core.model.Provider;
+import au.com.dius.pact.core.model.ProviderState;
 import au.com.dius.pact.model.v3.messaging.Message;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import org.apache.http.entity.ContentType;

@@ -1,12 +1,18 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.model.generators.Category
-import au.com.dius.pact.model.generators.Generators
-import au.com.dius.pact.model.generators.RandomIntGenerator
-import au.com.dius.pact.model.generators.RandomStringGenerator
-import au.com.dius.pact.model.generators.UuidGenerator
-import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
-import au.com.dius.pact.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.PactWriter
+import au.com.dius.pact.core.model.Provider
+import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.model.generators.Category
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.generators.RandomIntGenerator
+import au.com.dius.pact.core.model.generators.RandomStringGenerator
+import au.com.dius.pact.core.model.generators.UuidGenerator
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
 import groovy.json.JsonSlurper

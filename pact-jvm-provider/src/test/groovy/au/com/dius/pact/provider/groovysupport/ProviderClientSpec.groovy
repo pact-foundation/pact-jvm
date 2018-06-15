@@ -1,11 +1,10 @@
 package au.com.dius.pact.provider.groovysupport
 
-import au.com.dius.pact.model.OptionalBody
-import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.model.Request
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.provider.GroovyScalaUtils$
-import au.com.dius.pact.provider.HttpClientFactory
 import au.com.dius.pact.provider.IHttpClientFactory
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.ProviderClient

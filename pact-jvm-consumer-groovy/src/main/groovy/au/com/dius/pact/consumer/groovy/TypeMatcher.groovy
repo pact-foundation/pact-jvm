@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.groovy
 
-import au.com.dius.pact.model.matchingrules.MatchingRule
-import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.MatchingRule
+import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 
 /**
  * Matcher for validating same types
@@ -19,7 +19,7 @@ class TypeMatcher extends Matcher {
       case 'number':
         return new NumberTypeMatcher(NumberTypeMatcher.NumberType.NUMBER)
       default:
-        return au.com.dius.pact.model.matchingrules.TypeMatcher.INSTANCE
+        return au.com.dius.pact.core.model.matchingrules.TypeMatcher.INSTANCE
     }
   }
 

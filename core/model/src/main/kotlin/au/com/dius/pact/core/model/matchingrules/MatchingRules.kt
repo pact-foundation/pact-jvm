@@ -1,6 +1,6 @@
-package au.com.dius.pact.model.matchingrules
+package au.com.dius.pact.core.model.matchingrules
 
-import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.core.model.PactSpecVersion
 import mu.KLogging
 import java.lang.IllegalArgumentException
 
@@ -191,7 +191,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(
           "decimal" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
           "real" -> {
             logger.warn { "The 'real' type matcher is deprecated, use 'decimal' instead" }
-            NumberTypeMatcher (NumberTypeMatcher.NumberType.DECIMAL)
+            NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
           }
           MIN -> MinTypeMatcher(mapEntryToInt(map, MIN))
           MAX -> MaxTypeMatcher(mapEntryToInt(map, MAX))

@@ -1,6 +1,8 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import scala.collection.JavaConversions
 import spock.lang.Specification
 

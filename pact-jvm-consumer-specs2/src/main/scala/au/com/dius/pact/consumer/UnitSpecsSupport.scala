@@ -2,8 +2,9 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.specs2.VerificationResultAsResult
+import au.com.dius.pact.core.model._
+import au.com.dius.pact.core.model.matchingrules.{MatchingRules, MatchingRulesImpl}
 import au.com.dius.pact.model._
-import au.com.dius.pact.model.matchingrules.{MatchingRules, MatchingRulesImpl}
 import org.specs2.mutable.Specification
 import org.specs2.specification.core.Fragments
 

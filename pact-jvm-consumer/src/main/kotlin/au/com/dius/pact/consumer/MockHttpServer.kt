@@ -3,9 +3,9 @@ package au.com.dius.pact.consumer
 import au.com.dius.pact.model.FullRequestMatch
 import au.com.dius.pact.model.MockHttpsProviderConfig
 import au.com.dius.pact.model.MockProviderConfig
-import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.model.PactReader
-import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.model.PartialRequestMatch
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.RequestMatching

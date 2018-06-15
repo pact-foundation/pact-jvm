@@ -1,7 +1,7 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
-import au.com.dius.pact.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import spock.lang.Specification
 import spock.lang.Unroll
 

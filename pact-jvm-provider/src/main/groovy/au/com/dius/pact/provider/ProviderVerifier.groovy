@@ -1,13 +1,13 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.FilteredPact
-import au.com.dius.pact.model.Interaction
-import au.com.dius.pact.model.OptionalBody
-import au.com.dius.pact.model.Pact
+import au.com.dius.pact.core.model.FilteredPact
+import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.model.PactReader
-import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.model.Response
-import au.com.dius.pact.model.UrlPactSource
+import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter

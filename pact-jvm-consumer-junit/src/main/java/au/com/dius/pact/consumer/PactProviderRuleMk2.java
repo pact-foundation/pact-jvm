@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.PactSpecVersion;
+import au.com.dius.pact.core.model.PactSpecVersion;
 
 /**
  * A junit rule that wraps every test annotated with {@link PactVerification}.

@@ -1,13 +1,13 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.HttpPart
-import au.com.dius.pact.model.isEmpty
-import au.com.dius.pact.model.isMissing
-import au.com.dius.pact.model.isNull
-import au.com.dius.pact.model.isPresent
-import au.com.dius.pact.model.matchingrules.MatchingRules
-import au.com.dius.pact.model.matchingrules.RegexMatcher
-import au.com.dius.pact.model.orElse
+import au.com.dius.pact.core.model.HttpPart
+import au.com.dius.pact.core.model.isEmpty
+import au.com.dius.pact.core.model.isMissing
+import au.com.dius.pact.core.model.isNull
+import au.com.dius.pact.core.model.isPresent
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.orElse
 import mu.KLogging
 
 class PlainTextBodyMatcher : BodyMatcher {

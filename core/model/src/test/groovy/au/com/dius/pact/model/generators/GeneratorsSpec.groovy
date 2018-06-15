@@ -1,7 +1,14 @@
 package au.com.dius.pact.model.generators
 
-import au.com.dius.pact.model.ContentType
-import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.core.model.generators.Category
+import au.com.dius.pact.core.model.generators.ContentTypeHandler
+import au.com.dius.pact.core.model.generators.Generator
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.generators.GeneratorsKt
+import au.com.dius.pact.core.model.generators.RandomIntGenerator
+import au.com.dius.pact.core.model.generators.RandomStringGenerator
+import au.com.dius.pact.core.model.ContentType
+import au.com.dius.pact.core.model.OptionalBody
 import spock.lang.Specification
 import spock.lang.Unroll
 

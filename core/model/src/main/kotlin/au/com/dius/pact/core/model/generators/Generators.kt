@@ -1,11 +1,11 @@
-package au.com.dius.pact.model.generators
+package au.com.dius.pact.core.model.generators
 
-import au.com.dius.pact.model.ContentType
-import au.com.dius.pact.model.InvalidPactException
-import au.com.dius.pact.model.OptionalBody
-import au.com.dius.pact.model.PactSpecVersion
-import au.com.dius.pact.model.PathToken
-import au.com.dius.pact.model.parsePath
+import au.com.dius.pact.core.model.ContentType
+import au.com.dius.pact.core.model.InvalidPactException
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.PathToken
+import au.com.dius.pact.core.model.parsePath
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import mu.KLogging

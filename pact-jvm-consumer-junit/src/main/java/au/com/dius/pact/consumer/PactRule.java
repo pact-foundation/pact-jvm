@@ -3,7 +3,7 @@ package au.com.dius.pact.consumer;
 import au.com.dius.pact.consumer.dsl.PactDslWithState;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactFragment;
-import au.com.dius.pact.model.PactSpecVersion;
+import au.com.dius.pact.core.model.PactSpecVersion;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;

@@ -5,7 +5,7 @@ import au.com.dius.pact.consumer.dsl.PactDslResponse;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit.JUnitTestSupport;
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.PactSpecVersion;
+import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.model.RequestResponsePact;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;

@@ -1,5 +1,21 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.core.model.BrokerUrlSource
+import au.com.dius.pact.core.model.ClosurePactSource
+import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.FileSource
+import au.com.dius.pact.core.model.InputStreamPactSource
+import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.model.PactReaderKt
+import au.com.dius.pact.core.model.PactSource
+import au.com.dius.pact.core.model.Provider
+import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.model.ReaderPactSource
+import au.com.dius.pact.core.model.S3PactSource
+import au.com.dius.pact.core.model.UnknownPactSource
+import au.com.dius.pact.core.model.UrlPactSource
+import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.MessagePact
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.AmazonS3URI
@@ -10,7 +26,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import kotlin.Pair
 
-import static au.com.dius.pact.model.PactReaderKt.newHttpClient
+import static au.com.dius.pact.core.model.PactReaderKt.newHttpClient
 
 /**
  * Class to load a Pact from a JSON source using a version strategy

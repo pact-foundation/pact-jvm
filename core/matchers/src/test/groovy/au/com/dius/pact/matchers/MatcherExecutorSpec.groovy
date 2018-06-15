@@ -1,19 +1,19 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.matchingrules.DateMatcher
-import au.com.dius.pact.model.matchingrules.EqualsMatcher
-import au.com.dius.pact.model.matchingrules.IncludeMatcher
-import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
-import au.com.dius.pact.model.matchingrules.RegexMatcher
-import au.com.dius.pact.model.matchingrules.TimeMatcher
-import au.com.dius.pact.model.matchingrules.TimestampMatcher
-import au.com.dius.pact.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.matchingrules.DateMatcher
+import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
+import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
+import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.matchingrules.TimeMatcher
+import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static au.com.dius.pact.model.matchingrules.NumberTypeMatcher.NumberType.DECIMAL
-import static au.com.dius.pact.model.matchingrules.NumberTypeMatcher.NumberType.INTEGER
-import static au.com.dius.pact.model.matchingrules.NumberTypeMatcher.NumberType.NUMBER
+import static au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher.NumberType.DECIMAL
+import static au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher.NumberType.INTEGER
+import static au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher.NumberType.NUMBER
 
 @SuppressWarnings(['UnnecessaryBooleanExpression', 'CyclomaticComplexity'])
 class MatcherExecutorSpec extends Specification {

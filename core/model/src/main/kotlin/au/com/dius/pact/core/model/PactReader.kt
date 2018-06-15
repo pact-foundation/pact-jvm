@@ -1,4 +1,4 @@
-package au.com.dius.pact.model
+package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.com.github.kittinunf.result.Result

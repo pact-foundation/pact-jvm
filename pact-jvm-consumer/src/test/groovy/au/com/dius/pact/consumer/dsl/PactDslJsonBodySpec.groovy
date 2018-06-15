@@ -1,14 +1,14 @@
 package au.com.dius.pact.consumer.dsl
 
-import au.com.dius.pact.model.Feature
-import au.com.dius.pact.model.FeatureToggles
-import au.com.dius.pact.model.PactSpecVersion
-import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
-import au.com.dius.pact.model.matchingrules.MinTypeMatcher
-import au.com.dius.pact.model.matchingrules.RegexMatcher
-import au.com.dius.pact.model.matchingrules.RuleLogic
-import au.com.dius.pact.model.matchingrules.TypeMatcher
-import au.com.dius.pact.model.matchingrules.ValuesMatcher
+import au.com.dius.pact.core.model.Feature
+import au.com.dius.pact.core.model.FeatureToggles
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.matchingrules.RuleLogic
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import spock.lang.Specification
 import spock.lang.Unroll
 

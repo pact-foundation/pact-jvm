@@ -1,11 +1,11 @@
 package au.com.dius.pact.model.v3.messaging
 
-import au.com.dius.pact.model.BrokerUrlSource
-import au.com.dius.pact.model.Consumer
-import au.com.dius.pact.model.InvalidPactException
-import au.com.dius.pact.model.OptionalBody
-import au.com.dius.pact.model.PactSpecVersion
-import au.com.dius.pact.model.Provider
+import au.com.dius.pact.core.model.BrokerUrlSource
+import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.InvalidPactException
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.Provider
 import spock.lang.Specification
 
 class MessagePactSpec extends Specification {

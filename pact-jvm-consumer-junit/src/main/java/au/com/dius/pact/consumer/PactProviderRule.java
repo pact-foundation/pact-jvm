@@ -5,14 +5,13 @@ import au.com.dius.pact.model.MockHttpsKeystoreProviderConfig;
 import au.com.dius.pact.model.MockHttpsProviderConfig;
 import au.com.dius.pact.model.MockProviderConfig;
 import au.com.dius.pact.model.PactFragment;
-import au.com.dius.pact.model.PactSpecVersion;
+import au.com.dius.pact.core.model.PactSpecVersion;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import java.lang.reflect.Method;
-import java.net.SocketException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;

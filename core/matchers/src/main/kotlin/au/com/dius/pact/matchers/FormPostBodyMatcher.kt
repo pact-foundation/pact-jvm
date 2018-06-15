@@ -1,12 +1,12 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.HttpPart
-import au.com.dius.pact.model.isEmpty
-import au.com.dius.pact.model.isMissing
-import au.com.dius.pact.model.isNotPresent
-import au.com.dius.pact.model.isPresent
-import au.com.dius.pact.model.matchingrules.MatchingRules
-import au.com.dius.pact.model.orElse
+import au.com.dius.pact.core.model.HttpPart
+import au.com.dius.pact.core.model.isEmpty
+import au.com.dius.pact.core.model.isMissing
+import au.com.dius.pact.core.model.isNotPresent
+import au.com.dius.pact.core.model.isPresent
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.model.orElse
 import mu.KLogging
 import org.apache.http.NameValuePair
 import org.apache.http.client.utils.URLEncodedUtils

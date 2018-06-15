@@ -1,4 +1,4 @@
-package au.com.dius.pact.model
+package au.com.dius.pact.core.model
 
 import com.google.gson.GsonBuilder
 import mu.KLogging

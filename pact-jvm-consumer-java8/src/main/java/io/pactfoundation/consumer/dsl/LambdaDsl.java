@@ -2,9 +2,9 @@ package io.pactfoundation.consumer.dsl;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
-import au.com.dius.pact.model.matchingrules.MaxTypeMatcher;
-import au.com.dius.pact.model.matchingrules.MinMaxTypeMatcher;
-import au.com.dius.pact.model.matchingrules.MinTypeMatcher;
+import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher;
+import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher;
+import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher;
 
 import java.util.function.Consumer;
 

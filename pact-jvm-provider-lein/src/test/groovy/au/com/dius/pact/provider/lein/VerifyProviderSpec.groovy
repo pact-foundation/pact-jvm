@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider.lein
 
-import au.com.dius.pact.model.UrlSource
+import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier

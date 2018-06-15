@@ -1,5 +1,9 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.Provider
+import au.com.dius.pact.core.model.ProviderState
 import spock.lang.Specification
 
 class PactSpec extends Specification {

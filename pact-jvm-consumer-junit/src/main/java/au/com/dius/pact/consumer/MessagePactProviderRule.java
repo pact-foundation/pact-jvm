@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer;
 
-import au.com.dius.pact.model.PactSpecVersion;
+import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.model.v3.messaging.Message;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import org.apache.commons.lang3.StringUtils;

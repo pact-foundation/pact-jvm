@@ -3,12 +3,15 @@ package au.com.dius.pact.model
 import au.com.dius.pact.matchers._
 import au.com.dius.pact.model.RequestPartMismatch._
 import au.com.dius.pact.model.ResponsePartMismatch._
-import au.com.dius.pact.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import com.typesafe.scalalogging.StrictLogging
 
 import scala.collection.JavaConversions
 import scala.collection.immutable.TreeMap
 import java.util.ArrayList
+
+import au.com.dius.pact.core.model.{HttpPart, OptionalBody}
+
 import scala.collection.JavaConverters._
 
 trait SharedMismatch {

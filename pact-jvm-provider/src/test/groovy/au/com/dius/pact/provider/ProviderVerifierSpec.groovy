@@ -1,17 +1,17 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.BrokerUrlSource
-import au.com.dius.pact.model.Consumer
-import au.com.dius.pact.model.Interaction
-import au.com.dius.pact.model.OptionalBody
-import au.com.dius.pact.model.Pact
+import au.com.dius.pact.core.model.BrokerUrlSource
+import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.model.PactReader
-import au.com.dius.pact.model.Provider
-import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.core.model.Provider
+import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
-import au.com.dius.pact.model.UnknownPactSource
-import au.com.dius.pact.model.UrlSource
+import au.com.dius.pact.core.model.UnknownPactSource
+import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.com.github.kittinunf.result.Result

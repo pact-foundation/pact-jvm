@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer
 
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.model.PactFragmentBuilder.PactWithAtLeastOneRequest
 import au.com.dius.pact.model._
 import org.specs2.execute.{AsResult, Failure, Result, Success}

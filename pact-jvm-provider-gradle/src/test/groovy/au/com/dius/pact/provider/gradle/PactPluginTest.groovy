@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider.gradle
 
-import au.com.dius.pact.model.UrlSource
+import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.provider.PactVerification
 import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException

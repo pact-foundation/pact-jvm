@@ -1,10 +1,11 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.model.generators.Category
-import au.com.dius.pact.model.generators.Generators
-import au.com.dius.pact.model.generators.RandomIntGenerator
-import au.com.dius.pact.model.generators.RandomStringGenerator
-import au.com.dius.pact.model.generators.UuidGenerator
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.generators.Category
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.generators.RandomIntGenerator
+import au.com.dius.pact.core.model.generators.RandomStringGenerator
+import au.com.dius.pact.core.model.generators.UuidGenerator
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import spock.lang.Specification

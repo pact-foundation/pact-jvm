@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.junit
 
-import au.com.dius.pact.model.Interaction
-import au.com.dius.pact.model.Pact
+import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.filterPactsByAnnotations
 import au.com.dius.pact.provider.junit.loader.NoPactsFoundException
 import au.com.dius.pact.provider.junit.loader.PactBroker
@@ -101,7 +101,7 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner>(claz
   protected open fun newInteractionRunner(
     testClass: TestClass,
     pact: Pact<I>,
-    pactSource: au.com.dius.pact.model.PactSource
+    pactSource: au.com.dius.pact.core.model.PactSource
   ): InteractionRunner {
     return InteractionRunner(testClass, pact, pactSource)
   }

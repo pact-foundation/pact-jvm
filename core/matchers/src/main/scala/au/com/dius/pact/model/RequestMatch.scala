@@ -1,5 +1,6 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.matchers.Mismatch
 
 sealed trait RequestMatch extends Ordered[RequestMatch] {

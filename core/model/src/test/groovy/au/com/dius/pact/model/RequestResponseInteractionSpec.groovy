@@ -1,8 +1,10 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.model.generators.Category
-import au.com.dius.pact.model.generators.Generators
-import au.com.dius.pact.model.generators.RandomStringGenerator
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.model.generators.Category
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.generators.RandomStringGenerator
 import spock.lang.Specification
 
 class RequestResponseInteractionSpec extends Specification {

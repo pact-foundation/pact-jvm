@@ -3,7 +3,8 @@ package au.com.dius.pact.model.unfiltered
 import java.net.URI
 import java.util.zip.GZIPInputStream
 
-import au.com.dius.pact.model.{OptionalBody, Request, Response}
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.model.{Request, Response}
 import com.typesafe.scalalogging.StrictLogging
 import io.netty.handler.codec.http.{HttpResponse => NHttpResponse}
 import unfiltered.netty.ReceivedMessage

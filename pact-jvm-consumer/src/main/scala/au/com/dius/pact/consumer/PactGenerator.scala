@@ -1,7 +1,8 @@
 package au.com.dius.pact.consumer
 
-import java.io.{PrintWriter, File}
+import java.io.{File, PrintWriter}
 
+import au.com.dius.pact.core.model._
 import com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.model._
 

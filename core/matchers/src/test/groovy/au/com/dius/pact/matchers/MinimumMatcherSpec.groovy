@@ -1,6 +1,6 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.matchingrules.MinTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import spock.lang.Specification
 import spock.lang.Unroll
 

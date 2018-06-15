@@ -1,8 +1,8 @@
 package au.com.dius.pact.consumer.groovy
 
-import au.com.dius.pact.model.generators.DateGenerator
-import au.com.dius.pact.model.generators.Generator
-import au.com.dius.pact.model.matchingrules.MatchingRule
+import au.com.dius.pact.core.model.generators.DateGenerator
+import au.com.dius.pact.core.model.generators.Generator
+import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import org.apache.commons.lang3.time.DateFormatUtils
 
 /**
@@ -19,7 +19,7 @@ class DateMatcher extends Matcher {
   }
 
   MatchingRule getMatcher() {
-    new au.com.dius.pact.model.matchingrules.DateMatcher(getPattern())
+    new au.com.dius.pact.core.model.matchingrules.DateMatcher(getPattern())
   }
 
   Generator getGenerator() {

@@ -1,14 +1,14 @@
 package au.com.dius.pact.model.v3.messaging
 
-import au.com.dius.pact.model.HttpPart
-import au.com.dius.pact.model.Interaction
-import au.com.dius.pact.model.OptionalBody
-import au.com.dius.pact.model.PactSpecVersion
-import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.core.model.HttpPart
+import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.model.Response
-import au.com.dius.pact.model.generators.Generators
-import au.com.dius.pact.model.matchingrules.MatchingRules
-import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical

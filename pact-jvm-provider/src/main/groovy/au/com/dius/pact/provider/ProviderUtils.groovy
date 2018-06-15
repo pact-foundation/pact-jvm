@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.FileSource
+import au.com.dius.pact.core.model.FileSource
 import groovy.io.FileType
 import groovy.json.JsonSlurper
 import org.fusesource.jansi.AnsiConsole

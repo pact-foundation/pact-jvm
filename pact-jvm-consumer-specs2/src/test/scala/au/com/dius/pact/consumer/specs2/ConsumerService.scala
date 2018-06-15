@@ -3,7 +3,8 @@ package au.com.dius.pact.consumer.specs2
 import java.util.concurrent.Executors
 
 import au.com.dius.pact.consumer.dispatch.HttpClient
-import au.com.dius.pact.model.{OptionalBody, PactReader, Request}
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.model.{PactReader, Request}
 
 import scala.collection.JavaConversions
 import scala.compat.java8.FutureConverters.toScala

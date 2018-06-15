@@ -1,6 +1,6 @@
-package au.com.dius.pact.model.matchingrules
+package au.com.dius.pact.core.model.matchingrules
 
-import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.core.model.PactSpecVersion
 
 class MatchingRulesImpl : MatchingRules {
 

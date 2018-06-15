@@ -1,17 +1,17 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
-import au.com.dius.pact.model.OptionalBody;
+import au.com.dius.pact.core.model.OptionalBody;
 import au.com.dius.pact.model.PactFragment;
-import au.com.dius.pact.model.ProviderState;
+import au.com.dius.pact.core.model.ProviderState;
 import au.com.dius.pact.model.Request;
 import au.com.dius.pact.model.RequestResponseInteraction;
 import au.com.dius.pact.model.RequestResponsePact;
 import au.com.dius.pact.model.Response;
-import au.com.dius.pact.model.generators.Generators;
-import au.com.dius.pact.model.matchingrules.MatchingRules;
-import au.com.dius.pact.model.matchingrules.MatchingRulesImpl;
-import au.com.dius.pact.model.matchingrules.RegexMatcher;
+import au.com.dius.pact.core.model.generators.Generators;
+import au.com.dius.pact.core.model.matchingrules.MatchingRules;
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl;
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
 import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;

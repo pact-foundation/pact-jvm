@@ -11,21 +11,21 @@ import org.json.JSONObject;
 
 import com.mifmif.common.regex.Generex;
 import au.com.dius.pact.consumer.InvalidMatcherException;
-import au.com.dius.pact.model.generators.Category;
-import au.com.dius.pact.model.generators.DateGenerator;
-import au.com.dius.pact.model.generators.DateTimeGenerator;
-import au.com.dius.pact.model.generators.RandomDecimalGenerator;
-import au.com.dius.pact.model.generators.RandomHexadecimalGenerator;
-import au.com.dius.pact.model.generators.RandomIntGenerator;
-import au.com.dius.pact.model.generators.RandomStringGenerator;
-import au.com.dius.pact.model.generators.RegexGenerator;
-import au.com.dius.pact.model.generators.TimeGenerator;
-import au.com.dius.pact.model.generators.UuidGenerator;
-import au.com.dius.pact.model.matchingrules.MatchingRule;
-import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
-import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
-import au.com.dius.pact.model.matchingrules.RuleLogic;
-import au.com.dius.pact.model.matchingrules.TypeMatcher;
+import au.com.dius.pact.core.model.generators.Category;
+import au.com.dius.pact.core.model.generators.DateGenerator;
+import au.com.dius.pact.core.model.generators.DateTimeGenerator;
+import au.com.dius.pact.core.model.generators.RandomDecimalGenerator;
+import au.com.dius.pact.core.model.generators.RandomHexadecimalGenerator;
+import au.com.dius.pact.core.model.generators.RandomIntGenerator;
+import au.com.dius.pact.core.model.generators.RandomStringGenerator;
+import au.com.dius.pact.core.model.generators.RegexGenerator;
+import au.com.dius.pact.core.model.generators.TimeGenerator;
+import au.com.dius.pact.core.model.generators.UuidGenerator;
+import au.com.dius.pact.core.model.matchingrules.MatchingRule;
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup;
+import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher;
+import au.com.dius.pact.core.model.matchingrules.RuleLogic;
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
 
 /**
  * Matcher to create a plain root matching strategy. Used with text/plain to match regex responses

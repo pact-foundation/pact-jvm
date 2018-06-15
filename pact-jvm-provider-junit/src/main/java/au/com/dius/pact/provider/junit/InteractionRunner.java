@@ -1,10 +1,10 @@
 package au.com.dius.pact.provider.junit;
 
-import au.com.dius.pact.model.FilteredPact;
-import au.com.dius.pact.model.PactSource;
-import au.com.dius.pact.model.ProviderState;
-import au.com.dius.pact.model.Interaction;
-import au.com.dius.pact.model.Pact;
+import au.com.dius.pact.core.model.FilteredPact;
+import au.com.dius.pact.core.model.PactSource;
+import au.com.dius.pact.core.model.ProviderState;
+import au.com.dius.pact.core.model.Interaction;
+import au.com.dius.pact.core.model.Pact;
 import au.com.dius.pact.provider.ProviderVerifier;
 import au.com.dius.pact.provider.ProviderVerifierKt;
 import au.com.dius.pact.provider.junit.target.Target;

@@ -1,10 +1,13 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.model.generators.Category
-import au.com.dius.pact.model.generators.Generator
-import au.com.dius.pact.model.generators.Generators
-import au.com.dius.pact.model.matchingrules.MatchingRules
-import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.BaseRequest
+import au.com.dius.pact.core.model.ContentType
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.generators.Category
+import au.com.dius.pact.core.model.generators.Generator
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import groovy.transform.Canonical
 import org.jetbrains.annotations.NotNull
 

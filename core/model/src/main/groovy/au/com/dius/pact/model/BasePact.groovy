@@ -1,5 +1,14 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.FeatureToggles
+import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.InvalidPactException
+import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.model.PactMerge
+import au.com.dius.pact.core.model.PactSource
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.Provider
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic

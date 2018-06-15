@@ -1,4 +1,4 @@
-package au.com.dius.pact.model
+package au.com.dius.pact.core.model
 
 /**
  * Exception class to indicate an invalid pact specification

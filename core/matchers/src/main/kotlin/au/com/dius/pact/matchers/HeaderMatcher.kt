@@ -1,6 +1,6 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import mu.KLogging
 
 object HeaderMatcher : KLogging() {

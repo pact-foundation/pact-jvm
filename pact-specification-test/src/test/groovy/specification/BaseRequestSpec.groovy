@@ -1,7 +1,7 @@
 package specification
 
 import au.com.dius.pact.model.PactReader
-import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.core.model.PactSpecVersion
 import groovy.json.JsonSlurper
 import spock.lang.Specification
 

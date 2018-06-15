@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
-import au.com.dius.pact.model.matchingrules.MatchingRule
+import au.com.dius.pact.core.model.matchingrules.MatchingRule
 
 /**
  * Each like matcher for arrays
@@ -8,7 +8,7 @@ import au.com.dius.pact.model.matchingrules.MatchingRule
 class EachLikeMatcher extends LikeMatcher {
 
   MatchingRule getMatcher() {
-    au.com.dius.pact.model.matchingrules.TypeMatcher.INSTANCE
+    au.com.dius.pact.core.model.matchingrules.TypeMatcher.INSTANCE
   }
 
 }

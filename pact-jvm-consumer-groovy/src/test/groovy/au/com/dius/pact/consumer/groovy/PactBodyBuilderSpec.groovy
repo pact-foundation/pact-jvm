@@ -1,26 +1,26 @@
 package au.com.dius.pact.consumer.groovy
 
-import au.com.dius.pact.model.generators.DateGenerator
-import au.com.dius.pact.model.generators.RandomDecimalGenerator
-import au.com.dius.pact.model.generators.RandomHexadecimalGenerator
-import au.com.dius.pact.model.generators.RandomIntGenerator
-import au.com.dius.pact.model.generators.UuidGenerator
-import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
-import au.com.dius.pact.model.matchingrules.MaxTypeMatcher
-import au.com.dius.pact.model.matchingrules.MinMaxTypeMatcher
-import au.com.dius.pact.model.matchingrules.MinTypeMatcher
-import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
-import au.com.dius.pact.model.matchingrules.RegexMatcher
-import au.com.dius.pact.model.matchingrules.TimestampMatcher
-import au.com.dius.pact.model.matchingrules.TypeMatcher
-import au.com.dius.pact.model.matchingrules.DateMatcher
+import au.com.dius.pact.core.model.generators.DateGenerator
+import au.com.dius.pact.core.model.generators.RandomDecimalGenerator
+import au.com.dius.pact.core.model.generators.RandomHexadecimalGenerator
+import au.com.dius.pact.core.model.generators.RandomIntGenerator
+import au.com.dius.pact.core.model.generators.UuidGenerator
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import spock.lang.Specification
 
-import static au.com.dius.pact.model.generators.Category.BODY
-import static au.com.dius.pact.model.matchingrules.NumberTypeMatcher.NumberType.INTEGER
-import static au.com.dius.pact.model.matchingrules.NumberTypeMatcher.NumberType.NUMBER
+import static au.com.dius.pact.core.model.generators.Category.BODY
+import static au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher.NumberType.INTEGER
+import static au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher.NumberType.NUMBER
 
 class PactBodyBuilderSpec extends Specification {
 

@@ -1,8 +1,9 @@
 package au.com.dius.pact.matchers
 
-import au.com.dius.pact.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.model.{QueryMismatch, QueryMismatchFactory}
 import com.typesafe.scalalogging.StrictLogging
+
 import scala.collection.JavaConverters._
 
 object QueryMatcher extends StrictLogging {

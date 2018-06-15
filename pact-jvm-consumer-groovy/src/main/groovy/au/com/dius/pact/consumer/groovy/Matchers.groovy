@@ -1,9 +1,9 @@
 package au.com.dius.pact.consumer.groovy
 
-import au.com.dius.pact.model.generators.RandomBooleanGenerator
-import au.com.dius.pact.model.generators.RandomDecimalGenerator
-import au.com.dius.pact.model.generators.RandomIntGenerator
-import au.com.dius.pact.model.generators.RandomStringGenerator
+import au.com.dius.pact.core.model.generators.RandomBooleanGenerator
+import au.com.dius.pact.core.model.generators.RandomDecimalGenerator
+import au.com.dius.pact.core.model.generators.RandomIntGenerator
+import au.com.dius.pact.core.model.generators.RandomStringGenerator
 import org.apache.commons.lang3.time.DateUtils
 
 import java.text.ParseException

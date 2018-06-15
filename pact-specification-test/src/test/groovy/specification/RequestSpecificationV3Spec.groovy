@@ -1,6 +1,6 @@
 package specification
 
-import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.model.RequestMatching
 import spock.lang.Unroll
 

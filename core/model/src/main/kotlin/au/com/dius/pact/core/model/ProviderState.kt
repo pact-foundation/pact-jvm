@@ -1,4 +1,4 @@
-package au.com.dius.pact.model
+package au.com.dius.pact.core.model
 
 /**
  * Class that encapsulates all the info about a provider state

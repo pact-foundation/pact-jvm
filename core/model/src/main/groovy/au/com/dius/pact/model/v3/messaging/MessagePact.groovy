@@ -1,13 +1,13 @@
 package au.com.dius.pact.model.v3.messaging
 
 import au.com.dius.pact.model.BasePact
-import au.com.dius.pact.model.Consumer
-import au.com.dius.pact.model.FilteredPact
-import au.com.dius.pact.model.Interaction
-import au.com.dius.pact.model.InvalidPactException
-import au.com.dius.pact.model.Pact
-import au.com.dius.pact.model.PactSpecVersion
-import au.com.dius.pact.model.Provider
+import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.FilteredPact
+import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.InvalidPactException
+import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.Provider
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString

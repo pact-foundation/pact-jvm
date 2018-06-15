@@ -2,11 +2,11 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue
-import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
-import au.com.dius.pact.model.matchingrules.MaxTypeMatcher
-import au.com.dius.pact.model.matchingrules.MinTypeMatcher
-import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
-import au.com.dius.pact.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import groovy.json.JsonSlurper
 import spock.lang.Specification
 

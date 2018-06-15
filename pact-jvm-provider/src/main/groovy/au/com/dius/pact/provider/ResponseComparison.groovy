@@ -5,7 +5,7 @@ import au.com.dius.pact.matchers.DiffUtilsKt
 import au.com.dius.pact.matchers.HeaderMismatch
 import au.com.dius.pact.matchers.MatchingConfig
 import au.com.dius.pact.model.BodyTypeMismatch
-import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.core.model.OptionalBody
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.ResponseMatching$
@@ -16,7 +16,6 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.apache.commons.lang3.StringUtils
 import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
-import scala.None$
 import scala.collection.JavaConverters$
 
 /**

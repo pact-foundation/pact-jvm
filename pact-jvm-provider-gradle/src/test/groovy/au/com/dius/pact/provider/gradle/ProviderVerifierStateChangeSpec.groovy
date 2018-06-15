@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.gradle
 
-import au.com.dius.pact.model.OptionalBody
-import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.Response

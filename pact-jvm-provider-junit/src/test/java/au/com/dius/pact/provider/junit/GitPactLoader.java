@@ -1,9 +1,9 @@
 package au.com.dius.pact.provider.junit;
 
-import au.com.dius.pact.model.DirectorySource;
-import au.com.dius.pact.model.Pact;
+import au.com.dius.pact.core.model.DirectorySource;
+import au.com.dius.pact.core.model.Pact;
 import au.com.dius.pact.model.PactReader;
-import au.com.dius.pact.model.PactSource;
+import au.com.dius.pact.core.model.PactSource;
 import au.com.dius.pact.provider.junit.loader.PactLoader;
 
 import java.io.File;

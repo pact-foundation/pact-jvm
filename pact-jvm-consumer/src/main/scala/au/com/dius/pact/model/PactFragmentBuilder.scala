@@ -2,7 +2,8 @@ package au.com.dius.pact.model
 
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.{ConsumerTestVerification, VerificationResult}
-import au.com.dius.pact.model.matchingrules.{MatchingRules, MatchingRulesImpl}
+import au.com.dius.pact.core.model.{Consumer, OptionalBody, Provider, ProviderState}
+import au.com.dius.pact.core.model.matchingrules.{MatchingRules, MatchingRulesImpl}
 import org.json.JSONObject
 
 import scala.collection.JavaConverters._

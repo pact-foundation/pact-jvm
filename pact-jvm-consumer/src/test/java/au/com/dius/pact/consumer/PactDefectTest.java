@@ -1,8 +1,7 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.PactFragment;
-import au.com.dius.pact.model.PactSpecVersion;
+import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.model.RequestResponsePact;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;

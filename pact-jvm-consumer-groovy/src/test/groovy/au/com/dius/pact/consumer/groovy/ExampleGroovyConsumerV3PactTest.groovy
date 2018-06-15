@@ -2,7 +2,7 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactConsumerConfig
 import au.com.dius.pact.consumer.PactVerificationResult
-import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.core.model.PactSpecVersion
 import groovy.json.JsonSlurper
 import groovyx.net.http.RESTClient
 import org.junit.Test

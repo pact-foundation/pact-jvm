@@ -1,9 +1,9 @@
 package au.com.dius.pact.consumer.groovy
 
-import au.com.dius.pact.model.generators.Generator
-import au.com.dius.pact.model.generators.RegexGenerator
-import au.com.dius.pact.model.matchingrules.MatchingRule
-import au.com.dius.pact.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.generators.Generator
+import au.com.dius.pact.core.model.generators.RegexGenerator
+import au.com.dius.pact.core.model.matchingrules.MatchingRule
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import com.mifmif.common.regex.Generex
 
 /**

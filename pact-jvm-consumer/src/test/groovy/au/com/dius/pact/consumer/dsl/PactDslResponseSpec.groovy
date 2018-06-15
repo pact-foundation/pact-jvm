@@ -1,11 +1,11 @@
 package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder
-import au.com.dius.pact.model.OptionalBody
-import au.com.dius.pact.model.generators.Generators
-import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
-import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
-import au.com.dius.pact.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import com.google.common.net.MediaType
 import org.apache.http.entity.ContentType
 import spock.lang.Specification

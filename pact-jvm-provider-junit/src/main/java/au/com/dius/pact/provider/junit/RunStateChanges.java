@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider.junit;
 
-import au.com.dius.pact.model.ProviderState;
+import au.com.dius.pact.core.model.ProviderState;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 

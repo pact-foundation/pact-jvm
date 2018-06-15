@@ -1,11 +1,11 @@
 package au.com.dius.pact.consumer.groovy
 
-import au.com.dius.pact.model.Feature
-import au.com.dius.pact.model.FeatureToggles
-import au.com.dius.pact.model.generators.Generators
-import au.com.dius.pact.model.matchingrules.Category
-import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
-import au.com.dius.pact.model.matchingrules.RuleLogic
+import au.com.dius.pact.core.model.Feature
+import au.com.dius.pact.core.model.FeatureToggles
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.Category
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import groovy.json.JsonBuilder
 @SuppressWarnings('UnusedImport')
 import io.gatling.jsonpath.Parser$
@@ -25,7 +25,7 @@ class PactBodyBuilder extends BaseBuilder {
   public static final String STAR = '*'
 
   def matchers = new Category('body')
-  def generators = new Generators().addCategory(au.com.dius.pact.model.generators.Category.BODY)
+  def generators = new Generators().addCategory(au.com.dius.pact.core.model.generators.Category.BODY)
   def mimetype = null
   Boolean prettyPrintBody = null
 
@@ -216,7 +216,7 @@ class PactBodyBuilder extends BaseBuilder {
       matchers.setRule(attributePath, value.matcher)
     }
     if (value.generator) {
-      generators.addGenerator(au.com.dius.pact.model.generators.Category.BODY, attributePath, value.generator)
+      generators.addGenerator(au.com.dius.pact.core.model.generators.Category.BODY, attributePath, value.generator)
     }
     value.value
   }

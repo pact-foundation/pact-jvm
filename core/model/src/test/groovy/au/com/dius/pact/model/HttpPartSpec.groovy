@@ -1,5 +1,6 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.core.model.OptionalBody
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -14,16 +15,16 @@ class HttpPartSpec extends Specification {
     request.mimeType() == mimeType
 
     where:
-    request                                                                                                             | mimeType
-    new Request('Get', '')                                                                                              | 'text/plain'
-    new Request('Get', '', null, ['Content-Type': 'text/html'])                                                         | 'text/html'
-    new Request('Get', '', null, ['Content-Type': 'application/json; charset=UTF-8'])                                   | 'application/json'
-    new Request('Get', '', null, ['content-type': 'application/json'])                                                  | 'application/json'
-    new Request('Get', '', null, ['CONTENT-TYPE': 'application/json'])                                                  | 'application/json'
-    new Request('Get', '', null, null, OptionalBody.body('{"json": true}'))                                             | 'application/json'
-    new Request('Get', '', null, null, OptionalBody.body('{}'))                                                         | 'application/json'
-    new Request('Get', '', null, null, OptionalBody.body('[]'))                                                         | 'application/json'
-    new Request('Get', '', null, null, OptionalBody.body('[1,2,3]'))                                                    | 'application/json'
+    request                                                                           | mimeType
+    new Request('Get', '')                                                            | 'text/plain'
+    new Request('Get', '', null, ['Content-Type': 'text/html'])                       | 'text/html'
+    new Request('Get', '', null, ['Content-Type': 'application/json; charset=UTF-8']) | 'application/json'
+    new Request('Get', '', null, ['content-type': 'application/json'])                | 'application/json'
+    new Request('Get', '', null, ['CONTENT-TYPE': 'application/json'])                | 'application/json'
+    new Request('Get', '', null, null, OptionalBody.body('{"json": true}'))           | 'application/json'
+    new Request('Get', '', null, null, OptionalBody.body('{}'))                       | 'application/json'
+    new Request('Get', '', null, null, OptionalBody.body('[]'))                       | 'application/json'
+    new Request('Get', '', null, null, OptionalBody.body('[1,2,3]'))                  | 'application/json'
     new Request('Get', '', null, null, OptionalBody.body('"string"'))                                                   | 'application/json'
     new Request('Get', '', null, null, OptionalBody.body('<?xml version="1.0" encoding="UTF-8"?>\n<json>false</json>')) | 'application/xml'
     new Request('Get', '', null, null, OptionalBody.body('<json>false</json>'))                                         | 'application/xml'

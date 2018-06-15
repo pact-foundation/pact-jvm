@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider.junit.loader
 
-import au.com.dius.pact.model.DirectorySource
-import au.com.dius.pact.model.Interaction
-import au.com.dius.pact.model.Pact
+import au.com.dius.pact.core.model.DirectorySource
+import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.model.PactReader
 import java.io.File
 import java.net.URL

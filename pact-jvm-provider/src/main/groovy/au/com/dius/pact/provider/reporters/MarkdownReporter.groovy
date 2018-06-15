@@ -1,10 +1,10 @@
 package au.com.dius.pact.provider.reporters
 
 import au.com.dius.pact.model.BasePact
-import au.com.dius.pact.model.Interaction
-import au.com.dius.pact.model.Pact
-import au.com.dius.pact.model.PactSource
-import au.com.dius.pact.model.UrlPactSource
+import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.model.PactSource
+import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 

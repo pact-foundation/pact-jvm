@@ -1,11 +1,11 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.BrokerUrlSource
-import au.com.dius.pact.model.ClosurePactSource
-import au.com.dius.pact.model.Consumer
-import au.com.dius.pact.model.FileSource
-import au.com.dius.pact.model.PactSource
-import au.com.dius.pact.model.UrlSource
+import au.com.dius.pact.core.model.BrokerUrlSource
+import au.com.dius.pact.core.model.ClosurePactSource
+import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.FileSource
+import au.com.dius.pact.core.model.PactSource
+import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.pactbroker.PactBrokerConsumer
 import groovy.transform.Canonical
 

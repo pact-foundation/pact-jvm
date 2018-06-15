@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.model.Request
 import groovy.json.JsonBuilder
 import groovy.lang.Binding

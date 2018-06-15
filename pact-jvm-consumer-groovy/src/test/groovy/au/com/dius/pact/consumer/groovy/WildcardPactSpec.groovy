@@ -1,8 +1,8 @@
 package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
-import au.com.dius.pact.model.FeatureToggles
-import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.core.model.FeatureToggles
+import au.com.dius.pact.core.model.PactSpecVersion
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
 

@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer
 
+import au.com.dius.pact.core.model.{Interaction, Pact, PactSpecVersion}
 import au.com.dius.pact.model._
 import com.typesafe.scalalogging.StrictLogging
 

@@ -1,7 +1,7 @@
 package au.com.dius.pact.model.v3.messaging
 
-import au.com.dius.pact.model.OptionalBody
-import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.ProviderState
 import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll

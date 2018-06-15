@@ -10,9 +10,9 @@ import org.junit.Test;
 import au.com.dius.pact.consumer.dsl.PactDslRootValue;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.RequestResponsePact;
-import au.com.dius.pact.model.matchingrules.MatchingRule;
-import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
-import au.com.dius.pact.model.matchingrules.RegexMatcher;
+import au.com.dius.pact.core.model.matchingrules.MatchingRule;
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup;
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
 
 public class PactDslRootValueTest {
 

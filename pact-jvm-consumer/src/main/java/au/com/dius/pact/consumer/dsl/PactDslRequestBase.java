@@ -1,11 +1,11 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.Headers;
-import au.com.dius.pact.model.OptionalBody;
-import au.com.dius.pact.model.generators.Generators;
-import au.com.dius.pact.model.matchingrules.MatchingRules;
-import au.com.dius.pact.model.matchingrules.MatchingRulesImpl;
-import au.com.dius.pact.model.matchingrules.RegexMatcher;
+import au.com.dius.pact.core.model.OptionalBody;
+import au.com.dius.pact.core.model.generators.Generators;
+import au.com.dius.pact.core.model.matchingrules.MatchingRules;
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl;
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;

@@ -2,8 +2,8 @@ package au.com.dius.pact.matchers
 
 import au.com.dius.pact.matchers.util.corresponds
 import au.com.dius.pact.matchers.util.tails
-import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
-import au.com.dius.pact.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import io.gatling.jsonpath.AST
 import io.gatling.jsonpath.Parser
 import mu.KLogging

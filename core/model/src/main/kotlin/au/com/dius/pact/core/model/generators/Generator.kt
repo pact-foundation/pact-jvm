@@ -1,6 +1,6 @@
-package au.com.dius.pact.model.generators
+package au.com.dius.pact.core.model.generators
 
-import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.core.model.PactSpecVersion
 import com.mifmif.common.regex.Generex
 import mu.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
@@ -25,7 +25,7 @@ fun lookupGenerator(generatorMap: Map<String, Any>): Generator? {
   var generator: Generator? = null
 
   try {
-    val generatorClass = Class.forName("au.com.dius.pact.model.generators.${generatorMap["type"]}Generator").kotlin
+    val generatorClass = Class.forName("au.com.dius.pact.core.model.generators.${generatorMap["type"]}Generator").kotlin
     val fromMap = when {
       generatorClass.companionObject != null ->
         generatorClass.companionObjectInstance to generatorClass.companionObject?.declaredMemberFunctions?.find { it.name == "fromMap" }

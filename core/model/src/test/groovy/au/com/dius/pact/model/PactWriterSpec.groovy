@@ -1,5 +1,10 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.PactWriter
+import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
 import groovy.json.JsonSlurper

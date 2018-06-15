@@ -2,8 +2,9 @@ package au.com.dius.pact.matchers
 
 import java.util.Collections
 
+import au.com.dius.pact.core.model.{HttpPart, OptionalBody}
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.model._
-import au.com.dius.pact.model.matchingrules.MatchingRules
 import com.typesafe.scalalogging.StrictLogging
 
 import scala.collection.JavaConverters._

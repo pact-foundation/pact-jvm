@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer
 
+import au.com.dius.pact.core.model.{Interaction, OptionalBody, Pact}
 import au.com.dius.pact.model._
 import org.apache.commons.lang3.StringEscapeUtils
 

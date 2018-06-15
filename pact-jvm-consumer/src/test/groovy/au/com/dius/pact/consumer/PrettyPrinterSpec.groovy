@@ -2,10 +2,10 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.matchers.BodyMismatch
 import au.com.dius.pact.matchers.HeaderMismatch
-import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.model.PartialRequestMatch
 import au.com.dius.pact.model.PathMismatch
-import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.RequestPartMismatch
 import au.com.dius.pact.model.RequestResponseInteraction

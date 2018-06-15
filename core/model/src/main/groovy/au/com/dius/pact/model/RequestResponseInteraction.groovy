@@ -1,5 +1,9 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.core.model.HttpPart
+import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.ProviderState
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 

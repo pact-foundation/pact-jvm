@@ -1,21 +1,8 @@
 package au.com.dius.pact.consumer.pactproviderrule;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.Key;
-import java.security.KeyPair;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +22,7 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerHttpsClient;
 import au.com.dius.pact.model.MockHttpsKeystoreProviderConfig;
 import au.com.dius.pact.model.PactFragment;
-import au.com.dius.pact.model.PactSpecVersion;
+import au.com.dius.pact.core.model.PactSpecVersion;
 
 public class PactProviderHttpsKeystoreTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(PactProviderHttpsKeystoreTest.class);

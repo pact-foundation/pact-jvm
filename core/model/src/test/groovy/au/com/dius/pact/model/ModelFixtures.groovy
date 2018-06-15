@@ -1,7 +1,8 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
-import au.com.dius.pact.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 
 @Singleton
 class ModelFixtures {

@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.BrokerUrlSource
-import au.com.dius.pact.model.Interaction
-import au.com.dius.pact.model.Pact
+import au.com.dius.pact.core.model.BrokerUrlSource
+import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.com.github.kittinunf.result.Result
 import groovy.lang.GroovyObjectSupport

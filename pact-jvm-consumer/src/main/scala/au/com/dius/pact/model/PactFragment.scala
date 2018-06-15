@@ -1,6 +1,7 @@
 package au.com.dius.pact.model
 
 import au.com.dius.pact.consumer._
+import au.com.dius.pact.core.model.{Consumer, Provider}
 
 /**
   * @deprecated Moved to Kotlin implementation: Use Pact interface instead

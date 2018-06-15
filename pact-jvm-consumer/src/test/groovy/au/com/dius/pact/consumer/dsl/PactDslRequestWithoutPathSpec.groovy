@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.dsl
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder
-import au.com.dius.pact.model.OptionalBody
+import au.com.dius.pact.core.model.OptionalBody
 import spock.lang.Specification
 
 class PactDslRequestWithoutPathSpec extends Specification {

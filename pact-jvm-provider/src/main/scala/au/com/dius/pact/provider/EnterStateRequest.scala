@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.{OptionalBody, Request}
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.model.Request
 
 object EnterStateRequest {
   def apply(url: String, state: String): Request = {

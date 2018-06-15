@@ -1,5 +1,12 @@
 package au.com.dius.pact.model.matchingrules
 
+import au.com.dius.pact.core.model.matchingrules.Category
+import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import spock.lang.Specification
 
 class MatchingRulesSpec extends Specification {
@@ -39,14 +46,14 @@ class MatchingRulesSpec extends Specification {
     !matchingRules.empty
     matchingRules.categories == ['path', 'query', 'header', 'body'] as Set
     matchingRules.rulesForCategory('path') == new Category('path', [
-      '': new MatchingRuleGroup([ new RegexMatcher('\\w+') ]) ])
+      '': new MatchingRuleGroup([new RegexMatcher('\\w+') ]) ])
     matchingRules.rulesForCategory('query') == new Category('query', [
       Q1: new MatchingRuleGroup([ new RegexMatcher('\\d+') ]) ])
     matchingRules.rulesForCategory('header') == new Category('header', [
       HEADERY: new MatchingRuleGroup([ new IncludeMatcher('ValueA') ]) ])
     matchingRules.rulesForCategory('body') == new Category('body', [
       '$.animals': new MatchingRuleGroup([ new MinTypeMatcher(1) ]),
-      '$.animals[*].*': new MatchingRuleGroup([ TypeMatcher.INSTANCE ]),
+      '$.animals[*].*': new MatchingRuleGroup([TypeMatcher.INSTANCE ]),
       '$.animals[*].children': new MatchingRuleGroup([ new MinTypeMatcher(1) ]),
       '$.animals[*].children[*].*': new MatchingRuleGroup([ TypeMatcher.INSTANCE ])
     ])

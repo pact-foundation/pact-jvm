@@ -2,9 +2,8 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.RequestResponsePact;
-import au.com.dius.pact.model.matchingrules.MatchingRule;
-import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
-import au.com.dius.pact.model.matchingrules.MatchingRules;
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup;
+import au.com.dius.pact.core.model.matchingrules.MatchingRules;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;

@@ -1,5 +1,6 @@
 package au.com.dius.pact.model.generators
 
+import au.com.dius.pact.core.model.generators.DateGenerator
 import spock.lang.Specification
 
 class DateGeneratorSpec extends Specification {

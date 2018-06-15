@@ -7,7 +7,7 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerHttpsClient;
 import au.com.dius.pact.model.MockHttpsProviderConfig;
 import au.com.dius.pact.model.PactFragment;
-import au.com.dius.pact.model.PactSpecVersion;
+import au.com.dius.pact.core.model.PactSpecVersion;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;

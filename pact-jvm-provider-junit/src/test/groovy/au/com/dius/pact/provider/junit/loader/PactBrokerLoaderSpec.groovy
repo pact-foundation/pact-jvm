@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider.junit.loader
 
-import au.com.dius.pact.model.Pact
+import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.pactbroker.IHalClient
 import au.com.dius.pact.core.pactbroker.InvalidHalResponse
 import au.com.dius.pact.core.pactbroker.PactBrokerClient

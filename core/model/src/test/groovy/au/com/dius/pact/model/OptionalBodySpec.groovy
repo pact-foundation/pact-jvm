@@ -1,5 +1,6 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.core.model.OptionalBody
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -11,11 +12,11 @@ class OptionalBodySpec extends Specification {
     body.missing == value
 
     where:
-    body | value
-    OptionalBody.missing() | true
-    OptionalBody.empty() | false
+    body                    | value
+    OptionalBody.missing()  | true
+    OptionalBody.empty()    | false
     OptionalBody.nullBody() | false
-    OptionalBody.body('a') | false
+    OptionalBody.body('a')  | false
   }
 
   @Unroll

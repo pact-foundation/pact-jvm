@@ -4,7 +4,8 @@ import java.nio.charset.Charset
 import java.util
 import java.util.concurrent.CompletableFuture
 
-import au.com.dius.pact.model.{OptionalBody, Request, Response}
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.model.{Request, Response}
 import org.apache.commons.lang3.StringUtils
 import org.asynchttpclient.{DefaultAsyncHttpClient, RequestBuilder}
 
