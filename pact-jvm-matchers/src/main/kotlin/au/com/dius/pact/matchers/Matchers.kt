@@ -10,8 +10,8 @@ import mu.KLogging
 import scala.collection.JavaConversions
 import scala.collection.JavaConverters
 import scala.util.parsing.combinator.Parsers
+import java.util.Comparator
 import java.util.function.Predicate
-import java.util.function.ToIntFunction
 
 object Matchers : KLogging() {
 
@@ -104,8 +104,18 @@ object Matchers : KLogging() {
   fun selectBestMatcher(matchers: MatchingRules, category: String, path: List<String>): MatchingRuleGroup {
     val matcherCategory = resolveMatchers(matchers, category, path)
     return if (category == "body")
-      matcherCategory.maxBy(ToIntFunction {
-        calculatePathWeight(it, path)
+      matcherCategory.maxBy(Comparator { a, b ->
+        val weightA = calculatePathWeight(a, path)
+        val weightB = calculatePathWeight(b, path)
+        when {
+          weightA == weightB -> when {
+            a.length > b.length -> 1
+            a.length < b.length -> -1
+            else -> 0
+          }
+          weightA > weightB -> 1
+          else -> -1
+        }
       })
     else {
       matcherCategory.matchingRules.values.first()
