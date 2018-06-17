@@ -28,7 +28,7 @@ open class PactProviderMojo : AbstractMojo() {
   private lateinit var classpathElements: List<String>
 
   @Parameter
-  private lateinit var serviceProviders: List<Provider>
+  lateinit var serviceProviders: List<Provider>
 
   @Parameter
   private var configuration = mutableMapOf<String, String>()
@@ -46,11 +46,11 @@ open class PactProviderMojo : AbstractMojo() {
     AnsiConsole.systemInstall()
 
     val failures = mutableMapOf<Any, Any>()
-    val verifier = ProviderVerifier().let {
+    val verifier = providerVerifier().let {
       it.projectHasProperty = Function { p: String -> this.propertyDefined(p) }
       it.projectGetProperty = Function { p: String -> this.property(p) }
-      it.pactLoadFailureMessage = Function { consumer: Consumer ->
-        "You must specify the pactfile to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
+      it.pactLoadFailureMessage = Function { consumer: ConsumerInfo ->
+        "You must specify the pact file to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
       }
       it.isBuildSpecificTask = Function { false }
       it.providerVersion = Supplier { projectVersion }
@@ -68,8 +68,17 @@ open class PactProviderMojo : AbstractMojo() {
       if (provider.pactFileDirectory != null) {
           consumers.addAll(loadPactFiles(provider, provider.pactFileDirectory))
       }
+      if (provider.pactFileDirectories.isNotEmpty()) {
+        provider.pactFileDirectories.forEach {
+          consumers.addAll(loadPactFiles(provider, it))
+        }
+      }
       if (provider.pactBrokerUrl != null || provider.pactBroker != null) {
         loadPactsFromPactBroker(provider, consumers)
+      }
+
+      if (consumers.isEmpty()) {
+        throw MojoFailureException("No pact files were found for provider '${provider.name}'")
       }
 
       provider.consumers = consumers
@@ -83,6 +92,8 @@ open class PactProviderMojo : AbstractMojo() {
       throw MojoFailureException("There were ${failures.size} pact failures")
     }
   }
+
+  open fun providerVerifier() = ProviderVerifier()
 
   fun loadPactsFromPactBroker(provider: Provider, consumers: MutableList<ConsumerInfo>) {
     val pactBroker = provider.pactBroker
@@ -108,11 +119,12 @@ open class PactProviderMojo : AbstractMojo() {
     }
   }
 
-  fun loadPactFiles(provider: Any, pactFileDir: File): MutableList<ConsumerInfo> {
-    try {
-      return ProviderUtils.loadPactFiles(provider, pactFileDir) as MutableList<ConsumerInfo>
+  open fun loadPactFiles(provider: Any, pactFileDir: File): List<ConsumerInfo> {
+    return try {
+      ProviderUtils.loadPactFiles(provider, pactFileDir)
     } catch (e: PactVerifierException) {
-      throw MojoFailureException(e.message, e)
+      log.warn("Failed to load pact files from directory $pactFileDir", e)
+      emptyList()
     }
   }
 

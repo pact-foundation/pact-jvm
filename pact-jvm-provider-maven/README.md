@@ -89,6 +89,30 @@ provider and define a consumer for each pact file in the directory. Consumer nam
 </plugin>
 ```
 
+### Verifying all pact files from multiple directories for a provider [3.5.18+]
+
+If you want to specify multiple directories, you can use `pactFileDirectories`. The plugin will only fail the build if
+no pact files are loaded after processing all the directories in the list.
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.18</version>
+    <configuration>
+      <serviceProviders>
+        <serviceProvider>
+          <name>provider1</name>
+          <pactFileDirectories>
+            <pactFileDirectory>path/to/pacts1</pactFileDirectory>
+            <pactFileDirectory>path/to/pacts2</pactFileDirectory>
+          </pactFileDirectories>
+        </serviceProvider>
+      </serviceProviders>
+    </configuration>
+</plugin>
+```
+
 ## Enabling insecure SSL
 
 For providers that are running on SSL with self-signed certificates, you need to enable insecure SSL mode by setting

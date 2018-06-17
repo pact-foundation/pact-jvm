@@ -95,7 +95,7 @@ subprojects {
         exclude group: 'org.codehaus.groovy'
       }
       testCompile "cglib:cglib:${project.cglibVersion}"
-      testCompile 'org.objenesis:objenesis:2.4'
+      testCompile 'org.objenesis:objenesis:2.6'
       testCompile 'io.kotlintest:kotlintest:2.0.7'
     }
 
