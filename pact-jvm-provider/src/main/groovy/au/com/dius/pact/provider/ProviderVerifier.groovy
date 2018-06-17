@@ -170,13 +170,13 @@ class ProviderVerifier extends ProviderVerifierBase {
 
   boolean verifyInteraction(ProviderInfo provider, ConsumerInfo consumer, Map failures, def interaction) {
     def interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name}" +
-      " - ${interaction.description}"
+      " - ${interaction.description} "
 
     ProviderClient providerClient = new ProviderClient(provider, new HttpClientFactory())
     def stateChangeResult = StateChange.executeStateChange(this, provider, consumer, interaction, interactionMessage,
       failures, providerClient)
     if (stateChangeResult.stateChangeOk) {
-      interactionMessage += stateChangeResult.message
+      interactionMessage = stateChangeResult.message
       reportInteractionDescription(interaction)
 
       boolean result = false
