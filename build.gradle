@@ -61,7 +61,7 @@ subprojects {
     apply plugin: 'org.jetbrains.kotlin.jvm'
     apply plugin: 'org.jmailen.kotlinter'
     apply plugin: 'io.gitlab.arturbosch.detekt'
-//    apply plugin: 'org.jetbrains.dokka'
+    apply plugin: 'org.jetbrains.dokka'
 
     repositories {
         mavenLocal()
@@ -122,10 +122,10 @@ subprojects {
       }
     }
 
-//    task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
-//      outputFormat = 'javadoc'
-//      outputDirectory = "$buildDir/docs/dokkaJavadoc"
-//    }
+    task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+      outputFormat = 'javadoc'
+      outputDirectory = "$buildDir/docs/dokkaJavadoc"
+    }
 
     test {
       systemProperty 'pact.rootDir', "$buildDir/pacts"
@@ -140,13 +140,13 @@ subprojects {
                 'Specification-Version': version
     }
 
-    task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc/*, dokkaJavadoc*/]) {
+    task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc, dokkaJavadoc]) {
         classifier = 'javadoc'
       if (project.hasProperty('scalaVersion')) {
-        from javadoc.destinationDir, scaladoc.destinationDir, groovydoc.destinationDir //, dokkaJavadoc.outputDirectory
+        from javadoc.destinationDir, scaladoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
         dependsOn << scaladoc
       } else {
-        from javadoc.destinationDir, groovydoc.destinationDir //, dokkaJavadoc.outputDirectory
+        from javadoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
       }
     }
 
