@@ -182,7 +182,7 @@ public class InteractionRunner extends Runner {
       } else {
           if (publishingDisabled) {
               LOGGER.warn("Skipping publishing of verification results (" + PACT_VERIFIER_PUBLISHRESUTS +
-                  " is set to false)");
+                  " is not set to 'true')");
           } else {
               LOGGER.warn("Skipping publishing of verification results as the interactions have been filtered");
           }

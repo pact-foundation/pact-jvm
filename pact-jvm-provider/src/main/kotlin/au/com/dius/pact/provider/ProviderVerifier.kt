@@ -40,11 +40,11 @@ open class ProviderVerifierBase : GroovyObjectSupport() {
   var projectGetProperty = Function<String, String?> { name -> System.getProperty(name) }
 
   /**
-   * This will return true if the pact.verifier.publishResults property is present and has the value of "false"
+   * This will return true unless the pact.verifier.publishResults property has the value of "true"
    */
   open fun publishingResultsDisabled(): Boolean {
-    return projectHasProperty.apply(PACT_VERIFIER_PUBLISHRESUTS) &&
-      projectGetProperty.apply(PACT_VERIFIER_PUBLISHRESUTS)?.toLowerCase() == "false"
+    return !projectHasProperty.apply(PACT_VERIFIER_PUBLISHRESUTS) ||
+      projectGetProperty.apply(PACT_VERIFIER_PUBLISHRESUTS)?.toLowerCase() != "true"
   }
 
   companion object {

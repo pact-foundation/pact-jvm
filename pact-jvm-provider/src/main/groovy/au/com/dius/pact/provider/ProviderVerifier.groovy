@@ -88,7 +88,7 @@ class ProviderVerifier extends ProviderVerifierBase {
         log.warn('Skipping publishing of verification results as the interactions have been filtered')
       } else if (publishingResultsDisabled()) {
         log.warn('Skipping publishing of verification results as it has been disabled ' +
-          "(${PACT_VERIFIER_PUBLISHRESUTS} is false)")
+          "(${PACT_VERIFIER_PUBLISHRESUTS} is not 'true')")
       } else {
         reportVerificationResults(pact, result, providerVersion?.get() ?: '0.0.0', client)
       }
