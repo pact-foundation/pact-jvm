@@ -166,7 +166,7 @@ The following project properties can be specified with `-Dproperty=value` on the
 |pact.filter.description|Only verify interactions whose description match the provided regular expression|
 |pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
 |pact.logLevel|Set the log level for the pact verification (DEBUG, INFO, etc).|
-|pact.verifier.publishResults|Publishing of verification results will be skipped if this property is set to false [version 3.5.7+]|
+|pact.verifier.publishResults|Publishing of verification results will be skipped unless this property is set to 'true' [version 3.5.18+]|
 
 ## Modifying the requests before they are sent
 
