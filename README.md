@@ -27,7 +27,7 @@ how to get going.
 ## Contact
 
 * Twitter: [@pact_up](https://twitter.com/pact_up)
-* Gitter: [![Join the chat at https://gitter.im/DiUS/pact-jvm](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/DiUS/pact-jvm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+* Slack: [Join the chat at http://slack.pact.io/](http://slack.pact.io/)
 * Stack Overflow: https://stackoverflow.com/questions/tagged/pact
 
 ## Links
