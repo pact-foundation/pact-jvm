@@ -1,5 +1,31 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.18 - Bugfix Release
+
+* a59d7996 - Implemented support for an array of primitives in the Java 8 DSL #701 (Ronald Holshausen, Sun Jun 17 16:13:32 2018 +1000)
+* 90e97eec - Allow the maven plugin to load pact files from multiple directories #652 (Ronald Holshausen, Sun Jun 17 15:30:44 2018 +1000)
+* 8323f076 - Update all the readmes #695 (Ronald Holshausen, Sun Jun 17 14:27:20 2018 +1000)
+* ffa625ec - Only publish verification results if the java system property is set to "true" #695 (Ronald Holshausen, Sun Jun 17 14:21:24 2018 +1000)
+* ee0ba492 - Fix the duplicate message in the console output when verification fails (Ronald Holshausen, Sun Jun 17 11:50:35 2018 +1000)
+* 3e0fc9e0 - Merge pull request #703 from artamonovkirill/fix/equalto-mismatch-message (Ronald Holshausen, Sat Jun 16 16:34:31 2018 +1000)
+* d6dcab6d - Upgrade kotlin to 1.2.50 (Ronald Holshausen, Sat Jun 16 15:57:49 2018 +1000)
+* b723ff42 - when selecting matchers with equal weight, use the one with the longest path #698 (Ronald Holshausen, Sat Jun 16 15:44:50 2018 +1000)
+* 98f04561 - fix: equalTo mismatch message (Kirill Artamonov, Wed Jun 13 20:24:12 2018 +0200)
+* 1ef2659b - fix small layout issue on doco (Ronald Holshausen, Tue Jun 12 09:33:19 2018 +1000)
+* 8f99667e - Implement verification result publishing for JUnit 5 provider tests #694 (Ronald Holshausen, Mon Jun 11 16:35:14 2018 +1000)
+* f89a637a - Revert "JUnit Interaction runner now uses its pact source not the one associated with the pact #667" (Ronald Holshausen, Mon Jun 11 15:24:24 2018 +1000)
+* 8b721bf4 - do not cache the verification report file objects #411 (Ronald Holshausen, Mon Jun 11 12:51:59 2018 +1000)
+* 4e035406 - fix for appveyor build (Ronald Holshausen, Mon Jun 11 12:42:36 2018 +1000)
+* ecb9095f - Added a method to PactDslJsonBody to add a field from a DslPart #661 (Ronald Holshausen, Thu Jun 7 14:14:23 2018 +1000)
+* 8d0f8f47 - refactor: cleanup duplicated code #661 (Ronald Holshausen, Thu Jun 7 12:46:57 2018 +1000)
+* 1689ba6c - fix: expose the parent of a DSLPart # 661 (Ronald Holshausen, Thu Jun 7 12:46:40 2018 +1000)
+* 7fa351dc - Upgrade the clojure plugin (Ronald Holshausen, Thu Jun 7 12:27:28 2018 +1000)
+* 53586e9b - Revert "chore: removed lein module to get build passing on travis" (Ronald Holshausen, Tue Jun 5 15:09:39 2018 +1000)
+* 8bc4b4a6 - Use the non-pooling http connection manager to test the mock server startup #658 (Ronald Holshausen, Sun Jun 3 17:34:15 2018 +1000)
+* cff36774 - Set the consumer tests to default to V3 spec (Ronald Holshausen, Sun Jun 3 17:33:22 2018 +1000)
+* 295c5141 - Upgrade Kotlin to the latest (Ronald Holshausen, Sun Jun 3 17:31:39 2018 +1000)
+* 17923002 - bump version to 3.5.18 (Ronald Holshausen, Sun Jun 3 15:51:47 2018 +1000)
+
 # 3.5.17 - Bugfix Release
 
 * 16634edd - JUnit Interaction runner now uses its pact source not the one associated with the pact #667 (Ronald Holshausen, Sun Jun 3 13:58:54 2018 +1000)

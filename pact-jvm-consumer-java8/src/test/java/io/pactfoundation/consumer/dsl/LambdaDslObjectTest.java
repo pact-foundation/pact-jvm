@@ -1,6 +1,7 @@
 package io.pactfoundation.consumer.dsl;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
+import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 import org.junit.Test;
 
 import java.util.Map;
@@ -838,4 +839,46 @@ public class LambdaDslObjectTest {
         String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
     }
+
+  @Test
+  public void testStringArray() {
+    /*
+        {
+            "foo": [ "one", "one", "one" ]
+        }
+     */
+
+    // Old DSL
+    final String pactDslJson = new PactDslJsonBody()
+      .minArrayLike("foo", 3, PactDslJsonRootValue.stringType("one"), 3)
+      .maxArrayLike("foo2", 3, PactDslJsonRootValue.stringType("one"), 3)
+      .minMaxArrayLike("foo3", 3, 10, PactDslJsonRootValue.stringType("one"), 3)
+      .getBody().toString();
+
+    // Lambda DSL
+    final PactDslJsonBody actualPactDsl = new PactDslJsonBody();
+    final LambdaDslObject object = new LambdaDslObject(actualPactDsl);
+    object
+      .minArrayLike("foo", 3, PactDslJsonRootValue.stringType("one"), 3)
+      .maxArrayLike("foo2", 3, PactDslJsonRootValue.stringType("one"), 3)
+      .minMaxArrayLike("foo3", 3, 10, PactDslJsonRootValue.stringType("one"), 3);
+    actualPactDsl.close();
+
+    String actualJson = actualPactDsl.getBody().toString();
+    assertThat(actualJson, is(pactDslJson));
+    assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(6));
+    Map<String, Object> rule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+    assertThat(rule.get("min"), is(3));
+    Map<String, Object> arrayObjectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+    assertThat(arrayObjectRule.get("match"), is("type"));
+    rule = actualPactDsl.getMatchers().allMatchingRules().get(2).toMap();
+    assertThat(rule.get("max"), is(3));
+    arrayObjectRule = actualPactDsl.getMatchers().allMatchingRules().get(3).toMap();
+    assertThat(arrayObjectRule.get("match"), is("type"));
+    rule = actualPactDsl.getMatchers().allMatchingRules().get(4).toMap();
+    assertThat(rule.get("min"), is(3));
+    assertThat(rule.get("max"), is(10));
+    arrayObjectRule = actualPactDsl.getMatchers().allMatchingRules().get(5).toMap();
+    assertThat(arrayObjectRule.get("match"), is("type"));
+  }
 }

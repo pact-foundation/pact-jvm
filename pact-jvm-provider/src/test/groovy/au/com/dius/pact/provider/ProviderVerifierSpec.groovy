@@ -374,6 +374,11 @@ class ProviderVerifierSpec extends Specification {
       getSource() >> new BrokerUrlSource('http://localhost', 'http://pact-broker')
     }
 
+    verifier.projectHasProperty = { it == ProviderVerifierBase.PACT_VERIFIER_PUBLISHRESUTS }
+    verifier.projectGetProperty = {
+      (it == ProviderVerifierBase.PACT_VERIFIER_PUBLISHRESUTS).toString()
+    }
+
     PactReader.loadPact(_) >> mockPact
     mockPact.interactions >> [interaction1, interaction2]
     StateChange.executeStateChange(*_) >> new StateChange.StateChangeResult(true)
@@ -506,12 +511,12 @@ class ProviderVerifierSpec extends Specification {
     where:
 
     description                  | value       | result
-    'Property is missing'        | null        | false
+    'Property is missing'        | null        | true
     'Property is true'           | 'true'      | false
     'Property is TRUE'           | 'TRUE'      | false
     'Property is false'          | 'false'     | true
     'Property is False'          | 'False'     | true
-    'Property is something else' | 'not false' | false
+    'Property is something else' | 'not false' | true
   }
 
   @RestoreSystemProperties

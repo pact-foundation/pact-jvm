@@ -336,7 +336,7 @@ The following project properties can be specified with `-Pproperty=value` on the
 |pact.filter.consumers|Comma seperated list of consumer names to verify|
 |pact.filter.description|Only verify interactions whose description match the provided regular expression|
 |pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
-|pact.verifier.publishResults|Publishing of verification results will be skipped if this property is set to false|
+|pact.verifier.publishResults|Publishing of verification results will be skipped unless this property is set to 'true'|
 
 ## Provider States
 
@@ -739,7 +739,7 @@ The following report types are available in addition to console output (which is
 
 # Publishing verification results to a Pact Broker [version 3.5.4+]
 
-For pacts that are loaded from a Pact Broker, the results of running the verification will be published back to the
+For pacts that are loaded from a Pact Broker, the results of running the verification can be published back to the
  broker against the URL for the pact. You will be able to see the result on the Pact Broker home screen.
 
-To turn off the verification publishing when running from your local machine, set the project property `pact.verifier.publishResults` to `false` [version 3.5.7+]. 
+To turn on the verification publishing, set the project property `pact.verifier.publishResults` to `true` [version 3.5.18+]. 

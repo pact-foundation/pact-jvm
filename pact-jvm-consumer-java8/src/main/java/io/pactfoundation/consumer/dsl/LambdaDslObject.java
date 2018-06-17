@@ -2,6 +2,7 @@ package io.pactfoundation.consumer.dsl;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
+import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -323,6 +324,19 @@ public class LambdaDslObject {
     }
 
     /**
+     * Attribute that is an array of values with a minimum size that are not objects where each item must match
+     * the following example
+     * @param name field name
+     * @param size minimum size of the array
+     * @param value Value to use to match each item
+     * @param numberExamples number of examples to generate
+     */
+    public LambdaDslObject minArrayLike(String name, Integer size, PactDslJsonRootValue value, int numberExamples) {
+      object.minArrayLike(name, size, value, numberExamples);
+      return this;
+    }
+
+    /**
      * Attribute that is an array with a maximum size where each item must match the following example
      *
      * @param name field name
@@ -353,6 +367,19 @@ public class LambdaDslObject {
     }
 
   /**
+   * Attribute that is an array of values with a maximum size that are not objects where each item must match the
+   * following example
+   * @param name field name
+   * @param size maximum size of the array
+   * @param value Value to use to match each item
+   * @param numberExamples number of examples to generate
+   */
+  public LambdaDslObject maxArrayLike(String name, Integer size, PactDslJsonRootValue value, int numberExamples) {
+    object.maxArrayLike(name, size, value, numberExamples);
+    return this;
+  }
+
+  /**
    * Attribute that is an array with a minimum and maximum size where each item must match the following example
    *
    * @param name field name
@@ -381,6 +408,21 @@ public class LambdaDslObject {
     final LambdaDslObject dslObject = new LambdaDslObject(maxArrayLike);
     nestedObject.accept(dslObject);
     maxArrayLike.closeArray();
+    return this;
+  }
+
+  /**
+   * Attribute that is an array of values with a minimum and maximum size that are not objects where each item must
+   * match the following example
+   * @param name field name
+   * @param minSize minimum size of the array
+   * @param maxSize maximum size of the array
+   * @param value Value to use to match each item
+   * @param numberExamples number of examples to generate
+   */
+  public LambdaDslObject minMaxArrayLike(String name, Integer minSize, Integer maxSize, PactDslJsonRootValue value,
+                                         int numberExamples) {
+    object.minMaxArrayLike(name, minSize, maxSize, value, numberExamples);
     return this;
   }
 

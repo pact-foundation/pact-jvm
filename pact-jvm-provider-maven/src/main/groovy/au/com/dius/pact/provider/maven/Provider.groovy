@@ -12,4 +12,5 @@ class Provider extends ProviderInfo {
     File pactFileDirectory
     URL pactBrokerUrl
     PactBroker pactBroker
+    List<File> pactFileDirectories = []
 }

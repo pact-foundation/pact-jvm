@@ -113,7 +113,7 @@ fun <M : Mismatch> matchEquality(
   return if (matches) {
     emptyList()
   } else {
-    listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to equal ${valueOf(actual)}", path))
+    listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to equal ${valueOf(expected)}", path))
   }
 }
 
