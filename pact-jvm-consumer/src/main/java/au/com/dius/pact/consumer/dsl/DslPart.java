@@ -378,4 +378,12 @@ public abstract class DslPart {
   public void setGenerators(Generators generators) {
     this.generators = generators;
   }
+
+  /**
+   * Returns the parent of this part (object or array)
+   * @return parent, or null if it is the root
+   */
+  public DslPart getParent() {
+    return parent;
+  }
 }

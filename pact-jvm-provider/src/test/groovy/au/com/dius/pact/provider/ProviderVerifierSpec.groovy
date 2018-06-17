@@ -20,7 +20,6 @@ import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
 
-@SuppressWarnings('MethodCount')
 class ProviderVerifierSpec extends Specification {
 
   ProviderVerifier verifier
@@ -375,6 +374,11 @@ class ProviderVerifierSpec extends Specification {
       getSource() >> new BrokerUrlSource('http://localhost', 'http://pact-broker')
     }
 
+    verifier.projectHasProperty = { it == ProviderVerifierBase.PACT_VERIFIER_PUBLISHRESUTS }
+    verifier.projectGetProperty = {
+      (it == ProviderVerifierBase.PACT_VERIFIER_PUBLISHRESUTS).toString()
+    }
+
     PactReader.loadPact(_) >> mockPact
     mockPact.interactions >> [interaction1, interaction2]
     StateChange.executeStateChange(*_) >> new StateChange.StateChangeResult(true)
@@ -462,23 +466,6 @@ class ProviderVerifierSpec extends Specification {
   }
 
   @SuppressWarnings('UnnecessaryGetter')
-  def 'Default the pact source to the source passed in over the one assciated to the pact'() {
-    given:
-    def links = ['publish': 'true']
-    def pact = Mock(Pact) {
-      getSource() >> new UrlSource('url')
-    }
-    def client = Mock(PactBrokerClient)
-
-    when:
-    ProviderVerifierKt.reportVerificationResults(pact, true, '0', client,
-      new BrokerUrlSource('url', 'url', links))
-
-    then:
-    1 * client.publishVerificationResults(links, true, '0', null) >> new Result.Success(true)
-  }
-
-  @SuppressWarnings('UnnecessaryGetter')
   def 'Ignore the verification results if publishing is disabled'() {
     given:
     def client = Mock(PactBrokerClient)
@@ -524,12 +511,12 @@ class ProviderVerifierSpec extends Specification {
     where:
 
     description                  | value       | result
-    'Property is missing'        | null        | false
+    'Property is missing'        | null        | true
     'Property is true'           | 'true'      | false
     'Property is TRUE'           | 'TRUE'      | false
     'Property is false'          | 'false'     | true
     'Property is False'          | 'False'     | true
-    'Property is something else' | 'not false' | false
+    'Property is something else' | 'not false' | true
   }
 
   @RestoreSystemProperties

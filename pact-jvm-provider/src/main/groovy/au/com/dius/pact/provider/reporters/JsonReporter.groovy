@@ -41,7 +41,7 @@ class JsonReporter implements VerifierReporter {
       execution: []
     ]
     reportDir.mkdirs()
-    reportFile = reportFile ?: new File(reportDir, (provider.name + ext))
+    reportFile = new File(reportDir, (provider.name + ext))
   }
 
   @Override

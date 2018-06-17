@@ -26,6 +26,7 @@ data class DirectorySource<I> @JvmOverloads constructor(
 data class PactBrokerSource<I> @JvmOverloads constructor(
   val host: String,
   val port: String,
+  val scheme: String = "http",
   val pacts: MutableMap<Consumer, List<Pact<I>>> = mutableMapOf()
 ) : PactSource()
   where I: Interaction

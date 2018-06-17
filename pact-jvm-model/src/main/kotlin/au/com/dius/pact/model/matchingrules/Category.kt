@@ -2,6 +2,7 @@ package au.com.dius.pact.model.matchingrules
 
 import au.com.dius.pact.model.PactSpecVersion
 import mu.KLogging
+import java.util.Comparator
 import java.util.function.Predicate
 import java.util.function.ToIntFunction
 
@@ -10,8 +11,7 @@ import java.util.function.ToIntFunction
  */
 data class Category @JvmOverloads constructor(
   val name: String,
-  var matchingRules: MutableMap<String, MatchingRuleGroup> =
-    mutableMapOf()
+  var matchingRules: MutableMap<String, MatchingRuleGroup> = mutableMapOf()
 ) {
 
   companion object : KLogging()
@@ -56,8 +56,14 @@ data class Category @JvmOverloads constructor(
   fun filter(predicate: Predicate<String>) =
     copy(matchingRules = matchingRules.filter { predicate.test(it.key) }.toMutableMap())
 
+  @Deprecated("Use maxBy(Comparator) as this function causes a defect (see issue #698)")
   fun maxBy(fn: ToIntFunction<String>): MatchingRuleGroup {
     val max = matchingRules.maxBy { fn.applyAsInt(it.key) }
+    return max?.value ?: MatchingRuleGroup()
+  }
+
+  fun maxBy(comparator: Comparator<String>): MatchingRuleGroup {
+    val max = matchingRules.maxWith(Comparator { a, b -> comparator.compare(a.key, b.key) })
     return max?.value ?: MatchingRuleGroup()
   }
 
@@ -73,6 +79,12 @@ data class Category @JvmOverloads constructor(
 
   fun applyMatcherRootPrefix(prefix: String) {
     matchingRules = matchingRules.mapKeys { e -> prefix + e.key }.toMutableMap()
+  }
+
+  fun copyWithUpdatedMatcherRootPrefix(prefix: String): Category {
+    val category = copy()
+    category.applyMatcherRootPrefix(prefix)
+    return category
   }
 
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {

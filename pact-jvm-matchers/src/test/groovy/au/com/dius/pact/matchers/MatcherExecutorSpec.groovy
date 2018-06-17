@@ -164,4 +164,16 @@ class MatcherExecutorSpec extends Specification {
     matcher = new IncludeMatcher(expected)
   }
 
+  def 'equality matching produces a message on mismatch'() {
+    given:
+    def factory = Mock MismatchFactory
+
+    when:
+    MatcherExecutorKt.matchEquality path, 'foo', 'bar', factory
+
+    then:
+    1 * factory.create(_, _, "Expected 'bar' to equal 'foo'", _)
+    0 * _
+  }
+
 }

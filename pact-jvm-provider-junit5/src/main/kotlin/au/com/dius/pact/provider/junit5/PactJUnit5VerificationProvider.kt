@@ -22,6 +22,7 @@ import au.com.dius.pact.provider.junit.sysprops.ValueResolver
 import au.com.dius.pact.provider.reporters.ReporterManager
 import mu.KLogging
 import org.apache.http.HttpRequest
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
 import org.junit.jupiter.api.extension.Extension
@@ -51,7 +52,8 @@ data class PactVerificationContext(
   var valueResolver: ValueResolver = SystemPropertyResolver(),
   var providerInfo: ProviderInfo = ProviderInfo(),
   val consumerName: String,
-  val interaction: Interaction
+  val interaction: Interaction,
+  internal var testExecutionResult: Boolean = false
 ) {
 
   /**
@@ -65,7 +67,8 @@ data class PactVerificationContext(
     val request = store.get("request")
     val failures = mutableMapOf<String, Any>()
     try {
-      if (!validateTestExecution(client, request, failures)) {
+      this.testExecutionResult = validateTestExecution(client, request, failures)
+      if (!testExecutionResult) {
         verifier!!.displayFailures(failures)
         throw AssertionError(JUnitProviderTestSupport.generateErrorStringFromMismatches(failures))
       }
@@ -108,7 +111,8 @@ class PactVerificationExtension(
   private val interaction: Interaction,
   private val serviceName: String,
   private val consumerName: String?
-) : TestTemplateInvocationContext, ParameterResolver, BeforeEachCallback, BeforeTestExecutionCallback {
+) : TestTemplateInvocationContext, ParameterResolver, BeforeEachCallback, BeforeTestExecutionCallback,
+  AfterTestExecutionCallback {
 
   override fun getDisplayName(invocationIndex: Int): String {
     return "${pact.consumer.name} - ${interaction.description}"
@@ -226,6 +230,12 @@ class PactVerificationExtension(
           reporter
         }
     }
+  }
+
+  override fun afterTestExecution(context: ExtensionContext) {
+    val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
+    val testContext = store.get("interactionContext") as PactVerificationContext
+    TestResultAccumulator.updateTestResult(pact, interaction, testContext.testExecutionResult)
   }
 
   companion object : KLogging()

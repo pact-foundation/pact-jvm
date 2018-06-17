@@ -178,19 +178,19 @@ public class InteractionRunner extends Runner {
       Boolean publishingDisabled = results.values()
         .stream().anyMatch(pair -> pair.getSecond().publishingResultsDisabled());
       if (!publishingDisabled && (!(pact instanceof FilteredPact) || ((FilteredPact) pact).isNotFiltered())) {
-        reportVerificationResults(allPassed, pact, pactSource);
+        reportVerificationResults(allPassed);
       } else {
           if (publishingDisabled) {
               LOGGER.warn("Skipping publishing of verification results (" + PACT_VERIFIER_PUBLISHRESUTS +
-                  " is set to false)");
+                  " is not set to 'true')");
           } else {
               LOGGER.warn("Skipping publishing of verification results as the interactions have been filtered");
           }
       }
     }
 
-  public void reportVerificationResults(Boolean allPassed, Pact<? extends Interaction> pact, PactSource pactSource) {
-    ProviderVerifierKt.reportVerificationResults(pact, allPassed, providerVersion(), null, pactSource);
+  public void reportVerificationResults(Boolean allPassed) {
+    ProviderVerifierKt.reportVerificationResults(pact, allPassed, providerVersion());
   }
 
   private String providerVersion() {
@@ -198,7 +198,7 @@ public class InteractionRunner extends Runner {
     if (version != null) {
       return version;
     }
-    LOGGER.warn("Set the provider version using the pact.provider.version property");
+    LOGGER.warn("Set the provider version using the 'pact.provider.version' property. Defaulting to '0.0.0'");
     return "0.0.0";
   }
 

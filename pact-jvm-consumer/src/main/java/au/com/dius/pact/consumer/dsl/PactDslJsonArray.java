@@ -37,19 +37,50 @@ public class PactDslJsonArray extends DslPart {
     private boolean wildCard;
     private int numberExamples = 1;
 
-    public PactDslJsonArray() {
+  /**
+   * Construct a root level array
+   */
+  public PactDslJsonArray() {
       this("", "", null, false);
     }
-	
-    public PactDslJsonArray(String rootPath, String rootName, DslPart parent) {
-        this(rootPath, rootName, parent, false);
-    }
 
-    public PactDslJsonArray(String rootPath, String rootName, DslPart parent, boolean wildCard) {
-        super(parent, rootPath, rootName);
-        this.wildCard = wildCard;
-        body = new JSONArray();
-    }
+  /**
+   * Construct an array as a child
+   * @param rootPath Path to the child array
+   * @param rootName Name to associate the child as
+   * @param parent Parent to attach the child to
+   */
+  public PactDslJsonArray(String rootPath, String rootName, DslPart parent) {
+      this(rootPath, rootName, parent, false);
+  }
+
+  /**
+   * Construct an array as a child copied from an existing array
+   * @param rootPath Path to the child array
+   * @param rootName Name to associate the child as
+   * @param parent Parent to attach the child to
+   * @param array Array to copy
+   */
+  public PactDslJsonArray(String rootPath, String rootName, DslPart parent, PactDslJsonArray array) {
+    super(parent, rootPath, rootName);
+    this.body = array.body;
+    this.wildCard = array.wildCard;
+    this.matchers = array.matchers.copyWithUpdatedMatcherRootPrefix(rootPath);
+    this.generators = array.generators;
+  }
+
+  /**
+   * Construct a array as a child
+   * @param rootPath Path to the child array
+   * @param rootName Name to associate the child as
+   * @param parent Parent to attach the child to
+   * @param wildCard If it should be matched as a wild card
+   */
+  public PactDslJsonArray(String rootPath, String rootName, DslPart parent, boolean wildCard) {
+      super(parent, rootPath, rootName);
+      this.wildCard = wildCard;
+      body = new JSONArray();
+  }
 
     /**
      * Closes the current array

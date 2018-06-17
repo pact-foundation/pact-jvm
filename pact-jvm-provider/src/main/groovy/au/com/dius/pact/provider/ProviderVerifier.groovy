@@ -88,7 +88,7 @@ class ProviderVerifier extends ProviderVerifierBase {
         log.warn('Skipping publishing of verification results as the interactions have been filtered')
       } else if (publishingResultsDisabled()) {
         log.warn('Skipping publishing of verification results as it has been disabled ' +
-          "(${PACT_VERIFIER_PUBLISHRESUTS} is false)")
+          "(${PACT_VERIFIER_PUBLISHRESUTS} is not 'true')")
       } else {
         reportVerificationResults(pact, result, providerVersion?.get() ?: '0.0.0', client)
       }
@@ -170,13 +170,13 @@ class ProviderVerifier extends ProviderVerifierBase {
 
   boolean verifyInteraction(ProviderInfo provider, ConsumerInfo consumer, Map failures, def interaction) {
     def interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name}" +
-      " - ${interaction.description}"
+      " - ${interaction.description} "
 
     ProviderClient providerClient = new ProviderClient(provider, new HttpClientFactory())
     def stateChangeResult = StateChange.executeStateChange(this, provider, consumer, interaction, interactionMessage,
       failures, providerClient)
     if (stateChangeResult.stateChangeOk) {
-      interactionMessage += stateChangeResult.message
+      interactionMessage = stateChangeResult.message
       reportInteractionDescription(interaction)
 
       boolean result = false

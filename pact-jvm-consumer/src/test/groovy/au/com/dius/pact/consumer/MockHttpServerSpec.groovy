@@ -1,7 +1,15 @@
 package au.com.dius.pact.consumer
 
+import au.com.dius.pact.model.Consumer
+import au.com.dius.pact.model.MockProviderConfig
+import au.com.dius.pact.model.Provider
+import au.com.dius.pact.model.RequestResponsePact
+import spock.lang.IgnoreIf
 import spock.lang.Specification
+import spock.lang.Timeout
 import spock.lang.Unroll
+
+import static au.com.dius.pact.consumer.MockHttpServerKt.mockServer
 
 class MockHttpServerSpec extends Specification {
 
@@ -34,6 +42,23 @@ class MockHttpServerSpec extends Specification {
   def 'ignores case with the header name'() {
     expect:
     MockHttpServerKt.calculateCharset(['content-type': 'text/plain; charset=ISO-8859-1']).name() == 'ISO-8859-1'
+  }
+
+  @Timeout(60)
+  @IgnoreIf({ os.windows })
+  def 'handle more than 200 tests'() {
+    given:
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [])
+    def config = MockProviderConfig.createDefault()
+
+    when:
+    201.times { count ->
+      def server = mockServer(pact, config)
+      server.runAndWritePact(pact, config.pactVersion) { }
+    }
+
+    then:
+    true
   }
 
 }

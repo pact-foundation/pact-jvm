@@ -2,7 +2,9 @@ package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Request
+import au.com.dius.pact.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.model.matchingrules.RegexMatcher
 import au.com.dius.pact.model.matchingrules.TypeMatcher
 import spock.lang.Specification
 
@@ -102,6 +104,23 @@ class MatchersSpec extends Specification {
 
     then:
     rules.rules.first() == TypeMatcher.INSTANCE
+  }
+
+  def 'with matching rules with the same weighting, select the one of the same path length'() {
+    given:
+    def matchingRules = new MatchingRulesImpl()
+    matchingRules.addCategory('body')
+      .addRule('$.rawArray', TypeMatcher.INSTANCE)
+      .addRule('$.rawArrayEqTo', TypeMatcher.INSTANCE)
+      .addRule('$.rawArrayEqTo[*]', EqualsMatcher.INSTANCE)
+      .addRule('$.regexpRawArray', TypeMatcher.INSTANCE)
+      .addRule('$.regexpRawArray[*]', new RegexMatcher('.+'))
+
+    when:
+    def rules = Matchers.selectBestMatcher(matchingRules, 'body', ['$', 'rawArrayEqTo', '1'])
+
+    then:
+    rules.rules == [ EqualsMatcher.INSTANCE ]
   }
 
   def 'type matcher - match on type - list elements should inherit the matcher from the parent'() {

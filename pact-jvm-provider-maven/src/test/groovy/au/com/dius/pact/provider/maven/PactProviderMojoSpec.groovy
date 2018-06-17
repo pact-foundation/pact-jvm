@@ -1,5 +1,7 @@
 package au.com.dius.pact.provider.maven
 
+import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.ProviderVerifier
 import org.apache.maven.settings.Server
 import org.apache.maven.settings.Settings
 import org.apache.maven.settings.crypto.SettingsDecrypter
@@ -127,4 +129,27 @@ class PactProviderMojoSpec extends Specification {
     list
   }
 
+  def 'load pacts from multiple directories'() {
+    given:
+    def dir1 = 'dir1' as File
+    def dir2 = 'dir2' as File
+    def dir3 = 'dir3' as File
+    def provider = new Provider(pactFileDirectories: [dir1, dir2], pactFileDirectory: dir3)
+    def verifier = Mock(ProviderVerifier) {
+      verifyProvider(provider) >> [:]
+    }
+    mojo = Spy(PactProviderMojo) {
+      loadPactFiles(provider, _) >> []
+      providerVerifier() >> verifier
+    }
+    mojo.serviceProviders = [ provider ]
+
+    when:
+    mojo.execute()
+
+    then:
+    1 * mojo.loadPactFiles(provider, dir1) >> []
+    1 * mojo.loadPactFiles(provider, dir2) >> []
+    1 * mojo.loadPactFiles(provider, dir3) >> [ new ConsumerInfo('mock consumer', dir3) ]
+  }
 }
