@@ -3,8 +3,8 @@ package au.com.dius.pact.provider.junit
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Provider
-import au.com.dius.pact.model.RequestResponseInteraction
-import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.provider.junit.target.HttpTarget
 import au.com.dius.pact.provider.junit.target.Target

@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.spring
 
-import au.com.dius.pact.model.Request
-import au.com.dius.pact.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.Request
+import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
 import mu.KLogging

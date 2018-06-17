@@ -1,16 +1,14 @@
 package au.com.dius.pact.consumer.examples;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import au.com.dius.pact.consumer.ConsumerPactTest;
 import au.com.dius.pact.consumer.ConsumerPactTestMk2;
 import au.com.dius.pact.consumer.MockServer;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.model.PactFragment;
-import au.com.dius.pact.model.RequestResponsePact;
+import au.com.dius.pact.core.model.RequestResponsePact;
 import org.apache.http.client.fluent.Request;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 

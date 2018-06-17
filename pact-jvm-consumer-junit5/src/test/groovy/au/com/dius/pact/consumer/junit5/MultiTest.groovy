@@ -5,7 +5,7 @@ import au.com.dius.pact.consumer.Pact
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
-import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.core.model.RequestResponsePact
 import groovy.json.JsonOutput
 import groovyx.net.http.ContentType
 import groovyx.net.http.HTTPBuilder

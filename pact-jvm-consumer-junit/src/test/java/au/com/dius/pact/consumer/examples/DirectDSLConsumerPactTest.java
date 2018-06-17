@@ -4,7 +4,7 @@ import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.consumer.PactVerificationResult;
 import au.com.dius.pact.consumer.exampleclients.ProviderClient;
 import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.RequestResponsePact;
+import au.com.dius.pact.core.model.RequestResponsePact;
 import org.junit.Test;
 
 import java.io.IOException;

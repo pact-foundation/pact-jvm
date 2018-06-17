@@ -2,7 +2,7 @@ package au.com.dius.pact.provider.spring
 
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
-import au.com.dius.pact.model.v3.messaging.Message
+import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.provider.junit.InteractionRunner
 import au.com.dius.pact.provider.junit.MessagePactRunner
 import au.com.dius.pact.provider.junit.loader.PactLoader

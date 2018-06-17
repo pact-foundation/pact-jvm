@@ -6,6 +6,7 @@ import io.netty.channel.ChannelHandler.Sharable
 import io.netty.handler.codec.{http => netty}
 import _root_.unfiltered.netty.{SslEngineProvider, cycle => unettyc}
 import _root_.unfiltered.{netty => unetty, request => ureq, response => uresp}
+import au.com.dius.pact.core.model.{Request, RequestResponseInteraction, Response}
 
 class UnfilteredHttpsKeystoreMockProvider(val config: MockHttpsKeystoreProviderConfig) extends StatefulMockProvider[RequestResponseInteraction] {
   type UnfilteredRequest = ureq.HttpRequest[unetty.ReceivedMessage]

@@ -2,10 +2,9 @@ package au.com.dius.pact.consumer.specs2
 
 import java.util
 
-import au.com.dius.pact.core.model.{Consumer, OptionalBody, Provider, ProviderState}
+import au.com.dius.pact.core.model.{RequestResponseInteraction, _}
 
 import scala.collection.JavaConverters._
-import au.com.dius.pact.model.{RequestResponseInteraction, _}
 
 object Fixtures {
 

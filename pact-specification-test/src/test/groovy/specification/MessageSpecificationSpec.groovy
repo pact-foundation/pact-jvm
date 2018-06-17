@@ -1,7 +1,7 @@
 package specification
 
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.model.v3.messaging.Message
+import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.provider.ResponseComparison
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper

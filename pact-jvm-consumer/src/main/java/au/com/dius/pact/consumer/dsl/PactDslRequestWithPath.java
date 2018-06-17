@@ -3,7 +3,7 @@ package au.com.dius.pact.consumer.dsl;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.core.model.Consumer;
 import au.com.dius.pact.core.model.OptionalBody;
-import au.com.dius.pact.model.PactReader;
+import au.com.dius.pact.core.model.PactReader;
 import au.com.dius.pact.core.model.Provider;
 import au.com.dius.pact.core.model.ProviderState;
 import au.com.dius.pact.core.model.generators.Generators;

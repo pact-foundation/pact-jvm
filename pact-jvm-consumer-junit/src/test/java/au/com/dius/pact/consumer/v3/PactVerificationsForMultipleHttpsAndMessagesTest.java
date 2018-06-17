@@ -10,8 +10,8 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.core.model.PactSpecVersion;
-import au.com.dius.pact.model.RequestResponsePact;
-import au.com.dius.pact.model.v3.messaging.MessagePact;
+import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.messaging.MessagePact;
 import org.junit.Rule;
 import org.junit.Test;
 

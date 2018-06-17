@@ -4,7 +4,7 @@ import au.com.dius.pact.consumer.Pact
 import au.com.dius.pact.consumer.PactProviderRuleMk2
 import au.com.dius.pact.consumer.PactVerification
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
-import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.core.model.RequestResponsePact
 import org.apache.http.HttpResponse
 import org.apache.http.NameValuePair
 import org.apache.http.client.fluent.Form

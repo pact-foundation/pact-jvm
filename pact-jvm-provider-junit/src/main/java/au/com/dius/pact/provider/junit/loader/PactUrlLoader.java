@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.junit.loader;
 
 import au.com.dius.pact.core.model.Pact;
-import au.com.dius.pact.model.PactReader;
+import au.com.dius.pact.core.model.PactReader;
 import au.com.dius.pact.core.model.UrlsSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

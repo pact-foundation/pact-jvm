@@ -7,11 +7,11 @@ import au.com.dius.pact.matchers.MatchingConfig
 import au.com.dius.pact.model.BodyTypeMismatch
 import au.com.dius.pact.core.model.OptionalBody
 @SuppressWarnings('UnusedImport')
-import au.com.dius.pact.model.Response
+import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.model.ResponseMatching$
 import au.com.dius.pact.model.ResponsePartMismatch
 import au.com.dius.pact.model.StatusMismatch
-import au.com.dius.pact.model.v3.messaging.Message
+import au.com.dius.pact.core.model.messaging.Message
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.apache.commons.lang3.StringUtils

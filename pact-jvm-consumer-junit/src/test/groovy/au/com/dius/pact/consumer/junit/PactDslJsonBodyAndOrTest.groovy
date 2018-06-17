@@ -8,7 +8,7 @@ import au.com.dius.pact.consumer.dsl.PM
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient
-import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.core.model.RequestResponsePact
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.hasKey

@@ -1,7 +1,7 @@
 package au.com.dius.pact.server
 
 import au.com.dius.pact.consumer.DefaultMockProvider
-import au.com.dius.pact.core.model.{OptionalBody, PactSpecVersion}
+import au.com.dius.pact.core.model._
 import au.com.dius.pact.model._
 import com.typesafe.scalalogging.StrictLogging
 

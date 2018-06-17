@@ -1,7 +1,6 @@
 package au.com.dius.pact.provider.sbtsupport
 
-import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.model.Response
+import au.com.dius.pact.core.model.{OptionalBody, Response}
 
 import scala.collection.JavaConversions
 

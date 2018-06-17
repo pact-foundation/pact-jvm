@@ -3,7 +3,7 @@ package au.com.dius.pact.provider.junit.loader
 import au.com.dius.pact.core.model.DirectorySource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
-import au.com.dius.pact.model.PactReader
+import au.com.dius.pact.core.model.PactReader
 import java.io.File
 import java.net.URL
 import java.net.URLDecoder

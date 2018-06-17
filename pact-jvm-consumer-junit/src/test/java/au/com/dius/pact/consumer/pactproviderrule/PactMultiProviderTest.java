@@ -7,7 +7,7 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.matchers.BodyMismatch;
 import au.com.dius.pact.matchers.Mismatch;
-import au.com.dius.pact.model.RequestResponsePact;
+import au.com.dius.pact.core.model.RequestResponsePact;
 import org.junit.Rule;
 import org.junit.Test;
 

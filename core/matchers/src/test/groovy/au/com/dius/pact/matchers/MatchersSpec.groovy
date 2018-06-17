@@ -1,7 +1,7 @@
 package au.com.dius.pact.matchers
 
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.model.Request
+import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher

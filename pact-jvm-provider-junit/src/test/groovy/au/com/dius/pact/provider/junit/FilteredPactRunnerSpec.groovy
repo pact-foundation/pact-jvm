@@ -2,10 +2,10 @@ package au.com.dius.pact.provider.junit
 
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.ProviderState
-import au.com.dius.pact.model.Request
-import au.com.dius.pact.model.RequestResponseInteraction
-import au.com.dius.pact.model.RequestResponsePact
-import au.com.dius.pact.model.Response
+import au.com.dius.pact.core.model.Request
+import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.provider.junit.loader.PactFilter
 import au.com.dius.pact.provider.junit.loader.PactFolder
 import au.com.dius.pact.provider.junit.target.Target

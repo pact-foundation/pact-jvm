@@ -9,7 +9,7 @@ import au.com.dius.pact.consumer.dsl.PactDslRequestWithoutPath;
 import au.com.dius.pact.consumer.dsl.PactDslResponse;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
-import au.com.dius.pact.model.RequestResponsePact;
+import au.com.dius.pact.core.model.RequestResponsePact;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;

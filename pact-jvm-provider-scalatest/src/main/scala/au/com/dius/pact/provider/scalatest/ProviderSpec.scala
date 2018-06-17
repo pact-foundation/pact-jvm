@@ -4,8 +4,8 @@ import java.io.File
 import java.net.URL
 import java.util.concurrent.Executors
 
-import au.com.dius.pact.core.model.{Pact => PactForConsumer}
-import au.com.dius.pact.model.{FullResponseMatch, RequestResponseInteraction, ResponseMatching}
+import au.com.dius.pact.core.model.{RequestResponseInteraction, Pact => PactForConsumer}
+import au.com.dius.pact.model.{FullResponseMatch, ResponseMatching}
 import au.com.dius.pact.provider.sbtsupport.HttpClient
 import au.com.dius.pact.provider.scalatest.ProviderDsl.defaultPactDirectory
 import au.com.dius.pact.provider.scalatest.Tags.ProviderTest

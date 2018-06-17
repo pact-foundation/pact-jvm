@@ -8,7 +8,7 @@ import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.core.model.FeatureToggles;
-import au.com.dius.pact.model.RequestResponsePact;
+import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher;

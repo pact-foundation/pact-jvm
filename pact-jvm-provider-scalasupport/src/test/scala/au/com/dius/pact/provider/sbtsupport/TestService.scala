@@ -2,13 +2,14 @@ package au.com.dius.pact.provider.sbtsupport
 
 import com.typesafe.scalalogging.StrictLogging
 import au.com.dius.pact.provider.unfiltered.Conversions
-import au.com.dius.pact.model.{Request, Response}
+import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.provider.sbtsupport.AnimalServiceResponses.responses
 import groovy.json.JsonSlurper
 import io.netty.channel.ChannelHandler.Sharable
 import _root_.unfiltered.netty.{ReceivedMessage, ServerErrorResponse, cycle}
 import _root_.unfiltered.request.HttpRequest
 import _root_.unfiltered.response.ResponseFunction
+import au.com.dius.pact.core.model.Response
 
 object TestService extends StrictLogging {
   var state: String = ""

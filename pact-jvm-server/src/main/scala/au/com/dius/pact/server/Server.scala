@@ -1,7 +1,6 @@
 package au.com.dius.pact.server
 
-import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.model._
+import au.com.dius.pact.core.model.{OptionalBody, Response}
 import ch.qos.logback.classic.Level
 import org.slf4j.{Logger, LoggerFactory}
 

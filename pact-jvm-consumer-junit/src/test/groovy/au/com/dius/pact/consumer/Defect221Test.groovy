@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
-import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.core.model.RequestResponsePact
 import org.apache.http.client.fluent.Request
 import org.apache.http.entity.ContentType
 import org.junit.Rule

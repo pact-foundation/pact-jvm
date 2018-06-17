@@ -2,9 +2,9 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.ProviderState
-import au.com.dius.pact.model.Request
-import au.com.dius.pact.model.RequestResponseInteraction
-import au.com.dius.pact.model.Response
+import au.com.dius.pact.core.model.Request
+import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo

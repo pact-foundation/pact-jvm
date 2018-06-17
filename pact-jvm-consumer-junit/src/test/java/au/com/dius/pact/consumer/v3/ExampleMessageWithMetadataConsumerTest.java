@@ -1,19 +1,19 @@
 package au.com.dius.pact.consumer.v3;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.consumer.MessagePactProviderRule;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
-import au.com.dius.pact.model.v3.messaging.MessagePact;
-import java.util.HashMap;
-import java.util.Map;
+import au.com.dius.pact.core.model.messaging.MessagePact;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class ExampleMessageWithMetadataConsumerTest {
 

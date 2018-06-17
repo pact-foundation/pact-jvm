@@ -4,7 +4,7 @@ import au.com.dius.pact.consumer.Pact
 import au.com.dius.pact.consumer.PactMismatchesException
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
-import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.core.model.RequestResponsePact
 
 import java.lang.reflect.Method
 

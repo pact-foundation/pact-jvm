@@ -4,11 +4,11 @@ import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
-import au.com.dius.pact.model.PactReader
+import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.model.ProviderState
-import au.com.dius.pact.model.Response
+import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UrlPactSource
-import au.com.dius.pact.model.v3.messaging.Message
+import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.VerifierReporter

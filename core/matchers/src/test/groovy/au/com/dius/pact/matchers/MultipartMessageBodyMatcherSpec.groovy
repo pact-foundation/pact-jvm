@@ -1,7 +1,7 @@
 package au.com.dius.pact.matchers
 
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.model.Request
+import au.com.dius.pact.core.model.Request
 import spock.lang.Specification
 
 class MultipartMessageBodyMatcherSpec extends Specification {

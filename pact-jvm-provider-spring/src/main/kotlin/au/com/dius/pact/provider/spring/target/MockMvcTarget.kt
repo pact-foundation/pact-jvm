@@ -2,7 +2,7 @@ package au.com.dius.pact.provider.spring.target
 
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSource
-import au.com.dius.pact.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo

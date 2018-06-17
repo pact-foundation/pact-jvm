@@ -2,7 +2,7 @@ package au.com.dius.pact.consumer.junit
 
 import au.com.dius.pact.consumer.Pact
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
-import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.core.model.RequestResponsePact
 import spock.lang.Specification
 import spock.lang.Unroll
 

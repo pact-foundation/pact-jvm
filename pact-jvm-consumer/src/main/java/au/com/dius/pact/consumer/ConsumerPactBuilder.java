@@ -2,7 +2,7 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.model.RequestResponseInteraction;
+import au.com.dius.pact.core.model.RequestResponseInteraction;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.OutputKeys;
@@ -18,7 +18,7 @@ import java.util.List;
 public class ConsumerPactBuilder {
 
     private String consumerName;
-    private List<RequestResponseInteraction> interactions = new ArrayList<RequestResponseInteraction>();
+    private List<RequestResponseInteraction> interactions = new ArrayList<>();
 
     public ConsumerPactBuilder(String consumer) {
         this.consumerName = consumer;

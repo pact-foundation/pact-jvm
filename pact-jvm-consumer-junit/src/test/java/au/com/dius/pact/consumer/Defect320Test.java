@@ -6,8 +6,6 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.PactFragment;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
-import org.junit.Rule;
-import org.junit.Test;
 
 import java.io.IOException;
 

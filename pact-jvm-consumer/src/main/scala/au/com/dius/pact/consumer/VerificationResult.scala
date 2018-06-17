@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.RequestResponseInteraction
 
 import scala.util.Failure
 import scala.util.Success

@@ -1,10 +1,7 @@
 package au.com.dius.pact.server
 
-import au.com.dius.pact.model.Request
-import au.com.dius.pact.model.Response
-import au.com.dius.pact.consumer.DefaultMockProvider
 import au.com.dius.pact.consumer.StatefulMockProvider
-import au.com.dius.pact.model._
+import au.com.dius.pact.core.model.{Request, Response, _}
 
 import scala.collection.JavaConverters._
 

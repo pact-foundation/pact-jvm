@@ -10,7 +10,7 @@ import scala.collection.JavaConversions
 import scala.collection.immutable.TreeMap
 import java.util.ArrayList
 
-import au.com.dius.pact.core.model.{HttpPart, OptionalBody}
+import au.com.dius.pact.core.model.{HttpPart, OptionalBody, Request}
 
 import scala.collection.JavaConverters._
 

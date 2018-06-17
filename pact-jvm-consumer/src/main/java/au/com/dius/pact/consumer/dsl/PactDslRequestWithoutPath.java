@@ -3,7 +3,7 @@ package au.com.dius.pact.consumer.dsl;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.core.model.OptionalBody;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
-import au.com.dius.pact.model.PactReader;
+import au.com.dius.pact.core.model.PactReader;
 import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;

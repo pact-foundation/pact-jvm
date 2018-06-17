@@ -1,5 +1,6 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.core.model.{Request, RequestResponseInteraction, RequestResponsePact, Response}
 import au.com.dius.pact.matchers.Mismatch
 import com.typesafe.scalalogging.StrictLogging
 

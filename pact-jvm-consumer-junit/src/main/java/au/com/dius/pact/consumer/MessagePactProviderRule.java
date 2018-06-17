@@ -1,8 +1,8 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.core.model.PactSpecVersion;
-import au.com.dius.pact.model.v3.messaging.Message;
-import au.com.dius.pact.model.v3.messaging.MessagePact;
+import au.com.dius.pact.core.model.messaging.Message;
+import au.com.dius.pact.core.model.messaging.MessagePact;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;

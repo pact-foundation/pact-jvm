@@ -2,7 +2,8 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.matchers.{BodyMismatch, HeaderMismatch, Mismatch}
-import au.com.dius.pact.model.{RequestResponseInteraction, _}
+import au.com.dius.pact.core.model.{RequestResponseInteraction, _}
+import au.com.dius.pact.model.{CookieMismatch, MethodMismatch, PartialRequestMatch, PathMismatch}
 import difflib.DiffUtils
 import groovy.json.JsonOutput
 

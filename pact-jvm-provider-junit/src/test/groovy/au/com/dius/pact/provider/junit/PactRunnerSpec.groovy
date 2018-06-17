@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.junit
 
 import au.com.dius.pact.core.model.Pact
-import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.provider.junit.loader.PactFolder
 import au.com.dius.pact.provider.junit.loader.PactLoader

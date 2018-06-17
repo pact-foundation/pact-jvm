@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.sbtsupport
 
 import java.io.File
-import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.provider.PactFileSource
 import org.scalatest._
 

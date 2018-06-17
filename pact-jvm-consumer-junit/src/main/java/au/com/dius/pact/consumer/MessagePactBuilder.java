@@ -6,8 +6,8 @@ import au.com.dius.pact.core.model.InvalidPactException;
 import au.com.dius.pact.core.model.OptionalBody;
 import au.com.dius.pact.core.model.Provider;
 import au.com.dius.pact.core.model.ProviderState;
-import au.com.dius.pact.model.v3.messaging.Message;
-import au.com.dius.pact.model.v3.messaging.MessagePact;
+import au.com.dius.pact.core.model.messaging.Message;
+import au.com.dius.pact.core.model.messaging.MessagePact;
 import org.apache.http.entity.ContentType;
 
 import java.util.ArrayList;

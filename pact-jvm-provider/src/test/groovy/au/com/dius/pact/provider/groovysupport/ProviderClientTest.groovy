@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider.groovysupport
 
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.model.PactReader
-import au.com.dius.pact.model.Request
+import au.com.dius.pact.core.model.PactReader
+import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.provider.IHttpClientFactory
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo

@@ -3,7 +3,7 @@ package au.com.dius.pact.provider.junit
 import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
-import au.com.dius.pact.model.v3.messaging.MessagePact
+import au.com.dius.pact.core.model.messaging.MessagePact
 
 /**
  * Pact runner that only verifies message pacts

@@ -2,7 +2,7 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslRequestWithoutPath;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
-import au.com.dius.pact.model.RequestResponsePact;
+import au.com.dius.pact.core.model.RequestResponsePact;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.fluent.Response;
 import org.junit.Rule;

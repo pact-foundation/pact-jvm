@@ -1,6 +1,6 @@
 package specification
 
-import au.com.dius.pact.model.PactReader
+import au.com.dius.pact.core.model.PactReader
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import spock.lang.Specification

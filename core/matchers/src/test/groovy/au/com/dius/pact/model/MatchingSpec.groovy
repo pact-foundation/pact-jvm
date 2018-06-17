@@ -1,6 +1,8 @@
 package au.com.dius.pact.model
 
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.PactReader
+import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.matchers.BodyMismatch
 import au.com.dius.pact.matchers.HeaderMismatch
 import scala.None$

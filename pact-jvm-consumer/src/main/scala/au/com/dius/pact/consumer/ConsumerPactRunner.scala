@@ -3,7 +3,7 @@ package au.com.dius.pact.consumer
 import java.net.SocketException
 
 import au.com.dius.pact.core.model.{Pact, PactSpecVersion}
-import au.com.dius.pact.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.RequestResponseInteraction
 
 import scala.util.{Failure, Success, Try}
 

@@ -7,6 +7,7 @@ import _root_.unfiltered.{netty => unetty}
 import _root_.unfiltered.netty.{cycle => unettyc}
 import _root_.unfiltered.{request => ureq}
 import _root_.unfiltered.{response => uresp}
+import au.com.dius.pact.core.model.{Request, RequestResponseInteraction, Response}
 import io.netty.channel.ChannelHandler.Sharable
 
 class UnfilteredMockProvider(val config: MockProviderConfig) extends StatefulMockProvider[RequestResponseInteraction] {

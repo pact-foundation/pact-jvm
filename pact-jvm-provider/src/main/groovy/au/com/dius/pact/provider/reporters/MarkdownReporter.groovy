@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider.reporters
 
-import au.com.dius.pact.model.BasePact
+import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource

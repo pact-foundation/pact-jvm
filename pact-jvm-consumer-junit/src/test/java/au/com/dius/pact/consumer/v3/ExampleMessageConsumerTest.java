@@ -12,7 +12,7 @@ import au.com.dius.pact.consumer.MessagePactProviderRule;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.PactVerification;
-import au.com.dius.pact.model.v3.messaging.MessagePact;
+import au.com.dius.pact.core.model.messaging.MessagePact;
 
 
 public class ExampleMessageConsumerTest {
