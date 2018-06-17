@@ -1,11 +1,5 @@
-package au.com.dius.pact.model
+package au.com.dius.pact.core.model
 
-import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.isEmpty
-import au.com.dius.pact.core.model.isMissing
-import au.com.dius.pact.core.model.isNull
-import au.com.dius.pact.core.model.isPresent
-import au.com.dius.pact.core.model.orElse
 import io.kotlintest.matchers.shouldBe
 import io.kotlintest.specs.StringSpec
 

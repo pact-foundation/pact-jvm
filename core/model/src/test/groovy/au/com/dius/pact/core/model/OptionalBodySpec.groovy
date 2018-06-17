@@ -1,6 +1,5 @@
-package au.com.dius.pact.model
+package au.com.dius.pact.core.model
 
-import au.com.dius.pact.core.model.OptionalBody
 import spock.lang.Specification
 import spock.lang.Unroll
 

@@ -1,14 +1,5 @@
-package au.com.dius.pact.model
+package au.com.dius.pact.core.model
 
-import au.com.dius.pact.core.model.BrokerUrlSource
-import au.com.dius.pact.core.model.Consumer
-import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.PactSpecVersion
-import au.com.dius.pact.core.model.Provider
-import au.com.dius.pact.core.model.Request
-import au.com.dius.pact.core.model.RequestResponseInteraction
-import au.com.dius.pact.core.model.RequestResponsePact
-import au.com.dius.pact.core.model.Response
 import spock.lang.Specification
 
 class RequestResponsePactSpec extends Specification {

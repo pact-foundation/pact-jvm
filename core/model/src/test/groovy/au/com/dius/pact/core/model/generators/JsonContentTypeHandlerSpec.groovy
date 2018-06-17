@@ -1,8 +1,5 @@
-package au.com.dius.pact.model.generators
+package au.com.dius.pact.core.model.generators
 
-import au.com.dius.pact.core.model.generators.Generator
-import au.com.dius.pact.core.model.generators.JsonContentTypeHandler
-import au.com.dius.pact.core.model.generators.QueryResult
 import spock.lang.Specification
 
 class JsonContentTypeHandlerSpec extends Specification {

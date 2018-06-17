@@ -9,7 +9,6 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
-import au.com.dius.pact.model.ModelFixtures
 import groovy.json.JsonSlurper
 import spock.lang.Specification
 

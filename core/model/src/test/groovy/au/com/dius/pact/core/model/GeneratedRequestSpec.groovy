@@ -1,7 +1,5 @@
-package au.com.dius.pact.model
+package au.com.dius.pact.core.model
 
-import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.RandomIntGenerator

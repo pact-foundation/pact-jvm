@@ -1,8 +1,5 @@
-package au.com.dius.pact.model
+package au.com.dius.pact.core.model
 
-import au.com.dius.pact.core.model.InvalidPathExpression
-import au.com.dius.pact.core.model.PathExpressionsKt
-import au.com.dius.pact.core.model.PathToken
 import spock.lang.Specification
 import spock.lang.Unroll
 

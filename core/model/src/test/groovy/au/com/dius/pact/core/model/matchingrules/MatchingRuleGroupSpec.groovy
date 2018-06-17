@@ -1,19 +1,5 @@
-package au.com.dius.pact.model.matchingrules
+package au.com.dius.pact.core.model.matchingrules
 
-import au.com.dius.pact.core.model.matchingrules.DateMatcher
-import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
-import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
-import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
-import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
-import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher
-import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
-import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
-import au.com.dius.pact.core.model.matchingrules.RegexMatcher
-import au.com.dius.pact.core.model.matchingrules.RuleLogic
-import au.com.dius.pact.core.model.matchingrules.TimeMatcher
-import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
-import au.com.dius.pact.core.model.matchingrules.TypeMatcher
-import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
 import spock.lang.Specification
 import spock.lang.Unroll
 

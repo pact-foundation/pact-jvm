@@ -1,15 +1,5 @@
-package au.com.dius.pact.model
+package au.com.dius.pact.core.model
 
-import au.com.dius.pact.core.model.ClosurePactSource
-import au.com.dius.pact.core.model.InputStreamPactSource
-import au.com.dius.pact.core.model.PactReader
-import au.com.dius.pact.core.model.PactReaderKt
-import au.com.dius.pact.core.model.ProviderState
-import au.com.dius.pact.core.model.RequestResponsePact
-import au.com.dius.pact.core.model.S3PactSource
-import au.com.dius.pact.core.model.UnknownPactSource
-import au.com.dius.pact.core.model.UrlPactSource
-import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.model.messaging.MessagePact
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.S3Object

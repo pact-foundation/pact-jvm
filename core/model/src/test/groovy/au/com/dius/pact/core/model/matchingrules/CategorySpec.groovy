@@ -1,9 +1,5 @@
-package au.com.dius.pact.model.matchingrules
+package au.com.dius.pact.core.model.matchingrules
 
-import au.com.dius.pact.core.model.matchingrules.Category
-import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
-import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
-import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.PactSpecVersion
 import spock.lang.Specification
 import spock.lang.Unroll

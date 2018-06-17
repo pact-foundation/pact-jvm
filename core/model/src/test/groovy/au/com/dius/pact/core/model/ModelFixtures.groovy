@@ -1,9 +1,5 @@
-package au.com.dius.pact.model
+package au.com.dius.pact.core.model
 
-import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.PactReader
-import au.com.dius.pact.core.model.Request
-import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 
