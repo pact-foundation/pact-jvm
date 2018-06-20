@@ -48,7 +48,7 @@ class ExampleGroovyConsumerV3PactTest {
 
       def pactFile = new File("${PactConsumerConfig.pactRootDir()}/V3Consumer-V3Service.json")
       def json = new JsonSlurper().parse(pactFile)
-      assert json.metadata['pact-specification'].version == '3.0.0'
+      assert json.metadata.pactSpecification.version == '3.0.0'
       def providerStates = json.interactions.first().providerStates
       assert providerStates.size() == 3
       assert providerStates[0] == [name: 'a provider state']

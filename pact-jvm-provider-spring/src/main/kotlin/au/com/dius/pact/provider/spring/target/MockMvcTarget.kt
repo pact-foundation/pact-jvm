@@ -65,7 +65,7 @@ class MockMvcTarget @JvmOverloads constructor(
 
     val failures = HashMap<String, Any>()
 
-    0.rangeTo(runTimes).forEach {
+    1.rangeTo(runTimes).forEach {
       verifier.verifyResponseFromProvider(provider, interaction as RequestResponseInteraction, interaction.description,
         failures, mockMvc)
     }
