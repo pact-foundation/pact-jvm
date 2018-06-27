@@ -5,7 +5,7 @@ dependencies {
       'org.apache.maven:maven-plugin-api:3.5.0',
       'org.apache.maven.plugin-tools:maven-plugin-annotations:3.5'
     compile 'org.apache.maven:maven-core:3.5.0'
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
 }
