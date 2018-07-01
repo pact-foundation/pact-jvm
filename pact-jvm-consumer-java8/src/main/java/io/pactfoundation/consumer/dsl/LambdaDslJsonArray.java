@@ -226,8 +226,8 @@ public class LambdaDslJsonArray {
      * @param value Attribute example value
      * @param rules Matching rules to apply
      */
-    public LambdaDslJsonArray and(Object object, MatchingRule... rules) {
-        pactArray.and(object, rules);
+    public LambdaDslJsonArray and(Object value, MatchingRule... rules) {
+        pactArray.and(value, rules);
         return this;
     }
 
@@ -236,8 +236,8 @@ public class LambdaDslJsonArray {
      * @param value Attribute example value
      * @param rules Matching rules to apply
      */
-    public LambdaDslJsonArray or(Object object, MatchingRule... rules) {
-        pactArray.or(object, rules);
+    public LambdaDslJsonArray or(Object value, MatchingRule... rules) {
+        pactArray.or(value, rules);
         return this;
     }
 
