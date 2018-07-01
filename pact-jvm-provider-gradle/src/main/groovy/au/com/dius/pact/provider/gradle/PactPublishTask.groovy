@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import groovy.io.FileType
+import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.StringUtils
 import org.fusesource.jansi.AnsiConsole
 import org.gradle.api.DefaultTask
@@ -39,16 +40,20 @@ class PactPublishTask extends DefaultTask {
         File pactDirectory = pactPublish.pactDirectory as File
         boolean anyFailed = false
         pactDirectory.eachFileMatch(FileType.FILES, ~/.*\.json/) { pactFile ->
-          def result
-          if (pactPublish.tags) {
-            print "Publishing ${pactFile.name} with tags ${pactPublish.tags.join(', ')} ... "
+          if (pactFileIsExcluded(pactPublish, pactFile)) {
+            println("Not publishing '${pactFile.name}' as it matches an item in the excluded list")
           } else {
-            print "Publishing ${pactFile.name} ... "
-          }
-          result = brokerClient.uploadPactFile(pactFile, pactPublish.version, pactPublish.tags)
-          println result
-          if (!anyFailed && result.startsWith('FAILED!')) {
-            anyFailed = true
+            def result
+            if (pactPublish.tags) {
+              print "Publishing '${pactFile.name}' with tags ${pactPublish.tags.join(', ')} ... "
+            } else {
+              print "Publishing '${pactFile.name}' ... "
+            }
+            result = brokerClient.uploadPactFile(pactFile, pactPublish.version, pactPublish.tags)
+            println result
+            if (!anyFailed && result.startsWith('FAILED!')) {
+              anyFailed = true
+            }
           }
         }
 
@@ -59,4 +64,9 @@ class PactPublishTask extends DefaultTask {
         }
     }
 
+  static boolean pactFileIsExcluded(PactPublish pactPublish, File pactFile) {
+    pactPublish.excludes.any {
+      FilenameUtils.getBaseName(pactFile.name) ==~ it
+    }
+  }
 }

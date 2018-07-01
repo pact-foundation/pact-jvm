@@ -629,10 +629,42 @@ configuration in your POM.
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.9</version>
+    <version>3.5.19</version>
     <configuration>
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <pactBrokerServerId>test-pact-broker</pactBrokerServerId>  <!-- This must match the server id in the maven settings -->
+    </configuration>
+</plugin>
+```
+
+## Excluding pacts from being published [version 3.5.19+]
+
+You can exclude some of the pact files from being published by providing a list of regular expressions that match
+against the base names of the pact files.
+
+For example:
+
+```groovy
+pact {
+
+    publish {
+        pactBrokerUrl = 'https://mypactbroker.com'
+        excludes = [ '.*\\-\\d+$' ] // exclude all pact files that end with a dash followed by a number in the name 
+    }
+
+}
+```
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.19</version>
+    <configuration>
+      <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
+      <excludes>
+        <exclude>.*\\-\\d+$</exclude> <!-- exclude pact files where the name ends in a dash followed by a number -->
+      </excludes>
     </configuration>
 </plugin>
 ```

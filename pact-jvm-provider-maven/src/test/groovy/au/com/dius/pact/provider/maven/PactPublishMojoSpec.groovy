@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.provider.broker.PactBrokerClient
+import kotlin.text.Regex
 import org.apache.maven.plugin.MojoExecutionException
 import spock.lang.Specification
 
@@ -126,6 +127,34 @@ class PactPublishMojoSpec extends Specification {
 
     then:
     1 * brokerClient.uploadPactFile(_, _, tags) >> 'OK'
+
+    cleanup:
+    dir.deleteDir()
+  }
+
+  def 'Allows some files to be excluded from being published'() {
+    given:
+    def dir = Files.createTempDirectory('pacts').toFile()
+    def pact = PactPublishMojoSpec.classLoader.getResourceAsStream('pacts/contract.json').text
+    def file1 = new File(dir, 'pact.json')
+    file1.write(pact)
+    def file2 = new File(dir, 'pact-2.json')
+    file2.write(pact)
+    def file3 = new File(dir, 'pact-3.json')
+    file3.write(pact)
+    def file4 = new File(dir, 'other-pact.json')
+    file4.write(pact)
+    mojo.pactDirectory = dir.toString()
+    mojo.excludes = [ 'other\\-pact', 'pact\\-\\d+' ]
+
+    when:
+    mojo.execute()
+
+    then:
+    1 * brokerClient.uploadPactFile(file1, _, []) >> 'OK'
+    0 * brokerClient.uploadPactFile(file2, _, [])
+    0 * brokerClient.uploadPactFile(file3, _, [])
+    0 * brokerClient.uploadPactFile(file4, _, [])
 
     cleanup:
     dir.deleteDir()
