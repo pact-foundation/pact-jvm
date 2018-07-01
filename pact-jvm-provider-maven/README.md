@@ -249,7 +249,7 @@ The following plugin properties can be specified with `-Dproperty=value` on the 
 |--------|-----------|
 |pact.showStacktrace|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
 |pact.showFullDiff|This turns on displaying the full diff of the expected versus actual bodies|
-|pact.filter.consumers|Comma seperated list of consumer names to verify|
+|pact.filter.consumers|Comma separated list of consumer names to verify|
 |pact.filter.description|Only verify interactions whose description match the provided regular expression|
 |pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
 |pact.verifier.publishResults|Publishing of verification results will be skipped unless this property is set to 'true' [version 3.5.18+]|
@@ -446,6 +446,13 @@ consumers (consumer1 and consumer2). Adding `-Dpact.filter.description=a request
 whose descriptions start with 'a request for payment'. `-Dpact.filter.providerState=.*payment` will match any interaction that
 has a provider state that ends with payment, and `-Dpact.filter.providerState=` will match any interaction that does not have a
 provider state.
+
+## Not failing the build if no pact files are found [version 3.5.19+]
+
+By default, if there are no pact files to verify, the plugin will raise an exception. This is to guard against false
+positives where the build is passing but nothing has been verified due to mis-configuration.
+
+To disable this behaviour, set the `failIfNoPactsFound` parameter to `false`.
 
 # Verifying a message provider
 

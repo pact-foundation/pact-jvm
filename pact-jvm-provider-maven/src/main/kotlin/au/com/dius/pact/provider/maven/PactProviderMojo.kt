@@ -42,6 +42,9 @@ open class PactProviderMojo : AbstractMojo() {
   @Component
   private lateinit var decrypter: SettingsDecrypter
 
+  @Parameter(defaultValue = "true")
+  var failIfNoPactsFound: Boolean = true
+
   override fun execute() {
     AnsiConsole.systemInstall()
 
@@ -77,7 +80,7 @@ open class PactProviderMojo : AbstractMojo() {
         loadPactsFromPactBroker(provider, consumers)
       }
 
-      if (consumers.isEmpty()) {
+      if (consumers.isEmpty() && failIfNoPactsFound) {
         throw MojoFailureException("No pact files were found for provider '${provider.name}'")
       }
 
