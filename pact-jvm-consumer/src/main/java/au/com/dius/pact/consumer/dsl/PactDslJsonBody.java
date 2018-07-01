@@ -565,16 +565,19 @@ public class PactDslJsonBody extends DslPart {
     return this;
   }
 
-    /**
-     * Closes the current JSON object
-     */
-    public DslPart closeObject() {
-      if (parent != null) {
-        parent.putObject(this);
-      }
-      closed = true;
-      return parent;
+  /**
+   * Closes the current JSON object
+   */
+  public DslPart closeObject() {
+    if (parent != null) {
+      parent.putObject(this);
+    } else {
+      getMatchers().applyMatcherRootPrefix("$");
+      getGenerators().applyRootPrefix("$");
     }
+    closed = true;
+    return parent;
+  }
 
   @Override
   public DslPart close() {
@@ -590,9 +593,6 @@ public class PactDslJsonBody extends DslPart {
           parent = parent.closeObject();
         }
       }
-
-      parentToReturn.getMatchers().applyMatcherRootPrefix("$");
-      parentToReturn.getGenerators().applyRootPrefix("$");
     }
 
     return parentToReturn;
