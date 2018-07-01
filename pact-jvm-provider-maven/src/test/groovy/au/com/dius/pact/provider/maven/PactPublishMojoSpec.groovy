@@ -1,7 +1,6 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.provider.broker.PactBrokerClient
-import kotlin.text.Regex
 import org.apache.maven.plugin.MojoExecutionException
 import spock.lang.Specification
 
