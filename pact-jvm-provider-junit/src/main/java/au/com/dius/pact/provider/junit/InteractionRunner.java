@@ -232,6 +232,7 @@ public class InteractionRunner extends Runner {
           public void evaluate() throws Throwable {
             setupTargetForInteraction(target);
             target.addResultCallback((result, verifier) -> results.put(interaction, new Pair<>(result, verifier)));
+            surrogateTestMethod();
             target.testInteraction(pact.getConsumer().getName(), interaction, source);
           }
       };
@@ -241,6 +242,10 @@ public class InteractionRunner extends Runner {
       statement = withAfters(interaction, testInstance, statement);
       return statement;
     }
+
+  public void surrogateTestMethod() {
+
+  }
 
   protected void setupTargetForInteraction(Target target) {
 

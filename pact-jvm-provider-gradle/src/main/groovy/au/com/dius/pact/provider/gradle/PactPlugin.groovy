@@ -40,14 +40,21 @@ class PactPlugin implements Plugin<Project> {
 
             it.pact.serviceProviders.all { ProviderInfo provider ->
                 def taskName = {
-                  def defaultName = "pactVerify_${provider.name}"
+                  def defaultName = "pactVerify_${provider.name.replaceAll(/\s+/, '_')}".toString()
                   try {
-                    def nameValidator =
-                      this.getClass().classLoader.loadClass('org.gradle.util.NameValidator').newInstance()
-                    return nameValidator.asValidName(defaultName)
+                    def clazz = this.getClass().classLoader.loadClass('org.gradle.util.NameValidator').metaClass
+                    def asValidName = clazz.getMetaMethod('asValidName', [String])
+                    if (asValidName) {
+                      return asValidName.invoke(clazz.newInstance(), [ defaultName ])
+                    }
+                    // Gradle versions > 4.6 no longer have an instance method
+                    return defaultName
                   } catch (ClassNotFoundException e) {
                     // Earlier versions of Gradle don't have NameValidator
                     // Without it, we just don't change the task name
+                    return defaultName
+                  } catch (NoSuchMethodException e) {
+                    // Gradle versions > 4.6 no longer have an instance method
                     return defaultName
                   }
                 } ()

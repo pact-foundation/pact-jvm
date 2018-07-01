@@ -69,6 +69,20 @@ class PactReaderSpec extends Specification {
       pact.source instanceof UrlPactSource
   }
 
+  def 'loads a pact with old version format'() {
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('v3-pact-old-format.json')
+
+    when:
+    def pact = PactReader.loadPact(pactUrl)
+
+    then:
+    0 * PactReader.loadV2Pact(_, _)
+    1 * PactReader.loadV3Pact({ it.url == pactUrl.toString() }, _)
+    pact instanceof RequestResponsePact
+    pact.source instanceof UrlPactSource
+  }
+
   def 'loads a message pact with V3 version using V3 loader'() {
       given:
       def pactUrl = PactReaderSpec.classLoader.getResource('v3-message-pact.json')

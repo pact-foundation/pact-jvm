@@ -1,5 +1,31 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.19 - Bugfix Release
+
+* 04415736 - fix: Add the standard test context listeners with SpringRestPactRunner #699 (Ronald Holshausen, Sun Jul 1 18:30:08 2018 +1000)
+* 481c4b1c - fix(Java DSL): matchHeader should override the matcher in case it is called after the body is set #716 (Ronald Holshausen, Sun Jul 1 16:31:38 2018 +1000)
+* fccb2236 - fix: make sure the Java body DSL objects are allways closed correctly #628 #708 (Ronald Holshausen, Sun Jul 1 15:59:41 2018 +1000)
+* 048926a7 - fix: code narc (Ronald Holshausen, Sun Jul 1 15:57:58 2018 +1000)
+* c3ec5f63 - feat: add exclusion lists to the Gradle and Maven publish tasks #711 (Ronald Holshausen, Sun Jul 1 15:07:17 2018 +1000)
+* 34d328dd - fix: allow the default behaviour of failing the build when no pacts are found in the Maven plugin to be disabled #713 (Ronald Holshausen, Sun Jul 1 13:27:17 2018 +1000)
+* c6efe79a - fix: correct Javadoc in LambdaDslJsonArray (Ronald Holshausen, Sun Jul 1 12:30:36 2018 +1000)
+* cb9726a6 - Upgrade Gradle to 4.8 (Ronald Holshausen, Mon Jun 18 10:44:38 2018 +1000)
+* 2c33cf80 - fix: throw ExceptionInfo instead of RuntimeException in the lein plugin #718 (Ronald Holshausen, Sun Jul 1 12:09:42 2018 +1000)
+* c4ce59b7 - Merge pull request #721 from SnewsButton/java-8-dsl-and-or (Ronald Holshausen, Sun Jul 1 11:41:12 2018 +1000)
+* 41cab004 - Added lambda dsl array and object tests for and or functionality (Stephen New, Wed Jun 27 10:50:43 2018 -0600)
+* 4b18bbd7 - Merge pull request #720 from SnewsButton/fix-readme-link (Ronald Holshausen, Wed Jun 27 12:36:26 2018 +1000)
+* c4fcfeb8 - Merge pull request #719 from yokotaso/kotlin-jre-deprecated (Ronald Holshausen, Wed Jun 27 12:35:42 2018 +1000)
+* 4106422f - Merge pull request #715 from yokotaso/wrong-artifactId (Ronald Holshausen, Wed Jun 27 12:23:38 2018 +1000)
+* bc201741 - Added and or functionality to Java 8 Dsl (Stephen New, Tue Jun 26 14:13:37 2018 -0600)
+* 9105aaa2 - Fixed link to issue #313 in consumer README.md (Stephen New, Tue Jun 26 11:54:32 2018 -0600)
+* 59b3f3d1 - Use kotlin-stdlib-jdk8 insted of kotlin-stdlib-jre8. kotlin-stdlib-jre8 is deprecated. (tomoya-yokota, Mon Jun 25 13:43:02 2018 +0900)
+* 7f425258 - artifact id of pact-jvm-consumer-java8 is wrong. (tomoya-yokota, Thu Jun 21 18:27:11 2018 +0900)
+* 866209a6 - fix: correct MockMvcTarget to call the controller the correct number of times #706 (Ronald Holshausen, Wed Jun 20 11:21:20 2018 +1000)
+* f71deb21 - fix: pact specification attribute should be in camel case, because Javascript (Ronald Holshausen, Tue Jun 19 10:35:10 2018 +1000)
+* 713347e7 - removed gitter link (Ronald Holshausen, Sun Jun 17 17:27:25 2018 +1000)
+* 315803e1 - Updated version in readme (Ronald Holshausen, Sun Jun 17 17:24:08 2018 +1000)
+* d6b68ae6 - bump version to 3.5.19 (Ronald Holshausen, Sun Jun 17 17:22:48 2018 +1000)
+
 # 3.5.18 - Scala 2.11 Bugfix Release
 
 * 6af95e9a - Merge tag '3_5_18' into v3.5.x-2.11 (Ronald Holshausen, Sun Jun 17 17:28:57 2018 +1000)

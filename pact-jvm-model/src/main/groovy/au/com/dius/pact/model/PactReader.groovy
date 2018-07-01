@@ -27,7 +27,8 @@ class PactReader {
   static Pact<? extends Interaction> loadPact(Map options = [:], def source) {
     Pair<Object, PactSource> pactInfo = loadFile(source, options)
     def version = '2.0.0'
-    def specification = pactInfo.first.metadata?.'pact-specification'
+    def metadata = pactInfo.first.metadata
+    def specification = metadata?.'pactSpecification' ?: metadata?.'pact-specification'
     if (specification instanceof Map && specification.version) {
       version = specification.version
     }

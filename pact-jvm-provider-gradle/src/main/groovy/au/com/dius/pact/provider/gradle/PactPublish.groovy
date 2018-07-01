@@ -14,4 +14,5 @@ class PactPublish {
     String pactBrokerPassword
     String pactBrokerAuthenticationScheme = 'basic'
     List<String> tags = []
+    List<String> excludes = []
 }

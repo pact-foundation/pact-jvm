@@ -5,17 +5,9 @@ import au.com.dius.pact.provider.PactVerification
 import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
 import org.gradle.testfixtures.ProjectBuilder
-import org.gradle.util.NameValidator
-import org.powermock.api.mockito.PowerMockito
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.powermock.core.classloader.annotations.PrepareForTest
-import org.powermock.modules.junit4.PowerMockRunner
-import org.mockito.Mockito
 
-@RunWith(PowerMockRunner)
-@PrepareForTest(NameValidator)
 class PactPluginTest {
 
     private PactPlugin plugin
@@ -59,20 +51,17 @@ class PactPluginTest {
     }
 
     @Test
-    void 'uses the valid name provided by Gradle\'s NameValidator'() {
-        PowerMockito.mockStatic(NameValidator)
-        Mockito.when(NameValidator.asValidName('pactVerify_invalidName')).thenReturn('pactVerify_validName')
-
+    void 'replaces white space with underscores'() {
         project.pact {
             serviceProviders {
-                invalidName {
+                'invalid Name' {
 
                 }
             }
         }
         project.evaluate()
 
-        assert project.tasks.pactVerify_validName
+        assert project.tasks.pactVerify_invalid_Name
     }
 
     @Test
