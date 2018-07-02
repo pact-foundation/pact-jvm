@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer.dsl
 
-import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import spock.lang.Specification
 import spock.lang.Unroll

@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
-import au.com.dius.pact.model.v3.messaging.Message
+import au.com.dius.pact.core.model.messaging.Message
 import spock.lang.Specification
 
 class MessagePactBuilderSpec extends Specification {

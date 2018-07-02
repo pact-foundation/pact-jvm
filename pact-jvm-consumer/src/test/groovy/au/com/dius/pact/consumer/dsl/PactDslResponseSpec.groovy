@@ -5,7 +5,7 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
-import au.com.dius.pact.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import com.google.common.net.MediaType
 import org.apache.http.entity.ContentType

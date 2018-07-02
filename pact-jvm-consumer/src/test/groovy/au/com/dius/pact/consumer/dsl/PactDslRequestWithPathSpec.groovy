@@ -4,7 +4,7 @@ import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
-import au.com.dius.pact.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import spock.lang.Specification
 
 class PactDslRequestWithPathSpec extends Specification {
