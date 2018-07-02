@@ -70,7 +70,7 @@ subprojects {
     }
 
     dependencies {
-      compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion"
+      compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
       compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
       compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
       compile('io.github.microutils:kotlin-logging:1.4.4') {

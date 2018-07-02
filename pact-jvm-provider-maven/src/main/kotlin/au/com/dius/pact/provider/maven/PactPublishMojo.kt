@@ -53,6 +53,9 @@ open class PactPublishMojo : AbstractMojo() {
     @Parameter
     private var tags: MutableList<String> = mutableListOf()
 
+    @Parameter
+    private var excludes: MutableList<String> = mutableListOf()
+
     override fun execute() {
       AnsiConsole.systemInstall()
 
@@ -80,15 +83,19 @@ open class PactPublishMojo : AbstractMojo() {
       if (!pactDirectory.exists()) {
         println("Pact directory $pactDirectory does not exist, skipping uploading of pacts")
       } else {
-
+        val excludedList = this.excludes.map { Regex(it) }
         try {
           var anyFailed = false
           pactDirectory.walkTopDown().filter { it.isFile && it.extension == "json" }.forEach { pactFile ->
-            print("Publishing ${pactFile.name} ... ")
-            val result = brokerClient!!.uploadPactFile(pactFile, projectVersion, tags).toString()
-            println(result)
-            if (!anyFailed && result.startsWith("FAILED!")) {
-              anyFailed = true
+            if (pactFileIsExcluded(excludedList, pactFile)) {
+              println("Not publishing '${pactFile.name}' as it matches an item in the excluded list")
+            } else {
+              print("Publishing '${pactFile.name}' ... ")
+              val result = brokerClient!!.uploadPactFile(pactFile, projectVersion, tags).toString()
+              println(result)
+              if (!anyFailed && result.startsWith("FAILED!")) {
+                anyFailed = true
+              }
             }
           }
 
@@ -100,4 +107,7 @@ open class PactPublishMojo : AbstractMojo() {
         }
       }
     }
+
+  private fun pactFileIsExcluded(exclusions: List<Regex>, pactFile: File) =
+    exclusions.any { it.matches(pactFile.nameWithoutExtension) }
 }

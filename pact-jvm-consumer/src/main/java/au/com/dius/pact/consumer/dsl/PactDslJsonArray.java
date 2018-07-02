@@ -88,6 +88,9 @@ public class PactDslJsonArray extends DslPart {
     public DslPart closeArray() {
       if (parent != null) {
         parent.putArray(this);
+      } else {
+        getMatchers().applyMatcherRootPrefix("$");
+        getGenerators().applyRootPrefix("$");
       }
       closed = true;
       return parent;
@@ -575,9 +578,6 @@ public class PactDslJsonArray extends DslPart {
           parent = parent.closeObject();
         }
       }
-
-      parentToReturn.getMatchers().applyMatcherRootPrefix("$");
-      parentToReturn.getGenerators().applyRootPrefix("$");
     }
 
     return parentToReturn;

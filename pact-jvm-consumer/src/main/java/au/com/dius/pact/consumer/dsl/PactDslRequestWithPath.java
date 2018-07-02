@@ -339,7 +339,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param headerExample Example value to use
      */
     public PactDslRequestWithPath matchHeader(String header, String regex, String headerExample) {
-        requestMatchers.addCategory("header").addRule(header, new RegexMatcher(regex));
+        requestMatchers.addCategory("header").setRule(header, new RegexMatcher(regex));
         requestHeaders.put(header, headerExample);
         return this;
     }

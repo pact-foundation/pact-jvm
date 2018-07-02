@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.model.matchingrules.RegexMatcher
 import spock.lang.Specification
 
 class PactDslRequestWithPathSpec extends Specification {
@@ -35,6 +36,43 @@ class PactDslRequestWithPathSpec extends Specification {
     subject2.requestHeaders == [test: 'test']
     subject2.query == [test: ['true']]
     subject2.requestBody == OptionalBody.body('{"test":true}')
+  }
+
+  def 'set the content type header correctly (issue #716)'() {
+    given:
+    def builder = ConsumerPactBuilder.consumer('spec').hasPactWith('provider')
+    def body = new PactDslJsonBody().numberValue('key', 1).close()
+
+    when:
+    def pact = builder
+      .given('Given the body method is invoked before the header method')
+      .uponReceiving('a request for some response')
+      .path('/bad/content-type/matcher')
+      .method('GET')
+      .body(body)
+      .matchHeader('Content-Type', 'application/json')
+      .willRespondWith()
+      .status(200)
+
+      .given('Given the body method is invoked after the header method')
+      .uponReceiving('a request for some response')
+      .path('/no/content-type/matcher')
+      .method('GET')
+      .matchHeader('Content-Type', 'application/json')
+      .body(body)
+      .willRespondWith()
+      .status(200)
+      .toPact()
+
+    def requests = pact.interactions*.request
+
+    then:
+    requests[0].matchingRules.rulesForCategory('header').matchingRules['Content-Type'].rules == [
+      new RegexMatcher('application/json')
+    ]
+    requests[1].matchingRules.rulesForCategory('header').matchingRules['Content-Type'].rules == [
+      new RegexMatcher('application/json')
+    ]
   }
 
 }

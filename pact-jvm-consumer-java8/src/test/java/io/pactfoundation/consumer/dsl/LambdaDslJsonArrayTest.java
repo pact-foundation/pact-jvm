@@ -1,5 +1,6 @@
 package io.pactfoundation.consumer.dsl;
 
+import au.com.dius.pact.consumer.dsl.PM;
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
 import org.junit.Test;
 
@@ -103,6 +104,67 @@ public class LambdaDslJsonArrayTest {
 
         String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
+    }
+
+    @Test
+    public void testAndMatchingRules() {
+        /*
+            [
+                "fooBar"
+            ]
+         */
+
+        // Old DSL
+        final String pactDslJson = new PactDslJsonArray("", "", null, false)
+                .and("foobar", PM.stringType(), PM.includesStr("foo"), PM.stringMatcher("*Bar"))
+                .getBody().toString();
+
+        // Lambda DSL
+        final PactDslJsonArray actualPactDsl = new PactDslJsonArray("", "", null, false);
+        final LambdaDslJsonArray array = new LambdaDslJsonArray(actualPactDsl);
+        array
+                .and("foobar", PM.stringType(), PM.includesStr("foo"), PM.stringMatcher("*Bar"))
+                .build();
+
+        String actualJson = actualPactDsl.getBody().toString();
+        assertThat(actualJson, is(pactDslJson));
+        assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(3));
+        Map matcher = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        assertThat(matcher.get("match"), is("type"));
+        matcher = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        assertThat(matcher.get("match"), is("include"));
+        matcher = actualPactDsl.getMatchers().allMatchingRules().get(2).toMap();
+        assertThat(matcher.get("match"), is("regex"));
+    }
+
+    @Test
+    public void testOrMatchingRules() {
+        /*
+            [
+                null
+            ]
+         */
+        // Old DSL
+        final String pactDslJson = new PactDslJsonArray("", "", null, false)
+                .or(null, PM.nullValue(), PM.date(), PM.ipAddress())
+                .getBody().toString();
+
+        // Lambda DSL
+        final PactDslJsonArray actualPactDsl = new PactDslJsonArray("", "", null, false);
+        final LambdaDslJsonArray array = new LambdaDslJsonArray(actualPactDsl);
+        array
+                .or(null, PM.nullValue(), PM.date(), PM.ipAddress())
+                .build();
+
+        String actualJson = actualPactDsl.getBody().toString();
+        assertThat(actualJson, is(pactDslJson));
+        assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(3));
+        Map matcher = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        assertThat(matcher.get("match"), is("null"));
+        matcher = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        assertThat(matcher.get("match"), is("date"));
+        matcher = actualPactDsl.getMatchers().allMatchingRules().get(2).toMap();
+        assertThat(matcher.get("match"), is("regex"));
     }
 
     @Test
