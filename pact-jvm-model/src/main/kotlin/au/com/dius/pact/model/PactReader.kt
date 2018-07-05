@@ -33,7 +33,7 @@ fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: Clos
       pactResponse.pactFile to source.copy(attributes = pactResponse.links, options = options)
     }
     else -> if (options.containsKey("authentication")) {
-      val jsonResource = fetchJsonResource(http!!, options, source)
+      val jsonResource = fetchJsonResource(http!!, source)
       when (jsonResource) {
         is Result.Success -> jsonResource.value
         is Result.Failure -> throw jsonResource.error
@@ -44,7 +44,7 @@ fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: Clos
   }
 }
 
-fun fetchJsonResource(http: CloseableHttpClient, options: Map<String, Any>, source: UrlPactSource):
+private fun fetchJsonResource(http: CloseableHttpClient, source: UrlPactSource):
         Result<Pair<JsonElement, UrlPactSource>, Exception> {
   return Result.of {
     val httpGet = HttpGet(HttpClientUtils.buildUrl("", source.url, true))

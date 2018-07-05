@@ -387,15 +387,15 @@ abstract class HalClientBase @JvmOverloads constructor(
     return null
   }
 
-  override fun forAll(linkName: String, just: Consumer<Map<String, Any?>>) {
+  override fun forAll(linkName: String, closure: Consumer<Map<String, Any?>>) {
     initPathInfo()
     val links = pathInfo!![LINKS]
     if (links.isJsonObject && links.obj.has(linkName)) {
       val matchingLink = links[linkName]
       if (matchingLink.isJsonArray) {
-        matchingLink.asJsonArray.forEach { just.accept(asMap(it.asJsonObject)) }
+        matchingLink.asJsonArray.forEach { closure.accept(asMap(it.asJsonObject)) }
       } else {
-        just.accept(asMap(matchingLink.asJsonObject))
+        closure.accept(asMap(matchingLink.asJsonObject))
       }
     }
   }
