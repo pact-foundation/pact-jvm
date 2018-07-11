@@ -28,7 +28,7 @@ open class PactProviderMojo : AbstractMojo() {
   private lateinit var classpathElements: List<String>
 
   @Parameter
-  private var systemPropertyVariables = mutableMapOf<String, String>()
+  var systemPropertyVariables: Map<String, String> = mutableMapOf()
 
   @Parameter
   lateinit var serviceProviders: List<Provider>
