@@ -48,16 +48,4 @@ class PactProviderMojoTest {
         assert mojo.property('pact.test.105') == null
     }
 
-    @Test
-    void 'property declared though systemPropertyVariables is a system property'() {
-        mojo.systemPropertyVariables.put('systemPropertyVariables', 'true')
-
-        when:
-        mojo.execute()
-
-        then:
-        assert System.getProperty('systemPropertyVariables') == 'true'
-
-    }
-
 }

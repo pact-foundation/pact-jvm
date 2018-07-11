@@ -51,6 +51,10 @@ open class PactProviderMojo : AbstractMojo() {
   override fun execute() {
     AnsiConsole.systemInstall()
 
+    systemPropertyVariables.forEach { (property, value) ->
+      System.setProperty(property, value)
+    }
+
     val failures = mutableMapOf<Any, Any>()
     val verifier = providerVerifier().let {
       it.projectHasProperty = Function { p: String -> this.propertyDefined(p) }
@@ -66,10 +70,6 @@ open class PactProviderMojo : AbstractMojo() {
         urls.toTypedArray()
       }
       it
-    }
-
-    systemPropertyVariables.forEach { (property, value) ->
-      System.setProperty(property, value)
     }
 
     serviceProviders.forEach { provider ->
