@@ -28,6 +28,9 @@ open class PactProviderMojo : AbstractMojo() {
   private lateinit var classpathElements: List<String>
 
   @Parameter
+  private var systemPropertyVariables = mutableMapOf<String, String>()
+
+  @Parameter
   lateinit var serviceProviders: List<Provider>
 
   @Parameter
@@ -63,6 +66,10 @@ open class PactProviderMojo : AbstractMojo() {
         urls.toTypedArray()
       }
       it
+    }
+
+    systemPropertyVariables.forEach { (property, value) ->
+      System.setProperty(property, value)
     }
 
     serviceProviders.forEach { provider ->
