@@ -674,4 +674,4 @@ pact {
 For pacts that are loaded from a Pact Broker, the results of running the verification can be published back to the
  broker against the URL for the pact. You will be able to then see the result on the Pact Broker home screen.
  
-To turn on the verification publishing, set the system property `pact.verifier.publishResults` to `true`.
+To turn on the verification publishing, set the system property `pact.verifier.publishResults` to `true` in the pact maven plugin, not surefire, configuration.

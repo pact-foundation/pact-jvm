@@ -104,8 +104,6 @@ You want to look at: [pact gradle plugin](pact-jvm-provider-gradle)
 
 You want to look at: [pact maven plugin](pact-jvm-provider-maven)
 
-For publishing pacts to a pact broker, have a look at https://github.com/warmuuh/pactbroker-maven-plugin
-
 #### verify pacts with JUnit tests [version 2.3.3+, 3.1.3+]
 
 You want to look at: [junit provider support](pact-jvm-provider-junit) for JUnit 4 tests and 
