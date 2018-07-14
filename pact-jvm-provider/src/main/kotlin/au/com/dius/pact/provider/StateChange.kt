@@ -2,13 +2,25 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.com.github.michaelbull.result.Err
+import au.com.dius.pact.com.github.michaelbull.result.Ok
+import au.com.dius.pact.com.github.michaelbull.result.Result
+import au.com.dius.pact.com.github.michaelbull.result.mapEither
+import au.com.dius.pact.com.github.michaelbull.result.unwrap
+import groovy.json.JsonSlurper
 import groovy.lang.Closure
 import mu.KLogging
+import org.apache.http.HttpEntity
+import org.apache.http.entity.ContentType
+import org.apache.http.util.EntityUtils
 import java.net.URI
 import java.net.URISyntaxException
 import java.net.URL
 
-data class StateChangeResult @JvmOverloads constructor (val stateChangeOk: Any, val message: String = "")
+data class StateChangeResult @JvmOverloads constructor (
+  val stateChangeResult: Result<Map<String, Any>, Exception>,
+  val message: String = ""
+)
 
 /**
  * Class containing all the state change logic
@@ -26,27 +38,32 @@ object StateChange : KLogging() {
     providerClient: ProviderClient
   ): StateChangeResult {
     var message = interactionMessage
-    var stateChangeOk: Any = true
+    var stateChangeResult: Result<Map<String, Any>, Exception> = Ok(emptyMap())
 
     if (interaction.providerStates.isNotEmpty()) {
       val iterator = interaction.providerStates.iterator()
       var first = true
-      while (stateChangeOk is Boolean && stateChangeOk && iterator.hasNext()) {
+      while (stateChangeResult is Ok && iterator.hasNext()) {
         val providerState = iterator.next()
-        stateChangeOk = stateChange(verifier, providerState, provider, consumer, true, providerClient)
-        logger.debug { "State Change: \"$providerState\" -> $stateChangeOk" }
-        if (stateChangeOk !is Boolean || !stateChangeOk) {
-          failures[message] = stateChangeOk
-        } else if (first) {
-          message += " Given ${providerState.name}"
-          first = false
-        } else {
-          message += " And ${providerState.name}"
-        }
+        val result = stateChange(verifier, providerState, provider, consumer, true, providerClient)
+        logger.debug { "State Change: \"$providerState\" -> $result" }
+
+        stateChangeResult = result.mapEither({
+          if (first) {
+            message += " Given ${providerState.name}"
+            first = false
+          } else {
+            message += " And ${providerState.name}"
+          }
+          stateChangeResult.unwrap().plus(it)
+        }, {
+          failures[message] = it.message.toString()
+          it
+        })
       }
     }
 
-    return StateChangeResult(stateChangeOk, message)
+    return StateChangeResult(stateChangeResult, message)
   }
 
   @JvmStatic
@@ -57,7 +74,7 @@ object StateChange : KLogging() {
     consumer: IConsumerInfo,
     isSetup: Boolean,
     providerClient: ProviderClient
-  ): Any {
+  ): Result<Map<String, Any>, Exception> {
     verifier.reportStateForInteraction(state.name, provider, consumer, isSetup)
     try {
       var stateChangeHandler = consumer.stateChange
@@ -68,7 +85,11 @@ object StateChange : KLogging() {
       }
       if (stateChangeHandler == null || (stateChangeHandler is String && stateChangeHandler.isBlank())) {
         verifier.reporters.forEach { it.warnStateChangeIgnored(state.name, provider, consumer) }
-        return true
+        return Ok(emptyMap())
+      } else if (verifier.checkBuildSpecificTask.apply(stateChangeHandler)) {
+        logger.debug { "Invoking build specific task $stateChangeHandler" }
+        verifier.executeBuildSpecificTask.accept(stateChangeHandler, state)
+        return Ok(emptyMap())
       } else if (stateChangeHandler is Closure<*>) {
         val result = if (provider.stateChangeTeardown) {
           stateChangeHandler.call(state, if (isSetup) "setup" else "teardown")
@@ -77,13 +98,9 @@ object StateChange : KLogging() {
         }
         logger.debug { "Invoked state change closure -> $result" }
         if (result !is URL) {
-          return result
+          return Ok(if (result is Map<*, *>) result as Map<String, Any> else emptyMap())
         }
         stateChangeHandler = result
-      } else if (verifier.checkBuildSpecificTask.apply(stateChangeHandler)) {
-        logger.debug { "Invoking build specific task $stateChangeHandler" }
-        verifier.executeBuildSpecificTask.accept(stateChangeHandler, state)
-        return true
       }
       return executeHttpStateChangeRequest(verifier, stateChangeHandler, stateChangeUsesBody, state, provider, isSetup,
         providerClient)
@@ -92,7 +109,7 @@ object StateChange : KLogging() {
         it.stateChangeRequestFailedWithException(state.name, provider, consumer, isSetup, e,
           verifier.projectHasProperty.apply(ProviderVerifierBase.PACT_SHOW_STACKTRACE))
       }
-      return e
+      return Err(e)
     }
   }
 
@@ -117,8 +134,8 @@ object StateChange : KLogging() {
     provider: IProviderInfo,
     isSetup: Boolean,
     providerClient: ProviderClient
-  ): Any {
-    try {
+  ): Result<Map<String, Any>, Exception> {
+    return try {
       val url = stateChangeHandler as? URI ?: URI(stateChangeHandler.toString())
       val response = providerClient.makeStateChangeRequest(url, state, useBody, isSetup, provider.stateChangeTeardown)
       logger.debug { "Invoked state change $url -> ${response?.statusLine}" }
@@ -127,14 +144,25 @@ object StateChange : KLogging() {
           verifier.reporters.forEach {
             it.stateChangeRequestFailed(state.name, provider, isSetup, response.statusLine.toString())
           }
-          return "State Change Request Failed - ${response.statusLine}"
+          Err(Exception("State Change Request Failed - ${response.statusLine}"))
+        } else {
+          parseJsonResponse(response.entity)
         }
-      }
+      } ?: Ok(emptyMap())
     } catch (ex: URISyntaxException) {
       verifier.reporters.forEach {
         it.warnStateChangeIgnoredDueToInvalidUrl(state.name, provider, isSetup, stateChangeHandler)
       }
+      Ok(emptyMap())
     }
-    return true
+  }
+
+  private fun parseJsonResponse(entity: HttpEntity?): Result<Map<String, Any>, Exception> {
+    return if (entity != null && ContentType.get(entity).mimeType == ContentType.APPLICATION_JSON.mimeType) {
+      val body = EntityUtils.toString(entity)
+      Ok(JsonSlurper().parseText(body) as Map<String, Any>)
+    } else {
+      Ok(emptyMap())
+    }
   }
 }

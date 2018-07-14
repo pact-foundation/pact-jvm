@@ -196,7 +196,7 @@ open class ProviderClient(
     isSetup: Boolean,
     stateChangeTeardown: Boolean
   ): CloseableHttpResponse? {
-    if (stateChangeUrl != null) {
+    return if (stateChangeUrl != null) {
       val httpclient = getHttpClient()
       val urlBuilder = if (stateChangeUrl is URI) {
         URIBuilder(stateChangeUrl)
@@ -241,9 +241,9 @@ open class ProviderClient(
         }
       }
 
-      return httpclient.execute(method)
+      httpclient.execute(method)
     } else {
-      return null
+      null
     }
   }
 

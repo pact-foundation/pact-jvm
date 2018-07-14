@@ -12,6 +12,7 @@ import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.VerifierReporter
+import au.com.dius.pact.com.github.michaelbull.result.Ok
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.reflections.Reflections
@@ -170,7 +171,7 @@ class ProviderVerifier extends ProviderVerifierBase {
     ProviderClient providerClient = new ProviderClient(provider, new HttpClientFactory())
     def stateChangeResult = StateChange.executeStateChange(this, provider, consumer, interaction, interactionMessage,
       failures, providerClient)
-    if (stateChangeResult.stateChangeOk) {
+    if (stateChangeResult.stateChangeResult instanceof Ok) {
       interactionMessage = stateChangeResult.message
       reportInteractionDescription(interaction)
 

@@ -11,6 +11,7 @@ import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.StateChange
 import au.com.dius.pact.provider.StateChangeResult
+import au.com.dius.pact.com.github.michaelbull.result.Ok
 import spock.lang.Specification
 
 class ProviderVerifierStateChangeSpec extends Specification {
@@ -41,7 +42,7 @@ class ProviderVerifierStateChangeSpec extends Specification {
     providerVerifier.verifyInteraction(providerInfo, consumer, failures, interaction)
 
     then:
-    1 * StateChange.executeStateChange(*_) >> new StateChangeResult(true, 'interactionMessage')
+    1 * StateChange.executeStateChange(*_) >> new StateChangeResult(new Ok([:]), 'interactionMessage')
     1 * StateChange.executeStateChangeTeardown(providerVerifier, interaction, providerInfo, consumer, _)
   }
 
