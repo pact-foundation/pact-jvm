@@ -28,6 +28,9 @@ open class PactProviderMojo : AbstractMojo() {
   private lateinit var classpathElements: List<String>
 
   @Parameter
+  var systemPropertyVariables: Map<String, String> = mutableMapOf()
+
+  @Parameter
   lateinit var serviceProviders: List<Provider>
 
   @Parameter
@@ -47,6 +50,10 @@ open class PactProviderMojo : AbstractMojo() {
 
   override fun execute() {
     AnsiConsole.systemInstall()
+
+    systemPropertyVariables.forEach { (property, value) ->
+      System.setProperty(property, value)
+    }
 
     val failures = mutableMapOf<Any, Any>()
     val verifier = providerVerifier().let {
