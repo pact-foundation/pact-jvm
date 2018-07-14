@@ -8,6 +8,7 @@ import org.apache.maven.settings.Settings
 import org.apache.maven.settings.crypto.SettingsDecrypter
 import org.apache.maven.settings.crypto.SettingsDecryptionResult
 import spock.lang.Specification
+import spock.util.environment.RestoreSystemProperties
 
 @SuppressWarnings(['UnnecessaryGetter', 'ClosureAsLastMethodParameter'])
 class PactProviderMojoSpec extends Specification {
@@ -194,6 +195,7 @@ class PactProviderMojoSpec extends Specification {
     noExceptionThrown()
   }
 
+  @RestoreSystemProperties
   def 'system property pact.verifier.publishResults true when set with systemPropertyVariables' () {
     given:
     def provider = new Provider(pactFileDirectory: 'dir1' as File)
