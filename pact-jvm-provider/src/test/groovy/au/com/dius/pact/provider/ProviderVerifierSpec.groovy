@@ -374,14 +374,14 @@ class ProviderVerifierSpec extends Specification {
       getSource() >> new BrokerUrlSource('http://localhost', 'http://pact-broker')
     }
 
-    verifier.projectHasProperty = { it == ProviderVerifierBase.PACT_VERIFIER_PUBLISHRESUTS }
+    verifier.projectHasProperty = { it == ProviderVerifierBase.PACT_VERIFIER_PUBLISH_RESULTS }
     verifier.projectGetProperty = {
-      (it == ProviderVerifierBase.PACT_VERIFIER_PUBLISHRESUTS).toString()
+      (it == ProviderVerifierBase.PACT_VERIFIER_PUBLISH_RESULTS).toString()
     }
 
     PactReader.loadPact(_) >> mockPact
     mockPact.interactions >> [interaction1, interaction2]
-    StateChange.executeStateChange(*_) >> new StateChange.StateChangeResult(true)
+    StateChange.executeStateChange(*_) >> new StateChangeResult(true)
 
     when:
     verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
@@ -420,7 +420,7 @@ class ProviderVerifierSpec extends Specification {
 
     PactReader.loadPact(_) >> mockPact
     mockPact.interactions >> [interaction1, interaction2]
-    StateChange.executeStateChange(*_) >> new StateChange.StateChangeResult(true)
+    StateChange.executeStateChange(*_) >> new StateChangeResult(true)
     verifier.verifyResponseFromProvider(provider, interaction1, _, _, _) >> true
     verifier.verifyResponseFromProvider(provider, interaction2, _, _, _) >> true
 
@@ -480,11 +480,11 @@ class ProviderVerifierSpec extends Specification {
     pact.source = new BrokerUrlSource('url', 'url', [publish: [:]])
 
     verifier.projectHasProperty = {
-      it == ProviderVerifier.PACT_VERIFIER_PUBLISHRESUTS
+      it == ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS
     }
     verifier.projectGetProperty = {
       switch (it) {
-        case ProviderVerifier.PACT_VERIFIER_PUBLISHRESUTS:
+        case ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS:
           return 'false'
       }
     }
@@ -494,7 +494,7 @@ class ProviderVerifierSpec extends Specification {
 
     then:
     1 * PactReader.loadPact(_) >> pact
-    1 * StateChange.executeStateChange(_, _, _, _, _, _, _) >> new StateChange.StateChangeResult(true, '')
+    1 * StateChange.executeStateChange(_, _, _, _, _, _, _) >> new StateChangeResult(true, '')
     1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _) >> true
     0 * client.publishVerificationResults(_, true, _, _)
   }

@@ -62,7 +62,7 @@ open class PactProviderMojo : AbstractMojo() {
       it.pactLoadFailureMessage = Function { consumer: ConsumerInfo ->
         "You must specify the pact file to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
       }
-      it.isBuildSpecificTask = Function { false }
+      it.checkBuildSpecificTask = Function { false }
       it.providerVersion = Supplier { projectVersion }
 
       it.projectClasspath = Supplier {

@@ -32,6 +32,7 @@ import scala.Function1
 import java.lang.Boolean.getBoolean
 import java.lang.reflect.Modifier
 import java.net.URI
+import java.net.URL
 import java.net.URLDecoder
 
 interface IHttpClientFactory {
@@ -47,6 +48,14 @@ interface IProviderInfo {
 
   val requestFilter: Any?
   val stateChangeRequestFilter: Any?
+  val stateChangeUrl: URL?
+  val stateChangeUsesBody: Boolean
+  val stateChangeTeardown: Boolean
+}
+
+interface IConsumerInfo {
+  val stateChange: Any?
+  val stateChangeUsesBody: Boolean
 }
 
 /**

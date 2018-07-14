@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static au.com.dius.pact.provider.ProviderVerifierBase.PACT_VERIFIER_PUBLISHRESUTS;
+import static au.com.dius.pact.provider.ProviderVerifierBase.PACT_VERIFIER_PUBLISH_RESULTS;
 import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_METHOD_VALIDATOR;
 import static org.junit.internal.runners.rules.RuleMemberValidator.RULE_VALIDATOR;
 
@@ -181,7 +181,7 @@ public class InteractionRunner extends Runner {
         reportVerificationResults(allPassed);
       } else {
           if (publishingDisabled) {
-              LOGGER.warn("Skipping publishing of verification results (" + PACT_VERIFIER_PUBLISHRESUTS +
+              LOGGER.warn("Skipping publishing of verification results (" + PACT_VERIFIER_PUBLISH_RESULTS +
                   " is not set to 'true')");
           } else {
               LOGGER.warn("Skipping publishing of verification results as the interactions have been filtered");

@@ -3,10 +3,13 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.model.BrokerUrlSource
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
+import au.com.dius.pact.provider.reporters.VerifierReporter
 import groovy.lang.GroovyObjectSupport
 import mu.KotlinLogging
+import java.util.function.BiConsumer
 import java.util.function.Function
 
 private val logger = KotlinLogging.logger {}
@@ -34,20 +37,55 @@ private fun <I> publishResult(brokerClient: PactBrokerClient, source: BrokerUrlS
   }
 }
 
-open class ProviderVerifierBase : GroovyObjectSupport() {
+/**
+ * Interface to the provider verifier
+ */
+interface IProviderVerifier {
+  /**
+   * List of the all reporters to report the results of the verification to
+   */
+  var reporters: List<VerifierReporter>
 
-  var projectHasProperty = Function<String, Boolean> { name -> !System.getProperty(name).isNullOrEmpty() }
+  /**
+   * Callback to determine if something is a build specific task
+   */
+  var checkBuildSpecificTask: Function<Any, Boolean>
+
+  /**
+   * Consumer SAM to execute the build specific task
+   */
+  var executeBuildSpecificTask: BiConsumer<Any, ProviderState>
+
+  /**
+   * Callback to determine is the project has a particular property
+   */
+  var projectHasProperty: Function<String, Boolean>
+
+  /**
+   * Reports the state of the interaction to all the registered reporters
+   */
+  fun reportStateForInteraction(state: String, provider: IProviderInfo, consumer: IConsumerInfo, isSetup: Boolean)
+}
+
+abstract class ProviderVerifierBase : GroovyObjectSupport(), IProviderVerifier {
+
+  override var projectHasProperty = Function<String, Boolean> { name -> !System.getProperty(name).isNullOrEmpty() }
   var projectGetProperty = Function<String, String?> { name -> System.getProperty(name) }
 
   /**
    * This will return true unless the pact.verifier.publishResults property has the value of "true"
    */
   open fun publishingResultsDisabled(): Boolean {
-    return !projectHasProperty.apply(PACT_VERIFIER_PUBLISHRESUTS) ||
-      projectGetProperty.apply(PACT_VERIFIER_PUBLISHRESUTS)?.toLowerCase() != "true"
+    return !projectHasProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS) ||
+      projectGetProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS)?.toLowerCase() != "true"
   }
 
   companion object {
-    const val PACT_VERIFIER_PUBLISHRESUTS = "pact.verifier.publishResults"
+    const val PACT_VERIFIER_PUBLISH_RESULTS = "pact.verifier.publishResults"
+    const val PACT_FILTER_CONSUMERS = "pact.filter.consumers"
+    const val PACT_FILTER_DESCRIPTION = "pact.filter.description"
+    const val PACT_FILTER_PROVIDERSTATE = "pact.filter.providerState"
+    const val PACT_SHOW_STACKTRACE = "pact.showStacktrace"
+    const val PACT_SHOW_FULLDIFF = "pact.showFullDiff"
   }
 }

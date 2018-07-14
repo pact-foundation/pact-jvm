@@ -32,19 +32,14 @@ import static au.com.dius.pact.provider.ProviderVerifierKt.reportVerificationRes
  * Verifies the providers against the defined consumers in the context of a build plugin
  */
 @Slf4j
+@SuppressWarnings('ConfusingMethodName')
 class ProviderVerifier extends ProviderVerifierBase {
 
-  static final public String PACT_FILTER_CONSUMERS = 'pact.filter.consumers'
-  static final public String PACT_FILTER_DESCRIPTION = 'pact.filter.description'
-  static final public String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
-  static final public String PACT_SHOW_STACKTRACE = 'pact.showStacktrace'
-  static final public String PACT_SHOW_FULLDIFF = 'pact.showFullDiff'
-
   def pactLoadFailureMessage
-  Function<Object, Boolean> isBuildSpecificTask = { null }
+  Function<Object, Boolean> checkBuildSpecificTask = { false }
   BiConsumer<Object, ProviderState> executeBuildSpecificTask = { } as BiConsumer<Object, ProviderState>
   Supplier<URL[]> projectClasspath = { }
-  List<VerifierReporter> reporters = [ new AnsiConsoleReporter() ]
+  List<? extends VerifierReporter> reporters = [ new AnsiConsoleReporter() ]
   Function<Method, Object> providerMethodInstance = { Method m -> m.declaringClass.newInstance() }
   Supplier<String> providerVersion = { System.getProperty('pact.provider.version') }
 
@@ -88,7 +83,7 @@ class ProviderVerifier extends ProviderVerifierBase {
         log.warn('Skipping publishing of verification results as the interactions have been filtered')
       } else if (publishingResultsDisabled()) {
         log.warn('Skipping publishing of verification results as it has been disabled ' +
-          "(${PACT_VERIFIER_PUBLISHRESUTS} is not 'true')")
+          "(${PACT_VERIFIER_PUBLISH_RESULTS} is not 'true')")
       } else {
         reportVerificationResults(pact, result, providerVersion?.get() ?: '0.0.0', client)
       }
@@ -202,7 +197,8 @@ class ProviderVerifier extends ProviderVerifierBase {
     reporters.each { it.interactionDescription(interaction) }
   }
 
-  void reportStateForInteraction(String state, ProviderInfo provider, ConsumerInfo consumer, boolean isSetup) {
+  @Override
+  void reportStateForInteraction(String state, IProviderInfo provider, IConsumerInfo consumer, boolean isSetup) {
     reporters.each { it.stateForInteraction(state, provider, consumer, isSetup) }
   }
 

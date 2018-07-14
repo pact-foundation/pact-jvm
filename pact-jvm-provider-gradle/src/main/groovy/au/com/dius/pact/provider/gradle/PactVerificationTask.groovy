@@ -24,7 +24,7 @@ class PactVerificationTask extends DefaultTask {
       projectHasProperty = { project.hasProperty(it) }
       projectGetProperty = { project.property(it) }
       pactLoadFailureMessage = { 'You must specify the pactfile to execute (use pactFile = ...)' }
-      isBuildSpecificTask = { it instanceof Task || it instanceof String && project.tasks.findByName(it) }
+      checkBuildSpecificTask = { it instanceof Task || it instanceof String && project.tasks.findByName(it) }
       executeBuildSpecificTask = this.&executeStateChangeTask
       projectClasspath = {
         project.sourceSets.test.runtimeClasspath*.toURL() as URL[]
