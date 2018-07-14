@@ -86,6 +86,8 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
       }
     }
 
+    logger.debug { "providerInfo = $providerInfo" }
+
     val pact = lookupPact(providerInfo, pactMethod, context)
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     store.put("pact", pact)
