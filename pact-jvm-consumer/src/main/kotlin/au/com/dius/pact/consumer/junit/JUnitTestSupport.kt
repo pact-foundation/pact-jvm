@@ -3,7 +3,6 @@ package au.com.dius.pact.consumer.junit
 import au.com.dius.pact.consumer.Pact
 import au.com.dius.pact.consumer.PactMismatchesException
 import au.com.dius.pact.consumer.PactVerificationResult
-import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.model.RequestResponsePact
 
 import java.lang.reflect.Method
@@ -18,7 +17,7 @@ object JUnitTestSupport {
     val conforms = (pact != null &&
       RequestResponsePact::class.java.isAssignableFrom(m.returnType) &&
       m.parameterTypes.size == 1 &&
-      m.parameterTypes[0].isAssignableFrom(PactDslWithProvider::class.java))
+      m.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.dsl.PactDslWithProvider")))
 
     if (!conforms && pact != null) {
       throw UnsupportedOperationException("Method ${m.name} does not conform required method signature " +

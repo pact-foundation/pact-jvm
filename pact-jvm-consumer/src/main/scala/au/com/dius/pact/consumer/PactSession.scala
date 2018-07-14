@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.model._
+import au.com.dius.pact.model.{FullRequestMatch, Interaction, OptionalBody, PartialRequestMatch, Request,
+  RequestMatching, RequestMismatch, RequestResponseInteraction, Response, Pact => PactModel}
 import org.apache.commons.lang3.StringEscapeUtils
 
 object PactSessionResults {
@@ -26,7 +27,7 @@ object PactSession {
 
   val empty = PactSession(Seq(), PactSessionResults.empty)
   
-  def forPact[I <: Interaction](pact: Pact[I]) = PactSession(pact.getInteractions, PactSessionResults.empty)
+  def forPact[I <: Interaction](pact: PactModel[I]) = PactSession(pact.getInteractions, PactSessionResults.empty)
 }
 
 case class PactSession(expected: Seq[Interaction], results: PactSessionResults) {

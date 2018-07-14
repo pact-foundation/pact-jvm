@@ -1,9 +1,9 @@
 package au.com.dius.pact.consumer
 
-import java.io.{PrintWriter, File}
+import java.io.{File, PrintWriter}
 
 import com.typesafe.scalalogging.StrictLogging
-import au.com.dius.pact.model._
+import au.com.dius.pact.model.{Interaction, PactMerge, PactSpecVersion, PactWriter, RequestResponseInteraction, Pact => PactModel}
 
 /**
  * Globally accumulates Pacts, merges by destination file, and allows writing to File.
@@ -19,12 +19,12 @@ import au.com.dius.pact.model._
  */
 object PactGenerator {
 
-  def defaultFilename[I <: Interaction](pact: Pact[I]): String = s"${pact.getConsumer.getName}-${pact.getProvider.getName}.json"
+  def defaultFilename[I <: Interaction](pact: PactModel[I]): String = s"${pact.getConsumer.getName}-${pact.getProvider.getName}.json"
 
-  def destinationFileForPact[I <: Interaction](pact: Pact[I]): File = destinationFile(defaultFilename(pact))
+  def destinationFileForPact[I <: Interaction](pact: PactModel[I]): File = destinationFile(defaultFilename(pact))
   def destinationFile(filename: String): File = new File(s"${PactConsumerConfig.pactRootDir}/$filename")
   
-  def merge(pact: Pact[RequestResponseInteraction]): PactGenerator = synchronized {
+  def merge(pact: PactModel[RequestResponseInteraction]): PactGenerator = synchronized {
     pactGen = pactGen merge pact
     pactGen
   }
@@ -33,17 +33,17 @@ object PactGenerator {
     
 }
 
-case class PactGenerator(pacts: Map[String, Pact[RequestResponseInteraction]], conflicts: List[String]) extends StrictLogging {
+case class PactGenerator(pacts: Map[String, PactModel[RequestResponseInteraction]], conflicts: List[String]) extends StrictLogging {
   import PactGenerator._
   
   def failed: Boolean = conflicts.nonEmpty
   
   def isEmpty: Boolean = pacts.isEmpty
 
-  def merge[I <: Interaction](pact: Pact[RequestResponseInteraction]): PactGenerator = {
+  def merge[I <: Interaction](pact: PactModel[RequestResponseInteraction]): PactGenerator = {
     val pactFileName = defaultFilename(pact)
     val existingPact = pacts get pactFileName
-    def directlyAddPact(p: Pact[RequestResponseInteraction]) =
+    def directlyAddPact(p: PactModel[RequestResponseInteraction]) =
       PactGenerator(pacts + (pactFileName -> p), conflicts)
 
     existingPact.fold(directlyAddPact(pact)) { existing =>
@@ -60,7 +60,7 @@ case class PactGenerator(pacts: Map[String, Pact[RequestResponseInteraction]], c
     def createPactRootDir(): Unit = 
       new File(PactConsumerConfig.pactRootDir).mkdirs()
     
-    def writeToFile[I <: Interaction](pact: Pact[I], filename: String): Unit = {
+    def writeToFile[I <: Interaction](pact: PactModel[I], filename: String): Unit = {
       val file = destinationFileForPact(pact)
       logger.debug(s"Writing pact ${pact.getConsumer.getName} -> ${pact.getProvider.getName} to file $file")
       val writer = new PrintWriter(file)
