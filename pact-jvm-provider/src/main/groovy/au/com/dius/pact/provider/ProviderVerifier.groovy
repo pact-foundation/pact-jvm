@@ -175,10 +175,16 @@ class ProviderVerifier extends ProviderVerifierBase {
       interactionMessage = stateChangeResult.message
       reportInteractionDescription(interaction)
 
+      Map context = [
+        providerState: stateChangeResult.stateChangeResult.value,
+        interaction: interaction
+      ]
+
       boolean result = false
       if (ProviderUtils.verificationType(provider, consumer) == PactVerification.REQUST_RESPONSE) {
         log.debug('Verifying via request/response')
-        result = verifyResponseFromProvider(provider, interaction, interactionMessage, failures, providerClient)
+        result = verifyResponseFromProvider(provider, interaction, interactionMessage, failures, providerClient,
+          context)
       } else {
         log.debug('Verifying via annotated test method')
         result = verifyResponseByInvokingProviderMethods(provider, consumer, interaction, interactionMessage, failures)
@@ -203,12 +209,14 @@ class ProviderVerifier extends ProviderVerifierBase {
     reporters.each { it.stateForInteraction(state, provider, consumer, isSetup) }
   }
 
+  @SuppressWarnings('ParameterCount')
   boolean verifyResponseFromProvider(ProviderInfo provider, Interaction interaction, String interactionMessage,
                                      Map failures,
-                                     ProviderClient client) {
+                                     ProviderClient client,
+                                     Map context = [:]) {
     try {
       def expectedResponse = interaction.response
-      def actualResponse = client.makeRequest(interaction.request.generatedRequest())
+      def actualResponse = client.makeRequest(interaction.request.generatedRequest(context))
 
       verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
     } catch (e) {
@@ -281,7 +289,7 @@ class ProviderVerifier extends ProviderVerifierBase {
 
   @SuppressWarnings(['ThrowRuntimeException', 'ParameterCount'])
   boolean verifyResponseByInvokingProviderMethods(ProviderInfo providerInfo, ConsumerInfo consumer,
-                                               def interaction, String interactionMessage, Map failures) {
+                                                  def interaction, String interactionMessage, Map failures) {
     try {
       def urls = projectClasspath.get()
       URLClassLoader loader = new URLClassLoader(urls, GroovyObject.classLoader)

@@ -46,7 +46,7 @@ fun lookupGenerator(generatorMap: Map<String, Any>): Generator? {
 }
 
 interface Generator {
-  fun generate(base: Any?): Any
+  fun generate(context: Map<String, Any?>): Any?
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any>
 }
 
@@ -55,7 +55,7 @@ data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
     return mapOf("type" to "RandomInt", "min" to min, "max" to max)
   }
 
-  override fun generate(base: Any?): Any {
+  override fun generate(context: Map<String, Any?>): Any {
     return RandomUtils.nextInt(min, max)
   }
 
@@ -83,7 +83,7 @@ data class RandomDecimalGenerator(val digits: Int) : Generator {
     return mapOf("type" to "RandomDecimal", "digits" to digits)
   }
 
-  override fun generate(base: Any?): Any = BigDecimal(RandomStringUtils.randomNumeric(digits))
+  override fun generate(context: Map<String, Any?>): Any = BigDecimal(RandomStringUtils.randomNumeric(digits))
 
   companion object {
     fun fromMap(map: Map<String, Any>): RandomDecimalGenerator {
@@ -103,7 +103,7 @@ data class RandomHexadecimalGenerator(val digits: Int) : Generator {
     return mapOf("type" to "RandomHexadecimal", "digits" to digits)
   }
 
-  override fun generate(base: Any?): Any = RandomStringUtils.random(digits, "0123456789abcdef")
+  override fun generate(context: Map<String, Any?>): Any = RandomStringUtils.random(digits, "0123456789abcdef")
 
   companion object {
     fun fromMap(map: Map<String, Any>): RandomHexadecimalGenerator {
@@ -123,7 +123,7 @@ data class RandomStringGenerator(val size: Int = 20) : Generator {
     return mapOf("type" to "RandomString", "size" to size)
   }
 
-  override fun generate(base: Any?): Any {
+  override fun generate(context: Map<String, Any?>): Any {
     return RandomStringUtils.randomAlphanumeric(size)
   }
 
@@ -145,7 +145,7 @@ data class RegexGenerator(val regex: String) : Generator {
     return mapOf("type" to "Regex", "regex" to regex)
   }
 
-  override fun generate(base: Any?): Any = Generex(regex).random()
+  override fun generate(context: Map<String, Any?>): Any = Generex(regex).random()
 
   companion object {
     fun fromMap(map: Map<String, Any>) = RegexGenerator(map["regex"]!! as String)
@@ -157,7 +157,7 @@ object UuidGenerator : Generator {
     return mapOf("type" to "Uuid")
   }
 
-  override fun generate(base: Any?): Any {
+  override fun generate(context: Map<String, Any?>): Any {
     return UUID.randomUUID().toString()
   }
 
@@ -175,7 +175,7 @@ data class DateGenerator(val format: String? = null) : Generator {
     return mapOf("type" to "Date")
   }
 
-  override fun generate(base: Any?): Any {
+  override fun generate(context: Map<String, Any?>): Any {
     return if (format != null) {
       OffsetDateTime.now().format(DateTimeFormatter.ofPattern(format))
     } else {
@@ -198,7 +198,7 @@ data class TimeGenerator(val format: String? = null) : Generator {
     return mapOf("type" to "Time")
   }
 
-  override fun generate(base: Any?): Any {
+  override fun generate(context: Map<String, Any?>): Any {
     return if (format != null) {
       OffsetTime.now().format(DateTimeFormatter.ofPattern(format))
     } else {
@@ -221,7 +221,7 @@ data class DateTimeGenerator(val format: String? = null) : Generator {
     return mapOf("type" to "DateTime")
   }
 
-  override fun generate(base: Any?): Any {
+  override fun generate(context: Map<String, Any?>): Any {
     return if (format != null) {
       ZonedDateTime.now().format(DateTimeFormatter.ofPattern(format))
     } else {
@@ -241,7 +241,7 @@ object RandomBooleanGenerator : Generator {
     return mapOf("type" to "RandomBoolean")
   }
 
-  override fun generate(base: Any?): Any {
+  override fun generate(context: Map<String, Any?>): Any {
     return ThreadLocalRandom.current().nextBoolean()
   }
 
@@ -250,5 +250,17 @@ object RandomBooleanGenerator : Generator {
   @Suppress("UNUSED_PARAMETER")
   fun fromMap(map: Map<String, Any>): RandomBooleanGenerator {
     return RandomBooleanGenerator
+  }
+}
+
+data class ProviderStateGenerator(val expression: String) : Generator {
+  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+    return mapOf("type" to "ProviderState", "expression" to expression)
+  }
+
+  override fun generate(context: Map<String, Any?>): Any? = (context["providerState"] as Map<String, Any>)[expression]
+
+  companion object {
+    fun fromMap(map: Map<String, Any>) = ProviderStateGenerator(map["expression"]!! as String)
   }
 }

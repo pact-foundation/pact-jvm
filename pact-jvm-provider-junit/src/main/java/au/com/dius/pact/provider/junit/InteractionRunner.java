@@ -106,7 +106,12 @@ public class InteractionRunner extends Runner {
 
   private static void validateStateChangeMethods(TestClass testClass, final List<Throwable> errors) {
     getAnnotatedMethods(testClass, State.class).forEach(method -> {
-      method.validatePublicVoid(false, errors);
+      if (method.isStatic()) {
+        errors.add(new Exception("Method " + method.getName() + "() should not be static"));
+      }
+      if (!method.isPublic()) {
+        errors.add(new Exception("Method " + method.getName() + "() should be public"));
+      }
       if (method.getMethod().getParameterCount() == 1 && !Map.class.isAssignableFrom(method.getMethod().getParameterTypes()[0])) {
         errors.add(new Exception("Method " + method.getName() + " should take only a single Map parameter"));
       } else if (method.getMethod().getParameterCount() > 1) {
@@ -260,24 +265,24 @@ public class InteractionRunner extends Runner {
   }
 
   protected Statement withStateChanges(final Interaction interaction, final Object target, final Statement statement) {
-        if (!interaction.getProviderStates().isEmpty()) {
-          Statement stateChange = statement;
-          for (ProviderState state: interaction.getProviderStates()) {
-            List<FrameworkMethod> methods = getAnnotatedMethods(testClass, State.class)
-              .stream().filter(ann -> ArrayUtils.contains(ann.getAnnotation(State.class).value(), state.getName()))
-              .collect(Collectors.toList());
-            if (methods.isEmpty()) {
-              return new Fail(new MissingStateChangeMethod("MissingStateChangeMethod: Did not find a test class method annotated with @State(\""
-                + state.getName() + "\")"));
-            } else {
-              stateChange = new RunStateChanges(stateChange, methods, target, state);
-            }
-          }
-          return stateChange;
+    if (!interaction.getProviderStates().isEmpty()) {
+      Statement stateChange = statement;
+      for (ProviderState state: interaction.getProviderStates()) {
+        List<FrameworkMethod> methods = getAnnotatedMethods(testClass, State.class)
+          .stream().filter(ann -> ArrayUtils.contains(ann.getAnnotation(State.class).value(), state.getName()))
+          .collect(Collectors.toList());
+        if (methods.isEmpty()) {
+          return new Fail(new MissingStateChangeMethod("MissingStateChangeMethod: Did not find a test class method annotated with @State(\""
+            + state.getName() + "\")"));
         } else {
-            return statement;
+          stateChange = new RunStateChanges(stateChange, methods, target, state);
         }
+      }
+      return stateChange;
+    } else {
+        return statement;
     }
+  }
 
     private static List<FrameworkMethod> getAnnotatedMethods(TestClass testClass, Class<? extends Annotation> annotation){
       List<FrameworkMethod> methodsFromTestClass = testClass.getAnnotatedMethods(annotation);
