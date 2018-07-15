@@ -33,7 +33,7 @@ interface TestTarget {
    *
    * @return a pair of the client class and request to use for the test, or null if there is none
    */
-  fun prepareRequest(interaction: Interaction): Pair<Any, Any>?
+  fun prepareRequest(interaction: Interaction, context: Map<String, Any?>): Pair<Any, Any>?
 
   /**
    * If this is a request response (HTTP or HTTPS) target
@@ -76,10 +76,10 @@ open class HttpTestTarget @JvmOverloads constructor (
     return providerInfo
   }
 
-  override fun prepareRequest(interaction: Interaction): Pair<Any, Any>? {
+  override fun prepareRequest(interaction: Interaction, context: Map<String, Any?>): Pair<Any, Any>? {
     val providerClient = ProviderClient(getProviderInfo("provider"), HttpClientFactory())
     if (interaction is RequestResponseInteraction) {
-      return providerClient.prepareRequest(interaction.request.generatedRequest()) to providerClient
+      return providerClient.prepareRequest(interaction.request.generatedRequest(context)) to providerClient
     }
     throw UnsupportedOperationException("Only request/response interactions can be used with an HTTP test target")
   }
@@ -168,7 +168,7 @@ open class AmpqTestTarget(val packagesToScan: List<String> = emptyList()) : Test
     return providerInfo
   }
 
-  override fun prepareRequest(interaction: Interaction): Pair<Any, Any>? {
+  override fun prepareRequest(interaction: Interaction, context: Map<String, Any?>): Pair<Any, Any>? {
     if (interaction is Message) {
       return null
     }

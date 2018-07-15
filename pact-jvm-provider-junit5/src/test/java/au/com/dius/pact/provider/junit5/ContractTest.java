@@ -18,11 +18,13 @@ import ru.lanwen.wiremock.ext.WiremockUriResolver;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static java.lang.String.format;
 
@@ -65,6 +67,7 @@ public class ContractTest {
       server.stubFor(
         get(urlPathEqualTo("/data"))
           .withHeader("X-ContractTest", equalTo("true"))
+          .withQueryParam("ticketId", matching("0000|1234|99987"))
           .willReturn(aResponse()
             .withStatus(204)
             .withHeader("Location", format("http://localhost:%s/ticket/%s", server.port(), "1234")
@@ -74,16 +77,23 @@ public class ContractTest {
     }
 
     @State("default")
-    public void toDefaultState() {
-        // Prepare service before interaction that require "default" state
-        // ...
+    public Map<String, Object> toDefaultState() {
+      // Prepare service before interaction that require "default" state
+      // ...
       LOGGER.info("Now service in default state");
+
+      HashMap<String, Object> map = new HashMap<>();
+      map.put("ticketId", "1234");
+      return map;
     }
 
     @State("state 2")
-    public void toSecondState(Map params) {
-        // Prepare service before interaction that require "state 2" state
-        // ...
-        LOGGER.info("Now service in 'state 2' state: " + params);
+    public Map<String, Object> toSecondState(Map params) {
+      // Prepare service before interaction that require "state 2" state
+      // ...
+      LOGGER.info("Now service in 'state 2' state: " + params);
+      HashMap<String, Object> map = new HashMap<>();
+      map.put("ticketId", "99987");
+      return map;
     }
 }

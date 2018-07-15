@@ -3,7 +3,7 @@ failFast: false
 
 build:
   warningThreshold: 5
-  failThreshold: 25
+  maxIssues: 25
   weights:
     complexity: 2
     formatting: 1

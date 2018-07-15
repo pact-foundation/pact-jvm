@@ -56,6 +56,7 @@ data class PactVerificationContext(
   val interaction: Interaction,
   internal var testExecutionResult: Boolean = false
 ) {
+  var executionContext: Map<String, Any?>? = null
 
   /**
    * Called to verify the interaction from the test template method.
@@ -164,7 +165,7 @@ class PactVerificationExtension(
     prepareVerifier(testContext, context)
     store.put("verifier", testContext.verifier)
 
-    val requestAndClient = testContext.target.prepareRequest(interaction)
+    val requestAndClient = testContext.target.prepareRequest(interaction, testContext.executionContext ?: emptyMap())
     if (requestAndClient != null) {
       val (request, client) = requestAndClient
       store.put("request", request)
@@ -246,14 +247,21 @@ class PactVerificationExtension(
  * JUnit 5 test extension class for executing state change callbacks
  */
 class PactVerificationStateChangeExtension(private val interaction: Interaction) : BeforeTestExecutionCallback {
-  override fun beforeTestExecution(context: ExtensionContext) {
+  override fun beforeTestExecution(extensionContext: ExtensionContext) {
     logger.debug { "beforeEach for interaction '${interaction.description}'" }
-    invokeStateChangeMethods(context, interaction.providerStates)
+    val providerStateContext = invokeStateChangeMethods(extensionContext, interaction.providerStates)
+    val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
+    val testContext = store.get("interactionContext") as PactVerificationContext
+    testContext.executionContext = mapOf("providerState" to providerStateContext)
   }
 
-  private fun invokeStateChangeMethods(context: ExtensionContext, providerStates: List<ProviderState>) {
+  private fun invokeStateChangeMethods(
+    context: ExtensionContext,
+    providerStates: List<ProviderState>
+  ): Map<String, Any?> {
     val errors = mutableListOf<String>()
 
+    val providerStateContext = mutableMapOf<String, Any?>()
     providerStates.forEach {
       val stateChangeMethods = findStateChangeMethods(context.requiredTestClass, it)
       if (stateChangeMethods.isEmpty()) {
@@ -261,10 +269,14 @@ class PactVerificationStateChangeExtension(private val interaction: Interaction)
       } else {
         stateChangeMethods.forEach { method ->
           logger.debug { "Invoking state change method ${method.name} for state '${it.name}'" }
-          if (method.parameterCount > 0) {
+          val stateChangeValue = if (method.parameterCount > 0) {
             ReflectionSupport.invokeMethod(method, context.requiredTestInstance, it.params)
           } else {
             ReflectionSupport.invokeMethod(method, context.requiredTestInstance)
+          }
+
+          if (stateChangeValue is Map<*, *>) {
+            providerStateContext.putAll(stateChangeValue as Map<String, Any?>)
           }
         }
       }
@@ -273,6 +285,8 @@ class PactVerificationStateChangeExtension(private val interaction: Interaction)
     if (errors.isNotEmpty()) {
       throw MissingStateChangeMethod(errors.joinToString("\n"))
     }
+
+    return providerStateContext
   }
 
   private fun findStateChangeMethods(testClass: Class<*>, state: ProviderState): List<Method> {
