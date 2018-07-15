@@ -5,7 +5,6 @@ import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.Request
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.provider.GroovyScalaUtils$
-import au.com.dius.pact.provider.HttpClientFactory
 import au.com.dius.pact.provider.IHttpClientFactory
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.ProviderClient
@@ -19,8 +18,6 @@ import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
 import spock.lang.Specification
 import spock.lang.Unroll
-
-import java.lang.reflect.InvocationTargetException
 
 @SuppressWarnings(['ClosureAsLastMethodParameter', 'MethodCount'])
 class ProviderClientSpec extends Specification {
@@ -322,7 +319,7 @@ class ProviderClientSpec extends Specification {
     0 * _
   }
 
-  def 'execute request filter executes any Java Function'() {
+  def 'execute request filter rejects anything with more than one parameter'() {
     given:
     provider.requestFilter = GroovyJavaUtils.function2RequestFilter()
 
@@ -330,7 +327,7 @@ class ProviderClientSpec extends Specification {
     client.executeRequestFilter(httpRequest)
 
     then:
-    1 * httpRequest.addHeader('Java Function', 'was called')
+    thrown(IllegalArgumentException)
     1 * client.executeRequestFilter(_)
     0 * _
   }
@@ -347,19 +344,6 @@ class ProviderClientSpec extends Specification {
     0 * _
   }
 
-  def 'execute request filter throws an exception with parameters in a different order'() {
-    given:
-    provider.requestFilter = GroovyJavaUtils.function2RequestFilterWithParametersSwapped()
-
-    when:
-    client.executeRequestFilter(httpRequest)
-
-    then:
-    thrown(InvocationTargetException)
-    1 * client.executeRequestFilter(_)
-    0 * _
-  }
-
   def 'execute request filter throws an exception invalid Java Function parameters'() {
     given:
     provider.requestFilter = GroovyJavaUtils.invalidFunction2RequestFilter()
@@ -368,20 +352,7 @@ class ProviderClientSpec extends Specification {
     client.executeRequestFilter(httpRequest)
 
     then:
-    thrown(InvocationTargetException)
-    1 * client.executeRequestFilter(_)
-    0 * _
-  }
-
-  def 'execute request filter executes any java functions that take no parameters'() {
-    given:
-    provider.requestFilter = GroovyJavaUtils.supplierRequestFilter()
-
-    when:
-    client.executeRequestFilter(httpRequest)
-
-    then:
-    notThrown(IllegalArgumentException)
+    thrown(IllegalArgumentException)
     1 * client.executeRequestFilter(_)
     0 * _
   }

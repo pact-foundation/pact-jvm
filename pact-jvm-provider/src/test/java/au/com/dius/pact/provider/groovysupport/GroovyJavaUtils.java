@@ -47,8 +47,4 @@ public class GroovyJavaUtils {
   public static BiFunction<Boolean, Long, Object> invalidFunction2RequestFilter() {
     return (p1, p2) -> null;
   }
-
-  public static Supplier<HttpRequest> supplierRequestFilter() {
-    return () -> null;
-  }
 }

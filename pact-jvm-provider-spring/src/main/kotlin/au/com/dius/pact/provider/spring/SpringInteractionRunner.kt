@@ -99,7 +99,7 @@ open class SpringInteractionRunner<I>(
     if (target is SpringBootHttpTarget) {
       val environment = testContextManager.testContext.applicationContext.environment
       val port = environment.getProperty("local.server.port")
-      target.setPort(Integer.parseInt(port))
+      target.port = Integer.parseInt(port)
     }
   }
 }

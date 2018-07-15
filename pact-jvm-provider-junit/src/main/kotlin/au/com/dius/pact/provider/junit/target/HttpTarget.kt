@@ -1,0 +1,128 @@
+package au.com.dius.pact.provider.junit.target
+
+import au.com.dius.pact.model.Interaction
+import au.com.dius.pact.model.PactSource
+import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.HttpClientFactory
+import au.com.dius.pact.provider.ProviderClient
+import au.com.dius.pact.provider.ProviderInfo
+import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.junit.Provider
+import au.com.dius.pact.provider.junit.TargetRequestFilter
+import org.apache.http.HttpRequest
+import java.net.URL
+import java.util.function.Consumer
+
+/**
+ * Out-of-the-box implementation of [Target],
+ * that run [Interaction] against http service and verify response
+ */
+open class HttpTarget
+  /**
+   *
+   * @param host host of tested service
+   * @param port port of tested service
+   * @param protocol protocol of the tested service
+   * @param path path of the tested service
+   * @param insecure true if certificates should be ignored
+   */
+  @JvmOverloads constructor(
+    val protocol: String = "http",
+    val host: String = "127.0.0.1",
+    open val port: Int = 8080,
+    val path: String = "/",
+    val insecure: Boolean = false
+  ) : BaseTarget() {
+
+  /**
+   * @param port port of tested service
+   */
+  @JvmOverloads constructor(host: String = "127.0.0.1", port: Int) : this("http", host, port)
+
+  /**
+   * @param url url of the tested service
+   * @param insecure true if certificates should be ignored
+   */
+  @JvmOverloads constructor(url: URL, insecure: Boolean = false) : this(
+    if (url.protocol == null) "http" else url.protocol,
+    url.host,
+    if (url.port == -1 && url.protocol.equals("http", ignoreCase = true)) 8080
+    else if (url.port == -1 && url.protocol.equals("https", ignoreCase = true)) 443
+    else url.port,
+    if (url.path == null) "/" else url.path,
+    insecure
+  )
+
+  /**
+   * {@inheritDoc}
+   */
+  override fun testInteraction(consumerName: String, interaction: Interaction, source: PactSource) {
+    val provider = getProviderInfo(source)
+    val consumer = ConsumerInfo(consumerName)
+    val verifier = setupVerifier(interaction, provider, consumer)
+
+    val failures = mutableMapOf<String, Any>()
+    val client = ProviderClient(provider, HttpClientFactory())
+    verifier.verifyResponseFromProvider(provider, interaction, interaction.description, failures, client)
+    reportTestResult(failures.isEmpty(), verifier)
+
+    try {
+      if (!failures.isEmpty()) {
+        verifier.displayFailures(failures)
+        throw getAssertionError(failures)
+      }
+    } finally {
+      verifier.finialiseReports()
+    }
+  }
+
+  override fun setupVerifier(
+    interaction: Interaction,
+    provider: ProviderInfo,
+    consumer: ConsumerInfo
+  ): ProviderVerifier {
+    val verifier = ProviderVerifier()
+
+    setupReporters(verifier, provider.name, interaction.description)
+
+    verifier.initialiseReporters(provider)
+    verifier.reportVerificationForConsumer(consumer, provider)
+
+    if (!interaction.providerStates.isEmpty()) {
+      for ((name) in interaction.providerStates) {
+        verifier.reportStateForInteraction(name, provider, consumer, true)
+      }
+    }
+
+    verifier.reportInteractionDescription(interaction)
+
+    return verifier
+  }
+
+  override fun getProviderInfo(source: PactSource): ProviderInfo {
+    val provider = testClass.getAnnotation(Provider::class.java)
+    val providerInfo = ProviderInfo(provider.value)
+    providerInfo.setPort(port)
+    providerInfo.setHost(host)
+    providerInfo.setProtocol(protocol)
+    providerInfo.setPath(path)
+    providerInfo.isInsecure = insecure
+
+    if (testClass != null) {
+      val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
+      if (!methods.isEmpty()) {
+        providerInfo.setRequestFilter(Consumer { httpRequest: HttpRequest ->
+          methods.forEach { method ->
+            try {
+              method.invokeExplosively(testTarget, httpRequest)
+            } catch (t: Throwable) {
+              throw AssertionError("Request filter method ${method.name} failed with an exception", t)
+            }
+          }
+        })
+      }
+    }
+
+    return providerInfo
+  }
+}
