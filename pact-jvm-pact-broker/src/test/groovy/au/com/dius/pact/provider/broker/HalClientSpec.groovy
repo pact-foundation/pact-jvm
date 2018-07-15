@@ -1,8 +1,9 @@
 package au.com.dius.pact.provider.broker
 
+import au.com.dius.pact.com.github.michaelbull.result.Err
+import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.pactbroker.InvalidHalResponse
 import au.com.dius.pact.pactbroker.NotFoundHalResponse
-import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.ProtocolVersion
@@ -262,8 +263,8 @@ class HalClientSpec extends Specification {
     where:
 
     success   | status | expectedResult
-    'success' | 200    | new Result.Success(true)
-    'failure' | 400    | new Result.Success(false)
+    'success' | 200    | new Ok(true)
+    'failure' | 400    | new Ok(false)
   }
 
   def 'post URL returns a failure result if an exception is thrown'() {
@@ -276,7 +277,7 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute(_) >> { throw new IOException('Boom!') }
-    result instanceof Result.Failure
+    result instanceof Err
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -292,7 +293,7 @@ class HalClientSpec extends Specification {
     def result = client.postJson('path', 'body') { status, resp -> false }
 
     then:
-    result == new Result.Success(false)
+    result == new Ok(false)
   }
 
   def 'forAll does nothing if there is no matching link'() {

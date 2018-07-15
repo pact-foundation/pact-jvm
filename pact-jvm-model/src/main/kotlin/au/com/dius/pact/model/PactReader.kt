@@ -1,7 +1,9 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.com.github.michaelbull.result.Err
+import au.com.dius.pact.com.github.michaelbull.result.Ok
+import au.com.dius.pact.com.github.michaelbull.result.Result
 import au.com.dius.pact.provider.broker.PactBrokerClient
-import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import au.com.dius.pact.util.HttpClientUtils
 import au.com.dius.pact.util.HttpClientUtils.isJsonResponse
 import com.google.gson.JsonElement
@@ -35,8 +37,8 @@ fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: Clos
     else -> if (options.containsKey("authentication")) {
       val jsonResource = fetchJsonResource(http!!, options, source)
       when (jsonResource) {
-        is Result.Success -> jsonResource.value
-        is Result.Failure -> throw jsonResource.error
+        is Ok -> jsonResource.value
+        is Err -> throw jsonResource.error
       }
     } else {
       JsonSlurper().parse(URL(source.url), ACCEPT_JSON) to source
@@ -45,7 +47,7 @@ fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: Clos
 }
 
 fun fetchJsonResource(http: CloseableHttpClient, options: Map<String, Any>, source: UrlPactSource):
-        Result<Pair<JsonElement, UrlPactSource>, Exception> {
+  Result<Pair<JsonElement, UrlPactSource>, Exception> {
   return Result.of {
     val httpGet = HttpGet(HttpClientUtils.buildUrl("", source.url, true))
     httpGet.addHeader("Content-Type", "application/json")

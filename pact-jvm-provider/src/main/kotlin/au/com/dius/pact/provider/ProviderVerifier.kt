@@ -1,11 +1,11 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.model.BrokerUrlSource
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.provider.broker.PactBrokerClient
-import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import groovy.lang.GroovyObjectSupport
 import mu.KotlinLogging
@@ -29,7 +29,7 @@ fun <I> reportVerificationResults(pact: Pact<I>, result: Boolean, version: Strin
 
 private fun <I> publishResult(brokerClient: PactBrokerClient, source: BrokerUrlSource, result: Boolean, version: String, pact: Pact<I>) where I : Interaction {
   val publishResult = brokerClient.publishVerificationResults(source.attributes, result, version)
-  if (publishResult is Result.Failure) {
+  if (publishResult is Err) {
     logger.warn { "Failed to publish verification results - ${publishResult.error.localizedMessage}" }
     logger.debug(publishResult.error) {}
   } else {

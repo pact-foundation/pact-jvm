@@ -14,7 +14,6 @@ import au.com.dius.pact.model.UnknownPactSource
 import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.provider.broker.PactBrokerClient
-import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import spock.lang.Specification
@@ -448,7 +447,7 @@ class ProviderVerifierSpec extends Specification {
     ProviderVerifierKt.reportVerificationResults(pact, true, '0', client)
 
     then:
-    1 * client.publishVerificationResults(links, true, '0', null) >> new Result.Success(true)
+    1 * client.publishVerificationResults(links, true, '0', null) >> new Ok(true)
   }
 
   @SuppressWarnings('UnnecessaryGetter')

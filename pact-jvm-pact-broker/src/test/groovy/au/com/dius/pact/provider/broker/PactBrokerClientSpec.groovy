@@ -1,8 +1,9 @@
 package au.com.dius.pact.provider.broker
 
+import au.com.dius.pact.com.github.michaelbull.result.Err
+import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.pactbroker.IHalClient
 import au.com.dius.pact.pactbroker.NotFoundHalResponse
-import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import spock.lang.Specification
@@ -216,7 +217,7 @@ class PactBrokerClientSpec extends Specification {
     def client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
-    halClient.postJson('URL', _) >> new Result.Success(true)
+    halClient.postJson('URL', _) >> new Ok(true)
 
     expect:
     client.publishVerificationResults(attributes, true, '0', null).class.simpleName == result
@@ -224,10 +225,10 @@ class PactBrokerClientSpec extends Specification {
     where:
 
     reason                              | attributes                                         | result
-    'there is no verification link'     | [:]                                                | Result.Failure.simpleName
-    'the verification link has no href' | ['pb:publish-verification-results': [:]]           | Result.Failure.simpleName
-    'the broker client returns success' | ['pb:publish-verification-results': [href: 'URL']] | Result.Success.simpleName
-    'the links have different case'     | ['pb:Publish-Verification-Results': [HREF: 'URL']] | Result.Success.simpleName
+    'there is no verification link'     | [:]                                                | Err.simpleName
+    'the verification link has no href' | ['pb:publish-verification-results': [:]]           | Err.simpleName
+    'the broker client returns success' | ['pb:publish-verification-results': [href: 'URL']] | Ok.simpleName
+    'the links have different case'     | ['pb:Publish-Verification-Results': [HREF: 'URL']] | Ok.simpleName
   }
 
   def 'when fetching a pact, return the results as a Map'() {
