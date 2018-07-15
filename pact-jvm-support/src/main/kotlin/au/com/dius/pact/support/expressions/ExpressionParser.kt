@@ -17,10 +17,12 @@ object ExpressionParser {
   @JvmOverloads
   @JvmStatic
   fun parseExpression(value: String, valueResolver: ValueResolver = SystemPropertyResolver()): String {
-    return if (value.contains(START_EXPRESSION)) {
+    return if (containsExpressions(value)) {
       replaceExpressions(value, valueResolver)
     } else value
   }
+
+  fun containsExpressions(value: String) = value.contains(START_EXPRESSION)
 
   private fun replaceExpressions(value: String, valueResolver: ValueResolver): String {
     val joiner = StringJoiner("")

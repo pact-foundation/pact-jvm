@@ -1,6 +1,9 @@
 package au.com.dius.pact.model.generators
 
 import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.support.expressions.ExpressionParser.containsExpressions
+import au.com.dius.pact.support.expressions.ExpressionParser.parseExpression
+import au.com.dius.pact.support.expressions.MapValueResolver
 import com.mifmif.common.regex.Generex
 import mu.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
@@ -258,7 +261,20 @@ data class ProviderStateGenerator(val expression: String) : Generator {
     return mapOf("type" to "ProviderState", "expression" to expression)
   }
 
-  override fun generate(context: Map<String, Any?>): Any? = (context["providerState"] as Map<String, Any>)[expression]
+  override fun generate(context: Map<String, Any?>): Any? {
+    val providerState = context["providerState"]
+    return when (providerState) {
+      is Map<*, *> -> {
+        val map = providerState as Map<String, Any>
+        if (containsExpressions(expression)) {
+          parseExpression(expression, MapValueResolver(map))
+        } else {
+          map[expression]
+        }
+      }
+      else -> null
+    }
+  }
 
   companion object {
     fun fromMap(map: Map<String, Any>) = ProviderStateGenerator(map["expression"]!! as String)
