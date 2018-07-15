@@ -7,23 +7,18 @@ import au.com.dius.pact.provider.ProviderInfo;
 import au.com.dius.pact.provider.ProviderVerifier;
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport;
 import au.com.dius.pact.provider.junit.VerificationReports;
-import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver;
-import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
 import au.com.dius.pact.provider.reporters.ReporterManager;
 import au.com.dius.pact.provider.reporters.VerifierReporter;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import au.com.dius.pact.support.expressions.SystemPropertyResolver;
+import au.com.dius.pact.support.expressions.ValueResolver;
 import org.jooq.lambda.Seq;
-import org.jooq.lambda.tuple.Tuple2;
 import org.junit.runners.model.TestClass;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 /**
  * Out-of-the-box implementation of {@link Target},

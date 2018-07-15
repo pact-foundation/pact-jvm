@@ -1,4 +1,4 @@
-package au.com.dius.pact.provider.junit.sysprops
+package au.com.dius.pact.support.expressions
 
 import org.junit.Before
 import org.junit.Test

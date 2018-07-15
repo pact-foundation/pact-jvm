@@ -18,8 +18,8 @@ import au.com.dius.pact.provider.junit.State
 import au.com.dius.pact.provider.junit.VerificationReports
 import au.com.dius.pact.provider.junit.loader.PactLoader
 import au.com.dius.pact.provider.junit.loader.PactSource
-import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver
-import au.com.dius.pact.provider.junit.sysprops.ValueResolver
+import au.com.dius.pact.support.expressions.ValueResolver
+import au.com.dius.pact.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.provider.reporters.ReporterManager
 import mu.KLogging
 import org.apache.http.HttpRequest

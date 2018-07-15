@@ -1,5 +1,5 @@
 dependencies {
-    compile project(":pact-jvm-provider-junit_${project.scalaVersion}")
+    compile project(":pact-jvm-support"), project(":pact-jvm-provider-junit_${project.scalaVersion}")
     compile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
 
     testRuntime "ch.qos.logback:logback-classic:${project.logbackVersion}"

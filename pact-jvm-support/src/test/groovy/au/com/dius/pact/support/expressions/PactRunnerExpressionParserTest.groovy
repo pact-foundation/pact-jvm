@@ -1,8 +1,8 @@
-package au.com.dius.pact.provider.junit.sysprops
+package au.com.dius.pact.support.expressions
 
 import org.junit.Test
 
-import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.VALUES_SEPARATOR
+import static au.com.dius.pact.support.expressions.PactRunnerExpressionParser.VALUES_SEPARATOR
 import static org.hamcrest.CoreMatchers.is
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.containsInAnyOrder
