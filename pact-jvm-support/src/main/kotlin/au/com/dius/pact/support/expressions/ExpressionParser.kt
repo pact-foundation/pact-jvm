@@ -2,7 +2,7 @@ package au.com.dius.pact.support.expressions
 
 import java.util.StringJoiner
 
-object PactRunnerExpressionParser {
+object ExpressionParser {
 
   const val VALUES_SEPARATOR = ","
   const val START_EXPRESSION = "\${"

@@ -9,7 +9,7 @@ import au.com.dius.pact.support.expressions.ValueResolver
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 
-import static au.com.dius.pact.support.expressions.PactRunnerExpressionParser.VALUES_SEPARATOR
+import static au.com.dius.pact.support.expressions.ExpressionParser.VALUES_SEPARATOR
 
 class PactBrokerLoaderSpec extends Specification {
 

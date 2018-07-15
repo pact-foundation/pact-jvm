@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static au.com.dius.pact.support.expressions.PactRunnerExpressionParser.parseExpression;
-import static au.com.dius.pact.support.expressions.PactRunnerExpressionParser.parseListExpression;
+import static au.com.dius.pact.support.expressions.ExpressionParser.parseExpression;
+import static au.com.dius.pact.support.expressions.ExpressionParser.parseListExpression;
 import static java.util.stream.Collectors.toList;
 
 /**
