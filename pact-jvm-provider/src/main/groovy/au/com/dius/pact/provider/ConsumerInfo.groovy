@@ -5,7 +5,6 @@ import au.com.dius.pact.model.ClosurePactSource
 import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.FileSource
 import au.com.dius.pact.model.PactSource
-import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import groovy.transform.Canonical
