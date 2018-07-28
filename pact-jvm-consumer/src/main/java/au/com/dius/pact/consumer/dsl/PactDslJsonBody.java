@@ -865,6 +865,7 @@ public class PactDslJsonBody extends DslPart {
      */
     public PactDslJsonBody hexValue(String name) {
       generators.addGenerator(Category.BODY, matcherKey(name), new RandomHexadecimalGenerator(10));
+      int hex = 0x1234a;
       return hexValue(name, "1234a");
     }
 

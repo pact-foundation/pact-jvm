@@ -14,6 +14,11 @@ import java.util.function.Function
 
 private val logger = KotlinLogging.logger {}
 
+interface VerificationReporter {
+  fun <I> reportResults(pact: Pact<I>, result: Boolean, version: String, client: PactBrokerClient? = null)
+    where I: Interaction
+}
+
 @JvmOverloads
 fun <I> reportVerificationResults(pact: Pact<I>, result: Boolean, version: String, client: PactBrokerClient? = null)
   where I: Interaction {
@@ -25,6 +30,11 @@ fun <I> reportVerificationResults(pact: Pact<I>, result: Boolean, version: Strin
     }
     else -> logger.info { "Skipping publishing verification results for source $source" }
   }
+}
+
+object DefaultVerificationReporter : VerificationReporter {
+  override fun <I> reportResults(pact: Pact<I>, result: Boolean, version: String, client: PactBrokerClient?)
+    where I: Interaction = reportVerificationResults(pact, result, version, client)
 }
 
 private fun <I> publishResult(brokerClient: PactBrokerClient, source: BrokerUrlSource, result: Boolean, version: String, pact: Pact<I>) where I : Interaction {

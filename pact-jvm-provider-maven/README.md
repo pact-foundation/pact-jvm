@@ -675,3 +675,25 @@ For pacts that are loaded from a Pact Broker, the results of running the verific
  broker against the URL for the pact. You will be able to then see the result on the Pact Broker home screen.
  
 To turn on the verification publishing, set the system property `pact.verifier.publishResults` to `true` in the pact maven plugin, not surefire, configuration.
+
+# Enabling other verification reports [version 3.5.20+]
+
+By default the verification report is written to the console. You can also enable a JSON or Markdown report by setting
+the `reports` configuration list.
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.20</version>
+    <configuration>
+      <reports>
+          <report>console</report>
+          <report>json</report>
+          <report>markdown</report>
+      </reports>
+    </configuration>
+</plugin>
+```
+
+These reports will be written to `target/reports/pact`.
