@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.dsl
 
+import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.matchingrules.RuleLogic
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -184,6 +185,31 @@ class PactDslJsonArraySpec extends Specification {
           .stringType('myString3')
         .closeObject()
     array = obj.parent
+  }
+
+  def 'test for behaviour of close for issue 628'() {
+    given:
+    def body = new PactDslJsonArray()
+    body
+      .object()
+      .stringType('messageId', 'test')
+      .stringType('date', 'test')
+      .stringType('contractVersion', 'test')
+      .closeObject()
+      .object()
+      .stringType('name', 'srm.countries.get')
+      .stringType('iri', 'some_iri')
+      .closeObject()
+      .closeArray()
+
+    expect:
+    body.close().matchers.toMap(PactSpecVersion.V2) == [
+      '$.body[0].messageId': [match: 'type'],
+      '$.body[0].date': [match: 'type'],
+      '$.body[0].contractVersion': [match: 'type'],
+      '$.body[1].name': [match: 'type'],
+      '$.body[1].iri': [match: 'type']
+    ]
   }
 
 }

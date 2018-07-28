@@ -120,7 +120,7 @@ public class MessagePactBuilder {
     @SuppressWarnings("unchecked")
     Map<String, String> metadata = message.getMetaData();
     if (metadata == null) {
-      metadata = new HashMap<String, String>(1);
+      metadata = new HashMap<>(1);
       metadata.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
     } else if (!metadata.containsKey(CONTENT_TYPE)) {
       metadata.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());

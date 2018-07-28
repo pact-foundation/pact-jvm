@@ -15,6 +15,7 @@ class PactPublishTaskSpec extends Specification {
   private PactPlugin plugin
   private Project project
   private PactBrokerClient brokerClient
+  private File pactFile
 
   def setup() {
     project = ProjectBuilder.builder().build()
@@ -23,14 +24,15 @@ class PactPublishTaskSpec extends Specification {
     task = project.tasks.pactPublish
 
     project.file("${project.buildDir}/pacts").mkdirs()
-    project.file("${project.buildDir}/pacts/test_pact.json").withWriter {
+    pactFile = project.file("${project.buildDir}/pacts/test_pact.json")
+    pactFile.withWriter {
       IOUtils.copy(PactPublishTaskSpec.getResourceAsStream('/pacts/foo_pact.json'), it, Charset.forName('UTF-8'))
     }
 
     brokerClient = GroovySpy(PactBrokerClient, global: true, constructorArgs: ['baseUrl'])
   }
 
-  def 'rasies an exception if no pact publish configuration is found'() {
+  def 'raises an exception if no pact publish configuration is found'() {
     when:
     task.publishPacts()
 
@@ -104,6 +106,34 @@ class PactPublishTaskSpec extends Specification {
 
     then:
     1 * brokerClient.uploadPactFile(_, _, ['tag1']) >> 'HTTP/1.1 200 OK'
+  }
+
+  def 'allows pact files to be excluded from publishing'() {
+    given:
+    project.pact {
+      publish {
+        excludes = ['other-pact', 'pact\\-\\d+']
+        pactBrokerUrl = 'pactBrokerUrl'
+      }
+    }
+    project.evaluate()
+
+    List<File> excluded = ['pact-1', 'pact-2', 'other-pact'].collect { pactName ->
+      def file = project.file("${project.buildDir}/pacts/${pactName}.json")
+      file.withWriter {
+        IOUtils.copy(PactPublishTaskSpec.getResourceAsStream('/pacts/foo_pact.json'), it, Charset.forName('UTF-8'))
+      }
+      file
+    }
+
+    when:
+    task.publishPacts()
+
+    then:
+    1 * brokerClient.uploadPactFile(pactFile, _, []) >> 'HTTP/1.1 200 OK'
+    0 * brokerClient.uploadPactFile(excluded[0], _, [])
+    0 * brokerClient.uploadPactFile(excluded[1], _, [])
+    0 * brokerClient.uploadPactFile(excluded[2], _, [])
   }
 
 }

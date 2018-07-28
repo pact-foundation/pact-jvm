@@ -11,9 +11,9 @@ buildscript {
 }
 
 plugins {
-  id 'nebula.kotlin' version '1.2.50'
+  id 'nebula.kotlin' version '1.2.51'
   id 'org.jmailen.kotlinter' version '1.11.2'
-  id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC6-4'
+  id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC7-3'
   id 'org.jetbrains.dokka' version '0.9.16'
 }
 
@@ -69,7 +69,7 @@ subprojects {
     }
 
     dependencies {
-      compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlinVersion"
+      compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
       compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
       compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
       compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
@@ -100,7 +100,7 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '3.5.19'
+    version = '3.6.0'
     targetCompatibility = '1.8'
     sourceCompatibility = '1.8'
 

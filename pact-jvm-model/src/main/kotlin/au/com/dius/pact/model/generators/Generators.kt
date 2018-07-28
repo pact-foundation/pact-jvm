@@ -17,7 +17,7 @@ enum class Category {
 
 interface ContentTypeHandler {
   fun processBody(value: String, fn: (QueryResult) -> Unit): OptionalBody
-  fun applyKey(body: QueryResult, key: String, generator: Generator)
+  fun applyKey(body: QueryResult, key: String, generator: Generator, context: Map<String, Any?>)
 }
 
 val contentTypeHandlers: MutableMap<String, ContentTypeHandler> = mutableMapOf(
@@ -29,7 +29,7 @@ fun setupDefaultContentTypeHandlers() {
   contentTypeHandlers["application/json"] = JsonContentTypeHandler
 }
 
-data class QueryResult(var value: Any, val key: Any? = null, val parent: Any? = null)
+data class QueryResult(var value: Any?, val key: Any? = null, val parent: Any? = null)
 
 object JsonContentTypeHandler : ContentTypeHandler {
   override fun processBody(value: String, fn: (QueryResult) -> Unit): OptionalBody {
@@ -38,14 +38,14 @@ object JsonContentTypeHandler : ContentTypeHandler {
     return OptionalBody.body(JsonOutput.toJson(bodyJson.value))
   }
 
-  override fun applyKey(body: QueryResult, key: String, generator: Generator) {
+  override fun applyKey(body: QueryResult, key: String, generator: Generator, context: Map<String, Any?>) {
     val pathExp = parsePath(key)
-    queryObjectGraph(pathExp.iterator(), body) { (value, valueKey, parent) ->
+    queryObjectGraph(pathExp.iterator(), body) { (_, valueKey, parent) ->
       @Suppress("UNCHECKED_CAST")
       when (parent) {
-        is MutableMap<*, *> -> (parent as MutableMap<String, Any>)[valueKey.toString()] = generator.generate(value)
-        is MutableList<*> -> (parent as MutableList<Any>)[valueKey as Int] = generator.generate(value)
-        else -> body.value = generator.generate(value)
+        is MutableMap<*, *> -> (parent as MutableMap<String, Any?>)[valueKey.toString()] = generator.generate(context)
+        is MutableList<*> -> (parent as MutableList<Any?>)[valueKey as Int] = generator.generate(context)
+        else -> body.value = generator.generate(context)
       }
     }
   }
@@ -177,23 +177,23 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     }
   }
 
-  fun applyBodyGenerators(body: OptionalBody, contentType: ContentType): OptionalBody {
+  fun applyBodyGenerators(body: OptionalBody, contentType: ContentType, context: Map<String, Any?>): OptionalBody {
     return when (body.state) {
       OptionalBody.State.EMPTY, OptionalBody.State.MISSING, OptionalBody.State.NULL -> body
       OptionalBody.State.PRESENT -> when {
-        contentType.isJson() -> processBody(body.value!!, "application/json")
-        contentType.isXml() -> processBody(body.value!!, "application/xml")
+        contentType.isJson() -> processBody(body.value!!, "application/json", context)
+        contentType.isXml() -> processBody(body.value!!, "application/xml", context)
         else -> body
       }
     }
   }
 
-  private fun processBody(value: String, contentType: String): OptionalBody {
+  private fun processBody(value: String, contentType: String, context: Map<String, Any?>): OptionalBody {
     val handler = contentTypeHandlers[contentType]
     return handler?.processBody(value) { body: QueryResult ->
       applyGenerator(Category.BODY) { key: String, generator: Generator? ->
         if (generator != null) {
-          handler.applyKey(body, key, generator)
+          handler.applyKey(body, key, generator, context)
         }
       }
     } ?: OptionalBody.body(value)

@@ -254,7 +254,7 @@ public class PactDslResponse {
      * @param headerExample Example value to use
      */
     public PactDslResponse matchHeader(String header, String regexp, String headerExample) {
-        responseMatchers.addCategory("header").addRule(header, new RegexMatcher(regexp));
+        responseMatchers.addCategory("header").setRule(header, new RegexMatcher(regexp));
         responseHeaders.put(header, headerExample);
         return this;
     }

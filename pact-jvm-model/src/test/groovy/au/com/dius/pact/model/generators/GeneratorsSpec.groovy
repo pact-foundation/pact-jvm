@@ -61,7 +61,7 @@ class GeneratorsSpec extends Specification {
     }
 
     expect:
-    generators.applyBodyGenerators(body, new ContentType(contentType)) == returnedBody
+    generators.applyBodyGenerators(body, new ContentType(contentType), [:]) == returnedBody
 
     where:
 

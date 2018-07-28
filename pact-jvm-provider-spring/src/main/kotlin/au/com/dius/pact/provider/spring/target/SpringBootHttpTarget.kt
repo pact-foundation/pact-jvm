@@ -7,8 +7,4 @@ import au.com.dius.pact.provider.junit.target.HttpTarget
  * to be overridden by the interaction runner which looks up the server
  * port from the spring context.
  */
-class SpringBootHttpTarget : HttpTarget("localhost", 0) {
-  fun setPort(port: Int) {
-    super.port = port
-  }
-}
+class SpringBootHttpTarget(override var port: Int = 0) : HttpTarget(port = port)

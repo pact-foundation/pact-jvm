@@ -48,13 +48,13 @@ class Response extends BaseResponse {
     }
   }
 
-  Response generatedResponse() {
+  Response generatedResponse(Map context = [:]) {
     def r = this.copy()
-    generators.applyGenerator(Category.STATUS) { String key, Generator g -> r.status = g.generate(r.status) as Integer }
+    generators.applyGenerator(Category.STATUS) { String key, Generator g -> r.status = g.generate(context) as Integer }
     generators.applyGenerator(Category.HEADER) { String key, Generator g ->
-      r.headers[key] = g.generate(r.headers[key])
+      r.headers[key] = g.generate(context).toString()
     }
-    r.body = generators.applyBodyGenerators(r.body, new ContentType(mimeType()))
+    r.body = generators.applyBodyGenerators(r.body, new ContentType(mimeType()), context)
     r
   }
 }

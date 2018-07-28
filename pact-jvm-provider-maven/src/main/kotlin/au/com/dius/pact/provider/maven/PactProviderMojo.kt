@@ -28,6 +28,9 @@ open class PactProviderMojo : AbstractMojo() {
   private lateinit var classpathElements: List<String>
 
   @Parameter
+  var systemPropertyVariables: Map<String, String> = mutableMapOf()
+
+  @Parameter
   lateinit var serviceProviders: List<Provider>
 
   @Parameter
@@ -42,8 +45,15 @@ open class PactProviderMojo : AbstractMojo() {
   @Component
   private lateinit var decrypter: SettingsDecrypter
 
+  @Parameter(defaultValue = "true")
+  var failIfNoPactsFound: Boolean = true
+
   override fun execute() {
     AnsiConsole.systemInstall()
+
+    systemPropertyVariables.forEach { (property, value) ->
+      System.setProperty(property, value)
+    }
 
     val failures = mutableMapOf<Any, Any>()
     val verifier = providerVerifier().let {
@@ -52,7 +62,7 @@ open class PactProviderMojo : AbstractMojo() {
       it.pactLoadFailureMessage = Function { consumer: ConsumerInfo ->
         "You must specify the pact file to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
       }
-      it.isBuildSpecificTask = Function { false }
+      it.checkBuildSpecificTask = Function { false }
       it.providerVersion = Supplier { projectVersion }
 
       it.projectClasspath = Supplier {
@@ -77,7 +87,7 @@ open class PactProviderMojo : AbstractMojo() {
         loadPactsFromPactBroker(provider, consumers)
       }
 
-      if (consumers.isEmpty()) {
+      if (consumers.isEmpty() && failIfNoPactsFound) {
         throw MojoFailureException("No pact files were found for provider '${provider.name}'")
       }
 

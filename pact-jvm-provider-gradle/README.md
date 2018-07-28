@@ -642,6 +642,24 @@ pact {
 }
 ```
 
+## Excluding pacts from being published [version 3.5.19+]
+
+You can exclude some of the pact files from being published by providing a list of regular expressions that match
+against the base names of the pact files.
+
+For example:
+
+```groovy
+pact {
+
+    publish {
+        pactBrokerUrl = 'https://mypactbroker.com'
+        excludes = [ '.*\\-\\d+$' ] // exclude all pact files that end with a dash followed by a number in the name 
+    }
+
+}
+```
+
 # Verifying a message provider [version 2.2.12+]
 
 The Gradle plugin has been updated to allow invoking test methods that can return the message contents from a message

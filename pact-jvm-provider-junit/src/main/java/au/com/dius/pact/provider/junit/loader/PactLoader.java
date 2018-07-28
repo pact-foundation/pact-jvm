@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider.junit.loader;
 
-import au.com.dius.pact.model.*;
+import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.model.PactSource;
-import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
+import au.com.dius.pact.support.expressions.ValueResolver;
 
 import java.io.IOException;
 import java.util.List;

@@ -15,7 +15,7 @@ import java.util.function.Supplier
  * Consumer Info
  */
 @Canonical(excludes = ['pactFile'])
-class ConsumerInfo {
+class ConsumerInfo implements IConsumerInfo {
     String name
     def pactSource
     def stateChange

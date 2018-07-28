@@ -7,8 +7,8 @@ import au.com.dius.pact.model.PactReader;
 import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.provider.ConsumerInfo;
 import au.com.dius.pact.provider.broker.PactBrokerClient;
-import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver;
-import au.com.dius.pact.provider.junit.sysprops.ValueResolver;
+import au.com.dius.pact.support.expressions.SystemPropertyResolver;
+import au.com.dius.pact.support.expressions.ValueResolver;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseExpression;
-import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseListExpression;
+import static au.com.dius.pact.support.expressions.ExpressionParser.parseExpression;
+import static au.com.dius.pact.support.expressions.ExpressionParser.parseListExpression;
 import static java.util.stream.Collectors.toList;
 
 /**

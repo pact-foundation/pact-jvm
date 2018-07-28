@@ -30,9 +30,12 @@ import org.apache.http.message.BasicNameValuePair
 import org.apache.http.util.EntityUtils
 import scala.Function1
 import java.lang.Boolean.getBoolean
-import java.lang.reflect.Modifier
 import java.net.URI
+import java.net.URL
 import java.net.URLDecoder
+import java.util.concurrent.Callable
+import java.util.function.Consumer
+import java.util.function.Function
 
 interface IHttpClientFactory {
   fun newClient(provider: Any?): CloseableHttpClient
@@ -47,6 +50,14 @@ interface IProviderInfo {
 
   val requestFilter: Any?
   val stateChangeRequestFilter: Any?
+  val stateChangeUrl: URL?
+  val stateChangeUsesBody: Boolean
+  val stateChangeTeardown: Boolean
+}
+
+interface IConsumerInfo {
+  val stateChange: Any?
+  val stateChangeUsesBody: Boolean
 }
 
 /**
@@ -139,20 +150,13 @@ open class ProviderClient(
   }
 
   private fun invokeJavaFunctionalInterface(functionalInterface: Any, httpRequest: HttpRequest) {
-    val invokableMethods = functionalInterface::class.java.declaredMethods.filter { Modifier.isPublic(it.modifiers) }
-    if (invokableMethods.size == 1) {
-      val method = invokableMethods.first()
-      val params = arrayOfNulls<Any?>(method.parameterCount)
-      if (params.isNotEmpty()) {
-        params[0] = httpRequest
-      }
-      method.isAccessible = true
-      method.invoke(functionalInterface, *params)
-      return
+    when (functionalInterface) {
+      is Consumer<*> -> (functionalInterface as Consumer<HttpRequest>).accept(httpRequest)
+      is Function<*, *> -> (functionalInterface as Function<HttpRequest, Any?>).apply(httpRequest)
+      is Callable<*> -> (functionalInterface as Callable<HttpRequest>).call()
+      else -> throw IllegalArgumentException("Java request filters must be either a Consumer or Function that " +
+        "takes at least one HttpRequest parameter")
     }
-
-    throw IllegalArgumentException("Java request filters must be either a Consumer or Function that takes at " +
-      "least one HttpRequest parameter")
   }
 
   open fun setupBody(request: Request, method: HttpRequest) {
@@ -187,7 +191,7 @@ open class ProviderClient(
     isSetup: Boolean,
     stateChangeTeardown: Boolean
   ): CloseableHttpResponse? {
-    if (stateChangeUrl != null) {
+    return if (stateChangeUrl != null) {
       val httpclient = getHttpClient()
       val urlBuilder = if (stateChangeUrl is URI) {
         URIBuilder(stateChangeUrl)
@@ -232,9 +236,9 @@ open class ProviderClient(
         }
       }
 
-      return httpclient.execute(method)
+      httpclient.execute(method)
     } else {
-      return null
+      null
     }
   }
 

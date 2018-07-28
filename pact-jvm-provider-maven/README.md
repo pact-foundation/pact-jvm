@@ -249,7 +249,7 @@ The following plugin properties can be specified with `-Dproperty=value` on the 
 |--------|-----------|
 |pact.showStacktrace|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
 |pact.showFullDiff|This turns on displaying the full diff of the expected versus actual bodies|
-|pact.filter.consumers|Comma seperated list of consumer names to verify|
+|pact.filter.consumers|Comma separated list of consumer names to verify|
 |pact.filter.description|Only verify interactions whose description match the provided regular expression|
 |pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
 |pact.verifier.publishResults|Publishing of verification results will be skipped unless this property is set to 'true' [version 3.5.18+]|
@@ -447,6 +447,13 @@ whose descriptions start with 'a request for payment'. `-Dpact.filter.providerSt
 has a provider state that ends with payment, and `-Dpact.filter.providerState=` will match any interaction that does not have a
 provider state.
 
+## Not failing the build if no pact files are found [version 3.5.19+]
+
+By default, if there are no pact files to verify, the plugin will raise an exception. This is to guard against false
+positives where the build is passing but nothing has been verified due to mis-configuration.
+
+To disable this behaviour, set the `failIfNoPactsFound` parameter to `false`.
+
 # Verifying a message provider
 
 The Maven plugin has been updated to allow invoking test methods that can return the message contents from a message
@@ -622,10 +629,42 @@ configuration in your POM.
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.3.9</version>
+    <version>3.5.19</version>
     <configuration>
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <pactBrokerServerId>test-pact-broker</pactBrokerServerId>  <!-- This must match the server id in the maven settings -->
+    </configuration>
+</plugin>
+```
+
+## Excluding pacts from being published [version 3.5.19+]
+
+You can exclude some of the pact files from being published by providing a list of regular expressions that match
+against the base names of the pact files.
+
+For example:
+
+```groovy
+pact {
+
+    publish {
+        pactBrokerUrl = 'https://mypactbroker.com'
+        excludes = [ '.*\\-\\d+$' ] // exclude all pact files that end with a dash followed by a number in the name 
+    }
+
+}
+```
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.19</version>
+    <configuration>
+      <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
+      <excludes>
+        <exclude>.*\\-\\d+$</exclude> <!-- exclude pact files where the name ends in a dash followed by a number -->
+      </excludes>
     </configuration>
 </plugin>
 ```
@@ -635,4 +674,4 @@ configuration in your POM.
 For pacts that are loaded from a Pact Broker, the results of running the verification can be published back to the
  broker against the URL for the pact. You will be able to then see the result on the Pact Broker home screen.
  
-To turn on the verification publishing, set the system property `pact.verifier.publishResults` to `true`.
+To turn on the verification publishing, set the system property `pact.verifier.publishResults` to `true` in the pact maven plugin, not surefire, configuration.

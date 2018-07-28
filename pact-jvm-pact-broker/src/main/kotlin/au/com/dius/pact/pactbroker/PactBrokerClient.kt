@@ -1,6 +1,7 @@
 package au.com.dius.pact.pactbroker
 
-import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
+import au.com.dius.pact.com.github.michaelbull.result.Err
+import au.com.dius.pact.com.github.michaelbull.result.Result
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.toJson
 import java.net.URLDecoder
@@ -39,11 +40,11 @@ abstract class PactBrokerClientBase(val pactBrokerUrl: String, val options: Map<
       if (lowercaseMap.containsKey("href")) {
         halClient.postJson(lowercaseMap["href"].toString(), jsonObject.toString())
       } else {
-        Result.Failure(RuntimeException("Unable to publish verification results as there is no " +
+        Err(RuntimeException("Unable to publish verification results as there is no " +
           "pb:publish-verification-results link"))
       }
     } else {
-      Result.Failure(RuntimeException("Unable to publish verification results as there is no " +
+      Err(RuntimeException("Unable to publish verification results as there is no " +
         "pb:publish-verification-results link"))
     }
   }

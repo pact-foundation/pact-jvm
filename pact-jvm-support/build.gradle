@@ -1,0 +1,3 @@
+dependencies {
+  compile "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
+}

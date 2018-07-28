@@ -3,6 +3,7 @@ package io.pactfoundation.consumer.dsl;
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
+import au.com.dius.pact.model.matchingrules.MatchingRule;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -217,6 +218,26 @@ public class LambdaDslJsonArray {
 
     public LambdaDslJsonArray ipV4Address() {
         pactArray.ipAddress();
+        return this;
+    }
+
+    /**
+     * Combine all the matchers using AND
+     * @param value Attribute example value
+     * @param rules Matching rules to apply
+     */
+    public LambdaDslJsonArray and(Object value, MatchingRule... rules) {
+        pactArray.and(value, rules);
+        return this;
+    }
+
+    /**
+     * Combine all the matchers using OR
+     * @param value Attribute example value
+     * @param rules Matching rules to apply
+     */
+    public LambdaDslJsonArray or(Object value, MatchingRule... rules) {
+        pactArray.or(value, rules);
         return this;
     }
 

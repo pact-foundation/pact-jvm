@@ -2,11 +2,13 @@ package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderVerifier
+import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.settings.Server
 import org.apache.maven.settings.Settings
 import org.apache.maven.settings.crypto.SettingsDecrypter
 import org.apache.maven.settings.crypto.SettingsDecryptionResult
 import spock.lang.Specification
+import spock.util.environment.RestoreSystemProperties
 
 @SuppressWarnings(['UnnecessaryGetter', 'ClosureAsLastMethodParameter'])
 class PactProviderMojoSpec extends Specification {
@@ -151,5 +153,68 @@ class PactProviderMojoSpec extends Specification {
     1 * mojo.loadPactFiles(provider, dir1) >> []
     1 * mojo.loadPactFiles(provider, dir2) >> []
     1 * mojo.loadPactFiles(provider, dir3) >> [ new ConsumerInfo('mock consumer', dir3) ]
+  }
+
+  def 'fail the build if there are no pacts and failIfNoPactsFound is true'() {
+    given:
+    def provider = new Provider(pactFileDirectory: 'dir' as File)
+    def verifier = Mock(ProviderVerifier) {
+      verifyProvider(provider) >> [:]
+    }
+    mojo = Spy(PactProviderMojo) {
+      loadPactFiles(provider, _) >> []
+      providerVerifier() >> verifier
+    }
+    mojo.serviceProviders = [ provider ]
+    mojo.failIfNoPactsFound = true
+
+    when:
+    mojo.execute()
+
+    then:
+    thrown(MojoFailureException)
+  }
+
+  def 'do not fail the build if there are no pacts and failIfNoPactsFound is false'() {
+    given:
+    def provider = new Provider(pactFileDirectory: 'dir' as File)
+    def verifier = Mock(ProviderVerifier) {
+      verifyProvider(provider) >> [:]
+    }
+    mojo = Spy(PactProviderMojo) {
+      loadPactFiles(provider, _) >> []
+      providerVerifier() >> verifier
+    }
+    mojo.serviceProviders = [ provider ]
+    mojo.failIfNoPactsFound = false
+
+    when:
+    mojo.execute()
+
+    then:
+    noExceptionThrown()
+  }
+
+  @RestoreSystemProperties
+  def 'system property pact.verifier.publishResults true when set with systemPropertyVariables' () {
+    given:
+    def provider = new Provider(pactFileDirectory: 'dir1' as File)
+    def verifier = Mock(ProviderVerifier) {
+      verifyProvider(provider) >> [:]
+    }
+    mojo = Spy(PactProviderMojo) {
+      loadPactFiles(provider, _) >> []
+      providerVerifier() >> verifier
+    }
+    mojo.serviceProviders = [ provider ]
+    mojo.failIfNoPactsFound = false
+    mojo.systemPropertyVariables.put('pact.verifier.publishResults', 'true')
+
+    when:
+    mojo.execute()
+
+    then:
+    noExceptionThrown()
+    System.getProperty('pact.verifier.publishResults') == 'true'
   }
 }

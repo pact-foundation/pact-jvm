@@ -8,9 +8,14 @@ import au.com.dius.pact.provider.junit.RestPactRunner
 import au.com.dius.pact.provider.junit.loader.PactLoader
 import org.junit.runners.model.Statement
 import org.junit.runners.model.TestClass
+import org.springframework.beans.BeanUtils
 import org.springframework.test.context.TestContextManager
 import org.springframework.test.context.junit4.statements.RunAfterTestClassCallbacks
 import org.springframework.test.context.junit4.statements.RunBeforeTestClassCallbacks
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener
+import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener
+import org.springframework.test.context.web.ServletTestExecutionListener
 
 /**
  * Pact runner for REST providers that boots up the spring context
@@ -32,6 +37,12 @@ open class SpringRestPactRunner(clazz: Class<*>) : RestPactRunner<RequestRespons
   private fun initTestContextManager(clazz: Class<*>): TestContextManager {
     if (testContextManager == null) {
       testContextManager = TestContextManager(clazz)
+      testContextManager!!.registerTestExecutionListeners(
+        BeanUtils.instantiateClass(ServletTestExecutionListener::class.java),
+        BeanUtils.instantiateClass(DirtiesContextBeforeModesTestExecutionListener::class.java),
+        BeanUtils.instantiateClass(DependencyInjectionTestExecutionListener::class.java),
+        BeanUtils.instantiateClass(DirtiesContextTestExecutionListener::class.java)
+      )
     }
 
     return testContextManager!!

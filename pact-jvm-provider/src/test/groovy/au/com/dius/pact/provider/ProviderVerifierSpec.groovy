@@ -14,8 +14,8 @@ import au.com.dius.pact.model.UnknownPactSource
 import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.provider.broker.PactBrokerClient
-import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
 import au.com.dius.pact.provider.reporters.VerifierReporter
+import au.com.dius.pact.com.github.michaelbull.result.Ok
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
@@ -374,22 +374,22 @@ class ProviderVerifierSpec extends Specification {
       getSource() >> new BrokerUrlSource('http://localhost', 'http://pact-broker')
     }
 
-    verifier.projectHasProperty = { it == ProviderVerifierBase.PACT_VERIFIER_PUBLISHRESUTS }
+    verifier.projectHasProperty = { it == ProviderVerifierBase.PACT_VERIFIER_PUBLISH_RESULTS }
     verifier.projectGetProperty = {
-      (it == ProviderVerifierBase.PACT_VERIFIER_PUBLISHRESUTS).toString()
+      (it == ProviderVerifierBase.PACT_VERIFIER_PUBLISH_RESULTS).toString()
     }
 
     PactReader.loadPact(_) >> mockPact
     mockPact.interactions >> [interaction1, interaction2]
-    StateChange.executeStateChange(*_) >> new StateChange.StateChangeResult(true)
+    StateChange.executeStateChange(*_) >> new StateChangeResult(new Ok([:]))
 
     when:
     verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
 
     then:
     1 * pactBrokerClient.publishVerificationResults(_, finalResult, '0.0.0', _)
-    1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _) >> result1
-    1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _) >> result2
+    1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _) >> result1
+    1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _) >> result2
 
     where:
 
@@ -420,7 +420,7 @@ class ProviderVerifierSpec extends Specification {
 
     PactReader.loadPact(_) >> mockPact
     mockPact.interactions >> [interaction1, interaction2]
-    StateChange.executeStateChange(*_) >> new StateChange.StateChangeResult(true)
+    StateChange.executeStateChange(*_) >> new StateChangeResult(new Ok([:]))
     verifier.verifyResponseFromProvider(provider, interaction1, _, _, _) >> true
     verifier.verifyResponseFromProvider(provider, interaction2, _, _, _) >> true
 
@@ -447,7 +447,7 @@ class ProviderVerifierSpec extends Specification {
     ProviderVerifierKt.reportVerificationResults(pact, true, '0', client)
 
     then:
-    1 * client.publishVerificationResults(links, true, '0', null) >> new Result.Success(true)
+    1 * client.publishVerificationResults(links, true, '0', null) >> new Ok(true)
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -480,11 +480,11 @@ class ProviderVerifierSpec extends Specification {
     pact.source = new BrokerUrlSource('url', 'url', [publish: [:]])
 
     verifier.projectHasProperty = {
-      it == ProviderVerifier.PACT_VERIFIER_PUBLISHRESUTS
+      it == ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS
     }
     verifier.projectGetProperty = {
       switch (it) {
-        case ProviderVerifier.PACT_VERIFIER_PUBLISHRESUTS:
+        case ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS:
           return 'false'
       }
     }
@@ -494,7 +494,7 @@ class ProviderVerifierSpec extends Specification {
 
     then:
     1 * PactReader.loadPact(_) >> pact
-    1 * StateChange.executeStateChange(_, _, _, _, _, _, _) >> new StateChange.StateChangeResult(true, '')
+    1 * StateChange.executeStateChange(_, _, _, _, _, _, _) >> new StateChangeResult(new Ok([:]), '')
     1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _) >> true
     0 * client.publishVerificationResults(_, true, _, _)
   }

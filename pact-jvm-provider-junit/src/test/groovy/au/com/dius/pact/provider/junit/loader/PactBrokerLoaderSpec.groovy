@@ -5,11 +5,11 @@ import au.com.dius.pact.pactbroker.InvalidHalResponse
 import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.broker.PactBrokerClient
-import au.com.dius.pact.provider.junit.sysprops.ValueResolver
+import au.com.dius.pact.support.expressions.ValueResolver
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 
-import static au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.VALUES_SEPARATOR
+import static au.com.dius.pact.support.expressions.ExpressionParser.VALUES_SEPARATOR
 
 class PactBrokerLoaderSpec extends Specification {
 

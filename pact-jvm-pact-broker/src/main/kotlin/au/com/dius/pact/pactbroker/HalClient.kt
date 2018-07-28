@@ -1,6 +1,8 @@
 package au.com.dius.pact.pactbroker
 
-import au.com.dius.pact.provider.broker.com.github.kittinunf.result.Result
+import au.com.dius.pact.com.github.michaelbull.result.Err
+import au.com.dius.pact.com.github.michaelbull.result.Ok
+import au.com.dius.pact.com.github.michaelbull.result.Result
 import au.com.dius.pact.util.HttpClientUtils.buildUrl
 import au.com.dius.pact.util.HttpClientUtils.isJsonResponse
 import com.github.salomonbrys.kotson.array
@@ -201,8 +203,8 @@ abstract class HalClientBase @JvmOverloads constructor(
     logger.debug { "Fetching: $path" }
     val response = getJson(path, encodePath)
     when (response) {
-      is Result.Success -> return response.value
-      is Result.Failure -> throw response.error
+      is Ok -> return response.value
+      is Err -> throw response.error
     }
   }
 

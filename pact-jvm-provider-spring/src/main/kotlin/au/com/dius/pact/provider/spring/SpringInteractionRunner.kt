@@ -13,17 +13,19 @@ import org.junit.runners.model.MultipleFailureException
 import org.junit.runners.model.Statement
 import org.junit.runners.model.TestClass
 import org.springframework.test.context.TestContextManager
+import java.lang.reflect.Method
 
 open class SpringBeforeRunner(
   private val next: Statement,
   private val befores: List<FrameworkMethod>,
   private val testInstance: Any,
+  private val testMethod: Method,
   private val testContextManager: TestContextManager
 ) : Statement() {
 
   override fun evaluate() {
+    testContextManager.beforeTestMethod(testInstance, testMethod)
     for (before in befores) {
-      testContextManager.beforeTestMethod(testInstance, before.method)
       before.invokeExplosively(testInstance)
     }
     next.evaluate()
@@ -34,31 +36,32 @@ open class SpringAfterRunner(
   private val next: Statement,
   private val afters: List<FrameworkMethod>,
   private val testInstance: Any,
+  private val testMethod: Method,
   private val testContextManager: TestContextManager
 ) : Statement() {
 
   override fun evaluate() {
     val errors: MutableList<Throwable> = mutableListOf()
+    var testException: Throwable? = null
     try {
       next.evaluate()
     } catch (e: Throwable) {
+      testException = e
       errors.add(e)
     } finally {
       for (each in afters) {
-        var testException: Throwable? = null
         try {
           each.invokeExplosively(testInstance)
         } catch (e: Throwable) {
           errors.add(e)
-          testException = e
-        }
-
-        try {
-          testContextManager.afterTestMethod(testInstance, each.method, testException)
-        } catch (ex: Throwable) {
-          errors.add(ex)
         }
       }
+    }
+
+    try {
+      testContextManager.afterTestMethod(testInstance, testMethod, testException)
+    } catch (ex: Throwable) {
+      errors.add(ex)
     }
 
     MultipleFailureException.assertEmpty(errors)
@@ -74,20 +77,14 @@ open class SpringInteractionRunner<I>(
 
   override fun withBefores(interaction: Interaction, testInstance: Any, statement: Statement): Statement {
     val befores = testClass.getAnnotatedMethods(Before::class.java)
-    return if (befores.isNotEmpty()) {
-      SpringBeforeRunner(statement, befores, testInstance, testContextManager)
-    } else {
-      statement
-    }
+    return SpringBeforeRunner(statement, befores, testInstance,
+      this.javaClass.getMethod("surrogateTestMethod"), testContextManager)
   }
 
   override fun withAfters(interaction: Interaction, testInstance: Any, statement: Statement): Statement {
     val afters = testClass.getAnnotatedMethods(After::class.java)
-    return if (afters.isNotEmpty()) {
-      SpringAfterRunner(statement, afters, testInstance, testContextManager)
-    } else {
-      statement
-    }
+    return SpringAfterRunner(statement, afters, testInstance,
+      this.javaClass.getMethod("surrogateTestMethod"), testContextManager)
   }
 
   override fun createTest(): Any {
@@ -102,7 +99,7 @@ open class SpringInteractionRunner<I>(
     if (target is SpringBootHttpTarget) {
       val environment = testContextManager.testContext.applicationContext.environment
       val port = environment.getProperty("local.server.port")
-      target.setPort(Integer.parseInt(port))
+      target.port = Integer.parseInt(port)
     }
   }
 }

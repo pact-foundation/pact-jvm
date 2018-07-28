@@ -170,7 +170,7 @@ class PactDslJsonBodySpec extends Specification {
       .closeArray().toString() == '{"available Options":[{"Material":"Gold"}]}'
   }
 
-  def 'test for behaviour of close for issue #619'() {
+  def 'test for behaviour of close for issue 619'() {
     given:
     PactDslJsonBody pactDslJsonBody = new PactDslJsonBody()
     PactDslJsonBody contactDetailsPactDslJsonBody = pactDslJsonBody.object('contactDetails')
@@ -186,6 +186,31 @@ class PactDslJsonBodySpec extends Specification {
       '$.body.contactDetails.mobile.countryCode': [match: 'type'],
       '$.body.contactDetails.mobile.prefix': [match: 'type'],
       '$.body.contactDetails.mobile.subscriberNumber': [match: 'type']
+    ]
+  }
+
+  def 'test for behaviour of close for issue 628'() {
+    given:
+    PactDslJsonBody getBody = new PactDslJsonBody()
+    getBody
+      .object('metadata')
+      .stringType('messageId', 'test')
+      .stringType('date', 'test')
+      .stringType('contractVersion', 'test')
+      .closeObject()
+      .object('payload')
+      .stringType('name', 'srm.countries.get')
+      .stringType('iri', 'some_iri')
+      .closeObject()
+      .closeObject()
+
+    expect:
+    getBody.close().matchers.toMap(PactSpecVersion.V2) == [
+      '$.body.metadata.messageId': [match: 'type'],
+      '$.body.metadata.date': [match: 'type'],
+      '$.body.metadata.contractVersion': [match: 'type'],
+      '$.body.payload.name': [match: 'type'],
+      '$.body.payload.iri': [match: 'type']
     ]
   }
 

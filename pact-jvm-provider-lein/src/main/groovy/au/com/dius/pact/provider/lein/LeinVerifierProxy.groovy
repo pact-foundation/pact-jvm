@@ -35,7 +35,7 @@ class LeinVerifierProxy {
     verifier.pactLoadFailureMessage = { ConsumerInfo consumer ->
       "You must specify the pactfile to execute for consumer '${consumer.name}' (use :pact-file)"
     }
-    verifier.isBuildSpecificTask = { false }
+    verifier.checkBuildSpecificTask = { false }
 
     verifier.verifyProvider(provider)
   }
