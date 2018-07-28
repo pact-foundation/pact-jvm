@@ -17,6 +17,7 @@ class PactProviderMojoSpec extends Specification {
 
   def setup() {
     mojo = new PactProviderMojo()
+    mojo.reports = ['console']
   }
 
   def 'load pacts from pact broker uses the provider pactBrokerUrl'() {
@@ -145,6 +146,8 @@ class PactProviderMojoSpec extends Specification {
       providerVerifier() >> verifier
     }
     mojo.serviceProviders = [ provider ]
+    mojo.reports = [ 'console' ]
+    mojo.buildDir = new File('/tmp')
 
     when:
     mojo.execute()
@@ -167,6 +170,8 @@ class PactProviderMojoSpec extends Specification {
     }
     mojo.serviceProviders = [ provider ]
     mojo.failIfNoPactsFound = true
+    mojo.reports = [ 'console' ]
+    mojo.buildDir = new File('/tmp')
 
     when:
     mojo.execute()
@@ -187,6 +192,8 @@ class PactProviderMojoSpec extends Specification {
     }
     mojo.serviceProviders = [ provider ]
     mojo.failIfNoPactsFound = false
+    mojo.reports = [ 'console' ]
+    mojo.buildDir = new File('/tmp')
 
     when:
     mojo.execute()
@@ -209,6 +216,8 @@ class PactProviderMojoSpec extends Specification {
     mojo.serviceProviders = [ provider ]
     mojo.failIfNoPactsFound = false
     mojo.systemPropertyVariables.put('pact.verifier.publishResults', 'true')
+    mojo.reports = [ 'console' ]
+    mojo.buildDir = new File('/tmp')
 
     when:
     mojo.execute()
