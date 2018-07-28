@@ -43,6 +43,8 @@ class ConsumerInfo {
       pactSource = file
     } else if (file instanceof Closure) {
       pactSource = new ClosurePactSource(file as Supplier)
+    } else if (file instanceof URL) {
+      pactSource = new UrlSource(file.toString())
     } else {
       pactSource = new FileSource(file as File)
     }

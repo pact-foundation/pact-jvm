@@ -2,12 +2,15 @@ package au.com.dius.pact.provider.junit5
 
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
-import au.com.dius.pact.provider.reportVerificationResults
+import au.com.dius.pact.provider.DefaultVerificationReporter
+import au.com.dius.pact.provider.VerificationReporter
 import mu.KLogging
+import org.apache.commons.lang3.builder.HashCodeBuilder
 
 object TestResultAccumulator : KLogging() {
 
-  private val testResults: MutableMap<Pact<Interaction>, MutableMap<Interaction, Boolean>> = mutableMapOf()
+  private val testResults: MutableMap<Int, MutableMap<Int, Boolean>> = mutableMapOf()
+  var verificationReporter: VerificationReporter = DefaultVerificationReporter
 
   fun updateTestResult(
     pact: Pact<Interaction>,
@@ -16,13 +19,24 @@ object TestResultAccumulator : KLogging() {
   ) {
     logger.debug { "Received test result '$testExecutionResult' for Pact ${pact.provider.name}-${pact.consumer.name} " +
       "and ${interaction.description}" }
-    val interactionResults = testResults.getOrPut(pact) { mutableMapOf() }
-    interactionResults[interaction] = testExecutionResult
+    val pactHash = calculatePactHash(pact)
+    val interactionResults = testResults.getOrPut(pactHash) { mutableMapOf() }
+    val interactionHash = calculateInteractionHash(interaction)
+    interactionResults[interactionHash] = testExecutionResult
     if (allInteractionsVerified(pact, interactionResults)) {
       logger.debug { "All interactions for Pact ${pact.provider.name}-${pact.consumer.name} are verified" }
-      reportVerificationResults(pact, true, lookupProviderVersion(), null)
+      verificationReporter.reportResults(pact, true, lookupProviderVersion())
     }
   }
+
+  fun calculateInteractionHash(interaction: Interaction): Int {
+    val builder = HashCodeBuilder().append(interaction.description)
+    interaction.providerStates.forEach { builder.append(it.name) }
+    return builder.toHashCode()
+  }
+
+  fun calculatePactHash(pact: Pact<Interaction>) =
+    HashCodeBuilder().append(pact.consumer.name).append(pact.provider.name).toHashCode()
 
   fun lookupProviderVersion(): String {
     val version = System.getProperty("pact.provider.version")
@@ -34,7 +48,7 @@ object TestResultAccumulator : KLogging() {
     }
   }
 
-  fun allInteractionsVerified(pact: Pact<Interaction>, results: MutableMap<Interaction, Boolean>): Boolean {
-    return pact.interactions.all { results.getOrDefault(it, false) }
+  fun allInteractionsVerified(pact: Pact<Interaction>, results: MutableMap<Int, Boolean>): Boolean {
+    return pact.interactions.all { results.getOrDefault(calculateInteractionHash(it), false) }
   }
 }

@@ -150,12 +150,17 @@ abstract class BaseMockServer(
     server.createContext("/", this)
   }
 
-  fun start() = server.start()
+  fun start() {
+    logger.debug { "Starting mock server" }
+    server.start()
+    logger.debug { "Mock server started: ${server.address}" }
+  }
 
   fun stop() {
     if (!stopped) {
       stopped = true
       server.stop(0)
+      logger.debug { "Mock server shutdown" }
     }
   }
 

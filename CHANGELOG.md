@@ -1,5 +1,24 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.20 - Bugfix Release
+
+* 5df7b361 - fix: upgrade Kotlin to latest (Ronald Holshausen, Sat Jul 28 17:32:02 2018 +1000)
+* 9441dad3 - feat: add verification reports configuration to the Maven plugin #428 (Ronald Holshausen, Sat Jul 28 17:11:29 2018 +1000)
+* 281b004e - fix: Guard the JUnit 5 TestResultAccumulator against mutable model classes #736 (Ronald Holshausen, Sat Jul 28 14:36:17 2018 +1000)
+* b58bcbf2 - fix: Got codenarc'd #733 (Ronald Holshausen, Sat Jul 28 12:36:52 2018 +1000)
+* 560afad7 - fix: ConsumerInfo setPactFile method needs to take a URL class #733 (Ronald Holshausen, Sat Jul 28 12:06:28 2018 +1000)
+* 25cc63ed - fix: JUnit 5 ext now falls back to the class annotation at the property level (Ronald Holshausen, Sat Jul 14 15:25:43 2018 +1000)
+* 15d7750c - added some debug logging around starting and stopping the mock server (Ronald Holshausen, Sat Jul 14 14:22:32 2018 +1000)
+* 7c996e71 - fix: Remove the JUnit4 dependency from the JUnit5 implementation (Ronald Holshausen, Sat Jul 14 13:07:11 2018 +1000)
+* 544ad654 - fix: add @RestoreSystemProperties to test that mutates system properties (Ronald Holshausen, Sat Jul 14 11:54:06 2018 +1000)
+* c75d737c - Merge pull request #731 from SnewsButton/add-system-properties (Ronald Holshausen, Sat Jul 14 11:50:05 2018 +1000)
+* be8e146a - Added test to check that property is set (Stephen New, Wed Jul 11 15:54:39 2018 -0600)
+* f0379e56 - Modified README.md to reflect pact maven functionality (Stephen New, Wed Jul 11 15:28:14 2018 -0600)
+* df4999ab - pre migration (Stephen New, Wed Jul 11 15:10:40 2018 -0600)
+* 2efe4d7e - Added systemPropertyVariables parameter (Stephen New, Wed Jul 11 13:01:52 2018 -0600)
+* 66db39a0 - Added systemPropertyVariables parameter (Stephen New, Wed Jul 11 12:57:50 2018 -0600)
+* ef8808d5 - bump version to 3.5.20 (Ronald Holshausen, Sun Jul 1 19:31:24 2018 +1000)
+
 # 3.5.19 - Bugfix Release
 
 * d7404f03 - Merge tag '3_5_19' into v3.5.x-2.11 (Ronald Holshausen, Sun Jul 1 19:33:51 2018 +1000)

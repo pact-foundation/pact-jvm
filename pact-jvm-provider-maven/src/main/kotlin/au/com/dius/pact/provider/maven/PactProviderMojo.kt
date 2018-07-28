@@ -4,6 +4,7 @@ import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.PactVerifierException
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.reporters.ReporterManager
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugins.annotations.Component
@@ -28,6 +29,9 @@ open class PactProviderMojo : AbstractMojo() {
   private lateinit var classpathElements: List<String>
 
   @Parameter
+  var systemPropertyVariables: Map<String, String> = mutableMapOf()
+
+  @Parameter
   lateinit var serviceProviders: List<Provider>
 
   @Parameter
@@ -45,8 +49,18 @@ open class PactProviderMojo : AbstractMojo() {
   @Parameter(defaultValue = "true")
   var failIfNoPactsFound: Boolean = true
 
+  @Parameter(defaultValue = "\${project.build.directory}", readonly = true)
+  lateinit var buildDir: File
+
+  @Parameter(defaultValue = "console")
+  lateinit var reports: List<String>
+
   override fun execute() {
     AnsiConsole.systemInstall()
+
+    systemPropertyVariables.forEach { (property, value) ->
+      System.setProperty(property, value)
+    }
 
     val failures = mutableMapOf<Any, Any>()
     val verifier = providerVerifier().let {
@@ -62,37 +76,56 @@ open class PactProviderMojo : AbstractMojo() {
         val urls = classpathElements.map { File(it).toURI().toURL() }
         urls.toTypedArray()
       }
+
+      if (reports.isNotEmpty()) {
+        val reportsDir = File(buildDir, "reports/pact")
+        it.reporters = reports.map { name ->
+          if (ReporterManager.reporterDefined(name)) {
+            val reporter = ReporterManager.createReporter(name)
+            reporter.setReportDir(reportsDir)
+            reporter
+          } else {
+            throw MojoFailureException("There is no defined reporter named '$name'. Available reporters are: " +
+              "${ReporterManager.availableReporters()}")
+          }
+        }
+      }
+
       it
     }
 
-    serviceProviders.forEach { provider ->
-      val consumers = mutableListOf<ConsumerInfo>()
-      consumers.addAll(provider.consumers)
-      if (provider.pactFileDirectory != null) {
+    try {
+      serviceProviders.forEach { provider ->
+        val consumers = mutableListOf<ConsumerInfo>()
+        consumers.addAll(provider.consumers)
+        if (provider.pactFileDirectory != null) {
           consumers.addAll(loadPactFiles(provider, provider.pactFileDirectory))
-      }
-      if (provider.pactFileDirectories.isNotEmpty()) {
-        provider.pactFileDirectories.forEach {
-          consumers.addAll(loadPactFiles(provider, it))
         }
+        if (provider.pactFileDirectories.isNotEmpty()) {
+          provider.pactFileDirectories.forEach {
+            consumers.addAll(loadPactFiles(provider, it))
+          }
+        }
+        if (provider.pactBrokerUrl != null || provider.pactBroker != null) {
+          loadPactsFromPactBroker(provider, consumers)
+        }
+
+        if (consumers.isEmpty() && failIfNoPactsFound) {
+          throw MojoFailureException("No pact files were found for provider '${provider.name}'")
+        }
+
+        provider.consumers = consumers
+
+        failures.putAll(verifier.verifyProvider(provider) as Map<out Any, Any>)
       }
-      if (provider.pactBrokerUrl != null || provider.pactBroker != null) {
-        loadPactsFromPactBroker(provider, consumers)
+
+      if (failures.isNotEmpty()) {
+        verifier.displayFailures(failures)
+        AnsiConsole.systemUninstall()
+        throw MojoFailureException("There were ${failures.size} pact failures")
       }
-
-      if (consumers.isEmpty() && failIfNoPactsFound) {
-        throw MojoFailureException("No pact files were found for provider '${provider.name}'")
-      }
-
-      provider.consumers = consumers
-
-      failures.putAll(verifier.verifyProvider(provider) as Map<out Any, Any>)
-    }
-
-    if (failures.isNotEmpty()) {
-      verifier.displayFailures(failures)
-      AnsiConsole.systemUninstall()
-      throw MojoFailureException("There were ${failures.size} pact failures")
+    } finally {
+      verifier.finialiseReports()
     }
   }
 
