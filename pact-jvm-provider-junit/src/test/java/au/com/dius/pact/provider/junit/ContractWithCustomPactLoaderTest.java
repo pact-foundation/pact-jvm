@@ -42,7 +42,7 @@ public class ContractWithCustomPactLoaderTest {
         // Mock dependent service responses
         // ...
         embeddedService.addExpectation(
-                onRequestTo("/data"), giveEmptyResponse()
+                onRequestTo("/data").withAnyParams(), giveEmptyResponse()
         );
     }
 

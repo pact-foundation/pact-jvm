@@ -35,7 +35,7 @@ class MockMvcTargetSpec extends Specification {
     mockMvcTarget.controllers = [ controller ]
 
     when:
-    mockMvcTarget.testInteraction('testConsumer', interaction, UnknownPactSource.INSTANCE)
+    mockMvcTarget.testInteraction('testConsumer', interaction, UnknownPactSource.INSTANCE, [:])
 
     then:
     1 * controller.test()

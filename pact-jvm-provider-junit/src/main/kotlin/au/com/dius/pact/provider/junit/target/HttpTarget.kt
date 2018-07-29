@@ -56,14 +56,19 @@ open class HttpTarget
   /**
    * {@inheritDoc}
    */
-  override fun testInteraction(consumerName: String, interaction: Interaction, source: PactSource) {
+  override fun testInteraction(
+    consumerName: String,
+    interaction: Interaction,
+    source: PactSource,
+    context: Map<String, Any?>
+  ) {
     val provider = getProviderInfo(source)
     val consumer = ConsumerInfo(consumerName)
     val verifier = setupVerifier(interaction, provider, consumer)
 
     val failures = mutableMapOf<String, Any>()
     val client = ProviderClient(provider, HttpClientFactory())
-    verifier.verifyResponseFromProvider(provider, interaction, interaction.description, failures, client)
+    verifier.verifyResponseFromProvider(provider, interaction, interaction.description, failures, client, context)
     reportTestResult(failures.isEmpty(), verifier)
 
     try {

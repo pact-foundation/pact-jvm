@@ -36,18 +36,21 @@ abstract class BaseTarget : TestClassAwareTarget {
 
   protected fun setupReporters(verifier: ProviderVerifier, name: String, description: String) {
     var reportDirectory = "target/pact/reports"
-    var reports = arrayOf<String>()
     var reportingEnabled = false
 
     val verificationReports = testClass.getAnnotation(VerificationReports::class.java)
-    if (verificationReports != null) {
-      reportingEnabled = true
-      reportDirectory = verificationReports.reportDir
-      reports = verificationReports.value
-    } else if (valueResolver.propertyDefined("pact.verification.reports")) {
-      reportingEnabled = true
-      reportDirectory = valueResolver.resolveValue("pact.verification.reportDir:$reportDirectory")
-      reports = valueResolver.resolveValue("pact.verification.reports:").split(",").toTypedArray()
+    val reports: List<String> = when {
+      verificationReports != null -> {
+        reportingEnabled = true
+        reportDirectory = verificationReports.reportDir
+        verificationReports.value.toList()
+      }
+      valueResolver.propertyDefined("pact.verification.reports") -> {
+        reportingEnabled = true
+        reportDirectory = valueResolver.resolveValue("pact.verification.reportDir:$reportDirectory")
+        valueResolver.resolveValue("pact.verification.reports:").split(",")
+      }
+      else -> emptyList()
     }
 
     if (reportingEnabled) {
