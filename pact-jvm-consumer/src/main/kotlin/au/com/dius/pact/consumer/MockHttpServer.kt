@@ -12,6 +12,7 @@ import au.com.dius.pact.model.RequestMatching
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.Response
+import au.com.dius.pact.model.generators.GeneratorTestMode
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
@@ -113,7 +114,7 @@ abstract class BaseMockServer(
       is FullRequestMatch -> {
         val interaction = matchResult.interaction() as RequestResponseInteraction
         matchedRequests.add(interaction.request)
-        return interaction.response.generatedResponse()
+        return interaction.response.generatedResponse(emptyMap<String, Any>(), GeneratorTestMode.Consumer)
       }
       is PartialRequestMatch -> {
         val interaction = matchResult.problems().keys().head() as RequestResponseInteraction

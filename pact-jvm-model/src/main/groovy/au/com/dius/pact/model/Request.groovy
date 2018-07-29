@@ -2,6 +2,7 @@ package au.com.dius.pact.model
 
 import au.com.dius.pact.model.generators.Category
 import au.com.dius.pact.model.generators.Generator
+import au.com.dius.pact.model.generators.GeneratorTestMode
 import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.matchingrules.MatchingRules
 import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
@@ -53,16 +54,18 @@ class Request extends BaseRequest implements Comparable {
     }
   }
 
-  Request generatedRequest(Map context = [:]) {
+  Request generatedRequest(Map context = [:], GeneratorTestMode mode = GeneratorTestMode.Provider) {
     def r = this.copy()
-    generators.applyGenerator(Category.PATH) { String key, Generator g -> r.path = g.generate(context).toString() }
-    generators.applyGenerator(Category.HEADER) { String key, Generator g ->
+    generators.applyGenerator(Category.PATH, mode) { String key, Generator g ->
+      r.path = g.generate(context).toString()
+    }
+    generators.applyGenerator(Category.HEADER, mode) { String key, Generator g ->
       r.headers[key] = g.generate(context).toString()
     }
-    generators.applyGenerator(Category.QUERY) { String key, Generator g ->
+    generators.applyGenerator(Category.QUERY, mode) { String key, Generator g ->
       r.query[key] = r.query[key].collect { g.generate(context).toString() }
     }
-    r.body = generators.applyBodyGenerators(r.body, new ContentType(mimeType()), context)
+    r.body = generators.applyBodyGenerators(r.body, new ContentType(mimeType()), context, mode)
     r
   }
 

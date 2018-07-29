@@ -172,7 +172,7 @@ open class AmpqTestTarget(val packagesToScan: List<String> = emptyList()) : Test
     if (interaction is Message) {
       return null
     }
-    throw UnsupportedOperationException("Only message interactions can be used with an Ampq test target")
+    throw UnsupportedOperationException("Only message interactions can be used with an AMPQ test target")
   }
 
   override fun prepareVerifier(verifier: ProviderVerifier, testInstance: Any) {

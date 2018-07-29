@@ -95,6 +95,10 @@ object JsonContentTypeHandler : ContentTypeHandler {
   }
 }
 
+enum class GeneratorTestMode {
+  Consumer, Provider
+}
+
 data class Generators(val categories: MutableMap<Category, MutableMap<String, Generator>> = mutableMapOf()) {
 
   companion object : KLogging() {
@@ -166,32 +170,40 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     return this
   }
 
-  fun applyGenerator(category: Category, closure: (String, Generator?) -> Unit) {
+  fun applyGenerator(category: Category, mode: GeneratorTestMode, closure: (String, Generator?) -> Unit) {
     if (categories.containsKey(category) && categories[category] != null) {
       val categoryValues = categories[category]
       if (categoryValues != null) {
-        for ((key, value) in categoryValues) {
-          closure.invoke(key, value)
+        for ((key, generator) in categoryValues) {
+          if (generator.correspondsToMode(mode)) {
+            closure.invoke(key, generator)
+          }
         }
       }
     }
   }
 
-  fun applyBodyGenerators(body: OptionalBody, contentType: ContentType, context: Map<String, Any?>): OptionalBody {
+  fun applyBodyGenerators(
+    body: OptionalBody,
+    contentType: ContentType,
+    context: Map<String, Any?>,
+    mode: GeneratorTestMode
+  ): OptionalBody {
     return when (body.state) {
       OptionalBody.State.EMPTY, OptionalBody.State.MISSING, OptionalBody.State.NULL -> body
       OptionalBody.State.PRESENT -> when {
-        contentType.isJson() -> processBody(body.value!!, "application/json", context)
-        contentType.isXml() -> processBody(body.value!!, "application/xml", context)
+        contentType.isJson() -> processBody(body.value!!, "application/json", context, mode)
+        contentType.isXml() -> processBody(body.value!!, "application/xml", context, mode)
         else -> body
       }
     }
   }
 
-  private fun processBody(value: String, contentType: String, context: Map<String, Any?>): OptionalBody {
+  private fun processBody(value: String, contentType: String, context: Map<String, Any?>, mode: GeneratorTestMode):
+    OptionalBody {
     val handler = contentTypeHandlers[contentType]
     return handler?.processBody(value) { body: QueryResult ->
-      applyGenerator(Category.BODY) { key: String, generator: Generator? ->
+      applyGenerator(Category.BODY, mode) { key: String, generator: Generator? ->
         if (generator != null) {
           handler.applyKey(body, key, generator, context)
         }

@@ -51,6 +51,7 @@ fun lookupGenerator(generatorMap: Map<String, Any>): Generator? {
 interface Generator {
   fun generate(context: Map<String, Any?>): Any?
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any>
+  fun correspondsToMode(mode: GeneratorTestMode): Boolean = true
 }
 
 data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
@@ -275,6 +276,8 @@ data class ProviderStateGenerator(val expression: String) : Generator {
       else -> null
     }
   }
+
+  override fun correspondsToMode(mode: GeneratorTestMode) = mode == GeneratorTestMode.Provider
 
   companion object {
     fun fromMap(map: Map<String, Any>) = ProviderStateGenerator(map["expression"]!! as String)
