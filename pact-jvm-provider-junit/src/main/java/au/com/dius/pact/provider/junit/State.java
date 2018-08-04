@@ -18,4 +18,6 @@ public @interface State {
      * @return list of state names
      */
     String[] value();
+
+    StateChangeAction action() default StateChangeAction.SETUP;
 }
