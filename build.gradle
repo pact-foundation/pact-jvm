@@ -15,6 +15,7 @@ plugins {
   id 'org.jmailen.kotlinter' version '1.11.2'
   id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC6-4'
   id 'org.jetbrains.dokka' version '0.9.16'
+  id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
 
 repositories {
@@ -25,6 +26,24 @@ repositories {
 
 import org.apache.commons.text.StringEscapeUtils
 
+def scalaVersionLookup = [
+  '2.12': '2.12.5'
+]
+
+allprojects {
+  group = 'au.com.dius'
+  version = '3.5.21'
+
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+  }
+
+  targetCompatibility = '1.8'
+  sourceCompatibility = '1.8'
+}
+
 subprojects {
   buildscript {
     repositories {
@@ -33,10 +52,6 @@ subprojects {
       mavenLocal()
     }
   }
-
-    def scalaVersionLookup = [
-        '2.12': '2.12.5'
-    ]
 
     def m = project.name =~ /.*_(2\.1\d)(_0\.\d+)?/
     if (m.matches()) {
@@ -212,7 +227,6 @@ subprojects {
                     if (project.hasProperty('sonatypeUsername')) {
                         authentication(userName: sonatypeUsername, password: sonatypePassword)
                     }
-//                     proxy(host: 'localhost', port: 3128, type: 'http')
                 }
 
             }
@@ -294,4 +308,44 @@ if (System.env.TRAVIS == 'true') {
             maxHeapSize = '768m'
         }
     }
+}
+
+dependencies {
+  compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+  compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+  compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
+  compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
+  compile('io.github.microutils:kotlin-logging:1.4.4') {
+    exclude group: 'org.jetbrains.kotlin'
+  }
+  compile "org.scala-lang:scala-library:${scalaVersionLookup['2.12']}"
+  compile("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {
+    exclude group: 'org.scala-lang'
+  }
+
+  compile project(':pact-jvm-consumer-groovy_2.12')
+  compile project(':pact-jvm-consumer-java8_2.12')
+  compile project(':pact-jvm-consumer-junit5_2.12')
+  compile project(':pact-jvm-consumer-junit_2.12')
+  compile project(':pact-jvm-consumer-specs2_2.12')
+  compile project(':pact-jvm-consumer_2.12')
+  compile project(':pact-jvm-matchers_2.12')
+  compile project(':pact-jvm-model')
+  compile project(':pact-jvm-pact-broker')
+  compile project(':pact-jvm-provider-gradle_2.12')
+  compile project(':pact-jvm-provider-junit5_2.12')
+  compile project(':pact-jvm-provider-junit_2.12')
+  compile project(':pact-jvm-provider-lein_2.12')
+  compile project(':pact-jvm-provider-maven_2.12')
+  compile project(':pact-jvm-provider-scalasupport_2.12')
+  compile project(':pact-jvm-provider-scalatest_2.12')
+  compile project(':pact-jvm-provider-specs2_2.12')
+  compile project(':pact-jvm-provider-spring_2.12')
+  compile project(':pact-jvm-provider_2.12')
+}
+
+shadowJar {
+  mergeServiceFiles()
+  mergeGroovyExtensionModules()
+  zip64 = true
 }
