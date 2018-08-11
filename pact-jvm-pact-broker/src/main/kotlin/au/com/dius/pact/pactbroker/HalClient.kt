@@ -139,6 +139,7 @@ abstract class HalClientBase @JvmOverloads constructor(
     body: String,
     handler: ((status: Int, response: CloseableHttpResponse) -> Boolean)?
   ): Result<Boolean, Exception> {
+    logger.debug { "Posting JSON to $url\n$body" }
     val client = setupHttpClient()
 
     return Result.of {
@@ -147,6 +148,7 @@ abstract class HalClientBase @JvmOverloads constructor(
       httpPost.entity = StringEntity(body, ContentType.APPLICATION_JSON)
 
       client.execute(httpPost).use {
+        logger.debug { "Got response ${it.statusLine}" }
         if (handler != null) {
           handler(it.statusLine.statusCode, it)
         } else {
