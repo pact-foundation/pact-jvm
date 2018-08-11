@@ -147,4 +147,15 @@ class MatchingRulesSpec extends Specification {
     matchingRules.toV3Map() == [path: [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']]
   }
 
+  def 'do not include empty categories'() {
+    given:
+    def matchingRules = new MatchingRulesImpl()
+    matchingRules.addCategory('path').addRule(new RegexMatcher('\\w+'))
+    matchingRules.addCategory('body')
+    matchingRules.addCategory('header')
+
+    expect:
+    matchingRules.toV3Map() == [path: [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']]
+  }
+
 }

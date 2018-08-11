@@ -59,7 +59,7 @@ class MatchingRulesImpl : MatchingRules {
         else -> toV3Map()
     }
 
-    private fun toV3Map(): Map<String, Map<String, Any?>> = rules.mapValues { entry ->
+    private fun toV3Map(): Map<String, Map<String, Any?>> = rules.filter { it.value.isNotEmpty() }.mapValues { entry ->
         entry.value.toMap(PactSpecVersion.V3)
     }
 
