@@ -310,42 +310,44 @@ if (System.env.TRAVIS == 'true') {
     }
 }
 
-dependencies {
-  compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-  compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-  compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
-  compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
-  compile('io.github.microutils:kotlin-logging:1.4.4') {
-    exclude group: 'org.jetbrains.kotlin'
-  }
-  compile "org.scala-lang:scala-library:${scalaVersionLookup['2.12']}"
-  compile("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {
-    exclude group: 'org.scala-lang'
+if (System.env.UBERJAR == 'true') {
+  dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+    compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
+    compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
+    compile('io.github.microutils:kotlin-logging:1.4.4') {
+      exclude group: 'org.jetbrains.kotlin'
+    }
+    compile "org.scala-lang:scala-library:${scalaVersionLookup['2.12']}"
+    compile("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {
+      exclude group: 'org.scala-lang'
+    }
+
+    compile project(':pact-jvm-consumer-groovy_2.12')
+    compile project(':pact-jvm-consumer-java8_2.12')
+    compile project(':pact-jvm-consumer-junit5_2.12')
+    compile project(':pact-jvm-consumer-junit_2.12')
+    compile project(':pact-jvm-consumer-specs2_2.12')
+    compile project(':pact-jvm-consumer_2.12')
+    compile project(':pact-jvm-matchers_2.12')
+    compile project(':pact-jvm-model')
+    compile project(':pact-jvm-pact-broker')
+    compile project(':pact-jvm-provider-gradle_2.12')
+    compile project(':pact-jvm-provider-junit5_2.12')
+    compile project(':pact-jvm-provider-junit_2.12')
+    compile project(':pact-jvm-provider-lein_2.12')
+    compile project(':pact-jvm-provider-maven_2.12')
+    compile project(':pact-jvm-provider-scalasupport_2.12')
+    compile project(':pact-jvm-provider-scalatest_2.12')
+    compile project(':pact-jvm-provider-specs2_2.12')
+    compile project(':pact-jvm-provider-spring_2.12')
+    compile project(':pact-jvm-provider_2.12')
   }
 
-  compile project(':pact-jvm-consumer-groovy_2.12')
-  compile project(':pact-jvm-consumer-java8_2.12')
-  compile project(':pact-jvm-consumer-junit5_2.12')
-  compile project(':pact-jvm-consumer-junit_2.12')
-  compile project(':pact-jvm-consumer-specs2_2.12')
-  compile project(':pact-jvm-consumer_2.12')
-  compile project(':pact-jvm-matchers_2.12')
-  compile project(':pact-jvm-model')
-  compile project(':pact-jvm-pact-broker')
-  compile project(':pact-jvm-provider-gradle_2.12')
-  compile project(':pact-jvm-provider-junit5_2.12')
-  compile project(':pact-jvm-provider-junit_2.12')
-  compile project(':pact-jvm-provider-lein_2.12')
-  compile project(':pact-jvm-provider-maven_2.12')
-  compile project(':pact-jvm-provider-scalasupport_2.12')
-  compile project(':pact-jvm-provider-scalatest_2.12')
-  compile project(':pact-jvm-provider-specs2_2.12')
-  compile project(':pact-jvm-provider-spring_2.12')
-  compile project(':pact-jvm-provider_2.12')
-}
-
-shadowJar {
-  mergeServiceFiles()
-  mergeGroovyExtensionModules()
-  zip64 = true
+  shadowJar {
+    mergeServiceFiles()
+    mergeGroovyExtensionModules()
+    zip64 = true
+  }
 }
