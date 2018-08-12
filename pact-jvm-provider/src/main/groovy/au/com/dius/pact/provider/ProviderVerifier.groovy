@@ -6,6 +6,7 @@ import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.model.v3.messaging.Message
@@ -210,12 +211,13 @@ class ProviderVerifier extends ProviderVerifierBase {
   }
 
   @SuppressWarnings('ParameterCount')
-  boolean verifyResponseFromProvider(ProviderInfo provider, Interaction interaction, String interactionMessage,
+  boolean verifyResponseFromProvider(ProviderInfo provider, RequestResponseInteraction interaction,
+                                     String interactionMessage,
                                      Map failures,
                                      ProviderClient client,
                                      Map context = [:]) {
     try {
-      def expectedResponse = interaction.response
+      def expectedResponse = interaction.response.generatedResponse(context)
       def actualResponse = client.makeRequest(interaction.request.generatedRequest(context))
 
       verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)

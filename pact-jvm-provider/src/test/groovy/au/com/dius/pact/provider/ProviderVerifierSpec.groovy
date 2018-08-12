@@ -368,8 +368,8 @@ class ProviderVerifierSpec extends Specification {
     PactBrokerClient pactBrokerClient = Mock(PactBrokerClient)
     GroovyMock(PactReader, global: true)
     GroovyMock(StateChange, global: true)
-    def interaction1 = Mock(Interaction)
-    def interaction2 = Mock(Interaction)
+    def interaction1 = Mock(RequestResponseInteraction)
+    def interaction2 = Mock(RequestResponseInteraction)
     def mockPact = Mock(Pact) {
       getSource() >> new BrokerUrlSource('http://localhost', 'http://pact-broker')
     }
@@ -408,10 +408,10 @@ class ProviderVerifierSpec extends Specification {
     GroovyMock(PactReader, global: true)
     GroovyMock(ProviderVerifierKt, global: true)
     GroovyMock(StateChange, global: true)
-    def interaction1 = Mock(Interaction) {
+    def interaction1 = Mock(RequestResponseInteraction) {
       getDescription() >> 'Interaction 1'
     }
-    def interaction2 = Mock(Interaction) {
+    def interaction2 = Mock(RequestResponseInteraction) {
       getDescription() >> 'Interaction 2'
     }
     def mockPact = Mock(Pact) {

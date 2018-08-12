@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.junit.target
 
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.PactSource
+import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.HttpClientFactory
 import au.com.dius.pact.provider.ProviderClient
@@ -68,7 +69,8 @@ open class HttpTarget
 
     val failures = mutableMapOf<String, Any>()
     val client = ProviderClient(provider, HttpClientFactory())
-    verifier.verifyResponseFromProvider(provider, interaction, interaction.description, failures, client, context)
+    verifier.verifyResponseFromProvider(provider, interaction as RequestResponseInteraction, interaction.description,
+      failures, client, context)
     reportTestResult(failures.isEmpty(), verifier)
 
     try {
