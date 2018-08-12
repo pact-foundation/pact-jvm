@@ -24,6 +24,9 @@ repositories {
   jcenter()
 }
 
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
 import org.apache.commons.text.StringEscapeUtils
 
 def scalaVersionLookup = [
@@ -333,11 +336,8 @@ if (System.env.UBERJAR == 'true') {
     compile project(':pact-jvm-matchers_2.12')
     compile project(':pact-jvm-model')
     compile project(':pact-jvm-pact-broker')
-    compile project(':pact-jvm-provider-gradle_2.12')
     compile project(':pact-jvm-provider-junit5_2.12')
     compile project(':pact-jvm-provider-junit_2.12')
-    compile project(':pact-jvm-provider-lein_2.12')
-    compile project(':pact-jvm-provider-maven_2.12')
     compile project(':pact-jvm-provider-scalasupport_2.12')
     compile project(':pact-jvm-provider-scalatest_2.12')
     compile project(':pact-jvm-provider-specs2_2.12')
@@ -345,9 +345,72 @@ if (System.env.UBERJAR == 'true') {
     compile project(':pact-jvm-provider_2.12')
   }
 
+  publishing {
+    publications {
+      shadow(MavenPublication) { publication ->
+        project.shadow.component(publication)
+
+        pom.withXml {
+          asNode().children().last() + {
+            resolveStrategy = Closure.DELEGATE_FIRST
+
+            name project.name
+            description 'JVM implementation of the consumer driven contract library pact.'
+            url 'https://github.com/DiUS/pact-jvm'
+            licenses {
+              license {
+                name 'Apache 2'
+                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                distribution 'repo'
+              }
+            }
+            scm {
+              url 'https://github.com/DiUS/pact-jvm'
+              connection 'https://github.com/DiUS/pact-jvm.git'
+            }
+
+            developers {
+              developer {
+                id 'thetrav'
+                name 'Travis Dixon'
+                email 'the.trav@gmail.com'
+              }
+              developer {
+                id 'rholshausen'
+                name 'Ronald Holshausen'
+                email 'rholshausen@dius.com.au'
+              }
+            }
+          }
+        }
+      }
+    }
+    repositories {
+      maven {
+        url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+        credentials {
+          username sonatypeUsername
+          password sonatypePassword
+        }
+      }
+    }
+  }
+
+  signing {
+    sign publishing.publications.shadow
+  }
+
   shadowJar {
     mergeServiceFiles()
     mergeGroovyExtensionModules()
     zip64 = true
+    manifest {
+      attributes provider: 'gradle',
+        'Implementation-Title': project.name, 'Implementation-Version': version,
+        'Implementation-Vendor': project.group, 'Implementation-Vendor-Id': project.group,
+        'Specification-Vendor': project.group,
+        'Specification-Title': project.name,
+        'Specification-Version': version
+    }
   }
 }
