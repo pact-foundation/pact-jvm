@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.core.model._
-import au.com.dius.pact.model._
+import au.com.dius.pact.core.model.{Pact => PactModel, _}
+import au.com.dius.pact.model.{MockHttpsKeystoreProviderConfig, MockHttpsProviderConfig, MockProviderConfig}
 import com.typesafe.scalalogging.StrictLogging
 
 import scala.util.Try
@@ -9,9 +9,9 @@ import scala.util.Try
 trait MockProvider[I <: Interaction] {
   def config: MockProviderConfig
   def session: PactSession
-  def start(pact: Pact[I]): Unit
+  def start(pact: PactModel[I]): Unit
   def run[T](code: => T): Try[T]
-  def runAndClose[T](pact: Pact[I])(code: => T): Try[(T, PactSessionResults)]
+  def runAndClose[T](pact: PactModel[I])(code: => T): Try[(T, PactSessionResults)]
   def stop(): Unit
 }
 
@@ -33,16 +33,16 @@ object DefaultMockProvider {
 // TODO: eliminate horrid state mutation and synchronisation.  Reactive stuff to the rescue?
 abstract class StatefulMockProvider[I <: Interaction] extends MockProvider[I] with StrictLogging {
   private var sessionVar = PactSession.empty
-  private var pactVar: Option[Pact[I]] = None
+  private var pactVar: Option[PactModel[I]] = None
 
   private def waitForRequestsToFinish() = Thread.sleep(100)
 
   def session: PactSession  = sessionVar
-  def pact: Option[Pact[I]] = pactVar
+  def pact: Option[PactModel[I]] = pactVar
   
   def start(): Unit
   
-  override def start(pact: Pact[I]): Unit = synchronized {
+  override def start(pact: PactModel[I]): Unit = synchronized {
     pactVar = Some(pact)
     sessionVar = PactSession.forPact(pact)
     start()
@@ -56,7 +56,7 @@ abstract class StatefulMockProvider[I <: Interaction] extends MockProvider[I] wi
     }
   }
 
-  override def runAndClose[T](pact: Pact[I])(code: => T): Try[(T, PactSessionResults)] = {
+  override def runAndClose[T](pact: PactModel[I])(code: => T): Try[(T, PactSessionResults)] = {
     Try {
       try {
         start(pact)

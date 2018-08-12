@@ -3,11 +3,14 @@
 */bin
 # sbt specific
 dist/*
-target/
+/target/
+/*/target/
 lib_managed/
 src_managed/
 project/boot/
 project/plugins/project/
+pact-jvm-provider-sbt/project/project/
+pact-jvm-provider-sbt/project/target/
 
 # Scala-IDE specific
 .scala_dependencies

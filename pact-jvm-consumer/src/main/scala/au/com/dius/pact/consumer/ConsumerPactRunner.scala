@@ -2,7 +2,7 @@ package au.com.dius.pact.consumer
 
 import java.net.SocketException
 
-import au.com.dius.pact.core.model.{Pact, PactSpecVersion}
+import au.com.dius.pact.core.model.{Pact => PactModel, PactSpecVersion}
 import au.com.dius.pact.core.model.RequestResponseInteraction
 
 import scala.util.{Failure, Success, Try}
@@ -13,17 +13,17 @@ import scala.util.{Failure, Success, Try}
 @Deprecated
 object ConsumerPactRunner {
   
-  def writeIfMatching(pact: Pact[RequestResponseInteraction], results: PactSessionResults, pactVersion: PactSpecVersion)
+  def writeIfMatching(pact: PactModel[RequestResponseInteraction], results: PactSessionResults, pactVersion: PactSpecVersion)
     : VerificationResult = writeIfMatching(pact, Success(results), pactVersion)
   
-  def writeIfMatching(pact: Pact[RequestResponseInteraction], tryResults: Try[PactSessionResults], pactVersion: PactSpecVersion): VerificationResult = {
+  def writeIfMatching(pact: PactModel[RequestResponseInteraction], tryResults: Try[PactSessionResults], pactVersion: PactSpecVersion): VerificationResult = {
     for (results <- tryResults if results.allMatched) {
       PactGenerator.merge(pact).writeAllToFile(pactVersion)
     }
     VerificationResult(tryResults)
   }
   
-  def runAndWritePact[T](pact: Pact[RequestResponseInteraction], pactVersion: PactSpecVersion = PactSpecVersion.V3)(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
+  def runAndWritePact[T](pact: PactModel[RequestResponseInteraction], pactVersion: PactSpecVersion = PactSpecVersion.V3)(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
     val server = DefaultMockProvider.withDefaultConfig(pactVersion)
     new ConsumerPactRunner(server).runAndWritePact(pact, pactVersion)(userCode, userVerification)
   }
@@ -36,7 +36,7 @@ object ConsumerPactRunner {
 class ConsumerPactRunner(server: MockProvider[RequestResponseInteraction]) {
   import ConsumerPactRunner._
   
-  def runAndWritePact[T](pact: Pact[RequestResponseInteraction], pactVersion: PactSpecVersion)(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
+  def runAndWritePact[T](pact: PactModel[RequestResponseInteraction], pactVersion: PactSpecVersion)(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
     val tryResults = server.runAndClose(pact)(userCode)
     tryResults match {
       case Failure(e) =>
@@ -50,7 +50,7 @@ class ConsumerPactRunner(server: MockProvider[RequestResponseInteraction]) {
     }
   }
   
-  def runAndWritePact(pact: Pact[RequestResponseInteraction], userCode: Runnable): VerificationResult =
+  def runAndWritePact(pact: PactModel[RequestResponseInteraction], userCode: Runnable): VerificationResult =
     runAndWritePact(pact, server.config.getPactVersion)(userCode.run(), (u:Unit) => None)
 
   def run[T](userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
@@ -63,7 +63,7 @@ class ConsumerPactRunner(server: MockProvider[RequestResponseInteraction]) {
     }
   }
 
-  def writePact(pact: Pact[RequestResponseInteraction], pactVersion: PactSpecVersion): VerificationResult =
+  def writePact(pact: PactModel[RequestResponseInteraction], pactVersion: PactSpecVersion): VerificationResult =
     if (server.session.remainingResults.allMatched)
       writeIfMatching(pact, server.session.remainingResults, pactVersion)
     else

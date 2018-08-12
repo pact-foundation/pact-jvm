@@ -54,7 +54,12 @@ class MockMvcTarget @JvmOverloads constructor(
   /**
    * {@inheritDoc}
    */
-  override fun testInteraction(consumerName: String, interaction: Interaction, source: PactSource) {
+  override fun testInteraction(
+    consumerName: String,
+    interaction: Interaction,
+    source: PactSource,
+    context: Map<String, Any?>
+  ) {
     val provider = getProviderInfo(source)
     val consumer = ConsumerInfo(consumerName)
     provider.verificationType = PactVerification.ANNOTATED_METHOD

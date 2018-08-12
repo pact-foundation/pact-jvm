@@ -1,5 +1,41 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.21 - Bugfix Release
+
+* 3fe199a3 - doc: update version in readme (Ronald Holshausen, Sun Aug 12 15:11:05 2018 +1000)
+* 8d16a9c3 - fix: display the tag when verifying a pact fetched with a tag #754 (Ronald Holshausen, Sun Aug 12 14:34:10 2018 +1000)
+* 0b7168b5 - fix: Java 8 DSL was not setting wildcard matchers with min/max arrays #749 (Ronald Holshausen, Sun Aug 12 12:09:12 2018 +1000)
+* dd2b75e4 - fix: min-max type matcher was not being called by the verifier #749 (Ronald Holshausen, Sun Aug 12 11:33:28 2018 +1000)
+* d8121728 - feat: uponReceiving in the response of the Java DSL should use the existing path as a default #748 (Ronald Holshausen, Sun Aug 12 10:13:30 2018 +1000)
+* 383460e1 - fix: only include fatjar config when building it as it breaks appveyor build #747 (Ronald Holshausen, Sat Aug 11 20:48:40 2018 +1000)
+* 364d047d - fix: added response body debug logging for post requests to the pact broker #738 (Ronald Holshausen, Sat Aug 11 20:18:49 2018 +1000)
+* 6989edf5 - feat: added a fat jar of all the project libraries and depenencies #747 (Ronald Holshausen, Sat Aug 11 19:58:18 2018 +1000)
+* 9f74dd20 - fix: handle case where there is a FORM post as well as query parameters #745 (Ronald Holshausen, Sat Aug 11 18:54:36 2018 +1000)
+* d62f4395 - fix: added debug logging to post requests to the pact broker #738 (Ronald Holshausen, Sat Aug 11 17:11:27 2018 +1000)
+* ba08a40c - fix: do not write out empty matching rule categories (Ronald Holshausen, Sat Aug 11 14:51:44 2018 +1000)
+* 3372839d - fix: path matchers were not being written out in the correct format - #743 (Ronald Holshausen, Sat Aug 11 14:42:04 2018 +1000)
+* 340bf4c6 - fix: deprecate the global reportVerificationResults function (Ronald Holshausen, Sun Jul 29 13:35:21 2018 +1000)
+* cba1b336 - bump version to 3.5.21 (Ronald Holshausen, Sat Jul 28 18:15:19 2018 +1000)
+
+# 3.5.20 - Bugfix Release
+
+* 5df7b361 - fix: upgrade Kotlin to latest (Ronald Holshausen, Sat Jul 28 17:32:02 2018 +1000)
+* 9441dad3 - feat: add verification reports configuration to the Maven plugin #428 (Ronald Holshausen, Sat Jul 28 17:11:29 2018 +1000)
+* 281b004e - fix: Guard the JUnit 5 TestResultAccumulator against mutable model classes #736 (Ronald Holshausen, Sat Jul 28 14:36:17 2018 +1000)
+* b58bcbf2 - fix: Got codenarc'd #733 (Ronald Holshausen, Sat Jul 28 12:36:52 2018 +1000)
+* 560afad7 - fix: ConsumerInfo setPactFile method needs to take a URL class #733 (Ronald Holshausen, Sat Jul 28 12:06:28 2018 +1000)
+* 25cc63ed - fix: JUnit 5 ext now falls back to the class annotation at the property level (Ronald Holshausen, Sat Jul 14 15:25:43 2018 +1000)
+* 15d7750c - added some debug logging around starting and stopping the mock server (Ronald Holshausen, Sat Jul 14 14:22:32 2018 +1000)
+* 7c996e71 - fix: Remove the JUnit4 dependency from the JUnit5 implementation (Ronald Holshausen, Sat Jul 14 13:07:11 2018 +1000)
+* 544ad654 - fix: add @RestoreSystemProperties to test that mutates system properties (Ronald Holshausen, Sat Jul 14 11:54:06 2018 +1000)
+* c75d737c - Merge pull request #731 from SnewsButton/add-system-properties (Ronald Holshausen, Sat Jul 14 11:50:05 2018 +1000)
+* be8e146a - Added test to check that property is set (Stephen New, Wed Jul 11 15:54:39 2018 -0600)
+* f0379e56 - Modified README.md to reflect pact maven functionality (Stephen New, Wed Jul 11 15:28:14 2018 -0600)
+* df4999ab - pre migration (Stephen New, Wed Jul 11 15:10:40 2018 -0600)
+* 2efe4d7e - Added systemPropertyVariables parameter (Stephen New, Wed Jul 11 13:01:52 2018 -0600)
+* 66db39a0 - Added systemPropertyVariables parameter (Stephen New, Wed Jul 11 12:57:50 2018 -0600)
+* ef8808d5 - bump version to 3.5.20 (Ronald Holshausen, Sun Jul 1 19:31:24 2018 +1000)
+
 # 3.5.19 - Bugfix Release
 
 * 04415736 - fix: Add the standard test context listeners with SpringRestPactRunner #699 (Ronald Holshausen, Sun Jul 1 18:30:08 2018 +1000)

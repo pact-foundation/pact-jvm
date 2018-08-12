@@ -6,7 +6,7 @@ class DateTimeGeneratorSpec extends Specification {
 
   def 'supports timezones'() {
     expect:
-    new DateTimeGenerator('yyyy-MM-dd\'T\'HH:mm:ssZ').generate(null) ==~
+    new DateTimeGenerator('yyyy-MM-dd\'T\'HH:mm:ssZ').generate([:]) ==~
       /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[-+]\d+/
   }
 

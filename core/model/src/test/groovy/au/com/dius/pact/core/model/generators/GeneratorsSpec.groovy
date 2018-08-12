@@ -13,7 +13,9 @@ class GeneratorsSpec extends Specification {
   def setup() {
     GeneratorsKt.contentTypeHandlers.clear()
     generators = new Generators([:])
-    mockGenerator = Mock(Generator)
+    mockGenerator = Mock(Generator) {
+      correspondsToMode(_) >> true
+    }
   }
 
   def cleanupSpec() {
@@ -27,12 +29,30 @@ class GeneratorsSpec extends Specification {
     def closureCalls = []
 
     when:
-    generators.applyGenerator(Category.HEADER) { String key, Generator generator ->
+    generators.applyGenerator(Category.HEADER, GeneratorTestMode.Provider) { String key, Generator generator ->
       closureCalls << [key, generator]
     }
 
     then:
     closureCalls == [['A', mockGenerator], ['B', mockGenerator]]
+  }
+
+  def "doesn't invoke the provided closure if not in the appropriate mode"() {
+    given:
+    def mockGenerator2 = Mock(Generator) {
+      correspondsToMode(_) >> false
+    }
+    generators.addGenerator(Category.HEADER, 'A', mockGenerator)
+    generators.addGenerator(Category.HEADER, 'B', mockGenerator2)
+    def closureCalls = []
+
+    when:
+    generators.applyGenerator(Category.HEADER, GeneratorTestMode.Provider) { String key, Generator generator ->
+      closureCalls << [key, generator]
+    }
+
+    then:
+    closureCalls == [['A', mockGenerator]]
   }
 
   def 'handle the case of categories that do not have sub-keys'() {
@@ -42,7 +62,7 @@ class GeneratorsSpec extends Specification {
     def closureCalls = []
 
     when:
-    generators.applyGenerator(Category.STATUS) { String key, Generator generator ->
+    generators.applyGenerator(Category.STATUS, GeneratorTestMode.Provider) { String key, Generator generator ->
       closureCalls << [key, generator]
     }
 
@@ -61,7 +81,7 @@ class GeneratorsSpec extends Specification {
     }
 
     expect:
-    generators.applyBodyGenerators(body, new ContentType(contentType)) == returnedBody
+    generators.applyBodyGenerators(body, new ContentType(contentType), [:], GeneratorTestMode.Provider) == returnedBody
 
     where:
 

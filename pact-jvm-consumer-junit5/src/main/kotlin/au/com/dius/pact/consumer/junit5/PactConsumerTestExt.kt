@@ -28,22 +28,29 @@ import java.lang.annotation.Inherited
 @Inherited
 annotation class PactTestFor(
   val providerName: String = "",
-  val hostInterface: String = "localhost",
-  val port: String = "8080",
+  val hostInterface: String = "",
+  val port: String = "",
   val pactVersion: PactSpecVersion = PactSpecVersion.V3,
   val pactMethod: String = ""
 )
 
 data class ProviderInfo(
   val providerName: String = "",
-  val hostInterface: String = "localhost",
-  val port: String = "8080",
-  val pactVersion: PactSpecVersion = PactSpecVersion.V3
+  val hostInterface: String = "",
+  val port: String = "",
+  val pactVersion: PactSpecVersion? = null
 ) {
 
   fun mockServerConfig() =
     MockProviderConfig.httpConfig(if (hostInterface.isEmpty()) MockProviderConfig.LOCALHOST else hostInterface,
-      if (port.isEmpty()) 0 else port.toInt(), pactVersion)
+      if (port.isEmpty()) 0 else port.toInt(), pactVersion ?: PactSpecVersion.V3)
+
+  fun merge(other: ProviderInfo): ProviderInfo {
+    return copy(providerName = if (providerName.isNotEmpty()) providerName else other.providerName,
+      hostInterface = if (hostInterface.isNotEmpty()) hostInterface else other.hostInterface,
+      port = if (port.isNotEmpty()) port else other.port,
+      pactVersion = pactVersion ?: other.pactVersion)
+  }
 
   companion object {
     fun fromAnnotation(annotation: PactTestFor): ProviderInfo =
@@ -69,22 +76,9 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
   }
 
   override fun beforeEach(context: ExtensionContext) {
-    val (providerInfo, pactMethod) = when {
-      AnnotationSupport.isAnnotated(context.requiredTestMethod, PactTestFor::class.java) -> {
-        logger.debug { "Found @PactTestFor annotation on test method" }
-        val annotation = AnnotationSupport.findAnnotation(context.requiredTestMethod, PactTestFor::class.java).get()
-        ProviderInfo.fromAnnotation(annotation) to annotation.pactMethod
-      }
-      AnnotationSupport.isAnnotated(context.requiredTestClass, PactTestFor::class.java) -> {
-        logger.debug { "Found @PactTestFor annotation on test class" }
-        val annotation = AnnotationSupport.findAnnotation(context.requiredTestClass, PactTestFor::class.java).get()
-        ProviderInfo.fromAnnotation(annotation) to annotation.pactMethod
-      }
-      else -> {
-        logger.debug { "No @PactTestFor annotation found on test class, using defaults" }
-        ProviderInfo() to ""
-      }
-    }
+    val (providerInfo, pactMethod) = lookupProviderInfo(context)
+
+    logger.debug { "providerInfo = $providerInfo" }
 
     val pact = lookupPact(providerInfo, pactMethod, context)
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
@@ -95,6 +89,35 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
     mockServer.start()
     mockServer.waitForServer()
     store.put("mockServer", JUnit5MockServerSupport(mockServer))
+  }
+
+  fun lookupProviderInfo(context: ExtensionContext): Pair<ProviderInfo, String> {
+    val methodAnnotation = if (AnnotationSupport.isAnnotated(context.requiredTestMethod, PactTestFor::class.java)) {
+      logger.debug { "Found @PactTestFor annotation on test method" }
+      val annotation = AnnotationSupport.findAnnotation(context.requiredTestMethod, PactTestFor::class.java).get()
+      ProviderInfo.fromAnnotation(annotation) to annotation.pactMethod
+    } else {
+      null
+    }
+
+    val classAnnotation = if (AnnotationSupport.isAnnotated(context.requiredTestClass, PactTestFor::class.java)) {
+      logger.debug { "Found @PactTestFor annotation on test class" }
+      val annotation = AnnotationSupport.findAnnotation(context.requiredTestClass, PactTestFor::class.java).get()
+      ProviderInfo.fromAnnotation(annotation) to annotation.pactMethod
+    } else {
+      null
+    }
+
+    return when {
+      classAnnotation != null && methodAnnotation != null -> Pair(methodAnnotation.first.merge(classAnnotation.first),
+        if (methodAnnotation.second.isNotEmpty()) methodAnnotation.second else classAnnotation.second)
+      classAnnotation != null -> classAnnotation
+      methodAnnotation != null -> methodAnnotation
+      else -> {
+        logger.debug { "No @PactTestFor annotation found on test class, using defaults" }
+        ProviderInfo() to ""
+      }
+    }
   }
 
   fun lookupPact(providerInfo: ProviderInfo, pactMethod: String, context: ExtensionContext): RequestResponsePact {

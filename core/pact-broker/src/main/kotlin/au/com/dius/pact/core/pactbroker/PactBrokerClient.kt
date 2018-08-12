@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.pactbroker
 
-import au.com.dius.pact.core.pactbroker.com.github.kittinunf.result.Result
+import au.com.dius.pact.com.github.michaelbull.result.Err
+import au.com.dius.pact.com.github.michaelbull.result.Result
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.toJson
 import com.google.common.net.UrlEscapers.urlPathSegmentEscaper
@@ -37,7 +38,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
         if (options.containsKey("authentication")) {
           consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl, options["authentication"] as List<String>))
         } else {
-          consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl, emptyList()))
+          consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl))
         }
       })
       consumers
@@ -59,9 +60,9 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
         val href = Precoded(pact["href"].toString()).decoded().toString()
         val name = pact["name"].toString()
         if (options.containsKey("authentication")) {
-          consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl, options["authentication"] as List<String>))
+          consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl, options["authentication"] as List<String>, tag))
         } else {
-          consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl, emptyList()))
+          consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl, emptyList(), tag))
         }
       })
       consumers
@@ -134,11 +135,11 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
       if (lowercaseMap.containsKey("href")) {
         halClient.postJson(lowercaseMap["href"].toString(), jsonObject.toString())
       } else {
-        Result.Failure(RuntimeException("Unable to publish verification results as there is no " +
+        Err(RuntimeException("Unable to publish verification results as there is no " +
           "pb:publish-verification-results link"))
       }
     } else {
-      Result.Failure(RuntimeException("Unable to publish verification results as there is no " +
+      Err(RuntimeException("Unable to publish verification results as there is no " +
         "pb:publish-verification-results link"))
     }
   }

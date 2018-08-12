@@ -8,7 +8,9 @@ import au.com.dius.pact.core.model.Request;
 import au.com.dius.pact.core.model.RequestResponseInteraction;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.Response;
+import au.com.dius.pact.core.model.generators.Category;
 import au.com.dius.pact.core.model.generators.Generators;
+import au.com.dius.pact.core.model.generators.ProviderStateGenerator;
 import au.com.dius.pact.core.model.matchingrules.MatchingRules;
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
@@ -321,4 +323,16 @@ public class PactDslResponse {
       return new PactDslWithState(consumerPactBuilder, request.consumer.getName(), request.provider.getName(),
         new ProviderState(state, params), defaultRequestValues, defaultResponseValues);
     }
+
+  /**
+   * Adds a header that will have it's value injected from the provider state
+   * @param name Header Name
+   * @param expression Expression to be evaluated from the provider state
+   * @param example Example value to use in the consumer test
+   */
+  public PactDslResponse headerFromProviderState(String name, String expression, String example) {
+    responseGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression));
+    responseHeaders.put(name, example);
+    return this;
+  }
 }

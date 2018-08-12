@@ -1,5 +1,7 @@
+enableFeaturePreview('STABLE_PUBLISHING')
 rootProject.name = 'pact-jvm'
 
+include 'pact-jvm-support'
 include 'core:pact-jvm-core-pact-broker'
 include 'core:pact-jvm-core-model'
 include 'core:pact-jvm-core-matchers'

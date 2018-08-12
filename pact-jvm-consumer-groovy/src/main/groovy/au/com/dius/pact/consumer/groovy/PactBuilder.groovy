@@ -4,11 +4,8 @@ import au.com.dius.pact.consumer.Headers
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.StatefulMockProvider
 import au.com.dius.pact.consumer.VerificationResult
-import au.com.dius.pact.core.model.matchingrules.Category
 import au.com.dius.pact.core.model.Consumer
-import au.com.dius.pact.model.MockProviderConfig
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.model.PactFragment
 import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
@@ -18,9 +15,13 @@ import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.generators.ProviderStateGenerator
+import au.com.dius.pact.core.model.matchingrules.Category
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.model.MockProviderConfig
+import au.com.dius.pact.model.PactFragment
 import groovy.json.JsonBuilder
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
@@ -119,10 +120,10 @@ class PactBuilder extends BaseBuilder {
       MatchingRules responseMatchers = responseData[i].matchers
       Generators requestGenerators = requestData[i].generators
       Generators responseGenerators = responseData[i].generators
-      Map headers = setupHeaders(requestData[i].headers ?: [:], requestMatchers)
-      Map query = setupQueryParameters(requestData[i].query ?: [:], requestMatchers)
-      Map responseHeaders = setupHeaders(responseData[i].headers ?: [:], responseMatchers)
-      String path = setupPath(requestData[i].path ?: '/', requestMatchers)
+      Map headers = setupHeaders(requestData[i].headers ?: [:], requestMatchers, requestGenerators)
+      Map query = setupQueryParameters(requestData[i].query ?: [:], requestMatchers, requestGenerators)
+      Map responseHeaders = setupHeaders(responseData[i].headers ?: [:], responseMatchers, responseGenerators)
+      String path = setupPath(requestData[i].path ?: '/', requestMatchers, responseGenerators)
       interactions << new RequestResponseInteraction(
         requestDescription,
         providerStates,
@@ -138,7 +139,7 @@ class PactBuilder extends BaseBuilder {
     responseData = []
   }
 
-  private static Map setupHeaders(Map headers, MatchingRules matchers) {
+  private static Map setupHeaders(Map headers, MatchingRules matchers, Generators generators) {
     headers.collectEntries { key, value ->
       def header = HEADER
       if (value instanceof Matcher) {
@@ -148,13 +149,17 @@ class PactBuilder extends BaseBuilder {
         def matcher = new RegexpMatcher(regex: value)
         matchers.addCategory(header).addRule(key, matcher.matcher)
         [key, matcher.value]
+      } else if (value instanceof GeneratedValue) {
+        generators.addGenerator(au.com.dius.pact.core.model.generators.Category.HEADER, key,
+          new ProviderStateGenerator(value.expression))
+        [key, value.exampleValue]
       } else {
         [key, value]
       }
     }
   }
 
-  private static String setupPath(def path, MatchingRules matchers) {
+  private static String setupPath(def path, MatchingRules matchers, Generators generators) {
     def category = 'path'
     if (path instanceof Matcher) {
       matchers.addCategory(category).addRule(path.matcher)
@@ -163,12 +168,16 @@ class PactBuilder extends BaseBuilder {
       def matcher = new RegexpMatcher(regex: path)
       matchers.addCategory(category).addRule(matcher.matcher)
       matcher.value
+    } else if (path instanceof GeneratedValue) {
+      generators.addGenerator(au.com.dius.pact.core.model.generators.Category.PATH,
+        new ProviderStateGenerator(path.expression))
+      path.exampleValue
     } else {
       path as String
     }
   }
 
-  private static Map setupQueryParameters(Map query, MatchingRules matchers) {
+  private static Map setupQueryParameters(Map query, MatchingRules matchers, Generators generators) {
     query.collectEntries { key, value ->
       def category = 'query'
       if (value[0] instanceof Matcher) {
@@ -178,6 +187,10 @@ class PactBuilder extends BaseBuilder {
         def matcher = new RegexpMatcher(regex: value[0].toString())
         matchers.addCategory(category).addRule(key, matcher.matcher)
         [key, [matcher.value]]
+      } else if (value[0] instanceof GeneratedValue) {
+        generators.addGenerator(au.com.dius.pact.core.model.generators.Category.QUERY, key,
+          new ProviderStateGenerator(value[0].expression))
+        [key, [value[0].exampleValue]]
       } else {
         [key, value]
       }
@@ -437,5 +450,15 @@ class PactBuilder extends BaseBuilder {
       Category category  = responseData.last().matchers.addCategory(HEADER)
       category.addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX, multipart.contentType.value))
     }
+  }
+
+  /**
+   * Marks a item as to be injected from the provider state
+   * @param expression Expression to lookup in the provider state context
+   * @param exampleValue Example value to use in the consumer test
+   * @return example value
+   */
+  def fromProviderState(String expression, def exampleValue) {
+    new GeneratedValue(expression, exampleValue)
   }
 }

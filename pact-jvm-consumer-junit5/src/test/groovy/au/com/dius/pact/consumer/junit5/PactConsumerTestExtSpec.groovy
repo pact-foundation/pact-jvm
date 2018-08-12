@@ -36,6 +36,33 @@ class PactConsumerTestExtSpec {
     }
   }
 
+  @PactTestFor(providerName = 'TestClassWithClassLevelAnnotation', pactMethod = 'pactMethod',
+    hostInterface = 'localhost', port = '8080')
+  class TestClassWithClassLevelAnnotation {
+    @SuppressWarnings('UnusedMethodParameter')
+    RequestResponsePact pactMethod(PactDslWithProvider builder) {
+      pact
+    }
+  }
+
+  class TestClassWithMethodLevelAnnotation {
+    @SuppressWarnings('UnusedMethodParameter')
+    @PactTestFor(providerName = 'TestClassWithMethodLevelAnnotation', pactMethod = 'pactMethod',
+      hostInterface = 'localhost', port = '8080')
+    RequestResponsePact pactMethod(PactDslWithProvider builder) {
+      pact
+    }
+  }
+
+  @PactTestFor(providerName = 'TestClassWithMethodAndClassLevelAnnotation', port = '1234')
+  class TestClassWithMethodAndClassLevelAnnotation {
+    @SuppressWarnings('UnusedMethodParameter')
+    @PactTestFor(pactMethod = 'pactMethod', hostInterface = 'testServer')
+    RequestResponsePact pactMethod(PactDslWithProvider builder) {
+      pact
+    }
+  }
+
   @Test
   @DisplayName('lookupPact throws an exception when pact method is empty and there is no annotated method')
   void test1() {
@@ -83,6 +110,72 @@ class PactConsumerTestExtSpec {
     def pact = subject.lookupPact(new ProviderInfo('junit5_provider', 'localhost', '8080', PactSpecVersion.V3),
       'pactMethod', context)
     assertThat(pact, Matchers.is(this.pact))
+  }
+
+  @Test
+  @DisplayName('lookupProviderInfo returns default info if there is no annotation')
+  void lookupProviderInfo1() {
+    def instance = new TestClass()
+    def context = [
+      'getTestClass': { Optional.of(TestClass) },
+      'getTestInstance': { Optional.of(instance) },
+      'getTestMethod': { Optional.of(TestClass.methods.find { it.name == 'pactMethod' }) }
+    ] as ExtensionContext
+    def providerInfo = subject.lookupProviderInfo(context)
+    assertThat(providerInfo.first.providerName, Matchers.is(''))
+    assertThat(providerInfo.first.hostInterface, Matchers.is(''))
+    assertThat(providerInfo.first.port, Matchers.is(''))
+    assertThat(providerInfo.second, Matchers.is(''))
+  }
+
+  @Test
+  @DisplayName('lookupProviderInfo returns the value from the class annotation')
+  void lookupProviderInfo2() {
+    def instance = new TestClassWithClassLevelAnnotation()
+    def context = [
+      'getTestClass': { Optional.of(TestClassWithClassLevelAnnotation) },
+      'getTestInstance': { Optional.of(instance) },
+      'getTestMethod': { Optional.of(TestClassWithClassLevelAnnotation.methods.find { it.name == 'pactMethod' }) }
+    ] as ExtensionContext
+    def providerInfo = subject.lookupProviderInfo(context)
+    assertThat(providerInfo.first.providerName, Matchers.is('TestClassWithClassLevelAnnotation'))
+    assertThat(providerInfo.first.hostInterface, Matchers.is('localhost'))
+    assertThat(providerInfo.first.port, Matchers.is('8080'))
+    assertThat(providerInfo.second, Matchers.is('pactMethod'))
+  }
+
+  @Test
+  @DisplayName('lookupProviderInfo returns the value from the method level annotation')
+  void lookupProviderInfo3() {
+    def instance = new TestClassWithMethodLevelAnnotation()
+    def context = [
+      'getTestClass': { Optional.of(TestClassWithMethodLevelAnnotation) },
+      'getTestInstance': { Optional.of(instance) },
+      'getTestMethod': { Optional.of(TestClassWithMethodLevelAnnotation.methods.find { it.name == 'pactMethod' }) }
+    ] as ExtensionContext
+    def providerInfo = subject.lookupProviderInfo(context)
+    assertThat(providerInfo.first.providerName, Matchers.is('TestClassWithMethodLevelAnnotation'))
+    assertThat(providerInfo.first.hostInterface, Matchers.is('localhost'))
+    assertThat(providerInfo.first.port, Matchers.is('8080'))
+    assertThat(providerInfo.second, Matchers.is('pactMethod'))
+  }
+
+  @Test
+  @DisplayName('lookupProviderInfo returns the value from the method and then class level annotation')
+  void lookupProviderInfo4() {
+    def instance = new TestClassWithMethodAndClassLevelAnnotation()
+    def context = [
+      'getTestClass': { Optional.of(TestClassWithMethodAndClassLevelAnnotation) },
+      'getTestInstance': { Optional.of(instance) },
+      'getTestMethod': {
+        Optional.of(TestClassWithMethodAndClassLevelAnnotation.methods.find { it.name == 'pactMethod' })
+      }
+    ] as ExtensionContext
+    def providerInfo = subject.lookupProviderInfo(context)
+    assertThat(providerInfo.first.providerName, Matchers.is('TestClassWithMethodAndClassLevelAnnotation'))
+    assertThat(providerInfo.first.hostInterface, Matchers.is('testServer'))
+    assertThat(providerInfo.first.port, Matchers.is('1234'))
+    assertThat(providerInfo.second, Matchers.is('pactMethod'))
   }
 
 }

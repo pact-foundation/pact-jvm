@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.FeatureToggles;
 import au.com.dius.pact.core.model.generators.Category;
 import au.com.dius.pact.core.model.generators.DateGenerator;
 import au.com.dius.pact.core.model.generators.DateTimeGenerator;
+import au.com.dius.pact.core.model.generators.ProviderStateGenerator;
 import au.com.dius.pact.core.model.generators.RandomDecimalGenerator;
 import au.com.dius.pact.core.model.generators.RandomHexadecimalGenerator;
 import au.com.dius.pact.core.model.generators.RandomIntGenerator;
@@ -1220,5 +1221,17 @@ public class PactDslJsonBody extends DslPart {
     parent.setNumberExamples(numberExamples);
     parent.putObject(value);
     return (PactDslJsonBody) parent.closeArray();
+  }
+
+  /**
+   * Adds an attribute that will have it's value injected from the provider state
+   * @param name Attribute name
+   * @param expression Expression to be evaluated from the provider state
+   * @param example Example value to be used in the consumer test
+   */
+  public PactDslJsonBody valueFromProviderState(String name, String expression, Object example) {
+    generators.addGenerator(Category.BODY, matcherKey(name), new ProviderStateGenerator(expression));
+    body.put(name, example);
+    return this;
   }
 }

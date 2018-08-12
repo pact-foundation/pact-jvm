@@ -47,9 +47,9 @@ import kotlin.reflect.full.findAnnotation
  * - [State] - before each interaction that require state change,
  * all methods annotated by [State] with appropriate state listed will be invoked
  */
-open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner>(clazz) where I: Interaction {
+open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(clazz) where I: Interaction {
 
-  private val child = mutableListOf<InteractionRunner>()
+  private val child = mutableListOf<InteractionRunner<I>>()
 
   init {
     if (clazz.getAnnotation(Ignore::class.java) != null) {
@@ -65,10 +65,9 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner>(claz
 
       val testClass = TestClass(clazz)
 
-      var pacts: List<Pact<I>>? = null
       val pactLoader = getPactSource(testClass)
-      try {
-        pacts = filterPacts(pactLoader.load(serviceName)
+      val pacts = try {
+        filterPacts(pactLoader.load(serviceName)
           .filter { p -> consumerName == null || p.consumer.name == consumerName } as List<Pact<I>>)
       } catch (e: IOException) {
         throw InitializationError(e)
@@ -76,9 +75,10 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner>(claz
         throw InitializationError(e)
       } catch (e: NoPactsFoundException) {
         logger.debug(e) { "No pacts found" }
+        emptyList<Pact<I>>()
       }
 
-      if (pacts == null || pacts.isEmpty()) {
+      if (pacts.isEmpty()) {
         if (clazz.isAnnotationPresent(IgnoreNoPactsToVerify::class.java)) {
           logger.warn { "Did not find any pact files for provider ${providerInfo.value}" }
         } else {
@@ -90,11 +90,9 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner>(claz
     }
   }
 
-  protected open fun setupInteractionRunners(testClass: TestClass, pacts: List<Pact<I>>?, pactLoader: PactLoader) {
-    if (pacts != null) {
-      for (pact in pacts) {
-        this.child.add(newInteractionRunner(testClass, pact, pactLoader.pactSource))
-      }
+  protected open fun setupInteractionRunners(testClass: TestClass, pacts: List<Pact<I>>, pactLoader: PactLoader) {
+    for (pact in pacts) {
+      this.child.add(newInteractionRunner(testClass, pact, pactLoader.pactSource))
     }
   }
 
@@ -102,7 +100,7 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner>(claz
     testClass: TestClass,
     pact: Pact<I>,
     pactSource: au.com.dius.pact.core.model.PactSource
-  ): InteractionRunner {
+  ): InteractionRunner<I> {
     return InteractionRunner(testClass, pact, pactSource)
   }
 
@@ -112,9 +110,9 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner>(claz
 
   override fun getChildren() = child
 
-  override fun describeChild(child: InteractionRunner) = child.description
+  override fun describeChild(child: InteractionRunner<I>) = child.description
 
-  override fun runChild(interaction: InteractionRunner, notifier: RunNotifier) {
+  override fun runChild(interaction: InteractionRunner<I>, notifier: RunNotifier) {
     interaction.run(notifier)
   }
 

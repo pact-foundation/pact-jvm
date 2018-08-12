@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model.matchingrules
 
+import spock.lang.Issue
 import spock.lang.Specification
 
 class MatchingRulesSpec extends Specification {
@@ -111,6 +112,50 @@ class MatchingRulesSpec extends Specification {
       '$.animals[*].children': new MatchingRuleGroup([ new MinTypeMatcher(1) ]),
       '$.animals[*].children[*].*': new MatchingRuleGroup([ TypeMatcher.INSTANCE ])
     ])
+  }
+
+  @Issue('#743')
+  def 'loads matching rules affected by defect #743'() {
+    given:
+    def matchingRulesMap = [
+      'path': [
+        '': [
+          'matchers': [
+            [ 'match': 'regex', 'regex': '\\w+' ]
+          ]
+        ]
+      ]
+    ]
+
+    when:
+    def matchingRules = MatchingRulesImpl.fromMap(matchingRulesMap)
+
+    then:
+    !matchingRules.empty
+    matchingRules.categories == ['path'] as Set
+    matchingRules.rulesForCategory('path') == new Category('path', [
+      '': new MatchingRuleGroup([ new RegexMatcher('\\w+') ]) ])
+  }
+
+  @Issue('#743')
+  def 'generates path matching rules in the correct format'() {
+    given:
+    def matchingRules = new MatchingRulesImpl()
+    matchingRules.addCategory('path').addRule(new RegexMatcher('\\w+'))
+
+    expect:
+    matchingRules.toV3Map() == [path: [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']]
+  }
+
+  def 'do not include empty categories'() {
+    given:
+    def matchingRules = new MatchingRulesImpl()
+    matchingRules.addCategory('path').addRule(new RegexMatcher('\\w+'))
+    matchingRules.addCategory('body')
+    matchingRules.addCategory('header')
+
+    expect:
+    matchingRules.toV3Map() == [path: [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']]
   }
 
 }

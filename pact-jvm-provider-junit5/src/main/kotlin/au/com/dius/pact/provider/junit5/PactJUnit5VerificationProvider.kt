@@ -8,6 +8,7 @@ import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.ProviderVerifierBase
 import au.com.dius.pact.provider.junit.Consumer
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.filterPactsByAnnotations
@@ -17,8 +18,8 @@ import au.com.dius.pact.provider.junit.State
 import au.com.dius.pact.provider.junit.VerificationReports
 import au.com.dius.pact.provider.junit.loader.PactLoader
 import au.com.dius.pact.provider.junit.loader.PactSource
-import au.com.dius.pact.provider.junit.sysprops.SystemPropertyResolver
-import au.com.dius.pact.provider.junit.sysprops.ValueResolver
+import au.com.dius.pact.support.expressions.ValueResolver
+import au.com.dius.pact.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.provider.reporters.ReporterManager
 import mu.KLogging
 import org.apache.http.HttpRequest
@@ -55,6 +56,7 @@ data class PactVerificationContext(
   val interaction: Interaction,
   internal var testExecutionResult: Boolean = false
 ) {
+  var executionContext: Map<String, Any?>? = null
 
   /**
    * Called to verify the interaction from the test template method.
@@ -91,7 +93,7 @@ data class PactVerificationContext(
         failures[interactionMessage] = e
         verifier!!.reporters.forEach {
           it.requestFailed(providerInfo, interaction, interactionMessage, e,
-            verifier!!.projectHasProperty.apply(ProviderVerifier.PACT_SHOW_STACKTRACE))
+            verifier!!.projectHasProperty.apply(ProviderVerifierBase.PACT_SHOW_STACKTRACE))
         }
         false
       }
@@ -163,7 +165,7 @@ class PactVerificationExtension(
     prepareVerifier(testContext, context)
     store.put("verifier", testContext.verifier)
 
-    val requestAndClient = testContext.target.prepareRequest(interaction)
+    val requestAndClient = testContext.target.prepareRequest(interaction, testContext.executionContext ?: emptyMap())
     if (requestAndClient != null) {
       val (request, client) = requestAndClient
       store.put("request", request)
@@ -245,14 +247,21 @@ class PactVerificationExtension(
  * JUnit 5 test extension class for executing state change callbacks
  */
 class PactVerificationStateChangeExtension(private val interaction: Interaction) : BeforeTestExecutionCallback {
-  override fun beforeTestExecution(context: ExtensionContext) {
+  override fun beforeTestExecution(extensionContext: ExtensionContext) {
     logger.debug { "beforeEach for interaction '${interaction.description}'" }
-    invokeStateChangeMethods(context, interaction.providerStates)
+    val providerStateContext = invokeStateChangeMethods(extensionContext, interaction.providerStates)
+    val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
+    val testContext = store.get("interactionContext") as PactVerificationContext
+    testContext.executionContext = mapOf("providerState" to providerStateContext)
   }
 
-  private fun invokeStateChangeMethods(context: ExtensionContext, providerStates: List<ProviderState>) {
+  private fun invokeStateChangeMethods(
+    context: ExtensionContext,
+    providerStates: List<ProviderState>
+  ): Map<String, Any?> {
     val errors = mutableListOf<String>()
 
+    val providerStateContext = mutableMapOf<String, Any?>()
     providerStates.forEach {
       val stateChangeMethods = findStateChangeMethods(context.requiredTestClass, it)
       if (stateChangeMethods.isEmpty()) {
@@ -260,10 +269,14 @@ class PactVerificationStateChangeExtension(private val interaction: Interaction)
       } else {
         stateChangeMethods.forEach { method ->
           logger.debug { "Invoking state change method ${method.name} for state '${it.name}'" }
-          if (method.parameterCount > 0) {
+          val stateChangeValue = if (method.parameterCount > 0) {
             ReflectionSupport.invokeMethod(method, context.requiredTestInstance, it.params)
           } else {
             ReflectionSupport.invokeMethod(method, context.requiredTestInstance)
+          }
+
+          if (stateChangeValue is Map<*, *>) {
+            providerStateContext.putAll(stateChangeValue as Map<String, Any?>)
           }
         }
       }
@@ -272,6 +285,8 @@ class PactVerificationStateChangeExtension(private val interaction: Interaction)
     if (errors.isNotEmpty()) {
       throw MissingStateChangeMethod(errors.joinToString("\n"))
     }
+
+    return providerStateContext
   }
 
   private fun findStateChangeMethods(testClass: Class<*>, state: ProviderState): List<Method> {

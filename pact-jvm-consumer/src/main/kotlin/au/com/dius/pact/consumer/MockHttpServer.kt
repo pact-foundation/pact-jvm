@@ -12,6 +12,7 @@ import au.com.dius.pact.model.RequestMatching
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
@@ -113,7 +114,7 @@ abstract class BaseMockServer(
       is FullRequestMatch -> {
         val interaction = matchResult.interaction() as RequestResponseInteraction
         matchedRequests.add(interaction.request)
-        return interaction.response.generatedResponse()
+        return interaction.response.generatedResponse(emptyMap<String, Any>(), GeneratorTestMode.Consumer)
       }
       is PartialRequestMatch -> {
         val interaction = matchResult.problems().keys().head() as RequestResponseInteraction
@@ -150,12 +151,17 @@ abstract class BaseMockServer(
     server.createContext("/", this)
   }
 
-  fun start() = server.start()
+  fun start() {
+    logger.debug { "Starting mock server" }
+    server.start()
+    logger.debug { "Mock server started: ${server.address}" }
+  }
 
   fun stop() {
     if (!stopped) {
       stopped = true
       server.stop(0)
+      logger.debug { "Mock server shutdown" }
     }
   }
 

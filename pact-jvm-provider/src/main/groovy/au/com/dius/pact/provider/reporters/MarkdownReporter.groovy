@@ -5,13 +5,13 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.UrlPactSource
-import au.com.dius.pact.provider.ConsumerInfo
-import au.com.dius.pact.provider.ProviderInfo
+import au.com.dius.pact.provider.IConsumerInfo
+import au.com.dius.pact.provider.IProviderInfo
 
 /**
  * Pact verifier reporter that displays the results of the verification in a markdown document
  */
-@SuppressWarnings(['DuplicateStringLiteral', 'UnnecessaryObjectReferences', 'MethodCount'])
+@SuppressWarnings(['DuplicateStringLiteral', 'UnnecessaryObjectReferences', 'MethodCount', 'ParameterName'])
 class MarkdownReporter implements VerifierReporter {
 
   String name
@@ -21,7 +21,7 @@ class MarkdownReporter implements VerifierReporter {
   String ext = '.md'
 
   @Override
-  void initialise(ProviderInfo provider) {
+  void initialise(IProviderInfo provider) {
     reportDir.mkdirs()
     reportFile = new File(reportDir, (provider.name + ext))
     writer = reportFile.newPrintWriter()
@@ -40,27 +40,27 @@ class MarkdownReporter implements VerifierReporter {
   }
 
   @Override
-  void reportVerificationForConsumer(ConsumerInfo consumer, ProviderInfo provider) {
+  void reportVerificationForConsumer(IConsumerInfo consumer, IProviderInfo provider) {
     writer.println "## Verifying a pact between _${consumer.name}_ and _${provider.name}_"
     writer.println()
   }
 
   @Override
-  void verifyConsumerFromUrl(UrlPactSource pactUrl, ConsumerInfo consumer) {
+  void verifyConsumerFromUrl(UrlPactSource pactUrl, IConsumerInfo consumer) {
     writer.println "From ${pactUrl.description()}"
   }
 
   @Override
-  void verifyConsumerFromFile(PactSource pactFile, ConsumerInfo consumer) {
+  void verifyConsumerFromFile(PactSource pactFile, IConsumerInfo consumer) {
     writer.println "From ${pactFile.description()}"
     writer.println()
   }
 
   @Override
-  void pactLoadFailureForConsumer(ConsumerInfo consumerInfo, String message) { }
+  void pactLoadFailureForConsumer(IConsumerInfo IConsumerInfo, String message) { }
 
   @Override
-  void warnProviderHasNoConsumers(ProviderInfo providerInfo) { }
+  void warnProviderHasNoConsumers(IProviderInfo IProviderInfo) { }
 
   @Override
   void warnPactFileHasNoInteractions(Pact pact) { }
@@ -71,19 +71,19 @@ class MarkdownReporter implements VerifierReporter {
   }
 
   @Override
-  void stateForInteraction(String state, ProviderInfo provider, ConsumerInfo consumer, boolean isSetup) {
+  void stateForInteraction(String state, IProviderInfo provider, IConsumerInfo consumer, boolean isSetup) {
     writer.println "Given **$state**  "
   }
 
   @Override
-  void warnStateChangeIgnored(String state, ProviderInfo providerInfo, ConsumerInfo consumerInfo) {
+  void warnStateChangeIgnored(String state, IProviderInfo IProviderInfo, IConsumerInfo IConsumerInfo) {
     writer.println '&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color: yellow\'>WARNING: State Change ignored as there is' +
       ' no stateChange URL</span>  '
   }
 
   @Override
   @SuppressWarnings('ParameterCount')
-  void stateChangeRequestFailedWithException(String state, ProviderInfo providerInfo, ConsumerInfo consumerInfo,
+  void stateChangeRequestFailedWithException(String state, IProviderInfo IProviderInfo, IConsumerInfo IConsumerInfo,
                                              boolean isSetup, Exception e, boolean printStackTrace) {
     writer.println "&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: red'>State Change Request Failed - $e.message</span>"
     writer.println()
@@ -94,19 +94,19 @@ class MarkdownReporter implements VerifierReporter {
   }
 
   @Override
-  void stateChangeRequestFailed(String state, ProviderInfo providerInfo, boolean isSetup, String httpStatus) {
+  void stateChangeRequestFailed(String state, IProviderInfo IProviderInfo, boolean isSetup, String httpStatus) {
     writer.println "&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: red'>State Change Request Failed - $httpStatus</span>  "
   }
 
   @Override
-  void warnStateChangeIgnoredDueToInvalidUrl(String state, ProviderInfo providerInfo, boolean isSetup,
+  void warnStateChangeIgnoredDueToInvalidUrl(String state, IProviderInfo IProviderInfo, boolean isSetup,
                                              Object stateChangeHandler) {
     writer.println '&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color: yellow\'>WARNING: State Change ignored as there is ' +
       "no stateChange URL, received `$stateChangeHandler`</span>  "
   }
 
   @Override
-  void requestFailed(ProviderInfo providerInfo, Interaction interaction, String interactionMessage, Exception e,
+  void requestFailed(IProviderInfo IProviderInfo, Interaction interaction, String interactionMessage, Exception e,
                      boolean printStackTrace) {
     writer.println "&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: red'>Request Failed - $e.message</span>"
     writer.println()

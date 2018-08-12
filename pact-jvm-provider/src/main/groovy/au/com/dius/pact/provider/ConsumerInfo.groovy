@@ -15,7 +15,7 @@ import java.util.function.Supplier
  * Consumer Info
  */
 @Canonical(excludes = ['pactFile'])
-class ConsumerInfo {
+class ConsumerInfo implements IConsumerInfo {
     String name
     def pactSource
     def stateChange
@@ -43,6 +43,8 @@ class ConsumerInfo {
       pactSource = file
     } else if (file instanceof Closure) {
       pactSource = new ClosurePactSource(file as Supplier)
+    } else if (file instanceof URL) {
+      pactSource = new UrlSource(file.toString())
     } else {
       pactSource = new FileSource(file as File)
     }
@@ -58,7 +60,8 @@ class ConsumerInfo {
   }
 
   static ConsumerInfo from(PactBrokerConsumer consumer) {
-    new ConsumerInfo(name: consumer.name, pactSource: new BrokerUrlSource(consumer.source, consumer.pactBrokerUrl),
+    new ConsumerInfo(name: consumer.name,
+      pactSource: new BrokerUrlSource(consumer.source, consumer.pactBrokerUrl, [:], [:], consumer.tag),
       pactFileAuthentication: consumer.pactFileAuthentication)
   }
 }

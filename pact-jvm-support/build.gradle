@@ -1,0 +1,5 @@
+dependencies {
+  compile "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
+
+  testCompile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
+}

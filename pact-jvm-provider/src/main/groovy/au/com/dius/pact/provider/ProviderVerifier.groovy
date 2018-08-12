@@ -6,12 +6,14 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.VerifierReporter
+import au.com.dius.pact.com.github.michaelbull.result.Ok
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.reflections.Reflections
@@ -32,19 +34,14 @@ import static au.com.dius.pact.provider.ProviderVerifierKt.reportVerificationRes
  * Verifies the providers against the defined consumers in the context of a build plugin
  */
 @Slf4j
+@SuppressWarnings('ConfusingMethodName')
 class ProviderVerifier extends ProviderVerifierBase {
 
-  static final public String PACT_FILTER_CONSUMERS = 'pact.filter.consumers'
-  static final public String PACT_FILTER_DESCRIPTION = 'pact.filter.description'
-  static final public String PACT_FILTER_PROVIDERSTATE = 'pact.filter.providerState'
-  static final public String PACT_SHOW_STACKTRACE = 'pact.showStacktrace'
-  static final public String PACT_SHOW_FULLDIFF = 'pact.showFullDiff'
-
   def pactLoadFailureMessage
-  Function<Object, Boolean> isBuildSpecificTask = { null }
+  Function<Object, Boolean> checkBuildSpecificTask = { false }
   BiConsumer<Object, ProviderState> executeBuildSpecificTask = { } as BiConsumer<Object, ProviderState>
   Supplier<URL[]> projectClasspath = { }
-  List<VerifierReporter> reporters = [ new AnsiConsoleReporter() ]
+  List<? extends VerifierReporter> reporters = [ new AnsiConsoleReporter() ]
   Function<Method, Object> providerMethodInstance = { Method m -> m.declaringClass.newInstance() }
   Supplier<String> providerVersion = { System.getProperty('pact.provider.version') }
 
@@ -88,7 +85,7 @@ class ProviderVerifier extends ProviderVerifierBase {
         log.warn('Skipping publishing of verification results as the interactions have been filtered')
       } else if (publishingResultsDisabled()) {
         log.warn('Skipping publishing of verification results as it has been disabled ' +
-          "(${PACT_VERIFIER_PUBLISHRESUTS} is not 'true')")
+          "(${PACT_VERIFIER_PUBLISH_RESULTS} is not 'true')")
       } else {
         reportVerificationResults(pact, result, providerVersion?.get() ?: '0.0.0', client)
       }
@@ -175,14 +172,20 @@ class ProviderVerifier extends ProviderVerifierBase {
     ProviderClient providerClient = new ProviderClient(provider, new HttpClientFactory())
     def stateChangeResult = StateChange.executeStateChange(this, provider, consumer, interaction, interactionMessage,
       failures, providerClient)
-    if (stateChangeResult.stateChangeOk) {
+    if (stateChangeResult.stateChangeResult instanceof Ok) {
       interactionMessage = stateChangeResult.message
       reportInteractionDescription(interaction)
+
+      Map context = [
+        providerState: stateChangeResult.stateChangeResult.value,
+        interaction: interaction
+      ]
 
       boolean result = false
       if (ProviderUtils.verificationType(provider, consumer) == PactVerification.REQUST_RESPONSE) {
         log.debug('Verifying via request/response')
-        result = verifyResponseFromProvider(provider, interaction, interactionMessage, failures, providerClient)
+        result = verifyResponseFromProvider(provider, interaction, interactionMessage, failures, providerClient,
+          context)
       } else {
         log.debug('Verifying via annotated test method')
         result = verifyResponseByInvokingProviderMethods(provider, consumer, interaction, interactionMessage, failures)
@@ -202,16 +205,20 @@ class ProviderVerifier extends ProviderVerifierBase {
     reporters.each { it.interactionDescription(interaction) }
   }
 
-  void reportStateForInteraction(String state, ProviderInfo provider, ConsumerInfo consumer, boolean isSetup) {
+  @Override
+  void reportStateForInteraction(String state, IProviderInfo provider, IConsumerInfo consumer, boolean isSetup) {
     reporters.each { it.stateForInteraction(state, provider, consumer, isSetup) }
   }
 
-  boolean verifyResponseFromProvider(ProviderInfo provider, Interaction interaction, String interactionMessage,
+  @SuppressWarnings('ParameterCount')
+  boolean verifyResponseFromProvider(ProviderInfo provider, RequestResponseInteraction interaction,
+                                     String interactionMessage,
                                      Map failures,
-                                     ProviderClient client) {
+                                     ProviderClient client,
+                                     Map context = [:]) {
     try {
-      def expectedResponse = interaction.response
-      def actualResponse = client.makeRequest(interaction.request.generatedRequest())
+      def expectedResponse = interaction.response.generatedResponse(context)
+      def actualResponse = client.makeRequest(interaction.request.generatedRequest(context))
 
       verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
     } catch (e) {
@@ -284,7 +291,7 @@ class ProviderVerifier extends ProviderVerifierBase {
 
   @SuppressWarnings(['ThrowRuntimeException', 'ParameterCount'])
   boolean verifyResponseByInvokingProviderMethods(ProviderInfo providerInfo, ConsumerInfo consumer,
-                                               def interaction, String interactionMessage, Map failures) {
+                                                  def interaction, String interactionMessage, Map failures) {
     try {
       def urls = projectClasspath.get()
       URLClassLoader loader = new URLClassLoader(urls, GroovyObject.classLoader)

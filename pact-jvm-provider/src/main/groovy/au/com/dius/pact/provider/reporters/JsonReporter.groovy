@@ -7,15 +7,15 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.UrlPactSource
-import au.com.dius.pact.provider.ConsumerInfo
-import au.com.dius.pact.provider.ProviderInfo
+import au.com.dius.pact.provider.IConsumerInfo
+import au.com.dius.pact.provider.IProviderInfo
 import groovy.json.JsonOutput
 import org.apache.commons.lang3.exception.ExceptionUtils
 
 /**
  * Pact verifier reporter that generates the results of the verification in JSON format
  */
-@SuppressWarnings('MethodCount')
+@SuppressWarnings(['MethodCount', 'ParameterName'])
 class JsonReporter implements VerifierReporter {
 
   private static final REPORT_FORMAT = '0.0.0'
@@ -28,7 +28,7 @@ class JsonReporter implements VerifierReporter {
   String ext = '.json'
 
   @Override
-  void initialise(ProviderInfo provider) {
+  void initialise(IProviderInfo provider) {
     jsonData = [
       metaData: [
         date: new Date(),
@@ -50,7 +50,7 @@ class JsonReporter implements VerifierReporter {
   }
 
   @Override
-  void reportVerificationForConsumer(ConsumerInfo consumer, ProviderInfo provider) {
+  void reportVerificationForConsumer(IConsumerInfo consumer, IProviderInfo provider) {
     jsonData.execution << [
       consumer: [
         name: consumer.name
@@ -60,21 +60,21 @@ class JsonReporter implements VerifierReporter {
   }
 
   @Override
-  void verifyConsumerFromUrl(UrlPactSource pactUrl, ConsumerInfo consumer) {
+  void verifyConsumerFromUrl(UrlPactSource pactUrl, IConsumerInfo consumer) {
     jsonData.execution.last().consumer.source = [
       url: pactUrl.url
     ]
   }
 
   @Override
-  void verifyConsumerFromFile(PactSource pactFile, ConsumerInfo consumer) {
+  void verifyConsumerFromFile(PactSource pactFile, IConsumerInfo consumer) {
     jsonData.execution.last().consumer.source = [
       file: pactFile instanceof FileSource ? pactFile.file : pactFile.description()
     ]
   }
 
   @Override
-  void pactLoadFailureForConsumer(ConsumerInfo consumerInfo, String message) {
+  void pactLoadFailureForConsumer(IConsumerInfo IConsumerInfo, String message) {
     jsonData.execution.last().result = [
       state: 'Pact Load Failure',
       message: message
@@ -82,7 +82,7 @@ class JsonReporter implements VerifierReporter {
   }
 
   @Override
-  void warnProviderHasNoConsumers(ProviderInfo providerInfo) { }
+  void warnProviderHasNoConsumers(IProviderInfo IProviderInfo) { }
 
   @Override
   void warnPactFileHasNoInteractions(Pact pact) { }
@@ -98,29 +98,29 @@ class JsonReporter implements VerifierReporter {
   }
 
   @Override
-  void stateForInteraction(String state, ProviderInfo provider, ConsumerInfo consumer, boolean isSetup) { }
+  void stateForInteraction(String state, IProviderInfo provider, IConsumerInfo consumer, boolean isSetup) { }
 
   @Override
-  void warnStateChangeIgnored(String state, ProviderInfo providerInfo, ConsumerInfo consumerInfo) { }
+  void warnStateChangeIgnored(String state, IProviderInfo IProviderInfo, IConsumerInfo IConsumerInfo) { }
 
   @Override
   @SuppressWarnings('ParameterCount')
-  void stateChangeRequestFailedWithException(String state, ProviderInfo providerInfo, ConsumerInfo consumerInfo,
+  void stateChangeRequestFailedWithException(String state, IProviderInfo IProviderInfo, IConsumerInfo IConsumerInfo,
                                              boolean isSetup, Exception e, boolean printStackTrace) {
 
   }
 
   @Override
-  void stateChangeRequestFailed(String state, ProviderInfo providerInfo, boolean isSetup, String httpStatus) {
+  void stateChangeRequestFailed(String state, IProviderInfo IProviderInfo, boolean isSetup, String httpStatus) {
 
   }
 
   @Override
-  void warnStateChangeIgnoredDueToInvalidUrl(String state, ProviderInfo providerInfo, boolean isSetup,
+  void warnStateChangeIgnoredDueToInvalidUrl(String state, IProviderInfo IProviderInfo, boolean isSetup,
                                              Object stateChangeHandler) { }
 
   @Override
-  void requestFailed(ProviderInfo providerInfo, Interaction interaction, String interactionMessage, Exception e,
+  void requestFailed(IProviderInfo IProviderInfo, Interaction interaction, String interactionMessage, Exception e,
                      boolean printStackTrace) {
     jsonData.execution.last().interactions.last().verification = [
       result: FAILED,

@@ -19,8 +19,6 @@ import org.apache.http.impl.client.CloseableHttpClient
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.lang.reflect.InvocationTargetException
-
 @SuppressWarnings(['ClosureAsLastMethodParameter', 'MethodCount'])
 class ProviderClientSpec extends Specification {
 
@@ -185,7 +183,7 @@ class ProviderClientSpec extends Specification {
   }
 
   @Unroll
-  def 'setting up body sets a string entity if it is a url encoded form post and there is no query string'() {
+  def 'setting up body sets a string entity  entity if it is a url encoded form post and there is no query string'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
     request = new Request('POST', '/', query, ['Content-Type': ContentType.APPLICATION_FORM_URLENCODED.mimeType],
@@ -203,17 +201,17 @@ class ProviderClientSpec extends Specification {
     query << [ [:], null ]
   }
 
-  def 'setting up body sets a UrlEncodedFormEntity entity if it is urlencoded form post and there is a query string'() {
+  def 'setting up body sets a StringEntity entity if it is urlencoded form post and there is a query string'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
     request = new Request('POST', '/', ['A': ['B', 'C']], ['Content-Type': 'application/x-www-form-urlencoded'],
-      OptionalBody.body('{}'))
+      OptionalBody.body('A=B'))
 
     when:
     client.setupBody(request, httpRequest)
 
     then:
-    1 * httpRequest.setEntity { it instanceof UrlEncodedFormEntity && it.content.text == 'A=B&A=C' }
+    1 * httpRequest.setEntity { it instanceof StringEntity && it.content.text == 'A=B' }
     0 * httpRequest._
   }
 
@@ -222,7 +220,7 @@ class ProviderClientSpec extends Specification {
   def 'request is a url encoded form post'() {
     expect:
     def request = new Request(method, '/', ['A': ['B', 'C']], ['Content-Type': contentType],
-      OptionalBody.body('{}'))
+      OptionalBody.body('A=B'))
     ProviderClient.urlEncodedFormPost(request) == urlEncodedFormPost
 
     where:
@@ -321,7 +319,7 @@ class ProviderClientSpec extends Specification {
     0 * _
   }
 
-  def 'execute request filter executes any Java Function'() {
+  def 'execute request filter rejects anything with more than one parameter'() {
     given:
     provider.requestFilter = GroovyJavaUtils.function2RequestFilter()
 
@@ -329,7 +327,7 @@ class ProviderClientSpec extends Specification {
     client.executeRequestFilter(httpRequest)
 
     then:
-    1 * httpRequest.addHeader('Java Function', 'was called')
+    thrown(IllegalArgumentException)
     1 * client.executeRequestFilter(_)
     0 * _
   }
@@ -346,19 +344,6 @@ class ProviderClientSpec extends Specification {
     0 * _
   }
 
-  def 'execute request filter throws an exception with parameters in a different order'() {
-    given:
-    provider.requestFilter = GroovyJavaUtils.function2RequestFilterWithParametersSwapped()
-
-    when:
-    client.executeRequestFilter(httpRequest)
-
-    then:
-    thrown(InvocationTargetException)
-    1 * client.executeRequestFilter(_)
-    0 * _
-  }
-
   def 'execute request filter throws an exception invalid Java Function parameters'() {
     given:
     provider.requestFilter = GroovyJavaUtils.invalidFunction2RequestFilter()
@@ -367,20 +352,7 @@ class ProviderClientSpec extends Specification {
     client.executeRequestFilter(httpRequest)
 
     then:
-    thrown(InvocationTargetException)
-    1 * client.executeRequestFilter(_)
-    0 * _
-  }
-
-  def 'execute request filter executes any java functions that take no parameters'() {
-    given:
-    provider.requestFilter = GroovyJavaUtils.supplierRequestFilter()
-
-    when:
-    client.executeRequestFilter(httpRequest)
-
-    then:
-    notThrown(IllegalArgumentException)
+    thrown(IllegalArgumentException)
     1 * client.executeRequestFilter(_)
     0 * _
   }
@@ -596,6 +568,19 @@ class ProviderClientSpec extends Specification {
     '/path/'     | '/path'
     'path/path/' | 'path/path'
 
+  }
+
+  def 'includes query parameters when it is a form post'() {
+    given:
+    def pactRequest = new Request('POST', '/', ['A': ['B', 'C']],
+      ['Content-Type': 'application/x-www-form-urlencoded'],
+      OptionalBody.body('A=B'))
+
+    when:
+    def request = client.newRequest(pactRequest)
+
+    then:
+    request.URI.query == 'A=B&A=C'
   }
 
 }

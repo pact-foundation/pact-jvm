@@ -59,7 +59,7 @@ class MatchingRulesImpl : MatchingRules {
         else -> toV3Map()
     }
 
-    private fun toV3Map(): Map<String, Map<String, Any?>> = rules.mapValues { entry ->
+    private fun toV3Map(): Map<String, Map<String, Any?>> = rules.filter { it.value.isNotEmpty() }.mapValues { entry ->
         entry.value.toMap(PactSpecVersion.V3)
     }
 
@@ -74,7 +74,7 @@ class MatchingRulesImpl : MatchingRules {
         fun fromMap(map: Map<String, Map<String, Any?>>?): MatchingRules {
             val matchingRules = MatchingRulesImpl()
             if (map != null && map.isNotEmpty()) {
-                if (map.keys.first()?.startsWith("$")) {
+                if (map.keys.first().startsWith("$")) {
                     matchingRules.fromV2Map(map)
                 } else {
                     matchingRules.fromV3Map(map)

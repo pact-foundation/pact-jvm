@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
+import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.NullMatcher
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
@@ -96,6 +97,8 @@ fun <M : Mismatch> domatch(
     is TimestampMatcher -> matchTimestamp(matcher.format, path, expected, actual, mismatchFn)
     is MinTypeMatcher -> matchMinType(matcher.min, path, expected, actual, mismatchFn)
     is MaxTypeMatcher -> matchMaxType(matcher.max, path, expected, actual, mismatchFn)
+    is MinMaxTypeMatcher -> matchMinType(matcher.min, path, expected, actual, mismatchFn) +
+      matchMaxType(matcher.max, path, expected, actual, mismatchFn)
     is IncludeMatcher -> matchInclude(matcher.value, path, expected, actual, mismatchFn)
     is NullMatcher -> matchNull(path, actual, mismatchFn)
     else -> matchEquality(path, expected, actual, mismatchFn)

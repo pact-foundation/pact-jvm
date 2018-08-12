@@ -1,7 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
-import au.com.dius.pact.core.model.PactSpecVersion
 import groovy.json.JsonOutput
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
@@ -64,7 +63,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     }
 
     when:
-    PactVerificationResult result = matcherService.runTest(specificationVersion: PactSpecVersion.V3) {
+    PactVerificationResult result = matcherService.runTest {
       def client = new RESTClient(it.url)
       def response = client.put(requestContentType: JSON, body: [
           'name': 'harry',

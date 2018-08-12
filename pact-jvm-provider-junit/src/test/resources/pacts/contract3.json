@@ -10,7 +10,8 @@
     "description" : "Get data",
     "request" : {
       "method" : "GET",
-      "path" : "/data"
+      "path" : "/data",
+      "query": "ticketId=0000"
     },
     "response" : {
       "status" : 204

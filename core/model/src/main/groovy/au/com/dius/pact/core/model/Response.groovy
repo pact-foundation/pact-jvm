@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.model.generators.Generator
+import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
@@ -48,13 +49,15 @@ class Response extends BaseResponse {
     }
   }
 
-  Response generatedResponse() {
+  Response generatedResponse(Map context = [:], GeneratorTestMode mode = GeneratorTestMode.Provider) {
     def r = this.copy()
-    generators.applyGenerator(Category.STATUS) { String key, Generator g -> r.status = g.generate(r.status) as Integer }
-    generators.applyGenerator(Category.HEADER) { String key, Generator g ->
-      r.headers[key] = g.generate(r.headers[key])
+    generators.applyGenerator(Category.STATUS, mode) { String key, Generator g ->
+      r.status = g.generate(context) as Integer
     }
-    r.body = generators.applyBodyGenerators(r.body, new ContentType(mimeType()))
+    generators.applyGenerator(Category.HEADER, mode) { String key, Generator g ->
+      r.headers[key] = g.generate(context).toString()
+    }
+    r.body = generators.applyBodyGenerators(r.body, new ContentType(mimeType()), context, mode)
     r
   }
 }

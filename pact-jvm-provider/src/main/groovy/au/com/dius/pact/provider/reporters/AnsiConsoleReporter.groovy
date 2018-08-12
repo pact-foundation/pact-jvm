@@ -4,18 +4,19 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.UrlPactSource
-import au.com.dius.pact.provider.ConsumerInfo
-import au.com.dius.pact.provider.ProviderInfo
+import au.com.dius.pact.provider.IConsumerInfo
+import au.com.dius.pact.provider.IProviderInfo
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.AnsiConsole
 
 /**
  * Pact verifier reporter that displays the results of the verification to the console using ASCII escapes
  */
-@SuppressWarnings(['DuplicateStringLiteral', 'MethodCount'])
+@SuppressWarnings(['DuplicateStringLiteral', 'MethodCount', 'ParameterName'])
 class AnsiConsoleReporter implements VerifierReporter {
 
   boolean displayFullDiff = false
+  final String ext = null
 
   @Override
   void setReportDir(File reportDir) { }
@@ -24,33 +25,33 @@ class AnsiConsoleReporter implements VerifierReporter {
   void setReportFile(File reportFile) { }
 
   @Override
-  void initialise(ProviderInfo provider) { }
+  void initialise(IProviderInfo provider) { }
 
   @Override
   void finaliseReport() { }
 
   @Override
-  void reportVerificationForConsumer(ConsumerInfo consumer, ProviderInfo provider) {
+  void reportVerificationForConsumer(IConsumerInfo consumer, IProviderInfo provider) {
     AnsiConsole.out().println(Ansi.ansi().a('\nVerifying a pact between ').bold().a(consumer.name)
       .boldOff().a(' and ').bold().a(provider.name).boldOff())
   }
 
   @Override
-  void verifyConsumerFromUrl(UrlPactSource pactUrl, ConsumerInfo consumer) {
+  void verifyConsumerFromUrl(UrlPactSource pactUrl, IConsumerInfo consumer) {
     AnsiConsole.out().println(Ansi.ansi().a("  [from ${pactUrl.description()}]"))
   }
 
   @Override
-  void verifyConsumerFromFile(PactSource pactFile, ConsumerInfo consumer) {
+  void verifyConsumerFromFile(PactSource pactFile, IConsumerInfo consumer) {
     AnsiConsole.out().println(Ansi.ansi().a("  [Using ${pactFile.description()}]"))
   }
 
   @Override
-  void pactLoadFailureForConsumer(ConsumerInfo consumerInfo, String message) {
+  void pactLoadFailureForConsumer(IConsumerInfo IConsumerInfo, String message) {
   }
 
   @Override
-  void warnProviderHasNoConsumers(ProviderInfo provider) {
+  void warnProviderHasNoConsumers(IProviderInfo provider) {
     AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
       .a("WARNING: There are no consumers to verify for provider '$provider.name'").reset())
   }
@@ -68,12 +69,12 @@ class AnsiConsoleReporter implements VerifierReporter {
   }
 
   @Override
-  void stateForInteraction(String state, ProviderInfo provider, ConsumerInfo consumer, boolean isSetup) {
+  void stateForInteraction(String state, IProviderInfo provider, IConsumerInfo consumer, boolean isSetup) {
     AnsiConsole.out().println(Ansi.ansi().a('  Given ').bold().a(state).boldOff())
   }
 
   @Override
-  void warnStateChangeIgnored(String state, ProviderInfo providerInfo, ConsumerInfo consumerInfo) {
+  void warnStateChangeIgnored(String state, IProviderInfo IProviderInfo, IConsumerInfo IConsumerInfo) {
     AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
       .a('WARNING: State Change ignored as there is no stateChange URL')
       .reset())
@@ -81,7 +82,7 @@ class AnsiConsoleReporter implements VerifierReporter {
 
   @Override
   @SuppressWarnings(['PrintStackTrace', 'ParameterCount'])
-  void stateChangeRequestFailedWithException(String state, ProviderInfo providerInfo, ConsumerInfo consumerInfo,
+  void stateChangeRequestFailedWithException(String state, IProviderInfo IProviderInfo, IConsumerInfo IConsumerInfo,
                                              boolean isSetup, Exception e, boolean printStackTrace) {
     AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.RED).a('State Change Request Failed - ')
       .a(e.message).reset())
@@ -91,14 +92,14 @@ class AnsiConsoleReporter implements VerifierReporter {
   }
 
   @Override
-  void stateChangeRequestFailed(String state, ProviderInfo providerInfo, boolean isSetup, String httpStatus) {
+  void stateChangeRequestFailed(String state, IProviderInfo IProviderInfo, boolean isSetup, String httpStatus) {
     AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.RED)
       .a('State Change Request Failed - ')
       .a(httpStatus).reset())
   }
 
   @Override
-  void warnStateChangeIgnoredDueToInvalidUrl(String state, ProviderInfo providerInfo, boolean isSetup,
+  void warnStateChangeIgnoredDueToInvalidUrl(String state, IProviderInfo IProviderInfo, boolean isSetup,
                                              def stateChangeHandler) {
     AnsiConsole.out().println(Ansi.ansi().a('         ').fg(Ansi.Color.YELLOW)
       .a("WARNING: State Change ignored as there is no stateChange URL, received \"$stateChangeHandler\"")
@@ -107,7 +108,7 @@ class AnsiConsoleReporter implements VerifierReporter {
 
   @Override
   @SuppressWarnings('PrintStackTrace')
-  void requestFailed(ProviderInfo providerInfo, Interaction interaction, String interactionMessage, Exception e,
+  void requestFailed(IProviderInfo IProviderInfo, Interaction interaction, String interactionMessage, Exception e,
                      boolean printStackTrace) {
     AnsiConsole.out().println(Ansi.ansi().a('      ').fg(Ansi.Color.RED).a('Request Failed - ')
       .a(e.message).reset())

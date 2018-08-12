@@ -6,7 +6,9 @@ import au.com.dius.pact.core.model.OptionalBody;
 import au.com.dius.pact.core.model.PactReader;
 import au.com.dius.pact.core.model.Provider;
 import au.com.dius.pact.core.model.ProviderState;
+import au.com.dius.pact.core.model.generators.Category;
 import au.com.dius.pact.core.model.generators.Generators;
+import au.com.dius.pact.core.model.generators.ProviderStateGenerator;
 import au.com.dius.pact.core.model.matchingrules.MatchingRules;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
 import com.mifmif.common.regex.Generex;
@@ -85,6 +87,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
     this.state = existing.state;
     this.description = description;
     this.defaultResponseValues = defaultResponseValues;
+    this.path = existing.path;
 
     setupDefaultValues();
   }
@@ -399,4 +402,39 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
       setupFileUpload(partName, fileName, fileContentType, data);
       return this;
     }
+
+  /**
+   * Adds a header that will have it's value injected from the provider state
+   * @param name Header Name
+   * @param expression Expression to be evaluated from the provider state
+   * @param example Example value to use in the consumer test
+   */
+  public PactDslRequestWithPath headerFromProviderState(String name, String expression, String example) {
+    requestGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression));
+    requestHeaders.put(name, example);
+    return this;
+  }
+
+  /**
+   * Adds a query parameter that will have it's value injected from the provider state
+   * @param name Name
+   * @param expression Expression to be evaluated from the provider state
+   * @param example Example value to use in the consumer test
+   */
+  public PactDslRequestWithPath queryParameterFromProviderState(String name, String expression, String example) {
+    requestGenerators.addGenerator(Category.QUERY, name, new ProviderStateGenerator(expression));
+    query.put(name, Collections.singletonList(example));
+    return this;
+  }
+
+  /**
+   * Sets the path to have it's value injected from the provider state
+   * @param expression Expression to be evaluated from the provider state
+   * @param example Example value to use in the consumer test
+   */
+  public PactDslRequestWithPath pathFromProviderState(String expression, String example) {
+    requestGenerators.addGenerator(Category.PATH, new ProviderStateGenerator(expression));
+    this.path = example;
+    return this;
+  }
 }

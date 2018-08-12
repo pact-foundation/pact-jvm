@@ -50,9 +50,10 @@ data class BrokerUrlSource @JvmOverloads constructor(
   override val url: String,
   val pactBrokerUrl: String,
   val attributes: Map<String, Map<String, Any>> = mapOf(),
-  val options: Map<String, Any> = mapOf()
+  val options: Map<String, Any> = mapOf(),
+  val tag: String? = null
 ) : UrlPactSource() {
-  override fun description() = "Pact Broker $url"
+  override fun description() = if (tag == null) "Pact Broker $url" else "Pact Broker $url (Tag $tag)"
 }
 
 object InputStreamPactSource : PactSource()

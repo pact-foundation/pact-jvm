@@ -12,7 +12,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def generator = { 'X' } as Generator
 
     when:
-    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
+    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
 
     then:
     body.value == [a: 'A', b: 'X', c: 'C']
@@ -26,7 +26,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def generator = { 'X' } as Generator
 
     when:
-    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
+    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
 
     then:
     body.value == [a: 'A', b: 'B', c: 'C']
@@ -39,7 +39,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def generator = { 'X' } as Generator
 
     when:
-    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
+    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
 
     then:
     body.value == 100
@@ -53,7 +53,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def generator = { 'X' } as Generator
 
     when:
-    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
+    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
 
     then:
     body.value == ['A', 'X', 'C']
@@ -67,7 +67,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def generator = { 'X' } as Generator
 
     when:
-    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
+    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
 
     then:
     body.value == ['A', 'B', 'C']
@@ -80,7 +80,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def generator = { 'X' } as Generator
 
     when:
-    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
+    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
 
     then:
     body.value == 100
@@ -94,7 +94,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def generator = { 'X' } as Generator
 
     when:
-    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
+    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
 
     then:
     body.value == 'X'
@@ -108,7 +108,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def generator = { 'X' } as Generator
 
     when:
-    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
+    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
 
     then:
     body.value == [a: ['A', [a: 'A', b: ['1': '1', '2': 'X'], c: 'C'], 'C'], b: 'B', c: 'C']
@@ -122,7 +122,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def generator = { 'X' } as Generator
 
     when:
-    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
+    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
 
     then:
     body.value == [d: 'A', b: 'B', c: 'C']
@@ -136,7 +136,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def generator = { 'X' } as Generator
 
     when:
-    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
+    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
 
     then:
     body.value == [a: 'X', b: 'X', c: 'X']
@@ -150,7 +150,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def generator = { 'X' } as Generator
 
     when:
-    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
+    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
 
     then:
     body.value == ['X', 'X', 'X']
@@ -164,7 +164,7 @@ class JsonContentTypeHandlerSpec extends Specification {
     def generator = { 'X' } as Generator
 
     when:
-    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator)
+    JsonContentTypeHandler.INSTANCE.applyKey(body, key, generator, [:])
 
     then:
     body.value == [a: ['A', [a: 'A', b: ['X', 'X'], c: 'C'], 'C'], b: 'B', c: 'C']

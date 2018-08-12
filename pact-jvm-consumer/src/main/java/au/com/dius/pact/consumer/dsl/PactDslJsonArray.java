@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.InvalidMatcherException;
 import au.com.dius.pact.core.model.generators.Category;
 import au.com.dius.pact.core.model.generators.DateGenerator;
 import au.com.dius.pact.core.model.generators.DateTimeGenerator;
+import au.com.dius.pact.core.model.generators.ProviderStateGenerator;
 import au.com.dius.pact.core.model.generators.RandomBooleanGenerator;
 import au.com.dius.pact.core.model.generators.RandomDecimalGenerator;
 import au.com.dius.pact.core.model.generators.RandomHexadecimalGenerator;
@@ -1208,5 +1209,16 @@ public class PactDslJsonArray extends DslPart {
     PactDslJsonArray parent = new PactDslJsonArray(rootPath, "", this, true);
     parent.setNumberExamples(numberExamples);
     return new PactDslJsonArray("", "", parent);
+  }
+
+  /**
+   * Adds an element that will have it's value injected from the provider state
+   * @param expression Expression to be evaluated from the provider state
+   * @param example Example value to be used in the consumer test
+   */
+  public PactDslJsonArray valueFromProviderState(String expression, Object example) {
+    generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new ProviderStateGenerator(expression));
+    body.put(example);
+    return this;
   }
 }

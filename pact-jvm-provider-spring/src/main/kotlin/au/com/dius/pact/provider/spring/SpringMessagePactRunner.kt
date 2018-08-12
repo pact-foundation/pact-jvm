@@ -41,7 +41,7 @@ open class SpringMessagePactRunner(clazz: Class<*>) : MessagePactRunner<Message>
     return testContextManager!!
   }
 
-  override fun newInteractionRunner(testClass: TestClass, pact: Pact<Message>, pactSource: PactSource): InteractionRunner {
+  override fun newInteractionRunner(testClass: TestClass, pact: Pact<Message>, pactSource: PactSource): InteractionRunner<Message> {
     return SpringInteractionRunner(testClass, pact, pactSource, initTestContextManager(testClass.javaClass))
   }
 

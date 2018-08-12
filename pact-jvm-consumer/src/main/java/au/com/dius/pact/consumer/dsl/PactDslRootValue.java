@@ -1,19 +1,10 @@
 package au.com.dius.pact.consumer.dsl;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.UUID;
-
-import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.time.FastDateFormat;
-import org.json.JSONObject;
-
-import com.mifmif.common.regex.Generex;
 import au.com.dius.pact.consumer.InvalidMatcherException;
 import au.com.dius.pact.core.model.generators.Category;
 import au.com.dius.pact.core.model.generators.DateGenerator;
 import au.com.dius.pact.core.model.generators.DateTimeGenerator;
+import au.com.dius.pact.core.model.generators.ProviderStateGenerator;
 import au.com.dius.pact.core.model.generators.RandomDecimalGenerator;
 import au.com.dius.pact.core.model.generators.RandomHexadecimalGenerator;
 import au.com.dius.pact.core.model.generators.RandomIntGenerator;
@@ -26,6 +17,15 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher;
 import au.com.dius.pact.core.model.matchingrules.RuleLogic;
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
+import com.mifmif.common.regex.Generex;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
+import org.json.JSONObject;
+
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * Matcher to create a plain root matching strategy. Used with text/plain to match regex responses
@@ -764,6 +764,18 @@ public class PactDslRootValue extends DslPart {
       value.setValue(JSONObject.NULL);
     }
     value.matchers.setRules("", new MatchingRuleGroup(Arrays.asList(rules), RuleLogic.OR));
+    return value;
+  }
+
+  /**
+   * Adds a value that will have it's value injected from the provider state
+   * @param expression Expression to be evaluated from the provider state
+   * @param example Example value to be used in the consumer test
+   */
+  public static PactDslRootValue valueFromProviderState(String expression, Object example) {
+    PactDslRootValue value = new PactDslRootValue();
+    value.generators.addGenerator(Category.BODY, "", new ProviderStateGenerator(expression));
+    value.setValue(example);
     return value;
   }
 

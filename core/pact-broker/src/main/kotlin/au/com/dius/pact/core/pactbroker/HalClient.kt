@@ -1,6 +1,8 @@
 package au.com.dius.pact.core.pactbroker
 
-import au.com.dius.pact.core.pactbroker.com.github.kittinunf.result.Result
+import au.com.dius.pact.com.github.michaelbull.result.Err
+import au.com.dius.pact.com.github.michaelbull.result.Ok
+import au.com.dius.pact.com.github.michaelbull.result.Result
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.buildUrl
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
 import com.github.salomonbrys.kotson.array
@@ -139,6 +141,7 @@ open class HalClient @JvmOverloads constructor(
     body: String,
     handler: ((status: Int, response: CloseableHttpResponse) -> Boolean)?
   ): Result<Boolean, Exception> {
+    logger.debug { "Posting JSON to $url\n$body" }
     val client = setupHttpClient()
 
     return Result.of {
@@ -147,6 +150,8 @@ open class HalClient @JvmOverloads constructor(
       httpPost.entity = StringEntity(body, ContentType.APPLICATION_JSON)
 
       client.execute(httpPost).use {
+        logger.debug { "Got response ${it.statusLine}" }
+        logger.debug { "Response body: ${it.entity.content.reader().readText()}" }
         if (handler != null) {
           handler(it.statusLine.statusCode, it)
         } else {
@@ -201,8 +206,8 @@ open class HalClient @JvmOverloads constructor(
     logger.debug { "Fetching: $path" }
     val response = getJson(path, encodePath)
     when (response) {
-      is Result.Success -> return response.value
-      is Result.Failure -> throw response.error
+      is Ok -> return response.value
+      is Err -> throw response.error
     }
   }
 
@@ -387,15 +392,15 @@ open class HalClient @JvmOverloads constructor(
     return null
   }
 
-  override fun forAll(linkName: String, just: Consumer<Map<String, Any?>>) {
+  override fun forAll(linkName: String, closure: Consumer<Map<String, Any?>>) {
     initPathInfo()
     val links = pathInfo!![LINKS]
     if (links.isJsonObject && links.obj.has(linkName)) {
       val matchingLink = links[linkName]
       if (matchingLink.isJsonArray) {
-        matchingLink.asJsonArray.forEach { just.accept(asMap(it.asJsonObject)) }
+        matchingLink.asJsonArray.forEach { closure.accept(asMap(it.asJsonObject)) }
       } else {
-        just.accept(asMap(matchingLink.asJsonObject))
+        closure.accept(asMap(matchingLink.asJsonObject))
       }
     }
   }

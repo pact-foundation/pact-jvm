@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.groovy
 import au.com.dius.pact.core.model.Feature
 import au.com.dius.pact.core.model.FeatureToggles
 import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.generators.ProviderStateGenerator
 import au.com.dius.pact.core.model.matchingrules.Category
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
@@ -107,35 +108,7 @@ class PactBodyBuilder extends BaseBuilder {
       def matcher = regexp(value as Pattern, value2)
       bodyRepresentation[name] = setMatcherAttribute(matcher, path + buildPath(matcherName))
     } else if (value instanceof LikeMatcher) {
-      setMatcherAttribute(value, path + buildPath(matcherName))
-      bodyRepresentation[name] = []
-      value.numberExamples.times { index ->
-        def exampleValue = value.value
-        if (exampleValue instanceof Closure) {
-          bodyRepresentation[name] << invokeClosure(exampleValue, buildPath(matcherName, ALL_LIST_ITEMS))
-        } else if (exampleValue instanceof LikeMatcher) {
-          bodyRepresentation[name] << invoke(exampleValue, buildPath(matcherName, ALL_LIST_ITEMS))
-        } else if (exampleValue instanceof Matcher) {
-          bodyRepresentation[name] << setMatcherAttribute(exampleValue, path + buildPath(matcherName, ALL_LIST_ITEMS))
-        } else if (exampleValue instanceof Pattern) {
-          def matcher = regexp(exampleValue as Pattern, null)
-          bodyRepresentation[name] << setMatcherAttribute(matcher, path + buildPath(matcherName, ALL_LIST_ITEMS))
-        } else if (exampleValue instanceof List) {
-          def list = []
-          exampleValue.eachWithIndex { entry, i ->
-            if (entry instanceof Matcher) {
-              list << setMatcherAttribute(entry, path + buildPath(matcherName, START_LIST + i + END_LIST))
-            } else if (entry instanceof Closure) {
-              list << invokeClosure(entry, buildPath(matcherName, START_LIST + i + END_LIST))
-            } else {
-              list << entry
-            }
-          }
-          bodyRepresentation[name] << list
-        } else {
-          bodyRepresentation[name] << exampleValue
-        }
-      }
+      setupLikeMatcherAttribute(value, matcherName, name)
     } else if (value instanceof OrMatcher) {
       bodyRepresentation[name] = value.value
       matchers.setRules(path + buildPath(matcherName), new MatchingRuleGroup(value.matchers*.matcher, RuleLogic.OR))
@@ -145,24 +118,64 @@ class PactBodyBuilder extends BaseBuilder {
     } else if (value instanceof Matcher) {
       bodyRepresentation[name] = setMatcherAttribute(value, path + buildPath(matcherName))
     } else if (value instanceof List) {
-      bodyRepresentation[name] = []
-      value.eachWithIndex { entry, i ->
-        if (entry instanceof Matcher) {
-          bodyRepresentation[name] << setMatcherAttribute(entry, path + buildPath(matcherName,
-            START_LIST + i + END_LIST))
-        } else if (entry instanceof Closure) {
-          bodyRepresentation[name] << invokeClosure(entry, buildPath(matcherName, START_LIST + i + END_LIST))
-        } else {
-          bodyRepresentation[name] << entry
-        }
-      }
+      setupListAttribute(name, value, matcherName)
     } else if (value instanceof Closure) {
       if (matcherName == STAR) {
         setMatcherAttribute(new TypeMatcher(), path + buildPath(matcherName))
       }
       bodyRepresentation[name] = invokeClosure(value, buildPath(matcherName))
+    } else if (value instanceof GeneratedValue) {
+      bodyRepresentation[name] = value.exampleValue
+      this.generators.addGenerator(au.com.dius.pact.core.model.generators.Category.BODY, path + buildPath(name),
+        new ProviderStateGenerator(value.expression))
     } else {
       bodyRepresentation[name] = value
+    }
+  }
+
+  private void setupListAttribute(String name, List value, String matcherName) {
+    bodyRepresentation[name] = []
+    value.eachWithIndex { entry, i ->
+      if (entry instanceof Matcher) {
+        bodyRepresentation[name] << setMatcherAttribute(entry, path + buildPath(matcherName,
+          START_LIST + i + END_LIST))
+      } else if (entry instanceof Closure) {
+        bodyRepresentation[name] << invokeClosure(entry, buildPath(matcherName, START_LIST + i + END_LIST))
+      } else {
+        bodyRepresentation[name] << entry
+      }
+    }
+  }
+
+  private void setupLikeMatcherAttribute(LikeMatcher value, String matcherName, String name) {
+    setMatcherAttribute(value, path + buildPath(matcherName))
+    bodyRepresentation[name] = []
+    value.numberExamples.times { index ->
+      def exampleValue = value.value
+      if (exampleValue instanceof Closure) {
+        bodyRepresentation[name] << invokeClosure(exampleValue, buildPath(matcherName, ALL_LIST_ITEMS))
+      } else if (exampleValue instanceof LikeMatcher) {
+        bodyRepresentation[name] << invoke(exampleValue, buildPath(matcherName, ALL_LIST_ITEMS))
+      } else if (exampleValue instanceof Matcher) {
+        bodyRepresentation[name] << setMatcherAttribute(exampleValue, path + buildPath(matcherName, ALL_LIST_ITEMS))
+      } else if (exampleValue instanceof Pattern) {
+        def matcher = regexp(exampleValue as Pattern, null)
+        bodyRepresentation[name] << setMatcherAttribute(matcher, path + buildPath(matcherName, ALL_LIST_ITEMS))
+      } else if (exampleValue instanceof List) {
+        def list = []
+        exampleValue.eachWithIndex { entry, i ->
+          if (entry instanceof Matcher) {
+            list << setMatcherAttribute(entry, path + buildPath(matcherName, START_LIST + i + END_LIST))
+          } else if (entry instanceof Closure) {
+            list << invokeClosure(entry, buildPath(matcherName, START_LIST + i + END_LIST))
+          } else {
+            list << entry
+          }
+        }
+        bodyRepresentation[name] << list
+      } else {
+        bodyRepresentation[name] << exampleValue
+      }
     }
   }
 
@@ -261,4 +274,13 @@ class PactBodyBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * Marks a item as to be injected from the provider state
+   * @param expression Expression to lookup in the provider state context
+   * @param exampleValue Example value to use in the consumer test
+   * @return example value
+   */
+  def fromProviderState(String expression, def exampleValue) {
+    new GeneratedValue(expression, exampleValue)
+  }
 }
