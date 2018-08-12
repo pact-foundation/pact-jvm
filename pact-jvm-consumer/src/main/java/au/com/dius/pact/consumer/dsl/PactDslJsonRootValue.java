@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.InvalidMatcherException;
 import au.com.dius.pact.model.generators.Category;
 import au.com.dius.pact.model.generators.DateGenerator;
 import au.com.dius.pact.model.generators.DateTimeGenerator;
+import au.com.dius.pact.model.generators.ProviderStateGenerator;
 import au.com.dius.pact.model.generators.RandomDecimalGenerator;
 import au.com.dius.pact.model.generators.RandomHexadecimalGenerator;
 import au.com.dius.pact.model.generators.RandomIntGenerator;
@@ -792,6 +793,18 @@ public class PactDslJsonRootValue extends DslPart {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.setValue(urlMatcher.getExampleValue());
     value.setMatcher(value.regexp(urlMatcher.getRegexExpression()));
+    return value;
+  }
+
+  /**
+   * Adds a value that will have it's value injected from the provider state
+   * @param expression Expression to be evaluated from the provider state
+   * @param example Example value to be used in the consumer test
+   */
+  public static PactDslJsonRootValue valueFromProviderState(String expression, Object example) {
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    value.generators.addGenerator(Category.BODY, "", new ProviderStateGenerator(expression));
+    value.setValue(example);
     return value;
   }
 

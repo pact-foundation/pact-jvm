@@ -2,6 +2,8 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.OptionalBody;
+import au.com.dius.pact.model.generators.Category;
+import au.com.dius.pact.model.generators.ProviderStateGenerator;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import au.com.dius.pact.model.PactReader;
 import com.mifmif.common.regex.Generex;
@@ -11,6 +13,8 @@ import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -280,5 +284,41 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
       setupFileUpload(partName, fileName, fileContentType, data);
       return this;
     }
+
+  /**
+   * Adds a header that will have it's value injected from the provider state
+   * @param name Header Name
+   * @param expression Expression to be evaluated from the provider state
+   * @param example Example value to use in the consumer test
+   */
+  public PactDslRequestWithoutPath headerFromProviderState(String name, String expression, String example) {
+    requestGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression));
+    requestHeaders.put(name, example);
+    return this;
+  }
+
+  /**
+   * Adds a query parameter that will have it's value injected from the provider state
+   * @param name Name
+   * @param expression Expression to be evaluated from the provider state
+   * @param example Example value to use in the consumer test
+   */
+  public PactDslRequestWithoutPath queryParameterFromProviderState(String name, String expression, String example) {
+    requestGenerators.addGenerator(Category.QUERY, name, new ProviderStateGenerator(expression));
+    query.put(name, Collections.singletonList(example));
+    return this;
+  }
+
+  /**
+   * Sets the path to have it's value injected from the provider state
+   * @param expression Expression to be evaluated from the provider state
+   * @param example Example value to use in the consumer test
+   */
+  public PactDslRequestWithPath pathFromProviderState(String expression, String example) {
+    requestGenerators.addGenerator(Category.PATH, new ProviderStateGenerator(expression));
+    return new PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state,
+      description, example, requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators,
+      defaultRequestValues, defaultResponseValues);
+  }
 
 }
