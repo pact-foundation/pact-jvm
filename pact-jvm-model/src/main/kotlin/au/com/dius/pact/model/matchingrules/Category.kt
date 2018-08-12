@@ -98,7 +98,13 @@ data class Category @JvmOverloads constructor(
         }
       }
     } else {
-      matchingRules.entries.associate { Pair(it.key, it.value.toMap(pactSpecVersion)) }
+      matchingRules.flatMap { entry ->
+        if (entry.key.isEmpty()) {
+          entry.value.toMap(pactSpecVersion).entries.map { it.toPair() }
+        } else {
+          listOf(entry.key to entry.value.toMap(pactSpecVersion))
+        }
+      }.toMap()
     }
   }
 

@@ -1,5 +1,22 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.21 - Bugfix Release
+
+* 3fe199a3 - doc: update version in readme (Ronald Holshausen, Sun Aug 12 15:11:05 2018 +1000)
+* 8d16a9c3 - fix: display the tag when verifying a pact fetched with a tag #754 (Ronald Holshausen, Sun Aug 12 14:34:10 2018 +1000)
+* 0b7168b5 - fix: Java 8 DSL was not setting wildcard matchers with min/max arrays #749 (Ronald Holshausen, Sun Aug 12 12:09:12 2018 +1000)
+* dd2b75e4 - fix: min-max type matcher was not being called by the verifier #749 (Ronald Holshausen, Sun Aug 12 11:33:28 2018 +1000)
+* d8121728 - feat: uponReceiving in the response of the Java DSL should use the existing path as a default #748 (Ronald Holshausen, Sun Aug 12 10:13:30 2018 +1000)
+* 383460e1 - fix: only include fatjar config when building it as it breaks appveyor build #747 (Ronald Holshausen, Sat Aug 11 20:48:40 2018 +1000)
+* 364d047d - fix: added response body debug logging for post requests to the pact broker #738 (Ronald Holshausen, Sat Aug 11 20:18:49 2018 +1000)
+* 6989edf5 - feat: added a fat jar of all the project libraries and depenencies #747 (Ronald Holshausen, Sat Aug 11 19:58:18 2018 +1000)
+* 9f74dd20 - fix: handle case where there is a FORM post as well as query parameters #745 (Ronald Holshausen, Sat Aug 11 18:54:36 2018 +1000)
+* d62f4395 - fix: added debug logging to post requests to the pact broker #738 (Ronald Holshausen, Sat Aug 11 17:11:27 2018 +1000)
+* ba08a40c - fix: do not write out empty matching rule categories (Ronald Holshausen, Sat Aug 11 14:51:44 2018 +1000)
+* 3372839d - fix: path matchers were not being written out in the correct format - #743 (Ronald Holshausen, Sat Aug 11 14:42:04 2018 +1000)
+* 340bf4c6 - fix: deprecate the global reportVerificationResults function (Ronald Holshausen, Sun Jul 29 13:35:21 2018 +1000)
+* cba1b336 - bump version to 3.5.21 (Ronald Holshausen, Sat Jul 28 18:15:19 2018 +1000)
+
 # 3.5.20 - Bugfix Release
 
 * 1c45d0da - Merge tag '3_5_20' into v3.5.x-2.11 (Ronald Holshausen, Sat Jul 28 18:18:37 2018 +1000)

@@ -186,7 +186,7 @@ class ProviderClientSpec extends Specification {
   }
 
   @Unroll
-  def 'setting up body sets a string entity if it is a url encoded form post and there is no query string'() {
+  def 'setting up body sets a string entity  entity if it is a url encoded form post and there is no query string'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
     request = new Request('POST', '/', query, ['Content-Type': ContentType.APPLICATION_FORM_URLENCODED.mimeType],
@@ -204,17 +204,17 @@ class ProviderClientSpec extends Specification {
     query << [ [:], null ]
   }
 
-  def 'setting up body sets a UrlEncodedFormEntity entity if it is urlencoded form post and there is a query string'() {
+  def 'setting up body sets a StringEntity entity if it is urlencoded form post and there is a query string'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
     request = new Request('POST', '/', ['A': ['B', 'C']], ['Content-Type': 'application/x-www-form-urlencoded'],
-      OptionalBody.body('{}'))
+      OptionalBody.body('A=B'))
 
     when:
     client.setupBody(request, httpRequest)
 
     then:
-    1 * httpRequest.setEntity { it instanceof UrlEncodedFormEntity && it.content.text == 'A=B&A=C' }
+    1 * httpRequest.setEntity { it instanceof StringEntity && it.content.text == 'A=B' }
     0 * httpRequest._
   }
 
@@ -223,7 +223,7 @@ class ProviderClientSpec extends Specification {
   def 'request is a url encoded form post'() {
     expect:
     def request = new Request(method, '/', ['A': ['B', 'C']], ['Content-Type': contentType],
-      OptionalBody.body('{}'))
+      OptionalBody.body('A=B'))
     ProviderClient.urlEncodedFormPost(request) == urlEncodedFormPost
 
     where:
@@ -597,6 +597,19 @@ class ProviderClientSpec extends Specification {
     '/path/'     | '/path'
     'path/path/' | 'path/path'
 
+  }
+
+  def 'includes query parameters when it is a form post'() {
+    given:
+    def pactRequest = new Request('POST', '/', ['A': ['B', 'C']],
+      ['Content-Type': 'application/x-www-form-urlencoded'],
+      OptionalBody.body('A=B'))
+
+    when:
+    def request = client.newRequest(pactRequest)
+
+    then:
+    request.URI.query == 'A=B&A=C'
   }
 
 }

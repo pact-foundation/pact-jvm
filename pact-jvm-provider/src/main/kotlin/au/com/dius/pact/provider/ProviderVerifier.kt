@@ -17,6 +17,7 @@ interface VerificationReporter {
 }
 
 @JvmOverloads
+@Deprecated("Use the VerificationReporter instead of this function")
 fun <I> reportVerificationResults(pact: Pact<I>, result: Boolean, version: String, client: PactBrokerClient? = null)
   where I: Interaction {
   val source = pact.source

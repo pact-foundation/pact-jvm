@@ -15,6 +15,7 @@ plugins {
   id 'org.jmailen.kotlinter' version '1.11.2'
   id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC6-4'
   id 'org.jetbrains.dokka' version '0.9.16'
+  id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
 
 repositories {
@@ -25,6 +26,24 @@ repositories {
 
 import org.apache.commons.text.StringEscapeUtils
 
+def scalaVersionLookup = [
+  '2.11': '2.11.8'
+]
+
+allprojects {
+  group = 'au.com.dius'
+  version = '3.5.21'
+
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+  }
+
+  targetCompatibility = '1.8'
+  sourceCompatibility = '1.8'
+}
+
 subprojects {
   buildscript {
     repositories {
@@ -33,10 +52,6 @@ subprojects {
       mavenLocal()
     }
   }
-
-    def scalaVersionLookup = [
-        '2.11': '2.11.8'
-    ]
 
     def m = project.name =~ /.*_(2\.1\d)(_0\.\d+)?/
     if (m.matches()) {
@@ -212,7 +227,6 @@ subprojects {
                     if (project.hasProperty('sonatypeUsername')) {
                         authentication(userName: sonatypeUsername, password: sonatypePassword)
                     }
-//                     proxy(host: 'localhost', port: 3128, type: 'http')
                 }
 
             }

@@ -94,6 +94,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
     this.state = existing.state;
     this.description = description;
     this.defaultResponseValues = defaultResponseValues;
+    this.path = existing.path;
 
     setupDefaultValues();
   }
