@@ -3,6 +3,7 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.model.ClosurePactSource
 import au.com.dius.pact.model.FileSource
 import au.com.dius.pact.model.UrlSource
+import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -30,6 +31,15 @@ class ConsumerInfoSpec extends Specification {
     { -> }                                              | ClosurePactSource
     '/var/tmp/file'                                     | FileSource
 
+  }
+
+  def 'include the tag when converting from a PactBrokerConsumer'() {
+    expect:
+    ConsumerInfo.from(consumer).pactSource.tag == tag
+
+    where:
+    consumer | tag
+    new PactBrokerConsumer('test', 'test', 'url', [], 'TAG') | 'TAG'
   }
 
 }
