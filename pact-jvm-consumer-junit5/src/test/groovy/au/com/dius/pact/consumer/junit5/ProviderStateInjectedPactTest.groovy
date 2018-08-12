@@ -17,7 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(PactConsumerTestExt)
 @PactTestFor(providerName = 'ProviderStateService')
-@SuppressWarnings('JUnitPublicNonTestMethod')
+@SuppressWarnings(['JUnitPublicNonTestMethod', 'GStringExpressionWithinString'])
 class ProviderStateInjectedPactTest {
   @Pact(provider = 'ProviderStateService', consumer = 'V3Consumer')
   RequestResponsePact articles(PactDslWithProvider builder) {
