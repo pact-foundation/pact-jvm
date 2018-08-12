@@ -27,7 +27,7 @@ class ProviderStateInjectedPactTest {
         .path('/values')
         .method('POST')
       .willRespondWith()
-        .headerFromProviderState('LOCATION', 'http://server/users/$userId', 'http://server/users/$userId')
+        .headerFromProviderState('LOCATION', 'http://server/users/${userId}', 'http://server/users/666')
         .status(200)
       .body(
         new PactDslJsonBody()
@@ -54,7 +54,7 @@ class ProviderStateInjectedPactTest {
     def generators = json.interactions.first().response.generators
     assert generators == [
       body: ['$.userId': [type: 'ProviderState', expression: 'userId']],
-      header: [LOCATION: [type: 'ProviderState', expression: 'http://server/users/$userId']]
+      header: [LOCATION: [type: 'ProviderState', expression: 'http://server/users/${userId}']]
     ]
   }
 }

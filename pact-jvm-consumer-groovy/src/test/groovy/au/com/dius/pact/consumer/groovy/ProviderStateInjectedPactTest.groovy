@@ -26,7 +26,7 @@ class ProviderStateInjectedPactTest {
         userClass 'Shoddy'
       }
       willRespondWith(status: 200, headers:
-        [LOCATION: fromProviderState('http://server/users/$userId', 'http://server/users/$userId')])
+        [LOCATION: fromProviderState('http://server/users/${userId}', 'http://server/users/666')])
       withBody {
         userName 'Test'
         userId fromProviderState('userId', 100)
@@ -48,7 +48,7 @@ class ProviderStateInjectedPactTest {
     def generators = json.interactions.first().response.generators
     assert generators == [
       body: ['$.userId': [type: 'ProviderState', expression: 'userId']],
-      header: [LOCATION: [type: 'ProviderState', expression: 'http://server/users/$userId']]
+      header: [LOCATION: [type: 'ProviderState', expression: 'http://server/users/${userId}']]
     ]
   }
 }
