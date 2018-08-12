@@ -60,7 +60,8 @@ class ConsumerInfo implements IConsumerInfo {
   }
 
   static ConsumerInfo from(PactBrokerConsumer consumer) {
-    new ConsumerInfo(name: consumer.name, pactSource: new BrokerUrlSource(consumer.source, consumer.pactBrokerUrl),
+    new ConsumerInfo(name: consumer.name,
+      pactSource: new BrokerUrlSource(consumer.source, consumer.pactBrokerUrl, [:], [:], consumer.tag),
       pactFileAuthentication: consumer.pactFileAuthentication)
   }
 }

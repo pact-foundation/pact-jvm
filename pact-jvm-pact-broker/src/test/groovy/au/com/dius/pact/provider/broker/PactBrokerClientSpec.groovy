@@ -107,6 +107,7 @@ class PactBrokerClientSpec extends Specification {
     consumers != []
     consumers.first().name == 'bob'
     consumers.first().source == 'http://bob.com/'
+    consumers.first().tag == 'tag'
   }
 
   def 'when fetching consumers with specified tag, sets the auth if there is any'() {

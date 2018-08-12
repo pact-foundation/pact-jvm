@@ -3,6 +3,9 @@ package au.com.dius.pact.matchers
 import au.com.dius.pact.model.matchingrules.DateMatcher
 import au.com.dius.pact.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.model.matchingrules.IncludeMatcher
+import au.com.dius.pact.model.matchingrules.MaxTypeMatcher
+import au.com.dius.pact.model.matchingrules.MinMaxTypeMatcher
+import au.com.dius.pact.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher
 import au.com.dius.pact.model.matchingrules.RegexMatcher
 import au.com.dius.pact.model.matchingrules.TimeMatcher
@@ -29,7 +32,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'equals matcher matches using equals'() {
     expect:
-    MatcherExecutorKt.domatch(new EqualsMatcher(), path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(EqualsMatcher.INSTANCE, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
     expected | actual || mustBeEmpty
@@ -56,7 +59,7 @@ class MatcherExecutorSpec extends Specification {
   @Unroll
   def 'type matcher matches on types'() {
     expect:
-    MatcherExecutorKt.domatch(new TypeMatcher(), path, expected, actual, mismatchFactory).empty == mustBeEmpty
+    MatcherExecutorKt.domatch(TypeMatcher.INSTANCE, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
     expected        | actual                     || mustBeEmpty
@@ -174,6 +177,24 @@ class MatcherExecutorSpec extends Specification {
     then:
     1 * factory.create(_, _, "Expected 'bar' to equal 'foo'", _)
     0 * _
+  }
+
+  @Unroll
+  def 'list type matcher matches on array sizes - #matcher'() {
+    expect:
+    MatcherExecutorKt.domatch(matcher, path, expected, actual, mismatchFactory).empty == mustBeEmpty
+
+    where:
+    matcher                     | expected | actual    || mustBeEmpty
+    TypeMatcher.INSTANCE        | [0]      | [1]       || true
+    new MinTypeMatcher(1)       | [0]      | [1]       || true
+    new MinTypeMatcher(2)       | [0, 1]   | [1]       || false
+    new MaxTypeMatcher(2)       | [0]      | [1]       || true
+    new MaxTypeMatcher(1)       | [0]      | [1, 1]    || false
+    new MinMaxTypeMatcher(1, 2) | [0]      | [1]       || true
+    new MinMaxTypeMatcher(2, 3) | [0, 1]   | [1]       || false
+    new MinMaxTypeMatcher(1, 2) | [0, 1]   | [1, 1]    || true
+    new MinMaxTypeMatcher(1, 2) | [0]      | [1, 1, 2] || false
   }
 
 }

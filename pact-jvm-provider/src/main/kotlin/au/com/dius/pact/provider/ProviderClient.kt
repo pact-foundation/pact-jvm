@@ -7,11 +7,9 @@ import groovy.lang.Binding
 import groovy.lang.Closure
 import groovy.lang.GroovyShell
 import mu.KLogging
-import org.apache.http.Consts
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
-import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
@@ -26,7 +24,6 @@ import org.apache.http.client.utils.URIBuilder
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.message.BasicNameValuePair
 import org.apache.http.util.EntityUtils
 import scala.Function1
 import java.lang.Boolean.getBoolean
@@ -160,14 +157,8 @@ open class ProviderClient(
   }
 
   open fun setupBody(request: Request, method: HttpRequest) {
-    if (method is HttpEntityEnclosingRequest) {
-      if (urlEncodedFormPost(request) && request.query != null && request.query.isNotEmpty()) {
-        val charset = Consts.UTF_8
-        val parameters = request.query.flatMap { entry -> entry.value.map { BasicNameValuePair(entry.key, it) } }
-        method.entity = UrlEncodedFormEntity(parameters, charset)
-      } else if (request.body != null && request.body!!.isPresent()) {
-        method.entity = StringEntity(request.body!!.orElse(""))
-      }
+    if (method is HttpEntityEnclosingRequest && request.body != null && request.body!!.isPresent()) {
+      method.entity = StringEntity(request.body!!.orElse(""))
     }
   }
 
@@ -284,7 +275,7 @@ open class ProviderClient(
       urlBuilder.path = path
     }
 
-    if (request.query != null && !urlEncodedFormPost(request)) {
+    if (request.query != null) {
       request.query.forEach { entry ->
         entry.value.forEach {
           urlBuilder.addParameter(entry.key, it)

@@ -21,7 +21,7 @@ public class LambdaDsl {
     }
 
     public static LambdaDslJsonArray newJsonArrayMinLike(Integer size, Consumer<LambdaDslJsonArray> array) {
-        final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray();
+        final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray("", "", null, true);
         pactDslJsonArray.setNumberExamples(size);
         pactDslJsonArray.getMatchers().addRule(new MinTypeMatcher(size));
 
@@ -31,7 +31,7 @@ public class LambdaDsl {
     }
 
     public static LambdaDslJsonArray newJsonArrayMaxLike(Integer size, Consumer<LambdaDslJsonArray> array) {
-        final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray();
+        final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray("", "", null, true);
         pactDslJsonArray.setNumberExamples(1);
         pactDslJsonArray.getMatchers().addRule(new MaxTypeMatcher(size));
 
@@ -41,7 +41,7 @@ public class LambdaDsl {
     }
 
     public static LambdaDslJsonArray newJsonArrayMinMaxLike(Integer minSize, Integer maxSize, Consumer<LambdaDslJsonArray> array) {
-        final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray();
+        final PactDslJsonArray pactDslJsonArray = new PactDslJsonArray("", "", null, true);
         pactDslJsonArray.setNumberExamples(minSize);
         pactDslJsonArray.getMatchers().addRule(new MinMaxTypeMatcher(minSize, maxSize));
 

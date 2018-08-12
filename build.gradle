@@ -15,6 +15,7 @@ plugins {
   id 'org.jmailen.kotlinter' version '1.11.2'
   id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC7-3'
   id 'org.jetbrains.dokka' version '0.9.16'
+  id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
 
 repositories {
@@ -23,7 +24,28 @@ repositories {
   jcenter()
 }
 
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
 import org.apache.commons.text.StringEscapeUtils
+
+def scalaVersionLookup = [
+  '2.12': '2.12.5'
+]
+
+allprojects {
+  group = 'au.com.dius'
+  version = '3.6.0'
+
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+  }
+
+  targetCompatibility = '1.8'
+  sourceCompatibility = '1.8'
+}
 
 subprojects {
   buildscript {
@@ -33,10 +55,6 @@ subprojects {
       mavenLocal()
     }
   }
-
-    def scalaVersionLookup = [
-        '2.12': '2.12.5'
-    ]
 
     def m = project.name =~ /.*_(2\.1\d)(_0\.\d+)?/
     if (m.matches()) {
@@ -98,11 +116,6 @@ subprojects {
       testCompile 'org.objenesis:objenesis:2.6'
       testCompile 'io.kotlintest:kotlintest:2.0.7'
     }
-
-    group = 'au.com.dius'
-    version = '3.6.0'
-    targetCompatibility = '1.8'
-    sourceCompatibility = '1.8'
 
     tasks.withType(ScalaCompile) {
         scalaCompileOptions.additionalParameters = ['-target:jvm-1.8']
@@ -212,7 +225,6 @@ subprojects {
                     if (project.hasProperty('sonatypeUsername')) {
                         authentication(userName: sonatypeUsername, password: sonatypePassword)
                     }
-//                     proxy(host: 'localhost', port: 3128, type: 'http')
                 }
 
             }
@@ -294,4 +306,106 @@ if (System.env.TRAVIS == 'true') {
             maxHeapSize = '768m'
         }
     }
+}
+
+if (System.env.UBERJAR == 'true') {
+  dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+    compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
+    compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
+    compile('io.github.microutils:kotlin-logging:1.4.4') {
+      exclude group: 'org.jetbrains.kotlin'
+    }
+    compile "org.scala-lang:scala-library:${scalaVersionLookup['2.12']}"
+    compile("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {
+      exclude group: 'org.scala-lang'
+    }
+
+    compile project(':pact-jvm-consumer-groovy_2.12')
+    compile project(':pact-jvm-consumer-java8_2.12')
+    compile project(':pact-jvm-consumer-junit5_2.12')
+    compile project(':pact-jvm-consumer-junit_2.12')
+    compile project(':pact-jvm-consumer-specs2_2.12')
+    compile project(':pact-jvm-consumer_2.12')
+    compile project(':pact-jvm-matchers_2.12')
+    compile project(':pact-jvm-model')
+    compile project(':pact-jvm-pact-broker')
+    compile project(':pact-jvm-provider-junit5_2.12')
+    compile project(':pact-jvm-provider-junit_2.12')
+    compile project(':pact-jvm-provider-scalasupport_2.12')
+    compile project(':pact-jvm-provider-scalatest_2.12')
+    compile project(':pact-jvm-provider-specs2_2.12')
+    compile project(':pact-jvm-provider-spring_2.12')
+    compile project(':pact-jvm-provider_2.12')
+  }
+
+  publishing {
+    publications {
+      shadow(MavenPublication) { publication ->
+        project.shadow.component(publication)
+
+        pom.withXml {
+          asNode().children().last() + {
+            resolveStrategy = Closure.DELEGATE_FIRST
+
+            name project.name
+            description 'JVM implementation of the consumer driven contract library pact.'
+            url 'https://github.com/DiUS/pact-jvm'
+            licenses {
+              license {
+                name 'Apache 2'
+                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                distribution 'repo'
+              }
+            }
+            scm {
+              url 'https://github.com/DiUS/pact-jvm'
+              connection 'https://github.com/DiUS/pact-jvm.git'
+            }
+
+            developers {
+              developer {
+                id 'thetrav'
+                name 'Travis Dixon'
+                email 'the.trav@gmail.com'
+              }
+              developer {
+                id 'rholshausen'
+                name 'Ronald Holshausen'
+                email 'rholshausen@dius.com.au'
+              }
+            }
+          }
+        }
+      }
+    }
+    repositories {
+      maven {
+        url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+        credentials {
+          username sonatypeUsername
+          password sonatypePassword
+        }
+      }
+    }
+  }
+
+  signing {
+    sign publishing.publications.shadow
+  }
+
+  shadowJar {
+    mergeServiceFiles()
+    mergeGroovyExtensionModules()
+    zip64 = true
+    manifest {
+      attributes provider: 'gradle',
+        'Implementation-Title': project.name, 'Implementation-Version': version,
+        'Implementation-Vendor': project.group, 'Implementation-Vendor-Id': project.group,
+        'Specification-Vendor': project.group,
+        'Specification-Title': project.name,
+        'Specification-Version': version
+    }
+  }
 }

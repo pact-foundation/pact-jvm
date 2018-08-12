@@ -1,3 +1,5 @@
+enableFeaturePreview('STABLE_PUBLISHING')
+
 def crossCompileModules = [
   'pact-jvm-consumer',
   'pact-jvm-consumer-junit',

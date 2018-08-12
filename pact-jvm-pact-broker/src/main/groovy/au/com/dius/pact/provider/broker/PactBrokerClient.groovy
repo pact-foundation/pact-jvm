@@ -42,7 +42,7 @@ class PactBrokerClient extends PactBrokerClientBase {
         if (options.authentication) {
           consumers << new PactBrokerConsumer(pact.name, href, pactBrokerUrl, options.authentication)
         } else {
-          consumers << new PactBrokerConsumer(pact.name, href, pactBrokerUrl, [])
+          consumers << new PactBrokerConsumer(pact.name, href, pactBrokerUrl)
         }
       }
     }
@@ -62,9 +62,9 @@ class PactBrokerClient extends PactBrokerClientBase {
       halClient.navigate(LATEST_PROVIDER_PACTS_WITH_TAG, provider: provider, tag: tag).forAll(PACTS) { pact ->
         def href = new Precoded(pact.href).decoded()
         if (options.authentication) {
-          consumers << new PactBrokerConsumer(pact.name, href, pactBrokerUrl, options.authentication)
+          consumers << new PactBrokerConsumer(pact.name, href, pactBrokerUrl, options.authentication, tag)
         } else {
-          consumers << new PactBrokerConsumer(pact.name, href, pactBrokerUrl, [])
+          consumers << new PactBrokerConsumer(pact.name, href, pactBrokerUrl, [], tag)
         }
       }
     }
