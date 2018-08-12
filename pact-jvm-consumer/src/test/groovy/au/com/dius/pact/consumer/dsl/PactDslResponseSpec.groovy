@@ -9,6 +9,7 @@ import au.com.dius.pact.model.matchingrules.RegexMatcher
 import au.com.dius.pact.model.matchingrules.TypeMatcher
 import com.google.common.net.MediaType
 import org.apache.http.entity.ContentType
+import spock.lang.Issue
 import spock.lang.Specification
 
 import static au.com.dius.pact.consumer.dsl.PactDslResponse.DEFAULT_JSON_CONTENT_TYPE_REGEX
@@ -67,7 +68,8 @@ class PactDslResponseSpec extends Specification {
     subject.responseBody == OptionalBody.body('{"test":true}')
   }
 
-  def 'set the content type header correctly (issue #716)'() {
+  @Issue('#716')
+  def 'set the content type header correctly'() {
     given:
     def builder = ConsumerPactBuilder.consumer('spec').hasPactWith('provider')
     def body = new PactDslJsonBody().numberValue('key', 1).close()
@@ -102,6 +104,27 @@ class PactDslResponseSpec extends Specification {
     responses[1].matchingRules.rulesForCategory('header').matchingRules['Content-Type'].rules == [
       new RegexMatcher('application/json')
     ]
+  }
+
+  @Issue('#748')
+  def 'uponReceiving should pass the path on'() {
+    given:
+    def builder = ConsumerPactBuilder.consumer('spec').hasPactWith('provider')
+
+    when:
+    def pact = builder
+      .uponReceiving('a request for response No 1')
+      .path('/response/1')
+      .method('GET')
+      .willRespondWith()
+      .status(200)
+      .uponReceiving('a request for the same path')
+      .willRespondWith()
+      .status(200)
+      .toPact()
+
+    then:
+    pact.interactions*.request.path == ['/response/1', '/response/1']
   }
 
 }
