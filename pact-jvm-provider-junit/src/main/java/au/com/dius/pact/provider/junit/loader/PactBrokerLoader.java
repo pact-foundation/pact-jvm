@@ -55,8 +55,8 @@ public class PactBrokerLoader implements PactLoader {
     this.pactBrokerHost = pactBrokerHost;
     this.pactBrokerPort = pactBrokerPort;
     this.pactBrokerProtocol = pactBrokerProtocol;
-    this.pactBrokerTags = tags.stream().flatMap(tag -> parseListExpression(tag).stream()).collect(toList());
-    this.pactBrokerConsumers = consumers.stream().flatMap(consumer -> parseListExpression(consumer).stream()).collect(toList());
+    this.pactBrokerTags = tags;
+    this.pactBrokerConsumers = consumers;
     this.failIfNoPactsFound = true;
     this.pactSource = new PactBrokerSource(this.pactBrokerHost, this.pactBrokerPort, this.pactBrokerProtocol);
   }
@@ -70,18 +70,33 @@ public class PactBrokerLoader implements PactLoader {
 
   public List<Pact> load(final String providerName) throws IOException {
     List<Pact> pacts = new ArrayList<>();
+    ValueResolver resolver = setupValueResolver();
     if (pactBrokerTags == null || pactBrokerTags.isEmpty()) {
-      pacts.addAll(loadPactsForProvider(providerName, null));
+      pacts.addAll(loadPactsForProvider(providerName, null, resolver));
     } else {
-      for (String tag : pactBrokerTags) {
+      for (String tag : pactBrokerTags.stream().flatMap(tag -> parseListExpression(tag, resolver).stream()).collect(toList())) {
         try {
-          pacts.addAll(loadPactsForProvider(providerName, tag));
+          pacts.addAll(loadPactsForProvider(providerName, tag, resolver));
         } catch (NoPactsFoundException e) {
           // Ignoring exception at this point, it will be handled at a higher level
         }
       }
     }
     return pacts;
+  }
+
+  private ValueResolver setupValueResolver() {
+    ValueResolver resolver = new SystemPropertyResolver();
+    if (valueResolver != null) {
+      resolver = valueResolver;
+    } else if (valueResolverClass != null) {
+      try {
+        resolver = valueResolverClass.newInstance();
+      } catch (InstantiationException | IllegalAccessException e) {
+        LOGGER.warn("Failed to instantiate the value resolver, using the default", e);
+      }
+    }
+    return resolver;
   }
 
   @Override
@@ -94,18 +109,8 @@ public class PactBrokerLoader implements PactLoader {
     this.valueResolver = valueResolver;
   }
 
-  private List<Pact> loadPactsForProvider(final String providerName, final String tag) throws IOException {
+  private List<Pact> loadPactsForProvider(final String providerName, final String tag, ValueResolver resolver) throws IOException {
     LOGGER.debug("Loading pacts from pact broker for provider " + providerName + " and tag " + tag);
-    ValueResolver resolver = new SystemPropertyResolver();
-    if (valueResolver != null) {
-      resolver = valueResolver;
-    } else if (valueResolverClass != null) {
-      try {
-        resolver = valueResolverClass.newInstance();
-      } catch (InstantiationException | IllegalAccessException e) {
-        LOGGER.warn("Failed to instantiate the value resolver, using the default", e);
-      }
-    }
     String protocol = parseExpression(pactBrokerProtocol, resolver);
     String host = parseExpression(pactBrokerHost, resolver);
     String port = parseExpression(pactBrokerPort, resolver);
@@ -133,8 +138,12 @@ public class PactBrokerLoader implements PactLoader {
       }
 
       if (!pactBrokerConsumers.isEmpty()) {
+        List<String> consumerInclusions = pactBrokerConsumers
+          .stream()
+          .flatMap(consumer -> parseListExpression(consumer, resolver).stream())
+          .collect(toList());
         consumers = consumers.stream()
-                        .filter(c -> pactBrokerConsumers.contains(c.getName()))
+                        .filter(c -> consumerInclusions.contains(c.getName()))
                         .collect(toList());
       }
 
