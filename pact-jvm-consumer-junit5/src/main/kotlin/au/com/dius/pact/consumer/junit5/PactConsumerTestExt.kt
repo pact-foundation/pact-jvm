@@ -13,9 +13,7 @@ import au.com.dius.pact.model.BasePact
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.MockProviderConfig
 import au.com.dius.pact.model.PactSpecVersion
-import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
-import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
 import mu.KLogging
 import org.junit.jupiter.api.extension.AfterEachCallback
@@ -129,7 +127,7 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
     val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val providerInfo = store["providerInfo"] as ProviderInfo
     return when (providerInfo.providerType) {
-      ProviderType.ASYNCH ->  parameterContext.parameter.type.isAssignableFrom(List::class.java)
+      ProviderType.ASYNCH -> parameterContext.parameter.type.isAssignableFrom(List::class.java)
       else -> parameterContext.parameter.type.isAssignableFrom(MockServer::class.java)
     }
   }
@@ -212,7 +210,8 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
       else -> {
         logger.debug { "Looking for first @Pact method for provider '$providerName'" }
         methods.firstOrNull {
-          AnnotationSupport.findAnnotation(it, Pact::class.java).get().provider == providerInfo.providerName
+          val annotationProviderName = AnnotationSupport.findAnnotation(it, Pact::class.java).get().provider
+          annotationProviderName.isEmpty() || annotationProviderName == providerInfo.providerName
         }
       }
     }
@@ -232,11 +231,13 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
     val pactAnnotation = AnnotationSupport.findAnnotation(method, Pact::class.java).get()
     logger.debug { "Invoking method '${method.name}' to get Pact for the test " +
       "'${context.testMethod.map { it.name }.orElse("unknown")}'" }
+
+    val providerNameToUse = if (pactAnnotation.provider.isNotEmpty()) pactAnnotation.provider else providerName
     return when (providerType) {
       ProviderType.SYNCH, ProviderType.UNSPECIFIED -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
-        ConsumerPactBuilder.consumer(pactAnnotation.consumer).hasPactWith(pactAnnotation.provider)) as BasePact<*>
+        ConsumerPactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact<*>
       ProviderType.ASYNCH -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
-        MessagePactBuilder.consumer(pactAnnotation.consumer).hasPactWith(pactAnnotation.provider)) as BasePact<*>
+        MessagePactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact<*>
     }
   }
 
@@ -244,6 +245,7 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val providerInfo = store["providerInfo"] as ProviderInfo
 
+    val pactDirectory = pactDirectory()
     if (providerInfo.providerType != ProviderType.ASYNCH) {
       val mockServer = store["mockServer"] as JUnit5MockServerSupport
       val pact = store["pact"] as RequestResponsePact
@@ -252,7 +254,6 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
       mockServer.close()
       val result = mockServer.validateMockServerState()
       if (result === PactVerificationResult.Ok) {
-        val pactDirectory = pactDirectory()
         logger.debug {
           "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file " +
             "${pact.fileForPact(pactDirectory)}"
@@ -261,6 +262,13 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
       } else {
         JUnitTestSupport.validateMockServerResult(result)
       }
+    } else {
+      val pact = store["pact"] as MessagePact
+      logger.debug {
+        "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file " +
+          "${pact.fileForPact(pactDirectory)}"
+      }
+      pact.write(pactDirectory, PactSpecVersion.V3)
     }
   }
 

@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @PactTestFor(providerName = "MessageProvider", providerType = ProviderType.ASYNCH)
 public class MessageWithMetadataConsumerTest {
 
-    @Pact(provider = "test_provider", consumer = "test_consumer_v3")
+    @Pact(consumer = "test_consumer_v3")
     public MessagePact createPact(MessagePactBuilder builder) {
         PactDslJsonBody body = new PactDslJsonBody();
         body.stringValue("testParam1", "value1");

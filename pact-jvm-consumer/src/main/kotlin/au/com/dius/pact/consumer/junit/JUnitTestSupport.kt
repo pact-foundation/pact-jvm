@@ -34,9 +34,9 @@ object JUnitTestSupport {
   @JvmStatic
   fun conformsToMessagePactSignature(m: Method): Boolean {
     val pact = m.getAnnotation(Pact::class.java)
-    val hasValidPactSignature = MessagePact::class.java.isAssignableFrom(m.returnType)
-      && m.parameterTypes.size == 1
-      && m.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.MessagePactBuilder"))
+    val hasValidPactSignature = MessagePact::class.java.isAssignableFrom(m.returnType) &&
+      m.parameterTypes.size == 1 &&
+      m.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.MessagePactBuilder"))
 
     if (!hasValidPactSignature && pact != null) {
       throw UnsupportedOperationException("Method ${m.name} does not conform required method signature " +
