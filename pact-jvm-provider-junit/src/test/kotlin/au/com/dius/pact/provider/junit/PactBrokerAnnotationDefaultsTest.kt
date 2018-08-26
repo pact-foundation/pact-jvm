@@ -70,14 +70,14 @@ class PactBrokerAnnotationDefaultsTest {
 
     @Test
     fun `can set single tags`() {
-        props.setProperty("pactbroker.protocol", "myProtocol")
-        assertThat(parseListExpression(annotation.protocol), contains("myProtocol"))
+        props.setProperty("pactbroker.tags", "myTag")
+        assertThat(parseListExpression(annotation.tags[0]), contains("myTag"))
     }
 
     @Test
     fun `can set multiple tags`() {
-        props.setProperty("pactbroker.protocol", "myProtocol1,myProtocol2")
-        assertThat(parseListExpression(annotation.protocol), contains("myProtocol1", "myProtocol2"))
+        props.setProperty("pactbroker.tags", "myTag1,myTag2")
+        assertThat(parseListExpression(annotation.tags[0]), contains("myTag1", "myTag2"))
     }
 
     @Test
