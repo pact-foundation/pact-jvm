@@ -242,33 +242,34 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
   }
 
   override fun afterEach(context: ExtensionContext) {
-    val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
-    val providerInfo = store["providerInfo"] as ProviderInfo
-
-    val pactDirectory = pactDirectory()
-    if (providerInfo.providerType != ProviderType.ASYNCH) {
-      val mockServer = store["mockServer"] as JUnit5MockServerSupport
-      val pact = store["pact"] as RequestResponsePact
-      val config = store["mockServerConfig"] as MockProviderConfig
-      Thread.sleep(100) // give the mock server some time to have consistent state
-      mockServer.close()
-      val result = mockServer.validateMockServerState()
-      if (result === PactVerificationResult.Ok) {
+    if (!context.executionException.isPresent) {
+      val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
+      val providerInfo = store["providerInfo"] as ProviderInfo
+      val pactDirectory = pactDirectory()
+      if (providerInfo.providerType != ProviderType.ASYNCH) {
+        val mockServer = store["mockServer"] as JUnit5MockServerSupport
+        val pact = store["pact"] as RequestResponsePact
+        val config = store["mockServerConfig"] as MockProviderConfig
+        Thread.sleep(100) // give the mock server some time to have consistent state
+        mockServer.close()
+        val result = mockServer.validateMockServerState()
+        if (result === PactVerificationResult.Ok) {
+          logger.debug {
+            "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file " +
+              "${pact.fileForPact(pactDirectory)}"
+          }
+          pact.write(pactDirectory, config.pactVersion)
+        } else {
+          JUnitTestSupport.validateMockServerResult(result)
+        }
+      } else {
+        val pact = store["pact"] as MessagePact
         logger.debug {
           "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file " +
             "${pact.fileForPact(pactDirectory)}"
         }
-        pact.write(pactDirectory, config.pactVersion)
-      } else {
-        JUnitTestSupport.validateMockServerResult(result)
+        pact.write(pactDirectory, PactSpecVersion.V3)
       }
-    } else {
-      val pact = store["pact"] as MessagePact
-      logger.debug {
-        "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file " +
-          "${pact.fileForPact(pactDirectory)}"
-      }
-      pact.write(pactDirectory, PactSpecVersion.V3)
     }
   }
 
