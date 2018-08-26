@@ -108,6 +108,7 @@ class PactBrokerLoaderSpec extends Specification {
     1 * brokerClient.fetchConsumers('test') >> []
   }
 
+  @RestoreSystemProperties
   void 'Uses fallback PactBroker System Properties'() {
     given:
     System.setProperty('pactbroker.host', 'my.pactbroker.host')
@@ -131,6 +132,7 @@ class PactBrokerLoaderSpec extends Specification {
     1 * brokerClient.fetchConsumers('test') >> []
   }
 
+  @RestoreSystemProperties
   void 'Fails when no fallback system properties are set'() {
     given:
     System.clearProperty('pactbroker.host')
@@ -210,6 +212,22 @@ class PactBrokerLoaderSpec extends Specification {
     then:
     result.size() == 1
     1 * brokerClient.fetchConsumers('test') >> [ new PactBrokerConsumer('test', 'latest', '', []) ]
+  }
+
+  @SuppressWarnings('GStringExpressionWithinString')
+  def 'processes tags with the provided value resolver'() {
+    given:
+    tags = ['${a}', '${latest}', '${b}']
+    def loader = pactBrokerLoader()
+    loader.valueResolver = [resolveValue: { val -> 'X' } ] as ValueResolver
+
+    when:
+    def result = loader.load('test')
+
+    then:
+    3 * brokerClient.fetchConsumersWithTag('test', 'X') >> [ new PactBrokerConsumer('test', 'a', '', []) ]
+    0 * _
+    result.size() == 3
   }
 
   @PactBroker(host = 'pactbroker.host', port = '1000', failIfNoPactsFound = false)
