@@ -5,7 +5,8 @@ import au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parse
 import au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parseListExpression
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.*
+import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.empty
 import org.hamcrest.collection.IsArrayWithSize.arrayWithSize
 import org.junit.Before
 import org.junit.Test
