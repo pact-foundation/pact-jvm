@@ -56,7 +56,7 @@ public class PactBrokerLoader implements PactLoader {
     this.pactBrokerPort = pactBrokerPort;
     this.pactBrokerProtocol = pactBrokerProtocol;
     this.pactBrokerTags = tags;
-    this.pactBrokerConsumers = consumers.stream().flatMap(consumer -> parseListExpression(consumer).stream()).collect(toList());
+    this.pactBrokerConsumers = consumers;
     this.failIfNoPactsFound = true;
     this.pactSource = new PactBrokerSource(this.pactBrokerHost, this.pactBrokerPort, this.pactBrokerProtocol);
   }
@@ -138,8 +138,12 @@ public class PactBrokerLoader implements PactLoader {
       }
 
       if (!pactBrokerConsumers.isEmpty()) {
+        List<String> consumerInclusions = pactBrokerConsumers
+          .stream()
+          .flatMap(consumer -> parseListExpression(consumer, resolver).stream())
+          .collect(toList());
         consumers = consumers.stream()
-                        .filter(c -> pactBrokerConsumers.contains(c.getName()))
+                        .filter(c -> consumerInclusions.contains(c.getName()))
                         .collect(toList());
       }
 
