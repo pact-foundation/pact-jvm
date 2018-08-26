@@ -39,6 +39,7 @@ public class PactBrokerLoader implements PactLoader {
   private final String pactBrokerPort;
   private final String pactBrokerProtocol;
   private final List<String> pactBrokerTags;
+  private final List<String> pactBrokerConsumers;
   private boolean failIfNoPactsFound;
   private PactBrokerAuth authentication;
   private PactBrokerSource pactSource;
@@ -46,24 +47,25 @@ public class PactBrokerLoader implements PactLoader {
   private ValueResolver valueResolver;
 
   public PactBrokerLoader(final String pactBrokerHost, final String pactBrokerPort, final String pactBrokerProtocol) {
-      this(pactBrokerHost, pactBrokerPort, pactBrokerProtocol, Collections.singletonList(LATEST));
+    this(pactBrokerHost, pactBrokerPort, pactBrokerProtocol, Collections.singletonList(LATEST), new ArrayList<>());
   }
 
   public PactBrokerLoader(final String pactBrokerHost, final String pactBrokerPort, final String pactBrokerProtocol,
-                          final List<String> tags) {
+      final List<String> tags, final List<String> consumers) {
     this.pactBrokerHost = pactBrokerHost;
     this.pactBrokerPort = pactBrokerPort;
     this.pactBrokerProtocol = pactBrokerProtocol;
     this.pactBrokerTags = tags.stream().flatMap(tag -> parseListExpression(tag).stream()).collect(toList());
+    this.pactBrokerConsumers = consumers.stream().flatMap(consumer -> parseListExpression(consumer).stream()).collect(toList());
     this.failIfNoPactsFound = true;
-    this.pactSource = new PactBrokerSource(this.pactBrokerHost, this.pactBrokerPort, this.pactBrokerProtocol);
+    this.pactSource = new PactBrokerSource(this.pactBrokerHost, this.pactBrokerPort);
   }
 
   public PactBrokerLoader(final PactBroker pactBroker) {
-      this(pactBroker.host(), pactBroker.port(), pactBroker.protocol(), Arrays.asList(pactBroker.tags()));
-      this.failIfNoPactsFound = pactBroker.failIfNoPactsFound();
-      this.authentication = pactBroker.authentication();
-      this.valueResolverClass = pactBroker.valueResolver();
+    this(pactBroker.host(), pactBroker.port(), pactBroker.protocol(), Arrays.asList(pactBroker.tags()), Arrays.asList(pactBroker.consumers()));
+    this.failIfNoPactsFound = pactBroker.failIfNoPactsFound();
+    this.authentication = pactBroker.authentication();
+    this.valueResolverClass = pactBroker.valueResolver();
   }
 
   public List<Pact> load(final String providerName) throws IOException {
@@ -109,30 +111,36 @@ public class PactBrokerLoader implements PactLoader {
     String port = parseExpression(pactBrokerPort, resolver);
     if(!port.matches("^[0-9]+")){
       throw new IllegalArgumentException(String.format("Invalid pact broker port specified ('%s'). "
-          + "Please provide a valid port number or specify the system property 'pactbroker.port'.", pactBrokerPort));
+                                                           + "Please provide a valid port number or specify the system property 'pactbroker.port'.", pactBrokerPort));
     }
     URIBuilder uriBuilder = new URIBuilder().setScheme(protocol)
-      .setHost(parseExpression(host, resolver))
-      .setPort(Integer.parseInt(port));
+                                .setHost(parseExpression(host, resolver))
+                                .setPort(Integer.parseInt(port));
     try {
       List<ConsumerInfo> consumers;
       PactBrokerClient pactBrokerClient = newPactBrokerClient(uriBuilder.build(), resolver);
       if (StringUtils.isEmpty(tag) || tag.equals(LATEST)) {
         consumers = pactBrokerClient.fetchConsumers(providerName).stream()
-          .map(ConsumerInfo::from).collect(toList());
+                        .map(ConsumerInfo::from).collect(toList());
       } else {
         consumers = pactBrokerClient.fetchConsumersWithTag(providerName, tag).stream()
-          .map(ConsumerInfo::from).collect(toList());
+                        .map(ConsumerInfo::from).collect(toList());
       }
 
       if (failIfNoPactsFound && consumers.isEmpty()) {
         throw new NoPactsFoundException("No consumer pacts were found for provider '" + providerName + "' and tag '" +
-          tag + "'. (URL " + getUrlForProvider(providerName, tag, pactBrokerClient) + ")");
+                                            tag + "'. (URL " + getUrlForProvider(providerName, tag, pactBrokerClient) + ")");
+      }
+
+      if (!pactBrokerConsumers.isEmpty()) {
+        consumers = consumers.stream()
+                        .filter(c -> pactBrokerConsumers.contains(c.getName()))
+                        .collect(toList());
       }
 
       return consumers.stream()
-              .map(consumer -> this.loadPact(consumer, pactBrokerClient.getOptions()))
-              .collect(toList());
+                 .map(consumer -> this.loadPact(consumer, pactBrokerClient.getOptions()))
+                 .collect(toList());
     } catch (URISyntaxException e) {
       throw new IOException("Was not able load pacts from broker as the broker URL was invalid", e);
     }
@@ -161,8 +169,8 @@ public class PactBrokerLoader implements PactLoader {
     HashMap options = new HashMap();
     if (this.authentication != null && !this.authentication.scheme().equalsIgnoreCase("none")) {
       options.put("authentication", Arrays.asList(parseExpression(this.authentication.scheme(), resolver),
-        parseExpression(this.authentication.username(), resolver),
-        parseExpression(this.authentication.password(), resolver)));
+          parseExpression(this.authentication.username(), resolver),
+          parseExpression(this.authentication.password(), resolver)));
     }
     return new PactBrokerClient(url.toString(), options);
   }
