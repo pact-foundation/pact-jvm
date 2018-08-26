@@ -37,7 +37,7 @@ public @interface PactBroker {
 
     /**
      * Tags to use to fetch pacts for, defaults to `latest`
-     * If you set the tags through the `pactbroker.tag` system property, separate the tags by commas
+     * If you set the tags through the `pactbroker.tags` system property, separate the tags by commas
      */
     String[] tags() default "${pactbroker.tags:latest}";
 
