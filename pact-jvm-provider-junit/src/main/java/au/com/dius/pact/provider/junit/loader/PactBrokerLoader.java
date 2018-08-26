@@ -58,7 +58,7 @@ public class PactBrokerLoader implements PactLoader {
     this.pactBrokerTags = tags.stream().flatMap(tag -> parseListExpression(tag).stream()).collect(toList());
     this.pactBrokerConsumers = consumers.stream().flatMap(consumer -> parseListExpression(consumer).stream()).collect(toList());
     this.failIfNoPactsFound = true;
-    this.pactSource = new PactBrokerSource(this.pactBrokerHost, this.pactBrokerPort);
+    this.pactSource = new PactBrokerSource(this.pactBrokerHost, this.pactBrokerPort, this.pactBrokerProtocol);
   }
 
   public PactBrokerLoader(final PactBroker pactBroker) {
