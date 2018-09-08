@@ -161,7 +161,7 @@ public class InteractionRunner extends Runner {
 
     // Running
     public void run(final RunNotifier notifier) {
-      Boolean allPassed = true;
+      boolean allPassed = true;
       for (final Interaction interaction : pact.getInteractions()) {
         final Description description = describeChild(interaction);
         notifier.fireTestStarted(description);
@@ -175,7 +175,7 @@ public class InteractionRunner extends Runner {
         }
       }
 
-      Boolean publishingDisabled = results.values()
+      boolean publishingDisabled = results.values()
         .stream().anyMatch(pair -> pair.getSecond().publishingResultsDisabled());
       if (!publishingDisabled && (!(pact instanceof FilteredPact) || ((FilteredPact) pact).isNotFiltered())) {
         reportVerificationResults(allPassed);
@@ -236,10 +236,9 @@ public class InteractionRunner extends Runner {
             target.testInteraction(pact.getConsumer().getName(), interaction, source);
           }
       };
-      statement = withStateChanges(StateChangeAction.SETUP, interaction, testInstance, statement);
+      statement = withStateChanges(interaction, testInstance, statement);
       statement = withBefores(interaction, testInstance, statement);
       statement = withRules(interaction, testInstance, statement);
-      statement = withStateChanges(StateChangeAction.TEARDOWN, interaction, testInstance, statement);
       statement = withAfters(interaction, testInstance, statement);
       return statement;
     }
@@ -260,18 +259,19 @@ public class InteractionRunner extends Runner {
     return target;
   }
 
-  protected Statement withStateChanges(final StateChangeAction action, final Interaction interaction, final Object target, final Statement statement) {
+  protected Statement withStateChanges(final Interaction interaction, final Object target, final Statement prevStatement) {
         if (!interaction.getProviderStates().isEmpty()) {
-          Statement stateChange = statement;
+          Statement stateChange = prevStatement;
           for (ProviderState state: interaction.getProviderStates()) {
-            List<FrameworkMethod> methods = getAnnotatedMethods(testClass, State.class)
+            List<Pair<FrameworkMethod, State>> methods = getAnnotatedMethods(testClass, State.class)
               .stream()
-                .filter(method -> {
-                    final State annotation = method.getAnnotation(State.class);
-                    return annotation.action() == action && ArrayUtils.contains(annotation.value(), state.getName());
+                .map(method -> {
+                  final State annotation = method.getAnnotation(State.class);
+                  return new Pair<>(method, annotation);
                 })
+                .filter(method -> ArrayUtils.contains(method.getSecond().value(), state.getName()))
               .collect(Collectors.toList());
-            if (action == StateChangeAction.SETUP && methods.isEmpty()) {
+            if (methods.isEmpty()) {
               return new Fail(new MissingStateChangeMethod("MissingStateChangeMethod: Did not find a test class method annotated with @State(\""
                 + state.getName() + "\")"));
             } else {
@@ -280,7 +280,7 @@ public class InteractionRunner extends Runner {
           }
           return stateChange;
         } else {
-            return statement;
+            return prevStatement;
         }
     }
 
