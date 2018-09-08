@@ -34,7 +34,7 @@ trait UnitSpecsSupport extends Specification {
                    headers: Map[String, String] = Map(),
                    body: String = "",
                    matchers: MatchingRules = new MatchingRulesImpl()): Request =
-    new Request(method, path, PactReader.queryStringToMap(query), headers.asJava, OptionalBody.body(body), matchers)
+    new Request(method, path, PactReaderKt.queryStringToMap(query), headers.asJava, OptionalBody.body(body), matchers)
 
   def buildResponse(status: Int = 200,
                     headers: Map[String, String] = Map(),

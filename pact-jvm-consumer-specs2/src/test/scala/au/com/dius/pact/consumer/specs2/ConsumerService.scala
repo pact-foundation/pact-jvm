@@ -3,7 +3,7 @@ package au.com.dius.pact.consumer.specs2
 import java.util.concurrent.Executors
 
 import au.com.dius.pact.consumer.dispatch.HttpClient
-import au.com.dius.pact.model.{OptionalBody, PactReader, Request}
+import au.com.dius.pact.model.{OptionalBody, PactReaderKt, Request}
 
 import scala.collection.JavaConversions
 import scala.compat.java8.FutureConverters.toScala
@@ -30,7 +30,7 @@ case class ConsumerService(serverUrl: String) {
   }
 
   def simpleGet(path: String, query: String): Future[(Int, String)] = {
-    toScala[(Int, String)](HttpClient.run(new Request("GET", serverUrl + path, PactReader.queryStringToMap(query, true))).thenApply { response =>
+    toScala[(Int, String)](HttpClient.run(new Request("GET", serverUrl + path, PactReaderKt.queryStringToMap(query, true))).thenApply { response =>
       (response.getStatus, response.getBody.getValue)
     })
   }

@@ -2,8 +2,8 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.model.OptionalBody;
+import au.com.dius.pact.model.PactReaderKt;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
-import au.com.dius.pact.model.PactReader;
 import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
@@ -89,7 +89,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      * @param query query string
      */
     public PactDslRequestWithoutPath query(String query) {
-        this.query = PactReader.queryStringToMap(query, false);
+        this.query = PactReaderKt.queryStringToMap(query, false);
         return this;
     }
 
