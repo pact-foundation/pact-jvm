@@ -161,7 +161,7 @@ public class InteractionRunner extends Runner {
 
     // Running
     public void run(final RunNotifier notifier) {
-      Boolean allPassed = true;
+      boolean allPassed = true;
       for (final Interaction interaction : pact.getInteractions()) {
         final Description description = describeChild(interaction);
         notifier.fireTestStarted(description);
@@ -175,7 +175,7 @@ public class InteractionRunner extends Runner {
         }
       }
 
-      Boolean publishingDisabled = results.values()
+      boolean publishingDisabled = results.values()
         .stream().anyMatch(pair -> pair.getSecond().publishingResultsDisabled());
       if (!publishingDisabled && (!(pact instanceof FilteredPact) || ((FilteredPact) pact).isNotFiltered())) {
         reportVerificationResults(allPassed);
@@ -259,12 +259,17 @@ public class InteractionRunner extends Runner {
     return target;
   }
 
-  protected Statement withStateChanges(final Interaction interaction, final Object target, final Statement statement) {
+  protected Statement withStateChanges(final Interaction interaction, final Object target, final Statement prevStatement) {
         if (!interaction.getProviderStates().isEmpty()) {
-          Statement stateChange = statement;
+          Statement stateChange = prevStatement;
           for (ProviderState state: interaction.getProviderStates()) {
-            List<FrameworkMethod> methods = getAnnotatedMethods(testClass, State.class)
-              .stream().filter(ann -> ArrayUtils.contains(ann.getAnnotation(State.class).value(), state.getName()))
+            List<Pair<FrameworkMethod, State>> methods = getAnnotatedMethods(testClass, State.class)
+              .stream()
+                .map(method -> {
+                  final State annotation = method.getAnnotation(State.class);
+                  return new Pair<>(method, annotation);
+                })
+                .filter(method -> ArrayUtils.contains(method.getSecond().value(), state.getName()))
               .collect(Collectors.toList());
             if (methods.isEmpty()) {
               return new Fail(new MissingStateChangeMethod("MissingStateChangeMethod: Did not find a test class method annotated with @State(\""
@@ -275,7 +280,7 @@ public class InteractionRunner extends Runner {
           }
           return stateChange;
         } else {
-            return statement;
+            return prevStatement;
         }
     }
 

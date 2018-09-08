@@ -9,6 +9,8 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -21,6 +23,9 @@ import static com.github.restdriver.clientdriver.RestClientDriver.onRequestTo;
 @Provider("ArticlesProvider")
 @PactFolder("src/test/resources/wildcards")
 public class ArticlesContractTest {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ArticlesContractTest.class);
+
   @TestTarget
   public final Target target = new HttpTarget(8000);
 
@@ -36,5 +41,12 @@ public class ArticlesContractTest {
   }
 
   @State("Pact for Issue 313")
-  public void stateChange() {}
+  public void stateChange() {
+    LOGGER.debug("stateChange - Pact for Issue 313 - Before");
+  }
+
+  @State(value = "Pact for Issue 313", action = StateChangeAction.TEARDOWN)
+  public void stateChangeAfter() {
+    LOGGER.debug("stateChange - Pact for Issue 313 - After");
+  }
 }
