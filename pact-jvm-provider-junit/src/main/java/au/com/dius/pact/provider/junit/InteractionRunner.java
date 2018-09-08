@@ -236,9 +236,10 @@ public class InteractionRunner extends Runner {
             target.testInteraction(pact.getConsumer().getName(), interaction, source);
           }
       };
-      statement = withStateChanges(interaction, testInstance, statement);
+      statement = withStateChanges(StateChangeAction.SETUP, interaction, testInstance, statement);
       statement = withBefores(interaction, testInstance, statement);
       statement = withRules(interaction, testInstance, statement);
+      statement = withStateChanges(StateChangeAction.TEARDOWN, interaction, testInstance, statement);
       statement = withAfters(interaction, testInstance, statement);
       return statement;
     }
@@ -259,14 +260,18 @@ public class InteractionRunner extends Runner {
     return target;
   }
 
-  protected Statement withStateChanges(final Interaction interaction, final Object target, final Statement statement) {
+  protected Statement withStateChanges(final StateChangeAction action, final Interaction interaction, final Object target, final Statement statement) {
         if (!interaction.getProviderStates().isEmpty()) {
           Statement stateChange = statement;
           for (ProviderState state: interaction.getProviderStates()) {
             List<FrameworkMethod> methods = getAnnotatedMethods(testClass, State.class)
-              .stream().filter(ann -> ArrayUtils.contains(ann.getAnnotation(State.class).value(), state.getName()))
+              .stream()
+                .filter(method -> {
+                    final State annotation = method.getAnnotation(State.class);
+                    return annotation.action() == action && ArrayUtils.contains(annotation.value(), state.getName());
+                })
               .collect(Collectors.toList());
-            if (methods.isEmpty()) {
+            if (action == StateChangeAction.SETUP && methods.isEmpty()) {
               return new Fail(new MissingStateChangeMethod("MissingStateChangeMethod: Did not find a test class method annotated with @State(\""
                 + state.getName() + "\")"));
             } else {
