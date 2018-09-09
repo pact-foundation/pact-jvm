@@ -14,7 +14,7 @@ class MatchingSpec extends Specification {
   private static Request request
 
   def setup() {
-    request = new Request('GET', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
+    request = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
       [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test": true}'))
   }
 
@@ -72,7 +72,7 @@ class MatchingSpec extends Specification {
   }
 
   private query(String queryString = '') {
-    new Request('', '', PactReader.queryStringToMap(queryString), null, OptionalBody.body(''), null)
+    new Request('', '', PactReaderKt.queryStringToMap(queryString), null, OptionalBody.body(''), null)
   }
 
   def 'Query Matching - match same'() {

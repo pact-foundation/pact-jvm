@@ -1,31 +1,22 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
-import au.com.dius.pact.consumer.Headers;
 import au.com.dius.pact.model.Consumer;
 import au.com.dius.pact.model.OptionalBody;
-import au.com.dius.pact.model.PactReader;
+import au.com.dius.pact.model.PactReaderKt;
 import au.com.dius.pact.model.Provider;
 import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.model.generators.Generators;
 import au.com.dius.pact.model.matchingrules.MatchingRules;
-import au.com.dius.pact.model.matchingrules.MatchingRulesImpl;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import com.mifmif.common.regex.Generex;
-import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -145,7 +136,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param query query string
      */
     public PactDslRequestWithPath query(String query) {
-        this.query = PactReader.queryStringToMap(query, false);
+        this.query = PactReaderKt.queryStringToMap(query, false);
         return this;
     }
 
@@ -155,7 +146,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param query query string
      */
     public PactDslRequestWithPath encodedQuery(String query) {
-        this.query = PactReader.queryStringToMap(query, true);
+        this.query = PactReaderKt.queryStringToMap(query, true);
         return this;
     }
 

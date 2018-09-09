@@ -6,6 +6,7 @@ import au.com.dius.pact.provider.junit.sysprops.PactRunnerExpressionParser.parse
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.empty
 import org.hamcrest.collection.IsArrayWithSize.arrayWithSize
 import org.junit.Before
 import org.junit.Test
@@ -70,14 +71,32 @@ class PactBrokerAnnotationDefaultsTest {
 
     @Test
     fun `can set single tags`() {
-        props.setProperty("pactbroker.protocol", "myProtocol")
-        assertThat(parseListExpression(annotation.protocol), contains("myProtocol"))
+        props.setProperty("pactbroker.tags", "myTag")
+        assertThat(parseListExpression(annotation.tags[0]), contains("myTag"))
     }
 
     @Test
     fun `can set multiple tags`() {
-        props.setProperty("pactbroker.protocol", "myProtocol1,myProtocol2")
-        assertThat(parseListExpression(annotation.protocol), contains("myProtocol1", "myProtocol2"))
+        props.setProperty("pactbroker.tags", "myTag1,myTag2")
+        assertThat(parseListExpression(annotation.tags[0]), contains("myTag1", "myTag2"))
+    }
+
+    @Test
+    fun `default consumer filter is empty (all consumers)`() {
+        assertThat(annotation.consumers, arrayWithSize(1))
+        assertThat(parseListExpression(annotation.consumers[0]), empty())
+    }
+
+    @Test
+    fun `can set single consumer`() {
+        props.setProperty("pactbroker.consumers", "myConsumer")
+        assertThat(parseListExpression(annotation.consumers[0]), contains("myConsumer"))
+    }
+
+    @Test
+    fun `can set multiple consumers`() {
+        props.setProperty("pactbroker.consumers", "myConsumer1,myConsumer2")
+        assertThat(parseListExpression(annotation.consumers[0]), contains("myConsumer1", "myConsumer2"))
     }
 
     @Test

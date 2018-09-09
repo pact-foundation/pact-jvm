@@ -4,8 +4,7 @@ dependencies {
       project(":pact-jvm-matchers_${project.scalaVersion}"),
       'com.googlecode.java-diff-utils:diffutils:1.3.0',
       'dk.brics.automaton:automaton:1.11-8',
-      "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
-      "com.fasterxml.jackson.core:jackson-databind:${project.jacksonDatabindVersion}"
+      "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
     compile "org.json:json:${project.jsonVersion}"
     compile "io.netty:netty-handler:${project.nettyVersion}"
     compile "org.apache.httpcomponents:httpmime:${project.httpClientVersion}"

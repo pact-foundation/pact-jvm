@@ -9,7 +9,7 @@ class RequestMatchingSpec extends Specification {
   private request, response, interaction, testState
 
   def setup() {
-    request = new Request('GET', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
+    request = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
       [testreqheader: 'testreqheadervalue'],
       OptionalBody.body('{"test": true}'))
 
@@ -103,7 +103,7 @@ class RequestMatchingSpec extends Specification {
   def 'request matching should allow query string in different order'() {
     given:
     def queryRequest = request.copy()
-    queryRequest.query = PactReader.queryStringToMap('r=s&q=p&q=p2')
+    queryRequest.query = PactReaderKt.queryStringToMap('r=s&q=p&q=p2')
 
     when:
     def actualResponse = test(queryRequest)
@@ -115,7 +115,7 @@ class RequestMatchingSpec extends Specification {
   def 'request matching should fail if query string has the same parameter repeated in different order'() {
     given:
     def queryRequest = request.copy()
-    queryRequest.query = PactReader.queryStringToMap('r=s&q=p2&q=p')
+    queryRequest.query = PactReaderKt.queryStringToMap('r=s&q=p2&q=p')
 
     when:
     def actualResponse = test(queryRequest)

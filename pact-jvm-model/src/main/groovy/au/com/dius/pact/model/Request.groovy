@@ -30,7 +30,7 @@ class Request extends BaseRequest implements Comparable {
     new Request().with {
       method = (map.method ?: DEFAULT_METHOD) as String
       path = (map.path == null ? DEFAULT_PATH : map.path) as String
-      query = map.query ?: [:]
+      query = parseQueryParametersToMap(map.query)
       headers = map.headers ?: [:]
       body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
       matchingRules = MatchingRulesImpl.fromMap(map.matchingRules)

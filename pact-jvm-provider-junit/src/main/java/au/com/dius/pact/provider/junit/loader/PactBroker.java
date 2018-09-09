@@ -37,9 +37,15 @@ public @interface PactBroker {
 
     /**
      * Tags to use to fetch pacts for, defaults to `latest`
-     * If you set the tags through the `pactbroker.tag` system property, separate the tags by commas
+     * If you set the tags through the `pactbroker.tags` system property, separate the tags by commas
      */
     String[] tags() default "${pactbroker.tags:latest}";
+
+    /**
+     * Consumers to fetch pacts for, defaults to all consumers
+     * If you set the consumers through the `pactbroker.consumers` system property, separate the consumers by commas
+     */
+    String[] consumers() default "${pactbroker.consumers:}";
 
   /**
    * If the test should fail if no pacts are found for the provider, default is true

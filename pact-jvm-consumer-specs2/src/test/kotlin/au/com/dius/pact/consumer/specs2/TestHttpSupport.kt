@@ -2,7 +2,7 @@ package au.com.dius.pact.consumer.specs2
 
 import au.com.dius.pact.consumer.dispatch.HttpClient
 import au.com.dius.pact.model.OptionalBody
-import au.com.dius.pact.model.PactReader
+import au.com.dius.pact.model.queryStringToMap
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.Response
 
@@ -21,7 +21,7 @@ object TestHttpSupport {
       .thenApply({ response -> response.status to response.body!!.value }).get()
 
   fun simpleGet(serverUrl: String, path: String, query: String) =
-    HttpClient.run(Request("GET", serverUrl + path, PactReader.queryStringToMap(query, true)))
+    HttpClient.run(Request("GET", serverUrl + path, queryStringToMap(query, true)))
       .thenApply({ response -> response.status to response.body!!.value }).get()
 
   fun options(serverUrl: String, path: String) =

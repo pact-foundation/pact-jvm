@@ -32,7 +32,7 @@ class PactSerialiserSpec extends Specification {
   }
 
   def setup() {
-    request = new Request('GET', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
+    request = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
       [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'))
     response = new Response(200, [testreqheader: 'testreqheaderval'],
       OptionalBody.body('{"responsetest":true}'))
@@ -40,7 +40,7 @@ class PactSerialiserSpec extends Specification {
     consumer = new Consumer('test_consumer')
     def requestMatchers = new MatchingRulesImpl()
     requestMatchers.addCategory('body').addRule('$.test', TypeMatcher.INSTANCE)
-    requestWithMatchers = new Request('GET', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
+    requestWithMatchers = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
       [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'), requestMatchers
     )
     def responseMatchers = new MatchingRulesImpl()

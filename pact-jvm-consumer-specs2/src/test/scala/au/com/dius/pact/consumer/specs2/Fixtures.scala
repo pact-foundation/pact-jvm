@@ -1,15 +1,17 @@
 package au.com.dius.pact.consumer.specs2
 
 import java.util
-import scala.collection.JavaConverters._
+
 import au.com.dius.pact.model.{Consumer, Provider, RequestResponseInteraction, _}
+
+import scala.collection.JavaConverters._
 
 object Fixtures {
 
   val provider = new Provider("test_provider")
   val consumer = new Consumer("test_consumer")
 
-  val request = new Request("POST", "/", PactReader.queryStringToMap("q=p"),
+  val request = new Request("POST", "/", PactReaderKt.queryStringToMap("q=p"),
     Map("testreqheader" -> "testreqheadervalue").asInstanceOf[java.util.Map[String, String]],
     OptionalBody.body("{\"test\": true}"))
 

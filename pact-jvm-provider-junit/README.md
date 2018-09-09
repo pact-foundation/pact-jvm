@@ -108,6 +108,43 @@ no parameters or a single Map parameter.
     }
 ```
 
+## Provider state callback methods
+
+For the provider states in the pact being verified, you can define methods to be invoked to setup the correct state
+for each interaction. Just annotate a method with the `au.com.dius.pact.provider.junit.State` annotation and the
+method will be invoked before the interaction is verified.
+
+For example:
+
+```java
+@State("SomeProviderState") // Must match the state description in the pact file
+public void someProviderState() {
+  // Do what you need to set the correct state
+}
+```
+
+If there are parameters in the pact file, just add a Map parameter to the method to be able to access those parameters.
+
+```java
+@State("SomeProviderState")
+public void someProviderState(Map<String, Object> providerStateParameters) {
+  // Do what you need to set the correct state
+}
+```
+
+### Provider state teardown methods [3.5.22+]
+
+If you need to tear down your provider state, you can annotate a method with the `@State` annotation with the action
+set to `StateChangeAction.TEARDOWN` and it will be invoked after the interaction is verified.
+
+```java
+@State("SomeProviderState", action = StateChangeAction.TEARDOWN)
+public void someProviderStateCleanup() {
+  // Do what you need to to teardown the state
+}
+```
+
+
 ## Pact source
 
 The Pact runner will automatically collect pacts based on annotations on the test class. For this purpose there are 3

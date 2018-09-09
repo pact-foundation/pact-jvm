@@ -107,8 +107,8 @@ class PactConsumerTestExtSpec {
       'getTestInstance': { Optional.of(new TestClass()) },
       'getTestMethod': { Optional.empty() }
     ] as ExtensionContext
-    def pact = subject.lookupPact(new ProviderInfo('junit5_provider', 'localhost', '8080', PactSpecVersion.V3),
-      'pactMethod', context)
+    def pact = subject.lookupPact(new ProviderInfo('junit5_provider', 'localhost', '8080',
+      PactSpecVersion.V3, ProviderType.SYNCH), 'pactMethod', context)
     assertThat(pact, Matchers.is(this.pact))
   }
 

@@ -1,14 +1,10 @@
 package au.com.dius.pact.consumer.specs2
 
 import java.util.concurrent.Executors
-import java.util.function
 
-import au.com.dius.pact.consumer.dispatch.HttpClient
-import au.com.dius.pact.model.{OptionalBody, PactReader, Request, Response}
+import au.com.dius.pact.model.OptionalBody
 
-import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 
 case class ConsumerService(serverUrl: String) {
