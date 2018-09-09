@@ -53,6 +53,7 @@ interface IProviderInfo {
 }
 
 interface IConsumerInfo {
+  val name: String
   val stateChange: Any?
   val stateChangeUsesBody: Boolean
 }

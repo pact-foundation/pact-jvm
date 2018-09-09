@@ -13,11 +13,10 @@ import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
 import org.apache.http.client.methods.HttpUriRequest
-import java.lang.reflect.Method
 import java.net.URL
 import java.net.URLClassLoader
-import java.util.function.Supplier
 import java.util.function.Function
+import java.util.function.Supplier
 
 /**
  * Interface to a test target
@@ -176,9 +175,9 @@ open class AmpqTestTarget(val packagesToScan: List<String> = emptyList()) : Test
   }
 
   override fun prepareVerifier(verifier: ProviderVerifier, testInstance: Any) {
-    verifier.projectClasspath = Supplier<Array<URL>> { (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs }
+    verifier.projectClasspath = Supplier { (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs.toList() }
     val defaultProviderMethodInstance = verifier.providerMethodInstance
-    verifier.providerMethodInstance = Function<Method, Any?> { m ->
+    verifier.providerMethodInstance = Function { m ->
       if (m.declaringClass == testInstance.javaClass) {
         testInstance
       } else {

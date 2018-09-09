@@ -6,11 +6,16 @@ import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.provider.broker.PactBrokerClient
+import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import groovy.lang.GroovyObjectSupport
+import mu.KLogging
 import mu.KotlinLogging
+import java.lang.reflect.Method
+import java.net.URL
 import java.util.function.BiConsumer
 import java.util.function.Function
+import java.util.function.Supplier
 
 private val logger = KotlinLogging.logger {}
 
@@ -78,7 +83,18 @@ interface IProviderVerifier {
   fun reportStateForInteraction(state: String, provider: IProviderInfo, consumer: IConsumerInfo, isSetup: Boolean)
 }
 
-abstract class ProviderVerifierBase : GroovyObjectSupport(), IProviderVerifier {
+/**
+ * Verifies the providers against the defined consumers in the context of a build plugin
+ */
+abstract class ProviderVerifierBase @JvmOverloads constructor (
+  var pactLoadFailureMessage: Any? = null,
+  override var checkBuildSpecificTask: Function<Any, Boolean> = Function { false },
+  override var executeBuildSpecificTask: BiConsumer<Any, ProviderState> = BiConsumer { _, _ -> },
+  var projectClasspath: Supplier<List<URL>> = Supplier { emptyList<URL>() },
+  override var reporters: List<VerifierReporter> = listOf(AnsiConsoleReporter()),
+  var providerMethodInstance: Function<Method, Any> = Function { m -> m.declaringClass.newInstance() },
+  var providerVersion: Supplier<String> = Supplier { System.getProperty(PACT_PROVIDER_VERSION) }
+) : GroovyObjectSupport(), IProviderVerifier {
 
   override var projectHasProperty = Function<String, Boolean> { name -> !System.getProperty(name).isNullOrEmpty() }
   var projectGetProperty = Function<String, String?> { name -> System.getProperty(name) }
@@ -91,12 +107,13 @@ abstract class ProviderVerifierBase : GroovyObjectSupport(), IProviderVerifier {
       projectGetProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS)?.toLowerCase() != "true"
   }
 
-  companion object {
+  companion object : KLogging() {
     const val PACT_VERIFIER_PUBLISH_RESULTS = "pact.verifier.publishResults"
     const val PACT_FILTER_CONSUMERS = "pact.filter.consumers"
     const val PACT_FILTER_DESCRIPTION = "pact.filter.description"
     const val PACT_FILTER_PROVIDERSTATE = "pact.filter.providerState"
     const val PACT_SHOW_STACKTRACE = "pact.showStacktrace"
     const val PACT_SHOW_FULLDIFF = "pact.showFullDiff"
+    const val PACT_PROVIDER_VERSION = "pact.provider.version"
   }
 }

@@ -1,19 +1,16 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.model.FilteredPact
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
-import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.provider.broker.PactBrokerClient
-import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
-import au.com.dius.pact.provider.reporters.VerifierReporter
-import au.com.dius.pact.com.github.michaelbull.result.Ok
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.reflections.Reflections
@@ -23,10 +20,8 @@ import org.reflections.util.FilterBuilder
 import scala.Function1
 
 import java.lang.reflect.Method
-import java.util.function.BiConsumer
 import java.util.function.Function
 import java.util.function.Predicate
-import java.util.function.Supplier
 
 import static au.com.dius.pact.provider.ProviderVerifierKt.reportVerificationResults
 
@@ -36,14 +31,6 @@ import static au.com.dius.pact.provider.ProviderVerifierKt.reportVerificationRes
 @Slf4j
 @SuppressWarnings('ConfusingMethodName')
 class ProviderVerifier extends ProviderVerifierBase {
-
-  def pactLoadFailureMessage
-  Function<Object, Boolean> checkBuildSpecificTask = { false }
-  BiConsumer<Object, ProviderState> executeBuildSpecificTask = { } as BiConsumer<Object, ProviderState>
-  Supplier<URL[]> projectClasspath = { }
-  List<? extends VerifierReporter> reporters = [ new AnsiConsoleReporter() ]
-  Function<Method, Object> providerMethodInstance = { Method m -> m.declaringClass.newInstance() }
-  Supplier<String> providerVersion = { System.getProperty('pact.provider.version') }
 
   Map verifyProvider(ProviderInfo provider) {
     Map failures = [:]
@@ -293,7 +280,7 @@ class ProviderVerifier extends ProviderVerifierBase {
   boolean verifyResponseByInvokingProviderMethods(ProviderInfo providerInfo, ConsumerInfo consumer,
                                                   def interaction, String interactionMessage, Map failures) {
     try {
-      def urls = projectClasspath.get()
+      URL[] urls = projectClasspath.get().toArray()
       URLClassLoader loader = new URLClassLoader(urls, GroovyObject.classLoader)
       def configurationBuilder = new ConfigurationBuilder()
         .setScanners(new MethodAnnotationsScanner())

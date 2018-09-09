@@ -9,8 +9,6 @@ import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.junit.Provider
-import java.lang.reflect.Method
-import java.net.URL
 import java.net.URLClassLoader
 import java.util.function.Function
 import java.util.function.Supplier
@@ -59,9 +57,9 @@ open class AmqpTarget @JvmOverloads constructor(val packagesToScan: List<String>
     consumer: ConsumerInfo
   ): ProviderVerifier {
     val verifier = ProviderVerifier()
-    verifier.projectClasspath = Supplier<Array<URL>> { this.classPathUrls() }
+    verifier.projectClasspath = Supplier { this.classPathUrls().toList() }
     val defaultProviderMethodInstance = verifier.providerMethodInstance
-    verifier.providerMethodInstance = Function<Method, Any?> { m ->
+    verifier.providerMethodInstance = Function { m ->
       if (m.declaringClass == testTarget.javaClass) {
         testTarget
       } else {

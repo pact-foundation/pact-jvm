@@ -63,23 +63,20 @@ open class PactProviderMojo : AbstractMojo() {
     }
 
     val failures = mutableMapOf<Any, Any>()
-    val verifier = providerVerifier().let {
-      it.projectHasProperty = Function { p: String -> this.propertyDefined(p) }
-      it.projectGetProperty = Function { p: String -> this.property(p) }
-      it.pactLoadFailureMessage = Function { consumer: ConsumerInfo ->
+    val verifier = providerVerifier().let { verifier ->
+      verifier.projectHasProperty = Function { p: String -> this.propertyDefined(p) }
+      verifier.projectGetProperty = Function { p: String -> this.property(p) }
+      verifier.pactLoadFailureMessage = Function { consumer: ConsumerInfo ->
         "You must specify the pact file to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
       }
-      it.checkBuildSpecificTask = Function { false }
-      it.providerVersion = Supplier { projectVersion }
+      verifier.checkBuildSpecificTask = Function { false }
+      verifier.providerVersion = Supplier { projectVersion }
 
-      it.projectClasspath = Supplier {
-        val urls = classpathElements.map { File(it).toURI().toURL() }
-        urls.toTypedArray()
-      }
+      verifier.projectClasspath = Supplier { classpathElements.map { File(it).toURI().toURL() } }
 
       if (reports.isNotEmpty()) {
         val reportsDir = File(buildDir, "reports/pact")
-        it.reporters = reports.map { name ->
+        verifier.reporters = reports.map { name ->
           if (ReporterManager.reporterDefined(name)) {
             val reporter = ReporterManager.createReporter(name)
             reporter.setReportDir(reportsDir)
@@ -91,7 +88,7 @@ open class PactProviderMojo : AbstractMojo() {
         }
       }
 
-      it
+      verifier
     }
 
     try {

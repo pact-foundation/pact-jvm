@@ -334,7 +334,7 @@ class ProviderVerifierSpec extends Specification {
     1 * PactReader.loadPact([:], pactFile) >> Mock(Pact)
   }
 
-  class TestSupport {
+  static class TestSupport {
     String testMethod() {
       '\"test method result\"'
     }
@@ -347,7 +347,7 @@ class ProviderVerifierSpec extends Specification {
     def interactionMessage = 'test message interaction'
     def failures = [:]
     def reporter = Mock(VerifierReporter)
-    verifier.reporters << reporter
+    verifier.reporters = [reporter]
 
     when:
     def result = verifier.verifyMessagePact(methods, message, interactionMessage, failures)
