@@ -14,6 +14,7 @@ import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.filterPactsByAnn
 import au.com.dius.pact.provider.junit.MissingStateChangeMethod
 import au.com.dius.pact.provider.junit.Provider
 import au.com.dius.pact.provider.junit.State
+import au.com.dius.pact.provider.junit.StateChangeAction
 import au.com.dius.pact.provider.junit.VerificationReports
 import au.com.dius.pact.provider.junit.loader.PactLoader
 import au.com.dius.pact.provider.junit.loader.PactSource
@@ -244,24 +245,34 @@ class PactVerificationExtension(
 /**
  * JUnit 5 test extension class for executing state change callbacks
  */
-class PactVerificationStateChangeExtension(private val interaction: Interaction) : BeforeTestExecutionCallback {
+class PactVerificationStateChangeExtension(private val interaction: Interaction)
+  : BeforeTestExecutionCallback, AfterTestExecutionCallback {
   override fun beforeTestExecution(context: ExtensionContext) {
     logger.debug { "beforeEach for interaction '${interaction.description}'" }
-    invokeStateChangeMethods(context, interaction.providerStates)
+    invokeStateChangeMethods(context, interaction.providerStates, StateChangeAction.SETUP)
   }
 
-  private fun invokeStateChangeMethods(context: ExtensionContext, providerStates: List<ProviderState>) {
+  override fun afterTestExecution(context: ExtensionContext) {
+    logger.debug { "afterEach for interaction '${interaction.description}'" }
+    invokeStateChangeMethods(context, interaction.providerStates, StateChangeAction.TEARDOWN)
+  }
+
+  private fun invokeStateChangeMethods(
+    context: ExtensionContext,
+    providerStates: List<ProviderState>,
+    action: StateChangeAction
+  ) {
     val errors = mutableListOf<String>()
 
-    providerStates.forEach {
-      val stateChangeMethods = findStateChangeMethods(context.requiredTestClass, it)
+    providerStates.forEach { state ->
+      val stateChangeMethods = findStateChangeMethods(context.requiredTestClass, state)
       if (stateChangeMethods.isEmpty()) {
-        errors.add("Did not find a test class method annotated with @State(\"${it.name}\")")
+        errors.add("Did not find a test class method annotated with @State(\"${state.name}\")")
       } else {
-        stateChangeMethods.forEach { method ->
-          logger.debug { "Invoking state change method ${method.name} for state '${it.name}'" }
+        stateChangeMethods.filter { it.second.action == action }.forEach { (method, _) ->
+          logger.debug { "Invoking state change method ${method.name} for state '${state.name}'" }
           if (method.parameterCount > 0) {
-            ReflectionSupport.invokeMethod(method, context.requiredTestInstance, it.params)
+            ReflectionSupport.invokeMethod(method, context.requiredTestInstance, state.params)
           } else {
             ReflectionSupport.invokeMethod(method, context.requiredTestInstance)
           }
@@ -274,9 +285,10 @@ class PactVerificationStateChangeExtension(private val interaction: Interaction)
     }
   }
 
-  private fun findStateChangeMethods(testClass: Class<*>, state: ProviderState): List<Method> {
+  private fun findStateChangeMethods(testClass: Class<*>, state: ProviderState): List<Pair<Method, State>> {
     return AnnotationSupport.findAnnotatedMethods(testClass, State::class.java, HierarchyTraversalMode.TOP_DOWN)
-      .filter { it.getAnnotation(State::class.java).value.any { s -> state.name == s } }
+      .map { it to it.getAnnotation(State::class.java) }
+      .filter { it.second.value.any { s -> state.name == s } }
   }
 
   companion object : KLogging()

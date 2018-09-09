@@ -4,6 +4,7 @@ import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.model.Pact;
 import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.State;
+import au.com.dius.pact.provider.junit.StateChangeAction;
 import au.com.dius.pact.provider.junit.loader.PactFolder;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.apache.http.HttpRequest;
@@ -85,5 +86,19 @@ public class ContractTest {
         // Prepare service before interaction that require "state 2" state
         // ...
         LOGGER.info("Now service in 'state 2' state: " + params);
+    }
+
+    @State(value = "default", action = StateChangeAction.TEARDOWN)
+    public void toDefaultStateAfter() {
+      // Cleanup service after interaction that require "default" state
+      // ...
+      LOGGER.info("Default state teardown");
+    }
+
+    @State(value = "state 2", action = StateChangeAction.TEARDOWN)
+    public void toSecondStateAfter(Map params) {
+      // Cleanup service after interaction that require "state 2" state
+      // ...
+      LOGGER.info("'state 2' state teardown: " + params);
     }
 }
