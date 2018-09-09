@@ -20,6 +20,7 @@ import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
 import java.net.URI
 import java.net.URL
+import java.net.URLDecoder
 
 private val logger = KotlinLogging.logger {}
 
@@ -96,4 +97,26 @@ fun newHttpClient(baseUrl: String, options: Map<String, Any>): CloseableHttpClie
   }
 
   return builder.build()
+}
+
+/**
+ * Parses the query string into a Map
+ */
+@JvmOverloads
+fun queryStringToMap(query: String?, decode: Boolean = true): Map<String, List<String>> {
+  return if (query.isNullOrEmpty()) {
+    emptyMap()
+  } else {
+    query!!.split("&").filter { it.isNotEmpty() }.map { val nv = it.split("=", limit = 2); nv[0] to nv[1] }
+      .fold(mutableMapOf<String, MutableList<String>>()) { map, nameAndValue ->
+      val name = if (decode) URLDecoder.decode(nameAndValue.first, "UTF-8") else nameAndValue.first
+      val value = if (decode) URLDecoder.decode(nameAndValue.second, "UTF-8") else nameAndValue.second
+      if (map.containsKey(name)) {
+        map[name]!!.add(value)
+      } else {
+        map[name] = mutableListOf(value)
+      }
+      map
+    }
+  }
 }

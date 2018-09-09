@@ -124,7 +124,7 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
           s"Expected a Map with ${expectedValues.size} elements but received ${actualValues.size} elements",
           path.mkString("."), generateObjectDiff(expectedValues, actualValues))
       }
-      if (Matchers.wildcardMatcherDefined((path :+ "any").asJava, "body", matchers)) {
+      if (Matchers.wildcardMatchingEnabled() && Matchers.wildcardMatcherDefined((path :+ "any").asJava, "body", matchers)) {
         actualValues.foreach(entry => {
           if (expectedValues.contains(entry._1)) {
             result = result ++: compare(path :+ entry._1, expectedValues.apply(entry._1), entry._2, allowUnexpectedKeys, matchers)

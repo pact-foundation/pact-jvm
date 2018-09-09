@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.Pact
 import au.com.dius.pact.consumer.PactMismatchesException
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.model.messaging.MessagePact
 
 import java.lang.reflect.Method
 
@@ -25,6 +26,24 @@ object JUnitTestSupport {
     }
 
     return conforms
+  }
+
+  /**
+   * validates method signature for a Message Pact test
+   */
+  @JvmStatic
+  fun conformsToMessagePactSignature(m: Method): Boolean {
+    val pact = m.getAnnotation(Pact::class.java)
+    val hasValidPactSignature = MessagePact::class.java.isAssignableFrom(m.returnType) &&
+      m.parameterTypes.size == 1 &&
+      m.parameterTypes[0].isAssignableFrom(Class.forName("au.com.dius.pact.consumer.MessagePactBuilder"))
+
+    if (!hasValidPactSignature && pact != null) {
+      throw UnsupportedOperationException("Method ${m.name} does not conform required method signature " +
+        "'public MessagePact xxx(MessagePactBuilder builder)'")
+    }
+
+    return hasValidPactSignature
   }
 
   @JvmStatic

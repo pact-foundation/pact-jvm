@@ -56,7 +56,7 @@ class PactReader {
         def consumer = Consumer.fromMap(transformedJson.consumer as Map)
 
         def interactions = transformedJson.interactions.collect { i ->
-          def request = extractRequestV3(i.request)
+          def request = extractRequest(i.request)
           def response = extractResponse(i.response)
           def providerStates = []
           if (i.providerStates) {
@@ -80,7 +80,7 @@ class PactReader {
     def consumer = Consumer.fromMap(transformedJson.consumer ?: [:])
 
     def interactions = transformedJson.interactions.collect { i ->
-      def request = extractRequestV2(i.request ?: [:])
+      def request = extractRequest(i.request ?: [:])
       def response = extractResponse(i.response ?: [:])
       new RequestResponseInteraction(i.description, i.providerState ? [ new ProviderState(i.providerState) ] : [],
         request, response)
@@ -96,31 +96,7 @@ class PactReader {
     Response.fromMap(responseJson)
   }
 
-  static Request extractRequestV2(requestJson) {
-    extractBody(requestJson)
-    requestJson.query = queryStringToMap(requestJson.query)
-    Request.fromMap(requestJson)
-  }
-
-  @SuppressWarnings('DuplicateStringLiteral')
-  static Map<String, List<String>> queryStringToMap(String query, boolean decode = true) {
-    if (query) {
-      query.split('&')*.split('=', 2).inject([:]) { Map map, String[] nameAndValue ->
-        def name = decode ? URLDecoder.decode(nameAndValue.first(), 'UTF-8') : nameAndValue.first()
-        def value = decode ? URLDecoder.decode(nameAndValue.last(), 'UTF-8') : nameAndValue.last()
-        if (map.containsKey(name)) {
-          map[name] << value
-        } else {
-          map[name] = [value]
-        }
-        map
-      }
-    } else {
-      [:]
-    }
-  }
-
-  static Request extractRequestV3(requestJson) {
+  static Request extractRequest(requestJson) {
     extractBody(requestJson)
     Request.fromMap(requestJson)
   }

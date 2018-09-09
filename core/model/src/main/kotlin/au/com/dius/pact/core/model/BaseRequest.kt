@@ -41,4 +41,12 @@ abstract class BaseRequest : HttpPart() {
    * If this request represents a multipart file upload
    */
   fun isMultipartFileUpload() = mimeType().equals("multipart/form-data", ignoreCase = true)
+
+  fun parseQueryParametersToMap(query: Any?): Map<String, List<String>> {
+    return when (query) {
+      is Map<*, *> -> query as Map<String, List<String>>
+      is String -> queryStringToMap(query)
+      else -> emptyMap()
+    }
+  }
 }

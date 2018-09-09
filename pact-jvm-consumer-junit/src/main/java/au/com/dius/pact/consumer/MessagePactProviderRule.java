@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.consumer.junit.JUnitTestSupport;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.messaging.Message;
 import au.com.dius.pact.core.model.messaging.MessagePact;
@@ -152,24 +153,11 @@ public class MessagePactProviderRule extends ExternalResource {
 			Pact pact = method.getAnnotation(Pact.class);
 			if (pact != null && pact.provider().equals(provider)
 					&& (pactFragment.isEmpty() || pactFragment.equals(method.getName()))) {
-
-				validatePactSignature(method);
+				JUnitTestSupport.conformsToMessagePactSignature(method);
 				return Optional.of(method);
 			}
 		}
 		return Optional.empty();
-	}
-
-	private void validatePactSignature(Method method) {
-		boolean hasValidPactSignature =
-				MessagePact.class.isAssignableFrom(method.getReturnType())
-						&& method.getParameterTypes().length == 1
-						&& method.getParameterTypes()[0].isAssignableFrom(MessagePactBuilder.class);
-
-		if (!hasValidPactSignature) {
-			throw new UnsupportedOperationException("Method " + method.getName() +
-				" does not conform required method signature 'public MessagePact xxx(MessagePactBuilder builder)'");
-		}
 	}
 
 	@SuppressWarnings("unchecked")

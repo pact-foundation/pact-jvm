@@ -4,7 +4,6 @@ import au.com.dius.pact.model.FullRequestMatch
 import au.com.dius.pact.model.MockHttpsProviderConfig
 import au.com.dius.pact.model.MockProviderConfig
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.model.PartialRequestMatch
 import au.com.dius.pact.core.model.Request
@@ -12,6 +11,7 @@ import au.com.dius.pact.model.RequestMatching
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.queryStringToMap
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
@@ -144,7 +144,7 @@ abstract class BaseMockServer(
       OptionalBody.body(bodyContents)
     }
     return Request(exchange.requestMethod, exchange.requestURI.path,
-      PactReader.queryStringToMap(exchange.requestURI.rawQuery), headers, body)
+      queryStringToMap(exchange.requestURI.rawQuery), headers, body)
   }
 
   private fun initServer() {

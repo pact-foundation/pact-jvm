@@ -4,8 +4,8 @@ import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.core.model.OptionalBody;
 import au.com.dius.pact.core.model.generators.Category;
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator;
+import au.com.dius.pact.core.model.PactReaderKt;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
-import au.com.dius.pact.core.model.PactReader;
 import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
@@ -93,7 +93,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      * @param query query string
      */
     public PactDslRequestWithoutPath query(String query) {
-        this.query = PactReader.queryStringToMap(query, false);
+        this.query = PactReaderKt.queryStringToMap(query, false);
         return this;
     }
 

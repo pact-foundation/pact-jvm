@@ -7,6 +7,7 @@ import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import spock.lang.Specification
+import spock.util.environment.RestoreSystemProperties
 
 class JsonBodyMatcherSpec extends Specification {
 
@@ -237,9 +238,11 @@ class JsonBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('{"something": 101}')
   }
 
+  @RestoreSystemProperties
   def 'matching json bodies - with a matcher defined - and when the actual body is missing a key, not be a mismatch'() {
     given:
     matchers.addCategory('body').addRule('$.*', TypeMatcher.INSTANCE)
+    System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'true')
 
     expect:
     matcher.matchBody(expected(expectedBody), actual(actualBody), true).empty
@@ -250,10 +253,12 @@ class JsonBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.body('{"somethingElse": 100}')
   }
 
+  @RestoreSystemProperties
   def 'matching json bodies - with a matcher defined - defect 562: matching a list at the root with extra fields'() {
     given:
     matchers.addCategory('body').addRule('$', new MinTypeMatcher(1))
     matchers.addCategory('body').addRule('$[*].*', TypeMatcher.INSTANCE)
+    System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'true')
 
     expect:
     matcher.matchBody(expected(expectedBody), actual(actualBody), true).empty
@@ -282,5 +287,37 @@ class JsonBodyMatcherSpec extends Specification {
       "documentCategoryId": 5,
       "contentLength": 0
     }]''')
+  }
+
+  @RestoreSystemProperties
+  def 'returns a mismatch - when comparing maps with different keys and wildcard matching is disabled'() {
+    given:
+    matchers.addCategory('body').addRule('$.*', new MinTypeMatcher(0))
+    System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'false')
+
+    expect:
+    matcher.matchBody(expected(expectedBody), actual(actualBody), true).find {
+      it instanceof BodyMismatch && it.mismatch.contains('Expected height=100 but was missing')
+    }
+
+    where:
+
+    actualBody = OptionalBody.body('{"id": 100, "width": 100}')
+    expectedBody = OptionalBody.body('{"id": 100, "height": 100}')
+  }
+
+  @RestoreSystemProperties
+  def 'returns no mismatch - when comparing maps with different keys and wildcard matching is enabled'() {
+    given:
+    matchers.addCategory('body').addRule('$.*', new MinTypeMatcher(0))
+    System.setProperty(Matchers.PACT_MATCHING_WILDCARD, 'true')
+
+    expect:
+    matcher.matchBody(expected(expectedBody), actual(actualBody), true).empty
+
+    where:
+
+    actualBody = OptionalBody.body('{"id": 100, "width": 100}')
+    expectedBody = OptionalBody.body('{"id": 100, "height": 100}')
   }
 }

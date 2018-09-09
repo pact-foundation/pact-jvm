@@ -15,6 +15,8 @@ import java.util.function.Predicate
 
 object Matchers : KLogging() {
 
+  const val PACT_MATCHING_WILDCARD = "pact.matching.wildcard"
+
   fun matchesToken(pathElement: String, token: AST.PathToken) = when (token) {
     is AST.`RootNode$` -> if (pathElement == "$") 2 else 0
     is AST.Field -> if (pathElement == token.name()) 2 else 0
@@ -76,6 +78,9 @@ object Matchers : KLogging() {
       resolveMatchers(matchers, category, path).isNotEmpty()
     else false
 
+  /**
+   * Determines if a matcher of the form '.*' exists for the path
+   */
   @JvmStatic
   fun wildcardMatcherDefined(path: List<String>, category: String, matchers: MatchingRules?) =
     if (matchers != null) {
@@ -86,6 +91,12 @@ object Matchers : KLogging() {
     } else {
       false
     }
+
+  /**
+   * If wildcard matching logic is enabled (where keys are ignored and only values are compared)
+   */
+  @JvmStatic
+  fun wildcardMatchingEnabled() = System.getProperty(PACT_MATCHING_WILDCARD)?.trim() == "true"
 
   @JvmStatic
   fun <M : Mismatch> domatch(

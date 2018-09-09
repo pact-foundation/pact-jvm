@@ -3,7 +3,7 @@ package au.com.dius.pact.consumer.dsl;
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.core.model.Consumer;
 import au.com.dius.pact.core.model.OptionalBody;
-import au.com.dius.pact.core.model.PactReader;
+import au.com.dius.pact.core.model.PactReaderKt;
 import au.com.dius.pact.core.model.Provider;
 import au.com.dius.pact.core.model.ProviderState;
 import au.com.dius.pact.core.model.generators.Category;
@@ -138,7 +138,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param query query string
      */
     public PactDslRequestWithPath query(String query) {
-        this.query = PactReader.queryStringToMap(query, false);
+        this.query = PactReaderKt.queryStringToMap(query, false);
         return this;
     }
 
@@ -148,7 +148,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param query query string
      */
     public PactDslRequestWithPath encodedQuery(String query) {
-        this.query = PactReader.queryStringToMap(query, true);
+        this.query = PactReaderKt.queryStringToMap(query, true);
         return this;
     }
 

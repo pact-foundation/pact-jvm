@@ -11,7 +11,7 @@ object Fixtures {
   val provider = new Provider("test_provider")
   val consumer = new Consumer("test_consumer")
 
-  val request = new Request("POST", "/", PactReader.queryStringToMap("q=p"),
+  val request = new Request("POST", "/", PactReaderKt.queryStringToMap("q=p"),
     Map("testreqheader" -> "testreqheadervalue").asInstanceOf[java.util.Map[String, String]],
     OptionalBody.body("{\"test\": true}"))
 

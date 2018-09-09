@@ -1,7 +1,7 @@
 package au.com.dius.pact.model
 
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.PactReader
+import au.com.dius.pact.core.model.PactReaderKt
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.matchers.BodyMismatch
 import au.com.dius.pact.matchers.HeaderMismatch
@@ -17,7 +17,7 @@ class MatchingSpec extends Specification {
   private static Request request
 
   def setup() {
-    request = new Request('GET', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
+    request = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
       [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test": true}'))
   }
 
@@ -75,7 +75,7 @@ class MatchingSpec extends Specification {
   }
 
   private query(String queryString = '') {
-    new Request('', '', PactReader.queryStringToMap(queryString), null, OptionalBody.body(''), null)
+    new Request('', '', PactReaderKt.queryStringToMap(queryString), null, OptionalBody.body(''), null)
   }
 
   def 'Query Matching - match same'() {

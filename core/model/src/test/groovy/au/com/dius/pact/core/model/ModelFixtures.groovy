@@ -6,7 +6,7 @@ import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 @Singleton
 class ModelFixtures {
 
-  static request = new Request('GET', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
+  static request = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
     [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'))
 
   static response = new Response(200, [testreqheader: 'testreqheaderval'], OptionalBody.body('{"responsetest":true}'))
@@ -17,7 +17,7 @@ class ModelFixtures {
     rules
   }
 
-  static requestWithMatchers = new Request('GET', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
+  static requestWithMatchers = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
     [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'),
     requestMatchers())
 
@@ -30,7 +30,7 @@ class ModelFixtures {
   static responseWithMatchers = new Response(200, [testreqheader: 'testreqheaderval'],
     OptionalBody.body('{"responsetest":true}'), responseMatchers())
 
-  static requestNoBody = new Request('GET', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
+  static requestNoBody = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
     [testreqheader: 'testreqheadervalue'])
 
   static requestDecodedQuery = new Request('GET', '/', [datetime: ['2011-12-03T10:15:30+01:00'],
@@ -39,6 +39,6 @@ class ModelFixtures {
 
   static responseNoBody = new Response(200, [testreqheader: 'testreqheaderval'])
 
-  static requestLowerCaseMethod = new Request('get', '/', PactReader.queryStringToMap('q=p&q=p2&r=s'),
+  static requestLowerCaseMethod = new Request('get', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
     [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'))
 }
