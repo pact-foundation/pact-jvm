@@ -6,6 +6,9 @@ addons:
       - oracle-java8-installer
 jdk:
   - oraclejdk8
+  - oraclejdk9
+  - oraclejdk10
+  - openjdk8
 env:
   - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m"
 script:
