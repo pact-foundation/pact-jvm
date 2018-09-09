@@ -14,10 +14,13 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD})
 @Inherited
 public @interface State {
-    /**
-     * @return list of state names
-     */
-    String[] value();
+  /**
+   * @return list of state names
+   */
+  String[] value();
 
-    StateChangeAction action() default StateChangeAction.SETUP;
+  /**
+   * Whether to run the method before (SETUP) or after (TEARDOWN) the interaction
+   */
+  StateChangeAction action() default StateChangeAction.SETUP;
 }
