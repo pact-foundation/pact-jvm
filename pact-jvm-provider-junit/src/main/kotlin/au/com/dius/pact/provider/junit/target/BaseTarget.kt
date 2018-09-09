@@ -3,8 +3,8 @@ package au.com.dius.pact.provider.junit.target
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.PactSource
 import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderInfo
-import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport
 import au.com.dius.pact.provider.junit.VerificationReports
 import au.com.dius.pact.provider.reporters.ReporterManager
@@ -24,7 +24,7 @@ abstract class BaseTarget : TestClassAwareTarget {
   protected lateinit var testTarget: Any
 
   var valueResolver: ValueResolver = SystemPropertyResolver()
-  private val callbacks = mutableListOf<BiConsumer<Boolean, ProviderVerifier>>()
+  private val callbacks = mutableListOf<BiConsumer<Boolean, IProviderVerifier>>()
 
   protected abstract fun getProviderInfo(source: PactSource): ProviderInfo
 
@@ -32,9 +32,9 @@ abstract class BaseTarget : TestClassAwareTarget {
     interaction: Interaction,
     provider: ProviderInfo,
     consumer: ConsumerInfo
-  ): ProviderVerifier
+  ): IProviderVerifier
 
-  protected fun setupReporters(verifier: ProviderVerifier, name: String, description: String) {
+  protected fun setupReporters(verifier: IProviderVerifier, name: String, description: String) {
     var reportDirectory = "target/pact/reports"
     var reportingEnabled = false
 
@@ -76,11 +76,11 @@ abstract class BaseTarget : TestClassAwareTarget {
     this.testTarget = testTarget
   }
 
-  override fun addResultCallback(callback: BiConsumer<Boolean, ProviderVerifier>) {
+  override fun addResultCallback(callback: BiConsumer<Boolean, IProviderVerifier>) {
     this.callbacks.add(callback)
   }
 
-  protected fun reportTestResult(result: Boolean, verifier: ProviderVerifier) {
+  protected fun reportTestResult(result: Boolean, verifier: IProviderVerifier) {
     this.callbacks.forEach { callback -> callback.accept(result, verifier) }
   }
 }

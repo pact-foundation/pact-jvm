@@ -198,7 +198,7 @@ class ProviderVerifier extends ProviderVerifierBase {
   }
 
   @SuppressWarnings('ParameterCount')
-  boolean verifyResponseFromProvider(ProviderInfo provider, RequestResponseInteraction interaction,
+  boolean verifyResponseFromProvider(IProviderInfo provider, RequestResponseInteraction interaction,
                                      String interactionMessage,
                                      Map failures,
                                      ProviderClient client,
@@ -277,8 +277,8 @@ class ProviderVerifier extends ProviderVerifierBase {
   }
 
   @SuppressWarnings(['ThrowRuntimeException', 'ParameterCount'])
-  boolean verifyResponseByInvokingProviderMethods(ProviderInfo providerInfo, ConsumerInfo consumer,
-                                                  def interaction, String interactionMessage, Map failures) {
+  boolean verifyResponseByInvokingProviderMethods(IProviderInfo providerInfo, IConsumerInfo consumer,
+                                                  Interaction interaction, String interactionMessage, Map failures) {
     try {
       URL[] urls = projectClasspath.get().toArray()
       URLClassLoader loader = new URLClassLoader(urls, GroovyObject.classLoader)
@@ -353,7 +353,7 @@ class ProviderVerifier extends ProviderVerifierBase {
     reporters.each { it.displayFailures(failures) }
   }
 
-  void finialiseReports() {
+  void finaliseReports() {
     reporters.each { it.finaliseReport() }
   }
 }

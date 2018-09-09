@@ -122,7 +122,7 @@ open class PactProviderMojo : AbstractMojo() {
         throw MojoFailureException("There were ${failures.size} pact failures")
       }
     } finally {
-      verifier.finialiseReports()
+      verifier.finaliseReports()
     }
   }
 

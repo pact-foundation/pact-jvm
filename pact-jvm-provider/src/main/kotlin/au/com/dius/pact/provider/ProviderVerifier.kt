@@ -5,6 +5,8 @@ import au.com.dius.pact.model.BrokerUrlSource
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.model.RequestResponseInteraction
+import au.com.dius.pact.model.Response
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.VerifierReporter
@@ -78,9 +80,67 @@ interface IProviderVerifier {
   var projectHasProperty: Function<String, Boolean>
 
   /**
+   * Callback to return the instance for the provider method to invoke
+   */
+  var providerMethodInstance: Function<Method, Any>
+
+  /**
+   * Callback to return the project classpath to use for looking up methods
+   */
+  var projectClasspath: Supplier<List<URL>>
+
+  /**
    * Reports the state of the interaction to all the registered reporters
    */
   fun reportStateForInteraction(state: String, provider: IProviderInfo, consumer: IConsumerInfo, isSetup: Boolean)
+
+  /**
+   * Finalise all the reports after verification is complete
+   */
+  fun finaliseReports()
+
+  /**
+   * Displays all the failures from the verification run
+   */
+  fun displayFailures(failures: Map<String, Any>)
+
+  /**
+   * Verifies the response from the provider against the interaction
+   */
+  fun verifyResponseFromProvider(
+    provider: IProviderInfo,
+    interaction: RequestResponseInteraction,
+    interactionMessage: String,
+    failures: Map<String, Any>,
+    client: ProviderClient,
+    context: Map<String, Any?> = emptyMap()
+  ): Boolean
+
+  /**
+   * Verifies the interaction by invoking a method on a provider test class
+   */
+  fun verifyResponseByInvokingProviderMethods(
+    providerInfo: IProviderInfo,
+    consumer: IConsumerInfo,
+    interaction: Interaction,
+    interactionMessage: String,
+    failures: Map<String, Any>
+  ): Boolean
+
+  /**
+   * Compares the expected and actual responses
+   */
+  fun verifyRequestResponsePact(
+    expectedResponse: Response,
+    actualResponse: Map<String, Any>,
+    interactionMessage: String,
+    failures: Map<String, Any>
+  ): Boolean
+
+  /**
+   * If publishing of verification results has been disabled
+   */
+  fun publishingResultsDisabled(): Boolean
 }
 
 /**
@@ -90,9 +150,9 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
   var pactLoadFailureMessage: Any? = null,
   override var checkBuildSpecificTask: Function<Any, Boolean> = Function { false },
   override var executeBuildSpecificTask: BiConsumer<Any, ProviderState> = BiConsumer { _, _ -> },
-  var projectClasspath: Supplier<List<URL>> = Supplier { emptyList<URL>() },
+  override var projectClasspath: Supplier<List<URL>> = Supplier { emptyList<URL>() },
   override var reporters: List<VerifierReporter> = listOf(AnsiConsoleReporter()),
-  var providerMethodInstance: Function<Method, Any> = Function { m -> m.declaringClass.newInstance() },
+  override var providerMethodInstance: Function<Method, Any> = Function { m -> m.declaringClass.newInstance() },
   var providerVersion: Supplier<String> = Supplier { System.getProperty(PACT_PROVIDER_VERSION) }
 ) : GroovyObjectSupport(), IProviderVerifier {
 
@@ -102,7 +162,7 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
   /**
    * This will return true unless the pact.verifier.publishResults property has the value of "true"
    */
-  open fun publishingResultsDisabled(): Boolean {
+  override fun publishingResultsDisabled(): Boolean {
     return !projectHasProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS) ||
       projectGetProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS)?.toLowerCase() != "true"
   }

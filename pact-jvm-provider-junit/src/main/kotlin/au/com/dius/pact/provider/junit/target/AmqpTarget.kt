@@ -5,6 +5,7 @@ import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.PactBrokerSource
 import au.com.dius.pact.model.PactSource
 import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
@@ -47,7 +48,7 @@ open class AmqpTarget @JvmOverloads constructor(val packagesToScan: List<String>
         throw getAssertionError(failures)
       }
     } finally {
-      verifier.finialiseReports()
+      verifier.finaliseReports()
     }
   }
 
@@ -55,7 +56,7 @@ open class AmqpTarget @JvmOverloads constructor(val packagesToScan: List<String>
     interaction: Interaction,
     provider: ProviderInfo,
     consumer: ConsumerInfo
-  ): ProviderVerifier {
+  ): IProviderVerifier {
     val verifier = ProviderVerifier()
     verifier.projectClasspath = Supplier { this.classPathUrls().toList() }
     val defaultProviderMethodInstance = verifier.providerMethodInstance

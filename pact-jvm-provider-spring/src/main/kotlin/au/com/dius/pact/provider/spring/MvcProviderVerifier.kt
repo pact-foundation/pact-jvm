@@ -25,6 +25,7 @@ import javax.mail.internet.ContentDisposition
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
 import org.hamcrest.Matchers.anything
+
 /**
  * Verifies the providers against the defined consumers using Spring MockMvc
  */
