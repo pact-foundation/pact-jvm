@@ -253,6 +253,7 @@ The following plugin properties can be specified with `-Dproperty=value` on the 
 |pact.filter.description|Only verify interactions whose description match the provided regular expression|
 |pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
 |pact.verifier.publishResults|Publishing of verification results will be skipped unless this property is set to 'true' [version 3.5.18+]|
+|pact.matching.wildcard|Enables matching of map values ignoring the keys when this property is set to 'true'|
 
 Example in the configuration section:
 

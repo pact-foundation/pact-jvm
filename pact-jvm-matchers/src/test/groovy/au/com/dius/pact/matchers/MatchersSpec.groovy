@@ -7,6 +7,8 @@ import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.model.matchingrules.RegexMatcher
 import au.com.dius.pact.model.matchingrules.TypeMatcher
 import spock.lang.Specification
+import spock.lang.Unroll
+import spock.util.environment.RestoreSystemProperties
 
 class MatchersSpec extends Specification {
 
@@ -92,6 +94,36 @@ class MatchersSpec extends Specification {
         .addRule('$.*', TypeMatcher.INSTANCE)
       matchingRules
     }
+  }
+
+  def 'wildcardMatchingEnabled - disabled by default'() {
+    expect:
+    !Matchers.wildcardMatchingEnabled()
+  }
+
+  @RestoreSystemProperties
+  @Unroll
+  def 'wildcardMatchingEnabled - #enabledOrDisabled when pact.matching.wildcard = "#value"'() {
+    given:
+    def testInvocation = { String value ->
+      System.setProperty('pact.matching.wildcard', value)
+      Matchers.wildcardMatchingEnabled()
+    }
+
+    expect:
+    testInvocation(value) == enabled
+
+    where:
+
+    value       | enabledOrDisabled | enabled
+    ''          | 'disabled'        | false
+    '  '        | 'disabled'        | false
+    'somevalue' | 'disabled'        | false
+    'false'     | 'disabled'        | false
+    ' false   ' | 'disabled'        | false
+    'true'      | 'enabled'         | true
+    '  true   ' | 'enabled'         | true
+
   }
 
   def 'should default to a matching defined at a parent level'() {
