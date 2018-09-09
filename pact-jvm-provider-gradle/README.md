@@ -337,6 +337,7 @@ The following project properties can be specified with `-Pproperty=value` on the
 |pact.filter.description|Only verify interactions whose description match the provided regular expression|
 |pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
 |pact.verifier.publishResults|Publishing of verification results will be skipped unless this property is set to 'true'|
+|pact.matching.wildcard|Enables matching of map values ignoring the keys when this property is set to 'true'|
 
 ## Provider States
 

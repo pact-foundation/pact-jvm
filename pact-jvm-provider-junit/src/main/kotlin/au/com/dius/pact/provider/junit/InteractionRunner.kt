@@ -231,7 +231,8 @@ open class InteractionRunner<I>(
       var stateChange = statement
       for (state in interaction.providerStates) {
         val methods = getAnnotatedMethods(testClass, State::class.java)
-          .filter { ann -> ann.getAnnotation(State::class.java).value.contains(state.name) }
+          .map { method -> method to method.getAnnotation(State::class.java) }
+          .filter { pair -> pair.second.value.contains(state.name) }
         if (methods.isEmpty()) {
           return Fail(MissingStateChangeMethod("MissingStateChangeMethod: Did not find a test class method annotated " +
             "with @State(\"${state.name}\")"))

@@ -261,6 +261,10 @@ class PactBodyBuilder extends BaseBuilder {
     }
   }
 
+  /**
+   * Matches the values of the map ignoring the keys. Note: this needs the Java system property
+   * "pact.matching.wildcard" set to value "true" when the pact file is verified.
+   */
   def keyLike(String key, def value) {
     if (FeatureToggles.isFeatureSet(Feature.UseMatchValuesMatcher)) {
       setMatcherAttribute(new ValuesMatcher(), path)

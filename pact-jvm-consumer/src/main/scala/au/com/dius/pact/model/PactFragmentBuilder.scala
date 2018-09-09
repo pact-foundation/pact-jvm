@@ -68,7 +68,7 @@ object PactFragmentBuilder {
                  headers: Map[String, String] = Map(),
                  body: String = "",
                  matchers: MatchingRules = new MatchingRulesImpl()): DescribingResponse = {
-      DescribingResponse(new Request(method, path, PactReader.queryStringToMap(query), headers, OptionalBody.body(body),
+      DescribingResponse(new Request(method, path, PactReaderKt.queryStringToMap(query), headers, OptionalBody.body(body),
         matchers))
     }
 

@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.groovysupport
 
 import au.com.dius.pact.model.OptionalBody
-import au.com.dius.pact.model.PactReader
+import au.com.dius.pact.model.PactReaderKt
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.provider.IHttpClientFactory
 import au.com.dius.pact.provider.ProviderClient
@@ -62,7 +62,7 @@ class ProviderClientTest {
 
   @Test
   void 'query parameters must NOT be placed in the body for URL encoded FORM POSTs'() {
-    def request = new Request('POST', '/', PactReader.queryStringToMap('a=1&b=11&c=Hello World'),
+    def request = new Request('POST', '/', PactReaderKt.queryStringToMap('a=1&b=11&c=Hello World'),
       ['Content-Type': ContentType.APPLICATION_FORM_URLENCODED.toString()], OptionalBody.body('A=B'))
     client.makeRequest(request)
     assert args.URI.query == 'a=1&b=11&c=Hello+World'
