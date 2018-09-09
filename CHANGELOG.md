@@ -1,5 +1,28 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.22 - Bugfix Release
+
+* aaaa0719 - fix: only enable wildcard matching logic with an explicit system property #759 (Ronald Holshausen, Sun Sep 9 12:36:55 2018 +1000)
+* 22efe9c4 - feat: implemented state change teardown support in the JUnit 5 extension (Ronald Holshausen, Sun Sep 9 10:25:16 2018 +1000)
+* aa332bb5 - feat: Update readme with provider state teardown #750 (Ronald Holshausen, Sun Sep 9 10:00:35 2018 +1000)
+* fbe067df - Merge branch 'tinexw-teardown-junit' into v3.5.x (Ronald Holshausen, Sun Sep 9 09:39:27 2018 +1000)
+* 0883da3c - fix: run the statechange teardown methods after the interaction (Ronald Holshausen, Sun Sep 9 09:38:34 2018 +1000)
+* 1ef26f55 - Merge branch 'teardown-junit' of https://github.com/tinexw/pact-jvm into tinexw-teardown-junit (Ronald Holshausen, Sun Sep 9 08:47:43 2018 +1000)
+* 5f7479e6 - fix: handle the case where the query parameters are a string in a V3 pact (Ronald Holshausen, Sat Sep 8 18:03:27 2018 +1000)
+* 31d09845 - fix: Only write the pact file if the JUnit 5 consumer test passes #762 (Ronald Holshausen, Sun Aug 26 20:21:59 2018 +1000)
+* 9c601735 - fix: Need to write the pact file once the JUnit 5 message consumer test passes #762 (Ronald Holshausen, Sun Aug 26 20:14:22 2018 +1000)
+* 1d00a5e9 - feat: Implemented support for message pact tests in JUnit consumer tests #762 (Ronald Holshausen, Sun Aug 26 19:34:30 2018 +1000)
+* c988a554 - fix: only process the consumer tags after the value resolver has been set (Ronald Holshausen, Sun Aug 26 13:27:10 2018 +1000)
+* e6070fbb - Put back oddly removed param for pactSource initialization (carlz, Sun Aug 26 13:08:20 2018 +1200)
+* 721dca94 - Fix lintKotlinTest by replacing wildcard import with explicit imports (carlz, Sun Aug 26 12:43:44 2018 +1200)
+* 18a523a0 - Add ability to filter PactBroker loaded pacts by consumers (carlz, Sun Aug 26 12:16:02 2018 +1200)
+* 37b50e9c - Fix PactBroker `tags` description, fix PactBrokerAnnotationDefaultsTest tags tests (carlz, Sun Aug 26 12:15:20 2018 +1200)
+* af69fd1f - fix: only process the tags after the value resolver has been set #757 (Ronald Holshausen, Sun Aug 26 12:28:29 2018 +1000)
+* 6b9fe1c7 - chore: removed jackson-databind #687 (Ronald Holshausen, Sun Aug 26 11:08:56 2018 +1000)
+* 04e90dad - Add state teardown support to junit provider (tinexw, Sat Aug 4 14:14:52 2018 +0200)
+* df608ed2 - fix: update the uberjar to conform to maven central rules (Ronald Holshausen, Sun Aug 12 17:49:30 2018 +1000)
+* 4361b3b7 - bump version to 3.5.22 (Ronald Holshausen, Sun Aug 12 15:54:24 2018 +1000)
+
 # 3.5.21 - Bugfix Release
 
 * 3fe199a3 - doc: update version in readme (Ronald Holshausen, Sun Aug 12 15:11:05 2018 +1000)
