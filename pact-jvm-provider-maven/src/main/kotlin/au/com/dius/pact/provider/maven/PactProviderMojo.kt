@@ -62,7 +62,7 @@ open class PactProviderMojo : AbstractMojo() {
       System.setProperty(property, value)
     }
 
-    val failures = mutableMapOf<Any, Any>()
+    val failures = mutableMapOf<String, Any>()
     val verifier = providerVerifier().let { verifier ->
       verifier.projectHasProperty = Function { p: String -> this.propertyDefined(p) }
       verifier.projectGetProperty = Function { p: String -> this.property(p) }
@@ -113,7 +113,7 @@ open class PactProviderMojo : AbstractMojo() {
 
         provider.consumers = consumers
 
-        failures.putAll(verifier.verifyProvider(provider) as Map<out Any, Any>)
+        failures.putAll(verifier.verifyProvider(provider) as Map<String, Any>)
       }
 
       if (failures.isNotEmpty()) {

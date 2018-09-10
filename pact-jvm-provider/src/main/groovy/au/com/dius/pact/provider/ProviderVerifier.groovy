@@ -3,7 +3,6 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.model.FilteredPact
 import au.com.dius.pact.model.Interaction
-import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.RequestResponseInteraction
@@ -265,17 +264,6 @@ class ProviderVerifier extends ProviderVerifierBase {
     }
   }
 
-  boolean displayBodyResult(Map failures, def comparison, String comparisonDescription) {
-    if (comparison.isEmpty()) {
-      reporters.each { it.bodyComparisonOk() }
-      true
-    } else {
-      reporters.each { it.bodyComparisonFailed(comparison) }
-      failures["$comparisonDescription has a matching body"] = comparison
-      false
-    }
-  }
-
   @SuppressWarnings(['ThrowRuntimeException', 'ParameterCount'])
   boolean verifyResponseByInvokingProviderMethods(IProviderInfo providerInfo, IConsumerInfo consumer,
                                                   Interaction interaction, String interactionMessage, Map failures) {
@@ -315,7 +303,7 @@ class ProviderVerifier extends ProviderVerifierBase {
           def expectedResponse = interaction.response
           boolean result = true
           providerMethods.each {
-            def actualResponse = invokeProviderMethod(it)
+            def actualResponse = Companion.invokeProviderMethod(it)
             result &= verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
           }
           result
@@ -326,34 +314,5 @@ class ProviderVerifier extends ProviderVerifierBase {
       reporters.each { it.verificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)) }
       false
     }
-  }
-
-  boolean verifyMessagePact(Set methods, Message message, String interactionMessage, Map failures) {
-    boolean result = true
-    methods.each {
-      reporters.each { it.generatesAMessageWhich() }
-      def actualMessage = OptionalBody.body(invokeProviderMethod(it, providerMethodInstance.apply(it)) as String)
-      def comparison = ResponseComparison.compareMessage(message, actualMessage)
-      def s = ' generates a message which'
-      result &= displayBodyResult(failures, comparison, interactionMessage + s)
-    }
-    result
-  }
-
-  @SuppressWarnings('ThrowRuntimeException')
-  static invokeProviderMethod(Method m, Object instance) {
-    try {
-      m.invoke(instance)
-    } catch (e) {
-      throw new RuntimeException("Failed to invoke provider method '${m.name}'", e)
-    }
-  }
-
-  void displayFailures(Map failures) {
-    reporters.each { it.displayFailures(failures) }
-  }
-
-  void finaliseReports() {
-    reporters.each { it.finaliseReport() }
   }
 }

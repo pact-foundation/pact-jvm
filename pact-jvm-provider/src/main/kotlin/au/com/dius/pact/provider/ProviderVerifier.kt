@@ -3,10 +3,12 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.model.BrokerUrlSource
 import au.com.dius.pact.model.Interaction
+import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.Response
+import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.VerifierReporter
@@ -167,6 +169,37 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
       projectGetProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS)?.toLowerCase() != "true"
   }
 
+  fun displayBodyResult(failures: MutableMap<String, Any>, comparison: Map<String, Any>, comparisonDescription: String): Boolean {
+    return if (comparison.isEmpty()) {
+      reporters.forEach { it.bodyComparisonOk() }
+      true
+    } else {
+      reporters.forEach { it.bodyComparisonFailed(comparison) }
+      failures["$comparisonDescription has a matching body"] = comparison
+      false
+    }
+  }
+
+  fun verifyMessagePact(methods: Set<Method>, message: Message, interactionMessage: String, failures: MutableMap<String, Any>): Boolean {
+    var result = true
+    methods.forEach { method ->
+      reporters.forEach { it.generatesAMessageWhich() }
+      val actualMessage = OptionalBody.body(invokeProviderMethod(method, providerMethodInstance.apply(method)).toString())
+      val comparison = ResponseComparison.compareMessage(message, actualMessage)
+      val s = " generates a message which"
+      result = result && displayBodyResult(failures, comparison, interactionMessage + s)
+    }
+    return result
+  }
+
+  override fun displayFailures(failures: Map<String, Any>) {
+    reporters.forEach { it.displayFailures(failures) }
+  }
+
+  override fun finaliseReports() {
+    reporters.forEach { it.finaliseReport() }
+  }
+
   companion object : KLogging() {
     const val PACT_VERIFIER_PUBLISH_RESULTS = "pact.verifier.publishResults"
     const val PACT_FILTER_CONSUMERS = "pact.filter.consumers"
@@ -175,5 +208,13 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     const val PACT_SHOW_STACKTRACE = "pact.showStacktrace"
     const val PACT_SHOW_FULLDIFF = "pact.showFullDiff"
     const val PACT_PROVIDER_VERSION = "pact.provider.version"
+
+    fun invokeProviderMethod(m: Method, instance: Any): Any? {
+      try {
+        return m.invoke(instance)
+      } catch (e: Throwable) {
+        throw RuntimeException("Failed to invoke provider method '${m.name}'", e)
+      }
+    }
   }
 }
