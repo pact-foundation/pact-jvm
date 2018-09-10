@@ -233,7 +233,7 @@ class ProviderVerifier extends ProviderVerifierBase {
   }
 
   boolean displayStatusResult(Map failures, int status, def comparison, String comparisonDescription) {
-    if (comparison == true) {
+    if (comparison == null) {
       reporters.each { it.statusComparisonOk(status) }
       true
     } else {
@@ -252,7 +252,7 @@ class ProviderVerifier extends ProviderVerifierBase {
       boolean result = true
       comparison.each { key, headerComparison ->
         def expectedHeaderValue = expectedHeaders[key]
-        if (headerComparison == true) {
+        if (headerComparison == null) {
           reporters.each { it.headerComparisonOk(key, expectedHeaderValue) }
         } else {
           reporters.each { it.headerComparisonFailed(key, expectedHeaderValue, headerComparison) }
