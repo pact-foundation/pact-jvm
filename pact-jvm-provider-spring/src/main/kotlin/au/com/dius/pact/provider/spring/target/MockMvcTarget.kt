@@ -4,9 +4,9 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
-import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.junit.Provider
 import au.com.dius.pact.provider.junit.TargetRequestFilter
 import au.com.dius.pact.provider.junit.target.BaseTarget
@@ -19,7 +19,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder
 import java.net.URLClassLoader
-import java.util.HashMap
 import java.util.function.Consumer
 import java.util.function.Supplier
 
@@ -83,7 +82,7 @@ class MockMvcTarget @JvmOverloads constructor(
         throw getAssertionError(failures)
       }
     } finally {
-      verifier.finialiseReports()
+      verifier.finaliseReports()
     }
   }
 
@@ -105,12 +104,12 @@ class MockMvcTarget @JvmOverloads constructor(
   }
 
   override fun setupVerifier(interaction: Interaction, provider: ProviderInfo, consumer: ConsumerInfo):
-          ProviderVerifier {
+    IProviderVerifier {
     val verifier = MvcProviderVerifier(printRequestResponse)
 
     setupReporters(verifier, provider.name, interaction.description)
 
-    verifier.projectClasspath = Supplier { (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs }
+    verifier.projectClasspath = Supplier { (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs.toList() }
 
     verifier.initialiseReporters(provider)
     verifier.reportVerificationForConsumer(consumer, provider)
@@ -130,19 +129,17 @@ class MockMvcTarget @JvmOverloads constructor(
     val provider = testClass.getAnnotation(Provider::class.java)
     val providerInfo = ProviderInfo(provider.value)
 
-    if (testClass != null) {
-      val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
-      if (methods.isNotEmpty()) {
-        providerInfo.setRequestFilter(Consumer<HttpRequest> { httpRequest ->
-          methods.forEach { method ->
-            try {
-              method.invokeExplosively(testTarget, httpRequest)
-            } catch (t: Throwable) {
-              throw AssertionError("Request filter method ${method.name} failed with an exception", t)
-            }
+    val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
+    if (methods.isNotEmpty()) {
+      providerInfo.setRequestFilter(Consumer<HttpRequest> { httpRequest ->
+        methods.forEach { method ->
+          try {
+            method.invokeExplosively(testTarget, httpRequest)
+          } catch (t: Throwable) {
+            throw AssertionError("Request filter method ${method.name} failed with an exception", t)
           }
-        })
-      }
+        }
+      })
     }
 
     return providerInfo

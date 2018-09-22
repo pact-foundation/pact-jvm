@@ -5,6 +5,7 @@ import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
@@ -19,9 +20,9 @@ import au.com.dius.pact.provider.junit.StateChangeAction
 import au.com.dius.pact.provider.junit.VerificationReports
 import au.com.dius.pact.provider.junit.loader.PactLoader
 import au.com.dius.pact.provider.junit.loader.PactSource
-import au.com.dius.pact.support.expressions.ValueResolver
-import au.com.dius.pact.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.provider.reporters.ReporterManager
+import au.com.dius.pact.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.support.expressions.ValueResolver
 import mu.KLogging
 import org.apache.http.HttpRequest
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
@@ -50,7 +51,7 @@ data class PactVerificationContext(
   private val store: ExtensionContext.Store,
   private val context: ExtensionContext,
   var target: TestTarget = HttpTestTarget(port = 8080),
-  var verifier: ProviderVerifier? = null,
+  var verifier: IProviderVerifier? = null,
   var valueResolver: ValueResolver = SystemPropertyResolver(),
   var providerInfo: ProviderInfo = ProviderInfo(),
   val consumerName: String,
@@ -76,12 +77,12 @@ data class PactVerificationContext(
         throw AssertionError(JUnitProviderTestSupport.generateErrorStringFromMismatches(failures))
       }
     } finally {
-      verifier!!.finialiseReports()
+      verifier!!.finaliseReports()
     }
   }
 
   private fun validateTestExecution(client: Any?, request: Any?, failures: MutableMap<String, Any>): Boolean {
-    if (providerInfo.verificationType == null || providerInfo.verificationType == PactVerification.REQUST_RESPONSE) {
+    if (providerInfo.verificationType == null || providerInfo.verificationType == PactVerification.REQUEST_RESPONSE) {
       val interactionMessage = "Verifying a pact between $consumerName and ${providerInfo.name}" +
         " - ${interaction.description}"
       return try {
@@ -200,7 +201,7 @@ class PactVerificationExtension(
   }
 
   private fun setupReporters(
-    verifier: ProviderVerifier,
+    verifier: IProviderVerifier,
     name: String,
     description: String,
     extContext: ExtensionContext,

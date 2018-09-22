@@ -1,6 +1,8 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.IConsumerInfo
+import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.PactVerifierException
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderVerifier
@@ -62,24 +64,21 @@ open class PactProviderMojo : AbstractMojo() {
       System.setProperty(property, value)
     }
 
-    val failures = mutableMapOf<Any, Any>()
-    val verifier = providerVerifier().let {
-      it.projectHasProperty = Function { p: String -> this.propertyDefined(p) }
-      it.projectGetProperty = Function { p: String -> this.property(p) }
-      it.pactLoadFailureMessage = Function { consumer: ConsumerInfo ->
+    val failures = mutableMapOf<String, Any>()
+    val verifier = providerVerifier().let { verifier ->
+      verifier.projectHasProperty = Function { p: String -> this.propertyDefined(p) }
+      verifier.projectGetProperty = Function { p: String -> this.property(p) }
+      verifier.pactLoadFailureMessage = Function { consumer: ConsumerInfo ->
         "You must specify the pact file to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
       }
-      it.checkBuildSpecificTask = Function { false }
-      it.providerVersion = Supplier { projectVersion }
+      verifier.checkBuildSpecificTask = Function { false }
+      verifier.providerVersion = Supplier { projectVersion }
 
-      it.projectClasspath = Supplier {
-        val urls = classpathElements.map { File(it).toURI().toURL() }
-        urls.toTypedArray()
-      }
+      verifier.projectClasspath = Supplier { classpathElements.map { File(it).toURI().toURL() } }
 
       if (reports.isNotEmpty()) {
         val reportsDir = File(buildDir, "reports/pact")
-        it.reporters = reports.map { name ->
+        verifier.reporters = reports.map { name ->
           if (ReporterManager.reporterDefined(name)) {
             val reporter = ReporterManager.createReporter(name)
             reporter.setReportDir(reportsDir)
@@ -91,12 +90,12 @@ open class PactProviderMojo : AbstractMojo() {
         }
       }
 
-      it
+      verifier
     }
 
     try {
       serviceProviders.forEach { provider ->
-        val consumers = mutableListOf<ConsumerInfo>()
+        val consumers = mutableListOf<IConsumerInfo>()
         consumers.addAll(provider.consumers)
         if (provider.pactFileDirectory != null) {
           consumers.addAll(loadPactFiles(provider, provider.pactFileDirectory))
@@ -116,7 +115,7 @@ open class PactProviderMojo : AbstractMojo() {
 
         provider.consumers = consumers
 
-        failures.putAll(verifier.verifyProvider(provider) as Map<out Any, Any>)
+        failures.putAll(verifier.verifyProvider(provider) as Map<String, Any>)
       }
 
       if (failures.isNotEmpty()) {
@@ -125,13 +124,13 @@ open class PactProviderMojo : AbstractMojo() {
         throw MojoFailureException("There were ${failures.size} pact failures")
       }
     } finally {
-      verifier.finialiseReports()
+      verifier.finaliseReports()
     }
   }
 
   open fun providerVerifier() = ProviderVerifier()
 
-  fun loadPactsFromPactBroker(provider: Provider, consumers: MutableList<ConsumerInfo>) {
+  fun loadPactsFromPactBroker(provider: Provider, consumers: MutableList<IConsumerInfo>) {
     val pactBroker = provider.pactBroker
     val pactBrokerUrl = pactBroker?.url ?: provider.pactBrokerUrl
     val options = mutableMapOf<String, Any>()
@@ -155,7 +154,7 @@ open class PactProviderMojo : AbstractMojo() {
     }
   }
 
-  open fun loadPactFiles(provider: Any, pactFileDir: File): List<ConsumerInfo> {
+  open fun loadPactFiles(provider: IProviderInfo, pactFileDir: File): List<IConsumerInfo> {
     return try {
       ProviderUtils.loadPactFiles(provider, pactFileDir)
     } catch (e: PactVerifierException) {
@@ -166,5 +165,5 @@ open class PactProviderMojo : AbstractMojo() {
 
   private fun propertyDefined(key: String) = System.getProperty(key) != null || configuration.containsKey(key)
 
-  private fun property(key: String) = System.getProperty(key, configuration.get(key))
+  private fun property(key: String) = System.getProperty(key, configuration[key])
 }

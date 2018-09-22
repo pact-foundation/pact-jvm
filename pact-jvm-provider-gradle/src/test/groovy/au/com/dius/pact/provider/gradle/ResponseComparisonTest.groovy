@@ -4,7 +4,6 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.provider.ResponseComparison
 import org.apache.http.entity.ContentType
-import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
 import org.junit.Before
 import org.junit.Test
 
@@ -31,9 +30,9 @@ class ResponseComparisonTest {
 
   @Test
   void 'compare the status should, well, compare the status'() {
-    assert testSubject().method == true
+    assert testSubject().method == null
     actualStatus = 400
-    assert testSubject().method instanceof PowerAssertionError
+    assert testSubject().method == 'expected status of 200 but was 400'
   }
 
   @Test
@@ -46,7 +45,7 @@ class ResponseComparisonTest {
   void 'should only compare the expected headers'() {
     actualHeaders = ['A': 'B', 'C': 'D']
     response = new Response(200, ['A': 'B'], OptionalBody.body(''))
-    assert testSubject().headers == ['A': true]
+    assert testSubject().headers == ['A': null]
     response = new Response(200, ['A': 'D'], OptionalBody.body(''))
     assert testSubject().headers.A == 'Expected header \'A\' to have value \'D\' but was \'B\''
   }
@@ -55,7 +54,7 @@ class ResponseComparisonTest {
   void 'ignores case in header comparisons'() {
     actualHeaders = ['A': 'B', 'C': 'D']
     response = new Response(200, ['a': 'B'], OptionalBody.body(''))
-    assert testSubject().headers == ['a': true]
+    assert testSubject().headers == ['a': null]
   }
 
   @Test

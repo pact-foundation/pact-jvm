@@ -45,7 +45,7 @@ class PactVerificationTask extends DefaultTask {
           "There were ${ext.failures.size()} pact failures for provider ${providerToVerify.name}", null)
       }
     } finally {
-      verifier.finialiseReports()
+      verifier.finaliseReports()
       AnsiConsole.systemUninstall()
     }
   }

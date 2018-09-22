@@ -8,16 +8,15 @@ import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.HttpClientFactory
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
-import au.com.dius.pact.provider.ProviderVerifier
 import org.apache.http.client.methods.HttpUriRequest
-import java.lang.reflect.Method
 import java.net.URL
 import java.net.URLClassLoader
-import java.util.function.Supplier
 import java.util.function.Function
+import java.util.function.Supplier
 
 /**
  * Interface to a test target
@@ -50,7 +49,7 @@ interface TestTarget {
   /**
    * Prepares the verifier for use during the test
    */
-  fun prepareVerifier(verifier: ProviderVerifier, testInstance: Any)
+  fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any)
 }
 
 /**
@@ -84,8 +83,7 @@ open class HttpTestTarget @JvmOverloads constructor (
     throw UnsupportedOperationException("Only request/response interactions can be used with an HTTP test target")
   }
 
-  override fun prepareVerifier(verifier: ProviderVerifier, testInstance: Any) {
-  }
+  override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any) { }
 
   override fun executeInteraction(client: Any?, request: Any?): Map<String, Any> {
     val providerClient = client as ProviderClient
@@ -175,10 +173,10 @@ open class AmpqTestTarget(val packagesToScan: List<String> = emptyList()) : Test
     throw UnsupportedOperationException("Only message interactions can be used with an AMPQ test target")
   }
 
-  override fun prepareVerifier(verifier: ProviderVerifier, testInstance: Any) {
-    verifier.projectClasspath = Supplier<Array<URL>> { (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs }
+  override fun prepareVerifier(verifier: IProviderVerifier, testInstance: Any) {
+    verifier.projectClasspath = Supplier { (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs.toList() }
     val defaultProviderMethodInstance = verifier.providerMethodInstance
-    verifier.providerMethodInstance = Function<Method, Any?> { m ->
+    verifier.providerMethodInstance = Function { m ->
       if (m.declaringClass == testInstance.javaClass) {
         testInstance
       } else {

@@ -2,8 +2,7 @@ package au.com.dius.pact.provider.junit.target
 
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSource
-import au.com.dius.pact.provider.ProviderVerifier
-
+import au.com.dius.pact.provider.IProviderVerifier
 import java.util.function.BiConsumer
 
 /**
@@ -27,5 +26,5 @@ interface Target {
   /**
    * Add a callback to receive the test interaction result
    */
-  fun addResultCallback(callback: BiConsumer<Boolean, ProviderVerifier>)
+  fun addResultCallback(callback: BiConsumer<Boolean, IProviderVerifier>)
 }

@@ -25,29 +25,29 @@ interface VerifierReporter {
   fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo)
   fun verifyConsumerFromUrl(pactUrl: UrlPactSource, consumer: IConsumerInfo)
   fun verifyConsumerFromFile(pactFile: PactSource, consumer: IConsumerInfo)
-  fun pactLoadFailureForConsumer(IConsumerInfo: IConsumerInfo, message: String)
-  fun warnProviderHasNoConsumers(IProviderInfo: IProviderInfo)
+  fun pactLoadFailureForConsumer(consumer: IConsumerInfo, message: String)
+  fun warnProviderHasNoConsumers(provider: IProviderInfo)
   fun warnPactFileHasNoInteractions(pact: Pact<Interaction>)
   fun interactionDescription(interaction: Interaction)
   fun stateForInteraction(state: String, provider: IProviderInfo, consumer: IConsumerInfo, isSetup: Boolean)
   fun warnStateChangeIgnored(state: String, IProviderInfo: IProviderInfo, IConsumerInfo: IConsumerInfo)
   fun stateChangeRequestFailedWithException(
     state: String,
-    IProviderInfo: IProviderInfo,
-    IConsumerInfo: IConsumerInfo,
+    provider: IProviderInfo,
+    consumer: IConsumerInfo,
     isSetup: Boolean,
     e: Exception,
     printStackTrace: Boolean
   )
-  fun stateChangeRequestFailed(state: String, IProviderInfo: IProviderInfo, isSetup: Boolean, httpStatus: String)
+  fun stateChangeRequestFailed(state: String, provider: IProviderInfo, isSetup: Boolean, httpStatus: String)
   fun warnStateChangeIgnoredDueToInvalidUrl(
     state: String,
-    IProviderInfo: IProviderInfo,
+    provider: IProviderInfo,
     isSetup: Boolean,
     stateChangeHandler: Any
   )
   fun requestFailed(
-    IProviderInfo: IProviderInfo,
+    provider: IProviderInfo,
     interaction: Interaction,
     interactionMessage: String,
     e: Exception,

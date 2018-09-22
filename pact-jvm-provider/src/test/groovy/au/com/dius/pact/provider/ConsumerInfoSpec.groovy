@@ -16,7 +16,7 @@ class ConsumerInfoSpec extends Specification {
   }
 
   @Unroll
-  def 'set pact file should handle all the possible parameters correctly'() {
+  def 'set pact file should handle all the possible parameters correctly - #source'() {
     when:
     consumerInfo.setPactFile(source)
 
@@ -25,12 +25,11 @@ class ConsumerInfoSpec extends Specification {
 
     where:
 
-    source                                              | expectedSource
-    new URL('file:/var/tmp/file')                  | UrlSource
-    new FileSource(new File('/var/tmp/file'))  | FileSource
-    { -> }                                              | ClosurePactSource
-    '/var/tmp/file'                                     | FileSource
-
+    source                                    | expectedSource
+    new URL('file:/var/tmp/file')             | UrlSource
+    new FileSource(new File('/var/tmp/file')) | FileSource
+    { -> }                                    | ClosurePactSource
+    '/var/tmp/file'                           | FileSource
   }
 
   def 'include the tag when converting from a PactBrokerConsumer'() {

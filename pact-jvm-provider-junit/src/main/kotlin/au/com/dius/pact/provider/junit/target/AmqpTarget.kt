@@ -5,12 +5,11 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.junit.Provider
-import java.lang.reflect.Method
-import java.net.URL
 import java.net.URLClassLoader
 import java.util.function.Function
 import java.util.function.Supplier
@@ -49,7 +48,7 @@ open class AmqpTarget @JvmOverloads constructor(val packagesToScan: List<String>
         throw getAssertionError(failures)
       }
     } finally {
-      verifier.finialiseReports()
+      verifier.finaliseReports()
     }
   }
 
@@ -57,11 +56,11 @@ open class AmqpTarget @JvmOverloads constructor(val packagesToScan: List<String>
     interaction: Interaction,
     provider: ProviderInfo,
     consumer: ConsumerInfo
-  ): ProviderVerifier {
+  ): IProviderVerifier {
     val verifier = ProviderVerifier()
-    verifier.projectClasspath = Supplier<Array<URL>> { this.classPathUrls() }
+    verifier.projectClasspath = Supplier { this.classPathUrls().toList() }
     val defaultProviderMethodInstance = verifier.providerMethodInstance
-    verifier.providerMethodInstance = Function<Method, Any?> { m ->
+    verifier.providerMethodInstance = Function { m ->
       if (m.declaringClass == testTarget.javaClass) {
         testTarget
       } else {

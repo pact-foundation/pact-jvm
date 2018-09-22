@@ -2,7 +2,7 @@ package au.com.dius.pact.provider.scalatest
 
 import java.net.URI
 
-import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.IConsumerInfo
 
 /**
   * DSL extension on top of the default verify method
@@ -39,7 +39,7 @@ trait ProviderDsl {
     * Allows every pacts to be run against the provider
     */
   case object all extends Consumer {
-    override val filter = (consumerInfo: ConsumerInfo) => true
+    override val filter: IConsumerInfo => Boolean = (_: IConsumerInfo) => true
   }
 
   /**

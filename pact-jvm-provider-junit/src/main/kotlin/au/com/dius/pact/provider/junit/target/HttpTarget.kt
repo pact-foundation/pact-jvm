@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.HttpClientFactory
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
@@ -79,7 +80,7 @@ open class HttpTarget
         throw getAssertionError(failures)
       }
     } finally {
-      verifier.finialiseReports()
+      verifier.finaliseReports()
     }
   }
 
@@ -87,7 +88,7 @@ open class HttpTarget
     interaction: Interaction,
     provider: ProviderInfo,
     consumer: ConsumerInfo
-  ): ProviderVerifier {
+  ): IProviderVerifier {
     val verifier = ProviderVerifier()
 
     setupReporters(verifier, provider.name, interaction.description)
@@ -115,19 +116,17 @@ open class HttpTarget
     providerInfo.setPath(path)
     providerInfo.isInsecure = insecure
 
-    if (testClass != null) {
-      val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
-      if (!methods.isEmpty()) {
-        providerInfo.setRequestFilter(Consumer { httpRequest: HttpRequest ->
-          methods.forEach { method ->
-            try {
-              method.invokeExplosively(testTarget, httpRequest)
-            } catch (t: Throwable) {
-              throw AssertionError("Request filter method ${method.name} failed with an exception", t)
-            }
+    val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
+    if (!methods.isEmpty()) {
+      providerInfo.setRequestFilter(Consumer { httpRequest: HttpRequest ->
+        methods.forEach { method ->
+          try {
+            method.invokeExplosively(testTarget, httpRequest)
+          } catch (t: Throwable) {
+            throw AssertionError("Request filter method ${method.name} failed with an exception", t)
           }
-        })
-      }
+        }
+      })
     }
 
     return providerInfo

@@ -11,7 +11,7 @@ buildscript {
 }
 
 plugins {
-  id 'nebula.kotlin' version '1.2.61'
+  id 'nebula.kotlin' version '1.2.70'
   id 'org.jmailen.kotlinter' version '1.11.2'
   id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC8'
   id 'org.jetbrains.dokka' version '0.9.17'
@@ -43,7 +43,6 @@ String buildName(Project project) {
 
 allprojects {
   group = 'au.com.dius'
-  version = '4.0.0-beta.0'
 
   repositories {
     mavenLocal()
@@ -56,6 +55,8 @@ allprojects {
 }
 
 subprojects {
+  version = '4.0.0-beta.0'
+  
   buildscript {
     repositories {
       jcenter()

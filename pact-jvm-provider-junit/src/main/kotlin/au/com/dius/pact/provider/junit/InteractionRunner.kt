@@ -5,7 +5,7 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.provider.DefaultVerificationReporter
-import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderVerifierBase.Companion.PACT_VERIFIER_PUBLISH_RESULTS
 import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget
@@ -45,7 +45,7 @@ open class InteractionRunner<I>(
   private val pactSource: PactSource
 ) : Runner() where I: Interaction {
 
-  private val results = ConcurrentHashMap<String, Pair<Boolean, ProviderVerifier>>()
+  private val results = ConcurrentHashMap<String, Pair<Boolean, IProviderVerifier>>()
   private val testContext = ConcurrentHashMap<String, Any>()
   private val childDescriptions = ConcurrentHashMap<String, Description>()
   var verificationReporter = DefaultVerificationReporter
