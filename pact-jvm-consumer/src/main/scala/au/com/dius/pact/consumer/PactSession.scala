@@ -1,7 +1,8 @@
 package au.com.dius.pact.consumer
 
+import au.com.dius.pact.core.matchers.RequestMatching
 import au.com.dius.pact.core.model.{Pact => PactModel, _}
-import au.com.dius.pact.model.{FullRequestMatch, PartialRequestMatch, RequestMatching, RequestMismatch}
+import au.com.dius.pact.core.matchers.{FullRequestMatch, PartialRequestMatch, RequestMismatch}
 import org.apache.commons.lang3.StringEscapeUtils
 
 object PactSessionResults {

@@ -1,6 +1,6 @@
 package specification
 
-import au.com.dius.pact.model.ResponseMatching
+import au.com.dius.pact.core.matchers.ResponseMatching
 import spock.lang.Unroll
 
 class ResponseSpecificationV3Spec extends BaseResponseSpec {

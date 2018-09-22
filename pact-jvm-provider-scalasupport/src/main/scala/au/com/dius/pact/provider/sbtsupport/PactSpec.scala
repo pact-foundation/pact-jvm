@@ -3,7 +3,7 @@ package au.com.dius.pact.provider.sbtsupport
 import java.util.concurrent.Executors
 
 import au.com.dius.pact.core.model.{RequestResponsePact, Response}
-import au.com.dius.pact.model._
+import au.com.dius.pact.core.matchers._
 import au.com.dius.pact.provider.{EnterStateRequest, ServiceInvokeRequest}
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.{Assertions, FreeSpec, Ignore}

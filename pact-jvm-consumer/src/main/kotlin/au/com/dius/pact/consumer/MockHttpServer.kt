@@ -1,13 +1,13 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.model.FullRequestMatch
+import au.com.dius.pact.core.matchers.FullRequestMatch
+import au.com.dius.pact.core.matchers.PartialRequestMatch
 import au.com.dius.pact.model.MockHttpsProviderConfig
 import au.com.dius.pact.model.MockProviderConfig
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
-import au.com.dius.pact.model.PartialRequestMatch
 import au.com.dius.pact.core.model.Request
-import au.com.dius.pact.model.RequestMatching
+import au.com.dius.pact.core.matchers.RequestMatching
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response

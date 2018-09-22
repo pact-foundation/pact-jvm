@@ -4,7 +4,7 @@ import java.io.{File, InputStream, Reader, StringReader}
 import java.util.concurrent.Executors
 
 import au.com.dius.pact.core.model.{PactReader, RequestResponsePact}
-import au.com.dius.pact.model.{FullResponseMatch, ResponseMatching}
+import au.com.dius.pact.core.matchers.{FullResponseMatch, ResponseMatching}
 import au.com.dius.pact.provider.sbtsupport.HttpClient
 import org.specs2.Specification
 import org.specs2.execute.Result

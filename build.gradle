@@ -146,12 +146,15 @@ subprojects {
     }
 
     jar {
-        manifest.attributes provider: 'gradle',
-                'Implementation-Title': project.name, 'Implementation-Version': version,
-                'Implementation-Vendor': project.group, 'Implementation-Vendor-Id': project.group,
-                'Specification-Vendor': project.group,
-                'Specification-Title': project.name,
-                'Specification-Version': version
+        manifest {
+          attributes provider: 'gradle',
+            'Implementation-Title': project.name, 'Implementation-Version': version,
+            'Implementation-Vendor': project.group, 'Implementation-Vendor-Id': project.group,
+            'Specification-Vendor': project.group,
+            'Specification-Title': project.name,
+            'Specification-Version': version,
+            'Automatic-Module-Name': project.group + "." + project.name
+        }
     }
 
     task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc, dokkaJavadoc]) {

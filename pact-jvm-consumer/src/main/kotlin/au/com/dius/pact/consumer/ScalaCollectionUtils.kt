@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer
 
-import au.com.dius.pact.matchers.Mismatch
+import au.com.dius.pact.core.matchers.Mismatch
 import scala.Option
 import scala.collection.JavaConversions
 import scala.collection.Seq

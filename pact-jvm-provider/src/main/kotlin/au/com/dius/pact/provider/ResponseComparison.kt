@@ -1,17 +1,17 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.core.matchers.BodyMismatch
+import au.com.dius.pact.core.matchers.BodyTypeMismatch
+import au.com.dius.pact.core.matchers.HeaderMismatch
+import au.com.dius.pact.core.matchers.MatchingConfig
+import au.com.dius.pact.core.matchers.Mismatch
+import au.com.dius.pact.core.matchers.StatusMismatch
+import au.com.dius.pact.core.matchers.`ResponseMatching$`
+import au.com.dius.pact.core.matchers.generateDiff
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.orElse
-import au.com.dius.pact.matchers.BodyMismatch
-import au.com.dius.pact.matchers.HeaderMismatch
-import au.com.dius.pact.matchers.MatchingConfig
-import au.com.dius.pact.matchers.Mismatch
-import au.com.dius.pact.matchers.generateDiff
-import au.com.dius.pact.model.BodyTypeMismatch
-import au.com.dius.pact.model.StatusMismatch
-import au.com.dius.pact.model.`ResponseMatching$`
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import mu.KLogging

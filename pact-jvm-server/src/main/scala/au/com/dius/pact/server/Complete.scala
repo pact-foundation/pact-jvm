@@ -2,7 +2,7 @@ package au.com.dius.pact.server
 
 import au.com.dius.pact.consumer._
 import au.com.dius.pact.core.model.{OptionalBody, Response}
-import au.com.dius.pact.matchers.util.JsonUtils
+import au.com.dius.pact.core.matchers.util.JsonUtils
 import au.com.dius.pact.core.model._
 
 import scala.collection.JavaConversions
