@@ -23,7 +23,6 @@ class ProviderVerifierStateChangeSpec extends Specification {
 
   def setup() {
     providerInfo = new ProviderInfo()
-    consumer = new ConsumerInfo(name: 'Bob')
     providerVerifier = new ProviderVerifier()
     providerClient = Mock()
   }
@@ -34,7 +33,7 @@ class ProviderVerifierStateChangeSpec extends Specification {
     def interaction = new RequestResponseInteraction('provider state test', [state],
       new Request(), new Response(200, [:], OptionalBody.body('{}')))
     def failures = [:]
-    consumer.stateChange = 'http://localhost:2000/hello'
+    consumer = new ConsumerInfo('Bob', 'http://localhost:2000/hello')
     providerInfo.stateChangeTeardown = true
     GroovyMock(StateChange, global: true)
 
@@ -49,10 +48,10 @@ class ProviderVerifierStateChangeSpec extends Specification {
   def 'if the state change is a closure and teardown is set, executes it with the state change as a parameter'() {
     given:
     def closureArgs = []
-    consumer.stateChange = { arg1, arg2 ->
+    consumer = new ConsumerInfo('Bob', { arg1, arg2 ->
       closureArgs << [arg1, arg2]
       true
-    }
+    })
     def state = new ProviderState('state of the nation')
     def interaction = new RequestResponseInteraction('provider state test', [state],
       new Request(), new Response(200, [:], OptionalBody.body('{}')))

@@ -1,7 +1,14 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.model.BrokerUrlSource
+import au.com.dius.pact.model.ClosurePactSource
+import au.com.dius.pact.model.FileSource
+import au.com.dius.pact.model.Interaction
+import au.com.dius.pact.model.PactSource
 import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.Request
+import au.com.dius.pact.model.UrlSource
+import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import groovy.json.JsonBuilder
 import groovy.lang.Binding
 import groovy.lang.Closure
@@ -26,6 +33,7 @@ import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.util.EntityUtils
 import scala.Function1
+import java.io.File
 import java.lang.Boolean.getBoolean
 import java.net.URI
 import java.net.URL
@@ -33,6 +41,7 @@ import java.net.URLDecoder
 import java.util.concurrent.Callable
 import java.util.function.Consumer
 import java.util.function.Function
+import java.util.function.Supplier
 
 interface IHttpClientFactory {
   fun newClient(provider: Any?): CloseableHttpClient
@@ -50,12 +59,103 @@ interface IProviderInfo {
   val stateChangeUrl: URL?
   val stateChangeUsesBody: Boolean
   val stateChangeTeardown: Boolean
+  var packagesToScan: List<String>
+  var verificationType: PactVerification?
 }
 
 interface IConsumerInfo {
   val name: String
   val stateChange: Any?
   val stateChangeUsesBody: Boolean
+  val packagesToScan: List<String>
+  val verificationType: PactVerification?
+}
+
+open class ConsumerInfo @JvmOverloads constructor (
+  override var name: String = "",
+  override var stateChange: Any? = null,
+  override var stateChangeUsesBody: Boolean = true,
+  override var packagesToScan: List<String> = emptyList(),
+  override var verificationType: PactVerification? = null,
+  var pactSource: Any? = null,
+  var pactFileAuthentication: List<Any?> = emptyList()
+) : IConsumerInfo {
+
+  fun toPactConsumer() = au.com.dius.pact.model.Consumer(name)
+
+  /**
+   * Sets the Pact File for the consumer
+   * @param file Pact file, either as a string or a PactSource
+   * @deprecated Use setPactSource instead, this will be removed in 4.0
+   */
+  @Deprecated(
+    message = "Use setPactSource instead, this will be removed in 4.0",
+    replaceWith = ReplaceWith("setPactSource")
+  )
+  fun setPactFile(file: Any) {
+    pactSource = when (file) {
+      is PactSource -> file
+      is Supplier<*> -> ClosurePactSource(file as Supplier<Any>)
+      is Closure<*> -> ClosurePactSource(Supplier { file.call() })
+      is URL -> UrlSource<Interaction>(file.toString())
+      else -> FileSource<Interaction>(File(file.toString()))
+    }
+  }
+
+  /**
+   * Returns the Pact file for the consumer
+   * @deprecated Use getPactSource instead, this will be removed in 4.0
+   */
+  @Deprecated(
+    message = "Use getPactSource instead, this will be removed in 4.0",
+    replaceWith = ReplaceWith("getPactSource")
+  )
+  fun getPactFile() = pactSource
+
+  fun url(path: String) = UrlSource<Interaction>(path)
+
+  override fun toString(): String {
+    return "ConsumerInfo(name='$name', stateChange=$stateChange, stateChangeUsesBody=$stateChangeUsesBody, " +
+      "packagesToScan=$packagesToScan, verificationType=$verificationType, pactSource=$pactSource, " +
+      "pactFileAuthentication=$pactFileAuthentication)"
+  }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as ConsumerInfo
+
+    if (name != other.name) return false
+    if (stateChange != other.stateChange) return false
+    if (stateChangeUsesBody != other.stateChangeUsesBody) return false
+    if (packagesToScan != other.packagesToScan) return false
+    if (verificationType != other.verificationType) return false
+    if (pactSource != other.pactSource) return false
+    if (pactFileAuthentication != other.pactFileAuthentication) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = name.hashCode()
+    result = 31 * result + (stateChange?.hashCode() ?: 0)
+    result = 31 * result + stateChangeUsesBody.hashCode()
+    result = 31 * result + packagesToScan.hashCode()
+    result = 31 * result + (verificationType?.hashCode() ?: 0)
+    result = 31 * result + (pactSource?.hashCode() ?: 0)
+    result = 31 * result + pactFileAuthentication.hashCode()
+    return result
+  }
+
+  companion object : KLogging() {
+    @JvmStatic
+    fun from(consumer: PactBrokerConsumer) =
+      ConsumerInfo(name = consumer.name,
+        pactSource = BrokerUrlSource(url = consumer.source, pactBrokerUrl = consumer.pactBrokerUrl, tag = consumer.tag),
+        pactFileAuthentication = consumer.pactFileAuthentication
+      )
+  }
 }
 
 /**

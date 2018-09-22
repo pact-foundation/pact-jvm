@@ -101,7 +101,7 @@ class PactPluginTest {
                     hasPactWith('ConsumerA') {
                         pactSource = url(pactFileUrl)
                         stateChange = url(stateChangeUrl)
-                        verificationType = 'REQUST_RESPONSE'
+                        verificationType = 'REQUEST_RESPONSE'
                     }
                 }
             }
@@ -118,7 +118,7 @@ class PactPluginTest {
         assert consumer.name == 'ConsumerA'
         assert consumer.pactSource == new UrlSource(pactFileUrl)
         assert consumer.stateChange == new UrlSource(stateChangeUrl)
-        assert consumer.verificationType == PactVerification.REQUST_RESPONSE
+        assert consumer.verificationType == PactVerification.REQUEST_RESPONSE
     }
 
     @Test

@@ -99,9 +99,8 @@ class VerifyProviderSpec extends Specification {
         :packages-to-scan ["au.com.dius.pact.provider.lein"]
       }
     }''').entrySet().first()
-    def expected = new ConsumerInfo(':consumer1', new UrlSource('file:///path/to/pact.json'),
-      'http://statechange:8080', true,
-      null, ['au.com.dius.pact.provider.lein'], null)
+    def expected = new ConsumerInfo(':consumer1', 'http://statechange:8080', true,
+      ['au.com.dius.pact.provider.lein'], null, new UrlSource('file:///path/to/pact.json'))
 
     when:
     def consumer = toConsumer.invoke(consumerInfo)

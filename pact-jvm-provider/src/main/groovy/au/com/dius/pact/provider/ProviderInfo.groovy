@@ -36,7 +36,7 @@ class ProviderInfo implements IProviderInfo {
 
     PactVerification verificationType
     List packagesToScan = []
-    List<ConsumerInfo> consumers = []
+    List<IConsumerInfo> consumers = []
 
     ProviderInfo() {
     }
@@ -46,7 +46,7 @@ class ProviderInfo implements IProviderInfo {
     }
 
     ConsumerInfo hasPactWith(String consumer, Closure closure) {
-        def consumerInfo = new ConsumerInfo(name: consumer)
+        def consumerInfo = new ConsumerInfo(consumer)
         consumers << consumerInfo
         closure.delegate = consumerInfo
         closure.call(consumerInfo)
@@ -89,11 +89,13 @@ class ProviderInfo implements IProviderInfo {
 
         pactFileDirectory.eachFileRecurse { File file ->
             if (file.file && file.name ==~ consumersGroup.include) {
-              consumers << new ConsumerInfo(
-                name: new JsonSlurper().parse(file).consumer.name,
-                pactSource: new FileSource(file),
-                stateChange: consumersGroup.stateChange,
-                stateChangeUsesBody: consumersGroup.stateChangeUsesBody
+              String name = new JsonSlurper().parse(file).consumer.name
+              consumers << new ConsumerInfo(name,
+                consumersGroup.stateChange,
+                consumersGroup.stateChangeUsesBody,
+                [],
+                null,
+                new FileSource(file)
               )
             }
         }

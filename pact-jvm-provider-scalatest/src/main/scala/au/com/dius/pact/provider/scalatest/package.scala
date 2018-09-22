@@ -5,7 +5,7 @@ import java.net.URI
 package object scalatest {
 
   trait Consumer {
-    val filter: ConsumerInfo => Boolean
+    val filter: IConsumerInfo => Boolean
   }
 
   /**
@@ -14,8 +14,8 @@ package object scalatest {
     * @param consumer
     * @return
     */
-  implicit def strToConsumer(consumer: String) = new Consumer {
-    override val filter = (consumerInfo: ConsumerInfo) => consumerInfo.getName == consumer
+  implicit def strToConsumer(consumer: String): Consumer = new Consumer {
+    override val filter: IConsumerInfo => Boolean = (consumerInfo: IConsumerInfo) => consumerInfo.getName == consumer
   }
 
   /**

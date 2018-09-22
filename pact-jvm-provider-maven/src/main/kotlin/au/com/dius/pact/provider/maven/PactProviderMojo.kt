@@ -1,6 +1,8 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.IConsumerInfo
+import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.PactVerifierException
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderVerifier
@@ -93,7 +95,7 @@ open class PactProviderMojo : AbstractMojo() {
 
     try {
       serviceProviders.forEach { provider ->
-        val consumers = mutableListOf<ConsumerInfo>()
+        val consumers = mutableListOf<IConsumerInfo>()
         consumers.addAll(provider.consumers)
         if (provider.pactFileDirectory != null) {
           consumers.addAll(loadPactFiles(provider, provider.pactFileDirectory))
@@ -128,7 +130,7 @@ open class PactProviderMojo : AbstractMojo() {
 
   open fun providerVerifier() = ProviderVerifier()
 
-  fun loadPactsFromPactBroker(provider: Provider, consumers: MutableList<ConsumerInfo>) {
+  fun loadPactsFromPactBroker(provider: Provider, consumers: MutableList<IConsumerInfo>) {
     val pactBroker = provider.pactBroker
     val pactBrokerUrl = pactBroker?.url ?: provider.pactBrokerUrl
     val options = mutableMapOf<String, Any>()
@@ -152,7 +154,7 @@ open class PactProviderMojo : AbstractMojo() {
     }
   }
 
-  open fun loadPactFiles(provider: Any, pactFileDir: File): List<ConsumerInfo> {
+  open fun loadPactFiles(provider: IProviderInfo, pactFileDir: File): List<IConsumerInfo> {
     return try {
       ProviderUtils.loadPactFiles(provider, pactFileDir)
     } catch (e: PactVerifierException) {
@@ -163,5 +165,5 @@ open class PactProviderMojo : AbstractMojo() {
 
   private fun propertyDefined(key: String) = System.getProperty(key) != null || configuration.containsKey(key)
 
-  private fun property(key: String) = System.getProperty(key, configuration.get(key))
+  private fun property(key: String) = System.getProperty(key, configuration[key])
 }

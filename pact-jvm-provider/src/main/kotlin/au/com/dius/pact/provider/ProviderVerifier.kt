@@ -15,8 +15,13 @@ import au.com.dius.pact.provider.reporters.VerifierReporter
 import groovy.lang.GroovyObjectSupport
 import mu.KLogging
 import mu.KotlinLogging
+import org.reflections.Reflections
+import org.reflections.scanners.MethodAnnotationsScanner
+import org.reflections.util.ConfigurationBuilder
+import org.reflections.util.FilterBuilder
 import java.lang.reflect.Method
 import java.net.URL
+import java.net.URLClassLoader
 import java.util.function.BiConsumer
 import java.util.function.Function
 import java.util.function.Supplier
@@ -56,6 +61,30 @@ private fun <I> publishResult(brokerClient: PactBrokerClient, source: BrokerUrlS
     logger.info { "Published verification result of '$result' for consumer '${pact.consumer}'" }
   }
 }
+
+enum class PactVerification {
+  REQUEST_RESPONSE, ANNOTATED_METHOD
+}
+
+/**
+ * Exception indicating failure to setup pact verification
+ */
+class PactVerifierException(
+  override val message: String = "PactVerifierException",
+  override val cause: Throwable? = null
+) : RuntimeException(message, cause)
+
+/**
+ * Annotation to mark a test method for provider verification
+ */
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
+annotation class PactVerifyProvider(
+  /**
+   * the tested provider name.
+   */
+  val value: String
+)
 
 /**
  * Interface to the provider verifier
@@ -113,7 +142,7 @@ interface IProviderVerifier {
     provider: IProviderInfo,
     interaction: RequestResponseInteraction,
     interactionMessage: String,
-    failures: Map<String, Any>,
+    failures: MutableMap<String, Any>,
     client: ProviderClient,
     context: Map<String, Any?> = emptyMap()
   ): Boolean
@@ -126,7 +155,7 @@ interface IProviderVerifier {
     consumer: IConsumerInfo,
     interaction: Interaction,
     interactionMessage: String,
-    failures: Map<String, Any>
+    failures: MutableMap<String, Any>
   ): Boolean
 
   /**
@@ -136,7 +165,7 @@ interface IProviderVerifier {
     expectedResponse: Response,
     actualResponse: Map<String, Any>,
     interactionMessage: String,
-    failures: Map<String, Any>
+    failures: MutableMap<String, Any>
   ): Boolean
 
   /**
@@ -167,6 +196,62 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
   override fun publishingResultsDisabled(): Boolean {
     return !projectHasProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS) ||
       projectGetProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS)?.toLowerCase() != "true"
+  }
+
+  override fun verifyResponseByInvokingProviderMethods(
+    providerInfo: IProviderInfo,
+    consumer: IConsumerInfo,
+    interaction: Interaction,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>
+  ): Boolean {
+    try {
+      val urls = projectClasspath.get()
+      val loader = URLClassLoader(urls.toTypedArray(), ProviderVerifierBase::class.java.classLoader)
+      val configurationBuilder = ConfigurationBuilder()
+        .setScanners(MethodAnnotationsScanner())
+        .addClassLoader(loader)
+        .addUrls(urls)
+
+      val scan = ProviderUtils.packagesToScan(providerInfo, consumer)
+      if (scan.isNotEmpty()) {
+        val filterBuilder = FilterBuilder()
+        scan.forEach { filterBuilder.include(it) }
+        configurationBuilder.filterInputsBy(filterBuilder)
+      }
+
+      val reflections = Reflections(configurationBuilder)
+      val methodsAnnotatedWith = reflections.getMethodsAnnotatedWith(PactVerifyProvider::class.java)
+      val providerMethods = methodsAnnotatedWith.filter { m ->
+        logger.debug { "Found annotated method $m" }
+        val annotation = m.getAnnotation(PactVerifyProvider::class.java)
+        logger.debug { "Found annotation $annotation" }
+        annotation?.value == interaction.description
+      }
+
+      if (providerMethods.isEmpty()) {
+        reporters.forEach { it.errorHasNoAnnotatedMethodsFoundForInteraction(interaction) }
+        throw RuntimeException("No annotated methods were found for interaction " +
+          "'${interaction.description}'. You need to provide a method annotated with " +
+          "@PactVerifyProvider(\"${interaction.description}\") that returns the message contents.")
+      } else {
+        return if (interaction is Message) {
+          verifyMessagePact(providerMethods.toHashSet(), interaction, interactionMessage, failures)
+        } else {
+          val expectedResponse = (interaction as RequestResponseInteraction).response
+          var result = true
+          providerMethods.forEach {
+            val actualResponse = invokeProviderMethod(it, null) as Map<String, Any>
+            result = result && this.verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
+          }
+          result
+        }
+      }
+    } catch (e: Exception) {
+      failures[interactionMessage] = e
+      reporters.forEach { it.verificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)) }
+      return false
+    }
   }
 
   fun displayBodyResult(failures: MutableMap<String, Any>, comparison: Map<String, Any>, comparisonDescription: String): Boolean {
@@ -209,7 +294,7 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     const val PACT_SHOW_FULLDIFF = "pact.showFullDiff"
     const val PACT_PROVIDER_VERSION = "pact.provider.version"
 
-    fun invokeProviderMethod(m: Method, instance: Any): Any? {
+    fun invokeProviderMethod(m: Method, instance: Any?): Any? {
       try {
         return m.invoke(instance)
       } catch (e: Throwable) {

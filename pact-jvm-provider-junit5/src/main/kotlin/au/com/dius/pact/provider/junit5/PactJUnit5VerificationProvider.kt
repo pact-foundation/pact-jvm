@@ -82,7 +82,7 @@ data class PactVerificationContext(
   }
 
   private fun validateTestExecution(client: Any?, request: Any?, failures: MutableMap<String, Any>): Boolean {
-    if (providerInfo.verificationType == null || providerInfo.verificationType == PactVerification.REQUST_RESPONSE) {
+    if (providerInfo.verificationType == null || providerInfo.verificationType == PactVerification.REQUEST_RESPONSE) {
       val interactionMessage = "Verifying a pact between $consumerName and ${providerInfo.name}" +
         " - ${interaction.description}"
       return try {

@@ -8,21 +8,13 @@ import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.UrlPactSource
-import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import org.reflections.Reflections
-import org.reflections.scanners.MethodAnnotationsScanner
-import org.reflections.util.ConfigurationBuilder
-import org.reflections.util.FilterBuilder
 import scala.Function1
 
-import java.lang.reflect.Method
 import java.util.function.Function
 import java.util.function.Predicate
-
-import static au.com.dius.pact.provider.ProviderVerifierKt.reportVerificationResults
 
 /**
  * Verifies the providers against the defined consumers in the context of a build plugin
@@ -73,7 +65,7 @@ class ProviderVerifier extends ProviderVerifierBase {
         log.warn('Skipping publishing of verification results as it has been disabled ' +
           "(${PACT_VERIFIER_PUBLISH_RESULTS} is not 'true')")
       } else {
-        reportVerificationResults(pact, result, providerVersion?.get() ?: '0.0.0', client)
+        DefaultVerificationReporter.INSTANCE.reportResults(pact, result, providerVersion?.get() ?: '0.0.0', client)
       }
     }
   }
@@ -83,7 +75,7 @@ class ProviderVerifier extends ProviderVerifierBase {
   }
 
   @SuppressWarnings('ThrowRuntimeException')
-  Pact<? extends Interaction> loadPactFileForConsumer(ConsumerInfo consumer) {
+  Pact<? extends Interaction> loadPactFileForConsumer(IConsumerInfo consumer) {
     def pactSource = consumer.pactSource
     if (pactSource instanceof Closure) {
       pactSource = pactSource.call()
@@ -110,7 +102,7 @@ class ProviderVerifier extends ProviderVerifierBase {
     }
   }
 
-  private generateLoadFailureMessage(ConsumerInfo consumer) {
+  private generateLoadFailureMessage(IConsumerInfo consumer) {
     if (pactLoadFailureMessage instanceof Closure) {
       pactLoadFailureMessage.call(consumer) as String
     } else if (pactLoadFailureMessage instanceof Function) {
@@ -168,7 +160,7 @@ class ProviderVerifier extends ProviderVerifierBase {
       ]
 
       boolean result = false
-      if (ProviderUtils.verificationType(provider, consumer) == PactVerification.REQUST_RESPONSE) {
+      if (ProviderUtils.verificationType(provider, consumer) == PactVerification.REQUEST_RESPONSE) {
         log.debug('Verifying via request/response')
         result = verifyResponseFromProvider(provider, interaction, interactionMessage, failures, providerClient,
           context)
@@ -261,58 +253,6 @@ class ProviderVerifier extends ProviderVerifierBase {
         }
       }
       result
-    }
-  }
-
-  @SuppressWarnings(['ThrowRuntimeException', 'ParameterCount'])
-  boolean verifyResponseByInvokingProviderMethods(IProviderInfo providerInfo, IConsumerInfo consumer,
-                                                  Interaction interaction, String interactionMessage, Map failures) {
-    try {
-      URL[] urls = projectClasspath.get().toArray()
-      URLClassLoader loader = new URLClassLoader(urls, GroovyObject.classLoader)
-      def configurationBuilder = new ConfigurationBuilder()
-        .setScanners(new MethodAnnotationsScanner())
-        .addClassLoader(loader)
-        .addUrls(loader.URLs)
-
-      def scan = ProviderUtils.packagesToScan(providerInfo, consumer)
-      if (!scan.empty) {
-        def filterBuilder = new FilterBuilder()
-        scan.each { filterBuilder.include(it) }
-        configurationBuilder.filterInputsBy(filterBuilder)
-      }
-
-      Reflections reflections = new Reflections(configurationBuilder)
-      def methodsAnnotatedWith = reflections.getMethodsAnnotatedWith(PactVerifyProvider)
-      def providerMethods = methodsAnnotatedWith.findAll { Method m ->
-        log.debug("Found annotated method $m")
-        def annotation = m.annotations.find { it.annotationType().toString() == PactVerifyProvider.toString() }
-        log.debug("Found annotation $annotation")
-        annotation?.value() == interaction.description
-      }
-
-      if (providerMethods.empty) {
-        reporters.each { it.errorHasNoAnnotatedMethodsFoundForInteraction(interaction) }
-        throw new RuntimeException('No annotated methods were found for interaction ' +
-          "'${interaction.description}'. You need to provide a method annotated with " +
-          "@PactVerifyProvider(\"${interaction.description}\") that returns the message contents.")
-      } else {
-        if (interaction instanceof Message) {
-          verifyMessagePact(providerMethods, interaction as Message, interactionMessage, failures)
-        } else {
-          def expectedResponse = interaction.response
-          boolean result = true
-          providerMethods.each {
-            def actualResponse = Companion.invokeProviderMethod(it)
-            result &= verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
-          }
-          result
-        }
-      }
-    } catch (e) {
-      failures[interactionMessage] = e
-      reporters.each { it.verificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)) }
-      false
     }
   }
 }

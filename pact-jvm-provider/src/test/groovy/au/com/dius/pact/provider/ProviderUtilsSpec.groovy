@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider
 
+import spock.lang.IgnoreIf
 import spock.lang.Specification
 
 @SuppressWarnings('UnnecessaryBooleanExpression')
@@ -33,19 +34,20 @@ class ProviderUtilsSpec extends Specification {
     thrown(PactVerifierException)
   }
 
-// Fails on windows
-//  def 'load pact files throws an exception if the directory is not readable'() {
-//    given:
-//    File dir = File.createTempDir()
-//    dir.setReadable(false, false)
-//    dir.deleteOnExit()
-//
-//    when:
-//    ProviderUtils.loadPactFiles(providerInfo, dir)
-//
-//    then:
-//    thrown(PactVerifierException)
-//  }
+  // Fails on windows
+  @IgnoreIf({ os.windows })
+  def 'load pact files throws an exception if the directory is not readable'() {
+    given:
+    File dir = File.createTempDir()
+    dir.setReadable(false, false)
+    dir.deleteOnExit()
+
+    when:
+    ProviderUtils.loadPactFiles(providerInfo, dir)
+
+    then:
+    thrown(PactVerifierException)
+  }
 
   @SuppressWarnings('LineLength')
   def 'verification type test'() {
@@ -53,11 +55,11 @@ class ProviderUtilsSpec extends Specification {
     ProviderUtils.verificationType(provider, consumer) == verificationType
 
     where:
-    provider | consumer || verificationType
-    new ProviderInfo() | new ConsumerInfo() || PactVerification.REQUST_RESPONSE
-    new ProviderInfo() | new ConsumerInfo(verificationType: PactVerification.ANNOTATED_METHOD) || PactVerification.ANNOTATED_METHOD
-    new ProviderInfo(verificationType: PactVerification.REQUST_RESPONSE) | new ConsumerInfo(verificationType: PactVerification.ANNOTATED_METHOD) || PactVerification.ANNOTATED_METHOD
-    new ProviderInfo(verificationType: PactVerification.ANNOTATED_METHOD) | new ConsumerInfo() || PactVerification.ANNOTATED_METHOD
+    provider                                                              | consumer                                                              || verificationType
+    new ProviderInfo()                                                    | new ConsumerInfo()                                                    || PactVerification.REQUEST_RESPONSE
+    new ProviderInfo()                                                    | new ConsumerInfo(verificationType: PactVerification.ANNOTATED_METHOD) || PactVerification.ANNOTATED_METHOD
+    new ProviderInfo(verificationType: PactVerification.REQUEST_RESPONSE) | new ConsumerInfo(verificationType: PactVerification.ANNOTATED_METHOD) || PactVerification.ANNOTATED_METHOD
+    new ProviderInfo(verificationType: PactVerification.ANNOTATED_METHOD) | new ConsumerInfo()                                                    || PactVerification.ANNOTATED_METHOD
   }
 
   def 'packages to scan test'() {
