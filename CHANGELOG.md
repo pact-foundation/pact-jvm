@@ -1,5 +1,9 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.6.0-rc.0 - 3.6 Release Candidate
+
+* c1d77a6b - fix: Maven plugin depends on the support library (Ronald Holshausen, Sat Sep 22 17:02:31 2018 +1000)
+
 # 3.6.0-rc.0 - First 3.6 candidate
 
 * c08abbce - fix: correct version for use in the release script (Ronald Holshausen, Sat Sep 22 16:30:32 2018 +1000)
