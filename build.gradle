@@ -47,7 +47,7 @@ allprojects {
 }
 
 subprojects {
-  version = '3.6.0-rc.0'
+  version = '3.6.0-rc.1'
   
   buildscript {
     repositories {
