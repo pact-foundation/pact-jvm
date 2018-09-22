@@ -11,7 +11,7 @@ buildscript {
 }
 
 plugins {
-  id 'nebula.kotlin' version '1.2.61'
+  id 'nebula.kotlin' version '1.2.70'
   id 'org.jmailen.kotlinter' version '1.11.2'
   id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC8'
   id 'org.jetbrains.dokka' version '0.9.16'
@@ -35,7 +35,7 @@ def scalaVersionLookup = [
 
 allprojects {
   group = 'au.com.dius'
-  version = '3.6.0'
+  version = '3.6.0-rc.0'
 
   repositories {
     mavenLocal()
