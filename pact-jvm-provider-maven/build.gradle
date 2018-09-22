@@ -18,7 +18,8 @@ def isWindows() {
 task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider_${project.scalaVersion}:install",
                                               ':pact-jvm-model:install',
                                               ":pact-jvm-matchers_${project.scalaVersion}:install",
-                                              ':pact-jvm-pact-broker:install']) {
+                                              ':pact-jvm-pact-broker:install',
+                                              ':pact-jvm-support:install']) {
     String mvn = 'mvn'
     if (isWindows()) {
         mvn = 'mvn.bat'
