@@ -289,6 +289,26 @@ class PactBrokerLoaderSpec extends Specification {
     result.size() == 4
   }
 
+  @RestoreSystemProperties
+  @SuppressWarnings('GStringExpressionWithinString')
+  def 'Loads all consumers by default'() {
+    given:
+    consumers = ['${pactbroker.consumers:}']
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    1 * brokerClient.fetchConsumers('test') >> [
+      new PactBrokerConsumer('a', 'latest', '', []),
+      new PactBrokerConsumer('b', 'latest', '', []),
+      new PactBrokerConsumer('c', 'latest', '', []),
+      new PactBrokerConsumer('d', 'latest', '', [])
+    ]
+    0 * _
+    result.size() == 4
+  }
+
   def 'Loads pacts only for provided consumers with the specified tags'() {
     given:
     consumers = ['a', 'b', 'c']
