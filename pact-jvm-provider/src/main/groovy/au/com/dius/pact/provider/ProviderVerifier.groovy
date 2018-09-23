@@ -26,8 +26,6 @@ import java.util.function.Function
 import java.util.function.Predicate
 import java.util.function.Supplier
 
-import static au.com.dius.pact.provider.ProviderVerifierKt.reportVerificationResults
-
 /**
  * Verifies the providers against the defined consumers in the context of a build plugin
  */
