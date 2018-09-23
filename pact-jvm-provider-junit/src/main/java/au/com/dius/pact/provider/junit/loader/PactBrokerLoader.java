@@ -143,7 +143,7 @@ public class PactBrokerLoader implements PactLoader {
           .flatMap(consumer -> parseListExpression(consumer, resolver).stream())
           .collect(toList());
         consumers = consumers.stream()
-                        .filter(c -> consumerInclusions.contains(c.getName()))
+                        .filter(c -> consumerInclusions.isEmpty() || consumerInclusions.contains(c.getName()))
                         .collect(toList());
       }
 
