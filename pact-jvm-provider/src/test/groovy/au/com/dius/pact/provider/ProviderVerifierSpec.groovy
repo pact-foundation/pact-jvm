@@ -406,7 +406,6 @@ class ProviderVerifierSpec extends Specification {
     ProviderInfo provider = new ProviderInfo('Test Provider')
     ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
     GroovyMock(PactReader, global: true)
-    GroovyMock(ProviderVerifierKt, global: true)
     GroovyMock(StateChange, global: true)
     def interaction1 = Mock(Interaction) {
       getDescription() >> 'Interaction 1'
@@ -426,12 +425,13 @@ class ProviderVerifierSpec extends Specification {
 
     verifier.projectHasProperty = { it == ProviderVerifier.PACT_FILTER_DESCRIPTION }
     verifier.projectGetProperty = { 'Interaction 2' }
+    verifier.verificationReporter = Mock(VerificationReporter)
 
     when:
     verifier.runVerificationForConsumer([:], provider, consumer)
 
     then:
-    0 * ProviderVerifierKt.reportVerificationResults(_, _, _)
+    0 * verifier.verificationReporter.reportResults(_, _, _)
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -444,7 +444,7 @@ class ProviderVerifierSpec extends Specification {
     def client = Mock(PactBrokerClient)
 
     when:
-    ProviderVerifierKt.reportVerificationResults(pact, true, '0', client)
+    DefaultVerificationReporter.INSTANCE.reportResults(pact, true, '0', client)
 
     then:
     1 * client.publishVerificationResults(links, true, '0', null) >> new Result.Success(true)
@@ -459,7 +459,7 @@ class ProviderVerifierSpec extends Specification {
     def client = Mock(PactBrokerClient)
 
     when:
-    ProviderVerifierKt.reportVerificationResults(pact, true, '0', client)
+    DefaultVerificationReporter.INSTANCE.reportResults(pact, true, '0', client)
 
     then:
     0 * client.publishVerificationResults(_, true, '0', null)
