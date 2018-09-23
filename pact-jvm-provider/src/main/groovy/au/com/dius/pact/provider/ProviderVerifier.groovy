@@ -26,8 +26,6 @@ import java.util.function.Function
 import java.util.function.Predicate
 import java.util.function.Supplier
 
-import static au.com.dius.pact.provider.ProviderVerifierKt.reportVerificationResults
-
 /**
  * Verifies the providers against the defined consumers in the context of a build plugin
  */
@@ -90,7 +88,7 @@ class ProviderVerifier extends ProviderVerifierBase {
         log.warn('Skipping publishing of verification results as it has been disabled ' +
           "(${PACT_VERIFIER_PUBLISHRESUTS} is not 'true')")
       } else {
-        reportVerificationResults(pact, result, providerVersion?.get() ?: '0.0.0', client)
+        verificationReporter.reportResults(pact, result, providerVersion?.get() ?: '0.0.0', client)
       }
     }
   }

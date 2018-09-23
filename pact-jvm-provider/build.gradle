@@ -8,6 +8,7 @@ dependencies {
 
     testCompile project(":pact-jvm-consumer-groovy_${project.scalaVersion}")
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
+    testCompile 'io.dropwizard:dropwizard-testing:1.3.5'
 }
 
 compileGroovy {
