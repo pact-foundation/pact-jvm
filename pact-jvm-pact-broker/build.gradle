@@ -6,6 +6,10 @@ dependencies {
   compile "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
   compile "com.google.guava:guava:${project.guavaVersion}"
   compile 'org.dmfs:rfc3986-uri:0.8'
+
+  compile('io.github.microutils:kotlin-logging:1.4.4') {
+    exclude group: 'org.jetbrains.kotlin'
+  }
 }
 
 compileGroovy {

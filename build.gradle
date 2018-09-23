@@ -88,21 +88,8 @@ subprojects {
     }
 
     dependencies {
-      compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
-
-      compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-      compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-      compile('io.github.microutils:kotlin-logging:1.4.4') {
-        exclude group: 'org.jetbrains.kotlin'
-      }
-
       if (project.hasProperty('scalaVersion')) {
-          compile "org.scala-lang:scala-library:${project.scalaFullVersion}"
-          compile("com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.7.2") {
-            exclude group: 'org.scala-lang'
-          }
-
-          testCompile "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}",
+        testCompile "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}",
             "org.specs2:specs2-junit_${project.scalaVersion}:${project.specs2Version}"
       }
 
