@@ -50,6 +50,15 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * ef156ff9 - chore: converted StateChange to Kotlin (Ronald Holshausen, Sat Jul 14 18:39:33 2018 +1000)
 * e7f896c1 - Fix compilation warning (tomoya-yokota, Thu Jul 5 13:00:49 2018 +0900)
 
+# 3.5.23 - Bugfix Release
+
+* 82d54f25 - fix: correct the example Spock code in the README #774 (Ronald Holshausen, Sun Sep 23 16:08:58 2018 +1000)
+* 12290ae8 - fix: correct the example JUnit code in the README #774 (Ronald Holshausen, Sun Sep 23 15:34:01 2018 +1000)
+* 6f1cafe7 - fix: codenarc violation (Ronald Holshausen, Sun Sep 23 14:12:24 2018 +1000)
+* 6c18cf1f - fix: when publishing results fails, log the message at ERROR level #738 (Ronald Holshausen, Sun Sep 23 13:53:25 2018 +1000)
+* 41773123 - fix: correct the regression introduced in #764 (#771) (Ronald Holshausen, Sun Sep 23 12:24:04 2018 +1000)
+* 7b126a29 - bump version to 3.5.23 (Ronald Holshausen, Sun Sep 9 14:16:36 2018 +1000)
+
 # 3.5.22 - Bugfix Release
 
 * aaaa0719 - fix: only enable wildcard matching logic with an explicit system property #759 (Ronald Holshausen, Sun Sep 9 12:36:55 2018 +1000)
