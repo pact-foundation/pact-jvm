@@ -103,72 +103,62 @@ Again the provider service is a DropWizard application, and is using the Dropwiz
 This example runs all interactions using spocks Unroll feature
 
 ```groovy
-class PactJVMProviderSpockSpec extends Specification {
+class ReadmeExamplePactJVMProviderSpockSpec extends Specification {
 
-    @ClassRule @Shared
-    TestRule startServiceRule = new DropwizardAppRule<DropwizardAppConfig>(DropwizardApp.class, "config.yml");
+  @ClassRule @Shared
+  TestRule startServiceRule = new DropwizardAppRule<DropwizardConfiguration>(TestDropwizardApplication,
+    ResourceHelpers.resourceFilePath('dropwizard/test-config.yaml'))
 
-    @Shared
-    ProviderInfo serviceProvider
-    @Shared
-    Pact testConsumerPact
+  @Shared
+  ProviderInfo serviceProvider
 
-    def setupSpec() {
-        serviceProvider = new ProviderInfo("Dropwizard App")
-        serviceProvider.protocol = "http"
-        serviceProvider.host = "localhost"
-        serviceProvider.port = 8080;
-        serviceProvider.path = "/"
-        def consumer = serviceProvider.hasPactWith("ping_consumer", {
-            pactFile = new File('target/pacts/ping_client-ping_service.json')
-        })
+  ProviderVerifier verifier
 
-        testConsumerPact = (Pact) new PactReader().loadPact(consumer.getPactFile());
+  def setupSpec() {
+    serviceProvider = new ProviderInfo('Dropwizard App')
+    serviceProvider.protocol = 'http'
+    serviceProvider.host = 'localhost'
+    serviceProvider.port = 8080
+    serviceProvider.path = '/'
+
+    serviceProvider.hasPactWith('zoo_app') {
+      pactSource = new FileSource(new File(ResourceHelpers.resourceFilePath('pacts/zoo_app-animal_service.json')))
+    }
+  }
+
+  def setup() {
+    verifier = new ProviderVerifier()
+  }
+
+  def cleanup() {
+    // cleanup provider state
+    // ie. db.truncateAllTables()
+  }
+
+  def cleanupSpec() {
+    // cleanup provider
+  }
+
+  @Unroll
+  def "Provider Pact - With Consumer #consumer"() {
+    expect:
+    verifyConsumerPact(consumer).empty
+
+    where:
+    consumer << serviceProvider.consumers
+  }
+
+  private Map verifyConsumerPact(ConsumerInfo consumer) {
+    Map failures = [:]
+
+    verifier.initialiseReporters(serviceProvider)
+    verifier.runVerificationForConsumer(failures, serviceProvider, consumer)
+
+    if (!failures.empty) {
+      verifier.displayFailures(failures)
     }
 
-    def cleanup() {
-        //cleanup provider state
-        //ie. db.truncateAllTables()
-    }
-
-    def cleanupSpec() {
-        //cleanup provider
-    }
-
-    @Unroll
-    def "Provider Pact - With Consumer"() {
-        given:
-        //setup provider state
-        // ie.    db.setupRecords()
-        //        serviceProvider.requestFilter = { req ->
-        //            req.addHeader('Authorization', token)
-        //        }
-
-        when:
-        ProviderClient client = new ProviderClient(provider: serviceProvider, request: interaction.request())
-        Map clientResponse = (Map) client.makeRequest()
-        Map result = (Map) ResponseComparison.compareResponse(interaction.response(),
-                clientResponse, clientResponse.statusCode, clientResponse.headers, clientResponse.data)
-
-        then:
-
-        // method matches
-        result.method == true
-
-        // headers all match, spock needs the size checked before
-        // asserting each result
-        if (result.headers.size() > 0) {
-            result.headers.each() { k, v ->
-                assert v == true
-            }
-        }
-
-        // empty list of body mismatches
-        result.body.size() == 0
-
-        where:
-        interaction << scala.collection.JavaConversions.seqAsJavaList(testConsumerPact.interactions())
-    }
+    failures
+  }
 }
 ```
-    
