@@ -91,4 +91,35 @@ class OptionalBodySpec extends Specification {
     OptionalBody.body('a') | 'a'
   }
 
+  def 'unwrap throws an exception when the body is missing'() {
+    when:
+    body.unwrap()
+
+    then:
+    thrown(UnwrapMissingBodyException)
+
+    where:
+    body << [
+      OptionalBody.nullBody(),
+      OptionalBody.missing(),
+      OptionalBody.body(null)
+    ]
+  }
+
+  @Unroll
+  def 'unwrap does not throw an exception when the body is not missing'() {
+    when:
+    body.unwrap()
+
+    then:
+    notThrown(UnwrapMissingBodyException)
+
+    where:
+    body << [
+      OptionalBody.empty(),
+      OptionalBody.body(''),
+      OptionalBody.body('a')
+    ]
+  }
+
 }

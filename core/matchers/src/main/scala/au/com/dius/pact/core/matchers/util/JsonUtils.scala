@@ -4,6 +4,7 @@ import groovy.json.JsonSlurper
 
 import scala.collection.JavaConversions
 
+@Deprecated
 object JsonUtils {
 
   def parseJsonString(json: String) = {

@@ -14,6 +14,10 @@ import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.matchingrules.TimeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import com.google.gson.JsonArray
+import com.google.gson.JsonNull
+import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import mu.KotlinLogging
 import org.apache.commons.lang3.time.DateUtils
 import scala.xml.Elem
@@ -22,6 +26,8 @@ import java.math.BigInteger
 import java.text.ParseException
 
 private val logger = KotlinLogging.logger {}
+private val integerRegex = Regex("^\\d+$")
+private val decimalRegex = Regex("^\\d+\\.\\d*$")
 
 fun valueOf(value: Any?): String {
   return when (value) {
@@ -31,10 +37,18 @@ fun valueOf(value: Any?): String {
   }
 }
 
+fun typeOf(value: Any?): String {
+  return when (value) {
+    null -> "Null"
+    else -> value.javaClass.simpleName
+  }
+}
+
 fun safeToString(value: Any?): String {
   return when (value) {
     null -> ""
     is Elem -> value.text()
+    is JsonPrimitive -> value.asString
     else -> value.toString()
   }
 }
@@ -131,9 +145,11 @@ fun <M : Mismatch> matchRegex(
   logger.debug { "comparing ${valueOf(actual)} with regexp $regex at $path -> $matches" }
   return if (matches ||
     expected is List<*> && actual is List<*> ||
+    expected is JsonArray && actual is JsonArray ||
     expected is scala.collection.immutable.List<*> && actual is scala.collection.immutable.List<*> ||
     expected is Map<*, *> && actual is Map<*, *> ||
-    expected is scala.collection.Map<*, *> && actual is scala.collection.Map<*, *>) {
+    expected is scala.collection.Map<*, *> && actual is scala.collection.Map<*, *> ||
+    expected is JsonObject && actual is JsonObject) {
     emptyList()
   } else {
     listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to match '$regex'", path))
@@ -151,11 +167,18 @@ fun <M : Mismatch> matchType(
     expected is Number && actual is Number ||
     expected is Boolean && actual is Boolean ||
     expected is List<*> && actual is List<*> ||
+    expected is JsonArray && actual is JsonArray ||
     expected is scala.collection.immutable.List<*> && actual is scala.collection.immutable.List<*> ||
     expected is Map<*, *> && actual is Map<*, *> ||
+    expected is JsonObject && actual is JsonObject ||
     expected is scala.collection.Map<*, *> && actual is scala.collection.Map<*, *> ||
     expected is Elem && actual is Elem && actual.label() == expected.label()) {
     emptyList()
+  } else if (expected is JsonPrimitive && actual is JsonPrimitive &&
+    ((expected.isBoolean && actual.isBoolean) ||
+      (expected.isNumber && actual.isNumber) ||
+      (expected.isString && actual.isString))) {
+      emptyList()
   } else if (expected == null) {
     if (actual == null) {
       emptyList()
@@ -164,7 +187,8 @@ fun <M : Mismatch> matchType(
     }
   } else {
     listOf(mismatchFactory.create(expected, actual,
-      "Expected ${valueOf(actual)} to be the same type as ${valueOf(expected)}", path))
+      "Expected ${valueOf(actual)} (${typeOf(actual)}) to be the same type as " +
+        "${valueOf(expected)} (${typeOf(expected)})", path))
   }
 }
 
@@ -180,29 +204,55 @@ fun <M : Mismatch> matchNumber(
   }
   when (numberType) {
     NumberTypeMatcher.NumberType.NUMBER -> {
-      logger.debug { "comparing type of ${valueOf(actual)} to a number at $path" }
-      if (actual !is Number) {
+      logger.debug { "comparing type of ${valueOf(actual)} (${typeOf(actual)}) to a number at $path" }
+      if (actual is JsonPrimitive && !actual.isNumber || (actual !is Number && actual !is JsonPrimitive)) {
         return listOf(mismatchFactory.create(expected, actual,
-          "Expected ${valueOf(actual)} to be a number", path))
+          "Expected ${valueOf(actual)} (${typeOf(actual)}) to be a number", path))
       }
     }
     NumberTypeMatcher.NumberType.INTEGER -> {
-      logger.debug { "comparing type of ${valueOf(actual)} to an integer at $path" }
-      if (actual !is Int && actual !is Long && actual !is BigInteger) {
+      logger.debug { "comparing type of ${valueOf(actual)} (${typeOf(actual)}) to an integer at $path" }
+      if (!matchInteger(actual)) {
         return listOf(mismatchFactory.create(expected, actual,
-          "Expected ${valueOf(actual)} to be an integer", path))
+          "Expected ${valueOf(actual)} (${typeOf(actual)}) to be an integer", path))
       }
     }
     NumberTypeMatcher.NumberType.DECIMAL -> {
-      logger.debug { "comparing type of ${valueOf(actual)} to a decimal at $path" }
-      if (actual !is Float && actual !is Double && actual !is BigDecimal && actual != 0) {
+      logger.debug { "comparing type of ${valueOf(actual)} (${typeOf(actual)}) to a decimal at $path" }
+      if (!matchDecimal(actual)) {
         return listOf(mismatchFactory.create(expected, actual,
-          "Expected ${valueOf(actual)} to be a decimal number",
+          "Expected ${valueOf(actual)} (${typeOf(actual)}) to be a decimal number",
           path))
       }
     }
   }
   return emptyList()
+}
+
+fun matchDecimal(actual: Any?): Boolean {
+  val result = when {
+    actual == 0 -> true
+    actual is Float -> true
+    actual is Double -> true
+    actual is BigDecimal && actual.precision() > 0 -> true
+    actual is JsonPrimitive && actual.isNumber -> decimalRegex.matches(actual.toString())
+    else -> false
+  }
+  logger.debug { "${valueOf(actual)} (${typeOf(actual)}) matches decimal number -> $result" }
+  return result
+}
+
+fun matchInteger(actual: Any?): Boolean {
+  val result = when {
+    actual is Int -> true
+    actual is Long -> true
+    actual is BigInteger -> true
+    actual is BigDecimal && actual.precision() == 0 -> true
+    actual is JsonPrimitive && actual.isNumber -> integerRegex.matches(actual.toString())
+    else -> false
+  }
+  logger.debug { "${valueOf(actual)} (${typeOf(actual)}) matches integer -> $result" }
+  return result
 }
 
 fun <M : Mismatch> matchDate(
@@ -279,6 +329,12 @@ fun <M : Mismatch> matchMinType(
     } else {
       emptyList()
     }
+  } else if (actual is JsonArray) {
+    if (actual.size() < min) {
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
+    } else {
+      emptyList()
+    }
   } else if (actual is Elem) {
     if (actual.child().size() < min) {
       listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
@@ -310,6 +366,12 @@ fun <M : Mismatch> matchMaxType(
     } else {
       emptyList()
     }
+  } else if (actual is JsonArray) {
+    if (actual.size() > max) {
+      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
+    } else {
+      emptyList()
+    }
   } else if (actual is Elem) {
     if (actual.child().size() > max) {
       listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
@@ -322,7 +384,7 @@ fun <M : Mismatch> matchMaxType(
 }
 
 fun <M : Mismatch> matchNull(path: List<String>, actual: Any?, mismatchFactory: MismatchFactory<M>): List<M> {
-  val matches = actual == null
+  val matches = actual == null || actual is JsonNull
   logger.debug { "comparing ${valueOf(actual)} to null at $path -> $matches" }
   return if (matches) {
     emptyList()

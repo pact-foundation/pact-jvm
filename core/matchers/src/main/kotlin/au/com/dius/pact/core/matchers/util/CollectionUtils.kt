@@ -18,3 +18,15 @@ fun <A, B> corresponds(l1: List<A>, l2: List<B>, fn: (a: A, b: B) -> Boolean): B
     false
   }
 }
+
+fun <E> List<E>.padTo(size: Int, item: E): List<E> {
+  return if (size < this.size) {
+    this.dropLast(this.size - size)
+  } else {
+    val list = this.toMutableList()
+    for (i in this.size.until(size)) {
+      list.add(item)
+    }
+    return list
+  }
+}

@@ -167,7 +167,7 @@ class MatchersSpec extends Specification {
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ['Expected \'200.3\' to be the same type as 100']
+    mismatches*.mismatch == ['Expected "200.3" (JsonPrimitive) to be the same type as 100 (JsonPrimitive)']
   }
 
   def 'type matcher - match on type - map elements should inherit the matchers from the parent'() {
@@ -184,7 +184,7 @@ class MatchersSpec extends Specification {
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ['Expected \'200.3\' to be the same type as 100']
+    mismatches*.mismatch == ['Expected "200.3" (JsonPrimitive) to be the same type as 100 (JsonPrimitive)']
   }
 
   def 'path matching - match root node'() {

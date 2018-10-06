@@ -33,7 +33,7 @@ public class MatchingTest {
     public void testRegexpMatchingOnBody() {
         PactDslJsonBody body = new PactDslJsonBody()
             .stringMatcher("name", "\\w+", HARRY)
-            .stringMatcher("position", "staff|contactor");
+            .stringMatcher("position", "staff|contractor", "staff");
 
         PactDslJsonBody responseBody = new PactDslJsonBody()
             .stringMatcher("name", "\\w+", HARRY);
@@ -140,15 +140,12 @@ public class MatchingTest {
 
     private void runTest(PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
         MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V3);
-        PactVerificationResult result = runConsumerTest(pactFragment.toPact(), config, new PactTestRun() {
-            @Override
-            public void run(@NotNull MockServer mockServer) throws IOException {
-                try {
-                    Assert.assertEquals(expectedResponse, new ConsumerClient(config.url()).post(path, body, ContentType.APPLICATION_JSON));
-                } catch (IOException e) {
-                    LOGGER.error(e.getMessage(), e);
-                    throw e;
-                }
+        PactVerificationResult result = runConsumerTest(pactFragment.toPact(), config, mockServer -> {
+            try {
+                Assert.assertEquals(expectedResponse, new ConsumerClient(config.url()).post(path, body, ContentType.APPLICATION_JSON));
+            } catch (IOException e) {
+                LOGGER.error(e.getMessage(), e);
+                throw e;
             }
         });
 

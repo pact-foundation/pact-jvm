@@ -9,6 +9,7 @@ import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 
+@SuppressWarnings('BracesForMethod')
 class JsonBodyMatcherSpec extends Specification {
 
   private matchers
@@ -117,11 +118,22 @@ class JsonBodyMatcherSpec extends Specification {
     expectedBody = OptionalBody.nullBody()
   }
 
-  def 'matching json bodies - returns a mismatch - when comparing an empty map to a non-empty one'() {
+  def 'matching json bodies - returns no mismatch - when comparing an empty map to a non-empty one'() {
     expect:
-    matcher.matchBody(expected(expectedBody), actual(actualBody), true).find {
+    matcher.matchBody(expected(expectedBody), actual(actualBody), true).empty
+
+    where:
+
+    actualBody = OptionalBody.body('{"something": 100}')
+    expectedBody = OptionalBody.body('{}')
+  }
+
+  def '''matching json bodies - returns a mismatch - when comparing an empty map to a non-empty one and we do not
+         allow unexpected keys'''() {
+    expect:
+    matcher.matchBody(expected(expectedBody), actual(actualBody), false).find {
       it instanceof BodyMismatch &&
-        it.mismatch.contains('Expected an empty Map but received Map(something -> 100)')
+        it.mismatch.contains('Expected an empty Map but received {"something":100}')
     }
 
     where:
@@ -134,7 +146,7 @@ class JsonBodyMatcherSpec extends Specification {
     expect:
     matcher.matchBody(expected(expectedBody), actual(actualBody), true).find {
       it instanceof BodyMismatch &&
-        it.mismatch.contains('Expected an empty List but received List(100)')
+        it.mismatch.contains('Expected an empty List but received [100]')
     }
 
     where:
@@ -202,8 +214,8 @@ class JsonBodyMatcherSpec extends Specification {
     expect:
     matcher.matchBody(expected(expectedBody), actual(actualBody), true).find {
       it instanceof BodyMismatch &&
-        it.mismatch.contains('Type mismatch: Expected Map Map(something -> 100, somethingElse -> 100) ' +
-          'but received List List(100, 100)')
+        it.mismatch.contains('Type mismatch: Expected Map {"something":100,"somethingElse":100} ' +
+          'but received List [100,100]')
     }
 
     where:
@@ -216,7 +228,7 @@ class JsonBodyMatcherSpec extends Specification {
     expect:
     matcher.matchBody(expected(expectedBody), actual(actualBody), true).find {
       it instanceof BodyMismatch &&
-        it.mismatch.contains('Type mismatch: Expected List List(100, 100) but received Integer 100')
+        it.mismatch.contains('Type mismatch: Expected List [100,100] but received Primitive 100')
     }
 
     where:
@@ -271,14 +283,14 @@ class JsonBodyMatcherSpec extends Specification {
             "documentCategoryId": 5,
             "documentCategoryCode": null,
             "contentLength": 0,
-            "tags": null,
+            "tags": null
         },
         {
             "documentId": 1,
             "documentCategoryId": 5,
             "documentCategoryCode": null,
             "contentLength": 0,
-            "tags": null,
+            "tags": null
         }
     ]''')
     expectedBody = OptionalBody.body('''[{

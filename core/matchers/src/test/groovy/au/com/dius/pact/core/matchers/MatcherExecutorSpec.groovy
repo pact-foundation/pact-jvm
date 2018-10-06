@@ -197,4 +197,42 @@ class MatcherExecutorSpec extends Specification {
     new MinMaxTypeMatcher(1, 2) | [0]      | [1, 1, 2] || false
   }
 
+  @Unroll
+  @SuppressWarnings('UnnecessaryCast')
+  def 'matching integer values'() {
+    expect:
+    MatcherExecutorKt.matchInteger(value) == result
+
+    where:
+
+    value             | result
+    '100'             | false
+    100               | true
+    100.0             | false
+    100 as int        | true
+    100 as long       | true
+    100 as BigInteger | true
+
+  }
+
+  @Unroll
+  @SuppressWarnings('UnnecessaryCast')
+  def 'matching decimal number values'() {
+    expect:
+    MatcherExecutorKt.matchDecimal(value) == result
+
+    where:
+
+    value             | result
+    '100'             | false
+    100               | false
+    100.0             | true
+    100.0 as float    | true
+    100.0 as double   | true
+    100 as int        | false
+    100 as long       | false
+    100 as BigInteger | false
+
+  }
+
 }

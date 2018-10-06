@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.matchers
 
+import com.google.gson.JsonElement
 import groovy.json.JsonOutput
 
 private const val NEW_LINE = '\n'
@@ -43,4 +44,10 @@ fun generateObjectDiff(expected: Any?, actual: Any?): String {
     }
 
     return generateDiff(expectedJson, actualJson).joinToString(separator = NEW_LINE.toString())
+}
+
+fun generateJsonDiff(expected: JsonElement, actual: JsonElement): String {
+  val actualJson = JsonOutput.prettyPrint(actual.toString())
+  val expectedJson = JsonOutput.prettyPrint(expected.toString())
+  return generateDiff(expectedJson, actualJson).joinToString(separator = NEW_LINE.toString())
 }

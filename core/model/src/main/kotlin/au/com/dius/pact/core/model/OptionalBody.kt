@@ -61,7 +61,7 @@ data class OptionalBody(val state: State, val value: String? = null) {
   }
 
   fun unwrap(): String {
-    if (isPresent()) {
+    if (isPresent() || isEmpty()) {
       return value!!
     } else {
       throw UnwrapMissingBodyException("Failed to unwrap value from a $state body")
@@ -80,3 +80,5 @@ fun OptionalBody?.isPresent() = this != null && this.isPresent()
 fun OptionalBody?.isNotPresent() = this == null || this.isNotPresent()
 
 fun OptionalBody?.orElse(defaultValue: String) = this?.orElse(defaultValue) ?: defaultValue
+
+fun OptionalBody?.unwrap() = this?.unwrap() ?: throw throw UnwrapMissingBodyException("Failed to unwrap value from a null body")

@@ -117,12 +117,12 @@ public class PactMultiProviderTest {
 
     @Test
     @PactVerification(value = {"test_provider", "test_provider2"})
-    public void provider2Fails() throws IOException, InterruptedException {
+    public void provider2Fails() throws IOException {
       mockTestProvider2.validateResultWith((result, t) -> {
         assertThat(t, is(instanceOf(AssertionError.class)));
         assertThat(t.getMessage(), is("The following mismatched requests occurred:\n" +
-          "PartialMismatch(mismatches=[BodyMismatch(expected=larry, actual=farry, mismatch=Expected 'larry'" +
-          " but received 'farry', path=$.name, diff=null)])"));
+          "PartialMismatch(mismatches=[BodyMismatch(expected=\"larry\", actual=\"farry\", " +
+          "mismatch=Expected \"larry\" but received \"farry\", path=$.name, diff=null)])"));
         assertThat(result, is(instanceOf(PactVerificationResult.Mismatches.class)));
         PactVerificationResult.Mismatches error = (PactVerificationResult.Mismatches) result;
         assertThat(error.getMismatches(), hasSize(1));
@@ -138,7 +138,7 @@ public class PactMultiProviderTest {
 
     @Test
     @PactVerification(value = {"test_provider", "test_provider2"})
-    public void bothprovidersFail() throws IOException, InterruptedException {
+    public void bothprovidersFail() throws IOException {
       mockTestProvider.validateResultWith((result, t) -> {
         assertThat(t, is(instanceOf(AssertionError.class)));
         assertThat(t.getMessage(), startsWith("The following mismatched requests occurred:\nUnexpected Request:\n\tmethod: GET\n\tpath: /abc"));
@@ -153,8 +153,8 @@ public class PactMultiProviderTest {
       mockTestProvider2.validateResultWith((result, t) -> {
         assertThat(t, is(instanceOf(AssertionError.class)));
         assertThat(t.getMessage(), is("The following mismatched requests occurred:\n" +
-          "PartialMismatch(mismatches=[BodyMismatch(expected=larry, actual=farry, mismatch=Expected 'larry' " +
-          "but received 'farry', path=$.name, diff=null)])"));
+          "PartialMismatch(mismatches=[BodyMismatch(expected=\"larry\", actual=\"farry\", " +
+          "mismatch=Expected \"larry\" but received \"farry\", path=$.name, diff=null)])"));
         assertThat(result, is(instanceOf(PactVerificationResult.Mismatches.class)));
         PactVerificationResult.Mismatches error = (PactVerificationResult.Mismatches) result;
         assertThat(error.getMismatches(), hasSize(1));
