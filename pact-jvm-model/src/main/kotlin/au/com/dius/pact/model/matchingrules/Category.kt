@@ -91,11 +91,13 @@ data class Category @JvmOverloads constructor(
     return if (pactSpecVersion < PactSpecVersion.V3) {
       matchingRules.entries.associate {
         val keyBase = "\$.$name"
-        if (it.key.startsWith('$')) {
-          Pair(keyBase + it.key.substring(1), it.value.toMap(pactSpecVersion))
-        } else {
-          Pair(keyBase + it.key, it.value.toMap(pactSpecVersion))
+        val key = when {
+          it.key.startsWith('$') -> keyBase + it.key.substring(1)
+          it.key.isNotEmpty() && !it.key.startsWith('[') -> keyBase + '.' + it.key
+          it.key.isNotEmpty() -> keyBase + it.key
+          else -> keyBase
         }
+        Pair(key, it.value.toMap(pactSpecVersion))
       }
     } else {
       matchingRules.flatMap { entry ->
