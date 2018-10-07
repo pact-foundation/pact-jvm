@@ -32,7 +32,7 @@ public @interface PactBroker {
 
     /**
      * HTTP protocol, defaults to http
-     * @deprecated Use scheme instead
+     * @deprecated Use scheme instead (will be removed in 4.0.x)
      */
     @Deprecated
     String protocol() default "${pactbroker.protocol:http}";
@@ -56,7 +56,7 @@ public @interface PactBroker {
 
   /**
    * If the test should fail if no pacts are found for the provider, default is true
-   * @deprecated Use a @IgnoreNoPactsToVerify annotation on the test class instead
+   * @deprecated Use a @IgnoreNoPactsToVerify annotation on the test class instead (will be removed in 4.0.x)
    */
   @Deprecated
   boolean failIfNoPactsFound() default true;
