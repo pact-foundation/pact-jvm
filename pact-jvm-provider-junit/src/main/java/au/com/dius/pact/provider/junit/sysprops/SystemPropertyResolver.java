@@ -7,17 +7,22 @@ public class SystemPropertyResolver implements ValueResolver {
   @Override
   public String resolveValue(final String property) {
     PropertyValueTuple tuple = new PropertyValueTuple(property).invoke();
-    String propertyValue = System.getProperty(tuple.getPropertyName());
-    if (propertyValue == null) {
-      propertyValue = System.getenv(tuple.getPropertyName());
+    String propertyValue = property;
+
+    if (StringUtils.isNotEmpty(propertyValue)) {
+      propertyValue = System.getProperty(tuple.getPropertyName());
+      if (propertyValue == null) {
+        propertyValue = System.getenv(tuple.getPropertyName());
+      }
+      if (propertyValue == null) {
+        propertyValue = tuple.getDefaultValue();
+      }
+      if (propertyValue == null) {
+        throw new RuntimeException("Could not resolve property \"" + tuple.getPropertyName()
+          + "\" in the system properties or environment variables and no default value is supplied");
+      }
     }
-    if (propertyValue == null) {
-      propertyValue = tuple.getDefaultValue();
-    }
-    if (propertyValue == null) {
-      throw new RuntimeException("Could not resolve property \"" + tuple.getPropertyName()
-        + "\" in the system properties or environment variables and no default value is supplied");
-    }
+
     return propertyValue;
   }
 
@@ -48,7 +53,7 @@ public class SystemPropertyResolver implements ValueResolver {
     }
 
     public PropertyValueTuple invoke() {
-      if (propertyName.contains(":")) {
+      if (StringUtils.contains(propertyName, ":")) {
         String[] kv = StringUtils.splitPreserveAllTokens(propertyName, ':');
         propertyName = kv[0];
         if (kv.length > 1) {

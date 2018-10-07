@@ -312,6 +312,15 @@ public class PactJUnitTest {
 By default the pact runner will fail the verification test if no pact files are found to verify. To change the
 failure into a warning, add a `@IgnoreNoPactsToVerify` annotation to your test class.
 
+#### Ignoring IO errors loading pact files [version 3.5.24+]
+
+You can also set the test to ignore any IO and parser exceptions when loading the pact files by setting the
+`ignoreIoErrors` attribute on the annotation to `"true"` or setting the JVM system property `pact.verification.ignoreIoErrors`
+to `true`.
+
+** WARNING! Do not enable this on your CI server, as this could result in your build passing with no providers 
+having been verified due to a configuration error. **        
+
 ## Test target
 
 The field in test class of type `au.com.dius.pact.provider.junit.target.Target` annotated with `au.com.dius.pact.provider.junit.target.TestTarget`
