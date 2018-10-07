@@ -37,7 +37,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = { boolean failIfNoPactsFound = true ->
       def loader = new PactBrokerLoader(host, port, protocol, tags, consumers) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
+        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           brokerClient
         }
 
@@ -97,7 +97,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = {
       new PactBrokerLoader(FullPactBrokerAnnotation.getAnnotation(PactBroker)) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
+        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           assert url.host == 'pactbroker.host'
           assert url.port == 1000
           brokerClient
@@ -121,7 +121,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = {
       new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
+        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           assert url.host == 'my.pactbroker.host'
           assert url.port == 4711
           brokerClient
@@ -145,7 +145,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = {
       new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
+        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           assert url.host == 'my.pactbroker.host'
           assert url.port == 4711
           brokerClient
@@ -169,7 +169,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = {
       new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
+        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           assert url.host == 'my.pactbroker.host'
           assert url.port == -1
           brokerClient
@@ -370,7 +370,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = {
       new PactBrokerLoader(PactBrokerAnnotationNoPort.getAnnotation(PactBroker)) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
+        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           assert url.host == 'pactbroker.host'
           assert url.port == -1
           brokerClient
@@ -391,7 +391,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = {
       new PactBrokerLoader(PactBrokerAnnotationHttpsNoPort.getAnnotation(PactBroker)) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
+        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           assert url.host == 'pactbroker.host'
           assert url.port == -1
           brokerClient
@@ -407,22 +407,22 @@ class PactBrokerLoaderSpec extends Specification {
     1 * brokerClient.fetchConsumers('test') >> []
   }
 
-  @PactBroker(host = 'pactbroker.host', port = '1000', failIfNoPactsFound = false)
+  @PactBroker(host = 'pactbroker.host', port = '1000')
   static class FullPactBrokerAnnotation {
 
   }
 
-  @PactBroker(failIfNoPactsFound = false)
+  @PactBroker
   static class MinimalPactBrokerAnnotation {
 
   }
 
-  @PactBroker(host = 'pactbroker.host', failIfNoPactsFound = false)
+  @PactBroker(host = 'pactbroker.host')
   static class PactBrokerAnnotationNoPort {
 
   }
 
-  @PactBroker(host = 'pactbroker.host', scheme = 'https', failIfNoPactsFound = false)
+  @PactBroker(host = 'pactbroker.host', scheme = 'https')
   static class PactBrokerAnnotationHttpsNoPort {
 
   }

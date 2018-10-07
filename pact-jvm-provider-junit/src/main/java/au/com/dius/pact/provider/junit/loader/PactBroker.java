@@ -31,16 +31,9 @@ public @interface PactBroker {
     String port() default "${pactbroker.port:}";
 
     /**
-     * HTTP protocol, defaults to http
-     * @deprecated Use scheme instead
-     */
-    @Deprecated
-    String protocol() default "${pactbroker.protocol:http}";
-
-    /**
      * HTTP scheme, defaults to HTTP
      */
-    String scheme() default "${pactbroker.protocol:http}";
+    String scheme() default "${pactbroker.scheme:http}";
 
     /**
      * Tags to use to fetch pacts for, defaults to `latest`
@@ -55,16 +48,10 @@ public @interface PactBroker {
     String[] consumers() default "${pactbroker.consumers:}";
 
   /**
-   * If the test should fail if no pacts are found for the provider, default is true
-   * @deprecated Use a @IgnoreNoPactsToVerify annotation on the test class instead
-   */
-  @Deprecated
-  boolean failIfNoPactsFound() default true;
-
-  /**
    * Authentication to use with the pact broker, by default no authentication is used
    */
-  PactBrokerAuth authentication() default @PactBrokerAuth(scheme = "${pactbroker.auth.scheme:basic}", username = "${pactbroker.auth.username:}", password = "${pactbroker.auth.password:}");
+  PactBrokerAuth authentication() default @PactBrokerAuth(scheme = "${pactbroker.auth.scheme:basic}",
+    username = "${pactbroker.auth.username:}", password = "${pactbroker.auth.password:}");
 
   /**
    * Override the default value resolver for resolving the values in the expressions

@@ -40,31 +40,29 @@ public class PactBrokerLoader implements PactLoader {
   private final String pactBrokerScheme;
   private final List<String> pactBrokerTags;
   private final List<String> pactBrokerConsumers;
-  private boolean failIfNoPactsFound;
+  private boolean failIfNoPactsFound = true;
   private PactBrokerAuth authentication;
   private PactBrokerSource pactSource;
   private Class<? extends ValueResolver> valueResolverClass;
   private ValueResolver valueResolver;
 
-  public PactBrokerLoader(final String pactBrokerHost, final String pactBrokerPort, final String pactBrokerProtocol) {
-    this(pactBrokerHost, pactBrokerPort, pactBrokerProtocol, Collections.singletonList(LATEST), new ArrayList<>());
+  public PactBrokerLoader(final String pactBrokerHost, final String pactBrokerPort, final String pactBrokerScheme) {
+    this(pactBrokerHost, pactBrokerPort, pactBrokerScheme, Collections.singletonList(LATEST), new ArrayList<>());
   }
 
-  public PactBrokerLoader(final String pactBrokerHost, final String pactBrokerPort, final String pactBrokerProtocol,
+  public PactBrokerLoader(final String pactBrokerHost, final String pactBrokerPort, final String pactBrokerScheme,
       final List<String> tags, final List<String> consumers) {
     this.pactBrokerHost = pactBrokerHost;
     this.pactBrokerPort = pactBrokerPort;
-    this.pactBrokerScheme = pactBrokerProtocol;
+    this.pactBrokerScheme = pactBrokerScheme;
     this.pactBrokerTags = tags;
     this.pactBrokerConsumers = consumers;
-    this.failIfNoPactsFound = true;
     this.pactSource = new PactBrokerSource(this.pactBrokerHost, this.pactBrokerPort, this.pactBrokerScheme);
   }
 
   public PactBrokerLoader(final PactBroker pactBroker) {
-    this(pactBroker.host(), pactBroker.port(), StringUtils.defaultIfBlank(pactBroker.scheme(), pactBroker.protocol()),
-      Arrays.asList(pactBroker.tags()), Arrays.asList(pactBroker.consumers()));
-    this.failIfNoPactsFound = pactBroker.failIfNoPactsFound();
+    this(pactBroker.host(), pactBroker.port(), pactBroker.scheme(), Arrays.asList(pactBroker.tags()),
+      Arrays.asList(pactBroker.consumers()));
     this.authentication = pactBroker.authentication();
     this.valueResolverClass = pactBroker.valueResolver();
   }
@@ -183,7 +181,7 @@ public class PactBrokerLoader implements PactLoader {
     return pact;
   }
 
-  PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
+  PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
     HashMap options = new HashMap();
     if (this.authentication != null && !this.authentication.scheme().equalsIgnoreCase("none")) {
       options.put("authentication", Arrays.asList(parseExpression(this.authentication.scheme(), resolver),

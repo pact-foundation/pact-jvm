@@ -54,13 +54,13 @@ class PactBrokerAnnotationDefaultsTest {
 
     @Test
     fun `default protocol is http`() {
-        assertThat(parseExpression(annotation.protocol), `is`("http"))
+        assertThat(parseExpression(annotation.scheme), `is`("http"))
     }
 
     @Test
-    fun `can set protocol`() {
-        props.setProperty("pactbroker.protocol", "myProtocol")
-        assertThat(parseExpression(annotation.protocol), `is`("myProtocol"))
+    fun `can set scheme`() {
+        props.setProperty("pactbroker.scheme", "myProtocol")
+        assertThat(parseExpression(annotation.scheme), `is`("myProtocol"))
     }
 
     @Test

@@ -198,7 +198,7 @@ The default values of the `@PactBroker` annotation now enable variable interpola
 The following keys may be managed through the environment
 * `pactbroker.host`
 * `pactbroker.port`
-* `pactbroker.protocol`
+* `pactbroker.scheme`
 * `pactbroker.tags` (comma separated)
 * `pactbroker.auth.scheme`
 * `pactbroker.auth.username`
