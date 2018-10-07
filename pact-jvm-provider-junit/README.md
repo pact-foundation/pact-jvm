@@ -151,6 +151,8 @@ The Pact runner will automatically collect pacts based on annotations on the tes
 out-of-the-box options (files from a directory, files from a set of URLs or a pact broker) or you can easily add your
 own Pact source.
 
+If you need to load a single pact file from the file system, use the `PactUrl` with the URL set to the file path.
+
 **Note:** You can only define one source of pacts per test class.
 
 ### Download pacts from a pact-broker
@@ -238,6 +240,8 @@ To use pacts from urls annotate the test class with
 ```java
 @PactUrl(urls = {"http://build.server/zoo_app-animal_service.json"} )
 ```
+
+If you need to load a single pact file from the file system, you can use the `PactUrl` with the URL set to the file path.
 
 ### Pact folder
 
