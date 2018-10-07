@@ -218,8 +218,8 @@ class PactVerificationExtension(
       reports.addAll(verificationReports.get().value)
     } else if (valueResolver.propertyDefined("pact.verification.reports")) {
       reportingEnabled = true
-      reportDirectory = valueResolver.resolveValue("pact.verification.reportDir:$reportDirectory")
-      reports.addAll(valueResolver.resolveValue("pact.verification.reports:").split(","))
+      reportDirectory = valueResolver.resolveValue("pact.verification.reportDir:$reportDirectory")!!
+      reports.addAll(valueResolver.resolveValue("pact.verification.reports:")!!.split(","))
     }
 
     if (reportingEnabled) {

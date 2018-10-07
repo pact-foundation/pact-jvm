@@ -11,6 +11,7 @@ import au.com.dius.pact.provider.junit.loader.PactSource
 import au.com.dius.pact.provider.junit.target.HttpTarget
 import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestTarget
+import au.com.dius.pact.support.expressions.SystemPropertyResolver
 import groovy.json.JsonException
 import mu.KLogging
 import org.junit.Ignore
@@ -50,6 +51,7 @@ import kotlin.reflect.full.findAnnotation
 open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(clazz) where I: Interaction {
 
   private val child = mutableListOf<InteractionRunner<I>>()
+  private var valueResolver = SystemPropertyResolver()
 
   init {
     if (clazz.getAnnotation(Ignore::class.java) != null) {
@@ -64,22 +66,41 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(c
       val consumerName = consumerInfo?.value
 
       val testClass = TestClass(clazz)
+      val ignoreNoPactsToVerify = clazz.getAnnotation(IgnoreNoPactsToVerify::class.java)
+      val ignoreIoErrors = try {
+        valueResolver.resolveValue(ignoreNoPactsToVerify?.ignoreIoErrors)
+      } catch (e: RuntimeException) {
+        logger.debug(e) { "Failed to resolve property value" }
+        ignoreNoPactsToVerify?.ignoreIoErrors
+      } ?: "false"
 
       val pactLoader = getPactSource(testClass)
       val pacts = try {
         filterPacts(pactLoader.load(serviceName)
           .filter { p -> consumerName == null || p.consumer.name == consumerName } as List<Pact<I>>)
       } catch (e: IOException) {
-        throw InitializationError(e)
+        if (ignoreIoErrors == "true") {
+          logger.warn { "\n" + WARNING_ON_IGNORED_IOERROR.trimIndent() }
+          logger.debug(e) { "Failed to load pact files" }
+          emptyList<Pact<I>>()
+        } else {
+          throw InitializationError(e)
+        }
       } catch (e: JsonException) {
-        throw InitializationError(e)
+        if (ignoreIoErrors == "true") {
+          logger.warn { "\n" + WARNING_ON_IGNORED_IOERROR.trimIndent() }
+          logger.debug(e) { "Failed to load pact files" }
+          emptyList<Pact<I>>()
+        } else {
+          throw InitializationError(e)
+        }
       } catch (e: NoPactsFoundException) {
         logger.debug(e) { "No pacts found" }
         emptyList<Pact<I>>()
       }
 
       if (pacts.isEmpty()) {
-        if (clazz.isAnnotationPresent(IgnoreNoPactsToVerify::class.java)) {
+        if (ignoreNoPactsToVerify != null) {
           logger.warn { "Did not find any pact files for provider ${providerInfo.value}" }
         } else {
           throw InitializationError("Did not find any pact files for provider ${providerInfo.value}")
@@ -151,5 +172,15 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(c
     }
   }
 
-  companion object : KLogging()
+  companion object : KLogging() {
+    const val WARNING_ON_IGNORED_IOERROR = """
+         ---------------------------------------------------------------------------
+         | WARNING! Ignoring IO Exception received when loading Pact files as      |
+         | WARNING! the @IgnoreNoPactsToVerify annotation is present and           |
+         | WARNING! ignoreIoErrors is set to true. Make sure this is not happening |
+         | WARNING! on your CI server, as this could result in your build passing  |
+         | WARNING! with no providers having been verified due to a configuration  |
+         | WARNING! error.                                                         |
+         -------------------------------------------------------------------------"""
+  }
 }
