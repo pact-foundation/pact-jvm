@@ -8,16 +8,18 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.containsInAnyOrder
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.hasSize
+import static org.hamcrest.Matchers.nullValue
 
 @SuppressWarnings('GStringExpressionWithinString')
 class ExpressionParserTest {
 
   private final ValueResolver valueResolver = [
-    resolveValue: { expression -> '[' + expression + ']' }
+    resolveValue: { expression -> "[$expression]".toString() }
   ] as ValueResolver
 
   @Test
   void 'Does Not Modify Strings With No Expressions'() {
+    assertThat(ExpressionParser.parseExpression(null), is(nullValue()))
     assertThat(ExpressionParser.parseExpression(''), is(equalTo('')))
     assertThat(ExpressionParser.parseExpression('hello world'), is(equalTo('hello world')))
     assertThat(ExpressionParser.parseExpression('looks like a $'), is(equalTo('looks like a $')))

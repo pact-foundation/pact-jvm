@@ -4,15 +4,13 @@ dependencies {
   compile("io.gatling:jsonpath_${project.scalaVersion}:0.6.9") {
     exclude group: 'org.scala-lang'
   }
+  compile 'com.googlecode.java-diff-utils:diffutils:1.3.0'
+
+  compile "org.scala-lang.modules:scala-xml_${project.scalaVersion}:1.0.6"
   compile "org.scala-lang:scala-library:${project.scalaFullVersion}"
   compile("com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.7.2") {
     exclude group: 'org.scala-lang'
   }
-
-  testCompile "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}",
-    "org.specs2:specs2-junit_${project.scalaVersion}:${project.specs2Version}"
-  compile 'com.googlecode.java-diff-utils:diffutils:1.3.0'
-  compile "org.scala-lang.modules:scala-xml_${project.scalaVersion}:1.0.6"
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }
