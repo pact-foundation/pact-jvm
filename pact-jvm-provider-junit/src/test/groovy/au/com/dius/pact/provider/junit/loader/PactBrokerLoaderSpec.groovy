@@ -154,8 +154,32 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader().load('test')
 
     then:
-    Exception exception = thrown(Exception)
-    exception.message.startsWith('Invalid pact broker port')
+    IllegalArgumentException exception = thrown(IllegalArgumentException)
+    exception.message.startsWith('Invalid pact broker host specified')
+  }
+
+  @RestoreSystemProperties
+  void 'Does not fail when no fallback port system properties is set'() {
+    given:
+    System.setProperty('pactbroker.host', 'my.pactbroker.host')
+    System.clearProperty('pactbroker.port')
+    pactBrokerLoader = {
+      new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
+        @Override
+        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
+          assert url.host == 'my.pactbroker.host'
+          assert url.port == -1
+          brokerClient
+        }
+      }
+    }
+
+    when:
+    pactBrokerLoader().load('test')
+
+    then:
+    noExceptionThrown()
+    1 * brokerClient.fetchConsumers('test') >> []
   }
 
   def 'Loads pacts for each provided tag'() {
@@ -328,6 +352,58 @@ class PactBrokerLoaderSpec extends Specification {
     result.size() == 3
   }
 
+  def 'does not fail if the port is not provided'() {
+    when:
+    port = null
+    pactBrokerLoader().load('test')
+
+    then:
+    1 * brokerClient.fetchConsumers('test') >> []
+    noExceptionThrown()
+  }
+
+  def 'configured from annotation with no port'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(PactBrokerAnnotationNoPort.getAnnotation(PactBroker)) {
+        @Override
+        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
+          assert url.host == 'pactbroker.host'
+          assert url.port == -1
+          brokerClient
+        }
+      }
+    }
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    result == []
+    1 * brokerClient.fetchConsumers('test') >> []
+  }
+
+  def 'configured from annotation with https and no port'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(PactBrokerAnnotationHttpsNoPort.getAnnotation(PactBroker)) {
+        @Override
+        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
+          assert url.host == 'pactbroker.host'
+          assert url.port == -1
+          brokerClient
+        }
+      }
+    }
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    result == []
+    1 * brokerClient.fetchConsumers('test') >> []
+  }
+
   @PactBroker(host = 'pactbroker.host', port = '1000', failIfNoPactsFound = false)
   static class FullPactBrokerAnnotation {
 
@@ -335,6 +411,16 @@ class PactBrokerLoaderSpec extends Specification {
 
   @PactBroker(failIfNoPactsFound = false)
   static class MinimalPactBrokerAnnotation {
+
+  }
+
+  @PactBroker(host = 'pactbroker.host', failIfNoPactsFound = false)
+  static class PactBrokerAnnotationNoPort {
+
+  }
+
+  @PactBroker(host = 'pactbroker.host', scheme = 'https', failIfNoPactsFound = false)
+  static class PactBrokerAnnotationHttpsNoPort {
 
   }
 

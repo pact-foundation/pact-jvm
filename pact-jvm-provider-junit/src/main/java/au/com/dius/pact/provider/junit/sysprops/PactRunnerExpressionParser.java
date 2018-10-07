@@ -1,5 +1,7 @@
 package au.com.dius.pact.provider.junit.sysprops;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
@@ -30,7 +32,7 @@ public class PactRunnerExpressionParser {
   }
 
   public static String parseExpression(final String value, final ValueResolver valueResolver) {
-    if (value.contains(START_EXPRESSION)) {
+    if (StringUtils.contains(value, START_EXPRESSION)) {
       return replaceExpressions(value, valueResolver);
     }
     return value;
