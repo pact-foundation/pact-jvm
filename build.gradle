@@ -5,32 +5,22 @@ buildscript {
     mavenLocal()
   }
   dependencies {
-    classpath "org.apache.commons:commons-lang3:$commonsLang3Version"
-    classpath 'org.apache.commons:commons-text:1.1'
+    classpath 'org.apache.commons:commons-text:1.5'
   }
 }
 
 plugins {
-  id 'nebula.kotlin' version '1.2.70'
-  id 'org.jmailen.kotlinter' version '1.11.2'
-  id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC8'
+  id 'nebula.kotlin' version '1.2.71'
+  id 'org.jmailen.kotlinter' version '1.20.0'
+  id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC9.2'
   id 'org.jetbrains.dokka' version '0.9.16'
-  id 'com.github.johnrengelman.shadow' version '2.0.4'
+  id 'com.github.johnrengelman.shadow' version '2.0.4' apply false
 }
-
-repositories {
-  mavenLocal()
-  mavenCentral()
-  jcenter()
-}
-
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
 
 import org.apache.commons.text.StringEscapeUtils
 
 def scalaVersionLookup = [
-  '2.12': '2.12.5'
+  '2.12': '2.12.7'
 ]
 
 allprojects {
@@ -231,11 +221,11 @@ subprojects {
     }
 
     codenarcMain {
-        configFile = file('../config/codenarc/ruleset.groovy')
+        configFile = rootProject.file('config/codenarc/ruleset.groovy')
     }
 
     codenarcTest {
-        configFile = file('../config/codenarc/rulesetTest.groovy')
+        configFile = rootProject.file('config/codenarc/rulesetTest.groovy')
     }
 
     check.dependsOn << 'jacocoTestReport'
@@ -247,21 +237,8 @@ subprojects {
   }
 
   detekt {
-    profile("main") {
-      config = "${project.parent.projectDir}/config/detekt-config.yml"
-      if (file("$projectDir/src/main/kotlin").exists()) {
-        input = "$projectDir/src/main/kotlin"
-      }
-    }
-    profile("test") {
-      config = "${project.parent.projectDir}/config/detekt-config-test.yml"
-      if (file("$projectDir/src/test/kotlin").exists()) {
-        input = "$projectDir/src/test/kotlin"
-      }
-    }
+    config = files(rootProject.file("config/detekt-config.yml"))
   }
-
-  check.dependsOn << 'detektCheck'
 
   task allDeps(type: DependencyReportTask) {}
 }
@@ -298,6 +275,10 @@ if (System.env.TRAVIS == 'true') {
 }
 
 if (System.env.UBERJAR == 'true') {
+  apply plugin: 'maven-publish'
+  apply plugin: 'signing'
+  apply plugin: "com.github.johnrengelman.shadow"
+
   dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"

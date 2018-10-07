@@ -1,11 +1,10 @@
 dependencies {
     compile project(":pact-jvm-provider-junit_${project.scalaVersion}")
 
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '1.5.14.RELEASE'
-    compile group: 'org.springframework', name: 'spring-web', version: '4.3.18.RELEASE'
-    compile group: 'org.springframework', name: 'spring-webmvc', version: '4.3.18.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '1.5.16.RELEASE'
+    compile group: 'org.springframework', name: 'spring-webmvc', version: '4.3.19.RELEASE'
     compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-joda', version: '2.6.4'
 
-    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '1.5.14.RELEASE'
+    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '1.5.16.RELEASE'
 }

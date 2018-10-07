@@ -1,5 +1,5 @@
 plugins {
-  id "nebula.clojure" version "5.0.6"
+  id "nebula.clojure" version "6.0.2"
 }
 
 dependencies {
@@ -12,7 +12,7 @@ dependencies {
   testCompile "ch.qos.logback:logback-core:${project.logbackVersion}",
     "ch.qos.logback:logback-classic:${project.logbackVersion}",
     'org.apache.commons:commons-collections4:4.1',
-    'com.google.code.gson:gson:2.8.1',
+    'com.google.code.gson:gson:2.8.5',
     "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}",
     "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
     'com.jayway.restassured:rest-assured:2.9.0',

@@ -4,7 +4,7 @@ dependencies {
       "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
       "junit:junit:${project.junitVersion}",
       "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
-      'org.jooq:jool:0.9.11'
+      'org.jooq:jool:0.9.14'
     compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
     compile('com.github.rholder:guava-retrying:2.0.0')
     compile 'javax.mail:mail:1.5.0-b01'

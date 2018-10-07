@@ -178,13 +178,13 @@ open class InteractionRunner<I>(
 
   protected fun interactionBlock(interaction: Interaction, source: PactSource, context: Map<String, Any>): Statement {
 
-    //1. prepare object
-    //2. get Target
-    //3. run Rule`s
-    //4. run Before`s
-    //5. run OnStateChange`s
-    //6. run test
-    //7. run After`s
+    // 1. prepare object
+    // 2. get Target
+    // 3. run Rule`s
+    // 4. run Before`s
+    // 5. run OnStateChange`s
+    // 6. run test
+    // 7. run After`s
 
     val testInstance: Any
     try {
