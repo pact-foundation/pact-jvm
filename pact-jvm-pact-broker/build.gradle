@@ -1,7 +1,7 @@
 dependencies {
   compile project(":pact-jvm-support")
   compile "org.apache.commons:commons-lang3:$commonsLang3Version"
-  compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}:indy"
+  compile "org.codehaus.groovy:groovy-all:${project.groovyVersion}"
   compile 'com.github.salomonbrys.kotson:kotson:2.5.0'
   compile "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
   compile "com.google.guava:guava:${project.guavaVersion}"
