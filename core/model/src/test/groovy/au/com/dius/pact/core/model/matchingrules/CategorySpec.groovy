@@ -5,10 +5,10 @@ import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings(['LineLength', 'SpaceAroundMapEntryColon'])
 class CategorySpec extends Specification {
 
   @Unroll
-  @SuppressWarnings(['LineLength', 'SpaceAroundMapEntryColon'])
   def 'generate #spec format body matchers'() {
     given:
     def category = new Category('body', [
@@ -38,6 +38,19 @@ class CategorySpec extends Specification {
     ])
 
     expect:
+    category.toMap(PactSpecVersion.V2) == ['$.path': [match: 'regex', regex: '\\w+']]
     category.toMap(PactSpecVersion.V3) == [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']
+  }
+
+  @Issue('#786')
+  def 'writes header matchers in the correct format'() {
+    given:
+    def category = new Category('header', [
+      'Content-Type': new MatchingRuleGroup([new RegexMatcher('application/json;\\s?charset=(utf|UTF)-8')])
+    ])
+
+    expect:
+    category.toMap(PactSpecVersion.V2) == ['$.header.Content-Type': [match: 'regex', regex: 'application/json;\\s?charset=(utf|UTF)-8']]
+    category.toMap(PactSpecVersion.V3) == ['Content-Type': [matchers: [[match: 'regex', regex: 'application/json;\\s?charset=(utf|UTF)-8']], combine: 'AND']]
   }
 }

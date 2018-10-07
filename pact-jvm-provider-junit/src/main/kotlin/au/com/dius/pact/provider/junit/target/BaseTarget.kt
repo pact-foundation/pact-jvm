@@ -47,8 +47,8 @@ abstract class BaseTarget : TestClassAwareTarget {
       }
       valueResolver.propertyDefined("pact.verification.reports") -> {
         reportingEnabled = true
-        reportDirectory = valueResolver.resolveValue("pact.verification.reportDir:$reportDirectory")
-        valueResolver.resolveValue("pact.verification.reports:").split(",")
+        reportDirectory = valueResolver.resolveValue("pact.verification.reportDir:$reportDirectory")!!
+        valueResolver.resolveValue("pact.verification.reports:")!!.split(",")
       }
       else -> emptyList()
     }

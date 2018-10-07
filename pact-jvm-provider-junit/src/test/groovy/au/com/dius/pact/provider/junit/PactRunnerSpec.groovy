@@ -54,6 +54,13 @@ class PactRunnerSpec extends Specification {
 
   }
 
+  @Provider('Bob')
+  @PactUrl(urls = ['http://doesnt%20exist/I%20hope?'])
+  @IgnoreNoPactsToVerify(ignoreIoErrors = 'true')
+  class DoesNotFailsTestClass {
+
+  }
+
   static class PactLoaderWithConstructorParameter implements PactLoader {
 
     private final Class clazz
@@ -146,6 +153,15 @@ class PactRunnerSpec extends Specification {
   def 'PactRunner does not throw an exception if there are no pacts to verify and @IgnoreNoPactsToVerify'() {
     when:
     new PactRunner(NoPactsIgnoredTestClass)
+
+    then:
+    notThrown(InitializationError)
+  }
+
+  @SuppressWarnings('LineLength')
+  def 'PactRunner does not throw an exception if there is an IO error and @IgnoreNoPactsToVerify has ignoreIoErrors set'() {
+    when:
+    new PactRunner(DoesNotFailsTestClass)
 
     then:
     notThrown(InitializationError)

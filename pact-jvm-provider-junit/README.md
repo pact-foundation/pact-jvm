@@ -151,6 +151,8 @@ The Pact runner will automatically collect pacts based on annotations on the tes
 out-of-the-box options (files from a directory, files from a set of URLs or a pact broker) or you can easily add your
 own Pact source.
 
+If you need to load a single pact file from the file system, use the `PactUrl` with the URL set to the file path.
+
 **Note:** You can only define one source of pacts per test class.
 
 ### Download pacts from a pact-broker
@@ -239,6 +241,8 @@ To use pacts from urls annotate the test class with
 @PactUrl(urls = {"http://build.server/zoo_app-animal_service.json"} )
 ```
 
+If you need to load a single pact file from the file system, you can use the `PactUrl` with the URL set to the file path.
+
 ### Pact folder
 
 To use pacts from a resource folder of the project annotate test class with
@@ -311,6 +315,15 @@ public class PactJUnitTest {
 
 By default the pact runner will fail the verification test if no pact files are found to verify. To change the
 failure into a warning, add a `@IgnoreNoPactsToVerify` annotation to your test class.
+
+#### Ignoring IO errors loading pact files [version 3.5.24+]
+
+You can also set the test to ignore any IO and parser exceptions when loading the pact files by setting the
+`ignoreIoErrors` attribute on the annotation to `"true"` or setting the JVM system property `pact.verification.ignoreIoErrors`
+to `true`.
+
+** WARNING! Do not enable this on your CI server, as this could result in your build passing with no providers 
+having been verified due to a configuration error. **        
 
 ## Test target
 

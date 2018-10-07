@@ -39,7 +39,7 @@ object ExpressionParser {
       }
       var expression = ""
       if (endPosition - position > 2) {
-        expression = valueResolver.resolveValue(buffer.substring(position + 2, endPosition))
+        expression = valueResolver.resolveValue(buffer.substring(position + 2, endPosition)) ?: ""
       }
       joiner.add(expression)
       buffer = buffer.substring(endPosition + 1)

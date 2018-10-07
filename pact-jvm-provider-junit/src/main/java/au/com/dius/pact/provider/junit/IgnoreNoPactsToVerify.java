@@ -14,4 +14,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Inherited
 public @interface IgnoreNoPactsToVerify {
+  /**
+   * Boolean flag to indicate that IO errors should also be ignored
+   */
+  String ignoreIoErrors() default "${pact.verification.ignoreIoErrors:false}";
 }
