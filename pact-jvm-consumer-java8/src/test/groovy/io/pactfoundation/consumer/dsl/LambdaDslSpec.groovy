@@ -1,6 +1,7 @@
 package io.pactfoundation.consumer.dsl
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray
+import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue
 import spock.lang.Issue
 import spock.lang.Specification
 
@@ -60,6 +61,45 @@ class LambdaDslSpec extends Specification {
       '', '[*].id', '[*].created', '[*].lastModified', '[*].creator',
       '[*].quantity', '[*].description', '[*].location.floor', '[*].location.room'
     ] as Set
+  }
+
+  @Issue('#778')
+  def 'each key like should handle primitive values'() {
+    /*
+    {
+      "offer": {
+        "prices": {
+          "DE": 1620
+        },
+        "shippingCosts": {
+          "DE": {
+            "cia": 300
+          }
+        }
+    }
+     */
+
+    given:
+    Consumer<LambdaDslObject> jsonObject = { object ->
+      object.object('offer') { offer ->
+        offer.object('prices') { prices ->
+          prices.eachKeyLike('DE', PactDslJsonRootValue.numberType(1620))
+        }
+        offer.object('shippingCosts') { shippingCosts ->
+          shippingCosts.eachKeyLike('DE') { cost ->
+            cost.numberValue('cia', 300)
+          }
+        }
+      }
+    }
+
+    when:
+    def result = LambdaDsl.newJsonBody(jsonObject).build()
+
+    then:
+    result.matchers.matchingRules.keySet() == ['.offer.prices.*', '.offer.shippingCosts.*'] as Set
+    result.toString() == '{"offer":{"prices":{"DE":1620},"shippingCosts":{"DE":{"cia":300}}}}'
+
   }
 
 }

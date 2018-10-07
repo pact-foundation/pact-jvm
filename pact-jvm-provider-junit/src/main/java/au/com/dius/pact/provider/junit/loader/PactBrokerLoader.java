@@ -37,7 +37,7 @@ public class PactBrokerLoader implements PactLoader {
 
   private final String pactBrokerHost;
   private final String pactBrokerPort;
-  private final String pactBrokerProtocol;
+  private final String pactBrokerScheme;
   private final List<String> pactBrokerTags;
   private final List<String> pactBrokerConsumers;
   private boolean failIfNoPactsFound;
@@ -54,15 +54,16 @@ public class PactBrokerLoader implements PactLoader {
       final List<String> tags, final List<String> consumers) {
     this.pactBrokerHost = pactBrokerHost;
     this.pactBrokerPort = pactBrokerPort;
-    this.pactBrokerProtocol = pactBrokerProtocol;
+    this.pactBrokerScheme = pactBrokerProtocol;
     this.pactBrokerTags = tags;
     this.pactBrokerConsumers = consumers;
     this.failIfNoPactsFound = true;
-    this.pactSource = new PactBrokerSource(this.pactBrokerHost, this.pactBrokerPort, this.pactBrokerProtocol);
+    this.pactSource = new PactBrokerSource(this.pactBrokerHost, this.pactBrokerPort, this.pactBrokerScheme);
   }
 
   public PactBrokerLoader(final PactBroker pactBroker) {
-    this(pactBroker.host(), pactBroker.port(), pactBroker.protocol(), Arrays.asList(pactBroker.tags()), Arrays.asList(pactBroker.consumers()));
+    this(pactBroker.host(), pactBroker.port(), StringUtils.defaultIfBlank(pactBroker.scheme(), pactBroker.protocol()),
+      Arrays.asList(pactBroker.tags()), Arrays.asList(pactBroker.consumers()));
     this.failIfNoPactsFound = pactBroker.failIfNoPactsFound();
     this.authentication = pactBroker.authentication();
     this.valueResolverClass = pactBroker.valueResolver();
@@ -111,16 +112,24 @@ public class PactBrokerLoader implements PactLoader {
 
   private List<Pact> loadPactsForProvider(final String providerName, final String tag, ValueResolver resolver) throws IOException {
     LOGGER.debug("Loading pacts from pact broker for provider " + providerName + " and tag " + tag);
-    String protocol = parseExpression(pactBrokerProtocol, resolver);
+    String scheme = parseExpression(pactBrokerScheme, resolver);
     String host = parseExpression(pactBrokerHost, resolver);
     String port = parseExpression(pactBrokerPort, resolver);
-    if(!port.matches("^[0-9]+")){
-      throw new IllegalArgumentException(String.format("Invalid pact broker port specified ('%s'). "
-                                                           + "Please provide a valid port number or specify the system property 'pactbroker.port'.", pactBrokerPort));
+
+    if(StringUtils.isEmpty(host)){
+      throw new IllegalArgumentException(String.format("Invalid pact broker host specified ('%s'). "
+        + "Please provide a valid host or specify the system property 'pactbroker.host'.", pactBrokerHost));
     }
-    URIBuilder uriBuilder = new URIBuilder().setScheme(protocol)
-                                .setHost(parseExpression(host, resolver))
-                                .setPort(Integer.parseInt(port));
+
+    if(StringUtils.isNotEmpty(port) && !port.matches("^[0-9]+")){
+      throw new IllegalArgumentException(String.format("Invalid pact broker port specified ('%s'). "
+        + "Please provide a valid port number or specify the system property 'pactbroker.port'.", pactBrokerPort));
+    }
+
+    URIBuilder uriBuilder = new URIBuilder().setScheme(scheme).setHost(host);
+    if (StringUtils.isNotEmpty(port)) {
+      uriBuilder.setPort(Integer.parseInt(port));
+    }
     try {
       List<ConsumerInfo> consumers;
       PactBrokerClient pactBrokerClient = newPactBrokerClient(uriBuilder.build(), resolver);
