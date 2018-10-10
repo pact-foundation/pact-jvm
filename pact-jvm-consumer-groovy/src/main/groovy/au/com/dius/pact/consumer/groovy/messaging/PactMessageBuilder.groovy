@@ -124,4 +124,13 @@ class PactMessageBuilder extends BaseBuilder {
     }
   }
 
+  @Override
+  def call(@DelegatesTo(value = PactMessageBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
+    return super.call(closure)
+  }
+
+  @Override
+  def build(@DelegatesTo(value = PactMessageBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
+    return super.build(closure)
+  }
 }
