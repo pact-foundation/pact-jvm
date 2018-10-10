@@ -290,11 +290,11 @@ class PactBodyBuilder extends BaseBuilder {
 
   @Override
   def call(@DelegatesTo(value = PactBodyBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
-    return super.call(closure)
+    build(closure)
   }
 
   @Override
   def build(@DelegatesTo(value = PactBodyBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
-    return super.build(closure)
+    callWithThisAsDelegate(closure)
   }
 }
