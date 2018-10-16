@@ -8,10 +8,11 @@ import au.com.dius.pact.core.model.matchingrules.Category
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import groovy.json.JsonBuilder
-@SuppressWarnings('UnusedImport')
-import io.gatling.jsonpath.Parser$
+import org.apache.commons.lang3.StringUtils
 
 import java.util.regex.Pattern
+
+import static au.com.dius.pact.core.model.PathExpressionsKt.PATH_SPECIAL_CHARS
 
 /**
  * DSL Builder for constructing JSON bodies
@@ -181,7 +182,7 @@ class PactBodyBuilder extends BaseBuilder {
 
   private String buildPath(String name, String children = '') {
     def key = PATH_SEP + name
-    if (name != STAR && !(name ==~ Parser$.MODULE$.FieldRegex().toString())) {
+    if (name != STAR && StringUtils.containsAny(name, PATH_SPECIAL_CHARS)) {
       key = "['" + name + "']"
     }
     key + children

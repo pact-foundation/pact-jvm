@@ -29,15 +29,15 @@ class V2MatchingHeaderTest {
       .status(HttpStatus.SC_OK)
       .body('{}', ContentType.APPLICATION_JSON)
       .headers(headers)
-      .matchHeader('Content-Type', 'application/json;\\s?charset=(utf|UTF)-8')
+      .matchHeader('Content-Type', 'application/json; ?charset=(utf|UTF)-8')
       .toPact()
 
     assert pact.interactions.first().response.matchingRules.rulesForCategory('header').matchingRules == [
-      'Content-Type': new MatchingRuleGroup([new RegexMatcher('application/json;\\s?charset=(utf|UTF)-8')])
+      'Content-Type': new MatchingRuleGroup([new RegexMatcher('application/json; ?charset=(utf|UTF)-8')])
     ]
     assert pact.interactions.first().response.matchingRules.rulesForCategory('header')
       .toMap(PactSpecVersion.V2) == [
-      '$.header.Content-Type': [match: 'regex', regex: 'application/json;\\s?charset=(utf|UTF)-8']
+      '$.header.Content-Type': [match: 'regex', regex: 'application/json; ?charset=(utf|UTF)-8']
     ]
 
     pact

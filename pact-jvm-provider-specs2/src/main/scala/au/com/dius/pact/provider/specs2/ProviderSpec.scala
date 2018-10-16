@@ -43,7 +43,7 @@ trait ProviderSpec extends Specification {
         request.setPath(s"$url${interaction.getRequest.getPath}")
         val actualResponseFuture = HttpClient.run(request)
         val actualResponse = Await.result(actualResponseFuture, timeout)
-        ResponseMatching.matchRules(interaction.getResponse, actualResponse) must beEqualTo(FullResponseMatch)
+        ResponseMatching.matchRules(interaction.getResponse, actualResponse) must beEqualTo(FullResponseMatch.INSTANCE)
       }
       fragmentFactory.example(description, {inState(interaction.getProviderState, test)})
     }

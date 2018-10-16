@@ -25,7 +25,7 @@ class MatcherExecutorSpec extends Specification {
   def path
 
   def setup() {
-    mismatchFactory = [create: { p0, p1, p2, p3 -> [:] as Mismatch } ] as MismatchFactory
+    mismatchFactory = [create: { p0, p1, p2, p3 -> new StatusMismatch(100, 100) } ] as MismatchFactory
     path = ['/']
   }
 

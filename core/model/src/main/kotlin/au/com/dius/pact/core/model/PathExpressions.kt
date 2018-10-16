@@ -2,6 +2,8 @@ package au.com.dius.pact.core.model
 
 import org.apache.commons.collections4.iterators.PushbackIterator
 
+const val PATH_SPECIAL_CHARS = "'[].@ \t\n"
+
 sealed class PathToken {
   object Root : PathToken()
   data class Field(val name: String) : PathToken()

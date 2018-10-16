@@ -2,17 +2,13 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
-import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.matchers.PartialRequestMatch
 import au.com.dius.pact.core.matchers.PathMismatch
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
-import au.com.dius.pact.core.matchers.RequestPartMismatch
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.Response
-import scala.Option
-import scala.collection.JavaConversions
-import scala.collection.Seq
 import spock.lang.Specification
 
 class PrettyPrinterSpec extends Specification {
@@ -24,9 +20,8 @@ class PrettyPrinterSpec extends Specification {
 
     def print(mismatch) {
       PrettyPrinter.print(PactSessionResults.empty().addAlmostMatched(
-        PartialRequestMatch.apply(new RequestResponseInteraction('test interaction', [
-          new ProviderState('test state')], request, response),
-          JavaConversions.asScalaBuffer([mismatch]).toSeq() as Seq<RequestPartMismatch>)))
+        new PartialRequestMatch([(new RequestResponseInteraction('test interaction', [
+          new ProviderState('test state')], request, response)): [mismatch]])))
     }
 
     def plus = '+++ '
@@ -43,7 +38,7 @@ class PrettyPrinterSpec extends Specification {
 
     def 'path mismatch'() {
         expect:
-        print(new PathMismatch('/foo/bar', '/foo/baz', Option.empty())) ==
+        print(new PathMismatch('/foo/bar', '/foo/baz')) ==
               """--- Path
               |$plus
               |@@ -1,1 +1,1 @@

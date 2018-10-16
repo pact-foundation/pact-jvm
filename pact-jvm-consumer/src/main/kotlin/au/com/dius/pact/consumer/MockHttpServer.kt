@@ -2,17 +2,17 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.core.matchers.FullRequestMatch
 import au.com.dius.pact.core.matchers.PartialRequestMatch
-import au.com.dius.pact.model.MockHttpsProviderConfig
-import au.com.dius.pact.model.MockProviderConfig
+import au.com.dius.pact.core.matchers.RequestMatching
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Request
-import au.com.dius.pact.core.matchers.RequestMatching
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
-import au.com.dius.pact.core.model.queryStringToMap
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
+import au.com.dius.pact.core.model.queryStringToMap
+import au.com.dius.pact.model.MockHttpsProviderConfig
+import au.com.dius.pact.model.MockProviderConfig
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
@@ -23,7 +23,6 @@ import org.apache.http.client.methods.HttpOptions
 import org.apache.http.entity.ContentType
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager
-import scala.collection.JavaConversions
 import java.lang.Thread.sleep
 import java.nio.charset.Charset
 import java.util.concurrent.ConcurrentHashMap
@@ -70,7 +69,7 @@ abstract class BaseMockServer(
 ) : HttpHandler, MockServer {
   private val mismatchedRequests = ConcurrentHashMap<Request, MutableList<PactVerificationResult>>()
   private val matchedRequests = ConcurrentLinkedQueue<Request>()
-  private val requestMatcher = RequestMatching.apply(JavaConversions.asScalaBuffer(pact.interactions).toSeq())
+  private val requestMatcher = RequestMatching(pact.interactions)
 
   override fun handle(exchange: HttpExchange) {
     if (exchange.requestMethod == "OPTIONS" && exchange.requestHeaders.containsKey("X-PACT-BOOTCHECK")) {
@@ -112,15 +111,15 @@ abstract class BaseMockServer(
     val matchResult = requestMatcher.matchInteraction(request)
     when (matchResult) {
       is FullRequestMatch -> {
-        val interaction = matchResult.interaction() as RequestResponseInteraction
+        val interaction = matchResult.interaction as RequestResponseInteraction
         matchedRequests.add(interaction.request)
         return interaction.response.generatedResponse(emptyMap<String, Any>(), GeneratorTestMode.Consumer)
       }
       is PartialRequestMatch -> {
-        val interaction = matchResult.problems().keys().head() as RequestResponseInteraction
+        val interaction = matchResult.problems.keys.first() as RequestResponseInteraction
         mismatchedRequests.putIfAbsent(interaction.request, mutableListOf())
         mismatchedRequests[interaction.request]?.add(PactVerificationResult.PartialMismatch(
-          ScalaCollectionUtils.toList(matchResult.problems()[interaction])))
+          matchResult.problems[interaction]!!))
       }
       else -> {
         mismatchedRequests.putIfAbsent(request, mutableListOf())
@@ -198,7 +197,10 @@ abstract class BaseMockServer(
     if (mismatchedRequests.isNotEmpty()) {
       return PactVerificationResult.Mismatches(mismatchedRequests.values.flatten())
     }
-    val expectedRequests = pact.interactions.map { it.request }.filter { !matchedRequests.contains(it) }
+    val expectedRequests = pact.interactions.asSequence()
+      .map { it.request }
+      .filter { !matchedRequests.contains(it) }
+      .toList()
     if (expectedRequests.isNotEmpty()) {
       return PactVerificationResult.ExpectedButNotReceived(expectedRequests)
     }

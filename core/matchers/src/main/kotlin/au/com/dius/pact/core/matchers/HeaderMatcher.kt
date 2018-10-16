@@ -46,7 +46,8 @@ object HeaderMatcher : KLogging() {
                 HeaderMismatchFactory).firstOrNull()
       headerKey.equals("Content-Type", ignoreCase = true) -> matchContentType(expected, actual)
       stripWhiteSpaceAfterCommas(expected) == stripWhiteSpaceAfterCommas(actual) -> null
-      else -> HeaderMismatch(headerKey, expected, actual, "Expected header '$headerKey' to have value '$expected' but was '$actual'")
+      else -> HeaderMismatch(headerKey, expected, actual, "Expected header '$headerKey' to have value " +
+        "'$expected' but was '$actual'")
     }
   }
 }

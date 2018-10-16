@@ -4,6 +4,7 @@ import java.io.File
 import java.net.URL
 import java.util.concurrent.Executors
 
+import au.com.dius.pact.core.matchers
 import au.com.dius.pact.core.model.{RequestResponseInteraction, Pact => PactForConsumer}
 import au.com.dius.pact.core.matchers.{FullResponseMatch, ResponseMatching}
 import au.com.dius.pact.provider.sbtsupport.HttpClient
@@ -51,7 +52,7 @@ trait ProviderSpec extends FlatSpec with BeforeAndAfterAll with ProviderDsl with
           val actualResponseFuture = HttpClient.run(request)
           val actualResponse = Await.result(actualResponseFuture, 5 seconds)
           if (restartServer) stopServer()
-          ResponseMatching.matchRules(interaction.getResponse, actualResponse) shouldBe (FullResponseMatch)
+          ResponseMatching.matchRules(interaction.getResponse, actualResponse) shouldBe matchers.FullResponseMatch.INSTANCE
         }
       }
   }

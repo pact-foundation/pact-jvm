@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.{RequestResponseInteraction, _}
 import au.com.dius.pact.core.matchers.{CookieMismatch, MethodMismatch, PartialRequestMatch, PathMismatch}
 import difflib.DiffUtils
 import groovy.json.JsonOutput
+import scala.collection.JavaConverters._
 
 @Deprecated
 object PrettyPrinter {
@@ -48,16 +49,17 @@ object PrettyPrinter {
       case hm: HeaderMismatch => printStringMismatch("Header " + hm.getHeaderKey, hm.getExpected, hm.getActual)
       case bm: BodyMismatch => printStringMismatch("Body",
         JsonOutput.prettyPrint(bm.getExpected.toString), JsonOutput.prettyPrint(bm.getActual.toString))
-      case CookieMismatch(expected, actual) => printDiff("Cookies", expected.sorted, actual.sorted)
-      case PathMismatch(expected, actual, _) => printDiff("Path", List(expected), List(actual), 0)
-      case MethodMismatch(expected, actual) => printDiff("Method", List(expected), List(actual), 0)
+      case cm: CookieMismatch => printDiff("Cookies", asScalaBuffer(cm.getExpected).toList.sorted,
+        asScalaBuffer(cm.getActual).toList.sorted)
+      case pm: PathMismatch => printDiff("Path", List(pm.getExpected), List(pm.getActual), 0)
+      case mm: MethodMismatch => printDiff("Method", List(mm.getExpected), List(mm.getActual), 0)
     }.mkString("\n")
   }
 
   def printAlmost(almost: List[PartialRequestMatch]): String = {
 
-    def partialRequestMatch(p:PartialRequestMatch): Iterable[String] = {
-      val map: Map[Interaction, Seq[Mismatch]] = p.problems
+    def partialRequestMatch(p: PartialRequestMatch): Iterable[String] = {
+      val map = p.getProblems.asScala.mapValues(_.asScala.toSeq)
       map.flatMap {
         case (_, Nil) => None
         case (i, mismatches) => Some(printProblem(i, mismatches))

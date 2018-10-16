@@ -5,6 +5,8 @@ import au.com.dius.pact.core.model.{Pact => PactModel, _}
 import au.com.dius.pact.core.matchers.{FullRequestMatch, PartialRequestMatch, RequestMismatch}
 import org.apache.commons.lang3.StringEscapeUtils
 
+import scala.collection.JavaConverters
+
 object PactSessionResults {
   val empty = PactSessionResults(Nil, Nil, Nil, Nil)
 }
@@ -32,15 +34,15 @@ object PactSession {
 }
 
 case class PactSession(expected: Seq[Interaction], results: PactSessionResults) {
-  import scala.collection.JavaConversions._
-  private def matcher = RequestMatching(expected.asInstanceOf[Seq[RequestResponseInteraction]])
+  import scala.collection.JavaConverters._
+  private def matcher = new RequestMatching(seqAsJavaList(expected.asInstanceOf[Seq[RequestResponseInteraction]]))
 
   val CrossSiteHeaders = Map[String, String]("Access-Control-Allow-Origin" -> "*")
 
   def invalidRequest(req: Request) = {
     val headers: Map[String, String] = CrossSiteHeaders ++ Map("Content-Type" -> "application/json",
       "X-Pact-Unexpected-Request" -> "1")
-    new Response(500, headers, OptionalBody.body("{ \"error\": \"Unexpected request : " +
+    new Response(500, mapAsJavaMap(headers), OptionalBody.body("{ \"error\": \"Unexpected request : " +
       StringEscapeUtils.escapeJson(req.toString) + "\" }"))
   }
 
@@ -48,13 +50,11 @@ case class PactSession(expected: Seq[Interaction], results: PactSessionResults) 
     val invalidResponse = invalidRequest(req)
     
     matcher.matchInteraction(req) match {
-      case FullRequestMatch(inter) => 
-        (inter.asInstanceOf[RequestResponseInteraction].getResponse, recordMatched(inter))
-        
-      case p @ PartialRequestMatch(problems) => 
+      case m: FullRequestMatch =>
+        (m.getInteraction.asInstanceOf[RequestResponseInteraction].getResponse, recordMatched(m.getInteraction))
+      case p: PartialRequestMatch =>
         (invalidResponse, recordAlmostMatched(p))
-        
-      case RequestMismatch => 
+      case _: RequestMismatch =>
         (invalidResponse, recordUnexpected(req))
     }
   }

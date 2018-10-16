@@ -43,14 +43,18 @@ class FormPostBodyMatcher : BodyMatcher {
           val path = listOf("$", it.key, index.toString())
           if (matchingRules != null && Matchers.matcherDefined("body", path, matchingRules)) {
             logger.debug { "Matcher defined for form post parameter '${it.key}'[$index]" }
-            result.addAll(Matchers.domatch(matchingRules, "body", path, valuePair.value, actualMap[it.key]!![index].value, BodyMismatchFactory))
+            result.addAll(Matchers.domatch(matchingRules, "body", path, valuePair.value,
+              actualMap[it.key]!![index].value, BodyMismatchFactory))
           } else {
             logger.debug { "No matcher defined for form post parameter '${it.key}'[$index], using equality" }
             val actualValues = actualMap[it.key]!!
             if (actualValues.size <= index) {
-              result.add(BodyMismatch("${it.key}=${valuePair.value}", null, "Expected form post parameter '${it.key}'='${valuePair.value}' but was missing"))
+              result.add(BodyMismatch("${it.key}=${valuePair.value}", null,
+                "Expected form post parameter '${it.key}'='${valuePair.value}' but was missing"))
             } else if (valuePair.value != actualValues[index].value) {
-              result.add(BodyMismatch("${it.key}=${valuePair.value}", "${it.key}=${actualValues[index].value}", "Expected form post parameter '${it.key}'[$index] with value '${valuePair.value}' but was '${actualValues[index].value}'"))
+              result.add(BodyMismatch("${it.key}=${valuePair.value}",
+                "${it.key}=${actualValues[index].value}", "Expected form post parameter " +
+                "'${it.key}'[$index] with value '${valuePair.value}' but was '${actualValues[index].value}'"))
             }
           }
         }
@@ -63,7 +67,8 @@ class FormPostBodyMatcher : BodyMatcher {
       actualMap.entries.forEach {
         if (!expectedMap.containsKey(it.key)) {
           val values = it.value.map { it.value }
-          result.add(BodyMismatch(null, "${it.key}=$values", "Received unexpected form post parameter '${it.key}'=${values.map { "'$it'" }}"))
+          result.add(BodyMismatch(null, "${it.key}=$values", "Received unexpected form post " +
+            "parameter '${it.key}'=${values.map { "'$it'" }}"))
         }
       }
     }

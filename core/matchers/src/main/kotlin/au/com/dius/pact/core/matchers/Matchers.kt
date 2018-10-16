@@ -2,62 +2,59 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.matchers.util.corresponds
 import au.com.dius.pact.core.matchers.util.tails
+import au.com.dius.pact.core.model.InvalidPathExpression
+import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
-import io.gatling.jsonpath.AST
-import io.gatling.jsonpath.Parser
+import au.com.dius.pact.core.model.parsePath
 import mu.KLogging
-import scala.collection.JavaConversions
-import scala.collection.JavaConverters
-import scala.util.parsing.combinator.Parsers
 import java.util.Comparator
 import java.util.function.Predicate
 
 object Matchers : KLogging() {
 
   const val PACT_MATCHING_WILDCARD = "pact.matching.wildcard"
+  private val intRegex = Regex("\\d+")
 
-  fun matchesToken(pathElement: String, token: AST.PathToken) = when (token) {
-    is AST.`RootNode$` -> if (pathElement == "$") 2 else 0
-    is AST.Field -> if (pathElement == token.name()) 2 else 0
-    is AST.ArrayRandomAccess -> if (pathElement.matches(Regex("\\d+")) && token.indices().contains(pathElement.toInt())) 2 else 0
-    is AST.ArraySlice -> if (pathElement.matches(Regex("\\d+"))) 1 else 0
-    is AST.`AnyField$` -> 1
-    else -> 0
+  private fun matchesToken(pathElement: String, token: PathToken): Int {
+    return when (token) {
+      is PathToken.Root -> if (pathElement == "$") 2 else 0
+      is PathToken.Field -> if (pathElement == token.name) 2 else 0
+      is PathToken.Index -> if (pathElement.matches(intRegex) && token.index == pathElement.toInt()) 2 else 0
+      is PathToken.StarIndex -> if (pathElement.matches(intRegex)) 1 else 0
+      is PathToken.Star -> 1
+      else -> 0
+    }
   }
 
   fun matchesPath(pathExp: String, path: List<String>): Int {
-    val parseResult = Parser().compile(pathExp)
-    return when (parseResult) {
-      is Parsers.Success -> {
-        val filter = tails(path.reversed()).filter { l ->
-            corresponds(l.reversed(), JavaConversions.asJavaCollection(parseResult.result()).toList()) { pathElement, pathToken ->
-                matchesToken(pathElement, pathToken) != 0
-            }
-        }
-        if (filter.isNotEmpty()) {
-          filter.maxBy { seq -> seq.size }?.size ?: 0
-        } else {
-          0
+    return try {
+      val parseResult = parsePath(pathExp)
+      val filter = tails(path.reversed()).filter { l ->
+        corresponds(l.reversed(), parseResult) { pathElement, pathToken ->
+          matchesToken(pathElement, pathToken) != 0
         }
       }
-      else -> {
-        logger.warn { "Path expression $pathExp is invalid, ignoring: $parseResult" }
+      if (filter.isNotEmpty()) {
+        filter.maxBy { seq -> seq.size }?.size ?: 0
+      } else {
         0
       }
+    } catch (e: InvalidPathExpression) {
+      logger.warn(e) { "Path expression $pathExp is invalid, ignoring" }
+      0
     }
   }
 
   fun calculatePathWeight(pathExp: String, path: List<String>): Int {
-    val parseResult = Parser().compile(pathExp)
-    return when (parseResult) {
-      is Parsers.Success -> path.zip(JavaConverters.asJavaCollection(parseResult.result())).map {
+    return try {
+      val parseResult = parsePath(pathExp)
+      path.zip(parseResult).asSequence().map {
           matchesToken(it.first, it.second)
       }.reduce { acc, i -> acc * i }
-      else -> {
-        logger.warn { "Path expression $pathExp is invalid, ignoring: $parseResult" }
-        0
-      }
+    } catch (e: InvalidPathExpression) {
+      logger.warn(e) { "Path expression $pathExp is invalid, ignoring" }
+      0
     }
   }
 
@@ -88,9 +85,7 @@ object Matchers : KLogging() {
         matchesPath(it, path) == path.size
       })
       resolvedMatchers.matchingRules.keys.any { entry -> entry.endsWith(".*") }
-    } else {
-      false
-    }
+    } else false
 
   /**
    * If wildcard matching logic is enabled (where keys are ignored and only values are compared)

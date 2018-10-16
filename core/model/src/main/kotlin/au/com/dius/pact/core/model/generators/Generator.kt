@@ -240,6 +240,7 @@ data class DateTimeGenerator(val format: String? = null) : Generator {
   }
 }
 
+@SuppressWarnings("EqualsWithHashCodeExist")
 object RandomBooleanGenerator : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     return mapOf("type" to "RandomBoolean")

@@ -37,7 +37,8 @@ class MultipartMessageBodyMatcher : BodyMatcher {
       expectedContents.isEmpty() && actualContents.isEmpty() -> emptyList()
       expectedContents.isNotEmpty() && actualContents.isNotEmpty() -> emptyList()
       expectedContents.isEmpty() && actualContents.isNotEmpty() -> listOf(BodyMismatch(expectedContents,
-              actualContents, "Expected no contents, but received ${actualContents.toByteArray().size} bytes of content"))
+              actualContents,
+        "Expected no contents, but received ${actualContents.toByteArray().size} bytes of content"))
       else -> listOf(BodyMismatch(expectedContents,
               actualContents, "Expected content with the multipart, but received no bytes of content"))
     }
@@ -54,7 +55,8 @@ class MultipartMessageBodyMatcher : BodyMatcher {
                   "Expected a multipart header '${it.name}' with value '${it.value}', but was '$actualValue'"))
         }
       } else {
-        mismatches.add(BodyMismatch(it.toString(), null, "Expected a multipart header '${it.name}', but was missing"))
+        mismatches.add(BodyMismatch(it.toString(), null,
+          "Expected a multipart header '${it.name}', but was missing"))
       }
     }
 

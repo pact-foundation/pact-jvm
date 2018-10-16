@@ -5,8 +5,8 @@ import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.matchers.MatchingConfig
 import au.com.dius.pact.core.matchers.Mismatch
+import au.com.dius.pact.core.matchers.ResponseMatching
 import au.com.dius.pact.core.matchers.StatusMismatch
-import au.com.dius.pact.core.matchers.`ResponseMatching$`
 import au.com.dius.pact.core.matchers.generateDiff
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
@@ -16,7 +16,6 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import mu.KLogging
 import org.apache.http.entity.ContentType
-import scala.collection.JavaConverters
 
 /**
  * Utility class to compare responses
@@ -32,8 +31,8 @@ class ResponseComparison(
   fun compareStatus(mismatches: List<Mismatch>): String? {
     val statusMismatch = mismatches.find { it is StatusMismatch } as StatusMismatch?
     if (statusMismatch != null) {
-      val expectedStatus = statusMismatch.expected()
-      val actualStatus = statusMismatch.actual()
+      val expectedStatus = statusMismatch.expected
+      val actualStatus = statusMismatch.actual
       return "expected status of $expectedStatus but was $actualStatus"
     }
     return null
@@ -67,8 +66,8 @@ class ResponseComparison(
 
     val bodyTypeMismatch = mismatches.find { it is BodyTypeMismatch } as BodyTypeMismatch?
     if (bodyTypeMismatch != null) {
-      result["comparison"] = "Expected a response type of '${bodyTypeMismatch.expected()}' but the actual " +
-          "type was '${bodyTypeMismatch.actual()}'"
+      result["comparison"] = "Expected a response type of '${bodyTypeMismatch.expected}' but the actual " +
+          "type was '${bodyTypeMismatch.actual}'"
     } else if (mismatches.any { it is BodyMismatch }) {
       result["comparison"] = mismatches
         .filter { it is BodyMismatch }
@@ -124,9 +123,8 @@ class ResponseComparison(
       val result = mutableMapOf<String, Any?>()
       val comparison = ResponseComparison(response, actualResponse, actualStatus,
         actualHeaders.mapKeys { it.key.toUpperCase() }, actualBody)
-      val mismatches = JavaConverters.seqAsJavaListConverter(
-        `ResponseMatching$`.`MODULE$`.responseMismatches(response, Response(actualStatus,
-        actualHeaders, OptionalBody.body(actualBody)))).asJava()
+      val mismatches = ResponseMatching.responseMismatches(response, Response(actualStatus,
+        actualHeaders, OptionalBody.body(actualBody)), true)
 
       result["method"] = comparison.compareStatus(mismatches)
       result["headers"] = comparison.compareHeaders(mismatches)

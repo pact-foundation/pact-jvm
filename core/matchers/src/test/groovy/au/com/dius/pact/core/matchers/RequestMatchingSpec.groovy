@@ -7,7 +7,6 @@ import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
-import scala.collection.JavaConversions
 import spock.lang.Specification
 
 class RequestMatchingSpec extends Specification {
@@ -26,12 +25,12 @@ class RequestMatchingSpec extends Specification {
 
   def test(Request actual) {
     interaction = new RequestResponseInteraction('test interaction', testState, request, response)
-    new RequestMatching(JavaConversions.asScalaBuffer([interaction]).toSeq()).findResponse(actual)
+    new RequestMatching([interaction]).findResponse(actual)
   }
 
   def 'request matching should match the valid request'() {
     expect:
-    test(request).get() == response
+    test(request) == response
   }
 
   def 'request matching should disallow additional keys'() {
@@ -43,7 +42,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(leakyRequest)
 
     then:
-    !actualResponse.defined
+    !actualResponse
   }
 
   def 'request matching should require precise matching'() {
@@ -55,7 +54,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(impreciseRequest)
 
     then:
-    !actualResponse.defined
+    !actualResponse
   }
 
   def 'request matching should trim protocol, server name and port'() {
@@ -67,7 +66,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(fancyRequest)
 
     then:
-    actualResponse.get() == response
+    actualResponse == response
   }
 
   def 'request matching should fail to match when missing headers'() {
@@ -79,7 +78,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(headerlessRequest)
 
     then:
-    !actualResponse.defined
+    !actualResponse
   }
 
   def 'request matching should fail to match when headers are present but contain incorrect value'() {
@@ -91,7 +90,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(incorrectRequest)
 
     then:
-    !actualResponse.defined
+    !actualResponse
   }
 
   def 'request matching should allow additional headers'() {
@@ -103,7 +102,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(extraHeaderRequest)
 
     then:
-    actualResponse.get() == response
+    actualResponse == response
   }
 
   def 'request matching should allow query string in different order'() {
@@ -115,7 +114,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(queryRequest)
 
     then:
-    actualResponse.get() == response
+    actualResponse == response
   }
 
   def 'request matching should fail if query string has the same parameter repeated in different order'() {
@@ -127,7 +126,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(queryRequest)
 
     then:
-    !actualResponse.defined
+    !actualResponse
   }
 
   def 'request with cookie should match if actual cookie exactly matches the expected'() {
@@ -140,7 +139,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(cookieRequest)
 
     then:
-    actualResponse.get() == response
+    actualResponse == response
   }
 
   def 'request with cookie should mismatch if actual cookie contains less data than expected cookie'() {
@@ -153,7 +152,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(cookieRequest)
 
     then:
-    !actualResponse.defined
+    !actualResponse
   }
 
   def 'request with cookie should match if actual cookie contains more data than expected one'() {
@@ -166,7 +165,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(cookieRequest)
 
     then:
-    actualResponse.get() == response
+    actualResponse == response
   }
 
   def 'request with cookie should mismatch if actual cookie has no intersection with expected request'() {
@@ -179,7 +178,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(cookieRequest)
 
     then:
-    !actualResponse.defined
+    !actualResponse
   }
 
   def 'request with cookie should match when cookie field is different from cases'() {
@@ -192,7 +191,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(cookieRequest)
 
     then:
-    actualResponse.get() == response
+    actualResponse == response
   }
 
   def 'request with cookie should match when there are spaces between cookie items'() {
@@ -205,7 +204,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(cookieRequest)
 
     then:
-    actualResponse.get() == response
+    actualResponse == response
   }
 
   def 'path matching should match when the paths are equal'() {
@@ -216,7 +215,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(request)
 
     then:
-    actualResponse.get() == response
+    actualResponse == response
   }
 
   def 'path matching should not match when the paths are different'() {
@@ -229,7 +228,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(requestWithDifferentPath)
 
     then:
-    !actualResponse.defined
+    !actualResponse
   }
 
   def 'path matching should allow matching with a defined matcher'() {
@@ -243,7 +242,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(requestWithMatcher)
 
     then:
-    actualResponse.get() == response
+    actualResponse == response
   }
 
   def 'path matching should not match with the defined matcher'() {
@@ -257,7 +256,7 @@ class RequestMatchingSpec extends Specification {
     def actualResponse = test(requestWithDifferentPath)
 
     then:
-    !actualResponse.defined
+    !actualResponse
   }
 
 }

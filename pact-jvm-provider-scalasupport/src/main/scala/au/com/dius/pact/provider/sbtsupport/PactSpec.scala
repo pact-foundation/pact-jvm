@@ -9,6 +9,7 @@ import org.scalatest.exceptions.TestFailedException
 import org.scalatest.{Assertions, FreeSpec, Ignore}
 
 import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
@@ -35,9 +36,9 @@ class PactSpec(config: PactConfiguration, pact: RequestResponsePact)(implicit ti
 
         val actualResponse = Await.result(pactResponseFuture, timeout)
 
-      val responseMismatches = ResponseMatching.responseMismatches(interaction.getResponse, actualResponse)
-      if (responseMismatches.nonEmpty) {
-          throw new TestFailedException(s"There were response mismatches: \n${responseMismatches.mkString("\n")}", 10)
+      val responseMismatches = ResponseMatching.responseMismatches(interaction.getResponse, actualResponse, true)
+      if (!responseMismatches.isEmpty) {
+          throw new TestFailedException(s"There were response mismatches: \n${responseMismatches.asScala.mkString("\n")}", 10)
         }
       }
   }

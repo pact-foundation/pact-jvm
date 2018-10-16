@@ -22,7 +22,6 @@ import au.com.dius.pact.core.model.matchingrules.RuleLogic;
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher;
 import com.mifmif.common.regex.Generex;
-import io.gatling.jsonpath.Parser$;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -35,13 +34,15 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static au.com.dius.pact.core.model.PathExpressionsKt.PATH_SPECIAL_CHARS;
+
 /**
  * DSL to define a JSON Object
  */
 public class PactDslJsonBody extends DslPart {
 
-  private static final String EXAMPLE = "Example \"";
-  private final JSONObject body;
+    private static final String EXAMPLE = "Example \"";
+    private final JSONObject body;
 
   /**
    * Constructs a new body as a root
@@ -184,7 +185,7 @@ public class PactDslJsonBody extends DslPart {
 
     private String matcherKey(String name) {
         String key = rootPath + name;
-        if (!name.equals("*") && !name.matches(Parser$.MODULE$.FieldRegex().toString())) {
+        if (StringUtils.containsAny(name, PATH_SPECIAL_CHARS)) {
             key = StringUtils.stripEnd(rootPath, ".") + "['" + name + "']";
         }
         return key;
@@ -536,7 +537,7 @@ public class PactDslJsonBody extends DslPart {
      */
     public PactDslJsonBody object(String name) {
         String base = rootPath + name;
-        if (!name.matches(Parser$.MODULE$.FieldRegex().toString())) {
+        if (StringUtils.containsAny(name, PATH_SPECIAL_CHARS)) {
             base = StringUtils.substringBeforeLast(rootPath, ".") + "['" + name + "']";
         }
         return new PactDslJsonBody(base + ".", "", this);
@@ -553,7 +554,7 @@ public class PactDslJsonBody extends DslPart {
    */
   public PactDslJsonBody object(String name, DslPart value) {
     String base = rootPath + name;
-    if (!name.matches(Parser$.MODULE$.FieldRegex().toString())) {
+    if (StringUtils.containsAny(name, PATH_SPECIAL_CHARS)) {
       base = StringUtils.substringBeforeLast(rootPath, ".") + "['" + name + "']";
     }
     if (value instanceof PactDslJsonBody) {

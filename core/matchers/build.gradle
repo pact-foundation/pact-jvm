@@ -1,9 +1,7 @@
 dependencies {
-  compile project(":core:pact-jvm-core-model"),
-    "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
-  compile("io.gatling:jsonpath_${project.scalaVersion}:0.6.9") {
-    exclude group: 'org.scala-lang'
-  }
+  compile project(":core:pact-jvm-core-model")
+  compile project(":pact-jvm-support")
+  compile "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   compile 'com.googlecode.java-diff-utils:diffutils:1.3.0'
 
   compile "org.scala-lang.modules:scala-xml_${project.scalaVersion}:1.0.6"
