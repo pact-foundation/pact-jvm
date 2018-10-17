@@ -136,13 +136,16 @@ open class InteractionRunner<I>(
   // Running
   override fun run(notifier: RunNotifier) {
     var allPassed = true
+    val failures = mutableListOf<String>()
     for (interaction in pact.interactions) {
       val description = describeChild(interaction)
       notifier.fireTestStarted(description)
       try {
         interactionBlock(interaction, pactSource, testContext).evaluate()
       } catch (e: Throwable) {
-        notifier.fireTestFailure(Failure(description, e))
+        val failure = Failure(description, e)
+        failures.add(failure.toString())
+        notifier.fireTestFailure(failure)
         allPassed = false
       } finally {
         notifier.fireTestFinished(description)
@@ -151,7 +154,7 @@ open class InteractionRunner<I>(
 
     val publishingDisabled = results.values.any { it.second.publishingResultsDisabled() }
     if (!publishingDisabled && (pact !is FilteredPact<*> || pact.isNotFiltered())) {
-      verificationReporter.reportResults(pact, allPassed, providerVersion())
+      verificationReporter.reportResults(pact, allPassed, providerVersion(), null, failures.toString())
     } else {
       if (publishingDisabled) {
         logger.warn { "Skipping publishing of verification results (" + PACT_VERIFIER_PUBLISH_RESULTS +

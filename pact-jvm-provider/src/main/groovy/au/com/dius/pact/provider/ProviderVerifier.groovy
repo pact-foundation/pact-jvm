@@ -65,7 +65,7 @@ class ProviderVerifier extends ProviderVerifierBase {
         log.warn('Skipping publishing of verification results as it has been disabled ' +
           "(${PACT_VERIFIER_PUBLISH_RESULTS} is not 'true')")
       } else {
-        verificationReporter.reportResults(pact, result, providerVersion?.get() ?: '0.0.0', client)
+        verificationReporter.reportResults(pact, result, providerVersion?.get() ?: '0.0.0', client, failures.toString())
       }
     }
   }
