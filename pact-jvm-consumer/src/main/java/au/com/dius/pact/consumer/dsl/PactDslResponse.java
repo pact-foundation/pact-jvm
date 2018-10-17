@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 
 public class PactDslResponse {
     private static final String CONTENT_TYPE = "Content-Type";
-    static final String DEFAULT_JSON_CONTENT_TYPE_REGEX = "application/json;\\s?charset=(utf|UTF)-8";
+    static final String DEFAULT_JSON_CONTENT_TYPE_REGEX = "application/json(;\\s?charset=[\\w\\-]+)?";
 
     private final ConsumerPactBuilder consumerPactBuilder;
     private PactDslRequestWithPath request;
