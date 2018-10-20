@@ -22,7 +22,7 @@ object PactGenerator {
   def defaultFilename[I <: Interaction](pact: PactModel[I]): String = s"${pact.getConsumer.getName}-${pact.getProvider.getName}.json"
 
   def destinationFileForPact[I <: Interaction](pact: PactModel[I]): File = destinationFile(defaultFilename(pact))
-  def destinationFile(filename: String): File = new File(s"${PactConsumerConfig.pactRootDir}/$filename")
+  def destinationFile(filename: String): File = new File(s"${PactConsumerConfig.INSTANCE.getPactDirectory}/$filename")
   
   def merge(pact: PactModel[RequestResponseInteraction]): PactGenerator = synchronized {
     pactGen = pactGen merge pact
@@ -58,7 +58,7 @@ case class PactGenerator(pacts: Map[String, PactModel[RequestResponseInteraction
 
   def writeAllToFile(pactVersion: PactSpecVersion): Unit = {
     def createPactRootDir(): Unit = 
-      new File(PactConsumerConfig.pactRootDir).mkdirs()
+      new File(PactConsumerConfig.INSTANCE.getPactDirectory).mkdirs()
     
     def writeToFile[I <: Interaction](pact: PactModel[I], filename: String): Unit = {
       val file = destinationFileForPact(pact)

@@ -3587,7 +3587,7 @@ with previous versions with matchers defined on arrays will not be applied.**
 * b15e191 - Ported the code from the gradle plugin to the maven plugin (Ronald Holshausen, Wed Dec 24 14:25:00 2014 +1100)                                                                                                                   
 * 43a0ed9 - correct example matcher json fragment (Ronald Holshausen, Wed Dec 24 10:47:01 2014 +1100)                                                                                                                                        
 * 8fd1de5 - update READMEs about updating the directory pact files are written to #59 (Ronald Holshausen, Wed Dec 24 10:45:01 2014 +1100)                                                                                                    
-* 37b48dc - pact.rootDir system property now overides the directory pact files are written to #59 (Ronald Holshausen, Wed Dec 24 10:27:13 2014 +1100)                                                                                        
+* 37b48dc - pact.rootDir system property now overrides the directory pact files are written to #59 (Ronald Holshausen, Wed Dec 24 10:27:13 2014 +1100)
 * 35bdf9d - added start of a maven plugin (Ronald Holshausen, Mon Dec 22 20:20:21 2014 +1100)
 * bf34f1e - update build to latest 2.11 version of scala (Ronald Holshausen, Fri Dec 19 15:03:27 2014 +1100)
 * 1461003 - fix the matchers to handle null values #77 (Ronald Holshausen, Fri Dec 19 14:48:39 2014 +1100)
