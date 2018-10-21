@@ -24,9 +24,6 @@ dependencies {
 }
 
 clojureTest {
-  jvmOptions = {
-    systemProperty('pact.rootDir', "$buildDir/pacts")
-  }
   junit = true
   clojureTest.dependsOn 'testClasses'
 }

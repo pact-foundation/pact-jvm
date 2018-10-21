@@ -131,10 +131,6 @@ subprojects {
       outputDirectory = "$buildDir/docs/dokkaJavadoc"
     }
 
-    test {
-      systemProperty 'pact.rootDir', "$buildDir/pacts"
-    }
-
     jar {
         manifest.attributes provider: 'gradle',
                 'Implementation-Title': project.name, 'Implementation-Version': version,
