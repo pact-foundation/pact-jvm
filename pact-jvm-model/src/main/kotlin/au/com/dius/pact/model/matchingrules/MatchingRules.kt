@@ -191,7 +191,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(
           "decimal" -> NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
           "real" -> {
             logger.warn { "The 'real' type matcher is deprecated, use 'decimal' instead" }
-            NumberTypeMatcher (NumberTypeMatcher.NumberType.DECIMAL)
+            NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL)
           }
           MIN -> MinTypeMatcher(mapEntryToInt(map, MIN))
           MAX -> MaxTypeMatcher(mapEntryToInt(map, MAX))

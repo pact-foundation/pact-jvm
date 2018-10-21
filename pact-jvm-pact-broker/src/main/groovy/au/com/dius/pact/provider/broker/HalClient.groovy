@@ -10,7 +10,6 @@ import groovy.util.logging.Slf4j
  */
 @Slf4j
 @Canonical
-@SuppressWarnings('DuplicateStringLiteral')
 class HalClient extends HalClientBase {
 
   /**

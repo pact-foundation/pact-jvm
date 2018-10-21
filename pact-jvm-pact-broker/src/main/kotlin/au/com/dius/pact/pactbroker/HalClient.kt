@@ -262,7 +262,7 @@ abstract class HalClientBase @JvmOverloads constructor(
               "URL: '$baseUrl', LINK: '$link'")
           }
         } else {
-          throw InvalidNavigationRequest ("Link '$link' has multiple entries. You need to filter by the link name. " +
+          throw InvalidNavigationRequest("Link '$link' has multiple entries. You need to filter by the link name. " +
             "URL: '$baseUrl', LINK: '$link'")
         }
       } else if (linkData.isJsonObject) {
