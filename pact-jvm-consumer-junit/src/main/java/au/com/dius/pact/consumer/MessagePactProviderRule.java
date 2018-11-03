@@ -98,7 +98,7 @@ public class MessagePactProviderRule extends ExternalResource {
 				setMessage(providedMessage, description);
 				try {
 					base.evaluate();
-					messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir(), PactSpecVersion.V3);
+					messagePact.write(PactConsumerConfig.INSTANCE.getPactDirectory(), PactSpecVersion.V3);
 				} catch (Throwable t) {
 					throw t;
 				}
@@ -131,7 +131,7 @@ public class MessagePactProviderRule extends ExternalResource {
 		MessagePact messagePact = (MessagePact) method.invoke(testClassInstance, builder);
 		setMessage(messagePact.getMessages().get(0), description);
 		base.evaluate();
-		messagePact.write(PactConsumerConfig$.MODULE$.pactRootDir(), PactSpecVersion.V3);
+		messagePact.write(PactConsumerConfig.INSTANCE.getPactDirectory(), PactSpecVersion.V3);
 	}
 
 	private Optional<PactVerification> findPactVerification(PactVerifications pactVerifications) {

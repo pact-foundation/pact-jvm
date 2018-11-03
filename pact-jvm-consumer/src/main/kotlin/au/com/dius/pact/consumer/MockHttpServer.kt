@@ -185,7 +185,7 @@ abstract class BaseMockServer(
 
     val result = validateMockServerState()
     if (result is PactVerificationResult.Ok) {
-      val pactDirectory = pactDirectory()
+      val pactDirectory = PactConsumerConfig.pactDirectory
       logger.debug { "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file " +
         "${pact.fileForPact(pactDirectory)}" }
       pact.write(pactDirectory, pactVersion)
@@ -242,5 +242,3 @@ fun calculateCharset(headers: Map<String, String>): Charset {
   }
   return default
 }
-
-fun pactDirectory() = System.getProperty("pact.rootDir", "target/pacts")!!
