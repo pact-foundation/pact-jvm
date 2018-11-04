@@ -11,17 +11,20 @@ import scala.util.{Failure, Success, Try}
   */
 @Deprecated
 object ConsumerPactRunner {
-  
+
+  @Deprecated
   def writeIfMatching(pact: PactModel[RequestResponseInteraction], results: PactSessionResults, pactVersion: PactSpecVersion)
     : VerificationResult = writeIfMatching(pact, Success(results), pactVersion)
-  
+
+  @Deprecated
   def writeIfMatching(pact: PactModel[RequestResponseInteraction], tryResults: Try[PactSessionResults], pactVersion: PactSpecVersion): VerificationResult = {
     for (results <- tryResults if results.allMatched) {
       PactGenerator.merge(pact).writeAllToFile(pactVersion)
     }
     VerificationResult(tryResults)
   }
-  
+
+  @Deprecated
   def runAndWritePact[T](pact: PactModel[RequestResponseInteraction], pactVersion: PactSpecVersion = PactSpecVersion.V3)(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
     val server = DefaultMockProvider.withDefaultConfig(pactVersion)
     new ConsumerPactRunner(server).runAndWritePact(pact, pactVersion)(userCode, userVerification)
@@ -34,7 +37,8 @@ object ConsumerPactRunner {
 @Deprecated
 class ConsumerPactRunner(server: MockProvider[RequestResponseInteraction]) {
   import ConsumerPactRunner._
-  
+
+  @Deprecated
   def runAndWritePact[T](pact: PactModel[RequestResponseInteraction], pactVersion: PactSpecVersion)(userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
     val tryResults = server.runAndClose(pact)(userCode)
     tryResults match {
@@ -48,10 +52,12 @@ class ConsumerPactRunner(server: MockProvider[RequestResponseInteraction]) {
         }
     }
   }
-  
+
+  @Deprecated
   def runAndWritePact(pact: PactModel[RequestResponseInteraction], userCode: Runnable): VerificationResult =
     runAndWritePact(pact, server.config.getPactVersion)(userCode.run(), (u:Unit) => None)
 
+  @Deprecated
   def run[T](userCode: => T, userVerification: ConsumerTestVerification[T]): VerificationResult = {
     val tryResults = server.run(userCode)
     tryResults match {
@@ -62,6 +68,7 @@ class ConsumerPactRunner(server: MockProvider[RequestResponseInteraction]) {
     }
   }
 
+  @Deprecated
   def writePact(pact: PactModel[RequestResponseInteraction], pactVersion: PactSpecVersion): VerificationResult =
     if (server.session.remainingResults.allMatched)
       writeIfMatching(pact, server.session.remainingResults, pactVersion)

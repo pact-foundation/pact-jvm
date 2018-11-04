@@ -15,14 +15,30 @@ dependencies {
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile "org.specs2:specs2-mock_${project.scalaVersion}:${project.specs2Version}"
     testCompile 'org.cthul:cthul-matchers:1.1.0'
+    testCompile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
+    testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 }
 
+// The language compilers should execute in this order
+// Java then Kotlin then Scala then Groovy
 sourceSets.main.scala.srcDir "src/main/java"
 sourceSets.main.java.srcDirs = []
 
 compileKotlin {
-    dependsOn tasks.getByPath('compileGroovy')
-    classpath += files(compileGroovy.destinationDir)
+    dependsOn tasks.getByPath('compileGroovy'), tasks.getByPath('compileScala')
+    dependsOn.remove('compileJava')
+    classpath += files(compileGroovy.destinationDir) + files(compileScala.destinationDir)
 }
 compileGroovy.dependsOn.remove("compileJava")
+compileScala.dependsOn = []
 compileTestGroovy.dependsOn compileTestScala
+
+test {
+  useJUnitPlatform()
+
+  // Show test results.
+  testLogging {
+    events "passed", "skipped", "failed"
+  }
+}

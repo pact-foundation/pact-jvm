@@ -17,13 +17,18 @@ import au.com.dius.pact.model.{Interaction, PactMerge, PactSpecVersion, PactWrit
  * 
  * This code has a way to go before it is fit for purpose.
  */
+@Deprecated
 object PactGenerator {
 
+  @Deprecated
   def defaultFilename[I <: Interaction](pact: PactModel[I]): String = s"${pact.getConsumer.getName}-${pact.getProvider.getName}.json"
 
+  @Deprecated
   def destinationFileForPact[I <: Interaction](pact: PactModel[I]): File = destinationFile(defaultFilename(pact))
-  def destinationFile(filename: String): File = new File(s"${PactConsumerConfig.INSTANCE.getPactDirectory}/$filename")
-  
+  @Deprecated
+  def destinationFile(filename: String) = new File(s"${System.getProperty("pact.rootDir", "target/pacts")}/$filename")
+
+  @Deprecated
   def merge(pact: PactModel[RequestResponseInteraction]): PactGenerator = synchronized {
     pactGen = pactGen merge pact
     pactGen
@@ -33,13 +38,17 @@ object PactGenerator {
     
 }
 
+@Deprecated
 case class PactGenerator(pacts: Map[String, PactModel[RequestResponseInteraction]], conflicts: List[String]) extends StrictLogging {
   import PactGenerator._
-  
+
+  @Deprecated
   def failed: Boolean = conflicts.nonEmpty
-  
+
+  @Deprecated
   def isEmpty: Boolean = pacts.isEmpty
 
+  @Deprecated
   def merge[I <: Interaction](pact: PactModel[RequestResponseInteraction]): PactGenerator = {
     val pactFileName = defaultFilename(pact)
     val existingPact = pacts get pactFileName
@@ -56,9 +65,10 @@ case class PactGenerator(pacts: Map[String, PactModel[RequestResponseInteraction
     }
   }
 
+  @Deprecated
   def writeAllToFile(pactVersion: PactSpecVersion): Unit = {
     def createPactRootDir(): Unit = 
-      new File(PactConsumerConfig.INSTANCE.getPactDirectory).mkdirs()
+      new File(System.getProperty("pact.rootDir", "target/pacts")).mkdirs()
     
     def writeToFile[I <: Interaction](pact: PactModel[I], filename: String): Unit = {
       val file = destinationFileForPact(pact)
