@@ -3,7 +3,6 @@ package au.com.dius.pact.consumer.dsl;
 import au.com.dius.pact.model.generators.Generators;
 import au.com.dius.pact.model.matchingrules.Category;
 import au.com.dius.pact.model.matchingrules.DateMatcher;
-import au.com.dius.pact.model.matchingrules.EqualsMatcher;
 import au.com.dius.pact.model.matchingrules.IncludeMatcher;
 import au.com.dius.pact.model.matchingrules.MaxTypeMatcher;
 import au.com.dius.pact.model.matchingrules.MinMaxTypeMatcher;
@@ -341,11 +340,11 @@ public abstract class DslPart {
         return new TimeMatcher(format);
     }
 
-    protected MinTypeMatcher matchMin(Integer min) {
-        return new MinTypeMatcher(min);
-    }
+  protected MinTypeMatcher matchMin(Integer min) {
+      return new MinTypeMatcher(min);
+  }
 
-    protected MaxTypeMatcher matchMax(Integer max) {
+  protected MaxTypeMatcher matchMax(Integer max) {
         return new MaxTypeMatcher(max);
     }
 

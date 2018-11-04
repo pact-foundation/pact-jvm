@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.InvalidMatcherException;
+import au.com.dius.pact.matchers.UrlMatcherSupport;
 import au.com.dius.pact.model.Feature;
 import au.com.dius.pact.model.FeatureToggles;
 import au.com.dius.pact.model.generators.Category;
