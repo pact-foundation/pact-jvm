@@ -1,5 +1,21 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.24 - 2.11 Bugfix Release
+
+* 4835d0f0 - Merge tag '3_5_24' into v3.5.x-2.11 (Ronald Holshausen, Sun Nov 4 19:10:17 2018 +1100)
+* ab51d303 - update changelog for release 3.5.24 (Ronald Holshausen, Sun Nov 4 18:36:01 2018 +1100)
+* 5a5d3c22 - fix: small fix for a flacky test (Ronald Holshausen, Sun Nov 4 13:49:51 2018 +1100)
+* 10cd1433 - fix: JUnit 5 provider test support code was not honouring pact.verifier.publishResults #799 (Ronald Holshausen, Sun Nov 4 13:42:50 2018 +1100)
+* 8fbb755e - fix: when determining matching rules, headers should be compared case-insensitive #798 (Ronald Holshausen, Sun Nov 4 12:51:37 2018 +1100)
+* 372a44c1 - fix: change the way maven is invoked from the build (Ronald Holshausen, Sun Nov 4 12:50:07 2018 +1100)
+* b7d8332a - fix: header matcher keys were being written incorrectly in V2 format #786 (Ronald Holshausen, Sun Oct 7 17:23:56 2018 +1100)
+* 165ce6cf - doc: added a note about using the @PactUrl anotation to load a single pact from the file system #780 (Ronald Holshausen, Sun Oct 7 15:07:15 2018 +1100)
+* 67b17f0b - feat: add a flag to ignore IO errors when loading pacts during a pact verification test (Ronald Holshausen, Sun Oct 7 14:52:14 2018 +1100)
+* 65cd7564 - fix: the port is optional in URLs #779 (Ronald Holshausen, Sun Oct 7 12:12:00 2018 +1100)
+* 914c69dd - feat: add missing eachKeyLike method to the Java 8 DSL #778 (Ronald Holshausen, Sun Oct 7 11:17:13 2018 +1100)
+* 82251120 - bump version to 3.5.24 (Ronald Holshausen, Sun Sep 23 17:34:42 2018 +1000)
+* d66eac23 - bump version to 3.5.24 (Ronald Holshausen, Sun Sep 23 17:00:26 2018 +1000)
+
 # 3.5.24 - Bugfix Release
 
 * 5a5d3c22 - fix: small fix for a flacky test (Ronald Holshausen, Sun Nov 4 13:49:51 2018 +1100)
