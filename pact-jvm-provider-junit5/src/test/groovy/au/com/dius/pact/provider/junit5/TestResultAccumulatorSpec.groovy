@@ -78,4 +78,40 @@ class TestResultAccumulatorSpec extends Specification {
     TestResultAccumulator.INSTANCE.verificationReporter = DefaultVerificationReporter.INSTANCE
   }
 
+  def 'updateTestResult - skip publishing verification results if publishing is disabled'() {
+    given:
+    def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'), [interaction1])
+    def reporter = TestResultAccumulator.INSTANCE.verificationReporter
+    TestResultAccumulator.INSTANCE.verificationReporter = Mock(VerificationReporter) {
+      publishingResultsDisabled() >> true
+    }
+
+    when:
+    TestResultAccumulator.INSTANCE.updateTestResult(pact, interaction1, true)
+
+    then:
+    0 * TestResultAccumulator.INSTANCE.verificationReporter.reportResults(_, _, _, _)
+
+    cleanup:
+    TestResultAccumulator.INSTANCE.verificationReporter = reporter
+  }
+
+  def 'updateTestResult - publish verification results if publishing is enabled'() {
+    given:
+    def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'), [interaction1])
+    def reporter = TestResultAccumulator.INSTANCE.verificationReporter
+    TestResultAccumulator.INSTANCE.verificationReporter = Mock(VerificationReporter) {
+      publishingResultsDisabled() >> false
+    }
+
+    when:
+    TestResultAccumulator.INSTANCE.updateTestResult(pact, interaction1, true)
+
+    then:
+    1 * TestResultAccumulator.INSTANCE.verificationReporter.reportResults(pact, true, _, null)
+
+    cleanup:
+    TestResultAccumulator.INSTANCE.verificationReporter = reporter
+  }
+
 }

@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.junit5
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.provider.DefaultVerificationReporter
+import au.com.dius.pact.provider.ProviderVerifierBase.Companion.PACT_VERIFIER_PUBLISHRESULTS
 import au.com.dius.pact.provider.VerificationReporter
 import mu.KLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
@@ -25,7 +26,12 @@ object TestResultAccumulator : KLogging() {
     interactionResults[interactionHash] = testExecutionResult
     if (allInteractionsVerified(pact, interactionResults)) {
       logger.debug { "All interactions for Pact ${pact.provider.name}-${pact.consumer.name} are verified" }
-      verificationReporter.reportResults(pact, true, lookupProviderVersion())
+      if (verificationReporter.publishingResultsDisabled()) {
+        logger.warn { "Skipping publishing of verification results as it has been disabled " +
+          "($PACT_VERIFIER_PUBLISHRESULTS is not 'true')" }
+      } else {
+        verificationReporter.reportResults(pact, true, lookupProviderVersion())
+      }
     }
   }
 
