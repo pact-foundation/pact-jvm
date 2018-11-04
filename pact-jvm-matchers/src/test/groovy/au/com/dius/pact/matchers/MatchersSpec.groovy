@@ -46,6 +46,19 @@ class MatchersSpec extends Specification {
     }
   }
 
+  def 'matchers defined - uses any provided path comparator'() {
+    expect:
+    Matchers.matcherDefined('header', ['SOMETHING'], matchingRules(),
+      { String a, String b -> a.compareToIgnoreCase(b) } as Comparator<String>)
+
+    where:
+    matchingRules = {
+      def matchingRules = new MatchingRulesImpl()
+      matchingRules.addCategory('header').addRule('something', TypeMatcher.INSTANCE)
+      matchingRules
+    }
+  }
+
   def 'wildcardMatcherDefined - should be false when there are no matchers'() {
     expect:
     !Matchers.wildcardMatcherDefined([''], 'body', new MatchingRulesImpl())

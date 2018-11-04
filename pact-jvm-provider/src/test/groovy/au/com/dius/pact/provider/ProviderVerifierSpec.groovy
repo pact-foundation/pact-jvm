@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.model.BrokerUrlSource
 import au.com.dius.pact.model.Consumer
-import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
@@ -15,7 +15,6 @@ import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.VerifierReporter
-import au.com.dius.pact.com.github.michaelbull.result.Ok
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
@@ -500,13 +499,19 @@ class ProviderVerifierSpec extends Specification {
   }
 
   @Unroll
+  @RestoreSystemProperties
   def 'test for pact.verifier.publishResults - #description'() {
     given:
     verifier.projectHasProperty = { value != null }
     verifier.projectGetProperty = { value }
 
+    if (value != null) {
+      System.setProperty(ProviderVerifierBase.PACT_VERIFIER_PUBLISH_RESULTS, value)
+    }
+
     expect:
     verifier.publishingResultsDisabled() == result
+    DefaultVerificationReporter.INSTANCE.publishingResultsDisabled() == result
 
     where:
 

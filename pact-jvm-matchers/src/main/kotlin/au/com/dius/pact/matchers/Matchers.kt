@@ -61,21 +61,31 @@ object Matchers : KLogging() {
     }
   }
 
-  fun resolveMatchers(matchers: MatchingRules, category: String, items: List<String>) =
-    if (category == "body")
+  fun resolveMatchers(
+    matchers: MatchingRules,
+    category: String,
+    items: List<String>,
+    pathComparator: Comparator<String>
+  ) = if (category == "body")
       matchers.rulesForCategory(category).filter(Predicate {
         matchesPath(it, items) > 0
       })
     else if (category == "header" || category == "query")
-      matchers.rulesForCategory(category).filter(Predicate {
-        items == listOf(it)
+      matchers.rulesForCategory(category).filter(Predicate { key ->
+        items.all { pathComparator.compare(key, it) == 0 }
       })
     else matchers.rulesForCategory(category)
 
   @JvmStatic
-  fun matcherDefined(category: String, path: List<String>, matchers: MatchingRules?): Boolean =
+  @JvmOverloads
+  fun matcherDefined(
+    category: String,
+    path: List<String>,
+    matchers: MatchingRules?,
+    pathComparator: Comparator<String> = Comparator.naturalOrder()
+  ): Boolean =
     if (matchers != null)
-      resolveMatchers(matchers, category, path).isNotEmpty()
+      resolveMatchers(matchers, category, path, pathComparator).isNotEmpty()
     else false
 
   /**
@@ -99,21 +109,29 @@ object Matchers : KLogging() {
   fun wildcardMatchingEnabled() = System.getProperty(PACT_MATCHING_WILDCARD)?.trim() == "true"
 
   @JvmStatic
+  @JvmOverloads
   fun <M : Mismatch> domatch(
     matchers: MatchingRules,
     category: String,
     path: List<String>,
     expected: Any?,
     actual: Any?,
-    mismatchFn: MismatchFactory<M>
+    mismatchFn: MismatchFactory<M>,
+    pathComparator: Comparator<String> = Comparator.naturalOrder()
   ): List<M> {
-    val matcherDef = selectBestMatcher(matchers, category, path)
+    val matcherDef = selectBestMatcher(matchers, category, path, pathComparator)
     return domatch(matcherDef, path, expected, actual, mismatchFn)
   }
 
   @JvmStatic
-  fun selectBestMatcher(matchers: MatchingRules, category: String, path: List<String>): MatchingRuleGroup {
-    val matcherCategory = resolveMatchers(matchers, category, path)
+  @JvmOverloads
+  fun selectBestMatcher(
+    matchers: MatchingRules,
+    category: String,
+    path: List<String>,
+    pathComparator: Comparator<String> = Comparator.naturalOrder()
+  ): MatchingRuleGroup {
+    val matcherCategory = resolveMatchers(matchers, category, path, pathComparator)
     return if (category == "body")
       matcherCategory.maxBy(Comparator { a, b ->
         val weightA = calculatePathWeight(a, path)

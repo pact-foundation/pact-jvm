@@ -31,6 +31,11 @@ private val logger = KotlinLogging.logger {}
 interface VerificationReporter {
   fun <I> reportResults(pact: Pact<I>, result: Boolean, version: String, client: PactBrokerClient? = null)
     where I: Interaction
+
+  /**
+   * This must return true unless the pact.verifier.publishResults property has the value of "true"
+   */
+  fun publishingResultsDisabled(): Boolean
 }
 
 @JvmOverloads
@@ -61,6 +66,9 @@ object DefaultVerificationReporter : VerificationReporter {
       logger.info { "Published verification result of '$result' for consumer '${pact.consumer}'" }
     }
   }
+
+  override fun publishingResultsDisabled() =
+    System.getProperty(ProviderVerifierBase.PACT_VERIFIER_PUBLISH_RESULTS)?.toLowerCase() != "true"
 }
 
 enum class PactVerification {
