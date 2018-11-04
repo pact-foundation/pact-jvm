@@ -11,7 +11,7 @@ buildscript {
 }
 
 plugins {
-  id 'nebula.kotlin' version '1.2.51'
+  id 'nebula.kotlin' version '1.2.71'
   id 'org.jmailen.kotlinter' version '1.11.2'
   id 'io.gitlab.arturbosch.detekt' version '1.0.0.RC6-4'
   id 'org.jetbrains.dokka' version '0.9.16'
