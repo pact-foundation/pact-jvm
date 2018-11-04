@@ -374,9 +374,9 @@ class ProviderVerifierSpec extends Specification {
       getSource() >> new BrokerUrlSource('http://localhost', 'http://pact-broker')
     }
 
-    verifier.projectHasProperty = { it == ProviderVerifierBase.PACT_VERIFIER_PUBLISHRESUTS }
+    verifier.projectHasProperty = { it == ProviderVerifierBase.PACT_VERIFIER_PUBLISHRESULTS }
     verifier.projectGetProperty = {
-      (it == ProviderVerifierBase.PACT_VERIFIER_PUBLISHRESUTS).toString()
+      (it == ProviderVerifierBase.PACT_VERIFIER_PUBLISHRESULTS).toString()
     }
 
     PactReader.loadPact(_) >> mockPact
@@ -480,11 +480,11 @@ class ProviderVerifierSpec extends Specification {
     pact.source = new BrokerUrlSource('url', 'url', [publish: [:]])
 
     verifier.projectHasProperty = {
-      it == ProviderVerifier.PACT_VERIFIER_PUBLISHRESUTS
+      it == ProviderVerifier.PACT_VERIFIER_PUBLISHRESULTS
     }
     verifier.projectGetProperty = {
       switch (it) {
-        case ProviderVerifier.PACT_VERIFIER_PUBLISHRESUTS:
+        case ProviderVerifier.PACT_VERIFIER_PUBLISHRESULTS:
           return 'false'
       }
     }
@@ -500,13 +500,19 @@ class ProviderVerifierSpec extends Specification {
   }
 
   @Unroll
+  @RestoreSystemProperties
   def 'test for pact.verifier.publishResults - #description'() {
     given:
     verifier.projectHasProperty = { value != null }
     verifier.projectGetProperty = { value }
 
+    if (value != null) {
+      System.setProperty(ProviderVerifierBase.PACT_VERIFIER_PUBLISHRESULTS, value)
+    }
+
     expect:
     verifier.publishingResultsDisabled() == result
+    DefaultVerificationReporter.INSTANCE.publishingResultsDisabled() == result
 
     where:
 

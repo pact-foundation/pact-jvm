@@ -32,8 +32,15 @@ public @interface PactBroker {
 
     /**
      * HTTP protocol, defaults to http
+     * @deprecated Use scheme instead
      */
+    @Deprecated
     String protocol() default "${pactbroker.protocol:http}";
+
+    /**
+     * HTTP scheme, defaults to HTTP
+     */
+    String scheme() default "${pactbroker.protocol:http}";
 
     /**
      * Tags to use to fetch pacts for, defaults to `latest`

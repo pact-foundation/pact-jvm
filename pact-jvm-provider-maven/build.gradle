@@ -19,12 +19,13 @@ task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider_${project.scal
                                               ':pact-jvm-model:install',
                                               ":pact-jvm-matchers_${project.scalaVersion}:install",
                                               ':pact-jvm-pact-broker:install']) {
-    String mvn = 'mvn'
     if (isWindows()) {
-        mvn = 'mvn.bat'
+      commandLine 'mvn.bat', '-f', "${buildDir}/poms/pom.xml", '--settings',
+        'src/main/resources/settings.xml', '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.5:descriptor'
+    } else {
+      commandLine 'sh', '-c', "mvn -f ${buildDir}/poms/pom.xml --settings src/main/resources/settings.xml -e -B org.apache.maven.plugins:maven-plugin-plugin:3.5:descriptor"      
     }
-    commandLine mvn, '-f', "${buildDir}/poms/pom.xml", '--settings',
-      'src/main/resources/settings.xml', '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.5:descriptor'
+  
     doFirst {
         def pomFile = file("${buildDir}/poms/pom.xml")
         def pom = install.repositories.mavenInstaller.pom

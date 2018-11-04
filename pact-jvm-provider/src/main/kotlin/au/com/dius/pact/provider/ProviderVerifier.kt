@@ -14,6 +14,11 @@ private val logger = KotlinLogging.logger {}
 interface VerificationReporter {
   fun <I> reportResults(pact: Pact<I>, result: Boolean, version: String, client: PactBrokerClient? = null)
     where I: Interaction
+
+  /**
+   * This must return true unless the pact.verifier.publishResults property has the value of "true"
+   */
+  fun publishingResultsDisabled(): Boolean
 }
 
 @JvmOverloads
@@ -44,6 +49,9 @@ object DefaultVerificationReporter : VerificationReporter {
       logger.info { "Published verification result of '$result' for consumer '${pact.consumer}'" }
     }
   }
+
+  override fun publishingResultsDisabled() =
+    System.getProperty(ProviderVerifierBase.PACT_VERIFIER_PUBLISHRESULTS)?.toLowerCase() != "true"
 }
 
 open class ProviderVerifierBase : GroovyObjectSupport() {
@@ -56,11 +64,11 @@ open class ProviderVerifierBase : GroovyObjectSupport() {
    * This will return true unless the pact.verifier.publishResults property has the value of "true"
    */
   open fun publishingResultsDisabled(): Boolean {
-    return !projectHasProperty.apply(PACT_VERIFIER_PUBLISHRESUTS) ||
-      projectGetProperty.apply(PACT_VERIFIER_PUBLISHRESUTS)?.toLowerCase() != "true"
+    return !projectHasProperty.apply(PACT_VERIFIER_PUBLISHRESULTS) ||
+      projectGetProperty.apply(PACT_VERIFIER_PUBLISHRESULTS)?.toLowerCase() != "true"
   }
 
   companion object {
-    const val PACT_VERIFIER_PUBLISHRESUTS = "pact.verifier.publishResults"
+    const val PACT_VERIFIER_PUBLISHRESULTS = "pact.verifier.publishResults"
   }
 }
