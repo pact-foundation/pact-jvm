@@ -1,4 +1,5 @@
 dependencies {
   compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
   compile "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
+  compile "com.google.code.findbugs:jsr305:3.0.2"
 }
