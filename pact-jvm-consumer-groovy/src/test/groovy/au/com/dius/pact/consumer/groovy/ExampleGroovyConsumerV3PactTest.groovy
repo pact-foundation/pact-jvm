@@ -14,7 +14,7 @@ class ExampleGroovyConsumerV3PactTest {
     @Test
     void "example V3 spec test"() {
 
-        def date = new Date()
+        Date date = new Date()
         def aliceService = new PactBuilder()
         aliceService {
             serviceConsumer 'V3Consumer'

@@ -178,6 +178,7 @@ abstract class BaseMockServer(
       testFn.run(this)
       sleep(100) // give the mock server some time to have consistent state
     } catch (e: Throwable) {
+      logger.debug(e) { "Caught exception in mock server" }
       return PactVerificationResult.Error(e, validateMockServerState())
     } finally {
       stop()
