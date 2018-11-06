@@ -1,4 +1,4 @@
-package au.com.dius.pact.support;
+package au.com.dius.pact.core.support;
 
 import javax.annotation.Nonnull;
 import javax.annotation.meta.TypeQualifierDefault;

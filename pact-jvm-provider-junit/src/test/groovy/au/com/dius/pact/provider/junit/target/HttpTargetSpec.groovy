@@ -2,7 +2,7 @@ package au.com.dius.pact.provider.junit.target
 
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.junit.VerificationReports
-import au.com.dius.pact.support.expressions.ValueResolver
+import au.com.dius.pact.core.support.expressions.ValueResolver
 import org.junit.runners.model.TestClass
 import spock.lang.Specification
 

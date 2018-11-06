@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.spring
 
-import au.com.dius.pact.support.expressions.SystemPropertyResolver
-import au.com.dius.pact.support.expressions.ValueResolver
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.core.support.expressions.ValueResolver
 import org.springframework.core.env.Environment
 
 class SpringEnvironmentResolver(private val environment: Environment) : ValueResolver {

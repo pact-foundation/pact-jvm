@@ -1,4 +1,4 @@
-package au.com.dius.pact.support
+package au.com.dius.pact.core.support
 
 fun String?.isNotEmpty(): Boolean = !this.isNullOrEmpty()
 

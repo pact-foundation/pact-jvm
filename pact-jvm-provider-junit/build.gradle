@@ -1,5 +1,5 @@
 dependencies {
-    compile project(":pact-jvm-support"), project(":pact-jvm-provider"),
+    compile project(":core:pact-jvm-core-support"), project(":pact-jvm-provider"),
       "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}",
       "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
       "junit:junit:${project.junitVersion}",

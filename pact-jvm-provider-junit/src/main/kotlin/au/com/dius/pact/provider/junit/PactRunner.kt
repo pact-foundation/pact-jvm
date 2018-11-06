@@ -11,7 +11,7 @@ import au.com.dius.pact.provider.junit.loader.PactSource
 import au.com.dius.pact.provider.junit.target.HttpTarget
 import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestTarget
-import au.com.dius.pact.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import groovy.json.JsonException
 import mu.KLogging
 import org.junit.Ignore

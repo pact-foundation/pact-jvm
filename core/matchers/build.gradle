@@ -1,6 +1,6 @@
 dependencies {
   compile project(":core:pact-jvm-core-model")
-  compile project(":pact-jvm-support")
+  compile project(":core:pact-jvm-core-support")
   compile "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   compile 'com.googlecode.java-diff-utils:diffutils:1.3.0'
 

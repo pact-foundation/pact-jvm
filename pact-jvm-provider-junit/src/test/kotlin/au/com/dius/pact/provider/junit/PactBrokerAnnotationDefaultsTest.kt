@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider.junit
 
 import au.com.dius.pact.provider.junit.loader.PactBroker
-import au.com.dius.pact.support.expressions.ExpressionParser.parseExpression
-import au.com.dius.pact.support.expressions.ExpressionParser.parseListExpression
+import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
+import au.com.dius.pact.core.support.expressions.ExpressionParser.parseListExpression
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains

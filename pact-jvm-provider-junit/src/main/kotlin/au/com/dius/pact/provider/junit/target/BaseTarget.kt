@@ -8,8 +8,8 @@ import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport
 import au.com.dius.pact.provider.junit.VerificationReports
 import au.com.dius.pact.provider.reporters.ReporterManager
-import au.com.dius.pact.support.expressions.SystemPropertyResolver
-import au.com.dius.pact.support.expressions.ValueResolver
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.core.support.expressions.ValueResolver
 import org.junit.runners.model.TestClass
 import java.io.File
 import java.util.function.BiConsumer

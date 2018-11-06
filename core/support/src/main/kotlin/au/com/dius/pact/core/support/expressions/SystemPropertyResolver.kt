@@ -1,8 +1,8 @@
-package au.com.dius.pact.support.expressions
+package au.com.dius.pact.core.support.expressions
 
 import org.apache.commons.lang3.StringUtils
-import au.com.dius.pact.support.isNotEmpty
-import au.com.dius.pact.support.contains
+import au.com.dius.pact.core.support.isNotEmpty
+import au.com.dius.pact.core.support.contains
 
 class SystemPropertyResolver : ValueResolver {
 

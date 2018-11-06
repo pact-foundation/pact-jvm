@@ -1,9 +1,9 @@
 package au.com.dius.pact.core.model.generators
 
 import au.com.dius.pact.core.model.PactSpecVersion
-import au.com.dius.pact.support.expressions.ExpressionParser.containsExpressions
-import au.com.dius.pact.support.expressions.ExpressionParser.parseExpression
-import au.com.dius.pact.support.expressions.MapValueResolver
+import au.com.dius.pact.core.support.expressions.ExpressionParser.containsExpressions
+import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
+import au.com.dius.pact.core.support.expressions.MapValueResolver
 import com.mifmif.common.regex.Generex
 import mu.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils

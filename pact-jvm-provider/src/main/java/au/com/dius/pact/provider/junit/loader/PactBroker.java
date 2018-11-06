@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.junit.loader;
 
-import au.com.dius.pact.support.expressions.SystemPropertyResolver;
-import au.com.dius.pact.support.expressions.ValueResolver;
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver;
+import au.com.dius.pact.core.support.expressions.ValueResolver;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;

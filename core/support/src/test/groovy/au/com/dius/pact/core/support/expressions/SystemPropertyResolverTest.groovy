@@ -1,4 +1,4 @@
-package au.com.dius.pact.support.expressions
+package au.com.dius.pact.core.support.expressions
 
 import org.junit.Before
 import org.junit.Test
