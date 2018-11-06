@@ -12,5 +12,5 @@ env:
 script:
   - unset _JAVA_OPTIONS
   - env
-  - ./gradlew --stacktrace --no-daemon -i check_$SCALA
+  - ./gradlew --stacktrace --no-daemon -i build_$SCALA
 install: true
