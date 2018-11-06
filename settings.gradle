@@ -1,11 +1,12 @@
 enableFeaturePreview('STABLE_PUBLISHING')
 rootProject.name = 'pact-jvm'
 
-include 'pact-jvm-support'
+include 'core:pact-jvm-core-support'
 include 'core:pact-jvm-core-pact-broker'
 include 'core:pact-jvm-core-model'
 include 'core:pact-jvm-core-matchers'
 
+project(':core:pact-jvm-core-support').projectDir = file('core/support')
 project(':core:pact-jvm-core-pact-broker').projectDir = file('core/pact-broker')
 project(':core:pact-jvm-core-model').projectDir = file('core/model')
 project(':core:pact-jvm-core-matchers').projectDir = file('core/matchers')
