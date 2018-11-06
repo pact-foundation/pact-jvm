@@ -1,9 +1,7 @@
 package io.pactfoundation.consumer.dsl;
 
-import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PM;
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
-import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
