@@ -1,14 +1,14 @@
 language: java
 sudo: false
-addons:
-  apt:
-    packages:
-      - oracle-java8-installer
 jdk:
   - oraclejdk8
   - oraclejdk9
   - oraclejdk10
+  - oraclejdk11
   - openjdk8
+  - openjdk9
+  - openjdk10
+  - openjdk11
 env:
   - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT='-p core'
   - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT=
