@@ -1,4 +1,4 @@
-package au.com.dius.pact.core.matchers.util
+package au.com.dius.pact.server
 
 import groovy.json.JsonSlurper
 
@@ -33,3 +33,4 @@ object JsonUtils {
   }
 
 }
+

@@ -126,7 +126,7 @@ class XmlBodyMatcherSpec extends Specification {
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ['Expected an empty List but received <item/>']
+    mismatches*.mismatch == ['Expected an empty List but received 1 child nodes']
     mismatches*.path == ['$.foo']
   }
 
@@ -140,7 +140,7 @@ class XmlBodyMatcherSpec extends Specification {
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ['Expected <four/> but was missing', 'Expected a List with 4 elements but received 3 elements']
+    mismatches*.mismatch == ['Expected <four/> but was missing', 'Expected a List with at least 4 elements but received 3 elements']
     mismatches*.path.unique() == ['$.foo']
   }
 
@@ -181,7 +181,7 @@ class XmlBodyMatcherSpec extends Specification {
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ['Expected a Tag with 2 attributes but received 1 attributes',
+    mismatches*.mismatch == ['Expected a Tag with at least 2 attributes but received 1 attributes',
                              'Expected somethingElse=\'101\' but was missing']
   }
 
@@ -208,7 +208,7 @@ class XmlBodyMatcherSpec extends Specification {
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ['Expected a Tag with 2 attributes but received 1 attributes',
+    mismatches*.mismatch == ['Expected a Tag with at least 2 attributes but received 1 attributes',
                              'Expected somethingElse=\'100\' but was missing']
   }
 

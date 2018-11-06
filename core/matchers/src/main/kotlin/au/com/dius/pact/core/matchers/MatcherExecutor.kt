@@ -20,7 +20,8 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import mu.KotlinLogging
 import org.apache.commons.lang3.time.DateUtils
-import scala.xml.Elem
+import org.w3c.dom.Element
+import org.w3c.dom.Text
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.text.ParseException
@@ -47,7 +48,8 @@ fun typeOf(value: Any?): String {
 fun safeToString(value: Any?): String {
   return when (value) {
     null -> ""
-    is Elem -> value.text()
+    is Text -> value.wholeText
+    is Element -> value.textContent
     is JsonPrimitive -> value.asString
     else -> value.toString()
   }
@@ -146,9 +148,7 @@ fun <M : Mismatch> matchRegex(
   return if (matches ||
     expected is List<*> && actual is List<*> ||
     expected is JsonArray && actual is JsonArray ||
-    expected is scala.collection.immutable.List<*> && actual is scala.collection.immutable.List<*> ||
     expected is Map<*, *> && actual is Map<*, *> ||
-    expected is scala.collection.Map<*, *> && actual is scala.collection.Map<*, *> ||
     expected is JsonObject && actual is JsonObject) {
     emptyList()
   } else {
@@ -168,11 +168,10 @@ fun <M : Mismatch> matchType(
     expected is Boolean && actual is Boolean ||
     expected is List<*> && actual is List<*> ||
     expected is JsonArray && actual is JsonArray ||
-    expected is scala.collection.immutable.List<*> && actual is scala.collection.immutable.List<*> ||
     expected is Map<*, *> && actual is Map<*, *> ||
     expected is JsonObject && actual is JsonObject ||
-    expected is scala.collection.Map<*, *> && actual is scala.collection.Map<*, *> ||
-    expected is Elem && actual is Elem && actual.label() == expected.label()) {
+    expected is Element && actual is Element && actual.tagName == expected.tagName
+  ) {
     emptyList()
   } else if (expected is JsonPrimitive && actual is JsonPrimitive &&
     ((expected.isBoolean && actual.isBoolean) ||
@@ -323,20 +322,14 @@ fun <M : Mismatch> matchMinType(
     } else {
       emptyList()
     }
-  } else if (actual is scala.collection.immutable.List<*>) {
-    if (actual.size() < min) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
-    } else {
-      emptyList()
-    }
   } else if (actual is JsonArray) {
     if (actual.size() < min) {
       listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
     } else {
       emptyList()
     }
-  } else if (actual is Elem) {
-    if (actual.child().size() < min) {
+  } else if (actual is Element) {
+    if (actual.childNodes.length < min) {
       listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have minimum $min", path))
     } else {
       emptyList()
@@ -360,20 +353,14 @@ fun <M : Mismatch> matchMaxType(
     } else {
       emptyList()
     }
-  } else if (actual is scala.collection.immutable.List<*>) {
-    if (actual.size() > max) {
-      listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
-    } else {
-      emptyList()
-    }
   } else if (actual is JsonArray) {
     if (actual.size() > max) {
       listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
     } else {
       emptyList()
     }
-  } else if (actual is Elem) {
-    if (actual.child().size() > max) {
+  } else if (actual is Element) {
+    if (actual.childNodes.length > max) {
       listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to have maximum $max", path))
     } else {
       emptyList()
