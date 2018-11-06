@@ -14,6 +14,5 @@ env:
   - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT=
 script:
   - unset _JAVA_OPTIONS
-  - env
-  - ./gradlew --stacktrace --no-daemon -i $PROJECT build
+  - ./gradlew --stacktrace --no-daemon $PROJECT build
 install: true

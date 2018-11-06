@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.InvalidMatcherException;
+import au.com.dius.pact.core.matchers.UrlMatcherSupport;
 import au.com.dius.pact.core.model.generators.Category;
 import au.com.dius.pact.core.model.generators.DateGenerator;
 import au.com.dius.pact.core.model.generators.DateTimeGenerator;

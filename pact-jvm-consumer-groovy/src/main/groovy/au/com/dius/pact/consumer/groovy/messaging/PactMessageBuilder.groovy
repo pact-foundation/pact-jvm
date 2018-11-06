@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.groovy.messaging
 
 @SuppressWarnings('UnusedImport')
-import au.com.dius.pact.consumer.PactConsumerConfig$
+import au.com.dius.pact.consumer.PactConsumerConfig
 import au.com.dius.pact.consumer.groovy.BaseBuilder
 import au.com.dius.pact.consumer.groovy.PactBodyBuilder
 import au.com.dius.pact.core.model.Consumer
@@ -120,7 +120,7 @@ class PactMessageBuilder extends BaseBuilder {
     if (results.any { it instanceof Throwable }) {
       throw new MessagePactFailedException(results.findAll { it instanceof Throwable })
     } else {
-      pact.write(PactConsumerConfig$.MODULE$.pactRootDir(), PactSpecVersion.V3)
+      pact.write(PactConsumerConfig.pactDirectory, PactSpecVersion.V3)
     }
   }
 

@@ -6,7 +6,9 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 import au.com.dius.pact.core.model.matchingrules.MatchingRule;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -160,6 +162,31 @@ public class LambdaDslObject {
     }
 
     /**
+     * Attribute that must match the provided date format
+     *
+     * @param name    attribute date
+     * @param format  date format to match
+     * @param example example date to use for generated values
+     * @param timeZone time zone used for formatting of example date
+     */
+    public LambdaDslObject date(String name, String format, Date example, TimeZone timeZone) {
+        object.date(name, format, example, timeZone);
+        return this;
+    }
+
+    /**
+     * Attribute that must match the provided date format
+     *
+     * @param name    attribute date
+     * @param format  date format to match
+     * @param example example date to use for generated values
+     */
+    public LambdaDslObject date(String name, String format, ZonedDateTime example) {
+        object.date(name, format, Date.from(example.toInstant()), TimeZone.getTimeZone(example.getZone()));
+        return this;
+    }
+
+    /**
      * Attribute named 'time' that must be an ISO formatted time
      */
     public LambdaDslObject time() {
@@ -197,6 +224,30 @@ public class LambdaDslObject {
      */
     public LambdaDslObject time(String name, String format, Date example) {
         object.time(name, format, example);
+        return this;
+    }
+    /**
+     * Attribute that must match the provided time format
+     *
+     * @param name    attribute name
+     * @param format  time format to match
+     * @param example example time to use for generated values
+     * @param timeZone time zone used for formatting of example time
+     */
+    public LambdaDslObject time(String name, String format, Date example, TimeZone timeZone) {
+        object.time(name, format, example, timeZone);
+        return this;
+    }
+
+    /**
+     * Attribute that must match the provided time format
+     *
+     * @param name    attribute name
+     * @param format  time format to match
+     * @param example example time to use for generated values
+     */
+    public LambdaDslObject time(String name, String format, ZonedDateTime example) {
+        object.time(name, format, Date.from(example.toInstant()), TimeZone.getTimeZone(example.getZone()));
         return this;
     }
 
@@ -238,6 +289,31 @@ public class LambdaDslObject {
      */
     public LambdaDslObject timestamp(String name, String format, Date example) {
         object.timestamp(name, format, example);
+        return this;
+    }
+
+    /**
+     * Attribute that must match the given timestamp format
+     *
+     * @param name    attribute name
+     * @param format  timestamp format
+     * @param example example date and time to use for generated bodies
+     * @param timeZone time zone used for formatting of example date and time
+     */
+    public LambdaDslObject timestamp(String name, String format, Date example, TimeZone timeZone){
+        object.timestamp(name, format, example, timeZone);
+        return this;
+    }
+
+    /**
+     * Attribute that must match the given timestamp format
+     *
+     * @param name    attribute name
+     * @param format  timestamp format
+     * @param example example date and time to use for generated bodies
+     */
+    public LambdaDslObject timestamp(String name, String format, ZonedDateTime example) {
+        object.timestamp(name, format, Date.from(example.toInstant()), TimeZone.getTimeZone(example.getZone()));
         return this;
     }
 

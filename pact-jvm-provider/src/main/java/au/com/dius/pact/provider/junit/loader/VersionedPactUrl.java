@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Used to point {@link au.com.dius.pact.provider.junit.PactRunner} to a versioned source of pacts for contract tests.
+ * Used to point Pact runner to a versioned source of pacts for contract tests.
  * <p>
  *     Use ${any.variable} in the url and specify any.variable as a system property.
  * </p>

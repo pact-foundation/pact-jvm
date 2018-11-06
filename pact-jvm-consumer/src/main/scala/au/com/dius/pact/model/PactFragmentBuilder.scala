@@ -13,36 +13,46 @@ import scala.collection.JavaConverters._
   */
 @Deprecated
 object PactFragmentBuilder {
+  @Deprecated
   def apply(consumer: Consumer) = {
     WithConsumer(consumer)
   }
 
+  @Deprecated
   case class WithConsumer(consumer: Consumer) {
     import scala.collection.JavaConversions._
 
+    @Deprecated
     def hasPactWith(provider: String) = {
       WithProvider(new Provider(provider))
     }
 
+    @Deprecated
     case class WithProvider(provider: Provider) {
+      @Deprecated
       def given(state: String) = {
         InState(List(new ProviderState(state)))
       }
 
+      @Deprecated
       def given(state: String, params: Map[String, String]) = {
         InState(List(new ProviderState(state)))
       }
 
+      @Deprecated
       def uponReceiving(description: String) = {
         InState(List()).uponReceiving(description)
       }
 
+      @Deprecated
       case class InState(state: List[ProviderState]) {
 
+        @Deprecated
         def given(stateDesc: String, params: Map[String, String]) = {
           InState(state.+:(new ProviderState(stateDesc, params)))
         }
 
+        @Deprecated
         def uponReceiving(description: String) = {
           DescribingRequest(consumer, provider, state, description)
         }
@@ -50,6 +60,7 @@ object PactFragmentBuilder {
     }
   }
 
+  @Deprecated
   case class DescribingRequest(consumer: Consumer, provider: Provider, state: List[ProviderState], description: String,
                                builder: CanBuildPactFragment.Builder = CanBuildPactFragment.firstBuild) {
     import scala.collection.JavaConversions._
@@ -57,12 +68,14 @@ object PactFragmentBuilder {
     /**
      * supports java DSL
      */
+    @Deprecated
     def matching(path: String, method: String, query: String, headers: java.util.Map[String, String], body: String,
                  matchers: java.util.Map[String, Any]): DescribingResponse = {
       import collection.JavaConversions._
       matching(path, method, query, headers.toMap, body, matchers.toMap.asInstanceOf[Map[String, Map[String, String]]])
     }
 
+    @Deprecated
     def matching(path: String,
                  method: String = "GET",
                  query: String = "",
@@ -73,15 +86,18 @@ object PactFragmentBuilder {
         matchers))
     }
 
+    @Deprecated
     case class DescribingResponse(request: Request) {
       /**
        * supports java DSL
        */
+      @Deprecated
       def willRespondWith(status: Int, headers: java.util.Map[String, String], maybeBody: Option[String], matchers: JSONObject): PactWithAtLeastOneRequest = {
         import collection.JavaConversions._
         willRespondWith(status, headers.toMap, maybeBody, matchers)
       }
 
+      @Deprecated
       def willRespondWith(status: Int = 200,
                           headers: Map[String, String] = Map(),
                           maybeBody: Option[String] = None,
@@ -102,6 +118,7 @@ object PactFragmentBuilder {
             new Response(status, headers, optionalBody, matchers))))
       }
 
+      @Deprecated
       def willRespondWith(status: Int,
                           headers: Map[String, String],
                           bodyAndMatchers: DslPart): PactWithAtLeastOneRequest = {
@@ -120,6 +137,7 @@ object PactFragmentBuilder {
     }
   }
 
+  @Deprecated
   case class PactWithAtLeastOneRequest(consumer: Consumer, provider:Provider, state: List[ProviderState], interactions: Seq[RequestResponseInteraction]) {
     import scala.collection.JavaConversions._
 
@@ -154,6 +172,7 @@ object PactFragmentBuilder {
     }
   }
 
+  @Deprecated
   object CanBuildPactFragment {
     type Builder = (Consumer, Provider, List[ProviderState], Seq[RequestResponseInteraction]) => PactWithAtLeastOneRequest
 

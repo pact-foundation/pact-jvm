@@ -2,12 +2,14 @@ apply plugin: 'maven-publish'
 
 dependencies {
     compile project(":pact-jvm-provider"),
-      'org.apache.maven:maven-plugin-api:3.5.0',
-      'org.apache.maven.plugin-tools:maven-plugin-annotations:3.5'
-    compile 'org.apache.maven:maven-core:3.5.0'
+      'org.apache.maven:maven-plugin-api:3.5.3',
+      'org.apache.maven.plugin-tools:maven-plugin-annotations:3.5.2'
+    compile 'org.apache.maven:maven-core:3.5.3'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
+
+  testCompile "org.codehaus.groovy:groovy-nio:${project.groovyVersion}:indy"
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -20,12 +22,13 @@ task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider:install",
                                               ':core:pact-jvm-core-matchers:install',
                                               ':core:pact-jvm-core-pact-broker:install',
                                               ':pact-jvm-support:install']) {
-    String mvn = 'mvn'
     if (isWindows()) {
-        mvn = 'mvn.bat'
+      commandLine 'mvn.bat', '-f', "${buildDir}/poms/pom.xml", '--settings',
+        'src/main/resources/settings.xml', '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.5:descriptor'
+    } else {
+      commandLine 'sh', '-c', "mvn -f ${buildDir}/poms/pom.xml --settings src/main/resources/settings.xml -e -B org.apache.maven.plugins:maven-plugin-plugin:3.5:descriptor"      
     }
-    commandLine mvn, '-f', "${buildDir}/poms/pom.xml", '--settings',
-      'src/main/resources/settings.xml', '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.5:descriptor'
+  
     doFirst {
         def pomFile = file("${buildDir}/poms/pom.xml")
         def pom = install.repositories.mavenInstaller.pom

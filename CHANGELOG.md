@@ -1,5 +1,44 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.6.0-rc.1 - Second RC release
+
+* 363a9480 - Revert "Update Gradle to 4.10.2" (Ronald Holshausen, Sun Oct 21 13:52:51 2018 +1100)
+* 2dedd4e3 - Merge pull request #795 from tinexw/689 (Ronald Holshausen, Sun Oct 21 12:23:19 2018 +1100)
+* 2d8cf5f5 - Merge pull request #794 from tinexw/zoned-date-time (Ronald Holshausen, Sun Oct 21 12:22:09 2018 +1100)
+* b1552636 - Merge pull request #793 from tinexw/date-formatting-with-timezone (Ronald Holshausen, Sun Oct 21 12:19:48 2018 +1100)
+* e0ba83fb - Merge branch 'pkubowicz-provider-junit5' (Ronald Holshausen, Sun Oct 21 11:40:29 2018 +1100)
+* ba5af7a7 - Merge branch 'provider-junit5' of https://github.com/pkubowicz/pact-jvm into pkubowicz-provider-junit5 (Ronald Holshausen, Sun Oct 21 11:36:11 2018 +1100)
+* 61b60689 - Merge branch 'pkubowicz-update-libs' (Ronald Holshausen, Sun Oct 21 11:34:09 2018 +1100)
+* 32fd640b - PactDslResponse should accept all charsets, not just UTF-8 (tinexw, Wed Oct 17 23:20:47 2018 +0200)
+* 5a3e3422 - Support ZonedDateTime as example value (tinexw, Wed Oct 17 01:12:17 2018 +0200)
+* ae1927f5 - Add option to use concrete timezone for example date formatting (tinexw, Wed Oct 17 00:23:14 2018 +0200)
+* 2eb94348 - Update Gradle to 4.10.2 (Piotr Kubowicz, Sun Oct 7 17:56:13 2018 +0200)
+* de0fac50 - Update libraries (Piotr Kubowicz, Sun Oct 7 17:34:23 2018 +0200)
+* cebffb74 - Stop jvm-provider-junit5 being dependent on jvm-provider-junit (Piotr Kubowicz, Sun Oct 7 19:51:10 2018 +0200)
+* 70dcaf57 - Merge branch 'v3.5.x' (Ronald Holshausen, Sun Oct 7 18:02:56 2018 +1100)
+* b7d8332a - fix: header matcher keys were being written incorrectly in V2 format #786 (Ronald Holshausen, Sun Oct 7 17:23:56 2018 +1100)
+* 165ce6cf - doc: added a note about using the @PactUrl anotation to load a single pact from the file system #780 (Ronald Holshausen, Sun Oct 7 15:07:15 2018 +1100)
+* 67b17f0b - feat: add a flag to ignore IO errors when loading pacts during a pact verification test (Ronald Holshausen, Sun Oct 7 14:52:14 2018 +1100)
+* 248d93fa - chore: add removal comment to deprecatios (Ronald Holshausen, Sun Oct 7 13:28:50 2018 +1100)
+* 52be0115 - Merge branch 'v3.5.x' (Ronald Holshausen, Sun Oct 7 12:56:10 2018 +1100)
+* 65cd7564 - fix: the port is optional in URLs #779 (Ronald Holshausen, Sun Oct 7 12:12:00 2018 +1100)
+* 914c69dd - feat: add missing eachKeyLike method to the Java 8 DSL #778 (Ronald Holshausen, Sun Oct 7 11:17:13 2018 +1100)
+* 7d58e4f5 - Merge pull request #777 from pkubowicz/reduce-deps (Ronald Holshausen, Mon Sep 24 11:10:52 2018 +1000)
+* 58a588a4 - Merge pull request #776 from pkubowicz/java8-consumer-deps (Ronald Holshausen, Mon Sep 24 10:49:11 2018 +1000)
+* 802a0038 - Stop pushing compile dependencies to all projects (Piotr Kubowicz, Sun Sep 23 17:23:27 2018 +0200)
+* 4585186d - Use proper transitive dependencies for Groovy (Piotr Kubowicz, Sun Sep 23 16:13:33 2018 +0200)
+* 9d6b7aa5 - Stop pact-jvm-consumer-java8 being dependent on JUnit 4 (Piotr Kubowicz, Sun Sep 23 16:00:12 2018 +0200)
+* 7db3a27b - Merge branch 'v3.5.x' (Ronald Holshausen, Sun Sep 23 18:09:21 2018 +1000)
+* d66eac23 - bump version to 3.5.24 (Ronald Holshausen, Sun Sep 23 17:00:26 2018 +1000)
+* 0f77b3c4 - update changelog for release 3.5.23 (Ronald Holshausen, Sun Sep 23 16:29:50 2018 +1000)
+* 82d54f25 - fix: correct the example Spock code in the README #774 (Ronald Holshausen, Sun Sep 23 16:08:58 2018 +1000)
+* 12290ae8 - fix: correct the example JUnit code in the README #774 (Ronald Holshausen, Sun Sep 23 15:34:01 2018 +1000)
+* 6f1cafe7 - fix: codenarc violation (Ronald Holshausen, Sun Sep 23 14:12:24 2018 +1000)
+* 6c18cf1f - fix: when publishing results fails, log the message at ERROR level #738 (Ronald Holshausen, Sun Sep 23 13:53:25 2018 +1000)
+* 41773123 - fix: correct the regression introduced in #764 (#771) (Ronald Holshausen, Sun Sep 23 12:24:04 2018 +1000)
+* 41a6071a - chore: updated versions in readme (Ronald Holshausen, Sat Sep 22 19:37:37 2018 +1000)
+* 3935a93c - bump version to 3.6.0-rc.1 (Ronald Holshausen, Sat Sep 22 17:48:52 2018 +1000)
+
 # 3.6.0-rc.0 - 3.6 Release Candidate
 
 * c1d77a6b - fix: Maven plugin depends on the support library (Ronald Holshausen, Sat Sep 22 17:02:31 2018 +1000)
@@ -49,6 +88,19 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 9dc0901f - feat: Update to allow state change requests to return values (Ronald Holshausen, Sat Jul 14 21:06:04 2018 +1000)
 * ef156ff9 - chore: converted StateChange to Kotlin (Ronald Holshausen, Sat Jul 14 18:39:33 2018 +1000)
 * e7f896c1 - Fix compilation warning (tomoya-yokota, Thu Jul 5 13:00:49 2018 +0900)
+
+# 3.5.24 - Bugfix Release
+
+* 5a5d3c22 - fix: small fix for a flacky test (Ronald Holshausen, Sun Nov 4 13:49:51 2018 +1100)
+* 10cd1433 - fix: JUnit 5 provider test support code was not honouring pact.verifier.publishResults #799 (Ronald Holshausen, Sun Nov 4 13:42:50 2018 +1100)
+* 8fbb755e - fix: when determining matching rules, headers should be compared case-insensitive #798 (Ronald Holshausen, Sun Nov 4 12:51:37 2018 +1100)
+* 372a44c1 - fix: change the way maven is invoked from the build (Ronald Holshausen, Sun Nov 4 12:50:07 2018 +1100)
+* b7d8332a - fix: header matcher keys were being written incorrectly in V2 format #786 (Ronald Holshausen, Sun Oct 7 17:23:56 2018 +1100)
+* 165ce6cf - doc: added a note about using the @PactUrl anotation to load a single pact from the file system #780 (Ronald Holshausen, Sun Oct 7 15:07:15 2018 +1100)
+* 67b17f0b - feat: add a flag to ignore IO errors when loading pacts during a pact verification test (Ronald Holshausen, Sun Oct 7 14:52:14 2018 +1100)
+* 65cd7564 - fix: the port is optional in URLs #779 (Ronald Holshausen, Sun Oct 7 12:12:00 2018 +1100)
+* 914c69dd - feat: add missing eachKeyLike method to the Java 8 DSL #778 (Ronald Holshausen, Sun Oct 7 11:17:13 2018 +1100)
+* d66eac23 - bump version to 3.5.24 (Ronald Holshausen, Sun Sep 23 17:00:26 2018 +1000)
 
 # 3.5.23 - Bugfix Release
 
@@ -3548,7 +3600,7 @@ with previous versions with matchers defined on arrays will not be applied.**
 * b15e191 - Ported the code from the gradle plugin to the maven plugin (Ronald Holshausen, Wed Dec 24 14:25:00 2014 +1100)                                                                                                                   
 * 43a0ed9 - correct example matcher json fragment (Ronald Holshausen, Wed Dec 24 10:47:01 2014 +1100)                                                                                                                                        
 * 8fd1de5 - update READMEs about updating the directory pact files are written to #59 (Ronald Holshausen, Wed Dec 24 10:45:01 2014 +1100)                                                                                                    
-* 37b48dc - pact.rootDir system property now overides the directory pact files are written to #59 (Ronald Holshausen, Wed Dec 24 10:27:13 2014 +1100)                                                                                        
+* 37b48dc - pact.rootDir system property now overrides the directory pact files are written to #59 (Ronald Holshausen, Wed Dec 24 10:27:13 2014 +1100)
 * 35bdf9d - added start of a maven plugin (Ronald Holshausen, Mon Dec 22 20:20:21 2014 +1100)
 * bf34f1e - update build to latest 2.11 version of scala (Ronald Holshausen, Fri Dec 19 15:03:27 2014 +1100)
 * 1461003 - fix the matchers to handle null values #77 (Ronald Holshausen, Fri Dec 19 14:48:39 2014 +1100)

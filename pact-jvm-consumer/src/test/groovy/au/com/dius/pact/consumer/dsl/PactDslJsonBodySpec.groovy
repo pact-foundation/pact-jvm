@@ -241,7 +241,7 @@ class PactDslJsonBodySpec extends Specification {
     pactDslJsonBody.matchers.matchingRules == [
       '$.one.*': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
       '$.one.*.id': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
-      '$.two.*': new MatchingRuleGroup([new RegexMatcher('\\w+')]),
+      '$.two.*': new MatchingRuleGroup([new RegexMatcher('\\w+', 'test')]),
       '$.three.*': new MatchingRuleGroup([new MinTypeMatcher(0)]),
       '$.three.*[*].key3-id': new MatchingRuleGroup([TypeMatcher.INSTANCE])
     ]
@@ -278,7 +278,7 @@ class PactDslJsonBodySpec extends Specification {
       '$.one': new MatchingRuleGroup([ValuesMatcher.INSTANCE]),
       '$.one.*.id': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
       '$.two': new MatchingRuleGroup([ValuesMatcher.INSTANCE]),
-      '$.two.*': new MatchingRuleGroup([new RegexMatcher('\\w+')]),
+      '$.two.*': new MatchingRuleGroup([new RegexMatcher('\\w+', 'test')]),
       '$.three': new MatchingRuleGroup([ValuesMatcher.INSTANCE]),
       '$.three.*[*].key3-id': new MatchingRuleGroup([TypeMatcher.INSTANCE])
     ]

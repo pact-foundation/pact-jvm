@@ -500,13 +500,19 @@ class ProviderVerifierSpec extends Specification {
   }
 
   @Unroll
+  @RestoreSystemProperties
   def 'test for pact.verifier.publishResults - #description'() {
     given:
     verifier.projectHasProperty = { value != null }
     verifier.projectGetProperty = { value }
 
+    if (value != null) {
+      System.setProperty(ProviderVerifierBase.PACT_VERIFIER_PUBLISH_RESULTS, value)
+    }
+
     expect:
     verifier.publishingResultsDisabled() == result
+    DefaultVerificationReporter.INSTANCE.publishingResultsDisabled() == result
 
     where:
 

@@ -34,19 +34,22 @@ class PactDslResponseSpec extends Specification {
   }
 
   def 'default json content type should match common variants'() {
-      def acceptableDefaultContentTypes = [
-              'application/json;charset=utf-8',
-              'application/json; charset=UTF-8',
-              'application/json; charset=utf-8',
+    expect:
+      acceptableDefaultContentType.matches(DEFAULT_JSON_CONTENT_TYPE_REGEX) == matches
 
-              ContentType.APPLICATION_JSON.toString(),
-              MediaType.JSON_UTF_8.toString(),
-      ]
-
-      expect:
-        acceptableDefaultContentTypes.each {
-            it.matches(DEFAULT_JSON_CONTENT_TYPE_REGEX)
-        }
+    where:
+      acceptableDefaultContentType            | matches
+      'application/json;charset=utf-8'        | true
+      'application/json; charset=UTF-8'       | true
+      'application/json; charset=utf-8'       | true
+      'application/json;charset=iso-8859-1'   | true
+      'application/json'                      | true
+      ContentType.APPLICATION_JSON.toString() | true
+      MediaType.JSON_UTF_8.toString()         | true
+      'application/json;foo=bar'              | false
+      'application/json;charset=*'            | false
+      'application/xml'                       | false
+      'foo'                                   | false
   }
 
   def 'sets up any default state when created'() {

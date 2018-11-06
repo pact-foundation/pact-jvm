@@ -17,10 +17,10 @@ object HeaderMatcher : KLogging() {
     val headerMismatch = HeaderMismatch("Content-Type", expected, actual,
             "Expected header 'Content-Type' to have value '$expected' but was '$actual'")
 
-    return if (expectedContentType == actualContentType) {
+    return if (expectedContentType.equals(actualContentType, ignoreCase = true)) {
       expectedParameters.map { entry ->
         if (actualParameters.contains(entry.key)) {
-          if (entry.value == actualParameters[entry.key]) null
+          if (entry.value.equals(actualParameters[entry.key], ignoreCase = true)) null
           else headerMismatch
         } else headerMismatch
       }.filterNotNull().firstOrNull()
@@ -40,10 +40,11 @@ object HeaderMatcher : KLogging() {
   fun compareHeader(headerKey: String, expected: String, actual: String, matchers: MatchingRules): HeaderMismatch? {
     logger.debug { "Comparing header '$headerKey': '$actual' to '$expected'" }
 
+    val comparator = Comparator<String> { a, b -> a.compareTo(b, ignoreCase = true) }
     return when {
-      Matchers.matcherDefined("header", listOf(headerKey), matchers) ->
-        Matchers.domatch<HeaderMismatch>(matchers, "header", listOf(headerKey), expected, actual,
-                HeaderMismatchFactory).firstOrNull()
+      Matchers.matcherDefined("header", listOf(headerKey), matchers, comparator) ->
+        Matchers.domatch(matchers, "header", listOf(headerKey), expected, actual,
+                HeaderMismatchFactory, comparator).firstOrNull()
       headerKey.equals("Content-Type", ignoreCase = true) -> matchContentType(expected, actual)
       stripWhiteSpaceAfterCommas(expected) == stripWhiteSpaceAfterCommas(actual) -> null
       else -> HeaderMismatch(headerKey, expected, actual, "Expected header '$headerKey' to have value " +

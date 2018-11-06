@@ -48,7 +48,7 @@ class ProviderStateInjectedPactTest {
 
   @AfterAll
   static void checkPactFile() {
-    def pactFile = new File("${PactConsumerConfig.pactRootDir()}/V3Consumer-ProviderStateService.json")
+    def pactFile = new File("${PactConsumerConfig.pactDirectory}/V3Consumer-ProviderStateService.json")
     def json = new JsonSlurper().parse(pactFile)
     assert json.metadata.pactSpecification.version == '3.0.0'
     def generators = json.interactions.first().response.generators

@@ -18,10 +18,10 @@ import java.util.jar.JarInputStream
 @ToString
 @EqualsAndHashCode(excludes = ['metadata', 'source'])
 abstract class BasePact<I extends Interaction> implements Pact<I> {
-  protected static final Map DEFAULT_METADATA = [
+  static final Map DEFAULT_METADATA = Collections.unmodifiableMap([
     'pactSpecification': [version: '3.0.0'],
     'pact-jvm'         : [version: lookupVersion()]
-  ]
+  ])
   private static final String METADATA = 'metadata'
 
   Consumer consumer
@@ -63,7 +63,7 @@ abstract class BasePact<I extends Interaction> implements Pact<I> {
 
   static Map convertToMap(def object) {
     if (object == null) {
-      object
+      null
     } else {
       object.properties.findAll { it.key != 'class' }.collectEntries { k, v ->
         if (v instanceof Map) {

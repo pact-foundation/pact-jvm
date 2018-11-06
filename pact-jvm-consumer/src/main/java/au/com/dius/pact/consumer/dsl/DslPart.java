@@ -340,11 +340,11 @@ public abstract class DslPart {
         return new TimeMatcher(format);
     }
 
-    protected MinTypeMatcher matchMin(Integer min) {
-        return new MinTypeMatcher(min);
-    }
+  protected MinTypeMatcher matchMin(Integer min) {
+      return new MinTypeMatcher(min);
+  }
 
-    protected MaxTypeMatcher matchMax(Integer max) {
+  protected MaxTypeMatcher matchMax(Integer max) {
         return new MaxTypeMatcher(max);
     }
 

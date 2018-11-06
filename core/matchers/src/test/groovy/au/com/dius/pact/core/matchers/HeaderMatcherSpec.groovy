@@ -34,10 +34,18 @@ class HeaderMatcherSpec extends Specification {
     HeaderMatcher.compareHeader('HEADER', 'HEADER', 'XYZ', matchers) == null
   }
 
-  def "matching headers - content type header - be true when headers are equal"() {
+  @Unroll
+  @SuppressWarnings('LineLength')
+  def "matching headers - content type header - be true when #description"() {
     expect:
-    HeaderMatcher.compareHeader('CONTENT-TYPE', 'application/json;charset=UTF-8',
-      'application/json; charset=UTF-8', new MatchingRulesImpl()) == null
+    HeaderMatcher.compareHeader('CONTENT-TYPE', expected, actual, new MatchingRulesImpl()) == null
+
+    where:
+
+    description                                       | expected                         | actual
+    'headers are equal'                               | 'application/json;charset=UTF-8' | 'application/json; charset=UTF-8'
+    'headers are equal but have different case'       | 'application/json;charset=UTF-8' | 'application/JSON; charset=utf-8'
+    'the charset is missing from the expected header' | 'application/json'               | 'application/json ; charset=utf-8'
   }
 
   def "matching headers - content type header - be false when headers are not equal"() {
@@ -58,12 +66,6 @@ class HeaderMatcherSpec extends Specification {
       'application/json;charset=UTF-8', new MatchingRulesImpl()) != null
   }
 
-  def "matching headers - content type header - be true when the charset is missing from the expected header"() {
-    expect:
-    HeaderMatcher.compareHeader('CONTENT-TYPE', 'application/json',
-      'application/json ; charset=UTF-8', new MatchingRulesImpl()) == null
-  }
-
   def "matching headers - content type header - delegate to any defined matcher"() {
     given:
     def matchers = new MatchingRulesImpl()
@@ -71,6 +73,10 @@ class HeaderMatcherSpec extends Specification {
 
     expect:
     HeaderMatcher.compareHeader('CONTENT-TYPE', 'application/json',
+      'application/json;charset=UTF-8', matchers) != null
+    HeaderMatcher.compareHeader('content-type', 'application/json',
+      'application/json;charset=UTF-8', matchers) != null
+    HeaderMatcher.compareHeader('Content-Type', 'application/json',
       'application/json;charset=UTF-8', matchers) != null
   }
 

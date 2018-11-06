@@ -29,7 +29,8 @@ class V2MatchingHeaderTest {
       .status(HttpStatus.SC_OK)
       .body('{}', ContentType.APPLICATION_JSON)
       .headers(headers)
-      .matchHeader('Content-Type', 'application/json; ?charset=(utf|UTF)-8')
+      .matchHeader('Content-Type', 'application/json; ?charset=(utf|UTF)-8',
+      'application/json;charset=utf-8')
       .toPact()
 
     assert pact.interactions.first().response.matchingRules.rulesForCategory('header').matchingRules == [

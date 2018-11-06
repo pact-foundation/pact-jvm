@@ -8,7 +8,6 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TimeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
-import java.util.regex.Pattern
 
 /**
  * Pact Matcher functions for 'and' and 'or'
@@ -128,24 +127,4 @@ object PM {
    */
   @JvmStatic
   fun includesStr(value: String) = IncludeMatcher(value)
-}
-
-data class UrlMatcherSupport(val basePath: String, val pathFragments: List<Any>) {
-  fun getExampleValue() = basePath + PATH_SEP + pathFragments.joinToString(separator = PATH_SEP) {
-    when (it) {
-      is RegexMatcher -> it.example!!
-      else -> it.toString()
-    }
-  }
-
-  fun getRegexExpression() = ".*" + pathFragments.joinToString(separator = "\\/") {
-    when (it) {
-      is RegexMatcher -> it.regex
-      else -> Pattern.quote(it.toString())
-    }
-  } + "$"
-
-  companion object {
-    const val PATH_SEP = "/"
-  }
 }

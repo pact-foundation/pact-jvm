@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
-import au.com.dius.pact.consumer.dsl.UrlMatcherSupport
+import au.com.dius.pact.core.matchers.UrlMatcherSupport
 import au.com.dius.pact.core.model.matchingrules.MatchingRule
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 

@@ -2,6 +2,8 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
+import java.util.Date;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -264,5 +266,24 @@ public class PactDslJsonBodyTest {
         .date("creationDate", DATE_FORMAT);
       JSONObject jsonObject = (JSONObject) response.getBody();
       assertThat(jsonObject.get("lastUpdate").toString(), matchesPattern("\\w{3}, \\d{2} \\w{3} \\d{4} \\d{2}:00:00 \\+\\d+ GMT"));
+    }
+
+    @Test
+    public void testExampleTimestampTimezone() {
+      final PactDslJsonBody response = new PactDslJsonBody();
+      response
+        .timestamp("timestampLosAngeles", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", new Date(0), TimeZone.getTimeZone("America/Los_Angeles"))
+        .timestamp("timestampBerlin", "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", new Date(0), TimeZone.getTimeZone("Europe/Berlin"))
+        .date("dateLosAngeles", "yyyy-MM-dd", new Date(0), TimeZone.getTimeZone("America/Los_Angeles"))
+        .date("dateBerlin", "yyyy-MM-dd", new Date(0), TimeZone.getTimeZone("Europe/Berlin"))
+        .time("timeLosAngeles", "HH:mm:ss", new Date(0), TimeZone.getTimeZone("America/Los_Angeles"))
+        .time("timeBerlin", "HH:mm:ss", new Date(0), TimeZone.getTimeZone("Europe/Berlin"));
+      JSONObject jsonObject = (JSONObject) response.getBody();
+      assertThat(jsonObject.get("timestampLosAngeles").toString(), is(equalTo("1969-12-31T16:00:00.000Z")));
+      assertThat(jsonObject.get("timestampBerlin").toString(), is(equalTo("1970-01-01T01:00:00.000Z")));
+      assertThat(jsonObject.get("dateLosAngeles").toString(), is(equalTo("1969-12-31")));
+      assertThat(jsonObject.get("dateBerlin").toString(), is(equalTo("1970-01-01")));
+      assertThat(jsonObject.get("timeLosAngeles").toString(), is(equalTo("16:00:00")));
+      assertThat(jsonObject.get("timeBerlin").toString(), is(equalTo("01:00:00")));
     }
 }

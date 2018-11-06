@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.InvalidMatcherException;
+import au.com.dius.pact.core.matchers.UrlMatcherSupport;
 import au.com.dius.pact.core.model.generators.Category;
 import au.com.dius.pact.core.model.generators.DateGenerator;
 import au.com.dius.pact.core.model.generators.DateTimeGenerator;
@@ -15,6 +16,7 @@ import au.com.dius.pact.core.model.generators.UuidGenerator;
 import au.com.dius.pact.core.model.matchingrules.MatchingRule;
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher;
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
 import au.com.dius.pact.core.model.matchingrules.RuleLogic;
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
 import com.mifmif.common.regex.Generex;
@@ -413,7 +415,7 @@ public class PactDslJsonRootValue extends DslPart {
     }
     PactDslJsonRootValue rootValue = new PactDslJsonRootValue();
     rootValue.setValue(value);
-    rootValue.setMatcher(rootValue.regexp(regex));
+    rootValue.setMatcher(new RegexMatcher(regex, value));
     return rootValue;
   }
 

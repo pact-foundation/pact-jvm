@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Used to pass provider name to {@link PactRunner}
+ * Used to pass provider name to Pact runner
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

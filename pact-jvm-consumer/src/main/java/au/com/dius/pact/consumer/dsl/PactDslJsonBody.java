@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.InvalidMatcherException;
+import au.com.dius.pact.core.matchers.UrlMatcherSupport;
 import au.com.dius.pact.core.model.Feature;
 import au.com.dius.pact.core.model.FeatureToggles;
 import au.com.dius.pact.core.model.generators.Category;
@@ -22,6 +23,7 @@ import au.com.dius.pact.core.model.matchingrules.RuleLogic;
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher;
 import com.mifmif.common.regex.Generex;
+import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -425,7 +427,18 @@ public class PactDslJsonBody extends DslPart {
      * @param example example date and time to use for generated bodies
      */
     public PactDslJsonBody timestamp(String name, String format, Date example) {
-        FastDateFormat instance = FastDateFormat.getInstance(format);
+        return timestamp(name, format, example, TimeZone.getDefault());
+    }
+
+    /**
+     * Attribute that must match the given timestamp format
+     * @param name attribute name
+     * @param format timestamp format
+     * @param example example date and time to use for generated bodies
+     * @param timeZone time zone used for formatting of example date and time
+     */
+    public PactDslJsonBody timestamp(String name, String format, Date example, TimeZone timeZone) {
+        FastDateFormat instance = FastDateFormat.getInstance(format, timeZone);
         body.put(name, instance.format(example));
         matchers.addRule(matcherKey(name), matchTimestamp(format));
         return this;
@@ -470,7 +483,18 @@ public class PactDslJsonBody extends DslPart {
      * @param example example date to use for generated values
      */
     public PactDslJsonBody date(String name, String format, Date example) {
-        FastDateFormat instance = FastDateFormat.getInstance(format);
+        return date(name, format, example, TimeZone.getDefault());
+    }
+
+    /**
+     * Attribute that must match the provided date format
+     * @param name attribute date
+     * @param format date format to match
+     * @param example example date to use for generated values
+     * @param timeZone time zone used for formatting of example date
+     */
+    public PactDslJsonBody date(String name, String format, Date example, TimeZone timeZone) {
+        FastDateFormat instance = FastDateFormat.getInstance(format, timeZone);
         body.put(name, instance.format(example));
         matchers.addRule(matcherKey(name), matchDate(format));
         return this;
@@ -515,7 +539,18 @@ public class PactDslJsonBody extends DslPart {
      * @param example example time to use for generated bodies
      */
     public PactDslJsonBody time(String name, String format, Date example) {
-        FastDateFormat instance = FastDateFormat.getInstance(format);
+        return time(name, format, example, TimeZone.getDefault());
+    }
+
+    /**
+     * Attribute that must match the given time format
+     * @param name attribute name
+     * @param format time format to match
+     * @param example example time to use for generated bodies
+     * @param timeZone time zone used for formatting of example time
+     */
+    public PactDslJsonBody time(String name, String format, Date example, TimeZone timeZone) {
+        FastDateFormat instance = FastDateFormat.getInstance(format, timeZone);
         body.put(name, instance.format(example));
         matchers.addRule(matcherKey(name), matchTime(format));
         return this;
