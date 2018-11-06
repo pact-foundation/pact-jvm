@@ -7,10 +7,11 @@ addons:
 jdk:
   - oraclejdk8
 env:
-  - SCALA=2.12 JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m"
-  - SCALA=nonscala JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m"
+  - TASKS="check_2.12" JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m"
+  - TASKS="check_nonscala" JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m"
+  - TASKS="build -x check" JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m"
 script:
   - unset _JAVA_OPTIONS
   - env
-  - ./gradlew --stacktrace --no-daemon -i build_$SCALA
+  - ./gradlew --stacktrace --no-daemon $TASKS
 install: true
