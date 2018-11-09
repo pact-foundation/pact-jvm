@@ -28,7 +28,7 @@ trait ProviderSpec extends FlatSpec with BeforeAndAfterAll with ProviderDsl with
     *
     * @param verificationConfig
     */
-  def verify(verificationConfig: VerificationConfig): Unit = {
+  def verify(verificationConfig: VerificationConfig, timeoutSeconds: Duration = 5 seconds): Unit = {
 
     import verificationConfig.pact._
     import verificationConfig.serverConfig._
@@ -48,7 +48,7 @@ trait ProviderSpec extends FlatSpec with BeforeAndAfterAll with ProviderDsl with
           val request = interaction.getRequest.copy
           handler.foreach(h => request.setPath(s"${h.url.toString}${interaction.getRequest.getPath}"))
           val actualResponseFuture = HttpClient.run(request)
-          val actualResponse = Await.result(actualResponseFuture, 5 seconds)
+          val actualResponse = Await.result(actualResponseFuture, timeoutSeconds)
           if (restartServer) stopServer()
           ResponseMatching.matchRules(interaction.getResponse, actualResponse) shouldBe (FullResponseMatch)
         }
