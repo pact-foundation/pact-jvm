@@ -59,8 +59,10 @@ open class PactPublishMojo : AbstractMojo() {
     override fun execute() {
       AnsiConsole.systemInstall()
 
-      if (trimSnapshot && projectVersion.endsWith("-SNAPSHOT")) {
-          projectVersion = projectVersion.substring(0, projectVersion.length - 9)
+        val snapShotDefinitionString = "-SNAPSHOT"
+        val emptyString = ""
+        if (trimSnapshot && projectVersion.contains(snapShotDefinitionString)) {
+          projectVersion = projectVersion.replaceFirst(snapShotDefinitionString, emptyString)
       }
 
       if (brokerClient == null) {
