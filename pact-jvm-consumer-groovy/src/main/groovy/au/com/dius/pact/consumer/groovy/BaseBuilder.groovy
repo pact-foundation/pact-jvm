@@ -11,10 +11,6 @@ class BaseBuilder extends Matchers {
   }
 
   def build(Closure closure) {
-    callWithThisAsDelegate(closure)
-  }
-
-  def callWithThisAsDelegate(Closure closure) {
     closure.delegate = this
     closure.resolveStrategy = Closure.DELEGATE_FIRST
     closure.call()

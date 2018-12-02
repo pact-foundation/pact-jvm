@@ -462,12 +462,14 @@ class PactBuilder extends BaseBuilder {
   }
 
   @Override
+  @SuppressWarnings('UnnecessaryOverridingMethod')
   def call(@DelegatesTo(value = PactBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
-    build(closure)
+    super.build(closure)
   }
 
   @Override
+  @SuppressWarnings('UnnecessaryOverridingMethod')
   def build(@DelegatesTo(value = PactBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
-    callWithThisAsDelegate(closure)
+    super.build(closure)
   }
 }
