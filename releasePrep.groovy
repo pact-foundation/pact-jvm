@@ -110,7 +110,7 @@ ask('Publish artifacts to maven central?: [Y]') {
   executeOnShell './gradlew clean uploadArchives :pact-jvm-provider-gradle_2.12:publishPlugins -S'
 }
 
-def nextVer = Version.valueOf(releaseVer).incrementPreReleaseVersion()
+def nextVer = Version.valueOf(releaseVer).incrementPatchVersion()
 ask("Bump version to $nextVer?: [Y]") {
   executeOnShell "sed -i -e \"s/version = '${releaseVer}'/version = '${nextVer}'/\" build.gradle"
   executeOnShell("git add build.gradle")
