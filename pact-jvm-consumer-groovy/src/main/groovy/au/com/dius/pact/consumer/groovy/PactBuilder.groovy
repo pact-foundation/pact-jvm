@@ -460,4 +460,16 @@ class PactBuilder extends BaseBuilder {
   def fromProviderState(String expression, def exampleValue) {
     new GeneratedValue(expression, exampleValue)
   }
+
+  @Override
+  @SuppressWarnings('UnnecessaryOverridingMethod')
+  def call(@DelegatesTo(value = PactBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
+    super.build(closure)
+  }
+
+  @Override
+  @SuppressWarnings('UnnecessaryOverridingMethod')
+  def build(@DelegatesTo(value = PactBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
+    super.build(closure)
+  }
 }

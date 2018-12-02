@@ -1,6 +1,5 @@
 package au.com.dius.pact.consumer.groovy.messaging
 
-@SuppressWarnings('UnusedImport')
 import au.com.dius.pact.consumer.PactConsumerConfig
 import au.com.dius.pact.consumer.groovy.BaseBuilder
 import au.com.dius.pact.consumer.groovy.PactBodyBuilder
@@ -124,4 +123,15 @@ class PactMessageBuilder extends BaseBuilder {
     }
   }
 
+  @Override
+  @SuppressWarnings('UnnecessaryOverridingMethod')
+  def call(@DelegatesTo(value = PactMessageBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
+	  super.build(closure)
+  }
+
+	@Override
+  @SuppressWarnings('UnnecessaryOverridingMethod')
+	def build(@DelegatesTo(value = PactMessageBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
+		super.build(closure)
+	}
 }
