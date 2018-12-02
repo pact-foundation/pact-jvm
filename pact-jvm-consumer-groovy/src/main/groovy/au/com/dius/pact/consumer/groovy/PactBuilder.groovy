@@ -460,4 +460,14 @@ class PactBuilder extends BaseBuilder {
   def fromProviderState(String expression, def exampleValue) {
     new GeneratedValue(expression, exampleValue)
   }
+
+  @Override
+  def call(@DelegatesTo(value = PactBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
+    build(closure)
+  }
+
+  @Override
+  def build(@DelegatesTo(value = PactBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
+    callWithThisAsDelegate(closure)
+  }
 }
