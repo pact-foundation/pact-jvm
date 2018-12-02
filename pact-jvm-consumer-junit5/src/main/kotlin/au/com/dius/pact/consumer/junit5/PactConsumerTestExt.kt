@@ -16,7 +16,10 @@ import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.v3.messaging.MessagePact
 import mu.KLogging
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.AfterEachCallback
+import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.Extension
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -25,7 +28,9 @@ import org.junit.jupiter.api.extension.ParameterResolver
 import org.junit.platform.commons.support.AnnotationSupport
 import org.junit.platform.commons.support.HierarchyTraversalMode
 import org.junit.platform.commons.support.ReflectionSupport
+import org.junit.platform.commons.util.AnnotationUtils.isAnnotated
 import java.lang.annotation.Inherited
+import java.lang.reflect.Method
 
 /**
  * The type of provider (synchronous or asynchronous)
@@ -121,8 +126,7 @@ class JUnit5MockServerSupport(private val baseMockServer: BaseMockServer) : Mock
   }
 }
 
-class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, AfterEachCallback {
-
+class PactConsumerTestExt : Extension, BeforeEachCallback, BeforeAllCallback, ParameterResolver, AfterEachCallback, AfterAllCallback {
   override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
     val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val providerInfo = store["providerInfo"] as ProviderInfo
@@ -144,13 +148,19 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
     }
   }
 
+  override fun beforeAll(context: ExtensionContext) {
+    val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
+    store.put("executedFragments", mutableListOf<Method>())
+  }
+
   override fun beforeEach(context: ExtensionContext) {
     val (providerInfo, pactMethod) = lookupProviderInfo(context)
 
     logger.debug { "providerInfo = $providerInfo" }
 
-    val pact = lookupPact(providerInfo, pactMethod, context)
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
+    val executedFragments = store["executedFragments"] as MutableList<Method>
+    val pact = lookupPact(providerInfo, pactMethod, context, executedFragments)
     store.put("pact", pact)
     store.put("providerInfo", providerInfo)
 
@@ -193,7 +203,12 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
     }
   }
 
-  fun lookupPact(providerInfo: ProviderInfo, pactMethod: String, context: ExtensionContext): BasePact<out Interaction> {
+  fun lookupPact(
+    providerInfo: ProviderInfo,
+    pactMethod: String,
+    context: ExtensionContext,
+    executedFragments: MutableList<Method>
+  ): BasePact<out Interaction> {
     val providerName = if (providerInfo.providerName.isEmpty()) "default" else providerInfo.providerName
     val methods = AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java,
       HierarchyTraversalMode.TOP_DOWN)
@@ -233,12 +248,14 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
       "'${context.testMethod.map { it.name }.orElse("unknown")}'" }
 
     val providerNameToUse = if (pactAnnotation.provider.isNotEmpty()) pactAnnotation.provider else providerName
-    return when (providerType) {
+    val pact = when (providerType) {
       ProviderType.SYNCH, ProviderType.UNSPECIFIED -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
         ConsumerPactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact<*>
       ProviderType.ASYNCH -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
         MessagePactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact<*>
     }
+    executedFragments.add(method)
+    return pact
   }
 
   override fun afterEach(context: ExtensionContext) {
@@ -269,6 +286,25 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
             "${pact.fileForPact(pactDirectory)}"
         }
         pact.write(pactDirectory, PactSpecVersion.V3)
+      }
+    }
+  }
+
+  override fun afterAll(context: ExtensionContext) {
+    if (!context.executionException.isPresent) {
+      val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
+      val executedFragments = store["executedFragments"] as MutableList<Method>
+      val methods = AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java,
+        HierarchyTraversalMode.TOP_DOWN)
+      if (executedFragments.size < methods.size) {
+        val nonExecutedMethods = (methods - executedFragments).filter {
+          !isAnnotated(it, Disabled::class.java)
+        }.joinToString(", ") { it.declaringClass.simpleName + "." + it.name }
+        if (nonExecutedMethods.isNotEmpty()) {
+          throw AssertionError(
+            "The following methods annotated with @Pact were not executed during the test: $nonExecutedMethods" +
+              "\nIf these are currently a work in progress, and a @Disabled annotation to the method\n")
+        }
       }
     }
   }
