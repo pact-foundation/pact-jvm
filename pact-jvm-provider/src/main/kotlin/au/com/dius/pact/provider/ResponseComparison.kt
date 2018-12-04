@@ -50,7 +50,7 @@ class ResponseComparison(
           headerResult = expected.headers.orEmpty().mapValues { null }.toMutableMap()
       } else {
         expected.headers.orEmpty().forEach { headerKey, _ ->
-          if (headerMismatchers[headerKey]!!.isNotEmpty()) {
+          if (headerMismatchers.containsKey(headerKey) && headerMismatchers[headerKey]!!.isNotEmpty()) {
               headerResult[headerKey] = headerMismatchers[headerKey]!!.first().mismatch
           } else {
               headerResult[headerKey] = null

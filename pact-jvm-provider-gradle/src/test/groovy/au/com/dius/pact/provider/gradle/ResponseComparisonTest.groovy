@@ -19,7 +19,7 @@ class ResponseComparisonTest {
 
   @Before
   void setup() {
-    response = new Response(200, ['Content-Type': 'application/json'], OptionalBody.body('{"stuff": "is good"}'))
+    response = new Response(200, ['A': 'mismatch', 'Content-Type': 'application/json'], OptionalBody.body('{"stuff": "is good"}'))
     actualStatus = 200
     actualBody = '{"stuff": "is good"}'
     actualResponse = [contentType: ContentType.APPLICATION_JSON]
