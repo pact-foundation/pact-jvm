@@ -72,7 +72,7 @@ open class PactProviderMojo : AbstractMojo() {
         "You must specify the pact file to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
       }
       verifier.checkBuildSpecificTask = Function { false }
-      verifier.providerVersion = Supplier { projectVersion }
+      verifier.providerVersion = Supplier { ProviderUtils.getProviderVersion(projectVersion) }
 
       verifier.projectClasspath = Supplier { classpathElements.map { File(it).toURI().toURL() } }
 

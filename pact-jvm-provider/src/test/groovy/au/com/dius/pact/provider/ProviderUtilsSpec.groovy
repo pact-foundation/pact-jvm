@@ -2,6 +2,9 @@ package au.com.dius.pact.provider
 
 import spock.lang.IgnoreIf
 import spock.lang.Specification
+import spock.util.environment.RestoreSystemProperties
+
+import static org.junit.Assert.assertEquals
 
 @SuppressWarnings('UnnecessaryBooleanExpression')
 class ProviderUtilsSpec extends Specification {
@@ -72,6 +75,18 @@ class ProviderUtilsSpec extends Specification {
     new ProviderInfo() | new ConsumerInfo(packagesToScan: ['a.b.c']) || ['a.b.c']
     new ProviderInfo(packagesToScan: ['d.e.f']) | new ConsumerInfo(packagesToScan: ['a.b.c']) || ['a.b.c']
     new ProviderInfo(packagesToScan: ['d.e.f']) | new ConsumerInfo() || ['d.e.f']
+  }
+
+  @RestoreSystemProperties
+  def 'provider versions with trim snapshot' () {
+
+    expect:
+    ProviderUtils.getProviderVersion(projectVersion) == result
+
+    where:
+    systemProperty | projectVersion || result
+    System.setProperty('pact.provider.version.trimSnapshot', 'true') | '1.0.0-SNAPSHOT-re234hj' | '1.0.0-re234hj'
+    System.setProperty('pact.provider.version.trimSnapshot', null) | '1.0.0-SNAPSHOT-re234hj' | '1.0.0-SNAPSHOT-re234hj'
   }
 
 }
