@@ -86,17 +86,21 @@ object ProviderUtils {
   }
 
   @JvmStatic
-  fun getProviderVersion(projectVersion : String) : String {
+  fun getProviderVersion(projectVersion: String): String {
     val trimSnapshotProperty = System.getProperty(ProviderVerifierBase.PACT_PROVIDER_VERSION_TRIM_SNAPSHOT)
-    val isTrimSnapshot: Boolean = if (trimSnapshotProperty.isBlank()) false else BooleanUtils.toBoolean(trimSnapshotProperty)
+    val isTrimSnapshot: Boolean = if (trimSnapshotProperty == null || trimSnapshotProperty.isBlank()) {
+      false
+    } else {
+      BooleanUtils.toBoolean(trimSnapshotProperty)
+    }
     return if (isTrimSnapshot) trimSnapshot(projectVersion) else projectVersion
   }
 
-  private fun trimSnapshot(providerVersion : String) : String {
+  private fun trimSnapshot(providerVersion: String): String {
     val SNAPSHOT_STRING = "-SNAPSHOT"
     if (providerVersion.contains(SNAPSHOT_STRING)) {
       return providerVersion.replaceFirst(SNAPSHOT_STRING, "")
     }
-    return providerVersion;
+    return providerVersion
   }
 }

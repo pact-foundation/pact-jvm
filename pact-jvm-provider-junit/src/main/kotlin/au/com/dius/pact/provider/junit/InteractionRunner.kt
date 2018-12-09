@@ -173,7 +173,6 @@ open class InteractionRunner<I>(
     }
   }
 
-
   protected open fun createTest(): Any {
     return testClass.onlyConstructor.newInstance()
   }

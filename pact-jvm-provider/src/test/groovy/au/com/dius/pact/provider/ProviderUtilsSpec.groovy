@@ -4,8 +4,6 @@ import spock.lang.IgnoreIf
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 
-import static org.junit.Assert.assertEquals
-
 @SuppressWarnings('UnnecessaryBooleanExpression')
 class ProviderUtilsSpec extends Specification {
 
@@ -78,15 +76,53 @@ class ProviderUtilsSpec extends Specification {
   }
 
   @RestoreSystemProperties
-  def 'provider versions with trim snapshot' () {
+  def 'provider versions with trim snapshot property true' () {
 
     expect:
     ProviderUtils.getProviderVersion(projectVersion) == result
 
     where:
     systemProperty | projectVersion || result
-    System.setProperty('pact.provider.version.trimSnapshot', 'true') | '1.0.0-SNAPSHOT-re234hj' | '1.0.0-re234hj'
-    System.setProperty('pact.provider.version.trimSnapshot', null) | '1.0.0-SNAPSHOT-re234hj' | '1.0.0-SNAPSHOT-re234hj'
+    System.setProperty(ProviderVerifierBase.PACT_PROVIDER_VERSION_TRIM_SNAPSHOT, 'true') |
+            '1.0.0-SNAPSHOT-re234hj' |
+            '1.0.0-re234hj'
+  }
+
+  @RestoreSystemProperties
+  def 'provider versions with trim snapshot property false' () {
+
+    expect:
+    ProviderUtils.getProviderVersion(projectVersion) == result
+
+    where:
+    systemProperty | projectVersion || result
+    System.setProperty(ProviderVerifierBase.PACT_PROVIDER_VERSION_TRIM_SNAPSHOT, 'false') |
+            '1.0.0-SNAPSHOT-re234hj' |
+            '1.0.0-SNAPSHOT-re234hj'
+  }
+
+  @RestoreSystemProperties
+  def 'provider versions with trim snapshot property wrong value' () {
+
+    expect:
+    ProviderUtils.getProviderVersion(projectVersion) == result
+
+    where:
+    systemProperty | projectVersion || result
+    System.setProperty(ProviderVerifierBase.PACT_PROVIDER_VERSION_TRIM_SNAPSHOT, 'aweirdstring') |
+            '1.0.0-SNAPSHOT-re234hj' |
+            '1.0.0-SNAPSHOT-re234hj'
+  }
+
+  @RestoreSystemProperties
+  def 'provider versions with trim snapshot property not set' () {
+
+    expect:
+    ProviderUtils.getProviderVersion(projectVersion) == result
+
+    where:
+    systemProperty | projectVersion || result
+    _ | '1.0.0-SNAPSHOT-re234hj' | '1.0.0-SNAPSHOT-re234hj'
   }
 
 }

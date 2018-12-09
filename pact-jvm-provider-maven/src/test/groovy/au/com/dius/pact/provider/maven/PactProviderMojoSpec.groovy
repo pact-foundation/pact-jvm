@@ -7,13 +7,8 @@ import org.apache.maven.settings.Server
 import org.apache.maven.settings.Settings
 import org.apache.maven.settings.crypto.SettingsDecrypter
 import org.apache.maven.settings.crypto.SettingsDecryptionResult
-import org.junit.Assert
-import org.mockito.Mockito
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
-
-import static org.junit.Assert.assertEquals
-import static org.mockito.Mockito.when
 
 @SuppressWarnings(['UnnecessaryGetter', 'ClosureAsLastMethodParameter'])
 class PactProviderMojoSpec extends Specification {
