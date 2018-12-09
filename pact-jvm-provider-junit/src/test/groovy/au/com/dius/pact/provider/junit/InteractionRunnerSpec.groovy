@@ -6,17 +6,13 @@ import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.UnknownPactSource
-import au.com.dius.pact.provider.DefaultVerificationReporter
 import au.com.dius.pact.provider.junit.target.HttpTarget
 import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestTarget
-import org.junit.Assert
 import org.junit.runner.notification.RunNotifier
 import org.junit.runners.model.TestClass
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
-
-import static org.junit.Assert.assertEquals
 
 class InteractionRunnerSpec extends Specification {
 
