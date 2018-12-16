@@ -1,5 +1,19 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.6.1 - Bugfix Release
+
+* 0f68f9da - Merge pull request #828 from aplsup/trim-snapshot-provider-version (Ronald Holshausen, Sun Dec 16 14:15:29 2018 +1100)
+* b7e84fac - fix: correct the support for the old protocol on @PactBroker (Ronald Holshausen, Sun Dec 16 13:21:55 2018 +1100)
+* 31a024b7 - feat: allow junit 5 consumer tests to inject the Pact model class #830 (Ronald Holshausen, Sun Dec 16 12:44:07 2018 +1100)
+* e797dcc0 - Merge branch 'andreasf-fix_partial_header_mismatch_nullpointer' (Ronald Holshausen, Sun Dec 16 11:14:34 2018 +1100)
+* 1698456d - fix: linelength in test (Ronald Holshausen, Sun Dec 16 11:09:06 2018 +1100)
+* ef0d2891 - Additional test (Alessio Paciello, Sun Dec 9 13:42:29 2018 +0000)
+* d69d4923 - Fixed codenarc issues (Alessio Paciello, Sun Dec 9 09:01:02 2018 +0000)
+* 1d6eb496 - Feat: snapshot trimming on provider version (Alessio Paciello, Sat Dec 8 17:47:20 2018 +0000)
+* 7d882a09 - Fix: KotlinNullPointerException when a subset of headers don't match (Andreas Fleig, Tue Dec 4 17:09:57 2018 +0100)
+* c92f2a69 - Updated versions (Ronald Holshausen, Sun Dec 2 18:12:13 2018 +1100)
+* 152f8bb7 - bump version to 3.6.1 (Ronald Holshausen, Sun Dec 2 17:56:36 2018 +1100)
+
 # 3.6.0 - 3.6.0 Feature Release
 
 * 192e880d - chore: bump version to 3.6.0 (Ronald Holshausen, Sun Dec 2 17:18:19 2018 +1100)
