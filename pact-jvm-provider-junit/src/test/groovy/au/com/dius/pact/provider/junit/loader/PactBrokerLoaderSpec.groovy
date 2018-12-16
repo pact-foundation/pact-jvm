@@ -389,6 +389,29 @@ class PactBrokerLoaderSpec extends Specification {
       new PactBrokerLoader(PactBrokerAnnotationHttpsNoPort.getAnnotation(PactBroker)) {
         @Override
         PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
+          assert url.scheme == 'https'
+          assert url.host == 'pactbroker.host'
+          assert url.port == -1
+          brokerClient
+        }
+      }
+    }
+
+    when:
+    def result = pactBrokerLoader().load('test')
+
+    then:
+    result == []
+    1 * brokerClient.fetchConsumers('test') >> []
+  }
+
+  def 'configured from annotation with https using old value'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(PactBrokerAnnotationHttpsNoPortOldValue.getAnnotation(PactBroker)) {
+        @Override
+        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
+          assert url.scheme == 'https'
           assert url.host == 'pactbroker.host'
           assert url.port == -1
           brokerClient
@@ -421,6 +444,11 @@ class PactBrokerLoaderSpec extends Specification {
 
   @PactBroker(host = 'pactbroker.host', scheme = 'https', failIfNoPactsFound = false)
   static class PactBrokerAnnotationHttpsNoPort {
+
+  }
+
+  @PactBroker(host = 'pactbroker.host', protocol = 'https', failIfNoPactsFound = false)
+  static class PactBrokerAnnotationHttpsNoPortOldValue {
 
   }
 

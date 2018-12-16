@@ -62,11 +62,15 @@ public class PactBrokerLoader implements PactLoader {
   }
 
   public PactBrokerLoader(final PactBroker pactBroker) {
-    this(pactBroker.host(), pactBroker.port(), StringUtils.defaultIfBlank(pactBroker.scheme(), pactBroker.protocol()),
+    this(pactBroker.host(), pactBroker.port(), defaultIfUnassigned(pactBroker.scheme(), pactBroker.protocol()),
       Arrays.asList(pactBroker.tags()), Arrays.asList(pactBroker.consumers()));
     this.failIfNoPactsFound = pactBroker.failIfNoPactsFound();
     this.authentication = pactBroker.authentication();
     this.valueResolverClass = pactBroker.valueResolver();
+  }
+
+  private static String defaultIfUnassigned(String scheme, String protocol) {
+    return StringUtils.isBlank(scheme) || scheme.equals("${pactbroker.protocol:http}") ? protocol : scheme;
   }
 
   public List<Pact> load(final String providerName) throws IOException {
