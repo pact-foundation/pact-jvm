@@ -1,13 +1,6 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.BrokerUrlSource
-import au.com.dius.pact.model.ClosurePactSource
-import au.com.dius.pact.model.FileSource
-import au.com.dius.pact.model.Interaction
-import au.com.dius.pact.model.PactSource
-import au.com.dius.pact.model.ProviderState
-import au.com.dius.pact.model.Request
-import au.com.dius.pact.model.UrlSource
+import au.com.dius.pact.model.*
 import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import groovy.json.JsonBuilder
 import groovy.lang.Binding
@@ -17,16 +10,7 @@ import mu.KLogging
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
-import org.apache.http.client.methods.CloseableHttpResponse
-import org.apache.http.client.methods.HttpDelete
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.methods.HttpHead
-import org.apache.http.client.methods.HttpOptions
-import org.apache.http.client.methods.HttpPatch
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.client.methods.HttpPut
-import org.apache.http.client.methods.HttpTrace
-import org.apache.http.client.methods.HttpUriRequest
+import org.apache.http.client.methods.*
 import org.apache.http.client.utils.URIBuilder
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
@@ -389,7 +373,7 @@ open class ProviderClient(
       "post" -> HttpPost(url)
       "put" -> HttpPut(url)
       "options" -> HttpOptions(url)
-      "delete" -> HttpDelete(url)
+      "delete" -> HttpDeleteWithEntity(url)
       "head" -> HttpHead(url)
       "patch" -> HttpPatch(url)
       "trace" -> HttpTrace(url)
@@ -398,4 +382,15 @@ open class ProviderClient(
   }
 
   open fun systemPropertySet(property: String) = getBoolean(property)
+
+  internal class HttpDeleteWithEntity(uri: String) : HttpEntityEnclosingRequestBase() {
+    init {
+      setURI(URI.create(uri))
+    }
+
+    override fun getMethod(): String {
+      return HttpDelete.METHOD_NAME
+    }
+
+  }
 }
