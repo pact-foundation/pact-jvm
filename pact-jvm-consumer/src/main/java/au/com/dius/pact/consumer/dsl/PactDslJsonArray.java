@@ -24,6 +24,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -467,6 +469,18 @@ public class PactDslJsonArray extends DslPart {
         body.put(instance.format(example));
         matchers.addRule(rootPath + appendArrayIndex(0), matchTimestamp(format));
         return this;
+    }
+
+    /**
+     * Element that must match the given timestamp format
+     * @param format timestamp format
+     * @param example example date and time to use for generated bodies
+     */
+    public PactDslJsonArray timestamp(String format, Instant example) {
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+      body.put(formatter.format(example));
+      matchers.addRule(rootPath + appendArrayIndex(0), matchTimestamp(format));
+      return this;
     }
 
     /**

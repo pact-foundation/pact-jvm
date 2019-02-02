@@ -6,6 +6,7 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.matchingrules.MatchingRule;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Date;
 import java.util.function.Consumer;
 
@@ -44,6 +45,12 @@ public class LambdaDslJsonArray {
         return this;
     }
 
+    /**
+     * Element that must match the regular expression
+     * @param regex regular expression
+     * @deprecated Use the version that takes an example value
+     */
+    @Deprecated
     public LambdaDslJsonArray stringMatcher(final String regex) {
         pactArray.stringMatcher(regex);
         return this;
@@ -182,6 +189,17 @@ public class LambdaDslJsonArray {
      * @param example example date and time to use for generated bodies
      */
     public LambdaDslJsonArray timestamp(final String format, final Date example) {
+        pactArray.timestamp(format, example);
+        return this;
+    }
+
+    /**
+     * Element that must match the given timestamp format
+     *
+     * @param format  timestamp format
+     * @param example example date and time to use for generated bodies
+     */
+    public LambdaDslJsonArray timestamp(final String format, final Instant example) {
         pactArray.timestamp(format, example);
         return this;
     }
