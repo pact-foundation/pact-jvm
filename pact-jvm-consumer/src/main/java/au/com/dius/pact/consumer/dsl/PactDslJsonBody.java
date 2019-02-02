@@ -24,6 +24,9 @@ import au.com.dius.pact.model.matchingrules.TypeMatcher;
 import au.com.dius.pact.model.matchingrules.ValuesMatcher;
 import com.mifmif.common.regex.Generex;
 import io.gatling.jsonpath.Parser$;
+
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -441,6 +444,30 @@ public class PactDslJsonBody extends DslPart {
         body.put(name, instance.format(example));
         matchers.addRule(matcherKey(name), matchTimestamp(format));
         return this;
+    }
+
+    /**
+     * Attribute that must match the given timestamp format
+     * @param name attribute name
+     * @param format timestamp format
+     * @param example example date and time to use for generated bodies
+     */
+    public PactDslJsonBody timestamp(String name, String format, Instant example) {
+      return timestamp(name, format, example, TimeZone.getDefault());
+    }
+
+    /**
+     * Attribute that must match the given timestamp format
+     * @param name attribute name
+     * @param format timestamp format
+     * @param example example date and time to use for generated bodies
+     * @param timeZone time zone used for formatting of example date and time
+     */
+    public PactDslJsonBody timestamp(String name, String format, Instant example, TimeZone timeZone) {
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format).withZone(timeZone.toZoneId());
+      body.put(name, formatter.format(example));
+      matchers.addRule(matcherKey(name), matchTimestamp(format));
+      return this;
     }
 
     /**

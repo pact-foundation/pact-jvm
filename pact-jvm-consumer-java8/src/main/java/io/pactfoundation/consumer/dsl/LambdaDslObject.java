@@ -6,6 +6,7 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 import au.com.dius.pact.model.matchingrules.MatchingRule;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.TimeZone;
@@ -288,6 +289,18 @@ public class LambdaDslObject {
      * @param example example date and time to use for generated bodies
      */
     public LambdaDslObject timestamp(String name, String format, Date example) {
+        object.timestamp(name, format, example);
+        return this;
+    }
+
+    /**
+     * Attribute that must match the given timestamp format
+     *
+     * @param name    attribute name
+     * @param format  timestamp format
+     * @param example example date and time to use for generated bodies
+     */
+    public LambdaDslObject timestamp(String name, String format, Instant example) {
         object.timestamp(name, format, example);
         return this;
     }
