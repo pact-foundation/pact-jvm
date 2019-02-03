@@ -1,6 +1,13 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.model.*
+import au.com.dius.pact.model.BrokerUrlSource
+import au.com.dius.pact.model.ClosurePactSource
+import au.com.dius.pact.model.FileSource
+import au.com.dius.pact.model.Interaction
+import au.com.dius.pact.model.PactSource
+import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.model.Request
+import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import groovy.json.JsonBuilder
 import groovy.lang.Binding
@@ -10,7 +17,17 @@ import mu.KLogging
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
-import org.apache.http.client.methods.*
+import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.client.methods.HttpDelete
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.HttpHead
+import org.apache.http.client.methods.HttpOptions
+import org.apache.http.client.methods.HttpPatch
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.client.methods.HttpPut
+import org.apache.http.client.methods.HttpTrace
+import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.client.utils.URIBuilder
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
@@ -216,7 +233,8 @@ open class ProviderClient(
       when (requestFilter) {
         is Closure<*> -> requestFilter.call(method)
         is Function1<*, *> -> (requestFilter as Function1<HttpRequest, *>).apply(method)
-        is org.apache.commons.collections4.Closure<*> -> (requestFilter as org.apache.commons.collections4.Closure<Any>).execute(method)
+        is org.apache.commons.collections4.Closure<*> ->
+          (requestFilter as org.apache.commons.collections4.Closure<Any>).execute(method)
         else -> {
           if (isFunctionalInterface(requestFilter)) {
             invokeJavaFunctionalInterface(requestFilter, method)
@@ -301,8 +319,10 @@ open class ProviderClient(
 
       if (provider.stateChangeRequestFilter != null) {
         when {
-          provider.stateChangeRequestFilter is Closure<*> -> (provider.stateChangeRequestFilter as Closure<*>).call(method)
-          provider.stateChangeRequestFilter is Function1<*, *> -> (provider.stateChangeRequestFilter as Function1<Any, Any>).apply(method)
+          provider.stateChangeRequestFilter is Closure<*> ->
+            (provider.stateChangeRequestFilter as Closure<*>).call(method)
+          provider.stateChangeRequestFilter is Function1<*, *> ->
+            (provider.stateChangeRequestFilter as Function1<Any, Any>).apply(method)
           else -> {
             val binding = Binding()
             binding.setVariable(REQUEST, method)
@@ -391,6 +411,5 @@ open class ProviderClient(
     override fun getMethod(): String {
       return HttpDelete.METHOD_NAME
     }
-
   }
 }
