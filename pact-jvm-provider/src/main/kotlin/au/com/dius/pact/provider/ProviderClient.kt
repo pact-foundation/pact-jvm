@@ -19,6 +19,7 @@ import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpDelete
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpHead
 import org.apache.http.client.methods.HttpOptions
@@ -232,7 +233,8 @@ open class ProviderClient(
       when (requestFilter) {
         is Closure<*> -> requestFilter.call(method)
         is Function1<*, *> -> (requestFilter as Function1<HttpRequest, *>).apply(method)
-        is org.apache.commons.collections4.Closure<*> -> (requestFilter as org.apache.commons.collections4.Closure<Any>).execute(method)
+        is org.apache.commons.collections4.Closure<*> ->
+          (requestFilter as org.apache.commons.collections4.Closure<Any>).execute(method)
         else -> {
           if (isFunctionalInterface(requestFilter)) {
             invokeJavaFunctionalInterface(requestFilter, method)
@@ -317,8 +319,10 @@ open class ProviderClient(
 
       if (provider.stateChangeRequestFilter != null) {
         when {
-          provider.stateChangeRequestFilter is Closure<*> -> (provider.stateChangeRequestFilter as Closure<*>).call(method)
-          provider.stateChangeRequestFilter is Function1<*, *> -> (provider.stateChangeRequestFilter as Function1<Any, Any>).apply(method)
+          provider.stateChangeRequestFilter is Closure<*> ->
+            (provider.stateChangeRequestFilter as Closure<*>).call(method)
+          provider.stateChangeRequestFilter is Function1<*, *> ->
+            (provider.stateChangeRequestFilter as Function1<Any, Any>).apply(method)
           else -> {
             val binding = Binding()
             binding.setVariable(REQUEST, method)
@@ -389,7 +393,7 @@ open class ProviderClient(
       "post" -> HttpPost(url)
       "put" -> HttpPut(url)
       "options" -> HttpOptions(url)
-      "delete" -> HttpDelete(url)
+      "delete" -> HttpDeleteWithEntity(url)
       "head" -> HttpHead(url)
       "patch" -> HttpPatch(url)
       "trace" -> HttpTrace(url)
@@ -398,4 +402,14 @@ open class ProviderClient(
   }
 
   open fun systemPropertySet(property: String) = getBoolean(property)
+
+  internal class HttpDeleteWithEntity(uri: String) : HttpEntityEnclosingRequestBase() {
+    init {
+      setURI(URI.create(uri))
+    }
+
+    override fun getMethod(): String {
+      return HttpDelete.METHOD_NAME
+    }
+  }
 }

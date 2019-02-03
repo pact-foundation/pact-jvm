@@ -9,7 +9,6 @@ import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.UrlPactSource
 import au.com.dius.pact.provider.broker.PactBrokerClient
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import scala.Function1
 
