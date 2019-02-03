@@ -145,7 +145,7 @@ new PactDslJsonBody()
 newJsonBody((o) -> {
     o.stringValue("foo", "Foo");
     o.stringValue("bar", "Bar");
-}).build()
+}).build();
 ```
 
 #### An array of arrays
@@ -178,7 +178,7 @@ new PactDslJsonArray()
     .object()
     .stringValue("foo", "Foo")
     .closeObject()
-    .closeArray()
+    .closeArray();
 ```
 
 ##### Lambda DSL
@@ -187,8 +187,8 @@ new PactDslJsonArray()
 newJsonArray((rootArray) -> {
     rootArray.array((a) -> a.stringValue("a1").stringValue("a2"));
     rootArray.array((a) -> a.numberValue(1).numberValue(2));
-    rootArray.array((a) -> a.object((o) -> o.stringValue("foo", "Foo"));
-}).build()
+    rootArray.array((a) -> a.object((o) -> o.stringValue("foo", "Foo")));
+}).build();
 
 ```
 
@@ -199,5 +199,5 @@ newJsonArray { rootArray ->
     rootArray.array { a -> a.stringValue("a1").stringValue("a2") }
     rootArray.array { a -> a.numberValue(1).numberValue(2) }
     rootArray.array { a -> a.newObject { o -> o.stringValue("foo", "Foo") } }
-}.build()
+}.build();
 ```
