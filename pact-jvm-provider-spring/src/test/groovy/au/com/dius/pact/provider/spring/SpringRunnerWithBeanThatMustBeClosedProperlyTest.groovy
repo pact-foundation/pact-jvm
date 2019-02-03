@@ -41,13 +41,13 @@ class SpringRunnerWithBeanThatMustBeClosedProperlyTest {
 
   @State(value = 'book-not-found', action = StateChangeAction.SETUP)
   void booksNoFound() {
-    log.debug("state change method called")
+    log.debug('state change method called')
     assert !TestApplication.ObjectThatMustBeClosed.instance.destroyed
   }
 
   @State(value = 'book-not-found', action = StateChangeAction.TEARDOWN)
   void booksNoFoundTeardown() {
-    log.debug("state change teardown method called")
+    log.debug('state change teardown method called')
     assert !TestApplication.ObjectThatMustBeClosed.instance.destroyed
   }
 }

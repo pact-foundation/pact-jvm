@@ -45,12 +45,12 @@ class SpringFilteredTest {
 
   @State(value = 'provider accepts a new person', action = StateChangeAction.SETUP)
   void toCreatePersonState() {
-    log.debug("State change method called")
+    log.debug('State change method called')
   }
 
   @State(value = 'provider accepts a new person', action = StateChangeAction.TEARDOWN)
   void teardownPersonState() {
-    log.debug("State change teardown method called")
+    log.debug('State change teardown method called')
   }
 
 }
