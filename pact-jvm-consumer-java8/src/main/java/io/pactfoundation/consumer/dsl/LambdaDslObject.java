@@ -407,6 +407,29 @@ public class LambdaDslObject {
     }
 
     /**
+     * Attribute that is an array where each item is a primitive that must match the provided value
+     *
+     * @param name field name
+     * @param value Value that each item in the array must match
+     */
+    public LambdaDslObject eachLike(String name, PactDslJsonRootValue value) {
+        object.eachLike(name, value);
+        return this;
+    }
+
+    /**
+     * Attribute that is an array where each item is a primitive that must match the provided value
+     *
+     * @param name field name
+     * @param value Value that each item in the array must match
+     * @param numberExamples Number of examples to generate
+     */
+    public LambdaDslObject eachLike(String name, PactDslJsonRootValue value, int numberExamples) {
+        object.eachLike(name, value, numberExamples);
+        return this;
+    }
+
+    /**
      * Attribute that is an array with a minimum size where each item must match the following example
      *
      * @param name field name
