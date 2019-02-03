@@ -102,4 +102,37 @@ class LambdaDslSpec extends Specification {
 
   }
 
+  @Issue('#829')
+  def 'supports arrays of primitives in objects'() {
+    given:
+    Consumer<LambdaDslObject> object = { object ->
+      object.eachLike('componentsIds', PactDslJsonRootValue.stringType('A1'))
+      object.eachLike('componentsIds2', PactDslJsonRootValue.stringType('A1'), 5)
+    }
+
+    when:
+    def result = LambdaDsl.newJsonBody(object).build()
+
+    then:
+    result.body.toString() == '{"componentsIds":["A1"],"componentsIds2":["A1","A1","A1","A1","A1"]}'
+    result.matchers.matchingRules.keySet() == ['.componentsIds', '.componentsIds[*]', '.componentsIds2',
+                                               '.componentsIds2[*]'] as Set
+  }
+
+  @Issue('#829')
+  def 'supports arrays of primitives in arrays'() {
+    given:
+    Consumer<LambdaDslJsonArray> array = { array ->
+      array.eachLike(PactDslJsonRootValue.stringType('A1'))
+      array.eachLike(PactDslJsonRootValue.stringType('A1'), 5)
+    }
+
+    when:
+    def result = LambdaDsl.newJsonArray(array).build()
+
+    then:
+    result.body.toString() == '[["A1"],["A1","A1","A1","A1","A1"]]'
+    result.matchers.matchingRules.keySet() == ['[0]', '[0][*]', '[1]', '[1][*]'] as Set
+  }
+
 }

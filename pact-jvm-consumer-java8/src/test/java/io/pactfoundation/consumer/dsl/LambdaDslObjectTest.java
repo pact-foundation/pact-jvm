@@ -348,7 +348,6 @@ public class LambdaDslObjectTest {
                 .getBody()
                 .toString();
 
-        System.out.println(pactDslJson);
         // Lambda DSL
         final PactDslJsonBody actualPactDsl = new PactDslJsonBody();
         final LambdaDslJsonBody object = new LambdaDslJsonBody(actualPactDsl);

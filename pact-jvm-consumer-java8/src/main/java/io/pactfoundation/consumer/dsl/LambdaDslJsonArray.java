@@ -3,6 +3,7 @@ package io.pactfoundation.consumer.dsl;
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
+import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 import au.com.dius.pact.model.matchingrules.MatchingRule;
 
 import java.math.BigDecimal;
@@ -267,6 +268,27 @@ public class LambdaDslJsonArray {
         final LambdaDslJsonBody dslBody = new LambdaDslJsonBody(arrayLike);
         nestedObject.accept(dslBody);
         arrayLike.closeArray();
+        return this;
+    }
+
+    /**
+     * Element that is an array where each item must match the following example
+     *
+     * @param value Value that each item in the array must match
+     */
+    public LambdaDslJsonArray eachLike(PactDslJsonRootValue value) {
+        pactArray.eachLike(value);
+        return this;
+    }
+
+    /**
+     * Element that is an array where each item must match the following example
+     *
+     * @param value Value that each item in the array must match
+     * @param numberExamples Number of examples to generate
+     */
+    public LambdaDslJsonArray eachLike(PactDslJsonRootValue value, int numberExamples) {
+        pactArray.eachLike(value, numberExamples);
         return this;
     }
 
