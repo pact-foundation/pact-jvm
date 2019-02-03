@@ -47,7 +47,6 @@ class ProviderVerifier extends ProviderVerifierBase {
     }
   }
 
-  @CompileStatic
   void runVerificationForConsumer(Map failures, ProviderInfo provider, ConsumerInfo consumer,
                                   PactBrokerClient client = null) {
     reportVerificationForConsumer(consumer, provider)
