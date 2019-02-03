@@ -3,10 +3,12 @@ package au.com.dius.pact.provider.spring
 import au.com.dius.pact.provider.junit.Provider
 import au.com.dius.pact.provider.junit.RestPactRunner
 import au.com.dius.pact.provider.junit.State
+import au.com.dius.pact.provider.junit.StateChangeAction
 import au.com.dius.pact.provider.junit.loader.PactFilter
 import au.com.dius.pact.provider.junit.loader.PactFolder
 import au.com.dius.pact.provider.junit.target.TestTarget
 import au.com.dius.pact.provider.spring.target.MockMvcTarget
+import groovy.util.logging.Slf4j
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.springframework.http.HttpStatus
@@ -30,6 +32,7 @@ class TestController {
 @PactFolder('pacts-for-filter-test')
 @PactFilter('provider accepts a new person')
 @SuppressWarnings(['PublicInstanceField', 'JUnitPublicNonTestMethod', 'JUnitPublicField', 'EmptyMethod'])
+@Slf4j
 class SpringFilteredTest {
 
   @TestTarget
@@ -40,9 +43,14 @@ class SpringFilteredTest {
     target.setControllers(new TestController())
   }
 
-  @State('provider accepts a new person')
+  @State(value = 'provider accepts a new person', action = StateChangeAction.SETUP)
   void toCreatePersonState() {
-    // Yes, I'm an empty method
+    log.debug("State change method called")
+  }
+
+  @State(value = 'provider accepts a new person', action = StateChangeAction.TEARDOWN)
+  void teardownPersonState() {
+    log.debug("State change teardown method called")
   }
 
 }
