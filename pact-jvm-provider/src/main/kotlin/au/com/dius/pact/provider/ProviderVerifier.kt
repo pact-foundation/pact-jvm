@@ -217,11 +217,17 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
   ): Boolean {
     try {
       val urls = projectClasspath.get()
-      val loader = URLClassLoader(urls.toTypedArray(), ProviderVerifierBase::class.java.classLoader)
-      val configurationBuilder = ConfigurationBuilder()
-        .setScanners(MethodAnnotationsScanner())
-        .addClassLoader(loader)
-        .addUrls(urls)
+      logger.debug { "projectClasspath = $urls" }
+
+      val configurationBuilder = if (urls.isEmpty()) {
+        ConfigurationBuilder().setScanners(MethodAnnotationsScanner())
+      } else {
+        val loader = URLClassLoader(urls.toTypedArray(), ProviderVerifierBase::class.java.classLoader)
+        ConfigurationBuilder()
+          .setScanners(MethodAnnotationsScanner())
+          .addClassLoader(loader)
+          .addUrls(urls)
+      }
 
       val scan = ProviderUtils.packagesToScan(providerInfo, consumer)
       if (scan.isNotEmpty()) {
