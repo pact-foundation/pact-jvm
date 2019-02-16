@@ -94,6 +94,56 @@ You can get the mock server injected into the test method by adding a `MockServe
 
 This helps with getting the base URL of the mock server, especially when a random port is used.
 
+## Changing the directory pact files are written to
+
+By default, pact files are written to `target/pacts` (or `build/pacts` if you use Gradle), but this can be overwritten with the `pact.rootDir` system property.
+This property needs to be set on the test JVM as most build tools will fork a new JVM to run the tests.
+
+For Gradle, add this to your build.gradle:
+
+```groovy
+test {
+    systemProperties['pact.rootDir'] = "$buildDir/custom-pacts-directory"
+}
+```
+
+For maven, use the systemPropertyVariables configuration:
+
+```xml
+<project>
+  [...]
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.18</version>
+        <configuration>
+          <systemPropertyVariables>
+            <pact.rootDir>some/other/directory</pact.rootDir>
+            <buildDirectory>${project.build.directory}</buildDirectory>
+            [...]
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  [...]
+</project>
+```
+
+For SBT:
+
+```scala
+fork in Test := true,
+javaOptions in Test := Seq("-Dpact.rootDir=some/other/directory")
+```
+
+### Using `@PactFolder` annotation [3.6.2+]
+
+You can override the directory the pacts are written in a test by adding the `@PactFolder` annotation to the test
+class.
+
 ## Unsupported
 
 The current implementation does not support tests with multiple providers. This will be added in a later release.
