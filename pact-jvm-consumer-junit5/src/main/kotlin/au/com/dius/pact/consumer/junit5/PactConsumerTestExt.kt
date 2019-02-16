@@ -6,6 +6,7 @@ import au.com.dius.pact.consumer.MessagePactBuilder
 import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.Pact
 import au.com.dius.pact.consumer.PactConsumerConfig
+import au.com.dius.pact.consumer.PactFolder
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.junit.JUnitTestSupport
 import au.com.dius.pact.consumer.mockServer
@@ -283,7 +284,7 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, BeforeAllCallback, Pa
     if (!context.executionException.isPresent) {
       val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
       val providerInfo = store["providerInfo"] as ProviderInfo
-      val pactDirectory = PactConsumerConfig.pactDirectory
+      val pactDirectory = lookupPactDirectory(context)
       if (providerInfo.providerType != ProviderType.ASYNCH) {
         val mockServer = store["mockServer"] as JUnit5MockServerSupport
         val pact = store["pact"] as RequestResponsePact
@@ -309,6 +310,14 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, BeforeAllCallback, Pa
         pact.write(pactDirectory, PactSpecVersion.V3)
       }
     }
+  }
+
+  private fun lookupPactDirectory(context: ExtensionContext): String {
+    val pactFolder = AnnotationSupport.findAnnotation(context.requiredTestClass, PactFolder::class.java)
+    return if (pactFolder.isPresent)
+      pactFolder.get().value
+    else
+      PactConsumerConfig.pactDirectory
   }
 
   override fun afterAll(context: ExtensionContext) {
