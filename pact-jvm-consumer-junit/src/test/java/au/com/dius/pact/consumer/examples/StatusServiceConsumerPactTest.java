@@ -7,6 +7,7 @@ import java.util.Map;
 import au.com.dius.pact.consumer.ConsumerPactTest;
 import au.com.dius.pact.consumer.ConsumerPactTestMk2;
 import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.PactTestExecutionContext;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.RequestResponsePact;
@@ -43,7 +44,7 @@ public class StatusServiceConsumerPactTest extends ConsumerPactTestMk2 {
     }
 
     @Override
-    protected void runTest(MockServer mockServer) throws IOException {
+    protected void runTest(MockServer mockServer, PactTestExecutionContext context) throws IOException {
         StatusServiceClient statusServiceClient = new StatusServiceClient(mockServer.getUrl());
 
         String currentQuestionnairePage = statusServiceClient.getCurrentQuestionnairePage(null);

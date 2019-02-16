@@ -149,7 +149,7 @@ public class BaseProviderRule extends ExternalResource {
   }
 
   private PactVerificationResult runPactTest(final Statement base, RequestResponsePact pact) {
-      return runConsumerTest(pact, config, mockServer -> {
+      return runConsumerTest(pact, config, (mockServer, context) -> {
         this.mockServer = mockServer;
         base.evaluate();
         this.mockServer = null;

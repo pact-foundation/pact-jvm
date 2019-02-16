@@ -1,6 +1,7 @@
 package au.com.dius.pact.consumer.resultstests;
 
 import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.PactTestExecutionContext;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.model.RequestResponsePact;
@@ -43,7 +44,7 @@ public class PactVerifiedConsumerFailsTest extends ExpectedToFailBase {
     }
 
     @Override
-    protected void runTest(MockServer mockServer) throws IOException {
+    protected void runTest(MockServer mockServer, PactTestExecutionContext context) throws IOException {
         Map<String, Object> expectedResponse = new HashMap<String, Object>();
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "fred");

@@ -68,7 +68,7 @@ public class PactDefectTest {
 
         PactVerificationResult result = runConsumerTest(pact, new MockProviderConfig("localhost", 0, PactSpecVersion.V3), new PactTestRun() {
             @Override
-            public void run(@NotNull MockServer mockServer) throws IOException {
+            public void run(@NotNull MockServer mockServer, PactTestExecutionContext context) throws IOException {
               try {
                   URL url = new URL(mockServer.getUrl() + path);
                   String response = post(url, contentType, requestBody);

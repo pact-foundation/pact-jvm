@@ -47,7 +47,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     when:
-    def result = pactBroker.runTest {
+    def result = pactBroker.runTest { server, context ->
       assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'HTTP/1.1 200 OK'
     }
 
@@ -79,7 +79,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     when:
-    def result = pactBroker.runTest {
+    def result = pactBroker.runTest { server, context ->
       assert pactBrokerClient.uploadPactFile(pactFile, 'XXXX') == 'FAILED! 400 Bad Request - ' +
         'consumer_version_number: Consumer version number \'XXX\' cannot be parsed to a version number. ' +
         'The expected format (unless this configuration has been overridden) is a semantic version. eg. 1.3.0 or 2.0.4.rc1'
@@ -112,7 +112,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     when:
-    def result = pactBroker.runTest {
+    def result = pactBroker.runTest { server, context ->
       assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').startsWith('FAILED! 409 Conflict - ')
     }
 
@@ -136,7 +136,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     when:
-    def result = pactBroker.runTest {
+    def result = pactBroker.runTest { server, context ->
       assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'FAILED! 400 Bad Request - Enjoy this bit of text'
     }
 
@@ -185,7 +185,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     when:
-    def result = pactBroker.runTest {
+    def result = pactBroker.runTest { server, context ->
       assert pactBrokerClient.fetchConsumers('Activity Service').size() == 2
     }
 

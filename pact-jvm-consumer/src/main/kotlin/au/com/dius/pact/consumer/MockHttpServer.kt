@@ -174,8 +174,9 @@ abstract class BaseMockServer(
     start()
     waitForServer()
 
+    val context = PactTestExecutionContext()
     try {
-      testFn.run(this)
+      testFn.run(this, context)
       sleep(100) // give the mock server some time to have consistent state
     } catch (e: Throwable) {
       logger.debug(e) { "Caught exception in mock server" }
@@ -186,7 +187,7 @@ abstract class BaseMockServer(
 
     val result = validateMockServerState()
     if (result is PactVerificationResult.Ok) {
-      val pactDirectory = PactConsumerConfig.pactDirectory
+      val pactDirectory = context.pactFolder
       logger.debug { "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file " +
         "${pact.fileForPact(pactDirectory)}" }
       pact.write(pactDirectory, pactVersion)

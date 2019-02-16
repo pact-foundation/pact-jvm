@@ -5,7 +5,7 @@ import au.com.dius.pact.model.RequestResponsePact
 
 interface PactTestRun {
   @Throws(Throwable::class)
-  fun run(mockServer: MockServer)
+  fun run(mockServer: MockServer, context: PactTestExecutionContext?)
 }
 
 fun runConsumerTest(pact: RequestResponsePact, config: MockProviderConfig, test: PactTestRun): PactVerificationResult {

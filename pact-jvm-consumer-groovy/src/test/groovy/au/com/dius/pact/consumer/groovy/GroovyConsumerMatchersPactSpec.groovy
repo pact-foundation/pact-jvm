@@ -63,8 +63,8 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     }
 
     when:
-    PactVerificationResult result = matcherService.runTest {
-      def client = new RESTClient(it.url)
+    PactVerificationResult result = matcherService.runTest { server, context ->
+      def client = new RESTClient(server.url)
       def response = client.put(requestContentType: JSON, body: [
           'name': 'harry',
           'surname': 'larry',
@@ -128,8 +128,8 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     }
 
     when:
-    PactVerificationResult result = matcherService.runTest {
-      def client = new RESTClient(it.url)
+    PactVerificationResult result = matcherService.runTest { server, context ->
+      def client = new RESTClient(server.url)
       def response = client.get(query: [a: '100', b: 'Z'])
 
       assert response.status == 200
@@ -160,8 +160,8 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     }
 
     when:
-    PactVerificationResult result = matcherService.runTest {
-      def client = new RESTClient(it.url)
+    PactVerificationResult result = matcherService.runTest { server, context ->
+      def client = new RESTClient(server.url)
       def response = client.put(requestContentType: JSON, body: JsonOutput.toJson([
         valueA: 100, valueB: 'AZB', valueC: null]))
 

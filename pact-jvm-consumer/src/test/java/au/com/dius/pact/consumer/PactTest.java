@@ -32,7 +32,7 @@ public class PactTest {
     MockProviderConfig config = MockProviderConfig.createDefault();
     PactVerificationResult result = runConsumerTest(pact, config, new PactTestRun() {
       @Override
-      public void run(@NotNull MockServer mockServer) throws IOException {
+      public void run(@NotNull MockServer mockServer, PactTestExecutionContext context) throws IOException {
         Map expectedResponse = new HashMap();
         expectedResponse.put("hello", "harry");
         assertEquals(expectedResponse, new ConsumerClient(mockServer.getUrl()).post("/hello",

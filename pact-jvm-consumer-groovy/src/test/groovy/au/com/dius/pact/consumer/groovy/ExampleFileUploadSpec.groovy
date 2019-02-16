@@ -25,7 +25,7 @@ class ExampleFileUploadSpec extends Specification {
         }
 
         when:
-        def result = service.runTest { MockServer mockServer ->
+        def result = service.runTest { MockServer mockServer, context ->
           CloseableHttpClient httpclient = HttpClients.createDefault()
           httpclient.withCloseable {
             def data = MultipartEntityBuilder.create()
