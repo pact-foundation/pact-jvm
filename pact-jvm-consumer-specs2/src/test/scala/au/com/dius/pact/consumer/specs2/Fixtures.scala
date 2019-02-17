@@ -13,11 +13,11 @@ object Fixtures {
 
   val request = new Request("POST", "/", PactReaderKt.queryStringToMap("q=p"),
     Map("testreqheader" -> "testreqheadervalue").asInstanceOf[java.util.Map[String, String]],
-    OptionalBody.body("{\"test\": true}"))
+    OptionalBody.body("{\"test\": true}".getBytes))
 
   val response = new Response(200,
     Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*").asInstanceOf[java.util.Map[String, String]],
-    OptionalBody.body("{\"responsetest\": true}"))
+    OptionalBody.body("{\"responsetest\": true}".getBytes))
 
   val interaction = new RequestResponseInteraction("test interaction",
     Seq(new ProviderState("test state")).asJava, request, response)
