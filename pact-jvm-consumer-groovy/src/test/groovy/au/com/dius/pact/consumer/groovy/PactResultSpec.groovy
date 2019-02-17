@@ -136,7 +136,7 @@ class PactResultSpec extends Specification {
           '\theaders: [Content-Type:application/json]\n' +
           '\tmatchers: MatchingRules(rules={body=Category(name=body, matchingRules={}), path=Category(name=path, matchingRules={})})\n' +
           '\tgenerators: Generators(categories={})\n' +
-          '\tbody: OptionalBody(state=PRESENT, value={\n' +
+          '\tbody: PRESENT({\n' +
           '    "status": "isGood"\n' +
           '})')
     }

@@ -34,7 +34,7 @@ object Create extends StrictLogging {
         pathValue <- path
       ) yield (pathValue -> server))
 
-    val body = OptionalBody.body("{\"port\": " + port + "}")
+    val body = OptionalBody.body(("{\"port\": " + port + "}").getBytes)
 
     server.start(pact)
 
@@ -43,7 +43,7 @@ object Create extends StrictLogging {
   }
 
   def apply(request: Request, oldState: ServerState, config: Config): Result = {
-    def errorJson = OptionalBody.body("{\"error\": \"please provide state param and path param and pact body\"}")
+    def errorJson = OptionalBody.body("{\"error\": \"please provide state param and path param and pact body\"}".getBytes)
     def clientError = Result(new Response(400, JavaConversions.mapAsJavaMap(ResponseUtils.CrossSiteHeaders), errorJson),
       oldState)
 
@@ -57,7 +57,7 @@ object Create extends StrictLogging {
         state <- stateList.headOption
         paths <- CollectionUtils.javaLMapToScalaLMap(request.getQuery).get("path")
         body <- Option(request.getBody)
-      } yield create(state, paths, body.getValue, oldState, config)
+      } yield create(state, paths, body.valueAsString(), oldState, config)
     } else None
 
     result getOrElse clientError

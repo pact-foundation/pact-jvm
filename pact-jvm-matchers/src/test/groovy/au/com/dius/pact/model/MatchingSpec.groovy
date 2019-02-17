@@ -15,7 +15,7 @@ class MatchingSpec extends Specification {
 
   def setup() {
     request = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
-      [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test": true}'))
+      [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test": true}'.bytes))
   }
 
   def 'Body Matching - Handle both None'() {
@@ -31,7 +31,7 @@ class MatchingSpec extends Specification {
       new Request('', '', null, ['Content-Type': 'a']), true)).contains(mismatch)
 
     where:
-    mismatch = new BodyMismatch(request.body.value, null, 'Expected body \'{"test": true}\' but was missing')
+    mismatch = new BodyMismatch(request.body.valueAsString(), null, 'Expected body \'{"test": true}\' but was missing')
   }
 
   def 'Body Matching - Handle right None'() {
@@ -55,7 +55,7 @@ class MatchingSpec extends Specification {
       new Request('', '', null, ['Content-Type': 'application/x+json'], body), true).isEmpty()
 
     where:
-    body = OptionalBody.body('{ "name":  "bob" }')
+    body = OptionalBody.body('{ "name":  "bob" }'.bytes)
   }
 
   @Unroll
@@ -72,7 +72,7 @@ class MatchingSpec extends Specification {
   }
 
   private query(String queryString = '') {
-    new Request('', '', PactReaderKt.queryStringToMap(queryString), null, OptionalBody.body(''), null)
+    new Request('', '', PactReaderKt.queryStringToMap(queryString), null, OptionalBody.body(''.bytes), null)
   }
 
   def 'Query Matching - match same'() {

@@ -35,7 +35,7 @@ object JsonContentTypeHandler : ContentTypeHandler {
   override fun processBody(value: String, fn: (QueryResult) -> Unit): OptionalBody {
     val bodyJson = QueryResult(JsonSlurper().parseText(value))
     fn.invoke(bodyJson)
-    return OptionalBody.body(JsonOutput.toJson(bodyJson.value))
+    return OptionalBody.body(JsonOutput.toJson(bodyJson.value).toByteArray())
   }
 
   override fun applyKey(body: QueryResult, key: String, generator: Generator, context: Map<String, Any?>) {
@@ -192,8 +192,8 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     return when (body.state) {
       OptionalBody.State.EMPTY, OptionalBody.State.MISSING, OptionalBody.State.NULL -> body
       OptionalBody.State.PRESENT -> when {
-        contentType.isJson() -> processBody(body.value!!, "application/json", context, mode)
-        contentType.isXml() -> processBody(body.value!!, "application/xml", context, mode)
+        contentType.isJson() -> processBody(body.valueAsString(), "application/json", context, mode)
+        contentType.isXml() -> processBody(body.valueAsString(), "application/xml", context, mode)
         else -> body
       }
     }
@@ -208,7 +208,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
           handler.applyKey(body, key, generator, context)
         }
       }
-    } ?: OptionalBody.body(value)
+    } ?: OptionalBody.body(value.toByteArray())
   }
 
   /**

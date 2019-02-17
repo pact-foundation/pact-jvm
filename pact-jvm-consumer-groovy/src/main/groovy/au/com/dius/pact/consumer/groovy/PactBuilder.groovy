@@ -127,10 +127,10 @@ class PactBuilder extends BaseBuilder {
         requestDescription,
         providerStates,
         new Request(requestData[i].method ?: 'get', path, query, headers,
-          requestData[i].containsKey(BODY) ? OptionalBody.body(requestData[i].body) : OptionalBody.missing(),
+          requestData[i].containsKey(BODY) ? OptionalBody.body(requestData[i].body.bytes) : OptionalBody.missing(),
           requestMatchers, requestGenerators),
         new Response(responseData[i].status ?: 200, responseHeaders,
-          responseData[i].containsKey(BODY) ? OptionalBody.body(responseData[i].body) : OptionalBody.missing(),
+          responseData[i].containsKey(BODY) ? OptionalBody.body(responseData[i].body.bytes) : OptionalBody.missing(),
           responseMatchers, responseGenerators)
       )
     }

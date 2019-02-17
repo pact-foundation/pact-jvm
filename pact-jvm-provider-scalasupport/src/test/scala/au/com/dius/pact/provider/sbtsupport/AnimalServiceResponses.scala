@@ -8,13 +8,13 @@ object AnimalServiceResponses {
   def contentHeaders: Map[String, String] = Map("Content-Type" -> "application/json; charset=UTF-8")
 
   def alligator(name:String): Response = {
-    val json = OptionalBody.body("{\"alligators\": [{\"name\": \"" + name + "\"}")
+    val json = OptionalBody.body(("{\"alligators\": [{\"name\": \"" + name + "\"}").getBytes)
     new Response(200, JavaConversions.mapAsJavaMap(contentHeaders), json)
   }
   val bobResponse = alligator("Bob")
   val maryResponse = alligator("Mary")
 
-  val errorJson = OptionalBody.body("{\"error\": \"Argh!!!\"}")
+  val errorJson = OptionalBody.body("{\"error\": \"Argh!!!\"}".getBytes)
 
   val responses = Map(
     "there are alligators" -> Map (

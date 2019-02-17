@@ -30,12 +30,12 @@ class PactDslRequestWithPathSpec extends Specification {
     subject.requestMethod == 'PATCH'
     subject.requestHeaders == [test: 'test']
     subject.query == [test: ['true']]
-    subject.requestBody == OptionalBody.body('{"test":true}')
+    subject.requestBody == OptionalBody.body('{"test":true}'.bytes)
 
     subject2.requestMethod == 'PATCH'
     subject2.requestHeaders == [test: 'test']
     subject2.query == [test: ['true']]
-    subject2.requestBody == OptionalBody.body('{"test":true}')
+    subject2.requestBody == OptionalBody.body('{"test":true}'.bytes)
   }
 
   def 'set the content type header correctly (issue #716)'() {

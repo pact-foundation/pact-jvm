@@ -33,7 +33,7 @@ class Request extends BaseRequest implements Comparable {
       path = (map.path == null ? DEFAULT_PATH : map.path) as String
       query = parseQueryParametersToMap(map.query)
       headers = map.headers ?: [:]
-      body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
+      body = map.containsKey('body') ? OptionalBody.body(map.body?.bytes) : OptionalBody.missing()
       matchingRules = MatchingRulesImpl.fromMap(map.matchingRules)
       generators = Generators.fromMap(map.generators)
       it

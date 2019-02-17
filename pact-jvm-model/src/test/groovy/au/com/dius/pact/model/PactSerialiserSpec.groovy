@@ -33,20 +33,20 @@ class PactSerialiserSpec extends Specification {
 
   def setup() {
     request = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
-      [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'))
+      [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'.bytes))
     response = new Response(200, [testreqheader: 'testreqheaderval'],
-      OptionalBody.body('{"responsetest":true}'))
+      OptionalBody.body('{"responsetest":true}'.bytes))
     provider = new Provider('test_provider')
     consumer = new Consumer('test_consumer')
     def requestMatchers = new MatchingRulesImpl()
     requestMatchers.addCategory('body').addRule('$.test', TypeMatcher.INSTANCE)
     requestWithMatchers = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
-      [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'), requestMatchers
+      [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'.bytes), requestMatchers
     )
     def responseMatchers = new MatchingRulesImpl()
     responseMatchers.addCategory('body').addRule('$.responsetest', TypeMatcher.INSTANCE)
     responseWithMatchers = new Response(200, [testreqheader: 'testreqheaderval'],
-      OptionalBody.body('{"responsetest":true}'), responseMatchers
+      OptionalBody.body('{"responsetest":true}'.bytes), responseMatchers
     )
     interactionsWithMatcher = new RequestResponseInteraction('test interaction with matchers',
       [new ProviderState('test state')], requestWithMatchers, responseWithMatchers)
@@ -61,7 +61,7 @@ class PactSerialiserSpec extends Specification {
     pactWithGenerators = new RequestResponsePact(provider, consumer, [interactionsWithGenerators])
 
     messagePactWithGenerators = new MessagePact(provider, consumer, [ new Message('Test Message',
-      [new ProviderState('message exists')], OptionalBody.body('"Test Message"'), new MatchingRulesImpl(),
+      [new ProviderState('message exists')], OptionalBody.body('"Test Message"'.bytes), new MatchingRulesImpl(),
       new Generators([(Category.BODY): ['a': UuidGenerator.INSTANCE]]), [contentType: 'application/json']) ])
   }
 
@@ -89,9 +89,9 @@ class PactSerialiserSpec extends Specification {
     def testPact = new JsonSlurper().parseText(testPactJson)
     def expectedRequest = new Request('GET', '/',
       ['q': ['p', 'p2'], 'r': ['s']], [testreqheader: 'testreqheadervalue'],
-      OptionalBody.body('{"test": true}'))
+      OptionalBody.body('{"test": true}'.bytes))
     def expectedResponse = new Response(200, [testreqheader: 'testreqheaderval'],
-      OptionalBody.body('{"responsetest" : true}'))
+      OptionalBody.body('{"responsetest" : true}'.bytes))
     def expectedPact = new RequestResponsePact(new Provider('test_provider'),
       new Consumer('test_consumer'), [
         new RequestResponseInteraction('test interaction', [
@@ -177,8 +177,8 @@ class PactSerialiserSpec extends Specification {
     given:
     def file = File.createTempFile('non-ascii-pact', '.json')
     def fw = new FileWriter(file)
-    def request = new Request(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'))
-    def response = new Response(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'))
+    def request = new Request(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'.bytes))
+    def response = new Response(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'.bytes))
     def interaction = new RequestResponseInteraction('test interaction with non-ascii characters in bodies',
       null, request, response)
     def pact = new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
@@ -271,7 +271,8 @@ class PactSerialiserSpec extends Specification {
 
     where:
     pactBody = new JsonSlurper().parseText(
-      PactReader.loadPact(loadTestFile('test_pact_with_bodies.json')).interactions[0].request.body.value )
+      PactReader.loadPact(loadTestFile('test_pact_with_bodies.json'))
+        .interactions[0].request.body.valueAsString())
   }
 
   def 'PactSerialiser must deserialise pact with no bodies'() {

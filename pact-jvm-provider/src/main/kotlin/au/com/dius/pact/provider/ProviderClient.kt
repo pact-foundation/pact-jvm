@@ -8,6 +8,7 @@ import au.com.dius.pact.model.PactSource
 import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.UrlSource
+import au.com.dius.pact.model.valueAsString
 import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import groovy.json.JsonBuilder
 import groovy.lang.Binding
@@ -261,7 +262,7 @@ open class ProviderClient(
 
   open fun setupBody(request: Request, method: HttpRequest) {
     if (method is HttpEntityEnclosingRequest && request.body != null && request.body!!.isPresent()) {
-      method.entity = StringEntity(request.body!!.orElse(""))
+      method.entity = StringEntity(request.body.valueAsString())
     }
   }
 

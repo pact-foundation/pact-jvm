@@ -14,7 +14,7 @@ case class ConsumerService(serverUrl: String) {
   implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool)
 
   private def extractFrom(body: OptionalBody): Boolean = {
-    body.orElse("") == "{\"responsetest\": true}"
+    body.valueAsString == "{\"responsetest\": true}"
   }
 
   def extractResponseTest(path: String = request.getPath): Future[Boolean] = {
@@ -25,19 +25,19 @@ case class ConsumerService(serverUrl: String) {
 
   def simpleGet(path: String): Future[(Int, String)] = {
     toScala[(Int, String)](HttpClient.run(new Request("GET", serverUrl + path)).thenApply { response =>
-      (response.getStatus, response.getBody.getValue)
+      (response.getStatus, response.getBody.valueAsString)
     })
   }
 
   def simpleGet(path: String, query: String): Future[(Int, String)] = {
     toScala[(Int, String)](HttpClient.run(new Request("GET", serverUrl + path, PactReaderKt.queryStringToMap(query, true))).thenApply { response =>
-      (response.getStatus, response.getBody.getValue)
+      (response.getStatus, response.getBody.valueAsString)
     })
   }
 
   def options(path: String): Future[(Int, String, Map[String, String])] = {
     toScala[(Int, String, Map[String, String])](HttpClient.run(new Request("OPTION", serverUrl + path)).thenApply { response =>
-      (response.getStatus, response.getBody.orElse(""), JavaConversions.mapAsScalaMap(response.getHeaders).toMap)
+      (response.getStatus, response.getBody.valueAsString, JavaConversions.mapAsScalaMap(response.getHeaders).toMap)
     })
   }
 }

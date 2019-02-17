@@ -58,7 +58,7 @@ class MessagePactRunnerSpec extends Specification {
     interactions2 = [
       new Message('Req 3', [
         new ProviderState('State 1')
-      ], OptionalBody.body('{}')),
+      ], OptionalBody.body('{}'.bytes)),
       new Message('Req 4', [
         new ProviderState('State X')
       ], OptionalBody.empty())

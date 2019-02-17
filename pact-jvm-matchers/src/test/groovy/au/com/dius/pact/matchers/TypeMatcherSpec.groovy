@@ -14,8 +14,8 @@ class TypeMatcherSpec extends Specification {
     given:
     def matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('body').addRule('$.value', new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))
-    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123}'), matchingRules)
-    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": 456}'), null)
+    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123}'.bytes), matchingRules)
+    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": 456}'.bytes), null)
 
     when:
     def result = new JsonBodyMatcher().matchBody(expected, actual, allowUnexpectedKeys)
@@ -28,8 +28,8 @@ class TypeMatcherSpec extends Specification {
     given:
     def matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('body').addRule('$.value', new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))
-    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123}'), matchingRules)
-    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": null}'), null)
+    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123}'.bytes), matchingRules)
+    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": null}'.bytes), null)
 
     when:
     def result = new JsonBodyMatcher().matchBody(expected, actual, allowUnexpectedKeys)
@@ -42,8 +42,8 @@ class TypeMatcherSpec extends Specification {
     given:
     def matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('body').addRule('$.value', new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))
-    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123}'), matchingRules)
-    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": 123.10}'), null)
+    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123}'.bytes), matchingRules)
+    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": 123.10}'.bytes), null)
 
     when:
     def result = new JsonBodyMatcher().matchBody(expected, actual, allowUnexpectedKeys)
@@ -56,8 +56,8 @@ class TypeMatcherSpec extends Specification {
     given:
     def matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('body').addRule('$.value', new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
-    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123.10}'), matchingRules)
-    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": 456.20}'), null)
+    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123.10}'.bytes), matchingRules)
+    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": 456.20}'.bytes), null)
 
     when:
     def result = new JsonBodyMatcher().matchBody(expected, actual, allowUnexpectedKeys)
@@ -70,8 +70,8 @@ class TypeMatcherSpec extends Specification {
     given:
     def matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('body').addRule('$.value', new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
-    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123.10}'), matchingRules)
-    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": null}'), null)
+    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123.10}'.bytes), matchingRules)
+    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": null}'.bytes), null)
 
     when:
     def result = new JsonBodyMatcher().matchBody(expected, actual, allowUnexpectedKeys)
@@ -84,8 +84,8 @@ class TypeMatcherSpec extends Specification {
     given:
     def matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('body').addRule('$.value', new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
-    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123.10}'), matchingRules)
-    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": 123}'), null)
+    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123.10}'.bytes), matchingRules)
+    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": 123}'.bytes), null)
 
     when:
     def result = new JsonBodyMatcher().matchBody(expected, actual, allowUnexpectedKeys)

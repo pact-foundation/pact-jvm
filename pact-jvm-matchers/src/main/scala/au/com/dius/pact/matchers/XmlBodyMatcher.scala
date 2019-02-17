@@ -14,14 +14,14 @@ class XmlBodyMatcher extends BodyMatcher with StrictLogging {
   override def matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): java.util.List[BodyMismatch] = {
     (expected.getBody.getState, actual.getBody.getState) match {
       case (OptionalBody.State.MISSING, _) => Collections.emptyList()
-      case (OptionalBody.State.NULL, OptionalBody.State.PRESENT) => Collections.singletonList(new BodyMismatch(null, actual.getBody.getValue,
-        s"Expected empty body but received '${actual.getBody.getValue}'"))
+      case (OptionalBody.State.NULL, OptionalBody.State.PRESENT) => Collections.singletonList(new BodyMismatch(null, actual.getBody.valueAsString,
+        s"Expected empty body but received '${actual.getBody.valueAsString}'"))
       case (OptionalBody.State.NULL, _) => Collections.emptyList()
-      case (_, OptionalBody.State.MISSING) => Collections.singletonList(new BodyMismatch(expected.getBody.getValue, null,
-        s"Expected body '${expected.getBody.getValue}' but was missing"))
+      case (_, OptionalBody.State.MISSING) => Collections.singletonList(new BodyMismatch(expected.getBody.valueAsString, null,
+        s"Expected body '${expected.getBody.valueAsString}' but was missing"))
       case (OptionalBody.State.EMPTY, OptionalBody.State.EMPTY) => Collections.emptyList()
-      case (_, _) => compareNode(Seq("$"), parse(expected.getBody.orElse("")),
-        parse(actual.getBody.orElse("")), allowUnexpectedKeys, expected.getMatchingRules).asJava
+      case (_, _) => compareNode(Seq("$"), parse(expected.getBody.valueAsString),
+        parse(actual.getBody.valueAsString), allowUnexpectedKeys, expected.getMatchingRules).asJava
     }
   }
 

@@ -48,7 +48,7 @@ public class MatcherTestUtils {
     }
 
     public static void assertResponseKeysEqualTo(RequestResponsePact pact, String... keys) {
-      String body = pact.getInteractions().get(0).getResponse().getBody().getValue();
+      String body = pact.getInteractions().get(0).getResponse().getBody().valueAsString();
       Map hashMap = null;
       try {
         hashMap = new ObjectMapper().readValue(body, HashMap.class);

@@ -87,7 +87,7 @@ abstract class BaseMockServer(
       } catch (e: Exception) {
         logger.error(e) { "Failed to generate response" }
         pactResponseToHttpExchange(Response(500, mutableMapOf("Content-Type" to "application/json"),
-          OptionalBody.body("{\"error\": ${e.message}}")), exchange)
+          OptionalBody.body("{\"error\": ${e.message}}".toByteArray())), exchange)
       }
     }
   }
@@ -99,7 +99,7 @@ abstract class BaseMockServer(
     }
     val body = response.body
     if (body != null && body.isPresent()) {
-      val bytes = body.unwrap().toByteArray()
+      val bytes = body.unwrap()
       exchange.sendResponseHeaders(response.status, bytes.size.toLong())
       exchange.responseBody.write(bytes)
     } else {
@@ -130,18 +130,19 @@ abstract class BaseMockServer(
     return invalidResponse(request)
   }
 
-  private fun invalidResponse(request: Request) =
-    Response(500, mapOf("Access-Control-Allow-Origin" to "*", "Content-Type" to "application/json",
-      "X-Pact-Unexpected-Request" to "1"), OptionalBody.body("{ \"error\": \"Unexpected request : " +
-      StringEscapeUtils.escapeJson(request.toString()) + "\" }"))
+  private fun invalidResponse(request: Request): Response {
+    val body = "{ \"error\": \"Unexpected request : ${StringEscapeUtils.escapeJson(request.toString())}\" }"
+    return Response(500, mapOf("Access-Control-Allow-Origin" to "*", "Content-Type" to "application/json",
+      "X-Pact-Unexpected-Request" to "1"), OptionalBody.body(body.toByteArray()))
+  }
 
   private fun toPactRequest(exchange: HttpExchange): Request {
     val headers = exchange.requestHeaders.mapValues { it.value.joinToString(", ") }
     val bodyContents = exchange.requestBody.bufferedReader(calculateCharset(headers)).readText()
-    val body = if (bodyContents.isNullOrEmpty()) {
+    val body = if (bodyContents.isEmpty()) {
       OptionalBody.empty()
     } else {
-      OptionalBody.body(bodyContents)
+      OptionalBody.body(bodyContents.toByteArray())
     }
     return Request(exchange.requestMethod, exchange.requestURI.path,
       queryStringToMap(exchange.requestURI.rawQuery), headers, body)

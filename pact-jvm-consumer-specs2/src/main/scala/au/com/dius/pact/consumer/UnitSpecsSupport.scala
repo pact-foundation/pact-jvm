@@ -34,14 +34,14 @@ trait UnitSpecsSupport extends Specification {
                    headers: Map[String, String] = Map(),
                    body: String = "",
                    matchers: MatchingRules = new MatchingRulesImpl()): Request =
-    new Request(method, path, PactReaderKt.queryStringToMap(query), headers.asJava, OptionalBody.body(body), matchers)
+    new Request(method, path, PactReaderKt.queryStringToMap(query), headers.asJava, OptionalBody.body(body.getBytes), matchers)
 
   def buildResponse(status: Int = 200,
                     headers: Map[String, String] = Map(),
                     maybeBody: Option[String] = None,
                     matchers: MatchingRules = new MatchingRulesImpl()): Response = {
     val optionalBody = maybeBody match {
-      case Some(body) => OptionalBody.body(body)
+      case Some(body) => OptionalBody.body(body.getBytes)
       case None => OptionalBody.missing()
     }
 
@@ -53,7 +53,7 @@ trait UnitSpecsSupport extends Specification {
                     bodyAndMatchers: DslPart): Response = {
     val matchers = new MatchingRulesImpl()
     matchers.addCategory(bodyAndMatchers.getMatchers)
-    new Response(status, headers.asJava, OptionalBody.body(bodyAndMatchers.toString), matchers)
+    new Response(status, headers.asJava, OptionalBody.body(bodyAndMatchers.toString.getBytes), matchers)
   }
 
   def buildInteraction(description: String, states: List[ProviderState], request: Request, response: Response): RequestResponseInteraction =

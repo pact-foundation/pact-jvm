@@ -57,7 +57,7 @@ class RestPactRunnerSpec extends Specification {
     interactions2 = [
       new Message('Req 3', [
         new ProviderState('State 3')
-      ], OptionalBody.body('{}')),
+      ], OptionalBody.body('{}'.bytes)),
       new Message('Req 4', [
         new ProviderState('State X')
       ], OptionalBody.empty())

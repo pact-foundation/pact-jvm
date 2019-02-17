@@ -285,7 +285,7 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     var result = true
     methods.forEach { method ->
       reporters.forEach { it.generatesAMessageWhich() }
-      val actualMessage = OptionalBody.body(invokeProviderMethod(method, providerMethodInstance.apply(method)).toString())
+      val actualMessage = OptionalBody.body(invokeProviderMethod(method, providerMethodInstance.apply(method)).toString().toByteArray())
       val comparison = ResponseComparison.compareMessage(message, actualMessage)
       val s = " generates a message which"
       result = result && displayBodyResult(failures, comparison, interactionMessage + s)

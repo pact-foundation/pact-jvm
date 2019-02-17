@@ -89,7 +89,7 @@ public class PactDslResponse {
      * @param body Response body in string form
      */
     public PactDslResponse body(String body) {
-        this.responseBody = OptionalBody.body(body);
+        this.responseBody = OptionalBody.body(body.getBytes());
         return this;
     }
 
@@ -100,7 +100,7 @@ public class PactDslResponse {
      * @param mimeType the Content-Type response header value
      */
     public PactDslResponse body(String body, String mimeType) {
-        responseBody = OptionalBody.body(body);
+        responseBody = OptionalBody.body(body.getBytes());
         responseHeaders.put(CONTENT_TYPE, mimeType);
         return this;
     }
@@ -121,7 +121,7 @@ public class PactDslResponse {
      * @param body Response body in Java Functional Interface Supplier that must return a string
      */
     public PactDslResponse body(Supplier<String> body) {
-        responseBody = OptionalBody.body(body.get());
+        responseBody = OptionalBody.body(body.get().getBytes());
         return this;
     }
 
@@ -132,7 +132,7 @@ public class PactDslResponse {
      * @param mimeType the Content-Type response header value
      */
     public PactDslResponse body(Supplier<String> body, String mimeType) {
-        responseBody = OptionalBody.body(body.get());
+        responseBody = OptionalBody.body(body.get().getBytes());
         responseHeaders.put(CONTENT_TYPE, mimeType);
         return this;
     }
@@ -192,7 +192,7 @@ public class PactDslResponse {
      * @param body Response body in JSON form
      */
     public PactDslResponse body(JSONObject body) {
-        this.responseBody = OptionalBody.body(body.toString());
+        this.responseBody = OptionalBody.body(body.toString().getBytes());
         if (!responseHeaders.containsKey(CONTENT_TYPE)) {
             matchHeader(CONTENT_TYPE, DEFAULT_JSON_CONTENT_TYPE_REGEX, ContentType.APPLICATION_JSON.toString());
         }
@@ -214,7 +214,7 @@ public class PactDslResponse {
         responseMatchers.addCategory(parent.getMatchers());
         responseGenerators.addGenerators(parent.generators);
         if (parent.getBody() != null) {
-            responseBody = OptionalBody.body(parent.getBody().toString());
+            responseBody = OptionalBody.body(parent.getBody().toString().getBytes());
         } else {
             responseBody = OptionalBody.nullBody();
         }
@@ -231,7 +231,7 @@ public class PactDslResponse {
      * @param body Response body as an XML Document
      */
     public PactDslResponse body(Document body) throws TransformerException {
-        responseBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body));
+        responseBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body).getBytes());
         if (!responseHeaders.containsKey(CONTENT_TYPE)) {
             responseHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_XML.toString());
         }

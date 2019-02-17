@@ -39,8 +39,8 @@ case class PactSession(expected: Seq[Interaction], results: PactSessionResults) 
   def invalidRequest(req: Request) = {
     val headers: Map[String, String] = CrossSiteHeaders ++ Map("Content-Type" -> "application/json",
       "X-Pact-Unexpected-Request" -> "1")
-    new Response(500, headers, OptionalBody.body("{ \"error\": \"Unexpected request : " +
-      StringEscapeUtils.escapeJson(req.toString) + "\" }"))
+    val body = "{ \"error\": \"Unexpected request : " + StringEscapeUtils.escapeJson(req.toString) + "\" }"
+    new Response(500, headers, OptionalBody.body(body.getBytes))
   }
 
   def receiveRequest(req: Request): (Response, PactSession) = {

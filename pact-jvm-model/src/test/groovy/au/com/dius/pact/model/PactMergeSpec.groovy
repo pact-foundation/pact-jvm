@@ -17,8 +17,8 @@ class PactMergeSpec extends Specification {
 
   def setup() {
     request = new Request('Get', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
-      [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'))
-    response = new Response(200, [testreqheader: 'testreqheaderval'], OptionalBody.body('{"responsetest":true}'))
+      [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'.bytes))
+    response = new Response(200, [testreqheader: 'testreqheaderval'], OptionalBody.body('{"responsetest":true}'.bytes))
     interaction = new RequestResponseInteraction('test interaction',
       [new ProviderState('test state')], request, response)
     provider = new Provider('test_provider')
@@ -153,7 +153,7 @@ class PactMergeSpec extends Specification {
         new RequestResponseInteraction('test', [new ProviderState('test')], new Request('POST'), new Response())
       ]),
       new MessagePact(provider, consumer, [ new Message('test', [new ProviderState('test')],
-        OptionalBody.body('a b c')) ])
+        OptionalBody.body('a b c'.bytes)) ])
     ]
     result = PactMerge.merge(newPact, existingPact)
   }
@@ -174,7 +174,7 @@ class PactMergeSpec extends Specification {
       ]),
       new MessagePact(provider, consumer, [
         new Message('test', [new ProviderState('test')]),
-        new Message('test 2', [new ProviderState('test')], OptionalBody.body('1 2 3'))
+        new Message('test 2', [new ProviderState('test')], OptionalBody.body('1 2 3'.bytes))
       ])
     ]
     existingPact << [
@@ -284,7 +284,7 @@ class PactMergeSpec extends Specification {
             [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}')), response)
       ]),
       new MessagePact(provider, consumer, [ new Message('test interaction', [new ProviderState('test state')],
-        OptionalBody.body('a b c')) ])
+        OptionalBody.body('a b c'.bytes)) ])
     ]
     result = PactMerge.merge(basePact, newPact)
   }

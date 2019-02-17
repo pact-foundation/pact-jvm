@@ -54,8 +54,8 @@ class PactWriterSpec extends Specification {
 
   def 'when writing pacts, do not parse JSON string bodies'() {
     given:
-    def request = new Request(body: OptionalBody.body('"This is a string"'))
-    def response = new Response(body: OptionalBody.body('"This is a string"'))
+    def request = new Request(body: OptionalBody.body('"This is a string"'.bytes))
+    def response = new Response(body: OptionalBody.body('"This is a string"'.bytes))
     def interaction = new RequestResponseInteraction('test interaction with JSON string bodies',
       null, request, response)
     def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),
@@ -74,8 +74,8 @@ class PactWriterSpec extends Specification {
 
   def 'handle non-ascii characters correctly'() {
     given:
-    def request = new Request(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'))
-    def response = new Response(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'))
+    def request = new Request(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'.bytes))
+    def response = new Response(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'.bytes))
     def interaction = new RequestResponseInteraction('test interaction with non-ascii characters in bodies',
       null, request, response)
     def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),

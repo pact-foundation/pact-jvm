@@ -26,7 +26,7 @@ class Response extends BaseResponse {
     new Response().with {
       status = (map.status ?: DEFAULT_STATUS) as Integer
       headers = map.headers ?: [:]
-      body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
+      body = map.containsKey('body') ? OptionalBody.body(map.body?.bytes) : OptionalBody.missing()
       matchingRules = MatchingRulesImpl.fromMap(map.matchingRules)
       generators = Generators.fromMap(map.generators)
       it

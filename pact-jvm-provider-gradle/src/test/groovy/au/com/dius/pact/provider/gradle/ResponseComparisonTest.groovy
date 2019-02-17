@@ -20,7 +20,7 @@ class ResponseComparisonTest {
   @Before
   void setup() {
     response = new Response(200, ['A': 'mismatch', 'Content-Type': 'application/json'],
-      OptionalBody.body('{"stuff": "is good"}'))
+      OptionalBody.body('{"stuff": "is good"}'.bytes))
     actualStatus = 200
     actualBody = '{"stuff": "is good"}'
     actualResponse = [contentType: ContentType.APPLICATION_JSON]
@@ -38,23 +38,23 @@ class ResponseComparisonTest {
 
   @Test
   void 'should not compare headers if there are no expected headers'() {
-    response = new Response(200, [:], OptionalBody.body(''))
+    response = new Response(200, [:], OptionalBody.body(''.bytes))
     assert testSubject().headers == [:]
   }
 
   @Test
   void 'should only compare the expected headers'() {
     actualHeaders = ['A': 'B', 'C': 'D']
-    response = new Response(200, ['A': 'B'], OptionalBody.body(''))
+    response = new Response(200, ['A': 'B'], OptionalBody.body(''.bytes))
     assert testSubject().headers == ['A': null]
-    response = new Response(200, ['A': 'D'], OptionalBody.body(''))
+    response = new Response(200, ['A': 'D'], OptionalBody.body(''.bytes))
     assert testSubject().headers.A == 'Expected header \'A\' to have value \'D\' but was \'B\''
   }
 
   @Test
   void 'ignores case in header comparisons'() {
     actualHeaders = ['A': 'B', 'C': 'D']
-    response = new Response(200, ['a': 'B'], OptionalBody.body(''))
+    response = new Response(200, ['a': 'B'], OptionalBody.body(''.bytes))
     assert testSubject().headers == ['a': null]
   }
 
@@ -73,7 +73,7 @@ class ResponseComparisonTest {
   @Test
   void 'comparing bodies should pass when the order of elements in the actual response is different'() {
     response = new Response(200, ['Content-Type': 'application/json'], OptionalBody.body(
-            '{"moar_stuff": {"a": "is also good", "b": "is even better"}, "stuff": "is good"}'))
+            '{"moar_stuff": {"a": "is also good", "b": "is even better"}, "stuff": "is good"}'.bytes))
     actualBody = '{"stuff": "is good", "moar_stuff": {"b": "is even better", "a": "is also good"}}'
     assert testSubject().body == [:]
   }

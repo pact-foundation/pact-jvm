@@ -260,8 +260,8 @@ class PactReaderSpec extends Specification {
 
     then:
     pact instanceof RequestResponsePact
-    pact.interactions[0].request.body.value == '"This is a string"'
-    pact.interactions[0].response.body.value == '"This is a string"'
+    pact.interactions[0].request.body.valueAsString() == '"This is a string"'
+    pact.interactions[0].response.body.valueAsString() == '"This is a string"'
   }
 
   def 'loads a pact where the source is a closure'() {

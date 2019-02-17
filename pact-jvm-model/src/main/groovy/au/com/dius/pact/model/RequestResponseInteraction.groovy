@@ -109,14 +109,14 @@ class RequestResponseInteraction implements Interaction {
 
   static parseBody(HttpPart httpPart) {
     if (httpPart.jsonBody() && httpPart.body.present) {
-      def body = new JsonSlurper().parseText(httpPart.body.value)
+      def body = new JsonSlurper().parseText(httpPart.body.valueAsString())
       if (body instanceof String) {
-        httpPart.body.value
+        httpPart.body.valueAsString()
       } else {
         body
       }
     } else {
-      httpPart.body.value
+      httpPart.body.valueAsString()
     }
   }
 

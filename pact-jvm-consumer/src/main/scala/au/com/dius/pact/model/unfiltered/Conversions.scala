@@ -26,7 +26,7 @@ object Conversions extends StrictLogging {
 
   implicit def pactToUnfilteredResponse(response: Response): ResponseFunction[NHttpResponse] = {
     if (response.getBody.isPresent) {
-      Status(response.getStatus) ~> Headers(response.getHeaders) ~> ResponseString(response.getBody.getValue())
+      Status(response.getStatus) ~> Headers(response.getHeaders) ~> ResponseString(response.getBody.valueAsString)
     } else Status(response.getStatus) ~> Headers(response.getHeaders)
   }
 
@@ -53,6 +53,6 @@ object Conversions extends StrictLogging {
 
   implicit def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {
     new Request(request.method, toPath(request.uri), toQuery(request), toHeaders(request),
-      OptionalBody.body(toBody(request)))
+      OptionalBody.body(toBody(request).getBytes))
   }
 }

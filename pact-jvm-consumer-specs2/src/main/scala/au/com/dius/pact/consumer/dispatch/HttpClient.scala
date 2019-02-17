@@ -29,7 +29,7 @@ object HttpClient {
         org.apache.http.entity.ContentType.parse(res.getContentType)
       val charset = if (contentType.getCharset == null) Charset.forName("UTF-8") else contentType.getCharset
       val body = if (res.hasResponseBody) {
-        OptionalBody.body(res.getResponseBody(charset))
+        OptionalBody.body(res.getResponseBody(charset).getBytes)
       } else {
         OptionalBody.empty()
       }

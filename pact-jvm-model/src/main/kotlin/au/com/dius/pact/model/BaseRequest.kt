@@ -31,7 +31,7 @@ abstract class BaseRequest : HttpPart() {
 
     val stream = ByteArrayOutputStream()
     multipart.writeTo(stream)
-    body = OptionalBody.body(stream.toString())
+    body = OptionalBody.body(stream.toByteArray())
     headers!!["Content-Type"] = multipart.contentType
 
     return this

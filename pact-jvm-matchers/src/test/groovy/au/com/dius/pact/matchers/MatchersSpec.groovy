@@ -172,8 +172,8 @@ class MatchersSpec extends Specification {
     given:
     def matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('body').addRule('$.value', TypeMatcher.INSTANCE)
-    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": [100]}'), matchingRules)
-    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": ["200.3"]}'), null)
+    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": [100]}'.bytes), matchingRules)
+    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": ["200.3"]}'.bytes), null)
 
     when:
     def mismatches = new JsonBodyMatcher().matchBody(expected, actual, true)
@@ -188,9 +188,9 @@ class MatchersSpec extends Specification {
     def matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('body').addRule('$.value', TypeMatcher.INSTANCE)
     def expected = new Request('get', '/', null, null,
-      OptionalBody.body('{"value": {"a": 100}}'), matchingRules)
+      OptionalBody.body('{"value": {"a": 100}}'.bytes), matchingRules)
     def actual = new Request('get', '/', null, null,
-      OptionalBody.body('{"value": {"a": "200.3", "b": 200, "c": 300} }'), null)
+      OptionalBody.body('{"value": {"a": "200.3", "b": 200, "c": 300} }'.bytes), null)
 
     when:
     def mismatches = new JsonBodyMatcher().matchBody(expected, actual, true)

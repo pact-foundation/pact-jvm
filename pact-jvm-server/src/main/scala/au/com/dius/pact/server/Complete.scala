@@ -17,7 +17,7 @@ object Complete {
   }
 
   def toJson(error: VerificationResult) = {
-    OptionalBody.body("{\"error\": \"" + error + "\"}")
+    OptionalBody.body(("{\"error\": \"" + error + "\"}").getBytes)
   }
 
   def apply(request: Request, oldState: ServerState): Result = {
@@ -25,7 +25,7 @@ object Complete {
     def pactWritten(response: Response, port: String) = Result(response, oldState - port)
 
     val result = for {
-      port <- getPort(JsonUtils.parseJsonString(request.getBody.getValue))
+      port <- getPort(JsonUtils.parseJsonString(request.getBody.valueAsString()))
       mockProvider <- oldState.get(port)
       sessionResults = mockProvider.session.remainingResults
       pact <- mockProvider.pact

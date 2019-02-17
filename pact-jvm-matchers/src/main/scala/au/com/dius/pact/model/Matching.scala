@@ -138,16 +138,16 @@ object Matching extends StrictLogging {
         logger.debug("No matcher for " + actual.mimeType + ", using equality")
         (expected.getBody.getState, actual.getBody.getState) match {
           case (OptionalBody.State.MISSING, _) => List()
-          case (OptionalBody.State.NULL, OptionalBody.State.PRESENT) => List(new BodyMismatch(null, actual.getBody.getValue,
-            s"Expected empty body but received '${actual.getBody.getValue}'"))
+          case (OptionalBody.State.NULL, OptionalBody.State.PRESENT) => List(new BodyMismatch(null, actual.getBody.valueAsString,
+            s"Expected empty body but received '${actual.getBody.valueAsString}'"))
           case (OptionalBody.State.NULL, _) => List()
-          case (_, OptionalBody.State.MISSING) => List(new BodyMismatch(expected.getBody.getValue, null,
-            s"Expected body '${expected.getBody.getValue}' but was missing"))
+          case (_, OptionalBody.State.MISSING) => List(new BodyMismatch(expected.getBody.valueAsString, null,
+            s"Expected body '${expected.getBody.valueAsString}' but was missing"))
           case (_, _) =>
-            if (expected.getBody.getValue == actual.getBody.getValue)
+            if (expected.getBody == actual.getBody)
               List()
             else
-              List(new BodyMismatch(expected.getBody.getValue, actual.getBody.getValue))
+              List(new BodyMismatch(expected.getBody.valueAsString, actual.getBody.valueAsString))
         }
       }
     } else {

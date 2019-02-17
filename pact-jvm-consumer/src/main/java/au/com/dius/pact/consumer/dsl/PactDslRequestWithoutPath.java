@@ -103,7 +103,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      * @param body Request body in string form
      */
     public PactDslRequestWithoutPath body(String body) {
-        requestBody = OptionalBody.body(body);
+        requestBody = OptionalBody.body(body.getBytes());
         return this;
     }
 
@@ -113,7 +113,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      * @param body Request body in string form
      */
     public PactDslRequestWithoutPath body(String body, String mimeType) {
-        requestBody = OptionalBody.body(body);
+        requestBody = OptionalBody.body(body.getBytes());
         requestHeaders.put(CONTENT_TYPE, mimeType);
         return this;
     }
@@ -134,7 +134,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      * @param body Request body in Java Functional Interface Supplier that must return a string
      */
     public PactDslRequestWithoutPath body(Supplier<String> body) {
-        requestBody = OptionalBody.body(body.get());
+        requestBody = OptionalBody.body(body.get().getBytes());
         return this;
     }
 
@@ -144,7 +144,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      * @param body Request body in Java Functional Interface Supplier that must return a string
      */
     public PactDslRequestWithoutPath body(Supplier<String> body, String mimeType) {
-        requestBody = OptionalBody.body(body.get());
+        requestBody = OptionalBody.body(body.get().getBytes());
         requestHeaders.put(CONTENT_TYPE, mimeType);
         return this;
     }
@@ -203,7 +203,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      * @param body Request body in JSON form
      */
     public PactDslRequestWithoutPath body(JSONObject body) {
-        requestBody = OptionalBody.body(body.toString());
+        requestBody = OptionalBody.body(body.toString().getBytes());
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
             requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
         }
@@ -219,7 +219,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
         DslPart parent = body.close();
         requestMatchers.addCategory(parent.matchers);
         requestGenerators.addGenerators(parent.generators);
-        requestBody = OptionalBody.body(parent.toString());
+        requestBody = OptionalBody.body(parent.toString().getBytes());
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
             requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
         }
@@ -232,7 +232,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      * @param body XML Document
      */
     public PactDslRequestWithoutPath body(Document body) throws TransformerException {
-        requestBody = OptionalBody.body(xmlToString(body));
+        requestBody = OptionalBody.body(xmlToString(body).getBytes());
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
             requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_XML.toString());
         }

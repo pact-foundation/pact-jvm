@@ -19,8 +19,8 @@ class JsonBodyMatcher extends BodyMatcher with StrictLogging {
       case (OptionalBody.State.NULL, _) => Collections.emptyList()
       case (_, OptionalBody.State.MISSING) => Collections.singletonList(new BodyMismatch(expected.getBody.getValue, null,
         s"Expected body '${expected.getBody.getValue}' but was missing"))
-      case (_, _) => compare(Seq("$"), JsonUtils.parseJsonString(expected.getBody.getValue),
-        JsonUtils.parseJsonString(actual.getBody.getValue), allowUnexpectedKeys, expected.getMatchingRules).asJava
+      case (_, _) => compare(Seq("$"), JsonUtils.parseJsonString(expected.getBody.valueAsString),
+        JsonUtils.parseJsonString(actual.getBody.valueAsString), allowUnexpectedKeys, expected.getMatchingRules).asJava
     }
   }
 

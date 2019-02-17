@@ -32,7 +32,9 @@ abstract class HttpPart : GroovyObjectSupport() {
 
   fun detectContentType(): String = when {
     body != null && body!!.isPresent() -> {
-      val s = body?.value?.take(32)?.replace('\n', ' ').orEmpty()
+      val s = body?.value?.take(32)?.map {
+        if (it == '\n'.toByte()) ' ' else it.toChar()
+      }.orEmpty().joinToString("")
       when {
         s.matches(XMLREGEXP) -> "application/xml"
         s.toUpperCase().matches(HTMLREGEXP) -> "text/html"

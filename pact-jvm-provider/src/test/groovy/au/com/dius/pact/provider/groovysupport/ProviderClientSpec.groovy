@@ -85,7 +85,7 @@ class ProviderClientSpec extends Specification {
       B: 'b',
       C: 'c'
     ]
-    request = new Request('PUT', '/', null, headers, OptionalBody.body('{}'))
+    request = new Request('PUT', '/', null, headers, OptionalBody.body('{}'.bytes))
 
     when:
     client.setupHeaders(request, httpRequest)
@@ -129,7 +129,7 @@ class ProviderClientSpec extends Specification {
       B: 'b',
       'content-type': 'c'
     ]
-    request = new Request('PUT', '/', null, headers, OptionalBody.body('C'))
+    request = new Request('PUT', '/', null, headers, OptionalBody.body('C'.bytes))
 
     when:
     client.setupHeaders(request, httpRequest)
@@ -168,7 +168,7 @@ class ProviderClientSpec extends Specification {
   def 'setting up body sets a string entity if it is not a url encoded form post and there is a body'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
-    request = new Request('PUT', '/', query, [:], OptionalBody.body('{}'))
+    request = new Request('PUT', '/', query, [:], OptionalBody.body('{}'.bytes))
 
     when:
     client.setupBody(request, httpRequest)
@@ -187,7 +187,7 @@ class ProviderClientSpec extends Specification {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
     request = new Request('POST', '/', query, ['Content-Type': ContentType.APPLICATION_FORM_URLENCODED.mimeType],
-      OptionalBody.body('A=B'))
+      OptionalBody.body('A=B'.bytes))
 
     when:
     client.setupBody(request, httpRequest)
@@ -205,7 +205,7 @@ class ProviderClientSpec extends Specification {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
     request = new Request('POST', '/', ['A': ['B', 'C']], ['Content-Type': 'application/x-www-form-urlencoded'],
-      OptionalBody.body('A=B'))
+      OptionalBody.body('A=B'.bytes))
 
     when:
     client.setupBody(request, httpRequest)
@@ -220,7 +220,7 @@ class ProviderClientSpec extends Specification {
   def 'request is a url encoded form post'() {
     expect:
     def request = new Request(method, '/', ['A': ['B', 'C']], ['Content-Type': contentType],
-      OptionalBody.body('A=B'))
+      OptionalBody.body('A=B'.bytes))
     ProviderClient.urlEncodedFormPost(request) == urlEncodedFormPost
 
     where:
@@ -574,7 +574,7 @@ class ProviderClientSpec extends Specification {
     given:
     def pactRequest = new Request('POST', '/', ['A': ['B', 'C']],
       ['Content-Type': 'application/x-www-form-urlencoded'],
-      OptionalBody.body('A=B'))
+      OptionalBody.body('A=B'.bytes))
 
     when:
     def request = client.newRequest(pactRequest)

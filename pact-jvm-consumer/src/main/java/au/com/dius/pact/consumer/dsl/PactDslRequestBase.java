@@ -59,7 +59,7 @@ public abstract class PactDslRequestBase {
     OutputStream os = new ByteArrayOutputStream();
     multipart.writeTo(os);
 
-    requestBody = OptionalBody.body(os.toString());
+    requestBody = OptionalBody.body(os.toString().getBytes());
     requestMatchers.addCategory("header").addRule(CONTENT_TYPE, new RegexMatcher(MULTIPART_HEADER_REGEX,
       multipart.getContentType().getValue()));
     requestHeaders.put(CONTENT_TYPE, multipart.getContentType().getValue());

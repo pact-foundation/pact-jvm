@@ -127,7 +127,7 @@ public class MessagePactBuilder {
     }
 
     DslPart parent = body.close();
-    message.setContents(OptionalBody.body(parent.toString()));
+    message.setContents(OptionalBody.body(parent.toString().getBytes()));
     message.getMatchingRules().addCategory(parent.getMatchers());
 
     return this;

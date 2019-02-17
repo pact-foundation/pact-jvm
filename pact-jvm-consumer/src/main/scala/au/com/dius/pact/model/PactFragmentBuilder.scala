@@ -81,7 +81,7 @@ object PactFragmentBuilder {
                  headers: Map[String, String] = Map(),
                  body: String = "",
                  matchers: MatchingRules = new MatchingRulesImpl()): DescribingResponse = {
-      DescribingResponse(new Request(method, path, PactReaderKt.queryStringToMap(query), headers, OptionalBody.body(body),
+      DescribingResponse(new Request(method, path, PactReaderKt.queryStringToMap(query), headers, OptionalBody.body(body.getBytes),
         matchers))
     }
 
@@ -102,7 +102,7 @@ object PactFragmentBuilder {
                           maybeBody: Option[String] = None,
                           matchers: MatchingRules = new MatchingRulesImpl()): PactWithAtLeastOneRequest = {
         val optionalBody = maybeBody match {
-          case Some(body) => OptionalBody.body(body)
+          case Some(body) => OptionalBody.body(body.getBytes)
           case None => OptionalBody.missing()
         }
 
@@ -131,7 +131,7 @@ object PactFragmentBuilder {
             description,
             state.asJava,
             request,
-            new Response(status, headers, OptionalBody.body(bodyAndMatchers.toString), rules))))
+            new Response(status, headers, OptionalBody.body(bodyAndMatchers.toString.getBytes), rules))))
       }
     }
   }

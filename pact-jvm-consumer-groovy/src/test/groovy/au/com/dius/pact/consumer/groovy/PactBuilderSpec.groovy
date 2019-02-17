@@ -123,7 +123,7 @@ class PactBuilderSpec extends Specification {
     then:
     aliceService.interactions.size() == 1
 
-    firstInteraction.response.body.value == '[\n' +
+    firstInteraction.response.body.valueAsString() == '[\n' +
       '    1,\n' +
       '    2,\n' +
       '    3\n' +
@@ -154,7 +154,7 @@ class PactBuilderSpec extends Specification {
     then:
     aliceService.interactions.size() == 1
 
-    firstInteraction.response.body.value == '[\n' +
+    firstInteraction.response.body.valueAsString() == '[\n' +
       '    {\n' +
       '        "id": 1,\n' +
       '        "name": "item1"\n' +
@@ -187,7 +187,7 @@ class PactBuilderSpec extends Specification {
     then:
     aliceService.interactions.size() == 1
 
-    firstInteraction.response.body.value == '[\n' +
+    firstInteraction.response.body.valueAsString() == '[\n' +
       '    {\n' +
       '        "id": 1,\n' +
       '        "name": "item1"\n' +
@@ -216,13 +216,13 @@ class PactBuilderSpec extends Specification {
     def response = aliceService.interactions.first().response
 
     then:
-    request.body.value == '''|{
+    request.body.valueAsString() == '''|{
                              |    "name": "harry",
                              |    "surname": "larry",
                              |    "position": "staff",
                              |    "happy": true
                              |}'''.stripMargin()
-    response.body.value == '''|{
+    response.body.valueAsString() == '''|{
                               |    "name": "harry"
                               |}'''.stripMargin()
   }
@@ -246,13 +246,13 @@ class PactBuilderSpec extends Specification {
     def response = aliceService.interactions.first().response
 
     then:
-    request.body.value == '''|{
+    request.body.valueAsString() == '''|{
                              |    "name": "harry",
                              |    "surname": "larry",
                              |    "position": "staff",
                              |    "happy": true
                              |}'''.stripMargin()
-    response.body.value == '''|{
+    response.body.valueAsString() == '''|{
                               |    "name": "harry"
                               |}'''.stripMargin()
   }
@@ -276,8 +276,8 @@ class PactBuilderSpec extends Specification {
     def response = aliceService.interactions.first().response
 
     then:
-    request.body.value == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
-    response.body.value == '{"name":"harry"}'
+    request.body.valueAsString() == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
+    response.body.valueAsString() == '{"name":"harry"}'
   }
 
   def 'does not pretty print bodies if the mimetype corresponds to one that requires compact bodies'() {
@@ -299,8 +299,8 @@ class PactBuilderSpec extends Specification {
     def response = aliceService.interactions.first().response
 
     then:
-    request.body.value == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
-    response.body.value == '{"name":"harry"}'
+    request.body.valueAsString() == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
+    response.body.valueAsString() == '{"name":"harry"}'
   }
 
   def 'does not overwrite the content type if it has been set in a header'() {

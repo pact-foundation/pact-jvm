@@ -10,8 +10,9 @@ import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.StatusMismatch
 import au.com.dius.pact.model.`ResponseMatching$`
-import au.com.dius.pact.model.orElse
+import au.com.dius.pact.model.isNullOrEmpty
 import au.com.dius.pact.model.v3.messaging.Message
+import au.com.dius.pact.model.valueAsString
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import mu.KLogging
@@ -81,7 +82,7 @@ class ResponseComparison(
 
       val contentType = this.actual["contentType"] as ContentType
       result["diff"] = generateFullDiff(actualBody.orEmpty(), contentType.mimeType.toString(),
-        expected.body.orElse(""), expected.jsonBody())
+        expected.body.valueAsString(), expected.jsonBody())
     }
 
     return result
@@ -126,7 +127,7 @@ class ResponseComparison(
         actualHeaders.mapKeys { it.key.toUpperCase() }, actualBody)
       val mismatches = JavaConverters.seqAsJavaListConverter(
         `ResponseMatching$`.`MODULE$`.responseMismatches(response, Response(actualStatus,
-        actualHeaders, OptionalBody.body(actualBody)))).asJava()
+        actualHeaders, OptionalBody.body(actualBody?.toByteArray())))).asJava()
 
       result["method"] = comparison.compareStatus(mismatches)
       result["headers"] = comparison.compareHeaders(mismatches)
@@ -144,16 +145,16 @@ class ResponseComparison(
       if (result != null) {
         mismatches = result.matchBody(expected, actualMessage, true).toMutableList()
       } else {
-        val expectedBody = message.contents.orElse("")
-        if (expectedBody.isNotEmpty() && actual.value.isNullOrEmpty()) {
+        val expectedBody = message.contents.valueAsString()
+        if (expectedBody.isNotEmpty() && actual.isNullOrEmpty()) {
           mismatches.add(BodyMismatch(expectedBody, null))
-        } else if (actual.orElse("") != expectedBody) {
-          mismatches.add(BodyMismatch(expectedBody, actual.orElse("")))
+        } else if (actual.valueAsString() != expectedBody) {
+          mismatches.add(BodyMismatch(expectedBody, actual.valueAsString()))
         }
       }
 
       return ResponseComparison(expected as Response, mapOf("contentType" to ContentType.parse(message.contentType)),
-        200, emptyMap(), actual.orElse("")).compareBody(mismatches)
+        200, emptyMap(), actual.valueAsString()).compareBody(mismatches)
     }
   }
 }
