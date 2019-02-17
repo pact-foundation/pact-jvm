@@ -7,6 +7,7 @@ dependencies {
   testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
   testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}:indy"
   testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
+  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 }
 
 test {

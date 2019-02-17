@@ -66,7 +66,7 @@ public class MimeTypeTest {
         MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V3);
         PactVerificationResult result = runConsumerTest(pact, config, new PactTestRun() {
             @Override
-            public void run(@NotNull MockServer mockServer) throws IOException {
+            public void run(@NotNull MockServer mockServer, PactTestExecutionContext context) throws IOException {
                 try {
                     assertEquals(new ConsumerClient(config.url()).postBody("/hello", body, mimeType), expectedResponse);
                 } catch (IOException e) {

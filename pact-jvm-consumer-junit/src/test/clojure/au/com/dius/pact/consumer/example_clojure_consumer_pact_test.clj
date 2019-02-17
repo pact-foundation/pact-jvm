@@ -19,7 +19,7 @@
     (is (= (PactVerificationResult$Ok/INSTANCE)
         (ConsumerPactRunnerKt/runConsumerTest consumer-pact config
           (proxy [PactTestRun] []
-            (run [_] (
+            (run [_ _] (
                #(is (= 200
                    (:status
                      @(http/get (str (.url config) "/sample")))))))))))))

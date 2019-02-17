@@ -35,7 +35,7 @@ public class DirectDSLConsumerPactTest {
                 .toPact();
 
         MockProviderConfig config = MockProviderConfig.createDefault();
-        PactVerificationResult result = runConsumerTest(pact, config, mockServer -> {
+        PactVerificationResult result = runConsumerTest(pact, config, (mockServer, context) -> {
             Map expectedResponse = new HashMap();
             expectedResponse.put("hello", "harry");
             try {

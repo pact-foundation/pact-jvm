@@ -140,7 +140,7 @@ public class MatchingTest {
 
     private void runTest(PactDslResponse pactFragment, final String body, final Map expectedResponse, final String path) {
         MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V3);
-        PactVerificationResult result = runConsumerTest(pactFragment.toPact(), config, mockServer -> {
+        PactVerificationResult result = runConsumerTest(pactFragment.toPact(), config, (mockServer, context) -> {
             try {
                 Assert.assertEquals(expectedResponse, new ConsumerClient(config.url()).post(path, body, ContentType.APPLICATION_JSON));
             } catch (IOException e) {

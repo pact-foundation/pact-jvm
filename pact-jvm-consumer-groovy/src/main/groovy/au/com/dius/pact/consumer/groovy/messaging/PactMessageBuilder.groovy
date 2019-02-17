@@ -1,8 +1,8 @@
 package au.com.dius.pact.consumer.groovy.messaging
 
-@SuppressWarnings('UnusedImport')
 import au.com.dius.pact.consumer.PactConsumerConfig
 import au.com.dius.pact.consumer.groovy.BaseBuilder
+import au.com.dius.pact.consumer.groovy.Matcher
 import au.com.dius.pact.consumer.groovy.PactBodyBuilder
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.InvalidPactException
@@ -66,7 +66,18 @@ class PactMessageBuilder extends BaseBuilder {
     if (messages.empty) {
       throw new InvalidPactException('expectsToReceive is required before withMetaData')
     }
-    messages.last().metaData = metaData
+    Message message = messages.last()
+    message.metaData = metaData.collectEntries {
+      if (it.value instanceof Matcher) {
+        message.matchingRules.addCategory('metaData').addRule(it.key, it.value.matcher)
+        if (it.value.generator) {
+          message.generators.addGenerator(au.com.dius.pact.model.generators.Category.METADATA, it.value.generator)
+        }
+        [it.key, it.value.value]
+      } else {
+        [it.key, it.value]
+      }
+    }
     this
   }
 
@@ -124,4 +135,15 @@ class PactMessageBuilder extends BaseBuilder {
     }
   }
 
+  @Override
+  @SuppressWarnings('UnnecessaryOverridingMethod')
+  def call(@DelegatesTo(value = PactMessageBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
+	  super.build(closure)
+  }
+
+	@Override
+  @SuppressWarnings('UnnecessaryOverridingMethod')
+	def build(@DelegatesTo(value = PactMessageBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
+		super.build(closure)
+	}
 }

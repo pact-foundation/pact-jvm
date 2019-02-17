@@ -123,7 +123,8 @@ class AnsiConsoleReporter(
   }
 
   override fun statusComparisonFailed(status: Int, comparison: Any) {
-    AnsiConsole.out().println(Ansi.ansi().a("      ").a("has status code ").bold().a(status).boldOff().a(" (")
+    AnsiConsole.out().println(Ansi.ansi().a("      ").a("has status code ").bold().a(status).boldOff()
+      .a(" (")
       .fg(Ansi.Color.RED).a("FAILED").reset().a(")"))
   }
 
@@ -132,12 +133,14 @@ class AnsiConsoleReporter(
   }
 
   override fun headerComparisonOk(key: String, value: String) {
-    AnsiConsole.out().println(Ansi.ansi().a("        \"").bold().a(key).boldOff().a("\" with value \"").bold()
+    AnsiConsole.out().println(Ansi.ansi().a("        \"").bold().a(key).boldOff().a("\" with value \"")
+      .bold()
       .a(value).boldOff().a("\" (").fg(Ansi.Color.GREEN).a("OK").reset().a(")"))
   }
 
   override fun headerComparisonFailed(key: String, value: String, comparison: Any) {
-    AnsiConsole.out().println(Ansi.ansi().a("        \"").bold().a(key).boldOff().a("\" with value \"").bold()
+    AnsiConsole.out().println(Ansi.ansi().a("        \"").bold().a(key).boldOff().a("\" with value \"")
+      .bold()
       .a(value).boldOff().a("\" (").fg(Ansi.Color.RED).a("FAILED").reset().a(")"))
   }
 
@@ -189,7 +192,8 @@ class AnsiConsoleReporter(
         AnsiConsole.out().println("      $key -> ${mismatch["mismatch"]}")
         AnsiConsole.out().println()
 
-        val mismatchDiff = if (mismatch["diff"] is List<*>) mismatch["diff"] as List<String> else listOf(mismatch["diff"].toString())
+        val mismatchDiff = if (mismatch["diff"] is List<*>) mismatch["diff"] as List<String>
+          else listOf(mismatch["diff"].toString())
         if (mismatchDiff.any { it.isNotEmpty() }) {
           AnsiConsole.out().println("        Diff:")
           AnsiConsole.out().println()
@@ -197,9 +201,12 @@ class AnsiConsoleReporter(
           mismatchDiff.filter { it.isNotEmpty() }.forEach {
             it.split('\n').forEach { delta ->
               when {
-                delta.startsWith('@') -> AnsiConsole.out().println(Ansi.ansi().a("        ").fg(Ansi.Color.CYAN).a(delta).reset())
-                delta.startsWith('-') -> AnsiConsole.out().println(Ansi.ansi().a("        ").fg(Ansi.Color.RED).a(delta).reset())
-                delta.startsWith('+') -> AnsiConsole.out().println(Ansi.ansi().a("        ").fg(Ansi.Color.GREEN).a(delta).reset())
+                delta.startsWith('@') -> AnsiConsole.out().println(Ansi.ansi().a("        ")
+                  .fg(Ansi.Color.CYAN).a(delta).reset())
+                delta.startsWith('-') -> AnsiConsole.out().println(Ansi.ansi().a("        ")
+                  .fg(Ansi.Color.RED).a(delta).reset())
+                delta.startsWith('+') -> AnsiConsole.out().println(Ansi.ansi().a("        ")
+                  .fg(Ansi.Color.GREEN).a(delta).reset())
                 else -> AnsiConsole.out().println("        $delta")
               }
             }
@@ -215,9 +222,12 @@ class AnsiConsoleReporter(
 
       (diff["diff"] as List<String>).forEach { delta ->
         when {
-          delta.startsWith('@') -> AnsiConsole.out().println(Ansi.ansi().a("      ").fg(Ansi.Color.CYAN).a(delta).reset())
-          delta.startsWith('-') -> AnsiConsole.out().println(Ansi.ansi().a("      ").fg(Ansi.Color.RED).a(delta).reset())
-          delta.startsWith('+') -> AnsiConsole.out().println(Ansi.ansi().a("      ").fg(Ansi.Color.GREEN).a(delta).reset())
+          delta.startsWith('@') -> AnsiConsole.out().println(Ansi.ansi().a("      ")
+            .fg(Ansi.Color.CYAN).a(delta).reset())
+          delta.startsWith('-') -> AnsiConsole.out().println(Ansi.ansi().a("      ")
+            .fg(Ansi.Color.RED).a(delta).reset())
+          delta.startsWith('+') -> AnsiConsole.out().println(Ansi.ansi().a("      ")
+            .fg(Ansi.Color.GREEN).a(delta).reset())
           else -> AnsiConsole.out().println("      $delta")
         }
       }

@@ -5,8 +5,8 @@ import au.com.dius.pact.core.pactbroker.IHalClient
 import au.com.dius.pact.core.pactbroker.InvalidHalResponse
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerConsumer
-import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.core.support.expressions.ValueResolver
+import au.com.dius.pact.provider.ConsumerInfo
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 
@@ -392,6 +392,7 @@ class PactBrokerLoaderSpec extends Specification {
       new PactBrokerLoader(PactBrokerAnnotationHttpsNoPort.getAnnotation(PactBroker)) {
         @Override
         PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
+          assert url.scheme == 'https'
           assert url.host == 'pactbroker.host'
           assert url.port == -1
           brokerClient

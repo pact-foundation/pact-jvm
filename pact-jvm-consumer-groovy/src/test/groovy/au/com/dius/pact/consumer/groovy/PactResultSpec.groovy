@@ -22,7 +22,7 @@ class PactResultSpec extends Specification {
       when:
         def response
         def data
-        testService.runTestAndVerify { mockServer ->
+        testService.runTestAndVerify { mockServer, context ->
             def client = new RESTClient(mockServer.url)
             response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                 requestContentType: 'application/json')
@@ -50,7 +50,7 @@ class PactResultSpec extends Specification {
 
       when:
         def response
-        testService.runTestAndVerify { mockServer ->
+        testService.runTestAndVerify { mockServer, context ->
           def client = new RESTClient(mockServer.url)
           response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                 requestContentType: 'application/json')
@@ -83,7 +83,7 @@ class PactResultSpec extends Specification {
 
       when:
         def response
-        testService.runTestAndVerify { mockServer ->
+        testService.runTestAndVerify { mockServer, context ->
             def client = new RESTClient(mockServer.url)
             response = client.get(path: '/path', query: [status: 'bad', name: 'ron'],
                 requestContentType: 'application/json')
@@ -120,7 +120,7 @@ class PactResultSpec extends Specification {
         }
 
       when:
-        testService.runTestAndVerify { mockServer ->
+        testService.runTestAndVerify { mockServer, context ->
             def client = new RESTClient(mockServer.url)
             def response = client.get(path: '/path', query: [status: 'good', name: 'ron'],
                 requestContentType: 'application/json')

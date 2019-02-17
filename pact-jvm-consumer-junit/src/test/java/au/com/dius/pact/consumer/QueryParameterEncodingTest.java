@@ -32,7 +32,7 @@ public class QueryParameterEncodingTest extends ConsumerPactTestMk2 {
     }
 
     @Override
-    protected void runTest(MockServer mockServer) throws IOException {
+    protected void runTest(MockServer mockServer, PactTestExecutionContext context) throws IOException {
         new ConsumerClient(mockServer.getUrl()).getAsMap("/some path", "datetime=2011-12-03T10:15:30+01:00");
     }
 }

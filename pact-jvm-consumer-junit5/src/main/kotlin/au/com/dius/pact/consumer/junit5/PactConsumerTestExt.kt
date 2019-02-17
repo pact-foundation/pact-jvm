@@ -6,6 +6,7 @@ import au.com.dius.pact.consumer.MessagePactBuilder
 import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.Pact
 import au.com.dius.pact.consumer.PactConsumerConfig
+import au.com.dius.pact.consumer.PactFolder
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.junit.JUnitTestSupport
 import au.com.dius.pact.consumer.mockServer
@@ -16,7 +17,10 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.messaging.MessagePact
 import mu.KLogging
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.AfterEachCallback
+import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.Extension
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -25,7 +29,9 @@ import org.junit.jupiter.api.extension.ParameterResolver
 import org.junit.platform.commons.support.AnnotationSupport
 import org.junit.platform.commons.support.HierarchyTraversalMode
 import org.junit.platform.commons.support.ReflectionSupport
+import org.junit.platform.commons.util.AnnotationUtils.isAnnotated
 import java.lang.annotation.Inherited
+import java.lang.reflect.Method
 
 /**
  * The type of provider (synchronous or asynchronous)
@@ -84,7 +90,7 @@ annotation class PactTestFor(
   val providerType: ProviderType = ProviderType.UNSPECIFIED
 )
 
-data class ProviderInfo(
+data class ProviderInfo @JvmOverloads constructor(
   val providerName: String = "",
   val hostInterface: String = "",
   val port: String = "",
@@ -121,27 +127,52 @@ class JUnit5MockServerSupport(private val baseMockServer: BaseMockServer) : Mock
   }
 }
 
-class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, AfterEachCallback {
-
+class PactConsumerTestExt : Extension, BeforeEachCallback, BeforeAllCallback, ParameterResolver, AfterEachCallback, AfterAllCallback {
   override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
     val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val providerInfo = store["providerInfo"] as ProviderInfo
+    val type = parameterContext.parameter.type
     return when (providerInfo.providerType) {
-      ProviderType.ASYNCH -> parameterContext.parameter.type.isAssignableFrom(List::class.java)
-      else -> parameterContext.parameter.type.isAssignableFrom(MockServer::class.java)
+      ProviderType.ASYNCH -> when {
+        type.isAssignableFrom(List::class.java) -> true
+        type.isAssignableFrom(MessagePact::class.java) -> true
+        else -> false
+      }
+      else -> when {
+        type.isAssignableFrom(MockServer::class.java) -> true
+        type.isAssignableFrom(RequestResponsePact::class.java) -> true
+        else -> false
+      }
     }
   }
 
   override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any {
     val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val providerInfo = store["providerInfo"] as ProviderInfo
+    val type = parameterContext.parameter.type
     return when (providerInfo.providerType) {
       ProviderType.ASYNCH -> {
         val pact = store["pact"] as MessagePact
-        pact.messages
+        when {
+          type.isAssignableFrom(List::class.java) -> pact.messages
+          type.isAssignableFrom(MessagePact::class.java) -> pact
+          else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
+        }
       }
-      else -> store["mockServer"]
+      else -> {
+        val pact = store["pact"] as RequestResponsePact
+        when {
+          type.isAssignableFrom(MockServer::class.java) -> store["mockServer"]
+          type.isAssignableFrom(RequestResponsePact::class.java) -> pact
+          else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
+        }
+      }
     }
+  }
+
+  override fun beforeAll(context: ExtensionContext) {
+    val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
+    store.put("executedFragments", mutableListOf<Method>())
   }
 
   override fun beforeEach(context: ExtensionContext) {
@@ -149,8 +180,9 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
 
     logger.debug { "providerInfo = $providerInfo" }
 
-    val pact = lookupPact(providerInfo, pactMethod, context)
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
+    val executedFragments = store["executedFragments"] as MutableList<Method>
+    val pact = lookupPact(providerInfo, pactMethod, context, executedFragments)
     store.put("pact", pact)
     store.put("providerInfo", providerInfo)
 
@@ -193,7 +225,12 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
     }
   }
 
-  fun lookupPact(providerInfo: ProviderInfo, pactMethod: String, context: ExtensionContext): BasePact<out Interaction> {
+  fun lookupPact(
+    providerInfo: ProviderInfo,
+    pactMethod: String,
+    context: ExtensionContext,
+    executedFragments: MutableList<Method>
+  ): BasePact<out Interaction> {
     val providerName = if (providerInfo.providerName.isEmpty()) "default" else providerInfo.providerName
     val methods = AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java,
       HierarchyTraversalMode.TOP_DOWN)
@@ -233,19 +270,21 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
       "'${context.testMethod.map { it.name }.orElse("unknown")}'" }
 
     val providerNameToUse = if (pactAnnotation.provider.isNotEmpty()) pactAnnotation.provider else providerName
-    return when (providerType) {
+    val pact = when (providerType) {
       ProviderType.SYNCH, ProviderType.UNSPECIFIED -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
         ConsumerPactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact<*>
       ProviderType.ASYNCH -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
         MessagePactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact<*>
     }
+    executedFragments.add(method)
+    return pact
   }
 
   override fun afterEach(context: ExtensionContext) {
     if (!context.executionException.isPresent) {
       val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
       val providerInfo = store["providerInfo"] as ProviderInfo
-      val pactDirectory = PactConsumerConfig.pactDirectory
+      val pactDirectory = lookupPactDirectory(context)
       if (providerInfo.providerType != ProviderType.ASYNCH) {
         val mockServer = store["mockServer"] as JUnit5MockServerSupport
         val pact = store["pact"] as RequestResponsePact
@@ -269,6 +308,33 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, ParameterResolver, Af
             "${pact.fileForPact(pactDirectory)}"
         }
         pact.write(pactDirectory, PactSpecVersion.V3)
+      }
+    }
+  }
+
+  private fun lookupPactDirectory(context: ExtensionContext): String {
+    val pactFolder = AnnotationSupport.findAnnotation(context.requiredTestClass, PactFolder::class.java)
+    return if (pactFolder.isPresent)
+      pactFolder.get().value
+    else
+      PactConsumerConfig.pactDirectory
+  }
+
+  override fun afterAll(context: ExtensionContext) {
+    if (!context.executionException.isPresent) {
+      val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
+      val executedFragments = store["executedFragments"] as MutableList<Method>
+      val methods = AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java,
+        HierarchyTraversalMode.TOP_DOWN)
+      if (executedFragments.size < methods.size) {
+        val nonExecutedMethods = (methods - executedFragments).filter {
+          !isAnnotated(it, Disabled::class.java)
+        }.joinToString(", ") { it.declaringClass.simpleName + "." + it.name }
+        if (nonExecutedMethods.isNotEmpty()) {
+          throw AssertionError(
+            "The following methods annotated with @Pact were not executed during the test: $nonExecutedMethods" +
+              "\nIf these are currently a work in progress, and a @Disabled annotation to the method\n")
+        }
       }
     }
   }

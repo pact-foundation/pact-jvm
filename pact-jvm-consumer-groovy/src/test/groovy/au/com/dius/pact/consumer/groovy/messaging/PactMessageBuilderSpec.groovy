@@ -1,5 +1,7 @@
 package au.com.dius.pact.consumer.groovy.messaging
 
+import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.messaging.Message
 import groovy.json.JsonSlurper
 import spock.lang.Specification
@@ -87,6 +89,32 @@ class PactMessageBuilderSpec extends Specification {
 
     then:
     new String(message.contentsAsBytes()) == '{"name":"Bob","date":"2000-01-01","status":"bad","age":100}'
+  }
+
+  def 'allows using matchers with the metadata'() {
+    given:
+    builder {
+      given 'the provider has data for a message'
+      expectsToReceive 'a confirmation message for a group order'
+      withMetaData(contentType: 'application/json', destination: regexp(~/X\d+/, 'X01'))
+      withContent {
+        name 'Bob'
+        date = '2000-01-01'
+        status 'bad'
+        age 100
+      }
+    }
+
+    when:
+    builder.run { Message message ->
+      assert message.metaData == [contentType: 'application/json', destination: 'X01']
+      assert message.matchingRules.rules.metaData.matchingRules == [
+        destination: new MatchingRuleGroup([new RegexMatcher('X\\d+', 'X01')])
+      ]
+    }
+
+    then:
+    true
   }
 
 }

@@ -10,7 +10,7 @@ object Complete {
 
   def getPort(j: Any): Option[String] = j match {
     case map: Map[AnyRef, AnyRef] => {
-      if (map.contains("port")) Some(map("port").asInstanceOf[String])
+      if (map.contains("port")) Some(map("port").toString)
       else None
     }
     case _ => None
@@ -34,10 +34,10 @@ object Complete {
 
       ConsumerPactRunner.writeIfMatching(pact, sessionResults, mockProvider.config.getPactVersion) match {
         case PactVerified => pactWritten(new Response(200, JavaConversions.mapAsJavaMap(ResponseUtils.CrossSiteHeaders)),
-          mockProvider.config.getPort.asInstanceOf[String])
+          mockProvider.config.getPort.toString)
         case error => pactWritten(new Response(400,
           JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/json")), toJson(error)),
-          mockProvider.config.getPort.asInstanceOf[String])
+          mockProvider.config.getPort.toString)
       }
     }
 

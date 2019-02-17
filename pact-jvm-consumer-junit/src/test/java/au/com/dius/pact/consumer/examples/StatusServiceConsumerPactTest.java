@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.examples;
 
 import au.com.dius.pact.consumer.ConsumerPactTestMk2;
 import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.PactTestExecutionContext;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import org.apache.http.client.fluent.Request;
@@ -41,7 +42,7 @@ public class StatusServiceConsumerPactTest extends ConsumerPactTestMk2 {
     }
 
     @Override
-    protected void runTest(MockServer mockServer) throws IOException {
+    protected void runTest(MockServer mockServer, PactTestExecutionContext context) throws IOException {
         StatusServiceClient statusServiceClient = new StatusServiceClient(mockServer.getUrl());
 
         String currentQuestionnairePage = statusServiceClient.getCurrentQuestionnairePage(null);

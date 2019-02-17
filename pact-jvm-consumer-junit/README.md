@@ -81,7 +81,7 @@ public class ExampleJavaConsumerPactTest extends ConsumerPactTestMk2 {
     }
 
     @Override
-    protected void runTest(MockServer mockServer) throws IOException {
+    protected void runTest(MockServer mockServer, PactTestExecutionContext context) throws IOException {
         Assert.assertEquals(new ConsumerClient(mockServer.getUrl()).options("/second"), 200);
         Map expectedResponse = new HashMap();
         expectedResponse.put("responsetest", true);
@@ -295,7 +295,7 @@ public class DirectDSLConsumerPactTest {
                 .toPact();
 
         MockProviderConfig config = MockProviderConfig.createDefault();
-        PactVerificationResult result = runConsumerTest(pact, config, mockServer -> {
+        PactVerificationResult result = runConsumerTest(pact, config, (mockServer, context) -> {
             Map expectedResponse = new HashMap();
             expectedResponse.put("hello", "harry");
             try {
@@ -659,6 +659,11 @@ For SBT:
 fork in Test := true,
 javaOptions in Test := Seq("-Dpact.rootDir=some/other/directory")
 ```
+
+### Using `@PactFolder` annotation [3.6.2+]
+
+You can override the directory the pacts are written in a test by adding the `@PactFolder` annotation to the test
+class.
 
 # Publishing your pact files to a pact broker
 

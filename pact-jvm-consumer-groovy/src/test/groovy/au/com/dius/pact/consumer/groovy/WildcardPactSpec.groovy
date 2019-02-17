@@ -2,7 +2,6 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.core.model.FeatureToggles
-import au.com.dius.pact.core.model.PactSpecVersion
 import groovyx.net.http.RESTClient
 import spock.lang.Specification
 
@@ -45,8 +44,8 @@ class WildcardPactSpec extends Specification {
     }
 
     when:
-    PactVerificationResult result = articleService.runTest(specificationVersion: PactSpecVersion.V3) {
-      def client = new RESTClient(it.url)
+    PactVerificationResult result = articleService.runTest { server, context ->
+      def client = new RESTClient(server.url)
       def response = client.get(requestContentType: JSON)
 
       assert response.status == 200
@@ -106,8 +105,8 @@ class WildcardPactSpec extends Specification {
     }
 
     when:
-    PactVerificationResult result = articleService.runTest {
-      def client = new RESTClient(it.url)
+    PactVerificationResult result = articleService.runTest { server, context ->
+      def client = new RESTClient(server.url)
       def response = client.get(requestContentType: JSON)
 
       assert response.status == 200

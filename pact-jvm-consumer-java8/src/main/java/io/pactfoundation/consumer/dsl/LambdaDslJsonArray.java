@@ -3,9 +3,11 @@ package io.pactfoundation.consumer.dsl;
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
+import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 import au.com.dius.pact.core.model.matchingrules.MatchingRule;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Date;
 import java.util.function.Consumer;
 
@@ -44,6 +46,12 @@ public class LambdaDslJsonArray {
         return this;
     }
 
+    /**
+     * Element that must match the regular expression
+     * @param regex regular expression
+     * @deprecated Use the version that takes an example value
+     */
+    @Deprecated
     public LambdaDslJsonArray stringMatcher(final String regex) {
         pactArray.stringMatcher(regex);
         return this;
@@ -186,6 +194,17 @@ public class LambdaDslJsonArray {
         return this;
     }
 
+    /**
+     * Element that must match the given timestamp format
+     *
+     * @param format  timestamp format
+     * @param example example date and time to use for generated bodies
+     */
+    public LambdaDslJsonArray timestamp(final String format, final Instant example) {
+        pactArray.timestamp(format, example);
+        return this;
+    }
+
     public LambdaDslJsonArray id() {
         pactArray.id();
         return this;
@@ -249,6 +268,27 @@ public class LambdaDslJsonArray {
         final LambdaDslJsonBody dslBody = new LambdaDslJsonBody(arrayLike);
         nestedObject.accept(dslBody);
         arrayLike.closeArray();
+        return this;
+    }
+
+    /**
+     * Element that is an array where each item must match the following example
+     *
+     * @param value Value that each item in the array must match
+     */
+    public LambdaDslJsonArray eachLike(PactDslJsonRootValue value) {
+        pactArray.eachLike(value);
+        return this;
+    }
+
+    /**
+     * Element that is an array where each item must match the following example
+     *
+     * @param value Value that each item in the array must match
+     * @param numberExamples Number of examples to generate
+     */
+    public LambdaDslJsonArray eachLike(PactDslJsonRootValue value, int numberExamples) {
+        pactArray.eachLike(value, numberExamples);
         return this;
     }
 

@@ -143,7 +143,11 @@ class JsonReporter implements VerifierReporter {
     def verification = jsonData.execution.last().interactions.last().verification
     verification.result = FAILED
     verification.status = []
-    comparison.message.eachLine { verification.status << it }
+    if (comparison.hasProperty('message')) {
+      comparison.message.eachLine { verification.status << it }
+    } else {
+      comparison.toString().eachLine { verification.status << it }
+    }
   }
 
   @Override

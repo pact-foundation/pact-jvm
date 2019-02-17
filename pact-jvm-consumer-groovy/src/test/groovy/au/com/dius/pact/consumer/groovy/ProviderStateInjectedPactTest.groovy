@@ -34,7 +34,7 @@ class ProviderStateInjectedPactTest {
       }
     }
 
-    PactVerificationResult result = service.runTest { mockServer ->
+    PactVerificationResult result = service.runTest { mockServer, context ->
       def client = new RESTClient(mockServer.url, 'application/json')
       def response = client.post(path: '/values', body: [userName: 'Test', userClass: 'Shoddy'])
 

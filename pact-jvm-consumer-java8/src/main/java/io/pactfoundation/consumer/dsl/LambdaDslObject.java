@@ -6,6 +6,7 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue;
 import au.com.dius.pact.core.model.matchingrules.MatchingRule;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.TimeZone;
@@ -298,6 +299,18 @@ public class LambdaDslObject {
      * @param name    attribute name
      * @param format  timestamp format
      * @param example example date and time to use for generated bodies
+     */
+    public LambdaDslObject timestamp(String name, String format, Instant example) {
+        object.timestamp(name, format, example);
+        return this;
+    }
+
+    /**
+     * Attribute that must match the given timestamp format
+     *
+     * @param name    attribute name
+     * @param format  timestamp format
+     * @param example example date and time to use for generated bodies
      * @param timeZone time zone used for formatting of example date and time
      */
     public LambdaDslObject timestamp(String name, String format, Date example, TimeZone timeZone){
@@ -390,6 +403,29 @@ public class LambdaDslObject {
         final LambdaDslObject dslObject = new LambdaDslObject(arrayLike);
         nestedObject.accept(dslObject);
         arrayLike.closeArray();
+        return this;
+    }
+
+    /**
+     * Attribute that is an array where each item is a primitive that must match the provided value
+     *
+     * @param name field name
+     * @param value Value that each item in the array must match
+     */
+    public LambdaDslObject eachLike(String name, PactDslJsonRootValue value) {
+        object.eachLike(name, value);
+        return this;
+    }
+
+    /**
+     * Attribute that is an array where each item is a primitive that must match the provided value
+     *
+     * @param name field name
+     * @param value Value that each item in the array must match
+     * @param numberExamples Number of examples to generate
+     */
+    public LambdaDslObject eachLike(String name, PactDslJsonRootValue value, int numberExamples) {
+        object.eachLike(name, value, numberExamples);
         return this;
     }
 

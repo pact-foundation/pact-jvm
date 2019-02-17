@@ -53,7 +53,7 @@ class ExampleGroovyConsumerPactTest {
                 headers: ['Content-Type': 'application/json'])
         }
 
-        PactVerificationResult result = aliceService.runTest {
+        PactVerificationResult result = aliceService.runTest { server, context ->
             def client = new RESTClient('http://localhost:1233/')
             def aliceResponse = client.get(path: '/mallory', query: [status: 'good', name: 'ron'])
 
@@ -65,7 +65,7 @@ class ExampleGroovyConsumerPactTest {
         }
         assert result == PactVerificationResult.Ok.INSTANCE
 
-        result = bobService.runTest { mockServer ->
+        result = bobService.runTest { mockServer, context ->
             def client = new RESTClient(mockServer.url)
             def body = new JsonBuilder([name: 'Bobby'])
             def bobPostResponse = client.post(path: '/donuts', requestContentType: 'application/json',

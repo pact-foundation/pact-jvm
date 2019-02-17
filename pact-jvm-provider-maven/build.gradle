@@ -21,7 +21,7 @@ task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider:install",
                                               ':core:pact-jvm-core-model:install',
                                               ':core:pact-jvm-core-matchers:install',
                                               ':core:pact-jvm-core-pact-broker:install',
-                                              ':pact-jvm-support:install']) {
+                                              ':core:pact-jvm-core-support:install']) {
     if (isWindows()) {
       commandLine 'mvn.bat', '-f', "${buildDir}/poms/pom.xml", '--settings',
         'src/main/resources/settings.xml', '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.5:descriptor'

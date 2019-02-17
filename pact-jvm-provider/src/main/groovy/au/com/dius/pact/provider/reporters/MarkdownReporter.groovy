@@ -131,7 +131,11 @@ class MarkdownReporter implements VerifierReporter {
     writer.println "&nbsp;&nbsp;&nbsp;&nbsp;has status code **$status** (<span style='color:red'>FAILED</span>)"
     writer.println()
     writer.println '```'
-    writer.println comparison.message
+    if (comparison.hasProperty('message')) {
+      writer.println comparison.message
+    } else {
+      writer.println comparison
+    }
     writer.println '```'
     writer.println()
   }

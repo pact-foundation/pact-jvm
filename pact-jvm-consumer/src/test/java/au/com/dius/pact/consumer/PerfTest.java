@@ -52,7 +52,7 @@ public class PerfTest {
     MockProviderConfig config = MockProviderConfig.createDefault();
     PactVerificationResult result = runConsumerTest(pactFragment.toPact(), config, new PactTestRun() {
       @Override
-      public void run(@NotNull MockServer mockServer) throws IOException {
+      public void run(@NotNull MockServer mockServer, PactTestExecutionContext context) throws IOException {
         try {
           stopWatch.split();
           System.out.println("In Test: " + stopWatch.getSplitTime());

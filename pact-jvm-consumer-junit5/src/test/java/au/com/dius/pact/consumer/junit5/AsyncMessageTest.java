@@ -59,7 +59,7 @@ public class AsyncMessageTest {
 
   @Test
   @PactTestFor(pactMethod = "createPact2")
-  void test2(List<Message> messages) {
-    assertThat(new String(messages.get(0).contentsAsBytes()), is("{\"testParam1\":\"value3\",\"testParam2\":\"value4\"}"));
+  void test2(MessagePact pact) {
+    assertThat(new String(pact.getMessages().get(0).contentsAsBytes()), is("{\"testParam1\":\"value3\",\"testParam2\":\"value4\"}"));
   }
 }

@@ -9,7 +9,6 @@ import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
-import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import scala.Function1
 
@@ -47,7 +46,6 @@ class ProviderVerifier extends ProviderVerifierBase {
     }
   }
 
-  @CompileStatic
   void runVerificationForConsumer(Map failures, ProviderInfo provider, ConsumerInfo consumer,
                                   PactBrokerClient client = null) {
     reportVerificationForConsumer(consumer, provider)

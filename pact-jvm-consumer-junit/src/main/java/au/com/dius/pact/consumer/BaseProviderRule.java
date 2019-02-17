@@ -77,8 +77,9 @@ public class BaseProviderRule extends ExternalResource {
                   return;
               }
 
-              PactVerificationResult result = runPactTest(base, pact.get());
-              validateResult(result, pactDef);
+            PactFolder pactFolder = target.getClass().getAnnotation(PactFolder.class);
+            PactVerificationResult result = runPactTest(base, pact.get(), pactFolder);
+            validateResult(result, pactDef);
           }
       };
   }
@@ -105,7 +106,8 @@ public class BaseProviderRule extends ExternalResource {
       } catch (Exception e) {
           throw new RuntimeException("Failed to invoke pact method", e);
       }
-      PactVerificationResult result = runPactTest(base, pact);
+      PactFolder pactFolder = target.getClass().getAnnotation(PactFolder.class);
+      PactVerificationResult result = runPactTest(base, pact, pactFolder);
       validateResult(result, pactVerification);
   }
 
@@ -148,11 +150,15 @@ public class BaseProviderRule extends ExternalResource {
       }
   }
 
-  private PactVerificationResult runPactTest(final Statement base, RequestResponsePact pact) {
-      return runConsumerTest(pact, config, mockServer -> {
+  private PactVerificationResult runPactTest(final Statement base, RequestResponsePact pact, PactFolder pactFolder) {
+      return runConsumerTest(pact, config, (mockServer, context) -> {
         this.mockServer = mockServer;
         base.evaluate();
         this.mockServer = null;
+
+        if (pactFolder != null) {
+          context.setPactFolder(pactFolder.value());
+        }
       });
   }
 

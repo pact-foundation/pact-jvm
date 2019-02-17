@@ -2,7 +2,6 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactConsumerConfig
 import au.com.dius.pact.consumer.PactVerificationResult
-import au.com.dius.pact.core.model.PactSpecVersion
 import groovy.json.JsonSlurper
 import groovyx.net.http.RESTClient
 import org.junit.Test
@@ -34,7 +33,7 @@ class ExampleGroovyConsumerV3PactTest {
             )
         }
 
-        PactVerificationResult result = aliceService.runTest(specificationVersion: PactSpecVersion.V3) { mockServer ->
+        PactVerificationResult result = aliceService.runTest { mockServer, context ->
             def client = new RESTClient(mockServer.url)
             def aliceResponse = client.get(path: '/mallory', query: [status: 'good', name: 'ron'])
 

@@ -12,7 +12,7 @@ import mu.KLogging
 import org.apache.commons.collections4.IteratorUtils
 
 enum class Category {
-  METHOD, PATH, HEADER, QUERY, BODY, STATUS
+  METHOD, PATH, HEADER, QUERY, BODY, STATUS, METADATA
 }
 
 interface ContentTypeHandler {

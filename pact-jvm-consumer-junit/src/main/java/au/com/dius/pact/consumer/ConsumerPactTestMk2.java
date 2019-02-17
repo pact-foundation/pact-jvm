@@ -16,7 +16,7 @@ public abstract class ConsumerPactTestMk2 {
     protected abstract String providerName();
     protected abstract String consumerName();
 
-    protected abstract void runTest(MockServer mockServer) throws IOException;
+    protected abstract void runTest(MockServer mockServer, PactTestExecutionContext context) throws IOException;
 
     @Test
     public void testPact() throws Throwable {

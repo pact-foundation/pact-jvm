@@ -10,6 +10,7 @@ import groovy.json.JsonOutput
 import groovyx.net.http.ContentType
 import groovyx.net.http.HTTPBuilder
 import org.apache.http.client.fluent.Request
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -142,6 +143,18 @@ class MultiTest {
   @PactTestFor(pactMethod = 'getUsersFragment2')
   void runTest4(MockServer mockServer) {
     assert Request.Get(mockServer.url + '/idm/user').execute().returnContent().asString()
+  }
+
+  @Pact(provider = 'multitest_provider', consumer = 'test_consumer')
+  @Disabled
+  RequestResponsePact getUsersFragment3(PactDslWithProvider builder) {
+    builder
+      .uponReceiving('get all users')
+      .path('/idm/user')
+      .method('GET')
+      .willRespondWith()
+      .status(404)
+      .toPact()
   }
 
 }

@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.provider.DefaultVerificationReporter
 import au.com.dius.pact.provider.IProviderVerifier
+import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderVerifierBase.Companion.PACT_VERIFIER_PUBLISH_RESULTS
 import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget
@@ -165,7 +166,7 @@ open class InteractionRunner<I>(
   private fun providerVersion(): String {
     val version = System.getProperty("pact.provider.version")
     return if (version != null) {
-      version
+      ProviderUtils.getProviderVersion(version)
     } else {
       logger.warn { "Set the provider version using the 'pact.provider.version' property. Defaulting to '0.0.0'" }
       "0.0.0"

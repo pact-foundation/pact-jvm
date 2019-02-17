@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.junit;
 import au.com.dius.pact.consumer.ConsumerPactTestMk2;
 import au.com.dius.pact.consumer.MatcherTestUtils;
 import au.com.dius.pact.consumer.MockServer;
+import au.com.dius.pact.consumer.PactTestExecutionContext;
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
@@ -72,7 +73,7 @@ public class PactDslJsonBodyTest extends ConsumerPactTestMk2 {
     }
 
     @Override
-    protected void runTest(MockServer mockServer) {
+    protected void runTest(MockServer mockServer, PactTestExecutionContext context) {
         Map response;
         try {
             response = new ConsumerClient(mockServer.getUrl()).getAsMap("/", "");

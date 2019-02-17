@@ -226,4 +226,29 @@ class PactProviderMojoSpec extends Specification {
     noExceptionThrown()
     System.getProperty('pact.verifier.publishResults') == 'true'
   }
+
+  @RestoreSystemProperties
+  def 'system property pact.provider.version.trimSnapshot true when set with systemPropertyVariables' () {
+    given:
+    def provider = new Provider(pactFileDirectory: 'dir1' as File)
+    def verifier = Mock(ProviderVerifier) {
+      verifyProvider(provider) >> [:]
+    }
+    mojo = Spy(PactProviderMojo) {
+      loadPactFiles(provider, _) >> []
+      providerVerifier() >> verifier
+    }
+    mojo.serviceProviders = [ provider ]
+    mojo.failIfNoPactsFound = false
+    mojo.systemPropertyVariables.put('pact.provider.version.trimSnapshot', 'true')
+    mojo.reports = [ 'console' ]
+    mojo.buildDir = new File('/tmp')
+
+    when:
+    mojo.execute()
+
+    then:
+    noExceptionThrown()
+    System.getProperty('pact.provider.version.trimSnapshot') == 'true'
+  }
 }
