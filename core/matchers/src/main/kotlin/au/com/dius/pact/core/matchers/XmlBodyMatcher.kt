@@ -8,7 +8,7 @@ import au.com.dius.pact.core.model.orElse
 import au.com.dius.pact.core.model.unwrap
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
-import com.sun.org.apache.xerces.internal.dom.TextImpl
+import org.apache.xerces.dom.TextImpl
 import mu.KLogging
 import org.w3c.dom.NamedNodeMap
 import org.w3c.dom.Node
