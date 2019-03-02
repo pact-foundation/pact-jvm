@@ -30,7 +30,7 @@ private val logger = KotlinLogging.logger {}
 
 interface VerificationReporter {
   fun <I> reportResults(pact: Pact<I>, result: Boolean, version: String, client: PactBrokerClient? = null)
-    where I: Interaction
+    where I : Interaction
 
   /**
    * This must return true unless the pact.verifier.publishResults property has the value of "true"
@@ -42,11 +42,11 @@ interface VerificationReporter {
 @Deprecated("Use the VerificationReporter instead of this function",
   ReplaceWith("DefaultVerificationReporter.reportResults(pact, result, version, client)"))
 fun <I> reportVerificationResults(pact: Pact<I>, result: Boolean, version: String, client: PactBrokerClient? = null)
-  where I: Interaction = DefaultVerificationReporter.reportResults(pact, result, version, client)
+  where I : Interaction = DefaultVerificationReporter.reportResults(pact, result, version, client)
 
 object DefaultVerificationReporter : VerificationReporter {
   override fun <I> reportResults(pact: Pact<I>, result: Boolean, version: String, client: PactBrokerClient?)
-    where I: Interaction {
+    where I : Interaction {
     val source = pact.source
     when (source) {
       is BrokerUrlSource -> {

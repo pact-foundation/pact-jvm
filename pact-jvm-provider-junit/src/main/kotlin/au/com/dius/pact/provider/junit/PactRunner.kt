@@ -48,7 +48,7 @@ import kotlin.reflect.full.findAnnotation
  * - [State] - before each interaction that require state change,
  * all methods annotated by [State] with appropriate state listed will be invoked
  */
-open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(clazz) where I: Interaction {
+open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(clazz) where I : Interaction {
 
   private val child = mutableListOf<InteractionRunner<I>>()
   private var valueResolver = SystemPropertyResolver()
