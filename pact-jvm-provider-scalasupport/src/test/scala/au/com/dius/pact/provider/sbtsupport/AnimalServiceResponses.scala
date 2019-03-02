@@ -2,14 +2,14 @@ package au.com.dius.pact.provider.sbtsupport
 
 import au.com.dius.pact.model.{OptionalBody, Response}
 
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 
 object AnimalServiceResponses {
-  def contentHeaders: Map[String, String] = Map("Content-Type" -> "application/json; charset=UTF-8")
+  def contentHeaders: Map[String, java.util.List[String]] = Map("Content-Type" -> List("application/json; charset=UTF-8").asJava)
 
   def alligator(name:String): Response = {
     val json = OptionalBody.body(("{\"alligators\": [{\"name\": \"" + name + "\"}").getBytes)
-    new Response(200, JavaConversions.mapAsJavaMap(contentHeaders), json)
+    new Response(200, contentHeaders.asJava, json)
   }
   val bobResponse = alligator("Bob")
   val maryResponse = alligator("Mary")
@@ -29,7 +29,7 @@ object AnimalServiceResponses {
       "/alligators/Mary" -> new Response(404)
     ),
     "an error has occurred" -> Map (
-      "/alligators" -> new Response(500, JavaConversions.mapAsJavaMap(contentHeaders), errorJson)
+      "/alligators" -> new Response(500, contentHeaders.asJava, errorJson)
     )
   )
 
