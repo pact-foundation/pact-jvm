@@ -154,7 +154,7 @@ class JsonReporter implements VerifierReporter {
   void includesHeaders() { }
 
   @Override
-  void headerComparisonOk(String key, String value) { }
+  void headerComparisonOk(String key, List<String> value) { }
 
   @Override
   void headerComparisonFailed(String key, String value, def comparison) {

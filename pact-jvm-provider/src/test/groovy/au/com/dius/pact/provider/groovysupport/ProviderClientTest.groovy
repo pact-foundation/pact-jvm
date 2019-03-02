@@ -63,7 +63,7 @@ class ProviderClientTest {
   @Test
   void 'query parameters must NOT be placed in the body for URL encoded FORM POSTs'() {
     def request = new Request('POST', '/', PactReaderKt.queryStringToMap('a=1&b=11&c=Hello World'),
-      ['Content-Type': ContentType.APPLICATION_FORM_URLENCODED.toString()], OptionalBody.body('A=B'.bytes))
+      ['Content-Type': [ContentType.APPLICATION_FORM_URLENCODED.toString()]], OptionalBody.body('A=B'.bytes))
     client.makeRequest(request)
     assert args.URI.query == 'a=1&b=11&c=Hello+World'
     assert args.entity.content.text == 'A=B'

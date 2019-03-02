@@ -4,7 +4,7 @@ import au.com.dius.pact.consumer._
 import au.com.dius.pact.matchers.util.JsonUtils
 import au.com.dius.pact.model._
 
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 
 object Complete {
 
@@ -33,10 +33,10 @@ object Complete {
       mockProvider.stop()
 
       ConsumerPactRunner.writeIfMatching(pact, sessionResults, mockProvider.config.getPactVersion) match {
-        case PactVerified => pactWritten(new Response(200, JavaConversions.mapAsJavaMap(ResponseUtils.CrossSiteHeaders)),
+        case PactVerified => pactWritten(new Response(200, ResponseUtils.CrossSiteHeaders.asJava),
           mockProvider.config.getPort.toString)
         case error => pactWritten(new Response(400,
-          JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/json")), toJson(error)),
+          Map("Content-Type" -> List("application/json").asJava).asJava, toJson(error)),
           mockProvider.config.getPort.toString)
       }
     }

@@ -57,7 +57,7 @@ interface VerifierReporter {
   fun statusComparisonOk(status: Int)
   fun statusComparisonFailed(status: Int, comparison: Any)
   fun includesHeaders()
-  fun headerComparisonOk(key: String, value: String)
+  fun headerComparisonOk(key: String, value: List<String>)
   fun headerComparisonFailed(key: String, value: String, comparison: Any)
   fun bodyComparisonOk()
   fun bodyComparisonFailed(comparison: Any)

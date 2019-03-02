@@ -14,12 +14,12 @@ class ResponseComparisonTest {
   private Response response
   private actualResponse
   private int actualStatus
-  private Map actualHeaders = ['A': 'B', 'C': 'D', 'Content-Type': 'application/json']
+  private Map actualHeaders = ['A': ['B'], 'C': ['D'], 'Content-Type': ['application/json']]
   private actualBody
 
   @Before
   void setup() {
-    response = new Response(200, ['A': 'mismatch', 'Content-Type': 'application/json'],
+    response = new Response(200, ['A': ['mismatch'], 'Content-Type': ['application/json']],
       OptionalBody.body('{"stuff": "is good"}'.bytes))
     actualStatus = 200
     actualBody = '{"stuff": "is good"}'
@@ -44,23 +44,23 @@ class ResponseComparisonTest {
 
   @Test
   void 'should only compare the expected headers'() {
-    actualHeaders = ['A': 'B', 'C': 'D']
-    response = new Response(200, ['A': 'B'], OptionalBody.body(''.bytes))
+    actualHeaders = ['A': ['B'], 'C': ['D']]
+    response = new Response(200, ['A': ['B']], OptionalBody.body(''.bytes))
     assert testSubject().headers == ['A': null]
-    response = new Response(200, ['A': 'D'], OptionalBody.body(''.bytes))
+    response = new Response(200, ['A': ['D']], OptionalBody.body(''.bytes))
     assert testSubject().headers.A == 'Expected header \'A\' to have value \'D\' but was \'B\''
   }
 
   @Test
   void 'ignores case in header comparisons'() {
-    actualHeaders = ['A': 'B', 'C': 'D']
-    response = new Response(200, ['a': 'B'], OptionalBody.body(''.bytes))
+    actualHeaders = ['A': ['B'], 'C': ['D']]
+    response = new Response(200, ['a': ['B']], OptionalBody.body(''.bytes))
     assert testSubject().headers == ['a': null]
   }
 
   @Test
   void 'comparing bodies should fail with different content types'() {
-    actualHeaders['Content-Type'] = 'text/plain'
+    actualHeaders['Content-Type'] = ['text/plain']
     assert testSubject().body == [comparison:
       'Expected a response type of \'application/json\' but the actual type was \'text/plain\'']
   }
@@ -72,7 +72,7 @@ class ResponseComparisonTest {
 
   @Test
   void 'comparing bodies should pass when the order of elements in the actual response is different'() {
-    response = new Response(200, ['Content-Type': 'application/json'], OptionalBody.body(
+    response = new Response(200, ['Content-Type': ['application/json']], OptionalBody.body(
             '{"moar_stuff": {"a": "is also good", "b": "is even better"}, "stuff": "is good"}'.bytes))
     actualBody = '{"stuff": "is good", "moar_stuff": {"b": "is even better", "a": "is also good"}}'
     assert testSubject().body == [:]

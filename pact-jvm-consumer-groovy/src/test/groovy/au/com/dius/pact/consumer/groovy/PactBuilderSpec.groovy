@@ -100,7 +100,7 @@ class PactBuilderSpec extends Specification {
     firstInteraction.request.headers.MALLORY =~ 'mallory:[0-9]+'
     firstInteraction.request.matchingRules.rulesForCategory('header').matchingRules['MALLORY'].rules.first().regex ==
       'mallory:[0-9]+'
-    firstInteraction.response.headers['Content-Type'] == 'text/html'
+    firstInteraction.response.headers['Content-Type'] == ['text/html']
     firstInteraction.response.matchingRules.rulesForCategory('header').matchingRules['Content-Type'].
       rules.first().regex == 'text/.*'
   }
@@ -319,6 +319,6 @@ class PactBuilderSpec extends Specification {
     def response = aliceService.interactions.first().response
 
     then:
-    response.headers['Content-Type'] == 'application/hal+json'
+    response.headers['Content-Type'] == ['application/hal+json']
   }
 }

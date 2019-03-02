@@ -30,7 +30,7 @@ class MockHttpServerSpec extends Specification {
     'text/plain; charset='          | 'UTF-8'
     'text/plain;charset=ISO-8859-1' | 'ISO-8859-1'
 
-    headers = ['Content-Type': contentTypeHeader]
+    headers = ['Content-Type': [contentTypeHeader]]
 
   }
 
@@ -41,7 +41,7 @@ class MockHttpServerSpec extends Specification {
 
   def 'ignores case with the header name'() {
     expect:
-    MockHttpServerKt.calculateCharset(['content-type': 'text/plain; charset=ISO-8859-1']).name() == 'ISO-8859-1'
+    MockHttpServerKt.calculateCharset(['content-type': ['text/plain; charset=ISO-8859-1']]).name() == 'ISO-8859-1'
   }
 
   @Timeout(60)
@@ -54,7 +54,7 @@ class MockHttpServerSpec extends Specification {
     when:
     201.times { count ->
       def server = mockServer(pact, config)
-      server.runAndWritePact(pact, config.pactVersion) { }
+      server.runAndWritePact(pact, config.pactVersion) { s, context -> }
     }
 
     then:

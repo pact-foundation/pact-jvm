@@ -23,6 +23,7 @@ case class RequestMatching(expectedInteractions: Seq[RequestResponseInteraction]
 
 object RequestMatching extends StrictLogging {
   import au.com.dius.pact.model.Matching._
+  import scala.collection.JavaConverters._
 
   var allowUnexpectedKeys = false
 
@@ -52,7 +53,7 @@ object RequestMatching extends StrictLogging {
       ++ matchQuery(expected, actual)
       ++ matchCookie(au.com.dius.pact.matchers.util.CollectionUtils.toOptionalList(expected.cookie),
       au.com.dius.pact.matchers.util.CollectionUtils.toOptionalList(actual.cookie))
-      ++ matchRequestHeaders(expected, actual)
+      ++ au.com.dius.pact.matchers.Matching.matchRequestHeaders(expected, actual).asScala
       ++ matchBody(expected, actual, allowUnexpectedKeys)).toSeq
   }
 }

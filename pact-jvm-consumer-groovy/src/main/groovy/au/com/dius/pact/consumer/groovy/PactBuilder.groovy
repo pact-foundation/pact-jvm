@@ -143,17 +143,17 @@ class PactBuilder extends BaseBuilder {
       def header = HEADER
       if (value instanceof Matcher) {
         matchers.addCategory(header).addRule(key, value.matcher)
-        [key, value.value]
+        [key, [value.value]]
       } else if (value instanceof Pattern) {
         def matcher = new RegexpMatcher(regex: value)
         matchers.addCategory(header).addRule(key, matcher.matcher)
-        [key, matcher.value]
+        [key, [matcher.value]]
       } else if (value instanceof GeneratedValue) {
         generators.addGenerator(au.com.dius.pact.model.generators.Category.HEADER, key,
           new ProviderStateGenerator(value.expression))
-        [key, value.exampleValue]
+        [key, [value.exampleValue]]
       } else {
-        [key, value]
+        [key, value instanceof List ? value : [value]]
       }
     }
   }

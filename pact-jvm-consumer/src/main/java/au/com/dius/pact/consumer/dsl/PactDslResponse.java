@@ -21,7 +21,9 @@ import org.w3c.dom.Document;
 import scala.collection.JavaConversions$;
 
 import javax.xml.transform.TransformerException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -35,7 +37,7 @@ public class PactDslResponse {
     private final PactDslResponse defaultResponseValues;
 
     private int responseStatus = 200;
-    private Map<String, String> responseHeaders = new HashMap<String, String>();
+    private Map<String, List<String>> responseHeaders = new HashMap<>();
     private OptionalBody responseBody = OptionalBody.missing();
     private MatchingRules responseMatchers = new MatchingRulesImpl();
     private Generators responseGenerators = new Generators();
@@ -79,8 +81,10 @@ public class PactDslResponse {
      * @param headers key-value pairs of headers
      */
     public PactDslResponse headers(Map<String, String> headers) {
-        this.responseHeaders.putAll(headers);
-        return this;
+      for (Map.Entry<String, String> entry: headers.entrySet()) {
+        this.responseHeaders.put(entry.getKey(), Collections.singletonList(entry.getValue()));
+      }
+      return this;
     }
 
     /**
@@ -101,7 +105,7 @@ public class PactDslResponse {
      */
     public PactDslResponse body(String body, String mimeType) {
         responseBody = OptionalBody.body(body.getBytes());
-        responseHeaders.put(CONTENT_TYPE, mimeType);
+        responseHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
         return this;
     }
 
@@ -133,7 +137,7 @@ public class PactDslResponse {
      */
     public PactDslResponse body(Supplier<String> body, String mimeType) {
         responseBody = OptionalBody.body(body.get().getBytes());
-        responseHeaders.put(CONTENT_TYPE, mimeType);
+        responseHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
         return this;
     }
 
@@ -233,7 +237,7 @@ public class PactDslResponse {
     public PactDslResponse body(Document body) throws TransformerException {
         responseBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body).getBytes());
         if (!responseHeaders.containsKey(CONTENT_TYPE)) {
-            responseHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_XML.toString());
+            responseHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
         }
         return this;
     }
@@ -257,7 +261,7 @@ public class PactDslResponse {
      */
     public PactDslResponse matchHeader(String header, String regexp, String headerExample) {
         responseMatchers.addCategory("header").setRule(header, new RegexMatcher(regexp));
-        responseHeaders.put(header, headerExample);
+        responseHeaders.put(header, Collections.singletonList(headerExample));
         return this;
     }
 
@@ -332,7 +336,7 @@ public class PactDslResponse {
    */
   public PactDslResponse headerFromProviderState(String name, String expression, String example) {
     responseGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression));
-    responseHeaders.put(name, example);
+    responseHeaders.put(name, Collections.singletonList(example));
     return this;
   }
 }

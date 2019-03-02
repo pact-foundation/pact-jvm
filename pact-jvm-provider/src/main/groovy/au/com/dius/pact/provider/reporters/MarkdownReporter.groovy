@@ -146,7 +146,7 @@ class MarkdownReporter implements VerifierReporter {
   }
 
   @Override
-  void headerComparisonOk(String key, String value) {
+  void headerComparisonOk(String key, List<String> value) {
     writer.println "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"**$key**\" with value \"**$value**\" " +
       '(<span style=\'color:green\'>OK</span>)  '
   }

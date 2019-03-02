@@ -4,7 +4,7 @@ import au.com.dius.pact.consumer.DefaultMockProvider
 import au.com.dius.pact.model._
 import com.typesafe.scalalogging.StrictLogging
 
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 
 object Create extends StrictLogging {
 
@@ -38,13 +38,12 @@ object Create extends StrictLogging {
 
     server.start(pact)
 
-    Result(new Response(201, JavaConversions.mapAsJavaMap(ResponseUtils.CrossSiteHeaders ++
-      Map("Content-Type" -> "application/json")), body), newState)
+    Result(new Response(201, (ResponseUtils.CrossSiteHeaders ++ Map("Content-Type" -> List("application/json").asJava)).asJava, body), newState)
   }
 
   def apply(request: Request, oldState: ServerState, config: Config): Result = {
     def errorJson = OptionalBody.body("{\"error\": \"please provide state param and path param and pact body\"}".getBytes)
-    def clientError = Result(new Response(400, JavaConversions.mapAsJavaMap(ResponseUtils.CrossSiteHeaders), errorJson),
+    def clientError = Result(new Response(400, ResponseUtils.CrossSiteHeaders.asJava, errorJson),
       oldState)
 
     logger.debug(s"path=${request.getPath}")

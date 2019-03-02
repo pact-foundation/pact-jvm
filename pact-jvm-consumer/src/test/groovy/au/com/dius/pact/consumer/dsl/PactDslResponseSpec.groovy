@@ -67,7 +67,7 @@ class PactDslResponseSpec extends Specification {
 
     then:
     subject.responseStatus == 499
-    subject.responseHeaders == [test: 'test']
+    subject.responseHeaders == [test: ['test']]
     subject.responseBody == OptionalBody.body('{"test":true}'.bytes)
   }
 

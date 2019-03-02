@@ -9,6 +9,8 @@ import groovy.transform.Canonical
 @Canonical
 class RequestResponseInteraction implements Interaction {
 
+  private static final String COMMA = ', '
+
   String description
   List<ProviderState> providerStates = []
   Request request
@@ -23,7 +25,7 @@ class RequestResponseInteraction implements Interaction {
     if (providerStates.empty || providerStates.size() == 1 && !providerStates[0].name) {
       'None'
     } else {
-      providerStates*.name.join(', ')
+      providerStates*.name.join(COMMA)
     }
   }
 
@@ -68,7 +70,7 @@ class RequestResponseInteraction implements Interaction {
       path: request.path as Object
     ]
     if (request.headers) {
-      map.headers = request.headers as Map
+      map.headers = (request.headers as Map).collectEntries { key, value -> [key, value.join(COMMA)] }
     }
     if (request.query) {
       map.query = pactSpecVersion >= PactSpecVersion.V3 ? request.query : mapToQueryStr(request.query)
@@ -89,7 +91,7 @@ class RequestResponseInteraction implements Interaction {
   static Map responseToMap(Response response, PactSpecVersion pactSpecVersion) {
     Map<String, Object> map = [status: response.status as Object]
     if (response.headers) {
-      map.headers = response.headers as Map
+      map.headers = (response.headers as Map).collectEntries { key, value -> [key, value.join(COMMA)] }
     }
     if (!response.body.missing) {
       map.body = parseBody(response)

@@ -12,7 +12,7 @@ import java.nio.charset.Charset
 abstract class HttpPart : GroovyObjectSupport() {
 
   abstract var body: OptionalBody?
-  abstract var headers: MutableMap<String, String>?
+  abstract var headers: MutableMap<String, List<String>>?
   abstract var matchingRules: MatchingRules?
 
   fun mimeType(): String = contentTypeHeader()?.split(Regex("\\s*;\\s*"))?.first().orEmpty()
@@ -22,7 +22,7 @@ abstract class HttpPart : GroovyObjectSupport() {
     return if (contentTypeKey.isNullOrEmpty()) {
       detectContentType()
     } else {
-      headers?.get(contentTypeKey)
+      headers?.get(contentTypeKey)?.first()
     }
   }
 
@@ -51,7 +51,7 @@ abstract class HttpPart : GroovyObjectSupport() {
       headers = mutableMapOf()
     }
     if (!headers!!.containsKey(CONTENT_TYPE)) {
-      headers!![CONTENT_TYPE] = mimetype
+      headers!![CONTENT_TYPE] = listOf(mimetype)
     }
   }
 

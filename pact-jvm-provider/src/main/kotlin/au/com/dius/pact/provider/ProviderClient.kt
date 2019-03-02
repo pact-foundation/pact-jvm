@@ -270,7 +270,7 @@ open class ProviderClient(
     val headers = request.headers
     if (headers != null && headers.isNotEmpty()) {
       headers.forEach { key, value ->
-        method.addHeader(key, value)
+        method.addHeader(key, value.joinToString(", "))
       }
     }
 
@@ -341,11 +341,11 @@ open class ProviderClient(
 
   fun getHttpClient() = httpClientFactory.newClient(provider)
 
-  private fun handleResponse(httpResponse: HttpResponse): Map<String, Any> {
+  fun handleResponse(httpResponse: HttpResponse): Map<String, Any> {
     logger.debug { "Received response: ${httpResponse.statusLine}" }
     val response = mutableMapOf<String, Any>("statusCode" to httpResponse.statusLine.statusCode)
 
-    response["headers"] = httpResponse.allHeaders.associate { header -> header.name to header.value }
+    response["headers"] = httpResponse.allHeaders.groupBy({ header -> header.name }, { header -> header.value })
 
     val entity = httpResponse.entity
     if (entity != null) {

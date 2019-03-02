@@ -10,10 +10,11 @@ class RequestMatchingSpec extends Specification {
 
   def setup() {
     request = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
-      [testreqheader: 'testreqheadervalue'],
+      [testreqheader: ['testreqheadervalue']],
       OptionalBody.body('{"test": true}'.bytes))
 
-    response = new Response(200, [testreqheader: 'testreqheaderval'], OptionalBody.body('{"responsetest": true}'.bytes))
+    response = new Response(200, [testreqheader: ['testreqheaderval']],
+      OptionalBody.body('{"responsetest": true}'.bytes))
 
     testState = [new ProviderState('test state')]
   }
@@ -79,7 +80,7 @@ class RequestMatchingSpec extends Specification {
   def 'request matching should fail to match when headers are present but contain incorrect value'() {
     given:
     def incorrectRequest = request.copy()
-    incorrectRequest.headers = [testreqheader: 'incorrectValue']
+    incorrectRequest.headers = [testreqheader: ['incorrectValue']]
 
     when:
     def actualResponse = test(incorrectRequest)

@@ -133,7 +133,7 @@ class PactResultSpec extends Specification {
           '\tmethod: post\n' +
           '\tpath: /path\n' +
           '\tquery: [:]\n' +
-          '\theaders: [Content-Type:application/json]\n' +
+          '\theaders: [Content-Type:[application/json]]\n' +
           '\tmatchers: MatchingRules(rules={body=Category(name=body, matchingRules={}), path=Category(name=path, matchingRules={})})\n' +
           '\tgenerators: Generators(categories={})\n' +
           '\tbody: PRESENT({\n' +

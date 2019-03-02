@@ -7,9 +7,9 @@ import au.com.dius.pact.model.matchingrules.TypeMatcher
 class ModelFixtures {
 
   static request = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
-    [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'.bytes))
+    [testreqheader: ['testreqheadervalue']], OptionalBody.body('{"test":true}'.bytes))
 
-  static response = new Response(200, [testreqheader: 'testreqheaderval'],
+  static response = new Response(200, [testreqheader: ['testreqheaderval']],
     OptionalBody.body('{"responsetest":true}'.bytes))
 
   static requestMatchers = {
@@ -20,7 +20,7 @@ class ModelFixtures {
 
   static requestWithMatchers = new Request('GET', '/',
     PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
-    [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'.bytes),
+    [testreqheader: ['testreqheadervalue']], OptionalBody.body('{"test":true}'.bytes),
     requestMatchers())
 
   static responseMatchers = {
@@ -29,19 +29,19 @@ class ModelFixtures {
     rules
   }
 
-  static responseWithMatchers = new Response(200, [testreqheader: 'testreqheaderval'],
+  static responseWithMatchers = new Response(200, [testreqheader: ['testreqheaderval']],
     OptionalBody.body('{"responsetest":true}'.bytes), responseMatchers())
 
   static requestNoBody = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
-    [testreqheader: 'testreqheadervalue'])
+    [testreqheader: ['testreqheadervalue']])
 
   static requestDecodedQuery = new Request('GET', '/', [datetime: ['2011-12-03T10:15:30+01:00'],
-    description: ['hello world!']], [testreqheader: 'testreqheadervalue'],
+    description: ['hello world!']], [testreqheader: ['testreqheadervalue']],
     OptionalBody.body('{"test":true}'.bytes))
 
-  static responseNoBody = new Response(200, [testreqheader: 'testreqheaderval'])
+  static responseNoBody = new Response(200, [testreqheader: ['testreqheaderval']])
 
   static requestLowerCaseMethod = new Request('get', '/',
     PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
-    [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'.bytes))
+    [testreqheader: ['testreqheadervalue']], OptionalBody.body('{"test":true}'.bytes))
 }

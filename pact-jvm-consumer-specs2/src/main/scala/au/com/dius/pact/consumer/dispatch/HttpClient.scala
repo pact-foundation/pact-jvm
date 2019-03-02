@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture
 import au.com.dius.pact.model.{OptionalBody, Request, Response}
 import org.apache.commons.lang3.StringUtils
 import org.asynchttpclient.{DefaultAsyncHttpClient, RequestBuilder}
+import scala.collection.JavaConverters._
 
 object HttpClient {
 
@@ -14,15 +15,15 @@ object HttpClient {
     val req = new RequestBuilder(request.getMethod)
       .setUrl(request.getPath)
       .setQueryParams(request.getQuery)
-    request.getHeaders.forEach((name, value) => req.addHeader(name, value))
+    request.getHeaders.forEach((name, value) => req.addHeader(name, value.asScala.mkString(", ")))
     if (request.getBody.isPresent) {
       req.setBody(request.getBody.getValue)
     }
 
     val asyncHttpClient = new DefaultAsyncHttpClient
     asyncHttpClient.executeRequest(req).toCompletableFuture.thenApply(res => {
-      val headers = new util.HashMap[String, String]()
-      res.getHeaders.names().forEach(name => headers.put(name, res.getHeader(name)))
+      val headers = new util.HashMap[String, util.List[String]]()
+      res.getHeaders.names().forEach(name => headers.put(name, List(res.getHeader(name)).asJava))
       val contentType = if (StringUtils.isEmpty(res.getContentType))
         org.apache.http.entity.ContentType.APPLICATION_JSON
       else

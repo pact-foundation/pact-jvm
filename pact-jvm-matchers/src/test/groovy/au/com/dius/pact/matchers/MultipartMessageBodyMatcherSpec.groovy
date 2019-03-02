@@ -11,8 +11,8 @@ class MultipartMessageBodyMatcherSpec extends Specification {
 
   def setup() {
     matcher = new MultipartMessageBodyMatcher()
-    expected = { body -> new Request('', '', null, ['Content-Type': 'multipart/form-data; boundary=XXX'], body) }
-    actual = { body -> new Request('', '', null, ['Content-Type': 'multipart/form-data; boundary=XXX'], body) }
+    expected = { body -> new Request('', '', null, ['Content-Type': ['multipart/form-data; boundary=XXX']], body) }
+    actual = { body -> new Request('', '', null, ['Content-Type': ['multipart/form-data; boundary=XXX']], body) }
   }
 
   def 'return no mismatches - when comparing empty bodies'() {

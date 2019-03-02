@@ -16,10 +16,10 @@ class HttpPartSpec extends Specification {
     where:
     request                                                                                                                   | mimeType
     new Request('Get', '')                                                                                                    | 'text/plain'
-    new Request('Get', '', null, ['Content-Type': 'text/html'])                                                               | 'text/html'
-    new Request('Get', '', null, ['Content-Type': 'application/json; charset=UTF-8'])                                         | 'application/json'
-    new Request('Get', '', null, ['content-type': 'application/json'])                                                        | 'application/json'
-    new Request('Get', '', null, ['CONTENT-TYPE': 'application/json'])                                                        | 'application/json'
+    new Request('Get', '', null, ['Content-Type': ['text/html']])                                                             | 'text/html'
+    new Request('Get', '', null, ['Content-Type': ['application/json; charset=UTF-8']])                                       | 'application/json'
+    new Request('Get', '', null, ['content-type': ['application/json']])                                                      | 'application/json'
+    new Request('Get', '', null, ['CONTENT-TYPE': ['application/json']])                                                      | 'application/json'
     new Request('Get', '', null, null, OptionalBody.body('{"json": true}'.bytes))                                             | 'application/json'
     new Request('Get', '', null, null, OptionalBody.body('{}'.bytes))                                                         | 'application/json'
     new Request('Get', '', null, null, OptionalBody.body('[]'.bytes))                                                         | 'application/json'
@@ -38,9 +38,9 @@ class HttpPartSpec extends Specification {
     request.charset() == charset
 
     where:
-    request                                                                                                             | charset
-    new Request('Get', '')                                                                                              | null
-    new Request('Get', '', null, ['Content-Type': 'text/html'])                                                         | null
-    new Request('Get', '', null, ['Content-Type': 'application/json; charset=UTF-8'])                                   | Charset.forName('UTF-8')
+    request                                                                             | charset
+    new Request('Get', '')                                                              | null
+    new Request('Get', '', null, ['Content-Type': ['text/html']])                       | null
+    new Request('Get', '', null, ['Content-Type': ['application/json; charset=UTF-8']]) | Charset.forName('UTF-8')
   }
 }

@@ -14,6 +14,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,7 @@ public abstract class PactDslRequestBase {
 
   protected final PactDslRequestWithoutPath defaultRequestValues;
   protected String requestMethod;
-  protected Map<String, String> requestHeaders = new HashMap<>();
+  protected Map<String, List<String>> requestHeaders = new HashMap<>();
   protected Map<String, List<String>> query = new HashMap<>();
   protected OptionalBody requestBody = OptionalBody.missing();
   protected MatchingRules requestMatchers = new MatchingRulesImpl();
@@ -62,6 +63,6 @@ public abstract class PactDslRequestBase {
     requestBody = OptionalBody.body(os.toString().getBytes());
     requestMatchers.addCategory("header").addRule(CONTENT_TYPE, new RegexMatcher(MULTIPART_HEADER_REGEX,
       multipart.getContentType().getValue()));
-    requestHeaders.put(CONTENT_TYPE, multipart.getContentType().getValue());
+    requestHeaders.put(CONTENT_TYPE, Collections.singletonList(multipart.getContentType().getValue()));
   }
 }

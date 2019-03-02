@@ -10,16 +10,22 @@ import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
 import groovy.json.JsonBuilder
+import org.apache.http.Header
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpRequest
+import org.apache.http.HttpResponse
+import org.apache.http.ProtocolVersion
+import org.apache.http.StatusLine
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.message.BasicHeader
+import org.apache.http.message.BasicStatusLine
 import spock.lang.Specification
 import spock.lang.Unroll
 
-@SuppressWarnings(['ClosureAsLastMethodParameter', 'MethodCount'])
+@SuppressWarnings(['ClosureAsLastMethodParameter', 'MethodCount', 'UnnecessaryGetter'])
 class ProviderClientSpec extends Specification {
 
   private ProviderClient client
@@ -59,10 +65,10 @@ class ProviderClientSpec extends Specification {
   def 'setting up headers copies all headers without modification'() {
     given:
     def headers = [
-      'Content-Type': ContentType.APPLICATION_ATOM_XML.toString(),
-      A: 'a',
-      B: 'b',
-      C: 'c'
+      'Content-Type': [ContentType.APPLICATION_ATOM_XML.toString()],
+      A: ['a'],
+      B: ['b'],
+      C: ['c']
     ]
     request = new Request('PUT', '/', null, headers)
 
@@ -72,7 +78,7 @@ class ProviderClientSpec extends Specification {
     then:
     1 * httpRequest.containsHeader('Content-Type') >> true
     headers.each {
-      1 * httpRequest.addHeader(it.key, it.value)
+      1 * httpRequest.addHeader(it.key, it.value[0])
     }
 
     0 * httpRequest._
@@ -81,9 +87,9 @@ class ProviderClientSpec extends Specification {
   def 'setting up headers adds an JSON content type if none was provided and there is a body'() {
     given:
     def headers = [
-      A: 'a',
-      B: 'b',
-      C: 'c'
+      A: ['a'],
+      B: ['b'],
+      C: ['c']
     ]
     request = new Request('PUT', '/', null, headers, OptionalBody.body('{}'.bytes))
 
@@ -93,7 +99,7 @@ class ProviderClientSpec extends Specification {
     then:
     1 * httpRequest.containsHeader('Content-Type') >> false
     headers.each {
-      1 * httpRequest.addHeader(it.key, it.value)
+      1 * httpRequest.addHeader(it.key, it.value[0])
     }
     1 * httpRequest.addHeader('Content-Type', 'application/json')
 
@@ -103,9 +109,9 @@ class ProviderClientSpec extends Specification {
   def 'setting up headers does not add an JSON content type if there is no body'() {
     given:
     def headers = [
-      A: 'a',
-      B: 'b',
-      C: 'c'
+      A: ['a'],
+      B: ['b'],
+      C: ['c']
     ]
     request = new Request('PUT', '/', null, headers)
 
@@ -115,7 +121,7 @@ class ProviderClientSpec extends Specification {
     then:
     1 * httpRequest.containsHeader('Content-Type') >> false
     headers.each {
-      1 * httpRequest.addHeader(it.key, it.value)
+      1 * httpRequest.addHeader(it.key, it.value[0])
     }
     0 * httpRequest.addHeader('Content-Type', 'application/json')
 
@@ -125,9 +131,9 @@ class ProviderClientSpec extends Specification {
   def 'setting up headers does not add an JSON content type if there is already one'() {
     given:
     def headers = [
-      A: 'a',
-      B: 'b',
-      'content-type': 'c'
+      A: ['a'],
+      B: ['b'],
+      'content-type': ['c']
     ]
     request = new Request('PUT', '/', null, headers, OptionalBody.body('C'.bytes))
 
@@ -137,7 +143,7 @@ class ProviderClientSpec extends Specification {
     then:
     1 * httpRequest.containsHeader('Content-Type') >> true
     headers.each {
-      1 * httpRequest.addHeader(it.key, it.value)
+      1 * httpRequest.addHeader(it.key, it.value[0])
     }
     0 * httpRequest.addHeader('Content-Type', 'application/json')
 
@@ -186,7 +192,7 @@ class ProviderClientSpec extends Specification {
   def 'setting up body sets a string entity  entity if it is a url encoded form post and there is no query string'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
-    request = new Request('POST', '/', query, ['Content-Type': ContentType.APPLICATION_FORM_URLENCODED.mimeType],
+    request = new Request('POST', '/', query, ['Content-Type': [ContentType.APPLICATION_FORM_URLENCODED.mimeType]],
       OptionalBody.body('A=B'.bytes))
 
     when:
@@ -204,7 +210,7 @@ class ProviderClientSpec extends Specification {
   def 'setting up body sets a StringEntity entity if it is urlencoded form post and there is a query string'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
-    request = new Request('POST', '/', ['A': ['B', 'C']], ['Content-Type': 'application/x-www-form-urlencoded'],
+    request = new Request('POST', '/', ['A': ['B', 'C']], ['Content-Type': ['application/x-www-form-urlencoded']],
       OptionalBody.body('A=B'.bytes))
 
     when:
@@ -219,7 +225,7 @@ class ProviderClientSpec extends Specification {
   @SuppressWarnings('UnnecessaryBooleanExpression')
   def 'request is a url encoded form post'() {
     expect:
-    def request = new Request(method, '/', ['A': ['B', 'C']], ['Content-Type': contentType],
+    def request = new Request(method, '/', ['A': ['B', 'C']], ['Content-Type': [contentType]],
       OptionalBody.body('A=B'.bytes))
     ProviderClient.urlEncodedFormPost(request) == urlEncodedFormPost
 
@@ -581,6 +587,32 @@ class ProviderClientSpec extends Specification {
 
     then:
     request.URI.query == 'A=B&A=C'
+  }
+
+  def 'handles repeated headers when handling the response'() {
+    given:
+    StatusLine statusLine = new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
+    Header[] headers = [
+      new BasicHeader('Server', 'Apigee-Edge'),
+      new BasicHeader('Set-Cookie', 'JSESSIONID=alphabeta120394049; HttpOnly'),
+      new BasicHeader('Set-Cookie', 'AWSELBID=baaadbeef6767676767690220; Path=/alpha')
+    ] as Header[]
+    HttpResponse response = Mock(HttpResponse) {
+      getStatusLine() >> statusLine
+      getAllHeaders() >> headers
+    }
+
+    when:
+    def result = client.handleResponse(response)
+
+    then:
+    result == [
+      statusCode: 200,
+      headers: [
+        Server: ['Apigee-Edge'],
+        'Set-Cookie': ['JSESSIONID=alphabeta120394049; HttpOnly', 'AWSELBID=baaadbeef6767676767690220; Path=/alpha']
+      ]
+    ]
   }
 
 }

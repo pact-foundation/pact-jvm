@@ -12,11 +12,11 @@ object Fixtures {
   val consumer = new Consumer("test_consumer")
 
   val request = new Request("POST", "/", PactReaderKt.queryStringToMap("q=p"),
-    Map("testreqheader" -> "testreqheadervalue").asInstanceOf[java.util.Map[String, String]],
+    Map("testreqheader" -> List("testreqheadervalue").asJava).asJava,
     OptionalBody.body("{\"test\": true}".getBytes))
 
   val response = new Response(200,
-    Map("testreqheader" -> "testreqheaderval", "Access-Control-Allow-Origin" -> "*").asInstanceOf[java.util.Map[String, String]],
+    Map("testreqheader" -> List("testreqheaderval").asJava, "Access-Control-Allow-Origin" -> List("*").asJava).asJava,
     OptionalBody.body("{\"responsetest\": true}".getBytes))
 
   val interaction = new RequestResponseInteraction("test interaction",

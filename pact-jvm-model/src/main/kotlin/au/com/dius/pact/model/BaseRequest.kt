@@ -32,7 +32,7 @@ abstract class BaseRequest : HttpPart() {
     val stream = ByteArrayOutputStream()
     multipart.writeTo(stream)
     body = OptionalBody.body(stream.toByteArray())
-    headers!!["Content-Type"] = multipart.contentType
+    headers!!["Content-Type"] = listOf(multipart.contentType)
 
     return this
   }

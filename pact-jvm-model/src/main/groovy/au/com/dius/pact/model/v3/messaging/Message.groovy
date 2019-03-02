@@ -96,7 +96,7 @@ class Message implements Interaction {
   }
 
   HttpPart asPactRequest() {
-    new Response(200, ['Content-Type': contentType], contents, matchingRules)
+    new Response(200, ['Content-Type': [contentType]], contents, matchingRules)
   }
 
   @Override

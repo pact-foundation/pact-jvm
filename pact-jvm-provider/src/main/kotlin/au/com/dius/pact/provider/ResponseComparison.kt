@@ -26,7 +26,7 @@ class ResponseComparison(
   val expected: Response,
   val actual: Map<String, Any>,
   val actualStatus: Int,
-  val actualHeaders: Map<String, String>,
+  val actualHeaders: Map<String, List<String>>,
   val actualBody: String?
 ) {
 
@@ -119,7 +119,7 @@ class ResponseComparison(
       response: Response,
       actualResponse: Map<String, Any>,
       actualStatus: Int,
-      actualHeaders: Map<String, String>,
+      actualHeaders: Map<String, List<String>>,
       actualBody: String?
     ): Map<String, Any?> {
       val result = mutableMapOf<String, Any?>()
@@ -141,7 +141,7 @@ class ResponseComparison(
       val result = MatchingConfig.lookupBodyMatcher(message.contentType)
       var mismatches = mutableListOf<BodyMismatch>()
       val expected = message.asPactRequest()
-      val actualMessage = Response(200, mapOf("Content-Type" to message.contentType), actual)
+      val actualMessage = Response(200, mapOf("Content-Type" to listOf(message.contentType)), actual)
       if (result != null) {
         mismatches = result.matchBody(expected, actualMessage, true).toMutableList()
       } else {

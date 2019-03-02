@@ -36,7 +36,7 @@ class RequestSpec extends Specification {
 
   def 'detects multipart file uploads based on the content type'() {
     expect:
-    new Request(headers: ['Content-Type': contentType]).isMultipartFileUpload() == multipartFileUpload
+    new Request(headers: ['Content-Type': [contentType]]).isMultipartFileUpload() == multipartFileUpload
 
     where:
 

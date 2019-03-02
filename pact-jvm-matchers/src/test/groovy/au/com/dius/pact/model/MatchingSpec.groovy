@@ -1,7 +1,6 @@
 package au.com.dius.pact.model
 
 import au.com.dius.pact.matchers.BodyMismatch
-import au.com.dius.pact.matchers.HeaderMismatch
 import scala.None$
 import scala.Some
 import scala.collection.JavaConversions
@@ -15,20 +14,20 @@ class MatchingSpec extends Specification {
 
   def setup() {
     request = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
-      [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test": true}'.bytes))
+      [testreqheader: ['testreqheadervalue']], OptionalBody.body('{"test": true}'.bytes))
   }
 
   def 'Body Matching - Handle both None'() {
     expect:
-    Matching.matchBody(new Request('', '', null, ['Content-Type': 'a']),
-      new Request('', '', null, ['Content-Type': 'a']), true).isEmpty()
+    Matching.matchBody(new Request('', '', null, ['Content-Type': ['a']]),
+      new Request('', '', null, ['Content-Type': ['a']]), true).isEmpty()
   }
 
   def 'Body Matching - Handle left None'() {
     expect:
     JavaConverters.asJavaCollection(
-      Matching.matchBody(new Request('', '', null, ['Content-Type': 'a'], request.body),
-      new Request('', '', null, ['Content-Type': 'a']), true)).contains(mismatch)
+      Matching.matchBody(new Request('', '', null, ['Content-Type': ['a']], request.body),
+      new Request('', '', null, ['Content-Type': ['a']]), true)).contains(mismatch)
 
     where:
     mismatch = new BodyMismatch(request.body.valueAsString(), null, 'Expected body \'{"test": true}\' but was missing')
@@ -36,14 +35,14 @@ class MatchingSpec extends Specification {
 
   def 'Body Matching - Handle right None'() {
     expect:
-    Matching.matchBody(new Request('', '', null, ['Content-Type': 'a']),
-      new Request('', '', null, ['Content-Type': 'a'], request.body), true).isEmpty()
+    Matching.matchBody(new Request('', '', null, ['Content-Type': ['a']]),
+      new Request('', '', null, ['Content-Type': ['a']], request.body), true).isEmpty()
   }
 
   def 'Body Matching - Handle different mime types'() {
     expect:
-    Matching.matchBody(new Request('', '', null, ['Content-Type': 'a'], request.body),
-      new Request('', '', null, ['Content-Type': 'b'], request.body), true) == mismatch
+    Matching.matchBody(new Request('', '', null, ['Content-Type': ['a']], request.body),
+      new Request('', '', null, ['Content-Type': ['b']], request.body), true) == mismatch
 
     where:
     mismatch = JavaConversions.asScalaBuffer([ BodyTypeMismatch.apply('a', 'b') ]).toSeq()
@@ -51,8 +50,8 @@ class MatchingSpec extends Specification {
 
   def 'Body Matching - match different mimetypes by regexp'() {
     expect:
-    Matching.matchBody(new Request('', '', null, ['Content-Type': 'application/x+json'], body),
-      new Request('', '', null, ['Content-Type': 'application/x+json'], body), true).isEmpty()
+    Matching.matchBody(new Request('', '', null, ['Content-Type': ['application/x+json']], body),
+      new Request('', '', null, ['Content-Type': ['application/x+json']], body), true).isEmpty()
 
     where:
     body = OptionalBody.body('{ "name":  "bob" }'.bytes)
@@ -119,45 +118,6 @@ class MatchingSpec extends Specification {
         Some.apply("Expected '1' but received '2' for query parameter 'a'"), 'a'),
       QueryMismatch.apply('a', '2', '1',
         Some.apply("Expected '2' but received '1' for query parameter 'a'"), 'a')
-    ]).toSeq()
-  }
-
-  def 'Header Matching - match empty'() {
-    expect:
-    Matching.matchHeaders(new Request('', '', null), new Request('', '', null)).empty
-  }
-
-  def 'Header Matching - match same headers'() {
-    expect:
-    Matching.matchHeaders(new Request('', '', null, [A: 'B']),
-      new Request('', '', null, [A: 'B'])).empty
-  }
-
-  def 'Header Matching - ignore additional headers'() {
-    expect:
-    Matching.matchHeaders(new Request('', '', null, [A: 'B']),
-      new Request('', '', null, [A: 'B', C: 'D'])).empty
-  }
-
-  def 'Header Matching - complain about missing headers'() {
-    expect:
-    Matching.matchHeaders(new Request('', '', null, [A: 'B', C: 'D']),
-      new Request('', '', null, [A: 'B'])) == mismatch
-
-    where:
-    mismatch = JavaConversions.asScalaBuffer([
-      new HeaderMismatch('C', 'D', '', "Expected a header 'C' but was missing")
-    ]).toSeq()
-  }
-
-  def 'Header Matching - complain about incorrect headers'() {
-    expect:
-    Matching.matchHeaders(new Request('', '', null, [A: 'B']),
-      new Request('', '', null, [A: 'C'])) == mismatch
-
-    where:
-    mismatch = JavaConversions.asScalaBuffer([
-      new HeaderMismatch('A', 'B', 'C', "Expected header 'A' to have value 'B' but was 'C'")
     ]).toSeq()
   }
 

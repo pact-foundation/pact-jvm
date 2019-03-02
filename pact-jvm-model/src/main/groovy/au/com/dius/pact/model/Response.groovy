@@ -17,7 +17,7 @@ class Response extends BaseResponse {
   public static final int DEFAULT_STATUS = 200
 
   Integer status = DEFAULT_STATUS
-  Map<String, String> headers = [:]
+  Map<String, List<String>> headers = [:]
   OptionalBody body = OptionalBody.missing()
   MatchingRules matchingRules = new MatchingRulesImpl()
   Generators generators = new Generators()
@@ -25,7 +25,13 @@ class Response extends BaseResponse {
   static Response fromMap(def map) {
     new Response().with {
       status = (map.status ?: DEFAULT_STATUS) as Integer
-      headers = map.headers ?: [:]
+      headers = map.headers ? map.headers.collectEntries { key, value ->
+        if (value instanceof List) {
+          [key, value]
+        } else {
+          [key, [value]]
+        }
+      } : [:]
       body = map.containsKey('body') ? OptionalBody.body(map.body?.bytes) : OptionalBody.missing()
       matchingRules = MatchingRulesImpl.fromMap(map.matchingRules)
       generators = Generators.fromMap(map.generators)
@@ -55,7 +61,7 @@ class Response extends BaseResponse {
       r.status = g.generate(context) as Integer
     }
     generators.applyGenerator(Category.HEADER, mode) { String key, Generator g ->
-      r.headers[key] = g.generate(context).toString()
+      r.headers[key] = [ g.generate(context).toString() ]
     }
     r.body = generators.applyBodyGenerators(r.body, new ContentType(mimeType()), context, mode)
     r

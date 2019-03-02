@@ -1,14 +1,13 @@
 package au.com.dius.pact.model
 
+import java.util.ArrayList
+
 import au.com.dius.pact.matchers._
 import au.com.dius.pact.model.RequestPartMismatch._
 import au.com.dius.pact.model.ResponsePartMismatch._
-import au.com.dius.pact.model.matchingrules.MatchingRules
 import com.typesafe.scalalogging.StrictLogging
 
 import scala.collection.JavaConversions
-import scala.collection.immutable.TreeMap
-import java.util.ArrayList
 import scala.collection.JavaConverters._
 
 trait SharedMismatch {
@@ -63,30 +62,6 @@ object QueryMismatchFactory extends MismatchFactory[QueryMismatch] {
 
 object Matching extends StrictLogging {
   
-  def matchHeaders(expected: Option[Headers], actual: Option[Headers], matchers: MatchingRules): Seq[HeaderMismatch] = {
-
-    def compareHeaders(e: Map[String, String], a: Map[String, String]): Seq[HeaderMismatch] = {
-      e.foldLeft(Seq[HeaderMismatch]()) {
-        (seq, values) => a.get(values._1) match {
-          case Some(value) => Option.apply(HeaderMatcher.compareHeader(values._1, values._2, value, matchers)) match {
-            case Some(mismatch) => seq :+ mismatch
-            case None => seq
-          }
-          case None => seq :+ new HeaderMismatch(values._1, values._2, "", s"Expected a header '${values._1}' but was missing")
-        }
-      }
-    }
-    
-    def sortedOrEmpty(h: Option[Headers]): Map[String,String] = {
-      def sortCaseInsensitive[T](in: Map[String, T]): TreeMap[String, T] = {
-        new TreeMap[String, T]()(Ordering.by(_.toLowerCase)) ++ in
-      }
-      h.fold[Map[String,String]](Map())(sortCaseInsensitive)
-    }
-      
-    compareHeaders(sortedOrEmpty(expected), sortedOrEmpty(actual))
-  }
-
   def javaMapToScalaMap(map: java.util.Map[String, String]) : Option[Map[String, String]] = {
     if (map == null) {
       None
@@ -103,16 +78,6 @@ object Matching extends StrictLogging {
         case jlist: java.util.List[String] => JavaConversions.collectionAsScalaIterable(jlist).toList
       }.toMap)
     }
-  }
-
-  def matchRequestHeaders(expected: Request, actual: Request) = {
-    matchHeaders(javaMapToScalaMap(expected.headersWithoutCookie), javaMapToScalaMap(actual.headersWithoutCookie),
-      expected.getMatchingRules)
-  }
-
-  def matchHeaders(expected: HttpPart, actual: HttpPart) : Seq[HeaderMismatch] = {
-    matchHeaders(javaMapToScalaMap(expected.getHeaders), javaMapToScalaMap(actual.getHeaders),
-      expected.getMatchingRules)
   }
 
   def matchCookie(expected: Option[Cookies], actual: Option[Cookies]): Option[CookieMismatch] = {

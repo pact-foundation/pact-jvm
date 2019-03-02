@@ -13,7 +13,7 @@ class RequestResponsePactSpec extends Specification {
     consumer = new Consumer()
     interaction = new RequestResponseInteraction(request: new Request(method: 'GET'),
       response: new Response(body: OptionalBody.body('{"value": 1234.0}'.bytes),
-        headers: ['Content-Type': 'application/json']))
+        headers: ['Content-Type': ['application/json']]))
   }
 
   def 'when writing V2 spec, query parameters must be encoded appropriately'() {
@@ -35,8 +35,8 @@ class RequestResponsePactSpec extends Specification {
     def pact = new RequestResponsePact(provider, consumer, [
       new RequestResponseInteraction(request: new Request(method: 'PUT',
         body: OptionalBody.body('<?xml version="1.0"><root/>'.bytes),
-        headers: ['Content-Type': 'application/xml']),
-        response: new Response(body: OptionalBody.body('Ok, no prob'.bytes), headers: ['Content-Type': 'text/plain']))
+        headers: ['Content-Type': ['application/xml']]),
+        response: new Response(body: OptionalBody.body('Ok, no prob'.bytes), headers: ['Content-Type': ['text/plain']]))
     ])
 
     when:
@@ -52,7 +52,7 @@ class RequestResponsePactSpec extends Specification {
     def pact = new RequestResponsePact(provider, consumer, [
       new RequestResponseInteraction(request: new Request(method: 'GET'),
         response: new Response(body: OptionalBody.body('{"value": 1234.0}'.bytes),
-          headers: ['Content-Type': 'application/json']))
+          headers: ['Content-Type': ['application/json']]))
     ])
 
     when:
@@ -107,7 +107,7 @@ class RequestResponsePactSpec extends Specification {
     where:
     interaction2 = new RequestResponseInteraction(request: new Request(method: 'POST'),
       response: new Response(body: OptionalBody.body('{"value": 1234.0}'.bytes),
-        headers: ['Content-Type': 'application/json']))
+        headers: ['Content-Type': ['application/json']]))
     pact = new RequestResponsePact(provider, consumer, [ interaction ])
     pact2 = new RequestResponsePact(provider, consumer, [ interaction2 ])
   }
@@ -119,7 +119,7 @@ class RequestResponsePactSpec extends Specification {
     where:
     interaction2 = new RequestResponseInteraction(request: new Request(method: 'POST'),
       response: new Response(body: OptionalBody.body('{"value": 1234.0}'.bytes),
-        headers: ['Content-Type': 'application/json']))
+        headers: ['Content-Type': ['application/json']]))
     pact = new RequestResponsePact(provider, consumer, [ interaction ])
     pact2 = new RequestResponsePact(provider, consumer, [ interaction, interaction2 ])
   }

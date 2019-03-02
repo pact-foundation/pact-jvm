@@ -5,8 +5,6 @@ import au.com.dius.pact.consumer.{ConsumerTestVerification, VerificationResult}
 import au.com.dius.pact.model.matchingrules.{MatchingRules, MatchingRulesImpl}
 import org.json.JSONObject
 
-import scala.collection.JavaConverters._
-
 /**
   * @deprecated Moved to Kotlin implementation
   */
@@ -63,6 +61,7 @@ object PactFragmentBuilder {
   case class DescribingRequest(consumer: Consumer, provider: Provider, state: List[ProviderState], description: String,
                                builder: CanBuildPactFragment.Builder = CanBuildPactFragment.firstBuild) {
     import scala.collection.JavaConversions._
+    import scala.collection.JavaConverters._
 
     /**
      * supports java DSL
@@ -78,10 +77,10 @@ object PactFragmentBuilder {
     def matching(path: String,
                  method: String = "GET",
                  query: String = "",
-                 headers: Map[String, String] = Map(),
+                 headers: Map[String, List[String]] = Map(),
                  body: String = "",
                  matchers: MatchingRules = new MatchingRulesImpl()): DescribingResponse = {
-      DescribingResponse(new Request(method, path, PactReaderKt.queryStringToMap(query), headers, OptionalBody.body(body.getBytes),
+      DescribingResponse(new Request(method, path, PactReaderKt.queryStringToMap(query), headers.mapValues(f => f.asJava).asJava, OptionalBody.body(body.getBytes),
         matchers))
     }
 
@@ -98,7 +97,7 @@ object PactFragmentBuilder {
 
       @Deprecated
       def willRespondWith(status: Int = 200,
-                          headers: Map[String, String] = Map(),
+                          headers: Map[String, List[String]] = Map(),
                           maybeBody: Option[String] = None,
                           matchers: MatchingRules = new MatchingRulesImpl()): PactWithAtLeastOneRequest = {
         val optionalBody = maybeBody match {
@@ -114,12 +113,12 @@ object PactFragmentBuilder {
             description,
             state.asJava,
             request,
-            new Response(status, headers, optionalBody, matchers))))
+            new Response(status, headers.mapValues(f => f.asJava).asJava, optionalBody, matchers))))
       }
 
       @Deprecated
       def willRespondWith(status: Int,
-                          headers: Map[String, String],
+                          headers: Map[String, List[String]],
                           bodyAndMatchers: DslPart): PactWithAtLeastOneRequest = {
         val rules = new MatchingRulesImpl()
         rules.addCategory(bodyAndMatchers.getMatchers)
@@ -131,7 +130,7 @@ object PactFragmentBuilder {
             description,
             state.asJava,
             request,
-            new Response(status, headers, OptionalBody.body(bodyAndMatchers.toString.getBytes), rules))))
+            new Response(status, headers.mapValues(f => f.asJava).asJava, OptionalBody.body(bodyAndMatchers.toString.getBytes), rules))))
       }
     }
   }

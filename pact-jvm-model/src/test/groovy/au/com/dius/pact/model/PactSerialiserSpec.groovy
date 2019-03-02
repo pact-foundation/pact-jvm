@@ -33,19 +33,19 @@ class PactSerialiserSpec extends Specification {
 
   def setup() {
     request = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
-      [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'.bytes))
-    response = new Response(200, [testreqheader: 'testreqheaderval'],
+      [testreqheader: ['testreqheadervalue']], OptionalBody.body('{"test":true}'.bytes))
+    response = new Response(200, [testreqheader: ['testreqheaderval']],
       OptionalBody.body('{"responsetest":true}'.bytes))
     provider = new Provider('test_provider')
     consumer = new Consumer('test_consumer')
     def requestMatchers = new MatchingRulesImpl()
     requestMatchers.addCategory('body').addRule('$.test', TypeMatcher.INSTANCE)
     requestWithMatchers = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
-      [testreqheader: 'testreqheadervalue'], OptionalBody.body('{"test":true}'.bytes), requestMatchers
+      [testreqheader: ['testreqheadervalue']], OptionalBody.body('{"test":true}'.bytes), requestMatchers
     )
     def responseMatchers = new MatchingRulesImpl()
     responseMatchers.addCategory('body').addRule('$.responsetest', TypeMatcher.INSTANCE)
-    responseWithMatchers = new Response(200, [testreqheader: 'testreqheaderval'],
+    responseWithMatchers = new Response(200, [testreqheader: ['testreqheaderval']],
       OptionalBody.body('{"responsetest":true}'.bytes), responseMatchers
     )
     interactionsWithMatcher = new RequestResponseInteraction('test interaction with matchers',
@@ -88,9 +88,9 @@ class PactSerialiserSpec extends Specification {
     def testPactJson = loadTestFile('test_pact_v3.json').text.trim()
     def testPact = new JsonSlurper().parseText(testPactJson)
     def expectedRequest = new Request('GET', '/',
-      ['q': ['p', 'p2'], 'r': ['s']], [testreqheader: 'testreqheadervalue'],
+      ['q': ['p', 'p2'], 'r': ['s']], [testreqheader: ['testreqheadervalue']],
       OptionalBody.body('{"test": true}'.bytes))
-    def expectedResponse = new Response(200, [testreqheader: 'testreqheaderval'],
+    def expectedResponse = new Response(200, [testreqheader: ['testreqheaderval']],
       OptionalBody.body('{"responsetest" : true}'.bytes))
     def expectedPact = new RequestResponsePact(new Provider('test_provider'),
       new Consumer('test_consumer'), [
