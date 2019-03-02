@@ -29,7 +29,7 @@ class Response extends BaseResponse {
         if (value instanceof List) {
           [key, value]
         } else {
-          [key, [value]]
+          [key, value.split(/,/)*.trim() ]
         }
       } : [:]
       body = map.containsKey('body') ? OptionalBody.body(map.body?.bytes) : OptionalBody.missing()
