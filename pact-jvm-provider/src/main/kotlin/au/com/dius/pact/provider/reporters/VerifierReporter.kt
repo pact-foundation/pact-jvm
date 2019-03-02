@@ -58,7 +58,7 @@ interface VerifierReporter {
   fun statusComparisonFailed(status: Int, comparison: Any)
   fun includesHeaders()
   fun headerComparisonOk(key: String, value: List<String>)
-  fun headerComparisonFailed(key: String, value: String, comparison: Any)
+  fun headerComparisonFailed(key: String, value: List<String>, comparison: Any)
   fun bodyComparisonOk()
   fun bodyComparisonFailed(comparison: Any)
   fun errorHasNoAnnotatedMethodsFoundForInteraction(interaction: Interaction)

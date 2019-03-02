@@ -157,7 +157,7 @@ class JsonReporter implements VerifierReporter {
   void headerComparisonOk(String key, List<String> value) { }
 
   @Override
-  void headerComparisonFailed(String key, String value, def comparison) {
+  void headerComparisonFailed(String key, List<String> value, def comparison) {
     def verification = jsonData.execution.last().interactions.last().verification
     verification.result = FAILED
     verification.header = verification.header ?: [:]

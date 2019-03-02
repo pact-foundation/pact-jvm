@@ -152,7 +152,7 @@ class MarkdownReporter implements VerifierReporter {
   }
 
   @Override
-  void headerComparisonFailed(String key, String value, def comparison) {
+  void headerComparisonFailed(String key, List<String> value, def comparison) {
     writer.println "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"**$key**\" with value \"**$value**\" " +
       '(<span style=\'color:red\'>FAILED</span>)  '
     writer.println()

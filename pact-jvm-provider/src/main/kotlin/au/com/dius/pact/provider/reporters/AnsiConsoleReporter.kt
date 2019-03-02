@@ -138,10 +138,10 @@ class AnsiConsoleReporter(
       .a(value.joinToString(", ")).boldOff().a("\" (").fg(Ansi.Color.GREEN).a("OK").reset().a(")"))
   }
 
-  override fun headerComparisonFailed(key: String, value: String, comparison: Any) {
+  override fun headerComparisonFailed(key: String, value: List<String>, comparison: Any) {
     AnsiConsole.out().println(Ansi.ansi().a("        \"").bold().a(key).boldOff().a("\" with value \"")
       .bold()
-      .a(value).boldOff().a("\" (").fg(Ansi.Color.RED).a("FAILED").reset().a(")"))
+      .a(value.joinToString(", ")).boldOff().a("\" (").fg(Ansi.Color.RED).a("FAILED").reset().a(")"))
   }
 
   override fun bodyComparisonOk() {
