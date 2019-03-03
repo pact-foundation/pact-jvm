@@ -24,11 +24,18 @@ import kotlin.reflect.full.declaredMemberFunctions
 
 private val logger = KotlinLogging.logger {}
 
+const val DEFAULT_GENERATOR_PACKAGE = "au.com.dius.pact.model.generators"
+
+/**
+ * Looks up the generator class in the configured generator packages. By default it will look for generators in
+ * au.com.dius.pact.model.generators package, but this can be extended by adding a comma separated list to the
+ * pact.generators.packages system property. The generator class name needs to be <Type>Generator.
+ */
 fun lookupGenerator(generatorMap: Map<String, Any>): Generator? {
   var generator: Generator? = null
 
   try {
-    val generatorClass = Class.forName("au.com.dius.pact.model.generators.${generatorMap["type"]}Generator").kotlin
+    val generatorClass = findGeneratorClass(generatorMap["type"].toString()).kotlin
     val fromMap = when {
       generatorClass.companionObject != null ->
         generatorClass.companionObjectInstance to generatorClass.companionObject?.declaredMemberFunctions?.find { it.name == "fromMap" }
@@ -46,6 +53,28 @@ fun lookupGenerator(generatorMap: Map<String, Any>): Generator? {
   }
 
   return generator
+}
+
+fun findGeneratorClass(generatorType: String): Class<*> {
+  val generatorPackages = System.getProperty("pact.generators.packages")
+  return when {
+    generatorPackages.isNullOrBlank() -> Class.forName("$DEFAULT_GENERATOR_PACKAGE.${generatorType}Generator")
+    else -> {
+      val packages = generatorPackages.split(",").map { it.trim() } + DEFAULT_GENERATOR_PACKAGE
+      var generatorClass: Class<*>? = null
+
+      packages.find {
+        try {
+          generatorClass = Class.forName("$it.${generatorType}Generator")
+          true
+        } catch (_: ClassNotFoundException) {
+          false
+        }
+      }
+
+      generatorClass ?: throw ClassNotFoundException("No generator found for type '$generatorType'")
+    }
+  }
 }
 
 interface Generator {
