@@ -8,10 +8,13 @@ import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.ProtocolVersion
 import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.impl.client.SystemDefaultCredentialsProvider
 import org.apache.http.message.BasicHeader
 import org.apache.http.message.BasicStatusLine
 import spock.lang.Shared
@@ -58,6 +61,20 @@ class HalClientSpec extends Specification {
 
     then:
     client.httpClient.credentialsProvider instanceof BasicCredentialsProvider
+  }
+
+  def 'For bearer token authentication scheme adds an authorization header to all requests'() {
+    given:
+    client.options = [authentication: ['bearer', '1234']]
+
+    when:
+    client.setupHttpClient()
+    def request = client.initialiseRequest(new HttpGet('/'))
+
+    then:
+    client.httpClient.credentialsProvider instanceof SystemDefaultCredentialsProvider
+    client.defaultHeaders == [Authorization: 'Bearer 1234']
+    request.getFirstHeader('Authorization').value == 'Bearer 1234'
   }
 
   def 'throws an exception if the response is 404 Not Found'() {
@@ -438,6 +455,20 @@ class HalClientSpec extends Specification {
     '["a string value", 2]'                                 | ['a string value', 2]
     '{}'                                                    | [:]
     '{"a": "A", "b": 1, "c": [100], "d": {"href": "blah"}}' | [a: 'A', b: 1, c: [100], d: [href: 'blah']]
+  }
+
+  def 'initialise request adds all the default headers to the request'() {
+    given:
+    client.defaultHeaders = [
+      A: 'a',
+      B: 'b'
+    ]
+
+    when:
+    def request = client.initialiseRequest(new HttpPost('/'))
+
+    then:
+    request.allHeaders.collectEntries { [it.name, it.value] } == [A: 'a', B: 'b']
   }
 
 }
