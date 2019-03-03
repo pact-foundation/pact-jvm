@@ -403,7 +403,7 @@ public class PactDslJsonBody extends DslPart {
      */
     public PactDslJsonBody timestamp(String name) {
       String pattern = DateFormatUtils.ISO_DATETIME_FORMAT.getPattern();
-      generators.addGenerator(Category.BODY, matcherKey(name), new DateTimeGenerator(pattern));
+      generators.addGenerator(Category.BODY, matcherKey(name), new DateTimeGenerator(pattern, null));
       body.put(name, DateFormatUtils.ISO_DATETIME_FORMAT.format(new Date(DATE_2000)));
       matchers.addRule(matcherKey(name), matchTimestamp(pattern));
       return this;
@@ -415,7 +415,7 @@ public class PactDslJsonBody extends DslPart {
      * @param format timestamp format
      */
     public PactDslJsonBody timestamp(String name, String format) {
-        generators.addGenerator(Category.BODY, matcherKey(name), new DateTimeGenerator(format));
+        generators.addGenerator(Category.BODY, matcherKey(name), new DateTimeGenerator(format, null));
         FastDateFormat instance = FastDateFormat.getInstance(format);
         body.put(name, instance.format(new Date(DATE_2000)));
         matchers.addRule(matcherKey(name), matchTimestamp(format));
@@ -483,7 +483,7 @@ public class PactDslJsonBody extends DslPart {
      */
     public PactDslJsonBody date(String name) {
       String pattern = DateFormatUtils.ISO_DATE_FORMAT.getPattern();
-      generators.addGenerator(Category.BODY, matcherKey(name), new DateGenerator(pattern));
+      generators.addGenerator(Category.BODY, matcherKey(name), new DateGenerator(pattern, null));
       body.put(name, DateFormatUtils.ISO_DATE_FORMAT.format(new Date(DATE_2000)));
       matchers.addRule(matcherKey(name), matchDate(pattern));
       return this;
@@ -495,7 +495,7 @@ public class PactDslJsonBody extends DslPart {
      * @param format date format to match
      */
     public PactDslJsonBody date(String name, String format) {
-      generators.addGenerator(Category.BODY, matcherKey(name), new DateGenerator(format));
+      generators.addGenerator(Category.BODY, matcherKey(name), new DateGenerator(format, null));
       FastDateFormat instance = FastDateFormat.getInstance(format);
       body.put(name, instance.format(new Date(DATE_2000)));
       matchers.addRule(matcherKey(name), matchDate(format));
@@ -539,7 +539,7 @@ public class PactDslJsonBody extends DslPart {
      */
     public PactDslJsonBody time(String name) {
       String pattern = DateFormatUtils.ISO_TIME_FORMAT.getPattern();
-      generators.addGenerator(Category.BODY, matcherKey(name), new TimeGenerator(pattern));
+      generators.addGenerator(Category.BODY, matcherKey(name), new TimeGenerator(pattern, null));
       body.put(name, DateFormatUtils.ISO_TIME_FORMAT.format(new Date(DATE_2000)));
       matchers.addRule(matcherKey(name), matchTime(pattern));
       return this;
@@ -551,7 +551,7 @@ public class PactDslJsonBody extends DslPart {
      * @param format time format to match
      */
     public PactDslJsonBody time(String name, String format) {
-      generators.addGenerator(Category.BODY, matcherKey(name), new TimeGenerator(format));
+      generators.addGenerator(Category.BODY, matcherKey(name), new TimeGenerator(format, null));
       FastDateFormat instance = FastDateFormat.getInstance(format);
       body.put(name, instance.format(new Date(DATE_2000)));
       matchers.addRule(matcherKey(name), matchTime(format));

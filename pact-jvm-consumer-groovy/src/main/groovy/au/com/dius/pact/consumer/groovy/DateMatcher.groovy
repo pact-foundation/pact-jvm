@@ -23,7 +23,7 @@ class DateMatcher extends Matcher {
   }
 
   Generator getGenerator() {
-    super.@value == null ? new DateGenerator(getPattern()) : null
+    super.@value == null ? new DateGenerator(getPattern(), null) : null
   }
 
   def getValue() {

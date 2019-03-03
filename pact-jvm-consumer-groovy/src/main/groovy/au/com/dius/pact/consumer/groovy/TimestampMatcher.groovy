@@ -26,7 +26,7 @@ class TimestampMatcher extends Matcher {
   }
 
   Generator getGenerator() {
-    super.@value == null ? new DateTimeGenerator(getPattern()) : null
+    super.@value == null ? new DateTimeGenerator(getPattern(), null) : null
   }
 
 }
