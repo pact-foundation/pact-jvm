@@ -225,7 +225,7 @@ object UuidGenerator : Generator {
  * Generates a date value for the provided format. If no format is provided, ISO date format is used. If an expression
  * is given, it will be evaluated to generate the date, otherwise 'today' will be used
  */
-data class DateGenerator(val format: String? = null, val expression: String? = null) : Generator {
+data class DateGenerator @JvmOverloads constructor(val format: String? = null, val expression: String? = null) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     val map = mutableMapOf("type" to "Date")
     if (!format.isNullOrEmpty()) {
@@ -256,7 +256,7 @@ data class DateGenerator(val format: String? = null, val expression: String? = n
  * Generates a time value for the provided format. If no format is provided, ISO time format is used. If an expression
  * is given, it will be evaluated to generate the time, otherwise 'now' will be used
  */
-data class TimeGenerator(val format: String? = null, val expression: String? = null) : Generator {
+data class TimeGenerator @JvmOverloads constructor(val format: String? = null, val expression: String? = null) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     val map = mutableMapOf("type" to "Time")
     if (!format.isNullOrEmpty()) {
@@ -287,7 +287,7 @@ data class TimeGenerator(val format: String? = null, val expression: String? = n
  * Generates a datetime value for the provided format. If no format is provided, ISO format is used. If an expression
  * is given, it will be evaluated to generate the datetime, otherwise 'now' will be used
  */
-data class DateTimeGenerator(val format: String? = null, val expression: String? = null) : Generator {
+data class DateTimeGenerator @JvmOverloads constructor(val format: String? = null, val expression: String? = null) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     val map = mutableMapOf("type" to "DateTime")
     if (!format.isNullOrEmpty()) {
