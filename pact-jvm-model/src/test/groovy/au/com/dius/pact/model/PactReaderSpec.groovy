@@ -1,6 +1,7 @@
 package au.com.dius.pact.model
 
 import au.com.dius.pact.model.v3.messaging.MessagePact
+import au.com.dius.pact.pactbroker.CustomServiceUnavailableRetryStrategy
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectInputStream
@@ -163,6 +164,17 @@ class PactReaderSpec extends Specification {
     client.credentialsProvider instanceof BasicCredentialsProvider
     creds.principal.username == 'user'
     creds.password == 'pwd'
+  }
+
+  def 'custom retry strategy is added to execution chain of client'() {
+    given:
+    def pactUrl = new UrlSource('http://some.url/')
+
+    when:
+    def client = PactReaderKt.newHttpClient(pactUrl.url, [:])
+
+    then:
+    client.execChain.requestExecutor.retryStrategy instanceof CustomServiceUnavailableRetryStrategy
   }
 
   def 'correctly loads V2 pact query strings'() {

@@ -170,7 +170,8 @@ abstract class HalClientBase @JvmOverloads constructor(
 
   open fun setupHttpClient(): CloseableHttpClient {
     if (httpClient == null) {
-      val builder = HttpClients.custom().useSystemProperties()
+      val retryStrategy = CustomServiceUnavailableRetryStrategy(5, 3000)
+      val builder = HttpClients.custom().useSystemProperties().setServiceUnavailableRetryStrategy(retryStrategy)
       if (options["authentication"] is List<*>) {
         val authentication = options["authentication"] as List<*>
         val scheme = authentication.first().toString().toLowerCase()
