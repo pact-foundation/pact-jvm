@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.broker
 
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Ok
+import au.com.dius.pact.pactbroker.CustomServiceUnavailableRetryStrategy
 import au.com.dius.pact.pactbroker.InvalidHalResponse
 import au.com.dius.pact.pactbroker.NotFoundHalResponse
 import org.apache.http.HttpEntity
@@ -75,6 +76,14 @@ class HalClientSpec extends Specification {
     client.httpClient.credentialsProvider instanceof SystemDefaultCredentialsProvider
     client.defaultHeaders == [Authorization: 'Bearer 1234']
     request.getFirstHeader('Authorization').value == 'Bearer 1234'
+  }
+
+  def 'custom retry strategy is added to execution chain of client'() {
+    when:
+    client.setupHttpClient()
+
+    then:
+    client.httpClient.execChain.requestExecutor.retryStrategy instanceof CustomServiceUnavailableRetryStrategy
   }
 
   def 'throws an exception if the response is 404 Not Found'() {
