@@ -74,6 +74,22 @@ class PactPublishMojoSpec extends Specification {
     }
   }
 
+  def 'if the broker token is set, it passes in the creds to the broker client'() {
+    given:
+    mojo.pactBrokerToken = 'token1234'
+    mojo.brokerClient = null
+    mojo.pactBrokerUrl = '/broker'
+
+    when:
+    mojo.execute()
+
+    then:
+    new PactBrokerClient('/broker', _) >> { args ->
+      assert args[1] == [authentication: ['bearer', 'token1234']]
+      brokerClient
+    }
+  }
+
     def 'trimSnapshot=true removes the "-SNAPSHOT"'() {
         given:
         mojo.projectVersion = '1.0.0-SNAPSHOT'

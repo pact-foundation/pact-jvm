@@ -73,7 +73,7 @@ class PactPublishTaskSpec extends Specification {
     thrown(GradleScriptException)
   }
 
-  def 'passes in any authentication creds to the broker client'() {
+  def 'passes in basic authentication creds to the broker client'() {
     given:
     project.pact {
       publish {
@@ -88,6 +88,24 @@ class PactPublishTaskSpec extends Specification {
 
     then:
     1 * new PactBrokerClient(_, ['authentication': ['basic', 'my user name', null]]) >> brokerClient
+    1 * brokerClient.uploadPactFile(_, _, _) >> 'HTTP/1.1 200 OK'
+  }
+
+  def 'passes in bearer token to the broker client'() {
+    given:
+    project.pact {
+      publish {
+        pactBrokerToken = 'token1234'
+        pactBrokerUrl = 'pactBrokerUrl'
+      }
+    }
+    project.evaluate()
+
+    when:
+    task.publishPacts()
+
+    then:
+    1 * new PactBrokerClient(_, ['authentication': ['bearer', 'token1234']]) >> brokerClient
     1 * brokerClient.uploadPactFile(_, _, _) >> 'HTTP/1.1 200 OK'
   }
 
