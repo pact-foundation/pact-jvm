@@ -23,9 +23,6 @@ repositories {
   jcenter()
 }
 
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
-
 import org.apache.commons.text.StringEscapeUtils
 
 String buildName(Project project) {
@@ -41,6 +38,9 @@ String buildName(Project project) {
 }
 
 allprojects {
+  apply plugin: 'maven-publish'
+  apply plugin: 'signing'
+
   group = 'au.com.dius'
   version = '4.0.0-beta.0'
 
@@ -77,8 +77,6 @@ subprojects {
   apply plugin: 'java'
     apply plugin: 'scala'
     apply plugin: 'groovy'
-    apply plugin: 'maven'
-    apply plugin: 'signing'
     apply plugin: 'codenarc'
     apply plugin: 'jacoco'
     apply plugin: 'org.jetbrains.kotlin.jvm'
@@ -157,7 +155,7 @@ subprojects {
     }
 
     task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc, dokkaJavadoc]) {
-        classifier = 'javadoc'
+      archiveClassifier = 'javadoc'
       if (project.hasProperty('scalaVersion')) {
         from javadoc.destinationDir, scaladoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
         dependsOn << scaladoc
@@ -167,70 +165,61 @@ subprojects {
     }
 
     task sourceJar(type: Jar) {
-        classifier = 'sources'
-        from sourceSets.main.allSource
+      archiveClassifier = 'sources'
+      from sourceSets.main.allSource
     }
 
-    artifacts {
-        archives javadocJar
-        archives sourceJar
-    }
-
-    def pomCustomisation = {
-        name project.name
-        description StringEscapeUtils.escapeXml11(new File(projectDir, 'README.md').text)
-        url 'https://github.com/DiUS/pact-jvm'
-        licenses {
+  publishing {
+    publications {
+      mavenPublication(MavenPublication) {
+        from components.java
+        artifact sourceJar
+        artifact javadocJar
+        pom {
+          name = project.name
+          description = StringEscapeUtils.escapeXml11(new File(projectDir, 'README.md').text)
+          url = 'https://github.com/DiUS/pact-jvm'
+          licenses {
             license {
-                name 'Apache 2'
-	            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-	            distribution 'repo'
+              name = 'Apache 2'
+              url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+              distribution = 'repo'
             }
-        }
-        scm {
-            url 'https://github.com/DiUS/pact-jvm'
-            connection 'https://github.com/DiUS/pact-jvm.git'
-        }
+          }
+          scm {
+            url = 'https://github.com/DiUS/pact-jvm'
+            connection = 'https://github.com/DiUS/pact-jvm.git'
+          }
 
-	    developers {
+          developers {
             developer {
-                id 'thetrav'
-                name 'Travis Dixon'
-                email 'the.trav@gmail.com'
+              id = 'thetrav'
+              name = 'Travis Dixon'
+              email = 'the.trav@gmail.com'
             }
             developer {
-                id 'rholshausen'
-                name 'Ronald Holshausen'
-                email 'rholshausen@dius.com.au'
+              id = 'rholshausen'
+              name = 'Ronald Holshausen'
+              email = 'rholshausen@dius.com.au'
             }
+          }
         }
+      }
     }
-
-    uploadArchives {
-        repositories {
-            mavenDeployer {
-
-                beforeDeployment { def deployment -> signing.signPom(deployment) }
-
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                    if (project.hasProperty('sonatypeUsername')) {
-                        authentication(userName: sonatypeUsername, password: sonatypePassword)
-                    }
-                }
-
-            }
+    repositories {
+      maven {
+        url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+        credentials {
+          username sonatypeUsername
+          password sonatypePassword
         }
+      }
     }
+  }
 
-    ext.installer = install.repositories.mavenInstaller
-    ext.deployer = uploadArchives.repositories.mavenDeployer
-    installer.pom.project(pomCustomisation)
-    deployer.pom.project(pomCustomisation)
-
-    signing {
-        required { gradle.taskGraph.hasTask("uploadArchives") || gradle.taskGraph.hasTask("publishPlugins") }
-        sign configurations.archives
-    }
+  signing {
+    sign publishing.publications.mavenPublication
+  }
 
     codenarcMain {
         configFile = rootProject.file('config/codenarc/ruleset.groovy')
@@ -269,104 +258,3 @@ if (System.env.TRAVIS == 'true') {
     }
 }
 
-if (System.env.UBERJAR == 'true') {
-  dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-    compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
-    compile "org.codehaus.groovy:groovy:${project.groovyVersion}:indy"
-    compile('io.github.microutils:kotlin-logging:1.4.4') {
-      exclude group: 'org.jetbrains.kotlin'
-    }
-    compile "org.scala-lang:scala-library:${project.scalaFullVersion}"
-    compile("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {
-      exclude group: 'org.scala-lang'
-    }
-
-    compile project(':pact-jvm-consumer-groovy_2.12')
-    compile project(':pact-jvm-consumer-java8_2.12')
-    compile project(':pact-jvm-consumer-junit5_2.12')
-    compile project(':pact-jvm-consumer-junit_2.12')
-    compile project(':pact-jvm-consumer-specs2_2.12')
-    compile project(':pact-jvm-consumer_2.12')
-    compile project(':pact-jvm-matchers_2.12')
-    compile project(':pact-jvm-model')
-    compile project(':pact-jvm-pact-broker')
-    compile project(':pact-jvm-provider-junit5_2.12')
-    compile project(':pact-jvm-provider-junit_2.12')
-    compile project(':pact-jvm-provider-scalasupport_2.12')
-    compile project(':pact-jvm-provider-scalatest_2.12')
-    compile project(':pact-jvm-provider-specs2_2.12')
-    compile project(':pact-jvm-provider-spring_2.12')
-    compile project(':pact-jvm-provider_2.12')
-  }
-
-  publishing {
-    publications {
-      shadow(MavenPublication) { publication ->
-        project.shadow.component(publication)
-
-        pom.withXml {
-          asNode().children().last() + {
-            resolveStrategy = Closure.DELEGATE_FIRST
-
-            name project.name
-            description 'JVM implementation of the consumer driven contract library pact.'
-            url 'https://github.com/DiUS/pact-jvm'
-            licenses {
-              license {
-                name 'Apache 2'
-                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                distribution 'repo'
-              }
-            }
-            scm {
-              url 'https://github.com/DiUS/pact-jvm'
-              connection 'https://github.com/DiUS/pact-jvm.git'
-            }
-
-            developers {
-              developer {
-                id 'thetrav'
-                name 'Travis Dixon'
-                email 'the.trav@gmail.com'
-              }
-              developer {
-                id 'rholshausen'
-                name 'Ronald Holshausen'
-                email 'rholshausen@dius.com.au'
-              }
-            }
-          }
-        }
-      }
-    }
-    repositories {
-      maven {
-        url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-        credentials {
-          username sonatypeUsername
-          password sonatypePassword
-        }
-      }
-    }
-  }
-
-  signing {
-    sign publishing.publications.shadow
-  }
-
-  shadowJar {
-    mergeServiceFiles()
-    mergeGroovyExtensionModules()
-    zip64 = true
-    manifest {
-      attributes provider: 'gradle',
-        'Implementation-Title': project.name, 'Implementation-Version': version,
-        'Implementation-Vendor': project.group, 'Implementation-Vendor-Id': project.group,
-        'Specification-Vendor': project.group,
-        'Specification-Title': project.name,
-        'Specification-Version': version
-    }
-  }
-}
