@@ -39,3 +39,4 @@ pact-jvm-consumer-specs2/target/
 pact-jvm-provider-scalasupport/target/
 pact-jvm-provider-specs2/target/
 provider/pact-jvm-provider/target/
+consumer/pact-jvm-consumer-groovy/target/
