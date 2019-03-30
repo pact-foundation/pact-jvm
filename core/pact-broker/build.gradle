@@ -1,8 +1,8 @@
 dependencies {
   compile project(":core:pact-jvm-core-support")
   compile "org.apache.commons:commons-lang3:$commonsLang3Version"
-  compile "org.codehaus.groovy:groovy:${project.groovyVersion}:indy"
-  compile "org.codehaus.groovy:groovy-json:${project.groovyVersion}:indy"
+  compile "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  compile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
   compile 'com.github.salomonbrys.kotson:kotson:2.5.0'
   compile "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
   compile "com.google.guava:guava:${project.guavaVersion}"
@@ -12,4 +12,6 @@ dependencies {
     exclude group: 'org.jetbrains.kotlin'
   }
   implementation 'org.slf4j:slf4j-api:1.7.26'
+
+  testCompile 'net.bytebuddy:byte-buddy:1.9.12'
 }

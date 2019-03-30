@@ -8,8 +8,6 @@ import spock.lang.Specification
 
 class TypeMatcherSpec extends Specification {
 
-  private final Boolean allowUnexpectedKeys = true
-
   def 'match integers should accept integer values'() {
     given:
     def matchingRules = new MatchingRulesImpl()
@@ -18,7 +16,7 @@ class TypeMatcherSpec extends Specification {
     def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": 456}'.bytes), null)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, allowUnexpectedKeys)
+    def result = new JsonBodyMatcher().matchBody(expected, actual, true)
 
     then:
     result.empty
@@ -32,7 +30,7 @@ class TypeMatcherSpec extends Specification {
     def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": null}'.bytes), null)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, allowUnexpectedKeys)
+    def result = new JsonBodyMatcher().matchBody(expected, actual, true)
 
     then:
     !result.empty
@@ -46,7 +44,7 @@ class TypeMatcherSpec extends Specification {
     def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": 123.10}'.bytes), null)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, allowUnexpectedKeys)
+    def result = new JsonBodyMatcher().matchBody(expected, actual, true)
 
     then:
     !result.empty
@@ -60,7 +58,7 @@ class TypeMatcherSpec extends Specification {
     def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": 456.20}'.bytes), null)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, allowUnexpectedKeys)
+    def result = new JsonBodyMatcher().matchBody(expected, actual, true)
 
     then:
     result.empty
@@ -74,7 +72,7 @@ class TypeMatcherSpec extends Specification {
     def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": null}'.bytes), null)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, allowUnexpectedKeys)
+    def result = new JsonBodyMatcher().matchBody(expected, actual, true)
 
     then:
     !result.empty
@@ -88,7 +86,7 @@ class TypeMatcherSpec extends Specification {
     def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": 123}'.bytes), null)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, allowUnexpectedKeys)
+    def result = new JsonBodyMatcher().matchBody(expected, actual, true)
 
     then:
     !result.empty

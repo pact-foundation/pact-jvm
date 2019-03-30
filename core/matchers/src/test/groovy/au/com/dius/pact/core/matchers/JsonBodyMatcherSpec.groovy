@@ -9,11 +9,11 @@ import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 
-@SuppressWarnings('BracesForMethod')
+@SuppressWarnings(['BracesForMethod', 'PrivateFieldCouldBeFinal'])
 class JsonBodyMatcherSpec extends Specification {
 
   private matchers
-  private final JsonBodyMatcher matcher = new JsonBodyMatcher()
+  private JsonBodyMatcher matcher = new JsonBodyMatcher()
   private expected, actual
 
   def setup() {
