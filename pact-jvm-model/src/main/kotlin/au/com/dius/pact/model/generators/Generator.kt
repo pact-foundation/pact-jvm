@@ -1,5 +1,6 @@
 package au.com.dius.pact.model.generators
 
+import au.com.dius.pact.com.github.michaelbull.result.getOr
 import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.support.expressions.ExpressionParser.containsExpressions
 import au.com.dius.pact.support.expressions.ExpressionParser.parseExpression
@@ -9,7 +10,6 @@ import mu.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.OffsetDateTime
@@ -238,10 +238,11 @@ data class DateGenerator @JvmOverloads constructor(val format: String? = null, v
   }
 
   override fun generate(context: Map<String, Any?>): Any {
+    val date = DateExpression.executeDateExpression(OffsetDateTime.now(), expression).getOr { OffsetDateTime.now() }
     return if (format != null) {
-      OffsetDateTime.now().format(DateTimeFormatter.ofPattern(format))
+      date.format(DateTimeFormatter.ofPattern(format))
     } else {
-      LocalDate.now().toString()
+      date.toString()
     }
   }
 
