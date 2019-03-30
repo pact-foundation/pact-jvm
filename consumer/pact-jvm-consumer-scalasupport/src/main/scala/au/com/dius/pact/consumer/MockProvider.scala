@@ -1,10 +1,9 @@
 package au.com.dius.pact.consumer
 
+import au.com.dius.pact.consumer.model.{MockHttpsKeystoreProviderConfig, MockHttpsProviderConfig, MockProviderConfig}
 import au.com.dius.pact.core.model.{Pact => PactModel, _}
-import au.com.dius.pact.model.{MockHttpsKeystoreProviderConfig, MockHttpsProviderConfig, MockProviderConfig}
+import au.com.dius.pact.model.{MockHttpsProviderConfig, MockProviderConfig}
 import com.typesafe.scalalogging.StrictLogging
-
-import scala.util.Try
 
 trait MockProvider[I <: Interaction] {
   def config: MockProviderConfig

@@ -2,12 +2,11 @@ package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslResponse;
-import au.com.dius.pact.model.MockProviderConfig;
+import au.com.dius.pact.consumer.model.MockProviderConfig;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.entity.ContentType;
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
@@ -142,7 +141,7 @@ public class MatchingTest {
         MockProviderConfig config = MockProviderConfig.createDefault(PactSpecVersion.V3);
         PactVerificationResult result = runConsumerTest(pactFragment.toPact(), config, (mockServer, context) -> {
             try {
-                Assert.assertEquals(expectedResponse, new ConsumerClient(config.url()).post(path, body, ContentType.APPLICATION_JSON));
+                Assert.assertEquals(expectedResponse, new ConsumerClient(mockServer.getUrl()).post(path, body, ContentType.APPLICATION_JSON));
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
                 throw e;

@@ -13,7 +13,7 @@ Provides a DSL for use with Java to build consumer pacts.
 The library is available on maven central using:
 
 * group-id = `au.com.dius`
-* artifact-id = `pact-jvm-consumer_2.11`
+* artifact-id = `pact-jvm-consumer`
 
 ## DSL Usage
 
@@ -176,7 +176,7 @@ For example:
 This will ensure that the users list is never empty and that each user has an identifier that is a number and a name that is a string.
 
 
-#### Matching JSON values at the root (Version 3.2.2/2.4.3+)
+#### Matching JSON values at the root
 
 For cases where you are expecting basic JSON values (strings, numbers, booleans and null) at the root level of the body
 and need to use matchers, you can use the `PactDslJsonRootValue` class. It has all the DSL matching methods for basic
@@ -194,7 +194,7 @@ For example:
         .body(PactDslJsonRootValue.integerType())
 ```
 
-#### Root level arrays that match all items (version 2.2.11+)
+#### Root level arrays that match all items
 
 If the root of the body is an array, you can create PactDslJsonArray classes with the following methods:
 
@@ -233,7 +233,7 @@ This will then match a body like:
 } ]
 ```
 
-#### Matching arrays of arrays (version 3.2.12/2.4.14+)
+#### Matching arrays of arrays
 
 For the case where you have arrays of arrays (GeoJSON is an example), the following methods have been provided:
 
@@ -285,7 +285,7 @@ This generated the following JSON:
 
 and will be able to match all coordinates regardless of the number of coordinates.
 
-#### Matching any key in a map (3.3.1/2.5.0+)
+#### Matching any key in a map
 
 The DSL has been extended for cases where the keys in a map are IDs. For an example of this, see 
 [#313](https://github.com/DiUS/pact-jvm/issues/313). In this case you can use the `eachKeyLike` method, which takes an 
@@ -321,7 +321,7 @@ For an example, have a look at [WildcardKeysTest](../pact-jvm-consumer-junit/src
 **Further Note: From version 3.5.22 onwards pacts with wildcards applied to map keys will require the Java system property 
 "pact.matching.wildcard" set to value "true" when the pact file is verified.**
 
-### Matching on paths (version 2.1.5+)
+### Matching on paths
 
 You can use regular expressions to match incoming requests. The DSL has a `matchPath` method for this. You can provide
 a real path as a second value to use when generating requests, and if you leave it out it will generate a random one
@@ -340,7 +340,7 @@ For example:
         .body("{\"hello\": \"harry\"}")
 ```
 
-### Matching on headers (version 2.2.2+)
+### Matching on headers
 
 You can use regular expressions to match request and response headers. The DSL has a `matchHeader` method for this. You can provide
 an example header value to use when generating requests and responses, and if you leave it out it will generate a random one
@@ -361,7 +361,7 @@ For example:
         .matchHeader("Location", ".*/hello/[0-9]+", "/hello/1234")
 ```
 
-### Matching on query parameters (version 3.3.7+)
+### Matching on query parameters
 
 You can use regular expressions to match request query parameters. The DSL has a `matchQuery` method for this. You can provide
 an example value to use when generating requests, and if you leave it out it will generate a random one

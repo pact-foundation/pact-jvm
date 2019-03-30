@@ -13,8 +13,6 @@ project(':core:pact-jvm-core-matchers').projectDir = file('core/matchers')
 
 include   'consumer:pact-jvm-consumer'
 
-project(':consumer:pact-jvm-consumer').projectDir = file('consumer')
-
 //include   'pact-jvm-consumer-junit'
 //include   'pact-jvm-consumer-junit5'
 //include   'pact-jvm-consumer-java8'

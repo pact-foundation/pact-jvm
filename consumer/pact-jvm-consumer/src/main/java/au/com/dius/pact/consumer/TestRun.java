@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer;
 
-import au.com.dius.pact.model.MockProviderConfig;
+import au.com.dius.pact.consumer.model.MockProviderConfig;
 
 public interface TestRun {
     void run(MockProviderConfig config) throws Throwable;

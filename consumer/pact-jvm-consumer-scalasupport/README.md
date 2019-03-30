@@ -1,0 +1,3 @@
+Pact consumer Scala Support
+===========================
+

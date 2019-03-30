@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.core.model.RequestResponsePact;
-import au.com.dius.pact.model.MockProviderConfig;
+import au.com.dius.pact.consumer.model.MockProviderConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.util.EntityUtils;

@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer;
 
 import au.com.dius.pact.core.model.RequestResponsePact;
-import au.com.dius.pact.model.MockProviderConfig;
+import au.com.dius.pact.consumer.model.MockProviderConfig;
 import org.apache.http.entity.ContentType;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;

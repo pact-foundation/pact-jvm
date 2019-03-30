@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer;
 
-import au.com.dius.pact.model.MockProviderConfig;
-import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.consumer.model.MockProviderConfig;
+import au.com.dius.pact.core.model.RequestResponsePact;
 import org.apache.commons.lang3.time.StopWatch;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
@@ -34,7 +34,7 @@ public class PerfTest {
     stopWatch.split();
     System.out.println("Setup: " + stopWatch.getSplitTime());
 
-    PactFragment pactFragment = ConsumerPactBuilder
+    RequestResponsePact pact = ConsumerPactBuilder
       .consumer("perf_test_consumer")
       .hasPactWith("perf_test_provider")
       .uponReceiving("a request to get values")
@@ -44,24 +44,21 @@ public class PerfTest {
       .status(200)
       .headers(headerData)
       .body(bodyExpected)
-      .toFragment();
+      .toPact();
 
     stopWatch.split();
     System.out.println("Setup Fragment: " + stopWatch.getSplitTime());
 
     MockProviderConfig config = MockProviderConfig.createDefault();
-    PactVerificationResult result = runConsumerTest(pactFragment.toPact(), config, new PactTestRun() {
-      @Override
-      public void run(@NotNull MockServer mockServer, PactTestExecutionContext context) throws IOException {
-        try {
-          stopWatch.split();
-          System.out.println("In Test: " + stopWatch.getSplitTime());
-          new ConsumerClient(config.url()).getAsList(path);
-        } catch (IOException e) {
-        }
+    runConsumerTest(pact, config, (mockServer, context) -> {
+      try {
         stopWatch.split();
-        System.out.println("After Test: " + stopWatch.getSplitTime());
+        System.out.println("In Test: " + stopWatch.getSplitTime());
+        new ConsumerClient(config.url()).getAsList(path);
+      } catch (IOException e) {
       }
+      stopWatch.split();
+      System.out.println("After Test: " + stopWatch.getSplitTime());
     });
 
     stopWatch.split();

@@ -11,8 +11,8 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.queryStringToMap
-import au.com.dius.pact.model.MockHttpsProviderConfig
-import au.com.dius.pact.model.MockProviderConfig
+import au.com.dius.pact.consumer.model.MockHttpsProviderConfig
+import au.com.dius.pact.consumer.model.MockProviderConfig
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer

@@ -11,12 +11,3 @@ dependencies {
   testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 }
-
-test {
-  useJUnitPlatform()
-
-  // Show test results.
-  testLogging {
-    events "passed", "skipped", "failed"
-  }
-}

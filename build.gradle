@@ -85,6 +85,8 @@ subprojects {
     }
 
     dependencies {
+      testCompile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
+      testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
       testCompile('org.spockframework:spock-core:1.3-groovy-2.5') {
         exclude group: 'org.codehaus.groovy'
       }
@@ -140,6 +142,15 @@ subprojects {
       archiveClassifier = 'sources'
       from sourceSets.main.allSource
     }
+
+  test {
+    useJUnitPlatform()
+
+    // Show test results.
+    testLogging {
+      events "passed", "skipped", "failed"
+    }
+  }
 
   publishing {
     publications {

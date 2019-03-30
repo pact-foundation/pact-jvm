@@ -2,7 +2,6 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.core.model.OptionalBody;
-import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.core.model.ProviderState;
 import au.com.dius.pact.core.model.Request;
 import au.com.dius.pact.core.model.RequestResponseInteraction;
@@ -18,7 +17,6 @@ import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
-import scala.collection.JavaConversions$;
 
 import javax.xml.transform.TransformerException;
 import java.util.Collections;
@@ -273,19 +271,6 @@ public class PactDslResponse {
             request.requestHeaders, request.requestBody, request.requestMatchers, request.requestGenerators),
           new Response(responseStatus, responseHeaders, responseBody, responseMatchers, responseGenerators)
         ));
-    }
-
-    /**
-     * Terminates the DSL and builds a pact fragment to represent the interactions
-     *
-     * @deprecated Use toPact instead
-     */
-    public PactFragment toFragment() {
-        addInteraction();
-        return new PactFragment(
-                request.consumer,
-                request.provider,
-          JavaConversions$.MODULE$.asScalaBuffer(consumerPactBuilder.getInteractions()).toSeq());
     }
 
     /**
