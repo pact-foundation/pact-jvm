@@ -3,8 +3,6 @@
 */bin
 # sbt specific
 dist/*
-/target/
-/*/target/
 lib_managed/
 src_managed/
 project/boot/
@@ -33,4 +31,11 @@ pkgdiff_reports/
 .gradle/
 
 out/
-
+consumer/pact-jvm-consumer/target/
+pact-jvm-consumer-groovy/target/
+pact-jvm-consumer-junit/target/
+pact-jvm-consumer-junit5/target/
+pact-jvm-consumer-specs2/target/
+pact-jvm-provider-scalasupport/target/
+pact-jvm-provider-specs2/target/
+provider/pact-jvm-provider/target/

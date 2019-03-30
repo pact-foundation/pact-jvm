@@ -55,6 +55,10 @@ allprojects {
 }
 
 subprojects {
+
+  if (name in ['core', 'consumer', 'provider']) {
+    return
+  }
   
   buildscript {
     repositories {
