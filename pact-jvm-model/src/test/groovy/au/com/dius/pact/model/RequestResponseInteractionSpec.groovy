@@ -7,7 +7,7 @@ import spock.lang.Specification
 
 class RequestResponseInteractionSpec extends Specification {
 
-  def interaction, generators
+  private interaction, generators
 
   def setup() {
     generators = new Generators([(Category.HEADER): [a: new RandomStringGenerator(4)]])

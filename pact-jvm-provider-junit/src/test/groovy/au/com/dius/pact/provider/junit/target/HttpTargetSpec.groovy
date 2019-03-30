@@ -6,6 +6,7 @@ import au.com.dius.pact.support.expressions.ValueResolver
 import org.junit.runners.model.TestClass
 import spock.lang.Specification
 
+@SuppressWarnings('CoupledTestCase')
 class HttpTargetSpec extends Specification {
 
   private HttpTarget httpTarget

@@ -93,7 +93,6 @@ ruleset {
     IfStatementCouldBeTernary
     InvertedIfElse
     LongLiteralWithLowerCaseL
-//    NoDef
     ParameterReassignment
     TernaryCouldBeElvis
     VectorIsObsolete
@@ -101,7 +100,6 @@ ruleset {
     // rulesets/design.xml
     AbstractClassWithPublicConstructor
     AbstractClassWithoutAbstractMethod
-//    AssignmentToStaticFieldFromInstanceMethod
     BooleanMethodReturnsNull
     BuilderMethodWithSideEffects
     CloneableWithoutClone
@@ -111,7 +109,6 @@ ruleset {
     EmptyMethodInAbstractClass
     FinalClassWithProtectedMember
     ImplementationAsType
-//    Instanceof
     LocaleSetDefault
     NestedForLoop
     PrivateFieldCouldBeFinal
@@ -121,17 +118,6 @@ ruleset {
     SimpleDateFormatMissingLocale
     StatelessSingleton
     ToStringReturnsNull
-
-    // rulesets/dry.xml
-//    DuplicateListLiteral
-//    DuplicateMapLiteral
-//    DuplicateNumberLiteral
-//    DuplicateStringLiteral
-
-    // rulesets/enhanced.xml
-    //CloneWithoutCloneable
-    //JUnitAssertEqualsConstantActualValue
-    //UnsafeImplementationAsMap
 
     // rulesets/exceptions.xml
     CatchArrayIndexOutOfBoundsException
@@ -162,7 +148,6 @@ ruleset {
     BracesForIfElse
     BracesForMethod
     BracesForTryCatchFinally
-//    ClassJavadoc
     ClosureStatementOnOpeningLineOfMultipleLineClosure
     ConsecutiveBlankLines
     FileEndsWithoutNewline
@@ -248,7 +233,6 @@ ruleset {
     DuplicateImport
     ImportFromSamePackage
     ImportFromSunPackages
-//    MisorderedStaticImports
     NoWildcardImports
     UnnecessaryGroovyImport
     UnusedImport
@@ -267,12 +251,9 @@ ruleset {
     JUnitFailWithoutMessage
     JUnitLostTest
     JUnitPublicField
-    JUnitPublicNonTestMethod
-    JUnitPublicProperty
     JUnitSetUpCallsSuper
     JUnitStyleAssertions
     JUnitTearDownCallsSuper
-    JUnitTestMethodWithoutAssert
     JUnitUnnecessarySetUp
     JUnitUnnecessaryTearDown
     JUnitUnnecessaryThrowsException
@@ -291,7 +272,6 @@ ruleset {
     LoggingSwallowsStacktrace
     MultipleLoggers
     PrintStackTrace
-//    Println
     SystemErrPrint
     SystemOutPrint
 
@@ -299,13 +279,9 @@ ruleset {
     AbstractClassName
     ClassName
     ClassNameSameAsFilename
-//    ClassNameSameAsSuperclass
     ConfusingMethodName
-//    FactoryMethodName
     FieldName
     InterfaceName
-//    InterfaceNameSameAsSuperInterface
-//    MethodName
     ObjectOverrideMisspelledMethodName
     PackageName
     PackageNameMatchesFilePath
@@ -314,9 +290,7 @@ ruleset {
     VariableName
 
     // rulesets/security.xml
-//    FileCreateTempFile
     InsecureRandom
-//    JavaIoPackageAccess
     NonFinalPublicField
     NonFinalSubclassOfSensitiveInterface
     ObjectFinalize
@@ -333,7 +307,6 @@ ruleset {
     // rulesets/size.xml
     AbcMetric   // Requires the GMetrics jar
     ClassSize
-//    CrapMetric   // Requires the GMetrics jar and a Cobertura coverage file
     CyclomaticComplexity   // Requires the GMetrics jar
     MethodCount
     MethodSize
@@ -396,6 +369,5 @@ ruleset {
     UnusedPrivateMethod
     UnusedPrivateMethodParameter
     UnusedVariable
-
 
 }
