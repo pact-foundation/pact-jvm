@@ -1,7 +1,9 @@
 package au.com.dius.pact.core.model
 
 import io.kotlintest.matchers.shouldBe
+import io.kotlintest.matchers.shouldEqual
 import io.kotlintest.specs.StringSpec
+import java.nio.charset.Charset
 
 class OptionalBodyTest : StringSpec() {
 
@@ -9,7 +11,7 @@ class OptionalBodyTest : StringSpec() {
   val missingBody = OptionalBody.missing()
   val nullBody = OptionalBody.nullBody()
   val emptyBody = OptionalBody.empty()
-  val presentBody = OptionalBody.body("present")
+  val presentBody = OptionalBody.body("present".toByteArray())
 
   init {
 
@@ -94,23 +96,23 @@ class OptionalBodyTest : StringSpec() {
     }
 
     "a null body or else returns the else" {
-      nullBodyVar.orElse("else") shouldBe "else"
+      nullBodyVar.orElse("else".toByteArray()).toString(Charset.defaultCharset()) shouldEqual "else"
     }
 
     "a missing body or else returns the else" {
-      missingBody.orElse("else") shouldBe "else"
+      missingBody.orElse("else".toByteArray()).toString(Charset.defaultCharset()) shouldEqual "else"
     }
 
     "a body that contains a null or else returns the else" {
-      nullBody.orElse("else") shouldBe "else"
+      nullBody.orElse("else".toByteArray()).toString(Charset.defaultCharset()) shouldEqual "else"
     }
 
     "an empty body or else returns empty" {
-      emptyBody.orElse("else") shouldBe ""
+      emptyBody.orElse("else".toByteArray()).toString(Charset.defaultCharset()) shouldEqual ""
     }
 
     "a present body or else returns the body" {
-      presentBody.orElse("else") shouldBe "present"
+      presentBody.orElse("else".toByteArray()).toString(Charset.defaultCharset()) shouldEqual "present"
     }
   }
 }

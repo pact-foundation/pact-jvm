@@ -11,6 +11,7 @@ import org.asynchttpclient.{DefaultAsyncHttpClient, RequestBuilder}
 
 import scala.compat.java8.FutureConverters
 import scala.concurrent.Future
+import scala.collection.JavaConverters._
 
 object HttpClient extends StrictLogging {
 
@@ -28,15 +29,15 @@ object HttpClient extends StrictLogging {
 
     val asyncHttpClient = new DefaultAsyncHttpClient
     FutureConverters.toScala[Response](asyncHttpClient.executeRequest(req).toCompletableFuture.thenApply(res => {
-      val headers = new util.HashMap[String, String]()
-      res.getHeaders.names().forEach(name => headers.put(name, res.getHeader(name)))
+      val headers = new util.HashMap[String, util.List[String]]()
+      res.getHeaders.names().forEach(name => headers.put(name, List(res.getHeader(name)).asJava))
       val contentType = if (StringUtils.isEmpty(res.getContentType))
         org.apache.http.entity.ContentType.APPLICATION_JSON
       else
         org.apache.http.entity.ContentType.parse(res.getContentType)
       val charset = if (contentType.getCharset == null) Charset.forName("UTF-8") else contentType.getCharset
       val body = if (res.hasResponseBody) {
-        OptionalBody.body(res.getResponseBody(charset))
+        OptionalBody.body(res.getResponseBody(charset).getBytes)
       } else {
         OptionalBody.empty()
       }

@@ -21,7 +21,9 @@ import org.w3c.dom.Document;
 import scala.collection.JavaConversions$;
 
 import javax.xml.transform.TransformerException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -35,7 +37,7 @@ public class PactDslResponse {
     private final PactDslResponse defaultResponseValues;
 
     private int responseStatus = 200;
-    private Map<String, String> responseHeaders = new HashMap<String, String>();
+    private Map<String, List<String>> responseHeaders = new HashMap<>();
     private OptionalBody responseBody = OptionalBody.missing();
     private MatchingRules responseMatchers = new MatchingRulesImpl();
     private Generators responseGenerators = new Generators();
@@ -79,8 +81,10 @@ public class PactDslResponse {
      * @param headers key-value pairs of headers
      */
     public PactDslResponse headers(Map<String, String> headers) {
-        this.responseHeaders.putAll(headers);
-        return this;
+      for (Map.Entry<String, String> entry: headers.entrySet()) {
+        this.responseHeaders.put(entry.getKey(), Collections.singletonList(entry.getValue()));
+      }
+      return this;
     }
 
     /**
@@ -89,7 +93,7 @@ public class PactDslResponse {
      * @param body Response body in string form
      */
     public PactDslResponse body(String body) {
-        this.responseBody = OptionalBody.body(body);
+        this.responseBody = OptionalBody.body(body.getBytes());
         return this;
     }
 
@@ -100,8 +104,8 @@ public class PactDslResponse {
      * @param mimeType the Content-Type response header value
      */
     public PactDslResponse body(String body, String mimeType) {
-        responseBody = OptionalBody.body(body);
-        responseHeaders.put(CONTENT_TYPE, mimeType);
+        responseBody = OptionalBody.body(body.getBytes());
+        responseHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
         return this;
     }
 
@@ -121,7 +125,7 @@ public class PactDslResponse {
      * @param body Response body in Java Functional Interface Supplier that must return a string
      */
     public PactDslResponse body(Supplier<String> body) {
-        responseBody = OptionalBody.body(body.get());
+        responseBody = OptionalBody.body(body.get().getBytes());
         return this;
     }
 
@@ -132,8 +136,8 @@ public class PactDslResponse {
      * @param mimeType the Content-Type response header value
      */
     public PactDslResponse body(Supplier<String> body, String mimeType) {
-        responseBody = OptionalBody.body(body.get());
-        responseHeaders.put(CONTENT_TYPE, mimeType);
+        responseBody = OptionalBody.body(body.get().getBytes());
+        responseHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
         return this;
     }
 
@@ -192,7 +196,7 @@ public class PactDslResponse {
      * @param body Response body in JSON form
      */
     public PactDslResponse body(JSONObject body) {
-        this.responseBody = OptionalBody.body(body.toString());
+        this.responseBody = OptionalBody.body(body.toString().getBytes());
         if (!responseHeaders.containsKey(CONTENT_TYPE)) {
             matchHeader(CONTENT_TYPE, DEFAULT_JSON_CONTENT_TYPE_REGEX, ContentType.APPLICATION_JSON.toString());
         }
@@ -214,7 +218,7 @@ public class PactDslResponse {
         responseMatchers.addCategory(parent.getMatchers());
         responseGenerators.addGenerators(parent.generators);
         if (parent.getBody() != null) {
-            responseBody = OptionalBody.body(parent.getBody().toString());
+            responseBody = OptionalBody.body(parent.getBody().toString().getBytes());
         } else {
             responseBody = OptionalBody.nullBody();
         }
@@ -231,9 +235,9 @@ public class PactDslResponse {
      * @param body Response body as an XML Document
      */
     public PactDslResponse body(Document body) throws TransformerException {
-        responseBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body));
+        responseBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body).getBytes());
         if (!responseHeaders.containsKey(CONTENT_TYPE)) {
-            responseHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_XML.toString());
+            responseHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
         }
         return this;
     }
@@ -257,7 +261,7 @@ public class PactDslResponse {
      */
     public PactDslResponse matchHeader(String header, String regexp, String headerExample) {
         responseMatchers.addCategory("header").setRule(header, new RegexMatcher(regexp));
-        responseHeaders.put(header, headerExample);
+        responseHeaders.put(header, Collections.singletonList(headerExample));
         return this;
     }
 
@@ -332,7 +336,7 @@ public class PactDslResponse {
    */
   public PactDslResponse headerFromProviderState(String name, String expression, String example) {
     responseGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression));
-    responseHeaders.put(name, example);
+    responseHeaders.put(name, Collections.singletonList(example));
     return this;
   }
 }

@@ -1,5 +1,31 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.6.2 - Bugfix Release
+
+* 835c1151 - fix: missed one class after OptionalBody refactor #600 (Ronald Holshausen, Sun Feb 17 17:26:15 2019 +1100)
+* b845bf03 - feat: Changes OptionalBody to store byte arrays in prep for supporting binary playloads #600 (Ronald Holshausen, Sun Feb 17 17:07:46 2019 +1100)
+* 2af233ce - Merge pull request #850 from SchulteMarkus/patch-1 (Ronald Holshausen, Sat Feb 16 17:24:26 2019 +1100)
+* 0e3dbd5b - feat: update readmes #840 (Ronald Holshausen, Sat Feb 16 17:21:54 2019 +1100)
+* 199e434c - feat: set the pact directory if the PactFolder annotation is present #840 (Ronald Holshausen, Sat Feb 16 17:14:06 2019 +1100)
+* 1a701e81 - feat: add a PactFolder annotation and an execution context to all pact test functions #840 (Ronald Holshausen, Sat Feb 16 16:55:54 2019 +1100)
+* 136c69bc - fix: correct the ClassCastException in the /complete path (Ronald Holshausen, Sat Feb 16 15:25:41 2019 +1100)
+* 3126c751 - fix: If the project classpath is empty, do not use a classloader #763 (Ronald Holshausen, Sat Feb 16 14:51:07 2019 +1100)
+* cb685c36 - Correcting PactTestFor.port-doc, default is indeed 0 (Markus Schulte, Fri Feb 15 13:39:49 2019 +0100)
+* 786ab574 - feat: Update the Groovy DSL to allow specifying matchers on message metadata #479 (Ronald Holshausen, Sun Feb 3 16:56:54 2019 +1100)
+* ed11f342 - fix: correct codenarc errors (Ronald Holshausen, Sun Feb 3 16:28:27 2019 +1100)
+* 07d437d0 - Merge pull request #838 from SchulteMarkus/patch-1 (Ronald Holshausen, Sun Feb 3 16:02:06 2019 +1100)
+* 43898577 - chore: add state change teardown methods to spring tests (Ronald Holshausen, Sun Feb 3 15:55:54 2019 +1100)
+* 78aef9c7 - Merge branch 'ErikMoller-allow-http-delete-body' (Ronald Holshausen, Sun Feb 3 15:43:56 2019 +1100)
+* c670f9f0 - fix: static code analysis errors (Ronald Holshausen, Sun Feb 3 15:43:27 2019 +1100)
+* 299c81fa - Merge branch 'allow-http-delete-body' of https://github.com/ErikMoller/pact-jvm into ErikMoller-allow-http-delete-body (Ronald Holshausen, Sun Feb 3 15:13:04 2019 +1100)
+* 87508032 - fix: No such property: message for class: java.lang.String #831 (Ronald Holshausen, Sun Feb 3 14:45:20 2019 +1100)
+* 93f0ce2d - fix: Upgraded Groovy and removed @CompileStatic to fix NoSuchMethodError in the verifier (Ronald Holshausen, Sun Feb 3 13:41:32 2019 +1100)
+* f74ce9cd - feat: support arrays of primitives in LambdaDSL #829 (Ronald Holshausen, Sun Feb 3 11:37:32 2019 +1100)
+* 37673a9a - feat: add support for Instant in the Java DSL #802 (Ronald Holshausen, Sun Feb 3 10:37:12 2019 +1100)
+* 87202ac8 - Fixed syntax error at "An array of arrays" -> Lambda DSL example (Markus Schulte, Thu Dec 20 16:28:44 2018 +0100)
+* 7a6f00c7 - Added support for http delete request with body (Erik Möller, Tue Dec 18 10:24:11 2018 +0100)
+* 94217189 - bump version to 3.6.2 (Ronald Holshausen, Sun Dec 16 15:10:00 2018 +1100)
+
 # 3.6.1 - Bugfix Release
 
 * 0f68f9da - Merge pull request #828 from aplsup/trim-snapshot-provider-version (Ronald Holshausen, Sun Dec 16 14:15:29 2018 +1100)

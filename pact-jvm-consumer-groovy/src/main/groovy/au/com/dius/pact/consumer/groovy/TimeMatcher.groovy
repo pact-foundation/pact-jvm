@@ -22,7 +22,7 @@ class TimeMatcher extends Matcher {
   }
 
   Generator getGenerator() {
-    super.@value == null ? new TimeGenerator(getPattern()) : null
+    super.@value == null ? new TimeGenerator(getPattern(), null) : null
   }
 
   def getValue() {

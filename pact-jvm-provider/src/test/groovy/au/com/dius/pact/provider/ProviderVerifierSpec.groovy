@@ -343,7 +343,7 @@ class ProviderVerifierSpec extends Specification {
   def 'is able to verify a message pact'() {
     given:
     def methods = [ TestSupport.getMethod('testMethod') ] as Set
-    Message message = new Message(contents: OptionalBody.body('\"test method result\"'))
+    Message message = new Message(contents: OptionalBody.body('\"test method result\"'.bytes))
     def interactionMessage = 'test message interaction'
     def failures = [:]
     def reporter = Mock(VerifierReporter)

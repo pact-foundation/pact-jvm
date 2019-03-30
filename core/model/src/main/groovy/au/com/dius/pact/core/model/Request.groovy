@@ -22,7 +22,7 @@ class Request extends BaseRequest implements Comparable {
   String method = DEFAULT_METHOD
   String path = DEFAULT_PATH
   Map<String, List<String>> query = [:]
-  Map<String, String> headers = [:]
+  Map<String, List<String>> headers = [:]
   OptionalBody body = OptionalBody.missing()
   MatchingRules matchingRules = new MatchingRulesImpl()
   Generators generators = new Generators()
@@ -32,8 +32,14 @@ class Request extends BaseRequest implements Comparable {
       method = (map.method ?: DEFAULT_METHOD) as String
       path = (map.path == null ? DEFAULT_PATH : map.path) as String
       query = parseQueryParametersToMap(map.query)
-      headers = map.headers ?: [:]
-      body = map.containsKey('body') ? OptionalBody.body(map.body) : OptionalBody.missing()
+      headers = map.headers ? map.headers.collectEntries { key, value ->
+        if (value instanceof List) {
+          [key, value]
+        } else {
+          [key, value.split(/,/)*.trim() ]
+        }
+      } : [:]
+      body = map.containsKey('body') ? OptionalBody.body(map.body?.bytes) : OptionalBody.missing()
       matchingRules = MatchingRulesImpl.fromMap(map.matchingRules)
       generators = Generators.fromMap(map.generators)
       it
@@ -60,7 +66,7 @@ class Request extends BaseRequest implements Comparable {
       r.path = g.generate(context).toString()
     }
     generators.applyGenerator(Category.HEADER, mode) { String key, Generator g ->
-      r.headers[key] = g.generate(context).toString()
+      r.headers[key] = [g.generate(context).toString()]
     }
     generators.applyGenerator(Category.QUERY, mode) { String key, Generator g ->
       r.query[key] = r.query[key].collect { g.generate(context).toString() }
@@ -74,8 +80,8 @@ class Request extends BaseRequest implements Comparable {
       "generators: $generators\n\tbody: $body"
   }
 
-  Map<String, String> headersWithoutCookie() {
-    headers?.findAll { k, v -> k.toLowerCase() != COOKIE_KEY }
+  Map<String, List<String>> headersWithoutCookie() {
+    headers?.findAll { k, v -> k.toLowerCase() != COOKIE_KEY } ?: [:]
   }
 
   List<String> cookie() {

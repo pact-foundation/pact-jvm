@@ -88,7 +88,7 @@ class PactBodyBuilderSpec extends Specification {
 
     when:
     service.buildInteractions()
-    def keys = new JsonSlurper().parseText(service.interactions[0].request.body.value).keySet()
+    def keys = new JsonSlurper().parseText(service.interactions[0].request.body.valueAsString()).keySet()
     def requestMatchingRules = service.interactions[0].request.matchingRules
     def bodyMatchingRules = requestMatchingRules.rulesForCategory('body').matchingRules
     def responseMatchingRules = service.interactions[0].response.matchingRules
@@ -123,7 +123,7 @@ class PactBodyBuilderSpec extends Specification {
     keys == ['name', 'surname', 'position', 'happy', 'hexCode', 'hexCode2', 'id', 'id2', 'localAddress',
       'localAddress2', 'age', 'age2', 'salary', 'timestamp', 'ts', 'values', 'role', 'roles'] as Set
 
-    service.interactions[0].response.body.value == new JsonBuilder([name: 'harry']).toPrettyString()
+    service.interactions[0].response.body.valueAsString() == new JsonBuilder([name: 'harry']).toPrettyString()
 
     requestGenerators.keySet() == ['$.hexCode', '$.id', '$.age2', '$.salary', '$.ts', '$.timestamp', '$.values[3]',
                                    '$.role.id', '$.role.dob', '$.roles[0].id'] as Set
@@ -160,7 +160,7 @@ class PactBodyBuilderSpec extends Specification {
 
     when:
     service.buildInteractions()
-    def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.value))
+    def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.valueAsString()))
     def rules = service.interactions[0].request.matchingRules.rulesForCategory('body').matchingRules
 
     then:
@@ -208,7 +208,7 @@ class PactBodyBuilderSpec extends Specification {
 
     when:
     service.buildInteractions()
-    def body = new JsonSlurper().parseText(service.interactions[0].request.body.value)
+    def body = new JsonSlurper().parseText(service.interactions[0].request.body.valueAsString())
 
     then:
     service.interactions.size() == 1
@@ -247,7 +247,7 @@ class PactBodyBuilderSpec extends Specification {
 
     when:
     service.buildInteractions()
-    def body = new JsonSlurper().parseText(service.interactions[0].request.body.value)
+    def body = new JsonSlurper().parseText(service.interactions[0].request.body.valueAsString())
 
     then:
     service.interactions.size() == 1
@@ -279,7 +279,7 @@ class PactBodyBuilderSpec extends Specification {
 
     when:
     service.buildInteractions()
-    def body = new JsonSlurper().parseText(service.interactions[0].request.body.value)
+    def body = new JsonSlurper().parseText(service.interactions[0].request.body.valueAsString())
 
     then:
     service.interactions.size() == 1
@@ -319,13 +319,13 @@ class PactBodyBuilderSpec extends Specification {
     def response = service.interactions.first().response
 
     then:
-    request.body.value == '''|{
+    request.body.valueAsString() == '''|{
                        |    "name": "harry",
                        |    "surname": "larry",
                        |    "position": "staff",
                        |    "happy": true
                        |}'''.stripMargin()
-    response.body.value == '''|{
+    response.body.valueAsString() == '''|{
                         |    "name": "harry"
                         |}'''.stripMargin()
   }
@@ -353,13 +353,13 @@ class PactBodyBuilderSpec extends Specification {
     def response = service.interactions.first().response
 
     then:
-    request.body.value == '''|{
+    request.body.valueAsString() == '''|{
                        |    "name": "harry",
                        |    "surname": "larry",
                        |    "position": "staff",
                        |    "happy": true
                        |}'''.stripMargin()
-    response.body.value == '''|{
+    response.body.valueAsString() == '''|{
                         |    "name": "harry"
                         |}'''.stripMargin()
   }
@@ -387,8 +387,8 @@ class PactBodyBuilderSpec extends Specification {
     def response = service.interactions.first().response
 
     then:
-    request.body.value == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
-    response.body.value == '{"name":"harry"}'
+    request.body.valueAsString() == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
+    response.body.valueAsString() == '{"name":"harry"}'
   }
 
   def 'does not pretty print bodies if mimetype corresponds to one that requires compact bodies'() {
@@ -414,8 +414,8 @@ class PactBodyBuilderSpec extends Specification {
     def response = service.interactions.first().response
 
     then:
-    request.body.value == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
-    response.body.value == '{"name":"harry"}'
+    request.body.valueAsString() == '{"name":"harry","surname":"larry","position":"staff","happy":true}'
+    response.body.valueAsString() == '{"name":"harry"}'
   }
 
   def 'No Special Handling For Field Names Formerly Not Conforming Gatling Fields'() {
@@ -441,7 +441,7 @@ class PactBodyBuilderSpec extends Specification {
 
     when:
     service.buildInteractions()
-    def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.value))
+    def keys = walkGraph(new JsonSlurper().parseText(service.interactions[0].request.body.valueAsString()))
 
     then:
     service.interactions.size() == 1
@@ -489,10 +489,10 @@ class PactBodyBuilderSpec extends Specification {
     def response = service.interactions.first().response
 
     then:
-    request.body.value == '[["e8cda07e","sony"]]'
+    request.body.valueAsString() == '[["e8cda07e","sony"]]'
     request.matchingRules.rulesForCategory('body').matchingRules == expectedMatchingRules
 
-    response.body.value == '["test"]'
+    response.body.valueAsString() == '["test"]'
     response.matchingRules.rulesForCategory('body').matchingRules == [
       '$': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
       '$[*]': new MatchingRuleGroup([new RegexMatcher('\\w+', 'test')])
@@ -555,7 +555,8 @@ class PactBodyBuilderSpec extends Specification {
     def request = service.interactions.first().request
 
     then:
-    request.body.value == '{"answers":[{"questionId":"books","answer":[[{"questionId":"title","answer":"BBBB"},' +
+    request.body.valueAsString() ==
+      '{"answers":[{"questionId":"books","answer":[[{"questionId":"title","answer":"BBBB"},' +
       '{"questionId":"author","answer":"B.B."}]],"answer2":[[{"questionId":"title","answer":"BBBB"},' +
       '{"questionId":"title","answer":"BBBB"}],[{"questionId":"title","answer":"BBBB"},' +
       '{"questionId":"title","answer":"BBBB"}]],"answer3":[[{"questionId":"title","answer":"BBBB"}]]}]}'
@@ -584,7 +585,7 @@ class PactBodyBuilderSpec extends Specification {
     def request = service.interactions.first().request
 
     then:
-    request.body.value == '''|{
+    request.body.valueAsString() == '''|{
                              |    "items": [
                              |        {
                              |            "id": "100abc"

@@ -61,11 +61,11 @@ class GeneratedRequestSpec extends Specification {
   def 'applies body generators for body values to the copy of the request'() {
     given:
     def body = [a: 'A', b: 'B']
-    request.body = OptionalBody.body(JsonOutput.toJson(body))
+    request.body = OptionalBody.body(JsonOutput.toJson(body).bytes)
 
     when:
     def generated = request.generatedRequest()
-    def generatedBody = new JsonSlurper().parseText(generated.body.value)
+    def generatedBody = new JsonSlurper().parseText(generated.body.valueAsString())
 
     then:
     generatedBody.a != 'A'

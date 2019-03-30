@@ -17,7 +17,7 @@ class MessagePactSpec extends Specification {
   def setupSpec() {
     provider = new Provider()
     consumer = new Consumer()
-    message = new Message(contents: OptionalBody.body('1 2 3 4'))
+    message = new Message(contents: OptionalBody.body('1 2 3 4'.bytes))
   }
 
   def 'fails to convert the message to a Map if the target spec version is < 3'() {
@@ -71,7 +71,7 @@ class MessagePactSpec extends Specification {
     pact != pact2
 
     where:
-    message2 = new Message(contents: OptionalBody.body('A B C'))
+    message2 = new Message(contents: OptionalBody.body('A B C'.bytes))
     pact = new MessagePact(provider, consumer, [ message ])
     pact2 = new MessagePact(provider, consumer, [ message2 ])
   }
@@ -81,7 +81,7 @@ class MessagePactSpec extends Specification {
     pact != pact2
 
     where:
-    message2 = new Message(contents: OptionalBody.body('A B C'))
+    message2 = new Message(contents: OptionalBody.body('A B C'.bytes))
     pact = new MessagePact(provider, consumer, [ message ])
     pact2 = new MessagePact(provider, consumer, [ message, message2 ])
   }

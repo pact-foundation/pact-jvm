@@ -128,10 +128,10 @@ class PactBuilder extends BaseBuilder {
         requestDescription,
         providerStates,
         new Request(requestData[i].method ?: 'get', path, query, headers,
-          requestData[i].containsKey(BODY) ? OptionalBody.body(requestData[i].body) : OptionalBody.missing(),
+          requestData[i].containsKey(BODY) ? OptionalBody.body(requestData[i].body.bytes) : OptionalBody.missing(),
           requestMatchers, requestGenerators),
         new Response(responseData[i].status ?: 200, responseHeaders,
-          responseData[i].containsKey(BODY) ? OptionalBody.body(responseData[i].body) : OptionalBody.missing(),
+          responseData[i].containsKey(BODY) ? OptionalBody.body(responseData[i].body.bytes) : OptionalBody.missing(),
           responseMatchers, responseGenerators)
       )
     }
@@ -144,17 +144,17 @@ class PactBuilder extends BaseBuilder {
       def header = HEADER
       if (value instanceof Matcher) {
         matchers.addCategory(header).addRule(key, value.matcher)
-        [key, value.value]
+        [key, [value.value]]
       } else if (value instanceof Pattern) {
         def matcher = new RegexpMatcher(regex: value)
         matchers.addCategory(header).addRule(key, matcher.matcher)
-        [key, matcher.value]
+        [key, [matcher.value]]
       } else if (value instanceof GeneratedValue) {
         generators.addGenerator(au.com.dius.pact.core.model.generators.Category.HEADER, key,
           new ProviderStateGenerator(value.expression))
-        [key, value.exampleValue]
+        [key, [value.exampleValue]]
       } else {
-        [key, value]
+        [key, value instanceof List ? value : [value]]
       }
     }
   }

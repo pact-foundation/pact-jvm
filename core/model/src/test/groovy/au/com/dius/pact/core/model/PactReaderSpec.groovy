@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.model.messaging.MessagePact
+import au.com.dius.pact.core.pactbroker.CustomServiceUnavailableRetryStrategy
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectInputStream
@@ -165,6 +166,17 @@ class PactReaderSpec extends Specification {
     creds.password == 'pwd'
   }
 
+  def 'custom retry strategy is added to execution chain of client'() {
+    given:
+    def pactUrl = new UrlSource('http://some.url/')
+
+    when:
+    def client = PactReaderKt.newHttpClient(pactUrl.url, [:])
+
+    then:
+    client.execChain.requestExecutor.retryStrategy instanceof CustomServiceUnavailableRetryStrategy
+  }
+
   def 'correctly loads V2 pact query strings'() {
     given:
     def pactUrl = PactReaderSpec.classLoader.getResource('v2_pact_query.json')
@@ -260,8 +272,8 @@ class PactReaderSpec extends Specification {
 
     then:
     pact instanceof RequestResponsePact
-    pact.interactions[0].request.body.value == '"This is a string"'
-    pact.interactions[0].response.body.value == '"This is a string"'
+    pact.interactions[0].request.body.valueAsString() == '"This is a string"'
+    pact.interactions[0].response.body.valueAsString() == '"This is a string"'
   }
 
   def 'loads a pact where the source is a closure'() {

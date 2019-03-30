@@ -3,7 +3,7 @@ package au.com.dius.pact.core.model
 import java.util.function.Predicate
 
 class FilteredPact<I>(val pact: Pact<I>, private val interactionPredicate: Predicate<I>) : Pact<I> by pact
-  where I: Interaction {
+  where I : Interaction {
   override val interactions: List<I>
     get() = pact.interactions.filter { interactionPredicate.test(it) }
 

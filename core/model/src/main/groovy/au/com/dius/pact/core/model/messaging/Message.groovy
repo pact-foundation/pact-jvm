@@ -29,11 +29,7 @@ class Message implements Interaction {
   Map<String, String> metaData = [:]
 
   byte[] contentsAsBytes() {
-    if (contents.present) {
-      contents.value.toString().bytes
-    } else {
-      []
-    }
+    contents.orEmpty()
   }
 
   String getContentType() {
@@ -64,9 +60,9 @@ class Message implements Interaction {
   def formatContents() {
     if (contents.present) {
       switch (contentType) {
-        case JSON: return new JsonSlurper().parseText(contents.value.toString())
+        case JSON: return new JsonSlurper().parseText(contents.valueAsString())
         case 'application/octet-stream': return contentsAsBytes().encodeBase64().toString()
-        default: return contents.value.toString()
+        default: return contents.valueAsString()
       }
     } else {
       ''
@@ -90,7 +86,7 @@ class Message implements Interaction {
       } else if (map.contents instanceof String && map.contents.empty) {
         message.contents = OptionalBody.empty()
       } else {
-        message.contents = OptionalBody.body(JsonOutput.toJson(map.contents))
+        message.contents = OptionalBody.body(JsonOutput.toJson(map.contents).bytes)
       }
     }
     message.matchingRules = MatchingRulesImpl.fromMap(map.matchingRules)
@@ -100,7 +96,7 @@ class Message implements Interaction {
   }
 
   HttpPart asPactRequest() {
-    new Response(200, ['Content-Type': contentType], contents, matchingRules)
+    new Response(200, ['Content-Type': [contentType]], contents, matchingRules)
   }
 
   @Override

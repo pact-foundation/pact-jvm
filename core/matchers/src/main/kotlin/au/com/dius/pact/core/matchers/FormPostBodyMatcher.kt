@@ -6,7 +6,8 @@ import au.com.dius.pact.core.model.isMissing
 import au.com.dius.pact.core.model.isNotPresent
 import au.com.dius.pact.core.model.isPresent
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
-import au.com.dius.pact.core.model.orElse
+import au.com.dius.pact.core.model.valueAsString
+import au.com.dius.pact.core.model.orEmpty
 import mu.KLogging
 import org.apache.http.NameValuePair
 import org.apache.http.client.utils.URLEncodedUtils
@@ -17,12 +18,12 @@ class FormPostBodyMatcher : BodyMatcher {
     val actualBody = actual.body
     return when {
       expectedBody.isMissing() -> emptyList()
-      expectedBody.isPresent() && actualBody.isNotPresent() -> listOf(BodyMismatch(expectedBody.orElse(""),
+      expectedBody.isPresent() && actualBody.isNotPresent() -> listOf(BodyMismatch(expectedBody.orEmpty(),
               null, "Expected a form post body but was missing"))
       expectedBody.isEmpty() && actualBody.isEmpty() -> emptyList()
       else -> {
-        val expectedParameters = URLEncodedUtils.parse(expectedBody.orElse(""), expected.charset(), '&')
-        val actualParameters = URLEncodedUtils.parse(actualBody.orElse(""), actual.charset(), '&')
+        val expectedParameters = URLEncodedUtils.parse(expectedBody.valueAsString(), expected.charset(), '&')
+        val actualParameters = URLEncodedUtils.parse(actualBody.valueAsString(), actual.charset(), '&')
         compareParameters(expectedParameters, actualParameters, expected.matchingRules, allowUnexpectedKeys)
       }
     }

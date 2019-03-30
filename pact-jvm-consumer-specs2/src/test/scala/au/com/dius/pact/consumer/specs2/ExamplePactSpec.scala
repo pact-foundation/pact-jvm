@@ -24,7 +24,7 @@ class ExamplePactSpec extends Specification with PactSpec {
       .willRespondWith(maybeBody = Some("{}"))
     .uponReceiving("an option request")
       .matching(path = "/", method = "OPTION")
-      .willRespondWith(headers = Map("Option" -> "Value-X"))
+      .willRespondWith(headers = Map("Option" -> List("Value-X")))
     .withConsumerTest(providerConfig => {
       val optionsResult = ConsumerService(providerConfig.url).options("/")
       val simpleGet = ConsumerService(providerConfig.url).simpleGet("/foo")

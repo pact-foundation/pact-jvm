@@ -28,7 +28,7 @@ class ExamplePactWithMatchersSpec extends Specification with PactSpec {
       .matching(path = "/foo")
       .willRespondWith(
         status = 200,
-        headers = Map.empty[String, String],
+        headers = Map.empty[String, List[String]],
         bodyAndMatchers = body
       )
     .withConsumerTest(providerConfig => {

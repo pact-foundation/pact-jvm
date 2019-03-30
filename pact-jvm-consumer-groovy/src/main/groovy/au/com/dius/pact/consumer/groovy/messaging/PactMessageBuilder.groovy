@@ -108,7 +108,7 @@ class PactMessageBuilder extends BaseBuilder {
     def body = new PactBodyBuilder(mimetype: options.contentType, prettyPrintBody: options.prettyPrint)
     closure.delegate = body
     closure.call()
-    messages.last().contents = OptionalBody.body(body.body)
+    messages.last().contents = OptionalBody.body(body.body.bytes)
     messages.last().matchingRules.addCategory(body.matchers)
 
     this

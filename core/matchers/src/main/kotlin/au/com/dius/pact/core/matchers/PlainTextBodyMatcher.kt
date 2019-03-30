@@ -7,7 +7,7 @@ import au.com.dius.pact.core.model.isNull
 import au.com.dius.pact.core.model.isPresent
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
-import au.com.dius.pact.core.model.orElse
+import au.com.dius.pact.core.model.valueAsString
 import mu.KLogging
 
 class PlainTextBodyMatcher : BodyMatcher {
@@ -23,7 +23,7 @@ class PlainTextBodyMatcher : BodyMatcher {
       actualBody.isMissing() -> listOf(BodyMismatch(expectedBody!!.value, null,
               "Expected body '${expectedBody.value}' but was missing"))
       expectedBody.isEmpty() && actualBody.isEmpty() -> emptyList()
-      else -> compareText(expectedBody.orElse(""), actualBody.orElse(""), expected.matchingRules)
+      else -> compareText(expectedBody.valueAsString(), actualBody.valueAsString(), expected.matchingRules)
     }
   }
 

@@ -10,8 +10,9 @@ import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.matchers.generateDiff
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.isNullOrEmpty
 import au.com.dius.pact.core.model.messaging.Message
-import au.com.dius.pact.core.model.orElse
+import au.com.dius.pact.core.model.valueAsString
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import mu.KLogging
@@ -24,7 +25,7 @@ class ResponseComparison(
   val expected: Response,
   val actual: Map<String, Any>,
   val actualStatus: Int,
-  val actualHeaders: Map<String, String>,
+  val actualHeaders: Map<String, List<String>>,
   val actualBody: String?
 ) {
 
@@ -80,7 +81,7 @@ class ResponseComparison(
 
       val contentType = this.actual["contentType"] as ContentType
       result["diff"] = generateFullDiff(actualBody.orEmpty(), contentType.mimeType.toString(),
-        expected.body.orElse(""), expected.jsonBody())
+        expected.body.valueAsString(), expected.jsonBody())
     }
 
     return result
@@ -117,14 +118,14 @@ class ResponseComparison(
       response: Response,
       actualResponse: Map<String, Any>,
       actualStatus: Int,
-      actualHeaders: Map<String, String>,
+      actualHeaders: Map<String, List<String>>,
       actualBody: String?
     ): Map<String, Any?> {
       val result = mutableMapOf<String, Any?>()
       val comparison = ResponseComparison(response, actualResponse, actualStatus,
         actualHeaders.mapKeys { it.key.toUpperCase() }, actualBody)
       val mismatches = ResponseMatching.responseMismatches(response, Response(actualStatus,
-        actualHeaders, OptionalBody.body(actualBody)), true)
+        actualHeaders, OptionalBody.body(actualBody?.toByteArray())), true)
 
       result["method"] = comparison.compareStatus(mismatches)
       result["headers"] = comparison.compareHeaders(mismatches)
@@ -138,20 +139,20 @@ class ResponseComparison(
       val result = MatchingConfig.lookupBodyMatcher(message.contentType)
       var mismatches = mutableListOf<BodyMismatch>()
       val expected = message.asPactRequest()
-      val actualMessage = Response(200, mapOf("Content-Type" to message.contentType), actual)
+      val actualMessage = Response(200, mapOf("Content-Type" to listOf(message.contentType)), actual)
       if (result != null) {
         mismatches = result.matchBody(expected, actualMessage, true).toMutableList()
       } else {
-        val expectedBody = message.contents.orElse("")
-        if (expectedBody.isNotEmpty() && actual.value.isNullOrEmpty()) {
+        val expectedBody = message.contents.valueAsString()
+        if (expectedBody.isNotEmpty() && actual.isNullOrEmpty()) {
           mismatches.add(BodyMismatch(expectedBody, null))
-        } else if (actual.orElse("") != expectedBody) {
-          mismatches.add(BodyMismatch(expectedBody, actual.orElse("")))
+        } else if (actual.valueAsString() != expectedBody) {
+          mismatches.add(BodyMismatch(expectedBody, actual.valueAsString()))
         }
       }
 
       return ResponseComparison(expected as Response, mapOf("contentType" to ContentType.parse(message.contentType)),
-        200, emptyMap(), actual.orElse("")).compareBody(mismatches)
+        200, emptyMap(), actual.valueAsString()).compareBody(mismatches)
     }
   }
 }

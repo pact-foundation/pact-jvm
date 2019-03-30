@@ -8,7 +8,7 @@ import au.com.dius.pact.core.model.isNull
 import au.com.dius.pact.core.model.isPresent
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
-import au.com.dius.pact.core.model.unwrap
+import au.com.dius.pact.core.model.valueAsString
 import com.github.salomonbrys.kotson.contains
 import com.github.salomonbrys.kotson.forEach
 import com.github.salomonbrys.kotson.isEmpty
@@ -30,16 +30,16 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
       expected.body.isMissing() -> emptyList()
       expected.body.isEmpty() && actual.body.isEmpty() -> emptyList()
       !expected.body.isEmpty() && actual.body.isEmpty() ->
-        listOf(BodyMismatch(null, actual.body?.value, "Expected empty body but received '${actual.body?.value}'"))
+        listOf(BodyMismatch(null, actual.body.valueAsString(), "Expected empty body but received '${actual.body?.value}'"))
       expected.body.isNull() && actual.body.isPresent() ->
-        listOf(BodyMismatch(null, actual.body?.value, "Expected null body but received '${actual.body?.value}'"))
+        listOf(BodyMismatch(null, actual.body.valueAsString(), "Expected null body but received '${actual.body?.value}'"))
       expected.body.isNull() -> emptyList()
       actual.body.isMissing() ->
-        listOf(BodyMismatch(expected.body.unwrap(), null, "Expected body '${expected.body?.value}' but was missing"))
+        listOf(BodyMismatch(expected.body.valueAsString(), null, "Expected body '${expected.body?.value}' but was missing"))
       else -> {
         val parser = JsonParser()
-        compare(listOf("$"), parser.parse(expected.body.unwrap()),
-          parser.parse(actual.body.unwrap()), allowUnexpectedKeys, expected.matchingRules ?: MatchingRulesImpl())
+        compare(listOf("$"), parser.parse(expected.body.valueAsString()),
+          parser.parse(actual.body.valueAsString()), allowUnexpectedKeys, expected.matchingRules ?: MatchingRulesImpl())
       }
     }
   }

@@ -4,13 +4,13 @@ import au.com.dius.pact.core.model.{OptionalBody, Response}
 import ch.qos.logback.classic.Level
 import org.slf4j.{Logger, LoggerFactory}
 
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 
 object ListServers {
 
   def apply(oldState: ServerState): Result = {
-    val body = OptionalBody.body("{\"ports\": [" + oldState.keySet.mkString(", ") + "]}")
-    Result(new Response(200, JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/json")), body), oldState)
+    val body = OptionalBody.body(("{\"ports\": [" + oldState.keySet.mkString(", ") + "]}").getBytes)
+    Result(new Response(200, Map("Content-Type" -> List("application/json").asJava).asJava, body), oldState)
   }
 }
 

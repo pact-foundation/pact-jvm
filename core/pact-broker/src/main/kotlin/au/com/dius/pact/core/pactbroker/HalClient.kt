@@ -17,6 +17,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import mu.KLogging
+import org.apache.http.HttpMessage
 import org.apache.http.HttpResponse
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
@@ -133,6 +134,12 @@ open class HalClient @JvmOverloads constructor(
   var httpClient: CloseableHttpClient? = null
   var pathInfo: JsonElement? = null
   var lastUrl: String? = null
+  var defaultHeaders: MutableMap<String, String> = mutableMapOf()
+
+  fun <Method : HttpMessage> initialiseRequest(method: Method): Method {
+    defaultHeaders.forEach { key, value -> method.addHeader(key, value) }
+    return method
+  }
 
   override fun postJson(url: String, body: String) = postJson(url, body, null)
 
@@ -145,7 +152,7 @@ open class HalClient @JvmOverloads constructor(
     val client = setupHttpClient()
 
     return Result.of {
-      val httpPost = HttpPost(url)
+      val httpPost = initialiseRequest(HttpPost(url))
       httpPost.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
       httpPost.entity = StringEntity(body, ContentType.APPLICATION_JSON)
 
@@ -163,7 +170,8 @@ open class HalClient @JvmOverloads constructor(
 
   open fun setupHttpClient(): CloseableHttpClient {
     if (httpClient == null) {
-      val builder = HttpClients.custom().useSystemProperties()
+      val retryStrategy = CustomServiceUnavailableRetryStrategy(5, 3000)
+      val builder = HttpClients.custom().useSystemProperties().setServiceUnavailableRetryStrategy(retryStrategy)
       if (options["authentication"] is List<*>) {
         val authentication = options["authentication"] as List<*>
         val scheme = authentication.first().toString().toLowerCase()
@@ -179,7 +187,14 @@ open class HalClient @JvmOverloads constructor(
               logger.warn { "Basic authentication requires a username and password, ignoring." }
             }
           }
-          else -> logger.warn { "Hal client Only supports basic authentication, got '$scheme', ignoring." }
+          "bearer" -> {
+            if (authentication.size > 1) {
+              defaultHeaders["Authorization"] = "Bearer " + authentication[1].toString()
+            } else {
+              logger.warn { "Bearer token authentication requires a token, ignoring." }
+            }
+          }
+          else -> logger.warn { "Hal client Only supports basic and bearer token authentication, got '$scheme', ignoring." }
         }
       } else if (options.containsKey("authentication")) {
         logger.warn { "Authentication options needs to be a list of values, ignoring." }
@@ -214,7 +229,7 @@ open class HalClient @JvmOverloads constructor(
   private fun getJson(path: String, encodePath: Boolean = true): Result<JsonElement, Exception> {
     setupHttpClient()
     return Result.of {
-      val httpGet = HttpGet(buildUrl(baseUrl, path, encodePath))
+      val httpGet = initialiseRequest(HttpGet(buildUrl(baseUrl, path, encodePath)))
       httpGet.addHeader("Content-Type", "application/json")
       httpGet.addHeader("Accept", "application/hal+json, application/json")
 
@@ -325,7 +340,7 @@ open class HalClient @JvmOverloads constructor(
     encodePath: Boolean
   ): Any? {
     val client = setupHttpClient()
-    val httpPut = HttpPut(buildUrl(baseUrl, path, encodePath))
+    val httpPut = initialiseRequest(HttpPut(buildUrl(baseUrl, path, encodePath)))
     httpPut.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
     httpPut.entity = StringEntity(bodyJson, ContentType.APPLICATION_JSON)
 

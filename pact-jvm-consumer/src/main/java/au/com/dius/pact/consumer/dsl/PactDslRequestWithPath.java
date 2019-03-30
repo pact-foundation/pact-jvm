@@ -43,7 +43,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
                         String description,
                         String path,
                         String requestMethod,
-                        Map<String, String> requestHeaders,
+                        Map<String, List<String>> requestHeaders,
                         Map<String, List<String>> query,
                         OptionalBody requestBody,
                         MatchingRules requestMatchers,
@@ -113,10 +113,10 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
         if (headerNameValuePairs.length % 2 != 0) {
             throw new IllegalArgumentException("Pair key value should be provided, but there is one key without value.");
         }
-        requestHeaders.put(firstHeaderName, firstHeaderValue);
+        requestHeaders.put(firstHeaderName, Collections.singletonList(firstHeaderValue));
 
         for (int i = 0; i < headerNameValuePairs.length; i+=2) {
-            requestHeaders.put(headerNameValuePairs[i], headerNameValuePairs[i+1]);
+          requestHeaders.put(headerNameValuePairs[i], Collections.singletonList(headerNameValuePairs[i+1]));
         }
 
         return this;
@@ -128,8 +128,10 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param headers Key-value pairs
      */
     public PactDslRequestWithPath headers(Map<String, String> headers) {
-        requestHeaders.putAll(headers);
-        return this;
+      for (Map.Entry<String, String> entry: headers.entrySet()) {
+        requestHeaders.put(entry.getKey(), Collections.singletonList(entry.getValue()));
+      }
+      return this;
     }
 
     /**
@@ -158,7 +160,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param body Request body in string form
      */
     public PactDslRequestWithPath body(String body) {
-        requestBody = OptionalBody.body(body);
+        requestBody = OptionalBody.body(body.getBytes());
         return this;
     }
 
@@ -168,8 +170,8 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param body Request body in string form
      */
     public PactDslRequestWithPath body(String body, String mimeType) {
-        requestBody = OptionalBody.body(body);
-        requestHeaders.put(CONTENT_TYPE, mimeType);
+        requestBody = OptionalBody.body(body.getBytes());
+        requestHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
         return this;
     }
 
@@ -188,7 +190,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param body Request body in Java Functional Interface Supplier that must return a string
      */
     public PactDslRequestWithPath body(Supplier<String> body) {
-        requestBody = OptionalBody.body(body.get());
+        requestBody = OptionalBody.body(body.get().getBytes());
         return this;
     }
 
@@ -198,8 +200,8 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param body Request body in Java Functional Interface Supplier that must return a string
      */
     public PactDslRequestWithPath body(Supplier<String> body, String mimeType) {
-        requestBody = OptionalBody.body(body.get());
-        requestHeaders.put(CONTENT_TYPE, mimeType);
+        requestBody = OptionalBody.body(body.get().getBytes());
+        requestHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
         return this;
     }
 
@@ -257,9 +259,9 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param body Request body in JSON form
      */
     public PactDslRequestWithPath body(JSONObject body) {
-        requestBody = OptionalBody.body(body.toString());
+        requestBody = OptionalBody.body(body.toString().getBytes());
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
-            requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+            requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_JSON.toString()));
         }
         return this;
     }
@@ -273,9 +275,9 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
         DslPart parent = body.close();
         requestMatchers.addCategory(parent.getMatchers());
         requestGenerators.addGenerators(parent.generators);
-        requestBody = OptionalBody.body(parent.toString());
+        requestBody = OptionalBody.body(parent.toString().getBytes());
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
-            requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+            requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_JSON.toString()));
         }
         return this;
     }
@@ -286,9 +288,9 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param body XML Document
      */
     public PactDslRequestWithPath body(Document body) throws TransformerException {
-        requestBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body));
+        requestBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body).getBytes());
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
-            requestHeaders.put(CONTENT_TYPE, ContentType.APPLICATION_XML.toString());
+            requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
         }
         return this;
     }
@@ -343,7 +345,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      */
     public PactDslRequestWithPath matchHeader(String header, String regex, String headerExample) {
         requestMatchers.addCategory("header").setRule(header, new RegexMatcher(regex));
-        requestHeaders.put(header, headerExample);
+        requestHeaders.put(header, Collections.singletonList(headerExample));
         return this;
     }
 
@@ -411,7 +413,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
    */
   public PactDslRequestWithPath headerFromProviderState(String name, String expression, String example) {
     requestGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression));
-    requestHeaders.put(name, example);
+    requestHeaders.put(name, Collections.singletonList(example));
     return this;
   }
 

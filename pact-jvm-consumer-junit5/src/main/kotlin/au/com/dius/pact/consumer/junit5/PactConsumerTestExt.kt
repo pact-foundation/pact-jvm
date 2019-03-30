@@ -70,7 +70,7 @@ annotation class PactTestFor(
   val hostInterface: String = "",
 
   /**
-   * Port number to bind to. Only used for synchronous provider tests and defaults to 8080.
+   * Port number to bind to. Only used for synchronous provider tests and defaults to 0, which causes a random free port to be chosen.
    */
   val port: String = "",
 

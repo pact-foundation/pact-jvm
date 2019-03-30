@@ -4,12 +4,12 @@ import au.com.dius.pact.core.matchers.util.padTo
 import au.com.dius.pact.core.model.HttpPart
 import au.com.dius.pact.core.model.isEmpty
 import au.com.dius.pact.core.model.isMissing
-import au.com.dius.pact.core.model.orElse
-import au.com.dius.pact.core.model.unwrap
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
-import org.apache.xerces.dom.TextImpl
+import au.com.dius.pact.core.model.unwrap
+import au.com.dius.pact.core.model.valueAsString
 import mu.KLogging
+import org.apache.xerces.dom.TextImpl
 import org.w3c.dom.NamedNodeMap
 import org.w3c.dom.Node
 import org.w3c.dom.Node.ELEMENT_NODE
@@ -28,7 +28,7 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
       actual.body.isMissing() ->
         listOf(BodyMismatch(expected.body.unwrap(), null, "Expected body '${expected.body?.value}' but was missing"))
       else -> {
-        compareNode(listOf("$"), parse(expected.body.orElse("")), parse(actual.body.orElse("")),
+        compareNode(listOf("$"), parse(expected.body.valueAsString()), parse(actual.body.valueAsString()),
           allowUnexpectedKeys, expected.matchingRules ?: MatchingRulesImpl())
       }
     }

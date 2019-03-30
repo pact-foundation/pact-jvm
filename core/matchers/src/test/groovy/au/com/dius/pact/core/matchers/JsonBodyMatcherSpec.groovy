@@ -38,7 +38,7 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('"Blah"')
+    actualBody = OptionalBody.body('"Blah"'.bytes)
     expectedBody = OptionalBody.missing()
   }
 
@@ -48,8 +48,8 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('"Blah"')
-    expectedBody = OptionalBody.body('"Blah"')
+    actualBody = OptionalBody.body('"Blah"'.bytes)
+    expectedBody = OptionalBody.body('"Blah"'.bytes)
   }
 
   def 'matching json bodies - return no mismatches - with equal Maps'() {
@@ -58,8 +58,8 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('{"something": 100}')
-    expectedBody = OptionalBody.body('{"something":100}')
+    actualBody = OptionalBody.body('{"something": 100}'.bytes)
+    expectedBody = OptionalBody.body('{"something":100}'.bytes)
   }
 
   def 'matching json bodies - return no mismatches - with equal Lists'() {
@@ -68,8 +68,8 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('[100,200,300]')
-    expectedBody = OptionalBody.body('[100, 200, 300]')
+    actualBody = OptionalBody.body('[100,200,300]'.bytes)
+    expectedBody = OptionalBody.body('[100, 200, 300]'.bytes)
   }
 
   def 'matching json bodies - return no mismatches - with each like matcher on unequal lists'() {
@@ -81,8 +81,8 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('{"list": [100, 200, 300, 400]}')
-    expectedBody = OptionalBody.body('{"list": [100]}')
+    actualBody = OptionalBody.body('{"list": [100, 200, 300, 400]}'.bytes)
+    expectedBody = OptionalBody.body('{"list": [100]}'.bytes)
   }
 
   def 'matching json bodies - return no mismatches - with each like matcher on empty list'() {
@@ -94,8 +94,8 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('{"list": []}')
-    expectedBody = OptionalBody.body('{"list": [100]}')
+    actualBody = OptionalBody.body('{"list": []}'.bytes)
+    expectedBody = OptionalBody.body('{"list": [100]}'.bytes)
   }
 
   def 'matching json bodies - returns a mismatch - when comparing anything to an empty body'() {
@@ -104,8 +104,8 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('')
-    expectedBody = OptionalBody.body('"Blah"')
+    actualBody = OptionalBody.body(''.bytes)
+    expectedBody = OptionalBody.body('"Blah"'.bytes)
   }
 
   def 'matching json bodies - returns a mismatch - when comparing anything to a null body'() {
@@ -114,7 +114,7 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('""')
+    actualBody = OptionalBody.body('""'.bytes)
     expectedBody = OptionalBody.nullBody()
   }
 
@@ -124,8 +124,8 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('{"something": 100}')
-    expectedBody = OptionalBody.body('{}')
+    actualBody = OptionalBody.body('{"something": 100}'.bytes)
+    expectedBody = OptionalBody.body('{}'.bytes)
   }
 
   def '''matching json bodies - returns a mismatch - when comparing an empty map to a non-empty one and we do not
@@ -138,8 +138,8 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('{"something": 100}')
-    expectedBody = OptionalBody.body('{}')
+    actualBody = OptionalBody.body('{"something": 100}'.bytes)
+    expectedBody = OptionalBody.body('{}'.bytes)
   }
 
   def 'matching json bodies - returns a mismatch - when comparing an empty list to a non-empty one'() {
@@ -151,8 +151,8 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('[100]')
-    expectedBody = OptionalBody.body('[]')
+    actualBody = OptionalBody.body('[100]'.bytes)
+    expectedBody = OptionalBody.body('[]'.bytes)
   }
 
   def 'matching json bodies - returns a mismatch - when comparing a map to one with less entries'() {
@@ -164,14 +164,14 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('{"something": 100}')
-    expectedBody = OptionalBody.body('{"something": 100, "somethingElse": 100}')
+    actualBody = OptionalBody.body('{"something": 100}'.bytes)
+    expectedBody = OptionalBody.body('{"something": 100, "somethingElse": 100}'.bytes)
   }
 
   def 'matching json bodies - returns a mismatch - when comparing a list to one with with different size'() {
     given:
-    def actualBody = OptionalBody.body('[1,2,3]')
-    def expectedBody = OptionalBody.body('[1,2,3,4]')
+    def actualBody = OptionalBody.body('[1,2,3]'.bytes)
+    def expectedBody = OptionalBody.body('[1,2,3,4]'.bytes)
 
     when:
     def mismatches = matcher.matchBody(expected(expectedBody), actual(actualBody), true).findAll {
@@ -193,8 +193,8 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('{"something": 100}')
-    expectedBody = OptionalBody.body('{"something": 100, "somethingElse": 100}')
+    actualBody = OptionalBody.body('{"something": 100}'.bytes)
+    expectedBody = OptionalBody.body('{"something": 100, "somethingElse": 100}'.bytes)
   }
 
   def 'matching json bodies - returns a mismatch - when the actual body has invalid value'() {
@@ -206,8 +206,8 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('{"something": 101}')
-    expectedBody = OptionalBody.body('{"something": 100}')
+    actualBody = OptionalBody.body('{"something": 101}'.bytes)
+    expectedBody = OptionalBody.body('{"something": 100}'.bytes)
   }
 
   def 'matching json bodies - returns a mismatch - when comparing a map to a list'() {
@@ -220,8 +220,8 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('[100, 100]')
-    expectedBody = OptionalBody.body('{"something": 100, "somethingElse": 100}')
+    actualBody = OptionalBody.body('[100, 100]'.bytes)
+    expectedBody = OptionalBody.body('{"something": 100, "somethingElse": 100}'.bytes)
   }
 
   def 'matching json bodies - returns a mismatch - when comparing list to anything'() {
@@ -233,8 +233,8 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('100')
-    expectedBody = OptionalBody.body('[100, 100]')
+    actualBody = OptionalBody.body('100'.bytes)
+    expectedBody = OptionalBody.body('[100, 100]'.bytes)
   }
 
   def 'matching json bodies - with a matcher defined - delegate to the matcher'() {
@@ -246,8 +246,8 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('{"something": 100}')
-    expectedBody = OptionalBody.body('{"something": 101}')
+    actualBody = OptionalBody.body('{"something": 100}'.bytes)
+    expectedBody = OptionalBody.body('{"something": 101}'.bytes)
   }
 
   @RestoreSystemProperties
@@ -261,8 +261,8 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('{"something": 100, "other": 100}')
-    expectedBody = OptionalBody.body('{"somethingElse": 100}')
+    actualBody = OptionalBody.body('{"something": 100, "other": 100}'.bytes)
+    expectedBody = OptionalBody.body('{"somethingElse": 100}'.bytes)
   }
 
   @RestoreSystemProperties
@@ -292,13 +292,13 @@ class JsonBodyMatcherSpec extends Specification {
             "contentLength": 0,
             "tags": null
         }
-    ]''')
+    ]'''.bytes)
     expectedBody = OptionalBody.body('''[{
       "name": "Test",
       "documentId": 0,
       "documentCategoryId": 5,
       "contentLength": 0
-    }]''')
+    }]'''.bytes)
   }
 
   @RestoreSystemProperties
@@ -314,8 +314,8 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('{"id": 100, "width": 100}')
-    expectedBody = OptionalBody.body('{"id": 100, "height": 100}')
+    actualBody = OptionalBody.body('{"id": 100, "width": 100}'.bytes)
+    expectedBody = OptionalBody.body('{"id": 100, "height": 100}'.bytes)
   }
 
   @RestoreSystemProperties
@@ -329,7 +329,7 @@ class JsonBodyMatcherSpec extends Specification {
 
     where:
 
-    actualBody = OptionalBody.body('{"id": 100, "width": 100}')
-    expectedBody = OptionalBody.body('{"id": 100, "height": 100}')
+    actualBody = OptionalBody.body('{"id": 100, "width": 100}'.bytes)
+    expectedBody = OptionalBody.body('{"id": 100, "height": 100}'.bytes)
   }
 }

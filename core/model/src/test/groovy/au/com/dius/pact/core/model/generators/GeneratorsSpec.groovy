@@ -74,10 +74,10 @@ class GeneratorsSpec extends Specification {
   def 'for bodies, the generator is applied based on the content type'() {
     given:
     GeneratorsKt.contentTypeHandlers['application/json'] = Stub(ContentTypeHandler) {
-      processBody(_, _) >> OptionalBody.body('JSON')
+      processBody(_, _) >> OptionalBody.body('JSON'.bytes)
     }
     GeneratorsKt.contentTypeHandlers['application/xml'] = Stub(ContentTypeHandler) {
-      processBody(_, _) >> OptionalBody.body('XML')
+      processBody(_, _) >> OptionalBody.body('XML'.bytes)
     }
 
     expect:
@@ -85,13 +85,13 @@ class GeneratorsSpec extends Specification {
 
     where:
 
-    body | contentType | returnedBody
-    OptionalBody.empty() | 'text/plain' | OptionalBody.empty()
-    OptionalBody.missing() | 'text/plain' | OptionalBody.missing()
-    OptionalBody.nullBody() | 'text/plain' | OptionalBody.nullBody()
-    OptionalBody.body('text') | 'text/plain' | OptionalBody.body('text')
-    OptionalBody.body('text') | 'application/json' | OptionalBody.body('JSON')
-    OptionalBody.body('text') | 'application/xml' | OptionalBody.body('XML')
+    body                            | contentType        | returnedBody
+    OptionalBody.empty()            | 'text/plain'       | OptionalBody.empty()
+    OptionalBody.missing()          | 'text/plain'       | OptionalBody.missing()
+    OptionalBody.nullBody()         | 'text/plain'       | OptionalBody.nullBody()
+    OptionalBody.body('text'.bytes) | 'text/plain'       | OptionalBody.body('text'.bytes)
+    OptionalBody.body('text'.bytes) | 'application/json' | OptionalBody.body('JSON'.bytes)
+    OptionalBody.body('text'.bytes) | 'application/xml'  | OptionalBody.body('XML'.bytes)
 
   }
 

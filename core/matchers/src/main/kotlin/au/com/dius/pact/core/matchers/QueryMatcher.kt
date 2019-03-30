@@ -13,10 +13,10 @@ object QueryMatcher : KLogging() {
     matchers: MatchingRules
   ): List<QueryMismatch> {
     return if (Matchers.matcherDefined("query", listOf(parameter), matchers)) {
-      logger.debug("compareQueryParameterValues: Matcher defined for query parameter '$parameter'")
+      logger.debug { "compareQueryParameterValues: Matcher defined for query parameter '$parameter'" }
       Matchers.domatch(matchers, "query", listOf(parameter), expected, actual, QueryMismatchFactory)
     } else {
-      logger.debug("compareQueryParameterValues: No matcher defined for query parameter '$parameter', using equality")
+      logger.debug { "compareQueryParameterValues: No matcher defined for query parameter '$parameter', using equality" }
       if (expected == actual) {
         emptyList()
       } else {
@@ -54,7 +54,7 @@ object QueryMatcher : KLogging() {
   ): List<QueryMismatch> {
     val path = listOf(parameter)
     return if (Matchers.matcherDefined("query", path, matchers)) {
-      logger.debug("compareQuery: Matcher defined for query parameter '$parameter'")
+      logger.debug { "compareQuery: Matcher defined for query parameter '$parameter'" }
       Matchers.domatch(matchers, "query", path, expected, actual, QueryMismatchFactory) +
         compareQueryParameterValues(parameter, expected, actual, path, matchers)
     } else {

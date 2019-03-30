@@ -1,7 +1,18 @@
+plugins {
+  id 'antlr'
+}
+
 dependencies {
   compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
   compile "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   compile "com.google.code.findbugs:jsr305:3.0.2"
 
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}:indy"
+
+  antlr "org.antlr:antlr4:4.7.2"
+}
+
+compileJava {
+  classpath = classpath.plus(files(compileKotlin.destinationDir))
+  dependsOn compileKotlin
 }

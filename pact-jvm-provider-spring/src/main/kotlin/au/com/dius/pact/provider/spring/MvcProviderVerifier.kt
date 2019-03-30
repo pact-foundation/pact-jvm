@@ -111,7 +111,7 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     val httpHeaders = HttpHeaders()
 
     request.headers?.forEach { k, v ->
-      httpHeaders.add(k, v)
+      httpHeaders.add(k, v.joinToString(", "))
     }
 
     if (hasBody && !httpHeaders.containsKey(HttpHeaders.CONTENT_TYPE)) {
@@ -125,9 +125,9 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     logger.debug { "Received response: ${httpResponse.status}" }
     val response = mutableMapOf<String, Any>("statusCode" to httpResponse.status)
 
-    val headers = mutableMapOf<String, String>()
+    val headers = mutableMapOf<String, List<String>>()
     httpResponse.headerNames.forEach { headerName ->
-      headers[headerName] = httpResponse.getHeader(headerName)
+      headers[headerName] = listOf(httpResponse.getHeader(headerName))
     }
     response["headers"] = headers
 

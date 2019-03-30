@@ -9,7 +9,7 @@ The library is available on maven central using:
 
 * group-id = `au.com.dius`
 * artifact-id = `pact-jvm-consumer-junit5_2.12`
-* version-id = `3.5.x`
+* version-id = `3.6.x`
 
 ## Usage
 
@@ -29,12 +29,12 @@ For each test (as with JUnit 4), you need to define a method annotated with the 
 interactions for the test.
 
 ```java
-    @Pact(provider="test_provider", consumer="test_consumer")
+    @Pact(provider="ArticlesProvider", consumer="test_consumer")
     public RequestResponsePact createPact(PactDslWithProvider builder) {
         return builder
             .given("test state")
             .uponReceiving("ExampleJavaConsumerPactTest test interaction")
-                .path("/")
+                .path("/articles.json")
                 .method("GET")
             .willRespondWith()
                 .status(200)
@@ -56,7 +56,7 @@ can also set the Pact specification version to use (default is V3).
 
 ```java
 @ExtendWith(PactConsumerTestExt.class)
-@PactTestFor(providerName = "ArticlesProvider", port = "1234")
+@PactTestFor(providerName = "ArticlesProvider")
 public class ExampleJavaConsumerPactTest {
 ```
 
@@ -86,7 +86,7 @@ You can get the mock server injected into the test method by adding a `MockServe
 
 ```java
   @Test
-  void test(MockServer mockServer) {
+  void test(MockServer mockServer) throws IOException {
     HttpResponse httpResponse = Request.Get(mockServer.getUrl() + "/articles.json").execute().returnResponse();
     assertThat(httpResponse.getStatusLine().getStatusCode(), is(equalTo(200)));
   }

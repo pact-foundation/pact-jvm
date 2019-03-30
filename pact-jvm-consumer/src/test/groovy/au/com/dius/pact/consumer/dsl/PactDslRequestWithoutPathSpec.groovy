@@ -23,9 +23,9 @@ class PactDslRequestWithoutPathSpec extends Specification {
 
     then:
     subject.requestMethod == 'PATCH'
-    subject.requestHeaders == [test: 'test']
+    subject.requestHeaders == [test: ['test']]
     subject.query == [test: ['true']]
-    subject.requestBody == OptionalBody.body('{"test":true}')
+    subject.requestBody == OptionalBody.body('{"test":true}'.bytes)
   }
 
 }

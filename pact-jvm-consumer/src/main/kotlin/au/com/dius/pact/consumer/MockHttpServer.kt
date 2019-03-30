@@ -85,8 +85,8 @@ abstract class BaseMockServer(
         pactResponseToHttpExchange(response, exchange)
       } catch (e: Exception) {
         logger.error(e) { "Failed to generate response" }
-        pactResponseToHttpExchange(Response(500, mutableMapOf("Content-Type" to "application/json"),
-          OptionalBody.body("{\"error\": ${e.message}}")), exchange)
+        pactResponseToHttpExchange(Response(500, mutableMapOf("Content-Type" to listOf("application/json")),
+          OptionalBody.body("{\"error\": ${e.message}}".toByteArray())), exchange)
       }
     }
   }
@@ -94,11 +94,11 @@ abstract class BaseMockServer(
   private fun pactResponseToHttpExchange(response: Response, exchange: HttpExchange) {
     val headers = response.headers
     if (headers != null) {
-      exchange.responseHeaders.putAll(headers.mapValues { listOf(it.value) })
+      exchange.responseHeaders.putAll(headers)
     }
     val body = response.body
     if (body != null && body.isPresent()) {
-      val bytes = body.unwrap().toByteArray()
+      val bytes = body.unwrap()
       exchange.sendResponseHeaders(response.status, bytes.size.toLong())
       exchange.responseBody.write(bytes)
     } else {
@@ -129,18 +129,19 @@ abstract class BaseMockServer(
     return invalidResponse(request)
   }
 
-  private fun invalidResponse(request: Request) =
-    Response(500, mapOf("Access-Control-Allow-Origin" to "*", "Content-Type" to "application/json",
-      "X-Pact-Unexpected-Request" to "1"), OptionalBody.body("{ \"error\": \"Unexpected request : " +
-      StringEscapeUtils.escapeJson(request.toString()) + "\" }"))
+  private fun invalidResponse(request: Request): Response {
+    val body = "{ \"error\": \"Unexpected request : ${StringEscapeUtils.escapeJson(request.toString())}\" }"
+    return Response(500, mapOf("Access-Control-Allow-Origin" to listOf("*"), "Content-Type" to listOf("application/json"),
+      "X-Pact-Unexpected-Request" to listOf("1")), OptionalBody.body(body.toByteArray()))
+  }
 
   private fun toPactRequest(exchange: HttpExchange): Request {
-    val headers = exchange.requestHeaders.mapValues { it.value.joinToString(", ") }
+    val headers = exchange.requestHeaders
     val bodyContents = exchange.requestBody.bufferedReader(calculateCharset(headers)).readText()
-    val body = if (bodyContents.isNullOrEmpty()) {
+    val body = if (bodyContents.isEmpty()) {
       OptionalBody.empty()
     } else {
-      OptionalBody.body(bodyContents)
+      OptionalBody.body(bodyContents.toByteArray())
     }
     return Request(exchange.requestMethod, exchange.requestURI.path,
       queryStringToMap(exchange.requestURI.rawQuery), headers, body)
@@ -234,14 +235,14 @@ open class MockHttpServer(pact: RequestResponsePact, config: MockProviderConfig)
 open class MockHttpsServer(pact: RequestResponsePact, config: MockProviderConfig)
   : BaseMockServer(pact, config, HttpsServer.create(config.address(), 0))
 
-fun calculateCharset(headers: Map<String, String>): Charset {
+fun calculateCharset(headers: Map<String, List<String>>): Charset {
   val contentType = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
   val default = Charset.forName("UTF-8")
-  if (contentType != null) {
+  if (contentType != null && contentType.value.isNotEmpty()) {
     try {
-      return ContentType.parse(contentType.value)?.charset ?: default
+      return ContentType.parse(contentType.value.first())?.charset ?: default
     } catch (e: Exception) {
-      BaseMockServer.Companion.logger.debug(e) { "Failed to parse the charset from the content type header" }
+      BaseMockServer.logger.debug(e) { "Failed to parse the charset from the content type header" }
     }
   }
   return default

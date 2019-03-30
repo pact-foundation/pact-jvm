@@ -34,6 +34,9 @@ open class PactPublishMojo : AbstractMojo() {
     private var pactBrokerServerId: String? = null
 
     @Parameter
+    private var pactBrokerToken: String? = null
+
+    @Parameter
     private var pactBrokerUsername: String? = null
 
     @Parameter
@@ -67,7 +70,10 @@ open class PactPublishMojo : AbstractMojo() {
 
       if (brokerClient == null) {
         val options = mutableMapOf<String, Any>()
-        if (!pactBrokerUsername.isNullOrEmpty()) {
+        if (!pactBrokerToken.isNullOrEmpty()) {
+          pactBrokerAuthenticationScheme = "bearer"
+          options["authentication"] = listOf(pactBrokerAuthenticationScheme, pactBrokerToken)
+        } else if (!pactBrokerUsername.isNullOrEmpty()) {
           options["authentication"] = listOf(pactBrokerAuthenticationScheme ?: "basic", pactBrokerUsername,
             pactBrokerPassword)
         } else if (!pactBrokerServerId.isNullOrEmpty()) {

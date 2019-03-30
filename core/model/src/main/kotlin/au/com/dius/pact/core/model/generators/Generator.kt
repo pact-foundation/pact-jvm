@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model.generators
 
+import au.com.dius.pact.com.github.michaelbull.result.getOr
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.support.expressions.ExpressionParser.containsExpressions
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
@@ -9,7 +10,6 @@ import mu.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.OffsetDateTime
@@ -24,11 +24,18 @@ import kotlin.reflect.full.declaredMemberFunctions
 
 private val logger = KotlinLogging.logger {}
 
+const val DEFAULT_GENERATOR_PACKAGE = "au.com.dius.pact.core.model.generators"
+
+/**
+ * Looks up the generator class in the configured generator packages. By default it will look for generators in
+ * au.com.dius.pact.model.generators package, but this can be extended by adding a comma separated list to the
+ * pact.generators.packages system property. The generator class name needs to be <Type>Generator.
+ */
 fun lookupGenerator(generatorMap: Map<String, Any>): Generator? {
   var generator: Generator? = null
 
   try {
-    val generatorClass = Class.forName("au.com.dius.pact.core.model.generators.${generatorMap["type"]}Generator").kotlin
+    val generatorClass = findGeneratorClass(generatorMap["type"].toString()).kotlin
     val fromMap = when {
       generatorClass.companionObject != null ->
         generatorClass.companionObjectInstance to generatorClass.companionObject?.declaredMemberFunctions?.find { it.name == "fromMap" }
@@ -48,12 +55,40 @@ fun lookupGenerator(generatorMap: Map<String, Any>): Generator? {
   return generator
 }
 
+fun findGeneratorClass(generatorType: String): Class<*> {
+  val generatorPackages = System.getProperty("pact.generators.packages")
+  return when {
+    generatorPackages.isNullOrBlank() -> Class.forName("$DEFAULT_GENERATOR_PACKAGE.${generatorType}Generator")
+    else -> {
+      val packages = generatorPackages.split(",").map { it.trim() } + DEFAULT_GENERATOR_PACKAGE
+      var generatorClass: Class<*>? = null
+
+      packages.find {
+        try {
+          generatorClass = Class.forName("$it.${generatorType}Generator")
+          true
+        } catch (_: ClassNotFoundException) {
+          false
+        }
+      }
+
+      generatorClass ?: throw ClassNotFoundException("No generator found for type '$generatorType'")
+    }
+  }
+}
+
+/**
+ * Interface that all Generators need to implement
+ */
 interface Generator {
   fun generate(context: Map<String, Any?>): Any?
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any>
   fun correspondsToMode(mode: GeneratorTestMode): Boolean = true
 }
 
+/**
+ * Generates a random integer between a min and max value
+ */
 data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     return mapOf("type" to "RandomInt", "min" to min, "max" to max)
@@ -82,6 +117,9 @@ data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
   }
 }
 
+/**
+ * Generates a random big decimal value with the provided number of digits
+ */
 data class RandomDecimalGenerator(val digits: Int) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     return mapOf("type" to "RandomDecimal", "digits" to digits)
@@ -102,6 +140,9 @@ data class RandomDecimalGenerator(val digits: Int) : Generator {
   }
 }
 
+/**
+ * Generates a random hexadecimal value of the given number of digits
+ */
 data class RandomHexadecimalGenerator(val digits: Int) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     return mapOf("type" to "RandomHexadecimal", "digits" to digits)
@@ -122,6 +163,9 @@ data class RandomHexadecimalGenerator(val digits: Int) : Generator {
   }
 }
 
+/**
+ * Generates a random alphanumeric string of the provided length
+ */
 data class RandomStringGenerator(val size: Int = 20) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     return mapOf("type" to "RandomString", "size" to size)
@@ -144,6 +188,9 @@ data class RandomStringGenerator(val size: Int = 20) : Generator {
   }
 }
 
+/**
+ * Generates a random string from the provided regular expression
+ */
 data class RegexGenerator(val regex: String) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     return mapOf("type" to "Regex", "regex" to regex)
@@ -156,6 +203,9 @@ data class RegexGenerator(val regex: String) : Generator {
   }
 }
 
+/**
+ * Generates a random UUID
+ */
 object UuidGenerator : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     return mapOf("type" to "Uuid")
@@ -171,35 +221,52 @@ object UuidGenerator : Generator {
   }
 }
 
-data class DateGenerator(val format: String? = null) : Generator {
+/**
+ * Generates a date value for the provided format. If no format is provided, ISO date format is used. If an expression
+ * is given, it will be evaluated to generate the date, otherwise 'today' will be used
+ */
+data class DateGenerator @JvmOverloads constructor(val format: String? = null, val expression: String? = null) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
-    if (format != null) {
-      return mapOf("type" to "Date", "format" to this.format)
+    val map = mutableMapOf("type" to "Date")
+    if (!format.isNullOrEmpty()) {
+      map["format"] = this.format
     }
-    return mapOf("type" to "Date")
+    if (!expression.isNullOrEmpty()) {
+      map["expression"] = this.expression
+    }
+    return map
   }
 
   override fun generate(context: Map<String, Any?>): Any {
+    val date = DateExpression.executeDateExpression(OffsetDateTime.now(), expression).getOr { OffsetDateTime.now() }
     return if (format != null) {
-      OffsetDateTime.now().format(DateTimeFormatter.ofPattern(format))
+      date.format(DateTimeFormatter.ofPattern(format))
     } else {
-      LocalDate.now().toString()
+      date.toString()
     }
   }
 
   companion object {
     fun fromMap(map: Map<String, Any>): DateGenerator {
-      return DateGenerator(map["format"] as String?)
+      return DateGenerator(map["format"] as String?, map["expression"] as String?)
     }
   }
 }
 
-data class TimeGenerator(val format: String? = null) : Generator {
+/**
+ * Generates a time value for the provided format. If no format is provided, ISO time format is used. If an expression
+ * is given, it will be evaluated to generate the time, otherwise 'now' will be used
+ */
+data class TimeGenerator @JvmOverloads constructor(val format: String? = null, val expression: String? = null) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
-    if (format != null) {
-      return mapOf("type" to "Time", "format" to this.format)
+    val map = mutableMapOf("type" to "Time")
+    if (!format.isNullOrEmpty()) {
+      map["format"] = this.format
     }
-    return mapOf("type" to "Time")
+    if (!expression.isNullOrEmpty()) {
+      map["expression"] = this.expression
+    }
+    return map
   }
 
   override fun generate(context: Map<String, Any?>): Any {
@@ -212,17 +279,25 @@ data class TimeGenerator(val format: String? = null) : Generator {
 
   companion object {
     fun fromMap(map: Map<String, Any>): TimeGenerator {
-      return TimeGenerator(map["format"] as String?)
+      return TimeGenerator(map["format"] as String?, map["expression"] as String?)
     }
   }
 }
 
-data class DateTimeGenerator(val format: String? = null) : Generator {
+/**
+ * Generates a datetime value for the provided format. If no format is provided, ISO format is used. If an expression
+ * is given, it will be evaluated to generate the datetime, otherwise 'now' will be used
+ */
+data class DateTimeGenerator @JvmOverloads constructor(val format: String? = null, val expression: String? = null) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
-    if (format != null) {
-      return mapOf("type" to "DateTime", "format" to this.format)
+    val map = mutableMapOf("type" to "DateTime")
+    if (!format.isNullOrEmpty()) {
+      map["format"] = this.format
     }
-    return mapOf("type" to "DateTime")
+    if (!expression.isNullOrEmpty()) {
+      map["expression"] = this.expression
+    }
+    return map
   }
 
   override fun generate(context: Map<String, Any?>): Any {
@@ -235,11 +310,14 @@ data class DateTimeGenerator(val format: String? = null) : Generator {
 
   companion object {
     fun fromMap(map: Map<String, Any>): DateTimeGenerator {
-      return DateTimeGenerator(map["format"] as String?)
+      return DateTimeGenerator(map["format"] as String?, map["expression"] as String?)
     }
   }
 }
 
+/**
+ * Generates a random boolean value
+ */
 @SuppressWarnings("EqualsWithHashCodeExist")
 object RandomBooleanGenerator : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
@@ -258,6 +336,9 @@ object RandomBooleanGenerator : Generator {
   }
 }
 
+/**
+ * Generates a value that is looked up from the provider state context
+ */
 data class ProviderStateGenerator(val expression: String) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     return mapOf("type" to "ProviderState", "expression" to expression)

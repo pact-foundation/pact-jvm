@@ -13,28 +13,27 @@ import unfiltered.request.HttpRequest
 import unfiltered.response._
 
 import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 import scala.collection.immutable.Stream
 
 object Conversions extends StrictLogging {
 
-  case class Headers(headers: java.util.Map[String, String]) extends unfiltered.response.Responder[Any] {
+  case class Headers(headers: java.util.Map[String, java.util.List[String]]) extends unfiltered.response.Responder[Any] {
     def respond(res: HttpResponse[Any]) {
-      import collection.JavaConversions._
       if (headers != null) {
-        headers.foreach { case (key, value) => res.header(key, value) }
+        headers.asScala.foreach { case (key, value) => res.header(key, value.asScala.mkString(", ")) }
       }
     }
   }
 
   implicit def pactToUnfilteredResponse(response: Response): ResponseFunction[NHttpResponse] = {
     if (response.getBody.isPresent) {
-      Status(response.getStatus) ~> Headers(response.getHeaders) ~> ResponseString(response.getBody.getValue())
+      Status(response.getStatus) ~> Headers(response.getHeaders) ~> ResponseString(response.getBody.valueAsString())
     } else Status(response.getStatus) ~> Headers(response.getHeaders)
   }
 
-  def toHeaders(request: HttpRequest[ReceivedMessage]): java.util.Map[String, String] = {
-    JavaConversions.mapAsJavaMap(request.headerNames.map(name =>
-      name -> request.headers(name).mkString(",")).toMap)
+  def toHeaders(request: HttpRequest[ReceivedMessage]): java.util.Map[String, java.util.List[String]] = {
+    request.headerNames.map(name => name -> request.headers(name).toList.asJava).toMap.asJava
   }
 
   def toQuery(request: HttpRequest[ReceivedMessage]): java.util.Map[String, java.util.List[String]] = {
@@ -55,6 +54,6 @@ object Conversions extends StrictLogging {
 
   implicit def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {
     new Request(request.method, toPath(request.uri), toQuery(request), toHeaders(request),
-      OptionalBody.body(toBody(request)))
+      OptionalBody.body(toBody(request).getBytes))
   }
 }

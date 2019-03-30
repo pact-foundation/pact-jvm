@@ -24,7 +24,7 @@ class MultipleExamplesPactSpec extends Specification with PactSpec with UnitSpec
     .willRespondWith(maybeBody = Some("{}"))
     .uponReceiving("an option request")
     .matching(path = "/", method = "OPTION")
-    .willRespondWith(headers = Map("Option" -> "Value-X"))
+    .willRespondWith(headers = Map("Option" -> List("Value-X")))
     .asPactFragment()
 
   pactFragment.description >> {

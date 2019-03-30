@@ -29,7 +29,7 @@ class ExampleFileUploadSpec {
       .withFileUpload('file', 'data.csv', 'text/csv', '1,2,3,4\n5,6,7,8'.bytes)
       .willRespondWith()
       .status(201)
-      .body('file uploaded ok')
+      .body('file uploaded ok', 'text/plain')
       .toPact()
   }
 

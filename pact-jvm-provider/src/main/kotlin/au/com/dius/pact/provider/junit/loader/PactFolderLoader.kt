@@ -12,7 +12,7 @@ import java.net.URLDecoder
  * Out-of-the-box implementation of [PactLoader]
  * that loads pacts from either a subfolder of project resource folder or a directory
  */
-class PactFolderLoader<I>(private val path: File) : PactLoader where I: Interaction {
+class PactFolderLoader<I>(private val path: File) : PactLoader where I : Interaction {
   private val pactSource: DirectorySource<I> = DirectorySource(path)
 
   constructor(path: String) : this(File(path))

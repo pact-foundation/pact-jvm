@@ -48,7 +48,7 @@ class CreateSpec extends Specification {
 
     then:
     result.response().status == 201
-    result.response().body.value == '{"port": 8444}'
+    result.response().body.valueAsString() == '{"port": 8444}'
 
     cleanup:
     if (result != null) {

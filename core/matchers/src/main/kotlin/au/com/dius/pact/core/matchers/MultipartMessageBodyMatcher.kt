@@ -5,7 +5,8 @@ import au.com.dius.pact.core.model.isEmpty
 import au.com.dius.pact.core.model.isMissing
 import au.com.dius.pact.core.model.isNotPresent
 import au.com.dius.pact.core.model.isPresent
-import au.com.dius.pact.core.model.orElse
+import au.com.dius.pact.core.model.orEmpty
+import au.com.dius.pact.core.model.valueAsString
 import java.util.Enumeration
 import javax.mail.BodyPart
 import javax.mail.Header
@@ -19,12 +20,12 @@ class MultipartMessageBodyMatcher : BodyMatcher {
     val actualBody = actual.body
     return when {
       expectedBody.isMissing() -> emptyList()
-      expectedBody.isPresent() && actualBody.isNotPresent() -> listOf(BodyMismatch(expectedBody.orElse(""),
+      expectedBody.isPresent() && actualBody.isNotPresent() -> listOf(BodyMismatch(expectedBody.orEmpty(),
               null, "Expected a multipart body but was missing"))
       expectedBody.isEmpty() && actualBody.isEmpty() -> emptyList()
       else -> {
-        val expectedMultipart = parseMultipart(expectedBody.orElse(""), expected.contentTypeHeader().orEmpty())
-        val actualMultipart = parseMultipart(actualBody.orElse(""), actual.contentTypeHeader().orEmpty())
+        val expectedMultipart = parseMultipart(expectedBody.valueAsString(), expected.contentTypeHeader().orEmpty())
+        val actualMultipart = parseMultipart(actualBody.valueAsString(), actual.contentTypeHeader().orEmpty())
         compareHeaders(expectedMultipart, actualMultipart) + compareContents(expectedMultipart, actualMultipart)
       }
     }

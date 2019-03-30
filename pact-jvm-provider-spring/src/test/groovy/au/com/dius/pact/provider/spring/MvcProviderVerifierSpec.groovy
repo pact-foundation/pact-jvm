@@ -38,7 +38,7 @@ class MvcProviderVerifierSpec extends Specification {
   def 'executing a request against mock MVC with a body'() {
     given:
     def body = '"This is a body"'
-    def request = new Request(body: OptionalBody.body(body))
+    def request = new Request(body: OptionalBody.body(body.bytes))
 
     when:
     def response = verifier.executeMockMvcRequest(mockMvc, request)

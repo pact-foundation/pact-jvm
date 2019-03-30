@@ -15,10 +15,11 @@ class RequestMatchingSpec extends Specification {
 
   def setup() {
     request = new Request('GET', '/', PactReaderKt.queryStringToMap('q=p&q=p2&r=s'),
-      [testreqheader: 'testreqheadervalue'],
-      OptionalBody.body('{"test": true}'))
+      [testreqheader: ['testreqheadervalue']],
+      OptionalBody.body('{"test": true}'.bytes))
 
-    response = new Response(200, [testreqheader: 'testreqheaderval'], OptionalBody.body('{"responsetest": true}'))
+    response = new Response(200, [testreqheader: ['testreqheaderval']],
+      OptionalBody.body('{"responsetest": true}'.bytes))
 
     testState = [new ProviderState('test state')]
   }
@@ -36,7 +37,7 @@ class RequestMatchingSpec extends Specification {
   def 'request matching should disallow additional keys'() {
     given:
     def leakyRequest = request.copy()
-    leakyRequest.body = OptionalBody.body('{"test": true, "extra": false}')
+    leakyRequest.body = OptionalBody.body('{"test": true, "extra": false}'.bytes)
 
     when:
     def actualResponse = test(leakyRequest)
@@ -48,7 +49,7 @@ class RequestMatchingSpec extends Specification {
   def 'request matching should require precise matching'() {
     given:
     def impreciseRequest = request.copy()
-    impreciseRequest.body = OptionalBody.body('{"test": false}')
+    impreciseRequest.body = OptionalBody.body('{"test": false}'.bytes)
 
     when:
     def actualResponse = test(impreciseRequest)
@@ -84,7 +85,7 @@ class RequestMatchingSpec extends Specification {
   def 'request matching should fail to match when headers are present but contain incorrect value'() {
     given:
     def incorrectRequest = request.copy()
-    incorrectRequest.headers = [testreqheader: 'incorrectValue']
+    incorrectRequest.headers = [testreqheader: ['incorrectValue']]
 
     when:
     def actualResponse = test(incorrectRequest)
@@ -131,7 +132,7 @@ class RequestMatchingSpec extends Specification {
 
   def 'request with cookie should match if actual cookie exactly matches the expected'() {
     given:
-    request = new Request('GET', '/', null, [Cookie: 'key1=value1;key2=value2'], OptionalBody.body(''))
+    request = new Request('GET', '/', null, [Cookie: 'key1=value1;key2=value2'], OptionalBody.body(''.bytes))
     def cookieRequest = request.copy()
     cookieRequest.headers.Cookie = 'key1=value1;key2=value2'
 
@@ -144,7 +145,7 @@ class RequestMatchingSpec extends Specification {
 
   def 'request with cookie should mismatch if actual cookie contains less data than expected cookie'() {
     given:
-    request = new Request('GET', '/', null, [Cookie: 'key1=value1;key2=value2'], OptionalBody.body(''))
+    request = new Request('GET', '/', null, [Cookie: 'key1=value1;key2=value2'], OptionalBody.body(''.bytes))
     def cookieRequest = request.copy()
     cookieRequest.headers.Cookie = 'key2=value2'
 
@@ -157,7 +158,7 @@ class RequestMatchingSpec extends Specification {
 
   def 'request with cookie should match if actual cookie contains more data than expected one'() {
     given:
-    request = new Request('GET', '/', null, [Cookie: 'key1=value1;key2=value2'], OptionalBody.body(''))
+    request = new Request('GET', '/', null, [Cookie: 'key1=value1;key2=value2'], OptionalBody.body(''.bytes))
     def cookieRequest = request.copy()
     cookieRequest.headers.Cookie = 'key2=value2;key1=value1;key3=value3'
 
@@ -170,7 +171,7 @@ class RequestMatchingSpec extends Specification {
 
   def 'request with cookie should mismatch if actual cookie has no intersection with expected request'() {
     given:
-    request = new Request('GET', '/', null, [Cookie: 'key1=value1;key2=value2'], OptionalBody.body(''))
+    request = new Request('GET', '/', null, [Cookie: 'key1=value1;key2=value2'], OptionalBody.body(''.bytes))
     def cookieRequest = request.copy()
     cookieRequest.headers.Cookie = 'key5=value5'
 
@@ -183,7 +184,7 @@ class RequestMatchingSpec extends Specification {
 
   def 'request with cookie should match when cookie field is different from cases'() {
     given:
-    request = new Request('GET', '/', null, [Cookie: 'key1=value1;key2=value2'], OptionalBody.body(''))
+    request = new Request('GET', '/', null, [Cookie: 'key1=value1;key2=value2'], OptionalBody.body(''.bytes))
     def cookieRequest = request.copy()
     cookieRequest.headers = [cOoKie: 'key1=value1;key2=value2']
 
@@ -196,7 +197,7 @@ class RequestMatchingSpec extends Specification {
 
   def 'request with cookie should match when there are spaces between cookie items'() {
     given:
-    request = new Request('GET', '/', null, [Cookie: 'key1=value1;key2=value2'], OptionalBody.body(''))
+    request = new Request('GET', '/', null, [Cookie: 'key1=value1;key2=value2'], OptionalBody.body(''.bytes))
     def cookieRequest = request.copy()
     cookieRequest.headers.Cookie = 'key1=value1; key2=value2'
 

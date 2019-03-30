@@ -2,7 +2,7 @@ package au.com.dius.pact.core.model
 
 import mu.KLogging
 
-data class MergeResult<I>(val ok: Boolean, val message: String, val result: Pact<I>? = null) where I: Interaction
+data class MergeResult<I>(val ok: Boolean, val message: String, val result: Pact<I>? = null) where I : Interaction
 
 /**
  * Utility class for merging two pacts together, checking for conflicts
@@ -10,7 +10,7 @@ data class MergeResult<I>(val ok: Boolean, val message: String, val result: Pact
 object PactMerge : KLogging() {
 
   @JvmStatic
-  fun <I> merge(newPact: Pact<I>, existing: Pact<I>): MergeResult<I> where I: Interaction {
+  fun <I> merge(newPact: Pact<I>, existing: Pact<I>): MergeResult<I> where I : Interaction {
     if (!newPact.compatibleTo(existing)) {
       return MergeResult(false, "Cannot merge pacts as they are not compatible")
     }

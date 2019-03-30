@@ -70,7 +70,7 @@ interface Interaction {
 /**
  * Interface to a pact
  */
-interface Pact<I> where I: Interaction {
+interface Pact<I> where I : Interaction {
   /**
    * Returns the provider of the service for the pact
    */

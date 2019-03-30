@@ -12,31 +12,42 @@ import au.com.dius.pact.core.model.unwrap
 import mu.KLogging
 
 object Matching : KLogging() {
+  private val lowerCaseComparator = Comparator<String> { a, b -> a.toLowerCase().compareTo(b.toLowerCase()) }
 
   val pathFilter = Regex("http[s]*://([^/]*)")
 
-  fun matchHeaders(
-    expected: Map<String, String>,
-    actual: Map<String, String>,
-    matchers: MatchingRules
-  ): List<HeaderMismatch> {
-    return expected.asSequence().fold(listOf<HeaderMismatch?>()) { list, entry ->
-      val actualKey = actual.keys.find { it.equals(entry.key, ignoreCase = true) }
-      if (actualKey != null) {
-        list + HeaderMatcher.compareHeader(entry.key, entry.value, actual[actualKey]!!, matchers)
-      } else {
-        list + HeaderMismatch(entry.key, entry.value, "", "Expected a header '${entry.key}' but was missing")
-      }
-    }.filterNotNull()
-  }
-
+  @JvmStatic
   fun matchRequestHeaders(expected: Request, actual: Request) =
-    matchHeaders(expected.headersWithoutCookie() ?: emptyMap(), actual.headersWithoutCookie() ?: emptyMap(),
-      expected.matchingRules ?: MatchingRulesImpl())
+    matchHeaders(expected.headersWithoutCookie(), actual.headersWithoutCookie(), expected.matchingRules)
 
-  fun matchHeaders(expected: HttpPart, actual: HttpPart) =
-    matchHeaders(expected.headers ?: mapOf(), actual.headers ?: mapOf(),
-      expected.matchingRules ?: MatchingRulesImpl())
+  @JvmStatic
+  fun matchHeaders(expected: HttpPart, actual: HttpPart): List<HeaderMismatch> =
+    matchHeaders(expected.headers.orEmpty(), actual.headers.orEmpty(), expected.matchingRules)
+
+  @JvmStatic
+  fun matchHeaders(
+    expected: Map<String, List<String>>,
+    actual: Map<String, List<String>>,
+    matchers: MatchingRules?
+  ): List<HeaderMismatch> = compareHeaders(expected.toSortedMap(lowerCaseComparator),
+    actual.toSortedMap(lowerCaseComparator), matchers)
+
+  fun compareHeaders(
+    e: Map<String, List<String>>,
+    a: Map<String, List<String>>,
+    matchers: MatchingRules?
+  ): List<HeaderMismatch> {
+    return e.entries.fold(listOf()) { list, values ->
+      if (a.containsKey(values.key)) {
+        val actual = a[values.key].orEmpty()
+        list + values.value.mapIndexed { index, headerValue ->
+          HeaderMatcher.compareHeader(values.key, headerValue, actual.getOrElse(index) { "" }, matchers ?: MatchingRulesImpl())
+        }.filterNotNull()
+      } else {
+        list + HeaderMismatch(values.key, values.value.joinToString(separator = ", "), "", "Expected a header '${values.key}' but was missing")
+      }
+    }
+  }
 
   fun matchCookie(expected: List<String>, actual: List<String>) =
     if (expected.all { actual.contains(it) }) null
@@ -61,7 +72,7 @@ object Matching : KLogging() {
           expected.body.isNull() -> emptyList()
           actual.body.isMissing() -> listOf(BodyMismatch(expected.body.unwrap(), null,
             "Expected body '${expected.body.unwrap()}' but was missing"))
-          expected.body.unwrap() == actual.body.unwrap() -> emptyList()
+          expected.body.unwrap().contentEquals(actual.body.unwrap()) -> emptyList()
           else -> listOf(BodyMismatch(expected.body.unwrap(), actual.body.unwrap()))
         }
       }

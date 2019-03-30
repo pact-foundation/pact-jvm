@@ -14,9 +14,9 @@ import spock.lang.Specification
 class PrettyPrinterSpec extends Specification {
 
     def headers = [testreqheader: 'testreqheadervalue', 'Content-Type': 'application/json']
-    def request = new Request('POST', '/', null, headers, OptionalBody.body('{"test": true}'))
+    def request = new Request('POST', '/', null, headers, OptionalBody.body('{"test": true}'.bytes))
     def response = new Response(200, [testreqheader: 'testreqheaderval', 'Access-Control-Allow-Origin': '*'],
-      OptionalBody.body('{"responsetest": true}'))
+      OptionalBody.body('{"responsetest": true}'.bytes))
 
     def print(mismatch) {
       PrettyPrinter.print(PactSessionResults.empty().addAlmostMatched(

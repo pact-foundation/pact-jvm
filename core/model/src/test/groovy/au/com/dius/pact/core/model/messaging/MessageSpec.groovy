@@ -10,7 +10,7 @@ class MessageSpec extends Specification {
 
   def 'contentsAsBytes handles contents in string form'() {
       when:
-      Message message = new Message(contents: OptionalBody.body('1 2 3 4'))
+      Message message = new Message(contents: OptionalBody.body('1 2 3 4'.bytes))
 
       then:
       message.contentsAsBytes() == '1 2 3 4'.bytes
@@ -55,7 +55,7 @@ class MessageSpec extends Specification {
 
   def 'Uses V3 provider state format when converting to a map'() {
     given:
-    Message message = new Message(description: 'test', contents: OptionalBody.body('"1 2 3 4"'), providerStates: [
+    Message message = new Message(description: 'test', contents: OptionalBody.body('"1 2 3 4"'.bytes), providerStates: [
       new ProviderState('Test', [a: 'A', b: 100])])
 
     when:
@@ -130,8 +130,8 @@ class MessageSpec extends Specification {
     !message1.conflictsWith(message2)
 
     where:
-    message1 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3'))
-    message2 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3'))
+    message1 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3'.bytes))
+    message2 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3'.bytes))
   }
 
   @Ignore('Message conflicts do not work with generated values')
@@ -140,8 +140,8 @@ class MessageSpec extends Specification {
     message1.conflictsWith(message2)
 
     where:
-    message1 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3'))
-    message2 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3 4'))
+    message1 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3'.bytes))
+    message2 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3 4'.bytes))
   }
 
   @Unroll
@@ -156,7 +156,7 @@ class MessageSpec extends Specification {
     '1 2 3 4'                          | 'text/plain'               | '1 2 3 4'
     new String([1, 2, 3, 4] as byte[]) | 'application/octet-stream' | 'AQIDBA=='
 
-    message = new Message(contents: OptionalBody.body(body), metaData: [contentType: contentType])
+    message = new Message(contents: OptionalBody.body(body.bytes), metaData: [contentType: contentType])
   }
 
 }

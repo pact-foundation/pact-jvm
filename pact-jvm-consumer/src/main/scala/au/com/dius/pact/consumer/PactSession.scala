@@ -35,15 +35,16 @@ object PactSession {
 
 case class PactSession(expected: Seq[Interaction], results: PactSessionResults) {
   import scala.collection.JavaConverters._
+
   private def matcher = new RequestMatching(seqAsJavaList(expected.asInstanceOf[Seq[RequestResponseInteraction]]))
 
-  val CrossSiteHeaders = Map[String, String]("Access-Control-Allow-Origin" -> "*")
+  val CrossSiteHeaders = Map[String, java.util.List[String]]("Access-Control-Allow-Origin" -> List("*").asJava)
 
   def invalidRequest(req: Request) = {
-    val headers: Map[String, String] = CrossSiteHeaders ++ Map("Content-Type" -> "application/json",
-      "X-Pact-Unexpected-Request" -> "1")
-    new Response(500, mapAsJavaMap(headers), OptionalBody.body("{ \"error\": \"Unexpected request : " +
-      StringEscapeUtils.escapeJson(req.toString) + "\" }"))
+    val headers: Map[String, java.util.List[String]] = CrossSiteHeaders ++ Map("Content-Type" -> List("application/json").asJava,
+      "X-Pact-Unexpected-Request" -> List("1").asJava)
+    val body = "{ \"error\": \"Unexpected request : " + StringEscapeUtils.escapeJson(req.toString) + "\" }"
+    new Response(500, headers.asJava, OptionalBody.body(body.getBytes))
   }
 
   def receiveRequest(req: Request): (Response, PactSession) = {

@@ -41,8 +41,8 @@ class FormPostBodyMatcherSpec extends Specification {
     matcher.matchBody(expected(expectedBody), actual(actualBody), true).empty
 
     where:
-    actualBody = OptionalBody.body('a=b&c=d')
-    expectedBody = OptionalBody.body('a=b&c=d')
+    actualBody = OptionalBody.body('a=b&c=d'.bytes)
+    expectedBody = OptionalBody.body('a=b&c=d'.bytes)
   }
 
   def 'returns no mismatches - when the actual body has extra keys and we allow unexpected keys'() {
@@ -50,8 +50,8 @@ class FormPostBodyMatcherSpec extends Specification {
     matcher.matchBody(expected(expectedBody), actual(actualBody), true).empty
 
     where:
-    actualBody = OptionalBody.body('a=b&c=d')
-    expectedBody = OptionalBody.body('a=b')
+    actualBody = OptionalBody.body('a=b&c=d'.bytes)
+    expectedBody = OptionalBody.body('a=b'.bytes)
   }
 
   def 'returns no mismatches - when the keys are in different order'() {
@@ -59,8 +59,8 @@ class FormPostBodyMatcherSpec extends Specification {
     matcher.matchBody(expected(expectedBody), actual(actualBody), true).empty
 
     where:
-    actualBody = OptionalBody.body('a=b&c=d')
-    expectedBody = OptionalBody.body('c=d&a=b')
+    actualBody = OptionalBody.body('a=b&c=d'.bytes)
+    expectedBody = OptionalBody.body('c=d&a=b'.bytes)
   }
 
   def 'returns mismatches - when the expected body contains keys that are not in the actual body'() {
@@ -69,8 +69,8 @@ class FormPostBodyMatcherSpec extends Specification {
       ['Expected form post parameter \'c\' but was missing']
 
     where:
-    actualBody = OptionalBody.body('a=b')
-    expectedBody = OptionalBody.body('a=b&c=d')
+    actualBody = OptionalBody.body('a=b'.bytes)
+    expectedBody = OptionalBody.body('a=b&c=d'.bytes)
   }
 
   @SuppressWarnings('LineLength')
@@ -80,8 +80,8 @@ class FormPostBodyMatcherSpec extends Specification {
       ['Received unexpected form post parameter \'a\'=[\'b\']']
 
     where:
-    actualBody = OptionalBody.body('a=b&c=d')
-    expectedBody = OptionalBody.body('c=d')
+    actualBody = OptionalBody.body('a=b&c=d'.bytes)
+    expectedBody = OptionalBody.body('c=d'.bytes)
   }
 
   def 'returns mismatches - when the expected body is present but there is no actual body'() {
@@ -91,7 +91,7 @@ class FormPostBodyMatcherSpec extends Specification {
 
     where:
     actualBody = OptionalBody.missing()
-    expectedBody = OptionalBody.body('a=a')
+    expectedBody = OptionalBody.body('a=a'.bytes)
   }
 
   def 'returns mismatches - if the same key is repeated with values in different order'() {
@@ -103,8 +103,8 @@ class FormPostBodyMatcherSpec extends Specification {
       ]
 
     where:
-    actualBody = OptionalBody.body('a=2&a=1&b=3')
-    expectedBody = OptionalBody.body('a=1&a=2&b=3')
+    actualBody = OptionalBody.body('a=2&a=1&b=3'.bytes)
+    expectedBody = OptionalBody.body('a=1&a=2&b=3'.bytes)
   }
 
   def 'returns mismatches - if the same key is repeated with values missing'() {
@@ -115,8 +115,8 @@ class FormPostBodyMatcherSpec extends Specification {
       ]
 
     where:
-    actualBody = OptionalBody.body('a=1&a=2')
-    expectedBody = OptionalBody.body('a=1&a=2&a=3')
+    actualBody = OptionalBody.body('a=1&a=2'.bytes)
+    expectedBody = OptionalBody.body('a=1&a=2&a=3'.bytes)
   }
 
   def 'returns mismatches - when the actual body contains values that are not the same as the expected body'() {
@@ -125,8 +125,8 @@ class FormPostBodyMatcherSpec extends Specification {
       ['Expected form post parameter \'c\'[0] with value \'d\' but was \'1\'']
 
     where:
-    actualBody = OptionalBody.body('a=b&c=1')
-    expectedBody = OptionalBody.body('c=d&a=b')
+    actualBody = OptionalBody.body('a=b&c=1'.bytes)
+    expectedBody = OptionalBody.body('c=d&a=b'.bytes)
   }
 
   def 'handles delimiters in the values'() {
@@ -135,8 +135,8 @@ class FormPostBodyMatcherSpec extends Specification {
       ['Expected form post parameter \'c\'[0] with value \'1\' but was \'1=2\'']
 
     where:
-    actualBody = OptionalBody.body('a=b&c=1=2')
-    expectedBody = OptionalBody.body('c=1&a=b')
+    actualBody = OptionalBody.body('a=b&c=1=2'.bytes)
+    expectedBody = OptionalBody.body('c=1&a=b'.bytes)
   }
 
   def 'delegates to any defined matcher'() {
@@ -147,7 +147,7 @@ class FormPostBodyMatcherSpec extends Specification {
     matcher.matchBody(expected(expectedBody), actual(actualBody), true).empty
 
     where:
-    actualBody = OptionalBody.body('a=b&c=2')
-    expectedBody = OptionalBody.body('c=1&a=b')
+    actualBody = OptionalBody.body('a=b&c=2'.bytes)
+    expectedBody = OptionalBody.body('c=1&a=b'.bytes)
   }
 }

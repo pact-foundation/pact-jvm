@@ -4,7 +4,7 @@ import au.com.dius.pact.consumer._
 import au.com.dius.pact.core.model.{OptionalBody, Response}
 import au.com.dius.pact.core.model._
 
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 
 object Complete {
 
@@ -17,7 +17,7 @@ object Complete {
   }
 
   def toJson(error: VerificationResult) = {
-    OptionalBody.body("{\"error\": \"" + error + "\"}")
+    OptionalBody.body(("{\"error\": \"" + error + "\"}").getBytes)
   }
 
   def apply(request: Request, oldState: ServerState): Result = {
@@ -25,7 +25,7 @@ object Complete {
     def pactWritten(response: Response, port: String) = Result(response, oldState - port)
 
     val result = for {
-      port <- getPort(JsonUtils.parseJsonString(request.getBody.getValue))
+      port <- getPort(JsonUtils.parseJsonString(request.getBody.valueAsString()))
       mockProvider <- oldState.get(port)
       sessionResults = mockProvider.session.remainingResults
       pact <- mockProvider.pact
@@ -33,10 +33,10 @@ object Complete {
       mockProvider.stop()
 
       ConsumerPactRunner.writeIfMatching(pact, sessionResults, mockProvider.config.getPactVersion) match {
-        case PactVerified => pactWritten(new Response(200, JavaConversions.mapAsJavaMap(ResponseUtils.CrossSiteHeaders)),
+        case PactVerified => pactWritten(new Response(200, ResponseUtils.CrossSiteHeaders.asJava),
           mockProvider.config.getPort.toString)
         case error => pactWritten(new Response(400,
-          JavaConversions.mapAsJavaMap(Map("Content-Type" -> "application/json")), toJson(error)),
+          Map("Content-Type" -> List("application/json").asJava).asJava, toJson(error)),
           mockProvider.config.getPort.toString)
       }
     }

@@ -28,7 +28,7 @@ class DifferentStatesPactSpec extends Specification with PactSpec {
     .given("bar_state", Map("ValueA" -> "B"))
     .uponReceiving("an option request for bar")
       .matching(path = "/", method = "OPTION")
-      .willRespondWith(headers = Map("Option" -> "Value-X"))
+      .willRespondWith(headers = Map("Option" -> List("Value-X")))
     .given()
     .uponReceiving("a stateless request for foobar")
       .matching(path = "/foobar")

@@ -3,6 +3,7 @@ package au.com.dius.pact.core.model
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.com.github.michaelbull.result.Result
+import au.com.dius.pact.core.pactbroker.CustomServiceUnavailableRetryStrategy
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
@@ -73,7 +74,8 @@ fun fetchJsonResource(http: CloseableHttpClient, source: UrlPactSource):
 }
 
 fun newHttpClient(baseUrl: String, options: Map<String, Any>): CloseableHttpClient {
-  val builder = HttpClients.custom().useSystemProperties()
+  val retryStrategy = CustomServiceUnavailableRetryStrategy(5, 3000)
+  val builder = HttpClients.custom().useSystemProperties().setServiceUnavailableRetryStrategy(retryStrategy)
 
   if (options["authentication"] is List<*>) {
     val authentication = options["authentication"] as List<*>

@@ -44,7 +44,7 @@ open class InteractionRunner<I>(
   private val testClass: TestClass,
   private val pact: Pact<I>,
   private val pactSource: PactSource
-) : Runner() where I: Interaction {
+) : Runner() where I : Interaction {
 
   private val results = ConcurrentHashMap<String, Pair<Boolean, IProviderVerifier>>()
   private val testContext = ConcurrentHashMap<String, Any>()
