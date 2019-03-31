@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.v3;
 import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.consumer.MessagePactProviderRule;
 import au.com.dius.pact.consumer.Pact;
+import au.com.dius.pact.consumer.PactFolder;
 import au.com.dius.pact.consumer.PactVerification;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
@@ -15,6 +16,7 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
+@PactFolder("build/pacts/messages")
 public class AsyncMessageTest {
   @Rule
   public MessagePactProviderRule mockProvider = new MessagePactProviderRule("test_provider", this);

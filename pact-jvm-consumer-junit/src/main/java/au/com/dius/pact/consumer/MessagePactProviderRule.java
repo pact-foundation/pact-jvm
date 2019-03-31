@@ -98,7 +98,12 @@ public class MessagePactProviderRule extends ExternalResource {
 				setMessage(providedMessage, description);
 				try {
 					base.evaluate();
-					messagePact.write(PactConsumerConfig.INSTANCE.getPactDirectory(), PactSpecVersion.V3);
+					PactFolder pactFolder = testClassInstance.getClass().getAnnotation(PactFolder.class);
+					if (pactFolder != null) {
+						messagePact.write(pactFolder.value(), PactSpecVersion.V3);
+					} else {
+						messagePact.write(PactConsumerConfig.INSTANCE.getPactDirectory(), PactSpecVersion.V3);
+					}
 				} catch (Throwable t) {
 					throw t;
 				}
