@@ -1,5 +1,27 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.0.0-beta.1 - Version 4 main consumer and provider modules
+
+* cc579c35 - refactor: moved the remaining provider modules (Ronald Holshausen, Sun Mar 31 15:51:50 2019 +1100)
+* 01c1372b - refactor: moved the lein module to the provider subproject (Ronald Holshausen, Sun Mar 31 15:49:35 2019 +1100)
+* 622dc0f8 - refactor: moved the spring module to the subproject (Ronald Holshausen, Sun Mar 31 15:41:44 2019 +1100)
+* 0ecad88e - refactor: moved the provider junit libraries to the subproject (Ronald Holshausen, Sun Mar 31 15:35:15 2019 +1100)
+* b811720a - fix: maven provider module (Ronald Holshausen, Sun Mar 31 15:12:11 2019 +1100)
+* ff287e7d - fix: get build working on JDK 11 (Ronald Holshausen, Sun Mar 31 13:55:55 2019 +1100)
+* ac3c2cf6 - refactor: moved the provider maven project to the provider subproject (Ronald Holshausen, Sun Mar 31 13:06:03 2019 +1100)
+* 1382b80d - refactor: moved the provider gradle project to the provider subproject (Ronald Holshausen, Sun Mar 31 12:47:06 2019 +1100)
+* 4199cd2a - refactor: moved remaing consumer library (Ronald Holshausen, Sun Mar 31 12:29:24 2019 +1100)
+* ee103cb6 - refactor: moved the junit consumer projects to the consumer subproject (Ronald Holshausen, Sun Mar 31 12:25:27 2019 +1100)
+* 3e8549a0 - refactor: update travis to run sub-builds in parrallel (Ronald Holshausen, Sun Mar 31 11:27:56 2019 +1100)
+* f98cb068 - refactor: enabled the specification tests (Ronald Holshausen, Sun Mar 31 11:25:05 2019 +1100)
+* 0e561ed7 - refactor: got build passing after moving provider and consumer library (Ronald Holshausen, Sun Mar 31 11:16:47 2019 +1100)
+* d477c24a - refactor: moved consumer groovy library to a sub-project (Ronald Holshausen, Sun Mar 31 10:49:53 2019 +1100)
+* 6a47d12c - refactor: moved provider library to a sub-project (Ronald Holshausen, Sun Mar 31 10:48:02 2019 +1100)
+* 843427ff - refactor: moved consumer project and removed scala and groovy (Ronald Holshausen, Sat Mar 30 17:59:57 2019 +1100)
+* 85aaf4ce - refactor: moved consumer lib to consumer subproject (Ronald Holshausen, Sat Mar 30 16:17:58 2019 +1100)
+* 4d4c2b5a - fix: correct the release script (Ronald Holshausen, Sat Mar 30 16:09:24 2019 +1100)
+* 2c75f5eb - bump version to 4.0.0-beta.1 (Ronald Holshausen, Sat Mar 30 16:07:30 2019 +1100)
+
 # 4.0.0-beta.0 - Initial 4.0 release of the core libraries
 
 * fd7d6787 - fix: get build working with JDK 11 (Ronald Holshausen, Sat Mar 30 15:38:05 2019 +1100)
