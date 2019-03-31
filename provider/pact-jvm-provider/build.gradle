@@ -1,3 +1,7 @@
+plugins {
+  id 'scala'
+}
+
 dependencies {
     compile project(":core:pact-jvm-core-model"), 
       project(":core:pact-jvm-core-pact-broker"),
@@ -9,12 +13,18 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.26'
     implementation 'org.scala-lang:scala-library:2.12.8'
 
-    testCompile project("consumer:pact-jvm-consumer-groovy")
+    testCompile project(":consumer:pact-jvm-consumer-groovy")
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile 'io.dropwizard:dropwizard-testing:1.3.7'
+    testCompile 'org.hamcrest:hamcrest:2.1'
 }
 
 compileGroovy {
   classpath = classpath.plus(files(compileKotlin.destinationDir))
   dependsOn compileKotlin
+}
+
+compileTestGroovy {
+  dependsOn compileTestScala
+  classpath = classpath.plus(files(compileTestScala.destinationDir))
 }

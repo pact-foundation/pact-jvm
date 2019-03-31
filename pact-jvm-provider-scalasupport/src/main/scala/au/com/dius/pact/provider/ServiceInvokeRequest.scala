@@ -1,6 +1,4 @@
-package au.com.dius.pact.provider
-
-import au.com.dius.pact.core.model.Request
+package au.com.dius.pact.provider;
 
 object ServiceInvokeRequest {
   def apply(url: String, request: Request):Request = {

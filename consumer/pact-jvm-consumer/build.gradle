@@ -13,8 +13,6 @@ dependencies {
 
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile 'org.cthul:cthul-matchers:1.1.0'
-    testCompile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
-    testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
     testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
     testCompile "org.codehaus.groovy:groovy-dateutil:${project.groovyVersion}:indy"
     testCompile 'org.hamcrest:hamcrest:2.1'

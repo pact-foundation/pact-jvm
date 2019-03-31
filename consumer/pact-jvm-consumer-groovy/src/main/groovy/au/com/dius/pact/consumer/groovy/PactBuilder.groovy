@@ -2,8 +2,6 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.Headers
 import au.com.dius.pact.consumer.PactVerificationResult
-import au.com.dius.pact.consumer.StatefulMockProvider
-import au.com.dius.pact.consumer.VerificationResult
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactReader
@@ -20,13 +18,11 @@ import au.com.dius.pact.core.model.matchingrules.Category
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
-import au.com.dius.pact.model.MockProviderConfig
-import au.com.dius.pact.model.PactFragment
+import au.com.dius.pact.consumer.model.MockProviderConfig
 import groovy.json.JsonBuilder
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
-import scala.collection.JavaConverters$
 
 import java.util.regex.Pattern
 
@@ -51,7 +47,6 @@ class PactBuilder extends BaseBuilder {
   List requestData = []
   List responseData = []
   List interactions = []
-  StatefulMockProvider server
   List<ProviderState> providerStates = []
   boolean requestState
 
@@ -252,68 +247,6 @@ class PactBuilder extends BaseBuilder {
 
   private static boolean compactMimeTypes(Map reqResData) {
     reqResData.headers && reqResData.headers[CONTENT_TYPE] in COMPACT_MIME_TYPES
-  }
-
-  /**
-   * Executes the providers closure in the context of the interactions defined on this builder.
-   * @param options Optional map of options for the run
-   * @param closure Test to execute
-   * @return The result of the test run
-   * @deprecated use runTest instead
-   */
-  @Deprecated
-  VerificationResult run(Map options = [:], Closure closure) {
-    PactFragment fragment = fragment()
-
-    MockProviderConfig config
-    def pactVersion = options.specificationVersion ?: PactSpecVersion.V3
-    if (port == null) {
-      config = MockProviderConfig.createDefault(pactVersion)
-    } else {
-      config = MockProviderConfig.httpConfig(LOCALHOST, port, pactVersion)
-    }
-
-    fragment.runConsumer(config, closure)
-  }
-
-  @Deprecated
-  PactFragment fragment() {
-    buildInteractions()
-    new PactFragment(consumer, provider, JavaConverters$.MODULE$.asScalaBufferConverter(interactions).asScala())
-  }
-
-  /**
-   * Allows the body to be defined using a Groovy builder pattern
-   * @param mimeType Optional mimetype for the body
-   * @param closure Body closure
-   * @deprecated Use the withBody method that takes a Map for options
-   */
-  @Deprecated
-  PactBuilder withBody(String mimeType, Closure closure) {
-    withBody(mimeType: mimeType, closure)
-  }
-
-  /**
-   * Allows the body to be defined using a Groovy builder pattern with an array as the root
-   * @param mimeType Optional mimetype for the body
-   * @param array body
-   * @deprecated Use the withBody method that takes a Map for options
-   */
-  @Deprecated
-  PactBuilder withBody(String mimeType, List array) {
-    withBody(mimeType: mimeType, array)
-  }
-
-  /**
-   * Allows the body to be defined using a Groovy builder pattern with an array as the root
-   * using a each like matcher for all elements of the array
-   * @param mimeType Optional mimetype for the body
-   * @param matcher body
-   * @deprecated Use the withBody method that takes a Map for options
-   */
-  @Deprecated
-  PactBuilder withBody(String mimeType, LikeMatcher matcher) {
-    withBody(mimeType: mimeType, matcher)
   }
 
   /**

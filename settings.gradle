@@ -12,6 +12,7 @@ project(':core:pact-jvm-core-model').projectDir = file('core/model')
 project(':core:pact-jvm-core-matchers').projectDir = file('core/matchers')
 
 include   'consumer:pact-jvm-consumer'
+include   'consumer:pact-jvm-consumer-groovy'
 
 include   'provider:pact-jvm-provider'
 
@@ -19,7 +20,6 @@ include   'provider:pact-jvm-provider'
 //include   'pact-jvm-consumer-junit5'
 //include   'pact-jvm-consumer-java8'
 //include   'pact-jvm-consumer-specs2'
-//include   'pact-jvm-consumer-groovy'
 //include   'pact-jvm-provider'
 //include   'pact-jvm-provider-specs2'
 //include   'pact-jvm-provider-scalatest'

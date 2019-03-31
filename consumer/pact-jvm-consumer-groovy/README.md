@@ -8,8 +8,8 @@ Groovy DSL for Pact JVM
 The library is available on maven central using:
 
 * group-id = `au.com.dius`
-* artifact-id = `pact-jvm-consumer-groovy_2.11`
-* version-id = `3.5.x`
+* artifact-id = `pact-jvm-consumer-groovy`
+* version-id = `4.0.x`
 
 ## Usage
 
@@ -19,7 +19,7 @@ to define your pacts. For a full example, have a look at the example JUnit `Exam
 If you are using gradle for your build, add it to your `build.gradle`:
 
     dependencies {
-        testCompile 'au.com.dius:pact-jvm-consumer-groovy_2.11:3.5.0'
+        testCompile 'au.com.dius:pact-jvm-consumer-groovy:4.0.0'
     }
 
 Then create an instance of the `PactBuilder` in your test.
@@ -160,7 +160,7 @@ For example:
 
 Constructs the body of the request or response by invoking the supplied closure in the context of a PactBodyBuilder.
 
-##### Pretty Printed Bodies [Version 2.2.15+, 3.0.4+]
+##### Pretty Printed Bodies
 
 An optional Map can be supplied to control how the body is generated. The option values are available:
 
@@ -356,7 +356,7 @@ When using the body DSL, if there is a field that matches a matcher name (e.g. a
   }
 ```
 
-### Ensuring all items in a list match an example (2.2.0+)
+### Ensuring all items in a list match an example
 
 Lots of the time you might not know the number of items that will be in a list, but you want to ensure that the list
 has a minimum or maximum size and that each item in the list matches a given example. You can do this with the `eachLike`,
@@ -381,7 +381,7 @@ For example:
 
 This will ensure that the user list is never empty and that each user has an identifier that is a number and a name that is a string.
 
-__Version 3.2.4/2.4.6+__ You can specify the number of example items to generate in the array. The default is 1.
+You can specify the number of example items to generate in the array. The default is 1.
 
 ```groovy
     withBody {
@@ -394,7 +394,7 @@ __Version 3.2.4/2.4.6+__ You can specify the number of example items to generate
 
 This will create an example user list with 3 users.
 
-__Version 3.2.13/2.4.14+__ The each like matchers have been updated to work with primitive types.
+The each like matchers have been updated to work with primitive types.
 
 ```groovy
 withBody {
@@ -440,7 +440,7 @@ or if you have arrays of arrays
 withBody PactBodyBuilder.eachLike([ regexp('[0-9a-f]{8}', 'e8cda07e'), regexp(~/\w+/, 'sony') ])
 ```
 
-__Version 3.5.9+__ A `eachArrayLike` method has been added to handle matching of arrays of arrays.
+An `eachArrayLike` method has been added to handle matching of arrays of arrays.
 
 ```groovy
 {
@@ -455,7 +455,7 @@ __Version 3.5.9+__ A `eachArrayLike` method has been added to handle matching of
 
 This will generate an array of arrays for the `answer` attribute.
 
-### Matching any key in a map (3.3.1/2.5.0+)
+### Matching any key in a map
 
 The DSL has been extended for cases where the keys in a map are IDs. For an example of this, see 
 [#313](https://github.com/DiUS/pact-jvm/issues/313). In this case you can use the `keyLike` method, which takes an
@@ -495,7 +495,7 @@ For an example, have a look at [WildcardPactSpec](src/test/au/com/dius/pact/cons
 **Further Note: From version 3.5.22 onwards pacts with wildcards applied to map keys will require the Java system property 
 "pact.matching.wildcard" set to value "true" when the pact file is verified.**
 
-### Matching with an OR (3.5.0+)
+### Matching with an OR
 
 The V3 spec allows multiple matchers to be combined using either AND or OR for a value. The main use of this would be to
  either be able to match a value or a null, or to combine different matchers.
@@ -510,7 +510,7 @@ For example:
     }
 ```
 
-## Changing the directory pact files are written to (2.1.9+)
+## Changing the directory pact files are written to
 
 By default, pact files are written to `target/pacts` (or `build/pacts` if you use Gradle), but this can be overwritten with the `pact.rootDir` system property.
 This property needs to be set on the test JVM as most build tools will fork a new JVM to run the tests.
@@ -536,7 +536,7 @@ and [#97](https://github.com/DiUS/pact-jvm/issues/97) for information on what th
 * Introduces a new message pact format for testing interactions via a message queue.
 * Multiple provider states can be defined with data parameters.
 
-## Generating V3 spec pact files (3.1.0+, 2.3.0+)
+## Generating V3 spec pact files
 
 To have your consumer tests generate V3 format pacts, you can pass an option into the `runTest` method. For example:
 

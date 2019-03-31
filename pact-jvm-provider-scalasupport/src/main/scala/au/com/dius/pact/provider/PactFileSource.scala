@@ -1,10 +1,4 @@
-package au.com.dius.pact.provider
-
-import java.io.File
-
-import _root_.org.apache.commons.io.FileUtils
-import au.com.dius.pact.core.model.PactReader
-import au.com.dius.pact.core.model._
+package au.com.dius.pact.provider;
 
 object PactFileSource {
   def loadFiles(baseDir: File): Seq[RequestResponsePact] = {
