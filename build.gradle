@@ -39,7 +39,9 @@ String buildName(Project project) {
 
 allprojects {
   apply plugin: 'maven-publish'
-  apply plugin: 'signing'
+  if (System.env.TRAVIS != 'true') {
+    apply plugin: 'signing'
+  }
 
   group = 'au.com.dius'
   version = '4.0.0-beta.2'
@@ -206,8 +208,10 @@ subprojects {
     }
   }
 
-  signing {
-    sign publishing.publications.mavenPublication
+  if (System.env.TRAVIS != 'true') {
+    signing {
+      sign publishing.publications.mavenPublication
+    }
   }
 
     codenarcMain {
@@ -246,4 +250,3 @@ if (System.env.TRAVIS == 'true') {
         }
     }
 }
-
