@@ -49,6 +49,7 @@ module has a Jar file named pact-jvm-consumer_2.12. The full name of the file is
 
 | Branch | Specification | JDK | Scala Versions | Latest Version |
 | ------ | ------------- | ------- | -------------- | -------------- |
+| 4.0.x | V3 | 8-11 | N/A | 4.0.0-beta.1 |
 | 3.6.x | V3 | 8 | 2.12 | 3.6.2 |
 | 3.5.x | V3 | 8 | 2.12, 2.11 | 3.5.24 |
 | 3.5.x-jre7 | V3 | 7 | 2.11 | 3.5.7-jre7.0 |
