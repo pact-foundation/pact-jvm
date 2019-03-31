@@ -19,8 +19,8 @@ dependencies {
     exclude group: 'org.codehaus.groovy'
   }
   testCompile 'org.hamcrest:hamcrest:2.1'
-  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}:indy"
-  testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}:indy"
+  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}"
   testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
   // Required for Java 9
   testCompile 'javax.xml.bind:jaxb-api:2.3.0'

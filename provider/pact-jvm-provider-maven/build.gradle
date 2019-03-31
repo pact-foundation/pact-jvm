@@ -1,16 +1,15 @@
-apply plugin: 'maven-publish'
-
 dependencies {
-    compile project(":pact-jvm-provider"),
-      'org.apache.maven:maven-plugin-api:3.5.3',
-      'org.apache.maven.plugin-tools:maven-plugin-annotations:3.5.2'
-    compile 'org.apache.maven:maven-core:3.5.3'
+    api project(":provider:pact-jvm-provider")
+    compile 'org.apache.maven:maven-plugin-api:3.6.0',
+      'org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.0'
+    compile 'org.apache.maven:maven-core:3.6.0'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
 
   testCompile "org.codehaus.groovy:groovy-nio:${project.groovyVersion}:indy"
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testCompile 'net.bytebuddy:byte-buddy:1.9.12'
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -18,38 +17,35 @@ def isWindows() {
     Os.isFamily(Os.FAMILY_WINDOWS)
 }
 
-task pluginDescriptor(type: Exec, dependsOn: [":provider:pact-jvm-provider:install",
-                                              ':core:pact-jvm-core-model:install',
-                                              ':core:pact-jvm-core-matchers:install',
-                                              ':core:pact-jvm-core-pact-broker:install',
-                                              ':core:pact-jvm-core-support:install']) {
+task generatePom(type: GenerateMavenPom, dependsOn: [":provider:pact-jvm-provider:publishToMavenLocal",
+                                                     ':core:pact-jvm-core-model:publishToMavenLocal',
+                                                     ':core:pact-jvm-core-matchers:publishToMavenLocal',
+                                                     ':core:pact-jvm-core-pact-broker:publishToMavenLocal',
+                                                     ':core:pact-jvm-core-support:publishToMavenLocal']) {
+    destination = file("${buildDir}/poms/pom.xml")
+    pom = publishMavenPublicationPublicationToMavenLocal.publication.pom
+    pom.packaging = 'maven-plugin'
+    pom.withXml {
+        def buildNode = asNode().appendNode('build')
+        buildNode.appendNode('directory', buildDir)
+        buildNode.appendNode('outputDirectory', "$buildDir/classes/kotlin/main")
+        //add and configure the maven-plugin-plugin so that we can use the shortened 'pact' prefix
+        //https://maven.apache.org/guides/introduction/introduction-to-plugin-prefix-mapping.html
+        def pluginNode = buildNode.appendNode('plugins').appendNode('plugin')
+        pluginNode.appendNode('artifactId', 'maven-plugin-plugin')
+        pluginNode.appendNode('version', project.mavenPluginPluginVersion)
+        pluginNode.appendNode('configuration').appendNode('goalPrefix', 'pact')
+    }
+}
+
+task pluginDescriptor(type: Exec, dependsOn: generatePom) {
     if (isWindows()) {
       commandLine 'mvn.bat', '-f', "${buildDir}/poms/pom.xml", '--settings',
         'src/main/resources/settings.xml', '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.5:descriptor'
     } else {
       commandLine 'sh', '-c', "mvn -f ${buildDir}/poms/pom.xml --settings src/main/resources/settings.xml -e -B org.apache.maven.plugins:maven-plugin-plugin:3.5:descriptor"      
     }
-  
-    doFirst {
-        def pomFile = file("${buildDir}/poms/pom.xml")
-        def pom = install.repositories.mavenInstaller.pom
-        pom.packaging = 'maven-plugin'
-        pom.groupId = project.group
-        pom.artifactId = project.name
-        pom.version = version
-        pom.withXml {
-            def buildNode = asNode().appendNode('build')
-            buildNode.appendNode('directory', buildDir)
-            buildNode.appendNode('outputDirectory', "$buildDir/classes/kotlin/main")
-            //add and configure the maven-plugin-plugin so that we can use the shortened 'pact' prefix
-            //https://maven.apache.org/guides/introduction/introduction-to-plugin-prefix-mapping.html
-            def pluginNode = buildNode.appendNode('plugins').appendNode('plugin')
-            pluginNode.appendNode('artifactId', 'maven-plugin-plugin')
-            pluginNode.appendNode('version', project.mavenPluginPluginVersion)
-            pluginNode.appendNode('configuration').appendNode('goalPrefix', 'pact')
-        }
-        pom.writeTo( pomFile )
-    }
+    
     doLast {
         final  pluginDescriptor = file("${project.compileKotlin.destinationDir}/META-INF/maven/plugin.xml")
         assert pluginDescriptor.file, "[$pluginDescriptor.canonicalPath] was not created"
