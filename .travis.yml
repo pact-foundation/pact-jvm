@@ -15,5 +15,5 @@ env:
   - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT='-p pact-specification-test'
 script:
   - unset _JAVA_OPTIONS
-  - ./gradlew --stacktrace --no-daemon $PROJECT build
+  - ./gradlew --stacktrace --no-daemon $PROJECT build -x signArchives
 install: true
