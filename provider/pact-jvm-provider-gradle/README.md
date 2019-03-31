@@ -17,7 +17,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'au.com.dius:pact-jvm-provider-gradle_2.10:3.2.11'
+        classpath 'au.com.dius:pact-jvm-provider-gradle:4.0.0'
     }
 }
 ```
@@ -32,7 +32,7 @@ apply plugin: 'au.com.dius.pact'
 
 ```groovy
 plugins {
-  id "au.com.dius.pact" version "3.2.11"
+  id "au.com.dius.pact" version "4.0.0"
 }
 ```
 
@@ -100,9 +100,9 @@ pact {
 }
 ```
 
-_Since version 3.3.2+/2.4.17+_ you can also give a Closure as the provider `port`.
+You can also give a Closure as the provider `port`.
 
-## Specifying the pact file or URL at runtime [versions 3.2.7/2.4.9+]
+## Specifying the pact file or URL at runtime
 
 If you need to calculate the pact file or URL at runtime, you can give a Closure as the provider `pactFile`.
 
@@ -169,7 +169,7 @@ pact {
 Following typical Gradle behaviour, you can set the provider task properties to the actual tasks, or to the task names
 as a string (for the case when they haven't been defined yet).
 
-## Preventing the chaining of provider verify task to `pactVerify` [version 3.4.1+]
+## Preventing the chaining of provider verify task to `pactVerify`
 
 Normally a gradle task named `pactVerify_${provider.name}` is created and added as a task dependency for `pactVerify`.  You 
 can disable this dependency on a provider by setting `isDependencyForPactVerify` to `false` (defaults to `true`).
@@ -200,7 +200,7 @@ and as second without, so you can manually start your provider (to debug it from
  to run normally from your CI build.
 
 
-## Enabling insecure SSL [version 2.2.8+]
+## Enabling insecure SSL
 
 For providers that are running on SSL with self-signed certificates, you need to enable insecure SSL mode by setting
 `insecure = true` on the provider.
@@ -223,7 +223,7 @@ pact {
 }
 ```
 
-## Specifying a custom trust store [version 2.2.8+]
+## Specifying a custom trust store
 
 For environments that are running their own certificate chains:
 
@@ -250,7 +250,7 @@ pact {
 
 NOTE: The hostname will still be verified against the certificate.
 
-## Modifying the HTTP Client Used [version 2.2.4+]
+## Modifying the HTTP Client Used
 
 The default HTTP client is used for all requests to providers (created with a call to `HttpClients.createDefault()`).
 This can be changed by specifying a closure assigned to createClient on the provider that returns a CloseableHttpClient. For example:
@@ -283,9 +283,6 @@ pact {
 
 ## Modifying the requests before they are sent
 
-**NOTE on breaking change: Version 2.1.8+ uses Apache HttpClient instead of HttpBuilder so the closure will receive a
-HttpRequest object instead of a request Map.**
-
 Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would
 be authentication tokens, which have a small life span. The Pact Gradle plugin provides a request filter that can be
 set to a closure on the provider that will be called before the request is made. This closure will receive the HttpRequest
@@ -317,7 +314,7 @@ pact {
 __*Important Note:*__ You should only use this feature for things that can not be persisted in the pact file. By modifying
 the request, you are potentially modifying the contract from the consumer tests!
 
-## Turning off URL decoding of the paths in the pact file [version 3.3.3+]
+## Turning off URL decoding of the paths in the pact file
 
 By default the paths loaded from the pact file will be decoded before the request is sent to the provider. To turn this
 behaviour off, set the system property `pact.verifier.disableUrlPathDecoding` to `true`.
@@ -332,7 +329,7 @@ The following project properties can be specified with `-Pproperty=value` on the
 |Property|Description|
 |--------|-----------|
 |pact.showStacktrace|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
-|pact.showFullDiff|This turns on displaying the full diff of the expected versus actual bodies [version 3.3.6+]|
+|pact.showFullDiff|This turns on displaying the full diff of the expected versus actual bodies|
 |pact.filter.consumers|Comma seperated list of consumer names to verify|
 |pact.filter.description|Only verify interactions whose description match the provided regular expression|
 |pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
@@ -387,13 +384,13 @@ will be sent as JSON in the body of the request :
 ```  
 If it is set to false, they will be passed as query parameters.
 
-#### Teardown calls for state changes [version 3.2.5/2.4.7+]
+#### Teardown calls for state changes
 
 You can enable teardown state change calls by setting the property `stateChangeTeardown = true` on the provider. This
 will add an `action` parameter to the state change call. The setup call before the test will receive `action=setup`, and
 then a teardown call will be made afterwards to the state change URL with `action=teardown`.
 
-### Using a Closure [version 2.2.2+]
+### Using a Closure
 
 You can set a closure to be called before each verification with a defined provider state. The closure will be
 called with the state description and parameters from the pact file.
@@ -423,7 +420,7 @@ pact {
 }
 ```
 
-#### Teardown calls for state changes [version 3.2.5/2.4.7+]
+#### Teardown calls for state changes
 
 You can enable teardown state change calls by setting the property `stateChangeTeardown = true` on the provider. This
 will add an `action` parameter to the state change closure call. The setup call before the test will receive `setup`,
@@ -467,7 +464,7 @@ whose descriptions start with 'a request for payment'. `-Ppact.filter.providerSt
 has a provider state that ends with payment, and `-Ppact.filter.providerState=` will match any interaction that does not have a
 provider state.
 
-## Verifying pact files from a pact broker [version 3.1.1+/2.3.1+]
+## Verifying pact files from a pact broker
 
 You can setup your build to validate against the pacts stored in a pact broker. The pact gradle plugin will query
 the pact broker for all consumers that have a pact with the provider based on its name.
@@ -547,7 +544,7 @@ pact {
 
 `pactBrokerUser` and `pactBrokerPassword` can be defined in the gradle properties.
 
-## Verifying pact files from a S3 bucket [version 3.3.2+/2.4.17+]
+## Verifying pact files from a S3 bucket
 
 Pact files stored in an S3 bucket can be verified by using an S3 URL to the pact file. I.e.,
 
@@ -572,7 +569,7 @@ pact {
 **NOTE:** you can't use the `url` function with S3 URLs, as the URL and URI classes from the Java SDK
  don't support URLs with the s3 scheme.
 
-# Publishing pact files to a pact broker [version 2.2.7+]
+# Publishing pact files to a pact broker
 
 The pact gradle plugin provides a `pactPublish` task that can publish all pact files in a directory
 to a pact broker. To use it, you need to add a publish configuration to the pact configuration that defines the
@@ -609,7 +606,7 @@ pact {
 _NOTE:_ The pact broker requires a version for all published pacts. The `pactPublish` task will use the version of the
 gradle project by default. Make sure you have set one otherwise the broker will reject the pact files.
 
-_Version 3.2.2/2.4.3+_ you can override the version in the publish block.
+You can override the version in the publish block.
 
 ## Publishing to an authenticated pact broker
 
@@ -627,9 +624,7 @@ pact {
 }
 ```
 
-### [version 3.3.9+]
-
-You can add the username and password as properties since version 3.3.9+
+You can add the username and password as properties.
 
 ```groovy
 pact {
@@ -643,7 +638,7 @@ pact {
 }
 ```
 
-## Excluding pacts from being published [version 3.5.19+]
+## Excluding pacts from being published
 
 You can exclude some of the pact files from being published by providing a list of regular expressions that match
 against the base names of the pact files.
@@ -661,7 +656,7 @@ pact {
 }
 ```
 
-# Verifying a message provider [version 2.2.12+]
+# Verifying a message provider
 
 The Gradle plugin has been updated to allow invoking test methods that can return the message contents from a message
 producer. To use it, set the way to invoke the verification to `ANNOTATED_METHOD`. This will allow the pact verification
@@ -726,10 +721,10 @@ To publish the plugin to the community portal:
 
     $ ./gradlew :pact-jvm-provider-gradle_2.11:publishPlugins
 
-# Verification Reports [versions 3.2.7/2.4.9+]
+# Verification Reports
 
 The default behaviour is to display the verification being done to the console, and pass or fail the build via the normal
-Gradle mechanism. From versions 3.2.7/2.4.9+, additional reports can be generated from the verification.
+Gradle mechanism. Additional reports can be generated from the verification.
 
 ## Enabling additional reports
 
@@ -756,9 +751,9 @@ Any report files will be written to "build/reports/pact".
 The following report types are available in addition to console output (which is enabled by default):
 `markdown`, `json`.
 
-# Publishing verification results to a Pact Broker [version 3.5.4+]
+# Publishing verification results to a Pact Broker
 
 For pacts that are loaded from a Pact Broker, the results of running the verification can be published back to the
  broker against the URL for the pact. You will be able to see the result on the Pact Broker home screen.
 
-To turn on the verification publishing, set the project property `pact.verifier.publishResults` to `true` [version 3.5.18+]. 
+To turn on the verification publishing, set the project property `pact.verifier.publishResults` to `true`.

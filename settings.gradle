@@ -18,12 +18,12 @@ include   'consumer:pact-jvm-consumer-junit'
 include   'consumer:pact-jvm-consumer-junit5'
 
 include   'provider:pact-jvm-provider'
+include   'provider:pact-jvm-provider-gradle'
 
 //include   'pact-jvm-consumer-specs2'
 //include   'pact-jvm-provider-specs2'
 //include   'pact-jvm-provider-scalatest'
 //include   'pact-jvm-server'
-//include   'pact-jvm-provider-gradle'
 //include   'pact-jvm-provider-junit'
 //include   'pact-jvm-provider-spring'
 //include   'pact-jvm-provider-maven'

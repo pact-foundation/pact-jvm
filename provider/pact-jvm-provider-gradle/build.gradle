@@ -1,12 +1,12 @@
 plugins {
-  id "com.gradle.plugin-publish" version "0.10.0"
+  id "com.gradle.plugin-publish" version "0.10.1"
 }
 
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'maven-publish'
 
 dependencies {
-  compile project(":pact-jvm-provider")
+  compile project(":provider:pact-jvm-provider")
   compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
   
   testCompile 'org.powermock:powermock-module-junit4:1.7.3'
@@ -19,26 +19,11 @@ groovydoc {
   enabled = false
 }
 
-publishing {
-  publications {
-    maven(MavenPublication) {
-      from components.java
-
-      artifact sourceJar {
-        classifier "sources"
-      }
-      artifact javadocJar {
-        classifier "javadoc"
-      }
-    }
-  }
-}
-
 pluginBundle {
   website = 'https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle'
   vcsUrl = 'https://github.com/DiUS/pact-jvm.git'
   description = 'Gradle plugin for verifying pacts against a provider.'
-  tags = ['pact', 'provider', 'consumerdrivencontracts', 'microservicetesting']
+  tags = ['pact', 'cdc', 'consumerdrivencontracts', 'microservicetesting']
 
   plugins {
     pactProviderPlugin {
