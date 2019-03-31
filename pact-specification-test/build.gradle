@@ -1,7 +1,7 @@
 
 dependencies {
     testCompile project(":core:pact-jvm-core-matchers"),
-      project(":pact-jvm-provider")
+      project(":provider:pact-jvm-provider")
     testCompile "ch.qos.logback:logback-core:${project.logbackVersion}",
       "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }
