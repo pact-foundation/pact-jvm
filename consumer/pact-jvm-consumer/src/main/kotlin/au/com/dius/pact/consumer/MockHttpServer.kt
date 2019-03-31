@@ -5,6 +5,7 @@ import au.com.dius.pact.core.matchers.PartialRequestMatch
 import au.com.dius.pact.core.matchers.RequestMatching
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.model.PactWriter
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
@@ -188,9 +189,9 @@ abstract class BaseMockServer(
     val result = validateMockServerState()
     if (result is PactVerificationResult.Ok) {
       val pactDirectory = context.pactFolder
-      logger.debug { "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file " +
-        "${pact.fileForPact(pactDirectory)}" }
-      pact.write(pactDirectory, pactVersion)
+      val pactFile = pact.fileForPact(pactDirectory)
+      logger.debug { "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file $pactFile" }
+      PactWriter.writePact(pactFile, pact, pactVersion)
     }
 
     return result

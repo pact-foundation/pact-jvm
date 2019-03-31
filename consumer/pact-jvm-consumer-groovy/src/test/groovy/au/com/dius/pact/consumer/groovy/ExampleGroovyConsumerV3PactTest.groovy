@@ -6,14 +6,14 @@ import groovy.json.JsonSlurper
 import groovyx.net.http.RESTClient
 import org.junit.Test
 
-import static java.util.TimeZone.getTimeZone
+import java.time.LocalDate
 
 class ExampleGroovyConsumerV3PactTest {
 
     @Test
     void "example V3 spec test"() {
 
-        Date date = new Date()
+        LocalDate date = LocalDate.now()
         def aliceService = new PactBuilder()
         aliceService {
             serviceConsumer 'V3Consumer'
@@ -23,7 +23,7 @@ class ExampleGroovyConsumerV3PactTest {
         aliceService {
             given('a provider state')
             given('another provider state', [valueA: 'A', valueB: 100])
-            given('a third provider state', [valueC: date])
+            given('a third provider state', [valueC: date.toString()])
             uponReceiving('a retrieve Mallory request')
             withAttributes(method: 'get', path: '/mallory', query: [name: 'ron', status: 'good'])
             willRespondWith(
@@ -53,7 +53,7 @@ class ExampleGroovyConsumerV3PactTest {
       assert providerStates[0] == [name: 'a provider state']
       assert providerStates[1] == [name: 'another provider state', params: [valueA: 'A', valueB: 100]]
       assert providerStates[2] == [name: 'a third provider state',
-                                   params: [valueC: date.format('yyyy-MM-dd\'T\'HH:mm:ssZ', getTimeZone('GMT'))]
+                                   params: [valueC: date.toString()]
       ]
     }
 }

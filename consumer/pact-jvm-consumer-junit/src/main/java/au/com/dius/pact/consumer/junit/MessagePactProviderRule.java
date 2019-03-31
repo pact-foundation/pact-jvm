@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.junit;
 import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactConsumerConfig;
+import au.com.dius.pact.consumer.PactFolder;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.messaging.Message;
 import au.com.dius.pact.core.model.messaging.MessagePact;
@@ -100,7 +101,12 @@ public class MessagePactProviderRule extends ExternalResource {
 				setMessage(providedMessage, description);
 				try {
 					base.evaluate();
-					messagePact.write(PactConsumerConfig.INSTANCE.getPactDirectory(), PactSpecVersion.V3);
+					PactFolder pactFolder = testClassInstance.getClass().getAnnotation(PactFolder.class);
+					if (pactFolder != null) {
+						messagePact.write(pactFolder.value(), PactSpecVersion.V3);
+					} else {
+						messagePact.write(PactConsumerConfig.INSTANCE.getPactDirectory(), PactSpecVersion.V3);
+					}
 				} catch (Throwable t) {
 					throw t;
 				}
