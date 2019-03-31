@@ -1,15 +1,11 @@
 package au.com.dius.pact.model
 
 import com.google.gson.GsonBuilder
-import groovy.json.JsonOutput
 import mu.KLogging
 import java.io.File
 import java.io.PrintWriter
 import java.io.RandomAccessFile
 import java.io.StringWriter
-import java.nio.channels.FileLock
-import java.nio.charset.Charset
-import kotlin.reflect.full.staticFunctions
 
 /**
  * Class to write out a pact to a file
@@ -46,9 +42,9 @@ object PactWriter : KLogging() {
       val raf = RandomAccessFile(pactFile, "rw")
       val lock = raf.channel.lock()
       try {
-        val pactReaderClass = Class.forName("au.com.dius.pact.model.PactReader").kotlin
-        val loadPact = pactReaderClass.staticFunctions.find { it.name == "loadPact" }
-        val existingPact = loadPact!!.call(readLines(raf)) as Pact<I>
+        val pactReaderClass = Class.forName("au.com.dius.pact.model.PactReader")
+        val loadPact = pactReaderClass.getDeclaredMethod("loadPact", Class.forName("java.lang.Object"))
+        val existingPact = loadPact.invoke(null, readLines(raf)) as Pact<I>
         val result = PactMerge.merge(existingPact, pact)
         if (!result.ok) {
           throw InvalidPactException(result.message)
@@ -66,7 +62,7 @@ object PactWriter : KLogging() {
       }
     } else {
       pactFile.parentFile.mkdirs()
-      PactWriter.writePact(pact, PrintWriter(pactFile), pactSpecVersion)
+      pactFile.printWriter().use { PactWriter.writePact(pact, it, pactSpecVersion) }
     }
   }
 

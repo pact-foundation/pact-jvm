@@ -1,6 +1,5 @@
 package au.com.dius.pact.model
 
-import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
@@ -21,7 +20,6 @@ abstract class BasePact<I extends Interaction> implements Pact<I> {
     'pactSpecification': [version: '3.0.0'],
     'pact-jvm'         : [version: lookupVersion()]
   ])
-  private static final String METADATA = 'metadata'
 
   Consumer consumer
   Provider provider
@@ -91,21 +89,7 @@ abstract class BasePact<I extends Interaction> implements Pact<I> {
 
   @CompileStatic
   void write(String pactDir, PactSpecVersion pactSpecVersion) {
-    def pactFile = fileForPact(pactDir)
-    PactWriter.writePact(pactFile, this, pactSpecVersion)
-  }
-
-  @CompileStatic
-  private String toJson(PactSpecVersion pactSpecVersion) {
-    def jsonMap = toMap(pactSpecVersion)
-    if (jsonMap.containsKey(METADATA)) {
-      def map = [:] + DEFAULT_METADATA
-      map.putAll(jsonMap[METADATA] as Map)
-      jsonMap.put(METADATA, map)
-    } else {
-      jsonMap.put(METADATA, DEFAULT_METADATA)
-    }
-    JsonOutput.toJson(jsonMap)
+    PactWriter.writePact(fileForPact(pactDir), this, pactSpecVersion)
   }
 
   Map mergePacts(Map pact, File pactFile) {
