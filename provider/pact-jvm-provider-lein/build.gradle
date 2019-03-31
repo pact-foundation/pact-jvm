@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-  compile project(":pact-jvm-provider")
+  compile project(":provider:pact-jvm-provider")
   compile 'org.clojure:clojure:1.8.0'
   compile 'org.clojure:core.match:0.2.2'
   compile 'leiningen-core:leiningen-core:2.6.1'
@@ -13,6 +13,7 @@ dependencies {
   compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
 
   testRuntime 'org.clojure:tools.nrepl:0.2.13'
+  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 }
 
 clojure.aotCompile = true

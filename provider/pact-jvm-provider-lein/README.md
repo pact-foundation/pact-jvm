@@ -1,4 +1,4 @@
-# Leiningen plugin to verify a provider [version 2.2.14+, 3.0.3+]
+# Leiningen plugin to verify a provider
 
 Leiningen plugin for verifying pacts against a provider. The plugin provides a `pact-verify` task which will verify all
 configured pacts against your provider.
@@ -10,7 +10,7 @@ configured pacts against your provider.
 ```clojure
   :profiles {
              :pact {
-                    :plugins [[au.com.dius/pact-jvm-provider-lein_2.11 "3.2.11" :exclusions [commons-logging]]]
+                    :plugins [[au.com.dius/pact-jvm-provider-lein "4.0.0" :exclusions [commons-logging]]]
                     :dependencies [[ch.qos.logback/logback-core "1.1.3"]
                                    [ch.qos.logback/logback-classic "1.1.3"]
                                    [org.apache.httpcomponents/httpclient "4.4.1"]]
@@ -133,7 +133,7 @@ The default HTTP client is used for all requests to providers (created with a ca
 This can be changed by specifying a function assigned to `:create-client` on the provider that returns a `CloseableHttpClient`.
 The function will receive the provider info as a parameter.
 
-## Turning off URL decoding of the paths in the pact file [version 3.3.3+]
+## Turning off URL decoding of the paths in the pact file
 
 By default the paths loaded from the pact file will be decoded before the request is sent to the provider. To turn this
 behaviour off, set the system property `pact.verifier.disableUrlPathDecoding` to `true`.
@@ -243,7 +243,7 @@ Then you can just run:
 
 and the `start-app` and `terminate-app` tasks will run before and after the provider verification.
 
-## Specifying the provider hostname at runtime [3.0.4+]
+## Specifying the provider hostname at runtime
 
 If you need to calculate the provider hostname at runtime (for instance it is run as a new docker container or
 AWS instance), you can give an anonymous function as the provider host that returns the host name. The function

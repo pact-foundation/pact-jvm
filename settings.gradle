@@ -1,4 +1,3 @@
-enableFeaturePreview('STABLE_PUBLISHING')
 rootProject.name = 'pact-jvm'
 
 include 'core:pact-jvm-core-support'
@@ -23,12 +22,12 @@ include   'provider:pact-jvm-provider-maven'
 include   'provider:pact-jvm-provider-junit'
 include   'provider:pact-jvm-provider-junit5'
 include   'provider:pact-jvm-provider-spring'
+include   'provider:pact-jvm-provider-lein'
 
 //include   'pact-jvm-consumer-specs2'
 //include   'pact-jvm-provider-specs2'
 //include   'pact-jvm-provider-scalatest'
 //include   'pact-jvm-server'
-//include   'pact-jvm-provider-lein'
 //include   'pact-jvm-provider-scalasupport'
 
 include   'pact-specification-test'
