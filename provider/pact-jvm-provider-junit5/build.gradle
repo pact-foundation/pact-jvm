@@ -1,0 +1,11 @@
+dependencies {
+    api project(":core:pact-jvm-core-support"), 
+      project(":provider:pact-jvm-provider")
+    compile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
+    implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
+
+    testRuntime "ch.qos.logback:logback-classic:${project.logbackVersion}"
+    testCompile 'ru.lanwen.wiremock:wiremock-junit5:1.1.1'
+    testCompile 'com.github.tomakehurst:wiremock:2.19.0'
+    testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+}
