@@ -156,7 +156,7 @@ class PactBrokerClientPactSpec extends Specification {
       uponReceiving('a request to the root')
       withAttributes(path: '/')
       willRespondWith(status: 200)
-      withBody('application/hal+json') {
+      withBody(mimeType: 'application/hal+json') {
         '_links' {
           'pb:latest-provider-pacts' {
             href url('http://localhost:8080', 'pacts', 'provider', '{provider}', 'latest')
@@ -168,7 +168,7 @@ class PactBrokerClientPactSpec extends Specification {
       uponReceiving('a request for the provider pacts')
       withAttributes(path: '/pacts/provider/Activity Service/latest')
       willRespondWith(status: 200)
-      withBody('application/hal+json') {
+      withBody(mimeType: 'application/hal+json') {
         '_links' {
           provider {
             href url('http://localhost:8080', 'pacticipants', regexp('[^\\/]+', 'Activity Service'))

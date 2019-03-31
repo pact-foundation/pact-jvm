@@ -9,7 +9,7 @@ dependencies {
     compile "io.netty:netty-handler:${project.nettyVersion}"
     compile "org.apache.httpcomponents:httpmime:${project.httpClientVersion}"
     compile "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}"
-    implementation 'org.slf4j:slf4j-api:1.7.26'
+    implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
 
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile 'org.cthul:cthul-matchers:1.1.0'

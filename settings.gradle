@@ -13,14 +13,13 @@ project(':core:pact-jvm-core-matchers').projectDir = file('core/matchers')
 
 include   'consumer:pact-jvm-consumer'
 include   'consumer:pact-jvm-consumer-groovy'
+include   'consumer:pact-jvm-consumer-java8'
+include   'consumer:pact-jvm-consumer-junit'
+include   'consumer:pact-jvm-consumer-junit5'
 
 include   'provider:pact-jvm-provider'
 
-//include   'pact-jvm-consumer-junit'
-//include   'pact-jvm-consumer-junit5'
-//include   'pact-jvm-consumer-java8'
 //include   'pact-jvm-consumer-specs2'
-//include   'pact-jvm-provider'
 //include   'pact-jvm-provider-specs2'
 //include   'pact-jvm-provider-scalatest'
 //include   'pact-jvm-server'

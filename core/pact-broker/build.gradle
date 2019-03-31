@@ -11,7 +11,7 @@ dependencies {
   compile('io.github.microutils:kotlin-logging:1.4.4') {
     exclude group: 'org.jetbrains.kotlin'
   }
-  implementation 'org.slf4j:slf4j-api:1.7.26'
+  implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
 
   testCompile 'net.bytebuddy:byte-buddy:1.9.12'
 }

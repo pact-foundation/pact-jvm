@@ -4,4 +4,5 @@ dependencies {
       project(":provider:pact-jvm-provider")
     testCompile "ch.qos.logback:logback-core:${project.logbackVersion}",
       "ch.qos.logback:logback-classic:${project.logbackVersion}"
+    testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 }
