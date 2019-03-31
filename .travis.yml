@@ -11,9 +11,9 @@ jdk:
 env:
   - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT='-p core'
   - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT='-p consumer'
-  - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT='-p provider'
+  - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT='-p provider -x :provider:pact-jvm-provider:signArchives -x :core:pact-jvm-core-model:signArchives -x :core:pact-jvm-core-matchers:signArchives -x :core:pact-jvm-core-pact-broker:signArchives -x :core:pact-jvm-core-support:signArchives'
   - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT='-p pact-specification-test'
 script:
   - unset _JAVA_OPTIONS
-  - ./gradlew --stacktrace --no-daemon $PROJECT build -x signArchives
+  - ./gradlew --stacktrace --no-daemon $PROJECT build
 install: true
