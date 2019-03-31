@@ -10,7 +10,9 @@ jdk:
   - openjdk11
 env:
   - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT='-p core'
-  - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT=
+  - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT='-p consumer'
+  - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT='-p provider'
+  - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT='-p pact-specification-test'
 script:
   - unset _JAVA_OPTIONS
   - ./gradlew --stacktrace --no-daemon $PROJECT build
