@@ -7,7 +7,6 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 
-import java.nio.channels.FileLock
 import java.util.jar.JarInputStream
 
 /**
@@ -93,42 +92,7 @@ abstract class BasePact<I extends Interaction> implements Pact<I> {
   @CompileStatic
   void write(String pactDir, PactSpecVersion pactSpecVersion) {
     def pactFile = fileForPact(pactDir)
-    synchronized (pactFile) {
-      if (pactFile.exists() && pactFile.length() > 0) {
-        RandomAccessFile raf = new RandomAccessFile(pactFile, 'rw')
-        FileLock lock = raf.channel.lock()
-        try {
-          def existingPact = PactReader.loadPact(readLines(raf))
-          def result = PactMerge.merge(existingPact, this)
-          if (!result.ok) {
-            throw new InvalidPactException(result.message)
-          }
-          raf.seek(0)
-          def bytes = JsonOutput.prettyPrint(this.toJson(pactSpecVersion)).getBytes('UTF-8')
-          raf.setLength(bytes.length)
-          raf.write(bytes)
-        } finally {
-          lock.release()
-          raf.close()
-        }
-      } else {
-        pactFile.parentFile.mkdirs()
-        pactFile.withWriter { it.print(JsonOutput.prettyPrint(this.toJson(pactSpecVersion))) }
-      }
-    }
-  }
-
-  @CompileStatic
-  private static String readLines(RandomAccessFile file) {
-    StringBuilder data = new StringBuilder()
-
-    String line = file.readLine()
-    while (line != null) {
-      data.append(line)
-      line = file.readLine()
-    }
-
-    data.toString()
+    PactWriter.writePact(pactFile, this, pactSpecVersion)
   }
 
   @CompileStatic

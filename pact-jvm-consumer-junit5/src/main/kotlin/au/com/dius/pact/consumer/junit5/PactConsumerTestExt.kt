@@ -14,6 +14,7 @@ import au.com.dius.pact.model.BasePact
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.MockProviderConfig
 import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.model.PactWriter
 import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.v3.messaging.MessagePact
 import mu.KLogging
@@ -297,7 +298,8 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, BeforeAllCallback, Pa
             "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file " +
               "${pact.fileForPact(pactDirectory)}"
           }
-          pact.write(pactDirectory, config.pactVersion)
+          val pactFile = pact.fileForPact(pactDirectory)
+          PactWriter.writePact(pactFile, pact, config.pactVersion)
         } else {
           JUnitTestSupport.validateMockServerResult(result)
         }

@@ -97,7 +97,7 @@ subprojects {
       testRuntime "cglib:cglib:${project.cglibVersion}"
       testCompile 'org.objenesis:objenesis:2.6'
       testCompile 'io.kotlintest:kotlintest:2.0.7'
-      testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}:indy"
+      testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
 
       groovyDoc "org.codehaus.groovy:groovy-all:${project.groovyVersion}"
     }
@@ -288,7 +288,7 @@ if (System.env.UBERJAR == 'true') {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
-    compile "org.codehaus.groovy:groovy:${project.groovyVersion}:indy"
+    compile "org.codehaus.groovy:groovy:${project.groovyVersion}"
     compile('io.github.microutils:kotlin-logging:1.4.4') {
       exclude group: 'org.jetbrains.kotlin'
     }

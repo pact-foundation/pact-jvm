@@ -9,7 +9,7 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
 
-  testCompile "org.codehaus.groovy:groovy-nio:${project.groovyVersion}:indy"
+  testCompile "org.codehaus.groovy:groovy-nio:${project.groovyVersion}"
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os

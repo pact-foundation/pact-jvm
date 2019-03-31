@@ -3,6 +3,6 @@ dependencies {
 
     testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}",
       "ch.qos.logback:logback-classic:${project.logbackVersion}"
-    testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}:indy"
-    testCompile "org.codehaus.groovy:groovy-dateutil:${project.groovyVersion}:indy"
+    testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}"
+    testCompile "org.codehaus.groovy:groovy-dateutil:${project.groovyVersion}"
 }
