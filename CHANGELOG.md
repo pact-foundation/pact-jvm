@@ -1,5 +1,32 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.6.3 - Bugfixes + small enhancements
+
+* 2be31356 - fix: fix for failing tests #861 (Ronald Holshausen, Sun Mar 31 19:18:12 2019 +1100)
+* d4784b15 - fix: fix for OverlappingFileLockException with parrallel tests #861 (Ronald Holshausen, Sun Mar 31 18:31:58 2019 +1100)
+* 0b31b21e - fix: update MessagePactProviderRule to use @PactFolder annotation #855 (Ronald Holshausen, Sun Mar 31 17:08:31 2019 +1100)
+* efd70166 - chore: updated readme with 4.0.0 version (Ronald Holshausen, Sun Mar 31 16:50:37 2019 +1100)
+* f6ff32a7 - feat: implemented date expressions for date generator (Ronald Holshausen, Sat Mar 30 12:53:23 2019 +1100)
+* 5a14c3a1 - Merge pull request #866 from vixplows/feat/bearer-token-support (Ronald Holshausen, Sat Mar 30 12:43:32 2019 +1100)
+* 37b22a38 - chore: upgraded Gradle to 5.3 (Ronald Holshausen, Sat Mar 30 12:40:59 2019 +1100)
+* f8a6daba - feat: add bearer token to gradle task & maven plugin (Victoria Plows, Wed Mar 13 09:43:13 2019 +1100)
+* 333e872a - Merge pull request #860 from SchulteMarkus/patch-1 (Ronald Holshausen, Tue Mar 5 19:08:09 2019 +1100)
+* 0ee83867 - Merge pull request #862 from vixplows/feat/retries (Ronald Holshausen, Tue Mar 5 19:06:58 2019 +1100)
+* bf088a2c - feat: add retries to execution chain of client for 500 errors (Victoria Plows, Tue Mar 5 10:53:46 2019 +1100)
+* d3c2a228 - Example in README ready for C+P (Markus Schulte, Mon Mar 4 10:29:39 2019 +0100)
+* a0ba0873 - fix: add @JvmOverloads to the date and time generator constructors (Ronald Holshausen, Sun Mar 3 14:33:45 2019 +1100)
+* 0d494a14 - feat: update the date and time generators to take an expression (Ronald Holshausen, Sun Mar 3 13:43:07 2019 +1100)
+* 9f37cb7f - feat: allow the generator package to be configured (Ronald Holshausen, Sun Mar 3 12:28:52 2019 +1100)
+* 9777a1f4 - feat: add suport for bearer tokens in the pact broker HAL client (Ronald Holshausen, Sun Mar 3 11:15:40 2019 +1100)
+* 6328bf72 - fix: the vesion should be applied to all projects (Ronald Holshausen, Sat Mar 2 20:03:06 2019 +1100)
+* fdeb160c - fix: For repeated headers need to split the value around commas when loading from the pact file #851 (Ronald Holshausen, Sat Mar 2 18:34:58 2019 +1100)
+* eff5bd3b - fix: missed another references after refactor to handle repeated headers #851 (Ronald Holshausen, Sat Mar 2 18:27:03 2019 +1100)
+* 6f480181 - fix: missed a few references after refactor to handle repeated headers #851 (Ronald Holshausen, Sat Mar 2 18:06:25 2019 +1100)
+* 997e24eb - fix: handle repeated headers #851 (Ronald Holshausen, Sat Mar 2 17:50:13 2019 +1100)
+* 860675f8 - chore: upgraded Kotlin to latest (Ronald Holshausen, Sat Mar 2 11:32:33 2019 +1100)
+* 8e42b878 - Update README.md (Ronald Holshausen, Sun Feb 17 19:03:11 2019 +1100)
+* a5bfbe33 - bump version to 3.6.3 (Ronald Holshausen, Sun Feb 17 18:32:52 2019 +1100)
+
 # 3.6.2 - Bugfix Release
 
 * 835c1151 - fix: missed one class after OptionalBody refactor #600 (Ronald Holshausen, Sun Feb 17 17:26:15 2019 +1100)
