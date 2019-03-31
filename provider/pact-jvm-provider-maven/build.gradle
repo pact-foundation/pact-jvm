@@ -10,6 +10,7 @@ dependencies {
     compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
 
   testCompile "org.codehaus.groovy:groovy-nio:${project.groovyVersion}:indy"
+  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -17,7 +18,7 @@ def isWindows() {
     Os.isFamily(Os.FAMILY_WINDOWS)
 }
 
-task pluginDescriptor(type: Exec, dependsOn: [":pact-jvm-provider:install",
+task pluginDescriptor(type: Exec, dependsOn: [":provider:pact-jvm-provider:install",
                                               ':core:pact-jvm-core-model:install',
                                               ':core:pact-jvm-core-matchers:install',
                                               ':core:pact-jvm-core-pact-broker:install',

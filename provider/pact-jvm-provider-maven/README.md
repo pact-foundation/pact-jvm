@@ -16,8 +16,8 @@ The Maven plugin provides a `verify` goal which will verify all configured pacts
       [...]
       <plugin>
         <groupId>au.com.dius</groupId>
-        <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-        <version>3.5.11</version>
+        <artifactId>pact-jvm-provider-maven</artifactId>
+        <version>4.0.0</version>
       </plugin>
       [...]
     </plugins>
@@ -32,8 +32,8 @@ You define all the providers and consumers within the configuration element of t
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.11</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <serviceProviders>
         <!-- You can define as many as you need, but each must have a unique name -->
@@ -70,8 +70,8 @@ provider and define a consumer for each pact file in the directory. Consumer nam
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.11</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <serviceProviders>
         <!-- You can define as many as you need, but each must have a unique name -->
@@ -89,7 +89,7 @@ provider and define a consumer for each pact file in the directory. Consumer nam
 </plugin>
 ```
 
-### Verifying all pact files from multiple directories for a provider [3.5.18+]
+### Verifying all pact files from multiple directories for a provider
 
 If you want to specify multiple directories, you can use `pactFileDirectories`. The plugin will only fail the build if
 no pact files are loaded after processing all the directories in the list.
@@ -97,8 +97,8 @@ no pact files are loaded after processing all the directories in the list.
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.18</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -121,8 +121,8 @@ For providers that are running on SSL with self-signed certificates, you need to
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.11</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -142,8 +142,8 @@ For environments that are running their own certificate chains:
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.11</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -171,8 +171,8 @@ bound to a variable named `request` prior to it being executed.
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.11</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -205,8 +205,8 @@ For example:
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.11</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -260,8 +260,8 @@ Example in the configuration section:
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.11</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -292,8 +292,8 @@ These values can be set at the provider level, or for a specific consumer. Consu
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.11</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -337,8 +337,8 @@ For example:
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.11</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -361,8 +361,8 @@ For example:
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.11</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -381,17 +381,17 @@ For example:
 </plugin>
 ```
 
-#### Using the Maven servers configuration [version 3.5.6+]
+#### Using the Maven servers configuration
 
-From version 3.5.6, you can use the servers setup in the Maven settings. To do this, setup a server as per the 
+You can use the servers setup in the Maven settings. To do this, setup a server as per the
 [Maven Server Settings](https://maven.apache.org/settings.html#Servers). Then set the server ID in the pact broker
 configuration in your POM.
  
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.6</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -417,8 +417,8 @@ For example:
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.11</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -448,7 +448,7 @@ whose descriptions start with 'a request for payment'. `-Dpact.filter.providerSt
 has a provider state that ends with payment, and `-Dpact.filter.providerState=` will match any interaction that does not have a
 provider state.
 
-## Not failing the build if no pact files are found [version 3.5.19+]
+## Not failing the build if no pact files are found
 
 By default, if there are no pact files to verify, the plugin will raise an exception. This is to guard against false
 positives where the build is passing but nothing has been verified due to mis-configuration.
@@ -466,8 +466,8 @@ Add something like the following to your maven pom file:
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.11</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -528,8 +528,8 @@ By default, the test classpath is scanned for annotated methods. You can overrid
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.11</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -563,8 +563,8 @@ For example:
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.11</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <pactDirectory>path/to/pact/files</pactDirectory> <!-- Defaults to ${project.build.directory}/pacts -->
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
@@ -581,14 +581,14 @@ project by default, but can be overwritten with the `projectVersion` property. M
 _NOTE_: By default, the pact broker has issues parsing `SNAPSHOT` versions.  You can configure the publisher to 
 automatically remove `-SNAPSHOT` from your version number by setting `trimSnapshot` to true. This setting does not modify non-snapshot versions.
 
-You can set any tags that the pacts should be published with by setting the `tags` list property (version 3.5.12+). A common use of this
+You can set any tags that the pacts should be published with by setting the `tags` list property. A common use of this
 is setting the tag to the current source control branch. This supports using pact with feature branches.
 
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.12</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <pactDirectory>path/to/pact/files</pactDirectory> <!-- Defaults to ${project.build.directory}/pacts -->
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
@@ -610,8 +610,8 @@ For example:
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.11</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <pactBrokerUsername>USERNAME</pactBrokerUsername>
@@ -620,17 +620,17 @@ For example:
 </plugin>
 ```
 
-#### Using the Maven servers configuration [version 3.5.6+]
+#### Using the Maven servers configuration
 
-From version 3.5.6, you can use the servers setup in the Maven settings. To do this, setup a server as per the 
+You can use the servers setup in the Maven settings. To do this, setup a server as per the
 [Maven Server Settings](https://maven.apache.org/settings.html#Servers). Then set the server ID in the pact broker
 configuration in your POM.
 
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.11</artifactId>
-    <version>3.5.19</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <pactBrokerServerId>test-pact-broker</pactBrokerServerId>  <!-- This must match the server id in the maven settings -->
@@ -638,7 +638,7 @@ configuration in your POM.
 </plugin>
 ```
 
-## Excluding pacts from being published [version 3.5.19+]
+## Excluding pacts from being published
 
 You can exclude some of the pact files from being published by providing a list of regular expressions that match
 against the base names of the pact files.
@@ -659,8 +659,8 @@ pact {
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.19</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <excludes>
@@ -670,14 +670,14 @@ pact {
 </plugin>
 ```
 
-# Publishing verification results to a Pact Broker [version 3.5.4+]
+# Publishing verification results to a Pact Broker
 
 For pacts that are loaded from a Pact Broker, the results of running the verification can be published back to the
  broker against the URL for the pact. You will be able to then see the result on the Pact Broker home screen.
  
 To turn on the verification publishing, set the system property `pact.verifier.publishResults` to `true` in the pact maven plugin, not surefire, configuration.
 
-# Enabling other verification reports [version 3.5.20+]
+# Enabling other verification reports
 
 By default the verification report is written to the console. You can also enable a JSON or Markdown report by setting
 the `reports` configuration list.
@@ -685,8 +685,8 @@ the `reports` configuration list.
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
-    <version>3.5.20</version>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.0</version>
     <configuration>
       <reports>
           <report>console</report>
