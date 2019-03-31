@@ -75,7 +75,7 @@ is set with the version of your provider.
     }
 ```
 
-## Using a Spring runner (version 3.5.7+)
+## Using a Spring runner
 
 You can use `SpringRestPactRunner` instead of the default Pact runner to use the Spring test annotations. This will
 allow you to inject or mock spring beans.
@@ -116,9 +116,9 @@ public class PricingServiceProviderPactTest {
 }
 ```
 
-### Using Spring Context Properties (version 3.5.14+)
+### Using Spring Context Properties
 
-From version 3.5.14 onwards, the SpringRestPactRunner will look up any annotation expressions (like `${pactBrokerHost}`)
+The SpringRestPactRunner will look up any annotation expressions (like `${pactBrokerHost}`)
 above) from the Spring context. For Springboot, this will allow you to define the properties in the application test properties.
 
 For instance, if you create the following `application.yml` in the test resources:
@@ -147,7 +147,7 @@ public class PactVerificationTest {
 
 ```
 
-### Using a random port with a Springboot test (version 3.5.14+)
+### Using a random port with a Springboot test
 
 If you use a random port in a springboot test (by setting `SpringBootTest.WebEnvironment.RANDOM_PORT`), you can use the
 `SpringBootHttpTarget` which will get the application port from the spring application context.
