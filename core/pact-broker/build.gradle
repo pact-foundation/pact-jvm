@@ -1,5 +1,5 @@
 dependencies {
-  compile project(":core:pact-jvm-core-support")
+  api project(":core:pact-jvm-core-support")
   compile "org.apache.commons:commons-lang3:$commonsLang3Version"
   compile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   compile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
@@ -13,5 +13,6 @@ dependencies {
   }
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
 
+  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testCompile 'net.bytebuddy:byte-buddy:1.9.12'
 }

@@ -11,6 +11,7 @@ import javax.net.ssl.SSLHandshakeException;
 import au.com.dius.pact.consumer.junit.PactProviderRule;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import org.hamcrest.Matchers;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ import au.com.dius.pact.consumer.exampleclients.ConsumerHttpsClient;
 import au.com.dius.pact.consumer.model.MockHttpsKeystoreProviderConfig;
 import au.com.dius.pact.core.model.PactSpecVersion;
 
+@Ignore
 public class PactProviderHttpsKeystoreTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(PactProviderHttpsKeystoreTest.class);
 

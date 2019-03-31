@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import spock.lang.Specification
 
+@SuppressWarnings('PrivateFieldCouldBeFinal')
 class StateChangeSpec extends Specification {
 
   private ProviderVerifier providerVerifier
@@ -12,7 +13,7 @@ class StateChangeSpec extends Specification {
   private Closure consumer
   private ProviderState state
   private makeStateChangeRequestArgs
-  private final consumerMap = [name: 'bob']
+  private Map consumerMap = [name: 'bob']
   private ProviderClient mockProviderClient
 
   def setup() {

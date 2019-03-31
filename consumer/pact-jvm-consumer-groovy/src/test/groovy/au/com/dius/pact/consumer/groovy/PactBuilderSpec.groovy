@@ -2,9 +2,10 @@ package au.com.dius.pact.consumer.groovy
 
 import spock.lang.Specification
 
+@SuppressWarnings('PrivateFieldCouldBeFinal')
 class PactBuilderSpec extends Specification {
 
-  private final aliceService = new PactBuilder()
+  private PactBuilder aliceService = new PactBuilder()
 
   void setup() {
     aliceService {

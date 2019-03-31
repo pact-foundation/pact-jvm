@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
-  compile project(":consumer:pact-jvm-consumer"),
-    "junit:junit:${project.junitVersion}",
+  compile project(":consumer:pact-jvm-consumer")
+  compile "junit:junit:${project.junitVersion}",
     "org.json:json:${project.jsonVersion}",
     "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
     "com.google.guava:guava:${project.guavaVersion}"
@@ -14,11 +14,17 @@ dependencies {
     'org.apache.commons:commons-collections4:4.1',
     "com.google.code.gson:gson:${project.gsonVersion}",
     "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}",
-    "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
-    'com.jayway.restassured:rest-assured:2.9.0'
+    "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
+  testCompile('com.jayway.restassured:rest-assured:2.9.0') {
+    exclude group: 'org.codehaus.groovy'
+  }
   testCompile 'org.hamcrest:hamcrest:2.1'
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}:indy"
+  testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}:indy"
   testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
+  // Required for Java 9
+  testCompile 'javax.xml.bind:jaxb-api:2.3.0'
+  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 
   testCompile 'org.clojure:clojure:1.8.0',
     'http-kit:http-kit:2.1.19'

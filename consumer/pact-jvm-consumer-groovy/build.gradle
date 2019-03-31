@@ -1,8 +1,9 @@
 dependencies {
-    implementation project(":consumer:pact-jvm-consumer")
+    api project(":consumer:pact-jvm-consumer")
 
     testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}",
       "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}:indy"
     testCompile "org.codehaus.groovy:groovy-dateutil:${project.groovyVersion}:indy"
+    testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 }

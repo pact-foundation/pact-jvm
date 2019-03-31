@@ -1,8 +1,8 @@
 
 dependencies {
-    compile project(":core:pact-jvm-core-model"),
-      project(":core:pact-jvm-core-matchers"),
-      'com.googlecode.java-diff-utils:diffutils:1.3.0',
+    api project(":core:pact-jvm-core-model")
+    api project(":core:pact-jvm-core-matchers")
+    compile 'com.googlecode.java-diff-utils:diffutils:1.3.0',
       'dk.brics.automaton:automaton:1.11-8',
       "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
     compile "org.json:json:${project.jsonVersion}"

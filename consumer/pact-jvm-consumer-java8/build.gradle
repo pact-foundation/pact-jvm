@@ -1,5 +1,5 @@
 dependencies {
-  implementation project(":consumer:pact-jvm-consumer")
+  api project(":consumer:pact-jvm-consumer")
 
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 }

@@ -21,6 +21,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
+@Ignore
 public class PactProviderHttpsTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(PactProviderHttpsTest.class);
 
