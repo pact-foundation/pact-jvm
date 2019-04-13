@@ -34,6 +34,7 @@ import org.junit.runners.model.Statement
 import org.junit.runners.model.TestClass
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.BiConsumer
+import kotlin.reflect.jvm.kotlinProperty
 
 /**
  * Internal class to support pact test running
@@ -220,11 +221,16 @@ open class InteractionRunner<I>(
   protected open fun setupTargetForInteraction(target: Target) { }
 
   protected fun lookupTarget(testInstance: Any): Target {
-    val target = testClass.getAnnotatedFieldValues(testInstance, TestTarget::class.java, Target::class.java).first()
+    val targetField = testClass.getAnnotatedFields(TestTarget::class.java).first()
+    val target = if (targetField.field.kotlinProperty != null) {
+      targetField.field.kotlinProperty!!.getter.call(testInstance)
+    } else {
+      targetField.get(testInstance)
+    }
     if (target is TestClassAwareTarget) {
       target.setTestClass(testClass, testInstance)
     }
-    return target
+    return target as Target
   }
 
   protected fun withStateChanges(interaction: Interaction, target: Any, statement: Statement): Statement {
