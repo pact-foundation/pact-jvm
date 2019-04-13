@@ -23,7 +23,7 @@ class ExampleFormPostTest {
             willRespondWith(status: 201, body: 'form posted ok', headers: ['Content-Type': 'text/plain'])
         }
 
-        assert PactVerificationResult.Ok.INSTANCE == service.runTest { server, context ->
+        assert PactVerificationResult.Ok.INSTANCE == service.runTest {
             def http = new HTTPBuilder( 'http://localhost:8000' )
             http.post(path: '/path', body: [number: '12345678'], requestContentType: ContentType.URLENC) { resp ->
                 assert resp.statusLine.statusCode == 201

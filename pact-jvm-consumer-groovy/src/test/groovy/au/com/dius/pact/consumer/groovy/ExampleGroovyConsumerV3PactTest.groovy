@@ -33,7 +33,7 @@ class ExampleGroovyConsumerV3PactTest {
             )
         }
 
-        PactVerificationResult result = aliceService.runTest { mockServer, context ->
+        PactVerificationResult result = aliceService.runTest { mockServer ->
             def client = new RESTClient(mockServer.url)
             def aliceResponse = client.get(path: '/mallory', query: [status: 'good', name: 'ron'])
 
