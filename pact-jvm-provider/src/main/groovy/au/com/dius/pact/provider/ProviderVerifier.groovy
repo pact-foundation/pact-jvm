@@ -41,7 +41,7 @@ class ProviderVerifier extends ProviderVerifierBase {
   def pactLoadFailureMessage
   Function<Object, Boolean> isBuildSpecificTask = { null }
   BiConsumer<Object, ProviderState> executeBuildSpecificTask = { } as BiConsumer<Object, ProviderState>
-  Supplier<URL[]> projectClasspath = { }
+  Supplier<List<URL>> projectClasspath = { [] }
   List<VerifierReporter> reporters = [ new AnsiConsoleReporter() ]
   Function<Method, Object> providerMethodInstance = { Method m -> m.declaringClass.newInstance() }
   Supplier<String> providerVersion = { System.getProperty('pact.provider.version') }
@@ -285,11 +285,17 @@ class ProviderVerifier extends ProviderVerifierBase {
                                                def interaction, String interactionMessage, Map failures) {
     try {
       def urls = projectClasspath.get()
-      URLClassLoader loader = new URLClassLoader(urls, GroovyObject.classLoader)
-      def configurationBuilder = new ConfigurationBuilder()
-        .setScanners(new MethodAnnotationsScanner())
-        .addClassLoader(loader)
-        .addUrls(loader.URLs)
+      log.debug("projectClasspath = $urls")
+      def configurationBuilder
+      if (urls.isEmpty()) {
+        configurationBuilder = new ConfigurationBuilder().setScanners(new MethodAnnotationsScanner())
+      } else {
+        def loader = new URLClassLoader(urls as URL[], ProviderVerifierBase.classLoader)
+        configurationBuilder = new ConfigurationBuilder()
+          .setScanners(new MethodAnnotationsScanner())
+          .addClassLoader(loader)
+          .addUrls(urls)
+      }
 
       def scan = ProviderUtils.packagesToScan(providerInfo, consumer)
       if (!scan.empty) {

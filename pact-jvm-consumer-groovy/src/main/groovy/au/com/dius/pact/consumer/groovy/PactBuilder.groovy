@@ -437,4 +437,16 @@ class PactBuilder extends BaseBuilder {
       category.addRule(CONTENT_TYPE, new RegexMatcher(Headers.MULTIPART_HEADER_REGEX, multipart.contentType.value))
     }
   }
+
+  @Override
+  @SuppressWarnings('UnnecessaryOverridingMethod')
+  def call(@DelegatesTo(value = PactBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
+    super.build(closure)
+  }
+
+  @Override
+  @SuppressWarnings('UnnecessaryOverridingMethod')
+  def build(@DelegatesTo(value = PactBuilder, strategy = Closure.DELEGATE_FIRST) Closure closure) {
+    super.build(closure)
+  }
 }

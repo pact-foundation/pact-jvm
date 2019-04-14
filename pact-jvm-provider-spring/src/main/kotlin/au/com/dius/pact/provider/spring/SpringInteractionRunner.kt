@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.spring
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactSource
+import au.com.dius.pact.model.UnknownPactSource
 import au.com.dius.pact.provider.junit.InteractionRunner
 import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.spring.target.SpringBootHttpTarget
@@ -73,7 +74,7 @@ open class SpringInteractionRunner<I>(
   pact: Pact<I>,
   pactSource: PactSource?,
   private val testContextManager: TestContextManager
-) : InteractionRunner(testClass, pact, pactSource) where I : Interaction {
+) : InteractionRunner(testClass, pact, pactSource ?: UnknownPactSource) where I : Interaction {
 
   override fun withBefores(interaction: Interaction, testInstance: Any, statement: Statement): Statement {
     val befores = testClass.getAnnotatedMethods(Before::class.java)

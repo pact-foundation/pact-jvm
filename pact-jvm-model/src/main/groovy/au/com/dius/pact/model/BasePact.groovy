@@ -1,13 +1,11 @@
 package au.com.dius.pact.model
 
-import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 
-import java.nio.channels.FileLock
 import java.util.jar.JarInputStream
 
 /**
@@ -18,11 +16,10 @@ import java.util.jar.JarInputStream
 @ToString
 @EqualsAndHashCode(excludes = ['metadata', 'source'])
 abstract class BasePact<I extends Interaction> implements Pact<I> {
-  protected static final Map DEFAULT_METADATA = [
+  static final Map DEFAULT_METADATA = Collections.unmodifiableMap([
     'pactSpecification': [version: '3.0.0'],
     'pact-jvm'         : [version: lookupVersion()]
-  ]
-  private static final String METADATA = 'metadata'
+  ])
 
   Consumer consumer
   Provider provider
@@ -63,7 +60,7 @@ abstract class BasePact<I extends Interaction> implements Pact<I> {
 
   static Map convertToMap(def object) {
     if (object == null) {
-      object
+      null
     } else {
       object.properties.findAll { it.key != 'class' }.collectEntries { k, v ->
         if (v instanceof Map) {
@@ -92,56 +89,7 @@ abstract class BasePact<I extends Interaction> implements Pact<I> {
 
   @CompileStatic
   void write(String pactDir, PactSpecVersion pactSpecVersion) {
-    def pactFile = fileForPact(pactDir)
-    synchronized (pactFile) {
-      if (pactFile.exists() && pactFile.length() > 0) {
-        RandomAccessFile raf = new RandomAccessFile(pactFile, 'rw')
-        FileLock lock = raf.channel.lock()
-        try {
-          def existingPact = PactReader.loadPact(readLines(raf))
-          def result = PactMerge.merge(existingPact, this)
-          if (!result.ok) {
-            throw new InvalidPactException(result.message)
-          }
-          raf.seek(0)
-          def bytes = JsonOutput.prettyPrint(this.toJson(pactSpecVersion)).getBytes('UTF-8')
-          raf.setLength(bytes.length)
-          raf.write(bytes)
-        } finally {
-          lock.release()
-          raf.close()
-        }
-      } else {
-        pactFile.parentFile.mkdirs()
-        pactFile.withWriter { it.print(JsonOutput.prettyPrint(this.toJson(pactSpecVersion))) }
-      }
-    }
-  }
-
-  @CompileStatic
-  private static String readLines(RandomAccessFile file) {
-    StringBuilder data = new StringBuilder()
-
-    String line = file.readLine()
-    while (line != null) {
-      data.append(line)
-      line = file.readLine()
-    }
-
-    data.toString()
-  }
-
-  @CompileStatic
-  private String toJson(PactSpecVersion pactSpecVersion) {
-    def jsonMap = toMap(pactSpecVersion)
-    if (jsonMap.containsKey(METADATA)) {
-      def map = [:] + DEFAULT_METADATA
-      map.putAll(jsonMap[METADATA] as Map)
-      jsonMap.put(METADATA, map)
-    } else {
-      jsonMap.put(METADATA, DEFAULT_METADATA)
-    }
-    JsonOutput.toJson(jsonMap)
+    PactWriter.writePact(fileForPact(pactDir), this, pactSpecVersion)
   }
 
   Map mergePacts(Map pact, File pactFile) {

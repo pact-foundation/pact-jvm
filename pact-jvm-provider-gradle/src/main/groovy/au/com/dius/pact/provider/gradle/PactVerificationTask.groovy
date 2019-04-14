@@ -27,7 +27,7 @@ class PactVerificationTask extends DefaultTask {
       isBuildSpecificTask = { it instanceof Task || it instanceof String && project.tasks.findByName(it) }
       executeBuildSpecificTask = this.&executeStateChangeTask
       projectClasspath = {
-        project.sourceSets.test.runtimeClasspath*.toURL() as URL[]
+        project.sourceSets.test.runtimeClasspath*.toURL()
       }
       providerVersion = { project.version }
 

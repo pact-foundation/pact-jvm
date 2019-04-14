@@ -68,7 +68,7 @@ class PactConsumerTestExtSpec {
   void test1() {
     assertThrows(UnsupportedOperationException) {
       def context = ['getTestClass': { Optional.of(PactConsumerTestExtSpec) } ] as ExtensionContext
-      subject.lookupPact(providerInfo, '', context)
+      subject.lookupPact(providerInfo, '', context, [])
     }
   }
 
@@ -77,7 +77,7 @@ class PactConsumerTestExtSpec {
   void test2() {
     assertThrows(UnsupportedOperationException) {
       def context = ['getTestClass': { Optional.of(PactConsumerTestExtSpec) } ] as ExtensionContext
-      subject.lookupPact(providerInfo, 'test', context)
+      subject.lookupPact(providerInfo, 'test', context, [])
     }
   }
 
@@ -86,7 +86,7 @@ class PactConsumerTestExtSpec {
   void test3() {
     assertThrows(UnsupportedOperationException) {
       def context = ['getTestClass': { Optional.of(TestClassInvalidSignature) } ] as ExtensionContext
-      subject.lookupPact(providerInfo, 'pactMethod', context)
+      subject.lookupPact(providerInfo, 'pactMethod', context, [])
     }
   }
 
@@ -95,7 +95,7 @@ class PactConsumerTestExtSpec {
   void test4() {
     assertThrows(UnsupportedOperationException) {
       def context = ['getTestClass': { Optional.of(TestClass) } ] as ExtensionContext
-      subject.lookupPact(providerInfo, 'pactMethod', context)
+      subject.lookupPact(providerInfo, 'pactMethod', context, [])
     }
   }
 
@@ -108,7 +108,7 @@ class PactConsumerTestExtSpec {
       'getTestMethod': { Optional.empty() }
     ] as ExtensionContext
     def pact = subject.lookupPact(new ProviderInfo('junit5_provider', 'localhost', '8080',
-      PactSpecVersion.V3, ProviderType.SYNCH), 'pactMethod', context)
+      PactSpecVersion.V3, ProviderType.SYNCH), 'pactMethod', context, [])
     assertThat(pact, Matchers.is(this.pact))
   }
 

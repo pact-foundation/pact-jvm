@@ -176,7 +176,13 @@ open class AmpqTestTarget(val packagesToScan: List<String> = emptyList()) : Test
   }
 
   override fun prepareVerifier(verifier: ProviderVerifier, testInstance: Any) {
-    verifier.projectClasspath = Supplier<Array<URL>> { (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs }
+    verifier.projectClasspath = Supplier {
+      val classLoader = ClassLoader.getSystemClassLoader()
+      when (classLoader) {
+          is URLClassLoader -> classLoader.urLs.toList()
+        else -> emptyList()
+      }
+    }
     val defaultProviderMethodInstance = verifier.providerMethodInstance
     verifier.providerMethodInstance = Function<Method, Any?> { m ->
       if (m.declaringClass == testInstance.javaClass) {

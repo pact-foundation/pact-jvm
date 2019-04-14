@@ -78,6 +78,9 @@ data class RandomIntGenerator(val min: Int, val max: Int) : Generator {
   }
 }
 
+/**
+ * Generates a random big decimal value with the provided number of digits
+ */
 data class RandomDecimalGenerator(val digits: Int) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     return mapOf("type" to "RandomDecimal", "digits" to digits)
@@ -98,6 +101,9 @@ data class RandomDecimalGenerator(val digits: Int) : Generator {
   }
 }
 
+/**
+ * Generates a random hexadecimal value of the given number of digits
+ */
 data class RandomHexadecimalGenerator(val digits: Int) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     return mapOf("type" to "RandomHexadecimal", "digits" to digits)
@@ -118,6 +124,9 @@ data class RandomHexadecimalGenerator(val digits: Int) : Generator {
   }
 }
 
+/**
+ * Generates a random alphanumeric string of the provided length
+ */
 data class RandomStringGenerator(val size: Int = 20) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     return mapOf("type" to "RandomString", "size" to size)
@@ -140,6 +149,9 @@ data class RandomStringGenerator(val size: Int = 20) : Generator {
   }
 }
 
+/**
+ * Generates a random string from the provided regular expression
+ */
 data class RegexGenerator(val regex: String) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     return mapOf("type" to "Regex", "regex" to regex)
@@ -152,6 +164,9 @@ data class RegexGenerator(val regex: String) : Generator {
   }
 }
 
+/**
+ * Generates a random UUID
+ */
 object UuidGenerator : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     return mapOf("type" to "Uuid")
@@ -167,16 +182,20 @@ object UuidGenerator : Generator {
   }
 }
 
-data class DateGenerator(val format: String? = null) : Generator {
+/**
+ * Generates a date value for the provided format. If no format is provided, ISO date format is used. If an expression
+ * is given, it will be evaluated to generate the date, otherwise 'today' will be used
+ */
+data class DateGenerator @JvmOverloads constructor(val format: String? = null) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
-    if (format != null) {
-      return mapOf("type" to "Date", "format" to this.format)
+    if (!format.isNullOrEmpty()) {
+      return mapOf("type" to "Date", "format" to this.format.toString())
     }
     return mapOf("type" to "Date")
   }
 
   override fun generate(base: Any?): Any {
-    return if (format != null) {
+    return if (!format.isNullOrEmpty()) {
       OffsetDateTime.now().format(DateTimeFormatter.ofPattern(format))
     } else {
       LocalDate.now().toString()
@@ -190,10 +209,14 @@ data class DateGenerator(val format: String? = null) : Generator {
   }
 }
 
-data class TimeGenerator(val format: String? = null) : Generator {
+/**
+ * Generates a time value for the provided format. If no format is provided, ISO time format is used. If an expression
+ * is given, it will be evaluated to generate the time, otherwise 'now' will be used
+ */
+data class TimeGenerator @JvmOverloads constructor(val format: String? = null) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
-    if (format != null) {
-      return mapOf("type" to "Time", "format" to this.format)
+    if (!format.isNullOrEmpty()) {
+      return mapOf("type" to "Time", "format" to this.format.toString())
     }
     return mapOf("type" to "Time")
   }
@@ -213,16 +236,20 @@ data class TimeGenerator(val format: String? = null) : Generator {
   }
 }
 
-data class DateTimeGenerator(val format: String? = null) : Generator {
+/**
+ * Generates a datetime value for the provided format. If no format is provided, ISO format is used. If an expression
+ * is given, it will be evaluated to generate the datetime, otherwise 'now' will be used
+ */
+data class DateTimeGenerator @JvmOverloads constructor(val format: String? = null) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
-    if (format != null) {
-      return mapOf("type" to "DateTime", "format" to this.format)
+    if (!format.isNullOrEmpty()) {
+      return mapOf("type" to "DateTime", "format" to this.format.toString())
     }
     return mapOf("type" to "DateTime")
   }
 
   override fun generate(base: Any?): Any {
-    return if (format != null) {
+    return if (!format.isNullOrEmpty()) {
       ZonedDateTime.now().format(DateTimeFormatter.ofPattern(format))
     } else {
       LocalDateTime.now().toString()

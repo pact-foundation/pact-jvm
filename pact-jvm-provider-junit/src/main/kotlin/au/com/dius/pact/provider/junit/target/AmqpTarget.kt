@@ -9,8 +9,7 @@ import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.junit.Provider
-import java.lang.reflect.Method
-import java.net.URL
+import mu.KLogging
 import java.net.URLClassLoader
 import java.util.function.Function
 import java.util.function.Supplier
@@ -21,9 +20,10 @@ import java.util.function.Supplier
  * the performance cost
  * @param packagesToScan List of JVM packages
  */
-open class AmqpTarget @JvmOverloads constructor(val packagesToScan: List<String> = emptyList()) : BaseTarget() {
-
-  private fun classPathUrls() = (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs
+open class AmqpTarget @JvmOverloads constructor(
+  val packagesToScan: List<String> = emptyList(),
+  val classLoader: ClassLoader = Thread.currentThread().contextClassLoader
+) : BaseTarget() {
 
   /**
    * {@inheritDoc}
@@ -54,9 +54,15 @@ open class AmqpTarget @JvmOverloads constructor(val packagesToScan: List<String>
     consumer: ConsumerInfo
   ): ProviderVerifier {
     val verifier = ProviderVerifier()
-    verifier.projectClasspath = Supplier<Array<URL>> { this.classPathUrls() }
+    verifier.projectClasspath = Supplier {
+      logger.debug { "Classloader = ${this.classLoader}" }
+      when (this.classLoader) {
+        is URLClassLoader -> this.classLoader.urLs.asList()
+        else -> emptyList()
+      }
+    }
     val defaultProviderMethodInstance = verifier.providerMethodInstance
-    verifier.providerMethodInstance = Function<Method, Any?> { m ->
+    verifier.providerMethodInstance = Function { m ->
       if (m.declaringClass == testTarget.javaClass) {
         testTarget
       } else {
@@ -96,4 +102,6 @@ open class AmqpTarget @JvmOverloads constructor(val packagesToScan: List<String>
 
     return providerInfo
   }
+
+  companion object : KLogging()
 }

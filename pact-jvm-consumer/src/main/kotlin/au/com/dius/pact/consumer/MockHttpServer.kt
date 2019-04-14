@@ -177,6 +177,7 @@ abstract class BaseMockServer(
       testFn.run(this)
       sleep(100) // give the mock server some time to have consistent state
     } catch (e: Throwable) {
+      logger.debug(e) { "Caught exception in mock server" }
       return PactVerificationResult.Error(e, validateMockServerState())
     } finally {
       stop()
@@ -229,10 +230,10 @@ open class MockHttpServer(pact: RequestResponsePact, config: MockProviderConfig)
 open class MockHttpsServer(pact: RequestResponsePact, config: MockProviderConfig)
   : BaseMockServer(pact, config, HttpsServer.create(config.address(), 0))
 
-fun calculateCharset(headers: Map<String, String>): Charset {
+fun calculateCharset(headers: Map<String, String?>): Charset {
   val contentType = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
   val default = Charset.forName("UTF-8")
-  if (contentType != null) {
+  if (contentType != null && !contentType.value.isNullOrEmpty()) {
     try {
       return ContentType.parse(contentType.value)?.charset ?: default
     } catch (e: Exception) {

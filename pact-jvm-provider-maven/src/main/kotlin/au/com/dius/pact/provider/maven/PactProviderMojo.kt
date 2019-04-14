@@ -62,24 +62,21 @@ open class PactProviderMojo : AbstractMojo() {
       System.setProperty(property, value)
     }
 
-    val failures = mutableMapOf<Any, Any>()
-    val verifier = providerVerifier().let {
-      it.projectHasProperty = Function { p: String -> this.propertyDefined(p) }
-      it.projectGetProperty = Function { p: String -> this.property(p) }
-      it.pactLoadFailureMessage = Function { consumer: ConsumerInfo ->
+    val failures = mutableMapOf<String, Any>()
+    val verifier = providerVerifier().let { verifier ->
+      verifier.projectHasProperty = Function { p: String -> this.propertyDefined(p) }
+      verifier.projectGetProperty = Function { p: String -> this.property(p) }
+      verifier.pactLoadFailureMessage = Function { consumer: ConsumerInfo ->
         "You must specify the pact file to execute for consumer '${consumer.name}' (use <pactFile> or <pactUrl>)"
       }
-      it.isBuildSpecificTask = Function { false }
-      it.providerVersion = Supplier { projectVersion }
+      verifier.isBuildSpecificTask = Function { false }
+      verifier.providerVersion = Supplier { projectVersion }
 
-      it.projectClasspath = Supplier {
-        val urls = classpathElements.map { File(it).toURI().toURL() }
-        urls.toTypedArray()
-      }
+      verifier.projectClasspath = Supplier { classpathElements.map { File(it).toURI().toURL() } }
 
       if (reports.isNotEmpty()) {
         val reportsDir = File(buildDir, "reports/pact")
-        it.reporters = reports.map { name ->
+        verifier.reporters = reports.map { name ->
           if (ReporterManager.reporterDefined(name)) {
             val reporter = ReporterManager.createReporter(name)
             reporter.setReportDir(reportsDir)
@@ -91,7 +88,7 @@ open class PactProviderMojo : AbstractMojo() {
         }
       }
 
-      it
+      verifier
     }
 
     try {
@@ -116,7 +113,7 @@ open class PactProviderMojo : AbstractMojo() {
 
         provider.consumers = consumers
 
-        failures.putAll(verifier.verifyProvider(provider) as Map<out Any, Any>)
+        failures.putAll(verifier.verifyProvider(provider) as Map<String, Any>)
       }
 
       if (failures.isNotEmpty()) {
@@ -166,5 +163,5 @@ open class PactProviderMojo : AbstractMojo() {
 
   private fun propertyDefined(key: String) = System.getProperty(key) != null || configuration.containsKey(key)
 
-  private fun property(key: String) = System.getProperty(key, configuration.get(key))
+  private fun property(key: String) = System.getProperty(key, configuration[key])
 }
