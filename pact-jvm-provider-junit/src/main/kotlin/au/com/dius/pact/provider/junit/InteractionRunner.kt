@@ -8,6 +8,7 @@ import au.com.dius.pact.provider.DefaultVerificationReporter
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderVerifierBase.Companion.PACT_VERIFIER_PUBLISH_RESULTS
+import au.com.dius.pact.provider.VerificationReporter
 import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget
 import au.com.dius.pact.provider.junit.target.TestTarget
@@ -50,7 +51,7 @@ open class InteractionRunner<I>(
   private val results = ConcurrentHashMap<String, Pair<Boolean, IProviderVerifier>>()
   private val testContext = ConcurrentHashMap<String, Any>()
   private val childDescriptions = ConcurrentHashMap<String, Description>()
-  var verificationReporter = DefaultVerificationReporter
+  var verificationReporter: VerificationReporter = DefaultVerificationReporter
 
   init {
     validate()
@@ -151,7 +152,7 @@ open class InteractionRunner<I>(
       }
     }
 
-    val publishingDisabled = results.values.any { it.second.publishingResultsDisabled() }
+    val publishingDisabled = verificationReporter.publishingResultsDisabled()
     if (!publishingDisabled && (pact !is FilteredPact<*> || pact.isNotFiltered())) {
       verificationReporter.reportResults(pact, allPassed, providerVersion())
     } else {
