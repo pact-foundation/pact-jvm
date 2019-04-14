@@ -250,15 +250,21 @@ class PactBodyBuilder extends BaseBuilder {
 
   def build(LikeMatcher matcher) {
     setMatcherAttribute(matcher, path)
+
+    def example = matcher.value
     if (matcher.value instanceof List) {
-      [ build(matcher.value as List, path) ]
+      example = build(matcher.value as List, path)
     } else if (matcher.value instanceof Closure) {
-      [ invokeClosure(matcher.value, ALL_LIST_ITEMS) ]
+      example = invokeClosure(matcher.value, ALL_LIST_ITEMS)
     } else if (matcher.value instanceof Matcher) {
-      [ setMatcherAttribute(matcher.value, path + START_LIST + STAR + END_LIST) ]
-    } else {
-      [ matcher.value ]
+      example = setMatcherAttribute(matcher.value, path + START_LIST + STAR + END_LIST)
     }
+
+    def value = []
+    matcher.numberExamples.times {
+      value << example
+    }
+    value
   }
 
   /**
