@@ -35,7 +35,7 @@ def scalaVersionLookup = [
 
 allprojects {
   group = 'au.com.dius'
-  version = '3.5.25'
+  version = '3.5.26'
 
   repositories {
     mavenLocal()
@@ -118,7 +118,7 @@ subprojects {
     }
 
     group = 'au.com.dius'
-    version = '3.5.25'
+    version = '3.5.26'
     targetCompatibility = '1.8'
     sourceCompatibility = '1.8'
 
