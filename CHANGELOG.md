@@ -1,5 +1,25 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.6.4 - Bugfix Release
+
+* cd9cf826 - Merge branch 'v3.5.x' (Ronald Holshausen, Sun Apr 14 18:55:07 2019 +1000)
+* 09babcae - fix: provider junit5 does not report failed results to pact broker #858 (Ronald Holshausen, Sun Apr 14 18:41:36 2019 +1000)
+* e3eb0cf7 - bump version to 3.5.26 (Ronald Holshausen, Sun Apr 14 17:58:19 2019 +1000)
+* ba2a4fd5 - update changelog for release 3.5.25 (Ronald Holshausen, Sun Apr 14 17:00:40 2019 +1000)
+* b69b8142 - fix: backported fixes from 3.6.x (Ronald Holshausen, Sun Apr 14 16:40:38 2019 +1000)
+* 92e04f5e - Merge branch 'v3.5.x' (Ronald Holshausen, Sun Apr 14 14:32:47 2019 +1000)
+* 884b9dda - fix: JUnit tests were publishing results when a before step failed #872 (Ronald Holshausen, Sun Apr 14 13:46:23 2019 +1000)
+* 0ba381b9 - fix: Groovy DSL was not honouring the number of examples to generate #555 (Ronald Holshausen, Sun Apr 14 12:20:37 2019 +1000)
+* b4ed9106 - fix: when looking up a test target, try use the getter first #871 (Ronald Holshausen, Sat Apr 13 18:22:39 2019 +1000)
+* a3d7c1ea - fix: check for the gradle worker in both env and system properties #690 (Ronald Holshausen, Sat Apr 13 17:11:18 2019 +1000)
+* 7b1b448f - fix: make the paramaters to Groovy runTest method optional #863 (Ronald Holshausen, Sat Apr 13 15:18:46 2019 +1000)
+* 3398e541 - bump version to 3.6.4 (Ronald Holshausen, Sun Mar 31 20:07:03 2019 +1100)
+* 2c3455f7 - fix: correct the ClassCastException in the /complete path (Ronald Holshausen, Sat Feb 16 15:25:41 2019 +1100)
+* 40db53e9 - fix: No such property: message for class: java.lang.String #831 (Ronald Holshausen, Sun Feb 3 14:45:20 2019 +1100)
+* 85dc70dd - chore: add a test with mutiple providers #820 (Ronald Holshausen, Sun Feb 3 12:13:13 2019 +1100)
+* 8b170fac - feat: support arrays of primitives in LambdaDSL #829 (Ronald Holshausen, Sun Feb 3 11:37:32 2019 +1100)
+* 56a530c2 - feat: add support for Instant in the Java DSL #802 (Ronald Holshausen, Sun Feb 3 10:37:12 2019 +1100)
+
 # 3.6.3 - Bugfixes + small enhancements
 
 * 2be31356 - fix: fix for failing tests #861 (Ronald Holshausen, Sun Mar 31 19:18:12 2019 +1100)
