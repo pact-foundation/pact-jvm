@@ -47,8 +47,8 @@ class TestResultAccumulatorSpec extends Specification {
     'no results have been received'                     | [:]                                                    | false
     'only some results have been received'              | [(interaction1Hash): true]                             | false
     'all results have been received'                    | [(interaction1Hash): true, (interaction2Hash): true]   | true
-    'all results have been received but some are false' | [(interaction1Hash): true, (interaction2Hash): false]  | false
-    'all results have been received but all are false'  | [(interaction1Hash): false, (interaction2Hash): false] | false
+    'all results have been received but some are false' | [(interaction1Hash): true, (interaction2Hash): false]  | true
+    'all results have been received but all are false'  | [(interaction1Hash): false, (interaction2Hash): false] | true
   }
 
   def 'accumulator should not rely on the Pact class hash codes'() {
@@ -81,6 +81,7 @@ class TestResultAccumulatorSpec extends Specification {
   def 'updateTestResult - skip publishing verification results if publishing is disabled'() {
     given:
     def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'), [interaction1])
+    TestResultAccumulator.INSTANCE.testResults.clear()
     def reporter = TestResultAccumulator.INSTANCE.verificationReporter
     TestResultAccumulator.INSTANCE.verificationReporter = Mock(VerificationReporter) {
       publishingResultsDisabled() >> true
@@ -96,22 +97,58 @@ class TestResultAccumulatorSpec extends Specification {
     TestResultAccumulator.INSTANCE.verificationReporter = reporter
   }
 
-  def 'updateTestResult - publish verification results if publishing is enabled'() {
+  @Unroll
+  def 'updateTestResult - publish #result verification results if publishing is enabled'() {
     given:
     def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'), [interaction1])
+    TestResultAccumulator.INSTANCE.testResults.clear()
     def reporter = TestResultAccumulator.INSTANCE.verificationReporter
     TestResultAccumulator.INSTANCE.verificationReporter = Mock(VerificationReporter) {
       publishingResultsDisabled() >> false
     }
 
     when:
-    TestResultAccumulator.INSTANCE.updateTestResult(pact, interaction1, true)
+    TestResultAccumulator.INSTANCE.updateTestResult(pact, interaction1, result)
 
     then:
-    1 * TestResultAccumulator.INSTANCE.verificationReporter.reportResults(pact, true, _, null)
+    1 * TestResultAccumulator.INSTANCE.verificationReporter.reportResults(_, result, _, _)
 
     cleanup:
     TestResultAccumulator.INSTANCE.verificationReporter = reporter
+
+    where:
+
+    result << [true, false]
+  }
+
+  @Unroll
+  def 'updateTestResult - publish verification results should be an or of all the test results'() {
+    given:
+    def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'),
+      [interaction1, interaction2])
+    TestResultAccumulator.INSTANCE.testResults.clear()
+    def reporter = TestResultAccumulator.INSTANCE.verificationReporter
+    TestResultAccumulator.INSTANCE.verificationReporter = Mock(VerificationReporter) {
+      publishingResultsDisabled() >> false
+    }
+
+    when:
+    TestResultAccumulator.INSTANCE.updateTestResult(pact, interaction1, interaction1Result)
+    TestResultAccumulator.INSTANCE.updateTestResult(pact, interaction2, interaction2Result)
+
+    then:
+    1 * TestResultAccumulator.INSTANCE.verificationReporter.reportResults(_, result, _, _)
+
+    cleanup:
+    TestResultAccumulator.INSTANCE.verificationReporter = reporter
+
+    where:
+
+    interaction1Result | interaction2Result | result
+    true               | true               | true
+    true               | false              | false
+    false              | true               | false
+    false              | false              | false
   }
 
 }

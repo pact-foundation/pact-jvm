@@ -30,7 +30,8 @@ object TestResultAccumulator : KLogging() {
         logger.warn { "Skipping publishing of verification results as it has been disabled " +
           "($PACT_VERIFIER_PUBLISHRESULTS is not 'true')" }
       } else {
-        verificationReporter.reportResults(pact, true, lookupProviderVersion())
+        verificationReporter.reportResults(pact,
+          interactionResults.values.fold(true) { acc, result -> acc && result }, lookupProviderVersion())
       }
     }
   }
@@ -55,6 +56,6 @@ object TestResultAccumulator : KLogging() {
   }
 
   fun allInteractionsVerified(pact: Pact<Interaction>, results: MutableMap<Int, Boolean>): Boolean {
-    return pact.interactions.all { results.getOrDefault(calculateInteractionHash(it), false) }
+    return pact.interactions.all { results.containsKey(calculateInteractionHash(it)) }
   }
 }
