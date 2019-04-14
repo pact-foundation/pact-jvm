@@ -5,6 +5,7 @@ import au.com.dius.pact.model.PactSource;
 import au.com.dius.pact.model.ProviderState;
 import au.com.dius.pact.model.Interaction;
 import au.com.dius.pact.model.Pact;
+import au.com.dius.pact.provider.DefaultVerificationReporter;
 import au.com.dius.pact.provider.ProviderVerifier;
 import au.com.dius.pact.provider.ProviderVerifierKt;
 import au.com.dius.pact.provider.junit.target.Target;
@@ -175,8 +176,7 @@ public class InteractionRunner extends Runner {
         }
       }
 
-      boolean publishingDisabled = results.values()
-        .stream().anyMatch(pair -> pair.getSecond().publishingResultsDisabled());
+      boolean publishingDisabled = DefaultVerificationReporter.INSTANCE.publishingResultsDisabled();
       if (!publishingDisabled && (!(pact instanceof FilteredPact) || ((FilteredPact) pact).isNotFiltered())) {
         reportVerificationResults(allPassed);
       } else {
