@@ -239,7 +239,7 @@ data class DateGenerator @JvmOverloads constructor(val format: String? = null, v
 
   override fun generate(context: Map<String, Any?>): Any {
     val date = DateExpression.executeDateExpression(OffsetDateTime.now(), expression).getOr { OffsetDateTime.now() }
-    return if (format != null) {
+    return if (!format.isNullOrEmpty()) {
       date.format(DateTimeFormatter.ofPattern(format))
     } else {
       date.toString()
@@ -301,7 +301,7 @@ data class DateTimeGenerator @JvmOverloads constructor(val format: String? = nul
   }
 
   override fun generate(context: Map<String, Any?>): Any {
-    return if (format != null) {
+    return if (!format.isNullOrEmpty()) {
       ZonedDateTime.now().format(DateTimeFormatter.ofPattern(format))
     } else {
       LocalDateTime.now().toString()
