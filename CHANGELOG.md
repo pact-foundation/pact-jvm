@@ -1,5 +1,17 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.5.25 - Bugfix Release
+
+* b69b8142 - fix: backported fixes from 3.6.x (Ronald Holshausen, Sun Apr 14 16:40:38 2019 +1000)
+* 884b9dda - fix: JUnit tests were publishing results when a before step failed #872 (Ronald Holshausen, Sun Apr 14 13:46:23 2019 +1000)
+* 2c3455f7 - fix: correct the ClassCastException in the /complete path (Ronald Holshausen, Sat Feb 16 15:25:41 2019 +1100)
+* 40db53e9 - fix: No such property: message for class: java.lang.String #831 (Ronald Holshausen, Sun Feb 3 14:45:20 2019 +1100)
+* 85dc70dd - chore: add a test with mutiple providers #820 (Ronald Holshausen, Sun Feb 3 12:13:13 2019 +1100)
+* 8b170fac - feat: support arrays of primitives in LambdaDSL #829 (Ronald Holshausen, Sun Feb 3 11:37:32 2019 +1100)
+* 56a530c2 - feat: add support for Instant in the Java DSL #802 (Ronald Holshausen, Sun Feb 3 10:37:12 2019 +1100)
+* b3f7aa52 - fix: Upgrade Kotlin to 1.2.71 #805 (Ronald Holshausen, Mon Nov 5 09:46:01 2018 +1100)
+* 4a1abe3d - bump version to 3.5.25 (Ronald Holshausen, Sun Nov 4 19:07:53 2018 +1100)
+
 # 3.5.24 - Bugfix Release
 
 * 5a5d3c22 - fix: small fix for a flacky test (Ronald Holshausen, Sun Nov 4 13:49:51 2018 +1100)
