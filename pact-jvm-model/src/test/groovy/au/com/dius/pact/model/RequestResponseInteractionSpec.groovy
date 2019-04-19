@@ -4,6 +4,7 @@ import au.com.dius.pact.model.generators.Category
 import au.com.dius.pact.model.generators.Generators
 import au.com.dius.pact.model.generators.RandomStringGenerator
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class RequestResponseInteractionSpec extends Specification {
 
@@ -79,6 +80,21 @@ class RequestResponseInteractionSpec extends Specification {
     interaction3 = new RequestResponseInteraction('description 1+2', [new ProviderState('state 3')])
     interaction4 = new RequestResponseInteraction('description 4')
     interaction5 = new RequestResponseInteraction('description 4', [new ProviderState('state 5')])
+  }
+
+  @Unroll
+  def 'displayState test'() {
+    expect:
+    new RequestResponseInteraction(providerStates: providerStates).displayState() == stateDescription
+
+    where:
+
+    providerStates                                               | stateDescription
+    null                                                         | 'None'
+    []                                                           | 'None'
+    [new ProviderState(null)]                                    | 'None'
+    [new ProviderState('state 1')]                               | 'state 1'
+    [new ProviderState('state 1'), new ProviderState('state 2')] | 'state 1, state 2'
   }
 
 }

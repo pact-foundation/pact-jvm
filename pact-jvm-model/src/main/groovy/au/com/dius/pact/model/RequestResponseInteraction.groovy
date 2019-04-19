@@ -22,7 +22,7 @@ class RequestResponseInteraction implements Interaction {
   }
 
   String displayState() {
-    if (providerStates.empty || providerStates.size() == 1 && !providerStates[0].name) {
+    if (providerStates == null || providerStates.empty || providerStates.size() == 1 && !providerStates[0].name) {
       'None'
     } else {
       providerStates*.name.join(COMMA)
@@ -31,8 +31,11 @@ class RequestResponseInteraction implements Interaction {
 
   @Override
   @Deprecated
+  /**
+   * @deprecated Use providerStates attribute
+   */
   String getProviderState() {
-    providerStates.empty ? null : providerStates.first().name
+    providerStates == null || providerStates.empty ? null : providerStates.first().name
   }
 
   @Override

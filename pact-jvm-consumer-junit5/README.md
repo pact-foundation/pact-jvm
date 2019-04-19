@@ -144,6 +144,11 @@ javaOptions in Test := Seq("-Dpact.rootDir=some/other/directory")
 You can override the directory the pacts are written in a test by adding the `@PactFolder` annotation to the test
 class.
 
+## Forcing pact files to be overwritten (3.6.5+)
+
+By default, when the pact file is written, it will be merged with any existing pact file. To force the file to be 
+overwritten, set the Java system property `pact.writer.overwrite` to `true`.
+
 ## Unsupported
 
 The current implementation does not support tests with multiple providers. This will be added in a later release.
