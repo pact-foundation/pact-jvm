@@ -14,6 +14,7 @@ import au.com.dius.pact.model.generators.ProviderStateGenerator;
 import au.com.dius.pact.model.matchingrules.MatchingRules;
 import au.com.dius.pact.model.matchingrules.MatchingRulesImpl;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
+import au.com.dius.pact.model.matchingrules.RuleLogic;
 import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
@@ -21,11 +22,14 @@ import org.w3c.dom.Document;
 import scala.collection.JavaConversions$;
 
 import javax.xml.transform.TransformerException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 public class PactDslResponse {
     private static final String CONTENT_TYPE = "Content-Type";
@@ -337,6 +341,27 @@ public class PactDslResponse {
   public PactDslResponse headerFromProviderState(String name, String expression, String example) {
     responseGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression));
     responseHeaders.put(name, Collections.singletonList(example));
+    return this;
+  }
+
+  /**
+   * Match a set cookie header
+   * @param cookie Cookie name to match
+   * @param regex Regex to match the cookie value with
+   * @param example Example value
+   */
+  public PactDslResponse matchSetCookie(String cookie, String regex, String example) {
+    au.com.dius.pact.model.matchingrules.Category header = responseMatchers.addCategory("header");
+    if (header.numRules("set-cookie") > 0) {
+      header.addRule("set-cookie", new RegexMatcher("cookie=" + regex));
+    } else {
+      header.setRule("set-cookie", new RegexMatcher("cookie=" + regex), RuleLogic.OR);
+    }
+    if (responseHeaders.containsKey("set-cookie")) {
+      responseHeaders.get("set-cookie").add(cookie + "=" + example);
+    } else {
+      responseHeaders.put("set-cookie", newArrayList(cookie + "=" + example));
+    }
     return this;
   }
 }

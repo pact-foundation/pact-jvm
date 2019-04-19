@@ -16,29 +16,59 @@ data class Category @JvmOverloads constructor(
 
   companion object : KLogging()
 
-  fun addRule(item: String, matchingRule: MatchingRule): Category {
+  /**
+   * Add a rule by key to the given category
+   */
+  @JvmOverloads
+  fun addRule(item: String, matchingRule: MatchingRule, ruleLogic: RuleLogic = RuleLogic.AND): Category {
     if (!matchingRules.containsKey(item)) {
-      matchingRules[item] = MatchingRuleGroup(mutableListOf(matchingRule))
+      matchingRules[item] = MatchingRuleGroup(mutableListOf(matchingRule), ruleLogic)
     } else {
       matchingRules[item]!!.rules.add(matchingRule)
     }
     return this
   }
 
-  fun addRule(matchingRule: MatchingRule) = addRule("", matchingRule)
+  /**
+   * Add a non-key rule to the given category
+   */
+  @JvmOverloads
+  fun addRule(matchingRule: MatchingRule, ruleLogic: RuleLogic = RuleLogic.AND) =
+    addRule("", matchingRule, ruleLogic)
 
-  fun setRule(item: String, matchingRule: MatchingRule) {
-    matchingRules[item] = MatchingRuleGroup(mutableListOf(matchingRule))
+  /**
+   * Sets rule at the given key
+   */
+  @JvmOverloads
+  fun setRule(item: String, matchingRule: MatchingRule, ruleLogic: RuleLogic = RuleLogic.AND) {
+    matchingRules[item] = MatchingRuleGroup(mutableListOf(matchingRule), ruleLogic)
   }
 
-  fun setRule(matchingRule: MatchingRule) = setRule("", matchingRule)
+  /**
+   * Sets a non-key rule
+   */
+  @JvmOverloads
+  fun setRule(matchingRule: MatchingRule, ruleLogic: RuleLogic = RuleLogic.AND) =
+    setRule("", matchingRule, ruleLogic)
 
-  fun setRules(item: String, rules: List<MatchingRule>) {
-    setRules(item, MatchingRuleGroup(rules.toMutableList()))
+  /**
+   * Sets all the rules to the provided key
+   */
+  @JvmOverloads
+  fun setRules(item: String, rules: List<MatchingRule>, ruleLogic: RuleLogic = RuleLogic.AND) {
+    setRules(item, MatchingRuleGroup(rules.toMutableList(), ruleLogic))
   }
 
-  fun setRules(matchingRules: List<MatchingRule>) = setRules("", matchingRules)
+  /**
+   * Sets all the rules as non-keyed rules
+   */
+  @JvmOverloads
+  fun setRules(matchingRules: List<MatchingRule>, ruleLogic: RuleLogic = RuleLogic.AND) =
+    setRules("", matchingRules, ruleLogic)
 
+  /**
+   * Sets the matching rule group at the provided key
+   */
   fun setRules(item: String, rules: MatchingRuleGroup) {
     matchingRules[item] = rules
   }
@@ -53,6 +83,9 @@ data class Category @JvmOverloads constructor(
    */
   fun isNotEmpty() = matchingRules.any { it.value.rules.isNotEmpty() }
 
+  /**
+   * Returns a new Category filtered by the predicate
+   */
   fun filter(predicate: Predicate<String>) =
     copy(matchingRules = matchingRules.filter { predicate.test(it.key) }.toMutableMap())
 
@@ -67,26 +100,42 @@ data class Category @JvmOverloads constructor(
     return max?.value ?: MatchingRuleGroup()
   }
 
+  /**
+   * Returns all the matching rules
+   */
   fun allMatchingRules() = matchingRules.flatMap { it.value.rules }
 
-  fun addRules(item: String, rules: List<MatchingRule>) {
+  /**
+   * Adds all the rules to the given key
+   */
+  @JvmOverloads
+  fun addRules(item: String, rules: List<MatchingRule>, ruleLogic: RuleLogic = RuleLogic.AND) {
     if (!matchingRules.containsKey(item)) {
-      matchingRules[item] = MatchingRuleGroup(rules.toMutableList())
+      matchingRules[item] = MatchingRuleGroup(rules.toMutableList(), ruleLogic)
     } else {
       matchingRules[item]!!.rules.addAll(rules)
     }
   }
 
+  /**
+   * Re-key all the rules with the given prefix
+   */
   fun applyMatcherRootPrefix(prefix: String) {
     matchingRules = matchingRules.mapKeys { e -> prefix + e.key }.toMutableMap()
   }
 
+  /**
+   * Create a copy of the category with all rules re-keyed with the prefix
+   */
   fun copyWithUpdatedMatcherRootPrefix(prefix: String): Category {
     val category = copy()
     category.applyMatcherRootPrefix(prefix)
     return category
   }
 
+  /**
+   * Serialise this category to a Map
+   */
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
     return if (pactSpecVersion < PactSpecVersion.V3) {
       matchingRules.entries.associate {
@@ -110,6 +159,9 @@ data class Category @JvmOverloads constructor(
     }
   }
 
+  /**
+   * Deserialise the category from the Map
+   */
   fun fromMap(map: Map<String, Any?>) {
     map.forEach { (key, value) ->
       if (value is Map<*, *>) {
@@ -128,4 +180,9 @@ data class Category @JvmOverloads constructor(
       }
     }
   }
+
+  /**
+   * Returns the number of rules stored at the key
+   */
+  fun numRules(key: String) = matchingRules.getOrDefault(key, MatchingRuleGroup()).rules.size
 }
