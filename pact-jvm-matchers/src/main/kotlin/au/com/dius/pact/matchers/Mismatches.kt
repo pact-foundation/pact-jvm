@@ -22,6 +22,14 @@ data class HeaderMismatch(val headerKey: String, val expected: String, val actua
   } else {
     toString()
   }
+
+  fun merge(mismatch: HeaderMismatch): HeaderMismatch {
+    return if (this.mismatch != null) {
+      copy(mismatch = this.mismatch + ", " + mismatch.mismatch)
+    } else {
+      copy(mismatch = mismatch.mismatch)
+    }
+  }
 }
 
 object HeaderMismatchFactory : MismatchFactory<HeaderMismatch> {

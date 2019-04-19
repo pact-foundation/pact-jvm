@@ -22,12 +22,12 @@ import org.w3c.dom.Document;
 import scala.collection.JavaConversions$;
 
 import javax.xml.transform.TransformerException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -353,9 +353,9 @@ public class PactDslResponse {
   public PactDslResponse matchSetCookie(String cookie, String regex, String example) {
     au.com.dius.pact.model.matchingrules.Category header = responseMatchers.addCategory("header");
     if (header.numRules("set-cookie") > 0) {
-      header.addRule("set-cookie", new RegexMatcher("cookie=" + regex));
+      header.addRule("set-cookie", new RegexMatcher(Pattern.quote(cookie + "=") + regex));
     } else {
-      header.setRule("set-cookie", new RegexMatcher("cookie=" + regex), RuleLogic.OR);
+      header.setRule("set-cookie", new RegexMatcher(Pattern.quote(cookie + "=") + regex), RuleLogic.OR);
     }
     if (responseHeaders.containsKey("set-cookie")) {
       responseHeaders.get("set-cookie").add(cookie + "=" + example);
