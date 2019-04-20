@@ -1,12 +1,10 @@
-package au.com.dius.pact.provider.junit5
+package au.com.dius.pact.provider
 
 import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
-import au.com.dius.pact.provider.DefaultVerificationReporter
-import au.com.dius.pact.provider.VerificationReporter
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
@@ -18,8 +16,9 @@ class TestResultAccumulatorSpec extends Specification {
   static pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'), [
     interaction1, interaction2
   ])
-  static interaction1Hash = TestResultAccumulator.INSTANCE.calculateInteractionHash(interaction1)
-  static interaction2Hash = TestResultAccumulator.INSTANCE.calculateInteractionHash(interaction2)
+  static DefaultTestResultAccumulator testResultAccumulator = DefaultTestResultAccumulator.INSTANCE
+  static interaction1Hash = testResultAccumulator.calculateInteractionHash(interaction1)
+  static interaction2Hash = testResultAccumulator.calculateInteractionHash(interaction2)
 
   @RestoreSystemProperties
   def 'lookupProviderVersion - returns the version set in the system properties'() {
@@ -27,19 +26,19 @@ class TestResultAccumulatorSpec extends Specification {
     System.setProperty('pact.provider.version', '1.2.3')
 
     expect:
-    TestResultAccumulator.INSTANCE.lookupProviderVersion() == '1.2.3'
+    testResultAccumulator.lookupProviderVersion() == '1.2.3'
   }
 
   def 'lookupProviderVersion - returns a default value if there is no version set in the system properties'() {
     expect:
-    TestResultAccumulator.INSTANCE.lookupProviderVersion() == '0.0.0'
+    testResultAccumulator.lookupProviderVersion() == '0.0.0'
   }
 
   @Unroll
   @SuppressWarnings('LineLength')
   def 'allInteractionsVerified returns #result when #condition'() {
     expect:
-    TestResultAccumulator.INSTANCE.allInteractionsVerified(pact, results) == result
+    testResultAccumulator.allInteractionsVerified(pact, results) == result
 
     where:
 
@@ -62,59 +61,59 @@ class TestResultAccumulatorSpec extends Specification {
       interaction
     ])
     def mockVerificationReporter = Mock(VerificationReporter)
-    TestResultAccumulator.INSTANCE.verificationReporter = mockVerificationReporter
+    testResultAccumulator.verificationReporter = mockVerificationReporter
 
     when:
-    TestResultAccumulator.INSTANCE.updateTestResult(mutablePact, interaction1, true)
-    TestResultAccumulator.INSTANCE.updateTestResult(mutablePact, interaction2, true)
-    TestResultAccumulator.INSTANCE.updateTestResult(mutablePact2, interaction, false)
+    testResultAccumulator.updateTestResult(mutablePact, interaction1, true)
+    testResultAccumulator.updateTestResult(mutablePact, interaction2, true)
+    testResultAccumulator.updateTestResult(mutablePact2, interaction, false)
     mutablePact.interactions.first().request.matchingRules.rulesForCategory('body')
-    TestResultAccumulator.INSTANCE.updateTestResult(mutablePact, interaction3, true)
+    testResultAccumulator.updateTestResult(mutablePact, interaction3, true)
 
     then:
     1 * mockVerificationReporter.reportResults(_, true, _, null)
 
     cleanup:
-    TestResultAccumulator.INSTANCE.verificationReporter = DefaultVerificationReporter.INSTANCE
+    testResultAccumulator.verificationReporter = DefaultVerificationReporter.INSTANCE
   }
 
   def 'updateTestResult - skip publishing verification results if publishing is disabled'() {
     given:
     def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'), [interaction1])
-    TestResultAccumulator.INSTANCE.testResults.clear()
-    def reporter = TestResultAccumulator.INSTANCE.verificationReporter
-    TestResultAccumulator.INSTANCE.verificationReporter = Mock(VerificationReporter) {
+    testResultAccumulator.testResults.clear()
+    def reporter = testResultAccumulator.verificationReporter
+    testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
       publishingResultsDisabled() >> true
     }
 
     when:
-    TestResultAccumulator.INSTANCE.updateTestResult(pact, interaction1, true)
+    testResultAccumulator.updateTestResult(pact, interaction1, true)
 
     then:
-    0 * TestResultAccumulator.INSTANCE.verificationReporter.reportResults(_, _, _, _)
+    0 * testResultAccumulator.verificationReporter.reportResults(_, _, _, _)
 
     cleanup:
-    TestResultAccumulator.INSTANCE.verificationReporter = reporter
+    testResultAccumulator.verificationReporter = reporter
   }
 
   @Unroll
   def 'updateTestResult - publish #result verification results if publishing is enabled'() {
     given:
     def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'), [interaction1])
-    TestResultAccumulator.INSTANCE.testResults.clear()
-    def reporter = TestResultAccumulator.INSTANCE.verificationReporter
-    TestResultAccumulator.INSTANCE.verificationReporter = Mock(VerificationReporter) {
+    testResultAccumulator.testResults.clear()
+    def reporter = testResultAccumulator.verificationReporter
+    testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
       publishingResultsDisabled() >> false
     }
 
     when:
-    TestResultAccumulator.INSTANCE.updateTestResult(pact, interaction1, result)
+    testResultAccumulator.updateTestResult(pact, interaction1, result)
 
     then:
-    1 * TestResultAccumulator.INSTANCE.verificationReporter.reportResults(_, result, _, _)
+    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _)
 
     cleanup:
-    TestResultAccumulator.INSTANCE.verificationReporter = reporter
+    testResultAccumulator.verificationReporter = reporter
 
     where:
 
@@ -126,21 +125,21 @@ class TestResultAccumulatorSpec extends Specification {
     given:
     def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'),
       [interaction1, interaction2])
-    TestResultAccumulator.INSTANCE.testResults.clear()
-    def reporter = TestResultAccumulator.INSTANCE.verificationReporter
-    TestResultAccumulator.INSTANCE.verificationReporter = Mock(VerificationReporter) {
+    testResultAccumulator.testResults.clear()
+    def reporter = testResultAccumulator.verificationReporter
+    testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
       publishingResultsDisabled() >> false
     }
 
     when:
-    TestResultAccumulator.INSTANCE.updateTestResult(pact, interaction1, interaction1Result)
-    TestResultAccumulator.INSTANCE.updateTestResult(pact, interaction2, interaction2Result)
+    testResultAccumulator.updateTestResult(pact, interaction1, interaction1Result)
+    testResultAccumulator.updateTestResult(pact, interaction2, interaction2Result)
 
     then:
-    1 * TestResultAccumulator.INSTANCE.verificationReporter.reportResults(_, result, _, _)
+    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _)
 
     cleanup:
-    TestResultAccumulator.INSTANCE.verificationReporter = reporter
+    testResultAccumulator.verificationReporter = reporter
 
     where:
 

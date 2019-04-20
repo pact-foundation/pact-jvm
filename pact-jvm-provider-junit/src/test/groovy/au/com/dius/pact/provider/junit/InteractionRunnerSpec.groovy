@@ -7,6 +7,7 @@ import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.UnknownPactSource
+import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.VerificationReporter
 import au.com.dius.pact.provider.junit.target.HttpTarget
 import au.com.dius.pact.provider.junit.target.Target
@@ -26,31 +27,15 @@ class InteractionRunnerSpec extends Specification {
 
   private clazz
   private reporter
+  private TestResultAccumulator testResultAccumulator
 
   def setup() {
     clazz = new TestClass(InteractionRunnerTestClass)
     reporter = Mock(VerificationReporter)
+    testResultAccumulator = Mock(TestResultAccumulator)
   }
 
-  def 'do not publish verification results if any interactions have been filtered'() {
-    given:
-    def interaction1 = new RequestResponseInteraction(description: 'Interaction 1')
-    def interaction2 = new RequestResponseInteraction(description: 'Interaction 2')
-    def pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction1, interaction2 ])
-
-    def filteredPact = new FilteredPact(pact, { it.description == 'Interaction 1' })
-    def runner = new InteractionRunner(clazz, filteredPact, UnknownPactSource.INSTANCE)
-    runner.verificationReporter = reporter
-    reporter.publishingResultsDisabled() >> false
-
-    when:
-    runner.run([:] as RunNotifier)
-
-    then:
-    0 * reporter.reportResults
-  }
-
-  def 'do not publish verification results if any before step fails and publishing is not enabled'() {
+  def 'publish a failed verification result if any before step fails'() {
     given:
     def interaction1 = new RequestResponseInteraction(description: 'Interaction 1',
       providerStates: [ new ProviderState('Test State') ])
@@ -58,32 +43,13 @@ class InteractionRunnerSpec extends Specification {
     def pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction1, interaction2 ])
 
     def runner = new InteractionRunner(clazz, pact, UnknownPactSource.INSTANCE)
-    runner.verificationReporter = reporter
-    reporter.publishingResultsDisabled() >> true
+    runner.testResultAccumulator = testResultAccumulator
 
     when:
     runner.run([:] as RunNotifier)
 
     then:
-    0 * reporter.reportResults(_, false, _, _)
-  }
-
-  def 'publish a failed verification result if any before step fails and publishing is enabled'() {
-    given:
-    def interaction1 = new RequestResponseInteraction(description: 'Interaction 1',
-      providerStates: [ new ProviderState('Test State') ])
-    def interaction2 = new RequestResponseInteraction(description: 'Interaction 2')
-    def pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction1, interaction2 ])
-
-    def runner = new InteractionRunner(clazz, pact, UnknownPactSource.INSTANCE)
-    runner.verificationReporter = reporter
-    reporter.publishingResultsDisabled() >> false
-
-    when:
-    runner.run([:] as RunNotifier)
-
-    then:
-    1 * reporter.reportResults(_, false, _, _)
+    2 * testResultAccumulator.updateTestResult(pact, _, _)
   }
 
   @RestoreSystemProperties

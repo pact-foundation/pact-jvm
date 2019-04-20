@@ -1,19 +1,21 @@
-package au.com.dius.pact.provider.junit5
+package au.com.dius.pact.provider
 
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
-import au.com.dius.pact.provider.DefaultVerificationReporter
 import au.com.dius.pact.provider.ProviderVerifierBase.Companion.PACT_VERIFIER_PUBLISH_RESULTS
-import au.com.dius.pact.provider.VerificationReporter
 import mu.KLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
 
-object TestResultAccumulator : KLogging() {
+interface TestResultAccumulator {
+  fun updateTestResult(pact: Pact<Interaction>, interaction: Interaction, testExecutionResult: Boolean)
+}
+
+object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
 
   private val testResults: MutableMap<Int, MutableMap<Int, Boolean>> = mutableMapOf()
   var verificationReporter: VerificationReporter = DefaultVerificationReporter
 
-  fun updateTestResult(
+  override fun updateTestResult(
     pact: Pact<Interaction>,
     interaction: Interaction,
     testExecutionResult: Boolean

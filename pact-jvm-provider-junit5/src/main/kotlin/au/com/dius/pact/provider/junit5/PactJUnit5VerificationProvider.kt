@@ -5,6 +5,7 @@ import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
@@ -117,6 +118,8 @@ class PactVerificationExtension(
   private val consumerName: String?
 ) : TestTemplateInvocationContext, ParameterResolver, BeforeEachCallback, BeforeTestExecutionCallback,
   AfterTestExecutionCallback {
+
+  private val testResultAccumulator = DefaultTestResultAccumulator
 
   override fun getDisplayName(invocationIndex: Int): String {
     return "${pact.consumer.name} - ${interaction.description}"
@@ -239,7 +242,7 @@ class PactVerificationExtension(
   override fun afterTestExecution(context: ExtensionContext) {
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val testContext = store.get("interactionContext") as PactVerificationContext
-    TestResultAccumulator.updateTestResult(pact, interaction, testContext.testExecutionResult)
+    testResultAccumulator.updateTestResult(pact, interaction, testContext.testExecutionResult)
   }
 
   companion object : KLogging()
