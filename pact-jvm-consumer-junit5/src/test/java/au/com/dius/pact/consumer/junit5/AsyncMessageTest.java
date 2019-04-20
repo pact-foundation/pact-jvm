@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.junit5;
 
 import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.consumer.Pact;
+import au.com.dius.pact.consumer.dsl.Matchers;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.model.v3.messaging.Message;
 import au.com.dius.pact.model.v3.messaging.MessagePact;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.core.Is.is;
 
 @ExtendWith(PactConsumerTestExt.class)
@@ -25,8 +27,8 @@ public class AsyncMessageTest {
     body.stringValue("testParam1", "value1");
     body.stringValue("testParam2", "value2");
 
-    Map<String, String> metadata = new HashMap<String, String>();
-    metadata.put("contentType", "application/json");
+    Map<String, Object> metadata = new HashMap<>();
+    metadata.put("destination", Matchers.regexp("\\w+\\d+", "X001"));
 
     return builder.given("SomeProviderState")
       .expectsToReceive("a test message")
@@ -42,7 +44,7 @@ public class AsyncMessageTest {
     body.stringValue("testParam2", "value4");
 
     Map<String, String> metadata = new HashMap<String, String>();
-    metadata.put("contentType", "application/json");
+    metadata.put("Content-Type", "application/json");
 
     return builder.given("SomeProviderState2")
       .expectsToReceive("a test message")
@@ -55,6 +57,7 @@ public class AsyncMessageTest {
   @PactTestFor(pactMethod = "createPact")
   void test(List<Message> messages) {
     assertThat(new String(messages.get(0).contentsAsBytes()), is("{\"testParam1\":\"value1\",\"testParam2\":\"value2\"}"));
+    assertThat(messages.get(0).getMetaData(), hasEntry("destination", "X001"));
   }
 
   @Test
