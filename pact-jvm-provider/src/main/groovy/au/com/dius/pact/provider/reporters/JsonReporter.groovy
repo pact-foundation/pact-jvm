@@ -216,4 +216,7 @@ class JsonReporter implements VerifierReporter {
 
   @Override
   void metadataComparisonOk(@NotNull String key, @Nullable Object value) { }
+
+  @Override
+  void metadataComparisonOk() { }
 }

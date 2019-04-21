@@ -66,6 +66,7 @@ interface VerifierReporter {
   fun generatesAMessageWhich()
   fun displayFailures(failures: Map<String, Any>)
   fun includesMetadata()
+  fun metadataComparisonOk()
   fun metadataComparisonOk(key: String, value: Any?)
   fun metadataComparisonFailed(key: String, value: Any?, comparison: Any)
 }

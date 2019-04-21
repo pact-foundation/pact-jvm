@@ -323,6 +323,7 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     comparisonDescription: String
   ): Boolean {
     return if (comparison.isEmpty()) {
+      reporters.forEach { it.metadataComparisonOk() }
       true
     } else {
       reporters.forEach { it.includesMetadata() }

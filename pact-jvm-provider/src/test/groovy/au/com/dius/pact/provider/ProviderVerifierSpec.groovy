@@ -354,6 +354,7 @@ class ProviderVerifierSpec extends Specification {
     then:
     1 * reporter.bodyComparisonOk()
     1 * reporter.generatesAMessageWhich()
+    1 * reporter.metadataComparisonOk()
     0 * reporter._
     result
   }

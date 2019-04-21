@@ -22,6 +22,11 @@ class AnsiConsoleReporter(
     AnsiConsole.out().println("      includes message metadata")
   }
 
+  override fun metadataComparisonOk() {
+    AnsiConsole.out().println(Ansi.ansi().a("        has matching metadata (")
+      .fg(Ansi.Color.GREEN).a("OK").reset().a(")"))
+  }
+
   override fun metadataComparisonOk(key: String, value: Any?) {
     AnsiConsole.out().println(Ansi.ansi().a("        \"").bold().a(key).boldOff().a("\" with value \"")
       .bold().a(value).boldOff().a("\" (").fg(Ansi.Color.GREEN).a("OK").reset().a(")"))

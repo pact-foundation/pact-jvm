@@ -239,4 +239,9 @@ class MarkdownReporter implements VerifierReporter {
     writer.println "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"**$key**\" with value \"**$value**\" " +
       '(<span style=\'color:green\'>OK</span>)  '
   }
+
+  @Override
+  void metadataComparisonOk() {
+    writer.println "&nbsp;&nbsp;&nbsp;&nbsp;has matching metadata (<span style='color:green'>OK</span>)"
+  }
 }
