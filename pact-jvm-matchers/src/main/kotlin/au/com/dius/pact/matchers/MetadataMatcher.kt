@@ -14,8 +14,8 @@ object MetadataMatcher: KLogging() {
       " (${expected?.javaClass?.simpleName})" }
 
     return when {
-      Matchers.matcherDefined("metaData", listOf(key), matchers) -> {
-        val matchResult = Matchers.domatch(matchers, "metaData", listOf(key), expected, actual,
+      Matchers.matcherDefined("metadata", listOf(key), matchers) -> {
+        val matchResult = Matchers.domatch(matchers, "metadata", listOf(key), expected, actual,
           MetadataMismatchFactory)
         return matchResult.fold(null as MetadataMismatch?) { acc, item -> acc?.merge(item) ?: item }
       }

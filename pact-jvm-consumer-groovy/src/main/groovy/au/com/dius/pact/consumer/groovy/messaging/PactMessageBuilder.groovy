@@ -62,14 +62,14 @@ class PactMessageBuilder extends BaseBuilder {
    * Metadata attached to the message
    * @param metaData
    */
-  PactMessageBuilder withMetaData(Map metaData) {
+  PactMessageBuilder withMetaData(Map metadata) {
     if (messages.empty) {
       throw new InvalidPactException('expectsToReceive is required before withMetaData')
     }
     Message message = messages.last()
-    message.metaData = metaData.collectEntries {
+    message.metaData = metadata.collectEntries {
       if (it.value instanceof Matcher) {
-        message.matchingRules.addCategory('metaData').addRule(it.key, it.value.matcher)
+        message.matchingRules.addCategory('metadata').addRule(it.key, it.value.matcher)
         if (it.value.generator) {
           message.generators.addGenerator(au.com.dius.pact.model.generators.Category.METADATA, it.value.generator)
         }

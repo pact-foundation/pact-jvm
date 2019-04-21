@@ -27,7 +27,7 @@ class MetadataMatcherSpec extends Specification {
   def "delegate to a matcher when one is defined"() {
     given:
     def matchers = new MatchingRulesImpl()
-    matchers.addCategory('metaData').addRule('S', new RegexMatcher('\\w\\d+'))
+    matchers.addCategory('metadata').addRule('S', new RegexMatcher('\\w\\d+'))
 
     expect:
     MetadataMatcher.INSTANCE.compare('S', 'X001', 'Z155411', matchers) == null
@@ -36,7 +36,7 @@ class MetadataMatcherSpec extends Specification {
   def "combines mismatches if there are multiple"() {
     given:
     def matchers = new MatchingRulesImpl()
-    def category = matchers.addCategory('metaData')
+    def category = matchers.addCategory('metadata')
     category.addRule('X', new RegexMatcher('X=.*'))
     category.addRule('X', new RegexMatcher('A=.*'))
     category.addRule('X', new RegexMatcher('B=\\w\\d+'))

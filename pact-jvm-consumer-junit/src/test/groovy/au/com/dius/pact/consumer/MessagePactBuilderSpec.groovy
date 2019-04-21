@@ -56,7 +56,7 @@ class MessagePactBuilderSpec extends Specification {
     message.matchingRules.rules.body.matchingRules.keySet() == [
       '$.metadata.messageId', '$.metadata.date', '$.metadata.contractVersion', '$.payload.name', '$.payload.iri'
     ] as Set
-    message.matchingRules.rules.metaData.matchingRules.keySet() == [
+    message.matchingRules.rules.metadata.matchingRules.keySet() == [
       'destination'
     ] as Set
   }

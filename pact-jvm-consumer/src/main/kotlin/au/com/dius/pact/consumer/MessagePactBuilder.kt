@@ -83,7 +83,7 @@ class MessagePactBuilder(
         if (message.matchingRules == null) {
           message.matchingRules = MatchingRulesImpl()
         }
-        message.matchingRules.addCategory("metaData").addRule(key, value.matcher!!)
+        message.matchingRules.addCategory("metadata").addRule(key, value.matcher!!)
         if (value.generator != null) {
           message.generators.addGenerator(category = au.com.dius.pact.model.generators.Category.METADATA,
             generator = value.generator!!)
