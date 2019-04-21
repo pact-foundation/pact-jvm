@@ -2,14 +2,19 @@ package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Request
+import au.com.dius.pact.model.matchingrules.Category
 import au.com.dius.pact.model.matchingrules.EqualsMatcher
+import au.com.dius.pact.model.matchingrules.IncludeMatcher
+import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.model.matchingrules.NullMatcher
 import au.com.dius.pact.model.matchingrules.RegexMatcher
 import au.com.dius.pact.model.matchingrules.TypeMatcher
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
 
+@SuppressWarnings('ClosureAsLastMethodParameter')
 class MatchersSpec extends Specification {
 
   def 'matchers defined - should be false when there are no matchers'() {
@@ -234,6 +239,63 @@ class MatchersSpec extends Specification {
     Matchers.INSTANCE.matchesPath('$.name[*].name', ['$', 'name', '1', 'name']) > 0
 
     Matchers.INSTANCE.matchesPath('$[*]', ['$', 'str']) == 0
+  }
+
+  def 'resolveMatchers returns all matchers for the general case'() {
+    given:
+    def matchers = new MatchingRulesImpl()
+    def status = matchers.addCategory('status')
+      .addRule(EqualsMatcher.INSTANCE)
+      .addRule(NullMatcher.INSTANCE)
+    matchers.addCategory('body').addRule(new IncludeMatcher('A'))
+
+    expect:
+    Matchers.INSTANCE.resolveMatchers(matchers, 'status', [], { }) == status
+  }
+
+  def 'resolveMatchers returns matchers filtered by path length for body category'() {
+    given:
+    def matchers = new MatchingRulesImpl()
+    matchers.addCategory('status')
+      .addRule(EqualsMatcher.INSTANCE)
+      .addRule(NullMatcher.INSTANCE)
+    matchers.addCategory('body')
+      .addRule('$.X', new IncludeMatcher('A'))
+      .addRule('$.Y', EqualsMatcher.INSTANCE)
+    def expected = new Category('body')
+      .addRule('$.X', new IncludeMatcher('A'))
+
+    expect:
+    Matchers.INSTANCE.resolveMatchers(matchers, 'body', ['$', 'X'], { }) == expected
+  }
+
+  @Unroll
+  def 'resolveMatchers returns matchers filtered by path for #category'() {
+    given:
+    def matchers = new MatchingRulesImpl()
+    matchers.addCategory('status')
+      .addRule(EqualsMatcher.INSTANCE)
+    matchers.addCategory('body')
+      .addRule('$.X', new IncludeMatcher('A'))
+    matchers.addCategory('header')
+      .addRule('X', new IncludeMatcher('X'))
+      .addRule('Expected', new IncludeMatcher('Expected'))
+    matchers.addCategory('query')
+      .addRule('Q', new IncludeMatcher('Q'))
+      .addRule('Expected', new IncludeMatcher('Expected'))
+    matchers.addCategory('metadata')
+      .addRule('M', new IncludeMatcher('M'))
+      .addRule('Expected', new IncludeMatcher('Expected'))
+
+    expect:
+    Matchers.INSTANCE.resolveMatchers(matchers, category, ['Expected'],
+      { a, b -> a <=> b }).matchingRules == [
+        Expected: new MatchingRuleGroup([new IncludeMatcher('Expected')])
+      ]
+
+    where:
+
+    category << [ 'header', 'query', 'metadata' ]
   }
 
 }
