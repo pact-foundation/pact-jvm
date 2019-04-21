@@ -23,7 +23,7 @@ class AnsiConsoleReporter(
   }
 
   override fun metadataComparisonOk() {
-    AnsiConsole.out().println(Ansi.ansi().a("        has matching metadata (")
+    AnsiConsole.out().println(Ansi.ansi().a("      has matching metadata (")
       .fg(Ansi.Color.GREEN).a("OK").reset().a(")"))
   }
 
