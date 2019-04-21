@@ -21,9 +21,3 @@ compileTestGroovy {
   dependsOn compileTestScala
   classpath = classpath.plus(files(compileTestScala.destinationDir))
 }
-
-compileKotlin {
-  kotlinOptions {
-    apiVersion = "1.1"
-  }
-}

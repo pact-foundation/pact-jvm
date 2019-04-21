@@ -13,7 +13,7 @@ class MessageSpecificationSpec extends Specification {
   @Unroll
   def '#test #matchDesc'() {
     expect:
-    ResponseComparison.compareMessage(expected, actual).isEmpty() == match
+    ResponseComparison.compareMessage(expected, actual).body.isEmpty() == match
 
     where:
     [test, match, matchDesc, expected, actual] << loadTestCases()

@@ -95,6 +95,8 @@ annotation class PactVerifyProvider(
   val value: String
 )
 
+data class MessageAndMetadata(val messageData: ByteArray, val metadata: Map<String, Any>)
+
 /**
  * Interface to the provider verifier
  */
@@ -270,7 +272,7 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     }
   }
 
-  fun displayBodyResult(failures: MutableMap<String, Any>, comparison: Map<String, Any>, comparisonDescription: String): Boolean {
+  fun displayBodyResult(failures: MutableMap<String, Any>, comparison: Map<String, Any?>, comparisonDescription: String): Boolean {
     return if (comparison.isEmpty()) {
       reporters.forEach { it.bodyComparisonOk() }
       true
@@ -285,12 +287,59 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     var result = true
     methods.forEach { method ->
       reporters.forEach { it.generatesAMessageWhich() }
-      val actualMessage = OptionalBody.body(invokeProviderMethod(method, providerMethodInstance.apply(method)).toString().toByteArray())
-      val comparison = ResponseComparison.compareMessage(message, actualMessage)
+      val messageResult = invokeProviderMethod(method, providerMethodInstance.apply(method))
+      val actualMessage: OptionalBody
+      var messageMetadata: Map<String, Any>? = null
+      when (messageResult) {
+        is MessageAndMetadata -> {
+          actualMessage = OptionalBody.body(messageResult.messageData)
+          messageMetadata = messageResult.metadata
+        }
+        is Pair<*, *> -> {
+          actualMessage = OptionalBody.body(messageResult.first.toString().toByteArray())
+          messageMetadata = messageResult.second as Map<String, Any>
+        }
+        is org.apache.commons.lang3.tuple.Pair<*, *> -> {
+          actualMessage = OptionalBody.body(messageResult.left.toString().toByteArray())
+          messageMetadata = messageResult.right as Map<String, Any>
+        }
+        else -> {
+          actualMessage = OptionalBody.body(messageResult.toString().toByteArray())
+        }
+      }
+      val comparison = ResponseComparison.compareMessage(message, actualMessage, messageMetadata)
       val s = " generates a message which"
-      result = result && displayBodyResult(failures, comparison, interactionMessage + s)
+      result = result && displayBodyResult(failures, comparison["body"] as Map<String, Any?>, interactionMessage + s) &&
+        displayMetadataResult(messageMetadata ?: emptyMap(), failures, comparison["metadata"] as Map<String, Any?>,
+          interactionMessage + s)
     }
     return result
+  }
+
+  private fun displayMetadataResult(
+    expectedMetadata: Map<String, Any>,
+    failures: MutableMap<String, Any>,
+    comparison: Map<String, Any?>,
+    comparisonDescription: String
+  ): Boolean {
+    return if (comparison.isEmpty()) {
+      true
+    } else {
+      reporters.forEach { it.includesMetadata() }
+      var result = true
+      comparison.forEach { (key, metadataComparison) ->
+        val expectedValue = expectedMetadata[key]
+        if (metadataComparison == null) {
+          reporters.forEach { it.metadataComparisonOk(key, expectedValue) }
+        } else {
+          reporters.forEach { it.metadataComparisonFailed(key, expectedValue, metadataComparison) }
+          failures["$comparisonDescription includes metadata \"$key\" with value \"$expectedValue\""] =
+            metadataComparison
+          result = false
+        }
+      }
+      result
+    }
   }
 
   override fun displayFailures(failures: Map<String, Any>) {

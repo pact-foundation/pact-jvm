@@ -41,4 +41,19 @@ object Matching {
       }
     }
   }
+
+  @JvmStatic
+  fun compareMessageMetadata(e: Map<String, Any>, a: Map<String, Any>, matchers: MatchingRules?): List<MetadataMismatch> {
+    return e.entries.fold(listOf()) { list, value ->
+      if (a.containsKey(value.key)) {
+        val actual = a[value.key]
+        val compare = MetadataMatcher.compare(value.key, value.value, actual, matchers ?: MatchingRulesImpl())
+        if (compare != null) list + compare else list
+      } else if (value.key.toLowerCase() != "contenttype" && value.key.toLowerCase() != "content-type") {
+        list + MetadataMismatch(value.key, value.value, null, "Expected metadata '${value.key}' but was missing")
+      } else {
+        list
+      }
+    }
+  }
 }

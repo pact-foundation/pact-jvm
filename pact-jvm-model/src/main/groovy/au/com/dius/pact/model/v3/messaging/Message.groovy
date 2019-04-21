@@ -33,7 +33,7 @@ class Message implements Interaction {
   }
 
   String getContentType() {
-    metaData?.contentType ?: JSON
+    metaData?.find { it.key.toLowerCase() == 'contenttype' || it.key.toLowerCase() == 'content-type' }?.value ?: JSON
   }
 
   @SuppressWarnings('UnusedMethodParameter')
