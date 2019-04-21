@@ -1,5 +1,22 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.6.5 - Bugfix Release + Matching on message metadata
+
+* c3b8e3ad - fix: exclude clojure test from appveyor build (Ronald Holshausen, Sun Apr 21 14:57:07 2019 +1000)
+* 3240b670 - fix: indentation on the ANSI console output #479 (Ronald Holshausen, Sun Apr 21 14:44:43 2019 +1000)
+* c7ef9537 - fix: correct the verification output when succesfull #479 (Ronald Holshausen, Sun Apr 21 14:42:26 2019 +1000)
+* 38df7273 - fix: downcase the metadata rule category #479 (Ronald Holshausen, Sun Apr 21 14:25:21 2019 +1000)
+* 9f8ced90 - fix: metadata matchers need to handled like other kay-value types #479 (Ronald Holshausen, Sun Apr 21 13:55:34 2019 +1000)
+* ab78b3aa - feat: implemented verifying message metadata #479 (Ronald Holshausen, Sun Apr 21 12:45:58 2019 +1000)
+* f7bd4270 - feat: added a JUnit 4 and 5 test with matching on metadata (Ronald Holshausen, Sat Apr 20 16:08:25 2019 +1000)
+* 86e5447b - feat: Implemented JUnit support for matching message metadata (Ronald Holshausen, Sat Apr 20 15:57:25 2019 +1000)
+* 55376eb0 - chore: upgrade Kotlin to 1.3.30 (Ronald Holshausen, Sat Apr 20 14:10:04 2019 +1000)
+* 02cfb8ae - feat: enabel publishing of verification results after all interactions have been verified #522 (Ronald Holshausen, Sat Apr 20 13:28:04 2019 +1000)
+* 86e728d7 - fix: corrected the regex for the  set cookie matcher function in the Java DSL #873 (Ronald Holshausen, Fri Apr 19 18:29:47 2019 +1000)
+* a83352ff - feat: added a set cookie matcher function to the Java DSL #873 (Ronald Holshausen, Fri Apr 19 17:16:47 2019 +1000)
+* d41d44a6 - feat: add a system property to force overwriting pact files #804 (Ronald Holshausen, Fri Apr 19 15:19:33 2019 +1000)
+* 56ce9149 - bump version to 3.6.5 (Ronald Holshausen, Sun Apr 14 19:37:11 2019 +1000)
+
 # 3.6.4 - Bugfix Release
 
 * cd9cf826 - Merge branch 'v3.5.x' (Ronald Holshausen, Sun Apr 14 18:55:07 2019 +1000)
