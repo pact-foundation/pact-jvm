@@ -23,7 +23,10 @@ include   'provider:pact-jvm-provider-junit'
 include   'provider:pact-jvm-provider-junit5'
 include   'provider:pact-jvm-provider-spring'
 
-//include   'provider:pact-jvm-provider-lein'
+if (JavaVersion.current().isJava8()) {
+  include 'provider:pact-jvm-provider-lein'
+}
+
 //include   'pact-jvm-consumer-specs2'
 //include   'pact-jvm-provider-specs2'
 //include   'pact-jvm-provider-scalatest'
