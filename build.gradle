@@ -123,6 +123,9 @@ subprojects {
     }
 
     task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+      if (JavaVersion.current().java9Compatible) {
+        enabled = false
+      }
       outputFormat = 'javadoc'
       outputDirectory = "$buildDir/docs/dokkaJavadoc"
     }
@@ -243,8 +246,6 @@ if (System.env.TRAVIS == 'true') {
             groovyOptions.fork = false
         }
         tasks.withType(Test) {
-            // containers (currently) have 2 dedicated cores and 4GB of memory
-//            maxParallelForks = 2
             minHeapSize = '128m'
             maxHeapSize = '768m'
         }
