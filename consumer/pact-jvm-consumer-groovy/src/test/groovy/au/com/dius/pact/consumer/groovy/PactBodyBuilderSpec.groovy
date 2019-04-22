@@ -595,6 +595,29 @@ class PactBodyBuilderSpec extends Specification {
     request.matchingRules.rulesForCategory('body').matchingRules == expectedMatchingRules
   }
 
+  def 'root level array with multiple examples'() {
+    given:
+    service {
+      uponReceiving('a request with a root level array with multiple examples')
+      withAttributes(method: 'get', path: '/')
+      withBody(eachLike(3) {
+        id identifier
+        state('COMPLETED')
+        type regexp('(A|B)', 'A')
+      })
+      willRespondWith(status: 200)
+    }
+
+    when:
+    service.buildInteractions()
+    def request = service.interactions.first().request
+    def body = new JsonSlurper().parseText(request.body.valueAsString())
+
+    then:
+    body instanceof List
+    body.size() == 3
+  }
+
   private List walkGraph(def value) {
       def set = []
       if (value instanceof Map) {

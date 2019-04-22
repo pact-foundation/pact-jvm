@@ -1,8 +1,7 @@
-package au.com.dius.pact.provider.gradle
+package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
-import au.com.dius.pact.provider.ResponseComparison
 import org.apache.http.entity.ContentType
 import org.junit.Before
 import org.junit.Test

@@ -1,6 +1,8 @@
 package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.Headers
+import au.com.dius.pact.consumer.MockServer
+import au.com.dius.pact.consumer.PactTestExecutionContext
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.OptionalBody
@@ -20,6 +22,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.consumer.model.MockProviderConfig
 import groovy.json.JsonBuilder
+import groovy.transform.CompileStatic
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
@@ -326,14 +329,24 @@ class PactBuilder extends BaseBuilder {
    * @param closure Test to execute
    * @return The result of the test run
    */
+  @CompileStatic
   PactVerificationResult runTest(Map options = [:], Closure closure) {
     buildInteractions()
     def pact = new RequestResponsePact(provider, consumer, interactions)
 
     def pactVersion = options.specificationVersion ?: PactSpecVersion.V3
-    MockProviderConfig config = MockProviderConfig.httpConfig(LOCALHOST, port ?: 0, pactVersion)
+    MockProviderConfig config = MockProviderConfig.httpConfig(LOCALHOST, port ?: 0, pactVersion as PactSpecVersion)
 
-    runConsumerTest(pact, config, closure)
+    def runTest = closure
+    if (closure.maximumNumberOfParameters < 2) {
+      if (closure.maximumNumberOfParameters == 1) {
+        runTest =  { MockServer server, PactTestExecutionContext context -> closure.call(server) }
+      } else {
+        runTest =  { MockServer server, PactTestExecutionContext context -> closure.call() }
+      }
+    }
+
+    runConsumerTest(pact, config, runTest)
   }
 
   /**

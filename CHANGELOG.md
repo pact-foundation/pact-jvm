@@ -1,5 +1,42 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.6.5 - Bugfix Release + Matching on message metadata
+
+* c3b8e3ad - fix: exclude clojure test from appveyor build (Ronald Holshausen, Sun Apr 21 14:57:07 2019 +1000)
+* 3240b670 - fix: indentation on the ANSI console output #479 (Ronald Holshausen, Sun Apr 21 14:44:43 2019 +1000)
+* c7ef9537 - fix: correct the verification output when succesfull #479 (Ronald Holshausen, Sun Apr 21 14:42:26 2019 +1000)
+* 38df7273 - fix: downcase the metadata rule category #479 (Ronald Holshausen, Sun Apr 21 14:25:21 2019 +1000)
+* 9f8ced90 - fix: metadata matchers need to handled like other kay-value types #479 (Ronald Holshausen, Sun Apr 21 13:55:34 2019 +1000)
+* ab78b3aa - feat: implemented verifying message metadata #479 (Ronald Holshausen, Sun Apr 21 12:45:58 2019 +1000)
+* f7bd4270 - feat: added a JUnit 4 and 5 test with matching on metadata (Ronald Holshausen, Sat Apr 20 16:08:25 2019 +1000)
+* 86e5447b - feat: Implemented JUnit support for matching message metadata (Ronald Holshausen, Sat Apr 20 15:57:25 2019 +1000)
+* 55376eb0 - chore: upgrade Kotlin to 1.3.30 (Ronald Holshausen, Sat Apr 20 14:10:04 2019 +1000)
+* 02cfb8ae - feat: enabel publishing of verification results after all interactions have been verified #522 (Ronald Holshausen, Sat Apr 20 13:28:04 2019 +1000)
+* 86e728d7 - fix: corrected the regex for the  set cookie matcher function in the Java DSL #873 (Ronald Holshausen, Fri Apr 19 18:29:47 2019 +1000)
+* a83352ff - feat: added a set cookie matcher function to the Java DSL #873 (Ronald Holshausen, Fri Apr 19 17:16:47 2019 +1000)
+* d41d44a6 - feat: add a system property to force overwriting pact files #804 (Ronald Holshausen, Fri Apr 19 15:19:33 2019 +1000)
+* 56ce9149 - bump version to 3.6.5 (Ronald Holshausen, Sun Apr 14 19:37:11 2019 +1000)
+
+# 3.6.4 - Bugfix Release
+
+* cd9cf826 - Merge branch 'v3.5.x' (Ronald Holshausen, Sun Apr 14 18:55:07 2019 +1000)
+* 09babcae - fix: provider junit5 does not report failed results to pact broker #858 (Ronald Holshausen, Sun Apr 14 18:41:36 2019 +1000)
+* e3eb0cf7 - bump version to 3.5.26 (Ronald Holshausen, Sun Apr 14 17:58:19 2019 +1000)
+* ba2a4fd5 - update changelog for release 3.5.25 (Ronald Holshausen, Sun Apr 14 17:00:40 2019 +1000)
+* b69b8142 - fix: backported fixes from 3.6.x (Ronald Holshausen, Sun Apr 14 16:40:38 2019 +1000)
+* 92e04f5e - Merge branch 'v3.5.x' (Ronald Holshausen, Sun Apr 14 14:32:47 2019 +1000)
+* 884b9dda - fix: JUnit tests were publishing results when a before step failed #872 (Ronald Holshausen, Sun Apr 14 13:46:23 2019 +1000)
+* 0ba381b9 - fix: Groovy DSL was not honouring the number of examples to generate #555 (Ronald Holshausen, Sun Apr 14 12:20:37 2019 +1000)
+* b4ed9106 - fix: when looking up a test target, try use the getter first #871 (Ronald Holshausen, Sat Apr 13 18:22:39 2019 +1000)
+* a3d7c1ea - fix: check for the gradle worker in both env and system properties #690 (Ronald Holshausen, Sat Apr 13 17:11:18 2019 +1000)
+* 7b1b448f - fix: make the paramaters to Groovy runTest method optional #863 (Ronald Holshausen, Sat Apr 13 15:18:46 2019 +1000)
+* 3398e541 - bump version to 3.6.4 (Ronald Holshausen, Sun Mar 31 20:07:03 2019 +1100)
+* 2c3455f7 - fix: correct the ClassCastException in the /complete path (Ronald Holshausen, Sat Feb 16 15:25:41 2019 +1100)
+* 40db53e9 - fix: No such property: message for class: java.lang.String #831 (Ronald Holshausen, Sun Feb 3 14:45:20 2019 +1100)
+* 85dc70dd - chore: add a test with mutiple providers #820 (Ronald Holshausen, Sun Feb 3 12:13:13 2019 +1100)
+* 8b170fac - feat: support arrays of primitives in LambdaDSL #829 (Ronald Holshausen, Sun Feb 3 11:37:32 2019 +1100)
+* 56a530c2 - feat: add support for Instant in the Java DSL #802 (Ronald Holshausen, Sun Feb 3 10:37:12 2019 +1100)
+
 # 3.6.3 - Bugfixes + small enhancements
 
 * 2be31356 - fix: fix for failing tests #861 (Ronald Holshausen, Sun Mar 31 19:18:12 2019 +1100)
@@ -292,6 +329,18 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 9dc0901f - feat: Update to allow state change requests to return values (Ronald Holshausen, Sat Jul 14 21:06:04 2018 +1000)
 * ef156ff9 - chore: converted StateChange to Kotlin (Ronald Holshausen, Sat Jul 14 18:39:33 2018 +1000)
 * e7f896c1 - Fix compilation warning (tomoya-yokota, Thu Jul 5 13:00:49 2018 +0900)
+
+# 3.5.25 - Bugfix Release
+
+* b69b8142 - fix: backported fixes from 3.6.x (Ronald Holshausen, Sun Apr 14 16:40:38 2019 +1000)
+* 884b9dda - fix: JUnit tests were publishing results when a before step failed #872 (Ronald Holshausen, Sun Apr 14 13:46:23 2019 +1000)
+* 2c3455f7 - fix: correct the ClassCastException in the /complete path (Ronald Holshausen, Sat Feb 16 15:25:41 2019 +1100)
+* 40db53e9 - fix: No such property: message for class: java.lang.String #831 (Ronald Holshausen, Sun Feb 3 14:45:20 2019 +1100)
+* 85dc70dd - chore: add a test with mutiple providers #820 (Ronald Holshausen, Sun Feb 3 12:13:13 2019 +1100)
+* 8b170fac - feat: support arrays of primitives in LambdaDSL #829 (Ronald Holshausen, Sun Feb 3 11:37:32 2019 +1100)
+* 56a530c2 - feat: add support for Instant in the Java DSL #802 (Ronald Holshausen, Sun Feb 3 10:37:12 2019 +1100)
+* b3f7aa52 - fix: Upgrade Kotlin to 1.2.71 #805 (Ronald Holshausen, Mon Nov 5 09:46:01 2018 +1100)
+* 4a1abe3d - bump version to 3.5.25 (Ronald Holshausen, Sun Nov 4 19:07:53 2018 +1100)
 
 # 3.5.24 - Bugfix Release
 

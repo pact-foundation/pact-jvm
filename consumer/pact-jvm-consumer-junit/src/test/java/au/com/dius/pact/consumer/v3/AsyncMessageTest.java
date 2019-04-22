@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.junit.MessagePactProviderRule;
 import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactFolder;
 import au.com.dius.pact.consumer.junit.PactVerification;
+import au.com.dius.pact.consumer.dsl.Matchers;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.core.model.messaging.MessagePact;
 import org.junit.Rule;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.core.Is.is;
 
 @PactFolder("build/pacts/messages")
@@ -27,8 +29,9 @@ public class AsyncMessageTest {
     body.stringValue("testParam1", "value1");
     body.stringValue("testParam2", "value2");
 
-    Map<String, String> metadata = new HashMap<String, String>();
-    metadata.put("contentType", "application/json");
+    Map<String, Object> metadata = new HashMap<>();
+    metadata.put("Content-Type", "application/json");
+    metadata.put("destination", Matchers.regexp("\\w+\\d+", "X001"));
 
     return builder.given("SomeProviderState")
       .expectsToReceive("a test message")
@@ -44,7 +47,7 @@ public class AsyncMessageTest {
     body.stringValue("testParam2", "value4");
 
     Map<String, String> metadata = new HashMap<String, String>();
-    metadata.put("contentType", "application/json");
+    metadata.put("Content-Type", "application/json");
 
     return builder.given("SomeProviderState2")
       .expectsToReceive("a test message")
@@ -58,6 +61,7 @@ public class AsyncMessageTest {
   public void test() throws Exception {
     byte[] currentMessage = mockProvider.getMessage();
     assertThat(new String(currentMessage), is("{\"testParam1\":\"value1\",\"testParam2\":\"value2\"}"));
+    assertThat(mockProvider.getMetadata(), hasEntry("destination", "X001"));
   }
 
   @Test

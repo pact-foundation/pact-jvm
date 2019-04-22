@@ -7,6 +7,8 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
+import org.jetbrains.annotations.NotNull
+import org.jetbrains.annotations.Nullable
 
 /**
  * Pact verifier reporter that displays the results of the verification in a markdown document
@@ -215,4 +217,31 @@ class MarkdownReporter implements VerifierReporter {
 
   @Override
   void displayFailures(Map failures) { }
+
+  @Override
+  void metadataComparisonFailed(String key, def value, def comparison) {
+    writer.println "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"**$key**\" with value \"**$value**\" " +
+      '(<span style=\'color:red\'>FAILED</span>)  '
+    writer.println()
+    writer.println '```'
+    writer.println comparison
+    writer.println '```'
+    writer.println()
+  }
+
+  @Override
+  void includesMetadata() {
+    writer.println '&nbsp;&nbsp;&nbsp;&nbsp;includes metadata  '
+  }
+
+  @Override
+  void metadataComparisonOk(@NotNull String key, @Nullable Object value) {
+    writer.println "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"**$key**\" with value \"**$value**\" " +
+      '(<span style=\'color:green\'>OK</span>)  '
+  }
+
+  @Override
+  void metadataComparisonOk() {
+    writer.println "&nbsp;&nbsp;&nbsp;&nbsp;has matching metadata (<span style='color:green'>OK</span>)"
+  }
 }

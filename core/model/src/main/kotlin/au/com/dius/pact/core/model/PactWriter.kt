@@ -7,6 +7,10 @@ import java.io.PrintWriter
 import java.io.RandomAccessFile
 import java.io.StringWriter
 
+enum class PactWriteMode {
+  MERGE, OVERWRITE
+}
+
 /**
  * Class to write out a pact to a file
  */
@@ -38,7 +42,7 @@ object PactWriter : KLogging() {
   @Synchronized
   fun <I> writePact(pactFile: File, pact: Pact<I>, pactSpecVersion: PactSpecVersion)
     where I : Interaction {
-    if (pactFile.exists() && pactFile.length() > 0) {
+    if (pactWriteMode() == PactWriteMode.MERGE && pactFile.exists() && pactFile.length() > 0) {
       val raf = RandomAccessFile(pactFile, "rw")
       val lock = raf.channel.lock()
       try {
@@ -52,7 +56,7 @@ object PactWriter : KLogging() {
         raf.seek(0)
         val swriter = StringWriter()
         val writer = PrintWriter(swriter)
-        PactWriter.writePact(pact, writer, pactSpecVersion)
+        writePact(pact, writer, pactSpecVersion)
         val bytes = swriter.toString().toByteArray()
         raf.setLength(bytes.size.toLong())
         raf.write(bytes)
@@ -62,7 +66,14 @@ object PactWriter : KLogging() {
       }
     } else {
       pactFile.parentFile.mkdirs()
-      pactFile.printWriter().use { PactWriter.writePact(pact, it, pactSpecVersion) }
+      pactFile.printWriter().use { writePact(pact, it, pactSpecVersion) }
+    }
+  }
+
+  private fun pactWriteMode(): PactWriteMode {
+    return when (System.getProperty("pact.writer.overwrite")) {
+      "true" -> PactWriteMode.OVERWRITE
+      else -> PactWriteMode.MERGE
     }
   }
 

@@ -4,10 +4,10 @@ import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
-import au.com.dius.pact.provider.DefaultVerificationReporter
+import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderUtils
-import au.com.dius.pact.provider.ProviderVerifierBase.Companion.PACT_VERIFIER_PUBLISH_RESULTS
+import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget
 import au.com.dius.pact.provider.junit.target.TestTarget
@@ -34,6 +34,7 @@ import org.junit.runners.model.Statement
 import org.junit.runners.model.TestClass
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.BiConsumer
+import kotlin.reflect.jvm.kotlinProperty
 
 /**
  * Internal class to support pact test running
@@ -49,7 +50,7 @@ open class InteractionRunner<I>(
   private val results = ConcurrentHashMap<String, Pair<Boolean, IProviderVerifier>>()
   private val testContext = ConcurrentHashMap<String, Any>()
   private val childDescriptions = ConcurrentHashMap<String, Description>()
-  var verificationReporter = DefaultVerificationReporter
+  var testResultAccumulator: TestResultAccumulator = DefaultTestResultAccumulator
 
   init {
     validate()
@@ -136,29 +137,18 @@ open class InteractionRunner<I>(
 
   // Running
   override fun run(notifier: RunNotifier) {
-    var allPassed = true
     for (interaction in pact.interactions) {
       val description = describeChild(interaction)
       notifier.fireTestStarted(description)
+      var testResult = true
       try {
         interactionBlock(interaction, pactSource, testContext).evaluate()
       } catch (e: Throwable) {
         notifier.fireTestFailure(Failure(description, e))
-        allPassed = false
+        testResult = false
       } finally {
         notifier.fireTestFinished(description)
-      }
-    }
-
-    val publishingDisabled = results.values.any { it.second.publishingResultsDisabled() }
-    if (!publishingDisabled && (pact !is FilteredPact<*> || pact.isNotFiltered())) {
-      verificationReporter.reportResults(pact, allPassed, providerVersion())
-    } else {
-      if (publishingDisabled) {
-        logger.warn { "Skipping publishing of verification results (" + PACT_VERIFIER_PUBLISH_RESULTS +
-          " is not set to 'true')" }
-      } else {
-        logger.warn { "Skipping publishing of verification results as the interactions have been filtered" }
+        testResultAccumulator.updateTestResult(pact as Pact<Interaction>, interaction, testResult)
       }
     }
   }
@@ -220,11 +210,16 @@ open class InteractionRunner<I>(
   protected open fun setupTargetForInteraction(target: Target) { }
 
   protected fun lookupTarget(testInstance: Any): Target {
-    val target = testClass.getAnnotatedFieldValues(testInstance, TestTarget::class.java, Target::class.java).first()
+    val targetField = testClass.getAnnotatedFields(TestTarget::class.java).first()
+    val target = if (targetField.field.kotlinProperty != null) {
+      targetField.field.kotlinProperty!!.getter.call(testInstance)
+    } else {
+      targetField.get(testInstance)
+    }
     if (target is TestClassAwareTarget) {
       target.setTestClass(testClass, testInstance)
     }
-    return target
+    return target as Target
   }
 
   protected fun withStateChanges(interaction: Interaction, target: Any, statement: Statement): Statement {

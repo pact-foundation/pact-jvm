@@ -381,3 +381,8 @@ For example:
         .status(200)
         .body("{\"hello\": \"harry\"}")
 ```
+
+# Forcing pact files to be overwritten (3.6.5+)
+
+By default, when the pact file is written, it will be merged with any existing pact file. To force the file to be 
+overwritten, set the Java system property `pact.writer.overwrite` to `true`.

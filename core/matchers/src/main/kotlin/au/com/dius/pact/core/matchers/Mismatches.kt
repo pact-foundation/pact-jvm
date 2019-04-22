@@ -61,6 +61,14 @@ data class HeaderMismatch(
   } else {
     super.description()
   }
+
+  fun merge(mismatch: HeaderMismatch): HeaderMismatch {
+    return if (this.mismatch != null) {
+      copy(mismatch = this.mismatch + ", " + mismatch.mismatch)
+    } else {
+      copy(mismatch = mismatch.mismatch)
+    }
+  }
 }
 
 object HeaderMismatchFactory : MismatchFactory<HeaderMismatch> {
@@ -85,4 +93,15 @@ data class BodyMismatch @JvmOverloads constructor(
 object BodyMismatchFactory : MismatchFactory<BodyMismatch> {
   override fun create(expected: Any?, actual: Any?, message: String, path: List<String>) =
     BodyMismatch(expected, actual, message, path.joinToString("."))
+}
+
+data class MetadataMismatch(val key: String, val expected: Any?, val actual: Any?, val mismatch: String) : Mismatch() {
+  override fun description() = mismatch
+
+  fun merge(mismatch: MetadataMismatch) = copy(mismatch = this.mismatch + ", " + mismatch.mismatch)
+}
+
+object MetadataMismatchFactory : MismatchFactory<MetadataMismatch> {
+  override fun create(expected: Any?, actual: Any?, message: String, path: List<String>) =
+    MetadataMismatch(path.last(), expected, actual, message)
 }

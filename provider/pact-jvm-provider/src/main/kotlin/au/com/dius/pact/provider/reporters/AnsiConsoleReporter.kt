@@ -14,9 +14,28 @@ import java.io.File
  * Pact verifier reporter that displays the results of the verification to the console using ASCII escapes
  */
 class AnsiConsoleReporter(
-  var displayFullDiff: Boolean = false,
+  private var displayFullDiff: Boolean = false,
   override val ext: String? = null
 ) : VerifierReporter {
+
+  override fun includesMetadata() {
+    AnsiConsole.out().println("      includes message metadata")
+  }
+
+  override fun metadataComparisonOk() {
+    AnsiConsole.out().println(Ansi.ansi().a("      has matching metadata (")
+      .fg(Ansi.Color.GREEN).a("OK").reset().a(")"))
+  }
+
+  override fun metadataComparisonOk(key: String, value: Any?) {
+    AnsiConsole.out().println(Ansi.ansi().a("        \"").bold().a(key).boldOff().a("\" with value \"")
+      .bold().a(value).boldOff().a("\" (").fg(Ansi.Color.GREEN).a("OK").reset().a(")"))
+  }
+
+  override fun metadataComparisonFailed(key: String, value: Any?, comparison: Any) {
+    AnsiConsole.out().println(Ansi.ansi().a("        \"").bold().a(key).boldOff().a("\" with value \"")
+      .bold().a(value).boldOff().a("\" (").fg(Ansi.Color.RED).a("FAILED").reset().a(")"))
+  }
 
   override fun setReportDir(reportDir: File) { }
 

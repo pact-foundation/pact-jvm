@@ -2,7 +2,6 @@ package au.com.dius.pact.core.model.messaging
 
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.ProviderState
-import spock.lang.Ignore
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -134,16 +133,6 @@ class MessageSpec extends Specification {
     message2 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3'.bytes))
   }
 
-  @Ignore('Message conflicts do not work with generated values')
-  def 'messages do conflict if they have the same state and description but different bodies'() {
-    expect:
-    message1.conflictsWith(message2)
-
-    where:
-    message1 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3'.bytes))
-    message2 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3 4'.bytes))
-  }
-
   @Unroll
   def 'message to map handles message content correctly'() {
     expect:
@@ -157,6 +146,22 @@ class MessageSpec extends Specification {
     new String([1, 2, 3, 4] as byte[]) | 'application/octet-stream' | 'AQIDBA=='
 
     message = new Message(contents: OptionalBody.body(body.bytes), metaData: [contentType: contentType])
+  }
+
+  @Unroll
+  def 'get content type test'() {
+    expect:
+    message.contentType == result
+
+    where:
+
+    key            | contentType                | result
+    'contentType'  | 'application/json'         | 'application/json'
+    'Content-Type' | 'text/plain'               | 'text/plain'
+    'contenttype'  | 'application/octet-stream' | 'application/octet-stream'
+    'none'         | 'none'                     | 'application/json'
+
+    message = new Message(metaData: [(key): contentType])
   }
 
 }

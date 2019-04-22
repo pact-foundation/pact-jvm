@@ -67,7 +67,7 @@ object Matchers : KLogging() {
       matchers.rulesForCategory(category).filter(Predicate {
         matchesPath(it, items) > 0
       })
-    else if (category == "header" || category == "query")
+    else if (category == "header" || category == "query" || category == "metadata")
       matchers.rulesForCategory(category).filter(Predicate { key ->
         items.all { pathComparator.compare(key, it) == 0 }
       })

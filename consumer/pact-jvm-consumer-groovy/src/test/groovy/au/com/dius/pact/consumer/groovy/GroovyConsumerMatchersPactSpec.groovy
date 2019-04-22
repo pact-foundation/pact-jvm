@@ -128,7 +128,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     }
 
     when:
-    PactVerificationResult result = matcherService.runTest { server, context ->
+    PactVerificationResult result = matcherService.runTest { server ->
       def client = new RESTClient(server.url)
       def response = client.get(query: [a: '100', b: 'Z'])
 
@@ -160,7 +160,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     }
 
     when:
-    PactVerificationResult result = matcherService.runTest { server, context ->
+    PactVerificationResult result = matcherService.runTest { server ->
       def client = new RESTClient(server.url)
       def response = client.put(requestContentType: JSON, body: JsonOutput.toJson([
         valueA: 100, valueB: 'AZB', valueC: null]))

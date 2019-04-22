@@ -2,6 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -32,6 +33,19 @@ class HeaderMatcherSpec extends Specification {
 
     expect:
     HeaderMatcher.compareHeader('HEADER', 'HEADER', 'XYZ', matchers) == null
+  }
+
+  def "matching headers - combines mismatches if there are multiple"() {
+    given:
+    def matchers = new MatchingRulesImpl()
+    def category = matchers.addCategory('header')
+    category.addRule('HEADER', new RegexMatcher('X=.*'), RuleLogic.OR)
+    category.addRule('HEADER', new RegexMatcher('A=.*'), RuleLogic.OR)
+    category.addRule('HEADER', new RegexMatcher('B=.*'), RuleLogic.OR)
+
+    expect:
+    HeaderMatcher.compareHeader('HEADER', 'HEADER', 'XYZ', matchers).mismatch ==
+      "Expected 'XYZ' to match 'X=.*', Expected 'XYZ' to match 'A=.*', Expected 'XYZ' to match 'B=.*'"
   }
 
   @Unroll

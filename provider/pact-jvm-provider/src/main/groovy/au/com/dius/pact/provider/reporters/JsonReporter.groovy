@@ -11,6 +11,8 @@ import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import groovy.json.JsonOutput
 import org.apache.commons.lang3.exception.ExceptionUtils
+import org.jetbrains.annotations.NotNull
+import org.jetbrains.annotations.Nullable
 
 /**
  * Pact verifier reporter that generates the results of the verification in JSON format
@@ -200,4 +202,21 @@ class JsonReporter implements VerifierReporter {
 
   @Override
   void displayFailures(Map failures) { }
+
+  @Override
+  void metadataComparisonFailed(String key, def value, def comparison) {
+    def verification = jsonData.execution.last().interactions.last().verification
+    verification.result = FAILED
+    verification.metadata = verification.metadata ?: [:]
+    verification.metadata[key] = comparison
+  }
+
+  @Override
+  void includesMetadata() { }
+
+  @Override
+  void metadataComparisonOk(@NotNull String key, @Nullable Object value) { }
+
+  @Override
+  void metadataComparisonOk() { }
 }

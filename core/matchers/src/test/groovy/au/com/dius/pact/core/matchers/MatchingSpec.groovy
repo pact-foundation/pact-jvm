@@ -51,4 +51,45 @@ class MatchingSpec extends Specification {
     ]
   }
 
+  def 'Metadata Matching - match empty'() {
+    expect:
+    Matching.compareMessageMetadata([:], [:], null).empty
+  }
+
+  def 'Metadata Matching - match same metadata'() {
+    expect:
+    Matching.compareMessageMetadata([x: 1], [x: 1], null).empty
+  }
+
+  def 'Metadata Matching - ignore additional keys'() {
+    expect:
+    Matching.compareMessageMetadata([A: 'B'], [A: 'B', C: 'D'], null).empty
+  }
+
+  def 'Metadata Matching - complain about missing keys'() {
+    expect:
+    Matching.compareMessageMetadata([A: 'B', C: 'D'], [A: 'B'], null) == mismatch
+
+    where:
+    mismatch = [
+      new MetadataMismatch('C', 'D', null, "Expected metadata 'C' but was missing")
+    ]
+  }
+
+  def 'Metadata Matching - complain about incorrect keys'() {
+    expect:
+    Matching.compareMessageMetadata([A: 'B'], [A: 'C'], null) == mismatch
+
+    where:
+    mismatch = [
+      new MetadataMismatch('A', 'B', 'C',
+        "Expected metadata key 'A' to have value 'B' (String) but was 'C' (String)")
+    ]
+  }
+
+  def 'Metadata Matching - ignores missing content type'() {
+    expect:
+    Matching.compareMessageMetadata([A: 'B', contentType: 'D'], [A: 'B'], null).empty
+  }
+
 }

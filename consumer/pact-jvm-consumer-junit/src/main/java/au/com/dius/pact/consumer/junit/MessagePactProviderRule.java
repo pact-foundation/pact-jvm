@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.Pact;
 import au.com.dius.pact.consumer.PactConsumerConfig;
 import au.com.dius.pact.consumer.PactFolder;
 import au.com.dius.pact.core.model.PactSpecVersion;
+import au.com.dius.pact.core.model.ProviderState;
 import au.com.dius.pact.core.model.messaging.Message;
 import au.com.dius.pact.core.model.messaging.MessagePact;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * A junit rule that wraps every test annotated with {@link PactVerification}.
@@ -81,7 +83,8 @@ public class MessagePactProviderRule extends ExternalResource {
           MessagePactBuilder builder = MessagePactBuilder.consumer(pact.consumer()).hasPactWith(provider);
           messagePact = (MessagePact) method.invoke(testClassInstance, builder);
           for (Message message : messagePact.getMessages()) {
-            pacts.put(message.getProviderState(), message);
+            pacts.put(message.getProviderStates().stream().map(ProviderState::getName).collect(Collectors.joining()),
+							message);
           }
         } else {
           pacts = parsePacts();

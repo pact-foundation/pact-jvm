@@ -53,7 +53,7 @@ class ExampleGroovyConsumerPactTest {
                 headers: ['Content-Type': 'application/json'])
         }
 
-        PactVerificationResult result = aliceService.runTest { server, context ->
+        PactVerificationResult result = aliceService.runTest {
             def client = new RESTClient('http://localhost:1233/')
             def aliceResponse = client.get(path: '/mallory', query: [status: 'good', name: 'ron'])
 

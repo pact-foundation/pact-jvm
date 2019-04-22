@@ -1,19 +1,21 @@
-package au.com.dius.pact.provider.junit5
+package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
-import au.com.dius.pact.provider.DefaultVerificationReporter
 import au.com.dius.pact.provider.ProviderVerifierBase.Companion.PACT_VERIFIER_PUBLISH_RESULTS
-import au.com.dius.pact.provider.VerificationReporter
 import mu.KLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
 
-object TestResultAccumulator : KLogging() {
+interface TestResultAccumulator {
+  fun updateTestResult(pact: Pact<Interaction>, interaction: Interaction, testExecutionResult: Boolean)
+}
+
+object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
 
   private val testResults: MutableMap<Int, MutableMap<Int, Boolean>> = mutableMapOf()
   var verificationReporter: VerificationReporter = DefaultVerificationReporter
 
-  fun updateTestResult(
+  override fun updateTestResult(
     pact: Pact<Interaction>,
     interaction: Interaction,
     testExecutionResult: Boolean
@@ -30,7 +32,8 @@ object TestResultAccumulator : KLogging() {
         logger.warn { "Skipping publishing of verification results as it has been disabled " +
           "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')" }
       } else {
-        verificationReporter.reportResults(pact, true, lookupProviderVersion())
+        verificationReporter.reportResults(pact,
+          interactionResults.values.fold(true) { acc, result -> acc && result }, lookupProviderVersion())
       }
     }
   }
@@ -55,6 +58,6 @@ object TestResultAccumulator : KLogging() {
   }
 
   fun allInteractionsVerified(pact: Pact<Interaction>, results: MutableMap<Int, Boolean>): Boolean {
-    return pact.interactions.all { results.getOrDefault(calculateInteractionHash(it), false) }
+    return pact.interactions.all { results.containsKey(calculateInteractionHash(it)) }
   }
 }

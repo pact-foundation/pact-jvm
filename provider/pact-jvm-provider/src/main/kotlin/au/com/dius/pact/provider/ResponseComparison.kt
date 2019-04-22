@@ -3,11 +3,14 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
+import au.com.dius.pact.core.matchers.Matching
 import au.com.dius.pact.core.matchers.MatchingConfig
+import au.com.dius.pact.core.matchers.MetadataMismatch
 import au.com.dius.pact.core.matchers.Mismatch
 import au.com.dius.pact.core.matchers.ResponseMatching
 import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.matchers.generateDiff
+import au.com.dius.pact.core.model.HttpPart
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.isNullOrEmpty
@@ -135,24 +138,49 @@ class ResponseComparison(
     }
 
     @JvmStatic
-    fun compareMessage(message: Message, actual: OptionalBody): Map<String, Any> {
-      val result = MatchingConfig.lookupBodyMatcher(message.contentType)
-      var mismatches = mutableListOf<BodyMismatch>()
+    @JvmOverloads
+    fun compareMessage(message: Message, actual: OptionalBody, metadata: Map<String, Any>? = null): Map<String, Any?> {
       val expected = message.asPactRequest()
+      val bodyMismatches = compareMessageBody(message, actual, expected)
+
+      val metadataMismatches = when (metadata) {
+        null -> emptyList()
+        else -> Matching.compareMessageMetadata(message.metaData, metadata, message.matchingRules)
+      }
+
+      val responseComparison = ResponseComparison(expected as Response,
+        mapOf("contentType" to ContentType.parse(message.contentType)), 200, emptyMap(), actual.valueAsString())
+      val result = mutableMapOf<String, Any?>()
+      result["body"] = responseComparison.compareBody(bodyMismatches)
+      result["metadata"] = metadataResult(metadataMismatches)
+      return result
+    }
+
+    private fun metadataResult(mismatches: List<MetadataMismatch>): Map<String, Any> {
+      return if (mismatches.isNotEmpty()) {
+        mismatches.groupBy { it.key }.mapValues { (_, value) ->
+          value.joinToString(", ") { it.mismatch }
+        }
+      } else {
+        emptyMap()
+      }
+    }
+
+    private fun compareMessageBody(message: Message, actual: OptionalBody, expected: HttpPart): MutableList<BodyMismatch> {
+      val result = MatchingConfig.lookupBodyMatcher(message.contentType)
+      var bodyMismatches = mutableListOf<BodyMismatch>()
       val actualMessage = Response(200, mapOf("Content-Type" to listOf(message.contentType)), actual)
       if (result != null) {
-        mismatches = result.matchBody(expected, actualMessage, true).toMutableList()
+        bodyMismatches = result.matchBody(expected, actualMessage, true).toMutableList()
       } else {
         val expectedBody = message.contents.valueAsString()
         if (expectedBody.isNotEmpty() && actual.isNullOrEmpty()) {
-          mismatches.add(BodyMismatch(expectedBody, null))
+          bodyMismatches.add(BodyMismatch(expectedBody, null))
         } else if (actual.valueAsString() != expectedBody) {
-          mismatches.add(BodyMismatch(expectedBody, actual.valueAsString()))
+          bodyMismatches.add(BodyMismatch(expectedBody, actual.valueAsString()))
         }
       }
-
-      return ResponseComparison(expected as Response, mapOf("contentType" to ContentType.parse(message.contentType)),
-        200, emptyMap(), actual.valueAsString()).compareBody(mismatches)
+      return bodyMismatches
     }
   }
 }
