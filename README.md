@@ -50,8 +50,8 @@ module has a Jar file named pact-jvm-consumer_2.12. The full name of the file is
 | Branch | Specification | JDK | Scala Versions | Latest Version |
 | ------ | ------------- | ------- | -------------- | -------------- |
 | 4.0.x | V3 | 8-11 | N/A | 4.0.0-beta.1 |
-| 3.6.x | V3 | 8 | 2.12 | 3.6.2 |
-| 3.5.x | V3 | 8 | 2.12, 2.11 | 3.5.24 |
+| 3.6.x | V3 | 8 | 2.12 | 3.6.5 |
+| 3.5.x | V3 | 8 | 2.12, 2.11 | 3.5.25 |
 | 3.5.x-jre7 | V3 | 7 | 2.11 | 3.5.7-jre7.0 |
 | 2.4.x (v2.x) | V2 | 6 | 2.10, 2.11 | 2.4.20 |
 
