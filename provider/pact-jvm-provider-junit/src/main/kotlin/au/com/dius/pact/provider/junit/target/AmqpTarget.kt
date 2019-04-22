@@ -22,8 +22,8 @@ import java.util.function.Supplier
  * @param packagesToScan List of JVM packages
  */
 open class AmqpTarget @JvmOverloads constructor(
-  val packagesToScan: List<String> = emptyList(),
-  val classLoader: ClassLoader = Thread.currentThread().contextClassLoader
+  private val packagesToScan: List<String> = emptyList(),
+  private val classLoader: ClassLoader? = null
 ) : BaseTarget() {
 
   /**

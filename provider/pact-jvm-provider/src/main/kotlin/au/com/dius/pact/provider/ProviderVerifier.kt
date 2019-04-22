@@ -13,12 +13,9 @@ import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import groovy.lang.GroovyObjectSupport
+import io.github.classgraph.ClassGraph
 import mu.KLogging
 import mu.KotlinLogging
-import org.reflections.Reflections
-import org.reflections.scanners.MethodAnnotationsScanner
-import org.reflections.util.ConfigurationBuilder
-import org.reflections.util.FilterBuilder
 import java.lang.reflect.Method
 import java.net.URL
 import java.net.URLClassLoader
@@ -221,44 +218,48 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
       val urls = projectClasspath.get()
       logger.debug { "projectClasspath = $urls" }
 
-      val configurationBuilder = if (urls.isEmpty()) {
-        ConfigurationBuilder().setScanners(MethodAnnotationsScanner())
-      } else {
-        val loader = URLClassLoader(urls.toTypedArray(), ProviderVerifierBase::class.java.classLoader)
-        ConfigurationBuilder()
-          .setScanners(MethodAnnotationsScanner())
-          .addClassLoader(loader)
-          .addUrls(urls)
+      val classGraph = ClassGraph().enableAllInfo()
+      if (System.getProperty("pact.verifier.classpathscan.verbose") != null) {
+        classGraph.verbose()
+      }
+
+      if (urls.isNotEmpty()) {
+        classGraph.overrideClassLoaders(URLClassLoader(urls.toTypedArray()))
       }
 
       val scan = ProviderUtils.packagesToScan(providerInfo, consumer)
       if (scan.isNotEmpty()) {
-        val filterBuilder = FilterBuilder()
-        scan.forEach { filterBuilder.include(it) }
-        configurationBuilder.filterInputsBy(filterBuilder)
+        classGraph.whitelistPackages(*scan.toTypedArray())
       }
 
-      val reflections = Reflections(configurationBuilder)
-      val methodsAnnotatedWith = reflections.getMethodsAnnotatedWith(PactVerifyProvider::class.java)
-      val providerMethods = methodsAnnotatedWith.filter { m ->
-        logger.debug { "Found annotated method $m" }
-        val annotation = m.getAnnotation(PactVerifyProvider::class.java)
-        logger.debug { "Found annotation $annotation" }
-        annotation?.value == interaction.description
+      val methodsAnnotatedWith = classGraph.scan().use { scanResult ->
+        scanResult.getClassesWithMethodAnnotation(PactVerifyProvider::class.qualifiedName)
+          .flatMap { classInfo ->
+            logger.debug { "found class $classInfo" }
+            val methodInfo = classInfo.methodInfo.filter {
+              it.annotationInfo.any { info ->
+                info.name == PactVerifyProvider::class.qualifiedName &&
+                  info.parameterValues["value"].value == interaction.description
+              }
+            }
+            logger.debug { "found method $methodInfo" }
+            methodInfo.map { it.loadClassAndGetMethod() }
+          }
       }
 
-      if (providerMethods.isEmpty()) {
+      logger.debug { "Found methods = $methodsAnnotatedWith" }
+      if (methodsAnnotatedWith.isEmpty()) {
         reporters.forEach { it.errorHasNoAnnotatedMethodsFoundForInteraction(interaction) }
         throw RuntimeException("No annotated methods were found for interaction " +
           "'${interaction.description}'. You need to provide a method annotated with " +
-          "@PactVerifyProvider(\"${interaction.description}\") that returns the message contents.")
+          "@PactVerifyProvider(\"${interaction.description}\") on the classpath that returns the message contents.")
       } else {
         return if (interaction is Message) {
-          verifyMessagePact(providerMethods.toHashSet(), interaction, interactionMessage, failures)
+          verifyMessagePact(methodsAnnotatedWith.toHashSet(), interaction, interactionMessage, failures)
         } else {
           val expectedResponse = (interaction as RequestResponseInteraction).response
           var result = true
-          providerMethods.forEach {
+          methodsAnnotatedWith.forEach {
             val actualResponse = invokeProviderMethod(it, null) as Map<String, Any>
             result = result && this.verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
           }

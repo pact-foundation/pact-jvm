@@ -28,7 +28,7 @@ public class AmqpContractTest {
 
   @BeforeEach
   void before(PactVerificationContext context) {
-    context.setTarget(new AmpqTestTarget(Collections.singletonList("au.com.dius.pact.provider.junit5.*")));
+    context.setTarget(new AmpqTestTarget());
   }
 
   @State("SomeProviderState")

@@ -8,10 +8,10 @@ dependencies {
     api project(":core:pact-jvm-core-matchers") 
     compile'commons-io:commons-io:2.5',
       "org.fusesource.jansi:jansi:${project.jansiVersion}",
-      "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
-      'org.reflections:reflections:0.9.11'
+      "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
     implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
     implementation 'org.scala-lang:scala-library:2.12.8'
+    implementation 'io.github.classgraph:classgraph:4.8.25'
 
     testCompile project(":consumer:pact-jvm-consumer-groovy")
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
