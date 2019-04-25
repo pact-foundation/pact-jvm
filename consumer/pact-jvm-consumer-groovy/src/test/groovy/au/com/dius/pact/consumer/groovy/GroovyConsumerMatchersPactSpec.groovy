@@ -109,7 +109,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
   }
 
   def 'matching on query parameters'() {
@@ -136,7 +136,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
   }
 
   def 'matching with and and or'() {
@@ -169,6 +169,6 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
   }
 }

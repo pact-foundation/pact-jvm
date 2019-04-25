@@ -19,6 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class MatchingTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(MatchingTest.class);
@@ -146,13 +149,14 @@ public class MatchingTest {
                 LOGGER.error(e.getMessage(), e);
                 throw e;
             }
+            return true;
         });
 
         if (result instanceof PactVerificationResult.Error) {
             throw new RuntimeException(((PactVerificationResult.Error)result).getError());
         }
 
-        Assert.assertEquals(PactVerificationResult.Ok.INSTANCE, result);
+        assertThat(result, is(instanceOf(PactVerificationResult.Ok.class)));
     }
 
     private PactDslResponse buildPactFragment(PactDslJsonBody body, PactDslJsonBody responseBody, String description) {

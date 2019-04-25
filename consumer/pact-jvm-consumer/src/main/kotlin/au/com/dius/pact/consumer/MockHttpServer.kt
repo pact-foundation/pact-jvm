@@ -53,13 +53,13 @@ interface MockServer {
   /**
    * This will start the mock server and execute the test function. Returns the result of running the test.
    */
-  fun runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun):
+  fun <R> runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun<R>):
           PactVerificationResult
 
   /**
    * Returns the results of validating the mock server state
    */
-  fun validateMockServerState(): PactVerificationResult
+  fun validateMockServerState(testResult: Any?): PactVerificationResult
 }
 
 abstract class BaseMockServer(
@@ -109,8 +109,7 @@ abstract class BaseMockServer(
   }
 
   private fun generatePactResponse(request: Request): Response {
-    val matchResult = requestMatcher.matchInteraction(request)
-    when (matchResult) {
+    when (val matchResult = requestMatcher.matchInteraction(request)) {
       is FullRequestMatch -> {
         val interaction = matchResult.interaction as RequestResponseInteraction
         matchedRequests.add(interaction.request)
@@ -170,23 +169,33 @@ abstract class BaseMockServer(
     initServer()
   }
 
-  override fun runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun):
+  override fun <R> runAndWritePact(pact: RequestResponsePact, pactVersion: PactSpecVersion, testFn: PactTestRun<R>):
           PactVerificationResult {
     start()
     waitForServer()
 
     val context = PactTestExecutionContext()
+    val testResult: R
     try {
-      testFn.run(this, context)
+      testResult = testFn.run(this, context)
       sleep(100) // give the mock server some time to have consistent state
     } catch (e: Throwable) {
       logger.debug(e) { "Caught exception in mock server" }
-      return PactVerificationResult.Error(e, validateMockServerState())
+      return PactVerificationResult.Error(e, validateMockServerState(null))
     } finally {
       stop()
     }
 
-    val result = validateMockServerState()
+    return verifyResultAndWritePact(testResult, context, pact, pactVersion)
+  }
+
+  fun <R> verifyResultAndWritePact(
+    testResult: R,
+    context: PactTestExecutionContext,
+    pact: RequestResponsePact,
+    pactVersion: PactSpecVersion
+  ): PactVerificationResult {
+    val result = validateMockServerState(testResult)
     if (result is PactVerificationResult.Ok) {
       val pactDirectory = context.pactFolder
       val pactFile = pact.fileForPact(pactDirectory)
@@ -197,7 +206,7 @@ abstract class BaseMockServer(
     return result
   }
 
-  override fun validateMockServerState(): PactVerificationResult {
+  override fun validateMockServerState(testResult: Any?): PactVerificationResult {
     if (mismatchedRequests.isNotEmpty()) {
       return PactVerificationResult.Mismatches(mismatchedRequests.values.flatten())
     }
@@ -208,7 +217,7 @@ abstract class BaseMockServer(
     if (expectedRequests.isNotEmpty()) {
       return PactVerificationResult.ExpectedButNotReceived(expectedRequests)
     }
-    return PactVerificationResult.Ok
+    return PactVerificationResult.Ok(testResult)
   }
 
   fun waitForServer() {

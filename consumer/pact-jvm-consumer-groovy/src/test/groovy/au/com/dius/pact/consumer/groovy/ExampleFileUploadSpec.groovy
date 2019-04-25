@@ -42,7 +42,7 @@ class ExampleFileUploadSpec extends Specification {
         }
 
         then:
-        result == PactVerificationResult.Ok.INSTANCE
+        result instanceof PactVerificationResult.Ok
     }
 
 }

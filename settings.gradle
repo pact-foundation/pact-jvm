@@ -10,11 +10,14 @@ project(':core:pact-jvm-core-pact-broker').projectDir = file('core/pact-broker')
 project(':core:pact-jvm-core-model').projectDir = file('core/model')
 project(':core:pact-jvm-core-matchers').projectDir = file('core/matchers')
 
-include   'consumer:pact-jvm-consumer'
-include   'consumer:pact-jvm-consumer-groovy'
-include   'consumer:pact-jvm-consumer-java8'
-include   'consumer:pact-jvm-consumer-junit'
-include   'consumer:pact-jvm-consumer-junit5'
+include 'consumer:pact-jvm-consumer'
+include 'consumer:pact-jvm-consumer-groovy'
+include 'consumer:pact-jvm-consumer-java8'
+include 'consumer:pact-jvm-consumer-junit'
+include 'consumer:pact-jvm-consumer-junit5'
+
+include 'consumer:pact-jvm-consumer-specs2_2.12'
+project(':consumer:pact-jvm-consumer-specs2_2.12').projectDir = file('consumer/pact-jvm-consumer-specs2')
 
 include   'provider:pact-jvm-provider'
 include   'provider:pact-jvm-provider-gradle'
@@ -27,10 +30,12 @@ if (JavaVersion.current().isJava8()) {
   include 'provider:pact-jvm-provider-lein'
 }
 
-//include   'pact-jvm-consumer-specs2'
-//include   'pact-jvm-provider-specs2'
-//include   'pact-jvm-provider-scalatest'
-//include   'pact-jvm-server'
-//include   'pact-jvm-provider-scalasupport'
+include   'provider:pact-jvm-provider-specs2_2.12'
+project(':provider:pact-jvm-provider-specs2_2.12').projectDir = file('provider/pact-jvm-provider-specs2')
+include   'provider:pact-jvm-provider-scalatest_2.12'
+project(':provider:pact-jvm-provider-scalatest_2.12').projectDir = file('provider/pact-jvm-provider-scalatest')
+include   'provider:pact-jvm-provider-scalasupport_2.12'
+project(':provider:pact-jvm-provider-scalasupport_2.12').projectDir = file('provider/pact-jvm-provider-scalasupport')
 
+//include   'pact-jvm-server'
 include   'pact-specification-test'

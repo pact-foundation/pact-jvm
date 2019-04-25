@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer.junit
 import au.com.dius.pact.consumer.Pact
 import au.com.dius.pact.consumer.PactMismatchesException
 import au.com.dius.pact.consumer.PactVerificationResult
+import au.com.dius.pact.consumer.PactVerificationResult.Ok
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.messaging.MessagePact
 
@@ -48,9 +49,9 @@ object JUnitTestSupport {
 
   @JvmStatic
   fun validateMockServerResult(result: PactVerificationResult) {
-    if (result != PactVerificationResult.Ok) {
+    if (result !is Ok) {
       if (result is PactVerificationResult.Error) {
-        if (result.mockServerState !== PactVerificationResult.Ok) {
+        if (result.mockServerState !is Ok) {
           throw AssertionError("Pact Test function failed with an exception, possibly due to " + result.mockServerState, result.error)
         } else {
           throw AssertionError("Pact Test function failed with an exception: " + result.error.message, result.error)

@@ -43,7 +43,7 @@ class ExampleGroovyConsumerV3PactTest {
             def data = aliceResponse.data.text()
             assert data == '"That is some good Mallory."'
         }
-        assert result == PactVerificationResult.Ok.INSTANCE
+        assert result instanceof PactVerificationResult.Ok
 
       def pactFile = new File("${PactConsumerConfig.INSTANCE.pactDirectory}/V3Consumer-V3Service.json")
       def json = new JsonSlurper().parse(pactFile)

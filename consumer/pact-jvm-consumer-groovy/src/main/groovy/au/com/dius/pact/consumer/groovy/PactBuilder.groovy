@@ -354,11 +354,12 @@ class PactBuilder extends BaseBuilder {
    * @param options Optional map of options for the run
    * @param closure
    */
+  @SuppressWarnings('InvertedIfElse')
   void runTestAndVerify(Map options = [:], Closure closure) {
     PactVerificationResult result = runTest(options, closure)
-    if (result != PactVerificationResult.Ok.INSTANCE) {
+    if (!(result instanceof PactVerificationResult.Ok)) {
       if (result instanceof PactVerificationResult.Error) {
-        if (result.mockServerState != PactVerificationResult.Ok.INSTANCE) {
+        if (!(result.mockServerState instanceof PactVerificationResult.Ok)) {
           throw new AssertionError('Pact Test function failed with an exception, possibly due to ' +
             result.mockServerState, result.error)
         } else {

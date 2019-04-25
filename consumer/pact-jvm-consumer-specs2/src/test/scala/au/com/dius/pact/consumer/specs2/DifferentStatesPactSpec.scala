@@ -2,8 +2,7 @@ package au.com.dius.pact.consumer.specs2
 
 import java.util.concurrent.TimeUnit.MILLISECONDS
 
-import au.com.dius.pact.consumer.PactSpec
-import au.com.dius.pact.model.PactFragment
+import au.com.dius.pact.core.model.Consumer
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -19,7 +18,7 @@ class DifferentStatesPactSpec extends Specification with PactSpec {
 
   val timeout = Duration(5000, MILLISECONDS)
 
-  override def is = PactFragment.consumer(consumer).hasPactWith(provider)
+  override def is = PactFragmentBuilder(new Consumer(consumer)).hasPactWith(provider)
     .given("foo_state")
     .given("bar state", Map("ValueA" -> "A"))
     .uponReceiving("a request for foo")
@@ -33,10 +32,10 @@ class DifferentStatesPactSpec extends Specification with PactSpec {
     .uponReceiving("a stateless request for foobar")
       .matching(path = "/foobar")
       .willRespondWith(maybeBody = Some("{}"))
-    .withConsumerTest(providerConfig => {
-      val optionsResult = ConsumerService(providerConfig.url).options("/")
-      val simpleGet = ConsumerService(providerConfig.url).simpleGet("/foo")
-      val simpleStatelessGet = ConsumerService(providerConfig.url).simpleGet("/foobar")
+    .withConsumerTest((mockServer, _) => {
+      val optionsResult = ConsumerService(mockServer.getUrl).options("/")
+      val simpleGet = ConsumerService(mockServer.getUrl).simpleGet("/foo")
+      val simpleStatelessGet = ConsumerService(mockServer.getUrl).simpleGet("/foobar")
       Await.result(optionsResult, timeout) must be_==(200, "",
         Map("Content-Length" -> "0", "Connection" -> "keep-alive", "Option" -> "Value-X")) and
         (Await.result(simpleGet, timeout) must be_==(200, "{}")) and

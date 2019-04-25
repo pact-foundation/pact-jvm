@@ -1,20 +1,29 @@
-package au.com.dius.pact.consumer
+package au.com.dius.pact.consumer.specs2
 
-import au.com.dius.pact.core.model.Interaction
-import au.com.dius.pact.core.matchers.{BodyMismatch, HeaderMismatch, Mismatch}
-import au.com.dius.pact.core.model.{RequestResponseInteraction, _}
-import au.com.dius.pact.core.matchers.{CookieMismatch, MethodMismatch, PartialRequestMatch, PathMismatch}
+import au.com.dius.pact.consumer.PactVerificationResult
+import au.com.dius.pact.consumer.PactVerificationResult.{Error, ExpectedButNotReceived, Mismatches, Ok, PartialMismatch, UnexpectedRequest}
+import au.com.dius.pact.core.matchers._
+import au.com.dius.pact.core.model.Request
 import difflib.DiffUtils
 import groovy.json.JsonOutput
+
 import scala.collection.JavaConverters._
 
-@Deprecated
 object PrettyPrinter {
   //TODO: allow configurable context lines
   val defaultContextLines = 3
 
-  def print(session: PactSessionResults): String = {
-    printAlmost(session.almostMatched) + printMissing(session.missing) + printUnexpected(session.unexpected)
+  def print(mismatches: Seq[PactVerificationResult]): String = {
+    mismatches.flatMap(m => {
+      m match {
+        case r: Ok => List()
+        case r: PartialMismatch => List(PrettyPrinter.printProblem(r.getMismatches.asScala))
+        case e: Mismatches => print(e.getMismatches.asScala)
+        case e: Error => List(s"Test failed with an exception: ${e.getError.getMessage}")
+        case u: UnexpectedRequest => printUnexpected(List(u.getRequest))
+        case u: ExpectedButNotReceived => printMissing(u.getExpectedRequests.asScala)
+      }
+    }).mkString("\n")
   }
 
   def printDiff(label: String, expected: List[String], actual: List[String], contextLines: Int = defaultContextLines): Seq[String] = {
@@ -44,7 +53,7 @@ object PrettyPrinter {
     printDiff(label, stringify(anyToString(expected)), stringify(anyToString(actual)))
   }
 
-  def printProblem(interaction:Interaction, partial: Seq[Mismatch]): String = {
+  def printProblem(partial: Seq[Mismatch]): String = {
     partial.flatMap {
       case hm: HeaderMismatch => printStringMismatch("Header " + hm.getHeaderKey, hm.getExpected, hm.getActual)
       case bm: BodyMismatch => printStringMismatch("Body",
@@ -56,23 +65,11 @@ object PrettyPrinter {
     }.mkString("\n")
   }
 
-  def printAlmost(almost: List[PartialRequestMatch]): String = {
-
-    def partialRequestMatch(p: PartialRequestMatch): Iterable[String] = {
-      val map = p.getProblems.asScala.mapValues(_.asScala.toSeq)
-      map.flatMap {
-        case (_, Nil) => None
-        case (i, mismatches) => Some(printProblem(i, mismatches))
-      }
-    }
-    almost.flatMap(partialRequestMatch).mkString("\n")
-  }
-
-  def printMissing(missing: List[Interaction]) = {
+  def printMissing(missing: Seq[Request]) = {
     if(missing.isEmpty) {
       ""
     } else {
-      s"missing:\n ${missing.map(_.asInstanceOf[RequestResponseInteraction].getRequest).mkString("\n")}"
+      s"missing:\n ${missing.mkString("\n")}"
     }
   }
 

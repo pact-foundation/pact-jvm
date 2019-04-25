@@ -1,10 +1,10 @@
-package au.com.dius.pact.consumer
+package au.com.dius.pact.consumer.specs2
 
+import au.com.dius.pact.consumer.{MockHttpServer, MockHttpServerKt, PactTestExecutionContext}
 import au.com.dius.pact.consumer.dsl.DslPart
-import au.com.dius.pact.consumer.specs2.VerificationResultAsResult
+import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.model._
 import au.com.dius.pact.core.model.matchingrules.{MatchingRules, MatchingRulesImpl}
-import au.com.dius.pact.model._
 import org.specs2.mutable.Specification
 import org.specs2.specification.core.Fragments
 
@@ -12,20 +12,21 @@ import scala.collection.JavaConverters._
 
 trait UnitSpecsSupport extends Specification {
 
-  def pactFragment: PactFragment
+  def pactFragment: RequestResponsePact
 
-  protected lazy val pact = pactFragment.toPact
+  protected lazy val pact = pactFragment
   protected val providerConfig = MockProviderConfig.createDefault(PactSpecVersion.V3)
-  protected val server = DefaultMockProvider(providerConfig)
-  protected val consumerPactRunner = new ConsumerPactRunner(server)
+  protected val server = new MockHttpServer(pact, providerConfig)
+  protected val context = new PactTestExecutionContext()
 
   override def map(fragments: => Fragments) = {
-    step(server.start(pact)) ^
+    step(server.start()) ^
+    step(server.waitForServer()) ^
       fragments ^
       step(server.stop()) ^
       fragmentFactory.example(
         "Should match all mock server records",
-        VerificationResultAsResult(consumerPactRunner.writePact(pact, PactSpecVersion.V3))
+        VerificationResultAsResult(server.verifyResultAndWritePact(true, context, pact, PactSpecVersion.V3))
       )
   }
 
@@ -61,6 +62,9 @@ trait UnitSpecsSupport extends Specification {
   def buildInteraction(description: String, states: List[ProviderState], request: Request, response: Response): RequestResponseInteraction =
     new RequestResponseInteraction(description, states.asJava, request, response)
 
-  def buildPactFragment(consumer: String, provider: String, interactions: List[RequestResponseInteraction]): PactFragment =
-    new PactFragment(new Consumer(consumer), new Provider(provider), interactions)
+  def buildPactFragment(consumer: String, provider: String, interactions: List[RequestResponseInteraction]): RequestResponsePact =
+    new RequestResponsePact(new Provider(provider), new Consumer(consumer), interactions.asJava)
+
+  def description(pact: RequestResponsePact) = s"Consumer '${pact.getConsumer.getName}' has a pact with Provider '${pact.getProvider.getName}': " +
+    pact.getInteractions.asScala.map { i => i.getDescription }.mkString(" and ") + sys.props("line.separator")
 }

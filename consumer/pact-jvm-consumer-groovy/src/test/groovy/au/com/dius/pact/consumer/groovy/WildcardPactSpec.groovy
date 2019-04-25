@@ -58,7 +58,7 @@ class WildcardPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
     articleService.interactions.size() == 1
     articleService.interactions[0].response.matchingRules.rulesForCategory('body').matchingRules.keySet() == [
       '$.articles',
@@ -115,7 +115,7 @@ class WildcardPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
     articleService.interactions.size() == 1
     articleService.interactions[0].response.matchingRules.rulesForCategory('body').matchingRules.keySet() == [
       '$.events',

@@ -1,7 +1,11 @@
+plugins {
+    id 'scala'
+}
 
 dependencies {
-    compile project(":pact-jvm-provider"),
-            project(":pact-jvm-provider-scalasupport"),
-            "org.scalatest:scalatest_${project.scalaVersion}:${project.scalatestVersion}"
-    testCompile project(":pact-jvm-consumer")
+    compile project(":provider:pact-jvm-provider"),
+            project(":provider:pact-jvm-provider-scalasupport_2.12"),
+            "org.scalatest:scalatest_2.12:${project.scalaTestVersion}"
+
+    testCompile project(":consumer:pact-jvm-consumer")
 }

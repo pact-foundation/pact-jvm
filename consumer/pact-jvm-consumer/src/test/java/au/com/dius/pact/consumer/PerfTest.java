@@ -59,6 +59,8 @@ public class PerfTest {
       }
       stopWatch.split();
       System.out.println("After Test: " + stopWatch.getSplitTime());
+
+      return true;
     });
 
     stopWatch.split();

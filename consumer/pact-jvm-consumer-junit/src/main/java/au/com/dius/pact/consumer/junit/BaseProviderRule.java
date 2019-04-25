@@ -163,6 +163,8 @@ public class BaseProviderRule extends ExternalResource {
         if (pactFolder != null) {
           context.setPactFolder(pactFolder.value());
         }
+
+        return null;
       });
   }
 

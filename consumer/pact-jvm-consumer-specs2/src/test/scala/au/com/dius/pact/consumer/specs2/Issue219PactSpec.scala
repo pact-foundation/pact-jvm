@@ -2,7 +2,6 @@ package au.com.dius.pact.consumer.specs2
 
 import java.util.concurrent.TimeUnit.MILLISECONDS
 
-import au.com.dius.pact.consumer.PactSpec
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -21,8 +20,8 @@ class Issue219PactSpec extends Specification with PactSpec {
   override def is = uponReceiving("add a broker")
     .matching(path = "/api/broker/add", query = "options=delete.topic.enable%3Dtrue&broker=1")
     .willRespondWith(maybeBody = Some("{}"))
-    .withConsumerTest(providerConfig => {
-      val get = ConsumerService(providerConfig.url).simpleGet("/api/broker/add", "options=delete.topic.enable%3Dtrue&broker=1")
+    .withConsumerTest((mockServer, _) => {
+      val get = ConsumerService(mockServer.getUrl).simpleGet("/api/broker/add", "options=delete.topic.enable%3Dtrue&broker=1")
       Await.result(get, timeout) must be_==(200, "{}")
     })
 

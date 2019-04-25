@@ -1,14 +1,17 @@
+plugins {
+    id 'scala'
+}
 
 dependencies {
-    compile project(":pact-jvm-provider"),
-            project(":pact-jvm-provider-scalasupport"),
-            "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}"
-    testCompile project(":pact-jvm-consumer")
-    compile "org.scala-lang:scala-library:${project.scalaFullVersion}"
-    compile("com.typesafe.scala-logging:scala-logging_${project.scalaVersion}:3.7.2") {
+    compile project(":provider:pact-jvm-provider"),
+            project(":provider:pact-jvm-provider-scalasupport_2.12")
+    compile "org.specs2:specs2-core_2.12:${project.specs2Version}"
+    compile "org.scala-lang:scala-library:${project.scalaVersion}"
+    compile("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {
         exclude group: 'org.scala-lang'
     }
 
-    testCompile "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}",
-      "org.specs2:specs2-junit_${project.scalaVersion}:${project.specs2Version}"
+    testCompile project(":consumer:pact-jvm-consumer")
+    testCompile "org.specs2:specs2-core_2.12:${project.specs2Version}",
+      "org.specs2:specs2-junit_2.12:${project.specs2Version}"
 }

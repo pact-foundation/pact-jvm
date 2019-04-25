@@ -41,7 +41,7 @@ class ProviderStateInjectedPactTest {
       assert response.status == 200
       assert response.data == [userName: 'Test', userId: 100]
     }
-    assert result == PactVerificationResult.Ok.INSTANCE
+    assert result instanceof PactVerificationResult.Ok
 
     def pactFile = new File("${PactConsumerConfig.pactDirectory}/V3Consumer-ProviderStateService.json")
     def json = new JsonSlurper().parse(pactFile)

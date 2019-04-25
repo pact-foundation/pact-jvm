@@ -5,8 +5,6 @@ import au.com.dius.pact.consumer.model.MockProviderConfig;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import org.apache.http.entity.ContentType;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +14,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 
 public class MimeTypeTest {
@@ -70,13 +71,14 @@ public class MimeTypeTest {
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
             }
+            return true;
         });
 
         if (result instanceof PactVerificationResult.Error) {
             throw new RuntimeException(((PactVerificationResult.Error)result).getError());
         }
 
-        Assert.assertEquals(PactVerificationResult.Ok.INSTANCE, result);
+        assertThat(result, is(instanceOf(PactVerificationResult.Ok.class)));
     }
 
     private RequestResponsePact buildPact(String body, String responseBody, String description, ContentType contentType) {

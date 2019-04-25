@@ -33,7 +33,7 @@ class AltPactWithUnitSupportSpec extends Specification with PactSpec with UnitSp
     )
   )
 
-  pactFragment.description >> {
+  description(pactFragment) >> {
     "GET returns a 200 status and empty body" >> {
       val simpleGet = ConsumerService(providerConfig.url).simpleGet("/foo")
       Await.result(simpleGet, timeout) must be_==(200, "{}")

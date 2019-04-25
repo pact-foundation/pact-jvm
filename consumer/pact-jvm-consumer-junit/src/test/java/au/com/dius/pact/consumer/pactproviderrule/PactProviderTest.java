@@ -73,7 +73,7 @@ public class PactProviderTest {
           "<{responsetest=true, name=harry}> but was:<{responsetest=true, name=fred}>"));
         assertThat(result, is(instanceOf(PactVerificationResult.Error.class)));
         PactVerificationResult.Error error = (PactVerificationResult.Error) result;
-        assertThat(error.getMockServerState(), is(instanceOf(PactVerificationResult.Ok.INSTANCE.getClass())));
+        assertThat(error.getMockServerState(), is(instanceOf(PactVerificationResult.Ok.class)));
         assertThat(error.getError(), is(instanceOf(AssertionError.class)));
       });
       Assert.assertEquals(new ConsumerClient(mockTestProvider.getUrl()).options("/second"), 200);

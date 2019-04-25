@@ -2,7 +2,6 @@ package au.com.dius.pact.consumer.specs2
 
 import java.util.concurrent.TimeUnit.MILLISECONDS
 
-import au.com.dius.pact.consumer.PactSpec
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import org.json.JSONObject
 import org.junit.runner.RunWith
@@ -21,8 +20,8 @@ class ExamplePactWithMatchersSpec extends Specification with PactSpec {
   val timeout = Duration(5000, MILLISECONDS)
 
   val body = new PactDslJsonBody()
-    .stringMatcher("foo", "\\d{1,9}")
-    .stringMatcher("bar", "[aA]+")
+    .stringMatcher("foo", "\\d{1,9}", "100")
+    .stringMatcher("bar", "[aA]+", "aaAA")
 
   override def is = uponReceiving("a request for foo with a body")
       .matching(path = "/foo")
@@ -31,8 +30,8 @@ class ExamplePactWithMatchersSpec extends Specification with PactSpec {
         headers = Map.empty[String, List[String]],
         bodyAndMatchers = body
       )
-    .withConsumerTest(providerConfig => {
-      val (status, body) = Await.result(ConsumerService(providerConfig.url).simpleGet("/foo"), timeout)
+    .withConsumerTest((mockServer, _) => {
+      val (status, body) = Await.result(ConsumerService(mockServer.getUrl).simpleGet("/foo"), timeout)
       val bodyJson = new JSONObject(body)
 
       (status ==== 200) and

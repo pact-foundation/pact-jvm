@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -44,13 +47,14 @@ public class DirectDSLConsumerPactTest {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+            return null;
         });
 
         if (result instanceof PactVerificationResult.Error) {
             throw new RuntimeException(((PactVerificationResult.Error)result).getError());
         }
 
-        assertEquals(PactVerificationResult.Ok.INSTANCE, result);
+        assertThat(result, is(instanceOf(PactVerificationResult.Ok.class)));
     }
 
 }

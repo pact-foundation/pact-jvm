@@ -28,12 +28,15 @@ public abstract class ConsumerPactTest {
         RequestResponsePact pact = createPact(ConsumerPactBuilder.consumer(consumerName()).hasPactWith(providerName()));
         final MockProviderConfig config = MockProviderConfig.createDefault(getSpecificationVersion());
 
-        PactVerificationResult result = runConsumerTest(pact, config, this::runTest);
+        PactVerificationResult result = runConsumerTest(pact, config, (mockServer, context) -> {
+          runTest(mockServer, context);
+          return null;
+        });
 
-        if (!result.equals(PactVerificationResult.Ok.INSTANCE)) {
+        if (!(result instanceof PactVerificationResult.Ok)) {
             if (result instanceof PactVerificationResult.Error) {
               PactVerificationResult.Error error = (PactVerificationResult.Error) result;
-              if (error.getMockServerState() != PactVerificationResult.Ok.INSTANCE) {
+              if (!(error.getMockServerState() instanceof PactVerificationResult.Ok)) {
                 throw new AssertionError("Pact Test function failed with an exception, possibly due to " +
                   error.getMockServerState(), ((PactVerificationResult.Error) result).getError());
               } else {

@@ -16,7 +16,7 @@
                             (.status 200)
                             .toPact)
         config (-> (MockProviderConfig/createDefault))]
-    (is (= (PactVerificationResult$Ok/INSTANCE)
+    (is (instance? PactVerificationResult$Ok
         (ConsumerPactRunnerKt/runConsumerTest consumer-pact config
           (proxy [PactTestRun] []
             (run [mock-server _] (

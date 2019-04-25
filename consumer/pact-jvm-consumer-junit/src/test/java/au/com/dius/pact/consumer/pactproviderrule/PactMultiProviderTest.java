@@ -77,7 +77,7 @@ public class PactMultiProviderTest {
     public void allPass() throws IOException {
       mockTestProvider.validateResultWith((result, t) -> {
         assertThat(t, is(nullValue()));
-        assertThat(result, is(PactVerificationResult.Ok.INSTANCE));
+        assertThat(result, is(instanceOf(PactVerificationResult.Ok.class)));
       });
       doTest("/", NAME_LARRY_JSON);
     }
@@ -92,7 +92,7 @@ public class PactMultiProviderTest {
         PactVerificationResult.Error error = (PactVerificationResult.Error) result;
         assertThat(error.getError(), is(instanceOf(RuntimeException.class)));
         assertThat(error.getError().getMessage(), is("Oops"));
-        assertThat(error.getMockServerState(), is(PactVerificationResult.Ok.INSTANCE));
+        assertThat(error.getMockServerState(), is(instanceOf(PactVerificationResult.Ok.class)));
       });
       doTest("/", NAME_LARRY_JSON);
       throw new RuntimeException("Oops");

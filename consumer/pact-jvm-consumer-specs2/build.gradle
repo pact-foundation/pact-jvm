@@ -1,10 +1,15 @@
+plugins {
+    id 'scala'
+}
 
 dependencies {
-    compile project(":pact-jvm-consumer"),
-      "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}"
-    compile 'org.asynchttpclient:async-http-client:2.1.0-alpha24'
+    compile project(":consumer:pact-jvm-consumer")
+    compile "org.json:json:${project.jsonVersion}"
+    compile "org.specs2:specs2-core_2.12:${project.specs2Version}"
+    compile 'org.asynchttpclient:async-http-client:2.8.1'
+    compile 'org.scala-lang.modules:scala-java8-compat_2.12:0.9.0'
 
-    testCompile "org.specs2:specs2-junit_${project.scalaVersion}:${project.specs2Version}",
+    testCompile "org.specs2:specs2-junit_2.12:${project.specs2Version}",
       "ch.qos.logback:logback-core:${project.logbackVersion}",
       "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }

@@ -53,7 +53,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
   }
 
   @SuppressWarnings('LineLength')
@@ -87,7 +87,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
   }
 
   @SuppressWarnings('LineLength')
@@ -118,7 +118,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
   }
 
   @SuppressWarnings('LineLength')
@@ -142,7 +142,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
   }
 
   def 'pact broker navigation test'() {
@@ -191,6 +191,6 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
   }
 }

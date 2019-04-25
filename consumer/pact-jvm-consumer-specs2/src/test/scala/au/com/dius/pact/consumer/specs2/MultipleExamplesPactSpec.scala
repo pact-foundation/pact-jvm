@@ -25,9 +25,9 @@ class MultipleExamplesPactSpec extends Specification with PactSpec with UnitSpec
     .uponReceiving("an option request")
     .matching(path = "/", method = "OPTION")
     .willRespondWith(headers = Map("Option" -> List("Value-X")))
-    .asPactFragment()
+    .asPact()
 
-  pactFragment.description >> {
+  description(pactFragment) >> {
     "GET returns a 200 status and empty body" >> {
       val simpleGet = ConsumerService(providerConfig.url).simpleGet("/foo")
       Await.result(simpleGet, timeout) must be_==(200, "{}")

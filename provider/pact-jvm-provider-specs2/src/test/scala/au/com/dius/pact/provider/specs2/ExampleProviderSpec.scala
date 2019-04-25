@@ -1,7 +1,6 @@
 package au.com.dius.pact.provider.specs2
 
 import org.specs2.execute.Result
-
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 

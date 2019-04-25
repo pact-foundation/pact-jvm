@@ -1,4 +1,4 @@
-package au.com.dius.pact.consumer.dispatch
+package au.com.dius.pact.consumer.specs2.dispatch
 
 import java.nio.charset.Charset
 import java.util

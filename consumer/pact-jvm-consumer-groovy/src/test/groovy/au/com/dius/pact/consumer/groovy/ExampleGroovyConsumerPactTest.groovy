@@ -63,7 +63,7 @@ class ExampleGroovyConsumerPactTest {
             def data = aliceResponse.data.text()
             assert data == '"That is some good Mallory."'
         }
-        assert result == PactVerificationResult.Ok.INSTANCE
+        assert result instanceof PactVerificationResult.Ok
 
         result = bobService.runTest { mockServer, context ->
             def client = new RESTClient(mockServer.url)

@@ -292,8 +292,8 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, BeforeAllCallback, Pa
         val config = store["mockServerConfig"] as MockProviderConfig
         Thread.sleep(100) // give the mock server some time to have consistent state
         mockServer.close()
-        val result = mockServer.validateMockServerState()
-        if (result === PactVerificationResult.Ok) {
+        val result = mockServer.validateMockServerState(null)
+        if (result is PactVerificationResult.Ok) {
           logger.debug {
             "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file " +
               "${pact.fileForPact(pactDirectory)}"

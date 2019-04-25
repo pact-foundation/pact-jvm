@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.specs2
 
+import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.model.PactSpecVersion
-import au.com.dius.pact.model.MockProviderConfig
 import unfiltered.netty.cycle.{Plan, SynchronousExecution}
 import unfiltered.netty.{Server, ServerErrorResponse}
 import unfiltered.response.ResponseString

@@ -1,4 +1,4 @@
-package au.com.dius.pact.consumer
+package au.com.dius.pact.consumer.specs2
 
 import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch

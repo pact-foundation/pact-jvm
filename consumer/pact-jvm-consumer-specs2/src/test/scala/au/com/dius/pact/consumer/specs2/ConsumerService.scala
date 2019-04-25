@@ -2,7 +2,7 @@ package au.com.dius.pact.consumer.specs2
 
 import java.util.concurrent.Executors
 
-import au.com.dius.pact.consumer.dispatch.HttpClient
+import au.com.dius.pact.consumer.specs2.dispatch.HttpClient
 import au.com.dius.pact.core.model.{OptionalBody, PactReaderKt}
 import au.com.dius.pact.core.model.Request
 

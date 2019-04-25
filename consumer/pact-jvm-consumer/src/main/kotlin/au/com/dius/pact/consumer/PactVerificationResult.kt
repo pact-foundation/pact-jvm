@@ -6,7 +6,7 @@ import au.com.dius.pact.core.model.Request
 sealed class PactVerificationResult {
   open fun getDescription() = toString()
 
-  object Ok : PactVerificationResult()
+  data class Ok(val result: Any? = null) : PactVerificationResult()
 
   data class Error(val error: Throwable, val mockServerState: PactVerificationResult) : PactVerificationResult()
 
@@ -15,13 +15,13 @@ sealed class PactVerificationResult {
   data class Mismatches(val mismatches: List<PactVerificationResult>) : PactVerificationResult() {
     override fun getDescription(): String {
       return "The following mismatched requests occurred:\n" +
-        mismatches.map(PactVerificationResult::getDescription).joinToString("\n")
+        mismatches.joinToString("\n", transform = PactVerificationResult::getDescription)
     }
   }
 
   data class UnexpectedRequest(val request: Request) : PactVerificationResult() {
     override fun getDescription(): String {
-      return "Unexpected Request:\n" + request
+      return "Unexpected Request:\n$request"
     }
   }
 

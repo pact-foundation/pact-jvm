@@ -1,19 +1,19 @@
 package au.com.dius.pact.consumer;
 
-import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.consumer.model.MockProviderConfig;
+import au.com.dius.pact.core.model.RequestResponsePact;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.util.EntityUtils;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.Map;
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class PactQueryParameterTest {
     @Test
@@ -116,20 +116,19 @@ public class PactQueryParameterTest {
 
     private void verifyRequestMatches(RequestResponsePact pact, String fullPath) {
         MockProviderConfig config = MockProviderConfig.createDefault();
-        PactVerificationResult result = runConsumerTest(pact, config, new PactTestRun() {
-            @Override
-            public void run(@NotNull MockServer mockServer, PactTestExecutionContext context) throws IOException {
-                String uri = mockServer.getUrl() + "/" + fullPath;
+        PactVerificationResult result = runConsumerTest(pact, config, (mockServer, context) -> {
+            String uri = mockServer.getUrl() + "/" + fullPath;
 
-                Request.Get(uri).execute().handleResponse(httpResponse -> {
-                    String content = EntityUtils.toString(httpResponse.getEntity());
-                    if (httpResponse.getStatusLine().getStatusCode() == 500) {
-                        Map map = new ObjectMapper().readValue(content, Map.class);
-                        Assert.fail((String) map.get("error"));
-                    }
-                    return null;
-                });
-            }
+            Request.Get(uri).execute().handleResponse(httpResponse -> {
+                String content = EntityUtils.toString(httpResponse.getEntity());
+                if (httpResponse.getStatusLine().getStatusCode() == 500) {
+                    Map map = new ObjectMapper().readValue(content, Map.class);
+                    Assert.fail((String) map.get("error"));
+                }
+                return null;
+            });
+
+            return true;
         });
         if (result instanceof PactVerificationResult.Error) {
             Throwable error = ((PactVerificationResult.Error) result).getError();
@@ -139,6 +138,6 @@ public class PactQueryParameterTest {
                 throw new RuntimeException(error);
             }
         }
-        assertEquals(PactVerificationResult.Ok.INSTANCE, result);
+        assertThat(result, is(instanceOf(PactVerificationResult.Ok.class)));
     }
 }

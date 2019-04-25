@@ -6,9 +6,7 @@ package au.com.dius.pact.core.model
  * name - The provider state description
  * params - Provider state parameters as key value pairs
  */
-data class ProviderState(val name: String, val params: Map<String, Any> = mapOf()) {
-
-  constructor(name: String?) : this(name ?: "None")
+data class ProviderState @JvmOverloads constructor(val name: String, val params: Map<String, Any> = mapOf()) {
 
   fun toMap(): Map<String, Any> {
     val map = mutableMapOf<String, Any>("name" to name)
