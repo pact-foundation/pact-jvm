@@ -36,7 +36,6 @@ class MessageSpec extends Specification {
     Message message = Message.fromMap(map)
 
     then:
-    message.providerState == 'V3 state'
     message.providerStates == [new ProviderState('V3 state')]
   }
 
@@ -48,7 +47,6 @@ class MessageSpec extends Specification {
     Message message = Message.fromMap(map)
 
     then:
-    message.providerState == 'test state'
     message.providerStates == [new ProviderState('test state')]
   }
 
@@ -106,33 +104,6 @@ class MessageSpec extends Specification {
     interaction5 = new Message('description 4', [new ProviderState('state 5')])
   }
 
-  def 'messages do not conflict if they have different states'() {
-    expect:
-    !message1.conflictsWith(message2)
-
-    where:
-    message1 = new Message('description', [new ProviderState('state')])
-    message2 = new Message('description', [new ProviderState('state 2')])
-  }
-
-  def 'messages do not conflict if they have different descriptions'() {
-    expect:
-    !message1.conflictsWith(message2)
-
-    where:
-    message1 = new Message('description', [new ProviderState('state')])
-    message2 = new Message('description 2', [new ProviderState('state')])
-  }
-
-  def 'messages do not conflict if they are identical'() {
-    expect:
-    !message1.conflictsWith(message2)
-
-    where:
-    message1 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3'.bytes))
-    message2 = new Message('description', [new ProviderState('state')], OptionalBody.body('1 2 3'.bytes))
-  }
-
   @Unroll
   def 'message to map handles message content correctly'() {
     expect:
@@ -162,6 +133,28 @@ class MessageSpec extends Specification {
     'none'         | 'none'                     | 'application/json'
 
     message = new Message(metaData: [(key): contentType])
+  }
+
+  @Unroll
+  def 'format contents should handle content types correctly - #contentType'() {
+    expect:
+    message.formatContents() == result
+
+    where:
+
+    contentType                                | result
+    'application/json'                         | [a: 100.0, b: 'test']
+    'application/json;charset=UTF-8'           | [a: 100.0, b: 'test']
+    'application/json; charset\u003dUTF-8'     | [a: 100.0, b: 'test']
+    'application/hal+json; charset\u003dUTF-8' | [a: 100.0, b: 'test']
+    'text/plain'                               | '{"a": 100.0, "b": "test"}'
+    'application/octet-stream;charset=UTF-8'   | 'eyJhIjogMTAwLjAsICJiIjogInRlc3QifQ=='
+    'application/octet-stream'                 | 'eyJhIjogMTAwLjAsICJiIjogInRlc3QifQ=='
+    ''                                         | [a: 100.0, b: 'test']
+    null                                       | [a: 100.0, b: 'test']
+
+    message = new Message(metaData: ['contentType': contentType],
+      contents: OptionalBody.body('{"a": 100.0, "b": "test"}'.bytes))
   }
 
 }
