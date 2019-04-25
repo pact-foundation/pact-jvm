@@ -106,7 +106,15 @@ class MessagePactBuilder(
 
     val message = messages.last()
     val metadata = message.metaData ?: mutableMapOf()
-    metadata[CONTENT_TYPE] = ContentType.APPLICATION_JSON.toString()
+    val contentType = metadata.entries.find {
+      it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
+    }
+    if (contentType == null) {
+      metadata["contentType"] = ContentType.APPLICATION_JSON.toString()
+    } else {
+      metadata.remove(contentType.key)
+      metadata["contentType"] = contentType.value
+    }
 
     val parent = body.close()
     message.contents = OptionalBody.body(parent.toString().toByteArray())
@@ -122,11 +130,6 @@ class MessagePactBuilder(
   fun toPact() = MessagePact(provider, consumer, messages)
 
   companion object {
-    /**
-     * String constant "Content-type".
-     */
-    const val CONTENT_TYPE = "Content-Type"
-
     /**
      * Name the consumer of the pact
      *
