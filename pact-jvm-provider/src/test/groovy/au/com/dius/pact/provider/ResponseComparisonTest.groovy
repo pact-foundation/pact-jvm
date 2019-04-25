@@ -56,35 +56,4 @@ class ResponseComparisonTest {
     response = new Response(200, ['a': ['B']], OptionalBody.body(''.bytes))
     assert testSubject().headers == ['a': null]
   }
-
-  @Test
-  void 'comparing bodies should fail with different content types'() {
-    actualHeaders['Content-Type'] = ['text/plain']
-    assert testSubject().body == [comparison:
-      'Expected a response type of \'application/json\' but the actual type was \'text/plain\'']
-  }
-
-  @Test
-  void 'comparing bodies should pass with the same content types and body contents'() {
-    assert testSubject().body == [:]
-  }
-
-  @Test
-  void 'comparing bodies should pass when the order of elements in the actual response is different'() {
-    response = new Response(200, ['Content-Type': ['application/json']], OptionalBody.body(
-            '{"moar_stuff": {"a": "is also good", "b": "is even better"}, "stuff": "is good"}'.bytes))
-    actualBody = '{"stuff": "is good", "moar_stuff": {"b": "is even better", "a": "is also good"}}'
-    assert testSubject().body == [:]
-  }
-
-  @Test
-  void 'comparing bodies should show all the differences'() {
-    actualBody = '{"stuff": "should make the test fail"}'
-    def result = testSubject().body
-    assert result.comparison == [
-      '$.stuff': [[mismatch: "Expected 'is good' but received 'should make the test fail'", diff: '']]
-    ]
-    assert result.diff[1] == '-    "stuff": "is good"'
-    assert result.diff[2] == '+    "stuff": "should make the test fail"'
-  }
 }

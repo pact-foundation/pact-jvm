@@ -168,8 +168,9 @@ class ResponseComparison(
       }
     }
 
+    @JvmStatic
     private fun compareMessageBody(message: Message, actual: OptionalBody, expected: HttpPart): MutableList<BodyMismatch> {
-      val result = MatchingConfig.lookupBodyMatcher(message.contentType)
+      val result = MatchingConfig.lookupBodyMatcher(message.parsedContentType?.mimeType.orEmpty())
       var bodyMismatches = mutableListOf<BodyMismatch>()
       val actualMessage = Response(200, mapOf("Content-Type" to listOf(message.contentType)), actual)
       if (result != null) {
