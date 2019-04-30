@@ -5,9 +5,9 @@ jdk:
   - oraclejdk9
   - oraclejdk11
   - openjdk8
-  - openjdk9
-  - openjdk10
-  - openjdk11
+    #  - openjdk9
+    #  - openjdk10
+    #  - openjdk11
 env:
   - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT='-p core'
   - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT='-p consumer'
