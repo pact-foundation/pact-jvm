@@ -4,6 +4,21 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import java.net.InetSocketAddress
 
 /**
+ * Mock Server Implementation
+ */
+enum class MockServerImplementation {
+  /**
+   * Uses the Java HTTP server that comes with the JDK
+   */
+  JavaHttpServer,
+
+  /**
+   * Uses the KTor server framework
+   */
+  KTorServer
+}
+
+/**
  * Configuration of the Pact Mock Server.
  *
  * By default this class will setup the configuration for a http mock server running on
@@ -13,7 +28,8 @@ open class MockProviderConfig @JvmOverloads constructor (
   open val hostname: String = LOCALHOST,
   open val port: Int = 0,
   open val pactVersion: PactSpecVersion = PactSpecVersion.V3,
-  open val scheme: String = HTTP
+  open val scheme: String = HTTP,
+  open val mockServerImplementation: MockServerImplementation = MockServerImplementation.JavaHttpServer
 ) {
 
   fun url() = "$scheme://$hostname:$port"

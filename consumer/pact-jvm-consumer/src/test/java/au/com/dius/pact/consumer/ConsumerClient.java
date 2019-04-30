@@ -34,6 +34,9 @@ public class ConsumerClient {
                 .addHeader("testreqheader", "testreqheadervalue")
                 .bodyString(body, mimeType)
                 .execute().returnContent().asString();
+
+
+
         return jsonToMap(respBody);
     }
 

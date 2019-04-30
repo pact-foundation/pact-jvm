@@ -10,10 +10,13 @@ dependencies {
     compile "org.apache.httpcomponents:httpmime:${project.httpClientVersion}"
     compile "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}"
     implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
+    implementation 'io.ktor:ktor-server-netty:1.1.4'
+    implementation "io.ktor:ktor-network-tls:1.1.4"
 
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile 'org.cthul:cthul-matchers:1.1.0'
     testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+    testCompile "org.junit.jupiter:junit-jupiter-params:${project.junit5Version}"
     testCompile "org.codehaus.groovy:groovy-dateutil:${project.groovyVersion}:indy"
     testCompile 'org.hamcrest:hamcrest:2.1'
 }
