@@ -1,9 +1,12 @@
 package au.com.dius.pact.server
 
-import au.com.dius.pact.consumer.DefaultMockProvider
+import java.io.IOException
+import java.net.ServerSocket
+
+import au.com.dius.pact.consumer.model.{MockHttpsKeystoreProviderConfig, MockProviderConfig}
 import au.com.dius.pact.core.model._
-import au.com.dius.pact.model._
 import com.typesafe.scalalogging.StrictLogging
+import org.apache.commons.lang3.RandomUtils
 
 import scala.collection.JavaConverters._
 
@@ -14,13 +17,12 @@ object Create extends StrictLogging {
 
     val mockConfig : MockProviderConfig = {
       if(!config.keystorePath.isEmpty) {
-
         MockHttpsKeystoreProviderConfig
           .httpsKeystoreConfig(config.host, config.sslPort, config.keystorePath, config.keystorePassword,
             PactSpecVersion.fromInt(config.pactVersion))
       }
       else {
-        MockProviderConfig.create(config.host, config.portLowerBound, config.portUpperBound,
+        new MockProviderConfig(config.host, randomPort(config.portLowerBound, config.portUpperBound),
           PactSpecVersion.fromInt(config.pactVersion))
       }
     }
@@ -61,5 +63,41 @@ object Create extends StrictLogging {
     } else None
 
     result getOrElse clientError
+  }
+
+  def randomPort(lower: Int, upper: Int): Int = {
+    var port: Integer = null
+    var count = 0
+    while (port == null && count < 20) {
+      val randomPort = RandomUtils.nextInt(lower, upper)
+      if (portAvailable(randomPort)) {
+        port = randomPort
+      }
+      count += 1
+    }
+
+    if (port == null) {
+      port = 0
+    }
+
+    port
+  }
+
+  private def portAvailable(p: Int): Boolean = {
+    var socket: ServerSocket = null
+    try {
+      socket = new ServerSocket(p)
+      true
+    } catch {
+      case _: IOException => false
+    } finally {
+      if (socket != null) {
+        try {
+          socket.close()
+        } catch {
+          case _: IOException => {}
+        }
+      }
+    }
   }
 }

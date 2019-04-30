@@ -1,12 +1,19 @@
-apply plugin:'application'
+plugins {
+    id 'scala'
+    id 'application'
+}
 
 mainClassName = 'au.com.dius.pact.server.Server'
 
 dependencies {
-    compile project(":pact-jvm-consumer")
+    compile project(":consumer:pact-jvm-consumer")
     compile "ch.qos.logback:logback-core:${project.logbackVersion}",
       "ch.qos.logback:logback-classic:${project.logbackVersion}",
-      "com.github.scopt:scopt_${project.scalaVersion}:3.5.0"
+      "com.github.scopt:scopt_2.12:3.5.0"
+    compile("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {
+        exclude group: 'org.scala-lang'
+    }
+    compile "ws.unfiltered:unfiltered-netty-server_2.12:0.9.1"
 }
 
 jar {

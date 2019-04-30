@@ -1,6 +1,5 @@
 package au.com.dius.pact.server
 
-import au.com.dius.pact.model.unfiltered.Conversions
 import io.netty.channel.ChannelHandler.Sharable
 import unfiltered.netty.ReceivedMessage
 import unfiltered.netty.ServerErrorResponse

@@ -1,10 +1,11 @@
 package au.com.dius.pact.server
 
-import au.com.dius.pact.consumer._
-import au.com.dius.pact.core.model.{OptionalBody, Response}
-import au.com.dius.pact.core.model._
+import java.io.File
+
+import au.com.dius.pact.core.model.{Interaction, OptionalBody, Pact, PactSpecVersion, PactWriter, Request, RequestResponseInteraction, RequestResponsePact, Response}
 
 import scala.collection.JavaConverters._
+import scala.util.Success
 
 object Complete {
 
@@ -32,7 +33,7 @@ object Complete {
     } yield {
       mockProvider.stop()
 
-      ConsumerPactRunner.writeIfMatching(pact, sessionResults, mockProvider.config.getPactVersion) match {
+      writeIfMatching(pact, sessionResults, mockProvider.config.getPactVersion) match {
         case PactVerified => pactWritten(new Response(200, ResponseUtils.CrossSiteHeaders.asJava),
           mockProvider.config.getPort.toString)
         case error => pactWritten(new Response(400,
@@ -43,5 +44,19 @@ object Complete {
 
     result getOrElse clientError
   }
+
+  def writeIfMatching(pact: Pact[RequestResponseInteraction], results: PactSessionResults, pactVersion: PactSpecVersion) = {
+    if (results.allMatched) {
+      val pactFile = destinationFileForPact(pact)
+      PactWriter.writePact(pactFile, pact, pactVersion)
+    }
+    VerificationResult(Success(results))
+  }
+
+  def defaultFilename[I <: Interaction](pact: Pact[RequestResponseInteraction]): String = s"${pact.getConsumer.getName}-${pact.getProvider.getName}.json"
+
+  def destinationFileForPact[I <: Interaction](pact: Pact[RequestResponseInteraction]): File = destinationFile(defaultFilename(pact))
+
+  def destinationFile(filename: String) = new File(s"${System.getProperty("pact.rootDir", "target/pacts")}/$filename")
 
 }

@@ -1,6 +1,5 @@
 package au.com.dius.pact.server
 
-import au.com.dius.pact.consumer.StatefulMockProvider
 import au.com.dius.pact.core.model.{Request, Response, _}
 
 import scala.collection.JavaConverters._
@@ -8,14 +7,14 @@ import scala.collection.JavaConverters._
 object RequestRouter {
   def matchPath(request: Request, oldState: ServerState): Option[StatefulMockProvider[RequestResponseInteraction]] =
     (for {
-      k <- oldState.keys if (request.getPath.startsWith(k))
+      k <- oldState.keys if request.getPath.startsWith(k)
       pact <- oldState.get(k)
     } yield pact).headOption
 
   def handlePactRequest(request: Request, oldState: ServerState): Option[Response] =
-    (for {
+    for {
       pact <- matchPath(request, oldState)
-    } yield pact.handleRequest(request)).headOption
+    } yield pact.handleRequest(request)
 
   def state404(request: Request, oldState: ServerState): String =
     (oldState + ("path" -> request.getPath)).mkString(",\n")
