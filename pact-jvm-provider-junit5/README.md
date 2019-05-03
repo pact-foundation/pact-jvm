@@ -45,6 +45,22 @@ For example:
   }
 ```
 
+**Note for Maven users:** If you use Maven to run your tests, you will have to make sure that the Maven Surefire plugin is at least
+  version 2.22.1 uses an isolated classpath.
+
+For example, configure it by adding the following to your POM: 
+
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <version>2.22.1</version>
+    <configuration>
+        <useSystemClassLoader>false</useSystemClassLoader>
+    </configuration>
+</plugin>
+```
+
 ## Provider State Methods
 
 Provider State Methods work in the same way as with JUnit 4 tests, refer to the [Pact junit runner](../pact-jvm-provider-junit/README.md) docs.

@@ -344,6 +344,22 @@ _Version 3.2.2/2.4.3+_ you can also specify the protocol, defaults to "http".
 `au.com.dius.pact.provider.junit.target.AmqpTarget` - out-of-the-box implementation of `au.com.dius.pact.provider.junit.target.Target`
 that will play pacts as an AMQP message and assert response from service by matching rules from pact.
 
+**Note for Maven users:** If you use Maven to run your tests, you will have to make sure that the Maven Surefire plugin is at least
+  version 2.22.1 uses an isolated classpath.
+
+For example, configure it by adding the following to your POM: 
+
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <version>2.22.1</version>
+    <configuration>
+        <useSystemClassLoader>false</useSystemClassLoader>
+    </configuration>
+</plugin>
+```
+
 #### Modifying the requests before they are sent [Version 3.2.3/2.4.5+]
 
 Sometimes you may need to add things to the requests that can't be persisted in a pact file. Examples of these would
