@@ -16,6 +16,25 @@ interface MismatchFactory<out M : Mismatch> {
   fun create(expected: Any?, actual: Any?, message: String, path: List<String>): M
 }
 
+data class QueryMismatch(
+  val queryParameter: String,
+  val expected: String,
+  val actual: String,
+  val mismatch: String? = null,
+  val path: String = "/"
+) : Mismatch {
+  override fun description(): String = if (mismatch != null) {
+    "QueryMismatch - $mismatch"
+  } else {
+    toString()
+  }
+}
+
+object QueryMismatchFactory : MismatchFactory<QueryMismatch> {
+  override fun create(expected: Any?, actual: Any?, message: String, path: List<String>) =
+    QueryMismatch(path.last(), expected.toString(), actual.toString(), message)
+}
+
 data class HeaderMismatch(val headerKey: String, val expected: String, val actual: String, val mismatch: String? = null) : Mismatch {
   override fun description(): String = if (mismatch != null) {
     "HeaderMismatch - $mismatch"

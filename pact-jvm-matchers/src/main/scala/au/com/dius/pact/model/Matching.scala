@@ -46,18 +46,10 @@ case class PathMismatch(expected: Path, actual: Path, mismatch: Option[String] =
   }
 }
 case class MethodMismatch(expected: Method, actual: Method) extends RequestPartMismatch
-case class QueryMismatch(queryParameter: String, expected: String, actual: String, mismatch: Option[String] = None, path: String = "/") extends RequestPartMismatch
 
 object PathMismatchFactory extends MismatchFactory[PathMismatch] {
   def create(expected: Object, actual: Object, message: String, path: java.util.List[String]) =
     PathMismatch(expected.toString, actual.toString, Some(message))
-}
-
-object QueryMismatchFactory extends MismatchFactory[QueryMismatch] {
-  import JavaConversions._
-  def create(expected: Object, actual: Object, message: String, path: java.util.List[String]) = {
-    QueryMismatch(path.toList.last, expected.toString, actual.toString, Some(message))
-  }
 }
 
 object Matching extends StrictLogging {
@@ -142,15 +134,15 @@ object Matching extends StrictLogging {
   def matchQuery(expected: Request, actual: Request) = {
     javaMapToScalaMap3(expected.getQuery).getOrElse(Map()).foldLeft(Seq[QueryMismatch]()) {
       (seq, values) => javaMapToScalaMap3(actual.getQuery).getOrElse(Map()).get(values._1) match {
-        case Some(value) => seq ++ QueryMatcher.compareQuery(values._1, values._2, value, expected.getMatchingRules)
-        case None => seq :+ QueryMismatch(values._1, values._2.mkString(","), "",
-          Some(s"Expected query parameter '${values._1}' but was missing"), Seq("$", "query", values._1).mkString("."))
+        case Some(value) => seq ++ QueryMatcher.compareQuery(values._1, values._2.asJava, value.asJava, expected.getMatchingRules).asScala
+        case None => seq :+ new QueryMismatch(values._1, values._2.mkString(","), "",
+          s"Expected query parameter '${values._1}' but was missing", Seq("$", "query", values._1).mkString("."))
       }
     } ++ javaMapToScalaMap3(actual.getQuery).getOrElse(Map()).foldLeft(Seq[QueryMismatch]()) {
       (seq, values) => javaMapToScalaMap3(expected.getQuery).getOrElse(Map()).get(values._1) match {
         case Some(value) => seq
-        case None => seq :+ QueryMismatch(values._1, "", values._2.mkString(","),
-          Some(s"Unexpected query parameter '${values._1}' received"), Seq("$", "query", values._1).mkString("."))
+        case None => seq :+ new QueryMismatch(values._1, "", values._2.mkString(","),
+          s"Unexpected query parameter '${values._1}' received", Seq("$", "query", values._1).mkString("."))
       }
     }
   }
