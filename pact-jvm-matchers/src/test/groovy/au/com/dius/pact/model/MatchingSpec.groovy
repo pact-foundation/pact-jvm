@@ -1,6 +1,7 @@
 package au.com.dius.pact.model
 
 import au.com.dius.pact.matchers.BodyMismatch
+import au.com.dius.pact.matchers.QueryMismatch
 import scala.None$
 import scala.Some
 import scala.collection.JavaConversions
@@ -89,8 +90,8 @@ class MatchingSpec extends Specification {
     Matching.matchQuery(query(), query('a=b')) == mismatch
 
     where:
-    mismatch = JavaConversions.asScalaBuffer([ QueryMismatch.apply('a', '', 'b',
-      Some.apply("Unexpected query parameter 'a' received"), '$.query.a') ]).toSeq()
+    mismatch = JavaConversions.asScalaBuffer([ new QueryMismatch('a', '', 'b',
+      "Unexpected query parameter 'a' received", '$.query.a') ]).toSeq()
   }
 
   def 'Query Matching - mismatch something to none'() {
@@ -98,8 +99,8 @@ class MatchingSpec extends Specification {
     Matching.matchQuery(query('a=b'), query()) == mismatch
 
     where:
-    mismatch = JavaConversions.asScalaBuffer([ QueryMismatch.apply('a', 'b', '',
-      Some.apply("Expected query parameter 'a' but was missing"), '$.query.a') ]).toSeq()
+    mismatch = JavaConversions.asScalaBuffer([ new QueryMismatch('a', 'b', '',
+      "Expected query parameter 'a' but was missing", '$.query.a') ]).toSeq()
   }
 
   def 'Query Matching - match keys in different order'() {
@@ -114,10 +115,10 @@ class MatchingSpec extends Specification {
 
     where:
     mismatch = JavaConversions.asScalaBuffer([
-      QueryMismatch.apply('a', '1', '2',
-        Some.apply("Expected '1' but received '2' for query parameter 'a'"), 'a'),
-      QueryMismatch.apply('a', '2', '1',
-        Some.apply("Expected '2' but received '1' for query parameter 'a'"), 'a')
+      new QueryMismatch('a', '1', '2',
+        "Expected '1' but received '2' for query parameter 'a'", 'a'),
+      new QueryMismatch('a', '2', '1',
+        "Expected '2' but received '1' for query parameter 'a'", 'a')
     ]).toSeq()
   }
 

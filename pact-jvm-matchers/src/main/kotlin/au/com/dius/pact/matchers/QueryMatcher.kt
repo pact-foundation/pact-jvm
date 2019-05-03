@@ -1,6 +1,7 @@
 package au.com.dius.pact.matchers
 
 import au.com.dius.pact.model.matchingrules.MatchingRules
+import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
 import mu.KLogging
 import org.atteo.evo.inflector.English
 
@@ -52,9 +53,10 @@ object QueryMatcher : KLogging() {
     parameter: String,
     expected: List<String>,
     actual: List<String>,
-    matchers: MatchingRules
+    matchingRules: MatchingRules?
   ): List<QueryMismatch> {
     val path = listOf(parameter)
+    val matchers = matchingRules ?: MatchingRulesImpl()
     return if (Matchers.matcherDefined("query", path, matchers)) {
       logger.debug { "compareQuery: Matcher defined for query parameter '$parameter'" }
       Matchers.domatch(matchers, "query", path, expected, actual, QueryMismatchFactory) +
