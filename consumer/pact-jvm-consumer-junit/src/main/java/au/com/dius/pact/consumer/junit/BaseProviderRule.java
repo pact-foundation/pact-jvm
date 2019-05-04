@@ -168,10 +168,6 @@ public class BaseProviderRule extends ExternalResource {
       });
   }
 
-  /**
-   * @deprecated Use the static method JUnitTestSupport.validateMockServerResult
-   */
-  @Deprecated
   protected void validateResult(PactVerificationResult result, PactVerification pactVerification) throws Throwable {
     JUnitTestSupport.validateMockServerResult(result);
   }

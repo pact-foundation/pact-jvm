@@ -37,7 +37,7 @@ public class ConsumerHttpsClient {
       if (StringUtils.isNotEmpty(queryString)) {
           uriBuilder.setParameters(parseQueryString(queryString));
       }
-      return jsonToMap(InsecureHttpsRequest.get(uriBuilder.toString())
+      return jsonToMap(InsecureHttpsRequest.httpsGet(uriBuilder.toString())
               .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
               .execute().returnContent().asString());
   }
@@ -53,13 +53,13 @@ public class ConsumerHttpsClient {
     }
 
   public List getAsList(String path) throws IOException {
-    return jsonToList(InsecureHttpsRequest.get(url + encodePath(path))
+    return jsonToList(InsecureHttpsRequest.httpsGet(url + encodePath(path))
                 .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
                 .execute().returnContent().asString());
   }
 
   public Map post(String path, String body, ContentType mimeType) throws IOException {
-      String respBody = InsecureHttpsRequest.post(url + encodePath(path))
+      String respBody = InsecureHttpsRequest.httpsPost(url + encodePath(path))
               .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
               .bodyString(body, mimeType)
               .execute().returnContent().asString();
@@ -75,19 +75,19 @@ public class ConsumerHttpsClient {
 	}
 
   public int options(String path) throws IOException {
-      return InsecureHttpsRequest.options(url + encodePath(path))
+      return InsecureHttpsRequest.httpsOptions(url + encodePath(path))
               .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
               .execute().returnResponse().getStatusLine().getStatusCode();
   }
 
   public String postBody(String path, String body, ContentType mimeType) throws IOException {
-      return InsecureHttpsRequest.post(url + encodePath(path))
+      return InsecureHttpsRequest.httpsPost(url + encodePath(path))
           .bodyString(body, mimeType)
           .execute().returnContent().asString();
   }
 
   public Map putAsMap(String path, String body) throws IOException {
-      String respBody = InsecureHttpsRequest.put(url + encodePath(path))
+      String respBody = InsecureHttpsRequest.httpsPut(url + encodePath(path))
               .addHeader(TESTREQHEADER, TESTREQHEADERVALUE)
               .bodyString(body, ContentType.APPLICATION_JSON)
               .execute().returnContent().asString();

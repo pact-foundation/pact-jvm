@@ -2,7 +2,6 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.model.MockHttpsProviderConfig
 import au.com.dius.pact.consumer.model.MockProviderConfig
-import au.com.dius.pact.consumer.model.MockServerImplementation
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
 import groovy.json.JsonSlurper
@@ -77,9 +76,8 @@ class PactTest {
     def jksFile = File.createTempFile('PactTest', '.jks')
     def keystore = generateCertificate(jksFile, 'SHA1withRSA', 'PactTest', 'changeit', 'changeit', 1024)
 
-    MockProviderConfig config = new MockHttpsProviderConfig(null, '127.0.0.1', 8443, PactSpecVersion.V3,
-      keystore, 'PactTest', 'changeit', 'changeit',
-      MockServerImplementation.KTorServer)
+    MockProviderConfig config = new MockHttpsProviderConfig('127.0.0.1', 8443, PactSpecVersion.V3,
+      keystore, 'PactTest', 'changeit', 'changeit')
     PactVerificationResult result = runConsumerTest(pact, config, new PactTestRun<Boolean>() {
       @Override
       Boolean run(MockServer mockServer, PactTestExecutionContext context) throws IOException {

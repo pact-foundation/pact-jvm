@@ -75,35 +75,35 @@ public class InsecureHttpsRequest extends Request {
     return new Response(internalExecute(httpclient, null));
   }
 
-  public static Request options(final URI uri) {
+  public static Request httpsOptions(final URI uri) {
     return new InsecureHttpsRequest(new InternalHttpRequest(HttpOptions.METHOD_NAME, uri));
   }
 
-  public static Request options(final String uri) {
+  public static Request httpsOptions(final String uri) {
     return new InsecureHttpsRequest(new InternalHttpRequest(HttpOptions.METHOD_NAME, URI.create(uri)));
   }
 
-  public static Request post(final URI uri) {
+  public static Request httpsPost(final URI uri) {
     return new InsecureHttpsRequest(new InternalEntityEnclosingHttpRequest(HttpPost.METHOD_NAME, uri));
   }
 
-  public static Request post(final String uri) {
+  public static Request httpsPost(final String uri) {
     return new InsecureHttpsRequest(new InternalEntityEnclosingHttpRequest(HttpPost.METHOD_NAME, URI.create(uri)));
   }
 
-  public static Request put(final URI uri) {
+  public static Request httpsPut(final URI uri) {
     return new InsecureHttpsRequest(new InternalEntityEnclosingHttpRequest(HttpPut.METHOD_NAME, uri));
   }
 
-  public static Request put(final String uri) {
+  public static Request httpsPut(final String uri) {
     return new InsecureHttpsRequest(new InternalEntityEnclosingHttpRequest(HttpPut.METHOD_NAME, URI.create(uri)));
   }
 
-  public static Request get(final URI uri) {
+  public static Request httpsGet(final URI uri) {
     return new InsecureHttpsRequest(new InternalHttpRequest(HttpGet.METHOD_NAME, uri));
   }
 
-  public static Request get(final String uri) {
+  public static Request httpsGet(final String uri) {
     return new InsecureHttpsRequest(new InternalHttpRequest(HttpGet.METHOD_NAME, URI.create(uri)));
   }
 }
