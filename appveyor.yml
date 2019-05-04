@@ -6,5 +6,5 @@ build: false
 
 build_script:
   - java -version
-  - gradlew --stacktrace --no-daemon -i check -x :consumer:pact-jvm-consumer-junit:clojureTest
+  - gradlew --stacktrace --no-daemon -i check -x :consumer:pact-jvm-consumer-junit:clojureTest -x :provider:pact-jvm-provider-lein:compileClojure
 
