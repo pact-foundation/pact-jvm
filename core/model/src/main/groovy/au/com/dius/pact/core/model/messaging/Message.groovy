@@ -12,12 +12,15 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
+import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
+import org.apache.http.entity.ContentType
 
 /**
  * Message in a Message Pact
  */
 @Canonical
+@Slf4j
 class Message implements Interaction {
   private static final String JSON = 'application/json'
 
@@ -34,6 +37,10 @@ class Message implements Interaction {
 
   String getContentType() {
     metaData?.find { it.key.toLowerCase() == 'contenttype' || it.key.toLowerCase() == 'content-type' }?.value ?: JSON
+  }
+
+  ContentType getParsedContentType() {
+    parseContentType(this.contentType)
   }
 
   @SuppressWarnings('UnusedMethodParameter')
@@ -59,8 +66,8 @@ class Message implements Interaction {
 
   def formatContents() {
     if (contents.present) {
-      switch (contentType) {
-        case JSON: return new JsonSlurper().parseText(contents.valueAsString())
+      switch (parseContentType(contentType)?.mimeType) {
+        case { isJson(it) } : return new JsonSlurper().parseText(contents.valueAsString())
         case 'application/octet-stream': return contentsAsBytes().encodeBase64().toString()
         default: return contents.valueAsString()
       }
@@ -105,7 +112,11 @@ class Message implements Interaction {
     providerStates.isEmpty() ? null : providerStates.first().name
   }
 
+  /**
+   * @deprecated This will be removed in 4.0
+   */
   @Override
+  @Deprecated
   boolean conflictsWith(Interaction other) {
 //    TODO: Need to match the bodies
 //    if (other instanceof Message) {
@@ -120,6 +131,18 @@ class Message implements Interaction {
 
   @Override
   String uniqueKey() {
-    "${StringUtils.defaultIfEmpty(providerState, 'None')}_$description"
+    "${StringUtils.defaultIfEmpty(providerStates*.name.join(''), 'None')}_$description"
+  }
+
+  private static ContentType parseContentType(String contentType) {
+    try {
+      return ContentType.parse(contentType)
+    } catch (e) {
+      log.debug("Failed to parse content type '${contentType}'", e)
+    }
+  }
+
+  private static boolean isJson(String contentType) {
+    contentType ==~ /application\\/.*json/
   }
 }

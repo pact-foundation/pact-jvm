@@ -93,8 +93,8 @@ class PactResultSpec extends Specification {
       then:
          def e = thrown(AssertionError)
          e.message.contains(
-            'QueryMismatch(queryParameter=status, expected=good, actual=bad, mismatch=Expected \'good\' ' +
-              'but received \'bad\' for query parameter \'status\', path=status)')
+            'QueryMismatch(queryParameter=status, expected=good, actual=bad, mismatch=Expected \'good\'' +
+              ' but received \'bad\' for query parameter \'status\', path=status)')
     }
 
     @SuppressWarnings('LineLength')

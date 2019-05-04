@@ -262,15 +262,21 @@ fun <M : Mismatch> matchDate(
   mismatchFactory: MismatchFactory<M>
 ): List<M> {
   logger.debug { "comparing ${valueOf(actual)} to date pattern $pattern at $path" }
-  return try {
-    DateUtils.parseDate(safeToString(actual), pattern)
+  return if (isCollection(actual)) {
     emptyList()
-  } catch (e: ParseException) {
-    listOf(mismatchFactory.create(expected, actual,
-      "Expected ${valueOf(actual)} to match a date of '$pattern': " +
-        "${e.message}", path))
+  } else {
+    try {
+      DateUtils.parseDate(safeToString(actual), pattern)
+      emptyList<M>()
+    } catch (e: ParseException) {
+      listOf(mismatchFactory.create(expected, actual,
+        "Expected ${valueOf(actual)} to match a date of '$pattern': " +
+          "${e.message}", path))
+    }
   }
 }
+
+fun isCollection(value: Any?) = value is List<*> || value is Map<*, *>
 
 fun <M : Mismatch> matchTime(
   pattern: String,
@@ -280,13 +286,17 @@ fun <M : Mismatch> matchTime(
   mismatchFactory: MismatchFactory<M>
 ): List<M> {
   logger.debug { "comparing ${valueOf(actual)} to time pattern $pattern at $path" }
-  return try {
-    DateUtils.parseDate(safeToString(actual), pattern)
+  return if (isCollection(actual)) {
     emptyList()
-  } catch (e: ParseException) {
-    listOf(mismatchFactory.create(expected, actual,
-      "Expected ${valueOf(actual)} to match a time of '$pattern': " +
-        "${e.message}", path))
+  } else {
+    try {
+      DateUtils.parseDate(safeToString(actual), pattern)
+      emptyList<M>()
+    } catch (e: ParseException) {
+      listOf(mismatchFactory.create(expected, actual,
+        "Expected ${valueOf(actual)} to match a time of '$pattern': " +
+          "${e.message}", path))
+    }
   }
 }
 
@@ -298,13 +308,17 @@ fun <M : Mismatch> matchTimestamp(
   mismatchFactory: MismatchFactory<M>
 ): List<M> {
   logger.debug { "comparing ${valueOf(actual)} to timestamp pattern $pattern at $path" }
-  return try {
-    DateUtils.parseDate(safeToString(actual), pattern)
+  return if (isCollection(actual)) {
     emptyList()
-  } catch (e: ParseException) {
-    listOf(mismatchFactory.create(expected, actual,
-      "Expected ${valueOf(actual)} to match a timestamp of '$pattern': " +
-        "${e.message}", path))
+  } else {
+    try {
+      DateUtils.parseDate(safeToString(actual), pattern)
+      emptyList<M>()
+    } catch (e: ParseException) {
+      listOf(mismatchFactory.create(expected, actual,
+        "Expected ${valueOf(actual)} to match a timestamp of '$pattern': " +
+          "${e.message}", path))
+    }
   }
 }
 

@@ -1,11 +1,13 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import mu.KLogging
+import org.atteo.evo.inflector.English
 
 object QueryMatcher : KLogging() {
 
-  fun compare(
+  private fun compare(
     parameter: String,
     path: List<String>,
     expected: String,
@@ -26,7 +28,7 @@ object QueryMatcher : KLogging() {
     }
   }
 
-  fun compareQueryParameterValues(
+  private fun compareQueryParameterValues(
     parameter: String,
     expected: List<String>,
     actual: List<String>,
@@ -46,13 +48,15 @@ object QueryMatcher : KLogging() {
       }
   }
 
+  @JvmStatic
   fun compareQuery(
     parameter: String,
     expected: List<String>,
     actual: List<String>,
-    matchers: MatchingRules
+    matchingRules: MatchingRules?
   ): List<QueryMismatch> {
     val path = listOf(parameter)
+    val matchers = matchingRules ?: MatchingRulesImpl()
     return if (Matchers.matcherDefined("query", path, matchers)) {
       logger.debug { "compareQuery: Matcher defined for query parameter '$parameter'" }
       Matchers.domatch(matchers, "query", path, expected, actual, QueryMismatchFactory) +
@@ -66,7 +70,9 @@ object QueryMatcher : KLogging() {
         val mismatches = mutableListOf<QueryMismatch>()
         if (expected.size != actual.size) {
           mismatches.add(QueryMismatch(parameter, expected.toString(), actual.toString(),
-            "Expected query parameter '$parameter' with ${expected.size} values but received ${actual.size} values",
+            "Expected query parameter '$parameter' with ${expected.size} " +
+              "${English.plural("value", expected.size)} but received ${actual.size} " +
+              English.plural("value", actual.size),
             path.joinToString(".")))
         }
         mismatches + compareQueryParameterValues(parameter, expected, actual, path, matchers)

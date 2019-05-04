@@ -7,13 +7,14 @@ import groovyx.net.http.RESTClient
 import org.junit.Test
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class ExampleGroovyConsumerV3PactTest {
 
     @Test
     void "example V3 spec test"() {
 
-        LocalDate date = LocalDate.now()
+        LocalDate localDate = LocalDate.now()
         def aliceService = new PactBuilder()
         aliceService {
             serviceConsumer 'V3Consumer'
@@ -23,9 +24,10 @@ class ExampleGroovyConsumerV3PactTest {
         aliceService {
             given('a provider state')
             given('another provider state', [valueA: 'A', valueB: 100])
-            given('a third provider state', [valueC: date.toString()])
+            given('a third provider state', [valueC: localDate.toString()])
             uponReceiving('a retrieve Mallory request')
-            withAttributes(method: 'get', path: '/mallory', query: [name: 'ron', status: 'good'])
+            withAttributes(method: 'get', path: '/mallory', query: [name: 'ron', status: regexp(~/good|bad/, 'good'),
+              date: date('yyyy-MM-dd')])
             willRespondWith(
                 status: 200,
                 headers: ['Content-Type': 'text/html'],
@@ -35,7 +37,8 @@ class ExampleGroovyConsumerV3PactTest {
 
         PactVerificationResult result = aliceService.runTest { mockServer ->
             def client = new RESTClient(mockServer.url)
-            def aliceResponse = client.get(path: '/mallory', query: [status: 'good', name: 'ron'])
+            def aliceResponse = client.get(path: '/mallory', query: [status: 'good', name: 'ron',
+              date: LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)])
 
             assert aliceResponse.status == 200
             assert aliceResponse.contentType == 'text/html'
@@ -53,7 +56,7 @@ class ExampleGroovyConsumerV3PactTest {
       assert providerStates[0] == [name: 'a provider state']
       assert providerStates[1] == [name: 'another provider state', params: [valueA: 'A', valueB: 100]]
       assert providerStates[2] == [name: 'a third provider state',
-                                   params: [valueC: date.toString()]
+                                   params: [valueC: localDate.toString()]
       ]
     }
 }
