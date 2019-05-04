@@ -8,13 +8,14 @@ import org.apache.http.entity.ContentType
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings('PrivateFieldCouldBeFinal')
 class ResponseComparisonSpec extends Specification {
 
   private Closure<Map> comparison
   private Response response
   private actualResponse
   private int actualStatus
-  private final Map actualHeaders = ['A': ['B'], 'C': ['D'], 'Content-Type': ['application/json']]
+  private Map actualHeaders = ['A': ['B'], 'C': ['D'], 'Content-Type': ['application/json']]
   private actualBody
 
   def setup() {
