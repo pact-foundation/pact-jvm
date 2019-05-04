@@ -1,5 +1,6 @@
 package broker
 
+import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.groovy.PactBuilder
 import au.com.dius.pact.provider.broker.PactBrokerClient
@@ -217,6 +218,52 @@ class PactBrokerClientPactSpec extends Specification {
     when:
     def result = pactBroker.runTest { server, context ->
       assert pactBrokerClient.fetchConsumers('Activity Service').size() == 2
+    }
+
+    then:
+    result == PactVerificationResult.Ok.INSTANCE
+  }
+
+  def 'publishing verification results pact test'() {
+    given:
+    pactBroker {
+      given('A pact has been published between the Provider and Foo Consumer')
+      uponReceiving('a pact publish verification request')
+      withAttributes(method: 'POST',
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results',
+        body: [success: true, providerApplicationVersion: '10.0.0']
+      )
+      willRespondWith(status: 201)
+    }
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      assert pactBrokerClient.publishVerificationResults([
+        'pb:publish-verification-results': [href: 'http://localhost:8080/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890/verification-results']
+      ], true, '10.0.0') instanceof Ok
+    }
+
+    then:
+    result == PactVerificationResult.Ok.INSTANCE
+  }
+
+  def 'publishing verification results pact test with build info'() {
+    given:
+    pactBroker {
+      given('A pact has been published between the Provider and Foo Consumer')
+      uponReceiving('a pact publish verification request')
+      withAttributes(method: 'POST',
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results',
+        body: [success: true, providerApplicationVersion: '10.0.0', buildUrl: 'http://localhost:8080/build']
+      )
+      willRespondWith(status: 201)
+    }
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      assert pactBrokerClient.publishVerificationResults([
+        'pb:publish-verification-results': [href: 'http://localhost:8080/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890/verification-results']
+      ], true, '10.0.0', 'http://localhost:8080/build') instanceof Ok
     }
 
     then:
