@@ -1,7 +1,8 @@
-package au.com.dius.pact.provider.broker
+package broker
 
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.groovy.PactBuilder
+import au.com.dius.pact.provider.broker.PactBrokerClient
 import spock.lang.Specification
 
 @SuppressWarnings('UnnecessaryGetter')
@@ -10,7 +11,7 @@ class PactBrokerClientPactSpec extends Specification {
   private PactBrokerClient pactBrokerClient
   private File pactFile
   private String pactContents
-  private PactBuilder pactBroker
+  private PactBuilder pactBroker, imaginaryBroker
 
   def setup() {
     pactBrokerClient = new PactBrokerClient('http://localhost:8080')
@@ -33,6 +34,13 @@ class PactBrokerClientPactSpec extends Specification {
       hasPactWith 'Pact Broker'
       port 8080
     }
+
+    imaginaryBroker = new PactBuilder()
+    imaginaryBroker {
+      serviceConsumer 'JVM Pact Broker Client'
+      hasPactWith 'Imaginary Pact Broker'
+      port 8080
+    }
   }
 
   def 'returns success when uploading a pact is ok'() {
@@ -49,6 +57,28 @@ class PactBrokerClientPactSpec extends Specification {
     when:
     def result = pactBroker.runTest { server, context ->
       assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'HTTP/1.1 200 OK'
+    }
+
+    then:
+    result == PactVerificationResult.Ok.INSTANCE
+  }
+
+  def 'returns an error when forbidden to publish the pact'() {
+    given:
+    pactBroker {
+      uponReceiving('a pact publish request which will be forbidden')
+      withAttributes(method: 'PUT',
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
+        body: pactContents
+      )
+      willRespondWith(status: 401, headers: [
+        'Content-Type': 'application/json'
+      ])
+    }
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'FAILED! 401 Unauthorized'
     }
 
     then:
@@ -123,7 +153,7 @@ class PactBrokerClientPactSpec extends Specification {
   @SuppressWarnings('LineLength')
   def 'handles non-json failure responses'() {
     given:
-    pactBroker {
+    imaginaryBroker {
       given('Non-JSON response')
       uponReceiving('a pact publish request')
       withAttributes(method: 'PUT',
@@ -136,7 +166,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     when:
-    def result = pactBroker.runTest { server, context ->
+    def result = imaginaryBroker.runTest { server, context ->
       assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'FAILED! 400 Bad Request - Enjoy this bit of text'
     }
 

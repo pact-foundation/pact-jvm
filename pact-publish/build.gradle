@@ -1,0 +1,21 @@
+buildscript {
+  dependencies {
+    classpath "au.com.dius:pact-jvm-provider-gradle_2.12:${project.version}"
+  }
+}
+
+apply plugin: 'au.com.dius.pact'
+
+dependencies {
+  testCompile project(":pact-jvm-consumer-groovy_2.12")
+}
+
+pact {
+  publish {
+    pactBrokerUrl = 'https://pact-foundation.pact.dius.com.au'
+    if (project.hasProperty('pactBrokerToken')) {
+      pactBrokerToken = project.pactBrokerToken
+    }
+    excludes = [ 'JVM Pact Broker Client-Imaginary Pact Broker' ]
+  }
+}

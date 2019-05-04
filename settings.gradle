@@ -38,3 +38,6 @@ rootProject.children.each {
     it.dir = file(m.group(1))
   }
 }
+
+include 'pact-publish'
+

@@ -33,7 +33,7 @@ class PactPublishTask extends DefaultTask {
 
         def options = [:]
         if (StringUtils.isNotEmpty(pactPublish.pactBrokerToken)) {
-            options.authentication = [pactPublish.pactBrokerAuthenticationScheme = 'bearer',
+            options.authentication = [pactPublish.pactBrokerAuthenticationScheme ?: 'bearer',
                                       pactPublish.pactBrokerToken]
         }
         else if (StringUtils.isNotEmpty(pactPublish.pactBrokerUsername)) {
