@@ -267,8 +267,8 @@ class HalClientSpec extends Specification {
     where:
 
     description                                | body                               | firstArg | secondArg
-    'body is null'                             | null                               | 'FAILED' | '400 Not OK - Unknown error'
-    'body is a parsed json doc with no errors' | '{}'                               | 'FAILED' | '400 Not OK - Unknown error'
+    'body is null'                             | null                               | 'FAILED' | '400 Not OK'
+    'body is a parsed json doc with no errors' | '{}'                               | 'FAILED' | '400 Not OK'
     'body is a parsed json doc with errors'    | '{"errors":["one","two","three"]}' | 'FAILED' | '400 Not OK - one, two, three'
 
   }
