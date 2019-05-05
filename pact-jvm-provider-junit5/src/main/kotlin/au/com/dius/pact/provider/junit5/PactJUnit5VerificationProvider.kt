@@ -4,6 +4,7 @@ import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.RequestResponseInteraction
+import au.com.dius.pact.pactbroker.TestResult
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
@@ -57,7 +58,7 @@ data class PactVerificationContext(
   var providerInfo: ProviderInfo = ProviderInfo(),
   val consumerName: String,
   val interaction: Interaction,
-  internal var testExecutionResult: Boolean = false
+  internal var testExecutionResult: TestResult = TestResult.Ok
 ) {
   var executionContext: Map<String, Any?>? = null
 
@@ -73,7 +74,7 @@ data class PactVerificationContext(
     val failures = mutableMapOf<String, Any>()
     try {
       this.testExecutionResult = validateTestExecution(client, request, failures)
-      if (!testExecutionResult) {
+      if (testExecutionResult is TestResult.Failed) {
         verifier!!.displayFailures(failures)
         throw AssertionError(JUnitProviderTestSupport.generateErrorStringFromMismatches(failures))
       }
@@ -82,7 +83,7 @@ data class PactVerificationContext(
     }
   }
 
-  private fun validateTestExecution(client: Any?, request: Any?, failures: MutableMap<String, Any>): Boolean {
+  private fun validateTestExecution(client: Any?, request: Any?, failures: MutableMap<String, Any>): TestResult {
     if (providerInfo.verificationType == null || providerInfo.verificationType == PactVerification.REQUEST_RESPONSE) {
       val interactionMessage = "Verifying a pact between $consumerName and ${providerInfo.name}" +
         " - ${interaction.description}"
@@ -98,7 +99,7 @@ data class PactVerificationContext(
           it.requestFailed(providerInfo, interaction, interactionMessage, e,
             verifier!!.projectHasProperty.apply(ProviderVerifierBase.PACT_SHOW_STACKTRACE))
         }
-        false
+        TestResult.Failed(listOf(e.message.orEmpty()))
       }
     } else {
       return verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, ConsumerInfo(consumerName), interaction,

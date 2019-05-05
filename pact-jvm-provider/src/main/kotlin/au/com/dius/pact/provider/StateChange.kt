@@ -22,13 +22,41 @@ data class StateChangeResult @JvmOverloads constructor (
   val message: String = ""
 )
 
+interface StateChange {
+  fun executeStateChange(
+    verifier: IProviderVerifier,
+    provider: IProviderInfo,
+    consumer: IConsumerInfo,
+    interaction: Interaction,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    providerClient: ProviderClient
+  ): StateChangeResult
+
+  fun stateChange(
+    verifier: IProviderVerifier,
+    state: ProviderState,
+    provider: IProviderInfo,
+    consumer: IConsumerInfo,
+    isSetup: Boolean,
+    providerClient: ProviderClient
+  ): Result<Map<String, Any>, Exception>
+
+  fun executeStateChangeTeardown(
+    verifier: IProviderVerifier,
+    interaction: Interaction,
+    provider: IProviderInfo,
+    consumer: IConsumerInfo,
+    providerClient: ProviderClient
+  )
+}
+
 /**
  * Class containing all the state change logic
  */
-object StateChange : KLogging() {
+object DefaultStateChange : StateChange, KLogging() {
 
-  @JvmStatic
-  fun executeStateChange(
+  override fun executeStateChange(
     verifier: IProviderVerifier,
     provider: IProviderInfo,
     consumer: IConsumerInfo,
@@ -66,8 +94,7 @@ object StateChange : KLogging() {
     return StateChangeResult(stateChangeResult, message)
   }
 
-  @JvmStatic
-  fun stateChange(
+  override fun stateChange(
     verifier: IProviderVerifier,
     state: ProviderState,
     provider: IProviderInfo,
@@ -113,8 +140,7 @@ object StateChange : KLogging() {
     }
   }
 
-  @JvmStatic
-  fun executeStateChangeTeardown(
+  override fun executeStateChangeTeardown(
     verifier: IProviderVerifier,
     interaction: Interaction,
     provider: IProviderInfo,

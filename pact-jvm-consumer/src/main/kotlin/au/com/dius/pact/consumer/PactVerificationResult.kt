@@ -15,14 +15,12 @@ sealed class PactVerificationResult {
   data class Mismatches(val mismatches: List<PactVerificationResult>) : PactVerificationResult() {
     override fun getDescription(): String {
       return "The following mismatched requests occurred:\n" +
-        mismatches.map(PactVerificationResult::getDescription).joinToString("\n")
+        mismatches.joinToString("\n", transform = PactVerificationResult::getDescription)
     }
   }
 
   data class UnexpectedRequest(val request: Request) : PactVerificationResult() {
-    override fun getDescription(): String {
-      return "Unexpected Request:\n" + request
-    }
+    override fun getDescription() = "Unexpected Request:\n$request"
   }
 
   data class ExpectedButNotReceived(val expectedRequests: List<Request>) : PactVerificationResult() {

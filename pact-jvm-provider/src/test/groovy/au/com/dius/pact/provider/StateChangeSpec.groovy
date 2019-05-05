@@ -35,7 +35,7 @@ class StateChangeSpec extends Specification {
     consumerMap.stateChange = null
 
     when:
-    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true,
+    def result = DefaultStateChange.INSTANCE.stateChange(providerVerifier, state, providerInfo, consumer(), true,
       mockProviderClient)
 
     then:
@@ -48,7 +48,7 @@ class StateChangeSpec extends Specification {
     consumerMap.stateChange = ''
 
     when:
-    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true,
+    def result = DefaultStateChange.INSTANCE.stateChange(providerVerifier, state, providerInfo, consumer(), true,
       mockProviderClient)
 
     then:
@@ -61,7 +61,7 @@ class StateChangeSpec extends Specification {
     consumerMap.stateChange = '      '
 
     when:
-    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true,
+    def result = DefaultStateChange.INSTANCE.stateChange(providerVerifier, state, providerInfo, consumer(), true,
       mockProviderClient)
 
     then:
@@ -74,7 +74,7 @@ class StateChangeSpec extends Specification {
     consumerMap.stateChange = 'http://localhost:2000/hello'
 
     when:
-    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true,
+    def result = DefaultStateChange.INSTANCE.stateChange(providerVerifier, state, providerInfo, consumer(), true,
       mockProviderClient)
 
     then:
@@ -90,7 +90,7 @@ class StateChangeSpec extends Specification {
     consumerMap.stateChange = { arg -> closureArgs << arg; true }
 
     when:
-    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true,
+    def result = DefaultStateChange.INSTANCE.stateChange(providerVerifier, state, providerInfo, consumer(), true,
       mockProviderClient)
 
     then:
@@ -104,7 +104,7 @@ class StateChangeSpec extends Specification {
     consumerMap.stateChange = 'blah blah blah'
 
     when:
-    def result = StateChange.stateChange(providerVerifier, state, providerInfo, consumer(), true,
+    def result = DefaultStateChange.INSTANCE.stateChange(providerVerifier, state, providerInfo, consumer(), true,
       mockProviderClient)
 
     then:
@@ -122,7 +122,7 @@ class StateChangeSpec extends Specification {
     ] as Interaction
 
     when:
-    def result = StateChange.executeStateChange(providerVerifier, providerInfo, consumer(), interaction,
+    def result = DefaultStateChange.INSTANCE.executeStateChange(providerVerifier, providerInfo, consumer(), interaction,
       '', [:], mockProviderClient)
 
     then:

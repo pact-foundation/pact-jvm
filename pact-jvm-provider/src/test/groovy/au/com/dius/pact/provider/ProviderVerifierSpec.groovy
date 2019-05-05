@@ -368,7 +368,9 @@ class ProviderVerifierSpec extends Specification {
     ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
     PactBrokerClient pactBrokerClient = Mock(PactBrokerClient)
     GroovyMock(PactReader, global: true)
-    GroovyMock(StateChange, global: true)
+    def statechange = Mock(StateChange) {
+      executeStateChange(*_) >> new StateChangeResult(new Ok([:]))
+    }
     def interaction1 = Mock(RequestResponseInteraction)
     def interaction2 = Mock(RequestResponseInteraction)
     def mockPact = Mock(Pact) {
@@ -379,10 +381,10 @@ class ProviderVerifierSpec extends Specification {
     verifier.projectGetProperty = {
       (it == ProviderVerifierBase.PACT_VERIFIER_PUBLISH_RESULTS).toString()
     }
+    verifier.stateChangeHandler = statechange
 
     PactReader.loadPact(_) >> mockPact
     mockPact.interactions >> [interaction1, interaction2]
-    StateChange.executeStateChange(*_) >> new StateChangeResult(new Ok([:]))
 
     when:
     verifier.runVerificationForConsumer([:], provider, consumer, pactBrokerClient)
@@ -394,11 +396,11 @@ class ProviderVerifierSpec extends Specification {
 
     where:
 
-    result1 | result2 | finalResult
-    true    | true    | TestResult.Ok.INSTANCE
-    true    | false   | new TestResult.Failed()
-    false   | true    | new TestResult.Failed()
-    false   | false   | new TestResult.Failed()
+    result1                 | result2                 | finalResult
+    TestResult.Ok.INSTANCE  | TestResult.Ok.INSTANCE  | TestResult.Ok.INSTANCE
+    TestResult.Ok.INSTANCE  | new TestResult.Failed() | new TestResult.Failed()
+    new TestResult.Failed() | TestResult.Ok.INSTANCE  | new TestResult.Failed()
+    new TestResult.Failed() | new TestResult.Failed() | new TestResult.Failed()
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -407,7 +409,9 @@ class ProviderVerifierSpec extends Specification {
     ProviderInfo provider = new ProviderInfo('Test Provider')
     ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
     GroovyMock(PactReader, global: true)
-    GroovyMock(StateChange, global: true)
+    def statechange = Mock(StateChange) {
+      executeStateChange(*_) >> new StateChangeResult(new Ok([:]))
+    }
     def interaction1 = Mock(RequestResponseInteraction) {
       getDescription() >> 'Interaction 1'
     }
@@ -420,13 +424,13 @@ class ProviderVerifierSpec extends Specification {
 
     PactReader.loadPact(_) >> mockPact
     mockPact.interactions >> [interaction1, interaction2]
-    StateChange.executeStateChange(*_) >> new StateChangeResult(new Ok([:]))
     verifier.verifyResponseFromProvider(provider, interaction1, _, _, _) >> true
     verifier.verifyResponseFromProvider(provider, interaction2, _, _, _) >> true
 
     verifier.projectHasProperty = { it == ProviderVerifier.PACT_FILTER_DESCRIPTION }
     verifier.projectGetProperty = { 'Interaction 2' }
     verifier.verificationReporter = Mock(VerificationReporter)
+    verifier.stateChangeHandler = statechange
 
     when:
     verifier.runVerificationForConsumer([:], provider, consumer)
@@ -466,12 +470,12 @@ class ProviderVerifierSpec extends Specification {
     0 * client.publishVerificationResults(_, TestResult.Ok.INSTANCE, '0', null)
   }
 
-  @SuppressWarnings('UnnecessaryGetter')
+  @SuppressWarnings(['UnnecessaryGetter', 'LineLength'])
   def 'Ignore the verification results if publishing is disabled'() {
     given:
     def client = Mock(PactBrokerClient)
     GroovyMock(PactReader, global: true)
-    GroovyMock(StateChange, global: true)
+    def statechange = Mock(StateChange)
 
     def providerInfo = new ProviderInfo(verificationType: PactVerification.ANNOTATED_METHOD)
     def consumerInfo = new ConsumerInfo()
@@ -489,14 +493,15 @@ class ProviderVerifierSpec extends Specification {
           return 'false'
       }
     }
+    verifier.stateChangeHandler = statechange
 
     when:
     verifier.runVerificationForConsumer([:], providerInfo, consumerInfo, client)
 
     then:
     1 * PactReader.loadPact(_) >> pact
-    1 * StateChange.executeStateChange(_, _, _, _, _, _, _) >> new StateChangeResult(new Ok([:]), '')
-    1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _) >> true
+    1 * statechange.executeStateChange(_, _, _, _, _, _, _) >> new StateChangeResult(new Ok([:]), '')
+    1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _) >> TestResult.Ok.INSTANCE
     0 * client.publishVerificationResults(_, TestResult.Ok.INSTANCE, _, _)
   }
 

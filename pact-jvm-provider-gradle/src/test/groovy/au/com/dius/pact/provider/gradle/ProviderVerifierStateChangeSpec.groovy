@@ -6,6 +6,7 @@ import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.Response
 import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.DefaultStateChange
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
@@ -35,14 +36,15 @@ class ProviderVerifierStateChangeSpec extends Specification {
     def failures = [:]
     consumer = new ConsumerInfo('Bob', 'http://localhost:2000/hello')
     providerInfo.stateChangeTeardown = true
-    GroovyMock(StateChange, global: true)
+    def statechange = Mock(StateChange)
+    providerVerifier.stateChangeHandler = statechange
 
     when:
     providerVerifier.verifyInteraction(providerInfo, consumer, failures, interaction)
 
     then:
-    1 * StateChange.executeStateChange(*_) >> new StateChangeResult(new Ok([:]), 'interactionMessage')
-    1 * StateChange.executeStateChangeTeardown(providerVerifier, interaction, providerInfo, consumer, _)
+    1 * statechange.executeStateChange(*_) >> new StateChangeResult(new Ok([:]), 'interactionMessage')
+    1 * statechange.executeStateChangeTeardown(providerVerifier, interaction, providerInfo, consumer, _)
   }
 
   def 'if the state change is a closure and teardown is set, executes it with the state change as a parameter'() {
@@ -59,9 +61,10 @@ class ProviderVerifierStateChangeSpec extends Specification {
     providerInfo.stateChangeTeardown = true
 
     when:
-    StateChange.executeStateChange(providerVerifier, providerInfo, consumer, interaction, 'state of the nation',
-      failures, providerClient)
-    StateChange.executeStateChangeTeardown(providerVerifier, interaction, providerInfo, consumer, providerClient)
+    DefaultStateChange.INSTANCE.executeStateChange(providerVerifier, providerInfo, consumer, interaction,
+      'state of the nation', failures, providerClient)
+    DefaultStateChange.INSTANCE.executeStateChangeTeardown(providerVerifier, interaction, providerInfo, consumer,
+      providerClient)
 
     then:
     closureArgs == [[state, 'setup'], [state, 'teardown']]

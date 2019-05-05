@@ -270,7 +270,7 @@ class PactBrokerClientPactSpec extends Specification {
           href: 'http://localhost:8080/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
             '/verification-results'
         ]
-      ], true, '10.0.0', 'http://localhost:8080/build') instanceof Ok
+      ], TestResult.Ok.INSTANCE, '10.0.0', 'http://localhost:8080/build') instanceof Ok
     }
 
     then:

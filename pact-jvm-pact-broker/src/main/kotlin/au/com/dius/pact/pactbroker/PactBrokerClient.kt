@@ -15,13 +15,24 @@ data class PactResponse(val pactFile: Any, val links: Map<String, Map<String, An
 sealed class TestResult {
   object Ok: TestResult() {
     override fun toBoolean() = true
+
+    override fun merge(result: TestResult) = when (result) {
+      is Ok -> this
+      is Failed -> result
+    }
   }
 
-  data class Failed(var results: List<String> = emptyList()): TestResult() {
+  data class Failed(var results: List<Any> = emptyList()): TestResult() {
     override fun toBoolean() = false
+
+    override fun merge(result: TestResult) = when (result) {
+      is Ok -> this
+      is Failed -> Failed(results + result.results)
+    }
   }
 
   abstract fun toBoolean(): Boolean
+  abstract fun merge(result: TestResult): TestResult
 
   companion object {
     fun fromBoolean(result: Boolean) = if (result) Ok else Failed()

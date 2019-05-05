@@ -1,13 +1,11 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.model.FilteredPact
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
-import au.com.dius.pact.model.RequestResponseInteraction
-import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.UrlPactSource
+import au.com.dius.pact.pactbroker.TestResult
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import groovy.util.logging.Slf4j
 import scala.Function1
@@ -54,9 +52,9 @@ class ProviderVerifier extends ProviderVerifierBase {
     if (pact.interactions.empty) {
       reporters.each { it.warnPactFileHasNoInteractions(pact) }
     } else {
-      boolean result = pact.interactions
+      def result = pact.interactions
         .collect(this.&verifyInteraction.curry(provider, consumer, failures))
-        .inject(true) { acc, val -> acc && val }
+        .inject(TestResult.Ok.INSTANCE) { acc, val -> acc.merge(val) }
       if (pact.isFiltered()) {
         log.warn('Skipping publishing of verification results as the interactions have been filtered')
       } else if (publishingResultsDisabled()) {
@@ -141,116 +139,8 @@ class ProviderVerifier extends ProviderVerifierBase {
     interaction.description ==~ projectGetProperty.apply(PACT_FILTER_DESCRIPTION)
   }
 
-  boolean verifyInteraction(ProviderInfo provider, ConsumerInfo consumer, Map failures, def interaction) {
-    def interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name}" +
-      " - ${interaction.description} "
-
-    ProviderClient providerClient = new ProviderClient(provider, new HttpClientFactory())
-    def stateChangeResult = StateChange.executeStateChange(this, provider, consumer, interaction, interactionMessage,
-      failures, providerClient)
-    if (stateChangeResult.stateChangeResult instanceof Ok) {
-      interactionMessage = stateChangeResult.message
-      reportInteractionDescription(interaction)
-
-      Map context = [
-        providerState: stateChangeResult.stateChangeResult.value,
-        interaction: interaction
-      ]
-
-      boolean result = false
-      if (ProviderUtils.verificationType(provider, consumer) == PactVerification.REQUEST_RESPONSE) {
-        log.debug('Verifying via request/response')
-        result = verifyResponseFromProvider(provider, interaction, interactionMessage, failures, providerClient,
-          context)
-      } else {
-        log.debug('Verifying via annotated test method')
-        result = verifyResponseByInvokingProviderMethods(provider, consumer, interaction, interactionMessage, failures)
-      }
-
-      if (provider.stateChangeTeardown) {
-        StateChange.executeStateChangeTeardown(this, interaction, provider, consumer, providerClient)
-      }
-
-      result
-    } else {
-      false
-    }
-  }
-
-  void reportInteractionDescription(interaction) {
-    reporters.each { it.interactionDescription(interaction) }
-  }
-
   @Override
   void reportStateForInteraction(String state, IProviderInfo provider, IConsumerInfo consumer, boolean isSetup) {
     reporters.each { it.stateForInteraction(state, provider, consumer, isSetup) }
-  }
-
-  @SuppressWarnings('ParameterCount')
-  boolean verifyResponseFromProvider(IProviderInfo provider, RequestResponseInteraction interaction,
-                                     String interactionMessage,
-                                     Map failures,
-                                     ProviderClient client,
-                                     Map context = [:]) {
-    try {
-      def expectedResponse = interaction.response.generatedResponse(context)
-      def actualResponse = client.makeRequest(interaction.request.generatedRequest(context))
-
-      verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
-    } catch (e) {
-      failures[interactionMessage] = e
-      reporters.each {
-        it.requestFailed(provider, interaction, interactionMessage, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE))
-      }
-      false
-    }
-  }
-
-  boolean verifyRequestResponsePact(Response expectedResponse, Map actualResponse, String interactionMessage,
-                                 Map failures) {
-    def comparison = ResponseComparison.compareResponse(expectedResponse, actualResponse,
-      actualResponse.statusCode, actualResponse.headers, actualResponse.data)
-
-    reporters.each { it.returnsAResponseWhich() }
-
-    def s = ' returns a response which'
-    def result = true
-    result &= displayStatusResult(failures, expectedResponse.status, comparison.method, interactionMessage + s)
-    result &= displayHeadersResult(failures, expectedResponse.headers, comparison.headers, interactionMessage + s)
-    result &= displayBodyResult(failures, comparison.body, interactionMessage + s)
-    result
-  }
-
-  boolean displayStatusResult(Map failures, int status, def comparison, String comparisonDescription) {
-    if (comparison == null) {
-      reporters.each { it.statusComparisonOk(status) }
-      true
-    } else {
-      reporters.each { it.statusComparisonFailed(status, comparison) }
-      failures["$comparisonDescription has status code $status"] = comparison
-      false
-    }
-  }
-
-  boolean displayHeadersResult(Map failures, def expected, Map comparison, String comparisonDescription) {
-    if (comparison.isEmpty()) {
-      true
-    } else {
-      reporters.each { it.includesHeaders() }
-      Map expectedHeaders = expected
-      boolean result = true
-      comparison.each { key, headerComparison ->
-        def expectedHeaderValue = expectedHeaders[key]
-        if (headerComparison == null) {
-          reporters.each { it.headerComparisonOk(key, expectedHeaderValue) }
-        } else {
-          reporters.each { it.headerComparisonFailed(key, expectedHeaderValue, headerComparison) }
-          failures["$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""] =
-            headerComparison
-          result = false
-        }
-      }
-      result
-    }
   }
 }

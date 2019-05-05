@@ -45,8 +45,9 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
         logger.warn { "Skipping publishing of verification results as it has been disabled " +
           "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')" }
       } else {
-        verificationReporter.reportResults(pact,
-          interactionResults.values.fold(true) { acc, result -> acc && result.toBoolean() }, lookupProviderVersion())
+        verificationReporter.reportResults(pact, interactionResults.values.fold(TestResult.Ok) {
+          acc: TestResult, result -> acc.merge(result)
+        }, lookupProviderVersion())
       }
     }
   }
