@@ -25,7 +25,7 @@ def scalaVersionLookup = [
 
 allprojects {
   group = 'au.com.dius'
-  version = '3.6.6'
+  version = '3.6.7'
 
   repositories {
     mavenLocal()
