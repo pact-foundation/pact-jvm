@@ -110,11 +110,11 @@ open class HttpTarget
   override fun getProviderInfo(source: PactSource): ProviderInfo {
     val provider = testClass.getAnnotation(Provider::class.java)
     val providerInfo = ProviderInfo(provider.value)
-    providerInfo.setPort(port)
-    providerInfo.setHost(host)
-    providerInfo.setProtocol(protocol)
-    providerInfo.setPath(path)
-    providerInfo.isInsecure = insecure
+    providerInfo.port = port
+    providerInfo.host = host
+    providerInfo.protocol = protocol
+    providerInfo.path = path
+    providerInfo.insecure = insecure
 
     val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
     if (!methods.isEmpty()) {

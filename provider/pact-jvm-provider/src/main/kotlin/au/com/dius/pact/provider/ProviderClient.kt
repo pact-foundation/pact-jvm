@@ -46,15 +46,15 @@ import java.util.function.Function
 import java.util.function.Supplier
 
 interface IHttpClientFactory {
-  fun newClient(provider: Any?): CloseableHttpClient
+  fun newClient(provider: IProviderInfo): CloseableHttpClient
 }
 
 interface IProviderInfo {
-  val protocol: String
-  val host: Any?
-  val port: Any?
-  val path: String
-  val name: String
+  var protocol: String
+  var host: Any?
+  var port: Any?
+  var path: String
+  var name: String
 
   val requestFilter: Any?
   val stateChangeRequestFilter: Any?
@@ -63,6 +63,11 @@ interface IProviderInfo {
   val stateChangeTeardown: Boolean
   var packagesToScan: List<String>
   var verificationType: PactVerification?
+  var createClient: Any?
+
+  var insecure: Boolean
+  var trustStore: File?
+  var trustStorePassword: String?
 }
 
 interface IConsumerInfo {

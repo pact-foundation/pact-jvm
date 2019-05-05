@@ -68,10 +68,10 @@ open class HttpTestTarget @JvmOverloads constructor (
 
   override fun getProviderInfo(serviceName: String, pactSource: PactSource?): ProviderInfo {
     val providerInfo = ProviderInfo(serviceName)
-    providerInfo.setPort(port)
-    providerInfo.setHost(host)
-    providerInfo.setProtocol("http")
-    providerInfo.setPath(path)
+    providerInfo.port = port
+    providerInfo.host = host
+    providerInfo.protocol = "http"
+    providerInfo.path = path
     return providerInfo
   }
 
@@ -120,8 +120,8 @@ open class HttpsTestTarget @JvmOverloads constructor (
 
   override fun getProviderInfo(serviceName: String, pactSource: PactSource?): ProviderInfo {
     val providerInfo = super.getProviderInfo(serviceName, pactSource)
-    providerInfo.setProtocol("https")
-    providerInfo.isInsecure = insecure
+    providerInfo.protocol = "https"
+    providerInfo.insecure = insecure
     return providerInfo
   }
 

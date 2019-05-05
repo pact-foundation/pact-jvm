@@ -13,7 +13,7 @@ class PactPublish {
     String pactBrokerToken
     String pactBrokerUsername
     String pactBrokerPassword
-    String pactBrokerAuthenticationScheme = 'basic'
+    String pactBrokerAuthenticationScheme
     List<String> tags = []
     List<String> excludes = []
 }

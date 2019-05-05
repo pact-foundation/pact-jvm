@@ -20,9 +20,7 @@ sealed class PactVerificationResult {
   }
 
   data class UnexpectedRequest(val request: Request) : PactVerificationResult() {
-    override fun getDescription(): String {
-      return "Unexpected Request:\n$request"
-    }
+    override fun getDescription() = "Unexpected Request:\n$request"
   }
 
   data class ExpectedButNotReceived(val expectedRequests: List<Request>) : PactVerificationResult() {

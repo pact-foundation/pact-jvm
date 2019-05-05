@@ -18,6 +18,33 @@ import java.util.function.Consumer
  */
 data class PactResponse(val pactFile: Any, val links: Map<String, Map<String, Any>>)
 
+sealed class TestResult {
+  object Ok: TestResult() {
+    override fun toBoolean() = true
+
+    override fun merge(result: TestResult) = when (result) {
+      is Ok -> this
+      is Failed -> result
+    }
+  }
+
+  data class Failed(var results: List<Any> = emptyList()): TestResult() {
+    override fun toBoolean() = false
+
+    override fun merge(result: TestResult) = when (result) {
+      is Ok -> this
+      is Failed -> Failed(results + result.results)
+    }
+  }
+
+  abstract fun toBoolean(): Boolean
+  abstract fun merge(result: TestResult): TestResult
+
+  companion object {
+    fun fromBoolean(result: Boolean) = if (result) Ok else Failed()
+  }
+}
+
 /**
  * Client for the pact broker service
  */
@@ -114,20 +141,30 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
 
   open fun newHalClient(): IHalClient = HalClient(pactBrokerUrl, options)
 
+  @Deprecated(message = "Use the version that takes a test result",
+    replaceWith = ReplaceWith("publishVerificationResults"))
+  open fun publishVerificationResults(
+    docAttributes: Map<String, Map<String, Any>>,
+    result: Boolean,
+    version: String,
+    buildUrl: String? = null
+  ): Result<Boolean, Exception>
+    = publishVerificationResults(docAttributes, TestResult.fromBoolean(result), version, buildUrl)
+
   /**
    * Publishes the result to the "pb:publish-verification-results" link in the document attributes.
    */
   @JvmOverloads
   open fun publishVerificationResults(
     docAttributes: Map<String, Map<String, Any>>,
-    result: Boolean,
+    result: TestResult,
     version: String,
     buildUrl: String? = null
   ): Result<Boolean, Exception> {
     val halClient = newHalClient()
     val publishLink = docAttributes.mapKeys { it.key.toLowerCase() } ["pb:publish-verification-results"] // ktlint-disable curly-spacing
     return if (publishLink != null) {
-      val jsonObject = jsonObject("success" to result, "providerApplicationVersion" to version)
+      val jsonObject = jsonObject("success" to result.toBoolean(), "providerApplicationVersion" to version)
       if (buildUrl != null) {
         jsonObject.add("buildUrl", buildUrl.toJson())
       }

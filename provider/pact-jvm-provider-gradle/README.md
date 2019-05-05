@@ -544,6 +544,20 @@ pact {
 
 `pactBrokerUser` and `pactBrokerPassword` can be defined in the gradle properties.
 
+Or with a bearer token:
+
+```groovy
+pact {
+
+    serviceProviders {
+        provider1 {
+            hasPactsFromPactBroker('http://pact-broker:5000/', authentication: ['Bearer', pactBrokerToken])
+        }
+    }
+    
+}
+```
+
 ## Verifying pact files from a S3 bucket
 
 Pact files stored in an S3 bucket can be verified by using an S3 URL to the pact file. I.e.,
@@ -633,6 +647,19 @@ pact {
         pactBrokerUrl = 'https://mypactbroker.com'
         pactBrokerUsername = 'username'
         pactBrokerPassword = 'password'
+    }
+
+}
+```
+
+or with a bearer token
+
+```groovy
+pact {
+
+    publish {
+        pactBrokerUrl = 'https://mypactbroker.com'
+        pactBrokerToken = 'token'
     }
 
 }

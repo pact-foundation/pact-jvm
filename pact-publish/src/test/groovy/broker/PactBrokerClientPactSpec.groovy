@@ -1,8 +1,10 @@
-package au.com.dius.pact.provider.broker
+package broker
 
+import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.groovy.PactBuilder
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.TestResult
 import spock.lang.Specification
 
 @SuppressWarnings('UnnecessaryGetter')
@@ -11,7 +13,7 @@ class PactBrokerClientPactSpec extends Specification {
   private PactBrokerClient pactBrokerClient
   private File pactFile
   private String pactContents
-  private PactBuilder pactBroker
+  private PactBuilder pactBroker, imaginaryBroker
 
   def setup() {
     pactBrokerClient = new PactBrokerClient('http://localhost:8080')
@@ -34,6 +36,13 @@ class PactBrokerClientPactSpec extends Specification {
       hasPactWith 'Pact Broker'
       port 8080
     }
+
+    imaginaryBroker = new PactBuilder()
+    imaginaryBroker {
+      serviceConsumer 'JVM Pact Broker Client'
+      hasPactWith 'Imaginary Pact Broker'
+      port 8080
+    }
   }
 
   def 'returns success when uploading a pact is ok'() {
@@ -53,7 +62,29 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result instanceof PactVerificationResult.Ok
+    result == PactVerificationResult.Ok.INSTANCE
+  }
+
+  def 'returns an error when forbidden to publish the pact'() {
+    given:
+    pactBroker {
+      uponReceiving('a pact publish request which will be forbidden')
+      withAttributes(method: 'PUT',
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
+        body: pactContents
+      )
+      willRespondWith(status: 401, headers: [
+        'Content-Type': 'application/json'
+      ])
+    }
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'FAILED! 401 Unauthorized'
+    }
+
+    then:
+    result == PactVerificationResult.Ok.INSTANCE
   }
 
   @SuppressWarnings('LineLength')
@@ -87,7 +118,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result instanceof PactVerificationResult.Ok
+    result == PactVerificationResult.Ok.INSTANCE
   }
 
   @SuppressWarnings('LineLength')
@@ -118,13 +149,13 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result instanceof PactVerificationResult.Ok
+    result == PactVerificationResult.Ok.INSTANCE
   }
 
   @SuppressWarnings('LineLength')
   def 'handles non-json failure responses'() {
     given:
-    pactBroker {
+    imaginaryBroker {
       given('Non-JSON response')
       uponReceiving('a pact publish request')
       withAttributes(method: 'PUT',
@@ -137,12 +168,12 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     when:
-    def result = pactBroker.runTest { server, context ->
+    def result = imaginaryBroker.runTest { server, context ->
       assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'FAILED! 400 Bad Request - Enjoy this bit of text'
     }
 
     then:
-    result instanceof PactVerificationResult.Ok
+    result == PactVerificationResult.Ok.INSTANCE
   }
 
   def 'pact broker navigation test'() {
@@ -156,7 +187,7 @@ class PactBrokerClientPactSpec extends Specification {
       uponReceiving('a request to the root')
       withAttributes(path: '/')
       willRespondWith(status: 200)
-      withBody(mimeType: 'application/hal+json') {
+      withBody('application/hal+json') {
         '_links' {
           'pb:latest-provider-pacts' {
             href url('http://localhost:8080', 'pacts', 'provider', '{provider}', 'latest')
@@ -168,7 +199,7 @@ class PactBrokerClientPactSpec extends Specification {
       uponReceiving('a request for the provider pacts')
       withAttributes(path: '/pacts/provider/Activity Service/latest')
       willRespondWith(status: 200)
-      withBody(mimeType: 'application/hal+json') {
+      withBody('application/hal+json') {
         '_links' {
           provider {
             href url('http://localhost:8080', 'pacticipants', regexp('[^\\/]+', 'Activity Service'))
@@ -191,6 +222,58 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result instanceof PactVerificationResult.Ok
+    result == PactVerificationResult.Ok.INSTANCE
+  }
+
+  def 'publishing verification results pact test'() {
+    given:
+    pactBroker {
+      given('A pact has been published between the Provider and Foo Consumer')
+      uponReceiving('a pact publish verification request')
+      withAttributes(method: 'POST',
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results',
+        body: [success: true, providerApplicationVersion: '10.0.0']
+      )
+      willRespondWith(status: 201)
+    }
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      assert pactBrokerClient.publishVerificationResults([
+        'pb:publish-verification-results': [
+          href: 'http://localhost:8080/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
+            '/verification-results'
+        ]
+      ], TestResult.Ok.INSTANCE, '10.0.0') instanceof Ok
+    }
+
+    then:
+    result == PactVerificationResult.Ok.INSTANCE
+  }
+
+  def 'publishing verification results pact test with build info'() {
+    given:
+    pactBroker {
+      given('A pact has been published between the Provider and Foo Consumer')
+      uponReceiving('a pact publish verification request')
+      withAttributes(method: 'POST',
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results',
+        body: [success: true, providerApplicationVersion: '10.0.0', buildUrl: 'http://localhost:8080/build']
+      )
+      willRespondWith(status: 201)
+    }
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      assert pactBrokerClient.publishVerificationResults([
+        'pb:publish-verification-results': [
+          href: 'http://localhost:8080/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
+            '/verification-results'
+        ]
+      ], TestResult.Ok.INSTANCE, '10.0.0', 'http://localhost:8080/build') instanceof Ok
+    }
+
+    then:
+    result == PactVerificationResult.Ok.INSTANCE
   }
 }

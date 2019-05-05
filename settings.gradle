@@ -39,3 +39,6 @@ project(':provider:pact-jvm-provider-scalasupport_2.12').projectDir = file('prov
 
 include   'pact-jvm-server'
 include   'pact-specification-test'
+
+include 'pact-publish'
+

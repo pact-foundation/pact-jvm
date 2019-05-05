@@ -3,6 +3,7 @@ package au.com.dius.pact.core.pactbroker
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.com.github.michaelbull.result.Result
+import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.buildUrl
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
 import com.github.salomonbrys.kotson.array
@@ -367,14 +368,14 @@ open class HalClient @JvmOverloads constructor(
     if (resp.entity.contentType != null) {
       val contentType = ContentType.getOrDefault(resp.entity)
       if (isJsonResponse(contentType)) {
-        var error = "Unknown error"
-        if (body != null) {
+        var error = ""
+        if (body.isNotEmpty()) {
           val jsonBody = JsonParser().parse(body)
           if (jsonBody != null && jsonBody.obj.has("errors")) {
             if (jsonBody["errors"].isJsonArray) {
-              error = jsonBody["errors"].asJsonArray.joinToString(", ") { it.asString }
+              error = " - " + jsonBody["errors"].asJsonArray.joinToString(", ") { it.asString }
             } else if (jsonBody["errors"].isJsonObject) {
-              error = jsonBody["errors"].asJsonObject.entrySet().joinToString(", ") {
+              error = " - " + jsonBody["errors"].asJsonObject.entrySet().joinToString(", ") {
                 if (it.value.isJsonArray) {
                   "${it.key}: ${it.value.array.joinToString(", ") { it.asString }}"
                 } else {
@@ -384,7 +385,7 @@ open class HalClient @JvmOverloads constructor(
             }
           }
         }
-        return closure.apply("FAILED", "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - $error")
+        return closure.apply("FAILED", "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase}$error")
       } else {
         return closure.apply("FAILED", "${resp.statusLine.statusCode} ${resp.statusLine.reasonPhrase} - $body")
       }

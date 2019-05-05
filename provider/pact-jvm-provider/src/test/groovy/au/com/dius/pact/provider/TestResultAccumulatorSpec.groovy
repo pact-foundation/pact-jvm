@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.pactbroker.TestResult
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
@@ -71,7 +72,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.updateTestResult(mutablePact, interaction3, true)
 
     then:
-    1 * mockVerificationReporter.reportResults(_, true, _, null)
+    1 * mockVerificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, null)
 
     cleanup:
     testResultAccumulator.verificationReporter = DefaultVerificationReporter.INSTANCE
@@ -117,11 +118,11 @@ class TestResultAccumulatorSpec extends Specification {
 
     where:
 
-    result << [true, false]
+    result << [TestResult.Ok.INSTANCE, new TestResult.Failed()]
   }
 
   @Unroll
-  def 'updateTestResult - publish verification results should be an or of all the test results'() {
+  def 'updateTestResult - publish verification results should be an "or" of all the test results'() {
     given:
     def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'),
       [interaction1, interaction2])
@@ -143,11 +144,11 @@ class TestResultAccumulatorSpec extends Specification {
 
     where:
 
-    interaction1Result | interaction2Result | result
-    true               | true               | true
-    true               | false              | false
-    false              | true               | false
-    false              | false              | false
+    interaction1Result      | interaction2Result      | result
+    TestResult.Ok.INSTANCE  | TestResult.Ok.INSTANCE  | TestResult.Ok.INSTANCE
+    TestResult.Ok.INSTANCE  | new TestResult.Failed() | new TestResult.Failed()
+    new TestResult.Failed() | TestResult.Ok.INSTANCE  | new TestResult.Failed()
+    new TestResult.Failed() | new TestResult.Failed() | new TestResult.Failed()
   }
 
 }

@@ -620,6 +620,21 @@ For example:
 </plugin>
 ```
 
+Or to use a bearer token:
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven_2.12</artifactId>
+    <version>3.5.11</version>
+    <configuration>
+      <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
+      <pactBrokerToken>TOKEN</pactBrokerToken> <!-- Replace TOKEN with the actual token -->
+      <pactBrokerAuthenticationScheme>Bearer</pactBrokerAuthenticationScheme>
+    </configuration>
+</plugin>
+```
+
 #### Using the Maven servers configuration
 
 You can use the servers setup in the Maven settings. To do this, setup a server as per the
@@ -644,17 +659,6 @@ You can exclude some of the pact files from being published by providing a list 
 against the base names of the pact files.
 
 For example:
-
-```groovy
-pact {
-
-    publish {
-        pactBrokerUrl = 'https://mypactbroker.com'
-        excludes = [ '.*\\-\\d+$' ] // exclude all pact files that end with a dash followed by a number in the name 
-    }
-
-}
-```
 
 ```xml
 <plugin>
