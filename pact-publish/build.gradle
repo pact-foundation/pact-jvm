@@ -1,6 +1,6 @@
 buildscript {
   dependencies {
-    classpath "au.com.dius:pact-jvm-provider-gradle_2.12:${project.version}"
+    classpath "au.com.dius:pact-jvm-provider-gradle_2.12:3.6.6"
   }
 }
 
