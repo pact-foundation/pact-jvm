@@ -13,6 +13,7 @@ import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.UnknownPactSource
 import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.Message
+import au.com.dius.pact.pactbroker.TestResult
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import spock.lang.Specification
@@ -394,14 +395,14 @@ class ProviderVerifierSpec extends Specification {
     where:
 
     result1 | result2 | finalResult
-    true    | true    | true
-    true    | false   | false
-    false   | true    | false
-    false   | false   | false
+    true    | true    | TestResult.Ok.INSTANCE
+    true    | false   | new TestResult.Failed()
+    false   | true    | new TestResult.Failed()
+    false   | false   | new TestResult.Failed()
   }
 
   @SuppressWarnings('UnnecessaryGetter')
-  def 'Do not publish verification results if the pact interactions have been filtered'() {
+  def 'Do not publish verification results if not all the pact interactions have been verified'() {
     given:
     ProviderInfo provider = new ProviderInfo('Test Provider')
     ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
@@ -444,10 +445,10 @@ class ProviderVerifierSpec extends Specification {
     def client = Mock(PactBrokerClient)
 
     when:
-    DefaultVerificationReporter.INSTANCE.reportResults(pact, true, '0', client)
+    DefaultVerificationReporter.INSTANCE.reportResults(pact, TestResult.Ok.INSTANCE, '0', client)
 
     then:
-    1 * client.publishVerificationResults(links, true, '0', null) >> new Ok(true)
+    1 * client.publishVerificationResults(links, TestResult.Ok.INSTANCE, '0', null) >> new Ok(true)
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -459,10 +460,10 @@ class ProviderVerifierSpec extends Specification {
     def client = Mock(PactBrokerClient)
 
     when:
-    DefaultVerificationReporter.INSTANCE.reportResults(pact, true, '0', client)
+    DefaultVerificationReporter.INSTANCE.reportResults(pact, TestResult.Ok.INSTANCE, '0', client)
 
     then:
-    0 * client.publishVerificationResults(_, true, '0', null)
+    0 * client.publishVerificationResults(_, TestResult.Ok.INSTANCE, '0', null)
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -496,7 +497,7 @@ class ProviderVerifierSpec extends Specification {
     1 * PactReader.loadPact(_) >> pact
     1 * StateChange.executeStateChange(_, _, _, _, _, _, _) >> new StateChangeResult(new Ok([:]), '')
     1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _) >> true
-    0 * client.publishVerificationResults(_, true, _, _)
+    0 * client.publishVerificationResults(_, TestResult.Ok.INSTANCE, _, _)
   }
 
   @Unroll

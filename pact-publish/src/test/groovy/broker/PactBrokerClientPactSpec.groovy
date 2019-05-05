@@ -3,6 +3,7 @@ package broker
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.groovy.PactBuilder
+import au.com.dius.pact.pactbroker.TestResult
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import spock.lang.Specification
 
@@ -243,7 +244,7 @@ class PactBrokerClientPactSpec extends Specification {
           href: 'http://localhost:8080/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
             '/verification-results'
         ]
-      ], true, '10.0.0') instanceof Ok
+      ], TestResult.Ok.INSTANCE, '10.0.0') instanceof Ok
     }
 
     then:

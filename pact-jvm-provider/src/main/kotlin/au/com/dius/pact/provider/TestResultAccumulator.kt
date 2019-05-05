@@ -2,23 +2,36 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
+import au.com.dius.pact.pactbroker.TestResult
 import au.com.dius.pact.provider.ProviderVerifierBase.Companion.PACT_VERIFIER_PUBLISH_RESULTS
 import mu.KLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
 
+/**
+ * Accumulates the test results for the interactions. Once all the interactions for a pact have been verified,
+ * the result is submitted back to the broker
+ */
 interface TestResultAccumulator {
-  fun updateTestResult(pact: Pact<Interaction>, interaction: Interaction, testExecutionResult: Boolean)
+  @Deprecated(message = "Use the version that takes a TestResult parameter")
+  fun updateTestResult(pact: Pact<out Interaction>, interaction: Interaction, testExecutionResult: Boolean)
+  fun updateTestResult(pact: Pact<out Interaction>, interaction: Interaction, testExecutionResult: TestResult)
+
+  fun clearTestResult(pact: Pact<out Interaction>)
 }
 
 object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
 
-  private val testResults: MutableMap<Int, MutableMap<Int, Boolean>> = mutableMapOf()
+  private val testResults: MutableMap<Int, MutableMap<Int, TestResult>> = mutableMapOf()
   var verificationReporter: VerificationReporter = DefaultVerificationReporter
 
+  override fun updateTestResult(pact: Pact<out Interaction>, interaction: Interaction, testExecutionResult: Boolean) {
+    updateTestResult(pact, interaction, TestResult.fromBoolean(testExecutionResult))
+  }
+
   override fun updateTestResult(
-    pact: Pact<Interaction>,
+    pact: Pact<out Interaction>,
     interaction: Interaction,
-    testExecutionResult: Boolean
+    testExecutionResult: TestResult
   ) {
     logger.debug { "Received test result '$testExecutionResult' for Pact ${pact.provider.name}-${pact.consumer.name} " +
       "and ${interaction.description}" }
@@ -33,7 +46,7 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
           "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')" }
       } else {
         verificationReporter.reportResults(pact,
-          interactionResults.values.fold(true) { acc, result -> acc && result }, lookupProviderVersion())
+          interactionResults.values.fold(true) { acc, result -> acc && result.toBoolean() }, lookupProviderVersion())
       }
     }
   }
@@ -44,7 +57,7 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
     return builder.toHashCode()
   }
 
-  fun calculatePactHash(pact: Pact<Interaction>) =
+  fun calculatePactHash(pact: Pact<out Interaction>) =
     HashCodeBuilder().append(pact.consumer.name).append(pact.provider.name).toHashCode()
 
   fun lookupProviderVersion(): String {
@@ -57,7 +70,12 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
     }
   }
 
-  fun allInteractionsVerified(pact: Pact<Interaction>, results: MutableMap<Int, Boolean>): Boolean {
+  fun allInteractionsVerified(pact: Pact<out Interaction>, results: MutableMap<Int, TestResult>): Boolean {
     return pact.interactions.all { results.containsKey(calculateInteractionHash(it)) }
+  }
+
+  override fun clearTestResult(pact: Pact<out Interaction>) {
+    val pactHash = calculatePactHash(pact)
+    testResults.remove(pactHash)
   }
 }
