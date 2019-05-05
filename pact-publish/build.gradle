@@ -1,10 +1,10 @@
-if (System.env.PACT_PUBLISH == 'true') {
-  buildscript {
-    dependencies {
-      classpath "au.com.dius:pact-jvm-provider-gradle_2.12:${project.version}"
-    }
+buildscript {
+  dependencies {
+    classpath "au.com.dius:pact-jvm-provider-gradle_2.12:${project.version}"
   }
-  
+}
+
+if (System.env.PACT_PUBLISH == 'true') {
   apply plugin: 'au.com.dius.pact'
 }
 

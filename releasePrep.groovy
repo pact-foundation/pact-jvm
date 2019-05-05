@@ -107,7 +107,11 @@ ask('Tag and Push commits?: [Y]') {
 }
 
 ask('Publish artifacts to maven central?: [Y]') {
-  executeOnShell './gradlew clean uploadArchives :pact-jvm-provider-gradle_2.12:publishPlugins -S'
+  executeOnShell './gradlew clean uploadArchives :pact-jvm-provider-gradle_2.12:publishPlugins -S -x :pact-publish:uploadArchives'
+}
+
+ask('Publish pacts to pact-foundation.pact.dius.com.au?: [Y]') {
+  executeOnShell 'PACT_PUBLISH=true ./gradlew :pact-publish:test :pact-publish:pactPublish'
 }
 
 def nextVer = Version.valueOf(releaseVer).incrementPatchVersion()
