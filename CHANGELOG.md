@@ -1,5 +1,26 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.6.6 - Bugfix Release
+
+* ad59aa4d - refactor: verification methods now return test results instead of boolean (Ronald Holshausen, Sun May 5 16:07:28 2019 +1000)
+* dcd05213 - feat: update the verification results to be a test result instead of a boolean (Ronald Holshausen, Sun May 5 12:16:56 2019 +1000)
+* ae17dc5b - doc: updated doco about using bearer tokens (Ronald Holshausen, Sat May 4 17:30:51 2019 +1000)
+* a88e6a17 - fix: the build (Ronald Holshausen, Sat May 4 17:21:14 2019 +1000)
+* b26bed53 - feat: added pact test for publishing verification results (Ronald Holshausen, Sat May 4 16:48:23 2019 +1000)
+* 1610f9d3 - feat: added pact-publish module to enable pactception (Ronald Holshausen, Sat May 4 16:28:48 2019 +1000)
+* ac704677 - fix: for failing build #876 (Ronald Holshausen, Fri May 3 18:21:50 2019 +1000)
+* cf937f44 - fix: correct the use of matchers with query parameters #876 (Ronald Holshausen, Fri May 3 18:05:48 2019 +1000)
+* 3c5c65b7 - doc: add note about using Maven isolated classpath and message verification tests #763 (Ronald Holshausen, Fri May 3 16:43:27 2019 +1000)
+* 2f447e9d - test: updated JUnit 5 test with a does not exist example (Ronald Holshausen, Thu Apr 25 18:29:43 2019 +1000)
+* a1b97980 - fix: correctly handle the message content type with charsets when verifying #874 (Ronald Holshausen, Thu Apr 25 17:51:53 2019 +1000)
+* efe3e0fe - fix: correctly handle the message content type with charsets #874 (Ronald Holshausen, Thu Apr 25 17:17:02 2019 +1000)
+* dbe9bc21 - fix: only set the message content type if it has not been specified #874 (Ronald Holshausen, Thu Apr 25 16:06:44 2019 +1000)
+* 3d43a33a - chore: update clojure to latest (Ronald Holshausen, Mon Apr 22 11:16:22 2019 +1000)
+* 3c8267a5 - Revert "fix: exclude clojure test from appveyor build" (Ronald Holshausen, Mon Apr 22 11:15:54 2019 +1000)
+* 616ade41 - chore: update nebula.clojure plugin (Ronald Holshausen, Mon Apr 22 11:09:55 2019 +1000)
+* 49bf7fc5 - Update README.md (Ronald Holshausen, Mon Apr 22 11:02:29 2019 +1000)
+* 550cf6f7 - bump version to 3.6.6 (Ronald Holshausen, Sun Apr 21 15:38:11 2019 +1000)
+
 # 3.6.5 - Bugfix Release + Matching on message metadata
 
 * c3b8e3ad - fix: exclude clojure test from appveyor build (Ronald Holshausen, Sun Apr 21 14:57:07 2019 +1000)
