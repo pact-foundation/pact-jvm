@@ -7,6 +7,7 @@ import au.com.dius.pact.model.generators.ProviderStateGenerator;
 import au.com.dius.pact.model.PactReaderKt;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import com.mifmif.common.regex.Generex;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
@@ -321,6 +322,115 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
     return new PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state,
       description, example, requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators,
       defaultRequestValues, defaultResponseValues);
+  }
+
+  /**
+   * Matches a date field using the provided date pattern
+   * @param field field name
+   * @param pattern pattern to match
+   * @param example Example value
+   */
+  public PactDslRequestWithoutPath queryMatchingDate(String field, String pattern, String example) {
+    return (PactDslRequestWithoutPath) queryMatchingDateBase(field, pattern, example);
+  }
+
+  /**
+   * Matches a date field using the provided date pattern. The current system date will be used for the example value.
+   * @param field field name
+   * @param pattern pattern to match
+   */
+  public PactDslRequestWithoutPath queryMatchingDate(String field, String pattern) {
+    return (PactDslRequestWithoutPath) queryMatchingDateBase(field, pattern, null);
+  }
+
+  /**
+   * Matches a time field using the provided time pattern
+   * @param field field name
+   * @param pattern pattern to match
+   * @param example Example value
+   */
+  public PactDslRequestWithoutPath queryMatchingTime(String field, String pattern, String example) {
+    return (PactDslRequestWithoutPath) queryMatchingTimeBase(field, pattern, example);
+  }
+
+  /**
+   * Matches a time field using the provided time pattern. The current system time will be used for the example value.
+   * @param field field name
+   * @param pattern pattern to match
+   */
+  public PactDslRequestWithoutPath queryMatchingTime(String field, String pattern) {
+    return (PactDslRequestWithoutPath) queryMatchingTimeBase(field, pattern, null);
+  }
+
+  /**
+   * Matches a datetime field using the provided pattern
+   * @param field field name
+   * @param pattern pattern to match
+   * @param example Example value
+   */
+  public PactDslRequestWithoutPath queryMatchingDatetime(String field, String pattern, String example) {
+    return (PactDslRequestWithoutPath) queryMatchingDatetimeBase(field, pattern, example);
+  }
+
+  /**
+   * Matches a datetime field using the provided pattern. The current system date and time will be used for the example value.
+   * @param field field name
+   * @param pattern pattern to match
+   */
+  public PactDslRequestWithoutPath queryMatchingDatetime(String field, String pattern) {
+    return (PactDslRequestWithoutPath) queryMatchingDatetimeBase(field, pattern, null);
+  }
+
+  /**
+   * Matches a date field using the ISO date pattern
+   * @param field field name
+   * @param example Example value
+   */
+  public PactDslRequestWithoutPath queryMatchingISODate(String field, String example) {
+    return (PactDslRequestWithoutPath) queryMatchingDateBase(field, DateFormatUtils.ISO_DATE_FORMAT.getPattern(), example);
+  }
+
+  /**
+   * Matches a date field using the ISO date pattern. The current system date will be used for the example value.
+   * @param field field name
+   */
+  public PactDslRequestWithoutPath queryMatchingISODate(String field) {
+    return queryMatchingISODate(field, null);
+  }
+
+  /**
+   * Matches a time field using the ISO time pattern
+   * @param field field name
+   * @param example Example value
+   */
+  public PactDslRequestWithoutPath queryMatchingISOTime(String field, String example) {
+    return (PactDslRequestWithoutPath) queryMatchingTimeBase(field, DateFormatUtils.ISO_TIME_FORMAT.getPattern(), example);
+  }
+
+  /**
+   * Matches a time field using the ISO time pattern. The current system time will be used for the example value.
+   * @param field field name
+   */
+  public PactDslRequestWithoutPath queryMatchingTime(String field) {
+    return queryMatchingISOTime(field, null);
+  }
+
+  /**
+   * Matches a datetime field using the ISO pattern
+   * @param field field name
+   * @param example Example value
+   */
+  public PactDslRequestWithoutPath queryMatchingISODatetime(String field, String example) {
+    return (PactDslRequestWithoutPath) queryMatchingDatetimeBase(field, DateFormatUtils.ISO_DATETIME_FORMAT.getPattern(),
+      example);
+  }
+
+  /**
+   * Matches a datetime field using the ISO pattern. The current system date and time will be used for the example value.
+   * @param field field name
+   */
+  public PactDslRequestWithoutPath queryMatchingISODatetime(String field) {
+    return queryMatchingISODatetime(field, null);
   }
 
 }
