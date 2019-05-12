@@ -1,5 +1,13 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.6.7 - Bugfix Release
+
+* e09e6841 - feat: allow JUnit tests to use multiple pact methods #820 (Ronald Holshausen, Sun May 12 15:43:25 2019 +1000)
+* d0743826 - feat: add query parameter date/time matching to the Java DSL #876 (Ronald Holshausen, Sun May 12 12:50:58 2019 +1000)
+* e7f4c819 - fix: travis build (Ronald Holshausen, Sun May 5 18:43:11 2019 +1000)
+* ed9dba4d - chore: updated release script to publish pacts (Ronald Holshausen, Sun May 5 17:23:52 2019 +1000)
+* 07db6ddf - bump version to 3.6.7 (Ronald Holshausen, Sun May 5 17:23:16 2019 +1000)
+
 # 3.6.6 - Bugfix Release
 
 * ad59aa4d - refactor: verification methods now return test results instead of boolean (Ronald Holshausen, Sun May 5 16:07:28 2019 +1000)

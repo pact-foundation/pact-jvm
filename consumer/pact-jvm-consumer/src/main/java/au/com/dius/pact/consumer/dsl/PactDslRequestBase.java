@@ -1,11 +1,12 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.core.model.OptionalBody;
-import au.com.dius.pact.core.model.generators.Generators;
+import au.com.dius.pact.core.model.generators.*;
 import au.com.dius.pact.core.model.matchingrules.MatchingRules;
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
@@ -14,10 +15,7 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class PactDslRequestBase {
   protected static final String CONTENT_TYPE = "Content-Type";
@@ -26,6 +24,7 @@ public abstract class PactDslRequestBase {
    */
   @Deprecated
   private static final String MULTIPART_HEADER_REGEX = "multipart/form-data;(\\s*charset=[^;]*;)?\\s*boundary=.*";
+  private static final long DATE_2000 = 949323600000L;
 
   protected final PactDslRequestWithoutPath defaultRequestValues;
   protected String requestMethod;
@@ -64,5 +63,41 @@ public abstract class PactDslRequestBase {
     requestMatchers.addCategory("header").addRule(CONTENT_TYPE, new RegexMatcher(MULTIPART_HEADER_REGEX,
       multipart.getContentType().getValue()));
     requestHeaders.put(CONTENT_TYPE, Collections.singletonList(multipart.getContentType().getValue()));
+  }
+
+  protected PactDslRequestBase queryMatchingDateBase(String field, String pattern, String example) {
+    requestMatchers.addCategory("query").addRule(field, new au.com.dius.pact.core.model.matchingrules.DateMatcher(pattern));
+    if (StringUtils.isNotEmpty(example)) {
+      query.put(field, Collections.singletonList(example));
+    } else {
+      requestGenerators.addGenerator(Category.BODY, field, new DateGenerator(pattern, null));
+      FastDateFormat instance = FastDateFormat.getInstance(pattern);
+      query.put(field, Collections.singletonList(instance.format(new Date(DATE_2000))));
+    }
+    return this;
+  }
+
+  protected PactDslRequestBase queryMatchingTimeBase(String field, String pattern, String example) {
+    requestMatchers.addCategory("query").addRule(field, new au.com.dius.pact.core.model.matchingrules.TimeMatcher(pattern));
+    if (StringUtils.isNotEmpty(example)) {
+      query.put(field, Collections.singletonList(example));
+    } else {
+      requestGenerators.addGenerator(Category.BODY, field, new TimeGenerator(pattern, null));
+      FastDateFormat instance = FastDateFormat.getInstance(pattern);
+      query.put(field, Collections.singletonList(instance.format(new Date(DATE_2000))));
+    }
+    return this;
+  }
+
+  protected PactDslRequestBase queryMatchingDatetimeBase(String field, String pattern, String example) {
+    requestMatchers.addCategory("query").addRule(field, new au.com.dius.pact.core.model.matchingrules.TimestampMatcher(pattern));
+    if (StringUtils.isNotEmpty(example)) {
+      query.put(field, Collections.singletonList(example));
+    } else {
+      requestGenerators.addGenerator(Category.BODY, field, new DateTimeGenerator(pattern, null));
+      FastDateFormat instance = FastDateFormat.getInstance(pattern);
+      query.put(field, Collections.singletonList(instance.format(new Date(DATE_2000))));
+    }
+    return this;
   }
 }

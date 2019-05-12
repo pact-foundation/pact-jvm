@@ -11,6 +11,7 @@ import au.com.dius.pact.consumer.dsl.PactDslResponse;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.core.model.RequestResponsePact;
+import org.apache.http.client.HttpResponseException;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,7 +20,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class PactProviderWithMultipleFragmentsTest {
 
@@ -76,6 +80,19 @@ public class PactProviderWithMultipleFragmentsTest {
                 .toPact();
     }
 
+    @Pact(consumer="test_consumer", provider = "test_provider2")
+    public RequestResponsePact createFragment3(PactDslWithProvider builder) {
+        return builder
+          .given("bad state")
+          .uponReceiving("PactProviderTest test interaction 3")
+          .path("/path/2")
+          .method("GET")
+          .willRespondWith()
+          .status(404)
+          .body("{\"error\": \"ID 2 does not exist\"}")
+          .toPact();
+    }
+
     @Test
     @PactVerification(value = "test_provider2", fragment = "createFragment2")
     public void runTestWithFragment2() throws IOException {
@@ -111,5 +128,31 @@ public class PactProviderWithMultipleFragmentsTest {
         expectedResponse.put("responsetest", true);
         expectedResponse.put("name", "fred");
         assertEquals(new ConsumerClient(mockTestProvider2.getUrl()).getAsMap("/", ""), expectedResponse);
+    }
+
+    @Test
+    @PactVerifications({
+      @PactVerification(value = "test_provider", fragment = "createFragment"),
+      @PactVerification(value = "test_provider2", fragment = "createFragment2"),
+      @PactVerification(value = "test_provider2", fragment = "createFragment3")
+    })
+    public void runTestWithAllFragments() throws IOException {
+        Assert.assertEquals(new ConsumerClient(mockTestProvider.getUrl()).options("/second"), 200);
+        Map expectedResponse = new HashMap();
+        expectedResponse.put("responsetest", true);
+        expectedResponse.put("name", "harry");
+        assertEquals(new ConsumerClient(mockTestProvider.getUrl()).getAsMap("/", ""), expectedResponse);
+
+        expectedResponse = new HashMap();
+        expectedResponse.put("responsetest", true);
+        expectedResponse.put("name", "fred");
+        assertEquals(new ConsumerClient(mockTestProvider2.getUrl()).getAsMap("/", ""), expectedResponse);
+
+        try {
+            new ConsumerClient(mockTestProvider2.getUrl()).getAsMap("/path/2", "");
+            fail();
+        } catch (HttpResponseException ex) {
+            assertThat(ex.getStatusCode(), is(404));
+        }
     }
 }
