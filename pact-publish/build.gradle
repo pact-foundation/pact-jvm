@@ -10,6 +10,7 @@ if (System.env.PACT_PUBLISH == 'true') {
 
 dependencies {
   testCompile project(":consumer:pact-jvm-consumer-groovy")
+  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 }
 
 if (System.env.PACT_PUBLISH == 'true') {

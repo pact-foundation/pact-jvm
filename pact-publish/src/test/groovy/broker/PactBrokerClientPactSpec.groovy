@@ -62,7 +62,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
   }
 
   def 'returns an error when forbidden to publish the pact'() {
@@ -84,7 +84,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
   }
 
   @SuppressWarnings('LineLength')
@@ -118,7 +118,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
   }
 
   @SuppressWarnings('LineLength')
@@ -149,7 +149,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
   }
 
   @SuppressWarnings('LineLength')
@@ -173,7 +173,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
   }
 
   def 'pact broker navigation test'() {
@@ -187,7 +187,7 @@ class PactBrokerClientPactSpec extends Specification {
       uponReceiving('a request to the root')
       withAttributes(path: '/')
       willRespondWith(status: 200)
-      withBody('application/hal+json') {
+      withBody(contentType: 'application/hal+json') {
         '_links' {
           'pb:latest-provider-pacts' {
             href url('http://localhost:8080', 'pacts', 'provider', '{provider}', 'latest')
@@ -199,7 +199,7 @@ class PactBrokerClientPactSpec extends Specification {
       uponReceiving('a request for the provider pacts')
       withAttributes(path: '/pacts/provider/Activity Service/latest')
       willRespondWith(status: 200)
-      withBody('application/hal+json') {
+      withBody(contentType: 'application/hal+json') {
         '_links' {
           provider {
             href url('http://localhost:8080', 'pacticipants', regexp('[^\\/]+', 'Activity Service'))
@@ -222,7 +222,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
   }
 
   def 'publishing verification results pact test'() {
@@ -248,7 +248,7 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
   }
 
   def 'publishing verification results pact test with build info'() {
@@ -274,6 +274,6 @@ class PactBrokerClientPactSpec extends Specification {
     }
 
     then:
-    result == PactVerificationResult.Ok.INSTANCE
+    result instanceof PactVerificationResult.Ok
   }
 }
