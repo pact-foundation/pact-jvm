@@ -59,7 +59,7 @@ def projectProps = './gradlew :core:pact-jvm-core-model:properties'.execute().te
 
 def version = projectProps.version
 
-def prevTag = 'git describe --abbrev=0 --tags'.execute().text.trim()
+def prevTag = 'git tag --merged'.execute().text.split('\n').last()
 def changelog = []
 executeOnShell("git log --pretty='* %h - %s (%an, %ad)' ${prevTag}..HEAD".toString()) {
   println it
