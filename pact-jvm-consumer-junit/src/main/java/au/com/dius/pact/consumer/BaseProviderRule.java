@@ -14,11 +14,8 @@ import org.junit.runners.model.Statement;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
 
@@ -85,33 +82,40 @@ public class BaseProviderRule extends ExternalResource {
   }
 
   private void evaluatePactVerifications(PactVerifications pactVerifications, Statement base) throws Throwable {
-      Optional<PactVerification> possiblePactVerification = findPactVerification(pactVerifications);
-      if (!possiblePactVerification.isPresent()) {
-          base.evaluate();
-          return;
-      }
+    List<PactVerification> possiblePactVerifications = findPactVerifications(pactVerifications, this.provider);
+    if (possiblePactVerifications.isEmpty()) {
+        base.evaluate();
+        return;
+    }
 
-      PactVerification pactVerification = possiblePactVerification.get();
+    final RequestResponsePact[] pact = { null };
+    possiblePactVerifications.forEach(pactVerification -> {
       Optional<Method> possiblePactMethod = findPactMethod(pactVerification);
       if (!possiblePactMethod.isPresent()) {
-          throw new UnsupportedOperationException("Could not find method with @Pact for the provider " + provider);
+        throw new UnsupportedOperationException("Could not find method with @Pact for the provider " + provider);
       }
 
       Method method = possiblePactMethod.get();
       Pact pactAnnotation = method.getAnnotation(Pact.class);
       PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(pactAnnotation.consumer()).hasPactWith(provider);
-      RequestResponsePact pact;
       try {
-        pact = (RequestResponsePact) method.invoke(target, dslBuilder);
+        RequestResponsePact pactFromMethod = (RequestResponsePact) method.invoke(target, dslBuilder);
+        if (pact[0] == null) {
+          pact[0] = pactFromMethod;
+        } else {
+          pact[0].mergeInteractions(pactFromMethod.getInteractions());
+        }
       } catch (Exception e) {
-          throw new RuntimeException("Failed to invoke pact method", e);
+        throw new RuntimeException("Failed to invoke pact method", e);
       }
-      PactFolder pactFolder = target.getClass().getAnnotation(PactFolder.class);
-      PactVerificationResult result = runPactTest(base, pact, pactFolder);
-      validateResult(result, pactVerification);
+    });
+
+    PactFolder pactFolder = target.getClass().getAnnotation(PactFolder.class);
+    PactVerificationResult result = runPactTest(base, pact[0], pactFolder);
+    JUnitTestSupport.validateMockServerResult(result);
   }
 
-  private Optional<PactVerification> findPactVerification(PactVerifications pactVerifications) {
+  private List<PactVerification> findPactVerifications(PactVerifications pactVerifications, String providerName) {
       PactVerification[] pactVerificationValues = pactVerifications.value();
       return Arrays.stream(pactVerificationValues).filter(p -> {
           String[] providers = p.value();
@@ -120,8 +124,8 @@ public class BaseProviderRule extends ExternalResource {
                       "Each @PactVerification must specify one and only provider when using @PactVerifications");
           }
           String provider = providers[0];
-          return provider.equals(this.provider);
-      }).findFirst();
+          return StringUtils.equals(provider, providerName);
+      }).collect(Collectors.toList());
   }
 
   private Optional<Method> findPactMethod(PactVerification pactVerification) {
