@@ -39,13 +39,11 @@ how to get going.
 Additional documentation can be found at [docs.pact.io](http://docs.pact.io), in the [Pact Wiki](https://github.com/realestate-com-au/pact/wiki),
 and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overflow](https://stackoverflow.com/questions/tagged/pact) is also a good source of help.
 
-## Note about artifact names and versions
-
 ## Supported JDK and specification versions:
 
 | Branch | Specification | JDK | Scala Versions | Latest Version |
 | ------ | ------------- | ------- | -------------- | -------------- |
-| 4.0.x | V3 | 8-11 | N/A | 4.0.0-beta.1 |
+| 4.0.x | V3 | 8-12 | N/A | 4.0.0-beta.1 |
 | 3.6.x | V3 | 8 | 2.12 | 3.6.7 |
 | 3.5.x | V3 | 8 | 2.12, 2.11 | 3.5.25 |
 | 3.5.x-jre7 | V3 | 7 | 2.11 | 3.5.7-jre7.0 |
