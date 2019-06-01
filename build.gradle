@@ -196,7 +196,7 @@ subprojects {
                 name 'Ronald Holshausen'
                 email 'rholshausen@dius.com.au'
             }
-        }
+      }
     }
 
     uploadArchives {

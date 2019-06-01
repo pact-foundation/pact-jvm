@@ -1,11 +1,13 @@
 task pactsJar(type: Jar, dependsOn: testClasses) {
-  baseName = "pacts-jar"
+  classifier = 'test-pacts'
   into('jar-pacts') {
     from(sourceSets.test.output) {
       include 'test_pact_v3.json'
     }
   }
 }
+
+test.dependsOn pactsJar
 
 configurations {
   testJars
@@ -35,4 +37,13 @@ dependencies {
 compileGroovy {
   classpath = classpath.plus(files(compileKotlin.destinationDir))
   dependsOn compileKotlin
+}
+
+install.repositories.mavenInstaller.pom.withXml {
+  Node pomNode = asNode()
+  pomNode.dependencies.'*'.findAll() {
+    it.classifier.text() == 'test-pacts'
+  }.each() {
+    it.parent().remove(it)
+  }
 }
