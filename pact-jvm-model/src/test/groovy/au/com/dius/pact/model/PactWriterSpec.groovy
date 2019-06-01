@@ -168,4 +168,23 @@ class PactWriterSpec extends Specification {
     interactionJson.request.body == [settlement_summary: [capture_submit_time: null, captured_date: null]]
     interactionJson.response.body == [settlement_summary: [capture_submit_time: null, captured_date: null]]
   }
+
+  @Issue('#879')
+  def 'when merging pact files, the original file must be read using UTF-8'() {
+    given:
+    def pactFile = File.createTempFile('PactWriterSpec', '.json')
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [
+      new RequestResponseInteraction(description: 'Request für ping', request: new Request(), response: new Response())
+    ])
+
+    when:
+    PactWriter.writePact(pactFile, pact, PactSpecVersion.V3)
+    PactWriter.writePact(pactFile, pact, PactSpecVersion.V3)
+
+    then:
+    new JsonSlurper().parse(pactFile).interactions[0].description == 'Request für ping'
+
+    cleanup:
+    pactFile.delete()
+  }
 }

@@ -1,12 +1,12 @@
 package au.com.dius.pact.model
 
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import mu.KLogging
 import java.io.File
 import java.io.PrintWriter
 import java.io.RandomAccessFile
 import java.io.StringWriter
+import java.nio.charset.Charset
 
 enum class PactWriteMode {
   MERGE, OVERWRITE
@@ -50,7 +50,7 @@ object PactWriter : KLogging() {
       try {
         val pactReaderClass = Class.forName("au.com.dius.pact.model.PactReader")
         val loadPact = pactReaderClass.getDeclaredMethod("loadPact", Class.forName("java.lang.Object"))
-        val existingPact = loadPact.invoke(null, readLines(raf)) as Pact<I>
+        val existingPact = loadPact.invoke(null, readFileUtf8(raf)) as Pact<I>
         val result = PactMerge.merge(existingPact, pact)
         if (!result.ok) {
           throw InvalidPactException(result.message)
@@ -79,13 +79,17 @@ object PactWriter : KLogging() {
     }
   }
 
-  private fun readLines(file: RandomAccessFile): String {
+  private fun readFileUtf8(file: RandomAccessFile): String {
+    val buffer = ByteArray(128)
     val data = StringBuilder()
-    var line = file.readLine()
-    while (line != null) {
-      data.append(line)
-      line = file.readLine()
+    val charset = Charset.forName("UTF-8")
+
+    var count = file.read(buffer)
+    while (count > 0) {
+      data.append(String(buffer, charset))
+      count = file.read(buffer)
     }
+
     return data.toString()
   }
 }
