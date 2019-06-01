@@ -90,8 +90,8 @@ class MatchingRulesImpl : MatchingRules {
 
     private fun toV2Map(): Map<String, Any?> {
         val result = mutableMapOf<String, Any?>()
-        rules.forEach {
-            it.value.toMap(PactSpecVersion.V2).forEach {
+        rules.forEach { entry ->
+            entry.value.toMap(PactSpecVersion.V2).forEach {
                 result[it.key] = it.value
             }
         }

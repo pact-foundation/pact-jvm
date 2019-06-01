@@ -139,7 +139,10 @@ data class Category @JvmOverloads constructor(
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
     return if (pactSpecVersion < PactSpecVersion.V3) {
       matchingRules.entries.associate {
-        val keyBase = "\$.$name"
+        val keyBase = when (name) {
+          "header" -> "\$.headers"
+          else -> "\$.$name"
+        }
         val key = when {
           it.key.startsWith('$') -> keyBase + it.key.substring(1)
           it.key.isNotEmpty() && !it.key.startsWith('[') -> keyBase + '.' + it.key
