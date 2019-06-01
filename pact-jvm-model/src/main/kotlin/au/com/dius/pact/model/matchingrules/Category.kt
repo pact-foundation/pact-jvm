@@ -121,7 +121,13 @@ data class Category @JvmOverloads constructor(
    * Re-key all the rules with the given prefix
    */
   fun applyMatcherRootPrefix(prefix: String) {
-    matchingRules = matchingRules.mapKeys { e -> prefix + e.key }.toMutableMap()
+    matchingRules = matchingRules.mapKeys { e ->
+      if (e.key.startsWith(prefix)) {
+        e.key
+      } else {
+        prefix + e.key
+      }
+    }.toMutableMap()
   }
 
   /**
