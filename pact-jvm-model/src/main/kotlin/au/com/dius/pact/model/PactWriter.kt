@@ -1,5 +1,6 @@
 package au.com.dius.pact.model
 
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import mu.KLogging
 import java.io.File
@@ -16,6 +17,8 @@ enum class PactWriteMode {
  */
 object PactWriter : KLogging() {
 
+  private val gson = GsonBuilder().setPrettyPrinting().serializeNulls().create()
+
   /**
    * Writes out the pact to the provided pact file
    * @param pact Pact to write
@@ -28,7 +31,6 @@ object PactWriter : KLogging() {
     where I : Interaction {
     pact.sortInteractions()
     val jsonData = pact.toMap(pactSpecVersion)
-    val gson = GsonBuilder().setPrettyPrinting().create()
     gson.toJson(jsonData, writer)
   }
 

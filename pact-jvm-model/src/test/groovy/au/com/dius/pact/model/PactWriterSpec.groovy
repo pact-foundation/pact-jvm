@@ -3,6 +3,7 @@ package au.com.dius.pact.model
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.model.v3.messaging.MessagePact
 import groovy.json.JsonSlurper
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 
@@ -145,4 +146,26 @@ class PactWriterSpec extends Specification {
     file.delete()
   }
 
+  @Issue('#877')
+  def 'keep null attributes in the body'() {
+    given:
+    def request = new Request(body: OptionalBody.body(
+      '{"settlement_summary": {"capture_submit_time": null,"captured_date": null}}'.bytes))
+    def response = new Response(body: OptionalBody.body(
+      '{"settlement_summary": {"capture_submit_time": null,"captured_date": null}}'.bytes))
+    def interaction = new RequestResponseInteraction('test interaction with null values in bodies',
+      null, request, response)
+    def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),
+      new Consumer('PactWriterSpecConsumer'), [interaction])
+    def sw = new StringWriter()
+
+    when:
+    PactWriter.writePact(pact, new PrintWriter(sw))
+    def json = new JsonSlurper().parseText(sw.toString())
+    def interactionJson = json.interactions.first()
+
+    then:
+    interactionJson.request.body == [settlement_summary: [capture_submit_time: null, captured_date: null]]
+    interactionJson.response.body == [settlement_summary: [capture_submit_time: null, captured_date: null]]
+  }
 }
