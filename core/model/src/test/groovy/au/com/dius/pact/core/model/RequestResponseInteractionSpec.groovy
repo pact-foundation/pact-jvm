@@ -20,7 +20,7 @@ class RequestResponseInteractionSpec extends Specification {
 
   def 'creates a V3 map format if V3 spec'() {
     when:
-    def map = interaction.toMap()
+    def map = interaction.toMap(PactSpecVersion.V3)
 
     then:
     map == [
@@ -52,9 +52,10 @@ class RequestResponseInteractionSpec extends Specification {
 
   def 'does not include a provide state if there is not any'() {
     when:
-    interaction.providerStates = []
-    def mapV3 = interaction.toMap()
-    def mapV2 = interaction.toMap(PactSpecVersion.V3)
+    interaction = new RequestResponseInteraction('test interaction', [],
+      new Request(generators: generators), new Response(generators: generators))
+    def mapV3 = interaction.toMap(PactSpecVersion.V3)
+    def mapV2 = interaction.toMap(PactSpecVersion.V2)
 
     then:
     !mapV3.containsKey('providerStates')
@@ -75,24 +76,26 @@ class RequestResponseInteractionSpec extends Specification {
     interaction4.uniqueKey() != interaction5.uniqueKey()
 
     where:
-    interaction1 = new RequestResponseInteraction('description 1+2')
-    interaction2 = new RequestResponseInteraction('description 1+2')
-    interaction3 = new RequestResponseInteraction('description 1+2', [new ProviderState('state 3')])
-    interaction4 = new RequestResponseInteraction('description 4')
-    interaction5 = new RequestResponseInteraction('description 4', [new ProviderState('state 5')])
+    interaction1 = new RequestResponseInteraction('description 1+2', new Request(), new Response())
+    interaction2 = new RequestResponseInteraction('description 1+2', new Request(), new Response())
+    interaction3 = new RequestResponseInteraction('description 1+2', [new ProviderState('state 3')],
+      new Request(), new Response())
+    interaction4 = new RequestResponseInteraction('description 4', new Request(), new Response())
+    interaction5 = new RequestResponseInteraction('description 4', [new ProviderState('state 5')],
+      new Request(), new Response())
   }
 
   @Unroll
   def 'displayState test'() {
     expect:
-    new RequestResponseInteraction(providerStates: providerStates).displayState() == stateDescription
+    new RequestResponseInteraction(stateDescription, providerStates, new Request(), new Response())
+      .displayState() == stateDescription
 
     where:
 
     providerStates                                               | stateDescription
-    null                                                         | 'None'
     []                                                           | 'None'
-    [new ProviderState(null)]                                    | 'None'
+    [new ProviderState('')]                                      | 'None'
     [new ProviderState('state 1')]                               | 'state 1'
     [new ProviderState('state 1'), new ProviderState('state 2')] | 'state 1, state 2'
   }

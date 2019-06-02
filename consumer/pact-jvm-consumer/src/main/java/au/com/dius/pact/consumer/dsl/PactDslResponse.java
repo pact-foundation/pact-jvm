@@ -106,7 +106,7 @@ public class PactDslResponse {
      * @param mimeType the Content-Type response header value
      */
     public PactDslResponse body(String body, String mimeType) {
-        responseBody = OptionalBody.body(body.getBytes());
+        responseBody = OptionalBody.body(body.getBytes(), new au.com.dius.pact.core.model.ContentType(mimeType));
         responseHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
         return this;
     }
@@ -138,7 +138,7 @@ public class PactDslResponse {
      * @param mimeType the Content-Type response header value
      */
     public PactDslResponse body(Supplier<String> body, String mimeType) {
-        responseBody = OptionalBody.body(body.get().getBytes());
+        responseBody = OptionalBody.body(body.get().getBytes(), new au.com.dius.pact.core.model.ContentType(mimeType));
         responseHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
         return this;
     }
@@ -198,7 +198,8 @@ public class PactDslResponse {
      * @param body Response body in JSON form
      */
     public PactDslResponse body(JSONObject body) {
-        this.responseBody = OptionalBody.body(body.toString().getBytes());
+        this.responseBody = OptionalBody.body(body.toString().getBytes(),
+          au.com.dius.pact.core.model.ContentType.Companion.getJSON());
         if (!responseHeaders.containsKey(CONTENT_TYPE)) {
             matchHeader(CONTENT_TYPE, DEFAULT_JSON_CONTENT_TYPE_REGEX, ContentType.APPLICATION_JSON.toString());
         }
@@ -220,7 +221,8 @@ public class PactDslResponse {
         responseMatchers.addCategory(parent.getMatchers());
         responseGenerators.addGenerators(parent.generators);
         if (parent.getBody() != null) {
-            responseBody = OptionalBody.body(parent.getBody().toString().getBytes());
+            responseBody = OptionalBody.body(parent.getBody().toString().getBytes(),
+              au.com.dius.pact.core.model.ContentType.Companion.getJSON());
         } else {
             responseBody = OptionalBody.nullBody();
         }

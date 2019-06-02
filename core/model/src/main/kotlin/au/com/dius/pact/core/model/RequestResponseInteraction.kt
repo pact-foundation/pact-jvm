@@ -7,7 +7,7 @@ import java.net.URLEncoder
 /**
  * Interaction between a consumer and a provider
  */
-class RequestResponseInteraction(
+class RequestResponseInteraction @JvmOverloads constructor(
   override val description: String,
   override val providerStates: List<ProviderState> = listOf(),
   val request: Request,

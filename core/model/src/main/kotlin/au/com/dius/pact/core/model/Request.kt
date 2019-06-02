@@ -25,6 +25,7 @@ class Request @JvmOverloads constructor(
   fun copy() = Request(method, path, query.toMutableMap(), headers.toMutableMap(), body.copy(), matchingRules.copy(),
     generators.copy())
 
+  @JvmOverloads
   fun generatedRequest(context: Map<String, Any> = emptyMap(), mode: GeneratorTestMode = GeneratorTestMode.Provider): Request {
     val r = this.copy()
     generators.applyGenerator(Category.PATH, mode) { _, g -> r.path = g.generate(context).toString() }
@@ -58,6 +59,34 @@ class Request @JvmOverloads constructor(
     }
   }
 
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as Request
+
+    if (method != other.method) return false
+    if (path != other.path) return false
+    if (query != other.query) return false
+    if (headers != other.headers) return false
+    if (body != other.body) return false
+    if (matchingRules != other.matchingRules) return false
+    if (generators != other.generators) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = method.hashCode()
+    result = 31 * result + path.hashCode()
+    result = 31 * result + query.hashCode()
+    result = 31 * result + headers.hashCode()
+    result = 31 * result + body.hashCode()
+    result = 31 * result + matchingRules.hashCode()
+    result = 31 * result + generators.hashCode()
+    return result
+  }
+
   companion object: KLogging() {
     const val COOKIE_KEY = "cookie"
     const val DEFAULT_METHOD = "GET"
@@ -79,8 +108,12 @@ class Request @JvmOverloads constructor(
       val body = if (map.containsKey("body"))
         OptionalBody.body(map["body"]?.toString()?.toByteArray())
         else OptionalBody.missing()
-      val matchingRules = MatchingRulesImpl.fromMap(map["matchingRules"] as Map<String, Map<String, Any?>>)
-      val generators = Generators.fromMap(map["generators"] as Map<String, Map<String, Any>>)
+      val matchingRules = if (map.containsKey("matchingRules"))
+        MatchingRulesImpl.fromMap(map["matchingRules"] as Map<String, Map<String, Any?>>)
+        else MatchingRulesImpl()
+      val generators = if (map.containsKey("generators"))
+        Generators.fromMap(map["generators"] as Map<String, Map<String, Any>>)
+        else Generators()
       return Request(method, path, query.toMutableMap(), headers.toMutableMap(), body, matchingRules, generators)
     }
   }

@@ -59,9 +59,6 @@ class RequestMatching(private val expectedInteractions: List<RequestResponseInte
   companion object : KLogging() {
     var allowUnexpectedKeys = false
 
-    //  implicit def liftPactForMatching(pact: RequestResponsePact): RequestMatching =
-    //    RequestMatching(JavaConversions.collectionAsScalaIterable(pact.getInteractions).toSeq)
-
     private fun isPartialMatch(problems: List<Mismatch>): Boolean = !problems.any {
       when (it) {
         is PathMismatch, is MethodMismatch -> true

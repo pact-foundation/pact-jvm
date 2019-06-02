@@ -30,7 +30,10 @@ object PactMerge : KLogging() {
     }
   }
 
-  private fun cartesianProduct(list1: List<Interaction>, list2: List<Interaction>): List<Pair<Interaction, Interaction>> {
+  private fun cartesianProduct(
+    list1: List<Interaction>,
+    list2: List<Interaction>
+  ): List<Pair<Interaction, Interaction>> {
     val result = mutableListOf<Pair<Interaction, Interaction>>()
     list1.forEach { item1 ->
       list2.forEach { item2 -> result.add(item1 to item2) }

@@ -5,7 +5,11 @@ import java.nio.charset.Charset
 /**
  * Class to represent missing, empty, null and present bodies
  */
-data class OptionalBody(val state: State, val value: ByteArray? = null) {
+data class OptionalBody(
+  val state: State,
+  val value: ByteArray? = null,
+  val contentType: ContentType = ContentType.UNKNOWN
+) {
 
   enum class State {
     MISSING, EMPTY, NULL, PRESENT
@@ -25,11 +29,13 @@ data class OptionalBody(val state: State, val value: ByteArray? = null) {
       return OptionalBody(State.NULL)
     }
 
-    @JvmStatic fun body(body: ByteArray?): OptionalBody {
+    @JvmStatic
+    @JvmOverloads
+    fun body(body: ByteArray?, contentType: ContentType = ContentType.UNKNOWN): OptionalBody {
       return when {
         body == null -> nullBody()
         body.isEmpty() -> empty()
-        else -> OptionalBody(State.PRESENT, body)
+        else -> OptionalBody(State.PRESENT, body, contentType)
       }
     }
   }

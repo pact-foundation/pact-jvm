@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.model.generators.Category
+import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.RandomIntGenerator
 import au.com.dius.pact.core.model.generators.RandomStringGenerator
@@ -26,7 +27,7 @@ class GeneratedResponseSpec extends Specification {
     response.status = 200
 
     when:
-    def generated = response.generatedResponse()
+    def generated = response.generatedResponse([:], GeneratorTestMode.Provider)
 
     then:
     generated.status >= 400 && generated.status < 500
@@ -37,7 +38,7 @@ class GeneratedResponseSpec extends Specification {
     response.headers = [A: 'a', B: 'b']
 
     when:
-    def generated = response.generatedResponse()
+    def generated = response.generatedResponse([:], GeneratorTestMode.Provider)
 
     then:
     generated.headers.A != 'a'
@@ -50,7 +51,7 @@ class GeneratedResponseSpec extends Specification {
     response.body = OptionalBody.body(JsonOutput.toJson(body).bytes)
 
     when:
-    def generated = response.generatedResponse()
+    def generated = response.generatedResponse([:], GeneratorTestMode.Provider)
     def generatedBody = new JsonSlurper().parseText(generated.body.valueAsString())
 
     then:

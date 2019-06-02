@@ -123,7 +123,7 @@ interface IProviderVerifier {
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     client: ProviderClient,
-    context: Map<String, Any?>
+    context: Map<String, Any>
   ): TestResult
 
   /**
@@ -447,7 +447,7 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     interactionMessage: String,
     failures: MutableMap<String, Any>,
     client: ProviderClient,
-    context: Map<String, Any?>
+    context: Map<String, Any>
   ): TestResult {
     return try {
       val expectedResponse = interaction.response.generatedResponse(context)

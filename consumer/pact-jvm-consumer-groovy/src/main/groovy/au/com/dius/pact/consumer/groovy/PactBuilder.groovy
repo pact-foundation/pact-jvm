@@ -126,15 +126,26 @@ class PactBuilder extends BaseBuilder {
         requestDescription,
         providerStates,
         new Request(requestData[i].method ?: 'get', path, query, headers,
-          requestData[i].containsKey(BODY) ? OptionalBody.body(requestData[i].body.bytes) : OptionalBody.missing(),
+          requestData[i].containsKey(BODY) ? OptionalBody.body(requestData[i].body.bytes, contentType(headers)) :
+            OptionalBody.missing(),
           requestMatchers, requestGenerators),
         new Response(responseData[i].status ?: 200, responseHeaders,
-          responseData[i].containsKey(BODY) ? OptionalBody.body(responseData[i].body.bytes) : OptionalBody.missing(),
+          responseData[i].containsKey(BODY) ? OptionalBody.body(responseData[i].body.bytes,
+            contentType(responseHeaders)) : OptionalBody.missing(),
           responseMatchers, responseGenerators)
       )
     }
     requestData = []
     responseData = []
+  }
+
+  au.com.dius.pact.core.model.ContentType contentType(Map<?, ?> headers) {
+    def contentTypeHeader = headers.find { it.key.toLowerCase() == 'content-type' }
+    if (contentTypeHeader) {
+      new au.com.dius.pact.core.model.ContentType(contentTypeHeader.value.first())
+    } else {
+      au.com.dius.pact.core.model.ContentType.UNKNOWN
+    }
   }
 
   private static Map setupHeaders(Map headers, MatchingRules matchers, Generators generators) {

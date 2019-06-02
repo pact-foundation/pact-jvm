@@ -61,6 +61,7 @@ abstract class HttpPart {
     val XMLREGEXP2 = """^\s*<\w+\s*(:\w+=[\"”][^\"”]+[\"”])?.*""".toRegex()
   }
 
+  @Deprecated("use the method on OptionalBody")
   fun charset(): Charset? {
     return try {
       ContentType.parse(contentTypeHeader())?.charset

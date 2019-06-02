@@ -191,7 +191,7 @@ public class MessagePactProviderRule extends ExternalResource {
 		                    }
 
 	                		for (Message message : messages) {
-	                			providerStateMessages.put(message.getProviderState(), message);
+	                			providerStateMessages.put(message.getProviderStates().get(0).getName(), message);
 	                		}
 
 	                	}

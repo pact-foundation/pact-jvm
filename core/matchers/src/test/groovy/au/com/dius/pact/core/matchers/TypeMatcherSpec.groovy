@@ -1,7 +1,6 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
 import spock.lang.Specification
@@ -12,11 +11,11 @@ class TypeMatcherSpec extends Specification {
     given:
     def matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('body').addRule('$.value', new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))
-    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123}'.bytes), matchingRules)
-    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": 456}'.bytes), null)
+    def expected = OptionalBody.body('{"value": 123}'.bytes)
+    def actual = OptionalBody.body('{"value": 456}'.bytes)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, true)
+    def result = new JsonBodyMatcher().matchBody(expected, actual, true, matchingRules)
 
     then:
     result.empty
@@ -26,11 +25,11 @@ class TypeMatcherSpec extends Specification {
     given:
     def matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('body').addRule('$.value', new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))
-    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123}'.bytes), matchingRules)
-    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": null}'.bytes), null)
+    def expected = OptionalBody.body('{"value": 123}'.bytes)
+    def actual = OptionalBody.body('{"value": null}'.bytes)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, true)
+    def result = new JsonBodyMatcher().matchBody(expected, actual, true, matchingRules)
 
     then:
     !result.empty
@@ -40,11 +39,11 @@ class TypeMatcherSpec extends Specification {
     given:
     def matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('body').addRule('$.value', new NumberTypeMatcher(NumberTypeMatcher.NumberType.INTEGER))
-    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123}'.bytes), matchingRules)
-    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": 123.10}'.bytes), null)
+    def expected = OptionalBody.body('{"value": 123}'.bytes)
+    def actual = OptionalBody.body('{"value": 123.10}'.bytes)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, true)
+    def result = new JsonBodyMatcher().matchBody(expected, actual, true, matchingRules)
 
     then:
     !result.empty
@@ -54,11 +53,11 @@ class TypeMatcherSpec extends Specification {
     given:
     def matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('body').addRule('$.value', new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
-    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123.10}'.bytes), matchingRules)
-    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": 456.20}'.bytes), null)
+    def expected = OptionalBody.body('{"value": 123.10}'.bytes)
+    def actual = OptionalBody.body('{"value": 456.20}'.bytes)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, true)
+    def result = new JsonBodyMatcher().matchBody(expected, actual, true, matchingRules)
 
     then:
     result.empty
@@ -68,11 +67,11 @@ class TypeMatcherSpec extends Specification {
     given:
     def matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('body').addRule('$.value', new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
-    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123.10}'.bytes), matchingRules)
-    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": null}'.bytes), null)
+    def expected = OptionalBody.body('{"value": 123.10}'.bytes)
+    def actual = OptionalBody.body('{"value": null}'.bytes)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, true)
+    def result = new JsonBodyMatcher().matchBody(expected, actual, true, matchingRules)
 
     then:
     !result.empty
@@ -82,11 +81,11 @@ class TypeMatcherSpec extends Specification {
     given:
     def matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('body').addRule('$.value', new NumberTypeMatcher(NumberTypeMatcher.NumberType.DECIMAL))
-    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": 123.10}'.bytes), matchingRules)
-    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": 123}'.bytes), null)
+    def expected = OptionalBody.body('{"value": 123.10}'.bytes)
+    def actual = OptionalBody.body('{"value": 123}'.bytes)
 
     when:
-    def result = new JsonBodyMatcher().matchBody(expected, actual, true)
+    def result = new JsonBodyMatcher().matchBody(expected, actual, true, matchingRules)
 
     then:
     !result.empty

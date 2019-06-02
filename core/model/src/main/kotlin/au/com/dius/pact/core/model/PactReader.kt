@@ -8,6 +8,7 @@ import au.com.dius.pact.core.pactbroker.CustomServiceUnavailableRetryStrategy
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
+import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.amazonaws.services.s3.AmazonS3URI
 import com.github.salomonbrys.kotson.toMap
@@ -141,6 +142,9 @@ object PactReader: KLogging() {
 
   const val CLASSPATH_URI_START = "classpath:"
 
+  @JvmStatic
+  var s3Client: AmazonS3 = AmazonS3ClientBuilder.defaultClient()
+
   /**
    * Loads a pact file from either a File or a URL
    * @param source a File or a URL
@@ -152,7 +156,7 @@ object PactReader: KLogging() {
     var version = "2.0.0"
     val metadata = pactInfo.first["metadata"] as Map<String, Any>?
     val specification = metadata?.get("pactSpecification") ?: metadata?.get("pact-specification")
-    if (specification is Map<*, *> && specification.containsKey("version")) {
+    if (specification is Map<*, *> && specification["version"] != null) {
       version = specification["version"].toString()
     }
     if (version == "3.0") {
@@ -185,7 +189,8 @@ object PactReader: KLogging() {
         RequestResponseInteraction(i["description"].toString(), providerStates, request, response)
       }
 
-      return RequestResponsePact(provider, consumer, interactions.toMutableList(), emptyMap(), source)
+      return RequestResponsePact(provider, consumer, interactions.toMutableList(),
+        BasePact.metaData(PactSpecVersion.V3), source)
     }
   }
 
@@ -194,7 +199,7 @@ object PactReader: KLogging() {
     val provider = Provider.fromMap(transformedJson["provider"] as Map<String, Any>? ?: emptyMap())
     val consumer = Consumer.fromMap(transformedJson["consumer"] as Map<String, Any>? ?: emptyMap())
 
-    val interactions = (transformedJson["interactions"] as List<MutableMap<String, Any>>).map { i ->
+    val interactions = (transformedJson.getOrDefault("interactions", emptyList<MutableMap<String, Any>>()) as List<MutableMap<String, Any>>).map { i ->
       val request = extractRequest(i["request"] as MutableMap<String, Any>)
       val response = extractResponse(i["response"] as MutableMap<String, Any>)
       RequestResponseInteraction(i["description"].toString(),
@@ -202,14 +207,17 @@ object PactReader: KLogging() {
         request, response)
     }
 
-    return RequestResponsePact(provider, consumer, interactions.toMutableList(), emptyMap(), source)
+    return RequestResponsePact(provider, consumer, interactions.toMutableList(), BasePact.metaData(PactSpecVersion.V2),
+      source)
   }
 
+  @JvmStatic
   fun extractResponse(responseJson: MutableMap<String, Any>): Response {
     extractBody(responseJson)
     return Response.fromMap(responseJson)
   }
 
+  @JvmStatic
   fun extractRequest(requestJson: MutableMap<String, Any>): Request {
     extractBody(requestJson)
     return Request.fromMap(requestJson)
@@ -222,19 +230,21 @@ object PactReader: KLogging() {
   }
 
   fun transformJson(pactJson: MutableMap<String, Any>): Map<String, Any> {
-    pactJson["interactions"] = (pactJson["interactions"] as List<Map<String, Any>>).map { i ->
-      val interaction = i.entries.associate { entry ->
-        when (entry.key) {
-          "provider_state" -> "providerState" to entry.value
-          "request" -> "request" to transformRequestResponseJson(entry.value as MutableMap<String, Any>)
-          "response" -> "response" to transformRequestResponseJson(entry.value as MutableMap<String, Any>)
-          else -> entry.toPair()
+    if (pactJson["interactions"] != null) {
+      pactJson["interactions"] = (pactJson["interactions"] as List<Map<String, Any>>).map { i ->
+        val interaction = i.entries.associate { entry ->
+          when (entry.key) {
+            "provider_state" -> "providerState" to entry.value
+            "request" -> "request" to transformRequestResponseJson(entry.value as MutableMap<String, Any>)
+            "response" -> "response" to transformRequestResponseJson(entry.value as MutableMap<String, Any>)
+            else -> entry.toPair()
+          }
+        }.toMutableMap()
+        if (i.containsKey("providerState") && i["providerState"] != null) {
+          interaction["providerState"] = i["providerState"] as Any
         }
-      }.toMutableMap()
-      if (i.containsKey("providerState") && i["providerState"] != null) {
-        interaction["providerState"] = i["providerState"] as Any
+        interaction
       }
-      interaction
     }
     return pactJson
   }
@@ -295,8 +305,7 @@ object PactReader: KLogging() {
 
   private fun loadPactFromS3Bucket(source: String, options: Map<String, Any>): Pair<Map<String, Any>, PactSource> {
     val s3Uri = AmazonS3URI(source)
-    val client = s3Client()
-    val s3Pact = client.getObject(s3Uri.bucket, s3Uri.key)
+    val s3Pact = s3Client.getObject(s3Uri.bucket, s3Uri.key)
     return JsonSlurper().parse(s3Pact.objectContent) as Map<String, Any> to S3PactSource(source)
   }
 
@@ -309,6 +318,4 @@ object PactReader: KLogging() {
   }
 
   private fun fileExists(path: String) = File(path).exists()
-
-  private fun s3Client() = AmazonS3ClientBuilder.defaultClient()
 }

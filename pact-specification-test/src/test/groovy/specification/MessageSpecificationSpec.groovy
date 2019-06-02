@@ -27,7 +27,7 @@ class MessageSpecificationSpec extends Specification {
       d.eachFile { f ->
         def json = new JsonSlurper().parse(f)
         result << [json.comment, json.match, json.match ? 'should match' : 'should not match',
-                   new Message().fromMap(json.expected),
+                   Message.fromMap(json.expected),
                    json.actual.contents ?
                      OptionalBody.body(new JsonBuilder(json.actual.contents).toPrettyString().bytes) :
                      OptionalBody.missing()]

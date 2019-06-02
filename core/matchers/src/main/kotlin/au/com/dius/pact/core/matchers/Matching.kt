@@ -62,7 +62,7 @@ object Matching : KLogging() {
       val matcher = MatchingConfig.lookupBodyMatcher(actual.mimeType())
       if (matcher != null) {
         logger.debug { "Found a matcher for ${actual.mimeType()} -> $matcher" }
-        matcher.matchBody(expected, actual, allowUnexpectedKeys)
+        matcher.matchBody(expected.body, actual.body, allowUnexpectedKeys, expected.matchingRules)
       } else {
         logger.debug { "No matcher for ${actual.mimeType()}, using equality" }
         when {

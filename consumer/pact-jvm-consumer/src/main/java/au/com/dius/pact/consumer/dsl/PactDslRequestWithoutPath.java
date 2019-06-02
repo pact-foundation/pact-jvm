@@ -116,7 +116,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      * @param body Request body in string form
      */
     public PactDslRequestWithoutPath body(String body, String mimeType) {
-        requestBody = OptionalBody.body(body.getBytes());
+        requestBody = OptionalBody.body(body.getBytes(), new au.com.dius.pact.core.model.ContentType(mimeType));
         requestHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
         return this;
     }
@@ -206,7 +206,8 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      * @param body Request body in JSON form
      */
     public PactDslRequestWithoutPath body(JSONObject body) {
-        requestBody = OptionalBody.body(body.toString().getBytes());
+        requestBody = OptionalBody.body(body.toString().getBytes(),
+          au.com.dius.pact.core.model.ContentType.Companion.getJSON());
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
             requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_JSON.toString()));
         }
@@ -222,7 +223,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
         DslPart parent = body.close();
         requestMatchers.addCategory(parent.matchers);
         requestGenerators.addGenerators(parent.generators);
-        requestBody = OptionalBody.body(parent.toString().getBytes());
+        requestBody = OptionalBody.body(parent.toString().getBytes(), au.com.dius.pact.core.model.ContentType.Companion.getJSON());
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
             requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_JSON.toString()));
         }
@@ -235,7 +236,8 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      * @param body XML Document
      */
     public PactDslRequestWithoutPath body(Document body) throws TransformerException {
-        requestBody = OptionalBody.body(xmlToString(body).getBytes());
+        requestBody = OptionalBody.body(xmlToString(body).getBytes(),
+          new au.com.dius.pact.core.model.ContentType(ContentType.APPLICATION_XML.toString()));
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
             requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
         }

@@ -180,7 +180,7 @@ class PactSerialiserSpec extends Specification {
     def request = new Request(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'.bytes))
     def response = new Response(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'.bytes))
     def interaction = new RequestResponseInteraction('test interaction with non-ascii characters in bodies',
-      null, request, response)
+      [], request, response)
     def pact = new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
       [interaction])
 

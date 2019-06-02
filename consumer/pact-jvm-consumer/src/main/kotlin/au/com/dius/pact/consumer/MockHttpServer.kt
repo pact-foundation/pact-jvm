@@ -15,6 +15,7 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.queryStringToMap
+import com.sun.net.httpserver.Headers
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
@@ -173,7 +174,8 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
   private fun invalidResponse(request: Request): Response {
     val body = "{ \"error\": \"Unexpected request : ${StringEscapeUtils.escapeJson(request.toString())}\" }"
     return Response(500, mutableMapOf("Access-Control-Allow-Origin" to listOf("*"), "Content-Type" to listOf("application/json"),
-      "X-Pact-Unexpected-Request" to listOf("1")), OptionalBody.body(body.toByteArray()))
+      "X-Pact-Unexpected-Request" to listOf("1")), OptionalBody.body(body.toByteArray(),
+      au.com.dius.pact.core.model.ContentType.JSON))
   }
 
   companion object: KLogging()
@@ -201,7 +203,7 @@ abstract class BaseJdkMockServer(
       } catch (e: Exception) {
         logger.error(e) { "Failed to generate response" }
         pactResponseToHttpExchange(Response(500, mutableMapOf("Content-Type" to listOf("application/json")),
-          OptionalBody.body("{\"error\": ${e.message}}".toByteArray())), exchange)
+          OptionalBody.body("{\"error\": ${e.message}}".toByteArray(), au.com.dius.pact.core.model.ContentType.JSON)), exchange)
       }
     }
   }
@@ -226,10 +228,19 @@ abstract class BaseJdkMockServer(
     val body = if (bodyContents.isEmpty()) {
       OptionalBody.empty()
     } else {
-      OptionalBody.body(bodyContents.toByteArray())
+      OptionalBody.body(bodyContents.toByteArray(), contentType(headers))
     }
     return Request(exchange.requestMethod, exchange.requestURI.path,
       queryStringToMap(exchange.requestURI.rawQuery).toMutableMap(), headers, body)
+  }
+
+  private fun contentType(headers: Headers): au.com.dius.pact.core.model.ContentType {
+    val contentType = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
+    return if (contentType != null && contentType.value.isNotEmpty()) {
+      au.com.dius.pact.core.model.ContentType(contentType.value.first())
+    } else {
+      au.com.dius.pact.core.model.ContentType.JSON
+    }
   }
 
   private fun initServer() {

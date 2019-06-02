@@ -114,7 +114,8 @@ class MessagePactBuilder(
     }
 
     val parent = body.close()
-    message.contents = OptionalBody.body(parent.toString().toByteArray())
+    message.contents = OptionalBody.body(parent.toString().toByteArray(),
+      au.com.dius.pact.core.model.ContentType(metadata["contentType"].toString()))
     message.metaData = metadata
     message.matchingRules.addCategory(parent.matchers)
 

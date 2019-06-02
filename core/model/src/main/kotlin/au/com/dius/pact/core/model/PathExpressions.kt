@@ -81,7 +81,12 @@ fun identifier(ch: Char, chars: PushbackIterator<IndexedValue<Char>>, tokens: Mu
 }
 
 // path_identifier -> identifier | *
-fun pathIdentifier(chars: PushbackIterator<IndexedValue<Char>>, tokens: MutableList<PathToken>, path: String, index: Int) {
+fun pathIdentifier(
+  chars: PushbackIterator<IndexedValue<Char>>,
+  tokens: MutableList<PathToken>,
+  path: String,
+  index: Int
+) {
   if (chars.hasNext()) {
     val ch = chars.next()
     when {

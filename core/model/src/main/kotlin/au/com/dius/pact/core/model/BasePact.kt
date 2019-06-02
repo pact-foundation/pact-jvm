@@ -11,7 +11,7 @@ import kotlin.reflect.full.memberProperties
 /**
  * Base Pact class
  */
-abstract class BasePact<I>(
+abstract class BasePact<I> @JvmOverloads constructor(
   override val consumer: Consumer,
   override val provider: Provider,
   open val metadata: Map<String, Any> = DEFAULT_METADATA,
@@ -22,7 +22,7 @@ abstract class BasePact<I>(
     PactWriter.writePact(fileForPact(pactDir), this, pactSpecVersion)
   }
 
-  fun fileForPact(pactDir: String) = File(pactDir, "${consumer.name}-${provider.name}.json")
+  open fun fileForPact(pactDir: String) = File(pactDir, "${consumer.name}-${provider.name}.json")
 
   override fun compatibleTo(other: Pact<I>) = provider == other.provider &&
     this::class.java.isAssignableFrom(other::class.java)
@@ -53,6 +53,7 @@ abstract class BasePact<I>(
       "pact-jvm" to mapOf("version" to lookupVersion())
     ))
 
+    @JvmStatic
     fun metaData(pactSpecVersion: PactSpecVersion): Map<String, Any> {
       val pactJvmMetadata = mutableMapOf<String, Any>("version" to lookupVersion())
       val updatedToggles = FeatureToggles.updatedToggles()
@@ -97,7 +98,7 @@ abstract class BasePact<I>(
 
     private fun convertToMap(obj: Any): Map<String, Any?> {
       return obj::class.memberProperties.filter { it.name != "class" }.associate { prop ->
-        when (val propVal = prop.getter.call()) {
+        when (val propVal = prop.getter.call(obj)) {
           is Map<*, *> -> prop.name to convertToMap(propVal)
           is Collection<*> -> prop.name to propVal.map { convertToMap(it!!) }
           else -> prop.name to propVal

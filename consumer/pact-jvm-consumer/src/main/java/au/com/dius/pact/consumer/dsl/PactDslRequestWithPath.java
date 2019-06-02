@@ -171,7 +171,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param body Request body in string form
      */
     public PactDslRequestWithPath body(String body, String mimeType) {
-        requestBody = OptionalBody.body(body.getBytes());
+        requestBody = OptionalBody.body(body.getBytes(), new au.com.dius.pact.core.model.ContentType(mimeType));
         requestHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
         return this;
     }
@@ -201,7 +201,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param body Request body in Java Functional Interface Supplier that must return a string
      */
     public PactDslRequestWithPath body(Supplier<String> body, String mimeType) {
-        requestBody = OptionalBody.body(body.get().getBytes());
+        requestBody = OptionalBody.body(body.get().getBytes(), new au.com.dius.pact.core.model.ContentType(mimeType));
         requestHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
         return this;
     }
@@ -260,7 +260,8 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param body Request body in JSON form
      */
     public PactDslRequestWithPath body(JSONObject body) {
-        requestBody = OptionalBody.body(body.toString().getBytes());
+        requestBody = OptionalBody.body(body.toString().getBytes(),
+          au.com.dius.pact.core.model.ContentType.Companion.getJSON());
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
             requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_JSON.toString()));
         }
@@ -282,7 +283,8 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
         requestMatchers.addCategory(parent.getMatchers());
         requestGenerators.addGenerators(parent.generators);
         if (parent.getBody() != null) {
-          requestBody = OptionalBody.body(parent.getBody().toString().getBytes());
+          requestBody = OptionalBody.body(parent.getBody().toString().getBytes(),
+            au.com.dius.pact.core.model.ContentType.Companion.getJSON());
         } else {
           requestBody = OptionalBody.nullBody();
         }
@@ -298,7 +300,8 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param body XML Document
      */
     public PactDslRequestWithPath body(Document body) throws TransformerException {
-        requestBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body).getBytes());
+        requestBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body).getBytes(),
+          new au.com.dius.pact.core.model.ContentType(ContentType.APPLICATION_XML.toString()));
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
             requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
         }

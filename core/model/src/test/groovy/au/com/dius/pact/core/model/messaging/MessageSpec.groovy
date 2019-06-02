@@ -1,7 +1,10 @@
 package au.com.dius.pact.core.model.messaging
 
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -9,7 +12,7 @@ class MessageSpec extends Specification {
 
   def 'contentsAsBytes handles contents in string form'() {
       when:
-      Message message = new Message(contents: OptionalBody.body('1 2 3 4'.bytes))
+      Message message = new Message('test', [], OptionalBody.body('1 2 3 4'.bytes))
 
       then:
       message.contentsAsBytes() == '1 2 3 4'.bytes
@@ -17,7 +20,7 @@ class MessageSpec extends Specification {
 
   def 'contentsAsBytes handles no contents'() {
       when:
-      Message message = new Message(contents: OptionalBody.missing())
+      Message message = new Message('test', [], OptionalBody.missing())
 
       then:
       message.contentsAsBytes() == []
@@ -52,11 +55,11 @@ class MessageSpec extends Specification {
 
   def 'Uses V3 provider state format when converting to a map'() {
     given:
-    Message message = new Message(description: 'test', contents: OptionalBody.body('"1 2 3 4"'.bytes), providerStates: [
-      new ProviderState('Test', [a: 'A', b: 100])])
+    Message message = new Message('test', [new ProviderState('Test', [a: 'A', b: 100])],
+      OptionalBody.body('"1 2 3 4"'.bytes))
 
     when:
-    def map = message.toMap()
+    def map = message.toMap(PactSpecVersion.V3)
 
     then:
     map == [
@@ -150,11 +153,11 @@ class MessageSpec extends Specification {
     'text/plain'                               | '{"a": 100.0, "b": "test"}'
     'application/octet-stream;charset=UTF-8'   | 'eyJhIjogMTAwLjAsICJiIjogInRlc3QifQ=='
     'application/octet-stream'                 | 'eyJhIjogMTAwLjAsICJiIjogInRlc3QifQ=='
-    ''                                         | [a: 100.0, b: 'test']
+    ''                                         | '{"a": 100.0, "b": "test"}'
     null                                       | [a: 100.0, b: 'test']
 
-    message = new Message(metaData: ['contentType': contentType],
-      contents: OptionalBody.body('{"a": 100.0, "b": "test"}'.bytes))
+    message = new Message('test', [], OptionalBody.body('{"a": 100.0, "b": "test"}'.bytes),
+      new MatchingRulesImpl(), new Generators(), ['contentType': contentType])
   }
 
 }

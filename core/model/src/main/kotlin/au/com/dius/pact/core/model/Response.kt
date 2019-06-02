@@ -74,8 +74,12 @@ class Response @JvmOverloads constructor(
       val body = if (map.containsKey("body"))
         OptionalBody.body(map["body"]?.toString()?.toByteArray())
         else OptionalBody.missing()
-      val matchingRules = MatchingRulesImpl.fromMap(map["matchingRules"] as Map<String, Map<String, Any>>)
-      val generators = Generators.fromMap(map["generators"] as Map<String, Map<String, Any>>)
+      val matchingRules = if (map.containsKey("matchingRules"))
+        MatchingRulesImpl.fromMap(map["matchingRules"] as Map<String, Map<String, Any?>>)
+      else MatchingRulesImpl()
+      val generators = if (map.containsKey("generators"))
+        Generators.fromMap(map["generators"] as Map<String, Map<String, Any>>)
+      else Generators()
       return Response(status, headers.toMutableMap(), body, matchingRules, generators)
     }
   }

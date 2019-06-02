@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.model.MockHttpsProviderConfig
 import au.com.dius.pact.consumer.model.MockProviderConfig
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponsePact
@@ -65,7 +66,7 @@ class KTorMockServer(
           } catch (e: Exception) {
             logger.error(e) { "Failed to generate response" }
             pactResponseToKTorResponse(Response(500, mutableMapOf("Content-Type" to listOf("application/json")),
-              OptionalBody.body("{\"error\": ${e.message}}".toByteArray())), context)
+              OptionalBody.body("{\"error\": ${e.message}}".toByteArray(), ContentType.JSON)), context)
           }
         }
       }

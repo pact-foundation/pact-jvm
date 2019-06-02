@@ -2,6 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.matchers.util.padTo
 import au.com.dius.pact.core.model.HttpPart
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.isEmpty
 import au.com.dius.pact.core.model.isMissing
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
@@ -21,15 +22,20 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 object XmlBodyMatcher : BodyMatcher, KLogging() {
 
-  override fun matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): List<BodyMismatch> {
+  override fun matchBody(
+    expected: OptionalBody,
+    actual: OptionalBody,
+    allowUnexpectedKeys: Boolean,
+    matchingRules: MatchingRules
+  ): List<BodyMismatch> {
     return when {
-      expected.body.isMissing() -> emptyList()
-      expected.body.isEmpty() && actual.body.isEmpty() -> emptyList()
-      actual.body.isMissing() ->
-        listOf(BodyMismatch(expected.body.unwrap(), null, "Expected body '${expected.body?.value}' but was missing"))
+      expected.isMissing() -> emptyList()
+      expected.isEmpty() && actual.isEmpty() -> emptyList()
+      actual.isMissing() ->
+        listOf(BodyMismatch(expected.unwrap(), null, "Expected body '${expected.value}' but was missing"))
       else -> {
-        compareNode(listOf("$"), parse(expected.body.valueAsString()), parse(actual.body.valueAsString()),
-          allowUnexpectedKeys, expected.matchingRules ?: MatchingRulesImpl())
+        compareNode(listOf("$"), parse(expected.valueAsString()), parse(actual.valueAsString()),
+          allowUnexpectedKeys, matchingRules)
       }
     }
   }

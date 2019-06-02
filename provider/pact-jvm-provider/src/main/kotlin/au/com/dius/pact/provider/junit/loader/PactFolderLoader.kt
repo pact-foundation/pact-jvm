@@ -28,7 +28,7 @@ class PactFolderLoader<I>(private val path: File) : PactLoader where I : Interac
     val files = pactFolder.listFiles { _, name -> name.endsWith(".json") }
     if (files != null) {
       for (file in files) {
-        val pact = PactReader.loadPact(file)
+        val pact = PactReader.loadPact(emptyMap(), file)
         if (pact.provider.name == providerName) {
           pacts.add(pact as Pact<I>)
           this.pactSource.pacts.put(file, pact)

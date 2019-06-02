@@ -17,7 +17,7 @@ import org.apache.http.entity.ContentType
 /**
  * Message in a Message Pact
  */
-class Message(
+class Message @JvmOverloads constructor(
   override val description: String,
   override val providerStates: List<ProviderState> = listOf(),
   var contents: OptionalBody = OptionalBody.missing(),
@@ -25,8 +25,6 @@ class Message(
   var generators: Generators = Generators(),
   var metaData: Map<String, String> = mapOf()
 ): Interaction {
-
-
 
   fun contentsAsBytes() = contents.orEmpty()
 
@@ -134,11 +132,15 @@ class Message(
       } else {
         OptionalBody.missing()
       }
+      val matchingRules = if (map.containsKey("matchingRules"))
+        MatchingRulesImpl.fromMap(map["matchingRules"] as Map<String, Map<String, Any?>>)
+      else MatchingRulesImpl()
+      val generators = if (map.containsKey("generators"))
+        Generators.fromMap(map["generators"] as Map<String, Map<String, Any>>)
+      else Generators()
 
       return Message(map.getOrDefault("description", "").toString(), providerStates,
-        contents, MatchingRulesImpl.fromMap(map["matchingRules"] as Map<String, Map<String, Any?>>?),
-        Generators.fromMap(map["generators"] as Map<String, Map<String, Any>>?),
-        map["metaData"] as Map<String, String>? ?: emptyMap())
+        contents, matchingRules, generators, map["metaData"] as Map<String, String>? ?: emptyMap())
     }
 
     private fun parseContentType(contentType: String): ContentType? {
@@ -151,7 +153,7 @@ class Message(
     }
 
     private fun isJson(contentType: String?) =
-      contentType != null && contentType.matches(Regex("^application\\.*json$"))
+      contentType != null && contentType.matches(Regex("application/.*json"))
 
     private fun isOctetStream(contentType: String?) = contentType == "application/octet-stream"
   }

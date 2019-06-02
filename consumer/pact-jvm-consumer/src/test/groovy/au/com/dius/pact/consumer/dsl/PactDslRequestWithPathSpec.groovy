@@ -99,11 +99,11 @@ class PactDslRequestWithPathSpec extends Specification {
 
     then:
     request.body.value == 'example'.bytes
-    request.matchingRules.rulesForCategory('body').matchingRules['$'].rules == [
-      au.com.dius.pact.model.matchingrules.TypeMatcher.INSTANCE ]
+    request.matchingRules.rulesForCategory('body').matchingRules['$'].rules*.class.simpleName == [
+      'TypeMatcher']
     response.body.value == 'example'.bytes
-    response.matchingRules.rulesForCategory('body').matchingRules['$'].rules == [
-      au.com.dius.pact.model.matchingrules.TypeMatcher.INSTANCE ]
+    response.matchingRules.rulesForCategory('body').matchingRules['$'].rules*.class.simpleName == [
+      'TypeMatcher']
 
   }
 

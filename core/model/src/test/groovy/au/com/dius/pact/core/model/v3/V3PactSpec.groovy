@@ -8,11 +8,11 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
+import au.com.dius.pact.core.model.UnknownPactSource
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
+import org.jetbrains.annotations.NotNull
 import spock.lang.Specification
-
-import java.util.function.Predicate
 
 class V3PactSpec extends Specification {
     private File pactFile
@@ -29,7 +29,7 @@ class V3PactSpec extends Specification {
 
     def 'writing pacts should merge with any existing file'() {
         given:
-        def pact = PactReader.loadV3Pact(null, [
+        def pact = PactReader.INSTANCE.loadV3Pact(UnknownPactSource.INSTANCE, [
           consumer: [name: 'consumer'],
           provider: [name: 'provider'],
           messages: [
@@ -54,7 +54,7 @@ class V3PactSpec extends Specification {
 
     def 'when merging it should replace messages with the same description and state'() {
         given:
-        def pact = PactReader.loadV3Pact(null, [
+        def pact = PactReader.INSTANCE.loadV3Pact(UnknownPactSource.INSTANCE, [
             consumer: [name: 'consumer'],
             provider: [name: 'provider'],
             messages: [
@@ -84,17 +84,17 @@ class V3PactSpec extends Specification {
         then:
         json.messages.size == 3
         json.messages*.description.toSet() == ['a hello message', 'a new hello message'].toSet()
-        json.messages.find { it.description == 'a hello message' && !it.providerStates } == [contents: 'Hello',
-            description: 'a hello message', metaData: [ contentType: 'application/json' ]]
+        json.messages.find { it.description == 'a hello message' && !it.providerStates } ==
+          [contents: 'Hello', description: 'a hello message', metaData: [ contentType: 'application/json' ]]
     }
 
     def 'refuse to merge pacts with different spec versions'() {
         given:
         def json = new JsonSlurper().parse(pactFile)
-        json.metadata['pact-specification'].version = '2.0.0'
+        json.metadata['pactSpecification'].version = '2.0.0'
         pactFile.write(new JsonBuilder(json).toPrettyString())
 
-        def pact = new BasePact(new Provider(), new Consumer(), BasePact.DEFAULT_METADATA) {
+        def pact = new BasePact(new Consumer(), new Provider(), BasePact.DEFAULT_METADATA) {
             @Override
             Map toMap(PactSpecVersion pactSpecVersion) {
                 [
@@ -123,11 +123,8 @@ class V3PactSpec extends Specification {
             @Override
             Pact sortInteractions() { this }
 
-          @Override
-          void mergeInteractions(List<Interaction> interactions) { }
-
-          @Override
-          Pact filterInteractions(Predicate<Interaction> predicate) { this }
+            @Override
+            void mergeInteractions(@NotNull List interactions) { }
         }
 
         when:
@@ -143,7 +140,7 @@ class V3PactSpec extends Specification {
         def pactUrl = V3PactSpec.classLoader.getResource('v3-pact.json')
         pactFile.write(pactUrl.text)
 
-        def pact = new BasePact(new Provider(), new Consumer(), BasePact.DEFAULT_METADATA) {
+        def pact = new BasePact(new Consumer(), new Provider(), BasePact.DEFAULT_METADATA) {
             @Override
             Map toMap(PactSpecVersion pactSpecVersion) {
                 [
@@ -175,8 +172,6 @@ class V3PactSpec extends Specification {
             @Override
             Pact sortInteractions() { this }
 
-          @Override
-          Pact filterInteractions(Predicate<Interaction> predicate) { this }
         }
 
         when:

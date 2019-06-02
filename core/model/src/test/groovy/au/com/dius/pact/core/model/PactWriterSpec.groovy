@@ -13,7 +13,7 @@ class PactWriterSpec extends Specification {
     given:
     def request = new Request()
     def response = new Response()
-    def interaction = new RequestResponseInteraction('test interaction', null, request, response)
+    def interaction = new RequestResponseInteraction('test interaction', [], request, response)
     def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),
       new Consumer('PactWriterSpecConsumer'), [interaction])
     def sw = new StringWriter()
@@ -59,7 +59,7 @@ class PactWriterSpec extends Specification {
     def request = new Request(body: OptionalBody.body('"This is a string"'.bytes))
     def response = new Response(body: OptionalBody.body('"This is a string"'.bytes))
     def interaction = new RequestResponseInteraction('test interaction with JSON string bodies',
-      null, request, response)
+      [], request, response)
     def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),
       new Consumer('PactWriterSpecConsumer'), [interaction])
     def sw = new StringWriter()
@@ -79,7 +79,7 @@ class PactWriterSpec extends Specification {
     def request = new Request(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'.bytes))
     def response = new Response(body: OptionalBody.body('"This is a string with letters ä, ü, ö and ß"'.bytes))
     def interaction = new RequestResponseInteraction('test interaction with non-ascii characters in bodies',
-      null, request, response)
+      [], request, response)
     def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),
       new Consumer('PactWriterSpecConsumer'), [interaction])
     def sw = new StringWriter()
@@ -99,9 +99,9 @@ class PactWriterSpec extends Specification {
     def request = new Request()
     def response = new Response()
     def interaction = new RequestResponseInteraction('test interaction',
-      null, request, response)
+      [], request, response)
     def interaction2 = new RequestResponseInteraction('test interaction two',
-      null, request, response)
+      [], request, response)
     def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),
       new Consumer('PactWriterSpecConsumer'), [interaction])
     def file = File.createTempFile('PactWriterSpec', '.json')
@@ -125,9 +125,9 @@ class PactWriterSpec extends Specification {
     def request = new Request()
     def response = new Response()
     def interaction = new RequestResponseInteraction('test interaction',
-      null, request, response)
+      [], request, response)
     def interaction2 = new RequestResponseInteraction('test interaction two',
-      null, request, response)
+      [], request, response)
     def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),
       new Consumer('PactWriterSpecConsumer'), [interaction])
     def file = File.createTempFile('PactWriterSpec', '.json')
@@ -154,7 +154,7 @@ class PactWriterSpec extends Specification {
     def response = new Response(body: OptionalBody.body(
       '{"settlement_summary": {"capture_submit_time": null,"captured_date": null}}'.bytes))
     def interaction = new RequestResponseInteraction('test interaction with null values in bodies',
-      null, request, response)
+      [], request, response)
     def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),
       new Consumer('PactWriterSpecConsumer'), [interaction])
     def sw = new StringWriter()
@@ -174,7 +174,7 @@ class PactWriterSpec extends Specification {
     given:
     def pactFile = File.createTempFile('PactWriterSpec', '.json')
     def pact = new RequestResponsePact(new Provider(), new Consumer(), [
-      new RequestResponseInteraction(description: 'Request für ping', request: new Request(), response: new Response())
+      new RequestResponseInteraction('Request für ping', new Request(), new Response())
     ])
 
     when:

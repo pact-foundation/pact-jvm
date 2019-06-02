@@ -129,15 +129,16 @@ class PactResultSpec extends Specification {
 
       then:
         def e = thrown(PactFailedException)
-        e.message.contains('The following requests were not received:\n' +
-          '\tmethod: post\n' +
-          '\tpath: /path\n' +
-          '\tquery: [:]\n' +
-          '\theaders: [Content-Type:[application/json]]\n' +
-          '\tmatchers: MatchingRules(rules={body=Category(name=body, matchingRules={}), path=Category(name=path, matchingRules={})})\n' +
-          '\tgenerators: Generators(categories={})\n' +
-          '\tbody: PRESENT({\n' +
-          '    "status": "isGood"\n' +
-          '})')
+        e.message.contains(
+          '''|The following requests were not received:
+             |\tmethod: post
+             |\tpath: /path
+             |\tquery: {}
+             |\theaders: {Content-Type=[application/json]}
+             |\tmatchers: MatchingRules(rules={body=Category(name=body, matchingRules={}), path=Category(name=path, matchingRules={})})
+             |\tgenerators: Generators(categories={})
+             |\tbody: PRESENT({
+             |    "status": "isGood"
+             |})'''.stripMargin())
     }
 }

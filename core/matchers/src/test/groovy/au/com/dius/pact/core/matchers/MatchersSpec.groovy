@@ -1,7 +1,6 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.matchingrules.Category
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
@@ -177,11 +176,11 @@ class MatchersSpec extends Specification {
     given:
     def matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('body').addRule('$.value', TypeMatcher.INSTANCE)
-    def expected = new Request('get', '/', null, null, OptionalBody.body('{"value": [100]}'.bytes), matchingRules)
-    def actual = new Request('get', '/', null, null, OptionalBody.body('{"value": ["200.3"]}'.bytes), null)
+    def expected = OptionalBody.body('{"value": [100]}'.bytes)
+    def actual = OptionalBody.body('{"value": ["200.3"]}'.bytes)
 
     when:
-    def mismatches = new JsonBodyMatcher().matchBody(expected, actual, true)
+    def mismatches = new JsonBodyMatcher().matchBody(expected, actual, true, matchingRules)
 
     then:
     !mismatches.empty
@@ -192,13 +191,11 @@ class MatchersSpec extends Specification {
     given:
     def matchingRules = new MatchingRulesImpl()
     matchingRules.addCategory('body').addRule('$.value', TypeMatcher.INSTANCE)
-    def expected = new Request('get', '/', null, null,
-      OptionalBody.body('{"value": {"a": 100}}'.bytes), matchingRules)
-    def actual = new Request('get', '/', null, null,
-      OptionalBody.body('{"value": {"a": "200.3", "b": 200, "c": 300} }'.bytes), null)
+    def expected = OptionalBody.body('{"value": {"a": 100}}'.bytes)
+    def actual = OptionalBody.body('{"value": {"a": "200.3", "b": 200, "c": 300} }'.bytes)
 
     when:
-    def mismatches = new JsonBodyMatcher().matchBody(expected, actual, true)
+    def mismatches = new JsonBodyMatcher().matchBody(expected, actual, true, matchingRules)
 
     then:
     !mismatches.empty

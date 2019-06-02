@@ -2,6 +2,7 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.matchers.util.padTo
 import au.com.dius.pact.core.model.HttpPart
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.isEmpty
 import au.com.dius.pact.core.model.isMissing
 import au.com.dius.pact.core.model.isNull
@@ -25,21 +26,26 @@ import mu.KLogging
 
 object JsonBodyMatcher : BodyMatcher, KLogging() {
 
-  override fun matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): List<BodyMismatch> {
+  override fun matchBody(
+    expected: OptionalBody,
+    actual: OptionalBody,
+    allowUnexpectedKeys: Boolean,
+    matchingRules: MatchingRules
+  ): List<BodyMismatch> {
     return when {
-      expected.body.isMissing() -> emptyList()
-      expected.body.isEmpty() && actual.body.isEmpty() -> emptyList()
-      !expected.body.isEmpty() && actual.body.isEmpty() ->
-        listOf(BodyMismatch(null, actual.body.valueAsString(), "Expected empty body but received '${actual.body?.value}'"))
-      expected.body.isNull() && actual.body.isPresent() ->
-        listOf(BodyMismatch(null, actual.body.valueAsString(), "Expected null body but received '${actual.body?.value}'"))
-      expected.body.isNull() -> emptyList()
-      actual.body.isMissing() ->
-        listOf(BodyMismatch(expected.body.valueAsString(), null, "Expected body '${expected.body?.value}' but was missing"))
+      expected.isMissing() -> emptyList()
+      expected.isEmpty() && actual.isEmpty() -> emptyList()
+      !expected.isEmpty() && actual.isEmpty() ->
+        listOf(BodyMismatch(null, actual.valueAsString(), "Expected empty body but received '${actual.value}'"))
+      expected.isNull() && actual.isPresent() ->
+        listOf(BodyMismatch(null, actual.valueAsString(), "Expected null body but received '${actual.value}'"))
+      expected.isNull() -> emptyList()
+      actual.isMissing() ->
+        listOf(BodyMismatch(expected.valueAsString(), null, "Expected body '${expected.value}' but was missing"))
       else -> {
         val parser = JsonParser()
-        compare(listOf("$"), parser.parse(expected.body.valueAsString()),
-          parser.parse(actual.body.valueAsString()), allowUnexpectedKeys, expected.matchingRules ?: MatchingRulesImpl())
+        compare(listOf("$"), parser.parse(expected.valueAsString()),
+          parser.parse(actual.valueAsString()), allowUnexpectedKeys, matchingRules)
       }
     }
   }

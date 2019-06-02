@@ -2,7 +2,7 @@ package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.pactbroker.CustomServiceUnavailableRetryStrategy
-import com.amazonaws.services.s3.AmazonS3Client
+import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectInputStream
 import org.apache.http.impl.client.BasicCredentialsProvider
@@ -23,10 +23,9 @@ class PactReaderSpec extends Specification {
       def pact = PactReader.loadPact(pactUrl)
 
       then:
-      1 * PactReader.loadV2Pact({ it.url == pactUrl.toString() }, _)
-      0 * PactReader.loadV3Pact(_, _)
       pact instanceof RequestResponsePact
       pact.source instanceof UrlPactSource
+      pact.metadata == [pactSpecification: [version: '2.0.0'], 'pact-jvm': [version: '']]
   }
 
   def 'loads a pact with V1 version using existing loader'() {
@@ -37,10 +36,9 @@ class PactReaderSpec extends Specification {
       def pact = PactReader.loadPact(pactUrl)
 
       then:
-      1 * PactReader.loadV2Pact({ it.url == pactUrl.toString() }, _)
-      0 * PactReader.loadV3Pact(_, _)
       pact instanceof RequestResponsePact
       pact.source instanceof UrlPactSource
+      pact.metadata == [pactSpecification: [version: '2.0.0'], 'pact-jvm': [version: '']]
   }
 
   def 'loads a pact with V2 version using existing loader'() {
@@ -51,9 +49,8 @@ class PactReaderSpec extends Specification {
       def pact = PactReader.loadPact(pactUrl)
 
       then:
-      1 * PactReader.loadV2Pact({ it.url == pactUrl.toString() }, _)
-      0 * PactReader.loadV3Pact(_, _)
       pact instanceof RequestResponsePact
+      pact.metadata == [pactSpecification: [version: '2.0.0'], 'pact-jvm': [version: '']]
   }
 
   def 'loads a pact with V3 version using V3 loader'() {
@@ -64,10 +61,9 @@ class PactReaderSpec extends Specification {
       def pact = PactReader.loadPact(pactUrl)
 
       then:
-      0 * PactReader.loadV2Pact(_, _)
-      1 * PactReader.loadV3Pact({ it.url == pactUrl.toString() }, _)
       pact instanceof RequestResponsePact
       pact.source instanceof UrlPactSource
+      pact.metadata == [pactSpecification: [version: '3.0.0'], 'pact-jvm': [version: '']]
   }
 
   def 'loads a pact with old version format'() {
@@ -78,10 +74,9 @@ class PactReaderSpec extends Specification {
     def pact = PactReader.loadPact(pactUrl)
 
     then:
-    0 * PactReader.loadV2Pact(_, _)
-    1 * PactReader.loadV3Pact({ it.url == pactUrl.toString() }, _)
     pact instanceof RequestResponsePact
     pact.source instanceof UrlPactSource
+    pact.metadata == [pactSpecification: [version: '3.0.0'], 'pact-jvm': [version: '']]
   }
 
   def 'loads a message pact with V3 version using V3 loader'() {
@@ -92,10 +87,9 @@ class PactReaderSpec extends Specification {
       def pact = PactReader.loadPact(pactUrl)
 
       then:
-      1 * PactReader.loadV3Pact({ it.url == pactUrl.toString() }, _)
-      0 * PactReader.loadV2Pact(_, _)
       pact instanceof MessagePact
       pact.source instanceof UrlPactSource
+      pact.metadata.pactSpecification == [version: '3.0.0']
   }
 
   def 'loads a pact from an inputstream'() {
@@ -106,8 +100,6 @@ class PactReaderSpec extends Specification {
       def pact = PactReader.loadPact(pactInputStream)
 
       then:
-      1 * PactReader.loadV2Pact(_, _)
-      0 * PactReader.loadV3Pact(_, _)
       pact instanceof RequestResponsePact
       pact.source instanceof InputStreamPactSource
   }
@@ -120,8 +112,6 @@ class PactReaderSpec extends Specification {
     def pact = PactReader.loadPact(pactString)
 
     then:
-    1 * PactReader.loadV2Pact(_, _)
-    0 * PactReader.loadV3Pact(_, _)
     pact instanceof RequestResponsePact
     pact.source instanceof UnknownPactSource
   }
@@ -135,8 +125,6 @@ class PactReaderSpec extends Specification {
 
     then:
     thrown(UnsupportedOperationException)
-    0 * PactReader.loadV2Pact(pactString, _)
-    0 * PactReader.loadV3Pact(pactString, _)
   }
 
   def 'handles invalid version metadata'() {
@@ -144,11 +132,11 @@ class PactReaderSpec extends Specification {
     def pactString = PactReaderSpec.classLoader.getResourceAsStream('pact-invalid-version.json').text
 
     when:
-    PactReader.loadPact(pactString)
+    def pact = PactReader.loadPact(pactString)
 
     then:
-    1 * PactReader.loadV2Pact(_, _)
-    0 * PactReader.loadV3Pact(_, _)
+    pact instanceof RequestResponsePact
+    pact.metadata == [pactSpecification: [version: '2.0.0'], 'pact-jvm': [version: '']]
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -221,11 +209,11 @@ class PactReaderSpec extends Specification {
   def 'correctly load pact file from S3'() {
     given:
     def pactUrl = 'S3://some/bucket/aFile.json'
-    def s3ClientMock = Mock(AmazonS3Client)
+    AmazonS3 s3ClientMock = Mock(AmazonS3)
     String pactJson = this.class.getResourceAsStream('/v2-pact.json').text
     S3Object object = Mock()
     object.objectContent >> new S3ObjectInputStream(new ByteArrayInputStream(pactJson.bytes), null)
-    PactReader.s3Client() >> s3ClientMock
+    PactReader.s3Client = s3ClientMock
 
     when:
     def pact = PactReader.loadPact(pactUrl)
@@ -284,8 +272,6 @@ class PactReaderSpec extends Specification {
     def pact = PactReader.loadPact(new ClosurePactSource({ pactUrl }))
 
     then:
-    1 * PactReader.loadV2Pact({ it.url == pactUrl.toString() }, _)
-    0 * PactReader.loadV3Pact(_, _)
     pact instanceof RequestResponsePact
     pact.source instanceof UrlPactSource
   }

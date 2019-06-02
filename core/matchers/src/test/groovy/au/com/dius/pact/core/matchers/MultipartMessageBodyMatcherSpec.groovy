@@ -1,23 +1,21 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.Request
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import spock.lang.Specification
 
 class MultipartMessageBodyMatcherSpec extends Specification {
 
   private MultipartMessageBodyMatcher matcher
-  private expected, actual
 
   def setup() {
     matcher = new MultipartMessageBodyMatcher()
-    expected = { body -> new Request('', '', null, ['Content-Type': ['multipart/form-data; boundary=XXX']], body) }
-    actual = { body -> new Request('', '', null, ['Content-Type': ['multipart/form-data; boundary=XXX']], body) }
   }
 
   def 'return no mismatches - when comparing empty bodies'() {
     expect:
-    matcher.matchBody(expected(expectedBody), actual(actualBody), true).empty
+    matcher.matchBody(expectedBody, actualBody, true, new MatchingRulesImpl()).empty
 
     where:
 
@@ -27,7 +25,7 @@ class MultipartMessageBodyMatcherSpec extends Specification {
 
   def 'return no mismatches - when comparing a missing body to anything'() {
     expect:
-    matcher.matchBody(expected(expectedBody), actual(actualBody), true).empty
+    matcher.matchBody(expectedBody, actualBody, true, new MatchingRulesImpl()).empty
 
     where:
 
@@ -37,7 +35,7 @@ class MultipartMessageBodyMatcherSpec extends Specification {
 
   def 'returns a mismatch - when comparing anything to an empty body'() {
     expect:
-    matcher.matchBody(expected(expectedBody), actual(actualBody), true)*.mismatch == [
+    matcher.matchBody(expectedBody, actualBody, true, new MatchingRulesImpl())*.mismatch == [
       'Expected a multipart body but was missing'
     ]
 
@@ -49,7 +47,7 @@ class MultipartMessageBodyMatcherSpec extends Specification {
 
   def 'returns a mismatch - when the actual body is missing a header'() {
     expect:
-    matcher.matchBody(expected(expectedBody), actual(actualBody), true)*.mismatch == [
+    matcher.matchBody(expectedBody, actualBody, true, new MatchingRulesImpl())*.mismatch == [
       'Expected a multipart header \'Test\', but was missing'
     ]
 
@@ -61,7 +59,7 @@ class MultipartMessageBodyMatcherSpec extends Specification {
 
   def 'returns a mismatch - when the headers do not match'() {
     expect:
-    matcher.matchBody(expected(expectedBody), actual(actualBody), true)*.mismatch == [
+    matcher.matchBody(expectedBody, actualBody, true, new MatchingRulesImpl())*.mismatch == [
       'Expected a multipart header \'Content-Type\' with value \'text/html\', but was \'text/plain\''
     ]
 
@@ -73,7 +71,7 @@ class MultipartMessageBodyMatcherSpec extends Specification {
 
   def 'returns a mismatch - when the actual body is empty'() {
     expect:
-    matcher.matchBody(expected(expectedBody), actual(actualBody), true)*.mismatch == [
+    matcher.matchBody(expectedBody, actualBody, true, new MatchingRulesImpl())*.mismatch == [
       'Expected content with the multipart, but received no bytes of content'
     ]
 
@@ -88,7 +86,6 @@ class MultipartMessageBodyMatcherSpec extends Specification {
   @SuppressWarnings('ParameterCount')
   OptionalBody multipart(disposition, name, filename, contentType, headers, body) {
     OptionalBody.body(
-
       """--XXX
         |Content-Disposition: $disposition; name=\"$name\"; filename=\"$filename\"
         |Content-Type: $contentType
@@ -96,7 +93,7 @@ class MultipartMessageBodyMatcherSpec extends Specification {
         |
         |$body
         |--XXX
-       """.stripMargin().bytes
+       """.stripMargin().bytes, new ContentType('multipart/form-data; boundary=XXX')
     )
   }
 

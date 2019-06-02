@@ -24,11 +24,11 @@
     }
   ],
   "metadata": {
-    "pact-specification": {
+    "pactSpecification": {
       "version": "3.0.0"
     },
     "pact-jvm": {
-      "version": "3.0.0"
+      "version": ""
     }
   }
 }
