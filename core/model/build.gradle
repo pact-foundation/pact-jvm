@@ -1,5 +1,5 @@
 task pactsJar(type: Jar, dependsOn: testClasses) {
-  classifier = 'pacts'
+  classifier = 'test-pacts'
   into('jar-pacts') {
     from(sourceSets.test.output) {
       include 'test_pact_v3.json'
@@ -25,6 +25,7 @@ dependencies {
   compile 'javax.mail:mail:1.5.0-b01'
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
+  implementation "com.google.code.gson:gson:${project.gsonVersion}"
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
@@ -38,4 +39,13 @@ dependencies {
 compileGroovy {
   classpath = classpath.plus(files(compileKotlin.destinationDir))
   dependsOn compileKotlin
+}
+
+install.repositories.mavenInstaller.pom.withXml {
+  Node pomNode = asNode()
+  pomNode.dependencies.'*'.findAll() {
+    it.classifier.text() == 'test-pacts'
+  }.each() {
+    it.parent().remove(it)
+  }
 }

@@ -42,7 +42,7 @@ class CategorySpec extends Specification {
     category.toMap(PactSpecVersion.V3) == [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']
   }
 
-  @Issue('#786')
+  @Issue(['#786', '#882'])
   def 'writes header matchers in the correct format'() {
     given:
     def category = new Category('header', [
@@ -50,7 +50,7 @@ class CategorySpec extends Specification {
     ])
 
     expect:
-    category.toMap(PactSpecVersion.V2) == ['$.header.Content-Type': [match: 'regex', regex: 'application/json;\\s?charset=(utf|UTF)-8']]
+    category.toMap(PactSpecVersion.V2) == ['$.headers.Content-Type': [match: 'regex', regex: 'application/json;\\s?charset=(utf|UTF)-8']]
     category.toMap(PactSpecVersion.V3) == ['Content-Type': [matchers: [[match: 'regex', regex: 'application/json;\\s?charset=(utf|UTF)-8']], combine: 'AND']]
   }
 }

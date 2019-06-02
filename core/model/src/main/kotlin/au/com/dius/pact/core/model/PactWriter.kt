@@ -2,10 +2,12 @@ package au.com.dius.pact.core.model
 
 import com.google.gson.GsonBuilder
 import mu.KLogging
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintWriter
 import java.io.RandomAccessFile
 import java.io.StringWriter
+import java.nio.charset.Charset
 
 enum class PactWriteMode {
   MERGE, OVERWRITE
@@ -15,6 +17,8 @@ enum class PactWriteMode {
  * Class to write out a pact to a file
  */
 object PactWriter : KLogging() {
+
+  private val gson = GsonBuilder().setPrettyPrinting().serializeNulls().create()
 
   /**
    * Writes out the pact to the provided pact file
@@ -28,7 +32,6 @@ object PactWriter : KLogging() {
     where I : Interaction {
     pact.sortInteractions()
     val jsonData = pact.toMap(pactSpecVersion)
-    val gson = GsonBuilder().setPrettyPrinting().create()
     gson.toJson(jsonData, writer)
   }
 
@@ -48,7 +51,7 @@ object PactWriter : KLogging() {
       try {
         val pactReaderClass = Class.forName("au.com.dius.pact.core.model.PactReader")
         val loadPact = pactReaderClass.getDeclaredMethod("loadPact", Class.forName("java.lang.Object"))
-        val existingPact = loadPact.invoke(null, readLines(raf)) as Pact<I>
+        val existingPact = loadPact.invoke(null, readFileUtf8(raf)) as Pact<I>
         val result = PactMerge.merge(existingPact, pact)
         if (!result.ok) {
           throw InvalidPactException(result.message)
@@ -77,13 +80,16 @@ object PactWriter : KLogging() {
     }
   }
 
-  private fun readLines(file: RandomAccessFile): String {
-    val data = StringBuilder()
-    var line = file.readLine()
-    while (line != null) {
-      data.append(line)
-      line = file.readLine()
+  private fun readFileUtf8(file: RandomAccessFile): String {
+    val buffer = ByteArray(128)
+    val data = ByteArrayOutputStream()
+
+    var count = file.read(buffer)
+    while (count > 0) {
+      data.write(buffer)
+      count = file.read(buffer)
     }
-    return data.toString()
+
+    return String(data.toByteArray(), Charset.forName("UTF-8"))
   }
 }

@@ -121,7 +121,13 @@ data class Category @JvmOverloads constructor(
    * Re-key all the rules with the given prefix
    */
   fun applyMatcherRootPrefix(prefix: String) {
-    matchingRules = matchingRules.mapKeys { e -> prefix + e.key }.toMutableMap()
+    matchingRules = matchingRules.mapKeys { e ->
+      if (e.key.startsWith(prefix)) {
+        e.key
+      } else {
+        prefix + e.key
+      }
+    }.toMutableMap()
   }
 
   /**
@@ -139,7 +145,10 @@ data class Category @JvmOverloads constructor(
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
     return if (pactSpecVersion < PactSpecVersion.V3) {
       matchingRules.entries.associate {
-        val keyBase = "\$.$name"
+        val keyBase = when (name) {
+          "header" -> "\$.headers"
+          else -> "\$.$name"
+        }
         val key = when {
           it.key.startsWith('$') -> keyBase + it.key.substring(1)
           it.key.isNotEmpty() && !it.key.startsWith('[') -> keyBase + '.' + it.key

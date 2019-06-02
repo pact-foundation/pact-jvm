@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import spock.lang.Issue
 import spock.lang.Specification
 
 class PactDslRequestWithPathSpec extends Specification {
@@ -73,6 +74,37 @@ class PactDslRequestWithPathSpec extends Specification {
     requests[1].matchingRules.rulesForCategory('header').matchingRules['Content-Type'].rules == [
       new RegexMatcher('application/json')
     ]
+  }
+
+  @Issue('#883')
+  def 'Pact with PactDslRootValue as body'() {
+    given:
+    def builder = ConsumerPactBuilder.consumer('spec').hasPactWith('provider')
+    def body = PactDslRootValue.stringType('example')
+
+    when:
+    def pact = builder
+      .given('Given a body that is a string')
+        .uponReceiving('a request for a string')
+        .path('/string')
+        .method('POST')
+        .body(body)
+      .willRespondWith()
+        .status(200)
+        .body(body)
+        .toPact()
+
+    def request = pact.interactions[0].request
+    def response = pact.interactions[0].response
+
+    then:
+    request.body.value == 'example'.bytes
+    request.matchingRules.rulesForCategory('body').matchingRules['$'].rules == [
+      au.com.dius.pact.model.matchingrules.TypeMatcher.INSTANCE ]
+    response.body.value == 'example'.bytes
+    response.matchingRules.rulesForCategory('body').matchingRules['$'].rules == [
+      au.com.dius.pact.model.matchingrules.TypeMatcher.INSTANCE ]
+
   }
 
 }

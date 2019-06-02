@@ -40,7 +40,7 @@ class V2MatchingHeaderTest {
     ]
     assert pact.interactions.first().response.matchingRules.rulesForCategory('header')
       .toMap(PactSpecVersion.V2) == [
-      '$.header.Content-Type': [match: 'regex', regex: 'application/json; ?charset=(utf|UTF)-8']
+      '$.headers.Content-Type': [match: 'regex', regex: 'application/json; ?charset=(utf|UTF)-8']
     ]
 
     pact

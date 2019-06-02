@@ -3,6 +3,7 @@ package au.com.dius.pact.core.model
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
 import groovy.json.JsonSlurper
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 
@@ -145,4 +146,45 @@ class PactWriterSpec extends Specification {
     file.delete()
   }
 
+  @Issue('#877')
+  def 'keep null attributes in the body'() {
+    given:
+    def request = new Request(body: OptionalBody.body(
+      '{"settlement_summary": {"capture_submit_time": null,"captured_date": null}}'.bytes))
+    def response = new Response(body: OptionalBody.body(
+      '{"settlement_summary": {"capture_submit_time": null,"captured_date": null}}'.bytes))
+    def interaction = new RequestResponseInteraction('test interaction with null values in bodies',
+      null, request, response)
+    def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),
+      new Consumer('PactWriterSpecConsumer'), [interaction])
+    def sw = new StringWriter()
+
+    when:
+    PactWriter.writePact(pact, new PrintWriter(sw))
+    def json = new JsonSlurper().parseText(sw.toString())
+    def interactionJson = json.interactions.first()
+
+    then:
+    interactionJson.request.body == [settlement_summary: [capture_submit_time: null, captured_date: null]]
+    interactionJson.response.body == [settlement_summary: [capture_submit_time: null, captured_date: null]]
+  }
+
+  @Issue('#879')
+  def 'when merging pact files, the original file must be read using UTF-8'() {
+    given:
+    def pactFile = File.createTempFile('PactWriterSpec', '.json')
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [
+      new RequestResponseInteraction(description: 'Request für ping', request: new Request(), response: new Response())
+    ])
+
+    when:
+    PactWriter.writePact(pactFile, pact, PactSpecVersion.V3)
+    PactWriter.writePact(pactFile, pact, PactSpecVersion.V3)
+
+    then:
+    new JsonSlurper().parse(pactFile).interactions[0].description == 'Request für ping'
+
+    cleanup:
+    pactFile.delete()
+  }
 }

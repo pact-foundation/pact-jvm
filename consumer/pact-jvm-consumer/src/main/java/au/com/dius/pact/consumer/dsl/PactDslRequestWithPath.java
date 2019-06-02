@@ -274,9 +274,18 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      */
     public PactDslRequestWithPath body(DslPart body) {
         DslPart parent = body.close();
+
+        if (parent instanceof PactDslJsonRootValue) {
+          ((PactDslJsonRootValue)parent).setEncodeJson(true);
+        }
+
         requestMatchers.addCategory(parent.getMatchers());
         requestGenerators.addGenerators(parent.generators);
-        requestBody = OptionalBody.body(parent.toString().getBytes());
+        if (parent.getBody() != null) {
+          requestBody = OptionalBody.body(parent.getBody().toString().getBytes());
+        } else {
+          requestBody = OptionalBody.nullBody();
+        }
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
             requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_JSON.toString()));
         }
