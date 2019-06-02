@@ -2,6 +2,7 @@ package au.com.dius.pact.model
 
 import com.google.gson.GsonBuilder
 import mu.KLogging
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintWriter
 import java.io.RandomAccessFile
@@ -81,15 +82,14 @@ object PactWriter : KLogging() {
 
   private fun readFileUtf8(file: RandomAccessFile): String {
     val buffer = ByteArray(128)
-    val data = StringBuilder()
-    val charset = Charset.forName("UTF-8")
+    val data = ByteArrayOutputStream()
 
     var count = file.read(buffer)
     while (count > 0) {
-      data.append(String(buffer, charset))
+      data.write(buffer)
       count = file.read(buffer)
     }
 
-    return data.toString()
+    return String(data.toByteArray(), Charset.forName("UTF-8"))
   }
 }
