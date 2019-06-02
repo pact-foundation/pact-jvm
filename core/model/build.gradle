@@ -40,12 +40,3 @@ compileGroovy {
   classpath = classpath.plus(files(compileKotlin.destinationDir))
   dependsOn compileKotlin
 }
-
-install.repositories.mavenInstaller.pom.withXml {
-  Node pomNode = asNode()
-  pomNode.dependencies.'*'.findAll() {
-    it.classifier.text() == 'test-pacts'
-  }.each() {
-    it.parent().remove(it)
-  }
-}
