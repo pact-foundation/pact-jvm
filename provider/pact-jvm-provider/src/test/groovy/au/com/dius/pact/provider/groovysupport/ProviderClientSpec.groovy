@@ -16,7 +16,6 @@ import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
 import org.apache.http.ProtocolVersion
 import org.apache.http.StatusLine
-import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient

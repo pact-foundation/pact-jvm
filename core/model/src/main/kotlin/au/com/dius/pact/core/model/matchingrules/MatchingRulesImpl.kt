@@ -15,7 +15,7 @@ class MatchingRulesImpl : MatchingRules {
 
     override fun addCategory(category: String): Category = rules.getOrPut(category, { Category(category) })
 
-    fun copy(): MatchingRules {
+    override fun copy(): MatchingRules {
         val copy = MatchingRulesImpl()
         rules.map { it.value }.forEach { copy.addCategory(it) }
         return copy
@@ -38,13 +38,13 @@ class MatchingRulesImpl : MatchingRules {
         }
     }
 
-    fun isEmpty(): Boolean = rules.all { it.value.isEmpty() }
+    override fun isEmpty(): Boolean = rules.all { it.value.isEmpty() }
 
-    fun isNotEmpty(): Boolean = !isEmpty()
+    override fun isNotEmpty(): Boolean = !isEmpty()
 
-    fun hasCategory(category: String): Boolean = rules.contains(category)
+    override fun hasCategory(category: String): Boolean = rules.contains(category)
 
-    fun getCategories(): Set<String> = rules.keys
+    override fun getCategories(): Set<String> = rules.keys
 
     override fun toString(): String = "MatchingRules(rules=$rules)"
     override fun equals(other: Any?): Boolean = when (other) {
@@ -54,7 +54,7 @@ class MatchingRulesImpl : MatchingRules {
 
     override fun hashCode(): Int = rules.hashCode()
 
-    fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> = when {
+    override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> = when {
         pactSpecVersion < PactSpecVersion.V3 -> toV2Map()
         else -> toV3Map()
     }

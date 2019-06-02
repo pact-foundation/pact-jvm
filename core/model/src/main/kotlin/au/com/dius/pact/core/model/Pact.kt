@@ -44,12 +44,6 @@ interface Interaction {
   val description: String
 
   /**
-   * This just returns the first description from getProviderStates()
-   */
-  @get:Deprecated("Use getProviderStates()")
-  val providerState: String
-
-  /**
    * Returns the provider states for this interaction
    */
   val providerStates: List<ProviderState>
@@ -64,6 +58,9 @@ interface Interaction {
    */
   fun toMap(pactSpecVersion: PactSpecVersion): Map<*, *>
 
+  /**
+   * Unique key for this interaction
+   */
   fun uniqueKey(): String
 }
 
@@ -110,11 +107,4 @@ interface Pact<I> where I : Interaction {
    * @param interactions
    */
   fun mergeInteractions(interactions: List<I>)
-
-  /**
-   * Returns a new Pact with all the interactions filtered by the provided predicate
-   * @deprecated Wrap the pact in a FilteredPact instead
-   */
-  @Deprecated("Wrap the pact in a FilteredPact instead")
-  fun filterInteractions(predicate: Predicate<I>): Pact<I>
 }

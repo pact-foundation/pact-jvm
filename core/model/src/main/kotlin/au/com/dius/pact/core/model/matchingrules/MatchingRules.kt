@@ -243,4 +243,34 @@ interface MatchingRules {
    * Adds the category to the collection
    */
   fun addCategory(category: Category): Category
+
+  /**
+   * If the matching rules are empty
+   */
+  fun isEmpty(): Boolean
+
+  /**
+   * If the matching rules is not empty
+   */
+  fun isNotEmpty(): Boolean
+
+  /**
+   * If the matching rules has the named category
+   */
+  fun hasCategory(category: String): Boolean
+
+  /**
+   * Returns the set of all categories that rules are defined for
+   */
+  fun getCategories(): Set<String>
+
+  /**
+   * Converts these rules into a Map that can be serialised to JSON
+   */
+  fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?>
+
+  /**
+   * Create a new copy of the matching rules
+   */
+  fun copy(): MatchingRules
 }

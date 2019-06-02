@@ -25,8 +25,6 @@ import org.apache.http.client.methods.HttpOptions
 import org.apache.http.config.RegistryBuilder
 import org.apache.http.conn.socket.ConnectionSocketFactory
 import org.apache.http.conn.socket.PlainConnectionSocketFactory
-import org.apache.http.conn.ssl.NoopHostnameVerifier
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory
 import org.apache.http.conn.ssl.SSLSocketFactory
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy
 import org.apache.http.entity.ContentType
@@ -36,7 +34,6 @@ import java.lang.Thread.sleep
 import java.nio.charset.Charset
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
-import javax.net.ssl.SSLContext
 
 /**
  * Returns a mock server for the pact and config
@@ -79,9 +76,9 @@ interface MockServer {
 
 abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockProviderConfig): MockServer {
 
-  internal val mismatchedRequests = ConcurrentHashMap<Request, MutableList<PactVerificationResult>>()
-  internal val matchedRequests = ConcurrentLinkedQueue<Request>()
-  internal val requestMatcher = RequestMatching(pact.interactions)
+  private val mismatchedRequests = ConcurrentHashMap<Request, MutableList<PactVerificationResult>>()
+  private val matchedRequests = ConcurrentLinkedQueue<Request>()
+  private val requestMatcher = RequestMatching(pact.interactions)
 
   abstract fun start()
   abstract fun stop()
@@ -157,7 +154,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
       is FullRequestMatch -> {
         val interaction = matchResult.interaction as RequestResponseInteraction
         matchedRequests.add(interaction.request)
-        return interaction.response.generatedResponse(emptyMap<String, Any>(), GeneratorTestMode.Consumer)
+        return interaction.response.generatedResponse(emptyMap(), GeneratorTestMode.Consumer)
       }
       is PartialRequestMatch -> {
         val interaction = matchResult.problems.keys.first() as RequestResponseInteraction
@@ -175,7 +172,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
 
   private fun invalidResponse(request: Request): Response {
     val body = "{ \"error\": \"Unexpected request : ${StringEscapeUtils.escapeJson(request.toString())}\" }"
-    return Response(500, mapOf("Access-Control-Allow-Origin" to listOf("*"), "Content-Type" to listOf("application/json"),
+    return Response(500, mutableMapOf("Access-Control-Allow-Origin" to listOf("*"), "Content-Type" to listOf("application/json"),
       "X-Pact-Unexpected-Request" to listOf("1")), OptionalBody.body(body.toByteArray()))
   }
 
@@ -211,11 +208,9 @@ abstract class BaseJdkMockServer(
 
   private fun pactResponseToHttpExchange(response: Response, exchange: HttpExchange) {
     val headers = response.headers
-    if (headers != null) {
-      exchange.responseHeaders.putAll(headers)
-    }
+    exchange.responseHeaders.putAll(headers)
     val body = response.body
-    if (body != null && body.isPresent()) {
+    if (body.isPresent()) {
       val bytes = body.unwrap()
       exchange.sendResponseHeaders(response.status, bytes.size.toLong())
       exchange.responseBody.write(bytes)
@@ -234,7 +229,7 @@ abstract class BaseJdkMockServer(
       OptionalBody.body(bodyContents.toByteArray())
     }
     return Request(exchange.requestMethod, exchange.requestURI.path,
-      queryStringToMap(exchange.requestURI.rawQuery), headers, body)
+      queryStringToMap(exchange.requestURI.rawQuery).toMutableMap(), headers, body)
   }
 
   private fun initServer() {

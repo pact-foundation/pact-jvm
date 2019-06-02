@@ -32,7 +32,7 @@ abstract class BaseRequest : HttpPart() {
     val stream = ByteArrayOutputStream()
     multipart.writeTo(stream)
     body = OptionalBody.body(stream.toByteArray())
-    headers!!["Content-Type"] = listOf(multipart.contentType)
+    headers["Content-Type"] = listOf(multipart.contentType)
 
     return this
   }
@@ -42,11 +42,13 @@ abstract class BaseRequest : HttpPart() {
    */
   fun isMultipartFileUpload() = mimeType().equals("multipart/form-data", ignoreCase = true)
 
-  fun parseQueryParametersToMap(query: Any?): Map<String, List<String>> {
-    return when (query) {
-      is Map<*, *> -> query as Map<String, List<String>>
-      is String -> queryStringToMap(query)
-      else -> emptyMap()
+  companion object {
+    fun parseQueryParametersToMap(query: Any?): Map<String, List<String>> {
+      return when (query) {
+        is Map<*, *> -> query as Map<String, List<String>>
+        is String -> queryStringToMap(query)
+        else -> emptyMap()
+      }
     }
   }
 }

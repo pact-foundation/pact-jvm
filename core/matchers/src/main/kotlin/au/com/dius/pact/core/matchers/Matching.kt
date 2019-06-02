@@ -96,16 +96,15 @@ object Matching : KLogging() {
   fun matchStatus(expected: Int, actual: Int) = if (expected == actual) null else StatusMismatch(expected, actual)
 
   fun matchQuery(expected: Request, actual: Request): List<QueryMismatch> {
-    return (expected.query ?: emptyMap()).entries.fold(emptyList<QueryMismatch>()) { acc, entry ->
+    return expected.query.entries.fold(emptyList<QueryMismatch>()) { acc, entry ->
       val value = actual.query[entry.key]
       when (value) {
         null -> acc + QueryMismatch(entry.key, entry.value.joinToString(","), "",
           "Expected query parameter '${entry.key}' but was missing",
           listOf("$", "query", entry.key).joinToString("."))
-        else -> acc + QueryMatcher.compareQuery(entry.key, entry.value, value,
-          expected.matchingRules ?: MatchingRulesImpl())
+        else -> acc + QueryMatcher.compareQuery(entry.key, entry.value, value, expected.matchingRules)
       }
-    } + (actual.query ?: emptyMap()).entries.fold(emptyList<QueryMismatch>()) { acc, entry ->
+    } + actual.query.entries.fold(emptyList<QueryMismatch>()) { acc, entry ->
       when (expected.query[entry.key]) {
         null -> acc + QueryMismatch(entry.key, "", entry.value.joinToString(","),
           "Unexpected query parameter '${entry.key}' received",

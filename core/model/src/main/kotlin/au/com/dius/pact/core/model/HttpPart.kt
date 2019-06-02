@@ -9,20 +9,20 @@ import java.nio.charset.Charset
 /**
  * Base trait for an object that represents part of an http message
  */
-abstract class HttpPart : GroovyObjectSupport() {
+abstract class HttpPart {
 
-  abstract var body: OptionalBody?
-  abstract var headers: MutableMap<String, List<String>>?
-  abstract var matchingRules: MatchingRules?
+  abstract var body: OptionalBody
+  abstract var headers: MutableMap<String, List<String>>
+  abstract var matchingRules: MatchingRules
 
   fun mimeType(): String = contentTypeHeader()?.split(Regex("\\s*;\\s*"))?.first().orEmpty()
 
   fun contentTypeHeader(): String? {
-    val contentTypeKey = headers?.keys?.find { CONTENT_TYPE.equals(it, ignoreCase = true) }
+    val contentTypeKey = headers.keys.find { CONTENT_TYPE.equals(it, ignoreCase = true) }
     return if (contentTypeKey.isNullOrEmpty()) {
       detectContentType()
     } else {
-      headers?.get(contentTypeKey)?.first()
+      headers.get(contentTypeKey)?.first()
     }
   }
 
@@ -31,10 +31,10 @@ abstract class HttpPart : GroovyObjectSupport() {
   fun xmlBody() = mimeType().matches(Regex("application\\/.*xml"))
 
   fun detectContentType(): String = when {
-    body != null && body!!.isPresent() -> {
-      val s = body?.value?.take(32)?.map {
+    body.isPresent() -> {
+      val s = body.value!!.take(32).map {
         if (it == '\n'.toByte()) ' ' else it.toChar()
-      }.orEmpty().joinToString("")
+      }.joinToString("")
       when {
         s.matches(XMLREGEXP) -> "application/xml"
         s.toUpperCase().matches(HTMLREGEXP) -> "text/html"
@@ -47,11 +47,8 @@ abstract class HttpPart : GroovyObjectSupport() {
   }
 
   fun setDefaultMimeType(mimetype: String) {
-    if (headers == null) {
-      headers = mutableMapOf()
-    }
-    if (!headers!!.containsKey(CONTENT_TYPE)) {
-      headers!![CONTENT_TYPE] = listOf(mimetype)
+    if (!headers.containsKey(CONTENT_TYPE)) {
+      headers[CONTENT_TYPE] = listOf(mimetype)
     }
   }
 

@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit
 class KTorMockServer(
   pact: RequestResponsePact,
   config: MockProviderConfig,
-  val stopTimeout: Long = 20000
+  private val stopTimeout: Long = 20000
 ) : BaseMockServer(pact, config) {
 
   private val env = applicationEngineEnvironment {
@@ -98,8 +98,8 @@ class KTorMockServer(
       OptionalBody.body(bodyContents.toByteArray())
     }
     return Request(call.request.httpMethod.value, call.request.path(),
-      call.request.queryParameters.entries().associate { it.toPair() },
-      headers.entries().associate { it.toPair() }, body)
+      call.request.queryParameters.entries().associate { it.toPair() }.toMutableMap(),
+      headers.entries().associate { it.toPair() }.toMutableMap(), body)
   }
 
   override fun getUrl() =

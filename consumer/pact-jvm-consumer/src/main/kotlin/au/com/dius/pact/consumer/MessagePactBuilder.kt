@@ -80,9 +80,6 @@ class MessagePactBuilder(
     val message = messages.last()
     message.metaData = metadata.mapValues { (key, value) ->
       if (value is Matcher) {
-        if (message.matchingRules == null) {
-          message.matchingRules = MatchingRulesImpl()
-        }
         message.matchingRules.addCategory("metadata").addRule(key, value.matcher!!)
         if (value.generator != null) {
           message.generators.addGenerator(category = au.com.dius.pact.core.model.generators.Category.METADATA,
@@ -105,7 +102,7 @@ class MessagePactBuilder(
     }
 
     val message = messages.last()
-    val metadata = message.metaData ?: mutableMapOf()
+    val metadata = message.metaData.toMutableMap()
     val contentType = metadata.entries.find {
       it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
     }
