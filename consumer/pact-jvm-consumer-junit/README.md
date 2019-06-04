@@ -668,7 +668,7 @@ overwritten, set the Java system property `pact.writer.overwrite` to `true`.
 
 # Publishing your pact files to a pact broker
 
-If you use Gradle, you can use the [pact Gradle plugin](https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle#publishing-pact-files-to-a-pact-broker) to publish your pact files.
+If you use Gradle, you can use the [pact Gradle plugin](../provider/pact-jvm-provider-gradle#publishing-pact-files-to-a-pact-broker) to publish your pact files.
 
 # Pact Specification V3
 
@@ -703,5 +703,5 @@ If you are using the `PactProviderRuleMk2`, you can pass the version into the co
 For testing a consumer of messages from a message queue, the `MessagePactProviderRule` rule class works in much the
 same way as the `PactProviderRule` class for Request-Response interactions, but will generate a V3 format message pact file.
 
-For an example, look at [ExampleMessageConsumerTest](https://github.com/DiUS/pact-jvm/blob/master/pact-jvm-consumer-junit%2Fsrc%2Ftest%2Fjava%2Fau%2Fcom%2Fdius%2Fpact%2Fconsumer%2Fv3%2FExampleMessageConsumerTest.java)
+For an example, look at [ExampleMessageConsumerTest](src/test/java/au/com/dius/pact/consumer/v3%2FExampleMessageConsumerTest.java)
 

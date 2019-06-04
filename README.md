@@ -96,26 +96,26 @@ You want to look at: [scala-pact](https://github.com/ITV/scala-pact) or [pact sb
 
 You want to look at: [pact gradle plugin](provider/pact-jvm-provider-gradle)
 
-#### verify pacts with Maven [version 2.1.9+]
+#### verify pacts with Maven
 
 You want to look at: [pact maven plugin](provider/pact-jvm-provider-maven)
 
-#### verify pacts with JUnit tests [version 2.3.3+, 3.1.3+]
+#### verify pacts with JUnit tests
 
 You want to look at: [junit provider support](provider/pact-jvm-provider-junit) for JUnit 4 tests and 
  [pact-jvm-provider-junit5](provider/pact-jvm-provider-junit5) for JUnit 5 tests
 
-#### verify pacts with Leiningen [version 2.2.14+, 3.0.3+]
+#### verify pacts with Leiningen
 
 You want to look at: [pact leiningen plugin](provider/pact-jvm-provider-lein)
 
 #### verify pacts with Specs2
 
-Have a look at [writing specs to validate a provider](https://github.com/realestate-com-au/pact-jvm-provider-specs2)
+Have a look at [pact-jvm-provider-specs2](provider/pact-jvm-provider-specs2)
 
 #### verify pacts with a Spring MVC project
 
-Have a look at [Spring MVC Pact Test Runner](https://github.com/realestate-com-au/pact-jvm-provider-spring-mvc)
+Have a look at [pact-jvm-provider-specs2](provider/pact-jvm-provider-specs2) or [Spring MVC Pact Test Runner](https://github.com/realestate-com-au/pact-jvm-provider-spring-mvc) (Not maintained).
 
 #### I want to verify pacts but don't want to use sbt or gradle or leiningen
 
