@@ -161,7 +161,7 @@ class V3PactSpec extends Specification {
             }
 
             @Override
-            void mergeInteractions(List<Interaction> interactions) { }
+            void mergeInteractions(@NotNull List interactions) { }
 
             @SuppressWarnings('UnusedMethodParameter')
             @Override

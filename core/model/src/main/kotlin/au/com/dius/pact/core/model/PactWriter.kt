@@ -49,9 +49,7 @@ object PactWriter : KLogging() {
       val raf = RandomAccessFile(pactFile, "rw")
       val lock = raf.channel.lock()
       try {
-        val pactReaderClass = Class.forName("au.com.dius.pact.core.model.PactReader")
-        val loadPact = pactReaderClass.getDeclaredMethod("loadPact", Class.forName("java.lang.Object"))
-        val existingPact = loadPact.invoke(null, readFileUtf8(raf)) as Pact<I>
+        val existingPact = PactReader.loadPact(readFileUtf8(raf)) as Pact<I>
         val result = PactMerge.merge(existingPact, pact)
         if (!result.ok) {
           throw InvalidPactException(result.message)
