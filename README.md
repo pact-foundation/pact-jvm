@@ -45,8 +45,8 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 | ------ | ------------- | ------- | -------------- | -------------- |
 | [4.0.x](https://github.com/DiUS/pact-jvm/blob/v4.0.x/README.md) | V3 | 8-12 | N/A | 4.0.0-beta.1 |
 | [3.6.x](https://github.com/DiUS/pact-jvm/blob/v3.6.x/README.md) | V3 | 8 | 2.12 | 3.6.7 |
-| [3.5.x](https://github.com/DiUS/pact-jvm/blob/3.5.x/README.md) | V3 | 8 | 2.12, 2.11 | 3.5.25 |
-| [3.5.x-jre7](https://github.com/DiUS/pact-jvm/blob/3.5.x-jre7/README.md) | V3 | 7 | 2.11 | 3.5.7-jre7.0 |
+| [3.5.x](https://github.com/DiUS/pact-jvm/blob/v3.5.x/README.md) | V3 | 8 | 2.12, 2.11 | 3.5.25 |
+| [3.5.x-jre7](https://github.com/DiUS/pact-jvm/blob/v3.5.x-jre7/README.md) | V3 | 7 | 2.11 | 3.5.7-jre7.0 |
 | [2.4.x](https://github.com/DiUS/pact-jvm/blob/v2.x/README.md) | V2 | 6 | 2.10, 2.11 | 2.4.20 |
 
 ## Service Consumers
