@@ -6,7 +6,7 @@ import spock.lang.Specification
 class PactReaderTransformSpec extends Specification {
   private provider
   private consumer
-  private jsonMap
+  private Map jsonMap
   private request
   private Map<String, Serializable> response
 
@@ -126,7 +126,7 @@ class PactReaderTransformSpec extends Specification {
     jsonMap.interactions[0].request.method = 'get'
 
     when:
-    def result = PactReader.transformJson(jsonMap)
+    def result = au.com.dius.pact.core.model.PactReader.transformJson(jsonMap)
 
     then:
     result == [
