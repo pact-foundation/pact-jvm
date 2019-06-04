@@ -60,7 +60,7 @@ data class PactVerificationContext(
   val interaction: Interaction,
   internal var testExecutionResult: TestResult = TestResult.Ok
 ) {
-  var executionContext: Map<String, Any?>? = null
+  var executionContext: Map<String, Any>? = null
 
   /**
    * Called to verify the interaction from the test template method.

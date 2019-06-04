@@ -2,7 +2,9 @@ package au.com.dius.pact.provider.junit5
 
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.provider.junit.MissingStateChangeMethod
 import au.com.dius.pact.provider.junit.State
 import au.com.dius.pact.provider.junit.StateChangeAction
@@ -44,7 +46,7 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
   }
 
   def setup() {
-    interaction = new RequestResponseInteraction()
+    interaction = new RequestResponseInteraction('test', new Request(), new Response())
     verificationExtension = new PactVerificationStateChangeExtension(interaction)
   }
 

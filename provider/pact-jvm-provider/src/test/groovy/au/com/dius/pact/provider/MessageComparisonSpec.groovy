@@ -1,6 +1,8 @@
 package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
 import spock.lang.Specification
 
@@ -8,7 +10,7 @@ class MessageComparisonSpec extends Specification {
 
   def 'compares the message contents as JSON by default'() {
     given:
-    def message = new Message(contents: OptionalBody.body('{"a":1,"b":"2"}'.bytes))
+    def message = new Message('test', [], OptionalBody.body('{"a":1,"b":"2"}'.bytes))
     def actual = OptionalBody.body('{"a":1,"b":"3"}'.bytes)
 
     when:
@@ -22,8 +24,8 @@ class MessageComparisonSpec extends Specification {
 
   def 'compares the message contents by the content type'() {
     given:
-    def message = new Message(contents: OptionalBody.body('{"a":1,"b":"2"}'.bytes),
-      metaData: [contentType: 'text/plain'])
+    def message = new Message('test', [], OptionalBody.body('{"a":1,"b":"2"}'.bytes), new MatchingRulesImpl(),
+      new Generators(), [contentType: 'text/plain'])
     def actual = OptionalBody.body('{"a":1,"b":"3"}'.bytes)
 
     when:
@@ -43,7 +45,8 @@ class MessageComparisonSpec extends Specification {
 
   def 'compares the metadata if provided'() {
     given:
-    def message = new Message(contents: OptionalBody.body('{"a":1,"b":"2"}'.bytes), metaData: [
+    def message = new Message('test', [], OptionalBody.body('{"a":1,"b":"2"}'.bytes), new MatchingRulesImpl(),
+      new Generators(), [
       contentType: 'application/json',
       destination: 'X001'
     ])

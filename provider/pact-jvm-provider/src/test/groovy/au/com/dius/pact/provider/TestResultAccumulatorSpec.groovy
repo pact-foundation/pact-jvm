@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.pactbroker.TestResult
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -12,8 +13,8 @@ import spock.util.environment.RestoreSystemProperties
 
 class TestResultAccumulatorSpec extends Specification {
 
-  static interaction1 = new RequestResponseInteraction('interaction1', [], new Request())
-  static interaction2 = new RequestResponseInteraction('interaction2', [], new Request())
+  static interaction1 = new RequestResponseInteraction('interaction1', [], new Request(), new Response())
+  static interaction2 = new RequestResponseInteraction('interaction2', [], new Request(), new Response())
   static pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'), [
     interaction1, interaction2
   ])
@@ -53,11 +54,11 @@ class TestResultAccumulatorSpec extends Specification {
 
   def 'accumulator should not rely on the Pact class hash codes'() {
     given:
-    def interaction3 = new RequestResponseInteraction('interaction3', [], new Request())
+    def interaction3 = new RequestResponseInteraction('interaction3', [], new Request(), new Response())
     def mutablePact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'), [
       interaction1, interaction2, interaction3
     ])
-    def interaction = new RequestResponseInteraction('interaction1', [], new Request())
+    def interaction = new RequestResponseInteraction('interaction1', [], new Request(), new Response())
     def mutablePact2 = new RequestResponsePact(new Provider('provider'), new Consumer('consumer2'), [
       interaction
     ])

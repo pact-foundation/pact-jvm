@@ -29,8 +29,7 @@ class MockMvcTargetSpec extends Specification {
     given:
     mockMvcTarget.runTimes = 1
     mockMvcTarget.setTestClass(new TestClass(MockMvcTargetSpec), this)
-    def interaction = new RequestResponseInteraction(description: 'Test Interaction', request: new Request(),
-      response: new Response())
+    def interaction = new RequestResponseInteraction('Test Interaction', new Request(), new Response())
     def controller = Mock(TestController)
     mockMvcTarget.controllers = [ controller ]
 

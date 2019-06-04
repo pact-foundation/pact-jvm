@@ -66,7 +66,8 @@ abstract class BasePact<I> @JvmOverloads constructor(
       )
     }
 
-    private fun lookupVersion(): String {
+    @JvmStatic
+    fun lookupVersion(): String {
       val url = BasePact::class.java.protectionDomain?.codeSource?.location
       return if (url != null) {
         val openStream = url.openStream()

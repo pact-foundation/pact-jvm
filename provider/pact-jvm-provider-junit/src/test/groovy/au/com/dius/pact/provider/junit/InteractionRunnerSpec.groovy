@@ -4,8 +4,10 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.VerificationReporter
@@ -37,9 +39,9 @@ class InteractionRunnerSpec extends Specification {
 
   def 'publish a failed verification result if any before step fails'() {
     given:
-    def interaction1 = new RequestResponseInteraction(description: 'Interaction 1',
-      providerStates: [ new ProviderState('Test State') ])
-    def interaction2 = new RequestResponseInteraction(description: 'Interaction 2')
+    def interaction1 = new RequestResponseInteraction('Interaction 1',
+      [ new ProviderState('Test State') ], new Request(), new Response())
+    def interaction2 = new RequestResponseInteraction('Interaction 2', [], new Request(), new Response())
     def pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction1, interaction2 ])
 
     def runner = new InteractionRunner(clazz, pact, UnknownPactSource.INSTANCE)
@@ -56,7 +58,7 @@ class InteractionRunnerSpec extends Specification {
   def 'provider version trims -SNAPSHOT'() {
     given:
     System.setProperty('pact.provider.version', '1.0.0-SNAPSHOT-wn23jhd')
-    def interaction1 = new RequestResponseInteraction(description: 'Interaction 1')
+    def interaction1 = new RequestResponseInteraction('Interaction 1', [], new Request(), new Response())
     def pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction1 ])
 
     def filteredPact = new FilteredPact(pact, { it.description == 'Interaction 1' })

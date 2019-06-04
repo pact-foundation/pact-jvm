@@ -2,6 +2,8 @@ package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.provider.ResponseComparison
 import org.apache.http.entity.ContentType
@@ -70,12 +72,12 @@ class ResponseComparisonSpec extends Specification {
   @Unroll
   def 'when comparing message bodies, handles content type #contentType'() {
     given:
-    Message expectedMessage = new Message(metaData: [contentType: contentType],
-      contents: OptionalBody.body(expected.bytes))
+    Message expectedMessage = new Message('test', [], OptionalBody.body(expected.bytes),
+      new MatchingRulesImpl(), new Generators(), [contentType: contentType])
     OptionalBody actualMessage = OptionalBody.body(actual.bytes)
 
     expect:
-    ResponseComparison.compareMessageBody(expectedMessage, actualMessage, expectedMessage.asPactRequest()).empty
+    ResponseComparison.compareMessageBody(expectedMessage, actualMessage).empty
 
     where:
 
@@ -87,7 +89,7 @@ class ResponseComparisonSpec extends Specification {
     'text/plain'                               | '{"a": 100.0, "b": "test"}' | '{"a": 100.0, "b": "test"}'
     'application/octet-stream;charset=UTF-8'   | '{"a": 100.0, "b": "test"}' | '{"a": 100.0, "b": "test"}'
     'application/octet-stream'                 | '{"a": 100.0, "b": "test"}' | '{"a": 100.0, "b": "test"}'
-    ''                                         | '{"a": 100.0, "b": "test"}' | '{"a":100.0,"b":"test"}'
+    ''                                         | '{"a": 100.0, "b": "test"}' | '{"a": 100.0, "b": "test"}'
     null                                       | '{"a": 100.0, "b": "test"}' | '{"a":100.0,"b":"test"}'
 
   }

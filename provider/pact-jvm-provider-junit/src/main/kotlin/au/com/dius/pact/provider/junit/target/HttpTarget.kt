@@ -62,7 +62,7 @@ open class HttpTarget
     consumerName: String,
     interaction: Interaction,
     source: PactSource,
-    context: Map<String, Any?>
+    context: Map<String, Any>
   ) {
     val provider = getProviderInfo(source)
     val consumer = ConsumerInfo(consumerName)

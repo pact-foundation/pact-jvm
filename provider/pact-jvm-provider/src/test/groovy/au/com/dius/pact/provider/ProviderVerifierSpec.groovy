@@ -2,13 +2,16 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.model.messaging.Message
@@ -343,7 +346,7 @@ class ProviderVerifierSpec extends Specification {
   def 'is able to verify a message pact'() {
     given:
     def methods = [ TestSupport.getMethod('testMethod') ] as Set
-    Message message = new Message(contents: OptionalBody.body('\"test method result\"'.bytes))
+    Message message = new Message('test', [], OptionalBody.body('\"test method result\"'.bytes))
     def interactionMessage = 'test message interaction'
     def failures = [:]
     def reporter = Mock(VerifierReporter)
@@ -480,9 +483,9 @@ class ProviderVerifierSpec extends Specification {
     def providerInfo = new ProviderInfo(verificationType: PactVerification.ANNOTATED_METHOD)
     def consumerInfo = new ConsumerInfo()
 
-    def interaction = new RequestResponseInteraction(description: 'Test Interaction')
-    def pact = new RequestResponsePact(new Provider(), new Consumer(), [interaction])
-    pact.source = new BrokerUrlSource('url', 'url', [publish: [:]])
+    def interaction = new RequestResponseInteraction('Test Interaction', new Request(), new Response())
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [interaction], [:],
+      new BrokerUrlSource('url', 'url', [publish: [:]]))
 
     verifier.projectHasProperty = {
       it == ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS

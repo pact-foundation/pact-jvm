@@ -22,10 +22,10 @@ class PactSpec(config: PactConfiguration, pact: RequestResponsePact)(implicit ti
     s"""pact for consumer ${pact.getConsumer.getName}
        |provider ${pact.getProvider.getName}
        |interaction "${interaction.getDescription}"
-       |in state: "${interaction.getProviderState}" """.stripMargin in {
+       |in state: "${interaction.getProviderStates.get(0)}" """.stripMargin in {
 
-        val stateChangeFuture = (Option.apply(config.getStateChangeUrl), Option.apply(interaction.getProviderState)) match {
-          case (Some(stateChangeUrl), Some(providerState)) => HttpClient.run(EnterStateRequest(stateChangeUrl.url, providerState))
+        val stateChangeFuture = (Option.apply(config.getStateChangeUrl), Option.apply(interaction.getProviderStates.get(0))) match {
+          case (Some(stateChangeUrl), Some(providerState)) => HttpClient.run(EnterStateRequest(stateChangeUrl.url, providerState.getName))
           case (_, _) => Future.successful(new Response(200))
         }
         
