@@ -83,7 +83,7 @@ class ProviderVerifier extends ProviderVerifierBase {
       if (consumer.pactFileAuthentication) {
         options.authentication = consumer.pactFileAuthentication
       }
-      PactReader.loadPact(options, pactSource)
+      PactReader.loadPact(pactSource, options)
     } else {
       try {
         def pact = PactReader.loadPact(pactSource)

@@ -29,7 +29,7 @@ class V3PactSpec extends Specification {
 
     def 'writing pacts should merge with any existing file'() {
         given:
-        def pact = PactReader.INSTANCE.loadV3Pact(UnknownPactSource.INSTANCE, [
+        def pact = PactReader.loadV3Pact(UnknownPactSource.INSTANCE, [
           consumer: [name: 'consumer'],
           provider: [name: 'provider'],
           messages: [
@@ -54,7 +54,7 @@ class V3PactSpec extends Specification {
 
     def 'when merging it should replace messages with the same description and state'() {
         given:
-        def pact = PactReader.INSTANCE.loadV3Pact(UnknownPactSource.INSTANCE, [
+        def pact = PactReader.loadV3Pact(UnknownPactSource.INSTANCE, [
             consumer: [name: 'consumer'],
             provider: [name: 'provider'],
             messages: [

@@ -38,7 +38,7 @@ class PactReaderTransformSpec extends Specification {
 
   def 'only transforms legacy fields'() {
     when:
-    def result = PactReader.INSTANCE.transformJson(jsonMap)
+    def result = PactReader.transformJson(jsonMap)
 
     then:
     result == [
@@ -59,7 +59,7 @@ class PactReaderTransformSpec extends Specification {
     jsonMap.interactions[0].provider_state = 'provider state'
 
     when:
-    def result = PactReader.INSTANCE.transformJson(jsonMap)
+    def result = PactReader.transformJson(jsonMap)
 
     then:
     result == [
@@ -82,7 +82,7 @@ class PactReaderTransformSpec extends Specification {
     jsonMap.interactions[0].providerState = 'provider state 2'
 
     when:
-    def result = PactReader.INSTANCE.transformJson(jsonMap)
+    def result = PactReader.transformJson(jsonMap)
 
     then:
     result == [
@@ -105,7 +105,7 @@ class PactReaderTransformSpec extends Specification {
     jsonMap.interactions[0].response.responseMatchingRules = [body: ['$': [['match': 'type']]]]
 
     when:
-    def result = PactReader.INSTANCE.transformJson(jsonMap)
+    def result = PactReader.transformJson(jsonMap)
 
     then:
     result == [
@@ -126,7 +126,7 @@ class PactReaderTransformSpec extends Specification {
     jsonMap.interactions[0].request.method = 'get'
 
     when:
-    def result = PactReader.INSTANCE.transformJson(jsonMap)
+    def result = PactReader.transformJson(jsonMap)
 
     then:
     result == [

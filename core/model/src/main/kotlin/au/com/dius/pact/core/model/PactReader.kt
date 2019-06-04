@@ -151,7 +151,7 @@ object PactReader: KLogging() {
    */
   @JvmOverloads
   @JvmStatic
-  fun loadPact(options: Map<String, Any> = emptyMap(), source: Any): Pact<out Interaction> {
+  fun loadPact(source: Any, options: Map<String, Any> = emptyMap()): Pact<out Interaction> {
     val pactInfo = loadFile(source, options)
     var version = "2.0.0"
     val metadata = pactInfo.first["metadata"] as Map<String, Any>?
@@ -169,6 +169,7 @@ object PactReader: KLogging() {
     }
   }
 
+  @JvmStatic
   fun loadV3Pact(source: PactSource, pactJson: MutableMap<String, Any>): Pact<out Interaction> {
     if (pactJson.containsKey("messages")) {
       return MessagePact.fromMap(pactJson, source)
@@ -194,6 +195,7 @@ object PactReader: KLogging() {
     }
   }
 
+  @JvmStatic
   fun loadV2Pact(source: PactSource, pactJson: MutableMap<String, Any>): Pact<out Interaction> {
     val transformedJson = transformJson(pactJson)
     val provider = Provider.fromMap(transformedJson["provider"] as Map<String, Any>? ?: emptyMap())
@@ -229,6 +231,7 @@ object PactReader: KLogging() {
     }
   }
 
+  @JvmStatic
   fun transformJson(pactJson: MutableMap<String, Any>): Map<String, Any> {
     if (pactJson["interactions"] != null) {
       pactJson["interactions"] = (pactJson["interactions"] as List<Map<String, Any>>).map { i ->

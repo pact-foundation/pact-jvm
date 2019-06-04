@@ -321,7 +321,7 @@ class ProviderVerifierSpec extends Specification {
     verifier.loadPactFileForConsumer(consumer)
 
     then:
-    1 * PactReader.loadPact(['authentication': ['basic', 'test', 'pwd']], pactFile) >> Mock(Pact)
+    1 * PactReader.loadPact(pactFile, ['authentication': ['basic', 'test', 'pwd']]) >> Mock(Pact)
   }
 
   def 'when loading a pact file for a consumer, it handles a closure'() {
@@ -334,7 +334,7 @@ class ProviderVerifierSpec extends Specification {
     verifier.loadPactFileForConsumer(consumer)
 
     then:
-    1 * PactReader.loadPact([:], pactFile) >> Mock(Pact)
+    1 * PactReader.loadPact(pactFile, [:]) >> Mock(Pact)
   }
 
   static class TestSupport {
