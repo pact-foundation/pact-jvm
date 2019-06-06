@@ -147,7 +147,11 @@ open class InteractionRunner<I>(
         testResult = false
       } finally {
         notifier.fireTestFinished(description)
-        testResultAccumulator.updateTestResult(pact as Pact<Interaction>, interaction, testResult)
+        if (pact is FilteredPact) {
+          testResultAccumulator.updateTestResult(pact.pact, interaction, testResult)
+        } else {
+          testResultAccumulator.updateTestResult(pact, interaction, testResult)
+        }
       }
     }
   }

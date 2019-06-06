@@ -24,7 +24,8 @@ class Response extends BaseResponse {
 
   static Response fromMap(def map) {
     new Response().with {
-      status = (map.status ?: DEFAULT_STATUS) as Integer
+      def statusJson = map.status ?: DEFAULT_STATUS
+      status = statusJson instanceof BigDecimal ? statusJson.toInt() : statusJson as Integer
       headers = map.headers ? map.headers.collectEntries { key, value ->
         if (value instanceof List) {
           [key, value]

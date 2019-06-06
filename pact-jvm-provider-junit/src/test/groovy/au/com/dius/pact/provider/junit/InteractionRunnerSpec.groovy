@@ -7,6 +7,7 @@ import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
 import au.com.dius.pact.model.UnknownPactSource
+import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.VerificationReporter
 import au.com.dius.pact.provider.junit.target.HttpTarget
@@ -95,4 +96,25 @@ class InteractionRunnerSpec extends Specification {
     providerVersion == '1.0.0-SNAPSHOT-wn23jhd'
   }
 
+
+  @RestoreSystemProperties
+  def 'updateTestResult - if FilteredPact and not all interactions verified then no call on verificationReporter'() {
+    given:
+    def interaction1 = new RequestResponseInteraction('interaction1', [], new Request(), new Response())
+    def interaction2 = new RequestResponseInteraction('interaction2', [], new Request(), new Response())
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction1, interaction2 ])
+    def notifier = Mock(RunNotifier.class)
+    def filteredPact = new FilteredPact(pact, { it.description == 'interaction1' })
+    def testResultAccumulator = DefaultTestResultAccumulator.INSTANCE
+    testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
+      publishingResultsDisabled() >> false
+    }
+    def runner = new InteractionRunner(clazz, filteredPact, UnknownPactSource.INSTANCE)
+
+    when:
+    runner.run(notifier)
+
+    then:
+    0 * testResultAccumulator.verificationReporter.reportResults(_, _, _, _)
+  }
 }
