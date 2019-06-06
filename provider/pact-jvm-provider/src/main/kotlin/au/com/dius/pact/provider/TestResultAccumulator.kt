@@ -49,6 +49,8 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
           acc: TestResult, result -> acc.merge(result)
         }, lookupProviderVersion())
       }
+    } else {
+      logger.info { "Not all of the #${pact.interactions.size} were verified." }
     }
   }
 
@@ -72,6 +74,7 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
   }
 
   fun allInteractionsVerified(pact: Pact<out Interaction>, results: MutableMap<Int, TestResult>): Boolean {
+    logger.debug { "Number of interactions #${pact.interactions.size} and results: ${results.values}" }
     return pact.interactions.all { results.containsKey(calculateInteractionHash(it)) }
   }
 

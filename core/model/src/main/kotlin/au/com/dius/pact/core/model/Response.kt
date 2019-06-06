@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import mu.KLogging
+import java.math.BigDecimal
 
 /**
  * Response from a provider to a consumer
@@ -62,7 +63,8 @@ class Response @JvmOverloads constructor(
 
     @JvmStatic
     fun fromMap(map: Map<String, Any>): Response {
-      val status = map.getOrDefault("status", DEFAULT_STATUS) as Int
+      val statusJson = map.getOrDefault("status", DEFAULT_STATUS)
+      val status = if (statusJson is BigDecimal)  statusJson.toInt() else statusJson
       val headers = (map.getOrDefault("headers", mutableMapOf<String, Any>()) as Map<String, Any>)
         .entries.associate { (key, value) ->
         if (value is List<*>) {
@@ -73,14 +75,14 @@ class Response @JvmOverloads constructor(
       }
       val body = if (map.containsKey("body"))
         OptionalBody.body(map["body"]?.toString()?.toByteArray())
-        else OptionalBody.missing()
+      else OptionalBody.missing()
       val matchingRules = if (map.containsKey("matchingRules"))
         MatchingRulesImpl.fromMap(map["matchingRules"] as Map<String, Map<String, Any?>>)
       else MatchingRulesImpl()
       val generators = if (map.containsKey("generators"))
         Generators.fromMap(map["generators"] as Map<String, Map<String, Any>>)
       else Generators()
-      return Response(status, headers.toMutableMap(), body, matchingRules, generators)
+      return Response(status as Int, headers.toMutableMap(), body, matchingRules, generators)
     }
   }
 }
