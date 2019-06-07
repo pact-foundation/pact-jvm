@@ -96,14 +96,13 @@ class InteractionRunnerSpec extends Specification {
     providerVersion == '1.0.0-SNAPSHOT-wn23jhd'
   }
 
-
   @RestoreSystemProperties
   def 'updateTestResult - if FilteredPact and not all interactions verified then no call on verificationReporter'() {
     given:
     def interaction1 = new RequestResponseInteraction('interaction1', [], new Request(), new Response())
     def interaction2 = new RequestResponseInteraction('interaction2', [], new Request(), new Response())
     def pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction1, interaction2 ])
-    def notifier = Mock(RunNotifier.class)
+    def notifier = Mock(RunNotifier)
     def filteredPact = new FilteredPact(pact, { it.description == 'interaction1' })
     def testResultAccumulator = DefaultTestResultAccumulator.INSTANCE
     testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
