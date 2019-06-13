@@ -4,8 +4,10 @@ import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.FilteredPact
 import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.UnknownPactSource
 import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.TestResultAccumulator
