@@ -7,7 +7,7 @@ repositories {
 }
 
 dependencies {
-  compile project(":pact-jvm-consumer_${project.scalaVersion}")
+  compile project(path: ":pact-jvm-consumer_${project.scalaVersion}", configuration: 'default')
 
   testCompile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
   testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"

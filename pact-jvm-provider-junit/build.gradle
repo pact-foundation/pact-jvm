@@ -1,5 +1,6 @@
 dependencies {
-    compile project(":pact-jvm-support"), project(":pact-jvm-provider_${project.scalaVersion}"),
+    compile project(path: ":pact-jvm-support", configuration: 'default'), 
+      project(path: ":pact-jvm-provider_${project.scalaVersion}", configuration: 'default'),
       "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}",
       "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
       "junit:junit:${project.junitVersion}",

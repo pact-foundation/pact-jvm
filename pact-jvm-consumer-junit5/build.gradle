@@ -1,5 +1,5 @@
 dependencies {
-  compile project(":pact-jvm-consumer_${project.scalaVersion}")
+  compile project(path: ":pact-jvm-consumer_${project.scalaVersion}", configuration: 'default')
   compile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
 
   testCompile "ch.qos.logback:logback-core:${project.logbackVersion}",

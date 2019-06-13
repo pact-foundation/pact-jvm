@@ -1,6 +1,6 @@
 
 dependencies {
-    compile project(":pact-jvm-consumer_${project.scalaVersion}"),
+    compile project(path: ":pact-jvm-consumer_${project.scalaVersion}", configuration: 'default'),
       "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}"
     compile 'org.asynchttpclient:async-http-client:2.1.0-alpha24'
 

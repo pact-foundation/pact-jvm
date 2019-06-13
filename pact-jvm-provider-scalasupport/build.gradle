@@ -1,5 +1,6 @@
 dependencies {
-  compile project(":pact-jvm-model"), project(":pact-jvm-provider_${project.scalaVersion}"),
+  compile project(path: ":pact-jvm-model", configuration: 'default'), 
+    project(path: ":pact-jvm-provider_${project.scalaVersion}", configuration: 'default'),
     "org.scalatest:scalatest_${project.scalaVersion}:${project.scalatestVersion}"
   compile 'org.asynchttpclient:async-http-client:2.1.0-alpha24'
   compile("ws.unfiltered:unfiltered-netty-server_${project.scalaVersion}:0.9.1") {

@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-  compile project(":pact-jvm-consumer_${project.scalaVersion}"),
+  compile project(path: ":pact-jvm-consumer_${project.scalaVersion}", configuration: 'default'),
     "junit:junit:${project.junitVersion}",
     "org.json:json:${project.jsonVersion}",
     "org.apache.commons:commons-lang3:${project.commonsLang3Version}",

@@ -1,7 +1,7 @@
 
 dependencies {
-    compile project(":pact-jvm-model"),
-      project(":pact-jvm-matchers_${project.scalaVersion}"),
+    compile project(path: ":pact-jvm-model", configuration: 'default'),
+      project(path: ":pact-jvm-matchers_${project.scalaVersion}", configuration: 'default'),
       'com.googlecode.java-diff-utils:diffutils:1.3.0',
       'dk.brics.automaton:automaton:1.11-8',
       "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"

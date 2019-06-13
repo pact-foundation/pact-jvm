@@ -1,5 +1,5 @@
 dependencies {
-    compile project(":pact-jvm-consumer_${project.scalaVersion}")
+    compile project(path: ":pact-jvm-consumer_${project.scalaVersion}", configuration: 'default')
 
     testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}",
       "ch.qos.logback:logback-classic:${project.logbackVersion}"

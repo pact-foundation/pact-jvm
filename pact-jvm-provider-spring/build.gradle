@@ -1,5 +1,5 @@
 dependencies {
-    compile project(":pact-jvm-provider-junit_${project.scalaVersion}")
+    compile project(path: ":pact-jvm-provider-junit_${project.scalaVersion}", configuration: 'default')
 
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '1.5.16.RELEASE'
     compile group: 'org.springframework', name: 'spring-webmvc', version: '4.3.19.RELEASE'

@@ -1,12 +1,12 @@
 dependencies {
-    compile project(":pact-jvm-model"), 
-      project(":pact-jvm-pact-broker"),
-      project(":pact-jvm-matchers_${project.scalaVersion}"),
+    compile project(path: ":pact-jvm-model", configuration: 'default'), 
+      project(path: ":pact-jvm-pact-broker", configuration: 'default'),
+      project(path: ":pact-jvm-matchers_${project.scalaVersion}", configuration: 'default'),
         'commons-io:commons-io:2.5',
         "org.fusesource.jansi:jansi:${project.jansiVersion}",
         "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
         'org.reflections:reflections:0.9.11'
-    compile project(":pact-jvm-support")
+    compile project(path: ":pact-jvm-support", configuration: 'default')
     compile 'org.scala-lang.modules:scala-java8-compat_2.12:0.9.0'
 
     testCompile project(":pact-jvm-consumer-groovy_${project.scalaVersion}")

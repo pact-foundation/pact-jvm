@@ -1,5 +1,5 @@
 dependencies {
-  compile project(":pact-jvm-support")
+  compile project(path: ":pact-jvm-support", configuration: 'default')
   compile "org.apache.commons:commons-lang3:$commonsLang3Version"
   compile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   compile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
