@@ -14,7 +14,7 @@ plugins {
 //  id 'org.jmailen.kotlinter' version '1.23.1'
   id 'io.gitlab.arturbosch.detekt' version '1.0.0-RC14'
   id 'org.jetbrains.dokka' version '0.9.16'
-  id 'com.github.johnrengelman.shadow' version '2.0.4' apply false
+  id 'com.github.johnrengelman.shadow' version '5.0.0' apply false
 }
 
 import org.apache.commons.text.StringEscapeUtils
@@ -285,8 +285,8 @@ if (System.env.UBERJAR == 'true') {
   apply plugin: "com.github.johnrengelman.shadow"
 
   dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+    shadow "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+    shadow "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     compile "org.slf4j:slf4j-api:${project.slf4jVersion}"
     compile "org.codehaus.groovy:groovy:${project.groovyVersion}"
     compile('io.github.microutils:kotlin-logging:1.4.4') {
@@ -297,22 +297,22 @@ if (System.env.UBERJAR == 'true') {
       exclude group: 'org.scala-lang'
     }
 
-    compile project(':pact-jvm-consumer-groovy_2.12')
-    compile project(':pact-jvm-consumer-java8_2.12')
-    compile project(':pact-jvm-consumer-junit5_2.12')
-    compile project(':pact-jvm-consumer-junit_2.12')
-    compile project(':pact-jvm-consumer-specs2_2.12')
-    compile project(':pact-jvm-consumer_2.12')
-    compile project(':pact-jvm-matchers_2.12')
-    compile project(':pact-jvm-model')
-    compile project(':pact-jvm-pact-broker')
-    compile project(':pact-jvm-provider-junit5_2.12')
-    compile project(':pact-jvm-provider-junit_2.12')
-    compile project(':pact-jvm-provider-scalasupport_2.12')
-    compile project(':pact-jvm-provider-scalatest_2.12')
-    compile project(':pact-jvm-provider-specs2_2.12')
-    compile project(':pact-jvm-provider-spring_2.12')
-    compile project(':pact-jvm-provider_2.12')
+    compile project(path: ':pact-jvm-consumer-groovy_2.12', configuration: 'default')
+    compile project(path: ':pact-jvm-consumer-java8_2.12', configuration: 'default')
+    compile project(path: ':pact-jvm-consumer-junit5_2.12', configuration: 'default')
+    compile project(path: ':pact-jvm-consumer-junit_2.12', configuration: 'default')
+    compile project(path: ':pact-jvm-consumer-specs2_2.12', configuration: 'default')
+    compile project(path: ':pact-jvm-consumer_2.12', configuration: 'default')
+    compile project(path: ':pact-jvm-matchers_2.12', configuration: 'default')
+    compile project(path: ':pact-jvm-model', configuration: 'default')
+    compile project(path: ':pact-jvm-pact-broker', configuration: 'default')
+    compile project(path: ':pact-jvm-provider-junit5_2.12', configuration: 'default')
+    compile project(path: ':pact-jvm-provider-junit_2.12', configuration: 'default')
+    compile project(path: ':pact-jvm-provider-scalasupport_2.12', configuration: 'default')
+    compile project(path: ':pact-jvm-provider-scalatest_2.12', configuration: 'default')
+    compile project(path: ':pact-jvm-provider-specs2_2.12', configuration: 'default')
+    compile project(path: ':pact-jvm-provider-spring_2.12', configuration: 'default')
+    compile project(path: ':pact-jvm-provider_2.12', configuration: 'default')
   }
 
   publishing {
@@ -381,6 +381,9 @@ if (System.env.UBERJAR == 'true') {
         'Specification-Vendor': project.group,
         'Specification-Title': project.name,
         'Specification-Version': version
+    }
+    dependencies {
+      exclude(dependency('org.jetbrains.kotlin::'))
     }
   }
 }
