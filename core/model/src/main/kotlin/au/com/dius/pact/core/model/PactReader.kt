@@ -143,7 +143,7 @@ object PactReader: KLogging() {
   const val CLASSPATH_URI_START = "classpath:"
 
   @JvmStatic
-  var s3Client: AmazonS3 = AmazonS3ClientBuilder.defaultClient()
+  lateinit var s3Client: AmazonS3
 
   /**
    * Loads a pact file from either a File or a URL
@@ -308,6 +308,9 @@ object PactReader: KLogging() {
 
   private fun loadPactFromS3Bucket(source: String, options: Map<String, Any>): Pair<Map<String, Any>, PactSource> {
     val s3Uri = AmazonS3URI(source)
+    if (!PactReader::s3Client.isInitialized) {
+      s3Client = AmazonS3ClientBuilder.defaultClient()
+    }
     val s3Pact = s3Client.getObject(s3Uri.bucket, s3Uri.key)
     return JsonSlurper().parse(s3Pact.objectContent) as Map<String, Any> to S3PactSource(source)
   }
