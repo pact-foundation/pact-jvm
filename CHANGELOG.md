@@ -1,5 +1,34 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.6.8 - Bugfix Release
+
+* 13dd0e1e - fix: Codenarc errors #893 (Ronald Holshausen, Sat Jun 15 15:16:10 2019 +1000)
+* 136f67c0 - fix: MarkdownReporter should append results not overwrite them #893 (Ronald Holshausen, Sat Jun 15 15:07:24 2019 +1000)
+* 5c87868b - fix: JsonReporter should merge results not overwrite them #893 (Ronald Holshausen, Sat Jun 15 14:32:25 2019 +1000)
+* 5bafefe1 - fix: publish the tags before the pacts #892 (Ronald Holshausen, Sat Jun 15 13:28:05 2019 +1000)
+* bb0f8e8f - chore: upgraded Spock and Hamcrest (Ronald Holshausen, Sat Jun 15 13:16:37 2019 +1000)
+* 61df4e0f - fix: metadata was always being overwritten instead of merged (Ronald Holshausen, Sat Jun 15 12:02:37 2019 +1000)
+* bf8c7c23 - fix: after cherrypick from master (Ronald Holshausen, Thu Jun 13 15:52:50 2019 +1000)
+* 796b11f1 - fix: code narc failure (Ronald Holshausen, Fri Jun 7 14:31:57 2019 +1000)
+* e7b02871 - fix: Don't send successfull verification result to the Broker if not all interactions are verified (Alessio Paciello, Thu Jun 6 12:57:17 2019 +0100)
+* 73c10350 - fix: exclude the koltin libraries from the fat jar #888 (Ronald Holshausen, Thu Jun 13 15:05:48 2019 +1000)
+* c4a300d1 - fix: for Cannot choose between the following variants of project error (Ronald Holshausen, Thu Jun 13 15:05:05 2019 +1000)
+* fcd333b8 - Update appveyor.yml (Ronald Holshausen, Sun Jun 2 12:50:41 2019 +1000)
+* 08c45cf1 - fix: still more appveyor build fix (Ronald Holshausen, Sun Jun 2 12:40:59 2019 +1000)
+* eec764bb - fix: correct the loading of pacts with the Maven plugin #885 (Ronald Holshausen, Sun Jun 2 12:32:27 2019 +1000)
+* 836208a1 - fix: more fix appveyor build (Ronald Holshausen, Sun Jun 2 12:06:48 2019 +1000)
+* 1511fede - fix: only covert bytes to a string at the end #879 (Ronald Holshausen, Sun Jun 2 11:49:13 2019 +1000)
+* ac6cb649 - fix: appveyor build (Ronald Holshausen, Sun Jun 2 11:45:13 2019 +1000)
+* 300c2d75 - fix: removed pact-jvm-model reference to itself in the generated POM #884 (Ronald Holshausen, Sat Jun 1 18:43:13 2019 +1000)
+* f49a6f9b - fix: request with PactDslRootValue as body was not being applied correctly #883 (Ronald Holshausen, Sat Jun 1 17:41:59 2019 +1000)
+* 0ee714d7 - fix: try fix the appveyor build (Ronald Holshausen, Sat Jun 1 17:40:50 2019 +1000)
+* d1d85e98 - fix: when merging pact files, read the existing file as UTF-8 #879 (Ronald Holshausen, Sat Jun 1 17:03:41 2019 +1000)
+* 33f729f1 - fix: debugging Appveyor build (Ronald Holshausen, Sat Jun 1 16:22:54 2019 +1000)
+* 9daf5fe4 - fix: appveyor build (Ronald Holshausen, Sat Jun 1 15:36:18 2019 +1000)
+* 40f97e9b - fix: when writing pact specs in V2 format, header matchers must be pluralised #882 (Ronald Holshausen, Sat Jun 1 14:05:58 2019 +1000)
+* 107afe45 - fix: configure GSon to serialise null values #877 (Ronald Holshausen, Sat Jun 1 13:30:33 2019 +1000)
+* 7ae62585 - bump version to 3.6.8 (Ronald Holshausen, Sun May 12 16:32:32 2019 +1000)
+
 # 4.0.0-beta.2 - Bugfixes + HTTPS mock server support
 
 * 71b6b503 - Merge branch 'master' into v4.x (Ronald Holshausen, Sun May 12 16:56:34 2019 +1000)

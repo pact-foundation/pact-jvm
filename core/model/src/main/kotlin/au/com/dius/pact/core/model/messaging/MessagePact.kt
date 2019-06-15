@@ -34,7 +34,7 @@ class MessagePact @JvmOverloads constructor (
       "consumer" to mapOf("name" to consumer.name),
       "provider" to mapOf("name" to provider.name),
       "messages" to messages.map { it.toMap(pactSpecVersion) },
-      "metadata" to metaData(pactSpecVersion)
+      "metadata" to metaData(metadata, pactSpecVersion)
     )
   }
 

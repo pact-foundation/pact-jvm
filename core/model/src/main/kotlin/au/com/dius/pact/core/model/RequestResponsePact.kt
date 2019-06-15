@@ -20,7 +20,7 @@ class RequestResponsePact @JvmOverloads constructor(
     "provider"      to objectToMap(provider),
     "consumer"      to objectToMap(consumer),
     "interactions"  to interactions.map { it.toMap(pactSpecVersion) },
-    "metadata"      to metaData(pactSpecVersion)
+    "metadata"      to metaData(metadata, pactSpecVersion)
   )
 
   override fun mergeInteractions(interactions: List<RequestResponseInteraction>) {

@@ -1,5 +1,5 @@
 dependencies {
-    api project(":consumer:pact-jvm-consumer")
+    api project(path: ":consumer:pact-jvm-consumer", configuration: 'default')
 
     testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}",
       "ch.qos.logback:logback-classic:${project.logbackVersion}"

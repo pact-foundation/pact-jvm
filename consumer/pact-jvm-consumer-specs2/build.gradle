@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    compile project(":consumer:pact-jvm-consumer")
+    compile project(path: ":consumer:pact-jvm-consumer", configuration: 'default')
     compile "org.json:json:${project.jsonVersion}"
     compile "org.specs2:specs2-core_2.12:${project.specs2Version}"
     compile 'org.asynchttpclient:async-http-client:2.8.1'

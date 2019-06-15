@@ -111,11 +111,11 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     val consumerName = urlPathSegmentEscaper().escape(pact["consumer"]!!["name"].toString())
     val version = urlPathSegmentEscaper().escape(unescapedVersion)
     val uploadPath = "/pacts/provider/$providerName/consumer/$consumerName/version/$version"
+    if (tags.isNotEmpty()) {
+      uploadTags(halClient, consumerName, version, tags)
+    }
     return halClient.uploadJson(uploadPath, pactText, BiFunction { result, status ->
       if (result == "OK") {
-        if (tags.isNotEmpty()) {
-          uploadTags(halClient, consumerName, version, tags)
-        }
         status
       } else {
         "FAILED! $status"

@@ -3,10 +3,10 @@ plugins {
 }
 
 dependencies {
-    api project(":core:pact-jvm-core-model") 
-    api project(":core:pact-jvm-core-pact-broker")
-    api project(":core:pact-jvm-core-matchers") 
-    api project(":core:pact-jvm-core-support")
+    api project(path: ":core:pact-jvm-core-model", configuration: 'default')
+    api project(path: ":core:pact-jvm-core-pact-broker", configuration: 'default')
+    api project(path: ":core:pact-jvm-core-matchers", configuration: 'default')
+    api project(path: ":core:pact-jvm-core-support", configuration: 'default')
     compile'commons-io:commons-io:2.5',
       "org.fusesource.jansi:jansi:${project.jansiVersion}",
       "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"

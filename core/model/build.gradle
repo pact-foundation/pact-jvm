@@ -16,8 +16,8 @@ artifacts {
 }
 
 dependencies {
-  api project(":core:pact-jvm-core-support")
-  api project(":core:pact-jvm-core-pact-broker")
+  api project(path: ":core:pact-jvm-core-support", configuration: 'default')
+  api project(path: ":core:pact-jvm-core-pact-broker", configuration: 'default')
   compile 'com.github.zafarkhaja:java-semver:0.9.0'
   compile 'com.amazonaws:aws-java-sdk-s3:1.11.335'
   compile 'org.apache.commons:commons-collections4:4.1'

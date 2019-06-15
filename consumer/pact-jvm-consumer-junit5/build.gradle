@@ -1,5 +1,5 @@
 dependencies {
-  api project(":consumer:pact-jvm-consumer")
+  api project(path: ":consumer:pact-jvm-consumer", configuration: 'default')
   compile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
 

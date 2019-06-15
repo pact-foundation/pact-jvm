@@ -54,13 +54,13 @@ abstract class BasePact<I> @JvmOverloads constructor(
     ))
 
     @JvmStatic
-    fun metaData(pactSpecVersion: PactSpecVersion): Map<String, Any> {
+    fun metaData(metadata: Map<String, Any>, pactSpecVersion: PactSpecVersion): Map<String, Any> {
       val pactJvmMetadata = mutableMapOf<String, Any>("version" to lookupVersion())
       val updatedToggles = FeatureToggles.updatedToggles()
       if (updatedToggles.isNotEmpty()) {
         pactJvmMetadata["features"] = updatedToggles
       }
-      return mapOf(
+      return metadata + mapOf(
         "pactSpecification" to mapOf("version" to if (pactSpecVersion >= PactSpecVersion.V3) "3.0.0" else "2.0.0"),
         "pact-jvm" to pactJvmMetadata
       )
