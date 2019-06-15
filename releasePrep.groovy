@@ -8,15 +8,18 @@ def executeOnShell(String command, Closure closure = null) {
 
 def executeOnShell(String command, File workingDir, Closure closure = null) {
   println "==>: $command"
-  def process = new ProcessBuilder(['sh', '-c', command])
+  def processBuilder = new ProcessBuilder(['sh', '-c', command])
     .directory(workingDir)
-    .redirectErrorStream(true)
-    .start()
-  def cl = closure
-  if (cl == null) {
-    cl = { println it }
+
+  if (closure) {
+    processBuilder.redirectErrorStream(true)
+  } else {
+    processBuilder.inheritIO()
   }
-  process.inputStream.eachLine cl
+  def process = processBuilder.start()
+  if (closure) {
+    process.inputStream.eachLine closure
+  }
   process.waitFor()
   if (process.exitValue() > 0) {
     System.exit(process.exitValue())
