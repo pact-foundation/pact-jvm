@@ -77,15 +77,16 @@ class MarkdownReporter implements VerifierReporter {
 
   @Override
   void warnStateChangeIgnored(String state, IProviderInfo IProviderInfo, IConsumerInfo IConsumerInfo) {
-    reportFile.append '&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color: yellow\'>WARNING: State Change ignored as there is' +
-      ' no stateChange URL</span>  \n'
+    reportFile.append '&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color: yellow\'>WARNING: State Change ignored as ' +
+      'there is no stateChange URL</span>  \n'
   }
 
   @Override
   @SuppressWarnings('ParameterCount')
   void stateChangeRequestFailedWithException(String state, IProviderInfo IProviderInfo, IConsumerInfo IConsumerInfo,
                                              boolean isSetup, Exception e, boolean printStackTrace) {
-    reportFile.append "&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: red'>State Change Request Failed - $e.message</span>\n"
+    reportFile.append "&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: red'>State Change Request Failed - $e.message" +
+      '</span>\n'
     reportFile.append '\n'
     reportFile.append '```\n'
     reportFile.withWriterAppend { w -> w.withPrintWriter { e.printStackTrace(it) } }
@@ -95,14 +96,15 @@ class MarkdownReporter implements VerifierReporter {
 
   @Override
   void stateChangeRequestFailed(String state, IProviderInfo IProviderInfo, boolean isSetup, String httpStatus) {
-    reportFile.append "&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: red'>State Change Request Failed - $httpStatus</span>  \n"
+    reportFile.append "&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: red'>State Change Request Failed - $httpStatus" +
+      '</span>  \n'
   }
 
   @Override
   void warnStateChangeIgnoredDueToInvalidUrl(String state, IProviderInfo IProviderInfo, boolean isSetup,
                                              Object stateChangeHandler) {
-    reportFile.append '&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color: yellow\'>WARNING: State Change ignored as there is ' +
-      "no stateChange URL, received `$stateChangeHandler`</span>  \n"
+    reportFile.append '&nbsp;&nbsp;&nbsp;&nbsp;<span style=\'color: yellow\'>WARNING: State Change ignored as ' +
+      "there is no stateChange URL, received `$stateChangeHandler`</span>  \n"
   }
 
   @Override

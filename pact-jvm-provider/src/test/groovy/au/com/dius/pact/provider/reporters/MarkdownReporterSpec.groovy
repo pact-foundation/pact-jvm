@@ -7,6 +7,7 @@ import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 import spock.lang.Specification
 
+@SuppressWarnings('UnnecessaryObjectReferences')
 class MarkdownReporterSpec extends Specification {
 
   private File reportDir
@@ -42,7 +43,6 @@ class MarkdownReporterSpec extends Specification {
     def consumer = new ConsumerInfo(name: 'Consumer')
     def interaction1 = new RequestResponseInteraction('Interaction 1', [], new Request(), new Response())
     def interaction2 = new RequestResponseInteraction('Interaction 2', [], new Request(), new Response())
-
 
     when:
     reporter.initialise(provider1)
