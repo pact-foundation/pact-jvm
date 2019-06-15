@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.junit5;
 
 import au.com.dius.pact.consumer.MessagePactBuilder;
-import au.com.dius.pact.consumer.Pact;
+import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.consumer.dsl.Matchers;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.core.model.messaging.Message;

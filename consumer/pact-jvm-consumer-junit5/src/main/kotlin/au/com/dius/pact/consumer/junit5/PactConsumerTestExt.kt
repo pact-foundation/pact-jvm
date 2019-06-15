@@ -4,9 +4,9 @@ import au.com.dius.pact.consumer.BaseMockServer
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.consumer.MessagePactBuilder
 import au.com.dius.pact.consumer.MockServer
-import au.com.dius.pact.consumer.Pact
+import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.consumer.PactConsumerConfig
-import au.com.dius.pact.consumer.PactFolder
+import au.com.dius.pact.core.model.annotations.PactFolder
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.junit.JUnitTestSupport
 import au.com.dius.pact.consumer.mockServer

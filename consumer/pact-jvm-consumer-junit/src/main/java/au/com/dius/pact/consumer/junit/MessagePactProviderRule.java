@@ -1,9 +1,9 @@
 package au.com.dius.pact.consumer.junit;
 
 import au.com.dius.pact.consumer.MessagePactBuilder;
-import au.com.dius.pact.consumer.Pact;
+import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.consumer.PactConsumerConfig;
-import au.com.dius.pact.consumer.PactFolder;
+import au.com.dius.pact.core.model.annotations.PactFolder;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.ProviderState;
 import au.com.dius.pact.core.model.messaging.Message;

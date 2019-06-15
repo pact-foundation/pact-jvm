@@ -1,4 +1,4 @@
-package au.com.dius.pact.consumer
+package au.com.dius.pact.core.model.annotations
 
 /**
  * describes the interactions between a provider and a consumer used in JUnit tests.
@@ -19,11 +19,5 @@ annotation class Pact(
   /**
    * name of the consumer
    */
-  val consumer: String,
-
-  /**
-   * name of the state, the provider has to be in
-   */
-  @Deprecated("Provider state should be defined on the interactions")
-  val state: String = ""
+  val consumer: String
 )

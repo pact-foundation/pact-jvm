@@ -1,4 +1,4 @@
-package au.com.dius.pact.consumer
+package au.com.dius.pact.core.model.annotations
 
 import java.lang.annotation.Inherited
 

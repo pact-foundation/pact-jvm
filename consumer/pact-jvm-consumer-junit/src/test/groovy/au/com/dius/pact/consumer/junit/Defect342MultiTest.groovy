@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer.junit
 
-import au.com.dius.pact.consumer.Pact
+import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider

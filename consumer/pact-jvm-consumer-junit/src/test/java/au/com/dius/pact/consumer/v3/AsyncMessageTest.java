@@ -2,8 +2,8 @@ package au.com.dius.pact.consumer.v3;
 
 import au.com.dius.pact.consumer.MessagePactBuilder;
 import au.com.dius.pact.consumer.junit.MessagePactProviderRule;
-import au.com.dius.pact.consumer.Pact;
-import au.com.dius.pact.consumer.PactFolder;
+import au.com.dius.pact.core.model.annotations.Pact;
+import au.com.dius.pact.core.model.annotations.PactFolder;
 import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.consumer.dsl.Matchers;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;

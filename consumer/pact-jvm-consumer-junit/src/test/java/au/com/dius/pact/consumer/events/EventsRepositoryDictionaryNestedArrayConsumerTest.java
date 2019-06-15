@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.events;
 
 import au.com.dius.pact.consumer.MatcherTestUtils;
-import au.com.dius.pact.consumer.Pact;
+import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.consumer.junit.PactProviderRule;
 import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.consumer.dsl.DslPart;
