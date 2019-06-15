@@ -87,11 +87,11 @@ class PactBrokerClient extends PactBrokerClientBase {
     def consumerName = urlPathSegmentEscaper().escape(pact.consumer.name)
     def version =  urlPathSegmentEscaper().escape(unescapedVersion)
     def uploadPath = "/pacts/provider/$providerName/consumer/$consumerName/version/$version"
+    if (tags) {
+      uploadTags(halClient, consumerName, version, tags)
+    }
     halClient.uploadJson(uploadPath, pactText, { result, status ->
       if (result == 'OK') {
-        if (tags) {
-          uploadTags(halClient, consumerName, version, tags)
-        }
         status
       } else {
         "FAILED! $status"
