@@ -37,7 +37,7 @@ class RequestResponsePact extends BasePact<RequestResponseInteraction> {
       provider      : objectToMap(provider),
       consumer      : objectToMap(consumer),
       interactions  : interactions*.toMap(pactSpecVersion),
-      metadata      : metaData(pactSpecVersion)
+      metadata      : metaData(this.metadata, pactSpecVersion)
     ]
   }
 

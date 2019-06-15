@@ -75,13 +75,13 @@ abstract class BasePact<I extends Interaction> implements Pact<I> {
   }
 
   @SuppressWarnings(['ConfusingMethodName'])
-  static Map metaData(PactSpecVersion pactSpecVersion) {
+  static Map metaData(Map metadata, PactSpecVersion pactSpecVersion) {
     def pactJvmMetadata = [version: lookupVersion()]
     def updatedToggles = FeatureToggles.updatedToggles()
     if (!updatedToggles.isEmpty()) {
       pactJvmMetadata.features = updatedToggles
     }
-    [
+    metadata + [
       'pactSpecification': [version: pactSpecVersion >= PactSpecVersion.V3 ? '3.0.0' : '2.0.0'],
       'pact-jvm': pactJvmMetadata
     ]
