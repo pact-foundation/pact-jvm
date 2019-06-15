@@ -3,5 +3,9 @@ dependencies {
     compile project(path: ":pact-jvm-provider_${project.scalaVersion}", configuration: 'default'),
             project(path: ":pact-jvm-provider-scalasupport_${project.scalaVersion}", configuration: 'default'),
             "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}"
+    
     testCompile project(":pact-jvm-consumer_${project.scalaVersion}")
+    testCompile "junit:junit:${project.junitVersion}"
+    testCompile "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}",
+      "org.specs2:specs2-junit_${project.scalaVersion}:${project.specs2Version}"
 }

@@ -33,6 +33,8 @@ dependencies {
   testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
   testRuntime project(path: project.path, configuration: 'testJars')
   testCompile "org.codehaus.groovy:groovy-datetime:${project.groovyVersion}"
+  testCompile 'io.kotlintest:kotlintest:2.0.7'
+
 }
 
 compileGroovy {

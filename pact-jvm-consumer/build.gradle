@@ -14,7 +14,6 @@ dependencies {
     compile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
 
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
-    testCompile "org.specs2:specs2-mock_${project.scalaVersion}:${project.specs2Version}"
     testCompile 'org.cthul:cthul-matchers:1.1.0'
     testCompile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
     testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"

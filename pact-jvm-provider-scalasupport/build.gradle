@@ -6,4 +6,7 @@ dependencies {
   compile("ws.unfiltered:unfiltered-netty-server_${project.scalaVersion}:0.9.1") {
     exclude group: 'org.scala-lang'
   }
+
+  testCompile "org.specs2:specs2-core_${project.scalaVersion}:${project.specs2Version}",
+    "org.specs2:specs2-junit_${project.scalaVersion}:${project.specs2Version}"
 }
