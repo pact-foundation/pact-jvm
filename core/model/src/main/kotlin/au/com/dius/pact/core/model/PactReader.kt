@@ -49,8 +49,7 @@ fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: Clos
       pactResponse.pactFile as Map<String, Any> to source.copy(attributes = pactResponse.links, options = options)
     }
     else -> if (options.containsKey("authentication")) {
-      val jsonResource = fetchJsonResource(http!!, source)
-      when (jsonResource) {
+      when (val jsonResource = fetchJsonResource(http!!, source)) {
         is Ok -> jsonResource.value.first.asJsonObject.toMap() to jsonResource.value.second
         is Err -> throw jsonResource.error
       }
@@ -91,8 +90,7 @@ fun newHttpClient(baseUrl: String, options: Map<String, Any>): CloseableHttpClie
 
   if (options["authentication"] is List<*>) {
     val authentication = options["authentication"] as List<*>
-    val scheme = authentication.first().toString().toLowerCase()
-    when (scheme) {
+    when (val scheme = authentication.first().toString().toLowerCase()) {
       "basic" -> {
         if (authentication.size > 2) {
           val credsProvider = BasicCredentialsProvider()
@@ -191,7 +189,7 @@ object PactReader: KLogging() {
       }
 
       return RequestResponsePact(provider, consumer, interactions.toMutableList(),
-        BasePact.metaData(PactSpecVersion.V3), source)
+        BasePact.metaData(transformedJson["metadata"] as Map<String, Any>? ?: emptyMap(), PactSpecVersion.V3), source)
     }
   }
 
@@ -209,8 +207,8 @@ object PactReader: KLogging() {
         request, response)
     }
 
-    return RequestResponsePact(provider, consumer, interactions.toMutableList(), BasePact.metaData(PactSpecVersion.V2),
-      source)
+    return RequestResponsePact(provider, consumer, interactions.toMutableList(),
+      BasePact.metaData(transformedJson["metadata"] as Map<String, Any>? ?: emptyMap(), PactSpecVersion.V2), source)
   }
 
   @JvmStatic
@@ -249,6 +247,16 @@ object PactReader: KLogging() {
         interaction
       }
     }
+
+    if (pactJson["metadata"] is Map<*, *>) {
+      pactJson["metadata"] = (pactJson["metadata"] as Map<String, Any>).entries.associate { entry ->
+        when (entry.key) {
+          "pact-specification" -> "pactSpecification" to entry.value
+          else -> entry.toPair()
+        }
+      }
+    }
+
     return pactJson
   }
 
