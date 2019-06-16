@@ -82,9 +82,10 @@ object PactWriter : KLogging() {
     val buffer = ByteArray(128)
     val data = ByteArrayOutputStream()
 
+    file.seek(0)
     var count = file.read(buffer)
     while (count > 0) {
-      data.write(buffer)
+      data.write(buffer, 0, count)
       count = file.read(buffer)
     }
 
