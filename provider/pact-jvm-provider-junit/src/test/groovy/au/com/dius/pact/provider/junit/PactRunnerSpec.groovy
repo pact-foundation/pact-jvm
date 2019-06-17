@@ -138,7 +138,7 @@ class PactRunnerSpec extends Specification {
 
     then:
     InitializationError e = thrown()
-    e.causes*.message == ['doesntexist: Temporary failure in name resolution']
+    e.causes.every { IOException.isAssignableFrom(it.class) }
   }
 
   def 'PactRunner throws an exception if there are no pacts to verify'() {
