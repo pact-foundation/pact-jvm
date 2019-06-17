@@ -19,8 +19,8 @@ import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
 import au.com.dius.pact.core.model.matchingrules.RuleLogic;
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
+import au.com.dius.pact.core.support.Json;
 import com.mifmif.common.regex.Generex;
-import groovy.json.JsonOutput;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.json.JSONObject;
@@ -56,7 +56,7 @@ public class PactDslJsonRootValue extends DslPart {
   @Override
   public Object getBody() {
     if (encodeJson) {
-      return JsonOutput.toJson(value);
+      return Json.INSTANCE.getGsonPretty().toJson(value);
     }
     return value;
   }

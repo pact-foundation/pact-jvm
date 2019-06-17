@@ -5,12 +5,19 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.InvalidPactException
 import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.UnknownPactSource
-import au.com.dius.pact.core.support.extractFromMap
-import groovy.json.JsonSlurper
+import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.Json.extractFromJson
+import au.com.dius.pact.core.support.Utils.extractFromMap
+import com.github.salomonbrys.kotson.array
+import com.github.salomonbrys.kotson.jsonObject
+import com.github.salomonbrys.kotson.obj
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import mu.KLogging
 import java.io.File
 
@@ -21,7 +28,7 @@ class MessagePact @JvmOverloads constructor (
   override val provider: Provider,
   override val consumer: Consumer,
   var messages: MutableList<Message> = mutableListOf(),
-  override val metadata: Map<String, Any> = DEFAULT_METADATA,
+  override val metadata: Map<String, Any?> = DEFAULT_METADATA,
   override val source: PactSource = UnknownPactSource
 ): BasePact<Message>(consumer, provider, metadata, source) {
 
@@ -34,28 +41,29 @@ class MessagePact @JvmOverloads constructor (
       "consumer" to mapOf("name" to consumer.name),
       "provider" to mapOf("name" to provider.name),
       "messages" to messages.map { it.toMap(pactSpecVersion) },
-      "metadata" to metaData(metadata, pactSpecVersion)
+      "metadata" to metaData(jsonObject(metadata.entries.map { it.key to Json.toJson(it.value) }), pactSpecVersion)
     )
   }
 
   fun mergePacts(pact: Map<String, Any>, pactFile: File): Map<String, Any> {
     val newPact = pact.toMutableMap()
-    val json = JsonSlurper().parse(pactFile) as Map<String, Any>
+    val json = pactFile.bufferedReader().use { JsonParser().parse(it) }
 
     val pactSpec = "pact-specification"
-    val version = extractFromMap(json, "metadata", pactSpec, "version")
+    val version = extractFromJson(json, "metadata", pactSpec, "version")
     val pactVersion = extractFromMap(pact, "metadata", pactSpec, "version")
     if (version != null && version != pactVersion) {
       throw InvalidPactException("Could not merge pact into '$pactFile': pact specification version is " +
         "$pactVersion, while the file is version $version")
     }
 
-    if (json["interactions"] != null) {
+    if (json.isJsonObject && json.obj.has("interactions")) {
       throw InvalidPactException("Could not merge pact into '$pactFile': file is not a message pact " +
         "(it contains request/response interactions)")
     }
 
-    val messages = (newPact["messages"] as List<Map<String, Any>> + json["messages"] as List<Map<String, Any>>)
+    val messages = ((newPact["messages"] as List<Map<String, Any>>) +
+      json.obj["messages"].array.map {Json.toMap(it) })
       .distinctBy { it["description"] }
     newPact["messages"] = messages
     return newPact
@@ -109,11 +117,14 @@ class MessagePact @JvmOverloads constructor (
   }
 
   companion object: KLogging() {
-    fun fromMap(map: Map<String, Any>, source: PactSource = UnknownPactSource): MessagePact {
-      val consumer = Consumer.fromMap(map["consumer"] as Map<String, Any>)
-      val provider = Provider.fromMap(map["provider"] as Map<String, Any>)
-      val messages = (map["messages"] as List<Map<String, Any>>).map { Message.fromMap(it) }
-      val metadata = map["metadata"] as Map<String, Any>
+    fun fromJson(json: JsonObject, source: PactSource = UnknownPactSource): MessagePact {
+      val transformedJson = PactReader.transformJson(json)
+      val consumer = Consumer.fromJson(transformedJson["consumer"])
+      val provider = Provider.fromJson(transformedJson["provider"])
+      val messages = transformedJson["messages"].array.map { Message.fromJson(it.obj) }
+      val metadata = if (transformedJson.has("metadata"))
+        Json.toMap(transformedJson["metadata"])
+      else emptyMap()
       return MessagePact(provider, consumer, messages.toMutableList(), metadata, source)
     }
   }

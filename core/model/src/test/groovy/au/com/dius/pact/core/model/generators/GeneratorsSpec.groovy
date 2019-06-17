@@ -2,6 +2,7 @@ package au.com.dius.pact.core.model.generators
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.support.Json
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -99,7 +100,7 @@ class GeneratorsSpec extends Specification {
   @SuppressWarnings('LineLength')
   def 'load generator from map - #description'() {
     expect:
-    Generators.fromMap(map) == generator
+    Generators.fromJson(Json.INSTANCE.toJson(map)) == generator
 
     where:
 

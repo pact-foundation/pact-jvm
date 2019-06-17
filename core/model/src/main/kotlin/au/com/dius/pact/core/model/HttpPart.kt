@@ -1,7 +1,6 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
-import groovy.lang.GroovyObjectSupport
 import mu.KLogging
 import org.apache.http.entity.ContentType
 import java.nio.charset.Charset

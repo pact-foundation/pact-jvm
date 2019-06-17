@@ -1,5 +1,7 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.support.Json
+import com.google.gson.JsonElement
 import mu.KLogging
 import java.io.File
 import java.io.IOException
@@ -14,7 +16,7 @@ import kotlin.reflect.full.memberProperties
 abstract class BasePact<I> @JvmOverloads constructor(
   override val consumer: Consumer,
   override val provider: Provider,
-  open val metadata: Map<String, Any> = DEFAULT_METADATA,
+  open val metadata: Map<String, Any?> = DEFAULT_METADATA,
   override val source: PactSource = UnknownPactSource
 ): Pact<I> where I: Interaction {
 
@@ -48,19 +50,19 @@ abstract class BasePact<I> @JvmOverloads constructor(
   override fun toString() = "BasePact(consumer=$consumer, provider=$provider, metadata=$metadata, source=$source)"
 
   companion object: KLogging() {
-    val DEFAULT_METADATA: Map<String, Map<String, Any>> = Collections.unmodifiableMap(mapOf(
+    val DEFAULT_METADATA: Map<String, Map<String, Any?>> = Collections.unmodifiableMap(mapOf(
       "pactSpecification" to mapOf("version" to "3.0.0"),
       "pact-jvm" to mapOf("version" to lookupVersion())
     ))
 
     @JvmStatic
-    fun metaData(metadata: Map<String, Any>, pactSpecVersion: PactSpecVersion): Map<String, Any> {
+    fun metaData(metadata: JsonElement?, pactSpecVersion: PactSpecVersion): Map<String, Any?> {
       val pactJvmMetadata = mutableMapOf<String, Any>("version" to lookupVersion())
       val updatedToggles = FeatureToggles.updatedToggles()
       if (updatedToggles.isNotEmpty()) {
         pactJvmMetadata["features"] = updatedToggles
       }
-      return metadata + mapOf(
+      return Json.toMap(metadata) + mapOf(
         "pactSpecification" to mapOf("version" to if (pactSpecVersion >= PactSpecVersion.V3) "3.0.0" else "2.0.0"),
         "pact-jvm" to pactJvmMetadata
       )

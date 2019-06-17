@@ -83,7 +83,7 @@ class KTorMockServer(
     }
 
     val body = response.body
-    if (body != null && body.isPresent()) {
+    if (body.isPresent()) {
       call.respondBytes(status = HttpStatusCode.fromValue(response.status), bytes = body.unwrap())
     } else {
       call.respond(HttpStatusCode.fromValue(response.status))

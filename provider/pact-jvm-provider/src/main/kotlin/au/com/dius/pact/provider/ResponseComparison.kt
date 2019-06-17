@@ -10,14 +10,12 @@ import au.com.dius.pact.core.matchers.Mismatch
 import au.com.dius.pact.core.matchers.ResponseMatching
 import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.matchers.generateDiff
-import au.com.dius.pact.core.model.HttpPart
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.isNullOrEmpty
 import au.com.dius.pact.core.model.messaging.Message
-import au.com.dius.pact.core.model.valueAsString
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
+import au.com.dius.pact.core.support.Json
+import com.google.gson.JsonParser
 import mu.KLogging
 import org.apache.http.entity.ContentType
 
@@ -96,9 +94,7 @@ class ResponseComparison(
       var actualBodyString = ""
       if (actual.isNotEmpty()) {
         actualBodyString = if (mimeType.matches(Regex("application/.*json"))) {
-          val bodyMap = JsonSlurper().parseText(actual)
-          val bodyJson = JsonOutput.toJson(bodyMap)
-          JsonOutput.prettyPrint(bodyJson)
+          Json.gsonPretty.toJson(JsonParser().parse(actual))
         } else {
           actual
         }
@@ -107,7 +103,7 @@ class ResponseComparison(
       var expectedBodyString = ""
       if (response.isNotEmpty()) {
         expectedBodyString = if (jsonBody) {
-          JsonOutput.prettyPrint(response)
+          Json.gsonPretty.toJson(JsonParser().parse(response))
         } else {
           response
         }

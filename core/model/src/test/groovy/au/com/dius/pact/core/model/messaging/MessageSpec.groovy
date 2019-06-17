@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.support.Json
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -36,7 +37,7 @@ class MessageSpec extends Specification {
     ]
 
     when:
-    Message message = Message.fromMap(map)
+    Message message = Message.fromJson(Json.INSTANCE.toJson(map).asJsonObject)
 
     then:
     message.providerStates == [new ProviderState('V3 state')]
@@ -47,7 +48,7 @@ class MessageSpec extends Specification {
     def map = [providerState: 'test state']
 
     when:
-    Message message = Message.fromMap(map)
+    Message message = Message.fromJson(Json.INSTANCE.toJson(map).asJsonObject)
 
     then:
     message.providerStates == [new ProviderState('test state')]
@@ -65,7 +66,7 @@ class MessageSpec extends Specification {
     map == [
       description: 'test',
       metaData: [:],
-      contents: '1 2 3 4',
+      contents: '"1 2 3 4"',
       providerStates: [
         [name: 'Test', params: [a: 'A', b: 100]]
       ]
@@ -81,7 +82,7 @@ class MessageSpec extends Specification {
     ]
 
     when:
-    def message = Message.fromMap(json)
+    def message = Message.fromJson(Json.INSTANCE.toJson(json).asJsonObject)
 
     then:
     !message.matchingRules.empty
@@ -146,15 +147,15 @@ class MessageSpec extends Specification {
     where:
 
     contentType                                | result
-    'application/json'                         | [a: 100.0, b: 'test']
-    'application/json;charset=UTF-8'           | [a: 100.0, b: 'test']
-    'application/json; charset\u003dUTF-8'     | [a: 100.0, b: 'test']
-    'application/hal+json; charset\u003dUTF-8' | [a: 100.0, b: 'test']
+    'application/json'                         | '{\n  "a": 100.0,\n  "b": "test"\n}'
+    'application/json;charset=UTF-8'           | '{\n  "a": 100.0,\n  "b": "test"\n}'
+    'application/json; charset\u003dUTF-8'     | '{\n  "a": 100.0,\n  "b": "test"\n}'
+    'application/hal+json; charset\u003dUTF-8' | '{\n  "a": 100.0,\n  "b": "test"\n}'
     'text/plain'                               | '{"a": 100.0, "b": "test"}'
     'application/octet-stream;charset=UTF-8'   | 'eyJhIjogMTAwLjAsICJiIjogInRlc3QifQ=='
     'application/octet-stream'                 | 'eyJhIjogMTAwLjAsICJiIjogInRlc3QifQ=='
     ''                                         | '{"a": 100.0, "b": "test"}'
-    null                                       | [a: 100.0, b: 'test']
+    null                                       | '{\n  "a": 100.0,\n  "b": "test"\n}'
 
     message = new Message('test', [], OptionalBody.body('{"a": 100.0, "b": "test"}'.bytes),
       new MatchingRulesImpl(), new Generators(), ['contentType': contentType])

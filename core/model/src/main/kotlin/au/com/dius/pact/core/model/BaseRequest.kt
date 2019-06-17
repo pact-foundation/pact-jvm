@@ -1,5 +1,7 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.support.Json
+import com.google.gson.JsonElement
 import java.io.ByteArrayOutputStream
 import javax.mail.internet.InternetHeaders
 import javax.mail.internet.MimeBodyPart
@@ -43,10 +45,14 @@ abstract class BaseRequest : HttpPart() {
   fun isMultipartFileUpload() = mimeType().equals("multipart/form-data", ignoreCase = true)
 
   companion object {
-    fun parseQueryParametersToMap(query: Any?): Map<String, List<String>> {
-      return when (query) {
-        is Map<*, *> -> query as Map<String, List<String>>
-        is String -> queryStringToMap(query)
+    fun parseQueryParametersToMap(query: JsonElement?): Map<String, List<String>> {
+      return when {
+        query == null -> emptyMap()
+        query.isJsonObject -> Json.toMap(query) as Map<String, List<String>>
+        query.isJsonPrimitive -> queryStringToMap(when {
+          query.asJsonPrimitive.isString -> query.asJsonPrimitive.asString
+          else -> query.asJsonPrimitive.toString()
+        })
         else -> emptyMap()
       }
     }

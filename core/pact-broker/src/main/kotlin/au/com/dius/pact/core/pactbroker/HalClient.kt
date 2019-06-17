@@ -3,9 +3,10 @@ package au.com.dius.pact.core.pactbroker
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.com.github.michaelbull.result.Result
-import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.buildUrl
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
+import au.com.dius.pact.core.support.HttpClient
+import au.com.dius.pact.core.support.isNotEmpty
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.bool
 import com.github.salomonbrys.kotson.get
@@ -20,17 +21,13 @@ import com.google.gson.JsonParser
 import mu.KLogging
 import org.apache.http.HttpMessage
 import org.apache.http.HttpResponse
-import org.apache.http.auth.AuthScope
-import org.apache.http.auth.UsernamePasswordCredentials
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpPut
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
-import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
 import java.net.URI
 import java.util.function.BiFunction
@@ -171,37 +168,10 @@ open class HalClient @JvmOverloads constructor(
 
   open fun setupHttpClient(): CloseableHttpClient {
     if (httpClient == null) {
-      val retryStrategy = CustomServiceUnavailableRetryStrategy(5, 3000)
-      val builder = HttpClients.custom().useSystemProperties().setServiceUnavailableRetryStrategy(retryStrategy)
-      if (options["authentication"] is List<*>) {
-        val authentication = options["authentication"] as List<*>
-        val scheme = authentication.first().toString().toLowerCase()
-        when (scheme) {
-          "basic" -> {
-            if (authentication.size > 2) {
-              val credsProvider = BasicCredentialsProvider()
-              val uri = URI(baseUrl)
-              credsProvider.setCredentials(AuthScope(uri.host, uri.port),
-                UsernamePasswordCredentials(authentication[1].toString(), authentication[2].toString()))
-              builder.setDefaultCredentialsProvider(credsProvider)
-            } else {
-              logger.warn { "Basic authentication requires a username and password, ignoring." }
-            }
-          }
-          "bearer" -> {
-            if (authentication.size > 1) {
-              defaultHeaders["Authorization"] = "Bearer " + authentication[1].toString()
-            } else {
-              logger.warn { "Bearer token authentication requires a token, ignoring." }
-            }
-          }
-          else -> logger.warn { "Hal client Only supports basic and bearer token authentication, got '$scheme', ignoring." }
-        }
-      } else if (options.containsKey("authentication")) {
-        logger.warn { "Authentication options needs to be a list of values, ignoring." }
+      if (options.containsKey("authentication") && options["authentication"] !is List<*>) {
+        HttpClient.logger.warn { "Authentication options needs to be a list of values, ignoring." }
       }
-
-      httpClient = builder.build()
+      httpClient = HttpClient.newHttpClient(options["authentication"], URI(baseUrl), defaultHeaders)
     }
 
     return httpClient!!
@@ -220,8 +190,7 @@ open class HalClient @JvmOverloads constructor(
   override fun fetch(path: String, encodePath: Boolean): JsonElement {
     lastUrl = path
     logger.debug { "Fetching: $path" }
-    val response = getJson(path, encodePath)
-    when (response) {
+    when (val response = getJson(path, encodePath)) {
       is Ok -> return response.value
       is Err -> throw response.error
     }
@@ -431,18 +400,17 @@ open class HalClient @JvmOverloads constructor(
 
     @JvmStatic
     fun fromJson(jsonValue: JsonElement): Any? {
-      return if (jsonValue.isJsonObject) {
-        asMap(jsonValue.asJsonObject)
-      } else if (jsonValue.isJsonArray) {
-        jsonValue.asJsonArray.map { fromJson(it) }
-      } else if (jsonValue.isJsonNull) {
-        null
-      } else {
-        val primitive = jsonValue.asJsonPrimitive
-        when {
+      return when {
+        jsonValue.isJsonObject -> asMap(jsonValue.asJsonObject)
+        jsonValue.isJsonArray -> jsonValue.asJsonArray.map { fromJson(it) }
+        jsonValue.isJsonNull -> null
+        else -> {
+          val primitive = jsonValue.asJsonPrimitive
+          when {
             primitive.isBoolean -> primitive.asBoolean
             primitive.isNumber -> primitive.asBigDecimal
             else -> primitive.asString
+          }
         }
       }
     }

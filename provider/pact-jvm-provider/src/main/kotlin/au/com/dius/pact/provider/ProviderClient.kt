@@ -8,9 +8,8 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.UrlSource
-import au.com.dius.pact.core.model.valueAsString
 import au.com.dius.pact.core.pactbroker.PactBrokerConsumer
-import groovy.json.JsonBuilder
+import au.com.dius.pact.core.support.Json
 import groovy.lang.Binding
 import groovy.lang.Closure
 import groovy.lang.GroovyShell
@@ -309,10 +308,10 @@ open class ProviderClient(
         if (stateChangeTeardown) {
           map["action"] = if (isSetup) "setup" else "teardown"
         }
-        method.entity = StringEntity(JsonBuilder(map).toPrettyString(), ContentType.APPLICATION_JSON)
+        method.entity = StringEntity(Json.gsonPretty.toJson(map), ContentType.APPLICATION_JSON)
       } else {
         urlBuilder.setParameter("state", state.name)
-        state.params.forEach { k, v -> urlBuilder.setParameter(k, v.toString()) }
+        state.params.forEach { (k, v) -> urlBuilder.setParameter(k, v.toString()) }
         if (stateChangeTeardown) {
           if (isSetup) {
             urlBuilder.setParameter(ACTION, "setup")

@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.junit
 
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.filterPactsByAnnotations
 import au.com.dius.pact.provider.junit.loader.NoPactsFoundException
 import au.com.dius.pact.provider.junit.loader.PactBroker
@@ -11,8 +12,7 @@ import au.com.dius.pact.provider.junit.loader.PactSource
 import au.com.dius.pact.provider.junit.target.HttpTarget
 import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestTarget
-import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
-import groovy.json.JsonException
+import com.google.gson.JsonSyntaxException
 import mu.KLogging
 import org.junit.Ignore
 import org.junit.runner.notification.RunNotifier
@@ -86,7 +86,7 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(c
         } else {
           throw InitializationError(e)
         }
-      } catch (e: JsonException) {
+      } catch (e: JsonSyntaxException) {
         if (ignoreIoErrors == "true") {
           logger.warn { "\n" + WARNING_ON_IGNORED_IOERROR.trimIndent() }
           logger.debug(e) { "Failed to load pact files" }

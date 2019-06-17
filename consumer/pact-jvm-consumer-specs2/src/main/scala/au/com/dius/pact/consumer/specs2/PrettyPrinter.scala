@@ -4,8 +4,8 @@ import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.PactVerificationResult.{Error, ExpectedButNotReceived, Mismatches, Ok, PartialMismatch, UnexpectedRequest}
 import au.com.dius.pact.core.matchers._
 import au.com.dius.pact.core.model.Request
+import au.com.dius.pact.core.support.Json
 import difflib.DiffUtils
-import groovy.json.JsonOutput
 
 import scala.collection.JavaConverters._
 
@@ -57,7 +57,7 @@ object PrettyPrinter {
     partial.flatMap {
       case hm: HeaderMismatch => printStringMismatch("Header " + hm.getHeaderKey, hm.getExpected, hm.getActual)
       case bm: BodyMismatch => printStringMismatch("Body",
-        JsonOutput.prettyPrint(bm.getExpected.toString), JsonOutput.prettyPrint(bm.getActual.toString))
+        Json.INSTANCE.prettyPrint(bm.getExpected.toString), Json.INSTANCE.prettyPrint(bm.getActual.toString))
       case cm: CookieMismatch => printDiff("Cookies", asScalaBuffer(cm.getExpected).toList.sorted,
         asScalaBuffer(cm.getActual).toList.sorted)
       case pm: PathMismatch => printDiff("Path", List(pm.getExpected), List(pm.getActual), 0)

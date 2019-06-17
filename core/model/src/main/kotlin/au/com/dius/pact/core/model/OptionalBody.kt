@@ -136,4 +136,5 @@ fun OptionalBody?.valueAsString() = this?.valueAsString() ?: ""
 
 fun OptionalBody?.isNullOrEmpty() = this == null || this.isEmpty() || this.isNull()
 
-fun OptionalBody?.unwrap() = this?.unwrap() ?: throw throw UnwrapMissingBodyException("Failed to unwrap value from a null body")
+fun OptionalBody?.unwrap() = this?.unwrap() ?: throw UnwrapMissingBodyException(
+  "Failed to unwrap value from a null body")

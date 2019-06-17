@@ -7,10 +7,10 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.UrlPactSource
+import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
+import com.google.gson.JsonParser
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
@@ -50,16 +50,16 @@ class JsonReporter implements VerifierReporter {
   @Override
   void finaliseReport() {
     if (reportFile.exists() && reportFile.length() > 0) {
-      def existingContents = new JsonSlurper().parse(reportFile)
+      def existingContents = Json.INSTANCE.toMap(new JsonParser().parse(reportFile.text))
       if (jsonData.provider.name == existingContents?.provider?.name) {
         existingContents.metaData = jsonData.metaData
         existingContents.execution.addAll(jsonData.execution)
-        reportFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(existingContents))
+        reportFile.text = Json.INSTANCE.gsonPretty.toJson(existingContents)
       } else {
-        reportFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(jsonData))
+        reportFile.text = Json.INSTANCE.gsonPretty.toJson(jsonData)
       }
     } else {
-      reportFile.text = JsonOutput.prettyPrint(JsonOutput.toJson(jsonData))
+      reportFile.text = Json.INSTANCE.gsonPretty.toJson(jsonData)
     }
   }
 

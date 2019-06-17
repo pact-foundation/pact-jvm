@@ -13,6 +13,7 @@ dependencies {
     implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
     implementation 'org.scala-lang:scala-library:2.12.8'
     implementation 'io.github.classgraph:classgraph:4.8.25'
+    implementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
 
     testCompile project(":consumer:pact-jvm-consumer-groovy")
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"

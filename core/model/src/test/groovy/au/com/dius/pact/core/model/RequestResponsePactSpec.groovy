@@ -56,7 +56,7 @@ class RequestResponsePactSpec extends Specification {
     def result = pact.toMap(PactSpecVersion.V3)
 
     then:
-    result.interactions.first().response.body.toString() == '{value=1234.0}'
+    result.interactions.first().response.body.toString() == '[value:1234.0]'
   }
 
   @SuppressWarnings('ComparisonWithSelf')

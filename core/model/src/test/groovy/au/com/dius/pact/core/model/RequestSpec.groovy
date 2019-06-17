@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.support.Json
 import spock.lang.Specification
 
 class RequestSpec extends Specification {
@@ -13,7 +14,7 @@ class RequestSpec extends Specification {
     ]
 
     when:
-    def request = Request.fromMap(json)
+    def request = Request.fromJson(Json.INSTANCE.toJson(json).asJsonObject)
 
     then:
     !request.matchingRules.empty
@@ -31,7 +32,7 @@ class RequestSpec extends Specification {
     request.generators.empty
 
     where:
-    request = Request.fromMap([:])
+    request = Request.fromJson(Json.INSTANCE.toJson([:]).asJsonObject)
   }
 
   def 'detects multipart file uploads based on the content type'() {

@@ -25,7 +25,8 @@ dependencies {
   compile 'javax.mail:mail:1.5.0-b01'
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
-  implementation "com.google.code.gson:gson:${project.gsonVersion}"
+  api "com.google.code.gson:gson:${project.gsonVersion}"
+  implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"

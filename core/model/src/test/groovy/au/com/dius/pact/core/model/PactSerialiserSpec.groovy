@@ -9,7 +9,8 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
-import groovy.json.JsonSlurper
+import au.com.dius.pact.core.support.Json
+import com.google.gson.JsonParser
 import spock.lang.Specification
 
 class PactSerialiserSpec extends Specification {
@@ -69,14 +70,14 @@ class PactSerialiserSpec extends Specification {
     given:
     def sw = new StringWriter()
     def testPactJson = loadTestFile('test_pact.json').text.trim()
-    def testPact = new JsonSlurper().parseText(testPactJson)
+    def testPact = Json.INSTANCE.toMap(new JsonParser().parse(testPactJson))
 
     when:
     PactWriter.writePact(new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
       [new RequestResponseInteraction('test interaction', [new ProviderState('test state')], request, response)]),
       new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
-    def actualPact = new JsonSlurper().parseText(actualPactJson)
+    def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
 
     then:
     actualPact == testPact
@@ -86,7 +87,7 @@ class PactSerialiserSpec extends Specification {
     given:
     def sw = new StringWriter()
     def testPactJson = loadTestFile('test_pact_v3.json').text.trim()
-    def testPact = new JsonSlurper().parseText(testPactJson)
+    def testPact = Json.INSTANCE.toMap(new JsonParser().parse(testPactJson))
     def expectedRequest = new Request('GET', '/',
       ['q': ['p', 'p2'], 'r': ['s']], [testreqheader: ['testreqheadervalue']],
       OptionalBody.body('{"test": true}'.bytes))
@@ -103,7 +104,7 @@ class PactSerialiserSpec extends Specification {
     when:
     PactWriter.writePact(expectedPact, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
-    def actualPact = new JsonSlurper().parseText(actualPactJson)
+    def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
 
     then:
     actualPact == testPact
@@ -113,12 +114,12 @@ class PactSerialiserSpec extends Specification {
     given:
     def sw = new StringWriter()
     def testPactJson = loadTestFile('test_pact_matchers.json').text.trim()
-    def testPact = new JsonSlurper().parseText(testPactJson)
+    def testPact = Json.INSTANCE.toMap(new JsonParser().parse(testPactJson))
 
     when:
     PactWriter.writePact(pactWithMatchers, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
-    def actualPact = new JsonSlurper().parseText(actualPactJson)
+    def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
 
     then:
     actualPact == testPact
@@ -128,7 +129,7 @@ class PactSerialiserSpec extends Specification {
     given:
     def sw = new StringWriter()
     def testPactJson = loadTestFile('test_pact.json').text.trim()
-    def testPact = new JsonSlurper().parseText(testPactJson)
+    def testPact = Json.INSTANCE.toMap(new JsonParser().parse(testPactJson))
     def pact = new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
       [new RequestResponseInteraction('test interaction', [new ProviderState('test state')],
         ModelFixtures.requestLowerCaseMethod,
@@ -137,7 +138,7 @@ class PactSerialiserSpec extends Specification {
     when:
     PactWriter.writePact(pact, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
-    def actualPact = new JsonSlurper().parseText(actualPactJson)
+    def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
 
     then:
     actualPact == testPact
@@ -147,12 +148,12 @@ class PactSerialiserSpec extends Specification {
     given:
     def sw = new StringWriter()
     def testPactJson = loadTestFile('test_pact_generators.json').text.trim()
-    def testPact = new JsonSlurper().parseText(testPactJson)
+    def testPact = Json.INSTANCE.toMap(new JsonParser().parse(testPactJson))
 
     when:
     PactWriter.writePact(pactWithGenerators, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
-    def actualPact = new JsonSlurper().parseText(actualPactJson)
+    def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
 
     then:
     actualPact == testPact
@@ -162,12 +163,12 @@ class PactSerialiserSpec extends Specification {
     given:
     def sw = new StringWriter()
     def testPactJson = loadTestFile('v3-message-pact-generators.json').text.trim()
-    def testPact = new JsonSlurper().parseText(testPactJson)
+    def testPact = Json.INSTANCE.toMap(new JsonParser().parse(testPactJson))
 
     when:
     PactWriter.writePact(messagePactWithGenerators, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
-    def actualPact = new JsonSlurper().parseText(actualPactJson)
+    def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
 
     then:
     actualPact == testPact
@@ -253,7 +254,7 @@ class PactSerialiserSpec extends Specification {
 
   def 'PactSerialiser must not convert fields called \'body\''() {
     expect:
-    pactBody == new JsonSlurper().parseText('{\n' +
+    pactBody == Json.INSTANCE.toMap(new JsonParser().parse('{\n' +
       '  "body" : [ 1, 2, 3 ],\n' +
       '  "complete" : {\n' +
       '    "body" : 123456,\n' +
@@ -267,12 +268,12 @@ class PactSerialiserSpec extends Specification {
       '      "engine" : null\n' +
       '    }\n' +
       '  }\n' +
-      '}')
+      '}'))
 
     where:
-    pactBody = new JsonSlurper().parseText(
+    pactBody = Json.INSTANCE.toMap(new JsonParser().parse(
       PactReader.loadPact(loadTestFile('test_pact_with_bodies.json'))
-        .interactions[0].request.body.valueAsString())
+        .interactions[0].request.body.valueAsString()))
   }
 
   def 'PactSerialiser must deserialise pact with no bodies'() {

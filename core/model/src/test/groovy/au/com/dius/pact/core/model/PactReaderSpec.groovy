@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.model.messaging.MessagePact
-import au.com.dius.pact.core.pactbroker.CustomServiceUnavailableRetryStrategy
+import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectInputStream

@@ -5,8 +5,11 @@ import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.support.Json
+import com.github.salomonbrys.kotson.array
+import com.github.salomonbrys.kotson.obj
+import com.google.gson.JsonObject
 import mu.KLogging
-import java.math.BigDecimal
 
 /**
  * Response from a provider to a consumer
@@ -62,27 +65,44 @@ class Response @JvmOverloads constructor(
     const val DEFAULT_STATUS = 200
 
     @JvmStatic
-    fun fromMap(map: Map<String, Any>): Response {
-      val statusJson = map.getOrDefault("status", DEFAULT_STATUS)
-      val status = if (statusJson is BigDecimal)  statusJson.toInt() else statusJson
-      val headers = (map.getOrDefault("headers", mutableMapOf<String, Any>()) as Map<String, Any>)
-        .entries.associate { (key, value) ->
-        if (value is List<*>) {
-          key to value as List<String>
-        } else {
-          key to value.toString().split(",").map { it.trim() }
+    fun fromJson(json: JsonObject): Response {
+      val status = when {
+        json.has("status") && json["status"].isJsonPrimitive -> {
+          val statusJson = json["status"].asJsonPrimitive
+          when {
+            statusJson.isNumber -> statusJson.asNumber.toInt()
+            statusJson.isString -> statusJson.toString().toInt()
+            else -> DEFAULT_STATUS
+          }
         }
+        else -> DEFAULT_STATUS
       }
-      val body = if (map.containsKey("body"))
-        OptionalBody.body(map["body"]?.toString()?.toByteArray())
+      val headers = if (json.has("headers") && json["headers"].isJsonObject) {
+        json["headers"].obj.entrySet().associate { (key, value) ->
+          if (value.isJsonArray) {
+            key to value.array.map { Json.toString(it) }
+          } else {
+            key to Json.toString(value).split(",").map { it.trim() }
+          }
+        }
+      } else {
+        emptyMap()
+      }
+      val body = if (json.has("body"))
+        when {
+          json["body"].isJsonNull -> OptionalBody.nullBody()
+          json["body"].isJsonPrimitive && json["body"].asJsonPrimitive.isString ->
+            OptionalBody.body(json["body"].asJsonPrimitive.asString.toByteArray())
+          else -> OptionalBody.body(json["body"].toString().toByteArray())
+        }
       else OptionalBody.missing()
-      val matchingRules = if (map.containsKey("matchingRules"))
-        MatchingRulesImpl.fromMap(map["matchingRules"] as Map<String, Map<String, Any?>>)
+      val matchingRules = if (json.has("matchingRules") && json["matchingRules"].isJsonObject)
+        MatchingRulesImpl.fromJson(json["matchingRules"])
       else MatchingRulesImpl()
-      val generators = if (map.containsKey("generators"))
-        Generators.fromMap(map["generators"] as Map<String, Map<String, Any>>)
+      val generators = if (json.has("generators") && json["generators"].isJsonObject)
+        Generators.fromJson(json["generators"])
       else Generators()
-      return Response(status as Int, headers.toMutableMap(), body, matchingRules, generators)
+      return Response(status, headers.toMutableMap(), body, matchingRules, generators)
     }
   }
 }

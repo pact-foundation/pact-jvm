@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.sbtsupport
 
-import groovy.json.JsonSlurper
+import au.com.dius.pact.core.support.Json
+import com.github.salomonbrys.kotson.fromJson
 import java.io.File
 
 /**
@@ -29,7 +30,7 @@ data class PactConfiguration(val providerRoot: Address?, val stateChangeUrl: Add
   companion object {
     @JvmStatic
     fun loadConfiguration(configFile: File): PactConfiguration {
-      val configuration = JsonSlurper().parse(configFile) as PactConfiguration
+      val configuration = configFile.bufferedReader().use { Json.gson.fromJson<PactConfiguration>(it) }
       configuration.validate()
       return configuration
     }

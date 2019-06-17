@@ -2,6 +2,7 @@ package au.com.dius.pact.core.pactbroker
 
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Ok
+import au.com.dius.pact.core.support.Json
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import kotlin.Pair
@@ -268,7 +269,7 @@ class PactBrokerClientSpec extends Specification {
   def 'when fetching a pact, return the results as a Map'() {
     given:
     def halClient = Mock(IHalClient)
-    def client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
     def url = 'https://test.pact.dius.com.au' +
@@ -290,6 +291,6 @@ class PactBrokerClientSpec extends Specification {
 
     then:
     1 * halClient.fetch(url) >> json
-    result.pactFile == [a: 'a', b: 100, _links: [:], c: [true, 10.2, 'test']]
+    result.pactFile == Json.INSTANCE.toJson([a: 'a', b: 100, _links: [:], c: [true, 10.2, 'test']])
   }
 }

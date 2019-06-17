@@ -84,7 +84,7 @@ class ResponseComparisonTest {
     assert result.comparison == [
       '$.stuff': [[mismatch: 'Expected "is good" but received "should make the test fail"', diff: '']]
     ]
-    assert result.diff[1] == '-    "stuff": "is good"'
-    assert result.diff[2] == '+    "stuff": "should make the test fail"'
+    assert result.diff[1] == '-  "stuff": "is good"'
+    assert result.diff[2] == '+  "stuff": "should make the test fail"'
   }
 }

@@ -6,6 +6,7 @@ dependencies {
   testCompile "ch.qos.logback:logback-core:${project.logbackVersion}",
     "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
+  testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
   testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}"
   testCompile 'org.apache.commons:commons-io:1.3.2'
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"

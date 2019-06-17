@@ -7,8 +7,11 @@ import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
+import au.com.dius.pact.core.support.Json
+import com.github.salomonbrys.kotson.array
+import com.github.salomonbrys.kotson.obj
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import mu.KLogging
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.lang3.StringUtils
@@ -58,11 +61,11 @@ class Message @JvmOverloads constructor(
     return map
   }
 
-  fun formatContents(): Any {
+  fun formatContents(): String {
     return if (contents.isPresent()) {
       val mimeType = parseContentType(getContentType())?.mimeType
       when {
-        isJson(mimeType) -> JsonSlurper().parseText(contents.valueAsString())
+        isJson(mimeType) -> Json.gsonPretty.toJson(JsonParser().parse(contents.valueAsString()))
         isOctetStream(mimeType) -> Base64.encodeBase64String(contentsAsBytes())
         else -> contents.valueAsString()
       }
@@ -113,34 +116,37 @@ class Message @JvmOverloads constructor(
      * Builds a message from a Map
      */
     @JvmStatic
-    fun fromMap(map: Map<String, Any>): Message {
+    fun fromJson(json: JsonObject): Message {
       val providerStates = when {
-        map.containsKey("providerStates") -> (map["providerStates"] as List<Map<String, Any>>).map { ProviderState.fromMap(it) }
-        map.containsKey("providerState") -> listOf(ProviderState(map["providerState"].toString()))
+        json.has("providerStates") -> json["providerStates"].array.map { ProviderState.fromJson(it) }
+        json.has("providerState") -> listOf(ProviderState(Json.toString(json["providerState"])))
         else -> listOf()
       }
 
-      val contents = if (map.containsKey("contents")) {
-        val contents = map["contents"]
-        if (contents == null) {
-          OptionalBody.nullBody()
-        } else if (contents is String && contents.isEmpty()) {
-          OptionalBody.empty()
-        } else {
-          OptionalBody.body(JsonOutput.toJson(contents).toByteArray())
+      val contents = if (json.has("contents")) {
+        val contents = json["contents"]
+        when {
+          contents.isJsonNull -> OptionalBody.nullBody()
+          contents.isJsonPrimitive && contents.asJsonPrimitive.isString ->
+            OptionalBody.body(contents.asJsonPrimitive.asString.toByteArray())
+          else -> OptionalBody.body(contents.toString().toByteArray())
         }
       } else {
         OptionalBody.missing()
       }
-      val matchingRules = if (map.containsKey("matchingRules"))
-        MatchingRulesImpl.fromMap(map["matchingRules"] as Map<String, Map<String, Any?>>)
+      val matchingRules = if (json.has("matchingRules"))
+        MatchingRulesImpl.fromJson(json["matchingRules"])
       else MatchingRulesImpl()
-      val generators = if (map.containsKey("generators"))
-        Generators.fromMap(map["generators"] as Map<String, Map<String, Any>>)
+      val generators = if (json.has("generators"))
+        Generators.fromJson(json["generators"])
       else Generators()
 
-      return Message(map.getOrDefault("description", "").toString(), providerStates,
-        contents, matchingRules, generators, map["metaData"] as Map<String, String>? ?: emptyMap())
+      val metaData = if (json.has("metaData"))
+        json["metaData"].obj.entrySet().associate { it.key to Json.toString(it.value) }
+      else
+        emptyMap()
+      return Message(Json.toString(json["description"]), providerStates,
+        contents, matchingRules, generators, metaData)
     }
 
     private fun parseContentType(contentType: String): ContentType? {

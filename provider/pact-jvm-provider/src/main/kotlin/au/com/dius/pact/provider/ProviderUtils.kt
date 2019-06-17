@@ -2,8 +2,7 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.Interaction
-import au.com.dius.pact.core.support.extractFromMap
-import groovy.json.JsonSlurper
+import au.com.dius.pact.core.model.PactReader
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.BooleanUtils
 import org.fusesource.jansi.AnsiConsole
@@ -41,10 +40,10 @@ object ProviderUtils {
 
     val consumers = mutableListOf<ConsumerInfo>()
     for (f in pactFileDir.listFiles { _, name -> FilenameUtils.isExtension(name, "json") }) {
-      val pactJson = JsonSlurper().parse(f) as Map<String, Any>
-      val providerName = extractFromMap(pactJson, "provider", "name")
+      val pact = PactReader.loadPact(f)
+      val providerName = pact.provider.name
       if (providerName == provider.name) {
-        consumers.add(ConsumerInfo(extractFromMap(pactJson, "consumer", "name").toString(),
+        consumers.add(ConsumerInfo(pact.consumer.name,
           stateChange, stateChangeUsesBody, packagesToScan, verificationType,
           FileSource<Interaction>(f), pactFileAuthentication))
       } else {

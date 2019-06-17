@@ -9,8 +9,8 @@ import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.UnknownPactSource
-import groovy.json.JsonBuilder
-import groovy.json.JsonSlurper
+import au.com.dius.pact.core.support.Json
+import com.google.gson.JsonParser
 import org.jetbrains.annotations.NotNull
 import spock.lang.Specification
 
@@ -29,7 +29,7 @@ class V3PactSpec extends Specification {
 
     def 'writing pacts should merge with any existing file'() {
         given:
-        def pact = PactReader.loadV3Pact(UnknownPactSource.INSTANCE, [
+        def pact = PactReader.loadV3Pact(UnknownPactSource.INSTANCE, Json.INSTANCE.toJson([
           consumer: [name: 'consumer'],
           provider: [name: 'provider'],
           messages: [
@@ -41,11 +41,11 @@ class V3PactSpec extends Specification {
             ]
           ],
           metadata: BasePact.DEFAULT_METADATA
-        ])
+        ]))
 
         when:
         pact.write(pactFile.parentFile.toString(), PactSpecVersion.V3)
-        def json = new JsonSlurper().parse(pactFile)
+        def json = pactFile.withReader { Json.INSTANCE.toMap(new JsonParser().parse(it)) }
 
         then:
         json.messages.size == 2
@@ -54,7 +54,7 @@ class V3PactSpec extends Specification {
 
     def 'when merging it should replace messages with the same description and state'() {
         given:
-        def pact = PactReader.loadV3Pact(UnknownPactSource.INSTANCE, [
+        def pact = PactReader.loadV3Pact(UnknownPactSource.INSTANCE, Json.INSTANCE.toJson([
             consumer: [name: 'consumer'],
             provider: [name: 'provider'],
             messages: [
@@ -75,24 +75,24 @@ class V3PactSpec extends Specification {
               ]
             ],
             metadata: BasePact.DEFAULT_METADATA
-        ])
+        ]))
 
         when:
         pact.write(pactFile.parentFile.toString(), PactSpecVersion.V3)
-        def json = new JsonSlurper().parse(pactFile)
+        def json = pactFile.withReader { Json.INSTANCE.toMap(new JsonParser().parse(it)) }
 
         then:
         json.messages.size == 3
         json.messages*.description.toSet() == ['a hello message', 'a new hello message'].toSet()
         json.messages.find { it.description == 'a hello message' && !it.providerStates } ==
-          [contents: 'Hello', description: 'a hello message', metaData: [ contentType: 'application/json' ]]
+          [contents: '"Hello"', description: 'a hello message', metaData: [ contentType: 'application/json' ]]
     }
 
     def 'refuse to merge pacts with different spec versions'() {
         given:
-        def json = new JsonSlurper().parse(pactFile)
+        def json = pactFile.withReader { Json.INSTANCE.toMap(new JsonParser().parse(it)) }
         json.metadata['pactSpecification'].version = '2.0.0'
-        pactFile.write(new JsonBuilder(json).toPrettyString())
+        pactFile.write(Json.INSTANCE.gsonPretty.toJson(json))
 
         def pact = new BasePact(new Consumer(), new Provider(), BasePact.DEFAULT_METADATA) {
             @Override

@@ -2,11 +2,14 @@ package au.com.dius.pact.core.pactbroker
 
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Result
+import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.jsonObject
+import com.github.salomonbrys.kotson.string
+import com.github.salomonbrys.kotson.obj
 import com.github.salomonbrys.kotson.toJson
 import com.google.common.net.UrlEscapers.urlPathSegmentEscaper
 import com.google.gson.JsonObject
-import groovy.json.JsonSlurper
+import com.google.gson.JsonParser
 import org.dmfs.rfc3986.encoding.Precoded
 import java.io.File
 import java.net.URLDecoder
@@ -16,7 +19,7 @@ import java.util.function.Consumer
 /**
  * Wraps the response for a Pact from the broker with the link data associated with the Pact document.
  */
-data class PactResponse(val pactFile: Any, val links: Map<String, Map<String, Any>>)
+data class PactResponse(val pactFile: JsonObject, val links: Map<String, Map<String, Any>>)
 
 sealed class TestResult {
   object Ok: TestResult() {
@@ -105,10 +108,10 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   @JvmOverloads
   open fun uploadPactFile(pactFile: File, unescapedVersion: String, tags: List<String> = emptyList()): Any? {
     val pactText = pactFile.readText()
-    val pact = JsonSlurper().parseText(pactText) as Map<String, Map<String, Any>>
+    val pact = JsonParser().parse(pactText)
     val halClient = newHalClient()
-    val providerName = urlPathSegmentEscaper().escape(pact["provider"]!!["name"].toString())
-    val consumerName = urlPathSegmentEscaper().escape(pact["consumer"]!!["name"].toString())
+    val providerName = urlPathSegmentEscaper().escape(pact["provider"]["name"].string)
+    val consumerName = urlPathSegmentEscaper().escape(pact["consumer"]["name"].string)
     val version = urlPathSegmentEscaper().escape(unescapedVersion)
     val uploadPath = "/pacts/provider/$providerName/consumer/$consumerName/version/$version"
     if (tags.isNotEmpty()) {
@@ -134,9 +137,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   }
 
   open fun fetchPact(url: String): PactResponse {
-    val halDoc = newHalClient().fetch(url) as JsonObject
-    return PactResponse(HalClient.asMap(halDoc),
-      HalClient.asMap(halDoc["_links"] as JsonObject) as Map<String, Map<String, Any>>)
+    val halDoc = newHalClient().fetch(url).obj
+    return PactResponse(halDoc, HalClient.asMap(halDoc["_links"].obj) as Map<String, Map<String, Any>>)
   }
 
   open fun newHalClient(): IHalClient = HalClient(pactBrokerUrl, options)

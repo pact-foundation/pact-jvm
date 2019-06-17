@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.model
 
-import groovy.json.JsonSlurper
+import au.com.dius.pact.core.support.Json
+import com.google.gson.JsonParser
 import mu.KLogging
 import java.net.URLEncoder
 
@@ -68,8 +69,8 @@ open class RequestResponseInteraction @JvmOverloads constructor(
   companion object: KLogging() {
     const val COMMA = ", "
 
-    fun requestToMap(request: Request, pactSpecVersion: PactSpecVersion): Map<String, Any> {
-      val map = mutableMapOf<String, Any>(
+    fun requestToMap(request: Request, pactSpecVersion: PactSpecVersion): Map<String, Any?> {
+      val map = mutableMapOf<String, Any?>(
         "method" to request.method.toUpperCase(),
         "path" to request.path
       )
@@ -92,8 +93,8 @@ open class RequestResponseInteraction @JvmOverloads constructor(
       return map
     }
 
-    fun responseToMap(response: Response, pactSpecVersion: PactSpecVersion): Map<String, Any> {
-      val map = mutableMapOf<String, Any>("status" to response.status)
+    fun responseToMap(response: Response, pactSpecVersion: PactSpecVersion): Map<String, Any?> {
+      val map = mutableMapOf<String, Any?>("status" to response.status)
       if (response.headers.isNotEmpty()) {
         map["headers"] = response.headers.entries.associate { (key, value) -> key to value.joinToString(COMMA) }
       }
@@ -115,9 +116,9 @@ open class RequestResponseInteraction @JvmOverloads constructor(
       }
     }
 
-    private fun parseBody(httpPart: HttpPart): Any {
+    private fun parseBody(httpPart: HttpPart): Any? {
       return if (httpPart.jsonBody() && httpPart.body.isPresent()) {
-        val body = JsonSlurper().parseText(httpPart.body.valueAsString())
+        val body = Json.fromJson(JsonParser().parse(httpPart.body.valueAsString()))
         if (body is String) {
           httpPart.body.valueAsString()
         } else {

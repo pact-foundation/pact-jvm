@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.support.Json
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -8,7 +9,7 @@ class ProviderAndConsumerSpec extends Specification {
   @Unroll
   def 'creates a provider from a Map'() {
     expect:
-    Provider.fromMap(map) == provider
+    Provider.fromJson(Json.INSTANCE.toJson(map)) == provider
 
     where:
 
@@ -22,7 +23,7 @@ class ProviderAndConsumerSpec extends Specification {
   @Unroll
   def 'creates a consumer from a Map'() {
     expect:
-    Consumer.fromMap(map) == consumer
+    Consumer.fromJson(Json.INSTANCE.toJson(map)) == consumer
 
     where:
 

@@ -1,5 +1,8 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.support.Json
+import com.github.salomonbrys.kotson.jsonObject
+
 /**
  * Pact between a consumer and a provider
  */
@@ -7,7 +10,7 @@ class RequestResponsePact @JvmOverloads constructor(
   override val provider: Provider,
   override val consumer: Consumer,
   override var interactions: MutableList<RequestResponseInteraction> = mutableListOf(),
-  override val metadata: Map<String, Any> = DEFAULT_METADATA,
+  override val metadata: Map<String, Any?> = DEFAULT_METADATA,
   override val source: PactSource = UnknownPactSource
 ): BasePact<RequestResponseInteraction>(consumer, provider, metadata, source) {
 
@@ -20,7 +23,7 @@ class RequestResponsePact @JvmOverloads constructor(
     "provider"      to objectToMap(provider),
     "consumer"      to objectToMap(consumer),
     "interactions"  to interactions.map { it.toMap(pactSpecVersion) },
-    "metadata"      to metaData(metadata, pactSpecVersion)
+    "metadata"      to metaData(jsonObject(metadata.entries.map { it.key to Json.toJson(it.value) }), pactSpecVersion)
   )
 
   override fun mergeInteractions(interactions: List<RequestResponseInteraction>) {

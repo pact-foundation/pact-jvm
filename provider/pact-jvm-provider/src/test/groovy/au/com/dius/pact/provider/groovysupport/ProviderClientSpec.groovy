@@ -3,13 +3,13 @@ package au.com.dius.pact.provider.groovysupport
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
+import au.com.dius.pact.core.support.Json
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.provider.GroovyScalaUtils$
 import au.com.dius.pact.provider.IHttpClientFactory
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
-import groovy.json.JsonBuilder
 import org.apache.http.Header
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpRequest
@@ -414,11 +414,11 @@ class ProviderClientSpec extends Specification {
     given:
     state = new ProviderState('state one', [a: 'a', b: 1])
     def stateChangeUrl = 'http://state.change:1244'
-    def exepectedBody = new JsonBuilder([
+    def exepectedBody = Json.INSTANCE.gsonPretty.toJson([
       state: 'state one',
       params: [a: 'a', b: 1],
       action: 'setup'
-    ]).toPrettyString()
+    ])
 
     when:
     client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)

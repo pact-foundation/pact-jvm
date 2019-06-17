@@ -231,7 +231,7 @@ abstract class BaseJdkMockServer(
       OptionalBody.body(bodyContents.toByteArray(), contentType(headers))
     }
     return Request(exchange.requestMethod, exchange.requestURI.path,
-      queryStringToMap(exchange.requestURI.rawQuery).toMutableMap(), headers, body)
+      queryStringToMap(exchange.requestURI.rawQuery).toMutableMap(), headers.toMutableMap(), body)
   }
 
   private fun contentType(headers: Headers): au.com.dius.pact.core.model.ContentType {

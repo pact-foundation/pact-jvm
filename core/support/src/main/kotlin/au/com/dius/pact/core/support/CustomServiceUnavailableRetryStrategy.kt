@@ -1,4 +1,4 @@
-package au.com.dius.pact.core.pactbroker
+package au.com.dius.pact.core.support
 
 import org.apache.http.HttpResponse
 import org.apache.http.annotation.Contract

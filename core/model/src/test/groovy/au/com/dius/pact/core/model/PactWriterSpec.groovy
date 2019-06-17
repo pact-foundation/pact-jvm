@@ -2,7 +2,8 @@ package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
-import groovy.json.JsonSlurper
+import au.com.dius.pact.core.support.Json
+import com.google.gson.JsonParser
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
@@ -20,7 +21,7 @@ class PactWriterSpec extends Specification {
 
     when:
     PactWriter.writePact(pact, new PrintWriter(sw))
-    def json = new JsonSlurper().parseText(sw.toString())
+    def json = Json.INSTANCE.toMap(new JsonParser().parse(sw.toString()))
     def interactionJson = json.interactions.first()
 
     then:
@@ -44,7 +45,7 @@ class PactWriterSpec extends Specification {
 
     when:
     PactWriter.writePact(pact, new PrintWriter(sw), PactSpecVersion.V3)
-    def json = new JsonSlurper().parseText(sw.toString())
+    def json = Json.INSTANCE.toMap(new JsonParser().parse(sw.toString()))
     def messageJson = json.messages.first()
 
     then:
@@ -66,7 +67,7 @@ class PactWriterSpec extends Specification {
 
     when:
     PactWriter.writePact(pact, new PrintWriter(sw))
-    def json = new JsonSlurper().parseText(sw.toString())
+    def json = Json.INSTANCE.toMap(new JsonParser().parse(sw.toString()))
     def interactionJson = json.interactions.first()
 
     then:
@@ -86,7 +87,7 @@ class PactWriterSpec extends Specification {
 
     when:
     PactWriter.writePact(pact, new PrintWriter(sw))
-    def json = new JsonSlurper().parseText(sw.toString())
+    def json = Json.INSTANCE.toMap(new JsonParser().parse(sw.toString()))
     def interactionJson = json.interactions.first()
 
     then:
@@ -110,7 +111,7 @@ class PactWriterSpec extends Specification {
     PactWriter.writePact(file, pact, PactSpecVersion.V3)
     pact.interactions = [interaction2]
     PactWriter.writePact(file, pact, PactSpecVersion.V3)
-    def json = new JsonSlurper().parse(file)
+    def json = file.withReader { Json.INSTANCE.toMap(new JsonParser().parse(it)) }
 
     then:
     json.interactions*.description == ['test interaction', 'test interaction two']
@@ -137,7 +138,7 @@ class PactWriterSpec extends Specification {
     PactWriter.writePact(file, pact, PactSpecVersion.V3)
     pact.interactions = [interaction2]
     PactWriter.writePact(file, pact, PactSpecVersion.V3)
-    def json = new JsonSlurper().parse(file)
+    def json = file.withReader { Json.INSTANCE.toMap(new JsonParser().parse(it)) }
 
     then:
     json.interactions*.description == ['test interaction two']
@@ -161,7 +162,7 @@ class PactWriterSpec extends Specification {
 
     when:
     PactWriter.writePact(pact, new PrintWriter(sw))
-    def json = new JsonSlurper().parseText(sw.toString())
+    def json = Json.INSTANCE.toMap(new JsonParser().parse(sw.toString()))
     def interactionJson = json.interactions.first()
 
     then:
@@ -182,7 +183,8 @@ class PactWriterSpec extends Specification {
     PactWriter.writePact(pactFile, pact, PactSpecVersion.V3)
 
     then:
-    new JsonSlurper().parse(pactFile).interactions[0].description == 'Request für ping'
+    pactFile.withReader { Json.INSTANCE.toMap(new JsonParser().parse(it)) }.interactions[0].description ==
+      'Request für ping'
 
     cleanup:
     pactFile.delete()
