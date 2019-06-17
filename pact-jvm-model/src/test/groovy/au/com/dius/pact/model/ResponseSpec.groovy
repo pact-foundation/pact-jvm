@@ -1,6 +1,7 @@
 package au.com.dius.pact.model
 
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class ResponseSpec extends Specification {
 
@@ -30,6 +31,15 @@ class ResponseSpec extends Specification {
 
     where:
     response = Response.fromMap([:])
+  }
+
+  @Unroll
+  def 'fromMap should handle different number types'() {
+    expect:
+    Response.fromMap([status: statusValue]).status == 200
+
+    where:
+    statusValue << [200, 200.0, new BigDecimal('200'), new BigInteger('200')]
   }
 
 }
