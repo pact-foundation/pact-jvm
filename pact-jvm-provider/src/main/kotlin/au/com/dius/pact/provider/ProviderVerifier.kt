@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider
 
 import au.com.dius.pact.com.github.michaelbull.result.Ok
+import au.com.dius.pact.com.github.michaelbull.result.getError
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact
@@ -245,7 +246,8 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     } catch (e: Exception) {
       failures[interactionMessage] = e
       reporters.forEach { it.verificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)) }
-      return TestResult.Failed(listOf(e.message.orEmpty()))
+      return TestResult.Failed(listOf(mapOf("message" to "Request to provider method failed with an exception",
+        "exception" to e)))
     }
   }
 
@@ -364,7 +366,8 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
 
       return result
     } else {
-      return TestResult.Failed(listOf("State change request failed"))
+      return TestResult.Failed(listOf(mapOf("message" to "State change request failed",
+        "exception" to stateChangeResult.stateChangeResult.getError())))
     }
   }
 
@@ -458,7 +461,8 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
       reporters.forEach {
         it.requestFailed(provider, interaction, interactionMessage, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE))
       }
-      TestResult.Failed(listOf(e.message.orEmpty()))
+      TestResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
+        "exception" to e)))
     }
   }
 

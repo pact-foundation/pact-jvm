@@ -99,7 +99,8 @@ data class PactVerificationContext(
           it.requestFailed(providerInfo, interaction, interactionMessage, e,
             verifier!!.projectHasProperty.apply(ProviderVerifierBase.PACT_SHOW_STACKTRACE))
         }
-        TestResult.Failed(listOf(e.message.orEmpty()))
+        TestResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
+          "exception" to e)))
       }
     } else {
       return verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, ConsumerInfo(consumerName), interaction,

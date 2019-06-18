@@ -3,19 +3,23 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.model.BrokerUrlSource
 import au.com.dius.pact.model.Consumer
+import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactReader
 import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.ProviderState
+import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.RequestResponseInteraction
 import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.model.Response
 import au.com.dius.pact.model.UnknownPactSource
 import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.pactbroker.TestResult
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.VerifierReporter
+import org.apache.commons.lang3.NotImplementedException
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
@@ -541,5 +545,62 @@ class ProviderVerifierSpec extends Specification {
     verifier.projectGetProperty.apply('provider.verifier.test') == 'true'
     !verifier.projectHasProperty.apply('provider.verifier.test.other')
     verifier.projectGetProperty.apply('provider.verifier.test.other') == null
+  }
+
+  def 'verifyInteraction returns an error result if the state change request fails'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    provider.stateChangeUrl = new URL('http://localhost:66/statechange')
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    def failures = [:]
+    Interaction interaction = new RequestResponseInteraction('Test Interaction',
+      [new ProviderState('Test State')])
+
+    when:
+    def result = verifier.verifyInteraction(provider, consumer, failures, interaction)
+
+    then:
+    result instanceof TestResult.Failed
+    result.results.size() == 1
+    result.results[0].message == 'State change request failed'
+    result.results[0].exception instanceof IOException
+  }
+
+  def 'verifyResponseFromProvider returns an error result if the request to the provider fails with an exception'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    def failures = [:]
+    Interaction interaction = new RequestResponseInteraction('Test Interaction',
+      [new ProviderState('Test State')], new Request(), new Response())
+    def client = Mock(ProviderClient)
+
+    when:
+    def result = verifier.verifyResponseFromProvider(provider, interaction, 'Test Interaction', failures, client)
+
+    then:
+    client.makeRequest(_) >> { throw new IOException('Boom!') }
+    result instanceof TestResult.Failed
+    result.results.size() == 1
+    result.results[0].message == 'Request to provider failed with an exception'
+    result.results[0].exception instanceof IOException
+  }
+
+  def 'verifyResponseByInvokingProviderMethods returns an error result if the method fails with an exception'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    def failures = [:]
+    Interaction interaction = new Message('verifyResponseByInvokingProviderMethods Test Message', [])
+    IConsumerInfo consumer = Stub()
+    def interactionMessage = 'Test'
+
+    when:
+    def result = verifier.verifyResponseByInvokingProviderMethods(provider, consumer, interaction,
+      interactionMessage, failures)
+
+    then:
+    result instanceof TestResult.Failed
+    result.results.size() == 1
+    result.results[0].message == 'Request to provider method failed with an exception'
+    result.results[0].exception instanceof Exception
   }
 }
