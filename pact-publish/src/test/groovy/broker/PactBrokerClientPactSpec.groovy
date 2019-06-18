@@ -255,7 +255,7 @@ class PactBrokerClientPactSpec extends Specification {
     given:
     pactBroker {
       given('A pact has been published between the Provider and Foo Consumer')
-      uponReceiving('a pact publish verification request')
+      uponReceiving('a pact publish verification request with build info')
       withAttributes(method: 'POST',
         path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results',
         body: [success: true, providerApplicationVersion: '10.0.0', buildUrl: 'http://localhost:8080/build']
@@ -271,6 +271,43 @@ class PactBrokerClientPactSpec extends Specification {
             '/verification-results'
         ]
       ], TestResult.Ok.INSTANCE, '10.0.0', 'http://localhost:8080/build') instanceof Ok
+    }
+
+    then:
+    result == PactVerificationResult.Ok.INSTANCE
+  }
+
+  def 'publishing verification results pact test with failure info'() {
+    given:
+    pactBroker {
+      given('A pact has been published between the Provider and Foo Consumer')
+      uponReceiving('a pact publish verification request with failure info')
+      withAttributes(method: 'POST',
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results')
+      withBody(mimeType: 'application/json') {
+        success false
+        providerApplicationVersion '10.0.0'
+        buildUrl 'http://localhost:8080/build'
+        testResults eachLike {
+          description string('Request to provider method failed with an exception')
+          stacktrace eachLike(string())
+        }
+      }
+      willRespondWith(status: 201)
+    }
+    def failure = new TestResult.Failed([
+      [message: 'Request to provider method failed with an exception', exception: new IOException('Boom!')],
+      'expected status of 200 but was 400'
+    ])
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      pactBrokerClient.publishVerificationResults([
+        'pb:publish-verification-results': [
+          href: 'http://localhost:8080/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
+            '/verification-results'
+        ]
+      ], failure, '10.0.0', 'http://localhost:8080/build')
     }
 
     then:

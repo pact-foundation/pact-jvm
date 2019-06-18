@@ -8,24 +8,24 @@ import au.com.dius.pact.pactbroker.TestResult
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.support.expressions.ValueResolver
-import org.apache.commons.lang3.exception.ExceptionUtils
 import org.junit.jupiter.api.extension.ExtensionContext
 import spock.lang.Specification
 
 class PactVerificationContextSpec extends Specification {
 
+  @SuppressWarnings('UnnecessaryGetter')
   def 'sets the test result to an error result if the test fails with an exception'() {
     given:
     ExtensionContext.Store store = Stub()
-    ExtensionContext extContext = Stub() {
+    ExtensionContext extContext = Stub {
       getStore(_) >> store
     }
-    TestTarget target = Stub() {
+    TestTarget target = Stub {
       executeInteraction(_, _) >> { throw new IOException('Boom!') }
     }
     IProviderVerifier verifier = Stub()
     ValueResolver valueResolver = Stub()
-    ProviderInfo provider = Stub() {
+    ProviderInfo provider = Stub {
       getName() >> 'Stub'
     }
     String consumerName = 'Test'
@@ -40,7 +40,7 @@ class PactVerificationContextSpec extends Specification {
     context.verifyInteraction()
 
     then:
-    AssertionError error = thrown()
+    thrown(AssertionError)
     context.testExecutionResult instanceof TestResult.Failed
     context.testExecutionResult.results.size() == 1
     context.testExecutionResult.results[0].message == 'Request to provider failed with an exception'

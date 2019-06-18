@@ -36,7 +36,9 @@ sealed trait ResponsePartMismatch extends Mismatch {
   override def description: String = toString
 }
 
-case class StatusMismatch(expected: Status, actual: Status) extends ResponsePartMismatch
+case class StatusMismatch(expected: Status, actual: Status) extends ResponsePartMismatch {
+  override def description: String = s"expected status of $expected but was $actual"
+}
 case class BodyTypeMismatch(expected: String, actual: String) extends RequestPartMismatch with ResponsePartMismatch
 case class CookieMismatch(expected: Cookies, actual: Cookies) extends RequestPartMismatch
 case class PathMismatch(expected: Path, actual: Path, mismatch: Option[String] = None) extends RequestPartMismatch {

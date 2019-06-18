@@ -19,7 +19,6 @@ import au.com.dius.pact.model.v3.messaging.Message
 import au.com.dius.pact.pactbroker.TestResult
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.VerifierReporter
-import org.apache.commons.lang3.NotImplementedException
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties

@@ -2,8 +2,10 @@ package au.com.dius.pact.pactbroker
 
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Result
+import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.toJson
+import org.apache.commons.lang3.exception.ExceptionUtils
 import java.net.URLDecoder
 import java.util.function.Consumer
 
@@ -73,6 +75,25 @@ abstract class PactBrokerClientBase(val pactBrokerUrl: String, val options: Map<
       if (buildUrl != null) {
         jsonObject.add("buildUrl", buildUrl.toJson())
       }
+
+      if (result is TestResult.Failed && result.results.isNotEmpty()) {
+        val failures = jsonArray(result.results.map {
+          when (it) {
+            is Map<*, *> -> {
+              if (it.containsKey("exception")) {
+                val exp = it["exception"] as Exception
+                jsonObject("description" to it["message"],
+                  "stacktrace" to jsonArray(ExceptionUtils.getStackFrames(exp).toList()))
+              } else {
+                it
+              }
+            }
+            else -> jsonObject("description" to it.toString(), "stacktrace" to jsonArray())
+          }
+        })
+        jsonObject.add("testResults", failures)
+      }
+
       val lowercaseMap = publishLink.mapKeys { it.key.toLowerCase() }
       if (lowercaseMap.containsKey("href")) {
         halClient.postJson(lowercaseMap["href"].toString(), jsonObject.toString())
