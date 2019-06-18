@@ -136,6 +136,16 @@ abstract class HalClientBase @JvmOverloads constructor(
   var pathInfo: JsonElement? = null
   var lastUrl: String? = null
   var defaultHeaders: MutableMap<String, String> = mutableMapOf()
+  private var maxPublishRetries = 5
+  private var publishRetryInterval = 3000
+
+  init {
+    if (options.containsKey("halClient")) {
+      val halClient = options["halClient"] as Map<String, Any>
+      maxPublishRetries = halClient.getOrDefault("maxPublishRetries", this.maxPublishRetries) as Int
+      publishRetryInterval = halClient.getOrDefault("publishRetryInterval", this.publishRetryInterval) as Int
+    }
+  }
 
   fun <Method : HttpMessage> initialiseRequest(method: Method): Method {
     defaultHeaders.forEach { key, value -> method.addHeader(key, value) }
@@ -171,7 +181,7 @@ abstract class HalClientBase @JvmOverloads constructor(
 
   open fun setupHttpClient(): CloseableHttpClient {
     if (httpClient == null) {
-      val retryStrategy = CustomServiceUnavailableRetryStrategy(5, 3000)
+      val retryStrategy = CustomServiceUnavailableRetryStrategy(maxPublishRetries, publishRetryInterval)
       val builder = HttpClients.custom().useSystemProperties().setServiceUnavailableRetryStrategy(retryStrategy)
       if (options["authentication"] is List<*>) {
         val authentication = options["authentication"] as List<*>

@@ -16,7 +16,7 @@ class PactBrokerClientPactSpec extends Specification {
   private PactBuilder pactBroker, imaginaryBroker
 
   def setup() {
-    pactBrokerClient = new PactBrokerClient('http://localhost:8080')
+    pactBrokerClient = new PactBrokerClient('http://localhost:8080', [halClient: [maxPublishRetries: 0]])
     pactFile = File.createTempFile('pact', '.json')
     pactContents = '''
       {
