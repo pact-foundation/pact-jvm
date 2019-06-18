@@ -39,7 +39,7 @@ class ResponseSpec extends Specification {
     Response.fromMap([status: statusValue]).status == 200
 
     where:
-    statusValue << [200, 200.0, new BigDecimal('200'), new BigInteger('200')]
+    statusValue << [200, 200L, 200.0, 200.0G, 200G]
   }
 
 }
