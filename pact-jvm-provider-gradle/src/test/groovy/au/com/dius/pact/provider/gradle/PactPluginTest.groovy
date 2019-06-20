@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider.gradle
 
-import au.com.dius.pact.model.UrlSource
 import au.com.dius.pact.provider.PactVerification
 import org.gradle.api.Project
 import org.gradle.api.ProjectConfigurationException
@@ -99,8 +98,8 @@ class PactPluginTest {
                     port = 1234
 
                     hasPactWith('ConsumerA') {
-                        pactSource = url(pactFileUrl)
-                        stateChange = url(stateChangeUrl)
+                        pactSource = pactFileUrl
+                        stateChange = stateChangeUrl
                         verificationType = 'REQUEST_RESPONSE'
                     }
                 }
@@ -116,8 +115,8 @@ class PactPluginTest {
 
         def consumer = provider.consumers.first()
         assert consumer.name == 'ConsumerA'
-        assert consumer.pactSource == new UrlSource(pactFileUrl)
-        assert consumer.stateChange == new UrlSource(stateChangeUrl)
+        assert consumer.pactSource == pactFileUrl
+        assert consumer.stateChange == stateChangeUrl
         assert consumer.verificationType == PactVerification.REQUEST_RESPONSE
     }
 
@@ -137,7 +136,7 @@ class PactPluginTest {
         project.evaluate()
 
         def consumer = project.tasks.pactVerify_ProviderA.providerToVerify.consumers.first()
-        assert consumer.pactSource == new UrlSource(pactFileUrl)
+        assert consumer.pactSource.toString() == pactFileUrl
         assert consumer.stateChange == null
     }
 
