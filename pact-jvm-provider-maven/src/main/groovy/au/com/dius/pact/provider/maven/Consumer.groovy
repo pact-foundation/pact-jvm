@@ -21,12 +21,4 @@ class Consumer extends ConsumerInfo {
   void setPactUrl(URL pactUrl) {
     pactSource = new UrlSource(pactUrl.toString())
   }
-
-  URL getStateChangeUrl() {
-    stateChange ? new URL(stateChange.toString()) : null
-  }
-
-  void setStateChangeUrl(URL url) {
-    stateChange = url
-  }
 }

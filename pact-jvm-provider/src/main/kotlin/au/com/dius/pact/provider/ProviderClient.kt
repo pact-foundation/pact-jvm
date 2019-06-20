@@ -71,11 +71,11 @@ interface IProviderInfo {
 }
 
 interface IConsumerInfo {
-  val name: String
-  val stateChange: Any?
-  val stateChangeUsesBody: Boolean
-  val packagesToScan: List<String>
-  val verificationType: PactVerification?
+  var name: String
+  var stateChange: Any?
+  var stateChangeUsesBody: Boolean
+  var packagesToScan: List<String>
+  var verificationType: PactVerification?
 }
 
 open class ConsumerInfo @JvmOverloads constructor (
@@ -89,6 +89,10 @@ open class ConsumerInfo @JvmOverloads constructor (
 ) : IConsumerInfo {
 
   fun toPactConsumer() = au.com.dius.pact.model.Consumer(name)
+
+  var stateChangeUrl: URL?
+    get() = if (stateChange != null) URL(stateChange.toString()) else null
+    set(value) { stateChange = value }
 
   /**
    * Sets the Pact File for the consumer
@@ -118,8 +122,6 @@ open class ConsumerInfo @JvmOverloads constructor (
     replaceWith = ReplaceWith("getPactSource")
   )
   fun getPactFile() = pactSource
-
-  fun url(path: String) = UrlSource<Interaction>(path)
 
   override fun toString(): String {
     return "ConsumerInfo(name='$name', stateChange=$stateChange, stateChangeUsesBody=$stateChangeUsesBody, " +
