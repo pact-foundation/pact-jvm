@@ -1,5 +1,22 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.6.9 - Bugfix Release
+
+* 2c111f09 - fix: deprecation warning #894 (Ronald Holshausen, Thu Jun 20 14:42:02 2019 +1000)
+* 2832d4df - chore: relocate junit packages in fat jar #888 (Ronald Holshausen, Thu Jun 20 14:30:34 2019 +1000)
+* 0a095e9b - fix: failing test #894 (Ronald Holshausen, Thu Jun 20 14:29:09 2019 +1000)
+* aa483129 - fix: allow setting the state change URL at the consumer level in the Gradle plugin #894 (Ronald Holshausen, Thu Jun 20 14:12:54 2019 +1000)
+* 50776054 - fix: drop any dollar prefix when using composition with generators with Java DSL #895 (Ronald Holshausen, Thu Jun 20 12:57:57 2019 +1000)
+* acbd05af - fix: drop any dollar prefix when using composition with Java DSL #895 (Ronald Holshausen, Thu Jun 20 12:41:14 2019 +1000)
+* d653b6c2 - feat: implemented publishing of basic validation results (Ronald Holshausen, Tue Jun 18 16:23:04 2019 +1000)
+* 13a8e039 - fix: allow the publish retry attempts to be configurable (Ronald Holshausen, Tue Jun 18 16:22:20 2019 +1000)
+* 57cff5b2 - feat: capture the exception when a verification test fails (Ronald Holshausen, Tue Jun 18 14:13:08 2019 +1000)
+* 087884da - fix: codenarc failure #893 (Ronald Holshausen, Tue Jun 18 10:40:45 2019 +1000)
+* 74bd10e7 - fix: conversion of BigDecimal to Integer of the response status #893 (Ronald Holshausen, Tue Jun 18 09:57:39 2019 +1000)
+* a30fb450 - fix: garbage at end of buffer when loading pact file (Ronald Holshausen, Sun Jun 16 17:12:58 2019 +1000)
+* 86971b97 - fix: update release script to preserve the terminal IO (Ronald Holshausen, Sat Jun 15 17:37:12 2019 +1000)
+* 7230bf14 - bump version to 3.6.9 (Ronald Holshausen, Sat Jun 15 17:35:13 2019 +1000)
+
 # 3.6.8 - Bugfix Release
 
 * 13dd0e1e - fix: Codenarc errors #893 (Ronald Holshausen, Sat Jun 15 15:16:10 2019 +1000)
