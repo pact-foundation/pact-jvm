@@ -14,7 +14,7 @@ class Consumer extends ConsumerInfo {
     if (pactSource instanceof UrlSource) {
       new URL(pactSource.url)
     } else {
-      new URL(pactFile.toString())
+      new URL(pactSource.toString())
     }
   }
 
