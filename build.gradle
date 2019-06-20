@@ -376,5 +376,6 @@ if (System.env.UBERJAR == 'true') {
     dependencies {
       exclude(dependency('org.jetbrains.kotlin::'))
     }
+    relocate 'junit.framework', 'shadow.junit'
   }
 }
