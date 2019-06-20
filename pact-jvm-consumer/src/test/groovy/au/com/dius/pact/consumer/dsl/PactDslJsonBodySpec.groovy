@@ -324,15 +324,15 @@ class PactDslJsonBodySpec extends Specification {
   def 'check for invalid matcher paths'() {
     given:
     PactDslJsonBody body = new PactDslJsonBody()
-    body.object("headers")
-      .stringType("bestandstype", "foo")
-      .stringType("Content-Type", "application/json")
+    body.object('headers')
+      .stringType('bestandstype')
+      .stringType('Content-Type', 'application/json')
       .closeObject()
     PactDslJsonBody payload = new PactDslJsonBody()
-    payload.stringType("bestandstype", "foo")
-      .stringType("bestandsid", 'EXAMPLE_FOO_FILE_NAME')
+    payload.stringType('bestandstype', 'foo')
+      .stringType('bestandsid')
       .closeObject()
-    body.object("payload", payload).close()
+    body.object('payload', payload).close()
 
     expect:
     body.matchers.toMap(PactSpecVersion.V2) == [
@@ -347,6 +347,10 @@ class PactDslJsonBodySpec extends Specification {
       '$.payload.bestandstype': [matchers: [[match: 'type']], combine: 'AND'],
       '$.payload.bestandsid': [matchers: [[match: 'type']], combine: 'AND']
     ]
+    body.generators.toMap(PactSpecVersion.V3) == [body: [
+      '$.headers.bestandstype': [type: 'RandomString', size: 20],
+      '$.payload.bestandsid': [type: 'RandomString', size: 20]
+    ]]
   }
 
 }
