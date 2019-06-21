@@ -11,7 +11,7 @@ import java.net.URI
 /**
  * HTTP client support functions
  */
-object HttpClient: KLogging() {
+object HttpClient : KLogging() {
 
   /**
    * Creates a new HTTP client

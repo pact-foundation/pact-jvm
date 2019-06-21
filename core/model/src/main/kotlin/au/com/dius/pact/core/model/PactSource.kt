@@ -31,13 +31,13 @@ data class PactBrokerSource<I> @JvmOverloads constructor(
 ) : PactSource()
   where I : Interaction
 
-data class FileSource<I> @JvmOverloads constructor(val file: File, val pact: Pact<I>? = null)
-  : PactSource() where I : Interaction {
+data class FileSource<I> @JvmOverloads constructor(val file: File, val pact: Pact<I>? = null) :
+  PactSource() where I : Interaction {
   override fun description() = "File $file"
 }
 
-data class UrlSource<I> @JvmOverloads constructor(override val url: String, val pact: Pact<I>? = null)
-  : UrlPactSource() where I : Interaction {
+data class UrlSource<I> @JvmOverloads constructor(override val url: String, val pact: Pact<I>? = null) :
+  UrlPactSource() where I : Interaction {
   override fun description() = "URL $url"
 }
 

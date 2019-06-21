@@ -1,14 +1,8 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.matchers.util.padTo
-import au.com.dius.pact.core.model.HttpPart
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.isEmpty
-import au.com.dius.pact.core.model.isMissing
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
-import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
-import au.com.dius.pact.core.model.unwrap
-import au.com.dius.pact.core.model.valueAsString
 import mu.KLogging
 import org.apache.xerces.dom.TextImpl
 import org.w3c.dom.NamedNodeMap

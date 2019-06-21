@@ -119,5 +119,5 @@ class KTorMockServer(
     logger.debug { "Mock server shutdown" }
   }
 
-  companion object: KLogging()
+  companion object : KLogging()
 }

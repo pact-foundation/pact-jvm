@@ -1,15 +1,8 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.matchers.util.padTo
-import au.com.dius.pact.core.model.HttpPart
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.isEmpty
-import au.com.dius.pact.core.model.isMissing
-import au.com.dius.pact.core.model.isNull
-import au.com.dius.pact.core.model.isPresent
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
-import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
-import au.com.dius.pact.core.model.valueAsString
 import com.github.salomonbrys.kotson.contains
 import com.github.salomonbrys.kotson.forEach
 import com.github.salomonbrys.kotson.isEmpty

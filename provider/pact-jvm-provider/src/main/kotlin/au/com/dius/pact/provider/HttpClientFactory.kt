@@ -19,7 +19,7 @@ import java.security.cert.X509Certificate
 /**
  * HTTP Client Factory
  */
-class HttpClientFactory: IHttpClientFactory {
+class HttpClientFactory : IHttpClientFactory {
 
     override fun newClient(provider: IProviderInfo): CloseableHttpClient {
         return if (provider.createClient != null) {

@@ -75,7 +75,7 @@ interface MockServer {
   fun validateMockServerState(testResult: Any?): PactVerificationResult
 }
 
-abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockProviderConfig): MockServer {
+abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockProviderConfig) : MockServer {
 
   private val mismatchedRequests = ConcurrentHashMap<Request, MutableList<PactVerificationResult>>()
   private val matchedRequests = ConcurrentLinkedQueue<Request>()
@@ -178,7 +178,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
       au.com.dius.pact.core.model.ContentType.JSON))
   }
 
-  companion object: KLogging()
+  companion object : KLogging()
 }
 
 abstract class BaseJdkMockServer(
@@ -278,11 +278,11 @@ abstract class BaseJdkMockServer(
   companion object : KLogging()
 }
 
-open class MockHttpServer(pact: RequestResponsePact, config: MockProviderConfig)
-  : BaseJdkMockServer(pact, config, HttpServer.create(config.address(), 0))
+open class MockHttpServer(pact: RequestResponsePact, config: MockProviderConfig) :
+  BaseJdkMockServer(pact, config, HttpServer.create(config.address(), 0))
 
-open class MockHttpsServer(pact: RequestResponsePact, config: MockProviderConfig)
-  : BaseJdkMockServer(pact, config, HttpsServer.create(config.address(), 0))
+open class MockHttpsServer(pact: RequestResponsePact, config: MockProviderConfig) :
+  BaseJdkMockServer(pact, config, HttpsServer.create(config.address(), 0))
 
 fun calculateCharset(headers: Map<String, List<String>>): Charset {
   val contentType = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }

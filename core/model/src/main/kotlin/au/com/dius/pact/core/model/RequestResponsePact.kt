@@ -12,7 +12,7 @@ class RequestResponsePact @JvmOverloads constructor(
   override var interactions: MutableList<RequestResponseInteraction> = mutableListOf(),
   override val metadata: Map<String, Any?> = DEFAULT_METADATA,
   override val source: PactSource = UnknownPactSource
-): BasePact<RequestResponseInteraction>(consumer, provider, metadata, source) {
+) : BasePact<RequestResponseInteraction>(consumer, provider, metadata, source) {
 
   override fun sortInteractions(): Pact<RequestResponseInteraction> {
     interactions.sortBy { interaction -> interaction.providerStates.joinToString { it.name } + interaction.description }
@@ -20,10 +20,10 @@ class RequestResponsePact @JvmOverloads constructor(
   }
 
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> = mapOf(
-    "provider"      to objectToMap(provider),
-    "consumer"      to objectToMap(consumer),
-    "interactions"  to interactions.map { it.toMap(pactSpecVersion) },
-    "metadata"      to metaData(jsonObject(metadata.entries.map { it.key to Json.toJson(it.value) }), pactSpecVersion)
+    "provider" to objectToMap(provider),
+    "consumer" to objectToMap(consumer),
+    "interactions" to interactions.map { it.toMap(pactSpecVersion) },
+    "metadata" to metaData(jsonObject(metadata.entries.map { it.key to Json.toJson(it.value) }), pactSpecVersion)
   )
 
   override fun mergeInteractions(interactions: List<RequestResponseInteraction>) {
@@ -32,7 +32,7 @@ class RequestResponsePact @JvmOverloads constructor(
   }
 
   fun interactionFor(description: String, providerState: String): RequestResponseInteraction? {
-    return  interactions.find { i ->
+    return interactions.find { i ->
       i.description == description && i.providerStates.any { it.name == providerState }
     }
   }

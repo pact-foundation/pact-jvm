@@ -20,7 +20,7 @@ class Response @JvmOverloads constructor(
   override var body: OptionalBody = OptionalBody.missing(),
   override var matchingRules: MatchingRules = MatchingRulesImpl(),
   var generators: Generators = Generators()
-): HttpPart() {
+) : HttpPart() {
 
   override fun toString() =
     "\tstatus: $status\n\theaders: $headers\n\tmatchers: $matchingRules\n\tgenerators: $generators\n\tbody: $body"
@@ -61,7 +61,7 @@ class Response @JvmOverloads constructor(
     return result
   }
 
-  companion object: KLogging() {
+  companion object : KLogging() {
     const val DEFAULT_STATUS = 200
 
     @JvmStatic
@@ -88,14 +88,14 @@ class Response @JvmOverloads constructor(
       } else {
         emptyMap()
       }
-      val body = if (json.has("body"))
+      val body = if (json.has("body")) {
         when {
           json["body"].isJsonNull -> OptionalBody.nullBody()
           json["body"].isJsonPrimitive && json["body"].asJsonPrimitive.isString ->
             OptionalBody.body(json["body"].asJsonPrimitive.asString.toByteArray())
           else -> OptionalBody.body(json["body"].toString().toByteArray())
         }
-      else OptionalBody.missing()
+      } else OptionalBody.missing()
       val matchingRules = if (json.has("matchingRules") && json["matchingRules"].isJsonObject)
         MatchingRulesImpl.fromJson(json["matchingRules"])
       else MatchingRulesImpl()

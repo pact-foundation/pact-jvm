@@ -24,7 +24,7 @@ import java.util.function.Consumer
 data class PactResponse(val pactFile: JsonObject, val links: Map<String, Map<String, Any>>)
 
 sealed class TestResult {
-  object Ok: TestResult() {
+  object Ok : TestResult() {
     override fun toBoolean() = true
 
     override fun merge(result: TestResult) = when (result) {
@@ -33,7 +33,7 @@ sealed class TestResult {
     }
   }
 
-  data class Failed(var results: List<Any> = emptyList()): TestResult() {
+  data class Failed(var results: List<Any> = emptyList()) : TestResult() {
     override fun toBoolean() = false
 
     override fun merge(result: TestResult) = when (result) {
@@ -152,8 +152,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     result: Boolean,
     version: String,
     buildUrl: String? = null
-  ): Result<Boolean, Exception>
-    = publishVerificationResults(docAttributes, TestResult.fromBoolean(result), version, buildUrl)
+  ): Result<Boolean, Exception> =
+    publishVerificationResults(docAttributes, TestResult.fromBoolean(result), version, buildUrl)
 
   /**
    * Publishes the result to the "pb:publish-verification-results" link in the document attributes.

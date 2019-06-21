@@ -22,7 +22,7 @@ class Request @JvmOverloads constructor(
   override var body: OptionalBody = OptionalBody.missing(),
   override var matchingRules: MatchingRules = MatchingRulesImpl(),
   var generators: Generators = Generators()
-): BaseRequest(), Comparable<Request> {
+) : BaseRequest(), Comparable<Request> {
 
   override fun compareTo(other: Request) = if (equals(other)) 0 else 1
 
@@ -91,7 +91,7 @@ class Request @JvmOverloads constructor(
     return result
   }
 
-  companion object: KLogging() {
+  companion object : KLogging() {
     const val COOKIE_KEY = "cookie"
     const val DEFAULT_METHOD = "GET"
     const val DEFAULT_PATH = "/"
@@ -99,7 +99,7 @@ class Request @JvmOverloads constructor(
     @JvmStatic
     fun fromJson(json: JsonObject): Request {
       val method = if (json.has("method")) Json.toString(json["method"]) else DEFAULT_METHOD
-      val path = if(json.has("path")) Json.toString(json["path"]) else DEFAULT_PATH
+      val path = if (json.has("path")) Json.toString(json["path"]) else DEFAULT_PATH
       val query = parseQueryParametersToMap(json["query"])
       val headers = if (json.has("headers") && json["headers"].isJsonObject) {
         json["headers"].obj.entrySet().associate { (key, value) ->
@@ -112,14 +112,14 @@ class Request @JvmOverloads constructor(
       } else {
         emptyMap()
       }
-      val body = if (json.has("body"))
+      val body = if (json.has("body")) {
         when {
           json["body"].isJsonNull -> OptionalBody.nullBody()
           json["body"].isJsonPrimitive && json["body"].asJsonPrimitive.isString ->
             OptionalBody.body(json["body"].asJsonPrimitive.asString.toByteArray())
           else -> OptionalBody.body(json["body"].toString().toByteArray())
         }
-        else OptionalBody.missing()
+      } else OptionalBody.missing()
       val matchingRules = if (json.has("matchingRules") && json["matchingRules"].isJsonObject)
         MatchingRulesImpl.fromJson(json["matchingRules"])
         else MatchingRulesImpl()

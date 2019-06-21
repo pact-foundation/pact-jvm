@@ -27,7 +27,7 @@ class Message @JvmOverloads constructor(
   var matchingRules: MatchingRules = MatchingRulesImpl(),
   var generators: Generators = Generators(),
   var metaData: Map<String, String> = mapOf()
-): Interaction {
+) : Interaction {
 
   fun contentsAsBytes() = contents.orEmpty()
 
@@ -109,7 +109,7 @@ class Message @JvmOverloads constructor(
       "matchingRules=$matchingRules, generators=$generators, metaData=$metaData)"
   }
 
-  companion object: KLogging() {
+  companion object : KLogging() {
     const val JSON = "application/json"
 
     /**

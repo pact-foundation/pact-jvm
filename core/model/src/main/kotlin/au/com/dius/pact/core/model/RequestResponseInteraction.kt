@@ -13,7 +13,7 @@ open class RequestResponseInteraction @JvmOverloads constructor(
   override val providerStates: List<ProviderState> = listOf(),
   val request: Request,
   val response: Response
-): Interaction {
+) : Interaction {
 
   override fun toString() =
     "Interaction: $description\n\tin states ${displayState()}\nrequest:\n$request\n\nresponse:\n$response"
@@ -33,8 +33,8 @@ open class RequestResponseInteraction @JvmOverloads constructor(
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     val interactionJson = mutableMapOf(
       "description" to description,
-      "request"     to requestToMap(request, pactSpecVersion),
-      "response"    to responseToMap(response, pactSpecVersion)
+      "request" to requestToMap(request, pactSpecVersion),
+      "response" to responseToMap(response, pactSpecVersion)
     )
     if (pactSpecVersion < PactSpecVersion.V3 && providerStates.isNotEmpty()) {
       interactionJson["providerState"] = providerStates.first().name
@@ -66,7 +66,7 @@ open class RequestResponseInteraction @JvmOverloads constructor(
     return result
   }
 
-  companion object: KLogging() {
+  companion object : KLogging() {
     const val COMMA = ", "
 
     fun requestToMap(request: Request, pactSpecVersion: PactSpecVersion): Map<String, Any?> {
@@ -129,5 +129,4 @@ open class RequestResponseInteraction @JvmOverloads constructor(
       }
     }
   }
-
 }

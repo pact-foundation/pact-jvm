@@ -18,7 +18,7 @@ abstract class BasePact<I> @JvmOverloads constructor(
   override val provider: Provider,
   open val metadata: Map<String, Any?> = DEFAULT_METADATA,
   override val source: PactSource = UnknownPactSource
-): Pact<I> where I: Interaction {
+) : Pact<I> where I : Interaction {
 
   fun write(pactDir: String, pactSpecVersion: PactSpecVersion) {
     PactWriter.writePact(fileForPact(pactDir), this, pactSpecVersion)
@@ -49,7 +49,7 @@ abstract class BasePact<I> @JvmOverloads constructor(
 
   override fun toString() = "BasePact(consumer=$consumer, provider=$provider, metadata=$metadata, source=$source)"
 
-  companion object: KLogging() {
+  companion object : KLogging() {
     val DEFAULT_METADATA: Map<String, Map<String, Any?>> = Collections.unmodifiableMap(mapOf(
       "pactSpecification" to mapOf("version" to "3.0.0"),
       "pact-jvm" to mapOf("version" to lookupVersion())

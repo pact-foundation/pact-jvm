@@ -30,7 +30,7 @@ class MessagePact @JvmOverloads constructor (
   var messages: MutableList<Message> = mutableListOf(),
   override val metadata: Map<String, Any?> = DEFAULT_METADATA,
   override val source: PactSource = UnknownPactSource
-): BasePact<Message>(consumer, provider, metadata, source) {
+) : BasePact<Message>(consumer, provider, metadata, source) {
 
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     if (pactSpecVersion < PactSpecVersion.V3) {
@@ -63,7 +63,7 @@ class MessagePact @JvmOverloads constructor (
     }
 
     val messages = ((newPact["messages"] as List<Map<String, Any>>) +
-      json.obj["messages"].array.map {Json.toMap(it) })
+      json.obj["messages"].array.map { Json.toMap(it) })
       .distinctBy { it["description"] }
     newPact["messages"] = messages
     return newPact
@@ -116,7 +116,7 @@ class MessagePact @JvmOverloads constructor (
     return "MessagePact(provider=$provider, consumer=$consumer, messages=$messages, metadata=$metadata)"
   }
 
-  companion object: KLogging() {
+  companion object : KLogging() {
     fun fromJson(json: JsonObject, source: PactSource = UnknownPactSource): MessagePact {
       val transformedJson = PactReader.transformJson(json)
       val consumer = Consumer.fromJson(transformedJson["consumer"])

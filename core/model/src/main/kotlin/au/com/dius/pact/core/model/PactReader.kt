@@ -141,7 +141,7 @@ fun queryStringToMap(query: String?, decode: Boolean = true): Map<String, List<S
 /**
  * Class to load a Pact from a JSON source using a version strategy
  */
-object PactReader: KLogging() {
+object PactReader : KLogging() {
 
   private const val CLASSPATH_URI_START = "classpath:"
 

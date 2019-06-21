@@ -253,8 +253,8 @@ class PactVerificationExtension(
 /**
  * JUnit 5 test extension class for executing state change callbacks
  */
-class PactVerificationStateChangeExtension(private val interaction: Interaction)
-  : BeforeTestExecutionCallback, AfterTestExecutionCallback {
+class PactVerificationStateChangeExtension(private val interaction: Interaction) :
+  BeforeTestExecutionCallback, AfterTestExecutionCallback {
   override fun beforeTestExecution(extensionContext: ExtensionContext) {
     logger.debug { "beforeEach for interaction '${interaction.description}'" }
     val providerStateContext = invokeStateChangeMethods(extensionContext, interaction.providerStates, StateChangeAction.SETUP)

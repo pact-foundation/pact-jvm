@@ -11,7 +11,6 @@ import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.forEach
 import com.github.salomonbrys.kotson.obj
 import com.github.salomonbrys.kotson.set
-import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import mu.KLogging
@@ -48,7 +47,7 @@ object JsonContentTypeHandler : ContentTypeHandler {
     val pathExp = parsePath(key)
     queryObjectGraph(pathExp.iterator(), body) { (_, valueKey, parent) ->
       @Suppress("UNCHECKED_CAST")
-      when  {
+      when {
         parent != null && parent.isJsonObject -> parent.obj[valueKey.toString()] = Json.toJson(generator.generate(context))
         parent != null && parent.isJsonArray -> parent[valueKey as Int] = Json.toJson(generator.generate(context))
         else -> body.value = Json.toJson(generator.generate(context))
