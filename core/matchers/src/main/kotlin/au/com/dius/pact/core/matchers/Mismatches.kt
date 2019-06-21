@@ -13,7 +13,9 @@ sealed class Mismatch {
   open fun description() = this.toString()
 }
 
-data class StatusMismatch(val expected: Int, val actual: Int) : Mismatch()
+data class StatusMismatch(val expected: Int, val actual: Int) : Mismatch() {
+  override fun description() = "expected status of $expected but was $actual"
+}
 
 data class BodyTypeMismatch(val expected: String, val actual: String) : Mismatch()
 

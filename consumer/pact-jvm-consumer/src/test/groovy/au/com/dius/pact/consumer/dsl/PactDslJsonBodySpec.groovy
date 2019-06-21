@@ -9,6 +9,7 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.matchingrules.ValuesMatcher
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -317,6 +318,39 @@ class PactDslJsonBodySpec extends Specification {
     ]
     pactDslJsonBody.toString() == '{"contactDetails2":{"mobile":{"countryCode":"64","prefix":"21","subscriberNumber":' +
       '100}},"contactDetails":{"mobile":{"countryCode":"64","prefix":"21","subscriberNumber":100}}}'
+  }
+
+  @Issue('#895')
+  def 'check for invalid matcher paths'() {
+    given:
+    PactDslJsonBody body = new PactDslJsonBody()
+    body.object('headers')
+      .stringType('bestandstype')
+      .stringType('Content-Type', 'application/json')
+      .closeObject()
+    PactDslJsonBody payload = new PactDslJsonBody()
+    payload.stringType('bestandstype', 'foo')
+      .stringType('bestandsid')
+      .closeObject()
+    body.object('payload', payload).close()
+
+    expect:
+    body.matchers.toMap(PactSpecVersion.V2) == [
+      '$.body.headers.bestandstype': [match: 'type'],
+      '$.body.headers.Content-Type': [match: 'type'],
+      '$.body.payload.bestandstype': [match: 'type'],
+      '$.body.payload.bestandsid': [match: 'type']
+    ]
+    body.matchers.toMap(PactSpecVersion.V3) == [
+      '$.headers.bestandstype': [matchers: [[match: 'type']], combine: 'AND'],
+      '$.headers.Content-Type': [matchers: [[match: 'type']], combine: 'AND'],
+      '$.payload.bestandstype': [matchers: [[match: 'type']], combine: 'AND'],
+      '$.payload.bestandsid': [matchers: [[match: 'type']], combine: 'AND']
+    ]
+    body.generators.toMap(PactSpecVersion.V3) == [body: [
+      '$.headers.bestandstype': [type: 'RandomString', size: 20],
+      '$.payload.bestandsid': [type: 'RandomString', size: 20]
+    ]]
   }
 
 }

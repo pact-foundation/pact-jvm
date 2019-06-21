@@ -32,12 +32,7 @@ class ResponseComparison(
 
   fun compareStatus(mismatches: List<Mismatch>): String? {
     val statusMismatch = mismatches.find { it is StatusMismatch } as StatusMismatch?
-    if (statusMismatch != null) {
-      val expectedStatus = statusMismatch.expected
-      val actualStatus = statusMismatch.actual
-      return "expected status of $expectedStatus but was $actualStatus"
-    }
-    return null
+    return statusMismatch?.description()
   }
 
   fun compareHeaders(mismatches: List<Mismatch>): Map<String, String?> {
@@ -50,7 +45,7 @@ class ResponseComparison(
       if (headerMismatchers.isEmpty()) {
           headerResult = expected.headers.orEmpty().mapValues { null }.toMutableMap()
       } else {
-        expected.headers.orEmpty().forEach { headerKey, _ ->
+        expected.headers.orEmpty().forEach { (headerKey, _) ->
           if (headerMismatchers.containsKey(headerKey) && headerMismatchers[headerKey]!!.isNotEmpty()) {
               headerResult[headerKey] = headerMismatchers[headerKey]!!.first().mismatch
           } else {

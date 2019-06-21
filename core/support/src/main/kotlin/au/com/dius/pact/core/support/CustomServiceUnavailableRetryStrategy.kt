@@ -31,7 +31,7 @@ class CustomServiceUnavailableRetryStrategy(
   private val retryInterval: Long
 
   init {
-    Args.positive(maxRetries, "Max retries")
+    Args.notNegative(maxRetries, "Max retries")
     Args.positive(retryInterval, "Retry interval")
     this.retryInterval = retryInterval.toLong()
   }

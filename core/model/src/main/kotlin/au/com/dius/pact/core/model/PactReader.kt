@@ -3,7 +3,6 @@ package au.com.dius.pact.core.model
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.com.github.michaelbull.result.Result
-import au.com.dius.pact.core.model.ContentType.Companion.JSON
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
@@ -36,7 +35,6 @@ import java.io.InputStreamReader
 import java.io.Reader
 import java.net.URI
 import java.net.URL
-import java.net.URLConnection
 import java.net.URLDecoder
 import kotlin.collections.set
 

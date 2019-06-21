@@ -133,6 +133,16 @@ open class HalClient @JvmOverloads constructor(
   var pathInfo: JsonElement? = null
   var lastUrl: String? = null
   var defaultHeaders: MutableMap<String, String> = mutableMapOf()
+  private var maxPublishRetries = 5
+  private var publishRetryInterval = 3000
+
+  init {
+    if (options.containsKey("halClient")) {
+      val halClient = options["halClient"] as Map<String, Any>
+      maxPublishRetries = halClient.getOrDefault("maxPublishRetries", this.maxPublishRetries) as Int
+      publishRetryInterval = halClient.getOrDefault("publishRetryInterval", this.publishRetryInterval) as Int
+    }
+  }
 
   fun <Method : HttpMessage> initialiseRequest(method: Method): Method {
     defaultHeaders.forEach { key, value -> method.addHeader(key, value) }
@@ -171,7 +181,8 @@ open class HalClient @JvmOverloads constructor(
       if (options.containsKey("authentication") && options["authentication"] !is List<*>) {
         HttpClient.logger.warn { "Authentication options needs to be a list of values, ignoring." }
       }
-      httpClient = HttpClient.newHttpClient(options["authentication"], URI(baseUrl), defaultHeaders)
+      httpClient = HttpClient.newHttpClient(options["authentication"], URI(baseUrl), defaultHeaders,
+        this.maxPublishRetries, this.publishRetryInterval)
     }
 
     return httpClient!!

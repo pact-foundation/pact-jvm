@@ -16,8 +16,14 @@ object HttpClient: KLogging() {
   /**
    * Creates a new HTTP client
    */
-  fun newHttpClient(options: Any?, uri: URI, defaultHeaderStore: MutableMap<String, String>): CloseableHttpClient {
-    val retryStrategy = CustomServiceUnavailableRetryStrategy(5, 3000)
+  fun newHttpClient(
+    options: Any?,
+    uri: URI,
+    defaultHeaderStore: MutableMap<String, String>,
+    maxPublishRetries: Int = 5,
+    publishRetryInterval: Int = 3000
+  ): CloseableHttpClient {
+    val retryStrategy = CustomServiceUnavailableRetryStrategy(maxPublishRetries, publishRetryInterval)
     val builder = HttpClients.custom().useSystemProperties().setServiceUnavailableRetryStrategy(retryStrategy)
     if (options is List<*>) {
       when (val scheme = options.first().toString().toLowerCase()) {

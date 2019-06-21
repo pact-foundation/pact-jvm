@@ -3,6 +3,7 @@ package au.com.dius.pact.core.pactbroker
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Result
 import com.github.salomonbrys.kotson.get
+import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.string
 import com.github.salomonbrys.kotson.obj
@@ -10,6 +11,7 @@ import com.github.salomonbrys.kotson.toJson
 import com.google.common.net.UrlEscapers.urlPathSegmentEscaper
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import org.apache.commons.lang3.exception.ExceptionUtils
 import org.dmfs.rfc3986.encoding.Precoded
 import java.io.File
 import java.net.URLDecoder
@@ -170,6 +172,26 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
       if (buildUrl != null) {
         jsonObject.add("buildUrl", buildUrl.toJson())
       }
+
+      if (result is TestResult.Failed && result.results.isNotEmpty()) {
+        val failures = jsonArray(result.results.map {
+          when (it) {
+            is Map<*, *> -> {
+              val details = it as Map<String, Any>
+              if (details.containsKey("exception")) {
+                val exp = details["exception"] as Exception
+                jsonObject("description" to details["message"],
+                  "stacktrace" to jsonArray(ExceptionUtils.getStackFrames(exp).toList()))
+              } else {
+                it
+              }
+            }
+            else -> jsonObject("description" to it.toString(), "stacktrace" to jsonArray())
+          }
+        })
+        jsonObject.add("testResults", failures)
+      }
+
       val lowercaseMap = publishLink.mapKeys { it.key.toLowerCase() }
       if (lowercaseMap.containsKey("href")) {
         halClient.postJson(lowercaseMap["href"].toString(), jsonObject.toString())

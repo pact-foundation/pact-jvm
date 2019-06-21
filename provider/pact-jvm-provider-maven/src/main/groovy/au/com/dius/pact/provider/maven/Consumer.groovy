@@ -14,19 +14,11 @@ class Consumer extends ConsumerInfo {
     if (pactSource instanceof UrlSource) {
       new URL(pactSource.url)
     } else {
-      new URL(pactFile.toString())
+      new URL(pactSource.toString())
     }
   }
 
   void setPactUrl(URL pactUrl) {
     pactSource = new UrlSource(pactUrl.toString())
-  }
-
-  URL getStateChangeUrl() {
-    stateChange ? new URL(stateChange.toString()) : null
-  }
-
-  void setStateChangeUrl(URL url) {
-    stateChange = url
   }
 }
