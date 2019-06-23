@@ -14,11 +14,12 @@ class MessageComparisonSpec extends Specification {
     def actual = OptionalBody.body('{"a":1,"b":"3"}'.bytes)
 
     when:
-    def result = ResponseComparison.compareMessage(message, actual)
+    def result = ResponseComparison.compareMessage(message, actual).bodyMismatches
 
     then:
-    result.body.comparison == [
-      '$.b': [[mismatch: 'Expected "2" but received "3"', diff: '']]
+    result.isRight()
+    result.b.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
+      '$.b': ['Expected "2" but received "3"']
     ]
   }
 
@@ -29,17 +30,13 @@ class MessageComparisonSpec extends Specification {
     def actual = OptionalBody.body('{"a":1,"b":"3"}'.bytes)
 
     when:
-    def result = ResponseComparison.compareMessage(message, actual)
+    def result = ResponseComparison.compareMessage(message, actual).bodyMismatches
 
     then:
-    result.body.comparison == [
-      '/': [
-        [
-          mismatch: "Expected body '{\"a\":1,\"b\":\"2\"}' to match '{\"a\":1,\"b\":\"3\"}' using equality but did " +
-            'not match',
-          diff: ''
-        ]
-      ]
+    result.isRight()
+    result.b.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
+      '/': ["Expected body '{\"a\":1,\"b\":\"2\"}' to match '{\"a\":1,\"b\":\"3\"}' using equality but did " +
+            'not match']
     ]
   }
 
@@ -54,11 +51,13 @@ class MessageComparisonSpec extends Specification {
     def actualMetadata = [destination: 'X002']
 
     when:
-    def result = ResponseComparison.compareMessage(message, actual, actualMetadata)
+    def result = ResponseComparison.compareMessage(message, actual, actualMetadata).metadataMismatches.collectEntries {
+      [ it.key, it.value*.description() ]
+    }
 
     then:
-    result.metadata == [
-      'destination': "Expected metadata key 'destination' to have value 'X001' (String) but was 'X002' (String)"
+    result == [
+      'destination': ["Expected metadata key 'destination' to have value 'X001' (String) but was 'X002' (String)"]
     ]
   }
 

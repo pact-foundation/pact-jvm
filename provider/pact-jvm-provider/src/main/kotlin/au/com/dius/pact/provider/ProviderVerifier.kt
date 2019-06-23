@@ -1,7 +1,13 @@
 package au.com.dius.pact.provider
 
+import arrow.core.Either
+import arrow.core.right
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.com.github.michaelbull.result.getError
+import au.com.dius.pact.core.matchers.BodyTypeMismatch
+import au.com.dius.pact.core.matchers.HeaderMismatch
+import au.com.dius.pact.core.matchers.MetadataMismatch
+import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
@@ -252,14 +258,26 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     }
   }
 
-  fun displayBodyResult(failures: MutableMap<String, Any>, comparison: Map<String, Any?>, comparisonDescription: String): TestResult {
-    return if (comparison.isEmpty()) {
+  fun displayBodyResult(
+    failures: MutableMap<String, Any>,
+    comparison: Either<BodyTypeMismatch, BodyComparisonResult>,
+    comparisonDescription: String
+  ): TestResult {
+    return if (comparison is Either.Right && comparison.b.mismatches.isEmpty()) {
       reporters.forEach { it.bodyComparisonOk() }
       TestResult.Ok
     } else {
       reporters.forEach { it.bodyComparisonFailed(comparison) }
-      failures["$comparisonDescription has a matching body"] = comparison
-      TestResult.Failed(listOf(comparison))
+      when (comparison) {
+        is Either.Left -> {
+          failures["$comparisonDescription has a matching body"] = comparison.a.description()
+          TestResult.Failed(listOf(comparison.a))
+        }
+        is Either.Right -> {
+          failures["$comparisonDescription has a matching body"] = comparison.b
+          TestResult.Failed(listOf(comparison.b))
+        }
+      }
     }
   }
 
@@ -289,8 +307,8 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
       }
       val comparison = ResponseComparison.compareMessage(message, actualMessage, messageMetadata)
       val s = " generates a message which"
-      result = result.merge(displayBodyResult(failures, comparison["body"] as Map<String, Any?>, interactionMessage + s))
-        .merge(displayMetadataResult(messageMetadata ?: emptyMap(), failures, comparison["metadata"] as Map<String, Any?>,
+      result = result.merge(displayBodyResult(failures, comparison.bodyMismatches, interactionMessage + s))
+        .merge(displayMetadataResult(messageMetadata ?: emptyMap(), failures, comparison.metadataMismatches,
           interactionMessage + s))
     }
     return result
@@ -299,7 +317,7 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
   private fun displayMetadataResult(
     expectedMetadata: Map<String, Any>,
     failures: MutableMap<String, Any>,
-    comparison: Map<String, Any?>,
+    comparison: Map<String, List<MetadataMismatch>>,
     comparisonDescription: String
   ): TestResult {
     return if (comparison.isEmpty()) {
@@ -310,7 +328,7 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
       var result: TestResult = TestResult.Ok
       comparison.forEach { (key, metadataComparison) ->
         val expectedValue = expectedMetadata[key]
-        if (metadataComparison == null) {
+        if (metadataComparison.isEmpty()) {
           reporters.forEach { it.metadataComparisonOk(key, expectedValue) }
         } else {
           reporters.forEach { it.metadataComparisonFailed(key, expectedValue, metadataComparison) }
@@ -389,47 +407,47 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     reporters.forEach { it.returnsAResponseWhich() }
 
     val s = " returns a response which"
-    return displayStatusResult(failures, expectedResponse.status, comparison["method"], interactionMessage + s)
-      .merge(displayHeadersResult(failures, expectedResponse.headers ?: mapOf(), comparison["headers"] as Map<String, Any?>, interactionMessage + s))
-      .merge(displayBodyResult(failures, comparison["body"] as Map<String, Any?>, interactionMessage + s))
+    return displayStatusResult(failures, expectedResponse.status, comparison.statusMismatch, interactionMessage + s)
+      .merge(displayHeadersResult(failures, expectedResponse.headers, comparison.headerMismatches, interactionMessage + s))
+      .merge(displayBodyResult(failures, comparison.bodyMismatches, interactionMessage + s))
   }
 
   fun displayStatusResult(
     failures: MutableMap<String, Any>,
     status: Int,
-    comparison: Any?,
+    mismatch: StatusMismatch?,
     comparisonDescription: String
   ): TestResult {
-    return if (comparison == null) {
+    return if (mismatch == null) {
       reporters.forEach { it.statusComparisonOk(status) }
       TestResult.Ok
     } else {
-      reporters.forEach { it.statusComparisonFailed(status, comparison) }
-      failures["$comparisonDescription has status code $status"] = comparison
-      TestResult.Failed(listOf(comparison.toString()))
+      reporters.forEach { it.statusComparisonFailed(status, mismatch.description()) }
+      failures["$comparisonDescription has statusResult code $status"] = mismatch.description()
+      TestResult.Failed(listOf(mismatch))
     }
   }
 
   fun displayHeadersResult(
     failures: MutableMap<String, Any>,
     expected: Map<String, List<String>>,
-    comparison: Map<String, Any?>,
+    headers: Map<String, List<HeaderMismatch>>,
     comparisonDescription: String
   ): TestResult {
-    return if (comparison.isEmpty()) {
+    return if (headers.isEmpty()) {
       TestResult.Ok
     } else {
       reporters.forEach { it.includesHeaders() }
       var result: TestResult = TestResult.Ok
-      comparison.forEach { (key, headerComparison) ->
+      headers.forEach { (key, headerComparison) ->
         val expectedHeaderValue = expected[key]
-        if (headerComparison == null) {
+        if (headerComparison.isEmpty()) {
           reporters.forEach { it.headerComparisonOk(key, expectedHeaderValue!!) }
         } else {
           reporters.forEach { it.headerComparisonFailed(key, expectedHeaderValue!!, headerComparison) }
           failures["$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""] =
-            headerComparison
-          result = result.merge(TestResult.Failed(listOf(headerComparison)))
+            headerComparison.joinToString(", ") { it.description() }
+          result = result.merge(TestResult.Failed(headerComparison))
         }
       }
       result

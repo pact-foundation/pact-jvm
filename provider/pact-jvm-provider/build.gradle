@@ -14,6 +14,7 @@ dependencies {
     implementation 'org.scala-lang:scala-library:2.12.8'
     implementation 'io.github.classgraph:classgraph:4.8.25'
     implementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
+    api 'io.arrow-kt:arrow-core:0.8.2'
 
     testCompile project(":consumer:pact-jvm-consumer-groovy")
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"

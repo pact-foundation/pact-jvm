@@ -18,3 +18,7 @@ dependencies {
     testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
     testCompile 'net.bytebuddy:byte-buddy:1.9.12'
 }
+
+test {
+    systemProperty 'pact.showStacktrace', 'true'
+}

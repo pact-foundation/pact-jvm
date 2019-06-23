@@ -595,12 +595,10 @@ class ProviderClientSpec extends Specification {
     def result = client.handleResponse(response)
 
     then:
-    result == [
-      statusCode: 200,
-      headers: [
-        Server: ['Apigee-Edge'],
-        'Set-Cookie': ['JSESSIONID=alphabeta120394049; HttpOnly', 'AWSELBID=baaadbeef6767676767690220; Path=/alpha']
-      ]
+    result.statusCode == 200
+    result.headers == [
+      Server: ['Apigee-Edge'],
+      'Set-Cookie': ['JSESSIONID=alphabeta120394049; HttpOnly', 'AWSELBID=baaadbeef6767676767690220; Path=/alpha']
     ]
   }
 

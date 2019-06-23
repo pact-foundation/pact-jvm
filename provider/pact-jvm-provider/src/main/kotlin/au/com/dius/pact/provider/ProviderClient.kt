@@ -349,7 +349,8 @@ open class ProviderClient(
 
   fun handleResponse(httpResponse: HttpResponse): Map<String, Any> {
     logger.debug { "Received response: ${httpResponse.statusLine}" }
-    val response = mutableMapOf<String, Any>("statusCode" to httpResponse.statusLine.statusCode)
+    val response = mutableMapOf<String, Any>("statusCode" to httpResponse.statusLine.statusCode,
+      "contentType" to ContentType.TEXT_PLAIN)
 
     response["headers"] = httpResponse.allHeaders.groupBy({ header -> header.name }, { header -> header.value })
 
