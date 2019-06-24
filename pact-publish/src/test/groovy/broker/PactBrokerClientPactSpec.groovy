@@ -292,11 +292,12 @@ class PactBrokerClientPactSpec extends Specification {
           interactionId string()
           success false
           description string('Request to provider method failed with an exception')
+          exception {
+            message string('Boom!')
+            exceptionClass string('java.io.IOException')
+          }
           mismatches eachLike {
-            exception {
-              message string('Boom!')
-              exceptionClass string('java.io.IOException')
-            }
+            description string('Expected status code of 400 but got 500')
           }
         }
       }
@@ -306,6 +307,10 @@ class PactBrokerClientPactSpec extends Specification {
       [
         message: 'Request to provider method failed with an exception',
         exception: new IOException('Boom!'),
+        interactionId: '12345678'
+      ],
+      [
+        description: 'Expected status code of 400 but got 500',
         interactionId: '12345678'
       ]
     ], 'Request to provider method failed with an exception')

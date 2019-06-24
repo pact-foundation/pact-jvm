@@ -464,10 +464,7 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
           reporters.forEach { it.headerComparisonFailed(key, expectedHeaderValue!!, headerComparison) }
           failures["$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""] =
             headerComparison
-          val comparisonResult = when (headerComparison) {
-            is Map<*, *> -> headerComparison.plus("interactionId" to interactionId)
-            else -> headerComparison
-          }
+          val comparisonResult = (headerComparison as Map<String, Any?>).plus("interactionId" to interactionId)
           result = result.merge(TestResult.Failed(listOf(comparisonResult)))
         }
       }
