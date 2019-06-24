@@ -15,6 +15,7 @@ class RequestResponseInteraction implements Interaction {
   List<ProviderState> providerStates = []
   Request request
   Response response
+  String interactionId
 
   @Override
   String toString() {

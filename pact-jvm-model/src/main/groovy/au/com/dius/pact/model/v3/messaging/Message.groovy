@@ -30,6 +30,7 @@ class Message implements Interaction {
   MatchingRules matchingRules = new MatchingRulesImpl()
   Generators generators = new Generators()
   Map<String, String> metaData = [:]
+  String interactionId
 
   byte[] contentsAsBytes() {
     contents.orEmpty()
@@ -99,6 +100,7 @@ class Message implements Interaction {
     message.matchingRules = MatchingRulesImpl.fromMap(map.matchingRules)
     message.generators = Generators.fromMap(map.generators)
     message.metaData = map.metaData ?: [:]
+    message.interactionId = map['_id']
     message
   }
 

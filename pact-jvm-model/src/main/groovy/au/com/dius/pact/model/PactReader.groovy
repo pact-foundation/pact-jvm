@@ -64,7 +64,7 @@ class PactReader {
           } else if (i.providerState) {
             providerStates << new ProviderState(i.providerState)
           }
-          new RequestResponseInteraction(i.description, providerStates, request, response)
+          new RequestResponseInteraction(i.description, providerStates, request, response, i['_id'])
         }
 
         def pact = new RequestResponsePact(provider, consumer, interactions)
@@ -83,7 +83,7 @@ class PactReader {
       def request = extractRequest(i.request ?: [:])
       def response = extractResponse(i.response ?: [:])
       new RequestResponseInteraction(i.description, i.providerState ? [ new ProviderState(i.providerState) ] : [],
-        request, response)
+        request, response, i['_id'])
     }
 
     def pact = new RequestResponsePact(provider, consumer, interactions)

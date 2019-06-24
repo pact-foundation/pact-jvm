@@ -290,4 +290,42 @@ class PactReaderSpec extends Specification {
     pact.source instanceof UrlPactSource
   }
 
+  def 'when loading a pact with V2 version from the broker, it preserves the interaction ids'() {
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('v2-pact-broker.json')
+
+
+    when:
+    def pact = PactReader.loadPact(pactUrl)
+
+    then:
+    pact instanceof RequestResponsePact
+    pact.interactions.every { it.interactionId ==~ /^[a-zA-Z0-9]+$/  }
+  }
+
+  def 'when loading a pact with V3 version from the broker, it preserves the interaction ids'() {
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('v3-pact-broker.json')
+
+    when:
+    def pact = PactReader.loadPact(pactUrl)
+
+    then:
+    pact instanceof RequestResponsePact
+    pact.interactions.every { it.interactionId ==~ /^[a-zA-Z0-9]+$/  }
+  }
+
+  def 'when loading a message pact from the broker, it preserves the interaction ids'() {
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('message-pact-broker.json')
+
+
+    when:
+    def pact = PactReader.loadPact(pactUrl)
+
+    then:
+    pact instanceof MessagePact
+    pact.interactions.every { it.interactionId ==~ /^[a-zA-Z0-9]+$/  }
+  }
+
 }
