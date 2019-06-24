@@ -16,6 +16,7 @@ import static au.com.dius.pact.model.PactReaderKt.newHttpClient
  * Class to load a Pact from a JSON source using a version strategy
  */
 @Slf4j
+@SuppressWarnings('DuplicateStringLiteral')
 class PactReader {
 
   private static final String CLASSPATH_URI_START = 'classpath:'

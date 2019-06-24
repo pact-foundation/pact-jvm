@@ -30,7 +30,7 @@ class PactVerificationContextSpec extends Specification {
     }
     String consumerName = 'Test'
     Interaction interaction = new RequestResponseInteraction('Test Interaction', [], new Request(),
-      new Response())
+      new Response(), '12345')
     TestResult testResult = TestResult.Ok.INSTANCE
 
     def context = new PactVerificationContext(store, extContext, target, verifier, valueResolver,
@@ -45,6 +45,7 @@ class PactVerificationContextSpec extends Specification {
     context.testExecutionResult.results.size() == 1
     context.testExecutionResult.results[0].message == 'Request to provider failed with an exception'
     context.testExecutionResult.results[0].exception.cause instanceof IOException
+    context.testExecutionResult.results[0].interactionId == '12345'
   }
 
 }

@@ -554,6 +554,7 @@ class ProviderVerifierSpec extends Specification {
     def failures = [:]
     Interaction interaction = new RequestResponseInteraction('Test Interaction',
       [new ProviderState('Test State')])
+    interaction.interactionId = '1234'
 
     when:
     def result = verifier.verifyInteraction(provider, consumer, failures, interaction)
@@ -563,6 +564,7 @@ class ProviderVerifierSpec extends Specification {
     result.results.size() == 1
     result.results[0].message == 'State change request failed'
     result.results[0].exception instanceof IOException
+    result.results[0].interactionId == '1234'
   }
 
   def 'verifyResponseFromProvider returns an error result if the request to the provider fails with an exception'() {
@@ -570,7 +572,7 @@ class ProviderVerifierSpec extends Specification {
     ProviderInfo provider = new ProviderInfo('Test Provider')
     def failures = [:]
     Interaction interaction = new RequestResponseInteraction('Test Interaction',
-      [new ProviderState('Test State')], new Request(), new Response())
+      [new ProviderState('Test State')], new Request(), new Response(), '12345678')
     def client = Mock(ProviderClient)
 
     when:
@@ -582,6 +584,7 @@ class ProviderVerifierSpec extends Specification {
     result.results.size() == 1
     result.results[0].message == 'Request to provider failed with an exception'
     result.results[0].exception instanceof IOException
+    result.results[0].interactionId == '12345678'
   }
 
   def 'verifyResponseByInvokingProviderMethods returns an error result if the method fails with an exception'() {
@@ -589,6 +592,7 @@ class ProviderVerifierSpec extends Specification {
     ProviderInfo provider = new ProviderInfo('Test Provider')
     def failures = [:]
     Interaction interaction = new Message('verifyResponseByInvokingProviderMethods Test Message', [])
+    interaction.interactionId = 'abc123'
     IConsumerInfo consumer = Stub()
     def interactionMessage = 'Test'
 
@@ -601,5 +605,6 @@ class ProviderVerifierSpec extends Specification {
     result.results.size() == 1
     result.results[0].message == 'Request to provider method failed with an exception'
     result.results[0].exception instanceof Exception
+    result.results[0].interactionId == 'abc123'
   }
 }

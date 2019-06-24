@@ -15,9 +15,12 @@ class TestResultSpec extends Specification {
 
     result1                         | result2                                  | result3
     TestResult.Ok.INSTANCE          | TestResult.Ok.INSTANCE                   | TestResult.Ok.INSTANCE
-    TestResult.Ok.INSTANCE          | new TestResult.Failed(['Bang'])          | new TestResult.Failed(['Bang'])
-    new TestResult.Failed(['Bang']) | TestResult.Ok.INSTANCE                   | new TestResult.Failed(['Bang'])
-    new TestResult.Failed(['Bang']) | new TestResult.Failed(['Boom', 'Splat']) | new TestResult.Failed(['Bang', 'Boom', 'Splat'])
+    TestResult.Ok.INSTANCE          | new TestResult.Failed(['Bang'], '')          | new TestResult.Failed(['Bang'], '')
+    new TestResult.Failed(['Bang'], '') | TestResult.Ok.INSTANCE                   | new TestResult.Failed(['Bang'], '')
+    new TestResult.Failed(['Bang'], '') | new TestResult.Failed(['Boom', 'Splat'], '') | new TestResult.Failed(['Bang', 'Boom', 'Splat'], '')
+    new TestResult.Failed(['Bang'], 'A') | new TestResult.Failed(['Boom', 'Splat'], '') | new TestResult.Failed(['Bang', 'Boom', 'Splat'], 'A')
+    new TestResult.Failed(['Bang'], '') | new TestResult.Failed(['Boom', 'Splat'], 'B') | new TestResult.Failed(['Bang', 'Boom', 'Splat'], 'B')
+    new TestResult.Failed(['Bang'], 'A') | new TestResult.Failed(['Boom', 'Splat'], 'B') | new TestResult.Failed(['Bang', 'Boom', 'Splat'], 'A, B')
   }
 
 }

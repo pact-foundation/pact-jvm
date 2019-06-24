@@ -152,6 +152,17 @@ interface IProviderVerifier {
   ): TestResult
 
   /**
+   * Compares the expected and actual responses
+   */
+  fun verifyRequestResponsePact(
+    expectedResponse: Response,
+    actualResponse: Map<String, Any>,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    interactionId: String
+  ): TestResult
+
+  /**
    * If publishing of verification results has been disabled
    */
   fun publishingResultsDisabled(): Boolean
@@ -238,7 +249,8 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
           var result: TestResult = TestResult.Ok
           providerMethods.forEach {
             val actualResponse = invokeProviderMethod(it, null) as Map<String, Any>
-            result = result.merge(this.verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures))
+            result = result.merge(this.verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage,
+              failures, interaction.interactionId.orEmpty()))
           }
           result
         }
@@ -247,18 +259,24 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
       failures[interactionMessage] = e
       reporters.forEach { it.verificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)) }
       return TestResult.Failed(listOf(mapOf("message" to "Request to provider method failed with an exception",
-        "exception" to e)))
+        "exception" to e, "interactionId" to interaction.interactionId)),
+        "Request to provider method failed with an exception")
     }
   }
 
-  fun displayBodyResult(failures: MutableMap<String, Any>, comparison: Map<String, Any?>, comparisonDescription: String): TestResult {
+  fun displayBodyResult(
+    failures: MutableMap<String, Any>,
+    comparison: Map<String, Any?>,
+    comparisonDescription: String,
+    interactionId: String
+  ): TestResult {
     return if (comparison.isEmpty()) {
       reporters.forEach { it.bodyComparisonOk() }
       TestResult.Ok
     } else {
       reporters.forEach { it.bodyComparisonFailed(comparison) }
       failures["$comparisonDescription has a matching body"] = comparison
-      TestResult.Failed(listOf(comparison))
+      TestResult.Failed(listOf(comparison.plus("interactionId" to interactionId)), "Body had differences")
     }
   }
 
@@ -288,9 +306,10 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
       }
       val comparison = ResponseComparison.compareMessage(message, actualMessage, messageMetadata)
       val s = " generates a message which"
-      result = result.merge(displayBodyResult(failures, comparison["body"] as Map<String, Any?>, interactionMessage + s))
+      result = result.merge(displayBodyResult(failures, comparison["body"] as Map<String, Any?>,
+        interactionMessage + s, message.interactionId.orEmpty()))
         .merge(displayMetadataResult(messageMetadata ?: emptyMap(), failures, comparison["metadata"] as Map<String, Any?>,
-          interactionMessage + s))
+          interactionMessage + s, message.interactionId.orEmpty()))
     }
     return result
   }
@@ -299,14 +318,15 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     expectedMetadata: Map<String, Any>,
     failures: MutableMap<String, Any>,
     comparison: Map<String, Any?>,
-    comparisonDescription: String
+    comparisonDescription: String,
+    interactionId: String
   ): TestResult {
     return if (comparison.isEmpty()) {
       reporters.forEach { it.metadataComparisonOk() }
       TestResult.Ok
     } else {
       reporters.forEach { it.includesMetadata() }
-      var result: TestResult = TestResult.Ok
+      var result: TestResult = TestResult.Failed(emptyList(), "Metadata had differences")
       comparison.forEach { (key, metadataComparison) ->
         val expectedValue = expectedMetadata[key]
         if (metadataComparison == null) {
@@ -315,7 +335,8 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
           reporters.forEach { it.metadataComparisonFailed(key, expectedValue, metadataComparison) }
           failures["$comparisonDescription includes metadata \"$key\" with value \"$expectedValue\""] =
             metadataComparison
-          result = result.merge(TestResult.Failed(listOf(key to metadataComparison)))
+          result = result.merge(TestResult.Failed(listOf(mapOf(key to metadataComparison,
+            "interactionId" to interactionId))))
         }
       }
       result
@@ -367,7 +388,8 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
       return result
     } else {
       return TestResult.Failed(listOf(mapOf("message" to "State change request failed",
-        "exception" to stateChangeResult.stateChangeResult.getError())))
+        "exception" to stateChangeResult.stateChangeResult.getError(),
+        "interactionId" to interaction.interactionId)), "State change request failed")
     }
   }
 
@@ -380,6 +402,14 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     actualResponse: Map<String, Any>,
     interactionMessage: String,
     failures: MutableMap<String, Any>
+  ) = verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures, "")
+
+  override fun verifyRequestResponsePact(
+    expectedResponse: Response,
+    actualResponse: Map<String, Any>,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>,
+    interactionId: String
   ): TestResult {
     val comparison = ResponseComparison.compareResponse(expectedResponse, actualResponse,
       actualResponse["statusCode"] as Int, actualResponse["headers"] as Map<String, List<String>>,
@@ -388,16 +418,20 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     reporters.forEach { it.returnsAResponseWhich() }
 
     val s = " returns a response which"
-    return displayStatusResult(failures, expectedResponse.status, comparison["method"], interactionMessage + s)
-      .merge(displayHeadersResult(failures, expectedResponse.headers ?: mapOf(), comparison["headers"] as Map<String, Any?>, interactionMessage + s))
-      .merge(displayBodyResult(failures, comparison["body"] as Map<String, Any?>, interactionMessage + s))
+    return displayStatusResult(failures, expectedResponse.status, comparison["method"],
+      interactionMessage + s, interactionId)
+      .merge(displayHeadersResult(failures, expectedResponse.headers ?: mapOf(), comparison["headers"] as Map<String, Any?>,
+        interactionMessage + s, interactionId))
+      .merge(displayBodyResult(failures, comparison["body"] as Map<String, Any?>,
+        interactionMessage + s, interactionId))
   }
 
   fun displayStatusResult(
     failures: MutableMap<String, Any>,
     status: Int,
     comparison: Any?,
-    comparisonDescription: String
+    comparisonDescription: String,
+    interactionId: String
   ): TestResult {
     return if (comparison == null) {
       reporters.forEach { it.statusComparisonOk(status) }
@@ -405,7 +439,8 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     } else {
       reporters.forEach { it.statusComparisonFailed(status, comparison) }
       failures["$comparisonDescription has status code $status"] = comparison
-      TestResult.Failed(listOf(comparison.toString()))
+      TestResult.Failed(listOf(mapOf("description" to comparison.toString(), "interactionId" to interactionId)),
+        "Response status did not match")
     }
   }
 
@@ -413,13 +448,14 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     failures: MutableMap<String, Any>,
     expected: Map<String, List<String>>,
     comparison: Map<String, Any?>,
-    comparisonDescription: String
+    comparisonDescription: String,
+    interactionId: String
   ): TestResult {
     return if (comparison.isEmpty()) {
       TestResult.Ok
     } else {
       reporters.forEach { it.includesHeaders() }
-      var result: TestResult = TestResult.Ok
+      var result: TestResult = TestResult.Failed(emptyList(), "Headers had differences")
       comparison.forEach { (key, headerComparison) ->
         val expectedHeaderValue = expected[key]
         if (headerComparison == null) {
@@ -428,7 +464,11 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
           reporters.forEach { it.headerComparisonFailed(key, expectedHeaderValue!!, headerComparison) }
           failures["$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""] =
             headerComparison
-          result = result.merge(TestResult.Failed(listOf(headerComparison)))
+          val comparisonResult = when (headerComparison) {
+            is Map<*, *> -> headerComparison.plus("interactionId" to interactionId)
+            else -> headerComparison
+          }
+          result = result.merge(TestResult.Failed(listOf(comparisonResult)))
         }
       }
       result
@@ -455,14 +495,16 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
       val expectedResponse = interaction.response.generatedResponse(context)
       val actualResponse = client.makeRequest(interaction.request.generatedRequest(context))
 
-      verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
+      verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures,
+        interaction.interactionId.orEmpty())
     } catch (e: Exception) {
       failures[interactionMessage] = e
       reporters.forEach {
         it.requestFailed(provider, interaction, interactionMessage, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE))
       }
       TestResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
-        "exception" to e)))
+        "exception" to e, "interactionId" to interaction.interactionId)),
+        "Request to provider method failed with an exception")
     }
   }
 

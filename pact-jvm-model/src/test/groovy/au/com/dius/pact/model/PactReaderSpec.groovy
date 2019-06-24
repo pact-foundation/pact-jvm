@@ -294,7 +294,6 @@ class PactReaderSpec extends Specification {
     given:
     def pactUrl = PactReaderSpec.classLoader.getResource('v2-pact-broker.json')
 
-
     when:
     def pact = PactReader.loadPact(pactUrl)
 
@@ -318,7 +317,6 @@ class PactReaderSpec extends Specification {
   def 'when loading a message pact from the broker, it preserves the interaction ids'() {
     given:
     def pactUrl = PactReaderSpec.classLoader.getResource('message-pact-broker.json')
-
 
     when:
     def pact = PactReader.loadPact(pactUrl)

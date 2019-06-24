@@ -42,8 +42,7 @@ class ResponseComparison(
     var headerResult = mutableMapOf<String, String?>()
 
     if (expected.headers != null) {
-      val headerMismatchers = mismatches.filter { it is HeaderMismatch }
-        .map { it as HeaderMismatch }
+      val headerMismatchers = mismatches.filterIsInstance<HeaderMismatch>()
         .groupBy { it.headerKey }
       if (headerMismatchers.isEmpty()) {
           headerResult = expected.headers.orEmpty().mapValues { null }.toMutableMap()
@@ -70,8 +69,7 @@ class ResponseComparison(
           "type was '${bodyTypeMismatch.actual()}'"
     } else if (mismatches.any { it is BodyMismatch }) {
       result["comparison"] = mismatches
-        .filter { it is BodyMismatch }
-        .map { it as BodyMismatch }
+        .filterIsInstance<BodyMismatch>()
         .groupBy { bm -> bm.path }
         .entries
         .associate { (path, m) ->

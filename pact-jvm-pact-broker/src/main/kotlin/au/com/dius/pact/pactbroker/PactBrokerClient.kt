@@ -5,7 +5,6 @@ import au.com.dius.pact.com.github.michaelbull.result.Result
 import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.toJson
-import org.apache.commons.lang3.exception.ExceptionUtils
 import java.net.URLDecoder
 import java.util.function.Consumer
 
@@ -24,12 +23,16 @@ sealed class TestResult {
     }
   }
 
-  data class Failed(var results: List<Any> = emptyList()): TestResult() {
+  data class Failed(val results: List<Any> = emptyList(), val description: String = ""): TestResult() {
     override fun toBoolean() = false
 
     override fun merge(result: TestResult) = when (result) {
       is Ok -> this
-      is Failed -> Failed(results + result.results)
+      is Failed -> Failed(results + result.results, when {
+        description.isNotEmpty() && result.description.isNotEmpty() -> "$description, ${result.description}"
+        description.isNotEmpty() -> description
+        else -> result.description
+      })
     }
   }
 
@@ -77,21 +80,21 @@ abstract class PactBrokerClientBase(val pactBrokerUrl: String, val options: Map<
       }
 
       if (result is TestResult.Failed && result.results.isNotEmpty()) {
-        val failures = jsonArray(result.results.map {
-          when (it) {
-            is Map<*, *> -> {
-              if (it.containsKey("exception")) {
-                val exp = it["exception"] as Exception
-                jsonObject("description" to it["message"],
-                  "stacktrace" to jsonArray(ExceptionUtils.getStackFrames(exp).toList()))
-              } else {
-                it
-              }
-            }
-            else -> jsonObject("description" to it.toString(), "stacktrace" to jsonArray())
+        val values = (result.results as List<Map<String, Any>>)
+          .groupBy { it["interactionId"] }.map { mismatches ->
+            jsonObject("interactionId" to mismatches.key, "success" to false,
+              "description" to result.description,
+              "mismatches" to jsonArray(mismatches.value.map { mismatch ->
+                if (mismatch.containsKey("exception")) {
+                  val exp = mismatch["exception"] as Exception
+                  jsonObject("exception" to jsonObject("message" to exp.message,
+                      "exceptionClass" to exp.javaClass.name))
+                } else {
+                  jsonObject(mismatch.entries.map { it.toPair() })
+                }
+            }))
           }
-        })
-        jsonObject.add("testResults", failures)
+        jsonObject.add("testResults", jsonArray(values))
       }
 
       val lowercaseMap = publishLink.mapKeys { it.key.toLowerCase() }
