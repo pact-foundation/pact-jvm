@@ -16,14 +16,7 @@
             }
           ]
         },
-        "$.animals[0]": {
-          "matchers": [
-            {
-              "match": "type"
-            }
-          ]
-        },
-        "$.animals[1]": {
+        "$.animals.alligator": {
           "matchers": [
             {
               "match": "type"

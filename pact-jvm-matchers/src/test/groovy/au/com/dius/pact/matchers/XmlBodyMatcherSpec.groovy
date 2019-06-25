@@ -4,6 +4,7 @@ import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.model.matchingrules.RegexMatcher
+import spock.lang.Issue
 import spock.lang.Specification
 
 @SuppressWarnings(['LineLength', 'PrivateFieldCouldBeFinal'])
@@ -140,25 +141,26 @@ class XmlBodyMatcherSpec extends Specification {
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ['Expected <four/> but was missing', 'Expected a List with 4 elements but received 3 elements']
-    mismatches*.path.unique() == ['$.foo']
+    mismatches*.mismatch == ['Expected a List with 4 elements but received 3 elements',
+                             'Expected child <four/> but was missing']
+    mismatches*.path == ['$.foo', '$.foo']
   }
 
   def 'matching XML bodies - returns a mismatch - when comparing a list to one with with the same size but different children'() {
     given:
-    actualBody = OptionalBody.body('<foo><one/><two/><four/></foo>'.bytes)
-    expectedBody = OptionalBody.body('<foo><one/><two/><three/></foo>'.bytes)
+    actualBody = OptionalBody.body('<foo><one/><two/><three/><four/></foo>'.bytes)
+    expectedBody = OptionalBody.body('<foo><one/><two/><three/><three/></foo>'.bytes)
 
     when:
     def mismatches = matcher.matchBody(expected(), actual(), false)
 
     then:
     !mismatches.empty
-    mismatches*.mismatch == ['Expected element three but received four']
-    mismatches*.path.unique() == ['$.foo.2.three']
+    mismatches*.mismatch == ['Expected child <three/> but was missing']
+    mismatches*.path == ['$.foo.three.1']
   }
 
-  def 'matching XML bodies - returns a mismatch - when comparing a list to one where the items are in the wrong order'() {
+  def 'matching XML bodies - returns no mismatch - when comparing a list to one where the items are in the wrong order'() {
     given:
     actualBody = OptionalBody.body('<foo><one/><three/><two/></foo>'.bytes)
     expectedBody = OptionalBody.body('<foo><one/><two/><three/></foo>'.bytes)
@@ -167,8 +169,7 @@ class XmlBodyMatcherSpec extends Specification {
     def mismatches = matcher.matchBody(expected(), actual(), false)
 
     then:
-    !mismatches.empty
-    mismatches*.mismatch == ['Expected element two but received three', 'Expected element three but received two']
+    mismatches.empty
   }
 
   def 'matching XML bodies - returns a mismatch - when comparing a tags attributes to one with less entries'() {
@@ -262,6 +263,19 @@ class XmlBodyMatcherSpec extends Specification {
 
     expect:
     matcher.matchBody(expected(), actual(), false).empty
+  }
+
+  @Issue('#899')
+  def 'matching XML bodies - with unexpected elements'() {
+    given:
+    actualBody = OptionalBody.body(('<note> <to>John</to> <from>Jane</from> <subject>Reminder</subject> ' +
+      '<address> <firstName>John</firstName> <lastName>Doe</lastName> <street>Prince Street</street> ' +
+      '<number>34</number> <city>Manchester</city>\t</address> </note>').bytes)
+    expectedBody = OptionalBody.body(('<note> <to>John</to> <from>Jane</from> <subject>Reminder</subject> ' +
+      '<address> <city>Manchester</city>\t</address> </note>').bytes)
+
+    expect:
+    matcher.matchBody(expected(), actual(), true).empty
   }
 
 }

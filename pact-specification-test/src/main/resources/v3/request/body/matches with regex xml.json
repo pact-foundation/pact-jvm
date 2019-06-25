@@ -16,15 +16,7 @@
             }
           ]
         },
-        "$.alligator[0].favouriteColours[0].favouriteColour": {
-          "matchers": [
-            {
-              "match": "regex",
-              "regex": "red|blue"
-            }
-          ]
-        },
-        "$.alligator[0].favouriteColours[1].favouriteColour": {
+        "$.alligator.favouriteColours.favouriteColour": {
           "matchers": [
             {
               "match": "regex",

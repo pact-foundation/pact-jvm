@@ -1,5 +1,5 @@
 {
-  "match": false,
+  "match": true,
   "comment": "XML Favourite colours in wrong order",
   "expected" : {
     "headers": {"Content-Type": "application/xml"},

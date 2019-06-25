@@ -8,8 +8,7 @@
     "headers": {"Content-Type": "application/xml"},
     "matchingRules": {
       "$.body.animals": {"min": 1, "match": "type"},
-      "$.body.animals[0]": {"match": "type"},
-      "$.body.animals[1]": {"match": "type"}
+      "$.body.animals.alligator": {"match": "type"}
     },
     "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><animals><alligator name=\"Fred\"/></animals>"
   },

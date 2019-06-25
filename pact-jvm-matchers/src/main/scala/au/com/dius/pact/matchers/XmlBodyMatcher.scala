@@ -87,23 +87,33 @@ class XmlBodyMatcher extends BodyMatcher with StrictLogging {
     } else if (expected.child.isEmpty && actual.child.nonEmpty && !allowUnexpectedKeys) {
         List(new BodyMismatch(expected, actual, s"Expected an empty List but received ${actual.child.mkString(",")}", mkPathString(path)))
     } else if (expected.child.size != actual.child.size) {
-        val missingChilds = expected.child.diff(actual.child)
-        val result = missingChilds.map(child => new BodyMismatch(expected, actual, s"Expected $child but was missing", mkPathString(path)))
-        if (allowUnexpectedKeys && expected.child.size > actual.child.size) {
-          result.toList :+ new BodyMismatch(expected, actual,
-            s"Expected a List with atleast ${expected.child.size} elements but received ${actual.child.size} elements", mkPathString(path))
-        } else if (!allowUnexpectedKeys && expected.child.size != actual.child.size) {
-          result.toList :+ new BodyMismatch(expected, actual,
-            s"Expected a List with ${expected.child.size} elements but received ${actual.child.size} elements", mkPathString(path))
-        } else {
-          result.toList
-        }
+      if (allowUnexpectedKeys && expected.child.size > actual.child.size) {
+        List(new BodyMismatch(expected, actual,
+          s"Expected a List with at least ${expected.child.size} elements but received ${actual.child.size} elements", mkPathString(path)))
+      } else if (!allowUnexpectedKeys && expected.child.size != actual.child.size) {
+        List(new BodyMismatch(expected, actual,
+          s"Expected a List with ${expected.child.size} elements but received ${actual.child.size} elements", mkPathString(path)))
+      } else List()
     } else List()
 
+    val actualChildrenByTag = actualChildren.groupBy(_.label)
     mismatches ++: expectedChildren
-        .zipWithIndex
-        .zip(actualChildren)
-        .flatMap(x => compareNode(appendIndex(path, x._1._2), x._1._1, x._2, allowUnexpectedKeys, matchers)).toList
+      .groupBy(_.label)
+      .flatMap(e => {
+        if (actualChildrenByTag.contains(e._1)) {
+          e._2.map(Some(_)).zipAll(actualChildrenByTag(e._1).map(Some(_)), None, None).zipWithIndex.flatMap(comp =>
+            comp._1 match {
+              case (None, _) => List()
+              case (Some(child), None) => List(new BodyMismatch(expected, actual,
+                s"Expected child $child but was missing", mkPathString(appendIndex(path :+ child.label, comp._2))))
+              case (Some(expChild), Some(actChild)) => compareNode(path, expChild, actChild, allowUnexpectedKeys, matchers)
+            }
+          )
+        } else {
+          List(new BodyMismatch(expected, actual,
+            s"Expected child <${e._1}/> but was missing", mkPathString(path)))
+        }
+      }).toList
   }
 
   private def compareAttributes(path: Seq[String], expected: Node, actual: Node, allowUnexpectedKeys: Boolean,
