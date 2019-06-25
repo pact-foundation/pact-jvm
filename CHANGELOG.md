@@ -1,5 +1,16 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.6.10 - Publish failed test results
+
+* ef027f6f - feat: compare XML child elements by tag and not index #899 (Ronald Holshausen, Tue Jun 25 17:42:59 2019 +1000)
+* 06a736a2 - feat: correctly format message response failed verification results (Ronald Holshausen, Tue Jun 25 14:47:11 2019 +1000)
+* f7ac13f3 - feat: correctly format HTTP response failed verification results (Ronald Holshausen, Tue Jun 25 13:10:24 2019 +1000)
+* d7d12f1c - feat: correctly format failed verification results with an exception (Ronald Holshausen, Mon Jun 24 16:56:45 2019 +1000)
+* 0b94d239 - chore: copied the JSON support utility from v4.0.x (Ronald Holshausen, Mon Jun 24 15:34:22 2019 +1000)
+* a238dd37 - feat: merge the failed verification results into the correct format (Ronald Holshausen, Mon Jun 24 15:29:52 2019 +1000)
+* 28b92ae7 - feat: preserve the interaction ids from the broker (Ronald Holshausen, Mon Jun 24 13:08:52 2019 +1000)
+* f3fa0d10 - bump version to 3.6.10 (Ronald Holshausen, Thu Jun 20 15:40:49 2019 +1000)
+
 # 3.6.9 - Bugfix Release
 
 * 2c111f09 - fix: deprecation warning #894 (Ronald Holshausen, Thu Jun 20 14:42:02 2019 +1000)
