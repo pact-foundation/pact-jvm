@@ -7,6 +7,7 @@ import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.set
 import com.github.salomonbrys.kotson.toJson
 import com.google.gson.JsonObject
+import mu.KLogging
 import java.net.URLDecoder
 import java.util.function.Consumer
 
@@ -101,12 +102,44 @@ abstract class PactBrokerClientBase(val pactBrokerUrl: String, val options: Map<
       val values = result.results
         .groupBy { it["interactionId"] }
         .map { mismatches ->
+          val values = mismatches.value
+            .filter { !it.containsKey("exception") }
+            .flatMap { mismatch ->
+              when (mismatch["type"]) {
+                "body" -> {
+                  when (val bodyMismatches = mismatch["comparison"]) {
+                    is Map<*, *> -> bodyMismatches.entries.filter { it.key != "diff" }.flatMap { entry ->
+                      val values = entry.value as List<Map<String, Any>>
+                      values.map {
+                        jsonObject("attribute" to "body", "identifier" to entry.key, "description" to it["mismatch"],
+                          "diff" to it["diff"])
+                      }
+                    }
+                    else -> listOf(jsonObject("attribute" to "body", "description" to bodyMismatches.toString()))
+                  }
+                }
+                "status" -> listOf(jsonObject("attribute" to "status", "description" to mismatch["description"]))
+                "header" -> {
+                  listOf(jsonObject(mismatch.filter { it.key != "interactionId" }
+                  .map {
+                    if (it.key == "type") {
+                      "attribute" to it.value
+                    } else {
+                      it.toPair()
+                    }
+                  }))
+                }
+                else -> listOf(jsonObject(
+                  mismatch.filterNot { it.key == "interactionId" || it.key == "type" }.entries.map {
+                    it.toPair()
+                  }
+                ))
+              }
+            }
+          logger.debug { values }
           val interactionJson = jsonObject("interactionId" to mismatches.key, "success" to false,
             "description" to result.description,
-            "mismatches" to jsonArray(mismatches.value
-              .filter { !it.containsKey("exception") }
-              .map { mismatch -> jsonObject(mismatch.entries.filter{ it.key != "interactionId" }.map { it.toPair() }) }
-            )
+            "mismatches" to jsonArray(values)
           )
 
           val exceptionDetails = mismatches.value.find { it.containsKey("exception") }
@@ -144,7 +177,7 @@ abstract class PactBrokerClientBase(val pactBrokerUrl: String, val options: Map<
     }
   }
 
-  companion object {
+  companion object : KLogging() {
     const val LATEST_PROVIDER_PACTS_WITH_NO_TAG = "pb:latest-untagged-pact-version"
     const val PACTS = "pacts"
     const val UTF8 = "UTF-8"

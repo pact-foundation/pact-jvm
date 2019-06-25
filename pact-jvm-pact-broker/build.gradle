@@ -8,11 +8,12 @@ dependencies {
   compile "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
   compile "com.google.guava:guava:${project.guavaVersion}"
   compile 'org.dmfs:rfc3986-uri:0.8'
-
   compile('io.github.microutils:kotlin-logging:1.4.4') {
     exclude group: 'org.jetbrains.kotlin'
   }
   implementation 'org.slf4j:slf4j-api:1.7.26'
+
+  testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }
 
 compileGroovy {
