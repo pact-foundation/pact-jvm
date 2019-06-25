@@ -190,6 +190,7 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
   var projectGetProperty = Function<String, String?> { name -> System.getProperty(name) }
   var verificationReporter: VerificationReporter = DefaultVerificationReporter
   var stateChangeHandler: StateChange = DefaultStateChange
+  lateinit var configurationBuilder: ConfigurationBuilder
 
   /**
    * This will return true unless the pact.verifier.publishResults property has the value of "true"
@@ -207,19 +208,7 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     failures: MutableMap<String, Any>
   ): TestResult {
     try {
-      val urls = projectClasspath.get()
-      logger.debug { "projectClasspath = $urls" }
-
-      val configurationBuilder = if (urls.isEmpty()) {
-        ConfigurationBuilder().setScanners(MethodAnnotationsScanner())
-      } else {
-        val loader = URLClassLoader(urls.toTypedArray(), ProviderVerifierBase::class.java.classLoader)
-        ConfigurationBuilder()
-          .setScanners(MethodAnnotationsScanner())
-          .addClassLoader(loader)
-          .addUrls(urls)
-      }
-
+      val configurationBuilder = classFileScanner()
       val scan = ProviderUtils.packagesToScan(providerInfo, consumer)
       if (scan.isNotEmpty()) {
         val filterBuilder = FilterBuilder()
@@ -262,6 +251,27 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
         "exception" to e, "interactionId" to interaction.interactionId)),
         "Request to provider method failed with an exception")
     }
+  }
+
+  @Synchronized
+  private fun classFileScanner(): ConfigurationBuilder {
+    if (!this::configurationBuilder.isInitialized) {
+      val urls = projectClasspath.get()
+      logger.debug { "projectClasspath = $urls" }
+
+      configurationBuilder = if (urls.isEmpty()) {
+        ConfigurationBuilder().setScanners(MethodAnnotationsScanner())
+          .filterInputsBy(FilterBuilder().include("^.*\\.class$"))
+      } else {
+        val loader = URLClassLoader(urls.toTypedArray(), ProviderVerifierBase::class.java.classLoader)
+        ConfigurationBuilder()
+          .setScanners(MethodAnnotationsScanner())
+          .addClassLoader(loader)
+          .addUrls(urls)
+          .filterInputsBy(FilterBuilder().include("^.*\\.class$"))
+      }
+    }
+    return configurationBuilder
   }
 
   fun displayBodyResult(

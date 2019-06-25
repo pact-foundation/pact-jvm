@@ -32,7 +32,8 @@ sealed class TestResult {
     override fun merge(result: TestResult) = when (result) {
       is Ok -> this
       is Failed -> Failed(results + result.results, when {
-        description.isNotEmpty() && result.description.isNotEmpty() -> "$description, ${result.description}"
+        description.isNotEmpty() && result.description.isNotEmpty() && description != result.description ->
+          "$description, ${result.description}"
         description.isNotEmpty() -> description
         else -> result.description
       })
@@ -98,6 +99,7 @@ abstract class PactBrokerClientBase(val pactBrokerUrl: String, val options: Map<
       jsonObject.add("buildUrl", buildUrl.toJson())
     }
 
+    logger.debug { "Test result = $result" }
     if (result is TestResult.Failed && result.results.isNotEmpty()) {
       val values = result.results
         .groupBy { it["interactionId"] }
@@ -129,6 +131,15 @@ abstract class PactBrokerClientBase(val pactBrokerUrl: String, val options: Map<
                     }
                   }))
                 }
+                "metadata" -> {
+                  listOf(jsonObject(mismatch.filter { it.key != "interactionId" }
+                    .flatMap {
+                      when {
+                        it.key == "type" -> listOf("attribute" to it.value)
+                        else -> listOf("identifier" to it.key, "description" to it.value)
+                      }
+                    }))
+                }
                 else -> listOf(jsonObject(
                   mismatch.filterNot { it.key == "interactionId" || it.key == "type" }.entries.map {
                     it.toPair()
@@ -136,7 +147,6 @@ abstract class PactBrokerClientBase(val pactBrokerUrl: String, val options: Map<
                 ))
               }
             }
-          logger.debug { values }
           val interactionJson = jsonObject("interactionId" to mismatches.key, "success" to false,
             "description" to result.description,
             "mismatches" to jsonArray(values)

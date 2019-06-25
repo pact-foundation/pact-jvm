@@ -21,6 +21,7 @@ class TestResultSpec extends Specification {
     new TestResult.Failed(['Bang'], 'A') | new TestResult.Failed(['Boom', 'Splat'], '') | new TestResult.Failed(['Bang', 'Boom', 'Splat'], 'A')
     new TestResult.Failed(['Bang'], '') | new TestResult.Failed(['Boom', 'Splat'], 'B') | new TestResult.Failed(['Bang', 'Boom', 'Splat'], 'B')
     new TestResult.Failed(['Bang'], 'A') | new TestResult.Failed(['Boom', 'Splat'], 'B') | new TestResult.Failed(['Bang', 'Boom', 'Splat'], 'A, B')
+    new TestResult.Failed(['Bang'], 'A') | new TestResult.Failed(['Boom', 'Splat'], 'A') | new TestResult.Failed(['Bang', 'Boom', 'Splat'], 'A')
   }
 
 }
