@@ -60,7 +60,7 @@ trait UnitSpecsSupport extends Specification {
   }
 
   def buildInteraction(description: String, states: List[ProviderState], request: Request, response: Response): RequestResponseInteraction =
-    new RequestResponseInteraction(description, states.asJava, request, response)
+    new RequestResponseInteraction(description, states.asJava, request, response, null)
 
   def buildPactFragment(consumer: String, provider: String, interactions: List[RequestResponseInteraction]): RequestResponsePact =
     new RequestResponsePact(new Provider(provider), new Consumer(consumer), interactions.asJava)

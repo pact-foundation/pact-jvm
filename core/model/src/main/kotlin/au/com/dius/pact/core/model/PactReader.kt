@@ -4,10 +4,10 @@ import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.com.github.michaelbull.result.Result
 import au.com.dius.pact.core.model.messaging.MessagePact
-import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
+import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import au.com.dius.pact.core.support.HttpClient
 import au.com.dius.pact.core.support.Json
 import com.amazonaws.services.s3.AmazonS3
@@ -197,7 +197,8 @@ object PactReader : KLogging() {
         } else if (i.obj.has("providerState")) {
           providerStates.add(ProviderState(Json.toString(i["providerState"])))
         }
-        RequestResponseInteraction(Json.toString(i["description"]), providerStates, request, response)
+        RequestResponseInteraction(Json.toString(i["description"]), providerStates, request, response,
+          Json.toString(i.obj["_id"]))
       }
 
       return RequestResponsePact(provider, consumer, interactions.toMutableList(),
@@ -216,7 +217,7 @@ object PactReader : KLogging() {
       val response = extractResponse(i.obj["response"].obj)
       RequestResponseInteraction(Json.toString(i["description"]),
         if (i.obj.has("providerState")) listOf(ProviderState(Json.toString(i.obj["providerState"]))) else emptyList(),
-        request, response)
+        request, response, Json.toString(i.obj["_id"]))
     } else emptyList()
 
     return RequestResponsePact(provider, consumer, interactions.toMutableList(),

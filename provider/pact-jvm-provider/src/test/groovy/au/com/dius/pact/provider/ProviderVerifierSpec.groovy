@@ -14,6 +14,8 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.UrlSource
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
@@ -483,7 +485,7 @@ class ProviderVerifierSpec extends Specification {
     def providerInfo = new ProviderInfo(verificationType: PactVerification.ANNOTATED_METHOD)
     def consumerInfo = new ConsumerInfo()
 
-    def interaction = new RequestResponseInteraction('Test Interaction', new Request(), new Response())
+    def interaction = new RequestResponseInteraction('Test Interaction')
     def pact = new RequestResponsePact(new Provider(), new Consumer(), [interaction], [:],
       new BrokerUrlSource('url', 'url', [publish: [:]]))
 
@@ -553,7 +555,7 @@ class ProviderVerifierSpec extends Specification {
     ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
     def failures = [:]
     Interaction interaction = new RequestResponseInteraction('Test Interaction',
-      [new ProviderState('Test State')], new Request(), new Response())
+      [new ProviderState('Test State')], new Request(), new Response(), '1234')
 
     when:
     def result = verifier.verifyInteraction(provider, consumer, failures, interaction)
@@ -563,6 +565,7 @@ class ProviderVerifierSpec extends Specification {
     result.results.size() == 1
     result.results[0].message == 'State change request failed'
     result.results[0].exception instanceof IOException
+    result.results[0].interactionId == '1234'
   }
 
   def 'verifyResponseFromProvider returns an error result if the request to the provider fails with an exception'() {
@@ -570,7 +573,7 @@ class ProviderVerifierSpec extends Specification {
     ProviderInfo provider = new ProviderInfo('Test Provider')
     def failures = [:]
     Interaction interaction = new RequestResponseInteraction('Test Interaction',
-      [new ProviderState('Test State')], new Request(), new Response())
+      [new ProviderState('Test State')], new Request(), new Response(), '12345678')
     def client = Mock(ProviderClient)
 
     when:
@@ -582,13 +585,15 @@ class ProviderVerifierSpec extends Specification {
     result.results.size() == 1
     result.results[0].message == 'Request to provider failed with an exception'
     result.results[0].exception instanceof IOException
+    result.results[0].interactionId == '12345678'
   }
 
   def 'verifyResponseByInvokingProviderMethods returns an error result if the method fails with an exception'() {
     given:
     ProviderInfo provider = new ProviderInfo('Test Provider')
     def failures = [:]
-    Interaction interaction = new Message('verifyResponseByInvokingProviderMethods Test Message', [])
+    Interaction interaction = new Message('verifyResponseByInvokingProviderMethods Test Message', [],
+      OptionalBody.empty(), new MatchingRulesImpl(), new Generators(), [:], 'abc123')
     IConsumerInfo consumer = Stub()
     def interactionMessage = 'Test'
 
@@ -601,5 +606,6 @@ class ProviderVerifierSpec extends Specification {
     result.results.size() == 1
     result.results[0].message == 'Request to provider method failed with an exception'
     result.results[0].exception instanceof Exception
+    result.results[0].interactionId == 'abc123'
   }
 }

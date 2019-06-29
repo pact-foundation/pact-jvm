@@ -289,16 +289,31 @@ class PactBrokerClientPactSpec extends Specification {
         providerApplicationVersion '10.0.0'
         buildUrl 'http://localhost:8080/build'
         testResults eachLike {
+          interactionId string()
+          success false
           description string('Request to provider method failed with an exception')
-          stacktrace eachLike(string())
+          exception {
+            message string('Boom!')
+            exceptionClass string('java.io.IOException')
+          }
+          mismatches eachLike {
+            description string('Expected status code of 400 but got 500')
+          }
         }
       }
       willRespondWith(status: 201)
     }
     def failure = new TestResult.Failed([
-      [message: 'Request to provider method failed with an exception', exception: new IOException('Boom!')],
-      'expected status of 200 but was 400'
-    ])
+      [
+        message: 'Request to provider method failed with an exception',
+        exception: new IOException('Boom!'),
+        interactionId: '12345678'
+      ],
+      [
+        description: 'Expected status code of 400 but got 500',
+        interactionId: '12345678'
+      ]
+    ], 'Request to provider method failed with an exception')
 
     when:
     def result = pactBroker.runTest { server, context ->

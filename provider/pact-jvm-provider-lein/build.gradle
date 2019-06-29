@@ -26,9 +26,6 @@ compileClojure {
   dependsOn compileGroovy
   classpath = classpath.plus(files(compileGroovy.destinationDir))
   destinationDir = file("${project.buildDir}/classes/java/main")
-  doFirst {
-    println ">>> $destinationDir"
-  }
 }
 
 clojureTest {

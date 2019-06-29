@@ -14,8 +14,7 @@ class RequestResponseInteractionSpec extends Specification {
     generators = new Generators([(Category.HEADER): [a: new RandomStringGenerator(4)]])
     interaction = new RequestResponseInteraction('test interaction', [
       new ProviderState('state one'), new ProviderState('state two', [value: 'one', other: '2'])],
-      new Request(generators: generators), new Response(generators: generators)
-    )
+      new Request(generators: generators), new Response(generators: generators))
   }
 
   def 'creates a V3 map format if V3 spec'() {
@@ -76,19 +75,17 @@ class RequestResponseInteractionSpec extends Specification {
     interaction4.uniqueKey() != interaction5.uniqueKey()
 
     where:
-    interaction1 = new RequestResponseInteraction('description 1+2', new Request(), new Response())
-    interaction2 = new RequestResponseInteraction('description 1+2', new Request(), new Response())
-    interaction3 = new RequestResponseInteraction('description 1+2', [new ProviderState('state 3')],
-      new Request(), new Response())
-    interaction4 = new RequestResponseInteraction('description 4', new Request(), new Response())
-    interaction5 = new RequestResponseInteraction('description 4', [new ProviderState('state 5')],
-      new Request(), new Response())
+    interaction1 = new RequestResponseInteraction('description 1+2')
+    interaction2 = new RequestResponseInteraction('description 1+2')
+    interaction3 = new RequestResponseInteraction('description 1+2', [new ProviderState('state 3')])
+    interaction4 = new RequestResponseInteraction('description 4')
+    interaction5 = new RequestResponseInteraction('description 4', [new ProviderState('state 5')])
   }
 
   @Unroll
   def 'displayState test'() {
     expect:
-    new RequestResponseInteraction(stateDescription, providerStates, new Request(), new Response())
+    new RequestResponseInteraction(stateDescription, providerStates)
       .displayState() == stateDescription
 
     where:

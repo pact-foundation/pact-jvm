@@ -1,0 +1,130 @@
+{
+  "consumer": {
+    "name": "AWSSummiteerWeb"
+  },
+  "provider": {
+    "name": "AWSSummiteerTwitterSNSConsumer"
+  },
+  "messages": [
+    {
+      "_id": "e706eda3b22d7746e60322b69b311bc9073677cb",
+      "description": "a stream of tweets",
+      "providerStates": [
+        {
+          "name": "there are new tweets"
+        }
+      ],
+      "content": {
+        "id": 1,
+        "text": "some tweet content with emoji 😎"
+      },
+      "matchingRules": {
+        "body": {
+          "$.id": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.text": {
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "createdAt": "2018-04-18T09:23:24+00:00",
+  "_links": {
+    "self": {
+      "title": "Pact",
+      "name": "Pact between AWSSummiteerWeb (v1.0.1) and AWSSummiteerTwitterSNSConsumer",
+      "href": "https://test.pact.dius.com.au/pacts/provider/AWSSummiteerTwitterSNSConsumer/consumer/AWSSummiteerWeb/version/1.0.1"
+    },
+    "pb:consumer": {
+      "title": "Consumer",
+      "name": "AWSSummiteerWeb",
+      "href": "https://test.pact.dius.com.au/pacticipants/AWSSummiteerWeb"
+    },
+    "pb:consumer-version": {
+      "title": "Consumer version",
+      "name": "1.0.1",
+      "href": "https://test.pact.dius.com.au/pacticipants/AWSSummiteerWeb/versions/1.0.1"
+    },
+    "pb:provider": {
+      "title": "Provider",
+      "name": "AWSSummiteerTwitterSNSConsumer",
+      "href": "https://test.pact.dius.com.au/pacticipants/AWSSummiteerTwitterSNSConsumer"
+    },
+    "pb:latest-pact-version": {
+      "title": "Latest version of this pact",
+      "href": "https://test.pact.dius.com.au/pacts/provider/AWSSummiteerTwitterSNSConsumer/consumer/AWSSummiteerWeb/latest"
+    },
+    "pb:all-pact-versions": {
+      "title": "All versions of this pact",
+      "href": "https://test.pact.dius.com.au/pacts/provider/AWSSummiteerTwitterSNSConsumer/consumer/AWSSummiteerWeb/versions"
+    },
+    "pb:latest-untagged-pact-version": {
+      "title": "Latest untagged version of this pact",
+      "href": "https://test.pact.dius.com.au/pacts/provider/AWSSummiteerTwitterSNSConsumer/consumer/AWSSummiteerWeb/latest-untagged"
+    },
+    "pb:latest-tagged-pact-version": {
+      "title": "Latest tagged version of this pact",
+      "href": "https://test.pact.dius.com.au/pacts/provider/AWSSummiteerTwitterSNSConsumer/consumer/AWSSummiteerWeb/latest/{tag}",
+      "templated": true
+    },
+    "pb:previous-distinct": {
+      "title": "Previous distinct version of this pact",
+      "href": "https://test.pact.dius.com.au/pacts/provider/AWSSummiteerTwitterSNSConsumer/consumer/AWSSummiteerWeb/version/1.0.1/previous-distinct"
+    },
+    "pb:diff-previous-distinct": {
+      "title": "Diff with previous distinct version of this pact",
+      "href": "https://test.pact.dius.com.au/pacts/provider/AWSSummiteerTwitterSNSConsumer/consumer/AWSSummiteerWeb/version/1.0.1/diff/previous-distinct"
+    },
+    "pb:diff": {
+      "title": "Diff with another specified version of this pact",
+      "href": "https://test.pact.dius.com.au/pacts/provider/AWSSummiteerTwitterSNSConsumer/consumer/AWSSummiteerWeb/pact-version/afe67c2fe3f29330dcdf26a3799a614a91510e3b/diff/pact-version/{pactVersion}",
+      "templated": true
+    },
+    "pb:pact-webhooks": {
+      "title": "Webhooks for the pact between AWSSummiteerWeb and AWSSummiteerTwitterSNSConsumer",
+      "href": "https://test.pact.dius.com.au/webhooks/provider/AWSSummiteerTwitterSNSConsumer/consumer/AWSSummiteerWeb"
+    },
+    "pb:consumer-webhooks": {
+      "title": "Webhooks for all pacts with provider AWSSummiteerTwitterSNSConsumer",
+      "href": "https://test.pact.dius.com.au/webhooks/consumer/AWSSummiteerTwitterSNSConsumer"
+    },
+    "pb:tag-prod-version": {
+      "title": "PUT to this resource to tag this consumer version as 'production'",
+      "href": "https://test.pact.dius.com.au/pacticipants/AWSSummiteerWeb/versions/1.0.1/tags/prod"
+    },
+    "pb:tag-version": {
+      "title": "PUT to this resource to tag this consumer version",
+      "href": "https://test.pact.dius.com.au/pacticipants/AWSSummiteerWeb/versions/1.0.1/tags/{tag}"
+    },
+    "pb:publish-verification-results": {
+      "title": "Publish verification results",
+      "href": "https://test.pact.dius.com.au/pacts/provider/AWSSummiteerTwitterSNSConsumer/consumer/AWSSummiteerWeb/pact-version/afe67c2fe3f29330dcdf26a3799a614a91510e3b/verification-results"
+    },
+    "pb:triggered-webhooks": {
+      "title": "Webhooks triggered by the publication of this pact",
+      "href": "https://test.pact.dius.com.au/pacts/provider/AWSSummiteerTwitterSNSConsumer/consumer/AWSSummiteerWeb/version/1.0.1/triggered-webhooks"
+    },
+    "curies": [
+      {
+        "name": "pb",
+        "href": "https://test.pact.dius.com.au/doc/{rel}?context=pact",
+        "templated": true
+      }
+    ]
+  }
+}

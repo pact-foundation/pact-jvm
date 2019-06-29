@@ -3,6 +3,7 @@ package au.com.dius.pact.core.matchers
 import au.com.dius.pact.core.matchers.util.padTo
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
+import au.com.dius.pact.core.support.zipAll
 import mu.KLogging
 import org.apache.xerces.dom.TextImpl
 import org.w3c.dom.NamedNodeMap
@@ -129,27 +130,31 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
         listOf(BodyMismatch(expected, actual,
           "Expected an empty List but received ${actualChildren.size} child nodes",
           path.joinToString(".")))
-    } else if (expectedChildren.size != actualChildren.size) {
-        if (expectedChildren.size > actualChildren.size) {
-          (actualChildren.size until expectedChildren.size).map {
-            BodyMismatch(expected, actual, "Expected ${describe(expectedChildren[it])} but was missing", path.joinToString("."))
-          } + BodyMismatch(expected, actual,
-            "Expected a List with at least ${expectedChildren.size} elements but received " +
-              "${actualChildren.size} elements", path.joinToString("."))
-        } else if (!allowUnexpectedKeys && expectedChildren.size < actualChildren.size) {
-          listOf(BodyMismatch(expected, actual,
-            "Expected a List with ${expectedChildren.size} elements but received " +
-              "${actualChildren.size} elements", path.joinToString(".")))
-        } else {
-          emptyList()
-        }
     } else {
       emptyList()
     }
 
-    return mismatches + expectedChildren.withIndex()
-        .zip(actualChildren)
-        .flatMap { x -> compareNode(path + x.first.index.toString(), x.first.value, x.second, allowUnexpectedKeys, matchers) }
+    val actualChildrenByTag = actualChildren.groupBy { it.nodeName }
+    return mismatches + expectedChildren
+      .groupBy { it.nodeName }
+      .flatMap { e ->
+        if (actualChildrenByTag.contains(e.key)) {
+          e.value.zipAll(actualChildrenByTag.getValue(e.key)).mapIndexed { index, comp ->
+            val expectedNode = comp.first
+            val actualNode = comp.second
+            when {
+              expectedNode == null -> emptyList()
+              actualNode == null -> listOf(BodyMismatch(expected, actual,
+                "Expected child ${describe(expectedNode)} but was missing",
+                (path + expectedNode.nodeName + index.toString()).joinToString(".")))
+              else -> compareNode(path, expectedNode, actualNode, allowUnexpectedKeys, matchers)
+            }
+          }.flatten()
+        } else {
+          listOf(BodyMismatch(expected, actual,
+            "Expected child <${e.key}/> but was missing", path.joinToString(".")))
+        }
+      }
   }
 
   private fun describe(node: Node) =

@@ -1,0 +1,143 @@
+{
+  "consumer": {
+    "name": "Foo Web Client"
+  },
+  "provider": {
+    "name": "Activity Service"
+  },
+  "interactions": [
+    {
+      "_id": "e706eda3b22d7746e60322b69b311bc9073677cb",
+      "description": "a request for activities",
+      "provider_state": "many activities exist",
+      "request": {
+        "method": "get",
+        "path": "/activities",
+        "headers": {
+          "Accept": "application/json"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "activities": [
+            {
+              "name": "hx55sbvMPk1kF-9",
+              "description": "f_UXcxIXYhgqtxjiPumRiCo9C5JNDX"
+            },
+            {
+              "name": "hx55sbvMPk1kF-9",
+              "description": "f_UXcxIXYhgqtxjiPumRiCo9C5JNDX"
+            }
+          ]
+        },
+        "matchingRules": {
+          "$.body.activities": {
+            "min": 2
+          },
+          "$.body.activities[*].*": {
+            "match": "type"
+          },
+          "$.body.activities[*].name": {
+            "match": "type"
+          },
+          "$.body.activities[*].description": {
+            "match": "type"
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pact-specification": {
+      "version": "2.0.0"
+    }
+  },
+  "createdAt": "2017-08-18T02:58:33+00:00",
+  "_links": {
+    "self": {
+      "title": "Pact",
+      "name": "Pact between Foo Web Client (v1.0.2) and Activity Service",
+      "href": "https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/version/1.0.2"
+    },
+    "pb:consumer": {
+      "title": "Consumer",
+      "name": "Foo Web Client",
+      "href": "https://test.pact.dius.com.au/pacticipants/Foo%20Web%20Client"
+    },
+    "pb:consumer-version": {
+      "title": "Consumer version",
+      "name": "1.0.2",
+      "href": "https://test.pact.dius.com.au/pacticipants/Foo%20Web%20Client/versions/1.0.2"
+    },
+    "pb:provider": {
+      "title": "Provider",
+      "name": "Activity Service",
+      "href": "https://test.pact.dius.com.au/pacticipants/Activity%20Service"
+    },
+    "pb:latest-pact-version": {
+      "title": "Latest version of this pact",
+      "href": "https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/latest"
+    },
+    "pb:all-pact-versions": {
+      "title": "All versions of this pact",
+      "href": "https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/versions"
+    },
+    "pb:latest-untagged-pact-version": {
+      "title": "Latest untagged version of this pact",
+      "href": "https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/latest-untagged"
+    },
+    "pb:latest-tagged-pact-version": {
+      "title": "Latest tagged version of this pact",
+      "href": "https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/latest/{tag}",
+      "templated": true
+    },
+    "pb:previous-distinct": {
+      "title": "Previous distinct version of this pact",
+      "href": "https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/version/1.0.2/previous-distinct"
+    },
+    "pb:diff-previous-distinct": {
+      "title": "Diff with previous distinct version of this pact",
+      "href": "https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/version/1.0.2/diff/previous-distinct"
+    },
+    "pb:diff": {
+      "title": "Diff with another specified version of this pact",
+      "href": "https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/pact-version/dae8c8821b9b56ea38052cf41f055d1e57c71fc8/diff/pact-version/{pactVersion}",
+      "templated": true
+    },
+    "pb:pact-webhooks": {
+      "title": "Webhooks for the pact between Foo Web Client and Activity Service",
+      "href": "https://test.pact.dius.com.au/webhooks/provider/Activity%20Service/consumer/Foo%20Web%20Client"
+    },
+    "pb:consumer-webhooks": {
+      "title": "Webhooks for all pacts with provider Activity Service",
+      "href": "https://test.pact.dius.com.au/webhooks/consumer/Activity%20Service"
+    },
+    "pb:tag-prod-version": {
+      "title": "PUT to this resource to tag this consumer version as 'production'",
+      "href": "https://test.pact.dius.com.au/pacticipants/Foo%20Web%20Client/versions/1.0.2/tags/prod"
+    },
+    "pb:tag-version": {
+      "title": "PUT to this resource to tag this consumer version",
+      "href": "https://test.pact.dius.com.au/pacticipants/Foo%20Web%20Client/versions/1.0.2/tags/{tag}"
+    },
+    "pb:publish-verification-results": {
+      "title": "Publish verification results",
+      "href": "https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/pact-version/dae8c8821b9b56ea38052cf41f055d1e57c71fc8/verification-results"
+    },
+    "pb:triggered-webhooks": {
+      "title": "Webhooks triggered by the publication of this pact",
+      "href": "https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/version/1.0.2/triggered-webhooks"
+    },
+    "curies": [
+      {
+        "name": "pb",
+        "href": "https://test.pact.dius.com.au/doc/{rel}?context=pact",
+        "templated": true
+      }
+    ]
+  }
+}

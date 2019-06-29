@@ -25,7 +25,7 @@ class RequestMatchingSpec extends Specification {
   }
 
   def test(Request actual) {
-    interaction = new RequestResponseInteraction('test interaction', testState, request, response)
+    interaction = new RequestResponseInteraction('test interaction', testState, request, response, null)
     new RequestMatching([interaction]).findResponse(actual)
   }
 

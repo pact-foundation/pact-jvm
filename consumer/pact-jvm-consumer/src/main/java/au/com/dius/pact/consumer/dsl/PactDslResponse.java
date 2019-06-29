@@ -275,7 +275,8 @@ public class PactDslResponse {
           request.state,
           new Request(request.requestMethod, request.path, request.query,
             request.requestHeaders, request.requestBody, request.requestMatchers, request.requestGenerators),
-          new Response(responseStatus, responseHeaders, responseBody, responseMatchers, responseGenerators)
+          new Response(responseStatus, responseHeaders, responseBody, responseMatchers, responseGenerators),
+          null
         ));
     }
 

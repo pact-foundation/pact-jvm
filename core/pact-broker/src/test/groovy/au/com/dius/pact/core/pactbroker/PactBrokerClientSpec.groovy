@@ -249,13 +249,13 @@ class PactBrokerClientSpec extends Specification {
   def 'when publishing verification results, return a #result if #reason'() {
     given:
     def halClient = Mock(IHalClient)
-    def client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
     halClient.postJson('URL', _) >> new Ok(true)
 
     expect:
-    client.publishVerificationResults(attributes, true, '0', null).class.simpleName == result
+    client.publishVerificationResults(attributes, TestResult.Ok.INSTANCE, '0', null).class.simpleName == result
 
     where:
 

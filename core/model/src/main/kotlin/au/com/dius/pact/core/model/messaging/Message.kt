@@ -26,7 +26,8 @@ class Message @JvmOverloads constructor(
   var contents: OptionalBody = OptionalBody.missing(),
   var matchingRules: MatchingRules = MatchingRulesImpl(),
   var generators: Generators = Generators(),
-  var metaData: Map<String, String> = mapOf()
+  var metaData: Map<String, String> = mapOf(),
+  override val interactionId: String? = null
 ) : Interaction {
 
   fun contentsAsBytes() = contents.orEmpty()
@@ -146,7 +147,7 @@ class Message @JvmOverloads constructor(
       else
         emptyMap()
       return Message(Json.toString(json["description"]), providerStates,
-        contents, matchingRules, generators, metaData)
+        contents, matchingRules, generators, metaData, Json.toString(json["_id"]))
     }
 
     private fun parseContentType(contentType: String): ContentType? {

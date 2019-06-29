@@ -92,7 +92,8 @@ data class PactVerificationContext(
         val expectedResponse = reqResInteraction.response
         val actualResponse = target.executeInteraction(client, request)
 
-        verifier!!.verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
+        verifier!!.verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures,
+          reqResInteraction.interactionId.orEmpty())
       } catch (e: Exception) {
         failures[interactionMessage] = e
         verifier!!.reporters.forEach {
@@ -100,7 +101,8 @@ data class PactVerificationContext(
             verifier!!.projectHasProperty.apply(ProviderVerifierBase.PACT_SHOW_STACKTRACE))
         }
         TestResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
-          "exception" to e)))
+          "exception" to e, "interactionId" to interaction.interactionId)),
+          "Request to provider failed with an exception")
       }
     } else {
       return verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, ConsumerInfo(consumerName), interaction,

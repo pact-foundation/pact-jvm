@@ -175,7 +175,7 @@ class PactWriterSpec extends Specification {
     given:
     def pactFile = File.createTempFile('PactWriterSpec', '.json')
     def pact = new RequestResponsePact(new Provider(), new Consumer(), [
-      new RequestResponseInteraction('Request für ping', new Request(), new Response())
+      new RequestResponseInteraction('Request für ping')
     ])
 
     when:

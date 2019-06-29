@@ -279,7 +279,7 @@ class HalClientSpec extends Specification {
     client.httpClient = mockClient
     def mockResponse = Mock(CloseableHttpResponse)
     1 * mockClient.execute(_) >> mockResponse
-    1 * mockResponse.getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), status, 'OK')
+    mockResponse.getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), status, 'OK')
 
     expect:
     client.postJson('path', 'body') == expectedResult
@@ -311,7 +311,7 @@ class HalClientSpec extends Specification {
     client.httpClient = mockClient
     def mockResponse = Mock(CloseableHttpResponse)
     1 * mockClient.execute(_) >> mockResponse
-    1 * mockResponse.getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
+    mockResponse.getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
 
     when:
     def result = client.postJson('path', 'body') { status, resp -> false }

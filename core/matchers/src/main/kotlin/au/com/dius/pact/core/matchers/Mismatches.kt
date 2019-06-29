@@ -17,10 +17,16 @@ sealed class Mismatch {
 
 data class StatusMismatch(val expected: Int, val actual: Int) : Mismatch() {
   override fun description() = "expected status of $expected but was $actual"
+  fun toMap(): Map<String, Any?> {
+    return mapOf("mismatch" to description())
+  }
 }
 
 data class BodyTypeMismatch(val expected: String, val actual: String) : Mismatch() {
   override fun description() = "Expected a response type of '$expected' but the actual type was '$actual'"
+  fun toMap(): Map<String, Any?> {
+    return mapOf("mismatch" to description())
+  }
 }
 
 data class CookieMismatch(val expected: List<String>, val actual: List<String>) : Mismatch()
@@ -70,6 +76,10 @@ data class HeaderMismatch(
     } else {
       copy(mismatch = mismatch.mismatch)
     }
+  }
+
+  fun toMap(): Map<String, Any?> {
+    return mapOf("mismatch" to description())
   }
 }
 

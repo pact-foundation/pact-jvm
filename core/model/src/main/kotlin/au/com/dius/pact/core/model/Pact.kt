@@ -61,9 +61,14 @@ interface Interaction {
   fun toMap(pactSpecVersion: PactSpecVersion): Map<*, *>
 
   /**
-   * Unique key for this interaction
+   * Generates a unique key for this interaction
    */
   fun uniqueKey(): String
+
+  /**
+   * Interaction ID. Will only be populated from pacts loaded from a Pact Broker
+   */
+  val interactionId: String?
 }
 
 /**

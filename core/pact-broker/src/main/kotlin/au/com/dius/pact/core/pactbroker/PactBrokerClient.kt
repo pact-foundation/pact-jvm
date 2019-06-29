@@ -5,13 +5,14 @@ import au.com.dius.pact.com.github.michaelbull.result.Result
 import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
-import com.github.salomonbrys.kotson.string
 import com.github.salomonbrys.kotson.obj
+import com.github.salomonbrys.kotson.set
+import com.github.salomonbrys.kotson.string
 import com.github.salomonbrys.kotson.toJson
 import com.google.common.net.UrlEscapers.urlPathSegmentEscaper
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import org.apache.commons.lang3.exception.ExceptionUtils
+import mu.KLogging
 import org.dmfs.rfc3986.encoding.Precoded
 import java.io.File
 import java.net.URLDecoder
@@ -33,12 +34,17 @@ sealed class TestResult {
     }
   }
 
-  data class Failed(var results: List<Any> = emptyList()) : TestResult() {
+  data class Failed(var results: List<Map<String, Any?>> = emptyList(), val description: String = "") : TestResult() {
     override fun toBoolean() = false
 
     override fun merge(result: TestResult) = when (result) {
       is Ok -> this
-      is Failed -> Failed(results + result.results)
+      is Failed -> Failed(results + result.results, when {
+        description.isNotEmpty() && result.description.isNotEmpty() && description != result.description ->
+          "$description, ${result.description}"
+        description.isNotEmpty() -> description
+        else -> result.description
+      })
     }
   }
 
@@ -145,16 +151,6 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
 
   open fun newHalClient(): IHalClient = HalClient(pactBrokerUrl, options)
 
-  @Deprecated(message = "Use the version that takes a test result",
-    replaceWith = ReplaceWith("publishVerificationResults"))
-  open fun publishVerificationResults(
-    docAttributes: Map<String, Map<String, Any>>,
-    result: Boolean,
-    version: String,
-    buildUrl: String? = null
-  ): Result<Boolean, Exception> =
-    publishVerificationResults(docAttributes, TestResult.fromBoolean(result), version, buildUrl)
-
   /**
    * Publishes the result to the "pb:publish-verification-results" link in the document attributes.
    */
@@ -168,29 +164,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     val halClient = newHalClient()
     val publishLink = docAttributes.mapKeys { it.key.toLowerCase() } ["pb:publish-verification-results"] // ktlint-disable curly-spacing
     return if (publishLink != null) {
-      val jsonObject = jsonObject("success" to result.toBoolean(), "providerApplicationVersion" to version)
-      if (buildUrl != null) {
-        jsonObject.add("buildUrl", buildUrl.toJson())
-      }
-
-      if (result is TestResult.Failed && result.results.isNotEmpty()) {
-        val failures = jsonArray(result.results.map {
-          when (it) {
-            is Map<*, *> -> {
-              val details = it as Map<String, Any>
-              if (details.containsKey("exception")) {
-                val exp = details["exception"] as Exception
-                jsonObject("description" to details["message"],
-                  "stacktrace" to jsonArray(ExceptionUtils.getStackFrames(exp).toList()))
-              } else {
-                it
-              }
-            }
-            else -> jsonObject("description" to it.toString(), "stacktrace" to jsonArray())
-          }
-        })
-        jsonObject.add("testResults", failures)
-      }
+      val jsonObject = buildPayload(result, version, buildUrl)
 
       val lowercaseMap = publishLink.mapKeys { it.key.toLowerCase() }
       if (lowercaseMap.containsKey("href")) {
@@ -203,6 +177,79 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
       Err(RuntimeException("Unable to publish verification results as there is no " +
         "pb:publish-verification-results link"))
     }
+  }
+
+  fun buildPayload(result: TestResult, version: String, buildUrl: String?): JsonObject {
+    val jsonObject = jsonObject("success" to result.toBoolean(), "providerApplicationVersion" to version)
+    if (buildUrl != null) {
+      jsonObject.add("buildUrl", buildUrl.toJson())
+    }
+
+    logger.debug { "Test result = $result" }
+    if (result is TestResult.Failed && result.results.isNotEmpty()) {
+      val values = result.results
+        .groupBy { it["interactionId"] }
+        .map { mismatches ->
+          val values = mismatches.value
+            .filter { !it.containsKey("exception") }
+            .flatMap { mismatch ->
+              when (mismatch["type"]) {
+                "body" -> {
+                  when (val bodyMismatches = mismatch["comparison"]) {
+                    is Map<*, *> -> bodyMismatches.entries.filter { it.key != "diff" }.flatMap { entry ->
+                      val values = entry.value as List<Map<String, Any>>
+                      values.map {
+                        jsonObject("attribute" to "body", "identifier" to entry.key, "description" to it["mismatch"],
+                          "diff" to it["diff"])
+                      }
+                    }
+                    else -> listOf(jsonObject("attribute" to "body", "description" to bodyMismatches.toString()))
+                  }
+                }
+                "status" -> listOf(jsonObject("attribute" to "status", "description" to mismatch["description"]))
+                "header" -> {
+                  listOf(jsonObject(mismatch.filter { it.key != "interactionId" }
+                    .map {
+                      if (it.key == "type") {
+                        "attribute" to it.value
+                      } else {
+                        it.toPair()
+                      }
+                    }))
+                }
+                "metadata" -> {
+                  listOf(jsonObject(mismatch.filter { it.key != "interactionId" }
+                    .flatMap {
+                      when {
+                        it.key == "type" -> listOf("attribute" to it.value)
+                        else -> listOf("identifier" to it.key, "description" to it.value)
+                      }
+                    }))
+                }
+                else -> listOf(jsonObject(
+                  mismatch.filterNot { it.key == "interactionId" || it.key == "type" }.entries.map {
+                    it.toPair()
+                  }
+                ))
+              }
+            }
+          val interactionJson = jsonObject("interactionId" to mismatches.key, "success" to false,
+            "description" to result.description,
+            "mismatches" to jsonArray(values)
+          )
+
+          val exceptionDetails = mismatches.value.find { it.containsKey("exception") }
+          if (exceptionDetails != null) {
+            val exp = exceptionDetails["exception"] as Exception
+            interactionJson["exception"] = jsonObject("message" to exp.message,
+              "exceptionClass" to exp.javaClass.name)
+          }
+
+          interactionJson
+        }
+      jsonObject.add("testResults", jsonArray(values))
+    }
+    return jsonObject
   }
 
   /**
@@ -229,7 +276,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     }
   }
 
-  companion object {
+  companion object : KLogging() {
     const val LATEST_PROVIDER_PACTS_WITH_NO_TAG = "pb:latest-untagged-pact-version"
     const val LATEST_PROVIDER_PACTS = "pb:latest-provider-pacts"
     const val LATEST_PROVIDER_PACTS_WITH_TAG = "pb:latest-provider-pacts-with-tag"

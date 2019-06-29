@@ -11,15 +11,14 @@ class RequestResponsePactSpec extends Specification {
   def setupSpec() {
     provider = new Provider()
     consumer = new Consumer()
-    interaction = new RequestResponseInteraction('test', new Request('GET'),
+    interaction = new RequestResponseInteraction('test', [], new Request('GET'),
       new Response(200, ['Content-Type': ['application/json']], OptionalBody.body('{"value": 1234.0}'.bytes)))
   }
 
   def 'when writing V2 spec, query parameters must be encoded appropriately'() {
     given:
     def pact = new RequestResponsePact(provider, consumer, [
-      new RequestResponseInteraction('test', new Request('GET', '/', [a: ['b=c&d']]),
-        new Response())
+      new RequestResponseInteraction('test', [], new Request('GET', '/', [a: ['b=c&d']]))
     ])
 
     when:
@@ -32,7 +31,7 @@ class RequestResponsePactSpec extends Specification {
   def 'should handle body types other than JSON'() {
     given:
     def pact = new RequestResponsePact(provider, consumer, [
-      new RequestResponseInteraction('test', new Request('PUT', '/', [:],
+      new RequestResponseInteraction('test', [], new Request('PUT', '/', [:],
         ['Content-Type': ['application/xml']], OptionalBody.body('<?xml version="1.0"><root/>'.bytes)),
         new Response(200, ['Content-Type': ['text/plain']], OptionalBody.body('Ok, no prob'.bytes)))
     ])
@@ -48,7 +47,7 @@ class RequestResponsePactSpec extends Specification {
   def 'does not lose the scale for decimal numbers'() {
     given:
     def pact = new RequestResponsePact(provider, consumer, [
-      new RequestResponseInteraction('test', new Request('GET'),
+      new RequestResponseInteraction('test', [], new Request('GET'),
         new Response(200, ['Content-Type': ['application/json']], OptionalBody.body('{"value": 1234.0}'.bytes)))
     ])
 
@@ -102,7 +101,7 @@ class RequestResponsePactSpec extends Specification {
     pact != pact2
 
     where:
-    interaction2 = new RequestResponseInteraction('test', new Request('POST'),
+    interaction2 = new RequestResponseInteraction('test', [], new Request('POST'),
       new Response(200, ['Content-Type': ['application/json']], OptionalBody.body('{"value": 1234.0}'.bytes)))
     pact = new RequestResponsePact(provider, consumer, [ interaction ])
     pact2 = new RequestResponsePact(provider, consumer, [ interaction2 ])
@@ -113,7 +112,7 @@ class RequestResponsePactSpec extends Specification {
     pact != pact2
 
     where:
-    interaction2 = new RequestResponseInteraction('test', new Request('POST'),
+    interaction2 = new RequestResponseInteraction('test', [], new Request('POST'),
       new Response(200, ['Content-Type': ['application/json']], OptionalBody.body('{"value": 1234.0}'.bytes)))
     pact = new RequestResponsePact(provider, consumer, [ interaction ])
     pact2 = new RequestResponsePact(provider, consumer, [ interaction, interaction2 ])

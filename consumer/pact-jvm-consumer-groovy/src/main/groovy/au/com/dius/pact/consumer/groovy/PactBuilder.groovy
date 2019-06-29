@@ -132,7 +132,7 @@ class PactBuilder extends BaseBuilder {
         new Response(responseData[i].status ?: 200, responseHeaders,
           responseData[i].containsKey(BODY) ? OptionalBody.body(responseData[i].body.bytes,
             contentType(responseHeaders)) : OptionalBody.missing(),
-          responseMatchers, responseGenerators)
+          responseMatchers, responseGenerators), null
       )
     }
     requestData = []

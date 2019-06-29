@@ -81,7 +81,7 @@ object PactFragmentBuilder {
             description,
             state.asJava,
             request,
-            new Response(status, headers.mapValues(f => f.asJava).asJava, optionalBody, matchers))))
+            new Response(status, headers.mapValues(f => f.asJava).asJava, optionalBody, matchers), null)))
       }
 
       def willRespondWith(status: Int,
@@ -97,7 +97,8 @@ object PactFragmentBuilder {
             description,
             state.asJava,
             request,
-            new Response(status, headers.mapValues(f => f.asJava).asJava, OptionalBody.body(bodyAndMatchers.toString.getBytes), rules))))
+            new Response(status, headers.mapValues(f => f.asJava).asJava,
+              OptionalBody.body(bodyAndMatchers.toString.getBytes), rules), null)))
       }
     }
   }

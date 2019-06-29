@@ -16,6 +16,7 @@ dependencies {
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testCompile 'org.hamcrest:hamcrest:2.1'
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.2'
 
   antlr "org.antlr:antlr4:4.7.2"
 }

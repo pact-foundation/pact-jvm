@@ -166,7 +166,7 @@ open class HalClient @JvmOverloads constructor(
 
       client.execute(httpPost).use {
         logger.debug { "Got response ${it.statusLine}" }
-        logger.debug { "Response body: ${it.entity.content.reader().readText()}" }
+        logger.debug { "Response body: ${it.entity?.content?.reader()?.readText()}" }
         if (handler != null) {
           handler(it.statusLine.statusCode, it)
         } else {

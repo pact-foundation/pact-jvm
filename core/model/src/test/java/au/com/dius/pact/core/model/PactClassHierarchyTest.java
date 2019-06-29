@@ -16,8 +16,7 @@ public class PactClassHierarchyTest {
     Consumer consumer = new Consumer();
     RequestResponsePact pactA = new RequestResponsePact(provider, consumer, new ArrayList<>());
     RequestResponsePact pactB = new RequestResponsePact(provider, consumer,
-      Collections.singletonList(new RequestResponseInteraction("Test Merge Interaction",
-        new Request(), new Response())));
+      Collections.singletonList(new RequestResponseInteraction("Test Merge Interaction")));
     pactA.mergeInteractions(pactB.getInteractions());
 
     assertThat(pactA.getInteractions(), hasSize(1));

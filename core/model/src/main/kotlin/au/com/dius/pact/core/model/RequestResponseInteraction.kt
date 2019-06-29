@@ -11,8 +11,9 @@ import java.net.URLEncoder
 open class RequestResponseInteraction @JvmOverloads constructor(
   override val description: String,
   override val providerStates: List<ProviderState> = listOf(),
-  val request: Request,
-  val response: Response
+  val request: Request = Request(),
+  val response: Response = Response(),
+  override val interactionId: String? = null
 ) : Interaction {
 
   override fun toString() =
