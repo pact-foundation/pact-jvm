@@ -121,6 +121,16 @@ class Matchers {
     new TimestampMatcher(value: value, pattern: pattern)
   }
 
+  /**
+   * Match a timestamp generated from an expression
+   * @param pattern Pattern to use to match. If not provided, an ISO pattern will be used.
+   * @param expression Expression to use to generate the timestamp
+   */
+
+  static timestampExpression(String expression, String pattern = null) {
+    new TimestampMatcher(pattern: pattern, expression: expression)
+  }
+
   private static validateTimeValue(String value, String pattern) {
     if (value && pattern) {
       try {
@@ -142,6 +152,16 @@ class Matchers {
   }
 
   /**
+   * Match a time generated from an expression
+   * @param pattern Pattern to use to match. If not provided, an ISO pattern will be used.
+   * @param expression Expression to use to generate the time
+   */
+
+  static timeExpression(String expression, String pattern = null) {
+    new TimeMatcher(pattern: pattern, expression: expression)
+  }
+
+  /**
    * Match a date
    * @param pattern Pattern to use to match. If not provided, an ISO pattern will be used.
    * @param value Example value, if not provided the current date will be used
@@ -150,6 +170,16 @@ class Matchers {
   static date(String pattern = null, def value = null) {
     validateTimeValue(value, pattern)
     new DateMatcher(value: value, pattern: pattern)
+  }
+
+  /**
+   * Match a date generated from an expression
+   * @param pattern Pattern to use to match. If not provided, an ISO pattern will be used.
+   * @param expression Expression to use to generate the date
+   */
+
+  static dateExpression(String expression, String pattern = null) {
+    new DateMatcher(pattern: pattern, expression: expression)
   }
 
   /**

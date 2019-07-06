@@ -39,6 +39,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
 
         ts(timestamp)
         timestamp = timestamp('yyyy/MM/dd - HH:mm:ss.S')
+        nextReview = dateExpression("today + 1 year")
 
         values([1, 2, 3, numeric])
 
@@ -100,7 +101,8 @@ class GroovyConsumerMatchersPactSpec extends Specification {
               'name': 'dev',
               'id': '3590e5cf-8777-4d30-be4c-dac824765b9b'
             ]
-          ]
+          ],
+          nextReview: '2001-01-01'
         ]
       )
 

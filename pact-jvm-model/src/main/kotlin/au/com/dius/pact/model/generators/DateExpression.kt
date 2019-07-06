@@ -38,8 +38,7 @@ class ErrorListener(val errors: MutableList<String> = mutableListOf()) : BaseErr
 object DateExpression : KLogging() {
   fun executeDateExpression(base: OffsetDateTime, expression: String?): Result<OffsetDateTime, String> {
     return if (!expression.isNullOrEmpty()) {
-      val result = parseDateExpression(expression)
-      return when (result) {
+      return when (val result = parseDateExpression(expression)) {
         is Err -> result
         is Ok -> {
           var date = when (result.value.base) {
