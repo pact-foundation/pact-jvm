@@ -148,7 +148,6 @@ class LambdaDslSpec extends Specification {
     def result = LambdaDsl.newJsonBody(object).build()
 
     then:
-    result.body.toString() == '{"datetimeExp":"2000-02-01T00:00:00","dateExp":"2000-02-01","timeExp":"00:00:00"}'
     result.matchers.toMap(PactSpecVersion.V3) == [
       '.dateExp': [matchers: [[match: 'date', date: 'yyyy-MM-dd']], combine: 'AND'],
       '.timeExp': [matchers: [[match: 'time', time: 'HH:mm:ss']], combine: 'AND'],
@@ -175,7 +174,6 @@ class LambdaDslSpec extends Specification {
     def result = LambdaDsl.newJsonArray(array).build()
 
     then:
-    result.body.toString() == '["2000-02-01","00:00:00","2000-02-01T00:00:00"]'
     result.matchers.toMap(PactSpecVersion.V3) == [
       '[0]': [matchers: [[match: 'date', date: 'yyyy-MM-dd']], combine: 'AND'],
       '[1]': [matchers: [[match: 'time', time: 'HH:mm:ss']], combine: 'AND'],
