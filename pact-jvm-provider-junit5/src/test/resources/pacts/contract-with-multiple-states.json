@@ -1,0 +1,61 @@
+{
+  "provider" : {
+    "name" : "providerMultipleStates"
+  },
+  "consumer" : {
+    "name" : "consumerMultipleStates"
+  },
+  "interactions" : [ {
+    "providerStates": [
+      {
+        "name": "state 1",
+        "params": {
+          "name": "state 1"
+        }
+      },
+      {
+        "name": "state 2",
+        "params": {
+          "name": "state 2"
+        }
+      },
+      {
+        "name": "a gateway account with external id exists",
+        "params": {
+          "gateway_account_id": "9ddfcc27-acf5-43f9-92d5-52247540714c",
+          "mandate_id": "test_mandate_id_xyz",
+          "bank_mandate_reference": "410104",
+          "unique_identifier": "MD1234"
+        }
+      },
+      {
+        "name": "a confirmed mandate exists",
+        "params": {
+          "gateway_account_id": "9ddfcc27-acf5-43f9-92d5-52247540714c",
+          "mandate_id": "test_mandate_id_xyz",
+          "bank_mandate_reference": "410104",
+          "unique_identifier": "MD1234"
+        }
+      },
+      {
+        "name": "something else exists"
+      }
+    ],
+    "description" : "Get data",
+    "request" : {
+      "method" : "GET",
+      "path" : "/data"
+    },
+    "response" : {
+      "status" : 204
+    }
+  } ],
+  "metadata" : {
+    "pact-specification" : {
+      "version" : "3.0.0"
+    },
+    "pact-jvm" : {
+      "version" : "3.1.1"
+    }
+  }
+}

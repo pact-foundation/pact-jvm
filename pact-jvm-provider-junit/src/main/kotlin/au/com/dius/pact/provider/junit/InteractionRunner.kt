@@ -4,6 +4,7 @@ import au.com.dius.pact.model.FilteredPact
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.Pact
 import au.com.dius.pact.model.PactSource
+import au.com.dius.pact.pactbroker.TestResult
 import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderUtils
@@ -84,7 +85,7 @@ open class InteractionRunner<I>(
     validateRules(errors)
     validateTargetRequestFilters(errors)
 
-    if (!errors.isEmpty()) {
+    if (errors.isNotEmpty()) {
       throw InitializationError(errors)
     }
   }
@@ -140,12 +141,14 @@ open class InteractionRunner<I>(
     for (interaction in pact.interactions) {
       val description = describeChild(interaction)
       notifier.fireTestStarted(description)
-      var testResult = true
+      var testResult: TestResult = TestResult.Ok
       try {
         interactionBlock(interaction, pactSource, testContext).evaluate()
       } catch (e: Throwable) {
         notifier.fireTestFailure(Failure(description, e))
-        testResult = false
+        testResult = TestResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
+          "exception" to e, "interactionId" to interaction.interactionId)),
+          "Request to provider failed with an exception")
       } finally {
         notifier.fireTestFinished(description)
         if (pact is FilteredPact) {
@@ -229,7 +232,7 @@ open class InteractionRunner<I>(
   protected fun withStateChanges(interaction: Interaction, target: Any, statement: Statement): Statement {
     return if (interaction.providerStates.isNotEmpty()) {
       var stateChange = statement
-      for (state in interaction.providerStates) {
+      for (state in interaction.providerStates.reversed()) {
         val methods = getAnnotatedMethods(testClass, State::class.java)
           .map { method -> method to method.getAnnotation(State::class.java) }
           .filter { pair -> pair.second.value.contains(state.name) }
