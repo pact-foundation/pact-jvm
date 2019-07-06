@@ -810,4 +810,70 @@ public class PactDslJsonRootValue extends DslPart {
     return value;
   }
 
+  /**
+   * Date value generated from an expression. The date will be formatted as an ISO date.
+   * @param expression Date expression
+   */
+  public static PactDslJsonRootValue dateExpression(String expression) {
+    return dateExpression(expression, DateFormatUtils.ISO_DATE_FORMAT.getPattern());
+  }
+
+  /**
+   * Date value generated from an expression.
+   * @param expression Date expression
+   * @param format Date format to use
+   */
+  public static PactDslJsonRootValue dateExpression(String expression, String format) {
+    FastDateFormat instance = FastDateFormat.getInstance(format);
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    value.generators.addGenerator(Category.BODY, "", new DateGenerator(format, expression));
+    value.setValue(instance.format(new Date(DATE_2000)));
+    value.setMatcher(value.matchDate(format));
+    return value;
+  }
+
+  /**
+   * Time value generated from an expression. The time will be formatted as an ISO time.
+   * @param expression Date expression
+   */
+  public static PactDslJsonRootValue timeExpression(String expression) {
+    return timeExpression(expression, DateFormatUtils.ISO_TIME_NO_T_FORMAT.getPattern());
+  }
+
+  /**
+   * Time value generated from an expression.
+   * @param expression Time expression
+   * @param format Time format to use
+   */
+  public static PactDslJsonRootValue timeExpression(String expression, String format) {
+    FastDateFormat instance = FastDateFormat.getInstance(format);
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    value.generators.addGenerator(Category.BODY, "", new TimeGenerator(format, expression));
+    value.setValue(instance.format(new Date(DATE_2000)));
+    value.setMatcher(value.matchTime(format));
+    return value;
+  }
+
+  /**
+   * Datetime value generated from an expression. The datetime will be formatted as an ISO datetime.
+   * @param expression Datetime expression
+   */
+  public static PactDslJsonRootValue datetimeExpression(String expression) {
+    return datetimeExpression(expression, DateFormatUtils.ISO_DATETIME_FORMAT.getPattern());
+  }
+
+  /**
+   * Datetime value generated from an expression.
+   * @param expression Datetime expression
+   * @param format Datetime format to use
+   */
+  public static PactDslJsonRootValue datetimeExpression(String expression, String format) {
+    FastDateFormat instance = FastDateFormat.getInstance(format);
+    PactDslJsonRootValue value = new PactDslJsonRootValue();
+    value.generators.addGenerator(Category.BODY, "", new DateTimeGenerator(format, expression));
+    value.setValue(instance.format(new Date(DATE_2000)));
+    value.setMatcher(value.matchTimestamp(format));
+    return value;
+  }
+
 }

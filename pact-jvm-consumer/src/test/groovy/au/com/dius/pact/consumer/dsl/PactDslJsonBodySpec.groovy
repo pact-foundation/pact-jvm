@@ -353,4 +353,24 @@ class PactDslJsonBodySpec extends Specification {
     ]]
   }
 
+  def 'support for date and time expressions'() {
+    given:
+    PactDslJsonBody body = new PactDslJsonBody()
+    body.dateExpression('dateExp', 'today + 1 day')
+      .timeExpression('timeExp', 'now + 1 hour')
+      .datetimeExpression('datetimeExp', 'today + 1 hour')
+      .closeObject()
+
+    expect:
+    body.matchers.toMap(PactSpecVersion.V3) == [
+      '$.dateExp': [matchers: [[match: 'date', date: 'yyyy-MM-dd']], combine: 'AND'],
+      '$.timeExp': [matchers: [[match: 'time', time: 'HH:mm:ss']], combine: 'AND'],
+      '$.datetimeExp': [matchers: [[match: 'timestamp', timestamp: "yyyy-MM-dd'T'HH:mm:ss"]], combine: 'AND']]
+
+    body.generators.toMap(PactSpecVersion.V3) == [body: [
+      '$.dateExp': [type: 'Date', format: 'yyyy-MM-dd', expression: 'today + 1 day'],
+      '$.timeExp': [type: 'Time', format: 'HH:mm:ss', expression: 'now + 1 hour'],
+      '$.datetimeExp': [type: 'DateTime', format: "yyyy-MM-dd'T'HH:mm:ss", expression: 'today + 1 hour']]]
+  }
+
 }

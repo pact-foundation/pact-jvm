@@ -212,4 +212,24 @@ class PactDslJsonArraySpec extends Specification {
     ]
   }
 
+  def 'support for date and time expressions'() {
+    given:
+    PactDslJsonArray body = new PactDslJsonArray()
+    body.dateExpression('today + 1 day')
+      .timeExpression('now + 1 hour')
+      .datetimeExpression('today + 1 hour')
+      .closeArray()
+
+    expect:
+    body.matchers.toMap(PactSpecVersion.V3) == [
+      '$[0]': [matchers: [[match: 'date', date: 'yyyy-MM-dd']], combine: 'AND'],
+      '$[1]': [matchers: [[match: 'time', time: 'HH:mm:ss']], combine: 'AND'],
+      '$[2]': [matchers: [[match: 'timestamp', timestamp: "yyyy-MM-dd'T'HH:mm:ss"]], combine: 'AND']]
+
+    body.generators.toMap(PactSpecVersion.V3) == [body: [
+      '$[0]': [type: 'Date', format: 'yyyy-MM-dd', expression: 'today + 1 day'],
+      '$[1]': [type: 'Time', format: 'HH:mm:ss', expression: 'now + 1 hour'],
+      '$[2]': [type: 'DateTime', format: "yyyy-MM-dd'T'HH:mm:ss", expression: 'today + 1 hour']]]
+  }
+
 }
