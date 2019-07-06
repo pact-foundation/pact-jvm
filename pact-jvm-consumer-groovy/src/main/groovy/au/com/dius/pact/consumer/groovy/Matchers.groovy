@@ -12,7 +12,7 @@ import java.util.regex.Pattern
 /**
  * Base class for DSL matcher methods
  */
-@SuppressWarnings(['DuplicateNumberLiteral', 'ConfusingMethodName'])
+@SuppressWarnings(['DuplicateNumberLiteral', 'ConfusingMethodName', 'MethodCount'])
 class Matchers {
 
   static final String HEXADECIMAL = '[0-9a-fA-F]+'
