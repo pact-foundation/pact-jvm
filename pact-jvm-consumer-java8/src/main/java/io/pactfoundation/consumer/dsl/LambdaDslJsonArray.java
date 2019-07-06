@@ -471,4 +471,61 @@ public class LambdaDslJsonArray {
     public DslPart build() {
         return pactArray;
     }
+
+  /**
+   * Date value generated from the provided expression. Will use an ISO format.
+   * @param expression Date expression
+   */
+  public LambdaDslJsonArray dateExpression(String expression) {
+    pactArray.dateExpression(expression);
+    return this;
+  }
+
+  /**
+   * Date value generated from the provided expression
+   * @param expression Date expression
+   * @param format Date format to use for values
+   */
+  public LambdaDslJsonArray dateExpression(String expression, String format) {
+    pactArray.dateExpression(expression, format);
+    return this;
+  }
+
+  /**
+   * Time value generated from the provided expression. Will use an ISO format.
+   * @param expression Time expression
+   */
+  public LambdaDslJsonArray timeExpression(String expression) {
+    pactArray.timeExpression(expression);
+    return this;
+  }
+
+  /**
+   * Time value generated from the provided expression
+   * @param expression Time expression
+   * @param format Time format to use for values
+   */
+  public LambdaDslJsonArray timeExpression(String expression, String format) {
+    pactArray.timeExpression(expression, format);
+    return this;
+  }
+
+  /**
+   * Datetime generated from the provided expression. Will use an ISO format.
+   * @param expression Datetime expression
+   */
+  public LambdaDslJsonArray datetimeExpression(String expression) {
+    pactArray.datetimeExpression(expression);
+    return this;
+  }
+
+  /**
+   * Datetime generated from the provided expression
+   * @param expression Datetime expression
+   * @param format Datetime format to use for values
+   */
+  public LambdaDslJsonArray datetimeExpression(String expression, String format) {
+    pactArray.datetimeExpression(expression, format);
+    return this;
+  }
 }
