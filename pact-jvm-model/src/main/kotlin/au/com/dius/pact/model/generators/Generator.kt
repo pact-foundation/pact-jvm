@@ -270,10 +270,12 @@ data class TimeGenerator @JvmOverloads constructor(val format: String? = null, v
   }
 
   override fun generate(context: Map<String, Any?>): Any {
-    return if (format != null) {
-      OffsetTime.now().format(DateTimeFormatter.ofPattern(format))
+    val base = if (context.containsKey("baseTime")) context["baseTime"] as OffsetTime else OffsetTime.now()
+    val time = TimeExpression.executeTimeExpression(base, expression).getOr { base }
+    return if (!format.isNullOrEmpty()) {
+      time.format(DateTimeFormatter.ofPattern(format))
     } else {
-      LocalTime.now().toString()
+      time.toString()
     }
   }
 
@@ -301,10 +303,11 @@ data class DateTimeGenerator @JvmOverloads constructor(val format: String? = nul
   }
 
   override fun generate(context: Map<String, Any?>): Any {
+    val datetime = /*DateTimeExpression.executeDateTimeExpression(ZonedDateTime.now(), expression).getOr {*/ ZonedDateTime.now() /*}*/
     return if (!format.isNullOrEmpty()) {
-      ZonedDateTime.now().format(DateTimeFormatter.ofPattern(format))
+      datetime.format(DateTimeFormatter.ofPattern(format))
     } else {
-      LocalDateTime.now().toString()
+      datetime.toString()
     }
   }
 

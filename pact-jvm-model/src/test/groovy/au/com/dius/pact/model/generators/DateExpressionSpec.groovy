@@ -28,6 +28,7 @@ class DateExpressionSpec extends Specification {
         'yesterday'                        | '1999-12-31T00:00Z'
         'tomorrow'                         | '2000-01-02T00:00Z'
         '+ 1 day'                          | '2000-01-02T00:00Z'
+        '+ 1 week'                         | '2000-01-08T00:00Z'
         '- 2 weeks'                        | '1999-12-18T00:00Z'
         '+ 4 years'                        | '2004-01-01T00:00Z'
         'tomorrow+ 4 years'                | '2004-01-02T00:00Z'
