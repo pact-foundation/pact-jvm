@@ -338,6 +338,8 @@ The following project properties can be specified with `-Pproperty=value` on the
 |pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
 |pact.verifier.publishResults|Publishing of verification results will be skipped unless this property is set to 'true'|
 |pact.matching.wildcard|Enables matching of map values ignoring the keys when this property is set to 'true'|
+|pact.verifier.disableUrlPathDecoding|Disables decoding of request paths|
+|pact.pactbroker.httpclient.usePreemptiveAuthentication|Enables preemptive authentication with the pact broker when set to `true`|
 
 ## Provider States
 
@@ -560,6 +562,9 @@ pact {
     
 }
 ```
+
+Preemptive Authentication can be enabled by setting the `pact.pactbroker.httpclient.usePreemptiveAuthentication` Java
+system property to `true`.
 
 ## Verifying pact files from a S3 bucket [version 3.3.2+/2.4.17+]
 

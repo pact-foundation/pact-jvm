@@ -233,6 +233,9 @@ annotation. For example:
 
 The `username` and `password` values also take Java system property expressions.
 
+Preemptive Authentication can be enabled by setting the `pact.pactbroker.httpclient.usePreemptiveAuthentication` Java
+system property to `true`.
+
 ### Pact Url
 
 To use pacts from urls annotate the test class with
