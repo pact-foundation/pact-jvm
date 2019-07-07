@@ -1,5 +1,20 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.6.11 - Implemented Date and Time expressions with generators
+
+* 00699133 - feat: updated the readmes about enabling Preemptive Authentication when acessing the pact broker #902 (Ronald Holshausen, Sun Jul 7 17:12:28 2019 +1000)
+* f8fa4242 - feat: implemented Preemptive Authentication when acessing the pact broker #902 (Ronald Holshausen, Sun Jul 7 16:59:53 2019 +1000)
+* 74868d61 - feat: enabled datetime expressions for generators (Ronald Holshausen, Sun Jul 7 15:51:43 2019 +1000)
+* 72415b40 - feat: implemented time expressions for time generator (Ronald Holshausen, Sun Jul 7 14:04:45 2019 +1000)
+* 703f1f68 - fix: failing test (Ronald Holshausen, Sat Jul 6 18:59:13 2019 +1000)
+* 1e32f8e3 - feat: implemented date and time expression support in the Java 8 DSL (Ronald Holshausen, Sat Jul 6 18:40:17 2019 +1000)
+* cfc3b2f7 - chore: upgraded AWS S3 library to latest (Ronald Holshausen, Sat Jul 6 18:10:21 2019 +1000)
+* ab3077f5 - feat: implemented date and time expression support in the Java DSL (Ronald Holshausen, Sat Jul 6 17:52:48 2019 +1000)
+* 07ddfae8 - fix: code narc errors (Ronald Holshausen, Sat Jul 6 16:40:00 2019 +1000)
+* efd6f98d - feat: added support for date expressions to the groovy DSL (Ronald Holshausen, Sat Jul 6 16:27:16 2019 +1000)
+* cf7a3afd - fix: make sure JUnit tests execute the provider states in the correct order #897 (Ronald Holshausen, Sat Jul 6 15:51:25 2019 +1000)
+* 1eab4db3 - bump version to 3.6.11 (Ronald Holshausen, Wed Jun 26 10:32:07 2019 +1000)
+
 # 3.6.10 - Publish failed test results
 
 * ef027f6f - feat: compare XML child elements by tag and not index #899 (Ronald Holshausen, Tue Jun 25 17:42:59 2019 +1000)
