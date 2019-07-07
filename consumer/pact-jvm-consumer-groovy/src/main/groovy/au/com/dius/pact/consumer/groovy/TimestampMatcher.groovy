@@ -12,6 +12,7 @@ import org.apache.commons.lang3.time.DateFormatUtils
 class TimestampMatcher extends Matcher {
 
   String pattern
+  String expression = null
 
   String getPattern() {
     pattern ?: DateFormatUtils.ISO_DATETIME_FORMAT.pattern
@@ -26,7 +27,7 @@ class TimestampMatcher extends Matcher {
   }
 
   Generator getGenerator() {
-    super.@value == null ? new DateTimeGenerator(getPattern(), null) : null
+    super.@value == null ? new DateTimeGenerator(getPattern(), expression) : null
   }
 
 }

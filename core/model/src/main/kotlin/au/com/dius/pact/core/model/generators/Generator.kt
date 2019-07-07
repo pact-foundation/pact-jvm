@@ -12,11 +12,8 @@ import mu.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
 import java.math.BigDecimal
-import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.OffsetTime
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
@@ -272,10 +269,12 @@ data class TimeGenerator @JvmOverloads constructor(val format: String? = null, v
   }
 
   override fun generate(context: Map<String, Any?>): Any {
-    return if (format != null) {
-      OffsetTime.now().format(DateTimeFormatter.ofPattern(format))
+    val base = if (context.containsKey("baseTime")) context["baseTime"] as OffsetTime else OffsetTime.now()
+    val time = TimeExpression.executeTimeExpression(base, expression).getOr { base }
+    return if (!format.isNullOrEmpty()) {
+      time.format(DateTimeFormatter.ofPattern(format))
     } else {
-      LocalTime.now().toString()
+      time.toString()
     }
   }
 
@@ -303,10 +302,11 @@ data class DateTimeGenerator @JvmOverloads constructor(val format: String? = nul
   }
 
   override fun generate(context: Map<String, Any?>): Any {
+    val datetime = DateTimeExpression.executeExpression(OffsetDateTime.now(), expression).getOr { OffsetDateTime.now() }
     return if (!format.isNullOrEmpty()) {
-      ZonedDateTime.now().format(DateTimeFormatter.ofPattern(format))
+      datetime.format(DateTimeFormatter.ofPattern(format))
     } else {
-      LocalDateTime.now().toString()
+      datetime.toString()
     }
   }
 

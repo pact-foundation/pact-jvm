@@ -17,25 +17,11 @@ plugins {
   id 'com.github.johnrengelman.shadow' version '5.0.0' apply false
 }
 
-repositories {
-  mavenLocal()
-  mavenCentral()
-  jcenter()
-}
-
 import org.apache.commons.text.StringEscapeUtils
 
-String buildName(Project project) {
-  if (project.name.startsWith('pact-jvm')) {
-    project.name
-  } else {
-    if (project.parent) {
-      buildName(project.parent) + '-' + project.name
-    } else {
-      project.name
-    }
-  }
-}
+def scalaVersionLookup = [
+  '2.12': '2.12.7'
+]
 
 allprojects {
   apply plugin: 'maven-publish'

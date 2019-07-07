@@ -96,7 +96,7 @@ open class HttpTarget
     verifier.initialiseReporters(provider)
     verifier.reportVerificationForConsumer(consumer, provider)
 
-    if (!interaction.providerStates.isEmpty()) {
+    if (interaction.providerStates.isNotEmpty()) {
       for ((name) in interaction.providerStates) {
         verifier.reportStateForInteraction(name, provider, consumer, true)
       }
@@ -117,7 +117,7 @@ open class HttpTarget
     providerInfo.insecure = insecure
 
     val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
-    if (!methods.isEmpty()) {
+    if (methods.isNotEmpty()) {
       providerInfo.setRequestFilter(Consumer { httpRequest: HttpRequest ->
         methods.forEach { method ->
           try {

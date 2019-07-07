@@ -3,6 +3,7 @@ package au.com.dius.pact.core.support
 import mu.KLogging
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
+import org.apache.http.client.CredentialsProvider
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
@@ -22,14 +23,16 @@ object HttpClient : KLogging() {
     defaultHeaderStore: MutableMap<String, String>,
     maxPublishRetries: Int = 5,
     publishRetryInterval: Int = 3000
-  ): CloseableHttpClient {
+  ): Pair<CloseableHttpClient, CredentialsProvider?> {
     val retryStrategy = CustomServiceUnavailableRetryStrategy(maxPublishRetries, publishRetryInterval)
     val builder = HttpClients.custom().useSystemProperties().setServiceUnavailableRetryStrategy(retryStrategy)
+
+    var credsProvider: CredentialsProvider? = null
     if (options is List<*>) {
       when (val scheme = options.first().toString().toLowerCase()) {
         "basic" -> {
           if (options.size > 2) {
-            val credsProvider = BasicCredentialsProvider()
+            credsProvider = BasicCredentialsProvider()
             credsProvider.setCredentials(AuthScope(uri.host, uri.port),
               UsernamePasswordCredentials(options[1].toString(), options[2].toString()))
             builder.setDefaultCredentialsProvider(credsProvider)
@@ -48,6 +51,6 @@ object HttpClient : KLogging() {
       }
     }
 
-    return builder.build()
+    return builder.build() to credsProvider
   }
 }

@@ -19,14 +19,18 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import mu.KLogging
+import org.apache.http.HttpHost
 import org.apache.http.HttpMessage
 import org.apache.http.HttpResponse
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpPut
+import org.apache.http.client.protocol.HttpClientContext
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
+import org.apache.http.impl.auth.BasicScheme
+import org.apache.http.impl.client.BasicAuthCache
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.util.EntityUtils
 import java.net.URI
@@ -130,6 +134,7 @@ open class HalClient @JvmOverloads constructor(
 ) : IHalClient {
 
   var httpClient: CloseableHttpClient? = null
+  var httpContext: HttpClientContext? = null
   var pathInfo: JsonElement? = null
   var lastUrl: String? = null
   var defaultHeaders: MutableMap<String, String> = mutableMapOf()
@@ -145,7 +150,7 @@ open class HalClient @JvmOverloads constructor(
   }
 
   fun <Method : HttpMessage> initialiseRequest(method: Method): Method {
-    defaultHeaders.forEach { key, value -> method.addHeader(key, value) }
+    defaultHeaders.forEach { (key, value) -> method.addHeader(key, value) }
     return method
   }
 
@@ -164,7 +169,7 @@ open class HalClient @JvmOverloads constructor(
       httpPost.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
       httpPost.entity = StringEntity(body, ContentType.APPLICATION_JSON)
 
-      client.execute(httpPost).use {
+      client.execute(httpPost, httpContext).use {
         logger.debug { "Got response ${it.statusLine}" }
         logger.debug { "Response body: ${it.entity?.content?.reader()?.readText()}" }
         if (handler != null) {
@@ -181,8 +186,21 @@ open class HalClient @JvmOverloads constructor(
       if (options.containsKey("authentication") && options["authentication"] !is List<*>) {
         HttpClient.logger.warn { "Authentication options needs to be a list of values, ignoring." }
       }
-      httpClient = HttpClient.newHttpClient(options["authentication"], URI(baseUrl), defaultHeaders,
+      val uri = URI(baseUrl)
+      val result = HttpClient.newHttpClient(options["authentication"], uri, defaultHeaders,
         this.maxPublishRetries, this.publishRetryInterval)
+      httpClient = result.first
+
+      if (System.getProperty(PREEMPTIVE_AUTHENTICATION) == "true") {
+        val targetHost = HttpHost(uri.host, uri.port, "http")
+        logger.warn { "Using preemptive basic authentication with the pact broker at $targetHost" }
+        val authCache = BasicAuthCache()
+        val basicAuth = BasicScheme()
+        authCache.put(targetHost, basicAuth)
+        httpContext = HttpClientContext.create()
+        httpContext!!.credentialsProvider = result.second
+        httpContext!!.authCache = authCache
+      }
     }
 
     return httpClient!!
@@ -214,7 +232,7 @@ open class HalClient @JvmOverloads constructor(
       httpGet.addHeader("Content-Type", "application/json")
       httpGet.addHeader("Accept", "application/hal+json, application/json")
 
-      val response = httpClient!!.execute(httpGet)
+      val response = httpClient!!.execute(httpGet, httpContext)
       if (response.statusLine.statusCode < 300) {
         val contentType = ContentType.getOrDefault(response.entity)
         if (isJsonResponse(contentType)) {
@@ -325,7 +343,7 @@ open class HalClient @JvmOverloads constructor(
     httpPut.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
     httpPut.entity = StringEntity(bodyJson, ContentType.APPLICATION_JSON)
 
-    client.execute(httpPut).use {
+    client.execute(httpPut, httpContext).use {
       return when {
         it.statusLine.statusCode < 300 -> {
           EntityUtils.consume(it.entity)
@@ -404,6 +422,8 @@ open class HalClient @JvmOverloads constructor(
   companion object : KLogging() {
     const val ROOT = "/"
     const val LINKS = "_links"
+    const val PREEMPTIVE_AUTHENTICATION = "pact.pactbroker.httpclient.usePreemptiveAuthentication"
+
     val URL_TEMPLATE_REGEX = Regex("\\{(\\w+)\\}")
 
     @JvmStatic

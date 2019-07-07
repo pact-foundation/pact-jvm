@@ -296,7 +296,7 @@ object PactReader : KLogging() {
     } else if (source is InputStream || source is Reader || source is File) {
       return loadPactFromFile(source)
     } else if (source is BrokerUrlSource) {
-      return HttpClient.newHttpClient(options["authentication"], URI(source.pactBrokerUrl), mutableMapOf()).use {
+      return HttpClient.newHttpClient(options["authentication"], URI(source.pactBrokerUrl), mutableMapOf()).first.use {
         loadPactFromUrl(source, options, it)
       }
     } else if (source is URL || source is UrlPactSource) {

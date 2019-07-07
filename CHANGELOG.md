@@ -89,6 +89,32 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 164c7ae2 - fix: pact publishing (Ronald Holshausen, Sun May 12 18:02:42 2019 +1000)
 * 0ff97761 - bump version to 4.0.0-beta.3 (Ronald Holshausen, Sun May 12 18:02:05 2019 +1000)
 
+# 3.6.11 - Implemented Date and Time expressions with generators
+
+* 00699133 - feat: updated the readmes about enabling Preemptive Authentication when acessing the pact broker #902 (Ronald Holshausen, Sun Jul 7 17:12:28 2019 +1000)
+* f8fa4242 - feat: implemented Preemptive Authentication when acessing the pact broker #902 (Ronald Holshausen, Sun Jul 7 16:59:53 2019 +1000)
+* 74868d61 - feat: enabled datetime expressions for generators (Ronald Holshausen, Sun Jul 7 15:51:43 2019 +1000)
+* 72415b40 - feat: implemented time expressions for time generator (Ronald Holshausen, Sun Jul 7 14:04:45 2019 +1000)
+* 703f1f68 - fix: failing test (Ronald Holshausen, Sat Jul 6 18:59:13 2019 +1000)
+* 1e32f8e3 - feat: implemented date and time expression support in the Java 8 DSL (Ronald Holshausen, Sat Jul 6 18:40:17 2019 +1000)
+* cfc3b2f7 - chore: upgraded AWS S3 library to latest (Ronald Holshausen, Sat Jul 6 18:10:21 2019 +1000)
+* ab3077f5 - feat: implemented date and time expression support in the Java DSL (Ronald Holshausen, Sat Jul 6 17:52:48 2019 +1000)
+* 07ddfae8 - fix: code narc errors (Ronald Holshausen, Sat Jul 6 16:40:00 2019 +1000)
+* efd6f98d - feat: added support for date expressions to the groovy DSL (Ronald Holshausen, Sat Jul 6 16:27:16 2019 +1000)
+* cf7a3afd - fix: make sure JUnit tests execute the provider states in the correct order #897 (Ronald Holshausen, Sat Jul 6 15:51:25 2019 +1000)
+* 1eab4db3 - bump version to 3.6.11 (Ronald Holshausen, Wed Jun 26 10:32:07 2019 +1000)
+
+# 3.6.10 - Publish failed test results
+
+* ef027f6f - feat: compare XML child elements by tag and not index #899 (Ronald Holshausen, Tue Jun 25 17:42:59 2019 +1000)
+* 06a736a2 - feat: correctly format message response failed verification results (Ronald Holshausen, Tue Jun 25 14:47:11 2019 +1000)
+* f7ac13f3 - feat: correctly format HTTP response failed verification results (Ronald Holshausen, Tue Jun 25 13:10:24 2019 +1000)
+* d7d12f1c - feat: correctly format failed verification results with an exception (Ronald Holshausen, Mon Jun 24 16:56:45 2019 +1000)
+* 0b94d239 - chore: copied the JSON support utility from v4.0.x (Ronald Holshausen, Mon Jun 24 15:34:22 2019 +1000)
+* a238dd37 - feat: merge the failed verification results into the correct format (Ronald Holshausen, Mon Jun 24 15:29:52 2019 +1000)
+* 28b92ae7 - feat: preserve the interaction ids from the broker (Ronald Holshausen, Mon Jun 24 13:08:52 2019 +1000)
+* f3fa0d10 - bump version to 3.6.10 (Ronald Holshausen, Thu Jun 20 15:40:49 2019 +1000)
+
 # 3.6.9 - Bugfix Release
 
 * 2c111f09 - fix: deprecation warning #894 (Ronald Holshausen, Thu Jun 20 14:42:02 2019 +1000)
