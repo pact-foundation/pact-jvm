@@ -10,11 +10,8 @@ import mu.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
 import java.math.BigDecimal
-import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.OffsetTime
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
@@ -303,7 +300,7 @@ data class DateTimeGenerator @JvmOverloads constructor(val format: String? = nul
   }
 
   override fun generate(context: Map<String, Any?>): Any {
-    val datetime = /*DateTimeExpression.executeDateTimeExpression(ZonedDateTime.now(), expression).getOr {*/ ZonedDateTime.now() /*}*/
+    val datetime = DateTimeExpression.executeExpression(OffsetDateTime.now(), expression).getOr { OffsetDateTime.now() }
     return if (!format.isNullOrEmpty()) {
       datetime.format(DateTimeFormatter.ofPattern(format))
     } else {
