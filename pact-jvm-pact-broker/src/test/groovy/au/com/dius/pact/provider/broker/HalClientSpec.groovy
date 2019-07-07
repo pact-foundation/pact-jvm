@@ -3,9 +3,11 @@ package au.com.dius.pact.provider.broker
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.pactbroker.CustomServiceUnavailableRetryStrategy
+import au.com.dius.pact.pactbroker.HalClientBase
 import au.com.dius.pact.pactbroker.InvalidHalResponse
 import au.com.dius.pact.pactbroker.NotFoundHalResponse
 import org.apache.http.HttpEntity
+import org.apache.http.HttpHost
 import org.apache.http.HttpResponse
 import org.apache.http.ProtocolVersion
 import org.apache.http.client.methods.CloseableHttpResponse
@@ -22,6 +24,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 import com.google.gson.JsonParser
+import spock.util.environment.RestoreSystemProperties
 
 import java.util.function.Consumer
 
@@ -62,6 +65,7 @@ class HalClientSpec extends Specification {
 
     then:
     client.httpClient.credentialsProvider instanceof BasicCredentialsProvider
+    client.httpContext == null
   }
 
   def 'For bearer token authentication scheme adds an authorization header to all requests'() {
@@ -74,8 +78,25 @@ class HalClientSpec extends Specification {
 
     then:
     client.httpClient.credentialsProvider instanceof SystemDefaultCredentialsProvider
+    client.httpContext == null
     client.defaultHeaders == [Authorization: 'Bearer 1234']
     request.getFirstHeader('Authorization').value == 'Bearer 1234'
+  }
+
+  @RestoreSystemProperties
+  def 'populates the auth cache if preemptive authentication system property is enabled'() {
+    given:
+    client.options = [authentication: ['basic', '1', '2']]
+    System.setProperty(HalClientBase.PREEMPTIVE_AUTHENTICATION, 'true')
+    def host = new HttpHost('localhost', 1234, 'http')
+
+    when:
+    client.setupHttpClient()
+
+    then:
+    client.httpClient.credentialsProvider instanceof BasicCredentialsProvider
+    client.httpContext != null
+    client.httpContext.authCache.get(host).toString().startsWith('BASIC')
   }
 
   def 'custom retry strategy is added to execution chain of client'() {
@@ -97,7 +118,7 @@ class HalClientSpec extends Specification {
     client.navigate('pb:latest-provider-pacts')
 
     then:
-    1 * mockClient.execute(_) >> mockResponse
+    1 * mockClient.execute(_, _) >> mockResponse
     thrown(NotFoundHalResponse)
   }
 
@@ -117,7 +138,7 @@ class HalClientSpec extends Specification {
     client.navigate('pb:latest-provider-pacts')
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockRootResponse
+    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockRootResponse
     thrown(InvalidHalResponse)
   }
 
@@ -134,7 +155,7 @@ class HalClientSpec extends Specification {
     client.navigate('pb:latest-provider-pacts')
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockRootResponse
+    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockRootResponse
     thrown(InvalidHalResponse)
   }
 
@@ -151,7 +172,7 @@ class HalClientSpec extends Specification {
     client.navigate('pb:latest-provider-pacts')
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockRootResponse
+    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockRootResponse
     thrown(InvalidHalResponse)
   }
 
@@ -176,8 +197,8 @@ class HalClientSpec extends Specification {
     client.navigate('pb:latest-provider-pacts')
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockRootResponse
-    1 * mockClient.execute({ it.getURI().path == '/link' }) >> mockResponse
+    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockRootResponse
+    1 * mockClient.execute({ it.getURI().path == '/link' }, _) >> mockResponse
     notThrown(InvalidHalResponse)
   }
 
@@ -194,7 +215,7 @@ class HalClientSpec extends Specification {
     client.pacts { called = true }
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockResponse
+    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
     !called
   }
 
@@ -211,7 +232,7 @@ class HalClientSpec extends Specification {
     client.uploadJson('/', '', closure)
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockResponse
+    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
     result == ['OK', 'http/1.1 200 Ok']
   }
 
@@ -230,7 +251,7 @@ class HalClientSpec extends Specification {
 
     then:
     result == ['FAILED', '400 Not OK - 1, 2, 3']
-    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockResponse
+    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
   }
 
   def 'uploading a JSON doc returns the error if unsuccessful due to 409'() {
@@ -247,7 +268,7 @@ class HalClientSpec extends Specification {
     client.uploadJson('/', '', closure)
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockResponse
+    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
     result == ['FAILED', '409 Not OK - error line']
   }
 
@@ -280,7 +301,7 @@ class HalClientSpec extends Specification {
     def mockClient = Mock(CloseableHttpClient)
     client.httpClient = mockClient
     def mockResponse = Mock(CloseableHttpResponse)
-    1 * mockClient.execute(_) >> mockResponse
+    1 * mockClient.execute(_, _) >> mockResponse
     mockResponse.getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), status, 'OK')
 
     expect:
@@ -302,7 +323,7 @@ class HalClientSpec extends Specification {
     def result = client.postJson('path', 'body')
 
     then:
-    1 * mockClient.execute(_) >> { throw new IOException('Boom!') }
+    1 * mockClient.execute(_, _) >> { throw new IOException('Boom!') }
     result instanceof Err
   }
 
@@ -312,7 +333,7 @@ class HalClientSpec extends Specification {
     def mockClient = Mock(CloseableHttpClient)
     client.httpClient = mockClient
     def mockResponse = Mock(CloseableHttpResponse)
-    1 * mockClient.execute(_) >> mockResponse
+    1 * mockClient.execute(_, _) >> mockResponse
     mockResponse.getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
 
     when:
@@ -335,7 +356,7 @@ class HalClientSpec extends Specification {
     client.forAll('missingLink', closure)
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockResponse
+    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
     0 * closure.accept(_)
   }
 
@@ -353,7 +374,7 @@ class HalClientSpec extends Specification {
     client.forAll('simpleLink', closure)
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockResponse
+    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
     1 * closure.accept([link: 'linkData'])
   }
 
@@ -371,7 +392,7 @@ class HalClientSpec extends Specification {
     client.forAll('multipleLink', closure)
 
     then:
-    1 * mockClient.execute({ it.getURI().path == '/' }) >> mockResponse
+    1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
     1 * closure.accept([href: 'one'])
     1 * closure.accept([href: 'two'])
     1 * closure.accept([href: 'three'])
@@ -400,9 +421,9 @@ class HalClientSpec extends Specification {
     client.navigate('pb:latest-provider-pacts-with-tag', provider: providerName, tag: tag)
 
     then:
-    1 * mockClient.execute({ it.URI.path == '/' }) >> mockRootResponse
-    1 * mockClient.execute({ it.URI.rawPath == '/test%2Fprovider%20name-1/tag/test%2Ftag%20name-1' }) >> mockResponse
-    _ * mockClient.execute(_) >> notFoundResponse
+    1 * mockClient.execute({ it.URI.path == '/' }, _) >> mockRootResponse
+    1 * mockClient.execute({ it.URI.rawPath == '/test%2Fprovider%20name-1/tag/test%2Ftag%20name-1' }, _) >> mockResponse
+    _ * mockClient.execute(_, _) >> notFoundResponse
     client.pathInfo['_links']['linkA'].toString() == '"ValueA"'
   }
 
@@ -419,7 +440,7 @@ class HalClientSpec extends Specification {
     def result = client.fetch('https://test.pact.dius.com.au/pacts/provider/Activity Service/consumer/Foo Web Client 2/version/1.0.2')
 
     then:
-    1 * mockClient.execute({ it.URI.toString() == 'https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client%202/version/1.0.2' }) >> mockResponse
+    1 * mockClient.execute({ it.URI.toString() == 'https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client%202/version/1.0.2' }, _) >> mockResponse
     result['_links']['multipleLink']*.toString() == ['"one"', '"two"', '"three"']
   }
 
@@ -479,5 +500,4 @@ class HalClientSpec extends Specification {
     then:
     request.allHeaders.collectEntries { [it.name, it.value] } == [A: 'a', B: 'b']
   }
-
 }

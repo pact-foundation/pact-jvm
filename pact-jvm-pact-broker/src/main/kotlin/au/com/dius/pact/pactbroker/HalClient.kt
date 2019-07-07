@@ -18,6 +18,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import mu.KLogging
+import org.apache.http.HttpHost
 import org.apache.http.HttpMessage
 import org.apache.http.HttpResponse
 import org.apache.http.auth.AuthScope
@@ -26,11 +27,15 @@ import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpPut
+import org.apache.http.client.protocol.HttpClientContext
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
+import org.apache.http.impl.auth.BasicScheme
+import org.apache.http.impl.client.BasicAuthCache
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
+import org.apache.http.protocol.HttpContext
 import org.apache.http.util.EntityUtils
 import java.net.URI
 import java.util.function.BiFunction
@@ -133,6 +138,7 @@ abstract class HalClientBase @JvmOverloads constructor(
 ) : IHalClient {
 
   var httpClient: CloseableHttpClient? = null
+  var httpContext: HttpClientContext? = null
   var pathInfo: JsonElement? = null
   var lastUrl: String? = null
   var defaultHeaders: MutableMap<String, String> = mutableMapOf()
@@ -148,7 +154,7 @@ abstract class HalClientBase @JvmOverloads constructor(
   }
 
   fun <Method : HttpMessage> initialiseRequest(method: Method): Method {
-    defaultHeaders.forEach { key, value -> method.addHeader(key, value) }
+    defaultHeaders.forEach { (key, value) -> method.addHeader(key, value) }
     return method
   }
 
@@ -167,7 +173,7 @@ abstract class HalClientBase @JvmOverloads constructor(
       httpPost.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
       httpPost.entity = StringEntity(body, ContentType.APPLICATION_JSON)
 
-      client.execute(httpPost).use {
+      client.execute(httpPost, httpContext).use {
         logger.debug { "Got response ${it.statusLine}" }
         logger.debug { "Response body: ${it.entity?.content?.reader()?.readText()}" }
         if (handler != null) {
@@ -185,8 +191,7 @@ abstract class HalClientBase @JvmOverloads constructor(
       val builder = HttpClients.custom().useSystemProperties().setServiceUnavailableRetryStrategy(retryStrategy)
       if (options["authentication"] is List<*>) {
         val authentication = options["authentication"] as List<*>
-        val scheme = authentication.first().toString().toLowerCase()
-        when (scheme) {
+        when (val scheme = authentication.first().toString().toLowerCase()) {
           "basic" -> {
             if (authentication.size > 2) {
               val credsProvider = BasicCredentialsProvider()
@@ -194,6 +199,17 @@ abstract class HalClientBase @JvmOverloads constructor(
               credsProvider.setCredentials(AuthScope(uri.host, uri.port),
                 UsernamePasswordCredentials(authentication[1].toString(), authentication[2].toString()))
               builder.setDefaultCredentialsProvider(credsProvider)
+
+              if (System.getProperty(PREEMPTIVE_AUTHENTICATION) == "true") {
+                val targetHost = HttpHost(uri.host, uri.port, "http")
+                logger.warn { "Using preemptive basic authentication with the pact broker at $targetHost" }
+                val authCache = BasicAuthCache()
+                val basicAuth = BasicScheme()
+                authCache.put(targetHost, basicAuth)
+                httpContext = HttpClientContext.create()
+                httpContext!!.credentialsProvider = credsProvider
+                httpContext!!.authCache = authCache
+              }
             } else {
               logger.warn { "Basic authentication requires a username and password, ignoring." }
             }
@@ -244,7 +260,7 @@ abstract class HalClientBase @JvmOverloads constructor(
       httpGet.addHeader("Content-Type", "application/json")
       httpGet.addHeader("Accept", "application/hal+json, application/json")
 
-      val response = httpClient!!.execute(httpGet)
+      val response = httpClient!!.execute(httpGet, httpContext)
       if (response.statusLine.statusCode < 300) {
         val contentType = ContentType.getOrDefault(response.entity)
         if (isJsonResponse(contentType)) {
@@ -355,7 +371,7 @@ abstract class HalClientBase @JvmOverloads constructor(
     httpPut.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
     httpPut.entity = StringEntity(bodyJson, ContentType.APPLICATION_JSON)
 
-    client.execute(httpPut).use {
+    client.execute(httpPut, httpContext).use {
       return when {
         it.statusLine.statusCode < 300 -> {
           EntityUtils.consume(it.entity)
@@ -434,6 +450,8 @@ abstract class HalClientBase @JvmOverloads constructor(
   companion object : KLogging() {
     const val ROOT = "/"
     const val LINKS = "_links"
+    const val PREEMPTIVE_AUTHENTICATION = "pact.pactbroker.httpclient.usePreemptiveAuthentication"
+
     val URL_TEMPLATE_REGEX = Regex("\\{(\\w+)\\}")
 
     @JvmStatic
