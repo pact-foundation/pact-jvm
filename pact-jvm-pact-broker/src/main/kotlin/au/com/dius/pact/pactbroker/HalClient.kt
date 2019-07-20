@@ -201,7 +201,7 @@ abstract class HalClientBase @JvmOverloads constructor(
               builder.setDefaultCredentialsProvider(credsProvider)
 
               if (System.getProperty(PREEMPTIVE_AUTHENTICATION) == "true") {
-                val targetHost = HttpHost(uri.host, uri.port, "http")
+                val targetHost = HttpHost(uri.host, uri.port, uri.scheme)
                 logger.warn { "Using preemptive basic authentication with the pact broker at $targetHost" }
                 val authCache = BasicAuthCache()
                 val basicAuth = BasicScheme()
