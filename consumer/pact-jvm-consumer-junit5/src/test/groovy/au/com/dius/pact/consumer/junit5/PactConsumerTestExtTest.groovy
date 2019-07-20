@@ -38,7 +38,7 @@ class PactConsumerTestExtTest {
   }
 
   @PactTestFor(providerName = 'TestClassWithClassLevelAnnotation', pactMethod = 'pactMethod',
-    hostInterface = 'localhost', port = '8080')
+    hostInterface = 'localhost', port = '8080', pactVersion = PactSpecVersion.V3)
   class TestClassWithClassLevelAnnotation {
     @SuppressWarnings('UnusedMethodParameter')
     RequestResponsePact pactMethod(PactDslWithProvider builder) {
@@ -49,16 +49,27 @@ class PactConsumerTestExtTest {
   class TestClassWithMethodLevelAnnotation {
     @SuppressWarnings('UnusedMethodParameter')
     @PactTestFor(providerName = 'TestClassWithMethodLevelAnnotation', pactMethod = 'pactMethod',
-      hostInterface = 'localhost', port = '8080')
+      hostInterface = 'localhost', port = '8080', pactVersion = PactSpecVersion.V3)
     RequestResponsePact pactMethod(PactDslWithProvider builder) {
       pact
     }
   }
 
-  @PactTestFor(providerName = 'TestClassWithMethodAndClassLevelAnnotation', port = '1234')
+  @PactTestFor(providerName = 'TestClassWithMethodAndClassLevelAnnotation', port = '1234',
+    pactVersion = PactSpecVersion.V1_1)
   class TestClassWithMethodAndClassLevelAnnotation {
     @SuppressWarnings('UnusedMethodParameter')
     @PactTestFor(pactMethod = 'pactMethod', hostInterface = 'testServer')
+    RequestResponsePact pactMethod(PactDslWithProvider builder) {
+      pact
+    }
+  }
+
+  @PactTestFor(providerName = 'TestClassWithMethodAndClassLevelAnnotation', port = '1234',
+    pactVersion = PactSpecVersion.V1_1)
+  class TestClassWithMethodAndClassLevelAnnotation2 {
+    @SuppressWarnings('UnusedMethodParameter')
+    @PactTestFor(pactMethod = 'pactMethod', hostInterface = 'testServer', pactVersion = PactSpecVersion.V3)
     RequestResponsePact pactMethod(PactDslWithProvider builder) {
       pact
     }
@@ -126,6 +137,7 @@ class PactConsumerTestExtTest {
     assertThat(providerInfo.first.providerName, Matchers.is(''))
     assertThat(providerInfo.first.hostInterface, Matchers.is(''))
     assertThat(providerInfo.first.port, Matchers.is(''))
+    assertThat(providerInfo.first.pactVersion, Matchers.is(Matchers.nullValue()))
     assertThat(providerInfo.second, Matchers.is(''))
   }
 
@@ -142,6 +154,7 @@ class PactConsumerTestExtTest {
     assertThat(providerInfo.first.providerName, Matchers.is('TestClassWithClassLevelAnnotation'))
     assertThat(providerInfo.first.hostInterface, Matchers.is('localhost'))
     assertThat(providerInfo.first.port, Matchers.is('8080'))
+    assertThat(providerInfo.first.pactVersion, Matchers.is(PactSpecVersion.V3))
     assertThat(providerInfo.second, Matchers.is('pactMethod'))
   }
 
@@ -158,6 +171,7 @@ class PactConsumerTestExtTest {
     assertThat(providerInfo.first.providerName, Matchers.is('TestClassWithMethodLevelAnnotation'))
     assertThat(providerInfo.first.hostInterface, Matchers.is('localhost'))
     assertThat(providerInfo.first.port, Matchers.is('8080'))
+    assertThat(providerInfo.first.pactVersion, Matchers.is(PactSpecVersion.V3))
     assertThat(providerInfo.second, Matchers.is('pactMethod'))
   }
 
@@ -176,7 +190,23 @@ class PactConsumerTestExtTest {
     assertThat(providerInfo.first.providerName, Matchers.is('TestClassWithMethodAndClassLevelAnnotation'))
     assertThat(providerInfo.first.hostInterface, Matchers.is('testServer'))
     assertThat(providerInfo.first.port, Matchers.is('1234'))
+    assertThat(providerInfo.first.pactVersion, Matchers.is(PactSpecVersion.V1_1))
     assertThat(providerInfo.second, Matchers.is('pactMethod'))
+  }
+
+  @Test
+  @DisplayName('lookupProviderInfo returns the value from the method and then class level annotation (test 2)')
+  void lookupProviderInfo5() {
+    def instance = new TestClassWithMethodAndClassLevelAnnotation2()
+    def context = [
+      'getTestClass': { Optional.of(TestClassWithMethodAndClassLevelAnnotation2) },
+      'getTestInstance': { Optional.of(instance) },
+      'getTestMethod': {
+        Optional.of(TestClassWithMethodAndClassLevelAnnotation2.methods.find { it.name == 'pactMethod' })
+      }
+    ] as ExtensionContext
+    def providerInfo = subject.lookupProviderInfo(context)
+    assertThat(providerInfo.first.pactVersion, Matchers.is(PactSpecVersion.V3))
   }
 
 }

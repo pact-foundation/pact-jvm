@@ -78,7 +78,7 @@ annotation class PactTestFor(
   /**
    * Pact specification version to support. Default is V3.
    */
-  val pactVersion: PactSpecVersion = PactSpecVersion.V3,
+  val pactVersion: PactSpecVersion = PactSpecVersion.UNSPECIFIED,
 
   /**
    * Test method that provides the Pact to use for the test. Default behaviour is to use the first one found.
@@ -113,7 +113,11 @@ data class ProviderInfo @JvmOverloads constructor(
 
   companion object {
     fun fromAnnotation(annotation: PactTestFor): ProviderInfo =
-      ProviderInfo(annotation.providerName, annotation.hostInterface, annotation.port, annotation.pactVersion,
+      ProviderInfo(annotation.providerName, annotation.hostInterface, annotation.port,
+        when (annotation.pactVersion) {
+          PactSpecVersion.UNSPECIFIED -> null
+          else -> annotation.pactVersion
+        },
         when (annotation.providerType) {
           ProviderType.UNSPECIFIED -> null
           else -> annotation.providerType
