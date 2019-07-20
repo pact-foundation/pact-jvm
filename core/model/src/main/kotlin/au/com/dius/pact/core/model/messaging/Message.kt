@@ -42,13 +42,23 @@ class Message @JvmOverloads constructor(
 
   fun getParsedContentType() = parseContentType(this.getContentType())
 
-  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
-    val map = mutableMapOf(
+  override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
+    val map: MutableMap<String, Any?> = mutableMapOf(
       "description" to description,
       "metaData" to metaData
     )
     if (!contents.isMissing()) {
-      map["contents"] = formatContents()
+      map["contents"] = when {
+        isJsonContents() -> {
+          val json = JsonParser().parse(contents.valueAsString())
+          if (json.isJsonPrimitive && json.asJsonPrimitive.isString) {
+            contents.valueAsString()
+          } else {
+            Json.fromJson(json)
+          }
+        }
+        else -> formatContents()
+      }
     }
     if (providerStates.isNotEmpty()) {
       map["providerStates"] = providerStates.map { it.toMap() }
@@ -60,6 +70,15 @@ class Message @JvmOverloads constructor(
       map["generators"] = generators.toMap(pactSpecVersion)
     }
     return map
+  }
+
+  private fun isJsonContents(): Boolean {
+    return if (contents.isPresent()) {
+      val mimeType = parseContentType(getContentType())?.mimeType
+      isJson(mimeType)
+    } else {
+      false
+    }
   }
 
   fun formatContents(): String {

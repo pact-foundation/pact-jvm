@@ -111,16 +111,18 @@ class MessageSpec extends Specification {
   @Unroll
   def 'message to map handles message content correctly'() {
     expect:
-    message.toMap().contents == contents
+    message.toMap(PactSpecVersion.V3).contents == contents
 
     where:
 
     body                               | contentType                | contents
     '{"A": "Value A", "B": "Value B"}' | 'application/json'         | [A: 'Value A', B: 'Value B']
+    '{"A": "Value A", "B": "Value B"}' | ''                         | '{"A": "Value A", "B": "Value B"}'
     '1 2 3 4'                          | 'text/plain'               | '1 2 3 4'
     new String([1, 2, 3, 4] as byte[]) | 'application/octet-stream' | 'AQIDBA=='
 
-    message = new Message(contents: OptionalBody.body(body.bytes), metaData: [contentType: contentType])
+    message = new Message('test', [], OptionalBody.body(body.bytes), new MatchingRulesImpl(), new Generators(),
+      [contentType: contentType])
   }
 
   @Unroll
