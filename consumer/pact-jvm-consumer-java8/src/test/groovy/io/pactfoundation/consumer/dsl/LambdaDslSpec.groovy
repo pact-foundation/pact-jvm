@@ -6,6 +6,8 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import spock.lang.Issue
 import spock.lang.Specification
 
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.function.Consumer
 
 class LambdaDslSpec extends Specification {
@@ -194,13 +196,31 @@ class LambdaDslSpec extends Specification {
     given:
     Consumer<LambdaDslJsonBody> body = { o ->
       o.numberValue('number', 1)
+      o.numberValue('long', 1L)
+      o.numberValue('bigdecimal', 1.1G)
+      o.numberValue('bigint', 1G)
     }
 
     when:
     def result = LambdaDsl.newJsonBody(body).build()
 
     then:
-    result.body.toString() == '{"number":1}'
+    result.body.toString() == '{"number":1,"bigdecimal":1.1,"bigint":1,"long":1}'
+  }
+
+  @Issue('#910')
+  def 'serialise date values correctly'() {
+    given:
+    Consumer<LambdaDslJsonBody> body = { o ->
+      o.date('date1', 'yyyy-MM-dd', new Date(949323600000L))
+      o.date('date3', 'yyyy-MM-dd', ZonedDateTime.of(2000, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
+    }
+
+    when:
+    def result = LambdaDsl.newJsonBody(body).build()
+
+    then:
+    result.body.toString() == '{"date3":"2000-01-01","date1":"2000-02-01"}'
   }
 
 }

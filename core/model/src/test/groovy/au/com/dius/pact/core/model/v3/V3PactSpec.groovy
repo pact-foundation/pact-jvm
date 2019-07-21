@@ -85,7 +85,7 @@ class V3PactSpec extends Specification {
         json.messages.size == 3
         json.messages*.description.toSet() == ['a hello message', 'a new hello message'].toSet()
         json.messages.find { it.description == 'a hello message' && !it.providerStates } ==
-          [contents: '"Hello"', description: 'a hello message', metaData: [ contentType: 'application/json' ]]
+          [contents: 'Hello', description: 'a hello message', metaData: [ contentType: 'application/json' ]]
     }
 
     def 'refuse to merge pacts with different spec versions'() {
