@@ -8,6 +8,7 @@ import spock.lang.Specification
 
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.function.Consumer
 
 class LambdaDslSpec extends Specification {
@@ -211,16 +212,18 @@ class LambdaDslSpec extends Specification {
   @Issue('#910')
   def 'serialise date values correctly'() {
     given:
+    def zonedDateTime = ZonedDateTime.of(2000, 1, 1, 12, 0, 0, 0, ZoneId.of('UTC'))
+    def date = zonedDateTime.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))
     Consumer<LambdaDslJsonBody> body = { o ->
       o.date('date1', 'yyyy-MM-dd', new Date(949323600000L))
-      o.date('date3', 'yyyy-MM-dd', ZonedDateTime.of(2000, 1, 1, 12, 0, 0, 0, ZoneId.of('UTC')))
+      o.date('date3', 'yyyy-MM-dd', zonedDateTime)
     }
 
     when:
     def result = LambdaDsl.newJsonBody(body).build()
 
     then:
-    result.body.toString() == '{"date3":"2000-01-01","date1":"2000-02-01"}'
+    result.body.toString() == '{"date3":"' + date + '","date1":"2000-02-01"}'
   }
 
 }
