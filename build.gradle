@@ -154,14 +154,17 @@ subprojects {
         exceptionFormat "short"
 
         // set options for log level DEBUG
-        debug {
-          events "started", "skipped", "failed"
-          exceptionFormat "full"
+        info {
+          events "skipped", "failed"
+          exceptionFormat "short"
+          showExceptions = true
+//          showCauses =​ true
+//          showStackTraces =​ true
         }
 
         // remove standard output/error logging from --info builds
         // by assigning only 'failed' and 'skipped' events
-        info.events = ["failed", "skipped"]
+//        info.events = ["failed", "skipped"]
       }
     }
   }
