@@ -1,5 +1,12 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.6.12 - Bugfix Release
+
+* 63542f36 - fix: preserve the scheme when adding premtive auth #902 (Ronald Holshausen, Sat Jul 20 17:08:26 2019 +1000)
+* c5cd9362 - fix: allow the pact spec version to be specified at the class level (JUNIT 5) #905 (Ronald Holshausen, Sat Jul 20 16:50:14 2019 +1000)
+* 03544f90 - chore: add readme notes about injecting values from provider states (Ronald Holshausen, Sun Jul 7 18:40:37 2019 +1000)
+* f2115e5d - bump version to 3.6.12 (Ronald Holshausen, Sun Jul 7 18:06:34 2019 +1000)
+
 # 3.6.11 - Implemented Date and Time expressions with generators
 
 * 00699133 - feat: updated the readmes about enabling Preemptive Authentication when acessing the pact broker #902 (Ronald Holshausen, Sun Jul 7 17:12:28 2019 +1000)
