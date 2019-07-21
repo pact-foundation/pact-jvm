@@ -2,4 +2,5 @@ dependencies {
   api project(path: ":consumer:pact-jvm-consumer", configuration: 'default')
 
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testRuntime "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }

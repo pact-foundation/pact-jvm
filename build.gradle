@@ -142,29 +142,19 @@ subprojects {
   test {
     useJUnitPlatform()
 
-    // Show test results.
-    testLogging {
-      events "passed", "skipped", "failed"
-    }
-
     if (System.env.TRAVIS == 'true') {
       testLogging {
-        // set options for log level LIFECYCLE
-        events "failed"
-        exceptionFormat "short"
-
-        // set options for log level DEBUG
-        info {
-          events "skipped", "failed"
-          exceptionFormat "short"
-          showExceptions = true
-//          showCauses =​ true
-//          showStackTraces =​ true
-        }
-
-        // remove standard output/error logging from --info builds
-        // by assigning only 'failed' and 'skipped' events
-//        info.events = ["failed", "skipped"]
+        exceptionFormat "full"
+        showCauses true
+        showExceptions true
+        showStackTraces true
+        showStandardStreams true
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+      }
+    } else {
+      // Show test results.
+      testLogging {
+        events "passed", "skipped", "failed"
       }
     }
   }

@@ -18,5 +18,5 @@ env:
 script:
   - unset _JAVA_OPTIONS
   - ./gradlew --version
-  - ./gradlew --stacktrace --no-daemon -i $PROJECT build
+  - ./gradlew --stacktrace --no-daemon $PROJECT build
 install: true
