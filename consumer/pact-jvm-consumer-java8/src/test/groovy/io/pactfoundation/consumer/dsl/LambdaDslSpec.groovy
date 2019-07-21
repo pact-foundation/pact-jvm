@@ -213,7 +213,7 @@ class LambdaDslSpec extends Specification {
     given:
     Consumer<LambdaDslJsonBody> body = { o ->
       o.date('date1', 'yyyy-MM-dd', new Date(949323600000L))
-      o.date('date3', 'yyyy-MM-dd', ZonedDateTime.of(2000, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
+      o.date('date3', 'yyyy-MM-dd', ZonedDateTime.of(2000, 1, 1, 12, 0, 0, 0, ZoneId.of("UTC")))
     }
 
     when:
