@@ -3,6 +3,7 @@ package io.pactfoundation.consumer.dsl
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray
 import au.com.dius.pact.consumer.dsl.PactDslJsonRootValue
 import au.com.dius.pact.core.model.PactSpecVersion
+import org.apache.commons.lang3.time.FastDateFormat
 import spock.lang.Issue
 import spock.lang.Specification
 
@@ -212,18 +213,22 @@ class LambdaDslSpec extends Specification {
   @Issue('#910')
   def 'serialise date values correctly'() {
     given:
+    def date = new Date(949323600000L)
     def zonedDateTime = ZonedDateTime.of(2000, 1, 1, 12, 0, 0, 0, ZoneId.of('UTC'))
-    def date = zonedDateTime.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))
+    def format = 'yyyy-MM-dd'
+    def date3 = zonedDateTime.format(DateTimeFormatter.ofPattern(format))
+    FastDateFormat instance = FastDateFormat.getInstance(format, TimeZone.getTimeZone('UTC'))
+    def date1 = instance.format(date)
     Consumer<LambdaDslJsonBody> body = { o ->
-      o.date('date1', 'yyyy-MM-dd', new Date(949323600000L))
-      o.date('date3', 'yyyy-MM-dd', zonedDateTime)
+      o.date('date1', format, date, TimeZone.getTimeZone('UTC'))
+      o.date('date3', format, zonedDateTime)
     }
 
     when:
     def result = LambdaDsl.newJsonBody(body).build()
 
     then:
-    result.body.toString() == '{"date3":"' + date + '","date1":"2000-02-01"}'
+    result.body.toString() == '{"date3":"' + date3 + '","date1":"' + date1 + '"}'
   }
 
 }
