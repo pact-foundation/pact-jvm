@@ -10,14 +10,25 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
+import com.google.gson.JsonPrimitive
+import com.google.gson.JsonSerializationContext
+import com.google.gson.JsonSerializer
+import java.lang.reflect.Type
+
+open class NumberSerializer : JsonSerializer<Number> {
+  override fun serialize(src: Number, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+    return JsonPrimitive(src)
+  }
+}
 
 /**
  * JSON support functions
  */
 object Json {
 
-  val gsonPretty: Gson = GsonBuilder().setPrettyPrinting().serializeNulls().create()
-  val gson: Gson = GsonBuilder().serializeNulls().create()
+  val numberAdapter = NumberSerializer()
+  val gsonPretty: Gson = GsonBuilder().setPrettyPrinting().serializeNulls().registerTypeHierarchyAdapter(Number::class.java, numberAdapter).create()
+  val gson: Gson = GsonBuilder().serializeNulls().registerTypeHierarchyAdapter(Number::class.java, numberAdapter).create()
 
   /**
    * Converts an Object graph to a JSON Object
