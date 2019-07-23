@@ -171,7 +171,7 @@ class PactVerificationExtension(
     val providerInfo = testContext.target.getProviderInfo(serviceName, pactSource)
     testContext.providerInfo = providerInfo
 
-    prepareVerifier(testContext, context)
+    prepareVerifier(testContext, context, pactSource)
     store.put("verifier", testContext.verifier)
 
     val requestAndClient = testContext.target.prepareRequest(interaction, testContext.executionContext ?: emptyMap())
@@ -185,7 +185,7 @@ class PactVerificationExtension(
     }
   }
 
-  private fun prepareVerifier(testContext: PactVerificationContext, extContext: ExtensionContext) {
+  private fun prepareVerifier(testContext: PactVerificationContext, extContext: ExtensionContext, pactSource: au.com.dius.pact.core.model.PactSource) {
     val consumer = ConsumerInfo(consumerName ?: pact.consumer.name)
 
     val verifier = ProviderVerifier()
@@ -194,7 +194,7 @@ class PactVerificationExtension(
     setupReporters(verifier, serviceName, interaction.description, extContext, testContext.valueResolver)
 
     verifier.initialiseReporters(testContext.providerInfo)
-    verifier.reportVerificationForConsumer(consumer, testContext.providerInfo)
+    verifier.reportVerificationForConsumer(consumer, testContext.providerInfo, pactSource)
 
     if (!interaction.providerStates.isEmpty()) {
       for ((name) in interaction.providerStates) {

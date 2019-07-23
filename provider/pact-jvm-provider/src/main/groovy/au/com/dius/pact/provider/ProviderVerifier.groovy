@@ -1,13 +1,16 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactReader
+import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
 import groovy.util.logging.Slf4j
+import org.jetbrains.annotations.Nullable
 import scala.Function1
 
 import java.util.function.Function
@@ -46,9 +49,9 @@ class ProviderVerifier extends ProviderVerifierBase {
 
   void runVerificationForConsumer(Map failures, ProviderInfo provider, ConsumerInfo consumer,
                                   PactBrokerClient client = null) {
-    reportVerificationForConsumer(consumer, provider)
     FilteredPact pact = new FilteredPact(loadPactFileForConsumer(consumer),
       this.&filterInteractions as Predicate<Interaction>)
+    reportVerificationForConsumer(consumer, provider, pact.source)
     if (pact.interactions.empty) {
       reporters.each { it.warnPactFileHasNoInteractions(pact) }
     } else {
@@ -66,8 +69,12 @@ class ProviderVerifier extends ProviderVerifierBase {
     }
   }
 
-  void reportVerificationForConsumer(ConsumerInfo consumer, ProviderInfo provider) {
-    reporters.each { it.reportVerificationForConsumer(consumer, provider) }
+  void reportVerificationForConsumer(ConsumerInfo consumer, ProviderInfo provider, @Nullable PactSource pactSource) {
+    if (pactSource instanceof BrokerUrlSource) {
+      reporters.each { it.reportVerificationForConsumer(consumer, provider, ((BrokerUrlSource) pactSource).tag) }
+    } else {
+      reporters.each { it.reportVerificationForConsumer(consumer, provider, null) }
+    }
   }
 
   @SuppressWarnings('ThrowRuntimeException')

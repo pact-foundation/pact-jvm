@@ -81,7 +81,7 @@ class ReadmeExamplePactJVMProviderJUnitTest {
     ProviderVerifier verifier = new ProviderVerifier()
 
     verifier.initialiseReporters(provider)
-    verifier.reportVerificationForConsumer(consumer, provider)
+    verifier.reportVerificationForConsumer(consumer, provider, new UrlSource('http://example.example'))
 
     if (!interaction.getProviderStates().isEmpty()) {
       for (ProviderState providerState: interaction.getProviderStates()) {

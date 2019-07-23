@@ -45,9 +45,13 @@ class AnsiConsoleReporter(
 
   override fun finaliseReport() { }
 
-  override fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo) {
-    AnsiConsole.out().println(Ansi.ansi().a("\nVerifying a pact between ").bold().a(consumer.name)
-      .boldOff().a(" and ").bold().a(provider.name).boldOff())
+  override fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, tag: String?) {
+    val ansi = Ansi.ansi().a("\nVerifying a pact between ").bold().a(consumer.name)
+            .boldOff().a(" and ").bold().a(provider.name).boldOff()
+
+    if (tag != null) ansi.a(" for tag ").a(tag)
+
+    AnsiConsole.out().println(ansi)
   }
 
   override fun verifyConsumerFromUrl(pactUrl: UrlPactSource, consumer: IConsumerInfo) {
