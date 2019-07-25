@@ -846,6 +846,7 @@ public class PactDslJsonRootValue extends DslPart {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
     value.generators.addGenerator(Category.BODY, "", new ProviderStateGenerator(expression));
     value.setValue(example);
+    value.setMatcher(TypeMatcher.INSTANCE);
     return value;
   }
 

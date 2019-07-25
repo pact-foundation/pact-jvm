@@ -1234,6 +1234,7 @@ public class PactDslJsonArray extends DslPart {
   public PactDslJsonArray valueFromProviderState(String expression, Object example) {
     generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new ProviderStateGenerator(expression));
     body.put(example);
+    matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher.INSTANCE);
     return this;
   }
 

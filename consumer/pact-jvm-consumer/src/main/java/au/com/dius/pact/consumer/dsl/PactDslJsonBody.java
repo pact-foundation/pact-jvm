@@ -1298,6 +1298,7 @@ public class PactDslJsonBody extends DslPart {
   public PactDslJsonBody valueFromProviderState(String name, String expression, Object example) {
     generators.addGenerator(Category.BODY, matcherKey(name), new ProviderStateGenerator(expression));
     body.put(name, example);
+    matchers.addRule(matcherKey(name), TypeMatcher.INSTANCE);
     return this;
   }
 

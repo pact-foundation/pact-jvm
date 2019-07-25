@@ -129,6 +129,7 @@ class PactBodyBuilder extends BaseBuilder {
       bodyRepresentation[name] = value.exampleValue
       this.generators.addGenerator(au.com.dius.pact.core.model.generators.Category.BODY, path + buildPath(name),
         new ProviderStateGenerator(value.expression))
+      setMatcherAttribute(new TypeMatcher(), path + buildPath(matcherName))
     } else {
       bodyRepresentation[name] = value
     }
