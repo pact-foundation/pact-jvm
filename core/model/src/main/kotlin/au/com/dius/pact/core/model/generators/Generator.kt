@@ -37,7 +37,8 @@ fun lookupGenerator(generatorJson: JsonObject): Generator? {
     val generatorClass = findGeneratorClass(Json.toString(generatorJson["type"])).kotlin
     val fromJson = when {
       generatorClass.companionObject != null ->
-        generatorClass.companionObjectInstance to generatorClass.companionObject?.declaredMemberFunctions?.find { it.name == "fromJson" }
+        generatorClass.companionObjectInstance to generatorClass.companionObject?.declaredMemberFunctions?.find {
+          it.name == "fromJson" }
       generatorClass.objectInstance != null ->
         generatorClass.objectInstance to generatorClass.declaredMemberFunctions.find { it.name == "fromJson" }
       else -> null
@@ -224,7 +225,10 @@ object UuidGenerator : Generator {
  * Generates a date value for the provided format. If no format is provided, ISO date format is used. If an expression
  * is given, it will be evaluated to generate the date, otherwise 'today' will be used
  */
-data class DateGenerator @JvmOverloads constructor(val format: String? = null, val expression: String? = null) : Generator {
+data class DateGenerator @JvmOverloads constructor(
+  val format: String? = null,
+  val expression: String? = null
+) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     val map = mutableMapOf("type" to "Date")
     if (!format.isNullOrEmpty()) {
@@ -237,7 +241,9 @@ data class DateGenerator @JvmOverloads constructor(val format: String? = null, v
   }
 
   override fun generate(context: Map<String, Any?>): Any {
-    val date = DateExpression.executeDateExpression(OffsetDateTime.now(), expression).getOr { OffsetDateTime.now() }
+    val base = if (context.containsKey("baseDate")) context["baseDate"] as OffsetDateTime
+      else OffsetDateTime.now()
+    val date = DateExpression.executeDateExpression(base, expression).getOr { base }
     return if (!format.isNullOrEmpty()) {
       date.format(DateTimeFormatter.ofPattern(format))
     } else {
@@ -289,7 +295,10 @@ data class TimeGenerator @JvmOverloads constructor(val format: String? = null, v
  * Generates a datetime value for the provided format. If no format is provided, ISO format is used. If an expression
  * is given, it will be evaluated to generate the datetime, otherwise 'now' will be used
  */
-data class DateTimeGenerator @JvmOverloads constructor(val format: String? = null, val expression: String? = null) : Generator {
+data class DateTimeGenerator @JvmOverloads constructor(
+  val format: String? = null,
+  val expression: String? = null
+) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     val map = mutableMapOf("type" to "DateTime")
     if (!format.isNullOrEmpty()) {
@@ -302,7 +311,9 @@ data class DateTimeGenerator @JvmOverloads constructor(val format: String? = nul
   }
 
   override fun generate(context: Map<String, Any?>): Any {
-    val datetime = DateTimeExpression.executeExpression(OffsetDateTime.now(), expression).getOr { OffsetDateTime.now() }
+    val base = if (context.containsKey("baseDateTime")) context["baseDateTime"] as OffsetDateTime
+      else OffsetDateTime.now()
+    val datetime = DateTimeExpression.executeExpression(base, expression).getOr { base }
     return if (!format.isNullOrEmpty()) {
       datetime.format(DateTimeFormatter.ofPattern(format))
     } else {
