@@ -112,7 +112,7 @@ class MockMvcTarget @JvmOverloads constructor(
     verifier.projectClasspath = Supplier { (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs.toList() }
 
     verifier.initialiseReporters(provider)
-    verifier.reportVerificationForConsumer(consumer, provider)
+    verifier.reportVerificationForConsumer(consumer, provider, null)
 
     if (!interaction.providerStates.isEmpty()) {
       for ((name) in interaction.providerStates) {

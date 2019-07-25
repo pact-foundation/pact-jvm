@@ -94,7 +94,7 @@ open class HttpTarget
     setupReporters(verifier, provider.name, interaction.description)
 
     verifier.initialiseReporters(provider)
-    verifier.reportVerificationForConsumer(consumer, provider)
+    verifier.reportVerificationForConsumer(consumer, provider, null)
 
     if (interaction.providerStates.isNotEmpty()) {
       for ((name) in interaction.providerStates) {

@@ -64,7 +64,7 @@ class JsonReporter implements VerifierReporter {
   }
 
   @Override
-  void reportVerificationForConsumer(IConsumerInfo consumer, IProviderInfo provider) {
+  void reportVerificationForConsumer(IConsumerInfo consumer, IProviderInfo provider, @Nullable String tag) {
     jsonData.execution << [
       consumer: [
         name: consumer.name

@@ -22,7 +22,7 @@ interface VerifierReporter {
 
   fun initialise(provider: IProviderInfo)
   fun finaliseReport()
-  fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo)
+  fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, tag: String?)
   fun verifyConsumerFromUrl(pactUrl: UrlPactSource, consumer: IConsumerInfo)
   fun verifyConsumerFromFile(pactFile: PactSource, consumer: IConsumerInfo)
   fun pactLoadFailureForConsumer(consumer: IConsumerInfo, message: String)

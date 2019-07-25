@@ -49,11 +49,11 @@ class JsonReporterSpec extends Specification {
 
     when:
     reporter.initialise(provider1)
-    reporter.reportVerificationForConsumer(consumer, provider1)
+    reporter.reportVerificationForConsumer(consumer, provider1, null)
     reporter.interactionDescription(interaction1)
     reporter.finaliseReport()
     reporter.initialise(provider2)
-    reporter.reportVerificationForConsumer(consumer, provider2)
+    reporter.reportVerificationForConsumer(consumer, provider2, null)
     reporter.interactionDescription(interaction2)
     reporter.finaliseReport()
 
@@ -92,7 +92,7 @@ class JsonReporterSpec extends Specification {
 
     when:
     reporter.initialise(provider1)
-    reporter.reportVerificationForConsumer(consumer, provider1)
+    reporter.reportVerificationForConsumer(consumer, provider1, null)
     reporter.interactionDescription(interaction1)
     reporter.finaliseReport()
 

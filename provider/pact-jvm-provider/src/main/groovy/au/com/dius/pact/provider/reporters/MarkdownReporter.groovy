@@ -40,8 +40,13 @@ class MarkdownReporter implements VerifierReporter {
   }
 
   @Override
-  void reportVerificationForConsumer(IConsumerInfo consumer, IProviderInfo provider) {
-    reportFile.append "## Verifying a pact between _${consumer.name}_ and _${provider.name}_\n"
+  void reportVerificationForConsumer(IConsumerInfo consumer, IProviderInfo provider, @Nullable String tag) {
+    def report = new StringBuilder("## Verifying a pact between _${consumer.name}_ and _${provider.name}_")
+    if (tag != null) {
+      report.append(" for tag ${tag}")
+    }
+    report.append('\n')
+    reportFile.append report.toString()
     reportFile.append '\n'
   }
 
