@@ -317,7 +317,7 @@ the request, you are potentially modifying the contract from the consumer tests!
 ## Turning off URL decoding of the paths in the pact file
 
 By default the paths loaded from the pact file will be decoded before the request is sent to the provider. To turn this
-behaviour off, set the system property `pact.verifier.disableUrlPathDecoding` to `true`.
+behaviour off, set the property `pact.verifier.disableUrlPathDecoding` to `true`.
 
 __*Important Note:*__ If you turn off the url path decoding, you need to ensure that the paths in the pact files are
 correctly encoded. The verifier will not be able to make a request with an invalid encoded path.
@@ -571,8 +571,7 @@ pact {
 }
 ```
 
-Preemptive Authentication can be enabled by setting the `pact.pactbroker.httpclient.usePreemptiveAuthentication` Java
-system property to `true`.
+Preemptive Authentication can be enabled by setting the `pact.pactbroker.httpclient.usePreemptiveAuthentication` property to `true`.
 
 ## Verifying pact files from a S3 bucket
 
