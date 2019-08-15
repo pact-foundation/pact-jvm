@@ -1,5 +1,16 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.0.0-beta.5 - Bugfix Release
+
+* b370475f - chore: update readme (Ronald Holshausen, Sat Jul 27 12:42:31 2019 +1000)
+* 8e5a6194 - fix: correct a flakey date based test (Ronald Holshausen, Fri Jul 26 09:57:56 2019 +1000)
+* 80aa4db4 - fix: when using the values from provider state generator, a type matcher must be set (Ronald Holshausen, Fri Jul 26 09:26:13 2019 +1000)
+* 28b18ce0 - Merge pull request #915 from oswaldquek/master (Ronald Holshausen, Fri Jul 26 08:56:42 2019 +1000)
+* bc0d13bb - feat: specify the pact tag if applicable (Oswald Quek, Tue Jul 23 16:22:28 2019 +0100)
+* 31b81da5 - Merge pull request #913 from igordezky-blackberyy/master (Ronald Holshausen, Wed Jul 24 15:13:38 2019 +1000)
+* f3318bc8 - Fix gson number serialization #912, #908 (Isaac Gordezky, Mon Jul 22 18:39:46 2019 -0400)
+* bd318d9e - bump version to 4.0.0-beta.5 (Ronald Holshausen, Sun Jul 21 15:36:03 2019 +1000)
+
 # 4.0.0-beta.4 - Bugfix Release
 
 * 60bb0288 - chore: release script must check for Java 8 (Ronald Holshausen, Sun Jul 21 15:02:23 2019 +1000)
