@@ -1,11 +1,7 @@
 language: java
 sudo: false
-addons:
-  apt:
-    packages:
-      - oracle-java8-installer
 jdk:
-  - oraclejdk8
+  - openjdk8
 env:
   - TASKS="check_2.12" JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m"
   - TASKS="check_nonscala" JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m"
