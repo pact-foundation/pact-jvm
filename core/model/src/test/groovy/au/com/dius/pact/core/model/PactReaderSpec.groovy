@@ -5,8 +5,10 @@ import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectInputStream
+import com.google.gson.JsonParser
 import org.apache.http.impl.client.BasicCredentialsProvider
 import spock.lang.Specification
+import spock.lang.Unroll
 
 @SuppressWarnings('DuplicateMapLiteral')
 class PactReaderSpec extends Specification {
@@ -310,6 +312,25 @@ class PactReaderSpec extends Specification {
     then:
     pact instanceof MessagePact
     pact.interactions.every { it.interactionId ==~ /^[a-zA-Z0-9]+$/  }
+  }
+
+  @Unroll
+  def 'determining pact spec version'() {
+    expect:
+    PactReader.determineSpecVersion(new JsonParser().parse(json)) == version
+
+    where:
+
+    json                                                      | version
+    '{}'                                                      | '2.0.0'
+    '{"metadata":{}}'                                         | '2.0.0'
+    '{"metadata":{"pactSpecificationVersion":"1.2.3"}}'       | '1.2.3'
+    '{"metadata":{"pactSpecification":"1.2.3"}}'              | '2.0.0'
+    '{"metadata":{"pactSpecification":{}}}'                   | '2.0.0'
+    '{"metadata":{"pactSpecification":{"version":"1.2.3"}}}'  | '1.2.3'
+    '{"metadata":{"pactSpecification":{"version":"3.0"}}}'    | '3.0.0'
+    '{"metadata":{"pact-specification":{"version":"1.2.3"}}}' | '1.2.3'
+
   }
 
 }

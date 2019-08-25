@@ -156,26 +156,38 @@ object PactReader : KLogging() {
   @JvmStatic
   fun loadPact(source: Any, options: Map<String, Any> = emptyMap()): Pact<out Interaction> {
     val pactInfo = loadFile(source, options)
+    val version = determineSpecVersion(pactInfo.first)
+    val specVersion = Version.valueOf(version)
+    return when (specVersion.majorVersion) {
+      3 -> loadV3Pact(pactInfo.second, pactInfo.first.obj)
+      else -> loadV2Pact(pactInfo.second, pactInfo.first.obj)
+    }
+  }
+
+  @JvmStatic
+  fun determineSpecVersion(pactInfo: JsonElement): String {
     var version = "2.0.0"
-    if (pactInfo.first.obj.has("metadata")) {
-      val metadata = pactInfo.first.obj["metadata"].obj
-      val specification = when {
-        metadata.has("pactSpecification") -> metadata["pactSpecification"]
-        metadata.has("pact-specification") -> metadata["pact-specification"]
-        else -> jsonNull
-      }
-      if (specification.isJsonObject && specification.obj.has("version") &&
-        specification.obj["version"].isJsonPrimitive) {
-        version = specification.obj["version"].string
+    if (pactInfo.obj.has("metadata")) {
+      val metadata = pactInfo.obj["metadata"].obj
+      version = when {
+        metadata.has("pactSpecificationVersion") -> metadata["pactSpecificationVersion"].string
+        metadata.has("pactSpecification") -> specVersion(metadata["pactSpecification"], version)
+        metadata.has("pact-specification") -> specVersion(metadata["pact-specification"], version)
+        else -> version
       }
     }
     if (version == "3.0") {
       version = "3.0.0"
     }
-    val specVersion = Version.valueOf(version)
-    return when (specVersion.majorVersion) {
-      3 -> loadV3Pact(pactInfo.second, pactInfo.first.obj)
-      else -> loadV2Pact(pactInfo.second, pactInfo.first.obj)
+    return version
+  }
+
+  private fun specVersion(specification: JsonElement, defaultVersion: String): String {
+    return if (specification.isJsonObject && specification.obj.has("version") &&
+      specification.obj["version"].isJsonPrimitive) {
+      specification.obj["version"].string
+    } else {
+      return defaultVersion
     }
   }
 
