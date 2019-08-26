@@ -159,9 +159,11 @@ open class AmpqTestTarget(val packagesToScan: List<String> = emptyList()) : Test
     if (pactSource is PactBrokerSource<*>) {
       val (_, _, _, pacts) = pactSource
       providerInfo.consumers = pacts.entries.flatMap { e -> e.value.map { p -> ConsumerInfo(e.key.name, p) } }
+        .toMutableList()
     } else if (pactSource is DirectorySource<*>) {
       val (_, pacts) = pactSource
       providerInfo.consumers = pacts.entries.map { e -> ConsumerInfo(e.value.consumer.name, e.value) }
+        .toMutableList()
     }
     return providerInfo
   }

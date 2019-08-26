@@ -135,7 +135,7 @@ object DefaultStateChange : StateChange, KLogging() {
     } catch (e: Exception) {
       verifier.reporters.forEach {
         it.stateChangeRequestFailedWithException(state.name, provider, consumer, isSetup, e,
-          verifier.projectHasProperty.apply(ProviderVerifierBase.PACT_SHOW_STACKTRACE))
+          verifier.projectHasProperty.apply(ProviderVerifier.PACT_SHOW_STACKTRACE))
       }
       return Err(e)
     }

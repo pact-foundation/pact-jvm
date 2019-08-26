@@ -13,16 +13,12 @@ import spock.lang.Unroll
 @SuppressWarnings('DuplicateMapLiteral')
 class PactReaderSpec extends Specification {
 
-  def setup() {
-    GroovySpy(PactReader, global: true)
-  }
-
   def 'loads a pact with no metadata as V2'() {
       given:
       def pactUrl = PactReaderSpec.classLoader.getResource('pact.json')
 
       when:
-      def pact = PactReader.loadPact(pactUrl)
+      def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
 
       then:
       pact instanceof RequestResponsePact
@@ -35,7 +31,7 @@ class PactReaderSpec extends Specification {
       def pactUrl = PactReaderSpec.classLoader.getResource('v1-pact.json')
 
       when:
-      def pact = PactReader.loadPact(pactUrl)
+      def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
 
       then:
       pact instanceof RequestResponsePact
@@ -48,7 +44,7 @@ class PactReaderSpec extends Specification {
       def pactUrl = PactReaderSpec.classLoader.getResource('v2-pact.json')
 
       when:
-      def pact = PactReader.loadPact(pactUrl)
+      def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
 
       then:
       pact instanceof RequestResponsePact
@@ -60,7 +56,7 @@ class PactReaderSpec extends Specification {
       def pactUrl = PactReaderSpec.classLoader.getResource('v3-pact.json')
 
       when:
-      def pact = PactReader.loadPact(pactUrl)
+      def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
 
       then:
       pact instanceof RequestResponsePact
@@ -73,7 +69,7 @@ class PactReaderSpec extends Specification {
     def pactUrl = PactReaderSpec.classLoader.getResource('v3-pact-old-format.json')
 
     when:
-    def pact = PactReader.loadPact(pactUrl)
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
 
     then:
     pact instanceof RequestResponsePact
@@ -86,7 +82,7 @@ class PactReaderSpec extends Specification {
       def pactUrl = PactReaderSpec.classLoader.getResource('v3-message-pact.json')
 
       when:
-      def pact = PactReader.loadPact(pactUrl)
+      def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
 
       then:
       pact instanceof MessagePact
@@ -99,7 +95,7 @@ class PactReaderSpec extends Specification {
       def pactInputStream = PactReaderSpec.classLoader.getResourceAsStream('pact.json')
 
       when:
-      def pact = PactReader.loadPact(pactInputStream)
+      def pact = DefaultPactReader.INSTANCE.loadPact(pactInputStream)
 
       then:
       pact instanceof RequestResponsePact
@@ -111,7 +107,7 @@ class PactReaderSpec extends Specification {
     def pactString = PactReaderSpec.classLoader.getResourceAsStream('pact.json').text
 
     when:
-    def pact = PactReader.loadPact(pactString)
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactString)
 
     then:
     pact instanceof RequestResponsePact
@@ -123,7 +119,7 @@ class PactReaderSpec extends Specification {
     def pactString = 'this is not a pact file!'
 
     when:
-    PactReader.loadPact(pactString)
+    DefaultPactReader.INSTANCE.loadPact(pactString)
 
     then:
     thrown(UnsupportedOperationException)
@@ -134,7 +130,7 @@ class PactReaderSpec extends Specification {
     def pactString = PactReaderSpec.classLoader.getResourceAsStream('pact-invalid-version.json').text
 
     when:
-    def pact = PactReader.loadPact(pactString)
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactString)
 
     then:
     pact instanceof RequestResponsePact
@@ -172,7 +168,7 @@ class PactReaderSpec extends Specification {
     def pactUrl = PactReaderSpec.classLoader.getResource('v2_pact_query.json')
 
     when:
-    def pact = PactReader.loadPact(pactUrl)
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
 
     then:
     pact instanceof RequestResponsePact
@@ -186,7 +182,7 @@ class PactReaderSpec extends Specification {
     def pactUrl = PactReaderSpec.classLoader.getResource('test_pact_v3.json')
 
     when:
-    def pact = PactReader.loadPact(pactUrl)
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
 
     then:
     pact instanceof RequestResponsePact
@@ -201,7 +197,7 @@ class PactReaderSpec extends Specification {
     def pactUrl = PactReaderSpec.classLoader.getResource('test_pact_v3_old_provider_state.json')
 
     when:
-    def pact = PactReader.loadPact(pactUrl)
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
 
     then:
     pact instanceof RequestResponsePact
@@ -215,10 +211,10 @@ class PactReaderSpec extends Specification {
     String pactJson = this.class.getResourceAsStream('/v2-pact.json').text
     S3Object object = Mock()
     object.objectContent >> new S3ObjectInputStream(new ByteArrayInputStream(pactJson.bytes), null)
-    PactReader.s3Client = s3ClientMock
+    DefaultPactReader.INSTANCE.s3Client = s3ClientMock
 
     when:
-    def pact = PactReader.loadPact(pactUrl)
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
 
     then:
     1 * s3ClientMock.getObject('some', 'bucket/aFile.json') >> object
@@ -231,7 +227,7 @@ class PactReaderSpec extends Specification {
     def pactUrl = 'classpath:jar-pacts/test_pact_v3.json'
 
     when:
-    def pact = PactReader.loadPact(pactUrl)
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
 
     then:
     pact instanceof RequestResponsePact
@@ -246,7 +242,7 @@ class PactReaderSpec extends Specification {
     def pactUrl = 'classpath:no_such_pact.json'
 
     when:
-    PactReader.loadPact(pactUrl)
+    DefaultPactReader.INSTANCE.loadPact(pactUrl)
 
     then:
     def e = thrown(RuntimeException)
@@ -258,7 +254,7 @@ class PactReaderSpec extends Specification {
     def pactUrl = PactReaderSpec.classLoader.getResource('test_pact_with_string_body.json')
 
     when:
-    def pact = PactReader.loadPact(pactUrl)
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
 
     then:
     pact instanceof RequestResponsePact
@@ -271,7 +267,7 @@ class PactReaderSpec extends Specification {
     def pactUrl = PactReaderSpec.classLoader.getResource('pact.json')
 
     when:
-    def pact = PactReader.loadPact(new ClosurePactSource({ pactUrl }))
+    def pact = DefaultPactReader.INSTANCE.loadPact(new ClosurePactSource({ pactUrl }))
 
     then:
     pact instanceof RequestResponsePact
@@ -283,7 +279,7 @@ class PactReaderSpec extends Specification {
     def pactUrl = PactReaderSpec.classLoader.getResource('v2-pact-broker.json')
 
     when:
-    def pact = PactReader.loadPact(pactUrl)
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
 
     then:
     pact instanceof RequestResponsePact
@@ -295,7 +291,7 @@ class PactReaderSpec extends Specification {
     def pactUrl = PactReaderSpec.classLoader.getResource('v3-pact-broker.json')
 
     when:
-    def pact = PactReader.loadPact(pactUrl)
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
 
     then:
     pact instanceof RequestResponsePact
@@ -307,7 +303,7 @@ class PactReaderSpec extends Specification {
     def pactUrl = PactReaderSpec.classLoader.getResource('message-pact-broker.json')
 
     when:
-    def pact = PactReader.loadPact(pactUrl)
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
 
     then:
     pact instanceof MessagePact
@@ -317,7 +313,7 @@ class PactReaderSpec extends Specification {
   @Unroll
   def 'determining pact spec version'() {
     expect:
-    PactReader.determineSpecVersion(new JsonParser().parse(json)) == version
+    DefaultPactReader.INSTANCE.determineSpecVersion(new JsonParser().parse(json)) == version
 
     where:
 

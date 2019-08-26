@@ -3,8 +3,8 @@ package au.com.dius.pact.provider.specs2
 import java.io.{File, InputStream, Reader, StringReader}
 import java.util.concurrent.Executors
 
-import au.com.dius.pact.core.model.{PactReader, RequestResponsePact}
 import au.com.dius.pact.core.matchers.{FullResponseMatch, ResponseMatching}
+import au.com.dius.pact.core.model.{DefaultPactReader, RequestResponsePact}
 import au.com.dius.pact.provider.sbtsupport.HttpClient
 import org.specs2.Specification
 import org.specs2.execute.Result
@@ -35,7 +35,7 @@ trait ProviderSpec extends Specification {
   }
 
   override def is = {
-    val pact = PactReader.loadPact(convertInput(honoursPact)).asInstanceOf[RequestResponsePact]
+    val pact = DefaultPactReader.INSTANCE.loadPact(convertInput(honoursPact)).asInstanceOf[RequestResponsePact]
     val fs = JavaConversions.asScalaBuffer(pact.getInteractions).map { interaction =>
       val description = s"${interaction.getProviderStates.asScala.map(_.getName).mkString(", ")} ${interaction.getDescription}"
       val test: String => Result = { url =>

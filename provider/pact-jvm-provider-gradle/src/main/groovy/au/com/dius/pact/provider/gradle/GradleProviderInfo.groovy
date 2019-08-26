@@ -1,6 +1,8 @@
 package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.ConsumersGroup
+import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 import org.gradle.util.ConfigureUtil
 
@@ -13,12 +15,17 @@ class GradleProviderInfo extends ProviderInfo {
     super(name)
   }
 
-  @Override
-  ConsumerInfo hasPactWith(String consumer, Closure closure) {
+  IConsumerInfo hasPactWith(String consumer, Closure closure) {
     def consumerInfo = new ConsumerInfo(consumer, null, true, [], this.verificationType)
     consumers << consumerInfo
     ConfigureUtil.configure(closure, consumerInfo)
     consumerInfo
+  }
+
+  List<IConsumerInfo> hasPactsWith(String consumersGroupName, Closure closure) {
+    def consumersGroup = new ConsumersGroup(consumersGroupName)
+    ConfigureUtil.configure(closure, consumersGroup)
+    setupConsumerListFromPactFiles(consumersGroup)
   }
 
   List hasPactsFromPactBroker(Map options = [:], String pactBrokerUrl, Closure closure) {

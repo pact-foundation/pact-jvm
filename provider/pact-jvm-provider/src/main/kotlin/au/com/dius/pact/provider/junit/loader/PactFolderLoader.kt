@@ -1,9 +1,9 @@
 package au.com.dius.pact.provider.junit.loader
 
+import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.DirectorySource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
-import au.com.dius.pact.core.model.PactReader
 import java.io.File
 import java.net.URL
 import java.net.URLDecoder
@@ -28,7 +28,7 @@ class PactFolderLoader<I>(private val path: File) : PactLoader where I : Interac
     val files = pactFolder.listFiles { _, name -> name.endsWith(".json") }
     if (files != null) {
       for (file in files) {
-        val pact = PactReader.loadPact(file)
+        val pact = DefaultPactReader.loadPact(file)
         if (pact.provider.name == providerName) {
           pacts.add(pact as Pact<I>)
           this.pactSource.pacts.put(file, pact)

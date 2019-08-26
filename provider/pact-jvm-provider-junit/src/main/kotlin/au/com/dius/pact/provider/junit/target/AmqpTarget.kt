@@ -100,10 +100,10 @@ open class AmqpTarget @JvmOverloads constructor(
 
     if (source is PactBrokerSource<*>) {
       val (_, _, _, pacts) = source
-      providerInfo.consumers = pacts.entries.flatMap { e -> e.value.map { p -> ConsumerInfo(e.key.name, p) } }
+      providerInfo.consumers = pacts.entries.flatMap { e -> e.value.map { p -> ConsumerInfo(e.key.name, p) } }.toMutableList()
     } else if (source is DirectorySource<*>) {
       val (_, pacts) = source
-      providerInfo.consumers = pacts.entries.map { e -> ConsumerInfo(e.value.consumer.name, e.value) }
+      providerInfo.consumers = pacts.entries.map { e -> ConsumerInfo(e.value.consumer.name, e.value) }.toMutableList()
     }
 
     return providerInfo

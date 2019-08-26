@@ -59,9 +59,7 @@ abstract class BaseTarget : TestClassAwareTarget {
       verifier.reporters = reports
         .filter { r -> r.isNotEmpty() }
         .map { r ->
-          val reporter = ReporterManager.createReporter(r.trim())
-          reporter.setReportDir(reportDir)
-          reporter.setReportFile(File(reportDir, "$name - $description${reporter.ext}"))
+          val reporter = ReporterManager.createReporter(r.trim(), reportDir)
           reporter
         }
     }

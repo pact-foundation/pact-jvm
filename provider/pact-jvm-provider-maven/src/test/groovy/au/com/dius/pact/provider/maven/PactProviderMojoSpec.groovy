@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.provider.ConsumerInfo
-import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.IProviderVerifier
 import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.settings.Server
 import org.apache.maven.settings.Settings
@@ -138,7 +138,7 @@ class PactProviderMojoSpec extends Specification {
     def dir2 = 'dir2' as File
     def dir3 = 'dir3' as File
     def provider = new Provider(pactFileDirectories: [dir1, dir2], pactFileDirectory: dir3)
-    def verifier = Mock(ProviderVerifier) {
+    def verifier = Mock(IProviderVerifier) {
       verifyProvider(provider) >> [:]
     }
     mojo = Spy(PactProviderMojo) {
@@ -161,7 +161,7 @@ class PactProviderMojoSpec extends Specification {
   def 'fail the build if there are no pacts and failIfNoPactsFound is true'() {
     given:
     def provider = new Provider(pactFileDirectory: 'dir' as File)
-    def verifier = Mock(ProviderVerifier) {
+    def verifier = Mock(IProviderVerifier) {
       verifyProvider(provider) >> [:]
     }
     mojo = Spy(PactProviderMojo) {
@@ -183,7 +183,7 @@ class PactProviderMojoSpec extends Specification {
   def 'do not fail the build if there are no pacts and failIfNoPactsFound is false'() {
     given:
     def provider = new Provider(pactFileDirectory: 'dir' as File)
-    def verifier = Mock(ProviderVerifier) {
+    def verifier = Mock(IProviderVerifier) {
       verifyProvider(provider) >> [:]
     }
     mojo = Spy(PactProviderMojo) {
@@ -206,7 +206,7 @@ class PactProviderMojoSpec extends Specification {
   def 'system property pact.verifier.publishResults true when set with systemPropertyVariables' () {
     given:
     def provider = new Provider(pactFileDirectory: 'dir1' as File)
-    def verifier = Mock(ProviderVerifier) {
+    def verifier = Mock(IProviderVerifier) {
       verifyProvider(provider) >> [:]
     }
     mojo = Spy(PactProviderMojo) {
@@ -231,7 +231,7 @@ class PactProviderMojoSpec extends Specification {
   def 'system property pact.provider.version.trimSnapshot true when set with systemPropertyVariables' () {
     given:
     def provider = new Provider(pactFileDirectory: 'dir1' as File)
-    def verifier = Mock(ProviderVerifier) {
+    def verifier = Mock(IProviderVerifier) {
       verifyProvider(provider) >> [:]
     }
     mojo = Spy(PactProviderMojo) {

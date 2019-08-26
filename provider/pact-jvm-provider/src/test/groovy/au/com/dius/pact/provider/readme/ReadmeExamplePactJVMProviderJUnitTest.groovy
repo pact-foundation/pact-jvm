@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider.readme
 
+import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
-import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.UrlSource
@@ -53,7 +53,7 @@ class ReadmeExamplePactJVMProviderJUnitTest {
     consumer.setPactSource(new UrlSource(
       ReadmeExamplePactJVMProviderJUnitTest.getResource('/pacts/zoo_app-animal_service.json').toString()))
 
-    testConsumerPact = PactReader.loadPact(consumer.getPactSource()) as Pact<RequestResponseInteraction>
+    testConsumerPact = DefaultPactReader.INSTANCE.loadPact(consumer.getPactSource()) as Pact<RequestResponseInteraction>
   }
 
   @Test

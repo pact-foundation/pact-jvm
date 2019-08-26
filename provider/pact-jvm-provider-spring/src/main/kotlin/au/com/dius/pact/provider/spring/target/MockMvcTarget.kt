@@ -131,7 +131,7 @@ class MockMvcTarget @JvmOverloads constructor(
 
     val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
     if (methods.isNotEmpty()) {
-      providerInfo.setRequestFilter(Consumer<HttpRequest> { httpRequest ->
+      providerInfo.requestFilter = Consumer<HttpRequest> { httpRequest ->
         methods.forEach { method ->
           try {
             method.invokeExplosively(testTarget, httpRequest)
@@ -139,7 +139,7 @@ class MockMvcTarget @JvmOverloads constructor(
             throw AssertionError("Request filter method ${method.name} failed with an exception", t)
           }
         }
-      })
+      }
     }
 
     return providerInfo

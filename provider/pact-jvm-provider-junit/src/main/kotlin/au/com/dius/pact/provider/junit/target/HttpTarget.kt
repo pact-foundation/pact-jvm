@@ -118,7 +118,7 @@ open class HttpTarget
 
     val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
     if (methods.isNotEmpty()) {
-      providerInfo.setRequestFilter(Consumer { httpRequest: HttpRequest ->
+      providerInfo.requestFilter = Consumer { httpRequest: HttpRequest ->
         methods.forEach { method ->
           try {
             method.invokeExplosively(testTarget, httpRequest)
@@ -126,7 +126,7 @@ open class HttpTarget
             throw AssertionError("Request filter method ${method.name} failed with an exception", t)
           }
         }
-      })
+      }
     }
 
     return providerInfo

@@ -14,7 +14,7 @@ dependencies {
     implementation 'org.scala-lang:scala-library:2.12.8'
     implementation 'io.github.classgraph:classgraph:4.8.25'
     implementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
-    api 'io.arrow-kt:arrow-core:0.8.2'
+    api 'io.arrow-kt:arrow-core-extensions:0.9.0'
 
     testCompile project(":consumer:pact-jvm-consumer-groovy")
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
@@ -23,11 +23,7 @@ dependencies {
     testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
     testCompile 'net.bytebuddy:byte-buddy:1.9.12'
     testCompile 'org.mockito:mockito-core:2.28.2'
-}
-
-compileGroovy {
-  classpath = classpath.plus(files(compileKotlin.destinationDir))
-  dependsOn compileKotlin
+    testCompile 'javax.xml.bind:jaxb-api:2.3.1'
 }
 
 compileTestGroovy {

@@ -2,10 +2,10 @@ package au.com.dius.pact.core.model.v3
 
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.InvalidPactException
 import au.com.dius.pact.core.model.Pact
-import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.UnknownPactSource
@@ -29,7 +29,7 @@ class V3PactSpec extends Specification {
 
     def 'writing pacts should merge with any existing file'() {
         given:
-        def pact = PactReader.loadV3Pact(UnknownPactSource.INSTANCE, Json.INSTANCE.toJson([
+        def pact = DefaultPactReader.INSTANCE.loadV3Pact(UnknownPactSource.INSTANCE, Json.INSTANCE.toJson([
           consumer: [name: 'consumer'],
           provider: [name: 'provider'],
           messages: [
@@ -54,7 +54,7 @@ class V3PactSpec extends Specification {
 
     def 'when merging it should replace messages with the same description and state'() {
         given:
-        def pact = PactReader.loadV3Pact(UnknownPactSource.INSTANCE, Json.INSTANCE.toJson([
+        def pact = DefaultPactReader.INSTANCE.loadV3Pact(UnknownPactSource.INSTANCE, Json.INSTANCE.toJson([
             consumer: [name: 'consumer'],
             provider: [name: 'provider'],
             messages: [

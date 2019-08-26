@@ -1,39 +1,44 @@
 package au.com.dius.pact.provider
 
 import arrow.core.Either
-import arrow.core.right
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.com.github.michaelbull.result.getError
 import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.matchers.MetadataMismatch
 import au.com.dius.pact.core.matchers.StatusMismatch
+import au.com.dius.pact.core.model.BrokerUrlSource
+import au.com.dius.pact.core.model.DefaultPactReader
+import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.model.PactReader
+import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
+import au.com.dius.pact.core.support.hasProperty
+import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.VerifierReporter
-import groovy.lang.GroovyObjectSupport
+import groovy.lang.Closure
 import io.github.classgraph.ClassGraph
 import mu.KLogging
+import java.io.File
 import java.lang.reflect.Method
 import java.net.URL
 import java.net.URLClassLoader
+import java.util.concurrent.Callable
 import java.util.function.BiConsumer
 import java.util.function.Function
+import java.util.function.Predicate
 import java.util.function.Supplier
-
-@JvmOverloads
-@Deprecated("Use the VerificationReporter instead of this function",
-  ReplaceWith("DefaultVerificationReporter.reportResults(pact, result, version, client)"))
-fun <I> reportVerificationResults(pact: Pact<I>, result: Boolean, version: String, client: PactBrokerClient? = null)
-  where I : Interaction = DefaultVerificationReporter.reportResults(pact, TestResult.fromBoolean(result), version, client)
+import kotlin.reflect.KMutableProperty1
 
 enum class PactVerification {
   REQUEST_RESPONSE, ANNOTATED_METHOD
@@ -59,7 +64,25 @@ annotation class PactVerifyProvider(
   val value: String
 )
 
-data class MessageAndMetadata(val messageData: ByteArray, val metadata: Map<String, Any>)
+data class MessageAndMetadata(val messageData: ByteArray, val metadata: Map<String, Any>) {
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as MessageAndMetadata
+
+    if (!messageData.contentEquals(other.messageData)) return false
+    if (metadata != other.metadata) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = messageData.contentHashCode()
+    result = 31 * result + metadata.hashCode()
+    return result
+  }
+}
 
 /**
  * Interface to the provider verifier
@@ -86,6 +109,11 @@ interface IProviderVerifier {
   var projectHasProperty: Function<String, Boolean>
 
   /**
+   * Callback to fetch a project property
+   */
+  var projectGetProperty: Function<String, String?>
+
+  /**
    * Callback to return the instance for the provider method to invoke
    */
   var providerMethodInstance: Function<Method, Any>
@@ -94,6 +122,21 @@ interface IProviderVerifier {
    * Callback to return the project classpath to use for looking up methods
    */
   var projectClasspath: Supplier<List<URL>>
+
+  /**
+   * Callback to display a pact load error
+   */
+  var pactLoadFailureMessage: Any?
+
+  /**
+   * Callback to get the provider version
+   */
+  var providerVersion: Supplier<String?>
+
+  /**
+   * Run the verification for the given provider and return an failures in a Map
+   */
+  fun verifyProvider(provider: ProviderInfo): MutableMap<String, Any>
 
   /**
    * Reports the state of the interaction to all the registered reporters
@@ -169,20 +212,21 @@ interface IProviderVerifier {
 /**
  * Verifies the providers against the defined consumers in the context of a build plugin
  */
-abstract class ProviderVerifierBase @JvmOverloads constructor (
-  var pactLoadFailureMessage: Any? = null,
+open class ProviderVerifier @JvmOverloads constructor (
+  override var pactLoadFailureMessage: Any? = null,
   override var checkBuildSpecificTask: Function<Any, Boolean> = Function { false },
   override var executeBuildSpecificTask: BiConsumer<Any, ProviderState> = BiConsumer { _, _ -> },
   override var projectClasspath: Supplier<List<URL>> = Supplier { emptyList<URL>() },
-  override var reporters: List<VerifierReporter> = listOf(AnsiConsoleReporter()),
+  override var reporters: List<VerifierReporter> = listOf(AnsiConsoleReporter("console", File("/tmp/"))),
   override var providerMethodInstance: Function<Method, Any> = Function { m -> m.declaringClass.newInstance() },
-  var providerVersion: Supplier<String> = Supplier { System.getProperty(PACT_PROVIDER_VERSION) }
-) : GroovyObjectSupport(), IProviderVerifier {
+  override var providerVersion: Supplier<String?> = Supplier { System.getProperty(PACT_PROVIDER_VERSION) }
+) : IProviderVerifier {
 
   override var projectHasProperty = Function<String, Boolean> { name -> !System.getProperty(name).isNullOrEmpty() }
-  var projectGetProperty = Function<String, String?> { name -> System.getProperty(name) }
+  override var projectGetProperty = Function<String, String?> { name -> System.getProperty(name) }
   var verificationReporter: VerificationReporter = DefaultVerificationReporter
   var stateChangeHandler: StateChange = DefaultStateChange
+  var pactReader: PactReader = DefaultPactReader
 
   /**
    * This will return true unless the pact.verifier.publishResults property has the value of "true"
@@ -287,7 +331,12 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
     }
   }
 
-  fun verifyMessagePact(methods: Set<Method>, message: Message, interactionMessage: String, failures: MutableMap<String, Any>): TestResult {
+  fun verifyMessagePact(
+    methods: Set<Method>,
+    message: Message,
+    interactionMessage: String,
+    failures: MutableMap<String, Any>
+  ): TestResult {
     var result: TestResult = TestResult.Ok
     methods.forEach { method ->
       reporters.forEach { it.generatesAMessageWhich() }
@@ -499,6 +548,141 @@ abstract class ProviderVerifierBase @JvmOverloads constructor (
         "exception" to e, "interactionId" to interaction.interactionId)),
         "Request to provider method failed with an exception")
     }
+  }
+
+  override fun verifyProvider(provider: ProviderInfo): MutableMap<String, Any> {
+    val failures = mutableMapOf<String, Any>()
+
+    initialiseReporters(provider)
+
+    val consumers = provider.consumers.filter(::filterConsumers)
+    if (consumers.isEmpty()) {
+      reporters.forEach { it.warnProviderHasNoConsumers(provider) }
+    }
+
+    consumers.forEach {
+      runVerificationForConsumer(failures, provider, it)
+    }
+
+    return failures
+  }
+
+  fun initialiseReporters(provider: ProviderInfo) {
+    reporters.forEach {
+      if (it.hasProperty("displayFullDiff")) {
+        (it.property("displayFullDiff") as KMutableProperty1<VerifierReporter, Boolean>)
+          .set(it, projectHasProperty.apply(PACT_SHOW_FULLDIFF))
+      }
+      it.initialise(provider)
+    }
+  }
+
+  @JvmOverloads
+  fun runVerificationForConsumer(
+    failures: MutableMap<String, Any>,
+    provider: IProviderInfo,
+    consumer: IConsumerInfo,
+    client: PactBrokerClient? = null
+  ) {
+    val pact = FilteredPact(loadPactFileForConsumer(consumer), Predicate { filterInteractions(it) })
+    reportVerificationForConsumer(consumer, provider, pact.source)
+    if (pact.interactions.isEmpty()) {
+      reporters.forEach { it.warnPactFileHasNoInteractions(pact as Pact<Interaction>) }
+    } else {
+      val result = pact.interactions.map {
+        verifyInteraction(provider, consumer, failures, it)
+      }.reduce { acc, result -> acc.merge(result) }
+      when {
+        pact.isFiltered() -> logger.warn { "Skipping publishing of verification results as the interactions have been filtered" }
+        publishingResultsDisabled() -> logger.warn { "Skipping publishing of verification results as it has been disabled " +
+          "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')" }
+        else -> verificationReporter.reportResults(pact, result, providerVersion.get() ?: "0.0.0", client)
+      }
+    }
+  }
+
+  fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, pactSource: PactSource?) {
+    if (pactSource is BrokerUrlSource) {
+      reporters.forEach { it.reportVerificationForConsumer(consumer, provider, pactSource.tag) }
+    } else {
+      reporters.forEach { it.reportVerificationForConsumer(consumer, provider, null) }
+    }
+  }
+
+  fun loadPactFileForConsumer(consumer: IConsumerInfo): Pact<out Interaction> {
+    var pactSource = consumer.pactSource
+    if (pactSource is Callable<*>) {
+      pactSource = pactSource.call()
+    }
+
+    return if (pactSource is UrlPactSource) {
+      reporters.forEach { it.verifyConsumerFromUrl(pactSource, consumer) }
+      val options = mutableMapOf<String, Any>()
+      if (consumer.pactFileAuthentication.isNotEmpty()) {
+        options["authentication"] = consumer.pactFileAuthentication
+      }
+      pactReader.loadPact(pactSource, options)
+    } else {
+      try {
+        val pact = pactReader.loadPact(pactSource!!)
+        reporters.forEach { it.verifyConsumerFromFile(pact.source, consumer) }
+        pact
+      } catch (e: Exception) {
+        logger.error(e) { "Failed to load pact file" }
+        val message = generateLoadFailureMessage(consumer)
+        reporters.forEach { it.pactLoadFailureForConsumer(consumer, message) }
+        throw RuntimeException(message)
+      }
+    }
+  }
+
+  private fun generateLoadFailureMessage(consumer: IConsumerInfo): String {
+    val callback = pactLoadFailureMessage
+    return when (callback) {
+      is Closure<*> -> callback.call(consumer).toString()
+      is Function<*, *> -> (callback as Function<Any, Any>).apply(consumer).toString()
+      is scala.Function1<*, *> -> (callback as scala.Function1<Any, Any>).apply(consumer).toString()
+      else -> callback as String
+    }
+  }
+
+  fun filterConsumers(consumer: IConsumerInfo): Boolean {
+    return !projectHasProperty.apply(PACT_FILTER_CONSUMERS) ||
+      consumer.name in projectGetProperty.apply(PACT_FILTER_CONSUMERS).toString().split(',').map { it.trim() }
+  }
+
+  fun filterInteractions(interaction: Interaction): Boolean {
+    return if (projectHasProperty.apply(PACT_FILTER_DESCRIPTION) && projectHasProperty.apply(PACT_FILTER_PROVIDERSTATE)) {
+      matchDescription(interaction) && matchState(interaction)
+    } else if (projectHasProperty.apply(PACT_FILTER_DESCRIPTION)) {
+      matchDescription(interaction)
+    } else if (projectHasProperty.apply(PACT_FILTER_PROVIDERSTATE)) {
+      matchState(interaction)
+    } else {
+      true
+    }
+  }
+
+  private fun matchState(interaction: Interaction): Boolean {
+    return if (interaction.providerStates.isNotEmpty()) {
+      interaction.providerStates.any {
+        projectGetProperty.apply(PACT_FILTER_PROVIDERSTATE)?.toRegex()?.matches(it.name) ?: true }
+    } else {
+      projectGetProperty.apply(PACT_FILTER_PROVIDERSTATE).isNullOrEmpty()
+    }
+  }
+
+  private fun matchDescription(interaction: Interaction): Boolean {
+    return projectGetProperty.apply(PACT_FILTER_DESCRIPTION)?.toRegex()?.matches(interaction.description) ?: true
+  }
+
+  override fun reportStateForInteraction(
+    state: String,
+    provider: IProviderInfo,
+    consumer: IConsumerInfo,
+    isSetup: Boolean
+  ) {
+    reporters.forEach { it.stateForInteraction(state, provider, consumer, isSetup) }
   }
 
   companion object : KLogging() {

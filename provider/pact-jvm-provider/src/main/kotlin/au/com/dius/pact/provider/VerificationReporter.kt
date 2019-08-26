@@ -52,5 +52,5 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
   }
 
   override fun publishingResultsDisabled() =
-    System.getProperty(ProviderVerifierBase.PACT_VERIFIER_PUBLISH_RESULTS)?.toLowerCase() != "true"
+    System.getProperty(ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS)?.toLowerCase() != "true"
 }

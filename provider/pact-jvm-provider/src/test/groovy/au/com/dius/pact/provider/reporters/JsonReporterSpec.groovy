@@ -24,7 +24,7 @@ class JsonReporterSpec extends Specification {
 
   def 'does not overwrite the previous report file'() {
     given:
-    def reporter = new JsonReporter(reportDir: reportDir)
+    def reporter = new JsonReporter('test', reportDir)
     def provider1 = new ProviderInfo(name: 'provider1')
     def provider2 = new ProviderInfo(name: 'provider2')
 
@@ -40,7 +40,7 @@ class JsonReporterSpec extends Specification {
 
   def 'merges results with an existing file when the provider matches'() {
     given:
-    def reporter = new JsonReporter(reportDir: reportDir)
+    def reporter = new JsonReporter('test', reportDir)
     def provider1 = new ProviderInfo(name: 'provider1')
     def provider2 = new ProviderInfo(name: 'provider1')
     def consumer = new ConsumerInfo(name: 'Consumer')
@@ -68,7 +68,7 @@ class JsonReporterSpec extends Specification {
 
   def 'overwrites an existing file when the provider does not match'() {
     given:
-    def reporter = new JsonReporter(reportDir: reportDir)
+    def reporter = new JsonReporter('test', reportDir)
     def provider1 = new ProviderInfo(name: 'provider1')
     def consumer = new ConsumerInfo(name: 'Consumer')
     def interaction1 = new RequestResponseInteraction('Interaction 1', [], new Request(), new Response())

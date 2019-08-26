@@ -75,6 +75,8 @@ interface IConsumerInfo {
   var stateChangeUsesBody: Boolean
   var packagesToScan: List<String>
   var verificationType: PactVerification?
+  var pactSource: Any?
+  var pactFileAuthentication: List<Any?>
 }
 
 open class ConsumerInfo @JvmOverloads constructor (
@@ -83,8 +85,8 @@ open class ConsumerInfo @JvmOverloads constructor (
   override var stateChangeUsesBody: Boolean = true,
   override var packagesToScan: List<String> = emptyList(),
   override var verificationType: PactVerification? = null,
-  var pactSource: Any? = null,
-  var pactFileAuthentication: List<Any?> = emptyList()
+  override var pactSource: Any? = null,
+  override var pactFileAuthentication: List<Any?> = emptyList()
 ) : IConsumerInfo {
 
   fun toPactConsumer() = au.com.dius.pact.core.model.Consumer(name)

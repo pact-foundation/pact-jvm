@@ -22,7 +22,7 @@ class MarkdownReporterSpec extends Specification {
 
   def 'does not overwrite the previous report file'() {
     given:
-    def reporter = new MarkdownReporter(reportDir: reportDir)
+    def reporter = new MarkdownReporter('test', reportDir)
     def provider1 = new ProviderInfo(name: 'provider1')
     def provider2 = new ProviderInfo(name: 'provider2')
 
@@ -38,7 +38,7 @@ class MarkdownReporterSpec extends Specification {
 
   def 'appends to an existing report file'() {
     given:
-    def reporter = new MarkdownReporter(reportDir: reportDir)
+    def reporter = new MarkdownReporter('test', reportDir)
     def provider1 = new ProviderInfo(name: 'provider1')
     def consumer = new ConsumerInfo(name: 'Consumer')
     def interaction1 = new RequestResponseInteraction('Interaction 1', [], new Request(), new Response())
@@ -63,7 +63,7 @@ class MarkdownReporterSpec extends Specification {
 
   def 'does not specify tag if not tag is not specified'() {
     given:
-    def reporter = new MarkdownReporter(reportDir: reportDir)
+    def reporter = new MarkdownReporter('test', reportDir)
     def provider1 = new ProviderInfo(name: 'provider1')
     def consumer = new ConsumerInfo(name: 'Consumer')
     def interaction1 = new RequestResponseInteraction('Interaction 1', [], new Request(), new Response())

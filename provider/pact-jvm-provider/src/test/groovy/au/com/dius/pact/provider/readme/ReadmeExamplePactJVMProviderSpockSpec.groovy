@@ -36,8 +36,9 @@ class ReadmeExamplePactJVMProviderSpockSpec extends Specification {
     serviceProvider.port = 8080
     serviceProvider.path = '/'
 
-    serviceProvider.hasPactWith('zoo_app') {
-      pactSource = new FileSource(new File(ResourceHelpers.resourceFilePath('pacts/zoo_app-animal_service.json')))
+    serviceProvider.hasPactWith('zoo_app') { consumer ->
+      consumer.pactSource = new FileSource(new File(ResourceHelpers.resourceFilePath(
+        'pacts/zoo_app-animal_service.json')))
     }
   }
 

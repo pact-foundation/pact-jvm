@@ -210,7 +210,7 @@ class PactSerialiserSpec extends Specification {
     pact.interactions[0].response == response
 
     where:
-    pact = PactReader.loadPact(loadTestFile('test_pact.json'))
+    pact = DefaultPactReader.INSTANCE.loadPact(loadTestFile('test_pact.json'))
   }
 
   def 'PactSerialiser must de-serialise V3 pact'() {
@@ -225,7 +225,7 @@ class PactSerialiserSpec extends Specification {
     pact.interactions[0].response == response
 
     where:
-    pact = PactReader.loadPact(loadTestFile('test_pact_v3.json'))
+    pact = DefaultPactReader.INSTANCE.loadPact(loadTestFile('test_pact_v3.json'))
   }
 
   def 'PactSerialiser must de-serialise pact with matchers'() {
@@ -233,7 +233,7 @@ class PactSerialiserSpec extends Specification {
     pact == pactWithMatchers
 
     where:
-    pact = PactReader.loadPact(loadTestFile('test_pact_matchers.json'))
+    pact = DefaultPactReader.INSTANCE.loadPact(loadTestFile('test_pact_matchers.json'))
   }
 
   def 'PactSerialiser must de-serialise pact matchers in old format'() {
@@ -241,7 +241,7 @@ class PactSerialiserSpec extends Specification {
     pact == pactWithMatchers
 
     where:
-    pact = PactReader.loadPact(loadTestFile('test_pact_matchers_old_format.json'))
+    pact = DefaultPactReader.INSTANCE.loadPact(loadTestFile('test_pact_matchers_old_format.json'))
   }
 
   def 'PactSerialiser must convert http methods to upper case'() {
@@ -251,7 +251,7 @@ class PactSerialiserSpec extends Specification {
         request, response, null)])
 
     where:
-    pact = PactReader.loadPact(loadTestFile('test_pact_lowercase_method.json'))
+    pact = DefaultPactReader.INSTANCE.loadPact(loadTestFile('test_pact_lowercase_method.json'))
   }
 
   def 'PactSerialiser must not convert fields called \'body\''() {
@@ -274,7 +274,7 @@ class PactSerialiserSpec extends Specification {
 
     where:
     pactBody = Json.INSTANCE.toMap(new JsonParser().parse(
-      PactReader.loadPact(loadTestFile('test_pact_with_bodies.json'))
+      DefaultPactReader.INSTANCE.loadPact(loadTestFile('test_pact_with_bodies.json'))
         .interactions[0].request.body.valueAsString()))
   }
 
@@ -285,7 +285,7 @@ class PactSerialiserSpec extends Specification {
         ModelFixtures.requestNoBody, ModelFixtures.responseNoBody, null)])
 
     where:
-    pact = PactReader.loadPact(loadTestFile('test_pact_no_bodies.json'))
+    pact = DefaultPactReader.INSTANCE.loadPact(loadTestFile('test_pact_no_bodies.json'))
   }
 
   def 'PactSerialiser must deserialise pact with query in old format'() {
@@ -295,7 +295,7 @@ class PactSerialiserSpec extends Specification {
         request, response, null)])
 
     where:
-    pact = PactReader.loadPact(loadTestFile('test_pact_query_old_format.json'))
+    pact = DefaultPactReader.INSTANCE.loadPact(loadTestFile('test_pact_query_old_format.json'))
   }
 
   def 'PactSerialiser must deserialise pact with no version'() {
@@ -305,7 +305,7 @@ class PactSerialiserSpec extends Specification {
         request, response, null)])
 
     where:
-    pact = PactReader.loadPact(loadTestFile('test_pact_no_version.json'))
+    pact = DefaultPactReader.INSTANCE.loadPact(loadTestFile('test_pact_no_version.json'))
   }
 
   def 'PactSerialiser must deserialise pact with no specification version'() {
@@ -315,7 +315,7 @@ class PactSerialiserSpec extends Specification {
         request, response, null)])
 
     where:
-    pact = PactReader.loadPact(loadTestFile('test_pact_no_spec_version.json'))
+    pact = DefaultPactReader.INSTANCE.loadPact(loadTestFile('test_pact_no_spec_version.json'))
   }
 
   def 'PactSerialiser must deserialise pact with no metadata'() {
@@ -325,7 +325,7 @@ class PactSerialiserSpec extends Specification {
         request, response, null)])
 
     where:
-    pact = PactReader.loadPact(loadTestFile('test_pact_no_metadata.json'))
+    pact = DefaultPactReader.INSTANCE.loadPact(loadTestFile('test_pact_no_metadata.json'))
   }
 
   def 'PactSerialiser must deserialise pact with encoded query string'() {
@@ -335,7 +335,7 @@ class PactSerialiserSpec extends Specification {
         ModelFixtures.requestDecodedQuery, ModelFixtures.response, null)])
 
     where:
-    pact = PactReader.loadPact(loadTestFile('test_pact_encoded_query.json'))
+    pact = DefaultPactReader.INSTANCE.loadPact(loadTestFile('test_pact_encoded_query.json'))
   }
 
   def 'PactSerialiser must de-serialise pact with generators'() {
@@ -343,7 +343,7 @@ class PactSerialiserSpec extends Specification {
     pact == pactWithGenerators
 
     where:
-    pact = PactReader.loadPact(loadTestFile('test_pact_generators.json'))
+    pact = DefaultPactReader.INSTANCE.loadPact(loadTestFile('test_pact_generators.json'))
   }
 
   def 'PactSerialiser must de-serialise message pact with generators'() {
@@ -351,7 +351,7 @@ class PactSerialiserSpec extends Specification {
     pact == messagePactWithGenerators
 
     where:
-    pact = PactReader.loadPact(loadTestFile('v3-message-pact-generators.json'))
+    pact = DefaultPactReader.INSTANCE.loadPact(loadTestFile('v3-message-pact-generators.json'))
   }
 
 }

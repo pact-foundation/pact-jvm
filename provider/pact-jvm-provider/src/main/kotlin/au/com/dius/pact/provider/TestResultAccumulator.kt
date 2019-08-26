@@ -3,7 +3,7 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.pactbroker.TestResult
-import au.com.dius.pact.provider.ProviderVerifierBase.Companion.PACT_VERIFIER_PUBLISH_RESULTS
+import au.com.dius.pact.provider.ProviderVerifier.Companion.PACT_VERIFIER_PUBLISH_RESULTS
 import mu.KLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
 

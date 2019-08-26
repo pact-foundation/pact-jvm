@@ -141,20 +141,34 @@ fun queryStringToMap(query: String?, decode: Boolean = true): Map<String, List<S
 /**
  * Class to load a Pact from a JSON source using a version strategy
  */
-object PactReader : KLogging() {
+interface PactReader {
+  /**
+   * Loads a pact file from either a File or a URL
+   * @param source a File or a URL
+   */
+  fun loadPact(source: Any): Pact<out Interaction>
+
+  /**
+   * Loads a pact file from either a File or a URL
+   * @param source a File or a URL
+   * @param options to use when loading the pact
+   */
+  fun loadPact(source: Any, options: Map<String, Any>): Pact<out Interaction>
+}
+
+/**
+ * Default implementation of PactReader
+ */
+object DefaultPactReader : PactReader, KLogging() {
 
   private const val CLASSPATH_URI_START = "classpath:"
 
   @JvmStatic
   lateinit var s3Client: AmazonS3
 
-  /**
-   * Loads a pact file from either a File or a URL
-   * @param source a File or a URL
-   */
-  @JvmOverloads
-  @JvmStatic
-  fun loadPact(source: Any, options: Map<String, Any> = emptyMap()): Pact<out Interaction> {
+  override fun loadPact(source: Any) = loadPact(source, emptyMap())
+
+  override fun loadPact(source: Any, options: Map<String, Any>): Pact<out Interaction> {
     val pactInfo = loadFile(source, options)
     val version = determineSpecVersion(pactInfo.first)
     val specVersion = Version.valueOf(version)
@@ -347,7 +361,7 @@ object PactReader : KLogging() {
 
   private fun loadPactFromS3Bucket(source: String): Pair<JsonElement, PactSource> {
     val s3Uri = AmazonS3URI(source)
-    if (!PactReader::s3Client.isInitialized) {
+    if (!DefaultPactReader::s3Client.isInitialized) {
       s3Client = AmazonS3ClientBuilder.defaultClient()
     }
     val s3Pact = s3Client.getObject(s3Uri.bucket, s3Uri.key)

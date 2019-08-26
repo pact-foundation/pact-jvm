@@ -5,7 +5,7 @@ import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.InvalidPactException
 import au.com.dius.pact.core.model.Pact
-import au.com.dius.pact.core.model.PactReader
+import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
@@ -118,7 +118,7 @@ class MessagePact @JvmOverloads constructor (
 
   companion object : KLogging() {
     fun fromJson(json: JsonObject, source: PactSource = UnknownPactSource): MessagePact {
-      val transformedJson = PactReader.transformJson(json)
+      val transformedJson = DefaultPactReader.transformJson(json)
       val consumer = Consumer.fromJson(transformedJson["consumer"])
       val provider = Provider.fromJson(transformedJson["provider"])
       val messages = transformedJson["messages"].array.map { Message.fromJson(it.obj) }

@@ -42,7 +42,7 @@ class PactReaderTransformSpec extends Specification {
 
   def 'only transforms legacy fields'() {
     when:
-    def result = PactReader.transformJson(jsonMap)
+    def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
 
     then:
     Json.INSTANCE.gsonPretty.toJson(result) == '''{
@@ -81,7 +81,7 @@ class PactReaderTransformSpec extends Specification {
     jsonMap.get('interactions').asJsonArray.get(0).asJsonObject.addProperty('provider_state', 'provider state')
 
     when:
-    def result = PactReader.transformJson(jsonMap)
+    def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
 
     then:
     Json.INSTANCE.gsonPretty.toJson(result) == '''{
@@ -122,7 +122,7 @@ class PactReaderTransformSpec extends Specification {
     jsonMap.get('interactions').asJsonArray.get(0).asJsonObject.addProperty('providerState', 'provider state 2')
 
     when:
-    def result = PactReader.transformJson(jsonMap)
+    def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
 
     then:
     Json.INSTANCE.gsonPretty.toJson(result) == '''{
@@ -165,7 +165,7 @@ class PactReaderTransformSpec extends Specification {
       .add('responseMatchingRules', Json.INSTANCE.toJson([body: ['$': [['match': 'type']]]]))
 
     when:
-    def result = PactReader.transformJson(jsonMap)
+    def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
 
     then:
     Json.INSTANCE.gsonPretty.toJson(result) == '''{
@@ -223,7 +223,7 @@ class PactReaderTransformSpec extends Specification {
       .addProperty('method', 'post')
 
     when:
-    def result = PactReader.transformJson(jsonMap)
+    def result = DefaultPactReader.INSTANCE.transformJson(jsonMap)
 
     then:
     Json.INSTANCE.gsonPretty.toJson(result) == '''{

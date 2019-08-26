@@ -11,7 +11,6 @@ import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
-import au.com.dius.pact.provider.ProviderVerifierBase
 import au.com.dius.pact.provider.junit.Consumer
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.filterPactsByAnnotations
@@ -98,7 +97,7 @@ data class PactVerificationContext(
         failures[interactionMessage] = e
         verifier!!.reporters.forEach {
           it.requestFailed(providerInfo, interaction, interactionMessage, e,
-            verifier!!.projectHasProperty.apply(ProviderVerifierBase.PACT_SHOW_STACKTRACE))
+            verifier!!.projectHasProperty.apply(ProviderVerifier.PACT_SHOW_STACKTRACE))
         }
         TestResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
           "exception" to e, "interactionId" to interaction.interactionId)),
@@ -235,9 +234,8 @@ class PactVerificationExtension(
       verifier.reporters = reports
         .filter { r -> r.isNotEmpty() }
         .map { r ->
-          val reporter = ReporterManager.createReporter(r.trim())
-          reporter.setReportDir(reportDir)
-          reporter.setReportFile(File(reportDir, "$name - $description${reporter.ext}"))
+          val reporter = ReporterManager.createReporter(r.trim(), reportDir)
+          reporter.reportFile = File(reportDir, "$name - $description${reporter.ext}")
           reporter
         }
     }

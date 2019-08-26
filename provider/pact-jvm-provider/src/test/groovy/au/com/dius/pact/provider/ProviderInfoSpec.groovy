@@ -21,8 +21,8 @@ class ProviderInfoSpec extends Specification {
 
   def 'returns an empty list if the directory is null'() {
     when:
-    def consumers = providerInfo.hasPactsWith('testGroup') {
-      pactFileLocation = null
+    def consumers = providerInfo.hasPactsWith('testGroup') { group ->
+      group.pactFileLocation = null
     }
 
     then:
@@ -31,8 +31,8 @@ class ProviderInfoSpec extends Specification {
 
   def 'raises an exception if the directory does not exist'() {
     when:
-    providerInfo.hasPactsWith('testGroup') {
-      pactFileLocation = Mock(File) {
+    providerInfo.hasPactsWith('testGroup') { group ->
+      group.pactFileLocation = Mock(File) {
         exists() >> false
       }
     }
@@ -43,8 +43,8 @@ class ProviderInfoSpec extends Specification {
 
   def 'raises an exception if the directory is not readable'() {
     when:
-    providerInfo.hasPactsWith('testGroup') {
-      pactFileLocation = Mock(File) {
+    providerInfo.hasPactsWith('testGroup') { group ->
+      group.pactFileLocation = Mock(File) {
         exists() >> true
         canRead() >> false
       }

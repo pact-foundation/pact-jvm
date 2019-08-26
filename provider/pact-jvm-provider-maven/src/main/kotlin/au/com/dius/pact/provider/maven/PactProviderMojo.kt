@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.maven
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerifierException
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderVerifier
@@ -80,8 +81,7 @@ open class PactProviderMojo : AbstractMojo() {
         val reportsDir = File(buildDir, "reports/pact")
         verifier.reporters = reports.map { name ->
           if (ReporterManager.reporterDefined(name)) {
-            val reporter = ReporterManager.createReporter(name)
-            reporter.setReportDir(reportsDir)
+            val reporter = ReporterManager.createReporter(name, reportsDir)
             reporter
           } else {
             throw MojoFailureException("There is no defined reporter named '$name'. Available reporters are: " +
@@ -128,7 +128,7 @@ open class PactProviderMojo : AbstractMojo() {
     }
   }
 
-  open fun providerVerifier() = ProviderVerifier()
+  open fun providerVerifier(): IProviderVerifier = ProviderVerifier()
 
   fun loadPactsFromPactBroker(provider: Provider, consumers: MutableList<IConsumerInfo>) {
     val pactBroker = provider.pactBroker

@@ -47,7 +47,7 @@ object PactWriter : KLogging() {
       val raf = RandomAccessFile(pactFile, "rw")
       val lock = raf.channel.lock()
       try {
-        val existingPact = PactReader.loadPact(readFileUtf8(raf)) as Pact<I>
+        val existingPact = DefaultPactReader.loadPact(readFileUtf8(raf)) as Pact<I>
         val result = PactMerge.merge(existingPact, pact)
         if (!result.ok) {
           throw InvalidPactException(result.message)

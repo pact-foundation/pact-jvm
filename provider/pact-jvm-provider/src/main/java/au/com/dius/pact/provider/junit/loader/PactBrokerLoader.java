@@ -1,9 +1,6 @@
 package au.com.dius.pact.provider.junit.loader;
 
-import au.com.dius.pact.core.model.Consumer;
-import au.com.dius.pact.core.model.Pact;
-import au.com.dius.pact.core.model.PactBrokerSource;
-import au.com.dius.pact.core.model.PactReader;
+import au.com.dius.pact.core.model.*;
 import au.com.dius.pact.core.model.PactSource;
 import au.com.dius.pact.core.pactbroker.PactBrokerClient;
 import au.com.dius.pact.provider.ConsumerInfo;
@@ -172,7 +169,7 @@ public class PactBrokerLoader implements PactLoader {
   }
 
   Pact loadPact(ConsumerInfo consumer, Map options) {
-    Pact pact = PactReader.loadPact(consumer.getPactSource(), options);
+    Pact pact = DefaultPactReader.INSTANCE.loadPact(consumer.getPactSource(), options);
     Map<Consumer, List<Pact>> pacts = this.pactSource.getPacts();
     Consumer pactConsumer = consumer.toPactConsumer();
     List<Pact> pactList = pacts.getOrDefault(pactConsumer, new ArrayList<>());
