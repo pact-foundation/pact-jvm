@@ -13,12 +13,12 @@ import kotlin.reflect.full.memberProperties
 /**
  * Base Pact class
  */
-abstract class BasePact<I> @JvmOverloads constructor(
+abstract class BasePact<I : Interaction> @JvmOverloads constructor(
   override val consumer: Consumer,
   override val provider: Provider,
   open val metadata: Map<String, Any?> = DEFAULT_METADATA,
   override val source: PactSource = UnknownPactSource
-) : Pact<I> where I : Interaction {
+) : Pact<I> {
 
   fun write(pactDir: String, pactSpecVersion: PactSpecVersion) {
     DefaultPactWriter.writePact(fileForPact(pactDir), this, pactSpecVersion)
@@ -26,7 +26,7 @@ abstract class BasePact<I> @JvmOverloads constructor(
 
   open fun fileForPact(pactDir: String) = File(pactDir, "${consumer.name}-${provider.name}.json")
 
-  override fun compatibleTo(other: Pact<I>) = provider == other.provider &&
+  override fun compatibleTo(other: Pact<*>) = provider == other.provider &&
     this::class.java.isAssignableFrom(other::class.java)
 
   override fun equals(other: Any?): Boolean {

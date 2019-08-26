@@ -26,7 +26,8 @@ class RequestResponsePact @JvmOverloads constructor(
     "metadata" to metaData(jsonObject(metadata.entries.map { it.key to Json.toJson(it.value) }), pactSpecVersion)
   )
 
-  override fun mergeInteractions(interactions: List<RequestResponseInteraction>) {
+  override fun mergeInteractions(interactions: List<*>) {
+    interactions as List<RequestResponseInteraction>
     this.interactions = (this.interactions + interactions).distinctBy { it.uniqueKey() }.toMutableList()
     sortInteractions()
   }

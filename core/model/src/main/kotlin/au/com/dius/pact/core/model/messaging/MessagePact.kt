@@ -69,7 +69,8 @@ class MessagePact @JvmOverloads constructor (
     return newPact
   }
 
-  override fun mergeInteractions(interactions: List<Message>) {
+  override fun mergeInteractions(interactions: List<*>) {
+    interactions as List<Message>
     messages = (messages + interactions).distinctBy { it.uniqueKey() }.toMutableList()
     sortInteractions()
   }

@@ -23,16 +23,14 @@ interface PactWriter {
    * @param writer Writer to write out with
    * @param pactSpecVersion Pact version to use to control writing
    */
-  fun <I> writePact(pact: Pact<I>, writer: PrintWriter, pactSpecVersion: PactSpecVersion)
-    where I : Interaction
+  fun writePact(pact: Pact<*>, writer: PrintWriter, pactSpecVersion: PactSpecVersion)
 
   /**
    * Writes out the pact to the provided pact file
    * @param pact Pact to write
    * @param writer Writer to write out with
    */
-  fun <I> writePact(pact: Pact<I>, writer: PrintWriter)
-    where I : Interaction
+  fun writePact(pact: Pact<*>, writer: PrintWriter)
 
   /**
    * Writes out the pact to the provided pact file in a manor that is safe for parallel execution
@@ -40,8 +38,7 @@ interface PactWriter {
    * @param pact Pact to write
    * @param pactSpecVersion Pact version to use to control writing
    */
-  fun <I> writePact(pactFile: File, pact: Pact<I>, pactSpecVersion: PactSpecVersion)
-    where I : Interaction
+  fun writePact(pactFile: File, pact: Pact<*>, pactSpecVersion: PactSpecVersion)
 }
 
 /**
@@ -55,8 +52,7 @@ object DefaultPactWriter : PactWriter, KLogging() {
    * @param writer Writer to write out with
    * @param pactSpecVersion Pact version to use to control writing
    */
-  override fun <I> writePact(pact: Pact<I>, writer: PrintWriter, pactSpecVersion: PactSpecVersion)
-    where I : Interaction {
+  override fun writePact(pact: Pact<*>, writer: PrintWriter, pactSpecVersion: PactSpecVersion) {
     pact.sortInteractions()
     val jsonData = pact.toMap(pactSpecVersion)
     Json.gsonPretty.toJson(jsonData, writer)
@@ -67,7 +63,7 @@ object DefaultPactWriter : PactWriter, KLogging() {
    * @param pact Pact to write
    * @param writer Writer to write out with
    */
-  override fun <I> writePact(pact: Pact<I>, writer: PrintWriter) where I : Interaction {
+  override fun writePact(pact: Pact<*>, writer: PrintWriter) {
     writePact(pact, writer, PactSpecVersion.V3)
   }
 
@@ -78,13 +74,12 @@ object DefaultPactWriter : PactWriter, KLogging() {
    * @param pactSpecVersion Pact version to use to control writing
    */
   @Synchronized
-  override fun <I> writePact(pactFile: File, pact: Pact<I>, pactSpecVersion: PactSpecVersion)
-    where I : Interaction {
+  override fun writePact(pactFile: File, pact: Pact<*>, pactSpecVersion: PactSpecVersion) {
     if (pactWriteMode() == PactWriteMode.MERGE && pactFile.exists() && pactFile.length() > 0) {
       val raf = RandomAccessFile(pactFile, "rw")
       val lock = raf.channel.lock()
       try {
-        val existingPact = DefaultPactReader.loadPact(readFileUtf8(raf)) as Pact<I>
+        val existingPact = DefaultPactReader.loadPact(readFileUtf8(raf))
         val result = PactMerge.merge(existingPact, pact)
         if (!result.ok) {
           throw InvalidPactException(result.message)

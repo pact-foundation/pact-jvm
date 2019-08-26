@@ -146,14 +146,14 @@ interface PactReader {
    * Loads a pact file from either a File or a URL
    * @param source a File or a URL
    */
-  fun loadPact(source: Any): Pact<out Interaction>
+  fun loadPact(source: Any): Pact<*>
 
   /**
    * Loads a pact file from either a File or a URL
    * @param source a File or a URL
    * @param options to use when loading the pact
    */
-  fun loadPact(source: Any, options: Map<String, Any>): Pact<out Interaction>
+  fun loadPact(source: Any, options: Map<String, Any>): Pact<*>
 }
 
 /**
@@ -168,7 +168,7 @@ object DefaultPactReader : PactReader, KLogging() {
 
   override fun loadPact(source: Any) = loadPact(source, emptyMap())
 
-  override fun loadPact(source: Any, options: Map<String, Any>): Pact<out Interaction> {
+  override fun loadPact(source: Any, options: Map<String, Any>): Pact<*> {
     val pactInfo = loadFile(source, options)
     val version = determineSpecVersion(pactInfo.first)
     val specVersion = Version.valueOf(version)
@@ -206,7 +206,7 @@ object DefaultPactReader : PactReader, KLogging() {
   }
 
   @JvmStatic
-  fun loadV3Pact(source: PactSource, pactJson: JsonObject): Pact<out Interaction> {
+  fun loadV3Pact(source: PactSource, pactJson: JsonObject): Pact<*> {
     if (pactJson.has("messages")) {
       return MessagePact.fromJson(pactJson, source)
     } else {
@@ -233,7 +233,7 @@ object DefaultPactReader : PactReader, KLogging() {
   }
 
   @JvmStatic
-  fun loadV2Pact(source: PactSource, pactJson: JsonObject): Pact<out Interaction> {
+  fun loadV2Pact(source: PactSource, pactJson: JsonObject): Pact<*> {
     val transformedJson = transformJson(pactJson)
     val provider = Provider.fromJson(transformedJson["provider"])
     val consumer = Consumer.fromJson(transformedJson["consumer"])

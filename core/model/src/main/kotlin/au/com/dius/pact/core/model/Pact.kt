@@ -74,7 +74,7 @@ interface Interaction {
 /**
  * Interface to a pact
  */
-interface Pact<I> where I : Interaction {
+interface Pact<I : Interaction> {
   /**
    * Returns the provider of the service for the pact
    */
@@ -107,11 +107,11 @@ interface Pact<I> where I : Interaction {
    * If this pact is compatible with the other pact. Pacts are compatible if they have the
    * same provider and they are the same type
    */
-  fun compatibleTo(other: Pact<I>): Boolean
+  fun compatibleTo(other: Pact<*>): Boolean
 
   /**
    * Merges all the interactions into this Pact
    * @param interactions
    */
-  fun mergeInteractions(interactions: List<I>)
+  fun mergeInteractions(interactions: List<*>)
 }
