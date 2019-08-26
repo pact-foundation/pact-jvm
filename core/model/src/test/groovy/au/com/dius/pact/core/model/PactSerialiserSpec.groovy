@@ -73,7 +73,8 @@ class PactSerialiserSpec extends Specification {
     def testPact = Json.INSTANCE.toMap(new JsonParser().parse(testPactJson))
 
     when:
-    PactWriter.writePact(new RequestResponsePact(new Provider('test_provider'), new Consumer('test_consumer'),
+    DefaultPactWriter.INSTANCE.writePact(new RequestResponsePact(new Provider('test_provider'),
+      new Consumer('test_consumer'),
       [new RequestResponseInteraction('test interaction', [new ProviderState('test state')],
         request, response, null)]),
       new PrintWriter(sw), PactSpecVersion.V3)
@@ -103,7 +104,7 @@ class PactSerialiserSpec extends Specification {
       ])
 
     when:
-    PactWriter.writePact(expectedPact, new PrintWriter(sw), PactSpecVersion.V3)
+    DefaultPactWriter.INSTANCE.writePact(expectedPact, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
     def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
 
@@ -118,7 +119,7 @@ class PactSerialiserSpec extends Specification {
     def testPact = Json.INSTANCE.toMap(new JsonParser().parse(testPactJson))
 
     when:
-    PactWriter.writePact(pactWithMatchers, new PrintWriter(sw), PactSpecVersion.V3)
+    DefaultPactWriter.INSTANCE.writePact(pactWithMatchers, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
     def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
 
@@ -137,7 +138,7 @@ class PactSerialiserSpec extends Specification {
         ModelFixtures.response, null)])
 
     when:
-    PactWriter.writePact(pact, new PrintWriter(sw), PactSpecVersion.V3)
+    DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
     def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
 
@@ -152,7 +153,7 @@ class PactSerialiserSpec extends Specification {
     def testPact = Json.INSTANCE.toMap(new JsonParser().parse(testPactJson))
 
     when:
-    PactWriter.writePact(pactWithGenerators, new PrintWriter(sw), PactSpecVersion.V3)
+    DefaultPactWriter.INSTANCE.writePact(pactWithGenerators, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
     def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
 
@@ -167,7 +168,7 @@ class PactSerialiserSpec extends Specification {
     def testPact = Json.INSTANCE.toMap(new JsonParser().parse(testPactJson))
 
     when:
-    PactWriter.writePact(messagePactWithGenerators, new PrintWriter(sw), PactSpecVersion.V3)
+    DefaultPactWriter.INSTANCE.writePact(messagePactWithGenerators, new PrintWriter(sw), PactSpecVersion.V3)
     def actualPactJson = sw.toString().trim()
     def actualPact = Json.INSTANCE.toMap(new JsonParser().parse(actualPactJson))
 
@@ -188,7 +189,7 @@ class PactSerialiserSpec extends Specification {
 
     when:
     def writer = new PrintWriter(fw)
-    PactWriter.writePact(pact, writer, PactSpecVersion.V2)
+    DefaultPactWriter.INSTANCE.writePact(pact, writer, PactSpecVersion.V2)
     writer.close()
     def pactJson = file.text
 

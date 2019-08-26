@@ -2,7 +2,7 @@ package au.com.dius.pact.server
 
 import java.io.File
 
-import au.com.dius.pact.core.model.{Interaction, OptionalBody, Pact, PactSpecVersion, PactWriter, Request, RequestResponseInteraction, RequestResponsePact, Response}
+import au.com.dius.pact.core.model._
 
 import scala.collection.JavaConverters._
 import scala.util.Success
@@ -48,7 +48,7 @@ object Complete {
   def writeIfMatching(pact: Pact[RequestResponseInteraction], results: PactSessionResults, pactVersion: PactSpecVersion) = {
     if (results.allMatched) {
       val pactFile = destinationFileForPact(pact)
-      PactWriter.writePact(pactFile, pact, pactVersion)
+      DefaultPactWriter.INSTANCE.writePact(pactFile, pact, pactVersion)
     }
     VerificationResult(Success(results))
   }

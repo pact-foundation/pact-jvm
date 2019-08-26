@@ -20,7 +20,7 @@ class PactWriterSpec extends Specification {
     def sw = new StringWriter()
 
     when:
-    PactWriter.writePact(pact, new PrintWriter(sw))
+    DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw))
     def json = Json.INSTANCE.toMap(new JsonParser().parse(sw.toString()))
     def interactionJson = json.interactions.first()
 
@@ -44,7 +44,7 @@ class PactWriterSpec extends Specification {
     def sw = new StringWriter()
 
     when:
-    PactWriter.writePact(pact, new PrintWriter(sw), PactSpecVersion.V3)
+    DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw), PactSpecVersion.V3)
     def json = Json.INSTANCE.toMap(new JsonParser().parse(sw.toString()))
     def messageJson = json.messages.first()
 
@@ -66,7 +66,7 @@ class PactWriterSpec extends Specification {
     def sw = new StringWriter()
 
     when:
-    PactWriter.writePact(pact, new PrintWriter(sw))
+    DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw))
     def json = Json.INSTANCE.toMap(new JsonParser().parse(sw.toString()))
     def interactionJson = json.interactions.first()
 
@@ -86,7 +86,7 @@ class PactWriterSpec extends Specification {
     def sw = new StringWriter()
 
     when:
-    PactWriter.writePact(pact, new PrintWriter(sw))
+    DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw))
     def json = Json.INSTANCE.toMap(new JsonParser().parse(sw.toString()))
     def interactionJson = json.interactions.first()
 
@@ -108,9 +108,9 @@ class PactWriterSpec extends Specification {
     def file = File.createTempFile('PactWriterSpec', '.json')
 
     when:
-    PactWriter.writePact(file, pact, PactSpecVersion.V3)
+    DefaultPactWriter.INSTANCE.writePact(file, pact, PactSpecVersion.V3)
     pact.interactions = [interaction2]
-    PactWriter.writePact(file, pact, PactSpecVersion.V3)
+    DefaultPactWriter.INSTANCE.writePact(file, pact, PactSpecVersion.V3)
     def json = file.withReader { Json.INSTANCE.toMap(new JsonParser().parse(it)) }
 
     then:
@@ -135,9 +135,9 @@ class PactWriterSpec extends Specification {
     System.setProperty('pact.writer.overwrite', 'true')
 
     when:
-    PactWriter.writePact(file, pact, PactSpecVersion.V3)
+    DefaultPactWriter.INSTANCE.writePact(file, pact, PactSpecVersion.V3)
     pact.interactions = [interaction2]
-    PactWriter.writePact(file, pact, PactSpecVersion.V3)
+    DefaultPactWriter.INSTANCE.writePact(file, pact, PactSpecVersion.V3)
     def json = file.withReader { Json.INSTANCE.toMap(new JsonParser().parse(it)) }
 
     then:
@@ -161,7 +161,7 @@ class PactWriterSpec extends Specification {
     def sw = new StringWriter()
 
     when:
-    PactWriter.writePact(pact, new PrintWriter(sw))
+    DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw))
     def json = Json.INSTANCE.toMap(new JsonParser().parse(sw.toString()))
     def interactionJson = json.interactions.first()
 
@@ -179,8 +179,8 @@ class PactWriterSpec extends Specification {
     ])
 
     when:
-    PactWriter.writePact(pactFile, pact, PactSpecVersion.V3)
-    PactWriter.writePact(pactFile, pact, PactSpecVersion.V3)
+    DefaultPactWriter.INSTANCE.writePact(pactFile, pact, PactSpecVersion.V3)
+    DefaultPactWriter.INSTANCE.writePact(pactFile, pact, PactSpecVersion.V3)
 
     then:
     pactFile.withReader { Json.INSTANCE.toMap(new JsonParser().parse(it)) }.interactions[0].description ==

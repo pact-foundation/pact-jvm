@@ -16,7 +16,38 @@ enum class PactWriteMode {
 /**
  * Class to write out a pact to a file
  */
-object PactWriter : KLogging() {
+interface PactWriter {
+  /**
+   * Writes out the pact to the provided pact file
+   * @param pact Pact to write
+   * @param writer Writer to write out with
+   * @param pactSpecVersion Pact version to use to control writing
+   */
+  fun <I> writePact(pact: Pact<I>, writer: PrintWriter, pactSpecVersion: PactSpecVersion)
+    where I : Interaction
+
+  /**
+   * Writes out the pact to the provided pact file
+   * @param pact Pact to write
+   * @param writer Writer to write out with
+   */
+  fun <I> writePact(pact: Pact<I>, writer: PrintWriter)
+    where I : Interaction
+
+  /**
+   * Writes out the pact to the provided pact file in a manor that is safe for parallel execution
+   * @param pactFile File to write to
+   * @param pact Pact to write
+   * @param pactSpecVersion Pact version to use to control writing
+   */
+  fun <I> writePact(pactFile: File, pact: Pact<I>, pactSpecVersion: PactSpecVersion)
+    where I : Interaction
+}
+
+/**
+ * Default implementation of a Pact writer
+ */
+object DefaultPactWriter : PactWriter, KLogging() {
 
   /**
    * Writes out the pact to the provided pact file
@@ -24,13 +55,20 @@ object PactWriter : KLogging() {
    * @param writer Writer to write out with
    * @param pactSpecVersion Pact version to use to control writing
    */
-  @JvmStatic
-  @JvmOverloads
-  fun <I> writePact(pact: Pact<I>, writer: PrintWriter, pactSpecVersion: PactSpecVersion = PactSpecVersion.V3)
+  override fun <I> writePact(pact: Pact<I>, writer: PrintWriter, pactSpecVersion: PactSpecVersion)
     where I : Interaction {
     pact.sortInteractions()
     val jsonData = pact.toMap(pactSpecVersion)
     Json.gsonPretty.toJson(jsonData, writer)
+  }
+
+  /**
+   * Writes out the pact to the provided pact file in V3 format
+   * @param pact Pact to write
+   * @param writer Writer to write out with
+   */
+  override fun <I> writePact(pact: Pact<I>, writer: PrintWriter) where I : Interaction {
+    writePact(pact, writer, PactSpecVersion.V3)
   }
 
   /**
@@ -39,9 +77,8 @@ object PactWriter : KLogging() {
    * @param pact Pact to write
    * @param pactSpecVersion Pact version to use to control writing
    */
-  @JvmStatic
   @Synchronized
-  fun <I> writePact(pactFile: File, pact: Pact<I>, pactSpecVersion: PactSpecVersion)
+  override fun <I> writePact(pactFile: File, pact: Pact<I>, pactSpecVersion: PactSpecVersion)
     where I : Interaction {
     if (pactWriteMode() == PactWriteMode.MERGE && pactFile.exists() && pactFile.length() > 0) {
       val raf = RandomAccessFile(pactFile, "rw")

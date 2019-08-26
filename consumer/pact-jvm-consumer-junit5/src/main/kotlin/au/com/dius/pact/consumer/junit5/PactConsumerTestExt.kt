@@ -4,18 +4,18 @@ import au.com.dius.pact.consumer.BaseMockServer
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.consumer.MessagePactBuilder
 import au.com.dius.pact.consumer.MockServer
-import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.consumer.PactConsumerConfig
-import au.com.dius.pact.core.model.annotations.PactFolder
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.junit.JUnitTestSupport
 import au.com.dius.pact.consumer.mockServer
-import au.com.dius.pact.core.model.BasePact
-import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.consumer.model.MockProviderConfig
+import au.com.dius.pact.core.model.BasePact
+import au.com.dius.pact.core.model.DefaultPactWriter
+import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSpecVersion
-import au.com.dius.pact.core.model.PactWriter
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.model.annotations.Pact
+import au.com.dius.pact.core.model.annotations.PactFolder
 import au.com.dius.pact.core.model.messaging.MessagePact
 import mu.KLogging
 import org.junit.jupiter.api.Disabled
@@ -303,7 +303,7 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, BeforeAllCallback, Pa
               "${pact.fileForPact(pactDirectory)}"
           }
           val pactFile = pact.fileForPact(pactDirectory)
-          PactWriter.writePact(pactFile, pact, config.pactVersion)
+          DefaultPactWriter.writePact(pactFile, pact, config.pactVersion)
         } else {
           JUnitTestSupport.validateMockServerResult(result)
         }

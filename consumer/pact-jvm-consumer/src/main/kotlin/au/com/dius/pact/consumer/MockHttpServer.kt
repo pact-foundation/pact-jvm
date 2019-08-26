@@ -6,9 +6,9 @@ import au.com.dius.pact.consumer.model.MockServerImplementation
 import au.com.dius.pact.core.matchers.FullRequestMatch
 import au.com.dius.pact.core.matchers.PartialRequestMatch
 import au.com.dius.pact.core.matchers.RequestMatching
+import au.com.dius.pact.core.model.DefaultPactWriter
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
-import au.com.dius.pact.core.model.PactWriter
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
@@ -130,7 +130,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
       val pactDirectory = context.pactFolder
       val pactFile = pact.fileForPact(pactDirectory)
       logger.debug { "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file $pactFile" }
-      PactWriter.writePact(pactFile, pact, pactVersion)
+      DefaultPactWriter.writePact(pactFile, pact, pactVersion)
     }
 
     return result

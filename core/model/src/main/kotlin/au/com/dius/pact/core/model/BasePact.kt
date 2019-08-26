@@ -21,7 +21,7 @@ abstract class BasePact<I> @JvmOverloads constructor(
 ) : Pact<I> where I : Interaction {
 
   fun write(pactDir: String, pactSpecVersion: PactSpecVersion) {
-    PactWriter.writePact(fileForPact(pactDir), this, pactSpecVersion)
+    DefaultPactWriter.writePact(fileForPact(pactDir), this, pactSpecVersion)
   }
 
   open fun fileForPact(pactDir: String) = File(pactDir, "${consumer.name}-${provider.name}.json")
