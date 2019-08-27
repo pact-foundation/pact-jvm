@@ -5,6 +5,15 @@ import org.junit.jupiter.api.Test
 class ExtensionsTest {
   @Test
   fun `can use LambdaDslJsonArray#newObject`() {
-    LambdaDsl.newJsonArray { array -> array.newObject { o -> o.stringType("foo") } }
+    newJsonArray { newObject { stringType("foo") } }
+  }
+
+  @Test
+  fun `can use LambdaDslObject#newObject`() {
+    newJsonObject {
+      newObject("object") {
+        stringType("field")
+      }
+    }
   }
 }

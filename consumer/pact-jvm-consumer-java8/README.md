@@ -189,15 +189,22 @@ newJsonArray((rootArray) -> {
     rootArray.array((a) -> a.numberValue(1).numberValue(2));
     rootArray.array((a) -> a.object((o) -> o.stringValue("foo", "Foo")));
 }).build();
-
 ```
 
-`object` is a reserved word in Kotlin. To allow using the DSL without escaping, a Kotlin extension `newObject` is available:
+##### Kotlin Lambda DSL
 
 ```kotlin
-newJsonArray { rootArray ->
-    rootArray.array { a -> a.stringValue("a1").stringValue("a2") }
-    rootArray.array { a -> a.numberValue(1).numberValue(2) }
-    rootArray.array { a -> a.newObject { o -> o.stringValue("foo", "Foo") } }
-}.build();
+newJsonArray {
+    newArray {
+      stringValue("a1")
+      stringValue("a2")
+    }
+    newArray {
+      numberValue(1)
+      numberValue(2)
+    }
+    newArray {
+      newObject { stringValue("foo", "Foo") }
+    }
+ }
 ```
