@@ -9,8 +9,6 @@ import org.gradle.api.Task
 import org.gradle.api.tasks.GradleBuild
 import org.gradle.api.tasks.TaskAction
 
-import java.util.function.Supplier
-
 /**
  * Task to verify a pact against a provider
  */
@@ -37,7 +35,7 @@ class PactVerificationTask extends DefaultTask {
       } else {
         providerVersion = { project.version }
       }
-      
+
       if (project.pact.reports) {
         def reportsDir = new File(project.buildDir, 'reports/pact')
         reporters = project.pact.reports.toVerifierReporters(reportsDir)
