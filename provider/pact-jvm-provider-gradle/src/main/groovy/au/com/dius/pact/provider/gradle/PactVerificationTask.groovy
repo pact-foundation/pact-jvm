@@ -9,6 +9,8 @@ import org.gradle.api.Task
 import org.gradle.api.tasks.GradleBuild
 import org.gradle.api.tasks.TaskAction
 
+import java.util.function.Supplier
+
 /**
  * Task to verify a pact against a provider
  */
@@ -29,7 +31,8 @@ class PactVerificationTask extends DefaultTask {
       projectClasspath = {
         project.sourceSets.test.runtimeClasspath*.toURL()
       }
-      providerVersion = { project.version }
+
+      providerVersion = (providerToVerify.version != null) ? providerToVerify.version as Supplier<String> : project.version as Supplier<String>
 
       if (project.pact.reports) {
         def reportsDir = new File(project.buildDir, 'reports/pact')
