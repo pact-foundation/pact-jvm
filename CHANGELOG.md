@@ -1,5 +1,20 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.0.0-beta.6 - Bugfix Release
+
+* e373b522 - Merge pull request #927 from Scot3004/mockmvc-multipart (Ronald Holshausen, Wed Aug 28 09:51:10 2019 +1000)
+* cf6da7f8 - Merge pull request #923 from gmariotti/master (Ronald Holshausen, Wed Aug 28 09:49:15 2019 +1000)
+* 913219e0 - MockMVC support for more than 1 multipart request (Sergio Orozco, Tue Aug 27 15:41:40 2019 -0500)
+* 513e8295 - Extended Kotlin DSL (Guido Pio Mariotti, Tue Aug 20 16:13:00 2019 +0200)
+* 2284bd66 - fix: LeinVerifierProxy after refactor (Ronald Holshausen, Mon Aug 26 15:17:10 2019 +1000)
+* 44cb67a0 - refactor: fix the genetic types on the pact classes (Ronald Holshausen, Mon Aug 26 15:05:44 2019 +1000)
+* 9886707a - refactor: replace PactWriter with an interface (Ronald Holshausen, Mon Aug 26 14:13:08 2019 +1000)
+* 2e441625 - refactor: converted the remaining verifier Groovy classes to Kotlin (Ronald Holshausen, Mon Aug 26 13:38:53 2019 +1000)
+* 41868e1a - Update README.md (Ronald Holshausen, Sun Aug 25 12:16:39 2019 +1000)
+* e47caa0b - chore: support pactSpecificationVersion format for the spec version #917 (Ronald Holshausen, Sun Aug 25 12:14:39 2019 +1000)
+* e4b7e9bb - chore: only run on openjdk versions in travis (Ronald Holshausen, Sat Aug 24 10:50:11 2019 +1000)
+* 0194b223 - bump version to 4.0.0-beta.6 (Ronald Holshausen, Thu Aug 15 16:19:12 2019 +1000)
+
 # 4.0.0-beta.5 - Bugfix Release
 
 * b370475f - chore: update readme (Ronald Holshausen, Sat Jul 27 12:42:31 2019 +1000)
