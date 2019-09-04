@@ -51,6 +51,7 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
         logger.info { "Published verification result of '$result' for consumer '${pact.consumer}'" }
       } else {
         logger.error { "Failed to publish verification results - check out the debug logs" }
+      }
     }
   }
 
