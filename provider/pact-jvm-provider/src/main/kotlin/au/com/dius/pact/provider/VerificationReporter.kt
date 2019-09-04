@@ -47,7 +47,10 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
       logger.error { "Failed to publish verification results - ${publishResult.error.localizedMessage}" }
       logger.debug(publishResult.error) {}
     } else {
-      logger.info { "Published verification result of '$result' for consumer '${pact.consumer}'" }
+      if (publishResult.value) {
+        logger.info { "Published verification result of '$result' for consumer '${pact.consumer}'" }
+      } else {
+        logger.error { "Failed to publish verification results - check out the debug logs" }
     }
   }
 
