@@ -19,6 +19,7 @@ open class ProviderInfo @JvmOverloads constructor (
   override var host: Any? = "localhost",
   override var port: Any? = 8080,
   override var path: String = "/",
+  override var version: String = "0.0.1",
   var startProviderTask: Any? = null,
   var terminateProviderTask: Any? = null,
   override var requestFilter: Any? = null,
