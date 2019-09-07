@@ -54,7 +54,6 @@ interface IProviderInfo {
   var port: Any?
   var path: String
   var name: String
-  var version: String
 
   val requestFilter: Any?
   val stateChangeRequestFilter: Any?
