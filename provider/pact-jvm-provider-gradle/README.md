@@ -799,3 +799,17 @@ For pacts that are loaded from a Pact Broker, the results of running the verific
  broker against the URL for the pact. You will be able to see the result on the Pact Broker home screen.
 
 To turn on the verification publishing, set the project property `pact.verifier.publishResults` to `true`.
+
+By default, the Gradle project version will be used as the provider version. You can override this by setting the
+`providerVersion` property.
+
+```groovy
+pact {
+    serviceProviders {
+        provider1 {
+            providerVersion = { branchName() + '-' + abbreviatedId() }
+            hasPactsFromPactBroker('http://pact-broker:5000/', authentication: ['Basic', pactBrokerUser, pactBrokerPassword])
+        }
+    }
+}
+```
