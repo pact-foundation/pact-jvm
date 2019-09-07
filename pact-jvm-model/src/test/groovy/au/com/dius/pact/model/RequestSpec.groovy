@@ -47,4 +47,16 @@ class RequestSpec extends Specification {
     'multipart/form-data;boundary=boundaryMarker'  | true
     'MULTIPART/FORM-DATA; boundary=boundaryMarker' | true
   }
+
+  def 'handles the cookie header'() {
+    expect:
+    new Request(headers: ['Cookie': ['test=12345; test2=abcd']]).cookie() == ['test=12345', 'test2=abcd']
+  }
+
+  def 'handles the cookie header with multiple values'() {
+    expect:
+    new Request(headers: ['Cookie': ['test=12345', 'test2=abcd; test3=xgfes']]).cookie() == [
+      'test=12345', 'test2=abcd', 'test3=xgfes'
+    ]
+  }
 }

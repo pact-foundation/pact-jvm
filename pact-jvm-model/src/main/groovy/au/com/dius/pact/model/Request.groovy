@@ -89,7 +89,7 @@ class Request extends BaseRequest implements Comparable {
       k.toLowerCase() == COOKIE_KEY
     }
     if (cookieEntry) {
-      cookieEntry.value.split(';')*.trim()
+      cookieEntry.value*.split(';').flatten()*.trim()
     } else {
       null
     }

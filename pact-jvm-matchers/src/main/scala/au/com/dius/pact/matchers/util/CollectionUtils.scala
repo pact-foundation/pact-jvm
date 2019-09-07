@@ -1,6 +1,6 @@
 package au.com.dius.pact.matchers.util
 
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 
 object CollectionUtils {
 
@@ -8,7 +8,7 @@ object CollectionUtils {
     if (list == null) {
       None
     } else {
-      Some(JavaConversions.collectionAsScalaIterable(list).toList)
+      Some(list.asScala.toList)
     }
   }
 }
