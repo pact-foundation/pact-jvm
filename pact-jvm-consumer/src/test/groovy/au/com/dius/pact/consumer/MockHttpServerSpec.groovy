@@ -45,7 +45,7 @@ class MockHttpServerSpec extends Specification {
   }
 
   @Timeout(60)
-  @IgnoreIf({ os.windows })
+  @IgnoreIf({ System.env.TRAVIS != 'true' })
   def 'handle more than 200 tests'() {
     given:
     def pact = new RequestResponsePact(new Provider(), new Consumer(), [])
