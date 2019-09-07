@@ -17,7 +17,7 @@ interface VerifierReporter {
    */
   val ext: String?
 
-  var reportDir: File
+  var reportDir: File?
   var reportFile: File
 
   fun initialise(provider: IProviderInfo)

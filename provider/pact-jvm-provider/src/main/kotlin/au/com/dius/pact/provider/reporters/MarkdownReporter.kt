@@ -20,15 +20,18 @@ import java.time.ZonedDateTime
  */
 class MarkdownReporter(
   var name: String,
-  override var reportDir: File,
+  override var reportDir: File?,
   override var ext: String
 ) : VerifierReporter {
 
-  constructor(name: String, reportDir: File) : this(name, reportDir, ".md")
+  constructor(name: String, reportDir: File?) : this(name, reportDir, ".md")
 
   override lateinit var reportFile: File
 
   init {
+    if (reportDir == null) {
+      reportDir = File(System.getProperty("user.dir"))
+    }
     reportFile = File(reportDir, "$name$ext")
   }
 
@@ -39,7 +42,7 @@ class MarkdownReporter(
       pw!!.close()
     }
 
-    reportDir.mkdirs()
+    reportDir!!.mkdirs()
     reportFile = File(reportDir, provider.name + ext)
     pw = PrintWriter(BufferedWriter(FileWriter(reportFile, true)))
     pw!!.write("""
@@ -67,11 +70,11 @@ class MarkdownReporter(
   }
 
   override fun verifyConsumerFromUrl(pactUrl: UrlPactSource, consumer: IConsumerInfo) {
-    pw!!.write("From ${pactUrl.description()}\n")
+    pw!!.write("From `${pactUrl.description()}`<br/>\n")
   }
 
   override fun verifyConsumerFromFile(pactFile: PactSource, consumer: IConsumerInfo) {
-    pw!!.write("From ${pactFile.description()}\n\n")
+    pw!!.write("From `${pactFile.description()}`<br/>\n")
   }
 
   override fun pactLoadFailureForConsumer(consumer: IConsumerInfo, message: String) { }

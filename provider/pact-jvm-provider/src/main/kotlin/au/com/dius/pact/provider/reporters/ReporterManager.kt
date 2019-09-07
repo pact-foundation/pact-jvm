@@ -18,7 +18,8 @@ object ReporterManager {
   fun reporterDefined(name: String) = REPORTERS.containsKey(name)
 
   @JvmStatic
-  fun createReporter(name: String, reportDir: File): VerifierReporter {
+  @JvmOverloads
+  fun createReporter(name: String, reportDir: File? = null): VerifierReporter {
     val reporter: VerifierReporter = if (reporterDefined(name)) {
       try {
         REPORTERS[name]!!.constructors.first { it.parameters.size == 2 }.call(name, reportDir)

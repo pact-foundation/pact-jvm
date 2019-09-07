@@ -30,17 +30,20 @@ import java.time.ZonedDateTime
  */
 class JsonReporter(
   var name: String = "json",
-  override var reportDir: File,
+  override var reportDir: File?,
   var jsonData: JsonObject = JsonObject(),
   override var ext: String = ".json",
   private var providerName: String? = null
 ) : VerifierReporter {
 
-  constructor(name: String, reportDir: File) : this(name, reportDir, JsonObject(), ".json", null)
+  constructor(name: String, reportDir: File?) : this(name, reportDir, JsonObject(), ".json", null)
 
   override lateinit var reportFile: File
 
   init {
+    if (reportDir == null) {
+      reportDir = File(System.getProperty("user.dir"))
+    }
     reportFile = File(reportDir, "$name$ext")
   }
 
@@ -55,7 +58,7 @@ class JsonReporter(
       "provider" to jsonObject("name" to providerName),
       "execution" to jsonArray()
     )
-    reportDir.mkdirs()
+    reportDir!!.mkdirs()
     reportFile = File(reportDir, providerName + ext)
   }
 
@@ -92,6 +95,12 @@ class JsonReporter(
   }
 
   override fun pactLoadFailureForConsumer(consumer: IConsumerInfo, message: String) {
+    if (jsonData["execution"].array.size() == 0) {
+      jsonData["execution"].array.add(jsonObject(
+        "consumer" to jsonObject("name" to consumer.name),
+        "interactions" to jsonArray()
+      ))
+    }
     jsonData["execution"].array.last()["result"] = jsonObject(
       "state" to "Pact Load Failure",
       "message" to message
@@ -150,7 +159,7 @@ class JsonReporter(
       "message" to interactionMessage,
       "exception" to jsonObject(
         "message" to e.message,
-        "stackTrace" to ExceptionUtils.getStackFrames(e)
+        "stackTrace" to jsonArray(ExceptionUtils.getStackFrames(e).toList())
       )
     )
   }

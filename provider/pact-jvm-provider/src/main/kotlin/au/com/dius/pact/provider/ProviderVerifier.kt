@@ -602,10 +602,21 @@ open class ProviderVerifier @JvmOverloads constructor (
   }
 
   fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, pactSource: PactSource?) {
-    if (pactSource is BrokerUrlSource) {
-      reporters.forEach { it.reportVerificationForConsumer(consumer, provider, pactSource.tag) }
-    } else {
-      reporters.forEach { it.reportVerificationForConsumer(consumer, provider, null) }
+    when (pactSource) {
+      is BrokerUrlSource -> reporters.forEach {
+        it.reportVerificationForConsumer(consumer, provider, pactSource.tag)
+        it.verifyConsumerFromUrl(pactSource, consumer)
+      }
+      is UrlPactSource -> reporters.forEach {
+        it.reportVerificationForConsumer(consumer, provider, null)
+        it.verifyConsumerFromUrl(pactSource, consumer)
+      }
+      else -> reporters.forEach {
+        it.reportVerificationForConsumer(consumer, provider, null)
+        if (pactSource != null) {
+          it.verifyConsumerFromFile(pactSource, consumer)
+        }
+      }
     }
   }
 
@@ -616,7 +627,6 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
 
     return if (pactSource is UrlPactSource) {
-      reporters.forEach { it.verifyConsumerFromUrl(pactSource, consumer) }
       val options = mutableMapOf<String, Any>()
       if (consumer.pactFileAuthentication.isNotEmpty()) {
         options["authentication"] = consumer.pactFileAuthentication
@@ -624,9 +634,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       pactReader.loadPact(pactSource, options)
     } else {
       try {
-        val pact = pactReader.loadPact(pactSource!!)
-        reporters.forEach { it.verifyConsumerFromFile(pact.source, consumer) }
-        pact
+        pactReader.loadPact(pactSource!!)
       } catch (e: Exception) {
         logger.error(e) { "Failed to load pact file" }
         val message = generateLoadFailureMessage(consumer)

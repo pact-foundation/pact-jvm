@@ -15,11 +15,11 @@ import java.io.File
  */
 class AnsiConsoleReporter(
   var name: String,
-  override var reportDir: File,
+  override var reportDir: File?,
   var displayFullDiff: Boolean
 ) : VerifierReporter {
 
-  constructor(name: String, reportDir: File) : this(name, reportDir, false)
+  constructor(name: String, reportDir: File?) : this(name, reportDir, false)
 
   override val ext: String? = null
 
