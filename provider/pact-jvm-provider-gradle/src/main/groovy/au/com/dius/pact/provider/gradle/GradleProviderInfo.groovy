@@ -10,6 +10,7 @@ import org.gradle.util.ConfigureUtil
  * Extends the provider info to be setup in a gradle build
  */
 class GradleProviderInfo extends ProviderInfo {
+  def providerVersion
 
   GradleProviderInfo(String name) {
     super(name)

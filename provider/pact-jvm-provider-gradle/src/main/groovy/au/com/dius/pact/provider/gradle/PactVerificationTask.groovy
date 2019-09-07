@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider.gradle
 
-import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
 import org.fusesource.jansi.AnsiConsole
 import org.gradle.api.DefaultTask
@@ -14,7 +13,7 @@ import org.gradle.api.tasks.TaskAction
  */
 class PactVerificationTask extends DefaultTask {
 
-  ProviderInfo providerToVerify
+  GradleProviderInfo providerToVerify
 
   @TaskAction
   void verifyPact() {
@@ -29,7 +28,7 @@ class PactVerificationTask extends DefaultTask {
       projectClasspath = {
         project.sourceSets.test.runtimeClasspath*.toURL()
       }
-      providerVersion = providerToVerify.providerToVerify ?: { project.version }
+      providerVersion = providerToVerify.providerVersion ?: { project.version }
 
       if (project.pact.reports) {
         def reportsDir = new File(project.buildDir, 'reports/pact')
