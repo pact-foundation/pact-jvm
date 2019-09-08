@@ -293,4 +293,21 @@ class PactBrokerClientSpec extends Specification {
     1 * halClient.fetch(url) >> json
     result.pactFile == Json.INSTANCE.toJson([a: 'a', b: 100, _links: [:], c: [true, 10.2, 'test']])
   }
+
+  def 'publishing verification results with an exception should support any type of exception'() {
+    given:
+    def halClient = Mock(IHalClient)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+    def uploadResult = new Ok(true)
+    halClient.postJson(_, _) >> uploadResult
+    def result = new TestResult.Failed([
+      [exception: new AssertionError('boom')]
+    ], 'Failed')
+    def doc = ['pb:publish-verification-results': [href: '']]
+
+    expect:
+    client.publishVerificationResults(doc, result, '0', null) == uploadResult
+  }
 }
