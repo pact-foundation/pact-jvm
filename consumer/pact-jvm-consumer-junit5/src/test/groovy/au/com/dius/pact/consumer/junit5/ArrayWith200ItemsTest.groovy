@@ -1,19 +1,13 @@
 package au.com.dius.pact.consumer.junit5
 
 import au.com.dius.pact.consumer.MockServer
-import au.com.dius.pact.consumer.PactConsumerConfig
 import au.com.dius.pact.consumer.dsl.DslPart
-import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
 import io.pactfoundation.consumer.dsl.LambdaDslObject
 import org.apache.http.HttpResponse
 import org.apache.http.client.fluent.Request
-import org.apache.http.entity.ContentType
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -23,7 +17,8 @@ import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonArray
 
 @ExtendWith(PactConsumerTestExt)
 @PactTestFor(providerName = 'ProviderWith200Items')
-@SuppressWarnings(['JUnitPublicNonTestMethod', 'GStringExpressionWithinString'])
+@SuppressWarnings(['JUnitPublicNonTestMethod', 'PropertyName', 'UnnecessaryObjectReferences',
+  'ClosureAsLastMethodParameter'])
 class ArrayWith200ItemsTest {
   String FILE_PATH = 'path'
   String FILE_ID = 'id'
@@ -35,7 +30,7 @@ class ArrayWith200ItemsTest {
   String FILES = 'files'
 
   @Pact(consumer = 'Consumer')
-  RequestResponsePact files(PactDslWithProvider builder) {
+  RequestResponsePact filesPact(PactDslWithProvider builder) {
     builder
       .uponReceiving('a request for 200 items')
         .path('/values')
@@ -53,21 +48,21 @@ class ArrayWith200ItemsTest {
       o.stringType(FILE_TYPE, 'EXAMPLE')
       o.numberType(FILE_SIZE, 2)
       o.numberType(FILE_RECORD_SIZE, 3)
-    };
-    Consumer<LambdaDslObject> file_1 = { o ->
+    }
+    Consumer<LambdaDslObject> file1 = { o ->
       o.stringValue(FILE_PATH, 'PATH1')
       o.stringValue(FILE_ID, 'AAAA')
       o.stringValue(FILE_NAME, 'TOTO')
       o.stringValue(TYPE, 'TYPE_C')
       o.numberValue(FILE_SIZE, 4)
       o.numberValue(FILE_RECORD_SIZE, 2)
-    };
+    }
     newJsonArray({ folders ->
       folders.object({ folderA ->
         folderA.array(FILES, { appLambdaDslJsonArray ->
           appLambdaDslJsonArray.object(generic) // item 1
           198.times {
-            appLambdaDslJsonArray.object(file_1)
+            appLambdaDslJsonArray.object(file1)
           }
           appLambdaDslJsonArray.object(generic) // item 200
         })
