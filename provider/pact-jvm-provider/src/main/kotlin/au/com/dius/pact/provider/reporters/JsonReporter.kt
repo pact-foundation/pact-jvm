@@ -90,7 +90,7 @@ class JsonReporter(
 
   override fun verifyConsumerFromFile(pactFile: PactSource, consumer: IConsumerInfo) {
     jsonData["execution"].array.last()["consumer"].obj["source"] = jsonObject(
-      "file" to if (pactFile is FileSource<*>) pactFile.file else pactFile.description()
+      "file" to if (pactFile is FileSource<*>) pactFile.file.toString() else pactFile.description()
     )
   }
 
