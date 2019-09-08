@@ -1,5 +1,13 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 3.6.13 - Bugfix Release
+
+* 97a076d3 - fix: mark the test result as failed if a state change callback fails #930 (Ronald Holshausen, Sun Sep 8 11:38:54 2019 +1000)
+* 241c7f56 - chore: only run the 200 mock server test on CI (Ronald Holshausen, Sat Sep 7 15:34:45 2019 +1000)
+* f80d82a9 - fix: from 3.6.3 header values are now a list #928 (Ronald Holshausen, Sat Sep 7 15:09:15 2019 +1000)
+* 87df5116 - chore: switch to openjdk 8 on travis (Ronald Holshausen, Sat Aug 24 10:39:54 2019 +1000)
+* e7bdc6e9 - bump version to 3.6.13 (Ronald Holshausen, Sun Jul 21 12:08:36 2019 +1000)
+
 # 4.0.0-beta.6 - Bugfix Release
 
 * e373b522 - Merge pull request #927 from Scot3004/mockmvc-multipart (Ronald Holshausen, Wed Aug 28 09:51:10 2019 +1000)
@@ -73,7 +81,7 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 
 # 3.6.12 - Bugfix Release
 
-* 63542f36 - fix: preserve the scheme when adding premtive auth #902 (Ronald Holshausen, Sat Jul 20 17:08:26 2019 +1000)
+* 63542f36 - fix: preserve the scheme when adding preemptive auth #902 (Ronald Holshausen, Sat Jul 20 17:08:26 2019 +1000)
 * c5cd9362 - fix: allow the pact spec version to be specified at the class level (JUNIT 5) #905 (Ronald Holshausen, Sat Jul 20 16:50:14 2019 +1000)
 * 03544f90 - chore: add readme notes about injecting values from provider states (Ronald Holshausen, Sun Jul 7 18:40:37 2019 +1000)
 * f2115e5d - bump version to 3.6.12 (Ronald Holshausen, Sun Jul 7 18:06:34 2019 +1000)
