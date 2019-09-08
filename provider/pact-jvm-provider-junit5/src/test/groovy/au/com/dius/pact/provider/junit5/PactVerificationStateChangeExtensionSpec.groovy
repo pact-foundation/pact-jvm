@@ -23,6 +23,7 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
   private PactVerificationStateChangeExtension verificationExtension
   Interaction interaction
   private TestResultAccumulator testResultAcc
+  RequestResponsePact pact
 
   static class TestClass {
 
@@ -54,7 +55,7 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
 
   def setup() {
     interaction = new RequestResponseInteraction('test')
-    def pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction ])
+    pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction ])
     testResultAcc = Mock(TestResultAccumulator)
     verificationExtension = new PactVerificationStateChangeExtension(pact, interaction, testResultAcc)
   }
@@ -100,7 +101,7 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
   def 'marks the test as failed if the provider state callback fails'() {
     given:
     def state = new ProviderState('test state')
-    interaction.providerStates = [ state ]
+    def interaction = new RequestResponseInteraction('test', [ state ])
     def store = Mock(ExtensionContext.Store)
     def context = Mock(ExtensionContext) {
       getStore(_) >> store
@@ -114,6 +115,7 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     def verificationContext = new PactVerificationContext(store, context, target, verifier, resolver, provider,
       consumer, interaction, TestResult.Ok.INSTANCE)
     store.get(_) >> verificationContext
+    verificationExtension = new PactVerificationStateChangeExtension(pact, interaction, testResultAcc)
 
     when:
     verificationExtension.beforeTestExecution(context)
