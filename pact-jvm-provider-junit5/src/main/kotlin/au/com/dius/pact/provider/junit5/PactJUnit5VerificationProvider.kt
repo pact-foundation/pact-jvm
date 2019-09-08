@@ -12,6 +12,7 @@ import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.ProviderVerifierBase
+import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.junit.Consumer
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.filterPactsByAnnotations
@@ -130,7 +131,7 @@ class PactVerificationExtension(
   }
 
   override fun getAdditionalExtensions(): MutableList<Extension> {
-    return mutableListOf(PactVerificationStateChangeExtension(interaction), this)
+    return mutableListOf(PactVerificationStateChangeExtension(pact, interaction, testResultAccumulator), this)
   }
 
   override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
@@ -255,14 +256,24 @@ class PactVerificationExtension(
 /**
  * JUnit 5 test extension class for executing state change callbacks
  */
-class PactVerificationStateChangeExtension(private val interaction: Interaction)
-  : BeforeTestExecutionCallback, AfterTestExecutionCallback {
+class PactVerificationStateChangeExtension(
+  private val pact: Pact<Interaction>,
+  private val interaction: Interaction,
+  private val testResultAccumulator: TestResultAccumulator
+) : BeforeTestExecutionCallback, AfterTestExecutionCallback {
   override fun beforeTestExecution(extensionContext: ExtensionContext) {
     logger.debug { "beforeEach for interaction '${interaction.description}'" }
-    val providerStateContext = invokeStateChangeMethods(extensionContext, interaction.providerStates, StateChangeAction.SETUP)
     val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val testContext = store.get("interactionContext") as PactVerificationContext
-    testContext.executionContext = mapOf("providerState" to providerStateContext)
+
+    try {
+      val providerStateContext = invokeStateChangeMethods(extensionContext, interaction.providerStates, StateChangeAction.SETUP)
+      testContext.executionContext = mapOf("providerState" to providerStateContext)
+    } catch (e: Exception) {
+      logger.error(e) { "Provider state change callback failed" }
+      testResultAccumulator.updateTestResult(pact, interaction, TestResult.Failed(description = "Provider state change callback failed",
+        results = listOf(mapOf("exception" to e))))
+    }
   }
 
   override fun afterTestExecution(context: ExtensionContext) {

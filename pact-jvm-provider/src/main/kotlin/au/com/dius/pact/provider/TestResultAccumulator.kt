@@ -21,7 +21,7 @@ interface TestResultAccumulator {
 
 object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
 
-  private val testResults: MutableMap<Int, MutableMap<Int, TestResult>> = mutableMapOf()
+  val testResults: MutableMap<Int, MutableMap<Int, TestResult>> = mutableMapOf()
   var verificationReporter: VerificationReporter = DefaultVerificationReporter
 
   override fun updateTestResult(pact: Pact<out Interaction>, interaction: Interaction, testExecutionResult: Boolean) {
@@ -38,9 +38,16 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
     val pactHash = calculatePactHash(pact)
     val interactionResults = testResults.getOrPut(pactHash) { mutableMapOf() }
     val interactionHash = calculateInteractionHash(interaction)
-    interactionResults[interactionHash] = testExecutionResult
+    val testResult = interactionResults[interactionHash]
+    if (testResult == null) {
+      interactionResults[interactionHash] = testExecutionResult
+    } else {
+      interactionResults[interactionHash] = testResult.merge(testExecutionResult)
+    }
     if (allInteractionsVerified(pact, interactionResults)) {
-      logger.debug { "All interactions for Pact ${pact.provider.name}-${pact.consumer.name} are verified" }
+      logger.debug {
+        "All interactions for Pact ${pact.provider.name}-${pact.consumer.name} have a verification result"
+      }
       if (verificationReporter.publishingResultsDisabled()) {
         logger.warn { "Skipping publishing of verification results as it has been disabled " +
           "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')" }
@@ -49,8 +56,9 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
           acc: TestResult, result -> acc.merge(result)
         }, lookupProviderVersion())
       }
+      testResults.remove(pactHash)
     } else {
-      logger.info { "Not all of the #${pact.interactions.size} were verified." }
+      logger.info { "Not all of the ${pact.interactions.size} were verified." }
     }
   }
 

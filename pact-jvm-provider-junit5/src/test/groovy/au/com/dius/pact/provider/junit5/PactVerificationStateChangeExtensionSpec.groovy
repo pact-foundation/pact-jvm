@@ -1,11 +1,19 @@
 package au.com.dius.pact.provider.junit5
 
+import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.Interaction
+import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.RequestResponseInteraction
+import au.com.dius.pact.model.RequestResponsePact
+import au.com.dius.pact.pactbroker.TestResult
+import au.com.dius.pact.provider.IProviderVerifier
+import au.com.dius.pact.provider.ProviderInfo
+import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.junit.MissingStateChangeMethod
 import au.com.dius.pact.provider.junit.State
 import au.com.dius.pact.provider.junit.StateChangeAction
+import au.com.dius.pact.support.expressions.ValueResolver
 import org.junit.jupiter.api.extension.ExtensionContext
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -14,6 +22,7 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
 
   private PactVerificationStateChangeExtension verificationExtension
   Interaction interaction
+  private TestResultAccumulator testResultAcc
 
   static class TestClass {
 
@@ -45,7 +54,9 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
 
   def setup() {
     interaction = new RequestResponseInteraction()
-    verificationExtension = new PactVerificationStateChangeExtension(interaction)
+    def pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction ])
+    testResultAcc = Mock(TestResultAccumulator)
+    verificationExtension = new PactVerificationStateChangeExtension(pact, interaction, testResultAcc)
   }
 
   @Unroll
@@ -83,6 +94,32 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     testInstance.state2Called
     testInstance.state3Called == state.params
     !testInstance.state2TeardownCalled
+  }
+
+  @SuppressWarnings('ClosureAsLastMethodParameter')
+  def 'marks the test as failed if the provider state callback fails'() {
+    given:
+    def state = new ProviderState('test state')
+    interaction.providerStates = [ state ]
+    def store = Mock(ExtensionContext.Store)
+    def context = Mock(ExtensionContext) {
+      getStore(_) >> store
+      getRequiredTestClass() >> TestClass
+    }
+    def target = Mock(TestTarget)
+    IProviderVerifier verifier = Mock()
+    ValueResolver resolver = Mock()
+    ProviderInfo provider = Mock()
+    String consumer = 'consumer'
+    def verificationContext = new PactVerificationContext(store, context, target, verifier, resolver, provider,
+      consumer, interaction, TestResult.Ok.INSTANCE)
+    store.get(_) >> verificationContext
+
+    when:
+    verificationExtension.beforeTestExecution(context)
+
+    then:
+    1 * testResultAcc.updateTestResult(_, interaction, { it instanceof TestResult.Failed })
   }
 
 }

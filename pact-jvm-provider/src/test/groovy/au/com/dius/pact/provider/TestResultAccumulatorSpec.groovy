@@ -151,4 +151,49 @@ class TestResultAccumulatorSpec extends Specification {
     new TestResult.Failed() | new TestResult.Failed() | new TestResult.Failed()
   }
 
+  def 'updateTestResult - merge the test result with any existing result'() {
+    given:
+    def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'),
+      [interaction1, interaction2])
+    testResultAccumulator.testResults.clear()
+    def reporter = testResultAccumulator.verificationReporter
+    testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
+      publishingResultsDisabled() >> false
+    }
+    def failedResult = new TestResult.Failed()
+
+    when:
+    testResultAccumulator.updateTestResult(pact, interaction1, failedResult)
+    testResultAccumulator.updateTestResult(pact, interaction1, TestResult.Ok.INSTANCE)
+    testResultAccumulator.updateTestResult(pact, interaction2, TestResult.Ok.INSTANCE)
+
+    then:
+    1 * testResultAccumulator.verificationReporter.reportResults(_, failedResult, _, _)
+
+    cleanup:
+    testResultAccumulator.verificationReporter = reporter
+  }
+
+  def 'updateTestResult - clear the results when they are published'() {
+    given:
+    def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'),
+      [interaction1, interaction2])
+    testResultAccumulator.testResults.clear()
+    def reporter = testResultAccumulator.verificationReporter
+    testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
+      publishingResultsDisabled() >> false
+    }
+
+    when:
+    testResultAccumulator.updateTestResult(pact, interaction1, TestResult.Ok.INSTANCE)
+    testResultAccumulator.updateTestResult(pact, interaction2, TestResult.Ok.INSTANCE)
+
+    then:
+    1 * testResultAccumulator.verificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, _)
+    testResultAccumulator.testResults.isEmpty()
+
+    cleanup:
+    testResultAccumulator.verificationReporter = reporter
+  }
+
 }
