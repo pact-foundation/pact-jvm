@@ -291,8 +291,7 @@ class PactBrokerClientPactSpec extends Specification {
         testResults eachLike {
           interactionId string()
           success false
-          description string('Request to provider method failed with an exception')
-          exception {
+          exceptions eachLike {
             message string('Boom!')
             exceptionClass string('java.io.IOException')
           }

@@ -234,7 +234,6 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
               }
             }
           val interactionJson = jsonObject("interactionId" to mismatches.key, "success" to false,
-            "description" to result.description,
             "mismatches" to jsonArray(values)
           )
 
@@ -242,10 +241,10 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
           if (exceptionDetails != null) {
             val exception = exceptionDetails["exception"]
             if (exception is Throwable) {
-              interactionJson["exception"] = jsonObject("message" to exception.message,
-                "exceptionClass" to exception.javaClass.name)
+              interactionJson["exceptions"] = jsonArray(jsonObject("message" to exception.message,
+                "exceptionClass" to exception.javaClass.name))
             } else {
-              interactionJson["exception"] = jsonObject("message" to exception.toString())
+              interactionJson["exceptions"] = jsonArray(jsonObject("message" to exception.toString()))
             }
           }
 

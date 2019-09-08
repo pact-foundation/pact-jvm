@@ -33,12 +33,11 @@ class VerificationResultPayloadSpec extends Specification {
     result.testResults.size() == 1
     result.testResults.first() == [
       interactionId: 'ABC',
-      description: 'Test failed with exception',
       success: false,
-      exception: [
+      exceptions: [[
         message: 'Boom',
         exceptionClass: 'java.io.IOException'
-      ],
+      ]],
       mismatches: [
         [attribute: 'status', description: 'Expected status code of 400 but got 500']
       ]
@@ -61,19 +60,17 @@ class VerificationResultPayloadSpec extends Specification {
     result.testResults.size() == 2
     result.testResults.find { it.interactionId == '123' } == [
       interactionId: '123',
-      description: 'Test failed',
       success: false,
-      exception: [
+      exceptions: [[
         message: 'Boom',
         exceptionClass: 'java.io.IOException'
-      ],
+      ]],
       mismatches: [
         [attribute: 'status', description: 'Expected status code of 400 but got 500']
       ]
     ]
     result.testResults.find { it.interactionId == 'ABC' } == [
       interactionId: 'ABC',
-      description: 'Test failed',
       success: false,
       mismatches: [
         [attribute: 'status', description: 'Expected status code of 400 but got 500'],
@@ -143,7 +140,6 @@ class VerificationResultPayloadSpec extends Specification {
 
     then:
     result.testResults.size() == 2
-    result1.description == 'Test failed'
     result1.mismatches.size() == 2
     result1.mismatches[0] == [
       attribute: 'body',
@@ -157,7 +153,6 @@ class VerificationResultPayloadSpec extends Specification {
       description: "Expected doesNotExist='Test' but was missing",
       diff: diff
     ]
-    result2.description == 'Test failed'
     result2.mismatches.size() == 1
     result2.mismatches[0] == [
       attribute: 'body',
@@ -190,7 +185,6 @@ class VerificationResultPayloadSpec extends Specification {
     result.testResults[0] == [
       interactionId: '36803e0333e8967092c2910b9d2f75c033e696ee',
       success: false,
-      description: 'Test failed',
       mismatches: [
         [attribute: 'header', identifier: 'X', description: "Expected header 'X' to have value '100' but was '200'"],
         [attribute: 'header', identifier: 'Y', description: "Expected header 'Y' to have value 'X' but was '100'"]
