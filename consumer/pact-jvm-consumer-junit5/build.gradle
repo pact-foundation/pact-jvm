@@ -11,4 +11,5 @@ dependencies {
   testCompile 'org.apache.commons:commons-io:1.3.2'
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testCompile 'org.hamcrest:hamcrest:2.1'
+  testCompile project(path: ":consumer:pact-jvm-consumer-java8", configuration: 'default')
 }
