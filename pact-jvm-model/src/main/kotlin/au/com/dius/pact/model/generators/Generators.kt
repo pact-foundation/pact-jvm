@@ -10,6 +10,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import mu.KLogging
 import org.apache.commons.collections4.IteratorUtils
+import java.nio.charset.Charset
 
 enum class Category {
   METHOD, PATH, HEADER, QUERY, BODY, STATUS, METADATA
@@ -208,7 +209,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
           handler.applyKey(body, key, generator, context)
         }
       }
-    } ?: OptionalBody.body(value.toByteArray())
+    } ?: OptionalBody.body(value.toByteArray(org.apache.http.entity.ContentType.parse(contentType).charset ?: Charset.defaultCharset()))
   }
 
   /**

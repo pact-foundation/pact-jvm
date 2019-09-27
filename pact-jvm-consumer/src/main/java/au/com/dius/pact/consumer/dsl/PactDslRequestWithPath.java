@@ -19,6 +19,7 @@ import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -170,10 +171,8 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      *
      * @param body Request body in string form
      */
-    public PactDslRequestWithPath body(String body, String mimeType) {
-        requestBody = OptionalBody.body(body.getBytes());
-        requestHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
-        return this;
+    public PactDslRequestWithPath body(String body, String contentType) {
+      return body(body, ContentType.parse(contentType));
     }
 
     /**
@@ -181,8 +180,11 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      *
      * @param body Request body in string form
      */
-    public PactDslRequestWithPath body(String body, ContentType mimeType) {
-        return body(body, mimeType.toString());
+    public PactDslRequestWithPath body(String body, ContentType contentType) {
+      Charset charset = contentType.getCharset() == null ? Charset.defaultCharset() : contentType.getCharset();
+      requestBody = OptionalBody.body(body.getBytes(charset));
+      requestHeaders.put(CONTENT_TYPE, Collections.singletonList(contentType.toString()));
+      return this;
     }
 
     /**
@@ -200,10 +202,8 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      *
      * @param body Request body in Java Functional Interface Supplier that must return a string
      */
-    public PactDslRequestWithPath body(Supplier<String> body, String mimeType) {
-        requestBody = OptionalBody.body(body.get().getBytes());
-        requestHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
-        return this;
+    public PactDslRequestWithPath body(Supplier<String> body, String contentType) {
+      return body(body, ContentType.parse(contentType));
     }
 
     /**
@@ -211,8 +211,11 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      *
      * @param body Request body in Java Functional Interface Supplier that must return a string
      */
-    public PactDslRequestWithPath body(Supplier<String> body, ContentType mimeType) {
-        return body(body, mimeType.toString());
+    public PactDslRequestWithPath body(Supplier<String> body, ContentType contentType) {
+      Charset charset = contentType.getCharset() == null ? Charset.defaultCharset() : contentType.getCharset();
+      requestBody = OptionalBody.body(body.get().getBytes(charset));
+      requestHeaders.put(CONTENT_TYPE, Collections.singletonList(contentType.toString()));
+      return this;
     }
 
     /**
@@ -234,11 +237,11 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      *
      * @param body Request body in string form
      */
-    public PactDslRequestWithPath bodyWithSingleQuotes(String body, String mimeType) {
-        if (body != null) {
-            body = QuoteUtil.convert(body);
-        }
-        return body(body, mimeType);
+    public PactDslRequestWithPath bodyWithSingleQuotes(String body, String contentType) {
+      if (body != null) {
+        body = QuoteUtil.convert(body);
+      }
+      return body(body, contentType);
     }
 
     /**
@@ -247,11 +250,11 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      *
      * @param body Request body in string form
      */
-    public PactDslRequestWithPath bodyWithSingleQuotes(String body, ContentType mimeType) {
-        if (body != null) {
-            body = QuoteUtil.convert(body);
-        }
-        return body(body, mimeType);
+    public PactDslRequestWithPath bodyWithSingleQuotes(String body, ContentType contentType) {
+      if (body != null) {
+        body = QuoteUtil.convert(body);
+      }
+      return body(body, contentType);
     }
 
     /**

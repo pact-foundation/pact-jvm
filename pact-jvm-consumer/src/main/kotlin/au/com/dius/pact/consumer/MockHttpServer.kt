@@ -139,11 +139,11 @@ abstract class BaseMockServer(
 
   private fun toPactRequest(exchange: HttpExchange): Request {
     val headers = exchange.requestHeaders
-    val bodyContents = exchange.requestBody.bufferedReader(calculateCharset(headers)).readText()
+    val bodyContents = exchange.requestBody.readBytes()
     val body = if (bodyContents.isEmpty()) {
       OptionalBody.empty()
     } else {
-      OptionalBody.body(bodyContents.toByteArray())
+      OptionalBody.body(bodyContents)
     }
     return Request(exchange.requestMethod, exchange.requestURI.path,
       queryStringToMap(exchange.requestURI.rawQuery), headers, body)
