@@ -9,7 +9,9 @@ import scala.collection.JavaConverters._
 object ListServers {
 
   def apply(oldState: ServerState): Result = {
-    val body = OptionalBody.body(("{\"ports\": [" + oldState.keySet.mkString(", ") + "]}").getBytes)
+    val ports = oldState.keySet.filter(p => p.matches("\\d+")).mkString(", ")
+    val paths = oldState.keySet.filter(p => !p.matches("\\d+")).map("\"" + _ + "\"").mkString(", ")
+    val body = OptionalBody.body(("{\"ports\": [" + ports + "], \"paths\": [" + paths + "]}").getBytes)
     Result(new Response(200, Map("Content-Type" -> List("application/json").asJava).asJava, body), oldState)
   }
 }
