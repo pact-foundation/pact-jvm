@@ -20,6 +20,7 @@ import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -103,22 +104,23 @@ public class PactDslResponse {
      * Response body to return
      *
      * @param body body in string form
-     * @param mimeType the Content-Type response header value
+     * @param contentType the Content-Type response header value
      */
-    public PactDslResponse body(String body, String mimeType) {
-        responseBody = OptionalBody.body(body.getBytes(), new au.com.dius.pact.core.model.ContentType(mimeType));
-        responseHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
-        return this;
+    public PactDslResponse body(String body, String contentType) {
+      return body(body, ContentType.parse(contentType));
     }
 
     /**
      * Response body to return
      *
      * @param body body in string form
-     * @param mimeType the Content-Type response header value
+     * @param contentType the Content-Type response header value
      */
-    public PactDslResponse body(String body, ContentType mimeType) {
-        return body(body, mimeType.toString());
+    public PactDslResponse body(String body, ContentType contentType) {
+      Charset charset = contentType.getCharset() == null ? Charset.defaultCharset() : contentType.getCharset();
+      responseBody = OptionalBody.body(body.getBytes(charset), new au.com.dius.pact.core.model.ContentType(contentType.toString()));
+      responseHeaders.put(CONTENT_TYPE, Collections.singletonList(contentType.toString()));
+      return this;
     }
 
     /**
@@ -135,22 +137,23 @@ public class PactDslResponse {
      * The body of the request
      *
      * @param body Response body in Java Functional Interface Supplier that must return a string
-     * @param mimeType the Content-Type response header value
+     * @param contentType the Content-Type response header value
      */
-    public PactDslResponse body(Supplier<String> body, String mimeType) {
-        responseBody = OptionalBody.body(body.get().getBytes(), new au.com.dius.pact.core.model.ContentType(mimeType));
-        responseHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
-        return this;
+    public PactDslResponse body(Supplier<String> body, String contentType) {
+      return body(body, contentType);
     }
 
     /**
      * The body of the request
      *
      * @param body Response body in Java Functional Interface Supplier that must return a string
-     * @param mimeType the Content-Type response header value
+     * @param contentType the Content-Type response header value
      */
-    public PactDslResponse body(Supplier<String> body, ContentType mimeType) {
-        return body(body, mimeType.toString());
+    public PactDslResponse body(Supplier<String> body, ContentType contentType) {
+      Charset charset = contentType.getCharset() == null ? Charset.defaultCharset() : contentType.getCharset();
+      responseBody = OptionalBody.body(body.get().getBytes(charset), new au.com.dius.pact.core.model.ContentType(contentType.toString()));
+      responseHeaders.put(CONTENT_TYPE, Collections.singletonList(contentType.toString()));
+      return this;
     }
 
 
@@ -172,13 +175,13 @@ public class PactDslResponse {
      * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
      *
      * @param body Request body in string form
-     * @param mimeType the Content-Type response header value
+     * @param contentType the Content-Type response header value
      */
-    public PactDslResponse bodyWithSingleQuotes(String body, String mimeType) {
-        if (body != null) {
-            body = QuoteUtil.convert(body);
-        }
-        return body(body, mimeType);
+    public PactDslResponse bodyWithSingleQuotes(String body, String contentType) {
+      if (body != null) {
+        body = QuoteUtil.convert(body);
+      }
+      return body(body, contentType);
     }
 
     /**
@@ -186,10 +189,13 @@ public class PactDslResponse {
      * and using {@link QuoteUtil} to convert single quotes to double quotes if required.
      *
      * @param body Request body in string form
-     * @param mimeType the Content-Type response header value
+     * @param contentType the Content-Type response header value
      */
-    public PactDslResponse bodyWithSingleQuotes(String body, ContentType mimeType) {
-        return bodyWithSingleQuotes(body, mimeType.toString());
+    public PactDslResponse bodyWithSingleQuotes(String body, ContentType contentType) {
+      if (body != null) {
+        body = QuoteUtil.convert(body);
+      }
+      return body(body, contentType);
     }
 
     /**
