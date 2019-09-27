@@ -22,7 +22,11 @@ object Complete {
 
   def apply(request: Request, oldState: ServerState): Result = {
     def clientError = Result(new Response(400), oldState)
-    def pactWritten(response: Response, port: String) = Result(response, oldState - port)
+    def pactWritten(response: Response, port: String) = {
+      val server = oldState(port)
+      val newState = oldState.filter(p => p._2 != server)
+      Result(response, newState)
+    }
 
     val result = for {
       port <- getPort(JsonUtils.parseJsonString(request.getBody.valueAsString()))
