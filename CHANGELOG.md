@@ -1,5 +1,40 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.0.0 - Bugfix Release
+
+* f2e2f461 - Merge remote-tracking branch 'origin/v3.6.x' (Ronald Holshausen, Fri Sep 27 18:41:49 2019 +1000)
+* f0acf0a7 - fix: use the charset from the content type when converting bodies to bytes #941 (Ronald Holshausen, Fri Sep 27 18:24:48 2019 +1000)
+* c57c4e01 - Merge remote-tracking branch 'origin/v3.6.x' (Ronald Holshausen, Fri Sep 27 17:44:49 2019 +1000)
+* 63fed4ca - fix: remove all references to the mockserver on complete #939 (Ronald Holshausen, Fri Sep 27 17:09:27 2019 +1000)
+* c5a9e050 - fix: GET on pact-jvm-server root delivers broken json #938 (Ronald Holshausen, Fri Sep 27 16:29:20 2019 +1000)
+* 4ac4d12a - fix: blog post link in readme #937 (Ronald Holshausen, Mon Sep 9 18:56:01 2019 +1000)
+* 3ec0debe - fix: code narc error (Ronald Holshausen, Sun Sep 8 16:38:07 2019 +1000)
+* f359bdca - chore: added test with array with 200 items (Ronald Holshausen, Sun Sep 8 15:41:20 2019 +1000)
+* 8da6691a - fix: for JSON report failing when the source is a file (Ronald Holshausen, Sun Sep 8 15:00:16 2019 +1000)
+* 327d253f - chore: updated the verification result format to match the Ruby version (Ronald Holshausen, Sun Sep 8 14:05:32 2019 +1000)
+* af882622 - fix: for AssertionError cannot be cast to class java.lang.Exception #935 (Ronald Holshausen, Sun Sep 8 13:36:23 2019 +1000)
+* 705c35ce - fix: failing test after merge (Ronald Holshausen, Sun Sep 8 13:20:09 2019 +1000)
+* 72bbfaa1 - bump version to 3.6.14 (Ronald Holshausen, Sun Sep 8 12:44:35 2019 +1000)
+* a2ca363c - Merge remote-tracking branch 'origin/v3.6.x' (Ronald Holshausen, Sun Sep 8 12:42:03 2019 +1000)
+* 7e5e209b - update changelog for release 3.6.13 (Ronald Holshausen, Sun Sep 8 12:25:33 2019 +1000)
+* 97a076d3 - fix: mark the test result as failed if a state change callback fails #930 (Ronald Holshausen, Sun Sep 8 11:38:54 2019 +1000)
+* 7cd72529 - fix: Verification reporters were broken after last refactor (Ronald Holshausen, Sat Sep 7 17:59:36 2019 +1000)
+* 9af32411 - refactor: deprecate the version property for PactPublish in favor of providerVersion (Ronald Holshausen, Sat Sep 7 16:45:19 2019 +1000)
+* 715b95ac - Merge branch 'toastyblast-provider-gradle-add-verification-provider-version' (Ronald Holshausen, Sat Sep 7 16:33:44 2019 +1000)
+* f3f222c1 - chore: updated the readme about setting provider version (Ronald Holshausen, Sat Sep 7 16:33:20 2019 +1000)
+* 5999577f - fix: move providerVersion to GradleProviderInfo (Ronald Holshausen, Sat Sep 7 16:27:52 2019 +1000)
+* 0d0ac89c - Revert "Issue#929 Added the ability to add a version for the provider in pact-jvm-provider-gradle" (Ronald Holshausen, Sat Sep 7 16:07:43 2019 +1000)
+* 96421675 - Merge branch 'provider-gradle-add-verification-provider-version' of https://github.com/toastyblast/pact-jvm into toastyblast-provider-gradle-add-verification-provider-version (Ronald Holshausen, Sat Sep 7 16:00:36 2019 +1000)
+* 241c7f56 - chore: only run the 200 mock server test on CI (Ronald Holshausen, Sat Sep 7 15:34:45 2019 +1000)
+* f80d82a9 - fix: from 3.6.3 header values are now a list #928 (Ronald Holshausen, Sat Sep 7 15:09:15 2019 +1000)
+* 96f788de - bump version to 4.0.0-beta.7 (Ronald Holshausen, Tue Sep 3 14:29:44 2019 +1000)
+* a25f323e - Issue #929 Fixed erroneous removal in gradlew. (yoran.kerbusch, Sat Aug 31 17:04:11 2019 +0200)
+* 8dc54acf - Issue #929 Fixed the files automatically changed by IntelliJ on automated Gradle building. (yoran.kerbusch, Sat Aug 31 17:02:18 2019 +0200)
+* 2ee0051e - Issue#929 Fixed further codenarc errors. (yoran.kerbusch, Fri Aug 30 16:51:01 2019 +0200)
+* 5404318e - Issue#929 Reworked the code to uglier implementation to prevent codenarc failure of line exceeding 120 characters. (yoran.kerbusch, Fri Aug 30 16:45:03 2019 +0200)
+* 28447536 - Issue#929 Added the ability to add a version for the provider in pact-jvm-provider-gradle (yoran.kerbusch, Fri Aug 30 16:06:02 2019 +0200)
+* 87df5116 - chore: switch to openjdk 8 on travis (Ronald Holshausen, Sat Aug 24 10:39:54 2019 +1000)
+
 # 3.6.13 - Bugfix Release
 
 * 97a076d3 - fix: mark the test result as failed if a state change callback fails #930 (Ronald Holshausen, Sun Sep 8 11:38:54 2019 +1000)
