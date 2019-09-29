@@ -3,7 +3,7 @@ pact-jvm
 
 [![Build Status](https://travis-ci.org/DiUS/pact-jvm.svg?branch=master)](https://travis-ci.org/DiUS/pact-jvm)
 [![Appveyor build status](https://ci.appveyor.com/api/projects/status/172049m2sa57takc?svg=true)](https://ci.appveyor.com/project/uglyog/pact-jvm)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-model/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-model)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-core-model/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/au.com.dius/pact-jvm-core-model)
 
 JVM implementation of the consumer driven contract library [pact](https://github.com/pact-foundation/pact-specification).
 
