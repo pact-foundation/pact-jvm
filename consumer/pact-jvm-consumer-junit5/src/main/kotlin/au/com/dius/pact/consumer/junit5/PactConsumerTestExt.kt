@@ -76,7 +76,7 @@ annotation class PactTestFor(
   val port: String = "",
 
   /**
-   * Pact specification version to support. Default is V3.
+   * Pact specification version to support. Will default to V3.
    */
   val pactVersion: PactSpecVersion = PactSpecVersion.UNSPECIFIED,
 
