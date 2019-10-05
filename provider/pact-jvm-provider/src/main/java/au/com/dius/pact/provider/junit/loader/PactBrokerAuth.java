@@ -15,17 +15,22 @@ import java.lang.annotation.Target;
 public @interface PactBrokerAuth {
 
   /**
-   * Authentication scheme to use. The default is basic.
+   * Authentication scheme to use. Currently bearer and basic are supported. The default is basic.
    */
   String scheme() default "Basic";
 
   /**
-   * Username to use for authentication
+   * Username to use for basic authentication
    */
   String username();
 
   /**
-   * Password to use for authentication
+   * Password to use for basic authentication
    */
   String password();
+
+  /**
+   * Token to use for bearer token authentication
+   */
+  String token() default "";
 }

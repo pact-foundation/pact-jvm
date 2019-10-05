@@ -183,7 +183,8 @@ public class PactBrokerLoader implements PactLoader {
     if (this.authentication != null && !this.authentication.scheme().equalsIgnoreCase("none")) {
       options.put("authentication", Arrays.asList(parseExpression(this.authentication.scheme(), resolver),
           parseExpression(this.authentication.username(), resolver),
-          parseExpression(this.authentication.password(), resolver)));
+          parseExpression(this.authentication.password(), resolver),
+          parseExpression(this.authentication.token(), resolver)));
     }
     return new PactBrokerClient(url.toString(), options);
   }

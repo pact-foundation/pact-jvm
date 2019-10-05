@@ -51,7 +51,7 @@ public @interface PactBroker {
    * Authentication to use with the pact broker, by default no authentication is used
    */
   PactBrokerAuth authentication() default @PactBrokerAuth(scheme = "${pactbroker.auth.scheme:basic}",
-    username = "${pactbroker.auth.username:}", password = "${pactbroker.auth.password:}");
+    username = "${pactbroker.auth.username:}", password = "${pactbroker.auth.password:}", token = "${pactbroker.auth.token:}");
 
   /**
    * Override the default value resolver for resolving the values in the expressions

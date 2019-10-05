@@ -132,6 +132,17 @@ class PactBrokerAnnotationDefaultsTest {
         assertThat(parseListExpression(annotation.authentication.password), contains("myPass"))
     }
 
+    @Test
+    fun `default auth token is empty`() {
+        assertThat(parseExpression(annotation.authentication.token), `is`(""))
+    }
+
+    @Test
+    fun `can set auth token`() {
+        props.setProperty("pactbroker.auth.token", "myToken")
+        assertThat(parseListExpression(annotation.authentication.token), contains("myToken"))
+    }
+
     @PactBroker
     class SampleBrokerClass
 }
