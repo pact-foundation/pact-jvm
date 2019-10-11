@@ -3,10 +3,11 @@ package au.com.dius.pact.provider.maven
 import groovy.transform.Canonical
 
 /**
- * Basic authentication for the pact broker
+ * Authentication for the pact broker, defaulting to Basic Authentication
  */
 @Canonical
-class BasicAuth {
+class PactBrokerAuth {
+  String scheme = 'basic'
   String username
   String password
 }
