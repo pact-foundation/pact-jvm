@@ -117,7 +117,7 @@ ask('Publish pacts to pact-foundation.pact.dius.com.au?: [Y]') {
   executeOnShell 'PACT_PUBLISH=true ./gradlew :pact-publish:test :pact-publish:pactPublish'
 }
 
-def nextVer = Version.valueOf(releaseVer).incrementPreReleaseVersion()
+def nextVer = Version.valueOf(releaseVer).incrementPatchVersion()
 ask("Bump version to $nextVer?: [Y]") {
   executeOnShell "sed -i -e \"s/version = '${releaseVer}'/version = '${nextVer}'/\" build.gradle"
   executeOnShell("git add build.gradle")
