@@ -136,8 +136,12 @@ open class PactProviderMojo : AbstractMojo() {
     val options = mutableMapOf<String, Any>()
 
     if (pactBroker?.authentication != null) {
-      options["authentication"] = listOf("basic", provider.pactBroker.authentication.username,
-        provider.pactBroker.authentication.password)
+      if (provider.pactBroker.authentication.password != null) {
+        options["authentication"] = listOf(provider.pactBroker.authentication.scheme, provider.pactBroker.authentication.username,
+                provider.pactBroker.authentication.password)
+      } else {
+        options["authentication"] = listOf(provider.pactBroker.authentication.scheme, provider.pactBroker.authentication.username)
+      }
     } else if (!pactBroker?.serverId.isNullOrEmpty()) {
       val serverDetails = settings.getServer(provider.pactBroker!!.serverId)
       val request = DefaultSettingsDecryptionRequest(serverDetails)
