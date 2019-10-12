@@ -366,16 +366,16 @@ For example:
 
 ### Verifying pacts from an authenticated pact broker
 
-If your pact broker requires authentication (basic authentication is only supported), you can configure the username
+If your pact broker requires authentication (basic and bearer authentication are supported), you can configure the username
 and password to use by configuring the `authentication` element of the `pactBroker` element of your provider.
 
-For example:
+For example, here is how you configure the plugin to use basic authentication for verifying pacts:
 
 ```xml
 <plugin>
     <groupId>au.com.dius</groupId>
     <artifactId>pact-jvm-provider-maven</artifactId>
-    <version>4.0.0</version>
+    <version>4.0.1</version>
     <configuration>
       <serviceProviders>
         <serviceProvider>
@@ -384,8 +384,34 @@ For example:
           <pactBroker>
               <url>http://pactbroker:1234</url>
               <authentication>
+                  <scheme>basic</scheme>
                   <username>test</username>
                   <password>test</password>
+              </authentication>
+          </pactBroker>
+        </serviceProvider>
+      </serviceProviders>
+    </configuration>
+</plugin>
+```
+
+Here is how you configure the plugin to use basic authentication for verifying pacts
+
+```xml
+<plugin>
+    <groupId>au.com.dius</groupId>
+    <artifactId>pact-jvm-provider-maven</artifactId>
+    <version>4.0.1</version>
+    <configuration>
+      <serviceProviders>
+        <serviceProvider>
+          <name>provider1</name>
+          <stateChangeUrl>http://localhost:8080/tasks/pactStateChange</stateChangeUrl>
+          <pactBroker>
+              <url>http://pactbroker:1234</url>
+              <authentication>
+                  <scheme>bearer</scheme>
+                  <username>TOKEN</username>
               </authentication>
           </pactBroker>
         </serviceProvider>
