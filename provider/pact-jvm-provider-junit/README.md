@@ -132,7 +132,7 @@ public void someProviderState(Map<String, Object> providerStateParameters) {
 }
 ```
 
-### Provider state teardown methods [3.5.22+]
+### Provider state teardown methods
 
 If you need to tear down your provider state, you can annotate a method with the `@State` annotation with the action
 set to `StateChangeAction.TEARDOWN` and it will be invoked after the interaction is verified.
@@ -144,7 +144,7 @@ public void someProviderStateCleanup() {
 }
 ```
 
-#### Returning values that can be injected (3.6.11+)
+#### Returning values that can be injected
 
 You can have values from the provider state callbacks be injected into most places (paths, query parameters, headers,
 bodies, etc.). This works by using the V3 spec generators with provider state callbacks that return values. One example
@@ -154,6 +154,21 @@ provider side, so there is no way to know what the ID would be beforehand.
 There are methods on the consumer DSLs that can provider an expression that contains variables (like '/api/user/${id}'
 for the path). The provider state callback can then return a map for values, and the `id` attribute from the map will
 be expanded in the expression. For this to work, just make your provider state method return a Map of the values.
+
+### Using multiple classes for the state change methods
+
+If you have a large number of state change methods, you can split things up bu moving them to other classes. There are
+two ways you can do this:
+
+#### Use interfaces
+
+You can put the state change methods on interfaces and then have your test class implement those interfaces. See [StateAnnotationsOnInterfaceTest](src/test/java/au/com/dius/pact/provider/junit/StateAnnotationsOnInterfaceTest.java)
+for an example.
+
+#### Specify the additional classes on the test target
+
+You can provide the additional classes to the test target with the `withStateHandler` or `setStateHandlers` methods. See
+[BooksPactProviderTest](pact-jvm-provider-spring/src/test/java/au/com/dius/pact/provider/spring/BooksPactProviderTest.java) for an example. 
 
 ## Pact source
 

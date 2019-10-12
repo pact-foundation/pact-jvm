@@ -4,6 +4,8 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.provider.IProviderVerifier
 import java.util.function.BiConsumer
+import java.util.function.Supplier
+import org.apache.commons.lang3.tuple.Pair
 
 /**
  * Run [Interaction] and perform response verification
@@ -27,4 +29,24 @@ interface Target {
    * Add a callback to receive the test interaction result
    */
   fun addResultCallback(callback: BiConsumer<Boolean, IProviderVerifier>)
+
+  /**
+   * Add an additional state change handler to look for state change callbacks
+   */
+  fun withStateHandler(stateHandler: Pair<Class<out Any>, Supplier<out Any>>): Target
+
+  /**
+   * Add additional state change handlers to look for state change callbacks
+   */
+  fun withStateHandlers(vararg stateHandlers: Pair<Class<out Any>, Supplier<out Any>>): Target
+
+  /**
+   * Add additional state change handlers to look for state change callbacks
+   */
+  fun setStateHandlers(stateHandlers: List<Pair<Class<out Any>, Supplier<out Any>>>)
+
+  /**
+   * Additional state change handlers to look for state change callbacks
+   */
+  fun getStateHandlers(): List<Pair<Class<out Any>, Supplier<out Any>>>
 }

@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
+import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
@@ -35,7 +36,9 @@ import org.junit.runners.model.Statement
 import org.junit.runners.model.TestClass
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.BiConsumer
+import java.util.function.Supplier
 import kotlin.reflect.jvm.kotlinProperty
+import org.apache.commons.lang3.tuple.Pair as TuplePair
 
 /**
  * Internal class to support pact test running
@@ -205,7 +208,7 @@ open class InteractionRunner<I>(
         target.testInteraction(pact.consumer.name, interaction, source, mapOf("providerState" to context))
       }
     }
-    statement = withStateChanges(interaction, testInstance, statement)
+    statement = withStateChanges(interaction, testInstance, statement, target)
     statement = withBefores(interaction, testInstance, statement)
     statement = withRules(interaction, testInstance, statement)
     statement = withAfters(interaction, testInstance, statement)
@@ -229,24 +232,33 @@ open class InteractionRunner<I>(
     return target as Target
   }
 
-  protected fun withStateChanges(interaction: Interaction, target: Any, statement: Statement): Statement {
+  protected fun withStateChanges(interaction: Interaction, target: Any, statement: Statement, testTarget: Target): Statement {
     return if (interaction.providerStates.isNotEmpty()) {
       var stateChange = statement
       for (state in interaction.providerStates.reversed()) {
-        val methods = getAnnotatedMethods(testClass, State::class.java)
-          .map { method -> method to method.getAnnotation(State::class.java) }
-          .filter { pair -> pair.second.value.contains(state.name) }
+        val methods = findStateChangeMethod(state, testTarget.getStateHandlers())
         if (methods.isEmpty()) {
           return Fail(MissingStateChangeMethod("MissingStateChangeMethod: Did not find a test class method annotated " +
             "with @State(\"${state.name}\")"))
         } else {
-          stateChange = RunStateChanges(stateChange, methods, target, state, testContext)
+          stateChange = RunStateChanges(stateChange, methods, listOf(Supplier { target }) +
+            testTarget.getStateHandlers().map { it.right }, state, testContext)
         }
       }
       stateChange
     } else {
       statement
     }
+  }
+
+  private fun findStateChangeMethod(
+    state: ProviderState,
+    stateHandlers: List<TuplePair<Class<out Any>, Supplier<out Any>>>
+  ): List<Pair<FrameworkMethod, State>> {
+    return (listOf(testClass) + stateHandlers.map { TestClass(it.left) })
+    .flatMap { getAnnotatedMethods(it, State::class.java) }
+    .map { method -> method to method.getAnnotation(State::class.java) }
+    .filter { pair -> pair.second.value.contains(state.name) }
   }
 
   protected open fun withBefores(interaction: Interaction, target: Any, statement: Statement): Statement {

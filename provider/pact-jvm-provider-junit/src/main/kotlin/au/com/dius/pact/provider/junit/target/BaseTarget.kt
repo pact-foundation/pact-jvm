@@ -13,6 +13,8 @@ import au.com.dius.pact.core.support.expressions.ValueResolver
 import org.junit.runners.model.TestClass
 import java.io.File
 import java.util.function.BiConsumer
+import java.util.function.Supplier
+import org.apache.commons.lang3.tuple.Pair
 
 /**
  * Out-of-the-box implementation of [Target],
@@ -25,6 +27,7 @@ abstract class BaseTarget : TestClassAwareTarget {
 
   var valueResolver: ValueResolver = SystemPropertyResolver()
   private val callbacks = mutableListOf<BiConsumer<Boolean, IProviderVerifier>>()
+  private val stateHandlers = mutableListOf<Pair<Class<out Any>, Supplier<out Any>>>()
 
   protected abstract fun getProviderInfo(source: PactSource): ProviderInfo
 
@@ -80,5 +83,21 @@ abstract class BaseTarget : TestClassAwareTarget {
 
   protected fun reportTestResult(result: Boolean, verifier: IProviderVerifier) {
     this.callbacks.forEach { callback -> callback.accept(result, verifier) }
+  }
+
+  override fun setStateHandlers(stateHandlers: List<Pair<Class<out Any>, Supplier<out Any>>>) {
+    this.stateHandlers.addAll(stateHandlers)
+  }
+
+  override fun getStateHandlers() = stateHandlers.toList()
+
+  override fun withStateHandlers(vararg stateHandlers: Pair<Class<out Any>, Supplier<out Any>>): Target {
+    setStateHandlers(stateHandlers.asList())
+    return this
+  }
+
+  override fun withStateHandler(stateHandler: Pair<Class<out Any>, Supplier<out Any>>): Target {
+    this.stateHandlers.add(stateHandler)
+    return this
   }
 }
