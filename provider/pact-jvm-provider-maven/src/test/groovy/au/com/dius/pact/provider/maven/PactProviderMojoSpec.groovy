@@ -69,7 +69,7 @@ class PactProviderMojoSpec extends Specification {
     list
   }
 
-  def 'load pacts from pact broker uses the configured pactBroker authentication'() {
+  def 'load pacts from pact broker uses the configured pactBroker basic authentication'() {
     given:
     def provider = Mock(Provider) {
       getPactBrokerUrl() >> null
@@ -84,6 +84,25 @@ class PactProviderMojoSpec extends Specification {
     then:
     1 * provider.hasPactsFromPactBroker([authentication: ['basic', 'test', 'test']], 'http://broker:1234') >> [
       new Consumer()
+    ]
+    list
+  }
+
+  def 'load pacts from pact broker uses the configured pactBroker bearer authentication'() {
+    given:
+    def provider = Mock(Provider) {
+      getPactBrokerUrl() >> null
+      getPactBroker() >> new PactBroker(new URL('http://broker:1234'), null,
+              new PactBrokerAuth('bearer', 'test', null))
+    }
+    def list = []
+
+    when:
+    mojo.loadPactsFromPactBroker(provider, list)
+
+    then:
+    1 * provider.hasPactsFromPactBroker([authentication: ['bearer', 'test']], 'http://broker:1234') >> [
+            new Consumer()
     ]
     list
   }
