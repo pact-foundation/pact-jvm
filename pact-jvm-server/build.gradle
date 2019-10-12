@@ -1,6 +1,18 @@
+buildscript {
+  repositories {
+    jcenter()
+    mavenCentral()
+    mavenLocal()
+  }
+  dependencies {
+    classpath 'org.apache.commons:commons-text:1.5'
+  }
+}
+
 plugins {
-    id 'scala'
-    id 'application'
+  id 'scala'
+  id 'application'
+  id 'maven-publish'
 }
 
 mainClassName = 'au.com.dius.pact.server.Server'
@@ -19,4 +31,49 @@ dependencies {
 jar {
     manifest.attributes 'Main-Class': mainClassName,
             'Class-Path': configurations.compile.collect { it.getName() }.join(' ')
+}
+
+import org.apache.commons.text.StringEscapeUtils
+publishing {
+  publications {
+    serverDistribution(MavenPublication) {
+      artifact distZip
+      artifact distTar
+      pom {
+        name = project.name
+        description = StringEscapeUtils.escapeXml11(new File(projectDir, 'README.md').text)
+        url = 'https://github.com/DiUS/pact-jvm'
+        licenses {
+          license {
+            name = 'Apache 2'
+            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            distribution = 'repo'
+          }
+        }
+        scm {
+          url = 'https://github.com/DiUS/pact-jvm'
+          connection = 'https://github.com/DiUS/pact-jvm.git'
+        }
+
+        developers {
+          developer {
+            id = 'thetrav'
+            name = 'Travis Dixon'
+            email = 'the.trav@gmail.com'
+          }
+          developer {
+            id = 'rholshausen'
+            name = 'Ronald Holshausen'
+            email = 'rholshausen@dius.com.au'
+          }
+        }
+      }
+    }
+  }
+}
+
+if (System.env.TRAVIS != 'true') {
+  signing {
+    sign publishing.publications.serverDistribution
+  }
 }
