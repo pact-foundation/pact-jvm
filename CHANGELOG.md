@@ -35,6 +35,13 @@ To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD
 * 28447536 - Issue#929 Added the ability to add a version for the provider in pact-jvm-provider-gradle (yoran.kerbusch, Fri Aug 30 16:06:02 2019 +0200)
 * 87df5116 - chore: switch to openjdk 8 on travis (Ronald Holshausen, Sat Aug 24 10:39:54 2019 +1000)
 
+# 3.6.14 - Bugfix Release
+
+* f0acf0a7 - fix: use the charset from the content type when converting bodies to bytes #941 (Ronald Holshausen, Fri Sep 27 18:24:48 2019 +1000)
+* 63fed4ca - fix: remove all references to the mockserver on complete #939 (Ronald Holshausen, Fri Sep 27 17:09:27 2019 +1000)
+* c5a9e050 - fix: GET on pact-jvm-server root delivers broken json #938 (Ronald Holshausen, Fri Sep 27 16:29:20 2019 +1000)
+* 72bbfaa1 - bump version to 3.6.14 (Ronald Holshausen, Sun Sep 8 12:44:35 2019 +1000)
+
 # 3.6.13 - Bugfix Release
 
 * 97a076d3 - fix: mark the test result as failed if a state change callback fails #930 (Ronald Holshausen, Sun Sep 8 11:38:54 2019 +1000)
