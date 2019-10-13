@@ -697,6 +697,11 @@ For pacts that are loaded from a Pact Broker, the results of running the verific
  
 To turn on the verification publishing, set the system property `pact.verifier.publishResults` to `true` in the pact maven plugin, not surefire, configuration.
 
+## Tagging the provider before verification results are published [4.0.1+]
+
+You can have a tag pushed against the provider version before the verification results are published. To do this 
+you need set the `pact.provider.tag` JVM system property to the tag value.
+
 # Enabling other verification reports
 
 By default the verification report is written to the console. You can also enable a JSON or Markdown report by setting

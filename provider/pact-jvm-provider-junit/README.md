@@ -469,3 +469,8 @@ For pacts that are loaded from a Pact Broker, the results of running the verific
  set the version of the provider that is verified using the `pact.provider.version` system property.
  
 To enable publishing of results, set the property `pact.verifier.publishResults` to `true`.
+
+## Tagging the provider before verification results are published [4.0.1+]
+
+You can have a tag pushed against the provider version before the verification results are published. To do this 
+you need set the `pact.provider.tag` JVM system property to the tag value.

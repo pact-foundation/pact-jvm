@@ -337,6 +337,7 @@ The following project properties can be specified with `-Pproperty=value` on the
 |pact.matching.wildcard|Enables matching of map values ignoring the keys when this property is set to 'true'|
 |pact.verifier.disableUrlPathDecoding|Disables decoding of request paths|
 |pact.pactbroker.httpclient.usePreemptiveAuthentication|Enables preemptive authentication with the pact broker when set to `true`|
+|pact.provider.tag|Sets the provider tag to push before publishing verification results|
 
 ## Provider States
 
@@ -457,7 +458,7 @@ pact {
 }
 ```
 
-#### Returning values that can be injected (3.6.11+)
+#### Returning values that can be injected
 
 You can have values from the provider state callbacks be injected into most places (paths, query parameters, headers,
 bodies, etc.). This works by using the V3 spec generators with provider state callbacks that return values. One example
@@ -812,3 +813,26 @@ pact {
     }
 }
 ```
+
+## Tagging the provider before verification results are published [4.0.1+]
+
+You can have a tag pushed against the provider version before the verification results are published. There are two ways
+to do this with the Gradle plugin. You can provide a closure in a similar way to the provider version, i.e.
+
+```groovy
+pact {
+    serviceProviders {
+        provider1 {
+            providerVersion = { branchName() + '-' + abbreviatedId() }
+            providerTag = { branchName() }
+            hasPactsFromPactBroker('http://pact-broker:5000/', authentication: ['Basic', pactBrokerUser, pactBrokerPassword])
+        }
+    }
+}
+```
+
+or you can set the `pact.provider.tag` JVM system property. For example:
+
+```console
+$ ./gradlew -d pactverify -Ppact.verifier.publishResults=true -Dpact.provider.tag=Test2
+``` 
