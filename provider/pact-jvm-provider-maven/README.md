@@ -395,7 +395,7 @@ For example, here is how you configure the plugin to use basic authentication fo
 </plugin>
 ```
 
-Here is how you configure the plugin to use basic authentication for verifying pacts
+Here is how you configure the plugin to use bearer token authentication for verifying pacts
 
 ```xml
 <plugin>
