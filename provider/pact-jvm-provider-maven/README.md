@@ -411,7 +411,7 @@ Here is how you configure the plugin to use bearer token authentication for veri
               <url>http://pactbroker:1234</url>
               <authentication>
                   <scheme>bearer</scheme>
-                  <username>TOKEN</username>
+                  <token>TOKEN</token>
               </authentication>
           </pactBroker>
         </serviceProvider>
