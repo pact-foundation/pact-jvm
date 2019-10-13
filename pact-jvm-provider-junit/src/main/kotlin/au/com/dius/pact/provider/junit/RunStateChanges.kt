@@ -14,8 +14,11 @@ class RunStateChanges(
 
   override fun evaluate() {
     invokeStateChangeMethods(StateChangeAction.SETUP)
-    next.evaluate()
-    invokeStateChangeMethods(StateChangeAction.TEARDOWN)
+    try {
+      next.evaluate()
+    } finally {
+      invokeStateChangeMethods(StateChangeAction.TEARDOWN)
+    }
   }
 
   private fun invokeStateChangeMethods(action: StateChangeAction) {
