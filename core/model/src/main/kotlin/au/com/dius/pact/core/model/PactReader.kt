@@ -124,7 +124,7 @@ fun queryStringToMap(query: String?, decode: Boolean = true): Map<String, List<S
   return if (query.isNullOrEmpty()) {
     emptyMap()
   } else {
-    query!!.split("&").filter { it.isNotEmpty() }.map { val nv = it.split("=", limit = 2); nv[0] to nv[1] }
+    query.split("&").filter { it.isNotEmpty() }.map { val nv = it.split("=", limit = 2); nv[0] to nv[1] }
       .fold(mutableMapOf<String, MutableList<String>>()) { map, nameAndValue ->
       val name = if (decode) URLDecoder.decode(nameAndValue.first, "UTF-8") else nameAndValue.first
       val value = if (decode) URLDecoder.decode(nameAndValue.second, "UTF-8") else nameAndValue.second

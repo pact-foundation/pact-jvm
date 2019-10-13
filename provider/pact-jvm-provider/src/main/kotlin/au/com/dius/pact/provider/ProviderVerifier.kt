@@ -134,6 +134,11 @@ interface IProviderVerifier {
   var providerVersion: Supplier<String?>
 
   /**
+   * Callback to get the provider tag
+   */
+  var providerTag: Supplier<String?>?
+
+  /**
    * Run the verification for the given provider and return an failures in a Map
    */
   fun verifyProvider(provider: ProviderInfo): MutableMap<String, Any>
@@ -219,7 +224,8 @@ open class ProviderVerifier @JvmOverloads constructor (
   override var projectClasspath: Supplier<List<URL>> = Supplier { emptyList<URL>() },
   override var reporters: List<VerifierReporter> = listOf(AnsiConsoleReporter("console", File("/tmp/"))),
   override var providerMethodInstance: Function<Method, Any> = Function { m -> m.declaringClass.newInstance() },
-  override var providerVersion: Supplier<String?> = Supplier { System.getProperty(PACT_PROVIDER_VERSION) }
+  override var providerVersion: Supplier<String?> = Supplier { System.getProperty(PACT_PROVIDER_VERSION) },
+  override var providerTag: Supplier<String?>? = Supplier { System.getProperty(PACT_PROVIDER_TAG) }
 ) : IProviderVerifier {
 
   override var projectHasProperty = Function<String, Boolean> { name -> !System.getProperty(name).isNullOrEmpty() }
@@ -596,7 +602,7 @@ open class ProviderVerifier @JvmOverloads constructor (
         pact.isFiltered() -> logger.warn { "Skipping publishing of verification results as the interactions have been filtered" }
         publishingResultsDisabled() -> logger.warn { "Skipping publishing of verification results as it has been disabled " +
           "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')" }
-        else -> verificationReporter.reportResults(pact, result, providerVersion.get() ?: "0.0.0", client)
+        else -> verificationReporter.reportResults(pact, result, providerVersion.get() ?: "0.0.0", client, providerTag?.get())
       }
     }
   }
@@ -701,6 +707,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     const val PACT_SHOW_STACKTRACE = "pact.showStacktrace"
     const val PACT_SHOW_FULLDIFF = "pact.showFullDiff"
     const val PACT_PROVIDER_VERSION = "pact.provider.version"
+    const val PACT_PROVIDER_TAG = "pact.provider.tag"
     const val PACT_PROVIDER_VERSION_TRIM_SNAPSHOT = "pact.provider.version.trimSnapshot"
 
     fun invokeProviderMethod(m: Method, instance: Any?): Any? {

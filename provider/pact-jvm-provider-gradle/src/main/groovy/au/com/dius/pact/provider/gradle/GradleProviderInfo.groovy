@@ -11,6 +11,7 @@ import org.gradle.util.ConfigureUtil
  */
 class GradleProviderInfo extends ProviderInfo {
   def providerVersion
+  def providerTag
 
   GradleProviderInfo(String name) {
     super(name)

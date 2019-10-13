@@ -66,14 +66,14 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.verificationReporter = mockVerificationReporter
 
     when:
-    testResultAccumulator.updateTestResult(mutablePact, interaction1, true)
-    testResultAccumulator.updateTestResult(mutablePact, interaction2, true)
-    testResultAccumulator.updateTestResult(mutablePact2, interaction, false)
+    testResultAccumulator.updateTestResult(mutablePact, interaction1, TestResult.Ok.INSTANCE)
+    testResultAccumulator.updateTestResult(mutablePact, interaction2, TestResult.Ok.INSTANCE)
+    testResultAccumulator.updateTestResult(mutablePact2, interaction, new TestResult.Failed())
     mutablePact.interactions.first().request.matchingRules.rulesForCategory('body')
-    testResultAccumulator.updateTestResult(mutablePact, interaction3, true)
+    testResultAccumulator.updateTestResult(mutablePact, interaction3, TestResult.Ok.INSTANCE)
 
     then:
-    1 * mockVerificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, null)
+    1 * mockVerificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, null, null)
 
     cleanup:
     testResultAccumulator.verificationReporter = DefaultVerificationReporter.INSTANCE
@@ -92,7 +92,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.updateTestResult(pact, interaction1, true)
 
     then:
-    0 * testResultAccumulator.verificationReporter.reportResults(_, _, _, _)
+    0 * testResultAccumulator.verificationReporter.reportResults(_, _, _, _, _)
 
     cleanup:
     testResultAccumulator.verificationReporter = reporter
@@ -112,7 +112,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.updateTestResult(pact, interaction1, result)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _)
+    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _, _)
 
     cleanup:
     testResultAccumulator.verificationReporter = reporter
@@ -138,7 +138,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.updateTestResult(pact, interaction2, interaction2Result)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _)
+    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _, _)
 
     cleanup:
     testResultAccumulator.verificationReporter = reporter
@@ -169,7 +169,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.updateTestResult(pact, interaction2, TestResult.Ok.INSTANCE)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, failedResult, _, _)
+    1 * testResultAccumulator.verificationReporter.reportResults(_, failedResult, _, _, _)
 
     cleanup:
     testResultAccumulator.verificationReporter = reporter
@@ -190,7 +190,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.updateTestResult(pact, interaction2, TestResult.Ok.INSTANCE)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, _)
+    1 * testResultAccumulator.verificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, _, _)
     testResultAccumulator.testResults.isEmpty()
 
     cleanup:

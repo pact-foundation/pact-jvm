@@ -456,7 +456,7 @@ class ProviderVerifierSpec extends Specification {
     verifier.runVerificationForConsumer([:], provider, consumer)
 
     then:
-    0 * verifier.verificationReporter.reportResults(_, _, _)
+    0 * verifier.verificationReporter.reportResults(_, _, _, _, _)
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -469,7 +469,7 @@ class ProviderVerifierSpec extends Specification {
     def client = Mock(PactBrokerClient)
 
     when:
-    DefaultVerificationReporter.INSTANCE.reportResults(pact, TestResult.Ok.INSTANCE, '0', client)
+    DefaultVerificationReporter.INSTANCE.reportResults(pact, TestResult.Ok.INSTANCE, '0', client, null)
 
     then:
     1 * client.publishVerificationResults(links, TestResult.Ok.INSTANCE, '0', null) >> new Ok(true)
@@ -484,7 +484,7 @@ class ProviderVerifierSpec extends Specification {
     def client = Mock(PactBrokerClient)
 
     when:
-    DefaultVerificationReporter.INSTANCE.reportResults(pact, TestResult.Ok.INSTANCE, '0', client)
+    DefaultVerificationReporter.INSTANCE.reportResults(pact, TestResult.Ok.INSTANCE, '0', client, null)
 
     then:
     0 * client.publishVerificationResults(_, TestResult.Ok.INSTANCE, '0', null)

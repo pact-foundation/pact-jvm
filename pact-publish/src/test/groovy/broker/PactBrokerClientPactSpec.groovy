@@ -201,11 +201,11 @@ class PactBrokerClientPactSpec extends Specification {
       willRespondWith(status: 200)
       withBody(contentType: 'application/hal+json') {
         '_links' {
-          provider {
+          'pb:provider' {
             href url('http://localhost:8080', 'pacticipants', regexp('[^\\/]+', 'Activity Service'))
             title string('Activity Service')
           }
-          pacts eachLike(2) {
+          'pb:pacts' eachLike(2) {
             href url('http://localhost:8080', 'pacts', 'provider', regexp('[^\\/]+', 'Activity Service'),
               'consumer', regexp('[^\\/]+', 'Foo Web Client'),
               'version', regexp('\\d+\\.\\d+\\.\\d+', '0.1.380'))

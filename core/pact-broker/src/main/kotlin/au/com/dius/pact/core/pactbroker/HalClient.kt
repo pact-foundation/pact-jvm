@@ -10,9 +10,12 @@ import au.com.dius.pact.core.support.isNotEmpty
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.bool
 import com.github.salomonbrys.kotson.get
+import com.github.salomonbrys.kotson.jsonNull
+import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.keys
 import com.github.salomonbrys.kotson.nullObj
 import com.github.salomonbrys.kotson.obj
+import com.github.salomonbrys.kotson.set
 import com.github.salomonbrys.kotson.string
 import com.google.common.net.UrlEscapers
 import com.google.gson.JsonElement
@@ -34,6 +37,7 @@ import org.apache.http.impl.client.BasicAuthCache
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.util.EntityUtils
 import java.net.URI
+import java.net.URLDecoder
 import java.util.function.BiFunction
 import java.util.function.Consumer
 
@@ -71,6 +75,7 @@ interface IHalClient {
    * @param path Path to upload the document
    * @param bodyJson JSON contents for the body
    */
+  @Deprecated("Use putJson instead")
   fun uploadJson(path: String, bodyJson: String): Any?
 
   /**
@@ -80,6 +85,7 @@ interface IHalClient {
    * @param closure Closure that will be invoked with details about the response. The result from the closure will be
    * returned.
    */
+  @Deprecated("Use putJson instead")
   fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>): Any?
 
   /**
@@ -90,6 +96,7 @@ interface IHalClient {
    * returned.
    * @param encodePath If the path must be encoded beforehand.
    */
+  @Deprecated("Use putJson instead")
   fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>, encodePath: Boolean): Any?
 
   /**
@@ -123,6 +130,16 @@ interface IHalClient {
    * @param path The path to the HAL document. If it is a relative path, it is relative to the base URL
    */
   fun fetch(path: String): JsonElement
+
+  /**
+   * Sets the starting context from a previous broker interaction (Pact document)
+   */
+  fun withDocContext(docAttributes: Map<String, Any?>): IHalClient
+
+  /**
+   * Upload a JSON document to the current path link, using a PUT request
+   */
+  fun putJson(link: String, options: Map<String, Any>, json: String): Result<Boolean, Exception>
 }
 
 /**
@@ -225,6 +242,24 @@ open class HalClient @JvmOverloads constructor(
     }
   }
 
+  override fun withDocContext(docAttributes: Map<String, Any?>): IHalClient {
+    val links = JsonObject()
+    links[LINKS] = jsonObject(docAttributes.entries.map {
+      it.key to when (it.value) {
+        is Map<*, *> -> jsonObject((it.value as Map<*, *>).entries.map { entry ->
+          if (entry.key == "href") {
+            entry.key.toString() to URLDecoder.decode(entry.value.toString(), "UTF-8")
+          } else {
+            entry.key.toString() to entry.value
+          }
+        })
+        else -> jsonNull
+      }
+    })
+    pathInfo = links
+    return this
+  }
+
   private fun getJson(path: String, encodePath: Boolean = true): Result<JsonElement, Exception> {
     setupHttpClient()
     return Result.of {
@@ -250,6 +285,11 @@ open class HalClient @JvmOverloads constructor(
   }
 
   private fun fetchLink(link: String, options: Map<String, Any>): JsonElement {
+    val href = hrefForLink(link, options)
+    return this.fetch(href.first, href.second)
+  }
+
+  private fun hrefForLink(link: String, options: Map<String, Any>): Pair<String, Boolean> {
     if (pathInfo?.nullObj?.get(LINKS) == null) {
       throw InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got " +
         "a response with no '_links'. URL: '$baseUrl', LINK: '$link'")
@@ -268,9 +308,9 @@ open class HalClient @JvmOverloads constructor(
           val linkByName = linkData.asJsonArray.find { it.isJsonObject && it["name"] == options["name"] }
           return if (linkByName != null && linkByName.isJsonObject && linkByName["templated"].isJsonPrimitive &&
             linkByName["templated"].bool) {
-            this.fetch(parseLinkUrl(linkByName["href"].toString(), options), false)
+            parseLinkUrl(linkByName["href"].toString(), options) to false
           } else if (linkByName != null && linkByName.isJsonObject) {
-            this.fetch(linkByName["href"].string)
+            linkByName["href"].string to true
           } else {
             throw InvalidNavigationRequest("Link '$link' does not have an entry with name '${options["name"]}'. " +
               "URL: '$baseUrl', LINK: '$link'")
@@ -282,9 +322,9 @@ open class HalClient @JvmOverloads constructor(
       } else if (linkData.isJsonObject) {
         return if (linkData.obj.has("templated") && linkData["templated"].isJsonPrimitive &&
           linkData["templated"].bool) {
-          fetch(parseLinkUrl(linkData["href"].string, options), false)
+          parseLinkUrl(linkData["href"].string, options) to false
         } else {
-          fetch(linkData["href"].string)
+          linkData["href"].string to true
         }
       } else {
         throw InvalidHalResponse("Expected link in map form in the response, but " +
@@ -301,11 +341,11 @@ open class HalClient @JvmOverloads constructor(
     var match = URL_TEMPLATE_REGEX.find(href)
     var index = 0
     while (match != null) {
-      val start = match.range.start - 1
+      val start = match.range.first - 1
       if (start >= index) {
         result += href.substring(index..start)
       }
-      index = match.range.endInclusive + 1
+      index = match.range.last + 1
       val (key) = match.destructured
       result += encodePathParameter(options, key, match.value)
 
@@ -415,6 +455,25 @@ open class HalClient @JvmOverloads constructor(
         matchingLink.asJsonArray.forEach { closure.accept(asMap(it.asJsonObject)) }
       } else {
         closure.accept(asMap(matchingLink.asJsonObject))
+      }
+    }
+  }
+
+  override fun putJson(link: String, options: Map<String, Any>, json: String): Result<Boolean, Exception> {
+    val href = hrefForLink(link, options)
+    val httpPut = initialiseRequest(HttpPut(buildUrl(baseUrl, href.first, href.second)))
+    httpPut.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
+    httpPut.entity = StringEntity(json, ContentType.APPLICATION_JSON)
+
+    return Result.of {
+      httpClient!!.execute(httpPut, httpContext).use {
+        when {
+          it.statusLine.statusCode < 300 -> true
+          else -> {
+            logger.error { "PUT JSON request failed with status ${it.statusLine}" }
+            false
+          }
+        }
       }
     }
   }

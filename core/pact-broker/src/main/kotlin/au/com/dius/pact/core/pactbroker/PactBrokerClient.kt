@@ -1,6 +1,7 @@
 package au.com.dius.pact.core.pactbroker
 
 import au.com.dius.pact.com.github.michaelbull.result.Err
+import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.com.github.michaelbull.result.Result
 import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.jsonArray
@@ -22,7 +23,7 @@ import java.util.function.Consumer
 /**
  * Wraps the response for a Pact from the broker with the link data associated with the Pact document.
  */
-data class PactResponse(val pactFile: JsonObject, val links: Map<String, Map<String, Any>>)
+data class PactResponse(val pactFile: JsonObject, val links: Map<String, Any?>)
 
 sealed class TestResult {
   object Ok : TestResult() {
@@ -146,7 +147,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
 
   open fun fetchPact(url: String): PactResponse {
     val halDoc = newHalClient().fetch(url).obj
-    return PactResponse(halDoc, HalClient.asMap(halDoc["_links"].obj) as Map<String, Map<String, Any>>)
+    return PactResponse(halDoc, HalClient.asMap(halDoc["_links"].obj))
   }
 
   open fun newHalClient(): IHalClient = HalClient(pactBrokerUrl, options)
@@ -156,17 +157,17 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
    */
   @JvmOverloads
   open fun publishVerificationResults(
-    docAttributes: Map<String, Map<String, Any>>,
+    docAttributes: Map<String, Any?>,
     result: TestResult,
     version: String,
     buildUrl: String? = null
   ): Result<Boolean, Exception> {
     val halClient = newHalClient()
     val publishLink = docAttributes.mapKeys { it.key.toLowerCase() } ["pb:publish-verification-results"] // ktlint-disable curly-spacing
-    return if (publishLink != null) {
+    return if (publishLink is Map<*, *>) {
       val jsonObject = buildPayload(result, version, buildUrl)
 
-      val lowercaseMap = publishLink.mapKeys { it.key.toLowerCase() }
+      val lowercaseMap = publishLink.mapKeys { it.key.toString().toLowerCase() }
       if (lowercaseMap.containsKey("href")) {
         halClient.postJson(lowercaseMap["href"].toString(), jsonObject.toString())
       } else {
@@ -279,11 +280,27 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     }
   }
 
+  fun publishProviderTag(docAttributes: Map<String, Any?>, name: String, tag: String, version: String) {
+    return try {
+      val halClient = newHalClient()
+        .withDocContext(docAttributes)
+        .navigate(PROVIDER)
+      when (val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tag), "{}")) {
+        is Ok -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
+        is Err -> logger.error(result.error) { "Failed to push tag $tag for provider $name and version $version" }
+      }
+    } catch (e: NotFoundHalResponse) {
+      logger.error(e) { "Could not tag provider $name, link was missing" }
+    }
+  }
+
   companion object : KLogging() {
     const val LATEST_PROVIDER_PACTS_WITH_NO_TAG = "pb:latest-untagged-pact-version"
     const val LATEST_PROVIDER_PACTS = "pb:latest-provider-pacts"
     const val LATEST_PROVIDER_PACTS_WITH_TAG = "pb:latest-provider-pacts-with-tag"
-    const val PACTS = "pacts"
+    const val PROVIDER = "pb:provider"
+    const val PROVIDER_TAG_VERSION = "pb:version-tag"
+    const val PACTS = "pb:pacts"
     const val UTF8 = "UTF-8"
 
     fun uploadTags(halClient: IHalClient, consumerName: String, version: String, tags: List<String>) {

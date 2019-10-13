@@ -49,7 +49,7 @@ data class UrlsSource<I> @JvmOverloads constructor(
 data class BrokerUrlSource @JvmOverloads constructor(
   override val url: String,
   val pactBrokerUrl: String,
-  val attributes: Map<String, Map<String, Any>> = mapOf(),
+  val attributes: Map<String, Any?> = mapOf(),
   val options: Map<String, Any> = mapOf(),
   val tag: String? = null
 ) : UrlPactSource() {
