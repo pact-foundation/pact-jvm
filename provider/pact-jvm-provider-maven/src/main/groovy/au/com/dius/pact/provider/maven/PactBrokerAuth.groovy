@@ -8,6 +8,7 @@ import groovy.transform.Canonical
 @Canonical
 class PactBrokerAuth {
   String scheme = 'basic'
+  String token
   String username
   String password
 }
