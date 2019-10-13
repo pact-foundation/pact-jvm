@@ -29,7 +29,9 @@ class PactVerificationTask extends DefaultTask {
         project.sourceSets.test.runtimeClasspath*.toURL()
       }
       providerVersion = providerToVerify.providerVersion ?: { project.version }
-      providerTag = providerToVerify.providerTag
+      if (providerToVerify.providerTag) {
+        providerTag = providerToVerify.providerTag
+      }
 
       if (project.pact.reports) {
         def reportsDir = new File(project.buildDir, 'reports/pact')
