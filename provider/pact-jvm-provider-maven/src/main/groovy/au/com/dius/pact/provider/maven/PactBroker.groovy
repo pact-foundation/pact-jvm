@@ -9,6 +9,6 @@ import groovy.transform.Canonical
 class PactBroker {
   URL url
   List<String> tags = []
-  BasicAuth authentication
+  PactBrokerAuth authentication
   String serverId
 }
