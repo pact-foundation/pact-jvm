@@ -29,7 +29,7 @@ class PactProviderMojoSpec extends Specification {
     def list = []
 
     when:
-    mojo.loadPactsFromPactBroker(provider, list)
+    mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
     1 * provider.hasPactsFromPactBroker([:], 'http://broker:1234') >> [ new Consumer(name: 'test consumer') ]
@@ -46,7 +46,7 @@ class PactProviderMojoSpec extends Specification {
     def list = []
 
     when:
-    mojo.loadPactsFromPactBroker(provider, list)
+    mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
     1 * provider.hasPactsFromPactBroker([:], 'http://broker:1234') >> [ new Consumer() ]
@@ -62,7 +62,7 @@ class PactProviderMojoSpec extends Specification {
     def list = []
 
     when:
-    mojo.loadPactsFromPactBroker(provider, list)
+    mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
     1 * provider.hasPactsFromPactBroker([:], 'http://broker:1234') >> [ new Consumer() ]
@@ -78,11 +78,49 @@ class PactProviderMojoSpec extends Specification {
     def list = []
 
     when:
-    mojo.loadPactsFromPactBroker(provider, list)
+    mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
     1 * provider.hasPactsFromPactBroker([authentication: ['basic', 'test', 'test']], 'http://broker:1234') >> [
       new Consumer()
+    ]
+    list
+  }
+
+  def 'load pacts from pact broker uses the configured pactBroker bearer authentication'() {
+    given:
+    def provider = Mock(Provider) {
+      getPactBrokerUrl() >> null
+      getPactBroker() >> new PactBroker(new URL('http://broker:1234'), null,
+              new PactBrokerAuth('bearer', 'test', null, null))
+    }
+    def list = []
+
+    when:
+    mojo.loadPactsFromPactBroker(provider, list, [:])
+
+    then:
+    1 * provider.hasPactsFromPactBroker([authentication: ['bearer', 'test']], 'http://broker:1234') >> [
+            new Consumer()
+    ]
+    list
+  }
+
+  def 'load pacts from pact broker uses bearer authentication if token attribute is set without scheme being set'() {
+    given:
+    def provider = Mock(Provider) {
+      getPactBrokerUrl() >> null
+      getPactBroker() >> new PactBroker(new URL('http://broker:1234'), null,
+              new PactBrokerAuth(null, 'test', null, null))
+    }
+    def list = []
+
+    when:
+    mojo.loadPactsFromPactBroker(provider, list, [:])
+
+    then:
+    1 * provider.hasPactsFromPactBroker([authentication: ['bearer', 'test']], 'http://broker:1234') >> [
+            new Consumer()
     ]
     list
   }
@@ -96,7 +134,7 @@ class PactProviderMojoSpec extends Specification {
     def list = []
 
     when:
-    mojo.loadPactsFromPactBroker(provider, list)
+    mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
     1 * provider.hasPactsFromPactBrokerWithTag([:], 'http://broker:1234', '1') >> [new Consumer()]
@@ -120,7 +158,7 @@ class PactProviderMojoSpec extends Specification {
     def decryptResult = [getServer: { new Server(password: 'MavenPassword') } ] as SettingsDecryptionResult
 
     when:
-    mojo.loadPactsFromPactBroker(provider, list)
+    mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
     1 * settings.getServer('test-server') >> serverDetails
@@ -129,6 +167,24 @@ class PactProviderMojoSpec extends Specification {
       'http://broker:1234') >> [
       new Consumer()
     ]
+    list
+  }
+
+  def 'Falls back to the passed in broker config if not set on the provider'() {
+    given:
+    def provider = Mock(Provider) {
+      getPactBrokerUrl() >> null
+      getPactBroker() >> null
+    }
+    def list = []
+    mojo.pactBrokerUrl = 'http://broker:1235'
+
+    when:
+    mojo.loadPactsFromPactBroker(provider, list, [authentication: ['bearer', '1234']])
+
+    then:
+    1 * provider.hasPactsFromPactBroker([authentication: ['bearer', '1234']],
+      'http://broker:1235') >> [ new Consumer() ]
     list
   }
 

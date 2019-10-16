@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.maven
 
+import au.com.dius.pact.core.support.toUrl
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
@@ -7,15 +8,11 @@ import au.com.dius.pact.provider.PactVerifierException
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.reporters.ReporterManager
-import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugin.MojoFailureException
-import org.apache.maven.plugins.annotations.Component
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.plugins.annotations.ResolutionScope
-import org.apache.maven.settings.Settings
 import org.apache.maven.settings.crypto.DefaultSettingsDecryptionRequest
-import org.apache.maven.settings.crypto.SettingsDecrypter
 import org.fusesource.jansi.AnsiConsole
 import java.io.File
 import java.util.function.Function
@@ -25,7 +22,7 @@ import java.util.function.Supplier
  * Pact Verify Maven Plugin
  */
 @Mojo(name = "verify", requiresDependencyResolution = ResolutionScope.TEST)
-open class PactProviderMojo : AbstractMojo() {
+open class PactProviderMojo : PactBaseMojo() {
 
   @Parameter(defaultValue = "\${project.testClasspathElements}", required = true)
   private lateinit var classpathElements: List<String>
@@ -41,12 +38,6 @@ open class PactProviderMojo : AbstractMojo() {
 
   @Parameter(required = true, defaultValue = "\${project.version}")
   private lateinit var projectVersion: String
-
-  @Parameter(defaultValue = "\${settings}", readonly = true)
-  private lateinit var settings: Settings
-
-  @Component
-  private lateinit var decrypter: SettingsDecrypter
 
   @Parameter(defaultValue = "true")
   var failIfNoPactsFound: Boolean = true
@@ -108,6 +99,11 @@ open class PactProviderMojo : AbstractMojo() {
         if (provider.pactBrokerUrl != null || provider.pactBroker != null) {
           loadPactsFromPactBroker(provider, consumers)
         }
+        if (provider.pactFileDirectory == null && provider.pactFileDirectories.isEmpty() &&
+          provider.pactBrokerUrl == null && provider.pactBroker == null && (
+            pactBrokerUrl != null || pactBrokerServerId != null)) {
+          loadPactsFromPactBroker(provider, consumers, brokerClientOptions())
+        }
 
         if (consumers.isEmpty() && failIfNoPactsFound) {
           throw MojoFailureException("No pact files were found for provider '${provider.name}'")
@@ -130,10 +126,14 @@ open class PactProviderMojo : AbstractMojo() {
 
   open fun providerVerifier() = ProviderVerifier()
 
-  fun loadPactsFromPactBroker(provider: Provider, consumers: MutableList<IConsumerInfo>) {
+  fun loadPactsFromPactBroker(
+    provider: Provider,
+    consumers: MutableList<IConsumerInfo>,
+    brokerClientOptions: MutableMap<String, Any> = mutableMapOf()
+  ) {
     val pactBroker = provider.pactBroker
-    val pactBrokerUrl = pactBroker?.url ?: provider.pactBrokerUrl
-    val options = mutableMapOf<String, Any>()
+    val pactBrokerUrl = pactBroker?.url ?: provider.pactBrokerUrl ?: pactBrokerUrl.toUrl()
+    val options = brokerClientOptions.toMutableMap()
 
     if (pactBroker?.authentication != null) {
       options["authentication"] = listOf("basic", provider.pactBroker.authentication.username,

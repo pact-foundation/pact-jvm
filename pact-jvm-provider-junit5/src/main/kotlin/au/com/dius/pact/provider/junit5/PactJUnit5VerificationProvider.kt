@@ -197,7 +197,7 @@ class PactVerificationExtension(
     verifier.initialiseReporters(testContext.providerInfo)
     verifier.reportVerificationForConsumer(consumer, testContext.providerInfo)
 
-    if (!interaction.providerStates.isEmpty()) {
+    if (interaction.providerStates.isNotEmpty()) {
       for ((name) in interaction.providerStates) {
         verifier.reportStateForInteraction(name, testContext.providerInfo, consumer, true)
       }

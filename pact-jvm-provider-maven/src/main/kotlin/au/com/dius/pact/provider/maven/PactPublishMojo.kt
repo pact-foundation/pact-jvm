@@ -1,14 +1,9 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.provider.broker.PactBrokerClient
-import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugin.MojoExecutionException
-import org.apache.maven.plugins.annotations.Component
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
-import org.apache.maven.settings.Settings
-import org.apache.maven.settings.crypto.DefaultSettingsDecryptionRequest
-import org.apache.maven.settings.crypto.SettingsDecrypter
 import org.fusesource.jansi.AnsiConsole
 import java.io.File
 
@@ -16,7 +11,7 @@ import java.io.File
  * Task to push pact files to a pact broker
  */
 @Mojo(name = "publish")
-open class PactPublishMojo : AbstractMojo() {
+open class PactPublishMojo : PactBaseMojo() {
 
     @Parameter(required = true, defaultValue = "\${project.version}")
     private lateinit var projectVersion: String
@@ -27,31 +22,7 @@ open class PactPublishMojo : AbstractMojo() {
     @Parameter(defaultValue = "\${project.build.directory}/pacts")
     private lateinit var pactDirectory: String
 
-    @Parameter(required = true)
-    private lateinit var pactBrokerUrl: String
-
-    @Parameter
-    private var pactBrokerServerId: String? = null
-
-    @Parameter
-    private var pactBrokerToken: String? = null
-
-    @Parameter
-    private var pactBrokerUsername: String? = null
-
-    @Parameter
-    private var pactBrokerPassword: String? = null
-
-    @Parameter(defaultValue = "basic")
-    private var pactBrokerAuthenticationScheme: String? = null
-
     private var brokerClient: PactBrokerClient? = null
-
-    @Parameter(defaultValue = "\${settings}", readonly = true)
-    private lateinit var settings: Settings
-
-    @Component
-    private lateinit var decrypter: SettingsDecrypter
 
     @Parameter
     private var tags: MutableList<String> = mutableListOf()
@@ -62,28 +33,18 @@ open class PactPublishMojo : AbstractMojo() {
     override fun execute() {
       AnsiConsole.systemInstall()
 
-        val snapShotDefinitionString = "-SNAPSHOT"
-        val emptyString = ""
-        if (trimSnapshot && projectVersion.contains(snapShotDefinitionString)) {
+      if (pactBrokerUrl.isNullOrEmpty() && brokerClient == null) {
+        throw MojoExecutionException("pactBrokerUrl is required")
+      }
+
+      val snapShotDefinitionString = "-SNAPSHOT"
+      val emptyString = ""
+      if (trimSnapshot && projectVersion.contains(snapShotDefinitionString)) {
           projectVersion = projectVersion.replaceFirst(snapShotDefinitionString, emptyString)
       }
 
       if (brokerClient == null) {
-        val options = mutableMapOf<String, Any>()
-        if (!pactBrokerToken.isNullOrEmpty()) {
-          pactBrokerAuthenticationScheme = "bearer"
-          options["authentication"] = listOf(pactBrokerAuthenticationScheme, pactBrokerToken)
-        } else if (!pactBrokerUsername.isNullOrEmpty()) {
-          options["authentication"] = listOf(pactBrokerAuthenticationScheme ?: "basic", pactBrokerUsername,
-            pactBrokerPassword)
-        } else if (!pactBrokerServerId.isNullOrEmpty()) {
-          val serverDetails = settings.getServer(pactBrokerServerId)
-          val request = DefaultSettingsDecryptionRequest(serverDetails)
-          val result = decrypter.decrypt(request)
-          options["authentication"] = listOf(pactBrokerAuthenticationScheme ?: "basic", serverDetails.username,
-            result.server.password)
-        }
-        brokerClient = PactBrokerClient(pactBrokerUrl, options)
+        brokerClient = PactBrokerClient(pactBrokerUrl!!, brokerClientOptions())
       }
 
       val pactDirectory = File(pactDirectory)
