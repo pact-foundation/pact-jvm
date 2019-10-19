@@ -15,19 +15,26 @@ import java.lang.annotation.Target;
 public @interface PactBrokerAuth {
 
   /**
-   * Authentication scheme to use. Currently bearer and basic are supported. The default is basic.
+   * Authentication scheme to use.
+   *
+   * @deprecated Does no longer need to be set explicitly. It is now automatically set to
+   * <ul>
+   *     <li><b>Basic</b> if username is set.</li>
+   *     <li><b>Bearer</b> if token is set.</li>
+   * </ul>
    */
-  String scheme() default "Basic";
+  @Deprecated
+  String scheme() default "";
 
   /**
    * Username to use for basic authentication
    */
-  String username();
+  String username() default "";
 
   /**
    * Password to use for basic authentication
    */
-  String password();
+  String password() default "";
 
   /**
    * Token to use for bearer token authentication
