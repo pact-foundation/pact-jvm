@@ -100,8 +100,8 @@ class PactBrokerAnnotationDefaultsTest {
     }
 
     @Test
-    fun `default auth scheme is basic`() {
-        assertThat(parseExpression(annotation.authentication.scheme), `is`("basic"))
+    fun `default auth scheme is legacy`() {
+        assertThat(parseExpression(annotation.authentication.scheme), `is`("legacy"))
     }
 
     @Test

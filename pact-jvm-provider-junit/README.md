@@ -212,9 +212,9 @@ The following keys may be managed through the environment
 * `pactbroker.port`
 * `pactbroker.protocol`
 * `pactbroker.tags` (comma separated)
-* `pactbroker.auth.scheme`
-* `pactbroker.auth.username`
-* `pactbroker.auth.password`
+* `pactbroker.auth.username` (for basic auth)
+* `pactbroker.auth.password` (for basic auth)
+* `pactbroker.auth.token` (for bearer auth)
 
 
 #### _Version 3.2.4/2.4.6+_ - Using tags with the pact broker
@@ -241,7 +241,14 @@ annotation. For example:
   authentication = @PactBrokerAuth(username = "test", password = "test"))
 ```
 
-The `username` and `password` values also take Java system property expressions.
+Bearer tokens are also supported. For example:
+
+```java
+@PactBroker(host = "${pactbroker.url:localhost}", port = "1234", tags = {"latest", "prod", "dev"},
+  authentication = @PactBrokerAuth(token = "test"))
+```
+
+The `token`, `username` and `password` values also take Java system property expressions.
 
 Preemptive Authentication can be enabled by setting the `pact.pactbroker.httpclient.usePreemptiveAuthentication` Java
 system property to `true`.

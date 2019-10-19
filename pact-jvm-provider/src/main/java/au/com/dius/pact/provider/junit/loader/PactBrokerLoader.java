@@ -187,14 +187,42 @@ public class PactBrokerLoader implements PactLoader {
     return pact;
   }
 
-  PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) throws URISyntaxException {
-    HashMap options = new HashMap();
-    if (this.authentication != null && !this.authentication.scheme().equalsIgnoreCase("none")) {
-      options.put("authentication", Arrays.asList(parseExpression(this.authentication.scheme(), resolver),
-          parseExpression(this.authentication.username(), resolver),
-          parseExpression(this.authentication.password(), resolver)));
+  PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
+    if (this.authentication == null || this.authentication.scheme().equalsIgnoreCase("none")) {
+      LOGGER.debug("Authentication: None");
+      return new PactBrokerClient(url.toString(), Collections.emptyMap());
     }
-    return new PactBrokerClient(url.toString(), options);
+
+    String scheme = parseExpression(this.authentication.scheme(), resolver);
+    if (StringUtils.isNotEmpty(scheme)) {
+      // Legacy behavior (before support for bearer token was added):
+      // If scheme was not explicitly set, basic was always used.
+      // If it was explicitly set, the given value was used together with username and password
+      String schemeToUse = scheme.equals("legacy") ? "basic": scheme;
+      LOGGER.debug("Authentication: {}", schemeToUse);
+      Map<String, List<String>> options = Collections.singletonMap("authentication", Arrays.asList(schemeToUse,
+              parseExpression(this.authentication.username(), resolver),
+              parseExpression(this.authentication.password(), resolver)));
+      return new PactBrokerClient(url.toString(), options);
+    }
+
+    // Check if username is set. If yes, use basic auth.
+    String username = parseExpression(this.authentication.username(), resolver);
+    if (StringUtils.isNotEmpty(username)) {
+      LOGGER.debug("Authentication: Basic");
+      Map<String, List<String>> options = Collections.singletonMap("authentication", Arrays.asList("basic", username, parseExpression(this.authentication.password(), resolver)));
+      return new PactBrokerClient(url.toString(), options);
+    }
+
+    // Check if token is set. If yes, use bearer auth.
+    String token = parseExpression(this.authentication.token(), resolver);
+    if (StringUtils.isNotEmpty(token)) {
+      LOGGER.debug("Authentication: Bearer");
+      Map<String, List<String>> options = Collections.singletonMap("authentication", Arrays.asList("bearer", token));
+      return new PactBrokerClient(url.toString(), options);
+    }
+
+    throw new IllegalArgumentException("Invalid pact authentication specified. Either username or token must be set.");
   }
 
   public boolean isFailIfNoPactsFound() {

@@ -427,6 +427,104 @@ class PactBrokerLoaderSpec extends Specification {
     1 * brokerClient.fetchConsumers('test') >> []
   }
 
+  def 'Auth: Uses basic auth if no auth is provided'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(PactBrokerAnnotationAuthNotSet.getAnnotation(PactBroker))
+    }
+
+    when:
+    def pactBrokerClient = pactBrokerLoader()
+            .newPactBrokerClient(new URI('http://localhost'), new SystemPropertyResolver())
+
+    then:
+    pactBrokerClient.options == ['authentication': ['basic', '', '']]
+  }
+
+  def 'Auth: Uses provided auth scheme if it is provided'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(PactBrokerAnnotationAuthWithSchemeSet.getAnnotation(PactBroker))
+    }
+
+    when:
+    def pactBrokerClient = pactBrokerLoader()
+            .newPactBrokerClient(new URI('http://localhost'), new SystemPropertyResolver())
+
+    then:
+    pactBrokerClient.options == ['authentication': ['foobar', 'user', 'pw']]
+  }
+
+  def 'Auth: Uses basic auth if username and password are provided'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(PactBrokerAnnotationWithUsernameAndPassword.getAnnotation(PactBroker))
+    }
+
+    when:
+    def pactBrokerClient = pactBrokerLoader()
+            .newPactBrokerClient(new URI('http://localhost'), new SystemPropertyResolver())
+
+    then:
+    pactBrokerClient.options == ['authentication': ['basic', 'user', 'pw']]
+  }
+
+  def 'Auth: Uses basic auth if username and token are provided'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(PactBrokerAnnotationAuthWithUsernameAndToken.getAnnotation(PactBroker))
+    }
+
+    when:
+    def pactBrokerClient = pactBrokerLoader()
+            .newPactBrokerClient(new URI('http://localhost'), new SystemPropertyResolver())
+
+    then:
+    pactBrokerClient.options == ['authentication': ['basic', 'user', '']]
+  }
+
+  def 'Auth: Uses bearer auth if token is provided'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(PactBrokerAnnotationWithOnlyToken.getAnnotation(PactBroker))
+    }
+
+    when:
+    def pactBrokerClient = pactBrokerLoader()
+            .newPactBrokerClient(new URI('http://localhost'), new SystemPropertyResolver())
+
+    then:
+    pactBrokerClient.options == ['authentication': ['bearer', 'token-value']]
+  }
+
+  def 'Auth: Uses bearer auth if token and password are provided'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(PactBrokerAnnotationWithPasswordAndToken.getAnnotation(PactBroker))
+    }
+
+    when:
+    def pactBrokerClient = pactBrokerLoader()
+            .newPactBrokerClient(new URI('http://localhost'), new SystemPropertyResolver())
+
+    then:
+    pactBrokerClient.options == ['authentication': ['bearer', 'token-value']]
+  }
+
+  def 'Auth: Fails if neither token nor username is provided'() {
+    given:
+    pactBrokerLoader = {
+      new PactBrokerLoader(PactBrokerAnnotationEmptyAuth.getAnnotation(PactBroker))
+    }
+
+    when:
+    pactBrokerLoader().newPactBrokerClient(new URI('http://localhost'), new SystemPropertyResolver())
+
+    then:
+    IllegalArgumentException exception = thrown(IllegalArgumentException)
+    exception.message == 'Invalid pact authentication specified. Either username or token must be set.'
+  }
+
   @PactBroker(host = 'pactbroker.host', port = '1000', failIfNoPactsFound = false)
   static class FullPactBrokerAnnotation {
 
@@ -444,6 +542,47 @@ class PactBrokerLoaderSpec extends Specification {
 
   @PactBroker(host = 'pactbroker.host', scheme = 'https', failIfNoPactsFound = false)
   static class PactBrokerAnnotationHttpsNoPort {
+
+  }
+
+  @PactBroker(host = 'pactbroker.host')
+  static class PactBrokerAnnotationAuthNotSet {
+
+  }
+
+  @PactBroker(host = 'pactbroker.host',
+      authentication = @PactBrokerAuth(scheme = 'foobar', username = 'user', password = 'pw'))
+  static class PactBrokerAnnotationAuthWithSchemeSet {
+
+  }
+
+  @PactBroker(host = 'pactbroker.host',
+      authentication = @PactBrokerAuth(username = 'user', password =  'pw'))
+  static class PactBrokerAnnotationWithUsernameAndPassword {
+
+  }
+
+  @PactBroker(host = 'pactbroker.host',
+      authentication = @PactBrokerAuth(username = 'user', token = 'ignored'))
+  static class PactBrokerAnnotationAuthWithUsernameAndToken {
+
+  }
+
+  @PactBroker(host = 'pactbroker.host',
+      authentication = @PactBrokerAuth(password = 'pw', token = 'token-value'))
+  static class PactBrokerAnnotationWithPasswordAndToken {
+
+  }
+
+  @PactBroker(host = 'pactbroker.host',
+      authentication = @PactBrokerAuth(token = 'token-value'))
+  static class PactBrokerAnnotationWithOnlyToken {
+
+  }
+
+  @PactBroker(host = 'pactbroker.host',
+          authentication = @PactBrokerAuth)
+  static class PactBrokerAnnotationEmptyAuth {
 
   }
 
