@@ -227,9 +227,9 @@ The following keys may be managed through the environment
 * `pactbroker.port`
 * `pactbroker.scheme`
 * `pactbroker.tags` (comma separated)
-* `pactbroker.auth.scheme`
-* `pactbroker.auth.username`
-* `pactbroker.auth.password`
+* `pactbroker.auth.username` (for basic auth)
+* `pactbroker.auth.password` (for basic auth)
+* `pactbroker.auth.token` (for bearer auth)
 
 
 #### Using tags with the pact broker
@@ -246,7 +246,7 @@ For any other value the latest pact tagged with the specified tag is loaded.
 
 Specifying multiple tags is an OR operation. For example if you specify `tags = {"dev", "prod"}` then both the latest pact file tagged with `dev` and the latest pact file taggged with `prod` is loaded.
 
-#### Using basic auth with the with the pact broker
+#### Using authentication with the with the pact broker
 
 You can use basic authentication with the `@PactBroker` annotation by setting the `authentication` value to a `@PactBrokerAuth`
 annotation. For example:
@@ -256,7 +256,14 @@ annotation. For example:
   authentication = @PactBrokerAuth(username = "test", password = "test"))
 ```
 
-The `username` and `password` values also take Java system property expressions.
+Bearer tokens are also supported. For example:
+
+```java
+@PactBroker(host = "${pactbroker.url:localhost}", port = "1234", tags = {"latest", "prod", "dev"},
+  authentication = @PactBrokerAuth(token = "test"))
+```
+
+The `token`, `username` and `password` values also take Java system property expressions.
 
 Preemptive Authentication can be enabled by setting the `pact.pactbroker.httpclient.usePreemptiveAuthentication` Java
 system property to `true`.

@@ -100,8 +100,8 @@ class PactBrokerAnnotationDefaultsTest {
     }
 
     @Test
-    fun `default auth scheme is basic`() {
-        assertThat(parseExpression(annotation.authentication.scheme), `is`("basic"))
+    fun `default auth scheme is legacy`() {
+        assertThat(parseExpression(annotation.authentication.scheme), `is`("legacy"))
     }
 
     @Test
@@ -130,6 +130,17 @@ class PactBrokerAnnotationDefaultsTest {
     fun `can set auth password`() {
         props.setProperty("pactbroker.auth.password", "myPass")
         assertThat(parseListExpression(annotation.authentication.password), contains("myPass"))
+    }
+
+    @Test
+    fun `default auth token is empty`() {
+        assertThat(parseExpression(annotation.authentication.token), `is`(""))
+    }
+
+    @Test
+    fun `can set auth token`() {
+        props.setProperty("pactbroker.auth.token", "myToken")
+        assertThat(parseListExpression(annotation.authentication.token), contains("myToken"))
     }
 
     @PactBroker
