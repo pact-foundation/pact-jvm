@@ -16,7 +16,6 @@ dependencies {
     // Required for Java 9
     testCompile 'javax.xml.bind:jaxb-api:2.3.0'
     testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-    testCompile 'net.bytebuddy:byte-buddy:1.9.12'
 }
 
 test {

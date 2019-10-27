@@ -18,7 +18,6 @@ dependencies {
   testCompile('com.jayway.restassured:rest-assured:2.9.0') {
     exclude group: 'org.codehaus.groovy'
   }
-  testCompile 'org.hamcrest:hamcrest:2.1'
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
   testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}"

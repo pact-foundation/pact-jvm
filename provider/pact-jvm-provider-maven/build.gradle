@@ -10,7 +10,6 @@ dependencies {
 
   testCompile "org.codehaus.groovy:groovy-nio:${project.groovyVersion}:indy"
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testCompile 'net.bytebuddy:byte-buddy:1.9.12'
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
