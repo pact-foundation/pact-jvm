@@ -1,5 +1,21 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.0.2 - Bugfix Release
+
+* 343bd92b7 - fix: lookup the provider tag from system properties for JUnit based tests #823 #960 (Ronald Holshausen, Sun Oct 27 17:03:55 2019 +1100)
+* d8fdaa1df - feat: add colons to the allowed path characters #965 (Ronald Holshausen, Sun Oct 27 15:59:43 2019 +1100)
+* ed0df6594 - fix: correct spring test readme and comment #963 (Ronald Holshausen, Sun Oct 27 15:31:01 2019 +1100)
+* 00168b168 - chore: small code cleanup (Ronald Holshausen, Sun Oct 27 14:39:28 2019 +1100)
+* 079e673b1 - Merge pull request #951 from tinexw/925-bearer-token (Ronald Holshausen, Sun Oct 27 14:33:24 2019 +1100)
+* 3175a14cd - Merge pull request #959 from pkubowicz/provider-gradle-kotlin (Ronald Holshausen, Sun Oct 27 14:27:40 2019 +1100)
+* 0e5bdb4ff - feat: convert number type matchers to type matchers when spec version < 3 #958 (Ronald Holshausen, Sun Oct 27 14:16:49 2019 +1100)
+* 7d83a956a - fix: let invalid path exceptions propogate so verification fails #957 (Ronald Holshausen, Sun Oct 27 13:33:20 2019 +1100)
+* 05ca60291 - chore: use the charset from the content type when converting bodies #956 (Ronald Holshausen, Sun Oct 27 11:58:43 2019 +1100)
+* c89ecfb89 - Detect broker auth scheme automatically - Fixes gh-925 (Kristine Jetzke, Sun Oct 20 00:02:19 2019 +0200)
+* c4ac2a331 - Allow using pact-jvm-provider-gradle with Kotlin (Piotr Kubowicz, Sun Oct 20 09:07:13 2019 +0200)
+* b37c6d771 - bump version to 4.0.2 (Ronald Holshausen, Wed Oct 16 13:42:57 2019 +1100)
+* 6e87f3d2e - Support bearer token with JUnit annotations - Fixes gh-925 (Kristine Jetzke, Sun Oct 6 00:52:06 2019 +0200)
+
 # 4.0.1 - Bugfix Release
 
 * b9d5c79a2 - fix: Maven plugin should fall back to global broker config (Ronald Holshausen, Wed Oct 16 13:13:18 2019 +1100)
