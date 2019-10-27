@@ -85,7 +85,7 @@ class RequestMatching(private val expectedInteractions: List<RequestResponseInte
       return (listOf(Matching.matchMethod(expected.method, actual.method)) +
         Matching.matchPath(expected, actual) +
         Matching.matchQuery(expected, actual) +
-        Matching.matchCookie(expected.cookie() ?: emptyList(), actual.cookie() ?: emptyList()) +
+        Matching.matchCookie(expected.cookie(), actual.cookie()) +
         Matching.matchRequestHeaders(expected, actual) +
         Matching.matchBody(expected, actual, allowUnexpectedKeys)
       ).filterNotNull()
