@@ -305,10 +305,10 @@ class PactDslJsonBodySpec extends Specification {
     pactDslJsonBody.matchers.toMap(PactSpecVersion.V2) == [
       '$.body.contactDetails.mobile.countryCode': [match: 'type'],
       '$.body.contactDetails.mobile.prefix': [match: 'type'],
-      '$.body.contactDetails.mobile.subscriberNumber': [match: 'number'],
+      '$.body.contactDetails.mobile.subscriberNumber': [match: 'type'],
       '$.body.contactDetails2.mobile.countryCode': [match: 'type'],
       '$.body.contactDetails2.mobile.prefix': [match: 'type'],
-      '$.body.contactDetails2.mobile.subscriberNumber': [match: 'number']
+      '$.body.contactDetails2.mobile.subscriberNumber': [match: 'type']
     ]
     pactDslJsonBody.generators.toMap(PactSpecVersion.V3) == [
       body: [

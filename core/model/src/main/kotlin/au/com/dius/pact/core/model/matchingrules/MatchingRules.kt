@@ -15,7 +15,9 @@ enum class RuleLogic {
  * Matching rule
  */
 interface MatchingRule {
+  @Deprecated("Use version that takes a spec version")
   fun toMap(): Map<String, Any?>
+  fun toMap(spec: PactSpecVersion): Map<String, Any?>
 }
 
 /**
@@ -23,6 +25,7 @@ interface MatchingRule {
  */
 data class DateMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-dd") : MatchingRule {
   override fun toMap() = mapOf("match" to "date", "date" to format)
+  override fun toMap(spec: PactSpecVersion) = toMap()
 }
 
 /**
@@ -30,6 +33,7 @@ data class DateMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-d
  */
 object EqualsMatcher : MatchingRule {
   override fun toMap() = mapOf("match" to "equality")
+  override fun toMap(spec: PactSpecVersion) = toMap()
 }
 
 /**
@@ -37,6 +41,7 @@ object EqualsMatcher : MatchingRule {
  */
 data class IncludeMatcher(val value: String) : MatchingRule {
   override fun toMap() = mapOf("match" to "include", "value" to value)
+  override fun toMap(spec: PactSpecVersion) = toMap()
 }
 
 /**
@@ -44,6 +49,7 @@ data class IncludeMatcher(val value: String) : MatchingRule {
  */
 data class MaxTypeMatcher(val max: Int) : MatchingRule {
   override fun toMap() = mapOf("match" to "type", "max" to max)
+  override fun toMap(spec: PactSpecVersion) = toMap()
 }
 
 /**
@@ -51,6 +57,7 @@ data class MaxTypeMatcher(val max: Int) : MatchingRule {
  */
 data class MinMaxTypeMatcher(val min: Int, val max: Int) : MatchingRule {
   override fun toMap() = mapOf("match" to "type", "min" to min, "max" to max)
+  override fun toMap(spec: PactSpecVersion) = toMap()
 }
 
 /**
@@ -58,6 +65,7 @@ data class MinMaxTypeMatcher(val min: Int, val max: Int) : MatchingRule {
  */
 data class MinTypeMatcher(val min: Int) : MatchingRule {
   override fun toMap() = mapOf("match" to "type", "min" to min)
+  override fun toMap(spec: PactSpecVersion) = toMap()
 }
 
 /**
@@ -70,7 +78,12 @@ data class NumberTypeMatcher(val numberType: NumberType) : MatchingRule {
     DECIMAL
   }
 
-  override fun toMap() = mapOf("match" to numberType.name.toLowerCase())
+  override fun toMap() = toMap(PactSpecVersion.V3)
+  override fun toMap(spec: PactSpecVersion) = if (spec >= PactSpecVersion.V3) {
+    mapOf("match" to numberType.name.toLowerCase())
+  } else {
+    TypeMatcher.toMap(spec)
+  }
 }
 
 /**
@@ -78,6 +91,7 @@ data class NumberTypeMatcher(val numberType: NumberType) : MatchingRule {
  */
 data class RegexMatcher @JvmOverloads constructor (val regex: String, val example: String? = null) : MatchingRule {
   override fun toMap() = mapOf("match" to "regex", "regex" to regex)
+  override fun toMap(spec: PactSpecVersion) = toMap()
 }
 
 /**
@@ -85,6 +99,7 @@ data class RegexMatcher @JvmOverloads constructor (val regex: String, val exampl
  */
 data class TimeMatcher @JvmOverloads constructor(val format: String = "HH:mm:ss") : MatchingRule {
   override fun toMap() = mapOf("match" to "time", "time" to format)
+  override fun toMap(spec: PactSpecVersion) = toMap()
 }
 
 /**
@@ -92,6 +107,7 @@ data class TimeMatcher @JvmOverloads constructor(val format: String = "HH:mm:ss"
  */
 data class TimestampMatcher @JvmOverloads constructor(val format: String = "yyyy-MM-dd HH:mm:ssZZZ") : MatchingRule {
   override fun toMap() = mapOf("match" to "timestamp", "timestamp" to format)
+  override fun toMap(spec: PactSpecVersion) = toMap()
 }
 
 /**
@@ -99,6 +115,7 @@ data class TimestampMatcher @JvmOverloads constructor(val format: String = "yyyy
  */
 object TypeMatcher : MatchingRule {
   override fun toMap() = mapOf("match" to "type")
+  override fun toMap(spec: PactSpecVersion) = toMap()
 }
 
 /**
@@ -106,6 +123,7 @@ object TypeMatcher : MatchingRule {
  */
 object NullMatcher : MatchingRule {
   override fun toMap() = mapOf("match" to "null")
+  override fun toMap(spec: PactSpecVersion) = toMap()
 }
 
 /**
@@ -113,6 +131,7 @@ object NullMatcher : MatchingRule {
  */
 object ValuesMatcher : MatchingRule {
   override fun toMap() = mapOf("match" to "values")
+  override fun toMap(spec: PactSpecVersion) = toMap()
 }
 
 data class MatchingRuleGroup @JvmOverloads constructor(
@@ -121,7 +140,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(
 ) {
   fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
     return if (pactSpecVersion < PactSpecVersion.V3) {
-      rules.first().toMap()
+      rules.first().toMap(pactSpecVersion)
     } else {
       mapOf("matchers" to rules.map { it.toMap() }, "combine" to ruleLogic.name)
     }
