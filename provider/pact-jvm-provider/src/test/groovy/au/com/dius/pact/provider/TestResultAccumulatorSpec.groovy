@@ -197,4 +197,28 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.verificationReporter = reporter
   }
 
+  @RestoreSystemProperties
+  def 'updateTestResult - include the provider tag'() {
+    given:
+    def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'),
+      [interaction1])
+    testResultAccumulator.testResults.clear()
+    def reporter = testResultAccumulator.verificationReporter
+    testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
+      publishingResultsDisabled() >> false
+    }
+    System.setProperty('pact.provider.tag', 'updateTestResultTag')
+
+    when:
+    testResultAccumulator.updateTestResult(pact, interaction1, TestResult.Ok.INSTANCE)
+
+    then:
+    1 * testResultAccumulator.verificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, _,
+      'updateTestResultTag')
+    testResultAccumulator.testResults.isEmpty()
+
+    cleanup:
+    testResultAccumulator.verificationReporter = reporter
+  }
+
 }
