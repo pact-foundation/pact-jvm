@@ -75,10 +75,11 @@ is set with the version of your provider.
     }
 ```
 
-## Using a Spring runner
+## Using Spring runners
 
-You can use `SpringRestPactRunner` instead of the default Pact runner to use the Spring test annotations. This will
-allow you to inject or mock spring beans.
+You can use `SpringRestPactRunner` or `SpringMessagePactRunner` instead of the default Pact runner to use the Spring test annotations. This will
+allow you to inject or mock spring beans. `SpringRestPactRunner` is for restful webapps and `SpringMessagePactRunner` is
+for async message tests.
 
 For example:
 

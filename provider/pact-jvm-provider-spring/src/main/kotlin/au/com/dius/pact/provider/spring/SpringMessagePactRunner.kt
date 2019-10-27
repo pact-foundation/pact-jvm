@@ -13,7 +13,7 @@ import org.springframework.test.context.junit4.statements.RunAfterTestClassCallb
 import org.springframework.test.context.junit4.statements.RunBeforeTestClassCallbacks
 
 /**
- * Pact runner for REST providers that boots up the spring context
+ * Pact runner for Async message providers that boots up the spring context
  */
 open class SpringMessagePactRunner(clazz: Class<*>) : MessagePactRunner<Message>(clazz) {
 
