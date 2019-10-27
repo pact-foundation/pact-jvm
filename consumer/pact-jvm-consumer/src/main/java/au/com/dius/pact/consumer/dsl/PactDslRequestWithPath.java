@@ -266,7 +266,13 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
         requestBody = OptionalBody.body(body.toString().getBytes(),
           au.com.dius.pact.core.model.ContentType.Companion.getJSON());
         if (!requestHeaders.containsKey(CONTENT_TYPE)) {
-            requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_JSON.toString()));
+          requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_JSON.toString()));
+          requestBody = OptionalBody.body(body.toString().getBytes());
+        } else {
+          ContentType contentType = ContentType.parse(requestHeaders.get(CONTENT_TYPE).get(0));
+          Charset charset = contentType.getCharset() != null ? contentType.getCharset() : Charset.defaultCharset();
+          requestBody = OptionalBody.body(body.toString().getBytes(charset),
+            new au.com.dius.pact.core.model.ContentType(contentType.toString()));
         }
         return this;
     }
@@ -285,15 +291,24 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
 
         requestMatchers.addCategory(parent.getMatchers());
         requestGenerators.addGenerators(parent.generators);
+
+        Charset charset = Charset.defaultCharset();
+        String contentType = ContentType.APPLICATION_JSON.toString();
+        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+          requestHeaders.put(CONTENT_TYPE, Collections.singletonList(contentType));
+        } else {
+          contentType = requestHeaders.get(CONTENT_TYPE).get(0);
+          ContentType ct = ContentType.parse(contentType);
+          charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
+        }
+
         if (parent.getBody() != null) {
-          requestBody = OptionalBody.body(parent.getBody().toString().getBytes(),
-            au.com.dius.pact.core.model.ContentType.Companion.getJSON());
+          requestBody = OptionalBody.body(parent.getBody().toString().getBytes(charset),
+            new au.com.dius.pact.core.model.ContentType(contentType));
         } else {
           requestBody = OptionalBody.nullBody();
         }
-        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
-            requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_JSON.toString()));
-        }
+
         return this;
     }
 
@@ -303,12 +318,20 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
      * @param body XML Document
      */
     public PactDslRequestWithPath body(Document body) throws TransformerException {
+      if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+        String contentType = ContentType.APPLICATION_XML.toString();
+        requestHeaders.put(CONTENT_TYPE, Collections.singletonList(contentType));
         requestBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body).getBytes(),
-          new au.com.dius.pact.core.model.ContentType(ContentType.APPLICATION_XML.toString()));
-        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
-            requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
-        }
-        return this;
+          new au.com.dius.pact.core.model.ContentType(contentType));
+      } else {
+        String contentType = requestHeaders.get(CONTENT_TYPE).get(0);
+        ContentType ct = ContentType.parse(contentType);
+        Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
+        requestBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body).getBytes(charset),
+          new au.com.dius.pact.core.model.ContentType(contentType));
+      }
+
+      return this;
     }
 
     /**

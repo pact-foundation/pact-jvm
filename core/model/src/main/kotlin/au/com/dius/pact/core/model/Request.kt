@@ -112,12 +112,19 @@ class Request @JvmOverloads constructor(
       } else {
         emptyMap()
       }
+
+      var contentType = ContentType.JSON
+      val contentTypeEntry = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
+      if (contentTypeEntry != null) {
+        contentType = ContentType(contentTypeEntry.value.first())
+      }
+
       val body = if (json.has("body")) {
         when {
           json["body"].isJsonNull -> OptionalBody.nullBody()
           json["body"].isJsonPrimitive && json["body"].asJsonPrimitive.isString ->
-            OptionalBody.body(json["body"].asJsonPrimitive.asString.toByteArray())
-          else -> OptionalBody.body(json["body"].toString().toByteArray())
+            OptionalBody.body(json["body"].asJsonPrimitive.asString.toByteArray(contentType.asCharset()), contentType)
+          else -> OptionalBody.body(json["body"].toString().toByteArray(contentType.asCharset()), contentType)
         }
       } else OptionalBody.missing()
       val matchingRules = if (json.has("matchingRules") && json["matchingRules"].isJsonObject)

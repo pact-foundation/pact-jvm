@@ -3,13 +3,13 @@ package au.com.dius.pact.consumer
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.dsl.Matcher
 import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.InvalidPactException
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
-import org.apache.http.entity.ContentType
 
 /**
  * PACT DSL builder for v3 specification
@@ -102,19 +102,21 @@ class MessagePactBuilder(
 
     val message = messages.last()
     val metadata = message.metaData.toMutableMap()
-    val contentType = metadata.entries.find {
+    val contentTypeEntry = metadata.entries.find {
       it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
     }
-    if (contentType == null) {
-      metadata["contentType"] = ContentType.APPLICATION_JSON.toString()
+
+    var contentType = ContentType.JSON
+    if (contentTypeEntry == null) {
+      metadata["contentType"] = contentType.toString()
     } else {
-      metadata.remove(contentType.key)
-      metadata["contentType"] = contentType.value
+      contentType = ContentType(contentTypeEntry.value)
+      metadata.remove(contentTypeEntry.key)
+      metadata["contentType"] = contentTypeEntry.value
     }
 
     val parent = body.close()
-    message.contents = OptionalBody.body(parent.toString().toByteArray(),
-      au.com.dius.pact.core.model.ContentType(metadata["contentType"].toString()))
+    message.contents = OptionalBody.body(parent.toString().toByteArray(contentType.asCharset()), contentType)
     message.metaData = metadata
     message.matchingRules.addCategory(parent.matchers)
 

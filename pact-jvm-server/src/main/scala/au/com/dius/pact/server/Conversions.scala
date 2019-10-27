@@ -3,12 +3,12 @@ package au.com.dius.pact.server
 import java.net.URI
 import java.util.zip.GZIPInputStream
 
-import au.com.dius.pact.core.model.{OptionalBody, Request, Response}
+import au.com.dius.pact.core.model.{OptionalBody, ContentType, Request, Response}
 import com.typesafe.scalalogging.StrictLogging
 import io.netty.handler.codec.http.{HttpResponse => NHttpResponse}
 import unfiltered.netty.ReceivedMessage
 import unfiltered.request.HttpRequest
-import unfiltered.response._
+import unfiltered.response.{ContentEncoding, HttpResponse, ResponseFunction, ResponseString, Status}
 
 import scala.collection.JavaConverters._
 
@@ -22,7 +22,7 @@ object Conversions extends StrictLogging {
     }
   }
 
-  implicit def pactToUnfilteredResponse(response: Response): ResponseFunction[NHttpResponse] = {
+  def pactToUnfilteredResponse(response: Response): ResponseFunction[NHttpResponse] = {
     val headers = response.getHeaders
     if (response.getBody.isPresent) {
       Status(response.getStatus) ~> Headers(headers) ~> ResponseString(response.getBody.valueAsString)
@@ -48,8 +48,10 @@ object Conversions extends StrictLogging {
     if(is == null) "" else scala.io.Source.fromInputStream(is).mkString
   }
 
-  implicit def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {
-    new Request(request.method, toPath(request.uri), toQuery(request), toHeaders(request),
-      OptionalBody.body(toBody(request).getBytes))
+  def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {
+    val headers = toHeaders(request)
+    val contentType = new ContentType(request.headers("Content-Type").next())
+    new Request(request.method, toPath(request.uri), toQuery(request), headers,
+      OptionalBody.body(toBody(request).getBytes(contentType.asCharset), contentType))
   }
 }

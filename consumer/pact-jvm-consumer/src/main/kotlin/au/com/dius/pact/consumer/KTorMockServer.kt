@@ -96,7 +96,7 @@ class KTorMockServer(
     val body = if (bodyContents.isEmpty()) {
       OptionalBody.empty()
     } else {
-      OptionalBody.body(bodyContents.toByteArray())
+      OptionalBody.body(bodyContents.toByteArray(), ContentType(headers["Content-Type"] ?: ContentType.JSON.contentType))
     }
     return Request(call.request.httpMethod.value, call.request.path(),
       call.request.queryParameters.entries().associate { it.toPair() }.toMutableMap(),

@@ -8,6 +8,7 @@ import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.matchers.MetadataMismatch
 import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.model.BrokerUrlSource
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Interaction
@@ -347,26 +348,31 @@ open class ProviderVerifier @JvmOverloads constructor (
     methods.forEach { method ->
       reporters.forEach { it.generatesAMessageWhich() }
       val messageResult = invokeProviderMethod(method, providerMethodInstance.apply(method))
-      val actualMessage: OptionalBody
+      val actualMessage: ByteArray
       var messageMetadata: Map<String, Any>? = null
+      var contentType = ContentType.JSON
       when (messageResult) {
         is MessageAndMetadata -> {
-          actualMessage = OptionalBody.body(messageResult.messageData)
           messageMetadata = messageResult.metadata
+          contentType = ContentType(Message.getContentType(messageResult.metadata))
+          actualMessage = messageResult.messageData
         }
         is Pair<*, *> -> {
-          actualMessage = OptionalBody.body(messageResult.first.toString().toByteArray())
           messageMetadata = messageResult.second as Map<String, Any>
+          contentType = ContentType(Message.getContentType(messageMetadata))
+          actualMessage = messageResult.first.toString().toByteArray(contentType.asCharset())
         }
         is org.apache.commons.lang3.tuple.Pair<*, *> -> {
-          actualMessage = OptionalBody.body(messageResult.left.toString().toByteArray())
           messageMetadata = messageResult.right as Map<String, Any>
+          contentType = ContentType(Message.getContentType(messageMetadata))
+          actualMessage = messageResult.left.toString().toByteArray(contentType.asCharset())
         }
         else -> {
-          actualMessage = OptionalBody.body(messageResult.toString().toByteArray())
+          actualMessage = messageResult.toString().toByteArray()
         }
       }
-      val comparison = ResponseComparison.compareMessage(message, actualMessage, messageMetadata)
+      val comparison = ResponseComparison.compareMessage(message,
+        OptionalBody.body(actualMessage, contentType), messageMetadata)
       val s = " generates a message which"
       result = result.merge(displayBodyResult(failures, comparison.bodyMismatches,
         interactionMessage + s, message.interactionId.orEmpty()))

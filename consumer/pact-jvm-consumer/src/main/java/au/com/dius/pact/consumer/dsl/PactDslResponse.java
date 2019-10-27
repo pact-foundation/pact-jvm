@@ -204,12 +204,17 @@ public class PactDslResponse {
      * @param body Response body in JSON form
      */
     public PactDslResponse body(JSONObject body) {
-        this.responseBody = OptionalBody.body(body.toString().getBytes(),
-          au.com.dius.pact.core.model.ContentType.Companion.getJSON());
-        if (!responseHeaders.containsKey(CONTENT_TYPE)) {
-            matchHeader(CONTENT_TYPE, DEFAULT_JSON_CONTENT_TYPE_REGEX, ContentType.APPLICATION_JSON.toString());
-        }
-        return this;
+      if (!responseHeaders.containsKey(CONTENT_TYPE)) {
+        matchHeader(CONTENT_TYPE, DEFAULT_JSON_CONTENT_TYPE_REGEX, ContentType.APPLICATION_JSON.toString());
+        this.responseBody = OptionalBody.body(body.toString().getBytes());
+      } else {
+        String contentType = responseHeaders.get(CONTENT_TYPE).get(0);
+        ContentType ct = ContentType.parse(contentType);
+        Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
+        this.responseBody = OptionalBody.body(body.toString().getBytes(charset),
+          new au.com.dius.pact.core.model.ContentType(contentType));
+      }
+      return this;
     }
 
     /**
@@ -218,25 +223,33 @@ public class PactDslResponse {
      * @param body Response body built using the Pact body DSL
      */
     public PactDslResponse body(DslPart body) {
-        DslPart parent = body.close();
+      DslPart parent = body.close();
 
-        if (parent instanceof PactDslJsonRootValue) {
-          ((PactDslJsonRootValue)parent).setEncodeJson(true);
-        }
+      if (parent instanceof PactDslJsonRootValue) {
+        ((PactDslJsonRootValue)parent).setEncodeJson(true);
+      }
 
-        responseMatchers.addCategory(parent.getMatchers());
-        responseGenerators.addGenerators(parent.generators);
-        if (parent.getBody() != null) {
-            responseBody = OptionalBody.body(parent.getBody().toString().getBytes(),
-              au.com.dius.pact.core.model.ContentType.Companion.getJSON());
-        } else {
-            responseBody = OptionalBody.nullBody();
-        }
+      responseMatchers.addCategory(parent.getMatchers());
+      responseGenerators.addGenerators(parent.generators);
 
-        if (!responseHeaders.containsKey(CONTENT_TYPE)) {
-            matchHeader(CONTENT_TYPE, DEFAULT_JSON_CONTENT_TYPE_REGEX, ContentType.APPLICATION_JSON.toString());
-        }
-        return this;
+      Charset charset = Charset.defaultCharset();
+      String contentType = ContentType.APPLICATION_JSON.toString();
+      if (!responseHeaders.containsKey(CONTENT_TYPE)) {
+        matchHeader(CONTENT_TYPE, DEFAULT_JSON_CONTENT_TYPE_REGEX, contentType);
+      } else {
+        contentType = responseHeaders.get(CONTENT_TYPE).get(0);
+        ContentType ct = ContentType.parse(contentType);
+        charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
+      }
+
+      if (parent.getBody() != null) {
+        responseBody = OptionalBody.body(parent.getBody().toString().getBytes(charset),
+          new au.com.dius.pact.core.model.ContentType(contentType));
+      } else {
+        responseBody = OptionalBody.nullBody();
+      }
+
+      return this;
     }
 
     /**
@@ -245,11 +258,18 @@ public class PactDslResponse {
      * @param body Response body as an XML Document
      */
     public PactDslResponse body(Document body) throws TransformerException {
+      if (!responseHeaders.containsKey(CONTENT_TYPE)) {
+        responseHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
         responseBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body).getBytes());
-        if (!responseHeaders.containsKey(CONTENT_TYPE)) {
-            responseHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
-        }
-        return this;
+      } else {
+        String contentType = responseHeaders.get(CONTENT_TYPE).get(0);
+        ContentType ct = ContentType.parse(contentType);
+        Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
+        responseBody = OptionalBody.body(ConsumerPactBuilder.xmlToString(body).getBytes(charset),
+          new au.com.dius.pact.core.model.ContentType(contentType));
+      }
+
+      return this;
     }
 
     /**

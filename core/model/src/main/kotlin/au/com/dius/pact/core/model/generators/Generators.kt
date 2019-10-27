@@ -15,7 +15,6 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import mu.KLogging
 import org.apache.commons.collections4.IteratorUtils
-import java.nio.charset.Charset
 
 enum class Category {
   METHOD, PATH, HEADER, QUERY, BODY, STATUS, METADATA
@@ -212,7 +211,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
           handler.applyKey(body, key, generator, context)
         }
       }
-    } ?: OptionalBody.body(value.toByteArray(org.apache.http.entity.ContentType.parse(contentType).charset ?: Charset.defaultCharset()), ContentType(contentType))
+    } ?: OptionalBody.body(value.toByteArray(ContentType(contentType).asCharset()), ContentType(contentType))
   }
 
   /**

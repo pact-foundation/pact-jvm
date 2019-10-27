@@ -21,6 +21,7 @@ import au.com.dius.pact.core.support.Json
 import com.google.gson.JsonParser
 import mu.KLogging
 import org.apache.http.entity.ContentType
+import java.nio.charset.Charset
 
 data class BodyComparisonResult(
   val mismatches: Map<String, List<BodyMismatch>> = emptyMap(),
@@ -107,10 +108,12 @@ class ResponseComparison(
       actualHeaders: Map<String, List<String>>,
       actualBody: String?
     ): ComparisonResult {
+      val actualResponseContentType = actualResponse["contentType"] as ContentType
       val comparison = ResponseComparison(response.headers, response.body, response.jsonBody(),
-        actualResponse["contentType"] as ContentType, actualBody)
+        actualResponseContentType, actualBody)
       val mismatches = ResponseMatching.responseMismatches(response, Response(actualStatus,
-        actualHeaders.toMutableMap(), OptionalBody.body(actualBody?.toByteArray())), true)
+        actualHeaders.toMutableMap(), OptionalBody.body(actualBody?.toByteArray(
+        actualResponseContentType.charset ?: Charset.defaultCharset()))), true)
       return ComparisonResult(comparison.statusResult(mismatches), comparison.headerResult(mismatches),
         comparison.bodyResult(mismatches))
     }

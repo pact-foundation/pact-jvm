@@ -4,13 +4,13 @@ import java.io.{BufferedReader, InputStreamReader}
 import java.net.URI
 import java.util.zip.GZIPInputStream
 
-import au.com.dius.pact.core.model.{OptionalBody, Response}
+import au.com.dius.pact.core.model.{OptionalBody, ContentType, Response}
 import au.com.dius.pact.core.model.Request
 import com.typesafe.scalalogging.StrictLogging
 import io.netty.handler.codec.http.{HttpResponse => NHttpResponse}
 import unfiltered.netty.ReceivedMessage
 import unfiltered.request.HttpRequest
-import unfiltered.response._
+import unfiltered.response.{ContentEncoding, HttpResponse, ResponseFunction, ResponseString, Status}
 
 import scala.collection.JavaConversions
 import scala.collection.JavaConverters._
@@ -53,7 +53,8 @@ object Conversions extends StrictLogging {
   }
 
   implicit def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {
+    val contentType = new ContentType(request.headers("Content-Type").next())
     new Request(request.method, toPath(request.uri), toQuery(request), toHeaders(request),
-      OptionalBody.body(toBody(request).getBytes))
+      OptionalBody.body(toBody(request).getBytes(contentType.asCharset), contentType))
   }
 }

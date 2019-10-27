@@ -34,12 +34,9 @@ class Message @JvmOverloads constructor(
 
   fun contentsAsString() = contents.valueAsString()
 
-  fun getContentType(): String {
-    return metaData.entries.find {
-      it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
-    }?.value ?: JSON
-  }
+  fun getContentType() = Companion.getContentType(metaData)
 
+  @Deprecated("Use the content type associated with the message body")
   fun getParsedContentType() = parseContentType(this.getContentType())
 
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
@@ -74,7 +71,7 @@ class Message @JvmOverloads constructor(
 
   private fun isJsonContents(): Boolean {
     return if (contents.isPresent()) {
-      val mimeType = parseContentType(getContentType())?.mimeType
+      val mimeType = contents.contentType.asMimeType()
       isJson(mimeType)
     } else {
       false
@@ -83,7 +80,7 @@ class Message @JvmOverloads constructor(
 
   fun formatContents(): String {
     return if (contents.isPresent()) {
-      val mimeType = parseContentType(getContentType())?.mimeType
+      val mimeType = contents.contentType.asMimeType()
       when {
         isJson(mimeType) -> Json.gsonPretty.toJson(JsonParser().parse(contents.valueAsString()))
         isOctetStream(mimeType) -> Base64.encodeBase64String(contentsAsBytes())
@@ -143,13 +140,19 @@ class Message @JvmOverloads constructor(
         else -> listOf()
       }
 
+      val metaData = if (json.has("metaData"))
+        json["metaData"].obj.entrySet().associate { it.key to Json.toString(it.value) }
+      else
+        emptyMap()
+
+      val contentType = au.com.dius.pact.core.model.ContentType(getContentType(metaData))
       val contents = if (json.has("contents")) {
         val contents = json["contents"]
         when {
           contents.isJsonNull -> OptionalBody.nullBody()
           contents.isJsonPrimitive && contents.asJsonPrimitive.isString ->
-            OptionalBody.body(contents.asJsonPrimitive.asString.toByteArray())
-          else -> OptionalBody.body(contents.toString().toByteArray())
+            OptionalBody.body(contents.asJsonPrimitive.asString.toByteArray(contentType.asCharset()), contentType)
+          else -> OptionalBody.body(contents.toString().toByteArray(contentType.asCharset()), contentType)
         }
       } else {
         OptionalBody.missing()
@@ -161,14 +164,11 @@ class Message @JvmOverloads constructor(
         Generators.fromJson(json["generators"])
       else Generators()
 
-      val metaData = if (json.has("metaData"))
-        json["metaData"].obj.entrySet().associate { it.key to Json.toString(it.value) }
-      else
-        emptyMap()
       return Message(Json.toString(json["description"]), providerStates,
         contents, matchingRules, generators, metaData, Json.toString(json["_id"]))
     }
 
+    @Deprecated("Use the content type associated with the message body")
     private fun parseContentType(contentType: String): ContentType? {
       return try {
         ContentType.parse(contentType)
@@ -176,6 +176,12 @@ class Message @JvmOverloads constructor(
         logger.debug(e) { "Failed to parse content type '$contentType'" }
         null
       }
+    }
+
+    fun getContentType(metaData: Map<String, Any>): String {
+      return metaData.entries.find {
+        it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
+      }?.value?.toString() ?: JSON
     }
 
     private fun isJson(contentType: String?) =

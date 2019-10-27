@@ -1,7 +1,5 @@
 package au.com.dius.pact.core.model
 
-import java.nio.charset.Charset
-
 /**
  * Class to represent missing, empty, null and present bodies
  */
@@ -101,7 +99,7 @@ data class OptionalBody(
 
   override fun toString(): String {
     return when (state) {
-      State.PRESENT -> "PRESENT(${value!!.toString(Charset.defaultCharset())})"
+      State.PRESENT -> "PRESENT(${value!!.toString(contentType.asCharset())})"
       State.EMPTY -> "EMPTY"
       State.NULL -> "NULL"
       State.MISSING -> "MISSING"
@@ -110,7 +108,7 @@ data class OptionalBody(
 
   fun valueAsString(): String {
     return when (state) {
-      State.PRESENT -> value!!.toString(Charset.defaultCharset())
+      State.PRESENT -> value!!.toString(contentType.asCharset())
       State.EMPTY -> ""
       State.NULL -> ""
       State.MISSING -> ""

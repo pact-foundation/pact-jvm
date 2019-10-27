@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model.messaging
 
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.ProviderState
@@ -121,8 +122,8 @@ class MessageSpec extends Specification {
     '1 2 3 4'                          | 'text/plain'               | '1 2 3 4'
     new String([1, 2, 3, 4] as byte[]) | 'application/octet-stream' | 'AQIDBA=='
 
-    message = new Message('test', [], OptionalBody.body(body.bytes), new MatchingRulesImpl(), new Generators(),
-      [contentType: contentType])
+    message = new Message('test', [], OptionalBody.body(body.bytes, new ContentType(contentType)),
+      new MatchingRulesImpl(), new Generators(), [contentType: contentType])
   }
 
   @Unroll
@@ -159,7 +160,8 @@ class MessageSpec extends Specification {
     ''                                         | '{"a": 100.0, "b": "test"}'
     null                                       | '{\n  "a": 100.0,\n  "b": "test"\n}'
 
-    message = new Message('test', [], OptionalBody.body('{"a": 100.0, "b": "test"}'.bytes),
+    message = new Message('test', [], OptionalBody.body('{"a": 100.0, "b": "test"}'.bytes,
+      new ContentType(contentType)),
       new MatchingRulesImpl(), new Generators(), ['contentType': contentType])
   }
 
