@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.InvalidPathExpression
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactReader
@@ -16,12 +17,16 @@ import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import au.com.dius.pact.com.github.michaelbull.result.Ok
+import groovy.json.JsonOutput
+import org.apache.http.entity.ContentType
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
@@ -582,6 +587,46 @@ class ProviderVerifierSpec extends Specification {
     result.results[0].message == 'State change request failed'
     result.results[0].exception instanceof IOException
     result.results[0].interactionId == '1234'
+  }
+
+  def 'verifyInteraction returns an error result if any matcher paths are invalid'() {
+    given:
+    ProviderInfo provider = new ProviderInfo('Test Provider')
+    ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
+    def failures = [:]
+    MatchingRules matchingRules = new MatchingRulesImpl()
+    matchingRules.addCategory('body')
+      .addRule("\$.serviceNode.entity.status.thirdNode['@description]", new RegexMatcher('.*'))
+    def json = JsonOutput.toJson([
+      serviceNode: [
+        entity: [
+          status: [
+            thirdNode: [
+              '@description': 'Test'
+            ]
+          ]
+        ]
+      ]
+    ])
+    Interaction interaction = new RequestResponseInteraction('Test Interaction',
+      [new ProviderState('Test State')], new Request(),
+      new Response(200, [:], OptionalBody.body(json.bytes), matchingRules), '1234')
+    def client = Mock(ProviderClient)
+    client.makeRequest(_) >> [
+      statusCode: 200,
+      headers: [:],
+      contentType: ContentType.APPLICATION_JSON,
+      data: json
+    ]
+
+    when:
+    def result = verifier.verifyInteraction(provider, consumer, failures, interaction, client)
+
+    then:
+    result instanceof TestResult.Failed
+    result.results.size() == 1
+    result.results[0].message == 'Request to provider failed with an exception'
+    result.results[0].exception instanceof InvalidPathExpression
   }
 
   def 'verifyResponseFromProvider returns an error result if the request to the provider fails with an exception'() {

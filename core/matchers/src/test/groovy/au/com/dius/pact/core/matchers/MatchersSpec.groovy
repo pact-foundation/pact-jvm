@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.matchers
 
+import au.com.dius.pact.core.model.InvalidPathExpression
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.matchingrules.Category
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
@@ -236,6 +237,22 @@ class MatchersSpec extends Specification {
     Matchers.INSTANCE.matchesPath('$.name[*].name', ['$', 'name', '1', 'name']) > 0
 
     Matchers.INSTANCE.matchesPath('$[*]', ['$', 'str']) == 0
+  }
+
+  def 'path matching - throws an exception if path is invalid'() {
+    when:
+    Matchers.INSTANCE.matchesPath("\$.serviceNode.entity.status.thirdNode['@description]", ['a'])
+
+    then:
+    thrown(InvalidPathExpression)
+  }
+
+  def 'calculatePathWeight - throws an exception if path is invalid'() {
+    when:
+    Matchers.INSTANCE.calculatePathWeight("\$.serviceNode.entity.status.thirdNode['@description]", ['a'])
+
+    then:
+    thrown(InvalidPathExpression)
   }
 
   def 'resolveMatchers returns all matchers for the general case'() {

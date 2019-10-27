@@ -419,16 +419,17 @@ open class ProviderVerifier @JvmOverloads constructor (
     reporters.forEach { it.finaliseReport() }
   }
 
+  @JvmOverloads
   fun verifyInteraction(
     provider: IProviderInfo,
     consumer: IConsumerInfo,
     failures: MutableMap<String, Any>,
-    interaction: Interaction
+    interaction: Interaction,
+    providerClient: ProviderClient = ProviderClient(provider, HttpClientFactory())
   ): TestResult {
     var interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name}" +
     " - ${interaction.description} "
 
-    val providerClient = ProviderClient(provider, HttpClientFactory())
     val stateChangeResult = stateChangeHandler.executeStateChange(this, provider, consumer, interaction, interactionMessage,
       failures, providerClient)
     if (stateChangeResult.stateChangeResult is Ok) {
