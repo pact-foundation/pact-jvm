@@ -79,7 +79,7 @@ class MessagePact @JvmOverloads constructor (
     get() = messages
 
   override fun sortInteractions(): Pact<Message> {
-    messages.sortBy { it.providerStates.joinToString { it.name } + it.description }
+    messages.sortBy { message -> message.providerStates.joinToString { it.name.toString() } + message.description }
     return this
   }
 

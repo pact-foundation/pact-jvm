@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
 
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import org.json.JSONObject
+import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -11,7 +12,8 @@ import org.specs2.runner.JUnitRunner
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-@RunWith(classOf[JUnitRunner])
+//@RunWith(classOf[JUnitRunner])
+@Ignore
 class ExamplePactWithMatchersSpec extends Specification with PactSpec {
 
   val consumer = "My Consumer"

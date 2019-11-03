@@ -65,7 +65,7 @@ object Json {
    * Converts a JSON object to the Map of values
    */
   fun toMap(jsonElement: JsonElement?) = when {
-    jsonElement != null && jsonElement.isJsonObject -> toMapValue(jsonElement) as Map<String, Any?>
+    jsonElement != null && jsonElement.isJsonObject -> fromJson(jsonElement) as Map<String, Any?>
     else -> emptyMap()
   }
 
@@ -73,26 +73,8 @@ object Json {
    * Converts a JSON object to the List of values
    */
   fun toList(jsonElement: JsonElement?) = when {
-    jsonElement != null && jsonElement.isJsonArray -> toMapValue(jsonElement) as List<Any?>
+    jsonElement != null && jsonElement.isJsonArray -> fromJson(jsonElement) as List<Any?>
     else -> emptyList()
-  }
-
-  private fun toMapValue(json: JsonElement): Any? = when {
-    json.isJsonObject -> json.obj.entrySet().associate {
-      it.key to toMapValue(it.value)
-    }
-    json.isJsonArray -> json.array.map { toMapValue(it) }
-    json.isJsonPrimitive -> {
-      val primitive = json.asJsonPrimitive
-      when {
-        primitive.isString -> primitive.asString
-        primitive.isBoolean -> primitive.asBoolean
-        primitive.isNumber -> primitive.asNumber
-        else -> primitive.toString()
-      }
-    }
-    json.isJsonNull -> null
-    else -> json.toString()
   }
 
   fun extractFromJson(json: JsonElement, vararg s: String): Any? {

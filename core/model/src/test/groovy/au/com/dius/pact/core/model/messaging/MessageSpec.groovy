@@ -139,7 +139,7 @@ class MessageSpec extends Specification {
     'contenttype'  | 'application/octet-stream' | 'application/octet-stream'
     'none'         | 'none'                     | 'application/json'
 
-    message = new Message(metaData: [(key): contentType])
+    message = new Message('Test').withMetaData([(key): contentType])
   }
 
   @Unroll
@@ -158,7 +158,7 @@ class MessageSpec extends Specification {
     'application/octet-stream;charset=UTF-8'   | 'eyJhIjogMTAwLjAsICJiIjogInRlc3QifQ=='
     'application/octet-stream'                 | 'eyJhIjogMTAwLjAsICJiIjogInRlc3QifQ=='
     ''                                         | '{"a": 100.0, "b": "test"}'
-    null                                       | '{\n  "a": 100.0,\n  "b": "test"\n}'
+    null                                       | '{"a": 100.0, "b": "test"}'
 
     message = new Message('test', [], OptionalBody.body('{"a": 100.0, "b": "test"}'.bytes,
       new ContentType(contentType)),

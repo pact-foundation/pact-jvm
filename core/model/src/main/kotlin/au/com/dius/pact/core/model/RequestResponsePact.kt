@@ -15,7 +15,8 @@ class RequestResponsePact @JvmOverloads constructor(
 ) : BasePact<RequestResponseInteraction>(consumer, provider, metadata, source) {
 
   override fun sortInteractions(): Pact<RequestResponseInteraction> {
-    interactions.sortBy { interaction -> interaction.providerStates.joinToString { it.name } + interaction.description }
+    interactions.sortBy { interaction -> interaction.providerStates.joinToString { it.name.toString() } +
+      interaction.description }
     return this
   }
 

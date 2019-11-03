@@ -8,4 +8,5 @@ dependencies {
             "org.scalatest:scalatest_2.12:${project.scalaTestVersion}"
 
     testCompile project(":consumer:pact-jvm-consumer")
+    testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 }

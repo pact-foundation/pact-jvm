@@ -20,10 +20,10 @@ open class RequestResponseInteraction @JvmOverloads constructor(
     "Interaction: $description\n\tin states ${displayState()}\nrequest:\n$request\n\nresponse:\n$response"
 
   fun displayState(): String {
-    return if (providerStates.isEmpty() || providerStates.size == 1 && providerStates[0].name.isEmpty()) {
+    return if (providerStates.isEmpty() || providerStates.size == 1 && providerStates[0].name.isNullOrEmpty()) {
       "None"
     } else {
-      providerStates.joinToString(COMMA) { it.name }
+      providerStates.joinToString(COMMA) { it.name.toString() }
     }
   }
 
@@ -38,7 +38,7 @@ open class RequestResponseInteraction @JvmOverloads constructor(
       "response" to responseToMap(response, pactSpecVersion)
     )
     if (pactSpecVersion < PactSpecVersion.V3 && providerStates.isNotEmpty()) {
-      interactionJson["providerState"] = providerStates.first().name
+      interactionJson["providerState"] = providerStates.first().name.toString()
     } else if (providerStates.isNotEmpty()) {
       interactionJson["providerStates"] = providerStates.map { it.toMap() }
     }

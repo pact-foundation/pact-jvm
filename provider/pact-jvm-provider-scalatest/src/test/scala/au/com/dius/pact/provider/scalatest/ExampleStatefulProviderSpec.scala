@@ -1,7 +1,8 @@
 package au.com.dius.pact.provider.scalatest
 
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Ignore
+import org.scalatestplus.junit.JUnitRunner
 
 /**
   * Provider will be tested against all the defined consumers in the configured default directory.
@@ -10,6 +11,7 @@ import org.scalatest.junit.JUnitRunner
   * State will be initialised before a new interaction is tested.
   */
 @RunWith(classOf[JUnitRunner])
+@Ignore
 class ExampleStatefulProviderSpec extends PactProviderStatefulDslSpec("test_provider") {
 
   lazy val serverStarter: ServerStarter = new ProviderServerStarter

@@ -81,9 +81,9 @@ open class AmqpTarget @JvmOverloads constructor(
     verifier.initialiseReporters(provider)
     verifier.reportVerificationForConsumer(consumer, provider, null)
 
-    if (!interaction.providerStates.isEmpty()) {
+    if (interaction.providerStates.isNotEmpty()) {
       for ((name) in interaction.providerStates) {
-        verifier.reportStateForInteraction(name, provider, consumer, true)
+        verifier.reportStateForInteraction(name.toString(), provider, consumer, true)
       }
     }
 

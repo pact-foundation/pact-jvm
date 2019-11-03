@@ -11,10 +11,10 @@ import com.google.gson.JsonElement
  * name - The provider state description
  * params - Provider state parameters as key value pairs
  */
-data class ProviderState @JvmOverloads constructor(val name: String, val params: Map<String, Any?> = mapOf()) {
+data class ProviderState @JvmOverloads constructor(val name: String?, val params: Map<String, Any?> = mapOf()) {
 
   fun toMap(): Map<String, Any> {
-    val map = mutableMapOf<String, Any>("name" to name)
+    val map = mutableMapOf<String, Any>("name" to name.toString())
     if (params.isNotEmpty()) {
       map["params"] = params
     }
@@ -32,5 +32,5 @@ data class ProviderState @JvmOverloads constructor(val name: String, val params:
     }
   }
 
-  fun matches(state: String) = name.matches(Regex(state))
+  fun matches(state: String) = name?.matches(Regex(state)) ?: false
 }

@@ -12,4 +12,5 @@ dependencies {
     testCompile "org.specs2:specs2-junit_2.12:${project.specs2Version}",
       "ch.qos.logback:logback-core:${project.logbackVersion}",
       "ch.qos.logback:logback-classic:${project.logbackVersion}"
+    testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 }

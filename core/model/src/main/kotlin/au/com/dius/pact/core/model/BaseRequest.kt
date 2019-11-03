@@ -16,7 +16,7 @@ abstract class BaseRequest : HttpPart() {
    * @param contents File contents
    */
   fun withMultipartFileUpload(partName: String, filename: String, contentType: ContentType, contents: String) =
-    withMultipartFileUpload(partName, filename, contentType.contentType, contents)
+    withMultipartFileUpload(partName, filename, contentType.contentType!!, contents)
 
   /**
    * Sets up the request as a multipart file upload

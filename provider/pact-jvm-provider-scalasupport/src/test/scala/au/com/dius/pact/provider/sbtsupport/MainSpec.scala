@@ -3,12 +3,14 @@ package au.com.dius.pact.provider.sbtsupport
 import java.io.File
 import java.net.URL
 
+import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 import unfiltered.netty.Server
 
-@RunWith(classOf[JUnitRunner])
+//@RunWith(classOf[JUnitRunner])
+@Ignore
 class MainSpec extends Specification {
 
   def loadResource(name: String): URL = {

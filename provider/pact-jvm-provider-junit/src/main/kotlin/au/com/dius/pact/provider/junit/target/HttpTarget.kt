@@ -98,7 +98,7 @@ open class HttpTarget
 
     if (interaction.providerStates.isNotEmpty()) {
       for ((name) in interaction.providerStates) {
-        verifier.reportStateForInteraction(name, provider, consumer, true)
+        verifier.reportStateForInteraction(name.toString(), provider, consumer, true)
       }
     }
 

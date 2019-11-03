@@ -92,7 +92,8 @@ class Message @JvmOverloads constructor(
   }
 
   override fun uniqueKey(): String {
-    return "${StringUtils.defaultIfEmpty(providerStates.joinToString { it.name }, "None")}_$description"
+    return StringUtils.defaultIfEmpty(providerStates.joinToString { it.name.toString() }, "None") +
+      "_$description"
   }
 
   override fun conflictsWith(other: Interaction) = other !is Message
@@ -124,6 +125,11 @@ class Message @JvmOverloads constructor(
   override fun toString(): String {
     return "Message(description='$description', providerStates=$providerStates, contents=$contents, " +
       "matchingRules=$matchingRules, generators=$generators, metaData=$metaData)"
+  }
+
+  fun withMetaData(metadata: Map<String, String>): Message {
+    this.metaData = metadata
+    return this
   }
 
   companion object : KLogging() {

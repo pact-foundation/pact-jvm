@@ -7,11 +7,12 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@SuppressWarnings('PrivateFieldCouldBeFinal')
 class PactMergeSpec extends Specification {
   @Shared
-  private Consumer consumer, consumer2
+  private Consumer consumer = new Consumer('test_consumer'), consumer2 = new Consumer('other consumer')
   @Shared
-  private Provider provider, provider2
+  private Provider provider = new Provider('test_provider'), provider2 = new Provider('other provider')
   @Shared
   private pact, interaction, request, response
 
@@ -22,10 +23,6 @@ class PactMergeSpec extends Specification {
       OptionalBody.body('{"responsetest":true}'.bytes))
     interaction = new RequestResponseInteraction('test interaction',
       [new ProviderState('test state')], request, response, null)
-    provider = new Provider('test_provider')
-    provider2 = new Provider('other provider')
-    consumer = new Consumer('test_consumer')
-    consumer2 = new Consumer('other consumer')
     pact = new RequestResponsePact(provider, consumer, [interaction])
   }
 

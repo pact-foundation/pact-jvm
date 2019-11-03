@@ -198,7 +198,7 @@ class PactVerificationExtension(
 
     if (interaction.providerStates.isNotEmpty()) {
       for ((name) in interaction.providerStates) {
-        verifier.reportStateForInteraction(name, testContext.providerInfo, consumer, true)
+        verifier.reportStateForInteraction(name.toString(), testContext.providerInfo, consumer, true)
       }
     }
 

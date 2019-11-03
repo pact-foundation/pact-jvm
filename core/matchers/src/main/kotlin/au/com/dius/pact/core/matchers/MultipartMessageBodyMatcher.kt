@@ -16,16 +16,14 @@ class MultipartMessageBodyMatcher : BodyMatcher {
     allowUnexpectedKeys: Boolean,
     matchingRules: MatchingRules
   ): List<BodyMismatch> {
-    val expectedBody = expected
-    val actualBody = actual
     return when {
-      expectedBody.isMissing() -> emptyList()
-      expectedBody.isPresent() && actualBody.isNotPresent() -> listOf(BodyMismatch(expectedBody.orEmpty(),
+      expected.isMissing() -> emptyList()
+      expected.isPresent() && actual.isNotPresent() -> listOf(BodyMismatch(expected.orEmpty(),
               null, "Expected a multipart body but was missing"))
-      expectedBody.isEmpty() && actualBody.isEmpty() -> emptyList()
+      expected.isEmpty() && actual.isEmpty() -> emptyList()
       else -> {
-        val expectedMultipart = parseMultipart(expectedBody.valueAsString(), expected.contentType.contentType)
-        val actualMultipart = parseMultipart(actualBody.valueAsString(), actual.contentType.contentType)
+        val expectedMultipart = parseMultipart(expected.valueAsString(), expected.contentType.contentType!!)
+        val actualMultipart = parseMultipart(actual.valueAsString(), actual.contentType.contentType!!)
         compareHeaders(expectedMultipart, actualMultipart) + compareContents(expectedMultipart, actualMultipart)
       }
     }

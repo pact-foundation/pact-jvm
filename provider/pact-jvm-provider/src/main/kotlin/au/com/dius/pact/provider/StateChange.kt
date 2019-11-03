@@ -103,7 +103,7 @@ object DefaultStateChange : StateChange, KLogging() {
     isSetup: Boolean,
     providerClient: ProviderClient
   ): Result<Map<String, Any?>, Exception> {
-    verifier.reportStateForInteraction(state.name, provider, consumer, isSetup)
+    verifier.reportStateForInteraction(state.name.toString(), provider, consumer, isSetup)
     try {
       var stateChangeHandler = consumer.stateChange
       var stateChangeUsesBody = consumer.stateChangeUsesBody
@@ -112,7 +112,7 @@ object DefaultStateChange : StateChange, KLogging() {
         stateChangeUsesBody = provider.stateChangeUsesBody
       }
       if (stateChangeHandler == null || (stateChangeHandler is String && stateChangeHandler.isBlank())) {
-        verifier.reporters.forEach { it.warnStateChangeIgnored(state.name, provider, consumer) }
+        verifier.reporters.forEach { it.warnStateChangeIgnored(state.name.toString(), provider, consumer) }
         return Ok(emptyMap())
       } else if (verifier.checkBuildSpecificTask.apply(stateChangeHandler)) {
         logger.debug { "Invoking build specific task $stateChangeHandler" }
@@ -134,7 +134,7 @@ object DefaultStateChange : StateChange, KLogging() {
         providerClient)
     } catch (e: Exception) {
       verifier.reporters.forEach {
-        it.stateChangeRequestFailedWithException(state.name, provider, consumer, isSetup, e,
+        it.stateChangeRequestFailedWithException(state.name.toString(), provider, consumer, isSetup, e,
           verifier.projectHasProperty.apply(ProviderVerifier.PACT_SHOW_STACKTRACE))
       }
       return Err(e)
@@ -169,7 +169,7 @@ object DefaultStateChange : StateChange, KLogging() {
       response?.use {
         if (response.statusLine.statusCode >= 400) {
           verifier.reporters.forEach {
-            it.stateChangeRequestFailed(state.name, provider, isSetup, response.statusLine.toString())
+            it.stateChangeRequestFailed(state.name.toString(), provider, isSetup, response.statusLine.toString())
           }
           Err(Exception("State Change Request Failed - ${response.statusLine}"))
         } else {
@@ -178,7 +178,7 @@ object DefaultStateChange : StateChange, KLogging() {
       } ?: Ok(emptyMap())
     } catch (ex: URISyntaxException) {
       verifier.reporters.forEach {
-        it.warnStateChangeIgnoredDueToInvalidUrl(state.name, provider, isSetup, stateChangeHandler)
+        it.warnStateChangeIgnoredDueToInvalidUrl(state.name.toString(), provider, isSetup, stateChangeHandler)
       }
       Ok(emptyMap())
     }

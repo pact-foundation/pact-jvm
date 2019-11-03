@@ -305,7 +305,7 @@ open class ProviderClient(
 
       if (postStateInBody) {
         method = HttpPost(urlBuilder.build())
-        val map = mutableMapOf<String, Any>("state" to state.name)
+        val map = mutableMapOf<String, Any>("state" to state.name.toString())
         if (state.params.isNotEmpty()) {
           map["params"] = state.params
         }

@@ -1,13 +1,13 @@
 package au.com.dius.pact.server
 
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters
 import spock.lang.Specification
 
 class JsonUtilsSpec extends Specification {
 
   def "Parsing JSON bodies - handles a normal JSON body"() {
     expect:
-    JavaConversions.mapAsJavaMap(JsonUtils.parseJsonString(
+    JavaConverters.mapAsJavaMap(JsonUtils.parseJsonString(
       '{"password":"123456","firstname":"Brent","booleam":"true","username":"bbarke","lastname":"Barker"}'
     )) == [username: 'bbarke', firstname: 'Brent', lastname: 'Barker', booleam: 'true', password: '123456']
   }
@@ -19,7 +19,7 @@ class JsonUtilsSpec extends Specification {
 
   def "Parsing JSON bodies - handles a Number"() {
     expect:
-    JsonUtils.parseJsonString('1234') == 1234
+    JsonUtils.parseJsonString('1234').intValue() == 1234
   }
 
   def "Parsing JSON bodies - handles a Boolean"() {
@@ -34,7 +34,8 @@ class JsonUtilsSpec extends Specification {
 
   def "Parsing JSON bodies - handles an array"() {
     expect:
-    JavaConversions.seqAsJavaList(JsonUtils.parseJsonString('[1, 2, 3, 4]').toSeq()) == [1, 2, 3, 4]
+    JavaConverters.seqAsJavaList(JsonUtils.parseJsonString('[1, 2, 3, 4]').toSeq())*.intValue() ==
+      [1, 2, 3, 4]
   }
 
   def "Parsing JSON bodies - handles an empty body"() {

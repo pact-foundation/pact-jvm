@@ -687,7 +687,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   private fun matchState(interaction: Interaction): Boolean {
     return if (interaction.providerStates.isNotEmpty()) {
       interaction.providerStates.any {
-        projectGetProperty.apply(PACT_FILTER_PROVIDERSTATE)?.toRegex()?.matches(it.name) ?: true }
+        projectGetProperty.apply(PACT_FILTER_PROVIDERSTATE)?.toRegex()?.matches(it.name.toString()) ?: true }
     } else {
       projectGetProperty.apply(PACT_FILTER_PROVIDERSTATE).isNullOrEmpty()
     }

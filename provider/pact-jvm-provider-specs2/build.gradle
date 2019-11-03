@@ -14,4 +14,5 @@ dependencies {
     testCompile project(":consumer:pact-jvm-consumer")
     testCompile "org.specs2:specs2-core_2.12:${project.specs2Version}",
       "org.specs2:specs2-junit_2.12:${project.specs2Version}"
+    testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 }
