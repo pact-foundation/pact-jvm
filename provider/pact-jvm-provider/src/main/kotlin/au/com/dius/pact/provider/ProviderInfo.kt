@@ -8,7 +8,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.ToStringBuilder
 import java.io.File
 import java.net.URL
-import java.util.function.Consumer
 
 /**
  * Provider Info Config
@@ -41,16 +40,16 @@ open class ProviderInfo @JvmOverloads constructor (
 
   override fun toString() = ToStringBuilder.reflectionToString(this)
 
-  open fun hasPactWith(consumer: String, closure: Consumer<ConsumerInfo>): ConsumerInfo {
+  open fun hasPactWith(consumer: String, closure: ConsumerInfo.() -> Unit): ConsumerInfo {
     val consumerInfo = ConsumerInfo(consumer)
     consumers.add(consumerInfo)
-    closure.accept(consumerInfo)
+    consumerInfo.closure()
     return consumerInfo
   }
 
-  open fun hasPactsWith(consumersGroupName: String, closure: Consumer<ConsumersGroup>): List<IConsumerInfo> {
+  open fun hasPactsWith(consumersGroupName: String, closure: ConsumersGroup.() -> Unit): List<IConsumerInfo> {
     val consumersGroup = ConsumersGroup(consumersGroupName)
-    closure.accept(consumersGroup)
+    consumersGroup.closure()
 
     return setupConsumerListFromPactFiles(consumersGroup)
   }
