@@ -284,10 +284,10 @@ open class MockHttpServer(pact: RequestResponsePact, config: MockProviderConfig)
 open class MockHttpsServer(pact: RequestResponsePact, config: MockProviderConfig) :
   BaseJdkMockServer(pact, config, HttpsServer.create(config.address(), 0))
 
-fun calculateCharset(headers: Map<String, List<String>>): Charset {
+fun calculateCharset(headers: Map<String, List<String?>>): Charset {
   val contentType = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
   val default = Charset.forName("UTF-8")
-  if (contentType != null && contentType.value.isNotEmpty() && contentType.value.first().isNotEmpty()) {
+  if (contentType != null && contentType.value.isNotEmpty() && !contentType.value.first().isNullOrEmpty()) {
     try {
       return ContentType.parse(contentType.value.first())?.charset ?: default
     } catch (e: Exception) {
