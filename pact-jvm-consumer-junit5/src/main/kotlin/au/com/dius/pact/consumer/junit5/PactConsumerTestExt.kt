@@ -135,43 +135,51 @@ class JUnit5MockServerSupport(private val baseMockServer: BaseMockServer) : Mock
 class PactConsumerTestExt : Extension, BeforeEachCallback, BeforeAllCallback, ParameterResolver, AfterEachCallback, AfterAllCallback {
   override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
     val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
-    val providerInfo = store["providerInfo"] as ProviderInfo
-    val type = parameterContext.parameter.type
-    return when (providerInfo.providerType) {
-      ProviderType.ASYNCH -> when {
-        type.isAssignableFrom(List::class.java) -> true
-        type.isAssignableFrom(MessagePact::class.java) -> true
-        else -> false
+    if (store["providerInfo"] != null) {
+      val providerInfo = store["providerInfo"] as ProviderInfo
+      val type = parameterContext.parameter.type
+      return when (providerInfo.providerType) {
+        ProviderType.ASYNCH -> when {
+          type.isAssignableFrom(List::class.java) -> true
+          type.isAssignableFrom(MessagePact::class.java) -> true
+          else -> false
+        }
+        else -> when {
+          type.isAssignableFrom(MockServer::class.java) -> true
+          type.isAssignableFrom(RequestResponsePact::class.java) -> true
+          else -> false
+        }
       }
-      else -> when {
-        type.isAssignableFrom(MockServer::class.java) -> true
-        type.isAssignableFrom(RequestResponsePact::class.java) -> true
-        else -> false
-      }
+    } else {
+      return false
     }
   }
 
   override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any {
     val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
-    val providerInfo = store["providerInfo"] as ProviderInfo
-    val type = parameterContext.parameter.type
-    return when (providerInfo.providerType) {
-      ProviderType.ASYNCH -> {
-        val pact = store["pact"] as MessagePact
-        when {
-          type.isAssignableFrom(List::class.java) -> pact.messages
-          type.isAssignableFrom(MessagePact::class.java) -> pact
-          else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
+    if (store["providerInfo"] != null) {
+      val providerInfo = store["providerInfo"] as ProviderInfo
+      val type = parameterContext.parameter.type
+      return when (providerInfo.providerType) {
+        ProviderType.ASYNCH -> {
+          val pact = store["pact"] as MessagePact
+          when {
+            type.isAssignableFrom(List::class.java) -> pact.messages
+            type.isAssignableFrom(MessagePact::class.java) -> pact
+            else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
+          }
+        }
+        else -> {
+          val pact = store["pact"] as RequestResponsePact
+          when {
+            type.isAssignableFrom(MockServer::class.java) -> store["mockServer"]
+            type.isAssignableFrom(RequestResponsePact::class.java) -> pact
+            else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
+          }
         }
       }
-      else -> {
-        val pact = store["pact"] as RequestResponsePact
-        when {
-          type.isAssignableFrom(MockServer::class.java) -> store["mockServer"]
-          type.isAssignableFrom(RequestResponsePact::class.java) -> pact
-          else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
-        }
-      }
+    } else {
+      return false
     }
   }
 
