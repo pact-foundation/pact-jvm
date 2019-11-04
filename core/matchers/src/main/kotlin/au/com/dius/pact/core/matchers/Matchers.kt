@@ -2,7 +2,6 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.matchers.util.corresponds
 import au.com.dius.pact.core.matchers.util.tails
-import au.com.dius.pact.core.model.InvalidPathExpression
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
@@ -28,34 +27,24 @@ object Matchers : KLogging() {
   }
 
   fun matchesPath(pathExp: String, path: List<String>): Int {
-    return try {
-      val parseResult = parsePath(pathExp)
-      val filter = tails(path.reversed()).filter { l ->
-        corresponds(l.reversed(), parseResult) { pathElement, pathToken ->
-          matchesToken(pathElement, pathToken) != 0
-        }
+    val parseResult = parsePath(pathExp)
+    val filter = tails(path.reversed()).filter { l ->
+      corresponds(l.reversed(), parseResult) { pathElement, pathToken ->
+        matchesToken(pathElement, pathToken) != 0
       }
-      if (filter.isNotEmpty()) {
-        filter.maxBy { seq -> seq.size }?.size ?: 0
-      } else {
-        0
-      }
-    } catch (e: InvalidPathExpression) {
-      logger.warn(e) { "Path expression $pathExp is invalid, ignoring" }
+    }
+    return if (filter.isNotEmpty()) {
+      filter.maxBy { seq -> seq.size }?.size ?: 0
+    } else {
       0
     }
   }
 
   fun calculatePathWeight(pathExp: String, path: List<String>): Int {
-    return try {
-      val parseResult = parsePath(pathExp)
-      path.zip(parseResult).asSequence().map {
-          matchesToken(it.first, it.second)
-      }.reduce { acc, i -> acc * i }
-    } catch (e: InvalidPathExpression) {
-      logger.warn(e) { "Path expression $pathExp is invalid, ignoring" }
-      0
-    }
+    val parseResult = parsePath(pathExp)
+    return path.zip(parseResult).asSequence().map {
+        matchesToken(it.first, it.second)
+    }.reduce { acc, i -> acc * i }
   }
 
   fun resolveMatchers(

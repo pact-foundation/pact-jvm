@@ -1,5 +1,7 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.support.Json
+import com.google.gson.JsonElement
 import java.io.ByteArrayOutputStream
 import javax.mail.internet.InternetHeaders
 import javax.mail.internet.MimeBodyPart
@@ -14,7 +16,7 @@ abstract class BaseRequest : HttpPart() {
    * @param contents File contents
    */
   fun withMultipartFileUpload(partName: String, filename: String, contentType: ContentType, contents: String) =
-    withMultipartFileUpload(partName, filename, contentType.contentType, contents)
+    withMultipartFileUpload(partName, filename, contentType.contentType!!, contents)
 
   /**
    * Sets up the request as a multipart file upload
@@ -31,8 +33,8 @@ abstract class BaseRequest : HttpPart() {
 
     val stream = ByteArrayOutputStream()
     multipart.writeTo(stream)
-    body = OptionalBody.body(stream.toByteArray())
-    headers!!["Content-Type"] = listOf(multipart.contentType)
+    body = OptionalBody.body(stream.toByteArray(), ContentType(contentType))
+    headers["Content-Type"] = listOf(multipart.contentType)
 
     return this
   }
@@ -42,11 +44,17 @@ abstract class BaseRequest : HttpPart() {
    */
   fun isMultipartFileUpload() = mimeType().equals("multipart/form-data", ignoreCase = true)
 
-  fun parseQueryParametersToMap(query: Any?): Map<String, List<String>> {
-    return when (query) {
-      is Map<*, *> -> query as Map<String, List<String>>
-      is String -> queryStringToMap(query)
-      else -> emptyMap()
+  companion object {
+    fun parseQueryParametersToMap(query: JsonElement?): Map<String, List<String>> {
+      return when {
+        query == null -> emptyMap()
+        query.isJsonObject -> Json.toMap(query) as Map<String, List<String>>
+        query.isJsonPrimitive -> queryStringToMap(when {
+          query.asJsonPrimitive.isString -> query.asJsonPrimitive.asString
+          else -> query.asJsonPrimitive.toString()
+        })
+        else -> emptyMap()
+      }
     }
   }
 }

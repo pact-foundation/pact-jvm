@@ -83,7 +83,7 @@ class ProviderUtilsSpec extends Specification {
 
     where:
     systemProperty | projectVersion || result
-    System.setProperty(ProviderVerifierBase.PACT_PROVIDER_VERSION_TRIM_SNAPSHOT, 'true') |
+    System.setProperty(ProviderVerifier.PACT_PROVIDER_VERSION_TRIM_SNAPSHOT, 'true') |
             '1.0.0-SNAPSHOT-re234hj' |
             '1.0.0-re234hj'
   }
@@ -96,7 +96,7 @@ class ProviderUtilsSpec extends Specification {
 
     where:
     systemProperty | projectVersion || result
-    System.setProperty(ProviderVerifierBase.PACT_PROVIDER_VERSION_TRIM_SNAPSHOT, 'false') |
+    System.setProperty(ProviderVerifier.PACT_PROVIDER_VERSION_TRIM_SNAPSHOT, 'false') |
             '1.0.0-SNAPSHOT-re234hj' |
             '1.0.0-SNAPSHOT-re234hj'
   }
@@ -109,7 +109,7 @@ class ProviderUtilsSpec extends Specification {
 
     where:
     systemProperty | projectVersion || result
-    System.setProperty(ProviderVerifierBase.PACT_PROVIDER_VERSION_TRIM_SNAPSHOT, 'aweirdstring') |
+    System.setProperty(ProviderVerifier.PACT_PROVIDER_VERSION_TRIM_SNAPSHOT, 'aweirdstring') |
             '1.0.0-SNAPSHOT-re234hj' |
             '1.0.0-SNAPSHOT-re234hj'
   }

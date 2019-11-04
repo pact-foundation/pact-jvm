@@ -6,6 +6,7 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit.PactProviderRule;
 import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.annotations.Pact;
 import groovy.json.JsonSlurper;
 import org.apache.http.client.fluent.Request;
 import org.hamcrest.Matchers;

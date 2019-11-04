@@ -1,7 +1,12 @@
 package au.com.dius.pact.core.model.messaging
 
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.support.Json
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -9,7 +14,7 @@ class MessageSpec extends Specification {
 
   def 'contentsAsBytes handles contents in string form'() {
       when:
-      Message message = new Message(contents: OptionalBody.body('1 2 3 4'.bytes))
+      Message message = new Message('test', [], OptionalBody.body('1 2 3 4'.bytes))
 
       then:
       message.contentsAsBytes() == '1 2 3 4'.bytes
@@ -17,7 +22,7 @@ class MessageSpec extends Specification {
 
   def 'contentsAsBytes handles no contents'() {
       when:
-      Message message = new Message(contents: OptionalBody.missing())
+      Message message = new Message('test', [], OptionalBody.missing())
 
       then:
       message.contentsAsBytes() == []
@@ -33,7 +38,7 @@ class MessageSpec extends Specification {
     ]
 
     when:
-    Message message = Message.fromMap(map)
+    Message message = Message.fromJson(Json.INSTANCE.toJson(map).asJsonObject)
 
     then:
     message.providerStates == [new ProviderState('V3 state')]
@@ -44,7 +49,7 @@ class MessageSpec extends Specification {
     def map = [providerState: 'test state']
 
     when:
-    Message message = Message.fromMap(map)
+    Message message = Message.fromJson(Json.INSTANCE.toJson(map).asJsonObject)
 
     then:
     message.providerStates == [new ProviderState('test state')]
@@ -52,17 +57,17 @@ class MessageSpec extends Specification {
 
   def 'Uses V3 provider state format when converting to a map'() {
     given:
-    Message message = new Message(description: 'test', contents: OptionalBody.body('"1 2 3 4"'.bytes), providerStates: [
-      new ProviderState('Test', [a: 'A', b: 100])])
+    Message message = new Message('test', [new ProviderState('Test', [a: 'A', b: 100])],
+      OptionalBody.body('"1 2 3 4"'.bytes))
 
     when:
-    def map = message.toMap()
+    def map = message.toMap(PactSpecVersion.V3)
 
     then:
     map == [
       description: 'test',
       metaData: [:],
-      contents: '1 2 3 4',
+      contents: '"1 2 3 4"',
       providerStates: [
         [name: 'Test', params: [a: 'A', b: 100]]
       ]
@@ -78,7 +83,7 @@ class MessageSpec extends Specification {
     ]
 
     when:
-    def message = Message.fromMap(json)
+    def message = Message.fromJson(Json.INSTANCE.toJson(json).asJsonObject)
 
     then:
     !message.matchingRules.empty
@@ -107,16 +112,18 @@ class MessageSpec extends Specification {
   @Unroll
   def 'message to map handles message content correctly'() {
     expect:
-    message.toMap().contents == contents
+    message.toMap(PactSpecVersion.V3).contents == contents
 
     where:
 
     body                               | contentType                | contents
     '{"A": "Value A", "B": "Value B"}' | 'application/json'         | [A: 'Value A', B: 'Value B']
+    '{"A": "Value A", "B": "Value B"}' | ''                         | '{"A": "Value A", "B": "Value B"}'
     '1 2 3 4'                          | 'text/plain'               | '1 2 3 4'
     new String([1, 2, 3, 4] as byte[]) | 'application/octet-stream' | 'AQIDBA=='
 
-    message = new Message(contents: OptionalBody.body(body.bytes), metaData: [contentType: contentType])
+    message = new Message('test', [], OptionalBody.body(body.bytes, new ContentType(contentType)),
+      new MatchingRulesImpl(), new Generators(), [contentType: contentType])
   }
 
   @Unroll
@@ -132,7 +139,7 @@ class MessageSpec extends Specification {
     'contenttype'  | 'application/octet-stream' | 'application/octet-stream'
     'none'         | 'none'                     | 'application/json'
 
-    message = new Message(metaData: [(key): contentType])
+    message = new Message('Test').withMetaData([(key): contentType])
   }
 
   @Unroll
@@ -143,18 +150,19 @@ class MessageSpec extends Specification {
     where:
 
     contentType                                | result
-    'application/json'                         | [a: 100.0, b: 'test']
-    'application/json;charset=UTF-8'           | [a: 100.0, b: 'test']
-    'application/json; charset\u003dUTF-8'     | [a: 100.0, b: 'test']
-    'application/hal+json; charset\u003dUTF-8' | [a: 100.0, b: 'test']
+    'application/json'                         | '{\n  "a": 100.0,\n  "b": "test"\n}'
+    'application/json;charset=UTF-8'           | '{\n  "a": 100.0,\n  "b": "test"\n}'
+    'application/json; charset\u003dUTF-8'     | '{\n  "a": 100.0,\n  "b": "test"\n}'
+    'application/hal+json; charset\u003dUTF-8' | '{\n  "a": 100.0,\n  "b": "test"\n}'
     'text/plain'                               | '{"a": 100.0, "b": "test"}'
     'application/octet-stream;charset=UTF-8'   | 'eyJhIjogMTAwLjAsICJiIjogInRlc3QifQ=='
     'application/octet-stream'                 | 'eyJhIjogMTAwLjAsICJiIjogInRlc3QifQ=='
-    ''                                         | [a: 100.0, b: 'test']
-    null                                       | [a: 100.0, b: 'test']
+    ''                                         | '{"a": 100.0, "b": "test"}'
+    null                                       | '{"a": 100.0, "b": "test"}'
 
-    message = new Message(metaData: ['contentType': contentType],
-      contents: OptionalBody.body('{"a": 100.0, "b": "test"}'.bytes))
+    message = new Message('test', [], OptionalBody.body('{"a": 100.0, "b": "test"}'.bytes,
+      new ContentType(contentType)),
+      new MatchingRulesImpl(), new Generators(), ['contentType': contentType])
   }
 
 }

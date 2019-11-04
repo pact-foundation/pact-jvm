@@ -1,7 +1,9 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.support.Json
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class PlainTextBodyMatcherSpec extends Specification {
 
@@ -22,9 +24,10 @@ class PlainTextBodyMatcherSpec extends Specification {
     'expected' | 'expected' | true
   }
 
+  @Unroll
   def 'Uses the matcher if there is a matcher defined'() {
     expect:
-    matcher.compareText(expected, actual, MatchingRulesImpl.fromMap(rules)).empty == result
+    matcher.compareText(expected, actual, MatchingRulesImpl.fromJson(Json.INSTANCE.toJson(rules))).empty == result
 
     where:
 

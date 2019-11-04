@@ -1,6 +1,8 @@
 package au.com.dius.pact.core.model
 
-import java.util.function.Predicate
+import au.com.dius.pact.core.support.Json
+import com.github.salomonbrys.kotson.obj
+import com.google.gson.JsonElement
 
 /**
  * Pact Provider
@@ -8,9 +10,9 @@ import java.util.function.Predicate
 data class Provider @JvmOverloads constructor (val name: String = "provider") {
   companion object {
     @JvmStatic
-    fun fromMap(map: Map<String, Any?>): Provider {
-      if (map.containsKey("name") && map["name"] != null) {
-        val name = map["name"].toString()
+    fun fromJson(json: JsonElement): Provider {
+      if (json.isJsonObject && json.obj.has("name") && json.obj["name"].isJsonPrimitive) {
+        val name = Json.toString(json.obj["name"])
         return Provider(if (name.isEmpty()) "provider" else name)
       }
       return Provider("provider")
@@ -24,9 +26,9 @@ data class Provider @JvmOverloads constructor (val name: String = "provider") {
 data class Consumer @JvmOverloads constructor (val name: String = "consumer") {
   companion object {
     @JvmStatic
-    fun fromMap(map: Map<String, Any?>): Consumer {
-      if (map.containsKey("name") && map["name"] != null) {
-        val name = map["name"].toString()
+    fun fromJson(json: JsonElement): Consumer {
+      if (json.isJsonObject && json.obj.has("name") && json.obj["name"].isJsonPrimitive) {
+        val name = Json.toString(json.obj["name"])
         return Consumer(if (name.isEmpty()) "consumer" else name)
       }
       return Consumer("consumer")
@@ -44,12 +46,6 @@ interface Interaction {
   val description: String
 
   /**
-   * This just returns the first description from getProviderStates()
-   */
-  @get:Deprecated("Use getProviderStates()")
-  val providerState: String
-
-  /**
    * Returns the provider states for this interaction
    */
   val providerStates: List<ProviderState>
@@ -64,13 +60,21 @@ interface Interaction {
    */
   fun toMap(pactSpecVersion: PactSpecVersion): Map<*, *>
 
+  /**
+   * Generates a unique key for this interaction
+   */
   fun uniqueKey(): String
+
+  /**
+   * Interaction ID. Will only be populated from pacts loaded from a Pact Broker
+   */
+  val interactionId: String?
 }
 
 /**
  * Interface to a pact
  */
-interface Pact<I> where I : Interaction {
+interface Pact<I : Interaction> {
   /**
    * Returns the provider of the service for the pact
    */
@@ -103,18 +107,11 @@ interface Pact<I> where I : Interaction {
    * If this pact is compatible with the other pact. Pacts are compatible if they have the
    * same provider and they are the same type
    */
-  fun compatibleTo(other: Pact<I>): Boolean
+  fun compatibleTo(other: Pact<*>): Boolean
 
   /**
    * Merges all the interactions into this Pact
    * @param interactions
    */
-  fun mergeInteractions(interactions: List<I>)
-
-  /**
-   * Returns a new Pact with all the interactions filtered by the provided predicate
-   * @deprecated Wrap the pact in a FilteredPact instead
-   */
-  @Deprecated("Wrap the pact in a FilteredPact instead")
-  fun filterInteractions(predicate: Predicate<I>): Pact<I>
+  fun mergeInteractions(interactions: List<*>)
 }

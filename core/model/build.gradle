@@ -1,5 +1,5 @@
 task pactsJar(type: Jar, dependsOn: testClasses) {
-  classifier = 'pacts'
+  classifier = 'test-pacts'
   into('jar-pacts') {
     from(sourceSets.test.output) {
       include 'test_pact_v3.json'
@@ -16,23 +16,24 @@ artifacts {
 }
 
 dependencies {
-  api project(":core:pact-jvm-core-support")
-  api project(":core:pact-jvm-core-pact-broker")
+  api project(path: ":core:pact-jvm-core-support", configuration: 'default')
+  api project(path: ":core:pact-jvm-core-pact-broker", configuration: 'default')
   compile 'com.github.zafarkhaja:java-semver:0.9.0'
-  compile 'com.amazonaws:aws-java-sdk-s3:1.11.335'
+  implementation 'com.amazonaws:aws-java-sdk-s3:1.11.587'
   compile 'org.apache.commons:commons-collections4:4.1'
   compile 'com.github.mifmif:generex:1.0.2'
   compile 'javax.mail:mail:1.5.0-b01'
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
+  api "com.google.code.gson:gson:${project.gsonVersion}"
+  implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
   testRuntime project(path: project.path, configuration: 'testJars')
   testCompile "org.codehaus.groovy:groovy-datetime:${project.groovyVersion}"
-  testCompile 'org.hamcrest:hamcrest:2.1'
-  testCompile 'net.bytebuddy:byte-buddy:1.9.12'
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.2'
 }
 
 compileGroovy {

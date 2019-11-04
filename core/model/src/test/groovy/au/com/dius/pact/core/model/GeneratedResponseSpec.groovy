@@ -1,12 +1,13 @@
 package au.com.dius.pact.core.model
 
 import au.com.dius.pact.core.model.generators.Category
+import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.RandomIntGenerator
 import au.com.dius.pact.core.model.generators.RandomStringGenerator
 import au.com.dius.pact.core.model.generators.UuidGenerator
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
+import au.com.dius.pact.core.support.Json
+import com.google.gson.JsonParser
 import spock.lang.Specification
 
 class GeneratedResponseSpec extends Specification {
@@ -26,7 +27,7 @@ class GeneratedResponseSpec extends Specification {
     response.status = 200
 
     when:
-    def generated = response.generatedResponse()
+    def generated = response.generatedResponse([:], GeneratorTestMode.Provider)
 
     then:
     generated.status >= 400 && generated.status < 500
@@ -37,7 +38,7 @@ class GeneratedResponseSpec extends Specification {
     response.headers = [A: 'a', B: 'b']
 
     when:
-    def generated = response.generatedResponse()
+    def generated = response.generatedResponse([:], GeneratorTestMode.Provider)
 
     then:
     generated.headers.A != 'a'
@@ -47,11 +48,11 @@ class GeneratedResponseSpec extends Specification {
   def 'applies body generators for body values to the copy of the response'() {
     given:
     def body = [a: 'A', b: 'B']
-    response.body = OptionalBody.body(JsonOutput.toJson(body).bytes)
+    response.body = OptionalBody.body(Json.INSTANCE.gsonPretty.toJson(body).bytes)
 
     when:
-    def generated = response.generatedResponse()
-    def generatedBody = new JsonSlurper().parseText(generated.body.valueAsString())
+    def generated = response.generatedResponse([:], GeneratorTestMode.Provider)
+    def generatedBody = Json.INSTANCE.toMap(new JsonParser().parse(generated.body.valueAsString()))
 
     then:
     generatedBody.a != 'A'

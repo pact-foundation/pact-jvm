@@ -43,7 +43,7 @@ infix fun <V, E> Result<V, E>.getOr(default: V): V {
  * @param default The value to return if [Err].
  * @return The [value][Ok.value] if [Ok], otherwise [default].
  */
-inline infix fun <V, E> Result<V, E>.getOr(default: () -> V): V {
+public inline infix fun <V, E> Result<V, E>.getOr(default: () -> V): V {
     return when (this) {
         is Ok -> value
         is Err -> default()

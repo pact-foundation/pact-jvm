@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit.loader;
 
+import au.com.dius.pact.core.model.DefaultPactReader;
 import au.com.dius.pact.core.model.Pact;
 import au.com.dius.pact.core.model.PactReader;
 import au.com.dius.pact.core.model.UrlsSource;
@@ -32,7 +33,7 @@ public class PactUrlLoader implements PactLoader {
   public List<Pact> load(final String providerName) {
       return Arrays.stream(urls)
         .map(url -> {
-          Pact pact = PactReader.loadPact(url);
+          Pact pact = DefaultPactReader.INSTANCE.loadPact(url);
           this.getPactSource().getPacts().put(url, pact);
           return pact;
         })

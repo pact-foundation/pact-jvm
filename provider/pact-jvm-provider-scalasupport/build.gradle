@@ -3,20 +3,23 @@ plugins {
 }
 
 dependencies {
-  compile project(":core:pact-jvm-core-model"), project(":provider:pact-jvm-provider")
+  compile project(path: ":core:pact-jvm-core-model", configuration: 'default'), 
+    project(path: ":provider:pact-jvm-provider", configuration: 'default')
   implementation "org.scalatest:scalatest_2.12:${project.scalaTestVersion}"
   compile "org.scala-lang:scala-library:${project.scalaVersion}"
   compile("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {
     exclude group: 'org.scala-lang'
   }
   compile 'org.scala-lang.modules:scala-java8-compat_2.12:0.9.0'
-
-  testCompile "org.specs2:specs2-core_2.12:${project.specs2Version}",
-    "org.specs2:specs2-junit_2.12:${project.specs2Version}"
   compile 'org.asynchttpclient:async-http-client:2.1.0-alpha24'
   compile("ws.unfiltered:unfiltered-netty-server_2.12:0.9.1") {
     exclude group: 'org.scala-lang'
   }
+
+  testCompile "org.specs2:specs2-core_2.12:${project.specs2Version}",
+    "org.specs2:specs2-junit_2.12:${project.specs2Version}"
+  testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
+  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 }
 
 compileScala {

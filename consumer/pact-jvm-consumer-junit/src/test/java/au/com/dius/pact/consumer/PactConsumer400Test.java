@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.exampleclients.ConsumerClient;
 import au.com.dius.pact.consumer.junit.PactProviderRule;
 import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.model.annotations.Pact;
 import org.apache.http.client.HttpResponseException;
 import org.junit.Rule;
 import org.junit.Test;

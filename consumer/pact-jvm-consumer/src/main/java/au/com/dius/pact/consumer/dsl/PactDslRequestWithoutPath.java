@@ -2,9 +2,9 @@ package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
 import au.com.dius.pact.core.model.OptionalBody;
+import au.com.dius.pact.core.model.PactReaderKt;
 import au.com.dius.pact.core.model.generators.Category;
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator;
-import au.com.dius.pact.core.model.PactReaderKt;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -14,9 +14,8 @@ import org.w3c.dom.Document;
 
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
-import java.util.Arrays;
+import java.nio.charset.Charset;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -115,10 +114,8 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      *
      * @param body Request body in string form
      */
-    public PactDslRequestWithoutPath body(String body, String mimeType) {
-        requestBody = OptionalBody.body(body.getBytes());
-        requestHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
-        return this;
+    public PactDslRequestWithoutPath body(String body, String contentType) {
+      return body(body, ContentType.parse(contentType));
     }
 
     /**
@@ -126,8 +123,11 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      *
      * @param body Request body in string form
      */
-    public PactDslRequestWithoutPath body(String body, ContentType mimeType) {
-        return body(body, mimeType.toString());
+    public PactDslRequestWithoutPath body(String body, ContentType contentType) {
+      Charset charset = contentType.getCharset() == null ? Charset.defaultCharset() : contentType.getCharset();
+      requestBody = OptionalBody.body(body.getBytes(charset), new au.com.dius.pact.core.model.ContentType(contentType.toString()));
+      requestHeaders.put(CONTENT_TYPE, Collections.singletonList(contentType.toString()));
+      return this;
     }
 
 
@@ -146,10 +146,8 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      *
      * @param body Request body in Java Functional Interface Supplier that must return a string
      */
-    public PactDslRequestWithoutPath body(Supplier<String> body, String mimeType) {
-        requestBody = OptionalBody.body(body.get().getBytes());
-        requestHeaders.put(CONTENT_TYPE, Collections.singletonList(mimeType));
-        return this;
+    public PactDslRequestWithoutPath body(Supplier<String> body, String contentType) {
+      return this.body(body, ContentType.parse(contentType));
     }
 
     /**
@@ -157,8 +155,11 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      *
      * @param body Request body in Java Functional Interface Supplier that must return a string
      */
-    public PactDslRequestWithoutPath body(Supplier<String> body, ContentType mimeType) {
-        return body(body, mimeType.toString());
+    public PactDslRequestWithoutPath body(Supplier<String> body, ContentType contentType) {
+      Charset charset = contentType.getCharset() == null ? Charset.defaultCharset() : contentType.getCharset();
+      requestBody = OptionalBody.body(body.get().getBytes(charset), new au.com.dius.pact.core.model.ContentType(contentType.toString()));
+      requestHeaders.put(CONTENT_TYPE, Collections.singletonList(contentType.toString()));
+      return this;
     }
 
     /**
@@ -180,11 +181,11 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      *
      * @param body Request body in string form
      */
-    public PactDslRequestWithoutPath bodyWithSingleQuotes(String body, String mimeType) {
-        if (body != null) {
-            body = QuoteUtil.convert(body);
-        }
-        return body(body, mimeType);
+    public PactDslRequestWithoutPath bodyWithSingleQuotes(String body, String contentType) {
+      if (body != null) {
+        body = QuoteUtil.convert(body);
+      }
+      return body(body, contentType);
     }
 
     /**
@@ -193,11 +194,11 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      *
      * @param body Request body in string form
      */
-    public PactDslRequestWithoutPath bodyWithSingleQuotes(String body, ContentType mimeType) {
-        if (body != null) {
-            body = QuoteUtil.convert(body);
-        }
-        return body(body, mimeType);
+    public PactDslRequestWithoutPath bodyWithSingleQuotes(String body, ContentType contentType) {
+      if (body != null) {
+        body = QuoteUtil.convert(body);
+      }
+      return body(body, contentType);
     }
 
     /**
@@ -206,11 +207,18 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      * @param body Request body in JSON form
      */
     public PactDslRequestWithoutPath body(JSONObject body) {
+      if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+        requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_JSON.toString()));
         requestBody = OptionalBody.body(body.toString().getBytes());
-        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
-            requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_JSON.toString()));
-        }
-        return this;
+      } else {
+        String contentType = requestHeaders.get(CONTENT_TYPE).get(0);
+        ContentType ct = ContentType.parse(contentType);
+        Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
+        requestBody = OptionalBody.body(body.toString().getBytes(charset),
+          new au.com.dius.pact.core.model.ContentType(contentType));
+      }
+
+      return this;
     }
 
     /**
@@ -219,14 +227,20 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      * @param body Built using the Pact body DSL
      */
     public PactDslRequestWithoutPath body(DslPart body) {
-        DslPart parent = body.close();
-        requestMatchers.addCategory(parent.matchers);
-        requestGenerators.addGenerators(parent.generators);
+      DslPart parent = body.close();
+      requestMatchers.addCategory(parent.matchers);
+      requestGenerators.addGenerators(parent.generators);
+      if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+        requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_JSON.toString()));
         requestBody = OptionalBody.body(parent.toString().getBytes());
-        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
-            requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_JSON.toString()));
-        }
-        return this;
+      } else {
+        String contentType = requestHeaders.get(CONTENT_TYPE).get(0);
+        ContentType ct = ContentType.parse(contentType);
+        Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
+        requestBody = OptionalBody.body(parent.toString().getBytes(charset),
+          new au.com.dius.pact.core.model.ContentType(contentType));
+      }
+      return this;
     }
 
     /**
@@ -235,11 +249,18 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
      * @param body XML Document
      */
     public PactDslRequestWithoutPath body(Document body) throws TransformerException {
+      if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+        requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
         requestBody = OptionalBody.body(xmlToString(body).getBytes());
-        if (!requestHeaders.containsKey(CONTENT_TYPE)) {
-            requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
-        }
-        return this;
+      } else {
+        String contentType = requestHeaders.get(CONTENT_TYPE).get(0);
+        ContentType ct = ContentType.parse(contentType);
+        Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
+        requestBody = OptionalBody.body(xmlToString(body).getBytes(charset),
+          new au.com.dius.pact.core.model.ContentType(contentType));
+      }
+
+      return this;
     }
 
     /**

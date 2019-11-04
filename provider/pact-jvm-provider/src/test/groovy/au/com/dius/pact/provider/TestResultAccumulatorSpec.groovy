@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.pactbroker.TestResult
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -12,8 +13,8 @@ import spock.util.environment.RestoreSystemProperties
 
 class TestResultAccumulatorSpec extends Specification {
 
-  static interaction1 = new RequestResponseInteraction('interaction1', [], new Request())
-  static interaction2 = new RequestResponseInteraction('interaction2', [], new Request())
+  static interaction1 = new RequestResponseInteraction('interaction1', [], new Request(), new Response())
+  static interaction2 = new RequestResponseInteraction('interaction2', [], new Request(), new Response())
   static pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'), [
     interaction1, interaction2
   ])
@@ -53,11 +54,11 @@ class TestResultAccumulatorSpec extends Specification {
 
   def 'accumulator should not rely on the Pact class hash codes'() {
     given:
-    def interaction3 = new RequestResponseInteraction('interaction3', [], new Request())
+    def interaction3 = new RequestResponseInteraction('interaction3', [], new Request(), new Response())
     def mutablePact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'), [
       interaction1, interaction2, interaction3
     ])
-    def interaction = new RequestResponseInteraction('interaction1', [], new Request())
+    def interaction = new RequestResponseInteraction('interaction1', [], new Request(), new Response())
     def mutablePact2 = new RequestResponsePact(new Provider('provider'), new Consumer('consumer2'), [
       interaction
     ])
@@ -65,14 +66,14 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.verificationReporter = mockVerificationReporter
 
     when:
-    testResultAccumulator.updateTestResult(mutablePact, interaction1, true)
-    testResultAccumulator.updateTestResult(mutablePact, interaction2, true)
-    testResultAccumulator.updateTestResult(mutablePact2, interaction, false)
+    testResultAccumulator.updateTestResult(mutablePact, interaction1, TestResult.Ok.INSTANCE)
+    testResultAccumulator.updateTestResult(mutablePact, interaction2, TestResult.Ok.INSTANCE)
+    testResultAccumulator.updateTestResult(mutablePact2, interaction, new TestResult.Failed())
     mutablePact.interactions.first().request.matchingRules.rulesForCategory('body')
-    testResultAccumulator.updateTestResult(mutablePact, interaction3, true)
+    testResultAccumulator.updateTestResult(mutablePact, interaction3, TestResult.Ok.INSTANCE)
 
     then:
-    1 * mockVerificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, null)
+    1 * mockVerificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, null, null)
 
     cleanup:
     testResultAccumulator.verificationReporter = DefaultVerificationReporter.INSTANCE
@@ -91,7 +92,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.updateTestResult(pact, interaction1, true)
 
     then:
-    0 * testResultAccumulator.verificationReporter.reportResults(_, _, _, _)
+    0 * testResultAccumulator.verificationReporter.reportResults(_, _, _, _, _)
 
     cleanup:
     testResultAccumulator.verificationReporter = reporter
@@ -111,7 +112,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.updateTestResult(pact, interaction1, result)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _)
+    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _, _)
 
     cleanup:
     testResultAccumulator.verificationReporter = reporter
@@ -137,7 +138,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.updateTestResult(pact, interaction2, interaction2Result)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _)
+    1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _, _)
 
     cleanup:
     testResultAccumulator.verificationReporter = reporter
@@ -149,6 +150,75 @@ class TestResultAccumulatorSpec extends Specification {
     TestResult.Ok.INSTANCE  | new TestResult.Failed() | new TestResult.Failed()
     new TestResult.Failed() | TestResult.Ok.INSTANCE  | new TestResult.Failed()
     new TestResult.Failed() | new TestResult.Failed() | new TestResult.Failed()
+  }
+
+  def 'updateTestResult - merge the test result with any existing result'() {
+    given:
+    def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'),
+      [interaction1, interaction2])
+    testResultAccumulator.testResults.clear()
+    def reporter = testResultAccumulator.verificationReporter
+    testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
+      publishingResultsDisabled() >> false
+    }
+    def failedResult = new TestResult.Failed()
+
+    when:
+    testResultAccumulator.updateTestResult(pact, interaction1, failedResult)
+    testResultAccumulator.updateTestResult(pact, interaction1, TestResult.Ok.INSTANCE)
+    testResultAccumulator.updateTestResult(pact, interaction2, TestResult.Ok.INSTANCE)
+
+    then:
+    1 * testResultAccumulator.verificationReporter.reportResults(_, failedResult, _, _, _)
+
+    cleanup:
+    testResultAccumulator.verificationReporter = reporter
+  }
+
+  def 'updateTestResult - clear the results when they are published'() {
+    given:
+    def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'),
+      [interaction1, interaction2])
+    testResultAccumulator.testResults.clear()
+    def reporter = testResultAccumulator.verificationReporter
+    testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
+      publishingResultsDisabled() >> false
+    }
+
+    when:
+    testResultAccumulator.updateTestResult(pact, interaction1, TestResult.Ok.INSTANCE)
+    testResultAccumulator.updateTestResult(pact, interaction2, TestResult.Ok.INSTANCE)
+
+    then:
+    1 * testResultAccumulator.verificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, _, _)
+    testResultAccumulator.testResults.isEmpty()
+
+    cleanup:
+    testResultAccumulator.verificationReporter = reporter
+  }
+
+  @RestoreSystemProperties
+  def 'updateTestResult - include the provider tag'() {
+    given:
+    def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'),
+      [interaction1])
+    testResultAccumulator.testResults.clear()
+    def reporter = testResultAccumulator.verificationReporter
+    testResultAccumulator.verificationReporter = Mock(VerificationReporter) {
+      publishingResultsDisabled() >> false
+    }
+    System.setProperty('pact.provider.tag', 'updateTestResultTag')
+
+    when:
+    testResultAccumulator.updateTestResult(pact, interaction1, TestResult.Ok.INSTANCE)
+
+    then:
+    1 * testResultAccumulator.verificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, _,
+      'updateTestResultTag')
+    testResultAccumulator.testResults.isEmpty()
+
+    cleanup:
+    testResultAccumulator.verificationReporter = reporter
   }
 
 }

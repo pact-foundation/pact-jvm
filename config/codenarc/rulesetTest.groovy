@@ -308,7 +308,7 @@ ruleset {
     AbcMetric   // Requires the GMetrics jar
     ClassSize
     CyclomaticComplexity   // Requires the GMetrics jar
-    MethodCount
+//    MethodCount
     MethodSize
     NestedBlockDepth
     ParameterCount

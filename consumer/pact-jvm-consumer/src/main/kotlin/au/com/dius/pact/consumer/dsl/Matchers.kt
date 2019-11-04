@@ -43,7 +43,8 @@ data class TypeMatcher(
 
 data class TimestampMatcher(
   val pattern: String = DateFormatUtils.ISO_DATETIME_FORMAT.pattern,
-  override val value: String?) : Matcher(
+  override val value: String?
+) : Matcher(
   value,
   au.com.dius.pact.core.model.matchingrules.TimestampMatcher(pattern),
   if (value == null) DateTimeGenerator(pattern) else null
@@ -51,7 +52,8 @@ data class TimestampMatcher(
 
 data class TimeMatcher(
   val pattern: String = DateFormatUtils.ISO_TIME_FORMAT.pattern,
-  override val value: String?) : Matcher(
+  override val value: String?
+) : Matcher(
   value,
   au.com.dius.pact.core.model.matchingrules.TimeMatcher(pattern),
   if (value == null) TimeGenerator(pattern) else null
@@ -59,7 +61,8 @@ data class TimeMatcher(
 
 data class DateMatcher(
   val pattern: String = DateFormatUtils.ISO_DATE_FORMAT.pattern,
-  override val value: String?) : Matcher(
+  override val value: String?
+) : Matcher(
   value,
   au.com.dius.pact.core.model.matchingrules.DateMatcher(pattern),
   if (value == null) DateGenerator(pattern) else null

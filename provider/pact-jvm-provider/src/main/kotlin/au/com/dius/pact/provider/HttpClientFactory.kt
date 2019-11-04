@@ -19,7 +19,7 @@ import java.security.cert.X509Certificate
 /**
  * HTTP Client Factory
  */
-class HttpClientFactory: IHttpClientFactory {
+class HttpClientFactory : IHttpClientFactory {
 
     override fun newClient(provider: IProviderInfo): CloseableHttpClient {
         return if (provider.createClient != null) {
@@ -36,7 +36,7 @@ class HttpClientFactory: IHttpClientFactory {
         } else if (provider.trustStore != null && provider.trustStorePassword != null) {
             createWithTrustStore(provider)
         } else {
-            HttpClients.createDefault()
+            HttpClients.custom().useSystemProperties().disableRedirectHandling().build()
         }
     }
 
@@ -44,12 +44,16 @@ class HttpClientFactory: IHttpClientFactory {
         val password = provider.trustStorePassword.orEmpty().toCharArray()
         return HttpClients
             .custom()
+            .useSystemProperties()
+            .disableRedirectHandling()
             .setSslcontext(SSLContextBuilder().loadTrustMaterial(provider.trustStore, password).build())
             .build()
     }
 
     private fun createInsecure(): CloseableHttpClient {
         val b = HttpClientBuilder.create()
+          .useSystemProperties()
+          .disableRedirectHandling()
 
         // setup a Trust Strategy that allows all certificates.
         //

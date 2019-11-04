@@ -1,6 +1,6 @@
 dependencies {
-    api project(":core:pact-jvm-core-support"), 
-      project(":provider:pact-jvm-provider")
+    api project(path: ":core:pact-jvm-core-support", configuration: 'default'), 
+      project(path: ":provider:pact-jvm-provider", configuration: 'default')
     compile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
     implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
 

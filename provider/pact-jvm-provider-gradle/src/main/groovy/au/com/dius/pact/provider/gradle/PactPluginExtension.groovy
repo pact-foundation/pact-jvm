@@ -1,36 +1,39 @@
 package au.com.dius.pact.provider.gradle
 
+import groovy.transform.CompileStatic
+import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
-import org.gradle.util.ConfigureUtil
 
 /**
  * Extension object for pact plugin
  */
+@CompileStatic
 class PactPluginExtension {
 
     final NamedDomainObjectContainer<GradleProviderInfo> serviceProviders
 
     PactPublish publish
+
     VerificationReports reports
 
-    PactPluginExtension(serviceProviders) {
-      this.serviceProviders = serviceProviders
+    PactPluginExtension(NamedDomainObjectContainer<GradleProviderInfo> serviceProviders) {
+        this.serviceProviders = serviceProviders
     }
 
     @SuppressWarnings('ConfusingMethodName')
-    def serviceProviders(Closure closure) {
-        serviceProviders.configure(closure)
+    void serviceProviders(Action<? extends NamedDomainObjectContainer<GradleProviderInfo>> configureAction) {
+        configureAction.execute(serviceProviders)
     }
 
     @SuppressWarnings('ConfusingMethodName')
-    def publish(Closure closure) {
+    void publish(Action<? extends PactPublish> configureAction) {
         publish = new PactPublish()
-        ConfigureUtil.configure(closure, publish)
+        configureAction.execute(publish)
     }
 
-  @SuppressWarnings('ConfusingMethodName')
-  def reports(Closure closure) {
-    reports = new VerificationReports()
-    ConfigureUtil.configure(closure, reports)
-  }
+    @SuppressWarnings('ConfusingMethodName')
+    void reports(Action<? extends VerificationReports> configureAction) {
+        reports = new VerificationReports()
+        configureAction.execute(reports)
+    }
 }

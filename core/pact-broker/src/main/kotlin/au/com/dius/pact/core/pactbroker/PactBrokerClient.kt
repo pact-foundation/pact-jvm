@@ -1,12 +1,19 @@
 package au.com.dius.pact.core.pactbroker
 
 import au.com.dius.pact.com.github.michaelbull.result.Err
+import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.com.github.michaelbull.result.Result
+import com.github.salomonbrys.kotson.get
+import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
+import com.github.salomonbrys.kotson.obj
+import com.github.salomonbrys.kotson.set
+import com.github.salomonbrys.kotson.string
 import com.github.salomonbrys.kotson.toJson
 import com.google.common.net.UrlEscapers.urlPathSegmentEscaper
 import com.google.gson.JsonObject
-import groovy.json.JsonSlurper
+import com.google.gson.JsonParser
+import mu.KLogging
 import org.dmfs.rfc3986.encoding.Precoded
 import java.io.File
 import java.net.URLDecoder
@@ -16,10 +23,10 @@ import java.util.function.Consumer
 /**
  * Wraps the response for a Pact from the broker with the link data associated with the Pact document.
  */
-data class PactResponse(val pactFile: Any, val links: Map<String, Map<String, Any>>)
+data class PactResponse(val pactFile: JsonObject, val links: Map<String, Any?>)
 
 sealed class TestResult {
-  object Ok: TestResult() {
+  object Ok : TestResult() {
     override fun toBoolean() = true
 
     override fun merge(result: TestResult) = when (result) {
@@ -28,12 +35,17 @@ sealed class TestResult {
     }
   }
 
-  data class Failed(var results: List<Any> = emptyList()): TestResult() {
+  data class Failed(var results: List<Map<String, Any?>> = emptyList(), val description: String = "") : TestResult() {
     override fun toBoolean() = false
 
     override fun merge(result: TestResult) = when (result) {
       is Ok -> this
-      is Failed -> Failed(results + result.results)
+      is Failed -> Failed(results + result.results, when {
+        description.isNotEmpty() && result.description.isNotEmpty() && description != result.description ->
+          "$description, ${result.description}"
+        description.isNotEmpty() -> description
+        else -> result.description
+      })
     }
   }
 
@@ -105,17 +117,17 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   @JvmOverloads
   open fun uploadPactFile(pactFile: File, unescapedVersion: String, tags: List<String> = emptyList()): Any? {
     val pactText = pactFile.readText()
-    val pact = JsonSlurper().parseText(pactText) as Map<String, Map<String, Any>>
+    val pact = JsonParser().parse(pactText)
     val halClient = newHalClient()
-    val providerName = urlPathSegmentEscaper().escape(pact["provider"]!!["name"].toString())
-    val consumerName = urlPathSegmentEscaper().escape(pact["consumer"]!!["name"].toString())
+    val providerName = urlPathSegmentEscaper().escape(pact["provider"]["name"].string)
+    val consumerName = urlPathSegmentEscaper().escape(pact["consumer"]["name"].string)
     val version = urlPathSegmentEscaper().escape(unescapedVersion)
     val uploadPath = "/pacts/provider/$providerName/consumer/$consumerName/version/$version"
+    if (tags.isNotEmpty()) {
+      uploadTags(halClient, consumerName, version, tags)
+    }
     return halClient.uploadJson(uploadPath, pactText, BiFunction { result, status ->
       if (result == "OK") {
-        if (tags.isNotEmpty()) {
-          uploadTags(halClient, consumerName, version, tags)
-        }
         status
       } else {
         "FAILED! $status"
@@ -134,41 +146,28 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   }
 
   open fun fetchPact(url: String): PactResponse {
-    val halDoc = newHalClient().fetch(url) as JsonObject
-    return PactResponse(HalClient.asMap(halDoc),
-      HalClient.asMap(halDoc["_links"] as JsonObject) as Map<String, Map<String, Any>>)
+    val halDoc = newHalClient().fetch(url).obj
+    return PactResponse(halDoc, HalClient.asMap(halDoc["_links"].obj))
   }
 
   open fun newHalClient(): IHalClient = HalClient(pactBrokerUrl, options)
-
-  @Deprecated(message = "Use the version that takes a test result",
-    replaceWith = ReplaceWith("publishVerificationResults"))
-  open fun publishVerificationResults(
-    docAttributes: Map<String, Map<String, Any>>,
-    result: Boolean,
-    version: String,
-    buildUrl: String? = null
-  ): Result<Boolean, Exception>
-    = publishVerificationResults(docAttributes, TestResult.fromBoolean(result), version, buildUrl)
 
   /**
    * Publishes the result to the "pb:publish-verification-results" link in the document attributes.
    */
   @JvmOverloads
   open fun publishVerificationResults(
-    docAttributes: Map<String, Map<String, Any>>,
+    docAttributes: Map<String, Any?>,
     result: TestResult,
     version: String,
     buildUrl: String? = null
   ): Result<Boolean, Exception> {
     val halClient = newHalClient()
     val publishLink = docAttributes.mapKeys { it.key.toLowerCase() } ["pb:publish-verification-results"] // ktlint-disable curly-spacing
-    return if (publishLink != null) {
-      val jsonObject = jsonObject("success" to result.toBoolean(), "providerApplicationVersion" to version)
-      if (buildUrl != null) {
-        jsonObject.add("buildUrl", buildUrl.toJson())
-      }
-      val lowercaseMap = publishLink.mapKeys { it.key.toLowerCase() }
+    return if (publishLink is Map<*, *>) {
+      val jsonObject = buildPayload(result, version, buildUrl)
+
+      val lowercaseMap = publishLink.mapKeys { it.key.toString().toLowerCase() }
       if (lowercaseMap.containsKey("href")) {
         halClient.postJson(lowercaseMap["href"].toString(), jsonObject.toString())
       } else {
@@ -179,6 +178,82 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
       Err(RuntimeException("Unable to publish verification results as there is no " +
         "pb:publish-verification-results link"))
     }
+  }
+
+  fun buildPayload(result: TestResult, version: String, buildUrl: String?): JsonObject {
+    val jsonObject = jsonObject("success" to result.toBoolean(), "providerApplicationVersion" to version)
+    if (buildUrl != null) {
+      jsonObject.add("buildUrl", buildUrl.toJson())
+    }
+
+    logger.debug { "Test result = $result" }
+    if (result is TestResult.Failed && result.results.isNotEmpty()) {
+      val values = result.results
+        .groupBy { it["interactionId"] }
+        .map { mismatches ->
+          val values = mismatches.value
+            .filter { !it.containsKey("exception") }
+            .flatMap { mismatch ->
+              when (mismatch["type"]) {
+                "body" -> {
+                  when (val bodyMismatches = mismatch["comparison"]) {
+                    is Map<*, *> -> bodyMismatches.entries.filter { it.key != "diff" }.flatMap { entry ->
+                      val values = entry.value as List<Map<String, Any>>
+                      values.map {
+                        jsonObject("attribute" to "body", "identifier" to entry.key, "description" to it["mismatch"],
+                          "diff" to it["diff"])
+                      }
+                    }
+                    else -> listOf(jsonObject("attribute" to "body", "description" to bodyMismatches.toString()))
+                  }
+                }
+                "status" -> listOf(jsonObject("attribute" to "status", "description" to mismatch["description"]))
+                "header" -> {
+                  listOf(jsonObject(mismatch.filter { it.key != "interactionId" }
+                    .map {
+                      if (it.key == "type") {
+                        "attribute" to it.value
+                      } else {
+                        it.toPair()
+                      }
+                    }))
+                }
+                "metadata" -> {
+                  listOf(jsonObject(mismatch.filter { it.key != "interactionId" }
+                    .flatMap {
+                      when {
+                        it.key == "type" -> listOf("attribute" to it.value)
+                        else -> listOf("identifier" to it.key, "description" to it.value)
+                      }
+                    }))
+                }
+                else -> listOf(jsonObject(
+                  mismatch.filterNot { it.key == "interactionId" || it.key == "type" }.entries.map {
+                    it.toPair()
+                  }
+                ))
+              }
+            }
+          val interactionJson = jsonObject("interactionId" to mismatches.key, "success" to false,
+            "mismatches" to jsonArray(values)
+          )
+
+          val exceptionDetails = mismatches.value.find { it.containsKey("exception") }
+          if (exceptionDetails != null) {
+            val exception = exceptionDetails["exception"]
+            if (exception is Throwable) {
+              interactionJson["exceptions"] = jsonArray(jsonObject("message" to exception.message,
+                "exceptionClass" to exception.javaClass.name))
+            } else {
+              interactionJson["exceptions"] = jsonArray(jsonObject("message" to exception.toString()))
+            }
+          }
+
+          interactionJson
+        }
+      jsonObject.add("testResults", jsonArray(values))
+    }
+    return jsonObject
   }
 
   /**
@@ -205,11 +280,27 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     }
   }
 
-  companion object {
+  fun publishProviderTag(docAttributes: Map<String, Any?>, name: String, tag: String, version: String) {
+    return try {
+      val halClient = newHalClient()
+        .withDocContext(docAttributes)
+        .navigate(PROVIDER)
+      when (val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tag), "{}")) {
+        is Ok -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
+        is Err -> logger.error(result.error) { "Failed to push tag $tag for provider $name and version $version" }
+      }
+    } catch (e: NotFoundHalResponse) {
+      logger.error(e) { "Could not tag provider $name, link was missing" }
+    }
+  }
+
+  companion object : KLogging() {
     const val LATEST_PROVIDER_PACTS_WITH_NO_TAG = "pb:latest-untagged-pact-version"
     const val LATEST_PROVIDER_PACTS = "pb:latest-provider-pacts"
     const val LATEST_PROVIDER_PACTS_WITH_TAG = "pb:latest-provider-pacts-with-tag"
-    const val PACTS = "pacts"
+    const val PROVIDER = "pb:provider"
+    const val PROVIDER_TAG_VERSION = "pb:version-tag"
+    const val PACTS = "pb:pacts"
     const val UTF8 = "UTF-8"
 
     fun uploadTags(halClient: IHalClient, consumerName: String, version: String, tags: List<String>) {

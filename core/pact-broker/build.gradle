@@ -1,18 +1,17 @@
 dependencies {
-  api project(":core:pact-jvm-core-support")
+  api project(path: ":core:pact-jvm-core-support", configuration: 'default')
   compile "org.apache.commons:commons-lang3:$commonsLang3Version"
-  compile "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  compile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
+  api "com.google.code.gson:gson:${project.gsonVersion}"
   compile 'com.github.salomonbrys.kotson:kotson:2.5.0'
-  compile "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
   compile "com.google.guava:guava:${project.guavaVersion}"
   compile 'org.dmfs:rfc3986-uri:0.8'
 
-  compile('io.github.microutils:kotlin-logging:1.4.4') {
+  compile('io.github.microutils:kotlin-logging:1.6.26') {
     exclude group: 'org.jetbrains.kotlin'
   }
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
 
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testCompile 'net.bytebuddy:byte-buddy:1.9.12'
+  testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
+  testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
 }

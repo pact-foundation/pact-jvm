@@ -46,7 +46,7 @@
     "request" : {
       "method" : "GET",
       "path" : "/api/books",
-      "query": "type=fiction",
+      "query": "type=fiction"
     },
     "response" : {
       "status" : 200,
@@ -81,7 +81,7 @@
     "request" : {
       "method" : "GET",
       "path" : "/api/books",
-      "query": "bestSeller=true",
+      "query": "bestSeller=true"
     },
     "response" : {
       "status" : 200,

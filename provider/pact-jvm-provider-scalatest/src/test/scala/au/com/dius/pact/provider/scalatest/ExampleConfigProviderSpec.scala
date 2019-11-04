@@ -1,9 +1,11 @@
 package au.com.dius.pact.provider.scalatest
 
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Ignore
+import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
+@Ignore
 class ExampleConfigProviderSpec extends ProviderSpec {
 
   /**

@@ -16,24 +16,24 @@ class MatchingSpec extends Specification {
 
   def 'Header Matching - match empty'() {
     expect:
-    Matching.matchHeaders(new Request('', '', null),
-      new Request('', '', null)).empty
+    Matching.matchHeaders(new Request('', ''),
+      new Request('', '')).empty
   }
 
   def 'Header Matching - match same headers'() {
     expect:
-    Matching.matchHeaders(new Request('', '', null, [A: ['B']]), new Request('', '', null, [A: ['B']])).empty
+    Matching.matchHeaders(new Request('', '', [:], [A: ['B']]), new Request('', '', [:], [A: ['B']])).empty
   }
 
   def 'Header Matching - ignore additional headers'() {
     expect:
-    Matching.matchHeaders(new Request('', '', null, [A: ['B']]), new Request('', '', null, [A: ['B'], C: ['D']])).empty
+    Matching.matchHeaders(new Request('', '', [:], [A: ['B']]), new Request('', '', [:], [A: ['B'], C: ['D']])).empty
   }
 
   def 'Header Matching - complain about missing headers'() {
     expect:
-    Matching.matchHeaders(new Request('', '', null, [A: ['B'], C: ['D']]),
-      new Request('', '', null, [A: ['B']])) == mismatch
+    Matching.matchHeaders(new Request('', '', [:], [A: ['B'], C: ['D']]),
+      new Request('', '', [:], [A: ['B']])) == mismatch
 
     where:
     mismatch = [
@@ -43,7 +43,7 @@ class MatchingSpec extends Specification {
 
   def 'Header Matching - complain about incorrect headers'() {
     expect:
-    Matching.matchHeaders(new Request('', '', null, [A: ['B']]), new Request('', '', null, [A: ['C']])) == mismatch
+    Matching.matchHeaders(new Request('', '', [:], [A: ['B']]), new Request('', '', [:], [A: ['C']])) == mismatch
 
     where:
     mismatch = [

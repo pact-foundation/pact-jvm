@@ -10,10 +10,9 @@ dependencies {
   compile 'org.apache.maven:maven-aether-provider:3.0.5'
   compile 'org.sonatype.aether:aether-connector-file:1.13.1'
   compile 'org.sonatype.aether:aether-connector-wagon:1.13.1'
-  compile "ch.qos.logback:logback-core:${project.logbackVersion}"
-  compile "ch.qos.logback:logback-classic:${project.logbackVersion}"
   compile "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
   compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
+  compile "org.codehaus.groovy:groovy:${project.groovyVersion}"
 
   testRuntime 'org.clojure:tools.nrepl:0.2.13'
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
@@ -26,6 +25,7 @@ clojureRepl.port = '7888'
 compileClojure {
   dependsOn compileGroovy
   classpath = classpath.plus(files(compileGroovy.destinationDir))
+  destinationDir = file("${project.buildDir}/classes/java/main")
 }
 
 clojureTest {

@@ -5,8 +5,8 @@ import java.net.URL
 import java.util.concurrent.Executors
 
 import au.com.dius.pact.core.matchers
+import au.com.dius.pact.core.matchers.ResponseMatching
 import au.com.dius.pact.core.model.{RequestResponseInteraction, Pact => PactForConsumer}
-import au.com.dius.pact.core.matchers.{FullResponseMatch, ResponseMatching}
 import au.com.dius.pact.provider.sbtsupport.HttpClient
 import au.com.dius.pact.provider.scalatest.ProviderDsl.defaultPactDirectory
 import au.com.dius.pact.provider.scalatest.Tags.ProviderTest
@@ -14,8 +14,9 @@ import au.com.dius.pact.provider.{ProviderInfo, ProviderUtils, ProviderVerifier}
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext}
+import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor}
 
 /**
   * Trait to run consumer pacts against the provider
@@ -43,10 +44,10 @@ trait ProviderSpec extends FlatSpec with BeforeAndAfterAll with ProviderDsl with
         .getInteractions.map(i => (c.getName, i)))
       .foreach { case (consumerName, interaction) =>
         val description = new StringBuilder(s"${interaction.getDescription} for '$consumerName'")
-        if (interaction.getProviderState != null) description.append(s" given ${interaction.getProviderState}")
+        if (!interaction.getProviderStates.isEmpty) description.append(s" given ${interaction.getProviderStates.get(0).getName}")
         provider should description.toString() taggedAs ProviderTest in {
-          startServerWithState(serverStarter, interaction.getProviderState)
-          implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
+          startServerWithState(serverStarter, interaction.getProviderStates.asScala.headOption.map(_.getName).getOrElse(""))
+          implicit val executionContext: ExecutionContextExecutor = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
           val request = interaction.getRequest.copy
           handler.foreach(h => request.setPath(s"${h.url.toString}${interaction.getRequest.getPath}"))
           val actualResponseFuture = HttpClient.run(request)

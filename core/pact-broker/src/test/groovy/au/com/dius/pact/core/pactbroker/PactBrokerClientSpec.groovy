@@ -2,10 +2,12 @@ package au.com.dius.pact.core.pactbroker
 
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Ok
+import au.com.dius.pact.core.support.Json
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import kotlin.Pair
 import kotlin.collections.MapsKt
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -211,17 +213,49 @@ class PactBrokerClientSpec extends Specification {
     1 * halClient.uploadJson('/pacticipants/Foo%20Consumer%2FA/versions/10.0.0%2FB/tags/A%2FB', '', _, false)
   }
 
-  @Unroll
-  def 'when publishing verification results, return a #result if #reason'() {
+  @Issue('#892')
+  def 'when uploading a pact a pact with tags, publish the tags first'() {
     given:
     def halClient = Mock(IHalClient)
     def client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
+    def tag = 'A/B'
+    pactContents = '''
+      {
+          "provider" : {
+              "name" : "Provider/A"
+          },
+          "consumer" : {
+              "name" : "Foo Consumer/A"
+          },
+          "interactions" : []
+      }
+    '''
+    pactFile.write pactContents
+
+    when:
+    client.uploadPactFile(pactFile, '10.0.0/B', [tag])
+
+    then:
+    1 * halClient.uploadJson('/pacticipants/Foo%20Consumer%2FA/versions/10.0.0%2FB/tags/A%2FB', '', _, false)
+
+    then:
+    1 * halClient.uploadJson('/pacts/provider/Provider%2FA/consumer/Foo%20Consumer%2FA/version/10.0.0%2FB',
+      pactContents, _, false) >> { args -> args[2].apply('OK', 'OK') }
+  }
+
+  @Unroll
+  def 'when publishing verification results, return a #result if #reason'() {
+    given:
+    def halClient = Mock(IHalClient)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
     halClient.postJson('URL', _) >> new Ok(true)
 
     expect:
-    client.publishVerificationResults(attributes, true, '0', null).class.simpleName == result
+    client.publishVerificationResults(attributes, TestResult.Ok.INSTANCE, '0', null).class.simpleName == result
 
     where:
 
@@ -235,7 +269,7 @@ class PactBrokerClientSpec extends Specification {
   def 'when fetching a pact, return the results as a Map'() {
     given:
     def halClient = Mock(IHalClient)
-    def client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
     def url = 'https://test.pact.dius.com.au' +
@@ -257,6 +291,23 @@ class PactBrokerClientSpec extends Specification {
 
     then:
     1 * halClient.fetch(url) >> json
-    result.pactFile == [a: 'a', b: 100, _links: [:], c: [true, 10.2, 'test']]
+    result.pactFile == Json.INSTANCE.toJson([a: 'a', b: 100, _links: [:], c: [true, 10.2, 'test']])
+  }
+
+  def 'publishing verification results with an exception should support any type of exception'() {
+    given:
+    def halClient = Mock(IHalClient)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+    def uploadResult = new Ok(true)
+    halClient.postJson(_, _) >> uploadResult
+    def result = new TestResult.Failed([
+      [exception: new AssertionError('boom')]
+    ], 'Failed')
+    def doc = ['pb:publish-verification-results': [href: '']]
+
+    expect:
+    client.publishVerificationResults(doc, result, '0', null) == uploadResult
   }
 }

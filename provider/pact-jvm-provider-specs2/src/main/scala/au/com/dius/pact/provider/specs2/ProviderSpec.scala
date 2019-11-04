@@ -3,16 +3,17 @@ package au.com.dius.pact.provider.specs2
 import java.io.{File, InputStream, Reader, StringReader}
 import java.util.concurrent.Executors
 
-import au.com.dius.pact.core.model.{PactReader, RequestResponsePact}
 import au.com.dius.pact.core.matchers.{FullResponseMatch, ResponseMatching}
+import au.com.dius.pact.core.model.{DefaultPactReader, RequestResponsePact}
 import au.com.dius.pact.provider.sbtsupport.HttpClient
 import org.specs2.Specification
 import org.specs2.execute.Result
 import org.specs2.specification.core.Fragments
 
 import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext}
+import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor}
 
 trait PactInput
 case class StringInput(string: String) extends PactInput
@@ -34,18 +35,18 @@ trait ProviderSpec extends Specification {
   }
 
   override def is = {
-    val pact = PactReader.loadPact(convertInput(honoursPact)).asInstanceOf[RequestResponsePact]
+    val pact = DefaultPactReader.INSTANCE.loadPact(convertInput(honoursPact)).asInstanceOf[RequestResponsePact]
     val fs = JavaConversions.asScalaBuffer(pact.getInteractions).map { interaction =>
-      val description = s"${interaction.getProviderState} ${interaction.getDescription}"
+      val description = s"${interaction.getProviderStates.asScala.map(_.getName).mkString(", ")} ${interaction.getDescription}"
       val test: String => Result = { url =>
-        implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
+        implicit val executionContext: ExecutionContextExecutor = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
         val request = interaction.getRequest.copy
         request.setPath(s"$url${interaction.getRequest.getPath}")
         val actualResponseFuture = HttpClient.run(request)
         val actualResponse = Await.result(actualResponseFuture, timeout)
         ResponseMatching.matchRules(interaction.getResponse, actualResponse) must beEqualTo(FullResponseMatch.INSTANCE)
       }
-      fragmentFactory.example(description, {inState(interaction.getProviderState, test)})
+      fragmentFactory.example(description, {inState(interaction.getProviderStates.asScala.headOption.map(_.getName).getOrElse(""), test)})
     }
     Fragments(fs :_*)
   }

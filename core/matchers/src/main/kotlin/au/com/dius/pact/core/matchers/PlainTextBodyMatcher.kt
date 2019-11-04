@@ -1,20 +1,20 @@
 package au.com.dius.pact.core.matchers
 
-import au.com.dius.pact.core.model.HttpPart
-import au.com.dius.pact.core.model.isEmpty
-import au.com.dius.pact.core.model.isMissing
-import au.com.dius.pact.core.model.isNull
-import au.com.dius.pact.core.model.isPresent
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
-import au.com.dius.pact.core.model.valueAsString
 import mu.KLogging
 
 class PlainTextBodyMatcher : BodyMatcher {
 
-  override fun matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): List<BodyMismatch> {
-    val expectedBody = expected.body
-    val actualBody = actual.body
+  override fun matchBody(
+    expected: OptionalBody,
+    actual: OptionalBody,
+    allowUnexpectedKeys: Boolean,
+    matchingRules: MatchingRules
+  ): List<BodyMismatch> {
+    val expectedBody = expected
+    val actualBody = actual
     return when {
       expectedBody.isMissing() -> emptyList()
       expectedBody.isNull() && actualBody.isPresent() -> listOf(
@@ -23,7 +23,7 @@ class PlainTextBodyMatcher : BodyMatcher {
       actualBody.isMissing() -> listOf(BodyMismatch(expectedBody!!.value, null,
               "Expected body '${expectedBody.value}' but was missing"))
       expectedBody.isEmpty() && actualBody.isEmpty() -> emptyList()
-      else -> compareText(expectedBody.valueAsString(), actualBody.valueAsString(), expected.matchingRules)
+      else -> compareText(expectedBody.valueAsString(), actualBody.valueAsString(), matchingRules)
     }
   }
 

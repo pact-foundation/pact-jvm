@@ -2,7 +2,7 @@ package au.com.dius.pact.server
 
 import java.io.File
 
-import au.com.dius.pact.core.model.{Interaction, OptionalBody, Pact, PactSpecVersion, PactWriter, Request, RequestResponseInteraction, RequestResponsePact, Response}
+import au.com.dius.pact.core.model._
 
 import scala.collection.JavaConverters._
 import scala.util.Success
@@ -23,7 +23,11 @@ object Complete {
 
   def apply(request: Request, oldState: ServerState): Result = {
     def clientError = Result(new Response(400), oldState)
-    def pactWritten(response: Response, port: String) = Result(response, oldState - port)
+    def pactWritten(response: Response, port: String) = {
+      val server = oldState(port)
+      val newState = oldState.filter(p => p._2 != server)
+      Result(response, newState)
+    }
 
     val result = for {
       port <- getPort(JsonUtils.parseJsonString(request.getBody.valueAsString()))
@@ -48,7 +52,7 @@ object Complete {
   def writeIfMatching(pact: Pact[RequestResponseInteraction], results: PactSessionResults, pactVersion: PactSpecVersion) = {
     if (results.allMatched) {
       val pactFile = destinationFileForPact(pact)
-      PactWriter.writePact(pactFile, pact, pactVersion)
+      DefaultPactWriter.INSTANCE.writePact(pactFile, pact, pactVersion)
     }
     VerificationResult(Success(results))
   }

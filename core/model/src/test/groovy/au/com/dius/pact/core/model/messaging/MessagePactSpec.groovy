@@ -1,6 +1,5 @@
 package au.com.dius.pact.core.model.messaging
 
-import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.InvalidPactException
 import au.com.dius.pact.core.model.OptionalBody
@@ -17,7 +16,7 @@ class MessagePactSpec extends Specification {
   def setupSpec() {
     provider = new Provider()
     consumer = new Consumer()
-    message = new Message(contents: OptionalBody.body('1 2 3 4'.bytes))
+    message = new Message('message', [], OptionalBody.body('1 2 3 4'.bytes))
   }
 
   def 'fails to convert the message to a Map if the target spec version is < 3'() {
@@ -71,7 +70,7 @@ class MessagePactSpec extends Specification {
     pact != pact2
 
     where:
-    message2 = new Message(contents: OptionalBody.body('A B C'.bytes))
+    message2 = new Message('message', [], OptionalBody.body('A B C'.bytes))
     pact = new MessagePact(provider, consumer, [ message ])
     pact2 = new MessagePact(provider, consumer, [ message2 ])
   }
@@ -81,22 +80,9 @@ class MessagePactSpec extends Specification {
     pact != pact2
 
     where:
-    message2 = new Message(contents: OptionalBody.body('A B C'.bytes))
+    message2 = new Message('message', [], OptionalBody.body('A B C'.bytes))
     pact = new MessagePact(provider, consumer, [ message ])
     pact2 = new MessagePact(provider, consumer, [ message, message2 ])
-  }
-
-  def 'when filtering the pact, do not loose the source of the pact'() {
-    given:
-    def source = new BrokerUrlSource('url', 'brokerUrl')
-    def pact = new MessagePact(provider, consumer, [ message ])
-    pact.source = source
-
-    when:
-    pact.filterInteractions { true }
-
-    then:
-    pact.source == source
   }
 
 }

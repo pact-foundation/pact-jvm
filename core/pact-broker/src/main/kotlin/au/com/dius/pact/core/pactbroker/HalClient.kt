@@ -3,36 +3,41 @@ package au.com.dius.pact.core.pactbroker
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.com.github.michaelbull.result.Result
-import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.buildUrl
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
+import au.com.dius.pact.core.support.HttpClient
+import au.com.dius.pact.core.support.isNotEmpty
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.bool
 import com.github.salomonbrys.kotson.get
+import com.github.salomonbrys.kotson.jsonNull
+import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.keys
 import com.github.salomonbrys.kotson.nullObj
 import com.github.salomonbrys.kotson.obj
+import com.github.salomonbrys.kotson.set
 import com.github.salomonbrys.kotson.string
 import com.google.common.net.UrlEscapers
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import mu.KLogging
+import org.apache.http.HttpHost
 import org.apache.http.HttpMessage
 import org.apache.http.HttpResponse
-import org.apache.http.auth.AuthScope
-import org.apache.http.auth.UsernamePasswordCredentials
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpPut
+import org.apache.http.client.protocol.HttpClientContext
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
-import org.apache.http.impl.client.BasicCredentialsProvider
+import org.apache.http.impl.auth.BasicScheme
+import org.apache.http.impl.client.BasicAuthCache
 import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
 import java.net.URI
+import java.net.URLDecoder
 import java.util.function.BiFunction
 import java.util.function.Consumer
 
@@ -70,6 +75,7 @@ interface IHalClient {
    * @param path Path to upload the document
    * @param bodyJson JSON contents for the body
    */
+  @Deprecated("Use putJson instead")
   fun uploadJson(path: String, bodyJson: String): Any?
 
   /**
@@ -79,6 +85,7 @@ interface IHalClient {
    * @param closure Closure that will be invoked with details about the response. The result from the closure will be
    * returned.
    */
+  @Deprecated("Use putJson instead")
   fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>): Any?
 
   /**
@@ -89,6 +96,7 @@ interface IHalClient {
    * returned.
    * @param encodePath If the path must be encoded beforehand.
    */
+  @Deprecated("Use putJson instead")
   fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>, encodePath: Boolean): Any?
 
   /**
@@ -122,6 +130,16 @@ interface IHalClient {
    * @param path The path to the HAL document. If it is a relative path, it is relative to the base URL
    */
   fun fetch(path: String): JsonElement
+
+  /**
+   * Sets the starting context from a previous broker interaction (Pact document)
+   */
+  fun withDocContext(docAttributes: Map<String, Any?>): IHalClient
+
+  /**
+   * Upload a JSON document to the current path link, using a PUT request
+   */
+  fun putJson(link: String, options: Map<String, Any>, json: String): Result<Boolean, Exception>
 }
 
 /**
@@ -133,12 +151,23 @@ open class HalClient @JvmOverloads constructor(
 ) : IHalClient {
 
   var httpClient: CloseableHttpClient? = null
+  var httpContext: HttpClientContext? = null
   var pathInfo: JsonElement? = null
   var lastUrl: String? = null
   var defaultHeaders: MutableMap<String, String> = mutableMapOf()
+  private var maxPublishRetries = 5
+  private var publishRetryInterval = 3000
+
+  init {
+    if (options.containsKey("halClient")) {
+      val halClient = options["halClient"] as Map<String, Any>
+      maxPublishRetries = halClient.getOrDefault("maxPublishRetries", this.maxPublishRetries) as Int
+      publishRetryInterval = halClient.getOrDefault("publishRetryInterval", this.publishRetryInterval) as Int
+    }
+  }
 
   fun <Method : HttpMessage> initialiseRequest(method: Method): Method {
-    defaultHeaders.forEach { key, value -> method.addHeader(key, value) }
+    defaultHeaders.forEach { (key, value) -> method.addHeader(key, value) }
     return method
   }
 
@@ -157,9 +186,9 @@ open class HalClient @JvmOverloads constructor(
       httpPost.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
       httpPost.entity = StringEntity(body, ContentType.APPLICATION_JSON)
 
-      client.execute(httpPost).use {
+      client.execute(httpPost, httpContext).use {
         logger.debug { "Got response ${it.statusLine}" }
-        logger.debug { "Response body: ${it.entity.content.reader().readText()}" }
+        logger.debug { "Response body: ${it.entity?.content?.reader()?.readText()}" }
         if (handler != null) {
           handler(it.statusLine.statusCode, it)
         } else {
@@ -171,37 +200,24 @@ open class HalClient @JvmOverloads constructor(
 
   open fun setupHttpClient(): CloseableHttpClient {
     if (httpClient == null) {
-      val retryStrategy = CustomServiceUnavailableRetryStrategy(5, 3000)
-      val builder = HttpClients.custom().useSystemProperties().setServiceUnavailableRetryStrategy(retryStrategy)
-      if (options["authentication"] is List<*>) {
-        val authentication = options["authentication"] as List<*>
-        val scheme = authentication.first().toString().toLowerCase()
-        when (scheme) {
-          "basic" -> {
-            if (authentication.size > 2) {
-              val credsProvider = BasicCredentialsProvider()
-              val uri = URI(baseUrl)
-              credsProvider.setCredentials(AuthScope(uri.host, uri.port),
-                UsernamePasswordCredentials(authentication[1].toString(), authentication[2].toString()))
-              builder.setDefaultCredentialsProvider(credsProvider)
-            } else {
-              logger.warn { "Basic authentication requires a username and password, ignoring." }
-            }
-          }
-          "bearer" -> {
-            if (authentication.size > 1) {
-              defaultHeaders["Authorization"] = "Bearer " + authentication[1].toString()
-            } else {
-              logger.warn { "Bearer token authentication requires a token, ignoring." }
-            }
-          }
-          else -> logger.warn { "Hal client Only supports basic and bearer token authentication, got '$scheme', ignoring." }
-        }
-      } else if (options.containsKey("authentication")) {
-        logger.warn { "Authentication options needs to be a list of values, ignoring." }
+      if (options.containsKey("authentication") && options["authentication"] !is List<*>) {
+        HttpClient.logger.warn { "Authentication options needs to be a list of values, ignoring." }
       }
+      val uri = URI(baseUrl)
+      val result = HttpClient.newHttpClient(options["authentication"], uri, defaultHeaders,
+        this.maxPublishRetries, this.publishRetryInterval)
+      httpClient = result.first
 
-      httpClient = builder.build()
+      if (System.getProperty(PREEMPTIVE_AUTHENTICATION) == "true") {
+        val targetHost = HttpHost(uri.host, uri.port, uri.scheme)
+        logger.warn { "Using preemptive basic authentication with the pact broker at $targetHost" }
+        val authCache = BasicAuthCache()
+        val basicAuth = BasicScheme()
+        authCache.put(targetHost, basicAuth)
+        httpContext = HttpClientContext.create()
+        httpContext!!.credentialsProvider = result.second
+        httpContext!!.authCache = authCache
+      }
     }
 
     return httpClient!!
@@ -220,11 +236,28 @@ open class HalClient @JvmOverloads constructor(
   override fun fetch(path: String, encodePath: Boolean): JsonElement {
     lastUrl = path
     logger.debug { "Fetching: $path" }
-    val response = getJson(path, encodePath)
-    when (response) {
+    when (val response = getJson(path, encodePath)) {
       is Ok -> return response.value
       is Err -> throw response.error
     }
+  }
+
+  override fun withDocContext(docAttributes: Map<String, Any?>): IHalClient {
+    val links = JsonObject()
+    links[LINKS] = jsonObject(docAttributes.entries.map {
+      it.key to when (it.value) {
+        is Map<*, *> -> jsonObject((it.value as Map<*, *>).entries.map { entry ->
+          if (entry.key == "href") {
+            entry.key.toString() to URLDecoder.decode(entry.value.toString(), "UTF-8")
+          } else {
+            entry.key.toString() to entry.value
+          }
+        })
+        else -> jsonNull
+      }
+    })
+    pathInfo = links
+    return this
   }
 
   private fun getJson(path: String, encodePath: Boolean = true): Result<JsonElement, Exception> {
@@ -234,7 +267,7 @@ open class HalClient @JvmOverloads constructor(
       httpGet.addHeader("Content-Type", "application/json")
       httpGet.addHeader("Accept", "application/hal+json, application/json")
 
-      val response = httpClient!!.execute(httpGet)
+      val response = httpClient!!.execute(httpGet, httpContext)
       if (response.statusLine.statusCode < 300) {
         val contentType = ContentType.getOrDefault(response.entity)
         if (isJsonResponse(contentType)) {
@@ -252,6 +285,11 @@ open class HalClient @JvmOverloads constructor(
   }
 
   private fun fetchLink(link: String, options: Map<String, Any>): JsonElement {
+    val href = hrefForLink(link, options)
+    return this.fetch(href.first, href.second)
+  }
+
+  private fun hrefForLink(link: String, options: Map<String, Any>): Pair<String, Boolean> {
     if (pathInfo?.nullObj?.get(LINKS) == null) {
       throw InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got " +
         "a response with no '_links'. URL: '$baseUrl', LINK: '$link'")
@@ -270,9 +308,9 @@ open class HalClient @JvmOverloads constructor(
           val linkByName = linkData.asJsonArray.find { it.isJsonObject && it["name"] == options["name"] }
           return if (linkByName != null && linkByName.isJsonObject && linkByName["templated"].isJsonPrimitive &&
             linkByName["templated"].bool) {
-            this.fetch(parseLinkUrl(linkByName["href"].toString(), options), false)
+            parseLinkUrl(linkByName["href"].toString(), options) to false
           } else if (linkByName != null && linkByName.isJsonObject) {
-            this.fetch(linkByName["href"].string)
+            linkByName["href"].string to true
           } else {
             throw InvalidNavigationRequest("Link '$link' does not have an entry with name '${options["name"]}'. " +
               "URL: '$baseUrl', LINK: '$link'")
@@ -284,9 +322,9 @@ open class HalClient @JvmOverloads constructor(
       } else if (linkData.isJsonObject) {
         return if (linkData.obj.has("templated") && linkData["templated"].isJsonPrimitive &&
           linkData["templated"].bool) {
-          fetch(parseLinkUrl(linkData["href"].string, options), false)
+          parseLinkUrl(linkData["href"].string, options) to false
         } else {
-          fetch(linkData["href"].string)
+          linkData["href"].string to true
         }
       } else {
         throw InvalidHalResponse("Expected link in map form in the response, but " +
@@ -303,11 +341,11 @@ open class HalClient @JvmOverloads constructor(
     var match = URL_TEMPLATE_REGEX.find(href)
     var index = 0
     while (match != null) {
-      val start = match.range.start - 1
+      val start = match.range.first - 1
       if (start >= index) {
         result += href.substring(index..start)
       }
-      index = match.range.endInclusive + 1
+      index = match.range.last + 1
       val (key) = match.destructured
       result += encodePathParameter(options, key, match.value)
 
@@ -345,7 +383,7 @@ open class HalClient @JvmOverloads constructor(
     httpPut.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
     httpPut.entity = StringEntity(bodyJson, ContentType.APPLICATION_JSON)
 
-    client.execute(httpPut).use {
+    client.execute(httpPut, httpContext).use {
       return when {
         it.statusLine.statusCode < 300 -> {
           EntityUtils.consume(it.entity)
@@ -421,9 +459,30 @@ open class HalClient @JvmOverloads constructor(
     }
   }
 
+  override fun putJson(link: String, options: Map<String, Any>, json: String): Result<Boolean, Exception> {
+    val href = hrefForLink(link, options)
+    val httpPut = initialiseRequest(HttpPut(buildUrl(baseUrl, href.first, href.second)))
+    httpPut.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
+    httpPut.entity = StringEntity(json, ContentType.APPLICATION_JSON)
+
+    return Result.of {
+      httpClient!!.execute(httpPut, httpContext).use {
+        when {
+          it.statusLine.statusCode < 300 -> true
+          else -> {
+            logger.error { "PUT JSON request failed with status ${it.statusLine}" }
+            false
+          }
+        }
+      }
+    }
+  }
+
   companion object : KLogging() {
     const val ROOT = "/"
     const val LINKS = "_links"
+    const val PREEMPTIVE_AUTHENTICATION = "pact.pactbroker.httpclient.usePreemptiveAuthentication"
+
     val URL_TEMPLATE_REGEX = Regex("\\{(\\w+)\\}")
 
     @JvmStatic
@@ -431,18 +490,17 @@ open class HalClient @JvmOverloads constructor(
 
     @JvmStatic
     fun fromJson(jsonValue: JsonElement): Any? {
-      return if (jsonValue.isJsonObject) {
-        asMap(jsonValue.asJsonObject)
-      } else if (jsonValue.isJsonArray) {
-        jsonValue.asJsonArray.map { fromJson(it) }
-      } else if (jsonValue.isJsonNull) {
-        null
-      } else {
-        val primitive = jsonValue.asJsonPrimitive
-        when {
+      return when {
+        jsonValue.isJsonObject -> asMap(jsonValue.asJsonObject)
+        jsonValue.isJsonArray -> jsonValue.asJsonArray.map { fromJson(it) }
+        jsonValue.isJsonNull -> null
+        else -> {
+          val primitive = jsonValue.asJsonPrimitive
+          when {
             primitive.isBoolean -> primitive.asBoolean
             primitive.isNumber -> primitive.asBigDecimal
             else -> primitive.asString
+          }
         }
       }
     }

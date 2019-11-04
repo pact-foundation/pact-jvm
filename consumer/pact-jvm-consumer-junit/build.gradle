@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-  compile project(":consumer:pact-jvm-consumer")
+  compile project(path: ":consumer:pact-jvm-consumer", configuration: 'default')
   compile "junit:junit:${project.junitVersion}",
     "org.json:json:${project.jsonVersion}",
     "org.apache.commons:commons-lang3:${project.commonsLang3Version}",
@@ -18,8 +18,8 @@ dependencies {
   testCompile('com.jayway.restassured:rest-assured:2.9.0') {
     exclude group: 'org.codehaus.groovy'
   }
-  testCompile 'org.hamcrest:hamcrest:2.1'
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
   testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}"
   testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
   // Required for Java 9

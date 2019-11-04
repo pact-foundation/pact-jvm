@@ -16,7 +16,7 @@ class PactBrokerClientPactSpec extends Specification {
   private PactBuilder pactBroker, imaginaryBroker
 
   def setup() {
-    pactBrokerClient = new PactBrokerClient('http://localhost:8080')
+    pactBrokerClient = new PactBrokerClient('http://localhost:8080', [halClient: [maxPublishRetries: 0]])
     pactFile = File.createTempFile('pact', '.json')
     pactContents = '''
       {
@@ -201,11 +201,11 @@ class PactBrokerClientPactSpec extends Specification {
       willRespondWith(status: 200)
       withBody(contentType: 'application/hal+json') {
         '_links' {
-          provider {
+          'pb:provider' {
             href url('http://localhost:8080', 'pacticipants', regexp('[^\\/]+', 'Activity Service'))
             title string('Activity Service')
           }
-          pacts eachLike(2) {
+          'pb:pacts' eachLike(2) {
             href url('http://localhost:8080', 'pacts', 'provider', regexp('[^\\/]+', 'Activity Service'),
               'consumer', regexp('[^\\/]+', 'Foo Web Client'),
               'version', regexp('\\d+\\.\\d+\\.\\d+', '0.1.380'))
@@ -255,7 +255,7 @@ class PactBrokerClientPactSpec extends Specification {
     given:
     pactBroker {
       given('A pact has been published between the Provider and Foo Consumer')
-      uponReceiving('a pact publish verification request')
+      uponReceiving('a pact publish verification request with build info')
       withAttributes(method: 'POST',
         path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results',
         body: [success: true, providerApplicationVersion: '10.0.0', buildUrl: 'http://localhost:8080/build']
@@ -271,6 +271,57 @@ class PactBrokerClientPactSpec extends Specification {
             '/verification-results'
         ]
       ], TestResult.Ok.INSTANCE, '10.0.0', 'http://localhost:8080/build') instanceof Ok
+    }
+
+    then:
+    result instanceof PactVerificationResult.Ok
+  }
+
+  def 'publishing verification results pact test with failure info'() {
+    given:
+    pactBroker {
+      given('A pact has been published between the Provider and Foo Consumer')
+      uponReceiving('a pact publish verification request with failure info')
+      withAttributes(method: 'POST',
+        path: '/pacts/provider/Provider/consumer/Foo Consumer/pact-version/1234567890/verification-results')
+      withBody(mimeType: 'application/json') {
+        success false
+        providerApplicationVersion '10.0.0'
+        buildUrl 'http://localhost:8080/build'
+        testResults eachLike {
+          interactionId string()
+          success false
+          exceptions eachLike {
+            message string('Boom!')
+            exceptionClass string('java.io.IOException')
+          }
+          mismatches eachLike {
+            description string('Expected status code of 400 but got 500')
+          }
+        }
+      }
+      willRespondWith(status: 201)
+    }
+    def failure = new TestResult.Failed([
+      [
+        message: 'Request to provider method failed with an exception',
+        exception: new IOException('Boom!'),
+        interactionId: '12345678'
+      ],
+      [
+        description: 'Expected status code of 400 but got 500',
+        interactionId: '12345678'
+      ]
+    ], 'Request to provider method failed with an exception')
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      pactBrokerClient.publishVerificationResults([
+        'pb:publish-verification-results': [
+          href: 'http://localhost:8080/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
+            '/verification-results'
+        ]
+      ], failure, '10.0.0', 'http://localhost:8080/build')
     }
 
     then:

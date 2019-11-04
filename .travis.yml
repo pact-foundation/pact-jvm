@@ -1,13 +1,11 @@
 language: java
 sudo: false
 jdk:
-  - oraclejdk8
-  - oraclejdk9
-  - oraclejdk11
   - openjdk8
-    #  - openjdk9
-    #  - openjdk10
-    #  - openjdk11
+  - openjdk9
+  - openjdk10
+  - openjdk11
+  - openjdk12
 env:
   - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT='-p core'
   - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT='-p consumer'
@@ -15,5 +13,6 @@ env:
   - JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m" PROJECT='-p pact-specification-test'
 script:
   - unset _JAVA_OPTIONS
+  - ./gradlew --version
   - ./gradlew --stacktrace --no-daemon $PROJECT build
 install: true

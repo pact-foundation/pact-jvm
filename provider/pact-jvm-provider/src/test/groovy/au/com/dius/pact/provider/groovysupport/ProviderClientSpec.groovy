@@ -3,20 +3,19 @@ package au.com.dius.pact.provider.groovysupport
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
+import au.com.dius.pact.core.support.Json
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.provider.GroovyScalaUtils$
 import au.com.dius.pact.provider.IHttpClientFactory
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
-import groovy.json.JsonBuilder
 import org.apache.http.Header
 import org.apache.http.HttpEntityEnclosingRequest
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
 import org.apache.http.ProtocolVersion
 import org.apache.http.StatusLine
-import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
@@ -70,7 +69,7 @@ class ProviderClientSpec extends Specification {
       B: ['b'],
       C: ['c']
     ]
-    request = new Request('PUT', '/', null, headers)
+    request = new Request('PUT', '/', [:], headers)
 
     when:
     client.setupHeaders(request, httpRequest)
@@ -91,7 +90,7 @@ class ProviderClientSpec extends Specification {
       B: ['b'],
       C: ['c']
     ]
-    request = new Request('PUT', '/', null, headers, OptionalBody.body('{}'.bytes))
+    request = new Request('PUT', '/', [:], headers, OptionalBody.body('{}'.bytes))
 
     when:
     client.setupHeaders(request, httpRequest)
@@ -113,7 +112,7 @@ class ProviderClientSpec extends Specification {
       B: ['b'],
       C: ['c']
     ]
-    request = new Request('PUT', '/', null, headers)
+    request = new Request('PUT', '/', [:], headers)
 
     when:
     client.setupHeaders(request, httpRequest)
@@ -135,7 +134,7 @@ class ProviderClientSpec extends Specification {
       B: ['b'],
       'content-type': ['c']
     ]
-    request = new Request('PUT', '/', null, headers, OptionalBody.body('C'.bytes))
+    request = new Request('PUT', '/', [:], headers, OptionalBody.body('C'.bytes))
 
     when:
     client.setupHeaders(request, httpRequest)
@@ -170,11 +169,10 @@ class ProviderClientSpec extends Specification {
     0 * httpRequest._
   }
 
-  @Unroll
   def 'setting up body sets a string entity if it is not a url encoded form post and there is a body'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
-    request = new Request('PUT', '/', query, [:], OptionalBody.body('{}'.bytes))
+    request = new Request('PUT', '/', [:], [:], OptionalBody.body('{}'.bytes))
 
     when:
     client.setupBody(request, httpRequest)
@@ -182,17 +180,12 @@ class ProviderClientSpec extends Specification {
     then:
     1 * httpRequest.setEntity { it instanceof StringEntity && it.content.text == '{}' }
     0 * httpRequest._
-
-    where:
-
-    query << [ [:], null ]
   }
 
-  @Unroll
   def 'setting up body sets a string entity  entity if it is a url encoded form post and there is no query string'() {
     given:
     httpRequest = Mock HttpEntityEnclosingRequest
-    request = new Request('POST', '/', query, ['Content-Type': [ContentType.APPLICATION_FORM_URLENCODED.mimeType]],
+    request = new Request('POST', '/', [:], ['Content-Type': [ContentType.APPLICATION_FORM_URLENCODED.mimeType]],
       OptionalBody.body('A=B'.bytes))
 
     when:
@@ -201,10 +194,6 @@ class ProviderClientSpec extends Specification {
     then:
     1 * httpRequest.setEntity { it instanceof StringEntity && it.content.text == 'A=B' }
     0 * httpRequest._
-
-    where:
-
-    query << [ [:], null ]
   }
 
   def 'setting up body sets a StringEntity entity if it is urlencoded form post and there is a query string'() {
@@ -425,11 +414,11 @@ class ProviderClientSpec extends Specification {
     given:
     state = new ProviderState('state one', [a: 'a', b: 1])
     def stateChangeUrl = 'http://state.change:1244'
-    def exepectedBody = new JsonBuilder([
+    def exepectedBody = Json.INSTANCE.gsonPretty.toJson([
       state: 'state one',
       params: [a: 'a', b: 1],
       action: 'setup'
-    ]).toPrettyString()
+    ])
 
     when:
     client.makeStateChangeRequest(stateChangeUrl, state, true, true, true)
@@ -606,12 +595,10 @@ class ProviderClientSpec extends Specification {
     def result = client.handleResponse(response)
 
     then:
-    result == [
-      statusCode: 200,
-      headers: [
-        Server: ['Apigee-Edge'],
-        'Set-Cookie': ['JSESSIONID=alphabeta120394049; HttpOnly', 'AWSELBID=baaadbeef6767676767690220; Path=/alpha']
-      ]
+    result.statusCode == 200
+    result.headers == [
+      Server: ['Apigee-Edge'],
+      'Set-Cookie': ['JSESSIONID=alphabeta120394049; HttpOnly', 'AWSELBID=baaadbeef6767676767690220; Path=/alpha']
     ]
   }
 

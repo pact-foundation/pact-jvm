@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
-    compile project(":provider:pact-jvm-provider"),
-            project(":provider:pact-jvm-provider-scalasupport_2.12")
+    compile project(path: ":provider:pact-jvm-provider", configuration: 'default'),
+            project(path: ":provider:pact-jvm-provider-scalasupport_2.12", configuration: 'default')
     compile "org.specs2:specs2-core_2.12:${project.specs2Version}"
     compile "org.scala-lang:scala-library:${project.scalaVersion}"
     compile("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {
@@ -14,4 +14,5 @@ dependencies {
     testCompile project(":consumer:pact-jvm-consumer")
     testCompile "org.specs2:specs2-core_2.12:${project.specs2Version}",
       "org.specs2:specs2-junit_2.12:${project.specs2Version}"
+    testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 }

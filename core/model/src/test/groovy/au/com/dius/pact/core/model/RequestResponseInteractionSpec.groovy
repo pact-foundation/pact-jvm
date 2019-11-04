@@ -14,13 +14,12 @@ class RequestResponseInteractionSpec extends Specification {
     generators = new Generators([(Category.HEADER): [a: new RandomStringGenerator(4)]])
     interaction = new RequestResponseInteraction('test interaction', [
       new ProviderState('state one'), new ProviderState('state two', [value: 'one', other: '2'])],
-      new Request(generators: generators), new Response(generators: generators)
-    )
+      new Request(generators: generators), new Response(generators: generators))
   }
 
   def 'creates a V3 map format if V3 spec'() {
     when:
-    def map = interaction.toMap()
+    def map = interaction.toMap(PactSpecVersion.V3)
 
     then:
     map == [
@@ -52,9 +51,10 @@ class RequestResponseInteractionSpec extends Specification {
 
   def 'does not include a provide state if there is not any'() {
     when:
-    interaction.providerStates = []
-    def mapV3 = interaction.toMap()
-    def mapV2 = interaction.toMap(PactSpecVersion.V3)
+    interaction = new RequestResponseInteraction('test interaction', [],
+      new Request(generators: generators), new Response(generators: generators))
+    def mapV3 = interaction.toMap(PactSpecVersion.V3)
+    def mapV2 = interaction.toMap(PactSpecVersion.V2)
 
     then:
     !mapV3.containsKey('providerStates')
@@ -85,14 +85,14 @@ class RequestResponseInteractionSpec extends Specification {
   @Unroll
   def 'displayState test'() {
     expect:
-    new RequestResponseInteraction(providerStates: providerStates).displayState() == stateDescription
+    new RequestResponseInteraction(stateDescription, providerStates)
+      .displayState() == stateDescription
 
     where:
 
     providerStates                                               | stateDescription
-    null                                                         | 'None'
     []                                                           | 'None'
-    [new ProviderState(null)]                                    | 'None'
+    [new ProviderState('')]                                      | 'None'
     [new ProviderState('state 1')]                               | 'state 1'
     [new ProviderState('state 1'), new ProviderState('state 2')] | 'state 1, state 2'
   }

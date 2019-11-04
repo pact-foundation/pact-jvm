@@ -206,4 +206,10 @@ public class LambdaDslTest {
         String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
     }
+
+    @Test
+    public void testNumberValue() {
+        DslPart dslPart = LambdaDsl.newJsonBody(o -> o.numberValue("number", 1)).build();
+        assertThat(dslPart.getBody().toString(), is("{\"number\":1}"));
+    }
 }

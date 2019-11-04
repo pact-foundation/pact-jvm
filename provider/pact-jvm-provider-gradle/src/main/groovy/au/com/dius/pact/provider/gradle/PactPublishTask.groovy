@@ -27,8 +27,11 @@ class PactPublishTask extends DefaultTask {
         if (pactPublish.pactDirectory == null) {
             pactPublish.pactDirectory = project.file("${project.buildDir}/pacts")
         }
-        if (pactPublish.version == null) {
-            pactPublish.version = project.version
+        def version = pactPublish.providerVersion ?: pactPublish.version
+        if (version == null) {
+          version = project.version
+        } else if (version instanceof Closure) {
+          version = version.call()
         }
 
         def options = [:]
@@ -53,7 +56,7 @@ class PactPublishTask extends DefaultTask {
             } else {
               print "Publishing '${pactFile.name}' ... "
             }
-            result = brokerClient.uploadPactFile(pactFile, pactPublish.version, pactPublish.tags)
+            result = brokerClient.uploadPactFile(pactFile, version, pactPublish.tags)
             println result
             if (!anyFailed && result.startsWith('FAILED!')) {
               anyFailed = true

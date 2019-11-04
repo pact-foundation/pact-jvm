@@ -62,7 +62,7 @@ object Matching : KLogging() {
       val matcher = MatchingConfig.lookupBodyMatcher(actual.mimeType())
       if (matcher != null) {
         logger.debug { "Found a matcher for ${actual.mimeType()} -> $matcher" }
-        matcher.matchBody(expected, actual, allowUnexpectedKeys)
+        matcher.matchBody(expected.body, actual.body, allowUnexpectedKeys, expected.matchingRules)
       } else {
         logger.debug { "No matcher for ${actual.mimeType()}, using equality" }
         when {
@@ -73,7 +73,9 @@ object Matching : KLogging() {
           actual.body.isMissing() -> listOf(BodyMismatch(expected.body.unwrap(), null,
             "Expected body '${expected.body.unwrap()}' but was missing"))
           expected.body.unwrap().contentEquals(actual.body.unwrap()) -> emptyList()
-          else -> listOf(BodyMismatch(expected.body.unwrap(), actual.body.unwrap()))
+          else -> listOf(BodyMismatch(expected.body.unwrap(), actual.body.unwrap(),
+            "Actual body '${actual.body.unwrap()}' is not equal to the expected body " +
+              "'${expected.body.unwrap()}'"))
         }
       }
     } else {
@@ -84,7 +86,7 @@ object Matching : KLogging() {
 
   fun matchPath(expected: Request, actual: Request): PathMismatch? {
     val replacedActual = actual.path.replaceFirst(pathFilter, "")
-    val matchers = expected.matchingRules ?: MatchingRulesImpl()
+    val matchers = expected.matchingRules
     return if (Matchers.matcherDefined("path", emptyList(), matchers)) {
       val mismatch = Matchers.domatch(matchers, "path", emptyList(), expected.path,
         replacedActual, PathMismatchFactory)
@@ -96,16 +98,14 @@ object Matching : KLogging() {
   fun matchStatus(expected: Int, actual: Int) = if (expected == actual) null else StatusMismatch(expected, actual)
 
   fun matchQuery(expected: Request, actual: Request): List<QueryMismatch> {
-    return (expected.query ?: emptyMap()).entries.fold(emptyList<QueryMismatch>()) { acc, entry ->
-      val value = actual.query[entry.key]
-      when (value) {
+    return expected.query.entries.fold(emptyList<QueryMismatch>()) { acc, entry ->
+      when (val value = actual.query[entry.key]) {
         null -> acc + QueryMismatch(entry.key, entry.value.joinToString(","), "",
           "Expected query parameter '${entry.key}' but was missing",
           listOf("$", "query", entry.key).joinToString("."))
-        else -> acc + QueryMatcher.compareQuery(entry.key, entry.value, value,
-          expected.matchingRules ?: MatchingRulesImpl())
+        else -> acc + QueryMatcher.compareQuery(entry.key, entry.value, value, expected.matchingRules)
       }
-    } + (actual.query ?: emptyMap()).entries.fold(emptyList<QueryMismatch>()) { acc, entry ->
+    } + actual.query.entries.fold(emptyList<QueryMismatch>()) { acc, entry ->
       when (expected.query[entry.key]) {
         null -> acc + QueryMismatch(entry.key, "", entry.value.joinToString(","),
           "Unexpected query parameter '${entry.key}' received",

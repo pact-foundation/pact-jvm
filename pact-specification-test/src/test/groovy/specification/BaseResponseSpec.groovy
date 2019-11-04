@@ -1,7 +1,8 @@
 package specification
 
-import au.com.dius.pact.core.model.PactReader
-import groovy.json.JsonSlurper
+import au.com.dius.pact.core.model.DefaultPactReader
+import au.com.dius.pact.core.support.Json
+import com.google.gson.JsonParser
 import groovy.util.logging.Slf4j
 import spock.lang.Specification
 
@@ -14,14 +15,15 @@ class BaseResponseSpec extends Specification {
     def result = []
     file.eachDir { d ->
       d.eachFile { f ->
-        def json = new JsonSlurper().parse(f)
-        def expected = PactReader.extractResponse(json.expected)
-        def actual = PactReader.extractResponse(json.actual)
+        def json = f.withReader { new JsonParser().parse(it) }
+        def jsonMap = Json.INSTANCE.toMap(json)
+        def expected = DefaultPactReader.extractResponse(json.asJsonObject.get('expected').asJsonObject)
+        def actual = DefaultPactReader.extractResponse(json.asJsonObject.get('actual').asJsonObject)
         if (expected.body.present) {
           expected.setDefaultMimeType(expected.detectContentType())
         }
         actual.setDefaultMimeType(actual.body.present ? actual.detectContentType() : 'application/json')
-        result << [d.name, f.name, json.comment, json.match, json.match ? 'should match' : 'should not match',
+        result << [d.name, f.name, jsonMap.comment, jsonMap.match, jsonMap.match ? 'should match' : 'should not match',
                    expected, actual]
       }
     }

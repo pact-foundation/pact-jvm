@@ -1,7 +1,13 @@
 package au.com.dius.pact.core.matchers
 
-import au.com.dius.pact.core.model.HttpPart
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
 
 interface BodyMatcher {
-  fun matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): List<BodyMismatch>
+  fun matchBody(
+    expected: OptionalBody,
+    actual: OptionalBody,
+    allowUnexpectedKeys: Boolean,
+    matchingRules: MatchingRules
+  ): List<BodyMismatch>
 }

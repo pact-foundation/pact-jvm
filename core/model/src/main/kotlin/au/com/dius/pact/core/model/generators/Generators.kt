@@ -6,8 +6,13 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.PathToken
 import au.com.dius.pact.core.model.parsePath
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
+import au.com.dius.pact.core.support.Json
+import com.github.salomonbrys.kotson.array
+import com.github.salomonbrys.kotson.forEach
+import com.github.salomonbrys.kotson.obj
+import com.github.salomonbrys.kotson.set
+import com.google.gson.JsonElement
+import com.google.gson.JsonParser
 import mu.KLogging
 import org.apache.commons.collections4.IteratorUtils
 
@@ -29,23 +34,23 @@ fun setupDefaultContentTypeHandlers() {
   contentTypeHandlers["application/json"] = JsonContentTypeHandler
 }
 
-data class QueryResult(var value: Any?, val key: Any? = null, val parent: Any? = null)
+data class QueryResult(var value: JsonElement?, val key: Any? = null, val parent: JsonElement? = null)
 
 object JsonContentTypeHandler : ContentTypeHandler {
   override fun processBody(value: String, fn: (QueryResult) -> Unit): OptionalBody {
-    val bodyJson = QueryResult(JsonSlurper().parseText(value))
+    val bodyJson = QueryResult(JsonParser().parse(value))
     fn.invoke(bodyJson)
-    return OptionalBody.body(JsonOutput.toJson(bodyJson.value).toByteArray())
+    return OptionalBody.body(Json.gson.toJson(bodyJson.value).toByteArray(), ContentType.JSON)
   }
 
   override fun applyKey(body: QueryResult, key: String, generator: Generator, context: Map<String, Any?>) {
     val pathExp = parsePath(key)
     queryObjectGraph(pathExp.iterator(), body) { (_, valueKey, parent) ->
       @Suppress("UNCHECKED_CAST")
-      when (parent) {
-        is MutableMap<*, *> -> (parent as MutableMap<String, Any?>)[valueKey.toString()] = generator.generate(context)
-        is MutableList<*> -> (parent as MutableList<Any?>)[valueKey as Int] = generator.generate(context)
-        else -> body.value = generator.generate(context)
+      when {
+        parent != null && parent.isJsonObject -> parent.obj[valueKey.toString()] = Json.toJson(generator.generate(context))
+        parent != null && parent.isJsonArray -> parent[valueKey as Int] = Json.toJson(generator.generate(context))
+        else -> body.value = Json.toJson(generator.generate(context))
       }
     }
   }
@@ -53,33 +58,31 @@ object JsonContentTypeHandler : ContentTypeHandler {
   private fun queryObjectGraph(pathExp: Iterator<PathToken>, body: QueryResult, fn: (QueryResult) -> Unit) {
     var bodyCursor = body
     while (pathExp.hasNext()) {
-      val token = pathExp.next()
-      when (token) {
-        is PathToken.Field -> if (bodyCursor.value is Map<*, *> &&
-          (bodyCursor.value as Map<*, *>).containsKey(token.name)) {
-          val map = bodyCursor.value as Map<*, *>
-          bodyCursor = QueryResult(map[token.name]!!, token.name, bodyCursor.value)
+      val cursorValue = bodyCursor.value
+      when (val token = pathExp.next()) {
+        is PathToken.Field -> if (cursorValue != null && cursorValue.isJsonObject && cursorValue.obj.has(token.name)) {
+          bodyCursor = QueryResult(cursorValue.obj[token.name], token.name, bodyCursor.value)
         } else {
           return
         }
-        is PathToken.Index -> if (bodyCursor.value is List<*> && (bodyCursor.value as List<*>).size > token.index) {
-          val list = bodyCursor.value as List<*>
+        is PathToken.Index -> if (cursorValue != null && cursorValue.isJsonArray && cursorValue.array.size() > token.index) {
+          val list = cursorValue.array
           bodyCursor = QueryResult(list[token.index]!!, token.index, bodyCursor.value)
         } else {
           return
         }
-        is PathToken.Star -> if (bodyCursor.value is MutableMap<*, *>) {
-          val map = bodyCursor.value as MutableMap<*, *>
+        is PathToken.Star -> if (cursorValue != null && cursorValue.isJsonObject) {
+          val map = cursorValue.obj
           val pathIterator = IteratorUtils.toList(pathExp)
-          map.forEach { (key, value) ->
-            queryObjectGraph(pathIterator.iterator(), QueryResult(value!!, key, map), fn)
+          map.forEach { key, value ->
+            queryObjectGraph(pathIterator.iterator(), QueryResult(value, key, map), fn)
           }
           return
         } else {
           return
         }
-        is PathToken.StarIndex -> if (bodyCursor.value is List<*>) {
-          val list = bodyCursor.value as List<*>
+        is PathToken.StarIndex -> if (cursorValue != null && cursorValue.isJsonArray) {
+          val list = cursorValue.array
           val pathIterator = IteratorUtils.toList(pathExp)
           list.forEachIndexed { index, item ->
             queryObjectGraph(pathIterator.iterator(), QueryResult(item!!, index, list), fn)
@@ -103,39 +106,39 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
 
   companion object : KLogging() {
 
-    @JvmStatic fun fromMap(map: Map<String, Map<String, Any>>?): Generators {
+    @JvmStatic fun fromJson(json: JsonElement?): Generators {
       val generators = Generators()
 
-      map?.forEach { (key, generatorMap) ->
-        try {
-          val category = Category.valueOf(key.toUpperCase())
-          when (category) {
-            Category.STATUS, Category.PATH, Category.METHOD -> if (generatorMap.containsKey("type")) {
-              val generator = lookupGenerator(generatorMap)
-              if (generator != null) {
-                generators.addGenerator(category, generator = generator)
-              } else {
-                logger.warn { "Ignoring invalid generator config '$generatorMap'" }
-              }
-            } else {
-              logger.warn { "Ignoring invalid generator config '$generatorMap'" }
-            }
-            else -> generatorMap.forEach { (generatorKey, generatorValue) ->
-              if (generatorValue is Map<*, *> && generatorValue.containsKey("type")) {
-                @Suppress("UNCHECKED_CAST")
-                val generator = lookupGenerator(generatorValue as Map<String, Any>)
+      if (json != null && json.isJsonObject) {
+        json.obj.forEach { key, generatorJson ->
+          try {
+            when (val category = Category.valueOf(key.toUpperCase())) {
+              Category.STATUS, Category.PATH, Category.METHOD -> if (generatorJson.obj.has("type")) {
+                val generator = lookupGenerator(generatorJson.obj)
                 if (generator != null) {
-                  generators.addGenerator(category, generatorKey, generator)
+                  generators.addGenerator(category, generator = generator)
                 } else {
-                  logger.warn { "Ignoring invalid generator config '$generatorMap'" }
+                  logger.warn { "Ignoring invalid generator config '$generatorJson'" }
                 }
               } else {
-                logger.warn { "Ignoring invalid generator config '$generatorKey -> $generatorValue'" }
+                logger.warn { "Ignoring invalid generator config '$generatorJson.obj'" }
+              }
+              else -> generatorJson.obj.forEach { generatorKey, generatorValue ->
+                if (generatorValue.isJsonObject && generatorValue.obj.has("type")) {
+                  val generator = lookupGenerator(generatorValue.obj)
+                  if (generator != null) {
+                    generators.addGenerator(category, generatorKey, generator)
+                  } else {
+                    logger.warn { "Ignoring invalid generator config '$generatorValue'" }
+                  }
+                } else {
+                  logger.warn { "Ignoring invalid generator config '$generatorKey -> $generatorValue'" }
+                }
               }
             }
+          } catch (e: IllegalArgumentException) {
+            logger.warn(e) { "Ignoring generator with invalid category '$key'" }
           }
-        } catch (e: IllegalArgumentException) {
-          logger.warn(e) { "Ignoring generator with invalid category '$key'" }
         }
       }
 
@@ -170,7 +173,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     return this
   }
 
-  fun applyGenerator(category: Category, mode: GeneratorTestMode, closure: (String, Generator?) -> Unit) {
+  fun applyGenerator(category: Category, mode: GeneratorTestMode, closure: (String, Generator) -> Unit) {
     if (categories.containsKey(category) && categories[category] != null) {
       val categoryValues = categories[category]
       if (categoryValues != null) {
@@ -208,7 +211,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
           handler.applyKey(body, key, generator, context)
         }
       }
-    } ?: OptionalBody.body(value.toByteArray())
+    } ?: OptionalBody.body(value.toByteArray(ContentType(contentType).asCharset()), ContentType(contentType))
   }
 
   /**
@@ -237,7 +240,13 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
 
   fun applyRootPrefix(prefix: String) {
     categories.keys.forEach { category ->
-      categories[category] = categories[category]!!.mapKeys { entry -> prefix + entry.key }.toMutableMap()
+      categories[category] = categories[category]!!.mapKeys { entry ->
+        when {
+          entry.key.startsWith(prefix) -> entry.key
+          entry.key.startsWith("$") -> prefix + entry.key.substring(1)
+          else -> prefix + entry.key
+        }
+      }.toMutableMap()
     }
   }
 

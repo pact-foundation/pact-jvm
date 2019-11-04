@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider.junit;
 
+import au.com.dius.pact.core.model.DefaultPactReader;
 import au.com.dius.pact.core.model.DirectorySource;
 import au.com.dius.pact.core.model.Pact;
-import au.com.dius.pact.core.model.PactReader;
 import au.com.dius.pact.core.model.PactSource;
 import au.com.dius.pact.provider.junit.loader.PactLoader;
 
@@ -36,7 +36,7 @@ public class GitPactLoader implements PactLoader {
     File[] files = path.listFiles((dir, name) -> name.endsWith(".json"));
     if (files != null) {
       for (File file : files) {
-        Pact pact = PactReader.loadPact(file);
+        Pact pact = DefaultPactReader.INSTANCE.loadPact(file);
         if (pact.getProvider().getName().equals(providerName)) {
           pacts.add(pact);
           this.pactSource.getPacts().put(file, pact);

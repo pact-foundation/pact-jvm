@@ -1,8 +1,6 @@
 package au.com.dius.pact.provider.spring.target
 
-import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
-import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.provider.junit.Provider
 import org.junit.runners.model.TestClass
@@ -29,8 +27,7 @@ class MockMvcTargetSpec extends Specification {
     given:
     mockMvcTarget.runTimes = 1
     mockMvcTarget.setTestClass(new TestClass(MockMvcTargetSpec), this)
-    def interaction = new RequestResponseInteraction(description: 'Test Interaction', request: new Request(),
-      response: new Response())
+    def interaction = new RequestResponseInteraction('Test Interaction')
     def controller = Mock(TestController)
     mockMvcTarget.controllers = [ controller ]
 

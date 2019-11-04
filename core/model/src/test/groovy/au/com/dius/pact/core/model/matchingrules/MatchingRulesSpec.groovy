@@ -1,5 +1,7 @@
 package au.com.dius.pact.core.model.matchingrules
 
+import au.com.dius.pact.core.support.Json
+import com.google.gson.JsonObject
 import spock.lang.Issue
 import spock.lang.Specification
 
@@ -7,7 +9,7 @@ class MatchingRulesSpec extends Specification {
 
   def 'fromMap handles a null map'() {
     when:
-    def matchingRules = MatchingRulesImpl.fromMap(null)
+    def matchingRules = MatchingRulesImpl.fromJson(null)
 
     then:
     matchingRules.empty
@@ -15,7 +17,7 @@ class MatchingRulesSpec extends Specification {
 
   def 'fromMap handles an empty map'() {
     when:
-    def matchingRules = MatchingRulesImpl.fromMap([:])
+    def matchingRules = MatchingRulesImpl.fromJson(new JsonObject())
 
     then:
     matchingRules.empty
@@ -26,7 +28,8 @@ class MatchingRulesSpec extends Specification {
     def matchingRulesMap = [
       '$.path': ['match': 'regex', 'regex': '\\w+'],
       '$.query.Q1': ['match': 'regex', 'regex': '\\d+'],
-      '$.header.HEADERY': ['match': 'include', 'value': 'ValueA'],
+      '$.header.HEADERX': ['match': 'include', 'value': 'ValueA'],
+      '$.headers.HEADERY': ['match': 'include', 'value': 'ValueA'],
       '$.body.animals': ['min': 1, 'match': 'type'],
       '$.body.animals[*].*': ['match': 'type'],
       '$.body.animals[*].children': ['min': 1],
@@ -34,7 +37,7 @@ class MatchingRulesSpec extends Specification {
     ]
 
     when:
-    def matchingRules = MatchingRulesImpl.fromMap(matchingRulesMap)
+    def matchingRules = MatchingRulesImpl.fromJson(Json.INSTANCE.toJson(matchingRulesMap))
 
     then:
     !matchingRules.empty
@@ -44,6 +47,7 @@ class MatchingRulesSpec extends Specification {
     matchingRules.rulesForCategory('query') == new Category('query', [
       Q1: new MatchingRuleGroup([ new RegexMatcher('\\d+') ]) ])
     matchingRules.rulesForCategory('header') == new Category('header', [
+      HEADERX: new MatchingRuleGroup([ new IncludeMatcher('ValueA') ]),
       HEADERY: new MatchingRuleGroup([ new IncludeMatcher('ValueA') ]) ])
     matchingRules.rulesForCategory('body') == new Category('body', [
       '$.animals': new MatchingRuleGroup([ new MinTypeMatcher(1) ]),
@@ -94,7 +98,7 @@ class MatchingRulesSpec extends Specification {
     ]
 
     when:
-    def matchingRules = MatchingRulesImpl.fromMap(matchingRulesMap)
+    def matchingRules = MatchingRulesImpl.fromJson(Json.INSTANCE.toJson(matchingRulesMap))
 
     then:
     !matchingRules.empty
@@ -128,7 +132,7 @@ class MatchingRulesSpec extends Specification {
     ]
 
     when:
-    def matchingRules = MatchingRulesImpl.fromMap(matchingRulesMap)
+    def matchingRules = MatchingRulesImpl.fromJson(Json.INSTANCE.toJson(matchingRulesMap))
 
     then:
     !matchingRules.empty
@@ -156,6 +160,21 @@ class MatchingRulesSpec extends Specification {
 
     expect:
     matchingRules.toV3Map() == [path: [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']]
+  }
+
+  @Issue('#882')
+  def 'With V2 format, matching rules for headers are pluralised'() {
+    given:
+    def matchingRules = new MatchingRulesImpl()
+    matchingRules.addCategory('path').addRule(new RegexMatcher('\\w+'))
+    matchingRules.addCategory('body')
+    matchingRules.addCategory('header').addRule('X', new RegexMatcher('\\w+'))
+
+    expect:
+    matchingRules.toV2Map() == [
+      '$.path': [match: 'regex', regex: '\\w+'],
+      '$.headers.X': [match: 'regex', regex: '\\w+']
+    ]
   }
 
 }

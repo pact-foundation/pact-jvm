@@ -1,6 +1,13 @@
 package au.com.dius.pact.core.model.matchingrules
 
 import au.com.dius.pact.core.model.PactSpecVersion
+import au.com.dius.pact.core.support.Json
+import com.github.salomonbrys.kotson.forEach
+import com.github.salomonbrys.kotson.isNotEmpty
+import com.github.salomonbrys.kotson.keys
+import com.github.salomonbrys.kotson.obj
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 
 class MatchingRulesImpl : MatchingRules {
 
@@ -15,36 +22,36 @@ class MatchingRulesImpl : MatchingRules {
 
     override fun addCategory(category: String): Category = rules.getOrPut(category, { Category(category) })
 
-    fun copy(): MatchingRules {
+    override fun copy(): MatchingRules {
         val copy = MatchingRulesImpl()
         rules.map { it.value }.forEach { copy.addCategory(it) }
         return copy
     }
 
-    fun fromV2Map(map: Map<String, Map<String, Any?>>) {
-        map.forEach {
-            val path = it.key.split('.')
-            if (it.key.startsWith("$.body")) {
-                if (it.key == "$.body") {
-                    addV2Rule("body", "$", it.value)
-                } else {
-                    addV2Rule("body", "$${it.key.substring(6)}", it.value)
-                }
-            } else if (it.key.startsWith("$.headers")) {
-                addV2Rule("header", path[2], it.value)
-            } else {
-                addV2Rule(path[1], if (path.size > 2) path[2] else null, it.value)
-            }
+    fun fromV2Json(json: JsonObject) {
+      json.forEach { key, value ->
+        val path = key.split('.')
+        if (key.startsWith("$.body")) {
+          if (key == "$.body") {
+            addV2Rule("body", "$", Json.toMap(value))
+          } else {
+            addV2Rule("body", "$${key.substring(6)}", Json.toMap(value))
+          }
+        } else if (key.startsWith("$.headers")) {
+          addV2Rule("header", path[2], Json.toMap(value))
+        } else {
+          addV2Rule(path[1], if (path.size > 2) path[2] else null, Json.toMap(value))
         }
+      }
     }
 
-    fun isEmpty(): Boolean = rules.all { it.value.isEmpty() }
+    override fun isEmpty(): Boolean = rules.all { it.value.isEmpty() }
 
-    fun isNotEmpty(): Boolean = !isEmpty()
+    override fun isNotEmpty(): Boolean = !isEmpty()
 
-    fun hasCategory(category: String): Boolean = rules.contains(category)
+    override fun hasCategory(category: String): Boolean = rules.contains(category)
 
-    fun getCategories(): Set<String> = rules.keys
+    override fun getCategories(): Set<String> = rules.keys
 
     override fun toString(): String = "MatchingRules(rules=$rules)"
     override fun equals(other: Any?): Boolean = when (other) {
@@ -54,7 +61,7 @@ class MatchingRulesImpl : MatchingRules {
 
     override fun hashCode(): Int = rules.hashCode()
 
-    fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> = when {
+    override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> = when {
         pactSpecVersion < PactSpecVersion.V3 -> toV2Map()
         else -> toV3Map()
     }
@@ -63,25 +70,25 @@ class MatchingRulesImpl : MatchingRules {
         entry.value.toMap(PactSpecVersion.V3)
     }
 
-    fun fromV3Map(map: Map<String, Map<String, Any?>>) {
-        map.forEach {
-            addRules(it.key, it.value)
-        }
+    fun fromV3Json(json: JsonObject) {
+      json.forEach { key, value ->
+        addRules(key, Json.toMap(value))
+      }
     }
 
     companion object {
-        @JvmStatic
-        fun fromMap(map: Map<String, Map<String, Any?>>?): MatchingRules {
-            val matchingRules = MatchingRulesImpl()
-            if (map != null && map.isNotEmpty()) {
-                if (map.keys.first().startsWith("$")) {
-                    matchingRules.fromV2Map(map)
-                } else {
-                    matchingRules.fromV3Map(map)
-                }
-            }
-            return matchingRules
+      @JvmStatic
+      fun fromJson(json: JsonElement?): MatchingRules {
+        val matchingRules = MatchingRulesImpl()
+        if (json != null && json.isJsonObject && json.obj.isNotEmpty()) {
+          if (json.obj.keys().first().startsWith("$")) {
+            matchingRules.fromV2Json(json.obj)
+          } else {
+            matchingRules.fromV3Json(json.obj)
+          }
         }
+        return matchingRules
+      }
     }
 
     private fun addRules(categoryName: String, matcherDef: Map<String, Any?>) {
@@ -90,8 +97,8 @@ class MatchingRulesImpl : MatchingRules {
 
     private fun toV2Map(): Map<String, Any?> {
         val result = mutableMapOf<String, Any?>()
-        rules.forEach {
-            it.value.toMap(PactSpecVersion.V2).forEach {
+        rules.forEach { entry ->
+            entry.value.toMap(PactSpecVersion.V2).forEach {
                 result[it.key] = it.value
             }
         }

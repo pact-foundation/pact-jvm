@@ -71,8 +71,8 @@ public class MissingRequestConsumerPassesTest extends ExpectedToFailBase {
             containsString("The following requests were not received:\n" +
               "\tmethod: OPTIONS\n" +
               "\tpath: /second\n" +
-              "\tquery: [:]\n" +
-              "\theaders: [testreqheader:[testreqheadervalue]]\n" +
+              "\tquery: {}\n" +
+              "\theaders: {testreqheader=[testreqheadervalue]}\n" +
               "\tmatchers: MatchingRules(rules={path=Category(name=path, matchingRules={}), header=Category(name=header, matchingRules={})})\n" +
               "\tgenerators: Generators(categories={})\n" +
               "\tbody: EMPTY"));

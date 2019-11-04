@@ -25,7 +25,7 @@ class LeinVerifierProxy {
   private final IFn hasProperty = Clojure.var(LEIN_PACT_VERIFY_NAMESPACE, 'has-property?')
   private final IFn getProperty = Clojure.var(LEIN_PACT_VERIFY_NAMESPACE, 'get-property')
 
-  def verifyProvider(ProviderInfo provider) {
+  Map<String, Object> verifyProvider(ProviderInfo provider) {
     verifier.projectHasProperty = { property ->
       this.hasProperty.invoke(Clojure.read(":$property"), args)
     }

@@ -13,7 +13,7 @@ import scala.collection.JavaConverters._
 object Create extends StrictLogging {
 
   def create(state: String, path: List[String], requestBody: String, oldState: ServerState, config: Config): Result = {
-    val pact = PactReader.loadPact(requestBody).asInstanceOf[RequestResponsePact]
+    val pact = DefaultPactReader.INSTANCE.loadPact(requestBody).asInstanceOf[RequestResponsePact]
 
     val mockConfig : MockProviderConfig = {
       if(!config.keystorePath.isEmpty) {

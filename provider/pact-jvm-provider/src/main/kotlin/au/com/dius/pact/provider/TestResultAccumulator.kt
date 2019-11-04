@@ -3,7 +3,7 @@ package au.com.dius.pact.provider
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.pactbroker.TestResult
-import au.com.dius.pact.provider.ProviderVerifierBase.Companion.PACT_VERIFIER_PUBLISH_RESULTS
+import au.com.dius.pact.provider.ProviderVerifier.Companion.PACT_VERIFIER_PUBLISH_RESULTS
 import mu.KLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
 
@@ -21,7 +21,7 @@ interface TestResultAccumulator {
 
 object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
 
-  private val testResults: MutableMap<Int, MutableMap<Int, TestResult>> = mutableMapOf()
+  val testResults: MutableMap<Int, MutableMap<Int, TestResult>> = mutableMapOf()
   var verificationReporter: VerificationReporter = DefaultVerificationReporter
 
   override fun updateTestResult(pact: Pact<out Interaction>, interaction: Interaction, testExecutionResult: Boolean) {
@@ -38,17 +38,27 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
     val pactHash = calculatePactHash(pact)
     val interactionResults = testResults.getOrPut(pactHash) { mutableMapOf() }
     val interactionHash = calculateInteractionHash(interaction)
-    interactionResults[interactionHash] = testExecutionResult
+    val testResult = interactionResults[interactionHash]
+    if (testResult == null) {
+      interactionResults[interactionHash] = testExecutionResult
+    } else {
+      interactionResults[interactionHash] = testResult.merge(testExecutionResult)
+    }
     if (allInteractionsVerified(pact, interactionResults)) {
-      logger.debug { "All interactions for Pact ${pact.provider.name}-${pact.consumer.name} are verified" }
+      logger.debug {
+        "All interactions for Pact ${pact.provider.name}-${pact.consumer.name} have a verification result"
+      }
       if (verificationReporter.publishingResultsDisabled()) {
         logger.warn { "Skipping publishing of verification results as it has been disabled " +
           "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')" }
       } else {
         verificationReporter.reportResults(pact, interactionResults.values.fold(TestResult.Ok) {
           acc: TestResult, result -> acc.merge(result)
-        }, lookupProviderVersion())
+        }, lookupProviderVersion(), null, lookupProviderTag())
       }
+      testResults.remove(pactHash)
+    } else {
+      logger.info { "Not all of the ${pact.interactions.size} were verified." }
     }
   }
 
@@ -71,7 +81,10 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
     }
   }
 
+  private fun lookupProviderTag(): String? = System.getProperty("pact.provider.tag")
+
   fun allInteractionsVerified(pact: Pact<out Interaction>, results: MutableMap<Int, TestResult>): Boolean {
+    logger.debug { "Number of interactions #${pact.interactions.size} and results: ${results.values}" }
     return pact.interactions.all { results.containsKey(calculateInteractionHash(it)) }
   }
 

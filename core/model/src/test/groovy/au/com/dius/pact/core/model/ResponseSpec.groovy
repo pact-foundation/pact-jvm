@@ -1,6 +1,9 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.support.Json
+import com.google.gson.JsonObject
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class ResponseSpec extends Specification {
 
@@ -13,7 +16,7 @@ class ResponseSpec extends Specification {
     ]
 
     when:
-    def response = Response.fromMap(json)
+    def response = Response.fromJson(Json.INSTANCE.toJson(json).asJsonObject)
 
     then:
     !response.matchingRules.empty
@@ -29,7 +32,16 @@ class ResponseSpec extends Specification {
     response.generators.empty
 
     where:
-    response = Response.fromMap([:])
+    response = Response.fromJson(new JsonObject())
+  }
+
+  @Unroll
+  def 'fromMap should handle different number types'() {
+    expect:
+    Response.fromJson(Json.INSTANCE.toJson([status: statusValue]).asJsonObject).status == 200
+
+    where:
+    statusValue << [200, 200L, 200.0, 200.0G, 200G]
   }
 
 }

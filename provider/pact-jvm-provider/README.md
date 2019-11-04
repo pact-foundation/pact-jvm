@@ -30,8 +30,8 @@ As the provider service is a DropWizard application, it uses the DropwizardAppRu
 class ReadmeExamplePactJVMProviderJUnitTest {
 
   @ClassRule
-  public static TestRule startServiceRule = new DropwizardAppRule<DropwizardConfiguration>(
-    TestDropwizardApplication.class, ResourceHelpers.resourceFilePath("dropwizard/test-config.yaml"))
+  public static final TestRule startServiceRule = new DropwizardAppRule<DropwizardConfiguration>(
+    TestDropwizardApplication, ResourceHelpers.resourceFilePath('dropwizard/test-config.yaml'))
 
   private static ProviderInfo serviceProvider
   private static Pact<RequestResponseInteraction> testConsumerPact
@@ -39,18 +39,18 @@ class ReadmeExamplePactJVMProviderJUnitTest {
 
   @BeforeClass
   static void setupProvider() {
-    serviceProvider = new ProviderInfo("Dropwizard App")
-    serviceProvider.setProtocol("http")
-    serviceProvider.setHost("localhost")
+    serviceProvider = new ProviderInfo('Dropwizard App')
+    serviceProvider.setProtocol('http')
+    serviceProvider.setHost('localhost')
     serviceProvider.setPort(8080)
-    serviceProvider.setPath("/")
+    serviceProvider.setPath('/')
 
     consumer = new ConsumerInfo()
-    consumer.setName("test_consumer")
+    consumer.setName('test_consumer')
     consumer.setPactSource(new UrlSource(
-      ReadmeExamplePactJVMProviderJUnitTest.getResource("/pacts/zoo_app-animal_service.json").toString()))
+      ReadmeExamplePactJVMProviderJUnitTest.getResource('/pacts/zoo_app-animal_service.json').toString()))
 
-    testConsumerPact = PactReader.loadPact(consumer.getPactSource()) as Pact<RequestResponseInteraction>
+    testConsumerPact = DefaultPactReader.INSTANCE.loadPact(consumer.getPactSource()) as Pact<RequestResponseInteraction>
   }
 
   @Test
@@ -68,19 +68,17 @@ class ReadmeExamplePactJVMProviderJUnitTest {
     Map<String, Object> failures = new HashMap<>()
     verifier.verifyResponseFromProvider(serviceProvider, interaction, interaction.getDescription(), failures, client)
 
-    if (!failures.isEmpty()) {
-      verifier.displayFailures(failures)
-    }
+    // normally assert all good, but in this example it will fail
+    assertThat(failures, is(not(empty())))
 
-    // Assert all good
-    assertThat(failures, is(empty()))
+    verifier.displayFailures(failures)
   }
 
   private ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider, ConsumerInfo consumer) {
     ProviderVerifier verifier = new ProviderVerifier()
 
     verifier.initialiseReporters(provider)
-    verifier.reportVerificationForConsumer(consumer, provider)
+    verifier.reportVerificationForConsumer(consumer, provider, new UrlSource('http://example.example'))
 
     if (!interaction.getProviderStates().isEmpty()) {
       for (ProviderState providerState: interaction.getProviderStates()) {
@@ -121,8 +119,8 @@ class ReadmeExamplePactJVMProviderSpockSpec extends Specification {
     serviceProvider.port = 8080
     serviceProvider.path = '/'
 
-    serviceProvider.hasPactWith('zoo_app') {
-      pactSource = new FileSource(new File(ResourceHelpers.resourceFilePath('pacts/zoo_app-animal_service.json')))
+    serviceProvider.hasPactWith('zoo_app') { consumer ->
+      consumer.pactSource = new FileSource(new File(ResourceHelpers.resourceFilePath('pacts/zoo_app-animal_service.json')))
     }
   }
 
@@ -142,7 +140,7 @@ class ReadmeExamplePactJVMProviderSpockSpec extends Specification {
   @Unroll
   def "Provider Pact - With Consumer #consumer"() {
     expect:
-    verifyConsumerPact(consumer).empty
+    !verifyConsumerPact(consumer).empty
 
     where:
     consumer << serviceProvider.consumers
@@ -161,4 +159,5 @@ class ReadmeExamplePactJVMProviderSpockSpec extends Specification {
     failures
   }
 }
+
 ```

@@ -2,6 +2,9 @@ package au.com.dius.pact.core.model.generators
 
 import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.model.PactSpecVersion
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -99,7 +102,7 @@ class GeneratorsSpec extends Specification {
   @SuppressWarnings('LineLength')
   def 'load generator from map - #description'() {
     expect:
-    Generators.fromMap(map) == generator
+    Generators.fromJson(Json.INSTANCE.toJson(map)) == generator
 
     where:
 
@@ -115,6 +118,22 @@ class GeneratorsSpec extends Specification {
     'query'     | [query: [q: [type: 'RandomString', size: 10]]]  | new Generators().addGenerator(Category.QUERY, 'q', new RandomStringGenerator(10))
     'body'      | [body: ['$.a.b.c': [type: 'RandomString', size: 10]]]  | new Generators().addGenerator(Category.BODY, '$.a.b.c', new RandomStringGenerator(10))
     'status'    | [status: [type: 'RandomInt', min: 1, max: 3]]  | new Generators().addGenerator(Category.STATUS, '', new RandomIntGenerator(1, 3))
+  }
+
+  @Issue(['#895'])
+  def 'when re-keying the generators, drop any dollar from the start'() {
+    given:
+    generators.addGenerator(Category.BODY, '$.bestandstype', new RandomStringGenerator(10))
+    generators.addGenerator(Category.BODY, '$.bestandsid', new RandomStringGenerator(10))
+    generators.applyRootPrefix('payload')
+
+    expect:
+    generators.toMap(PactSpecVersion.V3) == [
+      body: [
+        'payload.bestandstype': [type: 'RandomString', size: 10],
+        'payload.bestandsid': [type: 'RandomString', size: 10]
+      ]
+    ]
   }
 
 }

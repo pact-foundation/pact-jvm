@@ -3,6 +3,8 @@ package au.com.dius.pact.core.model
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.nio.charset.Charset
+
 class OptionalBodySpec extends Specification {
 
   @Unroll
@@ -120,6 +122,19 @@ class OptionalBodySpec extends Specification {
       OptionalBody.body(''.bytes),
       OptionalBody.body('a'.bytes)
     ]
+  }
+
+  @Unroll
+  def 'charset test'() {
+    expect:
+    body.contentType.asCharset() == charset
+
+    where:
+    body                                                                               | charset
+    OptionalBody.body('{}'.bytes)                                                      | Charset.defaultCharset()
+    OptionalBody.body('{}'.bytes, ContentType.UNKNOWN)                                 | Charset.defaultCharset()
+    OptionalBody.body('{}'.bytes, ContentType.HTML)                                    | Charset.defaultCharset()
+    OptionalBody.body('{}'.bytes, new ContentType('application/json; charset=UTF-16')) | Charset.forName('UTF-16')
   }
 
 }

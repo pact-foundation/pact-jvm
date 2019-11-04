@@ -1,22 +1,23 @@
 package au.com.dius.pact.server
 
-import groovy.json.JsonSlurper
+import au.com.dius.pact.core.support.Json
+import com.google.gson.JsonParser
 
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 
 object JsonUtils {
 
   def parseJsonString(json: String) = {
     if (json == null || json.trim.isEmpty) null
-    else javaObjectGraphToScalaObjectGraph(new JsonSlurper().parseText(json))
+    else javaObjectGraphToScalaObjectGraph(Json.INSTANCE.fromJson(new JsonParser().parse(json)))
   }
 
   def javaObjectGraphToScalaObjectGraph(value: AnyRef): Any = {
     value match {
       case jmap: java.util.Map[String, AnyRef] =>
-        JavaConversions.mapAsScalaMap(jmap).toMap.mapValues(javaObjectGraphToScalaObjectGraph)
+        jmap.asScala.toMap.mapValues(javaObjectGraphToScalaObjectGraph)
       case jlist: java.util.List[AnyRef] =>
-        JavaConversions.collectionAsScalaIterable(jlist).map(javaObjectGraphToScalaObjectGraph).toList
+        jlist.asScala.map(javaObjectGraphToScalaObjectGraph).toList
       case _ => value
     }
   }
@@ -24,9 +25,9 @@ object JsonUtils {
   def scalaObjectGraphToJavaObjectGraph(value: Any): Any = {
     value match {
       case map: Map[String, Any] =>
-        JavaConversions.mapAsJavaMap(map.mapValues(scalaObjectGraphToJavaObjectGraph))
+        map.mapValues(scalaObjectGraphToJavaObjectGraph).asJava
       case list: List[Any] =>
-        JavaConversions.seqAsJavaList(list.map(scalaObjectGraphToJavaObjectGraph))
+        list.map(scalaObjectGraphToJavaObjectGraph).asJava
       case _ => value
     }
   }

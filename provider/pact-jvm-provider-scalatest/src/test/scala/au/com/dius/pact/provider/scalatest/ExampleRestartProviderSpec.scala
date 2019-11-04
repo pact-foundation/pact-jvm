@@ -1,7 +1,8 @@
 package au.com.dius.pact.provider.scalatest
 
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.Ignore
+import org.scalatestplus.junit.JUnitRunner
 
 /**
   * Provider will be tested against all the defined consumers in the configured default directory.
@@ -9,6 +10,7 @@ import org.scalatest.junit.JUnitRunner
   * A freshly started provider will be initialised with the state before verification take place.
   */
 @RunWith(classOf[JUnitRunner])
+@Ignore
 class ExampleRestartProviderSpec extends PactProviderRestartDslSpec("test_provider") {
 
   lazy val serverStarter: ServerStarter = new ProviderServerStarter

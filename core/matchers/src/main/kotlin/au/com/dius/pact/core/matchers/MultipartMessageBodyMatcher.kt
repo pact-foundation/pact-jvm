@@ -1,12 +1,7 @@
 package au.com.dius.pact.core.matchers
 
-import au.com.dius.pact.core.model.HttpPart
-import au.com.dius.pact.core.model.isEmpty
-import au.com.dius.pact.core.model.isMissing
-import au.com.dius.pact.core.model.isNotPresent
-import au.com.dius.pact.core.model.isPresent
-import au.com.dius.pact.core.model.orEmpty
-import au.com.dius.pact.core.model.valueAsString
+import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import java.util.Enumeration
 import javax.mail.BodyPart
 import javax.mail.Header
@@ -15,17 +10,20 @@ import javax.mail.util.ByteArrayDataSource
 
 class MultipartMessageBodyMatcher : BodyMatcher {
 
-  override fun matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): List<BodyMismatch> {
-    val expectedBody = expected.body
-    val actualBody = actual.body
+  override fun matchBody(
+    expected: OptionalBody,
+    actual: OptionalBody,
+    allowUnexpectedKeys: Boolean,
+    matchingRules: MatchingRules
+  ): List<BodyMismatch> {
     return when {
-      expectedBody.isMissing() -> emptyList()
-      expectedBody.isPresent() && actualBody.isNotPresent() -> listOf(BodyMismatch(expectedBody.orEmpty(),
+      expected.isMissing() -> emptyList()
+      expected.isPresent() && actual.isNotPresent() -> listOf(BodyMismatch(expected.orEmpty(),
               null, "Expected a multipart body but was missing"))
-      expectedBody.isEmpty() && actualBody.isEmpty() -> emptyList()
+      expected.isEmpty() && actual.isEmpty() -> emptyList()
       else -> {
-        val expectedMultipart = parseMultipart(expectedBody.valueAsString(), expected.contentTypeHeader().orEmpty())
-        val actualMultipart = parseMultipart(actualBody.valueAsString(), actual.contentTypeHeader().orEmpty())
+        val expectedMultipart = parseMultipart(expected.valueAsString(), expected.contentType.contentType!!)
+        val actualMultipart = parseMultipart(actual.valueAsString(), actual.contentType.contentType!!)
         compareHeaders(expectedMultipart, actualMultipart) + compareContents(expectedMultipart, actualMultipart)
       }
     }

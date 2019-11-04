@@ -1,8 +1,9 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.Interaction
-import groovy.json.JsonSlurper
+import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.BooleanUtils
 import org.fusesource.jansi.AnsiConsole
 import java.io.File
@@ -38,11 +39,11 @@ object ProviderUtils {
     AnsiConsole.out().println("Loading pact files for provider ${provider.name} from $pactFileDir")
 
     val consumers = mutableListOf<ConsumerInfo>()
-    for (f in pactFileDir.listFiles { f, _ -> f.extension == "json" }) {
-      val pactJson = JsonSlurper().parse(f) as Map<String, Any>
-      val providerName = extractFromMap(pactJson, "provider", "name")
+    for (f in pactFileDir.listFiles { _, name -> FilenameUtils.isExtension(name, "json") }) {
+      val pact = DefaultPactReader.loadPact(f)
+      val providerName = pact.provider.name
       if (providerName == provider.name) {
-        consumers.add(ConsumerInfo(extractFromMap(pactJson, "consumer", "name").toString(),
+        consumers.add(ConsumerInfo(pact.consumer.name,
           stateChange, stateChangeUsesBody, packagesToScan, verificationType,
           FileSource<Interaction>(f), pactFileAuthentication))
       } else {
@@ -52,21 +53,6 @@ object ProviderUtils {
     }
     AnsiConsole.out().println("Found ${consumers.size} pact files")
     return consumers
-  }
-
-  private fun extractFromMap(json: Map<String, Any>, vararg s: String): Any? {
-    return if (s.size == 1) {
-      json[s.first()]
-    } else if (json.containsKey(s.first())) {
-      val map = json[s.first()]
-      if (map is Map<*, *>) {
-        extractFromMap(map as Map<String, Any>, *s.drop(1).toTypedArray())
-      } else {
-        null
-      }
-    } else {
-      null
-    }
   }
 
   fun pactFileExists(pactFile: FileSource<Interaction>) = pactFile.file.exists()
@@ -87,7 +73,7 @@ object ProviderUtils {
 
   @JvmStatic
   fun getProviderVersion(projectVersion: String): String {
-    val trimSnapshotProperty = System.getProperty(ProviderVerifierBase.PACT_PROVIDER_VERSION_TRIM_SNAPSHOT)
+    val trimSnapshotProperty = System.getProperty(ProviderVerifier.PACT_PROVIDER_VERSION_TRIM_SNAPSHOT)
     val isTrimSnapshot: Boolean = if (trimSnapshotProperty == null || trimSnapshotProperty.isBlank()) {
       false
     } else {

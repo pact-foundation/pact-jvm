@@ -5,8 +5,8 @@ import spock.lang.Unroll
 
 class DslPartSpec extends Specification {
 
-  @SuppressWarnings('MethodCount')
-  private final DslPart subject = new DslPart('', '') {
+  @SuppressWarnings(['MethodCount', 'FieldName'])
+  private static final DslPart subject = new DslPart('', '') {
 
     @Override
     protected void putObject(DslPart object) { }

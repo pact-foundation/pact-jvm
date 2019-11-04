@@ -46,7 +46,8 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
       val expectedResponse = interaction.response
       val actualResponse = handleResponse(mvcResult.response)
 
-      verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures)
+      verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures,
+        interaction.interactionId.orEmpty())
     } catch (e: Exception) {
       failures[interactionMessage] = e
       reporters.forEach {
@@ -60,13 +61,17 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     val requestBuilder = if (body != null && body.isPresent()) {
       if (request.isMultipartFileUpload()) {
         val multipart = MimeMultipart(ByteArrayDataSource(body.unwrap(), request.contentTypeHeader()))
-        val bodyPart = multipart.getBodyPart(0)
-        val contentDisposition = ContentDisposition(bodyPart.getHeader("Content-Disposition").first())
-        val name = StringUtils.defaultString(contentDisposition.getParameter("name"), "file")
-        val filename = contentDisposition.getParameter("filename").orEmpty()
-        MockMvcRequestBuilders.fileUpload(requestUriString(request))
-          .file(MockMultipartFile(name, filename, bodyPart.contentType, bodyPart.inputStream))
-          .headers(mapHeaders(request, true))
+        val multipartRequest = MockMvcRequestBuilders.fileUpload(requestUriString(request))
+        var i = 0
+        while (i < multipart.count) {
+          val bodyPart = multipart.getBodyPart(i)
+          val contentDisposition = ContentDisposition(bodyPart.getHeader("Content-Disposition").first())
+          val name = StringUtils.defaultString(contentDisposition.getParameter("name"), "file")
+          val filename = contentDisposition.getParameter("filename").orEmpty()
+          multipartRequest.file(MockMultipartFile(name, filename, bodyPart.contentType, bodyPart.inputStream))
+          i++
+        }
+        multipartRequest.headers(mapHeaders(request, true))
       } else {
         MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
           .headers(mapHeaders(request, true))

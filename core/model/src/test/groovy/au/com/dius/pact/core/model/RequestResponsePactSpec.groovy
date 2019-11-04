@@ -11,16 +11,14 @@ class RequestResponsePactSpec extends Specification {
   def setupSpec() {
     provider = new Provider()
     consumer = new Consumer()
-    interaction = new RequestResponseInteraction(request: new Request(method: 'GET'),
-      response: new Response(body: OptionalBody.body('{"value": 1234.0}'.bytes),
-        headers: ['Content-Type': ['application/json']]))
+    interaction = new RequestResponseInteraction('test', [], new Request('GET'),
+      new Response(200, ['Content-Type': ['application/json']], OptionalBody.body('{"value": 1234.0}'.bytes)))
   }
 
   def 'when writing V2 spec, query parameters must be encoded appropriately'() {
     given:
     def pact = new RequestResponsePact(provider, consumer, [
-      new RequestResponseInteraction(request: new Request(method: 'GET', query: [a: ['b=c&d']]),
-        response: new Response())
+      new RequestResponseInteraction('test', [], new Request('GET', '/', [a: ['b=c&d']]))
     ])
 
     when:
@@ -33,10 +31,9 @@ class RequestResponsePactSpec extends Specification {
   def 'should handle body types other than JSON'() {
     given:
     def pact = new RequestResponsePact(provider, consumer, [
-      new RequestResponseInteraction(request: new Request(method: 'PUT',
-        body: OptionalBody.body('<?xml version="1.0"><root/>'.bytes),
-        headers: ['Content-Type': ['application/xml']]),
-        response: new Response(body: OptionalBody.body('Ok, no prob'.bytes), headers: ['Content-Type': ['text/plain']]))
+      new RequestResponseInteraction('test', [], new Request('PUT', '/', [:],
+        ['Content-Type': ['application/xml']], OptionalBody.body('<?xml version="1.0"><root/>'.bytes)),
+        new Response(200, ['Content-Type': ['text/plain']], OptionalBody.body('Ok, no prob'.bytes)))
     ])
 
     when:
@@ -50,16 +47,15 @@ class RequestResponsePactSpec extends Specification {
   def 'does not lose the scale for decimal numbers'() {
     given:
     def pact = new RequestResponsePact(provider, consumer, [
-      new RequestResponseInteraction(request: new Request(method: 'GET'),
-        response: new Response(body: OptionalBody.body('{"value": 1234.0}'.bytes),
-          headers: ['Content-Type': ['application/json']]))
+      new RequestResponseInteraction('test', [], new Request('GET'),
+        new Response(200, ['Content-Type': ['application/json']], OptionalBody.body('{"value": 1234.0}'.bytes)))
     ])
 
     when:
     def result = pact.toMap(PactSpecVersion.V3)
 
     then:
-    result.interactions.first().response.body.toString() == '{value=1234.0}'
+    result.interactions.first().response.body.toString() == '[value:1234.0]'
   }
 
   @SuppressWarnings('ComparisonWithSelf')
@@ -105,9 +101,8 @@ class RequestResponsePactSpec extends Specification {
     pact != pact2
 
     where:
-    interaction2 = new RequestResponseInteraction(request: new Request(method: 'POST'),
-      response: new Response(body: OptionalBody.body('{"value": 1234.0}'.bytes),
-        headers: ['Content-Type': ['application/json']]))
+    interaction2 = new RequestResponseInteraction('test', [], new Request('POST'),
+      new Response(200, ['Content-Type': ['application/json']], OptionalBody.body('{"value": 1234.0}'.bytes)))
     pact = new RequestResponsePact(provider, consumer, [ interaction ])
     pact2 = new RequestResponsePact(provider, consumer, [ interaction2 ])
   }
@@ -117,23 +112,10 @@ class RequestResponsePactSpec extends Specification {
     pact != pact2
 
     where:
-    interaction2 = new RequestResponseInteraction(request: new Request(method: 'POST'),
-      response: new Response(body: OptionalBody.body('{"value": 1234.0}'.bytes),
-        headers: ['Content-Type': ['application/json']]))
+    interaction2 = new RequestResponseInteraction('test', [], new Request('POST'),
+      new Response(200, ['Content-Type': ['application/json']], OptionalBody.body('{"value": 1234.0}'.bytes)))
     pact = new RequestResponsePact(provider, consumer, [ interaction ])
     pact2 = new RequestResponsePact(provider, consumer, [ interaction, interaction2 ])
   }
 
-  def 'when filtering the pact, do not loose the source of the pact'() {
-    given:
-    def source = new BrokerUrlSource('url', 'brokerUrl')
-    def pact = new RequestResponsePact(provider, consumer, [ interaction ])
-    pact.source = source
-
-    when:
-    pact.filterInteractions { true }
-
-    then:
-    pact.source == source
-  }
 }

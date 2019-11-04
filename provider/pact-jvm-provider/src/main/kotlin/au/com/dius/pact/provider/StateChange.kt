@@ -1,13 +1,14 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.core.model.Interaction
-import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.com.github.michaelbull.result.Result
 import au.com.dius.pact.com.github.michaelbull.result.mapEither
 import au.com.dius.pact.com.github.michaelbull.result.unwrap
-import groovy.json.JsonSlurper
+import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.core.support.Json
+import com.google.gson.JsonParser
 import groovy.lang.Closure
 import mu.KLogging
 import org.apache.http.HttpEntity
@@ -18,7 +19,7 @@ import java.net.URISyntaxException
 import java.net.URL
 
 data class StateChangeResult @JvmOverloads constructor (
-  val stateChangeResult: Result<Map<String, Any>, Exception>,
+  val stateChangeResult: Result<Map<String, Any?>, Exception>,
   val message: String = ""
 )
 
@@ -40,7 +41,7 @@ interface StateChange {
     consumer: IConsumerInfo,
     isSetup: Boolean,
     providerClient: ProviderClient
-  ): Result<Map<String, Any>, Exception>
+  ): Result<Map<String, Any?>, Exception>
 
   fun executeStateChangeTeardown(
     verifier: IProviderVerifier,
@@ -66,7 +67,7 @@ object DefaultStateChange : StateChange, KLogging() {
     providerClient: ProviderClient
   ): StateChangeResult {
     var message = interactionMessage
-    var stateChangeResult: Result<Map<String, Any>, Exception> = Ok(emptyMap())
+    var stateChangeResult: Result<Map<String, Any?>, Exception> = Ok(emptyMap())
 
     if (interaction.providerStates.isNotEmpty()) {
       val iterator = interaction.providerStates.iterator()
@@ -101,8 +102,8 @@ object DefaultStateChange : StateChange, KLogging() {
     consumer: IConsumerInfo,
     isSetup: Boolean,
     providerClient: ProviderClient
-  ): Result<Map<String, Any>, Exception> {
-    verifier.reportStateForInteraction(state.name, provider, consumer, isSetup)
+  ): Result<Map<String, Any?>, Exception> {
+    verifier.reportStateForInteraction(state.name.toString(), provider, consumer, isSetup)
     try {
       var stateChangeHandler = consumer.stateChange
       var stateChangeUsesBody = consumer.stateChangeUsesBody
@@ -111,7 +112,7 @@ object DefaultStateChange : StateChange, KLogging() {
         stateChangeUsesBody = provider.stateChangeUsesBody
       }
       if (stateChangeHandler == null || (stateChangeHandler is String && stateChangeHandler.isBlank())) {
-        verifier.reporters.forEach { it.warnStateChangeIgnored(state.name, provider, consumer) }
+        verifier.reporters.forEach { it.warnStateChangeIgnored(state.name.toString(), provider, consumer) }
         return Ok(emptyMap())
       } else if (verifier.checkBuildSpecificTask.apply(stateChangeHandler)) {
         logger.debug { "Invoking build specific task $stateChangeHandler" }
@@ -133,8 +134,8 @@ object DefaultStateChange : StateChange, KLogging() {
         providerClient)
     } catch (e: Exception) {
       verifier.reporters.forEach {
-        it.stateChangeRequestFailedWithException(state.name, provider, consumer, isSetup, e,
-          verifier.projectHasProperty.apply(ProviderVerifierBase.PACT_SHOW_STACKTRACE))
+        it.stateChangeRequestFailedWithException(state.name.toString(), provider, consumer, isSetup, e,
+          verifier.projectHasProperty.apply(ProviderVerifier.PACT_SHOW_STACKTRACE))
       }
       return Err(e)
     }
@@ -160,7 +161,7 @@ object DefaultStateChange : StateChange, KLogging() {
     provider: IProviderInfo,
     isSetup: Boolean,
     providerClient: ProviderClient
-  ): Result<Map<String, Any>, Exception> {
+  ): Result<Map<String, Any?>, Exception> {
     return try {
       val url = stateChangeHandler as? URI ?: URI(stateChangeHandler.toString())
       val response = providerClient.makeStateChangeRequest(url, state, useBody, isSetup, provider.stateChangeTeardown)
@@ -168,7 +169,7 @@ object DefaultStateChange : StateChange, KLogging() {
       response?.use {
         if (response.statusLine.statusCode >= 400) {
           verifier.reporters.forEach {
-            it.stateChangeRequestFailed(state.name, provider, isSetup, response.statusLine.toString())
+            it.stateChangeRequestFailed(state.name.toString(), provider, isSetup, response.statusLine.toString())
           }
           Err(Exception("State Change Request Failed - ${response.statusLine}"))
         } else {
@@ -177,16 +178,16 @@ object DefaultStateChange : StateChange, KLogging() {
       } ?: Ok(emptyMap())
     } catch (ex: URISyntaxException) {
       verifier.reporters.forEach {
-        it.warnStateChangeIgnoredDueToInvalidUrl(state.name, provider, isSetup, stateChangeHandler)
+        it.warnStateChangeIgnoredDueToInvalidUrl(state.name.toString(), provider, isSetup, stateChangeHandler)
       }
       Ok(emptyMap())
     }
   }
 
-  private fun parseJsonResponse(entity: HttpEntity?): Result<Map<String, Any>, Exception> {
+  private fun parseJsonResponse(entity: HttpEntity?): Result<Map<String, Any?>, Exception> {
     return if (entity != null && ContentType.get(entity).mimeType == ContentType.APPLICATION_JSON.mimeType) {
       val body = EntityUtils.toString(entity)
-      Ok(JsonSlurper().parseText(body) as Map<String, Any>)
+      Ok(Json.toMap(JsonParser().parse(body)))
     } else {
       Ok(emptyMap())
     }

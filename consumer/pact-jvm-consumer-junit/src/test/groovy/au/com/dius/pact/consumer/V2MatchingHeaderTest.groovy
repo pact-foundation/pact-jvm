@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.junit.PactProviderRule
 import au.com.dius.pact.consumer.junit.PactVerification
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import org.apache.http.HttpStatus
@@ -40,7 +41,7 @@ class V2MatchingHeaderTest {
     ]
     assert pact.interactions.first().response.matchingRules.rulesForCategory('header')
       .toMap(PactSpecVersion.V2) == [
-      '$.header.Content-Type': [match: 'regex', regex: 'application/json; ?charset=(utf|UTF)-8']
+      '$.headers.Content-Type': [match: 'regex', regex: 'application/json; ?charset=(utf|UTF)-8']
     ]
 
     pact

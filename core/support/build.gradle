@@ -3,13 +3,20 @@ plugins {
 }
 
 dependencies {
-  compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-  compile "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
-  compile "com.google.code.findbugs:jsr305:3.0.2"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+  implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+  implementation "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
+  implementation "com.google.code.findbugs:jsr305:3.0.2"
+  implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
+  api "com.google.code.gson:gson:${project.gsonVersion}"
+  api('io.github.microutils:kotlin-logging:1.6.26') {
+    exclude group: 'org.jetbrains.kotlin'
+  }
+  api "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
 
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
-  testCompile 'org.hamcrest:hamcrest:2.1'
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.2'
 
   antlr "org.antlr:antlr4:4.7.2"
 }

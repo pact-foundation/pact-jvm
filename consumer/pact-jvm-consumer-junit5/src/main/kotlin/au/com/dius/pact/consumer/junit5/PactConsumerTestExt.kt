@@ -4,18 +4,18 @@ import au.com.dius.pact.consumer.BaseMockServer
 import au.com.dius.pact.consumer.ConsumerPactBuilder
 import au.com.dius.pact.consumer.MessagePactBuilder
 import au.com.dius.pact.consumer.MockServer
-import au.com.dius.pact.consumer.Pact
 import au.com.dius.pact.consumer.PactConsumerConfig
-import au.com.dius.pact.consumer.PactFolder
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.junit.JUnitTestSupport
 import au.com.dius.pact.consumer.mockServer
-import au.com.dius.pact.core.model.BasePact
-import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.consumer.model.MockProviderConfig
+import au.com.dius.pact.core.model.BasePact
+import au.com.dius.pact.core.model.DefaultPactWriter
+import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSpecVersion
-import au.com.dius.pact.core.model.PactWriter
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.model.annotations.Pact
+import au.com.dius.pact.core.model.annotations.PactFolder
 import au.com.dius.pact.core.model.messaging.MessagePact
 import mu.KLogging
 import org.junit.jupiter.api.Disabled
@@ -76,9 +76,9 @@ annotation class PactTestFor(
   val port: String = "",
 
   /**
-   * Pact specification version to support. Default is V3.
+   * Pact specification version to support. Will default to V3.
    */
-  val pactVersion: PactSpecVersion = PactSpecVersion.V3,
+  val pactVersion: PactSpecVersion = PactSpecVersion.UNSPECIFIED,
 
   /**
    * Test method that provides the Pact to use for the test. Default behaviour is to use the first one found.
@@ -113,7 +113,11 @@ data class ProviderInfo @JvmOverloads constructor(
 
   companion object {
     fun fromAnnotation(annotation: PactTestFor): ProviderInfo =
-      ProviderInfo(annotation.providerName, annotation.hostInterface, annotation.port, annotation.pactVersion,
+      ProviderInfo(annotation.providerName, annotation.hostInterface, annotation.port,
+        when (annotation.pactVersion) {
+          PactSpecVersion.UNSPECIFIED -> null
+          else -> annotation.pactVersion
+        },
         when (annotation.providerType) {
           ProviderType.UNSPECIFIED -> null
           else -> annotation.providerType
@@ -131,43 +135,51 @@ class JUnit5MockServerSupport(private val baseMockServer: BaseMockServer) : Mock
 class PactConsumerTestExt : Extension, BeforeEachCallback, BeforeAllCallback, ParameterResolver, AfterEachCallback, AfterAllCallback {
   override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
     val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
-    val providerInfo = store["providerInfo"] as ProviderInfo
-    val type = parameterContext.parameter.type
-    return when (providerInfo.providerType) {
-      ProviderType.ASYNCH -> when {
-        type.isAssignableFrom(List::class.java) -> true
-        type.isAssignableFrom(MessagePact::class.java) -> true
-        else -> false
+    if (store["providerInfo"] != null) {
+      val providerInfo = store["providerInfo"] as ProviderInfo
+      val type = parameterContext.parameter.type
+      return when (providerInfo.providerType) {
+        ProviderType.ASYNCH -> when {
+          type.isAssignableFrom(List::class.java) -> true
+          type.isAssignableFrom(MessagePact::class.java) -> true
+          else -> false
+        }
+        else -> when {
+          type.isAssignableFrom(MockServer::class.java) -> true
+          type.isAssignableFrom(RequestResponsePact::class.java) -> true
+          else -> false
+        }
       }
-      else -> when {
-        type.isAssignableFrom(MockServer::class.java) -> true
-        type.isAssignableFrom(RequestResponsePact::class.java) -> true
-        else -> false
-      }
+    } else {
+      return false
     }
   }
 
   override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any {
     val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
-    val providerInfo = store["providerInfo"] as ProviderInfo
-    val type = parameterContext.parameter.type
-    return when (providerInfo.providerType) {
-      ProviderType.ASYNCH -> {
-        val pact = store["pact"] as MessagePact
-        when {
-          type.isAssignableFrom(List::class.java) -> pact.messages
-          type.isAssignableFrom(MessagePact::class.java) -> pact
-          else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
+    if (store["providerInfo"] != null) {
+      val providerInfo = store["providerInfo"] as ProviderInfo
+      val type = parameterContext.parameter.type
+      return when (providerInfo.providerType) {
+        ProviderType.ASYNCH -> {
+          val pact = store["pact"] as MessagePact
+          when {
+            type.isAssignableFrom(List::class.java) -> pact.messages
+            type.isAssignableFrom(MessagePact::class.java) -> pact
+            else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
+          }
+        }
+        else -> {
+          val pact = store["pact"] as RequestResponsePact
+          when {
+            type.isAssignableFrom(MockServer::class.java) -> store["mockServer"]
+            type.isAssignableFrom(RequestResponsePact::class.java) -> pact
+            else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
+          }
         }
       }
-      else -> {
-        val pact = store["pact"] as RequestResponsePact
-        when {
-          type.isAssignableFrom(MockServer::class.java) -> store["mockServer"]
-          type.isAssignableFrom(RequestResponsePact::class.java) -> pact
-          else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
-        }
-      }
+    } else {
+      return false
     }
   }
 
@@ -299,7 +311,7 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, BeforeAllCallback, Pa
               "${pact.fileForPact(pactDirectory)}"
           }
           val pactFile = pact.fileForPact(pactDirectory)
-          PactWriter.writePact(pactFile, pact, config.pactVersion)
+          DefaultPactWriter.writePact(pactFile, pact, config.pactVersion)
         } else {
           JUnitTestSupport.validateMockServerResult(result)
         }

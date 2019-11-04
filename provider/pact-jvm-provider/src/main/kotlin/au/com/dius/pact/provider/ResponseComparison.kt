@@ -1,5 +1,8 @@
 package au.com.dius.pact.provider
 
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
 import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
@@ -10,84 +13,67 @@ import au.com.dius.pact.core.matchers.Mismatch
 import au.com.dius.pact.core.matchers.ResponseMatching
 import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.matchers.generateDiff
-import au.com.dius.pact.core.model.HttpPart
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.isNullOrEmpty
 import au.com.dius.pact.core.model.messaging.Message
-import au.com.dius.pact.core.model.valueAsString
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
+import au.com.dius.pact.core.support.Json
+import com.google.gson.JsonParser
 import mu.KLogging
 import org.apache.http.entity.ContentType
+import java.nio.charset.Charset
+
+data class BodyComparisonResult(
+  val mismatches: Map<String, List<BodyMismatch>> = emptyMap(),
+  val diff: List<String> = emptyList()
+)
+
+data class ComparisonResult(
+  val statusMismatch: StatusMismatch? = null,
+  val headerMismatches: Map<String, List<HeaderMismatch>> = emptyMap(),
+  val bodyMismatches: Either<BodyTypeMismatch, BodyComparisonResult> = Either.Right(BodyComparisonResult()),
+  val metadataMismatches: Map<String, List<MetadataMismatch>> = emptyMap()
+)
 
 /**
  * Utility class to compare responses
  */
 class ResponseComparison(
-  val expected: Response,
-  val actual: Map<String, Any>,
-  val actualStatus: Int,
-  val actualHeaders: Map<String, List<String>>,
+  val expectedHeaders: Map<String, List<String>>,
+  val expectedBody: OptionalBody,
+  val isJsonBody: Boolean,
+  val actualResponseContentType: ContentType,
   val actualBody: String?
 ) {
 
-  fun compareStatus(mismatches: List<Mismatch>): String? {
-    val statusMismatch = mismatches.find { it is StatusMismatch } as StatusMismatch?
-    if (statusMismatch != null) {
-      val expectedStatus = statusMismatch.expected
-      val actualStatus = statusMismatch.actual
-      return "expected status of $expectedStatus but was $actualStatus"
-    }
-    return null
-  }
+  fun statusResult(mismatches: List<Mismatch>) = mismatches.filterIsInstance<StatusMismatch>().firstOrNull()
 
-  fun compareHeaders(mismatches: List<Mismatch>): Map<String, String?> {
-    var headerResult = mutableMapOf<String, String?>()
-
-    if (expected.headers != null) {
-      val headerMismatchers = mismatches.filter { it is HeaderMismatch }
-        .map { it as HeaderMismatch }
-        .groupBy { it.headerKey }
-      if (headerMismatchers.isEmpty()) {
-          headerResult = expected.headers.orEmpty().mapValues { null }.toMutableMap()
-      } else {
-        expected.headers.orEmpty().forEach { headerKey, _ ->
-          if (headerMismatchers.containsKey(headerKey) && headerMismatchers[headerKey]!!.isNotEmpty()) {
-              headerResult[headerKey] = headerMismatchers[headerKey]!!.first().mismatch
-          } else {
-              headerResult[headerKey] = null
-          }
-        }
+  fun headerResult(mismatches: List<Mismatch>): Map<String, List<HeaderMismatch>> {
+    val headerMismatchers = mismatches.filterIsInstance<HeaderMismatch>()
+      .groupBy { it.headerKey }
+    return if (headerMismatchers.isEmpty()) {
+      emptyMap()
+    } else {
+      expectedHeaders.entries.associate { (headerKey, _) ->
+        headerKey to headerMismatchers[headerKey].orEmpty()
       }
     }
-
-    return headerResult
   }
 
-  fun compareBody(mismatches: List<Mismatch>): Map<String, Any> {
-    val result = mutableMapOf<String, Any>()
-
-    val bodyTypeMismatch = mismatches.find { it is BodyTypeMismatch } as BodyTypeMismatch?
-    if (bodyTypeMismatch != null) {
-      result["comparison"] = "Expected a response type of '${bodyTypeMismatch.expected}' but the actual " +
-          "type was '${bodyTypeMismatch.actual}'"
-    } else if (mismatches.any { it is BodyMismatch }) {
-      result["comparison"] = mismatches
-        .filter { it is BodyMismatch }
-        .map { it as BodyMismatch }
+  fun bodyResult(mismatches: List<Mismatch>): Either<BodyTypeMismatch, BodyComparisonResult> {
+    val bodyTypeMismatch = mismatches.filterIsInstance<BodyTypeMismatch>().firstOrNull()
+    return if (bodyTypeMismatch != null) {
+      bodyTypeMismatch.left()
+    } else {
+      val bodyMismatches = mismatches
+        .filterIsInstance<BodyMismatch>()
         .groupBy { bm -> bm.path }
-        .entries
-        .associate { (path, m) ->
-          path to m.map { bm -> mapOf("mismatch" to (bm.mismatch ?: "mismatch"), "diff" to bm.diff.orEmpty()) }
-        }
 
-      val contentType = this.actual["contentType"] as ContentType
-      result["diff"] = generateFullDiff(actualBody.orEmpty(), contentType.mimeType.toString(),
-        expected.body.valueAsString(), expected.jsonBody())
+      val contentType = this.actualResponseContentType
+      val diff = generateFullDiff(actualBody.orEmpty(), contentType.mimeType.toString(),
+        expectedBody.valueAsString(), isJsonBody)
+      BodyComparisonResult(bodyMismatches, diff).right()
     }
-
-    return result
   }
 
   companion object : KLogging() {
@@ -96,9 +82,7 @@ class ResponseComparison(
       var actualBodyString = ""
       if (actual.isNotEmpty()) {
         actualBodyString = if (mimeType.matches(Regex("application/.*json"))) {
-          val bodyMap = JsonSlurper().parseText(actual)
-          val bodyJson = JsonOutput.toJson(bodyMap)
-          JsonOutput.prettyPrint(bodyJson)
+          Json.gsonPretty.toJson(JsonParser().parse(actual))
         } else {
           actual
         }
@@ -107,7 +91,7 @@ class ResponseComparison(
       var expectedBodyString = ""
       if (response.isNotEmpty()) {
         expectedBodyString = if (jsonBody) {
-          JsonOutput.prettyPrint(response)
+          Json.gsonPretty.toJson(JsonParser().parse(response))
         } else {
           response
         }
@@ -123,62 +107,50 @@ class ResponseComparison(
       actualStatus: Int,
       actualHeaders: Map<String, List<String>>,
       actualBody: String?
-    ): Map<String, Any?> {
-      val result = mutableMapOf<String, Any?>()
-      val comparison = ResponseComparison(response, actualResponse, actualStatus,
-        actualHeaders.mapKeys { it.key.toUpperCase() }, actualBody)
+    ): ComparisonResult {
+      val actualResponseContentType = actualResponse["contentType"] as ContentType
+      val comparison = ResponseComparison(response.headers, response.body, response.jsonBody(),
+        actualResponseContentType, actualBody)
       val mismatches = ResponseMatching.responseMismatches(response, Response(actualStatus,
-        actualHeaders, OptionalBody.body(actualBody?.toByteArray())), true)
-
-      result["method"] = comparison.compareStatus(mismatches)
-      result["headers"] = comparison.compareHeaders(mismatches)
-      result["body"] = comparison.compareBody(mismatches)
-
-      return result
+        actualHeaders.toMutableMap(), OptionalBody.body(actualBody?.toByteArray(
+        actualResponseContentType.charset ?: Charset.defaultCharset()))), true)
+      return ComparisonResult(comparison.statusResult(mismatches), comparison.headerResult(mismatches),
+        comparison.bodyResult(mismatches))
     }
 
     @JvmStatic
     @JvmOverloads
-    fun compareMessage(message: Message, actual: OptionalBody, metadata: Map<String, Any>? = null): Map<String, Any?> {
-      val expected = message.asPactRequest()
-      val bodyMismatches = compareMessageBody(message, actual, expected)
+    fun compareMessage(message: Message, actual: OptionalBody, metadata: Map<String, Any>? = null): ComparisonResult {
+      val bodyMismatches = compareMessageBody(message, actual)
 
       val metadataMismatches = when (metadata) {
         null -> emptyList()
         else -> Matching.compareMessageMetadata(message.metaData, metadata, message.matchingRules)
       }
 
-      val responseComparison = ResponseComparison(expected as Response,
-        mapOf("contentType" to ContentType.parse(message.contentType)), 200, emptyMap(), actual.valueAsString())
-      val result = mutableMapOf<String, Any?>()
-      result["body"] = responseComparison.compareBody(bodyMismatches)
-      result["metadata"] = metadataResult(metadataMismatches)
-      return result
-    }
-
-    private fun metadataResult(mismatches: List<MetadataMismatch>): Map<String, Any> {
-      return if (mismatches.isNotEmpty()) {
-        mismatches.groupBy { it.key }.mapValues { (_, value) ->
-          value.joinToString(", ") { it.mismatch }
-        }
-      } else {
-        emptyMap()
-      }
+      val contentType = message.getParsedContentType()!!
+      val responseComparison = ResponseComparison(
+        mapOf("Content-Type" to listOf(message.getContentType())), message.contents,
+        contentType.mimeType == ContentType.APPLICATION_JSON.mimeType,
+        contentType, actual.valueAsString())
+      return ComparisonResult(bodyMismatches = responseComparison.bodyResult(bodyMismatches),
+        metadataMismatches = metadataMismatches.groupBy { it.key })
     }
 
     @JvmStatic
-    private fun compareMessageBody(message: Message, actual: OptionalBody, expected: HttpPart): MutableList<BodyMismatch> {
-      val result = MatchingConfig.lookupBodyMatcher(message.parsedContentType?.mimeType.orEmpty())
+    private fun compareMessageBody(message: Message, actual: OptionalBody): MutableList<BodyMismatch> {
+      val result = MatchingConfig.lookupBodyMatcher(message.getParsedContentType()?.mimeType.orEmpty())
       var bodyMismatches = mutableListOf<BodyMismatch>()
-      val actualMessage = Response(200, mapOf("Content-Type" to listOf(message.contentType)), actual)
       if (result != null) {
-        bodyMismatches = result.matchBody(expected, actualMessage, true).toMutableList()
+        bodyMismatches = result.matchBody(message.contents, actual, true, message.matchingRules)
+          .toMutableList()
       } else {
         val expectedBody = message.contents.valueAsString()
         if (expectedBody.isNotEmpty() && actual.isNullOrEmpty()) {
-          bodyMismatches.add(BodyMismatch(expectedBody, null))
+          bodyMismatches.add(BodyMismatch(expectedBody, null, "Expected body '$expectedBody' but was missing"))
         } else if (actual.valueAsString() != expectedBody) {
-          bodyMismatches.add(BodyMismatch(expectedBody, actual.valueAsString()))
+          bodyMismatches.add(BodyMismatch(expectedBody, actual.valueAsString(),
+            "Actual body '${actual.valueAsString()}' is not equal to the expected body '$expectedBody'"))
         }
       }
       return bodyMismatches

@@ -8,9 +8,8 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.UrlSource
-import au.com.dius.pact.core.model.valueAsString
 import au.com.dius.pact.core.pactbroker.PactBrokerConsumer
-import groovy.json.JsonBuilder
+import au.com.dius.pact.core.support.Json
 import groovy.lang.Binding
 import groovy.lang.Closure
 import groovy.lang.GroovyShell
@@ -71,11 +70,13 @@ interface IProviderInfo {
 }
 
 interface IConsumerInfo {
-  val name: String
-  val stateChange: Any?
-  val stateChangeUsesBody: Boolean
-  val packagesToScan: List<String>
-  val verificationType: PactVerification?
+  var name: String
+  var stateChange: Any?
+  var stateChangeUsesBody: Boolean
+  var packagesToScan: List<String>
+  var verificationType: PactVerification?
+  var pactSource: Any?
+  var pactFileAuthentication: List<Any?>
 }
 
 open class ConsumerInfo @JvmOverloads constructor (
@@ -84,11 +85,15 @@ open class ConsumerInfo @JvmOverloads constructor (
   override var stateChangeUsesBody: Boolean = true,
   override var packagesToScan: List<String> = emptyList(),
   override var verificationType: PactVerification? = null,
-  var pactSource: Any? = null,
-  var pactFileAuthentication: List<Any?> = emptyList()
+  override var pactSource: Any? = null,
+  override var pactFileAuthentication: List<Any?> = emptyList()
 ) : IConsumerInfo {
 
   fun toPactConsumer() = au.com.dius.pact.core.model.Consumer(name)
+
+  var stateChangeUrl: URL?
+    get() = if (stateChange != null) URL(stateChange.toString()) else null
+    set(value) { stateChange = value }
 
   /**
    * Sets the Pact File for the consumer
@@ -118,8 +123,6 @@ open class ConsumerInfo @JvmOverloads constructor (
     replaceWith = ReplaceWith("getPactSource")
   )
   fun getPactFile() = pactSource
-
-  fun url(path: String) = UrlSource<Interaction>(path)
 
   override fun toString(): String {
     return "ConsumerInfo(name='$name', stateChange=$stateChange, stateChangeUsesBody=$stateChangeUsesBody, " +
@@ -302,17 +305,17 @@ open class ProviderClient(
 
       if (postStateInBody) {
         method = HttpPost(urlBuilder.build())
-        val map = mutableMapOf<String, Any>("state" to state.name)
+        val map = mutableMapOf<String, Any>("state" to state.name.toString())
         if (state.params.isNotEmpty()) {
           map["params"] = state.params
         }
         if (stateChangeTeardown) {
           map["action"] = if (isSetup) "setup" else "teardown"
         }
-        method.entity = StringEntity(JsonBuilder(map).toPrettyString(), ContentType.APPLICATION_JSON)
+        method.entity = StringEntity(Json.gsonPretty.toJson(map), ContentType.APPLICATION_JSON)
       } else {
         urlBuilder.setParameter("state", state.name)
-        state.params.forEach { k, v -> urlBuilder.setParameter(k, v.toString()) }
+        state.params.forEach { (k, v) -> urlBuilder.setParameter(k, v.toString()) }
         if (stateChangeTeardown) {
           if (isSetup) {
             urlBuilder.setParameter(ACTION, "setup")
@@ -348,7 +351,8 @@ open class ProviderClient(
 
   fun handleResponse(httpResponse: HttpResponse): Map<String, Any> {
     logger.debug { "Received response: ${httpResponse.statusLine}" }
-    val response = mutableMapOf<String, Any>("statusCode" to httpResponse.statusLine.statusCode)
+    val response = mutableMapOf<String, Any>("statusCode" to httpResponse.statusLine.statusCode,
+      "contentType" to ContentType.TEXT_PLAIN)
 
     response["headers"] = httpResponse.allHeaders.groupBy({ header -> header.name }, { header -> header.value })
 

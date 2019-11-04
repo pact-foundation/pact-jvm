@@ -3,7 +3,7 @@ package au.com.dius.pact.core.matchers
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import mu.KLogging
 
-object MetadataMatcher: KLogging() {
+object MetadataMatcher : KLogging() {
 
   /**
    * Compares the expected metadata value to the actual, delegating to any matching rules if present
@@ -24,5 +24,4 @@ object MetadataMatcher: KLogging() {
         "'$expected' (${expected?.javaClass?.simpleName}) but was '$actual' (${actual?.javaClass?.simpleName})")
     }
   }
-
 }

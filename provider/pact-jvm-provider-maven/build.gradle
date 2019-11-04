@@ -1,15 +1,15 @@
 dependencies {
-    api project(":provider:pact-jvm-provider")
-    compile 'org.apache.maven:maven-plugin-api:3.6.0',
-      'org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.0'
-    compile 'org.apache.maven:maven-core:3.6.0'
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-    compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
+  api project(":provider:pact-jvm-provider")
+  compile 'org.apache.maven:maven-plugin-api:3.6.0',
+    'org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.0'
+  compile 'org.apache.maven:maven-core:3.6.0'
+  compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+  compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+  compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
+  compile "org.codehaus.groovy:groovy:${project.groovyVersion}"
 
   testCompile "org.codehaus.groovy:groovy-nio:${project.groovyVersion}:indy"
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-  testCompile 'net.bytebuddy:byte-buddy:1.9.12'
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os

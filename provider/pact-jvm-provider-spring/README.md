@@ -75,10 +75,11 @@ is set with the version of your provider.
     }
 ```
 
-## Using a Spring runner
+## Using Spring runners
 
-You can use `SpringRestPactRunner` instead of the default Pact runner to use the Spring test annotations. This will
-allow you to inject or mock spring beans.
+You can use `SpringRestPactRunner` or `SpringMessagePactRunner` instead of the default Pact runner to use the Spring test annotations. This will
+allow you to inject or mock spring beans. `SpringRestPactRunner` is for restful webapps and `SpringMessagePactRunner` is
+for async message tests.
 
 For example:
 
@@ -148,8 +149,10 @@ public class PactVerificationTest {
 ```
 
 ### Using a random port with a Springboot test
+If you use a random port in a springboot test (by setting `SpringBootTest.WebEnvironment.RANDOM_PORT`), you need to set it to the `TestTarget`. How this works is different for JUnit4 and JUnit5.
 
-If you use a random port in a springboot test (by setting `SpringBootTest.WebEnvironment.RANDOM_PORT`), you can use the
+#### JUnit4
+You can use the
 `SpringBootHttpTarget` which will get the application port from the spring application context.
 
 For example:
@@ -166,3 +169,27 @@ public class PactVerificationTest {
 
 }
 ```
+
+#### JUnit5
+You actually don't need to dependend on `pact-jvm-provider-spring` for this. It's sufficient to depend on `pact-jvm-provider-junit5`. 
+
+You can set the port to the `HttpTestTarget` object in the before method.
+
+```java
+@Provider("My Service")
+@PactBroker
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class PactVerificationTest {
+
+    @LocalServerPort
+    private int port;
+
+    @BeforeEach
+    void before(PactVerificationContext context) {
+        context.setTarget(new HttpTestTarget("localhost", port));
+    }
+
+}
+```
+
+

@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.support.Json
 import spock.lang.Specification
 
 class RequestSpec extends Specification {
@@ -13,7 +14,7 @@ class RequestSpec extends Specification {
     ]
 
     when:
-    def request = Request.fromMap(json)
+    def request = Request.fromJson(Json.INSTANCE.toJson(json).asJsonObject)
 
     then:
     !request.matchingRules.empty
@@ -31,7 +32,7 @@ class RequestSpec extends Specification {
     request.generators.empty
 
     where:
-    request = Request.fromMap([:])
+    request = Request.fromJson(Json.INSTANCE.toJson([:]).asJsonObject)
   }
 
   def 'detects multipart file uploads based on the content type'() {
@@ -46,5 +47,17 @@ class RequestSpec extends Specification {
     'multipart/form-data; boundary=boundaryMarker' | true
     'multipart/form-data;boundary=boundaryMarker'  | true
     'MULTIPART/FORM-DATA; boundary=boundaryMarker' | true
+  }
+
+  def 'handles the cookie header'() {
+    expect:
+    new Request(headers: ['Cookie': ['test=12345; test2=abcd']]).cookie() == ['test=12345', 'test2=abcd']
+  }
+
+  def 'handles the cookie header with multiple values'() {
+    expect:
+    new Request(headers: ['Cookie': ['test=12345', 'test2=abcd; test3=xgfes']]).cookie() == [
+      'test=12345', 'test2=abcd', 'test3=xgfes'
+    ]
   }
 }

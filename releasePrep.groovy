@@ -8,15 +8,18 @@ def executeOnShell(String command, Closure closure = null) {
 
 def executeOnShell(String command, File workingDir, Closure closure = null) {
   println "==>: $command"
-  def process = new ProcessBuilder(['sh', '-c', command])
+  def processBuilder = new ProcessBuilder(['sh', '-c', command])
     .directory(workingDir)
-    .redirectErrorStream(true)
-    .start()
-  def cl = closure
-  if (cl == null) {
-    cl = { println it }
+
+  if (closure) {
+    processBuilder.redirectErrorStream(true)
+  } else {
+    processBuilder.inheritIO()
   }
-  process.inputStream.eachLine cl
+  def process = processBuilder.start()
+  if (closure) {
+    process.inputStream.eachLine closure
+  }
   process.waitFor()
   if (process.exitValue() > 0) {
     System.exit(process.exitValue())
@@ -39,7 +42,7 @@ def javaVersion
 executeOnShell("./gradlew --version 2>/dev/null | awk '/^JVM:/ { print \$2 }'") {
   javaVersion = Version.valueOf(it.trim().replace('_', '+b'))
 }
-if (!javaVersion?.satisfies('>=1.8.0')) {
+if (!javaVersion?.satisfies('=1.8.0')) {
   ask("You are building against Java $javaVersion. Do you want to exit?: [Y]") {
     System.exit(1)
   }
@@ -107,15 +110,14 @@ ask('Tag and Push commits?: [Y]') {
 }
 
 ask('Publish artifacts to maven central?: [Y]') {
-//  executeOnShell './gradlew clean publish :pact-jvm-provider-gradle:publishPlugins -S -x :pact-publish:uploadArchives'
-  executeOnShell './gradlew clean publish -S -x :pact-publish:publish'
+  executeOnShell './gradlew clean publish :provider:pact-jvm-provider-gradle:publishPlugins -S -x :pact-publish:uploadArchives'
 }
 
 ask('Publish pacts to pact-foundation.pact.dius.com.au?: [Y]') {
   executeOnShell 'PACT_PUBLISH=true ./gradlew :pact-publish:test :pact-publish:pactPublish'
 }
 
-def nextVer = Version.valueOf(releaseVer).incrementPreReleaseVersion()
+def nextVer = Version.valueOf(releaseVer).incrementPatchVersion()
 ask("Bump version to $nextVer?: [Y]") {
   executeOnShell "sed -i -e \"s/version = '${releaseVer}'/version = '${nextVer}'/\" build.gradle"
   executeOnShell("git add build.gradle")

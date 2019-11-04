@@ -681,4 +681,66 @@ public class LambdaDslObject {
         return this;
     }
 
+  /**
+   * Attribute whose values are generated from the provided expression. Will use an ISO format.
+   * @param name Attribute name
+   * @param expression Date expression
+   */
+  public LambdaDslObject dateExpression(String name, String expression) {
+    object.dateExpression(name, expression);
+    return this;
+  }
+
+  /**
+   * Attribute whose values are generated from the provided expression
+   * @param name Attribute name
+   * @param expression Date expression
+   * @param format Date format to use for values
+   */
+  public LambdaDslObject dateExpression(String name, String expression, String format) {
+    object.dateExpression(name, expression, format);
+    return this;
+  }
+
+  /**
+   * Attribute whose values are generated from the provided expression. Will use an ISO format.
+   * @param name Attribute name
+   * @param expression Time expression
+   */
+  public LambdaDslObject timeExpression(String name, String expression) {
+    object.timeExpression(name, expression);
+    return this;
+  }
+
+  /**
+   * Attribute whose values are generated from the provided expression
+   * @param name Attribute name
+   * @param expression Time expression
+   * @param format Time format to use for values
+   */
+  public LambdaDslObject timeExpression(String name, String expression, String format) {
+    object.timeExpression(name, expression, format);
+    return this;
+  }
+
+  /**
+   * Attribute whose values are generated from the provided expression. Will use an ISO format.
+   * @param name Attribute name
+   * @param expression Datetime expression
+   */
+  public LambdaDslObject datetimeExpression(String name, String expression) {
+    object.datetimeExpression(name, expression);
+    return this;
+  }
+
+  /**
+   * Attribute whose values are generated from the provided expression
+   * @param name Attribute name
+   * @param expression Datetime expression
+   * @param format Datetime format to use for values
+   */
+  public LambdaDslObject datetimeExpression(String name, String expression, String format) {
+    object.datetimeExpression(name, expression, format);
+    return this;
+  }
 }

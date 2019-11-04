@@ -42,7 +42,7 @@ class CategorySpec extends Specification {
     category.toMap(PactSpecVersion.V3) == [matchers: [[match: 'regex', regex: '\\w+']], combine: 'AND']
   }
 
-  @Issue('#786')
+  @Issue(['#786', '#882'])
   def 'writes header matchers in the correct format'() {
     given:
     def category = new Category('header', [
@@ -50,7 +50,27 @@ class CategorySpec extends Specification {
     ])
 
     expect:
-    category.toMap(PactSpecVersion.V2) == ['$.header.Content-Type': [match: 'regex', regex: 'application/json;\\s?charset=(utf|UTF)-8']]
+    category.toMap(PactSpecVersion.V2) == ['$.headers.Content-Type': [match: 'regex', regex: 'application/json;\\s?charset=(utf|UTF)-8']]
     category.toMap(PactSpecVersion.V3) == ['Content-Type': [matchers: [[match: 'regex', regex: 'application/json;\\s?charset=(utf|UTF)-8']], combine: 'AND']]
+  }
+
+  @Issue(['#895'])
+  def 'when re-keying the matchers, drop any dollar from the start'() {
+    given:
+    def category = new Category('body', [
+      '$.bestandstype': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.bestandsid': new MatchingRuleGroup([TypeMatcher.INSTANCE])
+    ])
+    category.applyMatcherRootPrefix('payload')
+
+    expect:
+    category.toMap(PactSpecVersion.V2) == [
+      '$.body.payload.bestandstype': [match: 'type'],
+      '$.body.payload.bestandsid': [match: 'type']
+    ]
+    category.toMap(PactSpecVersion.V3) == [
+      'payload.bestandstype': [matchers: [[match: 'type']], combine: 'AND'],
+      'payload.bestandsid': [matchers: [[match: 'type']], combine: 'AND']
+    ]
   }
 }

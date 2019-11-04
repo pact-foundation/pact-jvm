@@ -17,12 +17,12 @@ interface VerifierReporter {
    */
   val ext: String?
 
-  fun setReportDir(reportDir: File)
-  fun setReportFile(reportFile: File)
+  var reportDir: File?
+  var reportFile: File
 
   fun initialise(provider: IProviderInfo)
   fun finaliseReport()
-  fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo)
+  fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, tag: String?)
   fun verifyConsumerFromUrl(pactUrl: UrlPactSource, consumer: IConsumerInfo)
   fun verifyConsumerFromFile(pactFile: PactSource, consumer: IConsumerInfo)
   fun pactLoadFailureForConsumer(consumer: IConsumerInfo, message: String)
@@ -30,7 +30,7 @@ interface VerifierReporter {
   fun warnPactFileHasNoInteractions(pact: Pact<Interaction>)
   fun interactionDescription(interaction: Interaction)
   fun stateForInteraction(state: String, provider: IProviderInfo, consumer: IConsumerInfo, isSetup: Boolean)
-  fun warnStateChangeIgnored(state: String, IProviderInfo: IProviderInfo, IConsumerInfo: IConsumerInfo)
+  fun warnStateChangeIgnored(state: String, provider: IProviderInfo, consumer: IConsumerInfo)
   fun stateChangeRequestFailedWithException(
     state: String,
     provider: IProviderInfo,

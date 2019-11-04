@@ -1,30 +1,29 @@
 package au.com.dius.pact.core.matchers
 
-import au.com.dius.pact.core.model.HttpPart
-import au.com.dius.pact.core.model.isEmpty
-import au.com.dius.pact.core.model.isMissing
-import au.com.dius.pact.core.model.isNotPresent
-import au.com.dius.pact.core.model.isPresent
+import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
-import au.com.dius.pact.core.model.valueAsString
-import au.com.dius.pact.core.model.orEmpty
 import mu.KLogging
 import org.apache.http.NameValuePair
 import org.apache.http.client.utils.URLEncodedUtils
 
 class FormPostBodyMatcher : BodyMatcher {
-  override fun matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): List<BodyMismatch> {
-    val expectedBody = expected.body
-    val actualBody = actual.body
+  override fun matchBody(
+    expected: OptionalBody,
+    actual: OptionalBody,
+    allowUnexpectedKeys: Boolean,
+    matchingRules: MatchingRules
+  ): List<BodyMismatch> {
+    val expectedBody = expected
+    val actualBody = actual
     return when {
       expectedBody.isMissing() -> emptyList()
       expectedBody.isPresent() && actualBody.isNotPresent() -> listOf(BodyMismatch(expectedBody.orEmpty(),
               null, "Expected a form post body but was missing"))
       expectedBody.isEmpty() && actualBody.isEmpty() -> emptyList()
       else -> {
-        val expectedParameters = URLEncodedUtils.parse(expectedBody.valueAsString(), expected.charset(), '&')
-        val actualParameters = URLEncodedUtils.parse(actualBody.valueAsString(), actual.charset(), '&')
-        compareParameters(expectedParameters, actualParameters, expected.matchingRules, allowUnexpectedKeys)
+        val expectedParameters = URLEncodedUtils.parse(expectedBody.valueAsString(), expected.contentType.asCharset(), '&')
+        val actualParameters = URLEncodedUtils.parse(actualBody.valueAsString(), actual.contentType.asCharset(), '&')
+        compareParameters(expectedParameters, actualParameters, matchingRules, allowUnexpectedKeys)
       }
     }
   }

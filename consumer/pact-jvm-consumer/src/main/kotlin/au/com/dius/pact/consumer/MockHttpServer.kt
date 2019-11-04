@@ -6,15 +6,16 @@ import au.com.dius.pact.consumer.model.MockServerImplementation
 import au.com.dius.pact.core.matchers.FullRequestMatch
 import au.com.dius.pact.core.matchers.PartialRequestMatch
 import au.com.dius.pact.core.matchers.RequestMatching
+import au.com.dius.pact.core.model.DefaultPactWriter
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
-import au.com.dius.pact.core.model.PactWriter
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.generators.GeneratorTestMode
 import au.com.dius.pact.core.model.queryStringToMap
+import com.sun.net.httpserver.Headers
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpHandler
 import com.sun.net.httpserver.HttpServer
@@ -25,8 +26,6 @@ import org.apache.http.client.methods.HttpOptions
 import org.apache.http.config.RegistryBuilder
 import org.apache.http.conn.socket.ConnectionSocketFactory
 import org.apache.http.conn.socket.PlainConnectionSocketFactory
-import org.apache.http.conn.ssl.NoopHostnameVerifier
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory
 import org.apache.http.conn.ssl.SSLSocketFactory
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy
 import org.apache.http.entity.ContentType
@@ -36,7 +35,6 @@ import java.lang.Thread.sleep
 import java.nio.charset.Charset
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
-import javax.net.ssl.SSLContext
 
 /**
  * Returns a mock server for the pact and config
@@ -77,11 +75,11 @@ interface MockServer {
   fun validateMockServerState(testResult: Any?): PactVerificationResult
 }
 
-abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockProviderConfig): MockServer {
+abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockProviderConfig) : MockServer {
 
-  internal val mismatchedRequests = ConcurrentHashMap<Request, MutableList<PactVerificationResult>>()
-  internal val matchedRequests = ConcurrentLinkedQueue<Request>()
-  internal val requestMatcher = RequestMatching(pact.interactions)
+  private val mismatchedRequests = ConcurrentHashMap<Request, MutableList<PactVerificationResult>>()
+  private val matchedRequests = ConcurrentLinkedQueue<Request>()
+  private val requestMatcher = RequestMatching(pact.interactions)
 
   abstract fun start()
   abstract fun stop()
@@ -132,7 +130,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
       val pactDirectory = context.pactFolder
       val pactFile = pact.fileForPact(pactDirectory)
       logger.debug { "Writing pact ${pact.consumer.name} -> ${pact.provider.name} to file $pactFile" }
-      PactWriter.writePact(pactFile, pact, pactVersion)
+      DefaultPactWriter.writePact(pactFile, pact, pactVersion)
     }
 
     return result
@@ -157,7 +155,7 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
       is FullRequestMatch -> {
         val interaction = matchResult.interaction as RequestResponseInteraction
         matchedRequests.add(interaction.request)
-        return interaction.response.generatedResponse(emptyMap<String, Any>(), GeneratorTestMode.Consumer)
+        return interaction.response.generatedResponse(emptyMap(), GeneratorTestMode.Consumer)
       }
       is PartialRequestMatch -> {
         val interaction = matchResult.problems.keys.first() as RequestResponseInteraction
@@ -175,11 +173,12 @@ abstract class BaseMockServer(val pact: RequestResponsePact, val config: MockPro
 
   private fun invalidResponse(request: Request): Response {
     val body = "{ \"error\": \"Unexpected request : ${StringEscapeUtils.escapeJson(request.toString())}\" }"
-    return Response(500, mapOf("Access-Control-Allow-Origin" to listOf("*"), "Content-Type" to listOf("application/json"),
-      "X-Pact-Unexpected-Request" to listOf("1")), OptionalBody.body(body.toByteArray()))
+    return Response(500, mutableMapOf("Access-Control-Allow-Origin" to listOf("*"), "Content-Type" to listOf("application/json"),
+      "X-Pact-Unexpected-Request" to listOf("1")), OptionalBody.body(body.toByteArray(),
+      au.com.dius.pact.core.model.ContentType.JSON))
   }
 
-  companion object: KLogging()
+  companion object : KLogging()
 }
 
 abstract class BaseJdkMockServer(
@@ -204,18 +203,16 @@ abstract class BaseJdkMockServer(
       } catch (e: Exception) {
         logger.error(e) { "Failed to generate response" }
         pactResponseToHttpExchange(Response(500, mutableMapOf("Content-Type" to listOf("application/json")),
-          OptionalBody.body("{\"error\": ${e.message}}".toByteArray())), exchange)
+          OptionalBody.body("{\"error\": ${e.message}}".toByteArray(), au.com.dius.pact.core.model.ContentType.JSON)), exchange)
       }
     }
   }
 
   private fun pactResponseToHttpExchange(response: Response, exchange: HttpExchange) {
     val headers = response.headers
-    if (headers != null) {
-      exchange.responseHeaders.putAll(headers)
-    }
+    exchange.responseHeaders.putAll(headers)
     val body = response.body
-    if (body != null && body.isPresent()) {
+    if (body.isPresent()) {
       val bytes = body.unwrap()
       exchange.sendResponseHeaders(response.status, bytes.size.toLong())
       exchange.responseBody.write(bytes)
@@ -227,14 +224,23 @@ abstract class BaseJdkMockServer(
 
   private fun toPactRequest(exchange: HttpExchange): Request {
     val headers = exchange.requestHeaders
-    val bodyContents = exchange.requestBody.bufferedReader(calculateCharset(headers)).readText()
+    val bodyContents = exchange.requestBody.readBytes()
     val body = if (bodyContents.isEmpty()) {
       OptionalBody.empty()
     } else {
-      OptionalBody.body(bodyContents.toByteArray())
+      OptionalBody.body(bodyContents, contentType(headers))
     }
     return Request(exchange.requestMethod, exchange.requestURI.path,
-      queryStringToMap(exchange.requestURI.rawQuery), headers, body)
+      queryStringToMap(exchange.requestURI.rawQuery).toMutableMap(), headers.toMutableMap(), body)
+  }
+
+  private fun contentType(headers: Headers): au.com.dius.pact.core.model.ContentType {
+    val contentType = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
+    return if (contentType != null && contentType.value.isNotEmpty()) {
+      au.com.dius.pact.core.model.ContentType(contentType.value.first())
+    } else {
+      au.com.dius.pact.core.model.ContentType.JSON
+    }
   }
 
   private fun initServer() {
@@ -272,16 +278,16 @@ abstract class BaseJdkMockServer(
   companion object : KLogging()
 }
 
-open class MockHttpServer(pact: RequestResponsePact, config: MockProviderConfig)
-  : BaseJdkMockServer(pact, config, HttpServer.create(config.address(), 0))
+open class MockHttpServer(pact: RequestResponsePact, config: MockProviderConfig) :
+  BaseJdkMockServer(pact, config, HttpServer.create(config.address(), 0))
 
-open class MockHttpsServer(pact: RequestResponsePact, config: MockProviderConfig)
-  : BaseJdkMockServer(pact, config, HttpsServer.create(config.address(), 0))
+open class MockHttpsServer(pact: RequestResponsePact, config: MockProviderConfig) :
+  BaseJdkMockServer(pact, config, HttpsServer.create(config.address(), 0))
 
-fun calculateCharset(headers: Map<String, List<String>>): Charset {
+fun calculateCharset(headers: Map<String, List<String?>>): Charset {
   val contentType = headers.entries.find { it.key.toUpperCase() == "CONTENT-TYPE" }
   val default = Charset.forName("UTF-8")
-  if (contentType != null && contentType.value.isNotEmpty()) {
+  if (contentType != null && contentType.value.isNotEmpty() && !contentType.value.first().isNullOrEmpty()) {
     try {
       return ContentType.parse(contentType.value.first())?.charset ?: default
     } catch (e: Exception) {

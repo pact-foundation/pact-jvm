@@ -12,6 +12,7 @@ import org.apache.commons.lang3.time.DateFormatUtils
 class TimeMatcher extends Matcher {
 
   String pattern
+  String expression = null
 
   String getPattern() {
     pattern ?: DateFormatUtils.ISO_TIME_FORMAT.pattern
@@ -22,7 +23,7 @@ class TimeMatcher extends Matcher {
   }
 
   Generator getGenerator() {
-    super.@value == null ? new TimeGenerator(getPattern(), null) : null
+    super.@value == null ? new TimeGenerator(getPattern(), expression) : null
   }
 
   def getValue() {

@@ -1,7 +1,7 @@
 package au.com.dius.pact.consumer.junit5;
 
 import au.com.dius.pact.consumer.MockServer;
-import au.com.dius.pact.consumer.Pact;
+import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.core.model.RequestResponsePact;

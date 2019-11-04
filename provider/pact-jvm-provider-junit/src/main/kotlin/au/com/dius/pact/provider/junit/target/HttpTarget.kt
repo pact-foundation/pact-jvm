@@ -62,7 +62,7 @@ open class HttpTarget
     consumerName: String,
     interaction: Interaction,
     source: PactSource,
-    context: Map<String, Any?>
+    context: Map<String, Any>
   ) {
     val provider = getProviderInfo(source)
     val consumer = ConsumerInfo(consumerName)
@@ -94,11 +94,11 @@ open class HttpTarget
     setupReporters(verifier, provider.name, interaction.description)
 
     verifier.initialiseReporters(provider)
-    verifier.reportVerificationForConsumer(consumer, provider)
+    verifier.reportVerificationForConsumer(consumer, provider, null)
 
-    if (!interaction.providerStates.isEmpty()) {
+    if (interaction.providerStates.isNotEmpty()) {
       for ((name) in interaction.providerStates) {
-        verifier.reportStateForInteraction(name, provider, consumer, true)
+        verifier.reportStateForInteraction(name.toString(), provider, consumer, true)
       }
     }
 
@@ -117,8 +117,8 @@ open class HttpTarget
     providerInfo.insecure = insecure
 
     val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
-    if (!methods.isEmpty()) {
-      providerInfo.setRequestFilter(Consumer { httpRequest: HttpRequest ->
+    if (methods.isNotEmpty()) {
+      providerInfo.requestFilter = Consumer { httpRequest: HttpRequest ->
         methods.forEach { method ->
           try {
             method.invokeExplosively(testTarget, httpRequest)
@@ -126,7 +126,7 @@ open class HttpTarget
             throw AssertionError("Request filter method ${method.name} failed with an exception", t)
           }
         }
-      })
+      }
     }
 
     return providerInfo

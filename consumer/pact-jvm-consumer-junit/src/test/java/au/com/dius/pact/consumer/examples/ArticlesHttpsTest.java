@@ -1,11 +1,10 @@
 package au.com.dius.pact.consumer.examples;
 
-import au.com.dius.pact.consumer.Pact;
+import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.exampleclients.ArticlesRestClient;
 import au.com.dius.pact.consumer.junit.PactHttpsProviderRule;
-import au.com.dius.pact.consumer.junit.PactProviderRule;
 import au.com.dius.pact.consumer.junit.PactVerification;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;

@@ -14,9 +14,18 @@ import java.io.File
  * Pact verifier reporter that displays the results of the verification to the console using ASCII escapes
  */
 class AnsiConsoleReporter(
-  private var displayFullDiff: Boolean = false,
-  override val ext: String? = null
+  var name: String,
+  override var reportDir: File?,
+  var displayFullDiff: Boolean
 ) : VerifierReporter {
+
+  constructor(name: String, reportDir: File?) : this(name, reportDir, false)
+
+  override val ext: String? = null
+
+  override var reportFile: File
+    get() = TODO("not implemented")
+    set(value) {}
 
   override fun includesMetadata() {
     AnsiConsole.out().println("      includes message metadata")
@@ -37,17 +46,17 @@ class AnsiConsoleReporter(
       .bold().a(value).boldOff().a("\" (").fg(Ansi.Color.RED).a("FAILED").reset().a(")"))
   }
 
-  override fun setReportDir(reportDir: File) { }
-
-  override fun setReportFile(reportFile: File) { }
-
   override fun initialise(provider: IProviderInfo) { }
 
   override fun finaliseReport() { }
 
-  override fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo) {
-    AnsiConsole.out().println(Ansi.ansi().a("\nVerifying a pact between ").bold().a(consumer.name)
-      .boldOff().a(" and ").bold().a(provider.name).boldOff())
+  override fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, tag: String?) {
+    val ansi = Ansi.ansi().a("\nVerifying a pact between ").bold().a(consumer.name)
+            .boldOff().a(" and ").bold().a(provider.name).boldOff()
+
+    if (tag != null) ansi.a(" for tag ").a(tag)
+
+    AnsiConsole.out().println(ansi)
   }
 
   override fun verifyConsumerFromUrl(pactUrl: UrlPactSource, consumer: IConsumerInfo) {

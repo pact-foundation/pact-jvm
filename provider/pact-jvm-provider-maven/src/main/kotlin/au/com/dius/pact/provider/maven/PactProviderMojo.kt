@@ -1,21 +1,19 @@
 package au.com.dius.pact.provider.maven
 
+import au.com.dius.pact.core.support.toUrl
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerifierException
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.reporters.ReporterManager
-import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugin.MojoFailureException
-import org.apache.maven.plugins.annotations.Component
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.plugins.annotations.ResolutionScope
-import org.apache.maven.settings.Settings
 import org.apache.maven.settings.crypto.DefaultSettingsDecryptionRequest
-import org.apache.maven.settings.crypto.SettingsDecrypter
 import org.fusesource.jansi.AnsiConsole
 import java.io.File
 import java.util.function.Function
@@ -25,7 +23,7 @@ import java.util.function.Supplier
  * Pact Verify Maven Plugin
  */
 @Mojo(name = "verify", requiresDependencyResolution = ResolutionScope.TEST)
-open class PactProviderMojo : AbstractMojo() {
+open class PactProviderMojo : PactBaseMojo() {
 
   @Parameter(defaultValue = "\${project.testClasspathElements}", required = true)
   private lateinit var classpathElements: List<String>
@@ -41,12 +39,6 @@ open class PactProviderMojo : AbstractMojo() {
 
   @Parameter(required = true, defaultValue = "\${project.version}")
   private lateinit var projectVersion: String
-
-  @Parameter(defaultValue = "\${settings}", readonly = true)
-  private lateinit var settings: Settings
-
-  @Component
-  private lateinit var decrypter: SettingsDecrypter
 
   @Parameter(defaultValue = "true")
   var failIfNoPactsFound: Boolean = true
@@ -80,8 +72,7 @@ open class PactProviderMojo : AbstractMojo() {
         val reportsDir = File(buildDir, "reports/pact")
         verifier.reporters = reports.map { name ->
           if (ReporterManager.reporterDefined(name)) {
-            val reporter = ReporterManager.createReporter(name)
-            reporter.setReportDir(reportsDir)
+            val reporter = ReporterManager.createReporter(name, reportsDir)
             reporter
           } else {
             throw MojoFailureException("There is no defined reporter named '$name'. Available reporters are: " +
@@ -108,6 +99,11 @@ open class PactProviderMojo : AbstractMojo() {
         if (provider.pactBrokerUrl != null || provider.pactBroker != null) {
           loadPactsFromPactBroker(provider, consumers)
         }
+        if (provider.pactFileDirectory == null && provider.pactFileDirectories.isEmpty() &&
+          provider.pactBrokerUrl == null && provider.pactBroker == null && (
+            pactBrokerUrl != null || pactBrokerServerId != null)) {
+          loadPactsFromPactBroker(provider, consumers, brokerClientOptions())
+        }
 
         if (consumers.isEmpty() && failIfNoPactsFound) {
           throw MojoFailureException("No pact files were found for provider '${provider.name}'")
@@ -128,16 +124,24 @@ open class PactProviderMojo : AbstractMojo() {
     }
   }
 
-  open fun providerVerifier() = ProviderVerifier()
+  open fun providerVerifier(): IProviderVerifier = ProviderVerifier()
 
-  fun loadPactsFromPactBroker(provider: Provider, consumers: MutableList<IConsumerInfo>) {
+  fun loadPactsFromPactBroker(
+    provider: Provider,
+    consumers: MutableList<IConsumerInfo>,
+    brokerClientOptions: MutableMap<String, Any> = mutableMapOf()
+  ) {
     val pactBroker = provider.pactBroker
-    val pactBrokerUrl = pactBroker?.url ?: provider.pactBrokerUrl
-    val options = mutableMapOf<String, Any>()
+    val pactBrokerUrl = pactBroker?.url ?: provider.pactBrokerUrl ?: pactBrokerUrl.toUrl()
+    val options = brokerClientOptions.toMutableMap()
 
     if (pactBroker?.authentication != null) {
-      options["authentication"] = listOf("basic", provider.pactBroker.authentication.username,
-        provider.pactBroker.authentication.password)
+      if ("bearer" == provider.pactBroker.authentication.scheme || provider.pactBroker.authentication.token != null) {
+        options["authentication"] = listOf("bearer", provider.pactBroker.authentication.token)
+      } else if ("basic" == provider.pactBroker.authentication.scheme) {
+        options["authentication"] = listOf(provider.pactBroker.authentication.scheme, provider.pactBroker.authentication.username,
+                provider.pactBroker.authentication.password)
+      }
     } else if (!pactBroker?.serverId.isNullOrEmpty()) {
       val serverDetails = settings.getServer(provider.pactBroker!!.serverId)
       val request = DefaultSettingsDecryptionRequest(serverDetails)

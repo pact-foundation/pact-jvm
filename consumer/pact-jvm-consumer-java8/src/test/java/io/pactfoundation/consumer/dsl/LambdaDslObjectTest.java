@@ -45,6 +45,29 @@ public class LambdaDslObjectTest {
     }
 
     @Test
+    public void testNumberValue() {
+         /*
+            { "number": 1 }
+         */
+
+        // Old DSL
+        final String pactDslJson = new PactDslJsonBody()
+          .numberValue("number", 1)
+          .getBody().toString();
+
+        // Lambda DSL
+        final PactDslJsonBody actualPactDsl = new PactDslJsonBody("", "", null);
+        final LambdaDslObject object = new LambdaDslObject(actualPactDsl);
+        object
+          .numberValue("number", 1);
+        actualPactDsl.close();
+
+        String actualJson = actualPactDsl.getBody().toString();
+        assertThat(actualJson, is(pactDslJson));
+        assertThat(actualPactDsl.getMatchers().allMatchingRules().isEmpty(), is(true));
+    }
+
+    @Test
     public void testStringMatcher() {
         final PactDslJsonBody actualPactDsl = new PactDslJsonBody("", "", null);
         final LambdaDslObject object = new LambdaDslObject(actualPactDsl);

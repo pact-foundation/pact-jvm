@@ -27,7 +27,7 @@ public abstract class PactDslRequestBase {
   private static final long DATE_2000 = 949323600000L;
 
   protected final PactDslRequestWithoutPath defaultRequestValues;
-  protected String requestMethod;
+  protected String requestMethod = "GET";
   protected Map<String, List<String>> requestHeaders = new HashMap<>();
   protected Map<String, List<String>> query = new HashMap<>();
   protected OptionalBody requestBody = OptionalBody.missing();
@@ -59,7 +59,8 @@ public abstract class PactDslRequestBase {
     OutputStream os = new ByteArrayOutputStream();
     multipart.writeTo(os);
 
-    requestBody = OptionalBody.body(os.toString().getBytes());
+    requestBody = OptionalBody.body(os.toString().getBytes(),
+      new au.com.dius.pact.core.model.ContentType(multipart.getContentType().getValue()));
     requestMatchers.addCategory("header").addRule(CONTENT_TYPE, new RegexMatcher(MULTIPART_HEADER_REGEX,
       multipart.getContentType().getValue()));
     requestHeaders.put(CONTENT_TYPE, Collections.singletonList(multipart.getContentType().getValue()));

@@ -1,6 +1,6 @@
 dependencies {
-    api project(":core:pact-jvm-core-support"), 
-      project(":provider:pact-jvm-provider")
+    api project(path: ":core:pact-jvm-core-support", configuration: 'default'), 
+      project(path: ":provider:pact-jvm-provider", configuration: 'default')
     compile "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}",
       "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",
       "junit:junit:${project.junitVersion}",
@@ -16,5 +16,8 @@ dependencies {
     // Required for Java 9
     testCompile 'javax.xml.bind:jaxb-api:2.3.0'
     testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
-    testCompile 'net.bytebuddy:byte-buddy:1.9.12'
+}
+
+test {
+    systemProperty 'pact.showStacktrace', 'true'
 }

@@ -57,7 +57,7 @@ class MockMvcTarget @JvmOverloads constructor(
     consumerName: String,
     interaction: Interaction,
     source: PactSource,
-    context: Map<String, Any?>
+    context: Map<String, Any>
   ) {
     val provider = getProviderInfo(source)
     val consumer = ConsumerInfo(consumerName)
@@ -112,11 +112,11 @@ class MockMvcTarget @JvmOverloads constructor(
     verifier.projectClasspath = Supplier { (ClassLoader.getSystemClassLoader() as URLClassLoader).urLs.toList() }
 
     verifier.initialiseReporters(provider)
-    verifier.reportVerificationForConsumer(consumer, provider)
+    verifier.reportVerificationForConsumer(consumer, provider, null)
 
-    if (!interaction.providerStates.isEmpty()) {
+    if (interaction.providerStates.isNotEmpty()) {
       for ((name) in interaction.providerStates) {
-        verifier.reportStateForInteraction(name, provider, consumer, true)
+        verifier.reportStateForInteraction(name.toString(), provider, consumer, true)
       }
     }
 
@@ -131,7 +131,7 @@ class MockMvcTarget @JvmOverloads constructor(
 
     val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
     if (methods.isNotEmpty()) {
-      providerInfo.setRequestFilter(Consumer<HttpRequest> { httpRequest ->
+      providerInfo.requestFilter = Consumer<HttpRequest> { httpRequest ->
         methods.forEach { method ->
           try {
             method.invokeExplosively(testTarget, httpRequest)
@@ -139,7 +139,7 @@ class MockMvcTarget @JvmOverloads constructor(
             throw AssertionError("Request filter method ${method.name} failed with an exception", t)
           }
         }
-      })
+      }
     }
 
     return providerInfo

@@ -20,7 +20,7 @@ object Fixtures {
     OptionalBody.body("{\"responsetest\": true}".getBytes))
 
   val interaction = new RequestResponseInteraction("test interaction",
-    Seq(new ProviderState("test state")).asJava, request, response)
+    Seq(new ProviderState("test state")).asJava, request, response, null)
 
   val pact: RequestResponsePact = new RequestResponsePact(provider, consumer, util.Arrays.asList(interaction))
 }

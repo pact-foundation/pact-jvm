@@ -1,7 +1,7 @@
 
 dependencies {
-    api project(":core:pact-jvm-core-model")
-    api project(":core:pact-jvm-core-matchers")
+    api project(path: ":core:pact-jvm-core-model", configuration: 'default')
+    api project(path: ":core:pact-jvm-core-matchers", configuration: 'default')
     compile 'com.googlecode.java-diff-utils:diffutils:1.3.0',
       'dk.brics.automaton:automaton:1.11-8',
       "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
@@ -18,5 +18,5 @@ dependencies {
     testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
     testCompile "org.junit.jupiter:junit-jupiter-params:${project.junit5Version}"
     testCompile "org.codehaus.groovy:groovy-dateutil:${project.groovyVersion}:indy"
-    testCompile 'org.hamcrest:hamcrest:2.1'
+    testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
 }

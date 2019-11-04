@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    compile project(":consumer:pact-jvm-consumer")
+    compile project(path: ":consumer:pact-jvm-consumer", configuration: 'default')
     compile "org.json:json:${project.jsonVersion}"
     compile "org.specs2:specs2-core_2.12:${project.specs2Version}"
     compile 'org.asynchttpclient:async-http-client:2.8.1'
@@ -12,4 +12,5 @@ dependencies {
     testCompile "org.specs2:specs2-junit_2.12:${project.specs2Version}",
       "ch.qos.logback:logback-core:${project.logbackVersion}",
       "ch.qos.logback:logback-classic:${project.logbackVersion}"
+    testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 }

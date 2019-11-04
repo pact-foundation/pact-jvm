@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer.specs2
 
 import java.util.concurrent.TimeUnit.MILLISECONDS
 
+import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
@@ -9,7 +10,8 @@ import org.specs2.runner.JUnitRunner
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-@RunWith(classOf[JUnitRunner])
+//@RunWith(classOf[JUnitRunner])
+@Ignore
 class ExamplePactSpec extends Specification with PactSpec {
 
   val consumer = "My Consumer"

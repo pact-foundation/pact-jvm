@@ -20,7 +20,7 @@ class InteractionSpec extends Specification {
   @Unroll
   def 'display state should show a description of the state'() {
     expect:
-    new RequestResponseInteraction(providerStates: [state]).displayState() == description
+    new RequestResponseInteraction('Test', [state]).displayState() == description
 
     where:
     state                           | description

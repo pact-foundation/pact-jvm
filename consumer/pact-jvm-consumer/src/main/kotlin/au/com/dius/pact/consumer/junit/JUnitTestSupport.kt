@@ -1,6 +1,6 @@
 package au.com.dius.pact.consumer.junit
 
-import au.com.dius.pact.consumer.Pact
+import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.consumer.PactMismatchesException
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.PactVerificationResult.Ok

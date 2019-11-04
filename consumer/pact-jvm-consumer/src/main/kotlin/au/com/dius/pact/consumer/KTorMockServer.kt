@@ -2,6 +2,7 @@ package au.com.dius.pact.consumer
 
 import au.com.dius.pact.consumer.model.MockHttpsProviderConfig
 import au.com.dius.pact.consumer.model.MockProviderConfig
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponsePact
@@ -30,7 +31,7 @@ import java.util.concurrent.TimeUnit
 class KTorMockServer(
   pact: RequestResponsePact,
   config: MockProviderConfig,
-  val stopTimeout: Long = 20000
+  private val stopTimeout: Long = 20000
 ) : BaseMockServer(pact, config) {
 
   private val env = applicationEngineEnvironment {
@@ -65,7 +66,7 @@ class KTorMockServer(
           } catch (e: Exception) {
             logger.error(e) { "Failed to generate response" }
             pactResponseToKTorResponse(Response(500, mutableMapOf("Content-Type" to listOf("application/json")),
-              OptionalBody.body("{\"error\": ${e.message}}".toByteArray())), context)
+              OptionalBody.body("{\"error\": ${e.message}}".toByteArray(), ContentType.JSON)), context)
           }
         }
       }
@@ -82,7 +83,7 @@ class KTorMockServer(
     }
 
     val body = response.body
-    if (body != null && body.isPresent()) {
+    if (body.isPresent()) {
       call.respondBytes(status = HttpStatusCode.fromValue(response.status), bytes = body.unwrap())
     } else {
       call.respond(HttpStatusCode.fromValue(response.status))
@@ -95,11 +96,11 @@ class KTorMockServer(
     val body = if (bodyContents.isEmpty()) {
       OptionalBody.empty()
     } else {
-      OptionalBody.body(bodyContents.toByteArray())
+      OptionalBody.body(bodyContents.toByteArray(), ContentType(headers["Content-Type"] ?: ContentType.JSON.contentType))
     }
     return Request(call.request.httpMethod.value, call.request.path(),
-      call.request.queryParameters.entries().associate { it.toPair() },
-      headers.entries().associate { it.toPair() }, body)
+      call.request.queryParameters.entries().associate { it.toPair() }.toMutableMap(),
+      headers.entries().associate { it.toPair() }.toMutableMap(), body)
   }
 
   override fun getUrl() =
@@ -118,5 +119,5 @@ class KTorMockServer(
     logger.debug { "Mock server shutdown" }
   }
 
-  companion object: KLogging()
+  companion object : KLogging()
 }
