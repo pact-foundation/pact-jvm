@@ -40,6 +40,9 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
       TextImpl()
     } else {
       val dbFactory = DocumentBuilderFactory.newInstance()
+      if (System.getProperty("pact.matching.xml.validating") == "false") {
+        dbFactory.isValidating = false
+      }
       val dBuilder = dbFactory.newDocumentBuilder()
       val xmlInput = InputSource(StringReader(xmlData))
       val doc = dBuilder.parse(xmlInput)
