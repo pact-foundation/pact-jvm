@@ -73,4 +73,20 @@ class CategorySpec extends Specification {
       'payload.bestandsid': [matchers: [[match: 'type']], combine: 'AND']
     ]
   }
+  @Issue(['#976'])
+  def 'when re-keying the matchers, always prepend prefix to existing key'() {
+    given:
+    def matchingRule = new MatchingRuleGroup([TypeMatcher.INSTANCE])
+    def category = new Category('body', [
+            '.blueberry': matchingRule
+    ])
+    category.applyMatcherRootPrefix('blue')
+
+    expect:
+    category.toMap(PactSpecVersion.V2) == [
+            '$.body.blue.blueberry': [match: 'type']]
+
+    category.toMap(PactSpecVersion.V3) == [
+            'blue.blueberry': [matchers: [[match: 'type']], combine: 'AND']]
+  }
 }

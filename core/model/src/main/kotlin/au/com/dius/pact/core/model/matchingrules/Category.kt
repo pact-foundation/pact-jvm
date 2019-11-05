@@ -123,7 +123,6 @@ data class Category @JvmOverloads constructor(
   fun applyMatcherRootPrefix(prefix: String) {
     matchingRules = matchingRules.mapKeys { e ->
       when {
-        e.key.startsWith(prefix) -> e.key
         e.key.startsWith("$") -> prefix + e.key.substring(1)
         else -> prefix + e.key
       }
