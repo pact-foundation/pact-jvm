@@ -157,7 +157,7 @@ be expanded in the expression. For this to work, just make your provider state m
 
 ### Using multiple classes for the state change methods
 
-If you have a large number of state change methods, you can split things up bu moving them to other classes. There are
+If you have a large number of state change methods, you can split things up by moving them to other classes. There are
 two ways you can do this:
 
 #### Use interfaces
