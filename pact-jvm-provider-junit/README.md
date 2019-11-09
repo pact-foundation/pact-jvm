@@ -155,6 +155,21 @@ There are methods on the consumer DSLs that can provider an expression that cont
 for the path). The provider state callback can then return a map for values, and the `id` attribute from the map will
 be expanded in the expression. For this to work, just make your provider state method return a Map of the values.
 
+### Using multiple classes for the state change methods
+
+If you have a large number of state change methods, you can split things up by moving them to other classes. There are
+two ways you can do this:
+
+#### Use interfaces
+
+You can put the state change methods on interfaces and then have your test class implement those interfaces. See [StateAnnotationsOnInterfaceTest](src/test/java/au/com/dius/pact/provider/junit/StateAnnotationsOnInterfaceTest.java)
+for an example.
+
+#### Specify the additional classes on the test target
+
+You can provide the additional classes to the test target with the `withStateHandler` or `setStateHandlers` methods. See
+[BooksPactProviderTest](pact-jvm-provider-spring/src/test/java/au/com/dius/pact/provider/spring/BooksPactProviderTest.java) for an example. 
+
 ## Pact source
 
 The Pact runner will automatically collect pacts based on annotations on the test class. For this purpose there are 3

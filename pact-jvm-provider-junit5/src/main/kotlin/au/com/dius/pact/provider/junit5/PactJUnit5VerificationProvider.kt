@@ -50,7 +50,7 @@ import kotlin.reflect.full.findAnnotation
  * The instance that holds the context for the test of an interaction. The test target will need to be set on it in
  * the before each phase of the test, and the verifyInteraction method must be called in the test template method.
  */
-data class PactVerificationContext(
+data class PactVerificationContext @JvmOverloads constructor(
   private val store: ExtensionContext.Store,
   private val context: ExtensionContext,
   var target: TestTarget = HttpTestTarget(port = 8080),
@@ -61,6 +61,7 @@ data class PactVerificationContext(
   val interaction: Interaction,
   internal var testExecutionResult: TestResult = TestResult.Ok
 ) {
+  val stateChangeHandlers: MutableList<Any> = mutableListOf()
   var executionContext: Map<String, Any?>? = null
 
   /**
@@ -109,6 +110,15 @@ data class PactVerificationContext(
       return verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, ConsumerInfo(consumerName), interaction,
         interaction.description, failures)
     }
+  }
+
+  fun withStateChangeHandlers(vararg stateClasses: Any): PactVerificationContext {
+    stateChangeHandlers.addAll(stateClasses)
+    return this
+  }
+
+  fun addStateChangeHandlers(vararg stateClasses: Any) {
+    stateChangeHandlers.addAll(stateClasses)
   }
 }
 
@@ -267,7 +277,8 @@ class PactVerificationStateChangeExtension(
     val testContext = store.get("interactionContext") as PactVerificationContext
 
     try {
-      val providerStateContext = invokeStateChangeMethods(extensionContext, interaction.providerStates, StateChangeAction.SETUP)
+      val providerStateContext = invokeStateChangeMethods(extensionContext, testContext,
+        interaction.providerStates, StateChangeAction.SETUP)
       testContext.executionContext = mapOf("providerState" to providerStateContext)
     } catch (e: Exception) {
       logger.error(e) { "Provider state change callback failed" }
@@ -278,11 +289,15 @@ class PactVerificationStateChangeExtension(
 
   override fun afterTestExecution(context: ExtensionContext) {
     logger.debug { "afterEach for interaction '${interaction.description}'" }
-    invokeStateChangeMethods(context, interaction.providerStates, StateChangeAction.TEARDOWN)
+    val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
+    val testContext = store.get("interactionContext") as PactVerificationContext
+
+    invokeStateChangeMethods(context, testContext, interaction.providerStates, StateChangeAction.TEARDOWN)
   }
 
   private fun invokeStateChangeMethods(
     context: ExtensionContext,
+    testContext: PactVerificationContext,
     providerStates: List<ProviderState>,
     action: StateChangeAction
   ): Map<String, Any?> {
@@ -290,16 +305,17 @@ class PactVerificationStateChangeExtension(
 
     val providerStateContext = mutableMapOf<String, Any?>()
     providerStates.forEach { state ->
-      val stateChangeMethods = findStateChangeMethods(context.requiredTestClass, state)
+      val stateChangeMethods = findStateChangeMethods(context.requiredTestInstance,
+        testContext.stateChangeHandlers, state)
       if (stateChangeMethods.isEmpty()) {
         errors.add("Did not find a test class method annotated with @State(\"${state.name}\")")
       } else {
-        stateChangeMethods.filter { it.second.action == action }.forEach { (method, _) ->
-          logger.debug { "Invoking state change method ${method.name} for state '${state.name}'" }
+        stateChangeMethods.filter { it.second.action == action }.forEach { (method, _, instance) ->
+          logger.debug { "Invoking state change method ${method.name} for state '${state.name}' on $instance" }
           val stateChangeValue = if (method.parameterCount > 0) {
-            ReflectionSupport.invokeMethod(method, context.requiredTestInstance, state.params)
+            ReflectionSupport.invokeMethod(method, instance, state.params)
           } else {
-            ReflectionSupport.invokeMethod(method, context.requiredTestInstance)
+            ReflectionSupport.invokeMethod(method, instance)
           }
 
           if (stateChangeValue is Map<*, *>) {
@@ -316,9 +332,20 @@ class PactVerificationStateChangeExtension(
     return providerStateContext
   }
 
-  private fun findStateChangeMethods(testClass: Class<*>, state: ProviderState): List<Pair<Method, State>> {
-    return AnnotationSupport.findAnnotatedMethods(testClass, State::class.java, HierarchyTraversalMode.TOP_DOWN)
-      .map { it to it.getAnnotation(State::class.java) }
+  private fun findStateChangeMethods(
+    testClass: Any,
+    stateChangeHandlers: List<Any>,
+    state: ProviderState
+  ): List<Triple<Method, State, Any>> {
+    val stateChangeClasses =
+      AnnotationSupport.findAnnotatedMethods(testClass.javaClass, State::class.java, HierarchyTraversalMode.TOP_DOWN)
+        .map { it to testClass }
+        .plus(stateChangeHandlers.flatMap { handler ->
+          AnnotationSupport.findAnnotatedMethods(handler.javaClass, State::class.java, HierarchyTraversalMode.TOP_DOWN)
+            .map { it to handler }
+        })
+    return stateChangeClasses
+      .map { Triple(it.first, it.first.getAnnotation(State::class.java), it.second) }
       .filter { it.second.value.any { s -> state.name == s } }
   }
 
