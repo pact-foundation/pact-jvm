@@ -1,5 +1,24 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.0.3 - Bugfix Release
+
+* e1863113a - fix: link in readme (Ronald Holshausen, Sat Nov 9 14:50:53 2019 +1100)
+* ac276e2e3 - feat: allow JUnit 5 tests to have state change methods on additional classes #943 (Ronald Holshausen, Sat Nov 9 14:47:40 2019 +1100)
+* fb4530cd0 - Merge pull request #977 from treatwell/feature-fix-for-976 (Ronald Holshausen, Sat Nov 9 13:28:47 2019 +1100)
+* b5c748690 - fix: correctly handle XML node types when comparing with matchers #975 (Ronald Holshausen, Sat Nov 9 13:16:03 2019 +1100)
+* 7f3ec4e3c - #976: always prepend prefix to existing key (Greg Pappas, Tue Nov 5 11:29:42 2019 +0000)
+* 8aea916db - feat: add a system property to turn off XML DTD validation in the matcher #973 (Ronald Holshausen, Mon Nov 4 14:29:33 2019 +1100)
+* cd1df8dd8 - fix: support tests with injected constructor parameters #971 (Ronald Holshausen, Mon Nov 4 14:11:32 2019 +1100)
+* a2c521151 - fix: Fix codenarc #967 (Ronald Holshausen, Sun Nov 3 15:58:04 2019 +1100)
+* 44cc973a1 - fix: Fix for test failing on JDK 11/12 #967 (Ronald Holshausen, Sun Nov 3 15:19:48 2019 +1100)
+* c6f203f1f - fix: Fix for test failing on Windows #967 (Ronald Holshausen, Sun Nov 3 15:15:54 2019 +1100)
+* 929f9ef6d - Merge pull request #968 from pkubowicz/kotlin-has-pacts (Ronald Holshausen, Sun Nov 3 15:00:48 2019 +1100)
+* 08d4a208b - fix: Upgraded JUnit to 5.5.2; fixed JUnit4 tests that were not running #967 (Ronald Holshausen, Sun Nov 3 14:56:10 2019 +1100)
+* 2ef11f50e - Merge pull request #966 from pkubowicz/dependency-updates (Ronald Holshausen, Sun Nov 3 11:02:39 2019 +1100)
+* 89d3ce911 - feat: use functions with receiver in hasPactWith() (Piotr Kubowicz, Sun Oct 27 12:49:35 2019 +0100)
+* 8f7b7a4db - chore: update dependencies (Piotr Kubowicz, Sun Oct 27 09:55:46 2019 +0100)
+* 78b0e54e5 - bump version to 4.0.3 (Ronald Holshausen, Sun Oct 27 17:37:37 2019 +1100)
+
 # 4.0.2 - Bugfix Release
 
 * 343bd92b7 - fix: lookup the provider tag from system properties for JUnit based tests #823 #960 (Ronald Holshausen, Sun Oct 27 17:03:55 2019 +1100)
