@@ -8,6 +8,7 @@ import mu.KLogging
 import org.apache.xerces.dom.TextImpl
 import org.w3c.dom.NamedNodeMap
 import org.w3c.dom.Node
+import org.w3c.dom.Node.CDATA_SECTION_NODE
 import org.w3c.dom.Node.ELEMENT_NODE
 import org.w3c.dom.Node.TEXT_NODE
 import org.w3c.dom.NodeList
@@ -61,10 +62,12 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
     matchers: MatchingRules
   ): List<BodyMismatch> {
     val textpath = path + "#text"
-    val expectedText = asList(expected.childNodes).filter { n -> n.nodeType == TEXT_NODE }
-      .joinToString("") { n -> n.textContent.trim() }
-    val actualText = asList(actual.childNodes).filter { n -> n.nodeType == TEXT_NODE }
-      .joinToString("") { n -> n.textContent.trim() }
+    val expectedText = asList(expected.childNodes).filter { n ->
+      n.nodeType == TEXT_NODE || n.nodeType == CDATA_SECTION_NODE
+    }.joinToString("") { n -> n.textContent.trim() }
+    val actualText = asList(actual.childNodes).filter { n ->
+      n.nodeType == TEXT_NODE || n.nodeType == CDATA_SECTION_NODE
+    }.joinToString("") { n -> n.textContent.trim() }
     return when {
       Matchers.matcherDefined("body", textpath, matchers) -> {
         logger.debug { "compareText: Matcher defined for path $textpath" }

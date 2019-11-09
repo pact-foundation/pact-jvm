@@ -34,6 +34,8 @@ fun valueOf(value: Any?): String {
   return when (value) {
     null -> "null"
     is String -> "'$value'"
+    is Element -> "<${value.tagName}>"
+    is Text -> "'${value.wholeText}'"
     else -> value.toString()
   }
 }
@@ -127,7 +129,11 @@ fun <M : Mismatch> matchEquality(
   actual: Any?,
   mismatchFactory: MismatchFactory<M>
 ): List<M> {
-  val matches = actual == null && expected == null || actual != null && actual == expected
+  val matches = when {
+    actual == null && expected == null -> true
+    actual is Element && expected is Element -> actual.tagName == expected.tagName
+    else -> actual != null && actual == expected
+  }
   logger.debug { "comparing ${valueOf(actual)} to ${valueOf(expected)} at $path -> $matches" }
   return if (matches) {
     emptyList()

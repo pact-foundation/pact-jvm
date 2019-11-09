@@ -274,4 +274,70 @@ class XmlBodyMatcherSpec extends Specification {
     matcher.matchBody(expectedBody, actualBody, false, matchers).empty
   }
 
+  @Issue('#975')
+  def 'matching XML bodies - with CDATA elements'() {
+    given:
+    def xml = '''<?xml version="1.0" encoding="UTF-8"?>
+     <providerService version="1.0">
+       <attribute1>
+         <newattribute>
+             <date month="11" year="2019"/>
+           <name><![CDATA[Surname Name]]></name>
+         </newattribute>
+         <newattribute2>
+           <countryCode>RO</countryCode>
+           <hiddenData>ABCD***************010101</hiddenData>
+         </newattribute2>
+       </attribute1>
+     </providerService>
+    '''
+    actualBody = OptionalBody.body(xml.bytes)
+    expectedBody = OptionalBody.body(xml.bytes)
+
+    expect:
+    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+  }
+
+  @Issue('#975')
+  def 'matching XML bodies - with CDATA elements matching with regex'() {
+    given:
+    def expected = '''<?xml version="1.0" encoding="UTF-8"?>
+     <providerService version="1.0">
+       <attribute1>
+         <newattribute>
+             <date month="11" year="2019"/>
+           <name><![CDATA[Surname Name]]></name>
+         </newattribute>
+         <newattribute2>
+           <countryCode>RO</countryCode>
+           <hiddenData>OWY0NzEyYTAyMmMzZjI2Y2RmYzZiMTcx</hiddenData>
+         </newattribute2>
+       </attribute1>
+     </providerService>
+    '''
+    def actual = '''<?xml version="1.0" encoding="UTF-8"?>
+     <providerService version="1.0">
+       <attribute1>
+         <newattribute>
+             <date month="11" year="2019"/>
+           <name><![CDATA[Surname Name]]></name>
+         </newattribute>
+         <newattribute2>
+           <countryCode>RO</countryCode>
+           <hiddenData><![CDATA[Mjc5MGJkNDVjZTI3OWNjYjJjMmYzZTVh]]></hiddenData>
+         </newattribute2>
+       </attribute1>
+     </providerService>
+    '''
+
+    actualBody = OptionalBody.body(actual.bytes)
+    expectedBody = OptionalBody.body(expected.bytes)
+
+    matchers.addCategory('body').addRule('$.providerService.attribute1.newattribute2.hiddenData',
+      new RegexMatcher('[a-zA-Z0-9]*'))
+
+    expect:
+    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+  }
+
 }
