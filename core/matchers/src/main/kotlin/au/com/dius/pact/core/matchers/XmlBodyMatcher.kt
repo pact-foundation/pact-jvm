@@ -43,6 +43,8 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
       val dbFactory = DocumentBuilderFactory.newInstance()
       if (System.getProperty("pact.matching.xml.validating") == "false") {
         dbFactory.isValidating = false
+        dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false)
+        dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
       }
       val dBuilder = dbFactory.newDocumentBuilder()
       val xmlInput = InputSource(StringReader(xmlData))
