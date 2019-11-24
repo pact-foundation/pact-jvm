@@ -2,10 +2,15 @@ package au.com.dius.pact.provider.spring
 
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
+import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
+import groovy.lang.Binding
+import groovy.lang.Closure
+import groovy.lang.GroovyShell
 import mu.KLogging
 import org.apache.commons.lang3.StringUtils
+import org.hamcrest.Matchers.anything
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
@@ -15,16 +20,20 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.RequestBuilder
 import org.springframework.test.web.servlet.ResultActions
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.request
 import org.springframework.web.util.UriComponentsBuilder
+import scala.Function1
 import java.net.URI
+import java.util.concurrent.Callable
+import java.util.function.Consumer
+import java.util.function.Function
 import javax.mail.internet.ContentDisposition
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
-import org.hamcrest.Matchers.anything
 
 /**
  * Verifies the providers against the defined consumers using Spring MockMvc
@@ -41,7 +50,7 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     try {
       val request = interaction.request
 
-      val mvcResult = executeMockMvcRequest(mockMvc, request)
+      val mvcResult = executeMockMvcRequest(mockMvc, request, provider)
 
       val expectedResponse = interaction.response
       val actualResponse = handleResponse(mvcResult.response)
@@ -56,7 +65,7 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     }
   }
 
-  fun executeMockMvcRequest(mockMvc: MockMvc, request: Request): MvcResult {
+  fun executeMockMvcRequest(mockMvc: MockMvc, request: Request, provider: ProviderInfo): MvcResult {
     val body = request.body
     val requestBuilder = if (body != null && body.isPresent()) {
       if (request.isMultipartFileUpload()) {
@@ -81,11 +90,46 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
       MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
         .headers(mapHeaders(request, false))
     }
-      return performRequest(mockMvc, requestBuilder).andDo({
+
+    executeRequestFilter(requestBuilder, provider)
+
+    return performRequest(mockMvc, requestBuilder).andDo {
       if (debugRequestResponse) {
         MockMvcResultHandlers.print().handle(it)
       }
-    }).andReturn()
+    }.andReturn()
+  }
+
+  private fun executeRequestFilter(requestBuilder: MockHttpServletRequestBuilder, provider: ProviderInfo) {
+    val requestFilter = provider.requestFilter
+    if (requestFilter != null) {
+      when (requestFilter) {
+        is Closure<*> -> requestFilter.call(requestBuilder)
+        is Function1<*, *> -> (requestFilter as Function1<MockHttpServletRequestBuilder, *>).apply(requestBuilder)
+        is org.apache.commons.collections4.Closure<*> ->
+          (requestFilter as org.apache.commons.collections4.Closure<Any>).execute(requestBuilder)
+        else -> {
+          if (ProviderClient.isFunctionalInterface(requestFilter)) {
+            invokeJavaFunctionalInterface(requestFilter, requestBuilder)
+          } else {
+            val binding = Binding()
+            binding.setVariable(ProviderClient.REQUEST, requestBuilder)
+            val shell = GroovyShell(binding)
+            shell.evaluate(requestFilter as String)
+          }
+        }
+      }
+    }
+  }
+
+  private fun invokeJavaFunctionalInterface(functionalInterface: Any, requestBuilder: MockHttpServletRequestBuilder) {
+    when (functionalInterface) {
+      is Consumer<*> -> (functionalInterface as Consumer<MockHttpServletRequestBuilder>).accept(requestBuilder)
+      is Function<*, *> -> (functionalInterface as Function<MockHttpServletRequestBuilder, Any?>).apply(requestBuilder)
+      is Callable<*> -> (functionalInterface as Callable<MockHttpServletRequestBuilder>).call()
+      else -> throw IllegalArgumentException("Java request filters must be either a Consumer or Function that " +
+        "takes at least one MockHttpServletRequestBuilder parameter")
+    }
   }
 
   private fun performRequest(mockMvc: MockMvc, requestBuilder: RequestBuilder): ResultActions {

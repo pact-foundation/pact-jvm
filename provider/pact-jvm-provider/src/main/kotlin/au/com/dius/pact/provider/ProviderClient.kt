@@ -198,7 +198,7 @@ open class ProviderClient(
     fun urlEncodedFormPost(request: Request) = request.method.toLowerCase() == "post" &&
       request.mimeType() == ContentType.APPLICATION_FORM_URLENCODED.mimeType
 
-    private fun isFunctionalInterface(requestFilter: Any) =
+    fun isFunctionalInterface(requestFilter: Any) =
       requestFilter::class.java.interfaces.any { it.isAnnotationPresent(FunctionalInterface::class.java) }
 
     @JvmStatic

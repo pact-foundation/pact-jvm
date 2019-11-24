@@ -12,9 +12,9 @@ import au.com.dius.pact.provider.junit.TargetRequestFilter
 import au.com.dius.pact.provider.junit.target.BaseTarget
 import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.spring.MvcProviderVerifier
-import org.apache.http.HttpRequest
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder
@@ -69,7 +69,7 @@ class MockMvcTarget @JvmOverloads constructor(
 
     val failures = HashMap<String, Any>()
 
-    1.rangeTo(runTimes).forEach {
+    repeat(1.rangeTo(runTimes).count()) {
       verifier.verifyResponseFromProvider(provider, interaction as RequestResponseInteraction, interaction.description,
         failures, mockMvc)
     }
@@ -131,7 +131,7 @@ class MockMvcTarget @JvmOverloads constructor(
 
     val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
     if (methods.isNotEmpty()) {
-      providerInfo.requestFilter = Consumer<HttpRequest> { httpRequest ->
+      providerInfo.requestFilter = Consumer<MockHttpServletRequestBuilder> { httpRequest ->
         methods.forEach { method ->
           try {
             method.invokeExplosively(testTarget, httpRequest)
