@@ -18,6 +18,7 @@ import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.isNullOrEmpty
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.support.Json
+import com.github.salomonbrys.kotson.jsonObject
 import com.google.gson.JsonParser
 import mu.KLogging
 import org.apache.http.entity.ContentType
@@ -26,7 +27,12 @@ import java.nio.charset.Charset
 data class BodyComparisonResult(
   val mismatches: Map<String, List<BodyMismatch>> = emptyMap(),
   val diff: List<String> = emptyList()
-)
+) {
+  fun toJson() = jsonObject(
+    "mismatches" to Json.toJson(mismatches.mapValues { entry -> entry.value.map { it.description() } }),
+    "diff" to diff.joinToString("\n")
+  )
+}
 
 data class ComparisonResult(
   val statusMismatch: StatusMismatch? = null,

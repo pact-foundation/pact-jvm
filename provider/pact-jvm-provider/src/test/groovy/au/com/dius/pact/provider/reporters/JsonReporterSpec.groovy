@@ -1,15 +1,20 @@
 package au.com.dius.pact.provider.reporters
 
+import arrow.core.Either
+import au.com.dius.pact.core.matchers.BodyMismatch
+import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
+import com.google.gson.JsonParser
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import spock.lang.Specification
 
-@SuppressWarnings('UnnecessaryObjectReferences')
+@SuppressWarnings(['UnnecessaryObjectReferences', 'LineLength'])
 class JsonReporterSpec extends Specification {
 
   private File reportDir
@@ -103,6 +108,84 @@ class JsonReporterSpec extends Specification {
     reportJson.provider.name == 'provider1'
     reportJson.execution.size == 1
     reportJson.execution.first().interactions.first().interaction.description == 'Interaction 1'
+  }
+
+  def 'generates the correct JSON for validation failures'() {
+    given:
+    def reporter = new JsonReporter('test', reportDir)
+    def provider1 = new ProviderInfo(name: 'provider1')
+    def consumer = new ConsumerInfo(name: 'Consumer')
+    def interaction1 = new RequestResponseInteraction('Interaction 1', [], new Request(), new Response())
+
+    when:
+    reporter.initialise(provider1)
+    reporter.reportVerificationForConsumer(consumer, provider1, null)
+    reporter.interactionDescription(interaction1)
+    reporter.statusComparisonFailed(200, 'expected status of 201 but was 200')
+    reporter.headerComparisonFailed('HEADER-X', [''], [
+      new HeaderMismatch('HEADER-X', 'Y', '', "Expected a header 'HEADER-X' but was missing")
+    ])
+    reporter.bodyComparisonFailed(
+      new Either.Right(new BodyComparisonResult([
+        '$.0': [
+          new BodyMismatch(
+            JsonParser.parseString('{"doesNotExist":"Test","documentId":0}'),
+            JsonParser.parseString('{"documentId":0,"documentCategoryId":5,"documentCategoryCode":null,"contentLength":0,"tags":null}'),
+            'Expected doesNotExist="Test" but was missing', '$.0', '''{
+              -  "doesNotExist": "Test",
+              -  "documentId": 0
+              +  "documentId": 0,
+              +  "documentCategoryId": 5,
+              +  "documentCategoryCode": null,
+              +  "contentLength": 0,
+              +  "tags": null
+              }''')],
+        '$.1': [
+          new BodyMismatch(JsonParser.parseString('{"doesNotExist":"Test","documentId":0}'),
+            JsonParser.parseString('{"documentId":1,"documentCategoryId":5,"documentCategoryCode":null,"contentLength":0,"tags":null}'),
+              'Expected doesNotExist="Test" but was missing', '$.1', '''{
+              -  "doesNotExist": "Test",
+              -  "documentId": 0
+              +  "documentId": 1,
+              +  "documentCategoryId": 5,
+              +  "documentCategoryCode": null,
+              +  "contentLength": 0,
+              +  "tags": null
+              }''')]
+      ], [
+        '  {',
+        '-    " doesNotExist ": " Test ",',
+        '-    " documentId ": 0',
+        '+    " documentId ": 0,',
+        '+    " documentCategoryId ": 5,',
+        '+    " documentCategoryCode ": null,',
+        '+    " contentLength ": 0,',
+        '+    " tags ": null',
+        '+  },',
+        '+  {',
+        '+    " documentId ": 1,',
+        '+    " documentCategoryId ": 5,',
+        '+    " documentCategoryCode ": null,',
+        '+    " contentLength ": 0,',
+        '+    " tags ": null',
+        '  }'
+      ]))
+    )
+    reporter.finaliseReport()
+
+    def reportJson = new JsonSlurper().parse(new File(reportDir, 'provider1.json'))
+
+    then:
+    reportJson.provider.name == 'provider1'
+    reportJson.execution.size == 1
+    reportJson.execution[0].interactions.size == 1
+    reportJson.execution[0].interactions[0].verification.result == 'failed'
+    reportJson.execution[0].interactions[0].verification.status == ['expected status of 201 but was 200']
+    reportJson.execution[0].interactions[0].verification.header == ['HEADER-X': ["Expected a header 'HEADER-X' but was missing"]]
+    reportJson.execution[0].interactions[0].verification.body.mismatches == [
+      '$.0': ['Expected doesNotExist="Test" but was missing'],
+      '$.1': ['Expected doesNotExist="Test" but was missing']
+    ]
   }
 
 }
