@@ -1,13 +1,18 @@
 package au.com.dius.pact.provider.reporters
 
+import arrow.core.Either
+import au.com.dius.pact.core.matchers.BodyMismatch
+import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
+import com.google.gson.JsonParser
 import spock.lang.Specification
 
-@SuppressWarnings('UnnecessaryObjectReferences')
+@SuppressWarnings(['UnnecessaryObjectReferences', 'LineLength'])
 class MarkdownReporterSpec extends Specification {
 
   private File reportDir
@@ -78,6 +83,119 @@ class MarkdownReporterSpec extends Specification {
 
     then:
     results.contains('## Verifying a pact between _Consumer_ and _provider1_\n\nInteraction 1 ')
+  }
+
+  @SuppressWarnings(['MethodSize', 'TrailingWhitespace'])
+  def 'generates the correct markdown for validation failures'() {
+    given:
+    def reporter = new MarkdownReporter('test', reportDir)
+    def provider1 = new ProviderInfo(name: 'provider1')
+    def consumer = new ConsumerInfo(name: 'Consumer')
+    def interaction1 = new RequestResponseInteraction('Interaction 1', [], new Request(), new Response())
+
+    when:
+    reporter.initialise(provider1)
+    reporter.reportVerificationForConsumer(consumer, provider1, null)
+    reporter.interactionDescription(interaction1)
+    reporter.statusComparisonFailed(200, 'expected status of 201 but was 200')
+    reporter.headerComparisonFailed('HEADER-X', ['Y'], [
+      new HeaderMismatch('HEADER-X', 'Y', '', "Expected a header 'HEADER-X' but was missing")
+    ])
+    reporter.bodyComparisonFailed(
+      new Either.Right(new BodyComparisonResult([
+        '$.0': [
+          new BodyMismatch(
+            JsonParser.parseString('{"doesNotExist":"Test","documentId":0}'),
+            JsonParser.parseString('{"documentId":0,"documentCategoryId":5,"documentCategoryCode":null,"contentLength":0,"tags":null}'),
+            'Expected doesNotExist="Test" but was missing', '$.0', '''{
+              -  "doesNotExist": "Test",
+              -  "documentId": 0
+              +  "documentId": 0,
+              +  "documentCategoryId": 5,
+              +  "documentCategoryCode": null,
+              +  "contentLength": 0,
+              +  "tags": null
+              }''')],
+        '$.1': [
+          new BodyMismatch(JsonParser.parseString('{"doesNotExist":"Test","documentId":0}'),
+            JsonParser.parseString('{"documentId":1,"documentCategoryId":5,"documentCategoryCode":null,"contentLength":0,"tags":null}'),
+            'Expected doesNotExist="Test" but was missing', '$.1', '''{
+              -  "doesNotExist": "Test",
+              -  "documentId": 0
+              +  "documentId": 1,
+              +  "documentCategoryId": 5,
+              +  "documentCategoryCode": null,
+              +  "contentLength": 0,
+              +  "tags": null
+              }''')]
+      ], [
+        '  {',
+        '-    " doesNotExist ": " Test ",',
+        '-    " documentId ": 0',
+        '+    " documentId ": 0,',
+        '+    " documentCategoryId ": 5,',
+        '+    " documentCategoryCode ": null,',
+        '+    " contentLength ": 0,',
+        '+    " tags ": null',
+        '+  },',
+        '+  {',
+        '+    " documentId ": 1,',
+        '+    " documentCategoryId ": 5,',
+        '+    " documentCategoryCode ": null,',
+        '+    " contentLength ": 0,',
+        '+    " tags ": null',
+        '  }'
+      ]))
+    )
+    reporter.finaliseReport()
+
+    def results = new File(reportDir, 'provider1.md').text
+
+    then:
+    results.contains(
+   '''|&nbsp;&nbsp;&nbsp;&nbsp;has status code **200** (<span style='color:red'>FAILED</span>)
+      |
+      |```
+      |expected status of 201 but was 200
+      |```'''.stripMargin()
+    )
+    results.contains(
+   '''|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"**HEADER-X**" with value "**[Y]**" (<span style='color:red'>FAILED</span>)  
+      |
+      |```
+      |Expected a header 'HEADER-X' but was missing
+      |```'''.stripMargin()
+    )
+    results.contains(
+      '''|&nbsp;&nbsp;&nbsp;&nbsp;has a matching body (<span style='color:red'>FAILED</span>)  
+         |
+         || Path | Failure |
+         || ---- | ------- |
+         ||`$.0`|Expected doesNotExist="Test" but was missing|
+         ||`$.1`|Expected doesNotExist="Test" but was missing|
+         |
+         |
+         |Diff:
+         |
+         |```diff
+         |  {
+         |-    " doesNotExist ": " Test ",
+         |-    " documentId ": 0
+         |+    " documentId ": 0,
+         |+    " documentCategoryId ": 5,
+         |+    " documentCategoryCode ": null,
+         |+    " contentLength ": 0,
+         |+    " tags ": null
+         |+  },
+         |+  {
+         |+    " documentId ": 1,
+         |+    " documentCategoryId ": 5,
+         |+    " documentCategoryCode ": null,
+         |+    " contentLength ": 0,
+         |+    " tags ": null
+         |  }
+         |```'''.stripMargin()
+    )
   }
 
 }
