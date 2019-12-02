@@ -20,6 +20,10 @@ public class LambdaDslJsonArray {
         this.pactArray = pactArray;
     }
 
+    public PactDslJsonArray getPactDslJsonArray() {
+        return pactArray;
+    }
+
     public LambdaDslJsonArray object(final Consumer<LambdaDslObject> o) {
         final PactDslJsonBody pactObject = pactArray.object();
         LambdaDslObject object = new LambdaDslObject(pactObject);
