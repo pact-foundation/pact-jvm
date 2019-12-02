@@ -13,6 +13,9 @@ import java.io.File
 @Mojo(name = "publish")
 open class PactPublishMojo : PactBaseMojo() {
 
+    @Parameter(defaultValue = "false", expression="${skipPactPublish}")
+    private var skipPactPublish: Boolean = false
+
     @Parameter(required = true, defaultValue = "\${project.version}")
     private lateinit var projectVersion: String
 
@@ -32,6 +35,11 @@ open class PactPublishMojo : PactBaseMojo() {
 
     override fun execute() {
       AnsiConsole.systemInstall()
+
+      if (skipPactPublish) {
+        println("'skipPactPublish' is set to true, skipping uploading of pacts")
+        return
+      }
 
       if (pactBrokerUrl.isNullOrEmpty() && brokerClient == null) {
         throw MojoExecutionException("pactBrokerUrl is required")

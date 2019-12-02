@@ -612,6 +612,7 @@ For example:
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <projectVersion>1.0.100</projectVersion> <!-- Defaults to ${project.version} -->
       <trimSnapshot>true</trimSnapshot> <!-- Defaults to false -->
+      <skipPactPublish>false</skipPactPublish> <!-- Defaults to false -->
     </configuration>
 </plugin>
 ```
