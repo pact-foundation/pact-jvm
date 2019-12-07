@@ -21,6 +21,10 @@ public class LambdaDslObject {
         this.object = object;
     }
 
+    public PactDslJsonBody getPactDslObject() {
+        return object;
+    }
+
     public LambdaDslObject stringValue(final String name, final String value) {
         object.stringValue(name, value);
         return this;
