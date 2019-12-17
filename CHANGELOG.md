@@ -1,5 +1,22 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.0.4 - Bugfix Release
+
+* dc6bf9ed - Merge pull request #988 from ivangsa/pact-jvm-provider-maven (Ronald Holshausen, Sat Dec 7 17:51:05 2019 +1100)
+* 07b19634 - Merge pull request #987 from ivangsa/pact-jvm-consumer-java8 (Ronald Holshausen, Sat Dec 7 17:50:22 2019 +1100)
+* 7a95365f - Merge pull request #985 from scheuchzer/feature/953_kotlin_version (Ronald Holshausen, Sat Dec 7 17:44:08 2019 +1100)
+* 9be84160 - fix linting errors (Iván García Sainz-Aja, Mon Dec 2 12:32:28 2019 +0100)
+* d41a8808 - [pact-jvm-provider-maven] Adds skipPactPublish property (Iván García Sainz-Aja, Mon Dec 2 10:44:26 2019 +0100)
+* 75a3a9bc - Allow access to original PactDsl object and array (Iván García Sainz-Aja, Mon Dec 2 10:36:46 2019 +0100)
+* 60166084 - fixes 953 by upgrading ktor to a version that uses kotlin 1.3. (Thomas Scheuchzer, Mon Nov 25 16:40:22 2019 +0100)
+* c13a943c - feat: add support for request filters with MockMvcTarget #983 (Ronald Holshausen, Sun Nov 24 14:51:05 2019 +1100)
+* a57e7589 - fix: MessagePactProviderRule fails if there are no provider states #982 (Ronald Holshausen, Sun Nov 24 13:56:56 2019 +1100)
+* 7f44c37f - fix: correct the markdown rendering of verification errors #980 (Ronald Holshausen, Sun Nov 24 12:09:09 2019 +1100)
+* cd1d14dc - fix: JSON reporter was generated incorrect failure JSON #980 (Ronald Holshausen, Sun Nov 24 11:25:56 2019 +1100)
+* 4b2c3f6d - fix: get XML parser to ignore DTDs #973 (Ronald Holshausen, Sun Nov 24 09:39:56 2019 +1100)
+* a52115f9 - Update README.md (Ronald Holshausen, Sun Nov 10 10:16:57 2019 +1100)
+* 3d0cce96 - bump version to 4.0.4 (Ronald Holshausen, Sun Nov 10 10:07:39 2019 +1100)
+
 # 4.0.3 - Bugfix Release
 
 * e1863113a - fix: link in readme (Ronald Holshausen, Sat Nov 9 14:50:53 2019 +1100)
