@@ -6,6 +6,7 @@ import au.com.dius.pact.provider.IProviderVerifier
 import java.util.function.BiConsumer
 import java.util.function.Supplier
 import org.apache.commons.lang3.tuple.Pair
+import org.apache.http.HttpRequest
 
 /**
  * Run [Interaction] and perform response verification
@@ -49,4 +50,6 @@ interface Target {
    * Additional state change handlers to look for state change callbacks
    */
   fun getStateHandlers(): List<Pair<Class<out Any>, Supplier<out Any>>>
+
+  fun getRequestClass() : Class<*> = HttpRequest::class.java
 }

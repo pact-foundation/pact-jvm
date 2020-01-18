@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.spring;
 import au.com.dius.pact.provider.junit.Provider;
 import au.com.dius.pact.provider.junit.RestPactRunner;
 import au.com.dius.pact.provider.junit.State;
+import au.com.dius.pact.provider.junit.TargetRequestFilter;
 import au.com.dius.pact.provider.junit.loader.PactFolder;
 import au.com.dius.pact.provider.junit.target.TestTarget;
 import au.com.dius.pact.provider.spring.target.MockMvcTarget;
@@ -18,13 +19,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -97,5 +98,10 @@ public class BooksPactProviderTest {
     public void novelFound() {
         when(bookLogic.getBookById(any(UUID.class)))
                 .thenReturn(new Book(UUID.randomUUID(), "Nick Hoftsettler", true, DATE_TIME));
+    }
+
+    @TargetRequestFilter
+    public void requestFilter(MockHttpServletRequestBuilder request) {
+        request.header("Content-Type", "application/json");
     }
 }

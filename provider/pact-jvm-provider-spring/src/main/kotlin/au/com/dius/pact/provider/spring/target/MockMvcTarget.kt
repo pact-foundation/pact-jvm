@@ -144,4 +144,6 @@ class MockMvcTarget @JvmOverloads constructor(
 
     return providerInfo
   }
+
+  override fun getRequestClass(): Class<*> = MockHttpServletRequestBuilder::class.java
 }

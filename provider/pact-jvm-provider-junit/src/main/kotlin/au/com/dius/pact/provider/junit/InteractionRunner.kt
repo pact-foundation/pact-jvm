@@ -14,7 +14,6 @@ import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget
 import au.com.dius.pact.provider.junit.target.TestTarget
 import mu.KLogging
-import org.apache.http.HttpRequest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -30,6 +29,7 @@ import org.junit.runner.Description
 import org.junit.runner.Runner
 import org.junit.runner.notification.Failure
 import org.junit.runner.notification.RunNotifier
+import org.junit.runners.model.FrameworkField
 import org.junit.runners.model.FrameworkMethod
 import org.junit.runners.model.InitializationError
 import org.junit.runners.model.Statement
@@ -84,21 +84,22 @@ open class InteractionRunner<I>(
     validatePublicVoidNoArgMethods(After::class.java, false, errors)
     validateStateChangeMethods(testClass, errors)
     validateConstructor(errors)
-    validateTestTarget(errors)
+    val targetField = validateTestTarget(errors)
     validateRules(errors)
-    validateTargetRequestFilters(errors)
+    validateTargetRequestFilters(errors, targetField)
 
     if (errors.isNotEmpty()) {
       throw InitializationError(errors)
     }
   }
 
-  private fun validateTargetRequestFilters(errors: MutableList<Throwable>) {
+  private fun validateTargetRequestFilters(errors: MutableList<Throwable>, targetField: FrameworkField) {
     testClass.getAnnotatedMethods(TargetRequestFilter::class.java).forEach { method ->
       method.validatePublicVoid(false, errors)
+      val requestClass = (targetField.type.newInstance() as Target).getRequestClass()
       if (method.method.parameterTypes.size != 1) {
-        errors.add(Exception("Method ${method.name} should take only a single HttpRequest parameter"))
-      } else if (!HttpRequest::class.java.isAssignableFrom(method.method.parameterTypes[0])) {
+        errors.add(Exception("Method ${method.name} should take only a single ${requestClass.simpleName} parameter"))
+      } else if (!requestClass.isAssignableFrom(method.method.parameterTypes[0])) {
         errors.add(Exception("Method ${method.name} should take only a single HttpRequest parameter"))
       }
     }
@@ -124,7 +125,7 @@ open class InteractionRunner<I>(
 
   protected fun hasOneConstructor() = testClass.javaClass.constructors.size == 1
 
-  protected fun validateTestTarget(errors: MutableList<Throwable>) {
+  protected fun validateTestTarget(errors: MutableList<Throwable>): FrameworkField {
     val annotatedFields = testClass.getAnnotatedFields(TestTarget::class.java)
     if (annotatedFields.size != 1) {
       errors.add(Exception("Test class should have exactly one field annotated with ${TestTarget::class.java.name}"))
@@ -132,6 +133,7 @@ open class InteractionRunner<I>(
       errors.add(Exception("Field annotated with ${TestTarget::class.java.name} should implement " +
         "${Target::class.java.name} interface"))
     }
+    return annotatedFields[0]
   }
 
   protected fun validateRules(errors: List<Throwable>) {
