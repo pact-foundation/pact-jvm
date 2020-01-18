@@ -118,6 +118,8 @@ open class HttpTarget
 
     val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
     if (methods.isNotEmpty()) {
+      validateTargetRequestFilters(methods)
+
       providerInfo.requestFilter = Consumer { httpRequest: HttpRequest ->
         methods.forEach { method ->
           try {

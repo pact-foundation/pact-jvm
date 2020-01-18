@@ -84,24 +84,18 @@ open class InteractionRunner<I>(
     validatePublicVoidNoArgMethods(After::class.java, false, errors)
     validateStateChangeMethods(testClass, errors)
     validateConstructor(errors)
-    val targetField = validateTestTarget(errors)
+    validateTestTarget(errors)
     validateRules(errors)
-    validateTargetRequestFilters(errors, targetField)
+    validateTargetRequestFilters(errors)
 
     if (errors.isNotEmpty()) {
       throw InitializationError(errors)
     }
   }
 
-  private fun validateTargetRequestFilters(errors: MutableList<Throwable>, targetField: FrameworkField) {
+  private fun validateTargetRequestFilters(errors: MutableList<Throwable>) {
     testClass.getAnnotatedMethods(TargetRequestFilter::class.java).forEach { method ->
       method.validatePublicVoid(false, errors)
-      val requestClass = (targetField.type.newInstance() as Target).getRequestClass()
-      if (method.method.parameterTypes.size != 1) {
-        errors.add(Exception("Method ${method.name} should take only a single ${requestClass.simpleName} parameter"))
-      } else if (!requestClass.isAssignableFrom(method.method.parameterTypes[0])) {
-        errors.add(Exception("Method ${method.name} should take only a single HttpRequest parameter"))
-      }
     }
   }
 

@@ -131,6 +131,7 @@ class MockMvcTarget @JvmOverloads constructor(
 
     val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
     if (methods.isNotEmpty()) {
+      validateTargetRequestFilters(methods)
       providerInfo.requestFilter = Consumer<MockHttpServletRequestBuilder> { httpRequest ->
         methods.forEach { method ->
           try {

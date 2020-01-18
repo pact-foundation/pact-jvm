@@ -107,7 +107,7 @@ object Json {
     }
   }
 
-  fun prettyPrint(json: String) = gsonPretty.toJson(JsonParser().parse(json))
+  fun prettyPrint(json: String): String = gsonPretty.toJson(JsonParser.parseString(json))
 
   fun exceptionToJson(exp: Exception) = jsonObject("message" to exp.message,
     "exceptionClass" to exp.javaClass.name)

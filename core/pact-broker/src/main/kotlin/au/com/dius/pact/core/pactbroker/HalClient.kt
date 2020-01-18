@@ -271,7 +271,7 @@ open class HalClient @JvmOverloads constructor(
       if (response.statusLine.statusCode < 300) {
         val contentType = ContentType.getOrDefault(response.entity)
         if (isJsonResponse(contentType)) {
-          return@of JsonParser().parse(EntityUtils.toString(response.entity))
+          return@of JsonParser.parseString(EntityUtils.toString(response.entity))
         } else {
           throw InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got '$contentType'")
         }
@@ -408,16 +408,16 @@ open class HalClient @JvmOverloads constructor(
       if (isJsonResponse(contentType)) {
         var error = ""
         if (body.isNotEmpty()) {
-          val jsonBody = JsonParser().parse(body)
+          val jsonBody = JsonParser.parseString(body)
           if (jsonBody != null && jsonBody.obj.has("errors")) {
             if (jsonBody["errors"].isJsonArray) {
               error = " - " + jsonBody["errors"].asJsonArray.joinToString(", ") { it.asString }
             } else if (jsonBody["errors"].isJsonObject) {
-              error = " - " + jsonBody["errors"].asJsonObject.entrySet().joinToString(", ") {
-                if (it.value.isJsonArray) {
-                  "${it.key}: ${it.value.array.joinToString(", ") { it.asString }}"
+              error = " - " + jsonBody["errors"].asJsonObject.entrySet().joinToString(", ") { entry ->
+                if (entry.value.isJsonArray) {
+                  "${entry.key}: ${entry.value.array.joinToString(", ") { it.asString }}"
                 } else {
-                  "${it.key}: ${it.value.asString}"
+                  "${entry.key}: ${entry.value.asString}"
                 }
               }
             }
