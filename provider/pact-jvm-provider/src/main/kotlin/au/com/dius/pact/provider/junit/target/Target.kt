@@ -51,5 +51,5 @@ interface Target {
    */
   fun getStateHandlers(): List<Pair<Class<out Any>, Supplier<out Any>>>
 
-  fun getRequestClass() : Class<*> = HttpRequest::class.java
+  fun getRequestClass(): Class<*> = HttpRequest::class.java
 }
