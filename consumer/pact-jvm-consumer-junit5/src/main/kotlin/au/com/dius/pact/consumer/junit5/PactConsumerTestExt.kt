@@ -17,6 +17,7 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.core.model.annotations.PactFolder
 import au.com.dius.pact.core.model.messaging.MessagePact
+import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
 import mu.KLogging
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.AfterAllCallback
@@ -282,7 +283,8 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, BeforeAllCallback, Pa
     logger.debug { "Invoking method '${method.name}' to get Pact for the test " +
       "'${context.testMethod.map { it.name }.orElse("unknown")}'" }
 
-    val providerNameToUse = if (pactAnnotation.provider.isNotEmpty()) pactAnnotation.provider else providerName
+    val provider = parseExpression(pactAnnotation.provider).toString()
+    val providerNameToUse = if (provider.isNotEmpty()) provider else providerName
     val pact = when (providerType) {
       ProviderType.SYNCH, ProviderType.UNSPECIFIED -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
         ConsumerPactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact<*>
