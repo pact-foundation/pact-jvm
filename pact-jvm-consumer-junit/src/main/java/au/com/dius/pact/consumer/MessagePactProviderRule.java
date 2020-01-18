@@ -17,7 +17,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression;
 
 /**
  * A junit rule that wraps every test annotated with {@link PactVerification}.
@@ -77,7 +80,7 @@ public class MessagePactProviderRule extends ExternalResource {
           pacts = new HashMap<>();
           Method method = possiblePactMethod.get();
           Pact pact = method.getAnnotation(Pact.class);
-          MessagePactBuilder builder = MessagePactBuilder.consumer(pact.consumer()).hasPactWith(provider);
+          MessagePactBuilder builder = MessagePactBuilder.consumer(Objects.requireNonNull(parseExpression(pact.consumer()))).hasPactWith(provider);
           messagePact = (MessagePact) method.invoke(testClassInstance, builder);
           for (Message message : messagePact.getMessages()) {
             pacts.put(message.getProviderStates().stream().map(ProviderState::getName).collect(Collectors.joining()),
@@ -135,7 +138,7 @@ public class MessagePactProviderRule extends ExternalResource {
 
 		Method method = possiblePactMethod.get();
 		Pact pact = method.getAnnotation(Pact.class);
-		MessagePactBuilder builder = MessagePactBuilder.consumer(pact.consumer()).hasPactWith(provider);
+		MessagePactBuilder builder = MessagePactBuilder.consumer(Objects.requireNonNull(parseExpression(pact.consumer()))).hasPactWith(provider);
 		MessagePact messagePact = (MessagePact) method.invoke(testClassInstance, builder);
 		setMessage(messagePact.getMessages().get(0), description);
 		base.evaluate();
@@ -159,7 +162,7 @@ public class MessagePactProviderRule extends ExternalResource {
 		String pactFragment = pactVerification.fragment();
 		for (Method method : testClassInstance.getClass().getMethods()) {
 			Pact pact = method.getAnnotation(Pact.class);
-			if (pact != null && pact.provider().equals(provider)
+			if (pact != null && provider.equals(parseExpression(pact.provider()))
 					&& (pactFragment.isEmpty() || pactFragment.equals(method.getName()))) {
 				JUnitTestSupport.conformsToMessagePactSignature(method);
 				return Optional.of(method);
@@ -176,7 +179,7 @@ public class MessagePactProviderRule extends ExternalResource {
                 if (conformsToSignature(m)) {
 	                Pact pact = m.getAnnotation(Pact.class);
 	                if (pact != null) {
-	                	String provider = pact.provider();
+	                	String provider = parseExpression(pact.provider());
 	                	if (provider != null && !provider.trim().isEmpty()) {
 	                		MessagePactBuilder builder = MessagePactBuilder.consumer(pact.consumer()).hasPactWith(provider);
 	                		List<Message> messages = null;
