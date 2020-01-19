@@ -1,19 +1,21 @@
 package au.com.dius.pact.provider.junit.descriptions
 
-import au.com.dius.pact.core.model.BrokerUrlSource
-import au.com.dius.pact.core.model.Interaction
-import au.com.dius.pact.core.model.Pact
-import au.com.dius.pact.core.model.PactSource
-import au.com.dius.pact.core.support.isNotEmpty
+import au.com.dius.pact.model.BrokerUrlSource
+import au.com.dius.pact.model.Interaction
+import au.com.dius.pact.model.Pact
+import au.com.dius.pact.model.PactSource
+import au.com.dius.pact.support.isNotEmpty
 import org.junit.runner.Description
 import org.junit.runners.model.TestClass
 
 /**
  * Class responsible for building junit tests Description.
  */
-class DescriptionGenerator<I : Interaction>(private val testClass: TestClass,
-                                            private val pact: Pact<I>,
-                                            private val pactSource: PactSource) {
+class DescriptionGenerator<I : Interaction>(
+  private val testClass: TestClass,
+  private val pact: Pact<I>,
+  private val pactSource: PactSource
+) {
 
     /**
      * Builds an instance of junit Description adhering with this logic for building the name:
