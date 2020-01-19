@@ -158,7 +158,7 @@ The following plugin options can be specified on the command line:
 Example, to run verification only for a particular consumer:
 
 ```
-  $ lein with-profile pact pact-verify :pact.filter.consumers=consumer2
+  $ lein with-profile pact pact-verify :pact.filter.consumers=:consumer2
 ```
 
 ## Provider States
@@ -206,7 +206,7 @@ be expanded in the expression. For URL callbacks, the values need to be returned
 ## Filtering the interactions that are verified
 
 You can filter the interactions that are run using three properties: `:pact.filter.consumers`, `:pact.filter.description` and `:pact.filter.providerState`.
-Adding `:pact.filter.consumers=consumer1,consumer2` to the command line will only run the pact files for those
+Adding `:pact.filter.consumers=:consumer1,:consumer2` to the command line will only run the pact files for those
 consumers (consumer1 and consumer2). Adding `:pact.filter.description=a request for payment.*` will only run those interactions
 whose descriptions start with 'a request for payment'. `:pact.filter.providerState=.*payment` will match any interaction that
 has a provider state that ends with payment, and `:pact.filter.providerState=` will match any interaction that does not have a
