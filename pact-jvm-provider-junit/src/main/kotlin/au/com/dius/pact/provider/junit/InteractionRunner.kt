@@ -9,6 +9,7 @@ import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.TestResultAccumulator
+import au.com.dius.pact.provider.junit.descriptions.DescriptionGenerator
 import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget
 import au.com.dius.pact.provider.junit.target.TestTarget
@@ -51,6 +52,8 @@ open class InteractionRunner<I>(
   private val results = ConcurrentHashMap<String, Pair<Boolean, IProviderVerifier>>()
   private val testContext = ConcurrentHashMap<String, Any>()
   private val childDescriptions = ConcurrentHashMap<String, Description>()
+  private val descriptionGenerator = DescriptionGenerator(testClass, pact, pactSource)
+
   var testResultAccumulator: TestResultAccumulator = DefaultTestResultAccumulator
 
   init {
@@ -67,8 +70,7 @@ open class InteractionRunner<I>(
 
   protected fun describeChild(interaction: Interaction): Description {
     if (!childDescriptions.containsKey(interaction.uniqueKey())) {
-      childDescriptions[interaction.uniqueKey()] = Description.createTestDescription(testClass.javaClass,
-        "${pact.consumer.name} - ${interaction.description}")
+      childDescriptions[interaction.uniqueKey()] = descriptionGenerator.generate(interaction)
     }
     return childDescriptions[interaction.uniqueKey()]!!
   }
