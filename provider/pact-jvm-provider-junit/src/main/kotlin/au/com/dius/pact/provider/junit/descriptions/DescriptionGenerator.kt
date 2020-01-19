@@ -11,9 +11,11 @@ import org.junit.runners.model.TestClass
 /**
  * Class responsible for building junit tests Description.
  */
-class DescriptionGenerator<I : Interaction>(private val testClass: TestClass,
-                                            private val pact: Pact<I>,
-                                            private val pactSource: PactSource) {
+class DescriptionGenerator<I : Interaction>(
+  private val testClass: TestClass,
+  private val pact: Pact<I>,
+  private val pactSource: PactSource
+) {
 
     /**
      * Builds an instance of junit Description adhering with this logic for building the name:
