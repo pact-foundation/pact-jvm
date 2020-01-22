@@ -230,6 +230,7 @@ The following keys may be managed through the environment
 * `pactbroker.auth.username` (for basic auth)
 * `pactbroker.auth.password` (for basic auth)
 * `pactbroker.auth.token` (for bearer auth)
+* `pactbroker.consumers` (comma separated list to filter pacts by consumer; if not provided, will fetch all pacts for the provider)
 
 
 #### _Version 3.2.4/2.4.6+_ - Using tags with the pact broker
