@@ -269,20 +269,20 @@ open class ProviderClient(
   }
 
   open fun setupBody(request: Request, method: HttpRequest) {
-    if (method is HttpEntityEnclosingRequest && request.body != null && request.body!!.isPresent()) {
+    if (method is HttpEntityEnclosingRequest && request.body.isPresent()) {
       method.entity = StringEntity(request.body.valueAsString())
     }
   }
 
   open fun setupHeaders(request: Request, method: HttpRequest) {
     val headers = request.headers
-    if (headers != null && headers.isNotEmpty()) {
-      headers.forEach { key, value ->
+    if (headers.isNotEmpty()) {
+      headers.forEach { (key, value) ->
         method.addHeader(key, value.joinToString(", "))
       }
     }
 
-    if (!method.containsHeader(CONTENT_TYPE) && request.body?.isPresent() == true) {
+    if (!method.containsHeader(CONTENT_TYPE) && request.body.isPresent()) {
       method.addHeader(CONTENT_TYPE, "application/json")
     }
   }
@@ -354,7 +354,9 @@ open class ProviderClient(
     val response = mutableMapOf<String, Any>("statusCode" to httpResponse.statusLine.statusCode,
       "contentType" to ContentType.TEXT_PLAIN)
 
-    response["headers"] = httpResponse.allHeaders.groupBy({ header -> header.name }, { header -> header.value })
+    response["headers"] = httpResponse.allHeaders
+      .groupBy({ header -> header.name }, { header -> header.value.split(',').map { it.trim() } })
+      .mapValues { it.value.flatten() }
 
     val entity = httpResponse.entity
     if (entity != null) {
