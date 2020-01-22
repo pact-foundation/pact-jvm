@@ -615,4 +615,28 @@ class ProviderClientSpec extends Specification {
     ]
   }
 
+  def 'handles headers with comma-seperated values'() {
+    given:
+    StatusLine statusLine = new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
+    Header[] headers = [
+      new BasicHeader('Server', 'Apigee-Edge'),
+      new BasicHeader('Access-Control-Expose-Headers', 'content-length,content-type'),
+      new BasicHeader('Access-Control-Expose-Headers', 'accept')
+    ] as Header[]
+    HttpResponse response = Mock(HttpResponse) {
+      getStatusLine() >> statusLine
+      getAllHeaders() >> headers
+    }
+
+    when:
+    def result = client.handleResponse(response)
+
+    then:
+    result.statusCode == 200
+    result.headers == [
+      Server: ['Apigee-Edge'],
+      'Access-Control-Expose-Headers': ['content-length', 'content-type', 'accept']
+    ]
+  }
+
 }
