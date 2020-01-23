@@ -20,4 +20,4 @@
       (if (contains? project :pact)
         (let [verifier (LeinVerifierProxy. project (parse-args args))]
           (verify/verify verifier (-> project :pact)))
-        (throw (ex-info "No pact definition was found in the project"))))
+        (throw (ex-info "No pact definition was found in the project" {}))))
