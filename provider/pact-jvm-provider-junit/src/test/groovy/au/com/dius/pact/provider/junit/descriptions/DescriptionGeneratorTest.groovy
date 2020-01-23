@@ -34,7 +34,7 @@ class DescriptionGeneratorTest extends Specification {
   def 'when BrokerUrlSource tests description includes tag if present'() {
     def interaction = new RequestResponseInteraction('Interaction 1',
             [ new ProviderState('Test State') ], new Request(), new Response())
-    def pact = new RequestResponsePact(new Provider(), new Consumer("the-consumer-name"), [ interaction ])
+    def pact = new RequestResponsePact(new Provider(), new Consumer('the-consumer-name'), [ interaction ])
 
     expect:
     def pactSource =  new BrokerUrlSource('url', 'url', [:], [:], tag)
