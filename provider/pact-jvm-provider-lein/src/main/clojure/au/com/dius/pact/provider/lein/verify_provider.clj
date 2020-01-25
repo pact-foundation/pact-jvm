@@ -72,7 +72,7 @@
     (if (not-empty failures)
       (do
         (.displayFailures verifier (into {} failures))
-        (throw (ex-info (str "There were " (count failures) " pact failures")) {})))))
+        (throw (ex-info (str "There were " (count failures) " pact failures") {}))))))
 
 (defn verify [verifier pact-info]
   (verify-providers verifier (:service-providers pact-info)))
