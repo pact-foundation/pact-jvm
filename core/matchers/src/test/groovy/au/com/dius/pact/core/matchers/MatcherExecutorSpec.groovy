@@ -11,6 +11,7 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TimeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import com.google.gson.JsonNull
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -35,13 +36,16 @@ class MatcherExecutorSpec extends Specification {
     MatcherExecutorKt.domatch(EqualsMatcher.INSTANCE, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
-    expected | actual || mustBeEmpty
-    '100'    | '100'  || true
-    100      | '100'  || false
-    100      | 100    || true
-    null     | null   || true
-    '100'    | null   || false
-    null     | 100    || false
+    expected          | actual            || mustBeEmpty
+    '100'             | '100'             || true
+    100               | '100'             || false
+    100               | 100               || true
+    null              | null              || true
+    '100'             | null              || false
+    null              | 100               || false
+    JsonNull.INSTANCE | null              || true
+    null              | JsonNull.INSTANCE || true
+    JsonNull.INSTANCE | JsonNull.INSTANCE || true
   }
 
   @Unroll
@@ -62,15 +66,18 @@ class MatcherExecutorSpec extends Specification {
     MatcherExecutorKt.domatch(TypeMatcher.INSTANCE, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
-    expected        | actual                     || mustBeEmpty
-    'Harry'         | 'Some other string'        || true
-    100             | 200.3                      || true
-    true            | false                      || true
-    null            | null                       || true
-    '200'           | 200                        || false
-    200             | null                       || false
-    [100, 200, 300] | [200.3]                    || true
-    [a: 100]        | [a: 200.3, b: 200, c: 300] || true
+    expected          | actual                     || mustBeEmpty
+    'Harry'           | 'Some other string'        || true
+    100               | 200.3                      || true
+    true              | false                      || true
+    null              | null                       || true
+    '200'             | 200                        || false
+    200               | null                       || false
+    [100, 200, 300]   | [200.3]                    || true
+    [a: 100]          | [a: 200.3, b: 200, c: 300] || true
+    JsonNull.INSTANCE | null                       || true
+    null              | JsonNull.INSTANCE          || true
+    JsonNull.INSTANCE | JsonNull.INSTANCE          || true
   }
 
   @Unroll

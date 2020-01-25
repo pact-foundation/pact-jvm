@@ -130,7 +130,7 @@ fun <M : Mismatch> matchEquality(
   mismatchFactory: MismatchFactory<M>
 ): List<M> {
   val matches = when {
-    actual == null && expected == null -> true
+    (actual == null || actual is JsonNull) && (expected == null || expected is JsonNull) -> true
     actual is Element && expected is Element -> actual.tagName == expected.tagName
     else -> actual != null && actual == expected
   }
@@ -184,8 +184,8 @@ fun <M : Mismatch> matchType(
       (expected.isNumber && actual.isNumber) ||
       (expected.isString && actual.isString))) {
       emptyList()
-  } else if (expected == null) {
-    if (actual == null) {
+  } else if (expected == null || expected is JsonNull) {
+    if (actual == null || actual is JsonNull) {
       emptyList()
     } else {
       listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be null", path))
