@@ -116,7 +116,7 @@ object Matching : KLogging() {
   }
 
   @JvmStatic
-  fun compareMessageMetadata(e: Map<String, Any>, a: Map<String, Any>, matchers: MatchingRules?): List<MetadataMismatch> {
+  fun compareMessageMetadata(e: Map<String, Any?>, a: Map<String, Any?>, matchers: MatchingRules?): List<MetadataMismatch> {
     return e.entries.fold(listOf()) { list, value ->
       if (a.containsKey(value.key)) {
         val actual = a[value.key]

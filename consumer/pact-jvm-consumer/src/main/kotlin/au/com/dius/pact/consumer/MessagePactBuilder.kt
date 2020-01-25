@@ -110,7 +110,7 @@ class MessagePactBuilder(
     if (contentTypeEntry == null) {
       metadata["contentType"] = contentType.toString()
     } else {
-      contentType = ContentType(contentTypeEntry.value)
+      contentType = ContentType(contentTypeEntry.value.toString())
       metadata.remove(contentTypeEntry.key)
       metadata["contentType"] = contentTypeEntry.value
     }

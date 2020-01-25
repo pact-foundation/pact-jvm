@@ -35,7 +35,7 @@ public class MessagePactProviderRule extends ExternalResource {
 	private byte[] message;
 	private Map<String, Message> providerStateMessages;
 	private MessagePact messagePact;
-	private Map<String, String> metadata;
+	private Map<String, Object> metadata;
 
 	/**
 	 * @param testClassInstance
@@ -237,7 +237,7 @@ public class MessagePactProviderRule extends ExternalResource {
 		return message;
 	}
 
-	public Map<String, String> getMetadata() {
+	public Map<String, Object> getMetadata() {
 		if (metadata == null) {
 			throw new UnsupportedOperationException("Message metadata was not created and cannot be retrieved." +
 								" Check @Pact and @PactVerification match.");

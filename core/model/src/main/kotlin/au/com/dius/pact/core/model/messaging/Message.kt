@@ -26,7 +26,7 @@ class Message @JvmOverloads constructor(
   var contents: OptionalBody = OptionalBody.missing(),
   var matchingRules: MatchingRules = MatchingRulesImpl(),
   var generators: Generators = Generators(),
-  var metaData: Map<String, String> = mapOf(),
+  var metaData: Map<String, Any?> = mapOf(),
   override val interactionId: String? = null
 ) : Interaction {
 
@@ -127,7 +127,7 @@ class Message @JvmOverloads constructor(
       "matchingRules=$matchingRules, generators=$generators, metaData=$metaData)"
   }
 
-  fun withMetaData(metadata: Map<String, String>): Message {
+  fun withMetaData(metadata: Map<String, Any>): Message {
     this.metaData = metadata
     return this
   }
@@ -147,7 +147,7 @@ class Message @JvmOverloads constructor(
       }
 
       val metaData = if (json.has("metaData"))
-        json["metaData"].obj.entrySet().associate { it.key to Json.toString(it.value) }
+        json["metaData"].obj.entrySet().associate { it.key to Json.fromJson(it.value) }
       else
         emptyMap()
 
@@ -184,7 +184,7 @@ class Message @JvmOverloads constructor(
       }
     }
 
-    fun getContentType(metaData: Map<String, Any>): String {
+    fun getContentType(metaData: Map<String, Any?>): String {
       return metaData.entries.find {
         it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
       }?.value?.toString() ?: JSON
