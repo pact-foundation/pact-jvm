@@ -212,7 +212,9 @@ class MatcherExecutorSpec extends Specification {
     100 as int        | true
     100 as long       | true
     100 as BigInteger | true
-
+    100 as BigDecimal | true
+    BigInteger.ZERO   | true
+    BigDecimal.ZERO   | true
   }
 
   @Unroll
@@ -232,7 +234,8 @@ class MatcherExecutorSpec extends Specification {
     100 as int        | false
     100 as long       | false
     100 as BigInteger | false
-
+    BigInteger.ZERO   | false
+    BigDecimal.ZERO   | true
   }
 
 }

@@ -239,7 +239,7 @@ fun matchDecimal(actual: Any?): Boolean {
     actual == 0 -> true
     actual is Float -> true
     actual is Double -> true
-    actual is BigDecimal && actual.precision() > 0 -> true
+    actual is BigDecimal && (actual == BigDecimal.ZERO || actual.scale() > 0) -> true
     actual is JsonPrimitive && actual.isNumber -> decimalRegex.matches(actual.toString())
     else -> false
   }
@@ -252,7 +252,7 @@ fun matchInteger(actual: Any?): Boolean {
     actual is Int -> true
     actual is Long -> true
     actual is BigInteger -> true
-    actual is BigDecimal && actual.precision() == 0 -> true
+    actual is BigDecimal && actual.scale() == 0 -> true
     actual is JsonPrimitive && actual.isNumber -> integerRegex.matches(actual.toString())
     else -> false
   }
