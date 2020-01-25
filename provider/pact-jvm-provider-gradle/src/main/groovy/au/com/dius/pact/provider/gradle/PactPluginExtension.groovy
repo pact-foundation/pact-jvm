@@ -13,8 +13,8 @@ class PactPluginExtension {
     final NamedDomainObjectContainer<GradleProviderInfo> serviceProviders
 
     PactPublish publish
-
     VerificationReports reports
+    Broker broker
 
     PactPluginExtension(NamedDomainObjectContainer<GradleProviderInfo> serviceProviders) {
         this.serviceProviders = serviceProviders
@@ -35,5 +35,11 @@ class PactPluginExtension {
     void reports(Action<? extends VerificationReports> configureAction) {
         reports = new VerificationReports()
         configureAction.execute(reports)
+    }
+
+    @SuppressWarnings('ConfusingMethodName')
+    void broker(Action<? extends Broker> configureAction) {
+      broker = new Broker()
+      configureAction.execute(broker)
     }
 }

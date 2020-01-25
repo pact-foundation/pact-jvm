@@ -35,6 +35,11 @@ task generatePom(type: GenerateMavenPom, dependsOn: [":provider:pact-jvm-provide
         pluginNode.appendNode('artifactId', 'maven-plugin-plugin')
         pluginNode.appendNode('version', project.mavenPluginPluginVersion)
         pluginNode.appendNode('configuration').appendNode('goalPrefix', 'pact')
+
+      def repository = asNode().appendNode('repositories').appendNode('repository')
+      repository.appendNode('id', 'jcenter')
+      repository.appendNode('name', 'jcenter')
+      repository.appendNode('url', 'https://jcenter.bintray.com')
     }
 }
 

@@ -24,9 +24,11 @@ class PactPlugin implements Plugin<Project> {
         project.task(PACT_VERIFY, description: 'Verify your pacts against your providers', group: GROUP)
         project.task('pactPublish', description: 'Publish your pacts to a pact broker', type: PactPublishTask,
             group: GROUP)
+        project.task('canIDeploy', description: 'Check if it is safe to deploy by checking whether or not the ' +
+          'specified pacticipant versions are compatible', type: PactCanIDeployTask,
+          group: GROUP)
 
         project.afterEvaluate {
-
             if (it.pact == null) {
               throw new GradleScriptException('No pact block was found in the project', null)
             } else if (!(it.pact instanceof PactPluginExtension)) {

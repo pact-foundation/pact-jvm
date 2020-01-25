@@ -57,6 +57,13 @@ sealed class TestResult {
   }
 }
 
+sealed class Latest {
+  data class UseLatest(val latest: Boolean): Latest()
+  data class UseLatestTag(val latestTag: String): Latest()
+}
+
+data class CanIDeployResult(val ok: Boolean, val message: String, val reason: String)
+
 /**
  * Client for the pact broker service
  */
@@ -292,6 +299,10 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     } catch (e: NotFoundHalResponse) {
       logger.error(e) { "Could not tag provider $name, link was missing" }
     }
+  }
+
+  open fun canIDeploy(pacticipant: String, pacticipantVersion: String, latest: Latest, to: String?): CanIDeployResult {
+    return CanIDeployResult(false, "", "")
   }
 
   companion object : KLogging() {
