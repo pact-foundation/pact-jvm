@@ -17,7 +17,7 @@ class PactCanIDeployTask extends DefaultTask {
 
   private static final String PACTICIPANT = 'pacticipant'
   private static final String PACTICIPANT_VERSION = 'pacticipantVersion'
-  private static final String TO = 'to'
+  private static final String TO = 'toTag'
   private static final String LATEST = 'latest'
 
   @TaskAction

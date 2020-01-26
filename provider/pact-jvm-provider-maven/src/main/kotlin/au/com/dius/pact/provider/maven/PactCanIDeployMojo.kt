@@ -26,7 +26,7 @@ open class PactCanIDeployMojo : PactBaseMojo() {
   @Parameter(property = "latest", defaultValue = "")
   private var latest: String? = ""
 
-  @Parameter(property = "to", defaultValue = "")
+  @Parameter(property = "toTag", defaultValue = "")
   private var to: String? = ""
 
   override fun execute() {
