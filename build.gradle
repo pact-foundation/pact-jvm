@@ -216,10 +216,16 @@ subprojects {
 
     codenarcMain {
         configFile = rootProject.file('config/codenarc/ruleset.groovy')
+      reports {
+        console { enabled = true }
+      }
     }
 
     codenarcTest {
         configFile = rootProject.file('config/codenarc/rulesetTest.groovy')
+      reports {
+        console { enabled = true }
+      }
     }
 
     check.dependsOn << 'jacocoTestReport'
@@ -231,6 +237,7 @@ subprojects {
   }
 
   detekt {
+    failFast = false
     config = files(rootProject.file("config/detekt-config.yml"))
   }
 

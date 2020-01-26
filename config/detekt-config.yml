@@ -1,5 +1,4 @@
 autoCorrect: true
-failFast: false
 
 build:
   maxIssues: 25
