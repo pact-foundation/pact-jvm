@@ -1,5 +1,43 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.0.5 - Bugfix Release + Maven and Gradle can-i-deploy task
+
+* 2a46954d1 - fix: pacticipant version is optional is latest is specified #994 (Ronald Holshausen, Sun Jan 26 17:25:07 2020 +1100)
+* e23015b77 - chore: implemented can-i-deploy call on the broker client #994 (Ronald Holshausen, Sun Jan 26 16:58:52 2020 +1100)
+* 7068f2029 - fix: Fix codenarc #994 (Ronald Holshausen, Sun Jan 26 15:36:59 2020 +1100)
+* 28931c4f1 - chore: add tests for the Gradle and Maven plugins #994 (Ronald Holshausen, Sun Jan 26 14:50:07 2020 +1100)
+* 3d3bba842 - chore: rename to parameter to toTag #994 (Ronald Holshausen, Sun Jan 26 13:43:09 2020 +1100)
+* 6d6e3da64 - chore: cleanup Maven plugin deps after converting Groovy code to Kotlin #994 (Ronald Holshausen, Sun Jan 26 13:42:50 2020 +1100)
+* decdf18f4 - feat: added Maven can I deploy task #994 (Ronald Holshausen, Sun Jan 26 13:31:42 2020 +1100)
+* 177774ef0 - chore: upgrade Gradle to 5.5.1 (Ronald Holshausen, Sun Jan 26 11:56:36 2020 +1100)
+* adc95f1e5 - fix: lint and codenarc errors #994 (Ronald Holshausen, Sun Jan 26 11:38:32 2020 +1100)
+* 13b653184 - feat: added a can-i-deploy Gradle task #994 (Ronald Holshausen, Sat Jan 25 19:05:29 2020 +1100)
+* b0b07b0fb - fix: Message should return metadata as Map<String, Object> #1006 (Ronald Holshausen, Sat Jan 25 17:26:21 2020 +1100)
+* 86f5e8051 - fix: lein plugin parentheses after PR merge (Ronald Holshausen, Sat Jan 25 17:01:56 2020 +1100)
+* 14fd2586c - fix: correct the type matcher to treat JsonNull as a null #981 (Ronald Holshausen, Sat Jan 25 16:47:41 2020 +1100)
+* afba8a6a9 - fix: BigDecimal comparison should use scale and include BigDecimal.ZERO #1001 (Ronald Holshausen, Sat Jan 25 16:32:44 2020 +1100)
+* e70525b0d - Merge pull request #1004 from Biserkov/patch-1 (Ronald Holshausen, Sat Jan 25 15:57:03 2020 +1100)
+* e1e5388f0 - Merge pull request #1000 from sonalchandani/update-pact-leiningen-readme (Ronald Holshausen, Sat Jan 25 15:54:19 2020 +1100)
+* c9018796c - Merge branch 'master' into patch-1 (Jordan Biserkov, Fri Jan 24 09:33:00 2020 +0100)
+* 47aa88c84 - Merge pull request #1003 from aplsup/fix-lint-test-code (Beth Skurrie, Fri Jan 24 10:20:07 2020 +1100)
+* e2e49dd94 - Fix Wrong number of args passed to: ex-info (Jordan Biserkov, Thu Jan 23 16:07:17 2020 +0100)
+* ab551ac5b - Fix Wrong number of args passed to: ex-info (Jordan Biserkov, Thu Jan 23 16:02:13 2020 +0100)
+* 3d3446523 - fix: lint issue in test (Alessio Paciello, Thu Jan 23 11:12:24 2020 +0000)
+* 43d5d0138 - Merge pull request #999 from aplsup/junit-test-name-brokerpactsource-include-tag (Beth Skurrie, Thu Jan 23 13:15:32 2020 +1100)
+* 635c80f02 - Merge branch 'master' into junit-test-name-brokerpactsource-include-tag (Beth Skurrie, Thu Jan 23 12:54:03 2020 +1100)
+* 6ec4af6bb - feat: Place tag after consumer name in junit test description (Alessio Paciello, Wed Jan 22 22:59:05 2020 +0000)
+* 0444e8cd6 - Merge pull request #1002 from anto-ac/add-pactbroker-consumers-property-to-documentation (Beth Skurrie, Thu Jan 23 09:47:43 2020 +1100)
+* f54117fac - chore: Update README.md (Antonello Caboni, Wed Jan 22 16:25:30 2020 +0000)
+* 7e6b8c00d - fix: handle headers with comma-seprated values #997 (Ronald Holshausen, Wed Jan 22 16:46:17 2020 +1100)
+* 5e38e39b9 - lint fix (Alessio Paciello, Sun Jan 19 14:26:03 2020 +0000)
+* 6ad387182 - feat: Include tag in jUnit test name description when pact is retrieved from the pact broker (Alessio Paciello, Sun Jan 19 13:52:28 2020 +0000)
+* 44d7399af - Updated the readme for leiningen pact plugin to have the correct format for the consumer list (sonalchandani, Sun Jan 19 13:39:52 2020 +0530)
+* 6eee48267 - fix: Target request filter validation for MockMvcTarget #983 (Ronald Holshausen, Sat Jan 18 17:15:33 2020 +1100)
+* 4336c50b8 - fix: lint error #983 (Ronald Holshausen, Sat Jan 18 15:15:19 2020 +1100)
+* d5d1cec98 - fix: validation of TargetRequestFilter parameter for MockMvcTarget #983 (Ronald Holshausen, Sat Jan 18 14:49:14 2020 +1100)
+* 8725d4cf3 - feat: allow expressions with @Pact annotation #989 (Ronald Holshausen, Sat Jan 18 14:23:43 2020 +1100)
+* 3bb6c79ee - bump version to 4.0.5 (Ronald Holshausen, Wed Dec 18 10:41:08 2019 +1100)
+
 # 4.0.4 - Bugfix Release
 
 * dc6bf9ed - Merge pull request #988 from ivangsa/pact-jvm-provider-maven (Ronald Holshausen, Sat Dec 7 17:51:05 2019 +1100)
