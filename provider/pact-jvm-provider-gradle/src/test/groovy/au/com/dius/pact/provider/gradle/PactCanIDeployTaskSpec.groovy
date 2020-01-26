@@ -13,7 +13,6 @@ class PactCanIDeployTaskSpec extends Specification {
   private PactCanIDeployTask task
   private PactPlugin plugin
   private Project project
-  private PactBrokerClient brokerClient
 
   def setup() {
     project = ProjectBuilder.builder().build()
@@ -83,7 +82,8 @@ class PactCanIDeployTaskSpec extends Specification {
 
     then:
     notThrown(GradleScriptException)
-    1 * task.brokerClient.canIDeploy('pacticipant', '1.0.0', _, _) >> new CanIDeployResult(true, '', '')
+    1 * task.brokerClient.canIDeploy('pacticipant', '1.0.0', _, _) >>
+      new CanIDeployResult(true, '', '')
   }
 
   def 'passes optional parameters to the pact broker client'() {
@@ -106,7 +106,8 @@ class PactCanIDeployTaskSpec extends Specification {
 
     then:
     notThrown(GradleScriptException)
-    1 * task.brokerClient.canIDeploy('pacticipant', '1.0.0', new Latest.UseLatest(true), 'prod') >> new CanIDeployResult(true, '', '')
+    1 * task.brokerClient.canIDeploy('pacticipant', '1.0.0',
+      new Latest.UseLatest(true), 'prod') >> new CanIDeployResult(true, '', '')
   }
 
   def 'throws an exception if the pact broker client says no'() {
@@ -126,7 +127,8 @@ class PactCanIDeployTaskSpec extends Specification {
     task.canIDeploy()
 
     then:
-    1 * task.brokerClient.canIDeploy('pacticipant', '1.0.0', _, _) >> new CanIDeployResult(false, 'Bad version', 'Bad version')
+    1 * task.brokerClient.canIDeploy('pacticipant', '1.0.0', _, _) >>
+      new CanIDeployResult(false, 'Bad version', 'Bad version')
     def ex = thrown(GradleScriptException)
     ex.message == 'Can you deploy? Computer says no ¯\\_(ツ)_/¯ Bad version'
   }
