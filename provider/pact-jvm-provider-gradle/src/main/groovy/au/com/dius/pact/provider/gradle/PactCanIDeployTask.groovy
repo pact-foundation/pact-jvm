@@ -20,6 +20,8 @@ class PactCanIDeployTask extends DefaultTask {
   private static final String TO = 'toTag'
   private static final String LATEST = 'latest'
 
+  PactBrokerClient brokerClient
+
   @TaskAction
   void canIDeploy() {
     AnsiConsole.systemInstall()
@@ -28,8 +30,11 @@ class PactCanIDeployTask extends DefaultTask {
         'use the CanIDeploy task', null)
     }
 
-    Broker config = project.pact.broker
-    PactBrokerClient brokerClient = setupBrokerClient(config)
+    if (brokerClient == null) {
+      Broker config = project.pact.broker
+      brokerClient = setupBrokerClient(config)
+    }
+
     if (!project.hasProperty(PACTICIPANT)) {
       throw new GradleScriptException('The CanIDeploy task requires -Ppacticipant=...', null)
     }
