@@ -58,8 +58,8 @@ sealed class TestResult {
 }
 
 sealed class Latest {
-  data class UseLatest(val latest: Boolean): Latest()
-  data class UseLatestTag(val latestTag: String): Latest()
+  data class UseLatest(val latest: Boolean) : Latest()
+  data class UseLatestTag(val latestTag: String) : Latest()
 }
 
 data class CanIDeployResult(val ok: Boolean, val message: String, val reason: String)

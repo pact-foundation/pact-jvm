@@ -34,11 +34,7 @@ class PactPublishTask extends DefaultTask {
           version = version.call()
         }
 
-        def brokerConfig = project.pact.broker
-        if (!brokerConfig) {
-          brokerConfig = project.pact.publish
-        }
-
+        def brokerConfig = project.pact.broker ?: project.pact.publish
         def options = [:]
         if (StringUtils.isNotEmpty(brokerConfig.pactBrokerToken)) {
             options.authentication = [brokerConfig.pactBrokerAuthenticationScheme ?: 'bearer',
