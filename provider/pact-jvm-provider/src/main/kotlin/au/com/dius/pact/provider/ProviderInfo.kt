@@ -18,8 +18,8 @@ open class ProviderInfo @JvmOverloads constructor (
   override var host: Any? = "localhost",
   override var port: Any? = 8080,
   override var path: String = "/",
-  var startProviderTask: Any? = null,
-  var terminateProviderTask: Any? = null,
+  open var startProviderTask: Any? = null,
+  open var terminateProviderTask: Any? = null,
   override var requestFilter: Any? = null,
   override var stateChangeRequestFilter: Any? = null,
   override var createClient: Any? = null,
@@ -29,10 +29,10 @@ open class ProviderInfo @JvmOverloads constructor (
   override var stateChangeUrl: URL? = null,
   override var stateChangeUsesBody: Boolean = true,
   override var stateChangeTeardown: Boolean = false,
-  var isDependencyForPactVerify: Boolean = true,
+  open var isDependencyForPactVerify: Boolean = true,
   override var verificationType: PactVerification? = PactVerification.REQUEST_RESPONSE,
   override var packagesToScan: List<String> = emptyList(),
-  var consumers: MutableList<IConsumerInfo> = mutableListOf()
+  open var consumers: MutableList<IConsumerInfo> = mutableListOf()
 ) : IProviderInfo {
 
   override fun hashCode() = HashCodeBuilder()
