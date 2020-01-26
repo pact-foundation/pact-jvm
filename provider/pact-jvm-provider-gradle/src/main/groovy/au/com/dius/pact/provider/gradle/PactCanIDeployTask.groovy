@@ -39,11 +39,12 @@ class PactCanIDeployTask extends DefaultTask {
       throw new GradleScriptException('The CanIDeploy task requires -Ppacticipant=...', null)
     }
     String pacticipant = project.property(PACTICIPANT)
-    if (!project.hasProperty(PACTICIPANT_VERSION)) {
-      throw new GradleScriptException('The CanIDeploy task requires -PpacticipantVersion=...', null)
-    }
-    String pacticipantVersion = project.property(PACTICIPANT_VERSION)
     Latest latest = setupLatestParam()
+    if ((latest instanceof Latest.UseLatestTag || latest.latest == false) &&
+      !project.hasProperty(PACTICIPANT_VERSION)) {
+      throw new GradleScriptException('The CanIDeploy task requires -PpacticipantVersion=... or -Dlatest=true', null)
+    }
+    String pacticipantVersion = project.hasProperty(PACTICIPANT_VERSION) ? project.property(PACTICIPANT_VERSION) : ''
     String to = null
     if (project.hasProperty(TO)) {
       to = project.property(TO)

@@ -46,7 +46,7 @@ class PactCanIDeployTaskSpec extends Specification {
     ex.message == 'The CanIDeploy task requires -Ppacticipant=...'
   }
 
-  def 'raises an exception if no pacticipantVersion is provided'() {
+  def 'raises an exception if pacticipantVersion and latest is not provided'() {
     given:
     project.pact {
       broker {
@@ -61,7 +61,29 @@ class PactCanIDeployTaskSpec extends Specification {
 
     then:
     def ex = thrown(GradleScriptException)
-    ex.message == 'The CanIDeploy task requires -PpacticipantVersion=...'
+    ex.message == 'The CanIDeploy task requires -PpacticipantVersion=... or -Dlatest=true'
+  }
+
+  def 'pacticipantVersion can be missing if latest is provided'() {
+    given:
+    project.pact {
+      broker {
+        pactBrokerUrl = 'pactBrokerUrl'
+      }
+    }
+    project.ext.pacticipant = 'pacticipant'
+    project.ext.latest = 'true'
+    project.evaluate()
+
+    task.brokerClient = Mock(PactBrokerClient) {
+      canIDeploy(_, _, _, _) >> new CanIDeployResult(true, '', '')
+    }
+
+    when:
+    task.canIDeploy()
+
+    then:
+    notThrown(GradleScriptException)
   }
 
   def 'calls the pact broker client'() {

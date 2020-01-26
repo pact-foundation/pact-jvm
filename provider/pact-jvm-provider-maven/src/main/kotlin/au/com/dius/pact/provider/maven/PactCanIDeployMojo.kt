@@ -44,12 +44,13 @@ open class PactCanIDeployMojo : PactBaseMojo() {
       if (pacticipant.isNullOrEmpty()) {
         throw MojoExecutionException("The can-i-deploy task requires -Dpacticipant=...", null)
       }
-      if (pacticipantVersion.isNullOrEmpty()) {
-        throw MojoExecutionException("The can-i-deploy task requires -DpacticipantVersion=...", null)
-      }
 
       val latest = setupLatestParam()
-      val result = brokerClient!!.canIDeploy(pacticipant!!, pacticipantVersion!!, latest, to)
+      if ((latest !is Latest.UseLatest || !latest.latest) && pacticipantVersion.isNullOrEmpty()) {
+        throw MojoExecutionException("The can-i-deploy task requires -DpacticipantVersion=... or -Dlatest=true", null)
+      }
+
+      val result = brokerClient!!.canIDeploy(pacticipant!!, pacticipantVersion.orEmpty(), latest, to)
       if (result.ok) {
         AnsiConsole.out().println(Ansi.ansi().a("Computer says yes \\o/ ").a(result.message).a("\n\n")
           .fg(Ansi.Color.GREEN).a(result.reason).reset())

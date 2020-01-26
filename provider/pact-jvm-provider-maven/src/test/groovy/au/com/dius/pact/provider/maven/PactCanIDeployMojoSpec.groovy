@@ -41,7 +41,7 @@ class PactCanIDeployMojoSpec extends Specification {
     ex.message == 'The can-i-deploy task requires -Dpacticipant=...'
   }
 
-  def 'throws an exception if pacticipantVersion is not provided'() {
+  def 'throws an exception if pacticipantVersion and latest is not provided'() {
     given:
     mojo.pacticipantVersion = null
 
@@ -50,7 +50,22 @@ class PactCanIDeployMojoSpec extends Specification {
 
     then:
     def ex = thrown(MojoExecutionException)
-    ex.message == 'The can-i-deploy task requires -DpacticipantVersion=...'
+    ex.message == 'The can-i-deploy task requires -DpacticipantVersion=... or -Dlatest=true'
+  }
+
+  def 'pacticipantVersion can be missing if latest is provided'() {
+    given:
+    mojo.pacticipantVersion = null
+    mojo.latest = 'true'
+    mojo.brokerClient = Mock(PactBrokerClient) {
+      canIDeploy(_, _, _, _) >> new CanIDeployResult(true, '', '')
+    }
+
+    when:
+    mojo.execute()
+
+    then:
+    notThrown(MojoExecutionException)
   }
 
   def 'calls the pact broker client'() {
