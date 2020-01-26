@@ -140,6 +140,9 @@ interface IHalClient {
    * Upload a JSON document to the current path link, using a PUT request
    */
   fun putJson(link: String, options: Map<String, Any>, json: String): Result<Boolean, Exception>
+
+  fun getJson(path: String): Result<JsonElement, Exception>
+  fun getJson(path: String, encodePath: Boolean): Result<JsonElement, Exception>
 }
 
 /**
@@ -260,7 +263,9 @@ open class HalClient @JvmOverloads constructor(
     return this
   }
 
-  private fun getJson(path: String, encodePath: Boolean = true): Result<JsonElement, Exception> {
+  override fun getJson(path: String) = getJson(path, true)
+
+  override fun getJson(path: String, encodePath: Boolean): Result<JsonElement, Exception> {
     setupHttpClient()
     return Result.of {
       val httpGet = initialiseRequest(HttpGet(buildUrl(baseUrl, path, encodePath)))

@@ -111,4 +111,10 @@ object Json {
 
   fun exceptionToJson(exp: Exception) = jsonObject("message" to exp.message,
     "exceptionClass" to exp.javaClass.name)
+
+  fun toBoolean(jsonElement: JsonElement?) = when {
+    jsonElement == null || jsonElement.isJsonNull -> false
+    jsonElement.isJsonPrimitive && jsonElement.asJsonPrimitive.isBoolean -> jsonElement.asJsonPrimitive.asBoolean
+    else -> false
+  }
 }

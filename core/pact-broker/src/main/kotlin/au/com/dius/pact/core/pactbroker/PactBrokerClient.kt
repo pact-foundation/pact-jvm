@@ -3,6 +3,7 @@ package au.com.dius.pact.core.pactbroker
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.com.github.michaelbull.result.Result
+import au.com.dius.pact.core.support.Json
 import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
@@ -124,7 +125,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   @JvmOverloads
   open fun uploadPactFile(pactFile: File, unescapedVersion: String, tags: List<String> = emptyList()): Any? {
     val pactText = pactFile.readText()
-    val pact = JsonParser().parse(pactText)
+    val pact = JsonParser.parseString(pactText)
     val halClient = newHalClient()
     val providerName = urlPathSegmentEscaper().escape(pact["provider"]["name"].string)
     val consumerName = urlPathSegmentEscaper().escape(pact["consumer"]["name"].string)
@@ -228,8 +229,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
                 "metadata" -> {
                   listOf(jsonObject(mismatch.filter { it.key != "interactionId" }
                     .flatMap {
-                      when {
-                        it.key == "type" -> listOf("attribute" to it.value)
+                      when (it.key) {
+                        "type" -> listOf("attribute" to it.value)
                         else -> listOf("identifier" to it.key, "description" to it.value)
                       }
                     }))
@@ -302,7 +303,36 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   }
 
   open fun canIDeploy(pacticipant: String, pacticipantVersion: String, latest: Latest, to: String?): CanIDeployResult {
-    return CanIDeployResult(false, "", "")
+    val halClient = newHalClient()
+    val result = halClient.getJson("/matrix" + buildMatrixQuery(pacticipant, pacticipantVersion, latest, to),
+      false)
+    return when (result) {
+      is Ok -> {
+        val summary = result.value.asJsonObject["summary"].asJsonObject
+        CanIDeployResult(Json.toBoolean(summary["deployable"]), "", Json.toString(summary["reason"]))
+      }
+      is Err -> {
+        logger.error(result.error) { "Pact broker matrix query failed: ${result.error.message}" }
+        CanIDeployResult(false, result.error.message.toString(), "")
+      }
+    }
+  }
+
+  private fun buildMatrixQuery(pacticipant: String, pacticipantVersion: String, latest: Latest, to: String?): String {
+    val escaper = urlPathSegmentEscaper()
+    var base = "?q[][pacticipant]=${escaper.escape(pacticipant)}"
+    base += when (latest) {
+      is Latest.UseLatest -> if (latest.latest) {
+        "q[][latest]=true"
+      } else {
+        "&q[][version]=${escaper.escape(pacticipantVersion)}"
+      }
+      is Latest.UseLatestTag -> "q[][tag]=${escaper.escape(latest.latestTag)}"
+    }
+    if (!to.isNullOrEmpty()) {
+      base += "&latest=true&tag=${escaper.escape(to)}"
+    }
+    return base
   }
 
   companion object : KLogging() {
