@@ -685,7 +685,66 @@ public class LambdaDslObject {
         return this;
     }
 
-  /**
+    /**
+     * Attribute that is an array where order is ignored
+     * @param name field name
+     */
+    public LambdaDslObject unorderedArrayMatcher(String name) {
+        object.unorderedArrayMatcher(name);
+        return this;
+    }
+
+    /**
+     * Attribute that is an array where order is ignored in the following example
+     *
+     * @param name field name
+     */
+    public LambdaDslObject unorderedArrayLike(String name, Consumer<LambdaDslObject> nestedObject) {
+        final PactDslJsonBody arrayLike = object.unorderedArrayLike(name);
+        final LambdaDslObject dslObject = new LambdaDslObject(arrayLike);
+        nestedObject.accept(dslObject);
+        arrayLike.closeArray();
+        return this;
+    }
+
+    /**
+     * Attribute that is an array where order is ignored in the following example
+     *
+     * @param name field name
+     * @param numberExamples number of examples to generate
+     */
+    public LambdaDslObject unorderedArrayLike(String name, int numberExamples, Consumer<LambdaDslObject> nestedObject) {
+        final PactDslJsonBody arrayLike = object.unorderedArrayLike(name, numberExamples);
+        final LambdaDslObject dslObject = new LambdaDslObject(arrayLike);
+        nestedObject.accept(dslObject);
+        arrayLike.closeArray();
+        return this;
+    }
+
+    /**
+     * Attribute that is an array of primitives where order is ignored and must match the provided value
+     *
+     * @param name field name
+     * @param value Value that each item in the array must match
+     */
+    public LambdaDslObject unorderedArrayLike(String name, PactDslJsonRootValue value) {
+        object.unorderedArrayLike(name, value);
+        return this;
+    }
+
+    /**
+     * Attribute that is an array of primitives where order is ignored and must match the provided value
+     *
+     * @param name field name
+     * @param value Value that each item in the array must match
+     * @param numberExamples Number of examples to generate
+     */
+    public LambdaDslObject unorderedArrayLike(String name, PactDslJsonRootValue value, int numberExamples) {
+        object.unorderedArrayLike(name, value, numberExamples);
+        return this;
+    }
+
+    /**
    * Attribute whose values are generated from the provided expression. Will use an ISO format.
    * @param name Attribute name
    * @param expression Date expression

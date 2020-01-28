@@ -300,6 +300,30 @@ public abstract class DslPart {
   public abstract PactDslJsonArray eachArrayWithMinMaxLike(int numberExamples, Integer minSize, Integer maxSize);
 
     /**
+     * Array field where matcher ignores order of elements
+     * @param name field name
+     */
+    public abstract PactDslJsonBody unorderedArrayLike(String name);
+
+    /**
+     * Array element where order of each element is ignored
+     */
+    public abstract PactDslJsonBody unorderedArrayLike();
+
+    /**
+     * Array field where matcher ignores order of elements
+     * @param name field name
+     * @param numberExamples number of examples to generate
+     */
+    public abstract PactDslJsonBody unorderedArrayLike(String name, int numberExamples);
+
+    /**
+     * Array element where order of each element is ignored
+     * @param numberExamples number of examples to generate
+     */
+    public abstract PactDslJsonBody unorderedArrayLike(int numberExamples);
+
+    /**
      * Object field
      * @param name field name
      */

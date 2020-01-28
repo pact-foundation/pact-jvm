@@ -1,19 +1,6 @@
 package au.com.dius.pact.core.matchers
 
-import au.com.dius.pact.core.model.matchingrules.DateMatcher
-import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
-import au.com.dius.pact.core.model.matchingrules.MatchingRule
-import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
-import au.com.dius.pact.core.model.matchingrules.MaxTypeMatcher
-import au.com.dius.pact.core.model.matchingrules.MinMaxTypeMatcher
-import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
-import au.com.dius.pact.core.model.matchingrules.NullMatcher
-import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher
-import au.com.dius.pact.core.model.matchingrules.RegexMatcher
-import au.com.dius.pact.core.model.matchingrules.RuleLogic
-import au.com.dius.pact.core.model.matchingrules.TimeMatcher
-import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
-import au.com.dius.pact.core.model.matchingrules.TypeMatcher
+import au.com.dius.pact.core.model.matchingrules.*
 import com.google.gson.JsonArray
 import com.google.gson.JsonNull
 import com.google.gson.JsonObject
@@ -119,7 +106,51 @@ fun <M : Mismatch> domatch(
             matchMaxType(matcher.max, path, expected, actual, mismatchFn)
     is IncludeMatcher -> matchInclude(matcher.value, path, expected, actual, mismatchFn)
     is NullMatcher -> matchNull(path, actual, mismatchFn)
+    is IgnoreOrderMatcher -> matchIgnoringOrder(path, expected, actual, mismatchFn)
     else -> matchEquality(path, expected, actual, mismatchFn)
+  }
+}
+
+fun isIgnoreOrderMatcher(
+  matcher: MatchingRule,
+  expected: Any?,
+  actual: Any?
+): () -> Boolean = {
+  matcher is IgnoreOrderMatcher && actual is JsonArray && expected is JsonArray
+}
+
+fun <M : Mismatch> matchIgnoringOrder(
+  path: List<String>,
+  expected: Any?,
+  actual: Any?,
+  mismatchFactory: MismatchFactory<M>
+): List<M> {
+  val matches = when {
+    actual == null && expected == null -> true
+    actual is JsonPrimitive && expected is JsonPrimitive -> {
+      logger.debug { "matchIgnoringOrder skipping primitive" }
+      true
+    }
+    actual is JsonArray && expected is JsonArray -> {
+      var actualSet = mutableSetOf<String>()
+      for (item in actual)
+        actualSet.add(item.toString())
+      var expectedSet = mutableSetOf<String>()
+      for (item in expected)
+        expectedSet.add(item.toString())
+      when {
+        actual.size() == expected.size() -> expectedSet == actualSet
+        expected.size() < actual.size() -> actualSet.containsAll(expectedSet)
+        else -> false
+      }
+    }
+    else -> false
+  }
+  logger.debug { "comparing ${valueOf(actual)} to ${valueOf(expected)} ignoring order of elements at $path -> $matches" }
+  return if (matches) {
+    emptyList()
+  } else {
+    listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to equal ${valueOf(expected)} ignoring order of elements", path))
   }
 }
 

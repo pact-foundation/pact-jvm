@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.InvalidPathExpression
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.matchingrules.Category
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
+import au.com.dius.pact.core.model.matchingrules.IgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.IncludeMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
@@ -60,6 +61,55 @@ class MatchersSpec extends Specification {
     matchingRules = {
       def matchingRules = new MatchingRulesImpl()
       matchingRules.addCategory('header').addRule('something', TypeMatcher.INSTANCE)
+      matchingRules
+    }
+  }
+
+  @RestoreSystemProperties
+  @Unroll
+  def 'ignore-orderMatcherDefined - #enabledOrDisabled when pact.matching.ignore-order = "#value"'() {
+    given:
+    def testInvocation = { String value ->
+      System.setProperty('pact.matching.ignore-order', value)
+      Matchers.ignoreOrderMatchingEnabled()
+    }
+
+    expect:
+    testInvocation(value)  == enabled
+
+    where:
+    value   | enabledOrDisabled | enabled
+    ''      | 'disabled'        | false
+    'false' | 'disabled'        | false
+    'true'  | 'enabled'         | true
+
+  }
+
+  def 'ignore-orderMatcherDefined - should be true when there is an IgnoreOrderMatcher'() {
+    expect:
+    Matchers.ignoreOrderMatcherDefined(['$', 'array1'], 'body', matchingRules())
+
+    where:
+    matchingRules = {
+      def matchingRules = new MatchingRulesImpl()
+      matchingRules.addCategory('body')
+        .addRule('$.array1', IgnoreOrderMatcher.INSTANCE)
+        .addRule('$.array1[*].foo', new RegexMatcher('a|b'))
+        .addRule('$.array1[*].status', new RegexMatcher('up'))
+      matchingRules
+    }
+  }
+
+  def 'ignore-orderMatcherDefined - should be false when there is no IgnoreOrderMatcher'() {
+    expect:
+    !Matchers.ignoreOrderMatcherDefined(['$', 'array1'], 'body', matchingRules())
+
+    where:
+    matchingRules = {
+      def matchingRules = new MatchingRulesImpl()
+      matchingRules.addCategory('body')
+        .addRule('$.array1[*].foo', new RegexMatcher('a|b'))
+        .addRule('$.array1[*].status', new RegexMatcher('up'))
       matchingRules
     }
   }

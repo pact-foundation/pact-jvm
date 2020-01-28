@@ -15,13 +15,9 @@ import au.com.dius.pact.core.model.generators.RandomStringGenerator;
 import au.com.dius.pact.core.model.generators.RegexGenerator;
 import au.com.dius.pact.core.model.generators.TimeGenerator;
 import au.com.dius.pact.core.model.generators.UuidGenerator;
+import au.com.dius.pact.core.model.matchingrules.*;
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher;
-import au.com.dius.pact.core.model.matchingrules.MatchingRule;
-import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup;
-import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher;
-import au.com.dius.pact.core.model.matchingrules.RuleLogic;
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
-import au.com.dius.pact.core.model.matchingrules.ValuesMatcher;
 import com.mifmif.common.regex.Generex;
 
 import java.time.Instant;
@@ -1288,6 +1284,69 @@ public class PactDslJsonBody extends DslPart {
     parent.putObject(value);
     return (PactDslJsonBody) parent.closeArray();
   }
+    /**
+     *  Attribute that is an array where order is ignored
+     *  @param name field name
+     */
+    public PactDslJsonBody unorderedArrayMatcher(String name) {
+        matchers.addRule(matcherKey(name), IgnoreOrderMatcher.INSTANCE);
+        return this;
+    }
+
+    /**
+     * Attribute that is an array where order is ignored in the following example
+     * @param name field name
+     */
+    @Override
+    public PactDslJsonBody unorderedArrayLike(String name) {
+        return unorderedArrayLike(name, 1);
+    }
+
+    @Override
+    public PactDslJsonBody unorderedArrayLike() {
+        throw new UnsupportedOperationException("use the unorderedArrayLike(String name) form");
+    }
+
+    /**
+     * Attribute that is an array where order is ignored in the following example
+     * @param name field name
+     * @param numberExamples number of examples to generate
+     */
+    @Override
+    public PactDslJsonBody unorderedArrayLike(String name, int numberExamples) {
+        matchers.addRule(matcherKey(name), IgnoreOrderMatcher.INSTANCE);
+        PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), "", this, true);
+        parent.setNumberExamples(numberExamples);
+        return new PactDslJsonBody(".", ".", parent);
+    }
+
+    @Override
+    public PactDslJsonBody unorderedArrayLike(int numberExamples) {
+        throw new UnsupportedOperationException("use the unorderedArrayLike(String name, int numberExamples) form");
+    }
+
+    /**
+     * Attribute that is an array of values that are not objects where order is ignored in the following example
+     * @param name field name
+     * @param value Value to use to match each item
+     */
+    public PactDslJsonBody unorderedArrayLike(String name, PactDslJsonRootValue value) {
+        return unorderedArrayLike(name, value, 1);
+    }
+
+    /**
+     * Attribute that is an array of values that are not objects where order is ignored in the following example
+     * @param name field name
+     * @param value Value to use to match each item
+     * @param numberExamples number of examples to generate
+     */
+    public PactDslJsonBody unorderedArrayLike(String name, PactDslJsonRootValue value, int numberExamples) {
+        matchers.addRule(matcherKey(name), IgnoreOrderMatcher.INSTANCE);
+        PactDslJsonArray parent = new PactDslJsonArray(matcherKey(name), "", this, true);
+        parent.setNumberExamples(numberExamples);
+        parent.putObject(value);
+        return (PactDslJsonBody) parent.closeArray();
+    }
 
   /**
    * Adds an attribute that will have it's value injected from the provider state

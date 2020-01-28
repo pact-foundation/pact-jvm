@@ -99,6 +99,41 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
     return result
   }
 
+  /**
+   * Compares each 'expected' against all 'actual'. If any 'expected' matches then 'match==true' for that index.
+   * However, if iterated through entire 'expected' and no match in 'actual', then there is a mismatch.
+   */
+  fun compareListContentUnordered(
+    expectedValues: List<JsonElement>,
+    actualValues: List<JsonElement>,
+    path: List<String>,
+    allowUnexpectedKeys: Boolean,
+    matchers: MatchingRules
+  ): List<BodyMismatch> {
+    val result = mutableListOf<BodyMismatch>()
+    for ((expectedIndex, expectedValue) in expectedValues.withIndex()) {
+      if (expectedIndex < actualValues.size) {
+        var match = false
+        for (actualValue in actualValues) {
+          val outcome = compare(path + expectedIndex.toString(), expectedValue, actualValue, allowUnexpectedKeys, matchers)
+          if (outcome.isEmpty()) {
+            result.addAll(outcome)
+            match = true
+          }
+        }
+        if (!match) {
+          result.add(BodyMismatch(expectedValues, actualValues,
+                  "Expected ignore-order match of ${valueOf(expectedValues)} and ${valueOf(actualValues)}",
+                  path.joinToString("."), generateJsonDiff(expectedValues.toJsonArray(), actualValues.toJsonArray())))
+        }
+      } else if (!Matchers.matcherDefined("body", path, matchers)) {
+        result.add(BodyMismatch(expectedValues, actualValues, "Expected ${valueOf(expectedValue)} but was missing",
+                path.joinToString("."), generateJsonDiff(expectedValues.toJsonArray(), actualValues.toJsonArray())))
+      }
+    }
+    return result
+  }
+
   fun compareLists(
     expectedValues: JsonArray,
     actualValues: JsonArray,
@@ -115,8 +150,13 @@ object JsonBodyMatcher : BodyMatcher, KLogging() {
       val result = Matchers.domatch(matchers, "body", path, expectedValues, actualValues, BodyMismatchFactory)
         .toMutableList()
       if (expectedList.isNotEmpty()) {
-        result.addAll(compareListContent(expectedList.padTo(actualValues.size(), expectedValues.first()),
-          actualList, path, allowUnexpectedKeys, matchers))
+        if (Matchers.ignoreOrderMatcherDefined(path, "body", matchers)) {
+          // No need to pad 'expected' as we already visit all 'actual' values
+          result.addAll(compareListContentUnordered(expectedList, actualList, path, allowUnexpectedKeys, matchers))
+        } else {
+          result.addAll(compareListContent(expectedList.padTo(actualValues.size(), expectedValues.first()),
+                  actualList, path, allowUnexpectedKeys, matchers))
+        }
       }
       result
     } else {

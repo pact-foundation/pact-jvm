@@ -265,6 +265,42 @@ public class PactDslJsonRootValue extends DslPart {
   }
 
   /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonBody unorderedArrayLike(String name) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonBody unorderedArrayLike(int numberExamples) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonBody unorderedArrayLike(String name, int numberExamples) {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
+   * @deprecated Use PactDslJsonArray for arrays
+   */
+  @Override
+  @Deprecated
+  public PactDslJsonBody unorderedArrayLike() {
+    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
+  }
+
+  /**
    * @deprecated Use PactDslJsonBody for objects
    */
   @Override

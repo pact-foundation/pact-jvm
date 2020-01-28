@@ -134,6 +134,14 @@ object ValuesMatcher : MatchingRule {
   override fun toMap(spec: PactSpecVersion) = toMap()
 }
 
+/**
+ * Matcher for ignoring order of elements in array
+ */
+object IgnoreOrderMatcher : MatchingRule {
+  override fun toMap() = mapOf("match" to "ignore-order")
+  override fun toMap(spec: PactSpecVersion) = toMap()
+}
+
 data class MatchingRuleGroup @JvmOverloads constructor(
   val rules: MutableList<MatchingRule> = mutableListOf(),
   val ruleLogic: RuleLogic = RuleLogic.AND
@@ -224,6 +232,7 @@ data class MatchingRuleGroup @JvmOverloads constructor(
             if (map.containsKey(DATE)) DateMatcher(map[DATE].toString())
             else DateMatcher()
           "values" -> ValuesMatcher
+          "ignore-order" -> IgnoreOrderMatcher
           else -> {
             logger.warn { "Unrecognised matcher ${map[MATCH]}, defaulting to equality matching" }
             EqualsMatcher

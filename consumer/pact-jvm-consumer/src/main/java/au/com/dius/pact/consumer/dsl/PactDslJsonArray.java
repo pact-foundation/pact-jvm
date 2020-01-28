@@ -13,11 +13,8 @@ import au.com.dius.pact.core.model.generators.RandomIntGenerator;
 import au.com.dius.pact.core.model.generators.RandomStringGenerator;
 import au.com.dius.pact.core.model.generators.TimeGenerator;
 import au.com.dius.pact.core.model.generators.UuidGenerator;
+import au.com.dius.pact.core.model.matchingrules.*;
 import au.com.dius.pact.core.model.matchingrules.EqualsMatcher;
-import au.com.dius.pact.core.model.matchingrules.MatchingRule;
-import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup;
-import au.com.dius.pact.core.model.matchingrules.NumberTypeMatcher;
-import au.com.dius.pact.core.model.matchingrules.RuleLogic;
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -1226,7 +1223,72 @@ public class PactDslJsonArray extends DslPart {
     return new PactDslJsonArray("", "", parent);
   }
 
-  /**
+    /**
+     *  Element that is an array where order is ignored
+     */
+    public PactDslJsonArray unorderedArrayMatcher() {
+//        matchers.addRule(rootPath + appendArrayIndex(0), IgnoreOrderMatcher.INSTANCE);
+        matchers.addRule(rootPath, IgnoreOrderMatcher.INSTANCE);
+        return this;
+    }
+
+    @Override
+    public PactDslJsonBody unorderedArrayLike(String name) {
+        throw new UnsupportedOperationException("use the unorderedArrayLike() form");
+    }
+
+    @Override
+    public PactDslJsonBody unorderedArrayLike(String name, int numberExamples) {
+        throw new UnsupportedOperationException("use the unorderedArrayLike(numberExamples) form");
+    }
+
+    /**
+     * Element that is an array where order is ignored in the following example
+     */
+    @Override
+    public PactDslJsonBody unorderedArrayLike() {
+        return unorderedArrayLike(1);
+    }
+
+    /**
+     * Element that is an array where order is ignored in the following example
+     * @param numberExamples Number of examples to generate
+     */
+    @Override
+    public PactDslJsonBody unorderedArrayLike(int numberExamples) {
+        matchers.addRule(rootPath + appendArrayIndex(1), IgnoreOrderMatcher.INSTANCE);
+        PactDslJsonArray parent = new PactDslJsonArray(rootPath, "", this, true);
+        parent.setNumberExamples(numberExamples);
+        return new PactDslJsonBody(".", "", parent);
+    }
+
+    /**
+     * Array of values that are not objects where order is ignored in the provided example
+     * @param value Value to use to match each item
+     */
+    public PactDslJsonArray unorderedArrayLike(PactDslJsonRootValue value) {
+        return unorderedArrayLike(value, 1);
+    }
+
+    /**
+     * Array of values that are not objects where order is ignored in the provided example
+     * @param value Value to use to match each item
+     * @param numberExamples number of examples to generate
+     */
+    public PactDslJsonArray unorderedArrayLike(PactDslJsonRootValue value, int numberExamples) {
+        if (numberExamples == 0) {
+            throw new IllegalArgumentException("Testing Zero examples is unsafe. Please make sure to provide at least one " +
+                    "example in the Pact provider implementation. See https://github.com/DiUS/pact-jvm/issues/546");
+        }
+
+        matchers.addRule(rootPath + appendArrayIndex(1), IgnoreOrderMatcher.INSTANCE);
+        PactDslJsonArray parent = new PactDslJsonArray(rootPath, "", this, true);
+        parent.setNumberExamples(numberExamples);
+        parent.putObject(value);
+        return (PactDslJsonArray) parent.closeArray();
+    }
+
+    /**
    * Adds an element that will have it's value injected from the provider state
    * @param expression Expression to be evaluated from the provider state
    * @param example Example value to be used in the consumer test

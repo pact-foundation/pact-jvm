@@ -472,6 +472,59 @@ public class LambdaDslJsonArray {
     return this;
   }
 
+    /**
+     * Element that is an array where order is ignored
+     */
+    public LambdaDslJsonArray unorderedArrayMatcher() {
+        pactArray.unorderedArrayMatcher();
+        return this;
+    }
+
+    /**
+     * Element that is an array where order is ignored in the following example
+     */
+    public LambdaDslJsonArray unorderedArrayLike(Consumer<LambdaDslJsonBody> nestedObject) {
+        final PactDslJsonBody arrayLike = pactArray.unorderedArrayLike();
+        final LambdaDslJsonBody dslBody = new LambdaDslJsonBody(arrayLike);
+        nestedObject.accept(dslBody);
+        arrayLike.closeArray();
+        return this;
+    }
+
+    /**
+     * Element that is an array where order is ignored in the following example
+     *
+     * @param value Value that each item in the array must match
+     */
+    public LambdaDslJsonArray unorderedArrayLike(PactDslJsonRootValue value) {
+        pactArray.unorderedArrayLike(value);
+        return this;
+    }
+
+    /**
+     * Element that is an array where order is ignored in the following example
+     *
+     * @param value Value that each item in the array must match
+     * @param numberExamples Number of examples to generate
+     */
+    public LambdaDslJsonArray unorderedArrayLike(PactDslJsonRootValue value, int numberExamples) {
+        pactArray.unorderedArrayLike(value, numberExamples);
+        return this;
+    }
+
+    /**
+     * Element that is an array where order is ignored in the following example
+     *
+     * @param numberExamples Number of examples to generate
+     */
+    public LambdaDslJsonArray unorderedArrayLike(int numberExamples, Consumer<LambdaDslJsonBody> nestedObject) {
+        final PactDslJsonBody arrayLike = pactArray.unorderedArrayLike(numberExamples);
+        final LambdaDslJsonBody dslBody = new LambdaDslJsonBody(arrayLike);
+        nestedObject.accept(dslBody);
+        arrayLike.closeArray();
+        return this;
+    }
+
     public DslPart build() {
         return pactArray;
     }

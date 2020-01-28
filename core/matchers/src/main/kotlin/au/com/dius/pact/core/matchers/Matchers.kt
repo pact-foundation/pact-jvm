@@ -3,6 +3,7 @@ package au.com.dius.pact.core.matchers
 import au.com.dius.pact.core.matchers.util.corresponds
 import au.com.dius.pact.core.matchers.util.tails
 import au.com.dius.pact.core.model.PathToken
+import au.com.dius.pact.core.model.matchingrules.IgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.parsePath
@@ -12,6 +13,7 @@ import java.util.function.Predicate
 
 object Matchers : KLogging() {
 
+  const val PACT_MATCHING_IGNORE_ORDER = "pact.matching.ignore-order"
   const val PACT_MATCHING_WILDCARD = "pact.matching.wildcard"
   private val intRegex = Regex("\\d+")
 
@@ -73,6 +75,24 @@ object Matchers : KLogging() {
     if (matchers != null)
       resolveMatchers(matchers, category, path, pathComparator).isNotEmpty()
     else false
+
+  /**
+   * If ignore-order matching logic is enabled (where array contents can be in any order)
+   */
+  @JvmStatic
+  fun ignoreOrderMatchingEnabled() = System.getProperty(PACT_MATCHING_IGNORE_ORDER)?.trim() == "true"
+
+  /**
+   * Determines if an ignore-order matcher is defined on an array
+   */
+  @JvmStatic
+  fun ignoreOrderMatcherDefined(path: List<String>, category: String, matchers: MatchingRules?) =
+    if (matchers != null) {
+      val resolvedMatchers = matchers.rulesForCategory(category).filter(Predicate {
+        matchesPath(it, path) == path.size
+      })
+      resolvedMatchers.matchingRules.values.any { value -> value.rules.contains(IgnoreOrderMatcher) }
+    } else false
 
   /**
    * Determines if a matcher of the form '.*' exists for the path
