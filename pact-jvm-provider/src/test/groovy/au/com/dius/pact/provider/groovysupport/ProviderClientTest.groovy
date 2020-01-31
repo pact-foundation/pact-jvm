@@ -12,6 +12,7 @@ import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.ContentType
 import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.message.BasicHttpEntityEnclosingRequest
 import org.junit.Before
 import org.junit.Test
 import org.mockito.invocation.InvocationOnMock
@@ -42,7 +43,7 @@ class ProviderClientTest {
     httpClientFactory = [newClient: { provider -> mockHttpClient } ] as IHttpClientFactory
     client = new ProviderClient(provider, httpClientFactory)
     when(mockHttpClient.execute(any())).thenAnswer { InvocationOnMock invocation ->
-      args = invocation.arguments.first()
+      args = invocation.arguments.first() as HttpUriRequest
       [
         getStatusLine: { [getStatusCode: { 200 } ] as StatusLine },
         getAllHeaders: { [] as Header[] },
@@ -67,6 +68,41 @@ class ProviderClientTest {
     client.makeRequest(request)
     assert args.URI.query == 'a=1&b=11&c=Hello+World'
     assert args.entity.content.text == 'A=B'
+  }
+
+  @Test
+  void 'setupBody() needs to take Content-Type headegr into account (UTF-8)'() {
+    def contentType = 'text/plain; charset=UTF-8'
+    def headers = ['Content-Type': [contentType]]
+    def body = 'ÄÉÌÕÛ'
+    def request = new Request('PUT', '/', [:], headers, OptionalBody.body(body.bytes))
+    def method = new BasicHttpEntityEnclosingRequest('PUT', '/')
+    client.setupBody(request, method)
+    assert method.entity.contentType.value == contentType
+    assert method.entity.content.getText('UTF-8') == body
+  }
+
+  @Test
+  void 'setupBody() needs to take Content-Type header into account (ISO-8859-1)'() {
+    def contentType = 'text/plain; charset=ISO-8859-1'
+    def headers = ['Content-Type': [contentType]]
+    def body = 'ÄÉÌÕÛ'
+    def request = new Request('PUT', '/', [:], headers, OptionalBody.body(body.bytes))
+    def method = new BasicHttpEntityEnclosingRequest('PUT', '/')
+    client.setupBody(request, method)
+    assert method.entity.contentType.value == contentType
+    assert method.entity.content.getText('ISO-8859-1') == body
+  }
+
+  @Test
+  void 'setupBody() Content-Type defaults to plain text without encoding'() {
+    def contentType = 'text/plain'
+    def body = 'ÄÉÌÕÛ'
+    def request = new Request('PUT', '/', [:], [:], OptionalBody.body(body.bytes))
+    def method = new BasicHttpEntityEnclosingRequest('PUT', '/')
+    client.setupBody(request, method)
+    assert method.entity.contentType.value == contentType
+    assert method.entity.content.getText('ISO-8859-1') == body
   }
 
 }
