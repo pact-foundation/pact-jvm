@@ -51,11 +51,34 @@ class MessagePactBuilder(
   /**
    * Sets the provider state.
    *
-   * @param providerState state of the provider
+   * @param providerState description of the provider state
    * @return this builder.
    */
   fun given(providerState: String): MessagePactBuilder {
     this.providerStates.add(ProviderState(providerState))
+    return this
+  }
+
+  /**
+   * Sets the provider state.
+   *
+   * @param providerState description of the provider state
+   * @param params key/value pairs to describe state
+   * @return this builder.
+   */
+  fun given(providerState: String, params: Map<String, Any>): MessagePactBuilder {
+    this.providerStates.add(ProviderState(providerState, params))
+    return this
+  }
+
+  /**
+   * Sets the provider state.
+   *
+   * @param providerState state of the provider
+   * @return this builder.
+   */
+  fun given(providerState: ProviderState): MessagePactBuilder {
+    this.providerStates.add(providerState)
     return this
   }
 
