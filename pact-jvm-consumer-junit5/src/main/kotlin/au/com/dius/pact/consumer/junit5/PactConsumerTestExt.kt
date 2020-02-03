@@ -21,9 +21,9 @@ import au.com.dius.pact.support.expressions.ExpressionParser.parseExpression
 import mu.KLogging
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.extension.AfterAllCallback
-import org.junit.jupiter.api.extension.AfterEachCallback
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
-import org.junit.jupiter.api.extension.BeforeEachCallback
+import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
 import org.junit.jupiter.api.extension.Extension
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
@@ -133,7 +133,7 @@ class JUnit5MockServerSupport(private val baseMockServer: BaseMockServer) : Mock
   }
 }
 
-class PactConsumerTestExt : Extension, BeforeEachCallback, BeforeAllCallback, ParameterResolver, AfterEachCallback, AfterAllCallback {
+class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCallback, ParameterResolver, AfterTestExecutionCallback, AfterAllCallback {
   override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
     val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     if (store["providerInfo"] != null) {
@@ -189,7 +189,7 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, BeforeAllCallback, Pa
     store.put("executedFragments", mutableListOf<Method>())
   }
 
-  override fun beforeEach(context: ExtensionContext) {
+  override fun beforeTestExecution(context: ExtensionContext) {
     val (providerInfo, pactMethod) = lookupProviderInfo(context)
 
     logger.debug { "providerInfo = $providerInfo" }
@@ -295,7 +295,7 @@ class PactConsumerTestExt : Extension, BeforeEachCallback, BeforeAllCallback, Pa
     return pact
   }
 
-  override fun afterEach(context: ExtensionContext) {
+  override fun afterTestExecution(context: ExtensionContext) {
     if (!context.executionException.isPresent) {
       val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
       val providerInfo = store["providerInfo"] as ProviderInfo
