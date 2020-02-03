@@ -22,7 +22,9 @@ data class DirectorySource<I> @JvmOverloads constructor(
   val dir: File,
   val pacts: MutableMap<File, Pact<I>> = mutableMapOf()
 ) : PactSource()
-  where I : Interaction
+  where I : Interaction {
+  override fun description() = "Directory $dir"
+}
 
 data class PactBrokerSource<I> @JvmOverloads constructor(
   val host: String,
@@ -30,7 +32,14 @@ data class PactBrokerSource<I> @JvmOverloads constructor(
   val scheme: String = "http",
   val pacts: MutableMap<Consumer, MutableList<Pact<I>>> = mutableMapOf()
 ) : PactSource()
-  where I : Interaction
+  where I : Interaction {
+  override fun description() =
+    if (port == null) {
+      "Pact Broker $scheme://$host"
+    } else {
+      "Pact Broker $scheme://$host:$port"
+    }
+}
 
 data class FileSource<I> @JvmOverloads constructor(val file: File, val pact: Pact<I>? = null) :
   PactSource() where I : Interaction {

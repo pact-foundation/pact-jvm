@@ -1,11 +1,13 @@
 package au.com.dius.pact.provider.junit.loader
 
+import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.model.UrlSource
+import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseListExpression
@@ -35,8 +37,7 @@ open class PactBrokerLoader(
   valueResolver: ValueResolver? = null
 ) : OverrideablePactLoader {
 
-  private var _pactSource: PactBrokerSource<Interaction> = PactBrokerSource(
-    pactBrokerHost, pactBrokerPort, pactBrokerScheme)
+  private var pacts: MutableMap<Consumer, MutableList<Pact<Interaction>>> = mutableMapOf()
   private var resolver: ValueResolver? = valueResolver
   private var overriddenPactUrl: String? = null
   private var overriddenConsumer: String? = null
@@ -100,7 +101,10 @@ open class PactBrokerLoader(
     return valueResolver
   }
 
-  override fun getPactSource() = _pactSource
+  override fun getPactSource(): PactSource? {
+    val resolver = setupValueResolver()
+    return getPactBrokerSource(resolver)
+  }
 
   override fun setValueResolver(valueResolver: ValueResolver) {
     this.resolver = valueResolver
@@ -140,6 +144,16 @@ open class PactBrokerLoader(
   }
 
   private fun brokerUrl(resolver: ValueResolver): URIBuilder {
+    val (host, port, scheme) = getPactBrokerSource(resolver)
+
+    val uriBuilder = URIBuilder().setScheme(scheme).setHost(host)
+    if (port.isNotEmpty()) {
+      uriBuilder.port = Integer.parseInt(port)
+    }
+    return uriBuilder
+  }
+
+  private fun getPactBrokerSource(resolver: ValueResolver): PactBrokerSource<Interaction> {
     val scheme = parseExpression(pactBrokerScheme, resolver)
     val host = parseExpression(pactBrokerHost, resolver)
     val port = parseExpression(pactBrokerPort, resolver)
@@ -154,11 +168,11 @@ open class PactBrokerLoader(
         "Please provide a valid port number or specify the system property 'pactbroker.port'.", pactBrokerPort))
     }
 
-    val uriBuilder = URIBuilder().setScheme(scheme).setHost(host)
-    if (port.isNotEmpty()) {
-      uriBuilder.port = Integer.parseInt(port)
+    return if (scheme == null) {
+      PactBrokerSource(host, port, pacts = pacts)
+    } else {
+      PactBrokerSource(host, port, scheme, pacts)
     }
-    return uriBuilder
   }
 
   private fun getUrlForProvider(providerName: String, tag: String, pactBrokerClient: PactBrokerClient): String {
@@ -172,7 +186,6 @@ open class PactBrokerLoader(
 
   open fun loadPact(consumer: ConsumerInfo, options: Map<String, Any>): Pact<Interaction> {
     val pact = pactReader.loadPact(consumer.pactSource!!, options) as Pact<Interaction>
-    val pacts = this.pactSource.pacts
     val pactConsumer = consumer.toPactConsumer()
     val pactList = pacts.getOrDefault(pactConsumer, mutableListOf())
     pactList.add(pact)
