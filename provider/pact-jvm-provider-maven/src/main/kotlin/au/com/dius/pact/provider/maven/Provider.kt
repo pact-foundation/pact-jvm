@@ -36,4 +36,7 @@ open class Provider @JvmOverloads constructor(
   var pactFileDirectories: List<File>? = emptyList()
 ) : ProviderInfo(name, protocol, host, port, path, startProviderTask, terminateProviderTask, requestFilter,
   stateChangeRequestFilter, createClient, insecure, trustStore, trustStorePassword, stateChangeUrl,
-  stateChangeUsesBody, stateChangeTeardown, isDependencyForPactVerify, verificationType, packagesToScan, consumers)
+  stateChangeUsesBody, stateChangeTeardown, isDependencyForPactVerify, verificationType, packagesToScan, consumers) {
+
+  constructor() : this(pactFileDirectory = null, pactBrokerUrl = null, pactBroker = null)
+}

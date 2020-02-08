@@ -15,6 +15,7 @@ sealed class PactSource {
  */
 sealed class UrlPactSource : PactSource() {
   abstract val url: String
+  var encodePath: Boolean = true
 }
 
 data class DirectorySource<I> @JvmOverloads constructor(

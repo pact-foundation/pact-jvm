@@ -20,6 +20,7 @@ import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UrlPactSource
+import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
@@ -639,6 +640,16 @@ open class ProviderVerifier @JvmOverloads constructor (
       pactSource = pactSource.call()
     }
 
+    if (projectHasProperty.apply(PACT_FILTER_PACTURL)) {
+      val pactUrl = projectGetProperty.apply(PACT_FILTER_PACTURL)!!
+      pactSource = if (pactSource is BrokerUrlSource) {
+        pactSource.copy(url = pactUrl)
+      } else {
+        UrlSource<Interaction>(projectGetProperty.apply(PACT_FILTER_PACTURL)!!)
+      }
+      pactSource.encodePath = false
+    }
+
     return if (pactSource is UrlPactSource) {
       val options = mutableMapOf<String, Any>()
       if (consumer.pactFileAuthentication.isNotEmpty()) {
@@ -658,8 +669,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   }
 
   private fun generateLoadFailureMessage(consumer: IConsumerInfo): String {
-    val callback = pactLoadFailureMessage
-    return when (callback) {
+    return when (val callback = pactLoadFailureMessage) {
       is Closure<*> -> callback.call(consumer).toString()
       is Function<*, *> -> (callback as Function<Any, Any>).apply(consumer).toString()
       is scala.Function1<*, *> -> (callback as scala.Function1<Any, Any>).apply(consumer).toString()
@@ -711,6 +721,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     const val PACT_FILTER_CONSUMERS = "pact.filter.consumers"
     const val PACT_FILTER_DESCRIPTION = "pact.filter.description"
     const val PACT_FILTER_PROVIDERSTATE = "pact.filter.providerState"
+    const val PACT_FILTER_PACTURL = "pact.filter.pacturl"
     const val PACT_SHOW_STACKTRACE = "pact.showStacktrace"
     const val PACT_SHOW_FULLDIFF = "pact.showFullDiff"
     const val PACT_PROVIDER_VERSION = "pact.provider.version"

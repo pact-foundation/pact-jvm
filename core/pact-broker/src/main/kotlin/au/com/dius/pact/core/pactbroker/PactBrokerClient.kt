@@ -153,8 +153,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     return halClient.linkUrl(PACTS)
   }
 
-  open fun fetchPact(url: String): PactResponse {
-    val halDoc = newHalClient().fetch(url).obj
+  open fun fetchPact(url: String, encodePath: Boolean = true): PactResponse {
+    val halDoc = newHalClient().fetch(url, encodePath).obj
     return PactResponse(halDoc, HalClient.asMap(halDoc["_links"].obj))
   }
 

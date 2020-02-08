@@ -5,19 +5,19 @@ import java.net.URL
 /**
  * Bean to configure a pact broker to query
  */
-data class PactBroker(
-  val url: URL?,
+data class PactBroker @JvmOverloads constructor(
+  val url: URL? = null,
   val tags: List<String>? = emptyList(),
-  val authentication: PactBrokerAuth?,
-  val serverId: String?
+  val authentication: PactBrokerAuth? = null,
+  val serverId: String? = null
 )
 
 /**
  * Authentication for the pact broker, defaulting to Basic Authentication
  */
-data class PactBrokerAuth(
+data class PactBrokerAuth @JvmOverloads constructor (
   val scheme: String? = "basic",
-  val token: String?,
-  val username: String?,
-  val password: String?
+  val token: String? = null,
+  val username: String? = null,
+  val password: String? = null
 )
