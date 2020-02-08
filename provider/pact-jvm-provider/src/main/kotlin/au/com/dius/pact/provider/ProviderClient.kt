@@ -39,6 +39,7 @@ import java.lang.Boolean.getBoolean
 import java.net.URI
 import java.net.URL
 import java.net.URLDecoder
+import java.nio.charset.UnsupportedCharsetException
 import java.util.concurrent.Callable
 import java.util.function.Consumer
 import java.util.function.Function
@@ -270,7 +271,17 @@ open class ProviderClient(
 
   open fun setupBody(request: Request, method: HttpRequest) {
     if (method is HttpEntityEnclosingRequest && request.body.isPresent()) {
-      method.entity = StringEntity(request.body.valueAsString())
+      val contentTypeHeader = request.contentTypeHeader()
+      if (null != contentTypeHeader) {
+        try {
+          val contentType = ContentType.parse(contentTypeHeader)
+          method.entity = StringEntity(request.body.valueAsString(), contentType)
+        } catch (e: UnsupportedCharsetException) {
+          method.entity = StringEntity(request.body.valueAsString())
+        }
+      } else {
+        method.entity = StringEntity(request.body.valueAsString())
+      }
     }
   }
 
