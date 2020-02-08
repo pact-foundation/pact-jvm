@@ -269,6 +269,14 @@ The `token`, `username` and `password` values also take Java system property exp
 Preemptive Authentication can be enabled by setting the `pact.pactbroker.httpclient.usePreemptiveAuthentication` Java
 system property to `true`.
 
+### Allowing just the changed pact specified in a webhook to be verified [4.0.6+]
+
+When a consumer publishes a new version of a pact file, the Pact broker can fire off a webhook with the URL of the changed 
+pact file. To allow only the changed pact file to be verified, you can override the URL by adding the annotation 
+`@AllowOverridePactUrl` to your test class and then setting using the `pact.filter.consumers` and `pact.filter.pacturl` 
+values as either Java system properties or environment variables. If you have annotated your test class with `@Consumer`
+you don't need to provide `pact.filter.consumers`.
+
 ### Pact Url
 
 To use pacts from urls annotate the test class with
