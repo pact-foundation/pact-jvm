@@ -5,6 +5,8 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.pactbroker.TestResult
+import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
@@ -12,8 +14,10 @@ import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.TestResultAccumulator
+import au.com.dius.pact.provider.junit.AllowOverridePactUrl
 import au.com.dius.pact.provider.junit.Consumer
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport
+import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.checkForOverriddenPactUrl
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.filterPactsByAnnotations
 import au.com.dius.pact.provider.junit.MissingStateChangeMethod
 import au.com.dius.pact.provider.junit.Provider
@@ -23,8 +27,6 @@ import au.com.dius.pact.provider.junit.VerificationReports
 import au.com.dius.pact.provider.junit.loader.PactLoader
 import au.com.dius.pact.provider.junit.loader.PactSource
 import au.com.dius.pact.provider.reporters.ReporterManager
-import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
-import au.com.dius.pact.core.support.expressions.ValueResolver
 import mu.KLogging
 import org.apache.http.HttpRequest
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
@@ -428,6 +430,11 @@ class PactVerificationInvocationContextProvider : TestTemplateInvocationContextP
         it.annotationClass.findAnnotation<PactSource>()!!.value.java
           .getConstructor(it.annotationClass.java).newInstance(it)
       }
+    }.map {
+      checkForOverriddenPactUrl(it,
+        context.requiredTestClass.getAnnotation(AllowOverridePactUrl::class.java),
+        context.requiredTestClass.getAnnotation(Consumer::class.java))
+      it
     }
   }
 

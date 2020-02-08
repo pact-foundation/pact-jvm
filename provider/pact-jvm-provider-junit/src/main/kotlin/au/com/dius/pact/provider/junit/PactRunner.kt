@@ -3,11 +3,9 @@ package au.com.dius.pact.provider.junit
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
-import au.com.dius.pact.core.support.isNotEmpty
-import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.checkForOverriddenPactUrl
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.filterPactsByAnnotations
 import au.com.dius.pact.provider.junit.loader.NoPactsFoundException
-import au.com.dius.pact.provider.junit.loader.OverrideablePactLoader
 import au.com.dius.pact.provider.junit.loader.PactBroker
 import au.com.dius.pact.provider.junit.loader.PactFolder
 import au.com.dius.pact.provider.junit.loader.PactLoader
@@ -170,38 +168,13 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(c
           .getConstructor(annotation.annotationClass.java).newInstance(annotation)
       }
 
-      checkForOverriddenPactUrl(clazz, loader)
+      checkForOverriddenPactUrl(loader, clazz.getAnnotation(AllowOverridePactUrl::class.java),
+        clazz.getAnnotation(Consumer::class.java))
 
       return loader
     } catch (e: ReflectiveOperationException) {
       logger.error(e) { "Error while creating pact source" }
       throw InitializationError(e)
-    }
-  }
-
-  private fun checkForOverriddenPactUrl(clazz: TestClass, loader: PactLoader?) {
-    val overridePactUrl: AllowOverridePactUrl? = clazz.getAnnotation(AllowOverridePactUrl::class.java)
-    var pactUrl = System.getProperty(ProviderVerifier.PACT_FILTER_PACTURL)
-    if (pactUrl.isNullOrEmpty()) {
-      pactUrl = System.getenv(ProviderVerifier.PACT_FILTER_PACTURL)
-    }
-
-    if (loader is OverrideablePactLoader && overridePactUrl != null && pactUrl.isNotEmpty()) {
-      val consumer = clazz.getAnnotation(Consumer::class.java)
-      var consumerProperty = System.getProperty(ProviderVerifier.PACT_FILTER_CONSUMERS)
-      if (consumerProperty.isNullOrEmpty()) {
-        consumerProperty = System.getenv(ProviderVerifier.PACT_FILTER_CONSUMERS)
-      }
-      when {
-        consumerProperty.isNotEmpty() -> loader.overridePactUrl(pactUrl, consumerProperty)
-        consumer != null -> loader.overridePactUrl(pactUrl, consumer.value)
-        else -> {
-          logger.warn {
-            "The property ${ProviderVerifier.PACT_FILTER_PACTURL} has been set, but no consumer filter" +
-              " or @Consumer annotation has been provided, Ignoring"
-          }
-        }
-      }
     }
   }
 
