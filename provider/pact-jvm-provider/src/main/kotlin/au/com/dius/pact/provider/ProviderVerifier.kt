@@ -377,8 +377,8 @@ open class ProviderVerifier @JvmOverloads constructor (
       val s = " generates a message which"
       result = result.merge(displayBodyResult(failures, comparison.bodyMismatches,
         interactionMessage + s, message.interactionId.orEmpty()))
-        .merge(displayMetadataResult(messageMetadata ?: emptyMap(), failures, comparison.metadataMismatches,
-          interactionMessage + s, message.interactionId.orEmpty()))
+        .merge(displayMetadataResult(messageMetadata ?: emptyMap(), failures,
+          comparison.metadataMismatches, interactionMessage + s, message.interactionId.orEmpty()))
     }
     return result
   }
@@ -431,8 +431,8 @@ open class ProviderVerifier @JvmOverloads constructor (
     var interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name}" +
     " - ${interaction.description} "
 
-    val stateChangeResult = stateChangeHandler.executeStateChange(this, provider, consumer, interaction, interactionMessage,
-      failures, providerClient)
+    val stateChangeResult = stateChangeHandler.executeStateChange(this, provider, consumer,
+      interaction, interactionMessage, failures, providerClient)
     if (stateChangeResult.stateChangeResult is Ok) {
       interactionMessage = stateChangeResult.message
       reportInteractionDescription(interaction)
@@ -442,7 +442,8 @@ open class ProviderVerifier @JvmOverloads constructor (
         "interaction" to interaction
       )
 
-      val result = if (ProviderUtils.verificationType(provider, consumer) == PactVerification.REQUEST_RESPONSE) {
+      val result = if (ProviderUtils.verificationType(provider, consumer) ==
+        PactVerification.REQUEST_RESPONSE) {
         logger.debug { "Verifying via request/response" }
         verifyResponseFromProvider(provider, interaction as RequestResponseInteraction, interactionMessage, failures,
           providerClient, context)
@@ -481,9 +482,12 @@ open class ProviderVerifier @JvmOverloads constructor (
     reporters.forEach { it.returnsAResponseWhich() }
 
     val s = " returns a response which"
-    return displayStatusResult(failures, expectedResponse.status, comparison.statusMismatch, interactionMessage + s, interactionId)
-      .merge(displayHeadersResult(failures, expectedResponse.headers, comparison.headerMismatches, interactionMessage + s, interactionId))
-      .merge(displayBodyResult(failures, comparison.bodyMismatches, interactionMessage + s, interactionId))
+    return displayStatusResult(failures, expectedResponse.status, comparison.statusMismatch,
+      interactionMessage + s, interactionId)
+      .merge(displayHeadersResult(failures, expectedResponse.headers, comparison.headerMismatches,
+        interactionMessage + s, interactionId))
+      .merge(displayBodyResult(failures, comparison.bodyMismatches,
+        interactionMessage + s, interactionId))
   }
 
   fun displayStatusResult(
@@ -524,7 +528,8 @@ open class ProviderVerifier @JvmOverloads constructor (
           reporters.forEach { it.headerComparisonFailed(key, expectedHeaderValue!!, headerComparison) }
           failures["$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""] =
             headerComparison.joinToString(", ") { it.description() }
-          result = result.merge(TestResult.Failed(headerComparison.map { it.toMap() }, "Headers had differences"))
+          result = result.merge(TestResult.Failed(headerComparison.map { it.toMap() },
+            "Headers had differences"))
         }
       }
       result
@@ -598,7 +603,8 @@ open class ProviderVerifier @JvmOverloads constructor (
     consumer: IConsumerInfo,
     client: PactBrokerClient? = null
   ) {
-    val pact = FilteredPact(loadPactFileForConsumer(consumer), Predicate { filterInteractions(it) })
+    val pact = FilteredPact(loadPactFileForConsumer(consumer),
+      Predicate { filterInteractions(it) })
     reportVerificationForConsumer(consumer, provider, pact.source)
     if (pact.interactions.isEmpty()) {
       reporters.forEach { it.warnPactFileHasNoInteractions(pact as Pact<Interaction>) }
@@ -607,10 +613,15 @@ open class ProviderVerifier @JvmOverloads constructor (
         verifyInteraction(provider, consumer, failures, it)
       }.reduce { acc, result -> acc.merge(result) }
       when {
-        pact.isFiltered() -> logger.warn { "Skipping publishing of verification results as the interactions have been filtered" }
-        publishingResultsDisabled() -> logger.warn { "Skipping publishing of verification results as it has been disabled " +
-          "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')" }
-        else -> verificationReporter.reportResults(pact, result, providerVersion.get() ?: "0.0.0", client, providerTag?.get())
+        pact.isFiltered() -> logger.warn {
+          "Skipping publishing of verification results as the interactions have been filtered"
+        }
+        publishingResultsDisabled() -> logger.warn {
+          "Skipping publishing of verification results as it has been disabled " +
+          "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')"
+        }
+        else -> verificationReporter.reportResults(pact, result, providerVersion.get() ?: "0.0.0", client,
+          providerTag?.get())
       }
     }
   }
@@ -683,7 +694,8 @@ open class ProviderVerifier @JvmOverloads constructor (
   }
 
   fun filterInteractions(interaction: Interaction): Boolean {
-    return if (projectHasProperty.apply(PACT_FILTER_DESCRIPTION) && projectHasProperty.apply(PACT_FILTER_PROVIDERSTATE)) {
+    return if (projectHasProperty.apply(PACT_FILTER_DESCRIPTION) &&
+      projectHasProperty.apply(PACT_FILTER_PROVIDERSTATE)) {
       matchDescription(interaction) && matchState(interaction)
     } else if (projectHasProperty.apply(PACT_FILTER_DESCRIPTION)) {
       matchDescription(interaction)

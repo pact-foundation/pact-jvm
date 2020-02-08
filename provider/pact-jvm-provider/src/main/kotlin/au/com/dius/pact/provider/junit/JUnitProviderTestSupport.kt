@@ -11,7 +11,7 @@ import java.util.function.Predicate
 object JUnitProviderTestSupport {
   fun <I> filterPactsByAnnotations(pacts: List<Pact<I>>, testClass: Class<*>): List<Pact<I>> where I : Interaction {
     val pactFilterValues = testClass.getAnnotation(PactFilter::class.java)?.value
-    return if (pactFilterValues != null && pactFilterValues.any { !it.isEmpty() }) {
+    return if (pactFilterValues != null && pactFilterValues.any { it.isNotEmpty() }) {
       pacts.map { pact ->
         FilteredPact(pact, Predicate { interaction ->
           pactFilterValues.any { value -> interaction.providerStates.any { it.matches(value) } }
