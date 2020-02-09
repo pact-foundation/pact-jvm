@@ -484,7 +484,7 @@ For pacts that are loaded from a Pact Broker, the results of running the verific
  broker against the URL for the pact. You will be able to see the result on the Pact Broker home screen. You need to
  set the version of the provider that is verified using the `pact.provider.version` system property.
  
-To enable publishing of results, set the property `pact.verifier.publishResults` to `true`.
+To enable publishing of results, set the Java system property or environment variable `pact.verifier.publishResults` to `true`.
 
 ## Tagging the provider before verification results are published [4.0.1+]
 

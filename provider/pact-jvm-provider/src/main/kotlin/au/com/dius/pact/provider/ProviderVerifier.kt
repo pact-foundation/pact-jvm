@@ -240,8 +240,10 @@ open class ProviderVerifier @JvmOverloads constructor (
    * This will return true unless the pact.verifier.publishResults property has the value of "true"
    */
   override fun publishingResultsDisabled(): Boolean {
-    return !projectHasProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS) ||
-      projectGetProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS)?.toLowerCase() != "true"
+    return when {
+      !projectHasProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS) -> verificationReporter.publishingResultsDisabled()
+      else -> projectGetProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS)?.toLowerCase() != "true"
+    }
   }
 
   override fun verifyResponseByInvokingProviderMethods(

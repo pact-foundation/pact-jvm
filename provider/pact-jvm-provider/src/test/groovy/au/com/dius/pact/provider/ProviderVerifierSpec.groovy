@@ -408,13 +408,13 @@ class ProviderVerifierSpec extends Specification {
     ProviderInfo provider = new ProviderInfo('Test Provider')
     ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
     PactBrokerClient pactBrokerClient = Mock(PactBrokerClient, constructorArgs: [''])
-    verifier.pactReader = Mock(PactReader)
-    def statechange = Mock(StateChange) {
+    verifier.pactReader = Stub(PactReader)
+    def statechange = Stub(StateChange) {
       executeStateChange(*_) >> new StateChangeResult(new Ok([:]))
     }
-    def interaction1 = Mock(RequestResponseInteraction)
-    def interaction2 = Mock(RequestResponseInteraction)
-    def mockPact = Mock(Pact) {
+    def interaction1 = Stub(RequestResponseInteraction)
+    def interaction2 = Stub(RequestResponseInteraction)
+    def mockPact = Stub(Pact) {
       getSource() >> new BrokerUrlSource('http://localhost', 'http://pact-broker')
     }
 
