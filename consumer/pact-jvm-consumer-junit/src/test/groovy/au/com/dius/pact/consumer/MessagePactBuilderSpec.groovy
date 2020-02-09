@@ -4,6 +4,7 @@ import au.com.dius.pact.consumer.dsl.Matchers
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.core.model.messaging.Message
 import groovy.json.JsonSlurper
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -91,6 +92,29 @@ class MessagePactBuilderSpec extends Specification {
     where:
 
     contentTypeAttr << ['contentType', 'contenttype', 'Content-Type', 'content-type']
+  }
+
+  @Issue('#1006')
+  def 'handle non-string message metadata values'() {
+    given:
+    def body = new PactDslJsonBody()
+    Map<String, Object> metadata = [
+      'contentType': 'application/json',
+      'otherValue': 10L
+    ]
+
+    when:
+    def pact = MessagePactBuilder
+      .consumer('MessagePactBuilderSpec')
+      .given('srm.countries.get_message')
+      .expectsToReceive('srm.countries.get')
+      .withMetadata(metadata)
+      .withContent(body).toPact()
+    Message message = pact.interactions.first()
+    def messageMetadata = message.metaData
+
+    then:
+    messageMetadata == [contentType: 'application/json', otherValue: 10L]
   }
 
 }

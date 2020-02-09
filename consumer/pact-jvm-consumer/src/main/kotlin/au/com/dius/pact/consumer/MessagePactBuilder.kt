@@ -84,9 +84,9 @@ class MessagePactBuilder(
           message.generators.addGenerator(category = au.com.dius.pact.core.model.generators.Category.METADATA,
             generator = value.generator!!)
         }
-        value.value.toString()
+        value.value
       } else {
-        value.toString()
+        value
       }
     }
     return this
