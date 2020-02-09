@@ -88,7 +88,7 @@ class MessagePactBuilder(
       } else {
         value
       }
-    }
+    }.toMutableMap()
     return this
   }
 
