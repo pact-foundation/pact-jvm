@@ -380,6 +380,11 @@ class PactVerificationInvocationContextProvider : TestTemplateInvocationContextP
     val tests = pactSources.flatMap { pact ->
       pact.first.interactions.map { PactVerificationExtension(pact.first, pact.second, it, serviceName, consumerName) }
     }
+
+    if (tests.isEmpty()) {
+      throw UnsupportedOperationException("No Pact files where found to verify")
+    }
+
     return tests.stream() as Stream<TestTemplateInvocationContext>
   }
 
