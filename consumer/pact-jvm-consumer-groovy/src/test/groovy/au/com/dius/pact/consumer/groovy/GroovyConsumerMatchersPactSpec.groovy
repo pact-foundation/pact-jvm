@@ -2,10 +2,13 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
 import groovy.json.JsonOutput
-import groovyx.net.http.RESTClient
+import groovy.json.JsonSlurper
+import groovyx.net.http.ContentTypes
+import groovyx.net.http.FromServer
+import groovyx.net.http.HttpBuilder
 import spock.lang.Specification
 
-import static groovyx.net.http.ContentType.JSON
+import static groovyx.net.http.ContentTypes.JSON
 
 class GroovyConsumerMatchersPactSpec extends Specification {
 
@@ -21,7 +24,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
     matcherService {
       uponReceiving('a request')
       withAttributes(method: 'put', path: '/')
-      withBody(mimeType: JSON.toString()) {
+      withBody(mimeType: ContentTypes.JSON[0]) {
         name(~/\w+/, 'harry')
         surname includesStr('larry')
         position regexp(~/staff|contractor/, 'staff')
@@ -58,56 +61,63 @@ class GroovyConsumerMatchersPactSpec extends Specification {
         }
       }
       willRespondWith(status: 200)
-      withBody(mimeType: JSON.toString()) {
+      withBody(mimeType: ContentTypes.JSON[0]) {
         name(~/\w+/, 'harry')
       }
     }
 
     when:
     PactVerificationResult result = matcherService.runTest { server, context ->
-      def client = new RESTClient(server.url)
-      def response = client.put(requestContentType: JSON, body: [
-          'name': 'harry',
-          'surname': 'larry',
-          'position': 'staff',
-          'happy': true,
-          'hexCode': '9d1883afcd',
-          'hexCode2': '01234AB',
-          'id': 6444667731,
-          'id2': 1234567890,
-          'localAddress': '127.0.0.1',
-          'localAddress2': '192.169.0.2',
-          'age': 100,
-          'age2': 9817343207,
-          'salary': 59458983.55,
-          'ts': '2015-12-05T16:24:28',
-          'timestamp': '2015/12/05 - 16:24:28.429',
-          'values': [
-            1,
-            2,
-            3,
-            9232527554
-          ],
-          'role': [
-            'name': 'admin',
-            'id': '7a97e929-c5b1-43cf-9b2c-295e9d4fa3cd',
-            'kind': [
-              'id': 100
-            ],
-            'dob': '12/05/2015'
-          ],
-          'roles': [
-            [
-              'name': 'dev',
-              'id': '3590e5cf-8777-4d30-be4c-dac824765b9b'
-            ]
-          ],
-          nextReview: '2001-01-01'
-        ]
-      )
+      def client = HttpBuilder.configure {
+        request.uri = server.url
+      }
+      def resp = client.put(FromServer){
+        request.contentType = JSON[0]
+        request.body = JsonOutput.toJson([
+                'name': 'harry',
+                'surname': 'larry',
+                'position': 'staff',
+                'happy': true,
+                'hexCode': '9d1883afcd',
+                'hexCode2': '01234AB',
+                'id': 6444667731,
+                'id2': 1234567890,
+                'localAddress': '127.0.0.1',
+                'localAddress2': '192.169.0.2',
+                'age': 100,
+                'age2': 9817343207,
+                'salary': 59458983.55,
+                'ts': '2015-12-05T16:24:28',
+                'timestamp': '2015/12/05 - 16:24:28.429',
+                'values': [
+                        1,
+                        2,
+                        3,
+                        9232527554
+                ],
+                'role': [
+                        'name': 'admin',
+                        'id': '7a97e929-c5b1-43cf-9b2c-295e9d4fa3cd',
+                        'kind': [
+                                'id': 100
+                        ],
+                        'dob': '12/05/2015'
+                ],
+                'roles': [
+                        [
+                                'name': 'dev',
+                                'id': '3590e5cf-8777-4d30-be4c-dac824765b9b'
+                        ]
+                ],
+                nextReview: '2001-01-01'
+        ])
+        response.parser(JSON) { config, r ->
+          return r
+        }
+      }
 
-      assert response.status == 200
-      assert response.data == [name: 'harry']
+      assert resp.statusCode == 200
+      assert new JsonSlurper().parse(resp.inputStream) == [name: 'harry']
     }
 
     then:
@@ -131,10 +141,17 @@ class GroovyConsumerMatchersPactSpec extends Specification {
 
     when:
     PactVerificationResult result = matcherService.runTest { server ->
-      def client = new RESTClient(server.url)
-      def response = client.get(query: [a: '100', b: 'Z'])
+      def client = HttpBuilder.configure {
+        request.uri = server.url
+      }
+      def resp = client.get(FromServer){
+        request.uri.query = [a: '100', b: 'Z']
+        response.success { r, v ->
+          return r
+        }
+      }
 
-      assert response.status == 200
+      assert resp.statusCode == 200
     }
 
     then:
@@ -163,11 +180,19 @@ class GroovyConsumerMatchersPactSpec extends Specification {
 
     when:
     PactVerificationResult result = matcherService.runTest { server ->
-      def client = new RESTClient(server.url)
-      def response = client.put(requestContentType: JSON, body: JsonOutput.toJson([
-        valueA: 100, valueB: 'AZB', valueC: null]))
+      def client = HttpBuilder.configure {
+        request.uri = server.url
+      }
+      def resp = client.put(FromServer){
+        request.contentType = JSON[0]
+        request.body = JsonOutput.toJson([
+                valueA: 100, valueB: 'AZB', valueC: null])
+        response.success { resp, v ->
+          return resp
+        }
+      }
 
-      assert response.status == 200
+      assert resp.statusCode == 200
     }
 
     then:

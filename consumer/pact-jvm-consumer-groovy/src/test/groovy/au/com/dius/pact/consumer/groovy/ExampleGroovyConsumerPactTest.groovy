@@ -2,7 +2,10 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
 import groovy.json.JsonBuilder
-import groovyx.net.http.RESTClient
+import groovy.json.JsonSlurper
+import groovyx.net.http.ContentTypes
+import groovyx.net.http.FromServer
+import groovyx.net.http.HttpBuilder
 import org.junit.Test
 
 class ExampleGroovyConsumerPactTest {
@@ -54,37 +57,59 @@ class ExampleGroovyConsumerPactTest {
         }
 
         PactVerificationResult result = aliceService.runTest {
-            def client = new RESTClient('http://localhost:1233/')
-            def aliceResponse = client.get(path: '/mallory', query: [status: 'good', name: 'ron'])
+            def client = HttpBuilder.configure {
+                request.uri = 'http://localhost:1233/'
+            }
+            def aliceResponse = client.get(FromServer) {
+                request.uri.path = '/mallory'
+                request.uri.query = [status: 'good', name: 'ron']
+                response.parser(ContentTypes.HTML) { config, resp ->
+                    return resp
+                }
+            }
 
-            assert aliceResponse.status == 200
+            assert aliceResponse.statusCode == 200
             assert aliceResponse.contentType == 'text/html'
 
-            def data = aliceResponse.data.text()
+            def data = aliceResponse.inputStream.text
             assert data == '"That is some good Mallory."'
         }
         assert result instanceof PactVerificationResult.Ok
 
         result = bobService.runTest { mockServer, context ->
-            def client = new RESTClient(mockServer.url)
+            def client = HttpBuilder.configure {
+                request.uri = mockServer.url
+            }
             def body = new JsonBuilder([name: 'Bobby'])
-            def bobPostResponse = client.post(path: '/donuts', requestContentType: 'application/json',
-                headers: [
-                    'Accept': 'text/plain',
-                    'Content-Type': 'application/json'
-                ], body: body.toPrettyString()
-            )
+            def bobPostResponse = client.post(FromServer) {
+                request.uri.path = '/donuts'
+                request.contentType = 'application/json'
+                request.headers = [
+                        'Accept'      : 'text/plain',
+                        'Content-Type': 'application/json'
+                ]
+                request.body = body.toPrettyString()
+                response.parser(ContentTypes.TEXT) { config, resp ->
+                    return resp
+                }
+            }
 
-            assert bobPostResponse.status == 201
-            assert bobPostResponse.data.text == '"Donut created."'
+            assert bobPostResponse.statusCode == 201
+            assert bobPostResponse.inputStream.text == '"Donut created."'
 
             body = new JsonBuilder([ [name: 'Roger'] ])
-            def bobPutResponse = client.put(path: '/alligators', requestContentType: 'application/json',
-                headers: [ 'Content-Type': 'application/json' ], body: body.toPrettyString()
-            )
+            def bobPutResponse = client.put(FromServer){
+                request.uri.path = "/alligators"
+                request.contentType = 'application/json'
+                request.headers = [ 'Content-Type': 'application/json' ]
+                request.body = body.toPrettyString()
+                response.parser(ContentTypes.ANY) { config, resp ->
+                    return resp
+                }
+            }
 
-            assert bobPutResponse.status == 200
-            assert bobPutResponse.data == [ [age: 20, name: 'Roger'] ]
+            assert bobPutResponse.statusCode == 200
+            assert new JsonSlurper().parse(bobPutResponse.inputStream) == [[age: 20, name: 'Roger'] ]
         }
         assert result instanceof PactVerificationResult.ExpectedButNotReceived
         assert result.expectedRequests.size() == 1
