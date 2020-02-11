@@ -45,7 +45,7 @@ class ProviderStateInjectedPactTest {
         request.uri.path = '/values'
         request.body = [userName: 'Test', userClass: 'Shoddy']
         response.parser(ContentTypes.ANY) { config, r ->
-          return r
+          r
         }
       }
 

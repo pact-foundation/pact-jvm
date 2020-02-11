@@ -71,7 +71,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
       def client = HttpBuilder.configure {
         request.uri = server.url
       }
-      def resp = client.put(FromServer){
+      def resp = client.put(FromServer) {
         request.contentType = JSON[0]
         request.body = JsonOutput.toJson([
                 'name': 'harry',
@@ -112,7 +112,7 @@ class GroovyConsumerMatchersPactSpec extends Specification {
                 nextReview: '2001-01-01'
         ])
         response.parser(JSON) { config, r ->
-          return r
+          r
         }
       }
 
@@ -144,10 +144,10 @@ class GroovyConsumerMatchersPactSpec extends Specification {
       def client = HttpBuilder.configure {
         request.uri = server.url
       }
-      def resp = client.get(FromServer){
+      def resp = client.get(FromServer) {
         request.uri.query = [a: '100', b: 'Z']
         response.success { r, v ->
-          return r
+          r
         }
       }
 
@@ -183,12 +183,12 @@ class GroovyConsumerMatchersPactSpec extends Specification {
       def client = HttpBuilder.configure {
         request.uri = server.url
       }
-      def resp = client.put(FromServer){
+      def resp = client.put(FromServer) {
         request.contentType = JSON[0]
         request.body = JsonOutput.toJson([
                 valueA: 100, valueB: 'AZB', valueC: null])
         response.success { resp, v ->
-          return resp
+          resp
         }
       }
 

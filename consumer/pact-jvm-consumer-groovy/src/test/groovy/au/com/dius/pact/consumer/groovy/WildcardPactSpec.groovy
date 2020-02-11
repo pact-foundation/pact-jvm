@@ -51,10 +51,10 @@ class WildcardPactSpec extends Specification {
       def client = HttpBuilder.configure {
         request.uri = server.url
       }
-      def response = client.get(FromServer){
+      def response = client.get(FromServer) {
         request.contentType = JSON[0]
-        response.parser(ContentTypes.ANY) {config, resp ->
-          return resp
+        response.parser(ContentTypes.ANY) { config, resp ->
+          resp
         }
       }
 
@@ -120,10 +120,10 @@ class WildcardPactSpec extends Specification {
       def client = HttpBuilder.configure {
         request.uri = server.url
       }
-      def response = client.get(FromServer){
+      def response = client.get(FromServer) {
         request.contentType = JSON[0]
         response.parser(ContentTypes.ANY) { config, resp ->
-          return resp
+          resp
         }
       }
 

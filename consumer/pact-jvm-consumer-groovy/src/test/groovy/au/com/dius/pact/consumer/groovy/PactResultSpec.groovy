@@ -29,12 +29,12 @@ class PactResultSpec extends Specification {
             def client = HttpBuilder.configure {
                 request.uri = mockServer.url
             }
-            resp = client.get(FromServer){
+            resp = client.get(FromServer) {
                 request.uri.path = '/path'
                 request.uri.query = [status: 'good', name: 'ron']
                 request.contentType = 'application/json'
                 response.parser(ContentTypes.JSON) { config, r ->
-                    return r
+                    r
                 }
             }
             data = new JsonSlurper().parse(resp.inputStream)
@@ -70,7 +70,7 @@ class PactResultSpec extends Specification {
               request.uri.query = [status: 'good', name: 'ron']
               request.contentType = 'application/json'
               response.parser(ContentTypes.ANY) { config, r ->
-                  return r
+                  r
               }
           }
 
@@ -106,7 +106,7 @@ class PactResultSpec extends Specification {
             def client = HttpBuilder.configure {
                 request.uri = mockServer.url
             }
-            response = client.get(FromServer){
+            response = client.get(FromServer) {
                 request.uri.path = '/path'
                 request.uri.query = [status: 'bad', name: 'ron']
                 request.contentType = 'application/json'
@@ -152,8 +152,8 @@ class PactResultSpec extends Specification {
                 request.uri.path = '/path'
                 request.uri.query = [status: 'good', name: 'ron']
                 request.contentType = 'application/json'
-                response.parser(ContentTypes.ANY) {config, r ->
-                    return r
+                response.parser(ContentTypes.ANY) { config, r ->
+                    r
                 }
             }
             assert resp.statusCode == 200

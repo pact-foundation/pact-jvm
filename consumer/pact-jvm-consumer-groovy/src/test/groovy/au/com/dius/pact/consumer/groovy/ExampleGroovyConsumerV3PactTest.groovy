@@ -41,12 +41,12 @@ class ExampleGroovyConsumerV3PactTest {
             def client = HttpBuilder.configure {
                 request.uri = mockServer.url
             }
-            def aliceResponse = client.get(FromServer){
+            def aliceResponse = client.get(FromServer) {
                 request.uri.path = '/mallory'
                 request.uri.query = [status: 'good', name: 'ron',
                                      date: LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)]
                 response.parser(ContentTypes.ANY) { config, resp ->
-                    return resp
+                    resp
                 }
             }
 
