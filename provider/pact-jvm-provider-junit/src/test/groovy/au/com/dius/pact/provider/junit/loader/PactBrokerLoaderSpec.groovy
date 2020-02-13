@@ -31,16 +31,17 @@ class PactBrokerLoaderSpec extends Specification {
     protocol = 'http'
     tags = ['latest']
     consumers = []
-    brokerClient = Mock(PactBrokerClient, constructorArgs: ['']) {
+    brokerClient = Mock(PactBrokerClient) {
       newHalClient() >> Stub(IHalClient)
     }
     mockPact = Mock(Pact)
 
     pactBrokerLoader = { boolean failIfNoPactsFound = true ->
-      def loader = new PactBrokerLoader(host, port, protocol, tags, consumers, failIfNoPactsFound, null, null, null) {
+      PactBrokerClient client = brokerClient
+      new PactBrokerLoader(host, port, protocol, tags, consumers, failIfNoPactsFound, null, null, null) {
         @Override
         PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
-          brokerClient
+          client
         }
 
         @Override
@@ -48,7 +49,6 @@ class PactBrokerLoaderSpec extends Specification {
           mockPact
         }
       }
-      loader
     }
   }
 
