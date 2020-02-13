@@ -14,6 +14,7 @@ import java.util.function.BiFunction
 class ExampleGroovyConsumerPactTest {
 
     @Test
+    @SuppressWarnings('AbcMetric')
     void "A service consumer side of a pact goes a little something like this"() {
 
         def aliceService = new PactBuilder()
@@ -112,7 +113,7 @@ class ExampleGroovyConsumerPactTest {
         assert result.expectedRequests.size() == 1
     }
 
-    private static BiFunction<ChainedHttpConfig, FromServer, Object> DEFAULT_RESPONSE_HANDLER = { config, resp ->
+    private static final BiFunction<ChainedHttpConfig, FromServer, Object> DEFAULT_RESPONSE_HANDLER = { config, resp ->
         resp
     }
 }

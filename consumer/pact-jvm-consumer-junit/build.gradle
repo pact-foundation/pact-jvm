@@ -21,7 +21,7 @@ dependencies {
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
   testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}"
-  testCompile "io.github.http-builder-ng:http-builder-ng-apache:http-builder:${project.httpBuilderVersion}"
+  testCompile "io.github.http-builder-ng:http-builder-ng-apache:${project.httpBuilderVersion}"
   // Required for Java 9
   testCompile 'javax.xml.bind:jaxb-api:2.3.0'
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"

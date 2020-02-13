@@ -12,7 +12,7 @@ import static groovyx.net.http.ContentTypes.JSON
 
 class GroovyConsumerMatchersPactSpec extends Specification {
 
-  @SuppressWarnings('MethodSize')
+  @SuppressWarnings(['MethodSize', 'AbcMetric'])
   def 'example V3 spec test'() {
     given:
     def matcherService = new PactBuilder()

@@ -3,8 +3,8 @@ package au.com.dius.pact.consumer.junit
 import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.core.model.RequestResponsePact
-import groovyx.net.http.ContentType
-import groovyx.net.http.HTTPBuilder
+import groovyx.net.http.FromServer
+import groovyx.net.http.HttpBuilder
 import org.junit.Rule
 import org.junit.Test
 
@@ -31,13 +31,18 @@ class MultiCookieTest {
   @Test
   @PactVerification
   void runTest() {
-    def http = new HTTPBuilder(mockProvider.url)
+    def http = HttpBuilder.configure { request.uri = mockProvider.url }
 
-    http.post(path: '/provider', requestContentType: ContentType.JSON) { response ->
-      assert response.status == 200
-      assert response.headers.iterator().findAll { it.name == 'set-cookie' }*.value == [
-        'someCookie=someValue; Path=/', 'someOtherCookie=someValue; Path=/', 'someThirdCookie=someValue; Path=/'
-      ]
+    http.post {
+      request.uri.path = '/provider'
+      request.contentType = 'application/json'
+
+      response.success { FromServer fs, Object body ->
+        assert fs.statusCode == 200
+        assert fs.headers.findAll { it.key == 'set-cookie' }*.value == [
+          'someCookie=someValue; Path=/', 'someOtherCookie=someValue; Path=/', 'someThirdCookie=someValue; Path=/'
+        ]
+      }
     }
   }
 }
