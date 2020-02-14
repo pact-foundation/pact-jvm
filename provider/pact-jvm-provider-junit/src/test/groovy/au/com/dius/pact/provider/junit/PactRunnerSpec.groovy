@@ -10,6 +10,7 @@ import au.com.dius.pact.provider.junit.loader.PactUrl
 import au.com.dius.pact.provider.junit.loader.PactUrlLoader
 import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestTarget
+import org.junit.runner.notification.RunNotifier
 import org.junit.runners.model.InitializationError
 import spock.lang.Specification
 
@@ -115,7 +116,7 @@ class PactRunnerSpec extends Specification {
 
   def 'PactRunner throws an exception if there is no @Provider annotation on the test class'() {
     when:
-    new PactRunner(PactRunnerSpec)
+    new PactRunner(PactRunnerSpec).run(new RunNotifier())
 
     then:
     InitializationError e = thrown()
@@ -125,7 +126,7 @@ class PactRunnerSpec extends Specification {
 
   def 'PactRunner throws an exception if there is no pact source'() {
     when:
-    new PactRunner(NoSourceTestClass)
+    new PactRunner(NoSourceTestClass).run(new RunNotifier())
 
     then:
     InitializationError e = thrown()
@@ -134,7 +135,7 @@ class PactRunnerSpec extends Specification {
 
   def 'PactRunner throws an exception if the pact source throws an IO exception'() {
     when:
-    new PactRunner(FailsTestClass)
+    new PactRunner(FailsTestClass).run(new RunNotifier())
 
     then:
     InitializationError e = thrown()
@@ -143,7 +144,7 @@ class PactRunnerSpec extends Specification {
 
   def 'PactRunner throws an exception if there are no pacts to verify'() {
     when:
-    new PactRunner(NoPactsTestClass)
+    new PactRunner(NoPactsTestClass).run(new RunNotifier())
 
     then:
     InitializationError e = thrown()
@@ -169,7 +170,7 @@ class PactRunnerSpec extends Specification {
 
   def 'PactRunner throws an exception if there is both a pact source and pact loader annotation'() {
     when:
-    new PactRunner(BothPactSourceAndPactLoaderTestClass)
+    new PactRunner(BothPactSourceAndPactLoaderTestClass).run(new RunNotifier())
 
     then:
     InitializationError e = thrown()
@@ -179,6 +180,7 @@ class PactRunnerSpec extends Specification {
   def 'PactRunner handles a pact source with a pact loader that takes a class parameter'() {
     when:
     def runner = new PactRunner(PactLoaderWithConstructorParameterTestClass)
+    runner.run(new RunNotifier())
 
     then:
     !runner.children.empty
@@ -187,6 +189,7 @@ class PactRunnerSpec extends Specification {
   def 'PactRunner handles a pact source with a pact loader that does not takes a class parameter'() {
     when:
     def runner = new PactRunner(PactLoaderWithDefaultConstructorClass)
+    runner.run(new RunNotifier())
 
     then:
     !runner.children.empty
@@ -195,6 +198,7 @@ class PactRunnerSpec extends Specification {
   def 'PactRunner loads the pact loader class from the pact loader associated with the pact loader annotation'() {
     when:
     def runner = new PactRunner(TestClass)
+    runner.run(new RunNotifier())
 
     then:
     !runner.children.empty

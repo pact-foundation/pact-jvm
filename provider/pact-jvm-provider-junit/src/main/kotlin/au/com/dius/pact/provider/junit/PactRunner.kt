@@ -53,8 +53,9 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(c
 
   private val child = mutableListOf<InteractionRunner<I>>()
   private var valueResolver = SystemPropertyResolver()
+  private val clazz = clazz
 
-  init {
+  override fun run(notifier: RunNotifier?) {
     if (clazz.getAnnotation(Ignore::class.java) != null) {
       logger.info("Ignore annotation detected, exiting")
     } else {
@@ -110,6 +111,8 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(c
 
       setupInteractionRunners(testClass, pacts, pactLoader)
     }
+
+    super.run(notifier)
   }
 
   protected open fun setupInteractionRunners(testClass: TestClass, pacts: List<Pact<I>>, pactLoader: PactLoader) {
