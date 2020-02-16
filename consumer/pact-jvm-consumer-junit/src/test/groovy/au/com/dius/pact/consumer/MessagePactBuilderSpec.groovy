@@ -3,6 +3,7 @@ package au.com.dius.pact.consumer
 import au.com.dius.pact.consumer.dsl.Matchers
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.core.model.messaging.Message
+import au.com.dius.pact.core.model.ProviderState
 import groovy.json.JsonSlurper
 import spock.lang.Issue
 import spock.lang.Specification
@@ -117,4 +118,33 @@ class MessagePactBuilderSpec extends Specification {
     messageMetadata == [contentType: 'application/json', otherValue: 10L]
   }
 
+  def 'provider state can accept key/value pairs'() {
+    given:
+    def description = 'some state description'
+    def params = ['stateKey': 'stateValue']
+    def expectedProviderState = new ProviderState(description, params)
+
+    when:
+    def pact = MessagePactBuilder
+      .consumer('MessagePactBuilderSpec')
+      .given(description, params)
+
+    then:
+    pact.providerStates.last() == expectedProviderState
+  }
+
+  def 'provider state can accept ProviderState object'() {
+    given:
+    def description = 'some state description'
+    def params = ['stateKey': 'stateValue']
+    def expectedProviderState = new ProviderState(description, params)
+
+    when:
+    def pact = MessagePactBuilder
+            .consumer('MessagePactBuilderSpec')
+            .given(expectedProviderState)
+
+    then:
+    pact.providerStates.last() == expectedProviderState
+  }
 }
