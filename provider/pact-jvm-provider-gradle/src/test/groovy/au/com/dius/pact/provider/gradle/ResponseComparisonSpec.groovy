@@ -99,7 +99,7 @@ class ResponseComparisonSpec extends Specification {
     'application/octet-stream;charset=UTF-8'   | '{"a": 100.0, "b": "test"}' | '{"a": 100.0, "b": "test"}'
     'application/octet-stream'                 | '{"a": 100.0, "b": "test"}' | '{"a": 100.0, "b": "test"}'
     ''                                         | '{"a": 100.0, "b": "test"}' | '{"a": 100.0, "b": "test"}'
-    null                                       | '{"a": 100.0, "b": "test"}' | '{"a":100.0,"b":"test"}'
+    null                                       | '{"a": 100.0, "b": "test"}' | '{"a": 100.0, "b": "test"}'
 
   }
 

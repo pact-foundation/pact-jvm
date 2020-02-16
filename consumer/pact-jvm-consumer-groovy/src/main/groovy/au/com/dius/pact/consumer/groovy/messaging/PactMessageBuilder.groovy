@@ -5,6 +5,7 @@ import au.com.dius.pact.consumer.groovy.BaseBuilder
 import au.com.dius.pact.consumer.groovy.Matcher
 import au.com.dius.pact.consumer.groovy.PactBodyBuilder
 import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.InvalidPactException
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.PactSpecVersion
@@ -101,14 +102,19 @@ class PactMessageBuilder extends BaseBuilder {
     if (messages.empty) {
       throw new InvalidPactException('expectsToReceive is required before withContent')
     }
+
+    def contentType = ContentType.JSON.contentType
     if (options.contentType) {
+      contentType = options.contentType
       messages.last().metaData.contentType = options.contentType
+    } else if (messages.last().metaData.contentType) {
+      contentType = messages.last().metaData.contentType
     }
 
-    def body = new PactBodyBuilder(mimetype: options.contentType, prettyPrintBody: options.prettyPrint)
+    def body = new PactBodyBuilder(mimetype: contentType, prettyPrintBody: options.prettyPrint)
     closure.delegate = body
     closure.call()
-    messages.last().contents = OptionalBody.body(body.body.bytes)
+    messages.last().contents = OptionalBody.body(body.body.bytes, new ContentType(contentType))
     messages.last().matchingRules.addCategory(body.matchers)
 
     this

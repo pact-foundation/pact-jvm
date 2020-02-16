@@ -77,6 +77,11 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     }
   }
 
-  override fun publishingResultsDisabled() =
-    System.getProperty(ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS)?.toLowerCase() != "true"
+  override fun publishingResultsDisabled(): Boolean {
+    var property = System.getProperty(ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS)
+    if (property.isNullOrEmpty()) {
+      property = System.getenv(ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS)
+    }
+    return property?.toLowerCase() != "true"
+  }
 }

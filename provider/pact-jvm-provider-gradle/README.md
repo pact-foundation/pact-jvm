@@ -328,16 +328,17 @@ The following project properties can be specified with `-Pproperty=value` on the
 
 |Property|Description|
 |--------|-----------|
-|pact.showStacktrace|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
-|pact.showFullDiff|This turns on displaying the full diff of the expected versus actual bodies|
-|pact.filter.consumers|Comma seperated list of consumer names to verify|
-|pact.filter.description|Only verify interactions whose description match the provided regular expression|
-|pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
-|pact.verifier.publishResults|Publishing of verification results will be skipped unless this property is set to 'true'|
-|pact.matching.wildcard|Enables matching of map values ignoring the keys when this property is set to 'true'|
-|pact.verifier.disableUrlPathDecoding|Disables decoding of request paths|
-|pact.pactbroker.httpclient.usePreemptiveAuthentication|Enables preemptive authentication with the pact broker when set to `true`|
-|pact.provider.tag|Sets the provider tag to push before publishing verification results|
+|`pact.showStacktrace`|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
+|`pact.showFullDiff`|This turns on displaying the full diff of the expected versus actual bodies|
+|`pact.filter.consumers`|Comma seperated list of consumer names to verify|
+|`pact.filter.description`|Only verify interactions whose description match the provided regular expression|
+|`pact.filter.providerState`|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
+|`pact.filter.pacturl`|This filter allows just the just the changed pact specified in a webhook to be run. It should be used in conjunction with `pact.filter.consumers` |
+|`pact.verifier.publishResults`|Publishing of verification results will be skipped unless this property is set to 'true'|
+|`pact.matching.wildcard`|Enables matching of map values ignoring the keys when this property is set to 'true'|
+|`pact.verifier.disableUrlPathDecoding`|Disables decoding of request paths|
+|`pact.pactbroker.httpclient.usePreemptiveAuthentication`|Enables preemptive authentication with the pact broker when set to `true`|
+|`pact.provider.tag`|Sets the provider tag to push before publishing verification results|
 
 ## Provider States
 
@@ -573,6 +574,20 @@ pact {
 ```
 
 Preemptive Authentication can be enabled by setting the `pact.pactbroker.httpclient.usePreemptiveAuthentication` property to `true`.
+
+### Allowing just the changed pact specified in a webhook to be verified [4.0.6+]
+
+When a consumer publishes a new version of a pact file, the Pact broker can fire off a webhook with the URL of the changed 
+pact file. To allow only the changed pact file to be verified, you can override the URL by using the `pact.filter.consumers`
+and `pact.filter.pacturl` project properties.
+
+For example, running:
+
+```console
+gradle pactVerify -Ppact.filter.consumers='Foo Web Client' -Ppact.filter.pacturl=https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/version/1.0.1
+```  
+
+will only run the verification for Foo Web Client with the given pact file URL.
 
 ## Verifying pact files from a S3 bucket
 

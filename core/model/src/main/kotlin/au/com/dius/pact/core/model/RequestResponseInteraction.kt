@@ -119,7 +119,7 @@ open class RequestResponseInteraction @JvmOverloads constructor(
 
     private fun parseBody(httpPart: HttpPart): Any? {
       return if (httpPart.jsonBody() && httpPart.body.isPresent()) {
-        val body = Json.fromJson(JsonParser().parse(httpPart.body.valueAsString()))
+        val body = Json.fromJson(JsonParser.parseString(httpPart.body.valueAsString()))
         if (body is String) {
           httpPart.body.valueAsString()
         } else {

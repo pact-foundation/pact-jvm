@@ -3,15 +3,20 @@ package au.com.dius.pact.provider.junit
 import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.support.isNotEmpty
+import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.junit.loader.OverrideablePactLoader
 import au.com.dius.pact.provider.junit.loader.PactFilter
+import au.com.dius.pact.provider.junit.loader.PactLoader
+import mu.KLogging
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import java.util.function.Predicate
 
-object JUnitProviderTestSupport {
+object JUnitProviderTestSupport : KLogging() {
   fun <I> filterPactsByAnnotations(pacts: List<Pact<I>>, testClass: Class<*>): List<Pact<I>> where I : Interaction {
     val pactFilterValues = testClass.getAnnotation(PactFilter::class.java)?.value
-    return if (pactFilterValues != null && pactFilterValues.any { !it.isEmpty() }) {
+    return if (pactFilterValues != null && pactFilterValues.any { it.isNotEmpty() }) {
       pacts.map { pact ->
         FilteredPact(pact, Predicate { interaction ->
           pactFilterValues.any { value -> interaction.providerStates.any { it.matches(value) } }
@@ -78,5 +83,34 @@ object JUnitProviderTestSupport {
 
   private fun mapToString(comparison: Map<String, *>): String {
     return comparison.entries.joinToString(System.lineSeparator()) { (key, value) -> "$key -> $value" }
+  }
+
+  @JvmStatic
+  fun checkForOverriddenPactUrl(
+    loader: PactLoader?,
+    overridePactUrl: AllowOverridePactUrl?,
+    consumer: Consumer?
+  ) {
+    var pactUrl = System.getProperty(ProviderVerifier.PACT_FILTER_PACTURL)
+    if (pactUrl.isNullOrEmpty()) {
+      pactUrl = System.getenv(ProviderVerifier.PACT_FILTER_PACTURL)
+    }
+
+    if (loader is OverrideablePactLoader && overridePactUrl != null && pactUrl.isNotEmpty()) {
+      var consumerProperty = System.getProperty(ProviderVerifier.PACT_FILTER_CONSUMERS)
+      if (consumerProperty.isNullOrEmpty()) {
+        consumerProperty = System.getenv(ProviderVerifier.PACT_FILTER_CONSUMERS)
+      }
+      when {
+        consumerProperty.isNotEmpty() -> loader.overridePactUrl(pactUrl, consumerProperty)
+        consumer != null -> loader.overridePactUrl(pactUrl, consumer.value)
+        else -> {
+          logger.warn {
+            "The property ${ProviderVerifier.PACT_FILTER_PACTURL} has been set, but no consumer filter" +
+              " or @Consumer annotation has been provided, Ignoring"
+          }
+        }
+      }
+    }
   }
 }

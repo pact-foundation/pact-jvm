@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.junit
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.checkForOverriddenPactUrl
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.filterPactsByAnnotations
 import au.com.dius.pact.provider.junit.loader.NoPactsFoundException
 import au.com.dius.pact.provider.junit.loader.PactBroker
@@ -146,9 +147,9 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(c
     }
 
     try {
-      if (pactSource != null) {
+      val loader = if (pactSource != null) {
         val pactLoaderClass = pactSource.value
-        return try {
+        try {
           // Checks if there is a constructor with one argument of type Class.
           val constructorWithClass = pactLoaderClass.java.getDeclaredConstructor(Class::class.java)
           if (constructorWithClass != null) {
@@ -163,9 +164,14 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(c
         }
       } else {
         val annotation = pactLoaders.first()
-        return annotation.annotationClass.findAnnotation<PactSource>()!!.value.java
+        annotation.annotationClass.findAnnotation<PactSource>()!!.value.java
           .getConstructor(annotation.annotationClass.java).newInstance(annotation)
       }
+
+      checkForOverriddenPactUrl(loader, clazz.getAnnotation(AllowOverridePactUrl::class.java),
+        clazz.getAnnotation(Consumer::class.java))
+
+      return loader
     } catch (e: ReflectiveOperationException) {
       logger.error(e) { "Error while creating pact source" }
       throw InitializationError(e)

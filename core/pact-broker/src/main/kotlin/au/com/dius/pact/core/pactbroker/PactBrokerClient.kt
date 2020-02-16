@@ -4,6 +4,7 @@ import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.com.github.michaelbull.result.Result
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.isNotEmpty
 import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
@@ -153,8 +154,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     return halClient.linkUrl(PACTS)
   }
 
-  open fun fetchPact(url: String): PactResponse {
-    val halDoc = newHalClient().fetch(url).obj
+  open fun fetchPact(url: String, encodePath: Boolean = true): PactResponse {
+    val halDoc = newHalClient().fetch(url, encodePath).obj
     return PactResponse(halDoc, HalClient.asMap(halDoc["_links"].obj))
   }
 
@@ -320,17 +321,19 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
 
   private fun buildMatrixQuery(pacticipant: String, pacticipantVersion: String, latest: Latest, to: String?): String {
     val escaper = urlPathSegmentEscaper()
-    var base = "?q[][pacticipant]=${escaper.escape(pacticipant)}"
+    var base = "?q[][pacticipant]=${escaper.escape(pacticipant)}&latestby=cvp"
     base += when (latest) {
       is Latest.UseLatest -> if (latest.latest) {
-        "q[][latest]=true"
+        "&q[][latest]=true"
       } else {
         "&q[][version]=${escaper.escape(pacticipantVersion)}"
       }
       is Latest.UseLatestTag -> "q[][tag]=${escaper.escape(latest.latestTag)}"
     }
-    if (!to.isNullOrEmpty()) {
-      base += "&latest=true&tag=${escaper.escape(to)}"
+    base += if (to.isNotEmpty()) {
+      "&latest=true&tag=${escaper.escape(to)}"
+    } else {
+      "&latest=true"
     }
     return base
   }

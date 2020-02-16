@@ -8,6 +8,7 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.isNotEmpty
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.obj
 import com.google.gson.JsonObject
@@ -26,7 +27,7 @@ class Message @JvmOverloads constructor(
   var contents: OptionalBody = OptionalBody.missing(),
   var matchingRules: MatchingRules = MatchingRulesImpl(),
   var generators: Generators = Generators(),
-  var metaData: Map<String, Any?> = mapOf(),
+  var metaData: MutableMap<String, Any?> = mutableMapOf(),
   override val interactionId: String? = null
 ) : Interaction {
 
@@ -34,10 +35,14 @@ class Message @JvmOverloads constructor(
 
   fun contentsAsString() = contents.valueAsString()
 
-  fun getContentType() = Companion.getContentType(metaData)
+  fun getContentType() = if (contents.isPresent() && contents.contentType.contentType.isNotEmpty()) {
+    contents.contentType.contentType
+  } else {
+    getContentType(metaData)
+  }
 
   @Deprecated("Use the content type associated with the message body")
-  fun getParsedContentType() = parseContentType(this.getContentType())
+  fun getParsedContentType() = parseContentType(this.getContentType() ?: "")
 
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any?> {
     val map: MutableMap<String, Any?> = mutableMapOf(
@@ -47,7 +52,7 @@ class Message @JvmOverloads constructor(
     if (!contents.isMissing()) {
       map["contents"] = when {
         isJsonContents() -> {
-          val json = JsonParser().parse(contents.valueAsString())
+          val json = JsonParser.parseString(contents.valueAsString())
           if (json.isJsonPrimitive && json.asJsonPrimitive.isString) {
             contents.valueAsString()
           } else {
@@ -71,8 +76,12 @@ class Message @JvmOverloads constructor(
 
   private fun isJsonContents(): Boolean {
     return if (contents.isPresent()) {
-      val mimeType = contents.contentType.asMimeType()
-      isJson(mimeType)
+      val contentType = getContentType(metaData)
+      if (contentType.isNotEmpty()) {
+        isJson(contentType)
+      } else {
+        isJson(contents.contentType.asMimeType())
+      }
     } else {
       false
     }
@@ -80,10 +89,10 @@ class Message @JvmOverloads constructor(
 
   fun formatContents(): String {
     return if (contents.isPresent()) {
-      val mimeType = contents.contentType.asMimeType()
+      val contentType = getContentType(metaData) ?: contents.contentType.asMimeType()
       when {
-        isJson(mimeType) -> Json.gsonPretty.toJson(JsonParser().parse(contents.valueAsString()))
-        isOctetStream(mimeType) -> Base64.encodeBase64String(contentsAsBytes())
+        isJson(contentType) -> Json.gsonPretty.toJson(JsonParser.parseString(contents.valueAsString()))
+        isOctetStream(contentType) -> Base64.encodeBase64String(contentsAsBytes())
         else -> contents.valueAsString()
       }
     } else {
@@ -128,12 +137,13 @@ class Message @JvmOverloads constructor(
   }
 
   fun withMetaData(metadata: Map<String, Any>): Message {
-    this.metaData = metadata
+    this.metaData = metadata.toMutableMap()
     return this
   }
 
   companion object : KLogging() {
     const val JSON = "application/json"
+    const val TEXT = "text/plain"
 
     /**
      * Builds a message from a Map
@@ -171,23 +181,28 @@ class Message @JvmOverloads constructor(
       else Generators()
 
       return Message(Json.toString(json["description"]), providerStates,
-        contents, matchingRules, generators, metaData, Json.toString(json["_id"]))
+        contents, matchingRules, generators, metaData.toMutableMap(), Json.toString(json["_id"]))
     }
 
     @Deprecated("Use the content type associated with the message body")
-    private fun parseContentType(contentType: String): ContentType? {
-      return try {
-        ContentType.parse(contentType)
-      } catch (e: RuntimeException) {
-        logger.debug(e) { "Failed to parse content type '$contentType'" }
+    private fun parseContentType(contentType: String?): ContentType? {
+      return if (contentType.isNotEmpty()) {
+        try {
+          ContentType.parse(contentType)
+        } catch (e: RuntimeException) {
+          logger.debug(e) { "Failed to parse content type '$contentType'" }
+          null
+        }
+      } else {
         null
       }
     }
 
-    fun getContentType(metaData: Map<String, Any?>): String {
-      return metaData.entries.find {
+    @Deprecated("Use the content type associated with the message body")
+    fun getContentType(metaData: Map<String, Any?>): String? {
+      return parseContentType(metaData.entries.find {
         it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
-      }?.value?.toString() ?: JSON
+      }?.value?.toString())?.mimeType
     }
 
     private fun isJson(contentType: String?) =

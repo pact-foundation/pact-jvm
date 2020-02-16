@@ -25,11 +25,8 @@ class ConsumerInfoSpec extends Specification {
 
     where:
 
-    source                                    | expectedSource
-    new URL('file:/var/tmp/file')             | UrlSource
-    new FileSource(new File('/var/tmp/file')) | FileSource
-    { -> }                                    | ClosurePactSource
-    '/var/tmp/file'                           | FileSource
+    source << [new URL('file:/var/tmp/file'), new FileSource('/var/tmp/file' as File), { -> }, '/var/tmp/file']
+    expectedSource << [UrlSource, FileSource, ClosurePactSource, FileSource]
   }
 
   def 'include the tag when converting from a PactBrokerConsumer'() {

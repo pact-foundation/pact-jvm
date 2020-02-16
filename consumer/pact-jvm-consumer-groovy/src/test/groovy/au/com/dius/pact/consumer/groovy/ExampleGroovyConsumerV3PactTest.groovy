@@ -3,7 +3,9 @@ package au.com.dius.pact.consumer.groovy
 import au.com.dius.pact.consumer.PactConsumerConfig
 import au.com.dius.pact.consumer.PactVerificationResult
 import groovy.json.JsonSlurper
-import groovyx.net.http.RESTClient
+import groovyx.net.http.ContentTypes
+import groovyx.net.http.FromServer
+import groovyx.net.http.HttpBuilder
 import org.junit.Test
 
 import java.time.LocalDate
@@ -36,14 +38,22 @@ class ExampleGroovyConsumerV3PactTest {
         }
 
         PactVerificationResult result = aliceService.runTest { mockServer ->
-            def client = new RESTClient(mockServer.url)
-            def aliceResponse = client.get(path: '/mallory', query: [status: 'good', name: 'ron',
-              date: LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)])
+            def client = HttpBuilder.configure {
+                request.uri = mockServer.url
+            }
+            def aliceResponse = client.get(FromServer) {
+                request.uri.path = '/mallory'
+                request.uri.query = [status: 'good', name: 'ron',
+                                     date: LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)]
+                response.parser(ContentTypes.ANY) { config, resp ->
+                    resp
+                }
+            }
 
-            assert aliceResponse.status == 200
+            assert aliceResponse.statusCode == 200
             assert aliceResponse.contentType == 'text/html'
 
-            def data = aliceResponse.data.text()
+            def data = aliceResponse.inputStream.text
             assert data == '"That is some good Mallory."'
         }
         assert result instanceof PactVerificationResult.Ok
