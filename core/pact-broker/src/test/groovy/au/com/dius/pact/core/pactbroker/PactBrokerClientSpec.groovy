@@ -287,10 +287,10 @@ class PactBrokerClientSpec extends Specification {
     json.add('c', array)
 
     when:
-    def result = client.fetchPact(url)
+    def result = client.fetchPact(url, true)
 
     then:
-    1 * halClient.fetch(url) >> json
+    1 * halClient.fetch(url, _) >> json
     result.pactFile == Json.INSTANCE.toJson([a: 'a', b: 100, _links: [:], c: [true, 10.2, 'test']])
   }
 

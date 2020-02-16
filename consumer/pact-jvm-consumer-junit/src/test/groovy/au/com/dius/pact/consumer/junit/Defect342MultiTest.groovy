@@ -1,14 +1,15 @@
 package au.com.dius.pact.consumer.junit
 
-import au.com.dius.pact.core.model.annotations.Pact
 import au.com.dius.pact.consumer.dsl.DslPart
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.core.model.RequestResponsePact
+import au.com.dius.pact.core.model.annotations.Pact
 import groovy.json.JsonOutput
-import groovyx.net.http.ContentType
-import groovyx.net.http.HTTPBuilder
+import groovyx.net.http.FromServer
+import groovyx.net.http.HttpBuilder
 import org.apache.http.client.fluent.Request
+import org.apache.http.entity.ContentType
 import org.junit.Rule
 import org.junit.Test
 
@@ -61,16 +62,25 @@ class Defect342MultiTest {
   @Test
   @PactVerification(fragment = 'createFragment1')
   void runTest1() {
-    def http = new HTTPBuilder(mockProvider.url)
+    def http = HttpBuilder.configure { request.uri = mockProvider.url }
 
-    http.post(path: '/some-service/users', body: user(), requestContentType: ContentType.JSON) { response ->
-      assert response.status == 201
-      assert response.headers['location']?.toString()?.contains(SOME_SERVICE_USER)
+    http.post {
+      request.uri.path = '/some-service/users'
+      request.body = user()
+      request.contentType = 'application/json'
+
+      response.success { FromServer fs, Object body ->
+        assert fs.statusCode == 201
+        assert fs.headers.find { it.key == 'Location' }?.value?.contains(SOME_SERVICE_USER)
+      }
     }
 
-    http.get(path: SOME_SERVICE_USER + EXPECTED_USER_ID,
-      headers: ['Content-Type': ContentType.JSON.toString()]) { response ->
-      assert response.status == 200
+    http.get {
+      request.uri.path = SOME_SERVICE_USER + EXPECTED_USER_ID
+      request.contentType = 'application/json'
+      response.success { FromServer fs, Object body ->
+        assert fs.statusCode == 200
+      }
     }
   }
 
@@ -81,10 +91,10 @@ class Defect342MultiTest {
       .uponReceiving('A request with double precision number')
         .path('/numbertest')
         .method('PUT')
-        .body('{"name": "harry","data": 1234.0 }', ContentType.JSON.toString())
+        .body('{"name": "harry","data": 1234.0 }', 'application/json')
       .willRespondWith()
         .status(200)
-        .body('{"responsetest": true, "name": "harry","data": 1234.0 }', ContentType.JSON.toString())
+        .body('{"responsetest": true, "name": "harry","data": 1234.0 }', 'application/json')
       .toPact()
   }
 
@@ -92,8 +102,8 @@ class Defect342MultiTest {
   @PactVerification(fragment = 'createFragment2')
   void runTest2() {
     assert Request.Put(mockProvider.url + '/numbertest')
-      .addHeader('Accept', ContentType.JSON.toString())
-      .bodyString('{"name": "harry","data": 1234.0 }', org.apache.http.entity.ContentType.APPLICATION_JSON)
+      .addHeader('Accept', 'application/json')
+      .bodyString('{"name": "harry","data": 1234.0 }', ContentType.APPLICATION_JSON)
       .execute().returnContent().asString() == '{"responsetest":true,"name":"harry","data":1234.0}'
   }
 

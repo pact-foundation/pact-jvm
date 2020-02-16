@@ -46,7 +46,7 @@ fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: Clos
   return when (source) {
     is BrokerUrlSource -> {
       val brokerClient = PactBrokerClient(source.pactBrokerUrl, options)
-      val pactResponse = brokerClient.fetchPact(source.url)
+      val pactResponse = brokerClient.fetchPact(source.url, source.encodePath)
       pactResponse.pactFile to source.copy(attributes = pactResponse.links, options = options)
     }
     else -> when (val jsonResource = fetchJsonResource(http, source)) {
@@ -62,10 +62,10 @@ fun fetchJsonResource(http: CloseableHttpClient, source: UrlPactSource):
   return Result.of {
     when (url.protocol) {
       "file" -> {
-        JsonParser().parse(URL(source.url).readText()) to source
+        JsonParser.parseString(URL(source.url).readText()) to source
       }
       else -> {
-        val httpGet = HttpGet(HttpClientUtils.buildUrl("", source.url, true))
+        val httpGet = HttpGet(HttpClientUtils.buildUrl("", source.url, source.encodePath))
         httpGet.addHeader("Content-Type", "application/json")
         httpGet.addHeader("Accept", "application/hal+json, application/json")
 

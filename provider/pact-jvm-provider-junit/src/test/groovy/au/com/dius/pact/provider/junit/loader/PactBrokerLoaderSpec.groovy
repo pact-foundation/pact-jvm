@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.junit.loader
 
 import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.pactbroker.IHalClient
 import au.com.dius.pact.core.pactbroker.InvalidHalResponse
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
@@ -30,16 +31,17 @@ class PactBrokerLoaderSpec extends Specification {
     protocol = 'http'
     tags = ['latest']
     consumers = []
-    brokerClient = Mock(PactBrokerClient, constructorArgs: ['']) {
+    brokerClient = Mock(PactBrokerClient) {
       newHalClient() >> Stub(IHalClient)
     }
     mockPact = Mock(Pact)
 
     pactBrokerLoader = { boolean failIfNoPactsFound = true ->
-      def loader = new PactBrokerLoader(host, port, protocol, tags, consumers) {
+      PactBrokerClient client = brokerClient
+      new PactBrokerLoader(host, port, protocol, tags, consumers, failIfNoPactsFound, null, null, null) {
         @Override
         PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
-          brokerClient
+          client
         }
 
         @Override
@@ -47,8 +49,6 @@ class PactBrokerLoaderSpec extends Specification {
           mockPact
         }
       }
-      loader.failIfNoPactsFound = failIfNoPactsFound
-      loader
     }
   }
 
@@ -354,6 +354,23 @@ class PactBrokerLoaderSpec extends Specification {
     ]
     0 * _
     result.size() == 3
+  }
+
+  def 'use the overridden pact URL'() {
+    given:
+    consumers = ['a', 'b', 'c']
+    tags = ['demo']
+    PactBrokerLoader loader = Spy(pactBrokerLoader())
+    loader.overridePactUrl('http://overridden.com', 'overridden')
+    def consumer = new ConsumerInfo('overridden', null, true, [], null, new UrlSource('http://overridden.com'))
+
+    when:
+    def result = loader.load('test')
+
+    then:
+    1 * loader.loadPact(consumer, _) >> Stub(Pact)
+    0 * brokerClient._
+    result.size() == 1
   }
 
   def 'does not fail if the port is not provided'() {

@@ -8,6 +8,9 @@
     "messages": [
         {
             "description": "a test message",
+            "metaData": {
+                "contentType": "application/json"
+            },
             "contents": {
                 "testParam1": "value1",
                 "testParam2": "value2"

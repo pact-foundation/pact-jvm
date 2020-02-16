@@ -7,9 +7,10 @@ import au.com.dius.pact.consumer.dsl.PactDslJsonArray
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider
 import au.com.dius.pact.core.model.RequestResponsePact
 import groovy.json.JsonOutput
-import groovyx.net.http.ContentType
-import groovyx.net.http.HTTPBuilder
+import groovyx.net.http.FromServer
+import groovyx.net.http.HttpBuilder
 import org.apache.http.client.fluent.Request
+import org.apache.http.entity.ContentType
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -61,17 +62,27 @@ class MultiTest {
   @Test
   @PactTestFor(pactMethod = 'createFragment1')
   void runTest1(MockServer mockServer) {
-    def http = new HTTPBuilder(mockServer.url)
+    def http = HttpBuilder.configure { request.uri = mockServer.url }
 
-    http.post(path: '/some-service/users', body: user(), requestContentType: ContentType.JSON) { response ->
-      assert response.status == 201
-      assert response.headers['location']?.toString()?.contains(SOME_SERVICE_USER)
+    http.post {
+      request.uri.path = '/some-service/users'
+      request.body = user()
+      request.contentType = 'application/json'
+
+      response.success { FromServer fs, Object body ->
+        assert fs.statusCode == 201
+        assert fs.headers.find { it.key == 'Location' }?.value?.contains(SOME_SERVICE_USER)
+      }
     }
 
-    http.get(path: SOME_SERVICE_USER + EXPECTED_USER_ID,
-      headers: ['Content-Type': ContentType.JSON.toString()]) { response ->
-      assert response.status == 200
+    http.get {
+      request.uri.path = SOME_SERVICE_USER + EXPECTED_USER_ID
+      request.contentType = 'application/json'
+      response.success { FromServer fs, Object body ->
+        assert fs.statusCode == 200
+      }
     }
+
   }
 
   @Pact(provider= 'multitest_provider', consumer= 'test_consumer')
@@ -81,10 +92,10 @@ class MultiTest {
       .uponReceiving('A request with double precision number')
         .path('/numbertest')
         .method('PUT')
-        .body('{"name": "harry","data": 1234.0 }', ContentType.JSON.toString())
+        .body('{"name": "harry","data": 1234.0 }', 'application/json')
       .willRespondWith()
         .status(200)
-        .body('{"responsetest": true, "name": "harry","data": 1234.0 }', ContentType.JSON.toString())
+        .body('{"responsetest": true, "name": "harry","data": 1234.0 }', 'application/json')
       .toPact()
   }
 
@@ -92,8 +103,8 @@ class MultiTest {
   @PactTestFor(pactMethod = 'createFragment2')
   void runTest2(MockServer mockServer) {
     assert Request.Put(mockServer.url + '/numbertest')
-      .addHeader('Accept', ContentType.JSON.toString())
-      .bodyString('{"name": "harry","data": 1234.0 }', org.apache.http.entity.ContentType.APPLICATION_JSON)
+      .addHeader('Accept', 'application/json')
+      .bodyString('{"name": "harry","data": 1234.0 }', ContentType.APPLICATION_JSON)
       .execute().returnContent().asString() == '{"responsetest":true,"name":"harry","data":1234.0}'
   }
 

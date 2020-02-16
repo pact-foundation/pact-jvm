@@ -3,7 +3,9 @@ package au.com.dius.pact.consumer
 import au.com.dius.pact.consumer.dsl.Matchers
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.core.model.messaging.Message
+import au.com.dius.pact.core.model.ProviderState
 import groovy.json.JsonSlurper
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -93,4 +95,56 @@ class MessagePactBuilderSpec extends Specification {
     contentTypeAttr << ['contentType', 'contenttype', 'Content-Type', 'content-type']
   }
 
+  @Issue('#1006')
+  def 'handle non-string message metadata values'() {
+    given:
+    def body = new PactDslJsonBody()
+    Map<String, Object> metadata = [
+      'contentType': 'application/json',
+      'otherValue': 10L
+    ]
+
+    when:
+    def pact = MessagePactBuilder
+      .consumer('MessagePactBuilderSpec')
+      .given('srm.countries.get_message')
+      .expectsToReceive('srm.countries.get')
+      .withMetadata(metadata)
+      .withContent(body).toPact()
+    Message message = pact.interactions.first()
+    def messageMetadata = message.metaData
+
+    then:
+    messageMetadata == [contentType: 'application/json', otherValue: 10L]
+  }
+
+  def 'provider state can accept key/value pairs'() {
+    given:
+    def description = 'some state description'
+    def params = ['stateKey': 'stateValue']
+    def expectedProviderState = new ProviderState(description, params)
+
+    when:
+    def pact = MessagePactBuilder
+      .consumer('MessagePactBuilderSpec')
+      .given(description, params)
+
+    then:
+    pact.providerStates.last() == expectedProviderState
+  }
+
+  def 'provider state can accept ProviderState object'() {
+    given:
+    def description = 'some state description'
+    def params = ['stateKey': 'stateValue']
+    def expectedProviderState = new ProviderState(description, params)
+
+    when:
+    def pact = MessagePactBuilder
+            .consumer('MessagePactBuilderSpec')
+            .given(expectedProviderState)
+
+    then:
+    pact.providerStates.last() == expectedProviderState
+  }
 }

@@ -9,6 +9,9 @@ dependencies {
   
   testCompile 'org.mockito:mockito-core:2.28.2'
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testCompile('org.spockframework:spock-core:2.0-M2-groovy-2.5') {
+    exclude group: 'org.codehaus.groovy'
+  }
 }
 
 // There is a Groovy version mismatch between GroovyDoc, Gradle and the project  

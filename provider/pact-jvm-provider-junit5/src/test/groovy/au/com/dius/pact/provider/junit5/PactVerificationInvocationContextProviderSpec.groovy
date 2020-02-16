@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.junit5
 
 import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.provider.junit.Consumer
 import au.com.dius.pact.provider.junit.Provider
 import au.com.dius.pact.provider.junit.State
 import au.com.dius.pact.provider.junit.loader.PactFilter
@@ -11,6 +12,7 @@ import au.com.dius.pact.provider.junit.loader.PactSource
 import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestTarget
 import org.junit.jupiter.api.extension.ExtensionContext
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -28,6 +30,14 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
   @PactFilter('state 2')
   static class ChildClass extends TestClassWithAnnotation {
 
+  }
+
+  @Provider('myAwesomeService')
+  @Consumer('doesNotExist')
+  @PactFolder('pacts')
+  static class TestClassWithNoPacts {
+    @TestTarget
+    Target target
   }
 
   static class InvalidStateChangeTestClass {
@@ -146,6 +156,18 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
 
     then:
     extensions.count() == 1
+  }
+
+  @Issue('#1007')
+  def 'provideTestTemplateInvocationContexts throws an exception if there are no pacts to verify'() {
+    when:
+    provider.provideTestTemplateInvocationContexts(['getTestClass': {
+      Optional.of(TestClassWithNoPacts)
+    } ] as ExtensionContext)
+
+    then:
+    def exp = thrown(UnsupportedOperationException)
+    exp.message == 'No Pact files where found to verify'
   }
 
   @Unroll

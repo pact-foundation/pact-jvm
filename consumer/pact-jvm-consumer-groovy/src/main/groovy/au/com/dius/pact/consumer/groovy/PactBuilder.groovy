@@ -4,9 +4,10 @@ import au.com.dius.pact.consumer.Headers
 import au.com.dius.pact.consumer.MockServer
 import au.com.dius.pact.consumer.PactTestExecutionContext
 import au.com.dius.pact.consumer.PactVerificationResult
+import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.OptionalBody
-import au.com.dius.pact.core.model.PactReader
+import au.com.dius.pact.core.model.PactReaderKt
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
@@ -20,7 +21,6 @@ import au.com.dius.pact.core.model.matchingrules.Category
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
-import au.com.dius.pact.consumer.model.MockProviderConfig
 import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
 import org.apache.http.entity.ContentType
@@ -214,7 +214,7 @@ class PactBuilder extends BaseBuilder {
     def request = [matchers: new MatchingRulesImpl(), generators: new Generators()] + requestData
     setupBody(requestData, request)
     if (requestData.query instanceof String) {
-      request.query = PactReader.queryStringToMap(requestData.query)
+      request.query = PactReaderKt.queryStringToMap(requestData.query)
     } else {
       request.query = requestData.query?.collectEntries { k, v ->
         if (v instanceof Collection) {
