@@ -151,6 +151,19 @@ class PactRunnerSpec extends Specification {
     e.causes*.message == ['Did not find any pact files for provider Bob']
   }
 
+  def 'PactRunner only initializes once if run() is called multiple times'() {
+    when:
+    def runner = new PactRunner(TestClass)
+    runner.run(new RunNotifier())
+    def children1 = runner.children.clone()
+
+    runner.run(new RunNotifier())
+    def children2 = runner.children.clone()
+
+    then:
+    children1 == children2
+  }
+
   def 'PactRunner does not throw an exception if there are no pacts to verify and @IgnoreNoPactsToVerify'() {
     when:
     new PactRunner(NoPactsIgnoredTestClass)
