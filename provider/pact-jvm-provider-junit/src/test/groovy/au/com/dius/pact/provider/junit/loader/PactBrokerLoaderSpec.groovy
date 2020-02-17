@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.junit.loader
 
 import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.pactbroker.IHalClient
 import au.com.dius.pact.core.pactbroker.InvalidHalResponse
@@ -136,6 +137,26 @@ class PactBrokerLoaderSpec extends Specification {
     then:
     result == []
     1 * brokerClient.fetchConsumers('test') >> []
+  }
+
+  @RestoreSystemProperties
+  void 'Uses fallback PactBroker System Properties for PactSource'() {
+    given:
+    host = 'my.pactbroker.host'
+    port = '4711'
+    System.setProperty('pactbroker.host', host)
+    System.setProperty('pactbroker.port', port)
+
+    when:
+    def pactSource = new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)).pactSource
+
+    then:
+    assert pactSource instanceof PactBrokerSource
+
+    def pactBrokerSource = (PactBrokerSource) pactSource
+    assert pactBrokerSource.scheme == 'http'
+    assert pactBrokerSource.host == host
+    assert pactBrokerSource.port == port
   }
 
   @RestoreSystemProperties
