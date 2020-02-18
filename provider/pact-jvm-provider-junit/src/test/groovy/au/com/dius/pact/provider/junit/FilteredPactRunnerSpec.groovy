@@ -10,6 +10,7 @@ import au.com.dius.pact.provider.junit.loader.PactFilter
 import au.com.dius.pact.provider.junit.loader.PactFolder
 import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestTarget
+import org.junit.runner.notification.RunNotifier
 import org.junit.runners.model.InitializationError
 import spock.lang.Specification
 
@@ -189,7 +190,7 @@ class FilteredPactRunnerSpec extends Specification {
   @SuppressWarnings('UnusedObject')
   def 'Throws an initialisation error if all pacts are filtered out'() {
     when:
-    new PactRunner(TestFilterOutAllPactsClass)
+    new PactRunner(TestFilterOutAllPactsClass).run(new RunNotifier())
 
     then:
     thrown(InitializationError)
