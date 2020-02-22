@@ -2,8 +2,10 @@ package au.com.dius.pact.provider.junit5
 
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.provider.junit.Consumer
+import au.com.dius.pact.provider.junit.IgnoreNoPactsToVerify
 import au.com.dius.pact.provider.junit.Provider
 import au.com.dius.pact.provider.junit.State
+import au.com.dius.pact.provider.junit.loader.NoPactsFoundException
 import au.com.dius.pact.provider.junit.loader.PactFilter
 import au.com.dius.pact.provider.junit.loader.PactFolder
 import au.com.dius.pact.provider.junit.loader.PactFolderLoader
@@ -40,13 +42,18 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
     Target target
   }
 
+  @Provider('myAwesomeService')
+  @Consumer('doesNotExist')
+  @PactFolder('pacts')
+  @IgnoreNoPactsToVerify
+  static class TestClassWithNoPactsWithIgnore {
+    @TestTarget
+    Target target
+  }
+
   static class InvalidStateChangeTestClass {
-
     @State('one')
-    protected void incorrectStateChangeParameters(int one, String two, Map three) {
-
-    }
-
+    protected void incorrectStateChangeParameters(int one, String two, Map three) { }
   }
 
   static class InvalidStateChangeTestClass2 extends InvalidStateChangeTestClass {
@@ -166,8 +173,20 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
     } ] as ExtensionContext)
 
     then:
-    def exp = thrown(UnsupportedOperationException)
+    def exp = thrown(NoPactsFoundException)
     exp.message == 'No Pact files where found to verify'
+  }
+
+  @Issue('#768')
+  def 'returns a dummy test if there are no pacts to verify and IgnoreNoPactsToVerify is present'() {
+    when:
+    def result = provider.provideTestTemplateInvocationContexts(['getTestClass': {
+      Optional.of(TestClassWithNoPactsWithIgnore)
+    } ] as ExtensionContext).iterator().toList()
+
+    then:
+    result.size() == 1
+    result.first() instanceof DummyTestTemplate
   }
 
   @Unroll

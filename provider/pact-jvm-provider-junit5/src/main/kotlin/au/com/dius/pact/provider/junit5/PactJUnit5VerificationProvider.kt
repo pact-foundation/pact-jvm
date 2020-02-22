@@ -16,6 +16,7 @@ import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.junit.AllowOverridePactUrl
 import au.com.dius.pact.provider.junit.Consumer
+import au.com.dius.pact.provider.junit.IgnoreNoPactsToVerify
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.checkForOverriddenPactUrl
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.filterPactsByAnnotations
@@ -24,6 +25,7 @@ import au.com.dius.pact.provider.junit.Provider
 import au.com.dius.pact.provider.junit.State
 import au.com.dius.pact.provider.junit.StateChangeAction
 import au.com.dius.pact.provider.junit.VerificationReports
+import au.com.dius.pact.provider.junit.loader.NoPactsFoundException
 import au.com.dius.pact.provider.junit.loader.PactLoader
 import au.com.dius.pact.provider.junit.loader.PactSource
 import au.com.dius.pact.provider.reporters.ReporterManager
@@ -357,9 +359,19 @@ class PactVerificationStateChangeExtension(
  * a test template method on a test class annotated with a @Provider annotation.
  */
 open class PactVerificationInvocationContextProvider : TestTemplateInvocationContextProvider {
+
   override fun provideTestTemplateInvocationContexts(context: ExtensionContext): Stream<TestTemplateInvocationContext> {
     logger.debug { "provideTestTemplateInvocationContexts called" }
+    val tests = resolvePactSources(context)
+    return when {
+      tests.isNotEmpty() -> tests.stream() as Stream<TestTemplateInvocationContext>
+      AnnotationSupport.isAnnotated(context.requiredTestClass, IgnoreNoPactsToVerify::class.java) ->
+        listOf(DummyTestTemplate).stream() as Stream<TestTemplateInvocationContext>
+      else -> throw NoPactsFoundException("No Pact files where found to verify")
+    }
+  }
 
+  private fun resolvePactSources(context: ExtensionContext): List<PactVerificationExtension> {
     val providerInfo = AnnotationSupport.findAnnotation(context.requiredTestClass, Provider::class.java)
     if (!providerInfo.isPresent) {
       throw UnsupportedOperationException("Provider name should be specified by using @${Provider::class.java.name} annotation")
@@ -382,15 +394,9 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
       filterPactsByAnnotations(pacts, context.requiredTestClass).map { pact -> pact to it.pactSource }
     }.filter { p -> consumerName == null || p.first.consumer.name == consumerName }
 
-    val tests = pactSources.flatMap { pact ->
+    return pactSources.flatMap { pact ->
       pact.first.interactions.map { PactVerificationExtension(pact.first, pact.second, it, serviceName, consumerName) }
     }
-
-    if (tests.isEmpty()) {
-      throw UnsupportedOperationException("No Pact files where found to verify")
-    }
-
-    return tests.stream() as Stream<TestTemplateInvocationContext>
   }
 
   protected open fun getValueResolver(context: ExtensionContext): ValueResolver? = null
