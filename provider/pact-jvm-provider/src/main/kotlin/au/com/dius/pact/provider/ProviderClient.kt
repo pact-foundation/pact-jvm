@@ -294,7 +294,7 @@ open class ProviderClient(
     }
 
     if (!method.containsHeader(CONTENT_TYPE) && request.body.isPresent()) {
-      method.addHeader(CONTENT_TYPE, "application/json")
+      method.addHeader(CONTENT_TYPE, "text/plain; charset=ISO-8859-1")
     }
   }
 
@@ -374,7 +374,7 @@ open class ProviderClient(
       val contentType = if (entity.contentType != null) {
         ContentType.parse(entity.contentType.value)
       } else {
-        ContentType.APPLICATION_JSON
+        ContentType.TEXT_PLAIN
       }
       response["contentType"] = contentType
       response["data"] = EntityUtils.toString(entity, contentType.charset?.name() ?: UTF8)

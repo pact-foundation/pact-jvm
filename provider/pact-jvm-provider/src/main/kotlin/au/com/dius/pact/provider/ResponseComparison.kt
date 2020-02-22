@@ -88,7 +88,7 @@ class ResponseComparison(
       var actualBodyString = ""
       if (actual.isNotEmpty()) {
         actualBodyString = if (mimeType.matches(Regex("application/.*json"))) {
-          Json.gsonPretty.toJson(JsonParser().parse(actual))
+          Json.gsonPretty.toJson(JsonParser.parseString(actual))
         } else {
           actual
         }
@@ -97,7 +97,7 @@ class ResponseComparison(
       var expectedBodyString = ""
       if (response.isNotEmpty()) {
         expectedBodyString = if (jsonBody) {
-          Json.gsonPretty.toJson(JsonParser().parse(response))
+          Json.gsonPretty.toJson(JsonParser.parseString(response))
         } else {
           response
         }
