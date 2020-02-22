@@ -30,9 +30,13 @@ data class ContentType(val contentType: String?) {
   fun asMimeType() = parsedContentType?.mimeType ?: contentType
 
   companion object : KLogging() {
+    @JvmStatic
     val UNKNOWN = ContentType("")
+    @JvmStatic
     val TEXT_PLAIN = ContentType("text/plain")
+    @JvmStatic
     val HTML = ContentType("text/html")
+    @JvmStatic
     val JSON = ContentType("application/json")
   }
 }
