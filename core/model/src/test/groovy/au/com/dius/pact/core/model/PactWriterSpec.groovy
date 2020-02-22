@@ -212,4 +212,36 @@ class PactWriterSpec extends Specification {
     cleanup:
     pactFile.delete()
   }
+
+  @Issue('#1018')
+  def 'encode the query parameters correctly with V2 pact files'() {
+    given:
+    def request = new Request('GET', '/', [
+      'include[]': ['term', 'total_scores', 'license', 'is_public', 'needs_grading_count', 'permissions',
+                    'current_grading_period_scores', 'course_image', 'favorites']
+    ])
+    def response = new Response()
+    def interaction = new RequestResponseInteraction('test interaction with query parameters',
+      [], request, response)
+    def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),
+      new Consumer('PactWriterSpecConsumer'), [interaction])
+    def sw = new StringWriter()
+    def sw2 = new StringWriter()
+
+    when:
+    DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw), PactSpecVersion.V2)
+    DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw2), PactSpecVersion.V3)
+    def json = Json.INSTANCE.toMap(JsonParser.parseString(sw.toString()))
+    def interactionJson = json.interactions.first()
+    def json2 = Json.INSTANCE.toMap(JsonParser.parseString(sw2.toString()))
+    def interactionJson2 = json2.interactions.first()
+
+    then:
+    interactionJson.request.query == 'include[]=term&include[]=total_scores&include[]=license&include[]=is_public' +
+      '&include[]=needs_grading_count&include[]=permissions&include[]=current_grading_period_scores&include[]' +
+      '=course_image&include[]=favorites'
+    interactionJson2.request.query == [
+      'include[]': ['term', 'total_scores', 'license', 'is_public', 'needs_grading_count', 'permissions',
+                    'current_grading_period_scores', 'course_image', 'favorites']]
+  }
 }

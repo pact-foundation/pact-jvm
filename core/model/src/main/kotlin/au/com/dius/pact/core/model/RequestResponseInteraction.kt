@@ -113,7 +113,7 @@ open class RequestResponseInteraction @JvmOverloads constructor(
 
     private fun mapToQueryStr(query: Map<String, List<String>>): String {
       return query.entries.joinToString("&") { (k, v) ->
-        v.joinToString { "$k=${URLEncoder.encode(it, "UTF-8")}" }
+        v.joinToString("&") { "$k=${URLEncoder.encode(it, "UTF-8")}" }
       }
     }
 

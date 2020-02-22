@@ -39,6 +39,7 @@ class PactDslRequestWithPathSpec extends Specification {
     subject2.requestBody == OptionalBody.body('{"test":true}'.bytes)
   }
 
+  @Issue('#716')
   def 'set the content type header correctly (issue #716)'() {
     given:
     def builder = ConsumerPactBuilder.consumer('spec').hasPactWith('provider')
@@ -105,6 +106,31 @@ class PactDslRequestWithPathSpec extends Specification {
     response.matchingRules.rulesForCategory('body').matchingRules['$'].rules*.class.simpleName == [
       'TypeMatcher']
 
+  }
+
+  @Issue('#1018')
+  def 'Request query gets mangled/encoded '() {
+    given:
+    def builder = ConsumerPactBuilder.consumer('spec').hasPactWith('provider')
+
+    when:
+    def pact = builder
+      .uponReceiving('a request with query parameters')
+      .path('/')
+      .query('include[]=term&include[]=total_scores&include[]=license&include[]=is_public&include[]=needs_' +
+        'grading_count&include[]=permissions&include[]=current_grading_period_scores&include[]=course_image&' +
+        'include[]=favorites')
+      .willRespondWith()
+      .status(200)
+      .toPact()
+
+    def request = pact.interactions[0].request
+
+    then:
+    request.query == [
+      'include[]': ['term', 'total_scores', 'license', 'is_public', 'needs_grading_count', 'permissions',
+                    'current_grading_period_scores', 'course_image', 'favorites']
+    ]
   }
 
 }
