@@ -121,7 +121,7 @@ class PactBuilder extends BaseBuilder {
       Map headers = setupHeaders(requestData[i].headers ?: [:], requestMatchers, requestGenerators)
       Map query = setupQueryParameters(requestData[i].query ?: [:], requestMatchers, requestGenerators)
       Map responseHeaders = setupHeaders(responseData[i].headers ?: [:], responseMatchers, responseGenerators)
-      String path = setupPath(requestData[i].path ?: '/', requestMatchers, responseGenerators)
+      String path = setupPath(requestData[i].path ?: '/', requestMatchers, requestGenerators)
       interactions << new RequestResponseInteraction(
         requestDescription,
         providerStates,

@@ -23,7 +23,9 @@ class ProviderStateInjectedPactTest {
     service {
       given('a provider state with injectable values', [valueA: 'A', valueB: 100])
       uponReceiving('a request')
-      withAttributes(method: 'POST', path: '/values')
+      withAttributes(method: 'POST', path: fromProviderState(
+        '/shoppingCart/v2.0/shoppingCart/${shoppingcartId}',
+        '/shoppingCart/v2.0/shoppingCart/ShoppingCart_05540051-1155-4557-8080-008a802200aa'))
       withBody {
         userName 'Test'
         userClass 'Shoddy'
@@ -42,7 +44,7 @@ class ProviderStateInjectedPactTest {
         request.contentType = 'application/json'
       }
       def resp = client.post(FromServer) {
-        request.uri.path = '/values'
+        request.uri.path = '/shoppingCart/v2.0/shoppingCart/ShoppingCart_05540051-1155-4557-8080-008a802200aa'
         request.body = [userName: 'Test', userClass: 'Shoddy']
         response.parser(ContentTypes.ANY) { config, r ->
           r
@@ -57,7 +59,14 @@ class ProviderStateInjectedPactTest {
     def pactFile = new File("${PactConsumerConfig.pactDirectory}/V3Consumer-ProviderStateService.json")
     def json = new JsonSlurper().parse(pactFile)
     assert json.metadata.pactSpecification.version == '3.0.0'
-    def generators = json.interactions.first().response.generators
+    def interaction = json.interactions.first()
+    assert interaction.request.path ==
+      '/shoppingCart/v2.0/shoppingCart/ShoppingCart_05540051-1155-4557-8080-008a802200aa'
+    def generators = interaction.request.generators
+    assert generators == [
+      path: [type: 'ProviderState', expression: '/shoppingCart/v2.0/shoppingCart/${shoppingcartId}']
+    ]
+    generators = interaction.response.generators
     assert generators == [
       body: ['$.userId': [type: 'ProviderState', expression: 'userId']],
       header: [LOCATION: [type: 'ProviderState', expression: 'http://server/users/${userId}']]
