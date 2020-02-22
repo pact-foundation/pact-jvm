@@ -105,3 +105,9 @@ supported phase.
 | Interaction | any | The Interaction model for the test |
 | HttpRequest | @TestTemplate | The request that is going to be executed (only for HTTP and HTTPS targets) |
 | ProviderVerifier | @TestTemplate | The verifier instance that is used to verify the interaction |
+
+## Allowing the test to pass when no pacts are found to verify (version 4.0.7+)
+
+By default, the test will fail with an exception if no pacts were found to verify. This can be overridden by adding the 
+`@IgnoreNoPactsToVerify` annotation to the test class. For this to work, you test class will need to be able to receive 
+null values for any of the injected parameters.
