@@ -356,7 +356,7 @@ class PactVerificationStateChangeExtension(
  * Main TestTemplateInvocationContextProvider for JUnit 5 Pact verification tests. This class needs to be applied to
  * a test template method on a test class annotated with a @Provider annotation.
  */
-class PactVerificationInvocationContextProvider : TestTemplateInvocationContextProvider {
+open class PactVerificationInvocationContextProvider : TestTemplateInvocationContextProvider {
   override fun provideTestTemplateInvocationContexts(context: ExtensionContext): Stream<TestTemplateInvocationContext> {
     logger.debug { "provideTestTemplateInvocationContexts called" }
 
@@ -374,7 +374,12 @@ class PactVerificationInvocationContextProvider : TestTemplateInvocationContextP
     logger.debug { "Verifying pacts for provider '$serviceName' and consumer '$consumerName'" }
 
     val pactSources = findPactSources(context).flatMap {
-      filterPactsByAnnotations(it.load(serviceName), context.requiredTestClass).map { pact -> pact to it.pactSource }
+      val valueResolver = getValueResolver(context)
+      if (valueResolver != null) {
+        it.setValueResolver(valueResolver)
+      }
+      val pacts = it.load(serviceName)
+      filterPactsByAnnotations(pacts, context.requiredTestClass).map { pact -> pact to it.pactSource }
     }.filter { p -> consumerName == null || p.first.consumer.name == consumerName }
 
     val tests = pactSources.flatMap { pact ->
@@ -387,6 +392,8 @@ class PactVerificationInvocationContextProvider : TestTemplateInvocationContextP
 
     return tests.stream() as Stream<TestTemplateInvocationContext>
   }
+
+  protected open fun getValueResolver(context: ExtensionContext): ValueResolver? = null
 
   private fun validateStateChangeMethods(testClass: Class<*>) {
     val errors = mutableListOf<String>()
