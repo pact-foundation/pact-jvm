@@ -5,6 +5,9 @@ Gradle plugin for verifying pacts against a provider.
 
 The Gradle plugin creates a task `pactVerify` to your build which will verify all configured pacts against your provider.
 
+__*Important Note: Any properties that need to be set when using the Gradle plugin need to be provided with `-P` and
+not `-D` as with the other Pact-JVM modules!*__ 
+
 ## To Use It
 
 ### For Gradle versions prior to 2.1
