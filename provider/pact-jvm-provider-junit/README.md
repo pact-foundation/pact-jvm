@@ -324,23 +324,22 @@ public class PactJUnitTest {
 }
 ```
 
-#### Filtering by Provider State
+#### Interaction Filtering
 
 You can filter the interactions that are executed by adding a `@PactFilter` annotation to your test class. The pact 
-filter annotation will then only verify interactions that have a matching provider state. You can provide multiple 
-states to match with.
+filter annotation will then only verify interactions that have a matching value, by default provider state.
+You can provide multiple values to match with.
+
+The filter criteria is defined by the filter property. The filter must implement the
+`au.com.dius.pact.provider.junit.filter.InteractionFilter` interface. Also check the `InteractionFilter` interface
+for default filter implementations.
 
 For example: 
 
 ```java
 @RunWith(PactRunner.class)
-@Provider("Activity Service")
-@PactBroker(host = "localhost", port = "80")
-@PactFilter('Activity 100 exists in the database')
+@PactFilter("Activity 100 exists in the database")
 public class PactJUnitTest {
-
-  @TestTarget
-  public final Target target = new HttpTarget(5050);
 
 }
 ```
@@ -349,7 +348,7 @@ You can also use regular expressions with the filter. For example:
 
 ```java
 @RunWith(PactRunner.class)
-@PactFilter('Activity \\d+ exists in the database')
+@PactFilter(values = {"^\\/somepath.*"}, filter = InteractionFilter.ByRequestPath.class)
 public class PactJUnitTest {
 
 }
