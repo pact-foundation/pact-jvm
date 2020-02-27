@@ -38,6 +38,14 @@ class GradleProviderInfo extends ProviderInfo {
     fromPactBroker
   }
 
+  List hasPactsFromPactBrokerWithTag(Map options = [:], String pactBrokerUrl, String tag, Closure closure) {
+    def fromPactBroker = super.hasPactsFromPactBrokerWithTag(options, pactBrokerUrl, tag)
+    fromPactBroker.each {
+      ConfigureUtil.configure(closure, it)
+    }
+    fromPactBroker
+  }
+
   def url(String path) {
     new URL(path)
   }
