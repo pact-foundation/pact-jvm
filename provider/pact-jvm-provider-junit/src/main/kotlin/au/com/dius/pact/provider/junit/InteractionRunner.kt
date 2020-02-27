@@ -26,7 +26,6 @@ import org.junit.runner.Description
 import org.junit.runner.Runner
 import org.junit.runner.notification.Failure
 import org.junit.runner.notification.RunNotifier
-import org.junit.runners.model.FrameworkField
 import org.junit.runners.model.FrameworkMethod
 import org.junit.runners.model.InitializationError
 import org.junit.runners.model.Statement
@@ -117,7 +116,7 @@ open class InteractionRunner<I>(
 
   protected fun hasOneConstructor() = testClass.javaClass.constructors.size == 1
 
-  protected fun validateTestTarget(errors: MutableList<Throwable>): FrameworkField {
+  protected fun validateTestTarget(errors: MutableList<Throwable>) {
     val annotatedFields = testClass.getAnnotatedFields(TestTarget::class.java)
     if (annotatedFields.size != 1) {
       errors.add(Exception("Test class should have exactly one field annotated with ${TestTarget::class.java.name}"))
@@ -125,7 +124,6 @@ open class InteractionRunner<I>(
       errors.add(Exception("Field annotated with ${TestTarget::class.java.name} should implement " +
         "${Target::class.java.name} interface"))
     }
-    return annotatedFields[0]
   }
 
   protected fun validateRules(errors: List<Throwable>) {
