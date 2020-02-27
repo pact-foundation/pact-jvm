@@ -5,24 +5,24 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.junit.filter.InteractionFilter
 import au.com.dius.pact.provider.junit.loader.OverrideablePactLoader
 import au.com.dius.pact.provider.junit.loader.PactFilter
 import au.com.dius.pact.provider.junit.loader.PactLoader
 import mu.KLogging
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
-import java.util.function.Predicate
+import kotlin.reflect.full.createInstance
 
 object JUnitProviderTestSupport : KLogging() {
   fun <I> filterPactsByAnnotations(pacts: List<Pact<I>>, testClass: Class<*>): List<Pact<I>> where I : Interaction {
-    val pactFilterValues = testClass.getAnnotation(PactFilter::class.java)?.value
-    return if (pactFilterValues != null && pactFilterValues.any { it.isNotEmpty() }) {
-      pacts.map { pact ->
-        FilteredPact(pact, Predicate { interaction ->
-          pactFilterValues.any { value -> interaction.providerStates.any { it.matches(value) } }
-        })
-      }.filter { pact -> pact.interactions.isNotEmpty() }
-    } else pacts
+    val pactFilter = testClass.getAnnotation(PactFilter::class.java) ?: return pacts
+    if (pactFilter.value == null || pactFilter.value.all { it.isEmpty() }) return pacts
+
+    val interactionFilter = pactFilter.filter.createInstance() as InteractionFilter<I>
+    return pacts.map { pact ->
+      FilteredPact(pact, interactionFilter.buildPredicate(pactFilter.value))
+    }.filter { pact -> pact.interactions.isNotEmpty() }
   }
 
   @JvmStatic
