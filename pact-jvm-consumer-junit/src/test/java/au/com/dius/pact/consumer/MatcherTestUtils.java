@@ -1,7 +1,9 @@
 package au.com.dius.pact.consumer;
 
+import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.model.PactFragment;
 import au.com.dius.pact.model.RequestResponsePact;
+import au.com.dius.pact.core.model.generators.Generators;
 import au.com.dius.pact.model.matchingrules.MatchingRule;
 import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.model.matchingrules.MatchingRules;
@@ -41,6 +43,13 @@ public class MatcherTestUtils {
       MatchingRules matchingRules = pact.getInteractions().get(0).getResponse().getMatchingRules();
       Map<String, MatchingRuleGroup> matchers = matchingRules.rulesForCategory(category).getMatchingRules();
       assertEquals(asSet(matcherKeys), new TreeSet<>(matchers.keySet()));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void assertResponseGeneratorKeysEqualTo(RequestResponsePact pact, String category, String... matcherKeys) {
+        Generators generators = pact.getInteractions().get(0).getResponse().getGenerators();
+        Map<String, Object> categoryMap = (Map<String, Object>) generators.toMap(PactSpecVersion.V3).get(category);
+        assertEquals(asSet(matcherKeys), new TreeSet<>(categoryMap.keySet()));
     }
 
     public static void assertResponseKeysEqualTo(PactFragment fragment, String... keys) {

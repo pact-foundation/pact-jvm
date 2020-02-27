@@ -28,6 +28,9 @@ public class PactDslJsonArrayTest extends ConsumerPactTestMk2 {
             .stringValue("name", "Cat in the Hat")
             .timestamp()
             .date("dob", "MM/dd/yyyy")
+            .array("things")
+                .valueFromProviderState("thingName", "Thing 1")
+            .closeArray()
           .closeObject();
         RequestResponsePact pact = builder
           .uponReceiving("java test interaction with a DSL array body")
@@ -47,8 +50,18 @@ public class PactDslJsonArrayTest extends ConsumerPactTestMk2 {
             "$[2].v1",
             "$[3].id",
             "$[3].timestamp",
-            "$[3].dob"
+            "$[3].dob",
+            "$[3].things[0]"
         );
+
+        MatcherTestUtils.assertResponseGeneratorKeysEqualTo(pact, "body",
+            "$[2].id",
+            "$[2].timestamp",
+            "$[2].dob",
+            "$[3].id",
+            "$[3].timestamp",
+            "$[3].dob",
+            "$[3].things[0]");
 
         return pact;
     }
