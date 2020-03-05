@@ -84,7 +84,7 @@ fun pathIdentifier(chars: PushbackIterator<IndexedValue<Char>>, tokens: MutableL
     val ch = chars.next()
     when {
       ch.value == '*' -> tokens.add(PathToken.Star)
-      ch.value.isLetterOrDigit() || ch.value == '_' -> identifier(ch.value, chars, tokens, path)
+      ch.value.isLetterOrDigit() || EXP_ALLOWED_SPECIAL_CHARS.contains(ch.value) -> identifier(ch.value, chars, tokens, path)
       else -> throw InvalidPathExpression("Expected either a \"*\" or path identifier in path expression \"$path\"" +
         " at index ${ch.index}")
     }

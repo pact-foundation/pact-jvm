@@ -83,6 +83,21 @@ class PathExpressionsSpec extends Specification {
   }
 
   @Unroll
+  def 'Parse Path Exp With Punctuation in Identifiers - #expression'() {
+    expect:
+    PathExpressionsKt.parsePath(expression) == result
+
+    where:
+
+    expression                            | result
+    '$.container_records.example-ABC'     | [PathToken.Root.INSTANCE, new PathToken.Field('container_records'), new PathToken.Field('example-ABC')]
+    '$.container_records.example_ABC'     | [PathToken.Root.INSTANCE, new PathToken.Field('container_records'), new PathToken.Field('example_ABC')]
+    '$.container_records.example:ABC'     | [PathToken.Root.INSTANCE, new PathToken.Field('container_records'), new PathToken.Field('example:ABC')]
+    "\$.container_records['example:ABC']" | [PathToken.Root.INSTANCE, new PathToken.Field('container_records'), new PathToken.Field('example:ABC')]
+    "\$.container_records['example/ABC']" | [PathToken.Root.INSTANCE, new PathToken.Field('container_records'), new PathToken.Field('example/ABC')]
+  }
+
+  @Unroll
   def 'Parse Path Exp With Star Instead Of Identifiers - #expression'() {
     expect:
     PathExpressionsKt.parsePath(expression) == result
