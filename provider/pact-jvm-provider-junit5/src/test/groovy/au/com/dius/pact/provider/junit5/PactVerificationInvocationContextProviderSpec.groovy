@@ -174,7 +174,7 @@ class PactVerificationInvocationContextProviderSpec extends Specification {
 
     then:
     def exp = thrown(NoPactsFoundException)
-    exp.message == 'No Pact files where found to verify'
+    exp.message.startsWith('No Pact files were found to verify')
   }
 
   @Issue('#768')

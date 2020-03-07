@@ -55,6 +55,20 @@ open class PactBrokerLoader(
     pactBroker.valueResolver
   )
 
+  override fun description(): String {
+    val resolver = setupValueResolver()
+    val tags = pactBrokerTags?.flatMap { parseListExpression(it, resolver) }?.filter { it.isNotEmpty() }
+    val consumers = pactBrokerConsumers.flatMap { parseListExpression(it, resolver) }.filter { it.isNotEmpty() }
+    var source = getPactBrokerSource(resolver).description()
+    if (tags != null && tags.isNotEmpty()) {
+      source += " tags=$tags"
+    }
+    if (consumers.isNotEmpty()) {
+      source += " consumers=$consumers"
+    }
+    return source
+  }
+
   override fun overridePactUrl(pactUrl: String, consumer: String) {
     overriddenPactUrl = pactUrl
     overriddenConsumer = consumer
@@ -177,7 +191,7 @@ open class PactBrokerLoader(
 
   private fun getUrlForProvider(providerName: String, tag: String, pactBrokerClient: PactBrokerClient): String {
     return try {
-      pactBrokerClient.getUrlForProvider(providerName, tag)!!
+      pactBrokerClient.getUrlForProvider(providerName, tag) ?: "Unknown"
     } catch (e: Exception) {
       logger.debug(e) { "Failed to get provider URL from the pact broker" }
       "Unknown"

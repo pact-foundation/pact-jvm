@@ -30,4 +30,9 @@ public interface PactLoader {
    * @param valueResolver Value Resolver
    */
   default void setValueResolver(ValueResolver valueResolver) { }
+
+  /**
+   * Returns a description of this pact loader
+   */
+  default String description() { return this.getClass().getSimpleName(); };
 }

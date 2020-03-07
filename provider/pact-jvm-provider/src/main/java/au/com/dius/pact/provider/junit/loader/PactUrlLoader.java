@@ -30,6 +30,11 @@ public class PactUrlLoader implements PactLoader {
         this(pactUrl.urls());
     }
 
+  @Override
+  public String description() {
+    return "URL(" + Arrays.toString(urls) + ")";
+  }
+
   public List<Pact> load(final String providerName) {
       return Arrays.stream(urls)
         .map(url -> {

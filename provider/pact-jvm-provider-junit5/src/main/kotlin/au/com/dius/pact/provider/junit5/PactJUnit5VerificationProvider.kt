@@ -7,6 +7,7 @@ import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
+import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
@@ -364,28 +365,34 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
     logger.debug { "provideTestTemplateInvocationContexts called" }
     val tests = resolvePactSources(context)
     return when {
-      tests.isNotEmpty() -> tests.stream() as Stream<TestTemplateInvocationContext>
+      tests.first.isNotEmpty() -> tests.first.stream() as Stream<TestTemplateInvocationContext>
       AnnotationSupport.isAnnotated(context.requiredTestClass, IgnoreNoPactsToVerify::class.java) ->
         listOf(DummyTestTemplate).stream() as Stream<TestTemplateInvocationContext>
-      else -> throw NoPactsFoundException("No Pact files were found to verify")
+      else -> throw NoPactsFoundException("No Pact files were found to verify\n${tests.second}")
     }
   }
 
-  private fun resolvePactSources(context: ExtensionContext): List<PactVerificationExtension> {
+  private fun resolvePactSources(context: ExtensionContext): Pair<List<PactVerificationExtension>, String> {
+    var description = ""
     val providerInfo = AnnotationSupport.findAnnotation(context.requiredTestClass, Provider::class.java)
     if (!providerInfo.isPresent) {
       throw UnsupportedOperationException("Provider name should be specified by using @${Provider::class.java.name} annotation")
     }
     val serviceName = providerInfo.get().value
+    description += "Provider: $serviceName"
 
     val consumerInfo = AnnotationSupport.findAnnotation(context.requiredTestClass, Consumer::class.java)
     val consumerName = consumerInfo.orElse(null)?.value
+    if (consumerName.isNotEmpty()) {
+      description += "\nConsumer: $consumerName"
+    }
 
     validateStateChangeMethods(context.requiredTestClass)
 
     logger.debug { "Verifying pacts for provider '$serviceName' and consumer '$consumerName'" }
 
     val pactSources = findPactSources(context).flatMap {
+      description += "\nSource: ${it.description()}"
       val valueResolver = getValueResolver(context)
       if (valueResolver != null) {
         it.setValueResolver(valueResolver)
@@ -394,9 +401,9 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
       filterPactsByAnnotations(pacts, context.requiredTestClass).map { pact -> pact to it.pactSource }
     }.filter { p -> consumerName == null || p.first.consumer.name == consumerName }
 
-    return pactSources.flatMap { pact ->
+    return Pair(pactSources.flatMap { pact ->
       pact.first.interactions.map { PactVerificationExtension(pact.first, pact.second, it, serviceName, consumerName) }
-    }
+    }, description)
   }
 
   protected open fun getValueResolver(context: ExtensionContext): ValueResolver? = null
