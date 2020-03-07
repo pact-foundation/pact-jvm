@@ -42,7 +42,7 @@ import org.apache.commons.lang3.tuple.Pair as TuplePair
  * Developed with [org.junit.runners.BlockJUnit4ClassRunner] in mind
  */
 open class InteractionRunner<I>(
-  private val testClass: TestClass,
+  protected val testClass: TestClass,
   private val pact: Pact<I>,
   private val pactSource: PactSource
 ) : Runner() where I : Interaction {
@@ -109,12 +109,12 @@ open class InteractionRunner<I>(
       errors.add(Exception("Test class should have exactly one public constructor"))
     }
     if (!testClass.isANonStaticInnerClass && hasOneConstructor() &&
-      testClass.onlyConstructor.parameterTypes.isNotEmpty()) {
+      testClass.javaClass.kotlin.constructors.first().parameters.isNotEmpty()) {
       errors.add(Exception("Test class should have exactly one public zero-argument constructor"))
     }
   }
 
-  protected fun hasOneConstructor() = testClass.javaClass.constructors.size == 1
+  protected fun hasOneConstructor() = testClass.javaClass.kotlin.constructors.size == 1
 
   protected fun validateTestTarget(errors: MutableList<Throwable>) {
     val annotatedFields = testClass.getAnnotatedFields(TestTarget::class.java)
@@ -166,7 +166,7 @@ open class InteractionRunner<I>(
   }
 
   protected open fun createTest(): Any {
-    return testClass.onlyConstructor.newInstance()
+    return testClass.javaClass.newInstance()
   }
 
   protected fun interactionBlock(interaction: Interaction, source: PactSource, context: Map<String, Any>): Statement {

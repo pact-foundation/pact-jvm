@@ -70,7 +70,7 @@ open class SpringAfterRunner(
 }
 
 open class SpringInteractionRunner<I>(
-  private val testClass: TestClass,
+  testClass: TestClass,
   pact: Pact<I>,
   pactSource: PactSource?,
   private val testContextManager: TestContextManager

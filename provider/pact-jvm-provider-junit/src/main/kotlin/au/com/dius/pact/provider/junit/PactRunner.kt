@@ -49,18 +49,11 @@ import kotlin.reflect.full.findAnnotation
  * - [State] - before each interaction that require state change,
  * all methods annotated by [State] with appropriate state listed will be invoked
  */
-open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(clazz) where I : Interaction {
+open class PactRunner<I>(private val clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(clazz) where I : Interaction {
 
-  private val child = mutableListOf<InteractionRunner<I>>()
+  private val children = mutableListOf<InteractionRunner<I>>()
   private var valueResolver = SystemPropertyResolver()
-  private val clazz = clazz
   private var initialized = false
-
-  override fun run(notifier: RunNotifier?) {
-    initialize()
-
-    super.run(notifier)
-  }
 
   private fun initialize() {
     if (initialized) {
@@ -127,7 +120,7 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(c
 
   protected open fun setupInteractionRunners(testClass: TestClass, pacts: List<Pact<I>>, pactLoader: PactLoader) {
     for (pact in pacts) {
-      this.child.add(newInteractionRunner(testClass, pact, pactLoader.pactSource))
+      this.children.add(newInteractionRunner(testClass, pact, pactLoader.pactSource))
     }
   }
 
@@ -143,7 +136,10 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(c
     return filterPactsByAnnotations(pacts, testClass.javaClass)
   }
 
-  override fun getChildren() = child
+  override fun getChildren(): MutableList<InteractionRunner<I>> {
+    initialize()
+    return children
+  }
 
   override fun describeChild(child: InteractionRunner<I>) = child.description
 
