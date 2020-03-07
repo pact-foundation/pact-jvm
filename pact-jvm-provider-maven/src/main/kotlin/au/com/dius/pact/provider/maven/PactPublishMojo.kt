@@ -1,6 +1,7 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.provider.broker.PactBrokerClient
+import au.com.dius.pact.core.support.isNotEmpty
 import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
@@ -59,8 +60,13 @@ open class PactPublishMojo : PactBaseMojo() {
             if (pactFileIsExcluded(excludedList, pactFile)) {
               println("Not publishing '${pactFile.name}' as it matches an item in the excluded list")
             } else {
-              print("Publishing '${pactFile.name}' ... ")
-              val result = brokerClient!!.uploadPactFile(pactFile, projectVersion, tags).toString()
+              val tagsToPublish = calculateTags()
+              if (tagsToPublish.isNotEmpty()) {
+                print("Publishing '${pactFile.name}' with tags '${tagsToPublish.joinToString(", ")}' ... ")
+              } else {
+                print("Publishing '${pactFile.name}' ... ")
+              }
+              val result = brokerClient!!.uploadPactFile(pactFile, projectVersion, tagsToPublish).toString()
               println(result)
               if (!anyFailed && result.startsWith("FAILED!")) {
                 anyFailed = true
@@ -76,6 +82,15 @@ open class PactPublishMojo : PactBaseMojo() {
         }
       }
     }
+
+  private fun calculateTags(): List<String> {
+    val property = System.getProperty("pact.consumer.tags")
+    return if (property.isNotEmpty()) {
+      property.split(',').map { it.trim() }
+    } else {
+      tags
+    }
+  }
 
   private fun pactFileIsExcluded(exclusions: List<Regex>, pactFile: File) =
     exclusions.any { it.matches(pactFile.nameWithoutExtension) }
