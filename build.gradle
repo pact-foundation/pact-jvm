@@ -71,7 +71,7 @@ subprojects {
         mavenCentral()
         jcenter()
     }
-  
+
     compileTestGroovy {
       classpath = classpath.plus(files(compileTestKotlin.destinationDir))
       dependsOn compileTestKotlin

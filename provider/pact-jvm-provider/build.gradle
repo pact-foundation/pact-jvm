@@ -19,8 +19,8 @@ dependencies {
     testCompile(project(":consumer:pact-jvm-consumer-groovy")) {
         exclude group: 'org.codehaus.groovy'
     }
-    testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}:indy"
-    testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}:indy"
+    testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
+    testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
     testRuntime "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile 'io.dropwizard:dropwizard-testing:1.3.7'
     testCompile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"

@@ -31,8 +31,8 @@ dependencies {
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testCompile "io.github.http-builder-ng:http-builder-ng-apache:${project.httpBuilderVersion}"
   testRuntime project(path: project.path, configuration: 'testJars')
-  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}:indy"
-  testCompile "org.codehaus.groovy:groovy-datetime:${project.groovyVersion}:indy"
+  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testCompile "org.codehaus.groovy:groovy-datetime:${project.groovyVersion}"
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.2'
   testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {

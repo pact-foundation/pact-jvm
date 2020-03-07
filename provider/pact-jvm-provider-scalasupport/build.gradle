@@ -18,8 +18,8 @@ dependencies {
 
   testCompile "org.specs2:specs2-core_2.12:${project.specs2Version}",
     "org.specs2:specs2-junit_2.12:${project.specs2Version}"
-  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}:indy"
-  testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}:indy"
+  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'

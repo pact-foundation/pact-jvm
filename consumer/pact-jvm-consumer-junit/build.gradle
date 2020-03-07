@@ -18,9 +18,9 @@ dependencies {
   testCompile('com.jayway.restassured:rest-assured:2.9.0') {
     exclude group: 'org.codehaus.groovy'
   }
-  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}:indy"
-  testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}:indy"
-  testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}:indy"
+  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
+  testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}"
   testCompile "io.github.http-builder-ng:http-builder-ng-apache:${project.httpBuilderVersion}"
   // Required for Java 9
   testCompile 'javax.xml.bind:jaxb-api:2.3.0'
