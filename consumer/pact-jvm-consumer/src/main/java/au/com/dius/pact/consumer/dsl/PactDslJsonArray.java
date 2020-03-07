@@ -1232,8 +1232,8 @@ public class PactDslJsonArray extends DslPart {
    * @param example Example value to be used in the consumer test
    */
   public PactDslJsonArray valueFromProviderState(String expression, Object example) {
-    generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new ProviderStateGenerator(expression));
     body.put(example);
+    generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new ProviderStateGenerator(expression));
     matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher.INSTANCE);
     return this;
   }
