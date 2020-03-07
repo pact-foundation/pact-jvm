@@ -71,27 +71,7 @@ subprojects {
         mavenCentral()
         jcenter()
     }
-
-    // Gradle plugin needs to be compiled against the version of Groovy that is bundled with Gradle (currently 2.5.4)
-    if (name != 'pact-jvm-provider-gradle') {
-      dependencies {
-        testCompile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
-        testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
-        testCompile 'org.hamcrest:hamcrest:2.1'
-        testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
-          exclude group: 'org.codehaus.groovy'
-        }
-        testRuntime 'net.bytebuddy:byte-buddy:1.9.16'
-        constraints {
-          testRuntime 'net.bytebuddy:byte-buddy-agent:1.9.16'
-        }
-        testRuntime 'org.objenesis:objenesis:3.1'
-        testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
-
-        groovyDoc "org.codehaus.groovy:groovy-all:${project.groovyVersion}"
-      }
-    }
-
+  
     compileTestGroovy {
       classpath = classpath.plus(files(compileTestKotlin.destinationDir))
       dependsOn compileTestKotlin

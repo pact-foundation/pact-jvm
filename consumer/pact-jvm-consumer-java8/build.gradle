@@ -1,6 +1,12 @@
 dependencies {
   api project(path: ":consumer:pact-jvm-consumer", configuration: 'default')
 
+  testCompile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testRuntime "ch.qos.logback:logback-classic:${project.logbackVersion}"
+  testCompile "junit:junit:${project.junitVersion}"
+  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}:indy"
+  testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+    exclude group: 'org.codehaus.groovy'
+  }
 }

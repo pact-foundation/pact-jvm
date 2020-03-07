@@ -18,17 +18,22 @@ plugins {
 mainClassName = 'au.com.dius.pact.server.Server'
 
 dependencies {
-    compile project(":consumer:pact-jvm-consumer")
-    compile "ch.qos.logback:logback-core:${project.logbackVersion}",
-      "ch.qos.logback:logback-classic:${project.logbackVersion}",
-      "com.github.scopt:scopt_2.12:3.5.0"
-    compile("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {
-        exclude group: 'org.scala-lang'
-    }
-    compile "ws.unfiltered:unfiltered-netty-server_2.12:0.9.1"
+  compile project(":consumer:pact-jvm-consumer")
+  compile "ch.qos.logback:logback-core:${project.logbackVersion}",
+    "ch.qos.logback:logback-classic:${project.logbackVersion}",
+    "com.github.scopt:scopt_2.12:3.5.0"
+  compile("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {
+      exclude group: 'org.scala-lang'
+  }
+  compile "ws.unfiltered:unfiltered-netty-server_2.12:0.9.1"
   implementation 'org.apache.commons:commons-io:1.3.2'
 
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}:indy"
+  testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+    exclude group: 'org.codehaus.groovy'
+  }
+  testRuntime "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
 }
 
 jar {

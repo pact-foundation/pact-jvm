@@ -1,11 +1,16 @@
 dependencies {
-    api project(path: ":core:pact-jvm-core-support", configuration: 'default'), 
-      project(path: ":provider:pact-jvm-provider", configuration: 'default')
-    compile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
-    implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
+  api project(path: ":core:pact-jvm-core-support", configuration: 'default'),
+    project(path: ":provider:pact-jvm-provider", configuration: 'default')
+  compile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
+  implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
 
-    testRuntime "ch.qos.logback:logback-classic:${project.logbackVersion}"
-    testCompile 'ru.lanwen.wiremock:wiremock-junit5:1.1.1'
-    testCompile 'com.github.tomakehurst:wiremock:2.19.0'
-    testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testRuntime "ch.qos.logback:logback-classic:${project.logbackVersion}"
+  testCompile 'ru.lanwen.wiremock:wiremock-junit5:1.1.1'
+  testCompile 'com.github.tomakehurst:wiremock:2.19.0'
+  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}:indy"
+  testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+      exclude group: 'org.codehaus.groovy'
+  }
+  testRuntime "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
 }

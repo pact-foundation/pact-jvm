@@ -13,10 +13,16 @@ dependencies {
     implementation 'io.ktor:ktor-server-netty:1.2.6'
     implementation "io.ktor:ktor-network-tls:1.2.6"
 
+    testCompile "junit:junit:${project.junitVersion}"
     testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile 'org.cthul:cthul-matchers:1.1.0'
     testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
     testCompile "org.junit.jupiter:junit-jupiter-params:${project.junit5Version}"
+    testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}:indy"
     testCompile "org.codehaus.groovy:groovy-dateutil:${project.groovyVersion}:indy"
-    testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
+    testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}:indy"
+    testCompile 'org.hamcrest:hamcrest:2.1'
+    testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+      exclude group: 'org.codehaus.groovy'
+    }
 }
