@@ -367,7 +367,7 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
       tests.isNotEmpty() -> tests.stream() as Stream<TestTemplateInvocationContext>
       AnnotationSupport.isAnnotated(context.requiredTestClass, IgnoreNoPactsToVerify::class.java) ->
         listOf(DummyTestTemplate).stream() as Stream<TestTemplateInvocationContext>
-      else -> throw NoPactsFoundException("No Pact files where found to verify")
+      else -> throw NoPactsFoundException("No Pact files were found to verify")
     }
   }
 
