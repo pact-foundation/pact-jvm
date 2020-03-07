@@ -256,6 +256,7 @@ The following plugin properties can be specified with `-Dproperty=value` on the 
 |pact.matching.wildcard|Enables matching of map values ignoring the keys when this property is set to `true`|
 |pact.verifier.disableUrlPathDecoding|Disables decoding of request paths|
 |pact.pactbroker.httpclient.usePreemptiveAuthentication|Enables preemptive authentication with the pact broker when set to `true`|
+|`pact.consumer.tags`|Overrides the tags used when publishing pacts [version 4.0.7+]|
 
 Example in the configuration section:
 
@@ -615,6 +616,8 @@ is setting the tag to the current source control branch. This supports using pac
     </configuration>
 </plugin>
 ```
+
+You can also specify the tags using the `pact.consumer.tags` Java system property [version 4.0.7+].
 
 ## Publishing to an authenticated pact broker
 
