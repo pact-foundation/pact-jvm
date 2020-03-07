@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.maven
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import org.apache.maven.plugin.MojoExecutionException
 import spock.lang.Specification
+import spock.util.environment.RestoreSystemProperties
 
 import java.nio.file.Files
 
@@ -154,6 +155,28 @@ class PactPublishMojoSpec extends Specification {
 
     then:
     1 * brokerClient.uploadPactFile(_, _, tags) >> 'OK'
+
+    cleanup:
+    dir.deleteDir()
+  }
+
+  @RestoreSystemProperties
+  def 'Tags can also be overridden with Java system properties'() {
+    given:
+    def dir = Files.createTempDirectory('pacts')
+    def pact = PactPublishMojoSpec.classLoader.getResourceAsStream('pacts/contract.json').text
+    def file = Files.createTempFile(dir, 'pactfile', '.json')
+    file.write(pact)
+    mojo.pactDirectory = dir.toString()
+    System.setProperty('pact.consumer.tags', '1,2,3')
+    mojo.tags = ['one', 'two', 'three']
+
+
+    when:
+    mojo.execute()
+
+    then:
+    1 * brokerClient.uploadPactFile(_, _, ['1', '2', '3']) >> 'OK'
 
     cleanup:
     dir.deleteDir()
