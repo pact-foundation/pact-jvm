@@ -1,5 +1,41 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.0.7 - Bugfix Release
+
+* 1de706ed2 - chore: update travis build (Ronald Holshausen, Sun Mar 8 13:01:19 2020 +1100)
+* afe807b44 - chore: disable escaping of HTML and XML embedded in JSON #1031 (Ronald Holshausen, Sun Mar 8 12:52:21 2020 +1100)
+* 0fefe31c7 - feat: Update readme on allowing tags with the Maven plugin to be overridden from system properties #1043 (Ronald Holshausen, Sun Mar 8 10:54:31 2020 +1100)
+* 8349bb292 - feat: allow tags with the Maven plugin to be overridden from system properties #1043 (Ronald Holshausen, Sun Mar 8 10:50:28 2020 +1100)
+* 0905dca1f - Merge pull request #1042 from mikahjc/allow-punctuaion-in-path (Ronald Holshausen, Sun Mar 8 10:32:51 2020 +1100)
+* 2f1070bc7 - fix: add more information to exception when there are no pacts to verify #1039 (Ronald Holshausen, Sat Mar 7 18:20:04 2020 +1100)
+* 6a081d65e - fix: typo #1039 (Ronald Holshausen, Sat Mar 7 17:19:09 2020 +1100)
+* 0c83bcb4f - fix: get test runner working with JUnit 4.13 #1035 (Ronald Holshausen, Sat Mar 7 17:15:07 2020 +1100)
+* 436a5e856 - Revert "chore: remove system property fallback from SpringEnvironmentResolver #1023" (Ronald Holshausen, Sat Mar 7 16:12:59 2020 +1100)
+* 0312084f6 - chore: remove system property fallback from SpringEnvironmentResolver #1023 (Ronald Holshausen, Sat Mar 7 14:49:45 2020 +1100)
+* a80e74a9c - chore: remove indy version of Groovy (Ronald Holshausen, Sat Mar 7 14:48:18 2020 +1100)
+* 19b975e64 - chore: set consumer/pact-jvm-consumer-groovy to use Groovy 2.5 #1011 (Ronald Holshausen, Sat Mar 7 14:30:28 2020 +1100)
+* 981943c7c - Merge pull request #1034 from kppullin/fix-negative-index (Ronald Holshausen, Sat Mar 7 12:29:44 2020 +1100)
+* 84276a3f2 - Perform same check on character validity in pathIdentifier that identifier does (Mikah Chapman, Thu Mar 5 09:56:51 2020 -0700)
+* 7ab70a91a - Fix off-by-one valueFromProviderState index (Kevin Pullin, Thu Feb 27 15:59:05 2020 -0800)
+* 3bc07b834 - Merge pull request #1032 from gabie-giraffe/master (Ronald Holshausen, Fri Feb 28 10:18:40 2020 +1100)
+* 5ea99151a - Merge pull request #1030 from kppullin/fix-exception-in-validateTestTarget (Ronald Holshausen, Fri Feb 28 09:59:52 2020 +1100)
+* 425d3e865 - Merge branch 'master' into master (Gabrielle Gasse, Thu Feb 27 14:47:26 2020 -0800)
+* a33c921f2 - feat: Added state configuration for hasPactsFromPactBrokerWithTag in gradle #1026 (Gabrielle Gasse, Thu Feb 27 12:07:31 2020 -0800)
+* 2a1af9bed - Avoid unhandled exception in `validateTestTarget` (Kevin Pullin, Wed Feb 26 16:58:25 2020 -0800)
+* 7e817785b - Merge pull request #1025 from Pfarrer/extended-pact-filter (Ronald Holshausen, Thu Feb 27 09:48:41 2020 +1100)
+* 2f69eb8b4 - Extended PactFilter to allow variable filter criterias (Brian Pfretzschner, Mon Feb 24 10:31:05 2020 +0100)
+* 2157cab6b - chore: Put note about using -P with the Gradle plugin (Ronald Holshausen, Wed Feb 26 09:53:35 2020 +1100)
+* 896e82e03 - fix: do not convert the bodies to strings #1008 (Ronald Holshausen, Sun Feb 23 09:27:30 2020 +1100)
+* 1095b788a - feat: updated JUnit 5 readmne about IgnoreNoPactsToVerify annotation #768 (Ronald Holshausen, Sun Feb 23 09:11:15 2020 +1100)
+* dfb4e5f11 - feat: use a dummy test for JUnit 5 tests with IgnoreNoPactsToVerify annotation #768 (Ronald Holshausen, Sun Feb 23 09:05:52 2020 +1100)
+* d26555da4 - feat: created a Spring JUnit 5 module #1023 (Ronald Holshausen, Sat Feb 22 17:49:40 2020 +1100)
+* 6bf77f3cf - fix: fromProviderState on path doesnt work in pact-jvm-consumer-groovy #1022 (Ronald Holshausen, Sat Feb 22 16:16:04 2020 +1100)
+* 0da658100 - fix: Request query gets mangled/encoded when generating V2 pact file #1018 (Ronald Holshausen, Sat Feb 22 15:57:31 2020 +1100)
+* 1b2de39e6 - fix: default to text/plain content type if no content type header is provided #1013 (Ronald Holshausen, Sat Feb 22 15:14:55 2020 +1100)
+* ab61bac90 - fix: Pact server fails for requests that dont have Content-Type header #1008 (Ronald Holshausen, Sat Feb 22 14:34:50 2020 +1100)
+* 5d14f17f7 - Update README.md (Ronald Holshausen, Sat Feb 22 13:50:51 2020 +1100)
+* aa4f97cdf - bump version to 4.0.7 (Ronald Holshausen, Sat Feb 22 13:32:02 2020 +1100)
+
 # 4.0.6 - Bugfix Release + Upgrade to Groovy 3.0
 
 * 66babb0c7 - Merge pull request #1021 from treatwell/defer-junit-runner-initialization (Ronald Holshausen, Tue Feb 18 14:57:55 2020 +1100)
