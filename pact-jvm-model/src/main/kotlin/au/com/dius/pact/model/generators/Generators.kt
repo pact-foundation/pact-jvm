@@ -17,7 +17,7 @@ enum class Category {
 }
 
 interface ContentTypeHandler {
-  fun processBody(value: String, fn: (QueryResult) -> Unit): OptionalBody
+  fun processBody(value: OptionalBody, fn: (QueryResult) -> Unit): OptionalBody
   fun applyKey(body: QueryResult, key: String, generator: Generator, context: Map<String, Any?>)
 }
 
@@ -33,10 +33,10 @@ fun setupDefaultContentTypeHandlers() {
 data class QueryResult(var value: Any?, val key: Any? = null, val parent: Any? = null)
 
 object JsonContentTypeHandler : ContentTypeHandler {
-  override fun processBody(value: String, fn: (QueryResult) -> Unit): OptionalBody {
-    val bodyJson = QueryResult(JsonSlurper().parseText(value))
+  override fun processBody(value: OptionalBody, fn: (QueryResult) -> Unit): OptionalBody {
+    val bodyJson = QueryResult(JsonParser.parseString(value.valueAsString()))
     fn.invoke(bodyJson)
-    return OptionalBody.body(JsonOutput.toJson(bodyJson.value).toByteArray())
+    return OptionalBody.body(JsonOutput.toJson(bodyJson.value).toByteArray(value.contentType.asCharset()))
   }
 
   override fun applyKey(body: QueryResult, key: String, generator: Generator, context: Map<String, Any?>) {
@@ -193,14 +193,14 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     return when (body.state) {
       OptionalBody.State.EMPTY, OptionalBody.State.MISSING, OptionalBody.State.NULL -> body
       OptionalBody.State.PRESENT -> when {
-        contentType.isJson() -> processBody(body.valueAsString(), "application/json", context, mode)
-        contentType.isXml() -> processBody(body.valueAsString(), "application/xml", context, mode)
+        contentType.isJson() -> processBody(body, "application/json", context, mode)
+        contentType.isXml() -> processBody(body, "application/xml", context, mode)
         else -> body
       }
     }
   }
 
-  private fun processBody(value: String, contentType: String, context: Map<String, Any?>, mode: GeneratorTestMode):
+  private fun processBody(value: OptionalBody, contentType: String, context: Map<String, Any?>, mode: GeneratorTestMode):
     OptionalBody {
     val handler = contentTypeHandlers[contentType]
     return handler?.processBody(value) { body: QueryResult ->
@@ -209,7 +209,7 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
           handler.applyKey(body, key, generator, context)
         }
       }
-    } ?: OptionalBody.body(value.toByteArray(org.apache.http.entity.ContentType.parse(contentType).charset ?: Charset.defaultCharset()))
+    } ?: value
   }
 
   /**

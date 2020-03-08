@@ -16,8 +16,13 @@ import com.google.gson.JsonParser
  */
 object Json {
 
-  val gsonPretty: Gson = GsonBuilder().setPrettyPrinting().serializeNulls().create()
-  val gson: Gson = GsonBuilder().serializeNulls().create()
+  val numberAdapter = NumberSerializer()
+  val gsonPretty: Gson = GsonBuilder().setPrettyPrinting()
+    .serializeNulls()
+    .disableHtmlEscaping()
+    .registerTypeHierarchyAdapter(Number::class.java, numberAdapter).create()
+  val gson: Gson = GsonBuilder().serializeNulls().disableHtmlEscaping()
+    .registerTypeHierarchyAdapter(Number::class.java, numberAdapter).create()
 
   /**
    * Converts an Object graph to a JSON Object
