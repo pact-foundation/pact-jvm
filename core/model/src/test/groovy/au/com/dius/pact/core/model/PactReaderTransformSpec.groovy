@@ -36,7 +36,7 @@ class PactReaderTransformSpec extends Specification {
     ]
 
     jsonMap = this.class.getResourceAsStream('/pact.json').withReader {
-      new JsonParser().parse(it).asJsonObject
+      JsonParser.parseReader(it).asJsonObject
     }
   }
 
@@ -58,7 +58,7 @@ class PactReaderTransformSpec extends Specification {
       |      "request": {
       |        "method": "GET",
       |        "path": "/mallory",
-      |        "query": "name\\u003dron\\u0026status\\u003dgood",
+      |        "query": "name=ron&status=good",
       |        "body": {
       |          "id": "123",
       |          "method": "create"
@@ -97,7 +97,7 @@ class PactReaderTransformSpec extends Specification {
       |      "request": {
       |        "method": "GET",
       |        "path": "/mallory",
-      |        "query": "name\\u003dron\\u0026status\\u003dgood",
+      |        "query": "name=ron&status=good",
       |        "body": {
       |          "id": "123",
       |          "method": "create"
@@ -138,7 +138,7 @@ class PactReaderTransformSpec extends Specification {
       |      "request": {
       |        "method": "GET",
       |        "path": "/mallory",
-      |        "query": "name\\u003dron\\u0026status\\u003dgood",
+      |        "query": "name=ron&status=good",
       |        "body": {
       |          "id": "123",
       |          "method": "create"
@@ -181,7 +181,7 @@ class PactReaderTransformSpec extends Specification {
       |      "request": {
       |        "method": "GET",
       |        "path": "/mallory",
-      |        "query": "name\\u003dron\\u0026status\\u003dgood",
+      |        "query": "name=ron&status=good",
       |        "body": {
       |          "id": "123",
       |          "method": "create"
@@ -239,7 +239,7 @@ class PactReaderTransformSpec extends Specification {
       |      "request": {
       |        "method": "POST",
       |        "path": "/mallory",
-      |        "query": "name\\u003dron\\u0026status\\u003dgood",
+      |        "query": "name=ron&status=good",
       |        "body": {
       |          "id": "123",
       |          "method": "create"

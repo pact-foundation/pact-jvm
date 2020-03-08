@@ -7,6 +7,7 @@ dependencies {
   testRuntime "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testCompile 'ru.lanwen.wiremock:wiremock-junit5:1.1.1'
   testCompile 'com.github.tomakehurst:wiremock:2.19.0'
+  testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {

@@ -171,7 +171,6 @@ class PactPublishMojoSpec extends Specification {
     System.setProperty('pact.consumer.tags', '1,2,3')
     mojo.tags = ['one', 'two', 'three']
 
-
     when:
     mojo.execute()
 

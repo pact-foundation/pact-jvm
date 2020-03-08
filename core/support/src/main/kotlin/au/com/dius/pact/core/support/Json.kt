@@ -27,8 +27,12 @@ open class NumberSerializer : JsonSerializer<Number> {
 object Json {
 
   val numberAdapter = NumberSerializer()
-  val gsonPretty: Gson = GsonBuilder().setPrettyPrinting().serializeNulls().registerTypeHierarchyAdapter(Number::class.java, numberAdapter).create()
-  val gson: Gson = GsonBuilder().serializeNulls().registerTypeHierarchyAdapter(Number::class.java, numberAdapter).create()
+  val gsonPretty: Gson = GsonBuilder().setPrettyPrinting()
+    .serializeNulls()
+    .disableHtmlEscaping()
+    .registerTypeHierarchyAdapter(Number::class.java, numberAdapter).create()
+  val gson: Gson = GsonBuilder().serializeNulls().disableHtmlEscaping()
+    .registerTypeHierarchyAdapter(Number::class.java, numberAdapter).create()
 
   /**
    * Converts an Object graph to a JSON Object
