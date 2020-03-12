@@ -44,7 +44,7 @@ import java.util.concurrent.Callable
 import java.util.function.Consumer
 import java.util.function.Function
 import java.util.function.Supplier
-
+import au.com.dius.pact.core.model.ContentType as PactContentType
 interface IHttpClientFactory {
   fun newClient(provider: IProviderInfo): CloseableHttpClient
 }
@@ -294,7 +294,11 @@ open class ProviderClient(
     }
 
     if (!method.containsHeader(CONTENT_TYPE) && request.body.isPresent()) {
-      method.addHeader(CONTENT_TYPE, "text/plain; charset=ISO-8859-1")
+      val contentType = when (request.body.contentType) {
+        PactContentType.UNKNOWN -> "text/plain; charset=ISO-8859-1"
+        else -> request.body.contentType.toString()
+      }
+      method.addHeader(CONTENT_TYPE, contentType)
     }
   }
 
