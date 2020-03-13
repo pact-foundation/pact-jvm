@@ -4,11 +4,11 @@ import au.com.dius.pact.model.BrokerUrlSource
 import au.com.dius.pact.model.ClosurePactSource
 import au.com.dius.pact.model.FileSource
 import au.com.dius.pact.model.Interaction
+import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.PactSource
 import au.com.dius.pact.model.ProviderState
 import au.com.dius.pact.model.Request
 import au.com.dius.pact.model.UrlSource
-import au.com.dius.pact.model.valueAsString
 import au.com.dius.pact.pactbroker.PactBrokerConsumer
 import groovy.json.JsonBuilder
 import groovy.lang.Binding
@@ -45,7 +45,8 @@ import java.util.concurrent.Callable
 import java.util.function.Consumer
 import java.util.function.Function
 import java.util.function.Supplier
-import au.com.dius.pact.core.model.ContentType as PactContentType
+import au.com.dius.pact.model.ContentType as PactContentType
+
 interface IHttpClientFactory {
   fun newClient(provider: IProviderInfo): CloseableHttpClient
 }
@@ -294,9 +295,10 @@ open class ProviderClient(
     }
 
     if (!method.containsHeader(CONTENT_TYPE) && request.body != null && request.body!!.isPresent()) {
-      val contentType = when (request.body.contentType) {
+      val body = request.body as OptionalBody
+      val contentType = when (body.contentType) {
         PactContentType.UNKNOWN -> "application/json"
-        else -> request.body.contentType.toString()
+        else -> body.contentType.toString()
       }
       method.addHeader(CONTENT_TYPE, contentType)
     }
