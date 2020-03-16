@@ -392,11 +392,11 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
     logger.debug { "Verifying pacts for provider '$serviceName' and consumer '$consumerName'" }
 
     val pactSources = findPactSources(context).flatMap {
-      description += "\nSource: ${it.description()}"
       val valueResolver = getValueResolver(context)
       if (valueResolver != null) {
         it.setValueResolver(valueResolver)
       }
+      description += "\nSource: ${it.description()}"
       val pacts = it.load(serviceName)
       filterPactsByAnnotations(pacts, context.requiredTestClass).map { pact -> pact to it.pactSource }
     }.filter { p -> consumerName == null || p.first.consumer.name == consumerName }
