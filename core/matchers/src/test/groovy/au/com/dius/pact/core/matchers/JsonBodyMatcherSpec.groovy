@@ -1,12 +1,14 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.OptionalBody
+import au.com.dius.pact.core.model.matchingrules.EqualsMatcher
 import au.com.dius.pact.core.model.matchingrules.IgnoreOrderMatcher
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.MinTypeMatcher
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import spock.lang.Specification
+import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
 
 @SuppressWarnings(['BracesForMethod', 'PrivateFieldCouldBeFinal'])
@@ -365,8 +367,8 @@ class JsonBodyMatcherSpec extends Specification {
   }
 
   @RestoreSystemProperties
-  def '''matching json bodies - return mismatches - when comparing a list of objects and ignore-order
-         matching is enabled'''() {
+  def '''matching json bodies - return mismatches - when comparing a list of objects, ignore-order
+         matching is enabled and actual is smaller than expected'''() {
     given:
     matchers.addCategory('body')
             .addRule('$.array1', IgnoreOrderMatcher.INSTANCE)
@@ -505,6 +507,81 @@ class JsonBodyMatcherSpec extends Specification {
     then:
     mismatches.size() == 1
     mismatches.contains('Expected [100,100,100,400] to equal [100,100,500] ignoring order of elements')
+  }
+
+  @RestoreSystemProperties
+  def 'matching json bodies - return no mismatches - with unordered matching of elements with unique ids'() {
+    given:
+    matchers.addCategory('body')
+            .addRule('$.array', IgnoreOrderMatcher.INSTANCE)
+            .addRule('$.array[*].id', new EqualsMatcher())
+            .addRule('$.array[0].status', new EqualsMatcher())
+            .addRule('$.array[1].status', new RegexMatcher('up|down'))
+    System.setProperty(Matchers.PACT_MATCHING_IGNORE_ORDER, 'true')
+
+    expect:
+    matcher.matchBody(expectedBody, actualBody, true, matchers).empty == result
+
+    where:
+    actualBody << [OptionalBody.body('{"array": [{"id":"b", "status":"up"},{"id":"a", "status":"down"}]}'.bytes),
+                   OptionalBody.body('{"array": [{"id":"a", "status":"up"},{"id":"b", "status":"down"}]}'.bytes),
+                   OptionalBody.body('{"array": [{"id":"a", "status":"up"},{"id":"b", "status":"up"}]}'.bytes),
+                   OptionalBody.body('{"array": [{"id":"b", "status":"down"},{"id":"a", "status":"up"}]}'.bytes)]
+
+    expectedBody << [OptionalBody.body('{"array": [{"id":"a", "status":"up"},{"id":"b", "status":"down"}]}'.bytes),
+                     OptionalBody.body('{"array": [{"id":"a", "status":"up"},{"id":"b", "status":"down"}]}'.bytes),
+                     OptionalBody.body('{"array": [{"id":"a", "status":"up"},{"id":"b", "status":"down"}]}'.bytes),
+                     OptionalBody.body('{"array": [{"id":"a", "status":"up"},{"id":"b", "status":"down"}]}'.bytes)]
+
+    result << [false, true, true, true]
+  }
+
+  @RestoreSystemProperties
+  def 'matching json bodies - return no mismatches - with unordered matching of mixed elements'() {
+    given:
+    matchers.addCategory('body')
+            .addRule('$.array1', IgnoreOrderMatcher.INSTANCE)
+            .addRule('$.array1[*].id', new EqualsMatcher())
+            .addRule('$.array1[0].status', new EqualsMatcher())
+            .addRule('$.array1[1].status', new RegexMatcher('up|down'))
+            .addRule('$.array1[3]', TypeMatcher.INSTANCE)
+    System.setProperty(Matchers.PACT_MATCHING_IGNORE_ORDER, 'true')
+
+    expect:
+    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+
+    where:
+    actualBody = OptionalBody.body('{"array1": [{"id":"b", "status":"up"}, {"id":"a", "status":"up"}, 5]}'.bytes)
+    expectedBody = OptionalBody.body('{"array1": [{"id":"a", "status":"up"}, 4, {"id":"b", "status":"down"}]}'.bytes)
+  }
+
+  @Unroll
+  @RestoreSystemProperties
+  def 'matching json bodies - return no mismatches - with unordered matching of elements without unique ids'() {
+    given:
+    matchers.addCategory('body')
+            .addRule('$.array', IgnoreOrderMatcher.INSTANCE)
+            .addRule('$.array[0].foo', new RegexMatcher('a|b'))
+            .addRule('$.array[0].status', new EqualsMatcher())
+            .addRule('$.array[1].foo', new RegexMatcher('b|c'))
+            .addRule('$.array[1].status', new RegexMatcher('up|down'))
+    System.setProperty(Matchers.PACT_MATCHING_IGNORE_ORDER, 'true')
+
+    expect:
+    matcher.matchBody(expectedBody, actualBody, true, matchers).empty == result
+
+    where:
+    actualBody << [OptionalBody.body('{"array": [{"foo":"b", "status":"up"},{"foo":"b", "status":"down"}]}'.bytes),
+                   OptionalBody.body('{"array": [{"foo":"a", "status":"up"},{"foo":"b", "status":"down"}]}'.bytes),
+                   OptionalBody.body('{"array": [{"foo":"a", "status":"up"},{"foo":"b", "status":"up"}]}'.bytes),
+                   OptionalBody.body('{"array": [{"foo":"b", "status":"down"},{"foo":"a", "status":"up"}]}'.bytes)]
+
+    expectedBody << [OptionalBody.body('{"array": [{"foo":"a", "status":"up"},{"foo":"b", "status":"down"}]}'.bytes),
+                     OptionalBody.body('{"array": [{"foo":"a", "status":"up"},{"foo":"b", "status":"down"}]}'.bytes),
+                     OptionalBody.body('{"array": [{"foo":"a", "status":"up"},{"foo":"b", "status":"down"}]}'.bytes),
+                     OptionalBody.body('{"array": [{"foo":"a", "status":"up"},{"foo":"b", "status":"down"}]}'.bytes)]
+
+    result << [true, true, true, true]
   }
 
 }

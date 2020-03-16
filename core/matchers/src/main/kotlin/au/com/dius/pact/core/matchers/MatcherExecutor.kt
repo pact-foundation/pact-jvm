@@ -1,10 +1,7 @@
 package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.matchingrules.*
-import com.google.gson.JsonArray
-import com.google.gson.JsonNull
-import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
+import com.google.gson.*
 import mu.KotlinLogging
 import org.apache.commons.lang3.time.DateUtils
 import org.w3c.dom.Element
@@ -132,16 +129,17 @@ fun <M : Mismatch> matchIgnoringOrder(
       true
     }
     actual is JsonArray && expected is JsonArray -> {
-      var actualSet = mutableSetOf<String>()
-      for (item in actual)
-        actualSet.add(item.toString())
-      var expectedSet = mutableSetOf<String>()
-      for (item in expected)
-        expectedSet.add(item.toString())
+      val actualSet: MutableSet<String> = actual.map { it.toString() }.toMutableSet()
+      val expectedSet: MutableSet<String> = expected.map { it.toString() }.toMutableSet()
       when {
-        actual.size() == expected.size() -> expectedSet == actualSet
-        expected.size() < actual.size() -> actualSet.containsAll(expectedSet)
-        else -> false
+        expected.size() == actual.size() && expectedSet == actualSet -> true
+        expected.size() < actual.size() && actualSet.containsAll(expectedSet) -> true
+        expected.size() > actual.size() -> false
+        else -> {
+          val actualJsonObjects: List<JsonElement> = actual.filter { it is JsonObject }
+          val expectedJsonObjects: List<JsonElement> = expected.filter { it is JsonObject }
+          actualJsonObjects.isNotEmpty() || expectedJsonObjects.isNotEmpty()
+        }
       }
     }
     else -> false
