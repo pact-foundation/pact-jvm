@@ -34,7 +34,7 @@ fun valueOf(value: Any?): String {
   return when (value) {
     null -> "null"
     is String -> "'$value'"
-    is Element -> "<${value.tagName}>"
+    is Element -> "<${QualifiedName(value)}>"
     is Text -> "'${value.wholeText}'"
     else -> value.toString()
   }
@@ -131,7 +131,7 @@ fun <M : Mismatch> matchEquality(
 ): List<M> {
   val matches = when {
     (actual == null || actual is JsonNull) && (expected == null || expected is JsonNull) -> true
-    actual is Element && expected is Element -> actual.tagName == expected.tagName
+    actual is Element && expected is Element -> QualifiedName(actual) == QualifiedName(expected)
     else -> actual != null && actual == expected
   }
   logger.debug { "comparing ${valueOf(actual)} to ${valueOf(expected)} at $path -> $matches" }
@@ -176,7 +176,7 @@ fun <M : Mismatch> matchType(
     expected is JsonArray && actual is JsonArray ||
     expected is Map<*, *> && actual is Map<*, *> ||
     expected is JsonObject && actual is JsonObject ||
-    expected is Element && actual is Element && actual.tagName == expected.tagName
+    expected is Element && actual is Element && QualifiedName(actual) == QualifiedName(expected)
   ) {
     emptyList()
   } else if (expected is JsonPrimitive && actual is JsonPrimitive &&
