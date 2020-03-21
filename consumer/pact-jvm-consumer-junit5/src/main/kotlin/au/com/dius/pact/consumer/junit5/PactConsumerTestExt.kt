@@ -135,169 +135,178 @@ class JUnit5MockServerSupport(private val baseMockServer: BaseMockServer) : Mock
 
 class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCallback, ParameterResolver, AfterTestExecutionCallback, AfterAllCallback {
   override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
-    val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
-    if (store["providerInfo"] != null) {
-      val providerInfo = store["providerInfo"] as ProviderInfo
-      val type = parameterContext.parameter.type
-      return when (providerInfo.providerType) {
-        ProviderType.ASYNCH -> when {
-          type.isAssignableFrom(List::class.java) -> true
-          type.isAssignableFrom(MessagePact::class.java) -> true
-          else -> false
-        }
-        else -> when {
-          type.isAssignableFrom(MockServer::class.java) -> true
-          type.isAssignableFrom(RequestResponsePact::class.java) -> true
-          else -> false
-        }
+    val providerInfo = lookupProviderInfo(extensionContext).first
+    val type = parameterContext.parameter.type
+    return when (providerInfo.providerType) {
+      ProviderType.ASYNCH -> when {
+        type.isAssignableFrom(List::class.java) -> true
+        type.isAssignableFrom(MessagePact::class.java) -> true
+        else -> false
       }
-    } else {
-      return false
+      else -> when {
+        type.isAssignableFrom(MockServer::class.java) -> true
+        type.isAssignableFrom(RequestResponsePact::class.java) -> true
+        else -> false
+      }
     }
   }
 
   override fun resolveParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Any {
-    val store = extensionContext.getStore(ExtensionContext.Namespace.create("pact-jvm"))
-    if (store["providerInfo"] != null) {
-      val providerInfo = store["providerInfo"] as ProviderInfo
-      val type = parameterContext.parameter.type
-      return when (providerInfo.providerType) {
-        ProviderType.ASYNCH -> {
-          val pact = store["pact"] as MessagePact
-          when {
-            type.isAssignableFrom(List::class.java) -> pact.messages
-            type.isAssignableFrom(MessagePact::class.java) -> pact
-            else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
-          }
-        }
-        else -> {
-          val pact = store["pact"] as RequestResponsePact
-          when {
-            type.isAssignableFrom(MockServer::class.java) -> store["mockServer"]
-            type.isAssignableFrom(RequestResponsePact::class.java) -> pact
-            else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
-          }
+    val providerInfo = lookupProviderInfo(extensionContext)
+    val store = extensionContext.getStore(NAMESPACE)
+    val type = parameterContext.parameter.type
+    return when (providerInfo.first.providerType) {
+      ProviderType.ASYNCH -> {
+        val pact = lookupPact(providerInfo.first, providerInfo.second, extensionContext) as MessagePact
+        when {
+          type.isAssignableFrom(List::class.java) -> pact.messages
+          type.isAssignableFrom(MessagePact::class.java) -> pact
+          else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
         }
       }
-    } else {
-      return false
+      else -> {
+        when {
+          type.isAssignableFrom(MockServer::class.java) -> setupMockServer(providerInfo.first, providerInfo.second, extensionContext)!!
+          type.isAssignableFrom(RequestResponsePact::class.java) -> store["pact"] as RequestResponsePact
+          else -> throw UnsupportedOperationException("Could not inject parameter $type into test method")
+        }
+      }
     }
   }
 
   override fun beforeAll(context: ExtensionContext) {
-    val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
+    val store = context.getStore(NAMESPACE)
     store.put("executedFragments", mutableListOf<Method>())
   }
 
   override fun beforeTestExecution(context: ExtensionContext) {
     val (providerInfo, pactMethod) = lookupProviderInfo(context)
-
     logger.debug { "providerInfo = $providerInfo" }
 
-    val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
-    val executedFragments = store["executedFragments"] as MutableList<Method>
-    val pact = lookupPact(providerInfo, pactMethod, context, executedFragments)
-    store.put("pact", pact)
-    store.put("providerInfo", providerInfo)
+    setupMockServer(providerInfo, pactMethod, context)
+  }
 
-    if (providerInfo.providerType != ProviderType.ASYNCH) {
+  private fun setupMockServer(providerInfo: ProviderInfo, pactMethod: String, context: ExtensionContext): MockServer? {
+    val store = context.getStore(NAMESPACE)
+    return if (providerInfo.providerType != ProviderType.ASYNCH && store["mockServer"] == null) {
       val config = providerInfo.mockServerConfig()
       store.put("mockServerConfig", config)
-      val mockServer = mockServer(pact as RequestResponsePact, config) as BaseMockServer
+      val mockServer = mockServer(lookupPact(providerInfo, pactMethod, context) as RequestResponsePact, config) as BaseMockServer
       mockServer.start()
       mockServer.waitForServer()
       store.put("mockServer", JUnit5MockServerSupport(mockServer))
+      mockServer
+    } else {
+      store["mockServer"] as MockServer?
     }
   }
 
   fun lookupProviderInfo(context: ExtensionContext): Pair<ProviderInfo, String> {
-    val methodAnnotation = if (AnnotationSupport.isAnnotated(context.requiredTestMethod, PactTestFor::class.java)) {
-      logger.debug { "Found @PactTestFor annotation on test method" }
-      val annotation = AnnotationSupport.findAnnotation(context.requiredTestMethod, PactTestFor::class.java).get()
-      ProviderInfo.fromAnnotation(annotation) to annotation.pactMethod
+    val store = context.getStore(NAMESPACE)
+    return if (store["providerInfo"] != null) {
+      (store["providerInfo"] as ProviderInfo) to store["pactMethod"].toString()
     } else {
-      null
-    }
-
-    val classAnnotation = if (AnnotationSupport.isAnnotated(context.requiredTestClass, PactTestFor::class.java)) {
-      logger.debug { "Found @PactTestFor annotation on test class" }
-      val annotation = AnnotationSupport.findAnnotation(context.requiredTestClass, PactTestFor::class.java).get()
-      ProviderInfo.fromAnnotation(annotation) to annotation.pactMethod
-    } else {
-      null
-    }
-
-    return when {
-      classAnnotation != null && methodAnnotation != null -> Pair(methodAnnotation.first.merge(classAnnotation.first),
-        if (methodAnnotation.second.isNotEmpty()) methodAnnotation.second else classAnnotation.second)
-      classAnnotation != null -> classAnnotation
-      methodAnnotation != null -> methodAnnotation
-      else -> {
-        logger.debug { "No @PactTestFor annotation found on test class, using defaults" }
-        ProviderInfo() to ""
+      val methodAnnotation = if (AnnotationSupport.isAnnotated(context.requiredTestMethod, PactTestFor::class.java)) {
+        logger.debug { "Found @PactTestFor annotation on test method" }
+        val annotation = AnnotationSupport.findAnnotation(context.requiredTestMethod, PactTestFor::class.java).get()
+        ProviderInfo.fromAnnotation(annotation) to annotation.pactMethod
+      } else {
+        null
       }
+
+      val classAnnotation = if (AnnotationSupport.isAnnotated(context.requiredTestClass, PactTestFor::class.java)) {
+        logger.debug { "Found @PactTestFor annotation on test class" }
+        val annotation = AnnotationSupport.findAnnotation(context.requiredTestClass, PactTestFor::class.java).get()
+        ProviderInfo.fromAnnotation(annotation) to annotation.pactMethod
+      } else {
+        null
+      }
+
+      val providerInfo = when {
+        classAnnotation != null && methodAnnotation != null -> Pair(methodAnnotation.first.merge(classAnnotation.first),
+          if (methodAnnotation.second.isNotEmpty()) methodAnnotation.second else classAnnotation.second)
+        classAnnotation != null -> classAnnotation
+        methodAnnotation != null -> methodAnnotation
+        else -> {
+          logger.debug { "No @PactTestFor annotation found on test class, using defaults" }
+          ProviderInfo() to ""
+        }
+      }
+
+      store.put("providerInfo", providerInfo.first)
+      store.put("pactMethod", providerInfo.second)
+
+      providerInfo
     }
   }
 
   fun lookupPact(
     providerInfo: ProviderInfo,
     pactMethod: String,
-    context: ExtensionContext,
-    executedFragments: MutableList<Method>
+    context: ExtensionContext
   ): BasePact<out Interaction> {
-    val providerName = if (providerInfo.providerName.isEmpty()) "default" else providerInfo.providerName
-    val methods = AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java,
-      HierarchyTraversalMode.TOP_DOWN)
+    val store = context.getStore(NAMESPACE)
+    if (store["pact"] == null) {
+      val providerName = if (providerInfo.providerName.isEmpty()) "default" else providerInfo.providerName
+      val methods = AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java,
+        HierarchyTraversalMode.TOP_DOWN)
 
-    val method = when {
-      pactMethod.isNotEmpty() -> {
-        logger.debug { "Looking for @Pact method named '$pactMethod' for provider '$providerName'" }
-        methods.firstOrNull { it.name == pactMethod }
-      }
-      providerInfo.providerName.isEmpty() -> {
-        logger.debug { "Looking for first @Pact method" }
-        methods.firstOrNull()
-      }
-      else -> {
-        logger.debug { "Looking for first @Pact method for provider '$providerName'" }
-        methods.firstOrNull {
-          val annotationProviderName = AnnotationSupport.findAnnotation(it, Pact::class.java).get().provider
-          annotationProviderName.isEmpty() || annotationProviderName == providerInfo.providerName
+      val method = when {
+        pactMethod.isNotEmpty() -> {
+          logger.debug { "Looking for @Pact method named '$pactMethod' for provider '$providerName'" }
+          methods.firstOrNull { it.name == pactMethod }
+        }
+        providerInfo.providerName.isEmpty() -> {
+          logger.debug { "Looking for first @Pact method" }
+          methods.firstOrNull()
+        }
+        else -> {
+          logger.debug { "Looking for first @Pact method for provider '$providerName'" }
+          methods.firstOrNull {
+            val annotationProviderName = AnnotationSupport.findAnnotation(it, Pact::class.java).get().provider
+            annotationProviderName.isEmpty() || annotationProviderName == providerInfo.providerName
+          }
         }
       }
-    }
 
-    val providerType = providerInfo.providerType ?: ProviderType.SYNCH
-    if (method == null) {
-      throw UnsupportedOperationException("No method annotated with @Pact was found on test class " +
-        context.requiredTestClass.simpleName + " for provider '${providerInfo.providerName}'")
-    } else if (providerType == ProviderType.SYNCH && !JUnitTestSupport.conformsToSignature(method)) {
-      throw UnsupportedOperationException("Method ${method.name} does not conform to required method signature " +
-        "'public RequestResponsePact xxx(PactDslWithProvider builder)'")
-    } else if (providerType == ProviderType.ASYNCH && !JUnitTestSupport.conformsToMessagePactSignature(method)) {
-      throw UnsupportedOperationException("Method ${method.name} does not conform to required method signature " +
-        "'public MessagePact xxx(MessagePactBuilder builder)'")
-    }
+      val providerType = providerInfo.providerType ?: ProviderType.SYNCH
+      if (method == null) {
+        throw UnsupportedOperationException("No method annotated with @Pact was found on test class " +
+          context.requiredTestClass.simpleName + " for provider '${providerInfo.providerName}'")
+      } else if (providerType == ProviderType.SYNCH && !JUnitTestSupport.conformsToSignature(method)) {
+        throw UnsupportedOperationException("Method ${method.name} does not conform to required method signature " +
+          "'public RequestResponsePact xxx(PactDslWithProvider builder)'")
+      } else if (providerType == ProviderType.ASYNCH && !JUnitTestSupport.conformsToMessagePactSignature(method)) {
+        throw UnsupportedOperationException("Method ${method.name} does not conform to required method signature " +
+          "'public MessagePact xxx(MessagePactBuilder builder)'")
+      }
 
-    val pactAnnotation = AnnotationSupport.findAnnotation(method, Pact::class.java).get()
-    logger.debug { "Invoking method '${method.name}' to get Pact for the test " +
-      "'${context.testMethod.map { it.name }.orElse("unknown")}'" }
+      val pactAnnotation = AnnotationSupport.findAnnotation(method, Pact::class.java).get()
+      logger.debug {
+        "Invoking method '${method.name}' to get Pact for the test " +
+          "'${context.testMethod.map { it.name }.orElse("unknown")}'"
+      }
 
-    val provider = parseExpression(pactAnnotation.provider).toString()
-    val providerNameToUse = if (provider.isNotEmpty()) provider else providerName
-    val pact = when (providerType) {
-      ProviderType.SYNCH, ProviderType.UNSPECIFIED -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
-        ConsumerPactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact<*>
-      ProviderType.ASYNCH -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
-        MessagePactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact<*>
+      val provider = parseExpression(pactAnnotation.provider).toString()
+      val providerNameToUse = if (provider.isNotEmpty()) provider else providerName
+      val pact = when (providerType) {
+        ProviderType.SYNCH, ProviderType.UNSPECIFIED -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
+          ConsumerPactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact<*>
+        ProviderType.ASYNCH -> ReflectionSupport.invokeMethod(method, context.requiredTestInstance,
+          MessagePactBuilder.consumer(pactAnnotation.consumer).hasPactWith(providerNameToUse)) as BasePact<*>
+      }
+      val executedFragments = store["executedFragments"] as MutableList<Method>
+      executedFragments.add(method)
+      store.put("pact", pact)
+      return pact
+    } else {
+      return store["pact"] as BasePact<out Interaction>
     }
-    executedFragments.add(method)
-    return pact
   }
 
   override fun afterTestExecution(context: ExtensionContext) {
     if (!context.executionException.isPresent) {
-      val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
+      val store = context.getStore(NAMESPACE)
       val providerInfo = store["providerInfo"] as ProviderInfo
       val pactDirectory = lookupPactDirectory(context)
       if (providerInfo.providerType != ProviderType.ASYNCH) {
@@ -338,7 +347,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
 
   override fun afterAll(context: ExtensionContext) {
     if (!context.executionException.isPresent) {
-      val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
+      val store = context.getStore(NAMESPACE)
       val executedFragments = store["executedFragments"] as MutableList<Method>
       val methods = AnnotationSupport.findAnnotatedMethods(context.requiredTestClass, Pact::class.java,
         HierarchyTraversalMode.TOP_DOWN)
@@ -355,5 +364,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
     }
   }
 
-  companion object : KLogging()
+  companion object : KLogging() {
+    val NAMESPACE = ExtensionContext.Namespace.create("pact-jvm")
+  }
 }
