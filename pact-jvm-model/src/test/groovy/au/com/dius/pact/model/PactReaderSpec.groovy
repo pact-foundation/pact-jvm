@@ -9,7 +9,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
-import spock.util.environment.RestoreSystemProperties
 
 import static au.com.dius.pact.core.model.generators.Category.BODY
 
@@ -351,6 +350,7 @@ class PactReaderSpec extends Specification {
   }
 
   @Issue('#1031')
+  @SuppressWarnings('GStringExpressionWithinString')
   def 'handle encoded values in the pact file'() {
     given:
     def pactUrl = PactReaderSpec.classLoader.getResource('encoded-values-pact.json')
