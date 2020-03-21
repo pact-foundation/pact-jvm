@@ -2,4 +2,7 @@ dependencies {
   implementation project(path: ":provider:pact-jvm-provider-junit5", configuration: 'default')
   implementation 'org.springframework:spring-context:5.2.3.RELEASE'
   implementation 'org.springframework:spring-test:5.2.3.RELEASE'
+
+  testImplementation 'org.springframework.boot:spring-boot-starter-test:2.2.5.RELEASE'
+  testImplementation 'org.springframework.boot:spring-boot-starter-web:2.2.5.RELEASE'
 }
