@@ -24,6 +24,13 @@ fun LambdaDslObject.newObject(name: String, nestedObject: LambdaDslObject.() -> 
 }
 
 /**
+ * Extension function to make [LambdaDslObject.array] Kotlin friendly.
+ */
+fun LambdaDslObject.newArray(name: String, body: LambdaDslJsonArray.() -> (Unit)): LambdaDslObject {
+    return array(name) { it.body() }
+}
+
+/**
  * Extension function to make [LambdaDslJsonArray.array] Kotlin friendly.
  */
 fun LambdaDslJsonArray.newArray(body: LambdaDslJsonArray.() -> (Unit)): LambdaDslJsonArray {

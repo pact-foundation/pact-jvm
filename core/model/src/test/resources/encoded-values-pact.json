@@ -1,0 +1,66 @@
+{
+  "provider": {
+    "name": "Test_Provider"
+  },
+  "consumer": {
+    "name": "Test_Consumer"
+  },
+  "interactions": [
+    {
+      "description": "A request to create new entity",
+      "request": {
+        "method": "POST",
+        "path": "/test",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "entityName": "mock-name",
+          "xml": "\u003c?xml version\u003d\"1.0\" encoding\u003d\"UTF-8\"?\u003e\n"
+        },
+        "generators": {
+          "body": {
+            "$": {
+              "type": "ProviderState",
+              "expression": "{\n  \"entityName\": \"${eName}\",\n  \"xml\": \"\u003c?xml version\u003d\\\"1.0\\\" encoding\u003d\\\"UTF-8\\\"?\u003e\\n\"\n}"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json;charset\u003dUTF-8"
+        },
+        "body": {
+          "workflowDefinitionName": "mock-name"
+        },
+        "matchingRules": {
+          "body": {
+            "$.workflowDefinitionName": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "A entity name not exists"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "3.6.11"
+    }
+  }
+}
