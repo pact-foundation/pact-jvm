@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider.junit.loader
 
+import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactBrokerSource
-import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.pactbroker.IHalClient
 import au.com.dius.pact.core.pactbroker.InvalidHalResponse
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
@@ -383,7 +383,8 @@ class PactBrokerLoaderSpec extends Specification {
     tags = ['demo']
     PactBrokerLoader loader = Spy(pactBrokerLoader())
     loader.overridePactUrl('http://overridden.com', 'overridden')
-    def consumer = new ConsumerInfo('overridden', null, true, [], null, new UrlSource('http://overridden.com'))
+    def brokerUrlSource = new BrokerUrlSource('http://overridden.com', 'http://pactbroker:1234')
+    def consumer = new ConsumerInfo('overridden', null, true, [], null, brokerUrlSource)
 
     when:
     def result = loader.load('test')

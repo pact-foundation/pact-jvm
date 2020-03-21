@@ -1,12 +1,12 @@
 package au.com.dius.pact.provider.junit.loader
 
+import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.PactReader
-import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
@@ -78,8 +78,9 @@ open class PactBrokerLoader(
     val resolver = setupValueResolver()
     val pacts = when {
       overriddenPactUrl.isNotEmpty() -> {
-        val pactBrokerClient = newPactBrokerClient(brokerUrl(resolver).build(), resolver)
-        val pactSource = UrlSource<Interaction>(overriddenPactUrl!!)
+        val brokerUri = brokerUrl(resolver).build()
+        val pactBrokerClient = newPactBrokerClient(brokerUri, resolver)
+        val pactSource = BrokerUrlSource(overriddenPactUrl!!, brokerUri.toString())
         pactSource.encodePath = false
         listOf(loadPact(ConsumerInfo(name = overriddenConsumer!!, pactSource = pactSource),
           pactBrokerClient.options))
