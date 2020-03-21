@@ -358,7 +358,7 @@ class PactConsumerTestExt : Extension, BeforeTestExecutionCallback, BeforeAllCal
         if (nonExecutedMethods.isNotEmpty()) {
           throw AssertionError(
             "The following methods annotated with @Pact were not executed during the test: $nonExecutedMethods" +
-              "\nIf these are currently a work in progress, and a @Disabled annotation to the method\n")
+              "\nIf these are currently a work in progress, add a @Disabled annotation to the method\n")
         }
       }
     }
