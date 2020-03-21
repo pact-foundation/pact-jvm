@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.model.ContentType as PactContentType
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.provider.GroovyScalaUtils$
 import au.com.dius.pact.provider.IHttpClientFactory
@@ -102,6 +103,28 @@ class ProviderClientSpec extends Specification {
       1 * httpRequest.addHeader(it.key, it.value[0])
     }
     1 * httpRequest.addHeader('Content-Type', 'text/plain; charset=ISO-8859-1')
+
+    0 * httpRequest._
+  }
+
+  def 'setting up headers adds an content type if none was provided and there is a body with content type'() {
+    given:
+    def headers = [
+            A: ['a'],
+            B: ['b'],
+            C: ['c']
+    ]
+    request = new Request('PUT', '/', [:], headers, OptionalBody.body('{}'.bytes, PactContentType.JSON))
+
+    when:
+    client.setupHeaders(request, httpRequest)
+
+    then:
+    1 * httpRequest.containsHeader('Content-Type') >> false
+    headers.each {
+      1 * httpRequest.addHeader(it.key, it.value[0])
+    }
+    1 * httpRequest.addHeader('Content-Type', ContentType.APPLICATION_JSON.getMimeType())
 
     0 * httpRequest._
   }
