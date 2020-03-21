@@ -9,6 +9,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -19,6 +20,7 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 @ExtendWith(PactConsumerTestExt.class)
 @PactTestFor(providerName = "ArticlesProvider", port = "1234")
@@ -26,6 +28,11 @@ public class ArticlesTest {
   private Map<String, String> headers = MapUtils.putAll(new HashMap<>(), new String[] {
     "Content-Type", "application/json"
   });
+
+  @BeforeEach
+  public void setUp(MockServer mockServer) {
+    assertThat(mockServer, is(notNullValue()));
+  }
 
   @Pact(consumer = "ArticlesConsumer")
   public RequestResponsePact articles(PactDslWithProvider builder) {

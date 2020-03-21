@@ -7,6 +7,7 @@ import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.Provider
 import au.com.dius.pact.model.RequestResponsePact
 import org.hamcrest.Matchers
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -20,6 +21,20 @@ class PactConsumerTestExtTest {
   private providerInfo = new ProviderInfo()
   private pact = new RequestResponsePact(new Provider('junit5_provider'),
     new Consumer('junit5_consumer'), [])
+  private ExtensionContext.Store mockStore
+
+  @BeforeEach
+  void setup() {
+    mockStore = [
+      'get': { param ->
+        switch (param) {
+          case 'executedFragments': []; break
+          default: null
+        }
+      },
+      'put': { param, value -> }
+    ] as ExtensionContext.Store
+  }
 
   class TestClassInvalidSignature {
     @Pact(provider = 'junit5_provider', consumer = 'junit5_consumer')
@@ -80,7 +95,7 @@ class PactConsumerTestExtTest {
   void test1() {
     assertThrows(UnsupportedOperationException) {
       def context = ['getTestClass': { Optional.of(PactConsumerTestExtTest) } ] as ExtensionContext
-      subject.lookupPact(providerInfo, '', context, [])
+      subject.lookupPact(providerInfo, '', context)
     }
   }
 
@@ -89,7 +104,7 @@ class PactConsumerTestExtTest {
   void test2() {
     assertThrows(UnsupportedOperationException) {
       def context = ['getTestClass': { Optional.of(PactConsumerTestExtTest) } ] as ExtensionContext
-      subject.lookupPact(providerInfo, 'test', context, [])
+      subject.lookupPact(providerInfo, 'test', context)
     }
   }
 
@@ -98,7 +113,7 @@ class PactConsumerTestExtTest {
   void test3() {
     assertThrows(UnsupportedOperationException) {
       def context = ['getTestClass': { Optional.of(TestClassInvalidSignature) } ] as ExtensionContext
-      subject.lookupPact(providerInfo, 'pactMethod', context, [])
+      subject.lookupPact(providerInfo, 'pactMethod', context)
     }
   }
 
@@ -107,7 +122,7 @@ class PactConsumerTestExtTest {
   void test4() {
     assertThrows(UnsupportedOperationException) {
       def context = ['getTestClass': { Optional.of(TestClass) } ] as ExtensionContext
-      subject.lookupPact(providerInfo, 'pactMethod', context, [])
+      subject.lookupPact(providerInfo, 'pactMethod', context)
     }
   }
 
@@ -117,10 +132,11 @@ class PactConsumerTestExtTest {
     def context = [
       'getTestClass': { Optional.of(TestClass) },
       'getTestInstance': { Optional.of(new TestClass()) },
-      'getTestMethod': { Optional.empty() }
+      'getTestMethod': { Optional.empty() },
+      'getStore': { mockStore }
     ] as ExtensionContext
     def pact = subject.lookupPact(new ProviderInfo('junit5_provider', 'localhost', '8080',
-      PactSpecVersion.V3, ProviderType.SYNCH), 'pactMethod', context, [])
+      PactSpecVersion.V3, ProviderType.SYNCH), 'pactMethod', context)
     assertThat(pact, Matchers.is(this.pact))
   }
 
@@ -131,7 +147,8 @@ class PactConsumerTestExtTest {
     def context = [
       'getTestClass': { Optional.of(TestClass) },
       'getTestInstance': { Optional.of(instance) },
-      'getTestMethod': { Optional.of(TestClass.methods.find { it.name == 'pactMethod' }) }
+      'getTestMethod': { Optional.of(TestClass.methods.find { it.name == 'pactMethod' }) },
+      'getStore': { mockStore }
     ] as ExtensionContext
     def providerInfo = subject.lookupProviderInfo(context)
     assertThat(providerInfo.first.providerName, Matchers.is(''))
@@ -148,7 +165,8 @@ class PactConsumerTestExtTest {
     def context = [
       'getTestClass': { Optional.of(TestClassWithClassLevelAnnotation) },
       'getTestInstance': { Optional.of(instance) },
-      'getTestMethod': { Optional.of(TestClassWithClassLevelAnnotation.methods.find { it.name == 'pactMethod' }) }
+      'getTestMethod': { Optional.of(TestClassWithClassLevelAnnotation.methods.find { it.name == 'pactMethod' }) },
+      'getStore': { mockStore }
     ] as ExtensionContext
     def providerInfo = subject.lookupProviderInfo(context)
     assertThat(providerInfo.first.providerName, Matchers.is('TestClassWithClassLevelAnnotation'))
@@ -165,7 +183,8 @@ class PactConsumerTestExtTest {
     def context = [
       'getTestClass': { Optional.of(TestClassWithMethodLevelAnnotation) },
       'getTestInstance': { Optional.of(instance) },
-      'getTestMethod': { Optional.of(TestClassWithMethodLevelAnnotation.methods.find { it.name == 'pactMethod' }) }
+      'getTestMethod': { Optional.of(TestClassWithMethodLevelAnnotation.methods.find { it.name == 'pactMethod' }) },
+      'getStore': { mockStore }
     ] as ExtensionContext
     def providerInfo = subject.lookupProviderInfo(context)
     assertThat(providerInfo.first.providerName, Matchers.is('TestClassWithMethodLevelAnnotation'))
@@ -184,7 +203,8 @@ class PactConsumerTestExtTest {
       'getTestInstance': { Optional.of(instance) },
       'getTestMethod': {
         Optional.of(TestClassWithMethodAndClassLevelAnnotation.methods.find { it.name == 'pactMethod' })
-      }
+      },
+      'getStore': { mockStore }
     ] as ExtensionContext
     def providerInfo = subject.lookupProviderInfo(context)
     assertThat(providerInfo.first.providerName, Matchers.is('TestClassWithMethodAndClassLevelAnnotation'))
@@ -203,7 +223,8 @@ class PactConsumerTestExtTest {
       'getTestInstance': { Optional.of(instance) },
       'getTestMethod': {
         Optional.of(TestClassWithMethodAndClassLevelAnnotation2.methods.find { it.name == 'pactMethod' })
-      }
+      },
+      'getStore': { mockStore }
     ] as ExtensionContext
     def providerInfo = subject.lookupProviderInfo(context)
     assertThat(providerInfo.first.pactVersion, Matchers.is(PactSpecVersion.V3))
