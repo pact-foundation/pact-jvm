@@ -1,5 +1,6 @@
 package au.com.dius.pact.model.generators
 
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -38,6 +39,19 @@ class ProviderStateGeneratorSpec extends Specification {
     [a: 100]         | 'a'          | 100
     [a: 'A', b: 100] | '/${a}/${b}' | '/A/100'
     [a: 'A', b: 100] | '/${a}/${c}' | '/A/null'
+  }
+
+  @Issue('#1031')
+  def 'handles encoded values in the expressions'() {
+    given:
+    def expression = '{\n  "entityName": "${eName}",\n  "xml": "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n"\n}'
+    def context = [eName: 'Entity-Name']
+
+    when:
+    def result = new ProviderStateGenerator(expression).generate([providerState: context])
+
+    then:
+    result == '{\n  "entityName": "Entity-Name",\n  "xml": "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n"\n}'
   }
 
 }

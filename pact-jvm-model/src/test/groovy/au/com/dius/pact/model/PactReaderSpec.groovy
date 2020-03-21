@@ -6,7 +6,12 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectInputStream
 import org.apache.http.impl.client.BasicCredentialsProvider
+import spock.lang.Issue
 import spock.lang.Specification
+import spock.lang.Unroll
+import spock.util.environment.RestoreSystemProperties
+
+import static au.com.dius.pact.core.model.generators.Category.BODY
 
 @SuppressWarnings('DuplicateMapLiteral')
 class PactReaderSpec extends Specification {
@@ -324,6 +329,41 @@ class PactReaderSpec extends Specification {
     then:
     pact instanceof MessagePact
     pact.interactions.every { it.interactionId ==~ /^[a-zA-Z0-9]+$/  }
+  }
+
+  @Unroll
+  def 'determining pact spec version'() {
+    expect:
+    DefaultPactReader.INSTANCE.determineSpecVersion(JsonParser.parseString(json)) == version
+
+    where:
+
+    json                                                      | version
+    '{}'                                                      | '2.0.0'
+    '{"metadata":{}}'                                         | '2.0.0'
+    '{"metadata":{"pactSpecificationVersion":"1.2.3"}}'       | '1.2.3'
+    '{"metadata":{"pactSpecification":"1.2.3"}}'              | '2.0.0'
+    '{"metadata":{"pactSpecification":{}}}'                   | '2.0.0'
+    '{"metadata":{"pactSpecification":{"version":"1.2.3"}}}'  | '1.2.3'
+    '{"metadata":{"pactSpecification":{"version":"3.0"}}}'    | '3.0.0'
+    '{"metadata":{"pact-specification":{"version":"1.2.3"}}}' | '1.2.3'
+
+  }
+
+  @Issue('#1031')
+  def 'handle encoded values in the pact file'() {
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('encoded-values-pact.json')
+
+    when:
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
+
+    then:
+    pact instanceof RequestResponsePact
+    pact.interactions[0].request.body.valueAsString() ==
+      '{"entityName":"mock-name","xml":"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n"}'
+    pact.interactions[0].request.generators.categories[BODY]['$'].expression ==
+      '{\n  "entityName": "${eName}",\n  "xml": "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n"\n}'
   }
 
 }
