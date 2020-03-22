@@ -1,9 +1,11 @@
 package au.com.dius.pact.core.pactbroker
 
+import arrow.core.Either
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.com.github.michaelbull.result.Result
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
 import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.jsonArray
@@ -67,6 +69,13 @@ sealed class Latest {
 data class CanIDeployResult(val ok: Boolean, val message: String, val reason: String)
 
 /**
+ * Consumer version selector. See https://docs.pact.io/pact_broker/advanced_topics/selectors
+ */
+data class ConsumerVersionSelector(val tag: String, val latest: Boolean = true) {
+  fun toJson() = jsonObject("tag" to tag, "latest" to latest)
+}
+
+/**
  * Client for the pact broker service
  */
 open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, Any>) {
@@ -76,6 +85,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   /**
    * Fetches all consumers for the given provider
    */
+  @Deprecated(message = "Use the version that takes selectors instead",
+    replaceWith = ReplaceWith("fetchConsumersWithSelectors"))
   open fun fetchConsumers(provider: String): List<PactBrokerConsumer> {
     return try {
       val halClient = newHalClient()
@@ -99,6 +110,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   /**
    * Fetches all consumers for the given provider and tag
    */
+  @Deprecated(message = "Use the version that takes selectors instead",
+    replaceWith = ReplaceWith("fetchConsumersWithSelectors"))
   open fun fetchConsumersWithTag(provider: String, tag: String): List<PactBrokerConsumer> {
     return try {
       val halClient = newHalClient()
@@ -117,6 +130,48 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     } catch (e: NotFoundHalResponse) {
       // This means the provider is not defined in the broker, so fail gracefully.
       emptyList()
+    }
+  }
+
+  /**
+   * Fetches all consumers for the given provider and selectors
+   */
+  open fun fetchConsumersWithSelectors(provider: String, consumerVersionSelectors: List<ConsumerVersionSelector>): Either<Exception, List<PactResult>> {
+    val halClient = newHalClient()
+    val pactsForVerification = when {
+      halClient.linkUrl(PROVIDER_PACTS_FOR_VERIFICATION) != null -> PROVIDER_PACTS_FOR_VERIFICATION
+      halClient.linkUrl(BETA_PROVIDER_PACTS_FOR_VERIFICATION) != null -> BETA_PROVIDER_PACTS_FOR_VERIFICATION
+      else -> null
+    }
+    if (pactsForVerification != null) {
+      val body = jsonObject(
+        "consumerVersionSelectors" to jsonArray(consumerVersionSelectors.map { it.toJson() })
+      )
+      return handleWith {
+        halClient.postJson(pactsForVerification, mapOf("provider" to provider), body.toString()).map { result ->
+          result["_embedded"]["pacts"].asJsonArray.map { pactJson ->
+            val selfLink = pactJson["_links"]["self"]
+            val href = Precoded(Json.toString(selfLink["href"])).decoded().toString()
+            val name = Json.toString(selfLink["name"])
+            val notices = pactJson["verificationProperties"]["notices"].asJsonArray
+              .map { VerificationNotice.fromJson(it) }
+            if (options.containsKey("authentication")) {
+              PactResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, notices)
+            } else {
+              PactResult(name, href, pactBrokerUrl, emptyList(), notices)
+            }
+          }
+        }
+      }
+    } else {
+      return handleWith {
+        if (consumerVersionSelectors.isEmpty()) {
+          fetchConsumers(provider).map { PactResult.fromConsumer(it) }
+        } else {
+          fetchConsumersWithTag(provider, consumerVersionSelectors.first().tag)
+            .map { PactResult.fromConsumer(it) }
+        }
+      }
     }
   }
 
@@ -268,6 +323,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   /**
    * Fetches the consumers of the provider that have no associated tag
    */
+  @Deprecated(message = "Use the version that takes selectors instead",
+    replaceWith = ReplaceWith("fetchConsumersWithSelectors"))
   open fun fetchLatestConsumersWithNoTag(provider: String): List<PactBrokerConsumer> {
     return try {
       val halClient = newHalClient()
@@ -342,6 +399,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     const val LATEST_PROVIDER_PACTS_WITH_NO_TAG = "pb:latest-untagged-pact-version"
     const val LATEST_PROVIDER_PACTS = "pb:latest-provider-pacts"
     const val LATEST_PROVIDER_PACTS_WITH_TAG = "pb:latest-provider-pacts-with-tag"
+    const val PROVIDER_PACTS_FOR_VERIFICATION = "pb:provider-pacts-for-verification"
+    const val BETA_PROVIDER_PACTS_FOR_VERIFICATION = "beta:provider-pacts-for-verification"
     const val PROVIDER = "pb:provider"
     const val PROVIDER_TAG_VERSION = "pb:version-tag"
     const val PACTS = "pb:pacts"

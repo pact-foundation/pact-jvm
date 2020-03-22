@@ -40,6 +40,8 @@ import java.net.URI
 import java.net.URLDecoder
 import java.util.function.BiFunction
 import java.util.function.Consumer
+import arrow.core.Either
+import au.com.dius.pact.core.support.handleWith
 
 /**
  * Interface to a HAL Client
@@ -137,11 +139,30 @@ interface IHalClient {
   fun withDocContext(docAttributes: Map<String, Any?>): IHalClient
 
   /**
+   * Sets the starting context from a previous broker interaction (Pact document)
+   */
+  fun withDocContext(docAttributes: JsonElement): IHalClient
+
+  /**
    * Upload a JSON document to the current path link, using a PUT request
    */
   fun putJson(link: String, options: Map<String, Any>, json: String): Result<Boolean, Exception>
 
+  /**
+   * Upload a JSON document to the current path link, using a POST request
+   */
+  fun postJson(link: String, options: Map<String, Any>, json: String): Either<Exception, JsonElement>
+
+  /**
+   * Get JSON from the provided path
+   */
   fun getJson(path: String): Result<JsonElement, Exception>
+
+  /**
+   * Get JSON from the provided path
+   * @param path Path to fetch the JSON document from
+   * @param encodePath If the path should be encoded
+   */
   fun getJson(path: String, encodePath: Boolean): Result<JsonElement, Exception>
 }
 
@@ -263,6 +284,11 @@ open class HalClient @JvmOverloads constructor(
     return this
   }
 
+  override fun withDocContext(json: JsonElement): IHalClient {
+    pathInfo = json
+    return this
+  }
+
   override fun getJson(path: String) = getJson(path, true)
 
   override fun getJson(path: String, encodePath: Boolean): Result<JsonElement, Exception> {
@@ -273,18 +299,22 @@ open class HalClient @JvmOverloads constructor(
       httpGet.addHeader("Accept", "application/hal+json, application/json")
 
       val response = httpClient!!.execute(httpGet, httpContext)
-      if (response.statusLine.statusCode < 300) {
-        val contentType = ContentType.getOrDefault(response.entity)
-        if (isJsonResponse(contentType)) {
-          return@of JsonParser.parseString(EntityUtils.toString(response.entity))
-        } else {
-          throw InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got '$contentType'")
-        }
+      return@of handleHalResponse(response, path)
+    }
+  }
+
+  private fun handleHalResponse(response: CloseableHttpResponse, path: String): JsonElement {
+    if (response.statusLine.statusCode < 300) {
+      val contentType = ContentType.getOrDefault(response.entity)
+      if (isJsonResponse(contentType)) {
+        return JsonParser.parseString(EntityUtils.toString(response.entity))
       } else {
-        when (response.statusLine.statusCode) {
-          404 -> throw NotFoundHalResponse("No HAL document found at path '$path'")
-          else -> throw RequestFailedException("Request to path '$path' failed with response '${response.statusLine}'")
-        }
+        throw InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got '$contentType'")
+      }
+    } else {
+      when (response.statusLine.statusCode) {
+        404 -> throw NotFoundHalResponse("No HAL document found at path '$path'")
+        else -> throw RequestFailedException("Request to path '$path' failed with response '${response.statusLine}'")
       }
     }
   }
@@ -479,6 +509,20 @@ open class HalClient @JvmOverloads constructor(
             false
           }
         }
+      }
+    }
+  }
+
+  override fun postJson(link: String, options: Map<String, Any>, json: String): Either<Exception, JsonElement> {
+    val href = hrefForLink(link, options)
+    val http = initialiseRequest(HttpPost(buildUrl(baseUrl, href.first, href.second)))
+    http.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
+    http.addHeader("Accept", "application/hal+json, application/json")
+    http.entity = StringEntity(json, ContentType.APPLICATION_JSON)
+
+    return handleWith {
+      httpClient!!.execute(http, httpContext).use {
+        return@handleWith handleHalResponse(it, href.first)
       }
     }
   }
