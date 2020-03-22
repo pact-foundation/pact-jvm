@@ -352,6 +352,7 @@ class PactBrokerClientSpec extends Specification {
     def result = client.fetchConsumersWithSelectors('provider', selectors)
 
     then:
+    1 * halClient.navigate() >> halClient
     1 * halClient.linkUrl('pb:provider-pacts-for-verification') >> 'URL'
     1 * halClient.postJson('pb:provider-pacts-for-verification', [provider: 'provider'], json) >> new Either.Right(jsonResult)
     result.right
@@ -382,6 +383,7 @@ class PactBrokerClientSpec extends Specification {
     def result = client.fetchConsumersWithSelectors('provider', [])
 
     then:
+    1 * halClient.navigate() >> halClient
     1 * halClient.linkUrl('pb:provider-pacts-for-verification') >> null
     1 * halClient.linkUrl('beta:provider-pacts-for-verification') >> 'URL'
     1 * halClient.postJson('beta:provider-pacts-for-verification', _, _) >> new Either.Right(jsonResult)
@@ -399,6 +401,7 @@ class PactBrokerClientSpec extends Specification {
     def result = client.fetchConsumersWithSelectors('provider', [])
 
     then:
+    1 * halClient.navigate() >> halClient
     1 * halClient.linkUrl('pb:provider-pacts-for-verification') >> null
     1 * halClient.linkUrl('beta:provider-pacts-for-verification') >> null
     0 * halClient.postJson(_, _, _)

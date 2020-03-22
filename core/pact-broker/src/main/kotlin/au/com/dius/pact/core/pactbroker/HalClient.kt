@@ -48,6 +48,11 @@ import au.com.dius.pact.core.support.handleWith
  */
 interface IHalClient {
   /**
+   * Navigates to the Root
+   */
+  fun navigate(): IHalClient
+
+  /**
    * Navigates the URL associated with the given link using the current HAL document
    * @param options Map of key-value pairs to use for parsing templated links
    * @param link Link name to navigate
@@ -245,6 +250,11 @@ open class HalClient @JvmOverloads constructor(
     }
 
     return httpClient!!
+  }
+
+  override fun navigate(): IHalClient {
+    pathInfo = fetch(ROOT)
+    return this
   }
 
   override fun navigate(options: Map<String, Any>, link: String): IHalClient {

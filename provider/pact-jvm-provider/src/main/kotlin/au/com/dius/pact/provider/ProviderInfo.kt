@@ -1,8 +1,10 @@
 package au.com.dius.pact.provider
 
+import arrow.core.Either
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.ToStringBuilder
@@ -55,12 +57,8 @@ open class ProviderInfo @JvmOverloads constructor (
   }
 
   @JvmOverloads
-  open fun hasPactsFromPactBroker(options: Map<String, Any> = mapOf(), pactBrokerUrl: String): List<ConsumerInfo> {
-    val client = PactBrokerClient(pactBrokerUrl, options)
-    val consumersFromBroker = client.fetchConsumers(name).map { ConsumerInfo.from(it) }
-    consumers.addAll(consumersFromBroker)
-    return consumersFromBroker
-  }
+  open fun hasPactsFromPactBroker(options: Map<String, Any> = mapOf(), pactBrokerUrl: String) =
+    hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl, emptyList())
 
   @JvmOverloads
   open fun hasPactsFromPactBrokerWithTag(
@@ -72,6 +70,29 @@ open class ProviderInfo @JvmOverloads constructor (
     val consumersFromBroker = client.fetchConsumersWithTag(name, tag).map { ConsumerInfo.from(it) }
     consumers.addAll(consumersFromBroker)
     return consumersFromBroker
+  }
+
+  @JvmOverloads
+  open fun hasPactsFromPactBrokerWithSelectors(
+    options: Map<String, Any> = mapOf(),
+    pactBrokerUrl: String,
+    selectors: List<ConsumerVersionSelector>
+  ): List<ConsumerInfo> {
+    val client = PactBrokerClient(pactBrokerUrl, options)
+    val consumersFromBroker = client.fetchConsumersWithSelectors(name, selectors).map { results ->
+      results.map { ConsumerInfo.from(it) }
+    }
+    return when (consumersFromBroker) {
+      is Either.Right<*> -> {
+        val list = (consumersFromBroker as Either.Right<List<ConsumerInfo>>).b
+        consumers.addAll(list)
+        list
+      }
+      is Either.Left<*> -> {
+        throw RuntimeException("Call to fetch pacts from Pact Broker failed with an exception",
+          consumersFromBroker.a as Exception)
+      }
+    }
   }
 
   open fun setupConsumerListFromPactFiles(consumersGroup: ConsumersGroup): MutableList<IConsumerInfo> {

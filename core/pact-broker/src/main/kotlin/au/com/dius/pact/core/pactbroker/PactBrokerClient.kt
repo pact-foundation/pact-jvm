@@ -137,7 +137,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
    * Fetches all consumers for the given provider and selectors
    */
   open fun fetchConsumersWithSelectors(provider: String, consumerVersionSelectors: List<ConsumerVersionSelector>): Either<Exception, List<PactResult>> {
-    val halClient = newHalClient()
+    val halClient = newHalClient().navigate()
     val pactsForVerification = when {
       halClient.linkUrl(PROVIDER_PACTS_FOR_VERIFICATION) != null -> PROVIDER_PACTS_FOR_VERIFICATION
       halClient.linkUrl(BETA_PROVIDER_PACTS_FOR_VERIFICATION) != null -> BETA_PROVIDER_PACTS_FOR_VERIFICATION

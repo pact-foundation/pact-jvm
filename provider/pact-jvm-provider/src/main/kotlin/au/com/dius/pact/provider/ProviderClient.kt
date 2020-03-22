@@ -9,6 +9,7 @@ import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.pactbroker.PactBrokerConsumer
+import au.com.dius.pact.core.pactbroker.PactResult
 import au.com.dius.pact.core.support.Json
 import groovy.lang.Binding
 import groovy.lang.Closure
@@ -164,6 +165,12 @@ open class ConsumerInfo @JvmOverloads constructor (
     fun from(consumer: PactBrokerConsumer) =
       ConsumerInfo(name = consumer.name,
         pactSource = BrokerUrlSource(url = consumer.source, pactBrokerUrl = consumer.pactBrokerUrl, tag = consumer.tag),
+        pactFileAuthentication = consumer.pactFileAuthentication
+      )
+
+    fun from(consumer: PactResult) =
+      ConsumerInfo(name = consumer.name,
+        pactSource = BrokerUrlSource(url = consumer.source, pactBrokerUrl = consumer.pactBrokerUrl),
         pactFileAuthentication = consumer.pactFileAuthentication
       )
   }
