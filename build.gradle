@@ -11,7 +11,7 @@ buildscript {
 
 plugins {
   id 'nebula.kotlin' version '1.3.70'
-  id 'org.jmailen.kotlinter' version '1.26.0'
+  id 'org.jmailen.kotlinter' version '2.3.2'
   id 'io.gitlab.arturbosch.detekt' version '1.0.0-RC14'
   id 'org.jetbrains.dokka' version '0.10.0'
   id 'com.github.johnrengelman.shadow' version '5.0.0' apply false
@@ -209,7 +209,6 @@ subprojects {
 
   kotlinter {
     indentSize = 2
-    continuationIndentSize = 2
     reporters = ['checkstyle', 'plain', 'json']
   }
 

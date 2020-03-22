@@ -342,11 +342,9 @@ open class ProviderClient(
       }
 
       if (provider.stateChangeRequestFilter != null) {
-        when {
-          provider.stateChangeRequestFilter is Closure<*> ->
-            (provider.stateChangeRequestFilter as Closure<*>).call(method)
-          provider.stateChangeRequestFilter is Function1<*, *> ->
-            (provider.stateChangeRequestFilter as Function1<Any, Any>).apply(method)
+        when (provider.stateChangeRequestFilter) {
+          is Closure<*> -> (provider.stateChangeRequestFilter as Closure<*>).call(method)
+          is Function1<*, *> -> (provider.stateChangeRequestFilter as Function1<Any, Any>).apply(method)
           else -> {
             val binding = Binding()
             binding.setVariable(REQUEST, method)

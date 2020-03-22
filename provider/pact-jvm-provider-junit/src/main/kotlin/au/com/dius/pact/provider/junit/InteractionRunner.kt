@@ -1,6 +1,10 @@
 package au.com.dius.pact.provider.junit
 
-import au.com.dius.pact.core.model.*
+import au.com.dius.pact.core.model.FilteredPact
+import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.model.PactSource
+import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
