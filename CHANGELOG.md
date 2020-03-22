@@ -1,5 +1,31 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.0.8 - Bugfixes + support for provider-pacts-for-verification endpoint
+
+* a549ef32e - feat: display verification notices with Gradle and Maven #942 (Ronald Holshausen, Sun Mar 22 19:03:11 2020 +1100)
+* c5d734201 - feat: Updated Gradle plugin to use new hasPactsFromPactBrokerWithSelectors #942 (Ronald Holshausen, Sun Mar 22 17:37:25 2020 +1100)
+* 9644dd9f1 - chore: upgrade Kotlinter to 2.3.2 (Ronald Holshausen, Sun Mar 22 17:16:00 2020 +1100)
+* 7027da832 - feat: implemented pact broker client support for provider-pacts-for-verification endpoint #942 (Ronald Holshausen, Sun Mar 22 14:43:26 2020 +1100)
+* 85c3bdb6f - Merge pull request #1050 from arhohuttunen/fix-1049 (Ronald Holshausen, Sat Mar 21 15:59:13 2020 +1100)
+* 01d823547 - test: use springboot test to verify pact broker values from spring context #1051 (Ronald Holshausen, Sat Mar 21 15:38:29 2020 +1100)
+* f8997d708 - Merge branch 'master' into fix-1049 (Arho Huttunen, Sat Mar 21 06:37:45 2020 +0200)
+* 049ac1f98 - Merge pull request #1051 from arhohuttunen/fix-1023 (Ronald Holshausen, Sat Mar 21 15:34:46 2020 +1100)
+* adae5bb17 - Merge pull request #1048 from gmariotti/master (Ronald Holshausen, Sat Mar 21 15:19:24 2020 +1100)
+* d38fda122 - fix: typo in exception message (Ronald Holshausen, Sat Mar 21 15:17:40 2020 +1100)
+* 7f38fee0a - Merge pull request #1046 from wieslawmlynarski/pact-error-with-default-content-type (Ronald Holshausen, Sat Mar 21 14:50:20 2020 +1100)
+* 8bf077e6a - fix: corrected junit 5 tests to support injecting the mock server in a before callback (Ronald Holshausen, Sat Mar 21 14:48:32 2020 +1100)
+* 9332e4f4b - fix: codenarc (Ronald Holshausen, Sat Mar 21 13:34:07 2020 +1100)
+* cc8911a44 - Merge pull request #1045 from charbgr/patch-1 (Ronald Holshausen, Sat Mar 21 13:31:43 2020 +1100)
+* c9ef690c4 - test: add tests for generated values with XML within JSON #1031 (Ronald Holshausen, Sat Mar 21 13:23:06 2020 +1100)
+* a8d6ea2ef - chore: upgrade Kotlin to 1.3.70 (Ronald Holshausen, Sat Mar 21 12:44:24 2020 +1100)
+* 5685e85b0 - chore: Upgrade Gradle to 5.6.4 (Ronald Holshausen, Sat Mar 21 12:09:50 2020 +1100)
+* 7d6a50788 - fix: publish verification results when Pact URL is overridden #1049 (Arho Huttunen, Mon Mar 16 19:36:37 2020 +0200)
+* 4215789de - fix: @PactBroker not reading Spring properties with JUnit 5 #1023 (Arho Huttunen, Mon Mar 16 19:45:37 2020 +0200)
+* 045499f34 - feat: create Kotlin friendly extension for arrays (Guido Pio Mariotti, Fri Mar 13 16:30:41 2020 +0100)
+* d1b192a19 - #1013 - Fix to issue when in pact contract content type is not provided (Wiesław Młynarski, Thu Mar 12 22:49:18 2020 +0100)
+* 528bcb647 - Fix link for pact gradle plugin (Vasilis Charalampakis, Thu Mar 12 13:39:12 2020 +0200)
+* 6fd8adbc3 - bump version to 4.0.8 (Ronald Holshausen, Sun Mar 8 13:26:08 2020 +1100)
+
 # 4.0.7 - Bugfix Release
 
 * 1de706ed2 - chore: update travis build (Ronald Holshausen, Sun Mar 8 13:01:19 2020 +1100)
