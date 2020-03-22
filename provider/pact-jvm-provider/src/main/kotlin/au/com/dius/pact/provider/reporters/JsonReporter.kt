@@ -10,6 +10,7 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.UrlPactSource
+import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.property
@@ -254,6 +255,14 @@ class JsonReporter(
   override fun metadataComparisonOk(key: String, value: Any?) { }
 
   override fun metadataComparisonOk() { }
+
+  override fun reportVerificationNoticesForConsumer(
+    consumer: IConsumerInfo,
+    provider: IProviderInfo,
+    notices: List<VerificationNotice>
+  ) {
+    jsonData["execution"].array.last()["consumer"]["notices"] = jsonArray(notices.map { it.text })
+  }
 
   companion object {
     const val REPORT_FORMAT = "0.1.0"

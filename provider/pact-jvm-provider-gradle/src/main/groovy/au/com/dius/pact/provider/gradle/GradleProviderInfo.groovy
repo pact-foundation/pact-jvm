@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.gradle
 
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ConsumersGroup
 import au.com.dius.pact.provider.IConsumerInfo
@@ -38,8 +39,21 @@ class GradleProviderInfo extends ProviderInfo {
     fromPactBroker
   }
 
+  /**
+   * @deprecated Use hasPactsFromPactBrokerWithSelectors instead
+   */
+  @Deprecated
   List hasPactsFromPactBrokerWithTag(Map options = [:], String pactBrokerUrl, String tag, Closure closure) {
     def fromPactBroker = super.hasPactsFromPactBrokerWithTag(options, pactBrokerUrl, tag)
+    fromPactBroker.each {
+      ConfigureUtil.configure(closure, it)
+    }
+    fromPactBroker
+  }
+
+  List hasPactsFromPactBrokerWithSelectors(Map options = [:], String pactBrokerUrl,
+                                           List<ConsumerVersionSelector> selectors, Closure closure) {
+    def fromPactBroker = super.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl, selectors)
     fromPactBroker.each {
       ConfigureUtil.configure(closure, it)
     }

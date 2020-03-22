@@ -8,6 +8,7 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.UrlPactSource
+import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.BodyComparisonResult
@@ -273,5 +274,15 @@ class MarkdownReporter(
 
   override fun metadataComparisonOk() {
     pw!!.write("&nbsp;&nbsp;&nbsp;&nbsp;has matching metadata (<span style='color:green'>OK</span>)\n")
+  }
+
+  override fun reportVerificationNoticesForConsumer(
+    consumer: IConsumerInfo,
+    provider: IProviderInfo,
+    notices: List<VerificationNotice>
+  ) {
+    pw!!.write("Notices:\n")
+    notices.forEachIndexed { i, notice -> pw!!.write("${i + 1}. ${notice.text}\n") }
+    pw!!.write("\n")
   }
 }

@@ -10,6 +10,7 @@ dependencies {
     compile("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {
         exclude group: 'org.scala-lang'
     }
+    implementation 'io.netty:netty-transport-native-epoll:4.1.48.Final'
 
     testCompile project(":consumer:pact-jvm-consumer")
     testCompile "org.specs2:specs2-core_2.12:${project.specs2Version}",

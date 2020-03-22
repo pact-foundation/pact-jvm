@@ -42,4 +42,3 @@ include   'pact-jvm-server'
 include   'pact-specification-test'
 
 include 'pact-publish'
-

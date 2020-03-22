@@ -61,6 +61,8 @@ open class ProviderInfo @JvmOverloads constructor (
     hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl, emptyList())
 
   @JvmOverloads
+  @Deprecated(message = "Use version that takes selectors",
+    replaceWith = ReplaceWith("hasPactsFromPactBrokerWithSelectors"))
   open fun hasPactsFromPactBrokerWithTag(
     options: Map<String, Any> = mapOf(),
     pactBrokerUrl: String,

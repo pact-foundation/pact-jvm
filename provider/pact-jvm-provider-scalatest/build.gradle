@@ -6,6 +6,7 @@ dependencies {
   compile project(path: ":provider:pact-jvm-provider", configuration: 'default'),
           project(path: ":provider:pact-jvm-provider-scalasupport_2.12", configuration: 'default'),
           "org.scalatest:scalatest_2.12:${project.scalaTestVersion}"
+  implementation 'io.netty:netty-transport-native-epoll:4.1.48.Final'
 
   testCompile project(":consumer:pact-jvm-consumer")
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"

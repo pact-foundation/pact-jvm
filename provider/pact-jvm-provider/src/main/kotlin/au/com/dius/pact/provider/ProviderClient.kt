@@ -10,6 +10,7 @@ import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.pactbroker.PactBrokerConsumer
 import au.com.dius.pact.core.pactbroker.PactResult
+import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.core.support.Json
 import groovy.lang.Binding
 import groovy.lang.Closure
@@ -79,6 +80,7 @@ interface IConsumerInfo {
   var verificationType: PactVerification?
   var pactSource: Any?
   var pactFileAuthentication: List<Any?>
+  var notices: List<VerificationNotice>
 }
 
 open class ConsumerInfo @JvmOverloads constructor (
@@ -88,7 +90,8 @@ open class ConsumerInfo @JvmOverloads constructor (
   override var packagesToScan: List<String> = emptyList(),
   override var verificationType: PactVerification? = null,
   override var pactSource: Any? = null,
-  override var pactFileAuthentication: List<Any?> = emptyList()
+  override var pactFileAuthentication: List<Any?> = emptyList(),
+  override var notices: List<VerificationNotice> = emptyList()
 ) : IConsumerInfo {
 
   fun toPactConsumer() = au.com.dius.pact.core.model.Consumer(name)
@@ -171,7 +174,7 @@ open class ConsumerInfo @JvmOverloads constructor (
     fun from(consumer: PactResult) =
       ConsumerInfo(name = consumer.name,
         pactSource = BrokerUrlSource(url = consumer.source, pactBrokerUrl = consumer.pactBrokerUrl),
-        pactFileAuthentication = consumer.pactFileAuthentication
+        pactFileAuthentication = consumer.pactFileAuthentication, notices = consumer.notices
       )
   }
 }

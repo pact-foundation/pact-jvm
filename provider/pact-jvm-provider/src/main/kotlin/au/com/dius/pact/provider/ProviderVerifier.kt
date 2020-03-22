@@ -632,6 +632,10 @@ open class ProviderVerifier @JvmOverloads constructor (
     when (pactSource) {
       is BrokerUrlSource -> reporters.forEach {
         it.reportVerificationForConsumer(consumer, provider, pactSource.tag)
+        val notices = consumer.notices.filter { it.`when` == "before_verification" }
+        if (notices.isNotEmpty()) {
+          it.reportVerificationNoticesForConsumer(consumer, provider, notices)
+        }
         it.verifyConsumerFromUrl(pactSource, consumer)
       }
       is UrlPactSource -> reporters.forEach {
