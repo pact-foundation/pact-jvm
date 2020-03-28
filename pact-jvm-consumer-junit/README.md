@@ -15,7 +15,7 @@ The library is available on maven central using:
 
 ### Using the base ConsumerPactTest
 
-To write a pact spec extend ConsumerPactTestMk2. This base class defines the following four methods which must be
+To write a pact spec extend ConsumerPactTest. This base class defines the following four methods which must be
 overridden in your test class.
 
 * *providerName:* Returns the name of the API provider that Pact will mock
@@ -39,7 +39,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
-public class ExampleJavaConsumerPactTest extends ConsumerPactTestMk2 {
+public class ExampleJavaConsumerPactTest extends ConsumerPactTest {
 
     @Override
     protected RequestResponsePact createFragment(PactDslWithProvider builder) {
@@ -101,7 +101,7 @@ and then add the rule:
 
 ```java
     @Rule
-    public PactProviderRuleMk2 mockProvider = new PactProviderRuleMk2("test_provider", "localhost", 8080, this);
+    public PactProviderRule mockProvider = new PactProviderRule("test_provider", "localhost", 8080, this);
 ```
 
 The hostname and port are optional. If left out, it will default to 127.0.0.1 and a random available port. You can get 
@@ -695,11 +695,11 @@ To have your consumer tests generate V2 format pacts, you can set the specificat
     }
 ```
 
-If you are using the `PactProviderRuleMk2`, you can pass the version into the constructor for the rule.
+If you are using the `PactProviderRule`, you can pass the version into the constructor for the rule.
 
 ```java
     @Rule
-    public PactProviderRuleMk2 mockTestProvider = new PactProviderRuleMk2("test_provider", PactSpecVersion.V2, this);
+    public PactProviderRule mockTestProvider = new PactProviderRule("test_provider", PactSpecVersion.V2, this);
 ```
 
 ## Consumer test for a message consumer
