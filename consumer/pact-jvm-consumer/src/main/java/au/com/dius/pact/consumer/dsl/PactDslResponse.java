@@ -14,6 +14,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules;
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
 import au.com.dius.pact.core.model.matchingrules.RuleLogic;
+import au.com.dius.pact.core.support.expressions.DataType;
 import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
@@ -353,7 +354,7 @@ public class PactDslResponse {
    * @param example Example value to use in the consumer test
    */
   public PactDslResponse headerFromProviderState(String name, String expression, String example) {
-    responseGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression));
+    responseGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression, DataType.STRING));
     responseHeaders.put(name, Collections.singletonList(example));
     return this;
   }

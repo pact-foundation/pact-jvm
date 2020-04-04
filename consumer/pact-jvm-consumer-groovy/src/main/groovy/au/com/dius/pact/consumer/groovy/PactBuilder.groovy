@@ -21,6 +21,7 @@ import au.com.dius.pact.core.model.matchingrules.Category
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.support.expressions.DataType
 import groovy.json.JsonBuilder
 import groovy.transform.CompileStatic
 import org.apache.http.entity.ContentType
@@ -160,7 +161,7 @@ class PactBuilder extends BaseBuilder {
         [key, [matcher.value]]
       } else if (value instanceof GeneratedValue) {
         generators.addGenerator(au.com.dius.pact.core.model.generators.Category.HEADER, key,
-          new ProviderStateGenerator(value.expression))
+          new ProviderStateGenerator(value.expression, DataType.STRING))
         [key, [value.exampleValue]]
       } else {
         [key, value instanceof List ? value : [value]]
@@ -179,7 +180,7 @@ class PactBuilder extends BaseBuilder {
       matcher.value
     } else if (path instanceof GeneratedValue) {
       generators.addGenerator(au.com.dius.pact.core.model.generators.Category.PATH,
-        new ProviderStateGenerator(path.expression))
+        new ProviderStateGenerator(path.expression, DataType.STRING))
       path.exampleValue
     } else {
       path as String
@@ -198,7 +199,7 @@ class PactBuilder extends BaseBuilder {
         [key, [matcher.value]]
       } else if (value[0] instanceof GeneratedValue) {
         generators.addGenerator(au.com.dius.pact.core.model.generators.Category.QUERY, key,
-          new ProviderStateGenerator(value[0].expression))
+          new ProviderStateGenerator(value[0].expression, DataType.STRING))
         [key, [value[0].exampleValue]]
       } else {
         [key, value]

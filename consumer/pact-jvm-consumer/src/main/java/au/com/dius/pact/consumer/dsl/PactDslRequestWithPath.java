@@ -11,6 +11,7 @@ import au.com.dius.pact.core.model.generators.Generators;
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator;
 import au.com.dius.pact.core.model.matchingrules.MatchingRules;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
+import au.com.dius.pact.core.support.expressions.DataType;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.entity.ContentType;
@@ -451,7 +452,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
    * @param example Example value to use in the consumer test
    */
   public PactDslRequestWithPath headerFromProviderState(String name, String expression, String example) {
-    requestGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression));
+    requestGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression, DataType.STRING));
     requestHeaders.put(name, Collections.singletonList(example));
     return this;
   }
@@ -463,7 +464,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
    * @param example Example value to use in the consumer test
    */
   public PactDslRequestWithPath queryParameterFromProviderState(String name, String expression, String example) {
-    requestGenerators.addGenerator(Category.QUERY, name, new ProviderStateGenerator(expression));
+    requestGenerators.addGenerator(Category.QUERY, name, new ProviderStateGenerator(expression, DataType.STRING));
     query.put(name, Collections.singletonList(example));
     return this;
   }
@@ -474,7 +475,7 @@ public class PactDslRequestWithPath extends PactDslRequestBase {
    * @param example Example value to use in the consumer test
    */
   public PactDslRequestWithPath pathFromProviderState(String expression, String example) {
-    requestGenerators.addGenerator(Category.PATH, new ProviderStateGenerator(expression));
+    requestGenerators.addGenerator(Category.PATH, new ProviderStateGenerator(expression, DataType.STRING));
     this.path = example;
     return this;
   }

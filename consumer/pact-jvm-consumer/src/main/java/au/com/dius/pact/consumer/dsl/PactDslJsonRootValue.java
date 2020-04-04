@@ -20,6 +20,7 @@ import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
 import au.com.dius.pact.core.model.matchingrules.RuleLogic;
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher;
 import au.com.dius.pact.core.support.Json;
+import au.com.dius.pact.core.support.expressions.DataType;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -844,7 +845,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue valueFromProviderState(String expression, Object example) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "", new ProviderStateGenerator(expression));
+    value.generators.addGenerator(Category.BODY, "", new ProviderStateGenerator(expression, DataType.from(example)));
     value.setValue(example);
     value.setMatcher(TypeMatcher.INSTANCE);
     return value;

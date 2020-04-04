@@ -1,6 +1,40 @@
 package au.com.dius.pact.core.support.expressions
 
+import java.lang.Double.parseDouble
+import java.lang.Long.parseLong
+import java.math.BigDecimal
+import java.math.BigInteger
 import java.util.StringJoiner
+
+enum class DataType {
+  STRING,
+  INTEGER,
+  DECIMAL,
+  FLOAT,
+  RAW;
+
+  fun convert(value: Any) = when (this) {
+    INTEGER -> if (value is Number) value.toLong() else parseLong(value.toString())
+    DECIMAL -> BigDecimal(value.toString())
+    FLOAT -> if (value is Number) value.toDouble() else parseDouble(value.toString())
+    STRING -> value.toString()
+    else -> value
+  }
+
+  companion object {
+    @JvmStatic
+    fun from(example: Any) = when (example) {
+      is Int -> INTEGER
+      is Long -> INTEGER
+      is BigInteger -> INTEGER
+      is Float -> FLOAT
+      is Double -> FLOAT
+      is BigDecimal -> DECIMAL
+      is String -> STRING
+      else -> RAW
+    }
+  }
+}
 
 object ExpressionParser {
 
@@ -16,9 +50,18 @@ object ExpressionParser {
 
   @JvmOverloads
   @JvmStatic
+  @Deprecated(message = "Use version that takes a data type parameter")
   fun parseExpression(value: String?, valueResolver: ValueResolver = SystemPropertyResolver()): String? {
     return if (containsExpressions(value)) {
       replaceExpressions(value!!, valueResolver)
+    } else value
+  }
+
+  @JvmOverloads
+  @JvmStatic
+  fun parseExpression(value: String?, type: DataType, valueResolver: ValueResolver = SystemPropertyResolver()): Any? {
+    return if (containsExpressions(value)) {
+      type.convert(replaceExpressions(value!!, valueResolver))
     } else value
   }
 
