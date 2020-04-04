@@ -16,7 +16,14 @@ class PactVerificationContextSpec extends Specification {
   @SuppressWarnings('UnnecessaryGetter')
   def 'sets the test result to an error result if the test fails with an exception'() {
     given:
-    ExtensionContext.Store store = Stub()
+    PactVerificationContext context
+    ExtensionContext.Store store = Stub {
+      get(_) >> { args ->
+        if (args[0] == 'interactionContext') {
+          context
+        }
+      }
+    }
     ExtensionContext extContext = Stub {
       getStore(_) >> store
     }
@@ -33,7 +40,7 @@ class PactVerificationContextSpec extends Specification {
       new Response(), '12345')
     TestResult testResult = TestResult.Ok.INSTANCE
 
-    def context = new PactVerificationContext(store, extContext, target, verifier, valueResolver,
+    context = new PactVerificationContext(store, extContext, target, verifier, valueResolver,
       provider, consumerName, interaction, testResult)
 
     when:

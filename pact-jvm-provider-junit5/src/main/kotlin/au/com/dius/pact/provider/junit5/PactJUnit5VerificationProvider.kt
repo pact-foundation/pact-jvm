@@ -73,9 +73,10 @@ data class PactVerificationContext @JvmOverloads constructor(
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val client = store.get("client")
     val request = store.get("request")
+    val testContext = store.get("interactionContext") as PactVerificationContext
     val failures = mutableMapOf<String, Any>()
     try {
-      this.testExecutionResult = validateTestExecution(client, request, failures)
+      this.testExecutionResult = validateTestExecution(client, request, failures, testContext.executionContext ?: emptyMap())
       if (testExecutionResult is TestResult.Failed) {
         verifier!!.displayFailures(failures)
         throw AssertionError(JUnitProviderTestSupport.generateErrorStringFromMismatches(failures))
@@ -85,13 +86,18 @@ data class PactVerificationContext @JvmOverloads constructor(
     }
   }
 
-  private fun validateTestExecution(client: Any?, request: Any?, failures: MutableMap<String, Any>): TestResult {
+  private fun validateTestExecution(
+    client: Any?,
+    request: Any?,
+    failures: MutableMap<String, Any>,
+    context: Map<String, Any?>
+  ): TestResult {
     if (providerInfo.verificationType == null || providerInfo.verificationType == PactVerification.REQUEST_RESPONSE) {
       val interactionMessage = "Verifying a pact between $consumerName and ${providerInfo.name}" +
         " - ${interaction.description}"
       return try {
         val reqResInteraction = interaction as RequestResponseInteraction
-        val expectedResponse = reqResInteraction.response
+        val expectedResponse = reqResInteraction.response.generatedResponse(context)
         val actualResponse = target.executeInteraction(client, request)
 
         verifier!!.verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures,
