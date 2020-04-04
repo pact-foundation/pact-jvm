@@ -75,7 +75,7 @@ open class HttpTarget
     reportTestResult(failures.isEmpty(), verifier)
 
     try {
-      if (!failures.isEmpty()) {
+      if (failures.isNotEmpty()) {
         verifier.displayFailures(failures)
         throw getAssertionError(failures)
       }

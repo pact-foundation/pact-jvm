@@ -1,0 +1,45 @@
+{
+  "provider" : {
+    "name" : "providerInjectedHeaders"
+  },
+  "consumer" : {
+    "name" : "consumer"
+  },
+  "interactions" : [ {
+    "providerStates": [
+      {
+        "name": "an active account exists",
+        "params": {
+          "name": "account 1"
+        }
+      }
+    ],
+    "description" : "Create new account for user",
+    "request" : {
+      "method" : "POST",
+      "path" : "/accounts"
+    },
+    "response" : {
+      "status": 201,
+      "headers": {
+        "Location": "http://localhost:8080/accounts/4beb44f1-53f7-4281-a78b-12c06d682067"
+      },
+      "generators": {
+        "header": {
+          "Location": {
+            "type": "ProviderState",
+            "expression": "http://localhost:${port}/accounts/${accountId}"
+          }
+        }
+      }
+    }
+  } ],
+  "metadata" : {
+    "pact-specification" : {
+      "version" : "3.0.0"
+    },
+    "pact-jvm" : {
+      "version" : "4.0.8"
+    }
+  }
+}
