@@ -594,6 +594,8 @@ will only run the verification for Foo Web Client with the given pact file URL.
 
 ## Verifying pact files from a S3 bucket
 
+**NOTE:** You will need to add the Amazon S3 SDK jar file to your project.
+
 Pact files stored in an S3 bucket can be verified by using an S3 URL to the pact file. I.e.,
 
 ```groovy
