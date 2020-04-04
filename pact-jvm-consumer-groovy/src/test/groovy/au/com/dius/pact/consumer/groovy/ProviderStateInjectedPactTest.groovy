@@ -53,12 +53,13 @@ class ProviderStateInjectedPactTest {
       '/shoppingCart/v2.0/shoppingCart/ShoppingCart_05540051-1155-4557-8080-008a802200aa'
     def generators = interaction.request.generators
     assert generators == [
-      path: [type: 'ProviderState', expression: '/shoppingCart/v2.0/shoppingCart/${shoppingcartId}']
+      path: [type: 'ProviderState', expression: '/shoppingCart/v2.0/shoppingCart/${shoppingcartId}',
+             'dataType': 'STRING']
     ]
     generators = interaction.response.generators
     assert generators == [
-      body: ['$.userId': [type: 'ProviderState', expression: 'userId']],
-      header: [LOCATION: [type: 'ProviderState', expression: 'http://server/users/${userId}']]
+      body: ['$.userId': [type: 'ProviderState', expression: 'userId', 'dataType': 'INTEGER']],
+      header: [LOCATION: [type: 'ProviderState', expression: 'http://server/users/${userId}', 'dataType': 'STRING']]
     ]
   }
 }

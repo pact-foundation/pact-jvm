@@ -22,6 +22,7 @@ import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
 import au.com.dius.pact.model.matchingrules.RuleLogic;
 import au.com.dius.pact.model.matchingrules.TypeMatcher;
 import au.com.dius.pact.model.matchingrules.ValuesMatcher;
+import au.com.dius.pact.support.expressions.DataType;
 import com.mifmif.common.regex.Generex;
 import io.gatling.jsonpath.Parser$;
 
@@ -1296,7 +1297,7 @@ public class PactDslJsonBody extends DslPart {
    * @param example Example value to be used in the consumer test
    */
   public PactDslJsonBody valueFromProviderState(String name, String expression, Object example) {
-    generators.addGenerator(Category.BODY, matcherKey(name), new ProviderStateGenerator(expression));
+    generators.addGenerator(Category.BODY, matcherKey(name), new ProviderStateGenerator(expression, DataType.from(example)));
     body.put(name, example);
     return this;
   }

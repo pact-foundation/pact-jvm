@@ -53,8 +53,8 @@ class ProviderStateInjectedPactTest {
     assert json.metadata.pactSpecification.version == '3.0.0'
     def generators = json.interactions.first().response.generators
     assert generators == [
-      body: ['$.userId': [type: 'ProviderState', expression: 'userId']],
-      header: [LOCATION: [type: 'ProviderState', expression: 'http://server/users/${userId}']]
+      body: ['$.userId': [type: 'ProviderState', expression: 'userId', dataType: 'INTEGER']],
+      header: [LOCATION: [type: 'ProviderState', expression: 'http://server/users/${userId}', dataType: 'STRING']]
     ]
   }
 }

@@ -19,6 +19,8 @@ import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
 import au.com.dius.pact.model.matchingrules.RuleLogic;
 import au.com.dius.pact.model.matchingrules.TypeMatcher;
+import au.com.dius.pact.support.Json;
+import au.com.dius.pact.support.expressions.DataType;
 import com.mifmif.common.regex.Generex;
 import groovy.json.JsonOutput;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -805,7 +807,7 @@ public class PactDslJsonRootValue extends DslPart {
    */
   public static PactDslJsonRootValue valueFromProviderState(String expression, Object example) {
     PactDslJsonRootValue value = new PactDslJsonRootValue();
-    value.generators.addGenerator(Category.BODY, "", new ProviderStateGenerator(expression));
+    value.generators.addGenerator(Category.BODY, "", new ProviderStateGenerator(expression, DataType.from(example)));
     value.setValue(example);
     return value;
   }

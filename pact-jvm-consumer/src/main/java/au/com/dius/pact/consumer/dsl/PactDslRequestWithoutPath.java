@@ -6,6 +6,7 @@ import au.com.dius.pact.model.generators.Category;
 import au.com.dius.pact.model.generators.ProviderStateGenerator;
 import au.com.dius.pact.model.PactReaderKt;
 import au.com.dius.pact.model.matchingrules.RegexMatcher;
+import au.com.dius.pact.support.expressions.DataType;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.entity.ContentType;
@@ -298,7 +299,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
    * @param example Example value to use in the consumer test
    */
   public PactDslRequestWithoutPath headerFromProviderState(String name, String expression, String example) {
-    requestGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression));
+    requestGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression, DataType.STRING));
     requestHeaders.put(name, Collections.singletonList(example));
     return this;
   }
@@ -310,7 +311,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
    * @param example Example value to use in the consumer test
    */
   public PactDslRequestWithoutPath queryParameterFromProviderState(String name, String expression, String example) {
-    requestGenerators.addGenerator(Category.QUERY, name, new ProviderStateGenerator(expression));
+    requestGenerators.addGenerator(Category.QUERY, name, new ProviderStateGenerator(expression, DataType.STRING));
     query.put(name, Collections.singletonList(example));
     return this;
   }
@@ -321,7 +322,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
    * @param example Example value to use in the consumer test
    */
   public PactDslRequestWithPath pathFromProviderState(String expression, String example) {
-    requestGenerators.addGenerator(Category.PATH, new ProviderStateGenerator(expression));
+    requestGenerators.addGenerator(Category.PATH, new ProviderStateGenerator(expression, DataType.STRING));
     return new PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state,
       description, example, requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators,
       defaultRequestValues, defaultResponseValues);

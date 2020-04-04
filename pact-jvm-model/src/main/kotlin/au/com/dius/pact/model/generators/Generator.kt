@@ -2,9 +2,12 @@ package au.com.dius.pact.model.generators
 
 import au.com.dius.pact.com.github.michaelbull.result.getOr
 import au.com.dius.pact.model.PactSpecVersion
+import au.com.dius.pact.support.Json
+import au.com.dius.pact.support.expressions.DataType
 import au.com.dius.pact.support.expressions.ExpressionParser.containsExpressions
 import au.com.dius.pact.support.expressions.ExpressionParser.parseExpression
 import au.com.dius.pact.support.expressions.MapValueResolver
+import com.google.gson.JsonObject
 import com.mifmif.common.regex.Generex
 import mu.KotlinLogging
 import org.apache.commons.lang3.RandomStringUtils
@@ -338,9 +341,12 @@ object RandomBooleanGenerator : Generator {
 /**
  * Generates a value that is looked up from the provider state context
  */
-data class ProviderStateGenerator(val expression: String) : Generator {
+data class ProviderStateGenerator @JvmOverloads constructor (
+  val expression: String,
+  val type: DataType = DataType.RAW
+) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
-    return mapOf("type" to "ProviderState", "expression" to expression)
+    return mapOf("type" to "ProviderState", "expression" to expression, "dataType" to type.name)
   }
 
   override fun generate(context: Map<String, Any?>): Any? {
@@ -349,7 +355,7 @@ data class ProviderStateGenerator(val expression: String) : Generator {
       is Map<*, *> -> {
         val map = providerState as Map<String, Any>
         if (containsExpressions(expression)) {
-          parseExpression(expression, MapValueResolver(map))
+          parseExpression(expression, type, MapValueResolver(map))
         } else {
           map[expression]
         }
@@ -361,6 +367,9 @@ data class ProviderStateGenerator(val expression: String) : Generator {
   override fun correspondsToMode(mode: GeneratorTestMode) = mode == GeneratorTestMode.Provider
 
   companion object {
-    fun fromMap(map: Map<String, Any>) = ProviderStateGenerator(map["expression"]!! as String)
+    fun fromJson(json: JsonObject) = ProviderStateGenerator(
+      Json.toString(json["expression"]),
+      if (json.has("dataType")) DataType.valueOf(Json.toString(json["dataType"])) else DataType.RAW
+    )
   }
 }

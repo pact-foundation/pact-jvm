@@ -19,6 +19,7 @@ import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
 import au.com.dius.pact.model.matchingrules.RuleLogic;
 import au.com.dius.pact.model.matchingrules.TypeMatcher;
+import au.com.dius.pact.support.expressions.DataType;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -1233,7 +1234,8 @@ public class PactDslJsonArray extends DslPart {
    */
   public PactDslJsonArray valueFromProviderState(String expression, Object example) {
     body.put(example);
-    generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0), new ProviderStateGenerator(expression));
+    generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(0),
+            new ProviderStateGenerator(expression, DataType.from(example)));
     matchers.addRule(rootPath + appendArrayIndex(0), TypeMatcher.INSTANCE);
     return this;
   }

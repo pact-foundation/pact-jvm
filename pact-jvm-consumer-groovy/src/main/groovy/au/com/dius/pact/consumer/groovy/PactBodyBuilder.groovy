@@ -7,6 +7,7 @@ import au.com.dius.pact.model.generators.ProviderStateGenerator
 import au.com.dius.pact.model.matchingrules.Category
 import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.model.matchingrules.RuleLogic
+import au.com.dius.pact.core.support.expressions.DataType
 import groovy.json.JsonBuilder
 @SuppressWarnings('UnusedImport')
 import io.gatling.jsonpath.Parser$
@@ -127,7 +128,7 @@ class PactBodyBuilder extends BaseBuilder {
     } else if (value instanceof GeneratedValue) {
       bodyRepresentation[name] = value.exampleValue
       this.generators.addGenerator(au.com.dius.pact.model.generators.Category.BODY, path + buildPath(name),
-        new ProviderStateGenerator(value.expression))
+        new ProviderStateGenerator(value.expression, DataType.from(value.exampleValue)))
     } else {
       bodyRepresentation[name] = value
     }

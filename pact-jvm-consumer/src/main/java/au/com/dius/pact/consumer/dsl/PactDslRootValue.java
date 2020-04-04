@@ -17,6 +17,7 @@ import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.model.matchingrules.NumberTypeMatcher;
 import au.com.dius.pact.model.matchingrules.RuleLogic;
 import au.com.dius.pact.model.matchingrules.TypeMatcher;
+import au.com.dius.pact.support.expressions.DataType;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -774,7 +775,7 @@ public class PactDslRootValue extends DslPart {
    */
   public static PactDslRootValue valueFromProviderState(String expression, Object example) {
     PactDslRootValue value = new PactDslRootValue();
-    value.generators.addGenerator(Category.BODY, "", new ProviderStateGenerator(expression));
+    value.generators.addGenerator(Category.BODY, "", new ProviderStateGenerator(expression, DataType.from(example)));
     value.setValue(example);
     return value;
   }
