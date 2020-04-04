@@ -39,7 +39,7 @@ class TestResultAccumulatorSpec extends Specification {
   @SuppressWarnings('LineLength')
   def 'allInteractionsVerified returns #result when #condition'() {
     expect:
-    testResultAccumulator.allInteractionsVerified(pact, results) == result
+    testResultAccumulator.unverifiedInteractions(pact, results).empty == result
 
     where:
 

@@ -44,7 +44,8 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
     } else {
       interactionResults[interactionHash] = testResult.merge(testExecutionResult)
     }
-    if (allInteractionsVerified(pact, interactionResults)) {
+    val unverifiedInteractions = unverifiedInteractions(pact, interactionResults)
+    if (unverifiedInteractions.isEmpty()) {
       logger.debug {
         "All interactions for Pact ${pact.provider.name}-${pact.consumer.name} have a verification result"
       }
@@ -58,7 +59,10 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
       }
       testResults.remove(pactHash)
     } else {
-      logger.info { "Not all of the ${pact.interactions.size} were verified." }
+      logger.warn { "Not all of the ${pact.interactions.size} were verified. The following were missing:" }
+      unverifiedInteractions.forEach {
+        logger.warn { "    ${it.description}" }
+      }
     }
   }
 
@@ -83,9 +87,9 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
 
   private fun lookupProviderTag(): String? = System.getProperty("pact.provider.tag")
 
-  fun allInteractionsVerified(pact: Pact<out Interaction>, results: MutableMap<Int, TestResult>): Boolean {
+  fun unverifiedInteractions(pact: Pact<out Interaction>, results: MutableMap<Int, TestResult>): List<Interaction> {
     logger.debug { "Number of interactions #${pact.interactions.size} and results: ${results.values}" }
-    return pact.interactions.all { results.containsKey(calculateInteractionHash(it)) }
+    return pact.interactions.filter { !results.containsKey(calculateInteractionHash(it)) }
   }
 
   override fun clearTestResult(pact: Pact<out Interaction>) {
