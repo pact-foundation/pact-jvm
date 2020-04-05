@@ -624,6 +624,7 @@ of where this would be useful is API calls that require an ID which would be aut
 provider side, so there is no way to know what the ID would be beforehand.
 
 The DSL method `fromProviderState` allows you to set an expression that will be parsed with the values returned from the provider states.
+For the body, you can use the key value instead of an expression.
 
 For example, assume that an API call is made to get the details of a user by ID. A provider state can be defined that
 specifies that the user must be exist, but the ID will be created when the user is created. So we can then define an
@@ -635,7 +636,7 @@ service {
     uponReceiving('a request for user harry')
     withAttributes(method: 'get', path: fromProviderState('/api/user/${id}', '/api/user/100'))
     withBody {
-      name(~/\w+/, 'harry')
+      name(fromProviderState('userName', 'harry')) // looks up the value using the userName key
     }
 }
 ```
