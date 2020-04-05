@@ -1,5 +1,20 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.0.9 - Bugfix Release
+
+* 76ca345c1 - chore: add example for provider state injection where the value is missing (Ronald Holshausen, Sun Apr 5 13:28:00 2020 +1000)
+* fe33c7526 - feat: fix for failing test #1061 (Ronald Holshausen, Sun Apr 5 11:37:13 2020 +1000)
+* c509048eb - feat: update readmes on provider state injection #1061 (Ronald Holshausen, Sun Apr 5 10:00:18 2020 +1000)
+* 8a3efd70b - feat: allow provider state expressions to have a basic type #1061 (Ronald Holshausen, Sun Apr 5 09:48:22 2020 +1000)
+* 1d60338d6 - chore: update Kotlin to 1.3.71 (Ronald Holshausen, Sat Apr 4 15:38:36 2020 +1100)
+* d57fcefa3 - fix: correct test classpath after removing Amazon S3 #1063 (Ronald Holshausen, Sat Apr 4 15:23:02 2020 +1100)
+* 3b00d9ec3 - fix: removed dependency on Amazon S3 #1063 (Ronald Holshausen, Sat Apr 4 14:59:22 2020 +1100)
+* 2ed86d39a - fix: JUnit 5 No values are injected into response headers and response bodies from state callbacks #1060 (Ronald Holshausen, Sat Apr 4 13:43:29 2020 +1100)
+* 8997d01d7 - chore: list out unverified interactions when test results are received (Ronald Holshausen, Sat Apr 4 12:51:59 2020 +1100)
+* 20dfeaa16 - fix: use underscores in the module names #1055 (Ronald Holshausen, Sat Mar 28 13:25:30 2020 +1100)
+* 438e2f2cd - fix: correct the JUnit 4 readme to use the correct classes #1056 (Ronald Holshausen, Sat Mar 28 12:28:24 2020 +1100)
+* da201320c - bump version to 4.0.9 (Ronald Holshausen, Mon Mar 23 09:54:28 2020 +1100)
+
 # 4.0.8 - Bugfixes + support for provider-pacts-for-verification endpoint
 
 * a549ef32e - feat: display verification notices with Gradle and Maven #942 (Ronald Holshausen, Sun Mar 22 19:03:11 2020 +1100)
