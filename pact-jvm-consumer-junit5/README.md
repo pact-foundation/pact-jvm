@@ -174,3 +174,8 @@ expression for the path where the ID will be replaced with the value returned fr
 ```java
     .pathFromProviderState("/api/users/${id}", "/api/users/100")
 ``` 
+You can also just use the key instead of an expression:
+
+```java
+    .valueFromProviderState('userId', 'userId', 100) // will look value using userId as the key
+```
