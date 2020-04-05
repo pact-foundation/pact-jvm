@@ -104,7 +104,9 @@ class ExpressionParserSpec extends Specification {
   @SuppressWarnings('UnnecessaryBooleanExpression')
   def 'with a defined type, converts the expression into the correct type'() {
     expect:
-    ExpressionParser.parseExpression('${expression}', type, [ resolveValue: { value } ] as ValueResolver) == result
+    ExpressionParser.parseExpression('${expression}', type, [
+      resolveValue: { value.toString() }
+    ] as ValueResolver) == result
 
     where:
 
@@ -116,7 +118,7 @@ class ExpressionParserSpec extends Specification {
     '100'    | DataType.INTEGER || 100L
     '100'    | DataType.FLOAT   || 100.0f
     '100'    | DataType.DECIMAL || 100.0
-    100      | DataType.RAW     || 100
+    100      | DataType.RAW     || '100'
     100      | DataType.STRING  || '100'
     100      | DataType.INTEGER || 100L
     100      | DataType.FLOAT   || 100.0f
