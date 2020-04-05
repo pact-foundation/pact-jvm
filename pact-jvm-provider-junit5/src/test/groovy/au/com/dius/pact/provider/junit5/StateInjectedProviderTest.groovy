@@ -64,7 +64,9 @@ class StateInjectedProviderTest {
         .withRequestBody(matchingJsonPath('$.[?(@.entityName =~ /\\w+/)]'))
         .willReturn(aResponse()
           .withStatus(201)
-          .withHeader('Location', "http://localhost:${server.port()}/entity/1234"))
+          .withHeader('Location', "http://localhost:${server.port()}/entity/1234")
+          .withHeader('Content-Type', 'application/json')
+          .withBody('{"accountId": "4beb44f1-53f7-4281-abcd-12c06d682067"}'))
     )
   }
 

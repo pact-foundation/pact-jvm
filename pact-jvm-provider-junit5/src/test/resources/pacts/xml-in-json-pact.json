@@ -36,7 +36,30 @@
         }
       },
       "response": {
-        "status": 201
+        "status": 201,
+        "body": {
+          "accountId": "4beb44f1-53f7-4281-a78b-12c06d682067"
+        },
+        "matchingRules": {
+          "body": {
+            "$.accountId": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        },
+        "generators": {
+          "body": {
+            "$.accountId": {
+              "type": "ProviderState",
+              "expression": "${accountId}"
+            }
+          }
+        }
       }
     }
   ],
