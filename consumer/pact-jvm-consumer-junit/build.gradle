@@ -34,6 +34,9 @@ dependencies {
 
   testCompile 'org.clojure:clojure:1.10.0',
     'http-kit:http-kit:2.3.0'
+  testCompile 'javax.xml.bind:jaxb-api:2.3.0'
+  testCompile 'javax.activation:activation:1.1'
+  testCompile 'org.glassfish.jaxb:jaxb-runtime:2.3.0'
 }
 
 clojureTest {
