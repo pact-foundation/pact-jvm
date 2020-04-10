@@ -113,6 +113,7 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     def context = Mock(ExtensionContext) {
       getStore(_) >> store
       getRequiredTestClass() >> TestClass
+      getRequiredTestInstance() >> testInstance
     }
     def target = Mock(TestTarget)
     IProviderVerifier verifier = Mock()
@@ -127,7 +128,8 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     verificationExtension.beforeTestExecution(context)
 
     then:
-    1 * testResultAcc.updateTestResult(_, interaction, { it instanceof TestResult.Failed })
+    thrown(AssertionError)
+    verificationContext.testExecutionResult instanceof TestResult.Failed
   }
 
 }
