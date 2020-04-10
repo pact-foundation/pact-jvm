@@ -63,7 +63,7 @@ data class PactVerificationContext @JvmOverloads constructor(
   var providerInfo: ProviderInfo = ProviderInfo(),
   val consumerName: String,
   val interaction: Interaction,
-  internal var testExecutionResult: TestResult = TestResult.Ok
+  var testExecutionResult: TestResult = TestResult.Ok
 ) {
   val stateChangeHandlers: MutableList<Any> = mutableListOf()
   var executionContext: Map<String, Any>? = null
@@ -291,8 +291,9 @@ class PactVerificationStateChangeExtension(
       testContext.executionContext = mapOf("providerState" to providerStateContext)
     } catch (e: Exception) {
       logger.error(e) { "Provider state change callback failed" }
-      testResultAccumulator.updateTestResult(pact, interaction, TestResult.Failed(description = "Provider state change callback failed",
-        results = listOf(mapOf("exception" to e))))
+      testContext.testExecutionResult = TestResult.Failed(description = "Provider state change callback failed",
+        results = listOf(mapOf("exception" to e)))
+      throw AssertionError("Provider state change callback failed", e)
     }
   }
 
