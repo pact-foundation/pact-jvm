@@ -26,7 +26,7 @@ class ExampleGroovyConsumerV3PactTest {
             given('another provider state', [valueA: 'A', valueB: 100])
             given('a third provider state', [valueC: localDate.toString()])
             uponReceiving('a retrieve Mallory request')
-            withAttributes(method: 'get', path: '/mallory', query: [name: 'ron', status: regexp(~/good|bad/, 'good'),
+            withAttributes(method: 'get', path: ~/\/mallory/, query: [name: 'ron', status: regexp(~/good|bad/, 'good'),
               date: date('yyyy-MM-dd')])
             willRespondWith(
                 status: 200,
