@@ -23,6 +23,7 @@ import java.time.ZonedDateTime
 /**
  * Pact verifier reporter that displays the results of the verification in a markdown document
  */
+@Suppress("EmptyFunctionBlock", "TooManyFunctions")
 class MarkdownReporter(
   var name: String,
   override var reportDir: File?,

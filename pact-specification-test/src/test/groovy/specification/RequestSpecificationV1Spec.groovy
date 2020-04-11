@@ -10,7 +10,7 @@ class RequestSpecificationV1Spec extends BaseRequestSpec {
   @Unroll
   def '#type/#name #test #matchDesc'() {
     expect:
-    RequestMatching.requestMismatches(expected, actual).isEmpty() == match
+    RequestMatching.requestMismatches(expected, actual).empty == match
 
     where:
     [type, name, test, match, matchDesc, expected, actual] << loadTestCases('/v1/request/')

@@ -1,6 +1,6 @@
-plugins {
-  id "nebula.clojure" version "8.1.4"
-}
+//plugins {
+//  id "nebula.clojure" version "9.4.0"
+//}
 
 dependencies {
   compile project(path: ":consumer:pact-jvm-consumer", configuration: 'default')
@@ -32,17 +32,18 @@ dependencies {
   testRuntime 'org.objenesis:objenesis:3.1'
   testCompile 'com.fasterxml.jackson.core:jackson-databind:2.11.0.rc1'
 
-  testCompile 'org.clojure:clojure:1.10.0',
+  testCompile 'org.clojure:clojure:1.10.1',
     'http-kit:http-kit:2.3.0'
   testCompile 'javax.xml.bind:jaxb-api:2.3.0'
   testCompile 'javax.activation:activation:1.1'
   testCompile 'org.glassfish.jaxb:jaxb-runtime:2.3.0'
 }
 
-clojureTest {
-  junit = true
-  clojureTest.dependsOn 'testClasses'
-}
-
-clojure.aotCompile = true
-clojureRepl.port = '7888'
+//clojureTest {
+//  junit = false
+//  junitOutputDir = file("${buildDir}/test-results/clojure")
+//  clojureTest.dependsOn 'testClasses'
+//}
+//
+//clojure.aotCompile = true
+//clojureRepl.port = '7888'

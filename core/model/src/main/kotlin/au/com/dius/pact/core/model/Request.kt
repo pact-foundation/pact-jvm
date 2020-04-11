@@ -30,7 +30,10 @@ class Request @JvmOverloads constructor(
     generators.copy())
 
   @JvmOverloads
-  fun generatedRequest(context: Map<String, Any> = emptyMap(), mode: GeneratorTestMode = GeneratorTestMode.Provider): Request {
+  fun generatedRequest(
+    context: Map<String, Any> = emptyMap(),
+    mode: GeneratorTestMode = GeneratorTestMode.Provider
+  ): Request {
     val r = this.copy()
     generators.applyGenerator(Category.PATH, mode) { _, g -> r.path = g.generate(context).toString() }
     generators.applyGenerator(Category.HEADER, mode) { key, g ->

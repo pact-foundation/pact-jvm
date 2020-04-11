@@ -14,6 +14,7 @@ import java.io.File
 /**
  * Pact verifier reporter that displays the results of the verification to the console using ASCII escapes
  */
+@Suppress("EmptyFunctionBlock", "TooManyFunctions")
 class AnsiConsoleReporter(
   var name: String,
   override var reportDir: File?,
@@ -225,6 +226,7 @@ class AnsiConsoleReporter(
     AnsiConsole.out().println()
   }
 
+  @Suppress("ComplexMethod", "NestedBlockDepth")
   private fun displayDiff(diff: Map<String, Any>) {
     (diff["comparison"] as Map<String, List<Map<String, Any>>>).forEach { (key, messageAndDiff) ->
       messageAndDiff.forEach { mismatch ->

@@ -34,6 +34,7 @@ import java.time.ZonedDateTime
 /**
  * Pact verifier reporter that generates the results of the verification in JSON format
  */
+@Suppress("EmptyFunctionBlock", "TooManyFunctions")
 class JsonReporter(
   var name: String = "json",
   override var reportDir: File?,

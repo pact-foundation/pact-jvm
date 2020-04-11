@@ -14,6 +14,7 @@ import org.junit.runner.notification.RunNotifier
 import org.junit.runners.model.InitializationError
 import spock.lang.Specification
 
+@SuppressWarnings('UnnecessaryGetter')
 class FilteredPactRunnerSpec extends Specification {
 
   private List<Pact> pacts

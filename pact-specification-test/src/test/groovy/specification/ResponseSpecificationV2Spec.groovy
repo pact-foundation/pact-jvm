@@ -10,7 +10,7 @@ class ResponseSpecificationV2Spec extends BaseResponseSpec {
   @Unroll
   def '#type/#name - #test #matchDesc'() {
     expect:
-    ResponseMatching.responseMismatches(expected, actual, true).isEmpty() == match
+    ResponseMatching.responseMismatches(expected, actual, true).empty == match
 
     where:
     [type, name, test, match, matchDesc, expected, actual] << loadTestCases('/v2/response/')

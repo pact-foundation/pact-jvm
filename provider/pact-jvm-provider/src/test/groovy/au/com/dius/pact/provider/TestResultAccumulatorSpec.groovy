@@ -175,6 +175,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.verificationReporter = reporter
   }
 
+  @SuppressWarnings('UnnecessaryGetter')
   def 'updateTestResult - clear the results when they are published'() {
     given:
     def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'),
@@ -198,6 +199,7 @@ class TestResultAccumulatorSpec extends Specification {
   }
 
   @RestoreSystemProperties
+  @SuppressWarnings('UnnecessaryGetter')
   def 'updateTestResult - include the provider tag'() {
     given:
     def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'),

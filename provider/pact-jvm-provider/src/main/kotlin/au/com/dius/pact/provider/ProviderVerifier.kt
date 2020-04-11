@@ -246,6 +246,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
+  @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown", "SpreadOperator")
   override fun verifyResponseByInvokingProviderMethods(
     providerInfo: IProviderInfo,
     consumer: IConsumerInfo,
@@ -546,6 +547,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     client: ProviderClient
   ) = verifyResponseFromProvider(provider, interaction, interactionMessage, failures, client, mapOf())
 
+  @Suppress("TooGenericExceptionCaught")
   override fun verifyResponseFromProvider(
     provider: IProviderInfo,
     interaction: RequestResponseInteraction,
@@ -651,6 +653,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
+  @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown")
   fun loadPactFileForConsumer(consumer: IConsumerInfo): Pact<out Interaction> {
     var pactSource = consumer.pactSource
     if (pactSource is Callable<*>) {
@@ -746,6 +749,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     const val PACT_PROVIDER_TAG = "pact.provider.tag"
     const val PACT_PROVIDER_VERSION_TRIM_SNAPSHOT = "pact.provider.version.trimSnapshot"
 
+    @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown")
     fun invokeProviderMethod(m: Method, instance: Any?): Any? {
       try {
         return m.invoke(instance)

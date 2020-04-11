@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.core.model.PactSpecVersion
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -9,7 +10,7 @@ class MatchersSpec extends Specification {
   @SuppressWarnings('LineLength')
   def 'matcher methods generate the correct matcher definition - #matcherMethod'() {
     expect:
-    Matchers."$matcherMethod"(param).matcher.toMap() == matcherDefinition
+    Matchers."$matcherMethod"(param).matcher.toMap(PactSpecVersion.V3) == matcherDefinition
 
     where:
 
@@ -34,7 +35,7 @@ class MatchersSpec extends Specification {
   @Unroll
   def 'like matcher methods generate the correct matcher definition - #matcherMethod'() {
     expect:
-    Matchers."$matcherMethod"(*param).matcher.toMap() == matcherDefinition
+    Matchers."$matcherMethod"(*param).matcher.toMap(PactSpecVersion.V3) == matcherDefinition
 
     where:
 
@@ -46,7 +47,7 @@ class MatchersSpec extends Specification {
 
   def 'each like matcher method generates the correct matcher definition'() {
     expect:
-    Matchers.eachLike([:]).matcher.toMap() == [match: 'type']
+    Matchers.eachLike([:]).matcher.toMap(PactSpecVersion.V3) == [match: 'type']
   }
 
   @Unroll
@@ -60,7 +61,7 @@ class MatchersSpec extends Specification {
 
   def 'string matcher should generate value when not provided'() {
     expect:
-    !Matchers.string().value.isEmpty()
+    !Matchers.string().value.empty
   }
 
   def 'bool matcher should generate value when not provided'() {

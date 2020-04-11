@@ -11,6 +11,7 @@ import java.io.File
 /**
  * Common provider utils
  */
+@Suppress("ThrowsCount")
 object ProviderUtils {
 
   @JvmStatic

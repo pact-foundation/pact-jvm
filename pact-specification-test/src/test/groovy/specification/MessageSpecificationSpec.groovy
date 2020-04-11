@@ -12,6 +12,7 @@ import spock.lang.Unroll
 class MessageSpecificationSpec extends Specification {
 
   @Unroll
+  @SuppressWarnings('UnnecessaryGetter')
   def '#test #matchDesc'() {
     expect:
     ResponseComparison.compareMessage(expected, actual).bodyMismatches

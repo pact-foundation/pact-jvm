@@ -9,7 +9,7 @@ class ContentTypeSpec extends Specification {
   @Unroll
   def '"#value" is json -> #result'() {
     expect:
-    result ? contentType.isJson() : !contentType.isJson()
+    result ? contentType.json : !contentType.json
 
     where:
 
@@ -27,7 +27,7 @@ class ContentTypeSpec extends Specification {
   @Unroll
   def '"#value" is xml -> #result'() {
     expect:
-    result ? contentType.isXml() : !contentType.isXml()
+    result ? contentType.xml : !contentType.xml
 
     where:
 

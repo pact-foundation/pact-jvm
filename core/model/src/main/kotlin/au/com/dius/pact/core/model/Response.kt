@@ -27,7 +27,10 @@ class Response @JvmOverloads constructor(
 
   fun copy() = Response(status, headers.toMutableMap(), body.copy(), matchingRules.copy(), generators.copy())
 
-  fun generatedResponse(context: Map<String, Any> = mapOf(), mode: GeneratorTestMode = GeneratorTestMode.Provider): Response {
+  fun generatedResponse(
+    context: Map<String, Any> = mapOf(),
+    mode: GeneratorTestMode = GeneratorTestMode.Provider
+  ): Response {
     val r = this.copy()
     generators.applyGenerator(Category.STATUS, mode) { _, g -> r.status = g.generate(context) as Int }
     generators.applyGenerator(Category.HEADER, mode) { key, g ->

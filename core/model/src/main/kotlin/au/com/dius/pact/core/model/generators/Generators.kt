@@ -40,7 +40,8 @@ object JsonContentTypeHandler : ContentTypeHandler {
   override fun processBody(value: OptionalBody, fn: (QueryResult) -> Unit): OptionalBody {
     val bodyJson = QueryResult(JsonParser.parseString(value.valueAsString()))
     fn.invoke(bodyJson)
-    return OptionalBody.body(Json.gson.toJson(bodyJson.value).toByteArray(value.contentType.asCharset()), ContentType.JSON)
+    return OptionalBody.body(Json.gson.toJson(bodyJson.value)
+      .toByteArray(value.contentType.asCharset()), ContentType.JSON)
   }
 
   override fun applyKey(body: QueryResult, key: String, generator: Generator, context: Map<String, Any?>) {
@@ -48,13 +49,15 @@ object JsonContentTypeHandler : ContentTypeHandler {
     queryObjectGraph(pathExp.iterator(), body) { (_, valueKey, parent) ->
       @Suppress("UNCHECKED_CAST")
       when {
-        parent != null && parent.isJsonObject -> parent.obj[valueKey.toString()] = Json.toJson(generator.generate(context))
+        parent != null && parent.isJsonObject ->
+          parent.obj[valueKey.toString()] = Json.toJson(generator.generate(context))
         parent != null && parent.isJsonArray -> parent[valueKey as Int] = Json.toJson(generator.generate(context))
         else -> body.value = Json.toJson(generator.generate(context))
       }
     }
   }
 
+  @Suppress("ReturnCount")
   private fun queryObjectGraph(pathExp: Iterator<PathToken>, body: QueryResult, fn: (QueryResult) -> Unit) {
     var bodyCursor = body
     while (pathExp.hasNext()) {
@@ -65,7 +68,8 @@ object JsonContentTypeHandler : ContentTypeHandler {
         } else {
           return
         }
-        is PathToken.Index -> if (cursorValue != null && cursorValue.isJsonArray && cursorValue.array.size() > token.index) {
+        is PathToken.Index -> if (cursorValue != null && cursorValue.isJsonArray &&
+          cursorValue.array.size() > token.index) {
           val list = cursorValue.array
           bodyCursor = QueryResult(list[token.index]!!, token.index, bodyCursor.value)
         } else {
@@ -202,8 +206,12 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     }
   }
 
-  private fun processBody(value: OptionalBody, contentType: String, context: Map<String, Any?>, mode: GeneratorTestMode):
-    OptionalBody {
+  private fun processBody(
+    value: OptionalBody,
+    contentType: String,
+    context: Map<String, Any?>,
+    mode: GeneratorTestMode
+  ): OptionalBody {
     val handler = contentTypeHandlers[contentType]
     return handler?.processBody(value) { body: QueryResult ->
       applyGenerator(Category.BODY, mode) { key: String, generator: Generator? ->
@@ -230,7 +238,8 @@ data class Generators(val categories: MutableMap<Category, MutableMap<String, Ge
     }
     return categories.entries.associate { (key, value) ->
       when (key) {
-        Category.METHOD, Category.PATH, Category.STATUS -> key.name.toLowerCase() to value[""]!!.toMap(pactSpecVersion)
+        Category.METHOD, Category.PATH, Category.STATUS ->
+          key.name.toLowerCase() to value[""]!!.toMap(pactSpecVersion)
         else -> key.name.toLowerCase() to value.entries.associate { (genKey, generator) ->
           genKey to generator.toMap(pactSpecVersion)
         }

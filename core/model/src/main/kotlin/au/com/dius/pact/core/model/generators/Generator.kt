@@ -263,7 +263,10 @@ data class DateGenerator @JvmOverloads constructor(
  * Generates a time value for the provided format. If no format is provided, ISO time format is used. If an expression
  * is given, it will be evaluated to generate the time, otherwise 'now' will be used
  */
-data class TimeGenerator @JvmOverloads constructor(val format: String? = null, val expression: String? = null) : Generator {
+data class TimeGenerator @JvmOverloads constructor(
+  val format: String? = null,
+  val expression: String? = null
+) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
     val map = mutableMapOf("type" to "Time")
     if (!format.isNullOrEmpty()) {

@@ -95,6 +95,7 @@ object DefaultStateChange : StateChange, KLogging() {
     return StateChangeResult(stateChangeResult, message)
   }
 
+  @Suppress("TooGenericExceptionCaught")
   override fun stateChange(
     verifier: IProviderVerifier,
     state: ProviderState,

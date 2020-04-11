@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.Response
 import org.apache.http.entity.ContentType
 import spock.lang.Specification
 
+@SuppressWarnings('UnnecessaryGetter')
 class ResponseComparisonSpec extends Specification {
 
   private Closure<Map> subject

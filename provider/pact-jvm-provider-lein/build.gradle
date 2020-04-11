@@ -1,12 +1,12 @@
 plugins {
-  id "nebula.clojure" version "8.1.4"
+  id "nebula.clojure" version "9.4.0"
 }
 
 dependencies {
   compile project(":provider:pact-jvm-provider")
-  compile 'org.clojure:clojure:1.10.0'
+  compile 'org.clojure:clojure:1.10.1'
   compile 'org.clojure:core.match:0.3.0'
-  compile 'leiningen-core:leiningen-core:2.9.0'
+  compile 'leiningen-core:leiningen-core:2.9.3'
   compile 'org.apache.maven:maven-aether-provider:3.0.5'
   compile 'org.sonatype.aether:aether-connector-file:1.13.1'
   compile 'org.sonatype.aether:aether-connector-wagon:1.13.1'

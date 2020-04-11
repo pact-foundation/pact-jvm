@@ -21,13 +21,14 @@ class RequestSpec extends Specification {
     request.matchingRules.hasCategory('stuff')
   }
 
+  @SuppressWarnings('UnnecessaryGetter')
   def 'fromMap sets defaults for attributes missing from the map'() {
     expect:
     request.method == 'GET'
     request.path == '/'
     request.query.isEmpty()
     request.headers.isEmpty()
-    request.body.isMissing()
+    request.body.missing
     request.matchingRules.empty
     request.generators.empty
 
@@ -37,7 +38,7 @@ class RequestSpec extends Specification {
 
   def 'detects multipart file uploads based on the content type'() {
     expect:
-    new Request(headers: ['Content-Type': [contentType]]).isMultipartFileUpload() == multipartFileUpload
+    new Request(headers: ['Content-Type': [contentType]]).multipartFileUpload == multipartFileUpload
 
     where:
 

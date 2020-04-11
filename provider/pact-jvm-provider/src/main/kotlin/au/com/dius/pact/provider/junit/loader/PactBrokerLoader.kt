@@ -25,6 +25,7 @@ import kotlin.reflect.KClass
 /**
  * Out-of-the-box implementation of {@link PactLoader} that downloads pacts from Pact broker
  */
+@Suppress("LongParameterList", "TooManyFunctions")
 open class PactBrokerLoader(
   val pactBrokerHost: String,
   val pactBrokerPort: String?,
@@ -190,6 +191,7 @@ open class PactBrokerLoader(
     }
   }
 
+  @Suppress("TooGenericExceptionCaught")
   private fun getUrlForProvider(providerName: String, tag: String, pactBrokerClient: PactBrokerClient): String {
     return try {
       pactBrokerClient.getUrlForProvider(providerName, tag) ?: "Unknown"

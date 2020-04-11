@@ -75,6 +75,7 @@ open class ProviderInfo @JvmOverloads constructor (
   }
 
   @JvmOverloads
+  @Suppress("TooGenericExceptionThrown")
   open fun hasPactsFromPactBrokerWithSelectors(
     options: Map<String, Any> = mapOf(),
     pactBrokerUrl: String,
@@ -97,6 +98,7 @@ open class ProviderInfo @JvmOverloads constructor (
     }
   }
 
+  @Suppress("TooGenericExceptionThrown")
   open fun setupConsumerListFromPactFiles(consumersGroup: ConsumersGroup): MutableList<IConsumerInfo> {
     val pactFileDirectory = consumersGroup.pactFileLocation ?: return mutableListOf()
     if (!pactFileDirectory.exists() || !pactFileDirectory.canRead()) {

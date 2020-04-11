@@ -19,6 +19,7 @@ object ReporterManager {
 
   @JvmStatic
   @JvmOverloads
+  @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown", "ThrowsCount")
   fun createReporter(name: String, reportDir: File? = null): VerifierReporter {
     val reporter: VerifierReporter = if (reporterDefined(name)) {
       try {

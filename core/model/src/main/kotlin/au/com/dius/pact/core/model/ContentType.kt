@@ -8,6 +8,7 @@ private val xmlRegex = Regex("application\\/.*xml")
 
 data class ContentType(val contentType: String?) {
 
+  @Suppress("TooGenericExceptionCaught")
   private val parsedContentType: org.apache.http.entity.ContentType? = try {
     if (contentType.isNullOrEmpty()) {
       null

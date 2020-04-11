@@ -17,7 +17,7 @@ class MessageComparisonSpec extends Specification {
     def result = ResponseComparison.compareMessage(message, actual).bodyMismatches
 
     then:
-    result.isRight()
+    result.right
     result.b.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
       '/': ['Actual body \'{"a":1,"b":"3"}\' is not equal to the expected body \'{"a":1,"b":"2"}\'']
     ]
@@ -33,7 +33,7 @@ class MessageComparisonSpec extends Specification {
     def result = ResponseComparison.compareMessage(message, actual).bodyMismatches
 
     then:
-    result.isRight()
+    result.right
     result.b.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
       '/': ['Expected body \'{"a":1,"b":"2"}\' to match \'{"a":1,"b":"3"}\' using equality but did not match']
     ]

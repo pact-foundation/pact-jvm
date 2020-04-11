@@ -10,7 +10,7 @@ import org.apache.http.entity.ContentType
 import spock.lang.Specification
 import spock.lang.Unroll
 
-@SuppressWarnings('PrivateFieldCouldBeFinal')
+@SuppressWarnings(['PrivateFieldCouldBeFinal', 'UnnecessaryGetter'])
 class ResponseComparisonSpec extends Specification {
 
   private Closure<Map> comparison
@@ -37,7 +37,7 @@ class ResponseComparisonSpec extends Specification {
     def result = comparison()
 
     expect:
-    result.bodyMismatches.isLeft()
+    result.bodyMismatches.left
     result.bodyMismatches.a.description() ==
       'Expected a response type of \'application/json\' but the actual type was \'text/plain\''
   }
@@ -47,7 +47,7 @@ class ResponseComparisonSpec extends Specification {
     def result = comparison()
 
     expect:
-    result.bodyMismatches.isRight()
+    result.bodyMismatches.right
     result.bodyMismatches.b.mismatches.isEmpty()
   }
 
@@ -60,7 +60,7 @@ class ResponseComparisonSpec extends Specification {
     def result = comparison()
 
     expect:
-    result.bodyMismatches.isRight()
+    result.bodyMismatches.right
     result.bodyMismatches.b.mismatches.isEmpty()
   }
 

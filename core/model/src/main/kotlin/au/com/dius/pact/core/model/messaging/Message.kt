@@ -185,6 +185,7 @@ class Message @JvmOverloads constructor(
     }
 
     @Deprecated("Use the content type associated with the message body")
+    @Suppress("TooGenericExceptionCaught")
     private fun parseContentType(contentType: String?): ContentType? {
       return if (contentType.isNotEmpty()) {
         try {

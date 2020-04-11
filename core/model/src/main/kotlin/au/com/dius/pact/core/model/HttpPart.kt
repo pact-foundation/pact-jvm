@@ -61,6 +61,7 @@ abstract class HttpPart {
   }
 
   @Deprecated("use the method on OptionalBody")
+  @Suppress("TooGenericExceptionCaught")
   fun charset(): Charset? {
     return try {
       ContentType.parse(contentTypeHeader())?.charset

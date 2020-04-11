@@ -27,9 +27,9 @@ include   'provider:pact-jvm-provider-junit5'
 include   'provider:pact-jvm-provider-spring'
 include   'provider:pact-jvm-provider-junit5-spring'
 
-if (JavaVersion.current().isJava8()) {
-  include 'provider:pact-jvm-provider-lein'
-}
+//if (JavaVersion.current().isJava8()) {
+include 'provider:pact-jvm-provider-lein'
+//}
 
 include   'provider:pact-jvm-provider-specs2_2.12'
 project(':provider:pact-jvm-provider-specs2_2.12').projectDir = file('provider/pact-jvm-provider-specs2')
