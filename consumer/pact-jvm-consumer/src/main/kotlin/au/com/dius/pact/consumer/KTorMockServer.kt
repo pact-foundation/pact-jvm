@@ -26,7 +26,6 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.engine.sslConnector
 import io.ktor.server.netty.Netty
 import mu.KLogging
-import java.util.concurrent.TimeUnit
 
 class KTorMockServer(
   pact: RequestResponsePact,
@@ -41,7 +40,6 @@ class KTorMockServer(
         privateKeyPassword = { config.privateKeyPassword.toCharArray() }) {
         host = config.hostname
         port = config.port
-//        keyStorePath = config.keyStore.
       }
     } else {
       connector {
@@ -115,7 +113,7 @@ class KTorMockServer(
   }
 
   override fun stop() {
-    server.stop(100, stopTimeout, TimeUnit.MILLISECONDS)
+    server.stop(100, stopTimeout)
     logger.debug { "Mock server shutdown" }
   }
 
