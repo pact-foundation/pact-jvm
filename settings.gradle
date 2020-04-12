@@ -16,8 +16,10 @@ include 'consumer:pact-jvm-consumer-java8'
 include 'consumer:pact-jvm-consumer-junit'
 include 'consumer:pact-jvm-consumer-junit5'
 
-include 'consumer:pact-jvm-consumer-specs2_2.12'
-project(':consumer:pact-jvm-consumer-specs2_2.12').projectDir = file('consumer/pact-jvm-consumer-specs2')
+if (System.getenv("APPVEYOR") == null) {
+  include 'consumer:pact-jvm-consumer-specs2_2.12'
+  project(':consumer:pact-jvm-consumer-specs2_2.12').projectDir = file('consumer/pact-jvm-consumer-specs2')
+}
 
 include   'provider:pact-jvm-provider'
 include   'provider:pact-jvm-provider-gradle'
@@ -29,12 +31,14 @@ include   'provider:pact-jvm-provider-junit5-spring'
 
 include 'provider:pact-jvm-provider-lein'
 
-include   'provider:pact-jvm-provider-specs2_2.12'
-project(':provider:pact-jvm-provider-specs2_2.12').projectDir = file('provider/pact-jvm-provider-specs2')
-include   'provider:pact-jvm-provider-scalatest_2.12'
-project(':provider:pact-jvm-provider-scalatest_2.12').projectDir = file('provider/pact-jvm-provider-scalatest')
-include   'provider:pact-jvm-provider-scalasupport_2.12'
-project(':provider:pact-jvm-provider-scalasupport_2.12').projectDir = file('provider/pact-jvm-provider-scalasupport')
+if (System.getenv("APPVEYOR") == null) {
+  include 'provider:pact-jvm-provider-specs2_2.12'
+  project(':provider:pact-jvm-provider-specs2_2.12').projectDir = file('provider/pact-jvm-provider-specs2')
+  include 'provider:pact-jvm-provider-scalatest_2.12'
+  project(':provider:pact-jvm-provider-scalatest_2.12').projectDir = file('provider/pact-jvm-provider-scalatest')
+  include 'provider:pact-jvm-provider-scalasupport_2.12'
+  project(':provider:pact-jvm-provider-scalasupport_2.12').projectDir = file('provider/pact-jvm-provider-scalasupport')
+}
 
 if (System.getenv("APPVEYOR") == null) {
   include 'pact-jvm-server'
