@@ -2,7 +2,7 @@ package au.com.dius.pact.model.generators
 
 import spock.lang.Specification
 
-import java.time.OffsetTime
+import java.time.OffsetDateTime
 
 class TimeGeneratorSpec extends Specification {
 
@@ -16,7 +16,7 @@ class TimeGeneratorSpec extends Specification {
     new TimeGenerator('HH:mm:ss', '+ 1 hour').generate([baseTime: base]) == time
 
     where:
-    base = OffsetTime.now()
+    base = OffsetDateTime.now()
     time = base.plusHours(1).format('HH:mm:ss')
   }
 

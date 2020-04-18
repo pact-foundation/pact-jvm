@@ -3,13 +3,10 @@ package au.com.dius.pact.model.generators
 import au.com.dius.pact.com.github.michaelbull.result.Err
 import au.com.dius.pact.com.github.michaelbull.result.Ok
 import au.com.dius.pact.com.github.michaelbull.result.Result
-import au.com.dius.pact.com.github.michaelbull.result.get
-import au.com.dius.pact.com.github.michaelbull.result.map
 import au.com.dius.pact.com.github.michaelbull.result.mapError
 import mu.KLogging
 import java.lang.Integer.parseInt
 import java.time.OffsetDateTime
-import java.time.temporal.ChronoUnit
 
 object DateTimeExpression : KLogging() {
   fun executeExpression(base: OffsetDateTime, expression: String?): Result<OffsetDateTime, String> {
@@ -17,7 +14,10 @@ object DateTimeExpression : KLogging() {
       val split = expression.split("@", limit = 2)
       if (split.size > 1) {
         val datePart = DateExpression.executeDateExpression(base, split[0])
-        val timePart = TimeExpression.executeTimeExpression(base.toOffsetTime(), split[1])
+        val timePart = if (datePart is Ok<OffsetDateTime>)
+          TimeExpression.executeTimeExpression(datePart.value, split[1])
+        else
+          TimeExpression.executeTimeExpression(base, split[1])
         when {
           datePart is Err<String> && timePart is Err<String> -> datePart.mapError { "$it, " +
             Regex("1:(\\d+)").replace(timePart.error) { mr ->
@@ -32,7 +32,7 @@ object DateTimeExpression : KLogging() {
               "1:${pos + split[0].length + 1}"
             }
           }
-          else -> datePart.map { it.truncatedTo(ChronoUnit.DAYS).with(timePart.get()!!.toLocalTime()) }
+          else -> timePart
         }
       } else {
         DateExpression.executeDateExpression(base, split[0])
