@@ -5,6 +5,7 @@ import spock.lang.Specification
 
 import java.time.OffsetDateTime
 
+@SuppressWarnings('LineLength')
 class DateTimeGeneratorSpec extends Specification {
 
   def 'supports timezones'() {
