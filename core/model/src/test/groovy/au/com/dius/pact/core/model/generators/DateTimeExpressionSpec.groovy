@@ -83,7 +83,7 @@ class DateTimeExpressionSpec extends Specification {
         expression                                         | expected
         'today @ 1 o\'clock'                               | '2000-01-01T13:00Z'
         'yesterday @ midnight'                             | '1999-12-31T00:00Z'
-        'yesterday @ midnight - 1 hour'                    | '1999-12-31T23:00Z'
+        'yesterday @ midnight - 1 hour'                    | '1999-12-30T23:00Z'
         'tomorrow @ now'                                   | '2000-01-02T10:00Z'
         '+ 1 day @ noon'                                   | '2000-01-02T12:00Z'
         '+ 1 week @ +1 hour'                               | '2000-01-08T11:00Z'
@@ -110,5 +110,14 @@ class DateTimeExpressionSpec extends Specification {
         'now+ @ now +'  | 'Error parsing expression: line 1:5 mismatched input \'<EOF>\' expecting INT, Error parsing expression: line 1:12 mismatched input \'<EOF>\' expecting INT'
         'now @ now +'   | 'Error parsing expression: line 1:11 mismatched input \'<EOF>\' expecting INT'
         'now @ noo'     | /^Error parsing expression.*/
+    }
+
+    def 'Time expressions that cause the date to roll'() {
+        expect:
+        DateTimeExpression.INSTANCE.executeExpression(base, '+ 1 day @ + 1 hour').value.toString() == datetime
+
+        where:
+        base = OffsetDateTime.parse('2020-04-14T23:20:00.311Z')
+        datetime = base.plusDays(1).plusHours(1).format('yyyy-MM-dd\'T\'HH:mm:ss.SSSX')
     }
 }
