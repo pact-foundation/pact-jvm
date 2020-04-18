@@ -25,6 +25,10 @@ class MatcherExecutorSpec extends Specification {
   def mismatchFactory
   def path
 
+  static xml(String xml) {
+    XmlBodyMatcher.INSTANCE.parse(xml)
+  }
+
   def setup() {
     mismatchFactory = [create: { p0, p1, p2, p3 -> new StatusMismatch(100, 100) } ] as MismatchFactory
     path = ['/']
@@ -36,16 +40,21 @@ class MatcherExecutorSpec extends Specification {
     MatcherExecutorKt.domatch(EqualsMatcher.INSTANCE, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
-    expected          | actual            || mustBeEmpty
-    '100'             | '100'             || true
-    100               | '100'             || false
-    100               | 100               || true
-    null              | null              || true
-    '100'             | null              || false
-    null              | 100               || false
-    JsonNull.INSTANCE | null              || true
-    null              | JsonNull.INSTANCE || true
-    JsonNull.INSTANCE | JsonNull.INSTANCE || true
+    expected                  | actual                    || mustBeEmpty
+    '100'                     | '100'                     || true
+    100                       | '100'                     || false
+    100                       | 100                       || true
+    null                      | null                      || true
+    '100'                     | null                      || false
+    null                      | 100                       || false
+    JsonNull.INSTANCE         | null                      || true
+    null                      | JsonNull.INSTANCE         || true
+    JsonNull.INSTANCE         | JsonNull.INSTANCE         || true
+    xml('<a/>')               | xml('<a/>')               || true
+    xml('<a/>')               | xml('<b/>')               || false
+    xml('<e xmlns="a"/>')     | xml('<a:e xmlns:a="a"/>') || true
+    xml('<a:e xmlns:a="a"/>') | xml('<b:e xmlns:b="a"/>') || true
+    xml('<e xmlns="a"/>')     | xml('<e xmlns="b"/>')     || false
   }
 
   @Unroll
@@ -66,18 +75,23 @@ class MatcherExecutorSpec extends Specification {
     MatcherExecutorKt.domatch(TypeMatcher.INSTANCE, path, expected, actual, mismatchFactory).empty == mustBeEmpty
 
     where:
-    expected          | actual                     || mustBeEmpty
-    'Harry'           | 'Some other string'        || true
-    100               | 200.3                      || true
-    true              | false                      || true
-    null              | null                       || true
-    '200'             | 200                        || false
-    200               | null                       || false
-    [100, 200, 300]   | [200.3]                    || true
-    [a: 100]          | [a: 200.3, b: 200, c: 300] || true
-    JsonNull.INSTANCE | null                       || true
-    null              | JsonNull.INSTANCE          || true
-    JsonNull.INSTANCE | JsonNull.INSTANCE          || true
+    expected                  | actual                     || mustBeEmpty
+    'Harry'                   | 'Some other string'        || true
+    100                       | 200.3                      || true
+    true                      | false                      || true
+    null                      | null                       || true
+    '200'                     | 200                        || false
+    200                       | null                       || false
+    [100, 200, 300]           | [200.3]                    || true
+    [a: 100]                  | [a: 200.3, b: 200, c: 300] || true
+    JsonNull.INSTANCE         | null                       || true
+    null                      | JsonNull.INSTANCE          || true
+    JsonNull.INSTANCE         | JsonNull.INSTANCE          || true
+    xml('<a/>')               | xml('<a/>')                || true
+    xml('<a/>')               | xml('<b/>')                || false
+    xml('<e xmlns="a"/>')     | xml('<a:e xmlns:a="a"/>')  || true
+    xml('<a:e xmlns:a="a"/>') | xml('<b:e xmlns:b="a"/>')  || true
+    xml('<e xmlns="a"/>')     | xml('<e xmlns="b"/>')      || false
   }
 
   @Unroll
@@ -243,6 +257,23 @@ class MatcherExecutorSpec extends Specification {
     100 as BigInteger | false
     BigInteger.ZERO   | false
     BigDecimal.ZERO   | true
+  }
+
+  @Unroll
+  def 'display #value as #display'() {
+    expect:
+    MatcherExecutorKt.valueOf(value) == display
+
+    where:
+
+    value                         || display
+    null                          || 'null'
+    'foo'                         || "'foo'"
+    55                            || '55'
+    xml('<foo/>')                 || '<foo>'
+    xml('<foo><bar/></foo>')      || '<foo>'
+    xml('<foo xmlns="a"/>')       || '<{a}foo>'
+    xml('<a>text</a>').firstChild || "'text'"
   }
 
 }
