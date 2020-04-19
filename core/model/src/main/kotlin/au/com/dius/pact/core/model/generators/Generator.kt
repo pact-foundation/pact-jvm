@@ -1,6 +1,6 @@
 package au.com.dius.pact.core.model.generators
 
-import au.com.dius.pact.com.github.michaelbull.result.getOr
+import com.github.michaelbull.result.getOr
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.expressions.DataType
