@@ -1,7 +1,7 @@
 package au.com.dius.pact.pactbroker
 
-import au.com.dius.pact.com.github.michaelbull.result.Err
-import au.com.dius.pact.com.github.michaelbull.result.Result
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Result
 import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.set

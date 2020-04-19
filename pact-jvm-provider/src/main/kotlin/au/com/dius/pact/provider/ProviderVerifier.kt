@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.com.github.michaelbull.result.Ok
-import au.com.dius.pact.com.github.michaelbull.result.getError
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.getError
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.Pact

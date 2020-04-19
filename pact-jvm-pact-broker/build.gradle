@@ -12,6 +12,7 @@ dependencies {
     exclude group: 'org.jetbrains.kotlin'
   }
   implementation 'org.slf4j:slf4j-api:1.7.26'
+  api 'com.michael-bull.kotlin-result:kotlin-result:1.1.6'
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
 }

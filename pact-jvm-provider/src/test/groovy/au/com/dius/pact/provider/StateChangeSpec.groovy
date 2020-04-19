@@ -2,7 +2,7 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.ProviderState
-import au.com.dius.pact.com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Ok
 import spock.lang.Specification
 
 class StateChangeSpec extends Specification {

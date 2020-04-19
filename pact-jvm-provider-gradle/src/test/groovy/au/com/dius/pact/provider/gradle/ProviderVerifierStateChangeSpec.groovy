@@ -12,7 +12,7 @@ import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
 import au.com.dius.pact.provider.StateChange
 import au.com.dius.pact.provider.StateChangeResult
-import au.com.dius.pact.com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Ok
 import spock.lang.Specification
 
 class ProviderVerifierStateChangeSpec extends Specification {

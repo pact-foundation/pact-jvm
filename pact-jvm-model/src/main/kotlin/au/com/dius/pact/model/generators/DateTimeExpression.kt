@@ -1,9 +1,9 @@
 package au.com.dius.pact.model.generators
 
-import au.com.dius.pact.com.github.michaelbull.result.Err
-import au.com.dius.pact.com.github.michaelbull.result.Ok
-import au.com.dius.pact.com.github.michaelbull.result.Result
-import au.com.dius.pact.com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.mapError
 import mu.KLogging
 import java.lang.Integer.parseInt
 import java.time.OffsetDateTime

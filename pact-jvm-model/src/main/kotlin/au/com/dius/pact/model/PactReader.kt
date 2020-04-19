@@ -1,8 +1,8 @@
 package au.com.dius.pact.model
 
-import au.com.dius.pact.com.github.michaelbull.result.Err
-import au.com.dius.pact.com.github.michaelbull.result.Ok
-import au.com.dius.pact.com.github.michaelbull.result.Result
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import au.com.dius.pact.pactbroker.CustomServiceUnavailableRetryStrategy
 import au.com.dius.pact.provider.broker.PactBrokerClient
 import au.com.dius.pact.util.HttpClientUtils

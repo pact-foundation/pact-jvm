@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Ok
 import au.com.dius.pact.model.BrokerUrlSource
 import au.com.dius.pact.model.Consumer
 import au.com.dius.pact.model.Interaction

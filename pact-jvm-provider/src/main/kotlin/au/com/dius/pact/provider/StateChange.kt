@@ -2,11 +2,11 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.model.Interaction
 import au.com.dius.pact.model.ProviderState
-import au.com.dius.pact.com.github.michaelbull.result.Err
-import au.com.dius.pact.com.github.michaelbull.result.Ok
-import au.com.dius.pact.com.github.michaelbull.result.Result
-import au.com.dius.pact.com.github.michaelbull.result.mapEither
-import au.com.dius.pact.com.github.michaelbull.result.unwrap
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.mapEither
+import com.github.michaelbull.result.unwrap
 import groovy.json.JsonSlurper
 import groovy.lang.Closure
 import mu.KLogging
