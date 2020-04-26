@@ -1,6 +1,6 @@
 package au.com.dius.pact.core.model.generators
 
-import au.com.dius.pact.com.github.michaelbull.result.getOr
+import com.github.michaelbull.result.getOr
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.expressions.DataType
@@ -14,7 +14,6 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
 import java.math.BigDecimal
 import java.time.OffsetDateTime
-import java.time.OffsetTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
@@ -279,7 +278,7 @@ data class TimeGenerator @JvmOverloads constructor(
   }
 
   override fun generate(context: Map<String, Any?>): Any {
-    val base = if (context.containsKey("baseTime")) context["baseTime"] as OffsetTime else OffsetTime.now()
+    val base = if (context.containsKey("baseTime")) context["baseTime"] as OffsetDateTime else OffsetDateTime.now()
     val time = TimeExpression.executeTimeExpression(base, expression).getOr { base }
     return if (!format.isNullOrEmpty()) {
       time.format(DateTimeFormatter.ofPattern(format))

@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider
 
 import arrow.core.Either
-import au.com.dius.pact.com.github.michaelbull.result.Ok
-import au.com.dius.pact.com.github.michaelbull.result.getError
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.getError
 import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.matchers.MetadataMismatch

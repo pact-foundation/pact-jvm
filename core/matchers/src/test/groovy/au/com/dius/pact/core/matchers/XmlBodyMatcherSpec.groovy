@@ -5,6 +5,8 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import spock.lang.Issue
 import spock.lang.Specification
+import spock.lang.Unroll
+import spock.util.environment.RestoreSystemProperties
 
 @SuppressWarnings(['LineLength', 'PrivateFieldCouldBeFinal'])
 class XmlBodyMatcherSpec extends Specification {
@@ -14,6 +16,8 @@ class XmlBodyMatcherSpec extends Specification {
   private XmlBodyMatcher matcher
 
   def setup() {
+    System.clearProperty('pact.matching.xml.namespace-aware')
+
     matcher = new XmlBodyMatcher()
     matchers = new MatchingRulesImpl()
     expectedBody = OptionalBody.missing()
@@ -335,6 +339,137 @@ class XmlBodyMatcherSpec extends Specification {
 
     matchers.addCategory('body').addRule('$.providerService.attribute1.newattribute2.hiddenData',
       new RegexMatcher('[a-zA-Z0-9]*'))
+
+    expect:
+    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+  }
+
+  @Unroll
+  def 'matching XML bodies - with different namespace declarations'() {
+    given:
+    actualBody = OptionalBody.body(actual.bytes)
+    expectedBody = OptionalBody.body(expected.bytes)
+
+    expect:
+    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+
+    where:
+    actual                       | expected
+    '<blah xmlns="urn:ns"/>'     | '<blah xmlns="urn:ns"/>'
+    '<blah xmlns="urn:ns"/>'     | '<b:blah xmlns:b="urn:ns"/>'
+    '<a:blah xmlns:a="urn:ns"/>' | '<blah xmlns="urn:ns"/>'
+    '<a:blah xmlns:a="urn:ns"/>' | '<b:blah xmlns:b="urn:ns"/>'
+  }
+
+  @Unroll
+  def 'matching XML bodies - with different namespace declarations - and have child elements'() {
+    given:
+    actualBody = OptionalBody.body(actual.bytes)
+    expectedBody = OptionalBody.body(expected.bytes)
+
+    expect:
+    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+
+    where:
+    actual                                                         | expected
+    '<foo xmlns="urn:ns"><item/></foo>'                            | '<foo xmlns="urn:ns"><item/></foo>'
+    '<foo xmlns="urn:ns"><item/></foo>'                            | '<b:foo xmlns:b="urn:ns"><b:item/></b:foo>'
+    '<a:foo xmlns:a="urn:ns"><a:item/></a:foo>'                    | '<foo xmlns="urn:ns"><item/></foo>'
+    '<a:foo xmlns:a="urn:ns"><a:item/></a:foo>'                    | '<b:foo xmlns:b="urn:ns"><b:item/></b:foo>'
+    '<a:foo xmlns:a="urn:ns"><a2:item xmlns:a2="urn:ns"/></a:foo>' | '<b:foo xmlns:b="urn:ns"><b:item/></b:foo>'
+  }
+
+  def 'matching XML bodies - returns a mismatch - when different namespaces are used'() {
+    given:
+    actualBody = OptionalBody.body('<blah xmlns="urn:other"/>'.bytes)
+    expectedBody = OptionalBody.body('<blah xmlns="urn:ns"/>'.bytes)
+
+    when:
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+
+    then:
+    !mismatches.empty
+    mismatches*.mismatch == ['Expected element {urn:ns}blah but received {urn:other}blah']
+    mismatches*.path == ['$.blah']
+  }
+
+  def 'matching XML bodies - returns a mismatch - when expected namespace is not used'() {
+    given:
+    actualBody = OptionalBody.body('<blah/>'.bytes)
+    expectedBody = OptionalBody.body('<blah xmlns="urn:ns"/>'.bytes)
+
+    when:
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+
+    then:
+    !mismatches.empty
+    mismatches*.mismatch == ['Expected element {urn:ns}blah but received blah']
+    mismatches*.path == ['$.blah']
+  }
+
+  def 'matching XML bodies - returns a mismatch - when allowUnexpectedKeys is true - and no namespace is expected'() {
+    given:
+    actualBody = OptionalBody.body('<blah xmlns="urn:ns"/>'.bytes)
+    expectedBody = OptionalBody.body('<blah/>'.bytes)
+
+    when:
+    def mismatches = matcher.matchBody(expectedBody, actualBody, true, matchers)
+
+    then:
+    !mismatches.empty
+    mismatches*.mismatch == ['Expected element blah but received {urn:ns}blah']
+    mismatches*.path == ['$.blah']
+  }
+
+  @RestoreSystemProperties
+  def 'matching XML bodies - when allowUnexpectedKeys is true - and namespace-aware matching disabled - and no namespace is expected'() {
+    given:
+    System.setProperty('pact.matching.xml.namespace-aware', 'false')
+    actualBody = OptionalBody.body('<blah xmlns="urn:ns"/>'.bytes)
+    expectedBody = OptionalBody.body('<blah/>'.bytes)
+
+    expect:
+    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+  }
+
+  def 'matching XML bodies - when attribute uses different prefix'() {
+    given:
+    actualBody = OptionalBody.body('<foo xmlns:a="urn:ns" a:something="100"/>'.bytes)
+    expectedBody = OptionalBody.body('<foo xmlns:b="urn:ns" b:something="100"/>'.bytes)
+
+    expect:
+    matcher.matchBody(expectedBody, actualBody, true, matchers).empty
+  }
+
+  def 'matching XML bodies - returns a mismatch - when attribute uses different namespace'() {
+    given:
+    actualBody = OptionalBody.body('<foo xmlns:ns="urn:a" ns:something="100"/>'.bytes)
+    expectedBody = OptionalBody.body('<foo xmlns:ns="urn:b" ns:something="100"/>'.bytes)
+
+    when:
+    def mismatches = matcher.matchBody(expectedBody, actualBody, false, matchers)
+
+    then:
+    !mismatches.empty
+    mismatches*.mismatch == ['Expected {urn:b}something=\'100\' but was missing']
+    mismatches*.path == ['$.foo.@ns:something']
+  }
+
+  def 'matching XML bodies - with namespaces and a matcher defined - delegate to matcher for attribute'() {
+    given:
+    actualBody = OptionalBody.body('<foo xmlns:a="urn:ns" a:something="100"/>'.bytes)
+    expectedBody = OptionalBody.body('<foo xmlns:b="urn:ns" b:something="101"/>'.bytes)
+    matchers.addCategory('body').addRule("\$.foo['@b:something']", new RegexMatcher('\\d+'))
+
+    expect:
+    matcher.matchBody(expectedBody, actualBody, false, matchers).empty
+  }
+
+  def 'matching XML bodies - with namespaces and a matcher defined - delegate to the matcher'() {
+    given:
+    actualBody = OptionalBody.body('<ns:foo xmlns:ns="urn:ns"><ns:something>100</ns:something></ns:foo>'.bytes)
+    expectedBody = OptionalBody.body('<foo xmlns="urn:ns"><something>101</something></foo>'.bytes)
+    matchers.addCategory('body').addRule("\$.foo.something", new RegexMatcher('\\d+'))
 
     expect:
     matcher.matchBody(expectedBody, actualBody, false, matchers).empty

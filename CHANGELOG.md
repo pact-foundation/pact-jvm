@@ -1,5 +1,22 @@
 To generate the log, run `git log --pretty='* %h - %s (%an, %ad)'  TAGNAME..HEAD` replacing TAGNAME and HEAD as appropriate.
 
+# 4.0.10 - add support for MockMvc in JUnit 5 tests, add namespace-aware XML matching
+
+* 7d84f60af - chore: add test to try replicate Github issue (Ronald Holshausen, Sat Apr 18 16:49:33 2020 +1000)
+* 053d8969e - fix: datetime expressions where the time modifier rolls the date (Ronald Holshausen, Sat Apr 18 16:06:38 2020 +1000)
+* e30821de4 - fix: codenarc violation (Ronald Holshausen, Sat Apr 18 15:40:42 2020 +1000)
+* b0c815dfb - chore: update comment on failing test (Ronald Holshausen, Sat Apr 18 15:00:28 2020 +1000)
+* e5d5d12ea - chore: disabling test that fails on CI (Ronald Holshausen, Sat Apr 18 14:57:36 2020 +1000)
+* c7d47c253 - Merge pull request #1071 from mitre/namespace-aware (Ronald Holshausen, Sat Apr 18 14:48:14 2020 +1000)
+* a52f7e5dc - feat: add namespace-aware XML matching (Andrew Steffey, Tue Mar 17 20:46:05 2020 -0400)
+* b7a3ce75f - Merge pull request #1068 from ldziedziul/mock_mvc_junit5 (Ronald Holshausen, Wed Apr 15 09:16:38 2020 +1000)
+* f9a111562 - feat: add support for MockMvc in JUnit 5 tests (Łukasz Dziedziul, Sat Apr 11 20:59:54 2020 +0200)
+* 44bd33bfe - feat: Prototype of a XML DSL for consumer tests #243 (Ronald Holshausen, Fri Apr 10 17:31:53 2020 +1000)
+* aead5fa0e - fix: JUNIT 5 - Successful test result was being published after state change method failed #1058 (Ronald Holshausen, Fri Apr 10 12:28:09 2020 +1000)
+* 6d88608d2 - chore: updated Groovy consumer test to use path matcher (Ronald Holshausen, Fri Apr 10 10:13:28 2020 +1000)
+* 257ccc900 - bump version to 4.0.10 (Ronald Holshausen, Sun Apr 5 14:05:41 2020 +1000)
+* c88ed5ead - fix: update to latest Gradle publish plugin (Ronald Holshausen, Sun Apr 5 14:04:52 2020 +1000)
+
 # 4.0.9 - Bugfix Release
 
 * 76ca345c1 - chore: add example for provider state injection where the value is missing (Ronald Holshausen, Sun Apr 5 13:28:00 2020 +1000)

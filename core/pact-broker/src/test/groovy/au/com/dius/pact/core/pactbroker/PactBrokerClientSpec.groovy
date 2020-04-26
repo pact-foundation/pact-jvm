@@ -1,8 +1,8 @@
 package au.com.dius.pact.core.pactbroker
 
 import arrow.core.Either
-import au.com.dius.pact.com.github.michaelbull.result.Err
-import au.com.dius.pact.com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import au.com.dius.pact.core.support.Json
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject

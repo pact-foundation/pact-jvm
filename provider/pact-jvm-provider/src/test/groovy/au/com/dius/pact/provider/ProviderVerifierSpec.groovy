@@ -24,7 +24,7 @@ import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.VerifierReporter
-import au.com.dius.pact.com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Ok
 import groovy.json.JsonOutput
 import org.apache.http.entity.ContentType
 import spock.lang.Specification

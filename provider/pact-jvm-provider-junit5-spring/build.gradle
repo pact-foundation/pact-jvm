@@ -2,7 +2,13 @@ dependencies {
   implementation project(path: ":provider:pact-jvm-provider-junit5", configuration: 'default')
   implementation 'org.springframework:spring-context:5.2.3.RELEASE'
   implementation 'org.springframework:spring-test:5.2.3.RELEASE'
+  implementation 'org.springframework:spring-web:5.2.3.RELEASE'
+  implementation 'javax.servlet:javax.servlet-api:3.1.0'
 
   testImplementation 'org.springframework.boot:spring-boot-starter-test:2.2.5.RELEASE'
   testImplementation 'org.springframework.boot:spring-boot-starter-web:2.2.5.RELEASE'
+  testImplementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testImplementation('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+    exclude group: 'org.codehaus.groovy'
+  }
 }

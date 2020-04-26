@@ -1,8 +1,8 @@
 package au.com.dius.pact.core.model.generators
 
-import au.com.dius.pact.com.github.michaelbull.result.Err
-import au.com.dius.pact.com.github.michaelbull.result.Ok
-import au.com.dius.pact.com.github.michaelbull.result.Result
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import au.com.dius.pact.core.support.generators.expressions.Adjustment
 import au.com.dius.pact.core.support.generators.expressions.DateBase
 import au.com.dius.pact.core.support.generators.expressions.DateExpressionLexer

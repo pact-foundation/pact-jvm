@@ -1,7 +1,7 @@
 package au.com.dius.pact.core.pactbroker
 
-import au.com.dius.pact.com.github.michaelbull.result.Err
-import au.com.dius.pact.com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import com.google.gson.JsonParser
 import org.apache.http.HttpEntity
