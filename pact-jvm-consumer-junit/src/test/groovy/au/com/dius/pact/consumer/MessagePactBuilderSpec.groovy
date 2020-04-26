@@ -3,8 +3,9 @@ package au.com.dius.pact.consumer
 import au.com.dius.pact.consumer.dsl.Matchers
 import au.com.dius.pact.consumer.dsl.PactDslJsonBody
 import au.com.dius.pact.model.v3.messaging.Message
-import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.model.ProviderState
 import groovy.json.JsonSlurper
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 

@@ -1,11 +1,13 @@
 package au.com.dius.pact.model
 
-import java.nio.charset.Charset
-
 /**
  * Class to represent missing, empty, null and present bodies
  */
-data class OptionalBody(val state: State, val value: ByteArray? = null) {
+data class OptionalBody(
+  val state: State,
+  val value: ByteArray? = null,
+  val contentType: ContentType = ContentType.UNKNOWN
+) {
 
   enum class State {
     MISSING, EMPTY, NULL, PRESENT
@@ -25,11 +27,13 @@ data class OptionalBody(val state: State, val value: ByteArray? = null) {
       return OptionalBody(State.NULL)
     }
 
-    @JvmStatic fun body(body: ByteArray?): OptionalBody {
+    @JvmStatic
+    @JvmOverloads
+    fun body(body: ByteArray?, contentType: ContentType = ContentType.UNKNOWN): OptionalBody {
       return when {
         body == null -> nullBody()
         body.isEmpty() -> empty()
-        else -> OptionalBody(State.PRESENT, body)
+        else -> OptionalBody(State.PRESENT, body, contentType)
       }
     }
   }
@@ -65,7 +69,7 @@ data class OptionalBody(val state: State, val value: ByteArray? = null) {
   fun orEmpty() = orElse(ByteArray(0))
 
   fun unwrap(): ByteArray {
-    if (isPresent()) {
+    if (isPresent() || isEmpty()) {
       return value!!
     } else {
       throw UnwrapMissingBodyException("Failed to unwrap value from a $state body")
@@ -95,7 +99,7 @@ data class OptionalBody(val state: State, val value: ByteArray? = null) {
 
   override fun toString(): String {
     return when (state) {
-      State.PRESENT -> "PRESENT(${value!!.toString(Charset.defaultCharset())})"
+      State.PRESENT -> "PRESENT(${value!!.toString(contentType.asCharset())})"
       State.EMPTY -> "EMPTY"
       State.NULL -> "NULL"
       State.MISSING -> "MISSING"
@@ -104,7 +108,7 @@ data class OptionalBody(val state: State, val value: ByteArray? = null) {
 
   fun valueAsString(): String {
     return when (state) {
-      State.PRESENT -> value!!.toString(Charset.defaultCharset())
+      State.PRESENT -> value!!.toString(contentType.asCharset())
       State.EMPTY -> ""
       State.NULL -> ""
       State.MISSING -> ""
@@ -129,3 +133,6 @@ fun OptionalBody?.orEmpty() = this?.orElse(ByteArray(0))
 fun OptionalBody?.valueAsString() = this?.valueAsString() ?: ""
 
 fun OptionalBody?.isNullOrEmpty() = this == null || this.isEmpty() || this.isNull()
+
+fun OptionalBody?.unwrap() = this?.unwrap() ?: throw UnwrapMissingBodyException(
+  "Failed to unwrap value from a null body")

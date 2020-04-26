@@ -29,7 +29,7 @@ class Message implements Interaction {
   OptionalBody contents = OptionalBody.missing()
   MatchingRules matchingRules = new MatchingRulesImpl()
   Generators generators = new Generators()
-  Map<String, String> metaData = [:]
+  Map<String, Object> metaData = [:]
   String interactionId
 
   byte[] contentsAsBytes() {

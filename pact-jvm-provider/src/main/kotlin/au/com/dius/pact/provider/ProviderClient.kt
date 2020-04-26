@@ -269,30 +269,31 @@ open class ProviderClient(
   }
 
   open fun setupBody(request: Request, method: HttpRequest) {
-    if (method is HttpEntityEnclosingRequest && request.body.isPresent()) {
+    val body = request.body
+    if (method is HttpEntityEnclosingRequest && body != null && body.isPresent()) {
       val contentTypeHeader = request.contentTypeHeader()
       if (null != contentTypeHeader) {
         try {
           val contentType = ContentType.parse(contentTypeHeader)
-          method.entity = StringEntity(request.body.valueAsString(), contentType)
+          method.entity = StringEntity(body.valueAsString(), contentType)
         } catch (e: UnsupportedCharsetException) {
-          method.entity = StringEntity(request.body.valueAsString())
+          method.entity = StringEntity(body.valueAsString())
         }
       } else {
-        method.entity = StringEntity(request.body.valueAsString())
+        method.entity = StringEntity(body.valueAsString())
       }
     }
   }
 
   open fun setupHeaders(request: Request, method: HttpRequest) {
     val headers = request.headers
-    if (headers.isNotEmpty()) {
+    if (headers != null && headers.isNotEmpty()) {
       headers.forEach { (key, value) ->
         method.addHeader(key, value.joinToString(", "))
       }
     }
 
-    if (!method.containsHeader(CONTENT_TYPE) && request.body.isPresent()) {
+    if (!method.containsHeader(CONTENT_TYPE) && request.body != null && request.body!!.isPresent()) {
       method.addHeader(CONTENT_TYPE, "application/json")
     }
   }

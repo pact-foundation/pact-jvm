@@ -55,9 +55,9 @@ object Conversions extends StrictLogging {
   def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {
     val headers = toHeaders(request)
     val contentTypeHeader = request.headers("Content-Type")
-    val contentType = if (contentTypeHeader.hasNext) new ContentType(contentTypeHeader.next())
-      else ContentType.getTEXT_PLAIN
+    val contentType = if (contentTypeHeader != null && contentTypeHeader.hasNext) new au.com.dius.pact.model.ContentType(contentTypeHeader.next())
+      else au.com.dius.pact.model.ContentType.getTEXT_PLAIN
     new Request(request.method, toPath(request.uri), toQuery(request), headers,
-      OptionalBody.body(toBody(request).getBytes(contentType.asCharset), contentType))
+      OptionalBody.body(toBody(request).getBytes(contentType.asCharset)))
   }
 }

@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
-import static au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression;
+import static au.com.dius.pact.support.expressions.ExpressionParser.parseExpression;
 
 public class BaseProviderRule extends ExternalResource {
 

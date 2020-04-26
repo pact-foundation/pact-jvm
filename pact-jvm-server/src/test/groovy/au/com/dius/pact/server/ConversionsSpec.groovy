@@ -1,11 +1,11 @@
 package au.com.dius.pact.server
 
-import au.com.dius.pact.core.model.ContentType
-import au.com.dius.pact.core.model.Request
+import au.com.dius.pact.model.ContentType
+import au.com.dius.pact.model.Request
+import au.com.dius.pact.model.unfiltered.Conversions$
 import scala.collection.JavaConverters
 import spock.lang.Issue
 import spock.lang.Specification
-import unfiltered.netty.ReceivedMessage
 import unfiltered.request.HttpRequest
 
 class ConversionsSpec extends Specification {
@@ -13,7 +13,7 @@ class ConversionsSpec extends Specification {
   @Issue('#1008')
   def 'unfilteredRequestToPactRequest - handles the case where there is no content type header'() {
     given:
-    def httpRequest = Mock(HttpRequest<ReceivedMessage>) {
+    def httpRequest = Mock(HttpRequest) {
       headers(_) >> JavaConverters.asScalaIterator([].iterator())
       headerNames() >> JavaConverters.asScalaIterator([].iterator())
       uri() >> '/'
@@ -26,7 +26,7 @@ class ConversionsSpec extends Specification {
     Request request = Conversions$.MODULE$.unfilteredRequestToPactRequest(httpRequest)
 
     then:
-    request.body.contentType == ContentType.TEXT_PLAIN
+    request.body.contentType == ContentType.UNKNOWN
   }
 
 }

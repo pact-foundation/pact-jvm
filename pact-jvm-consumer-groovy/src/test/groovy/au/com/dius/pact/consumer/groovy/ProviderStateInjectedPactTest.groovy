@@ -6,7 +6,7 @@ import groovy.json.JsonSlurper
 import groovyx.net.http.RESTClient
 import org.junit.Test
 
-@SuppressWarnings('GStringExpressionWithinString')
+@SuppressWarnings(['GStringExpressionWithinString', 'LineLength'])
 class ProviderStateInjectedPactTest {
 
   @Test

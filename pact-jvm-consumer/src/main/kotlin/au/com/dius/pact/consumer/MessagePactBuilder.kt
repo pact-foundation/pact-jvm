@@ -111,9 +111,9 @@ class MessagePactBuilder(
           message.generators.addGenerator(category = au.com.dius.pact.model.generators.Category.METADATA,
             generator = value.generator!!)
         }
-        value.value.toString()
+        value.value
       } else {
-        value.toString()
+        value
       }
     }
     return this
