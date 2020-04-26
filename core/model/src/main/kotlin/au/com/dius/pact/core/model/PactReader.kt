@@ -1,8 +1,8 @@
 package au.com.dius.pact.core.model
 
-import au.com.dius.pact.com.github.michaelbull.result.Err
-import au.com.dius.pact.com.github.michaelbull.result.Ok
-import au.com.dius.pact.com.github.michaelbull.result.Result
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils
@@ -10,10 +10,13 @@ import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
 import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import au.com.dius.pact.core.support.HttpClient
 import au.com.dius.pact.core.support.Json
-import com.amazonaws.services.s3.AmazonS3
-import com.amazonaws.services.s3.AmazonS3ClientBuilder
-import com.amazonaws.services.s3.AmazonS3URI
-import com.github.salomonbrys.kotson.*
+import com.github.salomonbrys.kotson.array
+import com.github.salomonbrys.kotson.get
+import com.github.salomonbrys.kotson.jsonArray
+import com.github.salomonbrys.kotson.jsonObject
+import com.github.salomonbrys.kotson.obj
+import com.github.salomonbrys.kotson.set
+import com.github.salomonbrys.kotson.string
 import com.github.zafarkhaja.semver.Version
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -46,7 +49,7 @@ fun loadPactFromUrl(source: UrlPactSource, options: Map<String, Any>, http: Clos
   return when (source) {
     is BrokerUrlSource -> {
       val brokerClient = PactBrokerClient(source.pactBrokerUrl, options)
-      val pactResponse = brokerClient.fetchPact(source.url)
+      val pactResponse = brokerClient.fetchPact(source.url, source.encodePath)
       pactResponse.pactFile to source.copy(attributes = pactResponse.links, options = options)
     }
     else -> when (val jsonResource = fetchJsonResource(http, source)) {
@@ -62,10 +65,10 @@ fun fetchJsonResource(http: CloseableHttpClient, source: UrlPactSource):
   return Result.of {
     when (url.protocol) {
       "file" -> {
-        JsonParser().parse(URL(source.url).readText()) to source
+        JsonParser.parseString(URL(source.url).readText()) to source
       }
       else -> {
-        val httpGet = HttpGet(HttpClientUtils.buildUrl("", source.url, true))
+        val httpGet = HttpGet(HttpClientUtils.buildUrl("", source.url, source.encodePath))
         httpGet.addHeader("Content-Type", "application/json")
         httpGet.addHeader("Accept", "application/hal+json, application/json")
 
@@ -164,7 +167,7 @@ object DefaultPactReader : PactReader, KLogging() {
   private const val CLASSPATH_URI_START = "classpath:"
 
   @JvmStatic
-  lateinit var s3Client: AmazonS3
+  lateinit var s3Client: Any
 
   override fun loadPact(source: Any) = loadPact(source, emptyMap())
 
@@ -351,21 +354,29 @@ object DefaultPactReader : PactReader, KLogging() {
 
   private fun loadPactFromFile(source: Any): Pair<JsonElement, PactSource> {
     return when (source) {
-      is InputStream -> JsonParser().parse(InputStreamReader(source)) to InputStreamPactSource
-      is Reader -> JsonParser().parse(source) to ReaderPactSource
-      is File -> source.bufferedReader().use { JsonParser().parse(it) } to FileSource<Interaction>(source)
+      is InputStream -> JsonParser.parseReader(InputStreamReader(source)) to InputStreamPactSource
+      is Reader -> JsonParser.parseReader(source) to ReaderPactSource
+      is File -> source.bufferedReader().use { JsonParser.parseReader(it) } to FileSource<Interaction>(source)
       else -> throw IllegalArgumentException("loadPactFromFile expects either an InputStream, Reader or File. " +
         "Got a ${source.javaClass.name} instead")
     }
   }
 
   private fun loadPactFromS3Bucket(source: String): Pair<JsonElement, PactSource> {
-    val s3Uri = AmazonS3URI(source)
+    val amazonS3URIClass = Class.forName("com.amazonaws.services.s3.AmazonS3URI")
+    val s3Uri = amazonS3URIClass.getConstructor(String::class.java).newInstance(source)
+    val bucket = amazonS3URIClass.getMethod("getBucket").invoke(s3Uri).toString()
+    val key = amazonS3URIClass.getMethod("getKey").invoke(s3Uri).toString()
     if (!DefaultPactReader::s3Client.isInitialized) {
-      s3Client = AmazonS3ClientBuilder.defaultClient()
+      val amazonS3ClientBuilderClass = Class.forName("com.amazonaws.services.s3.AmazonS3ClientBuilder")
+      s3Client = amazonS3ClientBuilderClass.getMethod("defaultClient").invoke(null)
     }
-    val s3Pact = s3Client.getObject(s3Uri.bucket, s3Uri.key)
-    return JsonParser().parse(InputStreamReader(s3Pact.objectContent)) to S3PactSource(source)
+    val s3ClientClass = Class.forName("com.amazonaws.services.s3.AmazonS3")
+    val s3Pact = s3ClientClass.getMethod("getObject", String::class.java, String::class.java)
+      .invoke(s3Client, bucket, key)
+    val s3ObjectClass = Class.forName("com.amazonaws.services.s3.model.S3Object")
+    val objectContent = s3ObjectClass.getMethod("getObjectContent").invoke(s3Pact) as InputStream
+    return JsonParser.parseReader(InputStreamReader(objectContent)) to S3PactSource(source)
   }
 
   private fun loadPactFromClasspath(source: String): Pair<JsonElement, PactSource> {

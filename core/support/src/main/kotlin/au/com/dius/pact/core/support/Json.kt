@@ -27,8 +27,12 @@ open class NumberSerializer : JsonSerializer<Number> {
 object Json {
 
   val numberAdapter = NumberSerializer()
-  val gsonPretty: Gson = GsonBuilder().setPrettyPrinting().serializeNulls().registerTypeHierarchyAdapter(Number::class.java, numberAdapter).create()
-  val gson: Gson = GsonBuilder().serializeNulls().registerTypeHierarchyAdapter(Number::class.java, numberAdapter).create()
+  val gsonPretty: Gson = GsonBuilder().setPrettyPrinting()
+    .serializeNulls()
+    .disableHtmlEscaping()
+    .registerTypeHierarchyAdapter(Number::class.java, numberAdapter).create()
+  val gson: Gson = GsonBuilder().serializeNulls().disableHtmlEscaping()
+    .registerTypeHierarchyAdapter(Number::class.java, numberAdapter).create()
 
   /**
    * Converts an Object graph to a JSON Object
@@ -107,8 +111,14 @@ object Json {
     }
   }
 
-  fun prettyPrint(json: String) = gsonPretty.toJson(JsonParser().parse(json))
+  fun prettyPrint(json: String): String = gsonPretty.toJson(JsonParser.parseString(json))
 
   fun exceptionToJson(exp: Exception) = jsonObject("message" to exp.message,
     "exceptionClass" to exp.javaClass.name)
+
+  fun toBoolean(jsonElement: JsonElement?) = when {
+    jsonElement == null || jsonElement.isJsonNull -> false
+    jsonElement.isJsonPrimitive && jsonElement.asJsonPrimitive.isBoolean -> jsonElement.asJsonPrimitive.asBoolean
+    else -> false
+  }
 }

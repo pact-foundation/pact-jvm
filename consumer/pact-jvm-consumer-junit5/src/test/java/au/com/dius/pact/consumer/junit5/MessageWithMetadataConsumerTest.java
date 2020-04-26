@@ -25,9 +25,10 @@ public class MessageWithMetadataConsumerTest {
         body.stringValue("testParam1", "value1");
         body.stringValue("testParam2", "value2");
 
-        Map<String, String> metadata = new HashMap<>();
+        Map<String, Object> metadata = new HashMap<>();
         metadata.put("metadata1", "metadataValue1");
         metadata.put("metadata2", "metadataValue2");
+        metadata.put("metadata3", 10L);
 
         return builder.given("SomeProviderState")
                 .expectsToReceive("a test message with metadata")
@@ -42,6 +43,7 @@ public class MessageWithMetadataConsumerTest {
         assertTrue(!messages.get(0).getMetaData().isEmpty());
         assertEquals("metadataValue1", messages.get(0).getMetaData().get("metadata1"));
         assertEquals("metadataValue2", messages.get(0).getMetaData().get("metadata2"));
+        assertEquals(10L, messages.get(0).getMetaData().get("metadata3"));
     }
 
 }

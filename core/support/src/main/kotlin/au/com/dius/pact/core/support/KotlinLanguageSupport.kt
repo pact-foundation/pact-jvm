@@ -4,6 +4,7 @@ import java.lang.Integer.max
 import java.net.URL
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
+import arrow.core.Either
 
 public fun String?.isNotEmpty(): Boolean = !this.isNullOrEmpty()
 
@@ -25,4 +26,13 @@ public fun String?.toUrl() = if (this.isNullOrEmpty()) {
   null
 } else {
   URL(this)
+}
+
+public fun <F> handleWith(f: () -> Any): Either<Exception, F> {
+  return try {
+    val result = f()
+    if (result is Either<*, *>) result as Either<Exception, F> else Either.right(result as F)
+  } catch (ex: Exception) {
+    Either.left(ex)
+  }
 }

@@ -8,7 +8,7 @@ import spock.lang.Specification
 
 class MessageComparisonSpec extends Specification {
 
-  def 'compares the message contents as JSON by default'() {
+  def 'compares the message contents as TEXT by default'() {
     given:
     def message = new Message('test', [], OptionalBody.body('{"a":1,"b":"2"}'.bytes))
     def actual = OptionalBody.body('{"a":1,"b":"3"}'.bytes)
@@ -19,7 +19,7 @@ class MessageComparisonSpec extends Specification {
     then:
     result.isRight()
     result.b.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
-      '$.b': ['Expected "2" but received "3"']
+      '/': ['Actual body \'{"a":1,"b":"3"}\' is not equal to the expected body \'{"a":1,"b":"2"}\'']
     ]
   }
 
@@ -35,8 +35,7 @@ class MessageComparisonSpec extends Specification {
     then:
     result.isRight()
     result.b.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
-      '/': ["Expected body '{\"a\":1,\"b\":\"2\"}' to match '{\"a\":1,\"b\":\"3\"}' using equality but did " +
-            'not match']
+      '/': ['Expected body \'{"a":1,"b":"2"}\' to match \'{"a":1,"b":"3"}\' using equality but did not match']
     ]
   }
 

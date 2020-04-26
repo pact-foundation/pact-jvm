@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.UrlPactSource
+import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import java.io.File
@@ -69,4 +70,5 @@ interface VerifierReporter {
   fun metadataComparisonOk()
   fun metadataComparisonOk(key: String, value: Any?)
   fun metadataComparisonFailed(key: String, value: Any?, comparison: Any)
+  fun reportVerificationNoticesForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, notices: List<VerificationNotice>) {}
 }

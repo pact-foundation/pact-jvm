@@ -39,19 +39,28 @@ object Conversions extends StrictLogging {
 
   def toPath(uri: String) = new URI(uri).getPath
 
-  def toBody(request: HttpRequest[ReceivedMessage], charset: String = "UTF-8") = {
-    val is = if (request.headers(ContentEncoding.GZip.name).contains("gzip")) {
+  private def toBodyInputStream(request: HttpRequest[ReceivedMessage]) = {
+    val gzip = request.headers(ContentEncoding.GZip.name)
+    if (gzip.hasNext && gzip.next().contains("gzip")) {
       new GZIPInputStream(request.inputStream)
     } else {
       request.inputStream
     }
-    if(is == null) "" else scala.io.Source.fromInputStream(is).mkString
+  }
+
+  private def toBody(request: HttpRequest[ReceivedMessage], contentType: ContentType) = {
+    val inputStream = toBodyInputStream(request)
+    if (inputStream == null)
+      OptionalBody.empty()
+    else
+      OptionalBody.body(org.apache.commons.io.IOUtils.toByteArray(inputStream), contentType)
   }
 
   def unfilteredRequestToPactRequest(request: HttpRequest[ReceivedMessage]): Request = {
     val headers = toHeaders(request)
-    val contentType = new ContentType(request.headers("Content-Type").next())
-    new Request(request.method, toPath(request.uri), toQuery(request), headers,
-      OptionalBody.body(toBody(request).getBytes(contentType.asCharset), contentType))
+    val contentTypeHeader = request.headers("Content-Type")
+    val contentType = if (contentTypeHeader.hasNext) new ContentType(contentTypeHeader.next())
+      else ContentType.getTEXT_PLAIN
+    new Request(request.method, toPath(request.uri), toQuery(request), headers, toBody(request, contentType))
   }
 }

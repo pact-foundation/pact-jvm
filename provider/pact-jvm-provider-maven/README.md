@@ -247,15 +247,17 @@ The following plugin properties can be specified with `-Dproperty=value` on the 
 
 |Property|Description|
 |--------|-----------|
-|pact.showStacktrace|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
-|pact.showFullDiff|This turns on displaying the full diff of the expected versus actual bodies|
-|pact.filter.consumers|Comma separated list of consumer names to verify|
-|pact.filter.description|Only verify interactions whose description match the provided regular expression|
-|pact.filter.providerState|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
-|pact.verifier.publishResults|Publishing of verification results will be skipped unless this property is set to `true` [version 3.5.18+]|
-|pact.matching.wildcard|Enables matching of map values ignoring the keys when this property is set to `true`|
-|pact.verifier.disableUrlPathDecoding|Disables decoding of request paths|
-|pact.pactbroker.httpclient.usePreemptiveAuthentication|Enables preemptive authentication with the pact broker when set to `true`|
+|`pact.showStacktrace`|This turns on stacktrace printing for each request. It can help with diagnosing network errors|
+|`pact.showFullDiff`|This turns on displaying the full diff of the expected versus actual bodies|
+|`pact.filter.consumers`|Comma separated list of consumer names to verify|
+|`pact.filter.description`|Only verify interactions whose description match the provided regular expression|
+|`pact.filter.providerState`|Only verify interactions whose provider state match the provided regular expression. An empty string matches interactions that have no state|
+|`pact.filter.pacturl`|This filter allows just the just the changed pact specified in a webhook to be run. It should be used in conjunction with `pact.filter.consumers`|
+|`pact.verifier.publishResults`|Publishing of verification results will be skipped unless this property is set to `true` [version 3.5.18+]|
+|`pact.matching.wildcard`|Enables matching of map values ignoring the keys when this property is set to `true`|
+|`pact.verifier.disableUrlPathDecoding`|Disables decoding of request paths|
+|`pact.pactbroker.httpclient.usePreemptiveAuthentication`|Enables preemptive authentication with the pact broker when set to `true`|
+|`pact.consumer.tags`|Overrides the tags used when publishing pacts [version 4.0.7+]|
 
 Example in the configuration section:
 
@@ -422,6 +424,20 @@ Here is how you configure the plugin to use bearer token authentication for veri
 
 Preemptive Authentication can be enabled by setting the `pact.pactbroker.httpclient.usePreemptiveAuthentication` Java
 system property to `true`.
+
+### Allowing just the changed pact specified in a webhook to be verified [4.0.6+]
+
+When a consumer publishes a new version of a pact file, the Pact broker can fire off a webhook with the URL of the changed 
+pact file. To allow only the changed pact file to be verified, you can override the URL by using the `pact.filter.consumers`
+and `pact.filter.pacturl` Java system properties.
+
+For example, running:
+
+```console
+mvn pact:verify -Dpact.filter.consumers='Foo Web Client' -Dpact.filter.pacturl=https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/version/1.0.1
+```  
+
+will only run the verification for Foo Web Client with the given pact file URL.
 
 #### Using the Maven servers configuration
 
@@ -612,6 +628,7 @@ For example:
       <pactBrokerUrl>http://pactbroker:1234</pactBrokerUrl>
       <projectVersion>1.0.100</projectVersion> <!-- Defaults to ${project.version} -->
       <trimSnapshot>true</trimSnapshot> <!-- Defaults to false -->
+      <skipPactPublish>false</skipPactPublish> <!-- Defaults to false -->
     </configuration>
 </plugin>
 ```
@@ -641,6 +658,8 @@ is setting the tag to the current source control branch. This supports using pac
     </configuration>
 </plugin>
 ```
+
+You can also specify the tags using the `pact.consumer.tags` Java system property [version 4.0.7+].
 
 ## Publishing to an authenticated pact broker
 

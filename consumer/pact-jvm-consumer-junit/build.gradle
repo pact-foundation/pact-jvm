@@ -21,13 +21,22 @@ dependencies {
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
   testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}"
-  testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
+  testCompile "io.github.http-builder-ng:http-builder-ng-apache:${project.httpBuilderVersion}"
   // Required for Java 9
   testCompile 'javax.xml.bind:jaxb-api:2.3.0'
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+    exclude group: 'org.codehaus.groovy'
+  }
+  testRuntime "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
+  testRuntime 'org.objenesis:objenesis:3.1'
+  testCompile 'com.fasterxml.jackson.core:jackson-databind:2.11.0.rc1'
 
   testCompile 'org.clojure:clojure:1.10.0',
     'http-kit:http-kit:2.3.0'
+  testCompile 'javax.xml.bind:jaxb-api:2.3.0'
+  testCompile 'javax.activation:activation:1.1'
+  testCompile 'org.glassfish.jaxb:jaxb-runtime:2.3.0'
 }
 
 clojureTest {

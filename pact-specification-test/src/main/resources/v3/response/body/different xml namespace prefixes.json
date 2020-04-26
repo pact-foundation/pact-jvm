@@ -1,0 +1,12 @@
+{
+  "match": true,
+  "comment": "different XML namespace declarations/prefixes",
+  "expected" : {
+    "headers": {"Content-Type": "application/xml"},
+    "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><alligator xmlns=\"urn:alligators\" xmlns:names=\"urn:names\" names:name=\"Mary\"><favouriteNumbers xmlns:fn=\"urn:favourite:numbers\"><fn:favouriteNumber>1</fn:favouriteNumber></favouriteNumbers></alligator>"
+  },
+  "actual": {
+    "headers": {"Content-Type": "application/xml"},
+    "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><a:alligator xmlns:a=\"urn:alligators\" xmlns:n=\"urn:names\" n:name=\"Mary\"><a:favouriteNumbers><favouriteNumber xmlns=\"urn:favourite:numbers\">1</favouriteNumber></a:favouriteNumbers></a:alligator>"
+  }
+}

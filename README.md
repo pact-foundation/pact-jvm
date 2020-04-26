@@ -43,7 +43,7 @@ and in the [Pact-JVM wiki](https://github.com/DiUS/pact-jvm/wiki). [Stack Overfl
 
 | Branch | Specification | JDK | Scala Versions | Latest Version |
 | ------ | ------------- | ------- | -------------- | -------------- |
-| [4.0.x](https://github.com/DiUS/pact-jvm/blob/v4.x/README.md) | V3 | 8-12 | N/A | 4.0.0 |
+| [4.0.x](https://github.com/DiUS/pact-jvm/blob/v4.x/README.md) | V3 | 8-12 | N/A | 4.0.6 |
 | [3.6.x](https://github.com/DiUS/pact-jvm/blob/v3.6.x/README.md) | V3 | 8 | 2.12 | 3.6.14 |
 | [3.5.x](https://github.com/DiUS/pact-jvm/blob/v3.5.x/README.md) | V3 | 8 | 2.12, 2.11 | 3.5.25 |
 | [3.5.x-jre7](https://github.com/DiUS/pact-jvm/blob/v3.5.x-jre7/README.md) | V3 | 7 | 2.11 | 3.5.7-jre7.0 |

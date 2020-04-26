@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.model.ContentType as PactContentType
 @SuppressWarnings('UnusedImport')
 import au.com.dius.pact.provider.GroovyScalaUtils$
 import au.com.dius.pact.provider.IHttpClientFactory
@@ -21,6 +22,7 @@ import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.message.BasicHeader
 import org.apache.http.message.BasicStatusLine
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -83,7 +85,7 @@ class ProviderClientSpec extends Specification {
     0 * httpRequest._
   }
 
-  def 'setting up headers adds an JSON content type if none was provided and there is a body'() {
+  def 'setting up headers adds an TEXT content type if none was provided and there is a body'() {
     given:
     def headers = [
       A: ['a'],
@@ -100,12 +102,34 @@ class ProviderClientSpec extends Specification {
     headers.each {
       1 * httpRequest.addHeader(it.key, it.value[0])
     }
-    1 * httpRequest.addHeader('Content-Type', 'application/json')
+    1 * httpRequest.addHeader('Content-Type', 'text/plain; charset=ISO-8859-1')
 
     0 * httpRequest._
   }
 
-  def 'setting up headers does not add an JSON content type if there is no body'() {
+  def 'setting up headers adds an content type if none was provided and there is a body with content type'() {
+    given:
+    def headers = [
+            A: ['a'],
+            B: ['b'],
+            C: ['c']
+    ]
+    request = new Request('PUT', '/', [:], headers, OptionalBody.body('{}'.bytes, PactContentType.JSON))
+
+    when:
+    client.setupHeaders(request, httpRequest)
+
+    then:
+    1 * httpRequest.containsHeader('Content-Type') >> false
+    headers.each {
+      1 * httpRequest.addHeader(it.key, it.value[0])
+    }
+    1 * httpRequest.addHeader('Content-Type', ContentType.APPLICATION_JSON.getMimeType())
+
+    0 * httpRequest._
+  }
+
+  def 'setting up headers does not add an TEXT content type if there is no body'() {
     given:
     def headers = [
       A: ['a'],
@@ -122,12 +146,12 @@ class ProviderClientSpec extends Specification {
     headers.each {
       1 * httpRequest.addHeader(it.key, it.value[0])
     }
-    0 * httpRequest.addHeader('Content-Type', 'application/json')
+    0 * httpRequest.addHeader('Content-Type', 'text/plain')
 
     0 * httpRequest._
   }
 
-  def 'setting up headers does not add an JSON content type if there is already one'() {
+  def 'setting up headers does not add an TEXT content type if there is already one'() {
     given:
     def headers = [
       A: ['a'],
@@ -144,7 +168,7 @@ class ProviderClientSpec extends Specification {
     headers.each {
       1 * httpRequest.addHeader(it.key, it.value[0])
     }
-    0 * httpRequest.addHeader('Content-Type', 'application/json')
+    0 * httpRequest.addHeader('Content-Type', 'text/plain')
 
     0 * httpRequest._
   }
@@ -600,6 +624,48 @@ class ProviderClientSpec extends Specification {
       Server: ['Apigee-Edge'],
       'Set-Cookie': ['JSESSIONID=alphabeta120394049; HttpOnly', 'AWSELBID=baaadbeef6767676767690220; Path=/alpha']
     ]
+  }
+
+  def 'handles headers with comma-seperated values'() {
+    given:
+    StatusLine statusLine = new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
+    Header[] headers = [
+      new BasicHeader('Server', 'Apigee-Edge'),
+      new BasicHeader('Access-Control-Expose-Headers', 'content-length,content-type'),
+      new BasicHeader('Access-Control-Expose-Headers', 'accept')
+    ] as Header[]
+    HttpResponse response = Mock(HttpResponse) {
+      getStatusLine() >> statusLine
+      getAllHeaders() >> headers
+    }
+
+    when:
+    def result = client.handleResponse(response)
+
+    then:
+    result.statusCode == 200
+    result.headers == [
+      Server: ['Apigee-Edge'],
+      'Access-Control-Expose-Headers': ['content-length', 'content-type', 'accept']
+    ]
+  }
+
+  @Issue('#1013')
+  def 'If no content type header is present, defaults to text/plain'() {
+    given:
+    StatusLine statusLine = new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'OK')
+    Header[] headers = [] as Header[]
+    HttpResponse response = Mock(HttpResponse) {
+      getStatusLine() >> statusLine
+      getAllHeaders() >> headers
+      getEntity() >> new StringEntity('HELLO', null as ContentType)
+    }
+
+    when:
+    def result = client.handleResponse(response)
+
+    then:
+    result.contentType.toString() == 'text/plain; charset=ISO-8859-1'
   }
 
 }

@@ -22,6 +22,8 @@ class PactFolderLoader<I>(private val path: File) : PactLoader where I : Interac
 
   constructor(pactFolder: PactFolder) : this(pactFolder.value)
 
+  override fun description() = "Directory(${pactSource.dir})"
+
   override fun load(providerName: String): List<Pact<I>> {
     val pacts = mutableListOf<Pact<I>>()
     val pactFolder = resolvePath()

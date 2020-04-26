@@ -10,5 +10,8 @@ class SpringEnvironmentResolver(private val environment: Environment) : ValueRes
     return environment.getProperty(tuple.propertyName, tuple.defaultValue)
   }
 
-  override fun propertyDefined(property: String) = environment.containsProperty(property)
+  override fun propertyDefined(property: String): Boolean {
+    val tuple = SystemPropertyResolver.PropertyValueTuple(property).invoke()
+    return environment.containsProperty(tuple.propertyName)
+  }
 }

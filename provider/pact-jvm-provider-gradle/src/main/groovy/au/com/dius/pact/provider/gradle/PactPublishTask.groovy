@@ -34,16 +34,17 @@ class PactPublishTask extends DefaultTask {
           version = version.call()
         }
 
+        def brokerConfig = project.pact.broker ?: project.pact.publish
         def options = [:]
-        if (StringUtils.isNotEmpty(pactPublish.pactBrokerToken)) {
-            options.authentication = [pactPublish.pactBrokerAuthenticationScheme ?: 'bearer',
-                                      pactPublish.pactBrokerToken]
+        if (StringUtils.isNotEmpty(brokerConfig.pactBrokerToken)) {
+            options.authentication = [brokerConfig.pactBrokerAuthenticationScheme ?: 'bearer',
+                                      brokerConfig.pactBrokerToken]
         }
-        else if (StringUtils.isNotEmpty(pactPublish.pactBrokerUsername)) {
-          options.authentication = [pactPublish.pactBrokerAuthenticationScheme ?: 'basic',
-                                    pactPublish.pactBrokerUsername, pactPublish.pactBrokerPassword]
+        else if (StringUtils.isNotEmpty(brokerConfig.pactBrokerUsername)) {
+          options.authentication = [brokerConfig.pactBrokerAuthenticationScheme ?: 'basic',
+                                    brokerConfig.pactBrokerUsername, brokerConfig.pactBrokerPassword]
         }
-        def brokerClient = new PactBrokerClient(pactPublish.pactBrokerUrl, options)
+        def brokerClient = new PactBrokerClient(brokerConfig.pactBrokerUrl, options)
         File pactDirectory = pactPublish.pactDirectory as File
         boolean anyFailed = false
         pactDirectory.eachFileMatch(FileType.FILES, ~/.*\.json/) { pactFile ->

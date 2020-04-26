@@ -3,7 +3,9 @@ package au.com.dius.pact.consumer.groovy
 import au.com.dius.pact.consumer.PactConsumerConfig
 import au.com.dius.pact.consumer.PactVerificationResult
 import groovy.json.JsonSlurper
-import groovyx.net.http.RESTClient
+import groovyx.net.http.ContentTypes
+import groovyx.net.http.FromServer
+import groovyx.net.http.HttpBuilder
 import org.junit.Test
 
 @SuppressWarnings('GStringExpressionWithinString')
@@ -21,7 +23,9 @@ class ProviderStateInjectedPactTest {
     service {
       given('a provider state with injectable values', [valueA: 'A', valueB: 100])
       uponReceiving('a request')
-      withAttributes(method: 'POST', path: '/values')
+      withAttributes(method: 'POST', path: fromProviderState(
+        '/shoppingCart/v2.0/shoppingCart/${shoppingcartId}',
+        '/shoppingCart/v2.0/shoppingCart/ShoppingCart_05540051-1155-4557-8080-008a802200aa'))
       withBody {
         userName 'Test'
         userClass 'Shoddy'
@@ -35,21 +39,38 @@ class ProviderStateInjectedPactTest {
     }
 
     PactVerificationResult result = service.runTest { mockServer, context ->
-      def client = new RESTClient(mockServer.url, 'application/json')
-      def response = client.post(path: '/values', body: [userName: 'Test', userClass: 'Shoddy'])
+      def client = HttpBuilder.configure {
+        request.uri = mockServer.url
+        request.contentType = 'application/json'
+      }
+      def resp = client.post(FromServer) {
+        request.uri.path = '/shoppingCart/v2.0/shoppingCart/ShoppingCart_05540051-1155-4557-8080-008a802200aa'
+        request.body = [userName: 'Test', userClass: 'Shoddy']
+        response.parser(ContentTypes.ANY) { config, r ->
+          r
+        }
+      }
 
-      assert response.status == 200
-      assert response.data == [userName: 'Test', userId: 100]
+      assert resp.statusCode == 200
+      assert new JsonSlurper().parse(resp.inputStream) == [userName: 'Test', userId: 100]
     }
     assert result instanceof PactVerificationResult.Ok
 
     def pactFile = new File("${PactConsumerConfig.pactDirectory}/V3Consumer-ProviderStateService.json")
     def json = new JsonSlurper().parse(pactFile)
     assert json.metadata.pactSpecification.version == '3.0.0'
-    def generators = json.interactions.first().response.generators
+    def interaction = json.interactions.first()
+    assert interaction.request.path ==
+      '/shoppingCart/v2.0/shoppingCart/ShoppingCart_05540051-1155-4557-8080-008a802200aa'
+    def generators = interaction.request.generators
     assert generators == [
-      body: ['$.userId': [type: 'ProviderState', expression: 'userId']],
-      header: [LOCATION: [type: 'ProviderState', expression: 'http://server/users/${userId}']]
+      path: [type: 'ProviderState', expression: '/shoppingCart/v2.0/shoppingCart/${shoppingcartId}',
+             'dataType': 'STRING']
+    ]
+    generators = interaction.response.generators
+    assert generators == [
+      body: ['$.userId': [type: 'ProviderState', expression: 'userId', 'dataType': 'INTEGER']],
+      header: [LOCATION: [type: 'ProviderState', expression: 'http://server/users/${userId}', 'dataType': 'STRING']]
     ]
   }
 }

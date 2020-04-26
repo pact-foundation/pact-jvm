@@ -24,7 +24,7 @@ import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.provider.reporters.VerifierReporter
-import au.com.dius.pact.com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Ok
 import groovy.json.JsonOutput
 import org.apache.http.entity.ContentType
 import spock.lang.Specification
@@ -359,6 +359,22 @@ class ProviderVerifierSpec extends Specification {
     1 * verifier.pactReader.loadPact(pactFile, [:]) >> Mock(Pact)
   }
 
+  def 'when pact.filter.pacturl is set, use that URL for the Pact file'() {
+    given:
+    def pactUrl = 'https://test.pact.dius.com.au/pacticipants/Foo%20Web%20Client/versions/1.0.1'
+    def pactFile = new UrlSource('http://some.pact.file/')
+    def consumer = new ConsumerInfo(pactSource: pactFile, pactFileAuthentication: ['basic', 'test', 'pwd'])
+    verifier.pactReader = Mock(PactReader)
+    verifier.projectHasProperty = { it == ProviderVerifier.PACT_FILTER_PACTURL }
+    verifier.projectGetProperty = { it == ProviderVerifier.PACT_FILTER_PACTURL ? pactUrl : null }
+
+    when:
+    verifier.loadPactFileForConsumer(consumer)
+
+    then:
+    1 * verifier.pactReader.loadPact(new UrlSource(pactUrl), ['authentication': ['basic', 'test', 'pwd']]) >> Mock(Pact)
+  }
+
   static class TestSupport {
     String testMethod() {
       '\"test method result\"'
@@ -392,13 +408,13 @@ class ProviderVerifierSpec extends Specification {
     ProviderInfo provider = new ProviderInfo('Test Provider')
     ConsumerInfo consumer = new ConsumerInfo(name: 'Test Consumer', pactSource: UnknownPactSource.INSTANCE)
     PactBrokerClient pactBrokerClient = Mock(PactBrokerClient, constructorArgs: [''])
-    verifier.pactReader = Mock(PactReader)
-    def statechange = Mock(StateChange) {
+    verifier.pactReader = Stub(PactReader)
+    def statechange = Stub(StateChange) {
       executeStateChange(*_) >> new StateChangeResult(new Ok([:]))
     }
-    def interaction1 = Mock(RequestResponseInteraction)
-    def interaction2 = Mock(RequestResponseInteraction)
-    def mockPact = Mock(Pact) {
+    def interaction1 = Stub(RequestResponseInteraction)
+    def interaction2 = Stub(RequestResponseInteraction)
+    def mockPact = Stub(Pact) {
       getSource() >> new BrokerUrlSource('http://localhost', 'http://pact-broker')
     }
 

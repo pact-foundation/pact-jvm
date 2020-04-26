@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static au.com.dius.pact.consumer.ConsumerPactRunnerKt.runConsumerTest;
+import static au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression;
 
 public class BaseProviderRule extends ExternalResource {
 
@@ -101,7 +102,7 @@ public class BaseProviderRule extends ExternalResource {
 
       Method method = possiblePactMethod.get();
       Pact pactAnnotation = method.getAnnotation(Pact.class);
-      PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(pactAnnotation.consumer()).hasPactWith(provider);
+      PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(parseExpression(pactAnnotation.consumer())).hasPactWith(provider);
       try {
         RequestResponsePact pactFromMethod = (RequestResponsePact) method.invoke(target, dslBuilder);
         if (pact[0] == null) {
@@ -136,7 +137,7 @@ public class BaseProviderRule extends ExternalResource {
       String pactFragment = pactVerification.fragment();
       for (Method method : target.getClass().getMethods()) {
           Pact pact = method.getAnnotation(Pact.class);
-          if (pact != null && pact.provider().equals(provider)
+          if (pact != null && provider.equals(parseExpression(pact.provider()))
                   && (pactFragment.isEmpty() || pactFragment.equals(method.getName()))) {
 
               validatePactSignature(method);
@@ -186,13 +187,14 @@ public class BaseProviderRule extends ExternalResource {
           for (Method m: target.getClass().getMethods()) {
               if (JUnitTestSupport.conformsToSignature(m) && methodMatchesFragment(m, fragment)) {
                   Pact pactAnnotation = m.getAnnotation(Pact.class);
-                  if (StringUtils.isEmpty(pactAnnotation.provider()) || provider.equals(pactAnnotation.provider())) {
-                      PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(pactAnnotation.consumer())
-                          .hasPactWith(provider);
+                String provider = parseExpression(pactAnnotation.provider());
+                if (StringUtils.isEmpty(provider) || this.provider.equals(provider)) {
+                      PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(parseExpression(pactAnnotation.consumer()))
+                          .hasPactWith(this.provider);
                       updateAnyDefaultValues(dslBuilder);
                       try {
                         RequestResponsePact pact = (RequestResponsePact) m.invoke(target, dslBuilder);
-                        pacts.put(provider, pact);
+                        pacts.put(this.provider, pact);
                       } catch (Exception e) {
                           throw new RuntimeException("Failed to invoke pact method", e);
                       }

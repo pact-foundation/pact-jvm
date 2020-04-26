@@ -8,9 +8,14 @@ dependencies {
     compile "org.specs2:specs2-core_2.12:${project.specs2Version}"
     compile 'org.asynchttpclient:async-http-client:2.8.1'
     compile 'org.scala-lang.modules:scala-java8-compat_2.12:0.9.0'
+    implementation 'io.netty:netty-transport-native-epoll:4.1.48.Final'
 
     testCompile "org.specs2:specs2-junit_2.12:${project.specs2Version}",
       "ch.qos.logback:logback-core:${project.logbackVersion}",
       "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+    testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
+    testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+        exclude group: 'org.codehaus.groovy'
+    }
 }

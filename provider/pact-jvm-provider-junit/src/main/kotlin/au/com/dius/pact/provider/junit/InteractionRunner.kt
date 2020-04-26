@@ -10,11 +10,11 @@ import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.TestResultAccumulator
+import au.com.dius.pact.provider.junit.descriptions.DescriptionGenerator
 import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget
 import au.com.dius.pact.provider.junit.target.TestTarget
 import mu.KLogging
-import org.apache.http.HttpRequest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -46,7 +46,7 @@ import org.apache.commons.lang3.tuple.Pair as TuplePair
  * Developed with [org.junit.runners.BlockJUnit4ClassRunner] in mind
  */
 open class InteractionRunner<I>(
-  private val testClass: TestClass,
+  protected val testClass: TestClass,
   private val pact: Pact<I>,
   private val pactSource: PactSource
 ) : Runner() where I : Interaction {
@@ -54,6 +54,8 @@ open class InteractionRunner<I>(
   private val results = ConcurrentHashMap<String, Pair<Boolean, IProviderVerifier>>()
   private val testContext = ConcurrentHashMap<String, Any>()
   private val childDescriptions = ConcurrentHashMap<String, Description>()
+  private val descriptionGenerator = DescriptionGenerator(testClass, pact, pactSource)
+
   var testResultAccumulator: TestResultAccumulator = DefaultTestResultAccumulator
 
   init {
@@ -70,8 +72,7 @@ open class InteractionRunner<I>(
 
   protected fun describeChild(interaction: Interaction): Description {
     if (!childDescriptions.containsKey(interaction.uniqueKey())) {
-      childDescriptions[interaction.uniqueKey()] = Description.createTestDescription(testClass.javaClass,
-        "${pact.consumer.name} - ${interaction.description}")
+      childDescriptions[interaction.uniqueKey()] = descriptionGenerator.generate(interaction)
     }
     return childDescriptions[interaction.uniqueKey()]!!
   }
@@ -96,11 +97,6 @@ open class InteractionRunner<I>(
   private fun validateTargetRequestFilters(errors: MutableList<Throwable>) {
     testClass.getAnnotatedMethods(TargetRequestFilter::class.java).forEach { method ->
       method.validatePublicVoid(false, errors)
-      if (method.method.parameterTypes.size != 1) {
-        errors.add(Exception("Method ${method.name} should take only a single HttpRequest parameter"))
-      } else if (!HttpRequest::class.java.isAssignableFrom(method.method.parameterTypes[0])) {
-        errors.add(Exception("Method ${method.name} should take only a single HttpRequest parameter"))
-      }
     }
   }
 
@@ -117,12 +113,12 @@ open class InteractionRunner<I>(
       errors.add(Exception("Test class should have exactly one public constructor"))
     }
     if (!testClass.isANonStaticInnerClass && hasOneConstructor() &&
-      testClass.onlyConstructor.parameterTypes.isNotEmpty()) {
+      testClass.javaClass.kotlin.constructors.first().parameters.isNotEmpty()) {
       errors.add(Exception("Test class should have exactly one public zero-argument constructor"))
     }
   }
 
-  protected fun hasOneConstructor() = testClass.javaClass.constructors.size == 1
+  protected fun hasOneConstructor() = testClass.javaClass.kotlin.constructors.size == 1
 
   protected fun validateTestTarget(errors: MutableList<Throwable>) {
     val annotatedFields = testClass.getAnnotatedFields(TestTarget::class.java)
@@ -174,7 +170,7 @@ open class InteractionRunner<I>(
   }
 
   protected open fun createTest(): Any {
-    return testClass.onlyConstructor.newInstance()
+    return testClass.javaClass.newInstance()
   }
 
   protected fun interactionBlock(interaction: Interaction, source: PactSource, context: Map<String, Any>): Statement {

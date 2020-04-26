@@ -1,6 +1,8 @@
 package au.com.dius.pact.provider.junit.loader
 
+import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.pactbroker.IHalClient
 import au.com.dius.pact.core.pactbroker.InvalidHalResponse
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
@@ -30,16 +32,17 @@ class PactBrokerLoaderSpec extends Specification {
     protocol = 'http'
     tags = ['latest']
     consumers = []
-    brokerClient = Mock(PactBrokerClient, constructorArgs: ['']) {
+    brokerClient = Mock(PactBrokerClient) {
       newHalClient() >> Stub(IHalClient)
     }
     mockPact = Mock(Pact)
 
     pactBrokerLoader = { boolean failIfNoPactsFound = true ->
-      def loader = new PactBrokerLoader(host, port, protocol, tags, consumers) {
+      PactBrokerClient client = brokerClient
+      new PactBrokerLoader(host, port, protocol, tags, consumers, failIfNoPactsFound, null, null, null) {
         @Override
         PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
-          brokerClient
+          client
         }
 
         @Override
@@ -47,8 +50,6 @@ class PactBrokerLoaderSpec extends Specification {
           mockPact
         }
       }
-      loader.failIfNoPactsFound = failIfNoPactsFound
-      loader
     }
   }
 
@@ -136,6 +137,26 @@ class PactBrokerLoaderSpec extends Specification {
     then:
     result == []
     1 * brokerClient.fetchConsumers('test') >> []
+  }
+
+  @RestoreSystemProperties
+  void 'Uses fallback PactBroker System Properties for PactSource'() {
+    given:
+    host = 'my.pactbroker.host'
+    port = '4711'
+    System.setProperty('pactbroker.host', host)
+    System.setProperty('pactbroker.port', port)
+
+    when:
+    def pactSource = new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)).pactSource
+
+    then:
+    assert pactSource instanceof PactBrokerSource
+
+    def pactBrokerSource = (PactBrokerSource) pactSource
+    assert pactBrokerSource.scheme == 'http'
+    assert pactBrokerSource.host == host
+    assert pactBrokerSource.port == port
   }
 
   @RestoreSystemProperties
@@ -354,6 +375,24 @@ class PactBrokerLoaderSpec extends Specification {
     ]
     0 * _
     result.size() == 3
+  }
+
+  def 'use the overridden pact URL'() {
+    given:
+    consumers = ['a', 'b', 'c']
+    tags = ['demo']
+    PactBrokerLoader loader = Spy(pactBrokerLoader())
+    loader.overridePactUrl('http://overridden.com', 'overridden')
+    def brokerUrlSource = new BrokerUrlSource('http://overridden.com', 'http://pactbroker:1234')
+    def consumer = new ConsumerInfo('overridden', null, true, [], null, brokerUrlSource)
+
+    when:
+    def result = loader.load('test')
+
+    then:
+    1 * loader.loadPact(consumer, _) >> Stub(Pact)
+    0 * brokerClient._
+    result.size() == 1
   }
 
   def 'does not fail if the port is not provided'() {

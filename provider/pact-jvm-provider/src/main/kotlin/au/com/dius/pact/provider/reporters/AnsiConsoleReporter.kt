@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.UrlPactSource
+import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import org.fusesource.jansi.Ansi
@@ -205,7 +206,7 @@ class AnsiConsoleReporter(
         err.value is Map<*, *> && (err.value as Map<*, *>).containsKey("comparison") &&
           (err.value as Map<*, *>)["comparison"] is Map<*, *> -> displayDiff(err.value as Map<String, Any>)
         err.value is String -> AnsiConsole.out().println("      ${err.value}")
-        err.value is Map<*, *> -> (err.value as Map<*, *>).forEach { key, message ->
+        err.value is Map<*, *> -> (err.value as Map<*, *>).forEach { (key, message) ->
           AnsiConsole.out().println("      $key -> $message")
         }
         else -> AnsiConsole.out().println("      $err")
@@ -214,8 +215,18 @@ class AnsiConsoleReporter(
     }
   }
 
+  override fun reportVerificationNoticesForConsumer(
+    consumer: IConsumerInfo,
+    provider: IProviderInfo,
+    notices: List<VerificationNotice>
+  ) {
+    AnsiConsole.out().println("  Notices:")
+    notices.forEachIndexed { i, notice -> AnsiConsole.out().println("    ${i + 1}) ${notice.text}") }
+    AnsiConsole.out().println()
+  }
+
   private fun displayDiff(diff: Map<String, Any>) {
-    (diff["comparison"] as Map<String, List<Map<String, Any>>>).forEach { key, messageAndDiff ->
+    (diff["comparison"] as Map<String, List<Map<String, Any>>>).forEach { (key, messageAndDiff) ->
       messageAndDiff.forEach { mismatch ->
         AnsiConsole.out().println("      $key -> ${mismatch["mismatch"]}")
         AnsiConsole.out().println()

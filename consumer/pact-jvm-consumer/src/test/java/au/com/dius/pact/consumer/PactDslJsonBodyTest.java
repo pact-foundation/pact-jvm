@@ -265,7 +265,7 @@ public class PactDslJsonBodyTest {
         .date("lastUpdate", DATE_FORMAT)
         .date("creationDate", DATE_FORMAT);
       JSONObject jsonObject = (JSONObject) response.getBody();
-      assertThat(jsonObject.get("lastUpdate").toString(), matchesPattern("\\w{3}\\.?, \\d{2} \\w{3}\\.? \\d{4} \\d{2}:00:00 \\+\\d+ GMT"));
+      assertThat(jsonObject.get("lastUpdate").toString(), matchesPattern("\\w{2,3}\\.?, \\d{2} \\w{3}\\.? \\d{4} \\d{2}:00:00 \\+\\d+ GMT"));
     }
 
     @Test

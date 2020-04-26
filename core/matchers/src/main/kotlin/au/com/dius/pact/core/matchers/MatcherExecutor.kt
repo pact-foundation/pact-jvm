@@ -34,6 +34,8 @@ fun valueOf(value: Any?): String {
   return when (value) {
     null -> "null"
     is String -> "'$value'"
+    is Element -> "<${QualifiedName(value)}>"
+    is Text -> "'${value.wholeText}'"
     else -> value.toString()
   }
 }
@@ -127,7 +129,11 @@ fun <M : Mismatch> matchEquality(
   actual: Any?,
   mismatchFactory: MismatchFactory<M>
 ): List<M> {
-  val matches = actual == null && expected == null || actual != null && actual == expected
+  val matches = when {
+    (actual == null || actual is JsonNull) && (expected == null || expected is JsonNull) -> true
+    actual is Element && expected is Element -> QualifiedName(actual) == QualifiedName(expected)
+    else -> actual != null && actual == expected
+  }
   logger.debug { "comparing ${valueOf(actual)} to ${valueOf(expected)} at $path -> $matches" }
   return if (matches) {
     emptyList()
@@ -170,7 +176,7 @@ fun <M : Mismatch> matchType(
     expected is JsonArray && actual is JsonArray ||
     expected is Map<*, *> && actual is Map<*, *> ||
     expected is JsonObject && actual is JsonObject ||
-    expected is Element && actual is Element && actual.tagName == expected.tagName
+    expected is Element && actual is Element && QualifiedName(actual) == QualifiedName(expected)
   ) {
     emptyList()
   } else if (expected is JsonPrimitive && actual is JsonPrimitive &&
@@ -178,8 +184,8 @@ fun <M : Mismatch> matchType(
       (expected.isNumber && actual.isNumber) ||
       (expected.isString && actual.isString))) {
       emptyList()
-  } else if (expected == null) {
-    if (actual == null) {
+  } else if (expected == null || expected is JsonNull) {
+    if (actual == null || actual is JsonNull) {
       emptyList()
     } else {
       listOf(mismatchFactory.create(expected, actual, "Expected ${valueOf(actual)} to be null", path))
@@ -233,7 +239,7 @@ fun matchDecimal(actual: Any?): Boolean {
     actual == 0 -> true
     actual is Float -> true
     actual is Double -> true
-    actual is BigDecimal && actual.precision() > 0 -> true
+    actual is BigDecimal && (actual == BigDecimal.ZERO || actual.scale() > 0) -> true
     actual is JsonPrimitive && actual.isNumber -> decimalRegex.matches(actual.toString())
     else -> false
   }
@@ -246,7 +252,7 @@ fun matchInteger(actual: Any?): Boolean {
     actual is Int -> true
     actual is Long -> true
     actual is BigInteger -> true
-    actual is BigDecimal && actual.precision() == 0 -> true
+    actual is BigDecimal && actual.scale() == 0 -> true
     actual is JsonPrimitive && actual.isNumber -> integerRegex.matches(actual.toString())
     else -> false
   }

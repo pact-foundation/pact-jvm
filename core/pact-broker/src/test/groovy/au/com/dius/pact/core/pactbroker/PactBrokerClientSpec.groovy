@@ -1,10 +1,12 @@
 package au.com.dius.pact.core.pactbroker
 
-import au.com.dius.pact.com.github.michaelbull.result.Err
-import au.com.dius.pact.com.github.michaelbull.result.Ok
+import arrow.core.Either
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import au.com.dius.pact.core.support.Json
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import kotlin.Pair
 import kotlin.collections.MapsKt
 import spock.lang.Issue
@@ -287,10 +289,10 @@ class PactBrokerClientSpec extends Specification {
     json.add('c', array)
 
     when:
-    def result = client.fetchPact(url)
+    def result = client.fetchPact(url, true)
 
     then:
-    1 * halClient.fetch(url) >> json
+    1 * halClient.fetch(url, _) >> json
     result.pactFile == Json.INSTANCE.toJson([a: 'a', b: 100, _links: [:], c: [true, 10.2, 'test']])
   }
 
@@ -309,5 +311,101 @@ class PactBrokerClientSpec extends Specification {
 
     expect:
     client.publishVerificationResults(doc, result, '0', null) == uploadResult
+  }
+
+  @SuppressWarnings('LineLength')
+  def 'fetching pacts with selectors uses the provider-pacts-for-verification link and returns a list of results'() {
+    given:
+    def halClient = Mock(IHalClient)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+    def selectors = [ new ConsumerVersionSelector('DEV', true) ]
+    def json = '{"consumerVersionSelectors":[{"tag":"DEV","latest":true}]}'
+    def jsonResult = JsonParser.parseString('''
+      {
+        "_embedded": {
+          "pacts": [
+            {
+              "shortDescription": "latest DEV",
+              "verificationProperties": {
+                "notices": [
+                  {
+                    "when": "before_verification",
+                    "text": "The pact at ... is being verified because it matches the following configured selection criterion: latest pact for a consumer version tagged 'DEV'"
+                  }
+                ]
+              },
+              "_links": {
+                "self": {
+                  "href": "https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client/pact-version/384826ff3a2856e28dfae553efab302863dcd727",
+                  "name": "Pact between Foo Web Client (1.0.2) and Activity Service"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ''')
+
+    when:
+    def result = client.fetchConsumersWithSelectors('provider', selectors)
+
+    then:
+    1 * halClient.navigate() >> halClient
+    1 * halClient.linkUrl('pb:provider-pacts-for-verification') >> 'URL'
+    1 * halClient.postJson('pb:provider-pacts-for-verification', [provider: 'provider'], json) >> new Either.Right(jsonResult)
+    result.right
+    result.b.first() == new PactResult('Pact between Foo Web Client (1.0.2) and Activity Service',
+      'https://test.pact.dius.com.au/pacts/provider/Activity Service/consumer/Foo Web Client/pact-version/384826ff3a2856e28dfae553efab302863dcd727',
+       'baseUrl', [], [
+       new VerificationNotice('before_verification',
+         'The pact at ... is being verified because it matches the following configured selection criterion: latest pact for a consumer version tagged \'DEV\'')
+     ])
+  }
+
+  def 'fetching pacts with selectors falls back to the beta provider-pacts-for-verification link'() {
+    given:
+    def halClient = Mock(IHalClient)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+    def jsonResult = JsonParser.parseString('''
+    {
+      "_embedded": {
+        "pacts": [
+        ]
+      }
+    }
+    ''')
+
+    when:
+    def result = client.fetchConsumersWithSelectors('provider', [])
+
+    then:
+    1 * halClient.navigate() >> halClient
+    1 * halClient.linkUrl('pb:provider-pacts-for-verification') >> null
+    1 * halClient.linkUrl('beta:provider-pacts-for-verification') >> 'URL'
+    1 * halClient.postJson('beta:provider-pacts-for-verification', _, _) >> new Either.Right(jsonResult)
+    result.right
+  }
+
+  def 'fetching pacts with selectors falls back to the previous implementation if no link is available'() {
+    given:
+    def halClient = Mock(IHalClient)
+    PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
+      newHalClient() >> halClient
+    }
+
+    when:
+    def result = client.fetchConsumersWithSelectors('provider', [])
+
+    then:
+    1 * halClient.navigate() >> halClient
+    1 * halClient.linkUrl('pb:provider-pacts-for-verification') >> null
+    1 * halClient.linkUrl('beta:provider-pacts-for-verification') >> null
+    0 * halClient.postJson(_, _, _)
+    1 * client.fetchConsumers('provider') >> []
+    result.right
   }
 }

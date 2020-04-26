@@ -1,5 +1,8 @@
 package au.com.dius.pact.provider.reporters
 
+import arrow.core.Either
+import au.com.dius.pact.core.matchers.BodyTypeMismatch
+import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.Interaction
@@ -7,9 +10,11 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.model.UrlPactSource
+import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.property
+import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import com.github.salomonbrys.kotson.array
@@ -19,6 +24,7 @@ import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.obj
 import com.github.salomonbrys.kotson.set
 import com.github.salomonbrys.kotson.string
+import com.github.salomonbrys.kotson.toJson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.apache.commons.lang3.exception.ExceptionUtils
@@ -191,7 +197,15 @@ class JsonReporter(
     if (!verification.has("header")) {
       verification["header"] = jsonObject()
     }
-    verification["header"].obj[key] = Json.toJson(comparison)
+    verification["header"].obj[key] = when (comparison) {
+      is List<*> -> Json.toJson(comparison.map {
+        when (it) {
+          is HeaderMismatch -> it.mismatch.toJson()
+          else -> Json.toJson(it)
+        }
+      })
+      else -> Json.toJson(comparison)
+    }
   }
 
   override fun bodyComparisonOk() { }
@@ -199,7 +213,11 @@ class JsonReporter(
   override fun bodyComparisonFailed(comparison: Any) {
     val verification = jsonData["execution"].array.last()["interactions"].array.last()["verification"].obj
     verification["result"] = FAILED
-    verification["body"] = Json.toJson(comparison)
+    verification["body"] = when (comparison) {
+      is Either.Left<*> -> Json.toJson((comparison as Either.Left<BodyTypeMismatch>).a.description())
+      is Either.Right<*> -> (comparison as Either.Right<BodyComparisonResult>).b.toJson()
+      else -> Json.toJson(comparison)
+    }
   }
 
   override fun errorHasNoAnnotatedMethodsFoundForInteraction(interaction: Interaction) {
@@ -238,8 +256,16 @@ class JsonReporter(
 
   override fun metadataComparisonOk() { }
 
+  override fun reportVerificationNoticesForConsumer(
+    consumer: IConsumerInfo,
+    provider: IProviderInfo,
+    notices: List<VerificationNotice>
+  ) {
+    jsonData["execution"].array.last()["consumer"]["notices"] = jsonArray(notices.map { it.text })
+  }
+
   companion object {
-    const val REPORT_FORMAT = "0.0.0"
+    const val REPORT_FORMAT = "0.1.0"
     const val FAILED = "failed"
   }
 }

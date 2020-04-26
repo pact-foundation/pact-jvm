@@ -1,13 +1,14 @@
 package broker
 
-import au.com.dius.pact.com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Ok
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.groovy.PactBuilder
+import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
 import spock.lang.Specification
 
-@SuppressWarnings('UnnecessaryGetter')
+@SuppressWarnings(['UnnecessaryGetter', 'LineLength'])
 class PactBrokerClientPactSpec extends Specification {
 
   private PactBrokerClient pactBrokerClient
@@ -322,6 +323,95 @@ class PactBrokerClientPactSpec extends Specification {
             '/verification-results'
         ]
       ], failure, '10.0.0', 'http://localhost:8080/build')
+    }
+
+    then:
+    result instanceof PactVerificationResult.Ok
+  }
+
+  def 'can-i-deploy call with provider version'() {
+    given:
+    pactBroker {
+      given('the pact for Foo version 1.2.3 has been verified by Bar version 4.5.6 and version 5.6.7')
+      uponReceiving('a request for the compatibility matrix where only the version of Foo is specified')
+      withAttributes(method: 'GET', path: '/matrix', query: 'q[][pacticipant]=Foo&q[][version]=1.2.3&latestby=cvp&latest=true')
+      willRespondWith(status: 200)
+      withBody(mimeType: 'application/hal+json') {
+        summary {
+          deployable true
+          reason 'some text'
+          unknown 1
+        }
+        matrix = [
+          {
+            consumer {
+              name 'Foo'
+              version {
+                number '4'
+              }
+            }
+            provider {
+              name 'Bar'
+              version {
+                number '5'
+              }
+            }
+            verificationResult {
+              verifiedAt '2017-10-10T12:49:04+11:00'
+              success true
+            }
+            pact {
+              createdAt '2017-10-10T12:49:04+11:00'
+            }
+          }
+        ]
+      }
+    }
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      pactBrokerClient.canIDeploy('Foo', '1.2.3', new Latest.UseLatest(false), null)
+    }
+
+    then:
+    result instanceof PactVerificationResult.Ok
+  }
+
+  def 'can-i-deploy call with provider version and prod tag'() {
+    given:
+    pactBroker {
+      given('the pact for Foo version 1.2.3 has been successfully verified by Bar version 4.5.6 (tagged prod) and version 5.6.7')
+      uponReceiving('a request for the compatibility matrix for Foo version 1.2.3 and the latest prod versions of all other pacticipants')
+      withAttributes(method: 'GET', path: '/matrix', query: 'q[][pacticipant]=Foo&q[][version]=1.2.3&latestby=cvp&latest=true&tag=prod')
+      willRespondWith(status: 200)
+      withBody(mimeType: 'application/hal+json') {
+        summary {
+          deployable true
+          reason 'some text'
+          unknown 1
+        }
+        matrix = [
+          {
+            consumer {
+              name 'Foo'
+              version {
+                number '1.2.3'
+              }
+            }
+            provider {
+              name 'Bar'
+              version {
+                number '4.5.6'
+              }
+            }
+          }
+        ]
+      }
+    }
+
+    when:
+    def result = pactBroker.runTest { server, context ->
+      pactBrokerClient.canIDeploy('Foo', '1.2.3', new Latest.UseLatest(false), 'prod')
     }
 
     then:

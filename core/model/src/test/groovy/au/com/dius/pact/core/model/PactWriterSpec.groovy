@@ -1,9 +1,12 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.model.generators.Generators
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.Json
 import com.google.gson.JsonParser
+import com.google.gson.internal.LazilyParsedNumber
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
@@ -162,7 +165,7 @@ class PactWriterSpec extends Specification {
 
     when:
     DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw))
-    def json = Json.INSTANCE.toMap(new JsonParser().parse(sw.toString()))
+    def json = Json.INSTANCE.toMap(JsonParser.parseString(sw.toString()))
     def interactionJson = json.interactions.first()
 
     then:
@@ -183,10 +186,62 @@ class PactWriterSpec extends Specification {
     DefaultPactWriter.INSTANCE.writePact(pactFile, pact, PactSpecVersion.V3)
 
     then:
-    pactFile.withReader { Json.INSTANCE.toMap(new JsonParser().parse(it)) }.interactions[0].description ==
+    pactFile.withReader { Json.INSTANCE.toMap(JsonParser.parseReader(it)) }.interactions[0].description ==
       'Request für ping'
 
     cleanup:
     pactFile.delete()
+  }
+
+  @Issue('#1006')
+  def 'when writing message pact files, the metadata values should be stored as JSON'() {
+    given:
+    def pactFile = File.createTempFile('PactWriterSpec', '.json')
+    def pact = new MessagePact(new Provider(), new Consumer(), [
+      new Message('Sample Message', [], OptionalBody.body('body'.bytes, ContentType.TEXT_PLAIN),
+        new MatchingRulesImpl(), new Generators(), [test: [1, 2, 3]])
+    ])
+
+    when:
+    DefaultPactWriter.INSTANCE.writePact(pactFile, pact, PactSpecVersion.V3)
+
+    then:
+    pactFile.withReader { Json.INSTANCE.toMap(JsonParser.parseReader(it)) }.messages[0].metaData ==
+      [test: [new LazilyParsedNumber('1'), new LazilyParsedNumber('2'), new LazilyParsedNumber('3')]]
+
+    cleanup:
+    pactFile.delete()
+  }
+
+  @Issue('#1018')
+  def 'encode the query parameters correctly with V2 pact files'() {
+    given:
+    def request = new Request('GET', '/', [
+      'include[]': ['term', 'total_scores', 'license', 'is_public', 'needs_grading_count', 'permissions',
+                    'current_grading_period_scores', 'course_image', 'favorites']
+    ])
+    def response = new Response()
+    def interaction = new RequestResponseInteraction('test interaction with query parameters',
+      [], request, response)
+    def pact = new RequestResponsePact(new Provider('PactWriterSpecProvider'),
+      new Consumer('PactWriterSpecConsumer'), [interaction])
+    def sw = new StringWriter()
+    def sw2 = new StringWriter()
+
+    when:
+    DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw), PactSpecVersion.V2)
+    DefaultPactWriter.INSTANCE.writePact(pact, new PrintWriter(sw2), PactSpecVersion.V3)
+    def json = Json.INSTANCE.toMap(JsonParser.parseString(sw.toString()))
+    def interactionJson = json.interactions.first()
+    def json2 = Json.INSTANCE.toMap(JsonParser.parseString(sw2.toString()))
+    def interactionJson2 = json2.interactions.first()
+
+    then:
+    interactionJson.request.query == 'include[]=term&include[]=total_scores&include[]=license&include[]=is_public' +
+      '&include[]=needs_grading_count&include[]=permissions&include[]=current_grading_period_scores&include[]' +
+      '=course_image&include[]=favorites'
+    interactionJson2.request.query == [
+      'include[]': ['term', 'total_scores', 'license', 'is_public', 'needs_grading_count', 'permissions',
+                    'current_grading_period_scores', 'course_image', 'favorites']]
   }
 }

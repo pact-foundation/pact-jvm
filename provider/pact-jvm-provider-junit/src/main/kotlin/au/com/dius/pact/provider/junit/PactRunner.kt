@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.junit
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
+import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.checkForOverriddenPactUrl
 import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.filterPactsByAnnotations
 import au.com.dius.pact.provider.junit.loader.NoPactsFoundException
 import au.com.dius.pact.provider.junit.loader.PactBroker
@@ -48,12 +49,17 @@ import kotlin.reflect.full.findAnnotation
  * - [State] - before each interaction that require state change,
  * all methods annotated by [State] with appropriate state listed will be invoked
  */
-open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(clazz) where I : Interaction {
+open class PactRunner<I>(private val clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(clazz) where I : Interaction {
 
-  private val child = mutableListOf<InteractionRunner<I>>()
+  private val children = mutableListOf<InteractionRunner<I>>()
   private var valueResolver = SystemPropertyResolver()
+  private var initialized = false
 
-  init {
+  private fun initialize() {
+    if (initialized) {
+      return
+    }
+
     if (clazz.getAnnotation(Ignore::class.java) != null) {
       logger.info("Ignore annotation detected, exiting")
     } else {
@@ -109,11 +115,12 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(c
 
       setupInteractionRunners(testClass, pacts, pactLoader)
     }
+    initialized = true
   }
 
   protected open fun setupInteractionRunners(testClass: TestClass, pacts: List<Pact<I>>, pactLoader: PactLoader) {
     for (pact in pacts) {
-      this.child.add(newInteractionRunner(testClass, pact, pactLoader.pactSource))
+      this.children.add(newInteractionRunner(testClass, pact, pactLoader.pactSource))
     }
   }
 
@@ -129,7 +136,10 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(c
     return filterPactsByAnnotations(pacts, testClass.javaClass)
   }
 
-  override fun getChildren() = child
+  override fun getChildren(): MutableList<InteractionRunner<I>> {
+    initialize()
+    return children
+  }
 
   override fun describeChild(child: InteractionRunner<I>) = child.description
 
@@ -146,9 +156,9 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(c
     }
 
     try {
-      if (pactSource != null) {
+      val loader = if (pactSource != null) {
         val pactLoaderClass = pactSource.value
-        return try {
+        try {
           // Checks if there is a constructor with one argument of type Class.
           val constructorWithClass = pactLoaderClass.java.getDeclaredConstructor(Class::class.java)
           if (constructorWithClass != null) {
@@ -163,9 +173,14 @@ open class PactRunner<I>(clazz: Class<*>) : ParentRunner<InteractionRunner<I>>(c
         }
       } else {
         val annotation = pactLoaders.first()
-        return annotation.annotationClass.findAnnotation<PactSource>()!!.value.java
+        annotation.annotationClass.findAnnotation<PactSource>()!!.value.java
           .getConstructor(annotation.annotationClass.java).newInstance(annotation)
       }
+
+      checkForOverriddenPactUrl(loader, clazz.getAnnotation(AllowOverridePactUrl::class.java),
+        clazz.getAnnotation(Consumer::class.java))
+
+      return loader
     } catch (e: ReflectiveOperationException) {
       logger.error(e) { "Error while creating pact source" }
       throw InitializationError(e)

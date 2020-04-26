@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider
 
-import au.com.dius.pact.com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Err
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
@@ -77,6 +77,11 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
     }
   }
 
-  override fun publishingResultsDisabled() =
-    System.getProperty(ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS)?.toLowerCase() != "true"
+  override fun publishingResultsDisabled(): Boolean {
+    var property = System.getProperty(ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS)
+    if (property.isNullOrEmpty()) {
+      property = System.getenv(ProviderVerifier.PACT_VERIFIER_PUBLISH_RESULTS)
+    }
+    return property?.toLowerCase() != "true"
+  }
 }

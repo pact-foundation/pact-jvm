@@ -13,20 +13,26 @@ import au.com.dius.pact.core.matchers.Mismatch
 import au.com.dius.pact.core.matchers.ResponseMatching
 import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.matchers.generateDiff
+import au.com.dius.pact.core.model.ContentType
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.isNullOrEmpty
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.support.Json
+import com.github.salomonbrys.kotson.jsonObject
 import com.google.gson.JsonParser
 import mu.KLogging
-import org.apache.http.entity.ContentType
 import java.nio.charset.Charset
 
 data class BodyComparisonResult(
   val mismatches: Map<String, List<BodyMismatch>> = emptyMap(),
   val diff: List<String> = emptyList()
-)
+) {
+  fun toJson() = jsonObject(
+    "mismatches" to Json.toJson(mismatches.mapValues { entry -> entry.value.map { it.description() } }),
+    "diff" to diff.joinToString("\n")
+  )
+}
 
 data class ComparisonResult(
   val statusMismatch: StatusMismatch? = null,
@@ -42,7 +48,7 @@ class ResponseComparison(
   val expectedHeaders: Map<String, List<String>>,
   val expectedBody: OptionalBody,
   val isJsonBody: Boolean,
-  val actualResponseContentType: ContentType,
+  val actualResponseContentType: org.apache.http.entity.ContentType,
   val actualBody: String?
 ) {
 
@@ -82,7 +88,7 @@ class ResponseComparison(
       var actualBodyString = ""
       if (actual.isNotEmpty()) {
         actualBodyString = if (mimeType.matches(Regex("application/.*json"))) {
-          Json.gsonPretty.toJson(JsonParser().parse(actual))
+          Json.gsonPretty.toJson(JsonParser.parseString(actual))
         } else {
           actual
         }
@@ -91,7 +97,7 @@ class ResponseComparison(
       var expectedBodyString = ""
       if (response.isNotEmpty()) {
         expectedBodyString = if (jsonBody) {
-          Json.gsonPretty.toJson(JsonParser().parse(response))
+          Json.gsonPretty.toJson(JsonParser.parseString(response))
         } else {
           response
         }
@@ -108,7 +114,7 @@ class ResponseComparison(
       actualHeaders: Map<String, List<String>>,
       actualBody: String?
     ): ComparisonResult {
-      val actualResponseContentType = actualResponse["contentType"] as ContentType
+      val actualResponseContentType = actualResponse["contentType"] as org.apache.http.entity.ContentType
       val comparison = ResponseComparison(response.headers, response.body, response.jsonBody(),
         actualResponseContentType, actualBody)
       val mismatches = ResponseMatching.responseMismatches(response, Response(actualStatus,
@@ -128,18 +134,19 @@ class ResponseComparison(
         else -> Matching.compareMessageMetadata(message.metaData, metadata, message.matchingRules)
       }
 
-      val contentType = message.getParsedContentType()!!
+      val messageContentType = message.getContentType()
+      val contentType = if (messageContentType.isNullOrEmpty()) Message.TEXT else messageContentType
       val responseComparison = ResponseComparison(
-        mapOf("Content-Type" to listOf(message.getContentType())), message.contents,
-        contentType.mimeType == ContentType.APPLICATION_JSON.mimeType,
-        contentType, actual.valueAsString())
+        mapOf("Content-Type" to listOf(contentType)), message.contents,
+        contentType == ContentType.JSON.contentType,
+        org.apache.http.entity.ContentType.parse(contentType), actual.valueAsString())
       return ComparisonResult(bodyMismatches = responseComparison.bodyResult(bodyMismatches),
         metadataMismatches = metadataMismatches.groupBy { it.key })
     }
 
     @JvmStatic
     private fun compareMessageBody(message: Message, actual: OptionalBody): MutableList<BodyMismatch> {
-      val result = MatchingConfig.lookupBodyMatcher(message.getParsedContentType()?.mimeType.orEmpty())
+      val result = MatchingConfig.lookupBodyMatcher(message.getContentType().orEmpty())
       var bodyMismatches = mutableListOf<BodyMismatch>()
       if (result != null) {
         bodyMismatches = result.matchBody(message.contents, actual, true, message.matchingRules)
@@ -148,7 +155,7 @@ class ResponseComparison(
         val expectedBody = message.contents.valueAsString()
         if (expectedBody.isNotEmpty() && actual.isNullOrEmpty()) {
           bodyMismatches.add(BodyMismatch(expectedBody, null, "Expected body '$expectedBody' but was missing"))
-        } else if (actual.valueAsString() != expectedBody) {
+        } else if (expectedBody.isNotEmpty() && actual.valueAsString() != expectedBody) {
           bodyMismatches.add(BodyMismatch(expectedBody, actual.valueAsString(),
             "Actual body '${actual.valueAsString()}' is not equal to the expected body '$expectedBody'"))
         }

@@ -8,11 +8,13 @@ import mu.KLogging
 import org.apache.xerces.dom.TextImpl
 import org.w3c.dom.NamedNodeMap
 import org.w3c.dom.Node
+import org.w3c.dom.Node.CDATA_SECTION_NODE
 import org.w3c.dom.Node.ELEMENT_NODE
 import org.w3c.dom.Node.TEXT_NODE
 import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
 import java.io.StringReader
+import javax.xml.XMLConstants
 import javax.xml.parsers.DocumentBuilderFactory
 
 object XmlBodyMatcher : BodyMatcher, KLogging() {
@@ -40,6 +42,14 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
       TextImpl()
     } else {
       val dbFactory = DocumentBuilderFactory.newInstance()
+      if (System.getProperty("pact.matching.xml.validating") == "false") {
+        dbFactory.isValidating = false
+        dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false)
+        dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+      }
+      if (System.getProperty("pact.matching.xml.namespace-aware") != "false") {
+        dbFactory.isNamespaceAware = true
+      }
       val dBuilder = dbFactory.newDocumentBuilder()
       val xmlInput = InputSource(StringReader(xmlData))
       val doc = dBuilder.parse(xmlInput)
@@ -47,8 +57,8 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
     }
   }
 
-  private fun appendAttribute(path: List<String>, attribute: String): List<String> {
-    return path + "@$attribute"
+  private fun appendAttribute(path: List<String>, attribute: QualifiedName): List<String> {
+    return path + "@${attribute.nodeName}"
   }
 
   fun compareText(
@@ -58,10 +68,12 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
     matchers: MatchingRules
   ): List<BodyMismatch> {
     val textpath = path + "#text"
-    val expectedText = asList(expected.childNodes).filter { n -> n.nodeType == TEXT_NODE }
-      .joinToString("") { n -> n.textContent.trim() }
-    val actualText = asList(actual.childNodes).filter { n -> n.nodeType == TEXT_NODE }
-      .joinToString("") { n -> n.textContent.trim() }
+    val expectedText = asList(expected.childNodes).filter { n ->
+      n.nodeType == TEXT_NODE || n.nodeType == CDATA_SECTION_NODE
+    }.joinToString("") { n -> n.textContent.trim() }
+    val actualText = asList(actual.childNodes).filter { n ->
+      n.nodeType == TEXT_NODE || n.nodeType == CDATA_SECTION_NODE
+    }.joinToString("") { n -> n.textContent.trim() }
     return when {
       Matchers.matcherDefined("body", textpath, matchers) -> {
         logger.debug { "compareText: Matcher defined for path $textpath" }
@@ -99,10 +111,17 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
         logger.debug { "compareNode: Matcher defined for path $nodePath" }
         Matchers.domatch(matchers, "body", nodePath, expected, actual, BodyMismatchFactory)
       }
-      actual.nodeName != expected.nodeName -> listOf(BodyMismatch(expected, actual,
-        "Expected element ${expected.nodeName} but received ${actual.nodeName}",
-        nodePath.joinToString(".")))
-      else -> emptyList()
+      else -> {
+        val actualName = QualifiedName(actual)
+        val expectedName = QualifiedName(expected)
+
+        when {
+          actualName != expectedName -> listOf(BodyMismatch(expected, actual,
+                  "Expected element $expectedName but received $actualName",
+                  nodePath.joinToString(".")))
+          else -> emptyList()
+        }
+      }
     }
 
     return if (mismatches.isEmpty()) {
@@ -134,18 +153,18 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
       emptyList()
     }
 
-    val actualChildrenByTag = actualChildren.groupBy { it.nodeName }
+    val actualChildrenByQName = actualChildren.groupBy { QualifiedName(it) }
     return mismatches + expectedChildren
-      .groupBy { it.nodeName }
+      .groupBy { QualifiedName(it) }
       .flatMap { e ->
-        if (actualChildrenByTag.contains(e.key)) {
-          e.value.zipAll(actualChildrenByTag.getValue(e.key)).mapIndexed { index, comp ->
+        if (actualChildrenByQName.contains(e.key)) {
+          e.value.zipAll(actualChildrenByQName.getValue(e.key)).mapIndexed { index, comp ->
             val expectedNode = comp.first
             val actualNode = comp.second
             when {
               expectedNode == null -> emptyList()
               actualNode == null -> listOf(BodyMismatch(expected, actual,
-                "Expected child ${describe(expectedNode)} but was missing",
+                "Expected child <${e.key}/> but was missing",
                 (path + expectedNode.nodeName + index.toString()).joinToString(".")))
               else -> compareNode(path, expectedNode, actualNode, allowUnexpectedKeys, matchers)
             }
@@ -156,13 +175,6 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
         }
       }
   }
-
-  private fun describe(node: Node) =
-    if (node.nodeType == ELEMENT_NODE) {
-      "<${node.nodeName}/>"
-    } else {
-      node.toString()
-    }
 
   private fun compareAttributes(
     path: List<String>,
@@ -211,16 +223,15 @@ object XmlBodyMatcher : BodyMatcher, KLogging() {
     }
   }
 
-  private fun attributesToMap(attributes: NamedNodeMap?): Map<String, String> {
+  private fun attributesToMap(attributes: NamedNodeMap?): Map<QualifiedName, String> {
     return if (attributes == null) {
       emptyMap()
     } else {
-      val map = mutableMapOf<String, String>()
-      for (i in 0 until attributes.length) {
-        val item = attributes.item(i)
-        map[item.nodeName] = item.nodeValue
-      }
-      map
+      (0 until attributes.length)
+              .map { attributes.item(it) }
+              .filter { it.namespaceURI != XMLConstants.XMLNS_ATTRIBUTE_NS_URI }
+              .map { QualifiedName(it) to it.nodeValue }
+              .toMap()
     }
   }
 }

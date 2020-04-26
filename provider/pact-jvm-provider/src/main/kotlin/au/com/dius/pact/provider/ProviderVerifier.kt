@@ -1,8 +1,8 @@
 package au.com.dius.pact.provider
 
 import arrow.core.Either
-import au.com.dius.pact.com.github.michaelbull.result.Ok
-import au.com.dius.pact.com.github.michaelbull.result.getError
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.getError
 import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.matchers.MetadataMismatch
@@ -20,6 +20,7 @@ import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.UrlPactSource
+import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
@@ -239,8 +240,10 @@ open class ProviderVerifier @JvmOverloads constructor (
    * This will return true unless the pact.verifier.publishResults property has the value of "true"
    */
   override fun publishingResultsDisabled(): Boolean {
-    return !projectHasProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS) ||
-      projectGetProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS)?.toLowerCase() != "true"
+    return when {
+      !projectHasProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS) -> verificationReporter.publishingResultsDisabled()
+      else -> projectGetProperty.apply(PACT_VERIFIER_PUBLISH_RESULTS)?.toLowerCase() != "true"
+    }
   }
 
   override fun verifyResponseByInvokingProviderMethods(
@@ -376,8 +379,8 @@ open class ProviderVerifier @JvmOverloads constructor (
       val s = " generates a message which"
       result = result.merge(displayBodyResult(failures, comparison.bodyMismatches,
         interactionMessage + s, message.interactionId.orEmpty()))
-        .merge(displayMetadataResult(messageMetadata ?: emptyMap(), failures, comparison.metadataMismatches,
-          interactionMessage + s, message.interactionId.orEmpty()))
+        .merge(displayMetadataResult(messageMetadata ?: emptyMap(), failures,
+          comparison.metadataMismatches, interactionMessage + s, message.interactionId.orEmpty()))
     }
     return result
   }
@@ -430,8 +433,8 @@ open class ProviderVerifier @JvmOverloads constructor (
     var interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name}" +
     " - ${interaction.description} "
 
-    val stateChangeResult = stateChangeHandler.executeStateChange(this, provider, consumer, interaction, interactionMessage,
-      failures, providerClient)
+    val stateChangeResult = stateChangeHandler.executeStateChange(this, provider, consumer,
+      interaction, interactionMessage, failures, providerClient)
     if (stateChangeResult.stateChangeResult is Ok) {
       interactionMessage = stateChangeResult.message
       reportInteractionDescription(interaction)
@@ -441,7 +444,8 @@ open class ProviderVerifier @JvmOverloads constructor (
         "interaction" to interaction
       )
 
-      val result = if (ProviderUtils.verificationType(provider, consumer) == PactVerification.REQUEST_RESPONSE) {
+      val result = if (ProviderUtils.verificationType(provider, consumer) ==
+        PactVerification.REQUEST_RESPONSE) {
         logger.debug { "Verifying via request/response" }
         verifyResponseFromProvider(provider, interaction as RequestResponseInteraction, interactionMessage, failures,
           providerClient, context)
@@ -480,9 +484,12 @@ open class ProviderVerifier @JvmOverloads constructor (
     reporters.forEach { it.returnsAResponseWhich() }
 
     val s = " returns a response which"
-    return displayStatusResult(failures, expectedResponse.status, comparison.statusMismatch, interactionMessage + s, interactionId)
-      .merge(displayHeadersResult(failures, expectedResponse.headers, comparison.headerMismatches, interactionMessage + s, interactionId))
-      .merge(displayBodyResult(failures, comparison.bodyMismatches, interactionMessage + s, interactionId))
+    return displayStatusResult(failures, expectedResponse.status, comparison.statusMismatch,
+      interactionMessage + s, interactionId)
+      .merge(displayHeadersResult(failures, expectedResponse.headers, comparison.headerMismatches,
+        interactionMessage + s, interactionId))
+      .merge(displayBodyResult(failures, comparison.bodyMismatches,
+        interactionMessage + s, interactionId))
   }
 
   fun displayStatusResult(
@@ -523,7 +530,8 @@ open class ProviderVerifier @JvmOverloads constructor (
           reporters.forEach { it.headerComparisonFailed(key, expectedHeaderValue!!, headerComparison) }
           failures["$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""] =
             headerComparison.joinToString(", ") { it.description() }
-          result = result.merge(TestResult.Failed(headerComparison.map { it.toMap() }, "Headers had differences"))
+          result = result.merge(TestResult.Failed(headerComparison.map { it.toMap() },
+            "Headers had differences"))
         }
       }
       result
@@ -597,7 +605,8 @@ open class ProviderVerifier @JvmOverloads constructor (
     consumer: IConsumerInfo,
     client: PactBrokerClient? = null
   ) {
-    val pact = FilteredPact(loadPactFileForConsumer(consumer), Predicate { filterInteractions(it) })
+    val pact = FilteredPact(loadPactFileForConsumer(consumer),
+      Predicate { filterInteractions(it) })
     reportVerificationForConsumer(consumer, provider, pact.source)
     if (pact.interactions.isEmpty()) {
       reporters.forEach { it.warnPactFileHasNoInteractions(pact as Pact<Interaction>) }
@@ -606,10 +615,15 @@ open class ProviderVerifier @JvmOverloads constructor (
         verifyInteraction(provider, consumer, failures, it)
       }.reduce { acc, result -> acc.merge(result) }
       when {
-        pact.isFiltered() -> logger.warn { "Skipping publishing of verification results as the interactions have been filtered" }
-        publishingResultsDisabled() -> logger.warn { "Skipping publishing of verification results as it has been disabled " +
-          "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')" }
-        else -> verificationReporter.reportResults(pact, result, providerVersion.get() ?: "0.0.0", client, providerTag?.get())
+        pact.isFiltered() -> logger.warn {
+          "Skipping publishing of verification results as the interactions have been filtered"
+        }
+        publishingResultsDisabled() -> logger.warn {
+          "Skipping publishing of verification results as it has been disabled " +
+          "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')"
+        }
+        else -> verificationReporter.reportResults(pact, result, providerVersion.get() ?: "0.0.0", client,
+          providerTag?.get())
       }
     }
   }
@@ -618,6 +632,10 @@ open class ProviderVerifier @JvmOverloads constructor (
     when (pactSource) {
       is BrokerUrlSource -> reporters.forEach {
         it.reportVerificationForConsumer(consumer, provider, pactSource.tag)
+        val notices = consumer.notices.filter { it.`when` == "before_verification" }
+        if (notices.isNotEmpty()) {
+          it.reportVerificationNoticesForConsumer(consumer, provider, notices)
+        }
         it.verifyConsumerFromUrl(pactSource, consumer)
       }
       is UrlPactSource -> reporters.forEach {
@@ -639,6 +657,16 @@ open class ProviderVerifier @JvmOverloads constructor (
       pactSource = pactSource.call()
     }
 
+    if (projectHasProperty.apply(PACT_FILTER_PACTURL)) {
+      val pactUrl = projectGetProperty.apply(PACT_FILTER_PACTURL)!!
+      pactSource = if (pactSource is BrokerUrlSource) {
+        pactSource.copy(url = pactUrl)
+      } else {
+        UrlSource<Interaction>(projectGetProperty.apply(PACT_FILTER_PACTURL)!!)
+      }
+      pactSource.encodePath = false
+    }
+
     return if (pactSource is UrlPactSource) {
       val options = mutableMapOf<String, Any>()
       if (consumer.pactFileAuthentication.isNotEmpty()) {
@@ -658,8 +686,7 @@ open class ProviderVerifier @JvmOverloads constructor (
   }
 
   private fun generateLoadFailureMessage(consumer: IConsumerInfo): String {
-    val callback = pactLoadFailureMessage
-    return when (callback) {
+    return when (val callback = pactLoadFailureMessage) {
       is Closure<*> -> callback.call(consumer).toString()
       is Function<*, *> -> (callback as Function<Any, Any>).apply(consumer).toString()
       is scala.Function1<*, *> -> (callback as scala.Function1<Any, Any>).apply(consumer).toString()
@@ -673,7 +700,8 @@ open class ProviderVerifier @JvmOverloads constructor (
   }
 
   fun filterInteractions(interaction: Interaction): Boolean {
-    return if (projectHasProperty.apply(PACT_FILTER_DESCRIPTION) && projectHasProperty.apply(PACT_FILTER_PROVIDERSTATE)) {
+    return if (projectHasProperty.apply(PACT_FILTER_DESCRIPTION) &&
+      projectHasProperty.apply(PACT_FILTER_PROVIDERSTATE)) {
       matchDescription(interaction) && matchState(interaction)
     } else if (projectHasProperty.apply(PACT_FILTER_DESCRIPTION)) {
       matchDescription(interaction)
@@ -711,6 +739,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     const val PACT_FILTER_CONSUMERS = "pact.filter.consumers"
     const val PACT_FILTER_DESCRIPTION = "pact.filter.description"
     const val PACT_FILTER_PROVIDERSTATE = "pact.filter.providerState"
+    const val PACT_FILTER_PACTURL = "pact.filter.pacturl"
     const val PACT_SHOW_STACKTRACE = "pact.showStacktrace"
     const val PACT_SHOW_FULLDIFF = "pact.showFullDiff"
     const val PACT_PROVIDER_VERSION = "pact.provider.version"

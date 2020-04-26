@@ -24,6 +24,9 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
   Interaction interaction
   private TestResultAccumulator testResultAcc
   RequestResponsePact pact
+  private PactVerificationContext pactContext
+  private ExtensionContext testContext
+  private ExtensionContext.Store store
 
   static class TestClass {
 
@@ -53,11 +56,20 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     }
   }
 
+  private TestClass testInstance
+
   def setup() {
     interaction = new RequestResponseInteraction('test')
     pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction ])
     testResultAcc = Mock(TestResultAccumulator)
     verificationExtension = new PactVerificationStateChangeExtension(pact, interaction, testResultAcc)
+    testInstance = new TestClass()
+    testContext = [
+      'getTestClass': { Optional.of(TestClass) },
+      'getTestInstance': { Optional.of(testInstance) }
+    ] as ExtensionContext
+    store = [:] as ExtensionContext.Store
+    pactContext = new PactVerificationContext(store, testContext, 'test', interaction)
   }
 
   @Unroll
@@ -66,8 +78,7 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     def state = new ProviderState('test state')
 
     when:
-    verificationExtension.invokeStateChangeMethods(['getTestClass': { Optional.of(testClass) } ] as ExtensionContext,
-      [state], StateChangeAction.SETUP)
+    verificationExtension.invokeStateChangeMethods(testContext, pactContext, [state], StateChangeAction.SETUP)
 
     then:
     thrown(MissingStateChangeMethod)
@@ -80,16 +91,12 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
   def 'invokes the state change method for the provider state'() {
     given:
     def state = new ProviderState('Test 2', [a: 'A', b: 'B'])
-    def testInstance = new TestClass()
 
     when:
     testInstance.state2Called = false
     testInstance.state2TeardownCalled = false
     testInstance.state3Called = null
-    verificationExtension.invokeStateChangeMethods([
-      'getTestClass': { Optional.of(TestClass) },
-      'getTestInstance': { Optional.of(testInstance) }
-    ] as ExtensionContext, [state], StateChangeAction.SETUP)
+    verificationExtension.invokeStateChangeMethods(testContext, pactContext, [state], StateChangeAction.SETUP)
 
     then:
     testInstance.state2Called
@@ -106,6 +113,7 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     def context = Mock(ExtensionContext) {
       getStore(_) >> store
       getRequiredTestClass() >> TestClass
+      getRequiredTestInstance() >> testInstance
     }
     def target = Mock(TestTarget)
     IProviderVerifier verifier = Mock()
@@ -121,7 +129,8 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     verificationExtension.beforeTestExecution(context)
 
     then:
-    1 * testResultAcc.updateTestResult(_, interaction, { it instanceof TestResult.Failed })
+    thrown(AssertionError)
+    verificationContext.testExecutionResult instanceof TestResult.Failed
   }
 
 }

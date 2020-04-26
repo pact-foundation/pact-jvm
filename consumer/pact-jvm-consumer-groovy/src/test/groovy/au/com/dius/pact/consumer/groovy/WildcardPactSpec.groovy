@@ -2,10 +2,13 @@ package au.com.dius.pact.consumer.groovy
 
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.core.model.FeatureToggles
-import groovyx.net.http.RESTClient
+import groovy.json.JsonSlurper
+import groovyx.net.http.ContentTypes
+import groovyx.net.http.FromServer
+import groovyx.net.http.HttpBuilder
 import spock.lang.Specification
 
-import static groovyx.net.http.ContentType.JSON
+import static groovyx.net.http.ContentTypes.JSON
 
 @SuppressWarnings(['AbcMetric'])
 class WildcardPactSpec extends Specification {
@@ -45,16 +48,24 @@ class WildcardPactSpec extends Specification {
 
     when:
     PactVerificationResult result = articleService.runTest { server, context ->
-      def client = new RESTClient(server.url)
-      def response = client.get(requestContentType: JSON)
+      def client = HttpBuilder.configure {
+        request.uri = server.url
+      }
+      def response = client.get(FromServer) {
+        request.contentType = JSON[0]
+        response.parser(ContentTypes.ANY) { config, resp ->
+          resp
+        }
+      }
 
-      assert response.status == 200
-      assert response.data.articles.size() == 1
-      assert response.data.articles[0].variants.size() == 1
-      assert response.data.articles[0].variants[0].keySet() == ['001'] as Set
-      assert response.data.articles[0].variants[0].'001'.size() == 1
-      assert response.data.articles[0].variants[0].'001'[0].bundles.size() == 1
-      assert response.data.articles[0].variants[0].'001'[0].bundles[0].keySet() == ['001-A'] as Set
+      assert response.statusCode == 200
+      def data = new JsonSlurper().parse(response.inputStream)
+      assert data.articles.size() == 1
+      assert data.articles[0].variants.size() == 1
+      assert data.articles[0].variants[0].keySet() == ['001'] as Set
+      assert data.articles[0].variants[0].'001'.size() == 1
+      assert data.articles[0].variants[0].'001'[0].bundles.size() == 1
+      assert data.articles[0].variants[0].'001'[0].bundles[0].keySet() == ['001-A'] as Set
     }
 
     then:
@@ -89,7 +100,7 @@ class WildcardPactSpec extends Specification {
       uponReceiving('a request for events with useMatchValuesMatcher turned on')
       withAttributes(method: 'get', path: '/')
       willRespondWith(status: 200)
-      withBody(mimeType: JSON.toString()) {
+      withBody(mimeType: ContentTypes.JSON[0].toString()) {
         events {
           keyLike('001') {
             description string('some description')
@@ -106,12 +117,20 @@ class WildcardPactSpec extends Specification {
 
     when:
     PactVerificationResult result = articleService.runTest { server, context ->
-      def client = new RESTClient(server.url)
-      def response = client.get(requestContentType: JSON)
+      def client = HttpBuilder.configure {
+        request.uri = server.url
+      }
+      def response = client.get(FromServer) {
+        request.contentType = JSON[0]
+        response.parser(ContentTypes.ANY) { config, resp ->
+          resp
+        }
+      }
 
-      assert response.status == 200
-      assert response.data.events.size() == 1
-      assert response.data.events.keySet() == ['001'] as Set
+      assert response.statusCode == 200
+      def data = new JsonSlurper().parse(response.inputStream)
+      assert data.events.size() == 1
+      assert data.events.keySet() == ['001'] as Set
     }
 
     then:

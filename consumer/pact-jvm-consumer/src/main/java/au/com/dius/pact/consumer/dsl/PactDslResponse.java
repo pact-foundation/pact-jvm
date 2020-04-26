@@ -1,6 +1,8 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
+import au.com.dius.pact.consumer.MessagePactBuilder;
+import au.com.dius.pact.consumer.xml.PactXmlBuilder;
 import au.com.dius.pact.core.model.OptionalBody;
 import au.com.dius.pact.core.model.ProviderState;
 import au.com.dius.pact.core.model.Request;
@@ -14,6 +16,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules;
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
 import au.com.dius.pact.core.model.matchingrules.RuleLogic;
+import au.com.dius.pact.core.support.expressions.DataType;
 import com.mifmif.common.regex.Generex;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
@@ -353,7 +356,7 @@ public class PactDslResponse {
    * @param example Example value to use in the consumer test
    */
   public PactDslResponse headerFromProviderState(String name, String expression, String example) {
-    responseGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression));
+    responseGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression, DataType.STRING));
     responseHeaders.put(name, Collections.singletonList(example));
     return this;
   }
@@ -376,6 +379,29 @@ public class PactDslResponse {
     } else {
       responseHeaders.put("set-cookie", newArrayList(cookie + "=" + example));
     }
+    return this;
+  }
+
+  /**
+   * XML Response body to return
+   *
+   * @param xmlBuilder XML Builder used to construct the XML document
+   */
+  public PactDslResponse body(PactXmlBuilder xmlBuilder) {
+    responseMatchers.addCategory(xmlBuilder.getMatchingRules());
+    responseGenerators.addGenerators(xmlBuilder.getGenerators());
+
+    if (!responseHeaders.containsKey(CONTENT_TYPE)) {
+      responseHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
+      responseBody = OptionalBody.body(xmlBuilder.asBytes());
+    } else {
+      String contentType = responseHeaders.get(CONTENT_TYPE).get(0);
+      ContentType ct = ContentType.parse(contentType);
+      Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
+      responseBody = OptionalBody.body(xmlBuilder.asBytes(charset),
+        new au.com.dius.pact.core.model.ContentType(contentType));
+    }
+
     return this;
   }
 }

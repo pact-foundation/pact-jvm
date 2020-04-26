@@ -113,13 +113,13 @@ open class RequestResponseInteraction @JvmOverloads constructor(
 
     private fun mapToQueryStr(query: Map<String, List<String>>): String {
       return query.entries.joinToString("&") { (k, v) ->
-        v.joinToString { "$k=${URLEncoder.encode(it, "UTF-8")}" }
+        v.joinToString("&") { "$k=${URLEncoder.encode(it, "UTF-8")}" }
       }
     }
 
     private fun parseBody(httpPart: HttpPart): Any? {
       return if (httpPart.jsonBody() && httpPart.body.isPresent()) {
-        val body = Json.fromJson(JsonParser().parse(httpPart.body.valueAsString()))
+        val body = Json.fromJson(JsonParser.parseString(httpPart.body.valueAsString()))
         if (body is String) {
           httpPart.body.valueAsString()
         } else {

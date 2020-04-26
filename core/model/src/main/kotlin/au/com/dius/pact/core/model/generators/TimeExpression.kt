@@ -1,8 +1,8 @@
 package au.com.dius.pact.core.model.generators
 
-import au.com.dius.pact.com.github.michaelbull.result.Err
-import au.com.dius.pact.com.github.michaelbull.result.Ok
-import au.com.dius.pact.com.github.michaelbull.result.Result
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import au.com.dius.pact.core.support.generators.expressions.Adjustment
 import au.com.dius.pact.core.support.generators.expressions.Operation
 import au.com.dius.pact.core.support.generators.expressions.TimeBase
@@ -13,20 +13,20 @@ import mu.KLogging
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import java.time.LocalTime
-import java.time.OffsetTime
+import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 
 data class ParsedTimeExpression(val base: TimeBase, val adjustments: MutableList<Adjustment<TimeOffsetType>>)
 
 object TimeExpression : KLogging() {
-  fun executeTimeExpression(base: OffsetTime, expression: String?): Result<OffsetTime, String> {
+  fun executeTimeExpression(base: OffsetDateTime, expression: String?): Result<OffsetDateTime, String> {
     return if (!expression.isNullOrEmpty()) {
       return when (val result = parseTimeExpression(expression)) {
         is Err -> result
         is Ok -> {
-          val midnight = OffsetTime.of(LocalTime.MIDNIGHT, ZoneOffset.from(base))
-          val noon = OffsetTime.of(LocalTime.NOON, ZoneOffset.from(base))
+          val midnight = OffsetDateTime.of(base.toLocalDate(), LocalTime.MIDNIGHT, ZoneOffset.from(base))
+          val noon = OffsetDateTime.of(base.toLocalDate(), LocalTime.NOON, ZoneOffset.from(base))
           var time = when (val valBase = result.value.base) {
             TimeBase.Now -> base
             TimeBase.Midnight -> midnight

@@ -1,11 +1,16 @@
 dependencies {
-    api project(path: ":consumer:pact-jvm-consumer", configuration: 'default')
-    compile "org.codehaus.groovy:groovy:${project.groovyVersion}"
-    compile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
+  api project(path: ":consumer:pact-jvm-consumer", configuration: 'default')
+  compile "org.codehaus.groovy:groovy:${project.groovy2Version}"
+  compile "org.codehaus.groovy:groovy-json:${project.groovy2Version}"
 
-    testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}",
-      "ch.qos.logback:logback-classic:${project.logbackVersion}"
-    testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}"
-    testCompile "org.codehaus.groovy:groovy-dateutil:${project.groovyVersion}"
-    testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testCompile "io.github.http-builder-ng:http-builder-ng-apache:${project.httpBuilderVersion}",
+    "ch.qos.logback:logback-classic:${project.logbackVersion}"
+  testCompile "org.codehaus.groovy:groovy-xml:${project.groovy2Version}"
+  testCompile "org.codehaus.groovy:groovy-dateutil:${project.groovy2Version}"
+  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testCompile('org.spockframework:spock-core:2.0-M2-groovy-2.5') {
+      exclude group: 'org.codehaus.groovy'
+  }
+
+  groovyDoc "org.codehaus.groovy:groovy-all:${project.groovy2Version}"
 }

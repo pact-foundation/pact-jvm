@@ -50,11 +50,34 @@ class MessagePactBuilder(
   /**
    * Sets the provider state.
    *
-   * @param providerState state of the provider
+   * @param providerState description of the provider state
    * @return this builder.
    */
   fun given(providerState: String): MessagePactBuilder {
     this.providerStates.add(ProviderState(providerState))
+    return this
+  }
+
+  /**
+   * Sets the provider state.
+   *
+   * @param providerState description of the provider state
+   * @param params key/value pairs to describe state
+   * @return this builder.
+   */
+  fun given(providerState: String, params: Map<String, Any>): MessagePactBuilder {
+    this.providerStates.add(ProviderState(providerState, params))
+    return this
+  }
+
+  /**
+   * Sets the provider state.
+   *
+   * @param providerState state of the provider
+   * @return this builder.
+   */
+  fun given(providerState: ProviderState): MessagePactBuilder {
+    this.providerStates.add(providerState)
     return this
   }
 
@@ -84,11 +107,11 @@ class MessagePactBuilder(
           message.generators.addGenerator(category = au.com.dius.pact.core.model.generators.Category.METADATA,
             generator = value.generator!!)
         }
-        value.value.toString()
+        value.value
       } else {
-        value.toString()
+        value
       }
-    }
+    }.toMutableMap()
     return this
   }
 
@@ -110,7 +133,7 @@ class MessagePactBuilder(
     if (contentTypeEntry == null) {
       metadata["contentType"] = contentType.toString()
     } else {
-      contentType = ContentType(contentTypeEntry.value)
+      contentType = ContentType(contentTypeEntry.value.toString())
       metadata.remove(contentTypeEntry.key)
       metadata["contentType"] = contentTypeEntry.value
     }

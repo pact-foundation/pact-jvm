@@ -1,0 +1,74 @@
+{
+  "provider": {
+    "name": "XmlInJsonService"
+  },
+  "consumer": {
+    "name": "XmlInJsonConsumer"
+  },
+  "interactions": [
+    {
+      "providerStates": [
+        {
+          "name": "create XML entity",
+          "params": {
+            "name": "mock-name"
+          }
+        }
+      ],
+      "description": "Create new entity",
+      "request": {
+        "method": "POST",
+        "path": "/data",
+        "headers": {
+          "Content-Type": ["application/json"]
+        },
+        "body": {
+          "entityName": "mock-name",
+          "xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<entity name=\"mock-name\"/>"
+        },
+        "generators": {
+          "body": {
+            "$.entityName": {
+              "expression": "${eName}",
+              "type": "ProviderState"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "accountId": "4beb44f1-53f7-4281-a78b-12c06d682067"
+        },
+        "matchingRules": {
+          "body": {
+            "$.accountId": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        },
+        "generators": {
+          "body": {
+            "$.accountId": {
+              "type": "ProviderState",
+              "expression": "${accountId}"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "pact-specification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.0.7"
+    }
+  }
+}

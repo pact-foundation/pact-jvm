@@ -1,12 +1,17 @@
 package au.com.dius.pact.provider.reporters
 
+import arrow.core.Either
+import au.com.dius.pact.core.matchers.BodyTypeMismatch
+import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.model.BasePact
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.UrlPactSource
+import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.property
+import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import java.io.BufferedWriter
@@ -170,7 +175,17 @@ class MarkdownReporter(
 
   override fun headerComparisonFailed(key: String, value: List<String>, comparison: Any) {
     pw!!.write("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"**$key**\" with value \"**$value**\" " +
-      "(<span style=\'color:red\'>FAILED</span>)  \n\n```\n$comparison\n```\n\n")
+      "(<span style=\'color:red\'>FAILED</span>)  \n\n```\n")
+    when (comparison) {
+      is List<*> -> comparison.forEach {
+        when (it) {
+          is HeaderMismatch -> pw!!.write(it.mismatch)
+          else -> pw!!.write(it.toString())
+        }
+      }
+      else -> pw!!.write(comparison.toString())
+    }
+    pw!!.write("\n```\n\n")
   }
 
   override fun bodyComparisonOk() {
@@ -179,25 +194,42 @@ class MarkdownReporter(
 
   override fun bodyComparisonFailed(comparison: Any) {
     pw!!.write("&nbsp;&nbsp;&nbsp;&nbsp;has a matching body (<span style='color:red'>FAILED</span>)  \n\n")
-    pw!!.write("| Path | Failure |\n")
-    pw!!.write("| ---- | ------- |\n")
 
-    val property = comparison.property("comparison")?.get(comparison)
-    when {
-      comparison is String -> pw!!.write("|\$|$comparison|\n")
-      property is Map<*, *> -> pw!!.write(property.map {
-        val mismatches = (it.value as List<Map<String, Any>>).joinToString("; ") { mismatch ->
-          mismatch["mismatch"].toString()
+//    val property = comparison.property("comparison")?.get(comparison)
+//    when {
+//      comparison is String -> pw!!.write("|\$|$comparison|\n")
+//      property is Map<*, *> -> pw!!.write(property.map {
+//        val mismatches = (it.value as List<Map<String, Any>>).joinToString("; ") { mismatch ->
+//          mismatch["mismatch"].toString()
+//        }
+//        "|${it.key}|$mismatches|"
+//      }.joinToString("\n"))
+//      else -> pw!!.write("|\$|$property|")
+//    }
+//    pw!!.write("\n\n")
+//    if (comparison.hasProperty("diff")) {
+//      pw!!.write("Diff:\n\n")
+//      renderDiff(pw!!, comparison.property("diff")?.get(comparison))
+//      pw!!.write("\n\n")
+//    }
+
+    when (comparison) {
+      is Either.Left<*> -> {
+        comparison as Either.Left<BodyTypeMismatch>
+        pw!!.write("```\n${comparison.a.description()}\n```\n")
+      }
+      is Either.Right<*> -> {
+        comparison as Either.Right<BodyComparisonResult>
+        pw!!.write("| Path | Failure |\n")
+        pw!!.write("| ---- | ------- |\n")
+        comparison.b.mismatches.forEach { entry ->
+          pw!!.write("|`${entry.key}`|${entry.value.joinToString("\n") { it.description() }}|\n")
         }
-        "|${it.key}|$mismatches|"
-      }.joinToString("\n"))
-      else -> pw!!.write("|\$|$property|")
-    }
-    pw!!.write("\n\n")
-    if (comparison.hasProperty("diff")) {
-      pw!!.write("Diff:\n\n")
-      renderDiff(pw!!, comparison.property("diff")?.get(comparison))
-      pw!!.write("\n\n")
+        pw!!.write("\n\nDiff:\n\n")
+        renderDiff(pw!!, comparison.b.diff)
+        pw!!.write("\n\n")
+      }
+      else -> pw!!.write("```\n${comparison}\n```\n")
     }
   }
 
@@ -242,5 +274,15 @@ class MarkdownReporter(
 
   override fun metadataComparisonOk() {
     pw!!.write("&nbsp;&nbsp;&nbsp;&nbsp;has matching metadata (<span style='color:green'>OK</span>)\n")
+  }
+
+  override fun reportVerificationNoticesForConsumer(
+    consumer: IConsumerInfo,
+    provider: IProviderInfo,
+    notices: List<VerificationNotice>
+  ) {
+    pw!!.write("Notices:\n")
+    notices.forEachIndexed { i, notice -> pw!!.write("${i + 1}. ${notice.text}\n") }
+    pw!!.write("\n")
   }
 }

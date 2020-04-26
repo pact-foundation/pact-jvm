@@ -5,13 +5,19 @@ dependencies {
   compile 'com.github.salomonbrys.kotson:kotson:2.5.0'
   compile "com.google.guava:guava:${project.guavaVersion}"
   compile 'org.dmfs:rfc3986-uri:0.8'
-
   compile('io.github.microutils:kotlin-logging:1.6.26') {
     exclude group: 'org.jetbrains.kotlin'
   }
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
+  api 'io.arrow-kt:arrow-core-extensions:0.9.0'
+  api 'com.michael-bull.kotlin-result:kotlin-result:1.1.6'
 
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
+  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
+  testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+    exclude group: 'org.codehaus.groovy'
+  }
+  testRuntime "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
 }

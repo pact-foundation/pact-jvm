@@ -75,7 +75,7 @@ open class HttpTarget
     reportTestResult(failures.isEmpty(), verifier)
 
     try {
-      if (!failures.isEmpty()) {
+      if (failures.isNotEmpty()) {
         verifier.displayFailures(failures)
         throw getAssertionError(failures)
       }
@@ -118,6 +118,8 @@ open class HttpTarget
 
     val methods = testClass.getAnnotatedMethods(TargetRequestFilter::class.java)
     if (methods.isNotEmpty()) {
+      validateTargetRequestFilters(methods)
+
       providerInfo.requestFilter = Consumer { httpRequest: HttpRequest ->
         methods.forEach { method ->
           try {

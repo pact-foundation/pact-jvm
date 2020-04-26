@@ -15,6 +15,7 @@ import java.io.File
 import java.util.function.BiConsumer
 import java.util.function.Supplier
 import org.apache.commons.lang3.tuple.Pair
+import org.junit.runners.model.FrameworkMethod
 
 /**
  * Out-of-the-box implementation of [Target],
@@ -99,5 +100,16 @@ abstract class BaseTarget : TestClassAwareTarget {
   override fun withStateHandler(stateHandler: Pair<Class<out Any>, Supplier<out Any>>): Target {
     this.stateHandlers.add(stateHandler)
     return this
+  }
+
+  protected fun validateTargetRequestFilters(methods: MutableList<FrameworkMethod>) {
+    methods.forEach { method ->
+      val requestClass = getRequestClass()
+      if (method.method.parameterTypes.size != 1) {
+        throw Exception("Method ${method.name} should take only a single ${requestClass.simpleName} parameter")
+      } else if (!requestClass.isAssignableFrom(method.method.parameterTypes[0])) {
+        throw Exception("Method ${method.name} should take only a single ${requestClass.simpleName} parameter")
+      }
+    }
   }
 }

@@ -22,10 +22,8 @@ class PactProviderMojoSpec extends Specification {
 
   def 'load pacts from pact broker uses the provider pactBrokerUrl'() {
     given:
-    def provider = Mock(Provider) {
-      getPactBrokerUrl() >> new URL('http://broker:1234')
-      getPactBroker() >> new PactBroker()
-    }
+    def provider = Spy(new Provider('TestProvider', null as File, new URL('http://broker:1234'),
+      new PactBroker(null, null, null, null)))
     def list = []
 
     when:
@@ -39,10 +37,8 @@ class PactProviderMojoSpec extends Specification {
 
   def 'load pacts from pact broker uses the configured pactBroker Url'() {
     given:
-    def provider = Mock(Provider) {
-      getPactBrokerUrl() >> null
-      getPactBroker() >> new PactBroker(new URL('http://broker:1234'))
-    }
+    def provider = Spy(new Provider('TestProvider', null as File, null as URL,
+      new PactBroker(new URL('http://broker:1234'), null, null, null)))
     def list = []
 
     when:
@@ -55,10 +51,8 @@ class PactProviderMojoSpec extends Specification {
 
   def 'load pacts from pact broker uses the configured pactBroker Url over pactBrokerUrl'() {
     given:
-    def provider = Mock(Provider) {
-      getPactBrokerUrl() >> new URL('http://broker:1000')
-      getPactBroker() >> new PactBroker(new URL('http://broker:1234'))
-    }
+    def provider = Spy(new Provider('TestProvider', null as File, new URL('http://broker:1000'),
+      new PactBroker(new URL('http://broker:1234'), null, null, null)))
     def list = []
 
     when:
@@ -71,11 +65,8 @@ class PactProviderMojoSpec extends Specification {
 
   def 'load pacts from pact broker uses the configured pactBroker basic authentication'() {
     given:
-    def provider = Mock(Provider) {
-      getPactBrokerUrl() >> null
-      getPactBroker() >> new PactBroker(new URL('http://broker:1234'), null,
-              new PactBrokerAuth('basic', null, 'test', 'test'))
-    }
+    def provider = Spy(new Provider('TestProvider', null as File, null as URL,
+      new PactBroker(new URL('http://broker:1234'), null, new PactBrokerAuth('basic', null, 'test', 'test'), null)))
     def list = []
 
     when:
@@ -90,11 +81,8 @@ class PactProviderMojoSpec extends Specification {
 
   def 'load pacts from pact broker uses the configured pactBroker bearer authentication'() {
     given:
-    def provider = Mock(Provider) {
-      getPactBrokerUrl() >> null
-      getPactBroker() >> new PactBroker(new URL('http://broker:1234'), null,
-              new PactBrokerAuth('bearer', 'test', null, null))
-    }
+    def provider = Spy(new Provider('TestProvider', null as File, null as URL,
+      new PactBroker(new URL('http://broker:1234'), null, new PactBrokerAuth('bearer', 'test', null, null), null)))
     def list = []
 
     when:
@@ -109,11 +97,9 @@ class PactProviderMojoSpec extends Specification {
 
   def 'load pacts from pact broker uses bearer authentication if token attribute is set without scheme being set'() {
     given:
-    def provider = Mock(Provider) {
-      getPactBrokerUrl() >> null
-      getPactBroker() >> new PactBroker(new URL('http://broker:1234'), null,
-              new PactBrokerAuth(null, 'test', null, null))
-    }
+    def provider = Spy(new Provider('TestProvider', null as File, null as URL,
+      new PactBroker(new URL('http://broker:1234'), null,
+        new PactBrokerAuth(null, 'test', null, null), null)))
     def list = []
 
     when:
@@ -128,10 +114,8 @@ class PactProviderMojoSpec extends Specification {
 
   def 'load pacts from pact broker for each configured pactBroker tag'() {
     given:
-    def provider = Mock(Provider) {
-      getPactBrokerUrl() >> null
-      getPactBroker() >> new PactBroker(new URL('http://broker:1234'), ['1', '2', '3'])
-    }
+    def provider = Spy(new Provider('TestProvider', null as File, null as URL,
+      new PactBroker(new URL('http://broker:1234'), ['1', '2', '3'], null, null)))
     def list = []
 
     when:
@@ -150,10 +134,8 @@ class PactProviderMojoSpec extends Specification {
     mojo.settings = settings
     def decrypter = Mock(SettingsDecrypter)
     mojo.decrypter = decrypter
-    def provider = Mock(Provider) {
-      getPactBrokerUrl() >> null
-      getPactBroker() >> new PactBroker(new URL('http://broker:1234'), null, null, 'test-server')
-    }
+    def provider = Spy(new Provider('TestProvider', null as File, null as URL,
+      new PactBroker(new URL('http://broker:1234'), null, null, 'test-server')))
     def list = []
     def serverDetails = new Server(username: 'MavenTest')
     def decryptResult = [getServer: { new Server(password: 'MavenPassword') } ] as SettingsDecryptionResult
@@ -173,10 +155,7 @@ class PactProviderMojoSpec extends Specification {
 
   def 'Falls back to the passed in broker config if not set on the provider'() {
     given:
-    def provider = Mock(Provider) {
-      getPactBrokerUrl() >> null
-      getPactBroker() >> null
-    }
+    def provider = Spy(new Provider('TestProvider', null as File, null as URL, null))
     def list = []
     mojo.pactBrokerUrl = 'http://broker:1235'
 
@@ -194,7 +173,8 @@ class PactProviderMojoSpec extends Specification {
     def dir1 = 'dir1' as File
     def dir2 = 'dir2' as File
     def dir3 = 'dir3' as File
-    def provider = new Provider(pactFileDirectories: [dir1, dir2], pactFileDirectory: dir3)
+    def provider = new Provider('TestProvider', dir3, null, null)
+    provider.pactFileDirectories =  [dir1, dir2]
     def verifier = Mock(IProviderVerifier) {
       verifyProvider(provider) >> [:]
     }
@@ -217,7 +197,7 @@ class PactProviderMojoSpec extends Specification {
 
   def 'fail the build if there are no pacts and failIfNoPactsFound is true'() {
     given:
-    def provider = new Provider(pactFileDirectory: 'dir' as File)
+    def provider = new Provider('TestProvider', 'dir' as File, null, null)
     def verifier = Mock(IProviderVerifier) {
       verifyProvider(provider) >> [:]
     }
@@ -239,7 +219,7 @@ class PactProviderMojoSpec extends Specification {
 
   def 'do not fail the build if there are no pacts and failIfNoPactsFound is false'() {
     given:
-    def provider = new Provider(pactFileDirectory: 'dir' as File)
+    def provider = new Provider('TestProvider', 'dir' as File, null, null)
     def verifier = Mock(IProviderVerifier) {
       verifyProvider(provider) >> [:]
     }
@@ -262,7 +242,7 @@ class PactProviderMojoSpec extends Specification {
   @RestoreSystemProperties
   def 'system property pact.verifier.publishResults true when set with systemPropertyVariables' () {
     given:
-    def provider = new Provider(pactFileDirectory: 'dir1' as File)
+    def provider = new Provider('TestProvider', 'dir' as File, null, null)
     def verifier = Mock(IProviderVerifier) {
       verifyProvider(provider) >> [:]
     }
@@ -287,7 +267,7 @@ class PactProviderMojoSpec extends Specification {
   @RestoreSystemProperties
   def 'system property pact.provider.version.trimSnapshot true when set with systemPropertyVariables' () {
     given:
-    def provider = new Provider(pactFileDirectory: 'dir1' as File)
+    def provider = new Provider('TestProvider', 'dir1' as File, null, null)
     def verifier = Mock(IProviderVerifier) {
       verifyProvider(provider) >> [:]
     }

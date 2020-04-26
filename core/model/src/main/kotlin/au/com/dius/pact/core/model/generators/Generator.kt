@@ -1,8 +1,9 @@
 package au.com.dius.pact.core.model.generators
 
-import au.com.dius.pact.com.github.michaelbull.result.getOr
+import com.github.michaelbull.result.getOr
 import au.com.dius.pact.core.model.PactSpecVersion
 import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.containsExpressions
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
 import au.com.dius.pact.core.support.expressions.MapValueResolver
@@ -13,7 +14,6 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
 import java.math.BigDecimal
 import java.time.OffsetDateTime
-import java.time.OffsetTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
@@ -275,7 +275,7 @@ data class TimeGenerator @JvmOverloads constructor(val format: String? = null, v
   }
 
   override fun generate(context: Map<String, Any?>): Any {
-    val base = if (context.containsKey("baseTime")) context["baseTime"] as OffsetTime else OffsetTime.now()
+    val base = if (context.containsKey("baseTime")) context["baseTime"] as OffsetDateTime else OffsetDateTime.now()
     val time = TimeExpression.executeTimeExpression(base, expression).getOr { base }
     return if (!format.isNullOrEmpty()) {
       time.format(DateTimeFormatter.ofPattern(format))
@@ -352,9 +352,12 @@ object RandomBooleanGenerator : Generator {
 /**
  * Generates a value that is looked up from the provider state context
  */
-data class ProviderStateGenerator(val expression: String) : Generator {
+data class ProviderStateGenerator @JvmOverloads constructor (
+  val expression: String,
+  val type: DataType = DataType.RAW
+) : Generator {
   override fun toMap(pactSpecVersion: PactSpecVersion): Map<String, Any> {
-    return mapOf("type" to "ProviderState", "expression" to expression)
+    return mapOf("type" to "ProviderState", "expression" to expression, "dataType" to type.name)
   }
 
   override fun generate(context: Map<String, Any?>): Any? {
@@ -362,7 +365,7 @@ data class ProviderStateGenerator(val expression: String) : Generator {
       is Map<*, *> -> {
         val map = providerState as Map<String, Any>
         if (containsExpressions(expression)) {
-          parseExpression(expression, MapValueResolver(map))
+          parseExpression(expression, type, MapValueResolver(map))
         } else {
           map[expression]
         }
@@ -374,6 +377,9 @@ data class ProviderStateGenerator(val expression: String) : Generator {
   override fun correspondsToMode(mode: GeneratorTestMode) = mode == GeneratorTestMode.Provider
 
   companion object {
-    fun fromJson(json: JsonObject) = ProviderStateGenerator(Json.toString(json["expression"]))
+    fun fromJson(json: JsonObject) = ProviderStateGenerator(
+      Json.toString(json["expression"]),
+      if (json.has("dataType")) DataType.valueOf(Json.toString(json["dataType"])) else DataType.RAW
+    )
   }
 }

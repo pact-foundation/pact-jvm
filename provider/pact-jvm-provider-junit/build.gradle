@@ -16,6 +16,12 @@ dependencies {
     // Required for Java 9
     testCompile 'javax.xml.bind:jaxb-api:2.3.0'
     testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+    testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
+    testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+        exclude group: 'org.codehaus.groovy'
+    }
+    testRuntime "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
+    testRuntime 'org.objenesis:objenesis:3.1'
 }
 
 test {

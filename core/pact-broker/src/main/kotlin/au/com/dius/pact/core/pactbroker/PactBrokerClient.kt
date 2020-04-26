@@ -1,8 +1,12 @@
 package au.com.dius.pact.core.pactbroker
 
-import au.com.dius.pact.com.github.michaelbull.result.Err
-import au.com.dius.pact.com.github.michaelbull.result.Ok
-import au.com.dius.pact.com.github.michaelbull.result.Result
+import arrow.core.Either
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import au.com.dius.pact.core.support.Json
+import au.com.dius.pact.core.support.handleWith
+import au.com.dius.pact.core.support.isNotEmpty
 import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
@@ -57,6 +61,20 @@ sealed class TestResult {
   }
 }
 
+sealed class Latest {
+  data class UseLatest(val latest: Boolean) : Latest()
+  data class UseLatestTag(val latestTag: String) : Latest()
+}
+
+data class CanIDeployResult(val ok: Boolean, val message: String, val reason: String)
+
+/**
+ * Consumer version selector. See https://docs.pact.io/pact_broker/advanced_topics/selectors
+ */
+data class ConsumerVersionSelector(val tag: String, val latest: Boolean = true) {
+  fun toJson() = jsonObject("tag" to tag, "latest" to latest)
+}
+
 /**
  * Client for the pact broker service
  */
@@ -67,6 +85,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   /**
    * Fetches all consumers for the given provider
    */
+  @Deprecated(message = "Use the version that takes selectors instead",
+    replaceWith = ReplaceWith("fetchConsumersWithSelectors"))
   open fun fetchConsumers(provider: String): List<PactBrokerConsumer> {
     return try {
       val halClient = newHalClient()
@@ -90,6 +110,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   /**
    * Fetches all consumers for the given provider and tag
    */
+  @Deprecated(message = "Use the version that takes selectors instead",
+    replaceWith = ReplaceWith("fetchConsumersWithSelectors"))
   open fun fetchConsumersWithTag(provider: String, tag: String): List<PactBrokerConsumer> {
     return try {
       val halClient = newHalClient()
@@ -112,12 +134,54 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   }
 
   /**
+   * Fetches all consumers for the given provider and selectors
+   */
+  open fun fetchConsumersWithSelectors(provider: String, consumerVersionSelectors: List<ConsumerVersionSelector>): Either<Exception, List<PactResult>> {
+    val halClient = newHalClient().navigate()
+    val pactsForVerification = when {
+      halClient.linkUrl(PROVIDER_PACTS_FOR_VERIFICATION) != null -> PROVIDER_PACTS_FOR_VERIFICATION
+      halClient.linkUrl(BETA_PROVIDER_PACTS_FOR_VERIFICATION) != null -> BETA_PROVIDER_PACTS_FOR_VERIFICATION
+      else -> null
+    }
+    if (pactsForVerification != null) {
+      val body = jsonObject(
+        "consumerVersionSelectors" to jsonArray(consumerVersionSelectors.map { it.toJson() })
+      )
+      return handleWith {
+        halClient.postJson(pactsForVerification, mapOf("provider" to provider), body.toString()).map { result ->
+          result["_embedded"]["pacts"].asJsonArray.map { pactJson ->
+            val selfLink = pactJson["_links"]["self"]
+            val href = Precoded(Json.toString(selfLink["href"])).decoded().toString()
+            val name = Json.toString(selfLink["name"])
+            val notices = pactJson["verificationProperties"]["notices"].asJsonArray
+              .map { VerificationNotice.fromJson(it) }
+            if (options.containsKey("authentication")) {
+              PactResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, notices)
+            } else {
+              PactResult(name, href, pactBrokerUrl, emptyList(), notices)
+            }
+          }
+        }
+      }
+    } else {
+      return handleWith {
+        if (consumerVersionSelectors.isEmpty()) {
+          fetchConsumers(provider).map { PactResult.fromConsumer(it) }
+        } else {
+          fetchConsumersWithTag(provider, consumerVersionSelectors.first().tag)
+            .map { PactResult.fromConsumer(it) }
+        }
+      }
+    }
+  }
+
+  /**
    * Uploads the given pact file to the broker, and optionally applies any tags
    */
   @JvmOverloads
   open fun uploadPactFile(pactFile: File, unescapedVersion: String, tags: List<String> = emptyList()): Any? {
     val pactText = pactFile.readText()
-    val pact = JsonParser().parse(pactText)
+    val pact = JsonParser.parseString(pactText)
     val halClient = newHalClient()
     val providerName = urlPathSegmentEscaper().escape(pact["provider"]["name"].string)
     val consumerName = urlPathSegmentEscaper().escape(pact["consumer"]["name"].string)
@@ -145,8 +209,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     return halClient.linkUrl(PACTS)
   }
 
-  open fun fetchPact(url: String): PactResponse {
-    val halDoc = newHalClient().fetch(url).obj
+  open fun fetchPact(url: String, encodePath: Boolean = true): PactResponse {
+    val halDoc = newHalClient().fetch(url, encodePath).obj
     return PactResponse(halDoc, HalClient.asMap(halDoc["_links"].obj))
   }
 
@@ -221,8 +285,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
                 "metadata" -> {
                   listOf(jsonObject(mismatch.filter { it.key != "interactionId" }
                     .flatMap {
-                      when {
-                        it.key == "type" -> listOf("attribute" to it.value)
+                      when (it.key) {
+                        "type" -> listOf("attribute" to it.value)
                         else -> listOf("identifier" to it.key, "description" to it.value)
                       }
                     }))
@@ -259,6 +323,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   /**
    * Fetches the consumers of the provider that have no associated tag
    */
+  @Deprecated(message = "Use the version that takes selectors instead",
+    replaceWith = ReplaceWith("fetchConsumersWithSelectors"))
   open fun fetchLatestConsumersWithNoTag(provider: String): List<PactBrokerConsumer> {
     return try {
       val halClient = newHalClient()
@@ -294,10 +360,47 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     }
   }
 
+  open fun canIDeploy(pacticipant: String, pacticipantVersion: String, latest: Latest, to: String?): CanIDeployResult {
+    val halClient = newHalClient()
+    val result = halClient.getJson("/matrix" + buildMatrixQuery(pacticipant, pacticipantVersion, latest, to),
+      false)
+    return when (result) {
+      is Ok -> {
+        val summary = result.value.asJsonObject["summary"].asJsonObject
+        CanIDeployResult(Json.toBoolean(summary["deployable"]), "", Json.toString(summary["reason"]))
+      }
+      is Err -> {
+        logger.error(result.error) { "Pact broker matrix query failed: ${result.error.message}" }
+        CanIDeployResult(false, result.error.message.toString(), "")
+      }
+    }
+  }
+
+  private fun buildMatrixQuery(pacticipant: String, pacticipantVersion: String, latest: Latest, to: String?): String {
+    val escaper = urlPathSegmentEscaper()
+    var base = "?q[][pacticipant]=${escaper.escape(pacticipant)}&latestby=cvp"
+    base += when (latest) {
+      is Latest.UseLatest -> if (latest.latest) {
+        "&q[][latest]=true"
+      } else {
+        "&q[][version]=${escaper.escape(pacticipantVersion)}"
+      }
+      is Latest.UseLatestTag -> "q[][tag]=${escaper.escape(latest.latestTag)}"
+    }
+    base += if (to.isNotEmpty()) {
+      "&latest=true&tag=${escaper.escape(to)}"
+    } else {
+      "&latest=true"
+    }
+    return base
+  }
+
   companion object : KLogging() {
     const val LATEST_PROVIDER_PACTS_WITH_NO_TAG = "pb:latest-untagged-pact-version"
     const val LATEST_PROVIDER_PACTS = "pb:latest-provider-pacts"
     const val LATEST_PROVIDER_PACTS_WITH_TAG = "pb:latest-provider-pacts-with-tag"
+    const val PROVIDER_PACTS_FOR_VERIFICATION = "pb:provider-pacts-for-verification"
+    const val BETA_PROVIDER_PACTS_FOR_VERIFICATION = "beta:provider-pacts-for-verification"
     const val PROVIDER = "pb:provider"
     const val PROVIDER_TAG_VERSION = "pb:version-tag"
     const val PACTS = "pb:pacts"

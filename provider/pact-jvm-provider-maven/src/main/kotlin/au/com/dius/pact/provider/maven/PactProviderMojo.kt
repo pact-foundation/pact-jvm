@@ -89,17 +89,18 @@ open class PactProviderMojo : PactBaseMojo() {
         val consumers = mutableListOf<IConsumerInfo>()
         consumers.addAll(provider.consumers)
         if (provider.pactFileDirectory != null) {
-          consumers.addAll(loadPactFiles(provider, provider.pactFileDirectory))
+          consumers.addAll(loadPactFiles(provider, provider.pactFileDirectory!!))
         }
-        if (provider.pactFileDirectories.isNotEmpty()) {
-          provider.pactFileDirectories.forEach {
+        if (provider.pactFileDirectories != null && provider.pactFileDirectories!!.isNotEmpty()) {
+          provider.pactFileDirectories!!.forEach {
             consumers.addAll(loadPactFiles(provider, it))
           }
         }
         if (provider.pactBrokerUrl != null || provider.pactBroker != null) {
           loadPactsFromPactBroker(provider, consumers)
         }
-        if (provider.pactFileDirectory == null && provider.pactFileDirectories.isEmpty() &&
+        if (provider.pactFileDirectory == null &&
+          (provider.pactFileDirectories == null || provider.pactFileDirectories!!.isEmpty()) &&
           provider.pactBrokerUrl == null && provider.pactBroker == null && (
             pactBrokerUrl != null || pactBrokerServerId != null)) {
           loadPactsFromPactBroker(provider, consumers, brokerClientOptions())
@@ -136,11 +137,11 @@ open class PactProviderMojo : PactBaseMojo() {
     val options = brokerClientOptions.toMutableMap()
 
     if (pactBroker?.authentication != null) {
-      if ("bearer" == provider.pactBroker.authentication.scheme || provider.pactBroker.authentication.token != null) {
-        options["authentication"] = listOf("bearer", provider.pactBroker.authentication.token)
-      } else if ("basic" == provider.pactBroker.authentication.scheme) {
-        options["authentication"] = listOf(provider.pactBroker.authentication.scheme, provider.pactBroker.authentication.username,
-                provider.pactBroker.authentication.password)
+      if ("bearer" == provider.pactBroker?.authentication?.scheme || provider.pactBroker?.authentication?.token != null) {
+        options["authentication"] = listOf("bearer", provider.pactBroker!!.authentication!!.token)
+      } else if ("basic" == provider.pactBroker?.authentication?.scheme) {
+        options["authentication"] = listOf(provider.pactBroker!!.authentication!!.scheme, provider.pactBroker!!.authentication!!.username,
+                provider.pactBroker!!.authentication!!.password)
       }
     } else if (!pactBroker?.serverId.isNullOrEmpty()) {
       val serverDetails = settings.getServer(provider.pactBroker!!.serverId)
@@ -149,7 +150,7 @@ open class PactProviderMojo : PactBaseMojo() {
       options["authentication"] = listOf("basic", serverDetails.username, result.server.password)
     }
 
-    if (pactBroker != null && pactBroker.tags != null && pactBroker.tags.isNotEmpty()) {
+    if (pactBroker?.tags != null && pactBroker.tags.isNotEmpty()) {
       pactBroker.tags.forEach { tag ->
         consumers.addAll(provider.hasPactsFromPactBrokerWithTag(options, pactBrokerUrl.toString(), tag))
       }

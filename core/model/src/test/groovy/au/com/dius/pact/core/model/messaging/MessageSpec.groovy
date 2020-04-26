@@ -127,6 +127,40 @@ class MessageSpec extends Specification {
   }
 
   @Unroll
+  def 'message to map handles message content correctly - with only metadata'() {
+    expect:
+    message.toMap(PactSpecVersion.V3).contents == contents
+
+    where:
+
+    body                               | contentType                | contents
+    '{"A": "Value A", "B": "Value B"}' | 'application/json'         | [A: 'Value A', B: 'Value B']
+    '{"A": "Value A", "B": "Value B"}' | ''                         | '{"A": "Value A", "B": "Value B"}'
+    '1 2 3 4'                          | 'text/plain'               | '1 2 3 4'
+    new String([1, 2, 3, 4] as byte[]) | 'application/octet-stream' | 'AQIDBA=='
+
+    message = new Message('test', [], OptionalBody.body(body.bytes),
+      new MatchingRulesImpl(), new Generators(), [contentType: contentType])
+  }
+
+  @Unroll
+  def 'message to map handles message content correctly - with no metadata'() {
+    expect:
+    message.toMap(PactSpecVersion.V3).contents == contents
+
+    where:
+
+    body                               | contentType                | contents
+    '{"A": "Value A", "B": "Value B"}' | 'application/json'         | [A: 'Value A', B: 'Value B']
+    '{"A": "Value A", "B": "Value B"}' | ''                         | '{"A": "Value A", "B": "Value B"}'
+    '1 2 3 4'                          | 'text/plain'               | '1 2 3 4'
+    new String([1, 2, 3, 4] as byte[]) | 'application/octet-stream' | 'AQIDBA=='
+
+    message = new Message('test', [], OptionalBody.body(body.bytes, new ContentType(contentType)),
+      new MatchingRulesImpl(), new Generators(), [:])
+  }
+
+  @Unroll
   def 'get content type test'() {
     expect:
     message.contentType == result
@@ -137,7 +171,7 @@ class MessageSpec extends Specification {
     'contentType'  | 'application/json'         | 'application/json'
     'Content-Type' | 'text/plain'               | 'text/plain'
     'contenttype'  | 'application/octet-stream' | 'application/octet-stream'
-    'none'         | 'none'                     | 'application/json'
+    'none'         | 'none'                     | null
 
     message = new Message('Test').withMetaData([(key): contentType])
   }

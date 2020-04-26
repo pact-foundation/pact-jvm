@@ -3,18 +3,22 @@ package au.com.dius.pact.core.model
 import au.com.dius.pact.core.model.generators.Category
 import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.generators.RandomStringGenerator
+import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
 class RequestResponseInteractionSpec extends Specification {
 
-  private interaction, generators
+  private RequestResponseInteraction interaction
+  private generators
+  private Request request
 
   def setup() {
     generators = new Generators([(Category.HEADER): [a: new RandomStringGenerator(4)]])
+    request = new Request(generators: generators)
     interaction = new RequestResponseInteraction('test interaction', [
       new ProviderState('state one'), new ProviderState('state two', [value: 'one', other: '2'])],
-      new Request(generators: generators), new Response(generators: generators))
+      request, new Response(generators: generators))
   }
 
   def 'creates a V3 map format if V3 spec'() {
@@ -95,6 +99,21 @@ class RequestResponseInteractionSpec extends Specification {
     [new ProviderState('')]                                      | 'None'
     [new ProviderState('state 1')]                               | 'state 1'
     [new ProviderState('state 1'), new ProviderState('state 2')] | 'state 1, state 2'
+  }
+
+  @Issue('#1018')
+  def 'correctly encodes the query parameters when V2 format'() {
+    given:
+    request.query = ['include[]': ['term', 'total_scores', 'license', 'is_public', 'needs_grading_count', 'permissions',
+                                   'current_grading_period_scores', 'course_image', 'favorites']]
+
+    when:
+    def map = interaction.toMap(PactSpecVersion.V2)
+
+    then:
+    map.request.query == 'include[]=term&include[]=total_scores&include[]=license&include[]=is_public&' +
+      'include[]=needs_grading_count&include[]=permissions&include[]=current_grading_period_scores&' +
+      'include[]=course_image&include[]=favorites'
   }
 
 }

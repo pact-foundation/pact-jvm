@@ -19,7 +19,6 @@ dependencies {
   api project(path: ":core:pact-jvm-core-support", configuration: 'default')
   api project(path: ":core:pact-jvm-core-pact-broker", configuration: 'default')
   compile 'com.github.zafarkhaja:java-semver:0.9.0'
-  implementation 'com.amazonaws:aws-java-sdk-s3:1.11.587'
   compile 'org.apache.commons:commons-collections4:4.1'
   compile 'com.github.mifmif:generex:1.0.2'
   compile 'javax.mail:mail:1.5.0-b01'
@@ -27,13 +26,21 @@ dependencies {
   implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
   api "com.google.code.gson:gson:${project.gsonVersion}"
   implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
+  api 'com.michael-bull.kotlin-result:kotlin-result:1.1.6'
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
-  testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"
+  testCompile "io.github.http-builder-ng:http-builder-ng-apache:${project.httpBuilderVersion}"
   testRuntime project(path: project.path, configuration: 'testJars')
+  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testCompile "org.codehaus.groovy:groovy-datetime:${project.groovyVersion}"
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.2'
+  testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+    exclude group: 'org.codehaus.groovy'
+  }
+  testCompile "junit:junit:${project.junitVersion}"
+  testCompile 'org.hamcrest:hamcrest:2.1'
+  testCompile 'com.amazonaws:aws-java-sdk-s3:1.11.587'
 }
 
 compileGroovy {

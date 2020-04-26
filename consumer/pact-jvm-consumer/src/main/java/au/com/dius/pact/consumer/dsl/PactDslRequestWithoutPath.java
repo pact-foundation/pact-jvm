@@ -1,11 +1,13 @@
 package au.com.dius.pact.consumer.dsl;
 
 import au.com.dius.pact.consumer.ConsumerPactBuilder;
+import au.com.dius.pact.consumer.xml.PactXmlBuilder;
 import au.com.dius.pact.core.model.OptionalBody;
 import au.com.dius.pact.core.model.PactReaderKt;
 import au.com.dius.pact.core.model.generators.Category;
 import au.com.dius.pact.core.model.generators.ProviderStateGenerator;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
+import au.com.dius.pact.core.support.expressions.DataType;
 import com.mifmif.common.regex.Generex;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.entity.ContentType;
@@ -263,6 +265,29 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
       return this;
     }
 
+  /**
+   * XML Response body to return
+   *
+   * @param xmlBuilder XML Builder used to construct the XML document
+   */
+  public PactDslRequestWithoutPath body(PactXmlBuilder xmlBuilder) {
+    requestMatchers.addCategory(xmlBuilder.getMatchingRules());
+    requestGenerators.addGenerators(xmlBuilder.getGenerators());
+
+    if (!requestHeaders.containsKey(CONTENT_TYPE)) {
+      requestHeaders.put(CONTENT_TYPE, Collections.singletonList(ContentType.APPLICATION_XML.toString()));
+      requestBody = OptionalBody.body(xmlBuilder.asBytes());
+    } else {
+      String contentType = requestHeaders.get(CONTENT_TYPE).get(0);
+      ContentType ct = ContentType.parse(contentType);
+      Charset charset = ct.getCharset() != null ? ct.getCharset() : Charset.defaultCharset();
+      requestBody = OptionalBody.body(xmlBuilder.asBytes(charset),
+        new au.com.dius.pact.core.model.ContentType(contentType));
+    }
+
+    return this;
+  }
+
     /**
      * The path of the request
      *
@@ -316,7 +341,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
    * @param example Example value to use in the consumer test
    */
   public PactDslRequestWithoutPath headerFromProviderState(String name, String expression, String example) {
-    requestGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression));
+    requestGenerators.addGenerator(Category.HEADER, name, new ProviderStateGenerator(expression, DataType.STRING));
     requestHeaders.put(name, Collections.singletonList(example));
     return this;
   }
@@ -328,7 +353,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
    * @param example Example value to use in the consumer test
    */
   public PactDslRequestWithoutPath queryParameterFromProviderState(String name, String expression, String example) {
-    requestGenerators.addGenerator(Category.QUERY, name, new ProviderStateGenerator(expression));
+    requestGenerators.addGenerator(Category.QUERY, name, new ProviderStateGenerator(expression, DataType.STRING));
     query.put(name, Collections.singletonList(example));
     return this;
   }
@@ -339,7 +364,7 @@ public class PactDslRequestWithoutPath extends PactDslRequestBase {
    * @param example Example value to use in the consumer test
    */
   public PactDslRequestWithPath pathFromProviderState(String expression, String example) {
-    requestGenerators.addGenerator(Category.PATH, new ProviderStateGenerator(expression));
+    requestGenerators.addGenerator(Category.PATH, new ProviderStateGenerator(expression, DataType.STRING));
     return new PactDslRequestWithPath(consumerPactBuilder, consumerName, providerName, pactDslWithState.state,
       description, example, requestMethod, requestHeaders, query, requestBody, requestMatchers, requestGenerators,
       defaultRequestValues, defaultResponseValues);

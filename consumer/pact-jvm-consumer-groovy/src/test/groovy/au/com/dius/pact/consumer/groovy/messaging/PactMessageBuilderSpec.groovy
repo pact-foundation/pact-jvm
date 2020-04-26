@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.messaging.Message
 import groovy.json.JsonSlurper
+import spock.lang.Issue
 import spock.lang.Specification
 
 class PactMessageBuilderSpec extends Specification {
@@ -49,8 +50,7 @@ class PactMessageBuilderSpec extends Specification {
     builder {
       given 'the provider has data for a message'
       expectsToReceive 'a confirmation message for a group order'
-      withMetaData(contentType: 'application/json')
-      withContent {
+      withContent('application/json') {
         name 'Bob'
         date = '2000-01-01'
         status 'bad'
@@ -117,4 +117,36 @@ class PactMessageBuilderSpec extends Specification {
     true
   }
 
+  @Issue('#1011')
+  def 'invalid body format test'() {
+    given:
+    def pactMessageBuilder = new PactMessageBuilder().with {
+      serviceConsumer 'consumer'
+      hasPactWith 'provider'
+      expectsToReceive 'feed entry'
+      withMetaData(contentType: 'application/json')
+      withContent {
+        type 'foo'
+        data {
+          reference {
+            id string('abc')
+          }
+        }
+      }
+    }
+
+    expect:
+    pactMessageBuilder.run { Message message ->
+      def feedEntry = message.contentsAsString()
+      assert feedEntry == '''{
+        |    "type": "foo",
+        |    "data": {
+        |        "reference": {
+        |            "id": "abc"
+        |        }
+        |    }
+        |}'''.stripMargin()
+      assert message.jsonContents
+    }
+  }
 }

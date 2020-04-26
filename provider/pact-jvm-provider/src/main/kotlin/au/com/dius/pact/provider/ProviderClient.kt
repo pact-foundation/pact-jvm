@@ -9,6 +9,8 @@ import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.pactbroker.PactBrokerConsumer
+import au.com.dius.pact.core.pactbroker.PactResult
+import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.core.support.Json
 import groovy.lang.Binding
 import groovy.lang.Closure
@@ -39,11 +41,12 @@ import java.lang.Boolean.getBoolean
 import java.net.URI
 import java.net.URL
 import java.net.URLDecoder
+import java.nio.charset.UnsupportedCharsetException
 import java.util.concurrent.Callable
 import java.util.function.Consumer
 import java.util.function.Function
 import java.util.function.Supplier
-
+import au.com.dius.pact.core.model.ContentType as PactContentType
 interface IHttpClientFactory {
   fun newClient(provider: IProviderInfo): CloseableHttpClient
 }
@@ -77,6 +80,7 @@ interface IConsumerInfo {
   var verificationType: PactVerification?
   var pactSource: Any?
   var pactFileAuthentication: List<Any?>
+  var notices: List<VerificationNotice>
 }
 
 open class ConsumerInfo @JvmOverloads constructor (
@@ -86,7 +90,8 @@ open class ConsumerInfo @JvmOverloads constructor (
   override var packagesToScan: List<String> = emptyList(),
   override var verificationType: PactVerification? = null,
   override var pactSource: Any? = null,
-  override var pactFileAuthentication: List<Any?> = emptyList()
+  override var pactFileAuthentication: List<Any?> = emptyList(),
+  override var notices: List<VerificationNotice> = emptyList()
 ) : IConsumerInfo {
 
   fun toPactConsumer() = au.com.dius.pact.core.model.Consumer(name)
@@ -165,6 +170,12 @@ open class ConsumerInfo @JvmOverloads constructor (
         pactSource = BrokerUrlSource(url = consumer.source, pactBrokerUrl = consumer.pactBrokerUrl, tag = consumer.tag),
         pactFileAuthentication = consumer.pactFileAuthentication
       )
+
+    fun from(consumer: PactResult) =
+      ConsumerInfo(name = consumer.name,
+        pactSource = BrokerUrlSource(url = consumer.source, pactBrokerUrl = consumer.pactBrokerUrl),
+        pactFileAuthentication = consumer.pactFileAuthentication, notices = consumer.notices
+      )
   }
 }
 
@@ -198,7 +209,7 @@ open class ProviderClient(
     fun urlEncodedFormPost(request: Request) = request.method.toLowerCase() == "post" &&
       request.mimeType() == ContentType.APPLICATION_FORM_URLENCODED.mimeType
 
-    private fun isFunctionalInterface(requestFilter: Any) =
+    fun isFunctionalInterface(requestFilter: Any) =
       requestFilter::class.java.interfaces.any { it.isAnnotationPresent(FunctionalInterface::class.java) }
 
     @JvmStatic
@@ -269,21 +280,35 @@ open class ProviderClient(
   }
 
   open fun setupBody(request: Request, method: HttpRequest) {
-    if (method is HttpEntityEnclosingRequest && request.body != null && request.body!!.isPresent()) {
-      method.entity = StringEntity(request.body.valueAsString())
+    if (method is HttpEntityEnclosingRequest && request.body.isPresent()) {
+      val contentTypeHeader = request.contentTypeHeader()
+      if (null != contentTypeHeader) {
+        try {
+          val contentType = ContentType.parse(contentTypeHeader)
+          method.entity = StringEntity(request.body.valueAsString(), contentType)
+        } catch (e: UnsupportedCharsetException) {
+          method.entity = StringEntity(request.body.valueAsString())
+        }
+      } else {
+        method.entity = StringEntity(request.body.valueAsString())
+      }
     }
   }
 
   open fun setupHeaders(request: Request, method: HttpRequest) {
     val headers = request.headers
-    if (headers != null && headers.isNotEmpty()) {
-      headers.forEach { key, value ->
+    if (headers.isNotEmpty()) {
+      headers.forEach { (key, value) ->
         method.addHeader(key, value.joinToString(", "))
       }
     }
 
-    if (!method.containsHeader(CONTENT_TYPE) && request.body?.isPresent() == true) {
-      method.addHeader(CONTENT_TYPE, "application/json")
+    if (!method.containsHeader(CONTENT_TYPE) && request.body.isPresent()) {
+      val contentType = when (request.body.contentType) {
+        PactContentType.UNKNOWN -> "text/plain; charset=ISO-8859-1"
+        else -> request.body.contentType.toString()
+      }
+      method.addHeader(CONTENT_TYPE, contentType)
     }
   }
 
@@ -327,11 +352,9 @@ open class ProviderClient(
       }
 
       if (provider.stateChangeRequestFilter != null) {
-        when {
-          provider.stateChangeRequestFilter is Closure<*> ->
-            (provider.stateChangeRequestFilter as Closure<*>).call(method)
-          provider.stateChangeRequestFilter is Function1<*, *> ->
-            (provider.stateChangeRequestFilter as Function1<Any, Any>).apply(method)
+        when (provider.stateChangeRequestFilter) {
+          is Closure<*> -> (provider.stateChangeRequestFilter as Closure<*>).call(method)
+          is Function1<*, *> -> (provider.stateChangeRequestFilter as Function1<Any, Any>).apply(method)
           else -> {
             val binding = Binding()
             binding.setVariable(REQUEST, method)
@@ -354,14 +377,16 @@ open class ProviderClient(
     val response = mutableMapOf<String, Any>("statusCode" to httpResponse.statusLine.statusCode,
       "contentType" to ContentType.TEXT_PLAIN)
 
-    response["headers"] = httpResponse.allHeaders.groupBy({ header -> header.name }, { header -> header.value })
+    response["headers"] = httpResponse.allHeaders
+      .groupBy({ header -> header.name }, { header -> header.value.split(',').map { it.trim() } })
+      .mapValues { it.value.flatten() }
 
     val entity = httpResponse.entity
     if (entity != null) {
       val contentType = if (entity.contentType != null) {
         ContentType.parse(entity.contentType.value)
       } else {
-        ContentType.APPLICATION_JSON
+        ContentType.TEXT_PLAIN
       }
       response["contentType"] = contentType
       response["data"] = EntityUtils.toString(entity, contentType.charset?.name() ?: UTF8)

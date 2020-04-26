@@ -4,7 +4,7 @@ import au.com.dius.pact.core.model.generators.TimeExpression
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.time.OffsetTime
+import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
@@ -13,7 +13,7 @@ class TimeExpressionSpec extends Specification {
   private time
 
   def setup() {
-    time = OffsetTime.of(10, 0, 0, 0, ZoneOffset.UTC)
+    time = OffsetDateTime.of(2000, 4, 3, 10, 0, 0, 0, ZoneOffset.UTC)
   }
 
   @Unroll

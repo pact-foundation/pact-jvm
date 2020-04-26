@@ -2,6 +2,7 @@ package au.com.dius.pact.provider.spring
 
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Request
+import au.com.dius.pact.provider.ProviderInfo
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -41,7 +42,7 @@ class MvcProviderVerifierSpec extends Specification {
     def request = new Request(body: OptionalBody.body(body.bytes))
 
     when:
-    def response = verifier.executeMockMvcRequest(mockMvc, request)
+    def response = verifier.executeMockMvcRequest(mockMvc, request, new ProviderInfo())
 
     then:
     response.response.contentType == 'text/plain;charset=ISO-8859-1'
@@ -53,7 +54,7 @@ class MvcProviderVerifierSpec extends Specification {
     def request = new Request()
 
     when:
-    def response = verifier.executeMockMvcRequest(mockMvc, request)
+    def response = verifier.executeMockMvcRequest(mockMvc, request, new ProviderInfo())
 
     then:
     response.response.contentType == null
@@ -65,7 +66,7 @@ class MvcProviderVerifierSpec extends Specification {
     def request = new Request(path: '/upload').withMultipartFileUpload('file', 'filename', 'text/csv', 'file,contents')
 
     when:
-    def response = verifier.executeMockMvcRequest(mockMvc, request)
+    def response = verifier.executeMockMvcRequest(mockMvc, request, new ProviderInfo())
 
     then:
     response.response.contentType == 'text/plain;charset=ISO-8859-1'

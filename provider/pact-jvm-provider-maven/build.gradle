@@ -6,10 +6,15 @@ dependencies {
   compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
-  compile "org.codehaus.groovy:groovy:${project.groovyVersion}"
 
-  testCompile "org.codehaus.groovy:groovy-nio:${project.groovyVersion}:indy"
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testCompile "org.codehaus.groovy:groovy-nio:${project.groovyVersion}"
+  testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+    exclude group: 'org.codehaus.groovy'
+  }
+  testRuntime "net.bytebuddy:byte-buddy:${project.bytebuddyVersion}"
+  testRuntime 'org.objenesis:objenesis:3.1'
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -35,15 +40,20 @@ task generatePom(type: GenerateMavenPom, dependsOn: [":provider:pact-jvm-provide
         pluginNode.appendNode('artifactId', 'maven-plugin-plugin')
         pluginNode.appendNode('version', project.mavenPluginPluginVersion)
         pluginNode.appendNode('configuration').appendNode('goalPrefix', 'pact')
+
+      def repository = asNode().appendNode('repositories').appendNode('repository')
+      repository.appendNode('id', 'jcenter')
+      repository.appendNode('name', 'jcenter')
+      repository.appendNode('url', 'https://jcenter.bintray.com')
     }
 }
 
 task pluginDescriptor(type: Exec, dependsOn: generatePom) {
     if (isWindows()) {
       commandLine 'mvn.bat', '-f', "${buildDir}/poms/pom.xml", '--settings',
-        'src/main/resources/settings.xml', '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.5:descriptor'
+        'src/main/resources/settings.xml', '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.0:descriptor'
     } else {
-      commandLine 'sh', '-c', "mvn -f ${buildDir}/poms/pom.xml --settings src/main/resources/settings.xml -e -B org.apache.maven.plugins:maven-plugin-plugin:3.5:descriptor"      
+      commandLine 'sh', '-c', "mvn -f ${buildDir}/poms/pom.xml --settings src/main/resources/settings.xml -e -B org.apache.maven.plugins:maven-plugin-plugin:3.6.0:descriptor"      
     }
     
     doLast {
@@ -54,10 +64,3 @@ task pluginDescriptor(type: Exec, dependsOn: generatePom) {
 
 pluginDescriptor.shouldRunAfter project.jar
 project.jar.dependsOn pluginDescriptor
-
-compileGroovy.dependsOn = []
-
-compileKotlin {
-    classpath = classpath.plus(files(compileGroovy.destinationDir))
-    dependsOn compileGroovy
-}

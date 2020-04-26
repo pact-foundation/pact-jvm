@@ -157,7 +157,7 @@ be expanded in the expression. For this to work, just make your provider state m
 
 ### Using multiple classes for the state change methods
 
-If you have a large number of state change methods, you can split things up bu moving them to other classes. There are
+If you have a large number of state change methods, you can split things up by moving them to other classes. There are
 two ways you can do this:
 
 #### Use interfaces
@@ -230,6 +230,7 @@ The following keys may be managed through the environment
 * `pactbroker.auth.username` (for basic auth)
 * `pactbroker.auth.password` (for basic auth)
 * `pactbroker.auth.token` (for bearer auth)
+* `pactbroker.consumers` (comma separated list to filter pacts by consumer; if not provided, will fetch all pacts for the provider)
 
 
 #### Using tags with the pact broker
@@ -267,6 +268,14 @@ The `token`, `username` and `password` values also take Java system property exp
 
 Preemptive Authentication can be enabled by setting the `pact.pactbroker.httpclient.usePreemptiveAuthentication` Java
 system property to `true`.
+
+### Allowing just the changed pact specified in a webhook to be verified [4.0.6+]
+
+When a consumer publishes a new version of a pact file, the Pact broker can fire off a webhook with the URL of the changed 
+pact file. To allow only the changed pact file to be verified, you can override the URL by adding the annotation 
+`@AllowOverridePactUrl` to your test class and then setting using the `pact.filter.consumers` and `pact.filter.pacturl` 
+values as either Java system properties or environment variables. If you have annotated your test class with `@Consumer`
+you don't need to provide `pact.filter.consumers`.
 
 ### Pact Url
 
@@ -315,23 +324,22 @@ public class PactJUnitTest {
 }
 ```
 
-#### Filtering by Provider State
+#### Interaction Filtering
 
 You can filter the interactions that are executed by adding a `@PactFilter` annotation to your test class. The pact 
-filter annotation will then only verify interactions that have a matching provider state. You can provide multiple 
-states to match with.
+filter annotation will then only verify interactions that have a matching value, by default provider state.
+You can provide multiple values to match with.
+
+The filter criteria is defined by the filter property. The filter must implement the
+`au.com.dius.pact.provider.junit.filter.InteractionFilter` interface. Also check the `InteractionFilter` interface
+for default filter implementations.
 
 For example: 
 
 ```java
 @RunWith(PactRunner.class)
-@Provider("Activity Service")
-@PactBroker(host = "localhost", port = "80")
-@PactFilter('Activity 100 exists in the database')
+@PactFilter("Activity 100 exists in the database")
 public class PactJUnitTest {
-
-  @TestTarget
-  public final Target target = new HttpTarget(5050);
 
 }
 ```
@@ -340,7 +348,7 @@ You can also use regular expressions with the filter. For example:
 
 ```java
 @RunWith(PactRunner.class)
-@PactFilter('Activity \\d+ exists in the database')
+@PactFilter(values = {"^\\/somepath.*"}, filter = InteractionFilter.ByRequestPath.class)
 public class PactJUnitTest {
 
 }
@@ -475,7 +483,7 @@ For pacts that are loaded from a Pact Broker, the results of running the verific
  broker against the URL for the pact. You will be able to see the result on the Pact Broker home screen. You need to
  set the version of the provider that is verified using the `pact.provider.version` system property.
  
-To enable publishing of results, set the property `pact.verifier.publishResults` to `true`.
+To enable publishing of results, set the Java system property or environment variable `pact.verifier.publishResults` to `true`.
 
 ## Tagging the provider before verification results are published [4.0.1+]
 
