@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import au.com.dius.pact.core.model.PactSpecVersion;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -51,6 +52,6 @@ public class PactDslRootValueTest {
 
         List<MatchingRule> rules = matchingGroups.get("$").getRules();
         Assert.assertEquals(1, rules.size());
-        Assert.assertEquals(".{5}", rules.get(0).toMap().get("regex"));
+        Assert.assertEquals(".{5}", rules.get(0).toMap(PactSpecVersion.V3).get("regex"));
     }
 }

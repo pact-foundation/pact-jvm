@@ -16,11 +16,15 @@ object MatchingConfig {
   )
 
   @JvmStatic
-  fun lookupBodyMatcher(mimeType: String): BodyMatcher? {
-    val matcher = bodyMatchers.entries.find { mimeType.matches(Regex(it.key)) }?.value
-    return if (matcher != null) {
-      val clazz = Class.forName(matcher).kotlin
-      (clazz.objectInstance ?: clazz.createInstance()) as BodyMatcher?
+  fun lookupBodyMatcher(contentType: String?): BodyMatcher? {
+    return if (contentType != null) {
+      val matcher = bodyMatchers.entries.find { contentType.matches(Regex(it.key)) }?.value
+      if (matcher != null) {
+        val clazz = Class.forName(matcher).kotlin
+        (clazz.objectInstance ?: clazz.createInstance()) as BodyMatcher?
+      } else {
+        null
+      }
     } else {
       null
     }

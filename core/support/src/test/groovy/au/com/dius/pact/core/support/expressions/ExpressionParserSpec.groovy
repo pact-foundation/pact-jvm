@@ -18,15 +18,15 @@ class ExpressionParserSpec extends Specification {
 
   def 'Does Not Modify Strings With No Expressions'() {
     expect:
-    ExpressionParser.parseExpression(null) == null
-    ExpressionParser.parseExpression('') == ''
-    ExpressionParser.parseExpression('hello world') == 'hello world'
-    ExpressionParser.parseExpression('looks like a $') == 'looks like a $'
+    ExpressionParser.parseExpression(null, DataType.RAW) == null
+    ExpressionParser.parseExpression('', DataType.RAW) == ''
+    ExpressionParser.parseExpression('hello world', DataType.RAW) == 'hello world'
+    ExpressionParser.parseExpression('looks like a $', DataType.RAW) == 'looks like a $'
   }
 
   def 'Throws An Exception On Unterminated Expressions'() {
     when:
-    ExpressionParser.parseExpression('${value')
+    ExpressionParser.parseExpression('${value', DataType.RAW)
 
     then:
     thrown(RuntimeException)
@@ -36,7 +36,7 @@ class ExpressionParserSpec extends Specification {
   @SuppressWarnings('UnnecessaryBooleanExpression')
   def 'Replaces The Expression With System Properties'() {
     expect:
-    ExpressionParser.parseExpression(expression, valueResolver) == result
+    ExpressionParser.parseExpression(expression, DataType.RAW, valueResolver) == result
 
     where:
 
@@ -51,8 +51,8 @@ class ExpressionParserSpec extends Specification {
 
   def 'Handles Empty Expression'() {
     expect:
-    ExpressionParser.parseExpression('${}') == ''
-    ExpressionParser.parseExpression('${} ${} ${}') == '  '
+    ExpressionParser.parseExpression('${}', DataType.RAW) == ''
+    ExpressionParser.parseExpression('${} ${} ${}', DataType.RAW) == '  '
   }
 
   def 'Handles single value as list'() {

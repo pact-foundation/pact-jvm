@@ -89,7 +89,7 @@ class TestResultAccumulatorSpec extends Specification {
     }
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, true)
+    testResultAccumulator.updateTestResult(pact, interaction1, TestResult.Ok.INSTANCE)
 
     then:
     0 * testResultAccumulator.verificationReporter.reportResults(_, _, _, _, _)

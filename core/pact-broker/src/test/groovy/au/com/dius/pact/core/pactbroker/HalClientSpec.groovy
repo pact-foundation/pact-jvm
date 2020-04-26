@@ -1,7 +1,6 @@
 package au.com.dius.pact.core.pactbroker
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
+import arrow.core.Either
 import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import com.google.gson.JsonParser
 import org.apache.http.HttpEntity
@@ -33,7 +32,8 @@ class HalClientSpec extends Specification {
 
   def setup() {
     mockClient = Mock(CloseableHttpClient)
-    client = GroovySpy(HalClient, global: true, constructorArgs: ['http://localhost:1234/'])
+    client = Spy(HalClient, constructorArgs: ['http://localhost:1234/'])
+    client.pathInfo = null
   }
 
   @SuppressWarnings(['LineLength', 'UnnecessaryBooleanExpression'])
@@ -216,57 +216,54 @@ class HalClientSpec extends Specification {
     !called
   }
 
-  def 'uploading a JSON doc returns status line if successful'() {
+  def 'uploading a JSON doc'() {
     given:
     client.httpClient = mockClient
+    client.pathInfo = JsonParser.parseString('{"_links":{"link":{"href":"http://localhost:8080/"}}}')
     def mockResponse = Mock(CloseableHttpResponse) {
       getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 200, 'Ok')
     }
 
     when:
-    def result = []
-    def closure = { r, s -> result << r; result << s }
-    client.uploadJson('/', '', closure)
+    def result = client.putJson('link', [:], '{}')
 
     then:
     1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
-    result == ['OK', 'http/1.1 200 Ok']
+    result.b
   }
 
-  def 'uploading a JSON doc returns the error if unsuccessful'() {
+  def 'uploading a JSON doc returns an error'() {
     given:
     client.httpClient = mockClient
+    client.pathInfo = JsonParser.parseString('{"_links":{"link":{"href":"http://localhost:8080/"}}}')
     def mockResponse = Mock(CloseableHttpResponse) {
       getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 400, 'Not OK')
       getEntity() >> new StringEntity('{"errors":["1","2","3"]}', ContentType.create('application/json'))
     }
 
     when:
-    def result = []
-    def closure = { r, s -> result << r; result << s }
-    client.uploadJson('/', '', closure)
+    def result = client.putJson('link', [:], '{}')
 
     then:
-    result == ['FAILED', '400 Not OK - 1, 2, 3']
     1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
+    !result.b
   }
 
-  def 'uploading a JSON doc returns the error if unsuccessful due to 409'() {
+  def 'uploading a JSON doc unsuccessful due to 409'() {
     given:
     client.httpClient = mockClient
+    client.pathInfo = JsonParser.parseString('{"_links":{"link":{"href":"http://localhost:8080/"}}}')
     def mockResponse = Mock(CloseableHttpResponse) {
       getStatusLine() >> new BasicStatusLine(new ProtocolVersion('http', 1, 1), 409, 'Not OK')
       getEntity() >> new StringEntity('error line')
     }
 
     when:
-    def result = []
-    def closure = { r, s -> result << r; result << s }
-    client.uploadJson('/', '', closure)
+    def result = client.putJson('link', [:], '{}')
 
     then:
     1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
-    result == ['FAILED', '409 Not OK - error line']
+    !result.b
   }
 
   @Unroll
@@ -307,8 +304,8 @@ class HalClientSpec extends Specification {
     where:
 
     success   | status | expectedResult
-    'success' | 200    | new Ok(true)
-    'failure' | 400    | new Ok(false)
+    'success' | 200    | new Either.Right(true)
+    'failure' | 400    | new Either.Right(false)
   }
 
   def 'post URL returns a failure result if an exception is thrown'() {
@@ -321,7 +318,7 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute(_, _) >> { throw new IOException('Boom!') }
-    result instanceof Err
+    result instanceof Either.Left
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -337,7 +334,7 @@ class HalClientSpec extends Specification {
     def result = client.postJson('path', 'body') { status, resp -> false }
 
     then:
-    result == new Ok(false)
+    !result.b
   }
 
   def 'forAll does nothing if there is no matching link'() {
@@ -434,7 +431,7 @@ class HalClientSpec extends Specification {
     }
 
     when:
-    def result = client.fetch('https://test.pact.dius.com.au/pacts/provider/Activity Service/consumer/Foo Web Client 2/version/1.0.2')
+    def result = client.fetch('https://test.pact.dius.com.au/pacts/provider/Activity Service/consumer/Foo Web Client 2/version/1.0.2').b
 
     then:
     1 * mockClient.execute({ it.URI.toString() == 'https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client%202/version/1.0.2' }, _) >> mockResponse

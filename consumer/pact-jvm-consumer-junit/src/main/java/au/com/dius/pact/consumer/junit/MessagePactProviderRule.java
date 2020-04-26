@@ -8,6 +8,7 @@ import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.ProviderState;
 import au.com.dius.pact.core.model.messaging.Message;
 import au.com.dius.pact.core.model.messaging.MessagePact;
+import au.com.dius.pact.core.support.expressions.DataType;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
@@ -75,7 +76,7 @@ public class MessagePactProviderRule extends ExternalResource {
 				Map<String, Message> pacts;
 				if (StringUtils.isNoneEmpty(pactDef.fragment())) {
           Optional<Method> possiblePactMethod = findPactMethod(pactDef);
-          if (!possiblePactMethod.isPresent()) {
+          if (possiblePactMethod.isEmpty()) {
             base.evaluate();
             return;
           }
@@ -83,7 +84,8 @@ public class MessagePactProviderRule extends ExternalResource {
           pacts = new HashMap<>();
           Method method = possiblePactMethod.get();
           Pact pact = method.getAnnotation(Pact.class);
-          MessagePactBuilder builder = MessagePactBuilder.consumer(Objects.requireNonNull(parseExpression(pact.consumer()))).hasPactWith(provider);
+          MessagePactBuilder builder = MessagePactBuilder.consumer(
+          		Objects.toString(parseExpression(pact.consumer(), DataType.RAW))).hasPactWith(provider);
           messagePact = (MessagePact) method.invoke(testClassInstance, builder);
           for (Message message : messagePact.getMessages()) {
             pacts.put(message.getProviderStates().stream().map(ProviderState::getName).collect(Collectors.joining()),
@@ -128,20 +130,21 @@ public class MessagePactProviderRule extends ExternalResource {
 		}
 
 		Optional<PactVerification> possiblePactVerification = findPactVerification(pactVerifications);
-		if (!possiblePactVerification.isPresent()) {
+		if (possiblePactVerification.isEmpty()) {
 			base.evaluate();
 			return;
 		}
 
 		PactVerification pactVerification = possiblePactVerification.get();
 		Optional<Method> possiblePactMethod = findPactMethod(pactVerification);
-		if (!possiblePactMethod.isPresent()) {
+		if (possiblePactMethod.isEmpty()) {
 			throw new UnsupportedOperationException("Could not find method with @Pact for the provider " + provider);
 		}
 
 		Method method = possiblePactMethod.get();
 		Pact pact = method.getAnnotation(Pact.class);
-		MessagePactBuilder builder = MessagePactBuilder.consumer(Objects.requireNonNull(parseExpression(pact.consumer()))).hasPactWith(provider);
+		MessagePactBuilder builder = MessagePactBuilder.consumer(
+				Objects.toString(parseExpression(pact.consumer(), DataType.RAW))).hasPactWith(provider);
 		MessagePact messagePact = (MessagePact) method.invoke(testClassInstance, builder);
 		setMessage(messagePact.getMessages().get(0), description);
 		base.evaluate();
@@ -165,7 +168,7 @@ public class MessagePactProviderRule extends ExternalResource {
 		String pactFragment = pactVerification.fragment();
 		for (Method method : testClassInstance.getClass().getMethods()) {
 			Pact pact = method.getAnnotation(Pact.class);
-			if (pact != null && provider.equals(parseExpression(pact.provider()))
+			if (pact != null && provider.equals(parseExpression(pact.provider(), DataType.RAW))
 					&& (pactFragment.isEmpty() || pactFragment.equals(method.getName()))) {
 				JUnitTestSupport.conformsToMessagePactSignature(method);
 				return Optional.of(method);
@@ -182,10 +185,10 @@ public class MessagePactProviderRule extends ExternalResource {
                 if (conformsToSignature(m)) {
 	                Pact pact = m.getAnnotation(Pact.class);
 	                if (pact != null) {
-	                	String provider = parseExpression(pact.provider());
+	                	String provider = Objects.toString(parseExpression(pact.provider(), DataType.RAW));
 	                	if (provider != null && !provider.trim().isEmpty()) {
 	                		MessagePactBuilder builder = MessagePactBuilder.consumer(pact.consumer()).hasPactWith(provider);
-	                		List<Message> messages = null;
+	                		List<Message> messages;
 	                		try {
 	                			messagePact = (MessagePact) m.invoke(testClassInstance, builder);
 		                		messages = messagePact.getMessages();

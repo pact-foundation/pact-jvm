@@ -11,6 +11,7 @@ import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.model.MockProviderConfig;
 import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
+import au.com.dius.pact.core.support.expressions.DataType;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.Description;
@@ -96,13 +97,14 @@ public class BaseProviderRule extends ExternalResource {
     final RequestResponsePact[] pact = { null };
     possiblePactVerifications.forEach(pactVerification -> {
       Optional<Method> possiblePactMethod = findPactMethod(pactVerification);
-      if (!possiblePactMethod.isPresent()) {
+      if (possiblePactMethod.isEmpty()) {
         throw new UnsupportedOperationException("Could not find method with @Pact for the provider " + provider);
       }
 
       Method method = possiblePactMethod.get();
       Pact pactAnnotation = method.getAnnotation(Pact.class);
-      PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(parseExpression(pactAnnotation.consumer())).hasPactWith(provider);
+      PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(
+              parseExpression(pactAnnotation.consumer(), DataType.RAW).toString()).hasPactWith(provider);
       try {
         RequestResponsePact pactFromMethod = (RequestResponsePact) method.invoke(target, dslBuilder);
         if (pact[0] == null) {
@@ -137,7 +139,7 @@ public class BaseProviderRule extends ExternalResource {
       String pactFragment = pactVerification.fragment();
       for (Method method : target.getClass().getMethods()) {
           Pact pact = method.getAnnotation(Pact.class);
-          if (pact != null && provider.equals(parseExpression(pact.provider()))
+          if (pact != null && provider.equals(parseExpression(pact.provider(), DataType.RAW).toString())
                   && (pactFragment.isEmpty() || pactFragment.equals(method.getName()))) {
 
               validatePactSignature(method);
@@ -187,9 +189,10 @@ public class BaseProviderRule extends ExternalResource {
           for (Method m: target.getClass().getMethods()) {
               if (JUnitTestSupport.conformsToSignature(m) && methodMatchesFragment(m, fragment)) {
                   Pact pactAnnotation = m.getAnnotation(Pact.class);
-                String provider = parseExpression(pactAnnotation.provider());
+                String provider = parseExpression(pactAnnotation.provider(), DataType.RAW).toString();
                 if (StringUtils.isEmpty(provider) || this.provider.equals(provider)) {
-                      PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(parseExpression(pactAnnotation.consumer()))
+                      PactDslWithProvider dslBuilder = ConsumerPactBuilder.consumer(
+                              parseExpression(pactAnnotation.consumer(), DataType.RAW).toString())
                           .hasPactWith(this.provider);
                       updateAnyDefaultValues(dslBuilder);
                       try {

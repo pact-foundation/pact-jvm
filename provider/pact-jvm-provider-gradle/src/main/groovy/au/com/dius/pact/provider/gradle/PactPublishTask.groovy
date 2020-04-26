@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.gradle
 
+import arrow.core.Either
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import groovy.io.FileType
 import org.apache.commons.io.FilenameUtils
@@ -12,7 +13,7 @@ import org.gradle.api.tasks.TaskAction
 /**
  * Task to push pact files to a pact broker
  */
-@SuppressWarnings('Println')
+@SuppressWarnings(['Println', 'AbcMetric'])
 class PactPublishTask extends DefaultTask {
 
     @TaskAction
@@ -27,7 +28,7 @@ class PactPublishTask extends DefaultTask {
         if (pactPublish.pactDirectory == null) {
             pactPublish.pactDirectory = project.file("${project.buildDir}/pacts")
         }
-        def version = pactPublish.providerVersion ?: pactPublish.version
+        def version = pactPublish.providerVersion
         if (version == null) {
           version = project.version
         } else if (version instanceof Closure) {
@@ -58,8 +59,15 @@ class PactPublishTask extends DefaultTask {
               print "Publishing '${pactFile.name}' ... "
             }
             result = brokerClient.uploadPactFile(pactFile, version, pactPublish.tags)
-            println result
-            if (!anyFailed && result.startsWith('FAILED!')) {
+            if (result instanceof Either.Right) {
+              if (result.b) {
+                println('OK')
+              } else {
+                println('Failed')
+                anyFailed = true
+              }
+            } else {
+              println("Failed - ${result.a.message}")
               anyFailed = true
             }
           }

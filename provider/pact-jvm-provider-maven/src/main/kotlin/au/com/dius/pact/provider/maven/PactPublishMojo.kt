@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.maven
 
+import arrow.core.Either
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.support.isNotEmpty
 import org.apache.maven.plugin.MojoExecutionException
@@ -74,10 +75,17 @@ open class PactPublishMojo : PactBaseMojo() {
               } else {
                 print("Publishing '${pactFile.name}' ... ")
               }
-              val result = brokerClient!!.uploadPactFile(pactFile, projectVersion, tagsToPublish).toString()
-              println(result)
-              if (!anyFailed && result.startsWith("FAILED!")) {
-                anyFailed = true
+              when (val result = brokerClient!!.uploadPactFile(pactFile, projectVersion, tagsToPublish)) {
+                is Either.Right -> if (result.b) {
+                  println("OK")
+                } else {
+                  println("Failed")
+                  anyFailed = true
+                }
+                is Either.Left -> {
+                  println("Failed - ${result.a.message}")
+                  anyFailed = true
+                }
               }
             }
           }

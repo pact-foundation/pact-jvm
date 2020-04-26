@@ -5,7 +5,6 @@ import au.com.dius.pact.core.model.DirectorySource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import java.io.File
-import java.net.URL
 import java.net.URLDecoder
 
 /**
@@ -16,9 +15,6 @@ class PactFolderLoader<I>(private val path: File) : PactLoader where I : Interac
   private val pactSource: DirectorySource<I> = DirectorySource(path)
 
   constructor(path: String) : this(File(path))
-
-  @Deprecated("Use PactUrlLoader for URLs (will be removed in 4.0.x)")
-  constructor(path: URL?) : this(if (path == null) "" else path.path)
 
   constructor(pactFolder: PactFolder) : this(pactFolder.value)
 

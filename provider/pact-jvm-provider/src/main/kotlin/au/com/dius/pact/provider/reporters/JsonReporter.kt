@@ -71,7 +71,7 @@ class JsonReporter(
 
   override fun finaliseReport() {
     if (reportFile.exists() && reportFile.length() > 0) {
-      val existingContents = JsonParser().parse(reportFile.readText())
+      val existingContents = JsonParser.parseString(reportFile.readText())
       if (providerName == existingContents["provider"].obj["name"].string) {
         existingContents["metaData"] = jsonData["metaData"]
         existingContents["execution"].array.addAll(jsonData["execution"].array)

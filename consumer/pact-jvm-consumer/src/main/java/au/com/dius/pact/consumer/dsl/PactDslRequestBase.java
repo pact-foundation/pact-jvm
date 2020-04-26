@@ -17,13 +17,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 
+import static au.com.dius.pact.consumer.Headers.MULTIPART_HEADER_REGEX;
+
 public abstract class PactDslRequestBase {
   protected static final String CONTENT_TYPE = "Content-Type";
-  /**
-   * @deprecated Use Headers.MULTIPART_HEADER_REGEX
-   */
-  @Deprecated
-  private static final String MULTIPART_HEADER_REGEX = "multipart/form-data;(\\s*charset=[^;]*;)?\\s*boundary=.*";
   private static final long DATE_2000 = 949323600000L;
 
   protected final PactDslRequestWithoutPath defaultRequestValues;

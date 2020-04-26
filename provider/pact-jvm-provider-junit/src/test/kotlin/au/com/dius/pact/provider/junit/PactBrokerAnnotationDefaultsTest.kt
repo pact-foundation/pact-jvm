@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit
 
+import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.provider.junit.loader.PactBroker
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseListExpression
@@ -32,35 +33,35 @@ class PactBrokerAnnotationDefaultsTest {
 
     @Test
     fun `default host is empty`() {
-        assertThat(parseExpression(annotation.host), `is`(""))
+        assertThat(parseExpression(annotation.host, DataType.RAW)?.toString(), `is`(""))
     }
 
     @Test
     fun `can set host`() {
         props.setProperty("pactbroker.host", "myHost")
-        assertThat(parseExpression(annotation.host), `is`("myHost"))
+        assertThat(parseExpression(annotation.host, DataType.RAW)?.toString(), `is`("myHost"))
     }
 
     @Test
     fun `default port is empty`() {
-        assertThat(parseExpression(annotation.port), `is`(""))
+        assertThat(parseExpression(annotation.port, DataType.RAW)?.toString(), `is`(""))
     }
 
     @Test
     fun `can set port`() {
         props.setProperty("pactbroker.port", "myPort")
-        assertThat(parseExpression(annotation.port), `is`("myPort"))
+        assertThat(parseExpression(annotation.port, DataType.RAW)?.toString(), `is`("myPort"))
     }
 
     @Test
     fun `default protocol is http`() {
-        assertThat(parseExpression(annotation.scheme), `is`("http"))
+        assertThat(parseExpression(annotation.scheme, DataType.RAW)?.toString(), `is`("http"))
     }
 
     @Test
     fun `can set scheme`() {
         props.setProperty("pactbroker.scheme", "myProtocol")
-        assertThat(parseExpression(annotation.scheme), `is`("myProtocol"))
+        assertThat(parseExpression(annotation.scheme, DataType.RAW)?.toString(), `is`("myProtocol"))
     }
 
     @Test
@@ -100,19 +101,8 @@ class PactBrokerAnnotationDefaultsTest {
     }
 
     @Test
-    fun `default auth scheme is legacy`() {
-        assertThat(parseExpression(annotation.authentication.scheme), `is`("legacy"))
-    }
-
-    @Test
-    fun `can set auth scheme`() {
-        props.setProperty("pactbroker.auth.scheme", "myScheme")
-        assertThat(parseListExpression(annotation.authentication.scheme), contains("myScheme"))
-    }
-
-    @Test
     fun `default auth username is empty`() {
-        assertThat(parseExpression(annotation.authentication.username), `is`(""))
+        assertThat(parseExpression(annotation.authentication.username, DataType.RAW)?.toString(), `is`(""))
     }
 
     @Test
@@ -123,7 +113,7 @@ class PactBrokerAnnotationDefaultsTest {
 
     @Test
     fun `default auth password is empty`() {
-        assertThat(parseExpression(annotation.authentication.password), `is`(""))
+        assertThat(parseExpression(annotation.authentication.password, DataType.RAW)?.toString(), `is`(""))
     }
 
     @Test
@@ -134,7 +124,7 @@ class PactBrokerAnnotationDefaultsTest {
 
     @Test
     fun `default auth token is empty`() {
-        assertThat(parseExpression(annotation.authentication.token), `is`(""))
+        assertThat(parseExpression(annotation.authentication.token, DataType.RAW)?.toString(), `is`(""))
     }
 
     @Test

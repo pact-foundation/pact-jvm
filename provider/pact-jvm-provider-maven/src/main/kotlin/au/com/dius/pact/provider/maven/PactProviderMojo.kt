@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.maven
 
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.support.toUrl
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IConsumerInfo
@@ -151,9 +152,8 @@ open class PactProviderMojo : PactBaseMojo() {
     }
 
     if (pactBroker?.tags != null && pactBroker.tags.isNotEmpty()) {
-      pactBroker.tags.forEach { tag ->
-        consumers.addAll(provider.hasPactsFromPactBrokerWithTag(options, pactBrokerUrl.toString(), tag))
-      }
+      consumers.addAll(provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl.toString(),
+        pactBroker.tags.map { ConsumerVersionSelector(it) }))
     } else {
       consumers.addAll(provider.hasPactsFromPactBroker(options, pactBrokerUrl.toString()))
     }

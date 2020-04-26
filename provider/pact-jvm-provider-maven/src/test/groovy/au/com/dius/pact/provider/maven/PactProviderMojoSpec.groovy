@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.maven
 
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import org.apache.maven.plugin.MojoFailureException
@@ -122,9 +123,11 @@ class PactProviderMojoSpec extends Specification {
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBrokerWithTag([:], 'http://broker:1234', '1') >> [new Consumer()]
-    1 * provider.hasPactsFromPactBrokerWithTag([:], 'http://broker:1234', '2') >> []
-    1 * provider.hasPactsFromPactBrokerWithTag([:], 'http://broker:1234', '3') >> []
+    1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', [
+            new ConsumerVersionSelector('1', true),
+            new ConsumerVersionSelector('2', true),
+            new ConsumerVersionSelector('3', true)
+    ]) >> [new Consumer()]
     list.size() == 1
   }
 

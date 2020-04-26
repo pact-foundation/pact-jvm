@@ -4,7 +4,6 @@ import au.com.dius.pact.core.model.PactSpecVersion
 import mu.KLogging
 import java.util.Comparator
 import java.util.function.Predicate
-import java.util.function.ToIntFunction
 
 /**
  * Matching rules category
@@ -88,12 +87,6 @@ data class Category @JvmOverloads constructor(
    */
   fun filter(predicate: Predicate<String>) =
     copy(matchingRules = matchingRules.filter { predicate.test(it.key) }.toMutableMap())
-
-  @Deprecated("Use maxBy(Comparator) as this function causes a defect (see issue #698)")
-  fun maxBy(fn: ToIntFunction<String>): MatchingRuleGroup {
-    val max = matchingRules.maxBy { fn.applyAsInt(it.key) }
-    return max?.value ?: MatchingRuleGroup()
-  }
 
   fun maxBy(comparator: Comparator<String>): MatchingRuleGroup {
     val max = matchingRules.maxWith(Comparator { a, b -> comparator.compare(a.key, b.key) })

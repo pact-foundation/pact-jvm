@@ -102,22 +102,6 @@ public class PactDslJsonArray extends DslPart {
     }
 
     @Override
-    @Deprecated
-    public PactDslJsonBody arrayLike(String name) {
-        throw new UnsupportedOperationException("use the eachLike() form");
-    }
-
-    /**
-     * Element that is an array where each item must match the following example
-     * @deprecated use eachLike
-     */
-    @Override
-    @Deprecated
-    public PactDslJsonBody arrayLike() {
-        return eachLike();
-    }
-
-    @Override
     public PactDslJsonBody eachLike(String name) {
         throw new UnsupportedOperationException("use the eachLike() form");
     }
@@ -345,25 +329,6 @@ public class PactDslJsonArray extends DslPart {
         return this;
     }
 
-    /**
-     * Element that must be a real value
-     * @deprecated Use decimalType instead
-     */
-    @Deprecated
-    public PactDslJsonArray realType() {
-        return decimalType();
-    }
-
-    /**
-     * Element that must be a real value
-     * @param number example real value
-     * @deprecated Use decimalType instead
-     */
-    @Deprecated
-    public PactDslJsonArray realType(Double number) {
-      return decimalType(number);
-    }
-
   /**
    * Element that must be a decimal value
    */
@@ -425,18 +390,6 @@ public class PactDslJsonArray extends DslPart {
         body.put(value);
         matchers.addRule(rootPath + appendArrayIndex(0), regexp(regex));
         return this;
-    }
-
-    /**
-     * Element that must match the regular expression
-     * @param regex regular expression
-     * @deprecated Use the version that takes an example value
-     */
-    @Deprecated
-    public PactDslJsonArray stringMatcher(String regex) {
-      generators.addGenerator(Category.BODY, rootPath + appendArrayIndex(1), new RandomStringGenerator(10));
-      stringMatcher(regex, new Generex(regex).random());
-      return this;
     }
 
     /**
@@ -650,25 +603,6 @@ public class PactDslJsonArray extends DslPart {
         body.put(hexValue);
         matchers.addRule(rootPath + appendArrayIndex(0), regexp("[0-9a-fA-F]+"));
         return this;
-    }
-
-    /**
-     * Element that must be encoded as a GUID
-     * @deprecated use uuid instead
-     */
-    @Deprecated
-    public PactDslJsonArray guid() {
-        return uuid();
-    }
-
-    /**
-     * Element that must be encoded as a GUID
-     * @param uuid example UUID to use for generated bodies
-     * @deprecated use uuid instead
-     */
-    @Deprecated
-    public PactDslJsonArray guid(String uuid) {
-        return uuid(uuid);
     }
 
     /**

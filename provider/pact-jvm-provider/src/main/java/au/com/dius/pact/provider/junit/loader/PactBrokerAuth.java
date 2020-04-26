@@ -13,19 +13,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Inherited
 public @interface PactBrokerAuth {
-
-  /**
-   * Authentication scheme to use.
-   *
-   * @deprecated Does no longer need to be set explicitly. It is now automatically set to
-   * <ul>
-   *     <li><b>Basic</b> if username is set.</li>
-   *     <li><b>Bearer</b> if token is set.</li>
-   * </ul>
-   */
-  @Deprecated
-  String scheme() default "";
-
   /**
    * Username to use for basic authentication
    */

@@ -38,7 +38,7 @@ class Message @JvmOverloads constructor(
   fun getContentType() = if (contents.isPresent() && contents.contentType.contentType.isNotEmpty()) {
     contents.contentType.contentType
   } else {
-    getContentType(metaData)
+    contentType(metaData)
   }
 
   @Deprecated("Use the content type associated with the message body")
@@ -76,7 +76,7 @@ class Message @JvmOverloads constructor(
 
   private fun isJsonContents(): Boolean {
     return if (contents.isPresent()) {
-      val contentType = getContentType(metaData)
+      val contentType = contentType(metaData)
       if (contentType.isNotEmpty()) {
         isJson(contentType)
       } else {
@@ -89,7 +89,7 @@ class Message @JvmOverloads constructor(
 
   fun formatContents(): String {
     return if (contents.isPresent()) {
-      val contentType = getContentType(metaData) ?: contents.contentType.asMimeType()
+      val contentType = contentType(metaData) ?: contents.contentType.asMimeType()
       when {
         isJson(contentType) -> Json.gsonPretty.toJson(JsonParser.parseString(contents.valueAsString()))
         isOctetStream(contentType) -> Base64.encodeBase64String(contentsAsBytes())
@@ -161,7 +161,7 @@ class Message @JvmOverloads constructor(
       else
         emptyMap()
 
-      val contentType = au.com.dius.pact.core.model.ContentType(getContentType(metaData))
+      val contentType = au.com.dius.pact.core.model.ContentType(contentType(metaData))
       val contents = if (json.has("contents")) {
         val contents = json["contents"]
         when {
@@ -184,7 +184,6 @@ class Message @JvmOverloads constructor(
         contents, matchingRules, generators, metaData.toMutableMap(), Json.toString(json["_id"]))
     }
 
-    @Deprecated("Use the content type associated with the message body")
     @Suppress("TooGenericExceptionCaught")
     private fun parseContentType(contentType: String?): ContentType? {
       return if (contentType.isNotEmpty()) {
@@ -199,8 +198,7 @@ class Message @JvmOverloads constructor(
       }
     }
 
-    @Deprecated("Use the content type associated with the message body")
-    fun getContentType(metaData: Map<String, Any?>): String? {
+    fun contentType(metaData: Map<String, Any?>): String? {
       return parseContentType(metaData.entries.find {
         it.key.toLowerCase() == "contenttype" || it.key.toLowerCase() == "content-type"
       }?.value?.toString())?.mimeType

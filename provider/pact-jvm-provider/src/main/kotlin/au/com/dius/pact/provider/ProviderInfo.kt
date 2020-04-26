@@ -61,20 +61,6 @@ open class ProviderInfo @JvmOverloads constructor (
     hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl, emptyList())
 
   @JvmOverloads
-  @Deprecated(message = "Use version that takes selectors",
-    replaceWith = ReplaceWith("hasPactsFromPactBrokerWithSelectors"))
-  open fun hasPactsFromPactBrokerWithTag(
-    options: Map<String, Any> = mapOf(),
-    pactBrokerUrl: String,
-    tag: String
-  ): List<ConsumerInfo> {
-    val client = PactBrokerClient(pactBrokerUrl, options)
-    val consumersFromBroker = client.fetchConsumersWithTag(name, tag).map { ConsumerInfo.from(it) }
-    consumers.addAll(consumersFromBroker)
-    return consumersFromBroker
-  }
-
-  @JvmOverloads
   @Suppress("TooGenericExceptionThrown")
   open fun hasPactsFromPactBrokerWithSelectors(
     options: Map<String, Any> = mapOf(),

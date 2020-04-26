@@ -53,14 +53,7 @@ public class LambdaDslJsonArray {
     /**
      * Element that must match the regular expression
      * @param regex regular expression
-     * @deprecated Use the version that takes an example value
      */
-    @Deprecated
-    public LambdaDslJsonArray stringMatcher(final String regex) {
-        pactArray.stringMatcher(regex);
-        return this;
-    }
-
     public LambdaDslJsonArray stringMatcher(final String regex, final String example) {
         pactArray.stringMatcher(regex, example);
         return this;

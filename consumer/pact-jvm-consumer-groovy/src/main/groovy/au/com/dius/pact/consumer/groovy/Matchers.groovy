@@ -86,14 +86,6 @@ class Matchers {
   }
 
   /**
-   * @deprecated Use decimal instead
-   */
-  @Deprecated
-  static real(Number value = null) {
-    decimal(value)
-  }
-
-  /**
    * Match a decimal value
    * @param value Example value, if not provided a random one will be generated
    */
@@ -180,17 +172,6 @@ class Matchers {
 
   static dateExpression(String expression, String pattern = null) {
     new DateMatcher(pattern: pattern, expression: expression)
-  }
-
-  /**
-   * Match a globally unique ID (GUID)
-   * @param value optional value to use for examples
-   * @deprecated use uuid instead
-   */
-  @SuppressWarnings('ConfusingMethodName')
-  @Deprecated
-  static guid(String value = null) {
-    uuid(value)
   }
 
   /**

@@ -2,13 +2,8 @@ package au.com.dius.pact.core.matchers
 
 import au.com.dius.pact.core.model.HttpPart
 import au.com.dius.pact.core.model.Request
-import au.com.dius.pact.core.model.isEmpty
-import au.com.dius.pact.core.model.isMissing
-import au.com.dius.pact.core.model.isNull
-import au.com.dius.pact.core.model.isPresent
 import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
-import au.com.dius.pact.core.model.unwrap
 import mu.KLogging
 
 object Matching : KLogging() {
@@ -58,13 +53,13 @@ object Matching : KLogging() {
     else MethodMismatch(expected, actual)
 
   fun matchBody(expected: HttpPart, actual: HttpPart, allowUnexpectedKeys: Boolean): List<Mismatch> {
-    return if (expected.mimeType() == actual.mimeType()) {
-      val matcher = MatchingConfig.lookupBodyMatcher(actual.mimeType())
+    return if (expected.contentType() == actual.contentType()) {
+      val matcher = MatchingConfig.lookupBodyMatcher(actual.contentType())
       if (matcher != null) {
-        logger.debug { "Found a matcher for ${actual.mimeType()} -> $matcher" }
+        logger.debug { "Found a matcher for ${actual.contentType()} -> $matcher" }
         matcher.matchBody(expected.body, actual.body, allowUnexpectedKeys, expected.matchingRules)
       } else {
-        logger.debug { "No matcher for ${actual.mimeType()}, using equality" }
+        logger.debug { "No matcher for ${actual.contentType()}, using equality" }
         when {
           expected.body.isMissing() -> emptyList()
           expected.body.isNull() && actual.body.isPresent() -> listOf(BodyMismatch(null, actual.body.unwrap(),
@@ -80,7 +75,7 @@ object Matching : KLogging() {
       }
     } else {
       if (expected.body.isMissing() || expected.body.isNull() || expected.body.isEmpty()) emptyList()
-      else listOf(BodyTypeMismatch(expected.mimeType(), actual.mimeType()))
+      else listOf(BodyTypeMismatch(expected.contentType(), actual.contentType()))
     }
   }
 

@@ -108,24 +108,6 @@ public class PactDslJsonRootValue extends DslPart {
    */
   @Override
   @Deprecated
-  public PactDslJsonBody arrayLike(String name) {
-    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
-  }
-
-  /**
-   * @deprecated Use PactDslJsonArray for arrays
-   */
-  @Override
-  @Deprecated
-  public PactDslJsonBody arrayLike() {
-    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
-  }
-
-  /**
-   * @deprecated Use PactDslJsonArray for arrays
-   */
-  @Override
-  @Deprecated
   public PactDslJsonBody eachLike(String name) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }

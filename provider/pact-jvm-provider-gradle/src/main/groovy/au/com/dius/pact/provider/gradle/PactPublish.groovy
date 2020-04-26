@@ -9,11 +9,6 @@ import groovy.transform.ToString
 class PactPublish {
     def pactDirectory
     String pactBrokerUrl
-    /**
-     * @deprecated Use providerVersion instead
-     */
-    @Deprecated
-    String version
     def providerVersion
     String pactBrokerToken
     String pactBrokerUsername

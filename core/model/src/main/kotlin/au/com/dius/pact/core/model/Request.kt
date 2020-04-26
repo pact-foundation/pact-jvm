@@ -42,7 +42,7 @@ class Request @JvmOverloads constructor(
     generators.applyGenerator(Category.QUERY, mode) { key, g ->
       r.query[key] = r.query.getOrElse(key) { emptyList() }.map { g.generate(context).toString() }
     }
-    r.body = generators.applyBodyGenerators(r.body, ContentType(mimeType()), context, mode)
+    r.body = generators.applyBodyGenerators(r.body, ContentType(contentType()), context, mode)
     return r
   }
 

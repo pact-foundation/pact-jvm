@@ -1,14 +1,8 @@
 package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.model.BrokerUrlSource
-import au.com.dius.pact.core.model.ClosurePactSource
-import au.com.dius.pact.core.model.FileSource
-import au.com.dius.pact.core.model.Interaction
-import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
-import au.com.dius.pact.core.model.UrlSource
-import au.com.dius.pact.core.pactbroker.PactBrokerConsumer
 import au.com.dius.pact.core.pactbroker.PactResult
 import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.core.support.Json
@@ -45,8 +39,8 @@ import java.nio.charset.UnsupportedCharsetException
 import java.util.concurrent.Callable
 import java.util.function.Consumer
 import java.util.function.Function
-import java.util.function.Supplier
 import au.com.dius.pact.core.model.ContentType as PactContentType
+
 interface IHttpClientFactory {
   fun newClient(provider: IProviderInfo): CloseableHttpClient
 }
@@ -100,35 +94,6 @@ open class ConsumerInfo @JvmOverloads constructor (
     get() = if (stateChange != null) URL(stateChange.toString()) else null
     set(value) { stateChange = value }
 
-  /**
-   * Sets the Pact File for the consumer
-   * @param file Pact file, either as a string or a PactSource
-   * @deprecated Use setPactSource instead, this will be removed in 4.0
-   */
-  @Deprecated(
-    message = "Use setPactSource instead, this will be removed in 4.0",
-    replaceWith = ReplaceWith("setPactSource")
-  )
-  fun setPactFile(file: Any) {
-    pactSource = when (file) {
-      is PactSource -> file
-      is Supplier<*> -> ClosurePactSource(file as Supplier<Any>)
-      is Closure<*> -> ClosurePactSource(Supplier { file.call() })
-      is URL -> UrlSource<Interaction>(file.toString())
-      else -> FileSource<Interaction>(File(file.toString()))
-    }
-  }
-
-  /**
-   * Returns the Pact file for the consumer
-   * @deprecated Use getPactSource instead, this will be removed in 4.0
-   */
-  @Deprecated(
-    message = "Use getPactSource instead, this will be removed in 4.0",
-    replaceWith = ReplaceWith("getPactSource")
-  )
-  fun getPactFile() = pactSource
-
   override fun toString(): String {
     return "ConsumerInfo(name='$name', stateChange=$stateChange, stateChangeUsesBody=$stateChangeUsesBody, " +
       "packagesToScan=$packagesToScan, verificationType=$verificationType, pactSource=$pactSource, " +
@@ -164,13 +129,6 @@ open class ConsumerInfo @JvmOverloads constructor (
   }
 
   companion object : KLogging() {
-    @JvmStatic
-    fun from(consumer: PactBrokerConsumer) =
-      ConsumerInfo(name = consumer.name,
-        pactSource = BrokerUrlSource(url = consumer.source, pactBrokerUrl = consumer.pactBrokerUrl, tag = consumer.tag),
-        pactFileAuthentication = consumer.pactFileAuthentication
-      )
-
     fun from(consumer: PactResult) =
       ConsumerInfo(name = consumer.name,
         pactSource = BrokerUrlSource(url = consumer.source, pactBrokerUrl = consumer.pactBrokerUrl),
@@ -207,7 +165,7 @@ open class ProviderClient(
 
     @JvmStatic
     fun urlEncodedFormPost(request: Request) = request.method.toLowerCase() == "post" &&
-      request.mimeType() == ContentType.APPLICATION_FORM_URLENCODED.mimeType
+      request.contentType() == ContentType.APPLICATION_FORM_URLENCODED.mimeType
 
     fun isFunctionalInterface(requestFilter: Any) =
       requestFilter::class.java.interfaces.any { it.isAnnotationPresent(FunctionalInterface::class.java) }

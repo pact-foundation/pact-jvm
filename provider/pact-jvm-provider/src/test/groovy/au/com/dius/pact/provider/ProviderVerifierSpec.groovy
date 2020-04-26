@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider
 
+import arrow.core.Either
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.FileSource
@@ -21,8 +22,8 @@ import au.com.dius.pact.core.model.matchingrules.MatchingRules
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher
 import au.com.dius.pact.core.model.messaging.Message
-import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.provider.reporters.VerifierReporter
 import com.github.michaelbull.result.Ok
 import groovy.json.JsonOutput
@@ -493,7 +494,7 @@ class ProviderVerifierSpec extends Specification {
     DefaultVerificationReporter.INSTANCE.reportResults(pact, TestResult.Ok.INSTANCE, '0', client, null)
 
     then:
-    1 * client.publishVerificationResults(links, TestResult.Ok.INSTANCE, '0', null) >> new Ok(true)
+    1 * client.publishVerificationResults(links, TestResult.Ok.INSTANCE, '0', null) >> new Either.Right(true)
   }
 
   @SuppressWarnings('UnnecessaryGetter')

@@ -84,16 +84,6 @@ class PactMessageBuilder extends BaseBuilder {
 
   /**
    * Content of the message
-   * @param contentType optional content type of the message
-   * @deprecated Use version that takes an option map
-   */
-  @Deprecated
-  PactMessageBuilder withContent(String contentType, Closure closure) {
-    withContent(contentType: contentType, closure)
-  }
-
-  /**
-   * Content of the message
    * @param options Options for generating the message content:
    *  - contentType: optional content type of the message
    *  - prettyPrint: if the message content should be pretty printed

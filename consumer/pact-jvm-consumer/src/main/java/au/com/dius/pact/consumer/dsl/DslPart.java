@@ -62,21 +62,6 @@ public abstract class DslPart {
     /**
      * Array field where each element must match the following object
      * @param name field name
-     * @deprecated Use eachLike instead
-     */
-    @Deprecated
-    public abstract PactDslJsonBody arrayLike(String name);
-
-    /**
-     * Array element where each element of the array must match the following object
-     * @deprecated Use eachLike instead
-     */
-    @Deprecated
-    public abstract PactDslJsonBody arrayLike();
-
-    /**
-     * Array field where each element must match the following object
-     * @param name field name
      */
     public abstract PactDslJsonBody eachLike(String name);
 

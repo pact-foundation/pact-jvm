@@ -5,9 +5,7 @@ package au.com.dius.pact.core.matchers
  *
  * @param <Mismatch> Type of mismatch to create
  */
-@Deprecated("Use the mismatch class constructor directly")
 interface MismatchFactory<out M : Mismatch> {
-  @Deprecated("Use the mismatch class constructor directly")
   fun create(expected: Any?, actual: Any?, message: String, path: List<String>): M
 }
 
@@ -22,7 +20,7 @@ data class StatusMismatch(val expected: Int, val actual: Int) : Mismatch() {
   }
 }
 
-data class BodyTypeMismatch(val expected: String, val actual: String) : Mismatch() {
+data class BodyTypeMismatch(val expected: String?, val actual: String?) : Mismatch() {
   override fun description() = "Expected a response type of '$expected' but the actual type was '$actual'"
   fun toMap(): Map<String, Any?> {
     return mapOf("mismatch" to description())

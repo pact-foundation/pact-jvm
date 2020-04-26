@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider
 
-import com.github.michaelbull.result.Err
+import arrow.core.Either
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
@@ -12,9 +12,6 @@ import mu.KLogging
  * Interface to the reporter that published the verification results
  */
 interface VerificationReporter {
-  @Deprecated(message = "Use the method that takes a test result")
-  fun reportResults(pact: Pact<out Interaction>, result: Boolean, version: String, client: PactBrokerClient? = null)
-
   /**
    * Publish the results to the pact broker. If the tag is given, then the provider will be tagged with that first.
    */
@@ -36,10 +33,6 @@ interface VerificationReporter {
  * Default implementation of a verification reporter
  */
 object DefaultVerificationReporter : VerificationReporter, KLogging() {
-
-  override fun reportResults(pact: Pact<out Interaction>, result: Boolean, version: String, client: PactBrokerClient?) {
-    reportResults(pact, TestResult.fromBoolean(result), version, client)
-  }
 
   override fun reportResults(
     pact: Pact<out Interaction>,
@@ -69,9 +62,8 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
       brokerClient.publishProviderTag(source.attributes, pact.provider.name, tag, version)
     }
     val publishResult = brokerClient.publishVerificationResults(source.attributes, result, version)
-    if (publishResult is Err) {
-      logger.error { "Failed to publish verification results - ${publishResult.error.localizedMessage}" }
-      logger.debug(publishResult.error) {}
+    if (publishResult is Either.Left) {
+      logger.error { "Failed to publish verification results - ${publishResult.a}" }
     } else {
       logger.info { "Published verification result of '$result' for consumer '${pact.consumer}'" }
     }

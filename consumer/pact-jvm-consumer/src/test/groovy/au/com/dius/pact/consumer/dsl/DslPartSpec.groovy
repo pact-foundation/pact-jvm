@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.dsl
 
+import au.com.dius.pact.core.model.PactSpecVersion
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -24,12 +25,6 @@ class DslPartSpec extends Specification {
 
     @Override
     DslPart closeArray() { null }
-
-    @Override
-    PactDslJsonBody arrayLike(String name) { null }
-
-    @Override
-    PactDslJsonBody arrayLike() { null }
 
     @Override
     PactDslJsonBody eachLike(String name) { null }
@@ -159,7 +154,7 @@ class DslPartSpec extends Specification {
   @Unroll
   def 'matcher methods generate the correct matcher definition - #matcherMethod'() {
     expect:
-    subject."$matcherMethod"(param).toMap() == matcherDefinition
+    subject."$matcherMethod"(param).toMap(PactSpecVersion.V3) == matcherDefinition
 
     where:
 

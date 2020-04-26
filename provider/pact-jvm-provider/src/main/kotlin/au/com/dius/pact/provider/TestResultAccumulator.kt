@@ -12,10 +12,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder
  * the result is submitted back to the broker
  */
 interface TestResultAccumulator {
-  @Deprecated(message = "Use the version that takes a TestResult parameter")
-  fun updateTestResult(pact: Pact<out Interaction>, interaction: Interaction, testExecutionResult: Boolean)
   fun updateTestResult(pact: Pact<out Interaction>, interaction: Interaction, testExecutionResult: TestResult)
-
   fun clearTestResult(pact: Pact<out Interaction>)
 }
 
@@ -23,10 +20,6 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
 
   val testResults: MutableMap<Int, MutableMap<Int, TestResult>> = mutableMapOf()
   var verificationReporter: VerificationReporter = DefaultVerificationReporter
-
-  override fun updateTestResult(pact: Pact<out Interaction>, interaction: Interaction, testExecutionResult: Boolean) {
-    updateTestResult(pact, interaction, TestResult.fromBoolean(testExecutionResult))
-  }
 
   override fun updateTestResult(
     pact: Pact<out Interaction>,

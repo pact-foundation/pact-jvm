@@ -50,7 +50,7 @@ class PactMessageBuilderSpec extends Specification {
     builder {
       given 'the provider has data for a message'
       expectsToReceive 'a confirmation message for a group order'
-      withContent('application/json') {
+      withContent(contentType: 'application/json') {
         name 'Bob'
         date = '2000-01-01'
         status 'bad'

@@ -2,6 +2,7 @@ package io.pactfoundation.consumer.dsl;
 
 import au.com.dius.pact.consumer.dsl.PM;
 import au.com.dius.pact.consumer.dsl.PactDslJsonArray;
+import au.com.dius.pact.core.model.PactSpecVersion;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -129,11 +130,11 @@ public class LambdaDslJsonArrayTest {
         String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(3));
-        Map matcher = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        Map matcher = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(matcher.get("match"), is("type"));
-        matcher = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        matcher = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(matcher.get("match"), is("include"));
-        matcher = actualPactDsl.getMatchers().allMatchingRules().get(2).toMap();
+        matcher = actualPactDsl.getMatchers().allMatchingRules().get(2).toMap(PactSpecVersion.V3);
         assertThat(matcher.get("match"), is("regex"));
     }
 
@@ -159,11 +160,11 @@ public class LambdaDslJsonArrayTest {
         String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(3));
-        Map matcher = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        Map matcher = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(matcher.get("match"), is("null"));
-        matcher = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        matcher = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(matcher.get("match"), is("date"));
-        matcher = actualPactDsl.getMatchers().allMatchingRules().get(2).toMap();
+        matcher = actualPactDsl.getMatchers().allMatchingRules().get(2).toMap(PactSpecVersion.V3);
         assertThat(matcher.get("match"), is("regex"));
     }
 
@@ -234,9 +235,9 @@ public class LambdaDslJsonArrayTest {
         final String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
-        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(arrayRule.get("match"), is("type"));
-        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(objectRule.get("match"), is("type"));
     }
 
@@ -268,9 +269,9 @@ public class LambdaDslJsonArrayTest {
         final String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
-        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(arrayRule.get("match"), is("type"));
-        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(objectRule.get("match"), is("type"));
     }
 
@@ -302,9 +303,9 @@ public class LambdaDslJsonArrayTest {
         final String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
-        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(arrayRule.get("min"), is(2));
-        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(objectRule.get("match"), is("type"));
     }
 
@@ -336,9 +337,9 @@ public class LambdaDslJsonArrayTest {
         final String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
-        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(arrayRule.get("min"), is(2));
-        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(objectRule.get("match"), is("type"));
     }
 
@@ -370,9 +371,9 @@ public class LambdaDslJsonArrayTest {
         final String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
-        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(arrayRule.get("max"), is(2));
-        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(objectRule.get("match"), is("type"));
     }
 
@@ -404,9 +405,9 @@ public class LambdaDslJsonArrayTest {
         final String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
-        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(arrayRule.get("max"), is(3));
-        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(objectRule.get("match"), is("type"));
     }
 
@@ -430,10 +431,10 @@ public class LambdaDslJsonArrayTest {
         final String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
-        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(arrayRule.get("min"), is(2));
         assertThat(arrayRule.get("max"), is(10));
-        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(objectRule.get("match"), is("type"));
     }
 
@@ -457,10 +458,10 @@ public class LambdaDslJsonArrayTest {
         final String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
-        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(arrayRule.get("min"), is(2));
         assertThat(arrayRule.get("max"), is(10));
-        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(objectRule.get("match"), is("type"));
     }
 
@@ -493,9 +494,9 @@ public class LambdaDslJsonArrayTest {
         final String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
-        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(arrayRule.get("match"), is("type"));
-        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(objectRule.get("match"), is("type"));
     }
 
@@ -531,9 +532,9 @@ public class LambdaDslJsonArrayTest {
         final String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
-        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(arrayRule.get("match"), is("type"));
-        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(objectRule.get("match"), is("type"));
     }
 
@@ -569,9 +570,9 @@ public class LambdaDslJsonArrayTest {
         final String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
-        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(arrayRule.get("min"), is(2));
-        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(objectRule.get("match"), is("type"));
     }
 
@@ -610,9 +611,9 @@ public class LambdaDslJsonArrayTest {
         final String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
-        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(arrayRule.get("min"), is(2));
-        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(objectRule.get("match"), is("type"));
     }
 
@@ -645,9 +646,9 @@ public class LambdaDslJsonArrayTest {
         final String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
-        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(arrayRule.get("max"), is(2));
-        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(objectRule.get("match"), is("type"));
     }
 
@@ -683,9 +684,9 @@ public class LambdaDslJsonArrayTest {
         final String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
-        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(arrayRule.get("max"), is(3));
-        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(objectRule.get("match"), is("type"));
     }
 
@@ -708,10 +709,10 @@ public class LambdaDslJsonArrayTest {
         final String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
-        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(arrayRule.get("min"), is(2));
         assertThat(arrayRule.get("max"), is(5));
-        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(objectRule.get("match"), is("type"));
     }
 
@@ -734,10 +735,10 @@ public class LambdaDslJsonArrayTest {
         final String actualJson = actualPactDsl.getBody().toString();
         assertThat(actualJson, is(pactDslJson));
         assertThat(actualPactDsl.getMatchers().allMatchingRules().size(), is(2));
-        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap();
+        final Map<String, Object> arrayRule = actualPactDsl.getMatchers().allMatchingRules().get(0).toMap(PactSpecVersion.V3);
         assertThat(arrayRule.get("min"), is(3));
         assertThat(arrayRule.get("max"), is(8));
-        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap();
+        final Map<String, Object> objectRule = actualPactDsl.getMatchers().allMatchingRules().get(1).toMap(PactSpecVersion.V3);
         assertThat(objectRule.get("match"), is("type"));
     }
 }

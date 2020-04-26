@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit.loader
 
+import arrow.core.Either
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.DefaultPactReader
@@ -8,7 +9,9 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.model.PactSource
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseListExpression
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
@@ -135,12 +138,16 @@ open class PactBrokerLoader(
     logger.debug { "Loading pacts from pact broker for provider $providerName and tag $tag" }
     val uriBuilder = brokerUrl(resolver)
     try {
-      var consumers: List<ConsumerInfo>
+      var consumers: List<ConsumerInfo> = emptyList()
       val pactBrokerClient = newPactBrokerClient(uriBuilder.build(), resolver)
-      consumers = if (tag.isNullOrEmpty() || tag == "latest") {
-        pactBrokerClient.fetchConsumers(providerName).map { ConsumerInfo.from(it) }
+      val result = if (tag.isNullOrEmpty() || tag == "latest") {
+        pactBrokerClient.fetchConsumersWithSelectors(providerName)
       } else {
-        pactBrokerClient.fetchConsumersWithTag(providerName, tag).map { ConsumerInfo.from(it) }
+        pactBrokerClient.fetchConsumersWithSelectors(providerName, listOf(ConsumerVersionSelector(tag)))
+      }
+      when (result) {
+        is Either.Right -> consumers = result.b.map { ConsumerInfo.from(it) }
+        is Either.Left -> throw result.a
       }
 
       if (failIfNoPactsFound && consumers.isEmpty()) {
@@ -170,9 +177,9 @@ open class PactBrokerLoader(
   }
 
   private fun getPactBrokerSource(resolver: ValueResolver): PactBrokerSource<Interaction> {
-    val scheme = parseExpression(pactBrokerScheme, resolver)
-    val host = parseExpression(pactBrokerHost, resolver)
-    val port = parseExpression(pactBrokerPort, resolver)
+    val scheme = parseExpression(pactBrokerScheme, DataType.RAW, resolver)?.toString()
+    val host = parseExpression(pactBrokerHost, DataType.RAW, resolver)?.toString()
+    val port = parseExpression(pactBrokerPort, DataType.RAW, resolver)?.toString()
 
     if (host.isNullOrEmpty()) {
       throw IllegalArgumentException(String.format("Invalid pact broker host specified ('%s'). " +
@@ -211,42 +218,31 @@ open class PactBrokerLoader(
   }
 
   open fun newPactBrokerClient(url: URI, resolver: ValueResolver): PactBrokerClient {
-    if (authentication == null || authentication!!.scheme.equals("none", ignoreCase = true)) {
+    if (authentication == null) {
       logger.debug { "Authentication: None" }
       return PactBrokerClient(url.toString(), emptyMap())
     }
 
-    val scheme = parseExpression(authentication!!.scheme, resolver)
-    if (scheme.isNotEmpty()) {
-      // Legacy behavior (before support for bearer token was added):
-      // If scheme was not explicitly set, basic was always used.
-      // If it was explicitly set, the given value was used together with username and password
-      val schemeToUse = if (scheme.equals("legacy")) "basic" else scheme
-      logger.debug { "Authentication: $schemeToUse" }
-      val options = mapOf("authentication" to listOf(schemeToUse,
-              parseExpression(authentication!!.username, resolver),
-              parseExpression(authentication!!.password, resolver)))
-      return PactBrokerClient(url.toString(), options)
-    }
+    val username = parseExpression(authentication!!.username, DataType.RAW, resolver)?.toString()
+    val token = parseExpression(authentication!!.token, DataType.RAW, resolver)?.toString()
 
     // Check if username is set. If yes, use basic auth.
-    val username = parseExpression(authentication!!.username, resolver)
     if (username.isNotEmpty()) {
       logger.debug { "Authentication: Basic" }
       val options = mapOf("authentication" to listOf("basic", username,
-        parseExpression(authentication!!.password, resolver)))
+        parseExpression(authentication!!.password, DataType.RAW, resolver)))
       return PactBrokerClient(url.toString(), options)
     }
 
     // Check if token is set. If yes, use bearer auth.
-    val token = parseExpression(authentication!!.token, resolver)
     if (token.isNotEmpty()) {
       logger.debug { "Authentication: Bearer" }
       val options = mapOf("authentication" to listOf("bearer", token))
       return PactBrokerClient(url.toString(), options)
     }
 
-    throw IllegalArgumentException("Invalid pact authentication specified. Either username or token must be set.")
+    logger.debug { "Authentication: None" }
+    return PactBrokerClient(url.toString(), emptyMap())
   }
 
   companion object : KLogging()

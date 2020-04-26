@@ -1,8 +1,5 @@
 package au.com.dius.pact.core.pactbroker
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.buildUrl
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
 import au.com.dius.pact.core.support.HttpClient
@@ -42,6 +39,7 @@ import java.util.function.BiFunction
 import java.util.function.Consumer
 import arrow.core.Either
 import au.com.dius.pact.core.support.handleWith
+import au.com.dius.pact.core.support.unwrap
 
 /**
  * Interface to a HAL Client
@@ -78,42 +76,13 @@ interface IHalClient {
   fun forAll(linkName: String, closure: Consumer<Map<String, Any?>>)
 
   /**
-   * Upload the JSON document to the provided path, using a PUT request
-   * @param path Path to upload the document
-   * @param bodyJson JSON contents for the body
-   */
-  @Deprecated("Use putJson instead")
-  fun uploadJson(path: String, bodyJson: String): Any?
-
-  /**
-   * Upload the JSON document to the provided path, using a PUT request
-   * @param path Path to upload the document
-   * @param bodyJson JSON contents for the body
-   * @param closure Closure that will be invoked with details about the response. The result from the closure will be
-   * returned.
-   */
-  @Deprecated("Use putJson instead")
-  fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>): Any?
-
-  /**
-   * Upload the JSON document to the provided path, using a PUT request
-   * @param path Path to upload the document
-   * @param bodyJson JSON contents for the body
-   * @param closure Closure that will be invoked with details about the response. The result from the closure will be
-   * returned.
-   * @param encodePath If the path must be encoded beforehand.
-   */
-  @Deprecated("Use putJson instead")
-  fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>, encodePath: Boolean): Any?
-
-  /**
    * Upload the JSON document to the provided URL, using a POST request
    * @param url Url to upload the document to
    * @param body JSON contents for the body
    * @return Returns a Success result object with a boolean value to indicate if the request was successful or not. Any
    * exception will be wrapped in a Failure
    */
-  fun postJson(url: String, body: String): Result<Boolean, Exception>
+  fun postJson(url: String, body: String): Either<Exception, Boolean>
 
   /**
    * Upload the JSON document to the provided URL, using a POST request
@@ -123,20 +92,20 @@ interface IHalClient {
    * @return Returns a Success result object with the boolean value returned from the handler closure. Any
    * exception will be wrapped in a Failure
    */
-  fun postJson(url: String, body: String, handler: ((status: Int, response: CloseableHttpResponse) -> Boolean)?): Result<Boolean, Exception>
+  fun postJson(url: String, body: String, handler: ((status: Int, response: CloseableHttpResponse) -> Boolean)?): Either<Exception, Boolean>
 
   /**
    * Fetches the HAL document from the provided path
    * @param path The path to the HAL document. If it is a relative path, it is relative to the base URL
    * @param encodePath If the path should be encoded to make a valid URL
    */
-  fun fetch(path: String, encodePath: Boolean): JsonElement
+  fun fetch(path: String, encodePath: Boolean): Either<Exception, JsonElement>
 
   /**
    * Fetches the HAL document from the provided path
    * @param path The path to the HAL document. If it is a relative path, it is relative to the base URL
    */
-  fun fetch(path: String): JsonElement
+  fun fetch(path: String): Either<Exception, JsonElement>
 
   /**
    * Sets the starting context from a previous broker interaction (Pact document)
@@ -151,7 +120,7 @@ interface IHalClient {
   /**
    * Upload a JSON document to the current path link, using a PUT request
    */
-  fun putJson(link: String, options: Map<String, Any>, json: String): Result<Boolean, Exception>
+  fun putJson(link: String, options: Map<String, Any>, json: String): Either<Exception, Boolean>
 
   /**
    * Upload a JSON document to the current path link, using a POST request
@@ -161,14 +130,14 @@ interface IHalClient {
   /**
    * Get JSON from the provided path
    */
-  fun getJson(path: String): Result<JsonElement, Exception>
+  fun getJson(path: String): Either<Exception, JsonElement>
 
   /**
    * Get JSON from the provided path
    * @param path Path to fetch the JSON document from
    * @param encodePath If the path should be encoded
    */
-  fun getJson(path: String, encodePath: Boolean): Result<JsonElement, Exception>
+  fun getJson(path: String, encodePath: Boolean): Either<Exception, JsonElement>
 }
 
 /**
@@ -206,11 +175,11 @@ open class HalClient @JvmOverloads constructor(
     url: String,
     body: String,
     handler: ((status: Int, response: CloseableHttpResponse) -> Boolean)?
-  ): Result<Boolean, Exception> {
+  ): Either<Exception, Boolean> {
     logger.debug { "Posting JSON to $url\n$body" }
     val client = setupHttpClient()
 
-    return Result.of {
+    return handleWith {
       val httpPost = initialiseRequest(HttpPost(url))
       httpPost.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
       httpPost.entity = StringEntity(body, ContentType.APPLICATION_JSON)
@@ -253,12 +222,15 @@ open class HalClient @JvmOverloads constructor(
   }
 
   override fun navigate(): IHalClient {
-    pathInfo = fetch(ROOT)
+    when (val result = fetch(ROOT)) {
+      is Either.Right -> pathInfo = result.b
+      is Either.Left -> logger.warn(result.a) { "Could not fetch the root HAL document" }
+    }
     return this
   }
 
   override fun navigate(options: Map<String, Any>, link: String): IHalClient {
-    pathInfo = pathInfo ?: fetch(ROOT)
+    pathInfo = pathInfo ?: fetch(ROOT).unwrap()
     pathInfo = fetchLink(link, options)
     return this
   }
@@ -267,13 +239,10 @@ open class HalClient @JvmOverloads constructor(
 
   override fun fetch(path: String) = fetch(path, true)
 
-  override fun fetch(path: String, encodePath: Boolean): JsonElement {
+  override fun fetch(path: String, encodePath: Boolean): Either<Exception, JsonElement> {
     lastUrl = path
     logger.debug { "Fetching: $path" }
-    when (val response = getJson(path, encodePath)) {
-      is Ok -> return response.value
-      is Err -> throw response.error
-    }
+    return getJson(path, encodePath)
   }
 
   override fun withDocContext(docAttributes: Map<String, Any?>): IHalClient {
@@ -294,44 +263,44 @@ open class HalClient @JvmOverloads constructor(
     return this
   }
 
-  override fun withDocContext(json: JsonElement): IHalClient {
-    pathInfo = json
+  override fun withDocContext(docAttributes: JsonElement): IHalClient {
+    pathInfo = docAttributes
     return this
   }
 
   override fun getJson(path: String) = getJson(path, true)
 
-  override fun getJson(path: String, encodePath: Boolean): Result<JsonElement, Exception> {
+  override fun getJson(path: String, encodePath: Boolean): Either<Exception, JsonElement> {
     setupHttpClient()
-    return Result.of {
+    return handleWith {
       val httpGet = initialiseRequest(HttpGet(buildUrl(baseUrl, path, encodePath)))
       httpGet.addHeader("Content-Type", "application/json")
       httpGet.addHeader("Accept", "application/hal+json, application/json")
 
       val response = httpClient!!.execute(httpGet, httpContext)
-      return@of handleHalResponse(response, path)
+      handleHalResponse(response, path)
     }
   }
 
-  private fun handleHalResponse(response: CloseableHttpResponse, path: String): JsonElement {
-    if (response.statusLine.statusCode < 300) {
+  private fun handleHalResponse(response: CloseableHttpResponse, path: String): Either<Exception, JsonElement> {
+    return if (response.statusLine.statusCode < 300) {
       val contentType = ContentType.getOrDefault(response.entity)
       if (isJsonResponse(contentType)) {
-        return JsonParser.parseString(EntityUtils.toString(response.entity))
+        Either.right(JsonParser.parseString(EntityUtils.toString(response.entity)))
       } else {
-        throw InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got '$contentType'")
+        Either.left(InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got '$contentType'"))
       }
     } else {
       when (response.statusLine.statusCode) {
-        404 -> throw NotFoundHalResponse("No HAL document found at path '$path'")
-        else -> throw RequestFailedException("Request to path '$path' failed with response '${response.statusLine}'")
+        404 -> Either.left(NotFoundHalResponse("No HAL document found at path '$path'"))
+        else -> Either.left(RequestFailedException("Request to path '$path' failed with response '${response.statusLine}'"))
       }
     }
   }
 
   private fun fetchLink(link: String, options: Map<String, Any>): JsonElement {
     val href = hrefForLink(link, options)
-    return this.fetch(href.first, href.second)
+    return this.fetch(href.first, href.second).unwrap()
   }
 
   private fun hrefForLink(link: String, options: Map<String, Any>): Pair<String, Boolean> {
@@ -408,43 +377,7 @@ open class HalClient @JvmOverloads constructor(
   }
 
   fun initPathInfo() {
-    pathInfo = pathInfo ?: fetch(ROOT)
-  }
-
-  override fun uploadJson(path: String, bodyJson: String) = uploadJson(path, bodyJson,
-    BiFunction { _: String, _: String -> null }, true)
-
-  override fun uploadJson(path: String, bodyJson: String, closure: BiFunction<String, String, Any?>) =
-    uploadJson(path, bodyJson, closure, true)
-
-  override fun uploadJson(
-    path: String,
-    bodyJson: String,
-    closure: BiFunction<String, String, Any?>,
-    encodePath: Boolean
-  ): Any? {
-    val client = setupHttpClient()
-    val httpPut = initialiseRequest(HttpPut(buildUrl(baseUrl, path, encodePath)))
-    httpPut.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
-    httpPut.entity = StringEntity(bodyJson, ContentType.APPLICATION_JSON)
-
-    client.execute(httpPut, httpContext).use {
-      return when {
-        it.statusLine.statusCode < 300 -> {
-          EntityUtils.consume(it.entity)
-          closure.apply("OK", it.statusLine.toString())
-        }
-        it.statusLine.statusCode == 409 -> {
-          val body = it.entity.content.bufferedReader().readText()
-          closure.apply("FAILED",
-            "${it.statusLine.statusCode} ${it.statusLine.reasonPhrase} - $body")
-        }
-        else -> {
-          val body = it.entity.content.bufferedReader().readText()
-          handleFailure(it, body, closure)
-        }
-      }
-    }
+    pathInfo = pathInfo ?: fetch(ROOT).unwrap()
   }
 
   fun handleFailure(resp: HttpResponse, body: String?, closure: BiFunction<String, String, Any?>): Any? {
@@ -478,7 +411,7 @@ open class HalClient @JvmOverloads constructor(
   }
 
   override fun linkUrl(name: String): String? {
-    if (pathInfo!!.obj.has(LINKS)) {
+    if (pathInfo != null && pathInfo!!.obj.has(LINKS)) {
       val links = pathInfo!![LINKS]
       if (links.isJsonObject && links.obj.has(name)) {
         val linkData = links[name]
@@ -504,13 +437,13 @@ open class HalClient @JvmOverloads constructor(
     }
   }
 
-  override fun putJson(link: String, options: Map<String, Any>, json: String): Result<Boolean, Exception> {
+  override fun putJson(link: String, options: Map<String, Any>, json: String): Either<Exception, Boolean> {
     val href = hrefForLink(link, options)
     val httpPut = initialiseRequest(HttpPut(buildUrl(baseUrl, href.first, href.second)))
     httpPut.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
     httpPut.entity = StringEntity(json, ContentType.APPLICATION_JSON)
 
-    return Result.of {
+    return handleWith {
       httpClient!!.execute(httpPut, httpContext).use {
         when {
           it.statusLine.statusCode < 300 -> true

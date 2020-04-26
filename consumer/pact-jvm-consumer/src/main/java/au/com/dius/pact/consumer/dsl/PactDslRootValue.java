@@ -87,22 +87,6 @@ public class PactDslRootValue extends DslPart {
    * @deprecated Use PactDslJsonArray for arrays
    */
   @Override
-  public PactDslJsonBody arrayLike(String name) {
-    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
-  }
-
-  /**
-   * @deprecated Use PactDslJsonArray for arrays
-   */
-  @Override
-  public PactDslJsonBody arrayLike() {
-    throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
-  }
-
-  /**
-   * @deprecated Use PactDslJsonArray for arrays
-   */
-  @Override
   public PactDslJsonBody eachLike(String name) {
     throw new UnsupportedOperationException(USE_PACT_DSL_JSON_ARRAY_FOR_ARRAYS);
   }
@@ -399,20 +383,6 @@ public class PactDslRootValue extends DslPart {
     }
     PactDslRootValue rootValue = new PactDslRootValue();
     rootValue.setValue(value);
-    rootValue.setMatcher(rootValue.regexp(regex));
-    return rootValue;
-  }
-
-  /**
-   * Value that must match the regular expression
-   * @param regex regular expression
-   * @deprecated Use the version that takes an example value
-   */
-  @Deprecated
-  public static PactDslRootValue stringMatcher(String regex) {
-    PactDslRootValue rootValue = new PactDslRootValue();
-    rootValue.generators.addGenerator(Category.BODY, "", new RegexGenerator(regex));
-    rootValue.setValue(new Generex(regex).random());
     rootValue.setMatcher(rootValue.regexp(regex));
     return rootValue;
   }

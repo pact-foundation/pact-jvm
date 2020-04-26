@@ -270,27 +270,6 @@ public class PactDslJsonBody extends DslPart {
         return this;
     }
 
-    /**
-     * Attribute that must be a real value
-     * @param name attribute name
-     * @deprecated Use decimal instead
-     */
-    @Deprecated
-    public PactDslJsonBody realType(String name) {
-        return decimalType(name);
-    }
-
-    /**
-     * Attribute that must be a real value
-     * @param name attribute name
-     * @param number example real value
-     * @deprecated Use decimal instead
-     */
-    @Deprecated
-    public PactDslJsonBody realType(String name, Double number) {
-        return decimalType(name, number);
-    }
-
   /**
    * Attribute that must be a decimal value
    * @param name attribute name
@@ -383,9 +362,7 @@ public class PactDslJsonBody extends DslPart {
      * Attribute that must match the regular expression
      * @param name attribute name
      * @param regex regular expression
-     * @deprecated Use the version that takes an example value
      */
-    @Deprecated
     public PactDslJsonBody stringMatcher(String name, String regex) {
       generators.addGenerator(Category.BODY, matcherKey(name), new RegexGenerator(regex));
       stringMatcher(name, regex, new Generex(regex).random());
@@ -691,24 +668,6 @@ public class PactDslJsonBody extends DslPart {
     /**
      * Attribute that is an array where each item must match the following example
      * @param name field name
-     * @deprecated use eachLike
-     */
-    @Override
-    @Deprecated
-    public PactDslJsonBody arrayLike(String name) {
-        matchers.addRule(matcherKey(name), TypeMatcher.INSTANCE);
-        return new PactDslJsonBody(".", ".", new PactDslJsonArray(matcherKey(name), "", this, true));
-    }
-
-    @Override
-    @Deprecated
-    public PactDslJsonBody arrayLike() {
-        throw new UnsupportedOperationException("use the arrayLike(String name) form");
-    }
-
-    /**
-     * Attribute that is an array where each item must match the following example
-     * @param name field name
      */
     @Override
     public PactDslJsonBody eachLike(String name) {
@@ -945,38 +904,6 @@ public class PactDslJsonBody extends DslPart {
         body.put(name, hexValue);
         matchers.addRule(matcherKey(name), regexp("[0-9a-fA-F]+"));
         return this;
-    }
-
-    /**
-     * Attribute that must be encoded as a GUID
-     * @param name attribute name
-     * @deprecated use uuid instead
-     */
-    @Deprecated
-    public PactDslJsonBody guid(String name) {
-        return uuid(name);
-    }
-
-    /**
-     * Attribute that must be encoded as a GUID
-     * @param name attribute name
-     * @param uuid example UUID to use for generated bodies
-     * @deprecated use uuid instead
-     */
-    @Deprecated
-    public PactDslJsonBody guid(String name, UUID uuid) {
-        return uuid(name, uuid);
-    }
-
-    /**
-     * Attribute that must be encoded as a GUID
-     * @param name attribute name
-     * @param uuid example UUID to use for generated bodies
-     * @deprecated use uuid instead
-     */
-    @Deprecated
-    public PactDslJsonBody guid(String name, String uuid) {
-        return uuid(name, uuid);
     }
 
     /**

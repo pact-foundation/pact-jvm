@@ -81,7 +81,7 @@ class MockMvcTestTarget @JvmOverloads constructor(
 
     private fun toMockRequestBuilder(request: Request): MockHttpServletRequestBuilder {
         val body = request.body
-        val requestBuilder = if (body != null && body.isPresent()) {
+        return if (body.isPresent()) {
             if (request.isMultipartFileUpload()) {
                 val multipart = MimeMultipart(ByteArrayDataSource(body.unwrap(), request.contentTypeHeader()))
                 val multipartRequest = MockMvcRequestBuilders.fileUpload(requestUriString(request))
@@ -102,19 +102,16 @@ class MockMvcTestTarget @JvmOverloads constructor(
             }
         } else {
             MockMvcRequestBuilders.request(HttpMethod.valueOf(request.method), requestUriString(request))
-              .contentType(request.contentTypeHeader())
               .headers(mapHeaders(request, false))
         }
-
-        return requestBuilder
     }
 
     private fun requestUriString(request: Request): URI {
         val uriBuilder = UriComponentsBuilder.fromPath(request.path)
 
         val query = request.query
-        if (query != null && query.isNotEmpty()) {
-            query.forEach { key, value ->
+        if (query.isNotEmpty()) {
+            query.forEach { (key, value) ->
                 uriBuilder.queryParam(key, *value.toTypedArray())
             }
         }
@@ -125,7 +122,7 @@ class MockMvcTestTarget @JvmOverloads constructor(
     private fun mapHeaders(request: Request, hasBody: Boolean): HttpHeaders {
         val httpHeaders = HttpHeaders()
 
-        request.headers?.forEach { k, v ->
+        request.headers.forEach { (k, v) ->
             httpHeaders.add(k, v.joinToString(", "))
         }
 

@@ -1,12 +1,10 @@
 package au.com.dius.pact.core.pactbroker
 
 import arrow.core.Either
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
+import au.com.dius.pact.core.support.unwrap
 import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
@@ -21,7 +19,6 @@ import mu.KLogging
 import org.dmfs.rfc3986.encoding.Precoded
 import java.io.File
 import java.net.URLDecoder
-import java.util.function.BiFunction
 import java.util.function.Consumer
 
 /**
@@ -82,22 +79,18 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
 
   constructor(pactBrokerUrl: String) : this(pactBrokerUrl, mapOf())
 
-  /**
-   * Fetches all consumers for the given provider
-   */
-  @Deprecated(message = "Use the version that takes selectors instead",
-    replaceWith = ReplaceWith("fetchConsumersWithSelectors"))
-  open fun fetchConsumers(provider: String): List<PactBrokerConsumer> {
+  @Deprecated(message = "Use fetchConsumersWithSelectors")
+  open fun fetchConsumers(provider: String): List<PactResult> {
     return try {
       val halClient = newHalClient()
-      val consumers = mutableListOf<PactBrokerConsumer>()
+      val consumers = mutableListOf<PactResult>()
       halClient.navigate(mapOf("provider" to provider), LATEST_PROVIDER_PACTS).forAll(PACTS, Consumer { pact ->
         val href = Precoded(pact["href"].toString()).decoded().toString()
         val name = pact["name"].toString()
         if (options.containsKey("authentication")) {
-          consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl, options["authentication"] as List<String>))
+          consumers.add(PactResult(name, href, pactBrokerUrl, options["authentication"] as List<String>))
         } else {
-          consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl))
+          consumers.add(PactResult(name, href, pactBrokerUrl))
         }
       })
       consumers
@@ -110,20 +103,19 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   /**
    * Fetches all consumers for the given provider and tag
    */
-  @Deprecated(message = "Use the version that takes selectors instead",
-    replaceWith = ReplaceWith("fetchConsumersWithSelectors"))
-  open fun fetchConsumersWithTag(provider: String, tag: String): List<PactBrokerConsumer> {
+  @Deprecated(message = "Use fetchConsumersWithSelectors")
+  open fun fetchConsumersWithTag(provider: String, tag: String): List<PactResult> {
     return try {
       val halClient = newHalClient()
-      val consumers = mutableListOf<PactBrokerConsumer>()
+      val consumers = mutableListOf<PactResult>()
       halClient.navigate(mapOf("provider" to provider, "tag" to tag), LATEST_PROVIDER_PACTS_WITH_TAG)
         .forAll(PACTS, Consumer { pact ->
         val href = Precoded(pact["href"].toString()).decoded().toString()
         val name = pact["name"].toString()
         if (options.containsKey("authentication")) {
-          consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl, options["authentication"] as List<String>, tag))
+          consumers.add(PactResult(name, href, pactBrokerUrl, options["authentication"] as List<String>))
         } else {
-          consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl, emptyList(), tag))
+          consumers.add(PactResult(name, href, pactBrokerUrl, emptyList()))
         }
       })
       consumers
@@ -136,7 +128,11 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   /**
    * Fetches all consumers for the given provider and selectors
    */
-  open fun fetchConsumersWithSelectors(provider: String, consumerVersionSelectors: List<ConsumerVersionSelector>): Either<Exception, List<PactResult>> {
+  @JvmOverloads
+  open fun fetchConsumersWithSelectors(
+    provider: String,
+    consumerVersionSelectors: List<ConsumerVersionSelector> = emptyList()
+  ): Either<Exception, List<PactResult>> {
     val halClient = newHalClient().navigate()
     val pactsForVerification = when {
       halClient.linkUrl(PROVIDER_PACTS_FOR_VERIFICATION) != null -> PROVIDER_PACTS_FOR_VERIFICATION
@@ -166,10 +162,9 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     } else {
       return handleWith {
         if (consumerVersionSelectors.isEmpty()) {
-          fetchConsumers(provider).map { PactResult.fromConsumer(it) }
+          fetchConsumers(provider)
         } else {
           fetchConsumersWithTag(provider, consumerVersionSelectors.first().tag)
-            .map { PactResult.fromConsumer(it) }
         }
       }
     }
@@ -179,24 +174,25 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
    * Uploads the given pact file to the broker, and optionally applies any tags
    */
   @JvmOverloads
-  open fun uploadPactFile(pactFile: File, unescapedVersion: String, tags: List<String> = emptyList()): Any? {
+  open fun uploadPactFile(
+    pactFile: File,
+    unescapedVersion: String,
+    tags: List<String> = emptyList()
+  ): Either<Exception, Boolean> {
     val pactText = pactFile.readText()
     val pact = JsonParser.parseString(pactText)
     val halClient = newHalClient()
     val providerName = urlPathSegmentEscaper().escape(pact["provider"]["name"].string)
     val consumerName = urlPathSegmentEscaper().escape(pact["consumer"]["name"].string)
     val version = urlPathSegmentEscaper().escape(unescapedVersion)
-    val uploadPath = "/pacts/provider/$providerName/consumer/$consumerName/version/$version"
     if (tags.isNotEmpty()) {
       uploadTags(halClient, consumerName, version, tags)
     }
-    return halClient.uploadJson(uploadPath, pactText, BiFunction { result, status ->
-      if (result == "OK") {
-        status
-      } else {
-        "FAILED! $status"
-      }
-    }, false)
+    return halClient.navigate().putJson("pb:publish-pact", mapOf(
+      "provider" to providerName,
+      "consumer" to consumerName,
+      "consumerApplicationVersion" to version
+    ), pactText)
   }
 
   open fun getUrlForProvider(providerName: String, tag: String): String? {
@@ -210,7 +206,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   }
 
   open fun fetchPact(url: String, encodePath: Boolean = true): PactResponse {
-    val halDoc = newHalClient().fetch(url, encodePath).obj
+    val halDoc = newHalClient().fetch(url, encodePath).unwrap().obj
     return PactResponse(halDoc, HalClient.asMap(halDoc["_links"].obj))
   }
 
@@ -225,22 +221,22 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     result: TestResult,
     version: String,
     buildUrl: String? = null
-  ): Result<Boolean, Exception> {
+  ): Either<String, Boolean> {
     val halClient = newHalClient()
     val publishLink = docAttributes.mapKeys { it.key.toLowerCase() } ["pb:publish-verification-results"] // ktlint-disable curly-spacing
     return if (publishLink is Map<*, *>) {
       val jsonObject = buildPayload(result, version, buildUrl)
-
       val lowercaseMap = publishLink.mapKeys { it.key.toString().toLowerCase() }
       if (lowercaseMap.containsKey("href")) {
-        halClient.postJson(lowercaseMap["href"].toString(), jsonObject.toString())
+        halClient.postJson(lowercaseMap["href"].toString(), jsonObject.toString()).mapLeft {
+          logger.error(it) { "Publishing verification results failed with an exception" }
+          "Publishing verification results failed with an exception: ${it.message}"
+        }
       } else {
-        Err(RuntimeException("Unable to publish verification results as there is no " +
-          "pb:publish-verification-results link"))
+        Either.left("Unable to publish verification results as there is no pb:publish-verification-results link")
       }
     } else {
-      Err(RuntimeException("Unable to publish verification results as there is no " +
-        "pb:publish-verification-results link"))
+      Either.left("Unable to publish verification results as there is no pb:publish-verification-results link")
     }
   }
 
@@ -325,18 +321,18 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
    */
   @Deprecated(message = "Use the version that takes selectors instead",
     replaceWith = ReplaceWith("fetchConsumersWithSelectors"))
-  open fun fetchLatestConsumersWithNoTag(provider: String): List<PactBrokerConsumer> {
+  open fun fetchLatestConsumersWithNoTag(provider: String): List<PactResult> {
     return try {
       val halClient = newHalClient()
-      val consumers = mutableListOf<PactBrokerConsumer>()
+      val consumers = mutableListOf<PactResult>()
       halClient.navigate(mapOf("provider" to provider), LATEST_PROVIDER_PACTS_WITH_NO_TAG)
         .forAll(PACTS, Consumer { pact ->
           val href = URLDecoder.decode(pact["href"].toString(), UTF8)
           val name = pact["name"].toString()
           if (options.containsKey("authentication")) {
-            consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl, options["authentication"] as List<String>))
+            consumers.add(PactResult(name, href, pactBrokerUrl, options["authentication"] as List<String>))
           } else {
-            consumers.add(PactBrokerConsumer(name, href, pactBrokerUrl, emptyList()))
+            consumers.add(PactResult(name, href, pactBrokerUrl, emptyList()))
           }
         })
       consumers
@@ -352,8 +348,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
         .withDocContext(docAttributes)
         .navigate(PROVIDER)
       when (val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tag), "{}")) {
-        is Ok -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
-        is Err -> logger.error(result.error) { "Failed to push tag $tag for provider $name and version $version" }
+        is Either.Right -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
+        is Either.Left -> logger.error(result.a) { "Failed to push tag $tag for provider $name and version $version" }
       }
     } catch (e: NotFoundHalResponse) {
       logger.error(e) { "Could not tag provider $name, link was missing" }
@@ -365,13 +361,13 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     val result = halClient.getJson("/matrix" + buildMatrixQuery(pacticipant, pacticipantVersion, latest, to),
       false)
     return when (result) {
-      is Ok -> {
-        val summary = result.value.asJsonObject["summary"].asJsonObject
+      is Either.Right -> {
+        val summary = result.b.asJsonObject["summary"].asJsonObject
         CanIDeployResult(Json.toBoolean(summary["deployable"]), "", Json.toString(summary["reason"]))
       }
-      is Err -> {
-        logger.error(result.error) { "Pact broker matrix query failed: ${result.error.message}" }
-        CanIDeployResult(false, result.error.message.toString(), "")
+      is Either.Left -> {
+        logger.error(result.a) { "Pact broker matrix query failed: ${result.a.message}" }
+        CanIDeployResult(false, result.a.message.toString(), "")
       }
     }
   }
@@ -407,10 +403,16 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     const val UTF8 = "UTF-8"
 
     fun uploadTags(halClient: IHalClient, consumerName: String, version: String, tags: List<String>) {
+      halClient.navigate()
       tags.forEach {
-        val tag = urlPathSegmentEscaper().escape(it)
-        halClient.uploadJson("/pacticipants/$consumerName/versions/$version/tags/$tag", "",
-          BiFunction { _, _ -> null }, false)
+        val result = halClient.putJson("pb:pacticipant-version-tag", mapOf(
+          "pacticipant" to consumerName,
+          "version" to version,
+          "tag" to it
+        ), "{}")
+        if (result is Either.Left) {
+          logger.error(result.a) { "Failed to push tag $it for consumer $consumerName and version $version" }
+        }
       }
     }
   }

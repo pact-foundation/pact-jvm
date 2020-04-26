@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.core.model.PactSpecVersion
 import spock.lang.Specification
 
 class UrlMatcherSpec extends Specification {
@@ -10,6 +11,6 @@ class UrlMatcherSpec extends Specification {
       ['a', new RegexpMatcher(value: '123', regex: '\\d+'), 'b'])
 
     then:
-    matcher.matcher.toMap() == [match: 'regex', regex: '.*\\Qa\\E\\/\\d+\\/\\Qb\\E$' ]
+    matcher.matcher.toMap(PactSpecVersion.V3) == [match: 'regex', regex: '.*\\Qa\\E\\/\\d+\\/\\Qb\\E$' ]
   }
 }

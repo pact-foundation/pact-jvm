@@ -5,6 +5,7 @@ import java.net.URL
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 import arrow.core.Either
+import java.lang.RuntimeException
 
 public fun String?.isNotEmpty(): Boolean = !this.isNullOrEmpty()
 
@@ -34,5 +35,15 @@ public fun <F> handleWith(f: () -> Any): Either<Exception, F> {
     if (result is Either<*, *>) result as Either<Exception, F> else Either.right(result as F)
   } catch (ex: Exception) {
     Either.left(ex)
+  }
+}
+
+public fun <A, B> Either<A, B>.unwrap(): B {
+  when (this) {
+    is Either.Left -> when (a) {
+      is Throwable -> throw a as Throwable
+      else -> throw RuntimeException(a.toString())
+    }
+    is Either.Right -> return b
   }
 }

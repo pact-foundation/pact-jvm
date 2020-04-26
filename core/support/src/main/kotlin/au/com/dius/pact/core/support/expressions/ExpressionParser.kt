@@ -50,15 +50,6 @@ object ExpressionParser {
 
   @JvmOverloads
   @JvmStatic
-  @Deprecated(message = "Use version that takes a data type parameter")
-  fun parseExpression(value: String?, valueResolver: ValueResolver = SystemPropertyResolver()): String? {
-    return if (containsExpressions(value)) {
-      replaceExpressions(value!!, valueResolver)
-    } else value
-  }
-
-  @JvmOverloads
-  @JvmStatic
   fun parseExpression(value: String?, type: DataType, valueResolver: ValueResolver = SystemPropertyResolver()): Any? {
     return if (containsExpressions(value)) {
       type.convert(replaceExpressions(value!!, valueResolver))

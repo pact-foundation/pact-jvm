@@ -49,9 +49,21 @@ class PactBrokerClientPactSpec extends Specification {
   def 'returns success when uploading a pact is ok'() {
     given:
     pactBroker {
+      uponReceiving('a HAL navigate request')
+      withAttributes(method: 'GET', path: '/')
+      willRespondWith(status: 200)
+      withBody(mimetype: 'application/json') {
+        _links {
+          'pb:publish-pact' {
+            href url('http://localhost:8080', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
+            title 'Publish a pact'
+            templated true
+          }
+        }
+      }
       uponReceiving('a pact publish request')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
+        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0',
         body: pactContents
       )
       willRespondWith(status: 200)
@@ -59,7 +71,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'HTTP/1.1 200 OK'
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').b
     }
 
     then:
@@ -69,9 +81,21 @@ class PactBrokerClientPactSpec extends Specification {
   def 'returns an error when forbidden to publish the pact'() {
     given:
     pactBroker {
+      uponReceiving('a HAL navigate request')
+      withAttributes(method: 'GET', path: '/')
+      willRespondWith(status: 200)
+      withBody(mimetype: 'application/json') {
+        _links {
+          'pb:publish-pact' {
+            href url('http://localhost:8080', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
+            title 'Publish a pact'
+            templated true
+          }
+        }
+      }
       uponReceiving('a pact publish request which will be forbidden')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
+        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0',
         body: pactContents
       )
       willRespondWith(status: 401, headers: [
@@ -81,7 +105,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'FAILED! 401 Unauthorized'
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').b == false
     }
 
     then:
@@ -92,10 +116,22 @@ class PactBrokerClientPactSpec extends Specification {
   def 'returns an error if the pact broker rejects the pact'() {
     given:
     pactBroker {
+      uponReceiving('a HAL navigate request')
+      withAttributes(method: 'GET', path: '/')
+      willRespondWith(status: 200)
+      withBody(mimetype: 'application/json') {
+        _links {
+          'pb:publish-pact' {
+            href url('http://localhost:8080', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
+            title 'Publish a pact'
+            templated true
+          }
+        }
+      }
       given('No pact has been published between the Provider and Foo Consumer')
       uponReceiving('a pact publish request with invalid version')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/XXXX',
+        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/XXXX',
         body: pactContents
       )
       willRespondWith(status: 400, headers: ['Content-Type': 'application/json;charset=utf-8'],
@@ -113,9 +149,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, 'XXXX') == 'FAILED! 400 Bad Request - ' +
-        'consumer_version_number: Consumer version number \'XXX\' cannot be parsed to a version number. ' +
-        'The expected format (unless this configuration has been overridden) is a semantic version. eg. 1.3.0 or 2.0.4.rc1'
+      assert pactBrokerClient.uploadPactFile(pactFile, 'XXXX').b == false
     }
 
     then:
@@ -126,10 +160,22 @@ class PactBrokerClientPactSpec extends Specification {
   def 'returns an error if the pact broker rejects the pact with a conflict'() {
     given:
     pactBroker {
+      uponReceiving('a HAL navigate request')
+      withAttributes(method: 'GET', path: '/')
+      willRespondWith(status: 200)
+      withBody(mimetype: 'application/json') {
+        _links {
+          'pb:publish-pact' {
+            href url('http://localhost:8080', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
+            title 'Publish a pact'
+            templated true
+          }
+        }
+      }
       given('No pact has been published between the Provider and Foo Consumer and there is a similar consumer')
       uponReceiving('a pact publish request')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
+        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0',
         body: pactContents
       )
       willRespondWith(status: 409, headers: ['Content-Type': 'text/plain'],
@@ -146,7 +192,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').startsWith('FAILED! 409 Conflict - ')
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').b == false
     }
 
     then:
@@ -157,10 +203,22 @@ class PactBrokerClientPactSpec extends Specification {
   def 'handles non-json failure responses'() {
     given:
     imaginaryBroker {
+      uponReceiving('a HAL navigate request')
+      withAttributes(method: 'GET', path: '/')
+      willRespondWith(status: 200)
+      withBody(mimetype: 'application/json') {
+        _links {
+          'pb:publish-pact' {
+            href url('http://localhost:8080', 'pacts/provider/{provider}/consumer/{consumer}/version/{consumerApplicationVersion}')
+            title 'Publish a pact'
+            templated true
+          }
+        }
+      }
       given('Non-JSON response')
       uponReceiving('a pact publish request')
       withAttributes(method: 'PUT',
-        path: '/pacts/provider/Provider/consumer/Foo Consumer/version/10.0.0',
+        path: '/pacts/provider/Provider/consumer/Foo%20Consumer/version/10.0.0',
         body: pactContents
       )
       willRespondWith(status: 400, headers: ['Content-Type': 'text/plain'],
@@ -170,7 +228,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = imaginaryBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0') == 'FAILED! 400 Bad Request - Enjoy this bit of text'
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').b == false
     }
 
     then:
@@ -245,7 +303,7 @@ class PactBrokerClientPactSpec extends Specification {
           href: 'http://localhost:8080/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
             '/verification-results'
         ]
-      ], TestResult.Ok.INSTANCE, '10.0.0') instanceof Ok
+      ], TestResult.Ok.INSTANCE, '10.0.0').b
     }
 
     then:
@@ -271,7 +329,7 @@ class PactBrokerClientPactSpec extends Specification {
           href: 'http://localhost:8080/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
             '/verification-results'
         ]
-      ], TestResult.Ok.INSTANCE, '10.0.0', 'http://localhost:8080/build') instanceof Ok
+      ], TestResult.Ok.INSTANCE, '10.0.0', 'http://localhost:8080/build').b
     }
 
     then:

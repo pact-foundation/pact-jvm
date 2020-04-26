@@ -42,7 +42,7 @@ abstract class BaseRequest : HttpPart() {
   /**
    * If this request represents a multipart file upload
    */
-  fun isMultipartFileUpload() = mimeType().equals("multipart/form-data", ignoreCase = true)
+  fun isMultipartFileUpload() = contentType().equals("multipart/form-data", ignoreCase = true)
 
   companion object {
     fun parseQueryParametersToMap(query: JsonElement?): Map<String, List<String>> {
