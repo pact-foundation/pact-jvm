@@ -73,7 +73,8 @@ class PactProviderMojoSpec extends Specification {
     given:
     def provider = Mock(Provider) {
       getPactBrokerUrl() >> null
-      getPactBroker() >> new PactBroker(new URL('http://broker:1234'), null, new BasicAuth('test', 'test'))
+      getPactBroker() >> new PactBroker(new URL('http://broker:1234'), null,
+        new PactBrokerAuth('basic', null, 'test', 'test'))
     }
     def list = []
 

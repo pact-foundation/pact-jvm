@@ -1,10 +1,9 @@
 package au.com.dius.pact.consumer;
 
-import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.model.PactFragment;
+import au.com.dius.pact.model.PactSpecVersion;
 import au.com.dius.pact.model.RequestResponsePact;
-import au.com.dius.pact.core.model.generators.Generators;
-import au.com.dius.pact.model.matchingrules.MatchingRule;
+import au.com.dius.pact.model.generators.Generators;
 import au.com.dius.pact.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.model.matchingrules.MatchingRules;
 import au.com.dius.pact.model.v3.messaging.MessagePact;

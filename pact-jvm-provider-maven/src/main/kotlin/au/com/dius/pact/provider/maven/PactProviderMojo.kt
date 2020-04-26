@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider.maven
 
-import au.com.dius.pact.core.support.toUrl
+import au.com.dius.pact.support.toUrl
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
@@ -136,8 +136,12 @@ open class PactProviderMojo : PactBaseMojo() {
     val options = brokerClientOptions.toMutableMap()
 
     if (pactBroker?.authentication != null) {
-      options["authentication"] = listOf("basic", provider.pactBroker.authentication.username,
-        provider.pactBroker.authentication.password)
+      if ("bearer" == provider.pactBroker?.authentication?.scheme || provider.pactBroker?.authentication?.token != null) {
+        options["authentication"] = listOf("bearer", provider.pactBroker!!.authentication!!.token)
+      } else if ("basic" == provider.pactBroker?.authentication?.scheme) {
+        options["authentication"] = listOf(provider.pactBroker!!.authentication!!.scheme, provider.pactBroker!!.authentication!!.username,
+          provider.pactBroker!!.authentication!!.password)
+      }
     } else if (!pactBroker?.serverId.isNullOrEmpty()) {
       val serverDetails = settings.getServer(provider.pactBroker!!.serverId)
       val request = DefaultSettingsDecryptionRequest(serverDetails)

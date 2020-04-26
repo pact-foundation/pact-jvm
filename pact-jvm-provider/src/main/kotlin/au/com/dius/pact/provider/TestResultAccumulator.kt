@@ -54,7 +54,7 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
       } else {
         verificationReporter.reportResults(pact, interactionResults.values.fold(TestResult.Ok) {
           acc: TestResult, result -> acc.merge(result)
-        }, lookupProviderVersion(), null, lookupProviderTag())
+        }, lookupProviderVersion(), null)
       }
       testResults.remove(pactHash)
     } else {

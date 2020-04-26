@@ -27,12 +27,17 @@ public @interface PactBrokerAuth {
   String scheme() default "";
 
   /**
-   * Username to use for authentication
+   * Username to use for basic authentication
    */
   String username() default "";
 
   /**
-   * Password to use for authentication
+   * Password to use for basic authentication
    */
   String password() default "";
+
+  /**
+   * Token to use for bearer token authentication
+   */
+  String token() default "";
 }

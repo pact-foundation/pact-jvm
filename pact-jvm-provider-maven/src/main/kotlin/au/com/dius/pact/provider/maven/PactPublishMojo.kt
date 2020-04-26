@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.maven
 
 import au.com.dius.pact.provider.broker.PactBrokerClient
-import au.com.dius.pact.core.support.isNotEmpty
+import au.com.dius.pact.support.isNotEmpty
 import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter

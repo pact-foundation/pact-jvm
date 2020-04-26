@@ -212,8 +212,7 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.updateTestResult(pact, interaction1, TestResult.Ok.INSTANCE)
 
     then:
-    1 * testResultAccumulator.verificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, _,
-      'updateTestResultTag')
+    1 * testResultAccumulator.verificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, _)
     testResultAccumulator.testResults.isEmpty()
 
     cleanup:

@@ -2,6 +2,9 @@ package au.com.dius.pact.model
 
 import org.apache.commons.collections4.iterators.PushbackIterator
 
+const val PATH_SPECIAL_CHARS = "'[].@ \t\n"
+const val EXP_ALLOWED_SPECIAL_CHARS = "-_:"
+
 sealed class PathToken {
   object Root : PathToken()
   data class Field(val name: String) : PathToken()
@@ -60,12 +63,12 @@ fun indexPath(
   tokens.add(PathToken.Index(id.toInt()))
 }
 
-// identifier -> a-zA-Z0-9\-+
+// identifier -> a-zA-Z0-9\-:+
 fun identifier(ch: Char, chars: PushbackIterator<IndexedValue<Char>>, tokens: MutableList<PathToken>, path: String) {
   var id = String() + ch
   while (chars.hasNext()) {
     val c = chars.next()
-    if (c.value.isLetterOrDigit() || c.value == '-' || c.value == '_') {
+    if (c.value.isLetterOrDigit() || EXP_ALLOWED_SPECIAL_CHARS.contains(c.value)) {
       id += c.value
     } else if (c.value == '.' || c.value == '\'' || c.value == '[') {
       chars.pushback(c)
@@ -79,7 +82,12 @@ fun identifier(ch: Char, chars: PushbackIterator<IndexedValue<Char>>, tokens: Mu
 }
 
 // path_identifier -> identifier | *
-fun pathIdentifier(chars: PushbackIterator<IndexedValue<Char>>, tokens: MutableList<PathToken>, path: String, index: Int) {
+fun pathIdentifier(
+  chars: PushbackIterator<IndexedValue<Char>>,
+  tokens: MutableList<PathToken>,
+  path: String,
+  index: Int
+) {
   if (chars.hasNext()) {
     val ch = chars.next()
     when {
