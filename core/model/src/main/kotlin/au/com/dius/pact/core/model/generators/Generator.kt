@@ -253,7 +253,7 @@ data class DateGenerator @JvmOverloads constructor(
 
   companion object {
     fun fromJson(json: JsonObject): DateGenerator {
-      return DateGenerator(Json.toString(json["format"]), Json.toString(json["expression"]))
+      return DateGenerator(Json.toNullableString(json["format"]), Json.toNullableString(json["expression"]))
     }
   }
 }
@@ -286,7 +286,7 @@ data class TimeGenerator @JvmOverloads constructor(val format: String? = null, v
 
   companion object {
     fun fromJson(json: JsonObject): TimeGenerator {
-      return TimeGenerator(Json.toString(json["format"]), Json.toString(json["expression"]))
+      return TimeGenerator(Json.toNullableString(json["format"]), Json.toNullableString(json["expression"]))
     }
   }
 }
@@ -323,7 +323,7 @@ data class DateTimeGenerator @JvmOverloads constructor(
 
   companion object {
     fun fromJson(json: JsonObject): DateTimeGenerator {
-      return DateTimeGenerator(Json.toString(json["format"]), Json.toString(json["expression"]))
+      return DateTimeGenerator(Json.toNullableString(json["format"]), Json.toNullableString(json["expression"]))
     }
   }
 }
