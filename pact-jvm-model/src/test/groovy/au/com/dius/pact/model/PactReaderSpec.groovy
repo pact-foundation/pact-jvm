@@ -5,12 +5,13 @@ import au.com.dius.pact.pactbroker.CustomServiceUnavailableRetryStrategy
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.S3Object
 import com.amazonaws.services.s3.model.S3ObjectInputStream
+import groovy.json.JsonSlurper
 import org.apache.http.impl.client.BasicCredentialsProvider
 import spock.lang.Issue
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static au.com.dius.pact.core.model.generators.Category.BODY
+import static au.com.dius.pact.model.generators.Category.BODY
 
 @SuppressWarnings('DuplicateMapLiteral')
 class PactReaderSpec extends Specification {
@@ -333,7 +334,7 @@ class PactReaderSpec extends Specification {
   @Unroll
   def 'determining pact spec version'() {
     expect:
-    DefaultPactReader.INSTANCE.determineSpecVersion(JsonParser.parseString(json)) == version
+    PactReader.determineSpecVersion(new JsonSlurper().parseText(json)) == version
 
     where:
 
@@ -356,7 +357,7 @@ class PactReaderSpec extends Specification {
     def pactUrl = PactReaderSpec.classLoader.getResource('encoded-values-pact.json')
 
     when:
-    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
+    def pact = PactReader.loadPact(pactUrl)
 
     then:
     pact instanceof RequestResponsePact

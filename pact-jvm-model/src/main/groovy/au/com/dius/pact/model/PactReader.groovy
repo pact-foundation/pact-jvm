@@ -27,15 +27,7 @@ class PactReader {
    */
   static Pact<? extends Interaction> loadPact(Map options = [:], def source) {
     Pair<Object, PactSource> pactInfo = loadFile(source, options)
-    def version = '2.0.0'
-    def metadata = pactInfo.first.metadata
-    def specification = metadata?.'pactSpecification' ?: metadata?.'pact-specification'
-    if (specification instanceof Map && specification.version) {
-      version = specification.version
-    }
-    if (version == '3.0') {
-        version = '3.0.0'
-    }
+    def version = determineSpecVersion(pactInfo.first)
     def specVersion = Version.valueOf(version)
     switch (specVersion.majorVersion) {
         case 3:
@@ -43,6 +35,35 @@ class PactReader {
         default:
             return loadV2Pact(pactInfo.second, pactInfo.first)
     }
+  }
+
+  static String determineSpecVersion(def pactInfo) {
+    def version = '2.0.0'
+    if (pactInfo.metadata) {
+      def metadata = pactInfo.metadata as Map
+      if (metadata.containsKey('pactSpecificationVersion')) {
+        version = metadata['pactSpecificationVersion']
+      } else if (metadata.containsKey('pactSpecification')) {
+        version = specVersion(metadata['pactSpecification'], version)
+      } else if (metadata.containsKey('pact-specification')) {
+        version = specVersion(metadata['pact-specification'], version)
+      }
+    }
+
+    if (version == '3.0') {
+      version = '3.0.0'
+    }
+
+    version
+  }
+
+  private static String specVersion(def specification, String defaultVersion) {
+    if (specification instanceof Map && specification.containsKey('version') &&
+            specification['version'] instanceof String) {
+      return specification['version']
+    }
+
+    defaultVersion
   }
 
   @SuppressWarnings('UnusedMethodParameter')
