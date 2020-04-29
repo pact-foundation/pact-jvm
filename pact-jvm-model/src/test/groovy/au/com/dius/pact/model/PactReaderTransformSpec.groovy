@@ -1,5 +1,6 @@
 package au.com.dius.pact.model
 
+import au.com.dius.pact.support.Json
 import groovy.json.JsonSlurper
 import spock.lang.Specification
 
@@ -41,17 +42,35 @@ class PactReaderTransformSpec extends Specification {
     def result = PactReader.transformJson(jsonMap)
 
     then:
-    result == [
-      provider: provider,
-      consumer: consumer,
-      interactions: [
-        [
-          description: 'a retrieve Mallory request',
-          request: request,
-          response: response
-        ]
-      ]
-    ]
+    Json.INSTANCE.gsonPretty.toJson(result) == '''{
+      |  "provider": {
+      |    "name": "Alice Service"
+      |  },
+      |  "consumer": {
+      |    "name": "Consumer"
+      |  },
+      |  "interactions": [
+      |    {
+      |      "description": "a retrieve Mallory request",
+      |      "request": {
+      |        "method": "GET",
+      |        "path": "/mallory",
+      |        "query": "name=ron&status=good",
+      |        "body": {
+      |          "id": "123",
+      |          "method": "create"
+      |        }
+      |      },
+      |      "response": {
+      |        "status": 200,
+      |        "headers": {
+      |          "Content-Type": "text/html"
+      |        },
+      |        "body": "\\"That is some good Mallory.\\""
+      |      }
+      |    }
+      |  ]
+      |}'''.stripMargin()
   }
 
   def 'converts provider state to camel case'() {
@@ -62,18 +81,36 @@ class PactReaderTransformSpec extends Specification {
     def result = PactReader.transformJson(jsonMap)
 
     then:
-    result == [
-      provider: provider,
-      consumer: consumer,
-      interactions: [
-        [
-          description: 'a retrieve Mallory request',
-          providerState: 'provider state',
-          request: request,
-          response: response
-        ]
-      ]
-    ]
+    Json.INSTANCE.gsonPretty.toJson(result) == '''{
+      |  "provider": {
+      |    "name": "Alice Service"
+      |  },
+      |  "consumer": {
+      |    "name": "Consumer"
+      |  },
+      |  "interactions": [
+      |    {
+      |      "description": "a retrieve Mallory request",
+      |      "request": {
+      |        "method": "GET",
+      |        "path": "/mallory",
+      |        "query": "name=ron&status=good",
+      |        "body": {
+      |          "id": "123",
+      |          "method": "create"
+      |        }
+      |      },
+      |      "response": {
+      |        "status": 200,
+      |        "headers": {
+      |          "Content-Type": "text/html"
+      |        },
+      |        "body": "\\"That is some good Mallory.\\""
+      |      },
+      |      "providerState": "provider state"
+      |    }
+      |  ]
+      |}'''.stripMargin()
   }
 
   def 'handles both a snake and camel case provider state'() {
@@ -85,18 +122,36 @@ class PactReaderTransformSpec extends Specification {
     def result = PactReader.transformJson(jsonMap)
 
     then:
-    result == [
-      provider: provider,
-      consumer: consumer,
-      interactions: [
-        [
-          description: 'a retrieve Mallory request',
-          providerState: 'provider state 2',
-          request: request,
-          response: response
-        ]
-      ]
-    ]
+    Json.INSTANCE.gsonPretty.toJson(result) == '''{
+      |  "provider": {
+      |    "name": "Alice Service"
+      |  },
+      |  "consumer": {
+      |    "name": "Consumer"
+      |  },
+      |  "interactions": [
+      |    {
+      |      "description": "a retrieve Mallory request",
+      |      "request": {
+      |        "method": "GET",
+      |        "path": "/mallory",
+      |        "query": "name=ron&status=good",
+      |        "body": {
+      |          "id": "123",
+      |          "method": "create"
+      |        }
+      |      },
+      |      "response": {
+      |        "status": 200,
+      |        "headers": {
+      |          "Content-Type": "text/html"
+      |        },
+      |        "body": "\\"That is some good Mallory.\\""
+      |      },
+      |      "providerState": "provider state 2"
+      |    }
+      |  ]
+      |}'''.stripMargin()
   }
 
   def 'converts request and response matching rules'() {
@@ -108,38 +163,92 @@ class PactReaderTransformSpec extends Specification {
     def result = PactReader.transformJson(jsonMap)
 
     then:
-    result == [
-      provider: provider,
-      consumer: consumer,
-      interactions: [
-        [
-          description: 'a retrieve Mallory request',
-          request: request + [matchingRules: [body: ['$': [ [match: 'type'] ]]]],
-          response: response + [matchingRules: [body: ['$': [ [match: 'type']]]]]
-        ]
-      ]
-    ]
+    Json.INSTANCE.gsonPretty.toJson(result) == '''{
+      |  "provider": {
+      |    "name": "Alice Service"
+      |  },
+      |  "consumer": {
+      |    "name": "Consumer"
+      |  },
+      |  "interactions": [
+      |    {
+      |      "description": "a retrieve Mallory request",
+      |      "request": {
+      |        "method": "GET",
+      |        "path": "/mallory",
+      |        "query": "name=ron&status=good",
+      |        "body": {
+      |          "id": "123",
+      |          "method": "create"
+      |        },
+      |        "matchingRules": {
+      |          "body": {
+      |            "$": [
+      |              {
+      |                "match": "type"
+      |              }
+      |            ]
+      |          }
+      |        }
+      |      },
+      |      "response": {
+      |        "status": 200,
+      |        "headers": {
+      |          "Content-Type": "text/html"
+      |        },
+      |        "body": "\\"That is some good Mallory.\\"",
+      |        "matchingRules": {
+      |          "body": {
+      |            "$": [
+      |              {
+      |                "match": "type"
+      |              }
+      |            ]
+      |          }
+      |        }
+      |      }
+      |    }
+      |  ]
+      |}'''.stripMargin()
   }
 
   def 'converts the http methods to upper case'() {
     given:
-    jsonMap.interactions[0].request.method = 'get'
+    jsonMap.interactions[0].request.method = 'post'
 
     when:
     def result = PactReader.transformJson(jsonMap)
 
     then:
-    result == [
-      provider: provider,
-      consumer: consumer,
-      interactions: [
-        [
-          description: 'a retrieve Mallory request',
-          request: request,
-          response: response
-        ]
-      ]
-    ]
+    Json.INSTANCE.gsonPretty.toJson(result) == '''{
+      |  "provider": {
+      |    "name": "Alice Service"
+      |  },
+      |  "consumer": {
+      |    "name": "Consumer"
+      |  },
+      |  "interactions": [
+      |    {
+      |      "description": "a retrieve Mallory request",
+      |      "request": {
+      |        "method": "POST",
+      |        "path": "/mallory",
+      |        "query": "name=ron&status=good",
+      |        "body": {
+      |          "id": "123",
+      |          "method": "create"
+      |        }
+      |      },
+      |      "response": {
+      |        "status": 200,
+      |        "headers": {
+      |          "Content-Type": "text/html"
+      |        },
+      |        "body": "\\"That is some good Mallory.\\""
+      |      }
+      |    }
+      |  ]
+      |}'''.stripMargin()
   }
 
 }

@@ -6,11 +6,15 @@ import au.com.dius.pact.model.OptionalBody
 import au.com.dius.pact.model.PactSpecVersion
 import au.com.dius.pact.model.PathToken
 import au.com.dius.pact.model.parsePath
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
+import au.com.dius.pact.support.Json
+import com.github.salomonbrys.kotson.array
+import com.github.salomonbrys.kotson.forEach
+import com.github.salomonbrys.kotson.obj
+import com.github.salomonbrys.kotson.set
+import com.google.gson.JsonElement
+import com.google.gson.JsonParser
 import mu.KLogging
 import org.apache.commons.collections4.IteratorUtils
-import java.nio.charset.Charset
 
 enum class Category {
   METHOD, PATH, HEADER, QUERY, BODY, STATUS, METADATA
@@ -30,23 +34,23 @@ fun setupDefaultContentTypeHandlers() {
   contentTypeHandlers["application/json"] = JsonContentTypeHandler
 }
 
-data class QueryResult(var value: Any?, val key: Any? = null, val parent: Any? = null)
+data class QueryResult(var value: JsonElement?, val key: Any? = null, val parent: JsonElement? = null)
 
 object JsonContentTypeHandler : ContentTypeHandler {
   override fun processBody(value: OptionalBody, fn: (QueryResult) -> Unit): OptionalBody {
     val bodyJson = QueryResult(JsonParser.parseString(value.valueAsString()))
     fn.invoke(bodyJson)
-    return OptionalBody.body(JsonOutput.toJson(bodyJson.value).toByteArray(value.contentType.asCharset()))
+    return OptionalBody.body(Json.gson.toJson(bodyJson.value).toByteArray(value.contentType.asCharset()), ContentType.JSON)
   }
 
   override fun applyKey(body: QueryResult, key: String, generator: Generator, context: Map<String, Any?>) {
     val pathExp = parsePath(key)
     queryObjectGraph(pathExp.iterator(), body) { (_, valueKey, parent) ->
       @Suppress("UNCHECKED_CAST")
-      when (parent) {
-        is MutableMap<*, *> -> (parent as MutableMap<String, Any?>)[valueKey.toString()] = generator.generate(context)
-        is MutableList<*> -> (parent as MutableList<Any?>)[valueKey as Int] = generator.generate(context)
-        else -> body.value = generator.generate(context)
+      when {
+        parent != null && parent.isJsonObject -> parent.obj[valueKey.toString()] = Json.toJson(generator.generate(context))
+        parent != null && parent.isJsonArray -> parent[valueKey as Int] = Json.toJson(generator.generate(context))
+        else -> body.value = Json.toJson(generator.generate(context))
       }
     }
   }
@@ -54,33 +58,31 @@ object JsonContentTypeHandler : ContentTypeHandler {
   private fun queryObjectGraph(pathExp: Iterator<PathToken>, body: QueryResult, fn: (QueryResult) -> Unit) {
     var bodyCursor = body
     while (pathExp.hasNext()) {
-      val token = pathExp.next()
-      when (token) {
-        is PathToken.Field -> if (bodyCursor.value is Map<*, *> &&
-          (bodyCursor.value as Map<*, *>).containsKey(token.name)) {
-          val map = bodyCursor.value as Map<*, *>
-          bodyCursor = QueryResult(map[token.name]!!, token.name, bodyCursor.value)
+      val cursorValue = bodyCursor.value
+      when (val token = pathExp.next()) {
+        is PathToken.Field -> if (cursorValue != null && cursorValue.isJsonObject && cursorValue.obj.has(token.name)) {
+          bodyCursor = QueryResult(cursorValue.obj[token.name], token.name, bodyCursor.value)
         } else {
           return
         }
-        is PathToken.Index -> if (bodyCursor.value is List<*> && (bodyCursor.value as List<*>).size > token.index) {
-          val list = bodyCursor.value as List<*>
+        is PathToken.Index -> if (cursorValue != null && cursorValue.isJsonArray && cursorValue.array.size() > token.index) {
+          val list = cursorValue.array
           bodyCursor = QueryResult(list[token.index]!!, token.index, bodyCursor.value)
         } else {
           return
         }
-        is PathToken.Star -> if (bodyCursor.value is MutableMap<*, *>) {
-          val map = bodyCursor.value as MutableMap<*, *>
+        is PathToken.Star -> if (cursorValue != null && cursorValue.isJsonObject) {
+          val map = cursorValue.obj
           val pathIterator = IteratorUtils.toList(pathExp)
-          map.forEach { (key, value) ->
-            queryObjectGraph(pathIterator.iterator(), QueryResult(value!!, key, map), fn)
+          map.forEach { key, value ->
+            queryObjectGraph(pathIterator.iterator(), QueryResult(value, key, map), fn)
           }
           return
         } else {
           return
         }
-        is PathToken.StarIndex -> if (bodyCursor.value is List<*>) {
-          val list = bodyCursor.value as List<*>
+        is PathToken.StarIndex -> if (cursorValue != null && cursorValue.isJsonArray) {
+          val list = cursorValue.array
           val pathIterator = IteratorUtils.toList(pathExp)
           list.forEachIndexed { index, item ->
             queryObjectGraph(pathIterator.iterator(), QueryResult(item!!, index, list), fn)

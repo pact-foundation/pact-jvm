@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.junit5
 
-import au.com.dius.pact.core.model.Interaction
-import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.model.Interaction
+import au.com.dius.pact.model.Pact
 import au.com.dius.pact.provider.junit.Provider
 import au.com.dius.pact.provider.junit.State
 import au.com.dius.pact.provider.junit.loader.PactFolder

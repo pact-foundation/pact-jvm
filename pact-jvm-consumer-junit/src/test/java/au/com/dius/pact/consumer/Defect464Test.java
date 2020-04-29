@@ -49,7 +49,7 @@ public class Defect464Test {
   public void runTest() throws IOException {
     String jsonString
       = Request.Get(provider.getUrl() + PROVIDER_URI).execute().returnContent().asString();
-    JsonElement root = new JsonParser().parse(jsonString);
+    JsonElement root = JsonParser.parseString(jsonString);
     JsonElement myArrayElement = root.getAsJsonObject().get(JSON_ARRAY_MEMBER_NAME);
     ElementOfMyArray[] myArray = new Gson().fromJson(myArrayElement, ElementOfMyArray[].class);
 

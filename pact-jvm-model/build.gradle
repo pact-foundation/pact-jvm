@@ -28,6 +28,7 @@ dependencies {
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
   implementation 'org.slf4j:slf4j-api:1.7.26'
   implementation "com.google.code.gson:gson:${project.gsonVersion}"
+  implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
 
   testCompile "ch.qos.logback:logback-classic:${project.logbackVersion}"
   testCompile "org.codehaus.groovy.modules.http-builder:http-builder:${project.httpBuilderVersion}"

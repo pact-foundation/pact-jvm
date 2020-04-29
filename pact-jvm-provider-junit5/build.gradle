@@ -2,11 +2,12 @@ dependencies {
     compile project(path: ":pact-jvm-support", configuration: 'default'), 
       project(path: ":pact-jvm-provider_${project.scalaVersion}", configuration: 'default')
     compile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
+    implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
 
     testRuntime "ch.qos.logback:logback-classic:${project.logbackVersion}"
     testCompile 'ru.lanwen.wiremock:wiremock-junit5:1.1.1'
-    testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
     testCompile 'com.github.tomakehurst:wiremock:2.19.0'
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
     testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
 }
 

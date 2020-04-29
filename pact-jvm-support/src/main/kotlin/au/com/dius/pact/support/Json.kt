@@ -10,6 +10,16 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
+import com.google.gson.JsonPrimitive
+import com.google.gson.JsonSerializationContext
+import com.google.gson.JsonSerializer
+import java.lang.reflect.Type
+
+open class NumberSerializer : JsonSerializer<Number> {
+  override fun serialize(src: Number, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+    return JsonPrimitive(src)
+  }
+}
 
 /**
  * JSON support functions
