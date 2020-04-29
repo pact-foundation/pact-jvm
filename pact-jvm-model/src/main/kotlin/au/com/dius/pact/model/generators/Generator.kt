@@ -367,9 +367,9 @@ data class ProviderStateGenerator @JvmOverloads constructor (
   override fun correspondsToMode(mode: GeneratorTestMode) = mode == GeneratorTestMode.Provider
 
   companion object {
-    fun fromJson(json: JsonObject) = ProviderStateGenerator(
-      Json.toString(json["expression"]),
-      if (json.has("dataType")) DataType.valueOf(Json.toString(json["dataType"])) else DataType.RAW
+    fun fromMap(map: Map<String, Any>) = ProviderStateGenerator(
+      map["expression"].toString(),
+      if (map.containsKey("dataType")) DataType.valueOf(map["dataType"].toString()) else DataType.RAW
     )
   }
 }

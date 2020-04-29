@@ -7,7 +7,7 @@ import au.com.dius.pact.model.generators.ProviderStateGenerator
 import au.com.dius.pact.model.matchingrules.Category
 import au.com.dius.pact.model.matchingrules.MatchingRuleGroup
 import au.com.dius.pact.model.matchingrules.RuleLogic
-import au.com.dius.pact.core.support.expressions.DataType
+import au.com.dius.pact.support.expressions.DataType
 import groovy.json.JsonBuilder
 @SuppressWarnings('UnusedImport')
 import io.gatling.jsonpath.Parser$

@@ -1,4 +1,4 @@
-package au.com.dius.pact.core.support.expressions
+package au.com.dius.pact.support.expressions
 
 import spock.lang.Specification
 import spock.lang.Unroll
