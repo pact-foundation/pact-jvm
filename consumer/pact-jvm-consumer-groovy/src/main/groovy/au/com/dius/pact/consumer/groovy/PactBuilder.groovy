@@ -274,7 +274,13 @@ class PactBuilder extends BaseBuilder {
   PactBuilder withBody(Map options = [:], Closure closure) {
     def body = new PactBodyBuilder(mimetype: options.mimeType, prettyPrintBody: options.prettyPrint)
     closure.delegate = body
-    closure.call()
+    def result = closure.call()
+    if (result instanceof Matcher) {
+      throw new InvalidMatcherException('Detected an invalid use of the matchers. ' +
+        'If you are using matchers like "eachLike" they need to be assigned to something. For instance:\n' +
+        '  `fruits eachLike(1)` or `id = integer()`'
+      )
+    }
     setupBody(body, options)
     this
   }

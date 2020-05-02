@@ -1,5 +1,6 @@
 package au.com.dius.pact.consumer.groovy
 
+import au.com.dius.pact.core.model.PactSpecVersion
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -46,7 +47,7 @@ class MatchersSpec extends Specification {
 
   def 'each like matcher method generates the correct matcher definition'() {
     expect:
-    Matchers.eachLike([:]).matcher.toMap() == [match: 'type']
+    Matchers.eachLike([:]).matcher.toMap(PactSpecVersion.V3) == [match: 'type']
   }
 
   @Unroll
