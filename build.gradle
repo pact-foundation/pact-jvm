@@ -14,7 +14,7 @@ plugins {
   id 'org.jmailen.kotlinter' version '2.3.2'
   id 'io.gitlab.arturbosch.detekt' version '1.7.4'
   id 'org.jetbrains.dokka' version '0.10.1'
-  id 'org.javamodularity.moduleplugin' version '1.6.0' apply false
+  //id 'org.javamodularity.moduleplugin' version '1.6.0' apply false
 }
 
 import org.apache.commons.text.StringEscapeUtils
@@ -59,7 +59,7 @@ subprojects {
   apply plugin: 'org.jmailen.kotlinter'
   apply plugin: 'io.gitlab.arturbosch.detekt'
   apply plugin: 'org.jetbrains.dokka'
-  apply plugin: "org.javamodularity.moduleplugin"
+  //apply plugin: "org.javamodularity.moduleplugin"
 
     compileTestGroovy {
       classpath = classpath.plus(files(compileTestKotlin.destinationDir))
