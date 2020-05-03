@@ -53,8 +53,14 @@ object Json {
   /**
    * Converts a JSON object to a raw string if it is a string value, else just calls toString()
    */
-  fun toString(jsonElement: JsonElement?) = when {
-    jsonElement == null -> jsonNull.toString()
+  fun toString(jsonElement: JsonElement?): String = toNullableString(jsonElement) ?: jsonNull.toString()
+
+  /**
+   * Checks whether a JSON element is available and return null if jsonElement is null. Otherwise it would
+   * convert a JSON element to String
+   */
+  fun toNullableString(jsonElement: JsonElement?): String? = when {
+    jsonElement == null -> null
     jsonElement.isJsonPrimitive -> {
       val value = jsonElement.asJsonPrimitive
       when {

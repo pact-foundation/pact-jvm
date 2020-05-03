@@ -1,5 +1,8 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
+import au.com.dius.pact.core.model.matchingrules.RegexMatcher
+import au.com.dius.pact.core.model.matchingrules.RuleLogic
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
 import com.amazonaws.services.s3.AmazonS3
@@ -347,6 +350,21 @@ class PactReaderSpec extends Specification {
       '{"entityName":"mock-name","xml":"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n"}'
     pact.interactions[0].request.generators.categories[BODY]['$'].expression ==
       '{\n  "entityName": "${eName}",\n  "xml": "<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?>\\n"\n}'
+  }
+
+  @Issue('#1070')
+  def 'loading pact displays warning and does not load rules correctly'() {
+    given:
+    def pactUrl = PactReaderSpec.classLoader.getResource('1070-ApiConsumer-ApiProvider.json')
+    def matchingRules = new MatchingRulesImpl()
+    matchingRules.addCategory('path').addRule(new RegexMatcher('/api/test/\\d{1,8}'), RuleLogic.OR)
+
+    when:
+    def pact = DefaultPactReader.INSTANCE.loadPact(pactUrl)
+
+    then:
+    pact instanceof RequestResponsePact
+    pact.interactions[0].request.matchingRules == matchingRules
   }
 
 }

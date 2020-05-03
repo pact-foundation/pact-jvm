@@ -164,23 +164,30 @@ data class Category @JvmOverloads constructor(
    * Deserialise the category from the Map
    */
   fun fromMap(map: Map<String, Any?>) {
-    map.forEach { (key, value) ->
-      if (value is Map<*, *>) {
-        val ruleGroup = MatchingRuleGroup.fromMap(value as Map<String, Any?>)
-        if (name == "path") {
-          setRules("", ruleGroup)
-        } else {
+    if (categoryRequiresSubkeys()) {
+      map.forEach { (key, value) ->
+        if (value is Map<*, *>) {
+          val ruleGroup = MatchingRuleGroup.fromMap(value as Map<String, Any?>)
           setRules(key, ruleGroup)
+        } else if (name == "path" && value is List<*>) {
+          value.forEach {
+            addRule(MatchingRuleGroup.ruleFromMap(it as Map<String, Any?>))
+          }
+        } else {
+          logger.warn { "$value is not a valid matcher definition" }
         }
-      } else if (name == "path" && value is List<*>) {
-        value.forEach {
-          addRule(MatchingRuleGroup.ruleFromMap(it as Map<String, Any?>))
-        }
+      }
+    } else {
+      if (map.size == 1 && map.containsKey("")) {
+        // This is due to Defect #743
+        setRules("", MatchingRuleGroup.fromMap(map[""] as Map<String, Any?>))
       } else {
-        logger.warn { "$value is not a valid matcher definition" }
+        setRules("", MatchingRuleGroup.fromMap(map))
       }
     }
   }
+
+  private fun categoryRequiresSubkeys() = name != "path"
 
   /**
    * Returns the number of rules stored at the key

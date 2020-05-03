@@ -59,7 +59,7 @@ array.object((o) -> {
 ```
 <dependency>
     <groupId>au.com.dius</groupId>
-    <artifactId>pact-jvm-consumer-java8_2.12</artifactId>
+    <artifactId>pact-jvm-consumer-java8</artifactId>
     <version>${pact.version}</version>
 </dependency>
 ```

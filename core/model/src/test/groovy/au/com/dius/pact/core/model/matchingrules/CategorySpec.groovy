@@ -73,6 +73,7 @@ class CategorySpec extends Specification {
       'payload.bestandsid': [matchers: [[match: 'type']], combine: 'AND']
     ]
   }
+
   @Issue(['#976'])
   def 'when re-keying the matchers, always prepend prefix to existing key'() {
     given:
@@ -88,5 +89,27 @@ class CategorySpec extends Specification {
 
     category.toMap(PactSpecVersion.V3) == [
             'blue.blueberry': [matchers: [[match: 'type']], combine: 'AND']]
+  }
+
+  @Issue(['#1070'])
+  def 'loading matching rules from JSON'() {
+    given:
+    def matcherDefinition = [
+      matchers: [
+        [
+          match: 'regex',
+          regex: '/api/test/\\d{1,8}'
+        ]
+      ],
+      combine: 'OR'
+    ]
+    def category = new Category('path')
+
+    when:
+    category.fromMap(matcherDefinition)
+
+    then:
+    category.matchingRules[''].rules == [ new RegexMatcher('/api/test/\\d{1,8}', null) ]
+    category.matchingRules[''].ruleLogic == RuleLogic.OR
   }
 }

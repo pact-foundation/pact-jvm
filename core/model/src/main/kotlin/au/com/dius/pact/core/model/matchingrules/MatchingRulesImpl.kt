@@ -8,6 +8,7 @@ import com.github.salomonbrys.kotson.keys
 import com.github.salomonbrys.kotson.obj
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import mu.KLogging
 
 class MatchingRulesImpl : MatchingRules {
 
@@ -76,7 +77,7 @@ class MatchingRulesImpl : MatchingRules {
       }
     }
 
-    companion object {
+    companion object : KLogging() {
       @JvmStatic
       fun fromJson(json: JsonElement?): MatchingRules {
         val matchingRules = MatchingRulesImpl()
@@ -86,13 +87,13 @@ class MatchingRulesImpl : MatchingRules {
           } else {
             matchingRules.fromV3Json(json.obj)
           }
-        }
+        } else logger.warn { "$json is not valid matching rules format" }
         return matchingRules
       }
     }
 
     private fun addRules(categoryName: String, matcherDef: Map<String, Any?>) {
-        addCategory(categoryName).fromMap(matcherDef)
+      addCategory(categoryName).fromMap(matcherDef)
     }
 
     private fun toV2Map(): Map<String, Any?> {

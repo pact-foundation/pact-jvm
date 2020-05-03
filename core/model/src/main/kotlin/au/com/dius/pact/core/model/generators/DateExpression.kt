@@ -25,68 +25,11 @@ object DateExpression : KLogging() {
       return when (val result = parseDateExpression(expression)) {
         is Err -> result
         is Ok -> {
-          var date = when (result.value.base) {
-            DateBase.NOW, DateBase.TODAY -> base
-            DateBase.YESTERDAY -> base.minusDays(1)
-            DateBase.TOMORROW -> base.plusDays(1)
-          }
-
+          var date = baseDate(result, base)
           result.value.adjustments.forEach {
-            when (it.operation) {
-              Operation.PLUS -> {
-                date = when (it.type) {
-                  DateOffsetType.DAY -> date.plusDays(it.value.toLong())
-                  DateOffsetType.WEEK -> date.plus(it.value.toLong(), ChronoUnit.WEEKS)
-                  DateOffsetType.MONTH -> date.plus(it.value.toLong(), ChronoUnit.MONTHS)
-                  DateOffsetType.YEAR -> date.plus(it.value.toLong(), ChronoUnit.YEARS)
-                  DateOffsetType.MONDAY -> adjustUpTo(date) { d -> d.dayOfWeek == DayOfWeek.MONDAY }
-                  DateOffsetType.TUESDAY -> adjustUpTo(date) { d -> d.dayOfWeek == DayOfWeek.TUESDAY }
-                  DateOffsetType.WEDNESDAY -> adjustUpTo(date) { d -> d.dayOfWeek == DayOfWeek.WEDNESDAY }
-                  DateOffsetType.THURSDAY -> adjustUpTo(date) { d -> d.dayOfWeek == DayOfWeek.THURSDAY }
-                  DateOffsetType.FRIDAY -> adjustUpTo(date) { d -> d.dayOfWeek == DayOfWeek.FRIDAY }
-                  DateOffsetType.SATURDAY -> adjustUpTo(date) { d -> d.dayOfWeek == DayOfWeek.SATURDAY }
-                  DateOffsetType.SUNDAY -> adjustUpTo(date) { d -> d.dayOfWeek == DayOfWeek.SUNDAY }
-                  DateOffsetType.JAN -> adjustMonthUpTo(date, Month.JANUARY)
-                  DateOffsetType.FEB -> adjustMonthUpTo(date, Month.FEBRUARY)
-                  DateOffsetType.MAR -> adjustMonthUpTo(date, Month.MARCH)
-                  DateOffsetType.APR -> adjustMonthUpTo(date, Month.APRIL)
-                  DateOffsetType.MAY -> adjustMonthUpTo(date, Month.MAY)
-                  DateOffsetType.JUNE -> adjustMonthUpTo(date, Month.JUNE)
-                  DateOffsetType.JULY -> adjustMonthUpTo(date, Month.JULY)
-                  DateOffsetType.AUG -> adjustMonthUpTo(date, Month.AUGUST)
-                  DateOffsetType.SEP -> adjustMonthUpTo(date, Month.SEPTEMBER)
-                  DateOffsetType.OCT -> adjustMonthUpTo(date, Month.OCTOBER)
-                  DateOffsetType.NOV -> adjustMonthUpTo(date, Month.NOVEMBER)
-                  DateOffsetType.DEC -> adjustMonthUpTo(date, Month.DECEMBER)
-                }
-              }
-              Operation.MINUS -> {
-                date = when (it.type) {
-                  DateOffsetType.DAY -> date.minusDays(it.value.toLong())
-                  DateOffsetType.WEEK -> date.minus(it.value.toLong(), ChronoUnit.WEEKS)
-                  DateOffsetType.MONTH -> date.minus(it.value.toLong(), ChronoUnit.MONTHS)
-                  DateOffsetType.YEAR -> date.minus(it.value.toLong(), ChronoUnit.YEARS)
-                  DateOffsetType.MONDAY -> adjustDownTo(date) { d -> d.dayOfWeek == DayOfWeek.MONDAY }
-                  DateOffsetType.TUESDAY -> adjustDownTo(date) { d -> d.dayOfWeek == DayOfWeek.TUESDAY }
-                  DateOffsetType.WEDNESDAY -> adjustDownTo(date) { d -> d.dayOfWeek == DayOfWeek.WEDNESDAY }
-                  DateOffsetType.THURSDAY -> adjustDownTo(date) { d -> d.dayOfWeek == DayOfWeek.THURSDAY }
-                  DateOffsetType.FRIDAY -> adjustDownTo(date) { d -> d.dayOfWeek == DayOfWeek.FRIDAY }
-                  DateOffsetType.SATURDAY -> adjustDownTo(date) { d -> d.dayOfWeek == DayOfWeek.SATURDAY }
-                  DateOffsetType.SUNDAY -> adjustDownTo(date) { d -> d.dayOfWeek == DayOfWeek.SUNDAY }
-                  DateOffsetType.JAN -> adjustMonthDownTo(date, Month.JANUARY)
-                  DateOffsetType.FEB -> adjustMonthDownTo(date, Month.FEBRUARY)
-                  DateOffsetType.MAR -> adjustMonthDownTo(date, Month.MARCH)
-                  DateOffsetType.APR -> adjustMonthDownTo(date, Month.APRIL)
-                  DateOffsetType.MAY -> adjustMonthDownTo(date, Month.MAY)
-                  DateOffsetType.JUNE -> adjustMonthDownTo(date, Month.JUNE)
-                  DateOffsetType.JULY -> adjustMonthDownTo(date, Month.JULY)
-                  DateOffsetType.AUG -> adjustMonthDownTo(date, Month.AUGUST)
-                  DateOffsetType.SEP -> adjustMonthDownTo(date, Month.SEPTEMBER)
-                  DateOffsetType.OCT -> adjustMonthDownTo(date, Month.OCTOBER)
-                  DateOffsetType.NOV -> adjustMonthDownTo(date, Month.NOVEMBER)
-                  DateOffsetType.DEC -> adjustMonthDownTo(date, Month.DECEMBER)
-                }
-              }
+            date = when (it.operation) {
+              Operation.PLUS -> forwardDateBy(it, date)
+              Operation.MINUS -> reverseDateBy(it, date)
             }
           }
 
@@ -95,6 +38,72 @@ object DateExpression : KLogging() {
       }
     } else {
       Ok(base)
+    }
+  }
+
+  @Suppress("ComplexMethod")
+  private fun reverseDateBy(it: Adjustment<DateOffsetType>, date: OffsetDateTime): OffsetDateTime {
+    return when (it.type) {
+      DateOffsetType.DAY -> date.minusDays(it.value.toLong())
+      DateOffsetType.WEEK -> date.minus(it.value.toLong(), ChronoUnit.WEEKS)
+      DateOffsetType.MONTH -> date.minus(it.value.toLong(), ChronoUnit.MONTHS)
+      DateOffsetType.YEAR -> date.minus(it.value.toLong(), ChronoUnit.YEARS)
+      DateOffsetType.MONDAY -> adjustDownTo(date) { d -> d.dayOfWeek == DayOfWeek.MONDAY }
+      DateOffsetType.TUESDAY -> adjustDownTo(date) { d -> d.dayOfWeek == DayOfWeek.TUESDAY }
+      DateOffsetType.WEDNESDAY -> adjustDownTo(date) { d -> d.dayOfWeek == DayOfWeek.WEDNESDAY }
+      DateOffsetType.THURSDAY -> adjustDownTo(date) { d -> d.dayOfWeek == DayOfWeek.THURSDAY }
+      DateOffsetType.FRIDAY -> adjustDownTo(date) { d -> d.dayOfWeek == DayOfWeek.FRIDAY }
+      DateOffsetType.SATURDAY -> adjustDownTo(date) { d -> d.dayOfWeek == DayOfWeek.SATURDAY }
+      DateOffsetType.SUNDAY -> adjustDownTo(date) { d -> d.dayOfWeek == DayOfWeek.SUNDAY }
+      DateOffsetType.JAN -> adjustMonthDownTo(date, Month.JANUARY)
+      DateOffsetType.FEB -> adjustMonthDownTo(date, Month.FEBRUARY)
+      DateOffsetType.MAR -> adjustMonthDownTo(date, Month.MARCH)
+      DateOffsetType.APR -> adjustMonthDownTo(date, Month.APRIL)
+      DateOffsetType.MAY -> adjustMonthDownTo(date, Month.MAY)
+      DateOffsetType.JUNE -> adjustMonthDownTo(date, Month.JUNE)
+      DateOffsetType.JULY -> adjustMonthDownTo(date, Month.JULY)
+      DateOffsetType.AUG -> adjustMonthDownTo(date, Month.AUGUST)
+      DateOffsetType.SEP -> adjustMonthDownTo(date, Month.SEPTEMBER)
+      DateOffsetType.OCT -> adjustMonthDownTo(date, Month.OCTOBER)
+      DateOffsetType.NOV -> adjustMonthDownTo(date, Month.NOVEMBER)
+      DateOffsetType.DEC -> adjustMonthDownTo(date, Month.DECEMBER)
+    }
+  }
+
+  @Suppress("ComplexMethod")
+  private fun forwardDateBy(it: Adjustment<DateOffsetType>, date: OffsetDateTime): OffsetDateTime {
+    return when (it.type) {
+      DateOffsetType.DAY -> date.plusDays(it.value.toLong())
+      DateOffsetType.WEEK -> date.plus(it.value.toLong(), ChronoUnit.WEEKS)
+      DateOffsetType.MONTH -> date.plus(it.value.toLong(), ChronoUnit.MONTHS)
+      DateOffsetType.YEAR -> date.plus(it.value.toLong(), ChronoUnit.YEARS)
+      DateOffsetType.MONDAY -> adjustUpTo(date) { d -> d.dayOfWeek == DayOfWeek.MONDAY }
+      DateOffsetType.TUESDAY -> adjustUpTo(date) { d -> d.dayOfWeek == DayOfWeek.TUESDAY }
+      DateOffsetType.WEDNESDAY -> adjustUpTo(date) { d -> d.dayOfWeek == DayOfWeek.WEDNESDAY }
+      DateOffsetType.THURSDAY -> adjustUpTo(date) { d -> d.dayOfWeek == DayOfWeek.THURSDAY }
+      DateOffsetType.FRIDAY -> adjustUpTo(date) { d -> d.dayOfWeek == DayOfWeek.FRIDAY }
+      DateOffsetType.SATURDAY -> adjustUpTo(date) { d -> d.dayOfWeek == DayOfWeek.SATURDAY }
+      DateOffsetType.SUNDAY -> adjustUpTo(date) { d -> d.dayOfWeek == DayOfWeek.SUNDAY }
+      DateOffsetType.JAN -> adjustMonthUpTo(date, Month.JANUARY)
+      DateOffsetType.FEB -> adjustMonthUpTo(date, Month.FEBRUARY)
+      DateOffsetType.MAR -> adjustMonthUpTo(date, Month.MARCH)
+      DateOffsetType.APR -> adjustMonthUpTo(date, Month.APRIL)
+      DateOffsetType.MAY -> adjustMonthUpTo(date, Month.MAY)
+      DateOffsetType.JUNE -> adjustMonthUpTo(date, Month.JUNE)
+      DateOffsetType.JULY -> adjustMonthUpTo(date, Month.JULY)
+      DateOffsetType.AUG -> adjustMonthUpTo(date, Month.AUGUST)
+      DateOffsetType.SEP -> adjustMonthUpTo(date, Month.SEPTEMBER)
+      DateOffsetType.OCT -> adjustMonthUpTo(date, Month.OCTOBER)
+      DateOffsetType.NOV -> adjustMonthUpTo(date, Month.NOVEMBER)
+      DateOffsetType.DEC -> adjustMonthUpTo(date, Month.DECEMBER)
+    }
+  }
+
+  private fun baseDate(result: Ok<ParsedDateExpression>, base: OffsetDateTime): OffsetDateTime {
+    return when (result.value.base) {
+      DateBase.NOW, DateBase.TODAY -> base
+      DateBase.YESTERDAY -> base.minusDays(1)
+      DateBase.TOMORROW -> base.plusDays(1)
     }
   }
 

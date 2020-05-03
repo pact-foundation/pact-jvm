@@ -1,0 +1,91 @@
+{
+  "provider": {
+    "name": "ApiProvider"
+  },
+  "consumer": {
+    "name": "ApiConsumer"
+  },
+  "interactions": [
+    {
+      "description": "GET request to retrieve default values",
+      "request": {
+        "method": "GET",
+        "path": "/api/test/8",
+        "matchingRules": {
+          "path": {
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "/api/test/\\d{1,8}"
+              }
+            ],
+            "combine": "OR"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": [
+          {
+            "size": 1445211,
+            "name": "testId254",
+            "id": 32432
+          }
+        ],
+        "matchingRules": {
+          "body": {
+            "$": {
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[*].id": {
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[*].name": {
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ],
+              "combine": "AND"
+            },
+            "$[*].size": {
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ],
+              "combine": "AND"
+            }
+          }
+        }
+      },
+      "providerStates": [
+        {
+          "name": "This is a test"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.0.10"
+    }
+  }
+}

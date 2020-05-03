@@ -16,6 +16,7 @@ import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import au.com.dius.pact.core.model.matchingrules.DateMatcher
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
+import spock.lang.Issue
 import spock.lang.Specification
 
 import static au.com.dius.pact.core.model.generators.Category.BODY
@@ -616,6 +617,100 @@ class PactBodyBuilderSpec extends Specification {
     then:
     body instanceof List
     body.size() == 3
+  }
+
+  @Issue('#1076')
+  def 'raw array "eachlike"'() {
+    given:
+    service {
+      uponReceiving('a request with raw array eachlike')
+      withAttributes(method: 'get', path: '/')
+      withBody eachLike(1) {
+        type regexp('.*', 'banana')
+      }
+      willRespondWith(status: 200)
+    }
+    def expectedMatchingRules = [
+      '$': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$[*].type': new MatchingRuleGroup([new RegexMatcher('.*', 'banana')])
+    ]
+
+    when:
+    service.buildInteractions()
+    def request = service.interactions.first().request
+    def body = new JsonSlurper().parseText(request.body.valueAsString())
+
+    then:
+    body == [[type: 'banana']]
+    request.matchingRules.rulesForCategory('body').matchingRules == expectedMatchingRules
+  }
+
+  @Issue('#1076')
+  def 'A named array "eachLike"'() {
+    given:
+    service {
+      uponReceiving('a request with raw array eachlike')
+      withAttributes(method: 'get', path: '/')
+      withBody {
+        fruits eachLike(1) {
+          type regexp('.*', 'banana')
+        }
+      }
+      willRespondWith(status: 200)
+    }
+    def expectedMatchingRules = [
+      '$.fruits': new MatchingRuleGroup([TypeMatcher.INSTANCE]),
+      '$.fruits[*].type': new MatchingRuleGroup([new RegexMatcher('.*', 'banana')])
+    ]
+
+    when:
+    service.buildInteractions()
+    def request = service.interactions.first().request
+    def body = new JsonSlurper().parseText(request.body.valueAsString())
+
+    then:
+    body == [
+      fruits: [[type: 'banana']]
+    ]
+    request.matchingRules.rulesForCategory('body').matchingRules == expectedMatchingRules
+  }
+
+  @Issue('#1076')
+  def 'Incorrect use of "eachLike" in DSL'() {
+    when:
+    service {
+      uponReceiving('a request with raw array eachlike')
+      withAttributes(method: 'get', path: '/')
+      withBody {
+        eachLike(1) {
+          type regexp('.*', 'banana')
+        }
+      }
+      willRespondWith(status: 200)
+    }
+
+    then:
+    def exception = thrown(InvalidMatcherException)
+    exception.message.startsWith('Detected an invalid use of the matchers')
+  }
+
+  @Issue('#1076')
+  def 'Incorrect use of "eachLike" in DSL inner closure'() {
+    when:
+    service {
+      uponReceiving('a request with raw array eachlike')
+      withAttributes(method: 'get', path: '/')
+      withBody {
+        fruits eachLike(1) {
+          regexp('.*', 'banana')
+        }
+      }
+      willRespondWith(status: 200)
+    }
+
+    then:
+    def exception = thrown(InvalidMatcherException)
+    exception.message.startsWith('Detected an invalid use of the matchers')
   }
 
   private List walkGraph(def value) {

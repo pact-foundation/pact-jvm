@@ -197,7 +197,13 @@ class PactBodyBuilder extends BaseBuilder {
     entry.resolveStrategy = Closure.DELEGATE_FIRST
     bodyStack.push(bodyRepresentation)
     bodyRepresentation = [:]
-    entry.call()
+    def result = entry.call()
+    if (result instanceof Matcher) {
+      throw new InvalidMatcherException('Detected an invalid use of the matchers. ' +
+        'If you are using matchers like "eachLike" they need to be assigned to something. For instance:\n' +
+        '  `fruits eachLike(1)` or `id = integer()`'
+      )
+    }
     path = oldpath
     def tmp = bodyRepresentation
     bodyRepresentation = bodyStack.pop()

@@ -60,36 +60,40 @@ class MatchingRulesSpec extends Specification {
   def 'loads V3 matching rules'() {
     given:
     def matchingRulesMap = [
-      'path': [
+      path: [
+        'combine': 'OR',
         'matchers': [
           [ 'match': 'regex', 'regex': '\\w+' ]
         ]
       ],
-      'query': [
+      query: [
         'Q1': [
           'matchers': [
             [ 'match': 'regex', 'regex': '\\d+' ]
           ]
         ]
       ],
-      'header': [
+      header: [
         'HEADERY': [
-          'combine': 'AND',
+          'combine': 'OR',
           'matchers': [
             ['match': 'include', 'value': 'ValueA'],
             ['match': 'include', 'value': 'ValueB']
           ]
         ]
       ],
-      'body': [
+      body: [
         '$.animals': [
-          'matchers': [['min': 1, 'match': 'type']]
+          'matchers': [['min': 1, 'match': 'type']],
+          'combine': 'OR'
         ],
         '$.animals[*].*': [
-          'matchers': [['match': 'type']]
+          'matchers': [['match': 'type']],
+          'combine': 'AND',
         ],
         '$.animals[*].children': [
-          'matchers': [['min': 1]]
+          'matchers': [['min': 1]],
+          'combine': 'OTHER'
         ],
         '$.animals[*].children[*].*': [
           'matchers': [['match': 'type']]
@@ -104,14 +108,15 @@ class MatchingRulesSpec extends Specification {
     !matchingRules.empty
     matchingRules.categories == ['path', 'query', 'header', 'body'] as Set
     matchingRules.rulesForCategory('path') == new Category('path', [
-      '': new MatchingRuleGroup([ new RegexMatcher('\\w+') ]) ])
+      '': new MatchingRuleGroup([ new RegexMatcher('\\w+') ], RuleLogic.OR) ])
     matchingRules.rulesForCategory('query') == new Category('query', [
       Q1: new MatchingRuleGroup([ new RegexMatcher('\\d+') ]) ])
     matchingRules.rulesForCategory('header') == new Category('header', [
-      HEADERY: new MatchingRuleGroup([ new IncludeMatcher('ValueA'), new IncludeMatcher('ValueB') ])
+      HEADERY: new MatchingRuleGroup([ new IncludeMatcher('ValueA'), new IncludeMatcher('ValueB') ],
+        RuleLogic.OR)
     ])
     matchingRules.rulesForCategory('body') == new Category('body', [
-      '$.animals': new MatchingRuleGroup([ new MinTypeMatcher(1) ]),
+      '$.animals': new MatchingRuleGroup([ new MinTypeMatcher(1) ], RuleLogic.OR),
       '$.animals[*].*': new MatchingRuleGroup([ TypeMatcher.INSTANCE ]),
       '$.animals[*].children': new MatchingRuleGroup([ new MinTypeMatcher(1) ]),
       '$.animals[*].children[*].*': new MatchingRuleGroup([ TypeMatcher.INSTANCE ])
