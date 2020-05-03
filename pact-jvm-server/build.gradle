@@ -18,7 +18,7 @@ plugins {
 mainClassName = 'au.com.dius.pact.server.Server'
 
 dependencies {
-  compile project(":consumer:pact-jvm-consumer")
+  compile project(":consumer")
   compile "ch.qos.logback:logback-core:${project.logbackVersion}",
     "ch.qos.logback:logback-classic:${project.logbackVersion}",
     "com.github.scopt:scopt_2.12:3.5.0"

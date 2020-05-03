@@ -12,7 +12,7 @@ dependencies {
     }
     implementation 'io.netty:netty-transport-native-epoll:4.1.48.Final'
 
-    testCompile project(":consumer:pact-jvm-consumer")
+    testCompile project(":consumer")
     testCompile "org.specs2:specs2-core_2.12:${project.specs2Version}",
       "org.specs2:specs2-junit_2.12:${project.specs2Version}"
     testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"

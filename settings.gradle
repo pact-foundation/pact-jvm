@@ -5,15 +5,15 @@ include 'core:pactbroker'
 include 'core:model'
 include 'core:matchers'
 
-include 'consumer:pact-jvm-consumer'
-include 'consumer:pact-jvm-consumer-groovy'
-include 'consumer:pact-jvm-consumer-java8'
-include 'consumer:pact-jvm-consumer-junit'
-include 'consumer:pact-jvm-consumer-junit5'
+include 'consumer'
+include 'consumer:groovy'
+include 'consumer:java8'
+include 'consumer:junit'
+include 'consumer:junit5'
 
 if (System.getenv("APPVEYOR") == null) {
-  include 'consumer:pact-jvm-consumer-specs2_2.12'
-  project(':consumer:pact-jvm-consumer-specs2_2.12').projectDir = file('consumer/pact-jvm-consumer-specs2')
+  include 'consumer:specs2_2.12'
+  project(':consumer:specs2_2.12').projectDir = file('consumer/specs2')
 }
 
 include   'provider:pact-jvm-provider'

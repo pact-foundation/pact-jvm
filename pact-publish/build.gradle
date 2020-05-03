@@ -1,6 +1,6 @@
 buildscript {
   dependencies {
-    classpath "au.com.dius:pact-jvm-provider-gradle:4.0.0-beta.1"
+    classpath "au.com.dius:pact-jvm-provider-gradle:4.0.10"
   }
 }
 
@@ -9,10 +9,13 @@ if (System.env.PACT_PUBLISH == 'true') {
 }
 
 dependencies {
-  testCompile project(":consumer:pact-jvm-consumer-groovy")
+  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
+  testCompile(project(":consumer:groovy")) {
+    exclude group: 'org.codehaus.groovy'
+  }
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testRuntime "ch.qos.logback:logback-classic:${project.logbackVersion}"
-  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
     exclude group: 'org.codehaus.groovy'
   }

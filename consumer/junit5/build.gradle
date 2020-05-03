@@ -1,0 +1,20 @@
+dependencies {
+  api project(path: ":consumer", configuration: 'default')
+  compile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
+  implementation "org.slf4j:slf4j-api:${project.slf4jVersion}"
+
+  testCompile "ch.qos.logback:logback-core:${project.logbackVersion}",
+    "ch.qos.logback:logback-classic:${project.logbackVersion}"
+  testCompile "io.github.http-builder-ng:http-builder-ng-apache:${project.httpBuilderVersion}"
+  testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"
+  testCompile "org.codehaus.groovy:groovy-xml:${project.groovyVersion}"
+  testCompile 'org.apache.commons:commons-io:1.3.2'
+  testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
+  testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
+  testCompile project(path: ":consumer:java8", configuration: 'default')
+  testCompile 'org.hamcrest:hamcrest:2.1'
+  testCompile('org.spockframework:spock-core:2.0-M2-groovy-3.0') {
+    exclude group: 'org.codehaus.groovy'
+  }
+}

@@ -1,6 +1,5 @@
 package broker
 
-import com.github.michaelbull.result.Ok
 import au.com.dius.pact.consumer.PactVerificationResult
 import au.com.dius.pact.consumer.groovy.PactBuilder
 import au.com.dius.pact.core.pactbroker.Latest
