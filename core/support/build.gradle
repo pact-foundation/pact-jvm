@@ -16,6 +16,8 @@ dependencies {
   api 'io.arrow-kt:arrow-core-extensions:0.9.0'
 
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
+  testCompile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"
+  testRuntime "org.junit.jupiter:junit-jupiter-engine:${project.junit5Version}"
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.3.2'
   testCompile 'org.hamcrest:hamcrest:2.1'
