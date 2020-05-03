@@ -23,8 +23,8 @@ def isWindows() {
 }
 
 task generatePom(type: GenerateMavenPom, dependsOn: [":provider:pact-jvm-provider:publishToMavenLocal",
-                                                     ':core:pact-jvm-core-model:publishToMavenLocal',
-                                                     ':core:pact-jvm-core-matchers:publishToMavenLocal',
+                                                     ':core:model:publishToMavenLocal',
+                                                     ':core:matchers:publishToMavenLocal',
                                                      ':core:pactbroker:publishToMavenLocal',
                                                      ':core:support:publishToMavenLocal']) {
     destination = file("${buildDir}/poms/pom.xml")

@@ -2,11 +2,8 @@ rootProject.name = 'au.com.dius.pact'
 
 include 'core:support'
 include 'core:pactbroker'
-include 'core:pact-jvm-core-model'
-include 'core:pact-jvm-core-matchers'
-
-project(':core:pact-jvm-core-model').projectDir = file('core/model')
-project(':core:pact-jvm-core-matchers').projectDir = file('core/matchers')
+include 'core:model'
+include 'core:matchers'
 
 include 'consumer:pact-jvm-consumer'
 include 'consumer:pact-jvm-consumer-groovy'

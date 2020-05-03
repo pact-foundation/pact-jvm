@@ -1,5 +1,5 @@
 dependencies {
-  api project(path: ":core:pact-jvm-core-model", configuration: 'default')
+  api project(path: ":core:model", configuration: 'default')
   api project(path: ":core:support", configuration: 'default')
   compile "org.apache.commons:commons-lang3:${project.commonsLang3Version}"
   compile 'com.googlecode.java-diff-utils:diffutils:1.3.0'
