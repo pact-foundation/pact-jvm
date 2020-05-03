@@ -16,8 +16,8 @@ artifacts {
 }
 
 dependencies {
-  api project(path: ":core:pact-jvm-core-support", configuration: 'default')
-  api project(path: ":core:pact-jvm-core-pact-broker", configuration: 'default')
+  api project(path: ":core:support", configuration: 'default')
+  api project(path: ":core:pactbroker", configuration: 'default')
   compile 'com.github.zafarkhaja:java-semver:0.9.0'
   compile 'org.apache.commons:commons-collections4:4.1'
   compile 'com.github.mifmif:generex:1.0.2'

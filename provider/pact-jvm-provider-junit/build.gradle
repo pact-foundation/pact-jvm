@@ -1,5 +1,5 @@
 dependencies {
-    api project(path: ":core:pact-jvm-core-support", configuration: 'default'), 
+    api project(path: ":core:support", configuration: 'default'),
       project(path: ":provider:pact-jvm-provider", configuration: 'default')
     compile "org.apache.httpcomponents:fluent-hc:${project.httpClientVersion}",
       "org.apache.httpcomponents:httpclient:${project.httpClientVersion}",

@@ -76,7 +76,7 @@ public class MessagePactProviderRule extends ExternalResource {
 				Map<String, Message> pacts;
 				if (StringUtils.isNoneEmpty(pactDef.fragment())) {
           Optional<Method> possiblePactMethod = findPactMethod(pactDef);
-          if (possiblePactMethod.isEmpty()) {
+          if (!possiblePactMethod.isPresent()) {
             base.evaluate();
             return;
           }
@@ -130,14 +130,14 @@ public class MessagePactProviderRule extends ExternalResource {
 		}
 
 		Optional<PactVerification> possiblePactVerification = findPactVerification(pactVerifications);
-		if (possiblePactVerification.isEmpty()) {
+		if (!possiblePactVerification.isPresent()) {
 			base.evaluate();
 			return;
 		}
 
 		PactVerification pactVerification = possiblePactVerification.get();
 		Optional<Method> possiblePactMethod = findPactMethod(pactVerification);
-		if (possiblePactMethod.isEmpty()) {
+		if (!possiblePactMethod.isPresent()) {
 			throw new UnsupportedOperationException("Could not find method with @Pact for the provider " + provider);
 		}
 

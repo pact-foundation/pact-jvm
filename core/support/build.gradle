@@ -2,8 +2,6 @@ plugins {
   id 'antlr'
 }
 
-group = 'au.com.dius.pact.core.support'
-
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
   implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"

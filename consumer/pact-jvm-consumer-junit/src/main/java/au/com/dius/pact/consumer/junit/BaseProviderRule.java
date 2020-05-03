@@ -97,7 +97,7 @@ public class BaseProviderRule extends ExternalResource {
     final RequestResponsePact[] pact = { null };
     possiblePactVerifications.forEach(pactVerification -> {
       Optional<Method> possiblePactMethod = findPactMethod(pactVerification);
-      if (possiblePactMethod.isEmpty()) {
+      if (!possiblePactMethod.isPresent()) {
         throw new UnsupportedOperationException("Could not find method with @Pact for the provider " + provider);
       }
 

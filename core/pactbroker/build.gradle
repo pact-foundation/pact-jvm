@@ -1,5 +1,5 @@
 dependencies {
-  api project(path: ":core:pact-jvm-core-support", configuration: 'default')
+  api project(path: ":core:support", configuration: 'default')
   compile "org.apache.commons:commons-lang3:$commonsLang3Version"
   api "com.google.code.gson:gson:${project.gsonVersion}"
   compile 'com.github.salomonbrys.kotson:kotson:2.5.0'

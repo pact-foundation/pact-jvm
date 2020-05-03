@@ -25,8 +25,8 @@ def isWindows() {
 task generatePom(type: GenerateMavenPom, dependsOn: [":provider:pact-jvm-provider:publishToMavenLocal",
                                                      ':core:pact-jvm-core-model:publishToMavenLocal',
                                                      ':core:pact-jvm-core-matchers:publishToMavenLocal',
-                                                     ':core:pact-jvm-core-pact-broker:publishToMavenLocal',
-                                                     ':core:pact-jvm-core-support:publishToMavenLocal']) {
+                                                     ':core:pactbroker:publishToMavenLocal',
+                                                     ':core:support:publishToMavenLocal']) {
     destination = file("${buildDir}/poms/pom.xml")
     pom = publishMavenPublicationPublicationToMavenLocal.publication.pom
     pom.packaging = 'maven-plugin'
