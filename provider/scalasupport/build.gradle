@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
   compile project(path: ":core:model", configuration: 'default'),
-    project(path: ":provider:pact-jvm-provider", configuration: 'default')
+    project(path: ":provider", configuration: 'default')
   implementation "org.scalatest:scalatest_2.12:${project.scalaTestVersion}"
   compile "org.scala-lang:scala-library:${project.scalaVersion}"
   compile("com.typesafe.scala-logging:scala-logging_2.12:3.7.2") {

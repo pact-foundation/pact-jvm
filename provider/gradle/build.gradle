@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-  compile project(":provider:pact-jvm-provider")
+  compile project(":provider")
   compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
   compile gradleApi()
   
@@ -20,7 +20,7 @@ groovydoc {
 }
 
 pluginBundle {
-  website = 'https://github.com/DiUS/pact-jvm/tree/master/pact-jvm-provider-gradle'
+  website = 'https://github.com/DiUS/pact-jvm/tree/master/gradle'
   vcsUrl = 'https://github.com/DiUS/pact-jvm.git'
   description = 'Gradle plugin for verifying pacts against a provider.'
   tags = ['pact', 'cdc', 'consumerdrivencontracts', 'microservicetesting']

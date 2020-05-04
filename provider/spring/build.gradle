@@ -1,5 +1,5 @@
 dependencies {
-  api project(path: ":provider:pact-jvm-provider-junit", configuration: 'default')
+  api project(path: ":provider:junit", configuration: 'default')
 
   compile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '1.5.16.RELEASE'
   compile group: 'org.springframework', name: 'spring-webmvc', version: '4.3.19.RELEASE'

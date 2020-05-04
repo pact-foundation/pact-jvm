@@ -16,7 +16,7 @@ plugins {
 import org.apache.commons.lang3.RandomStringUtils
 
 dependencies {
-  compile project(":provider:pact-jvm-provider")
+  compile project(":provider")
   compile 'org.clojure:clojure:1.10.1'
   compile 'org.clojure:core.match:0.3.0'
   compile 'leiningen-core:leiningen-core:2.9.3'

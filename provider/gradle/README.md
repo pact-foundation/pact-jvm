@@ -20,7 +20,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'au.com.dius:pact-jvm-provider-gradle:4.0.0'
+        classpath 'au.com.dius.pact.provider:gradle:4.0.0'
     }
 }
 ```
