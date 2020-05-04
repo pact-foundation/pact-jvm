@@ -5,8 +5,6 @@ jdk:
   - openjdk10
   - openjdk11
   - openjdk12
-  - openjdk13
-  - openjdk14
 env:
   - PROJECT='-p core' JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m"
   - PROJECT='-p consumer' JAVA_OPTS="-Xmx512m" GRADLE_OPTS="-Xms128m"
