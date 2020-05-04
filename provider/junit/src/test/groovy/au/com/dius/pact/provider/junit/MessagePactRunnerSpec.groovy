@@ -10,10 +10,12 @@ import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.model.messaging.MessagePact
-import au.com.dius.pact.provider.junit.loader.PactFilter
-import au.com.dius.pact.provider.junit.loader.PactFolder
-import au.com.dius.pact.provider.junit.target.Target
-import au.com.dius.pact.provider.junit.target.TestTarget
+import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify
+import au.com.dius.pact.provider.junitsupport.Provider
+import au.com.dius.pact.provider.junitsupport.loader.PactFilter
+import au.com.dius.pact.provider.junitsupport.loader.PactFolder
+import au.com.dius.pact.provider.junitsupport.target.Target
+import au.com.dius.pact.provider.junitsupport.target.TestTarget
 import spock.lang.Specification
 
 class MessagePactRunnerSpec extends Specification {

@@ -1,8 +1,11 @@
 package au.com.dius.pact.provider.junit
 
 import au.com.dius.pact.provider.ProviderVerifier
-import au.com.dius.pact.provider.junit.loader.OverrideablePactLoader
-import au.com.dius.pact.provider.junit.loader.PactLoader
+import au.com.dius.pact.provider.junitsupport.loader.OverrideablePactLoader
+import au.com.dius.pact.provider.junitsupport.AllowOverridePactUrl
+import au.com.dius.pact.provider.junitsupport.Consumer
+import au.com.dius.pact.provider.junitsupport.JUnitProviderTestSupport
+import au.com.dius.pact.provider.junitsupport.loader.PactLoader
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 

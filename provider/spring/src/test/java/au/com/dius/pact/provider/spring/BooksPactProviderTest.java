@@ -1,11 +1,11 @@
 package au.com.dius.pact.provider.spring;
 
-import au.com.dius.pact.provider.junit.Provider;
+import au.com.dius.pact.provider.junitsupport.Provider;
 import au.com.dius.pact.provider.junit.RestPactRunner;
-import au.com.dius.pact.provider.junit.State;
-import au.com.dius.pact.provider.junit.TargetRequestFilter;
-import au.com.dius.pact.provider.junit.loader.PactFolder;
-import au.com.dius.pact.provider.junit.target.TestTarget;
+import au.com.dius.pact.provider.junitsupport.State;
+import au.com.dius.pact.provider.junitsupport.TargetRequestFilter;
+import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
+import au.com.dius.pact.provider.junitsupport.target.TestTarget;
 import au.com.dius.pact.provider.spring.target.MockMvcTarget;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider.spring;
 
-import au.com.dius.pact.provider.junit.State;
+import au.com.dius.pact.provider.junitsupport.State;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;

@@ -1,12 +1,12 @@
 package au.com.dius.pact.provider.spring
 
-import au.com.dius.pact.provider.junit.Provider
+import au.com.dius.pact.provider.junitsupport.Provider
 import au.com.dius.pact.provider.junit.RestPactRunner
-import au.com.dius.pact.provider.junit.State
-import au.com.dius.pact.provider.junit.StateChangeAction
-import au.com.dius.pact.provider.junit.loader.PactFilter
-import au.com.dius.pact.provider.junit.loader.PactFolder
-import au.com.dius.pact.provider.junit.target.TestTarget
+import au.com.dius.pact.provider.junitsupport.State
+import au.com.dius.pact.provider.junitsupport.StateChangeAction
+import au.com.dius.pact.provider.junitsupport.loader.PactFilter
+import au.com.dius.pact.provider.junitsupport.loader.PactFolder
+import au.com.dius.pact.provider.junitsupport.target.TestTarget
 import au.com.dius.pact.provider.spring.target.MockMvcTarget
 import groovy.util.logging.Slf4j
 import org.junit.Before

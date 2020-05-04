@@ -7,7 +7,7 @@ import java.util.concurrent.Executors
 import au.com.dius.pact.core.matchers
 import au.com.dius.pact.core.matchers.ResponseMatching
 import au.com.dius.pact.core.model.{RequestResponseInteraction, Pact => PactForConsumer}
-import au.com.dius.pact.provider.sbtsupport.HttpClient
+import au.com.dius.pact.provider.scalasupport.HttpClient
 import au.com.dius.pact.provider.scalatest.ProviderDsl.defaultPactDirectory
 import au.com.dius.pact.provider.scalatest.Tags.ProviderTest
 import au.com.dius.pact.provider.{ProviderInfo, ProviderUtils, ProviderVerifier}

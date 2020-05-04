@@ -5,7 +5,7 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.provider.junit.InteractionRunner
 import au.com.dius.pact.provider.junit.RestPactRunner
-import au.com.dius.pact.provider.junit.loader.PactLoader
+import au.com.dius.pact.provider.junitsupport.loader.PactLoader
 import org.junit.runners.model.Statement
 import org.junit.runners.model.TestClass
 import org.springframework.beans.BeanUtils

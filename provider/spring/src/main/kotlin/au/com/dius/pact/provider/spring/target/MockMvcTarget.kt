@@ -7,10 +7,10 @@ import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
-import au.com.dius.pact.provider.junit.Provider
-import au.com.dius.pact.provider.junit.TargetRequestFilter
+import au.com.dius.pact.provider.junitsupport.Provider
+import au.com.dius.pact.provider.junitsupport.TargetRequestFilter
 import au.com.dius.pact.provider.junit.target.BaseTarget
-import au.com.dius.pact.provider.junit.target.Target
+import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.spring.MvcProviderVerifier
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.test.web.servlet.MockMvc

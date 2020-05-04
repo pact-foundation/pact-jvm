@@ -9,8 +9,8 @@ import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
-import au.com.dius.pact.provider.junit.Provider
-import au.com.dius.pact.provider.junit.TargetRequestFilter
+import au.com.dius.pact.provider.junitsupport.Provider
+import au.com.dius.pact.provider.junitsupport.TargetRequestFilter
 import org.apache.http.HttpRequest
 import java.net.URL
 import java.util.function.Consumer

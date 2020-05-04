@@ -3,9 +3,9 @@ package au.com.dius.pact.consumer.specs2
 import au.com.dius.pact.consumer.PactVerificationResult.{Error, ExpectedButNotReceived, Mismatches, Ok, PartialMismatch, UnexpectedRequest}
 import au.com.dius.pact.consumer.model.MockProviderConfig
 import au.com.dius.pact.consumer.specs2.PactFragmentBuilder.PactWithAtLeastOneRequest
-import au.com.dius.pact.consumer.{ConsumerPactRunnerKt, MockServer, PactTestExecutionContext, PactTestRun, PactVerificationResult}
+import au.com.dius.pact.consumer._
 import au.com.dius.pact.core.model.{Consumer, PactSpecVersion, RequestResponsePact}
-import org.specs2.execute.{AsResult, Failure, Result, Success}
+import org.specs2.execute.{AsResult, Failure, Result}
 import org.specs2.specification.core.Fragment
 import org.specs2.specification.create.FragmentsFactory
 

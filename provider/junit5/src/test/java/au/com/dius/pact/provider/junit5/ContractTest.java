@@ -2,10 +2,10 @@ package au.com.dius.pact.provider.junit5;
 
 import au.com.dius.pact.core.model.Interaction;
 import au.com.dius.pact.core.model.Pact;
-import au.com.dius.pact.provider.junit.Provider;
-import au.com.dius.pact.provider.junit.State;
-import au.com.dius.pact.provider.junit.StateChangeAction;
-import au.com.dius.pact.provider.junit.loader.PactFolder;
+import au.com.dius.pact.provider.junitsupport.Provider;
+import au.com.dius.pact.provider.junitsupport.State;
+import au.com.dius.pact.provider.junitsupport.StateChangeAction;
+import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.apache.http.HttpRequest;
 import org.junit.jupiter.api.BeforeAll;

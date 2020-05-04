@@ -5,7 +5,7 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.UnknownPactSource
 import au.com.dius.pact.provider.junit.InteractionRunner
-import au.com.dius.pact.provider.junit.target.Target
+import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.spring.target.SpringBootHttpTarget
 import org.junit.After
 import org.junit.Before

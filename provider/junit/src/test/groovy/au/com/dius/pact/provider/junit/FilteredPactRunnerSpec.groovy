@@ -6,10 +6,12 @@ import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
-import au.com.dius.pact.provider.junit.loader.PactFilter
-import au.com.dius.pact.provider.junit.loader.PactFolder
-import au.com.dius.pact.provider.junit.target.Target
-import au.com.dius.pact.provider.junit.target.TestTarget
+import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify
+import au.com.dius.pact.provider.junitsupport.Provider
+import au.com.dius.pact.provider.junitsupport.loader.PactFilter
+import au.com.dius.pact.provider.junitsupport.loader.PactFolder
+import au.com.dius.pact.provider.junitsupport.target.Target
+import au.com.dius.pact.provider.junitsupport.target.TestTarget
 import org.junit.runner.notification.RunNotifier
 import org.junit.runners.model.InitializationError
 import spock.lang.Specification

@@ -5,6 +5,7 @@ import au.com.dius.pact.core.model.ProviderState;
 import au.com.dius.pact.core.model.Request;
 import au.com.dius.pact.core.model.RequestResponseInteraction;
 import au.com.dius.pact.core.model.messaging.Message;
+import au.com.dius.pact.provider.junitsupport.filter.InteractionFilter;
 import org.junit.Assert;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

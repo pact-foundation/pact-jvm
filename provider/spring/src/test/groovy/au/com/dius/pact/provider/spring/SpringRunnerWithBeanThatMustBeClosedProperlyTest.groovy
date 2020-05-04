@@ -1,13 +1,13 @@
 package au.com.dius.pact.provider.spring
 
-import au.com.dius.pact.provider.junit.Consumer
-import au.com.dius.pact.provider.junit.Provider
-import au.com.dius.pact.provider.junit.State
-import au.com.dius.pact.provider.junit.StateChangeAction
-import au.com.dius.pact.provider.junit.loader.PactFilter
-import au.com.dius.pact.provider.junit.loader.PactFolder
-import au.com.dius.pact.provider.junit.target.Target
-import au.com.dius.pact.provider.junit.target.TestTarget
+import au.com.dius.pact.provider.junitsupport.Consumer
+import au.com.dius.pact.provider.junitsupport.Provider
+import au.com.dius.pact.provider.junitsupport.State
+import au.com.dius.pact.provider.junitsupport.StateChangeAction
+import au.com.dius.pact.provider.junitsupport.loader.PactFilter
+import au.com.dius.pact.provider.junitsupport.loader.PactFolder
+import au.com.dius.pact.provider.junitsupport.target.Target
+import au.com.dius.pact.provider.junitsupport.target.TestTarget
 import au.com.dius.pact.provider.spring.target.SpringBootHttpTarget
 import au.com.dius.pact.provider.spring.testspringbootapp.TestApplication
 import groovy.util.logging.Slf4j

@@ -1,8 +1,13 @@
 package au.com.dius.pact.provider.junit;
 
-import au.com.dius.pact.provider.junit.loader.PactBroker;
-import au.com.dius.pact.provider.junit.loader.PactFilter;
-import au.com.dius.pact.provider.junit.loader.PactFolder;
+import au.com.dius.pact.provider.junitsupport.Consumer;
+import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify;
+import au.com.dius.pact.provider.junitsupport.Provider;
+import au.com.dius.pact.provider.junitsupport.State;
+import au.com.dius.pact.provider.junitsupport.TargetRequestFilter;
+import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
+import au.com.dius.pact.provider.junitsupport.loader.PactFilter;
+import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
 import org.apache.http.HttpRequest;
 import org.junit.Assert;
 import org.junit.Test;

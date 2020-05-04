@@ -4,7 +4,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 
-import au.com.dius.pact.provider.junit.State;
+import au.com.dius.pact.provider.junitsupport.State;
 import com.github.tomakehurst.wiremock.WireMockServer;
 
 public interface StateInterface2 {

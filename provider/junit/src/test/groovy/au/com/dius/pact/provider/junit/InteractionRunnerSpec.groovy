@@ -15,8 +15,8 @@ import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.VerificationReporter
 import au.com.dius.pact.provider.junit.target.HttpTarget
-import au.com.dius.pact.provider.junit.target.Target
-import au.com.dius.pact.provider.junit.target.TestTarget
+import au.com.dius.pact.provider.junitsupport.target.Target
+import au.com.dius.pact.provider.junitsupport.target.TestTarget
 import org.junit.runner.notification.RunNotifier
 import org.junit.runners.model.TestClass
 import spock.lang.Specification

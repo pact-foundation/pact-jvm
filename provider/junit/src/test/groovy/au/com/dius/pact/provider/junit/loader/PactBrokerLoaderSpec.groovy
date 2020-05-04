@@ -12,6 +12,10 @@ import au.com.dius.pact.core.pactbroker.PactResult
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.provider.ConsumerInfo
+import au.com.dius.pact.provider.junitsupport.loader.NoPactsFoundException
+import au.com.dius.pact.provider.junitsupport.loader.PactBroker
+import au.com.dius.pact.provider.junitsupport.loader.PactBrokerAuth
+import au.com.dius.pact.provider.junitsupport.loader.PactBrokerLoader
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 

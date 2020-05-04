@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.junit.target
 
+import au.com.dius.pact.provider.junitsupport.target.Target
 import org.junit.runners.model.TestClass
 
 /**

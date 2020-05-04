@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.junit5;
 
-import au.com.dius.pact.provider.junit.Provider;
-import au.com.dius.pact.provider.junit.loader.PactFolder;
+import au.com.dius.pact.provider.junitsupport.Provider;
+import au.com.dius.pact.provider.junitsupport.loader.PactFolder;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import java.net.MalformedURLException;
 import java.net.URL;

@@ -2,9 +2,9 @@ package au.com.dius.pact.provider.junit5
 
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
-import au.com.dius.pact.provider.junit.Provider
-import au.com.dius.pact.provider.junit.State
-import au.com.dius.pact.provider.junit.loader.PactFolder
+import au.com.dius.pact.provider.junitsupport.Provider
+import au.com.dius.pact.provider.junitsupport.State
+import au.com.dius.pact.provider.junitsupport.loader.PactFolder
 import com.github.tomakehurst.wiremock.WireMockServer
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.RandomStringUtils

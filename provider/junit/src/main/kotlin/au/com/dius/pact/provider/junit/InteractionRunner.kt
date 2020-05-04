@@ -11,9 +11,12 @@ import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.TestResultAccumulator
 import au.com.dius.pact.provider.junit.descriptions.DescriptionGenerator
-import au.com.dius.pact.provider.junit.target.Target
+import au.com.dius.pact.provider.junitsupport.target.Target
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget
-import au.com.dius.pact.provider.junit.target.TestTarget
+import au.com.dius.pact.provider.junitsupport.target.TestTarget
+import au.com.dius.pact.provider.junitsupport.MissingStateChangeMethod
+import au.com.dius.pact.provider.junitsupport.State
+import au.com.dius.pact.provider.junitsupport.TargetRequestFilter
 import mu.KLogging
 import org.junit.After
 import org.junit.Before

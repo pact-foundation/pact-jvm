@@ -3,13 +3,15 @@ package au.com.dius.pact.provider.junit
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.UrlSource
-import au.com.dius.pact.provider.junit.loader.PactFolder
-import au.com.dius.pact.provider.junit.loader.PactLoader
-import au.com.dius.pact.provider.junit.loader.PactSource
-import au.com.dius.pact.provider.junit.loader.PactUrl
-import au.com.dius.pact.provider.junit.loader.PactUrlLoader
-import au.com.dius.pact.provider.junit.target.Target
-import au.com.dius.pact.provider.junit.target.TestTarget
+import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify
+import au.com.dius.pact.provider.junitsupport.Provider
+import au.com.dius.pact.provider.junitsupport.loader.PactFolder
+import au.com.dius.pact.provider.junitsupport.loader.PactLoader
+import au.com.dius.pact.provider.junitsupport.loader.PactSource
+import au.com.dius.pact.provider.junitsupport.loader.PactUrl
+import au.com.dius.pact.provider.junitsupport.loader.PactUrlLoader
+import au.com.dius.pact.provider.junitsupport.target.Target
+import au.com.dius.pact.provider.junitsupport.target.TestTarget
 import org.junit.runner.notification.RunNotifier
 import org.junit.runners.model.InitializationError
 import spock.lang.Specification
@@ -121,7 +123,7 @@ class PactRunnerSpec extends Specification {
     then:
     InitializationError e = thrown()
     e.causes*.message ==
-      ['Provider name should be specified by using au.com.dius.pact.provider.junit.Provider annotation']
+      ['Provider name should be specified by using Provider annotation']
   }
 
   def 'PactRunner throws an exception if there is no pact source'() {

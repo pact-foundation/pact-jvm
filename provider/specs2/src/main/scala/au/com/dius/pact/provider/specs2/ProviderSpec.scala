@@ -5,7 +5,7 @@ import java.util.concurrent.Executors
 
 import au.com.dius.pact.core.matchers.{FullResponseMatch, ResponseMatching}
 import au.com.dius.pact.core.model.{DefaultPactReader, RequestResponsePact}
-import au.com.dius.pact.provider.sbtsupport.HttpClient
+import au.com.dius.pact.provider.scalasupport.HttpClient
 import org.specs2.Specification
 import org.specs2.execute.Result
 import org.specs2.specification.core.Fragments

@@ -10,8 +10,8 @@ import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.provider.junit.target.HttpTarget
-import au.com.dius.pact.provider.junit.target.Target
-import au.com.dius.pact.provider.junit.target.TestTarget
+import au.com.dius.pact.provider.junitsupport.target.Target
+import au.com.dius.pact.provider.junitsupport.target.TestTarget
 import org.junit.runners.model.TestClass
 import spock.lang.Specification
 

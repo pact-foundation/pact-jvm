@@ -1,6 +1,8 @@
 package au.com.dius.pact.provider.junit
 
 import au.com.dius.pact.core.model.ProviderState
+import au.com.dius.pact.provider.junitsupport.State
+import au.com.dius.pact.provider.junitsupport.StateChangeAction
 import kotlin.Pair
 import org.junit.runners.model.FrameworkMethod
 import org.junit.runners.model.Statement

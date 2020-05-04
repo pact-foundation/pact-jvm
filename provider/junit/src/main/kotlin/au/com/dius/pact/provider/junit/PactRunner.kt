@@ -3,16 +3,20 @@ package au.com.dius.pact.provider.junit
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
-import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.checkForOverriddenPactUrl
-import au.com.dius.pact.provider.junit.JUnitProviderTestSupport.filterPactsByAnnotations
-import au.com.dius.pact.provider.junit.loader.NoPactsFoundException
-import au.com.dius.pact.provider.junit.loader.PactBroker
-import au.com.dius.pact.provider.junit.loader.PactFolder
-import au.com.dius.pact.provider.junit.loader.PactLoader
-import au.com.dius.pact.provider.junit.loader.PactSource
+import au.com.dius.pact.provider.junitsupport.JUnitProviderTestSupport.checkForOverriddenPactUrl
+import au.com.dius.pact.provider.junitsupport.JUnitProviderTestSupport.filterPactsByAnnotations
+import au.com.dius.pact.provider.junitsupport.loader.NoPactsFoundException
+import au.com.dius.pact.provider.junitsupport.loader.PactBroker
+import au.com.dius.pact.provider.junitsupport.loader.PactFolder
+import au.com.dius.pact.provider.junitsupport.loader.PactLoader
+import au.com.dius.pact.provider.junitsupport.loader.PactSource
 import au.com.dius.pact.provider.junit.target.HttpTarget
-import au.com.dius.pact.provider.junit.target.Target
-import au.com.dius.pact.provider.junit.target.TestTarget
+import au.com.dius.pact.provider.junitsupport.AllowOverridePactUrl
+import au.com.dius.pact.provider.junitsupport.Consumer
+import au.com.dius.pact.provider.junitsupport.target.Target
+import au.com.dius.pact.provider.junitsupport.target.TestTarget
+import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify
+import au.com.dius.pact.provider.junitsupport.Provider
 import com.google.gson.JsonSyntaxException
 import mu.KLogging
 import org.junit.Ignore
@@ -65,7 +69,7 @@ open class PactRunner<I>(private val clazz: Class<*>) : ParentRunner<Interaction
     } else {
 
       val providerInfo = clazz.getAnnotation(Provider::class.java) ?: throw InitializationError(
-              "Provider name should be specified by using ${Provider::class.java.name} annotation")
+              "Provider name should be specified by using ${Provider::class.java.simpleName} annotation")
       val serviceName = providerInfo.value
 
       val consumerInfo = clazz.getAnnotation(Consumer::class.java)

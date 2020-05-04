@@ -5,11 +5,12 @@ import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderInfo
-import au.com.dius.pact.provider.junit.JUnitProviderTestSupport
-import au.com.dius.pact.provider.junit.VerificationReports
+import au.com.dius.pact.provider.junitsupport.JUnitProviderTestSupport
+import au.com.dius.pact.provider.junitsupport.VerificationReports
 import au.com.dius.pact.provider.reporters.ReporterManager
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
+import au.com.dius.pact.provider.junitsupport.target.Target
 import org.junit.runners.model.TestClass
 import java.io.File
 import java.util.function.BiConsumer

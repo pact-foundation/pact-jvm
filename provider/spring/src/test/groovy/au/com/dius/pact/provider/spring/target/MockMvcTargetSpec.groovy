@@ -2,8 +2,8 @@ package au.com.dius.pact.provider.spring.target
 
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.UnknownPactSource
-import au.com.dius.pact.provider.junit.Provider
-import au.com.dius.pact.provider.junit.TargetRequestFilter
+import au.com.dius.pact.provider.junitsupport.Provider
+import au.com.dius.pact.provider.junitsupport.TargetRequestFilter
 import groovy.transform.CompileStatic
 import org.junit.runners.model.TestClass
 import org.springframework.http.MediaType

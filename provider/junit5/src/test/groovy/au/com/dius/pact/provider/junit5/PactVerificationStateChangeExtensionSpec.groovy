@@ -10,9 +10,9 @@ import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.TestResultAccumulator
-import au.com.dius.pact.provider.junit.MissingStateChangeMethod
-import au.com.dius.pact.provider.junit.State
-import au.com.dius.pact.provider.junit.StateChangeAction
+import au.com.dius.pact.provider.junitsupport.MissingStateChangeMethod
+import au.com.dius.pact.provider.junitsupport.State
+import au.com.dius.pact.provider.junitsupport.StateChangeAction
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import org.junit.jupiter.api.extension.ExtensionContext
 import spock.lang.Specification
