@@ -28,7 +28,7 @@ import java.text.ParseException
 
 private val logger = KotlinLogging.logger {}
 private val integerRegex = Regex("^\\d+$")
-private val decimalRegex = Regex("^\\d+\\.\\d*$")
+private val decimalRegex = Regex("^0|\\d+\\.\\d*$")
 
 fun valueOf(value: Any?): String {
   return when (value) {

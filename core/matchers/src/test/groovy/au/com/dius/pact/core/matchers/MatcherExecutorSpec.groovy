@@ -12,6 +12,7 @@ import au.com.dius.pact.core.model.matchingrules.TimeMatcher
 import au.com.dius.pact.core.model.matchingrules.TimestampMatcher
 import au.com.dius.pact.core.model.matchingrules.TypeMatcher
 import com.google.gson.JsonNull
+import com.google.gson.JsonPrimitive
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -246,17 +247,18 @@ class MatcherExecutorSpec extends Specification {
 
     where:
 
-    value             | result
-    '100'             | false
-    100               | false
-    100.0             | true
-    100.0 as float    | true
-    100.0 as double   | true
-    100 as int        | false
-    100 as long       | false
-    100 as BigInteger | false
-    BigInteger.ZERO   | false
-    BigDecimal.ZERO   | true
+    value                | result
+    new JsonPrimitive(0) | true
+    '100'                | false
+    100                  | false
+    100.0                | true
+    100.0 as float       | true
+    100.0 as double      | true
+    100 as int           | false
+    100 as long          | false
+    100 as BigInteger    | false
+    BigInteger.ZERO      | false
+    BigDecimal.ZERO      | true
   }
 
   @Unroll
