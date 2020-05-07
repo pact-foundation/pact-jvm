@@ -349,7 +349,7 @@ class PactBrokerClientSpec extends Specification {
     ''')
 
     when:
-    def result = client.fetchConsumersWithSelectors('provider', selectors)
+    def result = client.fetchConsumersWithSelectors('provider', selectors, [], false)
 
     then:
     1 * halClient.navigate() >> halClient
@@ -358,10 +358,12 @@ class PactBrokerClientSpec extends Specification {
     result.right
     result.b.first() == new PactResult('Pact between Foo Web Client (1.0.2) and Activity Service',
       'https://test.pact.dius.com.au/pacts/provider/Activity Service/consumer/Foo Web Client/pact-version/384826ff3a2856e28dfae553efab302863dcd727',
-       'baseUrl', [], [
-       new VerificationNotice('before_verification',
+      'baseUrl', [], [
+        new VerificationNotice('before_verification',
          'The pact at ... is being verified because it matches the following configured selection criterion: latest pact for a consumer version tagged \'DEV\'')
-     ])
+      ],
+      false
+    )
   }
 
   def 'fetching pacts with selectors falls back to the beta provider-pacts-for-verification link'() {
@@ -380,7 +382,7 @@ class PactBrokerClientSpec extends Specification {
     ''')
 
     when:
-    def result = client.fetchConsumersWithSelectors('provider', [])
+    def result = client.fetchConsumersWithSelectors('provider', [], [], false)
 
     then:
     1 * halClient.navigate() >> halClient
@@ -398,7 +400,7 @@ class PactBrokerClientSpec extends Specification {
     }
 
     when:
-    def result = client.fetchConsumersWithSelectors('provider', [])
+    def result = client.fetchConsumersWithSelectors('provider', [], [], false)
 
     then:
     1 * halClient.navigate() >> halClient
