@@ -5,6 +5,7 @@ import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ConsumersGroup
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
+import org.gradle.api.GradleScriptException
 import org.gradle.util.ConfigureUtil
 
 /**
@@ -13,6 +14,7 @@ import org.gradle.util.ConfigureUtil
 class GradleProviderInfo extends ProviderInfo {
   def providerVersion
   def providerTag
+  PactBrokerConsumerConfig brokerConfig
 
   GradleProviderInfo(String name) {
     super(name)
@@ -62,5 +64,27 @@ class GradleProviderInfo extends ProviderInfo {
 
   def url(String path) {
     new URL(path)
+  }
+
+  @SuppressWarnings('LineLength')
+  def fromPactBroker(Closure closure) {
+    brokerConfig = new PactBrokerConsumerConfig()
+    ConfigureUtil.configure(closure, brokerConfig)
+
+    if (brokerConfig.enablePending && (!brokerConfig.providerTags ||
+      brokerConfig.providerTags.findAll { !it.trim().empty }.empty)) {
+      throw new GradleScriptException(
+        '''
+        |No providerTags: To use the pending pacts feature, you need to provide the list of provider names for the provider application version that will be published with the verification results
+        |
+        |For instance:
+        |
+        |fromPactBroker {
+        |    selectors = latestTags('test')
+        |    enablePending = true
+        |    providerTags = ['master']
+        |}
+        '''.stripMargin(), null)
+    }
   }
 }

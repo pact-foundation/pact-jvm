@@ -136,6 +136,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
   /**
    * Fetches all consumers for the given provider and selectors
    */
+  @JvmOverloads
   open fun fetchConsumersWithSelectors(
     provider: String,
     consumerVersionSelectors: List<ConsumerVersionSelector>,

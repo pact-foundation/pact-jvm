@@ -39,6 +39,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     pactBrokerLoader = { boolean failIfNoPactsFound = true ->
       PactBrokerClient client = brokerClient
+      Pact pact = mockPact
       new PactBrokerLoader(host, port, protocol, tags, consumers, failIfNoPactsFound, null, null, null) {
         @Override
         PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
@@ -47,7 +48,7 @@ class PactBrokerLoaderSpec extends Specification {
 
         @Override
         Pact loadPact(ConsumerInfo consumer, Map options) {
-          mockPact
+          pact
         }
       }
     }
@@ -384,7 +385,8 @@ class PactBrokerLoaderSpec extends Specification {
     PactBrokerLoader loader = Spy(pactBrokerLoader())
     loader.overridePactUrl('http://overridden.com', 'overridden')
     def brokerUrlSource = new BrokerUrlSource('http://overridden.com', 'http://pactbroker:1234')
-    def consumer = new ConsumerInfo('overridden', null, true, [], null, brokerUrlSource)
+    def consumer = new ConsumerInfo('overridden', null, true, [], null,
+      brokerUrlSource, [], [], false)
 
     when:
     def result = loader.load('test')

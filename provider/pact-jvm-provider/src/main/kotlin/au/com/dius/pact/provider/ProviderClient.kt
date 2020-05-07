@@ -80,7 +80,8 @@ interface IConsumerInfo {
   var verificationType: PactVerification?
   var pactSource: Any?
   var pactFileAuthentication: List<Any?>
-  var notices: List<VerificationNotice>
+  val notices: List<VerificationNotice>
+  val pending: Boolean
 }
 
 open class ConsumerInfo @JvmOverloads constructor (
@@ -91,7 +92,8 @@ open class ConsumerInfo @JvmOverloads constructor (
   override var verificationType: PactVerification? = null,
   override var pactSource: Any? = null,
   override var pactFileAuthentication: List<Any?> = emptyList(),
-  override var notices: List<VerificationNotice> = emptyList()
+  override val notices: List<VerificationNotice> = emptyList(),
+  override val pending: Boolean = false
 ) : IConsumerInfo {
 
   fun toPactConsumer() = au.com.dius.pact.core.model.Consumer(name)
@@ -132,7 +134,7 @@ open class ConsumerInfo @JvmOverloads constructor (
   override fun toString(): String {
     return "ConsumerInfo(name='$name', stateChange=$stateChange, stateChangeUsesBody=$stateChangeUsesBody, " +
       "packagesToScan=$packagesToScan, verificationType=$verificationType, pactSource=$pactSource, " +
-      "pactFileAuthentication=$pactFileAuthentication)"
+      "pactFileAuthentication=$pactFileAuthentication, notices=$notices, pending=$pending)"
   }
 
   override fun equals(other: Any?): Boolean {
@@ -148,6 +150,8 @@ open class ConsumerInfo @JvmOverloads constructor (
     if (verificationType != other.verificationType) return false
     if (pactSource != other.pactSource) return false
     if (pactFileAuthentication != other.pactFileAuthentication) return false
+    if (notices != other.notices) return false
+    if (pending != other.pending) return false
 
     return true
   }
@@ -160,6 +164,8 @@ open class ConsumerInfo @JvmOverloads constructor (
     result = 31 * result + (verificationType?.hashCode() ?: 0)
     result = 31 * result + (pactSource?.hashCode() ?: 0)
     result = 31 * result + pactFileAuthentication.hashCode()
+    result = 31 * result + notices.hashCode()
+    result = 31 * result + pending.hashCode()
     return result
   }
 
@@ -171,10 +177,11 @@ open class ConsumerInfo @JvmOverloads constructor (
         pactFileAuthentication = consumer.pactFileAuthentication
       )
 
-    fun from(consumer: PactResult) =
-      ConsumerInfo(name = consumer.name,
-        pactSource = BrokerUrlSource(url = consumer.source, pactBrokerUrl = consumer.pactBrokerUrl),
-        pactFileAuthentication = consumer.pactFileAuthentication, notices = consumer.notices
+    fun from(result: PactResult) =
+      ConsumerInfo(name = result.name,
+        pactSource = BrokerUrlSource(url = result.source, pactBrokerUrl = result.pactBrokerUrl),
+        pactFileAuthentication = result.pactFileAuthentication, notices = result.notices,
+        pending = result.pending
       )
   }
 }
