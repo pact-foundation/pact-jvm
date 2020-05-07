@@ -17,7 +17,8 @@ data class PactResult(
   val source: String,
   val pactBrokerUrl: String,
   val pactFileAuthentication: List<String> = listOf(),
-  val notices: List<VerificationNotice>
+  val notices: List<VerificationNotice>,
+  val pending: Boolean = false
 ) {
   companion object {
     fun fromConsumer(consumer: PactBrokerConsumer) =
