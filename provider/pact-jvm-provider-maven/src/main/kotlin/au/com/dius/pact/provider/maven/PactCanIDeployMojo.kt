@@ -3,11 +3,10 @@ package au.com.dius.pact.provider.maven
 import au.com.dius.pact.core.pactbroker.Latest
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.support.isNotEmpty
+import com.github.ajalt.mordant.TermColors
 import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
-import org.fusesource.jansi.Ansi
-import org.fusesource.jansi.AnsiConsole
 
 /**
  * Task to push pact files to a pact broker
@@ -30,40 +29,34 @@ open class PactCanIDeployMojo : PactBaseMojo() {
   private var to: String? = ""
 
   override fun execute() {
-    try {
-      AnsiConsole.systemInstall()
+    val t = TermColors()
 
-      if (pactBrokerUrl.isNullOrEmpty() && brokerClient == null) {
-        throw MojoExecutionException("pactBrokerUrl is required")
-      }
+    if (pactBrokerUrl.isNullOrEmpty() && brokerClient == null) {
+      throw MojoExecutionException("pactBrokerUrl is required")
+    }
 
-      if (brokerClient == null) {
-        brokerClient = PactBrokerClient(pactBrokerUrl!!, brokerClientOptions())
-      }
+    if (brokerClient == null) {
+      brokerClient = PactBrokerClient(pactBrokerUrl!!, brokerClientOptions())
+    }
 
-      if (pacticipant.isNullOrEmpty()) {
-        throw MojoExecutionException("The can-i-deploy task requires -Dpacticipant=...", null)
-      }
+    if (pacticipant.isNullOrEmpty()) {
+      throw MojoExecutionException("The can-i-deploy task requires -Dpacticipant=...", null)
+    }
 
-      val latest = setupLatestParam()
-      if ((latest !is Latest.UseLatest || !latest.latest) && pacticipantVersion.isNullOrEmpty()) {
-        throw MojoExecutionException("The can-i-deploy task requires -DpacticipantVersion=... or -Dlatest=true", null)
-      }
+    val latest = setupLatestParam()
+    if ((latest !is Latest.UseLatest || !latest.latest) && pacticipantVersion.isNullOrEmpty()) {
+      throw MojoExecutionException("The can-i-deploy task requires -DpacticipantVersion=... or -Dlatest=true", null)
+    }
 
-      val result = brokerClient!!.canIDeploy(pacticipant!!, pacticipantVersion.orEmpty(), latest, to)
-      if (result.ok) {
-        AnsiConsole.out().println(Ansi.ansi().a("Computer says yes \\o/ ").a(result.message).a("\n\n")
-          .fg(Ansi.Color.GREEN).a(result.reason).reset())
-      } else {
-        AnsiConsole.out().println(Ansi.ansi().a("Computer says no ¯\\_(ツ)_/¯ ").a(result.message).a("\n\n")
-          .fg(Ansi.Color.RED).a(result.reason).reset())
-      }
+    val result = brokerClient!!.canIDeploy(pacticipant!!, pacticipantVersion.orEmpty(), latest, to)
+    if (result.ok) {
+      println("Computer says yes \\o/ ${result.message}\n\n${t.green(result.reason)}")
+    } else {
+      println("Computer says no ¯\\_(ツ)_/¯ ${result.message}\n\n${t.red(result.reason)}")
+    }
 
-      if (!result.ok) {
-        throw MojoExecutionException("Can you deploy? Computer says no ¯\\_(ツ)_/¯ ${result.message}", null)
-      }
-    } finally {
-      AnsiConsole.systemUninstall()
+    if (!result.ok) {
+      throw MojoExecutionException("Can you deploy? Computer says no ¯\\_(ツ)_/¯ ${result.message}", null)
     }
   }
 

@@ -5,7 +5,6 @@ import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.Interaction
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.BooleanUtils
-import org.fusesource.jansi.AnsiConsole
 import java.io.File
 
 /**
@@ -36,7 +35,7 @@ object ProviderUtils {
       throw PactVerifierException("Pact file directory ($pactFileDir) is not readable")
     }
 
-    AnsiConsole.out().println("Loading pact files for provider ${provider.name} from $pactFileDir")
+    println("Loading pact files for provider ${provider.name} from $pactFileDir")
 
     val consumers = mutableListOf<ConsumerInfo>()
     for (f in pactFileDir.listFiles { _, name -> FilenameUtils.isExtension(name, "json") }) {
@@ -47,11 +46,11 @@ object ProviderUtils {
           stateChange, stateChangeUsesBody, packagesToScan, verificationType,
           FileSource<Interaction>(f), pactFileAuthentication))
       } else {
-        AnsiConsole.out().println("Skipping $f as the provider names don't match provider.name: " +
+        println("Skipping $f as the provider names don't match provider.name: " +
           "${provider.name} vs pactJson.provider.name: $providerName")
       }
     }
-    AnsiConsole.out().println("Found ${consumers.size} pact files")
+    println("Found ${consumers.size} pact files")
     return consumers
   }
 
