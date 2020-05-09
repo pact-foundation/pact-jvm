@@ -14,7 +14,6 @@ import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.plugins.annotations.ResolutionScope
 import org.apache.maven.settings.crypto.DefaultSettingsDecryptionRequest
-import org.fusesource.jansi.AnsiConsole
 import java.io.File
 import java.util.function.Function
 import java.util.function.Supplier
@@ -50,8 +49,6 @@ open class PactProviderMojo : PactBaseMojo() {
   lateinit var reports: List<String>
 
   override fun execute() {
-    AnsiConsole.systemInstall()
-
     systemPropertyVariables.forEach { (property, value) ->
       System.setProperty(property, value)
     }
@@ -117,7 +114,6 @@ open class PactProviderMojo : PactBaseMojo() {
 
       if (failures.isNotEmpty()) {
         verifier.displayFailures(failures)
-        AnsiConsole.systemUninstall()
         throw MojoFailureException("There were ${failures.size} pact failures")
       }
     } finally {

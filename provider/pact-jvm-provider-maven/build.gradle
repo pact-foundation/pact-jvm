@@ -5,7 +5,7 @@ dependencies {
   compile 'org.apache.maven:maven-core:3.6.0'
   compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
   compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-  compile "org.fusesource.jansi:jansi:${project.jansiVersion}"
+  implementation 'com.github.ajalt:mordant:1.2.1'
 
   testRuntime "org.junit.vintage:junit-vintage-engine:${project.junit5Version}"
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
