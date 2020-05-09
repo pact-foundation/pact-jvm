@@ -70,5 +70,11 @@ interface VerifierReporter {
   fun metadataComparisonOk()
   fun metadataComparisonOk(key: String, value: Any?)
   fun metadataComparisonFailed(key: String, value: Any?, comparison: Any)
-  fun reportVerificationNoticesForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, notices: List<VerificationNotice>) {}
+  fun reportVerificationNoticesForConsumer(
+    consumer: IConsumerInfo,
+    provider: IProviderInfo,
+    notices: List<VerificationNotice>
+  ) {}
+  fun warnPublishResultsSkippedBecauseFiltered() {}
+  fun warnPublishResultsSkippedBecauseDisabled(envVar: String) {}
 }

@@ -264,6 +264,9 @@ class JsonReporter(
     jsonData["execution"].array.last()["consumer"]["notices"] = jsonArray(notices.map { it.text })
   }
 
+  override fun warnPublishResultsSkippedBecauseFiltered() { }
+  override fun warnPublishResultsSkippedBecauseDisabled(envVar: String) { }
+
   companion object {
     const val REPORT_FORMAT = "0.1.0"
     const val FAILED = "failed"

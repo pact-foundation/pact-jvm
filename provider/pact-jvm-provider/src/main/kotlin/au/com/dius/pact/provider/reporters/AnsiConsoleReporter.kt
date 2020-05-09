@@ -49,7 +49,10 @@ class AnsiConsoleReporter(
   override fun finaliseReport() { }
 
   override fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, tag: String?) {
-    var out = "\nVerifying a pact between ${t.bold(consumer.name)} and ${t.bold(provider.name)}"
+    var out = "\nVerifying a pact between ${t.bold(consumer.name)}"
+    if (!consumer.name.contains(provider.name)) {
+      out += " and ${t.bold(provider.name)}"
+    }
     if (tag != null) {
       out += " for tag ${t.bold(tag)}"
     }
@@ -197,9 +200,18 @@ class AnsiConsoleReporter(
     provider: IProviderInfo,
     notices: List<VerificationNotice>
   ) {
-    println("  Notices:")
+    println("\n  Notices:")
     notices.forEachIndexed { i, notice -> println("    ${i + 1}) ${notice.text}") }
     println()
+  }
+
+  override fun warnPublishResultsSkippedBecauseFiltered() {
+    println(t.yellow("\nNOTE: Skipping publishing of verification results as the interactions have been filtered"))
+  }
+
+  override fun warnPublishResultsSkippedBecauseDisabled(envVar: String) {
+    println(t.yellow("\nNOTE: Skipping publishing of verification results as it has been disabled " +
+      "($envVar is not 'true')"))
   }
 
   private fun displayDiff(diff: Map<String, Any>) {
