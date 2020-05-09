@@ -66,7 +66,10 @@ class MarkdownReporter(
   }
 
   override fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, tag: String?) {
-    val report = StringBuilder("## Verifying a pact between _${consumer.name}_ and _${provider.name}_")
+    val report = StringBuilder("## Verifying a pact between _${consumer.name}_")
+    if (!consumer.name.contains(provider.name)) {
+      report.append(" and _${provider.name}_")
+    }
     if (tag != null) {
       report.append(" for tag $tag")
     }
@@ -195,24 +198,6 @@ class MarkdownReporter(
   override fun bodyComparisonFailed(comparison: Any) {
     pw!!.write("&nbsp;&nbsp;&nbsp;&nbsp;has a matching body (<span style='color:red'>FAILED</span>)  \n\n")
 
-//    val property = comparison.property("comparison")?.get(comparison)
-//    when {
-//      comparison is String -> pw!!.write("|\$|$comparison|\n")
-//      property is Map<*, *> -> pw!!.write(property.map {
-//        val mismatches = (it.value as List<Map<String, Any>>).joinToString("; ") { mismatch ->
-//          mismatch["mismatch"].toString()
-//        }
-//        "|${it.key}|$mismatches|"
-//      }.joinToString("\n"))
-//      else -> pw!!.write("|\$|$property|")
-//    }
-//    pw!!.write("\n\n")
-//    if (comparison.hasProperty("diff")) {
-//      pw!!.write("Diff:\n\n")
-//      renderDiff(pw!!, comparison.property("diff")?.get(comparison))
-//      pw!!.write("\n\n")
-//    }
-
     when (comparison) {
       is Either.Left<*> -> {
         comparison as Either.Left<BodyTypeMismatch>
@@ -284,5 +269,13 @@ class MarkdownReporter(
     pw!!.write("Notices:\n")
     notices.forEachIndexed { i, notice -> pw!!.write("${i + 1}. ${notice.text}\n") }
     pw!!.write("\n")
+  }
+
+  override fun warnPublishResultsSkippedBecauseFiltered() {
+    pw!!.write("NOTE: Skipping publishing of verification results as the interactions have been filtered")
+  }
+
+  override fun warnPublishResultsSkippedBecauseDisabled(envVar: String) {
+    pw!!.write("NOTE: Skipping publishing of verification results as it has been disabled ($envVar is not 'true')")
   }
 }

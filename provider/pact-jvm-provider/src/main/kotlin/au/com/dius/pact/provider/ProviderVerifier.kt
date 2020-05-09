@@ -615,13 +615,8 @@ open class ProviderVerifier @JvmOverloads constructor (
         verifyInteraction(provider, consumer, failures, it)
       }.reduce { acc, result -> acc.merge(result) }
       when {
-        pact.isFiltered() -> logger.warn {
-          "Skipping publishing of verification results as the interactions have been filtered"
-        }
-        publishingResultsDisabled() -> logger.warn {
-          "Skipping publishing of verification results as it has been disabled " +
-          "($PACT_VERIFIER_PUBLISH_RESULTS is not 'true')"
-        }
+        pact.isFiltered() -> reporters.forEach { it.warnPublishResultsSkippedBecauseFiltered() }
+        publishingResultsDisabled() -> reporters.forEach { it.warnPublishResultsSkippedBecauseDisabled(PACT_VERIFIER_PUBLISH_RESULTS) }
         else -> verificationReporter.reportResults(pact, result, providerVersion.get() ?: "0.0.0", client,
           providerTag?.get())
       }
