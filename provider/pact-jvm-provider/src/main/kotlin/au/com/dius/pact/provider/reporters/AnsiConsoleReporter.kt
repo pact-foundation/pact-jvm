@@ -7,6 +7,7 @@ import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
+import au.com.dius.pact.provider.VerificationResult
 import com.github.ajalt.mordant.TermColors
 import java.io.File
 
@@ -195,6 +196,16 @@ class AnsiConsoleReporter(
     }
   }
 
+  override fun displayFailures(failures: List<VerificationResult.Failed>) {
+    println("\nFailures:\n")
+    failures.forEachIndexed { i, err ->
+      println("${i + 1}) ${err.verificationDescription}\n")
+      err.failures.forEachIndexed { index, failure ->
+        println("    ${i + 1}.${index + 1}) ${failure.formatForDisplay(t)}\n")
+      }
+    }
+  }
+
   override fun reportVerificationNoticesForConsumer(
     consumer: IConsumerInfo,
     provider: IProviderInfo,
@@ -206,12 +217,12 @@ class AnsiConsoleReporter(
   }
 
   override fun warnPublishResultsSkippedBecauseFiltered() {
-    println(t.yellow("\nNOTE: Skipping publishing of verification results as the interactions have been filtered"))
+    println(t.yellow("\nNOTE: Skipping publishing of verification results as the interactions have been filtered\n"))
   }
 
   override fun warnPublishResultsSkippedBecauseDisabled(envVar: String) {
     println(t.yellow("\nNOTE: Skipping publishing of verification results as it has been disabled " +
-      "($envVar is not 'true')"))
+      "($envVar is not 'true')\n"))
   }
 
   private fun displayDiff(diff: Map<String, Any>) {
