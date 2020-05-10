@@ -504,7 +504,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       TestResult.Ok
     } else {
       reporters.forEach { it.statusComparisonFailed(status, mismatch.description()) }
-      failures["$comparisonDescription has statusResult code $status"] = mismatch.description()
+      failures["$comparisonDescription has status code $status"] = mismatch.description()
       TestResult.Failed(listOf(mismatch.toMap() + mapOf("interactionId" to interactionId,
         "type" to "status")), "Response status did not match")
     }
