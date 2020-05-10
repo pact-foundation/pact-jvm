@@ -1,12 +1,9 @@
 package au.com.dius.pact.provider
 
 import arrow.core.Either
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.getError
 import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.matchers.MetadataMismatch
-import au.com.dius.pact.core.matchers.Mismatch
 import au.com.dius.pact.core.matchers.StatusMismatch
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.ContentType
@@ -24,12 +21,12 @@ import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
-import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.support.hasProperty
-import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.VerifierReporter
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.getError
 import groovy.lang.Closure
 import io.github.classgraph.ClassGraph
 import mu.KLogging
@@ -86,59 +83,6 @@ data class MessageAndMetadata(val messageData: ByteArray, val metadata: Map<Stri
     result = 31 * result + metadata.hashCode()
     return result
   }
-}
-
-sealed class VerificationFailureType {
-  data class MismatchFailure(val mismatch: Mismatch) : VerificationFailureType()
-  data class ExceptionFailure(val e: Exception) : VerificationFailureType()
-}
-
-/**
- * Result of verifying an interaction
- */
-sealed class VerificationResult {
-  /**
-   * Result was successful
-   */
-  object Ok : VerificationResult() {
-    override fun merge(result: VerificationResult) = when (result) {
-      is Ok -> this
-      is Failed -> result
-    }
-
-    override fun toTestResult() = TestResult.Ok
-  }
-
-  /**
-   * Result failed
-   */
-  data class Failed(
-    var results: List<Map<String, Any?>> = emptyList(),
-    val description: String = "",
-    val failures: List<VerificationFailureType> = emptyList()
-  ) : VerificationResult() {
-    override fun merge(result: VerificationResult) = when (result) {
-      is Ok -> this
-      is Failed -> Failed(results + result.results, when {
-        description.isNotEmpty() && result.description.isNotEmpty() && description != result.description ->
-          "$description, ${result.description}"
-        description.isNotEmpty() -> description
-        else -> result.description
-      }, failures + result.failures)
-    }
-
-    override fun toTestResult() = TestResult.Failed(results, description)
-  }
-
-  /**
-   * Merge this result with the other one, creating a new result
-   */
-  abstract fun merge(result: VerificationResult): VerificationResult
-
-  /**
-   * Convert to a test result
-   */
-  abstract fun toTestResult(): TestResult
 }
 
 /**
@@ -198,7 +142,13 @@ interface IProviderVerifier {
   /**
    * Run the verification for the given provider and return an failures in a Map
    */
+  @Deprecated("Use version that returns VerificationResult")
   fun verifyProvider(provider: ProviderInfo): MutableMap<String, Any>
+
+  /**
+   * Run the verification for the given provider and return any failures
+   */
+  fun verifyProviderReturnResult(provider: ProviderInfo): List<VerificationResult>
 
   /**
    * Reports the state of the interaction to all the registered reporters
@@ -213,7 +163,13 @@ interface IProviderVerifier {
   /**
    * Displays all the failures from the verification run
    */
+  @Deprecated("use method that takes VerificationResult")
   fun displayFailures(failures: Map<String, Any>)
+
+  /**
+   * Displays all the failures from the verification run
+   */
+  fun displayFailures(failures: List<VerificationResult.Failed>)
 
   /**
    * Verifies the response from the provider against the interaction
@@ -366,7 +322,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       reporters.forEach { it.verificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)) }
       return VerificationResult.Failed(listOf(mapOf("message" to "Request to provider method failed with an exception",
         "exception" to e, "interactionId" to interaction.interactionId)),
-        "Request to provider method failed with an exception",
+        "Request to provider method failed with an exception", interactionMessage,
         listOf(VerificationFailureType.ExceptionFailure(e)))
     }
   }
@@ -387,13 +343,14 @@ open class ProviderVerifier @JvmOverloads constructor (
           failures["$comparisonDescription has a matching body"] = comparison.a.description()
           VerificationResult.Failed(listOf(comparison.a.toMap() +
             mapOf("interactionId" to interactionId, "type" to "body")),
-            "Body had differences", listOf(VerificationFailureType.MismatchFailure(comparison.a)))
+            "Body had differences", comparisonDescription,
+            listOf(VerificationFailureType.MismatchFailure(comparison.a)))
         }
         is Either.Right -> {
           failures["$comparisonDescription has a matching body"] = comparison.b
           VerificationResult.Failed(listOf(comparison.b.mismatches +
             mapOf("interactionId" to interactionId, "type" to "body")),
-            "Body had differences", comparison.b.mismatches.values.flatten()
+            "Body had differences", comparisonDescription, comparison.b.mismatches.values.flatten()
               .map { VerificationFailureType.MismatchFailure(it) })
         }
       }
@@ -456,7 +413,8 @@ open class ProviderVerifier @JvmOverloads constructor (
       VerificationResult.Ok
     } else {
       reporters.forEach { it.includesMetadata() }
-      var result: VerificationResult = VerificationResult.Failed(emptyList(), "Metadata had differences")
+      var result: VerificationResult = VerificationResult.Failed(emptyList(), "Metadata had differences",
+        comparisonDescription)
       comparison.forEach { (key, metadataComparison) ->
         val expectedValue = expectedMetadata[key]
         if (metadataComparison.isEmpty()) {
@@ -467,6 +425,7 @@ open class ProviderVerifier @JvmOverloads constructor (
             metadataComparison
           result = result.merge(VerificationResult.Failed(listOf(mapOf(key to metadataComparison,
             "interactionId" to interactionId, "type" to "metadata")),
+            verificationDescription = comparisonDescription,
             failures = metadataComparison.map { VerificationFailureType.MismatchFailure(it) }))
         }
       }
@@ -475,6 +434,10 @@ open class ProviderVerifier @JvmOverloads constructor (
   }
 
   override fun displayFailures(failures: Map<String, Any>) {
+    reporters.forEach { it.displayFailures(failures) }
+  }
+
+  override fun displayFailures(failures: List<VerificationResult.Failed>) {
     reporters.forEach { it.displayFailures(failures) }
   }
 
@@ -490,8 +453,11 @@ open class ProviderVerifier @JvmOverloads constructor (
     interaction: Interaction,
     providerClient: ProviderClient = ProviderClient(provider, HttpClientFactory())
   ): VerificationResult {
-    var interactionMessage = "Verifying a pact between ${consumer.name} and ${provider.name}" +
-    " - ${interaction.description} "
+    var interactionMessage = "Verifying a pact between ${consumer.name}"
+    if (!consumer.name.contains(provider.name)) {
+      interactionMessage += " and ${provider.name}"
+    }
+    interactionMessage += " - ${interaction.description}"
 
     val stateChangeResult = stateChangeHandler.executeStateChange(this, provider, consumer,
       interaction, interactionMessage, failures, providerClient)
@@ -522,7 +488,10 @@ open class ProviderVerifier @JvmOverloads constructor (
     } else {
       return VerificationResult.Failed(listOf(mapOf("message" to "State change request failed",
         "exception" to stateChangeResult.stateChangeResult.getError(),
-        "interactionId" to interaction.interactionId)), "State change request failed")
+        "interactionId" to interaction.interactionId)), "State change request failed",
+        stateChangeResult.message,
+        listOf(VerificationFailureType.StateChangeFailure(stateChangeResult))
+      )
     }
   }
 
@@ -543,13 +512,12 @@ open class ProviderVerifier @JvmOverloads constructor (
 
     reporters.forEach { it.returnsAResponseWhich() }
 
-    val s = " returns a response which"
     return displayStatusResult(failures, expectedResponse.status, comparison.statusMismatch,
-      interactionMessage + s, interactionId)
+      interactionMessage, interactionId)
       .merge(displayHeadersResult(failures, expectedResponse.headers, comparison.headerMismatches,
-        interactionMessage + s, interactionId))
+        interactionMessage, interactionId))
       .merge(displayBodyResult(failures, comparison.bodyMismatches,
-        interactionMessage + s, interactionId))
+        interactionMessage, interactionId))
   }
 
   fun displayStatusResult(
@@ -566,7 +534,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       reporters.forEach { it.statusComparisonFailed(status, mismatch.description()) }
       failures["$comparisonDescription has status code $status"] = mismatch.description()
       VerificationResult.Failed(listOf(mismatch.toMap() + mapOf("interactionId" to interactionId,
-        "type" to "status")), "Response status did not match",
+        "type" to "status")), "Response status did not match", comparisonDescription,
         listOf(VerificationFailureType.MismatchFailure(mismatch)))
     }
   }
@@ -592,7 +560,10 @@ open class ProviderVerifier @JvmOverloads constructor (
           failures["$comparisonDescription includes headers \"$key\" with value \"$expectedHeaderValue\""] =
             headerComparison.joinToString(", ") { it.description() }
           result = result.merge(VerificationResult.Failed(headerComparison.map { it.toMap() },
-            "Headers had differences", headerComparison.map { VerificationFailureType.MismatchFailure(it) }))
+            "Headers had differences", comparisonDescription, headerComparison.map {
+              VerificationFailureType.MismatchFailure(it)
+            }
+          ))
         }
       }
       result
@@ -628,7 +599,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       }
       VerificationResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
         "exception" to e, "interactionId" to interaction.interactionId)),
-        "Request to provider method failed with an exception",
+        "Request to provider method failed with an exception", interactionMessage,
         listOf(VerificationFailureType.ExceptionFailure(e)))
     }
   }
@@ -650,6 +621,19 @@ open class ProviderVerifier @JvmOverloads constructor (
     return failures
   }
 
+  override fun verifyProviderReturnResult(provider: ProviderInfo): List<VerificationResult> {
+    initialiseReporters(provider)
+
+    val consumers = provider.consumers.filter(::filterConsumers)
+    if (consumers.isEmpty()) {
+      reporters.forEach { it.warnProviderHasNoConsumers(provider) }
+    }
+
+    return consumers.map {
+      runVerificationForConsumer(mutableMapOf(), provider, it)
+    }
+  }
+
   fun initialiseReporters(provider: ProviderInfo) {
     reporters.forEach {
       if (it.hasProperty("displayFullDiff")) {
@@ -666,12 +650,13 @@ open class ProviderVerifier @JvmOverloads constructor (
     provider: IProviderInfo,
     consumer: IConsumerInfo,
     client: PactBrokerClient? = null
-  ) {
+  ): VerificationResult {
     val pact = FilteredPact(loadPactFileForConsumer(consumer),
       Predicate { filterInteractions(it) })
     reportVerificationForConsumer(consumer, provider, pact.source)
-    if (pact.interactions.isEmpty()) {
+    return if (pact.interactions.isEmpty()) {
       reporters.forEach { it.warnPactFileHasNoInteractions(pact as Pact<Interaction>) }
+      VerificationResult.Ok
     } else {
       val result = pact.interactions.map {
         verifyInteraction(provider, consumer, failures, it)
@@ -684,6 +669,7 @@ open class ProviderVerifier @JvmOverloads constructor (
         else -> verificationReporter.reportResults(pact, result.toTestResult(), providerVersion.get() ?: "0.0.0",
           client, providerTag?.get())
       }
+      result
     }
   }
 

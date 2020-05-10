@@ -1,8 +1,6 @@
 package au.com.dius.pact.provider.gradle
 
 import au.com.dius.pact.provider.ProviderVerifier
-import org.gradle.api.DefaultTask
-import org.gradle.api.GradleScriptException
 import org.gradle.api.Task
 import org.gradle.api.tasks.GradleBuild
 import org.gradle.api.tasks.TaskAction
@@ -10,7 +8,8 @@ import org.gradle.api.tasks.TaskAction
 /**
  * Task to verify a pact against a provider
  */
-class PactVerificationTask extends DefaultTask {
+@SuppressWarnings('Println')
+class PactVerificationTask extends PactVerificationBaseTask {
 
   GradleProviderInfo providerToVerify
 
@@ -37,16 +36,7 @@ class PactVerificationTask extends DefaultTask {
       }
     }
 
-    ext.failures = verifier.verifyProvider(providerToVerify)
-    try {
-      if (ext.failures.size() > 0) {
-        verifier.displayFailures(ext.failures)
-        throw new GradleScriptException(
-          "There were ${ext.failures.size()} pact failures for provider ${providerToVerify.name}", null)
-      }
-    } finally {
-      verifier.finaliseReports()
-    }
+    runVerification(verifier, providerToVerify)
   }
 
   def executeStateChangeTask(t, state) {

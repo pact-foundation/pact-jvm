@@ -13,14 +13,14 @@ class VerifierResultSpec extends Specification {
 
     where:
 
-    result1                                                   | result2                                                   | result3
-    VerificationResult.Ok.INSTANCE                            | VerificationResult.Ok.INSTANCE                            | VerificationResult.Ok.INSTANCE
-    VerificationResult.Ok.INSTANCE                            | new VerificationResult.Failed([[error: 'Bang']], '', [])  | new VerificationResult.Failed([[error: 'Bang']], '', [])
-    new VerificationResult.Failed([[error: 'Bang']], '', [])  | VerificationResult.Ok.INSTANCE                            | new VerificationResult.Failed([[error: 'Bang']], '', [])
-    new VerificationResult.Failed([[error: 'Bang']], '', [])  | new VerificationResult.Failed([[Boom: 'Splat']], '', [])  | new VerificationResult.Failed([[error: 'Bang'], [Boom: 'Splat']], '', [])
-    new VerificationResult.Failed([[error: 'Bang']], 'A', []) | new VerificationResult.Failed([[Boom: 'Splat']], '', [])  | new VerificationResult.Failed([[error: 'Bang'], [Boom: 'Splat']], 'A', [])
-    new VerificationResult.Failed([[error: 'Bang']], '', [])  | new VerificationResult.Failed([[Boom: 'Splat']], 'B', []) | new VerificationResult.Failed([[error: 'Bang'], [Boom: 'Splat']], 'B', [])
-    new VerificationResult.Failed([[error: 'Bang']], 'A', []) | new VerificationResult.Failed([[Boom: 'Splat']], 'B', []) | new VerificationResult.Failed([[error: 'Bang'], [Boom: 'Splat']], 'A, B', [])
-    new VerificationResult.Failed([[error: 'Bang']], 'A', []) | new VerificationResult.Failed([[Boom: 'Splat']], 'A', []) | new VerificationResult.Failed([[error: 'Bang'], [Boom: 'Splat']], 'A', [])
+    result1                                                       | result2                                                       | result3
+    VerificationResult.Ok.INSTANCE                                | VerificationResult.Ok.INSTANCE                                | VerificationResult.Ok.INSTANCE
+    VerificationResult.Ok.INSTANCE                                | new VerificationResult.Failed([[error: 'Bang']], '', '', [])  | new VerificationResult.Failed([[error: 'Bang']], '', '', [])
+    new VerificationResult.Failed([[error: 'Bang']], '', '', [])  | VerificationResult.Ok.INSTANCE                                | new VerificationResult.Failed([[error: 'Bang']], '', '', [])
+    new VerificationResult.Failed([[error: 'Bang']], '', '', [])  | new VerificationResult.Failed([[Boom: 'Splat']], '', '', [])  | new VerificationResult.Failed([[error: 'Bang'], [Boom: 'Splat']], '', '', [])
+    new VerificationResult.Failed([[error: 'Bang']], 'A', '', []) | new VerificationResult.Failed([[Boom: 'Splat']], '', '', [])  | new VerificationResult.Failed([[error: 'Bang'], [Boom: 'Splat']], 'A', '', [])
+    new VerificationResult.Failed([[error: 'Bang']], '', '', [])  | new VerificationResult.Failed([[Boom: 'Splat']], 'B', '', []) | new VerificationResult.Failed([[error: 'Bang'], [Boom: 'Splat']], 'B', '', [])
+    new VerificationResult.Failed([[error: 'Bang']], 'A', '', []) | new VerificationResult.Failed([[Boom: 'Splat']], 'B', '', []) | new VerificationResult.Failed([[error: 'Bang'], [Boom: 'Splat']], 'A, B', '', [])
+    new VerificationResult.Failed([[error: 'Bang']], 'A', '', []) | new VerificationResult.Failed([[Boom: 'Splat']], 'A', '', []) | new VerificationResult.Failed([[error: 'Bang'], [Boom: 'Splat']], 'A', '', [])
   }
 }

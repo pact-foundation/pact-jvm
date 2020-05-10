@@ -33,11 +33,7 @@ pluginBundle {
   }
 }
 
-test {
-
-  // exclude the gradle version of jansi from the classpath
-  classpath = project.sourceSets.test.runtimeClasspath.filter {
-    it.name != 'jansi-1.2.1.jar'
-  }
-
+compileGroovy {
+  dependsOn compileKotlin
+  classpath = classpath.plus(files(compileKotlin.destinationDir))
 }

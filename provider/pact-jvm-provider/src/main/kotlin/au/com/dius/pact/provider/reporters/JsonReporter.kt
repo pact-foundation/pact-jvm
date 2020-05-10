@@ -17,6 +17,7 @@ import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
+import au.com.dius.pact.provider.VerificationResult
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.jsonArray
@@ -240,6 +241,8 @@ class JsonReporter(
   override fun generatesAMessageWhich() { }
 
   override fun displayFailures(failures: Map<String, Any>) { }
+
+  override fun displayFailures(failures: List<VerificationResult.Failed>) { }
 
   override fun metadataComparisonFailed(key: String, value: Any?, comparison: Any) {
     val verification = jsonData["execution"].array.last()["interactions"].array.last()["verification"].obj

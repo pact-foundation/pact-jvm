@@ -14,6 +14,7 @@ import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
+import au.com.dius.pact.provider.VerificationResult
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -241,6 +242,8 @@ class MarkdownReporter(
   }
 
   override fun displayFailures(failures: Map<String, Any>) { }
+
+  override fun displayFailures(failures: List<VerificationResult.Failed>) { }
 
   override fun metadataComparisonFailed(key: String, value: Any?, comparison: Any) {
     pw!!.write("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"**$key**\" with value \"**$value**\" " +
