@@ -1,12 +1,16 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
 import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.pactbroker.TestResult
+import org.apache.commons.lang3.builder.HashCodeBuilder
 import spock.lang.Specification
 import spock.lang.Unroll
 import spock.util.environment.RestoreSystemProperties
@@ -66,11 +70,11 @@ class TestResultAccumulatorSpec extends Specification {
     testResultAccumulator.verificationReporter = mockVerificationReporter
 
     when:
-    testResultAccumulator.updateTestResult(mutablePact, interaction1, TestResult.Ok.INSTANCE)
-    testResultAccumulator.updateTestResult(mutablePact, interaction2, TestResult.Ok.INSTANCE)
-    testResultAccumulator.updateTestResult(mutablePact2, interaction, new TestResult.Failed())
+    testResultAccumulator.updateTestResult(mutablePact, interaction1, TestResult.Ok.INSTANCE, null)
+    testResultAccumulator.updateTestResult(mutablePact, interaction2, TestResult.Ok.INSTANCE, null)
+    testResultAccumulator.updateTestResult(mutablePact2, interaction, new TestResult.Failed(), null)
     mutablePact.interactions.first().request.matchingRules.rulesForCategory('body')
-    testResultAccumulator.updateTestResult(mutablePact, interaction3, TestResult.Ok.INSTANCE)
+    testResultAccumulator.updateTestResult(mutablePact, interaction3, TestResult.Ok.INSTANCE, null)
 
     then:
     1 * mockVerificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, null, null)
@@ -109,7 +113,7 @@ class TestResultAccumulatorSpec extends Specification {
     }
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, result)
+    testResultAccumulator.updateTestResult(pact, interaction1, result, null)
 
     then:
     1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _, _)
@@ -134,8 +138,8 @@ class TestResultAccumulatorSpec extends Specification {
     }
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, interaction1Result)
-    testResultAccumulator.updateTestResult(pact, interaction2, interaction2Result)
+    testResultAccumulator.updateTestResult(pact, interaction1, interaction1Result, null)
+    testResultAccumulator.updateTestResult(pact, interaction2, interaction2Result, null)
 
     then:
     1 * testResultAccumulator.verificationReporter.reportResults(_, result, _, _, _)
@@ -164,9 +168,9 @@ class TestResultAccumulatorSpec extends Specification {
     def failedResult = new TestResult.Failed()
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, failedResult)
-    testResultAccumulator.updateTestResult(pact, interaction1, TestResult.Ok.INSTANCE)
-    testResultAccumulator.updateTestResult(pact, interaction2, TestResult.Ok.INSTANCE)
+    testResultAccumulator.updateTestResult(pact, interaction1, failedResult, null)
+    testResultAccumulator.updateTestResult(pact, interaction1, TestResult.Ok.INSTANCE, null)
+    testResultAccumulator.updateTestResult(pact, interaction2, TestResult.Ok.INSTANCE, null)
 
     then:
     1 * testResultAccumulator.verificationReporter.reportResults(_, failedResult, _, _, _)
@@ -186,8 +190,8 @@ class TestResultAccumulatorSpec extends Specification {
     }
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, TestResult.Ok.INSTANCE)
-    testResultAccumulator.updateTestResult(pact, interaction2, TestResult.Ok.INSTANCE)
+    testResultAccumulator.updateTestResult(pact, interaction1, TestResult.Ok.INSTANCE, null)
+    testResultAccumulator.updateTestResult(pact, interaction2, TestResult.Ok.INSTANCE, null)
 
     then:
     1 * testResultAccumulator.verificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, _, _)
@@ -210,7 +214,7 @@ class TestResultAccumulatorSpec extends Specification {
     System.setProperty('pact.provider.tag', 'updateTestResultTag')
 
     when:
-    testResultAccumulator.updateTestResult(pact, interaction1, TestResult.Ok.INSTANCE)
+    testResultAccumulator.updateTestResult(pact, interaction1, TestResult.Ok.INSTANCE, null)
 
     then:
     1 * testResultAccumulator.verificationReporter.reportResults(_, TestResult.Ok.INSTANCE, _, _,
@@ -219,6 +223,36 @@ class TestResultAccumulatorSpec extends Specification {
 
     cleanup:
     testResultAccumulator.verificationReporter = reporter
+  }
+
+  @Unroll
+  @SuppressWarnings('LineLength')
+  def 'calculatePactHash includes the tag if one is available'() {
+    given:
+    def pact = new RequestResponsePact(new Provider('provider'), new Consumer('consumer'),
+      [interaction1])
+
+    when:
+    def hash = testResultAccumulator.calculatePactHash(pact, source)
+
+    then:
+    hash == calculatedHash
+
+    where:
+
+    source                                                                                                    | calculatedHash
+    null                                                                                                      | calculateHash('consumer', 'provider')
+    new UrlSource('http://pact.io')                                                                           | calculateHash('consumer', 'provider')
+    new FileSource('/tmp/pact' as File)                                                                       | calculateHash('consumer', 'provider')
+    new FileSource('/tmp/pact' as File)                                                                       | calculateHash('consumer', 'provider')
+    new BrokerUrlSource('https://test.pact.dius.com.au', 'https://test.pact.dius.com.au', [:], [:])           | calculateHash('consumer', 'provider')
+    new BrokerUrlSource('https://test.pact.dius.com.au', 'https://test.pact.dius.com.au', [:], [:], 'master') | calculateHash('consumer', 'provider', 'master')
+  }
+
+  private int calculateHash(String... args) {
+    def builder = new HashCodeBuilder()
+    args.each { builder.append(it) }
+    builder.toHashCode()
   }
 
 }
