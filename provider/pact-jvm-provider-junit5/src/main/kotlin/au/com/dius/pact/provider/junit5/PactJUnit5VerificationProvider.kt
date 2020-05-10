@@ -105,7 +105,7 @@ data class PactVerificationContext @JvmOverloads constructor(
         val actualResponse = target.executeInteraction(client, request)
 
         verifier!!.verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures,
-          reqResInteraction.interactionId.orEmpty())
+          reqResInteraction.interactionId.orEmpty()).toTestResult()
       } catch (e: Exception) {
         failures[interactionMessage] = e
         verifier!!.reporters.forEach {
@@ -118,7 +118,7 @@ data class PactVerificationContext @JvmOverloads constructor(
       }
     } else {
       return verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, ConsumerInfo(consumerName), interaction,
-        interaction.description, failures)
+        interaction.description, failures).toTestResult()
     }
   }
 

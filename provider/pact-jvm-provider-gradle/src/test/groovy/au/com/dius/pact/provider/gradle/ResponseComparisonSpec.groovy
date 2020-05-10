@@ -102,5 +102,4 @@ class ResponseComparisonSpec extends Specification {
     null                                       | '{"a": 100.0, "b": "test"}' | '{"a": 100.0, "b": "test"}'
 
   }
-
 }
