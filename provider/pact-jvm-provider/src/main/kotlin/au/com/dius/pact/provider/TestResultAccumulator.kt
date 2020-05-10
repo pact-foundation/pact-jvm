@@ -1,8 +1,11 @@
 package au.com.dius.pact.provider
 
+import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
+import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.pactbroker.TestResult
+import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.provider.ProviderVerifier.Companion.PACT_VERIFIER_PUBLISH_RESULTS
 import mu.KLogging
 import org.apache.commons.lang3.builder.HashCodeBuilder
@@ -14,9 +17,15 @@ import org.apache.commons.lang3.builder.HashCodeBuilder
 interface TestResultAccumulator {
   @Deprecated(message = "Use the version that takes a TestResult parameter")
   fun updateTestResult(pact: Pact<out Interaction>, interaction: Interaction, testExecutionResult: Boolean)
-  fun updateTestResult(pact: Pact<out Interaction>, interaction: Interaction, testExecutionResult: TestResult)
 
-  fun clearTestResult(pact: Pact<out Interaction>)
+  fun updateTestResult(
+    pact: Pact<out Interaction>,
+    interaction: Interaction,
+    testExecutionResult: TestResult,
+    source: PactSource?
+  )
+
+  fun clearTestResult(pact: Pact<out Interaction>, source: PactSource?)
 }
 
 object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
@@ -25,17 +34,18 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
   var verificationReporter: VerificationReporter = DefaultVerificationReporter
 
   override fun updateTestResult(pact: Pact<out Interaction>, interaction: Interaction, testExecutionResult: Boolean) {
-    updateTestResult(pact, interaction, TestResult.fromBoolean(testExecutionResult))
+    updateTestResult(pact, interaction, TestResult.fromBoolean(testExecutionResult), null)
   }
 
   override fun updateTestResult(
     pact: Pact<out Interaction>,
     interaction: Interaction,
-    testExecutionResult: TestResult
+    testExecutionResult: TestResult,
+    source: PactSource?
   ) {
     logger.debug { "Received test result '$testExecutionResult' for Pact ${pact.provider.name}-${pact.consumer.name} " +
-      "and ${interaction.description}" }
-    val pactHash = calculatePactHash(pact)
+      "and ${interaction.description} (${source?.description()})" }
+    val pactHash = calculatePactHash(pact, source)
     val interactionResults = testResults.getOrPut(pactHash) { mutableMapOf() }
     val interactionHash = calculateInteractionHash(interaction)
     val testResult = interactionResults[interactionHash]
@@ -72,8 +82,15 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
     return builder.toHashCode()
   }
 
-  fun calculatePactHash(pact: Pact<out Interaction>) =
-    HashCodeBuilder().append(pact.consumer.name).append(pact.provider.name).toHashCode()
+  fun calculatePactHash(pact: Pact<out Interaction>, source: PactSource?): Int {
+    val builder = HashCodeBuilder().append(pact.consumer.name).append(pact.provider.name)
+
+    if (source is BrokerUrlSource && source.tag.isNotEmpty()) {
+      builder.append(source.tag)
+    }
+
+    return builder.toHashCode()
+  }
 
   fun lookupProviderVersion(): String {
     val version = System.getProperty("pact.provider.version")
@@ -92,8 +109,8 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
     return pact.interactions.filter { !results.containsKey(calculateInteractionHash(it)) }
   }
 
-  override fun clearTestResult(pact: Pact<out Interaction>) {
-    val pactHash = calculatePactHash(pact)
+  override fun clearTestResult(pact: Pact<out Interaction>, source: PactSource?) {
+    val pactHash = calculatePactHash(pact, source)
     testResults.remove(pactHash)
   }
 }

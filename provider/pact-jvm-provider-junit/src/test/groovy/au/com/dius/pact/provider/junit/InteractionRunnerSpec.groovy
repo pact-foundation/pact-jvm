@@ -54,7 +54,7 @@ class InteractionRunnerSpec extends Specification {
     runner.run([:] as RunNotifier)
 
     then:
-    2 * testResultAccumulator.updateTestResult(pact, _, _)
+    2 * testResultAccumulator.updateTestResult(pact, _, _, _)
   }
 
   @RestoreSystemProperties

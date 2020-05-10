@@ -266,7 +266,7 @@ class PactVerificationExtension(
   override fun afterTestExecution(context: ExtensionContext) {
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val testContext = store.get("interactionContext") as PactVerificationContext
-    testResultAccumulator.updateTestResult(pact, interaction, testContext.testExecutionResult)
+    testResultAccumulator.updateTestResult(pact, interaction, testContext.testExecutionResult, pactSource)
   }
 
   companion object : KLogging()
