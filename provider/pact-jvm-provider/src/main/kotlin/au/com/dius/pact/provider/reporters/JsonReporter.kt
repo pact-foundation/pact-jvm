@@ -22,6 +22,7 @@ import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.get
+import com.github.salomonbrys.kotson.isNotEmpty
 import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.obj
@@ -74,17 +75,21 @@ class JsonReporter(
   }
 
   override fun finaliseReport() {
-    if (reportFile.exists() && reportFile.length() > 0) {
-      val existingContents = JsonParser().parse(reportFile.readText())
-      if (providerName == existingContents["provider"].obj["name"].string) {
-        existingContents["metaData"] = jsonData["metaData"]
-        existingContents["execution"].array.addAll(jsonData["execution"].array)
-        reportFile.writeText(existingContents.toString())
-      } else {
-        reportFile.writeText(jsonData.toString())
+    if (jsonData.isNotEmpty()) {
+      when {
+        reportFile.exists() && reportFile.length() > 0 -> {
+          val existingContents = JsonParser.parseString(reportFile.readText())
+          if (existingContents.isJsonObject && existingContents.obj.has("provider") &&
+            providerName == existingContents["provider"].obj["name"].string) {
+            existingContents["metaData"] = jsonData["metaData"]
+            existingContents["execution"].array.addAll(jsonData["execution"].array)
+            reportFile.writeText(existingContents.toString())
+          } else {
+            reportFile.writeText(jsonData.toString())
+          }
+        }
+        else -> reportFile.writeText(jsonData.toString())
       }
-    } else {
-      reportFile.writeText(jsonData.toString())
     }
   }
 

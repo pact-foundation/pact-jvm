@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.maven
 
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.support.toUrl
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IConsumerInfo
@@ -8,6 +9,7 @@ import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerifierException
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.reporters.ReporterManager
 import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugins.annotations.Mojo
@@ -53,7 +55,6 @@ open class PactProviderMojo : PactBaseMojo() {
       System.setProperty(property, value)
     }
 
-    val failures = mutableMapOf<String, Any>()
     val verifier = providerVerifier().let { verifier ->
       verifier.projectHasProperty = Function { p: String -> this.propertyDefined(p) }
       verifier.projectGetProperty = Function { p: String -> this.property(p) }
@@ -82,7 +83,7 @@ open class PactProviderMojo : PactBaseMojo() {
     }
 
     try {
-      serviceProviders.forEach { provider ->
+      val failures = serviceProviders.flatMap { provider ->
         val consumers = mutableListOf<IConsumerInfo>()
         consumers.addAll(provider.consumers)
         if (provider.pactFileDirectory != null) {
@@ -109,12 +110,15 @@ open class PactProviderMojo : PactBaseMojo() {
 
         provider.consumers = consumers
 
-        failures.putAll(verifier.verifyProvider(provider) as Map<String, Any>)
-      }
+        verifier.verifyProviderReturnResult(provider)
+      }.filterIsInstance<VerificationResult.Failed>()
 
       if (failures.isNotEmpty()) {
         verifier.displayFailures(failures)
-        throw MojoFailureException("There were ${failures.size} pact failures")
+        val nonPending = failures.filterNot { it.pending }
+        if (nonPending.isNotEmpty()) {
+          throw MojoFailureException("There were ${nonPending.sumBy { it.failures.size }} non-pending pact failures")
+        }
       }
     } finally {
       verifier.finaliseReports()
@@ -146,12 +150,31 @@ open class PactProviderMojo : PactBaseMojo() {
       options["authentication"] = listOf("basic", serverDetails.username, result.server.password)
     }
 
-    if (pactBroker?.tags != null && pactBroker.tags.isNotEmpty()) {
-      pactBroker.tags.forEach { tag ->
-        consumers.addAll(provider.hasPactsFromPactBrokerWithTag(options, pactBrokerUrl.toString(), tag))
+    when {
+      pactBroker?.enablePending != null -> {
+        if (pactBroker.enablePending!!.providerTags.isEmpty()) {
+          throw MojoFailureException("""
+            |No providerTags: To use the pending pacts feature, you need to provide the list of provider names for the provider application version that will be published with the verification results.
+            |
+            |For instance, if you tag your provider with 'master':
+            |
+            |<enablePending>
+            |    <providerTags>
+            |        <tag>master</tag>
+            |    </providerTags>
+            |</enablePending>
+          """.trimMargin())
+        }
+        val selectors = pactBroker.tags?.map { ConsumerVersionSelector(it, true) } ?: emptyList()
+        consumers.addAll(provider.hasPactsFromPactBrokerWithSelectors(options +
+          mapOf("enablePending" to true, "providerTags" to pactBroker.enablePending!!.providerTags),
+          pactBrokerUrl.toString(), selectors))
       }
-    } else {
-      consumers.addAll(provider.hasPactsFromPactBroker(options, pactBrokerUrl.toString()))
+      pactBroker?.tags != null && pactBroker.tags.isNotEmpty() -> {
+        val selectors = pactBroker.tags.map { ConsumerVersionSelector(it, true) }
+        consumers.addAll(provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl.toString(), selectors))
+      }
+      else -> consumers.addAll(provider.hasPactsFromPactBrokerWithSelectors(options, pactBrokerUrl.toString(), emptyList()))
     }
   }
 

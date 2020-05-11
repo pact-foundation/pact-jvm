@@ -46,10 +46,7 @@ class MarkdownReporter(
   private var pw: PrintWriter? = null
 
   override fun initialise(provider: IProviderInfo) {
-    if (pw != null) {
-      pw!!.close()
-    }
-
+    pw?.close()
     reportDir!!.mkdirs()
     reportFile = File(reportDir, provider.name + ext)
     pw = PrintWriter(BufferedWriter(FileWriter(reportFile, true)))
@@ -65,7 +62,7 @@ class MarkdownReporter(
   }
 
   override fun finaliseReport() {
-    pw!!.close()
+    pw?.close()
   }
 
   override fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, tag: String?) {
