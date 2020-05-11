@@ -7,6 +7,7 @@ import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
 import java.io.File
 
@@ -21,6 +22,7 @@ interface VerifierReporter {
 
   var reportDir: File?
   var reportFile: File
+  var verifier: IProviderVerifier
 
   fun initialise(provider: IProviderInfo)
   fun finaliseReport()

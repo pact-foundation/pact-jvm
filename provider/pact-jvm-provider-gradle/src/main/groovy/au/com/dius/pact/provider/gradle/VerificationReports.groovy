@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.gradle
 
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.reporters.ReporterManager
 import groovy.transform.ToString
 import org.gradle.api.GradleScriptException
@@ -15,9 +16,10 @@ class VerificationReports {
     reports.console = ReporterManager.createReporter('console')
   }
 
-  List toVerifierReporters(File reportDir) {
+  List toVerifierReporters(File reportDir, IProviderVerifier verifier) {
     reports.values().collect {
       it.reportDir = reportDir
+      it.verifier = verifier
       it
     }
   }

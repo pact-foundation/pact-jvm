@@ -69,7 +69,7 @@ open class PactProviderMojo : PactBaseMojo() {
         val reportsDir = File(buildDir, "reports/pact")
         verifier.reporters = reports.map { name ->
           if (ReporterManager.reporterDefined(name)) {
-            val reporter = ReporterManager.createReporter(name, reportsDir)
+            val reporter = ReporterManager.createReporter(name, reportsDir, verifier)
             reporter
           } else {
             throw MojoFailureException("There is no defined reporter named '$name'. Available reporters are: " +
