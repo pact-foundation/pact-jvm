@@ -75,7 +75,7 @@ class GradleProviderInfo extends ProviderInfo {
       brokerConfig.providerTags.findAll { !it.trim().empty }.empty)) {
       throw new GradleScriptException(
         '''
-        |No providerTags: To use the pending pacts feature, you need to provide the list of provider names for the provider application version that will be published with the verification results
+        |No providerTags: To use the pending pacts feature, you need to provide the list of provider names for the provider application version that will be published with the verification results.
         |
         |For instance:
         |

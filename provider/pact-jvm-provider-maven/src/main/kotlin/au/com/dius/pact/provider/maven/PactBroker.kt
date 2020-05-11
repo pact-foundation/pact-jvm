@@ -2,6 +2,8 @@ package au.com.dius.pact.provider.maven
 
 import java.net.URL
 
+data class EnablePending @JvmOverloads constructor(val providerTags: List<String> = emptyList())
+
 /**
  * Bean to configure a pact broker to query
  */
@@ -9,7 +11,8 @@ data class PactBroker @JvmOverloads constructor(
   val url: URL? = null,
   val tags: List<String>? = emptyList(),
   val authentication: PactBrokerAuth? = null,
-  val serverId: String? = null
+  val serverId: String? = null,
+  var enablePending: EnablePending? = null
 )
 
 /**
