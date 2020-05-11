@@ -8,7 +8,6 @@ import org.gradle.api.tasks.TaskAction
 /**
  * Task to verify a pact against a provider
  */
-@SuppressWarnings('Println')
 class PactVerificationTask extends PactVerificationBaseTask {
 
   GradleProviderInfo providerToVerify
@@ -32,7 +31,7 @@ class PactVerificationTask extends PactVerificationBaseTask {
 
       if (project.pact.reports) {
         def reportsDir = new File(project.buildDir, 'reports/pact')
-        reporters = project.pact.reports.toVerifierReporters(reportsDir)
+        reporters = project.pact.reports.toVerifierReporters(reportsDir, it)
       }
     }
 

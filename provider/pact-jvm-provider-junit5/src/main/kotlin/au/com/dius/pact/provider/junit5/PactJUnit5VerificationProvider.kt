@@ -256,7 +256,7 @@ class PactVerificationExtension(
       verifier.reporters = reports
         .filter { r -> r.isNotEmpty() }
         .map { r ->
-          val reporter = ReporterManager.createReporter(r.trim(), reportDir)
+          val reporter = ReporterManager.createReporter(r.trim(), reportDir, verifier)
           reporter.reportFile = File(reportDir, "$name - $description${reporter.ext}")
           reporter
         }

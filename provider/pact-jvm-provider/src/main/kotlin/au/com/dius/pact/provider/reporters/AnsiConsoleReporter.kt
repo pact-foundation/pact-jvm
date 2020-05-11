@@ -7,8 +7,10 @@ import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
 import com.github.ajalt.mordant.TermColors
+import org.apache.commons.lang3.exception.ExceptionUtils
 import java.io.File
 
 /**
@@ -23,6 +25,7 @@ class AnsiConsoleReporter(
   constructor(name: String, reportDir: File?) : this(name, reportDir, false)
 
   override val ext: String? = null
+  override lateinit var verifier: IProviderVerifier
   val t = TermColors()
 
   override var reportFile: File
@@ -202,6 +205,13 @@ class AnsiConsoleReporter(
       println("${i + 1}) ${err.verificationDescription}\n")
       err.failures.forEachIndexed { index, failure ->
         println("    ${i + 1}.${index + 1}) ${failure.formatForDisplay(t)}\n")
+
+        if (failure.hasException() && verifier.projectHasProperty.apply("pact.showStacktrace")) {
+          for (line in ExceptionUtils.getStackFrames(failure.getException()!!)) {
+            println("      $line")
+          }
+          println()
+        }
       }
     }
   }

@@ -14,6 +14,7 @@ import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
 import java.io.BufferedWriter
 import java.io.File
@@ -33,6 +34,7 @@ class MarkdownReporter(
   constructor(name: String, reportDir: File?) : this(name, reportDir, ".md")
 
   override lateinit var reportFile: File
+  override lateinit var verifier: IProviderVerifier
 
   init {
     if (reportDir == null) {
@@ -113,12 +115,10 @@ class MarkdownReporter(
     e: Exception,
     printStackTrace: Boolean
   ) {
-    reportFile.printWriter().use {
-      it.write("&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: red'>State Change Request Failed - ${e.message}" +
-        "</span>\n\n```\n")
-      e.printStackTrace(it)
-      it.write("\n```\n\n")
-    }
+    pw!!.write("&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: red'>State Change Request Failed - ${e.message}" +
+      "</span>\n\n```\n")
+    e.printStackTrace(pw!!)
+    pw!!.write("\n```\n\n")
   }
 
   override fun stateChangeRequestFailed(state: String, provider: IProviderInfo, isSetup: Boolean, httpStatus: String) {
@@ -275,10 +275,10 @@ class MarkdownReporter(
   }
 
   override fun warnPublishResultsSkippedBecauseFiltered() {
-    pw!!.write("NOTE: Skipping publishing of verification results as the interactions have been filtered")
+    pw!!.write("NOTE: Skipping publishing of verification results as the interactions have been filtered\n")
   }
 
   override fun warnPublishResultsSkippedBecauseDisabled(envVar: String) {
-    pw!!.write("NOTE: Skipping publishing of verification results as it has been disabled ($envVar is not 'true')")
+    pw!!.write("NOTE: Skipping publishing of verification results as it has been disabled ($envVar is not 'true')\n")
   }
 }

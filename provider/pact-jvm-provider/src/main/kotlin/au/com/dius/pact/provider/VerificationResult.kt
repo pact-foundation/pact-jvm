@@ -7,6 +7,7 @@ import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.support.isNotEmpty
 import com.github.ajalt.mordant.TermColors
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.getError
 
 private fun padLines(str: String, indent: Int): String {
@@ -16,6 +17,8 @@ private fun padLines(str: String, indent: Int): String {
 
 sealed class VerificationFailureType {
   abstract fun formatForDisplay(t: TermColors): String
+  abstract fun hasException(): Boolean
+  abstract fun getException(): Throwable?
 
   data class MismatchFailure(
     val mismatch: Mismatch,
@@ -37,6 +40,9 @@ sealed class VerificationFailureType {
       }
     }
 
+    override fun hasException() = false
+    override fun getException() = null
+
     private fun formatDiff(t: TermColors, diff: String): String {
       val pad = " ".repeat(8)
       return diff.split('\n').joinToString("\n") {
@@ -57,13 +63,19 @@ sealed class VerificationFailureType {
         "      ${e.javaClass.name}"
       }
     }
+
+    override fun hasException() = true
+    override fun getException() = e
   }
 
   data class StateChangeFailure(val result: StateChangeResult) : VerificationFailureType() {
     override fun formatForDisplay(t: TermColors): String {
       val e = result.stateChangeResult.getError()
-      return result.message + " - " + e?.message.toString()
+      return "State change callback failed with an exception - " + e?.message.toString()
     }
+
+    override fun hasException() = result.stateChangeResult is Err
+    override fun getException() = result.stateChangeResult.getError()
   }
 }
 

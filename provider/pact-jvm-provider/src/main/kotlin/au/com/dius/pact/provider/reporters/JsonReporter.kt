@@ -17,6 +17,7 @@ import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.get
@@ -46,6 +47,7 @@ class JsonReporter(
   constructor(name: String, reportDir: File?) : this(name, reportDir, JsonObject(), ".json", null)
 
   override lateinit var reportFile: File
+  override lateinit var verifier: IProviderVerifier
 
   init {
     if (reportDir == null) {
@@ -142,6 +144,22 @@ class JsonReporter(
     e: Exception,
     printStackTrace: Boolean
   ) {
+    val interactions = jsonData["execution"].array.last()["interactions"].array
+    val error = jsonObject(
+      "result" to FAILED,
+      "message" to "State change '$state' callback failed",
+      "exception" to jsonObject(
+        "message" to e.message,
+        "stackTrace" to jsonArray(ExceptionUtils.getStackFrames(e).toList())
+      )
+    )
+    if (interactions.size() == 0) {
+      interactions.add(jsonObject(
+        "verification" to error
+      ))
+    } else {
+      interactions.last()["verification"] = error
+    }
   }
 
   override fun stateChangeRequestFailed(state: String, provider: IProviderInfo, isSetup: Boolean, httpStatus: String) {
