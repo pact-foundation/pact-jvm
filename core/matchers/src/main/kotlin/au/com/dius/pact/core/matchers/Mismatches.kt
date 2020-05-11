@@ -76,7 +76,11 @@ data class HeaderMismatch(
   val actual: String,
   val mismatch: String
 ) : Mismatch() {
+  val regex = Regex("'[^']*'")
   override fun description() = mismatch
+  override fun description(t: TermColors): String {
+    return mismatch.replace(regex) { m -> t.bold(m.value) }
+  }
 
   fun merge(mismatch: HeaderMismatch): HeaderMismatch {
     return if (this.mismatch.isNotEmpty()) {

@@ -61,7 +61,7 @@ class AnsiConsoleReporter(
       out += " for tag ${t.bold(tag)}"
     }
     if (consumer.pending) {
-      out += " [PENDING]"
+      out += t.yellow(" [PENDING]")
     }
     println(out)
   }
