@@ -391,7 +391,7 @@ class ProviderVerifierSpec extends Specification {
     verifier.reporters = [reporter]
 
     when:
-    def result = verifier.verifyMessagePact(methods, message, interactionMessage, failures)
+    def result = verifier.verifyMessagePact(methods, message, interactionMessage, failures, false)
 
     then:
     1 * reporter.bodyComparisonOk()
@@ -432,8 +432,8 @@ class ProviderVerifierSpec extends Specification {
 
     then:
     1 * pactBrokerClient.publishVerificationResults(_, finalResult, '0.0.0', _)
-    1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _) >> result1
-    1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _) >> result2
+    1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> result1
+    1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> result2
 
     where:
 

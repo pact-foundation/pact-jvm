@@ -105,7 +105,7 @@ data class PactVerificationContext @JvmOverloads constructor(
         val actualResponse = target.executeInteraction(client, request)
 
         verifier!!.verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures,
-          reqResInteraction.interactionId.orEmpty()).toTestResult()
+          reqResInteraction.interactionId.orEmpty(), false).toTestResult()
       } catch (e: Exception) {
         failures[interactionMessage] = e
         verifier!!.reporters.forEach {

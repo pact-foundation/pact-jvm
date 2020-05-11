@@ -60,6 +60,9 @@ class AnsiConsoleReporter(
     if (tag != null) {
       out += " for tag ${t.bold(tag)}"
     }
+    if (consumer.pending) {
+      out += " [PENDING]"
+    }
     println(out)
   }
 
@@ -200,18 +203,30 @@ class AnsiConsoleReporter(
   }
 
   override fun displayFailures(failures: List<VerificationResult.Failed>) {
-    println("\nFailures:\n")
-    failures.forEachIndexed { i, err ->
-      println("${i + 1}) ${err.verificationDescription}\n")
-      err.failures.forEachIndexed { index, failure ->
-        println("    ${i + 1}.${index + 1}) ${failure.formatForDisplay(t)}\n")
+    val nonPending = failures.filterNot { it.pending }
+    val pending = failures.filter { it.pending }
 
-        if (failure.hasException() && verifier.projectHasProperty.apply("pact.showStacktrace")) {
-          for (line in ExceptionUtils.getStackFrames(failure.getException()!!)) {
-            println("      $line")
-          }
-          println()
+    if (pending.isNotEmpty()) {
+      println("\nPending Failures:\n")
+      pending.forEachIndexed { i, err -> displayFailure(i, err) }
+    }
+
+    if (nonPending.isNotEmpty()) {
+      println("\nFailures:\n")
+      nonPending.forEachIndexed { i, err -> displayFailure(i, err) }
+    }
+  }
+
+  private fun displayFailure(i: Int, err: VerificationResult.Failed) {
+    println("${i + 1}) ${err.verificationDescription}\n")
+    err.failures.forEachIndexed { index, failure ->
+      println("    ${i + 1}.${index + 1}) ${failure.formatForDisplay(t)}\n")
+
+      if (failure.hasException() && verifier.projectHasProperty.apply("pact.showStacktrace")) {
+        for (line in ExceptionUtils.getStackFrames(failure.getException()!!)) {
+          println("      $line")
         }
+        println()
       }
     }
   }

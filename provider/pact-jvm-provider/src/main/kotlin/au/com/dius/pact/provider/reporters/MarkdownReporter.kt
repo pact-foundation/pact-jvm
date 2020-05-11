@@ -76,6 +76,9 @@ class MarkdownReporter(
     if (tag != null) {
       report.append(" for tag $tag")
     }
+    if (consumer.pending) {
+      report.append(" [PENDING]")
+    }
     report.append("\n\n")
     pw!!.write(report.toString())
   }

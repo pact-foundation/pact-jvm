@@ -102,7 +102,8 @@ sealed class VerificationResult {
     var results: List<Map<String, Any?>> = emptyList(),
     val description: String = "",
     val verificationDescription: String = "",
-    val failures: List<VerificationFailureType> = emptyList()
+    val failures: List<VerificationFailureType> = emptyList(),
+    val pending: Boolean = false
   ) : VerificationResult() {
     override fun merge(result: VerificationResult) = when (result) {
       is Ok -> this
@@ -111,7 +112,7 @@ sealed class VerificationResult {
           "$description, ${result.description}"
         description.isNotEmpty() -> description
         else -> result.description
-      }, verificationDescription, failures + result.failures)
+      }, verificationDescription, failures + result.failures, pending && result.pending)
     }
 
     override fun toTestResult() = TestResult.Failed(results, description)

@@ -13,6 +13,7 @@ import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.hasProperty
+import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.IConsumerInfo
@@ -29,6 +30,7 @@ import com.github.salomonbrys.kotson.string
 import com.github.salomonbrys.kotson.toJson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.google.gson.JsonPrimitive
 import org.apache.commons.lang3.exception.ExceptionUtils
 import java.io.File
 import java.time.ZonedDateTime
@@ -87,10 +89,15 @@ class JsonReporter(
   }
 
   override fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, tag: String?) {
-    jsonData["execution"].array.add(jsonObject(
+    val jsonObject = jsonObject(
       "consumer" to jsonObject("name" to consumer.name),
-      "interactions" to jsonArray()
-    ))
+      "interactions" to jsonArray(),
+      "pending" to consumer.pending
+    )
+    if (tag.isNotEmpty()) {
+      jsonObject.add("tag", JsonPrimitive(tag))
+    }
+    jsonData["execution"].array.add(jsonObject)
   }
 
   override fun verifyConsumerFromUrl(pactUrl: UrlPactSource, consumer: IConsumerInfo) {
