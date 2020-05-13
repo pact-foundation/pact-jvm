@@ -263,7 +263,7 @@ class JsonReporter(
       "result" to FAILED,
       "exception" to jsonObject(
         "message" to e.message,
-        "stackTrace" to ExceptionUtils.getStackFrames(e)
+        "stackTrace" to jsonArray(*ExceptionUtils.getStackFrames(e))
     )
     )
   }
