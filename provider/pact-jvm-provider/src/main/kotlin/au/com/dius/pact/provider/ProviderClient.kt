@@ -9,7 +9,7 @@ import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.model.UrlSource
 import au.com.dius.pact.core.pactbroker.PactBrokerConsumer
-import au.com.dius.pact.core.pactbroker.PactResult
+import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.core.support.Json
 import groovy.lang.Binding
@@ -177,9 +177,9 @@ open class ConsumerInfo @JvmOverloads constructor (
         pactFileAuthentication = consumer.pactFileAuthentication
       )
 
-    fun from(result: PactResult) =
+    fun from(result: PactBrokerResult) =
       ConsumerInfo(name = result.name,
-        pactSource = BrokerUrlSource(url = result.source, pactBrokerUrl = result.pactBrokerUrl),
+        pactSource = BrokerUrlSource(url = result.source, pactBrokerUrl = result.pactBrokerUrl, result = result),
         pactFileAuthentication = result.pactFileAuthentication, notices = result.notices,
         pending = result.pending
       )

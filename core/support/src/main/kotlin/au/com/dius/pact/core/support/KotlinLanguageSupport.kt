@@ -36,3 +36,10 @@ public fun <F> handleWith(f: () -> Any): Either<Exception, F> {
     Either.left(ex)
   }
 }
+
+public fun <A> Either<Exception, A>.unwrapOr(v: A): A {
+  return when (this) {
+    is Either.Left -> v
+    is Either.Right -> this.b
+  }
+}

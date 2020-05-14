@@ -27,6 +27,7 @@ ratpack {
       render('''
         [
             {
+                doesNotExist: "Test", 
                 "documentId": 0,
                 "documentCategoryId": 5,
                 "documentCategoryCode": null,
@@ -34,6 +35,7 @@ ratpack {
                 "tags": null
             },
             {
+                doesNotExist: "Test",
                 "documentId": 1,
                 "documentCategoryId": 5,
                 "documentCategoryCode": null,

@@ -76,6 +76,7 @@ open class ProviderInfo @JvmOverloads constructor (
   }
 
   @JvmOverloads
+  @Suppress("TooGenericExceptionThrown")
   open fun hasPactsFromPactBrokerWithSelectors(
     options: Map<String, Any> = mapOf(),
     pactBrokerUrl: String,
@@ -92,8 +93,8 @@ open class ProviderInfo @JvmOverloads constructor (
       emptyList()
     }
     val client = pactBrokerClient(pactBrokerUrl, options)
-    val consumersFromBroker = client.fetchConsumersWithSelectors(name, selectors, providerTags, enablePending).map { results ->
-      results.map { ConsumerInfo.from(it) }
+    val consumersFromBroker = client.fetchConsumersWithSelectors(name, selectors, providerTags, enablePending)
+      .map { results -> results.map { ConsumerInfo.from(it) }
     }
     return when (consumersFromBroker) {
       is Either.Right<*> -> {

@@ -20,6 +20,7 @@ object ReporterManager {
 
   @JvmStatic
   @JvmOverloads
+  @Suppress("TooGenericExceptionCaught")
   fun createReporter(name: String, reportDir: File? = null, verifier: IProviderVerifier? = null): VerifierReporter {
     val reporter: VerifierReporter = if (reporterDefined(name)) {
       try {
