@@ -5,6 +5,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import au.com.dius.pact.core.model.messaging.MessagePact
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
 import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
@@ -327,6 +328,10 @@ object DefaultPactReader : PactReader, KLogging() {
     } else if (source is BrokerUrlSource) {
       return HttpClient.newHttpClient(options["authentication"], URI(source.pactBrokerUrl), mutableMapOf()).first.use {
         loadPactFromUrl(source, options, it)
+      }
+    } else if (source is PactBrokerResult) {
+      return HttpClient.newHttpClient(options["authentication"], URI(source.pactBrokerUrl), mutableMapOf()).first.use {
+        loadPactFromUrl(BrokerUrlSource.fromResult(source, options), options, it)
       }
     } else if (source is URL || source is UrlPactSource) {
       val urlSource = if (source is URL) UrlSource<Interaction>(source.toString()) else source as UrlPactSource

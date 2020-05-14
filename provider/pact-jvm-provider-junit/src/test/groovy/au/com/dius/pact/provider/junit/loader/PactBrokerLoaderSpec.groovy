@@ -1,20 +1,21 @@
 package au.com.dius.pact.provider.junit.loader
 
-import au.com.dius.pact.core.model.BrokerUrlSource
+import arrow.core.Either
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactBrokerSource
-import au.com.dius.pact.core.pactbroker.IHalClient
+import au.com.dius.pact.core.model.PactReader
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
+import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.InvalidHalResponse
-import au.com.dius.pact.core.pactbroker.PactBrokerClient
-import au.com.dius.pact.core.pactbroker.PactBrokerConsumer
+import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
-import au.com.dius.pact.provider.ConsumerInfo
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
 
 import static au.com.dius.pact.core.support.expressions.ExpressionParser.VALUES_SEPARATOR
 
+@SuppressWarnings('UnnecessaryGetter')
 class PactBrokerLoaderSpec extends Specification {
 
   private Closure<PactBrokerLoader> pactBrokerLoader
@@ -23,34 +24,35 @@ class PactBrokerLoaderSpec extends Specification {
   private String protocol
   private List tags
   private List consumers
-  private PactBrokerClient brokerClient
+  private IPactBrokerClient brokerClient
   private Pact mockPact
+  private PactReader mockReader
 
   void setup() {
     host = 'pactbroker'
     port = '1234'
     protocol = 'http'
-    tags = ['latest']
+    tags = []
     consumers = []
-    brokerClient = Mock(PactBrokerClient) {
-      newHalClient() >> Stub(IHalClient)
+    brokerClient = Mock(IPactBrokerClient) {
+      getOptions() >> [:]
     }
     mockPact = Mock(Pact)
+    mockReader = Mock(PactReader) {
+      loadPact(_) >> mockPact
+    }
 
     pactBrokerLoader = { boolean failIfNoPactsFound = true ->
-      PactBrokerClient client = brokerClient
-      Pact pact = mockPact
-      new PactBrokerLoader(host, port, protocol, tags, consumers, failIfNoPactsFound, null, null, null) {
+      IPactBrokerClient client = brokerClient
+      def loader = new PactBrokerLoader(host, port, protocol, tags, consumers, failIfNoPactsFound, null,
+        null, null, '', []) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
+        IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           client
         }
-
-        @Override
-        Pact loadPact(ConsumerInfo consumer, Map options) {
-          pact
-        }
       }
+      loader.pactReader = mockReader
+      loader
     }
   }
 
@@ -59,7 +61,7 @@ class PactBrokerLoaderSpec extends Specification {
     def list = pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumers('test') >> []
+    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _) >> new Either.Right([])
     notThrown(NoPactsFoundException)
     list.empty
   }
@@ -69,13 +71,13 @@ class PactBrokerLoaderSpec extends Specification {
     def result = pactBrokerLoader(false).load('test')
 
     then:
-    1 * brokerClient.fetchConsumers('test') >> []
+    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _) >> new Either.Right([])
     result == []
   }
 
   def 'Throws any Exception On Execution Exception'() {
     given:
-    brokerClient.fetchConsumers('test') >> { throw new InvalidHalResponse('message') }
+    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _) >> new Either.Left(new InvalidHalResponse('message'))
 
     when:
     pactBrokerLoader().load('test')
@@ -100,7 +102,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = {
       new PactBrokerLoader(FullPactBrokerAnnotation.getAnnotation(PactBroker)) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
+        IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           assert url.host == 'pactbroker.host'
           assert url.port == 1000
           brokerClient
@@ -113,7 +115,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     result == []
-    1 * brokerClient.fetchConsumers('test') >> []
+    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _) >> new Either.Right([])
   }
 
   @RestoreSystemProperties
@@ -124,7 +126,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = {
       new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
+        IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           assert url.host == 'my.pactbroker.host'
           assert url.port == 4711
           brokerClient
@@ -137,7 +139,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     result == []
-    1 * brokerClient.fetchConsumers('test') >> []
+    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _) >> new Either.Right([])
   }
 
   @RestoreSystemProperties
@@ -168,7 +170,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = {
       new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
+        IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           assert url.host == 'my.pactbroker.host'
           assert url.port == 4711
           brokerClient
@@ -192,7 +194,7 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader = {
       new PactBrokerLoader(MinimalPactBrokerAnnotation.getAnnotation(PactBroker)) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
+        IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           assert url.host == 'my.pactbroker.host'
           assert url.port == -1
           brokerClient
@@ -205,36 +207,30 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     noExceptionThrown()
-    1 * brokerClient.fetchConsumers('test') >> []
+    1 * brokerClient.fetchConsumersWithSelectors('test', _, _, _) >> new Either.Right([])
   }
 
   def 'Loads pacts for each provided tag'() {
     given:
     tags = ['a', 'b', 'c']
+    def selectors = [
+      new ConsumerVersionSelector('a', true),
+      new ConsumerVersionSelector('b', true),
+      new ConsumerVersionSelector('c', true)
+    ]
+    def expected = [
+      new PactBrokerResult('test', 'a', '', [], [], false),
+      new PactBrokerResult('test', 'b', '', [], [], false),
+      new PactBrokerResult('test', 'c', '', [], [], false)
+    ]
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumersWithTag('test', 'a') >> [ new PactBrokerConsumer('test', 'a', '', []) ]
-    1 * brokerClient.fetchConsumersWithTag('test', 'b') >> [ new PactBrokerConsumer('test', 'b', '', []) ]
-    1 * brokerClient.fetchConsumersWithTag('test', 'c') >> [ new PactBrokerConsumer('test', 'c', '', []) ]
-    0 * _
-    result.size() == 3
-  }
-
-  def 'Loads latest pacts together with other tags'() {
-    given:
-    tags = ['a', 'latest', 'b']
-
-    when:
-    def result = pactBrokerLoader().load('test')
-
-    then:
-    1 * brokerClient.fetchConsumersWithTag('test', 'a') >> [ new PactBrokerConsumer('test', 'a', '', []) ]
-    1 * brokerClient.fetchConsumers('test') >> [ new PactBrokerConsumer('test', 'latest', '', []) ]
-    1 * brokerClient.fetchConsumersWithTag('test', 'b') >> [ new PactBrokerConsumer('test', 'b', '', []) ]
-    0 * _
+    brokerClient.getOptions() >> [:]
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Either.Right(expected)
+    0 * brokerClient._
     result.size() == 3
   }
 
@@ -244,26 +240,34 @@ class PactBrokerLoaderSpec extends Specification {
     given:
     System.setProperty('composite', "one${VALUES_SEPARATOR}two")
     tags = ['${composite}']
+    def selectors = [
+      new ConsumerVersionSelector('one', true),
+      new ConsumerVersionSelector('two', true)
+    ]
+    def expected = [
+      new PactBrokerResult('test', 'one', '', [], [], false),
+      new PactBrokerResult('test', 'two', '', [], [], false)
+    ]
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumersWithTag('test', 'one') >> [ new PactBrokerConsumer('test', 'one', '', []) ]
-    1 * brokerClient.fetchConsumersWithTag('test', 'two') >> [ new PactBrokerConsumer('test', 'two', '', []) ]
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Either.Right(expected)
     result.size() == 2
   }
 
   def 'Loads the latest pacts if no tag is provided'() {
     given:
     tags = []
+    def expected = [ new PactBrokerResult('test', 'latest', '', [], [], false) ]
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
     result.size() == 1
-    1 * brokerClient.fetchConsumers('test') >> [ new PactBrokerConsumer('test', 'latest', '', []) ]
+    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Either.Right(expected)
   }
 
   @SuppressWarnings('GStringExpressionWithinString')
@@ -272,31 +276,40 @@ class PactBrokerLoaderSpec extends Specification {
     tags = ['${a}', '${latest}', '${b}']
     def loader = pactBrokerLoader()
     loader.valueResolver = [resolveValue: { val -> 'X' } ] as ValueResolver
+    def expected = [ new PactBrokerResult('test', 'a', '', [], [], false) ]
+    def selectors = [
+      new ConsumerVersionSelector('X', true),
+      new ConsumerVersionSelector('X', true),
+      new ConsumerVersionSelector('X', true)
+    ]
 
     when:
     def result = loader.load('test')
 
     then:
-    3 * brokerClient.fetchConsumersWithTag('test', 'X') >> [ new PactBrokerConsumer('test', 'a', '', []) ]
-    0 * _
-    result.size() == 3
+    1 * brokerClient.getOptions() >> [:]
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Either.Right(expected)
+    0 * brokerClient._
+    result.size() == 1
   }
 
   def 'Loads pacts only for provided consumers'() {
     given:
     consumers = ['a', 'b', 'c']
+    def expected = [
+      new PactBrokerResult('a', '', '', [], [], false),
+      new PactBrokerResult('b', '', '', [], [], false),
+      new PactBrokerResult('c', '', '', [], [], false),
+      new PactBrokerResult('d', '', '', [], [], false)
+    ]
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumers('test') >> [
-            new PactBrokerConsumer('a', 'latest', '', []),
-            new PactBrokerConsumer('b', 'latest', '', []),
-            new PactBrokerConsumer('c', 'latest', '', []),
-            new PactBrokerConsumer('d', 'latest', '', [])
-    ]
-    0 * _
+    brokerClient.getOptions() >> [:]
+    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Either.Right(expected)
+    0 * brokerClient._
     result.size() == 3
   }
 
@@ -306,36 +319,40 @@ class PactBrokerLoaderSpec extends Specification {
     given:
     System.setProperty('composite', "a${VALUES_SEPARATOR}b${VALUES_SEPARATOR}c")
     consumers = ['${composite}']
+    def expected = [
+      new PactBrokerResult('a', '', '', [], [], false),
+      new PactBrokerResult('b', '', '', [], [], false),
+      new PactBrokerResult('c', '', '', [], [], false),
+      new PactBrokerResult('d', '', '', [], [], false)
+    ]
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumers('test') >> [
-            new PactBrokerConsumer('a', 'latest', '', []),
-            new PactBrokerConsumer('b', 'latest', '', []),
-            new PactBrokerConsumer('c', 'latest', '', []),
-            new PactBrokerConsumer('d', 'latest', '', [])
-    ]
-    0 * _
+    brokerClient.getOptions() >> [:]
+    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Either.Right(expected)
+    0 * brokerClient._
     result.size() == 3
   }
 
   def 'Loads all consumer pacts if no consumer is provided'() {
     given:
     consumers = []
+    def expected = [
+      new PactBrokerResult('a', '', '', [], [], false),
+      new PactBrokerResult('b', '', '', [], [], false),
+      new PactBrokerResult('c', '', '', [], [], false),
+      new PactBrokerResult('d', '', '', [], [], false)
+    ]
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumers('test') >> [
-            new PactBrokerConsumer('a', 'latest', '', []),
-            new PactBrokerConsumer('b', 'latest', '', []),
-            new PactBrokerConsumer('c', 'latest', '', []),
-            new PactBrokerConsumer('d', 'latest', '', [])
-    ]
-    0 * _
+    brokerClient.getOptions() >> [:]
+    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Either.Right(expected)
+    0 * brokerClient._
     result.size() == 4
   }
 
@@ -344,18 +361,20 @@ class PactBrokerLoaderSpec extends Specification {
   def 'Loads all consumers by default'() {
     given:
     consumers = ['${pactbroker.consumers:}']
+    def expected = [
+      new PactBrokerResult('a', '', '', [], [], false),
+      new PactBrokerResult('b', '', '', [], [], false),
+      new PactBrokerResult('c', '', '', [], [], false),
+      new PactBrokerResult('d', '', '', [], [], false)
+    ]
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumers('test') >> [
-      new PactBrokerConsumer('a', 'latest', '', []),
-      new PactBrokerConsumer('b', 'latest', '', []),
-      new PactBrokerConsumer('c', 'latest', '', []),
-      new PactBrokerConsumer('d', 'latest', '', [])
-    ]
-    0 * _
+    brokerClient.getOptions() >> [:]
+    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Either.Right(expected)
+    0 * brokerClient._
     result.size() == 4
   }
 
@@ -363,18 +382,21 @@ class PactBrokerLoaderSpec extends Specification {
     given:
     consumers = ['a', 'b', 'c']
     tags = ['demo']
+    def expected = [
+      new PactBrokerResult('a', '', '', [], [], false),
+      new PactBrokerResult('b', '', '', [], [], false),
+      new PactBrokerResult('c', '', '', [], [], false),
+      new PactBrokerResult('d', '', '', [], [], false)
+    ]
+    def selectors = [ new ConsumerVersionSelector('demo', true) ]
 
     when:
     def result = pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumersWithTag('test', 'demo') >> [
-            new PactBrokerConsumer('a', 'demo', '', []),
-            new PactBrokerConsumer('b', 'demo', '', []),
-            new PactBrokerConsumer('c', 'demo', '', []),
-            new PactBrokerConsumer('d', 'demo', '', [])
-    ]
-    0 * _
+    brokerClient.getOptions() >> [:]
+    1 * brokerClient.fetchConsumersWithSelectors('test', selectors, [], false) >> new Either.Right(expected)
+    0 * brokerClient._
     result.size() == 3
   }
 
@@ -384,15 +406,12 @@ class PactBrokerLoaderSpec extends Specification {
     tags = ['demo']
     PactBrokerLoader loader = Spy(pactBrokerLoader())
     loader.overridePactUrl('http://overridden.com', 'overridden')
-    def brokerUrlSource = new BrokerUrlSource('http://overridden.com', 'http://pactbroker:1234')
-    def consumer = new ConsumerInfo('overridden', null, true, [], null,
-      brokerUrlSource, [], [], false)
 
     when:
     def result = loader.load('test')
 
     then:
-    1 * loader.loadPact(consumer, _) >> Stub(Pact)
+    brokerClient.getOptions() >> [:]
     0 * brokerClient._
     result.size() == 1
   }
@@ -403,21 +422,23 @@ class PactBrokerLoaderSpec extends Specification {
     pactBrokerLoader().load('test')
 
     then:
-    1 * brokerClient.fetchConsumers('test') >> []
+    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Either.Right([])
     noExceptionThrown()
   }
 
   def 'configured from annotation with no port'() {
     given:
     pactBrokerLoader = {
-      new PactBrokerLoader(PactBrokerAnnotationNoPort.getAnnotation(PactBroker)) {
+      def loader = new PactBrokerLoader(PactBrokerAnnotationNoPort.getAnnotation(PactBroker)) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
+        IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           assert url.host == 'pactbroker.host'
           assert url.port == -1
           brokerClient
         }
       }
+      loader.pactReader = mockReader
+      loader
     }
 
     when:
@@ -425,21 +446,24 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     result == []
-    1 * brokerClient.fetchConsumers('test') >> []
+    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Either.Right([])
   }
 
   def 'configured from annotation with https and no port'() {
     given:
     pactBrokerLoader = {
-      new PactBrokerLoader(PactBrokerAnnotationHttpsNoPort.getAnnotation(PactBroker)) {
+
+      def loader = new PactBrokerLoader(PactBrokerAnnotationHttpsNoPort.getAnnotation(PactBroker)) {
         @Override
-        PactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
+        IPactBrokerClient newPactBrokerClient(URI url, ValueResolver resolver) {
           assert url.scheme == 'https'
           assert url.host == 'pactbroker.host'
           assert url.port == -1
           brokerClient
         }
       }
+      loader.pactReader = mockReader
+      loader
     }
 
     when:
@@ -447,7 +471,7 @@ class PactBrokerLoaderSpec extends Specification {
 
     then:
     result == []
-    1 * brokerClient.fetchConsumers('test') >> []
+    1 * brokerClient.fetchConsumersWithSelectors('test', [], [], false) >> new Either.Right([])
   }
 
   def 'Auth: Uses basic auth if no auth is provided'() {

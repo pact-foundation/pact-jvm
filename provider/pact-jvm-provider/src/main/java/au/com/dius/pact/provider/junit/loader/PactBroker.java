@@ -39,7 +39,7 @@ public @interface PactBroker {
      * Tags to use to fetch pacts for, defaults to `latest`
      * If you set the tags through the `pactbroker.tags` system property, separate the tags by commas
      */
-    String[] tags() default "${pactbroker.tags:latest}";
+    String[] tags() default "${pactbroker.tags:}";
 
     /**
      * Consumers to fetch pacts for, defaults to all consumers
@@ -57,4 +57,15 @@ public @interface PactBroker {
    * Override the default value resolver for resolving the values in the expressions
    */
   Class<? extends ValueResolver> valueResolver() default SystemPropertyResolver.class;
+
+  /**
+   * If the pending pacts feature should be enabled. This can be set with the pactbroker.enablePending JVM system property.
+   * When this is set to try, the provider tags property also needs to be set
+   */
+  String enablePendingPacts() default "${pactbroker.enablePending:false}";
+
+  /**
+   * Provider Tags to use to evaluate pending pacts
+   */
+  String[] providerTags() default "${pactbroker.providerTags:}";
 }

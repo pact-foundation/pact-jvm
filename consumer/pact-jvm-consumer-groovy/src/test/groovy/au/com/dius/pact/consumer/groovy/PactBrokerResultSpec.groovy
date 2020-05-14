@@ -6,7 +6,7 @@ import groovyx.net.http.FromServer
 import groovyx.net.http.HttpBuilder
 import spock.lang.Specification
 
-class PactResultSpec extends Specification {
+class PactBrokerResultSpec extends Specification {
 
     def 'case when the test passes and the pact is verified'() {
       given:

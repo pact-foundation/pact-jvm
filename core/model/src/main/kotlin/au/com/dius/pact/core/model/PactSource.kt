@@ -1,5 +1,6 @@
 package au.com.dius.pact.core.model
 
+import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import java.io.File
 import java.util.function.Supplier
 
@@ -61,9 +62,23 @@ data class BrokerUrlSource @JvmOverloads constructor(
   val pactBrokerUrl: String,
   val attributes: Map<String, Any?> = mapOf(),
   val options: Map<String, Any> = mapOf(),
-  val tag: String? = null
+  val tag: String? = null,
+  val result: PactBrokerResult? = null
 ) : UrlPactSource() {
   override fun description() = if (tag == null) "Pact Broker $url" else "Pact Broker $url (Tag $tag)"
+
+  companion object {
+    fun fromResult(result: PactBrokerResult, options: Map<String, Any> = emptyMap()): BrokerUrlSource {
+      return BrokerUrlSource(
+        result.source,
+        result.pactBrokerUrl,
+        emptyMap(),
+        options,
+        null,
+        result
+      )
+    }
+  }
 }
 
 object InputStreamPactSource : PactSource()

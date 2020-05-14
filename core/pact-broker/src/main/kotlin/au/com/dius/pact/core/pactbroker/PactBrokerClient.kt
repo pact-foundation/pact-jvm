@@ -1,12 +1,12 @@
 package au.com.dius.pact.core.pactbroker
 
 import arrow.core.Either
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
@@ -75,10 +75,26 @@ data class ConsumerVersionSelector(val tag: String, val latest: Boolean = true) 
   fun toJson() = jsonObject("tag" to tag, "latest" to latest)
 }
 
+interface IPactBrokerClient {
+  /**
+   * Fetches all consumers for the given provider and selectors
+   */
+  fun fetchConsumersWithSelectors(
+    providerName: String,
+    selectors: List<ConsumerVersionSelector>,
+    providerTags: List<String> = emptyList(),
+    enablePending: Boolean = false
+  ): Either<Exception, List<PactBrokerResult>>
+
+  fun getUrlForProvider(providerName: String, tag: String): String?
+
+  val options: Map<String, Any>
+}
+
 /**
  * Client for the pact broker service
  */
-open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, Any>) {
+open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map<String, Any>) : IPactBrokerClient {
 
   constructor(pactBrokerUrl: String) : this(pactBrokerUrl, mapOf())
 
@@ -133,17 +149,17 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     }
   }
 
-  /**
-   * Fetches all consumers for the given provider and selectors
-   */
-  @JvmOverloads
-  open fun fetchConsumersWithSelectors(
-    provider: String,
-    consumerVersionSelectors: List<ConsumerVersionSelector>,
-    providerTags: List<String> = emptyList(),
-    enablePending: Boolean = false
-  ): Either<Exception, List<PactResult>> {
-    val halClient = newHalClient().navigate()
+  override fun fetchConsumersWithSelectors(
+    providerName: String,
+    selectors: List<ConsumerVersionSelector>,
+    providerTags: List<String>,
+    enablePending: Boolean
+  ): Either<Exception, List<PactBrokerResult>> {
+    val navigateResult = handleWith<IHalClient> { newHalClient().navigate() }
+    val halClient = when (navigateResult) {
+      is Either.Left -> return navigateResult
+      is Either.Right -> navigateResult.b
+    }
     val pactsForVerification = when {
       halClient.linkUrl(PROVIDER_PACTS_FOR_VERIFICATION) != null -> PROVIDER_PACTS_FOR_VERIFICATION
       halClient.linkUrl(BETA_PROVIDER_PACTS_FOR_VERIFICATION) != null -> BETA_PROVIDER_PACTS_FOR_VERIFICATION
@@ -151,7 +167,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     }
     if (pactsForVerification != null) {
       val body = jsonObject(
-        "consumerVersionSelectors" to jsonArray(consumerVersionSelectors.map { it.toJson() })
+        "consumerVersionSelectors" to jsonArray(selectors.map { it.toJson() })
       )
       if (enablePending) {
         body["providerVersionTags"] = jsonArray(providerTags)
@@ -159,7 +175,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
       }
 
       return handleWith {
-        halClient.postJson(pactsForVerification, mapOf("provider" to provider), body.toString()).map { result ->
+        halClient.postJson(pactsForVerification, mapOf("provider" to providerName), body.toString()).map { result ->
           result["_embedded"]["pacts"].asJsonArray.map { pactJson ->
             val selfLink = pactJson["_links"]["self"]
             val href = Precoded(Json.toString(selfLink["href"])).decoded().toString()
@@ -175,20 +191,20 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
               }
             }
             if (options.containsKey("authentication")) {
-              PactResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, notices, pending)
+              PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, notices, pending)
             } else {
-              PactResult(name, href, pactBrokerUrl, emptyList(), notices, pending)
+              PactBrokerResult(name, href, pactBrokerUrl, emptyList(), notices, pending)
             }
           }
         }
       }
     } else {
       return handleWith {
-        if (consumerVersionSelectors.isEmpty()) {
-          fetchConsumers(provider).map { PactResult.fromConsumer(it) }
+        if (selectors.isEmpty()) {
+          fetchConsumers(providerName).map { PactBrokerResult.fromConsumer(it) }
         } else {
-          fetchConsumersWithTag(provider, consumerVersionSelectors.first().tag)
-            .map { PactResult.fromConsumer(it) }
+          fetchConsumersWithTag(providerName, selectors.first().tag)
+            .map { PactBrokerResult.fromConsumer(it) }
         }
       }
     }
@@ -218,7 +234,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     }, false)
   }
 
-  open fun getUrlForProvider(providerName: String, tag: String): String? {
+  override fun getUrlForProvider(providerName: String, tag: String): String? {
     val halClient = newHalClient()
     if (tag.isEmpty() || tag == "latest") {
       halClient.navigate(mapOf("provider" to providerName), LATEST_PROVIDER_PACTS)

@@ -12,7 +12,7 @@ data class PactBrokerConsumer @JvmOverloads constructor (
   val tag: String? = null
 )
 
-data class PactResult(
+data class PactBrokerResult(
   val name: String,
   val source: String,
   val pactBrokerUrl: String,
@@ -22,7 +22,13 @@ data class PactResult(
 ) {
   companion object {
     fun fromConsumer(consumer: PactBrokerConsumer) =
-      PactResult(consumer.name, consumer.source, consumer.pactBrokerUrl, consumer.pactFileAuthentication, emptyList())
+      PactBrokerResult(
+        consumer.name,
+        consumer.source,
+        consumer.pactBrokerUrl,
+        consumer.pactFileAuthentication,
+        emptyList()
+      )
   }
 }
 

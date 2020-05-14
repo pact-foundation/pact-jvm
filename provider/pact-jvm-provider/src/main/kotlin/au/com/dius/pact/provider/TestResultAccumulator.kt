@@ -37,6 +37,17 @@ object DefaultTestResultAccumulator : TestResultAccumulator, KLogging() {
     updateTestResult(pact, interaction, TestResult.fromBoolean(testExecutionResult), null)
   }
 
+  fun updateTestResult(
+    pact: Pact<Interaction>,
+    interaction: Interaction,
+    testExecutionResult: List<VerificationResult.Failed>,
+    source: PactSource
+  ) {
+    updateTestResult(pact, interaction, testExecutionResult.fold(TestResult.Ok) {
+      acc: TestResult, r -> acc.merge(r.toTestResult())
+    }, source)
+  }
+
   override fun updateTestResult(
     pact: Pact<out Interaction>,
     interaction: Interaction,

@@ -356,7 +356,7 @@ class PactBrokerClientSpec extends Specification {
     1 * halClient.linkUrl('pb:provider-pacts-for-verification') >> 'URL'
     1 * halClient.postJson('pb:provider-pacts-for-verification', [provider: 'provider'], json) >> new Either.Right(jsonResult)
     result.right
-    result.b.first() == new PactResult('Pact between Foo Web Client (1.0.2) and Activity Service',
+    result.b.first() == new PactBrokerResult('Pact between Foo Web Client (1.0.2) and Activity Service',
       'https://test.pact.dius.com.au/pacts/provider/Activity Service/consumer/Foo Web Client/pact-version/384826ff3a2856e28dfae553efab302863dcd727',
       'baseUrl', [], [
         new VerificationNotice('before_verification',
