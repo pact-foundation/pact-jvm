@@ -12,6 +12,7 @@ import au.com.dius.pact.provider.VerificationResult
 import com.github.ajalt.mordant.TermColors
 import org.apache.commons.lang3.exception.ExceptionUtils
 import java.io.File
+import java.lang.StringBuilder
 
 /**
  * Pact verifier reporter that displays the results of the verification to the console using ASCII escapes
@@ -203,32 +204,43 @@ class AnsiConsoleReporter(
   }
 
   override fun displayFailures(failures: List<VerificationResult.Failed>) {
+    println(failuresToString(failures))
+  }
+
+  fun failuresToString(failures: List<VerificationResult.Failed>): String {
     val nonPending = failures.filterNot { it.pending }
     val pending = failures.filter { it.pending }
 
+    val s = StringBuilder()
     if (pending.isNotEmpty()) {
-      println("\nPending Failures:\n")
-      pending.forEachIndexed { i, err -> displayFailure(i, err) }
+      s.append("\nPending Failures:\n\n")
+      pending.forEachIndexed { i, err -> s.append(failure(i, err)) }
     }
 
     if (nonPending.isNotEmpty()) {
-      println("\nFailures:\n")
-      nonPending.forEachIndexed { i, err -> displayFailure(i, err) }
+      s.append("\nFailures:\n\n")
+      nonPending.forEachIndexed { i, err -> s.append(failure(i, err)) }
     }
+
+    return s.toString()
   }
 
-  private fun displayFailure(i: Int, err: VerificationResult.Failed) {
-    println("${i + 1}) ${err.verificationDescription}\n")
+  private fun failure(i: Int, err: VerificationResult.Failed): String {
+    val s = StringBuilder()
+
+    s.append("${i + 1}) ${err.verificationDescription}\n\n")
     err.failures.forEachIndexed { index, failure ->
-      println("    ${i + 1}.${index + 1}) ${failure.formatForDisplay(t)}\n")
+      s.append("    ${i + 1}.${index + 1}) ${failure.formatForDisplay(t)}\n\n")
 
       if (failure.hasException() && verifier.projectHasProperty.apply("pact.showStacktrace")) {
         for (line in ExceptionUtils.getStackFrames(failure.getException()!!)) {
-          println("      $line")
+          s.append("      $line\n")
         }
-        println()
+        s.append('\n')
       }
     }
+
+    return s.toString()
   }
 
   override fun reportVerificationNoticesForConsumer(

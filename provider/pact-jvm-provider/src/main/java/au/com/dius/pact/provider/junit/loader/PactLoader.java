@@ -35,4 +35,9 @@ public interface PactLoader {
    * Returns a description of this pact loader
    */
   default String description() { return this.getClass().getSimpleName(); };
+
+  /**
+   * Enables pending pact feature
+   */
+  default void enablePendingPacts(boolean flag) { };
 }

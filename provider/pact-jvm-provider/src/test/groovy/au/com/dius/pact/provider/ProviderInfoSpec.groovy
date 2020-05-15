@@ -3,7 +3,7 @@ package au.com.dius.pact.provider
 import arrow.core.Either
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
-import au.com.dius.pact.core.pactbroker.PactResult
+import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import spock.lang.Specification
 
 class ProviderInfoSpec extends Specification {
@@ -74,7 +74,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, [], false) >> new Either.Right([
-      new PactResult('consumer', '', url, [], [], false)
+      new PactBrokerResult('consumer', '', url, [], [], false)
     ])
     result.size == 1
     result[0].name == 'consumer'
@@ -97,7 +97,7 @@ class ProviderInfoSpec extends Specification {
 
     then:
     pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true) >> new Either.Right([
-      new PactResult('consumer', '', url, [], [], true)
+      new PactBrokerResult('consumer', '', url, [], [], true)
     ])
     result.size == 1
     result[0].name == 'consumer'

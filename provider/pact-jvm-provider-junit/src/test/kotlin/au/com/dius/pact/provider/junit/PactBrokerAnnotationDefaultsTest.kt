@@ -64,9 +64,9 @@ class PactBrokerAnnotationDefaultsTest {
     }
 
     @Test
-    fun `default tag is latest`() {
+    fun `default tag is empty`() {
         assertThat(annotation.tags, arrayWithSize(1))
-        assertThat(parseListExpression(annotation.tags[0]), contains("latest"))
+        assertThat(parseListExpression(annotation.tags[0]), empty())
     }
 
     @Test

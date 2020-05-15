@@ -227,6 +227,8 @@ interface IProviderVerifier {
    * Display info about the interaction about to be verified
    */
   fun reportInteractionDescription(interaction: Interaction)
+
+  fun generateErrorStringFromVerificationResult(result: List<VerificationResult.Failed>): String
 }
 
 /**
@@ -508,6 +510,11 @@ open class ProviderVerifier @JvmOverloads constructor (
     reporters.forEach { it.interactionDescription(interaction) }
   }
 
+  override fun generateErrorStringFromVerificationResult(result: List<VerificationResult.Failed>): String {
+    val reporter = reporters.filterIsInstance<AnsiConsoleReporter>().firstOrNull()
+    return reporter?.failuresToString(result) ?: "Test failed. Enable the console reporter to see the details"
+  }
+
   override fun verifyRequestResponsePact(
     expectedResponse: Response,
     actualResponse: Map<String, Any>,
@@ -647,7 +654,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  fun initialiseReporters(provider: ProviderInfo) {
+  fun initialiseReporters(provider: IProviderInfo) {
     reporters.forEach {
       if (it.hasProperty("displayFullDiff")) {
         (it.property("displayFullDiff") as KMutableProperty1<VerifierReporter, Boolean>)
