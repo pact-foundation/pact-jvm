@@ -7,7 +7,7 @@ import au.com.dius.pact.core.model.Request
 import au.com.dius.pact.core.support.Json
 import difflib.DiffUtils
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object PrettyPrinter {
   //TODO: allow configurable context lines
@@ -17,20 +17,19 @@ object PrettyPrinter {
     mismatches.flatMap(m => {
       m match {
         case r: Ok => List()
-        case r: PartialMismatch => List(PrettyPrinter.printProblem(r.getMismatches.asScala))
-        case e: Mismatches => print(e.getMismatches.asScala)
+        case r: PartialMismatch => List(PrettyPrinter.printProblem(r.getMismatches.asScala.toSeq))
+        case e: Mismatches => print(e.getMismatches.asScala.toSeq)
         case e: Error => List(s"Test failed with an exception: ${e.getError.getMessage}")
         case u: UnexpectedRequest => printUnexpected(List(u.getRequest))
-        case u: ExpectedButNotReceived => printMissing(u.getExpectedRequests.asScala)
+        case u: ExpectedButNotReceived => printMissing(u.getExpectedRequests.asScala.toSeq)
       }
     }).mkString("\n")
   }
 
   def printDiff(label: String, expected: List[String], actual: List[String], contextLines: Int = defaultContextLines): Seq[String] = {
-    import scala.collection.JavaConversions._
-    val patch = DiffUtils.diff(expected, actual)
-    val uDiff = DiffUtils.generateUnifiedDiff(label, "", expected, patch, contextLines)
-    uDiff.toSeq
+    val patch = DiffUtils.diff(expected.asJava, actual.asJava)
+    val uDiff = DiffUtils.generateUnifiedDiff(label, "", expected.asJava, patch, contextLines)
+    uDiff.asScala.toSeq
   }
 
   def printMapMismatch[A, B](label: String, expected: Map[A, B], actual: Map[A, B])(implicit oA: Ordering[A]): Seq[String] = {
@@ -58,8 +57,7 @@ object PrettyPrinter {
       case hm: HeaderMismatch => printStringMismatch("Header " + hm.getHeaderKey, hm.getExpected, hm.getActual)
       case bm: BodyMismatch => printStringMismatch("Body",
         Json.INSTANCE.prettyPrint(bm.getExpected.toString), Json.INSTANCE.prettyPrint(bm.getActual.toString))
-      case cm: CookieMismatch => printDiff("Cookies", asScalaBuffer(cm.getExpected).toList.sorted,
-        asScalaBuffer(cm.getActual).toList.sorted)
+      case cm: CookieMismatch => printDiff("Cookies", cm.getExpected.asScala.toList.sorted, cm.getActual.asScala.toList.sorted)
       case pm: PathMismatch => printDiff("Path", List(pm.getExpected), List(pm.getActual), 0)
       case mm: MethodMismatch => printDiff("Method", List(mm.getExpected), List(mm.getActual), 0)
     }.mkString("\n")

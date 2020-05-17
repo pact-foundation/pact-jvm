@@ -2,13 +2,13 @@ package au.com.dius.pact.consumer.specs2
 
 import java.util.concurrent.TimeUnit._
 
-import au.com.dius.pact.consumer._
+import au.com.dius.pact.core.model.{Request, RequestResponsePact, Response}
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
 
 import scala.concurrent.Await
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration.{Duration, FiniteDuration}
 
 @RunWith(classOf[JUnitRunner])
 class AltPactWithUnitSupportSpec extends Specification with PactSpec with UnitSpecsSupport {
@@ -17,14 +17,14 @@ class AltPactWithUnitSupportSpec extends Specification with PactSpec with UnitSp
   override val provider: String = "AltSpecsProvider"
   override val consumer: String = "AltSpecsConsumer"
 
-  val timeout = Duration(5000, MILLISECONDS)
+  val timeout: FiniteDuration = Duration(5000, MILLISECONDS)
 
-  val fooRequest = buildRequest(path = "/foo")
-  val fooResponse = buildResponse(maybeBody = Some("{}"))
-  val optionRequest = buildRequest(path = "/", method = "OPTION")
-  val optionResponse = buildResponse(headers = Map("Option" -> "Value-X"))
+  val fooRequest: Request = buildRequest(path = "/foo")
+  val fooResponse: Response = buildResponse(maybeBody = Some("{}"))
+  val optionRequest: Request = buildRequest(path = "/", method = "OPTION")
+  val optionResponse: Response = buildResponse(headers = Map("Option" -> "Value-X"))
 
-  override val pactFragment = buildPactFragment(
+  override val pactFragment: RequestResponsePact = buildPactFragment(
     consumer = consumer,
     provider = provider,
     interactions = List(
@@ -35,14 +35,14 @@ class AltPactWithUnitSupportSpec extends Specification with PactSpec with UnitSp
 
   description(pactFragment) >> {
     "GET returns a 200 status and empty body" >> {
-      val simpleGet = ConsumerService(providerConfig.url).simpleGet("/foo")
+      val simpleGet = ConsumerService(mockHttpServer.getUrl).simpleGet("/foo")
       Await.result(simpleGet, timeout) must be_==(200, "{}")
     }
 
     "OPTION returns a 200 status and the correct headers" >> {
-      val optionsResult = ConsumerService(providerConfig.url).options("/")
+      val optionsResult = ConsumerService(mockHttpServer.getUrl).options("/")
       Await.result(optionsResult, timeout) must be_==(200, "",
-        Map("Content-Length" -> "0", "Connection" -> "keep-alive", "Option" -> "Value-X"))
+        Map("Option" -> "Value-X"))
     }
   }
 }

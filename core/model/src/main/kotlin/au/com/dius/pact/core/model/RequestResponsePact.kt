@@ -9,10 +9,12 @@ import com.github.salomonbrys.kotson.jsonObject
 class RequestResponsePact @JvmOverloads constructor(
   override val provider: Provider,
   override val consumer: Consumer,
-  override var interactions: MutableList<RequestResponseInteraction> = mutableListOf(),
+  interactions: List<RequestResponseInteraction> = listOf(),
   override val metadata: Map<String, Any?> = DEFAULT_METADATA,
   override val source: PactSource = UnknownPactSource
 ) : BasePact<RequestResponseInteraction>(consumer, provider, metadata, source) {
+
+  override var interactions = interactions.toMutableList()
 
   override fun sortInteractions(): Pact<RequestResponseInteraction> {
     interactions.sortBy { interaction -> interaction.providerStates.joinToString { it.name.toString() } +

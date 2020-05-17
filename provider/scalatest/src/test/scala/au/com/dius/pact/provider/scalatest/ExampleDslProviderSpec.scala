@@ -1,7 +1,8 @@
 package au.com.dius.pact.provider.scalatest
 
-import org.junit.runner.RunWith
 import org.scalatest.Ignore
+import org.junit.runner.RunWith
+import scala.language.postfixOps
 import org.scalatestplus.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])

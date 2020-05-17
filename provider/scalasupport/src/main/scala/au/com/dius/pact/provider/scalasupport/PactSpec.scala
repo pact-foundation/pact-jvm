@@ -2,22 +2,22 @@ package au.com.dius.pact.provider.scalasupport
 
 import java.util.concurrent.Executors
 
-import au.com.dius.pact.core.model.{RequestResponsePact, Response}
 import au.com.dius.pact.core.matchers._
+import au.com.dius.pact.core.model.{RequestResponsePact, Response}
 import org.scalatest.exceptions.TestFailedException
-import org.scalatest.{Assertions, FreeSpec, Ignore}
+import org.scalatest.Assertions
+import org.scalatest.freespec.AnyFreeSpec
 
-import scala.collection.JavaConversions
-import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.jdk.CollectionConverters._
 
-@Ignore
+//@Ignore
 // Ignored as it seems to be failing on travis
-class PactSpec(config: PactConfiguration, pact: RequestResponsePact)(implicit timeout: Duration = 10.seconds) extends FreeSpec with Assertions {
+class PactSpec(config: PactConfiguration, pact: RequestResponsePact)(implicit timeout: Duration = 10.seconds) extends AnyFreeSpec with Assertions {
   implicit val executionContext = ExecutionContext.fromExecutor(Executors.newCachedThreadPool)
 
-  JavaConversions.asScalaBuffer(pact.getInteractions).toList.foreach { interaction =>
+  pact.getInteractions.asScala.toList.foreach { interaction =>
     s"""pact for consumer ${pact.getConsumer.getName}
        |provider ${pact.getProvider.getName}
        |interaction "${interaction.getDescription}"

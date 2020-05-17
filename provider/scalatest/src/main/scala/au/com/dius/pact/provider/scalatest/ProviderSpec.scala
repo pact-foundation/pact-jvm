@@ -13,10 +13,10 @@ import au.com.dius.pact.provider.scalatest.Tags.ProviderTest
 import au.com.dius.pact.provider.{ProviderInfo, ProviderUtils, ProviderVerifier}
 import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor}
+import scala.language.postfixOps
 
 /**
   * Trait to run consumer pacts against the provider
@@ -37,23 +37,24 @@ trait ProviderSpec extends FlatSpec with BeforeAndAfterAll with ProviderDsl with
     import verificationConfig.serverConfig._
 
     val verifier = new ProviderVerifier
-    ProviderUtils.loadPactFiles(new ProviderInfo(provider), new File(uri))
+    ProviderUtils.loadPactFiles(new ProviderInfo(provider), new File(uri)).asScala
       .filter(consumer.filter)
       .flatMap(c => verifier.loadPactFileForConsumer(c)
         .asInstanceOf[PactForConsumer[RequestResponseInteraction]]
-        .getInteractions.map(i => (c.getName, i)))
+        .getInteractions.asScala.map(i => (c.getName, i)))
       .foreach { case (consumerName, interaction) =>
         val description = new StringBuilder(s"${interaction.getDescription} for '$consumerName'")
         if (!interaction.getProviderStates.isEmpty) description.append(s" given ${interaction.getProviderStates.get(0).getName}")
         provider should description.toString() taggedAs ProviderTest in {
           startServerWithState(serverStarter, interaction.getProviderStates.asScala.headOption.map(_.getName).getOrElse(""))
           implicit val executionContext: ExecutionContextExecutor = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
-          val request = interaction.getRequest.copy
-          handler.foreach(h => request.setPath(s"${h.url.toString}${interaction.getRequest.getPath}"))
+          val requestResponseInteraction = interaction.asInstanceOf[RequestResponseInteraction]
+          val request = requestResponseInteraction.getRequest.copy
+          handler.foreach(h => request.setPath(s"${h.url.toString}${request.getPath}"))
           val actualResponseFuture = HttpClient.run(request)
           val actualResponse = Await.result(actualResponseFuture, timeoutSeconds)
           if (restartServer) stopServer()
-          ResponseMatching.matchRules(interaction.getResponse, actualResponse) shouldBe matchers.FullResponseMatch.INSTANCE
+          ResponseMatching.matchRules(requestResponseInteraction.getResponse, actualResponse) shouldBe matchers.FullResponseMatch.INSTANCE
         }
       }
   }

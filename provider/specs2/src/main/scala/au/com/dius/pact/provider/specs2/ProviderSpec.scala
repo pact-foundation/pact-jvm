@@ -10,8 +10,7 @@ import org.specs2.Specification
 import org.specs2.execute.Result
 import org.specs2.specification.core.Fragments
 
-import scala.collection.JavaConversions
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor}
 
@@ -36,7 +35,7 @@ trait ProviderSpec extends Specification {
 
   override def is = {
     val pact = DefaultPactReader.INSTANCE.loadPact(convertInput(honoursPact)).asInstanceOf[RequestResponsePact]
-    val fs = JavaConversions.asScalaBuffer(pact.getInteractions).map { interaction =>
+    val fs = pact.getInteractions.asScala.map { interaction =>
       val description = s"${interaction.getProviderStates.asScala.map(_.getName).mkString(", ")} ${interaction.getDescription}"
       val test: String => Result = { url =>
         implicit val executionContext: ExecutionContextExecutor = ExecutionContext.fromExecutor(Executors.newCachedThreadPool())
@@ -47,7 +46,7 @@ trait ProviderSpec extends Specification {
         ResponseMatching.matchRules(interaction.getResponse, actualResponse) must beEqualTo(FullResponseMatch.INSTANCE)
       }
       fragmentFactory.example(description, {inState(interaction.getProviderStates.asScala.headOption.map(_.getName).getOrElse(""), test)})
-    }
+    }.toSeq
     Fragments(fs :_*)
   }
 

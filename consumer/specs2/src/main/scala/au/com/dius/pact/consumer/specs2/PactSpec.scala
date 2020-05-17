@@ -9,7 +9,7 @@ import org.specs2.execute.{AsResult, Failure, Result}
 import org.specs2.specification.core.Fragment
 import org.specs2.specification.create.FragmentsFactory
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait PactSpec extends FragmentsFactory {
 
@@ -32,12 +32,12 @@ trait PactSpec extends FragmentsFactory {
       def asResult(test: => PactVerificationResult): Result = {
         test match {
           case r: Ok => r.getResult.asInstanceOf[Result]
-          case r: PartialMismatch => Failure(PrettyPrinter.printProblem(r.getMismatches.asScala))
-          case e: Mismatches => Failure(PrettyPrinter.print(e.getMismatches.asScala))
+          case r: PartialMismatch => Failure(PrettyPrinter.printProblem(r.getMismatches.asScala.toSeq))
+          case e: Mismatches => Failure(PrettyPrinter.print(e.getMismatches.asScala.toSeq))
           case e: Error => Failure(m = s"Test failed with an exception: ${e.getError.getMessage}",
             stackTrace = e.getError.getStackTrace.toList)
           case u: UnexpectedRequest => Failure(PrettyPrinter.printUnexpected(List(u.getRequest)))
-          case u: ExpectedButNotReceived => Failure(PrettyPrinter.printMissing(u.getExpectedRequests.asScala))
+          case u: ExpectedButNotReceived => Failure(PrettyPrinter.printMissing(u.getExpectedRequests.asScala.toSeq))
         }
       }
     }

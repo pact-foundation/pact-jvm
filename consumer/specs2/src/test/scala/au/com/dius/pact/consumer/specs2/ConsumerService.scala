@@ -6,7 +6,7 @@ import au.com.dius.pact.consumer.specs2.dispatch.HttpClient
 import au.com.dius.pact.core.model.{OptionalBody, PactReaderKt}
 import au.com.dius.pact.core.model.Request
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.compat.java8.FutureConverters.toScala
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -38,7 +38,8 @@ case class ConsumerService(serverUrl: String) {
 
   def options(path: String): Future[(Int, String, Map[String, String])] = {
     toScala[(Int, String, Map[String, String])](HttpClient.run(new Request("OPTION", serverUrl + path)).thenApply { response =>
-      (response.getStatus, response.getBody.valueAsString, response.getHeaders.asScala.mapValues(v => v.asScala.mkString(", ")).toMap)
+      (response.getStatus, response.getBody.valueAsString, response.getHeaders.asScala.view
+        .mapValues(v => v.asScala.mkString(", ")).filterKeys(_ == "Option").toMap)
     })
   }
 }

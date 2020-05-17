@@ -12,8 +12,7 @@ import unfiltered.netty.ReceivedMessage
 import unfiltered.request.HttpRequest
 import unfiltered.response.{ContentEncoding, HttpResponse, ResponseFunction, ResponseString, Status}
 
-import scala.collection.JavaConversions
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.Stream
 
 object Conversions extends StrictLogging {
@@ -37,8 +36,7 @@ object Conversions extends StrictLogging {
   }
 
   def toQuery(request: HttpRequest[ReceivedMessage]): java.util.Map[String, java.util.List[String]] = {
-    JavaConversions.mapAsJavaMap(request.parameterNames.map(name =>
-      name -> JavaConversions.seqAsJavaList(request.parameterValues(name))).toMap)
+    request.parameterNames.map(name => name -> request.parameterValues(name).asJava).toMap.asJava
   }
 
   def toPath(uri: String) = new URI(uri).getPath

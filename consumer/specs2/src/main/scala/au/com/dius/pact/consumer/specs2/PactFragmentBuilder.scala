@@ -6,7 +6,7 @@ import au.com.dius.pact.consumer.{ConsumerPactRunnerKt, PactTestRun, PactVerific
 import au.com.dius.pact.core.model.matchingrules.{MatchingRules, MatchingRulesImpl}
 import au.com.dius.pact.core.model._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object PactFragmentBuilder {
   type ConsumerTestVerification[T] = T => Option[T]
@@ -49,21 +49,17 @@ object PactFragmentBuilder {
 
   case class DescribingRequest(consumer: Consumer, provider: Provider, state: List[ProviderState], description: String,
                                builder: CanBuildPactFragment.Builder = CanBuildPactFragment.firstBuild) {
-    import scala.collection.JavaConverters._
-
     def matching(path: String,
                  method: String = "GET",
                  query: String = "",
                  headers: Map[String, List[String]] = Map(),
                  body: String = "",
                  matchers: MatchingRules = new MatchingRulesImpl()): DescribingResponse = {
-      DescribingResponse(new Request(method, path, PactReaderKt.queryStringToMap(query), headers.mapValues(f => f.asJava).asJava, OptionalBody.body(body.getBytes),
-        matchers))
+      DescribingResponse(new Request(method, path, PactReaderKt.queryStringToMap(query),
+        headers.view.mapValues(f => f.asJava).toMap.asJava, OptionalBody.body(body.getBytes), matchers))
     }
 
     case class DescribingResponse(request: Request) {
-      import scala.collection.JavaConverters._
-
       def willRespondWith(status: Int = 200,
                           headers: Map[String, List[String]] = Map(),
                           maybeBody: Option[String] = None,
@@ -81,7 +77,7 @@ object PactFragmentBuilder {
             description,
             state.asJava,
             request,
-            new Response(status, headers.mapValues(f => f.asJava).asJava, optionalBody, matchers), null)))
+            new Response(status, headers.view.mapValues(f => f.asJava).toMap.asJava, optionalBody, matchers), null)))
       }
 
       def willRespondWith(status: Int,
@@ -97,7 +93,7 @@ object PactFragmentBuilder {
             description,
             state.asJava,
             request,
-            new Response(status, headers.mapValues(f => f.asJava).asJava,
+            new Response(status, headers.view.mapValues(f => f.asJava).toMap.asJava,
               OptionalBody.body(bodyAndMatchers.toString.getBytes), rules), null)))
       }
     }

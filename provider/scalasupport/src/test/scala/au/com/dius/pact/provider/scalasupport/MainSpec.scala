@@ -3,21 +3,30 @@ package au.com.dius.pact.provider.scalasupport
 import java.io.File
 import java.net.URL
 
-import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.specs2.mutable.Specification
 import org.specs2.runner.JUnitRunner
+import org.specs2.specification.{AfterAll, BeforeAll}
 import unfiltered.netty.Server
 
+trait TestServerContext extends BeforeAll with AfterAll {
+  var server: Server
+
+  override def beforeAll() = {
+    server = TestService(8888)
+  }
+
+  override def afterAll() = {
+    server.stop()
+  }
+}
+
 @RunWith(classOf[JUnitRunner])
-class MainSpec extends Specification {
+class MainSpec extends Specification with TestServerContext {
 
   def loadResource(name: String): URL = {
     this.getClass.getClassLoader.getResource(name)
   }
-
-  var server: Server = null
-  step(server = TestService(8888))
 
   "PactRunner" should {
 
@@ -37,6 +46,5 @@ class MainSpec extends Specification {
 
   }
 
-  step(server.stop())
-
+  override var server: Server = _
 }

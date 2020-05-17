@@ -1,15 +1,15 @@
 package au.com.dius.pact.provider.scalasupport
 
-import com.typesafe.scalalogging.StrictLogging
-import au.com.dius.pact.provider.scalasupport.unfilteredsupport.Conversions
-import au.com.dius.pact.core.model.Request
-import au.com.dius.pact.provider.scalasupport.AnimalServiceResponses.responses
-import groovy.json.JsonSlurper
-import io.netty.channel.ChannelHandler.Sharable
-import _root_.unfiltered.netty.{ReceivedMessage, ServerErrorResponse, cycle}
+import _root_.unfiltered.netty.{ReceivedMessage, Server, ServerErrorResponse, cycle}
 import _root_.unfiltered.request.HttpRequest
 import _root_.unfiltered.response.ResponseFunction
-import au.com.dius.pact.core.model.Response
+import au.com.dius.pact.core.model.{Request, Response}
+import au.com.dius.pact.provider.scalasupport.AnimalServiceResponses.responses
+import au.com.dius.pact.provider.scalasupport.unfilteredsupport.Conversions
+import com.typesafe.scalalogging.StrictLogging
+import groovy.json.JsonSlurper
+import io.netty.channel.ChannelHandler.Sharable
+import unfiltered.netty.cycle.Plan.Intent
 
 object TestService extends StrictLogging {
   var state: String = ""
@@ -36,10 +36,10 @@ object TestService extends StrictLogging {
         Conversions.pactToUnfilteredResponse(response)
       }
 
-      def intent = PartialFunction[HttpRequest[ReceivedMessage], ResponseFunction[NHttpResponse]](handle)
+    def intent: Intent = handle _
   }
 
-  def apply(port:Int) = {
+  def apply(port:Int): Server = {
     val server = _root_.unfiltered.netty.Server.local(port).handler(RequestHandler(port))
     logger.info(s"starting unfiltered app at 127.0.0.1 on port $port")
     server.start()
