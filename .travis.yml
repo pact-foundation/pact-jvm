@@ -13,5 +13,5 @@ env:
 script:
   - unset _JAVA_OPTIONS
   - ./gradlew --version
-  - ./gradlew --stacktrace --no-daemon $PROJECT build -x :provider:dokkaJavadoc
+  - ./gradlew --stacktrace --no-daemon $PROJECT build
 install: true

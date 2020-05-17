@@ -58,7 +58,9 @@ subprojects {
   apply plugin: 'org.jetbrains.kotlin.jvm'
   apply plugin: 'org.jmailen.kotlinter'
   apply plugin: 'io.gitlab.arturbosch.detekt'
-  apply plugin: 'org.jetbrains.dokka'
+  if (System.env.TRAVIS != 'true') {
+    apply plugin: 'org.jetbrains.dokka'
+  }
   //apply plugin: "org.javamodularity.moduleplugin"
 
     compileTestGroovy {
@@ -80,10 +82,12 @@ subprojects {
       }
     }
 
+  if (System.env.TRAVIS != 'true') {
     task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
       outputFormat = 'javadoc'
       outputDirectory = "$buildDir/docs/dokkaJavadoc"
     }
+  }
 
     jar {
         manifest {
@@ -97,10 +101,12 @@ subprojects {
         }
     }
 
+  if (System.env.TRAVIS != 'true') {
     task javadocJar(type: Jar, dependsOn: [javadoc, groovydoc, dokkaJavadoc]) {
       archiveClassifier = 'javadoc'
       from javadoc.destinationDir, groovydoc.destinationDir, dokkaJavadoc.outputDirectory
     }
+  }
 
     task sourceJar(type: Jar) {
       archiveClassifier = 'sources'
