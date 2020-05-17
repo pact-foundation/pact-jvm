@@ -7,9 +7,12 @@ import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
-import org.fusesource.jansi.Ansi
-import org.fusesource.jansi.AnsiConsole
+import au.com.dius.pact.provider.IProviderVerifier
+import au.com.dius.pact.provider.VerificationResult
+import com.github.ajalt.mordant.TermColors
+import org.apache.commons.lang3.exception.ExceptionUtils
 import java.io.File
+import java.lang.StringBuilder
 
 /**
  * Pact verifier reporter that displays the results of the verification to the console using ASCII escapes
@@ -24,28 +27,27 @@ class AnsiConsoleReporter(
   constructor(name: String, reportDir: File?) : this(name, reportDir, false)
 
   override val ext: String? = null
+  override lateinit var verifier: IProviderVerifier
+  val t = TermColors()
 
   override var reportFile: File
     get() = TODO("not implemented")
     set(value) {}
 
   override fun includesMetadata() {
-    AnsiConsole.out().println("      includes message metadata")
+    println("      includes message metadata")
   }
 
   override fun metadataComparisonOk() {
-    AnsiConsole.out().println(Ansi.ansi().a("      has matching metadata (")
-      .fg(Ansi.Color.GREEN).a("OK").reset().a(")"))
+    println("      has matching metadata (${t.green("OK")})")
   }
 
   override fun metadataComparisonOk(key: String, value: Any?) {
-    AnsiConsole.out().println(Ansi.ansi().a("        \"").bold().a(key).boldOff().a("\" with value \"")
-      .bold().a(value).boldOff().a("\" (").fg(Ansi.Color.GREEN).a("OK").reset().a(")"))
+    println("        \"${t.bold(key)}\" with value \"${t.bold(value.toString())}\" (${t.green("OK")})")
   }
 
   override fun metadataComparisonFailed(key: String, value: Any?, comparison: Any) {
-    AnsiConsole.out().println(Ansi.ansi().a("        \"").bold().a(key).boldOff().a("\" with value \"")
-      .bold().a(value).boldOff().a("\" (").fg(Ansi.Color.RED).a("FAILED").reset().a(")"))
+    println("        \"${t.bold(key)}\" with value \"${t.bold(value.toString())}\" (${t.red("FAILED")})")
   }
 
   override fun initialise(provider: IProviderInfo) { }
@@ -53,47 +55,47 @@ class AnsiConsoleReporter(
   override fun finaliseReport() { }
 
   override fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, tag: String?) {
-    val ansi = Ansi.ansi().a("\nVerifying a pact between ").bold().a(consumer.name)
-            .boldOff().a(" and ").bold().a(provider.name).boldOff()
-
-    if (tag != null) ansi.a(" for tag ").a(tag)
-
-    AnsiConsole.out().println(ansi)
+    var out = "\nVerifying a pact between ${t.bold(consumer.name)}"
+    if (!consumer.name.contains(provider.name)) {
+      out += " and ${t.bold(provider.name)}"
+    }
+    if (tag != null) {
+      out += " for tag ${t.bold(tag)}"
+    }
+    if (consumer.pending) {
+      out += t.yellow(" [PENDING]")
+    }
+    println(out)
   }
 
   override fun verifyConsumerFromUrl(pactUrl: UrlPactSource, consumer: IConsumerInfo) {
-    AnsiConsole.out().println(Ansi.ansi().a("  [from ${pactUrl.description()}]"))
+    println("  [from ${pactUrl.description()}]")
   }
 
   override fun verifyConsumerFromFile(pactFile: PactSource, consumer: IConsumerInfo) {
-    AnsiConsole.out().println(Ansi.ansi().a("  [Using ${pactFile.description()}]"))
+    println("  [Using ${pactFile.description()}]")
   }
 
   override fun pactLoadFailureForConsumer(consumer: IConsumerInfo, message: String) { }
 
   override fun warnProviderHasNoConsumers(provider: IProviderInfo) {
-    AnsiConsole.out().println(Ansi.ansi().a("         ").fg(Ansi.Color.YELLOW)
-      .a("WARNING: There are no consumers to verify for provider '${provider.name}'").reset())
+    println("         ${t.yellow("WARNING: There are no consumers to verify for provider '${provider.name}'")}")
   }
 
   override fun warnPactFileHasNoInteractions(pact: Pact<Interaction>) {
-    AnsiConsole.out().println(Ansi.ansi().a("         ").fg(Ansi.Color.YELLOW)
-      .a("WARNING: Pact file has no interactions")
-      .reset())
+    println("         ${t.yellow("WARNING: Pact file has no interactions")}")
   }
 
   override fun interactionDescription(interaction: Interaction) {
-    AnsiConsole.out().println(Ansi.ansi().a("  ").a(interaction.description))
+    println("  " + interaction.description)
   }
 
   override fun stateForInteraction(state: String, provider: IProviderInfo, consumer: IConsumerInfo, isSetup: Boolean) {
-    AnsiConsole.out().println(Ansi.ansi().a("  Given ").bold().a(state).boldOff())
+    println("  Given ${t.bold(state)}")
   }
 
   override fun warnStateChangeIgnored(state: String, IProviderInfo: IProviderInfo, IConsumerInfo: IConsumerInfo) {
-    AnsiConsole.out().println(Ansi.ansi().a("         ").fg(Ansi.Color.YELLOW)
-      .a("WARNING: State Change ignored as there is no stateChange URL")
-      .reset())
+    println("         ${t.yellow("WARNING: State Change ignored as there is no stateChange URL")}")
   }
 
   override fun stateChangeRequestFailedWithException(
@@ -104,18 +106,14 @@ class AnsiConsoleReporter(
     e: Exception,
     printStackTrace: Boolean
   ) {
-    AnsiConsole.out().println(Ansi.ansi().a("         ")
-      .fg(Ansi.Color.RED).a("State Change Request Failed - ")
-      .a(e.message).reset())
+    println("         ${t.red("State Change Request Failed - ${e.message}")}")
     if (printStackTrace) {
       e.printStackTrace()
     }
   }
 
   override fun stateChangeRequestFailed(state: String, provider: IProviderInfo, isSetup: Boolean, httpStatus: String) {
-    AnsiConsole.out().println(Ansi.ansi().a("         ").fg(Ansi.Color.RED)
-      .a("State Change Request Failed - ")
-      .a(httpStatus).reset())
+    println("         ${t.red("State Change Request Failed - $httpStatus")}")
   }
 
   override fun warnStateChangeIgnoredDueToInvalidUrl(
@@ -124,9 +122,8 @@ class AnsiConsoleReporter(
     isSetup: Boolean,
     stateChangeHandler: Any
   ) {
-    AnsiConsole.out().println(Ansi.ansi().a("         ").fg(Ansi.Color.YELLOW)
-      .a("WARNING: State Change ignored as there is no stateChange URL, received \"$stateChangeHandler\"")
-      .reset())
+    println("         ${t.yellow("WARNING: State Change ignored as there is no stateChange URL, " +
+      "received \"$stateChangeHandler\"")}")
   }
 
   override fun requestFailed(
@@ -136,84 +133,115 @@ class AnsiConsoleReporter(
     e: Exception,
     printStackTrace: Boolean
   ) {
-    AnsiConsole.out().println(Ansi.ansi().a("      ").fg(Ansi.Color.RED).a("Request Failed - ")
-      .a(e.message).reset())
+    println("      ${t.red("Request Failed - ${e.message}")}")
     if (printStackTrace) {
       e.printStackTrace()
     }
   }
 
   override fun returnsAResponseWhich() {
-    AnsiConsole.out().println("    returns a response which")
+    println("    returns a response which")
   }
 
   override fun statusComparisonOk(status: Int) {
-    AnsiConsole.out().println(Ansi.ansi().a("      ").a("has status code ").bold().a(status).boldOff()
-      .a(" (").fg(Ansi.Color.GREEN).a("OK").reset().a(")"))
+    println("      has status code ${t.bold(status.toString())} (${t.green("OK")})")
   }
 
   override fun statusComparisonFailed(status: Int, comparison: Any) {
-    AnsiConsole.out().println(Ansi.ansi().a("      ").a("has status code ").bold().a(status).boldOff()
-      .a(" (")
-      .fg(Ansi.Color.RED).a("FAILED").reset().a(")"))
+    println("      has status code ${t.bold(status.toString())} (${t.red("FAILED")})")
   }
 
   override fun includesHeaders() {
-    AnsiConsole.out().println("      includes headers")
+    println("      includes headers")
   }
 
   override fun headerComparisonOk(key: String, value: List<String>) {
-    AnsiConsole.out().println(Ansi.ansi().a("        \"").bold().a(key).boldOff().a("\" with value \"")
-      .bold()
-      .a(value.joinToString(", ")).boldOff().a("\" (").fg(Ansi.Color.GREEN).a("OK").reset().a(")"))
+    println("        \"${t.bold(key)}\" with value \"${t.bold(value.joinToString(", "))}\"" +
+      " (${t.green("OK")})")
   }
 
   override fun headerComparisonFailed(key: String, value: List<String>, comparison: Any) {
-    AnsiConsole.out().println(Ansi.ansi().a("        \"").bold().a(key).boldOff().a("\" with value \"")
-      .bold()
-      .a(value.joinToString(", ")).boldOff().a("\" (").fg(Ansi.Color.RED).a("FAILED").reset().a(")"))
+    println("        \"${t.bold(key)}\" with value \"${t.bold(value.joinToString(", "))}\" " +
+      "(${t.red("FAILED")})")
   }
 
   override fun bodyComparisonOk() {
-    AnsiConsole.out().println(Ansi.ansi().a("      ").a("has a matching body").a(" (")
-      .fg(Ansi.Color.GREEN).a("OK").reset().a(")"))
+    println("      has a matching body (${t.green("OK")})")
   }
 
   override fun bodyComparisonFailed(comparison: Any) {
-    AnsiConsole.out().println(Ansi.ansi().a("      ").a("has a matching body").a(" (")
-      .fg(Ansi.Color.RED).a("FAILED").reset().a(")"))
+    println("      has a matching body (${t.red("FAILED")})")
   }
 
   override fun errorHasNoAnnotatedMethodsFoundForInteraction(interaction: Interaction) { }
 
   override fun verificationFailed(interaction: Interaction, e: Exception, printStackTrace: Boolean) {
-    AnsiConsole.out().println(Ansi.ansi().a("      ").fg(Ansi.Color.RED).a("Verification Failed - ")
-      .a(e.message).reset())
+    println("      ${t.red("Verification Failed - ${e.message}")}")
     if (printStackTrace) {
       e.printStackTrace()
     }
   }
 
   override fun generatesAMessageWhich() {
-    AnsiConsole.out().println("    generates a message which")
+    println("    generates a message which")
   }
 
   override fun displayFailures(failures: Map<String, Any>) {
-    AnsiConsole.out().println("\nFailures:\n")
+    println("\nFailures:\n")
     failures.entries.forEachIndexed { i, err ->
-      AnsiConsole.out().println("$i) ${err.key}")
+      println("$i) ${err.key}")
       when {
         err.value is Throwable -> displayError(err.value as Throwable)
         err.value is Map<*, *> && (err.value as Map<*, *>).containsKey("comparison") &&
           (err.value as Map<*, *>)["comparison"] is Map<*, *> -> displayDiff(err.value as Map<String, Any>)
-        err.value is String -> AnsiConsole.out().println("      ${err.value}")
+        err.value is String -> println("      ${err.value}")
         err.value is Map<*, *> -> (err.value as Map<*, *>).forEach { (key, message) ->
-          AnsiConsole.out().println("      $key -> $message")
+          println("      $key -> $message")
         }
-        else -> AnsiConsole.out().println("      $err")
+        else -> println("      $err")
       }
-      AnsiConsole.out().println()
+      println()
     }
+  }
+
+  override fun displayFailures(failures: List<VerificationResult.Failed>) {
+    println(failuresToString(failures))
+  }
+
+  fun failuresToString(failures: List<VerificationResult.Failed>): String {
+    val nonPending = failures.filterNot { it.pending }
+    val pending = failures.filter { it.pending }
+
+    val s = StringBuilder()
+    if (pending.isNotEmpty()) {
+      s.append("\nPending Failures:\n\n")
+      pending.forEachIndexed { i, err -> s.append(failure(i, err)) }
+    }
+
+    if (nonPending.isNotEmpty()) {
+      s.append("\nFailures:\n\n")
+      nonPending.forEachIndexed { i, err -> s.append(failure(i, err)) }
+    }
+
+    return s.toString()
+  }
+
+  private fun failure(i: Int, err: VerificationResult.Failed): String {
+    val s = StringBuilder()
+
+    s.append("${i + 1}) ${err.verificationDescription}\n\n")
+    err.failures.forEachIndexed { index, failure ->
+      s.append("    ${i + 1}.${index + 1}) ${failure.formatForDisplay(t)}\n\n")
+
+      if (failure.hasException() && verifier.projectHasProperty.apply("pact.showStacktrace")) {
+        for (line in ExceptionUtils.getStackFrames(failure.getException()!!)) {
+          s.append("      $line\n")
+        }
+        s.append('\n')
+      }
+    }
+
+    return s.toString()
   }
 
   override fun reportVerificationNoticesForConsumer(
@@ -221,68 +249,71 @@ class AnsiConsoleReporter(
     provider: IProviderInfo,
     notices: List<VerificationNotice>
   ) {
-    AnsiConsole.out().println("  Notices:")
-    notices.forEachIndexed { i, notice -> AnsiConsole.out().println("    ${i + 1}) ${notice.text}") }
-    AnsiConsole.out().println()
+    println("\n  Notices:")
+    notices.forEachIndexed { i, notice -> println("    ${i + 1}) ${notice.text}") }
+    println()
+  }
+
+  override fun warnPublishResultsSkippedBecauseFiltered() {
+    println(t.yellow("\nNOTE: Skipping publishing of verification results as the interactions have been filtered\n"))
+  }
+
+  override fun warnPublishResultsSkippedBecauseDisabled(envVar: String) {
+    println(t.yellow("\nNOTE: Skipping publishing of verification results as it has been disabled " +
+      "($envVar is not 'true')\n"))
   }
 
   @Suppress("ComplexMethod", "NestedBlockDepth")
   private fun displayDiff(diff: Map<String, Any>) {
     (diff["comparison"] as Map<String, List<Map<String, Any>>>).forEach { (key, messageAndDiff) ->
       messageAndDiff.forEach { mismatch ->
-        AnsiConsole.out().println("      $key -> ${mismatch["mismatch"]}")
-        AnsiConsole.out().println()
+        println("      $key -> ${mismatch["mismatch"]}")
+        println()
 
         val mismatchDiff = if (mismatch["diff"] is List<*>) mismatch["diff"] as List<String>
           else listOf(mismatch["diff"].toString())
         if (mismatchDiff.any { it.isNotEmpty() }) {
-          AnsiConsole.out().println("        Diff:")
-          AnsiConsole.out().println()
+          println("        Diff:")
+          println()
 
           mismatchDiff.filter { it.isNotEmpty() }.forEach {
             it.split('\n').forEach { delta ->
               when {
-                delta.startsWith('@') -> AnsiConsole.out().println(Ansi.ansi().a("        ")
-                  .fg(Ansi.Color.CYAN).a(delta).reset())
-                delta.startsWith('-') -> AnsiConsole.out().println(Ansi.ansi().a("        ")
-                  .fg(Ansi.Color.RED).a(delta).reset())
-                delta.startsWith('+') -> AnsiConsole.out().println(Ansi.ansi().a("        ")
-                  .fg(Ansi.Color.GREEN).a(delta).reset())
-                else -> AnsiConsole.out().println("        $delta")
+                delta.startsWith('@') -> println("        ${t.cyan(delta)}")
+                delta.startsWith('-') -> println("        ${t.red(delta)}")
+                delta.startsWith('+') -> println("        ${t.green(delta)}")
+                else -> println("        $delta")
               }
             }
-            AnsiConsole.out().println()
+            println()
           }
         }
       }
     }
 
     if (displayFullDiff) {
-      AnsiConsole.out().println("      Full Diff:")
-      AnsiConsole.out().println()
+      println("      Full Diff:")
+      println()
 
       (diff["diff"] as List<String>).forEach { delta ->
         when {
-          delta.startsWith('@') -> AnsiConsole.out().println(Ansi.ansi().a("      ")
-            .fg(Ansi.Color.CYAN).a(delta).reset())
-          delta.startsWith('-') -> AnsiConsole.out().println(Ansi.ansi().a("      ")
-            .fg(Ansi.Color.RED).a(delta).reset())
-          delta.startsWith('+') -> AnsiConsole.out().println(Ansi.ansi().a("      ")
-            .fg(Ansi.Color.GREEN).a(delta).reset())
-          else -> AnsiConsole.out().println("      $delta")
+          delta.startsWith('@') -> println("        ${t.cyan(delta)}")
+          delta.startsWith('-') -> println("        ${t.red(delta)}")
+          delta.startsWith('+') -> println("        ${t.green(delta)}")
+          else -> println("      $delta")
         }
       }
-      AnsiConsole.out().println()
+      println()
     }
   }
 
   private fun displayError(err: Throwable) {
     if (!err.message.isNullOrEmpty()) {
       err.message!!.split('\n').forEach {
-        AnsiConsole.out().println("      $it")
+        println("      $it")
       }
     } else {
-      AnsiConsole.out().println("      ${err.javaClass.name}")
+      println("      ${err.javaClass.name}")
     }
   }
 }

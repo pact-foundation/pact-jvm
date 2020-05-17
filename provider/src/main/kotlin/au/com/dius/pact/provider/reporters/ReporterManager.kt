@@ -1,5 +1,6 @@
 package au.com.dius.pact.provider.reporters
 
+import au.com.dius.pact.provider.IProviderVerifier
 import java.io.File
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.full.memberProperties
@@ -20,7 +21,7 @@ object ReporterManager {
   @JvmStatic
   @JvmOverloads
   @Suppress("TooGenericExceptionCaught", "TooGenericExceptionThrown", "ThrowsCount")
-  fun createReporter(name: String, reportDir: File? = null): VerifierReporter {
+  fun createReporter(name: String, reportDir: File? = null, verifier: IProviderVerifier? = null): VerifierReporter {
     val reporter: VerifierReporter = if (reporterDefined(name)) {
       try {
         REPORTERS[name]!!.constructors.first { it.parameters.size == 2 }.call(name, reportDir)
@@ -38,16 +39,19 @@ object ReporterManager {
 
         require(instance is VerifierReporter) { "Reporter with name '$name' does not implement VerifierReporter" }
 
-        instance
+        instance as VerifierReporter
       } catch (e: Exception) {
         throw IllegalArgumentException("No reporter with class '$name' defined. Verifier reporters must have a " +
           "constructor that accepts two parameters: (name: String, reportDir: File)", e)
-      } as VerifierReporter
+      }
     }
 
     val nameProp = reporter::class.memberProperties.find { it.name == "name" }
     if (nameProp is KMutableProperty1<*, *>) {
       (nameProp as KMutableProperty1<Any, String>).set(reporter, name)
+    }
+    if (verifier != null) {
+      reporter.verifier = verifier
     }
     return reporter
   }

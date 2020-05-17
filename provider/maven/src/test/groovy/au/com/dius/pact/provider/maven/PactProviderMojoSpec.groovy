@@ -31,7 +31,8 @@ class PactProviderMojoSpec extends Specification {
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBroker([:], 'http://broker:1234') >> [ new Consumer(name: 'test consumer') ]
+    1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', []) >>
+      [ new Consumer(name: 'test consumer') ]
     list.size() == 1
     list[0].name == 'test consumer'
   }
@@ -46,7 +47,7 @@ class PactProviderMojoSpec extends Specification {
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBroker([:], 'http://broker:1234') >> [ new Consumer() ]
+    1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', []) >> [ new Consumer() ]
     list
   }
 
@@ -60,7 +61,7 @@ class PactProviderMojoSpec extends Specification {
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBroker([:], 'http://broker:1234') >> [ new Consumer() ]
+    1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', []) >> [ new Consumer() ]
     list
   }
 
@@ -69,12 +70,13 @@ class PactProviderMojoSpec extends Specification {
     def provider = Spy(new Provider('TestProvider', null as File, null as URL,
       new PactBroker(new URL('http://broker:1234'), null, new PactBrokerAuth('basic', null, 'test', 'test'), null)))
     def list = []
+    def map = [authentication: ['basic', 'test', 'test']]
 
     when:
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBroker([authentication: ['basic', 'test', 'test']], 'http://broker:1234') >> [
+    1 * provider.hasPactsFromPactBrokerWithSelectors(map, 'http://broker:1234', []) >> [
       new Consumer()
     ]
     list
@@ -85,12 +87,13 @@ class PactProviderMojoSpec extends Specification {
     def provider = Spy(new Provider('TestProvider', null as File, null as URL,
       new PactBroker(new URL('http://broker:1234'), null, new PactBrokerAuth('bearer', 'test', null, null), null)))
     def list = []
+    def map = [authentication: ['bearer', 'test']]
 
     when:
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBroker([authentication: ['bearer', 'test']], 'http://broker:1234') >> [
+    1 * provider.hasPactsFromPactBrokerWithSelectors(map, 'http://broker:1234', []) >> [
             new Consumer()
     ]
     list
@@ -102,12 +105,13 @@ class PactProviderMojoSpec extends Specification {
       new PactBroker(new URL('http://broker:1234'), null,
         new PactBrokerAuth(null, 'test', null, null), null)))
     def list = []
+    def map = [authentication: ['bearer', 'test']]
 
     when:
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBroker([authentication: ['bearer', 'test']], 'http://broker:1234') >> [
+    1 * provider.hasPactsFromPactBrokerWithSelectors(map, 'http://broker:1234', []) >> [
             new Consumer()
     ]
     list
@@ -118,16 +122,13 @@ class PactProviderMojoSpec extends Specification {
     def provider = Spy(new Provider('TestProvider', null as File, null as URL,
       new PactBroker(new URL('http://broker:1234'), ['1', '2', '3'], null, null)))
     def list = []
+    def selectors = ['1', '2', '3'].collect { new ConsumerVersionSelector(it, true) }
 
     when:
     mojo.loadPactsFromPactBroker(provider, list, [:])
 
     then:
-    1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', [
-            new ConsumerVersionSelector('1', true),
-            new ConsumerVersionSelector('2', true),
-            new ConsumerVersionSelector('3', true)
-    ]) >> [new Consumer()]
+    1 * provider.hasPactsFromPactBrokerWithSelectors([:], 'http://broker:1234', selectors) >> [new Consumer()]
     list.size() == 1
   }
 
@@ -149,8 +150,8 @@ class PactProviderMojoSpec extends Specification {
     then:
     1 * settings.getServer('test-server') >> serverDetails
     1 * decrypter.decrypt({ it.servers == [serverDetails] }) >> decryptResult
-    1 * provider.hasPactsFromPactBroker([authentication: ['basic', 'MavenTest', 'MavenPassword']],
-      'http://broker:1234') >> [
+    1 * provider.hasPactsFromPactBrokerWithSelectors([authentication: ['basic', 'MavenTest', 'MavenPassword']],
+      'http://broker:1234', []) >> [
       new Consumer()
     ]
     list
@@ -166,9 +167,40 @@ class PactProviderMojoSpec extends Specification {
     mojo.loadPactsFromPactBroker(provider, list, [authentication: ['bearer', '1234']])
 
     then:
-    1 * provider.hasPactsFromPactBroker([authentication: ['bearer', '1234']],
-      'http://broker:1235') >> [ new Consumer() ]
+    1 * provider.hasPactsFromPactBrokerWithSelectors([authentication: ['bearer', '1234']],
+      'http://broker:1235', []) >> [ new Consumer() ]
     list
+  }
+
+  def 'configures pending pacts if the option is set'() {
+    given:
+    def provider = Spy(new Provider('TestProvider', null as File, null as URL,
+      new PactBroker(new URL('http://broker:1234'), ['1', '2', '3'], null, null,
+        new EnablePending(['master']))))
+    def list = []
+    def selectors = ['1', '2', '3'].collect { new ConsumerVersionSelector(it, true) }
+    def map = [enablePending: true, providerTags: ['master']]
+
+    when:
+    mojo.loadPactsFromPactBroker(provider, list, [:])
+
+    then:
+    1 * provider.hasPactsFromPactBrokerWithSelectors(map, 'http://broker:1234', selectors) >> [new Consumer()]
+    list.size() == 1
+  }
+
+  def 'throws an exception if pending pacts enabled and there are no provider tags'() {
+    given:
+    def provider = Spy(new Provider('TestProvider', null as File, null as URL,
+      new PactBroker(new URL('http://broker:1234'), ['1', '2', '3'], null, null,
+        new EnablePending([]))))
+    def list = []
+
+    when:
+    mojo.loadPactsFromPactBroker(provider, list, [:])
+
+    then:
+    thrown(MojoFailureException)
   }
 
   def 'load pacts from multiple directories'() {
@@ -179,7 +211,7 @@ class PactProviderMojoSpec extends Specification {
     def provider = new Provider('TestProvider', dir3, null, null)
     provider.pactFileDirectories =  [dir1, dir2]
     def verifier = Mock(IProviderVerifier) {
-      verifyProvider(provider) >> [:]
+      verifyProviderReturnResult(provider) >> []
     }
     mojo = Spy(PactProviderMojo) {
       loadPactFiles(provider, _) >> []
@@ -224,7 +256,7 @@ class PactProviderMojoSpec extends Specification {
     given:
     def provider = new Provider('TestProvider', 'dir' as File, null, null)
     def verifier = Mock(IProviderVerifier) {
-      verifyProvider(provider) >> [:]
+      verifyProviderReturnResult(provider) >> []
     }
     mojo = Spy(PactProviderMojo) {
       loadPactFiles(provider, _) >> []
@@ -247,7 +279,7 @@ class PactProviderMojoSpec extends Specification {
     given:
     def provider = new Provider('TestProvider', 'dir' as File, null, null)
     def verifier = Mock(IProviderVerifier) {
-      verifyProvider(provider) >> [:]
+      verifyProviderReturnResult(provider) >> []
     }
     mojo = Spy(PactProviderMojo) {
       loadPactFiles(provider, _) >> []
@@ -272,7 +304,7 @@ class PactProviderMojoSpec extends Specification {
     given:
     def provider = new Provider('TestProvider', 'dir1' as File, null, null)
     def verifier = Mock(IProviderVerifier) {
-      verifyProvider(provider) >> [:]
+      verifyProviderReturnResult(provider) >> []
     }
     mojo = Spy(PactProviderMojo) {
       loadPactFiles(provider, _) >> []

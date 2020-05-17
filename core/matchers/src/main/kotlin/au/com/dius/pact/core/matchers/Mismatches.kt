@@ -1,5 +1,7 @@
 package au.com.dius.pact.core.matchers
 
+import com.github.ajalt.mordant.TermColors
+
 /**
  * Interface to a factory class to create a mismatch
  *
@@ -11,10 +13,14 @@ interface MismatchFactory<out M : Mismatch> {
 
 sealed class Mismatch {
   open fun description() = this.toString()
+  open fun description(t: TermColors) = this.description()
+  fun type() = this::class.java.simpleName
 }
 
 data class StatusMismatch(val expected: Int, val actual: Int) : Mismatch() {
   override fun description() = "expected status of $expected but was $actual"
+  override fun description(t: TermColors) =
+    "expected status of ${t.bold(expected.toString())} but was ${t.bold(actual.toString())}"
   fun toMap(): Map<String, Any?> {
     return mapOf("mismatch" to description())
   }
@@ -22,6 +28,8 @@ data class StatusMismatch(val expected: Int, val actual: Int) : Mismatch() {
 
 data class BodyTypeMismatch(val expected: String?, val actual: String?) : Mismatch() {
   override fun description() = "Expected a response type of '$expected' but the actual type was '$actual'"
+  override fun description(t: TermColors) =
+    "Expected a response type of ${t.bold("'$expected'")} but the actual type was ${t.bold("'$actual'")}"
   fun toMap(): Map<String, Any?> {
     return mapOf("mismatch" to description())
   }
@@ -66,7 +74,11 @@ data class HeaderMismatch(
   val actual: String,
   val mismatch: String
 ) : Mismatch() {
+  val regex = Regex("'[^']*'")
   override fun description() = mismatch
+  override fun description(t: TermColors): String {
+    return mismatch.replace(regex) { m -> t.bold(m.value) }
+  }
 
   fun merge(mismatch: HeaderMismatch): HeaderMismatch {
     return if (this.mismatch.isNotEmpty()) {

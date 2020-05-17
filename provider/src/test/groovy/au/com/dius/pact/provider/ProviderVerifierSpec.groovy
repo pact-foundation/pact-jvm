@@ -392,7 +392,7 @@ class ProviderVerifierSpec extends Specification {
     verifier.reporters = [reporter]
 
     when:
-    def result = verifier.verifyMessagePact(methods, message, interactionMessage, failures)
+    def result = verifier.verifyMessagePact(methods, message, interactionMessage, failures, false)
 
     then:
     1 * reporter.bodyComparisonOk()
@@ -433,16 +433,16 @@ class ProviderVerifierSpec extends Specification {
 
     then:
     1 * pactBrokerClient.publishVerificationResults(_, finalResult, '0.0.0', _)
-    1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _) >> result1
-    1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _) >> result2
+    1 * verifier.verifyResponseFromProvider(provider, interaction1, _, _, _, _, false) >> result1
+    1 * verifier.verifyResponseFromProvider(provider, interaction2, _, _, _, _, false) >> result2
 
     where:
 
-    result1                 | result2                 | finalResult
-    TestResult.Ok.INSTANCE  | TestResult.Ok.INSTANCE  | TestResult.Ok.INSTANCE
-    TestResult.Ok.INSTANCE  | new TestResult.Failed() | new TestResult.Failed()
-    new TestResult.Failed() | TestResult.Ok.INSTANCE  | new TestResult.Failed()
-    new TestResult.Failed() | new TestResult.Failed() | new TestResult.Failed()
+    result1                         | result2                         | finalResult
+    VerificationResult.Ok.INSTANCE  | VerificationResult.Ok.INSTANCE  | TestResult.Ok.INSTANCE
+    VerificationResult.Ok.INSTANCE  | new VerificationResult.Failed() | new TestResult.Failed()
+    new VerificationResult.Failed() | VerificationResult.Ok.INSTANCE  | new TestResult.Failed()
+    new VerificationResult.Failed() | new VerificationResult.Failed() | new TestResult.Failed()
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -544,7 +544,7 @@ class ProviderVerifierSpec extends Specification {
     then:
     1 * verifier.pactReader.loadPact(_) >> pact
     1 * statechange.executeStateChange(_, _, _, _, _, _, _) >> new StateChangeResult(new Ok([:]), '')
-    1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _) >> TestResult.Ok.INSTANCE
+    1 * verifier.verifyResponseByInvokingProviderMethods(providerInfo, consumerInfo, interaction, _, _) >> VerificationResult.Ok.INSTANCE
     0 * client.publishVerificationResults(_, TestResult.Ok.INSTANCE, _, _)
   }
 
@@ -599,7 +599,7 @@ class ProviderVerifierSpec extends Specification {
     def result = verifier.verifyInteraction(provider, consumer, failures, interaction)
 
     then:
-    result instanceof TestResult.Failed
+    result instanceof VerificationResult.Failed
     result.results.size() == 1
     result.results[0].message == 'State change request failed'
     result.results[0].exception instanceof IOException
@@ -640,7 +640,7 @@ class ProviderVerifierSpec extends Specification {
     def result = verifier.verifyInteraction(provider, consumer, failures, interaction, client)
 
     then:
-    result instanceof TestResult.Failed
+    result instanceof VerificationResult.Failed
     result.results.size() == 1
     result.results[0].message == 'Request to provider failed with an exception'
     result.results[0].exception instanceof InvalidPathExpression
@@ -659,7 +659,7 @@ class ProviderVerifierSpec extends Specification {
 
     then:
     client.makeRequest(_) >> { throw new IOException('Boom!') }
-    result instanceof TestResult.Failed
+    result instanceof VerificationResult.Failed
     result.results.size() == 1
     result.results[0].message == 'Request to provider failed with an exception'
     result.results[0].exception instanceof IOException
@@ -680,7 +680,7 @@ class ProviderVerifierSpec extends Specification {
       interactionMessage, failures)
 
     then:
-    result instanceof TestResult.Failed
+    result instanceof VerificationResult.Failed
     result.results.size() == 1
     result.results[0].message == 'Request to provider method failed with an exception'
     result.results[0].exception instanceof Exception

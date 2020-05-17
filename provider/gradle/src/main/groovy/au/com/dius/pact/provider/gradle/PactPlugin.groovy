@@ -29,18 +29,20 @@ class PactPlugin implements Plugin<Project> {
           group: GROUP)
 
         project.afterEvaluate {
-            if (it.pact == null) {
-              throw new GradleScriptException('No pact block was found in the project', null)
-            } else if (!(it.pact instanceof PactPluginExtension)) {
-              throw new GradleScriptException('Your project is misconfigured, was expecting a \'pact\' configuration ' +
-                "in the build, but got a ${it.pact.class.simpleName} with value '${it.pact}' instead. " +
-                'Make sure there is no property that is overriding \'pact\'.', null)
-            } else if (it.pact.serviceProviders.empty
-              && it.gradle.startParameter.taskNames.any { it.equalsIgnoreCase(PACT_VERIFY) }) {
-              throw new GradleScriptException('No service providers are configured', null)
-            }
+          if (it.pact == null) {
+            throw new GradleScriptException('No pact block was found in the project', null)
+          } else if (!(it.pact instanceof PactPluginExtension)) {
+            throw new GradleScriptException('Your project is misconfigured, was expecting a \'pact\' configuration ' +
+              "in the build, but got a ${it.pact.class.simpleName} with value '${it.pact}' instead. " +
+              'Make sure there is no property that is overriding \'pact\'.', null)
+          } else if (it.pact.serviceProviders.empty
+            && it.gradle.startParameter.taskNames.any { it.equalsIgnoreCase(PACT_VERIFY) }) {
+            throw new GradleScriptException('No service providers are configured', null)
+          }
 
-            it.pact.serviceProviders.all { ProviderInfo provider ->
+          it.pact.serviceProviders.all { ProviderInfo provider ->
+            setupPactConsumersFromBroker(provider, project, it.pact)
+
                 def taskName = {
                   def defaultName = "pactVerify_${provider.name.replaceAll(/\s+/, '_')}".toString()
                   try {
@@ -85,4 +87,27 @@ class PactPlugin implements Plugin<Project> {
             }
         }
     }
+
+  @SuppressWarnings('CatchRuntimeException')
+  private void setupPactConsumersFromBroker(ProviderInfo provider, Project project, PactPluginExtension ext) {
+    if (provider.brokerConfig && project.gradle.startParameter.taskNames.any { it.equalsIgnoreCase(PACT_VERIFY) }) {
+      def options = [:]
+      if (ext.broker.pactBrokerUsername) {
+        options.authentication = ['basic', ext.broker.pactBrokerUsername, ext.broker.pactBrokerPassword]
+      } else if (ext.broker.pactBrokerToken) {
+        options.authentication = ['bearer', ext.broker.pactBrokerToken]
+      }
+      if (provider.brokerConfig.enablePending) {
+        options.enablePending = true
+        options.providerTags = provider.brokerConfig.providerTags
+      }
+      try {
+        provider.consumers = provider.hasPactsFromPactBrokerWithSelectors(options, ext.broker.pactBrokerUrl,
+          provider.brokerConfig.selectors)
+      } catch (RuntimeException ex) {
+        throw new GradleScriptException("Failed to fetch pacts from pact broker ${ext.broker.pactBrokerUrl}",
+          ex)
+      }
+    }
+  }
 }

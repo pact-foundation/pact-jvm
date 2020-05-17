@@ -2,7 +2,6 @@ package au.com.dius.pact.provider.junitsupport.loader
 
 import arrow.core.Either
 import au.com.dius.pact.core.model.BrokerUrlSource
-import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
@@ -10,6 +9,7 @@ import au.com.dius.pact.core.model.PactBrokerSource
 import au.com.dius.pact.core.model.PactReader
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
+import au.com.dius.pact.core.pactbroker.IPactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.support.expressions.DataType
 import au.com.dius.pact.core.support.expressions.ExpressionParser.parseExpression
@@ -17,7 +17,6 @@ import au.com.dius.pact.core.support.expressions.ExpressionParser.parseListExpre
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.isNotEmpty
-import au.com.dius.pact.provider.ConsumerInfo
 import mu.KLogging
 import org.apache.http.client.utils.URIBuilder
 import java.io.IOException
@@ -38,10 +37,11 @@ open class PactBrokerLoader(
   var failIfNoPactsFound: Boolean = true,
   var authentication: PactBrokerAuth?,
   var valueResolverClass: KClass<out ValueResolver>?,
-  valueResolver: ValueResolver? = null
+  valueResolver: ValueResolver? = null,
+  val enablePendingPacts: String = "false",
+  val providerTags: List<String> = emptyList()
 ) : OverrideablePactLoader {
 
-  private var pacts: MutableMap<Consumer, MutableList<Pact<Interaction>>> = mutableMapOf()
   private var resolver: ValueResolver? = valueResolver
   private var overriddenPactUrl: String? = null
   private var overriddenConsumer: String? = null
@@ -56,7 +56,10 @@ open class PactBrokerLoader(
     pactBroker.consumers.toList(),
     true,
     pactBroker.authentication,
-    pactBroker.valueResolver
+    pactBroker.valueResolver,
+    null,
+    pactBroker.enablePendingPacts,
+    pactBroker.providerTags.toList()
   )
 
   override fun description(): String {
@@ -78,30 +81,26 @@ open class PactBrokerLoader(
     overriddenConsumer = consumer
   }
 
-  override fun load(providerName: String): List<Pact<Interaction>> {
+  override fun load(providerName: String): List<Pact<*>> {
     val resolver = setupValueResolver()
-    val pacts = when {
+    return when {
       overriddenPactUrl.isNotEmpty() -> {
         val brokerUri = brokerUrl(resolver).build()
         val pactBrokerClient = newPactBrokerClient(brokerUri, resolver)
-        val pactSource = BrokerUrlSource(overriddenPactUrl!!, brokerUri.toString())
+        val pactSource = BrokerUrlSource(overriddenPactUrl!!, brokerUri.toString(), options = pactBrokerClient.options)
         pactSource.encodePath = false
-        listOf(loadPact(ConsumerInfo(name = overriddenConsumer!!, pactSource = pactSource),
-          pactBrokerClient.options))
+        listOf(pactReader.loadPact(pactSource, pactBrokerClient.options))
       }
-      pactBrokerTags.isNullOrEmpty() -> loadPactsForProvider(providerName, null, resolver)
       else -> {
-        pactBrokerTags.flatMap { parseListExpression(it, resolver) }.flatMap {
-          try {
-            loadPactsForProvider(providerName, it, resolver)
-          } catch (e: NoPactsFoundException) {
-            // Ignoring exception at this point, it will be handled at a higher level
-            emptyList<Pact<Interaction>>()
-          }
+        try {
+          val tags = pactBrokerTags.orEmpty().flatMap { parseListExpression(it, resolver) }
+          loadPactsForProvider(providerName, tags, resolver)
+        } catch (e: NoPactsFoundException) {
+          // Ignoring exception at this point, it will be handled at a higher level
+          emptyList<Pact<Interaction>>()
         }
       }
     }
-    return pacts
   }
 
   private fun setupValueResolver(): ValueResolver {
@@ -132,27 +131,33 @@ open class PactBrokerLoader(
   @Throws(IOException::class, IllegalArgumentException::class)
   private fun loadPactsForProvider(
     providerName: String,
-    tag: String?,
+    tags: List<String>,
     resolver: ValueResolver
-  ): List<Pact<Interaction>> {
-    logger.debug { "Loading pacts from pact broker for provider $providerName and tag $tag" }
+  ): List<Pact<*>> {
+    logger.debug { "Loading pacts from pact broker for provider $providerName and tags $tags" }
+    val pending = parseExpression(enablePendingPacts, DataType.BOOLEAN, resolver) as Boolean
+    val providerTags = providerTags.flatMap { parseListExpression(it, resolver) }.filter { it.isNotEmpty() }
+    if (pending && providerTags.none { it.isNotEmpty() }) {
+      throw IllegalArgumentException("Pending pacts feature has been enabled, but no provider tags have been " +
+        "specified. To use the pending pacts feature, you need to provide the list of provider names for the " +
+        "provider application version with the providerTags property that will be published with the verification " +
+        "results.")
+    }
+
     val uriBuilder = brokerUrl(resolver)
     try {
-      var consumers: List<ConsumerInfo> = emptyList()
       val pactBrokerClient = newPactBrokerClient(uriBuilder.build(), resolver)
-      val result = if (tag.isNullOrEmpty() || tag == "latest") {
-        pactBrokerClient.fetchConsumersWithSelectors(providerName)
-      } else {
-        pactBrokerClient.fetchConsumersWithSelectors(providerName, listOf(ConsumerVersionSelector(tag)))
-      }
-      when (result) {
-        is Either.Right -> consumers = result.b.map { ConsumerInfo.from(it) }
+      val selectors = tags.map { ConsumerVersionSelector(it) }
+
+      val result = pactBrokerClient.fetchConsumersWithSelectors(providerName, selectors, providerTags, pending)
+      var consumers = when (result) {
+        is Either.Right -> result.b
         is Either.Left -> throw result.a
       }
 
       if (failIfNoPactsFound && consumers.isEmpty()) {
-        throw NoPactsFoundException("No consumer pacts were found for provider '" + providerName + "' and tag '" +
-          tag + "'. (URL " + getUrlForProvider(providerName, tag.orEmpty(), pactBrokerClient) + ")")
+        throw NoPactsFoundException("No consumer pacts were found for provider '" + providerName + "' and tags '" +
+          tags + "'. (URL " + getUrlForProvider(providerName, pactBrokerClient) + ")")
       }
 
       if (pactBrokerConsumers.isNotEmpty()) {
@@ -160,7 +165,7 @@ open class PactBrokerLoader(
         consumers = consumers.filter { consumerInclusions.isEmpty() || consumerInclusions.contains(it.name) }
       }
 
-      return consumers.map { loadPact(it, pactBrokerClient.options) }
+      return consumers.map { pactReader.loadPact(it, pactBrokerClient.options) }
     } catch (e: URISyntaxException) {
       throw IOException("Was not able load pacts from broker as the broker URL was invalid", e)
     }
@@ -192,32 +197,23 @@ open class PactBrokerLoader(
     }
 
     return if (scheme == null) {
-      PactBrokerSource(host, port, pacts = pacts)
+      PactBrokerSource(host, port)
     } else {
-      PactBrokerSource(host, port, scheme, pacts)
+      PactBrokerSource(host, port, scheme)
     }
   }
 
   @Suppress("TooGenericExceptionCaught")
-  private fun getUrlForProvider(providerName: String, tag: String, pactBrokerClient: PactBrokerClient): String {
+  private fun getUrlForProvider(providerName: String, pactBrokerClient: IPactBrokerClient): String {
     return try {
-      pactBrokerClient.getUrlForProvider(providerName, tag) ?: "Unknown"
+      pactBrokerClient.getUrlForProvider(providerName, "") ?: "Unknown"
     } catch (e: Exception) {
       logger.debug(e) { "Failed to get provider URL from the pact broker" }
       "Unknown"
     }
   }
 
-  open fun loadPact(consumer: ConsumerInfo, options: Map<String, Any>): Pact<Interaction> {
-    val pact = pactReader.loadPact(consumer.pactSource!!, options) as Pact<Interaction>
-    val pactConsumer = consumer.toPactConsumer()
-    val pactList = pacts.getOrDefault(pactConsumer, mutableListOf())
-    pactList.add(pact)
-    pacts[pactConsumer] = pactList
-    return pact
-  }
-
-  open fun newPactBrokerClient(url: URI, resolver: ValueResolver): PactBrokerClient {
+  open fun newPactBrokerClient(url: URI, resolver: ValueResolver): IPactBrokerClient {
     if (authentication == null) {
       logger.debug { "Authentication: None" }
       return PactBrokerClient(url.toString(), emptyMap())

@@ -1,24 +1,29 @@
 package au.com.dius.pact.provider.junit5
 
+import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.RequestResponseInteraction
-import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
+import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
+import au.com.dius.pact.core.support.unwrapOr
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.DefaultTestResultAccumulator
+import au.com.dius.pact.provider.IConsumerInfo
+import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.PactVerification
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
-import au.com.dius.pact.provider.TestResultAccumulator
+import au.com.dius.pact.provider.StateChangeResult
+import au.com.dius.pact.provider.VerificationFailureType
+import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junitsupport.AllowOverridePactUrl
 import au.com.dius.pact.provider.junitsupport.Consumer
 import au.com.dius.pact.provider.junitsupport.IgnoreNoPactsToVerify
-import au.com.dius.pact.provider.junitsupport.JUnitProviderTestSupport
 import au.com.dius.pact.provider.junitsupport.JUnitProviderTestSupport.checkForOverriddenPactUrl
 import au.com.dius.pact.provider.junitsupport.JUnitProviderTestSupport.filterPactsByAnnotations
 import au.com.dius.pact.provider.junitsupport.MissingStateChangeMethod
@@ -30,6 +35,7 @@ import au.com.dius.pact.provider.junitsupport.loader.NoPactsFoundException
 import au.com.dius.pact.provider.junitsupport.loader.PactLoader
 import au.com.dius.pact.provider.junitsupport.loader.PactSource
 import au.com.dius.pact.provider.reporters.ReporterManager
+import com.github.michaelbull.result.Err
 import mu.KLogging
 import org.apache.http.HttpRequest
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
@@ -50,6 +56,8 @@ import java.util.stream.Stream
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 
+val namespace: ExtensionContext.Namespace = ExtensionContext.Namespace.create("pact-jvm")
+
 /**
  * The instance that holds the context for the test of an interaction. The test target will need to be set on it in
  * the before each phase of the test, and the verifyInteraction method must be called in the test template method.
@@ -60,10 +68,10 @@ data class PactVerificationContext @JvmOverloads constructor(
   var target: TestTarget = HttpTestTarget(port = 8080),
   var verifier: IProviderVerifier? = null,
   var valueResolver: ValueResolver = SystemPropertyResolver(),
-  var providerInfo: ProviderInfo = ProviderInfo(),
-  val consumerName: String,
+  var providerInfo: IProviderInfo,
+  val consumer: IConsumerInfo,
   val interaction: Interaction,
-  var testExecutionResult: TestResult = TestResult.Ok
+  var testExecutionResult: MutableList<VerificationResult.Failed> = mutableListOf()
 ) {
   val stateChangeHandlers: MutableList<Any> = mutableListOf()
   var executionContext: Map<String, Any>? = null
@@ -74,16 +82,16 @@ data class PactVerificationContext @JvmOverloads constructor(
    * @throws AssertionError Throws an assertion error if the verification fails.
    */
   fun verifyInteraction() {
-    val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
+    val store = context.getStore(namespace)
     val client = store.get("client")
     val request = store.get("request")
     val testContext = store.get("interactionContext") as PactVerificationContext
-    val failures = mutableMapOf<String, Any>()
     try {
-      this.testExecutionResult = validateTestExecution(client, request, failures, testContext.executionContext ?: emptyMap())
-      if (testExecutionResult is TestResult.Failed) {
-        verifier!!.displayFailures(failures)
-        throw AssertionError(JUnitProviderTestSupport.generateErrorStringFromMismatches(failures))
+      this.testExecutionResult.addAll(validateTestExecution(client, request, testContext.executionContext ?: emptyMap())
+        .filterIsInstance<VerificationResult.Failed>())
+      if (testExecutionResult.isNotEmpty()) {
+        verifier!!.displayFailures(testExecutionResult)
+        throw AssertionError(verifier!!.generateErrorStringFromVerificationResult(testExecutionResult))
       }
     } finally {
       verifier!!.finaliseReports()
@@ -93,32 +101,31 @@ data class PactVerificationContext @JvmOverloads constructor(
   private fun validateTestExecution(
     client: Any?,
     request: Any?,
-    failures: MutableMap<String, Any>,
     context: Map<String, Any>
-  ): TestResult {
+  ): List<VerificationResult> {
     if (providerInfo.verificationType == null || providerInfo.verificationType == PactVerification.REQUEST_RESPONSE) {
-      val interactionMessage = "Verifying a pact between $consumerName and ${providerInfo.name}" +
+      val interactionMessage = "Verifying a pact between ${consumer.name} and ${providerInfo.name}" +
         " - ${interaction.description}"
       return try {
         val reqResInteraction = interaction as RequestResponseInteraction
         val expectedResponse = reqResInteraction.response.generatedResponse(context)
         val actualResponse = target.executeInteraction(client, request)
 
-        verifier!!.verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures,
-          reqResInteraction.interactionId.orEmpty())
+        listOf(verifier!!.verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, mutableMapOf(),
+          reqResInteraction.interactionId.orEmpty(), consumer.pending))
       } catch (e: Exception) {
-        failures[interactionMessage] = e
         verifier!!.reporters.forEach {
           it.requestFailed(providerInfo, interaction, interactionMessage, e,
             verifier!!.projectHasProperty.apply(ProviderVerifier.PACT_SHOW_STACKTRACE))
         }
-        TestResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
+        listOf(VerificationResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
           "exception" to e, "interactionId" to interaction.interactionId)),
-          "Request to provider failed with an exception")
+          "Request to provider failed with an exception", interactionMessage,
+          listOf(VerificationFailureType.ExceptionFailure(e))))
       }
     } else {
-      return verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, ConsumerInfo(consumerName), interaction,
-        interaction.description, failures)
+      return listOf(verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, consumer, interaction,
+        interaction.description, mutableMapOf()))
     }
   }
 
@@ -147,11 +154,19 @@ class PactVerificationExtension(
   private val testResultAccumulator = DefaultTestResultAccumulator
 
   override fun getDisplayName(invocationIndex: Int): String {
-    return "${pact.consumer.name} - ${interaction.description}"
+    return when {
+      pactSource is BrokerUrlSource && pactSource.result != null -> if (pactSource.result!!.pending) {
+        pactSource.result!!.name + " [PENDING]"
+      } else {
+        pactSource.result!!.name
+      }
+      pactSource is BrokerUrlSource && pactSource.tag.isNotEmpty() -> "${pact.consumer.name} - ${interaction.description} (tag ${pactSource.tag})"
+      else -> "${pact.consumer.name} - ${interaction.description}"
+    }
   }
 
   override fun getAdditionalExtensions(): MutableList<Extension> {
-    return mutableListOf(PactVerificationStateChangeExtension(pact, interaction, testResultAccumulator), this)
+    return mutableListOf(PactVerificationStateChangeExtension(interaction, pactSource), this)
   }
 
   override fun supportsParameter(parameterContext: ParameterContext, extensionContext: ExtensionContext): Boolean {
@@ -180,13 +195,16 @@ class PactVerificationExtension(
   }
 
   override fun beforeEach(context: ExtensionContext) {
-    val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
-    store.put("interactionContext", PactVerificationContext(store, context, consumerName = pact.consumer.name,
-      interaction = interaction))
+    val store = context.getStore(namespace)
+    val pending = pactSource is BrokerUrlSource && pactSource.result?.pending == true
+    val verificationContext = PactVerificationContext(store, context,
+      consumer = ConsumerInfo(pact.consumer.name, pactSource = pactSource, pending = pending),
+      interaction = interaction, providerInfo = ProviderInfo(serviceName))
+    store.put("interactionContext", verificationContext)
   }
 
   override fun beforeTestExecution(context: ExtensionContext) {
-    val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
+    val store = context.getStore(namespace)
     val testContext = store.get("interactionContext") as PactVerificationContext
 
     val providerInfo = testContext.target.getProviderInfo(serviceName, pactSource)
@@ -207,7 +225,11 @@ class PactVerificationExtension(
   }
 
   private fun prepareVerifier(testContext: PactVerificationContext, extContext: ExtensionContext, pactSource: au.com.dius.pact.core.model.PactSource) {
-    val consumer = ConsumerInfo(consumerName ?: pact.consumer.name)
+    val consumer = when {
+      pactSource is BrokerUrlSource && pactSource.result != null -> ConsumerInfo(pactSource.result!!.name,
+        pactSource = pactSource, notices = pactSource.result!!.notices, pending = pactSource.result!!.pending)
+      else -> ConsumerInfo(consumerName ?: pact.consumer.name)
+    }
 
     val verifier = ProviderVerifier()
     testContext.target.prepareVerifier(verifier, extContext.requiredTestInstance)
@@ -256,7 +278,7 @@ class PactVerificationExtension(
       verifier.reporters = reports
         .filter { r -> r.isNotEmpty() }
         .map { r ->
-          val reporter = ReporterManager.createReporter(r.trim(), reportDir)
+          val reporter = ReporterManager.createReporter(r.trim(), reportDir, verifier)
           reporter.reportFile = File(reportDir, "$name - $description${reporter.ext}")
           reporter
         }
@@ -266,7 +288,7 @@ class PactVerificationExtension(
   override fun afterTestExecution(context: ExtensionContext) {
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val testContext = store.get("interactionContext") as PactVerificationContext
-    testResultAccumulator.updateTestResult(pact, interaction, testContext.testExecutionResult)
+    testResultAccumulator.updateTestResult(pact, interaction, testContext.testExecutionResult, pactSource)
   }
 
   companion object : KLogging()
@@ -276,9 +298,8 @@ class PactVerificationExtension(
  * JUnit 5 test extension class for executing state change callbacks
  */
 class PactVerificationStateChangeExtension(
-  private val pact: Pact<Interaction>,
   private val interaction: Interaction,
-  private val testResultAccumulator: TestResultAccumulator
+  private val pactSource: au.com.dius.pact.core.model.PactSource
 ) : BeforeTestExecutionCallback, AfterTestExecutionCallback {
   override fun beforeTestExecution(extensionContext: ExtensionContext) {
     logger.debug { "beforeEach for interaction '${interaction.description}'" }
@@ -290,10 +311,16 @@ class PactVerificationStateChangeExtension(
         interaction.providerStates, StateChangeAction.SETUP)
       testContext.executionContext = mapOf("providerState" to providerStateContext)
     } catch (e: Exception) {
+      val pending = pactSource is BrokerUrlSource && pactSource.result?.pending == true
       logger.error(e) { "Provider state change callback failed" }
-      testContext.testExecutionResult = TestResult.Failed(description = "Provider state change callback failed",
-        results = listOf(mapOf("exception" to e)))
-      throw AssertionError("Provider state change callback failed", e)
+      testContext.testExecutionResult.add(VerificationResult.Failed(description = "Provider state change teardown callback failed",
+        results = listOf(mapOf("exception" to e)),
+        failures = listOf(VerificationFailureType.StateChangeFailure(StateChangeResult(Err(e)))),
+        pending = pending
+      ))
+      if (!pending) {
+        throw AssertionError("Provider state change callback failed", e)
+      }
     }
   }
 
@@ -302,7 +329,20 @@ class PactVerificationStateChangeExtension(
     val store = context.getStore(ExtensionContext.Namespace.create("pact-jvm"))
     val testContext = store.get("interactionContext") as PactVerificationContext
 
-    invokeStateChangeMethods(context, testContext, interaction.providerStates, StateChangeAction.TEARDOWN)
+    try {
+      invokeStateChangeMethods(context, testContext, interaction.providerStates, StateChangeAction.TEARDOWN)
+    } catch (e: Exception) {
+      val pending = pactSource is BrokerUrlSource && pactSource.result?.pending == true
+      logger.error(e) { "Provider state change callback failed" }
+      testContext.testExecutionResult.add(VerificationResult.Failed(description = "Provider state change teardown callback failed",
+        results = listOf(mapOf("exception" to e)),
+        failures = listOf(VerificationFailureType.StateChangeFailure(StateChangeResult(Err(e)))),
+        pending = pending
+      ))
+      if (!pending) {
+        throw AssertionError("Provider state change callback failed", e)
+      }
+    }
   }
 
   private fun invokeStateChangeMethods(
@@ -404,12 +444,12 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
         it.setValueResolver(valueResolver)
       }
       description += "\nSource: ${it.description()}"
-      val pacts = it.load(serviceName)
-      filterPactsByAnnotations(pacts, context.requiredTestClass).map { pact -> pact to it.pactSource }
-    }.filter { p -> consumerName == null || p.first.consumer.name == consumerName }
+      val pacts = handleWith<List<Pact<Interaction>>> { it.load(serviceName) }.unwrapOr(emptyList())
+      filterPactsByAnnotations(pacts, context.requiredTestClass)
+    }.filter { p -> consumerName == null || p.consumer.name == consumerName }
 
     return Pair(pactSources.flatMap { pact ->
-      pact.first.interactions.map { PactVerificationExtension(pact.first, pact.second, it, serviceName, consumerName) }
+      pact.interactions.map { PactVerificationExtension(pact, pact.source, it, serviceName, consumerName) }
     }, description)
   }
 
@@ -448,12 +488,8 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
         try {
           // Checks if there is a constructor with one argument of type Class.
           val constructorWithClass = pactLoaderClass.java.getDeclaredConstructor(Class::class.java)
-          if (constructorWithClass != null) {
-            constructorWithClass.isAccessible = true
-            constructorWithClass.newInstance(context.requiredTestClass)
-          } else {
-            pactLoaderClass.createInstance()
-          }
+          constructorWithClass.isAccessible = true
+          constructorWithClass.newInstance(context.requiredTestClass)
         } catch (e: NoSuchMethodException) {
           logger.error(e) { e.message }
           pactLoaderClass.createInstance()

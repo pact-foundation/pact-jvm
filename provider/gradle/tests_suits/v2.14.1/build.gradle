@@ -1,0 +1,62 @@
+buildscript {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath 'au.com.dius:pact-jvm-provider-gradle:4.0.11'
+  }
+}
+
+plugins {
+  id "ch.kk7.spawn" version "1.0.20180924200750"
+}
+
+apply plugin: 'au.com.dius.pact'
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+task startTheApp(type: SpawnTask) {
+  commandLine 'java', '-jar', '../test_provider/build/libs/test_provider-all.jar'
+  waitFor 'Ratpack started for http://localhost:5050'
+}
+
+task killTheApp(type: KillTask) {
+  kills startTheApp
+}
+
+pact {
+  serviceProviders {
+    'Activity Service' {
+      port = 5050
+
+      startProviderTask = startTheApp
+      terminateProviderTask = killTheApp
+
+      providerVersion = { '2.14.1' }
+
+      fromPactBroker {
+        selectors = latestTags('test')
+        enablePending = true
+        providerTags = ['master']
+      }
+    }
+  }
+
+  reports {
+    defaultReports()
+
+    markdown
+    json
+  }
+
+  broker {
+    pactBrokerUrl = 'https://test.pact.dius.com.au/'
+    pactBrokerUsername = 'dXfltyFMgNOFZAxr8io9wJ37iUpY42M'
+    pactBrokerPassword = 'O5AIZWxelWbLvqMd8PkAVycBJh2Psyg1'
+  }
+}

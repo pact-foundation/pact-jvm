@@ -11,13 +11,15 @@ enum class DataType {
   INTEGER,
   DECIMAL,
   FLOAT,
-  RAW;
+  RAW,
+  BOOLEAN;
 
   fun convert(value: Any) = when (this) {
     INTEGER -> if (value is Number) value.toLong() else parseLong(value.toString())
     DECIMAL -> BigDecimal(value.toString())
     FLOAT -> if (value is Number) value.toDouble() else parseDouble(value.toString())
     STRING -> value.toString()
+    BOOLEAN -> value.toString() == "true"
     else -> value
   }
 
@@ -31,6 +33,7 @@ enum class DataType {
       is Double -> FLOAT
       is BigDecimal -> DECIMAL
       is String -> STRING
+      is Boolean -> BOOLEAN
       else -> RAW
     }
   }
@@ -51,9 +54,11 @@ object ExpressionParser {
   @JvmOverloads
   @JvmStatic
   fun parseExpression(value: String?, type: DataType, valueResolver: ValueResolver = SystemPropertyResolver()): Any? {
-    return if (containsExpressions(value)) {
-      type.convert(replaceExpressions(value!!, valueResolver))
-    } else value
+    return when {
+      containsExpressions(value) -> type.convert(replaceExpressions(value!!, valueResolver))
+      value != null -> type.convert(value)
+      else -> null
+    }
   }
 
   fun containsExpressions(value: String?) = value != null && value.contains(START_EXPRESSION)

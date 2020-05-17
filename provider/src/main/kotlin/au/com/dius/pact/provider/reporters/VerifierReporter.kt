@@ -7,11 +7,14 @@ import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
+import au.com.dius.pact.provider.IProviderVerifier
+import au.com.dius.pact.provider.VerificationResult
 import java.io.File
 
 /**
  * Interface to verification reporters that can hook into the events of the PactVerifier
  */
+@Suppress("TooManyFunctions")
 interface VerifierReporter {
   /**
    * The extension for the reporter
@@ -20,6 +23,7 @@ interface VerifierReporter {
 
   var reportDir: File?
   var reportFile: File
+  var verifier: IProviderVerifier
 
   fun initialise(provider: IProviderInfo)
   fun finaliseReport()
@@ -65,7 +69,9 @@ interface VerifierReporter {
   fun errorHasNoAnnotatedMethodsFoundForInteraction(interaction: Interaction)
   fun verificationFailed(interaction: Interaction, e: Exception, printStackTrace: Boolean)
   fun generatesAMessageWhich()
+  @Deprecated("Use version that takes a VerificationResult")
   fun displayFailures(failures: Map<String, Any>)
+  fun displayFailures(failures: List<VerificationResult.Failed>)
   fun includesMetadata()
   fun metadataComparisonOk()
   fun metadataComparisonOk(key: String, value: Any?)
@@ -75,4 +81,6 @@ interface VerifierReporter {
     provider: IProviderInfo,
     notices: List<VerificationNotice>
   ) {}
+  fun warnPublishResultsSkippedBecauseFiltered() {}
+  fun warnPublishResultsSkippedBecauseDisabled(envVar: String) {}
 }

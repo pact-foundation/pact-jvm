@@ -6,6 +6,7 @@ import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.support.Utils
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.ToStringBuilder
 import java.io.File
@@ -67,9 +68,19 @@ open class ProviderInfo @JvmOverloads constructor (
     pactBrokerUrl: String,
     selectors: List<ConsumerVersionSelector>
   ): List<ConsumerInfo> {
-    val client = PactBrokerClient(pactBrokerUrl, options)
-    val consumersFromBroker = client.fetchConsumersWithSelectors(name, selectors).map { results ->
-      results.map { ConsumerInfo.from(it) }
+    val enablePending = Utils.lookupInMap(options, "enablePending", Boolean::class.java, false)
+    if (enablePending && (!options.containsKey("providerTags") || options["providerTags"] !is List<*>)) {
+      throw RuntimeException("No providerTags: To use the pending pacts feature, you need to provide the list of " +
+        "provider names for the provider application version that will be published with the verification results")
+    }
+    val providerTags = if (enablePending) {
+      options["providerTags"] as List<String>
+    } else {
+      emptyList()
+    }
+    val client = pactBrokerClient(pactBrokerUrl, options)
+    val consumersFromBroker = client.fetchConsumersWithSelectors(name, selectors, providerTags, enablePending)
+      .map { results -> results.map { ConsumerInfo.from(it) }
     }
     return when (consumersFromBroker) {
       is Either.Right<*> -> {
@@ -83,6 +94,9 @@ open class ProviderInfo @JvmOverloads constructor (
       }
     }
   }
+
+  open fun pactBrokerClient(pactBrokerUrl: String, options: Map<String, Any>) =
+    PactBrokerClient(pactBrokerUrl, options)
 
   @Suppress("TooGenericExceptionThrown")
   open fun setupConsumerListFromPactFiles(consumersGroup: ConsumersGroup): MutableList<IConsumerInfo> {

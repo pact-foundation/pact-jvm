@@ -71,7 +71,7 @@ open class HttpTarget
     val failures = mutableMapOf<String, Any>()
     val client = ProviderClient(provider, HttpClientFactory())
     verifier.verifyResponseFromProvider(provider, interaction as RequestResponseInteraction, interaction.description,
-      failures, client, context)
+      failures, client, context, consumer.pending)
     reportTestResult(failures.isEmpty(), verifier)
 
     try {

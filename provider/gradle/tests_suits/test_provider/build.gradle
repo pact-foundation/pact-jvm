@@ -1,0 +1,20 @@
+buildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath "io.ratpack:ratpack-gradle:1.8.0"
+    classpath "com.github.jengelman.gradle.plugins:shadow:5.2.0"
+  }
+}
+
+apply plugin: "io.ratpack.ratpack-groovy"
+apply plugin: "com.github.johnrengelman.shadow"
+
+repositories {
+  jcenter()
+}
+
+dependencies {
+  runtime 'org.slf4j:slf4j-simple:1.7.30'
+}

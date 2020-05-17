@@ -6,7 +6,6 @@ import au.com.dius.pact.core.support.isNotEmpty
 import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
-import org.fusesource.jansi.AnsiConsole
 import java.io.File
 
 /**
@@ -36,8 +35,6 @@ open class PactPublishMojo : PactBaseMojo() {
     private var excludes: MutableList<String> = mutableListOf()
 
     override fun execute() {
-      AnsiConsole.systemInstall()
-
       if (skipPactPublish) {
         println("'skipPactPublish' is set to true, skipping uploading of pacts")
         return
@@ -63,19 +60,18 @@ open class PactPublishMojo : PactBaseMojo() {
         println("Pact directory $pactDirectory does not exist, skipping uploading of pacts")
       } else {
         val excludedList = this.excludes.map { Regex(it) }
-        try {
-          var anyFailed = false
-          pactDirectory.walkTopDown().filter { it.isFile && it.extension == "json" }.forEach { pactFile ->
-            if (pactFileIsExcluded(excludedList, pactFile)) {
-              println("Not publishing '${pactFile.name}' as it matches an item in the excluded list")
+        var anyFailed = false
+        pactDirectory.walkTopDown().filter { it.isFile && it.extension == "json" }.forEach { pactFile ->
+          if (pactFileIsExcluded(excludedList, pactFile)) {
+            println("Not publishing '${pactFile.name}' as it matches an item in the excluded list")
+          } else {
+            val tagsToPublish = calculateTags()
+            if (tagsToPublish.isNotEmpty()) {
+              print("Publishing '${pactFile.name}' with tags '${tagsToPublish.joinToString(", ")}' ... ")
             } else {
-              val tagsToPublish = calculateTags()
-              if (tagsToPublish.isNotEmpty()) {
-                print("Publishing '${pactFile.name}' with tags '${tagsToPublish.joinToString(", ")}' ... ")
-              } else {
-                print("Publishing '${pactFile.name}' ... ")
-              }
-              when (val result = brokerClient!!.uploadPactFile(pactFile, projectVersion, tagsToPublish)) {
+              print("Publishing '${pactFile.name}' ... ")
+            }
+            when (val result = brokerClient!!.uploadPactFile(pactFile, projectVersion, tagsToPublish)) {
                 is Either.Right -> if (result.b) {
                   println("OK")
                 } else {
@@ -90,11 +86,8 @@ open class PactPublishMojo : PactBaseMojo() {
             }
           }
 
-          if (anyFailed) {
-            throw MojoExecutionException("One or more of the pact files were rejected by the pact broker")
-          }
-        } finally {
-          AnsiConsole.systemUninstall()
+        if (anyFailed) {
+          throw MojoExecutionException("One or more of the pact files were rejected by the pact broker")
         }
       }
     }

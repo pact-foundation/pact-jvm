@@ -14,6 +14,8 @@ import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
+import au.com.dius.pact.provider.IProviderVerifier
+import au.com.dius.pact.provider.VerificationResult
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -33,6 +35,7 @@ class MarkdownReporter(
   constructor(name: String, reportDir: File?) : this(name, reportDir, ".md")
 
   override lateinit var reportFile: File
+  override lateinit var verifier: IProviderVerifier
 
   init {
     if (reportDir == null) {
@@ -44,10 +47,7 @@ class MarkdownReporter(
   private var pw: PrintWriter? = null
 
   override fun initialise(provider: IProviderInfo) {
-    if (pw != null) {
-      pw!!.close()
-    }
-
+    pw?.close()
     reportDir!!.mkdirs()
     reportFile = File(reportDir, provider.name + ext)
     pw = PrintWriter(BufferedWriter(FileWriter(reportFile, true)))
@@ -63,13 +63,19 @@ class MarkdownReporter(
   }
 
   override fun finaliseReport() {
-    pw!!.close()
+    pw?.close()
   }
 
   override fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, tag: String?) {
-    val report = StringBuilder("## Verifying a pact between _${consumer.name}_ and _${provider.name}_")
+    val report = StringBuilder("## Verifying a pact between _${consumer.name}_")
+    if (!consumer.name.contains(provider.name)) {
+      report.append(" and _${provider.name}_")
+    }
     if (tag != null) {
       report.append(" for tag $tag")
+    }
+    if (consumer.pending) {
+      report.append(" [PENDING]")
     }
     report.append("\n\n")
     pw!!.write(report.toString())
@@ -110,12 +116,10 @@ class MarkdownReporter(
     e: Exception,
     printStackTrace: Boolean
   ) {
-    reportFile.printWriter().use {
-      it.write("&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: red'>State Change Request Failed - ${e.message}" +
-        "</span>\n\n```\n")
-      e.printStackTrace(it)
-      it.write("\n```\n\n")
-    }
+    pw!!.write("&nbsp;&nbsp;&nbsp;&nbsp;<span style='color: red'>State Change Request Failed - ${e.message}" +
+      "</span>\n\n```\n")
+    e.printStackTrace(pw!!)
+    pw!!.write("\n```\n\n")
   }
 
   override fun stateChangeRequestFailed(state: String, provider: IProviderInfo, isSetup: Boolean, httpStatus: String) {
@@ -196,24 +200,6 @@ class MarkdownReporter(
   override fun bodyComparisonFailed(comparison: Any) {
     pw!!.write("&nbsp;&nbsp;&nbsp;&nbsp;has a matching body (<span style='color:red'>FAILED</span>)  \n\n")
 
-//    val property = comparison.property("comparison")?.get(comparison)
-//    when {
-//      comparison is String -> pw!!.write("|\$|$comparison|\n")
-//      property is Map<*, *> -> pw!!.write(property.map {
-//        val mismatches = (it.value as List<Map<String, Any>>).joinToString("; ") { mismatch ->
-//          mismatch["mismatch"].toString()
-//        }
-//        "|${it.key}|$mismatches|"
-//      }.joinToString("\n"))
-//      else -> pw!!.write("|\$|$property|")
-//    }
-//    pw!!.write("\n\n")
-//    if (comparison.hasProperty("diff")) {
-//      pw!!.write("Diff:\n\n")
-//      renderDiff(pw!!, comparison.property("diff")?.get(comparison))
-//      pw!!.write("\n\n")
-//    }
-
     when (comparison) {
       is Either.Left<*> -> {
         comparison as Either.Left<BodyTypeMismatch>
@@ -258,6 +244,8 @@ class MarkdownReporter(
 
   override fun displayFailures(failures: Map<String, Any>) { }
 
+  override fun displayFailures(failures: List<VerificationResult.Failed>) { }
+
   override fun metadataComparisonFailed(key: String, value: Any?, comparison: Any) {
     pw!!.write("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\"**$key**\" with value \"**$value**\" " +
       "(<span style=\'color:red\'>FAILED</span>)  \n")
@@ -285,5 +273,13 @@ class MarkdownReporter(
     pw!!.write("Notices:\n")
     notices.forEachIndexed { i, notice -> pw!!.write("${i + 1}. ${notice.text}\n") }
     pw!!.write("\n")
+  }
+
+  override fun warnPublishResultsSkippedBecauseFiltered() {
+    pw!!.write("NOTE: Skipping publishing of verification results as the interactions have been filtered\n")
+  }
+
+  override fun warnPublishResultsSkippedBecauseDisabled(envVar: String) {
+    pw!!.write("NOTE: Skipping publishing of verification results as it has been disabled ($envVar is not 'true')\n")
   }
 }

@@ -3,12 +3,13 @@ package au.com.dius.pact.core.pactbroker
 import au.com.dius.pact.core.support.Json
 import com.google.gson.JsonElement
 
-data class PactResult(
+data class PactBrokerResult(
   val name: String,
   val source: String,
   val pactBrokerUrl: String,
   val pactFileAuthentication: List<String> = listOf(),
-  val notices: List<VerificationNotice> = listOf()
+  val notices: List<VerificationNotice> = listOf(),
+  val pending: Boolean = false
 )
 
 data class VerificationNotice(

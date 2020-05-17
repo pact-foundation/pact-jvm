@@ -56,7 +56,7 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
       val actualResponse = handleResponse(mvcResult.response)
 
       verifyRequestResponsePact(expectedResponse, actualResponse, interactionMessage, failures,
-        interaction.interactionId.orEmpty())
+        interaction.interactionId.orEmpty(), false)
     } catch (e: Exception) {
       failures[interactionMessage] = e
       reporters.forEach {

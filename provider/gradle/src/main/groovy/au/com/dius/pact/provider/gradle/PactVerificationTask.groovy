@@ -1,9 +1,7 @@
 package au.com.dius.pact.provider.gradle
 
+import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderVerifier
-import org.fusesource.jansi.AnsiConsole
-import org.gradle.api.DefaultTask
-import org.gradle.api.GradleScriptException
 import org.gradle.api.Task
 import org.gradle.api.tasks.GradleBuild
 import org.gradle.api.tasks.TaskAction
@@ -11,14 +9,12 @@ import org.gradle.api.tasks.TaskAction
 /**
  * Task to verify a pact against a provider
  */
-class PactVerificationTask extends DefaultTask {
-
+class PactVerificationTask extends PactVerificationBaseTask {
+  IProviderVerifier verifier = new ProviderVerifier()
   GradleProviderInfo providerToVerify
 
   @TaskAction
   void verifyPact() {
-    AnsiConsole.systemInstall()
-    ProviderVerifier verifier = new ProviderVerifier()
     verifier.with {
       projectHasProperty = { project.hasProperty(it) }
       projectGetProperty = { project.property(it) }
@@ -35,21 +31,11 @@ class PactVerificationTask extends DefaultTask {
 
       if (project.pact.reports) {
         def reportsDir = new File(project.buildDir, 'reports/pact')
-        reporters = project.pact.reports.toVerifierReporters(reportsDir)
+        reporters = project.pact.reports.toVerifierReporters(reportsDir, it)
       }
     }
 
-    ext.failures = verifier.verifyProvider(providerToVerify)
-    try {
-      if (ext.failures.size() > 0) {
-        verifier.displayFailures(ext.failures)
-        throw new GradleScriptException(
-          "There were ${ext.failures.size()} pact failures for provider ${providerToVerify.name}", null)
-      }
-    } finally {
-      verifier.finaliseReports()
-      AnsiConsole.systemUninstall()
-    }
+    runVerification(verifier, providerToVerify)
   }
 
   def executeStateChangeTask(t, state) {

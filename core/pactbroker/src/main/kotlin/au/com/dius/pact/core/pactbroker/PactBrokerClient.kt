@@ -72,25 +72,45 @@ data class ConsumerVersionSelector(val tag: String, val latest: Boolean = true) 
   fun toJson() = jsonObject("tag" to tag, "latest" to latest)
 }
 
+interface IPactBrokerClient {
+  /**
+   * Fetches all consumers for the given provider and selectors
+   */
+  fun fetchConsumersWithSelectors(
+    providerName: String,
+    selectors: List<ConsumerVersionSelector>,
+    providerTags: List<String> = emptyList(),
+    enablePending: Boolean = false
+  ): Either<Exception, List<PactBrokerResult>>
+
+  fun getUrlForProvider(providerName: String, tag: String): String?
+
+  val options: Map<String, Any>
+}
+
 /**
  * Client for the pact broker service
  */
-open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, Any>) {
+open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map<String, Any>) : IPactBrokerClient {
 
   constructor(pactBrokerUrl: String) : this(pactBrokerUrl, mapOf())
 
-  @Deprecated(message = "Use fetchConsumersWithSelectors")
-  open fun fetchConsumers(provider: String): List<PactResult> {
+  /**
+   * Fetches all consumers for the given provider
+   */
+  @Deprecated(message = "Use the version that takes selectors instead",
+    replaceWith = ReplaceWith("fetchConsumersWithSelectors"))
+  open fun fetchConsumers(provider: String): List<PactBrokerResult> {
     return try {
       val halClient = newHalClient()
-      val consumers = mutableListOf<PactResult>()
+      val consumers = mutableListOf<PactBrokerResult>()
       halClient.navigate(mapOf("provider" to provider), LATEST_PROVIDER_PACTS).forAll(PACTS, Consumer { pact ->
         val href = Precoded(pact["href"].toString()).decoded().toString()
         val name = pact["name"].toString()
         if (options.containsKey("authentication")) {
-          consumers.add(PactResult(name, href, pactBrokerUrl, options["authentication"] as List<String>))
+          consumers.add(PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>))
         } else {
-          consumers.add(PactResult(name, href, pactBrokerUrl))
+          consumers.add(PactBrokerResult(name, href, pactBrokerUrl))
         }
       })
       consumers
@@ -104,18 +124,18 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
    * Fetches all consumers for the given provider and tag
    */
   @Deprecated(message = "Use fetchConsumersWithSelectors")
-  open fun fetchConsumersWithTag(provider: String, tag: String): List<PactResult> {
+  open fun fetchConsumersWithTag(provider: String, tag: String): List<PactBrokerResult> {
     return try {
       val halClient = newHalClient()
-      val consumers = mutableListOf<PactResult>()
+      val consumers = mutableListOf<PactBrokerResult>()
       halClient.navigate(mapOf("provider" to provider, "tag" to tag), LATEST_PROVIDER_PACTS_WITH_TAG)
         .forAll(PACTS, Consumer { pact ->
         val href = Precoded(pact["href"].toString()).decoded().toString()
         val name = pact["name"].toString()
         if (options.containsKey("authentication")) {
-          consumers.add(PactResult(name, href, pactBrokerUrl, options["authentication"] as List<String>))
+          consumers.add(PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>))
         } else {
-          consumers.add(PactResult(name, href, pactBrokerUrl, emptyList()))
+          consumers.add(PactBrokerResult(name, href, pactBrokerUrl, emptyList()))
         }
       })
       consumers
@@ -125,15 +145,17 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     }
   }
 
-  /**
-   * Fetches all consumers for the given provider and selectors
-   */
-  @JvmOverloads
-  open fun fetchConsumersWithSelectors(
-    provider: String,
-    consumerVersionSelectors: List<ConsumerVersionSelector> = emptyList()
-  ): Either<Exception, List<PactResult>> {
-    val halClient = newHalClient().navigate()
+  override fun fetchConsumersWithSelectors(
+    providerName: String,
+    selectors: List<ConsumerVersionSelector>,
+    providerTags: List<String>,
+    enablePending: Boolean
+  ): Either<Exception, List<PactBrokerResult>> {
+    val navigateResult = handleWith<IHalClient> { newHalClient().navigate() }
+    val halClient = when (navigateResult) {
+      is Either.Left -> return navigateResult
+      is Either.Right -> navigateResult.b
+    }
     val pactsForVerification = when {
       halClient.linkUrl(PROVIDER_PACTS_FOR_VERIFICATION) != null -> PROVIDER_PACTS_FOR_VERIFICATION
       halClient.linkUrl(BETA_PROVIDER_PACTS_FOR_VERIFICATION) != null -> BETA_PROVIDER_PACTS_FOR_VERIFICATION
@@ -141,30 +163,43 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     }
     if (pactsForVerification != null) {
       val body = jsonObject(
-        "consumerVersionSelectors" to jsonArray(consumerVersionSelectors.map { it.toJson() })
+        "consumerVersionSelectors" to jsonArray(selectors.map { it.toJson() })
       )
+      if (enablePending) {
+        body["providerVersionTags"] = jsonArray(providerTags)
+        body["includePendingStatus"] = true
+      }
+
       return handleWith {
-        halClient.postJson(pactsForVerification, mapOf("provider" to provider), body.toString()).map { result ->
+        halClient.postJson(pactsForVerification, mapOf("provider" to providerName), body.toString()).map { result ->
           result["_embedded"]["pacts"].asJsonArray.map { pactJson ->
             val selfLink = pactJson["_links"]["self"]
             val href = Precoded(Json.toString(selfLink["href"])).decoded().toString()
             val name = Json.toString(selfLink["name"])
-            val notices = pactJson["verificationProperties"]["notices"].asJsonArray
+            val properties = pactJson["verificationProperties"]
+            val notices = properties["notices"].asJsonArray
               .map { VerificationNotice.fromJson(it) }
+            var pending = false
+            if (properties.isJsonObject && properties.obj.has("pending") && properties["pending"].isJsonPrimitive) {
+              val pendingProperty = properties["pending"].asJsonPrimitive
+              if (pendingProperty.isBoolean) {
+                pending = pendingProperty.asBoolean
+              }
+            }
             if (options.containsKey("authentication")) {
-              PactResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, notices)
+              PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>, notices, pending)
             } else {
-              PactResult(name, href, pactBrokerUrl, emptyList(), notices)
+              PactBrokerResult(name, href, pactBrokerUrl, emptyList(), notices, pending)
             }
           }
         }
       }
     } else {
       return handleWith {
-        if (consumerVersionSelectors.isEmpty()) {
-          fetchConsumers(provider)
+        if (selectors.isEmpty()) {
+          fetchConsumers(providerName)
         } else {
-          fetchConsumersWithTag(provider, consumerVersionSelectors.first().tag)
+          fetchConsumersWithTag(providerName, selectors.first().tag)
         }
       }
     }
@@ -195,7 +230,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
     ), pactText)
   }
 
-  open fun getUrlForProvider(providerName: String, tag: String): String? {
+  override fun getUrlForProvider(providerName: String, tag: String): String? {
     val halClient = newHalClient()
     if (tag.isEmpty() || tag == "latest") {
       halClient.navigate(mapOf("provider" to providerName), LATEST_PROVIDER_PACTS)
@@ -321,18 +356,18 @@ open class PactBrokerClient(val pactBrokerUrl: String, val options: Map<String, 
    */
   @Deprecated(message = "Use the version that takes selectors instead",
     replaceWith = ReplaceWith("fetchConsumersWithSelectors"))
-  open fun fetchLatestConsumersWithNoTag(provider: String): List<PactResult> {
+  open fun fetchLatestConsumersWithNoTag(provider: String): List<PactBrokerResult> {
     return try {
       val halClient = newHalClient()
-      val consumers = mutableListOf<PactResult>()
+      val consumers = mutableListOf<PactBrokerResult>()
       halClient.navigate(mapOf("provider" to provider), LATEST_PROVIDER_PACTS_WITH_NO_TAG)
         .forAll(PACTS, Consumer { pact ->
           val href = URLDecoder.decode(pact["href"].toString(), UTF8)
           val name = pact["name"].toString()
           if (options.containsKey("authentication")) {
-            consumers.add(PactResult(name, href, pactBrokerUrl, options["authentication"] as List<String>))
+            consumers.add(PactBrokerResult(name, href, pactBrokerUrl, options["authentication"] as List<String>))
           } else {
-            consumers.add(PactResult(name, href, pactBrokerUrl, emptyList()))
+            consumers.add(PactBrokerResult(name, href, pactBrokerUrl, emptyList()))
           }
         })
       consumers

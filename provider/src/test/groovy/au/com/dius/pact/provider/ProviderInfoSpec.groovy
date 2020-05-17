@@ -1,5 +1,9 @@
 package au.com.dius.pact.provider
 
+import arrow.core.Either
+import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
+import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import au.com.dius.pact.core.pactbroker.PactBrokerResult
 import spock.lang.Specification
 
 class ProviderInfoSpec extends Specification {
@@ -7,9 +11,9 @@ class ProviderInfoSpec extends Specification {
   private ProviderInfo providerInfo
   private File mockPactDir
   private fileList
+  private PactBrokerClient pactBrokerClient
 
   def setup() {
-    providerInfo = new ProviderInfo()
     fileList = []
     mockPactDir = Mock(File) {
       exists() >> true
@@ -17,6 +21,9 @@ class ProviderInfoSpec extends Specification {
       isDirectory() >> true
       listFiles() >> { fileList as File[] }
     }
+    pactBrokerClient = Mock()
+    providerInfo = Spy(new ProviderInfo('TestProvider'))
+    providerInfo.pactBrokerClient(_, _) >> pactBrokerClient
   }
 
   def 'returns an empty list if the directory is null'() {
@@ -54,4 +61,65 @@ class ProviderInfoSpec extends Specification {
     thrown(RuntimeException)
   }
 
+  def 'does not include pending pacts if the option is not present'() {
+    given:
+    def options = [:]
+    def url = 'http://localhost:8080'
+    def selectors = [
+      new ConsumerVersionSelector('test', true)
+    ]
+
+    when:
+    def result = providerInfo.hasPactsFromPactBrokerWithSelectors(options, url, selectors)
+
+    then:
+    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, [], false) >> new Either.Right([
+      new PactBrokerResult('consumer', '', url, [], [], false)
+    ])
+    result.size == 1
+    result[0].name == 'consumer'
+    !result[0].pending
+  }
+
+  def 'does include pending pacts if the option is present'() {
+    given:
+    def options = [
+      enablePending: true,
+      providerTags: ['master']
+    ]
+    def url = 'http://localhost:8080'
+    def selectors = [
+      new ConsumerVersionSelector('test', true)
+    ]
+
+    when:
+    def result = providerInfo.hasPactsFromPactBrokerWithSelectors(options, url, selectors)
+
+    then:
+    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true) >> new Either.Right([
+      new PactBrokerResult('consumer', '', url, [], [], true)
+    ])
+    result.size == 1
+    result[0].name == 'consumer'
+    result[0].pending
+  }
+
+  def 'throws an exception if the pending pacts option is present but there is no provider tags'() {
+    given:
+    def options = [
+      enablePending: true
+    ]
+    def url = 'http://localhost:8080'
+    def selectors = [
+      new ConsumerVersionSelector('test', true)
+    ]
+
+    when:
+    providerInfo.hasPactsFromPactBrokerWithSelectors(options, url, selectors)
+
+    then:
+    def exception = thrown(RuntimeException)
+    exception.message == 'No providerTags: To use the pending pacts feature, you need to provide the list of ' +
+      'provider names for the provider application version that will be published with the verification results'
+  }
 }

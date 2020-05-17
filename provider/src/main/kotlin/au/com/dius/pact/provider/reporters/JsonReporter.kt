@@ -13,12 +13,16 @@ import au.com.dius.pact.core.model.UrlPactSource
 import au.com.dius.pact.core.pactbroker.VerificationNotice
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.hasProperty
+import au.com.dius.pact.core.support.isNotEmpty
 import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
+import au.com.dius.pact.provider.IProviderVerifier
+import au.com.dius.pact.provider.VerificationResult
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.get
+import com.github.salomonbrys.kotson.isNotEmpty
 import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.obj
@@ -27,6 +31,7 @@ import com.github.salomonbrys.kotson.string
 import com.github.salomonbrys.kotson.toJson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import com.google.gson.JsonPrimitive
 import org.apache.commons.lang3.exception.ExceptionUtils
 import java.io.File
 import java.time.ZonedDateTime
@@ -46,6 +51,7 @@ class JsonReporter(
   constructor(name: String, reportDir: File?) : this(name, reportDir, JsonObject(), ".json", null)
 
   override lateinit var reportFile: File
+  override lateinit var verifier: IProviderVerifier
 
   init {
     if (reportDir == null) {
@@ -70,25 +76,34 @@ class JsonReporter(
   }
 
   override fun finaliseReport() {
-    if (reportFile.exists() && reportFile.length() > 0) {
-      val existingContents = JsonParser.parseString(reportFile.readText())
-      if (providerName == existingContents["provider"].obj["name"].string) {
-        existingContents["metaData"] = jsonData["metaData"]
-        existingContents["execution"].array.addAll(jsonData["execution"].array)
-        reportFile.writeText(existingContents.toString())
-      } else {
-        reportFile.writeText(jsonData.toString())
+    if (jsonData.isNotEmpty()) {
+      when {
+        reportFile.exists() && reportFile.length() > 0 -> {
+          val existingContents = JsonParser.parseString(reportFile.readText())
+          if (existingContents.isJsonObject && existingContents.obj.has("provider") &&
+            providerName == existingContents["provider"].obj["name"].string) {
+            existingContents["metaData"] = jsonData["metaData"]
+            existingContents["execution"].array.addAll(jsonData["execution"].array)
+            reportFile.writeText(existingContents.toString())
+          } else {
+            reportFile.writeText(jsonData.toString())
+          }
+        }
+        else -> reportFile.writeText(jsonData.toString())
       }
-    } else {
-      reportFile.writeText(jsonData.toString())
     }
   }
 
   override fun reportVerificationForConsumer(consumer: IConsumerInfo, provider: IProviderInfo, tag: String?) {
-    jsonData["execution"].array.add(jsonObject(
+    val jsonObject = jsonObject(
       "consumer" to jsonObject("name" to consumer.name),
-      "interactions" to jsonArray()
-    ))
+      "interactions" to jsonArray(),
+      "pending" to consumer.pending
+    )
+    if (tag.isNotEmpty()) {
+      jsonObject.add("tag", JsonPrimitive(tag))
+    }
+    jsonData["execution"].array.add(jsonObject)
   }
 
   override fun verifyConsumerFromUrl(pactUrl: UrlPactSource, consumer: IConsumerInfo) {
@@ -142,6 +157,22 @@ class JsonReporter(
     e: Exception,
     printStackTrace: Boolean
   ) {
+    val interactions = jsonData["execution"].array.last()["interactions"].array
+    val error = jsonObject(
+      "result" to FAILED,
+      "message" to "State change '$state' callback failed",
+      "exception" to jsonObject(
+        "message" to e.message,
+        "stackTrace" to jsonArray(ExceptionUtils.getStackFrames(e).toList())
+      )
+    )
+    if (interactions.size() == 0) {
+      interactions.add(jsonObject(
+        "verification" to error
+      ))
+    } else {
+      interactions.last()["verification"] = error
+    }
   }
 
   override fun stateChangeRequestFailed(state: String, provider: IProviderInfo, isSetup: Boolean, httpStatus: String) {
@@ -242,6 +273,8 @@ class JsonReporter(
 
   override fun displayFailures(failures: Map<String, Any>) { }
 
+  override fun displayFailures(failures: List<VerificationResult.Failed>) { }
+
   override fun metadataComparisonFailed(key: String, value: Any?, comparison: Any) {
     val verification = jsonData["execution"].array.last()["interactions"].array.last()["verification"].obj
     verification["result"] = FAILED
@@ -264,6 +297,9 @@ class JsonReporter(
   ) {
     jsonData["execution"].array.last()["consumer"]["notices"] = jsonArray(notices.map { it.text })
   }
+
+  override fun warnPublishResultsSkippedBecauseFiltered() { }
+  override fun warnPublishResultsSkippedBecauseDisabled(envVar: String) { }
 
   companion object {
     const val REPORT_FORMAT = "0.1.0"

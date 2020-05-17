@@ -1,19 +1,22 @@
 package au.com.dius.pact.provider.junit5
 
 import au.com.dius.pact.core.model.Consumer
+import au.com.dius.pact.core.model.DirectorySource
 import au.com.dius.pact.core.model.Interaction
+import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.Provider
 import au.com.dius.pact.core.model.ProviderState
 import au.com.dius.pact.core.model.RequestResponseInteraction
 import au.com.dius.pact.core.model.RequestResponsePact
-import au.com.dius.pact.core.pactbroker.TestResult
+import au.com.dius.pact.core.support.expressions.ValueResolver
+import au.com.dius.pact.provider.IConsumerInfo
+import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
-import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.TestResultAccumulator
+import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junitsupport.MissingStateChangeMethod
 import au.com.dius.pact.provider.junitsupport.State
 import au.com.dius.pact.provider.junitsupport.StateChangeAction
-import au.com.dius.pact.core.support.expressions.ValueResolver
 import org.junit.jupiter.api.extension.ExtensionContext
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -27,6 +30,9 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
   private PactVerificationContext pactContext
   private ExtensionContext testContext
   private ExtensionContext.Store store
+  private IProviderInfo provider
+  private IConsumerInfo consumer
+  private PactSource pactSource
 
   static class TestClass {
 
@@ -62,14 +68,17 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     interaction = new RequestResponseInteraction('test')
     pact = new RequestResponsePact(new Provider(), new Consumer(), [ interaction ])
     testResultAcc = Mock(TestResultAccumulator)
-    verificationExtension = new PactVerificationStateChangeExtension(pact, interaction, testResultAcc)
+    pactSource = new DirectorySource('/tmp' as File)
+    verificationExtension = new PactVerificationStateChangeExtension(interaction, pactSource)
     testInstance = new TestClass()
     testContext = [
       'getTestClass': { Optional.of(TestClass) },
       'getTestInstance': { Optional.of(testInstance) }
     ] as ExtensionContext
     store = [:] as ExtensionContext.Store
-    pactContext = new PactVerificationContext(store, testContext, 'test', interaction)
+    provider = Mock()
+    consumer = Mock()
+    pactContext = new PactVerificationContext(store, testContext, provider, consumer, interaction)
   }
 
   @Unroll
@@ -118,19 +127,16 @@ class PactVerificationStateChangeExtensionSpec extends Specification {
     def target = Mock(TestTarget)
     IProviderVerifier verifier = Mock()
     ValueResolver resolver = Mock()
-    ProviderInfo provider = Mock()
-    String consumer = 'consumer'
     def verificationContext = new PactVerificationContext(store, context, target, verifier, resolver, provider,
-      consumer, interaction, TestResult.Ok.INSTANCE)
+      consumer, interaction, [])
     store.get(_) >> verificationContext
-    verificationExtension = new PactVerificationStateChangeExtension(pact, interaction, testResultAcc)
+    verificationExtension = new PactVerificationStateChangeExtension(interaction, pactSource)
 
     when:
     verificationExtension.beforeTestExecution(context)
 
     then:
     thrown(AssertionError)
-    verificationContext.testExecutionResult instanceof TestResult.Failed
+    verificationContext.testExecutionResult[0] instanceof VerificationResult.Failed
   }
-
 }
