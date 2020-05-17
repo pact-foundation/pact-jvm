@@ -188,4 +188,28 @@ class JsonReporterSpec extends Specification {
     ]
   }
 
+  def 'creates proper verification failure with exception stack traces'() {
+    given:
+    def reporter = new JsonReporter('test', reportDir)
+    def provider1 = new ProviderInfo(name: 'provider1')
+    def consumer = new ConsumerInfo(name: 'Consumer')
+    def interaction1 = new RequestResponseInteraction('Interaction 1', [], new Request(), new Response())
+
+    when:
+    reporter.initialise(provider1)
+    reporter.reportVerificationForConsumer(consumer, provider1, null)
+    reporter.interactionDescription(interaction1)
+    reporter.verificationFailed(interaction1, new Exception('xxxx'), true)
+    reporter.finaliseReport()
+
+    def reportJson = new JsonSlurper().parse(new File(reportDir, 'provider1.json'))
+
+    then:
+    reportJson.execution.size == 1
+    reportJson.execution[0].interactions.size == 1
+    reportJson.execution[0].interactions[0].verification.result == 'failed'
+    reportJson.execution[0].interactions[0].verification.exception.message == 'xxxx'
+    reportJson.execution[0].interactions[0].verification.exception.stackTrace.size > 1
+    reportJson.execution[0].interactions[0].verification.exception.stackTrace[0] == 'java.lang.Exception: xxxx'
+  }
 }
