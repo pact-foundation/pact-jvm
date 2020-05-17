@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider.reporters
 
-import arrow.core.Either
 import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.model.BasePact
@@ -20,6 +19,8 @@ import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.isNotEmpty
@@ -246,8 +247,8 @@ class JsonReporter(
     val verification = jsonData["execution"].array.last()["interactions"].array.last()["verification"].obj
     verification["result"] = FAILED
     verification["body"] = when (comparison) {
-      is Either.Left<*> -> Json.toJson((comparison as Either.Left<BodyTypeMismatch>).a.description())
-      is Either.Right<*> -> (comparison as Either.Right<BodyComparisonResult>).b.toJson()
+      is Err<*> -> Json.toJson((comparison as Err<BodyTypeMismatch>).error.description())
+      is Ok<*> -> (comparison as Ok<BodyComparisonResult>).value.toJson()
       else -> Json.toJson(comparison)
     }
   }

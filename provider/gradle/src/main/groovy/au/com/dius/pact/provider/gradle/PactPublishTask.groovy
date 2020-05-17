@@ -1,7 +1,7 @@
 package au.com.dius.pact.provider.gradle
 
-import arrow.core.Either
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import com.github.michaelbull.result.Ok
 import groovy.io.FileType
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.StringUtils
@@ -57,15 +57,15 @@ class PactPublishTask extends DefaultTask {
               print "Publishing '${pactFile.name}' ... "
             }
             result = brokerClient.uploadPactFile(pactFile, version, pactPublish.tags)
-            if (result instanceof Either.Right) {
-              if (result.b) {
+            if (result instanceof Ok) {
+              if (result.value) {
                 println('OK')
               } else {
                 println('Failed')
                 anyFailed = true
               }
             } else {
-              println("Failed - ${result.a.message}")
+              println("Failed - ${result.error.message}")
               anyFailed = true
             }
           }

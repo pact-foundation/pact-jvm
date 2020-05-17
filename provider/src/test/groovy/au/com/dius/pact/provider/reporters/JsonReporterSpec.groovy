@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider.reporters
 
-import arrow.core.Either
 import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.model.Request
@@ -9,6 +8,7 @@ import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.provider.BodyComparisonResult
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
+import com.github.michaelbull.result.Ok
 import com.google.gson.JsonParser
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -126,7 +126,7 @@ class JsonReporterSpec extends Specification {
       new HeaderMismatch('HEADER-X', 'Y', '', "Expected a header 'HEADER-X' but was missing")
     ])
     reporter.bodyComparisonFailed(
-      new Either.Right(new BodyComparisonResult([
+      new Ok(new BodyComparisonResult([
         '$.0': [
           new BodyMismatch(
             JsonParser.parseString('{"doesNotExist":"Test","documentId":0}'),

@@ -13,7 +13,7 @@ dependencies {
     implementation "org.scala-lang:scala-library:${project.scalaVersion}"
     implementation 'io.github.classgraph:classgraph:4.8.25'
     implementation "org.codehaus.groovy:groovy:${project.groovyVersion}"
-    api 'io.arrow-kt:arrow-core-extensions:0.9.0'
+    api 'com.michael-bull.kotlin-result:kotlin-result:1.1.6'
     implementation 'com.github.ajalt:mordant:1.2.1'
 
     testCompile "org.codehaus.groovy:groovy-json:${project.groovyVersion}"

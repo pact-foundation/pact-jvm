@@ -1,7 +1,8 @@
 package au.com.dius.pact.provider.maven
 
-import arrow.core.Either
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import org.apache.maven.plugin.MojoExecutionException
 import spock.lang.Specification
 import spock.util.environment.RestoreSystemProperties
@@ -32,7 +33,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    3 * brokerClient.uploadPactFile(_, _, []) >> new Either.Right(true)
+    3 * brokerClient.uploadPactFile(_, _, []) >> new Ok(true)
 
     cleanup:
     dir.deleteDir()
@@ -52,8 +53,8 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    3 * brokerClient.uploadPactFile(_, _, []) >> new Either.Right(true) >>
-            new Either.Left(new RuntimeException('FAILED! Bang')) >> new Either.Right(true)
+    3 * brokerClient.uploadPactFile(_, _, []) >> new Ok(true) >>
+            new Err(new RuntimeException('FAILED! Bang')) >> new Ok(true)
     thrown(MojoExecutionException)
 
     cleanup:
@@ -156,7 +157,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _, tags) >> new Either.Right(true)
+    1 * brokerClient.uploadPactFile(_, _, tags) >> new Ok(true)
 
     cleanup:
     dir.deleteDir()
@@ -177,7 +178,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _, ['1', '2', '3']) >> new Either.Right(true)
+    1 * brokerClient.uploadPactFile(_, _, ['1', '2', '3']) >> new Ok(true)
 
     cleanup:
     dir.deleteDir()
@@ -202,7 +203,7 @@ class PactPublishMojoSpec extends Specification {
     mojo.execute()
 
     then:
-    1 * brokerClient.uploadPactFile(file1, _, []) >> new Either.Right(true)
+    1 * brokerClient.uploadPactFile(file1, _, []) >> new Ok(true)
     0 * brokerClient.uploadPactFile(file2, _, [])
     0 * brokerClient.uploadPactFile(file3, _, [])
     0 * brokerClient.uploadPactFile(file4, _, [])

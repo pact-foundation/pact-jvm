@@ -13,7 +13,7 @@ dependencies {
     exclude group: 'org.jetbrains.kotlin'
   }
   api "org.apache.httpcomponents:httpclient:${project.httpClientVersion}"
-  api 'io.arrow-kt:arrow-core-extensions:0.9.0'
+  api 'com.michael-bull.kotlin-result:kotlin-result:1.1.6'
 
   testCompile "org.codehaus.groovy:groovy:${project.groovyVersion}"
   testCompile "org.junit.jupiter:junit-jupiter-api:${project.junit5Version}"

@@ -1,7 +1,8 @@
 package au.com.dius.pact.provider.gradle
 
-import arrow.core.Either
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import org.apache.commons.io.IOUtils
 import org.gradle.api.GradleScriptException
 import org.gradle.api.Project
@@ -54,7 +55,7 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _, _) >> new Either.Right(true)
+    1 * brokerClient.uploadPactFile(_, _, _) >> new Ok(true)
   }
 
   def 'failure to publish'() {
@@ -70,7 +71,7 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _, _) >> new Either.Left(new RuntimeException('Boom'))
+    1 * brokerClient.uploadPactFile(_, _, _) >> new Err(new RuntimeException('Boom'))
     thrown(GradleScriptException)
   }
 
@@ -89,7 +90,7 @@ class PactPublishTaskSpec extends Specification {
 
     then:
     1 * new PactBrokerClient(_, ['authentication': ['basic', 'my user name', null]]) >> brokerClient
-    1 * brokerClient.uploadPactFile(_, _, _) >> new Either.Right(true)
+    1 * brokerClient.uploadPactFile(_, _, _) >> new Ok(true)
   }
 
   def 'passes in bearer token to the broker client'() {
@@ -107,7 +108,7 @@ class PactPublishTaskSpec extends Specification {
 
     then:
     1 * new PactBrokerClient(_, ['authentication': ['bearer', 'token1234']]) >> brokerClient
-    1 * brokerClient.uploadPactFile(_, _, _) >> new Either.Right(true)
+    1 * brokerClient.uploadPactFile(_, _, _) >> new Ok(true)
   }
 
   def 'passes in any tags to the broker client'() {
@@ -124,7 +125,7 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(_, _, ['tag1']) >> new Either.Right(true)
+    1 * brokerClient.uploadPactFile(_, _, ['tag1']) >> new Ok(true)
   }
 
   def 'allows pact files to be excluded from publishing'() {
@@ -149,7 +150,7 @@ class PactPublishTaskSpec extends Specification {
     task.publishPacts()
 
     then:
-    1 * brokerClient.uploadPactFile(pactFile, _, []) >> new Either.Right(true)
+    1 * brokerClient.uploadPactFile(pactFile, _, []) >> new Ok(true)
     0 * brokerClient.uploadPactFile(excluded[0], _, [])
     0 * brokerClient.uploadPactFile(excluded[1], _, [])
     0 * brokerClient.uploadPactFile(excluded[2], _, [])

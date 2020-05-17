@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider.reporters
 
-import arrow.core.Either
 import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.model.BasePact
@@ -16,6 +15,8 @@ import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.VerificationResult
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
@@ -201,19 +202,19 @@ class MarkdownReporter(
     pw!!.write("&nbsp;&nbsp;&nbsp;&nbsp;has a matching body (<span style='color:red'>FAILED</span>)  \n\n")
 
     when (comparison) {
-      is Either.Left<*> -> {
-        comparison as Either.Left<BodyTypeMismatch>
-        pw!!.write("```\n${comparison.a.description()}\n```\n")
+      is Err<*> -> {
+        comparison as Err<BodyTypeMismatch>
+        pw!!.write("```\n${comparison.error.description()}\n```\n")
       }
-      is Either.Right<*> -> {
-        comparison as Either.Right<BodyComparisonResult>
+      is Ok<*> -> {
+        comparison as Ok<BodyComparisonResult>
         pw!!.write("| Path | Failure |\n")
         pw!!.write("| ---- | ------- |\n")
-        comparison.b.mismatches.forEach { entry ->
+        comparison.value.mismatches.forEach { entry ->
           pw!!.write("|`${entry.key}`|${entry.value.joinToString("\n") { it.description() }}|\n")
         }
         pw!!.write("\n\nDiff:\n\n")
-        renderDiff(pw!!, comparison.b.diff)
+        renderDiff(pw!!, comparison.value.diff)
         pw!!.write("\n\n")
       }
       else -> pw!!.write("```\n${comparison}\n```\n")

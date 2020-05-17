@@ -1,10 +1,10 @@
 package au.com.dius.pact.core.pactbroker
 
-import arrow.core.Either
 import au.com.dius.pact.core.support.Json
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
-import au.com.dius.pact.core.support.unwrap
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
@@ -20,6 +20,11 @@ import org.dmfs.rfc3986.encoding.Precoded
 import java.io.File
 import java.net.URLDecoder
 import java.util.function.Consumer
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.map
+import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.unwrap
+import com.google.gson.JsonElement
 
 /**
  * Wraps the response for a Pact from the broker with the link data associated with the Pact document.
@@ -81,7 +86,7 @@ interface IPactBrokerClient {
     selectors: List<ConsumerVersionSelector>,
     providerTags: List<String> = emptyList(),
     enablePending: Boolean = false
-  ): Either<Exception, List<PactBrokerResult>>
+  ): Result<List<PactBrokerResult>, Exception>
 
   fun getUrlForProvider(providerName: String, tag: String): String?
 
@@ -150,11 +155,11 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
     selectors: List<ConsumerVersionSelector>,
     providerTags: List<String>,
     enablePending: Boolean
-  ): Either<Exception, List<PactBrokerResult>> {
+  ): Result<List<PactBrokerResult>, Exception> {
     val navigateResult = handleWith<IHalClient> { newHalClient().navigate() }
     val halClient = when (navigateResult) {
-      is Either.Left -> return navigateResult
-      is Either.Right -> navigateResult.b
+      is Err<Exception> -> return Err(navigateResult.error)
+      is Ok<IHalClient> -> navigateResult.value
     }
     val pactsForVerification = when {
       halClient.linkUrl(PROVIDER_PACTS_FOR_VERIFICATION) != null -> PROVIDER_PACTS_FOR_VERIFICATION
@@ -213,7 +218,7 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
     pactFile: File,
     unescapedVersion: String,
     tags: List<String> = emptyList()
-  ): Either<Exception, Boolean> {
+  ): Result<Boolean, Exception> {
     val pactText = pactFile.readText()
     val pact = JsonParser.parseString(pactText)
     val halClient = newHalClient()
@@ -256,22 +261,22 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
     result: TestResult,
     version: String,
     buildUrl: String? = null
-  ): Either<String, Boolean> {
+  ): Result<Boolean, String> {
     val halClient = newHalClient()
     val publishLink = docAttributes.mapKeys { it.key.toLowerCase() } ["pb:publish-verification-results"] // ktlint-disable curly-spacing
     return if (publishLink is Map<*, *>) {
       val jsonObject = buildPayload(result, version, buildUrl)
       val lowercaseMap = publishLink.mapKeys { it.key.toString().toLowerCase() }
       if (lowercaseMap.containsKey("href")) {
-        halClient.postJson(lowercaseMap["href"].toString(), jsonObject.toString()).mapLeft {
+        halClient.postJson(lowercaseMap["href"].toString(), jsonObject.toString()).mapError {
           logger.error(it) { "Publishing verification results failed with an exception" }
           "Publishing verification results failed with an exception: ${it.message}"
         }
       } else {
-        Either.left("Unable to publish verification results as there is no pb:publish-verification-results link")
+        Err("Unable to publish verification results as there is no pb:publish-verification-results link")
       }
     } else {
-      Either.left("Unable to publish verification results as there is no pb:publish-verification-results link")
+      Err("Unable to publish verification results as there is no pb:publish-verification-results link")
     }
   }
 
@@ -383,8 +388,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
         .withDocContext(docAttributes)
         .navigate(PROVIDER)
       when (val result = halClient.putJson(PROVIDER_TAG_VERSION, mapOf("version" to version, "tag" to tag), "{}")) {
-        is Either.Right -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
-        is Either.Left -> logger.error(result.a) { "Failed to push tag $tag for provider $name and version $version" }
+        is Ok<*> -> logger.debug { "Pushed tag $tag for provider $name and version $version" }
+        is Err<Exception> -> logger.error(result.error) { "Failed to push tag $tag for provider $name and version $version" }
       }
     } catch (e: NotFoundHalResponse) {
       logger.error(e) { "Could not tag provider $name, link was missing" }
@@ -396,13 +401,13 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
     val result = halClient.getJson("/matrix" + buildMatrixQuery(pacticipant, pacticipantVersion, latest, to),
       false)
     return when (result) {
-      is Either.Right -> {
-        val summary = result.b.asJsonObject["summary"].asJsonObject
+      is Ok<JsonElement> -> {
+        val summary = result.value.asJsonObject["summary"].asJsonObject
         CanIDeployResult(Json.toBoolean(summary["deployable"]), "", Json.toString(summary["reason"]))
       }
-      is Either.Left -> {
-        logger.error(result.a) { "Pact broker matrix query failed: ${result.a.message}" }
-        CanIDeployResult(false, result.a.message.toString(), "")
+      is Err<Exception> -> {
+        logger.error(result.error) { "Pact broker matrix query failed: ${result.error.message}" }
+        CanIDeployResult(false, result.error.message.toString(), "")
       }
     }
   }
@@ -445,8 +450,8 @@ open class PactBrokerClient(val pactBrokerUrl: String, override val options: Map
           "version" to version,
           "tag" to it
         ), "{}")
-        if (result is Either.Left) {
-          logger.error(result.a) { "Failed to push tag $it for consumer $consumerName and version $version" }
+        if (result is Err<Exception>) {
+          logger.error(result.error) { "Failed to push tag $it for consumer $consumerName and version $version" }
         }
       }
     }

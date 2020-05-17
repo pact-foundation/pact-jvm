@@ -1,8 +1,6 @@
 package au.com.dius.pact.provider
 
-import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
+import com.github.michaelbull.result.Result
 import au.com.dius.pact.core.matchers.BodyMismatch
 import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
@@ -19,6 +17,8 @@ import au.com.dius.pact.core.model.Response
 import au.com.dius.pact.core.model.isNullOrEmpty
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.core.support.Json
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import com.github.salomonbrys.kotson.jsonObject
 import com.google.gson.JsonParser
 import mu.KLogging
@@ -37,7 +37,7 @@ data class BodyComparisonResult(
 data class ComparisonResult(
   val statusMismatch: StatusMismatch? = null,
   val headerMismatches: Map<String, List<HeaderMismatch>> = emptyMap(),
-  val bodyMismatches: Either<BodyTypeMismatch, BodyComparisonResult> = Either.Right(BodyComparisonResult()),
+  val bodyMismatches: Result<BodyComparisonResult, BodyTypeMismatch> = Ok(BodyComparisonResult()),
   val metadataMismatches: Map<String, List<MetadataMismatch>> = emptyMap()
 )
 
@@ -66,10 +66,10 @@ class ResponseComparison(
     }
   }
 
-  fun bodyResult(mismatches: List<Mismatch>): Either<BodyTypeMismatch, BodyComparisonResult> {
+  fun bodyResult(mismatches: List<Mismatch>): Result<BodyComparisonResult, BodyTypeMismatch> {
     val bodyTypeMismatch = mismatches.filterIsInstance<BodyTypeMismatch>().firstOrNull()
     return if (bodyTypeMismatch != null) {
-      bodyTypeMismatch.left()
+      Err(bodyTypeMismatch)
     } else {
       val bodyMismatches = mismatches
         .filterIsInstance<BodyMismatch>()
@@ -78,7 +78,7 @@ class ResponseComparison(
       val contentType = this.actualResponseContentType
       val diff = generateFullDiff(actualBody.orEmpty(), contentType.mimeType.toString(),
         expectedBody.valueAsString(), isJsonBody)
-      BodyComparisonResult(bodyMismatches, diff).right()
+      Ok(BodyComparisonResult(bodyMismatches, diff))
     }
   }
 

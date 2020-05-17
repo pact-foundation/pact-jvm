@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider.junitsupport.loader
 
-import arrow.core.Either
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.Interaction
@@ -17,6 +16,8 @@ import au.com.dius.pact.core.support.expressions.ExpressionParser.parseListExpre
 import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.isNotEmpty
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import mu.KLogging
 import org.apache.http.client.utils.URIBuilder
 import java.io.IOException
@@ -151,8 +152,8 @@ open class PactBrokerLoader(
 
       val result = pactBrokerClient.fetchConsumersWithSelectors(providerName, selectors, providerTags, pending)
       var consumers = when (result) {
-        is Either.Right -> result.b
-        is Either.Left -> throw result.a
+        is Ok -> result.value
+        is Err -> throw result.error
       }
 
       if (failIfNoPactsFound && consumers.isEmpty()) {

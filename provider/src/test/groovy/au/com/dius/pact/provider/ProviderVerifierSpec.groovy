@@ -1,6 +1,5 @@
 package au.com.dius.pact.provider
 
-import arrow.core.Either
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Consumer
 import au.com.dius.pact.core.model.FileSource
@@ -494,7 +493,7 @@ class ProviderVerifierSpec extends Specification {
     DefaultVerificationReporter.INSTANCE.reportResults(pact, TestResult.Ok.INSTANCE, '0', client, null)
 
     then:
-    1 * client.publishVerificationResults(links, TestResult.Ok.INSTANCE, '0', null) >> new Either.Right(true)
+    1 * client.publishVerificationResults(links, TestResult.Ok.INSTANCE, '0', null) >> new Ok(true)
   }
 
   @SuppressWarnings('UnnecessaryGetter')

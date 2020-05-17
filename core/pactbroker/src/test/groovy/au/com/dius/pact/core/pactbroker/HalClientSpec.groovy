@@ -1,7 +1,8 @@
 package au.com.dius.pact.core.pactbroker
 
-import arrow.core.Either
 import au.com.dius.pact.core.support.CustomServiceUnavailableRetryStrategy
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import com.google.gson.JsonParser
 import org.apache.http.HttpEntity
 import org.apache.http.HttpHost
@@ -229,7 +230,7 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
-    result.b
+    result.value
   }
 
   def 'uploading a JSON doc returns an error'() {
@@ -246,7 +247,7 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
-    !result.b
+    !result.value
   }
 
   def 'uploading a JSON doc unsuccessful due to 409'() {
@@ -263,7 +264,7 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute({ it.getURI().path == '/' }, _) >> mockResponse
-    !result.b
+    !result.value
   }
 
   @Unroll
@@ -304,8 +305,8 @@ class HalClientSpec extends Specification {
     where:
 
     success   | status | expectedResult
-    'success' | 200    | new Either.Right(true)
-    'failure' | 400    | new Either.Right(false)
+    'success' | 200    | new Ok(true)
+    'failure' | 400    | new Ok(false)
   }
 
   def 'post URL returns a failure result if an exception is thrown'() {
@@ -318,7 +319,7 @@ class HalClientSpec extends Specification {
 
     then:
     1 * mockClient.execute(_, _) >> { throw new IOException('Boom!') }
-    result instanceof Either.Left
+    result instanceof Err
   }
 
   @SuppressWarnings('UnnecessaryGetter')
@@ -334,7 +335,7 @@ class HalClientSpec extends Specification {
     def result = client.postJson('path', 'body') { status, resp -> false }
 
     then:
-    !result.b
+    !result.value
   }
 
   def 'forAll does nothing if there is no matching link'() {
@@ -431,7 +432,7 @@ class HalClientSpec extends Specification {
     }
 
     when:
-    def result = client.fetch('https://test.pact.dius.com.au/pacts/provider/Activity Service/consumer/Foo Web Client 2/version/1.0.2').b
+    def result = client.fetch('https://test.pact.dius.com.au/pacts/provider/Activity Service/consumer/Foo Web Client 2/version/1.0.2').value
 
     then:
     1 * mockClient.execute({ it.URI.toString() == 'https://test.pact.dius.com.au/pacts/provider/Activity%20Service/consumer/Foo%20Web%20Client%202/version/1.0.2' }, _) >> mockResponse

@@ -1,6 +1,6 @@
 package au.com.dius.pact.provider
 
-import arrow.core.Either
+import com.github.michaelbull.result.Result
 import au.com.dius.pact.core.matchers.BodyTypeMismatch
 import au.com.dius.pact.core.matchers.HeaderMismatch
 import au.com.dius.pact.core.matchers.MetadataMismatch
@@ -25,6 +25,7 @@ import au.com.dius.pact.core.support.hasProperty
 import au.com.dius.pact.core.support.property
 import au.com.dius.pact.provider.reporters.AnsiConsoleReporter
 import au.com.dius.pact.provider.reporters.VerifierReporter
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.getError
 import groovy.lang.Closure
@@ -337,29 +338,29 @@ open class ProviderVerifier @JvmOverloads constructor (
 
   fun displayBodyResult(
     failures: MutableMap<String, Any>,
-    comparison: Either<BodyTypeMismatch, BodyComparisonResult>,
+    comparison: Result<BodyComparisonResult, BodyTypeMismatch>,
     comparisonDescription: String,
     interactionId: String,
     pending: Boolean
   ): VerificationResult {
-    return if (comparison is Either.Right && comparison.b.mismatches.isEmpty()) {
+    return if (comparison is Ok && comparison.value.mismatches.isEmpty()) {
       reporters.forEach { it.bodyComparisonOk() }
       VerificationResult.Ok
     } else {
       reporters.forEach { it.bodyComparisonFailed(comparison) }
       when (comparison) {
-        is Either.Left -> {
-          failures["$comparisonDescription has a matching body"] = comparison.a.description()
-          VerificationResult.Failed(listOf(comparison.a.toMap() +
+        is Err -> {
+          failures["$comparisonDescription has a matching body"] = comparison.error.description()
+          VerificationResult.Failed(listOf(comparison.error.toMap() +
             mapOf("interactionId" to interactionId, "type" to "body")),
             "Body had differences", comparisonDescription,
-            listOf(VerificationFailureType.MismatchFailure(comparison.a)), pending)
+            listOf(VerificationFailureType.MismatchFailure(comparison.error)), pending)
         }
-        is Either.Right -> {
-          failures["$comparisonDescription has a matching body"] = comparison.b
-          VerificationResult.Failed(listOf(comparison.b.mismatches +
+        is Ok -> {
+          failures["$comparisonDescription has a matching body"] = comparison.value
+          VerificationResult.Failed(listOf(comparison.value.mismatches +
             mapOf("interactionId" to interactionId, "type" to "body")),
-            "Body had differences", comparisonDescription, comparison.b.mismatches.values.flatten()
+            "Body had differences", comparisonDescription, comparison.value.mismatches.values.flatten()
               .map { VerificationFailureType.MismatchFailure(it) }, pending)
         }
       }

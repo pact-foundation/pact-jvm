@@ -1,9 +1,9 @@
 package au.com.dius.pact.provider
 
-import arrow.core.Either
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.PactBrokerResult
+import com.github.michaelbull.result.Ok
 import spock.lang.Specification
 
 class ProviderInfoSpec extends Specification {
@@ -73,7 +73,7 @@ class ProviderInfoSpec extends Specification {
     def result = providerInfo.hasPactsFromPactBrokerWithSelectors(options, url, selectors)
 
     then:
-    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, [], false) >> new Either.Right([
+    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, [], false) >> new Ok([
       new PactBrokerResult('consumer', '', url, [], [], false)
     ])
     result.size == 1
@@ -96,7 +96,7 @@ class ProviderInfoSpec extends Specification {
     def result = providerInfo.hasPactsFromPactBrokerWithSelectors(options, url, selectors)
 
     then:
-    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true) >> new Either.Right([
+    pactBrokerClient.fetchConsumersWithSelectors('TestProvider', selectors, ['master'], true) >> new Ok([
       new PactBrokerResult('consumer', '', url, [], [], true)
     ])
     result.size == 1

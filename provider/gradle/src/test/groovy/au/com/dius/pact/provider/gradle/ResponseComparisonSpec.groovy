@@ -6,6 +6,8 @@ import au.com.dius.pact.core.model.generators.Generators
 import au.com.dius.pact.core.model.matchingrules.MatchingRulesImpl
 import au.com.dius.pact.core.model.messaging.Message
 import au.com.dius.pact.provider.ResponseComparison
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import org.apache.http.entity.ContentType
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -37,8 +39,8 @@ class ResponseComparisonSpec extends Specification {
     def result = comparison()
 
     expect:
-    result.bodyMismatches.left
-    result.bodyMismatches.a.description() ==
+    result.bodyMismatches instanceof Err
+    result.bodyMismatches.error.description() ==
       'Expected a response type of \'application/json\' but the actual type was \'text/plain\''
   }
 
@@ -47,8 +49,8 @@ class ResponseComparisonSpec extends Specification {
     def result = comparison()
 
     expect:
-    result.bodyMismatches.right
-    result.bodyMismatches.b.mismatches.isEmpty()
+    result.bodyMismatches instanceof Ok
+    result.bodyMismatches.value.mismatches.isEmpty()
   }
 
   def 'comparing bodies should pass when the order of elements in the actual response is different'() {
@@ -60,8 +62,8 @@ class ResponseComparisonSpec extends Specification {
     def result = comparison()
 
     expect:
-    result.bodyMismatches.right
-    result.bodyMismatches.b.mismatches.isEmpty()
+    result.bodyMismatches instanceof Ok
+    result.bodyMismatches.value.mismatches.isEmpty()
   }
 
   def 'comparing bodies should show all the differences'() {
@@ -70,12 +72,12 @@ class ResponseComparisonSpec extends Specification {
     def result = comparison().bodyMismatches
 
     expect:
-    result.isRight()
-    result.b.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
+    result instanceof Ok
+    result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
       '$.stuff': ['Expected "is good" but received "should make the test fail"']
     ]
-    result.b.diff[1] == '-  "stuff": "is good"'
-    result.b.diff[2] == '+  "stuff": "should make the test fail"'
+    result.value.diff[1] == '-  "stuff": "is good"'
+    result.value.diff[2] == '+  "stuff": "should make the test fail"'
   }
 
   @Unroll

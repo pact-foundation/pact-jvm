@@ -1,6 +1,5 @@
 package broker
 
-import arrow.core.Either
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import com.github.michaelbull.result.Ok
 import au.com.dius.pact.consumer.PactVerificationResult
@@ -73,7 +72,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').b
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').value
     }
 
     then:
@@ -107,7 +106,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').b == false
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').value == false
     }
 
     then:
@@ -151,7 +150,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, 'XXXX').b == false
+      assert pactBrokerClient.uploadPactFile(pactFile, 'XXXX').value == false
     }
 
     then:
@@ -194,7 +193,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = pactBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').b == false
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').value == false
     }
 
     then:
@@ -230,7 +229,7 @@ class PactBrokerClientPactSpec extends Specification {
 
     when:
     def result = imaginaryBroker.runTest { server, context ->
-      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').b == false
+      assert pactBrokerClient.uploadPactFile(pactFile, '10.0.0').value == false
     }
 
     then:
@@ -305,7 +304,7 @@ class PactBrokerClientPactSpec extends Specification {
           href: 'http://localhost:8080/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
             '/verification-results'
         ]
-      ], TestResult.Ok.INSTANCE, '10.0.0').b
+      ], TestResult.Ok.INSTANCE, '10.0.0').value
     }
 
     then:
@@ -331,7 +330,7 @@ class PactBrokerClientPactSpec extends Specification {
           href: 'http://localhost:8080/pacts/provider/Provider/consumer/Foo%20Consumer/pact-version/1234567890' +
             '/verification-results'
         ]
-      ], TestResult.Ok.INSTANCE, '10.0.0', 'http://localhost:8080/build').b
+      ], TestResult.Ok.INSTANCE, '10.0.0', 'http://localhost:8080/build').value
     }
 
     then:
@@ -567,10 +566,10 @@ class PactBrokerClientPactSpec extends Specification {
       def consumerPacts = pactBrokerClient.fetchConsumersWithSelectors('Activity Service', [
           new ConsumerVersionSelector('test', true)
       ], [], false)
-      assert consumerPacts instanceof Either.Right
-      assert consumerPacts.b.size == 2
-      assert !consumerPacts.b[0].pending
-      assert !consumerPacts.b[1].pending
+      assert consumerPacts instanceof Ok
+      assert consumerPacts.value.size == 2
+      assert !consumerPacts.value[0].pending
+      assert !consumerPacts.value[1].pending
     }
 
     then:
@@ -680,10 +679,10 @@ class PactBrokerClientPactSpec extends Specification {
       def consumerPacts = pactBrokerClient.fetchConsumersWithSelectors('Activity Service', [
         new ConsumerVersionSelector('test', true)
       ], ['master'], true)
-      assert consumerPacts instanceof Either.Right
-      assert consumerPacts.b.size == 2
-      assert !consumerPacts.b[0].pending
-      assert consumerPacts.b[1].pending
+      assert consumerPacts instanceof Ok
+      assert consumerPacts.value.size == 2
+      assert !consumerPacts.value[0].pending
+      assert consumerPacts.value[1].pending
     }
 
     then:

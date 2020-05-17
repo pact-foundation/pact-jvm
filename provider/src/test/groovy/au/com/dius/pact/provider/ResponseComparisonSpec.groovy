@@ -2,6 +2,8 @@ package au.com.dius.pact.provider
 
 import au.com.dius.pact.core.model.OptionalBody
 import au.com.dius.pact.core.model.Response
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import org.apache.http.entity.ContentType
 import spock.lang.Specification
 
@@ -72,8 +74,9 @@ class ResponseComparisonSpec extends Specification {
     def result = subject().bodyMismatches
 
     then:
-    result.isLeft()
-    result.a.description() == 'Expected a response type of \'application/json\' but the actual type was \'text/plain\''
+    result instanceof Err
+    result.error.description() ==
+      'Expected a response type of \'application/json\' but the actual type was \'text/plain\''
   }
 
   def 'comparing bodies should pass with the same content types and body contents'() {
@@ -81,8 +84,8 @@ class ResponseComparisonSpec extends Specification {
     def result = subject().bodyMismatches
 
     expect:
-    result.isRight()
-    result.b.mismatches.isEmpty()
+    result instanceof Ok
+    result.value.mismatches.isEmpty()
   }
 
   def 'comparing bodies should pass when the order of elements in the actual response is different'() {
@@ -93,8 +96,8 @@ class ResponseComparisonSpec extends Specification {
     def result = subject().bodyMismatches
 
     expect:
-    result.isRight()
-    result.b.mismatches.isEmpty()
+    result instanceof Ok
+    result.value.mismatches.isEmpty()
   }
 
   def 'comparing bodies should show all the differences'() {
@@ -103,11 +106,11 @@ class ResponseComparisonSpec extends Specification {
     def result = subject().bodyMismatches
 
     expect:
-    result.isRight()
-    result.b.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
+    result instanceof Ok
+    result.value.mismatches.collectEntries { [ it.key, it.value*.description() ] } == [
       '$.stuff': ['Expected "is good" but received "should make the test fail"']
     ]
-    result.b.diff[1] == '-  "stuff": "is good"'
-    result.b.diff[2] == '+  "stuff": "should make the test fail"'
+    result.value.diff[1] == '-  "stuff": "is good"'
+    result.value.diff[2] == '+  "stuff": "should make the test fail"'
   }
 }

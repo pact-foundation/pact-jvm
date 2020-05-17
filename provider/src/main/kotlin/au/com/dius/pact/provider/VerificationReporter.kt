@@ -1,11 +1,11 @@
 package au.com.dius.pact.provider
 
-import arrow.core.Either
 import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.pactbroker.TestResult
+import com.github.michaelbull.result.Err
 import mu.KLogging
 
 /**
@@ -62,8 +62,8 @@ object DefaultVerificationReporter : VerificationReporter, KLogging() {
       brokerClient.publishProviderTag(source.attributes, pact.provider.name, tag, version)
     }
     val publishResult = brokerClient.publishVerificationResults(source.attributes, result, version)
-    if (publishResult is Either.Left) {
-      logger.error { "Failed to publish verification results - ${publishResult.a}" }
+    if (publishResult is Err) {
+      logger.error { "Failed to publish verification results - ${publishResult.error}" }
     } else {
       logger.info { "Published verification result of '$result' for consumer '${pact.consumer}'" }
     }

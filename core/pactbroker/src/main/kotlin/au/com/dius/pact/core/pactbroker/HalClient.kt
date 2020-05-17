@@ -3,7 +3,11 @@ package au.com.dius.pact.core.pactbroker
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.buildUrl
 import au.com.dius.pact.core.pactbroker.util.HttpClientUtils.isJsonResponse
 import au.com.dius.pact.core.support.HttpClient
+import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
+import au.com.dius.pact.core.support.unwrap
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.bool
 import com.github.salomonbrys.kotson.get
@@ -37,9 +41,7 @@ import java.net.URI
 import java.net.URLDecoder
 import java.util.function.BiFunction
 import java.util.function.Consumer
-import arrow.core.Either
-import au.com.dius.pact.core.support.handleWith
-import au.com.dius.pact.core.support.unwrap
+import com.github.michaelbull.result.Result
 
 /**
  * Interface to a HAL Client
@@ -82,7 +84,7 @@ interface IHalClient {
    * @return Returns a Success result object with a boolean value to indicate if the request was successful or not. Any
    * exception will be wrapped in a Failure
    */
-  fun postJson(url: String, body: String): Either<Exception, Boolean>
+  fun postJson(url: String, body: String): Result<Boolean, Exception>
 
   /**
    * Upload the JSON document to the provided URL, using a POST request
@@ -92,20 +94,20 @@ interface IHalClient {
    * @return Returns a Success result object with the boolean value returned from the handler closure. Any
    * exception will be wrapped in a Failure
    */
-  fun postJson(url: String, body: String, handler: ((status: Int, response: CloseableHttpResponse) -> Boolean)?): Either<Exception, Boolean>
+  fun postJson(url: String, body: String, handler: ((status: Int, response: CloseableHttpResponse) -> Boolean)?): Result<Boolean, Exception>
 
   /**
    * Fetches the HAL document from the provided path
    * @param path The path to the HAL document. If it is a relative path, it is relative to the base URL
    * @param encodePath If the path should be encoded to make a valid URL
    */
-  fun fetch(path: String, encodePath: Boolean): Either<Exception, JsonElement>
+  fun fetch(path: String, encodePath: Boolean): Result<JsonElement, Exception>
 
   /**
    * Fetches the HAL document from the provided path
    * @param path The path to the HAL document. If it is a relative path, it is relative to the base URL
    */
-  fun fetch(path: String): Either<Exception, JsonElement>
+  fun fetch(path: String): Result<JsonElement, Exception>
 
   /**
    * Sets the starting context from a previous broker interaction (Pact document)
@@ -120,24 +122,24 @@ interface IHalClient {
   /**
    * Upload a JSON document to the current path link, using a PUT request
    */
-  fun putJson(link: String, options: Map<String, Any>, json: String): Either<Exception, Boolean>
+  fun putJson(link: String, options: Map<String, Any>, json: String): Result<Boolean, Exception>
 
   /**
    * Upload a JSON document to the current path link, using a POST request
    */
-  fun postJson(link: String, options: Map<String, Any>, json: String): Either<Exception, JsonElement>
+  fun postJson(link: String, options: Map<String, Any>, json: String): Result<JsonElement, Exception>
 
   /**
    * Get JSON from the provided path
    */
-  fun getJson(path: String): Either<Exception, JsonElement>
+  fun getJson(path: String): Result<JsonElement, Exception>
 
   /**
    * Get JSON from the provided path
    * @param path Path to fetch the JSON document from
    * @param encodePath If the path should be encoded
    */
-  fun getJson(path: String, encodePath: Boolean): Either<Exception, JsonElement>
+  fun getJson(path: String, encodePath: Boolean): Result<JsonElement, Exception>
 }
 
 /**
@@ -175,7 +177,7 @@ open class HalClient @JvmOverloads constructor(
     url: String,
     body: String,
     handler: ((status: Int, response: CloseableHttpResponse) -> Boolean)?
-  ): Either<Exception, Boolean> {
+  ): Result<Boolean, Exception> {
     logger.debug { "Posting JSON to $url\n$body" }
     val client = setupHttpClient()
 
@@ -223,8 +225,8 @@ open class HalClient @JvmOverloads constructor(
 
   override fun navigate(): IHalClient {
     when (val result = fetch(ROOT)) {
-      is Either.Right -> pathInfo = result.b
-      is Either.Left -> logger.warn(result.a) { "Could not fetch the root HAL document" }
+      is Ok<*> -> pathInfo = result.value as JsonElement?
+      is Err<*> -> logger.warn(result.error as Exception) { "Could not fetch the root HAL document" }
     }
     return this
   }
@@ -239,7 +241,7 @@ open class HalClient @JvmOverloads constructor(
 
   override fun fetch(path: String) = fetch(path, true)
 
-  override fun fetch(path: String, encodePath: Boolean): Either<Exception, JsonElement> {
+  override fun fetch(path: String, encodePath: Boolean): Result<JsonElement, Exception> {
     lastUrl = path
     logger.debug { "Fetching: $path" }
     return getJson(path, encodePath)
@@ -270,7 +272,7 @@ open class HalClient @JvmOverloads constructor(
 
   override fun getJson(path: String) = getJson(path, true)
 
-  override fun getJson(path: String, encodePath: Boolean): Either<Exception, JsonElement> {
+  override fun getJson(path: String, encodePath: Boolean): Result<JsonElement, Exception> {
     setupHttpClient()
     return handleWith {
       val httpGet = initialiseRequest(HttpGet(buildUrl(baseUrl, path, encodePath)))
@@ -282,18 +284,18 @@ open class HalClient @JvmOverloads constructor(
     }
   }
 
-  private fun handleHalResponse(response: CloseableHttpResponse, path: String): Either<Exception, JsonElement> {
+  private fun handleHalResponse(response: CloseableHttpResponse, path: String): Result<JsonElement, Exception> {
     return if (response.statusLine.statusCode < 300) {
       val contentType = ContentType.getOrDefault(response.entity)
       if (isJsonResponse(contentType)) {
-        Either.right(JsonParser.parseString(EntityUtils.toString(response.entity)))
+        Ok(JsonParser.parseString(EntityUtils.toString(response.entity)))
       } else {
-        Either.left(InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got '$contentType'"))
+        Err(InvalidHalResponse("Expected a HAL+JSON response from the pact broker, but got '$contentType'"))
       }
     } else {
       when (response.statusLine.statusCode) {
-        404 -> Either.left(NotFoundHalResponse("No HAL document found at path '$path'"))
-        else -> Either.left(RequestFailedException("Request to path '$path' failed with response '${response.statusLine}'"))
+        404 -> Err(NotFoundHalResponse("No HAL document found at path '$path'"))
+        else -> Err(RequestFailedException("Request to path '$path' failed with response '${response.statusLine}'"))
       }
     }
   }
@@ -437,7 +439,7 @@ open class HalClient @JvmOverloads constructor(
     }
   }
 
-  override fun putJson(link: String, options: Map<String, Any>, json: String): Either<Exception, Boolean> {
+  override fun putJson(link: String, options: Map<String, Any>, json: String): Result<Boolean, Exception> {
     val href = hrefForLink(link, options)
     val httpPut = initialiseRequest(HttpPut(buildUrl(baseUrl, href.first, href.second)))
     httpPut.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())
@@ -456,7 +458,7 @@ open class HalClient @JvmOverloads constructor(
     }
   }
 
-  override fun postJson(link: String, options: Map<String, Any>, json: String): Either<Exception, JsonElement> {
+  override fun postJson(link: String, options: Map<String, Any>, json: String): Result<JsonElement, Exception> {
     val href = hrefForLink(link, options)
     val http = initialiseRequest(HttpPost(buildUrl(baseUrl, href.first, href.second)))
     http.addHeader("Content-Type", ContentType.APPLICATION_JSON.toString())

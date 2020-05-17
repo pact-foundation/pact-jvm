@@ -9,7 +9,6 @@ import au.com.dius.pact.core.support.expressions.SystemPropertyResolver
 import au.com.dius.pact.core.support.expressions.ValueResolver
 import au.com.dius.pact.core.support.handleWith
 import au.com.dius.pact.core.support.isNotEmpty
-import au.com.dius.pact.core.support.unwrapOr
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IConsumerInfo
@@ -36,6 +35,7 @@ import au.com.dius.pact.provider.junitsupport.loader.PactLoader
 import au.com.dius.pact.provider.junitsupport.loader.PactSource
 import au.com.dius.pact.provider.reporters.ReporterManager
 import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.getOr
 import mu.KLogging
 import org.apache.http.HttpRequest
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback
@@ -444,7 +444,7 @@ open class PactVerificationInvocationContextProvider : TestTemplateInvocationCon
         it.setValueResolver(valueResolver)
       }
       description += "\nSource: ${it.description()}"
-      val pacts = handleWith<List<Pact<Interaction>>> { it.load(serviceName) }.unwrapOr(emptyList())
+      val pacts = handleWith<List<Pact<Interaction>>> { it.load(serviceName) }.getOr { emptyList() }
       filterPactsByAnnotations(pacts, context.requiredTestClass)
     }.filter { p -> consumerName == null || p.consumer.name == consumerName }
 

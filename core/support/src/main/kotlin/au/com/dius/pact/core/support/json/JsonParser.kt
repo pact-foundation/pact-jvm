@@ -1,6 +1,8 @@
 package au.com.dius.pact.core.support.json
 
-import arrow.core.Either
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import java.io.BufferedInputStream
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -107,53 +109,53 @@ class JsonLexer(val json: JsonSource) {
   private val validHexCharsLower = 'a'..'f'
   private val validHexCharsUpper = 'A'..'F'
 
-  fun nextToken(): Either<JsonException, JsonToken?> {
+  fun nextToken(): Result<JsonToken?, JsonException> {
     val next = nextChar()
     if (next != null) {
       return when {
         next.isWhitespace() -> {
           val chars = mutableListOf(next)
           chars.addAll(consumeChars(Char::isWhitespace))
-          Either.right(JsonToken.Whitespace(String(chars.toCharArray())))
+          Ok(JsonToken.Whitespace(String(chars.toCharArray())))
         }
         next == '-' || next.isDigit() -> scanNumber(next)
         next == 't' -> scanTrue()
         next == 'f' -> scanFalse()
         next == 'n' -> scanNull()
         next == '"' -> scanString()
-        next == '[' -> Either.right(JsonToken.ArrayStart)
-        next == ']' -> Either.right(JsonToken.ArrayEnd)
-        next == '{' -> Either.right(JsonToken.ObjectStart)
-        next == '}' -> Either.right(JsonToken.ObjectEnd)
-        next == ',' -> Either.right(JsonToken.Comma)
-        next == ':' -> Either.right(JsonToken.Colon)
+        next == '[' -> Ok(JsonToken.ArrayStart)
+        next == ']' -> Ok(JsonToken.ArrayEnd)
+        next == '{' -> Ok(JsonToken.ObjectStart)
+        next == '}' -> Ok(JsonToken.ObjectEnd)
+        next == ',' -> Ok(JsonToken.Comma)
+        next == ':' -> Ok(JsonToken.Colon)
         else -> unexpectedCharacter(next)
       }
     }
-    return Either.right(null)
+    return Ok(null)
   }
 
-  private fun scanNumber(next: Char): Either<JsonException, JsonToken> {
+  private fun scanNumber(next: Char): Result<JsonToken, JsonException> {
     val chars = mutableListOf(next)
     chars.addAll(consumeChars(Char::isDigit))
     if (next == '-' && chars.size == 1) {
-      return Either.left(JsonException(
+      return Err(JsonException(
         "Invalid JSON (${documentPointer()}), found a '$next' that was not followed by any digits"))
     }
     return if (validNumberSuffixes.contains(json.peekNextChar())) {
       scanDecimalNumber(chars)
     } else {
-      Either.right(JsonToken.Integer(String(chars.toCharArray())))
+      Ok(JsonToken.Integer(String(chars.toCharArray())))
     }
   }
 
-  private fun scanDecimalNumber(chars: MutableList<Char>): Either<JsonException, JsonToken.Decimal> {
+  private fun scanDecimalNumber(chars: MutableList<Char>): Result<JsonToken.Decimal, JsonException> {
     var next = json.peekNextChar()
     if (next == '.') {
       chars.add(json.nextChar()!!)
       chars.addAll(consumeChars(Char::isDigit))
       if (!chars.last().isDigit()) {
-        return Either.left(JsonException("Invalid JSON (${documentPointer()}), '$chars' is not a valid number"))
+        return Err(JsonException("Invalid JSON (${documentPointer()}), '$chars' is not a valid number"))
       }
       next = json.peekNextChar()
     }
@@ -165,13 +167,13 @@ class JsonLexer(val json: JsonSource) {
       }
       chars.addAll(consumeChars(Char::isDigit))
       if (!chars.last().isDigit()) {
-        return Either.left(JsonException("Invalid JSON (${documentPointer()}), '$chars' is not a valid number"))
+        return Err(JsonException("Invalid JSON (${documentPointer()}), '$chars' is not a valid number"))
       }
     }
-    return Either.right(JsonToken.Decimal(String(chars.toCharArray())))
+    return Ok(JsonToken.Decimal(String(chars.toCharArray())))
   }
 
-  private fun scanString(): Either<JsonException, JsonToken.StringValue> {
+  private fun scanString(): Result<JsonToken.StringValue, JsonException> {
     val chars = mutableListOf<Char>()
     do {
       var next = json.nextChar()
@@ -189,73 +191,73 @@ class JsonLexer(val json: JsonSource) {
           'u' -> {
             val u1 = json.nextChar()
             if (!validHex(u1)) {
-              return Either.left(
+              return Err(
                 JsonException("Invalid JSON (${documentPointer()}), '$u1' is not a valid hex code character"))
             } else if (u1 == null) {
-              return Either.left(
+              return Err(
                 JsonException("Invalid JSON (${documentPointer()}), Unicode characters require 4 hex digits"))
             }
             val u2 = json.nextChar()
             if (!validHex(u2)) {
-              return Either.left(
+              return Err(
                 JsonException("Invalid JSON (${documentPointer()}), '$u2' is not a valid hex code character"))
             } else if (u2 == null) {
-              return Either.left(
+              return Err(
                 JsonException("Invalid JSON (${documentPointer()}), Unicode characters require 4 hex digits"))
             }
             val u3 = json.nextChar()
             if (!validHex(u3)) {
-              return Either.left(
+              return Err(
                 JsonException("Invalid JSON (${documentPointer()}), '$u3' is not a valid hex code character"))
             } else if (u3 == null) {
-              return Either.left(
+              return Err(
                 JsonException("Invalid JSON (${documentPointer()}), Unicode characters require 4 hex digits"))
             }
             val u4 = json.nextChar()
             if (!validHex(u4)) {
-              return Either.left(
+              return Err(
                 JsonException("Invalid JSON (${documentPointer()}), '$u4' is not a valid hex code character"))
             } else if (u4 == null) {
-              return Either.left(
+              return Err(
                 JsonException("Invalid JSON (${documentPointer()}), Unicode characters require 4 hex digits"))
             }
             val hex = String(charArrayOf(u1, u2, u3, u4)).toInt(radix = 16)
             chars.add(hex.toChar())
           }
-          else -> return Either.left(
+          else -> return Err(
             JsonException("Invalid JSON (${documentPointer()}), '$escapeCode' is not a valid escape code"))
         }
       } else if (next == null) {
-        return Either.left(
+        return Err(
           JsonException("Invalid JSON (${documentPointer()}), End of document scanning for string terminator"))
       } else if (next != '"') {
         chars.add(next)
       }
     } while (next != '"')
-    return Either.right(JsonToken.StringValue(String(chars.toCharArray())))
+    return Ok(JsonToken.StringValue(String(chars.toCharArray())))
   }
 
   private fun validHex(char: Char?) = validHexDigits.contains(char) || validHexCharsLower.contains(char) ||
     validHexCharsUpper.contains(char)
 
   private fun unexpectedCharacter(next: Char?) = if (next == null)
-    Either.left(JsonException("Invalid JSON (${documentPointer()}), unexpected end of the JSON document"))
+    Err(JsonException("Invalid JSON (${documentPointer()}), unexpected end of the JSON document"))
   else
-    Either.left(JsonException("Invalid JSON (${documentPointer()}), found unexpected character '$next'"))
+    Err(JsonException("Invalid JSON (${documentPointer()}), found unexpected character '$next'"))
 
   fun documentPointer() = "${line + 1}:${character + 1}"
 
-  private fun scanNull(): Either<JsonException, JsonToken?> {
+  private fun scanNull(): Result<JsonToken?, JsonException> {
     var next = json.nextChar()
     if (next == null || next != 'u') return unexpectedCharacter(next)
     next = json.nextChar()
     if (next == null || next != 'l') return unexpectedCharacter(next)
     next = json.nextChar()
     if (next == null || next != 'l') return unexpectedCharacter(next)
-    return Either.right(JsonToken.Null)
+    return Ok(JsonToken.Null)
   }
 
-  private fun scanFalse(): Either<JsonException, JsonToken?> {
+  private fun scanFalse(): Result<JsonToken?, JsonException> {
     var next = json.nextChar()
     if (next == null || next != 'a') return unexpectedCharacter(next)
     next = json.nextChar()
@@ -264,17 +266,17 @@ class JsonLexer(val json: JsonSource) {
     if (next == null || next != 's') return unexpectedCharacter(next)
     next = json.nextChar()
     if (next == null || next != 'e') return unexpectedCharacter(next)
-    return Either.right(JsonToken.False)
+    return Ok(JsonToken.False)
   }
 
-  private fun scanTrue(): Either<JsonException, JsonToken?> {
+  private fun scanTrue(): Result<JsonToken?, JsonException> {
     var next = json.nextChar()
     if (next == null || next != 'r') return unexpectedCharacter(next)
     next = json.nextChar()
     if (next == null || next != 'u') return unexpectedCharacter(next)
     next = json.nextChar()
     if (next == null || next != 'e') return unexpectedCharacter(next)
-    return Either.right(JsonToken.True)
+    return Ok(JsonToken.True)
   }
 
   private fun consumeChars(predicate: (Char) -> Boolean): List<Char> {
@@ -443,8 +445,8 @@ object JsonParser {
     do {
       val next = lexer.nextToken()
       token = when (next) {
-        is Either.Left -> throw next.a
-        is Either.Right -> next.b
+        is Err -> throw next.error
+        is Ok -> next.value
       }
     } while (token is JsonToken.Whitespace)
     return token

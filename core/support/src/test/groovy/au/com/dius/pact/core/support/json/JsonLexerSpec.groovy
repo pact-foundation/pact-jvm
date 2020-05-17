@@ -1,6 +1,6 @@
 package au.com.dius.pact.core.support.json
 
-import arrow.core.Either
+import com.github.michaelbull.result.Err
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -15,7 +15,7 @@ class JsonLexerSpec extends Specification {
     def token = lexer.nextToken()
 
     then:
-    token.b == tokenValue
+    token.value == tokenValue
 
     where:
 
@@ -51,7 +51,7 @@ class JsonLexerSpec extends Specification {
     def token = lexer.nextToken()
 
     then:
-    token instanceof Either.Left
+    token instanceof Err
 
     where:
 

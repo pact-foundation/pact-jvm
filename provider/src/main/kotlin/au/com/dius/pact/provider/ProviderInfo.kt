@@ -1,12 +1,14 @@
 package au.com.dius.pact.provider
 
-import arrow.core.Either
 import au.com.dius.pact.core.model.DefaultPactReader
 import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.pactbroker.ConsumerVersionSelector
 import au.com.dius.pact.core.pactbroker.PactBrokerClient
 import au.com.dius.pact.core.support.Utils
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.map
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.ToStringBuilder
 import java.io.File
@@ -83,14 +85,14 @@ open class ProviderInfo @JvmOverloads constructor (
       .map { results -> results.map { ConsumerInfo.from(it) }
     }
     return when (consumersFromBroker) {
-      is Either.Right<*> -> {
-        val list = (consumersFromBroker as Either.Right<List<ConsumerInfo>>).b
+      is Ok<List<ConsumerInfo>> -> {
+        val list = consumersFromBroker.value
         consumers.addAll(list)
         list
       }
-      is Either.Left<*> -> {
+      is Err<Exception> -> {
         throw RuntimeException("Call to fetch pacts from Pact Broker failed with an exception",
-          consumersFromBroker.a as Exception)
+          consumersFromBroker.error)
       }
     }
   }

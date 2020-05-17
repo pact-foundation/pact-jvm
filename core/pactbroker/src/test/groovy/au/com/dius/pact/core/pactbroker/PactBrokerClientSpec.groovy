@@ -1,7 +1,8 @@
 package au.com.dius.pact.core.pactbroker
 
-import arrow.core.Either
 import au.com.dius.pact.core.support.Json
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -48,7 +49,7 @@ class PactBrokerClientSpec extends Specification {
     }
 
     when:
-    def consumers = client.fetchConsumersWithSelectors('provider', [], [], false).b
+    def consumers = client.fetchConsumersWithSelectors('provider', [], [], false).value
 
     then:
     consumers != []
@@ -69,7 +70,7 @@ class PactBrokerClientSpec extends Specification {
     }
 
     when:
-    def consumers = client.fetchConsumersWithSelectors('provider', [], [], false).b
+    def consumers = client.fetchConsumersWithSelectors('provider', [], [], false).value
 
     then:
     consumers == []
@@ -87,7 +88,7 @@ class PactBrokerClientSpec extends Specification {
     }
 
     when:
-    def consumers = client.fetchConsumersWithSelectors('provider', [], [], false).b
+    def consumers = client.fetchConsumersWithSelectors('provider', [], [], false).value
 
     then:
     consumers != []
@@ -108,7 +109,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true) ], [], false).b
+            [ new ConsumerVersionSelector('tag', true) ], [], false).value
 
     then:
     consumers != []
@@ -130,7 +131,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true) ], [], false).b
+            [ new ConsumerVersionSelector('tag', true) ], [], false).value
 
     then:
     consumers.first().pactFileAuthentication == ['Basic', '1', '2']
@@ -149,7 +150,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-            [ new ConsumerVersionSelector('tag', true) ], [], false).b
+            [ new ConsumerVersionSelector('tag', true) ], [], false).value
 
     then:
     consumers != []
@@ -170,7 +171,7 @@ class PactBrokerClientSpec extends Specification {
 
     when:
     def consumers = client.fetchConsumersWithSelectors('provider',
-      [ new ConsumerVersionSelector('tag', true) ], [], false).b
+      [ new ConsumerVersionSelector('tag', true) ], [], false).value
 
     then:
     consumers == []
@@ -190,8 +191,8 @@ class PactBrokerClientSpec extends Specification {
     then:
     1 * halClient.putJson('pb:publish-pact',
       ['provider': 'Provider', 'consumer': 'Foo%20Consumer', 'consumerApplicationVersion': '10.0.0'],
-      pactContents) >> new Either.Right(false)
-    !result.b
+      pactContents) >> new Ok(false)
+    !result.value
   }
 
   def 'encode the provider name, consumer name, tags and version when uploading a pact'() {
@@ -221,7 +222,7 @@ class PactBrokerClientSpec extends Specification {
     then:
     1 * halClient.putJson('pb:publish-pact',
       ['provider': 'Provider%2FA', 'consumer': 'Foo%20Consumer%2FA',
-       'consumerApplicationVersion': '10.0.0%2FB'], pactContents) >> new Either.Right(true)
+       'consumerApplicationVersion': '10.0.0%2FB'], pactContents) >> new Ok(true)
     1 * halClient.putJson('pb:pacticipant-version-tag',
             ['pacticipant': 'Foo%20Consumer%2FA', 'version': '10.0.0%2FB', 'tag': 'A/B'], '{}')
   }
@@ -253,12 +254,12 @@ class PactBrokerClientSpec extends Specification {
 
     then:
     1 * halClient.putJson('pb:pacticipant-version-tag',
-      ['pacticipant': 'Foo%20Consumer%2FA', 'version': '10.0.0%2FB', 'tag': 'A/B'], '{}') >> new Either.Right(true)
+      ['pacticipant': 'Foo%20Consumer%2FA', 'version': '10.0.0%2FB', 'tag': 'A/B'], '{}') >> new Ok(true)
 
     then:
     1 * halClient.putJson('pb:publish-pact',
       ['provider': 'Provider%2FA', 'consumer': 'Foo%20Consumer%2FA',
-      'consumerApplicationVersion': '10.0.0%2FB'], pactContents) >> new Either.Right(true)
+      'consumerApplicationVersion': '10.0.0%2FB'], pactContents) >> new Ok(true)
   }
 
   @Unroll
@@ -269,7 +270,7 @@ class PactBrokerClientSpec extends Specification {
     PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
-    halClient.postJson('URL', _) >> new Either.Right(true)
+    halClient.postJson('URL', _) >> new Ok(true)
 
     expect:
     client.publishVerificationResults(attributes, TestResult.Ok.INSTANCE, '0', null).class.simpleName == result
@@ -277,10 +278,10 @@ class PactBrokerClientSpec extends Specification {
     where:
 
     reason                              | attributes                                         | result
-    'there is no verification link'     | [:]                                                | Either.Left.simpleName
-    'the verification link has no href' | ['pb:publish-verification-results': [:]]           | Either.Left.simpleName
-    'the broker client returns success' | ['pb:publish-verification-results': [href: 'URL']] | Either.Right.simpleName
-    'the links have different case'     | ['pb:Publish-Verification-Results': [HREF: 'URL']] | Either.Right.simpleName
+    'there is no verification link'     | [:]                                                | Err.simpleName
+    'the verification link has no href' | ['pb:publish-verification-results': [:]]           | Err.simpleName
+    'the broker client returns success' | ['pb:publish-verification-results': [href: 'URL']] | Ok.simpleName
+    'the links have different case'     | ['pb:Publish-Verification-Results': [HREF: 'URL']] | Ok.simpleName
   }
 
   def 'when fetching a pact, return the results as a Map'() {
@@ -308,7 +309,7 @@ class PactBrokerClientSpec extends Specification {
     def result = client.fetchPact(url, true)
 
     then:
-    1 * halClient.fetch(url, _) >> new Either.Right(json)
+    1 * halClient.fetch(url, _) >> new Ok(json)
     result.pactFile == Json.INSTANCE.toJson([a: 'a', b: 100, _links: [:], c: [true, 10.2, 'test']])
   }
 
@@ -318,7 +319,7 @@ class PactBrokerClientSpec extends Specification {
     PactBrokerClient client = Spy(PactBrokerClient, constructorArgs: ['baseUrl']) {
       newHalClient() >> halClient
     }
-    def uploadResult = new Either.Right(true)
+    def uploadResult = new Ok(true)
     halClient.postJson(_, _) >> uploadResult
     def result = new TestResult.Failed([
       [exception: new AssertionError('boom')]
@@ -370,9 +371,9 @@ class PactBrokerClientSpec extends Specification {
     then:
     1 * halClient.navigate() >> halClient
     1 * halClient.linkUrl('pb:provider-pacts-for-verification') >> 'URL'
-    1 * halClient.postJson('pb:provider-pacts-for-verification', [provider: 'provider'], json) >> new Either.Right(jsonResult)
-    result.right
-    result.b.first() == new PactBrokerResult('Pact between Foo Web Client (1.0.2) and Activity Service',
+    1 * halClient.postJson('pb:provider-pacts-for-verification', [provider: 'provider'], json) >> new Ok(jsonResult)
+    result instanceof Ok
+    result.value.first() == new PactBrokerResult('Pact between Foo Web Client (1.0.2) and Activity Service',
       'https://test.pact.dius.com.au/pacts/provider/Activity Service/consumer/Foo Web Client/pact-version/384826ff3a2856e28dfae553efab302863dcd727',
       'baseUrl', [], [
         new VerificationNotice('before_verification',
@@ -404,8 +405,8 @@ class PactBrokerClientSpec extends Specification {
     1 * halClient.navigate() >> halClient
     1 * halClient.linkUrl('pb:provider-pacts-for-verification') >> null
     1 * halClient.linkUrl('beta:provider-pacts-for-verification') >> 'URL'
-    1 * halClient.postJson('beta:provider-pacts-for-verification', _, _) >> new Either.Right(jsonResult)
-    result.right
+    1 * halClient.postJson('beta:provider-pacts-for-verification', _, _) >> new Ok(jsonResult)
+    result instanceof Ok
   }
 
   def 'fetching pacts with selectors falls back to the previous implementation if no link is available'() {
@@ -424,6 +425,6 @@ class PactBrokerClientSpec extends Specification {
     1 * halClient.linkUrl('beta:provider-pacts-for-verification') >> null
     0 * halClient.postJson(_, _, _)
     1 * client.fetchConsumers('provider') >> []
-    result.right
+    result instanceof Ok
   }
 }
