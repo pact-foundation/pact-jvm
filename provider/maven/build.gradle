@@ -48,19 +48,21 @@ task generatePom(type: GenerateMavenPom, dependsOn: [":provider:publishToMavenLo
     }
 }
 
-task pluginDescriptor(type: Exec, dependsOn: generatePom) {
+if (System.env.TRAVIS == 'true') {
+  task pluginDescriptor(type: Exec, dependsOn: generatePom) {
     if (isWindows()) {
       commandLine 'mvn.bat', '-f', "${buildDir}/poms/pom.xml", '--settings',
         'src/main/resources/settings.xml', '-e', '-B', 'org.apache.maven.plugins:maven-plugin-plugin:3.6.0:descriptor'
     } else {
-      commandLine 'sh', '-c', "mvn -f ${buildDir}/poms/pom.xml --settings src/main/resources/settings.xml -e -B org.apache.maven.plugins:maven-plugin-plugin:3.6.0:descriptor"      
+      commandLine 'sh', '-c', "mvn -f ${buildDir}/poms/pom.xml --settings src/main/resources/settings.xml -e -B org.apache.maven.plugins:maven-plugin-plugin:3.6.0:descriptor"
     }
-    
-    doLast {
-        final  pluginDescriptor = file("${project.compileKotlin.destinationDir}/META-INF/maven/plugin.xml")
-        assert pluginDescriptor.file, "[$pluginDescriptor.canonicalPath] was not created"
-    }
-}
 
-pluginDescriptor.shouldRunAfter project.jar
-project.jar.dependsOn pluginDescriptor
+      doLast {
+        final pluginDescriptor = file("${project.compileKotlin.destinationDir}/META-INF/maven/plugin.xml")
+        assert pluginDescriptor.file, "[$pluginDescriptor.canonicalPath] was not created"
+      }
+  }
+
+  pluginDescriptor.shouldRunAfter project.jar
+  project.jar.dependsOn pluginDescriptor
+}
