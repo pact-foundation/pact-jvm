@@ -110,7 +110,7 @@ open class PactProviderMojo : PactBaseMojo() {
 
         provider.consumers = consumers
 
-        verifier.verifyProviderReturnResult(provider)
+        verifier.verifyProvider(provider)
       }.filterIsInstance<VerificationResult.Failed>()
 
       if (failures.isNotEmpty()) {

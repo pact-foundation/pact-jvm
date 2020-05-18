@@ -4,6 +4,7 @@ import au.com.dius.pact.core.model.FileSource
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.readme.dropwizard.DropwizardConfiguration
 import au.com.dius.pact.provider.readme.dropwizard.TestDropwizardApplication
 import io.dropwizard.testing.ResourceHelpers
@@ -58,22 +59,20 @@ class ReadmeExamplePactJVMProviderSpockSpec extends Specification {
   @Unroll
   def "Provider Pact - With Consumer #consumer"() {
     expect:
-    !verifyConsumerPact(consumer).empty
+    verifyConsumerPact(consumer) instanceof VerificationResult.Failed
 
     where:
     consumer << serviceProvider.consumers
   }
 
-  private Map verifyConsumerPact(ConsumerInfo consumer) {
-    Map failures = [:]
-
+  private VerificationResult verifyConsumerPact(ConsumerInfo consumer) {
     verifier.initialiseReporters(serviceProvider)
-    verifier.runVerificationForConsumer(failures, serviceProvider, consumer)
+    def result = verifier.runVerificationForConsumer([:], serviceProvider, consumer)
 
-    if (!failures.empty) {
-      verifier.displayFailures(failures)
+    if (result instanceof VerificationResult.Failed) {
+      verifier.displayFailures([result])
     }
 
-    failures
+    result
   }
 }

@@ -66,12 +66,13 @@ class ReadmeExamplePactJVMProviderJUnitTest {
     // setup the client and interaction to fire against the provider
     ProviderClient client = new ProviderClient(serviceProvider, new HttpClientFactory())
     Map<String, Object> failures = new HashMap<>()
-    verifier.verifyResponseFromProvider(serviceProvider, interaction, interaction.getDescription(), failures, client)
+    VerificationResult result = verifier.verifyResponseFromProvider(serviceProvider, interaction, 
+      interaction.getDescription(), failures, client)
 
     // normally assert all good, but in this example it will fail
-    assertThat(failures, is(not(empty())))
+    assertThat(failures, is(instanceOf(VerificationResult.Failed)))
 
-    verifier.displayFailures(failures)
+    verifier.displayFailures(result)
   }
 
   private ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider, ConsumerInfo consumer) {
@@ -140,23 +141,21 @@ class ReadmeExamplePactJVMProviderSpockSpec extends Specification {
   @Unroll
   def "Provider Pact - With Consumer #consumer"() {
     expect:
-    !verifyConsumerPact(consumer).empty
+    verifyConsumerPact(consumer) instanceof VerificationResult.Ok
 
     where:
     consumer << serviceProvider.consumers
   }
 
-  private Map verifyConsumerPact(ConsumerInfo consumer) {
-    Map failures = [:]
-
+  private VerificationResult verifyConsumerPact(ConsumerInfo consumer) {
     verifier.initialiseReporters(serviceProvider)
-    verifier.runVerificationForConsumer(failures, serviceProvider, consumer)
+    def result = verifier.runVerificationForConsumer([:], serviceProvider, consumer)
 
-    if (!failures.empty) {
-      verifier.displayFailures(failures)
+    if (result instanceof VerificationResult.Failed) {
+      verifier.displayFailures([result])
     }
 
-    failures
+    result
   }
 }
 

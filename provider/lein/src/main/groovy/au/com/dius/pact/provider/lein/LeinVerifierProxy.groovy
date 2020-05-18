@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.lein
 import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.VerificationResult
 import clojure.java.api.Clojure
 import clojure.lang.IFn
 import groovy.transform.Canonical
@@ -25,7 +26,7 @@ class LeinVerifierProxy {
   private final IFn hasProperty = Clojure.var(LEIN_PACT_VERIFY_NAMESPACE, 'has-property?')
   private final IFn getProperty = Clojure.var(LEIN_PACT_VERIFY_NAMESPACE, 'get-property')
 
-  Map<String, Object> verifyProvider(ProviderInfo provider) {
+  List<VerificationResult.Failed> verifyProvider(ProviderInfo provider) {
     verifier.projectHasProperty = { property ->
       this.hasProperty.invoke(Clojure.read(":$property"), args)
     }
@@ -38,6 +39,7 @@ class LeinVerifierProxy {
     verifier.checkBuildSpecificTask = { false }
 
     verifier.verifyProvider(provider)
+      .findAll { it instanceof VerificationResult.Failed } as List<VerificationResult.Failed>
   }
 
   Closure wrap(IFn fn) {

@@ -211,7 +211,7 @@ class PactProviderMojoSpec extends Specification {
     def provider = new Provider('TestProvider', dir3, null, null)
     provider.pactFileDirectories =  [dir1, dir2]
     def verifier = Mock(IProviderVerifier) {
-      verifyProviderReturnResult(provider) >> []
+      verifyProvider(provider) >> []
     }
     mojo = Spy(PactProviderMojo) {
       loadPactFiles(provider, _) >> []
@@ -256,7 +256,7 @@ class PactProviderMojoSpec extends Specification {
     given:
     def provider = new Provider('TestProvider', 'dir' as File, null, null)
     def verifier = Mock(IProviderVerifier) {
-      verifyProviderReturnResult(provider) >> []
+      verifyProvider(provider) >> []
     }
     mojo = Spy(PactProviderMojo) {
       loadPactFiles(provider, _) >> []
@@ -279,7 +279,7 @@ class PactProviderMojoSpec extends Specification {
     given:
     def provider = new Provider('TestProvider', 'dir' as File, null, null)
     def verifier = Mock(IProviderVerifier) {
-      verifyProviderReturnResult(provider) >> []
+      verifyProvider(provider) >> []
     }
     mojo = Spy(PactProviderMojo) {
       loadPactFiles(provider, _) >> []
@@ -304,7 +304,7 @@ class PactProviderMojoSpec extends Specification {
     given:
     def provider = new Provider('TestProvider', 'dir1' as File, null, null)
     def verifier = Mock(IProviderVerifier) {
-      verifyProviderReturnResult(provider) >> []
+      verifyProvider(provider) >> []
     }
     mojo = Spy(PactProviderMojo) {
       loadPactFiles(provider, _) >> []

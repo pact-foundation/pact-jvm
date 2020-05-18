@@ -142,15 +142,9 @@ interface IProviderVerifier {
   var providerTag: Supplier<String?>?
 
   /**
-   * Run the verification for the given provider and return an failures in a Map
-   */
-  @Deprecated("Use version that returns VerificationResult")
-  fun verifyProvider(provider: ProviderInfo): MutableMap<String, Any>
-
-  /**
    * Run the verification for the given provider and return any failures
    */
-  fun verifyProviderReturnResult(provider: ProviderInfo): List<VerificationResult>
+  fun verifyProvider(provider: ProviderInfo): List<VerificationResult>
 
   /**
    * Reports the state of the interaction to all the registered reporters
@@ -161,12 +155,6 @@ interface IProviderVerifier {
    * Finalise all the reports after verification is complete
    */
   fun finaliseReports()
-
-  /**
-   * Displays all the failures from the verification run
-   */
-  @Deprecated("use method that takes VerificationResult")
-  fun displayFailures(failures: Map<String, Any>)
 
   /**
    * Displays all the failures from the verification run
@@ -446,10 +434,6 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  override fun displayFailures(failures: Map<String, Any>) {
-    reporters.forEach { it.displayFailures(failures) }
-  }
-
   override fun displayFailures(failures: List<VerificationResult.Failed>) {
     reporters.forEach { it.displayFailures(failures) }
   }
@@ -628,24 +612,7 @@ open class ProviderVerifier @JvmOverloads constructor (
     }
   }
 
-  override fun verifyProvider(provider: ProviderInfo): MutableMap<String, Any> {
-    val failures = mutableMapOf<String, Any>()
-
-    initialiseReporters(provider)
-
-    val consumers = provider.consumers.filter(::filterConsumers)
-    if (consumers.isEmpty()) {
-      reporters.forEach { it.warnProviderHasNoConsumers(provider) }
-    }
-
-    consumers.forEach {
-      runVerificationForConsumer(failures, provider, it)
-    }
-
-    return failures
-  }
-
-  override fun verifyProviderReturnResult(provider: ProviderInfo): List<VerificationResult> {
+  override fun verifyProvider(provider: ProviderInfo): List<VerificationResult> {
     initialiseReporters(provider)
 
     val consumers = provider.consumers.filter(::filterConsumers)
@@ -664,6 +631,7 @@ open class ProviderVerifier @JvmOverloads constructor (
         (it.property("displayFullDiff") as KMutableProperty1<VerifierReporter, Boolean>)
           .set(it, projectHasProperty.apply(PACT_SHOW_FULLDIFF))
       }
+      it.verifier = this
       it.initialise(provider)
     }
   }

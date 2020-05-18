@@ -8,7 +8,7 @@ import org.gradle.api.GradleScriptException
 
 open class PactVerificationBaseTask : DefaultTask() {
   fun runVerification(verifier: IProviderVerifier, providerToVerify: ProviderInfo) {
-    val failures = verifier.verifyProviderReturnResult(providerToVerify).filterIsInstance<VerificationResult.Failed>()
+    val failures = verifier.verifyProvider(providerToVerify).filterIsInstance<VerificationResult.Failed>()
     try {
       if (failures.isNotEmpty()) {
         verifier.displayFailures(failures)

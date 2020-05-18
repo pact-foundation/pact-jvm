@@ -11,6 +11,7 @@ import au.com.dius.pact.provider.HttpClientFactory
 import au.com.dius.pact.provider.ProviderClient
 import au.com.dius.pact.provider.ProviderInfo
 import au.com.dius.pact.provider.ProviderVerifier
+import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.readme.dropwizard.DropwizardConfiguration
 import au.com.dius.pact.provider.readme.dropwizard.TestDropwizardApplication
 import io.dropwizard.testing.ResourceHelpers
@@ -20,9 +21,8 @@ import org.junit.ClassRule
 import org.junit.Test
 import org.junit.rules.TestRule
 
-import static org.hamcrest.Matchers.empty
+import static org.hamcrest.Matchers.instanceOf
 import static org.hamcrest.Matchers.is
-import static org.hamcrest.Matchers.not
 import static org.junit.Assert.assertThat
 
 /**
@@ -68,13 +68,13 @@ class ReadmeExamplePactJVMProviderJUnitTest {
 
     // setup the client and interaction to fire against the provider
     ProviderClient client = new ProviderClient(serviceProvider, new HttpClientFactory())
-    Map<String, Object> failures = new HashMap<>()
-    verifier.verifyResponseFromProvider(serviceProvider, interaction, interaction.getDescription(), failures, client)
+    def result = verifier.verifyResponseFromProvider(serviceProvider, interaction, interaction.getDescription(),
+      [:], client)
 
     // normally assert all good, but in this example it will fail
-    assertThat(failures, is(not(empty())))
+    assertThat(result, is(instanceOf(VerificationResult.Failed)))
 
-    verifier.displayFailures(failures)
+    verifier.displayFailures([result])
   }
 
   private ProviderVerifier setupVerifier(Interaction interaction, ProviderInfo provider, ConsumerInfo consumer) {
