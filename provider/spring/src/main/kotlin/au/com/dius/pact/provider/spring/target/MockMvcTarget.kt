@@ -3,7 +3,6 @@ package au.com.dius.pact.provider.spring.target
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.RequestResponseInteraction
-import au.com.dius.pact.provider.ConsumerInfo
 import au.com.dius.pact.provider.IConsumerInfo
 import au.com.dius.pact.provider.IProviderInfo
 import au.com.dius.pact.provider.IProviderVerifier
@@ -63,7 +62,7 @@ class MockMvcTarget @JvmOverloads constructor(
     context: Map<String, Any>
   ) {
     val provider = getProviderInfo(source)
-    val consumer = ConsumerInfo(consumerName)
+    val consumer = consumerInfo(consumerName, source)
     provider.verificationType = PactVerification.ANNOTATED_METHOD
 
     val mockMvc = buildMockMvc()
@@ -74,7 +73,7 @@ class MockMvcTarget @JvmOverloads constructor(
 
     val results = 1.rangeTo(runTimes).map {
       verifier.verifyResponseFromProvider(provider, interaction as RequestResponseInteraction, interaction.description,
-        failures, mockMvc)
+        failures, mockMvc, context, consumer.pending)
     }
     val result = results.fold(VerificationResult.Ok) { acc: VerificationResult, r -> acc.merge(r) }
 

@@ -28,6 +28,6 @@ class VerificationResultSpec extends Specification {
   }
 
   private static VerificationResult.Failed failed(List<LinkedHashMap<String, String>> details, String s, pending = false) {
-    new VerificationResult.Failed(details, s, '', [], pending)
+    new VerificationResult.Failed(details, s, '', [], pending, null)
   }
 }

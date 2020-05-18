@@ -161,7 +161,7 @@ open class InteractionRunner<I>(
         testResult = VerificationResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
           "exception" to e, "interactionId" to interaction.interactionId)),
           "Request to provider failed with an exception", description.displayName,
-          listOf(VerificationFailureType.ExceptionFailure(e)), pending)
+          listOf(VerificationFailureType.ExceptionFailure(e)), pending, interaction.interactionId)
       } finally {
         if (pact is FilteredPact) {
           testResultAccumulator.updateTestResult(pact.pact, interaction, testResult.toTestResult(), pactSource)

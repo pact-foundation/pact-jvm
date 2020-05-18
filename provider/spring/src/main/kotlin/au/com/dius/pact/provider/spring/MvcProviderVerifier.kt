@@ -47,7 +47,9 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
     interaction: RequestResponseInteraction,
     interactionMessage: String,
     failures: MutableMap<String, Any>,
-    mockMvc: MockMvc
+    mockMvc: MockMvc,
+    context: Map<String, Any>,
+    pending: Boolean
   ): VerificationResult {
     return try {
       val request = interaction.request
@@ -67,13 +69,13 @@ open class MvcProviderVerifier(private val debugRequestResponse: Boolean = false
       return VerificationResult.Failed(listOf(mapOf("message" to "Request to provider method failed with an exception",
         "exception" to e, "interactionId" to interaction.interactionId)),
         "Request to provider method failed with an exception", interactionMessage,
-        listOf(VerificationFailureType.ExceptionFailure(e)))
+        listOf(VerificationFailureType.ExceptionFailure(e)), pending, interaction.interactionId)
     }
   }
 
   fun executeMockMvcRequest(mockMvc: MockMvc, request: Request, provider: ProviderInfo): MvcResult {
     val body = request.body
-    val requestBuilder = if (body != null && body.isPresent()) {
+    val requestBuilder = if (body.isPresent()) {
       if (request.isMultipartFileUpload()) {
         val multipart = MimeMultipart(ByteArrayDataSource(body.unwrap(), request.contentTypeHeader()))
         val multipartRequest = MockMvcRequestBuilders.fileUpload(requestUriString(request))

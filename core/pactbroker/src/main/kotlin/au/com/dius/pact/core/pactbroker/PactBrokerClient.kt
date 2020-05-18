@@ -57,10 +57,6 @@ sealed class TestResult {
 
   abstract fun toBoolean(): Boolean
   abstract fun merge(result: TestResult): TestResult
-
-  companion object {
-    fun fromBoolean(result: Boolean) = if (result) Ok else Failed()
-  }
 }
 
 sealed class Latest {

@@ -121,7 +121,7 @@ data class PactVerificationContext @JvmOverloads constructor(
         listOf(VerificationResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
           "exception" to e, "interactionId" to interaction.interactionId)),
           "Request to provider failed with an exception", interactionMessage,
-          listOf(VerificationFailureType.ExceptionFailure(e)), consumer.pending))
+          listOf(VerificationFailureType.ExceptionFailure(e)), consumer.pending, interaction.interactionId))
       }
     } else {
       return listOf(verifier!!.verifyResponseByInvokingProviderMethods(providerInfo, consumer, interaction,
@@ -316,7 +316,8 @@ class PactVerificationStateChangeExtension(
       testContext.testExecutionResult.add(VerificationResult.Failed(description = "Provider state change teardown callback failed",
         results = listOf(mapOf("exception" to e)),
         failures = listOf(VerificationFailureType.StateChangeFailure(StateChangeResult(Err(e)))),
-        pending = pending
+        pending = pending,
+        interactionId = interaction.interactionId
       ))
       if (!pending) {
         throw AssertionError("Provider state change callback failed", e)
@@ -337,7 +338,8 @@ class PactVerificationStateChangeExtension(
       testContext.testExecutionResult.add(VerificationResult.Failed(description = "Provider state change teardown callback failed",
         results = listOf(mapOf("exception" to e)),
         failures = listOf(VerificationFailureType.StateChangeFailure(StateChangeResult(Err(e)))),
-        pending = pending
+        pending = pending,
+        interactionId = interaction.interactionId
       ))
       if (!pending) {
         throw AssertionError("Provider state change callback failed", e)
