@@ -53,7 +53,7 @@ class PactVerificationTaskSpec extends Specification {
     1 * verifier.verifyProviderReturnResult(_) >> [new VerificationResult.Failed([], '', '', [
       new VerificationFailureType.MismatchFailure(new StatusMismatch(200, 400),
         new RequestResponseInteraction('Test'), new RequestResponsePact(provider, consumer))
-    ], false) ]
+    ], false, null) ]
   }
 
   def 'does not raise an exception if the verification passed'() {
@@ -71,6 +71,6 @@ class PactVerificationTaskSpec extends Specification {
 
     then:
     noExceptionThrown()
-    1 * verifier.verifyProviderReturnResult(_) >> [new VerificationResult.Failed([], '', '', [], true) ]
+    1 * verifier.verifyProviderReturnResult(_) >> [new VerificationResult.Failed([], '', '', [], true, null) ]
   }
 }
