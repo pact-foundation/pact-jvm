@@ -31,7 +31,7 @@ public class ProviderStateTest {
     public void before() {
       embeddedService.noFailFastOnUnexpectedRequest();
       embeddedService.addExpectation(
-        onRequestTo("/data"), giveEmptyResponse()
+        onRequestTo("/data").withAnyParams(), giveEmptyResponse()
       );
     }
 

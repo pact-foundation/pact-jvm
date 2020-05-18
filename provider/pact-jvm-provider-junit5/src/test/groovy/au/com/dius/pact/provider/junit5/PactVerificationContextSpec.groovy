@@ -54,7 +54,7 @@ class PactVerificationContextSpec extends Specification {
     context.testExecutionResult[0].results.size() == 1
     context.testExecutionResult[0].results[0].message == 'Request to provider failed with an exception'
     context.testExecutionResult[0].results[0].exception.cause instanceof IOException
-    context.testExecutionResult[0].results[0].interactionId == '12345'
+    context.testExecutionResult[0].interactionId == '12345'
   }
 
 }
