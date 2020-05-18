@@ -329,7 +329,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       failures[interactionMessage] = e
       reporters.forEach { it.verificationFailed(interaction, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE)) }
       return VerificationResult.Failed(listOf(mapOf("message" to "Request to provider method failed with an exception",
-        "exception" to e, "interactionId" to interaction.interactionId)),
+        "exception" to e)),
         "Request to provider method failed with an exception", interactionMessage,
         listOf(VerificationFailureType.ExceptionFailure(e)), consumer.pending, interaction.interactionId)
     }
@@ -350,15 +350,13 @@ open class ProviderVerifier @JvmOverloads constructor (
       when (comparison) {
         is Either.Left -> {
           failures["$comparisonDescription has a matching body"] = comparison.a.description()
-          VerificationResult.Failed(listOf(comparison.a.toMap() +
-            mapOf("interactionId" to interactionId, "type" to "body")),
+          VerificationResult.Failed(listOf(comparison.a.toMap() + ("type" to "body")),
             "Body had differences", comparisonDescription,
             listOf(VerificationFailureType.MismatchFailure(comparison.a)), pending, interactionId)
         }
         is Either.Right -> {
           failures["$comparisonDescription has a matching body"] = comparison.b
-          VerificationResult.Failed(listOf(comparison.b.mismatches +
-            mapOf("interactionId" to interactionId, "type" to "body")),
+          VerificationResult.Failed(listOf(comparison.b.mismatches + ("type" to "body")),
             "Body had differences", comparisonDescription, comparison.b.mismatches.values.flatten()
               .map { VerificationFailureType.MismatchFailure(it) }, pending, interactionId)
         }
@@ -436,7 +434,7 @@ open class ProviderVerifier @JvmOverloads constructor (
           failures["$comparisonDescription includes metadata \"$key\" with value \"$expectedValue\""] =
             metadataComparison
           result = result.merge(VerificationResult.Failed(listOf(mapOf(key to metadataComparison,
-            "interactionId" to interactionId, "type" to "metadata")),
+            "type" to "metadata")),
             verificationDescription = comparisonDescription,
             failures = metadataComparison.map { VerificationFailureType.MismatchFailure(it) }, pending = pending,
             interactionId = interactionId
@@ -502,8 +500,7 @@ open class ProviderVerifier @JvmOverloads constructor (
       return result
     } else {
       return VerificationResult.Failed(listOf(mapOf("message" to "State change request failed",
-        "exception" to stateChangeResult.stateChangeResult.getError(),
-        "interactionId" to interaction.interactionId)), "State change request failed",
+        "exception" to stateChangeResult.stateChangeResult.getError())), "State change request failed",
         stateChangeResult.message,
         listOf(VerificationFailureType.StateChangeFailure(stateChangeResult)),
         consumer.pending, interaction.interactionId
@@ -556,8 +553,8 @@ open class ProviderVerifier @JvmOverloads constructor (
     } else {
       reporters.forEach { it.statusComparisonFailed(status, mismatch.description()) }
       failures["$comparisonDescription has status code $status"] = mismatch.description()
-      VerificationResult.Failed(listOf(mismatch.toMap() + mapOf("interactionId" to interactionId,
-        "type" to "status")), "Response status did not match", comparisonDescription,
+      VerificationResult.Failed(listOf(mismatch.toMap() + ("type" to "status")),
+        "Response status did not match", comparisonDescription,
         listOf(VerificationFailureType.MismatchFailure(mismatch)), pending, interactionId)
     }
   }
@@ -624,7 +621,7 @@ open class ProviderVerifier @JvmOverloads constructor (
         it.requestFailed(provider, interaction, interactionMessage, e, projectHasProperty.apply(PACT_SHOW_STACKTRACE))
       }
       VerificationResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
-        "exception" to e, "interactionId" to interaction.interactionId)),
+        "exception" to e)),
         "Request to provider method failed with an exception", interactionMessage,
         listOf(VerificationFailureType.ExceptionFailure(e)), pending, interaction.interactionId)
     }

@@ -292,7 +292,7 @@ class PactBrokerClientPactSpec extends Specification {
         providerApplicationVersion '10.0.0'
         buildUrl 'http://localhost:8080/build'
         testResults eachLike {
-          interactionId string()
+          interactionId string('12345678')
           success false
           exceptions eachLike {
             message string('Boom!')
