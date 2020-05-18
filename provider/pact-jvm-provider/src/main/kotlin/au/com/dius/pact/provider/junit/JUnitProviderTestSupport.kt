@@ -17,7 +17,7 @@ import kotlin.reflect.full.createInstance
 object JUnitProviderTestSupport : KLogging() {
   fun <I> filterPactsByAnnotations(pacts: List<Pact<I>>, testClass: Class<*>): List<Pact<I>> where I : Interaction {
     val pactFilter = testClass.getAnnotation(PactFilter::class.java) ?: return pacts
-    if (pactFilter.value == null || pactFilter.value.all { it.isEmpty() }) return pacts
+    if (pactFilter.value.all { it.isEmpty() }) return pacts
 
     val interactionFilter = pactFilter.filter.createInstance() as InteractionFilter<I>
     return pacts.map { pact ->

@@ -63,7 +63,6 @@ open class PactRunner<I>(private val clazz: Class<*>) : ParentRunner<Interaction
     if (clazz.getAnnotation(Ignore::class.java) != null) {
       logger.info("Ignore annotation detected, exiting")
     } else {
-
       val providerInfo = clazz.getAnnotation(Provider::class.java) ?: throw InitializationError(
               "Provider name should be specified by using ${Provider::class.java.name} annotation")
       val serviceName = providerInfo.value
@@ -120,7 +119,7 @@ open class PactRunner<I>(private val clazz: Class<*>) : ParentRunner<Interaction
 
   protected open fun setupInteractionRunners(testClass: TestClass, pacts: List<Pact<I>>, pactLoader: PactLoader) {
     for (pact in pacts) {
-      this.children.add(newInteractionRunner(testClass, pact, pactLoader.pactSource))
+      this.children.add(newInteractionRunner(testClass, pact, pact.source))
     }
   }
 

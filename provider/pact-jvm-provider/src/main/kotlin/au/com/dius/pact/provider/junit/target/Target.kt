@@ -3,6 +3,7 @@ package au.com.dius.pact.provider.junit.target
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.provider.IProviderVerifier
+import au.com.dius.pact.provider.VerificationResult
 import java.util.function.BiConsumer
 import java.util.function.Supplier
 import org.apache.commons.lang3.tuple.Pair
@@ -29,7 +30,7 @@ interface Target {
   /**
    * Add a callback to receive the test interaction result
    */
-  fun addResultCallback(callback: BiConsumer<Boolean, IProviderVerifier>)
+  fun addResultCallback(callback: BiConsumer<VerificationResult, IProviderVerifier>)
 
   /**
    * Add an additional state change handler to look for state change callbacks

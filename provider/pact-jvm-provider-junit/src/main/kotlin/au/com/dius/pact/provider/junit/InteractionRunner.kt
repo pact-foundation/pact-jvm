@@ -1,19 +1,21 @@
 package au.com.dius.pact.provider.junit
 
+import au.com.dius.pact.core.model.BrokerUrlSource
 import au.com.dius.pact.core.model.FilteredPact
 import au.com.dius.pact.core.model.Interaction
 import au.com.dius.pact.core.model.Pact
 import au.com.dius.pact.core.model.PactSource
 import au.com.dius.pact.core.model.ProviderState
-import au.com.dius.pact.core.pactbroker.TestResult
 import au.com.dius.pact.provider.DefaultTestResultAccumulator
 import au.com.dius.pact.provider.IProviderVerifier
 import au.com.dius.pact.provider.ProviderUtils
 import au.com.dius.pact.provider.TestResultAccumulator
+import au.com.dius.pact.provider.VerificationFailureType
+import au.com.dius.pact.provider.VerificationResult
 import au.com.dius.pact.provider.junit.descriptions.DescriptionGenerator
-import au.com.dius.pact.provider.junit.target.Target
 import au.com.dius.pact.provider.junit.target.TestClassAwareTarget
 import au.com.dius.pact.provider.junit.target.TestTarget
+import au.com.dius.pact.provider.junit.target.Target
 import mu.KLogging
 import org.junit.After
 import org.junit.Before
@@ -51,7 +53,7 @@ open class InteractionRunner<I>(
   private val pactSource: PactSource
 ) : Runner() where I : Interaction {
 
-  private val results = ConcurrentHashMap<String, Pair<Boolean, IProviderVerifier>>()
+  private val results = ConcurrentHashMap<String, Pair<VerificationResult, IProviderVerifier>>()
   private val testContext = ConcurrentHashMap<String, Any>()
   private val childDescriptions = ConcurrentHashMap<String, Description>()
   private val descriptionGenerator = DescriptionGenerator(testClass, pact, pactSource)
@@ -70,7 +72,7 @@ open class InteractionRunner<I>(
     return description
   }
 
-  protected fun describeChild(interaction: Interaction): Description {
+  private fun describeChild(interaction: Interaction): Description {
     if (!childDescriptions.containsKey(interaction.uniqueKey())) {
       childDescriptions[interaction.uniqueKey()] = descriptionGenerator.generate(interaction)
     }
@@ -78,7 +80,7 @@ open class InteractionRunner<I>(
   }
 
   // Validation
-  protected fun validate() {
+  private fun validate() {
     val errors = mutableListOf<Throwable>()
 
     validatePublicVoidNoArgMethods(Before::class.java, false, errors)
@@ -100,7 +102,7 @@ open class InteractionRunner<I>(
     }
   }
 
-  protected fun validatePublicVoidNoArgMethods(
+  private fun validatePublicVoidNoArgMethods(
     annotation: Class<out Annotation>,
     isStatic: Boolean,
     errors: MutableList<Throwable>
@@ -108,7 +110,7 @@ open class InteractionRunner<I>(
     testClass.getAnnotatedMethods(annotation).forEach { method -> method.validatePublicVoidNoArg(isStatic, errors) }
   }
 
-  protected fun validateConstructor(errors: MutableList<Throwable>) {
+  private fun validateConstructor(errors: MutableList<Throwable>) {
     if (!hasOneConstructor()) {
       errors.add(Exception("Test class should have exactly one public constructor"))
     }
@@ -118,9 +120,9 @@ open class InteractionRunner<I>(
     }
   }
 
-  protected fun hasOneConstructor() = testClass.javaClass.kotlin.constructors.size == 1
+  private fun hasOneConstructor() = testClass.javaClass.kotlin.constructors.size == 1
 
-  protected fun validateTestTarget(errors: MutableList<Throwable>) {
+  private fun validateTestTarget(errors: MutableList<Throwable>) {
     val annotatedFields = testClass.getAnnotatedFields(TestTarget::class.java)
     if (annotatedFields.size != 1) {
       errors.add(Exception("Test class should have exactly one field annotated with ${TestTarget::class.java.name}"))
@@ -130,7 +132,7 @@ open class InteractionRunner<I>(
     }
   }
 
-  protected fun validateRules(errors: List<Throwable>) {
+  private fun validateRules(errors: List<Throwable>) {
     RULE_VALIDATOR.validate(testClass, errors)
     RULE_METHOD_VALIDATOR.validate(testClass, errors)
   }
@@ -139,21 +141,29 @@ open class InteractionRunner<I>(
   override fun run(notifier: RunNotifier) {
     for (interaction in pact.interactions) {
       val description = describeChild(interaction)
-      notifier.fireTestStarted(description)
-      var testResult: TestResult = TestResult.Ok
+      var testResult: VerificationResult = VerificationResult.Ok
+      val pending = pact.source is BrokerUrlSource && (pact.source as BrokerUrlSource).result?.pending == true
+      if (!pending) {
+        notifier.fireTestStarted(description)
+      } else {
+        notifier.fireTestIgnored(description)
+      }
       try {
         interactionBlock(interaction, pactSource, testContext).evaluate()
-      } catch (e: Throwable) {
-        notifier.fireTestFailure(Failure(description, e))
-        testResult = TestResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
-          "exception" to e, "interactionId" to interaction.interactionId)),
-          "Request to provider failed with an exception")
-      } finally {
         notifier.fireTestFinished(description)
+      } catch (e: Throwable) {
+        if (!pending) {
+          notifier.fireTestFailure(Failure(description, e))
+        }
+        testResult = VerificationResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
+          "exception" to e, "interactionId" to interaction.interactionId)),
+          "Request to provider failed with an exception", description.displayName,
+          listOf(VerificationFailureType.ExceptionFailure(e)), pending)
+      } finally {
         if (pact is FilteredPact) {
-          testResultAccumulator.updateTestResult(pact.pact, interaction, testResult, pactSource)
+          testResultAccumulator.updateTestResult(pact.pact, interaction, testResult.toTestResult(), pactSource)
         } else {
-          testResultAccumulator.updateTestResult(pact, interaction, testResult, pactSource)
+          testResultAccumulator.updateTestResult(pact, interaction, testResult.toTestResult(), pactSource)
         }
       }
     }
@@ -200,7 +210,6 @@ open class InteractionRunner<I>(
         target.addResultCallback(BiConsumer { result, verifier ->
           results[interaction.uniqueKey()] = Pair(result, verifier)
         })
-        surrogateTestMethod()
         target.testInteraction(pact.consumer.name, interaction, source, mapOf("providerState" to context))
       }
     }
@@ -210,8 +219,6 @@ open class InteractionRunner<I>(
     statement = withAfters(interaction, testInstance, statement)
     return statement
   }
-
-  fun surrogateTestMethod() { }
 
   protected open fun setupTargetForInteraction(target: Target) { }
 
