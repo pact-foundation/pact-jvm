@@ -118,7 +118,8 @@ sealed class VerificationResult {
         interactionId ?: result.interactionId)
     }
 
-    override fun toTestResult() = TestResult.Failed(results, description)
+    override fun toTestResult() =
+      TestResult.Failed(results.map { it + ("interactionId" to interactionId) }, description)
   }
 
   /**

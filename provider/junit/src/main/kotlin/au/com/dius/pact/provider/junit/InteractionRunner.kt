@@ -159,7 +159,7 @@ open class InteractionRunner<I>(
           notifier.fireTestFailure(Failure(description, e))
         }
         testResult = VerificationResult.Failed(listOf(mapOf("message" to "Request to provider failed with an exception",
-          "exception" to e, "interactionId" to interaction.interactionId)),
+          "exception" to e)),
           "Request to provider failed with an exception", description.displayName,
           listOf(VerificationFailureType.ExceptionFailure(e)), pending, interaction.interactionId)
       } finally {
